@@ -61,7 +61,7 @@ ManagerImpl::create( const Update::UTopic& topic)
           );
     buffer << sample.id << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::create( TopicUpdate): ")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::create( TopicUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ topic %s ]\n"),
       this->id(),
       sample.domain,
@@ -96,7 +96,7 @@ ManagerImpl::create( const Update::UParticipant& participant)
                );
     buffer << sample.id << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::create( ParticipantUpdate): ")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::create( ParticipantUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s ]\n"),
       this->id(),
       sample.domain,
@@ -141,8 +141,8 @@ ManagerImpl::create( const Update::URActor& reader)
           );
     buffer << sample.id << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::create( SubscriptionUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::create( SubscriptionUpdate): ")
+      ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
       this->id(),
       sample.domain,
       participantBuffer.str().c_str(),
@@ -187,7 +187,7 @@ ManagerImpl::create( const Update::UWActor& writer)
           );
     buffer << sample.id << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::create( PublicationUpdate): ")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::create( PublicationUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
       this->id(),
       sample.domain,
@@ -222,7 +222,7 @@ ManagerImpl::create( const Update::OwnershipData& data)
                );
     buffer << sample.participant << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::create( OwnerUpdate): ")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::create( OwnerUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ sender %d/ owner %d ]\n"),
       this->id(),
       sample.domain,
@@ -270,7 +270,7 @@ ManagerImpl::destroy(
                 );
           buffer << sample.id << "(" << std::hex << key << ")";
           ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::destroy( TopicUpdate): ")
+            ACE_TEXT("(%P|%t) Federator::ManagerImpl::destroy( TopicUpdate): ")
             ACE_TEXT("repo %d - [ domain %d/ participant %s/ topic %s ]\n"),
             this->id(),
             sample.domain,
@@ -304,7 +304,7 @@ ManagerImpl::destroy(
                      );
           buffer << sample.id << "(" << std::hex << key << ")";
           ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::destroy( ParticipantUpdate): ")
+            ACE_TEXT("(%P|%t) Federator::ManagerImpl::destroy( ParticipantUpdate): ")
             ACE_TEXT("repo %d - [ domain %d/ participant %s ]\n"),
             this->id(),
             sample.domain,
@@ -346,7 +346,7 @@ ManagerImpl::destroy(
                     );
               buffer << sample.id << "(" << std::hex << key << ")";
               ACE_DEBUG((LM_DEBUG,
-                ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::destroy( PublicationUpdate): ")
+                ACE_TEXT("(%P|%t) Federator::ManagerImpl::destroy( PublicationUpdate): ")
                 ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
                 this->id(),
                 sample.domain,
@@ -386,7 +386,7 @@ ManagerImpl::destroy(
                     );
               buffer << sample.id << "(" << std::hex << key << ")";
               ACE_DEBUG((LM_DEBUG,
-                ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::destroy( SubscriptionUpdate): ")
+                ACE_TEXT("(%P|%t) Federator::ManagerImpl::destroy( SubscriptionUpdate): ")
                 ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
                 this->id(),
                 sample.domain,
@@ -426,7 +426,7 @@ ManagerImpl::update( const Update::IdPath& id, const ::DDS::DomainParticipantQos
                );
     buffer << sample.id << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::update( ParticipantUpdate): ")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::update( ParticipantUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s ]\n"),
       this->id(),
       sample.domain,
@@ -466,7 +466,7 @@ ManagerImpl::update( const Update::IdPath& id, const ::DDS::TopicQos& qos)
           );
     buffer << sample.id << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::update( TopicUpdate): ")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::update( TopicUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ topic %s ]\n"),
       this->id(),
       sample.domain,
@@ -507,7 +507,7 @@ ManagerImpl::update( const Update::IdPath& id, const ::DDS::DataWriterQos& qos)
           );
     buffer << sample.id << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::update( WriterUpdate): ")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::update( WriterUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
       this->id(),
       sample.domain,
@@ -548,7 +548,7 @@ ManagerImpl::update( const Update::IdPath& id, const ::DDS::PublisherQos& qos)
           );
     buffer << sample.id << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::update( PublisherUpdate): ")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::update( PublisherUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
       this->id(),
       sample.domain,
@@ -589,7 +589,7 @@ ManagerImpl::update( const Update::IdPath& id, const ::DDS::DataReaderQos& qos)
           );
     buffer << sample.id << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::update( ReaderUpdate): ")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::update( ReaderUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
       this->id(),
       sample.domain,
@@ -630,7 +630,7 @@ ManagerImpl::update( const Update::IdPath& id, const ::DDS::SubscriberQos& qos)
           );
     buffer << sample.id << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::update( SubscriberUpdate): ")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::update( SubscriberUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
       this->id(),
       sample.domain,
@@ -658,7 +658,7 @@ ManagerImpl::processCreate( const OwnerUpdate* sample, const ::DDS::SampleInfo* 
                );
     buffer << sample->participant << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::processCreate( OwnerUpdate): ")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::processCreate( OwnerUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ sender %d/ owner %d ]\n"),
       this->id(),
       sample->domain,
@@ -673,7 +673,13 @@ ManagerImpl::processCreate( const OwnerUpdate* sample, const ::DDS::SampleInfo* 
                                              sample->participant,
                                              sample->sender,
                                              sample->owner)) {
-    this->deferredOwnerships_.insert( sample);
+    this->deferredOwnerships_.push_back( *sample);
+    if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Federator::ManagerImpl::processCreate( OwnerUpdate): ")
+        ACE_TEXT("deferred update.\n")
+      ));
+    }
   }
 }
 
@@ -692,7 +698,7 @@ ManagerImpl::processCreate( const PublicationUpdate* sample, const ::DDS::Sample
           );
     buffer << sample->id << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::processCreate( PublicationUpdate): ")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::processCreate( PublicationUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
       this->id(),
       sample->domain,
@@ -713,7 +719,13 @@ ManagerImpl::processCreate( const PublicationUpdate* sample, const ::DDS::Sample
                                              sample->datawriter_qos,
                                              transportInfo,
                                              sample->publisher_qos)) {
-    this->deferredPublications_.insert( sample);
+    this->deferredPublications_.push_back( *sample);
+    if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Federator::ManagerImpl::processCreate( PublicationUpdate): ")
+        ACE_TEXT("deferred update.\n")
+      ));
+    }
   }
 }
 
@@ -732,7 +744,7 @@ ManagerImpl::processCreate( const SubscriptionUpdate* sample, const ::DDS::Sampl
           );
     buffer << sample->id << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::processCreate( SubscriptionUpdate): ")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::processCreate( SubscriptionUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
       this->id(),
       sample->domain,
@@ -753,7 +765,13 @@ ManagerImpl::processCreate( const SubscriptionUpdate* sample, const ::DDS::Sampl
                                               sample->datareader_qos,
                                               transportInfo,
                                               sample->subscriber_qos)) {
-    this->deferredSubscriptions_.insert( sample);
+    this->deferredSubscriptions_.push_back( *sample);
+    if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Federator::ManagerImpl::processCreate( SubscriptionUpdate): ")
+        ACE_TEXT("deferred update.\n")
+      ));
+    }
   }
 }
 
@@ -767,7 +785,7 @@ ManagerImpl::processCreate( const ParticipantUpdate* sample, const ::DDS::Sample
                );
     buffer << sample->id << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::processCreate( ParticipantUpdate): ")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::processCreate( ParticipantUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s ]\n"),
       this->id(),
       sample->domain,
@@ -780,6 +798,7 @@ ManagerImpl::processCreate( const ParticipantUpdate* sample, const ::DDS::Sample
     sample->id,
     sample->qos
   );
+  this->processDeferred();
 }
 
 void
@@ -797,7 +816,7 @@ ManagerImpl::processCreate( const TopicUpdate* sample, const ::DDS::SampleInfo* 
           );
     buffer << sample->id << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::processCreate( TopicUpdate): ")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::processCreate( TopicUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ topic %s ]\n"),
       this->id(),
       sample->domain,
@@ -812,8 +831,157 @@ ManagerImpl::processCreate( const TopicUpdate* sample, const ::DDS::SampleInfo* 
                                        sample->topic,
                                        sample->datatype,
                                        sample->qos)) {
-    this->deferredTopics_.insert( sample);
+    this->deferredTopics_.push_back( *sample);
+    if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Federator::ManagerImpl::processCreate( TopicUpdate): ")
+        ACE_TEXT("deferred update.\n")
+      ));
+    }
   }
+}
+
+void
+ManagerImpl::processDeferred()
+{
+  for( std::list< OwnerUpdate>::iterator current = this->deferredOwnerships_.begin();
+       current != this->deferredOwnerships_.end();
+       ++current) {
+    if( true == this->info_->changeOwnership( current->domain,
+                                              current->participant,
+                                              current->sender,
+                                              current->owner)) {
+      current = this->deferredOwnerships_.erase( current);
+      if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+        std::stringstream buffer;
+        long key = ::OpenDDS::DCPS::GuidConverter(
+                     const_cast< ::OpenDDS::DCPS::RepoId*>( &current->participant)
+                   );
+        buffer << current->participant << "(" << std::hex << key << ")";
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDeferred( OwnerUpdate): ")
+          ACE_TEXT("repo %d - [ domain %d/ participant %s/ sender %d/ owner %d ]\n"),
+          this->id(),
+          current->domain,
+          buffer.str().c_str(),
+          current->sender,
+          current->owner
+        ));
+      }
+    }
+  }
+
+  for( std::list< TopicUpdate>::iterator current = this->deferredTopics_.begin();
+       current != this->deferredTopics_.end();
+       ++current) {
+    if( false == this->info_->add_topic( current->id,
+                                         current->domain,
+                                         current->participant,
+                                         current->topic,
+                                         current->datatype,
+                                         current->qos)) {
+      current = this->deferredTopics_.erase( current);
+      if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+        std::stringstream participantBuffer;
+        std::stringstream buffer;
+        long key = ::OpenDDS::DCPS::GuidConverter(
+                     const_cast< ::OpenDDS::DCPS::RepoId*>( &current->participant)
+                   );
+        participantBuffer << current->participant << "(" << std::hex << key << ")";
+        key = ::OpenDDS::DCPS::GuidConverter(
+                const_cast< ::OpenDDS::DCPS::RepoId*>( &current->id)
+              );
+        buffer << current->id << "(" << std::hex << key << ")";
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDeferred( TopicUpdate): ")
+          ACE_TEXT("repo %d - [ domain %d/ participant %s/ topic %s ]\n"),
+          this->id(),
+          current->domain,
+          participantBuffer.str().c_str(),
+          buffer.str().c_str()
+        ));
+      }
+    }
+  }
+
+  for( std::list< PublicationUpdate>::iterator current = this->deferredPublications_.begin();
+       current != this->deferredPublications_.end();
+       ++current) {
+    ::OpenDDS::DCPS::TransportInterfaceInfo transportInfo;
+    transportInfo.transport_id = current->transport_id;
+    transportInfo.data         = current->transport_blob;
+
+    if( false == this->info_->add_publication( current->domain,
+                                               current->participant,
+                                               current->topic,
+                                               current->id,
+                                               current->callback,
+                                               current->datawriter_qos,
+                                               transportInfo,
+                                               current->publisher_qos)) {
+      current = this->deferredPublications_.erase( current);
+      if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+        std::stringstream participantBuffer;
+        std::stringstream buffer;
+        long key = ::OpenDDS::DCPS::GuidConverter(
+                     const_cast< ::OpenDDS::DCPS::RepoId*>( &current->participant)
+                   );
+        participantBuffer << current->participant << "(" << std::hex << key << ")";
+        key = ::OpenDDS::DCPS::GuidConverter(
+                const_cast< ::OpenDDS::DCPS::RepoId*>( &current->id)
+              );
+        buffer << current->id << "(" << std::hex << key << ")";
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDeferred( PublicationUpdate): ")
+          ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
+          this->id(),
+          current->domain,
+          participantBuffer.str().c_str(),
+          buffer.str().c_str()
+        ));
+      }
+    }
+  }
+
+  for( std::list< SubscriptionUpdate>::iterator current = this->deferredSubscriptions_.begin();
+       current != this->deferredSubscriptions_.end();
+       ++current) {
+    ::OpenDDS::DCPS::TransportInterfaceInfo transportInfo;
+    transportInfo.transport_id = current->transport_id;
+    transportInfo.data         = current->transport_blob;
+
+    if( false == this->info_->add_subscription( current->domain,
+                                                current->participant,
+                                                current->topic,
+                                                current->id,
+                                                current->callback,
+                                                current->datareader_qos,
+                                                transportInfo,
+                                                current->subscriber_qos)) {
+      current = this->deferredSubscriptions_.erase( current);
+      if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+        std::stringstream participantBuffer;
+        std::stringstream buffer;
+        long key = ::OpenDDS::DCPS::GuidConverter(
+                     const_cast< ::OpenDDS::DCPS::RepoId*>( &current->participant)
+                   );
+        participantBuffer << current->participant << "(" << std::hex << key << ")";
+        key = ::OpenDDS::DCPS::GuidConverter(
+                const_cast< ::OpenDDS::DCPS::RepoId*>( &current->id)
+              );
+        buffer << current->id << "(" << std::hex << key << ")";
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDeferred( SubscriptionUpdate): ")
+          ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
+          this->id(),
+          current->domain,
+          participantBuffer.str().c_str(),
+          buffer.str().c_str()
+        ));
+      }
+    }
+  }
+
 }
 
 void
@@ -826,7 +994,7 @@ ManagerImpl::processUpdateQos1( const OwnerUpdate* sample, const ::DDS::SampleIn
                );
     buffer << sample->participant << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::processUpdateQos1( OwnerUpdate): ")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateQos1( OwnerUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ sender %d/ owner %d ]\n"),
       this->id(),
       sample->domain,
@@ -840,7 +1008,11 @@ ManagerImpl::processUpdateQos1( const OwnerUpdate* sample, const ::DDS::SampleIn
                                              sample->participant,
                                              sample->sender,
                                              sample->owner)) {
-    this->deferredOwnerships_.insert( sample);
+    this->deferredOwnerships_.push_back( *sample);
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateQos1( OwnerUpdate): ")
+      ACE_TEXT("deferred update.\n")
+    ));
   }
 }
 
@@ -859,7 +1031,7 @@ ManagerImpl::processUpdateQos1( const PublicationUpdate* sample, const ::DDS::Sa
           );
     buffer << sample->id << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::processUpdateQos1( PublicationUpdate): ")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateQos1( PublicationUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
       this->id(),
       sample->domain,
@@ -891,7 +1063,7 @@ ManagerImpl::processUpdateQos2( const PublicationUpdate* sample, const ::DDS::Sa
           );
     buffer << sample->id << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::processUpdateQos2( PublicationUpdate): ")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateQos2( PublicationUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
       this->id(),
       sample->domain,
@@ -923,7 +1095,7 @@ ManagerImpl::processUpdateQos1( const SubscriptionUpdate* sample, const ::DDS::S
           );
     buffer << sample->id << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::processUpdateQos1( SubscriptionUpdate): ")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateQos1( SubscriptionUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
       this->id(),
       sample->domain,
@@ -955,7 +1127,7 @@ ManagerImpl::processUpdateQos2( const SubscriptionUpdate* sample, const ::DDS::S
           );
     buffer << sample->id << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::processUpdateQos2( SubscriptionUpdate): ")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateQos2( SubscriptionUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
       this->id(),
       sample->domain,
@@ -982,7 +1154,7 @@ ManagerImpl::processUpdateQos1( const ParticipantUpdate* sample, const ::DDS::Sa
                );
     buffer << sample->id << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::processUpdateQos1( ParticipantUpdate): ")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateQos1( ParticipantUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s ]\n"),
       this->id(),
       sample->domain,
@@ -1012,7 +1184,7 @@ ManagerImpl::processUpdateQos1( const TopicUpdate* sample, const ::DDS::SampleIn
           );
     buffer << sample->id << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::processUpdateQos1( TopicUpdate): ")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateQos1( TopicUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ topic %s ]\n"),
       this->id(),
       sample->domain,
@@ -1039,7 +1211,7 @@ ManagerImpl::processDelete( const OwnerUpdate* sample, const ::DDS::SampleInfo* 
                );
     buffer << sample->participant << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::processDelete( OwnerUpdate): ")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDelete( OwnerUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ sender %d/ owner %d ]\n"),
       this->id(),
       sample->domain,
@@ -1054,7 +1226,11 @@ ManagerImpl::processDelete( const OwnerUpdate* sample, const ::DDS::SampleInfo* 
                                              sample->participant,
                                              sample->sender,
                                              sample->owner)) {
-    this->deferredOwnerships_.insert( sample);
+    this->deferredOwnerships_.push_back( *sample);
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDelete( OwnerUpdate): ")
+      ACE_TEXT("deferred update.\n")
+    ));
   }
 }
 
@@ -1073,7 +1249,7 @@ ManagerImpl::processDelete( const PublicationUpdate* sample, const ::DDS::Sample
           );
     buffer << sample->id << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::processDelete( PublicationUpdate): ")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDelete( PublicationUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
       this->id(),
       sample->domain,
@@ -1104,7 +1280,7 @@ ManagerImpl::processDelete( const SubscriptionUpdate* sample, const ::DDS::Sampl
           );
     buffer << sample->id << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::processDelete( SubscriptionUpdate): ")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDelete( SubscriptionUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
       this->id(),
       sample->domain,
@@ -1130,7 +1306,7 @@ ManagerImpl::processDelete( const ParticipantUpdate* sample, const ::DDS::Sample
                );
     buffer << sample->id << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::processDelete( ParticipantUpdate): ")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDelete( ParticipantUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s ]\n"),
       this->id(),
       sample->domain,
@@ -1159,7 +1335,7 @@ ManagerImpl::processDelete( const TopicUpdate* sample, const ::DDS::SampleInfo* 
           );
     buffer << sample->id << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::processDelete( TopicUpdate): ")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDelete( TopicUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ topic %s ]\n"),
       this->id(),
       sample->domain,

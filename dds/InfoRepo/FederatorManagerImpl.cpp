@@ -19,6 +19,7 @@
 #include "FederatorTypeSupportC.h"
 #include "FederatorTypeSupportImpl.h"
 
+#include <sstream>
 #include <string>
 
 #if !defined (__ACE_INLINE__)
@@ -355,12 +356,18 @@ ManagerImpl::initialize()
 
   ::DDS::DataReaderQos readerQos;
   subscriber->get_default_datareader_qos( readerQos);
+  readerQos.durability.kind                          = ::DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
+  readerQos.history.kind                             = ::DDS::KEEP_LAST_HISTORY_QOS;
+  readerQos.history.depth                            = 50;
   readerQos.reliability.kind                         = ::DDS::RELIABLE_RELIABILITY_QOS;
   readerQos.reliability.max_blocking_time.sec        = 0;
   readerQos.reliability.max_blocking_time.nanosec    = 0;
 
   ::DDS::DataWriterQos writerQos;
   publisher->get_default_datawriter_qos( writerQos);
+  writerQos.durability.kind                          = ::DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
+  writerQos.history.kind                             = ::DDS::KEEP_LAST_HISTORY_QOS;
+  writerQos.history.depth                            = 50;
   writerQos.reliability.kind                         = ::DDS::RELIABLE_RELIABILITY_QOS;
   writerQos.reliability.max_blocking_time.sec        = 0;
   writerQos.reliability.max_blocking_time.nanosec    = 0;
@@ -391,7 +398,7 @@ ManagerImpl::initialize()
   if( CORBA::is_nil( dataWriter.in())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
-      ACE_TEXT("failed to create Owner update writer for repository %d\n"),
+      ACE_TEXT("failed to create OwnerUpdate writer for repository %d\n"),
       this->id()
     ));
     throw Incomplete();
@@ -402,16 +409,30 @@ ManagerImpl::initialize()
   if( 0 == this->ownerWriter_) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
-      ACE_TEXT("failed to extract typed Owner update writer.\n")
+      ACE_TEXT("failed to extract typed OwnerUpdate writer.\n")
     ));
     throw Incomplete();
 
   } else if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
-      ACE_TEXT("created federation Owner update writer for repository %d\n"),
-      this->id()
-    ));
+    ::OpenDDS::DCPS::DataWriterImpl* servant
+      = dynamic_cast< ::OpenDDS::DCPS::DataWriterImpl*>( dataWriter.in());
+    if( 0 == servant) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) WARNING: Federator::ManagerImpl::initialize() - ")
+        ACE_TEXT("unable to extract typed OwnerUpdate writer.\n")
+      ));
+    } else {
+      ::OpenDDS::DCPS::RepoId id = servant->get_publication_id();
+      std::stringstream buffer;
+      long key = ::OpenDDS::DCPS::GuidConverter( id);
+      buffer << id << "(" << std::hex << key << ")";
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+        ACE_TEXT("created federation OwnerUpdate writer %s for repository %d\n"),
+        buffer.str().c_str(),
+        this->id()
+      ));
+    }
   }
 
   description = this->federationParticipant_->lookup_topicdescription( OWNERUPDATETOPICNAME);
@@ -423,17 +444,32 @@ ManagerImpl::initialize()
   if( CORBA::is_nil( dataReader.in())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
-      ACE_TEXT("failed to create Owner update reader for repository %d\n"),
+      ACE_TEXT("failed to create OwnerUpdate reader for repository %d\n"),
       this->id()
     ));
     throw Incomplete();
 
   } else if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
-      ACE_TEXT("created federation Owner update reader for repository %d\n"),
-      this->id()
-    ));
+    ::OpenDDS::DCPS::DataReaderImpl* servant
+      = dynamic_cast< ::OpenDDS::DCPS::DataReaderImpl*>( dataReader.in());
+    if( 0 == servant) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) WARNING: Federator::ManagerImpl::initialize() - ")
+        ACE_TEXT("unable to extract typed OwnerUpdate reader.\n")
+      ));
+
+    } else {
+      ::OpenDDS::DCPS::RepoId id = servant->get_subscription_id();
+      std::stringstream buffer;
+      long key = ::OpenDDS::DCPS::GuidConverter( id);
+      buffer << id << "(" << std::hex << key << ")";
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+        ACE_TEXT("created federation OwnerUpdate reader %s for repository %d\n"),
+        buffer.str().c_str(),
+        this->id()
+      ));
+    }
   }
 
   topic = this->federationParticipant_->create_topic(
@@ -450,7 +486,7 @@ ManagerImpl::initialize()
   if( CORBA::is_nil( dataWriter.in())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
-      ACE_TEXT("failed to create Topic update writer for repository %d\n"),
+      ACE_TEXT("failed to create TopicUpdate writer for repository %d\n"),
       this->id()
     ));
     throw Incomplete();
@@ -461,16 +497,31 @@ ManagerImpl::initialize()
   if( 0 == this->topicWriter_) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
-      ACE_TEXT("failed to extract typed Topic update writer.\n")
+      ACE_TEXT("failed to extract typed TopicUpdate writer.\n")
     ));
     throw Incomplete();
 
   } else if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
-      ACE_TEXT("created federation Topic update writer for repository %d\n"),
-      this->id()
-    ));
+    ::OpenDDS::DCPS::DataWriterImpl* servant
+      = dynamic_cast< ::OpenDDS::DCPS::DataWriterImpl*>( dataWriter.in());
+    if( 0 == servant) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) WARNING: Federator::ManagerImpl::initialize() - ")
+        ACE_TEXT("unable to extract typed TopicUpdate writer.\n")
+      ));
+
+    } else {
+      ::OpenDDS::DCPS::RepoId id = servant->get_publication_id();
+      std::stringstream buffer;
+      long key = ::OpenDDS::DCPS::GuidConverter( id);
+      buffer << id << "(" << std::hex << key << ")";
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+        ACE_TEXT("created federation TopicUpdate writer %s for repository %d\n"),
+        buffer.str().c_str(),
+        this->id()
+      ));
+    }
   }
 
   description = this->federationParticipant_->lookup_topicdescription( TOPICUPDATETOPICNAME);
@@ -482,17 +533,32 @@ ManagerImpl::initialize()
   if( CORBA::is_nil( dataReader.in())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
-      ACE_TEXT("failed to create Topic update reader for repository %d\n"),
+      ACE_TEXT("failed to create TopicUpdate reader for repository %d\n"),
       this->id()
     ));
     throw Incomplete();
 
   } else if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
-      ACE_TEXT("created federation Topic update reader for repository %d\n"),
-      this->id()
-    ));
+    ::OpenDDS::DCPS::DataReaderImpl* servant
+      = dynamic_cast< ::OpenDDS::DCPS::DataReaderImpl*>( dataReader.in());
+    if( 0 == servant) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) WARNING: Federator::ManagerImpl::initialize() - ")
+        ACE_TEXT("unable to extract typed TopicUpdate reader.\n")
+      ));
+
+    } else {
+      ::OpenDDS::DCPS::RepoId id = servant->get_subscription_id();
+      std::stringstream buffer;
+      long key = ::OpenDDS::DCPS::GuidConverter( id);
+      buffer << id << "(" << std::hex << key << ")";
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+        ACE_TEXT("created federation TopicUpdate reader %s for repository %d\n"),
+        buffer.str().c_str(),
+        this->id()
+      ));
+    }
   }
 
   topic = this->federationParticipant_->create_topic(
@@ -509,7 +575,7 @@ ManagerImpl::initialize()
   if( CORBA::is_nil( dataWriter.in())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
-      ACE_TEXT("failed to create Participant update writer for repository %d\n"),
+      ACE_TEXT("failed to create ParticipantUpdate writer for repository %d\n"),
       this->id()
     ));
     throw Incomplete();
@@ -520,16 +586,31 @@ ManagerImpl::initialize()
   if( 0 == this->participantWriter_) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
-      ACE_TEXT("failed to extract typed Participant update writer.\n")
+      ACE_TEXT("failed to extract typed ParticipantUpdate writer.\n")
     ));
     throw Incomplete();
 
   } else if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
-      ACE_TEXT("created federation Participant update writer for repository %d\n"),
-      this->id()
-    ));
+    ::OpenDDS::DCPS::DataWriterImpl* servant
+      = dynamic_cast< ::OpenDDS::DCPS::DataWriterImpl*>( dataWriter.in());
+    if( 0 == servant) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) WARNING: Federator::ManagerImpl::initialize() - ")
+        ACE_TEXT("unable to extract typed ParticipantUpdate writer.\n")
+      ));
+
+    } else {
+      ::OpenDDS::DCPS::RepoId id = servant->get_publication_id();
+      std::stringstream buffer;
+      long key = ::OpenDDS::DCPS::GuidConverter( id);
+      buffer << id << "(" << std::hex << key << ")";
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+        ACE_TEXT("created federation ParticipantUpdate writer %s for repository %d\n"),
+        buffer.str().c_str(),
+        this->id()
+      ));
+    }
   }
 
   description = this->federationParticipant_->lookup_topicdescription( PARTICIPANTUPDATETOPICNAME);
@@ -541,17 +622,32 @@ ManagerImpl::initialize()
   if( CORBA::is_nil( dataReader.in())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
-      ACE_TEXT("failed to create Participant update reader for repository %d\n"),
+      ACE_TEXT("failed to create ParticipantUpdate reader for repository %d\n"),
       this->id()
     ));
     throw Incomplete();
 
   } else if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
-      ACE_TEXT("created federation Participant update reader for repository %d\n"),
-      this->id()
-    ));
+    ::OpenDDS::DCPS::DataReaderImpl* servant
+      = dynamic_cast< ::OpenDDS::DCPS::DataReaderImpl*>( dataReader.in());
+    if( 0 == servant) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) WARNING: Federator::ManagerImpl::initialize() - ")
+        ACE_TEXT("unable to extract typed ParticipantUpdate reader.\n")
+      ));
+
+    } else {
+      ::OpenDDS::DCPS::RepoId id = servant->get_subscription_id();
+      std::stringstream buffer;
+      long key = ::OpenDDS::DCPS::GuidConverter( id);
+      buffer << id << "(" << std::hex << key << ")";
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+        ACE_TEXT("created federation ParticipantUpdate reader %s for repository %d\n"),
+        buffer.str().c_str(),
+        this->id()
+      ));
+    }
   }
 
   topic = this->federationParticipant_->create_topic(
@@ -568,7 +664,7 @@ ManagerImpl::initialize()
   if( CORBA::is_nil( dataWriter.in())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
-      ACE_TEXT("failed to create Publication update writer for repository %d\n"),
+      ACE_TEXT("failed to create PublicationUpdate writer for repository %d\n"),
       this->id()
     ));
     throw Incomplete();
@@ -579,16 +675,31 @@ ManagerImpl::initialize()
   if( 0 == this->publicationWriter_) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
-      ACE_TEXT("failed to extract typed Publication update writer.\n")
+      ACE_TEXT("failed to extract typed PublicationUpdate writer.\n")
     ));
     throw Incomplete();
 
   } else if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
-      ACE_TEXT("created federation Publication update writer for repository %d\n"),
-      this->id()
-    ));
+    ::OpenDDS::DCPS::DataWriterImpl* servant
+      = dynamic_cast< ::OpenDDS::DCPS::DataWriterImpl*>( dataWriter.in());
+    if( 0 == servant) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) WARNING: Federator::ManagerImpl::initialize() - ")
+        ACE_TEXT("unable to extract typed PublicationUpdate writer.\n")
+      ));
+
+    } else {
+      ::OpenDDS::DCPS::RepoId id = servant->get_publication_id();
+      std::stringstream buffer;
+      long key = ::OpenDDS::DCPS::GuidConverter( id);
+      buffer << id << "(" << std::hex << key << ")";
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+        ACE_TEXT("created federation PublicationUpdate writer %s for repository %d\n"),
+        buffer.str().c_str(),
+        this->id()
+      ));
+    }
   }
 
   description = this->federationParticipant_->lookup_topicdescription( PUBLICATIONUPDATETOPICNAME);
@@ -600,17 +711,32 @@ ManagerImpl::initialize()
   if( CORBA::is_nil( dataReader.in())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
-      ACE_TEXT("failed to create Publication update reader for repository %d\n"),
+      ACE_TEXT("failed to create PublicationUpdate reader for repository %d\n"),
       this->id()
     ));
     throw Incomplete();
 
   } else if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
-      ACE_TEXT("created federation Publication update reader for repository %d\n"),
-      this->id()
-    ));
+    ::OpenDDS::DCPS::DataReaderImpl* servant
+      = dynamic_cast< ::OpenDDS::DCPS::DataReaderImpl*>( dataReader.in());
+    if( 0 == servant) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) WARNING: Federator::ManagerImpl::initialize() - ")
+        ACE_TEXT("unable to extract typed PublicationUpdate reader.\n")
+      ));
+
+    } else {
+      ::OpenDDS::DCPS::RepoId id = servant->get_subscription_id();
+      std::stringstream buffer;
+      long key = ::OpenDDS::DCPS::GuidConverter( id);
+      buffer << id << "(" << std::hex << key << ")";
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+        ACE_TEXT("created federation PublicationUpdate reader %s for repository %d\n"),
+        buffer.str().c_str(),
+        this->id()
+      ));
+    }
   }
 
   topic = this->federationParticipant_->create_topic(
@@ -627,7 +753,7 @@ ManagerImpl::initialize()
   if( CORBA::is_nil( dataWriter.in())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
-      ACE_TEXT("failed to create Subscription update writer for repository %d\n"),
+      ACE_TEXT("failed to create SubscriptionUpdate writer for repository %d\n"),
       this->id()
     ));
     throw Incomplete();
@@ -638,16 +764,31 @@ ManagerImpl::initialize()
   if( 0 == this->subscriptionWriter_) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
-      ACE_TEXT("failed to extract typed Subscription update writer.\n")
+      ACE_TEXT("failed to extract typed SubscriptionUpdate writer.\n")
     ));
     throw Incomplete();
 
   } else if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
-      ACE_TEXT("created federation Subscription update writer for repository %d\n"),
-      this->id()
-    ));
+    ::OpenDDS::DCPS::DataWriterImpl* servant
+      = dynamic_cast< ::OpenDDS::DCPS::DataWriterImpl*>( dataWriter.in());
+    if( 0 == servant) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) WARNING: Federator::ManagerImpl::initialize() - ")
+        ACE_TEXT("unable to extract typed SubscriptionUpdate writer.\n")
+      ));
+
+    } else {
+      ::OpenDDS::DCPS::RepoId id = servant->get_publication_id();
+      std::stringstream buffer;
+      long key = ::OpenDDS::DCPS::GuidConverter( id);
+      buffer << id << "(" << std::hex << key << ")";
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+        ACE_TEXT("created federation SubscriptionUpdate writer %s for repository %d\n"),
+        buffer.str().c_str(),
+        this->id()
+      ));
+    }
   }
 
   description = this->federationParticipant_->lookup_topicdescription( SUBSCRIPTIONUPDATETOPICNAME);
@@ -659,17 +800,32 @@ ManagerImpl::initialize()
   if( CORBA::is_nil( dataReader.in())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
-      ACE_TEXT("failed to create Subscription update reader for repository %d\n"),
+      ACE_TEXT("failed to create SubscriptionUpdate reader for repository %d\n"),
       this->id()
     ));
     throw Incomplete();
 
   } else if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
-      ACE_TEXT("created federation Subscription update reader for repository %d\n"),
-      this->id()
-    ));
+    ::OpenDDS::DCPS::DataReaderImpl* servant
+      = dynamic_cast< ::OpenDDS::DCPS::DataReaderImpl*>( dataReader.in());
+    if( 0 == servant) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) WARNING: Federator::ManagerImpl::initialize() - ")
+        ACE_TEXT("unable to extract typed SubscriptionUpdate reader.\n")
+      ));
+
+    } else {
+      ::OpenDDS::DCPS::RepoId id = servant->get_subscription_id();
+      std::stringstream buffer;
+      long key = ::OpenDDS::DCPS::GuidConverter( id);
+      buffer << id << "(" << std::hex << key << ")";
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+        ACE_TEXT("created federation SubscriptionUpdate reader %s for repository %d\n"),
+        buffer.str().c_str(),
+        this->id()
+      ));
+    }
   }
 
   // JSP

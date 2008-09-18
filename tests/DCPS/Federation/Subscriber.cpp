@@ -289,13 +289,9 @@ Subscriber::run()
   // Wait until we receive the final message at the last receiver, then
   // we are done.
   //
-  if( OpenDDS::DCPS::DCPS_debug_level > 0) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Subscriber::run about to wait.\n")));
-  }
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Subscriber::run about to wait.\n")));
   this->sync_->waitForCompletion();
 
-  if( OpenDDS::DCPS::DCPS_debug_level > 0) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Subscriber::run done processing.\n")));
-  }
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Subscriber::run done processing.\n")));
 }
 

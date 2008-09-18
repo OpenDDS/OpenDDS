@@ -1,55 +1,100 @@
+Thu Sep 18 22:43:49 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+	  Predicated some diagnostic messages on debug level.  Replaced
+	  throw operations with status returns where needed.
+
+	  Change internal publication and subscription calls to cause
+	  associations to be made.
+	  NOTE: This needs to be reconciled with the incompatible usage
+	        for persistence.
+
+        * dds/InfoRepo/FederatorManagerImpl.h:
+
+	  Changed deferred sample queues from std::set to std::list
+	  containers and changed from holding a pointer to the deferred
+	  samples to copying the samples to avoid issues with the inbound
+	  sample lifetimes.  Added method for processing for the deferred
+	  samples.
+
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+
+	  Changed DURABILITY for update writers and readers to
+	  TRANSIENT_LOCAL as a partial solution to indeterminate ordering
+	  of update reception.  Modified diagnostics for clarity.
+
+        * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
+
+	  Modified diagnostic messages for clarity.  Added additional
+	  diagnostic messages.  Changed deferred sample container type
+	  usage.  Implemented processing for the deferred samples.
+
+        * dds/InfoRepo/UpdateReceiver_T.cpp:
+
+	  Added more diagnostics and more information to existing
+	  diagnostic messages.
+
+        * tests/DCPS/Federation/Subscriber.cpp:
+
+	  Deconditionalized run() log messages.
+
+        * tests/DCPS/Federation/run_test.pl:
+
+	  Added some delays to help log output parsing during debug.
+
 Fri Sep 12 22:20:21 UTC 2008  Mike Martinez  <martinez_m@lab.ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:
 
-	  Predicate federation on id values other than the NIL id value.
+          Predicate federation on id values other than the NIL id value.
 
         * dds/InfoRepo/DCPSInfo_i.h:
         * dds/InfoRepo/DCPSInfo_i.cpp:
 
-	  changeOwnership() now returns a boolean completion status.
+          changeOwnership() now returns a boolean completion status.
 
         * dds/InfoRepo/FederatorManagerImpl.h:
 
-	  Added instance storage for local repository reference.  Addd
-	  sets to store unprocessed update samples.
+          Added instance storage for local repository reference.  Addd
+          sets to store unprocessed update samples.
 
         * dds/InfoRepo/FederatorManagerImpl.inl:
 
-	  localRepo() - new method to capture a copy of the local
-	                repository reference.
+          localRepo() - new method to capture a copy of the local
+                        repository reference.
 
         * dds/InfoRepo/FederatorManagerImpl.cpp:
 
-	  repository() - now returns the current federation management
-			 repository if any, and the local repository if
-			 there is no federation repository established.
-	  join_federation() - Moved pushState() call inside try/catch
-	                 block.  Moved update publication and
-			 subscription initialization to after federation
-			 establishment and initial pushState() call on
-			 both sides.
+          repository() - now returns the current federation management
+                         repository if any, and the local repository if
+                         there is no federation repository established.
+          join_federation() - Moved pushState() call inside try/catch
+                         block.  Moved update publication and
+                         subscription initialization to after federation
+                         establishment and initial pushState() call on
+                         both sides.
 
         * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
 
-	  Extensive additions to diagnostic messages.
-	  Store unsuccessfully processed samples for future reprocessing
-	  attempts.  This allows the out of order nature of update
-	  reception to proceed without failure.
+          Extensive additions to diagnostic messages.
+          Store unsuccessfully processed samples for future reprocessing
+          attempts.  This allows the out of order nature of update
+          reception to proceed without failure.
 
         * tests/DCPS/Federation/Subscriber.cpp:
 
-	  Added an additional diagnostic message.
+          Added an additional diagnostic message.
 
         * tests/DCPS/Federation/publisher_main.cpp:
 
-	  Removed the annoying and redundant timestamp from diagnostic
-	  messages.
+          Removed the annoying and redundant timestamp from diagnostic
+          messages.
 
         * tests/DCPS/Federation/run_test.pl:
 
-	  Added default counts.  Added publisher and subscriber to
-	  automatic process generation.
+          Added default counts.  Added publisher and subscriber to
+          automatic process generation.
 
 Tue Sep  9 22:49:36 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 

@@ -102,6 +102,14 @@ UpdateReceiver< DataType>::put( DataType* sample, ::DDS::SampleInfo* info)
   { // Protect the queue.
     ACE_GUARD( ACE_SYNCH_MUTEX, guard, this->lock_);
     this->queue_.push_back( DataInfo( sample, info));
+    if( OpenDDS::DCPS::DCPS_debug_level > 9) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) UpdateReceiver::put() - ")
+        ACE_TEXT(" %d samples waiting to process in 0x%x.\n"),
+        this->queue_.size(),
+        (void*)this
+      ));
+    }
   }
   this->workAvailable_.signal();
 }
@@ -123,9 +131,23 @@ UpdateReceiver< DataType>::svc()
       while( this->queue_.size() == 0) {
         // This releases the lock while we block.
         this->workAvailable_.wait();
+        if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) UpdateReceiver::svc() - ")
+            ACE_TEXT("wakeup in 0x%x.\n"),
+            (void*)this
+          ));
+        }
 
         // We were asked to stop instead.
-        if( this->stop_) {
+        if( this->stop_ == true) {
+          if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
+            ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) UpdateReceiver::svc() - ")
+              ACE_TEXT("discontinuing processing after wakeup in 0x%x.\n"),
+              (void*)this
+            ));
+          }
           return 0;
         }
       }
@@ -134,7 +156,8 @@ UpdateReceiver< DataType>::svc()
     if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) UpdateReceiver::svc() - ")
-        ACE_TEXT("processing a sample.\n")
+        ACE_TEXT("processing a sample in 0x%x.\n"),
+        (void*)this
       ));
     }
 
@@ -150,6 +173,14 @@ UpdateReceiver< DataType>::svc()
       delete this->queue_.front().second;
       this->queue_.pop_front();
     }
+  }
+
+  if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) UpdateReceiver::svc() - ")
+      ACE_TEXT("discontinuing processing after sample complete in 0x%x.\n"),
+      (void*)this
+    ));
   }
   return 0;
 }
