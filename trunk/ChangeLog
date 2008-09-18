@@ -1,3 +1,13 @@
+Thu Sep 18 22:57:36 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/modules/IDL2JNIHelper.pm:
+
+          The dependency between Foo.idl and FooTypeSupport.idl was reversed.
+
+        * java/dds/dcps_java_optional.mpb:
+
+          Fixed whitespace.
+
 Thu Sep 18 16:02:47 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * java/dds/dcps_java_optional.mpb:

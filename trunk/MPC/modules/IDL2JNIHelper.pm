@@ -149,12 +149,14 @@ sub get_tied {
   my($self, $file, $files) = @_;
   my $tied = [];
 
-  if ($file =~ s/$tsreg$/.idl/) {
-    foreach my $f (@$files) {
-      if ($f eq $file) {
-        push(@$tied, $f);
-        last;
-      }
+  my $ts = $tsreg;
+  $ts =~ s/\\//g;
+  $file =~ s/\.idl$//;
+
+  foreach my $f (@$files) {
+    if ($f eq "$file$ts") {
+      push(@$tied, $f);
+      last;
     }
   }
 
