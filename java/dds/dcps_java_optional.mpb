@@ -22,13 +22,14 @@ feature (built_in_topics): dcps_ts_defaults, idl2jni {
 
   TypeSupportJavaOnly_Files {
     dcps_ts_java_flags += --extension_args=cpp_file=BitsJC.cpp
-    $(DDS_ROOT)/dds/DdsDcpsInfrastructure.idl >> BitsJC.cpp DDS/ParticipantBuiltInTopicDataTypeSupportImpl.java DDS/TopicBuiltInTopicDataTypeSupportImpl.java DDS/PublicationBuiltInTopicDataTypeSupportImpl.java DDS/SubscriptionBuiltInTopicDataTypeSupportImpl.java
+    $(DDS_ROOT)/dds/DdsDcpsInfrastructure.idl >> BitsJC.cpp DDS/ParticipantBuiltinTopicDataTypeSupportImpl.java DDS/TopicBuiltinTopicDataTypeSupportImpl.java DDS/PublicationBuiltinTopicDataTypeSupportImpl.java DDS/SubscriptionBuiltinTopicDataTypeSupportImpl.java
   }
 
   Java_Files {
-    DDS/ParticipantBuiltInTopicDataTypeSupportImpl.java
-    DDS/TopicBuiltInTopicDataTypeSupportImpl.java 
-    DDS/PublicationBuiltInTopicDataTypeSupportImpl.java
-    DDS/SubscriptionBuiltInTopicDataTypeSupportImpl.java
+    DDS/ParticipantBuiltinTopicDataTypeSupportImpl.java // << DDS/ParticipantBuiltinTopicDataTypeSupport.java
+    DDS/TopicBuiltinTopicDataTypeSupportImpl.java 
+    DDS/PublicationBuiltinTopicDataTypeSupportImpl.java
+    DDS/SubscriptionBuiltinTopicDataTypeSupportImpl.java
+//    DDS/ParticipantBuiltinTopicDataTypeSupport.java << OpenDDS/DCPS/TypeSupport.java
   }
 }
