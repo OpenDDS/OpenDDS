@@ -19,7 +19,7 @@
 #include "dds/DCPS/transport/framework/TransportDefs.h"
 #include "ace/Condition_T.h"
 
-#include <set>
+#include <list>
 
 class TAO_DDS_DCPSInfo_i;
 
@@ -138,6 +138,9 @@ class OpenDDS_Federator_Export ManagerImpl
 
     /// Push our current state to a remote repository.
     void pushState( Manager_ptr peer);
+
+    /// Handle any deferred updates that might have become processable.
+    void processDeferred();
 
     //
     // Updater methods.
@@ -283,16 +286,16 @@ class OpenDDS_Federator_Export ManagerImpl
     SubscriptionUpdateDataWriter_var subscriptionWriter_;
 
     /// Deferred ownership updates
-    std::set< const OwnerUpdate*> deferredOwnerships_;
+    std::list< OwnerUpdate> deferredOwnerships_;
 
     /// Deferred topic updates
-    std::set< const TopicUpdate*> deferredTopics_;
+    std::list< TopicUpdate> deferredTopics_;
 
     /// Deferred publication updates
-    std::set< const PublicationUpdate*> deferredPublications_;
+    std::list< PublicationUpdate> deferredPublications_;
 
     /// Deferred subscription updates
-    std::set< const SubscriptionUpdate*> deferredSubscriptions_;
+    std::list< SubscriptionUpdate> deferredSubscriptions_;
 
     /// Is multicast enabled?
     bool multicastEnabled_;

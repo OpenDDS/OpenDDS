@@ -182,6 +182,7 @@ for my $index ( 1 .. $repoCount) {
       exit 1;
   }
 }
+print "\nLetting repository federation operations settle a bit...\n"; sleep 5;
 
 # Fire up the subscribers.
 
@@ -191,6 +192,7 @@ for my $index ( 1 .. $subCount) {
   $SUB[ $index - 1]->Spawn();
   sleep 2;
 }
+print "\nLetting subscribers settle a bit...\n"; sleep 5;
 
 # Fire up the publishers.
 
