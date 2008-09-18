@@ -4,7 +4,7 @@ feature (built_in_topics): dcps_ts_defaults, idl2jni {
               -Wb,stub_export_macro=dcps_java_Export
 
   Idl2Jni_Files {
-    idl2jniflags += -SS -I$(DDS_ROOT) -I$(DDS_ROOT)/dds \
+    idl2jniflags += -SS -I$(TAO_ROOT) -I$(DDS_ROOT) -I$(DDS_ROOT)/dds \
                     -Wb,stub_export_include=dcps_java_export.h \
                     -Wb,stub_export_macro=dcps_java_Export
     $(DDS_ROOT)/dds/DdsDcpsInfrastructureTypeSupport.idl

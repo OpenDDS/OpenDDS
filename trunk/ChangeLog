@@ -1,3 +1,9 @@
+Thu Sep 18 16:02:47 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * java/dds/dcps_java_optional.mpb:
+
+          Added a -I for $TAO_ROOT.
+
 Thu Sep 18 15:15:31 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * java/dds/dcps_java_optional.mpb:
