@@ -23,8 +23,8 @@ project: dcps_tcp, dcps_java {
   // Older versions of Visual Studio will create the intermediate directories
   // in all-lowercase, so we have to create them first to get the correct case.
   specific(vc71, vc8) {
-    prebuild   += <%mkdir%> Messenger 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
-    prebuild   += <%mkdir%> classes<%slash%>Messenger 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
+    prebuild   += <%mkdir%> MultiRepo 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
+    prebuild   += <%mkdir%> classes<%slash%>MultiRepo 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
   }
 
     TypeSupport_Files {
