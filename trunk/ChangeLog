@@ -1,3 +1,9 @@
+Thu Sep 18 15:15:31 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * java/dds/dcps_java_optional.mpb:
+
+          Added section for !built_in_topics.
+
 Thu Sep 18 00:10:40 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * java/dds/dcps_java_optional.mpb:
