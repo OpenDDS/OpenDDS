@@ -1,12 +1,7 @@
-//
 // $Id$
-//
-// Copyright (c) 2008 Object Computing, Inc.
-// All rights reserved.
-//
 project: dcps_tcp, dcps_java {
 
-    sharedname       = multirepo_test
+    sharedname      = multirepo_test
 
     idlflags        += -Wb,stub_export_include=multirepo_test_Export.h \
                        -Wb,stub_export_macro=multirepo_test_Export
@@ -17,15 +12,15 @@ project: dcps_tcp, dcps_java {
     dynamicflags    += MULTIREPO_TEST_BUILD_DLL
 
     specific {
-        jarname      = multirepo_test
+        jarname     = multirepo_test
     }
 
-  // Older versions of Visual Studio will create the intermediate directories
-  // in all-lowercase, so we have to create them first to get the correct case.
-  specific(vc71, vc8) {
-    prebuild   += <%mkdir%> MultiRepo 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
-    prebuild   += <%mkdir%> classes<%slash%>MultiRepo 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
-  }
+    // Older versions of Visual Studio will create the intermediate directories
+    // in all-lowercase, so we have to create them first to get the correct case.
+    specific(vc71, vc8) {
+        prebuild    += <%mkdir%> MultiRepo 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
+        prebuild    += <%mkdir%> classes<%slash%>MultiRepo 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
+    }
 
     TypeSupport_Files {
         MultiRepo.idl
