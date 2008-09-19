@@ -85,6 +85,7 @@ module OpenDDS { module Federator {
     struct ParticipantUpdate {
       FederationId              id;
       RepoKey                   sender;
+      RepoKey                   owner;
       DDS::DomainId_t           domain;
       UpdateType                action;
       DDS::DomainParticipantQos qos;

@@ -147,6 +147,7 @@ Manager::pushImage (const DImage& image)
 
       UParticipant* u_part;
       ACE_NEW_NORETURN (u_part, UParticipant (part.domainId
+                                              , part.owner
                                               , part.participantId
                                               , *qos));
       parts.push_back (u_part);

@@ -60,14 +60,17 @@ template<>
 struct ParticipantStrt< QosSeq>
 {
   ::DDS::DomainId_t domainId;
+  long              owner;
   IdType            participantId;
   QosSeq            participantQos;
 
   ParticipantStrt(
     const ::DDS::DomainId_t& dId,
+    long                     own,
     const IdType&            pId,
     const QosSeq&            pQos
   ) : domainId( dId),
+      owner( own),
       participantId( pId),
       participantQos( pQos)
   {}
@@ -76,6 +79,7 @@ struct ParticipantStrt< QosSeq>
     const DParticipant&            participant,
     PersistenceUpdater::ALLOCATOR* allocator
   ) : domainId( participant.domainId),
+      owner( participant.owner),
       participantId( participant.participantId)
   {
     int qos_len = participant.participantQos.second.first;
@@ -407,6 +411,7 @@ PersistenceUpdater::requestImage (void)
       BinSeq in_seq (qos_len, buf);
       QosSeq qos (ParticipantQos, in_seq);
       DParticipant dparticipant (participant->domainId
+                                                , participant->owner
                                                 , participant->participantId
                                                 , qos);
       image.participants.push_back (dparticipant);
@@ -572,7 +577,7 @@ PersistenceUpdater::create(const UParticipant& participant)
 
   QosSeq p (ParticipantQos, qos_bin);
   DParticipant participant_data
-    (participant.domainId, participant.participantId, p);
+    (participant.domainId, participant.owner, participant.participantId, p);
 
   // allocate memory for ParticipantData
   void* buffer;

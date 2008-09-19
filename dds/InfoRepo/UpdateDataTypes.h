@@ -88,14 +88,17 @@ typedef struct TopicStrt< QosSeq, std::string>           DTopic;
 template <typename Q>
 struct ParticipantStrt {
   DomainIdType domainId;
+  long         owner;
   IdType       participantId;
   Q            participantQos;
 
   ParticipantStrt(
     DomainIdType dom,
+    long         own,
     IdType       part,
     Q            pQos
   ) : domainId( dom),
+      owner( own),
       participantId( part),
       participantQos( pQos)
   { };

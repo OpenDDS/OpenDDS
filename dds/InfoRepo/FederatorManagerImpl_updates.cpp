@@ -85,6 +85,7 @@ ManagerImpl::create( const Update::UParticipant& participant)
   sample.sender = this->id();
   sample.action = CreateEntity;
 
+  sample.owner  = participant.owner;
   sample.domain = participant.domainId;
   sample.id     = participant.participantId;
   sample.qos    = participant.participantQos;
@@ -718,7 +719,8 @@ ManagerImpl::processCreate( const PublicationUpdate* sample, const ::DDS::Sample
                                              sample->callback,
                                              sample->datawriter_qos,
                                              transportInfo,
-                                             sample->publisher_qos)) {
+                                             sample->publisher_qos,
+                                             true)) {
     this->deferredPublications_.push_back( *sample);
     if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
       ACE_DEBUG((LM_DEBUG,
@@ -764,7 +766,8 @@ ManagerImpl::processCreate( const SubscriptionUpdate* sample, const ::DDS::Sampl
                                               sample->callback,
                                               sample->datareader_qos,
                                               transportInfo,
-                                              sample->subscriber_qos)) {
+                                              sample->subscriber_qos,
+                                              true)) {
     this->deferredSubscriptions_.push_back( *sample);
     if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
       ACE_DEBUG((LM_DEBUG,
@@ -786,10 +789,11 @@ ManagerImpl::processCreate( const ParticipantUpdate* sample, const ::DDS::Sample
     buffer << sample->id << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processCreate( ParticipantUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s ]\n"),
+      ACE_TEXT("repo %d - [ domain %d/ participant %s/ owner %d ]\n"),
       this->id(),
       sample->domain,
-      buffer.str().c_str()
+      buffer.str().c_str(),
+      sample->owner
     ));
   }
 
@@ -797,6 +801,12 @@ ManagerImpl::processCreate( const ParticipantUpdate* sample, const ::DDS::Sample
     sample->domain,
     sample->id,
     sample->qos
+  );
+  this->info_->changeOwnership(
+    sample->domain,
+    sample->id,
+    sample->sender,
+    sample->owner
   );
   this->processDeferred();
 }
@@ -918,7 +928,8 @@ ManagerImpl::processDeferred()
                                                current->callback,
                                                current->datawriter_qos,
                                                transportInfo,
-                                               current->publisher_qos)) {
+                                               current->publisher_qos,
+                                               true)) {
       current = this->deferredPublications_.erase( current);
       if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
         std::stringstream participantBuffer;
@@ -957,7 +968,8 @@ ManagerImpl::processDeferred()
                                                 current->callback,
                                                 current->datareader_qos,
                                                 transportInfo,
-                                                current->subscriber_qos)) {
+                                                current->subscriber_qos,
+                                                true)) {
       current = this->deferredSubscriptions_.erase( current);
       if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
         std::stringstream participantBuffer;
@@ -1393,6 +1405,7 @@ ManagerImpl::pushState( Manager_ptr peer)
       participantSample.sender = this->id();
       participantSample.action = CreateEntity;
 
+      participantSample.owner  =  currentParticipant->second->owner();
       participantSample.domain =  currentDomain->second->get_id();
       participantSample.id     =  currentParticipant->second->get_id();
       participantSample.qos    = *currentParticipant->second->get_qos();

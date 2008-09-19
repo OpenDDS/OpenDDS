@@ -1,47 +1,81 @@
+Fri Sep 19 15:51:57 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/Federator.idl:
+        * dds/InfoRepo/PersistenceUpdater.cpp:
+        * dds/InfoRepo/UpdateDataTypes.h:
+        * dds/InfoRepo/UpdateManager.cpp:
+
+	  Added 'owner' field to federation Participant updates.
+
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+	  Added 'associate' paramter to the internal
+	  DCPSInfo_i::add_publication() and
+	  DCPSInfo_i::add_subscription() methods to address the
+	  conflicting usages for federation updates and repository
+	  persistence.  Cleaned up some diagnostic messages.
+
+        * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
+
+	  Added 'owner' field to federation Participant updates.
+	  Called the internal DCPSInfo_i::add_publication() and
+	  DCPSInfo_i::add_subscription() methods with the new 'associate'
+	  parameter to to address the conflicting usages for federation
+	  udpates and repository persistence.
+	  NOTE: This resolves the issue identified in the immediately
+	        previous log entry.
+
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/UpdateProcessor_T.cpp:
+
+	  Modified diagnostic messsages to make them more consistent and
+	  added some new information to the messages.
+
 Thu Sep 18 22:43:49 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/DCPSInfo_i.cpp:
 
-	  Predicated some diagnostic messages on debug level.  Replaced
-	  throw operations with status returns where needed.
+          Predicated some diagnostic messages on debug level.  Replaced
+          throw operations with status returns where needed.
 
-	  Change internal publication and subscription calls to cause
-	  associations to be made.
-	  NOTE: This needs to be reconciled with the incompatible usage
-	        for persistence.
+          Change internal publication and subscription calls to cause
+          associations to be made.
+          NOTE: This needs to be reconciled with the incompatible usage
+                for persistence.
 
         * dds/InfoRepo/FederatorManagerImpl.h:
 
-	  Changed deferred sample queues from std::set to std::list
-	  containers and changed from holding a pointer to the deferred
-	  samples to copying the samples to avoid issues with the inbound
-	  sample lifetimes.  Added method for processing for the deferred
-	  samples.
+          Changed deferred sample queues from std::set to std::list
+          containers and changed from holding a pointer to the deferred
+          samples to copying the samples to avoid issues with the inbound
+          sample lifetimes.  Added method for processing for the deferred
+          samples.
 
         * dds/InfoRepo/FederatorManagerImpl.cpp:
 
-	  Changed DURABILITY for update writers and readers to
-	  TRANSIENT_LOCAL as a partial solution to indeterminate ordering
-	  of update reception.  Modified diagnostics for clarity.
+          Changed DURABILITY for update writers and readers to
+          TRANSIENT_LOCAL as a partial solution to indeterminate ordering
+          of update reception.  Modified diagnostics for clarity.
 
         * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
 
-	  Modified diagnostic messages for clarity.  Added additional
-	  diagnostic messages.  Changed deferred sample container type
-	  usage.  Implemented processing for the deferred samples.
+          Modified diagnostic messages for clarity.  Added additional
+          diagnostic messages.  Changed deferred sample container type
+          usage.  Implemented processing for the deferred samples.
 
         * dds/InfoRepo/UpdateReceiver_T.cpp:
 
-	  Added more diagnostics and more information to existing
-	  diagnostic messages.
+          Added more diagnostics and more information to existing
+          diagnostic messages.
 
         * tests/DCPS/Federation/Subscriber.cpp:
 
-	  Deconditionalized run() log messages.
+          Deconditionalized run() log messages.
 
         * tests/DCPS/Federation/run_test.pl:
 
-	  Added some delays to help log output parsing during debug.
+          Added some delays to help log output parsing during debug.
 
 Fri Sep 12 22:20:21 UTC 2008  Mike Martinez  <martinez_m@lab.ociweb.com>
 
