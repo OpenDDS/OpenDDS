@@ -1,3 +1,10 @@
+Fri Sep 19 21:58:11 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
+
+	  Minor cosmetic diagnostic bugfixes from debugging session.
+
 Fri Sep 19 15:51:57 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/Federator.idl:
@@ -5,32 +12,32 @@ Fri Sep 19 15:51:57 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * dds/InfoRepo/UpdateDataTypes.h:
         * dds/InfoRepo/UpdateManager.cpp:
 
-	  Added 'owner' field to federation Participant updates.
+          Added 'owner' field to federation Participant updates.
 
         * dds/InfoRepo/DCPSInfo_i.h:
         * dds/InfoRepo/DCPSInfo_i.cpp:
 
-	  Added 'associate' paramter to the internal
-	  DCPSInfo_i::add_publication() and
-	  DCPSInfo_i::add_subscription() methods to address the
-	  conflicting usages for federation updates and repository
-	  persistence.  Cleaned up some diagnostic messages.
+          Added 'associate' paramter to the internal
+          DCPSInfo_i::add_publication() and
+          DCPSInfo_i::add_subscription() methods to address the
+          conflicting usages for federation updates and repository
+          persistence.  Cleaned up some diagnostic messages.
 
         * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
 
-	  Added 'owner' field to federation Participant updates.
-	  Called the internal DCPSInfo_i::add_publication() and
-	  DCPSInfo_i::add_subscription() methods with the new 'associate'
-	  parameter to to address the conflicting usages for federation
-	  udpates and repository persistence.
-	  NOTE: This resolves the issue identified in the immediately
-	        previous log entry.
+          Added 'owner' field to federation Participant updates.
+          Called the internal DCPSInfo_i::add_publication() and
+          DCPSInfo_i::add_subscription() methods with the new 'associate'
+          parameter to to address the conflicting usages for federation
+          udpates and repository persistence.
+          NOTE: This resolves the issue identified in the immediately
+                previous log entry.
 
         * dds/InfoRepo/FederatorManagerImpl.cpp:
         * dds/InfoRepo/UpdateProcessor_T.cpp:
 
-	  Modified diagnostic messsages to make them more consistent and
-	  added some new information to the messages.
+          Modified diagnostic messsages to make them more consistent and
+          added some new information to the messages.
 
 Thu Sep 18 22:43:49 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
