@@ -169,6 +169,7 @@ public:
    * @param qos           the QoS value of the DataWriter.
    * @param transInfo     the transport information for the Publication.
    * @param publisherQos  the QoS value of the Publisher.
+   * @param associate     indicate whether to create new associations.
    *
    * Adds a Publication to the repository using a specified Publication
    * GUID Id value.  If the PublicationId indicates that this Publication
@@ -185,7 +186,8 @@ public:
                         const char* pub_str,
                         const ::DDS::DataWriterQos & qos,
                         const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
-                        const ::DDS::PublisherQos & publisherQos);
+                        const ::DDS::PublisherQos & publisherQos,
+                        bool associate = false);
 
     virtual void remove_publication (
       ::DDS::DomainId_t domainId,
@@ -226,6 +228,7 @@ public:
    * @param qos           the QoS value of the DataReader.
    * @param transInfo     the transport information for the Subscription.
    * @param subscriberQos the QoS value of the Subscriber.
+   * @param associate     indicate whether to create new associations.
    *
    * Adds a Subscription to the repository using a specified Subscription
    * GUID Id value.  If the SubscriptionId indicates that this Subscription
@@ -242,7 +245,8 @@ public:
                          const char* sub_str,
                          const ::DDS::DataReaderQos & qos,
                          const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
-                         const ::DDS::SubscriberQos & subscriberQos);
+                         const ::DDS::SubscriberQos & subscriberQos,
+                         bool associate = false);
 
     virtual void remove_subscription (
       ::DDS::DomainId_t domainId,

@@ -451,7 +451,8 @@ TAO_DDS_DCPSInfo_i::add_publication (::DDS::DomainId_t domainId,
                                      const char* pub_str,
                                      const ::DDS::DataWriterQos & qos,
                                      const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
-                                     const ::DDS::PublisherQos & publisherQos)
+                                     const ::DDS::PublisherQos & publisherQos,
+                                     bool associate)
 {
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
@@ -493,8 +494,8 @@ TAO_DDS_DCPSInfo_i::add_publication (::DDS::DomainId_t domainId,
                  const_cast< OpenDDS::DCPS::RepoId*>( &topicId)
                );
     buffer << topicId << "(" << std::hex << key << ")";
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i:add_publication: ")
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i:add_publication: ")
       ACE_TEXT("invalid topic %s in domain %d.\n"),
       buffer.str().c_str(),
       domainId
@@ -544,7 +545,7 @@ TAO_DDS_DCPSInfo_i::add_publication (::DDS::DomainId_t domainId,
     default: break;
   }
 
-  switch( topic->add_publication_reference(pubPtr, true)) {
+  switch( topic->add_publication_reference(pubPtr, associate)) {
     case -1:
       {
         std::stringstream buffer;
@@ -752,7 +753,8 @@ TAO_DDS_DCPSInfo_i::add_subscription (
     const char* sub_str,
     const ::DDS::DataReaderQos & qos,
     const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
-    const ::DDS::SubscriberQos & subscriberQos
+    const ::DDS::SubscriberQos & subscriberQos,
+    bool associate
   )
 {
   // Grab the domain.
@@ -846,7 +848,7 @@ TAO_DDS_DCPSInfo_i::add_subscription (
     default: break;
   }
 
-  switch( topic->add_subscription_reference(subPtr, true)) {
+  switch( topic->add_subscription_reference(subPtr, associate)) {
     case -1:
       {
         std::stringstream buffer;
@@ -1005,9 +1007,13 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_domain_participant (
 
   } else if( this->um_ && (participant->isBitPublisher() == false)) {
     // Push this participant to interested observers.
-    Update::UParticipant participant
-      (domain, participantId, const_cast< ::DDS::DomainParticipantQos &>(qos));
-    this->um_->create (participant);
+    Update::UParticipant updateParticipant(
+                           domain,
+                           participant->owner(),
+                           participantId,
+                           const_cast< ::DDS::DomainParticipantQos &>(qos)
+                         );
+    this->um_->create( updateParticipant);
     if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
       std::stringstream buffer;
       long key = ::OpenDDS::DCPS::GuidConverter(

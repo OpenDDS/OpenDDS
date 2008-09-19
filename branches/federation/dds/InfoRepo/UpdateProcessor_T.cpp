@@ -19,7 +19,7 @@ UpdateProcessor< DataType>::UpdateProcessor()
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: UpdateProcessor::UpdateProcessor()\n")
+      ACE_TEXT("(%P|%t) UpdateProcessor::UpdateProcessor()\n")
     ));
   }
 }
@@ -29,7 +29,7 @@ UpdateProcessor< DataType>::~UpdateProcessor(void)
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: UpdateProcessor::~UpdateProcessor()\n")
+      ACE_TEXT("(%P|%t) UpdateProcessor::~UpdateProcessor()\n")
     ));
   }
 }
@@ -43,7 +43,7 @@ UpdateProcessor< DataType>::processSample(
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: UpdateProcessor::processSample()\n")
+      ACE_TEXT("(%P|%t) UpdateProcessor::processSample()\n")
     ));
   }
   if( info->valid_data) {
@@ -63,7 +63,7 @@ UpdateProcessor< DataType>::processSample(
   } else {
     if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) INFO: UpdateProcessor::processSample() - ")
+        ACE_TEXT("(%P|%t) UpdateProcessor::processSample() - ")
         ACE_TEXT("sample not valid, declining to process.\n")
       ));
     }

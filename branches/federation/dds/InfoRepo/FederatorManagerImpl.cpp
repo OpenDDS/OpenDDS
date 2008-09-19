@@ -42,7 +42,7 @@ ManagerImpl::ManagerImpl(Config& config)
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::ManagerImpl()\n")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::ManagerImpl()\n")
     ));
   }
 
@@ -61,7 +61,7 @@ ManagerImpl::~ManagerImpl()
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::~ManagerImpl()\n")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::~ManagerImpl()\n")
     ));
   }
 }
@@ -71,7 +71,7 @@ ManagerImpl::initialize()
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federation::ManagerImpl::initialize()\n")
+      ACE_TEXT("(%P|%t) Federation::ManagerImpl::initialize()\n")
     ));
   }
 
@@ -245,7 +245,7 @@ ManagerImpl::initialize()
 
   } else if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
       ACE_TEXT("created federation subscriber for repository %d\n"),
       this->id()
     ));
@@ -259,7 +259,7 @@ ManagerImpl::initialize()
       );
   if( 0 == subscriberServant) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+      ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
       ACE_TEXT("failed to extract servant for federation subscriber.\n")
     ));
     throw Incomplete();
@@ -269,7 +269,7 @@ ManagerImpl::initialize()
     case OpenDDS::DCPS::ATTACH_OK:
          if( OpenDDS::DCPS::DCPS_debug_level > 4) {
            ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+             ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
              ACE_TEXT("attached transport to federation subscriber.\n")
            ));
          }
@@ -280,7 +280,7 @@ ManagerImpl::initialize()
     case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
     default:
          ACE_ERROR((LM_ERROR,
-           ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+           ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
            ACE_TEXT("failed to attach transport to federation subscriber.\n")
          ));
          throw Incomplete();
@@ -305,7 +305,7 @@ ManagerImpl::initialize()
 
   } else if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
       ACE_TEXT("created federation publisher for repository %d\n"),
       this->id()
     ));
@@ -319,7 +319,7 @@ ManagerImpl::initialize()
       );
   if( 0 == publisherServant) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+      ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
       ACE_TEXT("failed to extract servant for federation publisher.\n")
     ));
     throw Incomplete();
@@ -329,7 +329,7 @@ ManagerImpl::initialize()
     case OpenDDS::DCPS::ATTACH_OK:
          if( OpenDDS::DCPS::DCPS_debug_level > 4) {
            ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+             ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
              ACE_TEXT("attached transport to federation publisher.\n")
            ));
          }
@@ -340,7 +340,7 @@ ManagerImpl::initialize()
     case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
     default:
          ACE_ERROR((LM_ERROR,
-           ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+           ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
            ACE_TEXT("failed to attach transport to federation publisher.\n")
          ));
          throw Incomplete();
@@ -408,7 +408,7 @@ ManagerImpl::initialize()
     = dynamic_cast< OwnerUpdateDataWriter*>( dataWriter.in());
   if( 0 == this->ownerWriter_) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+      ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
       ACE_TEXT("failed to extract typed OwnerUpdate writer.\n")
     ));
     throw Incomplete();
@@ -427,7 +427,7 @@ ManagerImpl::initialize()
       long key = ::OpenDDS::DCPS::GuidConverter( id);
       buffer << id << "(" << std::hex << key << ")";
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+        ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
         ACE_TEXT("created federation OwnerUpdate writer %s for repository %d\n"),
         buffer.str().c_str(),
         this->id()
@@ -464,7 +464,7 @@ ManagerImpl::initialize()
       long key = ::OpenDDS::DCPS::GuidConverter( id);
       buffer << id << "(" << std::hex << key << ")";
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+        ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
         ACE_TEXT("created federation OwnerUpdate reader %s for repository %d\n"),
         buffer.str().c_str(),
         this->id()
@@ -496,7 +496,7 @@ ManagerImpl::initialize()
     = dynamic_cast< TopicUpdateDataWriter*>( dataWriter.in());
   if( 0 == this->topicWriter_) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+      ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
       ACE_TEXT("failed to extract typed TopicUpdate writer.\n")
     ));
     throw Incomplete();
@@ -516,7 +516,7 @@ ManagerImpl::initialize()
       long key = ::OpenDDS::DCPS::GuidConverter( id);
       buffer << id << "(" << std::hex << key << ")";
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+        ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
         ACE_TEXT("created federation TopicUpdate writer %s for repository %d\n"),
         buffer.str().c_str(),
         this->id()
@@ -553,7 +553,7 @@ ManagerImpl::initialize()
       long key = ::OpenDDS::DCPS::GuidConverter( id);
       buffer << id << "(" << std::hex << key << ")";
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+        ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
         ACE_TEXT("created federation TopicUpdate reader %s for repository %d\n"),
         buffer.str().c_str(),
         this->id()
@@ -585,7 +585,7 @@ ManagerImpl::initialize()
     = dynamic_cast< ParticipantUpdateDataWriter*>( dataWriter.in());
   if( 0 == this->participantWriter_) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+      ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
       ACE_TEXT("failed to extract typed ParticipantUpdate writer.\n")
     ));
     throw Incomplete();
@@ -605,7 +605,7 @@ ManagerImpl::initialize()
       long key = ::OpenDDS::DCPS::GuidConverter( id);
       buffer << id << "(" << std::hex << key << ")";
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+        ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
         ACE_TEXT("created federation ParticipantUpdate writer %s for repository %d\n"),
         buffer.str().c_str(),
         this->id()
@@ -642,7 +642,7 @@ ManagerImpl::initialize()
       long key = ::OpenDDS::DCPS::GuidConverter( id);
       buffer << id << "(" << std::hex << key << ")";
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+        ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
         ACE_TEXT("created federation ParticipantUpdate reader %s for repository %d\n"),
         buffer.str().c_str(),
         this->id()
@@ -674,7 +674,7 @@ ManagerImpl::initialize()
     = dynamic_cast< PublicationUpdateDataWriter*>( dataWriter.in());
   if( 0 == this->publicationWriter_) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+      ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
       ACE_TEXT("failed to extract typed PublicationUpdate writer.\n")
     ));
     throw Incomplete();
@@ -694,7 +694,7 @@ ManagerImpl::initialize()
       long key = ::OpenDDS::DCPS::GuidConverter( id);
       buffer << id << "(" << std::hex << key << ")";
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+        ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
         ACE_TEXT("created federation PublicationUpdate writer %s for repository %d\n"),
         buffer.str().c_str(),
         this->id()
@@ -731,7 +731,7 @@ ManagerImpl::initialize()
       long key = ::OpenDDS::DCPS::GuidConverter( id);
       buffer << id << "(" << std::hex << key << ")";
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+        ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
         ACE_TEXT("created federation PublicationUpdate reader %s for repository %d\n"),
         buffer.str().c_str(),
         this->id()
@@ -763,7 +763,7 @@ ManagerImpl::initialize()
     = dynamic_cast< SubscriptionUpdateDataWriter*>( dataWriter.in());
   if( 0 == this->subscriptionWriter_) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+      ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
       ACE_TEXT("failed to extract typed SubscriptionUpdate writer.\n")
     ));
     throw Incomplete();
@@ -783,7 +783,7 @@ ManagerImpl::initialize()
       long key = ::OpenDDS::DCPS::GuidConverter( id);
       buffer << id << "(" << std::hex << key << ")";
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+        ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
         ACE_TEXT("created federation SubscriptionUpdate writer %s for repository %d\n"),
         buffer.str().c_str(),
         this->id()
@@ -820,7 +820,7 @@ ManagerImpl::initialize()
       long key = ::OpenDDS::DCPS::GuidConverter( id);
       buffer << id << "(" << std::hex << key << ")";
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+        ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
         ACE_TEXT("created federation SubscriptionUpdate reader %s for repository %d\n"),
         buffer.str().c_str(),
         this->id()
@@ -909,7 +909,7 @@ ManagerImpl::initialize()
 
       if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+          ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
           ACE_TEXT("multicast server setup is complete.\n")
         ));
       }
@@ -925,7 +925,7 @@ ManagerImpl::finalize()
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::finalize()\n")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::finalize()\n")
     ));
   }
 
@@ -967,7 +967,7 @@ ACE_THROW_SPEC (( ::CORBA::SystemException))
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: ManagerImpl::federation_id()\n")
+      ACE_TEXT("(%P|%t) ManagerImpl::federation_id()\n")
     ));
   }
   return this->id();
@@ -979,7 +979,7 @@ ACE_THROW_SPEC (( ::CORBA::SystemException))
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: ManagerImpl::repository()\n")
+      ACE_TEXT("(%P|%t) ManagerImpl::repository()\n")
     ));
   }
   ::OpenDDS::DCPS::DCPSInfo_var repo
@@ -999,7 +999,7 @@ ACE_THROW_SPEC (( ::CORBA::SystemException, Incomplete))
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: ManagerImpl::discover_federation( %s)\n"),
+      ACE_TEXT("(%P|%t) ManagerImpl::discover_federation( %s)\n"),
       ior
     ));
   }
@@ -1016,7 +1016,7 @@ ManagerImpl::join_federation(
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: ManagerImpl::join_federation( peer, %d)\n"),
+      ACE_TEXT("(%P|%t) ManagerImpl::join_federation( peer, %d)\n"),
       federation
     ));
   }
@@ -1027,7 +1027,7 @@ ManagerImpl::join_federation(
     remote = peer->federation_id();
     if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::join_federation() - ")
+        ACE_TEXT("(%P|%t) Federator::ManagerImpl::join_federation() - ")
         ACE_TEXT("repo id %d entered from repository with id %d.\n"),
         this->id(),
         remote
@@ -1046,7 +1046,7 @@ ManagerImpl::join_federation(
   if( this->joiner_ == remote) {
     if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::join_federation() - ")
+        ACE_TEXT("(%P|%t) Federator::ManagerImpl::join_federation() - ")
         ACE_TEXT("repo id %d leaving after reentry from repository with id %d.\n"),
         this->id(),
         remote
@@ -1092,7 +1092,7 @@ ManagerImpl::join_federation(
         CORBA::ORB_var orb = TheServiceParticipant->get_ORB();
         CORBA::String_var remoteRepoIor = orb->object_to_string( remoteRepo.in());
         ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) INFO: FederatorManagerImpl::join_federation() - ")
+          ACE_TEXT("(%P|%t) FederatorManagerImpl::join_federation() - ")
           ACE_TEXT("id %d obtained reference to id %d:\n")
           ACE_TEXT("\t%s\n"),
           this->id(),
@@ -1124,7 +1124,7 @@ ManagerImpl::join_federation(
     //
     if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::join_federation() - ")
+        ACE_TEXT("(%P|%t) Federator::ManagerImpl::join_federation() - ")
         ACE_TEXT("repo id %d pushing state to repository with id %d.\n"),
         this->id(),
         remote
@@ -1150,7 +1150,7 @@ ManagerImpl::join_federation(
   // Adjust our joining state and give others the opportunity to proceed.
   if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::join_federation() - ")
+      ACE_TEXT("(%P|%t) Federator::ManagerImpl::join_federation() - ")
       ACE_TEXT("repo id %d joined to repository with id %d.\n"),
       this->id(),
       remote
