@@ -11,10 +11,6 @@ project: dcps_tcp, dcps_java {
 
     dynamicflags    += MULTIREPO_TEST_BUILD_DLL
 
-    specific {
-        jarname     = multirepo_test
-    }
-
     // Older versions of Visual Studio will create the intermediate directories
     // in all-lowercase, so we have to create them first to get the correct case.
     specific(vc71, vc8) {
