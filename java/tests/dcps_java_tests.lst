@@ -11,3 +11,4 @@
 java/tests/hello/run_test.pl
 java/tests/messenger/publisher/run_test.pl
 java/tests/messenger/subscriber/run_test.pl
+java/tests/multirepo/run_test.pl

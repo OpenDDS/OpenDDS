@@ -4,10 +4,8 @@
 module MultiRepo {
 
 #pragma DCPS_DATA_TYPE "MultiRepo::Message"
-#pragma DCPS_DATA_KEY "MultiRepo::Message id"
 
    struct Message {
-       long id;
        string text;
    };
 };

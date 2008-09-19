@@ -1,3 +1,21 @@
+Fri Sep 19 23:46:47 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/tests/dcps_java_tests.lst:
+        * java/tests/multirepo:
+        * java/tests/multirepo/MultiRepo.idl:
+        * java/tests/multirepo/MultiRepoBase.java:
+        * java/tests/multirepo/MultiRepoMaster.java:
+        * java/tests/multirepo/MultiRepoSlave.java:
+        * java/tests/multirepo/MultiRepoWorker.java:
+        * java/tests/multirepo/domain1_ids:
+        * java/tests/multirepo/domain2_ids:
+        * java/tests/multirepo/master.ini:
+        * java/tests/multirepo/multirepo_test.mpc:
+        * java/tests/multirepo/run_test.pl:
+        * java/tests/multirepo/slave.ini:
+
+          Added multi-repo test.
+
 Thu Sep 18 22:57:36 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * MPC/modules/IDL2JNIHelper.pm:
