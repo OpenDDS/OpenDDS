@@ -369,7 +369,7 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i (OpenDDS::DCPS::RepoId& t
 
               ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) WARNING: DCPS_IR_Domain::add_topic_i: ")
-                ACE_TEXT("Domain %d failed to add topic %s at 0x%x.\n"),
+                ACE_TEXT("Domain %d declined to add duplicate topic %s at 0x%x.\n"),
                 this->id_,
                 buffer.str().c_str(),
                 topic

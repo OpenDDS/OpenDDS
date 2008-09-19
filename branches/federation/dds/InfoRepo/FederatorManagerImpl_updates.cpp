@@ -861,7 +861,6 @@ ManagerImpl::processDeferred()
                                               current->participant,
                                               current->sender,
                                               current->owner)) {
-      current = this->deferredOwnerships_.erase( current);
       if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
         std::stringstream buffer;
         long key = ::OpenDDS::DCPS::GuidConverter(
@@ -878,19 +877,19 @@ ManagerImpl::processDeferred()
           current->owner
         ));
       }
+      current = this->deferredOwnerships_.erase( current);
     }
   }
 
   for( std::list< TopicUpdate>::iterator current = this->deferredTopics_.begin();
        current != this->deferredTopics_.end();
        ++current) {
-    if( false == this->info_->add_topic( current->id,
-                                         current->domain,
-                                         current->participant,
-                                         current->topic,
-                                         current->datatype,
-                                         current->qos)) {
-      current = this->deferredTopics_.erase( current);
+    if( true == this->info_->add_topic( current->id,
+                                        current->domain,
+                                        current->participant,
+                                        current->topic,
+                                        current->datatype,
+                                        current->qos)) {
       if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
         std::stringstream participantBuffer;
         std::stringstream buffer;
@@ -911,6 +910,7 @@ ManagerImpl::processDeferred()
           buffer.str().c_str()
         ));
       }
+      current = this->deferredTopics_.erase( current);
     }
   }
 
@@ -921,16 +921,15 @@ ManagerImpl::processDeferred()
     transportInfo.transport_id = current->transport_id;
     transportInfo.data         = current->transport_blob;
 
-    if( false == this->info_->add_publication( current->domain,
-                                               current->participant,
-                                               current->topic,
-                                               current->id,
-                                               current->callback,
-                                               current->datawriter_qos,
-                                               transportInfo,
-                                               current->publisher_qos,
-                                               true)) {
-      current = this->deferredPublications_.erase( current);
+    if( true == this->info_->add_publication( current->domain,
+                                              current->participant,
+                                              current->topic,
+                                              current->id,
+                                              current->callback,
+                                              current->datawriter_qos,
+                                              transportInfo,
+                                              current->publisher_qos,
+                                              true)) {
       if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
         std::stringstream participantBuffer;
         std::stringstream buffer;
@@ -951,6 +950,7 @@ ManagerImpl::processDeferred()
           buffer.str().c_str()
         ));
       }
+      current = this->deferredPublications_.erase( current);
     }
   }
 
@@ -961,16 +961,15 @@ ManagerImpl::processDeferred()
     transportInfo.transport_id = current->transport_id;
     transportInfo.data         = current->transport_blob;
 
-    if( false == this->info_->add_subscription( current->domain,
-                                                current->participant,
-                                                current->topic,
-                                                current->id,
-                                                current->callback,
-                                                current->datareader_qos,
-                                                transportInfo,
-                                                current->subscriber_qos,
-                                                true)) {
-      current = this->deferredSubscriptions_.erase( current);
+    if( true == this->info_->add_subscription( current->domain,
+                                               current->participant,
+                                               current->topic,
+                                               current->id,
+                                               current->callback,
+                                               current->datareader_qos,
+                                               transportInfo,
+                                               current->subscriber_qos,
+                                               true)) {
       if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
         std::stringstream participantBuffer;
         std::stringstream buffer;
@@ -984,13 +983,14 @@ ManagerImpl::processDeferred()
         buffer << current->id << "(" << std::hex << key << ")";
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDeferred( SubscriptionUpdate): ")
-          ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
+          ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
           this->id(),
           current->domain,
           participantBuffer.str().c_str(),
           buffer.str().c_str()
         ));
       }
+      current = this->deferredSubscriptions_.erase( current);
     }
   }
 
