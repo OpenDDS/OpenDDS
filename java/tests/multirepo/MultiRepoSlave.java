@@ -9,7 +9,7 @@
 public class MultiRepoSlave extends MultiRepoBase {
 
     public static void main(String[] args) throws Exception {
-        init(args);
+        setUp(args);
         try {
             // Slave process responds to a write on DOMAIN1
             MultiRepoWorker reader = createWorker(DOMAIN1_ID);
@@ -18,10 +18,11 @@ public class MultiRepoSlave extends MultiRepoBase {
             MultiRepoWorker writer = createWorker(DOMAIN2_ID);
             writer.write("Snap snap, grin grin, wink wink, nudge nudge, say no more?");
             
-            Thread.sleep(5000); // Wait for workers to finish
+            Thread.sleep(5000);
+            assert (reader.isRead());
         
         } finally {
-            fini();
+            tearDown();
         }
     }
 }

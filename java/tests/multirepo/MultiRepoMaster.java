@@ -9,7 +9,7 @@
 public class MultiRepoMaster extends MultiRepoBase {
     
     public static void main(String[] args) throws Exception {
-        init(args);
+        setUp(args);
         try {
             // Master process initiates a write on DOMAIN1
             MultiRepoWorker writer = createWorker(DOMAIN1_ID);
@@ -18,10 +18,11 @@ public class MultiRepoMaster extends MultiRepoBase {
             MultiRepoWorker reader = createWorker(DOMAIN2_ID);
             reader.read();
             
-            Thread.sleep(5000); // Wait for workers to finish
+            Thread.sleep(5000);
+            assert (reader.isRead());
         
         } finally {
-            fini();
+            tearDown();
         }
     }
 }

@@ -29,6 +29,7 @@ import DDS.Topic;
 import DDS._DataReaderListenerLocalBase;
 import DDS._DataWriterListenerLocalBase;
 import OpenDDS.DCPS.transport.AttachStatus;
+import OpenDDS.DCPS.transport.TheTransportFactory;
 import OpenDDS.DCPS.transport.TransportImpl;
 
 import MultiRepo.Message;
@@ -45,17 +46,19 @@ import MultiRepo.MessageTypeSupportImpl;
  * @version $Revision$
  */
 public class MultiRepoWorker {
+    private static volatile int transportId;
+
     private DomainParticipant participant;
-    private TransportImpl transport;
     
     private Topic topic;
+    private TransportImpl transport;
+
+    private boolean read;
     
-    public MultiRepoWorker(DomainParticipant participant, TransportImpl transport) {
+    public MultiRepoWorker(DomainParticipant participant) {
         assert (participant != null);
-        assert (transport != null);
-        
+
         this.participant = participant;
-        this.transport = transport;
 
         MessageTypeSupport typeSupport = new MessageTypeSupportImpl();
         if (typeSupport.register_type(participant, "MultiRepo::Message") != RETCODE_OK.value) {
@@ -64,13 +67,17 @@ public class MultiRepoWorker {
 
         topic = participant.create_topic("MultiRepo::Topic", typeSupport.get_type_name(),
                                          TOPIC_QOS_DEFAULT.get(), null);
+
+        transport = TheTransportFactory.create_transport_impl(++transportId, TheTransportFactory.AUTO_CONFIG);
+
         assert (topic != null);
+        assert (transport != null);
     }
-    
+
     public DomainParticipant getParticipant() {
         return participant;
     }
-    
+
     public void write(final String text) {
         Publisher publisher =
             participant.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null);
@@ -142,14 +149,21 @@ public class MultiRepoWorker {
 
                     MessageHolder mh = new MessageHolder(new Message());
 
-                    SampleInfoHolder sih = new SampleInfoHolder(
-                        new SampleInfo(0, 0, 0, new DDS.Time_t(), 0, 0, 0, 0, 0, 0, 0, false));
-
+                    SampleInfo si = new SampleInfo();
+                    si.source_timestamp = new DDS.Time_t();
+                    
+                    SampleInfoHolder sih = new SampleInfoHolder(si);
                     reader.take_next_sample(mh, sih);
+
+                    read = true;
 
                     System.out.printf("[%s] read: \"%s\"\n", participant, mh.value.text);
                 }
             }
         );
+    }
+
+    public boolean isRead() {
+        return read;
     }
 }

@@ -23,12 +23,11 @@ public class MultiRepoBase {
     public static final int DOMAIN2_ID = 64;
     
     private static DomainParticipantFactory dpf;
-    private static TransportImpl transport;
     
     private static Stack<DomainParticipant> participants =
         new Stack<DomainParticipant>();
 
-    protected static void init(String[] args) throws Exception {
+    protected static void setUp(String[] args) {
         dpf = TheParticipantFactory.WithArgs(new StringSeqHolder(args));
         
         TheServiceParticipant.set_repo_domain(DOMAIN1_ID, 1);
@@ -37,29 +36,24 @@ public class MultiRepoBase {
         TheServiceParticipant.set_repo_domain(DOMAIN2_ID, 2);
         TheServiceParticipant.set_repo_ior("file://repo2.ior", 2);
         
-        transport = TheTransportFactory.create_transport_impl(1, TheTransportFactory.AUTO_CONFIG);
-        
         assert (dpf != null);
-        assert (transport != null);
     }
     
-    protected static DomainParticipant createParticipant(int domainId) {
+    private static DomainParticipant createParticipant(int domainId) {
         return participants.push(dpf.create_participant(domainId, PARTICIPANT_QOS_DEFAULT.get(), null));
     }
     
     protected static MultiRepoWorker createWorker(int domainId) {
-        return new MultiRepoWorker(createParticipant(domainId), transport);
+        return new MultiRepoWorker(createParticipant(domainId));
     }
     
-    protected static void fini() {
-    //TODO: Destroying participants cause the JVM to segfault
+    protected static void tearDown() {
+        while (!participants.isEmpty()) {
+            DomainParticipant participant = participants.pop();
 
-//        while (!participants.isEmpty()) {
-//            DomainParticipant participant = participants.pop();
-//
-//            participant.delete_contained_entities();
-//            dpf.delete_participant(participant);
-//        }
+            participant.delete_contained_entities();
+            dpf.delete_participant(participant);
+        }
         
         TheTransportFactory.release();
         TheServiceParticipant.shutdown();

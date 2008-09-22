@@ -1,3 +1,25 @@
+Mon Sep 22 20:13:59 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Added known issue when a single TransportImpl is used for both
+          a DataWriter and DataReader in the same process in Java.
+
+        * java/tests/multirepo:
+        * java/tests/multirepo/MultiRepoBase.java:
+        * java/tests/multirepo/MultiRepoMaster.java:
+        * java/tests/multirepo/MultiRepoSlave.java:
+        * java/tests/multirepo/MultiRepoWorker.java:
+        * java/tests/multirepo/multirepo.ini:
+        * java/tests/multirepo/run_test.pl:
+
+          Updated the multirepo test to clean up state correctly.
+
+        * java/tests/multirepo/master.ini:
+        * java/tests/multirepo/slave.ini:
+
+          Removed these files.
+
 Mon Sep 22 19:40:16 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * java/dds/dcps_java_optional.mpb:
