@@ -711,7 +711,7 @@ New to this version are the following changes:
     problem.
 
 --- more notes and limitations ---
-  This section adds on to the "KNONW LIMITATIONS" section at the bottom
+  This section adds on to the "KNOWN LIMITATIONS" section at the bottom
   of this document.
 
   - A transport instance may only be used by publications and subscriptions
@@ -726,6 +726,9 @@ New to this version are the following changes:
 
     (1428|2740) ERROR: RepoId (9) already exists in RepoIdSet for RepoId (8).
     (1428|2740) ERROR: Failed to insert local subscriber_id (8) to remote publisher_id (9)
+
+    Applications which make use of the JNI bindings may experience a segmentation
+    fault during cleanup (DomainParticipant.delete_contained_entities()).
 
 =========================================================================
 

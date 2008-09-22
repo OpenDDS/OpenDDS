@@ -24,10 +24,10 @@ my $debug_opt = ($debug eq '0') ? ''
     : "-ORBDebugLevel $debug -DCPSDebugLevel $debug";
 
 my $master_opts = "$opts -ORBListenEndpoints iiop://127.0.0.1:12346 $debug_opt ".
-    "-ORBLogFile master.log -DCPSConfigFile master.ini";
+    "-ORBLogFile master.log -DCPSConfigFile multirepo.ini";
 
 my $slave_opts = "$opts -ORBListenEndpoints iiop://127.0.0.1:12347 $debug_opt ".
-    "-ORBLogFile slave.log -DCPSConfigFile slave.ini";
+    "-ORBLogFile slave.log -DCPSConfigFile multirepo.ini";
 
 my $dcpsrepo1_ior = "repo1.ior";
 my $dcpsrepo2_ior = "repo2.ior";
@@ -39,11 +39,13 @@ unlink $dcpsrepo1_ior;
 unlink $dcpsrepo2_ior;
 
 my $DCPSREPO1 = PerlDDS::create_process ("$DDS_ROOT/bin/DCPSInfoRepo",
+               "-DCPSDebugLevel 10 ".
                "-ORBListenEndpoints iiop://127.0.0.1:1111 -ORBDebugLevel 10 ".
                "-ORBLogFile DCPSInfoRepo.log $opts -o $dcpsrepo1_ior ".
                "-d $domains1_file");
 
 my $DCPSREPO2 = PerlDDS::create_process ("$DDS_ROOT/bin/DCPSInfoRepo",
+               "-DCPSDebugLevel 10 ".
                "-ORBListenEndpoints iiop://127.0.0.1:1112 -ORBDebugLevel 10 ".
                "-ORBLogFile DCPSInfoRepo.log $opts -o $dcpsrepo2_ior ".
                "-d $domains2_file");
@@ -65,15 +67,11 @@ if ($^O eq 'MSWin32') {
 my $classpath = join ($sep, @classpaths);
 
 my $MASTER = PerlDDS::create_process ("$JAVA_HOME/bin/java",
-                                   "-ea -Xcheck:jni -cp $classpath $jnid " .
-                                   "-Drepo1.ior=file://$dcpsrepo1_ior " .
-                                   "-Drepo2.ior=file://$dcpsrepo2_ior " .
+                                    "-ea -Xcheck:jni -cp $classpath $jnid " .
                                     "MultiRepoMaster $master_opts");
 
 my $SLAVE = PerlDDS::create_process ("$JAVA_HOME/bin/java",
-                                   "-ea -Xcheck:jni -cp $classpath $jnid " .
-                                   "-Drepo1.ior=file://$dcpsrepo1_ior " .
-                                   "-Drepo2.ior=file://$dcpsrepo2_ior " .
+                                    "-ea -Xcheck:jni -cp $classpath $jnid " .
                                     "MultiRepoSlave $slave_opts");
 
 $MASTER->IgnoreExeSubDir (1);
@@ -116,7 +114,7 @@ if ($ir1 != 0) {
 
 my $ir2 = $DCPSREPO2->TerminateWaitKill(5);
 if ($ir2 != 0) {
-    print STDERR "ERROR: DCPSInfoRepo1 returned $ir2\n";
+    print STDERR "ERROR: DCPSInfoRepo2 returned $ir2\n";
     $status = 1;
 }
 
