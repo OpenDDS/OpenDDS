@@ -1,3 +1,9 @@
+Mon Sep 22 19:40:16 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * java/dds/dcps_java_optional.mpb:
+
+          Fixed the build dependencies so built-in-topics code builds later.
+
 Fri Sep 19 23:46:47 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/tests/dcps_java_tests.lst:
