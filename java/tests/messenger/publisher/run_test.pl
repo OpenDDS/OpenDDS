@@ -19,13 +19,19 @@ foreach my $i (@ARGV) {
     } 
 }
 
-my $opts = "-ORBSvcConf $DDS_ROOT/DevGuideExamples/DCPS/Messenger/tcp.conf";
+my $transport = pop;
+if ($transport eq "") {
+    print "ERROR: transport not specified!\n";
+    exit 1;
+}
+
+my $opts = "-ORBSvcConf $DDS_ROOT/DevGuideExamples/DCPS/Messenger/$transport.conf";
 my $debug_opt = ($debug eq '0') ? ''
     : "-ORBDebugLevel $debug -DCPSDebugLevel $debug";
 my $pub_opts = "$opts -ORBListenEndpoints iiop://127.0.0.1:12346 $debug_opt ".
-    "-ORBLogFile pub.log -DCPSConfigFile pub.ini";
+    "-ORBLogFile pub.log -DCPSConfigFile pub_$transport.ini";
 my $sub_opts = "$opts -ORBListenEndpoints iiop://127.0.0.1:12347 $debug_opt ".
-    "-ORBLogFile sub.log -DCPSConfigFile sub.ini";
+    "-ORBLogFile sub.log -DCPSConfigFile sub_$transport.ini";
 
 my $domains_file = "domain_ids";
 my $dcpsrepo_ior = "repo.ior";
@@ -33,8 +39,9 @@ my $dcpsrepo_ior = "repo.ior";
 unlink $dcpsrepo_ior;
 
 my $DCPSREPO = PerlDDS::create_process ("$DDS_ROOT/bin/DCPSInfoRepo",
+               "-ORBSvcConf $DDS_ROOT/DevGuideExamples/DCPS/Messenger/tcp.conf ".
                "-ORBListenEndpoints iiop://127.0.0.1:1111 -ORBDebugLevel 10 ".
-               "-ORBLogFile DCPSInfoRepo.log $opts -o $dcpsrepo_ior ".
+               "-ORBLogFile DCPSInfoRepo.log -o $dcpsrepo_ior ".
                "-d $domains_file");
 
 my $SUB = PerlDDS::create_process ("$DDS_ROOT/DevGuideExamples/DCPS/Messenger".
