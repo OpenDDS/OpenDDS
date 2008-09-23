@@ -1,3 +1,36 @@
+Tue Sep 23 20:28:34 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/tests/dcps_java_tests.lst:
+        * java/tests/messenger/publisher/pub_mcast.ini:
+        * java/tests/messenger/publisher/pub_reliable_mcast.ini:
+        * java/tests/messenger/publisher/pub_tcp.ini:
+        * java/tests/messenger/publisher/pub_udp.ini:
+        * java/tests/messenger/publisher/publisher_idl_test.mpc:
+        * java/tests/messenger/publisher/run_test.pl:
+        * java/tests/messenger/publisher/sub_mcast.ini:
+        * java/tests/messenger/publisher/sub_reliable_mcast.ini:
+        * java/tests/messenger/publisher/sub_tcp.ini:
+        * java/tests/messenger/publisher/sub_udp.ini:
+        * java/tests/messenger/subscriber/pub_mcast.ini:
+        * java/tests/messenger/subscriber/pub_reliable_mcast.ini:
+        * java/tests/messenger/subscriber/pub_tcp.ini:
+        * java/tests/messenger/subscriber/pub_udp.ini:
+        * java/tests/messenger/subscriber/run_test.pl:
+        * java/tests/messenger/subscriber/sub_mcast.ini:
+        * java/tests/messenger/subscriber/sub_reliable_mcast.ini:
+        * java/tests/messenger/subscriber/sub_tcp.ini:
+        * java/tests/messenger/subscriber/sub_udp.ini:
+        * java/tests/messenger/subscriber/subscriber_idl_test.mpc:
+
+          Updated messenger tests to use tcp and non-tcp transports.
+
+        * java/tests/messenger/publisher/pub.ini:
+        * java/tests/messenger/publisher/sub.ini:
+        * java/tests/messenger/subscriber/pub.ini:
+        * java/tests/messenger/subscriber/sub.ini:
+
+          Removed these files.
+
 Tue Sep 23 16:04:59 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * DDS_release_notes.txt:
