@@ -1820,6 +1820,7 @@ namespace OpenDDS
         {
           ::DDS::DataReaderQos dr_qos;
           bit_subscriber_->get_default_datareader_qos(dr_qos);
+          dr_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
 
           ::DDS::TopicDescription_var bit_part_topic_desc
             = this->lookup_topicdescription (::OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC);

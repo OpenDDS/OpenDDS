@@ -1,19 +1,34 @@
+Wed Sep 24 17:21:26 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.cpp:
+
+	  Extended diagnostic messages.
+
+        * tests/DCPS/Federation/run_test.pl:
+
+	  Corrected transport debug usage.  Parameterized and increased
+	  the delay between Spawn calls to help disambiguate log
+	  messages.
+
 Wed Sep 24 04:32:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.mpc:
 
           Added more project dependency for InfoRepo executable.
-          
+
 Wed Sep 24 04:07:01 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/GuidUtils.cpp:
-        
+
           Added pre-compile header.
-          
+
         * dds/DCPS/SubscriberImpl.cpp:
 
           Corrected map type for iterator.
-          
+
         * dds/InfoRepo/DCPSInfoRepo.mpc:
         * dds/InfoRepo/DCPSInfo_i.h:
         * dds/InfoRepo/DCPS_IR_Domain.h:
@@ -32,8 +47,8 @@ Wed Sep 24 04:07:01 UTC 2008  Yan Dai  <dai_y@ociweb.com>
         * dds/InfoRepo/UpdateProcessor_T.h:
         * dds/InfoRepo/UpdateReceiver_T.h:
         * dds/InfoRepo/inforepo_export.h:
-        
-          Added InfoRepoLib library to fix federator lib and InfoRepo  
+
+          Added InfoRepoLib library to fix federator lib and InfoRepo
           circular depedency problem.
 
 Fri Sep 19 21:58:11 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
