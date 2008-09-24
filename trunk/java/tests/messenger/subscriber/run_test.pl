@@ -25,7 +25,7 @@ if ($transport eq "") {
     exit 1;
 }
 
-my $opts = "-ORBSvcConf $DDS_ROOT/DevGuideExamples/DCPS/Messenger/$transport.conf";
+my $opts = "-ORBSvcConf $DDS_ROOT/DevGuideExamples/DCPS/Messenger/$transport.conf -DCPSBit 0";
 my $debug_opt = ($debug eq '0') ? ''
     : "-ORBDebugLevel $debug -DCPSDebugLevel $debug";
 my $pub_opts = "$opts -ORBListenEndpoints iiop://127.0.0.1:12346 $debug_opt ".
@@ -39,7 +39,7 @@ my $dcpsrepo_ior = "repo.ior";
 unlink $dcpsrepo_ior;
 
 my $DCPSREPO = PerlDDS::create_process ("$DDS_ROOT/bin/DCPSInfoRepo",
-               "-ORBSvcConf $DDS_ROOT/DevGuideExamples/DCPS/Messenger/tcp.conf ".
+               "-ORBSvcConf $DDS_ROOT/DevGuideExamples/DCPS/Messenger/tcp.conf -NOBITS ".
                "-ORBListenEndpoints iiop://127.0.0.1:1111 -ORBDebugLevel 10 ".
                "-ORBLogFile DCPSInfoRepo.log -o $dcpsrepo_ior ".
                "-d $domains_file");
