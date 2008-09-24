@@ -28,6 +28,7 @@ my $verbose ;
 #
 # Specific options.
 #
+my $interval  = 10;
 my $repoCount = 2;
 my $pubCount  = 1;
 my $subCount  = 1;
@@ -58,10 +59,11 @@ pod2usage( -verbose => 2) if $man ;
 pod2usage( 1) and die "Not enough repositories specified!" if $repoCount < 2;
 
 print "Debug==$debug\n" if $debug;
-print "Repos==$repoCount\n" if $debug;
-print "pubs==$pubCount\n" if $debug;
-print "subs==$subCount\n" if $debug;
-print "samples==$samples\n" if $debug;
+print "TransportDebug==$transport\n" if $transport;
+print "Repos==$repoCount\n" if $verbose;
+print "pubs==$pubCount\n" if $verbose;
+print "subs==$subCount\n" if $verbose;
+print "samples==$samples\n" if $verbose;
 
 my @repo_ior;
 my @repo_ini;
@@ -101,7 +103,7 @@ my $appDebug;
 my $transportDebug;
 $repoDebug = $debug if $debug;
 $appDebug  = $debug if $debug;
-$transportDebug = $transportDebug if $transport;
+$transportDebug = $transport if $transport;
 # $repoDebug = 10;
 # $appDebug  = 10;
 # $transportDebug = 10;
@@ -182,7 +184,7 @@ for my $index ( 1 .. $repoCount) {
       exit 1;
   }
 }
-print "\nLetting repository federation operations settle a bit...\n"; sleep 5;
+print "\nLetting repository federation operations settle a bit...\n"; sleep 2*$interval;
 
 # Fire up the subscribers.
 
@@ -190,9 +192,9 @@ for my $index ( 1 .. $subCount) {
   print "\nSUBSCRIBER $index\n";
   print $SUB[ $index - 1]->CommandLine() . "\n";
   $SUB[ $index - 1]->Spawn();
-  sleep 2;
+  sleep $interval;
 }
-print "\nLetting subscribers settle a bit...\n"; sleep 5;
+print "\nLetting subscribers settle a bit...\n"; sleep $interval;
 
 # Fire up the publishers.
 
@@ -200,7 +202,7 @@ for my $index ( 1 .. $pubCount) {
   print "\nPUBLISHER $index\n";
   print $PUB[ $index - 1]->CommandLine() . "\n";
   $PUB[ $index - 1]->Spawn();
-  sleep 2;
+  sleep $interval;
 }
 
 # Wait for the subscribers to terminate nicely, kill them after 5 minutes

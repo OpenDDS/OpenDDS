@@ -230,10 +230,29 @@ DataWriterImpl::add_associations ( ::OpenDDS::DCPS::RepoId yourId,
 
     for (CORBA::ULong i = 0; i < len; ++i)
     {
-      if (OpenDDS::DCPS::insert(pending_readers_, readers[i].readerId) == -1)
-      {
-        ACE_ERROR ((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::add_associations: insert %d to pending failed\n",
-          readers[i].readerId));
+      if( OpenDDS::DCPS::insert(pending_readers_, readers[i].readerId) == -1) {
+        std::stringstream buffer;
+        long key = ::OpenDDS::DCPS::GuidConverter(
+                     const_cast< ::OpenDDS::DCPS::RepoId*>(&readers[i].readerId)
+                   );
+        buffer << readers[i].readerId << "(" << std::hex << key << ")";
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::add_associations: ")
+          ACE_TEXT("failed to mark %s as pending.\n"),
+          buffer.str().c_str()
+        ));
+
+      } else if (DCPS_debug_level > 0) {
+        std::stringstream buffer;
+        long key = ::OpenDDS::DCPS::GuidConverter(
+                     const_cast< ::OpenDDS::DCPS::RepoId*>(&readers[i].readerId)
+                   );
+        buffer << readers[i].readerId << "(" << std::hex << key << ")";
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DataWriterImpl::add_associations: ")
+          ACE_TEXT("marked %s as pending.\n"),
+          buffer.str().c_str()
+        ));
       }
     }
   }
