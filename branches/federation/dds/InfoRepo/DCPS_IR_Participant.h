@@ -11,6 +11,7 @@
 #ifndef DCPS_IR_PARTICIPANT_H
 #define DCPS_IR_PARTICIPANT_H
 
+#include  "inforepo_export.h"
 #include /**/ "dds/DdsDcpsInfrastructureC.h"
 #include /**/ "dds/DdsDcpsInfoS.h"
 
@@ -49,7 +50,7 @@ typedef ACE_Unbounded_Set<OpenDDS::DCPS::RepoId> TAO_DDS_RepoId_Set;
  *
  *
  */
-class DCPS_IR_Participant
+class OpenDDS_InfoRepoLib_Export DCPS_IR_Participant
 {
 public:
   /// Special owner to enforce no callbacks.

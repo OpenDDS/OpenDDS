@@ -10,6 +10,7 @@
 #ifndef DCPS_IR_PUBLICATION_H
 #define DCPS_IR_PUBLICATION_H
 
+#include  "inforepo_export.h"
 #include /**/ "UpdateDataTypes.h"
 #include /**/ "dds/DdsDcpsInfrastructureC.h"
 #include /**/ "dds/DdsDcpsPublicationC.h"
@@ -37,7 +38,7 @@ typedef ACE_Unbounded_Set<DCPS_IR_Subscription*> DCPS_IR_Subscription_Set;
  *
  *
  */
-class DCPS_IR_Publication
+class OpenDDS_InfoRepoLib_Export DCPS_IR_Publication
 {
 public:
   DCPS_IR_Publication (OpenDDS::DCPS::RepoId id,

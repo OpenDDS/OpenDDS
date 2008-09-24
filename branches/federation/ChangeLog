@@ -1,9 +1,41 @@
+Wed Sep 24 04:07:01 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/GuidUtils.cpp:
+        
+          Added pre-compile header.
+          
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Corrected map type for iterator.
+          
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Topic.h:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.h:
+        * dds/InfoRepo/DCPS_Utils.h:
+        * dds/InfoRepo/DomainParticipantListener_i.h:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/GuidGenerator.h:
+        * dds/InfoRepo/GuidGenerator.cpp:
+        * dds/InfoRepo/PersistenceUpdater.h:
+        * dds/InfoRepo/UpdateManager.h:
+        * dds/InfoRepo/UpdateProcessor_T.h:
+        * dds/InfoRepo/UpdateReceiver_T.h:
+        * dds/InfoRepo/inforepo_export.h:
+        
+          Added InfoRepoLib library to fix federator lib and InfoRepo  
+          circular depedency problem.
+
 Fri Sep 19 21:58:11 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/DCPS_IR_Domain.cpp:
         * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
 
-	  Minor cosmetic diagnostic bugfixes from debugging session.
+          Minor cosmetic diagnostic bugfixes from debugging session.
 
 Fri Sep 19 15:51:57 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 

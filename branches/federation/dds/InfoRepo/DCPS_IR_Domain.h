@@ -11,6 +11,7 @@
 #ifndef DCPS_IR_DOMAIN_H
 #define DCPS_IR_DOMAIN_H
 
+#include  "inforepo_export.h"
 #include /**/ "dds/DdsDcpsInfrastructureC.h"
 #include /**/ "dds/DdsDcpsInfoS.h"
 
@@ -60,7 +61,7 @@ class DCPS_IR_Publication;
  * representatives of the entities that are in the corresponding
  * system's domain.
  */
-class DCPS_IR_Domain
+class OpenDDS_InfoRepoLib_Export DCPS_IR_Domain
 {
 public:
   DCPS_IR_Domain(::DDS::DomainId_t id, GuidGenerator& generator);

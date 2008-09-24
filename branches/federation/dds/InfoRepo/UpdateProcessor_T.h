@@ -8,9 +8,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "federator_export.h"
 
-namespace DDS { class SampleInfo; }
+namespace DDS { struct SampleInfo; }
 
 namespace OpenDDS { namespace Federator {
 
@@ -23,7 +22,7 @@ namespace OpenDDS { namespace Federator {
    * federated repositories.
    */
   template< class DataType>
-  class OpenDDS_Federator_Export UpdateProcessor {
+  class  UpdateProcessor {
     public:
       /// Default constructor.
       UpdateProcessor();

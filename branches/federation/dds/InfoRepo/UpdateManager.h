@@ -11,6 +11,7 @@
 #ifndef _UPDATE_MANAGER_
 #define _UPDATE_MANAGER_
 
+#include "inforepo_export.h"
 #include "UpdateDataTypes.h"
 #include "Updater.h"
 
@@ -29,7 +30,7 @@ class TAO_DDS_DCPSInfo_i;
 
 namespace Update {
 
-class Manager : public ACE_Service_Object
+class OpenDDS_InfoRepoLib_Export Manager : public ACE_Service_Object
 {
  public:
   Manager (void);
@@ -104,7 +105,7 @@ ACE_STATIC_SVC_DECLARE (UpdateManagerSvc)
 
 ACE_FACTORY_DECLARE (ACE_Local_Service, UpdateManagerSvc)
 
-class UpdateManagerSvc_Loader
+class OpenDDS_InfoRepoLib_Export UpdateManagerSvc_Loader
 {
 public:
   static int init (void);

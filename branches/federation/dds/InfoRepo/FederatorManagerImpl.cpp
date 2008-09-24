@@ -406,7 +406,7 @@ ManagerImpl::initialize()
 
   this->ownerWriter_
     = dynamic_cast< OwnerUpdateDataWriter*>( dataWriter.in());
-  if( 0 == this->ownerWriter_) {
+  if(::CORBA::is_nil (this->ownerWriter_.in ())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
       ACE_TEXT("failed to extract typed OwnerUpdate writer.\n")
@@ -494,7 +494,7 @@ ManagerImpl::initialize()
 
   this->topicWriter_
     = dynamic_cast< TopicUpdateDataWriter*>( dataWriter.in());
-  if( 0 == this->topicWriter_) {
+  if(::CORBA::is_nil (this->topicWriter_.in ())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
       ACE_TEXT("failed to extract typed TopicUpdate writer.\n")
@@ -583,7 +583,7 @@ ManagerImpl::initialize()
 
   this->participantWriter_
     = dynamic_cast< ParticipantUpdateDataWriter*>( dataWriter.in());
-  if( 0 == this->participantWriter_) {
+  if(::CORBA::is_nil (this->participantWriter_.in ())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
       ACE_TEXT("failed to extract typed ParticipantUpdate writer.\n")
@@ -672,7 +672,7 @@ ManagerImpl::initialize()
 
   this->publicationWriter_
     = dynamic_cast< PublicationUpdateDataWriter*>( dataWriter.in());
-  if( 0 == this->publicationWriter_) {
+  if(::CORBA::is_nil (this->publicationWriter_.in ())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
       ACE_TEXT("failed to extract typed PublicationUpdate writer.\n")
@@ -761,7 +761,7 @@ ManagerImpl::initialize()
 
   this->subscriptionWriter_
     = dynamic_cast< SubscriptionUpdateDataWriter*>( dataWriter.in());
-  if( 0 == this->subscriptionWriter_) {
+  if(::CORBA::is_nil (this->subscriptionWriter_.in ())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
       ACE_TEXT("failed to extract typed SubscriptionUpdate writer.\n")
