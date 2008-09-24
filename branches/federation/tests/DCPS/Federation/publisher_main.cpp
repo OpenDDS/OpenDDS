@@ -13,6 +13,9 @@
 #include "TestException.h"
 #include "tao/Exception.h"
 #include "dds/DCPS/debug.h"
+#ifdef ACE_AS_STATIC_LIBS
+#include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
+#endif
 
 int
 main( int argc, char** argv)

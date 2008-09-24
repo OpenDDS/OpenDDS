@@ -1,3 +1,11 @@
+Wed Sep 24 18:48:16 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/Federation/publisher_main.cpp:
+        * tests/DCPS/Federation/subscriber_main.cpp:
+
+          Added SimpleTcp.h to fix SimpleTCP not load problem on static
+          builds.
+          
 Wed Sep 24 17:21:26 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:
@@ -5,13 +13,13 @@ Wed Sep 24 17:21:26 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * dds/DCPS/WriteDataContainer.cpp:
         * dds/DCPS/transport/framework/TransportInterface.cpp:
 
-	  Extended diagnostic messages.
+          Extended diagnostic messages.
 
         * tests/DCPS/Federation/run_test.pl:
 
-	  Corrected transport debug usage.  Parameterized and increased
-	  the delay between Spawn calls to help disambiguate log
-	  messages.
+          Corrected transport debug usage.  Parameterized and increased
+          the delay between Spawn calls to help disambiguate log
+          messages.
 
 Wed Sep 24 04:32:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
