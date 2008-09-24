@@ -14,6 +14,7 @@
 
 
 
+#include  "inforepo_export.h"
 #include /**/ "DCPS_IR_Topic.h"
 #include /**/ "DCPS_IR_Topic_Description.h"
 #include /**/ "DCPS_IR_Participant.h"
@@ -49,7 +50,7 @@ namespace Update { class Manager; }
  * This is the Information Repository object.  Clients of
  * the system will use the CORBA reference of this object.
  */
-class  TAO_DDS_DCPSInfo_i : public virtual POA_OpenDDS::DCPS::DCPSInfo
+class  OpenDDS_InfoRepoLib_Export TAO_DDS_DCPSInfo_i : public virtual POA_OpenDDS::DCPS::DCPSInfo
 {
 public:
   //Constructor

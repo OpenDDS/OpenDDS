@@ -575,7 +575,7 @@ SubscriberImpl::set_qos (
             }
           }
 
-          std::map<RepoId, ::DDS::DataReaderQos>::iterator iter = idToQosMap.begin ();
+          DrIdToQosMap::iterator iter = idToQosMap.begin ();
           while (iter != idToQosMap.end())
           {
             try

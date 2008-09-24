@@ -13,6 +13,7 @@
 #ifndef DCPS_UTILS_H
 #define DCPS_UTILS_H
 
+#include  "inforepo_export.h"
 #include /**/ "dds/DdsDcpsInfrastructureC.h"
 #include /**/ "DCPS_IR_Subscription.h"
 #include /**/ "DCPS_IR_Publication.h"

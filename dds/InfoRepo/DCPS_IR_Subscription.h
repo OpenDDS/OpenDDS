@@ -10,6 +10,7 @@
 #ifndef DCPS_IR_SUBSCRIPTION_H
 #define DCPS_IR_SUBSCRIPTION_H
 
+#include  "inforepo_export.h"
 #include /**/ "UpdateDataTypes.h"
 #include /**/ "dds/DdsDcpsInfrastructureC.h"
 #include /**/ "dds/DdsDcpsSubscriptionC.h"
@@ -37,7 +38,7 @@ class DCPS_IR_Topic;
  *
  *
  */
-class DCPS_IR_Subscription
+class OpenDDS_InfoRepoLib_Export DCPS_IR_Subscription
 {
 public:
   DCPS_IR_Subscription (OpenDDS::DCPS::RepoId id,

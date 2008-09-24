@@ -4,6 +4,7 @@
 #ifndef GUIDGENERATOR_H
 #define GUIDGENERATOR_H
 
+#include "inforepo_export.h"
 #include "dds/DCPS/GuidUtils.h"
 
 /**
@@ -75,7 +76,7 @@
  * Where the VendorId value used for OpenDDS is the one for
  * Object Computing, Inc. == 0x03.
  */
-class GuidGenerator {
+class OpenDDS_InfoRepoLib_Export GuidGenerator {
   public:
     /**
      * @brief construct with at least a FederationId value.

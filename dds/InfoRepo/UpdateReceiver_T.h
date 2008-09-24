@@ -8,13 +8,12 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "federator_export.h"
 #include "ace/Condition_T.h"
 #include "ace/Task.h"
 
 #include <list>
 
-namespace DDS { class SampleInfo; }
+namespace DDS { struct SampleInfo; }
 
 namespace OpenDDS { namespace Federator {
 
@@ -22,7 +21,7 @@ namespace OpenDDS { namespace Federator {
   class UpdateProcessor;
 
   template< class DataType>
-  class OpenDDS_Federator_Export UpdateReceiver : public virtual ACE_Task_Base {
+  class  UpdateReceiver : public virtual ACE_Task_Base {
     public:
       /// Construct with a processor reference.
       UpdateReceiver( UpdateProcessor< DataType>& processor);

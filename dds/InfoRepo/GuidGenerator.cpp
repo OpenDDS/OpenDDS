@@ -2,6 +2,7 @@
 //
 // $Id$
 
+#include "DcpsInfo_pch.h"
 #include "GuidGenerator.h"
 #include "ace/Log_Msg.h"
 

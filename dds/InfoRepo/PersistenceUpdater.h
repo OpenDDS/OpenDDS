@@ -9,6 +9,7 @@
 #ifndef _PERSISTENCE_UPDATER_
 #define _PERSISTENCE_UPDATER_
 
+#include "inforepo_export.h"
 #include "Updater.h"
 
 #include "dds/DdsDcpsInfoUtilsC.h"
@@ -25,7 +26,7 @@ namespace Update {
 // Forward declaration
 class Manager;
 
-class PersistenceUpdater : public Updater, public ACE_Task_Base
+class OpenDDS_InfoRepoLib_Export PersistenceUpdater : public Updater, public ACE_Task_Base
 {
  public:
   class IdType_ExtId {
