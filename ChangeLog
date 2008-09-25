@@ -1,3 +1,10 @@
+Thu Sep 25 19:04:17 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/tests/builtintopics/builtintopics_test.mpc:
+        * java/tests/dcps_java_tests.lst:
+
+          Added guards to Builin Topic tests.
+
 Thu Sep 25 18:27:19 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/dds:
@@ -13,7 +20,7 @@ Thu Sep 25 18:27:19 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
           Resolved JVM class resolution issue when generating native
           sequences (w/Adam Mitz).
-        
+
         * java/tests/builtintopics:
         * java/tests/builtintopics/BuiltinTopicsTest.java:
         * java/tests/builtintopics/builtintopics.ini:
@@ -23,7 +30,7 @@ Thu Sep 25 18:27:19 UTC 2008  Steven Stallion  <stallions@ociweb.com>
         * java/tests/dcps_java_tests.lst:
 
           Added Builtin Topic tests.
-       
+
         * java/tests/multirepo:
         * java/tests/multirepo/MultiRepoBase.java:
 
