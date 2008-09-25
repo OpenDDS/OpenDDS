@@ -8,6 +8,8 @@ use lib "$ENV{ACE_ROOT}/bin";
 use PerlACE::Run_Test;
 use strict;
 use Env qw(JAVA_HOME DDS_ROOT TAO_ROOT);
+use lib "$DDS_ROOT/bin";
+use JavaProcess;
 
 my $status = 0;
 my $debug = '0';
@@ -24,21 +26,9 @@ unlink $iorfile;
 my $SV = new PerlACE::Process ("$TAO_ROOT/tests/Hello/server",
                                "-ORBDebugLevel $debug -o $iorfile");
 
-PerlACE::add_lib_path ("$DDS_ROOT/lib");
 PerlACE::add_lib_path ('.');
-my @classpaths = ("$DDS_ROOT/lib/i2jrt.jar", "hello_java_client.jar");
-my $sep = ':';
-my $jnid;
-if ($^O eq 'MSWin32') {
-    $sep = ';';
-    $jnid = '-Djni.nativeDebug=1'
-        unless $PerlACE::Process::ExeSubDir =~ /Release/i;
-}
-my $classpath = join ($sep, @classpaths);
-my $CL = new PerlACE::Process ("$JAVA_HOME/bin/java",
-                               "-Xcheck:jni -cp $classpath $jnid Client " .
-                               "-k file://$iorfile -ORBDebugLevel $debug");
-$CL->IgnoreExeSubDir (1);
+my $CL = new JavaProcess ('Client', "-k file://$iorfile -ORBDebugLevel $debug",
+                          ['hello_java_client.jar']);
 
 my $server_status = $SV->Spawn ();
 

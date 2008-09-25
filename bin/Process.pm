@@ -10,13 +10,13 @@ use POSIX qw(:time_h);
 our @ISA = qw(PerlACE::Process);
 
 sub new {
-    my $proto = shift;
-    my $class = ref ($proto) || $proto;
-    my $executable = shift;
-    my $arguments = shift;
-    my $self = PerlACE::Process->new($executable, $arguments);
-	bless($self, $class);
-	return $self;
+  my $proto = shift;
+  my $class = ref ($proto) || $proto;
+  my $executable = shift;
+  my $arguments = shift;
+  my $self = PerlACE::Process->new($executable, $arguments);
+  bless($self, $class);
+  return $self;
 }
 
 sub Spawn {

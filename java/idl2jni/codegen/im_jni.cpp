@@ -172,13 +172,14 @@ string idl_mapping_jni::type (AST_Type *decl)
 
 namespace
 {
-  enum native_type {
+  enum native_type
+  {
     NATIVE_UNKNOWN,
     NATIVE_DATA_SEQUENCE,
     NATIVE_INFO_SEQUENCE
   };
 
-  native_type get_native_type(UTL_ScopedName *name, string &elem)
+  native_type get_native_type (UTL_ScopedName *name, string &elem)
   {
     string seq (idl_mapping_jni::scoped_helper (name, "/"));
     if (idl_global->dcps_support_zero_copy_read () && seq.size () > 3
@@ -1250,11 +1251,12 @@ bool idl_mapping_jni::gen_native (UTL_ScopedName *name, const char *)
     {
     case NATIVE_INFO_SEQUENCE:
       info = true;
-        /* fall through */
+      // fall through
 
     case NATIVE_DATA_SEQUENCE:
       {
         string elem_cxx (elem);
+        // $elem_cxx =~ s/\//::/g;
         for (size_t iter = elem_cxx.find ('/'); iter != string::npos;
           iter = elem_cxx.find ('/', iter + 1))
           {
@@ -1264,7 +1266,8 @@ bool idl_mapping_jni::gen_native (UTL_ScopedName *name, const char *)
         return gen_jarray_copies (name, "L" + elem + ";", "Object", "jobject",
             "jobjectArray", elem_cxx, true, "source.length ()");
       }
- 
+    default:
+      ; // fall through
     }
   return true;
 }

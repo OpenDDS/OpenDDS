@@ -4,10 +4,11 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 
 # -*- perl -*-
 
-use Env qw(ACE_ROOT JAVA_HOME DDS_ROOT TAO_ROOT);
+use Env qw(ACE_ROOT DDS_ROOT);
 use lib "$DDS_ROOT/bin";
 use lib "$ACE_ROOT/bin";
 use DDS_Run_Test;
+use JavaProcess;
 use strict;
 
 my $status = 0;
@@ -21,8 +22,7 @@ foreach my $i (@ARGV) {
 
 my $transport = pop;
 if ($transport eq "") {
-    print "ERROR: transport not specified!\n";
-    exit 1;
+    $transport = 'tcp';
 }
 
 my $opts = "-ORBSvcConf $DDS_ROOT/DevGuideExamples/DCPS/Messenger/$transport.conf -DCPSBit 0";
@@ -47,24 +47,11 @@ my $DCPSREPO = PerlDDS::create_process ("$DDS_ROOT/bin/DCPSInfoRepo",
 my $SUB = PerlDDS::create_process ("$DDS_ROOT/DevGuideExamples/DCPS/Messenger".
                                    "/subscriber", "$sub_opts");
 
-PerlACE::add_lib_path ("$DDS_ROOT/lib");
 PerlACE::add_lib_path ("$DDS_ROOT/java/tests/messenger/messenger_idl");
-my @classpaths = ('classes', "$DDS_ROOT/lib/i2jrt.jar",
-                  "$DDS_ROOT/lib/OpenDDS_DCPS.jar",
-                  "$DDS_ROOT/java/tests/messenger/messenger_idl/".
-                      "messenger_idl_test.jar");
-my $sep = ':';
-my $jnid;
-if ($^O eq 'MSWin32') {
-    $sep = ';';
-    $jnid = '-Djni.nativeDebug=1'
-        unless $PerlACE::Process::ExeSubDir =~ /Release/i;
-}
-my $classpath = join ($sep, @classpaths);
-my $PUB = PerlDDS::create_process ("$JAVA_HOME/bin/java",
-                                   "-Xcheck:jni -cp $classpath $jnid " .
-                                   "TestPublisher $pub_opts");
-$PUB->IgnoreExeSubDir (1);
+
+my $PUB = new JavaProcess ('TestPublisher', $pub_opts,
+                           ["$DDS_ROOT/java/tests/messenger/messenger_idl/".
+                            "messenger_idl_test.jar"]);
 
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {

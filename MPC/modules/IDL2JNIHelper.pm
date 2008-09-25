@@ -107,10 +107,10 @@ my %idl_keywords = ('abstract' => 1,
                    );
 
 # ************************************************************
-# Public Interface Section
+# "Friendly" interface for TYPESUPPORTHelper.pm
 # ************************************************************
 
-sub get_output {
+sub do_cached_parse {
   my($self, $file, $flags) = @_;
 
   ## Set up the macros and include paths supplied in the command flags
@@ -128,8 +128,26 @@ sub get_output {
     }
   }
 
+  return $self->cached_parse($file, \@include, \%macros, \%mparams);
+}
+
+
+sub get_typesupport_info {
+  my($self, $tsfile) = @_;
+  return undef unless exists $self->{'strs'}->{$tsfile};
+  return $self->{'strs'}->{$tsfile}->[1];
+}
+
+
+# ************************************************************
+# Public Interface Section
+# ************************************************************
+
+sub get_output {
+  my($self, $file, $flags) = @_;
+
   ## Parse the IDL file and get back the types and names
-  my $data = $self->cached_parse($file, \@include, \%macros, \%mparams);
+  my $data = $self->do_cached_parse($file, $flags);
 
   ## Get the file names based on the type and name of each entry
   my @filenames;
@@ -231,7 +249,8 @@ sub cached_parse {
   my $ts = defined $self->{'strs'}->{$actual} ||
            ($actual =~ /$tsreg$/ && -r $actual) ?
                    undef : ($actual =~ s/$tsreg$/.idl/);
-  my($data, $ts_str) = $self->parse($actual, $includes, $macros, $mparams);
+  my($data, $ts_str, $ts_pragma) = $self->parse($actual, $includes, $macros,
+                                                $mparams);
 
   if ($ts) {
     ## The file passed into this method was the type support file.  Store
@@ -249,7 +268,7 @@ sub cached_parse {
     my $key = $file;
     $key =~ s/\.idl$/$tsreg/;
     $key =~ s/\\//g;
-    $self->{'strs'}->{$key} = $ts_str;
+    $self->{'strs'}->{$key} = [$ts_str, $ts_pragma];
   }
 
   return $data;
@@ -260,8 +279,10 @@ sub parse {
 
   ## Preprocess the file into one huge string
   my $ts_str;
-  ($str, $ts_str) = $self->preprocess($file, $includes,
-                                      $macros, $mparams) if (!defined $str);
+  my $ts_pragma;
+  ($str, $ts_str, $ts_pragma) = $self->preprocess($file, $includes,
+                                                  $macros, $mparams)
+						            if (!defined $str);
 
   ## Keep track of const's and typedef's with these variables
   my $single;
@@ -428,7 +449,7 @@ sub parse {
     }
   }
 
-  return \@data, $ts_str;
+  return \@data, $ts_str, $ts_pragma;
 }
 
 # ************************************************************
@@ -441,6 +462,7 @@ sub preprocess {
   my $contents = '';
   my $skip = [];
   my $ts_str = '';
+  my $ts_pragma = '';
 
   if (open($fh, $file)) {
     my $line;
@@ -607,6 +629,7 @@ sub preprocess {
             elsif ($pline =~ /^pragma\s+(.*)/) {
               my $arg = $1;
               if ($arg =~ /^DCPS_DATA_TYPE\s+"(.*)"$/) {
+                $ts_pragma .= "$1;";
                 ## Get the data type and remove the scope portion
                 my $dtype = $1;
                 my @ns;
@@ -625,10 +648,7 @@ sub preprocess {
                 $ts_str .= "native ${dtype}Seq; " .
                            "local interface ${dtype}TypeSupport {}; " .
                            "local interface ${dtype}DataWriter {}; " .
-                           "local interface ${dtype}DataReader {}; " .
-                           "const long ${dtype}TypeSupportImpl = 0; ";
-                ## FooTypeSupportImpl is not a constant, but we'll generate the
-                ## correct mapping to .java files as if it were a constant.
+                           "local interface ${dtype}DataReader {}; ";
 
                 ## Close the namespaces (module or interface it works the
                 ## same).
@@ -658,10 +678,11 @@ sub preprocess {
     close($fh);
   }
   elsif (defined $self->{'strs'}->{$file} && !$included) {
-    $contents = delete $self->{'strs'}->{$file};
+    $contents = $self->{'strs'}->{$file}->[0];
+    delete $self->{'strs'}->{$file};
   }
 
-  return $contents, $ts_str;
+  return $contents, $ts_str, $ts_pragma;
 }
 
 sub include_file {
