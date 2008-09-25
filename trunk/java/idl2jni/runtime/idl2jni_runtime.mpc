@@ -18,7 +18,7 @@ project: taolib, java, optional_jni_check {
   }
 
   JavaH_Files {
-    classes/i2jrt/TAOObject.class
+    classes/i2jrt/TAOObject.class << classes/i2jrt/TAOLocalObject.class
     classes/i2jrt/ORB.class
   }
 

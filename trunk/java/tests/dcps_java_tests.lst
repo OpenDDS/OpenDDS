@@ -9,7 +9,7 @@
 # Paths are relative to $DDS_ROOT
 
 java/tests/hello/run_test.pl
-java/tests/builtintopics/run_test.pl !NO_BUILT_IN_TOPICS
+java/tests/builtintopics/run_test.pl: !NO_BUILT_IN_TOPICS
 java/tests/multirepo/run_test.pl
 
 #
