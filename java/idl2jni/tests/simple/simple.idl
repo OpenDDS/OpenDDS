@@ -113,6 +113,7 @@ module simple {
   interface TestLI {
     boolean localOp(inout EnumSeq p1, out TestStructSequence p2,
                     in TestStructArray p3);
+    boolean localOp2(inout TestStructSequence s1);
     EnumSeq returnASequence(out short p1, inout TestStruct p2);
     void primitive(inout boolean p1, out char p2, inout octet p3, out short p4,
                    inout unsigned long p5, out long long p6, inout float p7,

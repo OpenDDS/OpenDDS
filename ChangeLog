@@ -1,3 +1,34 @@
+Thu Sep 25 18:27:19 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/dds:
+        * java/dds/DDS:
+        * java/dds/OpenDDS/DCPS/BuiltinTopicUtils.java:
+        * java/dds/dcps_java_optional.mpb:
+
+          Added OpenDDS::DCPS Builtin Topic constants.
+
+        * java/idl2jni/codegen/im_jni.cpp:
+        * java/idl2jni/runtime:
+        * java/idl2jni/tests/simple/simple.idl:
+
+          Resolved JVM class resolution issue when generating native
+          sequences (w/Adam Mitz).
+        
+        * java/tests/builtintopics:
+        * java/tests/builtintopics/BuiltinTopicsTest.java:
+        * java/tests/builtintopics/builtintopics.ini:
+        * java/tests/builtintopics/builtintopics_test.mpc:
+        * java/tests/builtintopics/domain_ids:
+        * java/tests/builtintopics/run_test.pl:
+        * java/tests/dcps_java_tests.lst:
+
+          Added Builtin Topic tests.
+       
+        * java/tests/multirepo:
+        * java/tests/multirepo/MultiRepoBase.java:
+
+          Removed unused import.
+
 Wed Sep 24 15:23:19 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/tests/messenger/publisher/run_test.pl:
