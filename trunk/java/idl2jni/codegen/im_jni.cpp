@@ -170,6 +170,29 @@ string idl_mapping_jni::type (AST_Type *decl)
 }
 
 
+namespace
+{
+  enum native_type {
+    NATIVE_UNKNOWN,
+    NATIVE_DATA_SEQUENCE,
+    NATIVE_INFO_SEQUENCE
+  };
+
+  native_type get_native_type(UTL_ScopedName *name, string &elem)
+  {
+    string seq (idl_mapping_jni::scoped_helper (name, "/"));
+    if (idl_global->dcps_support_zero_copy_read () && seq.size () > 3
+      && seq.substr (seq.size () - 3) == "Seq")
+      {
+        elem = seq.substr (0, seq.size () - 3);
+        if (seq == "DDS/SampleInfoSeq") return NATIVE_INFO_SEQUENCE;
+        return NATIVE_DATA_SEQUENCE;
+      }
+    return NATIVE_UNKNOWN; 
+  }
+}
+
+
 string idl_mapping_jni::jvmSignature (AST_Type *decl)
 {
   switch (decl->node_type ())
@@ -198,7 +221,6 @@ string idl_mapping_jni::jvmSignature (AST_Type *decl)
     case AST_Decl::NT_enum:
     case AST_Decl::NT_struct:
     case AST_Decl::NT_union:
-    case AST_Decl::NT_native:
     case AST_Decl::NT_interface:
       return "L" + scoped_helper (decl->name (), "/") + ";";
     case AST_Decl::NT_typedef:
@@ -215,6 +237,14 @@ string idl_mapping_jni::jvmSignature (AST_Type *decl)
       {
         AST_Array *arr = AST_Array::narrow_from_decl (decl);
         return "[" + jvmSignature (arr->base_type ());
+      }
+    case AST_Decl::NT_native:
+      {
+        string elem;
+        if (get_native_type (decl->name (), elem) != NATIVE_UNKNOWN)
+          {
+            return "[L" + elem + ";";
+          }
       }
     default: ;//fall through
     }
@@ -1214,14 +1244,27 @@ bool idl_mapping_jni::gen_interf_fwd (UTL_ScopedName *name)
 bool idl_mapping_jni::gen_native (UTL_ScopedName *name, const char *)
 {
   string seq (scoped_helper (name, "/")), seq_cxx (scoped (name));
-  if (idl_global->dcps_support_zero_copy_read ()
-    && seq.substr (seq.size () - 3) == "Seq")
+  string elem;
+  bool info (false);
+  switch (get_native_type (name, elem))
     {
-      string elem (seq.substr (0, seq.size () - 3)),
-        elem_cxx (seq_cxx.substr (0, seq_cxx.size () - 3));
-      if (seq_cxx == "DDS::SampleInfoSeq") elem_cxx += "_var";
-      return gen_jarray_copies (name, "L" + elem + ";", "Object", "jobject",
-        "jobjectArray", elem_cxx, true, "source.length ()");
+    case NATIVE_INFO_SEQUENCE:
+      info = true;
+        /* fall through */
+
+    case NATIVE_DATA_SEQUENCE:
+      {
+        string elem_cxx (elem);
+        for (size_t iter = elem_cxx.find ('/'); iter != string::npos;
+          iter = elem_cxx.find ('/', iter + 1))
+          {
+            elem_cxx.replace (iter, 1, "::");
+          }
+        if (info) elem_cxx += "_var";
+        return gen_jarray_copies (name, "L" + elem + ";", "Object", "jobject",
+            "jobjectArray", elem_cxx, true, "source.length ()");
+      }
+ 
     }
   return true;
 }

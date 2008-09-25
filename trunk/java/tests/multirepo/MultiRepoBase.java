@@ -12,7 +12,6 @@ import DDS.PARTICIPANT_QOS_DEFAULT;
 import OpenDDS.DCPS.TheParticipantFactory;
 import OpenDDS.DCPS.TheServiceParticipant;
 import OpenDDS.DCPS.transport.TheTransportFactory;
-import OpenDDS.DCPS.transport.TransportImpl;
 
 /**
  * @author  Steven Stallion
