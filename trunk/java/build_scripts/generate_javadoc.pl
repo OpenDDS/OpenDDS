@@ -15,6 +15,7 @@ my @args = (
     "-overview", "$DDS_ROOT/java/docs/overview.html",
     "-protected",
     "-source", "1.5",
+    "-classpath", "$DDS_ROOT/lib/i2jrt.jar",
     "-sourcepath", "$DDS_ROOT/java/dds",
     "-d", "$DDS_ROOT/java/docs/api",
     "-version",
