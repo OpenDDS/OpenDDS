@@ -1,3 +1,14 @@
+Thu Sep 25 22:04:12 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/build_scripts/generate_javadoc.pl:
+
+          Script now takes an optional destination argument (used by
+          autobuild).
+
+        * java/docs/overview.html:
+
+          Updated documentation.
+
 Thu Sep 25 21:44:23 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * MPC/config/dcps_ts_defaults.mpb:
