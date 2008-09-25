@@ -1,3 +1,17 @@
+Thu Sep 25 20:56:45 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/dds/DDS/package.html:
+        * java/dds/OpenDDS/DCPS/package.html:
+        * java/docs:
+        * java/docs/overview.html:
+
+          Added documentation.
+        
+        * java/dds/OpenDDS/DCPS/transport/package.html:
+        * java/dds/OpenDDS/package.html:
+
+          Removed these files.
+
 Thu Sep 25 20:04:39 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/build_scripts/generate_javadoc.pl:
