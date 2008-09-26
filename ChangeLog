@@ -1,3 +1,10 @@
+Fri Sep 26 14:04:12 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * java/build_scripts/generate_javadoc.pl:
+
+          Added -quiet so class names are not printed on stdout.  One of the
+          class names (RETCODE_ERROR) is being flagged by the scoreboard.
+
 Thu Sep 25 22:04:12 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/build_scripts/generate_javadoc.pl:
