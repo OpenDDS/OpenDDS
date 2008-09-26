@@ -215,14 +215,6 @@ namespace OpenDDS
         DEFAULT_CONFIG_OPTIMUM_PACKET_SIZE    = 4096
       };
 
-
-    enum Association_Status
-    {
-      Fully_Associated,
-      Not_Fully_Associated,
-      Association_Error
-    };
-
   } /* namespace DCPS */
 
 } /* namespace OpenDDS */

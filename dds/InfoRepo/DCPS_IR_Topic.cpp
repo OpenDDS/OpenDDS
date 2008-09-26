@@ -84,7 +84,7 @@ DCPS_IR_Topic::~DCPS_IR_Topic ()
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Topic::~DCPS_IR_Topic: ")
         ACE_TEXT("id %s has retained subscriptions.\n"),
-        id_
+        buffer.str().c_str()
       ));
 
       while (iter != end)

@@ -4,6 +4,8 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "RepoIdSetMap.h"
 #include "dds/DCPS/Util.h"
+#include <sstream>
+
 
 #if !defined (__ACE_INLINE__)
 #include "RepoIdSetMap.inl"
@@ -205,24 +207,6 @@ OpenDDS::DCPS::RepoIdSetMap::marshal (bool byte_order)
 }
 
 
-
-bool
-OpenDDS::DCPS::RepoIdSetMap::is_subset (RepoIdSetMap& map, RepoId id)
-{
-  DBG_ENTRY_LVL("RepoIdSetMap","is_subset",6);
-
-  RepoIdSet_rch given_id_set = map.find (id);
-  RepoIdSet_rch this_id_set = this->find (id);
-
-  if (! given_id_set.is_nil () && ! this_id_set.is_nil ())
-  {
-    return this_id_set->is_subset (* (given_id_set.in ()));
-  }
-
-  return false;
-}
-
-
 int
 OpenDDS::DCPS::RepoIdSetMap::demarshal (ACE_Message_Block* acks, bool byte_order)
 {
@@ -310,6 +294,26 @@ OpenDDS::DCPS::RepoIdSetMap::clear ()
 }
 
 
+void 
+OpenDDS::DCPS::RepoIdSetMap::dump ()
+{
+  DBG_ENTRY_LVL("RepoIdSetMap","dump",6);
 
+  for (MapType::iterator itr = map_.begin();
+    itr != map_.end();
+    ++itr)
+  {
+    RepoIdSet_rch set = itr->second;
+    for (RepoIdSet::MapType::iterator it = set->map ().begin();
+      it != set->map ().end(); ++it)
+    {
+      std::stringstream buffer;
+      buffer << "key  " << itr->first << " - value " << it->first; 
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t)   %s \n"),
+        buffer.str().c_str()));
+    }
+  }
+}
 
 

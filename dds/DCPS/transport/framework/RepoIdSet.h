@@ -42,9 +42,6 @@ namespace OpenDDS
         /// stream: size of map, list of keys in the map.
         void serialize(TAO::DCPS::Serializer & serializer);
 
-        /// Check if contents in the two RepoIdSet are same.
-        bool is_subset (RepoIdSet& map);
-
         bool exist (const RepoId& remote_id, 
                     bool& last);
 
