@@ -1,10 +1,12 @@
+If you're building OpenDDS for use by Java applications, please see the file
+java/INSTALL instead of this one.
 
 BUILDING OpenDDS
 ========================
 
 * Supported platform:
 
-  We have built DDS examples on Win32 using Visual Studio .NET 2003 (VC 7.1)
+  We have built OpenDDS on Win32 using Visual Studio .NET 2003 (VC 7.1)
   and Visual Studio 2005 (VC 8), as well as gcc 3.3 on Solaris/x86, and gcc 3.4
   and 4.x on Linux. (See $DDS_ROOT/README for a more complete description)
 
@@ -51,7 +53,6 @@ BUILDING OpenDDS
 
   5 Test
 
-    cd $DDS_ROOT/tests
     $DDS_ROOT/bin/auto_run_tests.pl
 
 * Note:
@@ -68,7 +69,7 @@ BUILDING OpenDDS
      On Windows:
       cd %DDS_ROOT%
       perl %ACE_ROOT%\bin\mwc.pl -type [CompilerType] DDS.mwc
-        "CompilerTypes" tested include vc71, vc8, and nmake
+        "CompilerTypes" tested include vc71, vc8, vc9, and nmake
 
 * Platform specific notes:
 

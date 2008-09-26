@@ -1,3 +1,19 @@
+Fri Sep 26 21:20:37 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * README:
+        * docs/INSTALL:
+
+          Minor changes and added references to the new java/* documents.
+
+        * java/INSTALL:
+        * java/README:
+
+          Added first draft of Java README and INSTALL documents.
+
+        * java/tests/messenger/messenger_idl/messenger_idl_test.mpc:
+
+          Removed an unneeded line (it had the same value as the default).
+
 Fri Sep 26 14:04:12 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * java/build_scripts/generate_javadoc.pl:
