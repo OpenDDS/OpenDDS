@@ -1,10 +1,13 @@
 OpenDDS is an open-source C++ implementation of the
 Object Management Group's specification "Data Distribution
-Service for Real-time Systems". OpenDDS is built on the ACE
-(http://www.theaceorb.com/product/aboutace.html) abstraction layer to
-provide platform portability. OpenDDS also leverages capabilities of TAO
-(http://www.theaceorb.com/), such as its IDL compiler and as the basis
-of the OpenDDS DCPS Information Repository (DCPSInfoRepo).
+Service for Real-time Systems". Although OpenDDS is itself developed in
+C++, Java bindings are provided so that Java applications can use
+OpenDDS -- see java/README and java/INSTALL for details.
+
+OpenDDS is built on the ACE (http://www.theaceorb.com/product/aboutace.html)
+abstraction layer to provide platform portability. OpenDDS also leverages
+capabilities of TAO (http://www.theaceorb.com/), such as its IDL compiler
+and as the basis of the OpenDDS DCPS Information Repository (DCPSInfoRepo).
 
 The primary development of OpenDDS was done by the ACE/TAO development
 team at Object Computing, Incorporated (http://www.ociweb.com) in
