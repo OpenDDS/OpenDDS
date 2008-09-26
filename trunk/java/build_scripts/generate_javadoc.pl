@@ -17,6 +17,7 @@ if ($dest eq "") {
 
 my @args = (
     "$JAVA_HOME/bin/javadoc",
+    "-quiet",
     "-overview", "$DDS_ROOT/java/docs/overview.html",
     "-protected",
     "-source", "1.5",
