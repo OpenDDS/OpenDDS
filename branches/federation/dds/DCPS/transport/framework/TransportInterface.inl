@@ -209,12 +209,16 @@ OpenDDS::DCPS::TransportInterface::send(const DataSampleList& samples)
           // NOTE: This is the "local publisher id is not currently
           //       associated with any remote subscriber ids" case.
 
-          VDBG_LVL((LM_DEBUG,"(%P|%t) DBG: "
-               "TransportInterface::send no links for %d\n",
-               cur->publication_id_),5);
+          if( DCPS_debug_level > 4) {
+            ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) TransportInterface::send: ")
+              ACE_TEXT("no links for publication %s, ")
+              ACE_TEXT("not sending %d samples.\n"),
+              (const char*) ::OpenDDS::DCPS::GuidConverter( cur->publication_id_),
+              samples.size_
+            ));
+          }
 
-          VDBG_LVL((LM_DEBUG,"(%P|%t) DBG: No DataLinkSet found. Dropping %d elements.\n"
-                    , samples.size_), 5);
           // We tell the send_listener_ that all of the remote subscriber ids
           // that wanted the data (all zero of them) have indeed received
           // the data.

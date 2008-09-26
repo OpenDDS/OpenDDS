@@ -1,3 +1,33 @@
+Fri Sep 26 18:23:32 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/GuidUtils.h:
+        * dds/DCPS/GuidUtils.cpp:
+
+	  Simplified insertion of GUID values into log messages.
+
+        * dds/DCPS/BuiltInTopicUtils.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/DataLinkSetMap.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.cpp:
+        * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.inl:
+        * dds/DCPS/transport/framework/TransportInterface.cpp:
+
+	  Updated diagnostic messages to use simplifications and modified
+	  additional messages to include GUID based Id values rather than
+	  previous 32 bit values.
+
 Fri Sep 26 17:19:39 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/RepoIdSet.h:
@@ -10,18 +40,18 @@ Fri Sep 26 17:19:39 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
           Corrected fully association ack verification and removed some methods
           and data that are not needed.
-          
+
         * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.h:
         * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.inl:
         * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.h:
         * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.inl:
-        
+
           Updated acked() virtual method signature.
- 
+
         * dds/InfoRepo/DCPS_IR_Topic.cpp:
-        
+
           Fixed a bug in log message.
-        
+
 Wed Sep 24 18:48:16 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/Federation/publisher_main.cpp:

@@ -8,6 +8,7 @@
 #include "ace/ACE.h"
 
 #include <iostream>
+#include <sstream>
 #include <iomanip>
 
 namespace OpenDDS { namespace DCPS {
@@ -50,6 +51,13 @@ GuidConverter::operator GUID_t() const
 GuidConverter::operator long() const
 {
   return ACE::crc32( reinterpret_cast<void*>(&this->guid_), sizeof( this->guid_));
+}
+
+GuidConverter::operator const char*() const
+{
+  std::stringstream buffer;
+  buffer << this->guid_ << "(" << std::hex << this->operator long() << ")";
+  return buffer.str().c_str();
 }
 
 long

@@ -294,13 +294,10 @@ namespace OpenDDS {
               for (CORBA::ULong i = 0; i < repoid_len; ++i)
                 {
                   if (DCPS_debug_level >= 10) {
-                    std::stringstream buffer;
-                    long hash = GuidConverter(const_cast<GUID_t*>(&repoids[i]));
-                    buffer << repoids[i] << "(" << hash << ")";
                     ACE_DEBUG((LM_DEBUG,
                       ACE_TEXT("(%P|%t) BIT_Helper::repo_ids_to_instance_handles: ")
                       ACE_TEXT("repoId %s\n"),
-                      buffer.str().c_str()
+                      (const char*)::OpenDDS::DCPS::GuidConverter( const_cast<GUID_t*>( &repoids[i]))
                     ));
                   }
                   for (CORBA::ULong j = 0; j < data_len; ++j)

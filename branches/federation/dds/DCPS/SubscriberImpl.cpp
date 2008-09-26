@@ -205,11 +205,13 @@ SubscriberImpl::create_datareader (
   else if (impl->register_subscription (dr_servant->get_subscription_id(),
 					dr_servant) == -1)
     {
-      ACE_ERROR ((LM_ERROR,
-		  ACE_TEXT("(%P|%t) ERROR: ")
-		  ACE_TEXT("SubscriberImpl::create_datareader, ")
-		  ACE_TEXT("failed to register datareader %d with TransportImpl.\n"),
-		  dr_servant->get_subscription_id()));
+      RepoId id = dr_servant->get_subscription_id();
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("SubscriberImpl::create_datareader: ")
+        ACE_TEXT("failed to register datareader %s with TransportImpl.\n"),
+        (const char*) ::OpenDDS::DCPS::GuidConverter( id)
+      ));
       return ::DDS::DataReader::_nil ();
     }
 
@@ -241,8 +243,12 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
     ::DDS::Subscriber_var dr_subscriber(dr_servant->get_subscriber ());
     if (dr_subscriber.in() != this)
     {
-        ACE_ERROR ((LM_ERROR,"(%P|%t) SubscriberImpl::delete_datareader"
-            " the data reader (subId=%d) doesn't belong to this subscriber \n", dr_servant->get_subscription_id()));
+        RepoId id = dr_servant->get_subscription_id();
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) SubscriberImpl::delete_datareader: ")
+          ACE_TEXT("data reader %s doesn't belong to this subscriber.\n"),
+          (const char*) ::OpenDDS::DCPS::GuidConverter( id)
+        ));
         return ::DDS::RETCODE_PRECONDITION_NOT_MET;
     }
   }
@@ -280,10 +286,11 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
       RepoId id = dr_servant->get_subscription_id ();
       ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("SubscriberImpl::delete_datareader, ")
-        ACE_TEXT("The datareader(topic_name=%s id=%d) is not found\n"),
-        topic_name.in (), id),
-        ::DDS::RETCODE_ERROR);
+        ACE_TEXT("SubscriberImpl::delete_datareader: ")
+        ACE_TEXT("datareader(topic_name=%s) %s not found.\n"),
+        topic_name.in(),
+        (const char*) ::OpenDDS::DCPS::GuidConverter( id)
+      ),::DDS::RETCODE_ERROR);
     }
 
     dr_info = it->second;
@@ -334,11 +341,12 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
   // Unregister the DataReader object with the TransportImpl.
   else if (impl->unregister_subscription (subscription_id) == -1)
     {
-      ACE_ERROR ((LM_ERROR,
-		  ACE_TEXT("(%P|%t) ERROR: ")
-		  ACE_TEXT("SubscriberImpl::delete_datareader, ")
-		  ACE_TEXT("failed to unregister datareader %d with TransportImpl.\n"),
-		  subscription_id));
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("SubscriberImpl::delete_datareader: ")
+        ACE_TEXT("failed to unregister datareader %s with TransportImpl.\n"),
+        (const char*) ::OpenDDS::DCPS::GuidConverter( subscription_id)
+      ));
       return ::DDS::RETCODE_ERROR;
     }
 
@@ -565,12 +573,11 @@ SubscriberImpl::set_qos (
                 = idToQosMap.insert(DrIdToQosMap::value_type(id, qos));
               if (pair.second == false)
               {
-                ACE_ERROR_RETURN ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) "
-                  "SubscriberImpl::set_qos, ")
-                  ACE_TEXT("insert id(%d) to DrIdToQosMap failed. \n"), 
-                  id),
-                  ::DDS::RETCODE_ERROR);
+                ACE_ERROR_RETURN((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::set_qos: ")
+                  ACE_TEXT("insert %s to DrIdToQosMap failed.\n"), 
+                  (const char*) ::OpenDDS::DCPS::GuidConverter( id)
+                ),::DDS::RETCODE_ERROR);
               }
             }
           }

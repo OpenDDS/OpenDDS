@@ -30,15 +30,11 @@ OpenDDS::DCPS::ReceiveListenerSetMap::insert
   if (listener_set.is_nil())
     {
       // find_or_create failure
-      std::stringstream buffer;
-      long handle;
-      handle = ::OpenDDS::DCPS::GuidConverter( publisher_id);
-      buffer << publisher_id << "(" << std::hex << handle << ")";
       ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::insert: ")
         ACE_TEXT("failed to find_or_create entry for ")
         ACE_TEXT("publisher %s.\n"),
-        buffer.str().c_str()
+        (const char*) ::OpenDDS::DCPS::GuidConverter( publisher_id)
       ), -1);
     }
 
@@ -55,38 +51,22 @@ OpenDDS::DCPS::ReceiveListenerSetMap::insert
   // Handle the two possible failure cases (duplicate key or unknown)
   if (result == 1)
     {
-      std::stringstream subscriberBuffer;
-      long handle;
-      handle = ::OpenDDS::DCPS::GuidConverter( subscriber_id);
-      subscriberBuffer << subscriber_id << "(" << std::hex << handle << ")";
-
-      std::stringstream publisherBuffer;
-      handle = ::OpenDDS::DCPS::GuidConverter( publisher_id);
-      publisherBuffer << publisher_id << "(" << std::hex << handle << ")";
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::insert: ")
         ACE_TEXT("subscriber %s already exists for ")
         ACE_TEXT("publisher %s.\n"),
-        subscriberBuffer.str().c_str(),
-        publisherBuffer.str().c_str()
+        (const char*) ::OpenDDS::DCPS::GuidConverter( subscriber_id),
+        (const char*) ::OpenDDS::DCPS::GuidConverter( publisher_id)
       ));
     }
   else
     {
-      std::stringstream subscriberBuffer;
-      long handle;
-      handle = ::OpenDDS::DCPS::GuidConverter( subscriber_id);
-      subscriberBuffer << subscriber_id << "(" << std::hex << handle << ")";
-
-      std::stringstream publisherBuffer;
-      handle = ::OpenDDS::DCPS::GuidConverter( publisher_id);
-      publisherBuffer << publisher_id << "(" << std::hex << handle << ")";
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::insert: ")
         ACE_TEXT("failed to insert subscriber %s for ")
         ACE_TEXT("publisher %s.\n"),
-        subscriberBuffer.str().c_str(),
-        publisherBuffer.str().c_str()
+        (const char*) ::OpenDDS::DCPS::GuidConverter( subscriber_id),
+        (const char*) ::OpenDDS::DCPS::GuidConverter( publisher_id)
       ));
     }
 
@@ -99,15 +79,11 @@ OpenDDS::DCPS::ReceiveListenerSetMap::insert
 
       if (listener_set.is_nil())
         {
-          std::stringstream publisherBuffer;
-          long handle;
-          handle = ::OpenDDS::DCPS::GuidConverter( publisher_id);
-          publisherBuffer << publisher_id << "(" << std::hex << handle << ")";
           ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::insert: ")
             ACE_TEXT("failed to remove (undo create) ReceiveListenerSet ")
             ACE_TEXT("for publisher %s.\n"),
-            publisherBuffer.str().c_str()
+            (const char*) ::OpenDDS::DCPS::GuidConverter( publisher_id)
           ));
         }
     }
@@ -137,15 +113,11 @@ OpenDDS::DCPS::ReceiveListenerSetMap::remove(RepoId publisher_id,
     {
       if (unbind(map_, publisher_id) != 0)
         {
-          std::stringstream publisherBuffer;
-          long handle;
-          handle = ::OpenDDS::DCPS::GuidConverter( publisher_id);
-          publisherBuffer << publisher_id << "(" << std::hex << handle << ")";
           ACE_ERROR_RETURN((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::remove: ")
             ACE_TEXT("failed to remove empty ReceiveListenerSet for ")
             ACE_TEXT("publisher %s.\n"),
-            publisherBuffer.str().c_str()
+            (const char*) ::OpenDDS::DCPS::GuidConverter( publisher_id)
           ), -1);
         }
     }
@@ -177,14 +149,10 @@ OpenDDS::DCPS::ReceiveListenerSetMap::release_subscriber(RepoId publisher_id,
 
   if (OpenDDS::DCPS::find(map_, publisher_id, listener_set) != 0)
     {
-      std::stringstream publisherBuffer;
-      long handle;
-      handle = ::OpenDDS::DCPS::GuidConverter( publisher_id);
-      publisherBuffer << publisher_id << "(" << std::hex << handle << ")";
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ReciveListenerSetMap::release_subscriber: ")
         ACE_TEXT("publisher %s not found in map_.\n"),
-        publisherBuffer.str().c_str()
+        (const char*) ::OpenDDS::DCPS::GuidConverter( publisher_id)
       ));
       // Return 1 to indicate that the publisher_id is no longer associated
       // with any subscribers at all.
@@ -200,15 +168,11 @@ OpenDDS::DCPS::ReceiveListenerSetMap::release_subscriber(RepoId publisher_id,
     {
       if (unbind(map_, publisher_id) != 0)
         {
-          std::stringstream publisherBuffer;
-          long handle;
-          handle = ::OpenDDS::DCPS::GuidConverter( publisher_id);
-          publisherBuffer << publisher_id << "(" << std::hex << handle << ")";
           ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::release_subscriber: ")
             ACE_TEXT("failed to remove empty ReceiveListenerSet for ")
             ACE_TEXT("publisher %s.\n"),
-            publisherBuffer.str().c_str()
+            (const char*) ::OpenDDS::DCPS::GuidConverter( publisher_id)
           ));
         }
 

@@ -1038,13 +1038,10 @@ namespace OpenDDS
       try
         {
           if( DCPS_debug_level >= 4) {
-            std::stringstream buffer;
-            long key = GuidConverter( this->dp_id_);
-            buffer << this->dp_id_ << "(" << key << ")";
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("%P|%t) DomainParticipantImpl::ignore_participant: ")
               ACE_TEXT("%s ignoring handle==%d, key==%x.\n"),
-              buffer.str().c_str(),
+              (const char*) ::OpenDDS::DCPS::GuidConverter( this->dp_id_),
               handle,
               ignoreKey
             ));
@@ -1053,11 +1050,13 @@ namespace OpenDDS
           repo->ignore_domain_participant(domain_id_,
                                           dp_id_,
                                           ignoreKey);
-          if (DCPS_debug_level >= 4)
+          if( DCPS_debug_level >= 4) {
             ACE_DEBUG((LM_DEBUG,
-                "%P|%t) DomainParticipantImpl::ignore_participant"
-                " %d repo call returned.\n",
-                dp_id_ ));
+              ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_participant: ")
+              ACE_TEXT("%s repo call returned.\n"),
+              (const char*) ::OpenDDS::DCPS::GuidConverter( this->dp_id_)
+            ));
+          }
         }
       catch (const CORBA::SystemException& sysex)
         {
@@ -1115,13 +1114,10 @@ namespace OpenDDS
       try
         {
           if( DCPS_debug_level >= 4) {
-            std::stringstream buffer;
-            long key = GuidConverter( this->dp_id_);
-            buffer << this->dp_id_ << "(" << key << ")";
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("%P|%t) DomainParticipantImpl::ignore_topic: ")
               ACE_TEXT("%s ignoring handle==%d, key==%x.\n"),
-              buffer.str().c_str(),
+              (const char*) ::OpenDDS::DCPS::GuidConverter( this->dp_id_),
               handle,
               ignoreKey
             ));
@@ -1187,13 +1183,10 @@ namespace OpenDDS
       try
         {
           if( DCPS_debug_level >= 4) {
-            std::stringstream buffer;
-            long key = GuidConverter( this->dp_id_);
-            buffer << this->dp_id_ << "(" << key << ")";
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("%P|%t) DomainParticipantImpl::ignore_publication: ")
               ACE_TEXT("%s ignoring handle==%d, key==%x.\n"),
-              buffer.str().c_str(),
+              (const char*) ::OpenDDS::DCPS::GuidConverter( this->dp_id_),
               handle,
               ignoreKey
             ));
@@ -1259,13 +1252,10 @@ namespace OpenDDS
       try
         {
           if( DCPS_debug_level >= 4) {
-            std::stringstream buffer;
-            long key = GuidConverter( this->dp_id_);
-            buffer << this->dp_id_ << "(" << key << ")";
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("%P|%t) DomainParticipantImpl::ignore_subscription: ")
               ACE_TEXT("%s ignoring handle==%d, key==%x.\n"),
-              buffer.str().c_str(),
+              (const char*) ::OpenDDS::DCPS::GuidConverter( this->dp_id_),
               handle,
               ignoreKey
             ));

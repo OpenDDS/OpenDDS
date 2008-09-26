@@ -201,12 +201,14 @@ PublisherImpl::create_datawriter (
   else if (impl->register_publication (dw_servant->get_publication_id(),
                dw_servant) == -1)
     {
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: ")
-                  ACE_TEXT("PublisherImpl::create_datawriter, ")
-                  ACE_TEXT("failed to register datawriter %d with ")
-                  ACE_TEXT("TransportImpl.\n"),
-                  dw_servant->get_publication_id()));
+      RepoId id = dw_servant->get_publication_id();
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("PublisherImpl::create_datawriter: ")
+        ACE_TEXT("failed to register datawriter %s with ")
+        ACE_TEXT("TransportImpl.\n"),
+        (const char*) ::OpenDDS::DCPS::GuidConverter( id)
+      ));
       return ::DDS::DataWriter::_nil ();
     }
   return ::DDS::DataWriter::_duplicate (dw_obj.in ());
@@ -231,11 +233,13 @@ PublisherImpl::delete_datawriter (::DDS::DataWriter_ptr a_datawriter)
     ::DDS::Publisher_var dw_publisher(dw_servant->get_publisher());
     if (dw_publisher.in()!= this)
     {
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) PublisherImpl::delete_datareader ")
-                  ACE_TEXT("the data writer (pubId=%d) doesn't ")
-                  ACE_TEXT("belong to this subscriber \n"),
-                  dw_servant->get_publication_id()));
+      RepoId id = dw_servant->get_publication_id();
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) PublisherImpl::delete_datareader: ")
+        ACE_TEXT("the data writer %s doesn't ")
+        ACE_TEXT("belong to this subscriber \n"),
+        (const char*) ::OpenDDS::DCPS::GuidConverter( id)
+      ));
       return ::DDS::RETCODE_PRECONDITION_NOT_MET;
     }
   }
@@ -252,15 +256,14 @@ PublisherImpl::delete_datawriter (::DDS::DataWriter_ptr a_datawriter)
     publication_id = dw_servant->get_publication_id ();
     PublicationMap::iterator it = publication_map_.find (publication_id);
 
-    if (it == publication_map_.end ())
-      {
-  ACE_ERROR_RETURN ((LM_ERROR,
-         ACE_TEXT("(%P|%t) ERROR: ")
-         ACE_TEXT("PublisherImpl::delete_datawriter, ")
-         ACE_TEXT("The datawriter(repoid=%d) is not found\n"),
-         publication_id),
-        ::DDS::RETCODE_ERROR);
-      }
+    if( it == publication_map_.end ()) {
+      ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("PublisherImpl::delete_datawriter, ")
+        ACE_TEXT("datawriter %s not found.\n"),
+        (const char*) ::OpenDDS::DCPS::GuidConverter( publication_id)
+      ),::DDS::RETCODE_ERROR);
+    }
     local_writer = it->second->local_writer_impl_;
 
     PublisherDataWriterInfo* dw_info = it->second;
@@ -311,12 +314,13 @@ PublisherImpl::delete_datawriter (::DDS::DataWriter_ptr a_datawriter)
     // Unregister the DataWriterImpl object with the TransportImpl.
     else if (impl->unregister_publication (publication_id) == -1)
     {
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: ")
-                  ACE_TEXT("PublisherImpl::delete_datawriter, ")
-                  ACE_TEXT("failed to unregister datawriter %d ")
-                  ACE_TEXT("with TransportImpl.\n"),
-                  publication_id));
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("PublisherImpl::delete_datawriter: ")
+        ACE_TEXT("failed to unregister datawriter %s ")
+        ACE_TEXT("with TransportImpl.\n"),
+        (const char*) ::OpenDDS::DCPS::GuidConverter( publication_id)
+      ));
       return ::DDS::RETCODE_ERROR;
     }
 
@@ -440,13 +444,16 @@ PublisherImpl::delete_contained_entities ()
           delete_datawriter (it->second->local_writer_objref_);
       if (ret != ::DDS::RETCODE_OK)
         {
-          ACE_ERROR_RETURN ((LM_ERROR,
-                             ACE_TEXT("(%P|%t) ERROR: ")
-                             ACE_TEXT("PublisherImpl::")
-                             ACE_TEXT("delete_contained_entities, ")
-                             ACE_TEXT("failed to delete ")
-                             ACE_TEXT("datawriter(publication_id=%d)\n"),
-                             it->second->publication_id_), ret);
+          ACE_ERROR_RETURN((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR: ")
+            ACE_TEXT("PublisherImpl::")
+            ACE_TEXT("delete_contained_entities: ")
+            ACE_TEXT("failed to delete ")
+            ACE_TEXT("datawriter %s.\n"),
+            (const char*) ::OpenDDS::DCPS::GuidConverter(
+                            const_cast< ::OpenDDS::DCPS::RepoId*>( &it->second->publication_id_)
+                          )
+          ),ret);
         }
       it = next;
     }
@@ -495,13 +502,13 @@ PublisherImpl::set_qos (const ::DDS::PublisherQos & qos)
                 idToQosMap.insert(DwIdToQosMap::value_type(id, qos));
               if (pair.second == false)
               {
-                ACE_ERROR_RETURN ((LM_ERROR,
-                                   ACE_TEXT("(%P|%t) ")
-                                   ACE_TEXT("PublisherImpl::set_qos, ")
-                                   ACE_TEXT("insert id(%d) to DwIdToQosMap ")
-                                   ACE_TEXT("failed.\n"),
-                                   id),
-                                  ::DDS::RETCODE_ERROR);
+                ACE_ERROR_RETURN((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ")
+                  ACE_TEXT("PublisherImpl::set_qos: ")
+                  ACE_TEXT("insert id %d to DwIdToQosMap ")
+                  ACE_TEXT("failed.\n"),
+                  (const char*) ::OpenDDS::DCPS::GuidConverter( id)
+                ),::DDS::RETCODE_ERROR);
               }
             }
           }
@@ -873,12 +880,12 @@ PublisherImpl::writer_enabled(
 
     if (pair.second == false)
       {
-        ACE_ERROR_RETURN ((LM_ERROR,
-                           ACE_TEXT("(%P|%t) ERROR: ")
-                           ACE_TEXT("PublisherImpl::writer_enabled, ")
-                           ACE_TEXT("insert publication(id=%d) failed.\n"),
-                           info->publication_id_),
-                          ::DDS::RETCODE_ERROR);
+        ACE_ERROR_RETURN((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: ")
+          ACE_TEXT("PublisherImpl::writer_enabled: ")
+          ACE_TEXT("insert publication %s failed.\n"),
+          (const char*) ::OpenDDS::DCPS::GuidConverter( info->publication_id_)
+        ),::DDS::RETCODE_ERROR);
       }
 
     // Increase ref count when the servant is added to the
