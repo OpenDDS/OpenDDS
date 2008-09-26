@@ -8,6 +8,8 @@
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/Util.h"
 #include "tao/debug.h"
+#include <sstream>
+
 
 #if !defined (__ACE_INLINE__)
 #include "TransportImpl.inl"
@@ -245,12 +247,10 @@ OpenDDS::DCPS::TransportImpl::register_publication (OpenDDS::DCPS::RepoId pub_id
   // ack is received by the publisher side, we need check the
   // map to see if it's the case. If it is,the datawriter will be
   // notified fully associated at this time.
-  OpenDDS::DCPS::RepoIdSet_rch pending_subs
-    = this->pending_sub_map_.find (pub_id);
-  if (! pending_subs.is_nil () && this->acked (pub_id))
-    this->fully_associated (pub_id);
 
-  if (::OpenDDS::DCPS::Transport_debug_level > 4)
+  check_fully_association (pub_id);
+
+  if (::OpenDDS::DCPS::Transport_debug_level > 8)
     {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) transport %x added publication %d.\n"),
@@ -277,7 +277,7 @@ OpenDDS::DCPS::TransportImpl::unregister_publication (OpenDDS::DCPS::RepoId pub_
     dw_map_.erase(iter);
   }
 
-  if (::OpenDDS::DCPS::Transport_debug_level > 4)
+  if (::OpenDDS::DCPS::Transport_debug_level > 8)
     {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) transport %x released publication %d.\n"),
@@ -297,7 +297,7 @@ OpenDDS::DCPS::TransportImpl::find_publication (OpenDDS::DCPS::RepoId pub_id, bo
   PublicationObjectMap::iterator iter = dw_map_.find(pub_id);
   if (iter == dw_map_.end())
     {
-      if (::OpenDDS::DCPS::Transport_debug_level > 0)
+      if (::OpenDDS::DCPS::Transport_debug_level > 8)
         {
           ACE_DEBUG((LM_DEBUG, "(%P|%t)TransportImpl::find_publication   pub(%d) "
             "not found\n", pub_id));
@@ -327,7 +327,7 @@ OpenDDS::DCPS::TransportImpl::register_subscription (OpenDDS::DCPS::RepoId sub_i
     dr->_add_ref ();
   }
 
-  if (::OpenDDS::DCPS::Transport_debug_level > 4)
+  if (::OpenDDS::DCPS::Transport_debug_level > 8)
     {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) transport %x added subscription %d.\n"),
@@ -360,7 +360,7 @@ OpenDDS::DCPS::TransportImpl::unregister_subscription (OpenDDS::DCPS::RepoId sub
     ));
   }
 
-  if (::OpenDDS::DCPS::Transport_debug_level > 4)
+  if (::OpenDDS::DCPS::Transport_debug_level > 8)
     {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) transport %x released subscription %d.\n"),
@@ -382,7 +382,7 @@ OpenDDS::DCPS::TransportImpl::find_subscription (OpenDDS::DCPS::RepoId sub_id, b
   SubscriptionObjectMap::iterator iter = dr_map_.find(sub_id);
   if (iter == dr_map_.end())
     {
-      if (::OpenDDS::DCPS::Transport_debug_level > 0)
+      if (::OpenDDS::DCPS::Transport_debug_level > 8)
         {
           ACE_DEBUG((LM_DEBUG, "(%P|%t)TransportImpl::find_subscription   sub(%d) "
             "not found\n", sub_id));
@@ -406,17 +406,9 @@ OpenDDS::DCPS::TransportImpl::add_pending_association (RepoId  pub_id,
 
   GuardType guard(this->lock_);
 
-  // Add the remote_id to the pending publication map.
-  for (size_t i = 0; i < num_remote_associations; ++i)
-  {
-    if (this->pending_sub_map_.insert (pub_id, remote_associations [i].remote_id_) != 0)
-      return 0;
-  }
-
   AssociationInfo info;
   info.num_associations_ = num_remote_associations;
   info.association_data_ = remote_associations;
-  info.status_ = Not_Fully_Associated;
 
   // Cache the Association data so it can be used for the callback
   // to notify datawriter on_publication_match.
@@ -427,6 +419,7 @@ OpenDDS::DCPS::TransportImpl::add_pending_association (RepoId  pub_id,
   else {
     AssociationInfoList* infos = new AssociationInfoList;
     infos->push_back (info);
+   
     if (bind(pending_association_sub_map_, pub_id, infos) == -1)
     {
       ACE_ERROR_RETURN ((LM_ERROR,
@@ -436,8 +429,7 @@ OpenDDS::DCPS::TransportImpl::add_pending_association (RepoId  pub_id,
     }
   }
 
-  if (this->acked (pub_id))
-    this->fully_associated (pub_id);
+  check_fully_association (pub_id, info);
 
   return 0;
 }
@@ -456,76 +448,133 @@ OpenDDS::DCPS::TransportImpl::demarshal_acks (ACE_Message_Block* acks, bool byte
                       "(%P|%t) ERROR: TransportImpl::demarshal_acks failed\n"),
                       -1);
 
-  RepoIdSet acked_pubs;
-
-  this->acked_sub_map_.get_keys (acked_pubs);
-
-  RepoIdSet::MapType& acked_pubs_map = acked_pubs.map();
-
-  for (RepoIdSet::MapType::iterator itr = acked_pubs_map.begin();
-    itr != acked_pubs_map.end();
-    ++itr)
-  {
-    OpenDDS::DCPS::RepoIdSet_rch pending_subs
-      = this->pending_sub_map_.find (itr->first);
-
-    if (! pending_subs.is_nil () && this->acked (itr->first))
-      this->fully_associated (itr->first);
-  }
+  check_fully_association ();
   return 0;
 }
 
 
-void
-OpenDDS::DCPS::TransportImpl::fully_associated (RepoId pub_id)
+void OpenDDS::DCPS::TransportImpl::check_fully_association ()
 {
-  DBG_ENTRY_LVL("TransportImpl","fully_associated",6);
+  DBG_ENTRY_LVL("TransportImpl","check_fully_association",6);
+
+  if (::OpenDDS::DCPS::Transport_debug_level > 8)
+  {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("%P|%t)ack dump: \n")));
+  
+    acked_sub_map_.dump ();
+  }
+
+  PendingAssociationsMap::iterator penditer =
+    pending_association_sub_map_.begin();
+
+  while(penditer != pending_association_sub_map_.end())
+  {
+    PendingAssociationsMap::iterator cur = penditer;
+    ++ penditer;
+
+    check_fully_association (cur->first);
+  }
+}
+
+void OpenDDS::DCPS::TransportImpl::check_fully_association (const RepoId pub_id)
+{
+  DBG_ENTRY_LVL("TransportImpl","check_fully_association",6);
+
+  PendingAssociationsMap::iterator penditer =
+    pending_association_sub_map_.find (pub_id);
+
+  if (penditer != pending_association_sub_map_.end())
+  {
+    AssociationInfoList& associations = *(penditer->second);
+
+    AssociationInfoList::iterator iter = associations.begin ();
+
+    while (iter != associations.end ())
+    {
+      if (check_fully_association (penditer->first, *iter))
+      {
+        iter = associations.erase (iter);
+      }
+      else
+      {
+        ++ iter;
+      }
+    }
+
+    if (associations.size () == 0)
+    {
+      pending_association_sub_map_.erase(penditer);
+    }
+  }
+}
+
+
+bool OpenDDS::DCPS::TransportImpl::check_fully_association (const RepoId pub_id, 
+                                                            AssociationInfo& associations)
+{
+  DBG_ENTRY_LVL("TransportImpl","check_fully_association",6);
+
+  int num_acked = 0;
 
   PublicationObjectMap::iterator pubiter = dw_map_.find(pub_id);
 
-  AssociationInfoList* remote_associations = 0;
-  PendingAssociationsMap::iterator penditer =
-    pending_association_sub_map_.find(pub_id);
-
-  if (
-    (pubiter != dw_map_.end()) &&
-    (penditer != pending_association_sub_map_.end())
-    )
+  for (ssize_t i=0; i < associations.num_associations_; ++i)
   {
-    size_t len = penditer->second->size();
-    for (size_t i = 0; i < len; ++i)
+    RepoId sub_id = associations.association_data_[i].remote_id_;
+    if (this->acked (pub_id, sub_id) && pubiter != dw_map_.end())
     {
-      // DataWriter delete the association_data_ during fully_associated() call
-      // so using the association_data_ for removing associations from ack map
-      // need be done before fully_associated() call.
-      for (ssize_t j = 0; j < (*penditer->second)[i].num_associations_; ++ j)
-      {
-        RepoId sub_id = (*penditer->second)[i].association_data_[j].remote_id_;
-        this->remove_ack (pub_id, sub_id);
-      }
-      pubiter->second->fully_associated (pub_id,
-      (*penditer->second)[i].num_associations_,
-      (*penditer->second)[i].association_data_);
+      ++ num_acked;
     }
-    RepoIdSet_rch tmp = this->pending_sub_map_.remove_set (pub_id);
-    remote_associations = penditer->second;
-    pending_association_sub_map_.erase(pub_id);
-    delete remote_associations;
   }
-  else if (penditer != pending_association_sub_map_.end())
+
+  bool ret = (num_acked == associations.num_associations_);
+  if (ret && pubiter != dw_map_.end())
   {
-    size_t len = penditer->second->size();
-    for (size_t i = 0; i < len; ++i)
-      (*penditer->second)[i].status_ = Fully_Associated;
+    for (ssize_t i=0; i < associations.num_associations_; ++i)
+    {
+      RepoId sub_id = associations.association_data_[i].remote_id_;
+      this->remove_ack (pub_id, sub_id);
+    }
+    
+    pubiter->second->fully_associated (pub_id, 
+                                       associations.num_associations_,
+                                       associations.association_data_);
   }
+  else if (ret && ::OpenDDS::DCPS::Transport_debug_level > 8)
+  {
+    std::stringstream buffer;
+    buffer << " pub " << pub_id << " - sub " << associations.association_data_->remote_id_; 
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t)acked but DW is not registered:  %s \n"), buffer.str().c_str()));
+  }
+
+  return ret;
 }
 
 
 bool
-OpenDDS::DCPS::TransportImpl::acked (RepoId pub_id)
+OpenDDS::DCPS::TransportImpl::acked (RepoId pub_id, RepoId sub_id)
 {
-  return this->pending_sub_map_.is_subset (this->acked_sub_map_, pub_id);
+  int ret = false;
+  RepoIdSet_rch set = this->acked_sub_map_.find (pub_id);
+  if (! set.is_nil ())
+  {
+    bool last = false;
+    ret = set->exist (sub_id, last);
+  }
+
+  if (::OpenDDS::DCPS::Transport_debug_level > 8)
+  {
+    std::stringstream buffer;
+    buffer << " pub " << pub_id << " - sub " << sub_id; 
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t)%s %s \n"),
+      ret ? "acked" : "pending", buffer.str().c_str()));
+  }
+  return ret;
 }
+
 
 bool
 OpenDDS::DCPS::TransportImpl::release_link_resources (DataLink* link)
