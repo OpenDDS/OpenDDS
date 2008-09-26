@@ -103,6 +103,9 @@ namespace OpenDDS { namespace DCPS {
       /// Convert to long value.
       operator long() const;
 
+      /// Convert to diagnostic string.
+      operator const char*() const;
+
       /// Extract the federation Id value.
       long federationId() const;
 

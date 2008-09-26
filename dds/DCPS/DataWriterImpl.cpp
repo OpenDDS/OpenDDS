@@ -189,21 +189,14 @@ DataWriterImpl::add_associations ( ::OpenDDS::DCPS::RepoId yourId,
 
   if (DCPS_debug_level >= 1)
   {
-    std::stringstream buffer;
-    long handle;
-    handle = ::OpenDDS::DCPS::GuidConverter(yourId);
-    buffer << "local "   << yourId
-           << "(" << std::hex << handle << ")";
-    handle = ::OpenDDS::DCPS::GuidConverter(
-               const_cast< ::OpenDDS::DCPS::RepoId*>(&readers[0].readerId)
-             );
-    buffer << " remote " << readers[0].readerId
-           << "(" << std::hex << handle << ")";
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataWriterImpl::add_associations - ")
-      ACE_TEXT("bit %d %s num remotes %d \n"),
+      ACE_TEXT("bit %d local %s remote %s num remotes %d \n"),
       is_bit_,
-      buffer.str().c_str(),
+      (const char*) ::OpenDDS::DCPS::GuidConverter( yourId),
+      (const char*) ::OpenDDS::DCPS::GuidConverter(
+                      const_cast< ::OpenDDS::DCPS::RepoId*>( &readers[ 0].readerId)
+                    ),
       readers.length()
     ));
   }
@@ -231,27 +224,21 @@ DataWriterImpl::add_associations ( ::OpenDDS::DCPS::RepoId yourId,
     for (CORBA::ULong i = 0; i < len; ++i)
     {
       if( OpenDDS::DCPS::insert(pending_readers_, readers[i].readerId) == -1) {
-        std::stringstream buffer;
-        long key = ::OpenDDS::DCPS::GuidConverter(
-                     const_cast< ::OpenDDS::DCPS::RepoId*>(&readers[i].readerId)
-                   );
-        buffer << readers[i].readerId << "(" << std::hex << key << ")";
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::add_associations: ")
           ACE_TEXT("failed to mark %s as pending.\n"),
-          buffer.str().c_str()
+          (const char*) ::OpenDDS::DCPS::GuidConverter(
+                          const_cast< ::OpenDDS::DCPS::RepoId*>( &readers[ i].readerId)
+                        )
         ));
 
       } else if (DCPS_debug_level > 0) {
-        std::stringstream buffer;
-        long key = ::OpenDDS::DCPS::GuidConverter(
-                     const_cast< ::OpenDDS::DCPS::RepoId*>(&readers[i].readerId)
-                   );
-        buffer << readers[i].readerId << "(" << std::hex << key << ")";
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataWriterImpl::add_associations: ")
           ACE_TEXT("marked %s as pending.\n"),
-          buffer.str().c_str()
+          (const char*) ::OpenDDS::DCPS::GuidConverter(
+                          const_cast< ::OpenDDS::DCPS::RepoId*>( &readers[ i].readerId)
+                        )
         ));
       }
     }
@@ -279,21 +266,14 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
 
   if (DCPS_debug_level >= 1)
   {
-    std::stringstream buffer;
-    long handle;
-    handle = ::OpenDDS::DCPS::GuidConverter(myid);
-    buffer << "local "   << myid
-           << "(" << std::hex << handle << ")";
-    handle = ::OpenDDS::DCPS::GuidConverter(
-               const_cast< ::OpenDDS::DCPS::RepoId*>(&remote_associations[0].remote_id_)
-             );
-    buffer << " remote " << remote_associations[0].remote_id_
-           << "(" << std::hex << handle << ")";
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataWriterImpl::fully_associated - ")
-      ACE_TEXT("bit %d %s num remotes %d \n"),
+      ACE_TEXT("bit %d local %s remote %s num remotes %d \n"),
       is_bit_,
-      buffer.str().c_str(),
+      (const char*) ::OpenDDS::DCPS::GuidConverter( myid),
+      (const char*) ::OpenDDS::DCPS::GuidConverter(
+                      const_cast< ::OpenDDS::DCPS::RepoId*>( &remote_associations[ 0].remote_id_)
+                    ),
       num_remote_associations
     ));
   }
@@ -312,17 +292,13 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
       // is called before fully_associated() call.
       if (OpenDDS::DCPS::remove (pending_readers_, remote_associations[i].remote_id_) == -1)
       {
-        std::stringstream buffer;
-        long handle;
-        handle = ::OpenDDS::DCPS::GuidConverter(
-                   const_cast< ::OpenDDS::DCPS::RepoId*>(&remote_associations[i].remote_id_)
-                 );
-        buffer << remote_associations[i].remote_id_ << "(" << std::hex << handle << ")";
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataWriterImpl::fully_associated: ")
           ACE_TEXT("reader %s is not in pending list ")
           ACE_TEXT("because remove_association is already called.\n"),
-          buffer.str().c_str()
+          (const char*) ::OpenDDS::DCPS::GuidConverter(
+                          const_cast< ::OpenDDS::DCPS::RepoId*>( &remote_associations[ i].remote_id_)
+                        )
         ));
         continue;
       }
@@ -335,16 +311,12 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
       
       if (OpenDDS::DCPS::insert (readers_, remote_associations[i].remote_id_) == -1)
       {
-        std::stringstream buffer;
-        long handle;
-        handle = ::OpenDDS::DCPS::GuidConverter(
-                   const_cast< ::OpenDDS::DCPS::RepoId*>(&remote_associations[i].remote_id_)
-                 );
-        buffer << remote_associations[i].remote_id_ << "(" << std::hex << handle << ")";
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::fully_associated: ")
           ACE_TEXT("insert %s from pending failed.\n"),
-          buffer.str().c_str()
+          (const char*) ::OpenDDS::DCPS::GuidConverter(
+                          const_cast< ::OpenDDS::DCPS::RepoId*>( &remote_associations[ i].remote_id_)
+                        )
         ));
       }
     }
@@ -374,28 +346,24 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
         ++publication_match_status_.total_count_change;
         if (bind(id_to_handle_map_, rd_ids[i], handles[i]) != 0)
         {
-          std::stringstream buffer;
-          long handle = ::OpenDDS::DCPS::GuidConverter(
-                          const_cast< ::OpenDDS::DCPS::RepoId*>( &rd_ids[i])
-                        );
-          buffer << "[ " << rd_ids[i] << "(" << std::hex << handle << ")]";
           ACE_DEBUG((LM_WARNING,
             ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::fully_associated: ")
             ACE_TEXT("id_to_handle_map_%s = 0x%x failed.\n"),
-            buffer.str().c_str(), handles[i]
+            (const char*) ::OpenDDS::DCPS::GuidConverter(
+                            const_cast< ::OpenDDS::DCPS::RepoId*>( &rd_ids[ i])
+                          ),
+            handles[i]
           ));
           return;
 
         } else if( DCPS_debug_level > 4) {
-          std::stringstream buffer;
-          long handle = ::OpenDDS::DCPS::GuidConverter(
-                          const_cast< ::OpenDDS::DCPS::RepoId*>( &rd_ids[i])
-                        );
-          buffer << "[ " << rd_ids[i] << "(" << std::hex << handle << ")]";
           ACE_DEBUG((LM_WARNING,
             ACE_TEXT("(%P|%t) DataWriterImpl::fully_associated: ")
             ACE_TEXT("id_to_handle_map_%s = 0x%x.\n"),
-            buffer.str().c_str(), handles[i]
+            (const char*) ::OpenDDS::DCPS::GuidConverter(
+                            const_cast< ::OpenDDS::DCPS::RepoId*>( &rd_ids[ i])
+                          ),
+            handles[i]
           ));
         }
         publication_match_status_.last_subscription_handle = handles[i];
@@ -450,21 +418,14 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
 {
   if (DCPS_debug_level >= 1)
   {
-    std::stringstream buffer;
-    long handle;
-    handle = ::OpenDDS::DCPS::GuidConverter( this->publication_id_);
-    buffer << "local "   << this->publication_id_
-           << "(" << std::hex << handle << ")";
-    handle = ::OpenDDS::DCPS::GuidConverter(
-               const_cast< ::OpenDDS::DCPS::RepoId*>(&readers[0])
-             );
-    buffer << " remote " << readers[0]
-           << "(" << std::hex << handle << ")";
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataWriterImpl::remove_associations: ")
-      ACE_TEXT("bit %d %s num remotes %d\n"),
+      ACE_TEXT("bit %d local %s remote %s num remotes %d\n"),
       is_bit_,
-      buffer.str().c_str(),
+      (const char*) ::OpenDDS::DCPS::GuidConverter( this->publication_id_),
+      (const char*) ::OpenDDS::DCPS::GuidConverter(
+                      const_cast< ::OpenDDS::DCPS::RepoId*>( &readers[ 0])
+                    ),
       readers.length()
     ));
   }
@@ -506,16 +467,12 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
         rds.length (rds_len);
         rds [rds_len - 1] = readers[i]; 
 
-        std::stringstream buffer;
-        long handle;
-        handle = ::OpenDDS::DCPS::GuidConverter(
-                   const_cast< ::OpenDDS::DCPS::RepoId*>(&readers[i])
-                 );
-        buffer << readers[i] << "(" << std::hex << handle << ")";
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataWriterImpl::remove_associations: ")
           ACE_TEXT("removing reader %s before fully_associated() call.\n"),
-          buffer.str().c_str()
+          (const char*) ::OpenDDS::DCPS::GuidConverter(
+                          const_cast< ::OpenDDS::DCPS::RepoId*>( &readers[ i])
+                        )
         ));
       }
       //else reader is already removed which indicates remove_association()
@@ -1480,12 +1437,13 @@ DataWriterImpl::data_delivered (DataSampleListElement* sample)
   DBG_ENTRY_LVL("DataWriterImpl","data_delivered",6);
   if( !(sample->publication_id_ == this->publication_id_))
   {
-    ACE_ERROR ((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::data_delivered: ")
-                ACE_TEXT(" The publication id %d from delivered element ")
-                ACE_TEXT("does not match the datawriter's id %d\n"),
-                sample->publication_id_,
-                this->publication_id_));
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::data_delivered: ")
+      ACE_TEXT(" The publication id %s from delivered element ")
+      ACE_TEXT("does not match the datawriter's id %s\n"),
+      (const char*) ::OpenDDS::DCPS::GuidConverter( sample->publication_id_),
+      (const char*) ::OpenDDS::DCPS::GuidConverter( this->publication_id_)
+    ));
     return;
   }
 
@@ -1574,14 +1532,10 @@ DataWriterImpl::handle_timeout (const ACE_Time_Value &tv,
   {
     //Not recent enough then send liveliness message.
     if (DCPS_debug_level > 9) {
-      std::stringstream buffer;
-      long key;
-      key = ::OpenDDS::DCPS::GuidConverter( this->publication_id_);
-      buffer << this->publication_id_ << "(" << std::hex << key << ")";
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataWriterImpl::handle_timeout: ")
         ACE_TEXT("%s sending LIVELINESS message.\n"),
-        buffer.str().c_str()
+        (const char*) ::OpenDDS::DCPS::GuidConverter( this->publication_id_)
       ));
     }
     this->send_liveliness(tv);
@@ -1854,16 +1808,12 @@ DataWriterImpl::bit_lookup_instance_handles (const ReaderIdSeq& ids,
       CORBA::ULong const num_rds = ids.length ();
       for (CORBA::ULong i = 0; i < num_rds; ++i)
       {
-        std::stringstream buffer;
-        long handle;
-        handle = ::OpenDDS::DCPS::GuidConverter(
-                   const_cast< ::OpenDDS::DCPS::RepoId*>( &ids[i])
-                 );
-        buffer << ids[i] << "(" << std::hex << handle << ")";
         ACE_DEBUG((LM_WARNING,
           ACE_TEXT("(%P|%t) DataWriterImpl::bit_lookup_instance_handles: ")
           ACE_TEXT("reader %s has handle 0x%x.\n"),
-          buffer.str().c_str(),
+          (const char*) ::OpenDDS::DCPS::GuidConverter(
+                          const_cast< ::OpenDDS::DCPS::RepoId*>( &ids[ i])
+                        ),
           hdls[i]
         ));
       }
@@ -1876,16 +1826,15 @@ DataWriterImpl::bit_lookup_instance_handles (const ReaderIdSeq& ids,
     hdls.length (num_rds);
     for (CORBA::ULong i = 0; i < num_rds; ++i)
     {
-      hdls[i] = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &ids[i])
-               );
+      ::OpenDDS::DCPS::GuidConverter converter(
+                                       const_cast< ::OpenDDS::DCPS::RepoId*>( &ids[i])
+                                     );
+      hdls[i] = converter;
       if( DCPS_debug_level > 4) {
-        std::stringstream buffer;
-        buffer << ids[i] << "(" << std::hex << hdls[i] << ")";
         ACE_DEBUG((LM_WARNING,
           ACE_TEXT("(%P|%t) DataWriterImpl::bit_lookup_instance_handles: ")
           ACE_TEXT("using hash as handle for reader %s.\n"),
-          buffer.str().c_str()
+          (const char*) converter
         ));
       }
     }
@@ -1907,16 +1856,12 @@ DataWriterImpl::cache_lookup_instance_handles (const ReaderIdSeq& ids,
     RepoIdToHandleMap::iterator iter = id_to_handle_map_.find(ids[i]);
     if (iter == id_to_handle_map_.end())
     {
-      std::stringstream buffer;
-      long handle;
-      handle = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &ids[i])
-               );
-      buffer << ids[i] << "(" << std::hex << handle << ")";
       ACE_DEBUG((LM_WARNING,
         ACE_TEXT("(%P|%t) DataWriterImpl::cache_lookup_instance_handles: ")
         ACE_TEXT("could not find instance handle for writer %s.\n"),
-        buffer.str().c_str()
+        (const char*) ::OpenDDS::DCPS::GuidConverter(
+                        const_cast< ::OpenDDS::DCPS::RepoId*>( &ids[ i])
+                      )
       ));
       hdls[i] = -1;
       ret = false;
@@ -1925,16 +1870,12 @@ DataWriterImpl::cache_lookup_instance_handles (const ReaderIdSeq& ids,
     {
       hdls[i] = iter->second;
       if( DCPS_debug_level > 4) {
-        std::stringstream buffer;
-        long handle;
-        handle = ::OpenDDS::DCPS::GuidConverter(
-                   const_cast< ::OpenDDS::DCPS::RepoId*>( &ids[i])
-                 );
-        buffer << ids[i] << "(" << std::hex << handle << ")";
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataWriterImpl::cache_lookup_instance_handles: ")
           ACE_TEXT("instance handle for writer %s == 0x%x.\n"),
-          buffer.str().c_str(),
+          (const char*) ::OpenDDS::DCPS::GuidConverter(
+                          const_cast< ::OpenDDS::DCPS::RepoId*>( &ids[ i])
+                        ),
           hdls[i]
         ));
       }

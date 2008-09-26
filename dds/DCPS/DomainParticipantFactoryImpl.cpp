@@ -199,12 +199,14 @@ namespace OpenDDS
       //xxx servant rc = 4 (servant::DP::Entity::ServantBase::ref_count_
       if (the_servant->is_clean () == 0)
         {
-          ACE_ERROR_RETURN ((LM_ERROR,
-                            ACE_TEXT("(%P|%t) ERROR: ")
-                            ACE_TEXT("DomainParticipantFactoryImpl::delete_participant, ")
-                            ACE_TEXT("The participant(repo_id=%d) is not empty.\n"),
-                            the_servant->get_id ()),
-                            ::DDS::RETCODE_PRECONDITION_NOT_MET);
+          ACE_ERROR_RETURN((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR: ")
+            ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
+            ACE_TEXT("the participant %s is not empty.\n"),
+            (const char*) ::OpenDDS::DCPS::GuidConverter(
+              const_cast< ::OpenDDS::DCPS::RepoId*>( &the_servant->get_id())
+            )
+          ),::DDS::RETCODE_PRECONDITION_NOT_MET);
         }
 
       ::DDS::DomainId_t domain_id = the_servant->get_domain_id ();
@@ -213,12 +215,14 @@ namespace OpenDDS
       DPSet* entry;
       if (find(participants_, domain_id, entry) == -1)
         {
-          ACE_ERROR_RETURN ((LM_ERROR,
-                            ACE_TEXT("(%P|%t) ERROR: ")
-                            ACE_TEXT("DomainParticipantFactoryImpl::delete_participant, ")
-                            ACE_TEXT("%p domain_id=%d dp_id=%d.\n"),
-                            ACE_TEXT("find"), domain_id, dp_id),
-                            ::DDS::RETCODE_ERROR);
+          ACE_ERROR_RETURN((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR: ")
+            ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
+            ACE_TEXT("%p domain_id=%d dp_id=%s.\n"),
+            ACE_TEXT("find"),
+            domain_id,
+            (const char*) ::OpenDDS::DCPS::GuidConverter( dp_id)
+          ),::DDS::RETCODE_ERROR);
         }
       else
         {
@@ -230,14 +234,14 @@ namespace OpenDDS
           DPSet* entry;
           if (find(participants_, domain_id, entry) == -1)
             {
-              ACE_ERROR_RETURN ((LM_ERROR,
-                                ACE_TEXT("(%P|%t) ERROR: ")
-                                ACE_TEXT("DomainParticipantFactoryImpl::delete_participant, ")
-                                ACE_TEXT(" %p domain_id=%d dp_id=%d\n"),
-                                ACE_TEXT("find"),
-                                domain_id,
-                                dp_id),
-                                ::DDS::RETCODE_ERROR);
+              ACE_ERROR_RETURN((LM_ERROR,
+                ACE_TEXT("(%P|%t) ERROR: ")
+                ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
+                ACE_TEXT(" %p domain_id=%d dp_id=%s\n"),
+                ACE_TEXT("find"),
+                domain_id,
+                (const char*) ::OpenDDS::DCPS::GuidConverter( dp_id)
+              ),::DDS::RETCODE_ERROR);
             }
           else
             {

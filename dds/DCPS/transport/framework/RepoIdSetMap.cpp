@@ -28,10 +28,11 @@ OpenDDS::DCPS::RepoIdSetMap::insert(RepoId key, RepoId value)
     {
       // find_or_create failure
       ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: Failed to find_or_create RepoIdSet "
-                        "for RepoId (%d).\n",
-                        key),
-                       -1);
+        ACE_TEXT("(%P|%t) ERROR: RepoIdSetMap::insert: ")
+        ACE_TEXT("failed to find_or_create RepoIdSet ")
+        ACE_TEXT("for RepoId %s.\n"),
+        (const char*) ::OpenDDS::DCPS::GuidConverter( key)
+      ),-1);
     }
 
   int result = id_set->insert_id(value, key);
@@ -40,9 +41,12 @@ OpenDDS::DCPS::RepoIdSetMap::insert(RepoId key, RepoId value)
     {
 
       ACE_ERROR((LM_ERROR,
-                 "(%P|%t) ERROR: Failed to insert RepoId (%d) "
-                 "into RepoIdSet for RepoId (%d).\n",
-                 value, key));
+        ACE_TEXT("(%P|%t) ERROR: RepoIdSetMap::insert: ")
+        ACE_TEXT("failed to insert RepoId %s ")
+        ACE_TEXT("into RepoIdSet for RepoId %s.\n"),
+        (const char*) ::OpenDDS::DCPS::GuidConverter( value),
+        (const char*) ::OpenDDS::DCPS::GuidConverter( key)
+      ));
     }
   else
     {
@@ -60,9 +64,11 @@ OpenDDS::DCPS::RepoIdSetMap::insert(RepoId key, RepoId value)
       if (unbind(map_, key) != 0)
         {
           ACE_ERROR((LM_ERROR,
-                     "(%P|%t) ERROR: Failed to unbind (undo create) an empty "
-                     "RepoIdSet for RepoId (%d).\n",
-                     key));
+            ACE_TEXT("(%P|%t) ERROR: RepoIdSetMap::insert: ")
+            ACE_TEXT("failed to unbind (undo create) an empty ")
+            ACE_TEXT("RepoIdSet for RepoId %s.\n"),
+            (const char*) ::OpenDDS::DCPS::GuidConverter( key)
+          ));
         }
     }
 
@@ -84,9 +90,10 @@ OpenDDS::DCPS::RepoIdSetMap::remove(RepoId key,RepoId value)
     {
       // We couldn't find the id_set for the supplied key.
       ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: Unable to locate RepoIdSet for key %d.\n",
-                        key),
-                       -1);
+        ACE_TEXT("(%P|%t) ERROR: RepoIdSetMap::remove: ")
+        ACE_TEXT("unable to locate RepoIdSet for key %s.\n"),
+        (const char*) ::OpenDDS::DCPS::GuidConverter( key)
+      ),-1);
     }
 
   // Now we can attempt to remove the value RepoId from the id_set.
@@ -96,10 +103,12 @@ OpenDDS::DCPS::RepoIdSetMap::remove(RepoId key,RepoId value)
     {
       // We couldn't find the supplied RepoId value as a member of the id_set.
       ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: RepoIdSet for key %d does not contain "
-                        "value %d.\n",
-                        key, value),
-                       -1);
+        ACE_TEXT("(%P|%t) ERROR: RepoIdSetMap::remove: ")
+        ACE_TEXT("RepoIdSet for key %s does not contain ")
+        ACE_TEXT("value %s.\n"),
+        (const char*) ::OpenDDS::DCPS::GuidConverter( key),
+        (const char*) ::OpenDDS::DCPS::GuidConverter( value)
+      ),-1);
     }
 
   return 0;
@@ -115,7 +124,13 @@ OpenDDS::DCPS::RepoIdSetMap::remove_set(RepoId key)
 
   if (unbind(map_, key, value) != 0)
     {
-      VDBG((LM_DEBUG, "(%P|%t) RepoId (%d) not found in map_.\n",key));
+      if( DCPS_debug_level > 4) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) RepeIdSetMap::remove_set: ")
+          ACE_TEXT("RepoId %s not found in map.\n"),
+          (const char*) ::OpenDDS::DCPS::GuidConverter( key)
+        ));
+      }
       return 0;
     }
 
@@ -133,8 +148,10 @@ OpenDDS::DCPS::RepoIdSetMap::release_publisher(RepoId subscriber_id,
   if (OpenDDS::DCPS::find(map_, subscriber_id, id_set) != 0)
     {
       ACE_ERROR((LM_ERROR,
-                 "(%P|%t) ERROR: subscriber_id (%d) not found in map_.\n",
-                 subscriber_id));
+        ACE_TEXT("(%P|%t) ERROR: RepoIdSetMap::release_publisher: ")
+        ACE_TEXT("subscriber_id %s not found in map.\n"),
+        (const char*) ::OpenDDS::DCPS::GuidConverter( subscriber_id)
+      ));
       // Return 1 to indicate that the subscriber_id is no longer associated
       // with any publishers at all.
       return 1;
@@ -154,9 +171,11 @@ OpenDDS::DCPS::RepoIdSetMap::release_publisher(RepoId subscriber_id,
       if (unbind(map_, subscriber_id) != 0)
         {
           ACE_ERROR((LM_ERROR,
-                     "(%P|%t) ERROR: Failed to remove an empty "
-                     "ReceiveListenerSet for publisher_id (%d).\n",
-                     publisher_id));
+            ACE_TEXT("(%P|%t) ERROR: RepoIdSetMap::release_publisher: ")
+            ACE_TEXT("failed to remove an empty ")
+            ACE_TEXT("ReceiveListenerSet for publisher_id %s.\n"),
+            (const char*) ::OpenDDS::DCPS::GuidConverter( publisher_id)
+          ));
         }
 
       // We always return 1 if we know the publisher_id is no longer

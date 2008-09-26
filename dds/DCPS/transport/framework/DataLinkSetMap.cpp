@@ -123,9 +123,16 @@ OpenDDS::DCPS::DataLinkSetMap::release_reservations
       if (find (this->map_, remote_ids[i], link_set) != 0)
       {
         ACE_ERROR((LM_ERROR,
-          "(%P|%t) ERROR: Failed to find remote_id (%d) "
-          "from map_ for local_id %d. Skipping this remote_id.\n",
-          remote_ids[i], local_id));
+          ACE_TEXT("(%P|%t) ERROR: DataLinkSetMap::release_reservations: ")
+          ACE_TEXT("failed to find remote_id %s ")
+          ACE_TEXT("in map for local_id %s. Skipping this remote_id.\n"),
+          (const char*) ::OpenDDS::DCPS::GuidConverter(
+                          const_cast< ::OpenDDS::DCPS::RepoId*>( &remote_ids[ i])
+                        ),
+          (const char*) ::OpenDDS::DCPS::GuidConverter(
+                          const_cast< ::OpenDDS::DCPS::RepoId*>( &local_id)
+                        )
+        ));
         continue;
       }
 
@@ -137,9 +144,13 @@ OpenDDS::DCPS::DataLinkSetMap::release_reservations
         if (unbind(map_, remote_ids[i]) != 0)
         {
           VDBG((LM_DEBUG,
-            "(%P|%t) Warning: Failed to unbind remote_id (%d) "
-            "from map_. Skipping this remote_id.\n",
-            remote_ids[i]));
+            ACE_TEXT("(%P|%t) WARNING: DataLinkSetMap::release_reservations: ")
+            ACE_TEXT("failed to unbind remote_id %s ")
+            ACE_TEXT("from map. Skipping this remote_id.\n"),
+            (const char*) ::OpenDDS::DCPS::GuidConverter(
+                            const_cast< ::OpenDDS::DCPS::RepoId*>( &remote_ids[ i])
+                          )
+          ));
 
           continue;
         }
@@ -202,9 +213,11 @@ OpenDDS::DCPS::DataLinkSetMap::remove_released
       if (find (map_, local_id, link_set) != 0)
       {
         VDBG((LM_DEBUG,
-          "(%P|%t) Released local_id (%d) is not associated with "
-          "any DataLinkSet in map_. Skipping local_id.\n",
-          local_id));
+          ACE_TEXT("(%P|%t) DataLinkSetMap::remove_released: ")
+          ACE_TEXT("released local_id %s is not associated with ")
+          ACE_TEXT("any DataLinkSet in map. Skipping local_id.\n"),
+          (const char*) ::OpenDDS::DCPS::GuidConverter( local_id)
+        ));
         continue;
       }
 
@@ -228,9 +241,11 @@ OpenDDS::DCPS::DataLinkSetMap::remove_released
 
             // Just issue a warning.
             VDBG((LM_DEBUG,
-              "(%P|%t) Failed to unbind released local_id (%d) "
-              "from the map_.\n",
-              local_id));
+              ACE_TEXT("(%P|%t) DataLinkSetMap:remove_released: ")
+              ACE_TEXT("failed to unbind released local_id %s ")
+              ACE_TEXT("from the map.\n"),
+              (const char*) ::OpenDDS::DCPS::GuidConverter( local_id)
+            ));
           }
           
           continue; // This prevents the deadlock from trying to acquire lock twice

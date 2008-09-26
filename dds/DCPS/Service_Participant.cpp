@@ -676,12 +676,9 @@ namespace OpenDDS
               RepoId id = current->svt_->get_id();
               location->second->attach_participant( domain, id);
               if( DCPS_debug_level > 0) {
-                std::stringstream buffer;
-                long key = GuidConverter( id);
-                buffer << id << "(" << std::hex << key << ")";
                 ACE_DEBUG((LM_DEBUG,
                   ACE_TEXT("(%P|%t) Participant %s attached to Repo[ %d].\n"),
-                  buffer.str().c_str(),
+                  (const char*) ::OpenDDS::DCPS::GuidConverter( id),
                   key
                 ));
               }
