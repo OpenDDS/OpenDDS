@@ -32,7 +32,7 @@ general overview of OpenDDS.
       Visual Studio 2005), Visual C++ 7.1 (part of Visual Studio .NET 2003)
       VC++ 8 and 9 have free "express editions" -- these will work fine, see
       <http://www.microsoft.com/express/vc/>.
-      If possible use the VC9/VS2008 version because it fixes some annoying
+      If possible use the VC9 (VS2008) version because it fixes some annoying
       bugs with creating mixed-case directory names (which OpenDDS uses).
     - GCC 4.1.x or later (earlier versions may work but haven't been tested)
       Preferably, use the default gcc from your Linux distribution.
@@ -157,16 +157,20 @@ general overview of OpenDDS.
                 make Svc_Utils
 
      Windows => cd %TAO_ROOT%
-                Visual Studio: devenv TAO_ACE.sln
-                Visual C++ Express: vcexpress TAO_ACE.sln
+                Use either TAO_ACE.sln (VC 7.1) or TAO_ACE_vc8.sln (VC8, VC9)**
+                Visual Studio: devenv TAO_ACE.sln (or TAO_ACE_vc8.sln)
+                Visual C++ Express: vcexpress TAO_ACE.sln (or TAO_ACE_vc8.sln)
                 Select "Debug" or "Release" mode on the toolbar
                 Select the Naming_Service project in Solution Explorer
                 Build this project (right-click on it and select Build)
                   - All dependent projects will be built automatically
-
-                **TODO: shouldn't there be a *_vc8.sln in OCITAO?
+                **TAO_ACE_vc8.sln is provided starting with 1.5a_p10
 
   6. Build the OpenDDS C++ libraries
+
+     Note: If you've obtained OpenDDS from the subversion repository, you need
+           to generate makefiles (or Visual Studio project files) before
+           proceeding with this step.  See the section "Running MPC", below.
 
      Unix    => cd $DDS_ROOT/dds
                 make
@@ -194,7 +198,6 @@ general overview of OpenDDS.
                 selection from step 5)
                 Build this entire solution (Build menu -> Build Solution)
 
-
   8. Run a test Java application to verify the build
 
      Unix    => cd $DDS_ROOT/java/tests/multirepo
@@ -204,6 +207,24 @@ general overview of OpenDDS.
 
 
 ======================================================================
-* Next Steps
+* Next Steps: Developing Java applications with OpenDDS
 
   See the README file in this directory.
+
+
+======================================================================
+* Running MPC
+
+  This is only necessary if you've obtained the OpenDDS code directly from the
+  subversion repository.  First complete steps 1-5 of the "Building OpenDDS..."
+  section above.
+
+  Unix    => cd $DDS_ROOT
+             mwc.pl -type gnuace dds java
+  Windows => cd %DDS_ROOT%
+             mwc.pl -type [CompilerType] dds java
+             ** CompilerType options are: vc71, vc8, vc9, and nmake
+             This guide is not written with instructions for "nmake" -- if you
+             generate NMake makefiles we assume you know how to run them.
+
+  Continue with step 6 of the "Building OpenDDS..." section above.
