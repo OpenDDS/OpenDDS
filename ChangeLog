@@ -1,3 +1,9 @@
+Mon Sep 29 18:45:37 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * java/idl2jni/codegen/im_jni.cpp:
+
+          Added a cast for jchar -> char conversion.
+
 Mon Sep 29 15:55:37 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * MPC/config/dcps_java.mpb:
