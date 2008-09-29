@@ -1,3 +1,12 @@
+Mon Sep 29 21:26:18 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * java/tests/builtintopics/run_test.pl:
+        * java/tests/complex_idl/run_test.pl:
+        * java/tests/hello/run_test.pl:
+        * java/tests/multirepo/run_test.pl:
+
+          Updated remaining tests to make use of the new JavaProcess.pm.
+
 Mon Sep 29 18:45:37 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * java/idl2jni/codegen/im_jni.cpp:

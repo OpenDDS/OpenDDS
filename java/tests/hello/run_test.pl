@@ -4,12 +4,12 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 
 # -*- perl -*-
 
-use lib "$ENV{ACE_ROOT}/bin";
-use PerlACE::Run_Test;
-use strict;
-use Env qw(JAVA_HOME DDS_ROOT TAO_ROOT);
+use Env qw(ACE_ROOT TAO_ROOT DDS_ROOT);
+use lib "$ACE_ROOT/bin";
 use lib "$DDS_ROOT/bin";
+use PerlACE::Run_Test;
 use JavaProcess;
+use strict;
 
 my $status = 0;
 my $debug = '0';
