@@ -1,3 +1,18 @@
+Mon Sep 29 15:55:37 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * MPC/config/dcps_java.mpb:
+
+          Added link dependency on libtao_java.
+
+        * java/tao/tao_java.mpc:
+
+          Added more built-in sequence types.
+
+        * java/tests/complex_idl:
+        * java/tests/dcps_java_tests.lst:
+
+          Initial commit of complex IDL test.
+
 Mon Sep 29 14:37:05 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * java/INSTALL:
