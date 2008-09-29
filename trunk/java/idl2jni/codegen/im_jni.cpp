@@ -560,7 +560,8 @@ bool idl_mapping_jni::gen_jarray_copies (UTL_ScopedName *name,
         "  jni->Release" + jniFn + "ArrayElements (arr, buf, ";
       postLoopCxx = postLoop + "JNI_ABORT);\n";
       postLoopJava = postLoop + "0);\n";
-      loopCxx =
+      loopCxx = (jvmSig == "C") ?
+        "      target[i] = static_cast<char> (buf[i]);\n" :
         "      target[i] = buf[i];\n";
       loopJava =
         "      buf[i] = source[i];\n";
