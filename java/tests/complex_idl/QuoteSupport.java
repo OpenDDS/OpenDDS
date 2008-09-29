@@ -88,7 +88,7 @@ public class QuoteSupport {
         
         return quote;
     }
-        
+    
     private static CastMember createCastMember(String python, String role) {
         CastMember member = new CastMember();
         

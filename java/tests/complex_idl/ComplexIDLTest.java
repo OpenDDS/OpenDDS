@@ -25,28 +25,43 @@ public class ComplexIDLTest extends QuoteSupport {
     private static Publisher publisher;
     private static Subscriber subscriber;
     
-    protected static void setUp(String[] args) throws Exception {
+    protected static void setUp(String[] args) {
         dpf = TheParticipantFactory.WithArgs(new StringSeqHolder(args));
+        assert (dpf != null);
         
         participant = dpf.create_participant(DOMAIN_ID, PARTICIPANT_QOS_DEFAULT.get(), null);
+        assert (participant != null);
         
         DataTypeSupport typeSupport = new DataTypeSupportImpl();
-        assert (typeSupport.register_type(participant, "Complex::Data") == RETCODE_OK.value);
+        
+        int result = typeSupport.register_type(participant, "Complex::Data");
+        assert (result == RETCODE_OK.value);
 
         topic = participant.create_topic("Complex::Topic", typeSupport.get_type_name(),
                                          TOPIC_QOS_DEFAULT.get(), null);
+        assert (topic != null);
 
         publisher = participant.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null);
+        assert (publisher != null);
+        
+        AttachStatus status;
         
         TransportImpl transport1 = 
             TheTransportFactory.create_transport_impl(1, TheTransportFactory.AUTO_CONFIG);
-        assert (transport1.attach_to_publisher(publisher).value() == AttachStatus._ATTACH_OK);
+        assert (transport1 != null);
+        
+        status = transport1.attach_to_publisher(publisher);
+        assert (status.value() == AttachStatus._ATTACH_OK);
         
         subscriber = participant.create_subscriber(SUBSCRIBER_QOS_DEFAULT.get(), null);
+        assert (subscriber != null);
         
         TransportImpl transport2 =
             TheTransportFactory.create_transport_impl(2, TheTransportFactory.AUTO_CONFIG);
-        assert (transport2.attach_to_subscriber(subscriber).value() == AttachStatus._ATTACH_OK);
+        assert (transport2 != null);
+        
+        status = transport2.attach_to_subscriber(subscriber);
+        assert (status.value() == AttachStatus._ATTACH_OK);
     }
     
     protected static void testIDLQuote(final Quote quote) throws Exception {
@@ -68,9 +83,10 @@ public class ComplexIDLTest extends QuoteSupport {
                     Data data = new Data();
                     
                     data.payload = new DataUnion();
-                    data.payload.idl_quote(quote);
+                    data.payload.idl_quote(DataType.DATA_IDL, quote);
                     
-                    assert (writer.write(data, HANDLE_NIL.value) != RETCODE_OK.value);
+                    int result = writer.write(data, HANDLE_NIL.value);
+                    assert (result == RETCODE_OK.value);
                 }
             }
         );
@@ -93,13 +109,17 @@ public class ComplexIDLTest extends QuoteSupport {
                     public void on_data_available(DataReader dr) {
                         DataDataReader reader = DataDataReaderHelper.narrow(dr);
 
-                        Data data = createDefaultData();
+                        DataHolder dh = new DataHolder(createDefaultData());
 
                         SampleInfo si = new SampleInfo();
                         si.source_timestamp = new Time_t();
 
-                        assert (reader.take_next_sample(new DataHolder(data), new SampleInfoHolder(si)) == RETCODE_OK.value);
+                        int result = reader.take_next_sample(dh, new SampleInfoHolder(si));
+                        assert (result == RETCODE_OK.value);
 
+                        Data data = dh.value;
+
+                        assert (data.payload.discriminator().value() == DataType._DATA_IDL);
                         printQuote(data.payload.idl_quote());
 
                         // Notify main thread
@@ -119,7 +139,7 @@ public class ComplexIDLTest extends QuoteSupport {
         try {
             for (Quote quote : quotes) {
                 testIDLQuote(quote);
-                break;
+                break; // TODO
             }
             
         } finally {
@@ -145,9 +165,9 @@ public class ComplexIDLTest extends QuoteSupport {
                     
         Quote quote = new Quote();
         quote.cast_member = new CastMember();
-                    
-        data.payload.idl_quote(quote);
+        
         data.payload.stream(new byte[0]);
+        data.payload.idl_quote(quote);
 
         return data;
     }
