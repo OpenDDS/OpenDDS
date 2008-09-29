@@ -4,10 +4,11 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 
 # -*- perl -*-
 
-use Env qw(ACE_ROOT JAVA_HOME DDS_ROOT TAO_ROOT);
+use Env qw(ACE_ROOT DDS_ROOT);
 use lib "$DDS_ROOT/bin";
 use lib "$ACE_ROOT/bin";
 use DDS_Run_Test;
+use JavaProcess;
 use strict;
 
 my $status = 0;
@@ -37,26 +38,9 @@ my $DCPSREPO = PerlDDS::create_process ("$DDS_ROOT/bin/DCPSInfoRepo",
                "-ORBLogFile DCPSInfoRepo.log $opts -o $dcpsrepo_ior ".
                "-d $domains_file");
 
-PerlACE::add_lib_path ("$DDS_ROOT/lib");
 PerlACE::add_lib_path ("$DDS_ROOT/java/tests/complex_idl");
 
-my @classpaths = ('classes', "$DDS_ROOT/lib/i2jrt.jar",
-                  "$DDS_ROOT/lib/tao_java.jar",
-                  "$DDS_ROOT/lib/OpenDDS_DCPS.jar");
-
-my $sep = ':';
-my $jnid;
-if ($^O eq 'MSWin32') {
-    $sep = ';';
-    $jnid = '-Djni.nativeDebug=1'
-        unless $PerlACE::Process::ExeSubDir =~ /Release/i;
-}
-my $classpath = join ($sep, @classpaths);
-
-my $TEST = PerlDDS::create_process ("$JAVA_HOME/bin/java",
-                                    "-ea -Xcheck:jni -cp $classpath $jnid " .
-                                    "ComplexIDLTest $test_opts");
-$TEST->IgnoreExeSubDir (1);
+my $TEST = new JavaProcess ("ComplexIDLTest", $test_opts);
 
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {

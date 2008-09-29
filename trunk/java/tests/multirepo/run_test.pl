@@ -4,10 +4,11 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 
 # -*- perl -*-
 
-use Env qw(ACE_ROOT JAVA_HOME DDS_ROOT TAO_ROOT);
+use Env qw(ACE_ROOT JAVA_HOME DDS_ROOT);
 use lib "$DDS_ROOT/bin";
 use lib "$ACE_ROOT/bin";
 use DDS_Run_Test;
+use JavaProcess;
 use strict;
 
 my $status = 0;
@@ -50,32 +51,10 @@ my $DCPSREPO2 = PerlDDS::create_process ("$DDS_ROOT/bin/DCPSInfoRepo",
                "-ORBLogFile DCPSInfoRepo.log $opts -o $dcpsrepo2_ior ".
                "-d $domains2_file");
 
-PerlACE::add_lib_path ("$DDS_ROOT/lib");
 PerlACE::add_lib_path ("$DDS_ROOT/java/tests/multirepo");
 
-my @classpaths = ('classes', "$DDS_ROOT/lib/i2jrt.jar",
-                  "$DDS_ROOT/lib/OpenDDS_DCPS.jar",
-                  "$DDS_ROOT/java/tests/multirepo/classes");
-
-my $sep = ':';
-my $jnid;
-if ($^O eq 'MSWin32') {
-    $sep = ';';
-    $jnid = '-Djni.nativeDebug=1'
-        unless $PerlACE::Process::ExeSubDir =~ /Release/i;
-}
-my $classpath = join ($sep, @classpaths);
-
-my $MASTER = PerlDDS::create_process ("$JAVA_HOME/bin/java",
-                                    "-ea -Xcheck:jni -cp $classpath $jnid " .
-                                    "MultiRepoMaster $master_opts");
-
-my $SLAVE = PerlDDS::create_process ("$JAVA_HOME/bin/java",
-                                    "-ea -Xcheck:jni -cp $classpath $jnid " .
-                                    "MultiRepoSlave $slave_opts");
-
-$MASTER->IgnoreExeSubDir (1);
-$SLAVE->IgnoreExeSubDir (1);
+my $MASTER = new JavaProcess ("MultiRepoMaster", $master_opts);
+my $SLAVE = new JavaProcess ("MultiRepoSlave", $slave_opts);
 
 $DCPSREPO1->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo1_ior, 30) == -1) {
