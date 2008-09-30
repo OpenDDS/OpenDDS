@@ -8,6 +8,8 @@
 #include <vector>
 #include <map>
 
+class DataWriterListenerImpl;
+
 /**
  * @brief Publish data
  */
@@ -37,6 +39,12 @@ class Publisher {
 
     /// DataWriter.
     ::DDS::DataWriter_var dataWriter_;
+
+    /// Listener servant used for synchronization
+    DataWriterListenerImpl* sync_;
+
+    /// Listener
+    ::DDS::DataWriterListener_var listener_;
 
     /// Data transport.
     OpenDDS::DCPS::TransportImpl_rch transport_;

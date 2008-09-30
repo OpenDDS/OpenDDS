@@ -1,9 +1,11 @@
-Fri Sep 26 18:23:32 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+Tue Sep 30 14:37:22 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/GuidUtils.h:
         * dds/DCPS/GuidUtils.cpp:
 
-	  Simplified insertion of GUID values into log messages.
+	  Modified to place the formatted GUID value into a member buffer
+	  with a lifetime guaranteed to match that of the conversion
+	  object.
 
         * dds/DCPS/BuiltInTopicUtils.h:
         * dds/DCPS/DataReaderImpl.cpp:
@@ -24,9 +26,48 @@ Fri Sep 26 18:23:32 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * dds/DCPS/transport/framework/TransportInterface.inl:
         * dds/DCPS/transport/framework/TransportInterface.cpp:
 
-	  Updated diagnostic messages to use simplifications and modified
-	  additional messages to include GUID based Id values rather than
-	  previous 32 bit values.
+	  Modified to use automatic conversion objects rather than
+	  temporaries to ensure the lifetime of the formatted GUID values
+	  spanned the output operations.
+
+        * tests/DCPS/Federation/Federation.mpc:
+        * tests/DCPS/Federation/Publisher.h:
+        * tests/DCPS/Federation/Publisher.cpp:
+        * tests/DCPS/Federation/TestException.h:
+
+	  Changed asynchronous delay in publisher after publishing to a
+	  signalled condition predicated on the disconnection of the
+	  Subscriber.
+
+Fri Sep 26 18:23:32 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/GuidUtils.h:
+        * dds/DCPS/GuidUtils.cpp:
+
+          Simplified insertion of GUID values into log messages.
+
+        * dds/DCPS/BuiltInTopicUtils.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/DataLinkSetMap.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.cpp:
+        * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.inl:
+        * dds/DCPS/transport/framework/TransportInterface.cpp:
+
+          Updated diagnostic messages to use simplifications and modified
+          additional messages to include GUID based Id values rather than
+          previous 32 bit values.
 
 Fri Sep 26 17:19:39 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 

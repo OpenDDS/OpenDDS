@@ -17,18 +17,21 @@ GuidConverter::GuidConverter( GUID_t& guid)
   : guid_( guid),
     newGuid_( GUID_UNKNOWN)
 {
+  this->output_[0] = '\0';
 }
 
 GuidConverter::GuidConverter( GUID_t* guid)
   : guid_( *guid),
     newGuid_( GUID_UNKNOWN)
 {
+  this->output_[0] = '\0';
 }
 
 GuidConverter::GuidConverter( long federation, long participant)
   : guid_( this->newGuid_),
     newGuid_( GUID_UNKNOWN)
 {
+  this->output_[0] = '\0';
   this->guid_.guidPrefix[ 0] = VENDORID_OCI[0];
   this->guid_.guidPrefix[ 1] = VENDORID_OCI[1];
 
@@ -55,9 +58,12 @@ GuidConverter::operator long() const
 
 GuidConverter::operator const char*() const
 {
-  std::stringstream buffer;
-  buffer << this->guid_ << "(" << std::hex << this->operator long() << ")";
-  return buffer.str().c_str();
+  if( ACE_OS::strlen( this->output_) == 0) {
+    std::stringstream buffer;
+    buffer << this->guid_ << "(" << std::hex << this->operator long() << ")";
+    ACE_OS::strcpy( &this->output_[0], buffer.str().c_str());
+  }
+  return &this->output_[0];
 }
 
 long
@@ -126,12 +132,14 @@ GuidConverter::kind() const
 CORBA::Octet&
 GuidConverter::kind()
 {
+  this->output_[0] = '\0';
   return this->guid_.entityId.entityKind;
 }
 
 CORBA::Octet*
 GuidConverter::key()
 {
+  this->output_[0] = '\0';
   return &this->guid_.entityId.entityKey[0];
 }
 

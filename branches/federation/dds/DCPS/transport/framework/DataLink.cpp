@@ -130,42 +130,40 @@ OpenDDS::DCPS::DataLink::make_reservation(RepoId subscriber_id,  /* remote */
     {
       if (sub_result != 0)
         {
+          ::OpenDDS::DCPS::GuidConverter readerConverter( subscriber_id);
+          ::OpenDDS::DCPS::GuidConverter writerConverter( publisher_id);
           ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
             ACE_TEXT("failed to insert remote subscriber %s ")
             ACE_TEXT("to local publisher %s reservation into sub_map_.\n"),
-            (const char*) ::OpenDDS::DCPS::GuidConverter( subscriber_id),
-            (const char*) ::OpenDDS::DCPS::GuidConverter( publisher_id)
+            (const char*) readerConverter,
+            (const char*) writerConverter
           ));
         }
 
       if (pub_undo_result != 0)
         {
-          std::stringstream subscriberBuffer;
-          long handle;
-          handle = ::OpenDDS::DCPS::GuidConverter( subscriber_id);
-          subscriberBuffer << subscriber_id << "(" << std::hex << handle << ")";
-
-          std::stringstream publisherBuffer;
-          handle = ::OpenDDS::DCPS::GuidConverter( publisher_id);
-          publisherBuffer << publisher_id << "(" << std::hex << handle << ")";
+          ::OpenDDS::DCPS::GuidConverter writerConverter( publisher_id);
+          ::OpenDDS::DCPS::GuidConverter readerConverter( subscriber_id);
           ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
             ACE_TEXT("failed to remove (undo) local publisher %s ")
             ACE_TEXT("to remote subscriber %s reservation from pub_map_.\n"),
-            (const char*) ::OpenDDS::DCPS::GuidConverter( publisher_id),
-            (const char*) ::OpenDDS::DCPS::GuidConverter( subscriber_id)
+            (const char*) writerConverter,
+            (const char*) readerConverter
           ));
         }
     }
   else
     {
+      ::OpenDDS::DCPS::GuidConverter writerConverter( publisher_id);
+      ::OpenDDS::DCPS::GuidConverter readerConverter( subscriber_id);
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
         ACE_TEXT("failed to insert local publisher %s to remote ")
         ACE_TEXT("subscriber %s reservation into pub_map_.\n"),
-        (const char*) ::OpenDDS::DCPS::GuidConverter( publisher_id),
-        (const char*) ::OpenDDS::DCPS::GuidConverter( subscriber_id)
+        (const char*) writerConverter,
+        (const char*) readerConverter
       ));
     }
 
@@ -232,34 +230,40 @@ OpenDDS::DCPS::DataLink::make_reservation
     {
       if (pub_result != 0)
         {
+          ::OpenDDS::DCPS::GuidConverter writerConverter( publisher_id);
+          ::OpenDDS::DCPS::GuidConverter readerConverter( subscriber_id);
           ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
             ACE_TEXT("Failed to insert remote publisher %s to local ")
             ACE_TEXT("subscriber %s reservation into pub_map_.\n"),
-            (const char*) ::OpenDDS::DCPS::GuidConverter( publisher_id),
-            (const char*) ::OpenDDS::DCPS::GuidConverter( subscriber_id)
+            (const char*) writerConverter,
+            (const char*) readerConverter
           ));
         }
 
       if (sub_undo_result != 0)
         {
+          ::OpenDDS::DCPS::GuidConverter readerConverter( subscriber_id);
+          ::OpenDDS::DCPS::GuidConverter writerConverter( publisher_id);
           ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservations: ")
             ACE_TEXT("failed to remove (undo) local subscriber %s to remote ")
             ACE_TEXT("publisher %s reservation from sub_map_.\n"),
-            (const char*) ::OpenDDS::DCPS::GuidConverter( subscriber_id),
-            (const char*) ::OpenDDS::DCPS::GuidConverter( publisher_id)
+            (const char*) readerConverter,
+            (const char*) writerConverter
           ));
         }
     }
   else
     {
+      ::OpenDDS::DCPS::GuidConverter readerConverter( subscriber_id);
+      ::OpenDDS::DCPS::GuidConverter writerConverter( publisher_id);
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservations: ")
         ACE_TEXT("failed to insert local subscriber %s to remote ")
         ACE_TEXT("publisher %s reservation into sub_map_.\n"),
-        (const char*) ::OpenDDS::DCPS::GuidConverter( subscriber_id),
-        (const char*) ::OpenDDS::DCPS::GuidConverter( publisher_id)
+        (const char*) readerConverter,
+        (const char*) writerConverter
       ));
     }
 
@@ -303,10 +307,11 @@ OpenDDS::DCPS::DataLink::release_reservations(RepoId          remote_id,
       if (id_set.is_nil())
         {
           // We don't know about the remote_id.
+          ::OpenDDS::DCPS::GuidConverter converter( remote_id);
           ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: DataLink::release_reservations: ")
             ACE_TEXT("unable to locate remote %s in pub_map_ or sub_map_.\n"),
-            (const char*) ::OpenDDS::DCPS::GuidConverter( remote_id)
+            (const char*) converter
           ));
         }
       else
@@ -404,10 +409,11 @@ OpenDDS::DCPS::DataLink::data_received(ReceivedDataSample& sample)
   if( ::OpenDDS::DCPS::Transport_debug_level > 9) {
     std::stringstream buffer;
     buffer << sample.header_;
+    ::OpenDDS::DCPS::GuidConverter converter( publisher_id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataLink::data_received: ")
       ACE_TEXT(" publisher %s received sample: %s.\n"),
-      (const char*) ::OpenDDS::DCPS::GuidConverter( publisher_id),
+      (const char*) converter,
       buffer.str().c_str()
     ));
   }
@@ -421,10 +427,11 @@ OpenDDS::DCPS::DataLink::data_received(ReceivedDataSample& sample)
     {
       // Nobody has any interest in this message.  Drop it on the floor.
       if( ::OpenDDS::DCPS::Transport_debug_level > 4) {
+        ::OpenDDS::DCPS::GuidConverter converter( publisher_id);
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataLink::data_received: ")
           ACE_TEXT(" discarding sample from publisher %s due to no listeners.\n"),
-          (const char*) ::OpenDDS::DCPS::GuidConverter( publisher_id)
+          (const char*) converter
         ));
       }
       return 0;
@@ -476,10 +483,11 @@ OpenDDS::DCPS::DataLink::release_remote_subscriber
 
   // remove the publisher_id from the pubset that associate with the remote sub.
   if( pubid_set->remove_id (publisher_id) == -1) {
+    ::OpenDDS::DCPS::GuidConverter converter( publisher_id);
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: DataLink::release_remote_subscriber: ")
       ACE_TEXT(" failed to remove pub %s from PubSet.\n"),
-      (const char*) ::OpenDDS::DCPS::GuidConverter( publisher_id)
+      (const char*) converter
     ));
   }
 }
@@ -514,10 +522,11 @@ OpenDDS::DCPS::DataLink::release_remote_publisher
 
   if (listener_set->remove (subscriber_id) == -1)
   {
+    ::OpenDDS::DCPS::GuidConverter converter( subscriber_id);
     ACE_ERROR ((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: DataLink::release_remote_publisher: ")
       ACE_TEXT(" failed to remove sub %s from ListenerSet.\n"),
-      (const char*) ::OpenDDS::DCPS::GuidConverter( subscriber_id)
+      (const char*) converter
     ));
   }
 }
@@ -613,12 +622,13 @@ OpenDDS::DCPS::DataLink::notify (enum ConnectionNotice notice)
           {
             if (::OpenDDS::DCPS::Transport_debug_level > 0)
               {
+                ::OpenDDS::DCPS::GuidConverter converter(
+                  const_cast< ::OpenDDS::DCPS::RepoId*>( &itr->first)
+                );
                 ACE_DEBUG((LM_DEBUG,
                   ACE_TEXT("(%P|%t) DataLink::notify: ")
                   ACE_TEXT("notify pub %s %s.\n"),
-                  (const char*) ::OpenDDS::DCPS::GuidConverter(
-                                  const_cast< ::OpenDDS::DCPS::RepoId*>( &itr->first)
-                                ),
+                  (const char*) converter,
                   connection_notice_as_str(notice)
                 ));
               }
@@ -650,12 +660,13 @@ OpenDDS::DCPS::DataLink::notify (enum ConnectionNotice notice)
           {
             if (::OpenDDS::DCPS::Transport_debug_level > 0)
               {
+                ::OpenDDS::DCPS::GuidConverter converter(
+                  const_cast< ::OpenDDS::DCPS::RepoId*>( &itr->first)
+                );
                 ACE_DEBUG((LM_DEBUG,
                   ACE_TEXT("(%P|%t) DataLink::notify: ")
                   ACE_TEXT("not notify pub %s %s \n"),
-                  (const char*) ::OpenDDS::DCPS::GuidConverter(
-                                  const_cast< ::OpenDDS::DCPS::RepoId*>( &itr->first)
-                                ),
+                  (const char*) converter,
                   connection_notice_as_str(notice)
                 ));
               }
@@ -682,12 +693,13 @@ OpenDDS::DCPS::DataLink::notify (enum ConnectionNotice notice)
           {
             if (::OpenDDS::DCPS::Transport_debug_level > 0)
               {
+                ::OpenDDS::DCPS::GuidConverter converter(
+                  const_cast< ::OpenDDS::DCPS::RepoId*>( &itr->first)
+                );
                 ACE_DEBUG((LM_DEBUG,
                   ACE_TEXT("(%P|%t) DataLink::notify: ")
                   ACE_TEXT("notify sub %s %s.\n"),
-                  (const char*) ::OpenDDS::DCPS::GuidConverter(
-                                  const_cast< ::OpenDDS::DCPS::RepoId*>( &itr->first)
-                                ),
+                  (const char*) converter,
                   connection_notice_as_str(notice)
                 ));
               }
@@ -728,12 +740,13 @@ OpenDDS::DCPS::DataLink::notify (enum ConnectionNotice notice)
           {
             if (::OpenDDS::DCPS::Transport_debug_level > 0)
               {
+                ::OpenDDS::DCPS::GuidConverter converter(
+                  const_cast< ::OpenDDS::DCPS::RepoId*>( &itr->first)
+                );
                 ACE_DEBUG((LM_DEBUG,
                   ACE_TEXT("(%P|%t)DataLink::notify: ")
                   ACE_TEXT("not notify sub %s subscription lost.\n"),
-                  (const char*) ::OpenDDS::DCPS::GuidConverter(
-                                  const_cast< ::OpenDDS::DCPS::RepoId*>( &itr->first)
-                                )
+                  (const char*) converter
                 ));
               }
 
@@ -759,12 +772,13 @@ OpenDDS::DCPS::DataLink::notify_connection_deleted ()
         {
           if (::OpenDDS::DCPS::Transport_debug_level > 0)
             {
+              ::OpenDDS::DCPS::GuidConverter converter(
+                const_cast< ::OpenDDS::DCPS::RepoId*>( &itr->first)
+              );
               ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t)DataLink:: notify_connection_deleted: ")
                 ACE_TEXT("notify pub %s connection deleted.\n"),
-                (const char*) ::OpenDDS::DCPS::GuidConverter(
-                                const_cast< ::OpenDDS::DCPS::RepoId*>( &itr->first)
-                              )
+                (const char*) converter
               ));
             }
 
@@ -783,12 +797,13 @@ OpenDDS::DCPS::DataLink::notify_connection_deleted ()
         {
           if (::OpenDDS::DCPS::Transport_debug_level > 0)
             {
+              ::OpenDDS::DCPS::GuidConverter converter(
+                const_cast< ::OpenDDS::DCPS::RepoId*>( &itr2->first)
+              );
               ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) DataLink::notify_connection_deleted: ")
                 ACE_TEXT("notify sub %s connection deleted.\n"),
-                (const char*) ::OpenDDS::DCPS::GuidConverter(
-                                const_cast< ::OpenDDS::DCPS::RepoId*>( &itr2->first)
-                              )
+                (const char*) converter
               ));
             }
 

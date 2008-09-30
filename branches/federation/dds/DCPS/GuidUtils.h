@@ -154,6 +154,9 @@ namespace OpenDDS { namespace DCPS {
 
       /// GUID formed with handles.
       GUID_t newGuid_;
+
+      /// String conversion buffer.
+      mutable char output_[64];
   };
 
 }} // End namespace OpenDDS::DCPS

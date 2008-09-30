@@ -30,11 +30,12 @@ OpenDDS::DCPS::ReceiveListenerSetMap::insert
   if (listener_set.is_nil())
     {
       // find_or_create failure
+      ::OpenDDS::DCPS::GuidConverter converter( publisher_id);
       ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::insert: ")
         ACE_TEXT("failed to find_or_create entry for ")
         ACE_TEXT("publisher %s.\n"),
-        (const char*) ::OpenDDS::DCPS::GuidConverter( publisher_id)
+        (const char*) converter
       ), -1);
     }
 
@@ -51,22 +52,26 @@ OpenDDS::DCPS::ReceiveListenerSetMap::insert
   // Handle the two possible failure cases (duplicate key or unknown)
   if (result == 1)
     {
+      ::OpenDDS::DCPS::GuidConverter readerConverter( subscriber_id);
+      ::OpenDDS::DCPS::GuidConverter writerConverter( publisher_id);
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::insert: ")
         ACE_TEXT("subscriber %s already exists for ")
         ACE_TEXT("publisher %s.\n"),
-        (const char*) ::OpenDDS::DCPS::GuidConverter( subscriber_id),
-        (const char*) ::OpenDDS::DCPS::GuidConverter( publisher_id)
+        (const char*) readerConverter,
+        (const char*) writerConverter
       ));
     }
   else
     {
+      ::OpenDDS::DCPS::GuidConverter readerConverter( subscriber_id);
+      ::OpenDDS::DCPS::GuidConverter writerConverter( publisher_id);
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::insert: ")
         ACE_TEXT("failed to insert subscriber %s for ")
         ACE_TEXT("publisher %s.\n"),
-        (const char*) ::OpenDDS::DCPS::GuidConverter( subscriber_id),
-        (const char*) ::OpenDDS::DCPS::GuidConverter( publisher_id)
+        (const char*) readerConverter,
+        (const char*) writerConverter
       ));
     }
 
@@ -79,11 +84,12 @@ OpenDDS::DCPS::ReceiveListenerSetMap::insert
 
       if (listener_set.is_nil())
         {
+          ::OpenDDS::DCPS::GuidConverter converter( publisher_id);
           ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::insert: ")
             ACE_TEXT("failed to remove (undo create) ReceiveListenerSet ")
             ACE_TEXT("for publisher %s.\n"),
-            (const char*) ::OpenDDS::DCPS::GuidConverter( publisher_id)
+            (const char*) converter
           ));
         }
     }
@@ -113,11 +119,12 @@ OpenDDS::DCPS::ReceiveListenerSetMap::remove(RepoId publisher_id,
     {
       if (unbind(map_, publisher_id) != 0)
         {
+          ::OpenDDS::DCPS::GuidConverter converter( publisher_id);
           ACE_ERROR_RETURN((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::remove: ")
             ACE_TEXT("failed to remove empty ReceiveListenerSet for ")
             ACE_TEXT("publisher %s.\n"),
-            (const char*) ::OpenDDS::DCPS::GuidConverter( publisher_id)
+            (const char*) converter
           ), -1);
         }
     }
@@ -149,10 +156,11 @@ OpenDDS::DCPS::ReceiveListenerSetMap::release_subscriber(RepoId publisher_id,
 
   if (OpenDDS::DCPS::find(map_, publisher_id, listener_set) != 0)
     {
+      ::OpenDDS::DCPS::GuidConverter converter( publisher_id);
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ReciveListenerSetMap::release_subscriber: ")
         ACE_TEXT("publisher %s not found in map_.\n"),
-        (const char*) ::OpenDDS::DCPS::GuidConverter( publisher_id)
+        (const char*) converter
       ));
       // Return 1 to indicate that the publisher_id is no longer associated
       // with any subscribers at all.
@@ -168,11 +176,12 @@ OpenDDS::DCPS::ReceiveListenerSetMap::release_subscriber(RepoId publisher_id,
     {
       if (unbind(map_, publisher_id) != 0)
         {
+          ::OpenDDS::DCPS::GuidConverter converter( publisher_id);
           ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::release_subscriber: ")
             ACE_TEXT("failed to remove empty ReceiveListenerSet for ")
             ACE_TEXT("publisher %s.\n"),
-            (const char*) ::OpenDDS::DCPS::GuidConverter( publisher_id)
+            (const char*) converter
           ));
         }
 
