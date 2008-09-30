@@ -1038,10 +1038,11 @@ namespace OpenDDS
       try
         {
           if( DCPS_debug_level >= 4) {
+            ::OpenDDS::DCPS::GuidConverter converter( this->dp_id_);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("%P|%t) DomainParticipantImpl::ignore_participant: ")
               ACE_TEXT("%s ignoring handle==%d, key==%x.\n"),
-              (const char*) ::OpenDDS::DCPS::GuidConverter( this->dp_id_),
+              (const char*) converter,
               handle,
               ignoreKey
             ));
@@ -1051,10 +1052,11 @@ namespace OpenDDS
                                           dp_id_,
                                           ignoreKey);
           if( DCPS_debug_level >= 4) {
+            ::OpenDDS::DCPS::GuidConverter converter( this->dp_id_);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_participant: ")
               ACE_TEXT("%s repo call returned.\n"),
-              (const char*) ::OpenDDS::DCPS::GuidConverter( this->dp_id_)
+              (const char*) converter
             ));
           }
         }
@@ -1114,10 +1116,11 @@ namespace OpenDDS
       try
         {
           if( DCPS_debug_level >= 4) {
+            ::OpenDDS::DCPS::GuidConverter converter( this->dp_id_);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("%P|%t) DomainParticipantImpl::ignore_topic: ")
               ACE_TEXT("%s ignoring handle==%d, key==%x.\n"),
-              (const char*) ::OpenDDS::DCPS::GuidConverter( this->dp_id_),
+              (const char*) converter,
               handle,
               ignoreKey
             ));
@@ -1183,10 +1186,11 @@ namespace OpenDDS
       try
         {
           if( DCPS_debug_level >= 4) {
+            ::OpenDDS::DCPS::GuidConverter converter( this->dp_id_);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("%P|%t) DomainParticipantImpl::ignore_publication: ")
               ACE_TEXT("%s ignoring handle==%d, key==%x.\n"),
-              (const char*) ::OpenDDS::DCPS::GuidConverter( this->dp_id_),
+              (const char*) converter,
               handle,
               ignoreKey
             ));
@@ -1252,10 +1256,11 @@ namespace OpenDDS
       try
         {
           if( DCPS_debug_level >= 4) {
+            ::OpenDDS::DCPS::GuidConverter converter( this->dp_id_);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("%P|%t) DomainParticipantImpl::ignore_subscription: ")
               ACE_TEXT("%s ignoring handle==%d, key==%x.\n"),
-              (const char*) ::OpenDDS::DCPS::GuidConverter( this->dp_id_),
+              (const char*) converter,
               handle,
               ignoreKey
             ));

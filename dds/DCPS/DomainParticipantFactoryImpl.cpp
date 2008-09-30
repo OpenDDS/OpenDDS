@@ -199,13 +199,13 @@ namespace OpenDDS
       //xxx servant rc = 4 (servant::DP::Entity::ServantBase::ref_count_
       if (the_servant->is_clean () == 0)
         {
+          RepoId id = the_servant->get_id();
+          ::OpenDDS::DCPS::GuidConverter converter( id);
           ACE_ERROR_RETURN((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: ")
             ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
             ACE_TEXT("the participant %s is not empty.\n"),
-            (const char*) ::OpenDDS::DCPS::GuidConverter(
-              const_cast< ::OpenDDS::DCPS::RepoId*>( &the_servant->get_id())
-            )
+            (const char*) converter
           ),::DDS::RETCODE_PRECONDITION_NOT_MET);
         }
 
@@ -215,13 +215,14 @@ namespace OpenDDS
       DPSet* entry;
       if (find(participants_, domain_id, entry) == -1)
         {
+          ::OpenDDS::DCPS::GuidConverter converter( dp_id);
           ACE_ERROR_RETURN((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: ")
             ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
             ACE_TEXT("%p domain_id=%d dp_id=%s.\n"),
             ACE_TEXT("find"),
             domain_id,
-            (const char*) ::OpenDDS::DCPS::GuidConverter( dp_id)
+            (const char*) converter
           ),::DDS::RETCODE_ERROR);
         }
       else
@@ -234,13 +235,14 @@ namespace OpenDDS
           DPSet* entry;
           if (find(participants_, domain_id, entry) == -1)
             {
+              ::OpenDDS::DCPS::GuidConverter converter( dp_id);
               ACE_ERROR_RETURN((LM_ERROR,
                 ACE_TEXT("(%P|%t) ERROR: ")
                 ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
                 ACE_TEXT(" %p domain_id=%d dp_id=%s\n"),
                 ACE_TEXT("find"),
                 domain_id,
-                (const char*) ::OpenDDS::DCPS::GuidConverter( dp_id)
+                (const char*) converter
               ),::DDS::RETCODE_ERROR);
             }
           else

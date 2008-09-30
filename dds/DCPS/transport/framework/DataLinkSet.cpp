@@ -166,12 +166,13 @@ OpenDDS::DCPS::DataLinkSet::find_link(const RepoId remoteId,
           {
             if (unbind(map_, itr->first) != 0)
             {
+              ::OpenDDS::DCPS::GuidConverter converter(
+                const_cast< ::OpenDDS::DCPS::RepoId*>( &localId)
+              );
               ACE_ERROR((LM_ERROR,
                 ACE_TEXT("(%P|%t) DataLinkSet::find_link: ")
                 ACE_TEXT("cannot remove link for localId %s pub_side is %s.\n"),
-                (const char*) ::OpenDDS::DCPS::GuidConverter(
-                                const_cast< ::OpenDDS::DCPS::RepoId*>( &localId)
-                              ),
+                (const char*) converter,
                 (pub_side? "true": "false")
               ));
             }

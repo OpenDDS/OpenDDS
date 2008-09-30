@@ -210,11 +210,12 @@ OpenDDS::DCPS::TransportInterface::send(const DataSampleList& samples)
           //       associated with any remote subscriber ids" case.
 
           if( DCPS_debug_level > 4) {
+            ::OpenDDS::DCPS::GuidConverter converter( cur->publication_id_);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) TransportInterface::send: ")
               ACE_TEXT("no links for publication %s, ")
               ACE_TEXT("not sending %d samples.\n"),
-              (const char*) ::OpenDDS::DCPS::GuidConverter( cur->publication_id_),
+              (const char*) converter,
               samples.size_
             ));
           }

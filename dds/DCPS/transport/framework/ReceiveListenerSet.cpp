@@ -27,12 +27,13 @@ OpenDDS::DCPS::ReceiveListenerSet::exist (const RepoId& local_id,
   TransportReceiveListener* listener = 0;
   if (find(map_, local_id, listener) == -1)
   {
+    ::OpenDDS::DCPS::GuidConverter converter(
+      const_cast< ::OpenDDS::DCPS::RepoId*>( &local_id)
+    );
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ReceiveListenerSet::exist: ")
       ACE_TEXT("could not find local %s.\n"),
-      (const char*) ::OpenDDS::DCPS::GuidConverter(
-                      const_cast< ::OpenDDS::DCPS::RepoId*>( &local_id)
-                    )
+      (const char*) converter
     ));
 
     return false;
@@ -40,12 +41,13 @@ OpenDDS::DCPS::ReceiveListenerSet::exist (const RepoId& local_id,
 
   if (listener == 0)
   {
+    ::OpenDDS::DCPS::GuidConverter converter(
+      const_cast< ::OpenDDS::DCPS::RepoId*>( &local_id)
+    );
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ReceiveListenerSet::exist: ")
       ACE_TEXT("listener for local %s is nil.\n"),
-      (const char*) ::OpenDDS::DCPS::GuidConverter(
-                      const_cast< ::OpenDDS::DCPS::RepoId*>( &local_id)
-                    )
+      (const char*) converter
     ));
 
     return false;
