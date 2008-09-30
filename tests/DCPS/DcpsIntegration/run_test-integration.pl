@@ -19,12 +19,14 @@ $bit_conf = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : "-ORBSvcConf ../../tcp.conf";
 
 unlink $dcpsrepo_ior;
+unlink $testoutputfilename;
 
 PerlDDS::add_lib_path('../FooType');
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                              "$bit_conf -o $dcpsrepo_ior"
-                              . " -ORBDebugLevel 1");
+                              "$bit_conf -o $dcpsrepo_ior "
+                              # . "-ORBDebugLevel 1 "
+                              . "-ORBLogFile $testoutputfilename ");
 
 
 $Test = PerlDDS::create_process ("infrastructure_test",

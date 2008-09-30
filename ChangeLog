@@ -1,11 +1,38 @@
+Tue Sep 30 18:25:13 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/GuidUtils.h:
+
+	  Corrected some documentation.
+
+        * performance-tests/DCPS/InfoRepo_population/pub.ini:
+        * performance-tests/DCPS/InfoRepo_population/sub.ini:
+
+	  Removed transport specifications from configuration file.
+
+        * performance-tests/DCPS/InfoRepo_population/publisher.cpp:
+        * performance-tests/DCPS/InfoRepo_population/subscriber.cpp:
+
+	  Create a separate transport for use by each DomainParticipant.
+
+        * tests/DCPS/DcpsIntegration/infrastructure.cpp:
+
+	  Extend diagnostic messages to include test progress
+	  indications.
+
+        * tests/DCPS/DcpsIntegration/run_test-integration.pl:
+
+	  Remove any previous logfile before starting new test.  Remove
+	  ORBDebugLevel specification from repository.  Direct repository
+	  log output to same output file as for other processes.
+
 Tue Sep 30 14:37:22 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/GuidUtils.h:
         * dds/DCPS/GuidUtils.cpp:
 
-	  Modified to place the formatted GUID value into a member buffer
-	  with a lifetime guaranteed to match that of the conversion
-	  object.
+          Modified to place the formatted GUID value into a member buffer
+          with a lifetime guaranteed to match that of the conversion
+          object.
 
         * dds/DCPS/BuiltInTopicUtils.h:
         * dds/DCPS/DataReaderImpl.cpp:
@@ -26,18 +53,18 @@ Tue Sep 30 14:37:22 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * dds/DCPS/transport/framework/TransportInterface.inl:
         * dds/DCPS/transport/framework/TransportInterface.cpp:
 
-	  Modified to use automatic conversion objects rather than
-	  temporaries to ensure the lifetime of the formatted GUID values
-	  spanned the output operations.
+          Modified to use automatic conversion objects rather than
+          temporaries to ensure the lifetime of the formatted GUID values
+          spanned the output operations.
 
         * tests/DCPS/Federation/Federation.mpc:
         * tests/DCPS/Federation/Publisher.h:
         * tests/DCPS/Federation/Publisher.cpp:
         * tests/DCPS/Federation/TestException.h:
 
-	  Changed asynchronous delay in publisher after publishing to a
-	  signalled condition predicated on the disconnection of the
-	  Subscriber.
+          Changed asynchronous delay in publisher after publishing to a
+          signalled condition predicated on the disconnection of the
+          Subscriber.
 
 Fri Sep 26 18:23:32 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
