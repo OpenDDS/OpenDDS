@@ -4,6 +4,8 @@ can make use of the complete OpenDDS middleware just like C++ applications.
 See the java/INSTALL file (in this directory) for information on getting
 started, including the prerequisites and dependencies.
 
+See the java/FAQ file (in this directory) for information on common issues
+encountered while developing with the Java bindings.
 
 ======================================================================
 * See also
