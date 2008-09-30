@@ -56,35 +56,40 @@ namespace OpenDDS { namespace DCPS {
    *
    * @brief Conversion processing and GUID value testing utilities.
    *
-   * This class encapsulates the conversion of a GUID value to and from
+   * This class encapsulates the conversion of a GUID_t value to and from
    * other types used within OpenDDS.  This includes the ability to
-   * create new GUID values with a specific federation Id and Participant
+   * create new GUID_t values with a specific federation Id and Participant
    * instance handle as well as extracting the Instance handle for an
-   * Entity from the GUID value.  Tests for Entity Kind as well as the
+   * Entity from the GUID_t value.  Tests for Entity Kind as well as the
    * type (User v. Builtin) of Entity are also included.
    *
-   * Since the GUID type is formed of octets in network order, we do all
+   * Since the GUID_t type is formed of octets in network order, we do all
    * processing byte by byte to avoid any endian issues.
    *
-   * Currently the GUID is mapped from various internal values and handle
-   * values are extracted from the GUID.  These mappings are:
+   * Currently the GUID_t is mapped from various internal values.
+   * These mappings are:
    *
-   *   GUID.guidPrefix[ 0] == VendorId_t == 0x00 for OCI (used for OpenDDS)
-   *   GUID.guidPrefix[ 1] == VendorId_t == 0x03 for OCI (used for OpenDDS)
-   *   GUID.guidPrefix[ 2] == 0x00
-   *   GUID.guidPrefix[ 3] == 0x00
-   *   GUID.guidPrefix[ 4] == federation id
-   *   GUID.guidPrefix[ 5] == federation id
-   *   GUID.guidPrefix[ 6] == federation id
-   *   GUID.guidPrefix[ 7] == federation id
-   *   GUID.guidPrefix[ 8] == particpant id
-   *   GUID.guidPrefix[ 9] == particpant id
-   *   GUID.guidPrefix[10] == particpant id
-   *   GUID.guidPrefix[11] == particpant id
-   *   GUID.entityId.entityKey[ 2] == entity id[0]
-   *   GUID.entityId.entityKey[ 1] == entity id[1]
-   *   GUID.entityId.entityKey[ 0] == entity id[2]
-   *   GUID.entityId.entityKind    == entity kind
+   * byte  structure reference     content
+   * ---- ---------------------    --------------------------
+   *   0  GUID_t.guidPrefix[ 0] == VendorId_t == 0x00 for OCI (used for OpenDDS)
+   *   1  GUID_t.guidPrefix[ 1] == VendorId_t == 0x03 for OCI (used for OpenDDS)
+   *   2  GUID_t.guidPrefix[ 2] == 0x00
+   *   3  GUID_t.guidPrefix[ 3] == 0x00
+   *
+   *   4  GUID_t.guidPrefix[ 4] == federation id (MS byte)
+   *   5  GUID_t.guidPrefix[ 5] == federation id
+   *   6  GUID_t.guidPrefix[ 6] == federation id
+   *   7  GUID_t.guidPrefix[ 7] == federation id (LS byte)
+   *
+   *   8  GUID_t.guidPrefix[ 8] == particpant id (MS byte)
+   *   9  GUID_t.guidPrefix[ 9] == particpant id
+   *  10  GUID_t.guidPrefix[10] == particpant id
+   *  11  GUID_t.guidPrefix[11] == particpant id (LS byte)
+   *
+   *  12  GUID_t.entityId.entityKey[ 0] == entity id[0] (MS byte)
+   *  13  GUID_t.entityId.entityKey[ 1] == entity id[1]
+   *  14  GUID_t.entityId.entityKey[ 2] == entity id[2] (LS byte)
+   *  15  GUID_t.entityId.entityKind    == entity kind
    */
   class OpenDDS_Dcps_Export GuidConverter {
     public:
