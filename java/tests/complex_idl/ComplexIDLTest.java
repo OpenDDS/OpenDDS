@@ -76,6 +76,8 @@ public class ComplexIDLTest extends QuoteSupport {
     }
     
     protected static void testQuotes() throws Exception {
+        System.out.println("And now for something completely different...");
+        
         final AtomicInteger count = new AtomicInteger();
         
         final Lock lock = new ReentrantLock();
@@ -102,9 +104,10 @@ public class ComplexIDLTest extends QuoteSupport {
                         List<Data> dataItems = new ArrayList<Data>();
                         
                         for (Quote quote : quotes) {
+                            // DATA_IDL
                             dataItems.add(createData(quote));
-                        }
-                        for (Quote quote : quotes) {
+
+                            // DATA_STREAM
                             ByteArrayOutputStream out = new ByteArrayOutputStream();
                             
                             ObjectOutputStream os = new ObjectOutputStream(out);
@@ -195,6 +198,8 @@ public class ComplexIDLTest extends QuoteSupport {
         } finally {
             lock.unlock();
         }
+        
+        System.out.println("(Those responsible have been sacked.)");
     }
 
     public static void main(String[] args) throws Exception {
@@ -213,8 +218,6 @@ public class ComplexIDLTest extends QuoteSupport {
         
         TheTransportFactory.release();
         TheServiceParticipant.shutdown();
-        
-        System.out.println("(Those responsible have been sacked.)");
     }
     
     //
