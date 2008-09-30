@@ -6,6 +6,12 @@ import DDS.*;
 import OpenDDS.DCPS.*;
 import OpenDDS.DCPS.transport.*;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -14,12 +20,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.omg.CORBA.StringSeqHolder;
 
 import Complex.*;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author  Steven Stallion
