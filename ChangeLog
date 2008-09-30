@@ -1,29 +1,39 @@
+Tue Sep 30 21:22:33 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tests/DCPS/Federation/DataWriterListenerImpl.h:
+        * tests/DCPS/Federation/DataWriterListenerImpl.cpp:
+
+	  Forgot to add these files with a previous commit.
+
+	  These implement part of the signalled condition processing for
+	  the publisher termination.
+
 Tue Sep 30 18:25:13 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/GuidUtils.h:
 
-	  Corrected some documentation.
+          Corrected some documentation.
 
         * performance-tests/DCPS/InfoRepo_population/pub.ini:
         * performance-tests/DCPS/InfoRepo_population/sub.ini:
 
-	  Removed transport specifications from configuration file.
+          Removed transport specifications from configuration file.
 
         * performance-tests/DCPS/InfoRepo_population/publisher.cpp:
         * performance-tests/DCPS/InfoRepo_population/subscriber.cpp:
 
-	  Create a separate transport for use by each DomainParticipant.
+          Create a separate transport for use by each DomainParticipant.
 
         * tests/DCPS/DcpsIntegration/infrastructure.cpp:
 
-	  Extend diagnostic messages to include test progress
-	  indications.
+          Extend diagnostic messages to include test progress
+          indications.
 
         * tests/DCPS/DcpsIntegration/run_test-integration.pl:
 
-	  Remove any previous logfile before starting new test.  Remove
-	  ORBDebugLevel specification from repository.  Direct repository
-	  log output to same output file as for other processes.
+          Remove any previous logfile before starting new test.  Remove
+          ORBDebugLevel specification from repository.  Direct repository
+          log output to same output file as for other processes.
 
 Tue Sep 30 14:37:22 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
