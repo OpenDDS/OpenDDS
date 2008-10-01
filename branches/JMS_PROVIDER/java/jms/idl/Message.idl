@@ -1,0 +1,15 @@
+/*
+ * $Id$
+ */
+
+#pragma DCPS_DATA_TYPE "OpenDDS::JMS::Message"
+#pragma DCPS_DATA_KEY "OpenDDS::JMS::Message id"
+
+module OpenDDS {
+    module JMS {
+
+        struct Message {
+            long id;
+        };
+    };
+};
