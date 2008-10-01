@@ -226,5 +226,6 @@ general overview of OpenDDS.
              ** CompilerType options are: vc71, vc8, vc9, and nmake
              This guide is not written with instructions for "nmake" -- if you
              generate NMake makefiles we assume you know how to run them.
+             Make sure this is running ActiveState Perl.
 
   Continue with step 6 of the "Building OpenDDS..." section above.

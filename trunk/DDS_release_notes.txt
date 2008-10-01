@@ -2,6 +2,19 @@ Version 1.2 of OpenDDS.
 
 New to this version are the following changes:
 
+- Java Bindings for OpenDDS
+
+  See $DDS_ROOT/java/README, $DDS_ROOT/java/INSTALL, $DDS_ROOT/java/FAQ
+
+- dcps_ts.pl changes
+
+  Modified this script to create a single idl, header, and source file
+  no matter how many types are contained within the input idl file.  This
+  allows the output file names to be based upon the input file name (instead
+  of the types found in the idl file).  Users of prior OpenDDS versions can
+  use the script $DDS_ROOT/bin/update_dcps.pl to assist with this transition.
+
+
 =========================================================================
 
 Version 1.1 of OpenDDS.
