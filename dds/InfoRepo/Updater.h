@@ -20,6 +20,9 @@ namespace Update {
 class Updater
 {
   public:
+    // Virtual destructor.
+    virtual ~Updater();
+
     // Request an image refresh to be sent to
     //  the specified callback (asynchronously).
     virtual void requestImage (void) = 0;
@@ -42,6 +45,11 @@ class Updater
     // Propagate that an entity has been destroyed.
     virtual void destroy( const IdPath& id, ItemType type, ActorType actor) = 0;
 };
+
+inline
+Updater::~Updater()
+{
+}
 
 } // End of namespace Update
 

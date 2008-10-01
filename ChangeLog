@@ -1,12 +1,18 @@
+Wed Oct  1 18:21:19 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/Updater.h:
+
+	  Eliminate a warning about virtual destructor not present.
+
 Tue Sep 30 21:22:33 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * tests/DCPS/Federation/DataWriterListenerImpl.h:
         * tests/DCPS/Federation/DataWriterListenerImpl.cpp:
 
-	  Forgot to add these files with a previous commit.
+          Forgot to add these files with a previous commit.
 
-	  These implement part of the signalled condition processing for
-	  the publisher termination.
+          These implement part of the signalled condition processing for
+          the publisher termination.
 
 Tue Sep 30 18:25:13 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
