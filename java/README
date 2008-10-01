@@ -110,6 +110,7 @@ defined.
    Unix    => $ACE_ROOT/bin/mwc.pl -type gnuace
    Windows => %ACE_ROOT%\bin\mwc.pl -type [CompilerType]
                          ** CompilerType options are: vc71, vc8, vc9, and nmake
+                            Make sure this is running ActiveState Perl.
 
 6. Compile the generated C++ and Java code
    Unix    => make (GNU make, so this may be "gmake" on Solaris systems)
@@ -135,7 +136,7 @@ defined.
               If you are using the debug version (Food.dll) you'll need to
               inform the OpenDDS middleware that it shouldn't look for Foo.dll.
               To do this, add -Djni.nativeDebug=1 to the Java VM arguments.
-   See the publisher and subscriber directories ing java/tests/messenger for
+   See the publisher and subscriber directories in java/tests/messenger for
    examples of publishing and subscribing applications.
 
 8. If you make subsequent changes to Foo.idl, start by re-running MPC (step #5
