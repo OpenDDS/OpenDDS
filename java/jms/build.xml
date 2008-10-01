@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Id$
+
+    Author:  Steven Stallion
+    Version: $Revision$
+-->
+<project name="opendds-jms" default="all" basedir=".">
+    <property name="build.dir" value="${basedir}/build"/>
+    <property name="doc.dir" value="${basedir}/doc"/>
+    <property name="idl.dir" value="${basedir}/idl"/>
+    <property name="lib.dir" value="${basedir}/lib"/>
+    <property name="src.dir" value="${basedir}/src"/>
+    <property name="test.dir" value="${basedir}/test"/>
+
+    <property file="build.properties"/>
+    
+    <property environment="env"/>
+
+    <!--
+        Project Paths
+    -->
+    <fileset id="project.resources" dir="${src.dir}">
+        <exclude name="**/*.java"/>
+    </fileset>
+
+    <fileset id="test.resources" dir="${test.dir}">
+        <exclude name="**/*.java"/>
+    </fileset>
+
+    <path id="project.classpath">
+        <pathelement location="${build.dir}/classes"/>
+        <pathelement location="${build.dir}/tests"/>
+        
+        <pathelement location="${idl.dir}/classes"/>
+
+        <fileset refid="project.resources"/>
+        <fileset refid="test.resources"/>
+        
+        <fileset dir="${lib.dir}"/>
+        <fileset dir="${env.DDS_ROOT}/lib"/>
+    </path>
+
+    <!--
+        Project Targets
+    -->
+    <target name="all" depends="clean, test, jar"
+            description="Meta target for: clean, compile, test, jar"/>
+
+    <target name="clean" depends="javadoc.clean, test.clean, idl.clean"
+            description="Delete all build artifacts">
+        <delete dir="${build.dir}"/>
+    </target>
+    
+    <target name="init">
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${build.dir}/classes"/>
+    </target>
+
+    <target name="idl.clean">
+        <!-- TODO -->
+    </target>
+
+    <target name="idl.init">
+        <!-- TODO -->
+    </target>
+
+    <target name="idl" depends="idl.init"
+            description="Generate and compile IDL classes under idl/">
+        <!-- TODO -->
+    </target>
+
+    <target name="compile" depends="idl, init"
+            description="Compile classes under src/">
+        <javac srcdir="${src.dir}"
+               destdir="${build.dir}/classes"
+               debug="${compile.debug}"
+               deprecation="${compile.deprecation}"
+               optimize="${compile.optimize}"
+               source="${project.source}"
+               classpathref="project.classpath">
+        </javac>
+    </target>
+
+    <target name="jar" depends="compile"
+            description="Archive compiled classes and resources">
+        <jar destfile="${build.dir}/${ant.project.name}-${project.version}.jar"
+             compress="${jar.compress}"
+             index="${jar.index}"> 
+            <fileset dir="${build.dir}/classes"/>
+            <fileset dir="${idl.dir}/classes"/>
+            <fileset refid="project.resources"/>
+        </jar>
+    </target>
+    
+    <target name="test.clean">
+        <delete dir="${build.dir}/tests"/>
+    </target>
+
+    <target name="test.init" depends="init">
+        <mkdir dir="${build.dir}/tests"/>
+    </target>
+
+    <target name="test.compile" depends="compile, test.init">
+        <javac srcdir="${test.dir}"
+               destdir="${build.dir}/tests"
+               debug="${compile.debug}"
+               deprecation="${compile.deprecation}"
+               optimize="${compile.optimize}"
+               source="${project.source}"
+               classpathref="project.classpath">
+        </javac>
+    </target>
+
+    <target name="test" depends="test.compile"
+            description="Run test suites under test/">
+        <junit haltonerror="true"
+               haltonfailure="true"
+               printsummary="true"
+               fork="true">
+            <formatter type="brief"/>
+            <batchtest todir="${build.dir}/tests">
+                <fileset dir="${test.dir}">
+                    <include name="**/*Test.java"/>
+                </fileset>
+            </batchtest>
+            <jvmarg value="-ea"/> <!-- enable assertions -->
+            <classpath refid="project.classpath"/>
+        </junit>
+    </target>
+
+    <target name="javadoc.clean">
+        <delete dir="${doc.dir}/api"/>
+    </target>
+
+    <target name="javadoc.init">
+        <mkdir dir="${doc.dir}/api"/>
+    </target>
+
+    <target name="javadoc" depends="javadoc.init"
+            description="Generate API documentation under doc/api/">
+        <javadoc destdir="${doc.dir}/api"
+                 source="${project.source}"
+                 author="true"
+                 version="true"
+                 overview="${doc.dir}/overview.html"
+                 doctitle="OpenDDS JMS API Specification"
+                 windowtitle="${ant.project.name}">
+            <link href="http://java.sun.com/j2se/${project.source}/docs/api/"/>
+            <link href="http://java.sun.com/javaee/5/docs/api/"/>
+            <classpath refid="project.classpath"/>
+            <packageset dir="${src.dir}"/>
+        </javadoc>
+    </target>
+</project>
