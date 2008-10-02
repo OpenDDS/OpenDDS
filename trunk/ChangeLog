@@ -1,3 +1,23 @@
+Thu Oct  2 22:29:21 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Fixed a typo.
+
+        * java/INSTALL:
+
+          Removed an unneeded build step.
+
+        * java/FAQ:
+
+          Added a FAQ entry.
+
+        * java/idl2jni/runtime/idl2jni_runtime.cpp:
+
+          When translating an unknown exception type (not a CORBA
+          SystemException) from Java to C++, call the JNI ExceptionDescribe()
+          function to output a stack trace.
+
 Wed Oct  1 20:35:59 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * DDS_release_notes.txt:

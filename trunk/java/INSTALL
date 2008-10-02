@@ -174,8 +174,6 @@ general overview of OpenDDS.
 
      Unix    => cd $DDS_ROOT/dds
                 make
-                cd $DDS_ROOT/DevGuideExamples/DCPS/Messenger
-                make
 
      Windows => cd %DDS_ROOT%\dds
                 Use either dds.sln (VC 7.1) or dds_vc8.sln (VC8, VC9)
