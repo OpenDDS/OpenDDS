@@ -93,7 +93,7 @@ New to this version are the following changes:
 
   Fixed a bug in qos serialization. The TAO_OutputCDR stream was not
   fully copied to buffer when the qos contains sequence data. The
-  TAO_OutputCDR stream needs be cosolidated before memcpy.
+  TAO_OutputCDR stream needs be consolidated before memcpy.
 
 - Fixed compliance with qos RxO.
 
