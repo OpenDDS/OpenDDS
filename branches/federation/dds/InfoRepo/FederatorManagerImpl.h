@@ -20,6 +20,7 @@
 #include "ace/Condition_T.h"
 
 #include <list>
+#include <map>
 
 class TAO_DDS_DCPSInfo_i;
 
@@ -50,9 +51,17 @@ class OpenDDS_Federator_Export ManagerImpl
         Incomplete
       ));
 
-    virtual ::CORBA::Boolean join_federation (
+    virtual Manager_ptr join_federation (
         Manager_ptr peer,
         FederationDomain federation
+      )
+      ACE_THROW_SPEC ((
+        ::CORBA::SystemException,
+        Incomplete
+      ));
+
+    virtual void leave_federation (
+        RepoKey id
       )
       ACE_THROW_SPEC ((
         ::CORBA::SystemException,
@@ -230,9 +239,18 @@ class OpenDDS_Federator_Export ManagerImpl
     /// Simple recursion avoidance during the join operations.
     RepoKey joiner_;
 
+    /// Repository to which we joined.
+    RepoKey joinRepo_;
+
     /// Flag indicating that we are actively participating in a
     /// federation of repositories.
     bool federated_;
+
+    /// Map type to hold references to federated repository Managers.
+    typedef std::map< RepoKey, Manager_var> IdToManagerMap;
+
+    /// The peer with which we have federated.
+    IdToManagerMap peers_;
 
     /// The packet sequence number for data that we publish.
     ::OpenDDS::DCPS::SequenceNumber sequence_;

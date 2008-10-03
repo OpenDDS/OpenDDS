@@ -1,8 +1,44 @@
+Fri Oct  3 21:31:20 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+	  remove_by_owner() - new method to remove all Entities owned by
+	  a repository departing from a federation.
+
+        * dds/InfoRepo/Federator.idl:
+
+	  leave_federation() - new method for departing a federation.
+	  join_federation()  - now returns a reference to the remote
+	                       Manager.
+
+        * dds/InfoRepo/FederatorManagerImpl.h:
+
+	  Implementation methods for new IDL interfaces and associated
+	  members to support processing for the implementations.
+
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+
+	  Implemented IDL interface modifications.
+	  initialize() - use _narrow() to extract specific DataWriter
+	                 instead of a dynamic_cast.
+          finalize()   - added call to remote repository federation
+                         point to leave_federation().
+
+        * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
+
+	  destroy() - no longer propagates FederationDomain updates to
+	              remove Entities.
+
+        * tests/DCPS/Federation/run_test.pl:
+
+	  Additional diagnostic message.
+
 Wed Oct  1 18:21:19 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/Updater.h:
 
-	  Eliminate a warning about virtual destructor not present.
+          Eliminate a warning about virtual destructor not present.
 
 Tue Sep 30 21:22:33 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
