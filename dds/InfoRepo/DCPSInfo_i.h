@@ -310,6 +310,11 @@ public:
       , OpenDDS::DCPS::Invalid_Participant
     ));
 
+  bool remove_by_owner(
+    ::DDS::DomainId_t domain,
+    long              owner
+  );
+
   virtual void ignore_topic (
       ::DDS::DomainId_t domainId,
       const OpenDDS::DCPS::RepoId& myParticipantId,

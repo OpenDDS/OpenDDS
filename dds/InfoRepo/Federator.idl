@@ -190,10 +190,16 @@ module OpenDDS { module Federator {
       // Called to join a federation initially or to redirect the active
       // connection of an already federated repository Manager.
       //
-      boolean join_federation(
+      Manager join_federation(
                 in Manager          peer,
                 in FederationDomain federation
               ) raises( Incomplete);
+
+      //
+      // Called to leave a federation to allow the federation to cleanup
+      // storage associated with the repository leaving the federation.
+      //
+      void leave_federation( in RepoKey id) raises( Incomplete);
 
       //
       // Return the FederationId value for the managed repository.  This

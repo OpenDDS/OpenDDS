@@ -243,6 +243,14 @@ ManagerImpl::destroy(
   Update::ActorType     actor
 )
 {
+  //
+  // Do not propagate any destroy() messages within the FederationDomain.
+  // This domain will be managed separately.
+  //
+  if( id.domain == this->config_.federationDomain()) {
+    return;
+  }
+
   switch( type) {
     case Update::Topic:
       {

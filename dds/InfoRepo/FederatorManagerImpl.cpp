@@ -4,6 +4,7 @@
 
 #include "DcpsInfo_pch.h"
 #include "FederatorManagerImpl.h"
+#include "DCPSInfo_i.h"
 #include "DefaultValues.h"
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/Service_Participant.h"
@@ -405,7 +406,7 @@ ManagerImpl::initialize()
   }
 
   this->ownerWriter_
-    = dynamic_cast< OwnerUpdateDataWriter*>( dataWriter.in());
+    = OwnerUpdateDataWriter::_narrow( dataWriter.in());
   if(::CORBA::is_nil (this->ownerWriter_.in ())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
@@ -493,7 +494,7 @@ ManagerImpl::initialize()
   }
 
   this->topicWriter_
-    = dynamic_cast< TopicUpdateDataWriter*>( dataWriter.in());
+    = TopicUpdateDataWriter::_narrow( dataWriter.in());
   if(::CORBA::is_nil (this->topicWriter_.in ())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
@@ -582,7 +583,7 @@ ManagerImpl::initialize()
   }
 
   this->participantWriter_
-    = dynamic_cast< ParticipantUpdateDataWriter*>( dataWriter.in());
+    = ParticipantUpdateDataWriter::_narrow( dataWriter.in());
   if(::CORBA::is_nil (this->participantWriter_.in ())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
@@ -671,7 +672,7 @@ ManagerImpl::initialize()
   }
 
   this->publicationWriter_
-    = dynamic_cast< PublicationUpdateDataWriter*>( dataWriter.in());
+    = PublicationUpdateDataWriter::_narrow( dataWriter.in());
   if(::CORBA::is_nil (this->publicationWriter_.in ())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
@@ -760,7 +761,7 @@ ManagerImpl::initialize()
   }
 
   this->subscriptionWriter_
-    = dynamic_cast< SubscriptionUpdateDataWriter*>( dataWriter.in());
+    = SubscriptionUpdateDataWriter::_narrow( dataWriter.in());
   if(::CORBA::is_nil (this->subscriptionWriter_.in ())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
@@ -929,7 +930,39 @@ ManagerImpl::finalize()
     ));
   }
 
-  if (!CORBA::is_nil(orb_) && (0 != this->orb_->orb_core ()))
+  if( this->federated_) {
+    try {
+      IdToManagerMap::iterator where = this->peers_.find( this->joinRepo_);
+      if( where == this->peers_.end()) {
+        ACE_ERROR ((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: Federator::Manager::finalize: ")
+          ACE_TEXT("repository %d unable to find attachment to federation.\n"),
+          this->id()
+        ));
+
+      } else {
+        if( CORBA::is_nil( where->second.in())) {
+          ACE_ERROR ((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR: Federator::Manager::finalize: ")
+            ACE_TEXT("repository %d not currently attached to a federation.\n"),
+            this->id()
+          ));
+
+        } else {
+            where->second->leave_federation( this->id());
+            this->federated_ = false;
+        }
+      }
+    } catch( const CORBA::Exception& ex) {
+      ex._tao_print_exception(
+        ACE_TEXT("ERROR: Federator::ManagerImpl::finalize() - ")
+        ACE_TEXT("unable to leave remote federation ")
+      );
+      throw Incomplete();
+    }
+  }
+
+  if (!CORBA::is_nil( this->orb_.in()) && (0 != this->orb_->orb_core ()))
     {
       this->orb_->orb_core ()->reactor ()->remove_handler(
         &this->multicastResponder_,
@@ -1007,7 +1040,7 @@ ACE_THROW_SPEC (( ::CORBA::SystemException, Incomplete))
   return false;
 }
 
-::CORBA::Boolean
+Manager_ptr
 ManagerImpl::join_federation(
   Manager_ptr peer,
   FederationDomain federation
@@ -1052,7 +1085,7 @@ ManagerImpl::join_federation(
         remote
       ));
     }
-    return true;
+    return this->_this();
 
   } else {
     // Block while any different repository is joining.
@@ -1063,7 +1096,7 @@ ManagerImpl::join_federation(
 
       // We are now recursing - curses!
       if( this->joiner_ == remote) {
-        return true;
+        return this->_this();
       }
     }
 
@@ -1078,14 +1111,15 @@ ManagerImpl::join_federation(
   //
 
   // Check if we already have Federation repository.
-//  ::OpenDDS::DCPS::DCPSInfo_var federationRepo
-//    = TheServiceParticipant->get_repository( this->config_.federationDomain());
-//  if( CORBA::is_nil(federationRepo.in())) {
   // Check if we are already federated.
   if( this->federated_ == false) {
     // Go ahead and add the joining repository as our Federation
     // repository.
     try {
+      // Mark this repository as the point to which we are joined to
+      // the federation.
+      this->joinRepo_ = remote;
+
       // Obtain a reference to the remote repository.
       ::OpenDDS::DCPS::DCPSInfo_var remoteRepo = peer->repository();
       if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
@@ -1115,7 +1149,13 @@ ManagerImpl::join_federation(
 
   // Symmetrical joining behavior.
   try {
-    peer->join_federation( this->_this(), this->config_.federationDomain());
+    Manager_var remoteManager
+      = peer->join_federation( this->_this(), this->config_.federationDomain());
+
+    if( this->joinRepo_ == remote) {
+      this->peers_[ this->joinRepo_]
+        = OpenDDS::Federator::Manager::_duplicate( remoteManager.in());
+    }
 
     //
     // Push our initial state out to the joining repository *after* we call
@@ -1159,7 +1199,44 @@ ManagerImpl::join_federation(
   this->federated_ = true;
   this->joiner_    = NIL_REPOSITORY;
   this->joining_.signal();
-  return true;
+  return this->_this();
+}
+
+void
+ManagerImpl::leave_federation (
+  RepoKey id
+)
+ACE_THROW_SPEC ((
+  ::CORBA::SystemException,
+  Incomplete
+))
+{
+  if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) ManagerImpl::leave_federation( %d)\n"),
+      this->id()
+    ));
+  }
+
+  // Remove the leaving repository from our outbound mappings.
+  IdToManagerMap::iterator where = this->peers_.find( id);
+  if( where != this->peers_.end()) {
+    this->peers_.erase( where);
+  }
+
+  // Remove all the internal Entities owned by the leaving repository.
+  if( false
+      == this->info_->remove_by_owner( this->config_.federationDomain(), id)
+    ) {
+    throw Incomplete();
+  }
+
+  if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) ManagerImpl::leave_federation( %d) complete.\n"),
+      this->id()
+    ));
+  }
 }
 
 void

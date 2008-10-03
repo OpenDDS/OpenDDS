@@ -231,6 +231,8 @@ for my $index ( 1 .. $pubCount) {
 # Terminate the repositories.
 
 for my $index ( 1 .. $repoCount) {
+# for my $index ( $repoCount .. 1) {
+  print "\nStopping repository $index\n";
   $status = $REPO[ $index - 1]->TerminateWaitKill(5);
   if( $status != 0) {
     print STDERR "ERROR: Repository $index returned $status\n";
