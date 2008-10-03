@@ -89,3 +89,19 @@ in the $DDS_ROOT directory and the FAQ at <http://www.opendds.org/faq.html>.
     For more information about IDL and the IDL-to-Java mapping, see the
     references at the top of the $DDS_ROOT/java/README file and the book
     "Pure CORBA" by Fintan Bolton (Sams Publishing, 2002).
+
+  - Which IDL constructs are supported?
+
+    OpenDDS data types can consist of structs, sequences, unions, arrays,
+    enums, and basic types.  Constants and typedefs are also used in the IDL.
+    Of these types, multidimensional arrays and long double are not supported.
+    Anonymous sequences and arrays have been deprecated by the OMG specs
+    and are not supported by the OpenDDS Java tools.  For example,
+    struct A {
+      sequence<B> seq;
+    };
+    Must be replaced by:
+    typedef sequence<B> BSeq;
+    struct A {
+      BSeq seq;
+    };

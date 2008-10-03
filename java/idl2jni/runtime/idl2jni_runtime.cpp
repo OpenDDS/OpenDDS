@@ -293,7 +293,19 @@ void throw_java_exception (JNIEnv *jni, const CORBA::SystemException &se)
 
 void throw_cxx_exception (JNIEnv *jni, jthrowable excep)
 {
-  jni->ExceptionClear ();
+  // call jni->ExceptionClear() before this method exits (via throw)
+  struct ClearTheException
+  {
+    explicit ClearTheException (JNIEnv *j)
+      : j_ (j)
+    {}
+    ~ClearTheException ()
+    {
+      j_->ExceptionClear ();
+    }
+    JNIEnv *j_;
+  } cte (jni);
+
   jclass clazz = jni->GetObjectClass (excep);
   jclass clazz_comp = jni->FindClass ("org/omg/CORBA/CompletionStatus");
   jmethodID mid_comp_val = jni->GetMethodID (clazz_comp, "value", "()I");
@@ -336,8 +348,9 @@ void throw_cxx_exception (JNIEnv *jni, jthrowable excep)
   TAO_SYSTEM_EXCEPTION (INVALID_ACTIVITY)
   TAO_SYSTEM_EXCEPTION (ACTIVITY_COMPLETED)
   TAO_SYSTEM_EXCEPTION (ACTIVITY_REQUIRED)
-  //the macro ends with "else" so this is the fallback case
+  // the macro ends with "else" so this is the fallback case
     {
+      jni->ExceptionDescribe ();
       throw CORBA::UNKNOWN ();
     }
 }
