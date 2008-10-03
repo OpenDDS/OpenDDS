@@ -1,3 +1,10 @@
+Fri Oct  3 20:20:18 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/opendds-jms.iml:
+
+          Updated opendds-jms IDEA module to include generated sources
+          and classes in idl.
+
 Fri Oct  3 16:09:57 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * DDS_release_notes.txt:
