@@ -281,6 +281,17 @@ Publisher::~Publisher()
 void
 Publisher::run()
 {
+  ::DDS::InstanceHandleSeq handles;
+
+  while (1)
+  {
+    dataWriter_->get_matched_subscriptions(handles);
+    if (handles.length() > 0)
+      break;
+    else
+      ACE_OS::sleep(ACE_Time_Value(0,200000));
+  }
+
   // Write Foo samples.
   ::Xyz::FooNoKey foo;
   foo.data_source = 22;
@@ -294,10 +305,6 @@ Publisher::run()
     ));
     throw BadWriterException();
   }
-
-  // NOTE: This is a kluge to avoid a race condition - it is still
-  //       possible, though unlikely, to lock up due to the race.
-  ACE_OS::sleep(5);
 
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) Publisher::run starting to write.\n")
@@ -328,7 +335,17 @@ Publisher::run()
   ));
 
   // End when the subscriber disconnects.
-  this->sync_->wait_for_completion();
+  //this->sync_->wait_for_completion();
+
+  while (1)
+    {
+      dataWriter_->get_matched_subscriptions(handles);
+      if (handles.length() == 0)
+        break;
+      else
+        ACE_OS::sleep(1);
+    }
+
 
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) Publisher::run shutting down.\n")
