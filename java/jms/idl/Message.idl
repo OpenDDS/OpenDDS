@@ -2,14 +2,141 @@
  * $Id$
  */
 
-#pragma DCPS_DATA_TYPE "OpenDDS::JMS::Message"
-#pragma DCPS_DATA_KEY "OpenDDS::JMS::Message id"
+#pragma DCPS_DATA_TYPE "OpenDDS::JMS::MessagePayload"
+#pragma DCPS_DATA_KEY "OpenDDS::JMS::MessagePayload id"
 
 module OpenDDS {
-    module JMS {
+module JMS {
 
-        struct Message {
-            long id;
-        };
+    // Headers
+    struct MessageHeaders {
+        string JMSDestination; // string for Destination
+        long JMSDeliveryMode;
+        string JMSMessageID;
+        long long JMSTimestamp;
+        string JMSCorrelationID;
+        string JMSReplyTo;  // string for Destination
+        boolean JMSRedelivered;
+        string JMSType;
+        long long JMSExpiration;
+        long JMSPriority;
     };
+
+    // Properties
+    enum PropertyValueKind {
+        BOOLEAN_PROPERTY_KIND,
+        BYTE_PROPERTY_KIND,
+        SHORT_PROPERTY_KIND,
+        INT_PROPERTY_KIND,
+        LONG_PROPERTY_KIND,
+        FLOAT_PROPERTY_KIND,
+        DOUBLE_PROPERTY_KIND,
+        STRING_PROPERTY_KIND
+    };
+
+    union PropertyValue switch(PropertyValueKind) {
+        case BOOLEAN_PROPERTY_KIND:
+            boolean booleanValue;
+        case BYTE_PROPERTY_KIND:
+            octet byteValue;
+        case SHORT_PROPERTY_KIND:
+            short shortValue;
+        case INT_PROPERTY_KIND:
+            long intValue;
+        case LONG_PROPERTY_KIND:
+            long long longValue;
+        case FLOAT_PROPERTY_KIND:
+            float floatValue;
+        case DOUBLE_PROPERTY_KIND:
+            double doubleValue;
+        case STRING_PROPERTY_KIND:
+            string stringValue;
+    };
+
+    struct MessageProperty {
+        string name;
+        PropertyValue value;
+    };
+
+    typedef sequence<MessageProperty> MessageProperties;
+
+    // Body
+    enum ItemKind {
+        BOOLEAN_KIND,
+        BYTE_KIND,
+        SHORT_KIND,
+        CHAR_KIND,
+        INT_KIND,
+        LONG_KIND,
+        FLOAT_KIND,
+        DOUBLE_KIND,
+        STRING_KIND,
+        BYTE_ARRAY_KIND
+    };
+
+    typedef sequence<octet> ByteArray;
+
+    union StreamItem switch (ItemKind) {
+        case BOOLEAN_KIND:
+            boolean booleanValue;
+        case BYTE_KIND:
+            octet byteValue;
+        case SHORT_KIND:
+            short shortValue;
+        case CHAR_KIND:
+            char charValue;
+        case INT_KIND:
+            long intValue;
+        case LONG_KIND:
+            long longValue;
+        case FLOAT_KIND:
+            float floatValue;
+        case DOUBLE_KIND:
+            double doubleValue;
+        case STRING_KIND:
+            string stringValue;
+        case BYTE_ARRAY_KIND:
+            ByteArray byteArrayValue;
+    };
+
+    struct MapItem {
+        string name;
+        StreamItem value;
+    };
+
+    typedef sequence<StreamItem> StreamBody;
+    typedef sequence<MapItem> MapBody;
+    typedef sequence<octet> TextBody;
+    typedef sequence<octet> ObjectBody;
+    typedef sequence<octet> BytesBody;
+
+    enum MessageBodyKind {
+        STREAM_KIND,
+        MAP_KIND,
+        TEXT_KIND,
+        OBJECT_KIND,
+        BYTES_KIND
+    };
+
+    union MessageBody switch(MessageBodyKind) {
+        case STREAM_KIND:
+            StreamBody theStreamBody;
+        case MAP_KIND:
+            MapBody theMapBody;
+        case TEXT_KIND:
+            TextBody theTextBody;
+        case OBJECT_KIND:
+            ObjectBody theObjectBody;
+        case BYTES_KIND:
+            BytesBody theBytesBody;
+    };
+
+    struct MessagePayload {
+        long id;
+        MessageHeaders theHeaders;
+        MessageProperties theProperties;
+        MessageBody theBody;
+    };
+
+};
 };
