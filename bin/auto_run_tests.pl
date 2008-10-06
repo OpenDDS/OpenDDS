@@ -23,19 +23,18 @@ use Env qw(DDS_ROOT ACE_ROOT PATH);
 
 ################################################################################
 
-if (!getopts ('ds:cl:') || $opt_h) {
+if (!getopts ('das:l:') || $opt_h) {
     print "auto_run_tests.pl [-a] [-h] [-s sandbox] [-o] [-t] [-l listfile]\n";
     print "\n";
     print "Runs the tests listed in dcps_tests.lst\n";
     print "\n";
     print "Options:\n";
-    print "    -c config   Run the tests for the <config> configuration\n";
     print "    -h          display this help\n";
-    print "    -s sandbox  Runs each program using a sandbox program\n";
-    print "    -c          dcps tests only\n";
+    print "    -c config   Run the tests for the <config> configuration\n";
     print "    -Config cfg Run the tests for the <cfg> configuration\n";
-    print "    -l listfile Run the tests specified in listfile instead of ".
-        "dcps_tests.lst\n";
+    print "    -s sandbox  Runs each program using a sandbox program\n";
+    print "    -a          Run all DDS (DCPS) tests (default unless -l)\n";
+    print "    -l listfile Run the tests specified in list file\n";
     print "\n";
     $dcps_config_list = new PerlACE::ConfigList;
     $dcps_config_list->load ($DDS_ROOT."/bin/dcps_tests.lst");
@@ -45,11 +44,12 @@ if (!getopts ('ds:cl:') || $opt_h) {
 
 my @file_list;
 
+push (@file_list, "$DDS_ROOT/bin/dcps_tests.lst") if ($opt_a || !$opt_l);
 if ($opt_l) {
     push (@file_list, $opt_l);
-} else {
-    push (@file_list, "$DDS_ROOT/bin/dcps_tests.lst");
 }
+
+my $cwd = getcwd ();
 
 foreach my $test_lst (@file_list) {
 
@@ -131,5 +131,6 @@ foreach my $test_lst (@file_list) {
 
             print "\nauto_run_tests_finished: $test Time:$time"."s Result:$result\n";
         }
-    }
-}
+    } #foreach $test
+    chdir $cwd; #back to base dir
+} #foreach $test_lst

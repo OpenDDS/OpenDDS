@@ -11,7 +11,9 @@ project {
     inputext              = .idl
     source_outputext      = TypeSupportImpl.cpp
     header_outputext      = TypeSupportImpl.h
-    generic_outputext     = TypeSupport.idl
+//  The following is now handled by $DDS_ROOT/MPC/modules/TYPESUPPORTHelper.pm
+//  because MPC can't currently have both a Helper.pm and generic_output:
+//    generic_outputext     = TypeSupport.idl
   }
 
   dcps_ts_flags += $(OPENDDS_DCPS_TS_FLAGS)
