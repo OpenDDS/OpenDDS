@@ -83,7 +83,6 @@ else {
     exit 1;
 }
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "dcps_ir.ior";
 $pubdriver_ior = "pubdriver.ior";
 # The pub_id_fname can not be a full path because the
@@ -104,8 +103,7 @@ unlink $pubdriver_ior;
 unlink $sub_ready_file;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                    "$svc_config $repo_bit_conf -o $dcpsrepo_ior"
-                                    . " -d $domains_file");
+                                    "$svc_config $repo_bit_conf -o $dcpsrepo_ior ");
 print $DCPSREPO->CommandLine(), "\n";
 
 $publisher = PerlDDS::create_process ("FooTest3_publisher",

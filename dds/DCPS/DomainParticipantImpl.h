@@ -398,9 +398,6 @@ namespace OpenDDS
       /// The object reference activated from this servant.
       ::DDS::DomainParticipant_var participant_objref_;
 
-      /// Object reference to the DCPSInfo.
-      DCPSInfo_var                 repository_;
-
       /// The built in topic subscriber.
       ::DDS::Subscriber_var        bit_subscriber_;
 

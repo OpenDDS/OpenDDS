@@ -42,8 +42,8 @@ class PubDriver
 
 
     virtual void add_new_subscription (
-      CORBA::Long       reader_id,
-      const char *      sub_addr
+      const OpenDDS::DCPS::RepoId& reader_id,
+      const char *                 sub_addr
       )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -78,8 +78,8 @@ class PubDriver
     int parse_sub_arg(const std::string& arg);
 
     void add_subscription (
-    CORBA::Long       reader_id,
-    const char *      sub_addr
+    const OpenDDS::DCPS::RepoId& reader_id,
+    const char *                 sub_addr
     );
 
     void attach_to_transport ();

@@ -59,6 +59,7 @@ namespace OpenDDS
     Service_Participant::Service_Participant ()
     : orb_ (CORBA::ORB::_nil ()),
       orb_from_user_(0),
+      dp_factory_servant_( 0),
       n_chunks_ (DEFAULT_NUM_CHUNKS),
       association_chunk_multiplier_(DEFAULT_CHUNK_MULTIPLIER),
       liveliness_factor_ (80),
@@ -73,7 +74,6 @@ namespace OpenDDS
       transient_data_cache_ (),
       persistent_data_cache_ ()
     {
-      this->set_repo_domain( ANY_DOMAIN, DEFAULT_REPO);
       initialize();
     }
 
@@ -564,33 +564,14 @@ namespace OpenDDS
     {
       if( DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) Repo[ %d] == %s\n"),
+          ACE_TEXT("(%P|%t) Service_Participant::set_repo_ior: Repo[ %d] == %s\n"),
           key, ior
         ));
       }
 
+      // This is a global used for the bizzare commandline/configfile
+      // processing done for this class.
       got_info = true;
-      RepoMap::const_iterator location = this->repoMap_.find( key);
-      if( location != this->repoMap_.end()) {
-        // Repository is already loaded.  Remove the repository only if
-        // it is bound to no domains.
-        for( DomainRepoMap::const_iterator current = this->domainRepoMap_.begin();
-             current != this->domainRepoMap_.end();
-             ++current
-           ) {
-          if( current->second == location->first) {
-            ACE_ERROR((LM_ERROR,
-              ACE_TEXT( "(%P|%t) ERROR: ")
-              ACE_TEXT( "Service_Participant::set_repo_ior, ")
-              ACE_TEXT( "attempt to set new repository for key %d ")
-              ACE_TEXT( "while previous repository still bound. \n"),
-              key
-            ));
-            return; // throw;
-          }
-        }
-        // @TODO: determine if (how?) we need to destroy the existing transport.
-      }
 
       CORBA::Object_var obj
         = orb_->string_to_object(ACE_TEXT_ALWAYS_CHAR (ior));
@@ -599,46 +580,112 @@ namespace OpenDDS
                     ACE_TEXT ("(%P|%t) ERROR: ")
                     ACE_TEXT ("Service_Participant::set_repo_ior, ")
                     ACE_TEXT ("nil DCPSInfo (%s) for key %d. \n"), ior, key));
-        return; // throw;
-
-      } else {
-        this->repoMap_[ key] = DCPSInfo::_narrow( obj.in());
-        if( CORBA::is_nil( this->repoMap_[ key].in())) {
-          ACE_ERROR ((LM_ERROR,
-                      ACE_TEXT ("(%P|%t) ERROR: ")
-                      ACE_TEXT ("Service_Participant::set_repo_ior, ")
-                      ACE_TEXT ("unable to narrow DCPSInfo (%s) for key %d. \n"),
-                      ior, key));
-          return; // throw;
-        }
+        return;
       }
+
+      DCPSInfo_var repo = DCPSInfo::_narrow( obj.in());
+      if( CORBA::is_nil( repo.in())) {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT ("(%P|%t) ERROR: Service_Participant::set_repo_ior: ")
+          ACE_TEXT ("unable to narrow DCPSInfo (%s) for key %d. \n"),
+          ior,
+          key
+        ));
+        return;
+      }
+
+      // Actually install the repository to the mappings.
+      this->set_repo( repo.in(), key);
     }
 
     void
     Service_Participant::set_repo( DCPSInfo_ptr repo, const RepoKey key)
     {
+      if( DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) Service_Participant::set_repo: setting Repo[ %d]\n"),
+          key
+        ));
+      }
       this->repoMap_[ key] = DCPSInfo::_duplicate( repo);
+
+      // Search the mappings for any domains mapped to this repository.
+      for( DomainRepoMap::const_iterator current = this->domainRepoMap_.begin();
+           current != this->domainRepoMap_.end();
+           ++current
+         ) {
+        if( current->second == key) {
+          // For mapped domains, attach their participants by setting the
+          // mapping again.  Since this will only update the mappings if
+          // its a new mapping (and these by definition are not), we can
+          // confidently iterate through the map here.
+          this->set_repo_domain( current->first, key);
+        }
+      }
     }
 
     void
-    Service_Participant::set_repo_domain( const ::DDS::DomainId_t domain, const RepoKey repo)
+    Service_Participant::set_repo_domain( const ::DDS::DomainId_t domain, const RepoKey key)
     {
       DomainRepoMap::const_iterator where = this->domainRepoMap_.find( domain);
-      if( where != this->domainRepoMap_.end()) {
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) WARNING: ")
-          ACE_TEXT("Service_Participant::set_repo_domain, ")
-          ACE_TEXT("discarding previous mapping for domain %d.\n"),
-          domain
-        ));
-        /// @TODO: Determine correct action here.
+      if( (where == this->domainRepoMap_.end()) || (where->second != key)) {
+        // Only assign entries into the map when they change the
+        // contents.  This avoids unnecessary updates to the map being
+        // made while calling code may potentially be iterating through
+        // the map.
+        this->domainRepoMap_[ domain] = key;
+        if( DCPS_debug_level > 0) {
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) Service_Participant::set_repo_domain: ")
+            ACE_TEXT("Domain[ %d] = Repo[ %d].\n"),
+            domain, key
+          ));
+        }
       }
-      this->domainRepoMap_[ domain] = repo;
-      if( DCPS_debug_level > 0) {
-        ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) Domain[ %d] == Repo[ %d]\n"),
-          domain, repo
-        ));
+
+      //
+      // Make sure that we mark each DomainParticipant for this domain
+      // using this repository as attached to this repository.
+      //
+      // @TODO: Move this note into user documentation.
+      // N.B. Calling set_repo() or set_repo_ior() will result in this
+      //      code executing again with the new repository.  It is best
+      //      to call those routines first when making changes.
+      //
+
+      // No servant means no participant.  No worries.
+      if( 0 != this->dp_factory_servant_) {
+        // Map of domains to sets of participants.
+        const DomainParticipantFactoryImpl::DPMap& participants
+          = this->dp_factory_servant_->participants();
+
+        // Extract the set of participants for the current domain.
+        DomainParticipantFactoryImpl::DPMap::const_iterator
+          which  = participants.find( domain);
+        if( which != participants.end()) {
+          // Extract the repository to attach this domain to.
+          RepoMap::const_iterator location = this->repoMap_.find( key);
+          if( location != this->repoMap_.end()) {
+            for( DomainParticipantFactoryImpl::DPSet::const_iterator
+                 current  = which->second.begin();
+                 current != which->second.end();
+                 ++current
+               ) {
+              // Attach each DomainParticipant in this domain to this
+              // repository.
+              RepoId id = current->svt_->get_id();
+              location->second->attach_participant( domain, id);
+              if( DCPS_debug_level > 0) {
+                ::OpenDDS::DCPS::GuidConverter converter( id);
+                ACE_DEBUG((LM_DEBUG,
+                  ACE_TEXT("(%P|%t) Participant %s attached to Repo[ %d].\n"),
+                  (const char*) converter,
+                  key
+                ));
+              }
+            }
+          }
+        }
       }
     }
 
@@ -659,17 +706,45 @@ namespace OpenDDS
           location = this->repoMap_.find( repo);
           if( location == this->repoMap_.end()) {
             // The default IOR was invalid.
+            if( DCPS_debug_level > 0) {
+              ACE_DEBUG((LM_DEBUG,
+                ACE_TEXT("(%P|%t) Service_Participant::get_repository: ")
+                ACE_TEXT("failed attempt to set default IOR for domain %d.\n"),
+                domain
+              ));
+            }
             return OpenDDS::DCPS::DCPSInfo::_nil();
 
           } else {
             // Found the default!
+            if( DCPS_debug_level > 4) {
+              ACE_DEBUG((LM_DEBUG,
+                ACE_TEXT("(%P|%t) Service_Participant::get_repository: ")
+                ACE_TEXT("returning default repository for domain %d.\n"),
+                domain
+              ));
+            }
             return OpenDDS::DCPS::DCPSInfo::_duplicate( location->second);
           }
 
         } else {
           // Non-default repositories _must_ be loaded by application.
+          if( DCPS_debug_level > 4) {
+            ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) Service_Participant::get_repository: ")
+              ACE_TEXT("repository for domain %d was not set.\n"),
+              domain
+            ));
+          }
           return OpenDDS::DCPS::DCPSInfo::_nil();
         }
+      }
+      if( DCPS_debug_level > 4) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) Service_Participant::get_repository: ")
+          ACE_TEXT("returning repository for domain %d.\n"),
+          domain
+        ));
       }
       return OpenDDS::DCPS::DCPSInfo::_duplicate( location->second);
     }

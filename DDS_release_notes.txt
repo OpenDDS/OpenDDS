@@ -2,6 +2,33 @@ Version 1.2 of OpenDDS.
 
 New to this version are the following changes:
 
+- Added the ability for using multiple repositories to provide redundant
+  service metadata management.
+
+  The ability to federate repositories and redirect applications to
+  attach to a new repository in the event a repository fails or becomes
+  unreachable.  This is an experimental feature.
+
+- Removed requirement for repository domain specification files.
+
+  Repositories will manage DomainParticipants and their contained
+  Entities in any domain without requiring the domain to be prespecified
+  in a configuration file.  This removes the '-d' command line argument
+  from the repositories as well.
+
+- Internal service Entity identifiers have been expanded to 128 bits.
+
+  These internal identifiers were previously 32 bits.  The 128 format
+  follows the format of OMG Specification formal/08-04-09 (The Real-time
+  Publish-Subscribe Wire Protocol DDS Interoperability Wire Protocol
+  Specification, Version 2.0) GUID_t unique identifier type.
+
+  OpenDDS places the identifier value for the DataWriter Entity of a
+  publication on the wire to identify the source of data samples.  This
+  means that this version of OpenDDS WILL NOT INTEROPERATE with previous
+  versions since the 128 values are not compatible with the previous 32
+  bit values.
+
 - Java Bindings for OpenDDS
 
   See $DDS_ROOT/java/README, $DDS_ROOT/java/INSTALL, $DDS_ROOT/java/FAQ

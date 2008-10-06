@@ -23,14 +23,12 @@ unlink "Foo.txt";
 $status = 0;
 
 $num_threads_to_write=5;
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "dcps_ir.ior";
 
 unlink $dcpsrepo_ior; 
 
 $DCPSREPO = PerlDDS::create_process ("../../../../DDS/DCPSInfoRepo",
-                               "-o $dcpsrepo_ior"
-                               . " -d $domains_file");
+                               "-o $dcpsrepo_ior ");
 
 #Test with multiple write threads and non blocking write.
 $FooTest_1 = PerlDDS::create_process ("FooTest3NoKey",

@@ -1,4 +1,5 @@
 #include  "dds/DdsDcpsInfoC.h"
+#include  "dds/DCPS/GuidUtils.h"
 #include  "DCPSDataWriterI.h"
 
 #include "ace/Arg_Shifter.h"
@@ -92,14 +93,14 @@ main (int argc, char *argv[])
       ::DDS::DomainParticipantQos_var dpQos = new ::DDS::DomainParticipantQos;
       CORBA::Long domainId = 911;
 
-      CORBA::Long dpId = info->add_domain_participant(domainId, dpQos.in());
-      if (0 == dpId)
+      OpenDDS::DCPS::RepoId dpId = info->add_domain_participant(domainId, dpQos.in());
+      if (OpenDDS::DCPS::GUID_UNKNOWN == dpId)
         {
           ACE_ERROR((LM_ERROR, ACE_TEXT("add_domain_participant failed!\n") ));
         }
 
       // add a topic
-      CORBA::Long topicId;
+      OpenDDS::DCPS::RepoId topicId;
       const char* tname = "MYtopic";
       const char* dname = "MYdataname";
       ::DDS::TopicQos_var topicQos = new ::DDS::TopicQos;
@@ -132,20 +133,20 @@ main (int argc, char *argv[])
       OpenDDS::DCPS::TransportInterfaceInfo_var tii = new OpenDDS::DCPS::TransportInterfaceInfo;
       ::DDS::PublisherQos_var pQos = new ::DDS::PublisherQos;
 
-      CORBA::Long pubId = info->add_publication(domainId,
-                                                dpId,
-                                                topicId,
-                                                dw.in(),
-                                                dwq.in(),
-                                                tii.in(),
-                                                pQos.in());
-      if (0 == pubId)
+      OpenDDS::DCPS::RepoId pubId = info->add_publication(domainId,
+                                                          dpId,
+                                                          topicId,
+                                                          dw.in(),
+                                                          dwq.in(),
+                                                          tii.in(),
+                                                          pQos.in());
+      if (OpenDDS::DCPS::GUID_UNKNOWN == pubId)
         {
           ACE_ERROR((LM_ERROR, ACE_TEXT("add_publication failed!\n") ));
         }
 
       // add an inconsistent topic
-      CORBA::Long topicId2;
+      OpenDDS::DCPS::RepoId topicId2;
       const char* tname2 = "MYtopic";
       const char* dname2 = "MYnewdataname";
       ::DDS::TopicQos_var topicQos2 = new ::DDS::TopicQos;
@@ -182,19 +183,19 @@ main (int argc, char *argv[])
 
 
       // Set up the incompatible qos test
-      CORBA::Long dpIdAlmost = 0;
-      CORBA::Long topicIdAlmost;
+      OpenDDS::DCPS::RepoId dpIdAlmost = OpenDDS::DCPS::GUID_UNKNOWN;
+      OpenDDS::DCPS::RepoId topicIdAlmost;
       TAO_DDS_DCPSDataWriter_i* dwiAlmost = new TAO_DDS_DCPSDataWriter_i;
       PortableServer::ServantBase_var safe_servant = dwiAlmost;
       OpenDDS::DCPS::DataWriterRemote_var dwAlmost;
       ::DDS::DataWriterQos_var dwqAlmost = 0;
-      CORBA::Long pubIdAlmost = 0;
+      OpenDDS::DCPS::RepoId pubIdAlmost = OpenDDS::DCPS::GUID_UNKNOWN;
 
       if (qos_tests)
       {
 
         dpIdAlmost = info->add_domain_participant(domainId, dpQos.in());
-        if (0 == dpIdAlmost)
+        if( OpenDDS::DCPS::GUID_UNKNOWN == dpIdAlmost)
           {
             ACE_ERROR((LM_ERROR, ACE_TEXT("add_domain_participant for qos test failed!\n") ));
           }
@@ -235,7 +236,7 @@ main (int argc, char *argv[])
                                             dwqAlmost.in(),
                                             tii.in(),
                                             pQos.in());
-        if (0 == pubId)
+        if( OpenDDS::DCPS::GUID_UNKNOWN == pubId)
           {
             ACE_ERROR((LM_ERROR, ACE_TEXT("add_publication for qos test failed!\n") ));
           }

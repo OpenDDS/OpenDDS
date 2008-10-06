@@ -24,7 +24,6 @@ else {
   exit 1;
 }
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 
 unlink $dcpsrepo_ior;
@@ -38,9 +37,8 @@ $parameters = "$svc_config -DCPSLivelinessFactor 300 -z " ;
 
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                    "$svc_config -o $dcpsrepo_ior"
                                      #. " -ORBDebugLevel 1 "
-                                     . " -d $domains_file");
+                                    "$svc_config -o $dcpsrepo_ior ");
 
 $FooTest4 = PerlDDS::create_process ("FooTest4_0", $parameters);
 print $FooTest4->CommandLine(), "\n";

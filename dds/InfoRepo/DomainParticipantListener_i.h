@@ -5,6 +5,7 @@
 #ifndef DOMAINPARTICIPANTLISTENER_I_H
 #define DOMAINPARTICIPANTLISTENER_I_H
 
+#include "inforepo_export.h"
 #include "dds/DdsDcpsDomainS.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -12,7 +13,7 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 //Class OPENDDS_DCPS_DomainParticipantListener_i
-class OPENDDS_DCPS_DomainParticipantListener_i : public virtual DDS::DomainParticipantListener
+class OpenDDS_InfoRepoLib_Export OPENDDS_DCPS_DomainParticipantListener_i : public virtual DDS::DomainParticipantListener
 {
 public:
   //Constructor

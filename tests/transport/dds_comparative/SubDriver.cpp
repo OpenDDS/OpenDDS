@@ -232,7 +232,10 @@ SubDriver::parse_arg_p(const char* arg, bool& flag)
   std::string pub_id_str(arg_str,0,pos);
   std::string pub_addr_str(arg_str,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
 
-  OpenDDS::DCPS::RepoId pub_id = ACE_OS::atoi(pub_id_str.c_str());
+  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 1
+  converter.kind()   = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
+  converter.key()[2] = ACE_OS::atoi( pub_id_str.c_str());
+  OpenDDS::DCPS::RepoId pub_id = converter;
 
   ACE_INET_Addr pub_addr(pub_addr_str.c_str());
 
@@ -287,7 +290,10 @@ SubDriver::parse_arg_s(const char* arg, bool& flag)
   std::string sub_id_str(arg_str,0,pos);
   this->sub_addr_str_ = std::string (arg_str,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
 
-  OpenDDS::DCPS::RepoId sub_id = ACE_OS::atoi(sub_id_str.c_str());
+  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 2
+  converter.kind()   = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
+  converter.key()[2] = ACE_OS::atoi( sub_id_str.c_str());
+  OpenDDS::DCPS::RepoId sub_id = converter;
 
   this->local_address_ = ACE_INET_Addr(this->sub_addr_str_.c_str());
 

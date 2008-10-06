@@ -11,16 +11,19 @@
 #ifndef DCPS_IR_PARTICIPANT_H
 #define DCPS_IR_PARTICIPANT_H
 
+#include  "inforepo_export.h"
 #include /**/ "dds/DdsDcpsInfrastructureC.h"
 #include /**/ "dds/DdsDcpsInfoS.h"
-#include /**/ "DCPS_Entity_Id_Generator.h"
+
+#include "GuidGenerator.h"
+
 #include /**/ "ace/Map_Manager.h"
-#include /**/ "ace/Null_Mutex.h"
 
 #include /**/ "DCPS_IR_Subscription.h"
 #include /**/ "DCPS_IR_Publication.h"
 #include /**/ "DCPS_IR_Topic.h"
 
+#include <map>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -28,11 +31,14 @@
 
 // forward declarations
 class DCPS_IR_Domain;
-class UpdateManager;
+namespace Update { class Manager; }
 
-typedef ACE_Map_Manager<OpenDDS::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex> DCPS_IR_Subscription_Map;
-typedef ACE_Map_Manager<OpenDDS::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex> DCPS_IR_Publication_Map;
-typedef ACE_Map_Manager<OpenDDS::DCPS::RepoId,DCPS_IR_Topic*,ACE_Null_Mutex> DCPS_IR_Topic_Map;
+typedef std::map< OpenDDS::DCPS::RepoId, DCPS_IR_Subscription*, GUID_tKeyLessThan>
+          DCPS_IR_Subscription_Map;
+typedef std::map< OpenDDS::DCPS::RepoId, DCPS_IR_Publication*, GUID_tKeyLessThan>
+          DCPS_IR_Publication_Map;
+typedef std::map< OpenDDS::DCPS::RepoId, DCPS_IR_Topic*, GUID_tKeyLessThan>
+          DCPS_IR_Topic_Map;
 
 typedef ACE_Unbounded_Set<OpenDDS::DCPS::RepoId> TAO_DDS_RepoId_Set;
 
@@ -44,15 +50,35 @@ typedef ACE_Unbounded_Set<OpenDDS::DCPS::RepoId> TAO_DDS_RepoId_Set;
  *
  *
  */
-class DCPS_IR_Participant
+class OpenDDS_InfoRepoLib_Export DCPS_IR_Participant
 {
 public:
-  DCPS_IR_Participant (OpenDDS::DCPS::RepoId id,
+  /// Special owner to enforce no callbacks.
+  enum { OWNER_NONE};
+
+  DCPS_IR_Participant (long federationId,
+                       OpenDDS::DCPS::RepoId id,
                        DCPS_IR_Domain* domain,
                        ::DDS::DomainParticipantQos qos,
-		       UpdateManager* um);
+		       Update::Manager* um);
 
   virtual ~DCPS_IR_Participant();
+
+  /// Take local ownership of this participant and publish an update.
+  void takeOwnership();
+
+  /// Process an incoming update that changes ownership.
+  void changeOwner( long sender, long owner);
+
+  /// Value of the owner for this participant.
+  long owner() const;
+
+  /// Indication of whether the current repository is the owner of this participant.
+  bool isOwner() const;
+
+  /// Flag to discriminate the built-in topic publishing participant within a domain.
+  bool& isBitPublisher();
+  bool  isBitPublisher() const;
 
   /// Add a publication
   /// This takes ownership of the memory pointed to by pub
@@ -66,7 +92,7 @@ public:
   /// Removes the publication with the id
   /// Deletes the publication object if returns successful
   /// Returns 0 if successful
-  int remove_publication (long pubId);
+  int remove_publication (OpenDDS::DCPS::RepoId pubId);
 
   /// Add a subscription
   /// This takes ownership of the memory pointed to by aub
@@ -80,7 +106,7 @@ public:
   /// Removes the subscription with the id
   /// Deletes the subscription object if returns successful
   /// Returns 0 if successful
-  int remove_subscription (long subId);
+  int remove_subscription (OpenDDS::DCPS::RepoId subId);
 
   /// Add a topic
   /// Returns 0 if added, 1 if already exists, -1 other failure
@@ -89,13 +115,13 @@ public:
   /// Remove a topic reference
   /// Does not change or take ownership of topic
   /// Returns 0 if successful
-  int remove_topic_reference (long topicId,
+  int remove_topic_reference (OpenDDS::DCPS::RepoId topicId,
                               DCPS_IR_Topic*& topic);
 
   /// Find topic reference with id
   /// Does NOT give ownership of memory
   /// Returns 0 if successful
-  int find_topic_reference (long topicId,
+  int find_topic_reference (OpenDDS::DCPS::RepoId topicId,
                             DCPS_IR_Topic*& topic);
 
   /// Removes all topics, publications and
@@ -148,6 +174,25 @@ public:
 
   DCPS_IR_Domain* get_domain_reference () const;
 
+  // Next Entity Id value in sequence.
+  OpenDDS::DCPS::RepoId get_next_topic_id();
+  OpenDDS::DCPS::RepoId get_next_publication_id();
+  OpenDDS::DCPS::RepoId get_next_subscription_id();
+
+  // Ensure no conflicts with sequence values from persistent storage.
+  void last_topic_key(        long key);
+  void last_publication_key(  long key);
+  void last_subscription_key( long key);
+
+  /// Expose a readable reference to the publication map.
+  const DCPS_IR_Publication_Map& publications() const;
+
+  /// Expose a readable reference to the subscription map.
+  const DCPS_IR_Subscription_Map& subscriptions() const;
+
+  /// Expose a readable reference to the topic map.
+  const DCPS_IR_Topic_Map& topics() const;
+
 private:
   OpenDDS::DCPS::RepoId id_;
   DCPS_IR_Domain* domain_;
@@ -155,6 +200,17 @@ private:
   CORBA::Boolean aliveStatus_;
   ::DDS::InstanceHandle_t handle_;
   CORBA::Boolean isBIT_;
+
+  long federationId_;
+  long owner_;
+
+  /// Lock portions ownership processing.
+  ACE_SYNCH_MUTEX ownerLock_;
+
+  // Entity GUID Id generators.
+  GuidGenerator topicIdGenerator_;
+  GuidGenerator publicationIdGenerator_;
+  GuidGenerator subscriptionIdGenerator_;
 
   DCPS_IR_Subscription_Map subscriptions_;
   DCPS_IR_Publication_Map publications_;
@@ -169,9 +225,12 @@ private:
   // The participant is the only entity that has and deals with
   //  dependencies (topics, actors). In handling dependencies it
   //  encompasses a bigger role. Therefore it needs to update
-  //  other entities (specifically the UpdateManager) the
+  //  other entities (specifically the Update::Manager) the
   //  changes it makes.
-  UpdateManager* um_;
+  Update::Manager* um_;
+
+  /// Flag indicating this participant publishes built-in topics.
+  bool isBitPublisher_;
 };
 
 

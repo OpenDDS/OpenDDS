@@ -5,6 +5,7 @@
 #define OPENDDS_DCPS_PACKETREMOVEVISTOR_H
 
 #include "dds/DCPS/dcps_export.h"
+#include "dds/DCPS/GuidUtils.h"
 #include "BasicQueueVisitor_T.h"
 #include "TransportDefs.h"
 #include "TransportReplacedElement.h"

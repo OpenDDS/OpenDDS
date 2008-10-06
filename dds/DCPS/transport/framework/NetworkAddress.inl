@@ -4,7 +4,6 @@
 #include "EntryExit.h"
 
 #include <ace/CDR_Base.h>
-#include <sstream>
 
 ACE_INLINE
 OpenDDS::DCPS::NetworkAddress::NetworkAddress()

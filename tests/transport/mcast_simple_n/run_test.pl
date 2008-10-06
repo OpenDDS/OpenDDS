@@ -77,7 +77,7 @@ $publisher  = PerlDDS::create_process( $publisherCmd,  $publisherArgs) ;
 #
 print $subscriber->CommandLine() . "\n";
 $subscriber->Spawn() ;
-if (PerlACE::waitforfile_timed ($subreadyfile, 15) == -1) {
+if (PerlACE::waitforfile_timed ($subreadyfile, 30) == -1) {
     print STDERR "ERROR: waiting for subscriber file\n";
     $subscriber->Kill ();
     exit 1;

@@ -59,7 +59,6 @@ else {
   exit 1;
 }
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 $repo_bit_conf = $use_svc_conf ? "-ORBSvcConf ../../tcp.conf" : '';
 
@@ -68,8 +67,7 @@ unlink $dcpsrepo_ior;
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                              "$repo_bit_conf "
 #                           . "-ORBDebugLevel 1 "
-                           . "-o $dcpsrepo_ior "
-                           . "-d $domains_file ");
+                           . "-o $dcpsrepo_ior ");
 
 
 print $DCPSREPO->CommandLine(), "\n";

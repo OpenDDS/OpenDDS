@@ -13,11 +13,48 @@ use DDS_Run_Test;
 
 $status = 0;
 
+########################################
+#
+my $debug ;# = 10;
+my $repoDebug;
+my $pubDebug;
+my $subDebug;
+$repoDebug = $debug if not $repoDebug and $debug;
+$pubDebug  = $debug if not $pubDebug  and $debug;
+$subDebug  = $debug if not $subDebug  and $debug;
+
+my $transportDebug ;# = 10;
+my $repoTransportDebug;
+my $pubTransportDebug;
+my $subTransportDebug;
+$repoTransportDebug = $debug if not $repoTransportDebug and $transportDebug;
+$pubTransportDebug  = $debug if not $pubTransportDebug  and $transportDebug;
+$subTransportDebug  = $debug if not $subTransportDebug  and $transportDebug;
+
+my $debugFile;
+
+my $repoDebugOpts = "";
+$repoDebugOpts .= "-DCPSTransportDebugLevel $repoTransportDebug " if $repoTransportDebug;
+$repoDebugOpts .= "-DCPSDebugLevel $repoDebug " if $repoDebug;
+$repoDebugOpts .= "-ORBLogFile $debugFile "     if $repoDebug and $debugFile;
+
+my $pubDebugOpts = "";
+$pubDebugOpts .= "-DCPSTransportDebugLevel $pubTransportDebug " if $pubTransportDebug;
+$pubDebugOpts .= "-DCPSDebugLevel $pubDebug " if $pubDebug;
+$pubDebugOpts .= "-ORBLogFile $debugFile "    if $pubDebug and $debugFile;
+
+my $subDebugOpts = "";
+$subDebugOpts .= "-DCPSTransportDebugLevel $subTransportDebug " if $subTransportDebug;
+$subDebugOpts .= "-DCPSDebugLevel $subDebug " if $subDebug;
+$subDebugOpts .= "-ORBLogFile $debugFile "    if $subDebug and $debugFile;
+#
+########################################
+
 $use_svc_conf = !new PerlACE::ConfigList->check_config ('STATIC');
 
 $opts = $use_svc_conf ? "-ORBSvcConf tcp.conf" : '';
-$pub_opts = "$opts -DCPSConfigFile pub.ini";
-$sub_opts = "$opts -DCPSConfigFile sub.ini";
+$pub_opts = "$opts $pubDebugOpts -DCPSConfigFile pub.ini";
+$sub_opts = "$opts $subDebugOpts -DCPSConfigFile sub.ini";
 
 if ($ARGV[0] eq 'udp') {
     $opts = ($use_svc_conf ? "-ORBSvcConf udp.conf" : '') . " -t udp";
@@ -52,7 +89,6 @@ elsif ($ARGV[0] ne '') {
 $repo_svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
                  : "-ORBSvcConf ../../tcp.conf";
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 $info_prst_file = "info.pr";
 $repo_bit_opt = "$repo_svc_config -NOBITS";
@@ -65,7 +101,7 @@ unlink $info_prst_file;
 # If InfoRepo is running in persistent mode, use a
 #  static endpoint (instead of transient)
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                    "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file "
+                                    "$repo_bit_opt $repoDebugOpts -o $dcpsrepo_ior "
                                     . "-ORBSvcConf mySvc.conf "
                                     . "-orbendpoint iiop://:$SRV_PORT");
 $Subscriber = PerlDDS::create_process ("subscriber", "$app_bit_opt $sub_opts");
@@ -83,6 +119,11 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
 print "Spawning publisher.\n";
 print $Publisher->CommandLine() . "\n";
 $Publisher->Spawn ();
+
+# Attempt to ensure that the Publisher has the first participant value to
+# test that the participant numbering is reset during the persistence
+# update/download/whatEVER.
+sleep 5;
 
 print "Spawning first subscriber.\n";
 print $Subscriber->CommandLine() . "\n";

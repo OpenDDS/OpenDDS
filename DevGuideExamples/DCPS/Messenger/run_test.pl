@@ -77,13 +77,12 @@ elsif ($ARGV[0] ne '') {
     exit 1;
 }
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-				  "-ORBDebugLevel 10 -ORBLogFile DCPSInfoRepo.log $repo_bit_opt -o $dcpsrepo_ior -d $domains_file");
+				  "-ORBDebugLevel 10 -ORBLogFile DCPSInfoRepo.log $repo_bit_opt -o $dcpsrepo_ior ");
 
 if($stack_based == 0) {
   #create

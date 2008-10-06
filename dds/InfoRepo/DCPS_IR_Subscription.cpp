@@ -10,6 +10,7 @@
 #include /**/ "dds/DCPS/Qos_Helper.h"
 #include /**/ "tao/debug.h"
 
+#include <sstream>
 
 DCPS_IR_Subscription::DCPS_IR_Subscription (OpenDDS::DCPS::RepoId id,
                                             DCPS_IR_Participant* participant,
@@ -60,45 +61,91 @@ int DCPS_IR_Subscription::add_associated_publication (DCPS_IR_Publication* pub)
         associationSeq[0].pubQos = *(pub->get_publisher_qos());
         associationSeq[0].writerQos = *(pub->get_datawriter_qos());
 
-        if (participant_->is_alive())
+        if (participant_->is_alive() && this->participant_->isOwner())
           {
             try
               {
-                if (TAO_debug_level > 0)
+                if (::OpenDDS::DCPS::DCPS_debug_level > 0)
                  {
+                    std::stringstream buffer;
+                    long handle;
+                    handle = ::OpenDDS::DCPS::GuidConverter( this->id_);
+                    buffer << this->id_ << "(" << std::hex << handle << ")";
+
+                    std::stringstream publicationBuffer;
+                    OpenDDS::DCPS::RepoId pubId = pub->get_id();
+                    handle = ::OpenDDS::DCPS::GuidConverter( pubId);
+                    publicationBuffer << pubId << "(" << std::hex << handle << ")";
+
                     ACE_DEBUG((LM_DEBUG,
                       ACE_TEXT("(%P|%t) DCPS_IR_Subscription::add_associated_publication:")
-                      ACE_TEXT(" calling sub %d with pub %d\n"),
-                      id_, pub->get_id() ));
+                      ACE_TEXT(" subscription %s adding publication %s.\n"),
+                      buffer.str().c_str(),
+                      publicationBuffer.str().c_str()
+                    ));
                  }
                 reader_->add_associations(id_, associationSeq);
               }
             catch (const CORBA::Exception& ex)
               {
                 ex._tao_print_exception (
-                  "ERROR: Exception caught in DCPS_IR_Subscription::add_associated_publication:");
+                  "(%P|%t) ERROR: Exception caught in DCPS_IR_Subscription::add_associated_publication:");
                 participant_->mark_dead();
                 status = -1;
               }
           }
 
-        if (TAO_debug_level > 0)
+        if (::OpenDDS::DCPS::DCPS_debug_level > 0)
           {
-            ACE_DEBUG((LM_DEBUG, ACE_TEXT("DCPS_IR_Subscription::add_associated_publication ")
-              ACE_TEXT("Successfully added publication %X\n"),
-              pub));
+            ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) DCPS_IR_Subscription::add_associated_publication: ")
+              ACE_TEXT("successfully added publication %x\n"),
+              pub
+            ));
           }
       }
       break;
+
     case 1:
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Subscription::add_associated_publication ")
-        ACE_TEXT("Attempted to add existing publication %X\n"),
-        pub));
+      {
+        std::stringstream buffer;
+        long handle;
+        handle = ::OpenDDS::DCPS::GuidConverter( this->id_);
+        buffer << this->id_ << "(" << std::hex << handle << ")";
+
+        std::stringstream publicationBuffer;
+        OpenDDS::DCPS::RepoId pubId = pub->get_id();
+        handle = ::OpenDDS::DCPS::GuidConverter( pubId);
+        publicationBuffer << pubId << "(" << std::hex << handle << ")";
+
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Subscription::add_associated_publication: ")
+          ACE_TEXT("subscription %s attempted to re-add publication %s\n"),
+          buffer.str().c_str(),
+          publicationBuffer.str().c_str()
+        ));
+      }
       break;
+
     case -1:
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Subscription::add_associated_publication ")
-        ACE_TEXT("Unknown error while adding publication %X\n"),
-        pub));
+      {
+        std::stringstream buffer;
+        long handle;
+        handle = ::OpenDDS::DCPS::GuidConverter( this->id_);
+        buffer << this->id_ << "(" << std::hex << handle << ")";
+
+        std::stringstream publicationBuffer;
+        OpenDDS::DCPS::RepoId pubId = pub->get_id();
+        handle = ::OpenDDS::DCPS::GuidConverter( pubId);
+        publicationBuffer << pubId << "(" << std::hex << handle << ")";
+
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Subscription::add_associated_publication: ")
+          ACE_TEXT("subscription %s failed to add publication %s\n"),
+          buffer.str().c_str(),
+          publicationBuffer.str().c_str()
+        ));
+      }
     };
 
 
@@ -118,7 +165,7 @@ int DCPS_IR_Subscription::remove_associated_publication (DCPS_IR_Publication* pu
       OpenDDS::DCPS::WriterIdSeq idSeq(5);
       idSeq.length(1);
       idSeq[0] = pub->get_id();
-      if (participant_->is_alive())
+      if (participant_->is_alive() && this->participant_->isOwner())
         {
           try
             {
@@ -138,10 +185,10 @@ int DCPS_IR_Subscription::remove_associated_publication (DCPS_IR_Publication* pu
             }
           catch (const CORBA::Exception& ex)
             {
-              if (TAO_debug_level > 0)
+              if (::OpenDDS::DCPS::DCPS_debug_level > 0)
                 {
                   ex._tao_print_exception (
-                    "ERROR: Exception caught in DCPS_IR_Subscription::remove_associated_publication:");
+                    "(%P|%t) ERROR: Exception caught in DCPS_IR_Subscription::remove_associated_publication:");
                 }
               participant_->mark_dead();
               marked_dead = true;
@@ -152,18 +199,46 @@ int DCPS_IR_Subscription::remove_associated_publication (DCPS_IR_Publication* pu
   int status = associations_.remove(pub);
   if (0 == status)
     {
-      if (TAO_debug_level > 0)
+      if (::OpenDDS::DCPS::DCPS_debug_level > 0)
         {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("DCPS_IR_Subscription::remove_associated_publication ")
-            ACE_TEXT("Removed publication %X\n"),
-            pub));
+          std::stringstream buffer;
+          long handle;
+          handle = ::OpenDDS::DCPS::GuidConverter( this->id_);
+          buffer << this->id_ << "(" << std::hex << handle << ")";
+
+          std::stringstream publicationBuffer;
+          OpenDDS::DCPS::RepoId pubId = pub->get_id();
+          handle = ::OpenDDS::DCPS::GuidConverter( pubId);
+          publicationBuffer << pubId << "(" << std::hex << handle << ")";
+
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) DCPS_IR_Subscription::remove_associated_publication: ")
+            ACE_TEXT("subscription %s removed publication %s at %x.\n"),
+            buffer.str().c_str(),
+            publicationBuffer.str().c_str(),
+            pub
+          ));
         }
     }
   else
     {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Subscription::remove_associated_publication ")
-        ACE_TEXT("Unable to remove publication %X\n"),
-        pub));
+      std::stringstream buffer;
+      long handle;
+      handle = ::OpenDDS::DCPS::GuidConverter( this->id_);
+      buffer << this->id_ << "(" << std::hex << handle << ")";
+
+      std::stringstream publicationBuffer;
+      OpenDDS::DCPS::RepoId pubId = pub->get_id();
+      handle = ::OpenDDS::DCPS::GuidConverter( pubId);
+      publicationBuffer << pubId << "(" << std::hex << handle << ")";
+
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Subscription::remove_associated_publication: ")
+        ACE_TEXT("subscription %s failed to remove publication %s at %x.\n"),
+        buffer.str().c_str(),
+        publicationBuffer.str().c_str(),
+        pub
+      ));
     } // if (0 == status)
 
   if (marked_dead)
@@ -225,12 +300,38 @@ void DCPS_IR_Subscription::disassociate_participant (OpenDDS::DCPS::RepoId id)
         {
           pub = *iter;
           ++iter;
-          if (TAO_debug_level > 0)
+          if (::OpenDDS::DCPS::DCPS_debug_level > 0)
             {
+              std::stringstream buffer;
+              long handle;
+              handle = ::OpenDDS::DCPS::GuidConverter( this->id_);
+              buffer << this->id_ << "(" << std::hex << handle << ")";
+
+              std::stringstream publicationBuffer;
+              OpenDDS::DCPS::RepoId pubId = pub->get_id();
+              handle = ::OpenDDS::DCPS::GuidConverter( pubId);
+              publicationBuffer << pubId << "(" << std::hex << handle << ")";
+
+              std::stringstream participantBuffer;
+              handle = ::OpenDDS::DCPS::GuidConverter( id);
+              participantBuffer << id << "(" << std::hex << handle << ")";
+
+              std::stringstream publicationParticipantBuffer;
+              OpenDDS::DCPS::RepoId publicationParticipantId
+                = pub->get_participant_id();
+              handle
+                = ::OpenDDS::DCPS::GuidConverter( publicationParticipantId);
+              publicationParticipantBuffer
+                << publicationParticipantId << "(" << std::hex << handle << ")";
+
               ACE_DEBUG((LM_DEBUG,
-                ACE_TEXT("DCPS_IR_Subscription::disassociate_participant () ")
-                ACE_TEXT("Subscription %d testing if pub %d particpant %d = %d\n"),
-                id_, pub->get_id(), pub->get_participant_id(), id));
+                ACE_TEXT("(%P|%t) DCPS_IR_Subscription::disassociate_participant: ")
+                ACE_TEXT("subscription %s testing if publication %s particpant %s == %s.\n"),
+                buffer.str().c_str(),
+                publicationBuffer.str().c_str(),
+                publicationParticipantBuffer.str().c_str(),
+                participantBuffer.str().c_str()
+              ));
             }
           if (id == pub->get_participant_id() )
             {
@@ -246,7 +347,7 @@ void DCPS_IR_Subscription::disassociate_participant (OpenDDS::DCPS::RepoId id)
       if (0 < count)
         {
           idSeq.length(count);
-          if (participant_->is_alive())
+          if (participant_->is_alive() && this->participant_->isOwner())
             {
               try
                 {
@@ -255,10 +356,10 @@ void DCPS_IR_Subscription::disassociate_participant (OpenDDS::DCPS::RepoId id)
                 }
               catch (const CORBA::Exception& ex)
                 {
-                  if (TAO_debug_level > 0)
+                  if (::OpenDDS::DCPS::DCPS_debug_level > 0)
                     {
                       ex._tao_print_exception (
-                        "ERROR: Exception caught in DCPS_IR_Subscription::remove_associations:");
+                        "(%P|%t) ERROR: Exception caught in DCPS_IR_Subscription::disassociate_participant:");
                     }
                   participant_->mark_dead();
                 }
@@ -288,12 +389,38 @@ void DCPS_IR_Subscription::disassociate_topic (OpenDDS::DCPS::RepoId id)
         {
           pub = *iter;
           ++iter;
-          if (TAO_debug_level > 0)
+          if (::OpenDDS::DCPS::DCPS_debug_level > 0)
             {
+              std::stringstream buffer;
+              long handle;
+              handle = ::OpenDDS::DCPS::GuidConverter( this->id_);
+              buffer << this->id_ << "(" << std::hex << handle << ")";
+
+              std::stringstream publicationBuffer;
+              OpenDDS::DCPS::RepoId pubId = pub->get_id();
+              handle = ::OpenDDS::DCPS::GuidConverter( pubId);
+              publicationBuffer << pubId << "(" << std::hex << handle << ")";
+
+              std::stringstream topicBuffer;
+              handle = ::OpenDDS::DCPS::GuidConverter( id);
+              topicBuffer << id << "(" << std::hex << handle << ")";
+
+              std::stringstream publicationTopicBuffer;
+              OpenDDS::DCPS::RepoId publicationTopicId
+                = pub->get_topic_id();
+              handle
+                = ::OpenDDS::DCPS::GuidConverter( publicationTopicId);
+              publicationTopicBuffer
+                << publicationTopicId << "(" << std::hex << handle << ")";
+
               ACE_DEBUG((LM_DEBUG,
-                ACE_TEXT("DCPS_IR_Subscription::disassociate_topic () ")
-                ACE_TEXT("Subscription %d testing if pub %d topic %d = %d\n"),
-                id_, pub->get_id(), pub->get_topic_id(), id));
+                ACE_TEXT("(%P|%t) DCPS_IR_Subscription::disassociate_topic: ")
+                ACE_TEXT("subscription %s testing if publication %s topic %s == %s.\n"),
+                buffer.str().c_str(),
+                publicationBuffer.str().c_str(),
+                publicationTopicBuffer.str().c_str(),
+                topicBuffer.str().c_str()
+              ));
             }
           if (id == pub->get_topic_id() )
             {
@@ -309,7 +436,7 @@ void DCPS_IR_Subscription::disassociate_topic (OpenDDS::DCPS::RepoId id)
       if (0 < count)
         {
           idSeq.length(count);
-          if (participant_->is_alive())
+          if (participant_->is_alive() && this->participant_->isOwner())
             {
               try
                 {
@@ -318,10 +445,10 @@ void DCPS_IR_Subscription::disassociate_topic (OpenDDS::DCPS::RepoId id)
                 }
               catch (const CORBA::Exception& ex)
                 {
-                  if (TAO_debug_level > 0)
+                  if (::OpenDDS::DCPS::DCPS_debug_level > 0)
                     {
                       ex._tao_print_exception (
-                        "ERROR: Exception caught in DCPS_IR_Subscription::remove_associations:");
+                        "(%P|%t) ERROR: Exception caught in DCPS_IR_Subscription::remove_associations:");
                     }
                   participant_->mark_dead();
                 }
@@ -351,12 +478,29 @@ void DCPS_IR_Subscription::disassociate_publication (OpenDDS::DCPS::RepoId id)
         {
           pub = *iter;
           ++iter;
-          if (TAO_debug_level > 0)
+          if (::OpenDDS::DCPS::DCPS_debug_level > 0)
             {
+              std::stringstream buffer;
+              long handle;
+              handle = ::OpenDDS::DCPS::GuidConverter( this->id_);
+              buffer << this->id_ << "(" << std::hex << handle << ")";
+
+              std::stringstream publicationBuffer;
+              OpenDDS::DCPS::RepoId pubId = pub->get_id();
+              handle = ::OpenDDS::DCPS::GuidConverter( pubId);
+              publicationBuffer << pubId << "(" << std::hex << handle << ")";
+
+              std::stringstream idBuffer;
+              handle = ::OpenDDS::DCPS::GuidConverter( id);
+              idBuffer << id << "(" << std::hex << handle << ")";
+
               ACE_DEBUG((LM_DEBUG,
-                ACE_TEXT("DCPS_IR_Subscription::disassociate_publication () ")
-                ACE_TEXT("Subscription %d testing if pub %d = %d\n"),
-                id_, pub->get_id(), id));
+                ACE_TEXT("(%P|%t) DCPS_IR_Subscription::disassociate_publication: ")
+                ACE_TEXT("subscription %s testing if publication %s == %s.\n"),
+                buffer.str().c_str(),
+                publicationBuffer.str().c_str(),
+                idBuffer.str().c_str()
+              ));
             }
           if (id == pub->get_id() )
             {
@@ -372,7 +516,7 @@ void DCPS_IR_Subscription::disassociate_publication (OpenDDS::DCPS::RepoId id)
       if (0 < count)
         {
           idSeq.length(count);
-          if (participant_->is_alive())
+          if (participant_->is_alive() && this->participant_->isOwner())
             {
               try
                 {
@@ -381,10 +525,10 @@ void DCPS_IR_Subscription::disassociate_publication (OpenDDS::DCPS::RepoId id)
                 }
               catch (const CORBA::Exception& ex)
                 {
-                  if (TAO_debug_level > 0)
+                  if (::OpenDDS::DCPS::DCPS_debug_level > 0)
                     {
                       ex._tao_print_exception (
-                        "ERROR: Exception caught in DCPS_IR_Subscription::remove_associations:");
+                        "(%P|%t) ERROR: Exception caught in DCPS_IR_Subscription::remove_associations:");
                     }
                   participant_->mark_dead();
                 }
@@ -396,8 +540,10 @@ void DCPS_IR_Subscription::disassociate_publication (OpenDDS::DCPS::RepoId id)
 
 void DCPS_IR_Subscription::update_incompatible_qos ()
 {
-  reader_->update_incompatible_qos(incompatibleQosStatus_);
-  incompatibleQosStatus_.count_since_last_send = 0;
+  if( this->participant_->isOwner()) {
+    reader_->update_incompatible_qos(incompatibleQosStatus_);
+    incompatibleQosStatus_.count_since_last_send = 0;
+  }
 }
 
 
@@ -442,10 +588,77 @@ const ::DDS::SubscriberQos* DCPS_IR_Subscription::get_subscriber_qos ()
   return &subscriberQos_;
 }
 
+void
+DCPS_IR_Subscription::set_qos( const ::DDS::DataReaderQos& qos)
+{
+  if( false == ( qos == this->qos_)) {
+    if( ::should_check_compatibility_upon_change( qos, this->qos_)
+     && (false == this->compatibleQosChange( qos))) {
+      return;
+    }
+
+    // Check if we should check while we have both values.
+    bool check = ::should_check_association_upon_change( qos, this->qos_);
+
+    // Store the new, compatible, value.
+    this->qos_ = qos;
+
+    if( check) {
+      // This will remove any newly stale associations.
+      this->reevaluate_existing_associations();
+      
+      // Sleep a while to let remove_association handled by DataWriter 
+      // before add_association. Otherwise, new association will have
+      // trouble to connect each other.
+      ACE_OS::sleep (ACE_Time_Value (0, 250000));
+      
+      // This will establish any newly made associations.
+      DCPS_IR_Topic_Description* description
+        = this->topic_->get_topic_description();
+      description->reevaluate_associations (this);
+    }
+
+    this->participant_->get_domain_reference()->publish_subscription_bit( this);
+  }
+}
+
+void
+DCPS_IR_Subscription::set_qos( const ::DDS::SubscriberQos& qos)
+{
+  if( false == ( qos == this->subscriberQos_)) {
+    if( ::should_check_compatibility_upon_change( qos, this->subscriberQos_)
+     && (false == this->compatibleQosChange( qos))) {
+      return;
+    }
+
+    // Check if we should check while we have both values.
+    bool check = ::should_check_association_upon_change( qos, this->subscriberQos_);
+
+    // Store the new, compatible, value.
+    this->subscriberQos_ = qos;
+
+    if( check) {
+      // This will remove any newly stale associations.
+      this->reevaluate_existing_associations();
+      
+      // Sleep a while to let remove_association handled by DataWriter 
+      // before add_association. Otherwise, new association will have
+      // trouble to connect each other.
+      ACE_OS::sleep (ACE_Time_Value (0, 250000));
+      
+      // This will establish any newly made associations.
+      DCPS_IR_Topic_Description* description
+        = this->topic_->get_topic_description();
+      description->reevaluate_associations (this);
+    }
+
+    this->participant_->get_domain_reference()->publish_subscription_bit( this);
+  }
+}
 
 bool DCPS_IR_Subscription::set_qos (const ::DDS::DataReaderQos & qos,
                                     const ::DDS::SubscriberQos & subscriberQos,
-                                    SpecificQos& specificQos)
+                                    Update::SpecificQos& specificQos)
 {
   bool need_evaluate = false;
   bool u_dr_qos = ! (qos_ == qos);
@@ -492,8 +705,10 @@ bool DCPS_IR_Subscription::set_qos (const ::DDS::DataReaderQos & qos,
   }
 
   participant_->get_domain_reference()->publish_subscription_bit (this);
-  specificQos = u_dr_qos ? DataReaderQos : SubscriberQos;
-  
+  specificQos = u_dr_qos?  Update::DataReaderQos:
+                u_sub_qos? Update::SubscriberQos:
+                           Update::NoQos;
+
   return true;
 }
 
@@ -636,6 +851,12 @@ void DCPS_IR_Subscription::set_bit_status (CORBA::Boolean isBIT)
   isBIT_ = isBIT;
 }
 
+
+OpenDDS::DCPS::DataReaderRemote_ptr
+DCPS_IR_Subscription::reader()
+{
+  return OpenDDS::DCPS::DataReaderRemote::_duplicate( this->reader_);
+}
 
 #if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
 
