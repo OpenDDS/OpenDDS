@@ -202,7 +202,7 @@ OpenDDS::DCPS::TransportImpl::reserve_datalink
 /// its own request to attach_transport(TransportImpl*), and this
 /// TransportImpl object is the one to which it should be attached.
 OpenDDS::DCPS::AttachStatus
-OpenDDS::DCPS::TransportImpl::attach_interface(TransportInterface* interface)
+OpenDDS::DCPS::TransportImpl::attach_interface(TransportInterface* tansport_interface)
 {
   DBG_ENTRY_LVL("TransportImpl","attach_interface",6);
 
@@ -221,7 +221,7 @@ OpenDDS::DCPS::TransportImpl::attach_interface(TransportInterface* interface)
                        ATTACH_BAD_TRANSPORT);
     }
 
-    if (bind(interfaces_, interface, interface) != 0)
+    if (bind(interfaces_, tansport_interface, tansport_interface) != 0)
     {
       ACE_ERROR_RETURN((LM_ERROR,
                         "(%P|%t) ERROR: Cannot attach_listener() to TransportImpl "

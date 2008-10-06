@@ -39,6 +39,8 @@ my $pchfile ;
 my $file ;
 my $cpp_only = 0;
 my @extensions;
+my $ext_only;
+my $ext_args;
 
 ########################################################################
 #
@@ -56,7 +58,9 @@ GetOptions( "verbose!"    => \$verbose,
             "timestamp|t" => \$backup,
             "backup!"     => \$backup,
             "cpp_only=i"  => \$cpp_only,
-            "extension=s" => \@extensions
+            "extension=s" => \@extensions,
+            "extension_args=s" => \$ext_args,
+            "extensions_only" => \$ext_only,
 
 ) or pod2usage( 0) ;
 pod2usage( 1)             if $help ;
@@ -92,25 +96,6 @@ if (not scalar @types) {
   exit 1 ;
 }
 
-my %extra_text;
-
-#
-# Invoke extensions
-#
-for my $ext (@extensions) {
-  my @path = split /\/|\\/, $ext;
-  my $file = pop @path;
-  my $inc = join ('/', @path);
-  $inc = '.' if $inc eq '';
-  my @INCsave = @INC;
-  unshift @INC, $inc;
-  require "$file.pm";
-  @INC = @INCsave;
-  my $results = $file->generate (\@types);
-  for my $filetype ('idl', 'h', 'cpp') {
-    $extra_text{$filetype} .= $$results{$filetype};
-  }
-}
 
 
 #
@@ -125,6 +110,30 @@ $idlbase =~ s/\.idl//;
 my $idloutputfile = $idlbase . "TypeSupport.idl" ;
 my $houtputfile   = $idlbase . "TypeSupportImpl.h" ;
 my $cppoutputfile = $idlbase . "TypeSupportImpl.cpp" ;
+
+
+my %extra_text;
+
+#
+# Invoke extensions
+#
+for my $ext (@extensions) {
+  my @path = split /\/|\\/, $ext;
+  my $file = pop @path;
+  my $inc = join ('/', @path);
+  $inc = '.' if $inc eq '';
+  my @INCsave = @INC;
+  unshift @INC, $inc;
+  require "$file.pm";
+  @INC = @INCsave;
+  my $results = $file->generate (\@types, $ext_args,
+                                 [$idloutputfile, $houtputfile, $cppoutputfile]
+                                 );
+  for my $filetype ('idl', 'h', 'cpp') {
+    $extra_text{$filetype} .= $$results{$filetype};
+  }
+}
+
 
 #
 # Rename output files if we need to backup.
@@ -259,7 +268,7 @@ foreach my $type (@types) {
   #
   my $poa = "POA_${module}" ;
 
-  if ($cpp_only == 0) {
+  if ($cpp_only == 0 && !$ext_only) {
     ########################################################################
     #
     # Generate the IDL output file.
@@ -311,27 +320,31 @@ foreach my $type (@types) {
 
   } # endif $cpp_only != 0
 
-  ########################################################################
-  #
-  # Generate the C++ implementation output file.
-  #
+  if (!$ext_only) {
+    ########################################################################
+    #
+    # Generate the C++ implementation output file.
+    #
 
-  #
-  # Slurp the entire template.
-  #
-  my $cpp_template = DCPS::CPPTemplate::contents() ;
+    #
+    # Slurp the entire template.
+    #
+    my $cpp_template = DCPS::CPPTemplate::contents() ;
 
-  #
-  # Convert template tags into the specified values.
-  #
-  $cpp_template =~ s/<%TYPE%>/$basetype/g ;
-  $cpp_template =~ s/<%SCOPE%>/$scopepath/g ;
-  $cpp_template =~ s/<%MODULE%>/$module/g ;
-  $cpp_template =~ s/<%NAMESPACESTART%>/$namespacestart/g ;
-  $cpp_template =~ s/<%NAMESPACEEND%>/$namespaceend/g ;
-  $cpp_template =~ s/<%COUNT%>/$count/g;
+    #
+    # Convert template tags into the specified values.
+    #
+    $cpp_template =~ s/<%TYPE%>/$basetype/g ;
+    $cpp_template =~ s/<%SCOPE%>/$scopepath/g ;
+    $cpp_template =~ s/<%MODULE%>/$module/g ;
+    $cpp_template =~ s/<%NAMESPACESTART%>/$namespacestart/g ;
+    $cpp_template =~ s/<%NAMESPACEEND%>/$namespaceend/g ;
+    $cpp_template =~ s/<%COUNT%>/$count/g;
 
-  $cpp_content .= $cpp_template;
+    $cpp_content .= $cpp_template;
+
+  }
+
   $count++;
 }
 
@@ -349,6 +362,10 @@ $h_content .= $h_footer;
 #
 # Put the results in the file.
 #
+if ($ext_only) {
+  exit 0;
+}
+
 if (open(IDLFILE, ">$idloutputfile")) {
   print IDLFILE $idl_content;
   close(IDLFILE);

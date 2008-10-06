@@ -6,8 +6,8 @@ New to this version are the following changes:
   service metadata management.
 
   The ability to federate repositories and redirect applications to
-  attach to a new repository in the event a repository failes or becomes
-  unreachable.
+  attach to a new repository in the event a repository fails or becomes
+  unreachable.  This is an experimental feature.
 
 - Removed requirement for repository domain specification files.
 
@@ -28,6 +28,19 @@ New to this version are the following changes:
   means that this version of OpenDDS WILL NOT INTEROPERATE with previous
   versions since the 128 values are not compatible with the previous 32
   bit values.
+
+- Java Bindings for OpenDDS
+
+  See $DDS_ROOT/java/README, $DDS_ROOT/java/INSTALL, $DDS_ROOT/java/FAQ
+
+- dcps_ts.pl changes
+
+  Modified this script to create a single idl, header, and source file
+  no matter how many types are contained within the input idl file.  This
+  allows the output file names to be based upon the input file name (instead
+  of the types found in the idl file).  Users of prior OpenDDS versions can
+  use the script $DDS_ROOT/bin/update_dcps.pl to assist with this transition.
+
 
 =========================================================================
 
@@ -107,7 +120,7 @@ New to this version are the following changes:
 
   Fixed a bug in qos serialization. The TAO_OutputCDR stream was not
   fully copied to buffer when the qos contains sequence data. The
-  TAO_OutputCDR stream needs be cosolidated before memcpy.
+  TAO_OutputCDR stream needs be consolidated before memcpy.
 
 - Fixed compliance with qos RxO.
 
@@ -738,7 +751,7 @@ New to this version are the following changes:
     problem.
 
 --- more notes and limitations ---
-  This section adds on to the "KNONW LIMITATIONS" section at the bottom
+  This section adds on to the "KNOWN LIMITATIONS" section at the bottom
   of this document.
 
   - A transport instance may only be used by publications and subscriptions
