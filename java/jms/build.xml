@@ -109,7 +109,7 @@
                 </or>
             </and>
         </condition>
-        <condition property="idl.make.arguments" value="Debug"> // TODO
+        <condition property="idl.make.arguments" value="Debug"> <!-- TODO -->
             <os family="windows"/>
         </condition>
      </target>
