@@ -1,10 +1,3 @@
-Mon Oct  6 21:23:56 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
-
-        * history/ChangeLog-Federation:
-
-	  Moved branch ChangeLog into history in preparation for merging
-	  back to trunk.
-
 Mon Oct  6 20:47:10 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         Merging trunk changes 1357:1428 out to branch.
