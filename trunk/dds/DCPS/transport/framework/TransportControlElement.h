@@ -5,6 +5,7 @@
 #define OPENDDS_DCPS_TRANSPORTGDCONTROLELEMENT_H
 
 #include "dds/DCPS/dcps_export.h"
+#include "dds/DCPS/GuidUtils.h"
 #include "TransportDefs.h"
 #include "TransportQueueElement.h"
 

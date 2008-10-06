@@ -50,7 +50,7 @@ namespace OpenDDS
     typedef std::set<DataReaderImpl *> DataReaderSet ;
 
     // DataReader id to qos map.
-    typedef std::map<RepoId, ::DDS::DataReaderQos> DrIdToQosMap;
+    typedef std::map<RepoId, ::DDS::DataReaderQos, GUID_tKeyLessThan> DrIdToQosMap;
 
     //Class SubscriberImpl
     class OpenDDS_Dcps_Export SubscriberImpl
@@ -241,7 +241,7 @@ namespace OpenDDS
       DomainParticipantImpl*        participant_;
       ::DDS::DomainParticipant_var  participant_objref_;
 
-      DCPSInfo_var                  repository_;
+      ::DDS::DomainId_t             domain_id_;
 
       /// this lock protects the data structures in this class.
       /// It also projects the TransportInterface (it must be held when

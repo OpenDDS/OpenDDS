@@ -82,7 +82,6 @@ else {
   exit 1;
 }
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 
 unlink $dcpsrepo_ior; 

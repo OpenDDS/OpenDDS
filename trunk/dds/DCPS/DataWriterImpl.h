@@ -403,7 +403,7 @@ namespace OpenDDS
       /// via the bit datareader.
       bool bit_lookup_instance_handles (const ReaderIdSeq& ids,
                                          ::DDS::InstanceHandleSeq & hdls);
-
+ 
       /// Lookup the cache to get the instance handle by the
       /// subscription repo ids.
       bool cache_lookup_instance_handles (const ReaderIdSeq& ids,
@@ -451,14 +451,12 @@ namespace OpenDDS
       /// The lock to protect the activate subscriptions
       /// and status changes.
       ACE_Recursive_Thread_Mutex                lock_;
-      /// The list of active subscriptions.
-      ::DDS::InstanceHandleSeq        subscription_handles_;
 
-      typedef std::map<RepoId, DDS::InstanceHandle_t> RepoIdToHandleMap;
+      typedef std::map<RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan> RepoIdToHandleMap;
 
       RepoIdToHandleMap               id_to_handle_map_;
 
-      typedef std::set<RepoId>        IdSet;
+      typedef std::set<RepoId, GUID_tKeyLessThan> IdSet;
 
       IdSet                           readers_;
 

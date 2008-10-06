@@ -14,6 +14,8 @@
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 #include <string>
 
+#include <sstream>
+
 const long  TEST_DOMAIN   = 911;
 const char* TEST_TOPIC    = "foo";
 const char* TEST_TOPIC_TYPE     = "foo";
@@ -185,9 +187,13 @@ int ignore ()
       //SHH one of these should be the subscriber participant and the other should be the publisher participant.
       ::OpenDDS::DCPS::RepoId ignore_id = participant_servant->get_id ();
 
+      std::stringstream participantBuffer;
+      participantBuffer << part_id;
+      std::stringstream ignoreBuffer;
+      ignoreBuffer << ignore_id;
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) IGNORE_PARTICIPANT,  participant %d ignore participant %d .\n"),
-                 part_id, ignore_id));
+                 ACE_TEXT("(%P|%t) IGNORE_PARTICIPANT,  participant %s ignore participant %s .\n"),
+                 participantBuffer.str().c_str(), ignoreBuffer.str().c_str()));
 
       ::DDS::InstanceHandleSeq handles;
       ::OpenDDS::DCPS::ReaderIdSeq ignore_ids;
@@ -214,14 +220,20 @@ int ignore ()
         return -1;
       }
 
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) IGNORE_PARTICIPANT,  ignored participant %s has handle %d.\n"),
+        ignoreBuffer.str().c_str(),
+        handles[0]
+      ));
+
       ret = participant->ignore_participant (handles[0]);
 
       if (ret != ::DDS::RETCODE_OK)
       {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT("(%P|%t) IGNORE_PARTICIPANT, ")
-                    ACE_TEXT(" participant %d ignore participant %d returned error %d\n"),
-                    part_id, ignore_id, ret));
+                    ACE_TEXT(" participant %s ignore participant %s returned error %d\n"),
+                    participantBuffer.str().c_str(), ignoreBuffer.str().c_str(), ret));
         return -1;
       }
     }
@@ -232,9 +244,13 @@ int ignore ()
       ::OpenDDS::DCPS::RepoId part_id = participant_servant->get_id ();
       ::OpenDDS::DCPS::RepoId ignore_id = topic_servant->get_id ();
 
+      std::stringstream participantBuffer;
+      participantBuffer << part_id;
+      std::stringstream ignoreBuffer;
+      ignoreBuffer << ignore_id;
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) IGNORE_TOPIC, participant %d ignore topic %d .\n"),
-                 part_id, ignore_id));
+                 ACE_TEXT("(%P|%t) IGNORE_TOPIC, participant %s ignore topic %s .\n"),
+                 participantBuffer.str().c_str(), ignoreBuffer.str().c_str()));
 
       ::DDS::InstanceHandleSeq handles;
       ::OpenDDS::DCPS::ReaderIdSeq ignore_ids;
@@ -261,6 +277,12 @@ int ignore ()
         return -1;
       }
 
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) IGNORE_TOPIC,  ignored topic %s has handle %d.\n"),
+        ignoreBuffer.str().c_str(),
+        handles[0]
+      ));
+
       ret = participant->ignore_topic (handles[0]);
 
       if (ret != ::DDS::RETCODE_OK)
@@ -278,9 +300,13 @@ int ignore ()
       ::OpenDDS::DCPS::RepoId part_id = participant_servant->get_id ();
       ::OpenDDS::DCPS::RepoId ignore_id = datawriter_servant->get_publication_id ();
 
+      std::stringstream participantBuffer;
+      participantBuffer << part_id;
+      std::stringstream ignoreBuffer;
+      ignoreBuffer << ignore_id;
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) IGNORE_PUBLICATION, participant %d ignore publication %d .\n"),
-                 part_id, ignore_id));
+                 ACE_TEXT("(%P|%t) IGNORE_PUBLICATION, participant %s ignore publication %s .\n"),
+                 participantBuffer.str().c_str(), ignoreBuffer.str().c_str()));
 
       ::DDS::InstanceHandleSeq handles;
       ::OpenDDS::DCPS::ReaderIdSeq ignore_ids;
@@ -308,6 +334,12 @@ int ignore ()
         return -1;
       }
 
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) IGNORE_PUBLICATION,  ignored topic %s has handle %d.\n"),
+        ignoreBuffer.str().c_str(),
+        handles[0]
+      ));
+
       ret = participant->ignore_publication (handles[0]);
 
       if (ret != ::DDS::RETCODE_OK)
@@ -325,9 +357,13 @@ int ignore ()
       ::OpenDDS::DCPS::RepoId part_id = participant_servant->get_id ();
       ::OpenDDS::DCPS::RepoId ignore_id = datareader_servant->get_subscription_id ();
 
+      std::stringstream participantBuffer;
+      participantBuffer << part_id;
+      std::stringstream ignoreBuffer;
+      ignoreBuffer << ignore_id;
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) IGNORE_SUBSCRIPTION, participant %d ignore subscription %d .\n"),
-                 part_id, ignore_id));
+                 ACE_TEXT("(%P|%t) IGNORE_SUBSCRIPTION, participant %s ignore subscription %s .\n"),
+                 participantBuffer.str().c_str(), ignoreBuffer.str().c_str()));
 
       ::DDS::InstanceHandleSeq handles;
       ::OpenDDS::DCPS::ReaderIdSeq ignore_ids;
@@ -354,13 +390,19 @@ int ignore ()
         return -1;
       }
 
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) IGNORE_SUBSCRIPTION,  ignored topic %s has handle %d.\n"),
+        ignoreBuffer.str().c_str(),
+        handles[0]
+      ));
+
       ret = participant->ignore_subscription (handles[0]);
 
       if (ret != ::DDS::RETCODE_OK)
       {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT("(%P|%t) IGNORE_SUBSCRIPTION, ")
-                    ACE_TEXT(" ignore_subscription %d returned error 5d\n"),
+                    ACE_TEXT(" ignore_subscription %d returned error %d\n"),
                     handles[0], ret));
         return -1;
       }

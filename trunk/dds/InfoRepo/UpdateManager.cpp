@@ -1,3 +1,5 @@
+// -*- C++ -*-
+// $Id$
 #include "DcpsInfo_pch.h"
 
 #include "UpdateManager.h"
@@ -9,37 +11,39 @@
 
 #include <vector>
 
-UpdateManager::UpdateManager (void)
+namespace Update {
+
+Manager::Manager (void)
   : info_ (0)
 {
 }
 
-UpdateManager::~UpdateManager (void)
+Manager::~Manager (void)
 {
 }
 
 void
-UpdateManager::add (TAO_DDS_DCPSInfo_i* info)
+Manager::add (TAO_DDS_DCPSInfo_i* info)
 {
   info_ = info;
 }
 
 void
-UpdateManager::add (Updater* updater)
+Manager::add (Updater* updater)
 {
   // push new element to the back.
   updaters_.insert (updater);
 }
 
 void
-UpdateManager::remove ()
+Manager::remove ()
 {
   // Clean the refrence to the InfoRepo.
   info_ = 0;
 }
 
 void
-UpdateManager::remove (const Updater* updater)
+Manager::remove (const Updater* updater)
 {
   // check if the Updaters is part of the list.
   Updaters::iterator iter = updaters_.find(const_cast<Updater*>(updater));
@@ -52,19 +56,19 @@ UpdateManager::remove (const Updater* updater)
 }
 
 int
-UpdateManager::init (int , ACE_TCHAR *[])
+Manager::init (int , ACE_TCHAR *[])
 {
   return 0;
 }
 
 int
-UpdateManager::fini (void)
+Manager::fini (void)
 {
   return 0;
 }
 
 void
-UpdateManager::requestImage (void)
+Manager::requestImage (void)
 {
   for (Updaters::iterator iter = updaters_.begin();
        iter != updaters_.end();
@@ -102,7 +106,7 @@ private:
 
 
 void
-UpdateManager::pushImage (const DImage& image)
+Manager::pushImage (const DImage& image)
 {
   if (info_ == NULL) {
     return;
@@ -119,6 +123,38 @@ UpdateManager::pushImage (const DImage& image)
   // passed by reference. Usage of a custom guard class 'SeqGuard'
   // automates memory cleanup.
   ***************************/
+
+
+  // Participant buckets
+  SeqGuard< ::DDS::DomainParticipantQos> part_qos_guard;
+  SeqGuard< ::DDS::DomainParticipantQos>::Seq& part_qos = part_qos_guard.seq ();
+
+  SeqGuard<UParticipant> part_guard;
+  SeqGuard< UParticipant>::Seq& parts = part_guard.seq ();
+
+  for (DImage::ParticipantSeq::const_iterator iter = image.participants.begin();
+       iter != image.participants.end(); iter++)
+    {
+      const DParticipant& part = *iter;
+
+      TAO_InputCDR in_cdr (part.participantQos.second.second
+                          , part.participantQos.second.first);
+
+      ::DDS::DomainParticipantQos* qos;
+      ACE_NEW_NORETURN (qos, ::DDS::DomainParticipantQos);
+      in_cdr >> *qos;
+      part_qos.push_back (qos);
+
+      UParticipant* u_part;
+      ACE_NEW_NORETURN (u_part, UParticipant (part.domainId
+                                              , part.owner
+                                              , part.participantId
+                                              , *qos));
+      parts.push_back (u_part);
+
+      // push newly created UParticipant into UImage Participant bucket
+      u_image.participants.push_back (u_part);
+    }
 
   // Topic buckets
   SeqGuard< ::DDS::TopicQos> topics_qos_guard;
@@ -150,37 +186,6 @@ UpdateManager::pushImage (const DImage& image)
 
       // Push newly created UTopic into UImage Topic bucket
       u_image.topics.push_back (u_topic);
-    }
-
-
-  // Participant buckets
-  SeqGuard< ::DDS::DomainParticipantQos> part_qos_guard;
-  SeqGuard< ::DDS::DomainParticipantQos>::Seq& part_qos = part_qos_guard.seq ();
-
-  SeqGuard<UParticipant> part_guard;
-  SeqGuard< UParticipant>::Seq& parts = part_guard.seq ();
-
-  for (DImage::ParticipantSeq::const_iterator iter = image.participants.begin();
-       iter != image.participants.end(); iter++)
-    {
-      const DParticipant& part = *iter;
-
-      TAO_InputCDR in_cdr (part.participantQos.second.second
-                          , part.participantQos.second.first);
-
-      ::DDS::DomainParticipantQos* qos;
-      ACE_NEW_NORETURN (qos, ::DDS::DomainParticipantQos);
-      in_cdr >> *qos;
-      part_qos.push_back (qos);
-
-      UParticipant* u_part;
-      ACE_NEW_NORETURN (u_part, UParticipant (part.domainId
-                                              , part.participantId
-                                              , *qos));
-      parts.push_back (u_part);
-
-      // push newly created UParticipant into UImage Participant bucket
-      u_image.participants.push_back (u_part);
     }
 
   // Actor buckets
@@ -268,7 +273,7 @@ UpdateManager::pushImage (const DImage& image)
           u_image.wActors.push_back (writer);
         }
       else {
-        ACE_ERROR ((LM_ERROR, "UpdateManager::pushImage> unknown "
+        ACE_ERROR ((LM_ERROR, "Update::Manager::pushImage> unknown "
                     "actor type.\n"));
       }
     }
@@ -277,107 +282,18 @@ UpdateManager::pushImage (const DImage& image)
 }
 
 void
-UpdateManager::add (const UTopic& topic)
-{
-  if (updaters_.empty()) {
-    return;
-  }
-
-  // serialize the Topic QOS
-  TAO_OutputCDR outCdr;
-  outCdr << topic.topicQos;
-  ACE_Message_Block dst;
-  ACE_CDR::consolidate (&dst, outCdr.begin ());
-
-  size_t len = dst.length();
-  char *buf;
-  ACE_NEW_NORETURN (buf, char[len]);
-  ArrDelAdapter<char> guard (buf);
-  if (buf == 0) {
-    ACE_ERROR ((LM_ERROR, "UpdateManager::add> Allocation failed.\n"));
-    return;
-  }
-
-  ACE_OS::memcpy (buf, dst.base(), len);
-
-  BinSeq qos_bin (len, buf);
-
-  QosSeq p (TopicQos, qos_bin);
-  DTopic topic_data (topic.domainId, topic.topicId, topic.participantId
-                     , topic.name.c_str(), topic.dataType.c_str(), p);
-
-  // Invoke add on each of the iterators.
-  for (Updaters::iterator iter = updaters_.begin();
-       iter != updaters_.end();
-       iter++) {
-    (*iter)->add (topic_data);
-  }
-}
-
-void
-UpdateManager::add(const UParticipant& participant)
-{
-  if (updaters_.empty()) {
-    return;
-  }
-
-  // serialize the Topic QOS
-  TAO_OutputCDR outCdr;
-  outCdr << participant.participantQos;
-  ACE_Message_Block dst;
-  ACE_CDR::consolidate (&dst, outCdr.begin ());
-
-  size_t len = dst.length();
-  char *buf;
-  ACE_NEW_NORETURN (buf, char[len]);
-  ArrDelAdapter<char> guard (buf);
-  if (buf == 0) {
-    ACE_ERROR ((LM_ERROR, "UpdateManager::add2> Allocation failed.\n"));
-    return;
-  }
-
-  ACE_OS::memcpy (buf, dst.base(), len);
-
-  BinSeq qos_bin (len, buf);
-
-  QosSeq p (ParticipantQos, qos_bin);
-  DParticipant paticipant_data
-    (participant.domainId, participant.participantId, p);
-
-  // Invoke add on each of the iterators.
-  for (Updaters::iterator iter = updaters_.begin();
-       iter != updaters_.end();
-       iter++) {
-    (*iter)->add (paticipant_data);
-  }
-}
-
-void
-UpdateManager::remove (ItemType type, const IdType& id)
+Manager::destroy( const IdPath& id, ItemType type, ActorType actor)
 {
   // Invoke remove on each of the iterators.
   for (Updaters::iterator iter = updaters_.begin();
        iter != updaters_.end();
        iter++) {
-    (*iter)->remove (type, id);
+    (*iter)->destroy( id, type, actor);
   }
 }
 
 void
-UpdateManager::updateQos(const ItemType& itemType, const IdType& id
-			 , const QosSeq& qos)
-{
-  // Invoke updateQos on each of the iterators.
-  for (Updaters::iterator iter = updaters_.begin();
-       iter != updaters_.end();
-       iter++) {
-    (*iter)->updateQos (itemType, id, qos);
-  }
-}
-
-
-void
-UpdateManager::add (const DTopic& topic)
+Manager::add (const DTopic& topic)
 {
   if (info_ == NULL) {
     return;
@@ -397,7 +313,7 @@ UpdateManager::add (const DTopic& topic)
 }
 
 void
-UpdateManager::add (const DParticipant& participant)
+Manager::add (const DParticipant& participant)
 {
   if (info_ == NULL) {
     return;
@@ -417,7 +333,7 @@ UpdateManager::add (const DParticipant& participant)
 }
 
 void
-UpdateManager::add (const DActor& actor)
+Manager::add (const DActor& actor)
 {
   if (info_ == NULL) {
     return;
@@ -468,28 +384,24 @@ UpdateManager::add (const DActor& actor)
     }
 }
 
-void
-UpdateManager::add (Updater* updater, const DActor& actor)
-{
-  updater->add (actor);
-}
+} // End of namespace Update
 
 int
-UpdateManager_Loader::init (void)
+UpdateManagerSvc_Loader::init (void)
 {
   return ACE_Service_Config::process_directive
-    (ace_svc_desc_UpdateManager);
+    (ace_svc_desc_UpdateManagerSvc);
   return 0;
 }
 
-ACE_FACTORY_DEFINE (ACE_Local_Service, UpdateManager)
+ACE_FACTORY_DEFINE (ACE_Local_Service, UpdateManagerSvc)
 
-ACE_STATIC_SVC_DEFINE (UpdateManager,
-                         ACE_TEXT ("UpdateManager"),
+ACE_STATIC_SVC_DEFINE (UpdateManagerSvc,
+                         ACE_TEXT ("UpdateManagerSvc"),
                          ACE_SVC_OBJ_T,
-                         &ACE_SVC_NAME (UpdateManager),
+                         &ACE_SVC_NAME (UpdateManagerSvc),
                          ACE_Service_Type::DELETE_THIS
                          | ACE_Service_Type::DELETE_OBJ,
                          0)
 
-  //ACE_STATIC_SVC_REQUIRE (UpdateManager)
+  //ACE_STATIC_SVC_REQUIRE (Update::UpdateManager)

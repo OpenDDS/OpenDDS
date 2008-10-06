@@ -18,15 +18,19 @@ use Pod::Usage ;
 #
 my $help;
 my $man;
+my $transportDebug;
 my $debug;
+my $debugFile;
 my $nobit;
 my $udp;
 
-GetOptions( "help|?"      => \$help,
-            "man"         => \$man,
-            "debug|d=i"   => \$debug,
-            "udp|u"       => \$udp,
-            "nobit|x"     => \$nobit,
+GetOptions( "help|?"        => \$help,
+            "man"           => \$man,
+            "debug|d=i"     => \$debug,
+            "transport|t=i" => \$transportDebug,
+            "logfile|f=s"   => \$debugFile,
+            "udp|u"         => \$udp,
+            "nobit|x"       => \$nobit,
 
 ) or pod2usage( 0) ;
 pod2usage( 1)             if $help ;
@@ -36,7 +40,6 @@ my $status = 0;
 my $failed = 0;
 
 my $repo_ior     = PerlACE::LocalFile ("repo.ior");
-my $domains_file = PerlACE::LocalFile ("domain_ids");
 
 my $publisher_ini  = PerlACE::LocalFile ("dds_tcp_conf.ini");
 my $pub_udp_ini    = PerlACE::LocalFile ("pub_udp_conf.ini");
@@ -47,6 +50,8 @@ my $sub2_udp_ini   = PerlACE::LocalFile ("sub2_udp_conf.ini");
 # Change how test is configured according to which test we are.
 my $common_opts    = "-ORBSvcConf ./tcp.conf ";
    $common_opts   .= "-DCPSDebugLevel $debug " if $debug;
+   $common_opts   .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
+   $common_opts   .= "-ORBLogFile $debugFile " if $debugFile;
 my $repo_opts      = "-ORBEndpoint iiop://localhost:12345";
 my $publisher_opts = "-DCPSConfigFile $publisher_ini ";
 my $sub1_opts      = "-DCPSConfigFile $publisher_ini ";
@@ -63,7 +68,7 @@ if( $nobit) {
   $common_opts .= "-DCPSBit 0 ";
 }
 
-my $repo_args        = "$common_opts $repo_opts -d $domains_file ";
+my $repo_args        = "$common_opts $repo_opts ";
 my $publisher_args   = "$common_opts $publisher_opts ";
 my $subscriber1_args = "$common_opts $sub1_opts ";
 my $subscriber2_args = "$common_opts $sub2_opts ";
@@ -166,6 +171,9 @@ Options:
 
   -d NUMBER | --DCPSDebugLevel=NUMBER
                 set the corresponding DCPS debug level
+
+  -f FILENAME | --logfile=FILENAME
+                set the logfile name
 
   -u | --udp    execute using UDP transport
 

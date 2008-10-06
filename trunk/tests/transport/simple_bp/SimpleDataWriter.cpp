@@ -14,7 +14,7 @@
 
 
 SimpleDataWriter::SimpleDataWriter()
-  : pub_id_(0),
+  : pub_id_( OpenDDS::DCPS::GUID_UNKNOWN),
     num_messages_sent_(0),
     num_messages_delivered_(0)
 {

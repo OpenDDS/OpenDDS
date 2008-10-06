@@ -19,6 +19,10 @@ class BadReaderListenerException : public virtual TestException {
   public: virtual const char* what() const throw() { return "BadReaderListener"; }
 };
 
+class BadWriterListenerException : public virtual TestException {
+  public: virtual const char* what() const throw() { return "BadWriterListener"; }
+};
+
 class BadParticipantException : public virtual TestException {
   public: virtual const char* what() const throw() { return "BadParticipant"; }
 };

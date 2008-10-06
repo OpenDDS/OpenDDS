@@ -2,25 +2,43 @@
 //
 // $Id$
 #include "UpdateListener_T.h"
-#include "FederatorManagerImpl.h"
+#include "dds/DCPS/debug.h"
 
 namespace OpenDDS { namespace Federator {
 
 template< class DataType, class ReaderType>
-UpdateListener< DataType, ReaderType>::UpdateListener( ManagerImpl& manager)
- : manager_( manager)
+UpdateListener< DataType, ReaderType>::UpdateListener( UpdateProcessor< DataType>& processor)
+ : federationId_( NIL_REPOSITORY), receiver_( processor)
 {
-  ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) UpdateListener::UpdateListener\n")
-  ));
+  if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) UpdateListener::UpdateListener\n")
+    ));
+  }
 }
 
 template< class DataType, class ReaderType>
 UpdateListener< DataType, ReaderType>::~UpdateListener(void)
 {
-  ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) UpdateListener::~UpdateListener\n")
-  ));
+  if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) UpdateListener::~UpdateListener\n")
+    ));
+  }
+}
+
+template< class DataType, class ReaderType>
+RepoKey&
+UpdateListener< DataType, ReaderType>::federationId()
+{
+  return this->federationId_;
+}
+
+template< class DataType, class ReaderType>
+RepoKey
+UpdateListener< DataType, ReaderType>::federationId() const
+{
+  return this->federationId_;
 }
 
 template< class DataType, class ReaderType>
@@ -47,19 +65,31 @@ ACE_THROW_SPEC((
       return;
     }
 
-    DataType            sample;
-    ::DDS::SampleInfo   info;
-    ::DDS::ReturnCode_t status = dataReader->read_next_sample( sample, info);
+    // Process all available data.
+    while( true) {
+      DataType*           sample = new DataType();
+      ::DDS::SampleInfo*  info   = new ::DDS::SampleInfo();
+      ::DDS::ReturnCode_t status = dataReader->read_next_sample( *sample, *info);
 
-    if( status == ::DDS::RETCODE_OK) {
-      // Delegate processing to the federation manager.
-      this->manager_.update( sample, info);
+      if( status == ::DDS::RETCODE_OK) {
+        // Check if we should process the sample.
+        if( (this->federationId() != NIL_REPOSITORY) 
+         && (this->federationId() != sample->sender)) {
 
-    } else {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: UpdateListener::on_data_available: read status==%d\n"),
-        status
-      ));
+          // Delegate processing to the federation manager.
+          this->receiver_.put( sample, info);
+        }
+
+      } else if( status == ::DDS::RETCODE_NO_DATA) {
+        break;
+
+      } else {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: UpdateListener::on_data_available: read status==%d\n"),
+          status
+        ));
+        break;
+      }
     }
 
   } catch( const CORBA::Exception& ex) {

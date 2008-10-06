@@ -457,7 +457,7 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
                 ACE_TCHAR xbuffer[4096];
                 int xbytes =
                         this->receive_buffers_[this->buffer_index_]->length();
-                if (xbytes > 8) { xbytes = 8; }
+                if (xbytes > 11) { xbytes = 11; }
                 ACE::format_hexdump
                        (this->receive_buffers_[this->buffer_index_]->rd_ptr(),
                         xbytes, xbuffer, sizeof(xbuffer)) ;
@@ -631,13 +631,11 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
 
             if( initial == this->buffer_index_)
               {
-                //
-                // All buffers are empty, we have no more data to process.
-                //
-                VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-                           "We have 'consumed' all of the received data.  "
-                           "We are done (for now)\n"));
-                return 0;
+                // At this point we have a data sample with no data.
+                // This is actually Ok, since some control messages -
+                // specifically the DATAWRITER_LIVELINESS messages
+                // contain no data.
+                break;
               }
           }
 
@@ -798,6 +796,11 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
             this->receive_sample_.sample_->release() ;
             this->receive_sample_.sample_ = 0 ;
           }
+
+        if( amount == 0) {
+          // Relinquish control if there is no more data to process.
+          return 0;
+        }
 
       } // End of while( this->receive_transport_header_.length_ > 0)
 

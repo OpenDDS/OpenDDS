@@ -73,6 +73,13 @@ parse_args (int argc, char *argv[])
 int main (int argc, char *argv[]) {
   try
     {
+      if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) publisher: ")
+          ACE_TEXT("initialization starting.\n")
+        ));
+      }
+
       DDS::DomainParticipantFactory_var dpf =
         TheParticipantFactoryWithArgs(argc, argv);
       DDS::DomainParticipant_var participant =
@@ -84,8 +91,22 @@ int main (int argc, char *argv[]) {
         return 1;
       }
 
+      if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) publisher: ")
+          ACE_TEXT("participant created.\n")
+        ));
+      }
+
       if (parse_args (argc, argv) == -1) {
         return -1;
+      }
+
+      if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) publisher: ")
+          ACE_TEXT("arguments extracted.\n")
+        ));
       }
 
       MessageTypeSupportImpl* servant = new MessageTypeSupportImpl();
@@ -96,6 +117,13 @@ int main (int argc, char *argv[]) {
       }
 
       CORBA::String_var type_name = servant->get_type_name ();
+
+      if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) publisher: ")
+          ACE_TEXT("type support registered.\n")
+        ));
+      }
 
       DDS::TopicQos topic_qos;
       participant->get_default_topic_qos(topic_qos);
@@ -109,9 +137,23 @@ int main (int argc, char *argv[]) {
         exit(1);
       }
 
+      if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) publisher: ")
+          ACE_TEXT("topic created.\n")
+        ));
+      }
+
       OpenDDS::DCPS::TransportImpl_rch tcp_impl =
         TheTransportFactory->create_transport_impl (transport_impl_id,
                                                     ::OpenDDS::DCPS::AUTO_CONFIG);
+
+      if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) publisher: ")
+          ACE_TEXT("transport created.\n")
+        ));
+      }
 
       DDS::Publisher_var pub =
         participant->create_publisher(PUBLISHER_QOS_DEFAULT,
@@ -121,12 +163,26 @@ int main (int argc, char *argv[]) {
         exit(1);
       }
 
+      if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) publisher: ")
+          ACE_TEXT("publisher created.\n")
+        ));
+      }
+
       // Attach the publisher to the transport.
       OpenDDS::DCPS::PublisherImpl* pub_impl =
         dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub.in ());
       if (0 == pub_impl) {
         cerr << "Failed to obtain publisher servant" << endl;
         exit(1);
+      }
+
+      if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) publisher: ")
+          ACE_TEXT("servant extracted.\n")
+        ));
       }
 
       OpenDDS::DCPS::AttachStatus status = pub_impl->attach_transport(tcp_impl.in());
@@ -151,6 +207,13 @@ int main (int argc, char *argv[]) {
         exit(1);
       }
 
+      if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) publisher: ")
+          ACE_TEXT("transport attached.\n")
+        ));
+      }
+
       // Create the datawriter
       DDS::DataWriterQos dw_qos;
       pub->get_default_datawriter_qos (dw_qos);
@@ -162,9 +225,24 @@ int main (int argc, char *argv[]) {
         cerr << "create_datawriter failed." << endl;
         exit(1);
       }
+
+      if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) publisher: ")
+          ACE_TEXT("datawriter created.\n")
+        ));
+      }
+
       size_t msg_cnt = 5;
       size_t sub_cnt = 2;
       Writer* writer = new Writer(dw.in(), msg_cnt, sub_cnt);
+
+      if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) publisher: ")
+          ACE_TEXT("processing starting.\n")
+        ));
+      }
 
       writer->start ();
       while ( !writer->is_finished()) {

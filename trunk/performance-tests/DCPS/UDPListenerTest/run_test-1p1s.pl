@@ -28,7 +28,6 @@ $sub_addr="localhost:$sub_port";
 
 $num_msgs_btwn_rec=1;
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 $repo_bit_conf = "-NOBITS";
 $app_bit_conf = "-DCPSBit 0";
@@ -36,8 +35,7 @@ $app_bit_conf = "-DCPSBit 0";
 unlink $dcpsrepo_ior; 
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "$repo_bit_conf -o $dcpsrepo_ior"
-                             . " -d $domains_file");
+                             "$repo_bit_conf -o $dcpsrepo_ior ");
 
 
 print $DCPSREPO->CommandLine(), "\n";

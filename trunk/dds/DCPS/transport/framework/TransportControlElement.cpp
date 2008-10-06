@@ -53,7 +53,7 @@ OpenDDS::DCPS::TransportControlElement::data_delivered()
 OpenDDS::DCPS::RepoId
 OpenDDS::DCPS::TransportControlElement::publication_id() const
 {
-  return 0;
+  return GUID_UNKNOWN;
 }
 
 

@@ -5,7 +5,6 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "TransportInterface.h"
 
-
 #if !defined (__ACE_INLINE__)
 #include "TransportInterface.inl"
 #endif /* __ACE_INLINE__ */
@@ -171,8 +170,23 @@ OpenDDS::DCPS::TransportInterface::add_associations
         // use the local subscriber version.
         if (receive_listener == 0)
           {
-            VDBG((LM_DEBUG,"(%P|%t) TransportInterface::add_associations() pub %d to sub %d\n",
-                  local_id, remote_id));
+            if( DCPS_debug_level > 0) {
+              ACE_TCHAR ebuffer[4096] ;
+              ACE::format_hexdump(
+                (const char*)&remote_associations[i].remote_data_.data[0],
+                remote_associations[i].remote_data_.data.length(),
+                ebuffer, sizeof(ebuffer)
+              ) ;
+              ::OpenDDS::DCPS::GuidConverter localConverter( local_id);
+              ::OpenDDS::DCPS::GuidConverter remoteConverter( remote_id);
+              ACE_DEBUG((LM_DEBUG,
+                ACE_TEXT("(%P|%t) TransportInterface::add_associations: ")
+                ACE_TEXT("publication %s to subscription %s.\n%s\n"),
+                (const char*) localConverter,
+                (const char*) remoteConverter,
+                ebuffer
+              ));
+            }
             // Local publisher, remote subscriber.
             link = this->impl_->reserve_datalink(remote_associations[i].remote_data_,
                                                  remote_id,
@@ -181,8 +195,23 @@ OpenDDS::DCPS::TransportInterface::add_associations
           }
         else
           {
-            VDBG((LM_DEBUG,"(%P|%t) TransportInterface::add_associations() sub %d to pub %d\n",
-                  local_id, remote_id));
+            if( DCPS_debug_level > 0) {
+              ACE_TCHAR ebuffer[4096] ;
+              ACE::format_hexdump(
+                (const char*)&remote_associations[i].remote_data_.data[0],
+                remote_associations[i].remote_data_.data.length(),
+                ebuffer, sizeof(ebuffer)
+              ) ;
+              ::OpenDDS::DCPS::GuidConverter localConverter( local_id);
+              ::OpenDDS::DCPS::GuidConverter remoteConverter( remote_id);
+              ACE_DEBUG((LM_DEBUG,
+                ACE_TEXT("(%P|%t) TransportInterface::add_associations: ")
+                ACE_TEXT("subscription %s to publication %s.\n%s\n"),
+                (const char*) localConverter,
+                (const char*) remoteConverter,
+                ebuffer
+              ));
+            }
             // Local subscriber, remote publisher.
             link = this->impl_->reserve_datalink(remote_associations[i].remote_data_,
                                                  remote_id,
@@ -194,13 +223,17 @@ OpenDDS::DCPS::TransportInterface::add_associations
         if (link.is_nil())
           {
             // reserve_datalink failure
+            ::OpenDDS::DCPS::GuidConverter localConverter( local_id);
+            ::OpenDDS::DCPS::GuidConverter remoteConverter( remote_id);
             ACE_ERROR_RETURN((LM_ERROR,
-                              "(%P|%t) ERROR: Failed to reserve a DataLink with the "
-                              "TransportImpl for association from local "
-                              "[%s %d] to remote [%s %d].\n",
-                              local_id_str,local_id,
-                              remote_id_str,remote_id),
-                             -1);
+              ACE_TEXT("(%P|%t) ERROR: Failed to reserve a DataLink with the ")
+              ACE_TEXT("TransportImpl for association from local ")
+              ACE_TEXT("[%s %s] to remote [%s %s].\n"),
+              local_id_str,
+              (const char*) localConverter,
+              remote_id_str,
+              (const char*) remoteConverter
+            ),-1);
           }
 
         // At this point, the DataLink knows about our association.
@@ -259,10 +292,13 @@ OpenDDS::DCPS::TransportInterface::add_associations
             else
               {
                 // The remote_set->insert_link() failed.
+                ::OpenDDS::DCPS::GuidConverter converter( remote_id);
                 ACE_ERROR((LM_ERROR,
-                           "(%P|%t) ERROR: Failed to insert DataLink into remote_map_ "
-                           "(DataLinkSetMap) for remote [%s %d].\n",
-                           remote_id_str,remote_id));
+                  ACE_TEXT("(%P|%t) ERROR: Failed to insert DataLink into remote_map_ ")
+                  ACE_TEXT("(DataLinkSetMap) for remote [%s %s].\n"),
+                  remote_id_str,
+                  (const char*) converter
+                ));
               }
 
             // "Undo" logic due to error would go here.
@@ -272,10 +308,13 @@ OpenDDS::DCPS::TransportInterface::add_associations
         else
           {
             // The local_set->insert_link() failed.
+            ::OpenDDS::DCPS::GuidConverter converter( local_id);
             ACE_ERROR((LM_ERROR,
-                       "(%P|%t) ERROR: Failed to insert DataLink into "
-                       "local_map_ for local [%s %d].\n",
-                       local_id_str,local_id));
+              ACE_TEXT("(%P|%t) ERROR: Failed to insert DataLink into ")
+              ACE_TEXT("local_map_ for local [%s %s].\n"),
+              local_id_str,
+              (const char*) converter
+            ));
           }
 
         // "Undo" logic due to error would go here.
