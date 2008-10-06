@@ -1,3 +1,9 @@
+Mon Oct  6 21:35:15 UTC 2008  Weiqi Gao  <gaow@ociweb.com>
+
+        * java/jms/build.xml:
+
+          Defined idl.init, idl.clean, and idl targets.
+
 Mon Oct  6 17:10:22 UTC 2008  Weiqi Gao  <gaow@ociweb.com>
 
         * java/jms/idl/Message.idl:
