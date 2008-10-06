@@ -58,16 +58,75 @@
     </target>
 
     <target name="idl.clean">
-        <!-- TODO -->
+        <delete dir="${idl.dir}/classes"/>
+        <delete dir="${idl.dir}/OpenDDS"/>
+        <delete dir="${idl.dir}/Debug"/>
+        <delete dir="${idl.dir}/Release"/>
+        <delete>
+            <fileset dir="${idl.dir}"
+                includes="*.cpp *.h *.inl *TypeSupport.idl *.ncb *.sln *.suo *.vcproj* *.dll *.exp *.ilk *.lib *.pdb"
+                excludes="*Export.h"
+            />
+        </delete>
     </target>
 
     <target name="idl.init">
-        <!-- TODO -->
-    </target>
+        <!-- MPC type -->
+        <condition property="idl.target.type" value="gnuace">
+            <os family="unix"/>
+        </condition>
+        <condition property="idl.target.type" value="vc9">
+            <os family="windows"/>
+        </condition>
+
+        <!-- make or vcbuild or devenv -->
+        <condition property="idl.make.executable" value="make">
+            <os family="unix"/>
+        </condition>
+        <condition property="idl.make.executable" value="vcbuild">
+            <and>
+                <os family="windows"/>
+                <or>
+                    <isset property="env.VS90COMNTOOLS"/>
+                    <isset property="env.VS80COMNTOOLS"/>
+                </or>
+            </and>
+        </condition>
+        <condition property="idl.make.executable" value="devenv">
+            <os family="windows"/>
+        </condition>
+
+        <!-- command line arguments -->
+        <condition property="idl.make.arguments" value="">
+            <os family="unix"/>
+        </condition>
+        <condition property="idl.make.arguments" value="jms_idl.vcproj Debug">
+            <and>
+                <os family="windows"/>
+                <or>
+                    <isset property="env.VS90COMNTOOLS"/>
+                    <isset property="env.VS80COMNTOOLS"/>
+                </or>
+            </and>
+        </condition>
+        <condition property="idl.make.arguments" value="Debug"> // TODO
+            <os family="windows"/>
+        </condition>
+     </target>
 
     <target name="idl" depends="idl.init"
             description="Generate and compile IDL classes under idl/">
-        <!-- TODO -->
+        <!-- run MPC -->
+        <exec executable="perl" dir="${idl.dir}">
+            <arg value="${env.ACE_ROOT}/bin/mwc.pl"/>
+            <arg value="-type"/>
+            <arg value="${idl.target.type}"/>
+        </exec>
+
+        <!-- run make or vcbuild -->
+        <exec executable="${idl.make.executable}" dir="${idl.dir}">
+            <arg line="${idl.make.arguments}"/>
+        </exec>
     </target>
 
     <target name="compile" depends="idl, init"
