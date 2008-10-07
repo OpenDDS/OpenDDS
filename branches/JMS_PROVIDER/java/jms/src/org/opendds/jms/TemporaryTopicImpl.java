@@ -5,19 +5,23 @@
 package org.opendds.jms;
 
 import javax.jms.JMSException;
-import javax.jms.Topic;
+
+import org.opendds.jms.impl.DDSTopic;
 
 /**
  * @author  Steven Stallion
  * @version $Revision$
  */
-public class TopicImpl implements Topic {
+public class TemporaryTopicImpl implements DDSTopic {
 
-    protected String getDestinationName() {
+    public String getDestinationName() {
         return null;
     }
 
     public String getTopicName() throws JMSException {
         return null;
+    }
+
+    public void delete() throws JMSException {
     }
 }
