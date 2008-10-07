@@ -49,16 +49,8 @@ project: taolib, portableserver, core, dcps_bits, coverage_optional {
     CorbaSeq/*.idl
   }
 
-  TypeSupport_Files {
-    DdsDcpsGuid.idl
-  }
-
   IDL_Files {
     idlflags += -Gdcps
     DdsDcpsGuid.idl
-  }
-
-  IDL_Files {
-    DdsDcpsGuidTypeSupport.idl
   }
 }
