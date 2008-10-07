@@ -2,7 +2,7 @@
 // $Id$
 //
 
-project: dcps_tcp, dcps_java {
+project: dcps_java {
 
     sharedname      = jms_idl
 

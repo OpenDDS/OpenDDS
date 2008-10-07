@@ -1,3 +1,9 @@
+Tue Oct  7 21:32:05 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/idl/jms_idl.mpc:
+
+          Removed dcps_tcp dependency.
+
 Tue Oct  7 21:29:10 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/build.properties:
