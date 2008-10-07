@@ -77,10 +77,6 @@
         <delete dir="${build.dir}"/>
     </target>
 
-    <target name="version">
-
-    </target>
-
     <target name="init">
         <mkdir dir="${build.dir}"/>
         <mkdir dir="${build.dir}/classes"/>
