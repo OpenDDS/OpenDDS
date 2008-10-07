@@ -48,12 +48,11 @@ project: dcps, idl2jni, optional_jni_check, dcps_java_optional {
     DDS/DATAWRITER_QOS_USE_TOPIC_QOS.java << DDS/DataWriterQos.java
     DDS/DATAREADER_QOS_USE_TOPIC_QOS.java << DDS/DataReaderQos.java
     OpenDDS/DCPS/transport/TransportImpl.java << DDS/Publisher.java DDS/Subscriber.java
-    OpenDDS/DCPS/transport/TheTransportFactory.java
-    OpenDDS/DCPS/transport/AttachStatus.java
+    OpenDDS/DCPS/transport
   }
 
   // This list should match the Java_Files list above, but these are the .class
-  // files instead of the .java files.
+  // files instead of the .java files.  (Only for classes with native methods.)
   JavaH_Files {
     classes/OpenDDS/DCPS/TheParticipantFactory.class
     classes/OpenDDS/DCPS/TheServiceParticipant.class
@@ -68,6 +67,10 @@ project: dcps, idl2jni, optional_jni_check, dcps_java_optional {
     classes/OpenDDS/DCPS/transport/AttachStatus.class
     classes/OpenDDS/DCPS/transport/TheTransportFactory.class
     classes/OpenDDS/DCPS/transport/TransportImpl.class << classes/OpenDDS/DCPS/transport/TheTransportFactory.class
+    classes/OpenDDS/DCPS/transport/ReliableMulticastConfiguration.class
+    classes/OpenDDS/DCPS/transport/SimpleMcastConfiguration.class
+    classes/OpenDDS/DCPS/transport/SimpleTcpConfiguration.class
+    classes/OpenDDS/DCPS/transport/SimpleUnreliableDgramConfiguration.class
   }
 
 }

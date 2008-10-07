@@ -8,6 +8,13 @@ public final class TheParticipantFactory {
     WithArgs(org.omg.CORBA.StringSeqHolder args);
 
   static {
+    loadNativeLib();
+  }
+
+  // Even though this is public, the user shouldn't need to call it.  The first
+  // class loaded will have a static initializer which calls this function.
+  // It is only made public so that other OpenDDS packages can use it.
+  public static void loadNativeLib () {
     String propVal = System.getProperty("jni.nativeDebug");
     if (propVal != null && ("1".equalsIgnoreCase(propVal) ||
         "y".equalsIgnoreCase(propVal) ||

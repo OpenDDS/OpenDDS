@@ -1,3 +1,38 @@
+Tue Oct  7 22:48:56 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/NullSynchStrategy.h:
+        * dds/DCPS/transport/framework/TransportExceptions.h:
+
+          Added the export macro which is required for ALL C++ CLASSES that
+          can be used by client code.
+
+        * java/dds/OpenDDS/DCPS/TheParticipantFactory.java:
+        * java/dds/OpenDDS/DCPS/transport/ConfigurationConflictException.java:
+        * java/dds/OpenDDS/DCPS/transport/DuplicateException.java:
+        * java/dds/OpenDDS/DCPS/transport/MiscProblemException.java:
+        * java/dds/OpenDDS/DCPS/transport/NotConfiguredException.java:
+        * java/dds/OpenDDS/DCPS/transport/NotFoundException.java:
+        * java/dds/OpenDDS/DCPS/transport/ReliableMulticastConfiguration.java:
+        * java/dds/OpenDDS/DCPS/transport/SimpleMcastConfiguration.java:
+        * java/dds/OpenDDS/DCPS/transport/SimpleTcpConfiguration.java:
+        * java/dds/OpenDDS/DCPS/transport/SimpleUdpConfiguration.java:
+        * java/dds/OpenDDS/DCPS/transport/SimpleUnreliableDgramConfiguration.java:
+        * java/dds/OpenDDS/DCPS/transport/TheTransportFactory.java:
+        * java/dds/OpenDDS/DCPS/transport/TransportConfiguration.java:
+        * java/dds/OpenDDS/DCPS/transport/TransportException.java:
+        * java/dds/OpenDDS/DCPS/transport/TransportImpl.java:
+        * java/dds/OpenDDS/DCPS/transport/UnableToCreateException.java:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * java/dds/OpenDDS_jni_helpers.h:
+        * java/dds/dcps_java.mpc:
+
+          Added programmatic transport configuration from Java.
+
+        * java/tests/dcps_java_tests.lst:
+        * java/tests/transport_config:
+
+          New test for Java programmatic transport configuation.
+
 Tue Oct  7 22:40:00 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/build.xml:
