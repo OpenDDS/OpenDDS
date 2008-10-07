@@ -207,11 +207,11 @@ namespace OpenDDS
 
         /// Called by our friend, the TransportInterface, to attach
         /// itself to this TransportImpl object.
-        AttachStatus attach_interface(TransportInterface* tansport_interface);
+        AttachStatus attach_interface(TransportInterface* transport_interface);
 
         /// Called by our friend, the TransportInterface, to detach
         /// itself to this TransportImpl object.
-        void detach_interface(TransportInterface* tansport_interface);
+        void detach_interface(TransportInterface* transport_interface);
 
         /// Called by our friend, the TransportInterface, to reserve
         /// a DataLink for a remote subscription association

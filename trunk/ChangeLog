@@ -1,18 +1,26 @@
+Tue Oct  7 14:28:59 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Fixed misspelled variable name.
+
 Mon Oct  6 22:22:34 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
-	  Merged the Federation branch back onto the trunk.  This feature
-	  branch developed the basic infrastructure to support federation
-	  of multiple repositories.  This feature is intended to provide
-	  fault-tolerant capabilities to the DCPSInfoRepo service
-	  meta-data repositories.  Details of the development can be
-	  found in the file 'history/ChangeLog-Federation'.
+          Merged the Federation branch back onto the trunk.  This feature
+          branch developed the basic infrastructure to support federation
+          of multiple repositories.  This feature is intended to provide
+          fault-tolerant capabilities to the DCPSInfoRepo service
+          meta-data repositories.  Details of the development can be
+          found in the file 'history/ChangeLog-Federation'.
 
-	  See the file 'DDS_release_notes.txt' for a description
-	  of changes made that affect the user API to OpenDDS.
-	  Briefly, these changes include: removal of domain_ids domain
-	  specification files; extension of internal Id values from 32
-	  to 128 bits; ability to federate multiple repositories for
-	  distributed operation.
+          See the file 'DDS_release_notes.txt' for a description
+          of changes made that affect the user API to OpenDDS.
+          Briefly, these changes include: removal of domain_ids domain
+          specification files; extension of internal Id values from 32
+          to 128 bits; ability to federate multiple repositories for
+          distributed operation.
 
         * DDS_release_notes.txt:
         * DevGuideExamples/DCPS/Messenger/run_corbaloc_test.pl:
@@ -311,8 +319,8 @@ Mon Oct  6 22:22:34 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * tests/transport/udp_simple_n/SubDriver.cpp:
         * tests/transport/udp_simple_n/run_test.pl:
 
-	  These files were either added or modified on the Federation
-	  feature branch.
+          These files were either added or modified on the Federation
+          feature branch.
 
         * DevGuideExamples/DCPS/Messenger/domain_ids:
         * DevGuideExamples/DCPS/Messenger_ZeroCopy/domain_ids:
