@@ -3,19 +3,19 @@
  */
 
 #pragma DCPS_DATA_TYPE "OpenDDS::JMS::MessagePayload"
-#pragma DCPS_DATA_KEY "OpenDDS::JMS::MessagePayload id"
+#pragma DCPS_DATA_KEY "OpenDDS::JMS::MessagePayload theHeaders.JMSMessageID"
 
 module OpenDDS {
 module JMS {
 
     // Headers
     struct MessageHeaders {
-        string JMSDestination; // string for Destination
+        string JMSDestination;
         long JMSDeliveryMode;
         string JMSMessageID;
         long long JMSTimestamp;
         string JMSCorrelationID;
-        string JMSReplyTo;  // string for Destination
+        string JMSReplyTo;
         boolean JMSRedelivered;
         string JMSType;
         long long JMSExpiration;
@@ -132,7 +132,6 @@ module JMS {
     };
 
     struct MessagePayload {
-        long id;
         MessageHeaders theHeaders;
         MessageProperties theProperties;
         MessageBody theBody;
