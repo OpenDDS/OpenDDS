@@ -4,16 +4,16 @@
 
 project: dcps_java {
 
-    sharedname      = jms_idl
+    sharedname      = opendds-jms-native
 
-    dcps_ts_flags   += --export=jms_idl_Export
+    dcps_ts_flags   += --export=opendds_jms_native_Export
 
-    idlflags        += -Wb,stub_export_include=jms_idl_Export.h \
-                       -Wb,stub_export_macro=jms_idl_Export
-    idl2jniflags    += -Wb,stub_export_include=jms_idl_Export.h \
-                       -Wb,stub_export_macro=jms_idl_Export
+    idlflags        += -Wb,stub_export_include=opendds_jms_native_Export.h \
+                       -Wb,stub_export_macro=opendds_jms_native_Export
+    idl2jniflags    += -Wb,stub_export_include=opendds_jms_native_Export.h \
+                       -Wb,stub_export_macro=opendds_jms_native_Export
 
-    dynamicflags    += JMS_IDL_BUILD_DLL
+    dynamicflags    += OPENDDS_JMS_NATIVE_BUILD_DLL
 
     // Older versions of Visual Studio will create the intermediate directories
     // in all-lowercase, so we have to create them first to get the correct case.

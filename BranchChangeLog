@@ -1,3 +1,24 @@
+Tue Oct  7 22:40:00 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/build.xml:
+        * java/jms/native:
+        * java/jms/native/build.xml:
+        * java/jms/native/opendds_jms_native.mpc:
+        * java/jms/native/opendds_jms_native_Export.h:
+        * java/jms/opendds-jms.iml:
+        * java/jms/idl:
+        * java/jms/idl/Message.idl:
+        * java/jms/idl/build.xml:
+        * java/jms/idl/jms_idl.mpc:
+        * java/jms/idl/jms_idl_Export.h:
+
+          Renamed idl to native.
+
+        * java/jms/native/jms_idl.mpc:
+        * java/jms/native/jms_idl_Export.h:
+
+          Removed these files.
+
 Tue Oct  7 22:01:02 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * java/jms/build.xml:
