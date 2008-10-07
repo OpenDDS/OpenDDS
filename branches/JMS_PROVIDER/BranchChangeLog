@@ -1,3 +1,30 @@
+Tue Oct  7 17:47:33 UTC 2008  Weiqi Gao  <gaow@ociweb.com>
+
+        * java/jms/src/org/opendds/jms/DestinationImpl.java
+        * java/jms/src/org/opendds/jms/MapMessageImpl.java
+        * java/jms/src/org/opendds/jms/TextMessageImpl.java
+        * java/jms/src/org/opendds/jms/BytesMessageImpl.java
+        * java/jms/src/org/opendds/jms/StreamMessageImpl.java
+        * java/jms/src/org/opendds/jms/AbstractMessageImpl.java
+        * java/jms/src/org/opendds/jms/ObjectMessageImpl.java
+
+          Partial implementation of the Message hierarchy.
+
+        * java/jms/test/org/opendds/jms/AbstractMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/TextMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/ObjectMessageImplTest.java:
+
+          Tests.
+
+        * java/jms/idl/Message.idl:
+
+          Removed id field from MessagePayload.
+          Using theHeaders.JMSMessageID as the key now.
+
+        * java/jms/build.xml:
+
+          Fixed ${project.classpath} to include only *.jar files.
+
 Tue Oct  7 17:09:25 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/OpenDDS.ipr:
