@@ -10,102 +10,105 @@
 
     <property environment="env"/>
 
+    <condition property="makefile" value="${basedir}/GNUmakefile">
+        <os family="unix"/>
+    </condition>
+    <condition property="makefile" value="${basedir}/${ant.project.name}.vcproj">
+        <os family="windows"/>
+    </condition>
+
+    <available property="makefile.available"
+               file="${makefile}"/>
+
+    <!-- MPC features and type -->
+    <property name="mwc.features" value="java=1"/>
+
+    <condition property="mwc.type" value="gnuace">
+        <os family="unix"/>
+    </condition>
+    <condition property="mwc.type" value="vc9">
+        <os family="windows"/>
+    </condition>
+
+    <uptodate property="mwc.uptodate"
+              targetfile="${basedir}/.mwc">
+        <srcfiles dir="${basedir}">
+            <include name="*.idl"/>
+            <include name="*.mpc"/>
+        </srcfiles>
+    </uptodate>
+
+    <!-- gmake or make or vcbuild or devenv -->
+    <condition property="make.executable" value="gmake">
+        <os name="SunOS"/>
+    </condition>
+    <condition property="make.executable" value="make">
+        <and>
+            <os family="unix"/>
+            <not>
+                <os name="SunOS"/>
+            </not>
+        </and>
+    </condition>
+    <condition property="make.executable" value="vcbuild">
+        <and>
+            <os family="windows"/>
+            <or>
+                <isset property="env.VS90COMNTOOLS"/>
+                <isset property="env.VS80COMNTOOLS"/>
+            </or>
+        </and>
+    </condition>
+    <condition property="make.executable" value="devenv">
+        <os family="windows"/>
+    </condition>
+
+    <!-- command line arguments -->
+    <condition property="make.idl.arguments" value="">
+        <os family="unix"/>
+    </condition>
+    <condition property="make.idl.arguments" value="${makefile} Debug">
+        <and>
+            <os family="windows"/>
+            <or>
+                <isset property="env.VS90COMNTOOLS"/>
+                <isset property="env.VS80COMNTOOLS"/>
+            </or>
+        </and>
+    </condition>
+    <condition property="make.idl.arguments" value="Debug"> <!-- TODO -->
+        <os family="windows"/>
+    </condition>
+
+    <condition property="make.clean.arguments" value="realclean">
+        <os family="unix"/>
+    </condition>
+    <condition property="make.clean.arguments" value="${makefile} /c">
+        <os family="windows"/>
+    </condition>
+
     <!--
         Project Targets
     -->
     <target name="all" depends="clean, idl"/>
 
-    <target name="init">
-        <condition property="makefile" value="${basedir}/GNUmakefile">
-            <os family="unix"/>
-        </condition>
-        <condition property="makefile" value="${basedir}/jms_idl.vcproj">
-            <os family="windows"/>
-        </condition>
-
-        <available property="makefile.available"
-                   file="${makefile}"/>
-
-        <!-- MPC features and type -->
-        <property name="mwc.features" value="java=1"/>
-
-        <condition property="mwc.type" value="gnuace">
-            <os family="unix"/>
-        </condition>
-        <condition property="mwc.type" value="vc9">
-            <os family="windows"/>
-        </condition>
-
-        <uptodate property="mwc.uptodate"
-                  targetfile="${makefile}"
-                  srcfile="${ant.project.name}.mpc"/>
-
-        <!-- gmake or make or vcbuild or devenv -->
-        <condition property="make.executable" value="gmake">
-            <os name="SunOS"/>
-        </condition>
-        <condition property="make.executable" value="make">
-            <and>
-                <os family="unix"/>
-                <not>
-                    <os name="SunOS"/>
-                </not>
-            </and>
-        </condition>
-        <condition property="make.executable" value="vcbuild">
-            <and>
-                <os family="windows"/>
-                <or>
-                    <isset property="env.VS90COMNTOOLS"/>
-                    <isset property="env.VS80COMNTOOLS"/>
-                </or>
-            </and>
-        </condition>
-        <condition property="make.executable" value="devenv">
-            <os family="windows"/>
-        </condition>
-
-        <!-- command line arguments -->
-        <condition property="make.idl.arguments" value="">
-            <os family="unix"/>
-        </condition>
-        <condition property="make.idl.arguments" value="${makefile} Debug">
-            <and>
-                <os family="windows"/>
-                <or>
-                    <isset property="env.VS90COMNTOOLS"/>
-                    <isset property="env.VS80COMNTOOLS"/>
-                </or>
-            </and>
-        </condition>
-        <condition property="make.idl.arguments" value="Debug"> <!-- TODO -->
-            <os family="windows"/>
-        </condition>
-
-        <condition property="make.clean.arguments" value="realclean">
-            <os family="unix"/>
-        </condition>
-        <condition property="make.clean.arguments" value="${makefile} /c">
-            <os family="windows"/>
-        </condition>
-    </target>
-
-    <target name="clean" depends="init" if="makefile.available">
-        <exec executable="${make.executable}" dir="${basedir}">
+    <target name="clean" if="makefile.available">
+        <exec executable="${make.executable}">
             <arg line="${make.clean.arguments}"/>
         </exec>
     </target>
 
-    <target name="mwc" depends="init" unless="mwc.uptodate">
-        <exec executable="${perl.executable}" dir="${basedir}">
+    <target name="mwc" unless="mwc.uptodate">
+        <exec executable="${perl.executable}">
             <arg value="${env.ACE_ROOT}/bin/mwc.pl"/>
             <arg line="-type ${mwc.type}"/>
             <arg line="-features ${mwc.features}"/>
         </exec>
+        <touch file="${basedir}/.mwc"/>
     </target>
 
     <target name="idl" depends="mwc">
-        <exec executable="${make.executable}" dir="${basedir}">
+        <exec executable="${make.executable}">
             <arg line="${make.idl.arguments}"/>
         </exec>
     </target>
