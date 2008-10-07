@@ -1,3 +1,22 @@
+Tue Oct  7 17:09:25 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/OpenDDS.ipr:
+        * java/jms/src/org/opendds/jms/ConnectionFactoryImpl.java:
+        * java/jms/src/org/opendds/jms/ConnectionImpl.java:
+        * java/jms/src/org/opendds/jms/SessionImpl.java:
+        * java/jms/src/org/opendds/jms/TemporaryTopicImpl.java:
+        * java/jms/src/org/opendds/jms/TopicImpl.java:
+        * java/jms/src/org/opendds/jms/TopicMessageConsumerImpl.java:
+        * java/jms/src/org/opendds/jms/TopicMessageProducerImpl.java:
+        * java/jms/src/org/opendds/jms/impl:
+        * java/jms/src/org/opendds/jms/impl/DDSTopic.java:
+        * java/jms/src/org/opendds/jms/util:
+        * java/jms/src/org/opendds/jms/util/Strings.java:
+        * java/jms/test/org/opendds/jms/util:
+        * java/jms/test/org/opendds/jms/util/StringsTest.java:
+
+          Added initial top-level stubs.
+
 Tue Oct  7 15:53:38 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/src/org/opendds/jms/TopicImpl.java:
