@@ -1,3 +1,9 @@
+Tue Oct  7 15:53:38 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/src/org/opendds/jms/TopicImpl.java:
+
+          Added TopicImpl (Destination) stub.
+
 Mon Oct  6 21:35:15 UTC 2008  Weiqi Gao  <gaow@ociweb.com>
 
         * java/jms/build.xml:
