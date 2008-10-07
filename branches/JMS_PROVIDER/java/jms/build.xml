@@ -5,7 +5,7 @@
     Author:  Steven Stallion
     Version: $Revision$
 -->
-<project name="opendds-jms" default="all" basedir=".">
+<project name="opendds-jms" default="compile" basedir=".">
     <property name="build.dir" value="${basedir}/build"/>
     <property name="doc.dir" value="${basedir}/doc"/>
     <property name="idl.dir" value="${basedir}/idl"/>
@@ -14,7 +14,7 @@
     <property name="test.dir" value="${basedir}/test"/>
 
     <property file="build.properties"/>
-    
+
     <property environment="env"/>
 
     <!--
@@ -31,15 +31,25 @@
     <path id="project.classpath">
         <pathelement location="${build.dir}/classes"/>
         <pathelement location="${build.dir}/tests"/>
-        
+
         <pathelement location="${idl.dir}/classes"/>
 
         <fileset refid="project.resources"/>
         <fileset refid="test.resources"/>
-        
-        <fileset dir="${lib.dir}" includes="*.jar"/>
-        <fileset dir="${env.DDS_ROOT}/lib" includes="*.jar"/>
+
+        <fileset dir="${lib.dir}"/>
+
+        <fileset dir="${env.DDS_ROOT}/lib">
+            <include name="**/*.jar"/>
+        </fileset>
     </path>
+
+    <macrodef name="antidl">
+        <attribute name="target"/>
+        <sequential>
+            <subant buildpath="${idl.dir}" target="@{target}"/>
+        </sequential>
+    </macrodef>
 
     <!--
         Project Targets
@@ -51,85 +61,21 @@
             description="Delete all build artifacts">
         <delete dir="${build.dir}"/>
     </target>
-    
+
     <target name="init">
         <mkdir dir="${build.dir}"/>
         <mkdir dir="${build.dir}/classes"/>
     </target>
 
     <target name="idl.clean">
-        <delete dir="${idl.dir}/classes"/>
-        <delete dir="${idl.dir}/OpenDDS"/>
-        <delete dir="${idl.dir}/Debug"/>
-        <delete dir="${idl.dir}/Release"/>
-        <delete>
-            <fileset dir="${idl.dir}"
-                includes="*.cpp *.h *.inl *TypeSupport.idl *.ncb *.sln *.suo *.vcproj* *.dll *.exp *.ilk *.lib *.pdb"
-                excludes="*Export.h"
-            />
-        </delete>
+        <antidl target="clean"/>
     </target>
 
-    <target name="idl.init">
-        <!-- MPC type -->
-        <condition property="idl.target.type" value="gnuace">
-            <os family="unix"/>
-        </condition>
-        <condition property="idl.target.type" value="vc9">
-            <os family="windows"/>
-        </condition>
-
-        <!-- make or vcbuild or devenv -->
-        <condition property="idl.make.executable" value="make">
-            <os family="unix"/>
-        </condition>
-        <condition property="idl.make.executable" value="vcbuild">
-            <and>
-                <os family="windows"/>
-                <or>
-                    <isset property="env.VS90COMNTOOLS"/>
-                    <isset property="env.VS80COMNTOOLS"/>
-                </or>
-            </and>
-        </condition>
-        <condition property="idl.make.executable" value="devenv">
-            <os family="windows"/>
-        </condition>
-
-        <!-- command line arguments -->
-        <condition property="idl.make.arguments" value="">
-            <os family="unix"/>
-        </condition>
-        <condition property="idl.make.arguments" value="jms_idl.vcproj Debug">
-            <and>
-                <os family="windows"/>
-                <or>
-                    <isset property="env.VS90COMNTOOLS"/>
-                    <isset property="env.VS80COMNTOOLS"/>
-                </or>
-            </and>
-        </condition>
-        <condition property="idl.make.arguments" value="Debug"> <!-- TODO -->
-            <os family="windows"/>
-        </condition>
-     </target>
-
-    <target name="idl" depends="idl.init"
-            description="Generate and compile IDL classes under idl/">
-        <!-- run MPC -->
-        <exec executable="perl" dir="${idl.dir}">
-            <arg value="${env.ACE_ROOT}/bin/mwc.pl"/>
-            <arg value="-type"/>
-            <arg value="${idl.target.type}"/>
-        </exec>
-
-        <!-- run make or vcbuild -->
-        <exec executable="${idl.make.executable}" dir="${idl.dir}">
-            <arg line="${idl.make.arguments}"/>
-        </exec>
+    <target name="idl">
+        <antidl target="idl"/>
     </target>
 
-    <target name="compile" depends="idl, init"
+    <target name="compile" depends="init, idl"
             description="Compile classes under src/">
         <javac srcdir="${src.dir}"
                destdir="${build.dir}/classes"
@@ -145,13 +91,13 @@
             description="Archive compiled classes and resources">
         <jar destfile="${build.dir}/${ant.project.name}-${project.version}.jar"
              compress="${jar.compress}"
-             index="${jar.index}"> 
+             index="${jar.index}">
             <fileset dir="${build.dir}/classes"/>
             <fileset dir="${idl.dir}/classes"/>
             <fileset refid="project.resources"/>
         </jar>
     </target>
-    
+
     <target name="test.clean">
         <delete dir="${build.dir}/tests"/>
     </target>
