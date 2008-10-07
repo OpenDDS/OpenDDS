@@ -13,9 +13,23 @@
     <property name="src.dir" value="${basedir}/src"/>
     <property name="test.dir" value="${basedir}/test"/>
 
-    <property file="build.properties"/>
-
     <property environment="env"/>
+
+    <!-- Determine project version -->
+    <loadproperties srcfile="${env.DDS_ROOT}/dds/Version.h">
+        <filterchain>
+            <deletecharacters chars="&quot;"/>
+            <tokenfilter>
+                <replacestring from="#define DDS_MAJOR_VERSION" to="version.dds.major"/>
+                <replacestring from="#define DDS_MINOR_VERSION" to="version.dds.minor"/>
+                <replacestring from="#define DDS_VERSION" to="version.dds"/> <!-- project version -->
+            </tokenfilter>
+        </filterchain>
+    </loadproperties>
+
+    <property file="version.properties"/>
+
+    <property file="build.properties"/>
 
     <!--
         Project Paths
@@ -62,9 +76,23 @@
         <delete dir="${build.dir}"/>
     </target>
 
+    <target name="version">
+
+    </target>
+
     <target name="init">
         <mkdir dir="${build.dir}"/>
         <mkdir dir="${build.dir}/classes"/>
+
+        <copy file="${basedir}/version.properties"
+              todir="${build.dir}"/>
+
+        <!-- Update version.properties -->
+        <propertyfile file="${build.dir}/version.properties">
+            <entry key="version.dds" value="${version.dds}"/>
+            <entry key="version.dds.major" value="${version.dds.major}"/>
+            <entry key="version.dds.minor" value="${version.dds.minor}"/>
+        </propertyfile>
     </target>
 
     <target name="idl.clean">
@@ -89,12 +117,28 @@
 
     <target name="jar" depends="compile"
             description="Archive compiled classes and resources">
-        <jar destfile="${build.dir}/${ant.project.name}-${project.version}.jar"
+        <jar destfile="${build.dir}/${ant.project.name}-${version.dds}.jar"
              compress="${jar.compress}"
              index="${jar.index}">
-            <fileset dir="${build.dir}/classes"/>
-            <fileset dir="${idl.dir}/classes"/>
+
             <fileset refid="project.resources"/>
+
+            <fileset dir="${build.dir}/classes"/>
+            <fileset dir="${build.dir}">
+                <include name="version.properties"/>
+            </fileset>
+
+            <fileset dir="${idl.dir}/classes"/>
+
+            <!-- Identify distribution -->
+            <manifest>
+                <attribute name="Specification-Title" value="Java Message Service (JMS)"/>
+                <attribute name="Specification-Version" value="${version.jms}"/>
+                <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+                <attribute name="Implementation-Title" value="OpenDDS JMS Provider"/>
+                <attribute name="Implementation-Version" value="${version.dds}"/>
+                <attribute name="Implementation-URL" value="http://www.opendds.org/"/>
+            </manifest>
         </jar>
     </target>
 
@@ -149,7 +193,7 @@
                  author="true"
                  version="true"
                  overview="${doc.dir}/overview.html"
-                 doctitle="OpenDDS JMS API Specification"
+                 doctitle="OpenDDS ${version.dds} JMS API Specification"
                  windowtitle="${ant.project.name}">
             <link href="http://java.sun.com/j2se/${project.source}/docs/api/"/>
             <link href="http://java.sun.com/javaee/5/docs/api/"/>
