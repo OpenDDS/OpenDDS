@@ -22,6 +22,7 @@
             <tokenfilter>
                 <replacestring from="#define DDS_MAJOR_VERSION" to="version.dds.major"/>
                 <replacestring from="#define DDS_MINOR_VERSION" to="version.dds.minor"/>
+                <replacestring from="#define DDS_MICRO_VERSION" to="version.dds.micro"/>
                 <replacestring from="#define DDS_VERSION" to="version.dds"/> <!-- project version -->
             </tokenfilter>
         </filterchain>
@@ -92,6 +93,7 @@
             <entry key="version.dds" value="${version.dds}"/>
             <entry key="version.dds.major" value="${version.dds.major}"/>
             <entry key="version.dds.minor" value="${version.dds.minor}"/>
+            <entry key="version.dds.micro" value="${version.dds.micro}" default=""/>
         </propertyfile>
     </target>
 
