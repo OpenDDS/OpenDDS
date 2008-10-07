@@ -8,8 +8,8 @@
 <project name="opendds-jms" default="compile" basedir=".">
     <property name="build.dir" value="${basedir}/build"/>
     <property name="doc.dir" value="${basedir}/doc"/>
-    <property name="idl.dir" value="${basedir}/idl"/>
     <property name="lib.dir" value="${basedir}/lib"/>
+    <property name="native.dir" value="${basedir}/native"/>
     <property name="src.dir" value="${basedir}/src"/>
     <property name="test.dir" value="${basedir}/test"/>
 
@@ -47,7 +47,7 @@
         <pathelement location="${build.dir}/classes"/>
         <pathelement location="${build.dir}/tests"/>
 
-        <pathelement location="${idl.dir}/classes"/>
+        <pathelement location="${native.dir}/classes"/>
 
         <fileset refid="project.resources"/>
         <fileset refid="test.resources"/>
@@ -59,10 +59,10 @@
         </fileset>
     </path>
 
-    <macrodef name="antidl">
+    <macrodef name="antnative">
         <attribute name="target"/>
         <sequential>
-            <subant buildpath="${idl.dir}" target="@{target}"/>
+            <subant buildpath="${native.dir}" target="@{target}"/>
         </sequential>
     </macrodef>
 
@@ -98,11 +98,11 @@
     </target>
 
     <target name="idl.clean">
-        <antidl target="clean"/>
+        <antnative target="clean"/>
     </target>
 
     <target name="idl">
-        <antidl target="idl"/>
+        <antnative target="idl"/>
     </target>
 
     <target name="compile" depends="init, idl"
@@ -130,7 +130,7 @@
                 <include name="version.properties"/>
             </fileset>
 
-            <fileset dir="${idl.dir}/classes"/>
+            <fileset dir="${native.dir}/classes"/>
 
             <!-- Identify distribution -->
             <manifest>
