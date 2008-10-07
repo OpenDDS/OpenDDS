@@ -1,3 +1,12 @@
+Tue Oct  7 21:29:10 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/build.properties:
+        * java/jms/build.xml:
+        * java/jms/version.properties:
+
+          Builds now correctly identify the OpenDDS release as detailed
+          in DDS_ROOT/dds/Version.h.
+
 Tue Oct  7 18:51:50 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/build.xml:
