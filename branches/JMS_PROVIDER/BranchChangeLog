@@ -1,3 +1,9 @@
+Tue Oct  7 23:05:17 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/native/build.xml:
+
+          Fix to prevent spurious mwc invocations.
+
 Tue Oct  7 22:48:56 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/NullSynchStrategy.h:
@@ -33,6 +39,7 @@ Tue Oct  7 22:48:56 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
           New test for Java programmatic transport configuation.
 
+>>>>>>> .r1449
 Tue Oct  7 22:40:00 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/build.xml:
