@@ -11,6 +11,8 @@
 #include "ace/Log_Priority.h"
 #include "ace/Log_Msg.h"
 
+#include <algorithm>
+
 #if !defined (__ACE_INLINE__)
 # include "FederatorConfig.inl"
 #endif /* ! __ACE_INLINE__ */
