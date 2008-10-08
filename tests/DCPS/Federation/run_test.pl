@@ -104,12 +104,12 @@ my $transportDebug;
 $repoDebug = $debug if $debug;
 $appDebug  = $debug if $debug;
 $transportDebug = $transport if $transport;
-# $repoDebug = 10;
-# $appDebug  = 10;
-# $transportDebug = 10;
-# $debugFile = "debug.out";
+
+my $verboseDebug;
+$verboseDebug = "-ORBVerboseLogging 1 " if $verbose;
 
 my $repoOpts = "$svc_config ";
+$repoOpts .= $verboseDebug if $verboseDebug;
 $repoOpts .= "-DCPSDebugLevel $repoDebug " if $repoDebug;
 $repoOpts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
 $repoOpts .= "-ORBLogFile $debugFile " if ($repoDebug or $transportDebug) and $debugFile;
@@ -136,6 +136,7 @@ for my $index ( 1 .. $repoCount) {
 }
 
 my $appOpts = "$svc_config ";
+$appOpts .= $verboseDebug if $verboseDebug;
 $appOpts .= "-DCPSDebugLevel $appDebug "                if $appDebug;
 $appOpts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
 $appOpts .= "-ORBLogFile $debugFile " if ($appDebug or $transportDebug) and $debugFile;

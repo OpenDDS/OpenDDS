@@ -17,6 +17,8 @@
 #include "ace/Service_Config.h"
 #include "ace/Argv_Type_Converter.h"
 #include "ace/Auto_Ptr.h"
+
+#include <vector>
 #include <sstream>
 
 #if ! defined (__ACE_INLINE__)
@@ -35,6 +37,10 @@ namespace OpenDDS
     const size_t DEFAULT_NUM_CHUNKS = 20;
 
     const size_t DEFAULT_CHUNK_MULTIPLIER = 10;
+
+    const int DEFAULT_FEDERATION_RECOVERY_DURATION       = 900; // 15 minutes in seconds.
+    const int DEFAULT_FEDERATION_INITIAL_BACKOFF_SECONDS = 1;   // Wait only 1 second.
+    const int DEFAULT_FEDERATION_BACKOFF_MULTIPLIER      = 2;   // Exponential backoff.
 
     const int BIT_LOOKUP_DURATION_MSEC = 2000;
 
@@ -71,8 +77,12 @@ namespace OpenDDS
 #endif
                     ),
       bit_lookup_duration_msec_ (BIT_LOOKUP_DURATION_MSEC),
+      federation_recovery_duration_( DEFAULT_FEDERATION_RECOVERY_DURATION),
+      federation_initial_backoff_seconds_( DEFAULT_FEDERATION_INITIAL_BACKOFF_SECONDS),
+      federation_backoff_multiplier_( DEFAULT_FEDERATION_BACKOFF_MULTIPLIER),
       transient_data_cache_ (),
       persistent_data_cache_ ()
+
     {
       initialize();
     }
@@ -573,24 +583,28 @@ namespace OpenDDS
       // processing done for this class.
       got_info = true;
 
-      CORBA::Object_var obj
-        = orb_->string_to_object(ACE_TEXT_ALWAYS_CHAR (ior));
-      if( CORBA::is_nil( obj.in())) {
-        ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT ("(%P|%t) ERROR: ")
-                    ACE_TEXT ("Service_Participant::set_repo_ior, ")
-                    ACE_TEXT ("nil DCPSInfo (%s) for key %d. \n"), ior, key));
-        return;
-      }
+      // Delare this outside the try/catch scope since we use it later.
+      DCPSInfo_var repo;
 
-      DCPSInfo_var repo = DCPSInfo::_narrow( obj.in());
-      if( CORBA::is_nil( repo.in())) {
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT ("(%P|%t) ERROR: Service_Participant::set_repo_ior: ")
-          ACE_TEXT ("unable to narrow DCPSInfo (%s) for key %d. \n"),
-          ior,
-          key
-        ));
+      try {
+        CORBA::Object_var obj
+          = orb_->string_to_object(ACE_TEXT_ALWAYS_CHAR (ior));
+
+        repo = DCPSInfo::_narrow( obj.in());
+        if( CORBA::is_nil( repo.in())) {
+          ACE_ERROR((LM_ERROR,
+            ACE_TEXT ("(%P|%t) ERROR: Service_Participant::set_repo_ior: ")
+            ACE_TEXT ("unable to narrow DCPSInfo (%s) for key %d. \n"),
+            ior,
+            key
+          ));
+          return;
+        }
+
+      } catch (const CORBA::Exception& ex) {
+        ex._tao_print_exception (
+          "ERROR: Service_Participant::set_repo_ior: failed to resolve ior - "
+        );
         return;
       }
 
@@ -607,20 +621,34 @@ namespace OpenDDS
           key
         ));
       }
+
+      // Any previously held reference at this key will be released, right?
       this->repoMap_[ key] = DCPSInfo::_duplicate( repo);
 
+      // Force a call to attach_participant() for all domains bound to
+      // this repository.
+      this->remap_domains( key, key);
+    }
+
+    void
+    Service_Participant::remap_domains( const RepoKey oldKey, const RepoKey newKey)
+    {
       // Search the mappings for any domains mapped to this repository.
+      std::vector< ::DDS::DomainId_t> domainList;
       for( DomainRepoMap::const_iterator current = this->domainRepoMap_.begin();
            current != this->domainRepoMap_.end();
            ++current
          ) {
-        if( current->second == key) {
-          // For mapped domains, attach their participants by setting the
-          // mapping again.  Since this will only update the mappings if
-          // its a new mapping (and these by definition are not), we can
-          // confidently iterate through the map here.
-          this->set_repo_domain( current->first, key);
+        if( current->second == oldKey) {
+          domainList.push_back( current->first);
         }
+      }
+
+      // Remap the domains that were attached to this repository.
+      for( unsigned int index = 0; index < domainList.size(); ++index) {
+        // For mapped domains, attach their participants by setting the
+        // mapping again.
+        this->set_repo_domain( domainList[ index], newKey);
       }
     }
 
@@ -630,9 +658,7 @@ namespace OpenDDS
       DomainRepoMap::const_iterator where = this->domainRepoMap_.find( domain);
       if( (where == this->domainRepoMap_.end()) || (where->second != key)) {
         // Only assign entries into the map when they change the
-        // contents.  This avoids unnecessary updates to the map being
-        // made while calling code may potentially be iterating through
-        // the map.
+        // contents.
         this->domainRepoMap_[ domain] = key;
         if( DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
@@ -671,22 +697,131 @@ namespace OpenDDS
                  current != which->second.end();
                  ++current
                ) {
-              // Attach each DomainParticipant in this domain to this
-              // repository.
-              RepoId id = current->svt_->get_id();
-              location->second->attach_participant( domain, id);
-              if( DCPS_debug_level > 0) {
-                ::OpenDDS::DCPS::GuidConverter converter( id);
-                ACE_DEBUG((LM_DEBUG,
-                  ACE_TEXT("(%P|%t) Participant %s attached to Repo[ %d].\n"),
-                  (const char*) converter,
-                  key
-                ));
+              try {
+                // Attach each DomainParticipant in this domain to this
+                // repository.
+                RepoId id = current->svt_->get_id();
+                location->second->attach_participant( domain, id);
+                if( DCPS_debug_level > 0) {
+                  ::OpenDDS::DCPS::GuidConverter converter( id);
+                  ACE_DEBUG((LM_DEBUG,
+                    ACE_TEXT("(%P|%t) Service_Participant::set_repo_domain: ")
+                    ACE_TEXT("participant %s attached to Repo[ %d].\n"),
+                    (const char*) converter,
+                    key
+                  ));
+                }
+              } catch (const CORBA::Exception& ex) {
+                ex._tao_print_exception (
+                  "ERROR: Service_Participant::set_repo_domain: failed to attach repository - "
+                );
+                return;
               }
             }
           }
         }
       }
+    }
+
+    void
+    Service_Participant::repository_lost( const RepoKey key)
+    {
+      RepoMap::iterator initialLocation = this->repoMap_.find( key);
+      if( initialLocation == this->repoMap_.end()) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) WARNING: Service_Participant::repository_lost: ")
+          ACE_TEXT("lost repository %d was not present, ")
+          ACE_TEXT("finding another anyway.\n"),
+          key
+        ));
+      }
+
+      // Calculate the bounding end time for attempts.
+      ACE_Time_Value recoveryFailedTime
+        = ACE_OS::gettimeofday()
+        + ACE_Time_Value( this->federation_recovery_duration(), 0);
+
+      // Backoff delay.
+      int backoff = this->federation_initial_backoff_seconds();
+
+      // Start with the repository *after* the lost one.
+      RepoMap::iterator current = initialLocation;
+      if( current != this->repoMap_.end()) {
+        // Handle the lost not found case a bit inefficiently.
+        ++current;
+      }
+
+      // Keep trying until the total recovery time specified is exceeded.
+      while( recoveryFailedTime < ACE_OS::gettimeofday()) {
+        // Wrap to the beginning at the end of the list.
+        if( current == this->repoMap_.end()) {
+          // Continue to traverse the list.
+          current = this->repoMap_.begin();
+        }
+
+        // Handle reaching the lost repository by waiting before trying
+        // again.
+        if( current == initialLocation) {
+          if( DCPS_debug_level > 0) {
+            ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) Service_Participant::repository_lost: ")
+              ACE_TEXT("waiting %d seconds to traverse the ")
+              ACE_TEXT("repository list another time ")
+              ACE_TEXT("for lost key %d.\n"),
+              backoff,
+              key
+            ));
+          }
+
+          // Wait to traverse the list and try again.
+          ACE_OS::sleep( backoff);
+
+          // Exponentially backoff delay.
+          backoff *= this->federation_backoff_multiplier();
+
+          // Don't increment current to allow us to reattach to the
+          // original repository if it is restarted.
+        }
+
+        try {
+          // Check the availability of the current repository.
+          CORBA::PolicyList_var discard;
+          current->second->_validate_connection( discard.out());
+
+          // If we reach here, the validate_connection() call succeeded
+          // and the repository is reachable.
+          this->remap_domains( key, current->first);
+
+          if( DCPS_debug_level > 0) {
+            ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) Service_Participant::repository_lost: ")
+              ACE_TEXT("repository %d successfully replaced by %d.\n"),
+              key,
+              current->first
+            ));
+          }
+
+          // Now we are done.  This is the only non-failure exit from
+          // this method.
+          return;
+
+        } catch (const CORBA::Exception& ex) {
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) WARNING: Service_Participant::repository_lost: ")
+            ACE_TEXT("repository %d was not available to replace %d, ")
+            ACE_TEXT("looking for another.\n"),
+            current->first,
+            key
+          ));
+        }
+
+        // Move to the next candidate repository.
+        ++current;
+      }
+
+      // If we reach here, we have exceeded the total recovery time
+      // specified.
+      ACE_ASSERT( recoveryFailedTime == 0);
     }
 
     DCPSInfo_ptr
@@ -1076,6 +1211,11 @@ namespace OpenDDS
             {
               GET_CONFIG_VALUE (this->cf_, sect, ACE_TEXT("DCPSBit"), this->bit_enabled_, int)
             }
+
+          // These are not handled on the command line.
+          GET_CONFIG_VALUE (this->cf_, sect, ACE_TEXT("FederationRecoveryDuration"), this->federation_recovery_duration_, int)
+          GET_CONFIG_VALUE (this->cf_, sect, ACE_TEXT("FederationInitialBackoffSeconds"), this->federation_initial_backoff_seconds_, int)
+          GET_CONFIG_VALUE (this->cf_, sect, ACE_TEXT("FederationBackoffMultiplier"), this->federation_backoff_multiplier_, int)
         }
 
       return 0;
