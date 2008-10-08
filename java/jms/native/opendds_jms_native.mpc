@@ -4,7 +4,8 @@
 
 project: dcps_java {
 
-    sharedname      = opendds_jms_native
+    // Ensure the library name matches the opendds-jms jar name:
+    sharedname      = opendds-jms-native
 
     dcps_ts_flags   += --export=opendds_jms_native_Export
 
