@@ -24,6 +24,7 @@
 #include "tao/debug.h"
 
 #include "ace/Auto_Ptr.h"
+#include "ace/Vector_T.h"
 
 
 namespace OpenDDS
