@@ -13,7 +13,7 @@
     <condition property="makefile" value="${basedir}/GNUmakefile">
         <os family="unix"/>
     </condition>
-    <condition property="makefile" value="${basedir}/${ant.project.name}.vcproj">
+    <condition property="makefile" value="${basedir}/opendds_jms_native.vcproj">
         <os family="windows"/>
     </condition>
 
