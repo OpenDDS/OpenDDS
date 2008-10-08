@@ -75,9 +75,9 @@ GuidGenerator::next()
 
     OpenDDS::DCPS::GuidConverter converter( this->federation_, this->participant_);
 
-    converter.key()[0] = (this->lastKey_ >> 16) & 0xff;
-    converter.key()[1] = (this->lastKey_ >>  8) & 0xff;
-    converter.key()[2] =  this->lastKey_        & 0xff;
+    converter.key()[0] = static_cast<CORBA::Octet>((this->lastKey_ >> 16) & 0xff);
+    converter.key()[1] = static_cast<CORBA::Octet>((this->lastKey_ >>  8) & 0xff);
+    converter.key()[2] = static_cast<CORBA::Octet>(this->lastKey_        & 0xff);
     converter.kind()   =  this->kindCode_;
 
     return converter;

@@ -6,6 +6,7 @@
 #include "GuidUtils.h"
 
 #include "ace/ACE.h"
+#include "ace/OS_NS_string.h"
 
 #include <iostream>
 #include <sstream>
@@ -35,14 +36,14 @@ GuidConverter::GuidConverter( long federation, long participant)
   this->guid_.guidPrefix[ 0] = VENDORID_OCI[0];
   this->guid_.guidPrefix[ 1] = VENDORID_OCI[1];
 
-  this->guid_.guidPrefix[ 4] = (0xff&(federation>>24));
-  this->guid_.guidPrefix[ 5] = (0xff&(federation>>16));
-  this->guid_.guidPrefix[ 6] = (0xff&(federation>> 8));
-  this->guid_.guidPrefix[ 7] = (0xff& federation);
-  this->guid_.guidPrefix[ 8] = (0xff&(participant>>24));
-  this->guid_.guidPrefix[ 9] = (0xff&(participant>>16));
-  this->guid_.guidPrefix[10] = (0xff&(participant>> 8));
-  this->guid_.guidPrefix[11] = (0xff& participant);
+  this->guid_.guidPrefix[ 4] = static_cast<CORBA::Octet>((0xff&(federation>>24)));
+  this->guid_.guidPrefix[ 5] = static_cast<CORBA::Octet>((0xff&(federation>>16)));
+  this->guid_.guidPrefix[ 6] = static_cast<CORBA::Octet>((0xff&(federation>> 8)));
+  this->guid_.guidPrefix[ 7] = static_cast<CORBA::Octet>((0xff& federation));
+  this->guid_.guidPrefix[ 8] = static_cast<CORBA::Octet>((0xff&(participant>>24)));
+  this->guid_.guidPrefix[ 9] = static_cast<CORBA::Octet>((0xff&(participant>>16)));
+  this->guid_.guidPrefix[10] = static_cast<CORBA::Octet>((0xff&(participant>> 8)));
+  this->guid_.guidPrefix[11] = static_cast<CORBA::Octet>((0xff& participant));
   this->guid_.entityId       = ENTITYID_UNKNOWN;
 }
 
@@ -193,31 +194,31 @@ operator>>( std::istream& str, OpenDDS::DCPS::GUID_t& value)
   unsigned long word;
 
   str >> std::hex >> word;
-  value.guidPrefix[ 0] = (word>>24)&0xff;
-  value.guidPrefix[ 1] = (word>>16)&0xff;
-  value.guidPrefix[ 2] = (word>>8)&0xff;
-  value.guidPrefix[ 3] = word&0xff;
+  value.guidPrefix[ 0] = static_cast<CORBA::Octet>((word>>24)&0xff);
+  value.guidPrefix[ 1] = static_cast<CORBA::Octet>((word>>16)&0xff);
+  value.guidPrefix[ 2] = static_cast<CORBA::Octet>((word>>8)&0xff);
+  value.guidPrefix[ 3] = static_cast<CORBA::Octet>(word&0xff);
   str >> discard;
 
   str >> std::hex >> word;
-  value.guidPrefix[ 4] = (word>>24)&0xff;
-  value.guidPrefix[ 5] = (word>>16)&0xff;
-  value.guidPrefix[ 6] = (word>>8)&0xff;
-  value.guidPrefix[ 7] = word&0xff;
+  value.guidPrefix[ 4] = static_cast<CORBA::Octet>((word>>24)&0xff);
+  value.guidPrefix[ 5] = static_cast<CORBA::Octet>((word>>16)&0xff);
+  value.guidPrefix[ 6] = static_cast<CORBA::Octet>((word>>8)&0xff);
+  value.guidPrefix[ 7] = static_cast<CORBA::Octet>(word&0xff);
   str >> discard;
 
   str >> std::hex >> word;
-  value.guidPrefix[ 8] = (word>>24)&0xff;
-  value.guidPrefix[ 9] = (word>>16)&0xff;
-  value.guidPrefix[10] = (word>>8)&0xff;
-  value.guidPrefix[11] = word&0xff;
+  value.guidPrefix[ 8] = static_cast<CORBA::Octet>((word>>24)&0xff);
+  value.guidPrefix[ 9] = static_cast<CORBA::Octet>((word>>16)&0xff);
+  value.guidPrefix[10] = static_cast<CORBA::Octet>((word>>8)&0xff);
+  value.guidPrefix[11] = static_cast<CORBA::Octet>(word&0xff);
   str >> discard;
 
   str >> std::hex >> word;
-  value.entityId.entityKey[0] = (word>>24)&0xff;
-  value.entityId.entityKey[1] = (word>>16)&0xff;
-  value.entityId.entityKey[2] = (word>>8)&0xff;
-  value.entityId.entityKind = word&0xff;
+  value.entityId.entityKey[0] = static_cast<CORBA::Octet>((word>>24)&0xff);
+  value.entityId.entityKey[1] = static_cast<CORBA::Octet>((word>>16)&0xff);
+  value.entityId.entityKey[2] = static_cast<CORBA::Octet>((word>>8)&0xff);
+  value.entityId.entityKind = static_cast<CORBA::Octet>(word&0xff);
   return str;
 }
 
