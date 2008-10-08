@@ -1,3 +1,15 @@
+Wed Oct  8 15:42:20 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/src/org/opendds/jms/TemporaryTopicImpl.java:
+        * java/jms/src/org/opendds/jms/TopicImpl.java:
+
+          Dropped DDSTopic class for destination names in favor of
+          toString() as suggested by the JMS API documentation.
+
+        * java/jms/src/org/opendds/jms/impl/DDSTopic.java:
+
+          Removed this file.
+
 Wed Oct  8 15:27:38 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/native/build.xml:
