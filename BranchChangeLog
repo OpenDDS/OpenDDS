@@ -1,3 +1,9 @@
+Wed Oct  8 17:04:46 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/build_scripts/ant_wrapper.pl:
+
+          Added portable ant wrapper for nightly.
+
 Wed Oct  8 16:38:39 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * DDS.mwc:
