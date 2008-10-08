@@ -4,7 +4,7 @@
 
 project: dcps_java {
 
-    sharedname      = opendds-jms-native
+    sharedname      = opendds_jms_native
 
     dcps_ts_flags   += --export=opendds_jms_native_Export
 

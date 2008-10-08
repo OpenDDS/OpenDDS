@@ -1,3 +1,17 @@
+Wed Oct  8 14:28:34 UTC 2008  Weiqi Gao  <gao_w@ociweb.com>
+
+        * java/jms/native/build.xml:
+        * java/jms/native/opendds_jms_native.mpc:
+
+          Fixed typo.
+
+        * java/jms/src/org/opendds/jms/AbstractMessageImpl.java:
+        * java/jms/src/org/opendds/jms/MessagePropertiesFacade.java:
+        * java/jms/src/org/opendds/jms/util/Objects.java:
+        * java/jms/test/org/opendds/jms/AbstractMessageImplTest.java:
+
+          More Message hierarchy implementation and tests.
+
 Tue Oct  7 23:05:17 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/native/build.xml:
