@@ -1,3 +1,9 @@
+Wed Oct  8 18:34:52 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/native/build.xml:
+
+          Dropped uneccessary touch (.mwc).
+
 Wed Oct  8 17:04:46 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/build_scripts/ant_wrapper.pl:
