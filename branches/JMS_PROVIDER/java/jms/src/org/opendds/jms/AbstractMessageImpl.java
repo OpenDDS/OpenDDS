@@ -12,14 +12,16 @@ import OpenDDS.JMS.MessageBody;
 
 public abstract class AbstractMessageImpl implements Message {
     protected final MessagePayload payload;
+
+    // Convenience variables, should be kept in sync with payload
     protected final MessageHeaders headers;
-    protected final MessageProperty[] properties;
+    protected final MessagePropertiesFacade properties;
     protected final MessageBody body;
 
     protected AbstractMessageImpl() {
-        this.payload = new MessagePayload(new MessageHeaders(), null, new MessageBody());
+        this.payload = new MessagePayload(new MessageHeaders(), new MessageProperty[0], new MessageBody());
         headers = payload.theHeaders;
-        properties = payload.theProperties;
+        properties = new MessagePropertiesFacade(payload);
         body = payload.theBody;
     }
 
@@ -120,87 +122,119 @@ public abstract class AbstractMessageImpl implements Message {
     }
 
     public void clearProperties() throws JMSException {
-        throw new UnsupportedOperationException("Kaboom"); // TODO
+        properties.absorbTheProperties();
+        properties.clearProperties();
+        properties.updateTheProperties();
     }
 
     public boolean propertyExists(String s) throws JMSException {
-        throw new UnsupportedOperationException("Kaboom"); // TODO
+        properties.absorbTheProperties();
+        return properties.propertyExists(s);
     }
 
     public boolean getBooleanProperty(String s) throws JMSException {
-        throw new UnsupportedOperationException("Kaboom"); // TODO
+        properties.absorbTheProperties();
+        return properties.getBooleanProperty(s);
     }
 
     public byte getByteProperty(String s) throws JMSException {
-        throw new UnsupportedOperationException("Kaboom"); // TODO
+        properties.absorbTheProperties();
+        return properties.getByteProperty(s);
     }
 
     public short getShortProperty(String s) throws JMSException {
-        throw new UnsupportedOperationException("Kaboom"); // TODO
+        properties.absorbTheProperties();
+        return properties.getShortProperty(s);
+
     }
 
     public int getIntProperty(String s) throws JMSException {
-        throw new UnsupportedOperationException("Kaboom"); // TODO
+        properties.absorbTheProperties();
+        return properties.getIntProperty(s);
     }
 
     public long getLongProperty(String s) throws JMSException {
-        throw new UnsupportedOperationException("Kaboom"); // TODO
+        properties.absorbTheProperties();
+        return properties.getLongProperty(s);
     }
 
     public float getFloatProperty(String s) throws JMSException {
-        throw new UnsupportedOperationException("Kaboom"); // TODO
+        properties.absorbTheProperties();
+        return properties.getFloatProperty(s);
     }
 
     public double getDoubleProperty(String s) throws JMSException {
-        throw new UnsupportedOperationException("Kaboom"); // TODO
+        properties.absorbTheProperties();
+        return properties.getDoubleProperty(s);
     }
 
     public String getStringProperty(String s) throws JMSException {
-        throw new UnsupportedOperationException("Kaboom"); // TODO
+        properties.absorbTheProperties();
+        return properties.getStringProperty(s);
     }
 
     public Object getObjectProperty(String s) throws JMSException {
-        throw new UnsupportedOperationException("Kaboom"); // TODO
+        properties.absorbTheProperties();
+        return properties.getObjectProperty(s);
     }
 
     public Enumeration getPropertyNames() throws JMSException {
-        throw new UnsupportedOperationException("Kaboom"); // TODO
+        properties.absorbTheProperties();
+        return properties.getPropertyNames();
     }
 
     public void setBooleanProperty(String s, boolean b) throws JMSException {
-        throw new UnsupportedOperationException("Kaboom"); // TODO
+        properties.absorbTheProperties();
+        properties.setBooleanProperty(s, b);
+        properties.updateTheProperties();
     }
 
     public void setByteProperty(String s, byte b) throws JMSException {
-        throw new UnsupportedOperationException("Kaboom"); // TODO
+        properties.absorbTheProperties();
+        properties.setByteProperty(s, b);
+        properties.updateTheProperties();
     }
 
     public void setShortProperty(String s, short i) throws JMSException {
-        throw new UnsupportedOperationException("Kaboom"); // TODO
+        properties.absorbTheProperties();
+        properties.setShortProperty(s, i);
+        properties.updateTheProperties();
     }
 
     public void setIntProperty(String s, int i) throws JMSException {
-        throw new UnsupportedOperationException("Kaboom"); // TODO
+        properties.absorbTheProperties();
+        properties.setIntProperty(s, i);
+        properties.updateTheProperties();
     }
 
     public void setLongProperty(String s, long l) throws JMSException {
-        throw new UnsupportedOperationException("Kaboom"); // TODO
+        properties.absorbTheProperties();
+        properties.setLongProperty(s, l);
+        properties.updateTheProperties();
     }
 
     public void setFloatProperty(String s, float v) throws JMSException {
-        throw new UnsupportedOperationException("Kaboom"); // TODO
+        properties.absorbTheProperties();
+        properties.setFloatProperty(s, v);
+        properties.updateTheProperties();
     }
 
     public void setDoubleProperty(String s, double v) throws JMSException {
-        throw new UnsupportedOperationException("Kaboom"); // TODO
+        properties.absorbTheProperties();
+        properties.setDoubleProperty(s, v);
+        properties.updateTheProperties();
     }
 
     public void setStringProperty(String s, String s1) throws JMSException {
-        throw new UnsupportedOperationException("Kaboom"); // TODO
+        properties.absorbTheProperties();
+        properties.setStringProperty(s, s1);
+        properties.updateTheProperties();
     }
 
     public void setObjectProperty(String s, Object o) throws JMSException {
-        throw new UnsupportedOperationException("Kaboom"); // TODO
+        properties.absorbTheProperties();
+        properties.setObjectProperty(s, o);
+        properties.updateTheProperties();
     }
 
     public void acknowledge() throws JMSException {

@@ -5,7 +5,7 @@
     Author:  Weiqi Gao
     Version: $Revision$
 -->
-<project name="opendds-jms-native" default="idl" basedir=".">
+<project name="opendds_jms_native" default="idl" basedir=".">
     <property name="perl.executable" value="perl"/>
 
     <property environment="env"/>
