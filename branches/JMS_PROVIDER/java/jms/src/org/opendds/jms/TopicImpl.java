@@ -13,11 +13,12 @@ import javax.jms.Topic;
  */
 public class TopicImpl implements Topic {
 
-    protected String getDestinationName() {
+    public String getTopicName() throws JMSException {
         return null;
     }
 
-    public String getTopicName() throws JMSException {
+    @Override
+    public String toString() {
         return null;
     }
 }
