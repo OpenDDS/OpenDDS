@@ -31,7 +31,7 @@
     </condition>
 
     <uptodate property="mwc.uptodate"
-              targetfile="${basedir}/.mwc">
+              targetfile="${makefile}">
         <srcfiles dir="${basedir}">
             <include name="opendds_jms_native.mpc"/>
             <include name="Message.idl"/>
@@ -104,7 +104,6 @@
             <arg line="-type ${mwc.type}"/>
             <arg line="-features ${mwc.features}"/>
         </exec>
-        <touch file="${basedir}/.mwc"/>
     </target>
 
     <target name="idl" depends="mwc">
