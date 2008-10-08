@@ -1,5 +1,10 @@
 // $Id$
 
 workspace {
+
+  exclude {
+    java/jms //Uses "ant" to control build, but it also has an .mpc file
+  }
+
 }
 

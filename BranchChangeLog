@@ -1,3 +1,9 @@
+Wed Oct  8 16:38:39 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS.mwc:
+
+          Exclude the java/jms directory from a top-level MPC-based build.
+
 Wed Oct  8 15:42:20 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/src/org/opendds/jms/TemporaryTopicImpl.java:
