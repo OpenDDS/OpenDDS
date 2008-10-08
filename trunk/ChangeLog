@@ -1,3 +1,23 @@
+Wed Oct  8 18:45:16 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/Service_Participant.cpp:
+
+	  remap_domains()   - refactored partial implementation of
+	                      set_repo() into separate method.
+	  repository_lost() - added new method to failover to new
+	                      repository.
+          Added configurable variables and accessors/mutators for
+	    FederationRecoveryDuration
+	    FederationInitialBackoffSeconds
+	    FederationBackoffMultiplier
+
+        * tests/DCPS/Federation/run_test.pl:
+
+	  Added verbose option mapping to '-ORBVerboseLogging 1' for
+	  process arguments.
+
 Wed Oct  8 14:42:23 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/InfoRepo/FederatorConfig.cpp:

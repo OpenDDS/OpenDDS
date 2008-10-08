@@ -215,5 +215,47 @@ namespace OpenDDS
       return initial_SubscriberQos_;
     }
 
+    ACE_INLINE
+    int&
+    Service_Participant::federation_recovery_duration()
+    {
+      return this->federation_recovery_duration_;
+    }
+
+    ACE_INLINE
+    int
+    Service_Participant::federation_recovery_duration() const
+    {
+      return this->federation_recovery_duration_;
+    }
+
+    ACE_INLINE
+    int&
+    Service_Participant::federation_initial_backoff_seconds()
+    {
+      return this->federation_initial_backoff_seconds_;
+    }
+
+    ACE_INLINE
+    int
+    Service_Participant::federation_initial_backoff_seconds() const
+    {
+      return this->federation_initial_backoff_seconds_;
+    }
+
+    ACE_INLINE
+    int&
+    Service_Participant::federation_backoff_multiplier()
+    {
+      return this->federation_backoff_multiplier_;
+    }
+
+    ACE_INLINE
+    int
+    Service_Participant::federation_backoff_multiplier() const
+    {
+      return this->federation_backoff_multiplier_;
+    }
+
   } // namespace ::DDS
 } // namespace OpenDDS
