@@ -42,6 +42,8 @@ typedef std::map< DDS::DomainId_t, DCPS_IR_Domain*> DCPS_IR_Domain_Map;
 // Forward declaration
 namespace Update { class Manager; }
 
+class ShutdownInterface;
+
 /**
  * @class TAO_DDS_DCPSInfo_i
  *
@@ -54,7 +56,12 @@ class  OpenDDS_InfoRepoLib_Export TAO_DDS_DCPSInfo_i : public virtual POA_OpenDD
 {
 public:
   //Constructor
-  TAO_DDS_DCPSInfo_i (CORBA::ORB_ptr orb, bool reincarnate, long federation = 0);
+  TAO_DDS_DCPSInfo_i(
+    CORBA::ORB_ptr orb,
+    bool reincarnate,
+    ShutdownInterface* shutdown = 0,
+    long federation = 0
+  );
 
   //Destructor
   virtual ~TAO_DDS_DCPSInfo_i (void);
@@ -491,6 +498,9 @@ public:
 
   bool init_persistence (void);
 
+  /// Cause the entire repository to exit.
+  void shutdown();
+
 private:
   DCPS_IR_Domain_Map domains_;
   CORBA::ORB_var orb_;
@@ -500,6 +510,9 @@ private:
 
   Update::Manager* um_;
   bool reincarnate_;
+
+  /// Interface to effect shutdown of the process.
+  ShutdownInterface* shutdown_;
 };
 
 

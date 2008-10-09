@@ -1247,6 +1247,36 @@ ACE_THROW_SPEC ((
 }
 
 void
+ManagerImpl::leave_and_shutdown (
+    void
+)
+ACE_THROW_SPEC ((
+  ::CORBA::SystemException,
+  Incomplete
+))
+{
+  // Shutdown the process via the repository object.
+  this->info_->shutdown();
+}
+
+void
+ManagerImpl::shutdown (
+    void
+)
+ACE_THROW_SPEC ((
+  ::CORBA::SystemException,
+  Incomplete
+))
+{
+  // Prevent the removal of this repository from the federation during
+  // shutdown processing.
+  this->federated_ = false;
+
+  // Shutdown the process via the repository object.
+  this->info_->shutdown();
+}
+
+void
 ManagerImpl::initializeOwner (
   const ::OpenDDS::Federator::OwnerUpdate & data
 )
