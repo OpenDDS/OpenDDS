@@ -228,6 +228,26 @@ module OpenDDS { module Federator {
       void initializePublication(  in  PublicationUpdate data) raises( Incomplete);
       void initializeSubscription( in SubscriptionUpdate data) raises( Incomplete);
 
+      //////////////////////////////////
+      //
+      // Administrative methods.
+      //
+
+      //
+      // Leave the federation gracefully and shutdown the repository.
+      //
+      void leave_and_shutdown() raises( Incomplete);
+
+      //
+      // Shutdown without leaving the federation.  This leaves existing
+      // application associations in place and their management will
+      // transfer to a different repository within the federation.
+      //
+      void shutdown()           raises( Incomplete);
+
+      //
+      //////////////////////////////////
+
     };
 
     // Constant values.

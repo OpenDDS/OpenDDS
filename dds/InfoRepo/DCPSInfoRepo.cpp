@@ -2,6 +2,7 @@
 #include "DCPSInfo_i.h"
 #include "FederatorConfig.h"
 #include "FederatorManagerImpl.h"
+#include "ShutdownInterface.h"
 
 #include "dds/DCPS/Service_Participant.h"
 
@@ -38,7 +39,7 @@
 #include <fstream>
 #include <iostream>
 
-class InfoRepo : public ACE_Event_Handler {
+class InfoRepo : public ShutdownInterface, public ACE_Event_Handler {
 public:
   struct InitError
   {
@@ -51,8 +52,8 @@ public:
   ~InfoRepo (void);
   bool run (void);
 
-  /// Callback used by the INT signal handler to schedule a shutdown.
-  void shutdown (void);
+  /// ShutdownInterface used to schedule a shutdown.
+  virtual void shutdown (void);
   
   /// Handler for the reactor to dispatch finalization activity to.
   virtual int handle_exception( ACE_HANDLE fd = ACE_INVALID_HANDLE);
@@ -232,6 +233,7 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
   info_ = new TAO_DDS_DCPSInfo_i(
       orb_.in(),
       resurrect_,
+      this,
       this->federatorConfig_.federationId());
 
   TAO_DDS_DCPSInfo_i* info_servant 

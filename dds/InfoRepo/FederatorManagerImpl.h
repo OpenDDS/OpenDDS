@@ -122,6 +122,22 @@ class OpenDDS_Federator_Export ManagerImpl
         ::OpenDDS::Federator::Incomplete
         ));
 
+    virtual void leave_and_shutdown (
+        void
+      )
+      ACE_THROW_SPEC ((
+        ::CORBA::SystemException,
+        Incomplete
+      ));
+
+    virtual void shutdown (
+        void
+      )
+      ACE_THROW_SPEC ((
+        ::CORBA::SystemException,
+        Incomplete
+      ));
+
     // Servant methods
 
     /// Establish the update publications and subscriptions.

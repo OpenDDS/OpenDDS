@@ -1,13 +1,43 @@
+Thu Oct  9 21:37:23 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/Federator.idl:
+
+	  leave_and_shutdown()
+	  shutdown()
+	    Added these methods to the Federator::Manager interface.
+
+        * dds/InfoRepo/FederatorManagerImpl.h:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+
+	  leave_and_shutdown()
+	  shutdown()
+	    Implement the new IDL methods.
+
+        * dds/InfoRepo/ShutdownInterface.h:
+
+	  Abstract interface used to propagate shutdown requests.
+
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+	  shutdown() - forward shutdown requests to new ShutdownInterface
+	               reference provided via constructor.
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+
+	  Implement the new ShutdownInterface and pass this to the
+	  repository implementation object constructor.
+
 Thu Oct  9 20:31:34 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/DomainParticipantFactoryImpl.cpp:
         * dds/DCPS/DomainParticipantFactoryImpl/PublisherImpl.cpp:
-        
+
           Fixed an iterator access violation due to iterator erasing
           while iterating on map or set. The delete_*() invalidates
-          the iterator so the iterator has to be move forward for 
+          the iterator so the iterator has to be move forward for
           next iteration before delete_*() call.
-          
+
 Thu Oct  9 18:22:58 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DomainParticipantImpl.h:

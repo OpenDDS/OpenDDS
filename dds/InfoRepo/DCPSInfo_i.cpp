@@ -10,6 +10,7 @@
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "UpdateManager.h"
+#include "ShutdownInterface.h"
 
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
@@ -25,12 +26,14 @@
 // constructor
 TAO_DDS_DCPSInfo_i::TAO_DDS_DCPSInfo_i (CORBA::ORB_ptr orb
                                         , bool reincarnate
+                                        , ShutdownInterface* shutdown
                                         , long federation)
   : orb_ (CORBA::ORB::_duplicate (orb))
     , federation_(federation)
     , participantIdGenerator_( federation)
     , um_ (0)
     , reincarnate_ (reincarnate)
+    , shutdown_( shutdown)
 {
 }
 
@@ -38,6 +41,12 @@ TAO_DDS_DCPSInfo_i::TAO_DDS_DCPSInfo_i (CORBA::ORB_ptr orb
 //  destructor
 TAO_DDS_DCPSInfo_i::~TAO_DDS_DCPSInfo_i (void)
 {
+}
+
+void
+TAO_DDS_DCPSInfo_i::shutdown()
+{
+  this->shutdown_->shutdown();
 }
 
 CORBA::ORB_ptr
