@@ -1,3 +1,30 @@
+Thu Oct  9 19:34:36 UTC 2008  Weiqi Gao  <gao_w@ociweb.com>
+
+        * java/jms/native/Message.idl:
+        * java/jms/native/build.xml:
+
+          Update IDL.  Minor build file fix.
+
+        * java/jms/src/org/opendds/jms/AbstractMessageImpl.java:
+        * java/jms/src/org/opendds/jms/MapBodyFacade.java:
+        * java/jms/src/org/opendds/jms/MapMessageImpl.java:
+        * java/jms/src/org/opendds/jms/MessagePropertiesFacade.java:
+        * java/jms/src/org/opendds/jms/MessageState.java:
+        * java/jms/src/org/opendds/jms/MessageStateNonWritable.java:
+        * java/jms/src/org/opendds/jms/MessageStateWritable.java:
+        * java/jms/src/org/opendds/jms/ObjectMessageImpl.java:
+        * java/jms/src/org/opendds/jms/TextMessageImpl.java:
+        * java/jms/src/org/opendds/jms/util/Identifiers.java:
+        * java/jms/src/org/opendds/jms/util/PropertyValueConversion.java:
+
+          Implemented message property APIs.
+
+        * java/jms/test/org/opendds/jms/AbstractMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/MapMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/util/IdentifiersTest.java:
+
+          Tests for message property APIs.
+
 Thu Oct  9 02:18:32 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * java/tests/transport_config/dcps.ini:
