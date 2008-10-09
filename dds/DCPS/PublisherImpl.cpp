@@ -431,7 +431,7 @@ PublisherImpl::delete_contained_entities ()
   set_deleted (true);
 
   DataWriterMap::iterator it;
-  DataWriterMap::iterator next;
+  DataWriterMap::iterator cur;
 
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
         guard,
@@ -442,14 +442,16 @@ PublisherImpl::delete_contained_entities ()
     {
       // Get the iterator for next entry before erasing current entry since
       // the iterator will be invalid after deletion.
-      next = it;
-      next ++;
+      cur = it;
+      ++ it;
+
+      PublicationId pub_id = cur->second->publication_id_;
       ::DDS::ReturnCode_t ret =
-          delete_datawriter (it->second->local_writer_objref_);
+          delete_datawriter (cur->second->local_writer_objref_);
       if (ret != ::DDS::RETCODE_OK)
         {
           ::OpenDDS::DCPS::GuidConverter converter(
-            const_cast< ::OpenDDS::DCPS::RepoId*>( &it->second->publication_id_)
+            const_cast< ::OpenDDS::DCPS::RepoId*>( &pub_id)
           );
           ACE_ERROR_RETURN((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: ")
@@ -460,7 +462,6 @@ PublisherImpl::delete_contained_entities ()
             (const char*) converter
           ),ret);
         }
-      it = next;
     }
 
   // the publisher can now start creating new publications

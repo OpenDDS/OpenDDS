@@ -236,53 +236,37 @@ namespace OpenDDS
                             this->participants_protector_,
                             ::DDS::RETCODE_ERROR);
 
-          DPSet* entry;
-          if (find(participants_, domain_id, entry) == -1)
-            {
-              ::OpenDDS::DCPS::GuidConverter converter( dp_id);
-              ACE_ERROR_RETURN((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: ")
-                ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
-                ACE_TEXT(" %p domain_id=%d dp_id=%s\n"),
-                ACE_TEXT("find"),
-                domain_id,
-                (const char*) converter
-              ),::DDS::RETCODE_ERROR);
-            }
-          else
-            {
-              ::DDS::ReturnCode_t result
-                = the_servant->delete_contained_entities ();
+          ::DDS::ReturnCode_t result
+            = the_servant->delete_contained_entities ();
 
 //xxx still rc=4
-              if (result != ::DDS::RETCODE_OK)
-                {
-                  return result;
-                }
+          if (result != ::DDS::RETCODE_OK)
+            {
+              return result;
+            }
 
-              Participant_Pair pair (the_servant, a_participant, DUP);
+          Participant_Pair pair (the_servant, a_participant, DUP);
 
-              if (OpenDDS::DCPS::remove(*entry, pair) == -1)
+          if (OpenDDS::DCPS::remove(*entry, pair) == -1)
+            {
+              ACE_ERROR_RETURN ((LM_ERROR,
+                                ACE_TEXT("(%P|%t) ERROR: ")
+                                ACE_TEXT("DomainParticipantFactoryImpl::delete_participant, ")
+                                ACE_TEXT(" %p.\n"),
+                                ACE_TEXT("remove")),
+                                ::DDS::RETCODE_ERROR);
+            }
+//xxx now obj rc=5 and servant rc=4
+          if (entry->empty())
+            {
+              if (unbind(participants_, domain_id) == -1)
                 {
                   ACE_ERROR_RETURN ((LM_ERROR,
                                     ACE_TEXT("(%P|%t) ERROR: ")
                                     ACE_TEXT("DomainParticipantFactoryImpl::delete_participant, ")
                                     ACE_TEXT(" %p.\n"),
-                                    ACE_TEXT("remove")),
+                                    ACE_TEXT("unbind")),
                                     ::DDS::RETCODE_ERROR);
-                }
-//xxx now obj rc=5 and servant rc=4
-              if (entry->empty())
-                {
-                  if (unbind(participants_, domain_id) == -1)
-                    {
-                      ACE_ERROR_RETURN ((LM_ERROR,
-                                        ACE_TEXT("(%P|%t) ERROR: ")
-                                        ACE_TEXT("DomainParticipantFactoryImpl::delete_participant, ")
-                                        ACE_TEXT(" %p.\n"),
-                                        ACE_TEXT("unbind")),
-                                        ::DDS::RETCODE_ERROR);
-                    }
                 }
             } //xxx now obj rc = 4
         }//xxx now obj rc = 3
@@ -386,15 +370,26 @@ namespace OpenDDS
                         this->participants_protector_,
                         ::DDS::RETCODE_ERROR);
 
+      DPMap::iterator curMapIter;
       for (DPMap::iterator mapIter = participants_.begin();
         mapIter != participants_.end();
         ++mapIter)
       {
-        for (DPSet::iterator iter = mapIter->second.begin();
-          iter != mapIter->second.end();
+        // Move the iterator to next before delete_participant
+        // since it will erase this iterator.      
+        curMapIter = mapIter;
+        ++ mapIter;
+        
+        DPSet::iterator cur;
+        for (DPSet::iterator iter = curMapIter->second.begin();
+          iter != curMapIter->second.end();
           ++iter)
         {
-          ::DDS::ReturnCode_t result = delete_participant ((*iter).obj_.in ());
+          // Move the iterator to next before delete_participant
+          // since it will erase this iterator.      
+          cur = iter;
+          ++ iter;
+          ::DDS::ReturnCode_t result = delete_participant ((*cur).obj_.in ());
           if (result != ::DDS::RETCODE_OK)
           {
             return result;

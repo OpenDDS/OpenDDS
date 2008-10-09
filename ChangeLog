@@ -1,3 +1,13 @@
+Thu Oct  9 20:31:34 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantFactoryImpl/PublisherImpl.cpp:
+        
+          Fixed an iterator access violation due to iterator erasing
+          while iterating on map or set. The delete_*() invalidates
+          the iterator so the iterator has to be move forward for 
+          next iteration before delete_*() call.
+          
 Thu Oct  9 18:22:58 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DomainParticipantImpl.h:
@@ -5,65 +15,65 @@ Thu Oct  9 18:22:58 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * dds/DCPS/FailoverListener.h:
         * dds/DCPS/FailoverListener.cpp:
 
-	  Install a FailoverListener object to the DCPSParticipant
-	  built-in topic DataReader when federated.  This listener will
-	  initiate failover sequencing on reciept of the
-	  on_subscription_lost() callback.
-	  Set the LIVELINESS.lease_duration value for the DCPSParticpant
-	  built-in topic DataReader to that specified by the
-	  FederationLivelinessDuration value when federated.
+          Install a FailoverListener object to the DCPSParticipant
+          built-in topic DataReader when federated.  This listener will
+          initiate failover sequencing on reciept of the
+          on_subscription_lost() callback.
+          Set the LIVELINESS.lease_duration value for the DCPSParticpant
+          built-in topic DataReader to that specified by the
+          FederationLivelinessDuration value when federated.
 
         * dds/DCPS/Service_Participant.h:
         * dds/DCPS/Service_Participant.inl:
         * dds/DCPS/Service_Participant.cpp:
 
-	  load_common_config() - added FederationLivelinessDuration key
-	    value to this section.  The default value is 60 seconds.
-	  federation_liveliness() - new methods to access a member
-	    containing the new FederationLivelinessDuration value.
+          load_common_config() - added FederationLivelinessDuration key
+            value to this section.  The default value is 60 seconds.
+          federation_liveliness() - new methods to access a member
+            containing the new FederationLivelinessDuration value.
           repsitory_lost() - simplified handling the case where the
-	    specified lost repository is not found.
+            specified lost repository is not found.
 
         * dds/InfoRepo/DCPS_IR_Domain.h:
         * dds/InfoRepo/DCPS_IR_Domain.cpp:
 
-	  Add argument when initializing the built-in topics to cause the
-	  DCPSParticipant built-in topic to use a non-infinite
-	  LIVELINESS.lease_duration value.
+          Add argument when initializing the built-in topics to cause the
+          DCPSParticipant built-in topic to use a non-infinite
+          LIVELINESS.lease_duration value.
 
         * dds/DdsDcpsInfo.idl:
         * dds/DdsDcpsInfoUtils.idl:
         * dds/InfoRepo/DCPSInfo_i.h:
         * dds/InfoRepo/DCPSInfo_i.cpp:
 
-	  add_domain_participant() - changed signature to return a
-	    structure with both the previously returned Id value as well
-	    as a boolean indication of whether the repository is a
-	    federated repository.
+          add_domain_participant() - changed signature to return a
+            structure with both the previously returned Id value as well
+            as a boolean indication of whether the repository is a
+            federated repository.
 
         * dds/DCPS/DomainParticipantFactoryImpl.cpp:
 
-	  Use modified add_domain_participant() signature.
+          Use modified add_domain_participant() signature.
 
         * tests/DCPS/DCPSInfoRepo/publisher.cpp:
         * tests/DCPS/DCPSInfoRepo/subscriber.cpp:
 
-	  Use modified add_domain_participant() signature.
+          Use modified add_domain_participant() signature.
 
         * tests/DCPS/FooTest3_0/run_test.pl:
         * tests/DCPS/FooTest3_1/run_test_nokey.pl:
 
-	  Added diagnostic message to indicate final test result.
+          Added diagnostic message to indicate final test result.
 
         * tests/DCPS/FooTest3_1/PubDriver.cpp:
 
-	  Added additional diagnostic messages during test.
+          Added additional diagnostic messages during test.
 
         * tests/DCPS/FooTest3_1/run_test.pl:
 
-	  Added diagnostic message to indicate final test result.
-	  Moved command line prints to be immediately prior to the Spawn
-	  of the process.
+          Added diagnostic message to indicate final test result.
+          Moved command line prints to be immediately prior to the Spawn
+          of the process.
 
 Thu Oct  9 16:03:55 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
