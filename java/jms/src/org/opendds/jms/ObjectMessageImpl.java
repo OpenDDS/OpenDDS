@@ -15,14 +15,14 @@ public class ObjectMessageImpl extends AbstractMessageImpl implements ObjectMess
         try {
             ObjectOutputStream oos = new ObjectOutputStream(baos);
             oos.writeObject(serializable);
-            body.theObjectBody(baos.toByteArray());
+            body.theOctetSeqBody(baos.toByteArray());
         } catch (IOException e) {
             // Can't happen
         }
     }
 
     public Serializable getObject() throws JMSException {
-        ByteArrayInputStream bais = new ByteArrayInputStream(body.theObjectBody());
+        ByteArrayInputStream bais = new ByteArrayInputStream(body.theOctetSeqBody());
         try {
             ObjectInputStream ois = new ObjectInputStream(bais);
             return (Serializable) ois.readObject();
