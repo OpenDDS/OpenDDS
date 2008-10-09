@@ -948,7 +948,7 @@ void TAO_DDS_DCPSInfo_i::remove_subscription (
 }
 
 
-OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_domain_participant (
+OpenDDS::DCPS::AddDomainStatus TAO_DDS_DCPSInfo_i::add_domain_participant (
     ::DDS::DomainId_t domain,
     const ::DDS::DomainParticipantQos & qos
   )
@@ -963,6 +963,11 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_domain_participant (
     throw OpenDDS::DCPS::Invalid_Domain();
   }
 
+  // A value to return.
+  OpenDDS::DCPS::AddDomainStatus value;
+  value.id        = OpenDDS::DCPS::GUID_UNKNOWN;
+  value.federated = (this->federation_ != 0);
+
   // Obtain a shiny new GUID value.
   OpenDDS::DCPS::RepoId participantId = domainPtr->get_next_participant_id();
 
@@ -973,7 +978,10 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_domain_participant (
                    participantId,
                    domainPtr,
                    qos, um_),
-                 OpenDDS::DCPS::GUID_UNKNOWN);
+                 value);
+
+  // We created the participant, now we can return the Id value (eventually).
+  value.id = participantId;
 
   // Determine if this is the 'special' repository internal participant
   // that publishes the built-in topics for a domain.
@@ -1042,7 +1050,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_domain_participant (
     ));
   }
 
-  return participantId;
+  return value;
 }
 
 bool
@@ -1865,7 +1873,7 @@ TAO_DDS_DCPSInfo_i::domain( ::DDS::DomainId_t domain)
     int bit_status = 0;
     if( TheServiceParticipant->get_BIT()) {
 #if !defined (DDS_HAS_MINIMUM_BIT)
-      bit_status = domainPtr->init_built_in_topics();
+      bit_status = domainPtr->init_built_in_topics( this->federation_ != 0);
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
     }
 

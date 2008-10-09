@@ -239,6 +239,12 @@ namespace OpenDDS
       int  federation_backoff_multiplier() const;
       //@}
 
+      /// Accessors for FederationLivelinessDuration.
+      //@{
+      int& federation_liveliness();
+      int  federation_liveliness() const;
+      //@}
+
       /**
        * Accessors for @c bit_transport_port_.
        *
@@ -442,6 +448,9 @@ namespace OpenDDS
 
       /// This FederationBackoffMultiplier.
       int federation_backoff_multiplier_;
+
+      /// This FederationLivelinessDuration.
+      int federation_liveliness_;
 
       /// The @c TRANSIENT data durability cache.
       std::auto_ptr<DataDurabilityCache> transient_data_cache_;

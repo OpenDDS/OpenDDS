@@ -257,5 +257,19 @@ namespace OpenDDS
       return this->federation_backoff_multiplier_;
     }
 
+    ACE_INLINE
+    int&
+    Service_Participant::federation_liveliness()
+    {
+      return this->federation_liveliness_;
+    }
+
+    ACE_INLINE
+    int
+    Service_Participant::federation_liveliness() const
+    {
+      return this->federation_liveliness_;
+    }
+
   } // namespace ::DDS
 } // namespace OpenDDS

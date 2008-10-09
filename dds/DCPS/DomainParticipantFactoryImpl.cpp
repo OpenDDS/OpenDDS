@@ -63,12 +63,16 @@ namespace OpenDDS
           return ::DDS::DomainParticipant::_nil();
         }
 
-      RepoId dp_id = GUID_UNKNOWN;
+      RepoId dp_id     = GUID_UNKNOWN;
+      bool   federated = false;
 
       try
         {
-          dp_id = repo->add_domain_participant (domainId,
+          AddDomainStatus value
+            = repo->add_domain_participant (domainId,
                                                 qos);
+          dp_id     = value.id;
+          federated = value.federated;
         }
       catch (const CORBA::SystemException& sysex)
         {
@@ -97,7 +101,7 @@ namespace OpenDDS
       DomainParticipantImpl* dp;
 
       ACE_NEW_RETURN (dp,
-                      DomainParticipantImpl(domainId, dp_id, qos, a_listener),
+                      DomainParticipantImpl(domainId, dp_id, qos, a_listener, federated),
                       ::DDS::DomainParticipant::_nil ());
 
       ::DDS::DomainParticipant_ptr dp_obj(dp);

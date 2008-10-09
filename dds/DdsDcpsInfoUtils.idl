@@ -14,6 +14,12 @@ module OpenDDS
     // They are also the InstanceHandle_t in Sample_Info for built-in Topics
     typedef GUID_t RepoId;
 
+    // Information returned from call to add_domain_participant()
+    struct AddDomainStatus {
+      RepoId  id;
+      boolean federated;
+    };
+
     typedef long TransportInterfaceId;
     typedef CORBA::OctetSeq TransportInterfaceBLOB;
 
