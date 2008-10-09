@@ -1,16 +1,23 @@
+Thu Oct  9 16:03:55 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Removed unreferenced local variable.
+          Using ACE_Time_Value::zero to avoid ambiguous conversions.
+
 Thu Oct  9 07:00:04 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:
-                  
-          Made TAO_DDS_DCPSInfo_i servant be member of InfoRepo instead of 
-          in the scope of init() function. It is deleted when exit from 
+
+          Made TAO_DDS_DCPSInfo_i servant be member of InfoRepo instead of
+          in the scope of init() function. It is deleted when exit from
           init(). This should fix access violation on the TAO_DDS_DCPSInfo_i
           object and its members.
-          
+
         * dds/InfoRepo/FederatorManagerImpl.cpp:
-        
+
           Made listener thread stop in finalize ().
-         
+
         * dds/InfoRepo/UpdateListener_T.h:
         * dds/InfoRepo/UpdateListener_T.cpp:
 
@@ -22,19 +29,19 @@ Wed Oct  8 18:45:16 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * dds/DCPS/Service_Participant.inl:
         * dds/DCPS/Service_Participant.cpp:
 
-	  remap_domains()   - refactored partial implementation of
-	                      set_repo() into separate method.
-	  repository_lost() - added new method to failover to new
-	                      repository.
+          remap_domains()   - refactored partial implementation of
+                              set_repo() into separate method.
+          repository_lost() - added new method to failover to new
+                              repository.
           Added configurable variables and accessors/mutators for
-	    FederationRecoveryDuration
-	    FederationInitialBackoffSeconds
-	    FederationBackoffMultiplier
+            FederationRecoveryDuration
+            FederationInitialBackoffSeconds
+            FederationBackoffMultiplier
 
         * tests/DCPS/Federation/run_test.pl:
 
-	  Added verbose option mapping to '-ORBVerboseLogging 1' for
-	  process arguments.
+          Added verbose option mapping to '-ORBVerboseLogging 1' for
+          process arguments.
 
 Wed Oct  8 14:42:23 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
