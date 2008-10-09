@@ -3,13 +3,15 @@
  */
 
 #pragma DCPS_DATA_TYPE "OpenDDS::JMS::MessagePayload"
-#pragma DCPS_DATA_KEY "OpenDDS::JMS::MessagePayload theHeaders.JMSMessageID"
+#pragma DCPS_DATA_KEY "OpenDDS::JMS::MessagePayload theHeader.JMSMessageID"
+
+#include "tao/OctetSeq.pidl"
 
 module OpenDDS {
 module JMS {
 
     // Headers
-    struct MessageHeaders {
+    struct MessageHeader {
         string JMSDestination;
         long JMSDeliveryMode;
         string JMSMessageID;
@@ -74,8 +76,6 @@ module JMS {
         BYTE_ARRAY_KIND
     };
 
-    typedef sequence<octet> ByteArray;
-
     union StreamItem switch (ItemKind) {
         case BOOLEAN_KIND:
             boolean booleanValue;
@@ -84,11 +84,11 @@ module JMS {
         case SHORT_KIND:
             short shortValue;
         case CHAR_KIND:
-            char charValue;
+            wchar charValue;
         case INT_KIND:
             long intValue;
         case LONG_KIND:
-            long longValue;
+            long long longValue;
         case FLOAT_KIND:
             float floatValue;
         case DOUBLE_KIND:
@@ -96,7 +96,7 @@ module JMS {
         case STRING_KIND:
             string stringValue;
         case BYTE_ARRAY_KIND:
-            ByteArray byteArrayValue;
+            CORBA::OctetSeq byteArrayValue;
     };
 
     struct MapItem {
@@ -106,9 +106,6 @@ module JMS {
 
     typedef sequence<StreamItem> StreamBody;
     typedef sequence<MapItem> MapBody;
-    typedef sequence<octet> TextBody;
-    typedef sequence<octet> ObjectBody;
-    typedef sequence<octet> BytesBody;
 
     enum MessageBodyKind {
         STREAM_KIND,
@@ -124,15 +121,14 @@ module JMS {
         case MAP_KIND:
             MapBody theMapBody;
         case TEXT_KIND:
-            TextBody theTextBody;
+            string theTextBody;
         case OBJECT_KIND:
-            ObjectBody theObjectBody;
         case BYTES_KIND:
-            BytesBody theBytesBody;
+            CORBA::OctetSeq theOctetSeqBody;
     };
 
     struct MessagePayload {
-        MessageHeaders theHeaders;
+        MessageHeader theHeader;
         MessageProperties theProperties;
         MessageBody theBody;
     };

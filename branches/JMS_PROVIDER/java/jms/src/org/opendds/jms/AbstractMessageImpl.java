@@ -6,7 +6,7 @@ import javax.jms.Destination;
 import java.util.Enumeration;
 import java.io.UnsupportedEncodingException;
 import OpenDDS.JMS.MessagePayload;
-import OpenDDS.JMS.MessageHeaders;
+import OpenDDS.JMS.MessageHeader;
 import OpenDDS.JMS.MessageProperty;
 import OpenDDS.JMS.MessageBody;
 
@@ -14,17 +14,25 @@ public abstract class AbstractMessageImpl implements Message {
     protected final MessagePayload payload;
 
     // Convenience variables, should be kept in sync with payload
-    protected final MessageHeaders headers;
+    protected final MessageHeader headers;
     protected final MessagePropertiesFacade properties;
     protected final MessageBody body;
 
+    protected MessageState state;
+
     protected AbstractMessageImpl() {
-        this.payload = new MessagePayload(new MessageHeaders(), new MessageProperty[0], new MessageBody());
-        headers = payload.theHeaders;
-        properties = new MessagePropertiesFacade(payload);
-        body = payload.theBody;
+        this.payload = new MessagePayload(new MessageHeader(), new MessageProperty[0], new MessageBody());
+        this.headers = payload.theHeader;
+        this.properties = new MessagePropertiesFacade(payload);
+        this.body = payload.theBody;
+        this.state = new MessageStateWritable();
     }
 
+    public void setState(MessageState state) {
+        this.state = state;
+    }
+
+    // Message headers
     public String getJMSMessageID() throws JMSException {
         return headers.JMSMessageID;
     }
@@ -121,7 +129,9 @@ public abstract class AbstractMessageImpl implements Message {
         headers.JMSPriority = priority;
     }
 
+    // Message properties
     public void clearProperties() throws JMSException {
+        state.ensureWritable();
         properties.absorbTheProperties();
         properties.clearProperties();
         properties.updateTheProperties();
@@ -184,54 +194,63 @@ public abstract class AbstractMessageImpl implements Message {
     }
 
     public void setBooleanProperty(String s, boolean b) throws JMSException {
+        state.ensureWritable();
         properties.absorbTheProperties();
         properties.setBooleanProperty(s, b);
         properties.updateTheProperties();
     }
 
     public void setByteProperty(String s, byte b) throws JMSException {
+        state.ensureWritable();
         properties.absorbTheProperties();
         properties.setByteProperty(s, b);
         properties.updateTheProperties();
     }
 
     public void setShortProperty(String s, short i) throws JMSException {
+        state.ensureWritable();
         properties.absorbTheProperties();
         properties.setShortProperty(s, i);
         properties.updateTheProperties();
     }
 
     public void setIntProperty(String s, int i) throws JMSException {
+        state.ensureWritable();
         properties.absorbTheProperties();
         properties.setIntProperty(s, i);
         properties.updateTheProperties();
     }
 
     public void setLongProperty(String s, long l) throws JMSException {
+        state.ensureWritable();
         properties.absorbTheProperties();
         properties.setLongProperty(s, l);
         properties.updateTheProperties();
     }
 
     public void setFloatProperty(String s, float v) throws JMSException {
+        state.ensureWritable();
         properties.absorbTheProperties();
         properties.setFloatProperty(s, v);
         properties.updateTheProperties();
     }
 
     public void setDoubleProperty(String s, double v) throws JMSException {
+        state.ensureWritable();
         properties.absorbTheProperties();
         properties.setDoubleProperty(s, v);
         properties.updateTheProperties();
     }
 
     public void setStringProperty(String s, String s1) throws JMSException {
+        state.ensureWritable();
         properties.absorbTheProperties();
         properties.setStringProperty(s, s1);
         properties.updateTheProperties();
     }
 
     public void setObjectProperty(String s, Object o) throws JMSException {
+        state.ensureWritable();
         properties.absorbTheProperties();
         properties.setObjectProperty(s, o);
         properties.updateTheProperties();
