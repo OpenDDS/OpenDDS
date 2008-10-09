@@ -1,3 +1,21 @@
+Thu Oct  9 07:00:04 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+                  
+          Made TAO_DDS_DCPSInfo_i servant be member of InfoRepo instead of 
+          in the scope of init() function. It is deleted when exit from 
+          init(). This should fix access violation on the TAO_DDS_DCPSInfo_i
+          object and its members.
+          
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        
+          Made listener thread stop in finalize ().
+         
+        * dds/InfoRepo/UpdateListener_T.h:
+        * dds/InfoRepo/UpdateListener_T.cpp:
+
+          Added stop() method.
+
 Wed Oct  8 18:45:16 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:

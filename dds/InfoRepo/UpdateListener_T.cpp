@@ -177,5 +177,14 @@ UpdateListener< DataType, ReaderType>::on_sample_lost(
   }
 }
 
+
+template< class DataType, class ReaderType>
+void
+UpdateListener< DataType, ReaderType>::stop ()
+{
+  this->receiver_.stop ();
+}
+
+
 }} // End of namespace OpenDDS::Federator
 

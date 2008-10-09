@@ -82,6 +82,8 @@ private:
   /// Repository Federation behaviors
   OpenDDS::Federator::ManagerImpl federator_;
   OpenDDS::Federator::Config      federatorConfig_;
+
+  PortableServer::ServantBase_var info_;
 };
 
 InfoRepo::InfoRepo (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
@@ -115,6 +117,7 @@ InfoRepo::run (void)
 void
 InfoRepo::finalize()
 {
+  info_ = 0;
   federator_.finalize();
   TheTransportFactory->release();
   TheServiceParticipant->shutdown ();
@@ -226,14 +229,13 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
                           );
 
   orb_ = CORBA::ORB_init (cvt.get_argc(), cvt.get_ASCII_argv(), "");
-  PortableServer::ServantBase_var info(
-    new TAO_DDS_DCPSInfo_i(
+  info_ = new TAO_DDS_DCPSInfo_i(
       orb_.in(),
       resurrect_,
-      this->federatorConfig_.federationId()
-    )
-  );
-  TAO_DDS_DCPSInfo_i* info_servant = dynamic_cast<TAO_DDS_DCPSInfo_i*>(info.in());
+      this->federatorConfig_.federationId());
+
+  TAO_DDS_DCPSInfo_i* info_servant 
+    = dynamic_cast<TAO_DDS_DCPSInfo_i*>(this->info_.in());
 
   // Install the DCPSInfo_i into the Federator::Manager.
   this->federator_.info() = info_servant;
@@ -265,7 +267,7 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
   PortableServer::ObjectId_var oid =
     PortableServer::string_to_ObjectId ("InfoRepo");
   info_poa_->activate_object_with_id (oid.in (),
-                                      info.in());
+                                      this->info_.in());
   obj = info_poa_->id_to_reference(oid.in());
   // the object is created locally, so it is safe to do an 
   // _unchecked_narrow, this was needed to prevent an exception

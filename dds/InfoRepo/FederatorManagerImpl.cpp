@@ -391,6 +391,7 @@ ManagerImpl::initialize()
             TOPIC_QOS_DEFAULT,
             ::DDS::TopicListener::_nil()
           );
+
   dataWriter = publisher->create_datawriter(
                  topic.in(),
                  writerQos,
@@ -929,6 +930,12 @@ ManagerImpl::finalize()
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::finalize()\n")
     ));
   }
+
+  ownerListener_.stop ();
+  topicListener_.stop ();
+  participantListener_.stop ();
+  publicationListener_.stop ();
+  subscriptionListener_.stop ();
 
   if( this->federated_) {
     try {
