@@ -805,7 +805,7 @@ namespace OpenDDS
           // this method.
           return;
 
-        } catch (const CORBA::Exception& ex) {
+        } catch (const CORBA::Exception&) {
           ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) WARNING: Service_Participant::repository_lost: ")
             ACE_TEXT("repository %d was not available to replace %d, ")
@@ -821,7 +821,7 @@ namespace OpenDDS
 
       // If we reach here, we have exceeded the total recovery time
       // specified.
-      ACE_ASSERT( recoveryFailedTime == 0);
+      ACE_ASSERT( recoveryFailedTime == ACE_Time_Value::zero );
     }
 
     DCPSInfo_ptr
