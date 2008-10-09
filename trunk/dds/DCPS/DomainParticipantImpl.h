@@ -36,6 +36,7 @@ namespace OpenDDS
   {
     class PublisherImpl;
     class SubscriberImpl;
+    class FailoverListener;
 
     /**
     * @class DomainParticipantImpl
@@ -94,7 +95,8 @@ namespace OpenDDS
       DomainParticipantImpl (const ::DDS::DomainId_t&             domain_id,
                              const RepoId&                        dp_id,
                              const ::DDS::DomainParticipantQos &  qos,
-                             ::DDS::DomainParticipantListener_ptr a_listener);
+                             ::DDS::DomainParticipantListener_ptr a_listener,
+                             bool                                 federated = false);
 
       ///Destructor
       virtual ~DomainParticipantImpl (void);
@@ -381,6 +383,10 @@ namespace OpenDDS
       /// This participant id given by DCPSInfo repository.
       RepoId                                dp_id_;
 
+      /// Whether this DomainParticipant is attached to a federated
+      /// repository.
+      bool                                  federated_;
+
       /// Collection of publishers.
       PublisherSet   publishers_;
       /// Collection of subscribers.
@@ -409,6 +415,9 @@ namespace OpenDDS
       ::DDS::Topic_var       bit_pub_topic_;
       /// The topic for built in topic subscription.
       ::DDS::Topic_var       bit_sub_topic_;
+
+      /// Listener to initiate failover with.
+      FailoverListener*      failoverListener_;
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
       /// The datareader for built in topic participant.

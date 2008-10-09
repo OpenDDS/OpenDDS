@@ -139,7 +139,7 @@ public:
   /// Initialize the Built-In Topic structures
   /// This needs to be called before the run begins
   /// Returns 0 (zero) if successful
-  int init_built_in_topics();
+  int init_built_in_topics( bool federated = false);
 
   /// Cleans up the Built-In Topic structures
   int cleanup_built_in_topics();
@@ -191,7 +191,7 @@ private:
   /// done in these private methods.  They were
   /// broken up for readability.
   int init_built_in_topics_topics ();
-  int init_built_in_topics_datawriters ();
+  int init_built_in_topics_datawriters ( bool federated);
   int init_built_in_topics_transport ();
 
   ::DDS::DomainId_t id_;

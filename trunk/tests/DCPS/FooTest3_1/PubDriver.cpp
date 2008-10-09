@@ -265,6 +265,8 @@ PubDriver::init(int& argc, char *argv[])
   ACE_OS::fprintf (output_file, "%s", ior_string.in ());
   ACE_OS::fclose (output_file);
 
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) IOR written to file.\n")));
+
   datawriters_ = new ::DDS::DataWriter_var[num_datawriters_];
   writers_ = new Writer* [num_datawriters_];
 
@@ -282,6 +284,7 @@ PubDriver::init(int& argc, char *argv[])
         ACE_TEXT ("Failed to register the FooTypeSupport.")));
     }
 
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Publisher participant created.\n")));
 
   ::DDS::TopicQos topic_qos;
   participant_->get_default_topic_qos(topic_qos);
@@ -335,12 +338,13 @@ PubDriver::init(int& argc, char *argv[])
                                     ::DDS::DataWriterListener::_nil());
     TEST_CHECK (! CORBA::is_nil (datawriters_[i].in ()));
   }
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Publisher created %d datawriters.\n"), num_datawriters_));
 }
 
 void
 PubDriver::end()
 {
-  ACE_DEBUG((LM_DEBUG, "(%P|%t)PubDriver::end \n"));
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) PubDriver::end \n"));
 
   // Record samples been written in the Writer's data map.
   // Verify the number of instances and the number of samples
@@ -382,6 +386,8 @@ PubDriver::end()
 void
 PubDriver::run()
 {
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) PubDriver::run() entered.\n"));
+
   FILE* fp = ACE_OS::fopen (pub_id_fname_.c_str (), ACE_LIB_TEXT("w"));
   if (fp == 0)
   {
@@ -404,7 +410,7 @@ PubDriver::run()
     // Write the publication id to a file.
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT("(%P|%t) PubDriver::run, ")
-                ACE_TEXT(" Write to %s: pub_id=%s. \n"),
+                ACE_TEXT(" Write to %s: pub_id=%s.\n"),
                 pub_id_fname_.c_str (),
                 buffer.str().c_str()));
 
@@ -423,6 +429,8 @@ PubDriver::run()
     } while (0 == readers_ready);
 
   ACE_OS::fclose(readers_ready);
+
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) PubDriver::run() - subscriber has indicated willingness to connect.\n"));
 
   // Set up the subscriptions.
   ::OpenDDS::DCPS::ReaderAssociationSeq associations;
@@ -460,6 +468,8 @@ PubDriver::run()
   }
   }
 
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) PubDriver::run() - add_associations called directly.\n"));
+
   // Let the subscriber catch up before we broadcast.
   ACE_OS::sleep (2);
 
@@ -482,6 +492,8 @@ PubDriver::run()
     writers_[i]->start ();
   }
   }
+
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) PubDriver::run() - writers started.\n"));
 }
 
 int

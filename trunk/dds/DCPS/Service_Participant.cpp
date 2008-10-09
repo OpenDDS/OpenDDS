@@ -41,6 +41,7 @@ namespace OpenDDS
     const int DEFAULT_FEDERATION_RECOVERY_DURATION       = 900; // 15 minutes in seconds.
     const int DEFAULT_FEDERATION_INITIAL_BACKOFF_SECONDS = 1;   // Wait only 1 second.
     const int DEFAULT_FEDERATION_BACKOFF_MULTIPLIER      = 2;   // Exponential backoff.
+    const int DEFAULT_FEDERATION_LIVELINESS              = 60;  // 1 minute hearbeat.
 
     const int BIT_LOOKUP_DURATION_MSEC = 2000;
 
@@ -80,6 +81,7 @@ namespace OpenDDS
       federation_recovery_duration_( DEFAULT_FEDERATION_RECOVERY_DURATION),
       federation_initial_backoff_seconds_( DEFAULT_FEDERATION_INITIAL_BACKOFF_SECONDS),
       federation_backoff_multiplier_( DEFAULT_FEDERATION_BACKOFF_MULTIPLIER),
+      federation_liveliness_( DEFAULT_FEDERATION_LIVELINESS),
       transient_data_cache_ (),
       persistent_data_cache_ ()
 
@@ -726,14 +728,20 @@ namespace OpenDDS
     void
     Service_Participant::repository_lost( const RepoKey key)
     {
+      // Find the lost repository.
       RepoMap::iterator initialLocation = this->repoMap_.find( key);
-      if( initialLocation == this->repoMap_.end()) {
+      RepoMap::iterator current         = initialLocation;
+      if( current == this->repoMap_.end()) {
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) WARNING: Service_Participant::repository_lost: ")
           ACE_TEXT("lost repository %d was not present, ")
           ACE_TEXT("finding another anyway.\n"),
           key
         ));
+
+      } else {
+        // Start with the repository *after* the lost one.
+        ++current;
       }
 
       // Calculate the bounding end time for attempts.
@@ -743,13 +751,6 @@ namespace OpenDDS
 
       // Backoff delay.
       int backoff = this->federation_initial_backoff_seconds();
-
-      // Start with the repository *after* the lost one.
-      RepoMap::iterator current = initialLocation;
-      if( current != this->repoMap_.end()) {
-        // Handle the lost not found case a bit inefficiently.
-        ++current;
-      }
 
       // Keep trying until the total recovery time specified is exceeded.
       while( recoveryFailedTime < ACE_OS::gettimeofday()) {
@@ -1216,6 +1217,7 @@ namespace OpenDDS
           GET_CONFIG_VALUE (this->cf_, sect, ACE_TEXT("FederationRecoveryDuration"), this->federation_recovery_duration_, int)
           GET_CONFIG_VALUE (this->cf_, sect, ACE_TEXT("FederationInitialBackoffSeconds"), this->federation_initial_backoff_seconds_, int)
           GET_CONFIG_VALUE (this->cf_, sect, ACE_TEXT("FederationBackoffMultiplier"), this->federation_backoff_multiplier_, int)
+          GET_CONFIG_VALUE (this->cf_, sect, ACE_TEXT("FederationLivelinessDuration"), this->federation_liveliness_, int)
         }
 
       return 0;

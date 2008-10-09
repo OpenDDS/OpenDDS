@@ -130,4 +130,11 @@ if ($ir != 0) {
     $status = 1;
 }
 
+if ($status == 0) {
+  print "test PASSED.\n";
+}
+else {
+  print STDERR "test FAILED.\n";
+}
+
 exit $status;

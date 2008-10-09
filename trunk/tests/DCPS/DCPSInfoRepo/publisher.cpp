@@ -93,7 +93,8 @@ main (int argc, char *argv[])
       ::DDS::DomainParticipantQos_var dpQos = new ::DDS::DomainParticipantQos;
       CORBA::Long domainId = 911;
 
-      OpenDDS::DCPS::RepoId dpId = info->add_domain_participant(domainId, dpQos.in());
+      OpenDDS::DCPS::AddDomainStatus value = info->add_domain_participant(domainId, dpQos.in());
+      OpenDDS::DCPS::RepoId dpId = value.id;
       if (OpenDDS::DCPS::GUID_UNKNOWN == dpId)
         {
           ACE_ERROR((LM_ERROR, ACE_TEXT("add_domain_participant failed!\n") ));
@@ -194,7 +195,8 @@ main (int argc, char *argv[])
       if (qos_tests)
       {
 
-        dpIdAlmost = info->add_domain_participant(domainId, dpQos.in());
+        ::OpenDDS::DCPS::AddDomainStatus value = info->add_domain_participant(domainId, dpQos.in());
+        dpIdAlmost = value.id;
         if( OpenDDS::DCPS::GUID_UNKNOWN == dpIdAlmost)
           {
             ACE_ERROR((LM_ERROR, ACE_TEXT("add_domain_participant for qos test failed!\n") ));

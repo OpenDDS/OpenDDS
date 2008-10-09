@@ -10,6 +10,7 @@
 #include "Marked_Default_Qos.h"
 #include "Registered_Data_Types.h"
 #include "Transient_Kludge.h"
+#include "FailoverListener.h"
 #include "Util.h"
 
 #include <sstream>
@@ -53,13 +54,16 @@ namespace OpenDDS
     DomainParticipantImpl::DomainParticipantImpl (const ::DDS::DomainId_t&             domain_id,
                                                   const RepoId&                        dp_id,
                                                   const ::DDS::DomainParticipantQos &  qos,
-                                                  ::DDS::DomainParticipantListener_ptr a_listener)
+                                                  ::DDS::DomainParticipantListener_ptr a_listener,
+                                                  bool                                 federated)
       : default_topic_qos_(TheServiceParticipant->initial_TopicQos()),
         default_publisher_qos_(TheServiceParticipant->initial_PublisherQos()),
         default_subscriber_qos_(TheServiceParticipant->initial_SubscriberQos()),
         qos_(qos),
         domain_id_(domain_id),
-        dp_id_(dp_id)
+        dp_id_(dp_id),
+        federated_( federated),
+        failoverListener_( 0)
     {
       DDS::ReturnCode_t ret;
       ret = this->set_listener(a_listener, DEFAULT_STATUS_KIND_MASK);
@@ -69,6 +73,7 @@ namespace OpenDDS
     // Implementation skeleton destructor
     DomainParticipantImpl::~DomainParticipantImpl (void)
     {
+      delete this->failoverListener_;
     }
 
 
@@ -1813,20 +1818,38 @@ namespace OpenDDS
 #if !defined (DDS_HAS_MINIMUM_BIT)
       try
         {
-          ::DDS::DataReaderQos dr_qos;
-          bit_subscriber_->get_default_datareader_qos(dr_qos);
-          dr_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
-
           ::DDS::TopicDescription_var bit_part_topic_desc
             = this->lookup_topicdescription (::OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC);
 
+          // QoS policies for the DCPSParticipant built-in topic reader.
+          ::DDS::DataReaderQos participantReaderQos;
+          bit_subscriber_->get_default_datareader_qos( participantReaderQos);
+          participantReaderQos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
+          if( this->federated_) {
+            participantReaderQos.liveliness.lease_duration.nanosec = 0;
+            participantReaderQos.liveliness.lease_duration.sec
+              = TheServiceParticipant->federation_liveliness();
+          }
           ::DDS::DataReader_var dr
             = bit_subscriber_->create_datareader (bit_part_topic_desc.in (),
-                                                  dr_qos,
+                                                  participantReaderQos,
                                                   ::DDS::DataReaderListener::_nil ());
 
           bit_part_dr_
             = ::DDS::ParticipantBuiltinTopicDataDataReader::_narrow (dr.in ());
+
+          if( this->federated_) {
+            // Determine the repository key to which we are attached.
+            int key = TheServiceParticipant->domain_to_repo( this->domain_id_);
+
+            // Create and attach the listener.
+            this->failoverListener_ = new FailoverListener( key);
+            this->bit_part_dr_->set_listener( this->failoverListener_, DEFAULT_STATUS_KIND_MASK);
+          }
+
+          ::DDS::DataReaderQos dr_qos;
+          bit_subscriber_->get_default_datareader_qos(dr_qos);
+          dr_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
 
           ::DDS::TopicDescription_var bit_topic_topic_desc
             = this->lookup_topicdescription (::OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC);

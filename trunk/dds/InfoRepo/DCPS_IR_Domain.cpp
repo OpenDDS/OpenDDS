@@ -609,7 +609,7 @@ DCPS_IR_Domain::find_topic_description(
   }
 }
 
-int DCPS_IR_Domain::init_built_in_topics()
+int DCPS_IR_Domain::init_built_in_topics( bool federated)
 {
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
@@ -656,7 +656,7 @@ int DCPS_IR_Domain::init_built_in_topics()
           return topicsResult;
         }
 
-      int datawritersResult = init_built_in_topics_datawriters();
+      int datawritersResult = init_built_in_topics_datawriters( federated);
       if (0 != datawritersResult)
         {
           return datawritersResult;
@@ -818,20 +818,27 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
 
 
 
-int DCPS_IR_Domain::init_built_in_topics_datawriters()
+int DCPS_IR_Domain::init_built_in_topics_datawriters( bool federated)
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
   try
     {
       ::DDS::DataWriter_var datawriter;
-      ::DDS::DataWriterQos dw_qos;
-      bitPublisher_->get_default_datawriter_qos (dw_qos);
-      dw_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
+
+      ::DDS::DataWriterQos participantWriterQos;
+      bitPublisher_->get_default_datawriter_qos( participantWriterQos);
+      participantWriterQos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
+
+      if( federated) {
+        participantWriterQos.liveliness.lease_duration.nanosec = 0;
+        participantWriterQos.liveliness.lease_duration.sec
+          = TheServiceParticipant->federation_liveliness();
+      }
 
       // Participant DataWriter
       datawriter =
         bitPublisher_->create_datawriter(bitParticipantTopic_.in (),
-                                         dw_qos,
+                                         participantWriterQos,
                                          ::DDS::DataWriterListener::_nil());
 
       bitParticipantDataWriter_ =
@@ -844,6 +851,10 @@ int DCPS_IR_Domain::init_built_in_topics_datawriters()
                             ACE_TEXT("DCPS_IR_Domain::init_built_in_topics.\n")),
                             1);
         }
+
+      ::DDS::DataWriterQos dw_qos;
+      bitPublisher_->get_default_datawriter_qos (dw_qos);
+      dw_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
 
       // Topic DataWriter
       datawriter =

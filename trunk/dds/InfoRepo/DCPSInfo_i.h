@@ -261,7 +261,7 @@ public:
       , OpenDDS::DCPS::Invalid_Subscription
     ));
 
-  virtual OpenDDS::DCPS::RepoId add_domain_participant (
+  virtual OpenDDS::DCPS::AddDomainStatus add_domain_participant (
       ::DDS::DomainId_t domain,
       const ::DDS::DomainParticipantQos & qos
     )

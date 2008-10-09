@@ -117,10 +117,11 @@ module OpenDDS {
 
 
       // DomainParticipantFactory calls to add a new domain participant
-      // returns the id of the added participant
+      // returns the id of the added participant and indication that the
+      // repository is federated.
       // 0 is an invalid id
-      RepoId add_domain_participant (in ::DDS::DomainId_t domain,
-                                     in ::DDS::DomainParticipantQos qos)
+      AddDomainStatus add_domain_participant (in ::DDS::DomainId_t domain,
+                                              in ::DDS::DomainParticipantQos qos)
         raises (Invalid_Domain);
 
 
