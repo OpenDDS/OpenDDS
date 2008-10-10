@@ -13,19 +13,30 @@ use DDS_Run_Test;
 
 $status = 0;
 
+my $debug ;# = 10;
+my $transportDebug ;# = 10;
+my $debugFile = "debug.out";
+
+my $debugOpts = "";
+$debugOpts .= "-DCPSDebugLevel $debug " if $debug;
+$debugOpts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
+$debugOpts .= "-ORBLogFile $debugFile " if $debugFile and ($debug or $transportDebug);
+
 $opts = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : "-ORBSvcConf tcp.conf";
+
+$opts .= " " . $debugOpts if $debug or $transportDebug;
+
 $pub_opts = "$opts -DCPSConfigFile pub.ini";
 $sub_opts = "$opts -DCPSConfigFile sub.ini";
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 $repo_bit_opt = $opts;
 
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                    "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file");
+                                    "$repo_bit_opt -o $dcpsrepo_ior ");
 $Subscriber = PerlDDS::create_process ("subscriber", "$sub_opts");
 $Publisher = PerlDDS::create_process ("publisher", "$pub_opts");
 

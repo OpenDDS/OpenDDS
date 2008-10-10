@@ -20,7 +20,6 @@ $opts =
 $pub_opts = "$opts -DCPSConfigFile pub.ini";
 $sub_opts = "$opts -DCPSConfigFile sub.ini";
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 $repo_bit_opt = $opts;
 
@@ -35,7 +34,7 @@ unlink $durability_cache;
 
 $DCPSREPO =
   PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                           "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file");
+                           "$repo_bit_opt -o $dcpsrepo_ior ");
 $Subscriber = PerlDDS::create_process ("subscriber", "$sub_opts");
 $Publisher1 = PerlDDS::create_process ("publisher",
                                        "$pub_opts -w -ORBLogFile $data_file");

@@ -280,7 +280,10 @@ SubDriver::parse_pub_arg(const std::string& arg)
   std::string pub_id_str(arg,0,pos);
   this->pub_addr_str_ = std::string (arg,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
 
-  this->pub_id_ = ACE_OS::atoi(pub_id_str.c_str());
+  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 1
+  converter.kind()   = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
+  converter.key()[2] = ACE_OS::atoi( pub_id_str.c_str());
+  this->pub_id_ = converter;
 
   // Find the (only) ':' char in the remainder, and make sure it is in
   // a legal spot.
@@ -318,7 +321,10 @@ SubDriver::parse_pub_arg(const std::string& arg)
 int
 SubDriver::parse_sub_arg(const std::string& arg)
 {
-  this->sub_id_ = ACE_OS::atoi(arg.c_str());
+  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 2
+  converter.kind()   = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
+  converter.key()[2] = ACE_OS::atoi( arg.c_str());
+  this->sub_id_ = converter;
 
   return 0;
 }

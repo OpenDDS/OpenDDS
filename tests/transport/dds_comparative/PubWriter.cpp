@@ -8,7 +8,7 @@
 
 
 PubWriter::PubWriter()
-  : pub_id_(0),
+  : pub_id_( OpenDDS::DCPS::GUID_UNKNOWN),
     data_size_(0),
     num_to_send_(0),
     condition_(this->lock_),

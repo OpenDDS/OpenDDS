@@ -15,6 +15,8 @@
 
 #include "Serializer.h"
 
+#include <sstream>
+
 namespace OpenDDS
 {
   namespace DCPS
@@ -174,6 +176,16 @@ WriteDataContainer::reenqueue_all(OpenDDS::DCPS::ReaderIdSeq const & rds,
                            sent_data_,
                            rds,
                            lifespan);
+    if( DCPS_debug_level > 9) {
+      ::OpenDDS::DCPS::GuidConverter converter( this->publication_id_);
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) WriteDataContainer::reenqueue_all: ")
+        ACE_TEXT("domain %d topic %s publication %s copying HISTORY to resend.\n"),
+        this->domain_id_,
+        this->topic_name_,
+        (const char*) converter
+      ));
+    }
   }
 
   return ::DDS::RETCODE_OK;
@@ -516,6 +528,17 @@ WriteDataContainer::data_delivered (DataSampleListElement* sample)
   }
   else
   {
+    if( DCPS_debug_level > 9) {
+      ::OpenDDS::DCPS::GuidConverter converter( this->publication_id_);
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered: ")
+        ACE_TEXT("domain %d topic %s publication %s pushed to HISTORY.\n"),
+        this->domain_id_,
+        this->topic_name_,
+        (const char*) converter
+      ));
+    }
+
     // INSERT INTO DURABILITY CACHE HERE
     sent_data_.enqueue_tail_next_send_sample (sample);
   }
@@ -648,6 +671,16 @@ WriteDataContainer::remove_oldest_sample (
     result = this->sent_data_.dequeue_next_send_sample (stale);
     release_buffer(stale);
     released = true;
+    if( DCPS_debug_level > 9) {
+      ::OpenDDS::DCPS::GuidConverter converter( this->publication_id_);
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) WriteDataContainer::remove_oldest_sample: ")
+        ACE_TEXT("domain %d topic %s publication %s sample removed from HISTORY.\n"),
+        this->domain_id_,
+        this->topic_name_,
+        (const char*) converter
+      ));
+    }
   }
   else if( head == this->unsent_data_.head_)
   {

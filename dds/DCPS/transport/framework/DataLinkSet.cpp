@@ -30,7 +30,7 @@ OpenDDS::DCPS::DataLinkSet::DataLinkSet()
 
   if (::OpenDDS::DCPS::Transport_debug_level >= 2)
     {
-      ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataLinkSet send_control_element_allocator %x with %d chunks\n",
+      ACE_DEBUG ((LM_DEBUG, "(%P|%t) DataLinkSet send_control_element_allocator %x with %d chunks\n",
       &send_control_element_allocator_, NUM_SEND_CONTROL_ELEMENT_CHUNKS));
     }
 }
@@ -80,8 +80,10 @@ OpenDDS::DCPS::DataLinkSet::remove_links(DataLinkSet* released_set)
           //MJM: diagnostic (ORBDebugLevel 4).
           // Just report to the log that we tried.
           VDBG((LM_DEBUG,
-          "(%P|%t) link_id (%d) not found in map_->\n",
-          link_id));
+            ACE_TEXT("(%P|%t) DataLinkSet::remove_links: ")
+            ACE_TEXT("link_id %d not found in map.\n"),
+            link_id
+          ));
         }
     }
 
@@ -164,8 +166,15 @@ OpenDDS::DCPS::DataLinkSet::find_link(const RepoId remoteId,
           {
             if (unbind(map_, itr->first) != 0)
             {
-              ACE_ERROR ((LM_ERROR, "(%P|%t)DataLinkSet::find_link cannot remove"
-                " link for localId=%d pub_side=%d \n", localId, pub_side));
+              ::OpenDDS::DCPS::GuidConverter converter(
+                const_cast< ::OpenDDS::DCPS::RepoId*>( &localId)
+              );
+              ACE_ERROR((LM_ERROR,
+                ACE_TEXT("(%P|%t) DataLinkSet::find_link: ")
+                ACE_TEXT("cannot remove link for localId %s pub_side is %s.\n"),
+                (const char*) converter,
+                (pub_side? "true": "false")
+              ));
             }
           }
           return link._retn ();

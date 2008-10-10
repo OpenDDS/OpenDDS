@@ -92,7 +92,7 @@ namespace OpenDDS
         typedef ACE_SYNCH_MUTEX     LockType;
         typedef ACE_Guard<LockType> GuardType;
 
-        typedef std::map <RepoId, DataLinkSet_rch>      MapType;
+        typedef std::map <RepoId, DataLinkSet_rch, GUID_tKeyLessThan>      MapType;
 
         LockType map_lock_; // This lock is explicitly for this->map_ protection
         MapType  map_;

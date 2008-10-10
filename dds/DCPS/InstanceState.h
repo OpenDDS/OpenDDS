@@ -8,6 +8,7 @@
 #include "ace/Time_Value.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/GuidUtils.h"
 #include <set>
 
 
@@ -147,7 +148,7 @@ namespace OpenDDS
       DataReaderImpl* reader_ ;
       ::DDS::InstanceHandle_t handle_ ;
 
-      typedef std::set <PublicationId> Writers;
+      typedef std::set <PublicationId, GUID_tKeyLessThan> Writers;
 
       Writers writers_;
     } ;

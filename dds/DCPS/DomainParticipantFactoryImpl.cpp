@@ -63,12 +63,16 @@ namespace OpenDDS
           return ::DDS::DomainParticipant::_nil();
         }
 
-      RepoId dp_id = 0;
+      RepoId dp_id     = GUID_UNKNOWN;
+      bool   federated = false;
 
       try
         {
-          dp_id = repo->add_domain_participant (domainId,
+          AddDomainStatus value
+            = repo->add_domain_participant (domainId,
                                                 qos);
+          dp_id     = value.id;
+          federated = value.federated;
         }
       catch (const CORBA::SystemException& sysex)
         {
@@ -85,7 +89,7 @@ namespace OpenDDS
           return ::DDS::DomainParticipant::_nil();
         }
 
-      if (dp_id == 0)
+      if (dp_id == GUID_UNKNOWN)
         {
           ACE_ERROR ((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
@@ -97,7 +101,7 @@ namespace OpenDDS
       DomainParticipantImpl* dp;
 
       ACE_NEW_RETURN (dp,
-                      DomainParticipantImpl(domainId, dp_id, qos, a_listener),
+                      DomainParticipantImpl(domainId, dp_id, qos, a_listener, federated),
                       ::DDS::DomainParticipant::_nil ());
 
       ::DDS::DomainParticipant_ptr dp_obj(dp);
@@ -199,12 +203,14 @@ namespace OpenDDS
       //xxx servant rc = 4 (servant::DP::Entity::ServantBase::ref_count_
       if (the_servant->is_clean () == 0)
         {
-          ACE_ERROR_RETURN ((LM_ERROR,
-                            ACE_TEXT("(%P|%t) ERROR: ")
-                            ACE_TEXT("DomainParticipantFactoryImpl::delete_participant, ")
-                            ACE_TEXT("The participant(repo_id=%d) is not empty.\n"),
-                            the_servant->get_id ()),
-                            ::DDS::RETCODE_PRECONDITION_NOT_MET);
+          RepoId id = the_servant->get_id();
+          ::OpenDDS::DCPS::GuidConverter converter( id);
+          ACE_ERROR_RETURN((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR: ")
+            ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
+            ACE_TEXT("the participant %s is not empty.\n"),
+            (const char*) converter
+          ),::DDS::RETCODE_PRECONDITION_NOT_MET);
         }
 
       ::DDS::DomainId_t domain_id = the_servant->get_domain_id ();
@@ -213,12 +219,15 @@ namespace OpenDDS
       DPSet* entry;
       if (find(participants_, domain_id, entry) == -1)
         {
-          ACE_ERROR_RETURN ((LM_ERROR,
-                            ACE_TEXT("(%P|%t) ERROR: ")
-                            ACE_TEXT("DomainParticipantFactoryImpl::delete_participant, ")
-                            ACE_TEXT("%p domain_id=%d dp_id=%d.\n"),
-                            ACE_TEXT("find"), domain_id, dp_id),
-                            ::DDS::RETCODE_ERROR);
+          ::OpenDDS::DCPS::GuidConverter converter( dp_id);
+          ACE_ERROR_RETURN((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR: ")
+            ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
+            ACE_TEXT("%p domain_id=%d dp_id=%s.\n"),
+            ACE_TEXT("find"),
+            domain_id,
+            (const char*) converter
+          ),::DDS::RETCODE_ERROR);
         }
       else
         {
@@ -227,60 +236,45 @@ namespace OpenDDS
                             this->participants_protector_,
                             ::DDS::RETCODE_ERROR);
 
-          DPSet* entry;
-          if (find(participants_, domain_id, entry) == -1)
+          ::DDS::ReturnCode_t result
+            = the_servant->delete_contained_entities ();
+
+//xxx still rc=4
+          if (result != ::DDS::RETCODE_OK)
+            {
+              return result;
+            }
+
+          Participant_Pair pair (the_servant, a_participant, DUP);
+
+          if (OpenDDS::DCPS::remove(*entry, pair) == -1)
             {
               ACE_ERROR_RETURN ((LM_ERROR,
                                 ACE_TEXT("(%P|%t) ERROR: ")
                                 ACE_TEXT("DomainParticipantFactoryImpl::delete_participant, ")
-                                ACE_TEXT(" %p domain_id=%d dp_id=%d\n"),
-                                ACE_TEXT("find"),
-                                domain_id,
-                                dp_id),
+                                ACE_TEXT(" %p.\n"),
+                                ACE_TEXT("remove")),
                                 ::DDS::RETCODE_ERROR);
             }
-          else
+//xxx now obj rc=5 and servant rc=4
+          if (entry->empty())
             {
-              ::DDS::ReturnCode_t result
-                = the_servant->delete_contained_entities ();
-
-//xxx still rc=4
-              if (result != ::DDS::RETCODE_OK)
-                {
-                  return result;
-                }
-
-              Participant_Pair pair (the_servant, a_participant, DUP);
-
-              if (OpenDDS::DCPS::remove(*entry, pair) == -1)
+              if (unbind(participants_, domain_id) == -1)
                 {
                   ACE_ERROR_RETURN ((LM_ERROR,
                                     ACE_TEXT("(%P|%t) ERROR: ")
                                     ACE_TEXT("DomainParticipantFactoryImpl::delete_participant, ")
                                     ACE_TEXT(" %p.\n"),
-                                    ACE_TEXT("remove")),
+                                    ACE_TEXT("unbind")),
                                     ::DDS::RETCODE_ERROR);
-                }
-//xxx now obj rc=5 and servant rc=4
-              if (entry->empty())
-                {
-                  if (unbind(participants_, domain_id) == -1)
-                    {
-                      ACE_ERROR_RETURN ((LM_ERROR,
-                                        ACE_TEXT("(%P|%t) ERROR: ")
-                                        ACE_TEXT("DomainParticipantFactoryImpl::delete_participant, ")
-                                        ACE_TEXT(" %p.\n"),
-                                        ACE_TEXT("unbind")),
-                                        ::DDS::RETCODE_ERROR);
-                    }
                 }
             } //xxx now obj rc = 4
         }//xxx now obj rc = 3
 
-      DCPSInfo_var repo = TheServiceParticipant->get_repository( domain_id);
 
       try
         {
+          DCPSInfo_var repo = TheServiceParticipant->get_repository( domain_id);
           repo->remove_domain_participant (domain_id,
                                            dp_id);
         }
@@ -376,15 +370,26 @@ namespace OpenDDS
                         this->participants_protector_,
                         ::DDS::RETCODE_ERROR);
 
+      DPMap::iterator curMapIter;
       for (DPMap::iterator mapIter = participants_.begin();
         mapIter != participants_.end();
         ++mapIter)
       {
-        for (DPSet::iterator iter = mapIter->second.begin();
-          iter != mapIter->second.end();
+        // Move the iterator to next before delete_participant
+        // since it will erase this iterator.      
+        curMapIter = mapIter;
+        ++ mapIter;
+        
+        DPSet::iterator cur;
+        for (DPSet::iterator iter = curMapIter->second.begin();
+          iter != curMapIter->second.end();
           ++iter)
         {
-          ::DDS::ReturnCode_t result = delete_participant ((*iter).obj_.in ());
+          // Move the iterator to next before delete_participant
+          // since it will erase this iterator.      
+          cur = iter;
+          ++ iter;
+          ::DDS::ReturnCode_t result = delete_participant ((*cur).obj_.in ());
           if (result != ::DDS::RETCODE_OK)
           {
             return result;
@@ -403,6 +408,12 @@ namespace OpenDDS
       ))
     {
       return TheParticipantFactory;
+    }
+
+    const DomainParticipantFactoryImpl::DPMap&
+    DomainParticipantFactoryImpl::participants() const
+    {
+      return this->participants_;
     }
 
 

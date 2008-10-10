@@ -15,14 +15,13 @@ use Sys::Hostname;
 
 my $status = 0;
 
-my $domains_file = "domain_ids";
 my $dcpsrepo_ior = "repo.ior";
 my $dcpsrepo_port = PerlACE::random_port();
 
 # BuiltIn Topic (bit) support required for ignore_* operations
 # simple_tcp.conf contains the instructions to automatically load the SimpleTcp
 #  transport.
-my $RepoOpts = "-ORBSvcConf simple_tcp.conf -d $domains_file  -ORBEndpoint iiop://:$dcpsrepo_port";
+my $RepoOpts = "-ORBSvcConf simple_tcp.conf -ORBEndpoint iiop://:$dcpsrepo_port";
 
 # simple_tcp.conf contains the instructions to automatically load the SimpleTcp
 #  transport.

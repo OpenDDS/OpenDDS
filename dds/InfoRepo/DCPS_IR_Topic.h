@@ -10,6 +10,7 @@
 #ifndef DCPS_IR_TOPIC_H
 #define DCPS_IR_TOPIC_H
 
+#include  "inforepo_export.h"
 #include /**/ "dds/DdsDcpsInfrastructureC.h"
 #include /**/ "dds/DdsDcpsTopicC.h"
 #include /**/ "dds/DdsDcpsInfoC.h"
@@ -38,7 +39,7 @@ class DCPS_IR_Subscription;
  * @brief Representative of a Topic
  *
  */
-class DCPS_IR_Topic
+class OpenDDS_InfoRepoLib_Export DCPS_IR_Topic
 {
 public:
   DCPS_IR_Topic(OpenDDS::DCPS::RepoId id,

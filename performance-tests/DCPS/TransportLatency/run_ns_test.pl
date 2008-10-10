@@ -24,7 +24,6 @@ else {
 
 
 my($port1) = PerlACE::random_port();
-$domains_file = "domain_ids";
 $ns_ior = "ns.ior";
 $dcpsrepo_ior = "repo.ior";
 $arg_ns_ref = "-ORBInitRef NameService=file://$ns_ior";
@@ -36,7 +35,7 @@ unlink $dcpsrepo_ior;
 $NS = PerlDDS::create_process ("$ENV{TAO_ROOT}/orbsvcs/Naming_Service/Naming_Service",
                             "-o $ns_ior");
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-				  "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file "
+				  "$repo_bit_opt -o $dcpsrepo_ior "
                                 . "-ORBEndpoint iiop://localhost:$port1");
 $Subscriber = PerlDDS::create_process ("subscriber",
                                     "-DCPSConfigFile sub.ini $common_args");

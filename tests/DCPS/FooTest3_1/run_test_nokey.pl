@@ -57,7 +57,6 @@ else {
 
 $num_writes=$num_threads_to_write * $num_writes_per_thread * $num_writers + $num_writers;
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "dcps_ir.ior";
 $pubdriver_ior = "pubdriver.ior";
 # The pub_id_fname can not be a full path because the
@@ -77,7 +76,7 @@ $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                     "$repo_bit_conf -o $dcpsrepo_ior"
-                                     . " -d $domains_file $svc_config");
+                                     . " $svc_config");
 
 $publisher = PerlDDS::create_process ("FooTest3NoKey_publisher"
                                      , "$svc_config"
@@ -129,6 +128,13 @@ $ir = $DCPSREPO->TerminateWaitKill(5);
 if ($ir != 0) {
     print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
     $status = 1;
+}
+
+if ($status == 0) {
+  print "test PASSED.\n";
+}
+else {
+  print STDERR "test FAILED.\n";
 }
 
 exit $status;

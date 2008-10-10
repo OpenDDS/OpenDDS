@@ -37,7 +37,7 @@ namespace OpenDDS
 
 
     virtual void add_associations (
-        ::OpenDDS::DCPS::RepoId yourId,
+        const ::OpenDDS::DCPS::RepoId& yourId,
         const ReaderAssociationSeq & readers
       )
       ACE_THROW_SPEC ((

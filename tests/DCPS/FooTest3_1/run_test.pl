@@ -84,7 +84,6 @@ else {
 
 $num_writes=$num_threads_to_write * $num_writes_per_thread * $num_writers + $num_instances;
 
-$domains_file="domain_ids";
 $dcpsrepo_ior="dcps_ir.ior";
 $pubdriver_ior="pubdriver.ior";
 # The pub_id_fname can not be a full path because the
@@ -105,7 +104,7 @@ $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
 
 $DCPSREPO=PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                   "$repo_bit_conf -o $dcpsrepo_ior"
-                                  . " -d $domains_file $svc_config");
+                                  . " $svc_config");
 
 $publisher=PerlDDS::create_process ("FooTest3_publisher"
                                    , "$svc_config"
@@ -116,15 +115,13 @@ $publisher=PerlDDS::create_process ("FooTest3_publisher"
                                    . " -v $pubdriver_ior -l $write_dalay_msec -r $check_data_dropped "
                                    . " -b $blocking_write -f $sub_ready_file");
 
-print $publisher->CommandLine(), "\n";
-
 $subscriber=PerlDDS::create_process ("FooTest3_subscriber",
                                     , "$svc_config"
                                     . "$app_bit_conf -p $pub_id_fname:localhost:$pub_port -s $sub_id:localhost:$sub_port "
                                     . " -n $num_writes -v file://$pubdriver_ior -l $receive_dalay_msec -f $sub_ready_file");
 
-print $subscriber->CommandLine(), "\n";
 
+print $DCPSREPO->CommandLine(), "\n";
 $DCPSREPO->Spawn ();
 
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
@@ -134,7 +131,10 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
 }
 
 
+print $subscriber->CommandLine(), "\n";
 $subscriber->Spawn ();
+
+print $publisher->CommandLine(), "\n";
 $publisher->Spawn ();
 
 $result=$publisher->WaitKill ($publisher_running_sec);
@@ -166,6 +166,13 @@ $ir=$DCPSREPO->TerminateWaitKill(5);
 if ($ir != 0) {
     print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
     $status=1;
+}
+
+if ($status == 0) {
+  print "test PASSED.\n";
+}
+else {
+  print STDERR "test FAILED.\n";
 }
 
 exit $status;

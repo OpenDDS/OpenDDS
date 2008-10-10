@@ -24,6 +24,7 @@
 #include "ace/Reactor.h"
 #include "ace/Auto_Ptr.h"
 
+#include <sstream>
 
 namespace OpenDDS
 {
@@ -47,7 +48,7 @@ DataWriterImpl::DataWriterImpl (void)
     control_delivered_count_ (0),
     n_chunks_ (TheServiceParticipant->n_chunks ()),
     association_chunk_multiplier_(TheServiceParticipant->association_chunk_multiplier ()),
-    topic_id_ (0),
+    topic_id_ ( GUID_UNKNOWN ),
     topic_servant_ (0),
     qos_ (TheServiceParticipant->initial_DataWriterQos ()),
     listener_mask_(DEFAULT_STATUS_KIND_MASK),
@@ -55,7 +56,7 @@ DataWriterImpl::DataWriterImpl (void)
     participant_servant_ (0),
     domain_id_ (0),
     publisher_servant_(0),
-    publication_id_ (0),
+    publication_id_ ( GUID_UNKNOWN ),
     sequence_number_ (),
     data_container_ (0),
     mb_allocator_(0),
@@ -188,8 +189,18 @@ DataWriterImpl::add_associations ( ::OpenDDS::DCPS::RepoId yourId,
 
   if (DCPS_debug_level >= 1)
   {
-    ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataWriterImpl::add_associations  "
-      "bit %d local %d remote %d num remotes %d \n", is_bit_, yourId, readers[0].readerId, readers.length ()));
+    ::OpenDDS::DCPS::GuidConverter writerConverter( yourId);
+    ::OpenDDS::DCPS::GuidConverter readerConverter(
+      const_cast< ::OpenDDS::DCPS::RepoId*>( &readers[ 0].readerId)
+    );
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) DataWriterImpl::add_associations - ")
+      ACE_TEXT("bit %d local %s remote %s num remotes %d \n"),
+      is_bit_,
+      (const char*) writerConverter,
+      (const char*) readerConverter,
+      readers.length()
+    ));
   }
 
   if (entity_deleted_ == true)
@@ -201,7 +212,7 @@ DataWriterImpl::add_associations ( ::OpenDDS::DCPS::RepoId yourId,
     return;
   }
 
-  if (0 == publication_id_)
+  if (GUID_UNKNOWN == publication_id_)
   {
     publication_id_ = yourId;
   }
@@ -214,10 +225,25 @@ DataWriterImpl::add_associations ( ::OpenDDS::DCPS::RepoId yourId,
 
     for (CORBA::ULong i = 0; i < len; ++i)
     {
-      if (OpenDDS::DCPS::insert(pending_readers_, readers[i].readerId) == -1)
-      {
-        ACE_ERROR ((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::add_associations insert %d to pending failed\n",
-          readers[i].readerId));
+      if( OpenDDS::DCPS::insert(pending_readers_, readers[i].readerId) == -1) {
+        ::OpenDDS::DCPS::GuidConverter converter(
+          const_cast< ::OpenDDS::DCPS::RepoId*>( &readers[ i].readerId)
+        );
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::add_associations: ")
+          ACE_TEXT("failed to mark %s as pending.\n"),
+          (const char*) converter
+        ));
+
+      } else if (DCPS_debug_level > 0) {
+        ::OpenDDS::DCPS::GuidConverter converter(
+          const_cast< ::OpenDDS::DCPS::RepoId*>( &readers[ i].readerId)
+        );
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DataWriterImpl::add_associations: ")
+          ACE_TEXT("marked %s as pending.\n"),
+          (const char*) converter
+        ));
       }
     }
   }
@@ -244,8 +270,18 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
 
   if (DCPS_debug_level >= 1)
   {
-    ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataWriterImpl::fully_associated  "
-      "bit %d local %d remote %d num remotes %d\n", is_bit_, myid, remote_associations[0].remote_id_, num_remote_associations));
+    ::OpenDDS::DCPS::GuidConverter writerConverter( myid);
+    ::OpenDDS::DCPS::GuidConverter readerConverter(
+      const_cast< ::OpenDDS::DCPS::RepoId*>( &remote_associations[ 0].remote_id_)
+    );
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) DataWriterImpl::fully_associated - ")
+      ACE_TEXT("bit %d local %s remote %s num remotes %d \n"),
+      is_bit_,
+      (const char*) writerConverter,
+      (const char*) readerConverter,
+      num_remote_associations
+    ));
   }
 
   CORBA::ULong len = 0;
@@ -262,9 +298,15 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
       // is called before fully_associated() call.
       if (OpenDDS::DCPS::remove (pending_readers_, remote_associations[i].remote_id_) == -1)
       {
-        ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataWriterImpl::fully_associated  "
-            "reader %d is not in pending list because remove_association is already called \n",
-            remote_associations[i].remote_id_));
+        ::OpenDDS::DCPS::GuidConverter converter(
+          const_cast< ::OpenDDS::DCPS::RepoId*>( &remote_associations[ i].remote_id_)
+        );
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DataWriterImpl::fully_associated: ")
+          ACE_TEXT("reader %s is not in pending list ")
+          ACE_TEXT("because remove_association is already called.\n"),
+          (const char*) converter
+        ));
         continue;
       }
       
@@ -276,8 +318,14 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
       
       if (OpenDDS::DCPS::insert (readers_, remote_associations[i].remote_id_) == -1)
       {
-        ACE_ERROR ((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::fully_associated insert %d from pending failed\n",
-          remote_associations[i].remote_id_));
+        ::OpenDDS::DCPS::GuidConverter converter(
+          const_cast< ::OpenDDS::DCPS::RepoId*>( &remote_associations[ i].remote_id_)
+        );
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::fully_associated: ")
+          ACE_TEXT("insert %s from pending failed.\n"),
+          (const char*) converter
+        ));
       }
     }
   }
@@ -294,27 +342,39 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
       return;
 
     {
-      // protect subscription_handles_, publication_match_status_
-      // and status changed flags.
+      // protect publication_match_status_ and status changed flags.
       ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
       CORBA::ULong rd_len = handles.length ();
-      CORBA::ULong sub_len = subscription_handles_.length();
-      subscription_handles_.length (sub_len + rd_len);
 
       for (CORBA::ULong i = 0; i < rd_len; ++i)
       {
         // update the publication_match_status_
         ++publication_match_status_.total_count;
         ++publication_match_status_.total_count_change;
-        subscription_handles_[sub_len + i] = handles[i];
         if (bind(id_to_handle_map_, rd_ids[i], handles[i]) != 0)
         {
-          ACE_DEBUG ((LM_DEBUG,
-                      "(%P|%t)ERROR: DataWriterImpl::fully_associated "
-                      "insert %d - %X to id_to_handle_map_ failed \n",
-                      rd_ids[i], handles[i]));
+          ::OpenDDS::DCPS::GuidConverter converter(
+            const_cast< ::OpenDDS::DCPS::RepoId*>( &rd_ids[ i])
+          );
+          ACE_DEBUG((LM_WARNING,
+            ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::fully_associated: ")
+            ACE_TEXT("id_to_handle_map_%s = 0x%x failed.\n"),
+            (const char*) converter,
+            handles[i]
+          ));
           return;
+
+        } else if( DCPS_debug_level > 4) {
+          ::OpenDDS::DCPS::GuidConverter converter(
+            const_cast< ::OpenDDS::DCPS::RepoId*>( &rd_ids[ i])
+          );
+          ACE_DEBUG((LM_WARNING,
+            ACE_TEXT("(%P|%t) DataWriterImpl::fully_associated: ")
+            ACE_TEXT("id_to_handle_map_%s = 0x%x.\n"),
+            (const char*) converter,
+            handles[i]
+          ));
         }
         publication_match_status_.last_subscription_handle = handles[i];
       }
@@ -338,34 +398,8 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
     delete [] remote_associations;
   }
 
-  // Support TRANSIENT_LOCAL_DURABILITY_QOS instead of using
-  // TheTransientKludge.
-  if (this->qos_.durability.kind == DDS::TRANSIENT_LOCAL_DURABILITY_QOS
-      || this->qos_.durability.kind == DDS::TRANSIENT_DURABILITY_QOS
-      || this->qos_.durability.kind == DDS::PERSISTENT_DURABILITY_QOS)
-  //if (TheTransientKludge->is_enabled ())
-  {
-    // The above condition is only true for the DCPSInfo Server.
-
-    // kludge over a kludge
-    // This sleep ensures that the newly created connection used
-    // by Built-In Topics is established end-to-end
-    // before the BIT data is resent.
-    // Atleast hopefully that will happen in 3 seconds.
-    // !!! this sleep caused other problems.
-    //     Consider this double kludge at a later time.
-    //     Could optimize this by only sleeping when
-    //     it is the first time the TransportBlob is seen
-    //     (in other words when the connection is being established).
-    //     But actaully we still need a small sleep because
-    //     although the conneciton is established already the
-    //     subscriber side association may not yet be established.
-    //     ACE_OS::sleep(2);
-
-    // This is a very limited implementation of
-    // DURABILITY.kind=TRANSIENT_LOCAL
-    // It suffers from resending the history to every subscription.
-
+  // Support DURABILITY QoS
+  if( this->qos_.durability.kind != DDS::VOLATILE_DURABILITY_QOS) {
     // Tell the WriteDataContainer to resend all sending/sent
     // samples.
     this->data_container_->reenqueue_all (rd_ids,
@@ -394,8 +428,18 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
 {
   if (DCPS_debug_level >= 1)
   {
-    ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataWriterImpl::remove_associations  "
-      "bit %d local %d remote %d num remotes %d\n", is_bit_, publication_id_, readers[0], readers.length ()));
+    ::OpenDDS::DCPS::GuidConverter writerConverter( this->publication_id_);
+    ::OpenDDS::DCPS::GuidConverter readerConverter(
+      const_cast< ::OpenDDS::DCPS::RepoId*>( &readers[ 0])
+    );
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) DataWriterImpl::remove_associations: ")
+      ACE_TEXT("bit %d local %s remote %s num remotes %d\n"),
+      is_bit_,
+      (const char*) writerConverter,
+      (const char*) readerConverter,
+      readers.length()
+    ));
   }
 
   ReaderIdSeq fully_associated_readers;
@@ -434,8 +478,15 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
         ++ rds_len;
         rds.length (rds_len);
         rds [rds_len - 1] = readers[i]; 
-        ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataWriterImpl::remove_associations  "
-          "remove reader %d before fully_associated() call\n", readers[i]));
+
+        ::OpenDDS::DCPS::GuidConverter converter(
+          const_cast< ::OpenDDS::DCPS::RepoId*>( &readers[ i])
+        );
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DataWriterImpl::remove_associations: ")
+          ACE_TEXT("removing reader %s before fully_associated() call.\n"),
+          (const char*) converter
+        ));
       }
       //else reader is already removed which indicates remove_association()
       //is called multiple times.
@@ -447,34 +498,11 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
       // log with error.
       if (this->cache_lookup_instance_handles (fully_associated_readers, handles) == false)
       {
-        ACE_ERROR ((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::remove_associations "
+        ACE_ERROR ((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::remove_associations: "
           "cache_lookup_instance_handles failed, notify %d \n", notify_lost));
         return;
       }
 
-      CORBA::ULong subed_len = subscription_handles_.length();
-      CORBA::ULong const rd_len = handles.length ();
-      for (CORBA::ULong rd_index = 0; rd_index < rd_len; ++rd_index)
-      {
-        for (CORBA::ULong subed_index = 0;
-              subed_index < subed_len;
-              ++subed_index)
-        {
-          if (subscription_handles_[subed_index] == handles[rd_index])
-          {
-            // move last element to this position.
-            if (subed_index < subed_len - 1)
-            {
-              subscription_handles_[subed_index]
-              = subscription_handles_[subed_len - 1];
-            }
-            --subed_len;
-            subscription_handles_.length (subed_len);
-            break;
-          }
-        }
-      }
-      
       for (CORBA::ULong i = 0; i < fully_associated_len; ++i)
       {
         id_to_handle_map_.erase(fully_associated_readers[i]);
@@ -537,6 +565,13 @@ DataWriterImpl::update_incompatible_qos (
     listener_for (::DDS::OFFERED_INCOMPATIBLE_QOS_STATUS);
 
   ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
+
+#if 0
+  if( this->offered_incompatible_qos_status_.total_count == status.total_count) {
+    // This test should make the method idempotent.
+    return;
+  }
+#endif
 
   set_status_changed_flag (::DDS::OFFERED_INCOMPATIBLE_QOS_STATUS, true);
 
@@ -796,7 +831,7 @@ DataWriterImpl::get_matched_subscriptions (
   {
     ACE_ERROR_RETURN ((LM_ERROR,
                        ACE_TEXT("(%P|%t) ERROR: ")
-                       ACE_TEXT("DataWriterImpl::get_matched_subscriptions, ")
+                       ACE_TEXT("DataWriterImpl::get_matched_subscriptions: ")
                        ACE_TEXT(" Entity is not enabled. \n")),
                       ::DDS::RETCODE_NOT_ENABLED);
   }
@@ -804,7 +839,18 @@ DataWriterImpl::get_matched_subscriptions (
                     guard,
                     this->lock_,
                     ::DDS::RETCODE_ERROR);
-  subscription_handles = subscription_handles_;
+
+  // Copy out the handles for the current set of subscriptions.
+  int index = 0;
+  subscription_handles.length( this->id_to_handle_map_.size());
+  for( RepoIdToHandleMap::iterator
+       current = this->id_to_handle_map_.begin();
+       current != this->id_to_handle_map_.end();
+       ++current, ++index
+     ) {
+    subscription_handles[ index] = current->second;
+  }
+
   return ::DDS::RETCODE_OK;
 }
 
@@ -819,7 +865,7 @@ DataWriterImpl::get_matched_subscription_data (
   {
     ACE_ERROR_RETURN ((LM_ERROR,
                        ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::")
-                       ACE_TEXT("get_matched_subscription_data, ")
+                       ACE_TEXT("get_matched_subscription_data: ")
                        ACE_TEXT("Entity is not enabled. \n")),
       ::DDS::RETCODE_NOT_ENABLED);
   }
@@ -947,7 +993,7 @@ DataWriterImpl::enable ()
                                  liveliness_check_interval_) == -1)
     {
       ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable, ")
+                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable: ")
                   ACE_TEXT(" %p. \n"), "schedule_timer"));
     }
     else
@@ -995,7 +1041,7 @@ DataWriterImpl::enable ()
                                      this->qos_.lifespan))
     {
       ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable, ")
+                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable: ")
                   ACE_TEXT("unable to retrieve durable data\n")));
     }
   }
@@ -1022,7 +1068,7 @@ DataWriterImpl::register_instance(::DDS::InstanceHandle_t& handle,
   {
     ACE_ERROR_RETURN ((LM_ERROR,
                        ACE_TEXT("(%P|%t) ERROR: ")
-                       ACE_TEXT("DataWriterImpl::register_instance, ")
+                       ACE_TEXT("DataWriterImpl::register_instance: ")
                        ACE_TEXT(" Entity is not enabled. \n")),
                       ::DDS::RETCODE_NOT_ENABLED);
   }
@@ -1032,7 +1078,7 @@ DataWriterImpl::register_instance(::DDS::InstanceHandle_t& handle,
   if (ret != ::DDS::RETCODE_OK)
   {
     ACE_ERROR_RETURN ((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::register_instance, ")
+                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::register_instance: ")
                        ACE_TEXT("register instance with container failed.\n")),
                       ret);
   }
@@ -1056,7 +1102,7 @@ DataWriterImpl::register_instance(::DDS::InstanceHandle_t& handle,
   {
     ACE_ERROR_RETURN ((LM_ERROR,
                        ACE_TEXT("(%P|%t) ERROR: ")
-                       ACE_TEXT("DataWriterImpl::register_instance, ")
+                       ACE_TEXT("DataWriterImpl::register_instance: ")
                        ACE_TEXT("send_control failed.\n")),
                       ::DDS::RETCODE_ERROR);
   }
@@ -1074,7 +1120,7 @@ DataWriterImpl::unregister ( ::DDS::InstanceHandle_t handle,
   if (enabled_ == false)
   {
     ACE_ERROR_RETURN ((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::unregister, ")
+                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::unregister: ")
                        ACE_TEXT(" Entity is not enabled.\n")),
                       ::DDS::RETCODE_NOT_ENABLED);
   }
@@ -1091,7 +1137,7 @@ DataWriterImpl::unregister ( ::DDS::InstanceHandle_t handle,
     {
       ACE_ERROR_RETURN ((LM_ERROR,
                          ACE_TEXT("(%P|%t) ERROR: ")
-                         ACE_TEXT("DataWriterImpl::unregister, ")
+                         ACE_TEXT("DataWriterImpl::unregister: ")
                          ACE_TEXT(" unregister with container failed. \n")),
                         ret);
     }
@@ -1113,7 +1159,7 @@ DataWriterImpl::unregister ( ::DDS::InstanceHandle_t handle,
   if (status == SEND_CONTROL_ERROR)
   {
     ACE_ERROR_RETURN ((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::unregister, ")
+                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::unregister: ")
                        ACE_TEXT(" send_control failed. \n")),
                       ::DDS::RETCODE_ERROR);
   }
@@ -1131,7 +1177,7 @@ DataWriterImpl::write (DataSample* data,
   if (enabled_ == false)
   {
     ACE_ERROR_RETURN ((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::write, ")
+                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::write: ")
                        ACE_TEXT(" Entity is not enabled. \n")),
                       ::DDS::RETCODE_NOT_ENABLED);
   }
@@ -1145,7 +1191,7 @@ DataWriterImpl::write (DataSample* data,
   {
     ACE_ERROR_RETURN ((LM_ERROR,
                        ACE_TEXT("(%P|%t) ERROR: ")
-                       ACE_TEXT("DataWriterImpl::write, ")
+                       ACE_TEXT("DataWriterImpl::write: ")
                        ACE_TEXT("obtain_buffer returned %d.\n"),
                        ret),
                       ret);
@@ -1171,7 +1217,7 @@ DataWriterImpl::write (DataSample* data,
   {
     ACE_ERROR_RETURN ((LM_ERROR,
                        ACE_TEXT("(%P|%t) ERROR: ")
-                       ACE_TEXT("DataWriterImpl::write, ")
+                       ACE_TEXT("DataWriterImpl::write: ")
                        ACE_TEXT("enqueue failed.\n")),
                       ret);
   }
@@ -1195,7 +1241,7 @@ DataWriterImpl::dispose ( ::DDS::InstanceHandle_t handle,
   if (enabled_ == false)
   {
     ACE_ERROR_RETURN ((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::dispose, ")
+                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::dispose: ")
                        ACE_TEXT(" Entity is not enabled. \n")),
                       ::DDS::RETCODE_NOT_ENABLED);
   }
@@ -1209,7 +1255,7 @@ DataWriterImpl::dispose ( ::DDS::InstanceHandle_t handle,
   {
     ACE_ERROR_RETURN ((LM_ERROR,
                        ACE_TEXT("(%P|%t) ERROR: ")
-                       ACE_TEXT("DataWriterImpl::dispose, ")
+                       ACE_TEXT("DataWriterImpl::dispose: ")
                        ACE_TEXT("dispose failed.\n")),
                       ret);
   }
@@ -1231,7 +1277,7 @@ DataWriterImpl::dispose ( ::DDS::InstanceHandle_t handle,
   if (status == SEND_CONTROL_ERROR)
   {
     ACE_ERROR_RETURN ((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::dispose, ")
+                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::dispose: ")
                        ACE_TEXT(" send_control failed. \n")),
                       ::DDS::RETCODE_ERROR);
   }
@@ -1402,14 +1448,17 @@ void
 DataWriterImpl::data_delivered (DataSampleListElement* sample)
 {
   DBG_ENTRY_LVL("DataWriterImpl","data_delivered",6);
-  if (sample->publication_id_ != this->publication_id_)
+  if( !(sample->publication_id_ == this->publication_id_))
   {
-    ACE_ERROR ((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::data_delivered, ")
-                ACE_TEXT(" The publication id %d from delivered element ")
-                ACE_TEXT("does not match the datawriter's id %d\n"),
-                sample->publication_id_,
-                this->publication_id_));
+    ::OpenDDS::DCPS::GuidConverter sampleConverter( sample->publication_id_);
+    ::OpenDDS::DCPS::GuidConverter writerConverter( this->publication_id_);
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::data_delivered: ")
+      ACE_TEXT(" The publication id %s from delivered element ")
+      ACE_TEXT("does not match the datawriter's id %s\n"),
+      (const char*) sampleConverter,
+      (const char*) writerConverter
+    ));
     return;
   }
 
@@ -1497,6 +1546,13 @@ DataWriterImpl::handle_timeout (const ACE_Time_Value &tv,
   if (elapsed >= liveliness_check_interval_)
   {
     //Not recent enough then send liveliness message.
+    if (DCPS_debug_level > 9) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) DataWriterImpl::handle_timeout: ")
+        ACE_TEXT("%s sending LIVELINESS message.\n"),
+        (const char*) ::OpenDDS::DCPS::GuidConverter( this->publication_id_)
+      ));
+    }
     this->send_liveliness(tv);
   }
   else
@@ -1506,7 +1562,7 @@ DataWriterImpl::handle_timeout (const ACE_Time_Value &tv,
     {
       ACE_ERROR_RETURN ((LM_ERROR,
                          ACE_TEXT("(%P|%t) ERROR: ")
-                         ACE_TEXT("DataWriterImpl::handle_timeout, ")
+                         ACE_TEXT("DataWriterImpl::handle_timeout: ")
                          ACE_TEXT(" %p. \n"),
                          "cancel_timer"),
                         -1);
@@ -1521,7 +1577,7 @@ DataWriterImpl::handle_timeout (const ACE_Time_Value &tv,
     {
       ACE_ERROR_RETURN ((LM_ERROR,
                          ACE_TEXT("(%P|%t) ERROR: ")
-                         ACE_TEXT("DataWriterImpl::handle_timeout, ")
+                         ACE_TEXT("DataWriterImpl::handle_timeout: ")
                          ACE_TEXT(" %p. \n"),
                          "schedule_timer"),
                         -1);
@@ -1560,7 +1616,7 @@ DataWriterImpl::send_liveliness (const ACE_Time_Value& now)
   if (status == SEND_CONTROL_ERROR)
   {
     ACE_ERROR ((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::send_liveliness, ")
+                ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::send_liveliness: ")
                 ACE_TEXT(" send_control failed. \n")));
   }
   else
@@ -1635,8 +1691,8 @@ DataWriterImpl::notify_publication_reconnected (const ReaderIdSeq& subids)
       {
         ACE_ERROR ((LM_ERROR,
                     "(%P|%t)ERROR: DataWriterImpl::"
-                    "notify_publication_reconnected "
-                    "cache_lookup_instance_handles failed\n"));
+                    "notify_publication_reconnected: "
+                    "lookup_instance_handles failed\n"));
       }
 
       the_listener->on_publication_reconnected (this->dw_local_objref_.in (),
@@ -1721,6 +1777,25 @@ bool
 DataWriterImpl::bit_lookup_instance_handles (const ReaderIdSeq& ids,
                                              ::DDS::InstanceHandleSeq & hdls)
 {
+  if( DCPS_debug_level > 9) {
+    CORBA::ULong const size = ids.length ();
+    const char* separator = "";
+    std::stringstream buffer;
+    for( unsigned long i = 0; i < size; ++i) {
+      long handle;
+      handle = ::OpenDDS::DCPS::GuidConverter(
+                 const_cast< ::OpenDDS::DCPS::RepoId*>( &ids[i])
+               );
+      buffer << separator << ids[i] << "(" << std::hex << handle << ")";
+      separator = ", ";
+    }
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) DataWriterImpl::bit_lookup_instance_handles: ")
+      ACE_TEXT("searching for handles for reader Ids: %s.\n"),
+      buffer.str().c_str()
+    ));
+  }
+
   if (TheServiceParticipant->get_BIT () == true
       && ! TheTransientKludge->is_enabled ())
   {
@@ -1738,10 +1813,25 @@ DataWriterImpl::bit_lookup_instance_handles (const ReaderIdSeq& ids,
 
     if (ret != ::DDS::RETCODE_OK)
     {
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::")
-                  ACE_TEXT("bit_lookup_instance_handles failed\n")));
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::")
+        ACE_TEXT("bit_lookup_instance_handles: failed.\n")
+      ));
       return false;
+
+    } else if( DCPS_debug_level > 4) {
+      CORBA::ULong const num_rds = ids.length ();
+      for (CORBA::ULong i = 0; i < num_rds; ++i)
+      {
+        ACE_DEBUG((LM_WARNING,
+          ACE_TEXT("(%P|%t) DataWriterImpl::bit_lookup_instance_handles: ")
+          ACE_TEXT("reader %s has handle 0x%x.\n"),
+          (const char*) ::OpenDDS::DCPS::GuidConverter(
+                          const_cast< ::OpenDDS::DCPS::RepoId*>( &ids[ i])
+                        ),
+          hdls[i]
+        ));
+      }
     }
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
   }
@@ -1751,7 +1841,17 @@ DataWriterImpl::bit_lookup_instance_handles (const ReaderIdSeq& ids,
     hdls.length (num_rds);
     for (CORBA::ULong i = 0; i < num_rds; ++i)
     {
-      hdls[i] = ids[i];
+      ::OpenDDS::DCPS::GuidConverter converter(
+                                       const_cast< ::OpenDDS::DCPS::RepoId*>( &ids[i])
+                                     );
+      hdls[i] = converter;
+      if( DCPS_debug_level > 4) {
+        ACE_DEBUG((LM_WARNING,
+          ACE_TEXT("(%P|%t) DataWriterImpl::bit_lookup_instance_handles: ")
+          ACE_TEXT("using hash as handle for reader %s.\n"),
+          (const char*) converter
+        ));
+      }
     }
   }
 
@@ -1771,16 +1871,29 @@ DataWriterImpl::cache_lookup_instance_handles (const ReaderIdSeq& ids,
     RepoIdToHandleMap::iterator iter = id_to_handle_map_.find(ids[i]);
     if (iter == id_to_handle_map_.end())
     {
-      ACE_DEBUG ((LM_WARNING,
-                  "(%P|%t)DataWriterImpl::cache_lookup_instance_handles "
-                  "could not find instance handle for writer %d\n",
-                  ids[i]));
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) DataWriterImpl::cache_lookup_instance_handles: ")
+        ACE_TEXT("could not find instance handle for writer %s.\n"),
+        (const char*) ::OpenDDS::DCPS::GuidConverter(
+                        const_cast< ::OpenDDS::DCPS::RepoId*>( &ids[ i])
+                      )
+      ));
       hdls[i] = -1;
       ret = false;
     }
     else
     {
       hdls[i] = iter->second;
+      if( DCPS_debug_level > 4) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DataWriterImpl::cache_lookup_instance_handles: ")
+          ACE_TEXT("instance handle for writer %s == 0x%x.\n"),
+          (const char*) ::OpenDDS::DCPS::GuidConverter(
+                          const_cast< ::OpenDDS::DCPS::RepoId*>( &ids[ i])
+                        ),
+          hdls[i]
+        ));
+      }
     }
   }
 

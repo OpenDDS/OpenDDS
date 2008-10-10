@@ -89,14 +89,14 @@ int main (int argc, char *argv[]) {
                                 partQos,
                                 DDS::DomainParticipantListener::_nil());
       if (CORBA::is_nil (participant.in ())) {
-        cerr << "create_participant failed." << endl;
+        cerr << "publisher: create_participant failed." << endl;
         return 1;
       }
 
       ::Messenger::MessageTypeSupport_var ts = new ::Messenger::MessageTypeSupportImpl();
 
       if (DDS::RETCODE_OK != ts->register_type(participant.in (), "Messenger")) {
-        cerr << "register_type failed." << endl;
+        cerr << "publisher: register_type failed." << endl;
         exit(1);
       }
 
@@ -116,7 +116,7 @@ int main (int argc, char *argv[]) {
                                    topic_qos,
                                    DDS::TopicListener::_nil());
       if (CORBA::is_nil (topic.in ())) {
-        cerr << "create_topic failed." << endl;
+        cerr << "publisher: create_topic failed." << endl;
         exit(1);
       }
 
@@ -136,7 +136,7 @@ int main (int argc, char *argv[]) {
         participant->create_publisher(pub_qos,
         DDS::PublisherListener::_nil());
       if (CORBA::is_nil (pub.in ())) {
-        cerr << "create_publisher failed." << endl;
+        cerr << "publisher: create_publisher failed." << endl;
         exit(1);
       }
 
@@ -144,7 +144,7 @@ int main (int argc, char *argv[]) {
       OpenDDS::DCPS::PublisherImpl* pub_impl =
         dynamic_cast< OpenDDS::DCPS::PublisherImpl*>(pub.in ());
       if (0 == pub_impl) {
-        cerr << "Failed to obtain publisher servant" << endl;
+        cerr << "publisher: Failed to obtain publisher servant" << endl;
         exit(1);
       }
 
@@ -165,7 +165,7 @@ int main (int argc, char *argv[]) {
           status_str = "Unknown Status";
           break;
         }
-        cerr << "Failed to attach to the transport. Status == "
+        cerr << "publisher: Failed to attach to the transport. Status == "
           << status_str.c_str() << endl;
         exit(1);
       }
@@ -190,7 +190,7 @@ int main (int argc, char *argv[]) {
                                dw_qos,
                                DDS::DataWriterListener::_nil());
       if (CORBA::is_nil (dw.in ())) {
-        cerr << "create_datawriter failed." << endl;
+        cerr << "publisher: create_datawriter failed." << endl;
         exit(1);
       }
 
@@ -245,7 +245,7 @@ int main (int argc, char *argv[]) {
   }
   catch (CORBA::Exception& e)
     {
-       cerr << "PUB: Exception caught in main.cpp:" << endl
+       cerr << "publisher: PUB: Exception caught in main.cpp:" << endl
          << e << endl;
       exit(1);
     }

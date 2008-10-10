@@ -90,7 +90,6 @@ else {
   exit 1;
 }
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 $subscriber_completed = "subscriber_finished.txt";
 $subscriber_ready = "subscriber_ready.txt";
@@ -114,7 +113,7 @@ $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
 
 $DCPSREPO = PerlDDS::create_process
       ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo"
-       , "$svc_config -o $dcpsrepo_ior -d $domains_file -ORBSvcConf repo.conf");
+       , "$svc_config -o $dcpsrepo_ior -ORBSvcConf repo.conf");
 $Subscriber = PerlDDS::create_process
       ("subscriber"
        , " $svc_config -a $num_reads_before_crash"

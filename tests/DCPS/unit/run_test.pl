@@ -12,9 +12,15 @@ use lib "$ACE_ROOT/bin";
 use DDS_Run_Test;
 
 $status = 0;
-my $debug = 0;
+my $debugFile;
+my $debug;
+# $debug = 10;
+# $debugFile = "test.log";
+my $debugOpts = "";
+$debugOpts .= "-DCPSDebugLevel $debug " if $debug;
+$debugOpts .= "-ORBLogFile $debugFile " if $debug and $debugFile;
 
-$testoutputfilename = "test.log";
+unlink $debugFile;
 
 $iorfile = "repo.ior";
 unlink $iorfile;
@@ -28,22 +34,22 @@ $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : "-ORBSvcConf ../../tcp.conf";
 
 $REPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo"
-                              , "-o $iorfile -d domain_ids $svc_config");
+                              , "$debugOpts -o $iorfile $svc_config");
 
 $CL = PerlDDS::create_process ("DdsDcps_UnitTest",
-                              "-DCPSInfoRepo file://$iorfile $svc_config " .
-                              "-c $client_orb -ORBLogFile $testoutputfilename");
+                              "$debugOpts -DCPSInfoRepo file://$iorfile $svc_config " .
+                              "-c $client_orb ");
 
-print $REPO->CommandLine() . "\n" if $debug ;
+print $REPO->CommandLine() . "\n";
 $REPO->Spawn ();
 
-if (PerlACE::waitforfile_timed ($iorfile, 5) == -1) {
+if (PerlACE::waitforfile_timed ($iorfile, 30) == -1) {
     print STDERR "ERROR: cannot find file <$iorfile>\n";
     $REPO->Kill (); $REPO->TimedWait (1);
     exit 1;
 }
 
-print $CL->CommandLine() . "\n" if $debug ;
+print $CL->CommandLine() . "\n";
 
 $client = $CL->SpawnWaitKill (30);
 

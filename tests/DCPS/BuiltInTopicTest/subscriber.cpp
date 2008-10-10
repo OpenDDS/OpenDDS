@@ -91,14 +91,14 @@ int main (int argc, char *argv[])
                                             partQos,
                                             DDS::DomainParticipantListener::_nil());
       if (CORBA::is_nil (participant.in ())) {
-        cerr << "create_participant failed." << endl;
+        cerr << "subscriber: create_participant failed." << endl;
         return 1 ;
       }
 
       ::Messenger::MessageTypeSupport_var mts = new ::Messenger::MessageTypeSupportImpl();
 
       if (DDS::RETCODE_OK != mts->register_type(participant.in (), "Messenger")) {
-          cerr << "Failed to register the MessageTypeTypeSupport." << endl;
+          cerr << "subscriber: Failed to register the MessageTypeTypeSupport." << endl;
           exit(1);
         }
 
@@ -117,7 +117,7 @@ int main (int argc, char *argv[])
                                                         topic_qos,
                                                         DDS::TopicListener::_nil());
       if (CORBA::is_nil (topic.in ())) {
-        cerr << "Failed to create_topic." << endl;
+        cerr << "subscriber: Failed to create_topic." << endl;
         exit(1);
       }
 
@@ -141,7 +141,7 @@ int main (int argc, char *argv[])
         participant->create_subscriber(sub_qos,
                                        DDS::SubscriberListener::_nil());
       if (CORBA::is_nil (sub.in ())) {
-        cerr << "Failed to create_subscriber." << endl;
+        cerr << "subscriber: Failed to create_subscriber." << endl;
         exit(1);
       }
 
@@ -149,7 +149,7 @@ int main (int argc, char *argv[])
       OpenDDS::DCPS::SubscriberImpl* sub_impl =
         dynamic_cast< OpenDDS::DCPS::SubscriberImpl*> (sub.in ());
       if (0 == sub_impl) {
-        cerr << "Failed to obtain subscriber servant\n" << endl;
+        cerr << "subscriber: Failed to obtain subscriber servant\n" << endl;
         exit(1);
       }
 
@@ -170,7 +170,7 @@ int main (int argc, char *argv[])
           status_str = "Unknown Status";
           break;
         }
-        cerr << "Failed to attach to the transport. Status == "
+        cerr << "subscriber: Failed to attach to the transport. Status == "
           << status_str.c_str() << endl;
         exit(1);
       }
@@ -181,7 +181,7 @@ int main (int argc, char *argv[])
         dynamic_cast<DataReaderListenerImpl*>(listener.in());
 
       if (CORBA::is_nil (listener.in ())) {
-        cerr << "listener is nil." << endl;
+        cerr << "subscriber: listener is nil." << endl;
         exit(1);
       }
 
@@ -200,7 +200,7 @@ int main (int argc, char *argv[])
                                                       dr_qos,
                                                       listener.in ());
       if (CORBA::is_nil (dr.in ())) {
-        cerr << "create_datareader failed." << endl;
+        cerr << "subscriber: create_datareader failed." << endl;
         exit(1);
       }
 
@@ -252,7 +252,7 @@ int main (int argc, char *argv[])
     }
   catch (CORBA::Exception& e)
     {
-      cerr << "SUB: Exception caught in main ():" << endl << e << endl;
+      cerr << "subscriber: SUB: Exception caught in main ():" << endl << e << endl;
       return 1;
     }
 

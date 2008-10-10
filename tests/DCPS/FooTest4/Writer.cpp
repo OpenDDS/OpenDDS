@@ -68,7 +68,12 @@ Writer::start ()
       sample.header_.message_length_ = sizeof(foo) ;
       sample.header_.message_id_ = ::OpenDDS::DCPS::SAMPLE_DATA ;
       sample.header_.sequence_ = seq.value_ ;
-      sample.header_.publication_id_ = 1 ;
+
+      OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation 0, Participant 1.
+      converter.kind()   = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
+      converter.key()[2] = 1;
+      sample.header_.publication_id_ = converter ;
+
       sample.header_.source_timestamp_sec_ =
 		  static_cast<ACE_INT32> (now.sec ());
       sample.header_.source_timestamp_nanosec_ = now.usec() * 1000 ;

@@ -22,7 +22,6 @@ $port=29804;
 $use_svc_conf = !new PerlACE::ConfigList->check_config ('STATIC');
 $svc_conf = $use_svc_conf ? " -ORBSvcConf ../../tcp.conf " : '';
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 $repo_bit_conf = $use_svc_conf ? "-ORBSvcConf ../../tcp.conf" : '';
 
@@ -86,8 +85,7 @@ sub run_compatibility_tests {
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 							 "$repo_bit_conf "
 #                           . "-ORBDebugLevel 1 "
-						   . "-o $dcpsrepo_ior "
-						   . "-d $domains_file ");
+						   . "-o $dcpsrepo_ior ");
 print $DCPSREPO->CommandLine() . "\n";
 $DCPSREPO->Spawn ();
 print "Repository PID: " . $DCPSREPO->{PROCESS} . "\n" if $DCPSREPO->{PROCESS};

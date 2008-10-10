@@ -21,13 +21,12 @@ $sub_conf = "-DCPSConfigFile sub.ini";
 $pub_opts = "$opts $pub_conf ";
 $sub_opts = "$opts $sub_conf ";
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-				  "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file");
+				  "$repo_bit_opt -o $dcpsrepo_ior ");
 $Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
 $Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
 

@@ -16,6 +16,7 @@
 
 #include <ace/Arg_Shifter.h>
 #include <string>
+#include <sstream>
 
 const long  MY_DOMAIN   = 411;
 const char* MY_TOPIC    = "foo";
@@ -28,7 +29,7 @@ PubDriver::PubDriver()
   datawriters_ (0),
   writers_ (0),
   pub_id_fname_ ("pub_id.txt"),
-  sub_id_ (0),
+  sub_id_ ( OpenDDS::DCPS::GUID_UNKNOWN),
   block_on_write_ (0),
   num_threads_to_write_ (0),
   multiple_instances_ (0),
@@ -264,6 +265,8 @@ PubDriver::init(int& argc, char *argv[])
   ACE_OS::fprintf (output_file, "%s", ior_string.in ());
   ACE_OS::fclose (output_file);
 
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) IOR written to file.\n")));
+
   datawriters_ = new ::DDS::DataWriter_var[num_datawriters_];
   writers_ = new Writer* [num_datawriters_];
 
@@ -281,6 +284,7 @@ PubDriver::init(int& argc, char *argv[])
         ACE_TEXT ("Failed to register the FooTypeSupport.")));
     }
 
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Publisher participant created.\n")));
 
   ::DDS::TopicQos topic_qos;
   participant_->get_default_topic_qos(topic_qos);
@@ -334,12 +338,13 @@ PubDriver::init(int& argc, char *argv[])
                                     ::DDS::DataWriterListener::_nil());
     TEST_CHECK (! CORBA::is_nil (datawriters_[i].in ()));
   }
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Publisher created %d datawriters.\n"), num_datawriters_));
 }
 
 void
 PubDriver::end()
 {
-  ACE_DEBUG((LM_DEBUG, "(%P|%t)PubDriver::end \n"));
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) PubDriver::end \n"));
 
   // Record samples been written in the Writer's data map.
   // Verify the number of instances and the number of samples
@@ -381,6 +386,8 @@ PubDriver::end()
 void
 PubDriver::run()
 {
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) PubDriver::run() entered.\n"));
+
   FILE* fp = ACE_OS::fopen (pub_id_fname_.c_str (), ACE_LIB_TEXT("w"));
   if (fp == 0)
   {
@@ -397,15 +404,17 @@ PubDriver::run()
       = dynamic_cast< ::Xyz::FooDataWriterImpl*>
       (datawriters_[i].in ());
     OpenDDS::DCPS::PublicationId pub_id = datawriter_servant->get_publication_id ();
+    std::stringstream buffer;
+    buffer << pub_id;
 
     // Write the publication id to a file.
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT("(%P|%t) PubDriver::run, ")
-                ACE_TEXT(" Write to %s: pub_id=%d. \n"),
+                ACE_TEXT(" Write to %s: pub_id=%s.\n"),
                 pub_id_fname_.c_str (),
-                pub_id));
+                buffer.str().c_str()));
 
-    ACE_OS::fprintf (fp, "%d\n", pub_id);
+    ACE_OS::fprintf (fp, "%s\n", buffer.str().c_str());
   }
 
   fclose (fp);
@@ -420,6 +429,8 @@ PubDriver::run()
     } while (0 == readers_ready);
 
   ACE_OS::fclose(readers_ready);
+
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) PubDriver::run() - subscriber has indicated willingness to connect.\n"));
 
   // Set up the subscriptions.
   ::OpenDDS::DCPS::ReaderAssociationSeq associations;
@@ -457,6 +468,8 @@ PubDriver::run()
   }
   }
 
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) PubDriver::run() - add_associations called directly.\n"));
+
   // Let the subscriber catch up before we broadcast.
   ACE_OS::sleep (2);
 
@@ -479,6 +492,8 @@ PubDriver::run()
     writers_[i]->start ();
   }
   }
+
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) PubDriver::run() - writers started.\n"));
 }
 
 int
@@ -553,7 +568,10 @@ PubDriver::parse_sub_arg(const std::string& arg)
   std::string sub_id_str(arg,0,pos);
   this->sub_addr_str_ = std::string (arg,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
 
-  this->sub_id_ = ACE_OS::atoi(sub_id_str.c_str());
+  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 1
+  converter.kind()   = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
+  converter.key()[2] = ACE_OS::atoi(sub_id_str.c_str());
+  this->sub_id_ = converter;
 
   // Use the remainder as the "stringified" ACE_INET_Addr.
   this->sub_addr_ = ACE_INET_Addr(this->sub_addr_str_.c_str());
