@@ -786,25 +786,33 @@ namespace OpenDDS
 
         try {
           // Check the availability of the current repository.
-          CORBA::PolicyList_var discard;
-          current->second->_validate_connection( discard.out());
+          if( false == current->second->_non_existent()) {
 
-          // If we reach here, the validate_connection() call succeeded
-          // and the repository is reachable.
-          this->remap_domains( key, current->first);
+            if( DCPS_debug_level > 0) {
+              ACE_DEBUG((LM_DEBUG,
+                ACE_TEXT("(%P|%t) Service_Participant::repository_lost: ")
+                ACE_TEXT("replacing repository %d with %d.\n"),
+                key,
+                current->first
+              ));
+            }
 
-          if( DCPS_debug_level > 0) {
+            // If we reach here, the validate_connection() call succeeded
+            // and the repository is reachable.
+            this->remap_domains( key, current->first);
+
+            // Now we are done.  This is the only non-failure exit from
+            // this method.
+            return;
+
+          } else if( DCPS_debug_level > 0) {
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) Service_Participant::repository_lost: ")
-              ACE_TEXT("repository %d successfully replaced by %d.\n"),
+              ACE_TEXT("repository %d reference to %d non-existent.\n"),
               key,
               current->first
             ));
           }
-
-          // Now we are done.  This is the only non-failure exit from
-          // this method.
-          return;
 
         } catch (const CORBA::Exception&) {
           ACE_DEBUG((LM_DEBUG,
