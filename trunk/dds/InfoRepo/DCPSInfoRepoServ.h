@@ -13,12 +13,13 @@
 
 #include "tao/ORB_Core.h"
 
+#include "DCPSInfoRepoServ_Export.h"
 #include "FederatorConfig.h"
 #include "FederatorManagerImpl.h"
-
 #include "ShutdownInterface.h"
 
-class InfoRepo : public ShutdownInterface, public ACE_Event_Handler {
+class OpenDDS_DCPSInfoRepoServ_Export InfoRepo :
+    public ShutdownInterface, public ACE_Event_Handler {
 public:
   struct InitError
   {
@@ -66,7 +67,8 @@ private:
   PortableServer::ServantBase_var info_;
 };
 
-class InfoRepo_Shutdown : public Shutdown_Functor
+class OpenDDS_DCPSInfoRepoServ_Export InfoRepo_Shutdown :
+    public Shutdown_Functor
 {
 public:
   InfoRepo_Shutdown(InfoRepo& ir);
