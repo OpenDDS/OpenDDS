@@ -1,11 +1,20 @@
+Fri Oct 10 22:39:35 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/tools:
+        * dds/tools/federation:
+        * dds/tools/federation/Federation.mpc:
+        * dds/tools/federation/federation.cpp:
+
+	  Added new command line tool for managing federations.
+
 Fri Oct 10 22:13:49 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/InfoRepo/DCPSInfo_i.h:
         * dds/InfoRepo/DCPSInfo_i.cpp:
 
-          Changed lock_ ACE_Recursive_Thread_Mutex to solve the deadlock 
+          Changed lock_ ACE_Recursive_Thread_Mutex to solve the deadlock
           on linux.
-          
+
 Fri Oct 10 22:15:39 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * java/tests/builtintopics/domain_ids:
