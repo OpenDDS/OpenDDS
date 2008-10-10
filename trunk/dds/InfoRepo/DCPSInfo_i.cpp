@@ -66,7 +66,7 @@ ACE_THROW_SPEC ((
   , OpenDDS::DCPS::Invalid_Participant
 ))
 {
-  ACE_GUARD_RETURN( ACE_Thread_Mutex, guard, this->lock_, 0);
+  ACE_GUARD_RETURN( ACE_Recursive_Thread_Mutex, guard, this->lock_, 0);
 
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
@@ -95,7 +95,7 @@ TAO_DDS_DCPSInfo_i::changeOwnership(
   long                           owner
 )
 {
-  ACE_GUARD_RETURN( ACE_Thread_Mutex, guard, this->lock_, false);
+  ACE_GUARD_RETURN( ACE_Recursive_Thread_Mutex, guard, this->lock_, false);
 
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
@@ -129,7 +129,7 @@ OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::assert_topic (
     , OpenDDS::DCPS::Invalid_Participant
   ))
 {
-  ACE_GUARD_RETURN( ACE_Thread_Mutex, guard, this->lock_, OpenDDS::DCPS::INTERNAL_ERROR);
+  ACE_GUARD_RETURN( ACE_Recursive_Thread_Mutex, guard, this->lock_, OpenDDS::DCPS::INTERNAL_ERROR);
 
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
@@ -184,7 +184,7 @@ TAO_DDS_DCPSInfo_i::add_topic (const OpenDDS::DCPS::RepoId& topicId,
                                const char* dataTypeName,
                                const ::DDS::TopicQos& qos)
 {
-  ACE_GUARD_RETURN( ACE_Thread_Mutex, guard, this->lock_, false);
+  ACE_GUARD_RETURN( ACE_Recursive_Thread_Mutex, guard, this->lock_, false);
 
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
@@ -251,7 +251,7 @@ OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::find_topic (
     , OpenDDS::DCPS::Invalid_Domain
   ))
 {
-  ACE_GUARD_RETURN( ACE_Thread_Mutex, guard, this->lock_, OpenDDS::DCPS::INTERNAL_ERROR);
+  ACE_GUARD_RETURN( ACE_Recursive_Thread_Mutex, guard, this->lock_, OpenDDS::DCPS::INTERNAL_ERROR);
 
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
@@ -290,7 +290,7 @@ OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::remove_topic (
     , OpenDDS::DCPS::Invalid_Topic
   ))
 {
-  ACE_GUARD_RETURN( ACE_Thread_Mutex, guard, this->lock_, OpenDDS::DCPS::INTERNAL_ERROR);
+  ACE_GUARD_RETURN( ACE_Recursive_Thread_Mutex, guard, this->lock_, OpenDDS::DCPS::INTERNAL_ERROR);
 
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
@@ -350,7 +350,7 @@ OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::enable_topic (
   ))
 {
 
-  ACE_GUARD_RETURN( ACE_Thread_Mutex, guard, this->lock_, OpenDDS::DCPS::INTERNAL_ERROR);
+  ACE_GUARD_RETURN( ACE_Recursive_Thread_Mutex, guard, this->lock_, OpenDDS::DCPS::INTERNAL_ERROR);
 
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
@@ -391,7 +391,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication (
     , OpenDDS::DCPS::Invalid_Topic
   ))
 {
-  ACE_GUARD_RETURN( ACE_Thread_Mutex, guard, this->lock_, OpenDDS::DCPS::GUID_UNKNOWN);
+  ACE_GUARD_RETURN( ACE_Recursive_Thread_Mutex, guard, this->lock_, OpenDDS::DCPS::GUID_UNKNOWN);
 
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
@@ -481,7 +481,7 @@ TAO_DDS_DCPSInfo_i::add_publication (::DDS::DomainId_t domainId,
                                      const ::DDS::PublisherQos & publisherQos,
                                      bool associate)
 {
-  ACE_GUARD_RETURN( ACE_Thread_Mutex, guard, this->lock_, false);
+  ACE_GUARD_RETURN( ACE_Recursive_Thread_Mutex, guard, this->lock_, false);
 
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
@@ -632,7 +632,7 @@ void TAO_DDS_DCPSInfo_i::remove_publication (
     , OpenDDS::DCPS::Invalid_Publication
   ))
 {
-  ACE_GUARD( ACE_Thread_Mutex, guard, this->lock_);
+  ACE_GUARD( ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
@@ -695,7 +695,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription (
     , OpenDDS::DCPS::Invalid_Topic
   ))
 {
-  ACE_GUARD_RETURN( ACE_Thread_Mutex, guard, this->lock_, OpenDDS::DCPS::GUID_UNKNOWN);
+  ACE_GUARD_RETURN( ACE_Recursive_Thread_Mutex, guard, this->lock_, OpenDDS::DCPS::GUID_UNKNOWN);
 
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
@@ -790,7 +790,7 @@ TAO_DDS_DCPSInfo_i::add_subscription (
     bool associate
   )
 {
-  ACE_GUARD_RETURN( ACE_Thread_Mutex, guard, this->lock_, false);
+  ACE_GUARD_RETURN( ACE_Recursive_Thread_Mutex, guard, this->lock_, false);
 
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
@@ -940,7 +940,7 @@ void TAO_DDS_DCPSInfo_i::remove_subscription (
     , OpenDDS::DCPS::Invalid_Subscription
   ))
 {
-  ACE_GUARD( ACE_Thread_Mutex, guard, this->lock_);
+  ACE_GUARD( ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
@@ -999,7 +999,7 @@ OpenDDS::DCPS::AddDomainStatus TAO_DDS_DCPSInfo_i::add_domain_participant (
   value.id        = OpenDDS::DCPS::GUID_UNKNOWN;
   value.federated = (this->federation_ != 0);
 
-  ACE_GUARD_RETURN( ACE_Thread_Mutex, guard, this->lock_, value);
+  ACE_GUARD_RETURN( ACE_Recursive_Thread_Mutex, guard, this->lock_, value);
 
   // Grab the domain.
   DCPS_IR_Domain* domainPtr = this->domain( domain);
@@ -1097,7 +1097,7 @@ TAO_DDS_DCPSInfo_i::add_domain_participant (::DDS::DomainId_t domainId
                                             , const OpenDDS::DCPS::RepoId& participantId
                                             , const ::DDS::DomainParticipantQos & qos)
 {
-  ACE_GUARD_RETURN( ACE_Thread_Mutex, guard, this->lock_, false);
+  ACE_GUARD_RETURN( ACE_Recursive_Thread_Mutex, guard, this->lock_, false);
 
   // Grab the domain.
   DCPS_IR_Domain* domainPtr = this->domain( domainId);
@@ -1208,7 +1208,7 @@ TAO_DDS_DCPSInfo_i::remove_by_owner(
   long              owner
 )
 {
-  ACE_GUARD_RETURN( ACE_Thread_Mutex, guard, this->lock_, false);
+  ACE_GUARD_RETURN( ACE_Recursive_Thread_Mutex, guard, this->lock_, false);
 
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find( domain);
@@ -1335,7 +1335,7 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant (
     , OpenDDS::DCPS::Invalid_Participant
   ))
 {
-  ACE_GUARD( ACE_Thread_Mutex, guard, this->lock_);
+  ACE_GUARD( ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
@@ -1408,7 +1408,7 @@ void TAO_DDS_DCPSInfo_i::ignore_domain_participant (
     , OpenDDS::DCPS::Invalid_Participant
   ))
 {
-  ACE_GUARD( ACE_Thread_Mutex, guard, this->lock_);
+  ACE_GUARD( ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
@@ -1442,7 +1442,7 @@ void TAO_DDS_DCPSInfo_i::ignore_topic (
     , OpenDDS::DCPS::Invalid_Topic
   ))
 {
-  ACE_GUARD( ACE_Thread_Mutex, guard, this->lock_);
+  ACE_GUARD( ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
@@ -1476,7 +1476,7 @@ void TAO_DDS_DCPSInfo_i::ignore_subscription (
     , OpenDDS::DCPS::Invalid_Subscription
   ))
 {
-  ACE_GUARD( ACE_Thread_Mutex, guard, this->lock_);
+  ACE_GUARD( ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
@@ -1510,7 +1510,7 @@ void TAO_DDS_DCPSInfo_i::ignore_publication (
     , OpenDDS::DCPS::Invalid_Publication
   ))
 {
-  ACE_GUARD( ACE_Thread_Mutex, guard, this->lock_);
+  ACE_GUARD( ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
@@ -1546,7 +1546,7 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_publication_qos (
     , OpenDDS::DCPS::Invalid_Publication
   ))
 {
-  ACE_GUARD_RETURN( ACE_Thread_Mutex, guard, this->lock_, 0);
+  ACE_GUARD_RETURN( ACE_Recursive_Thread_Mutex, guard, this->lock_, 0);
 
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
@@ -1612,7 +1612,7 @@ TAO_DDS_DCPSInfo_i::update_publication_qos (
   const ::DDS::DataWriterQos&  qos
 )
 {
-  ACE_GUARD( ACE_Thread_Mutex, guard, this->lock_);
+  ACE_GUARD( ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
@@ -1643,7 +1643,7 @@ TAO_DDS_DCPSInfo_i::update_publication_qos (
   const ::DDS::PublisherQos&   qos
 )
 {
-  ACE_GUARD( ACE_Thread_Mutex, guard, this->lock_);
+  ACE_GUARD( ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
@@ -1680,7 +1680,7 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_subscription_qos (
     , OpenDDS::DCPS::Invalid_Subscription
   ))
 {
-  ACE_GUARD_RETURN( ACE_Thread_Mutex, guard, this->lock_, 0);
+  ACE_GUARD_RETURN( ACE_Recursive_Thread_Mutex, guard, this->lock_, 0);
 
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
@@ -1745,7 +1745,7 @@ TAO_DDS_DCPSInfo_i::update_subscription_qos (
   const ::DDS::DataReaderQos&  qos
 )
 {
-  ACE_GUARD( ACE_Thread_Mutex, guard, this->lock_);
+  ACE_GUARD( ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
@@ -1776,7 +1776,7 @@ TAO_DDS_DCPSInfo_i::update_subscription_qos (
   const ::DDS::SubscriberQos&  qos
 )
 {
-  ACE_GUARD( ACE_Thread_Mutex, guard, this->lock_);
+  ACE_GUARD( ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
@@ -1812,7 +1812,7 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_topic_qos (
     , OpenDDS::DCPS::Invalid_Topic
   ))
 {
-  ACE_GUARD_RETURN( ACE_Thread_Mutex, guard, this->lock_, 0);
+  ACE_GUARD_RETURN( ACE_Recursive_Thread_Mutex, guard, this->lock_, 0);
 
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
@@ -1870,7 +1870,7 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_domain_participant_qos (
     ::OpenDDS::DCPS::Invalid_Participant
   ))
 {
-  ACE_GUARD_RETURN( ACE_Thread_Mutex, guard, this->lock_, 0);
+  ACE_GUARD_RETURN( ACE_Recursive_Thread_Mutex, guard, this->lock_, 0);
 
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);

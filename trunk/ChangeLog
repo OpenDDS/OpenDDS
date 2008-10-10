@@ -1,3 +1,11 @@
+Fri Oct 10 22:13:49 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          Changed lock_ ACE_Recursive_Thread_Mutex to solve the deadlock 
+          on linux.
+          
 Fri Oct 10 22:15:39 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * java/tests/builtintopics/domain_ids:
