@@ -1,3 +1,10 @@
+Fri Oct 10 17:04:52 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/native/opendds_jms_native.mpc:
+        * java/jms/native/opendds_jms_native_export.h:
+
+          Updated flilename case on export header.
+
 Thu Oct  9 19:34:36 UTC 2008  Weiqi Gao  <gao_w@ociweb.com>
 
         * java/jms/native/Message.idl:
