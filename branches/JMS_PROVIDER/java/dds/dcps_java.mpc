@@ -48,7 +48,21 @@ project: dcps, idl2jni, optional_jni_check, dcps_java_optional {
     DDS/DATAWRITER_QOS_USE_TOPIC_QOS.java << DDS/DataWriterQos.java
     DDS/DATAREADER_QOS_USE_TOPIC_QOS.java << DDS/DataReaderQos.java
     OpenDDS/DCPS/transport/TransportImpl.java << DDS/Publisher.java DDS/Subscriber.java
-    OpenDDS/DCPS/transport
+    OpenDDS/DCPS/transport/TheTransportFactory.java
+    OpenDDS/DCPS/transport/AttachStatus.java
+    OpenDDS/DCPS/transport/ConfigurationConflictException.java
+    OpenDDS/DCPS/transport/DuplicateException.java
+    OpenDDS/DCPS/transport/MiscProblemException.java
+    OpenDDS/DCPS/transport/NotConfiguredException.java
+    OpenDDS/DCPS/transport/NotFoundException.java
+    OpenDDS/DCPS/transport/ReliableMulticastConfiguration.java
+    OpenDDS/DCPS/transport/SimpleMcastConfiguration.java
+    OpenDDS/DCPS/transport/SimpleTcpConfiguration.java
+    OpenDDS/DCPS/transport/SimpleUdpConfiguration.java
+    OpenDDS/DCPS/transport/SimpleUnreliableDgramConfiguration.java
+    OpenDDS/DCPS/transport/TransportConfiguration.java
+    OpenDDS/DCPS/transport/TransportException.java
+    OpenDDS/DCPS/transport/UnableToCreateException.java
   }
 
   // This list should match the Java_Files list above, but these are the .class
