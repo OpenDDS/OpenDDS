@@ -45,6 +45,9 @@ project(*DCPSInfoRepoServ): dcps, iortable, DCPSInfoRepo_bits, imr_client, svc_u
   Header_Files {
     DCPSInfoRepoServ.h
   }
+
+  IDL_Files {
+  }
 }
 
 
@@ -101,7 +104,10 @@ project(*InfoRepo): dcpsexe, iortable, DCPSInfoRepo_bits, imr_client, svc_utils 
   libpaths += $(DDS_ROOT)/lib
   libs     += InfoRepoLib DCPSInfoRepoServ
   after    += *InfoRepoLib *DCPSInfoRepoServ
-    
+ 
+  pch_header   =
+  pch_source   =
+
   IDL_Files {
   }
 
@@ -117,4 +123,5 @@ project(*InfoRepo): dcpsexe, iortable, DCPSInfoRepo_bits, imr_client, svc_utils 
 
   Template_Files {
   }
+
 }

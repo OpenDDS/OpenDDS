@@ -1,3 +1,9 @@
+Fri Oct 10 19:59:44 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+
+          Adjusted MPC settings to not pick up the defaults.
+
 Fri Oct 10 19:48:27 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
