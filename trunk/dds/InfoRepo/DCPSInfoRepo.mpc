@@ -48,6 +48,9 @@ project(*DCPSInfoRepoServ): dcps, iortable, DCPSInfoRepo_bits, imr_client, svc_u
 
   IDL_Files {
   }
+  
+  Template_Files {
+  } 
 }
 
 

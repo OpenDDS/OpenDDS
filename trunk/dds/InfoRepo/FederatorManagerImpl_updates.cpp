@@ -755,7 +755,7 @@ ManagerImpl::processCreate( const SubscriptionUpdate* sample, const ::DDS::Sampl
     buffer << sample->id << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processCreate( SubscriptionUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
+      ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
       this->id(),
       sample->domain,
       participantBuffer.str().c_str(),
