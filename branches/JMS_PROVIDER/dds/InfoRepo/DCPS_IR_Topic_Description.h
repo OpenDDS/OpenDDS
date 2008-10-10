@@ -10,6 +10,7 @@
 #ifndef DCPS_IR_TOPIC_DESCRIPTION_H
 #define DCPS_IR_TOPIC_DESCRIPTION_H
 
+#include  "inforepo_export.h"
 #include /**/ "ace/Unbounded_Set.h"
 #include /**/ "ace/SString.h"
 #include /**/ "tao/corbafwd.h"
@@ -36,7 +37,7 @@ typedef ACE_Unbounded_Set<DCPS_IR_Topic*> DCPS_IR_Topic_Set;
  * @brief Representative of a Topic Description
  *
  */
-class DCPS_IR_Topic_Description
+class OpenDDS_InfoRepoLib_Export DCPS_IR_Topic_Description
 {
 public:
   DCPS_IR_Topic_Description (

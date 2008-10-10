@@ -1,5 +1,4 @@
 // -*- C++ -*-
-
 /**
  * @file      PersistenceUpdate.h
  *
@@ -7,10 +6,10 @@
  *
  * @author Ciju John <johnc@ociweb.com>
  */
-
 #ifndef _PERSISTENCE_UPDATER_
 #define _PERSISTENCE_UPDATER_
 
+#include "inforepo_export.h"
 #include "Updater.h"
 
 #include "dds/DdsDcpsInfoUtilsC.h"
@@ -22,29 +21,30 @@
 
 #include <string>
 
-// Forward declaration
-class UpdateManager;
+namespace Update {
 
-class PersistenceUpdater : public UpdaterBase, public ACE_Task_Base
+// Forward declaration
+class Manager;
+
+class OpenDDS_InfoRepoLib_Export PersistenceUpdater : public Updater, public ACE_Task_Base
 {
  public:
-  class IdType_ExtId
-  {
-  public:
-    IdType_ExtId ();
+  class IdType_ExtId {
+    public:
+      IdType_ExtId ();
 
-    IdType_ExtId (IdType id);
+      IdType_ExtId (IdType id);
 
-    IdType_ExtId (const IdType_ExtId& ext);
+      IdType_ExtId (const IdType_ExtId& ext);
 
-    void operator= (const IdType_ExtId& ext);
+      void operator= (const IdType_ExtId& ext);
 
-    bool operator== (const IdType_ExtId& ext) const;
+      bool operator== (const IdType_ExtId& ext) const;
 
-    unsigned long hash (void) const;
+      unsigned long hash (void) const;
 
-  private:
-    IdType id_;
+    private:
+      IdType id_;
   };
 
 public:
@@ -77,25 +77,31 @@ public:
   virtual void requestImage (void);
 
   /// Add entities to be persisted.
-  virtual void add (const UpdateManager::DTopic& topic);
-  virtual void add (const UpdateManager::DParticipant& participant);
-  virtual void add (const UpdateManager::DActor& actor);
-
-  /// Remove an entity (but not children) from persistence.
-  virtual void remove (ItemType type, const IdType& id);
+  virtual void create( const UTopic& topic);
+  virtual void create( const UParticipant& participant);
+  virtual void create( const URActor& actor);
+  virtual void create( const UWActor& actor);
+  virtual void create( const OwnershipData& data);
 
   /// Persist updated Qos parameters for an entity.
-  virtual void updateQos (const ItemType& itemType, const IdType& id
-			 , const ::QosSeq& qos);
+  virtual void update( const IdPath& id, const ::DDS::DomainParticipantQos& qos);
+  virtual void update( const IdPath& id, const ::DDS::TopicQos&             qos);
+  virtual void update( const IdPath& id, const ::DDS::DataWriterQos&        qos);
+  virtual void update( const IdPath& id, const ::DDS::PublisherQos&         qos);
+  virtual void update( const IdPath& id, const ::DDS::DataReaderQos&        qos);
+  virtual void update( const IdPath& id, const ::DDS::SubscriberQos&        qos);
+
+  /// Remove an entity (but not children) from persistence.
+  virtual void destroy( const IdPath& id, ItemType type, ActorType actor);
 
  private:
   int parse (int argc, ACE_TCHAR *argv[]);
-  void get_bin_seq (const ::QosSeq& qos, BinSeq & binSeq);
+  void storeUpdate( const ACE_Message_Block& data, BinSeq& storage);
 
   ACE_TString persistence_file_;
   bool reset_;
 
-  UpdateManager *um_;
+  Manager *um_;
 
   ALLOCATOR *allocator_;
 
@@ -104,5 +110,7 @@ public:
   ActorIndex *actor_index_;
 };
 
+} // End of namespace Update
 
 #endif // _PERSISTENCE_UPDATER_
+

@@ -1,5 +1,6 @@
 
 #include "Publisher.h"
+#include "DataWriterListenerImpl.h"
 #include "TestException.h"
 #include "tests/DCPS/FooType5/FooDefTypeSupportC.h"
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
@@ -217,11 +218,21 @@ Publisher::Publisher( int argc, char** argv, char** envp)
   writerQos.reliability.max_blocking_time.sec        = 0;
   writerQos.reliability.max_blocking_time.nanosec    = 0;
 
+  this->sync_     = new DataWriterListenerImpl;
+  this->listener_ = this->sync_;
+  if( CORBA::is_nil (this->listener_.in())) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT ("(%P|%t) ERROR: failed to obtain listener for domain %d.\n"),
+      this->config_.domain()
+    ));
+    throw BadWriterListenerException ();
+  }
+
   this->dataWriter_
     = this->publisher_->create_datawriter(
         this->topic_.in(),
         writerQos,
-        ::DDS::DataWriterListener::_nil()
+        this->listener_.in()
       );
   if( CORBA::is_nil( this->dataWriter_.in()) ) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: create datawriter failed.\n")));
@@ -270,6 +281,17 @@ Publisher::~Publisher()
 void
 Publisher::run()
 {
+  ::DDS::InstanceHandleSeq handles;
+
+  while (1)
+  {
+    dataWriter_->get_matched_subscriptions(handles);
+    if (handles.length() > 0)
+      break;
+    else
+      ACE_OS::sleep(ACE_Time_Value(0,200000));
+  }
+
   // Write Foo samples.
   ::Xyz::FooNoKey foo;
   foo.data_source = 22;
@@ -283,10 +305,6 @@ Publisher::run()
     ));
     throw BadWriterException();
   }
-
-  // NOTE: This is a kluge to avoid a race condition - it is still
-  //       possible, though unlikely, to lock up due to the race.
-  ACE_OS::sleep(5);
 
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) Publisher::run starting to write.\n")
@@ -312,14 +330,25 @@ Publisher::run()
     }
   }
 
-  // Until we implement v1.2 Publisher::wait_for_acknowledgments()
-  // NOTE: This is a kluge to avoid a race condition - it is still
-  //       possible, though unlikely, to lock up due to the race.
-  ACE_OS::sleep(5);
-
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) Publisher::run writes complete.\n")
   ));
 
+  // End when the subscriber disconnects.
+  //this->sync_->wait_for_completion();
+
+  while (1)
+    {
+      dataWriter_->get_matched_subscriptions(handles);
+      if (handles.length() == 0)
+        break;
+      else
+        ACE_OS::sleep(1);
+    }
+
+
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) Publisher::run shutting down.\n")
+  ));
 }
 

@@ -10,6 +10,7 @@
 #ifndef DCPS_IR_PUBLICATION_H
 #define DCPS_IR_PUBLICATION_H
 
+#include  "inforepo_export.h"
 #include /**/ "UpdateDataTypes.h"
 #include /**/ "dds/DdsDcpsInfrastructureC.h"
 #include /**/ "dds/DdsDcpsPublicationC.h"
@@ -37,7 +38,7 @@ typedef ACE_Unbounded_Set<DCPS_IR_Subscription*> DCPS_IR_Subscription_Set;
  *
  *
  */
-class DCPS_IR_Publication
+class OpenDDS_InfoRepoLib_Export DCPS_IR_Publication
 {
 public:
   DCPS_IR_Publication (OpenDDS::DCPS::RepoId id,
@@ -114,7 +115,13 @@ public:
   /// to datawriter BIT.
   bool set_qos (const ::DDS::DataWriterQos & qos,
                 const ::DDS::PublisherQos & publisherQos,
-                SpecificQos& specificQos);
+                Update::SpecificQos& specificQos);
+
+  /// Update DataWriterQos only.
+  void set_qos( const ::DDS::DataWriterQos& qos);
+
+  /// Update PublisherQos only.
+  void set_qos( const ::DDS::PublisherQos& qos);
 
   /// get the transport ID of the transport implementation type.
   OpenDDS::DCPS::TransportInterfaceId   get_transport_id () const;
@@ -138,6 +145,9 @@ public:
 
   CORBA::Boolean is_bit ();
   void set_bit_status (CORBA::Boolean isBIT);
+
+  // Expose the datawriter.
+  OpenDDS::DCPS::DataWriterRemote_ptr writer();
 
   // Verify the existing associations. This may result removal of
   // associations. The existing associations have to be removed before

@@ -81,13 +81,14 @@ main (int argc, char *argv[])
       ::DDS::DomainParticipantQos_var dpQos = new ::DDS::DomainParticipantQos;
       CORBA::Long domainId = 911;
 
-      CORBA::Long dpId = info->add_domain_participant(domainId, dpQos.in());
-      if (0 == dpId)
+      OpenDDS::DCPS::AddDomainStatus value = info->add_domain_participant(domainId, dpQos.in());
+      OpenDDS::DCPS::RepoId dpId = value.id;
+      if( OpenDDS::DCPS::GUID_UNKNOWN == dpId)
         {
           ACE_ERROR((LM_ERROR, ACE_TEXT("add_domain_participant failed!\n") ));
         }
 
-      CORBA::Long topicId;
+      OpenDDS::DCPS::RepoId topicId;
       const char* tname = "MYtopic";
       const char* dname = "MYdataname";
       ::DDS::TopicQos_var topicQos = new ::DDS::TopicQos;
@@ -121,14 +122,14 @@ main (int argc, char *argv[])
       ::DDS::SubscriberQos_var sQos = new ::DDS::SubscriberQos;
       OpenDDS::DCPS::TransportInterfaceInfo_var tii = new OpenDDS::DCPS::TransportInterfaceInfo;
 
-      CORBA::Long subId = info->add_subscription(domainId,
+      OpenDDS::DCPS::RepoId subId = info->add_subscription(domainId,
                                                  dpId,
                                                  topicId,
                                                  dr.in(),
                                                  drq.in(),
                                                  tii.in(),
                                                  sQos.in());
-      if (0 == subId)
+      if( OpenDDS::DCPS::GUID_UNKNOWN == subId)
         {
           ACE_ERROR((LM_ERROR, ACE_TEXT("add_subscription failed!\n") ));
         }

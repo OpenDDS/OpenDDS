@@ -12,48 +12,45 @@
 #define _UPDATER_
 
 #include "UpdateDataTypes.h"
-#include "UpdateManager.h"
-
+#include "dds/DCPS/GuidUtils.h"
 #include "ace/Synch.h"
 
+namespace Update {
 
 class Updater
 {
- public:
+  public:
+    // Virtual destructor.
+    virtual ~Updater();
 
-  virtual ~Updater (void);
+    // Request an image refresh to be sent to
+    //  the specified callback (asynchronously).
+    virtual void requestImage (void) = 0;
 
-  virtual void unregisterCallback (void) = 0;
+    // Propagate that an entity has been created.
+    virtual void create( const UTopic&              topic) = 0;
+    virtual void create( const UParticipant&  participant) = 0;
+    virtual void create( const URActor&             actor) = 0;
+    virtual void create( const UWActor&             actor) = 0;
+    virtual void create( const OwnershipData&        data) = 0;
 
-  // Request an image refresh to be sent to
-  //  the specified callback (asynchronously).
-  virtual void requestImage (void) = 0;
+    // Propagate updated Qos parameters for an entity.
+    virtual void update( const IdPath& id, const ::DDS::DomainParticipantQos& qos) = 0;
+    virtual void update( const IdPath& id, const ::DDS::TopicQos&             qos) = 0;
+    virtual void update( const IdPath& id, const ::DDS::DataWriterQos&        qos) = 0;
+    virtual void update( const IdPath& id, const ::DDS::PublisherQos&         qos) = 0;
+    virtual void update( const IdPath& id, const ::DDS::DataReaderQos&        qos) = 0;
+    virtual void update( const IdPath& id, const ::DDS::SubscriberQos&        qos) = 0;
 
-  // Add entities to be persisted.
-  virtual void add(const UpdateManager::DTopic& topic) = 0;
-  virtual void add(const UpdateManager::DParticipant& participant) = 0;
-  virtual void add(const UpdateManager::DActor& actor) = 0;
-
-  // Remove an entity (but not children) from persistence.
-  virtual void remove (ItemType type, const IdType& id) = 0;
-
-  // Persist updated Qos parameters for an entity.
-  virtual void updateQos(const ItemType& itemType, const IdType& id
-			 , const QosSeq& qos) = 0;
+    // Propagate that an entity has been destroyed.
+    virtual void destroy( const IdPath& id, ItemType type, ActorType actor) = 0;
 };
 
-// forward declare
-class UpdateManager;
-
-class UpdaterBase : public Updater
+inline
+Updater::~Updater()
 {
- public:
-  virtual ~UpdaterBase (void);
+}
 
-  void unregisterCallback (void);
-
- protected:
-  UpdateManager* um_;
-};
+} // End of namespace Update
 
 #endif // _UPDATER_

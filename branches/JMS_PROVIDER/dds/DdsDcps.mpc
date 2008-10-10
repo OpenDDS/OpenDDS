@@ -48,4 +48,9 @@ project: taolib, portableserver, core, dcps_bits, coverage_optional {
     gendir = .
     CorbaSeq/*.idl
   }
+
+  IDL_Files {
+    idlflags += -Gdcps
+    DdsDcpsGuid.idl
+  }
 }

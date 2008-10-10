@@ -25,7 +25,6 @@ $pub1_addr='localhost:34567';
 $pub2_addr='localhost:34568';
 $sub_addr='localhost:45678';
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 $repo_bit_conf = "-NOBITS";
 $app_bit_conf = "-DCPSBit 0";
@@ -33,8 +32,7 @@ $app_bit_conf = "-DCPSBit 0";
 unlink $dcpsrepo_ior; 
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "$repo_bit_conf -o $dcpsrepo_ior"
-                             . " -d $domains_file");
+                             "$repo_bit_conf -o $dcpsrepo_ior ");
 
 
 print $DCPSREPO->CommandLine(), "\n";

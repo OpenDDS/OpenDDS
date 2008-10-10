@@ -122,7 +122,7 @@ OpenDDS::DCPS::TransportImpl::release_datalink(DataLink* link)
 /// its own request to detach_transport(), and this TransportImpl object
 /// is the one to which it is currently attached.
 ACE_INLINE void
-OpenDDS::DCPS::TransportImpl::detach_interface(TransportInterface* tansport_interface)
+OpenDDS::DCPS::TransportImpl::detach_interface(TransportInterface* transport_interface)
 {
   DBG_ENTRY_LVL("TransportImpl","detach_interface",6);
 
@@ -131,7 +131,7 @@ OpenDDS::DCPS::TransportImpl::detach_interface(TransportInterface* tansport_inte
   // We really don't care if this unbind "works" or not.  As long as we
   // don't have the interface pointer in our interfaces_ collection, then
   // we are happy.
-  unbind(interfaces_, tansport_interface);
+  unbind(interfaces_, transport_interface);
 }
 
 

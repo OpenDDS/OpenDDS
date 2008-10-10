@@ -1,3 +1,627 @@
+Fri Oct 10 19:59:44 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+
+          Adjusted MPC settings to not pick up the defaults.
+
+Fri Oct 10 19:48:27 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+        Transitioned from using _validate_connection() to using
+        _non_existant() to remove a dependency on a non-minimal CORBA
+        feature.
+
+Fri Oct 10 19:29:57 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepoServ.h:
+        * dds/InfoRepo/DCPSInfoRepoServ_Export.h:
+
+          Added Export macros for GCC 4.x and Windows builds.
+
+Fri Oct 10 19:09:50 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/DCPSInfoRepoServ.h:
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+
+          Added libDCPSInfoRepoServ service library. DCPSInfoRepo is
+          now a simple wrapper around the library.
+
+Fri Oct 10 14:08:06 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/FailoverListener.cpp:
+
+          Added required #include of the PCH header.
+
+Thu Oct  9 21:37:23 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/Federator.idl:
+
+          leave_and_shutdown()
+          shutdown()
+            Added these methods to the Federator::Manager interface.
+
+        * dds/InfoRepo/FederatorManagerImpl.h:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+
+          leave_and_shutdown()
+          shutdown()
+            Implement the new IDL methods.
+
+        * dds/InfoRepo/ShutdownInterface.h:
+
+          Abstract interface used to propagate shutdown requests.
+
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          shutdown() - forward shutdown requests to new ShutdownInterface
+                       reference provided via constructor.
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+
+          Implement the new ShutdownInterface and pass this to the
+          repository implementation object constructor.
+
+Thu Oct  9 20:31:34 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantFactoryImpl/PublisherImpl.cpp:
+
+          Fixed an iterator access violation due to iterator erasing
+          while iterating on map or set. The delete_*() invalidates
+          the iterator so the iterator has to be move forward for
+          next iteration before delete_*() call.
+
+Thu Oct  9 18:22:58 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/FailoverListener.h:
+        * dds/DCPS/FailoverListener.cpp:
+
+          Install a FailoverListener object to the DCPSParticipant
+          built-in topic DataReader when federated.  This listener will
+          initiate failover sequencing on reciept of the
+          on_subscription_lost() callback.
+          Set the LIVELINESS.lease_duration value for the DCPSParticpant
+          built-in topic DataReader to that specified by the
+          FederationLivelinessDuration value when federated.
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/Service_Participant.cpp:
+
+          load_common_config() - added FederationLivelinessDuration key
+            value to this section.  The default value is 60 seconds.
+          federation_liveliness() - new methods to access a member
+            containing the new FederationLivelinessDuration value.
+          repsitory_lost() - simplified handling the case where the
+            specified lost repository is not found.
+
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+
+          Add argument when initializing the built-in topics to cause the
+          DCPSParticipant built-in topic to use a non-infinite
+          LIVELINESS.lease_duration value.
+
+        * dds/DdsDcpsInfo.idl:
+        * dds/DdsDcpsInfoUtils.idl:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          add_domain_participant() - changed signature to return a
+            structure with both the previously returned Id value as well
+            as a boolean indication of whether the repository is a
+            federated repository.
+
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+
+          Use modified add_domain_participant() signature.
+
+        * tests/DCPS/DCPSInfoRepo/publisher.cpp:
+        * tests/DCPS/DCPSInfoRepo/subscriber.cpp:
+
+          Use modified add_domain_participant() signature.
+
+        * tests/DCPS/FooTest3_0/run_test.pl:
+        * tests/DCPS/FooTest3_1/run_test_nokey.pl:
+
+          Added diagnostic message to indicate final test result.
+
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+
+          Added additional diagnostic messages during test.
+
+        * tests/DCPS/FooTest3_1/run_test.pl:
+
+          Added diagnostic message to indicate final test result.
+          Moved command line prints to be immediately prior to the Spawn
+          of the process.
+
+Thu Oct  9 16:03:55 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Removed unreferenced local variable.
+          Using ACE_Time_Value::zero to avoid ambiguous conversions.
+
+Thu Oct  9 07:00:04 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+
+          Made TAO_DDS_DCPSInfo_i servant be member of InfoRepo instead of
+          in the scope of init() function. It is deleted when exit from
+          init(). This should fix access violation on the TAO_DDS_DCPSInfo_i
+          object and its members.
+
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+
+          Made listener thread stop in finalize ().
+
+        * dds/InfoRepo/UpdateListener_T.h:
+        * dds/InfoRepo/UpdateListener_T.cpp:
+
+          Added stop() method.
+
+Wed Oct  8 18:45:16 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/Service_Participant.cpp:
+
+          remap_domains()   - refactored partial implementation of
+                              set_repo() into separate method.
+          repository_lost() - added new method to failover to new
+                              repository.
+          Added configurable variables and accessors/mutators for
+            FederationRecoveryDuration
+            FederationInitialBackoffSeconds
+            FederationBackoffMultiplier
+
+        * tests/DCPS/Federation/run_test.pl:
+
+          Added verbose option mapping to '-ORBVerboseLogging 1' for
+          process arguments.
+
+Wed Oct  8 14:42:23 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/InfoRepo/FederatorConfig.cpp:
+
+          Added required #include.
+
+Wed Oct  8 14:09:18 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Added required #include.
+
+        * dds/DCPS/GuidUtils.cpp:
+        * dds/InfoRepo/GuidGenerator.cpp:
+
+          Added static_cast<> around numeric narrowing conversions.  This
+          silences warnings from some compilers.
+
+Tue Oct  7 19:31:05 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DdsDcps.mpc:
+
+          No need to run dcps_ts.pl on DdsDcpsGuid.idl, tao_idl generates all
+          the code that's actually used for the Guid type.
+
+Tue Oct  7 14:28:59 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Fixed misspelled variable name.
+
+Mon Oct  6 22:22:34 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+          Merged the Federation branch back onto the trunk.  This feature
+          branch developed the basic infrastructure to support federation
+          of multiple repositories.  This feature is intended to provide
+          fault-tolerant capabilities to the DCPSInfoRepo service
+          meta-data repositories.  Details of the development can be
+          found in the file 'history/ChangeLog-Federation'.
+
+          See the file 'DDS_release_notes.txt' for a description
+          of changes made that affect the user API to OpenDDS.
+          Briefly, these changes include: removal of domain_ids domain
+          specification files; extension of internal Id values from 32
+          to 128 bits; ability to federate multiple repositories for
+          distributed operation.
+
+        * DDS_release_notes.txt:
+        * DevGuideExamples/DCPS/Messenger/run_corbaloc_test.pl:
+        * DevGuideExamples/DCPS/Messenger/run_ns_test.pl:
+        * DevGuideExamples/DCPS/Messenger/run_test.pl:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/run_test.pl:
+
+        * dds/DCPS/BuiltInTopicUtils.h:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderRemoteImpl.h:
+        * dds/DCPS/DataReaderRemoteImpl.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterRemoteImpl.h:
+        * dds/DCPS/DataWriterRemoteImpl.cpp:
+        * dds/DCPS/DomainParticipantFactoryImpl.h:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/GuidUtils.h:
+        * dds/DCPS/GuidUtils.cpp:
+        * dds/DCPS/InstanceState.h:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/DataLinkSetMap.h:
+        * dds/DCPS/transport/framework/DataLinkSetMap.cpp:
+        * dds/DCPS/transport/framework/NetworkAddress.inl:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.h:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.h:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.inl:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.h:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.h:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.cpp:
+        * dds/DCPS/transport/framework/RepoIdSet.h:
+        * dds/DCPS/transport/framework/RepoIdSet.cpp:
+        * dds/DCPS/transport/framework/RepoIdSetMap.h:
+        * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
+        * dds/DCPS/transport/framework/TransportControlElement.h:
+        * dds/DCPS/transport/framework/TransportControlElement.cpp:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.inl:
+        * dds/DCPS/transport/framework/TransportInterface.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportSendControlElement.h:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.h:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.inl:
+
+        * dds/DdsDcps.mpc:
+        * dds/DdsDcpsGuid.idl:
+        * dds/DdsDcpsInfo.idl:
+        * dds/DdsDcpsInfoUtils.idl:
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic.h:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.h:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+        * dds/InfoRepo/DCPS_Utils.h:
+        * dds/InfoRepo/DefaultValues.h:
+        * dds/InfoRepo/DomainParticipantListener_i.h:
+        * dds/InfoRepo/Federator.idl:
+        * dds/InfoRepo/FederatorConfig.h:
+        * dds/InfoRepo/FederatorConfig.inl:
+        * dds/InfoRepo/FederatorConfig.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.h:
+        * dds/InfoRepo/FederatorManagerImpl.inl:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
+        * dds/InfoRepo/GuidGenerator.h:
+        * dds/InfoRepo/GuidGenerator.cpp:
+        * dds/InfoRepo/InfoRepoMulticastResponder.h:
+        * dds/InfoRepo/InfoRepoMulticastResponder.cpp:
+        * dds/InfoRepo/PersistenceUpdater.h:
+        * dds/InfoRepo/PersistenceUpdater.cpp:
+        * dds/InfoRepo/UpdateDataTypes.h:
+        * dds/InfoRepo/UpdateListener_T.h:
+        * dds/InfoRepo/UpdateListener_T.cpp:
+        * dds/InfoRepo/UpdateManager.h:
+        * dds/InfoRepo/UpdateManager.cpp:
+        * dds/InfoRepo/UpdateManager_T.cpp:
+        * dds/InfoRepo/UpdateProcessor_T.h:
+        * dds/InfoRepo/UpdateProcessor_T.cpp:
+        * dds/InfoRepo/UpdateReceiver_T.h:
+        * dds/InfoRepo/UpdateReceiver_T.cpp:
+        * dds/InfoRepo/Updater.h:
+        * dds/InfoRepo/federator_export.h:
+        * dds/InfoRepo/inforepo_export.h:
+
+        * examples/DCPS/DistributedContent/run_test.pl:
+        * examples/DCPS/IntroductionToOpenDDS/ExchangeEventDataReaderListenerImpl.cpp:
+        * examples/DCPS/IntroductionToOpenDDS/QuoteDataReaderListenerImpl.cpp:
+        * examples/DCPS/IntroductionToOpenDDS/run_tcp.bat:
+        * examples/DCPS/IntroductionToOpenDDS/run_tcp_bit_off.bat:
+        * examples/DCPS/IntroductionToOpenDDS/run_test.pl:
+        * examples/DCPS/IntroductionToOpenDDS/run_udp.bat:
+        * examples/DCPS/IntroductionToOpenDDS/run_udp_bit_off.bat:
+        * examples/DCPS/Messenger_IOGR_Imr/run_test.pl:
+        * examples/DCPS/Messenger_Imr/run_test.pl:
+
+        * history/ChangeLog-Federation:
+
+        * performance-tests/DCPS/InfoRepo_population/pub.ini:
+        * performance-tests/DCPS/InfoRepo_population/publisher.cpp:
+        * performance-tests/DCPS/InfoRepo_population/run_test.pl:
+        * performance-tests/DCPS/InfoRepo_population/sub.ini:
+        * performance-tests/DCPS/InfoRepo_population/subscriber.cpp:
+        * performance-tests/DCPS/McastListenerTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/McastListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/McastListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/McastListenerTest/run_test-4p1s.pl:
+        * performance-tests/DCPS/SimpleE2ETest/run_test.pl:
+        * performance-tests/DCPS/SimpleE2ETest/run_test_long.pl:
+        * performance-tests/DCPS/SimpleE2ETest/run_test_rejected.pl:
+        * performance-tests/DCPS/SimpleLatency/run_test.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-4p1s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-4p1s.pl:
+        * performance-tests/DCPS/TransportLatency/run_corbaloc_test.pl:
+        * performance-tests/DCPS/TransportLatency/run_ns_test.pl:
+        * performance-tests/DCPS/TransportLatency/run_test.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-4p1s.pl:
+        * performance-tests/DCPS/UDPNoKeyTest/run_test-2pubs.pl:
+        * performance-tests/DCPS/UDPNoKeyTest/run_test.pl:
+
+        * tests/DCPS/BuiltInTopic/common.cpp:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/BuiltInTopic/run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.cpp:
+        * tests/DCPS/BuiltInTopicTest/Writer.cpp:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/mySvc.conf:
+        * tests/DCPS/BuiltInTopicTest/prst_repo_run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+        * tests/DCPS/CompatibilityTest/run_test.pl:
+        * tests/DCPS/CorbaSeq/run_test.pl:
+        * tests/DCPS/Crossplatform/Messenger_run_test.pl:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.cpp:
+        * tests/DCPS/DCPSInfoRepo/publisher.cpp:
+        * tests/DCPS/DCPSInfoRepo/run_test.pl:
+        * tests/DCPS/DCPSInfoRepo/subscriber.cpp:
+        * tests/DCPS/DcpsIntegration/infrastructure.cpp:
+        * tests/DCPS/DcpsIntegration/run_test-integration.pl:
+        * tests/DCPS/DcpsIntegration/run_test-topic.pl:
+        * tests/DCPS/Deadline/run_test.pl:
+        * tests/DCPS/Federation/DataWriterListenerImpl.h:
+        * tests/DCPS/Federation/DataWriterListenerImpl.cpp:
+        * tests/DCPS/Federation/Federation.mpc:
+        * tests/DCPS/Federation/Publisher.h:
+        * tests/DCPS/Federation/Publisher.cpp:
+        * tests/DCPS/Federation/Subscriber.cpp:
+        * tests/DCPS/Federation/TestException.h:
+        * tests/DCPS/Federation/publisher_main.cpp:
+        * tests/DCPS/Federation/run_test.pl:
+        * tests/DCPS/Federation/subscriber_main.cpp:
+        * tests/DCPS/FooTest2/obsolete_test.pl:
+        * tests/DCPS/FooTest3/special_build_test.pl:
+        * tests/DCPS/FooTest3NoKey/special_build_test.pl:
+        * tests/DCPS/FooTest3NoKey/special_build_test_mw.pl:
+        * tests/DCPS/FooTest3_0/PubDriver.h:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/SimpleDataReader.cpp:
+        * tests/DCPS/FooTest3_0/SimpleSubscriber.cpp:
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/DCPS/FooTest3_0/Test.idl:
+        * tests/DCPS/FooTest3_0/run_test.pl:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/SimpleDataReader.cpp:
+        * tests/DCPS/FooTest3_1/SubDriver.cpp:
+        * tests/DCPS/FooTest3_1/run_test.pl:
+        * tests/DCPS/FooTest3_1/run_test_nokey.pl:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/SimpleDataReader.cpp:
+        * tests/DCPS/FooTest3_2/SubDriver.cpp:
+        * tests/DCPS/FooTest3_2/run_test.pl:
+        * tests/DCPS/FooTest4/Writer.cpp:
+        * tests/DCPS/FooTest4/run_test.pl:
+        * tests/DCPS/FooTest4_0/run_test.pl:
+        * tests/DCPS/FooTest5/run_test.pl:
+        * tests/DCPS/FooTest5_0/run_test.pl:
+        * tests/DCPS/Lifespan/run_test.pl:
+        * tests/DCPS/LivelinessTest/run_test.pl:
+        * tests/DCPS/LivelinessTimeout/DataReaderListenerImpl.h:
+        * tests/DCPS/LivelinessTimeout/DataReaderListenerImpl.cpp:
+        * tests/DCPS/LivelinessTimeout/LivelinessTimeout.mpc:
+        * tests/DCPS/LivelinessTimeout/run_test.pl:
+        * tests/DCPS/LivelinessTimeout/subscriber.cpp:
+        * tests/DCPS/MultiDPTest/run_test.pl:
+        * tests/DCPS/MultiRepoTest/run_test.pl:
+        * tests/DCPS/MultiTopicTest/run_test.pl:
+        * tests/DCPS/MultiTopicTest/run_test1.pl:
+        * tests/DCPS/MultiTopicTest/run_test2.pl:
+        * tests/DCPS/MultiTopicTest/run_test3.pl:
+        * tests/DCPS/NotifyTest/run_test.pl:
+        * tests/DCPS/Partition/run_test.pl:
+        * tests/DCPS/PersistentDurability/run_test.pl:
+        * tests/DCPS/Prst_delayed_subscriber/mySvc.conf:
+        * tests/DCPS/Prst_delayed_subscriber/publisher.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/run_test.pl:
+        * tests/DCPS/Prst_delayed_subscriber/subscriber.cpp:
+        * tests/DCPS/Reconnect/run_test.pl:
+        * tests/DCPS/SetQosDeadline/run_test.pl:
+        * tests/DCPS/SetQosPartition/pub.ini:
+        * tests/DCPS/SetQosPartition/run_test.pl:
+        * tests/DCPS/SetQosPartition/sub.ini:
+        * tests/DCPS/SimpleFooTest/obsolete_test.pl:
+        * tests/DCPS/StringKey/run_test.pl:
+        * tests/DCPS/TransientDurability/run_test.pl:
+        * tests/DCPS/TransientLocalTest/run_test.pl:
+        * tests/DCPS/ViewState/run_test.pl:
+        * tests/DCPS/ZeroCopyRead/run_test.pl:
+        * tests/DCPS/ZeroCopyRead/run_test_coverage.pl:
+        * tests/DCPS/sub_init_loop/run_test.pl:
+        * tests/DCPS/unit/Main.cpp:
+        * tests/DCPS/unit/run_test.pl:
+        * tests/transport/dds_comparative/Pub.cpp:
+        * tests/transport/dds_comparative/PubDriver.cpp:
+        * tests/transport/dds_comparative/PubWriter.cpp:
+        * tests/transport/dds_comparative/Sub.cpp:
+        * tests/transport/dds_comparative/SubDriver.cpp:
+        * tests/transport/dds_comparative/SubReader.cpp:
+        * tests/transport/mcast_simple/PubDriver.cpp:
+        * tests/transport/mcast_simple/SimpleDataReader.cpp:
+        * tests/transport/mcast_simple/SubDriver.cpp:
+        * tests/transport/mcast_simple/run_test.pl:
+        * tests/transport/mcast_simple_n/PubDriver.cpp:
+        * tests/transport/mcast_simple_n/SimpleDataReader.cpp:
+        * tests/transport/mcast_simple_n/SimpleDataWriter.cpp:
+        * tests/transport/mcast_simple_n/SubDriver.cpp:
+        * tests/transport/mcast_simple_n/run_test.pl:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SimpleDataReader.cpp:
+        * tests/transport/simple/SubDriver.cpp:
+        * tests/transport/simple/run_test.pl:
+        * tests/transport/simple_bp/PubDriver.cpp:
+        * tests/transport/simple_bp/SimpleDataReader.cpp:
+        * tests/transport/simple_bp/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp/SubDriver.cpp:
+        * tests/transport/simple_bp/run_test.pl:
+        * tests/transport/simple_bp_rm/PubDriver.cpp:
+        * tests/transport/simple_bp_rm/SimpleDataReader.cpp:
+        * tests/transport/simple_bp_rm/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp_rm/SubDriver.cpp:
+        * tests/transport/simple_bp_rm/run_test.pl:
+        * tests/transport/simple_n/PubDriver.cpp:
+        * tests/transport/simple_n/SimpleDataReader.cpp:
+        * tests/transport/simple_n/SimpleDataWriter.cpp:
+        * tests/transport/simple_n/SubDriver.cpp:
+        * tests/transport/simple_n/run_test.pl:
+        * tests/transport/udp_simple/PubDriver.cpp:
+        * tests/transport/udp_simple/SimpleDataReader.cpp:
+        * tests/transport/udp_simple/SubDriver.cpp:
+        * tests/transport/udp_simple/run_test.pl:
+        * tests/transport/udp_simple_n/PubDriver.cpp:
+        * tests/transport/udp_simple_n/SimpleDataReader.cpp:
+        * tests/transport/udp_simple_n/SimpleDataWriter.cpp:
+        * tests/transport/udp_simple_n/SubDriver.cpp:
+        * tests/transport/udp_simple_n/run_test.pl:
+
+          These files were either added or modified on the Federation
+          feature branch.
+
+        * DevGuideExamples/DCPS/Messenger/domain_ids:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/domain_ids:
+        * dds/InfoRepo/DCPS_Entity_Id_Generator.h:
+        * dds/InfoRepo/DCPS_Entity_Id_Generator.cpp:
+        * dds/InfoRepo/UpdateManager.inl:
+        * dds/InfoRepo/Updater.cpp:
+        * examples/DCPS/DistributedContent/domain_ids:
+        * examples/DCPS/IntroductionToOpenDDS/domain_ids:
+        * examples/DCPS/Messenger_IOGR_Imr/domain_ids:
+        * examples/DCPS/Messenger_Imr/domain_ids:
+        * performance-tests/DCPS/InfoRepo_population/domain_ids:
+        * performance-tests/DCPS/McastListenerTest/domain_ids:
+        * performance-tests/DCPS/SimpleE2ETest/domain_ids:
+        * performance-tests/DCPS/SimpleLatency/domain_ids:
+        * performance-tests/DCPS/TCPListenerTest/domain_ids:
+        * performance-tests/DCPS/TCPProfilingTest/domain_ids:
+        * performance-tests/DCPS/TransportLatency/domain_ids:
+        * performance-tests/DCPS/UDPListenerTest/domain_ids:
+        * performance-tests/DCPS/UDPNoKeyTest/domain_ids:
+        * tests/DCPS/BuiltInTopic/domain_ids:
+        * tests/DCPS/BuiltInTopicTest/domain_ids:
+        * tests/DCPS/CompatibilityTest/domain_ids:
+        * tests/DCPS/CorbaSeq/domain_ids:
+        * tests/DCPS/DCPSInfoRepo/domainids.txt:
+        * tests/DCPS/DcpsIntegration/domain_ids:
+        * tests/DCPS/Deadline/domain_ids:
+        * tests/DCPS/Federation/domain1_ids:
+        * tests/DCPS/Federation/domain2_ids:
+        * tests/DCPS/FooTest2/domain_ids:
+        * tests/DCPS/FooTest3/domain_ids:
+        * tests/DCPS/FooTest3NoKey/domain_ids:
+        * tests/DCPS/FooTest3_0/domain_ids:
+        * tests/DCPS/FooTest3_1/domain_ids:
+        * tests/DCPS/FooTest3_2/domain_ids:
+        * tests/DCPS/FooTest4/domain_ids:
+        * tests/DCPS/FooTest4_0/domain_ids:
+        * tests/DCPS/FooTest5/domain_ids:
+        * tests/DCPS/FooTest5_0/domain_ids:
+        * tests/DCPS/Lifespan/domain_ids:
+        * tests/DCPS/LivelinessTest/domain_ids:
+        * tests/DCPS/LivelinessTimeout/DataReaderListener.h:
+        * tests/DCPS/LivelinessTimeout/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTimeout/domain_ids:
+        * tests/DCPS/MultiDPTest/domain_ids:
+        * tests/DCPS/MultiRepoTest/domain1_ids:
+        * tests/DCPS/MultiRepoTest/domain2_ids:
+        * tests/DCPS/MultiRepoTest/domain3_ids:
+        * tests/DCPS/MultiTopicTest/domain_ids:
+        * tests/DCPS/NotifyTest/domain_ids:
+        * tests/DCPS/Partition/domain_ids:
+        * tests/DCPS/PersistentDurability/domain_ids:
+        * tests/DCPS/Prst_delayed_subscriber/domain_ids:
+        * tests/DCPS/Reconnect/domain_ids:
+        * tests/DCPS/SetQosDeadline/domain_ids:
+        * tests/DCPS/SetQosPartition/domain_ids:
+        * tests/DCPS/SimpleFooTest/domain_ids:
+        * tests/DCPS/StringKey/domain_ids:
+        * tests/DCPS/TransientDurability/domain_ids:
+        * tests/DCPS/TransientLocalTest/domain_ids:
+        * tests/DCPS/ViewState/domain_ids:
+        * tests/DCPS/ZeroCopyRead/domain_ids:
+        * tests/DCPS/sub_init_loop/domain_ids:
+        * tests/DCPS/unit/domain_ids:
+
+          Removed these files.
+
+Thu Oct  2 22:29:21 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Fixed a typo.
+
+        * java/INSTALL:
+
+          Removed an unneeded build step.
+
+        * java/FAQ:
+
+          Added a FAQ entry.
+
+        * java/idl2jni/runtime/idl2jni_runtime.cpp:
+
+          When translating an unknown exception type (not a CORBA
+          SystemException) from Java to C++, call the JNI ExceptionDescribe()
+          function to output a stack trace.
+
 Wed Oct  1 20:35:59 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * DDS_release_notes.txt:

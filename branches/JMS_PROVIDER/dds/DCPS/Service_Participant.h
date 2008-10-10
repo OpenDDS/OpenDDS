@@ -208,12 +208,42 @@ namespace OpenDDS
       /// Load DCPSInfoRepo reference directly.
       void set_repo (DCPSInfo_ptr repo, const RepoKey key = DEFAULT_REPO);
 
+      /// Rebind a domain from one repository to another.
+      void remap_domains( const RepoKey oldKey, const RepoKey newKey);
+
       /// Bind DCPSInfoRepo IORs to domains.
       void set_repo_domain (const ::DDS::DomainId_t domain,
                             const RepoKey repo);
 
       /// Convert domainId to repository key.
       const RepoKey domain_to_repo (const ::DDS::DomainId_t domain) const;
+
+      /// Failover to a new repository.
+      void repository_lost( const RepoKey key);
+
+      /// Accessors for FederationRecoveryDuration in seconds.
+      //@{
+      int& federation_recovery_duration();
+      int  federation_recovery_duration() const;
+      //@}
+
+      /// Accessors for FederationInitialBackoffSeconds.
+      //@{
+      int& federation_initial_backoff_seconds();
+      int  federation_initial_backoff_seconds() const;
+      //@}
+
+      /// Accessors for FederationBackoffMultiplier.
+      //@{
+      int& federation_backoff_multiplier();
+      int  federation_backoff_multiplier() const;
+      //@}
+
+      /// Accessors for FederationLivelinessDuration.
+      //@{
+      int& federation_liveliness();
+      int  federation_liveliness() const;
+      //@}
 
       /**
        * Accessors for @c bit_transport_port_.
@@ -410,6 +440,17 @@ namespace OpenDDS
       ACE_Configuration_Heap cf_;
 
     private:
+      /// The FederationRecoveryDuration value in seconds.
+      int federation_recovery_duration_;
+
+      /// The FederationInitialBackoffSeconds value.
+      int federation_initial_backoff_seconds_;
+
+      /// This FederationBackoffMultiplier.
+      int federation_backoff_multiplier_;
+
+      /// This FederationLivelinessDuration.
+      int federation_liveliness_;
 
       /// The @c TRANSIENT data durability cache.
       std::auto_ptr<DataDurabilityCache> transient_data_cache_;

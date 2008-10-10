@@ -13,7 +13,6 @@ use DDS_Run_Test;
 
 $status = 0;
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 $repo_bit_conf = "-NOBITS";
 $app_bit_conf = "-ORBSvcConf ../../tcp.conf -DCPSBit 0";
@@ -21,7 +20,7 @@ $app_bit_conf = "-ORBSvcConf ../../tcp.conf -DCPSBit 0";
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-				  "$repo_bit_conf -o $dcpsrepo_ior -d $domains_file");
+				  "$repo_bit_conf -o $dcpsrepo_ior ");
 
 $Subscriber = PerlDDS::create_process ("dds_sub", "$app_bit_conf");
 

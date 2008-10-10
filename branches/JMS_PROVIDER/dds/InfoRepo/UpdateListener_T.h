@@ -5,6 +5,7 @@
 #define UPDATELISTENER_T_H
 
 #include "dds/DCPS/SubscriberImpl.h"
+#include "UpdateReceiver_T.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -12,29 +13,14 @@
 
 namespace OpenDDS { namespace Federator {
 
-class ManagerImpl;
-
-/**
- * @class UpdateMarker
- *
- * @brief Mark the udpate listeners to enable containment.
- *
- * This Marker class is used to enable the individual UpdateListener<>
- * instantiations to e contained in a single container.  The only use we
- * have for this is to allow the deletion of the contained listeners, so
- * not interfaces are included.
- */
-class UpdateMarker { };
-
 /// @class UpdateListener< DataType, ReaderType>
 template< class DataType, class ReaderType>
 class UpdateListener
-  : public virtual ::OpenDDS::DCPS::LocalObject< ::DDS::DataReaderListener>,
-    public virtual UpdateMarker
+  : public virtual ::OpenDDS::DCPS::LocalObject< ::DDS::DataReaderListener>
 {
   public:
     /// Default constructor
-    UpdateListener( ManagerImpl& manager);
+    UpdateListener( UpdateProcessor< DataType>& processor);
 
     /// Virtual destructor
     virtual ~UpdateListener();
@@ -94,9 +80,18 @@ class UpdateListener
       CORBA::SystemException
     ));
 
+    /// Access our Federation Id value.
+    RepoKey& federationId();
+    RepoKey  federationId() const;
+
+    void stop ();
+
   private:
+    /// Our Federation Id value.
+    RepoKey federationId_;
+
     /// Manager object to delegate sample processing to.
-    ManagerImpl& manager_;
+    UpdateReceiver< DataType> receiver_;
 
 };
 

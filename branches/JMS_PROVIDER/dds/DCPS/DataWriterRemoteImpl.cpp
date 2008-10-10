@@ -35,7 +35,7 @@ DataWriterRemoteImpl::~DataWriterRemoteImpl (void)
 
 
 void
-DataWriterRemoteImpl::add_associations ( ::OpenDDS::DCPS::RepoId yourId,
+DataWriterRemoteImpl::add_associations ( const ::OpenDDS::DCPS::RepoId& yourId,
            const ReaderAssociationSeq & readers
            )
   ACE_THROW_SPEC (( CORBA::SystemException ))

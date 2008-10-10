@@ -11,7 +11,7 @@
 
 
 #include "../common/TestException.h"
-#include "DataReaderListener.h"
+#include "DataReaderListenerImpl.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
@@ -251,14 +251,24 @@ int main (int argc, char *argv[])
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
-      if (drl_servant->deadline_missed() < threshold_liveliness_lost)
-      {
-        ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("(%P|%t) The liviness deadline wasn't missed as many times as it should have."
-                    "threashold=%d, num missed=%d\n"),
-                    threshold_liveliness_lost,
-                    drl_servant->deadline_missed()));
-          return 1;
+      if( drl_servant->deadline_missed() < threshold_liveliness_lost) {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) subscriber: ")
+          ACE_TEXT("liviness deadline not violated enough for test. ")
+          ACE_TEXT("threshold( %d) < num missed( %d).\n"),
+          threshold_liveliness_lost,
+          drl_servant->deadline_missed()
+        ));
+        return 1;
+
+      } else {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) subscriber: ")
+          ACE_TEXT("liviness deadline violated enough to pass test. ")
+          ACE_TEXT("threshold( %d) < num missed( %d).\n"),
+          threshold_liveliness_lost,
+          drl_servant->deadline_missed()
+        ));
       }
     }
   catch (const TestException&)

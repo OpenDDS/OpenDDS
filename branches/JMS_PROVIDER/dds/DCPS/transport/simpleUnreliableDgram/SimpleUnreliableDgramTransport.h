@@ -62,7 +62,7 @@ namespace OpenDDS
         virtual int connection_info_i
                                  (TransportInterfaceInfo& local_info) const = 0;
 
-        virtual bool acked (RepoId);
+        virtual bool acked (RepoId, RepoId);
         virtual void remove_ack (RepoId pub_id, RepoId sub_id);
 
         virtual void notify_lost_on_backpressure_timeout ();

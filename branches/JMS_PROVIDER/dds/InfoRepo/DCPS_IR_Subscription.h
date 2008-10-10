@@ -10,6 +10,7 @@
 #ifndef DCPS_IR_SUBSCRIPTION_H
 #define DCPS_IR_SUBSCRIPTION_H
 
+#include  "inforepo_export.h"
 #include /**/ "UpdateDataTypes.h"
 #include /**/ "dds/DdsDcpsInfrastructureC.h"
 #include /**/ "dds/DdsDcpsSubscriptionC.h"
@@ -37,7 +38,7 @@ class DCPS_IR_Topic;
  *
  *
  */
-class DCPS_IR_Subscription
+class OpenDDS_InfoRepoLib_Export DCPS_IR_Subscription
 {
 public:
   DCPS_IR_Subscription (OpenDDS::DCPS::RepoId id,
@@ -115,7 +116,13 @@ public:
   /// changes to datereader BIT.
   bool set_qos (const ::DDS::DataReaderQos & qos,
                 const ::DDS::SubscriberQos & subscriberQos,
-                SpecificQos& specificQos);
+                Update::SpecificQos& specificQos);
+
+  /// Update DataReaderQos only.
+  void set_qos( const ::DDS::DataReaderQos& qos);
+
+  /// Update SubscriberQos only.
+  void set_qos( const ::DDS::SubscriberQos& qos);
 
   // Verify the existing associations. This may result removal of
   // associations. The existing associations have to be removed before
@@ -154,6 +161,9 @@ public:
 
   CORBA::Boolean is_bit ();
   void set_bit_status (CORBA::Boolean isBIT);
+
+  // Expose the datareader.
+  OpenDDS::DCPS::DataReaderRemote_ptr reader();
 
 private:
   /// Check compatibility between provided DataReader QoS and the QoS of

@@ -30,7 +30,7 @@ OpenDDS::DCPS::SimpleUnreliableDgramTransport::deliver_sample
 
 
 ACE_INLINE bool
-OpenDDS::DCPS::SimpleUnreliableDgramTransport::acked (RepoId)
+OpenDDS::DCPS::SimpleUnreliableDgramTransport::acked (RepoId, RepoId)
 {
   return true;
 }

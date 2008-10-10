@@ -1,5 +1,4 @@
 // -*- C++ -*-
-
 /**
  * @file      UpdateDataTypes.h
  *
@@ -7,114 +6,168 @@
  *
  * @author Ciju John <johnc@ociweb.com>
  */
-
 #ifndef _UPDATE_DATA_TYPES
 #define _UPDATE_DATA_TYPES
+
+#include "dds/DdsDcpsInfoUtilsC.h"
 
 #include <vector>
 #include <string>
 
-// Enumerations:
+namespace Update {
 
-enum ActorType
-  {
-    DataReader
-    , DataWriter
-  };
+enum ItemType  { Topic, Participant, Actor };
+enum ActorType { DataReader, DataWriter };
+enum SpecificQos {
+       NoQos,
+       ParticipantQos,
+       TopicQos,
+       DataWriterQos,
+       PublisherQos,
+       DataReaderQos,
+       SubscriberQos
+     };
 
-enum ItemType
-  {
-    Topic
-    , Participant
-    , Actor
-  };
-
-enum SpecificQos
-  {
-    ParticipantQos
-    , TopicQos
-    , DataWriterQos
-    , PublisherQos
-    , DataReaderQos
-    , SubscriberQos
-  };
-
-// Typedefs:
-
-typedef long IdType;
-
-typedef std::pair <size_t, char*> BinSeq;
-
+typedef long                            DomainIdType;
+typedef OpenDDS::DCPS::RepoId           IdType; // Federation scope identifier type.
+typedef std::pair <size_t, char*>       BinSeq;
 typedef std::pair <SpecificQos, BinSeq> QosSeq;
+typedef BinSeq                          TransportInterfaceInfo;
 
-typedef BinSeq TransportInterfaceInfo;
+struct IdPath {
+  DomainIdType domain;
+  IdType       participant;
+  IdType       id;
 
-// Data Types:
+  IdPath( DomainIdType d, IdType p, IdType i)
+   : domain( d),
+     participant( p),
+     id( i)
+  { }
+};
+
+struct OwnershipData {
+  DomainIdType domain;
+  IdType       participant;
+  long         owner;
+
+  OwnershipData( DomainIdType d, IdType p, long o)
+   : domain( d),
+     participant( p),
+     owner( o)
+  { }
+};
 
 template <typename Q, typename S>
 struct TopicStrt {
-  IdType domainId;
-  IdType topicId; // Unique system-wide
-  IdType participantId;
-  S name;
-  S dataType;
-  Q topicQos;
+  DomainIdType domainId;
+  IdType       topicId;
+  IdType       participantId;
+  S            name;
+  S            dataType;
+  Q            topicQos;
 
-  TopicStrt (IdType dom, IdType to, IdType pa
-             , const char* na, const char* da, Q tQos)
-    : domainId (dom), topicId (to), participantId (pa)
-    , name (na), dataType (da), topicQos (tQos)
+  TopicStrt(
+    DomainIdType dom,
+    IdType       to,
+    IdType       pa,
+    const char*  na,
+    const char*  da,
+    Q            tQos
+  ) : domainId( dom),
+      topicId( to),
+      participantId( pa),
+      name( na),
+      dataType( da),
+      topicQos( tQos)
   { };
 };
+typedef struct TopicStrt< ::DDS::TopicQos&, std::string> UTopic;
+typedef struct TopicStrt< QosSeq, std::string>           DTopic;
 
 template <typename Q>
 struct ParticipantStrt {
-  IdType domainId;
-  IdType participantId; // Unique system-wide
-  Q participantQos;
+  DomainIdType domainId;
+  long         owner;
+  IdType       participantId;
+  Q            participantQos;
 
-  ParticipantStrt (IdType dom, IdType part
-                   , Q pQos)
-    : domainId (dom), participantId (part)
-      , participantQos (pQos)
+  ParticipantStrt(
+    DomainIdType dom,
+    long         own,
+    IdType       part,
+    Q            pQos
+  ) : domainId( dom),
+      owner( own),
+      participantId( part),
+      participantQos( pQos)
   { };
 };
+typedef struct ParticipantStrt< ::DDS::DomainParticipantQos&> UParticipant;
+typedef struct ParticipantStrt< QosSeq>                       DParticipant;
 
 template <typename PSQ, typename RWQ, typename C, typename T>
 struct ActorStrt {
-  IdType domainId;
-  IdType actorId; // Unique system-wide
-  IdType topicId;
-  IdType participantId;
-  ActorType type;
-  C callback;
-  PSQ pubsubQos;
-  RWQ drdwQos;
-  T transportInterfaceInfo;
+  DomainIdType domainId;
+  IdType       actorId;
+  IdType       topicId;
+  IdType       participantId;
+  ActorType    type;
+  C            callback;
+  PSQ          pubsubQos;
+  RWQ          drdwQos;
+  T            transportInterfaceInfo;
 
-  ActorStrt (IdType dom, IdType act, IdType top
-             , IdType part
-             , ActorType typ, const char* call
-             , PSQ pub, RWQ drdw, T trans)
-    : domainId (dom), actorId (act), topicId (top)
-    , participantId (part)
-    , type (typ), callback (call), pubsubQos (pub)
-    , drdwQos (drdw), transportInterfaceInfo (trans)
+  ActorStrt(
+    DomainIdType dom,
+    IdType       act,
+    IdType       top,
+    IdType       part,
+    ActorType    typ,
+    const char*  call,
+    PSQ          pub,
+    RWQ          drdw,
+    T            trans
+  ) : domainId( dom),
+      actorId( act),
+      topicId( top),
+      participantId( part),
+      type( typ),
+      callback( call),
+      pubsubQos( pub),
+      drdwQos( drdw),
+      transportInterfaceInfo( trans)
   { };
 };
+typedef struct ActorStrt<
+  ::DDS::SubscriberQos& ,
+  ::DDS::DataReaderQos&,
+  std::string,
+  ::OpenDDS::DCPS::TransportInterfaceInfo&> URActor;
+typedef struct ActorStrt<
+  ::DDS::PublisherQos& ,
+  ::DDS::DataWriterQos& ,
+  std::string,
+  ::OpenDDS::DCPS::TransportInterfaceInfo&> UWActor;
+typedef struct ActorStrt< QosSeq, QosSeq, std::string, BinSeq> DActor;
 
 template <typename T, typename P, typename A, typename W>
 struct ImageData {
-  typedef std::vector <T> TopicSeq;
-  typedef std::vector <P> ParticipantSeq;
-  typedef std::vector <A> ReaderSeq;
-  typedef std::vector <W> WriterSeq;
+  typedef std::vector<T> TopicSeq;
+  typedef std::vector<P> ParticipantSeq;
+  typedef std::vector<A> ReaderSeq;
+  typedef std::vector<W> WriterSeq;
 
-  unsigned long sequenceNumber;
-  TopicSeq topics;
+  unsigned long  sequenceNumber;
+  TopicSeq       topics;
   ParticipantSeq participants;
-  ReaderSeq actors;
-  WriterSeq wActors;
+  ReaderSeq      actors;
+  WriterSeq      wActors;
 };
+typedef struct ImageData< UTopic*, UParticipant*, URActor*, UWActor*> UImage;
+typedef struct ImageData< DTopic,  DParticipant,  DActor,   DActor>   DImage;
+
+} // End of namespace Update
 
 #endif // _UPDATE_DATA_TYPES
+

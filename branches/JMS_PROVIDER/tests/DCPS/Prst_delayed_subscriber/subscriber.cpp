@@ -79,6 +79,13 @@ int main (int argc, char *argv[])
       DDS::DomainParticipantFactory_var dpf;
       DDS::DomainParticipant_var participant;
 
+      if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) subscriber: ")
+          ACE_TEXT("initialization starting.\n")
+        ));
+      }
+
       dpf = TheParticipantFactoryWithArgs(argc, argv);
       participant = dpf->create_participant(411,
                                             PARTICIPANT_QOS_DEFAULT,
@@ -88,8 +95,22 @@ int main (int argc, char *argv[])
         return 1 ;
       }
 
+      if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) subscriber: ")
+          ACE_TEXT("participant created.\n")
+        ));
+      }
+
       if (parse_args (argc, argv) == -1) {
         return -1;
+      }
+
+      if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) subscriber: ")
+          ACE_TEXT("command line parsed.\n")
+        ));
       }
 
       MessageTypeSupportImpl* mts_servant = new MessageTypeSupportImpl();
@@ -100,6 +121,13 @@ int main (int argc, char *argv[])
         }
 
       CORBA::String_var type_name = mts_servant->get_type_name ();
+
+      if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) subscriber: ")
+          ACE_TEXT("type support installed.\n")
+        ));
+      }
 
       DDS::TopicQos topic_qos;
       participant->get_default_topic_qos(topic_qos);
@@ -112,10 +140,24 @@ int main (int argc, char *argv[])
         exit(1);
       }
 
+      if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) subscriber: ")
+          ACE_TEXT("topic created.\n")
+        ));
+      }
+
       // Initialize the transport
       OpenDDS::DCPS::TransportImpl_rch tcp_impl =
         TheTransportFactory->create_transport_impl (transport_impl_id,
                                                     ::OpenDDS::DCPS::AUTO_CONFIG);
+
+      if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) subscriber: ")
+          ACE_TEXT("transport created.\n")
+        ));
+      }
 
       // Create the subscriber and attach to the corresponding
       // transport.
@@ -127,12 +169,26 @@ int main (int argc, char *argv[])
         exit(1);
       }
 
+      if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) subscriber: ")
+          ACE_TEXT("subscriber created.\n")
+        ));
+      }
+
       // Attach the subscriber to the transport.
       OpenDDS::DCPS::SubscriberImpl* sub_impl =
         dynamic_cast<OpenDDS::DCPS::SubscriberImpl*> (sub.in ());
       if (0 == sub_impl) {
         cerr << "Failed to obtain subscriber servant\n" << endl;
         exit(1);
+      }
+
+      if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) subscriber: ")
+          ACE_TEXT("servant extracted.\n")
+        ));
       }
 
       OpenDDS::DCPS::AttachStatus status = sub_impl->attach_transport(tcp_impl.in());
@@ -157,6 +213,13 @@ int main (int argc, char *argv[])
         exit(1);
       }
 
+      if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) subscriber: ")
+          ACE_TEXT("transport attached.\n")
+        ));
+      }
+
       // activate the listener
       DDS::DataReaderListener_var listener (new DataReaderListenerImpl);
       DataReaderListenerImpl* listener_servant =
@@ -165,6 +228,13 @@ int main (int argc, char *argv[])
       if (CORBA::is_nil (listener.in ())) {
         cerr << "listener is nil." << endl;
         exit(1);
+      }
+
+      if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) subscriber: ")
+          ACE_TEXT("listener created.\n")
+        ));
       }
 
       // Create the Datareaders
@@ -178,6 +248,12 @@ int main (int argc, char *argv[])
         exit(1);
       }
 
+      if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) subscriber: ")
+          ACE_TEXT("processing starting.\n")
+        ));
+      }
 
       int expected = 5;
       while ( listener_servant->num_reads() < expected) {

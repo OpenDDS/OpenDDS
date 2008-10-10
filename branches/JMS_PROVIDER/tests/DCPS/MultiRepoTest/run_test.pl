@@ -13,6 +13,8 @@ use DDS_Run_Test;
 
 my $status = 0;
 my $failed = 0;
+my $debug;
+# $debug = 10;
 
 PerlDDS::add_lib_path('../FooType5');
 
@@ -36,10 +38,6 @@ my $sys3_sub_domain = 911;
 my $sys3_pub_topic  = "Left";
 my $sys3_sub_topic  = "Right";
 my $monitor_addr = "localhost:29803";
-
-my $domains1_file = "domain1_ids";
-my $domains2_file = "domain2_ids";
-my $domains3_file = "domain3_ids";
 
 my $dcpsrepo1_ior = "repo1.ior";
 my $dcpsrepo2_ior = "repo2.ior";
@@ -101,6 +99,8 @@ unlink $dcpsrepo3_ior;
 my $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : "-ORBSvcConf ../../tcp.conf ";
 
+$svc_config .= "-DCPSDebugLevel $debug " if $debug;
+
 # Configure the subsystems.
 my $sys1_parameters = "$svc_config $system1_config "
                     .             "-WriterDomain $sys1_pub_domain -ReaderDomain $sys1_sub_domain "
@@ -143,38 +143,32 @@ $monitor_parameters = "$svc_config -Samples $samples $monitor_config "
 
 
 $DCPSREPO1 = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                     "$svc_config -o $dcpsrepo1_ior"
-  #                                  . " -ORBDebugLevel 1"
-                                     . " -d $domains1_file");
-print $DCPSREPO1->CommandLine(), "\n";
+                                     "$svc_config -o $dcpsrepo1_ior "
+  #                                  . " -ORBDebugLevel 1 "
+                                     . "-FederationId 273 ");
 
 $DCPSREPO2 = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                     "$svc_config -o $dcpsrepo2_ior"
-  #                                  . " -ORBDebugLevel 1"
-                                     . " -d $domains2_file");
-print $DCPSREPO2->CommandLine(), "\n";
+                                     "$svc_config -o $dcpsrepo2_ior "
+  #                                  . " -ORBDebugLevel 1 "
+                                     . "-FederationId 546 ");
 
 $DCPSREPO3 = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                     "$svc_config -o $dcpsrepo3_ior"
-  #                                  . " -ORBDebugLevel 1"
-                                     . " -d $domains3_file");
-print $DCPSREPO3->CommandLine(), "\n";
+                                     "$svc_config -o $dcpsrepo3_ior "
+  #                                  . " -ORBDebugLevel 1 "
+                                     . "-FederationId 819 ");
 
 $System1 = PerlDDS::create_process ("system", $sys1_parameters);
-print $System1->CommandLine(), "\n";
 
 $System2 = PerlDDS::create_process ("system", $sys2_parameters);
-print $System2->CommandLine(), "\n";
 
 $System3 = PerlDDS::create_process ("system", $sys3_parameters);
-print $System3->CommandLine(), "\n";
 
 
 $Monitor = PerlDDS::create_process ("monitor", $monitor_parameters);
-print $Monitor->CommandLine(), "\n";
 
 # Fire up the repositories.
 
+print $DCPSREPO1->CommandLine(), "\n";
 $DCPSREPO1->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo1_ior, 30) == -1) {
     print STDERR "ERROR: waiting for DCPSInfo 1 IOR file\n";
@@ -182,6 +176,7 @@ if (PerlACE::waitforfile_timed ($dcpsrepo1_ior, 30) == -1) {
     exit 1;
 }
 
+print $DCPSREPO2->CommandLine(), "\n";
 $DCPSREPO2->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo2_ior, 30) == -1) {
     print STDERR "ERROR: waiting for DCPSInfo 2 IOR file\n";
@@ -190,6 +185,7 @@ if (PerlACE::waitforfile_timed ($dcpsrepo2_ior, 30) == -1) {
     exit 1;
 }
 
+print $DCPSREPO3->CommandLine(), "\n";
 $DCPSREPO3->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo3_ior, 30) == -1) {
     print STDERR "ERROR: waiting for DCPSInfo 3 IOR file\n";
@@ -201,12 +197,18 @@ if (PerlACE::waitforfile_timed ($dcpsrepo3_ior, 30) == -1) {
 
 # Fire up the monitor process.
 
+print $Monitor->CommandLine(), "\n";
 $Monitor->Spawn ();
 
 # Fire up the subsystems.
 
+print $System1->CommandLine(), "\n";
 $System1->Spawn ();
+
+print $System2->CommandLine(), "\n";
 $System2->Spawn ();
+
+print $System3->CommandLine(), "\n";
 $System3->Spawn ();
 
 # Wait up to 5 minutes for test to complete.
@@ -270,5 +272,5 @@ else {
   print STDERR "test FAILED.\n";
 }
 
-exit $status;
+exit $failed;
 
