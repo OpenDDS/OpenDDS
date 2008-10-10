@@ -1,32 +1,38 @@
+Fri Oct 10 14:08:06 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/FailoverListener.cpp:
+
+          Added required #include of the PCH header.
+
 Thu Oct  9 21:37:23 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/Federator.idl:
 
-	  leave_and_shutdown()
-	  shutdown()
-	    Added these methods to the Federator::Manager interface.
+          leave_and_shutdown()
+          shutdown()
+            Added these methods to the Federator::Manager interface.
 
         * dds/InfoRepo/FederatorManagerImpl.h:
         * dds/InfoRepo/FederatorManagerImpl.cpp:
 
-	  leave_and_shutdown()
-	  shutdown()
-	    Implement the new IDL methods.
+          leave_and_shutdown()
+          shutdown()
+            Implement the new IDL methods.
 
         * dds/InfoRepo/ShutdownInterface.h:
 
-	  Abstract interface used to propagate shutdown requests.
+          Abstract interface used to propagate shutdown requests.
 
         * dds/InfoRepo/DCPSInfo_i.h:
         * dds/InfoRepo/DCPSInfo_i.cpp:
 
-	  shutdown() - forward shutdown requests to new ShutdownInterface
-	               reference provided via constructor.
+          shutdown() - forward shutdown requests to new ShutdownInterface
+                       reference provided via constructor.
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:
 
-	  Implement the new ShutdownInterface and pass this to the
-	  repository implementation object constructor.
+          Implement the new ShutdownInterface and pass this to the
+          repository implementation object constructor.
 
 Thu Oct  9 20:31:34 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
