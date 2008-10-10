@@ -762,10 +762,17 @@ void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
       }
     }
 
+    
     // Remove the topic ourselves.
     // N.B. This call sets the second (reference) argument to 0, so when
     //      clear() is called below, no destructor is (re)called.
-    this->domain_->remove_topic( this, current->second);
+
+    // Get the topic id and topic point before remove_topic since it 
+    // invalidates the iterator. Accessing after removal got SEGV.
+    OpenDDS::DCPS::RepoId id = current->first;
+    DCPS_IR_Topic* topic = current->second;
+
+    this->domain_->remove_topic( this, topic);
 
     if (::OpenDDS::DCPS::DCPS_debug_level > 9) {
       std::stringstream buffer;
@@ -775,9 +782,9 @@ void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
       buffer << this->id_ << "(" << std::hex << key << ")";
 
       key = OpenDDS::DCPS::GuidConverter(
-              const_cast< OpenDDS::DCPS::RepoId*>( &current->first)
+              const_cast< OpenDDS::DCPS::RepoId*>( &id)
             );
-      topicBuffer << current->first << "(" << std::hex << key << ")";
+      topicBuffer << id << "(" << std::hex << key << ")";
 
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DCPS_IR_Participant::remove_all_dependents: ")

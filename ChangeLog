@@ -1,3 +1,48 @@
+Fri Oct 10 20:26:41 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+          
+          Corrected an debug logging. 
+          
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Added invalid repo id from repo.
+          
+        * dds/DdsDcpsInfoUtils.idl:
+
+          Added an enum TopicStatus - INTERNAL_ERROR .
+          
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        
+          Added lock_ to synchronize the servant implementations 
+          and the methods called by updater threads.
+          
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        
+          Fixed a problem that the iterator is not accessible after
+          remove_topic() is called. 
+         
+        * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
+        
+          Corrected a debug logging.
+          
+        * dds/InfoRepo/UpdateReceiver_T.cpp:
+
+          Removed task wait() call from close() since close() can be
+          called when thread exit. It'll cause problem waiting for
+          itself to finish. Use stop() instead of close() to shutdown
+          the UpdateReceiver task thread.
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+          
+          Added pre-compile header.
+          
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+
+          Added empty Template_Files section to DCPSInfoRepoServ.
+         
 Fri Oct 10 19:59:44 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.mpc:

@@ -241,7 +241,7 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
       );
       if( DCPS_debug_level > 4) {
         ::OpenDDS::DCPS::GuidConverter converter( writer_id);
-        ACE_ERROR((LM_ERROR,
+        ACE_DEBUG((LM_DEBUG,
           "(%P|%t) DataReaderImpl::add_associations: "
           "inserted writer %s.\n",
           (const char*) converter

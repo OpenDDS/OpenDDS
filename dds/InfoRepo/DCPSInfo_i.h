@@ -513,6 +513,8 @@ private:
 
   /// Interface to effect shutdown of the process.
   ShutdownInterface* shutdown_;
+
+  ACE_Thread_Mutex lock_;
 };
 
 

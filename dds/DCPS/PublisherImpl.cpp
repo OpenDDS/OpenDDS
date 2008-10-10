@@ -846,6 +846,15 @@ PublisherImpl::writer_enabled(
           qos,
           trans_conf_info ,   // Obtained during setup.
           this->qos_);
+      
+      if (info->publication_id_ == GUID_UNKNOWN)
+      {
+        ACE_ERROR ((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: PublisherImpl::writer_enabled, ")
+          ACE_TEXT("add_publication returned invalid id. \n")));
+        return ::DDS::RETCODE_ERROR;
+      }
+
       info->local_writer_impl_->set_publication_id (info->publication_id_);
     }
   catch (const CORBA::SystemException& sysex)
