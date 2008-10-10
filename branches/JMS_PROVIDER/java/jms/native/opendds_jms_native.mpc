@@ -7,12 +7,12 @@ project: dcps_java {
     // Ensure the library name matches the opendds-jms jar name:
     sharedname      = opendds-jms-native
 
-    dcps_ts_flags   += --export=opendds_jms_native_Export
+    dcps_ts_flags   += --export=opendds_jms_native_export
 
-    idlflags        += -Wb,stub_export_include=opendds_jms_native_Export.h \
-                       -Wb,stub_export_macro=opendds_jms_native_Export
-    idl2jniflags    += -Wb,stub_export_include=opendds_jms_native_Export.h \
-                       -Wb,stub_export_macro=opendds_jms_native_Export
+    idlflags        += -Wb,stub_export_include=opendds_jms_native_export.h \
+                       -Wb,stub_export_macro=opendds_jms_native_export
+    idl2jniflags    += -Wb,stub_export_include=opendds_jms_native_export.h \
+                       -Wb,stub_export_macro=opendds_jms_native_export
 
     dynamicflags    += OPENDDS_JMS_NATIVE_BUILD_DLL
 
