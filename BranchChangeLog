@@ -1,3 +1,10 @@
+Sat Oct 11 21:27:45 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * java/jms/native/opendds_jms_native.mpc:
+
+          The export header file name is now lowercase but the macro name still
+          includes an uppercase Export.
+
 Fri Oct 10 21:06:45 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
           Back-merged from trunk (r1424:1476).
