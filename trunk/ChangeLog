@@ -1,3 +1,10 @@
+Sun Oct 12 04:12:31 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
+
+        * wrappers/*:
+        
+          Added new set of wrapper classes to simplify DDS usage in 
+          applications.
+
 Fri Oct 10 22:39:35 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/tools:
