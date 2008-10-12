@@ -1,0 +1,6 @@
+project {
+  after += DDSWrapper
+  libs  += DDSWrapper
+
+  macros += DDSWRAPPER_HAS_DLL
+}
