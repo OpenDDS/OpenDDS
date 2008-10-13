@@ -2,12 +2,15 @@
 //
 // $Id$
 
-#include "dds/InfoRepo/DcpsInfo_pch.h"
 #include "dds/DCPS/debug.h"
 
 #include "dds/InfoRepo/FederatorC.h"
+
+#include "ace/OS_main.h"
+
 #include <string>
 #include <iostream>
+
 
 namespace { // Anonymous namespace for file scope.
 
@@ -81,7 +84,7 @@ class Options {
     enum Command { JOIN, LEAVE, SHUTDOWN};
 
     /// Construct with command line arguments only.
-    Options( int argc, char** argv, char** envp);
+    Options( int argc, char** argv);
 
     /// Virtual destructor.
     virtual ~Options() { }
@@ -112,7 +115,7 @@ class Options {
     int federationDomain_;
 };
 
-Options::Options( int argc, char** argv, char**)
+Options::Options( int argc, char** argv)
  : federationDomain_( OpenDDS::Federator::DEFAULT_FEDERATIONDOMAIN)
 {
   if( --argc) {
@@ -150,7 +153,7 @@ Options::Options( int argc, char** argv, char**)
 } // End of anonymous namespace.
 
 int
-main( int argc, char** argv, char** envp)
+main( int argc, char** argv)
 {
   int status = 0;
   try {
@@ -158,7 +161,7 @@ main( int argc, char** argv, char** envp)
     CORBA::ORB_var orb = CORBA::ORB_init( argc, argv);
 
     // Grab our information from the command line.
-    Options options( argc, argv, envp);
+    Options options( argc, argv);
 
     // Resolve the target reference.
     std::string iorString( "corbaloc:iiop:");
