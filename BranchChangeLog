@@ -1,3 +1,11 @@
+Mon Oct 13 20:04:46 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/native/opendds_jms_native.mpc:
+        * java/jms/native/opendds_jms_native_Export.h:
+
+          Case changes in export header were too confusing; reverted
+          back to original behavior.
+
 Mon Oct 13 17:44:46 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * java/dds/OpenDDS_jni_helpers.h:

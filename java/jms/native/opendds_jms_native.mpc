@@ -9,9 +9,9 @@ project: dcps_java {
 
     dcps_ts_flags   += --export=opendds_jms_native_Export
 
-    idlflags        += -Wb,stub_export_include=opendds_jms_native_export.h \
+    idlflags        += -Wb,stub_export_include=opendds_jms_native_Export.h \
                        -Wb,stub_export_macro=opendds_jms_native_Export
-    idl2jniflags    += -Wb,stub_export_include=opendds_jms_native_export.h \
+    idl2jniflags    += -Wb,stub_export_include=opendds_jms_native_Export.h \
                        -Wb,stub_export_macro=opendds_jms_native_Export
 
     dynamicflags    += OPENDDS_JMS_NATIVE_BUILD_DLL
