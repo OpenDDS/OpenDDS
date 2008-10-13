@@ -1,3 +1,9 @@
+Mon Oct 13 20:12:34 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/opendds-jms.iml:
+
+          Corrected bad exclude paths.
+
 Mon Oct 13 20:04:46 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/native/opendds_jms_native.mpc:
