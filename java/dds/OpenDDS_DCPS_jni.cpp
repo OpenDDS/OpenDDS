@@ -31,6 +31,7 @@
 #include "DdsDcpsSubscriptionJC.h"
 
 #include "ace/Service_Config.h"
+#include "ace/Service_Repository.h"
 
 
 // TheParticipantFactory
@@ -320,17 +321,16 @@ namespace McastConfig
 
 namespace
 {
-//1.4a doesn't have ASG, but ASC has the same interface
-#if TAO_MAJOR_VERSION == 1 && TAO_MINOR_VERSION < 5
-  typedef ACE_Service_Config ACE_Service_Gestalt;
-#endif
-
   void loadLibIfNeeded (const ACE_TCHAR *svcname, const ACE_TCHAR *svcconf)
   {
+#if TAO_MAJOR_VERSION == 1 && TAO_MINOR_VERSION < 5
+    ACE_Service_Repository *asg = ACE_Service_Repository::instance ();
+#else
     ACE_Service_Gestalt *asg = ACE_Service_Config::current ();
+#endif
     if (asg->find (svcname) == -1 /*not found*/)
       {
-        asg->process_directive (svcconf);
+        ACE_Service_Config::process_directive (svcconf);
       }
   }
 }
