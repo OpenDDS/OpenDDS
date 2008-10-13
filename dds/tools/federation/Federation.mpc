@@ -7,9 +7,6 @@ project(*federation): dcpsexe_with_tcp {
   libs     += Federator
   after    += DCPSInfoRepo_Federator
 
-  pch_header = $(DDS_ROOT)/dds/InfoRepo/DcpsInfo_pch.h
-  pch_source = $(DDS_ROOT)/dds/InfoRepo/DcpsInfo_pch.cpp
-
   Source_Files {
     federation.cpp
   }

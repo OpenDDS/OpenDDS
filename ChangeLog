@@ -1,8 +1,15 @@
+Mon Oct 13 14:27:57 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/tools/federation/Federation.mpc:
+        * dds/tools/federation/federation.cpp:
+
+          Fixed compile errors.
+
 Sun Oct 12 04:12:31 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
 
         * wrappers/*:
-        
-          Added new set of wrapper classes to simplify DDS usage in 
+
+          Added new set of wrapper classes to simplify DDS usage in
           applications.
 
 Fri Oct 10 22:39:35 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
@@ -12,7 +19,7 @@ Fri Oct 10 22:39:35 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * dds/tools/federation/Federation.mpc:
         * dds/tools/federation/federation.cpp:
 
-	  Added new command line tool for managing federations.
+          Added new command line tool for managing federations.
 
 Fri Oct 10 22:13:49 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
