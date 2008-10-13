@@ -1,3 +1,10 @@
+Mon Oct 13 17:44:46 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * java/dds/OpenDDS_jni_helpers.h:
+        * java/jms/native/build.xml:
+
+          Visual C++ 7.1 compatibility.
+
 Mon Oct 13 15:40:36 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * java/tests/transport_config/TransportConfigTest.java:

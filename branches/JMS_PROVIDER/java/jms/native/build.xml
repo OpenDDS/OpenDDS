@@ -27,7 +27,22 @@
         <os family="unix"/>
     </condition>
     <condition property="mwc.type" value="vc9">
-        <os family="windows"/>
+        <and>
+            <os family="windows"/>
+            <isset property="env.VS90COMNTOOLS"/>
+        </and>
+    </condition>
+    <condition property="mwc.type" value="vc8">
+        <and>
+            <os family="windows"/>
+            <isset property="env.VS80COMNTOOLS"/>
+        </and>
+    </condition>
+    <condition property="mwc.type" value="vc71">
+        <and>
+            <os family="windows"/>
+            <isset property="env.VS71COMNTOOLS"/>
+        </and>
     </condition>
 
     <uptodate property="mwc.uptodate"
@@ -76,7 +91,7 @@
             </or>
         </and>
     </condition>
-    <condition property="make.idl.arguments" value="Debug"> <!-- TODO -->
+    <condition property="make.idl.arguments" value="/build Debug ${makefile}">
         <os family="windows"/>
     </condition>
 
@@ -84,6 +99,15 @@
         <os family="unix"/>
     </condition>
     <condition property="make.clean.arguments" value="${makefile} /c">
+        <and>
+            <os family="windows"/>
+            <or>
+                <isset property="env.VS90COMNTOOLS"/>
+                <isset property="env.VS80COMNTOOLS"/>
+            </or>
+        </and>
+    </condition>
+    <condition property="make.clean.arguments" value="/clean Debug ${makefile}">
         <os family="windows"/>
     </condition>
 
