@@ -56,7 +56,7 @@ public class TransportConfigTest {
                 TheTransportFactory.TRANSPORT_TCP);
         // Verify the values were read in from the ini file
         assert tc.isSwapBytes();
-        assert tc.getMaxSamplesPerPacket() == 23;
+        assert tc.getMaxSamplesPerPacket() == 5;
         SimpleTcpConfiguration tc_tcp = (SimpleTcpConfiguration) tc;
         assert tc_tcp.getConnRetryAttempts() == 42;
 
@@ -70,7 +70,7 @@ public class TransportConfigTest {
         tc = TheTransportFactory.get_or_create_configuration(ID,
                  TheTransportFactory.TRANSPORT_TCP);
         assert !tc.isSwapBytes();
-        assert tc.getMaxSamplesPerPacket() == 23;
+        assert tc.getMaxSamplesPerPacket() == 5;
 
         TheTransportFactory.release(ID);
     }
