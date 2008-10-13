@@ -53,7 +53,7 @@ struct Field : BaseField<C>
   memptr_t member_ptr_;
   
   Field (const char *j, memptr_t c)
-    : BaseField (j), member_ptr_ (c) {}
+    : BaseField<C> (j), member_ptr_ (c) {}
 
   jfieldID getFid (JNIEnv *jni, jclass clazz)
   {
@@ -68,7 +68,7 @@ template <typename C, typename T, jvmSig::sig_t whichSig, typename JNI_T,
 struct SimpleField : Field<C, T, whichSig>
 {
   SimpleField (const char *j, memptr_t c)
-    : Field (j, c) {}
+    : Field<C, T, whichSig> (j, c) {}
 
   void toCxx (JNIEnv *jni, jclass clazz, jobject obj, C &cxx)
   {
@@ -88,7 +88,8 @@ struct BoolField : SimpleField<C, bool, jvmSig::BOOLEAN, jboolean,
   &JNIEnv::GetBooleanField, &JNIEnv::SetBooleanField>
 {
   BoolField (const char *j, memptr_t c)
-    : SimpleField (j, c) {}
+    : SimpleField<C, bool, jvmSig::BOOLEAN, jboolean,
+        &JNIEnv::GetBooleanField, &JNIEnv::SetBooleanField> (j, c) {}
 };
 
 template <typename C>
@@ -96,7 +97,8 @@ struct IntField : SimpleField<C, int, jvmSig::INT, jint,
   &JNIEnv::GetIntField, &JNIEnv::SetIntField>
 {
   IntField (const char *j, memptr_t c)
-    : SimpleField (j, c) {}
+    : SimpleField<C, int, jvmSig::INT, jint,
+        &JNIEnv::GetIntField, &JNIEnv::SetIntField> (j, c) {}
 };
 
 template <typename C>
@@ -104,7 +106,8 @@ struct SizetField : SimpleField<C, size_t, jvmSig::INT, jint,
   &JNIEnv::GetIntField, &JNIEnv::SetIntField>
 {
   SizetField (const char *j, memptr_t c)
-    : SimpleField (j, c) {}
+    : SimpleField<C, size_t, jvmSig::INT, jint,
+        &JNIEnv::GetIntField, &JNIEnv::SetIntField> (j, c) {}
 };
 
 template <typename C>
@@ -112,7 +115,8 @@ struct UlongField : SimpleField<C, unsigned long, jvmSig::INT, jint,
   &JNIEnv::GetIntField, &JNIEnv::SetIntField>
 {
   UlongField (const char *j, memptr_t c)
-    : SimpleField (j, c) {}
+    : SimpleField<C, unsigned long, jvmSig::INT, jint,
+        &JNIEnv::GetIntField, &JNIEnv::SetIntField> (j, c) {}
 };
 
 template <typename C>
@@ -120,7 +124,8 @@ struct DoubleField : SimpleField<C, double, jvmSig::DOUBLE, jdouble,
   &JNIEnv::GetDoubleField, &JNIEnv::SetDoubleField>
 {
   DoubleField (const char *j, memptr_t c)
-    : SimpleField (j, c) {}
+    : SimpleField<C, double, jvmSig::DOUBLE, jdouble,
+        &JNIEnv::GetDoubleField, &JNIEnv::SetDoubleField> (j, c) {}
 };
 
 template <typename C>
@@ -129,7 +134,8 @@ struct InetAddrField : Field<C, std::string, jvmSig::STRING>
   typedef ACE_INET_Addr C::*inetaddr_t;
   inetaddr_t addr_;
   InetAddrField (const char *j, memptr_t string_field, inetaddr_t addr_field)
-    : Field (j, string_field), addr_ (addr_field) {}
+    : Field<C, std::string, jvmSig::STRING> (j, string_field)
+    , addr_ (addr_field) {}
 
   void toCxx (JNIEnv *jni, jclass clazz, jobject obj, C &cxx)
   {
