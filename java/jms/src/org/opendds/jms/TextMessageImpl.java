@@ -1,15 +1,28 @@
 package org.opendds.jms;
 
-import java.io.UnsupportedEncodingException;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 
 public class TextMessageImpl extends AbstractMessageImpl implements TextMessage {
-    public void setText(String s) throws JMSException {
-        body.theTextBody(s);
+    public TextMessageImpl() {
+        initTextBody();
+    }
+
+    private void initTextBody() {
+        payload.theBody.theTextBody(null);
+        setBodyState(new MessageStateWritable());
+    }
+
+    public void setText(String string) throws JMSException {
+        getBodyState().checkWritable();
+        payload.theBody.theTextBody(string);
     }
 
     public String getText() throws JMSException {
-        return body.theTextBody();
+        return payload.theBody.theTextBody();
+    }
+
+    protected void doClearBody() {
+        initTextBody();
     }
 }

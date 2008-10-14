@@ -4,7 +4,6 @@ import javax.jms.Message;
 import javax.jms.JMSException;
 import javax.jms.Destination;
 import java.util.Enumeration;
-import java.io.UnsupportedEncodingException;
 import OpenDDS.JMS.MessagePayload;
 import OpenDDS.JMS.MessageHeader;
 import OpenDDS.JMS.MessageProperty;
@@ -16,20 +15,31 @@ public abstract class AbstractMessageImpl implements Message {
     // Convenience variables, should be kept in sync with payload
     protected final MessageHeader headers;
     protected final MessagePropertiesFacade properties;
-    protected final MessageBody body;
 
-    protected MessageState state;
+    private MessageState propertiesState;
+    private MessageState bodyState;
 
     protected AbstractMessageImpl() {
         this.payload = new MessagePayload(new MessageHeader(), new MessageProperty[0], new MessageBody());
         this.headers = payload.theHeader;
         this.properties = new MessagePropertiesFacade(payload);
-        this.body = payload.theBody;
-        this.state = new MessageStateWritable();
+        this.propertiesState = new MessageStateWritable();
     }
 
-    public void setState(MessageState state) {
-        this.state = state;
+    public void setPropertiesState(MessageState propertiesState) {
+        this.propertiesState = propertiesState;
+    }
+
+    public MessageState getPropertiesState() {
+        return propertiesState;
+    }
+
+    public MessageState getBodyState() {
+        return bodyState;
+    }
+
+    public void setBodyState(MessageState bodyState) {
+        this.bodyState = bodyState;
     }
 
     // Message headers
@@ -50,19 +60,11 @@ public abstract class AbstractMessageImpl implements Message {
     }
 
     public byte[] getJMSCorrelationIDAsBytes() throws JMSException {
-        try {
-            return headers.JMSCorrelationID.getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            return null; // Can't happen
-        }
+        throw new java.lang.UnsupportedOperationException("getJMSCorrelationIDAsBytes() is not supported.");
     }
 
     public void setJMSCorrelationIDAsBytes(byte[] correlationID) throws JMSException {
-        try {
-            headers.JMSCorrelationID = new String(correlationID, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            headers.JMSCorrelationID = ""; // Can't happen
-        }
+        throw new java.lang.UnsupportedOperationException("setJMSCorrelationIDAsBytes() is not supported.");
     }
 
     public void setJMSCorrelationID(String correlationID) throws JMSException {
@@ -131,7 +133,8 @@ public abstract class AbstractMessageImpl implements Message {
 
     // Message properties
     public void clearProperties() throws JMSException {
-        state.ensureWritable();
+        // JMS 1.1, 3.10
+        propertiesState.makeWritable();
         properties.absorbTheProperties();
         properties.clearProperties();
         properties.updateTheProperties();
@@ -194,63 +197,63 @@ public abstract class AbstractMessageImpl implements Message {
     }
 
     public void setBooleanProperty(String s, boolean b) throws JMSException {
-        state.ensureWritable();
+        propertiesState.checkWritable();
         properties.absorbTheProperties();
         properties.setBooleanProperty(s, b);
         properties.updateTheProperties();
     }
 
     public void setByteProperty(String s, byte b) throws JMSException {
-        state.ensureWritable();
+        propertiesState.checkWritable();
         properties.absorbTheProperties();
         properties.setByteProperty(s, b);
         properties.updateTheProperties();
     }
 
     public void setShortProperty(String s, short i) throws JMSException {
-        state.ensureWritable();
+        propertiesState.checkWritable();
         properties.absorbTheProperties();
         properties.setShortProperty(s, i);
         properties.updateTheProperties();
     }
 
     public void setIntProperty(String s, int i) throws JMSException {
-        state.ensureWritable();
+        propertiesState.checkWritable();
         properties.absorbTheProperties();
         properties.setIntProperty(s, i);
         properties.updateTheProperties();
     }
 
     public void setLongProperty(String s, long l) throws JMSException {
-        state.ensureWritable();
+        propertiesState.checkWritable();
         properties.absorbTheProperties();
         properties.setLongProperty(s, l);
         properties.updateTheProperties();
     }
 
     public void setFloatProperty(String s, float v) throws JMSException {
-        state.ensureWritable();
+        propertiesState.checkWritable();
         properties.absorbTheProperties();
         properties.setFloatProperty(s, v);
         properties.updateTheProperties();
     }
 
     public void setDoubleProperty(String s, double v) throws JMSException {
-        state.ensureWritable();
+        propertiesState.checkWritable();
         properties.absorbTheProperties();
         properties.setDoubleProperty(s, v);
         properties.updateTheProperties();
     }
 
     public void setStringProperty(String s, String s1) throws JMSException {
-        state.ensureWritable();
+        propertiesState.checkWritable();
         properties.absorbTheProperties();
         properties.setStringProperty(s, s1);
         properties.updateTheProperties();
     }
 
     public void setObjectProperty(String s, Object o) throws JMSException {
-        state.ensureWritable();
+        propertiesState.checkWritable();
         properties.absorbTheProperties();
         properties.setObjectProperty(s, o);
         properties.updateTheProperties();
@@ -260,7 +263,17 @@ public abstract class AbstractMessageImpl implements Message {
         throw new UnsupportedOperationException("Kaboom"); // TODO
     }
 
+    // Message body
     public void clearBody() throws JMSException {
-        throw new UnsupportedOperationException("Kaboom"); // TODO
+        // JMS 1.1, 3.10
+        bodyState.makeWritable();
+        payload.theBody = new MessageBody();
+        doClearBody();
     }
+
+    /**
+     * Subclass should implement this method by initializing payload.theBody with the
+     * appropriate kind of body.
+     */
+    protected abstract void doClearBody();
 }

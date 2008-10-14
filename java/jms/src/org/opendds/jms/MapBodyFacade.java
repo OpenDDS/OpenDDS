@@ -9,6 +9,8 @@ import java.util.Set;
 import java.util.Enumeration;
 import java.util.Iterator;
 import org.opendds.jms.util.Objects;
+import org.opendds.jms.util.StreamItemConversion;
+import javax.jms.MessageFormatException;
 
 public class MapBodyFacade {
     private final MessageBody body;
@@ -40,48 +42,59 @@ public class MapBodyFacade {
         body.theMapBody(theNewMapBody);
     }
 
-    public boolean getBoolean(String s) {
-        return items.get(s).booleanValue();
+    public boolean getBoolean(String s) throws MessageFormatException {
+        final StreamItem streamItem = items.get(s);
+        return StreamItemConversion.convertToBoolean(streamItem);
     }
 
-    public byte getByte(String s) {
-        return items.get(s).byteValue();
+    public byte getByte(String s) throws MessageFormatException {
+        final StreamItem streamItem = items.get(s);
+        return StreamItemConversion.convertToByte(streamItem);
     }
 
-    public short getShort(String s) {
-        return items.get(s).shortValue();
+    public short getShort(String s) throws MessageFormatException {
+        final StreamItem streamItem = items.get(s);
+        return StreamItemConversion.convertToShort(streamItem);
     }
 
-    public char getChar(String s) {
-        return items.get(s).charValue();
+    public char getChar(String s) throws MessageFormatException {
+        final StreamItem streamItem = items.get(s);
+        return StreamItemConversion.convertToChar(streamItem);
     }
 
-    public int getInt(String s) {
-        return items.get(s).intValue();
+    public int getInt(String s) throws MessageFormatException {
+        final StreamItem streamItem = items.get(s);
+        return StreamItemConversion.convertToInt(streamItem);
     }
 
-    public long getLong(String s) {
-        return items.get(s).longValue();
+    public long getLong(String s) throws MessageFormatException {
+        final StreamItem streamItem = items.get(s);
+        return StreamItemConversion.convertToLong(streamItem);
     }
 
-    public float getFloat(String s) {
-        return items.get(s).floatValue();
+    public float getFloat(String s) throws MessageFormatException {
+        final StreamItem streamItem = items.get(s);
+        return StreamItemConversion.convertToFloat(streamItem);
     }
 
-    public double getDouble(String s) {
-        return items.get(s).doubleValue();
+    public double getDouble(String s) throws MessageFormatException {
+        final StreamItem streamItem = items.get(s);
+        return StreamItemConversion.convertToDouble(streamItem);
     }
 
-    public String getString(String s) {
-        return items.get(s).stringValue();
+    public String getString(String s) throws MessageFormatException {
+        final StreamItem streamItem = items.get(s);
+        return StreamItemConversion.convertToString(streamItem);
     }
 
-    public byte[] getBytes(String s) {
-        return null; // TODO
+    public byte[] getBytes(String s) throws MessageFormatException {
+        final StreamItem streamItem = items.get(s);
+        return StreamItemConversion.convertToByteArray(streamItem);
     }
 
-    public Object getObject(String s) {
-        return items.get(s); // TODO
+    public Object getObject(String s) throws MessageFormatException {
+        final StreamItem streamItem = items.get(s);
+        return StreamItemConversion.convertToObject(streamItem);
     }
 
     public Enumeration getMapNames() {
@@ -97,82 +110,77 @@ public class MapBodyFacade {
     }
 
     public void setBoolean(String s, boolean b) {
-        StreamItem item = items.get(s);
-        if (item == null) item = new StreamItem();
+        StreamItem item = getOrCreateStreamItem(s);
         item.booleanValue(b);
         items.put(s, item);
     }
 
-    public void setByte(String s, byte b) {
+    private StreamItem getOrCreateStreamItem(String s) {
         StreamItem item = items.get(s);
         if (item == null) item = new StreamItem();
+        return item;
+    }
+
+    public void setByte(String s, byte b) {
+        StreamItem item = getOrCreateStreamItem(s);
         item.byteValue(b);
         items.put(s, item);
     }
 
     public void setShort(String s, short i) {
-        StreamItem item = items.get(s);
-        if (item == null) item = new StreamItem();
+        StreamItem item = getOrCreateStreamItem(s);
         item.shortValue(i);
         items.put(s, item);
     }
 
     public void setChar(String s, char c) {
-        StreamItem item = items.get(s);
-        if (item == null) item = new StreamItem();
+        StreamItem item = getOrCreateStreamItem(s);
         item.charValue(c);
         items.put(s, item);
     }
 
     public void setInt(String s, int i) {
-        StreamItem item = items.get(s);
-        if (item == null) item = new StreamItem();
+        StreamItem item = getOrCreateStreamItem(s);
         item.intValue(i);
         items.put(s, item);
     }
 
     public void setLong(String s, long l) {
-        StreamItem item = items.get(s);
-        if (item == null) item = new StreamItem();
+        StreamItem item = getOrCreateStreamItem(s);
         item.longValue(l);
         items.put(s, item);
     }
 
     public void setFloat(String s, float v) {
-        StreamItem item = items.get(s);
-        if (item == null) item = new StreamItem();
+        StreamItem item = getOrCreateStreamItem(s);
         item.floatValue(v);
         items.put(s, item);
     }
 
     public void setDouble(String s, double v) {
-        StreamItem item = items.get(s);
-        if (item == null) item = new StreamItem();
+        StreamItem item = getOrCreateStreamItem(s);
         item.doubleValue(v);
         items.put(s, item);
 
     }
 
     public void setString(String s, String s1) {
-        StreamItem item = items.get(s);
-        if (item == null) item = new StreamItem();
+        StreamItem item = getOrCreateStreamItem(s);
         item.stringValue(s1);
         items.put(s, item);
     }
 
     public void setBytes(String s, byte[] bytes) {
-        StreamItem item = items.get(s);
-        if (item == null) item = new StreamItem();
+        StreamItem item = getOrCreateStreamItem(s);
         byte[] subBytes = extractSubBytes(bytes, 0, bytes.length);
         item.byteArrayValue(bytes);
         items.put(s, item);
     }
 
     public void setBytes(String s, byte[] bytes, int i, int i1) {
-        StreamItem item = items.get(s);
-        if (item == null) item = new StreamItem();
+        StreamItem item = getOrCreateStreamItem(s);
         byte[] subBytes = extractSubBytes(bytes, i, i1);
-        item.byteArrayValue(bytes);
+        item.byteArrayValue(subBytes);
         items.put(s, item);
     }
 
@@ -182,10 +190,31 @@ public class MapBodyFacade {
         return subBytes;
     }
 
-    public void setObject(String s, Object o) {
-        StreamItem item = items.get(s);
-        if (item == null) item = new StreamItem();
-//        item.objectValue(l); // TODO
+    public void setObject(String s, Object o) throws MessageFormatException {
+        StreamItem item = getOrCreateStreamItem(s);
+        if (o instanceof Boolean) {
+            item.booleanValue((Boolean) o);
+        } else if (o instanceof Byte) {
+            item.byteValue((Byte) o);
+        } else if (o instanceof Short) {
+            item.shortValue((Short) o);
+        } else if (o instanceof Character){
+            item.charValue((Character) o);
+        } else if (o instanceof Integer) {
+            item.intValue((Integer) o);
+        } else if (o instanceof Long) {
+            item.longValue((Long) o);
+        } else if (o instanceof Float) {
+            item.floatValue((Float) o);
+        } else if (o instanceof Double) {
+            item.doubleValue((Double) o);
+        } else if (o instanceof String) {
+            item.stringValue((String) o);
+        } else if (o instanceof byte[]) {
+            item.byteArrayValue((byte[]) o);
+        } else {
+            throw new MessageFormatException("Invalid value passed in for setObject()");
+        }
         items.put(s, item);
     }
 

@@ -163,7 +163,7 @@ public class PropertyValueConversion {
         } else if (compare(kind, PropertyValueKind.STRING_PROPERTY_KIND)) {
             return propertyValue.stringValue();
         } else {
-            throw new MessageFormatException("Cannot convert property to string");
+            throw new MessageFormatException("Cannot convert property to object");
         }
     }
 }

@@ -3,12 +3,19 @@ package org.opendds.jms;
 import javax.jms.MapMessage;
 import javax.jms.JMSException;
 import java.util.Enumeration;
+import OpenDDS.JMS.MapItem;
 
 public class MapMessageImpl extends AbstractMessageImpl implements MapMessage {
-    protected final MapBodyFacade mapBody;
+    protected MapBodyFacade mapBody;
 
     public MapMessageImpl() {
-        mapBody = new MapBodyFacade(body);
+        initBody();
+    }
+
+    private void initBody() {
+        payload.theBody.theMapBody(new MapItem[0]);
+        mapBody = new MapBodyFacade(payload.theBody);
+        setBodyState(new MessageStateWritable());
     }
 
     public boolean getBoolean(String s) throws JMSException {
@@ -72,72 +79,84 @@ public class MapMessageImpl extends AbstractMessageImpl implements MapMessage {
     }
 
     public void setBoolean(String s, boolean b) throws JMSException {
+        getBodyState().checkWritable();
         mapBody.absorbTheMapBody();
         mapBody.setBoolean(s, b);
         mapBody.updateTheMapBody();
     }
 
     public void setByte(String s, byte b) throws JMSException {
+        getBodyState().checkWritable();
         mapBody.absorbTheMapBody();
         mapBody.setByte(s, b);
         mapBody.updateTheMapBody();
     }
 
     public void setShort(String s, short i) throws JMSException {
+        getBodyState().checkWritable();
         mapBody.absorbTheMapBody();
         mapBody.setShort(s, i);
         mapBody.updateTheMapBody();
     }
 
     public void setChar(String s, char c) throws JMSException {
+        getBodyState().checkWritable();
         mapBody.absorbTheMapBody();
         mapBody.setChar(s, c);
         mapBody.updateTheMapBody();
     }
 
     public void setInt(String s, int i) throws JMSException {
+        getBodyState().checkWritable();
         mapBody.absorbTheMapBody();
         mapBody.setInt(s, i);
         mapBody.updateTheMapBody();
     }
 
     public void setLong(String s, long l) throws JMSException {
+        getBodyState().checkWritable();
         mapBody.absorbTheMapBody();
         mapBody.setLong(s, l);
         mapBody.updateTheMapBody();
     }
 
     public void setFloat(String s, float v) throws JMSException {
+        getBodyState().checkWritable();
         mapBody.absorbTheMapBody();
         mapBody.setFloat(s, v);
         mapBody.updateTheMapBody();
     }
 
     public void setDouble(String s, double v) throws JMSException {
+        getBodyState().checkWritable();
         mapBody.absorbTheMapBody();
         mapBody.setDouble(s, v);
         mapBody.updateTheMapBody();
     }
 
     public void setString(String s, String s1) throws JMSException {
+        getBodyState().checkWritable();
         mapBody.absorbTheMapBody();
         mapBody.setString(s, s1);
         mapBody.updateTheMapBody();
     }
 
     public void setBytes(String s, byte[] bytes) throws JMSException {
+        getBodyState().checkWritable();
         mapBody.absorbTheMapBody();
         mapBody.setBytes(s, bytes);
         mapBody.updateTheMapBody();
     }
 
     public void setBytes(String s, byte[] bytes, int i, int i1) throws JMSException {
+        getBodyState().checkWritable();
         mapBody.absorbTheMapBody();
         mapBody.setBytes(s, bytes, i, i1);
         mapBody.updateTheMapBody();
     }
 
     public void setObject(String s, Object o) throws JMSException {
+        getBodyState().checkWritable();
         mapBody.absorbTheMapBody();
         mapBody.setObject(s, o);
         mapBody.updateTheMapBody();
@@ -146,5 +165,9 @@ public class MapMessageImpl extends AbstractMessageImpl implements MapMessage {
     public boolean itemExists(String s) throws JMSException {
         mapBody.absorbTheMapBody();
         return mapBody.itemExists(s);
+    }
+
+    protected void doClearBody() {
+        initBody();
     }
 }

@@ -4,26 +4,71 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import javax.jms.ObjectMessage;
 import javax.jms.JMSException;
+import javax.jms.MessageNotWriteableException;
 import java.io.Serializable;
 
 public class ObjectMessageImplTest {
     @Test
-    public void testSetAndGetObject() {
+    public void testNewlyCreatedObjectMessage() throws JMSException {
         ObjectMessage objectMessage = new ObjectMessageImpl();
-        TestObjectPayload payload = new TestObjectPayload("Hello OpenDDS JMS Provider");
-        try {
-            objectMessage.setObject(payload);
-            assertEquals(payload, objectMessage.getObject());
-        } catch (JMSException e) {
-            fail("Unexpected exception.");
-        }
-
+        assertNull(objectMessage.getObject());
     }
 
-    private static class TestObjectPayload implements Serializable {
+    @Test
+    public void testSetAndGetObject() throws JMSException {
+        ObjectMessage objectMessage = new ObjectMessageImpl();
+        Foo foo = new Foo("Hello OpenDDS JMS Provider");
+        objectMessage.setObject(foo);
+        assertEquals(foo, objectMessage.getObject());
+    }
+
+    @Test
+    public void testCLearBody() throws JMSException {
+        ObjectMessage objectMessage = new ObjectMessageImpl();
+        final Foo foo = new Foo("Hello OpenDDS JMS Provider");
+        objectMessage.setObject(foo);
+        assertEquals(foo, objectMessage.getObject());
+
+        objectMessage.clearBody();
+        assertNull(objectMessage.getObject());
+    }
+
+    @Test
+    public void testSetObjectInNonWritableState() throws JMSException {
+        ObjectMessageImpl objectMessage = new ObjectMessageImpl();
+        final Foo foo = new Foo("Hello OpenDDS JMS Provider");
+        objectMessage.setObject(foo);
+        assertEquals(foo, objectMessage.getObject());
+        objectMessage.setBodyState(new MessageStateBodyNonWritable(objectMessage));
+
+        try {
+            objectMessage.setObject(new Foo("Goodbye OpenDDS JMS Provider"));
+            fail("Should throw");
+        } catch (MessageNotWriteableException e) {
+            assertEquals("The message is in a body non-writable state", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testClearBodyInNonWritableState() throws JMSException {
+        ObjectMessageImpl objectMessage = new ObjectMessageImpl();
+        final Foo foo = new Foo("Hello OpenDDS JMS Provider");
+        objectMessage.setObject(foo);
+        assertEquals(foo, objectMessage.getObject());
+        objectMessage.setBodyState(new MessageStateBodyNonWritable(objectMessage));
+
+        objectMessage.clearBody();
+        assertNull(objectMessage.getObject());
+
+        final Foo foo2 = new Foo("Goodbye OpenDDS JMS Provider");
+        objectMessage.setObject(foo2);
+        assertEquals(foo2, objectMessage.getObject());
+    }
+
+    private static class Foo implements Serializable {
         public String message;
 
-        private TestObjectPayload(String message) {
+        private Foo(String message) {
             this.message = message;
         }
 
@@ -31,7 +76,7 @@ public class ObjectMessageImplTest {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            TestObjectPayload that = (TestObjectPayload) o;
+            Foo that = (Foo) o;
 
             if (message != null ? !message.equals(that.message) : that.message != null) return false;
 
