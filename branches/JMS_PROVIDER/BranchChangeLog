@@ -1,3 +1,11 @@
+Tue Oct 14 18:15:23 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.inl:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.cpp:
+
+          Moved the destructor from .inl to .cpp.  Since it's virtual, having
+          it inline causes extra dependencies on some compilers (gcc).
+
 Mon Oct 13 23:43:38 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * java/dds/OpenDDS_DCPS_jni.cpp:

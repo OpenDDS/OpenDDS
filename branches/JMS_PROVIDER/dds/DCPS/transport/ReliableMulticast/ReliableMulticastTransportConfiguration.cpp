@@ -60,3 +60,7 @@ OpenDDS::DCPS::ReliableMulticastTransportConfiguration::load(
   }
   return result;
 }
+
+OpenDDS::DCPS::ReliableMulticastTransportConfiguration::~ReliableMulticastTransportConfiguration()
+{
+}
