@@ -3,4 +3,5 @@ project {
   libs  += DDSWrapper
 
   macros += DDSWRAPPER_HAS_DLL
+  includes += $(DDS_ROOT)/wrapper
 }
