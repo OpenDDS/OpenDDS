@@ -7,7 +7,4 @@ workspace {
 
   // tell the projects where to find the DDS base projects (*.mpb)
   cmdline += -include $DDS_ROOT/MPC/config
-
-  cmdline += -include $DDS_ROOT/wrapper
-
 }

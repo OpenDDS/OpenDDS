@@ -1,9 +1,11 @@
 Tue Oct 14 14:11:04 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
 
         * MPC/config/dds_wrapper.mpb:
+        * wrapper/example/WrapperStockQuoter.m?c
         
           Fixed scoreboard error by moving dds_wrapper.mpb file from
-          the wrapper directory to the MPC/config directory.
+          the wrapper directory to the MPC/config directory and
+          renamed MPC project files.
 
 Mon Oct 13 21:36:42 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
