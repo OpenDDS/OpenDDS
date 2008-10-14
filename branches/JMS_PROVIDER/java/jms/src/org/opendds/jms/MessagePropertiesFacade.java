@@ -113,6 +113,7 @@ public class MessagePropertiesFacade {
     }
 
     public Object getObjectProperty(String s) throws MessageFormatException {
+        ensureValidPropertyName(s);
         final PropertyValue value = properties.get(s);
         return PropertyValueConversion.convertToObject(value);
     }

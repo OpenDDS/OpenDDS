@@ -90,9 +90,19 @@ public class AbstractMessageImplTest {
 
     @Test
     public void testClearProperties() throws JMSException {
-        Message message = new MapMessageImpl();
+        AbstractMessageImpl message = new MapMessageImpl();
 
         message.setBooleanProperty("boolean", false);
+        assertTrue(message.getPropertyNames().hasMoreElements());
+        assertTrue(message.propertyExists("boolean"));
+
+        message.clearProperties();
+        assertFalse(message.getPropertyNames().hasMoreElements());
+        assertFalse(message.propertyExists("boolean"));
+
+        // JMS 1.1, 3.10
+        message.setBooleanProperty("boolean", false);
+        message.setPropertiesState(new MessageStatePropertiesNonWritable(message));
         assertTrue(message.getPropertyNames().hasMoreElements());
         assertTrue(message.propertyExists("boolean"));
 
@@ -188,55 +198,55 @@ public class AbstractMessageImplTest {
      * JMS 1.1, 3.5.3
      */
     @Test
-    public void testMessageNotWriteableException() {
+    public void testSetPropertiesInNotWritableState() {
         AbstractMessageImpl message = new StreamMessageImpl();
-        message.setState(new MessageStateNonWritable());
+        message.setPropertiesState(new MessageStatePropertiesNonWritable(message));
 
         try {
             message.setBooleanProperty("boolean", true);
-            fail("setBooleanProperty() succeded on a message in a non-writable state");
+            fail("setBooleanProperty() succeded on a message in a non-writable propertiesState");
         } catch (JMSException e) {
             assertTrue(e instanceof MessageNotWriteableException);
         }
 
         try {
             message.setByteProperty("byte", (byte) 63);
-            fail("setByteProperty() succeded on a message in a non-writable state");
+            fail("setByteProperty() succeded on a message in a non-writable propertiesState");
         } catch (JMSException e) {
             assertTrue(e instanceof MessageNotWriteableException);
         }
 
         try {
             message.setShortProperty("short", (short) 1024);
-            fail("setShortProperty() succeded on a message in a non-writable state");
+            fail("setShortProperty() succeded on a message in a non-writable propertiesState");
         } catch (JMSException e) {
             assertTrue(e instanceof MessageNotWriteableException);
         }
 
         try {
             message.setIntProperty("int", 2048);
-            fail("setIntProperty() succeded on a message in a non-writable state");
+            fail("setIntProperty() succeded on a message in a non-writable propertiesState");
         } catch (JMSException e) {
             assertTrue(e instanceof MessageNotWriteableException);
         }
 
         try {
             message.setLongProperty("long", 9765625L);
-            fail("setLongProperty() succeded on a message in a non-writable state");
+            fail("setLongProperty() succeded on a message in a non-writable propertiesState");
         } catch (JMSException e) {
             assertTrue(e instanceof MessageNotWriteableException);
         }
 
         try {
             message.setFloatProperty("float", 3.14F);
-            fail("setFloatProperty() succeded on a message in a non-writable state");
+            fail("setFloatProperty() succeded on a message in a non-writable propertiesState");
         } catch (JMSException e) {
             assertTrue(e instanceof MessageNotWriteableException);
         }
 
         try {
             message.setDoubleProperty("double", 2.718281828459045);
-            fail("setDoubleProperty() succeded on a message in a non-writable state");
+            fail("setDoubleProperty() succeded on a message in a non-writable propertiesState");
         } catch (JMSException e) {
             assertTrue(e instanceof MessageNotWriteableException);
         }
@@ -244,7 +254,7 @@ public class AbstractMessageImplTest {
         try {
             final String greeting = "Hello OpenDDS JMS Provider";
             message.setStringProperty("string", greeting);
-            fail("setStringProperty() succeded on a message in a non-writable state");
+            fail("setStringProperty() succeded on a message in a non-writable propertiesState");
         } catch (JMSException e) {
             assertTrue(e instanceof MessageNotWriteableException);
         }
@@ -252,14 +262,7 @@ public class AbstractMessageImplTest {
         try {
             Object o = new Double(2.718281828459045);
             message.setObjectProperty("object", o);
-            fail("setObjectProperty() succeded on a message in a non-writable state");
-        } catch (JMSException e) {
-            assertTrue(e instanceof MessageNotWriteableException);
-        }
-
-        try {
-            message.clearProperties();
-            fail("clearProperties() succeded on a message in a non-writable state");
+            fail("setObjectProperty() succeded on a message in a non-writable propertiesState");
         } catch (JMSException e) {
             assertTrue(e instanceof MessageNotWriteableException);
         }
@@ -538,7 +541,7 @@ public class AbstractMessageImplTest {
     }
 
     @Test
-    public void testPropertyIteration() throws JMSException {
+    public void testGetPropertyNames() throws JMSException {
         Message message = new TextMessageImpl();
         populateProperties(message);
 
@@ -611,5 +614,141 @@ public class AbstractMessageImplTest {
 
         assertNull(message.getStringProperty("nonexistent"));
         assertNull(message.getObjectProperty("nonexistent"));
+    }
+
+    @Test
+    public void testSettingPropertiesWithIllegalNames() throws JMSException {
+        Message message = new BytesMessageImpl();
+
+        try {
+            message.setBooleanProperty("illegal name", true);
+            fail("Should throw");
+        } catch (Exception e) {
+            assertTrue(e instanceof IllegalArgumentException);
+        }
+
+        try {
+            message.setByteProperty("illegal name", (byte) 63);
+            fail("Should throw");
+        } catch (Exception e) {
+            assertTrue(e instanceof IllegalArgumentException);
+        }
+
+        try {
+            message.setShortProperty("illegal name", (short) 1024);
+            fail("Should throw");
+        } catch (Exception e) {
+            assertTrue(e instanceof IllegalArgumentException);
+        }
+
+        try {
+            message.setIntProperty("illegal name", 2048);
+            fail("Should throw");
+        } catch (Exception e) {
+            assertTrue(e instanceof IllegalArgumentException);
+        }
+
+        try {
+            message.setLongProperty("illegal name", 9765625);
+            fail("Should throw");
+        } catch (Exception e) {
+            assertTrue(e instanceof IllegalArgumentException);
+        }
+
+        try {
+            message.setFloatProperty("illegal name", 3.14f);
+            fail("Should throw");
+        } catch (Exception e) {
+            assertTrue(e instanceof IllegalArgumentException);
+        }
+
+        try {
+            message.setDoubleProperty("illegal name", 2.718281828459045);
+            fail("Should throw");
+        } catch (Exception e) {
+            assertTrue(e instanceof IllegalArgumentException);
+        }
+
+        try {
+            message.setStringProperty("illegal name", "Hello OpenDDS JMS Provider");
+            fail("Should throw");
+        } catch (Exception e) {
+            assertTrue(e instanceof IllegalArgumentException);
+        }
+
+        try {
+            message.setObjectProperty("illegal name", new Integer(4096));
+            fail("Should throw");
+        } catch (Exception e) {
+            assertTrue(e instanceof IllegalArgumentException);
+        }
+    }
+
+    @Test
+    public void testGettingPropertiesWithIllegalNames() {
+        Message message = new TextMessageImpl();
+
+        try {
+            message.getBooleanProperty("illegal name");
+            fail("Should throw");
+        } catch (Exception e) {
+            assertTrue(e instanceof IllegalArgumentException);
+        }
+
+        try {
+            message.getByteProperty("illegal name");
+            fail("Should throw");
+        } catch (Exception e) {
+            assertTrue(e instanceof IllegalArgumentException);
+        }
+
+        try {
+            message.getShortProperty("illegal name");
+            fail("Should throw");
+        } catch (Exception e) {
+            assertTrue(e instanceof IllegalArgumentException);
+        }
+
+        try {
+            message.getIntProperty("illegal name");
+            fail("Should throw");
+        } catch (Exception e) {
+            assertTrue(e instanceof IllegalArgumentException);
+        }
+
+        try {
+            message.getLongProperty("illegal name");
+            fail("Should throw");
+        } catch (Exception e) {
+            assertTrue(e instanceof IllegalArgumentException);
+        }
+
+        try {
+            message.getFloatProperty("illegal name");
+            fail("Should throw");
+        } catch (Exception e) {
+            assertTrue(e instanceof IllegalArgumentException);
+        }
+
+        try {
+            message.getDoubleProperty("illegal name");
+            fail("Should throw");
+        } catch (Exception e) {
+            assertTrue(e instanceof IllegalArgumentException);
+        }
+
+        try {
+            message.getStringProperty("illegal name");
+            fail("Should throw");
+        } catch (Exception e) {
+            assertTrue(e instanceof IllegalArgumentException);
+        }
+
+        try {
+            message.getObjectProperty("illegal name");
+            fail("Should throw");
+        } catch (Exception e) {
+            assertTrue(e instanceof IllegalArgumentException);
+        }
     }
 }

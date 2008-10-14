@@ -1,3 +1,48 @@
+Tue Oct 14 20:10:35 UTC 2008  Weiqi Gao  <gao_w@ociweb.com>
+
+        * java/OpenDDS.ipr:
+        * java/jms/opendds-jms.iml:
+
+          No essential changes.
+
+        * java/jms/src/org/opendds/jms/AbstractMessageImpl.java:
+        * java/jms/src/org/opendds/jms/BytesBodyFacade.java:
+        * java/jms/src/org/opendds/jms/BytesMessageImpl.java:
+        * java/jms/src/org/opendds/jms/MapBodyFacade.java:
+        * java/jms/src/org/opendds/jms/MapMessageImpl.java:
+        * java/jms/src/org/opendds/jms/MessagePropertiesFacade.java:
+        * java/jms/src/org/opendds/jms/MessageState.java:
+        * java/jms/src/org/opendds/jms/MessageStateBodyNonWritable.java:
+        * java/jms/src/org/opendds/jms/MessageStateBodyReadOnly.java:
+        * java/jms/src/org/opendds/jms/MessageStateBodyWriteOnly.java:
+        * java/jms/src/org/opendds/jms/MessageStatePropertiesNonWritable.java:
+        * java/jms/src/org/opendds/jms/MessageStateWritable.java:
+        * java/jms/src/org/opendds/jms/ObjectMessageImpl.java:
+        * java/jms/src/org/opendds/jms/StreamBodyFacade.java:
+        * java/jms/src/org/opendds/jms/StreamMessageImpl.java:
+        * java/jms/src/org/opendds/jms/TextMessageImpl.java:
+
+          Implemented the Message API hierarchy.
+
+        * java/jms/src/org/opendds/jms/util/ByteArrays.java:
+        * java/jms/src/org/opendds/jms/util/PropertyValueConversion.java:
+        * java/jms/src/org/opendds/jms/util/StreamItemConversion.java:
+
+          Some utility classes for the Message API implementation.
+
+        * java/jms/test/org/opendds/jms/AbstractMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/BytesMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/MapMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/ObjectMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/StreamMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/TextMessageImplTest.java:
+
+          Tests for Message API implementation classes.
+
+        * java/jms/src/org/opendds/jms/MessageStateNonWritable.java:
+
+          Removed this file.
+
 Tue Oct 14 18:15:23 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.inl:
