@@ -1,7 +1,15 @@
+Tue Oct 14 15:18:14 UTC 2008  Chris Cleeland  <cleeland@ociweb.com>
+
+        * tests/DCPS/Serializer/SerializerTest.cpp:
+ 
+          Appended 'LL' to the constant used when ACE_SIZEOF_LONG_DOUBLE
+          is 16.  Without this it was causing compile errors on at least
+          Mac OS X 10.5.*.
+
 Tue Oct 14 14:11:04 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
 
         * MPC/config/dds_wrapper.mpb:
-        * wrapper/example/WrapperStockQuoter.m?c
+        * wrapper/example/WrapperStockQuoter.m?c:
         
           Fixed scoreboard error by moving dds_wrapper.mpb file from
           the wrapper directory to the MPC/config directory and
