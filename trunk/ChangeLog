@@ -1,7 +1,27 @@
+Tue Oct 14 19:11:47 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DdsDcps.mpc:
+        * dds/dcps_bits.mpb:
+
+          Even with built_in_topics=0, we now need to use -Gdcps on
+          DdsDcpsInfrastructure.idl because Federation is depending on the
+          functions it generates.
+
+        * java/tests/builtintopics/run_test.pl:
+        * java/tests/complex_idl/run_test.pl:
+        * java/tests/messenger/publisher/run_test.pl:
+        * java/tests/messenger/subscriber/run_test.pl:
+
+          Remove references to deprecated 'domain_ids' files.
+
+        * wrapper/DDSWrapper_OpenDDS.mpc:
+
+          Use "dynamic" flags to set the *_BUILD_DLL macros.
+
 Tue Oct 14 15:18:14 UTC 2008  Chris Cleeland  <cleeland@ociweb.com>
 
         * tests/DCPS/Serializer/SerializerTest.cpp:
- 
+
           Appended 'LL' to the constant used when ACE_SIZEOF_LONG_DOUBLE
           is 16.  Without this it was causing compile errors on at least
           Mac OS X 10.5.*.
@@ -10,7 +30,7 @@ Tue Oct 14 14:11:04 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
 
         * MPC/config/dds_wrapper.mpb:
         * wrapper/example/WrapperStockQuoter.m?c:
-        
+
           Fixed scoreboard error by moving dds_wrapper.mpb file from
           the wrapper directory to the MPC/config directory and
           renamed MPC project files.
