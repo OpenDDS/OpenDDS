@@ -28,15 +28,13 @@ my $test_opts = "$opts -ORBListenEndpoints iiop://127.0.0.1:12346 $debug_opt ".
     "-ORBLogFile test.log -DCPSConfigFile builtintopics.ini";
 
 my $dcpsrepo_ior = "repo.ior";
-my $domains_file = "domain_ids";
 
 unlink $dcpsrepo_ior;
 
 my $DCPSREPO = PerlDDS::create_process ("$DDS_ROOT/bin/DCPSInfoRepo",
                "-DCPSDebugLevel 10 ".
                "-ORBListenEndpoints iiop://127.0.0.1:1111 -ORBDebugLevel 10 ".
-               "-ORBLogFile DCPSInfoRepo.log $opts -o $dcpsrepo_ior ".
-               "-d $domains_file");
+               "-ORBLogFile DCPSInfoRepo.log $opts -o $dcpsrepo_ior ");
 
 PerlACE::add_lib_path ("$DDS_ROOT/java/tests/messenger/messenger_idl");
 

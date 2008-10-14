@@ -1,6 +1,6 @@
 project(DDSWrapper_OpenDDS) : dcpsexe_with_tcp, dcps_unreliable_dgram, dcps_reliable_multicast {
   sharedname = DDSWrapper
-  macros += DDSWRAPPER_BUILD_DLL
+  dynamicflags += DDSWRAPPER_BUILD_DLL
   includes += .
 
   Source_Files {  
