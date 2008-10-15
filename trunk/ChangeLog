@@ -1,3 +1,10 @@
+Wed Oct 15 15:56:53 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
+
+        * MPC/config/dds_wrapper.mpb:
+        
+          Fixed project dependency settings to remove linker errors in
+          static builds.
+
 Wed Oct 15 00:15:36 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/BuiltInTopicUtils.h:

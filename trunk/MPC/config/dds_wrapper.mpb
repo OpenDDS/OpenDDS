@@ -1,7 +1,6 @@
-project {
+project : dcps_tcp, dcps_unreliable_dgram, dcps_reliable_multicast {
   after += DDSWrapper
   libs  += DDSWrapper
 
-  macros += DDSWRAPPER_HAS_DLL
   includes += $(DDS_ROOT)/wrapper
 }
