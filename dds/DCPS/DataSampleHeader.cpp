@@ -34,14 +34,14 @@ OpenDDS::DCPS::DataSampleHeader::init (ACE_Message_Block* buffer)
   if( reader.good_bit() != true) return ;
   this->marshaled_size_ += sizeof( byte) ;
 
-  this->byte_order_  = ((byte & 0x01) != 0) ;
-  this->last_sample_ = ((byte & 0x02) != 0) ;
-  this->reserved_1   = ((byte & 0x04) != 0) ;
-  this->reserved_2   = ((byte & 0x08) != 0) ;
-  this->reserved_3   = ((byte & 0x10) != 0) ;
-  this->reserved_4   = ((byte & 0x20) != 0) ;
-  this->reserved_5   = ((byte & 0x40) != 0) ;
-  this->reserved_6   = ((byte & 0x80) != 0) ;
+  this->byte_order_       = ((byte & 0x01) != 0) ;
+  this->last_sample_      = ((byte & 0x02) != 0) ;
+  this->historic_sample_  = ((byte & 0x04) != 0) ;
+  this->reserved_1        = ((byte & 0x08) != 0) ;
+  this->reserved_2        = ((byte & 0x10) != 0) ;
+  this->reserved_3        = ((byte & 0x20) != 0) ;
+  this->reserved_4        = ((byte & 0x40) != 0) ;
+  this->reserved_5        = ((byte & 0x80) != 0) ;
 
   // Set swap_bytes flag to the Serializer if data sample from
   // the publisher is in different byte order.
@@ -78,6 +78,28 @@ OpenDDS::DCPS::DataSampleHeader::init (ACE_Message_Block* buffer)
 
 }
 
+/// The update_flag method is a hack which updates the sample
+/// header flags after a sample has been serialized without
+/// deserializing the message. This method will break if the
+/// current Serializer behavior changes.
+
+void
+OpenDDS::DCPS::DataSampleHeader::update_flag(ACE_Message_Block* buffer, FlagKind flag)
+{
+  char *base = buffer->base();
+
+  // The flags octet will always be the second byte;
+  // verify sufficient length exists:
+  if (buffer->end() - base < 2) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: DataSampleHeader::update_flag: ")
+      ACE_TEXT("ACE_Message_Block too short (missing flags octet).\n")));
+  }
+
+  // Twiddle flag bit.
+  *(base + 1) |= (1 << flag);
+}
+
 ACE_CDR::Boolean
 operator<< (ACE_Message_Block*& buffer, OpenDDS::DCPS::DataSampleHeader& value)
 {
@@ -86,14 +108,14 @@ operator<< (ACE_Message_Block*& buffer, OpenDDS::DCPS::DataSampleHeader& value)
   writer << value.message_id_ ;
 
   // Write the flags as a single byte.
-  ACE_CDR::Octet flags = (value.byte_order_  << 0)
-                       | (value.last_sample_ << 1)
-                       | (value.reserved_1   << 2)
-                       | (value.reserved_2   << 3)
-                       | (value.reserved_3   << 4)
-                       | (value.reserved_4   << 5)
-                       | (value.reserved_5   << 6)
-                       | (value.reserved_6   << 7)
+  ACE_CDR::Octet flags = (value.byte_order_       << 0)
+                       | (value.last_sample_      << 1)
+                       | (value.historic_sample_  << 2)
+                       | (value.reserved_1        << 3)
+                       | (value.reserved_2        << 4)
+                       | (value.reserved_3        << 5)
+                       | (value.reserved_4        << 6)
+                       | (value.reserved_5        << 7)
                        ;
   writer << ACE_OutputCDR::from_octet (flags);
   writer << value.message_length_ ;

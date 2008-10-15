@@ -399,7 +399,7 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
   }
 
   // Support DURABILITY QoS
-  if( this->qos_.durability.kind != DDS::VOLATILE_DURABILITY_QOS) {
+  if( this->qos_.durability.kind > ::DDS::VOLATILE_DURABILITY_QOS) {
     // Tell the WriteDataContainer to resend all sending/sent
     // samples.
     this->data_container_->reenqueue_all (rd_ids,

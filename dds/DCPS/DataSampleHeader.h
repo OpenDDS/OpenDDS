@@ -30,6 +30,17 @@ namespace OpenDDS
       FULLY_ASSOCIATED
     };
 
+    enum FlagKind {
+      LAST_SAMPLE,
+      BYTE_ORDER,
+      HISTORIC_SAMPLE,
+      RESERVED_1,
+      RESERVED_2,
+      RESERVED_3,
+      RESERVED_4,
+      RESERVED_5
+    };
+
     /// The header message of a data sample.
     /// This header and the data sample are in different
     /// message block and will be chained together.
@@ -45,13 +56,16 @@ namespace OpenDDS
       /// 1 -  Message encoded using network byte order.
       bool byte_order_  : 1;
 
+      /// This flag indicates a sample has been resent from a
+      /// non-VOLATILE DataWriter.
+      bool historic_sample_ : 1;
+
       /// reservered bits
       bool reserved_1   : 1;
       bool reserved_2   : 1;
       bool reserved_3   : 1;
       bool reserved_4   : 1;
       bool reserved_5   : 1;
-      bool reserved_6   : 1;
 
       //The size of the message including the entire header.
       ACE_UINT32 message_length_;
@@ -81,6 +95,8 @@ namespace OpenDDS
       /// Identify the DataWriter that produced the sample data being 
       /// sent.
       PublicationId  publication_id_;
+      
+      static void update_flag (ACE_Message_Block* buffer, FlagKind flag) ;
 
       /// Default constructor.
       DataSampleHeader() ;
