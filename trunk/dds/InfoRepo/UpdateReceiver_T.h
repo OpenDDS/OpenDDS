@@ -44,7 +44,7 @@ namespace OpenDDS { namespace Federator {
        * NOTE: We take ownership of this data and delete it when we are
        *       done processing it.
        */
-      void put( DataType* sample, ::DDS::SampleInfo* info);
+      void add( DataType* sample, ::DDS::SampleInfo* info);
 
       /// Synchronous termination.
       void stop();

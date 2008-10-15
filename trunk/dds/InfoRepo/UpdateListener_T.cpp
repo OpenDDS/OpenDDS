@@ -77,7 +77,7 @@ ACE_THROW_SPEC((
          && (this->federationId() != sample->sender)) {
 
           // Delegate processing to the federation manager.
-          this->receiver_.put( sample, info);
+          this->receiver_.add( sample, info);
         }
 
       } else if( status == ::DDS::RETCODE_NO_DATA) {
