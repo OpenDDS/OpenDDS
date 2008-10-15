@@ -1,3 +1,9 @@
+Wed Oct 15 22:45:58 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/InfoRepo/FederatorManagerImpl.h:
+
+          Fixed warnings from SunOS compiler.
+          
 Wed Oct 15 18:46:14 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
@@ -7,7 +13,7 @@ Wed Oct 15 18:46:14 UTC 2008  Yan Dai  <dai_y@ociweb.com>
         * dds/InfoRepo/UpdateReceiver_T.cpp:
 
           Fixed warnings.
-          
+
 Wed Oct 15 17:37:22 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/InfoRepo/DCPSInfo_i.cpp:
