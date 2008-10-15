@@ -1,3 +1,15 @@
+Wed Oct 15 17:37:22 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        
+          Made BIT transport configured with datalink_release_delay_=0, this
+          makes the BIT transport send the graceful shutdown to the peer so 
+          the InfoRepo won't try to reconnect.
+          
+        * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
+
+          Fixed some warnings.
+          
 Wed Oct 15 15:56:53 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
 
         * MPC/config/dds_wrapper.mpb:
