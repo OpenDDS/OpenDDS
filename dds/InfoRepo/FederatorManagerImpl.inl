@@ -48,6 +48,6 @@ ACE_INLINE
 void
 OpenDDS::Federator::ManagerImpl::orb( CORBA::ORB_ptr value)
 {
-  this->orb_ = value;
+  this->orb_ = CORBA::ORB::_duplicate (value);
 }
 
