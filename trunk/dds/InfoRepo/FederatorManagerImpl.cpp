@@ -941,9 +941,9 @@ ManagerImpl::finalize()
     try {
       IdToManagerMap::iterator where = this->peers_.find( this->joinRepo_);
       if( where == this->peers_.end()) {
-        ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: Federator::Manager::finalize: ")
-          ACE_TEXT("repository %d unable to find attachment to federation.\n"),
+        ACE_DEBUG ((LM_DEBUG,
+          ACE_TEXT("(%P|%t)Federator::Manager::finalize: ")
+          ACE_TEXT("repository %d - all attachment to federation left.\n"),
           this->id()
         ));
 

@@ -25,7 +25,8 @@ DCPS_IR_Topic::DCPS_IR_Topic(OpenDDS::DCPS::RepoId id,
   participant_(creator),
   description_(description),
   handle_(0),
-  isBIT_(0)
+  isBIT_(0),
+  removed_ (false)
 {
 }
 
@@ -108,6 +109,25 @@ DCPS_IR_Topic::~DCPS_IR_Topic ()
     }
 }
 
+
+void DCPS_IR_Topic::release (bool removing)
+{
+  if (removing)
+  {
+    this->removed_ = true;
+    if (publicationRefs_.size () == 0 && subscriptionRefs_.size () == 0)
+    {
+      delete this;
+    }
+  }
+  else if (this->removed_)
+  {
+   if (publicationRefs_.size () == 0 && subscriptionRefs_.size () == 0)
+    {
+      delete this;
+    }
+  }
+}
 
 int DCPS_IR_Topic::add_publication_reference (DCPS_IR_Publication* publication
                                               , bool associate)
@@ -238,6 +258,7 @@ int DCPS_IR_Topic::remove_publication_reference (DCPS_IR_Publication* publicatio
         publicationBuffer.str().c_str()
       ));
     }
+
   return status;
 }
 

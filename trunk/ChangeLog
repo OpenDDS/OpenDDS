@@ -1,3 +1,44 @@
+Wed Oct 15 00:15:36 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/BuiltInTopicUtils.h:
+
+          Fixed a guid comparison problem.
+
+        * dds/InfoRepo/DCPS_IR_Topic.h:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+
+          Added release() to support topic deletion upon last associated
+          sub/pub/topic object deletion. This would fix the access violation
+          when sub/pub deletion updates happen after topic deletion.
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+
+          - Made topic->release called upon removing sub/pub/topic.
+          - Updated remove_all_dependents() to move iterator to next
+            before removing sub/pub/topic to fix access violation.
+
+        * dds/InfoRepo/FederatorManagerImpl.inl:
+
+          Fixed orb reference counting issue.
+
+        * dds/InfoRepo/FederatorManagerImpl.h:
+        * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
+
+          - Added lock_ to protect the deferred updata samples.
+          - Added processDeferred() call in each processCreate().
+            This would fix missing update problem due to timing
+            of multithreads handling participant/topic/sub/pub
+            updates.
+          - Added try and catch Invalid_Participant block for
+            remove_topic/remove_publication/remove_subscription
+            in case the remove_domain_participant is called
+            before them.
+
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+
+          Changed an LM_ERROR message to LM_DEBUG message.
+
 Tue Oct 14 19:11:47 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DdsDcps.mpc:

@@ -333,6 +333,9 @@ class OpenDDS_Federator_Export ManagerImpl
 
     /// Is multicast enabled?
     bool multicastEnabled_;
+
+    /// Protect deferred updates.
+    ACE_Thread_Mutex deferred_lock_;
 };
 
 }} // End namespace OpenDDS::Federator

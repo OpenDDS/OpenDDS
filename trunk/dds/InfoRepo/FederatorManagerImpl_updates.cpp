@@ -682,7 +682,13 @@ ManagerImpl::processCreate( const OwnerUpdate* sample, const ::DDS::SampleInfo* 
                                              sample->participant,
                                              sample->sender,
                                              sample->owner)) {
-    this->deferredOwnerships_.push_back( *sample);
+    {
+      ACE_GUARD (ACE_Thread_Mutex,
+        guard,
+        this->deferred_lock_);
+      this->deferredOwnerships_.push_back( *sample);
+    }
+
     if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Federator::ManagerImpl::processCreate( OwnerUpdate): ")
@@ -690,6 +696,8 @@ ManagerImpl::processCreate( const OwnerUpdate* sample, const ::DDS::SampleInfo* 
       ));
     }
   }
+
+  this->processDeferred();
 }
 
 void
@@ -729,7 +737,12 @@ ManagerImpl::processCreate( const PublicationUpdate* sample, const ::DDS::Sample
                                              transportInfo,
                                              sample->publisher_qos,
                                              true)) {
-    this->deferredPublications_.push_back( *sample);
+    {
+      ACE_GUARD (ACE_Thread_Mutex,
+        guard,
+        this->deferred_lock_);
+      this->deferredPublications_.push_back( *sample);
+    }
     if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Federator::ManagerImpl::processCreate( PublicationUpdate): ")
@@ -737,6 +750,8 @@ ManagerImpl::processCreate( const PublicationUpdate* sample, const ::DDS::Sample
       ));
     }
   }
+
+  this->processDeferred();
 }
 
 void
@@ -776,7 +791,12 @@ ManagerImpl::processCreate( const SubscriptionUpdate* sample, const ::DDS::Sampl
                                               transportInfo,
                                               sample->subscriber_qos,
                                               true)) {
-    this->deferredSubscriptions_.push_back( *sample);
+    {
+      ACE_GUARD (ACE_Thread_Mutex,
+        guard,
+        this->deferred_lock_);
+      this->deferredSubscriptions_.push_back( *sample);
+    }
     if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Federator::ManagerImpl::processCreate( SubscriptionUpdate): ")
@@ -784,6 +804,8 @@ ManagerImpl::processCreate( const SubscriptionUpdate* sample, const ::DDS::Sampl
       ));
     }
   }
+
+  this->processDeferred();
 }
 
 void
@@ -849,7 +871,12 @@ ManagerImpl::processCreate( const TopicUpdate* sample, const ::DDS::SampleInfo* 
                                        sample->topic,
                                        sample->datatype,
                                        sample->qos)) {
-    this->deferredTopics_.push_back( *sample);
+    {
+      ACE_GUARD (ACE_Thread_Mutex,
+        guard,
+        this->deferred_lock_);
+      this->deferredTopics_.push_back( *sample);
+    }
     if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Federator::ManagerImpl::processCreate( TopicUpdate): ")
@@ -857,11 +884,18 @@ ManagerImpl::processCreate( const TopicUpdate* sample, const ::DDS::SampleInfo* 
       ));
     }
   }
+
+
+  this->processDeferred();
 }
 
 void
 ManagerImpl::processDeferred()
 {
+  ACE_GUARD (ACE_Thread_Mutex,
+    guard,
+    this->deferred_lock_);
+
   for( std::list< OwnerUpdate>::iterator current = this->deferredOwnerships_.begin();
        current != this->deferredOwnerships_.end();
        ++current) {
@@ -1028,7 +1062,13 @@ ManagerImpl::processUpdateQos1( const OwnerUpdate* sample, const ::DDS::SampleIn
                                              sample->participant,
                                              sample->sender,
                                              sample->owner)) {
-    this->deferredOwnerships_.push_back( *sample);
+    {
+      ACE_GUARD (ACE_Thread_Mutex,
+        guard,
+        this->deferred_lock_);
+
+      this->deferredOwnerships_.push_back( *sample);
+    }
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateQos1( OwnerUpdate): ")
       ACE_TEXT("deferred update.\n")
@@ -1246,7 +1286,12 @@ ManagerImpl::processDelete( const OwnerUpdate* sample, const ::DDS::SampleInfo* 
                                              sample->participant,
                                              sample->sender,
                                              sample->owner)) {
-    this->deferredOwnerships_.push_back( *sample);
+    {
+      ACE_GUARD (ACE_Thread_Mutex,
+        guard,
+        this->deferred_lock_);
+      this->deferredOwnerships_.push_back( *sample);
+    }
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDelete( OwnerUpdate): ")
       ACE_TEXT("deferred update.\n")
@@ -1278,11 +1323,22 @@ ManagerImpl::processDelete( const PublicationUpdate* sample, const ::DDS::Sample
     ));
   }
 
-  this->info_->remove_publication(
-    sample->domain,
-    sample->participant,
-    sample->id
-  );
+  try
+  {
+    this->info_->remove_publication(
+      sample->domain,
+      sample->participant,
+      sample->id
+      );
+  }
+  catch (OpenDDS::DCPS::Invalid_Participant& ex)
+  {
+    if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDelete( PublicationUpdate): ")
+        ACE_TEXT("the participant was already removed.\n")));
+    }
+  }
 }
 
 void
@@ -1308,12 +1364,22 @@ ManagerImpl::processDelete( const SubscriptionUpdate* sample, const ::DDS::Sampl
       buffer.str().c_str()
     ));
   }
-
-  this->info_->remove_subscription(
-    sample->domain,
-    sample->participant,
-    sample->id
-  );
+  
+  try {
+    this->info_->remove_subscription(
+      sample->domain,
+      sample->participant,
+      sample->id
+    );
+  }
+  catch (OpenDDS::DCPS::Invalid_Participant& ex)
+  {
+    if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDelete( SubscriptionUpdate): ")
+        ACE_TEXT("the participant was already removed.\n")));
+    }
+  }
 }
 
 void
@@ -1364,11 +1430,22 @@ ManagerImpl::processDelete( const TopicUpdate* sample, const ::DDS::SampleInfo* 
     ));
   }
 
-  this->info_->remove_topic(
-    sample->domain,
-    sample->participant,
-    sample->id
-  );
+  try
+  {
+    this->info_->remove_topic(
+      sample->domain,
+      sample->participant,
+      sample->id
+      );
+  }
+  catch (OpenDDS::DCPS::Invalid_Participant& ex)
+  {
+    if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDelete( TopicUpdate): ")
+        ACE_TEXT("the participant was already removed.\n")));
+    }
+  }
 }
 
 void
