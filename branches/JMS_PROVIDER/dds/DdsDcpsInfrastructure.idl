@@ -306,7 +306,12 @@ module DDS {
 		Duration_t duration;
 		};
 
+    /// The VOLATILE_NO_HISTORY_DURABILITY_QOS kind is an OpenDDS
+    /// specific extension which allows a DataReader to filter
+    /// historic samples sent by a non-VOLATILE DataWriter.
+
     enum DurabilityQosPolicyKind {
+                VOLATILE_NO_HISTORY_DURABILITY_QOS,
 		VOLATILE_DURABILITY_QOS,
 		TRANSIENT_LOCAL_DURABILITY_QOS,
 		TRANSIENT_DURABILITY_QOS,

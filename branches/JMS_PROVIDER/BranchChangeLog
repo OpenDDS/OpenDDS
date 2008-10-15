@@ -1,3 +1,17 @@
+Wed Oct 15 16:44:01 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DdsDcpsInfrastructure.idl:
+
+          Added support for VOLATILE_NO_HISTORY DurabilityQosPolicyKind
+          (OpenDDS-specific extension).
+
 Tue Oct 14 20:10:35 UTC 2008  Weiqi Gao  <gao_w@ociweb.com>
 
         * java/OpenDDS.ipr:

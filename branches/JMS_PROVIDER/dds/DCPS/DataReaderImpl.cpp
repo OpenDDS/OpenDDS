@@ -1976,6 +1976,20 @@ DataReaderImpl::cache_lookup_instance_handles (const WriterIdSeq& ids,
 bool
 DataReaderImpl::data_expired (DataSampleHeader const & header) const
 {
+  // Expire historic data if QoS indicates VOLATILE_NO_HISTORY.
+  if (qos_.durability.kind <= ::DDS::VOLATILE_NO_HISTORY_DURABILITY_QOS
+      && header.historic_sample_)
+  {
+    if (DCPS_debug_level >= 8)
+    {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) DataReaderImpl::data_expired: ")
+                 ACE_TEXT("Discarded historic data.\n")));
+    }
+
+    return true;  // Data expired. 
+  }
+
   // @@ Is getting the LIFESPAN value from the Topic sufficient?
   ::DDS::TopicQos topic_qos;
   this->topic_servant_->get_qos (topic_qos);
