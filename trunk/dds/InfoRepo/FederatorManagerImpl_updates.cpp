@@ -1331,7 +1331,7 @@ ManagerImpl::processDelete( const PublicationUpdate* sample, const ::DDS::Sample
       sample->id
       );
   }
-  catch (OpenDDS::DCPS::Invalid_Participant& ex)
+  catch (OpenDDS::DCPS::Invalid_Participant&)
   {
     if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
       ACE_DEBUG((LM_DEBUG,
@@ -1372,7 +1372,7 @@ ManagerImpl::processDelete( const SubscriptionUpdate* sample, const ::DDS::Sampl
       sample->id
     );
   }
-  catch (OpenDDS::DCPS::Invalid_Participant& ex)
+  catch (OpenDDS::DCPS::Invalid_Participant&)
   {
     if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
       ACE_DEBUG((LM_DEBUG,
@@ -1438,7 +1438,7 @@ ManagerImpl::processDelete( const TopicUpdate* sample, const ::DDS::SampleInfo* 
       sample->id
       );
   }
-  catch (OpenDDS::DCPS::Invalid_Participant& ex)
+  catch (OpenDDS::DCPS::Invalid_Participant&)
   {
     if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
       ACE_DEBUG((LM_DEBUG,

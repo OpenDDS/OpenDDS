@@ -1987,6 +1987,9 @@ int TAO_DDS_DCPSInfo_i::init_transport (int listen_address_given,
   OpenDDS::DCPS::TransportConfiguration_rch config
     = TheTransportFactory->get_or_create_configuration (OpenDDS::DCPS::BIT_ALL_TRAFFIC,
                                                         ACE_TEXT("SimpleTcp"));
+
+  config->datalink_release_delay_ = 0;
+
   OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config
     = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
 
