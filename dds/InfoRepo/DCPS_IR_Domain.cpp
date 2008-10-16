@@ -588,16 +588,18 @@ DCPS_IR_Domain::find_topic_description(
       return 0;
 
     } else {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::find_topic_description: ")
-        ACE_TEXT("searching for topic description %s/%s, ")
-        ACE_TEXT("located topic description %s/%s instead in domain %d.\n"),
-        name,
-        dataTypeName,
-        (*which)->get_name(),
-        (*which)->get_dataTypeName(),
-        id_
-      ));
+      if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::find_topic_description: ")
+          ACE_TEXT("searching for topic description %s/%s, ")
+          ACE_TEXT("located topic description %s/%s instead in domain %d.\n"),
+          name,
+          dataTypeName,
+          (*which)->get_name(),
+          (*which)->get_dataTypeName(),
+          id_
+        ));
+      }
       // desc = 0;
       return 1;
     }
