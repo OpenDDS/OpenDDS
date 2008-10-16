@@ -541,7 +541,9 @@ WriteDataContainer::data_delivered (DataSampleListElement* sample)
     }
 
     // INSERT INTO DURABILITY CACHE HERE
-    ::OpenDDS::DCPS::DataSampleHeader::update_flag (sample->sample_, HISTORIC_SAMPLE);
+    ::OpenDDS::DCPS::DataSampleHeader::update_flag (sample->sample_,
+      HISTORIC_SAMPLE_FLAG);
+    
     sent_data_.enqueue_tail_next_send_sample (sample);
   }
 }

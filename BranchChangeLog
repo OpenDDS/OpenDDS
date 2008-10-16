@@ -1,3 +1,11 @@
+Thu Oct 16 14:21:33 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Renamed FlagKind members - BYTE_ORDER was conflicting with 
+          pre-existing macro on Linux platforms.
+
 Wed Oct 15 16:44:01 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
