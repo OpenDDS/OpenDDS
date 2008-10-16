@@ -1990,21 +1990,16 @@ DataReaderImpl::data_expired (DataSampleHeader const & header) const
     return true;  // Data expired. 
   }
 
-  // @@ Is getting the LIFESPAN value from the Topic sufficient?
-  ::DDS::TopicQos topic_qos;
-  this->topic_servant_->get_qos (topic_qos);
-
-  ::DDS::LifespanQosPolicy const & lifespan = topic_qos.lifespan;
-
-  if (lifespan.duration.sec != ::DDS::DURATION_INFINITY_SEC
-      || lifespan.duration.nanosec != ::DDS::DURATION_INFINITY_NSEC)
+  // The LIFESPAN_DURATION_FLAG is set when sample data is sent
+  // with a non-default LIFESPAN duration value.
+  if (header.lifespan_duration_)
   {
     // Finite lifespan.  Check if data has expired.
 
     ::DDS::Time_t const tmp =
       {
-        header.source_timestamp_sec_ + lifespan.duration.sec,
-        header.source_timestamp_nanosec_ + lifespan.duration.nanosec
+        header.source_timestamp_sec_ + header.lifespan_duration_sec_,
+        header.source_timestamp_nanosec_ + header.lifespan_duration_nanosec_
       };
 
     // We assume that the publisher host's clock and subcriber host's
