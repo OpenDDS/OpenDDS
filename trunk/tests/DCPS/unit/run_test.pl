@@ -15,10 +15,10 @@ $status = 0;
 my $debugFile;
 my $debug;
 # $debug = 10;
-# $debugFile = "test.log";
+$debugFile = "test.log";
 my $debugOpts = "";
 $debugOpts .= "-DCPSDebugLevel $debug " if $debug;
-$debugOpts .= "-ORBLogFile $debugFile " if $debug and $debugFile;
+$debugOpts .= "-ORBLogFile $debugFile ";
 
 unlink $debugFile;
 
