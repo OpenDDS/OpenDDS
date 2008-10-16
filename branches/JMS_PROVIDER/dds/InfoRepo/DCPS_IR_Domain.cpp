@@ -552,9 +552,8 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::remove_topic(DCPS_IR_Participant* par
   // Dispose the BIT information
   dispose_topic_bit(topic);
 
-  delete topic;
+  topic->release (true);
   topic = 0;
-
   return OpenDDS::DCPS::REMOVED;
 }
 

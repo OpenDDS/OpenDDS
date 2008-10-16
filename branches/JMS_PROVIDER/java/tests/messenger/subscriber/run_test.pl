@@ -33,7 +33,6 @@ my $pub_opts = "$opts -ORBListenEndpoints iiop://127.0.0.1:12346 $debug_opt ".
 my $sub_opts = "$opts -ORBListenEndpoints iiop://127.0.0.1:12347 $debug_opt ".
     "-ORBLogFile sub.log -DCPSConfigFile sub_$transport.ini";
 
-my $domains_file = "domain_ids";
 my $dcpsrepo_ior = "repo.ior";
 
 unlink $dcpsrepo_ior;
@@ -41,8 +40,7 @@ unlink $dcpsrepo_ior;
 my $DCPSREPO = PerlDDS::create_process ("$DDS_ROOT/bin/DCPSInfoRepo",
                "-ORBSvcConf $DDS_ROOT/DevGuideExamples/DCPS/Messenger/tcp.conf -NOBITS ".
                "-ORBListenEndpoints iiop://127.0.0.1:1111 -ORBDebugLevel 10 ".
-               "-ORBLogFile DCPSInfoRepo.log -o $dcpsrepo_ior ".
-               "-d $domains_file");
+               "-ORBLogFile DCPSInfoRepo.log -o $dcpsrepo_ior ");
 
 my $PUB = PerlDDS::create_process ("$DDS_ROOT/DevGuideExamples/DCPS/Messenger".
                                    "/publisher", "$pub_opts");

@@ -1,6 +1,7 @@
 /*
  * $Id$
  */
+#include "DcpsInfo_pch.h"
 
 #include <iostream>
 

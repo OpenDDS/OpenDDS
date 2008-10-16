@@ -231,7 +231,6 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
     for (CORBA::ULong i = 0; i < wr_len; i++)
     {
       PublicationId writer_id = writers[i].writerId;
-      WriterInfo info(this, writer_id);
       this->writers_.insert(
         // This insertion is idempotent.
         WriterMapType::value_type(
@@ -241,7 +240,7 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
       );
       if( DCPS_debug_level > 4) {
         ::OpenDDS::DCPS::GuidConverter converter( writer_id);
-        ACE_ERROR((LM_ERROR,
+        ACE_DEBUG((LM_DEBUG,
           "(%P|%t) DataReaderImpl::add_associations: "
           "inserted writer %s.\n",
           (const char*) converter

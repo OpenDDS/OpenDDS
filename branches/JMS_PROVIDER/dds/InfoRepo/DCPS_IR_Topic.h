@@ -50,6 +50,12 @@ public:
 
   ~DCPS_IR_Topic ();
 
+  /// Delete the topic object upon last topic associated sub/pub and topic 
+  /// object deletion. It's kind of reference counting.
+  /// The removing true indicates it's called upon delete_topic, otherwise 
+  /// it's upon remove_publication/remove_subcription.
+  void release (bool removing);
+
   /// Adds the publication to the list of publications
   /// Calls the topic description's try associate if successfully added
   /// 'associate' switch toggles association attempt.
@@ -122,6 +128,10 @@ private:
   /// Keep track the subscriptions of this topic so the TopicQos 
   /// change can be published for those subscriptions.
   DCPS_IR_Subscription_Set subscriptionRefs_;
+
+  /// True means release() is called upon delete_topic, but topic object is
+  /// not deleted because there are still pub/sub associated.
+  bool removed_;
 };
 
 #endif /* DCPS_IR_TOPIC_H */
