@@ -786,7 +786,7 @@ namespace OpenDDS
 
         try {
           // Check the availability of the current repository.
-          if( false == current->second->_non_existent()) {
+          if(false == current->second->_is_a ("Not_An_IDL_Type")) {
 
             if( DCPS_debug_level > 0) {
               ACE_DEBUG((LM_DEBUG,
@@ -808,7 +808,7 @@ namespace OpenDDS
           } else if( DCPS_debug_level > 0) {
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) Service_Participant::repository_lost: ")
-              ACE_TEXT("repository %d reference to %d non-existent.\n"),
+              ACE_TEXT("repository %d reference to %d unexpected _is_a return.\n"),
               key,
               current->first
             ));
