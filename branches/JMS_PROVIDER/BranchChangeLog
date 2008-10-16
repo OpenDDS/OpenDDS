@@ -1,10 +1,23 @@
+Thu Oct 16 15:53:58 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * tests/DCPS/Lifespan/publisher.cpp:
+
+          Updated support for LIFESPAN QoS. A DataReader will
+          now correctly expire a sample based on the DataWriter's
+          QoS setting rather than the Topic's QoS.
+
 Thu Oct 16 14:21:33 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/DataSampleHeader.cpp:
         * dds/DCPS/DataSampleHeader.h:
         * dds/DCPS/WriteDataContainer.cpp:
 
-          Renamed FlagKind members - BYTE_ORDER was conflicting with 
+          Renamed FlagKind members - BYTE_ORDER was conflicting with
           pre-existing macro on Linux platforms.
 
 Wed Oct 15 16:44:01 UTC 2008  Steven Stallion  <stallions@ociweb.com>
