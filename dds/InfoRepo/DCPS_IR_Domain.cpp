@@ -608,7 +608,11 @@ DCPS_IR_Domain::find_topic_description(
   }
 }
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
 int DCPS_IR_Domain::init_built_in_topics( bool federated)
+#else
+int DCPS_IR_Domain::init_built_in_topics( bool /* federated */)
+#endif
 {
 
 #if !defined (DDS_HAS_MINIMUM_BIT)

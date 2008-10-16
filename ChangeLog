@@ -1,9 +1,25 @@
+Thu Oct 16 19:50:35 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Replaced _non_exist() call with _is_a() to validate repo connections.
+          This would fix the 1.4a minimum_corba build issue due to _non_exist 
+          is not available in 1.4a. 
+          
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+
+          Fixed a warning in DDS_HAS_MINIMUM_BIT build.
+          
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          Fixed a warning.
+                    
 Wed Oct 15 22:45:58 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/InfoRepo/FederatorManagerImpl.h:
 
           Fixed warnings from SunOS compiler.
-          
+
 Wed Oct 15 18:46:14 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
