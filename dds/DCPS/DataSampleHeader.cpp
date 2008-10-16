@@ -84,7 +84,8 @@ OpenDDS::DCPS::DataSampleHeader::init (ACE_Message_Block* buffer)
 /// current Serializer behavior changes.
 
 void
-OpenDDS::DCPS::DataSampleHeader::update_flag(ACE_Message_Block* buffer, FlagKind flag)
+OpenDDS::DCPS::DataSampleHeader::update_flag (ACE_Message_Block* buffer,
+  DataSampleHeaderFlag flag)
 {
   char *base = buffer->base();
 
