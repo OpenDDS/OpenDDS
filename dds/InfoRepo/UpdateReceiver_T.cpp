@@ -41,7 +41,8 @@ UpdateReceiver< DataType>::~UpdateReceiver()
   }
 
   // Cleanly terminate.
-  this->close();
+  this->stop();
+  this->wait ();
 }
 
 template< class DataType>
@@ -68,9 +69,6 @@ UpdateReceiver< DataType>::close( u_long /* flags */)
     ));
   }
 
-  // Stop the thread and return after it has finalized.
-  this->stop();
-  this->wait();
   return 0;
 }
 
@@ -85,17 +83,20 @@ UpdateReceiver< DataType>::stop()
   }
 
   // Indicate the thread should stop and get its attention.
+  if (this->stop_)
+    return;
+
   this->stop_ = true;
   this->workAvailable_.signal();
 }
 
 template< class DataType>
 void
-UpdateReceiver< DataType>::put( DataType* sample, ::DDS::SampleInfo* info)
+UpdateReceiver< DataType>::add( DataType* sample, ::DDS::SampleInfo* info)
 {
   if( OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) UpdateReceiver::put()\n")
+      ACE_TEXT("(%P|%t) UpdateReceiver::add()\n")
     ));
   }
 
@@ -104,7 +105,7 @@ UpdateReceiver< DataType>::put( DataType* sample, ::DDS::SampleInfo* info)
     this->queue_.push_back( DataInfo( sample, info));
     if( OpenDDS::DCPS::DCPS_debug_level > 9) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) UpdateReceiver::put() - ")
+        ACE_TEXT("(%P|%t) UpdateReceiver::add() - ")
         ACE_TEXT(" %d samples waiting to process in 0x%x.\n"),
         this->queue_.size(),
         (void*)this

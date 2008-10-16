@@ -38,7 +38,8 @@ module OpenDDS
       FOUND,
       NOT_FOUND,
       REMOVED,
-      CONFLICTING_TYPENAME
+      CONFLICTING_TYPENAME,
+      INTERNAL_ERROR
     };
 
     // thrown when operation receives an

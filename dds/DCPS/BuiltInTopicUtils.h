@@ -293,8 +293,8 @@ namespace OpenDDS {
               /// @TODO: FIXME This fails on fragmented sample sets.
               for (CORBA::ULong i = 0; i < repoid_len; ++i)
                 {
+                  ::OpenDDS::DCPS::GuidConverter converter( const_cast<GUID_t*>( &repoids[i]));
                   if (DCPS_debug_level >= 10) {
-                    ::OpenDDS::DCPS::GuidConverter converter( const_cast<GUID_t*>( &repoids[i]));
                     ACE_DEBUG((LM_DEBUG,
                       ACE_TEXT("(%P|%t) BIT_Helper::repo_ids_to_instance_handles: ")
                       ACE_TEXT("repoId %s\n"),
@@ -315,7 +315,7 @@ namespace OpenDDS {
                           infos[j].instance_handle
                         ));
                       }
-                      if( data[j].key[key_pos] == GuidConverter(const_cast<GUID_t*>(&repoids[i])))
+                      if( data[j].key[key_pos] == (CORBA::Long)((long) converter))
                         {
                           handles[i] = infos[j].instance_handle;
                           ++count;

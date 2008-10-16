@@ -1,3 +1,207 @@
+Wed Oct 15 22:45:58 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/InfoRepo/FederatorManagerImpl.h:
+
+          Fixed warnings from SunOS compiler.
+          
+Wed Oct 15 18:46:14 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/FailoverListener.cpp:
+        * dds/InfoRepo/UpdateListener_T.cpp:
+        * dds/InfoRepo/UpdateReceiver_T.h:
+        * dds/InfoRepo/UpdateReceiver_T.cpp:
+
+          Fixed warnings.
+
+Wed Oct 15 17:37:22 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          Made BIT transport configured with datalink_release_delay_=0, this
+          makes the BIT transport send the graceful shutdown to the peer so
+          the InfoRepo won't try to reconnect.
+
+        * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
+
+          Fixed some warnings.
+
+Wed Oct 15 15:56:53 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
+
+        * MPC/config/dds_wrapper.mpb:
+
+          Fixed project dependency settings to remove linker errors in
+          static builds.
+
+Wed Oct 15 00:15:36 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/BuiltInTopicUtils.h:
+
+          Fixed a guid comparison problem.
+
+        * dds/InfoRepo/DCPS_IR_Topic.h:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+
+          Added release() to support topic deletion upon last associated
+          sub/pub/topic object deletion. This would fix the access violation
+          when sub/pub deletion updates happen after topic deletion.
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+
+          - Made topic->release called upon removing sub/pub/topic.
+          - Updated remove_all_dependents() to move iterator to next
+            before removing sub/pub/topic to fix access violation.
+
+        * dds/InfoRepo/FederatorManagerImpl.inl:
+
+          Fixed orb reference counting issue.
+
+        * dds/InfoRepo/FederatorManagerImpl.h:
+        * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
+
+          - Added lock_ to protect the deferred updata samples.
+          - Added processDeferred() call in each processCreate().
+            This would fix missing update problem due to timing
+            of multithreads handling participant/topic/sub/pub
+            updates.
+          - Added try and catch Invalid_Participant block for
+            remove_topic/remove_publication/remove_subscription
+            in case the remove_domain_participant is called
+            before them.
+
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+
+          Changed an LM_ERROR message to LM_DEBUG message.
+
+Tue Oct 14 19:11:47 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DdsDcps.mpc:
+        * dds/dcps_bits.mpb:
+
+          Even with built_in_topics=0, we now need to use -Gdcps on
+          DdsDcpsInfrastructure.idl because Federation is depending on the
+          functions it generates.
+
+        * java/tests/builtintopics/run_test.pl:
+        * java/tests/complex_idl/run_test.pl:
+        * java/tests/messenger/publisher/run_test.pl:
+        * java/tests/messenger/subscriber/run_test.pl:
+
+          Remove references to deprecated 'domain_ids' files.
+
+        * wrapper/DDSWrapper_OpenDDS.mpc:
+
+          Use "dynamic" flags to set the *_BUILD_DLL macros.
+
+Tue Oct 14 15:18:14 UTC 2008  Chris Cleeland  <cleeland@ociweb.com>
+
+        * tests/DCPS/Serializer/SerializerTest.cpp:
+
+          Appended 'LL' to the constant used when ACE_SIZEOF_LONG_DOUBLE
+          is 16.  Without this it was causing compile errors on at least
+          Mac OS X 10.5.*.
+
+Tue Oct 14 14:11:04 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
+
+        * MPC/config/dds_wrapper.mpb:
+        * wrapper/example/WrapperStockQuoter.m?c:
+
+          Fixed scoreboard error by moving dds_wrapper.mpb file from
+          the wrapper directory to the MPC/config directory and
+          renamed MPC project files.
+
+Mon Oct 13 21:36:42 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+
+          Fixed build breakage on static builds of DCPSInfoRepo.
+
+Mon Oct 13 14:27:57 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/tools/federation/Federation.mpc:
+        * dds/tools/federation/federation.cpp:
+
+          Fixed compile errors.
+
+Sun Oct 12 04:12:31 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
+
+        * wrappers/*:
+
+          Added new set of wrapper classes to simplify DDS usage in
+          applications.
+
+Fri Oct 10 22:39:35 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/tools:
+        * dds/tools/federation:
+        * dds/tools/federation/Federation.mpc:
+        * dds/tools/federation/federation.cpp:
+
+          Added new command line tool for managing federations.
+
+Fri Oct 10 22:13:49 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          Changed lock_ ACE_Recursive_Thread_Mutex to solve the deadlock
+          on linux.
+
+Fri Oct 10 22:15:39 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * java/tests/builtintopics/domain_ids:
+        * java/tests/complex_idl/domain_ids:
+        * java/tests/messenger/publisher/domain_ids:
+        * java/tests/messenger/subscriber/domain_ids:
+
+          Removed these files.  Domain ID files are now depreceated.
+
+Fri Oct 10 20:26:41 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Corrected an debug logging.
+
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Added invalid repo id from repo.
+
+        * dds/DdsDcpsInfoUtils.idl:
+
+          Added an enum TopicStatus - INTERNAL_ERROR .
+
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          Added lock_ to synchronize the servant implementations
+          and the methods called by updater threads.
+
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+
+          Fixed a problem that the iterator is not accessible after
+          remove_topic() is called.
+
+        * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
+
+          Corrected a debug logging.
+
+        * dds/InfoRepo/UpdateReceiver_T.cpp:
+
+          Removed task wait() call from close() since close() can be
+          called when thread exit. It'll cause problem waiting for
+          itself to finish. Use stop() instead of close() to shutdown
+          the UpdateReceiver task thread.
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+
+          Added pre-compile header.
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+
+          Added empty Template_Files section to DCPSInfoRepoServ.
+
 Fri Oct 10 19:59:44 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.mpc:

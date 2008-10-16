@@ -942,6 +942,14 @@ SubscriberImpl::reader_enabled(
 			          qos,
 			          trans_conf_info,
 			          this->qos_) ;
+
+      if (info->subscription_id_ == OpenDDS::DCPS::GUID_UNKNOWN)
+      {
+        ACE_ERROR ((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::reader_enabled, ")
+          ACE_TEXT("add_subscription returned invalid id. \n")));
+        return;
+      }
       info->local_reader_impl_->set_subscription_id (info->subscription_id_);
     }
   catch (const CORBA::SystemException& sysex)

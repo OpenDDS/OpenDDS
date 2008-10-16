@@ -71,7 +71,7 @@ throw (CORBA::SystemException)
 void
 FailoverListener::on_liveliness_changed(
     ::DDS::DataReader_ptr /* reader */,
-    const ::DDS::LivelinessChangedStatus & status)
+    const ::DDS::LivelinessChangedStatus & /* status */)
 throw (CORBA::SystemException)
 {
   if( OpenDDS::DCPS::DCPS_debug_level > 0) {

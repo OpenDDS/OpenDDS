@@ -193,6 +193,11 @@ class OpenDDS_Federator_Export ManagerImpl
     //
     // UpdateProcessor<> methods.
     //
+    // "using" directive to fix "Hides the virtual function in virtual base" warning on 
+    // SunOS compiler.
+    using UpdateProcessor<OwnerUpdate>::processUpdateQos2;
+    using UpdateProcessor<TopicUpdate>::processUpdateQos2;
+    using UpdateProcessor<ParticipantUpdate>::processUpdateQos2;
 
     /// Null implementation for OwnerUpdate samples.
     void processCreate( const OwnerUpdate* sample, const ::DDS::SampleInfo* info);
@@ -333,6 +338,9 @@ class OpenDDS_Federator_Export ManagerImpl
 
     /// Is multicast enabled?
     bool multicastEnabled_;
+
+    /// Protect deferred updates.
+    ACE_Thread_Mutex deferred_lock_;
 };
 
 }} // End namespace OpenDDS::Federator

@@ -347,6 +347,7 @@ int DCPS_IR_Participant::remove_publication (OpenDDS::DCPS::RepoId pubId)
 
     this->domain_->dispose_publication_bit( where->second);
     delete where->second;
+    topic->release (false);
     this->publications_.erase( where);
 
     if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
@@ -517,6 +518,7 @@ int DCPS_IR_Participant::remove_subscription (OpenDDS::DCPS::RepoId subId)
 
     this->domain_->dispose_subscription_bit( where->second);
     delete where->second;
+    topic->release (false);
     this->subscriptions_.erase( where);
 
     if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
@@ -711,81 +713,98 @@ int DCPS_IR_Participant::find_topic_reference (OpenDDS::DCPS::RepoId topicId,
 void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
 {
   // remove all the publications associations
-  for( DCPS_IR_Publication_Map::const_iterator current = this->publications_.begin();
-       current != this->publications_.end();
-       ++current
-     ) {
-    DCPS_IR_Topic* topic = current->second->get_topic();
-    topic->remove_publication_reference( current->second);
-    if( 0 != current->second->remove_associations( notify_lost)) {
-      return;
-    }
-  }
+  {
+    DCPS_IR_Publication_Map::const_iterator next = this->publications_.begin();
+    while (next != this->publications_.end())
+    {
+      DCPS_IR_Publication_Map::const_iterator current = next;
+      ++ next;
+      DCPS_IR_Topic* topic = current->second->get_topic();
+      topic->remove_publication_reference( current->second);
 
-  // remove all the subscriptions associations
-  for( DCPS_IR_Subscription_Map::const_iterator current
-         = this->subscriptions_.begin();
-       current != this->subscriptions_.end();
-       ++current
-     ) {
-    DCPS_IR_Topic* topic = current->second->get_topic();
-    topic->remove_subscription_reference( current->second);
-    if( 0 != current->second->remove_associations( notify_lost)) {
-      return;
-    }
-  }
-
-  // Destroy all the topics.
-  for( DCPS_IR_Topic_Map::iterator current = this->topicRefs_.begin();
-       current != this->topicRefs_.end();
-       ++current
-     ) {
-    // Notify the federation to remove the topic.
-    if( this->um_ && (this->isBitPublisher() == false)) {
-      Update::IdPath path(
-        this->domain_->get_id(),
-        this->get_id(),
-        current->second->get_id()
-      );
-      this->um_->destroy( path, Update::Topic);
-      if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
-        ::OpenDDS::DCPS::RepoId id = current->second->get_id();
-        std::stringstream buffer;
-        long key = ::OpenDDS::DCPS::GuidConverter( id);
-        buffer << id << "(" << std::hex << key << ")";
-        ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) DCPS_IR_Participant::remove_all_dependents: ")
-          ACE_TEXT("pushing deletion of topic %s in domain %d.\n"),
-          buffer.str().c_str(),
-          this->domain_->get_id()
-        ));
+      if( 0 != current->second->remove_associations( notify_lost)) {
+        return;
       }
+      topic->release (false);
     }
+  }
 
-    // Remove the topic ourselves.
-    // N.B. This call sets the second (reference) argument to 0, so when
-    //      clear() is called below, no destructor is (re)called.
-    this->domain_->remove_topic( this, current->second);
+  {
+    DCPS_IR_Subscription_Map::const_iterator next = this->subscriptions_.begin();
+    while (next != this->subscriptions_.end())
+    {
+      DCPS_IR_Subscription_Map::const_iterator current = next;
+      ++ next;
+      DCPS_IR_Topic* topic = current->second->get_topic();
+      topic->remove_subscription_reference( current->second);
 
-    if (::OpenDDS::DCPS::DCPS_debug_level > 9) {
-      std::stringstream buffer;
-      std::stringstream topicBuffer;
+      if( 0 != current->second->remove_associations( notify_lost)) {
+        return;
+      }
+      topic->release (false);
+    }
+  }
 
-      long key = ::OpenDDS::DCPS::GuidConverter( this->id_);
-      buffer << this->id_ << "(" << std::hex << key << ")";
+  {
+    DCPS_IR_Topic_Map::const_iterator next = this->topicRefs_.begin();
+    while (next != this->topicRefs_.end())
+    {
+      DCPS_IR_Topic_Map::const_iterator current = next;
+      ++ next;
+      // Notify the federation to remove the topic.
+      if( this->um_ && (this->isBitPublisher() == false)) {
+        Update::IdPath path(
+          this->domain_->get_id(),
+          this->get_id(),
+          current->second->get_id()
+          );
+        this->um_->destroy( path, Update::Topic);
+        if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
+          ::OpenDDS::DCPS::RepoId id = current->second->get_id();
+          std::stringstream buffer;
+          long key = ::OpenDDS::DCPS::GuidConverter( id);
+          buffer << id << "(" << std::hex << key << ")";
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) DCPS_IR_Participant::remove_all_dependents: ")
+            ACE_TEXT("pushing deletion of topic %s in domain %d.\n"),
+            buffer.str().c_str(),
+            this->domain_->get_id()
+            ));
+        }
 
-      key = OpenDDS::DCPS::GuidConverter(
-              const_cast< OpenDDS::DCPS::RepoId*>( &current->first)
+
+        // Remove the topic ourselves.
+        // N.B. This call sets the second (reference) argument to 0, so when
+        //      clear() is called below, no destructor is (re)called.
+
+        // Get the topic id and topic point before remove_topic since it 
+        // invalidates the iterator. Accessing after removal got SEGV.
+        OpenDDS::DCPS::RepoId id = current->first;
+        DCPS_IR_Topic* topic = current->second;
+
+        this->domain_->remove_topic( this, topic);
+
+        if (::OpenDDS::DCPS::DCPS_debug_level > 9) {
+          std::stringstream buffer;
+          std::stringstream topicBuffer;
+
+          long key = ::OpenDDS::DCPS::GuidConverter( this->id_);
+          buffer << this->id_ << "(" << std::hex << key << ")";
+
+          key = OpenDDS::DCPS::GuidConverter(
+            const_cast< OpenDDS::DCPS::RepoId*>( &id)
             );
-      topicBuffer << current->first << "(" << std::hex << key << ")";
+          topicBuffer << id << "(" << std::hex << key << ")";
 
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) DCPS_IR_Participant::remove_all_dependents: ")
-        ACE_TEXT("domain %d participant %s removed topic %s.\n"),
-        this->domain_->get_id(),
-        buffer.str().c_str(),
-        topicBuffer.str().c_str()
-      ));
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) DCPS_IR_Participant::remove_all_dependents: ")
+            ACE_TEXT("domain %d participant %s removed topic %s.\n"),
+            this->domain_->get_id(),
+            buffer.str().c_str(),
+            topicBuffer.str().c_str()
+            ));
+        }
+      }
     }
   }
 
