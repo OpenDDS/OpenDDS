@@ -30,15 +30,15 @@ namespace OpenDDS
       FULLY_ASSOCIATED
     };
 
-    enum FlagKind {
-      LAST_SAMPLE,
-      BYTE_ORDER,
-      HISTORIC_SAMPLE,
-      RESERVED_1,
-      RESERVED_2,
-      RESERVED_3,
-      RESERVED_4,
-      RESERVED_5
+    enum DataSampleHeaderFlag {
+      LAST_SAMPLE_FLAG,
+      BYTE_ORDER_FLAG,
+      HISTORIC_SAMPLE_FLAG,
+      RESERVED_1_FLAG,
+      RESERVED_2_FLAG,
+      RESERVED_3_FLAG,
+      RESERVED_4_FLAG,
+      RESERVED_5_FLAG
     };
 
     /// The header message of a data sample.
@@ -96,7 +96,8 @@ namespace OpenDDS
       /// sent.
       PublicationId  publication_id_;
       
-      static void update_flag (ACE_Message_Block* buffer, FlagKind flag) ;
+      static void update_flag (ACE_Message_Block* buffer,
+                               DataSampleHeaderFlag flag) ;
 
       /// Default constructor.
       DataSampleHeader() ;
