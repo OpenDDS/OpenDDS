@@ -9,7 +9,7 @@ Thu Oct 16 15:53:58 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
           Updated support for LIFESPAN QoS. A DataReader will
           now correctly expire a sample based on the DataWriter's
-          QoS setting rather than the Topic's QoS.
+          QoS setting rather than the Topic QoS.
 
 Thu Oct 16 14:21:33 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
