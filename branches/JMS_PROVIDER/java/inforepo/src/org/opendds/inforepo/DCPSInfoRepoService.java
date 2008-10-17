@@ -49,7 +49,7 @@ public final class DCPSInfoRepoService implements Runnable {
      * @throws  IllegalStateException if the DCPSInfoRepo instance
      *          has been finalized and marked for collection
      *
-     * @see #shutdown
+     * @see     #shutdown
      */
     public native void run();
 
