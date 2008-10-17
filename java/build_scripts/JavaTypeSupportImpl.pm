@@ -44,7 +44,7 @@ EOT
 extern "C" JNIEXPORT jlong JNICALL
 Java_${jniclass}TypeSupportImpl__1jni_1init (JNIEnv *, jclass)
 {
-  return reinterpret_cast<jlong> (CORBA::Object::_duplicate (new ${type}TypeSupportImpl));
+  return reinterpret_cast<jlong> (static_cast<CORBA::Object_ptr> (new ${type}TypeSupportImpl));
 }
 
 EOT

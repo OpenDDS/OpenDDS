@@ -1,8 +1,18 @@
+Fri Oct 17 22:21:38 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * java/build_scripts/JavaTypeSupportImpl.pm:
+
+          Removed an extraneous reference count on the typesupport object.
+
+        * wrapper/example/WrapperStockQuoter.mpc:
+
+          Removed references to non-existent domain_ids file.
+
 Fri Oct 17 22:18:52 UTC 2008  Mike Martinez  <martinez_m@lab.ociweb.com>
 
         * bin/dcps_ts.pl:
 
-	  Added -o <dir> option to write output files to a directory.
+          Added -o <dir> option to write output files to a directory.
 
 Thu Oct 16 23:09:41 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
