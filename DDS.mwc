@@ -2,8 +2,11 @@
 
 workspace {
 
+  // These projects use apache ant to control the build, however
+  // they also contain .mpc files which should be ignored:
   exclude {
-    java/jms //Uses "ant" to control build, but it also has an .mpc file
+    java/inforepo 
+    java/jms
   }
 
 }

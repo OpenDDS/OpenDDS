@@ -1,3 +1,37 @@
+Fri Oct 17 18:46:07 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * DDS.mwc:
+        * java/OpenDDS.ipr:
+        * java/inforepo:
+        * java/inforepo/build.properties:
+        * java/inforepo/build.xml:
+        * java/inforepo/doc:
+        * java/inforepo/doc/overview.html:
+        * java/inforepo/lib:
+        * java/inforepo/lib/junit-4.5.jar:
+        * java/inforepo/native:
+        * java/inforepo/native/build.xml:
+        * java/inforepo/native/opendds_inforepo_native.mpc:
+        * java/inforepo/native/opendds_inforepo_native_Export.h:
+        * java/inforepo/native/org_opendds_inforepo_DCPSInfoRepoService.cpp:
+        * java/inforepo/opendds-inforepo.iml:
+        * java/inforepo/src:
+        * java/inforepo/src/org:
+        * java/inforepo/src/org/opendds:
+        * java/inforepo/src/org/opendds/inforepo:
+        * java/inforepo/src/org/opendds/inforepo/DCPSInfoRepoService.java:
+        * java/inforepo/src/org/opendds/inforepo/jmx:
+        * java/inforepo/src/org/opendds/inforepo/jmx/DCPSInfoRepo.java:
+        * java/inforepo/src/org/opendds/inforepo/jmx/DCPSInfoRepoMBean.java:
+        * java/inforepo/test:
+        * java/inforepo/test/org:
+        * java/inforepo/test/org/opendds:
+        * java/inforepo/test/org/opendds/inforepo:
+        * java/inforepo/test/org/opendds/inforepo/DCPSInfoRepoServiceTest.java:
+        * java/inforepo/test/org/opendds/inforepo/jmx:
+
+          Initial JNI binding for DCPSInfoRepo.
+
 Fri Oct 17 00:39:55 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepoServ.cpp:

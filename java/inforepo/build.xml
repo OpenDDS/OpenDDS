@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Id$
+
+    Author:  Steven Stallion
+    Version: $Revision$
+-->
+<project name="opendds-inforepo" default="native" basedir=".">
+    <property name="build.dir" value="${basedir}/build"/>
+    <property name="doc.dir" value="${basedir}/doc"/>
+    <property name="lib.dir" value="${basedir}/lib"/>
+    <property name="native.dir" value="${basedir}/native"/>
+    <property name="src.dir" value="${basedir}/src"/>
+    <property name="test.dir" value="${basedir}/test"/>
+
+    <property environment="env"/>
+
+    <!-- Determine project version -->
+    <loadproperties srcfile="${env.DDS_ROOT}/dds/Version.h">
+        <filterchain>
+            <deletecharacters chars="&quot;"/>
+            <tokenfilter>
+                <replacestring from="#define DDS_MAJOR_VERSION" to="version.dds.major"/>
+                <replacestring from="#define DDS_MINOR_VERSION" to="version.dds.minor"/>
+                <replacestring from="#define DDS_MICRO_VERSION" to="version.dds.micro"/>
+                <replacestring from="#define DDS_VERSION" to="version.dds"/> <!-- project version -->
+            </tokenfilter>
+        </filterchain>
+    </loadproperties>
+
+    <property file="build.properties"/>
+
+    <!--
+        Project Paths
+    -->
+    <path id="project.classpath">
+        <pathelement location="${build.dir}/classes"/>
+        <pathelement location="${build.dir}/tests"/>
+
+        <pathelement location="${src.dir}"/>
+        <pathelement location="${test.dir}"/>
+
+        <fileset dir="${lib.dir}"/>
+
+        <fileset dir="${env.DDS_ROOT}/lib">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+
+    <macrodef name="antnative">
+        <attribute name="target"/>
+        <sequential>
+            <subant buildpath="${native.dir}" target="@{target}"/>
+        </sequential>
+    </macrodef>
+
+    <!--
+        Project Targets
+    -->
+    <target name="all" depends="clean, test, jar"
+            description="Meta target for: clean, compile, test, jar"/>
+
+    <target name="clean" depends="native.clean, javadoc.clean, test.clean"
+            description="Delete all build artifacts">
+        <delete dir="${build.dir}"/>
+    </target>
+
+    <target name="init">
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${build.dir}/classes"/>
+    </target>
+
+    <target name="compile" depends="init"
+            description="Compile classes under src/">
+        <javac srcdir="${src.dir}"
+               destdir="${build.dir}/classes"
+               debug="${compile.debug}"
+               deprecation="${compile.deprecation}"
+               optimize="${compile.optimize}"
+               source="${project.source}"
+               classpathref="project.classpath">
+        </javac>
+    </target>
+
+    <target name="javah" depends="compile">
+        <javah destdir="${native.dir}"
+               classpathref="project.classpath">
+            <class name="org.opendds.inforepo.DCPSInfoRepoService"/>
+        </javah>
+    </target>
+
+    <target name="native.clean">
+        <antnative target="clean"/>
+    </target>
+
+    <target name="native" depends="javah">
+        <antnative target="compile"/>
+    </target>
+
+    <target name="jar" depends="compile, native"
+            description="Archive compiled classes and resources">
+        <jar destfile="${build.dir}/${ant.project.name}-${version.dds}.jar"
+             compress="${jar.compress}"
+             index="${jar.index}">
+            <fileset dir="${build.dir}/classes"/>
+            <fileset dir="${src.dir}">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </jar>
+    </target>
+
+    <target name="test.clean">
+        <delete dir="${build.dir}/tests"/>
+    </target>
+
+    <target name="test.init" depends="init">
+        <mkdir dir="${build.dir}/tests"/>
+    </target>
+
+    <target name="test.compile" depends="compile, native, test.init">
+        <javac srcdir="${test.dir}"
+               destdir="${build.dir}/tests"
+               debug="${compile.debug}"
+               deprecation="${compile.deprecation}"
+               optimize="${compile.optimize}"
+               source="${project.source}"
+               classpathref="project.classpath">
+        </javac>
+    </target>
+
+    <target name="test" depends="test.compile"
+            description="Run test suites under test/">
+        <junit fork="true"
+               haltonerror="true"
+               haltonfailure="true"
+               printsummary="true">
+            <formatter type="brief"/>
+            <batchtest todir="${build.dir}/tests">
+                <fileset dir="${test.dir}">
+                    <include name="**/*Test.java"/>
+                </fileset>
+            </batchtest>
+            <jvmarg value="-ea"/> <!-- enable assertions -->
+            <classpath refid="project.classpath"/>
+        </junit>
+    </target>
+
+    <target name="javadoc.clean">
+        <delete dir="${doc.dir}/api"/>
+    </target>
+
+    <target name="javadoc.init">
+        <mkdir dir="${doc.dir}/api"/>
+    </target>
+
+    <target name="javadoc" depends="javadoc.init"
+            description="Generate API documentation under doc/api/">
+        <javadoc destdir="${doc.dir}/api"
+                 source="${project.source}"
+                 author="true"
+                 version="true"
+                 overview="${doc.dir}/overview.html"
+                 doctitle="OpenDDS ${version.dds} DCPS InfoRepo API Specification"
+                 windowtitle="${ant.project.name}">
+            <link href="http://java.sun.com/j2se/${project.source}/docs/api/"/>
+            <classpath refid="project.classpath"/>
+            <packageset dir="${src.dir}"/>
+        </javadoc>
+    </target>
+</project>
