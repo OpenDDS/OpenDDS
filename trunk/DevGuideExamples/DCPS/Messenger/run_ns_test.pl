@@ -62,11 +62,19 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
 }
 
 
+my $exec_extn="";
+if ($^O eq "MSWin32") {
+  $exec_extn=".exe";
+}
+
+
 $nsadd="$ENV{ACE_ROOT}/bin/tao_nsadd";
-if (! -s $nsadd) {
+
+if (! -s $nsadd.$exec_extn) {
   $nsadd="$ENV{ACE_ROOT}/bin/nsadd";
-  if (! -s $nsadd) {
-    print STDERR "ERROR: could not file nsadd\n";
+
+  if (! -s $nsadd.$exec_extn) {
+    print STDERR "ERROR: could not find $nsadd\n";
     $DCPSREPO->Kill ();
     $NS->Kill();
     exit 1;
