@@ -56,7 +56,7 @@ namespace
     void
     delete_argv(JNIEnv *env, ACE_TCHAR **argv, jsize len)
     {
-        // Skip first element; argv[0] is a constant.
+        // Skip first element; argv[0] is a string literal.
         for (int i = 1; i < len; ++i) {
             ACE_OS::free(argv[i]);
         }
@@ -119,7 +119,7 @@ Java_org_opendds_inforepo_DCPSInfoRepoService_init(JNIEnv *env,
                 err.msg_.c_str());
         }
         catch (CORBA::Exception &err) {
-            throw_exception(env, "java/lang/IllegalArgumentException",
+            throw_exception(env, "org/omg/CORBA/UNKNOWN",
                 err._info().c_str());
         }
         catch (...) {
