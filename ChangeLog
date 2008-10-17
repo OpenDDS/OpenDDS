@@ -1,15 +1,21 @@
+Fri Oct 17 22:18:52 UTC 2008  Mike Martinez  <martinez_m@lab.ociweb.com>
+
+        * bin/dcps_ts.pl:
+
+	  Added -o <dir> option to write output files to a directory.
+
 Thu Oct 16 23:09:41 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/run_ns_test.pl:
 
-          Worked around nsadd executable name difference in DOC and other 
-          TAO version(1.4a and 1.5a). The script now verify nsadd executable 
-          file existence. 
-          
+          Worked around nsadd executable name difference in DOC and other
+          TAO version(1.4a and 1.5a). The script now verify nsadd executable
+          file existence.
+
         * dds/InfoRepo/DCPS_IR_Domain.cpp:
 
           Changed an LM_ERROR logging in find_topic_description to LM_DEBUG.
-          
+
         * tests/DCPS/unit/run_test.pl:
 
           Directed output to a file as the errors loggings are expected.
