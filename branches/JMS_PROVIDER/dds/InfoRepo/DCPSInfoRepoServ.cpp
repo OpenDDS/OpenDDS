@@ -257,9 +257,9 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
     {
       if (0 != info_servant->init_transport(listen_address_given_, listen_address_str_.c_str()))
         {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("ERROR: Failed to initialize the transport!\n")),
-                           false);
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPSInfoRepo::init: ")
+                     ACE_TEXT("Unable to initialize transport.\n")));
+          throw InitError ("Unable to initialize transport.");
         }
     }
   else

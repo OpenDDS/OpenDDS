@@ -1,3 +1,12 @@
+Fri Oct 17 00:39:55 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          Fixed SIGABRT in DCPSInfoRepo if executed with no arguments
+          (affectings the stability of the new JNI bindings). Execution
+          now dies gracefully.
+
 Thu Oct 16 16:29:34 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
           Back-merged from trunk (r1476:1507).
