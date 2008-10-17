@@ -14,19 +14,24 @@ package org.opendds.inforepo;
 public final class DCPSInfoRepoService implements Runnable {
 
     static {
-        System.loadLibrary("opendds-inforepo-native");
+        String library = "opendds-inforepo-native";
+        if (Boolean.getBoolean("jni.nativeDebug")) {
+            library = library.concat("d");  // Win32 hosts only
+        }
+        System.loadLibrary(library);
     }
 
     private long peer;
 
     /**
      * Constructs and initializes a DCPSInfoRepoService instance.
-     * Care must be taken to ensure that the {@code args}
      *
-     * @throws  IllegalArgumentException    if an invalid argument
+     * @throws  IllegalArgumentException if an invalid argument
      *          causes DCPSInfoRepo initialization to fail
-     * @throws  NullPointerException        if {@code args} is
-     *          {@code null} or contains a {@code null} value
+     * @throws  NullPointerException if {@code args} is {@code null}
+     *          or contains a {@code null} value
+     * @throws  org.omg.CORBA.UNKNOWN if the DCPSInfoRepo fails
+     *          internally with a CORBA exception
      */
     public DCPSInfoRepoService(String[] args) {
         init(args);
@@ -41,8 +46,8 @@ public final class DCPSInfoRepoService implements Runnable {
      * method will block until the DCPSInfoRepo is terminated by
      * the {@code shutdown()} method.
      *
-     * @throws  IllegalStateException   if the DCPSInfoRepo instance
-     *          has been finalized and marked for garbage collection
+     * @throws  IllegalStateException if the DCPSInfoRepo instance
+     *          has been finalized and marked for collection
      *
      * @see #shutdown
      */
@@ -52,8 +57,8 @@ public final class DCPSInfoRepoService implements Runnable {
      * Gracefully terminates a DCPSInfoRepo instance running on
      * another thread.
      *
-     * @throws  IllegalStateException   if the DCPSInfoRepo instance
-     *          has been finalized and marked for garbage collection
+     * @throws  IllegalStateException if the DCPSInfoRepo instance
+     *          has been finalized and marked for collection
      */
     public native void shutdown();
 

@@ -46,6 +46,16 @@ public class DCPSInfoRepoServiceTest {
     }
 
     @Test
-    public void testRunWithShutdown() {
+    public void testRunWithShutdown() throws Exception {
+        DCPSInfoRepoService service =
+            new DCPSInfoRepoService(new String[] { "-NOBITS" });
+
+        Thread t = new Thread(service);
+        t.start();
+
+        Thread.sleep(10000);
+
+        service.shutdown();
+        t.join();
     }
 }
