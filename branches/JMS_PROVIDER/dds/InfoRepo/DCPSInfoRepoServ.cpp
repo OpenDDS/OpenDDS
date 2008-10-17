@@ -41,7 +41,7 @@
 #include <string>
 #include <sstream>
 
-InfoRepo::InfoRepo (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
+InfoRepo::InfoRepo (int argc, ACE_TCHAR *argv[])
   : ior_file_ (ACE_TEXT("repo.ior"))
     , listen_address_given_ (0)
     , use_bits_ (true)
@@ -50,7 +50,7 @@ InfoRepo::InfoRepo (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
     , federator_( this->federatorConfig_)
     , federatorConfig_( argc, argv)
 {
-  init (argc, argv);
+  init ();
 }
 
 InfoRepo::~InfoRepo (void)
@@ -61,12 +61,10 @@ InfoRepo::~InfoRepo (void)
   orb_->destroy ();
 }
 
-bool
+void
 InfoRepo::run (void)
 {
   orb_->run ();
-
-  return true;
 }
 
 void
@@ -163,8 +161,7 @@ InfoRepo::parse_args (int argc,
       else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-?")) == 0)
         {
           this->usage (argv[0]);
-          ACE_OS::exit (0);
-
+          throw InitError ("Usage");
         }
       // Anything else we just skip
 
@@ -175,8 +172,8 @@ InfoRepo::parse_args (int argc,
     }
 }
 
-bool
-InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
+void
+InfoRepo::init ()
 {
   ACE_Argv_Type_Converter cvt(
                             this->federatorConfig_.argc(),
@@ -238,7 +235,8 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
 
   // Initialize the DomainParticipantFactory
   ::DDS::DomainParticipantFactory_var dpf
-      = TheParticipantFactoryWithArgs(argc, argv);
+      = TheParticipantFactoryWithArgs(this->federatorConfig_.argc(),
+                                      this->federatorConfig_.argv());
 
   // We need parse the command line options for DCPSInfoRepo after parsing DCPS specific
   // command line options.
@@ -386,8 +384,6 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
       this->federatorConfig_.federationDomain()
     );
   }
-
-  return true;
 }
 
 InfoRepo_Shutdown::InfoRepo_Shutdown (InfoRepo &ir)

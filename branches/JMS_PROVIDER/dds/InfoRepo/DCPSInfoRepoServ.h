@@ -28,9 +28,9 @@ public:
     std::string msg_;
   };
 
-  InfoRepo (int argc, ACE_TCHAR *argv[]) throw (InitError);
+  InfoRepo (int argc, ACE_TCHAR *argv[]);
   ~InfoRepo (void);
-  bool run (void);
+  void run (void);
 
   /// ShutdownInterface used to schedule a shutdown.
   virtual void shutdown (void);
@@ -39,7 +39,7 @@ public:
   virtual int handle_exception( ACE_HANDLE fd = ACE_INVALID_HANDLE);
 
 private:
-  bool init (int argc, ACE_TCHAR *argv[]) throw (InitError);
+  void init ();
   void usage (const ACE_TCHAR * cmd);
   void parse_args (int argc, ACE_TCHAR *argv[]);
 
