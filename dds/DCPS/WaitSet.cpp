@@ -8,7 +8,7 @@
 namespace
 {
   void copyInto(DDS::ConditionSeq& target,
-    const std::set<DDS::Condition_var>& source)
+    const DDS::WaitSet::ConditionSet& source)
   {
     size_t size = source.size();
     // If we're shortening the sequence we must manually nil-out the extra slots
@@ -18,7 +18,7 @@ namespace
       }
     target.length(size);
     CORBA::ULong index = 0;
-    for (std::set<DDS::Condition_var>::const_iterator iter = source.begin(),
+    for (DDS::WaitSet::ConditionSet::const_iterator iter = source.begin(),
       end = source.end(); iter != end; ++iter, ++index)
       {
         target[index] = *iter;

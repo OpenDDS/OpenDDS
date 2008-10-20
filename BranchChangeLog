@@ -1,3 +1,25 @@
+Mon Oct 20 19:39:11 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/StatusConditionImpl.h:
+
+          Forgot to "svn add" this one last time.
+
+        * dds/DCPS/Definitions.h:
+
+          Added a VarLess template that works like std::less, on _var types.
+
+        * dds/DCPS/ConditionImpl.h:
+        * dds/DCPS/ConditionImpl.cpp:
+        * dds/DCPS/WaitSet.h:
+        * dds/DCPS/WaitSet.cpp:
+
+          Used the VarLess so as not to rely on the implicit _ptr conversion,
+          some compilers didn't like this.
+
+        * dds/DdsDcps.mpc:
+
+          Expand the list of .h files (only impacts IDEs).
+
 Mon Oct 20 19:23:33 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * DDS.mwc:
