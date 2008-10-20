@@ -92,7 +92,7 @@ namespace
     }
 }
 
-void opendds_inforepo_native_Export
+void JNICALL
 Java_org_opendds_inforepo_DCPSInfoRepoService_init(JNIEnv *env,
     jobject self, jobjectArray args)
 {
@@ -129,7 +129,7 @@ Java_org_opendds_inforepo_DCPSInfoRepoService_init(JNIEnv *env,
     }
 }
 
-void opendds_inforepo_native_Export
+void JNICALL
 Java_org_opendds_inforepo_DCPSInfoRepoService_fini(JNIEnv *env,
     jobject self)
 {
@@ -139,7 +139,7 @@ Java_org_opendds_inforepo_DCPSInfoRepoService_fini(JNIEnv *env,
     }
 }
 
-void opendds_inforepo_native_Export
+void JNICALL
 Java_org_opendds_inforepo_DCPSInfoRepoService_run(JNIEnv *env,
     jobject self)
 {
@@ -151,7 +151,7 @@ Java_org_opendds_inforepo_DCPSInfoRepoService_run(JNIEnv *env,
     peer->run();
 }
 
-void opendds_inforepo_native_Export
+void JNICALL
 Java_org_opendds_inforepo_DCPSInfoRepoService_shutdown(JNIEnv *env,
     jobject self)
 {
