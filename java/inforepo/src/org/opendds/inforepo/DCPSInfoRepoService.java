@@ -58,6 +58,7 @@ public final class DCPSInfoRepoService implements Runnable {
      *          has been finalized and marked for collection
      *
      * @see     #shutdown
+     * @see     #shutdown(boolean)
      */
     public native void run();
 
