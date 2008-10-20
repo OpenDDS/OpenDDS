@@ -22,35 +22,24 @@
             <tokenfilter>
                 <replacestring from="#define DDS_MAJOR_VERSION" to="version.dds.major"/>
                 <replacestring from="#define DDS_MINOR_VERSION" to="version.dds.minor"/>
-                <replacestring from="#define DDS_MICRO_VERSION" to="version.dds.micro"/>
                 <replacestring from="#define DDS_VERSION" to="version.dds"/> <!-- project version -->
             </tokenfilter>
         </filterchain>
     </loadproperties>
-
-    <property file="version.properties"/>
 
     <property file="build.properties"/>
 
     <!--
         Project Paths
     -->
-    <fileset id="project.resources" dir="${src.dir}">
-        <exclude name="**/*.java"/>
-    </fileset>
-
-    <fileset id="test.resources" dir="${test.dir}">
-        <exclude name="**/*.java"/>
-    </fileset>
-
     <path id="project.classpath">
         <pathelement location="${build.dir}/classes"/>
         <pathelement location="${build.dir}/tests"/>
 
         <pathelement location="${native.dir}/classes"/>
 
-        <fileset refid="project.resources"/>
-        <fileset refid="test.resources"/>
+        <pathelement location="${src.dir}"/>
+        <pathelement location="${test.dir}"/>
 
         <fileset dir="${lib.dir}"/>
 
@@ -72,7 +61,7 @@
     <target name="all" depends="clean, test, jar"
             description="Meta target for: clean, compile, test, jar"/>
 
-    <target name="clean" depends="javadoc.clean, test.clean, idl.clean"
+    <target name="clean" depends="javadoc.clean, test.clean, native.clean"
             description="Delete all build artifacts">
         <delete dir="${build.dir}"/>
     </target>
@@ -89,19 +78,24 @@
             <entry key="version.dds" value="${version.dds}"/>
             <entry key="version.dds.major" value="${version.dds.major}"/>
             <entry key="version.dds.minor" value="${version.dds.minor}"/>
-            <entry key="version.dds.micro" value="${version.dds.micro}" default=""/>
+            <entry key="version.jca" value="${version.jca}"/>
+            <entry key="version.jca.minor" value="${version.jca.minor}"/>
+            <entry key="version.jca.major" value="${version.jca.major}"/>
+            <entry key="version.jms" value="${version.jms}"/>
+            <entry key="version.jms.minor" value="${version.jms.minor}"/>
+            <entry key="version.jms.major" value="${version.jms.major}"/>
         </propertyfile>
     </target>
 
-    <target name="idl.clean">
+    <target name="native.clean">
         <antnative target="clean"/>
     </target>
 
-    <target name="idl">
-        <antnative target="idl"/>
+    <target name="native">
+        <antnative target="compile"/>
     </target>
 
-    <target name="compile" depends="init, idl"
+    <target name="compile" depends="init, native"
             description="Compile classes under src/">
         <javac srcdir="${src.dir}"
                destdir="${build.dir}/classes"
@@ -118,9 +112,6 @@
         <jar destfile="${build.dir}/${ant.project.name}-${version.dds}.jar"
              compress="${jar.compress}"
              index="${jar.index}">
-
-            <fileset refid="project.resources"/>
-
             <fileset dir="${build.dir}/classes"/>
             <fileset dir="${build.dir}">
                 <include name="version.properties"/>
@@ -128,7 +119,11 @@
 
             <fileset dir="${native.dir}/classes"/>
 
-            <!-- Identify distribution -->
+            <fileset dir="${src.dir}">
+                <exclude name="**/*.java"/>
+            </fileset>
+
+            <!-- Identify specification/implementation -->
             <manifest>
                 <attribute name="Specification-Title" value="Java Message Service (JMS)"/>
                 <attribute name="Specification-Version" value="${version.jms}"/>
@@ -184,7 +179,7 @@
         <mkdir dir="${doc.dir}/api"/>
     </target>
 
-    <target name="javadoc" depends="javadoc.init"
+    <target name="javadoc" depends="native, javadoc.init"
             description="Generate API documentation under doc/api/">
         <javadoc destdir="${doc.dir}/api"
                  source="${project.source}"
@@ -197,6 +192,7 @@
             <link href="http://java.sun.com/javaee/5/docs/api/"/>
             <classpath refid="project.classpath"/>
             <packageset dir="${src.dir}"/>
+            <packageset dir="${native.dir}"/>
         </javadoc>
     </target>
 </project>

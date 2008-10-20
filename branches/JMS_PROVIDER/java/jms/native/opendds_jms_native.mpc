@@ -4,8 +4,10 @@
 
 project: dcps_java {
 
-    // Ensure the library name matches the opendds-jms jar name:
-    sharedname      = opendds-jms-native
+    // Ensure sharedname matches the opendds-jms jar naming scheme:
+    sharedname       = opendds-jms-native
+
+    after           += InfoRepoLib Federator DCPSInfoRepoServ
 
     dcps_ts_flags   += --export=opendds_jms_native_Export
 
@@ -16,6 +18,11 @@ project: dcps_java {
 
     dynamicflags    += OPENDDS_JMS_NATIVE_BUILD_DLL
 
+    includes        += $(JAVA_HOME)/include $(JAVA_HOME)/include/$(JAVA_PLATFORM) \
+                       $(ACE_ROOT) $(TAO_ROOT) $(TAO_ROOT)/orbsvcs
+
+    libs            += DCPSInfoRepoServ InfoRepoLib Federator
+
     // Older versions of Visual Studio will create the intermediate directories
     // in all-lowercase, so we have to create them first to get the correct case.
     specific(vc71, vc8) {
@@ -23,6 +30,14 @@ project: dcps_java {
         prebuild    += <%mkdir%> OpenDDS<%slash%>JMS 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
         prebuild    += <%mkdir%> classes<%slash%>OpenDDS 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
         prebuild    += <%mkdir%> classes<%slash%>OpenDDS<%slash%>JMS 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
+    }
+
+    Java_Files {
+        org/opendds/jms/ir/DCPSInfoRepoService.java
+    }
+
+    JavaH_Files {
+        classes/org/opendds/jms/ir/DCPSInfoRepoService.class
     }
 
     TypeSupport_Files {
