@@ -1,3 +1,7 @@
+Mon Oct 20 18:07:23 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+          Back-merged from trunk (r1521:1531)
+
 Mon Oct 20 17:44:30 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/inforepo/native/org_opendds_inforepo_DCPSInfoRepoService.cpp:
