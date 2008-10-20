@@ -5,7 +5,7 @@
     Author:  Steven Stallion
     Version: $Revision$
 -->
-<project name="opendds-jms" default="compile" basedir=".">
+<project name="opendds-jms" default="all" basedir=".">
     <property name="build.dir" value="${basedir}/build"/>
     <property name="doc.dir" value="${basedir}/doc"/>
     <property name="lib.dir" value="${basedir}/lib"/>
