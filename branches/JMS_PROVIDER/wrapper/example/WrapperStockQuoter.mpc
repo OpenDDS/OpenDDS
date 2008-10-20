@@ -45,7 +45,6 @@ project(*Publisher) : dcpsexe, svc_utils, dds_wrapper {
 
   Documentation_Files {
     README.txt
-    domain_ids
     dds_tcp_conf.ini
     pub_udp_conf.ini
     sub2_udp_conf.ini
@@ -76,7 +75,6 @@ project(*Subscriber) : dcpsexe, dds_wrapper {
 
   Documentation_Files {
     README.txt
-    domain_ids
     dds_tcp_conf.ini
     pub_udp_conf.ini
     sub2_udp_conf.ini

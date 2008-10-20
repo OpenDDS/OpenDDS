@@ -33,6 +33,7 @@ my $verbose ;
 #
 my $backup = 0 ;
 my $typestyle = "struct" ;
+my $outputdir = ".";
 my $subdir ;
 my $exportmacro ;
 my $pchfile ;
@@ -51,6 +52,7 @@ GetOptions( "verbose!"    => \$verbose,
             "help|?"      => \$help,
             "man"         => \$man,
             "debug|d"     => \$debug,
+            "output|o=s"  => \$outputdir,
             "dir|S=s"     => \$subdir,
             "export|X=s"  => \$exportmacro,
             "pch=s"       => \$pchfile,
@@ -154,16 +156,16 @@ if( $backup) {
   my $cppbackupfile = $cppoutputfile . $timestamp ;
 
   if ($cpp_only == 0) {
-    rename $idloutputfile, $idlbackupfile
+    rename $outputdir/$idloutputfile, $outputdir/$idlbackupfile
       or die "Failed to backup $idloutputfile to $idlbackupfile\n"
-      if -r $idloutputfile ;
-    rename $houtputfile, $hbackupfile
+      if -r $outputdir/$idloutputfile ;
+    rename $outputdir/$houtputfile, $outputdir/$hbackupfile
       or die "Failed to backup $houtputfile to $hbackupfile\n"
-      if -r $houtputfile ;
+      if -r $outputdir/$houtputfile ;
   }
-  rename $cppoutputfile, $cppbackupfile
+  rename $outputdir/$cppoutputfile, $outputdir/$cppbackupfile
     or die "Failed to backup $cppoutputfile to $cppbackupfile\n"
-    if -r $cppoutputfile ;
+    if -r $outputdir/$cppoutputfile ;
 }
 
 #
@@ -366,7 +368,7 @@ if ($ext_only) {
   exit 0;
 }
 
-if (open(IDLFILE, ">$idloutputfile")) {
+if (open(IDLFILE, ">$outputdir/$idloutputfile")) {
   print IDLFILE $idl_content;
   close(IDLFILE);
   console("IDL file $idloutputfile written.");
@@ -381,7 +383,7 @@ if ($cpp_only == 0) {
   #
   # Put the results in the file.
   #
-  if (open(HFILE, ">$houtputfile")) {
+  if (open(HFILE, ">$outputdir/$houtputfile")) {
     print HFILE $h_content;
     close(HFILE);
     console("Header file $houtputfile written.") ;
@@ -396,7 +398,7 @@ if ($cpp_only == 0) {
 #
 # Put the results in the file.
 #
-if (open(CPPFILE, ">$cppoutputfile")) {
+if (open(CPPFILE, ">$outputdir/$cppoutputfile")) {
   print CPPFILE $cpp_content;
   close(CPPFILE);
   console("CPP file $cppoutputfile written.");
@@ -445,6 +447,7 @@ perl ./dcps_ts.pl [options] [IDLfile]
  --man       - print manual page and exit
  --verbose   - execute in a wordy fashion
  --debug     - execute additional debug statements
+ --output=S  - place generated output files in directory
  --dir=S     - subdirectory for input and output files
  --export=S  - export macro to use
  --pch=S     - PreCompiled Header file to be included
@@ -485,6 +488,10 @@ Prints a brief usage message and exits.
 =item B<--man>
 
 Prints the manual page and exits.
+
+=item B<--output | -o> = string
+
+Indicates the subdirectory in which the output files should be placed.
 
 =item B<--dir | -S> = string
 
