@@ -14,8 +14,6 @@ package org.opendds.inforepo;
  * process should ensure the {@code shutdown()} method is always
  * called with {@code finalize} set as {@code true}.
  *
- * @see     #shutdown(boolean)
- *
  * @author  Steven Stallion
  * @version $Revision$
  */
@@ -56,9 +54,6 @@ public final class DCPSInfoRepoService implements Runnable {
      *
      * @throws  IllegalStateException if the DCPSInfoRepo instance
      *          has been finalized and marked for collection
-     *
-     * @see     #shutdown
-     * @see     #shutdown(boolean)
      */
     public native void run();
 
