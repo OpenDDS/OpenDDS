@@ -14,10 +14,10 @@
 
 #include "org_opendds_inforepo_DCPSInfoRepoService.h"
 
-#define JNI_init        Java_org_opendds_inforepo_DCPSInfoRepoService_init
-#define JNI_fini        Java_org_opendds_inforepo_DCPSInfoRepoService_fini
-#define JNI_run         Java_org_opendds_inforepo_DCPSInfoRepoService_run
-#define JNI_shutdown    Java_org_opendds_inforepo_DCPSInfoRepoService_shutdown
+#define DCPSInfoRepoService_init        Java_org_opendds_inforepo_DCPSInfoRepoService_init
+#define DCPSInfoRepoService_fini        Java_org_opendds_inforepo_DCPSInfoRepoService_fini
+#define DCPSInfoRepoService_run         Java_org_opendds_inforepo_DCPSInfoRepoService_run
+#define DCPSInfoRepoService_shutdown    Java_org_opendds_inforepo_DCPSInfoRepoService_shutdown
 
 namespace
 {
@@ -97,7 +97,7 @@ namespace
 }
 
 void JNICALL
-JNI_init(JNIEnv *env, jobject self, jobjectArray args)
+DCPSInfoRepoService_init(JNIEnv *env, jobject self, jobjectArray args)
 {
     if (args == NULL) {
         throw_exception(env, "java/lang/NullPointerException");
@@ -133,7 +133,7 @@ JNI_init(JNIEnv *env, jobject self, jobjectArray args)
 }
 
 void JNICALL
-JNI_fini(JNIEnv *env, jobject self)
+DCPSInfoRepoService_fini(JNIEnv *env, jobject self)
 {
     InfoRepo *peer = get_InfoRepo_peer(env, self);
     if (peer != NULL) {
@@ -142,7 +142,7 @@ JNI_fini(JNIEnv *env, jobject self)
 }
 
 void JNICALL
-JNI_run(JNIEnv *env, jobject self)
+DCPSInfoRepoService_run(JNIEnv *env, jobject self)
 {
     InfoRepo *peer = get_InfoRepo_peer(env, self);
     if (peer == NULL) {
@@ -153,7 +153,7 @@ JNI_run(JNIEnv *env, jobject self)
 }
 
 void JNICALL
-JNI_shutdown(JNIEnv *env, jobject self, jboolean finalize)
+DCPSInfoRepoService_shutdown(JNIEnv *env, jobject self, jboolean finalize)
 {
     InfoRepo *peer = get_InfoRepo_peer(env, self);
     if (peer == NULL) {
@@ -163,6 +163,6 @@ JNI_shutdown(JNIEnv *env, jobject self, jboolean finalize)
     peer->shutdown();
 
     if (finalize) {
-        JNI_fini(env, self);
+        DCPSInfoRepoService_fini(env, self);
     }
 }
