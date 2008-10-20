@@ -41,6 +41,11 @@ New to this version are the following changes:
   of the types found in the idl file).  Users of prior OpenDDS versions can
   use the script $DDS_ROOT/bin/update_dcps.pl to assist with this transition.
 
+  Added a command line argument to allow an output directory to be
+  specified.  All output files will be placed into this directory if
+  present.  They will continue to be placed in the current directory if
+  this argument is not present.
+
 - DCPSInfoRepo changes
 
   A new library has been introduced (libDCPSInfoRepoServ) which provides
