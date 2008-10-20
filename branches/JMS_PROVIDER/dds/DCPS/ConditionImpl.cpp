@@ -7,14 +7,14 @@ void ConditionImpl::signal_all()
 {
   if (!get_trigger_value()) return;
 
-  std::set<DDS::WaitSet_var> local_ws;
+  WaitSetSet local_ws;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     local_ws = waitsets_;
   }
 
-  for (std::set<DDS::WaitSet_var>::iterator it = local_ws.begin(),
-    end = local_ws.end(); it != end; ++it)
+  for (WaitSetSet::iterator it = local_ws.begin(), end = local_ws.end();
+    it != end; ++it)
   {
     (*it)->signal(this);
   }

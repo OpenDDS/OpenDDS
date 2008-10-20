@@ -9,6 +9,7 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "dds/DCPS/LocalObject.h"
+#include "dds/DCPS/Definitions.h"
 
 #include "ace/Thread_Mutex.h"
 #include "ace/Condition_Recursive_Thread_Mutex.h"
@@ -29,10 +30,15 @@ namespace DDS
   class WaitSet;
   typedef WaitSet* WaitSet_ptr;
 
+  typedef TAO_Objref_Var_T<WaitSet> WaitSet_var;
+
   class OpenDDS_Dcps_Export WaitSet
     : public virtual OpenDDS::DCPS::LocalObject<WaitSetInterf>
   {
   public:
+    typedef WaitSet_ptr _ptr_type;
+    typedef WaitSet_var _var_type;
+
     WaitSet()
       : lock_(), cond_(lock_)
     {}
@@ -54,6 +60,9 @@ namespace DDS
 
     static WaitSet_ptr _duplicate(WaitSet_ptr obj);
 
+    typedef std::set<Condition_var,
+      OpenDDS::DCPS::VarLess<Condition> > ConditionSet;
+
   private:
     void signal(Condition_ptr cond);
     friend class OpenDDS::DCPS::ConditionImpl;
@@ -62,7 +71,6 @@ namespace DDS
     ACE_Condition_Recursive_Thread_Mutex cond_;
     ACE_Atomic_Op<ACE_Thread_Mutex, long> waiting_;
 
-    typedef std::set<Condition_var> ConditionSet;
     ConditionSet attached_conditions_;
     ConditionSet signaled_conditions_;
   };
@@ -79,11 +87,6 @@ namespace TAO
     static CORBA::Boolean marshal(const DDS::WaitSet_ptr p,
       TAO_OutputCDR & cdr);
   };
-}
-
-namespace DDS
-{
-  typedef TAO_Objref_Var_T<WaitSet> WaitSet_var;
 }
 
 #endif

@@ -4,6 +4,7 @@
 
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DCPS/WaitSet.h"
+#include "dds/DCPS/Definitions.h"
 
 #include "ace/Thread_Mutex.h"
 
@@ -29,7 +30,8 @@ namespace OpenDDS
       ConditionImpl() {}
       virtual ~ConditionImpl() {}
 
-      std::set<DDS::WaitSet_var> waitsets_;
+      typedef std::set<DDS::WaitSet_var, VarLess<DDS::WaitSet> > WaitSetSet;
+      WaitSetSet waitsets_;
       ACE_Thread_Mutex lock_;
     };
   }

@@ -135,6 +135,17 @@ namespace OpenDDS
       T_var   obj_;
     };
 
+    /// Use a Foo_var in a std::set or std::map with this comparison function,
+    /// for example std::set<Foo_var, VarLess<Foo> >
+    template <class T, class V = typename T::_var_type>
+    struct VarLess : public std::binary_function<V, V, bool>
+    {
+      bool operator() (const V& x, const V& y) const
+      {
+        return x.in() < y.in();
+      }
+    };
+
   } // namespace OpenDDS
 } // namespace DCPS
 
