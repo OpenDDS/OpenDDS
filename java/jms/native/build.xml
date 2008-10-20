@@ -5,7 +5,7 @@
     Author:  Weiqi Gao
     Version: $Revision$
 -->
-<project name="opendds-jms-native" default="idl" basedir=".">
+<project name="opendds-jms-native" default="compile" basedir=".">
     <property name="perl.executable" value="perl"/>
 
     <property environment="env"/>
@@ -79,10 +79,10 @@
     </condition>
 
     <!-- command line arguments -->
-    <condition property="make.idl.arguments" value="">
+    <condition property="make.compile.arguments" value="">
         <os family="unix"/>
     </condition>
-    <condition property="make.idl.arguments" value="${makefile} Debug">
+    <condition property="make.compile.arguments" value="${makefile} Debug">
         <and>
             <os family="windows"/>
             <or>
@@ -91,7 +91,7 @@
             </or>
         </and>
     </condition>
-    <condition property="make.idl.arguments" value="/build Debug ${makefile}">
+    <condition property="make.compile.arguments" value="/build Debug ${makefile}">
         <os family="windows"/>
     </condition>
 
@@ -114,7 +114,7 @@
     <!--
         Project Targets
     -->
-    <target name="all" depends="clean, idl"/>
+    <target name="all" depends="clean, compile"/>
 
     <target name="clean" if="makefile.available">
         <exec executable="${make.executable}">
@@ -130,9 +130,9 @@
         </exec>
     </target>
 
-    <target name="idl" depends="mwc">
+    <target name="compile" depends="mwc">
         <exec executable="${make.executable}">
-            <arg line="${make.idl.arguments}"/>
+            <arg line="${make.compile.arguments}"/>
         </exec>
     </target>
 </project>

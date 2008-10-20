@@ -1,3 +1,31 @@
+Mon Oct 20 19:21:43 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/OpenDDS.ipr:
+        * java/jms/build.properties:
+        * java/jms/build.xml:
+        * java/jms/native:
+        * java/jms/native/build.xml:
+        * java/jms/native/opendds_jms_native.mpc:
+        * java/jms/native/org:
+        * java/jms/native/org/opendds:
+        * java/jms/native/org/opendds/jms:
+        * java/jms/native/org/opendds/jms/ir:
+        * java/jms/native/org/opendds/jms/ir/DCPSInfoRepoService.java:
+        * java/jms/native/org_opendds_jms_ir_DCPSInfoRepoService.cpp:
+        * java/jms/opendds-jms.iml:
+        * java/jms/src/org/opendds/jms/jmx:
+        * java/jms/src/org/opendds/jms/jmx/DCPSInfoRepo.java:
+        * java/jms/src/org/opendds/jms/jmx/DCPSInfoRepoMBean.java:
+        * java/jms/test/org/opendds/jms/ir:
+        * java/jms/test/org/opendds/jms/ir/DCPSInfoRepoServiceTest.java:
+
+          Merged inforepo/ into jms/.
+
+        * java/jms/src/org/opendds/jms/impl:
+        * java/jms/version.properties:
+
+          Removed these files.
+
 Mon Oct 20 18:44:30 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DdsDcpsInfrastructure.idl:
