@@ -1,3 +1,14 @@
+Mon Oct 20 16:31:25 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Service_Participant::shutdown() is now resilient.
+
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+
+          Updated DCPSInfoRepoServ to clean up after itself on init
+          failure.
+
 Mon Oct 20 15:14:26 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * java/inforepo/native/org_opendds_inforepo_DCPSInfoRepoService.cpp:

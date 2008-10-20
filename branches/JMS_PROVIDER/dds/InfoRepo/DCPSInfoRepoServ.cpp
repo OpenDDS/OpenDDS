@@ -50,7 +50,17 @@ InfoRepo::InfoRepo (int argc, ACE_TCHAR *argv[])
     , federator_( this->federatorConfig_)
     , federatorConfig_( argc, argv)
 {
-  init ();
+  try
+  {
+    init ();
+  }
+  catch (...)
+  { 
+    if( this->finalized_ == false) {
+      this->finalize();
+    }
+    throw;
+  }
 }
 
 InfoRepo::~InfoRepo (void)
@@ -58,7 +68,6 @@ InfoRepo::~InfoRepo (void)
   if( this->finalized_ == false) {
     this->finalize();
   }
-  orb_->destroy ();
 }
 
 void
@@ -72,8 +81,15 @@ InfoRepo::finalize()
 {
   info_ = 0;
   federator_.finalize();
+ 
   TheTransportFactory->release();
   TheServiceParticipant->shutdown ();
+ 
+  if (orb_) 
+  {
+    orb_->destroy ();
+  }
+ 
   this->finalized_ = true;
 }
 
@@ -83,7 +99,6 @@ InfoRepo::handle_exception( ACE_HANDLE /* fd */)
   if( this->finalized_ == false) {
     this->finalize();
   }
-  orb_->shutdown (0);
   return 0;
 }
 
@@ -179,7 +194,6 @@ InfoRepo::init ()
                             this->federatorConfig_.argc(),
                             this->federatorConfig_.argv()
                           );
-
   orb_ = CORBA::ORB_init (cvt.get_argc(), cvt.get_ASCII_argv(), "");
   info_ = new TAO_DDS_DCPSInfo_i(
       orb_.in(),
@@ -188,7 +202,7 @@ InfoRepo::init ()
       this->federatorConfig_.federationId());
 
   TAO_DDS_DCPSInfo_i* info_servant 
-    = dynamic_cast<TAO_DDS_DCPSInfo_i*>(this->info_.in());
+    = dynamic_cast<TAO_DDS_DCPSInfo_i*>(info_.in());
 
   // Install the DCPSInfo_i into the Federator::Manager.
   this->federator_.info() = info_servant;
@@ -220,7 +234,7 @@ InfoRepo::init ()
   PortableServer::ObjectId_var oid =
     PortableServer::string_to_ObjectId ("InfoRepo");
   info_poa_->activate_object_with_id (oid.in (),
-                                      this->info_.in());
+                                      info_.in());
   obj = info_poa_->id_to_reference(oid.in());
   // the object is created locally, so it is safe to do an 
   // _unchecked_narrow, this was needed to prevent an exception
@@ -359,7 +373,7 @@ InfoRepo::init ()
     }
 
     CORBA::Object_var obj
-      = this->orb_->string_to_object( this->federatorConfig_.federateIor().c_str());
+      = orb_->string_to_object( this->federatorConfig_.federateIor().c_str());
     if( CORBA::is_nil( obj.in())) {
       ACE_ERROR(( LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: could not resolve %s for initial federation.\n"),
