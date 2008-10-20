@@ -44,8 +44,8 @@ New to this version are the following changes:
 - DCPSInfoRepo changes
 
   A new library has been introduced (libDCPSInfoRepoServ) which provides
-  the neccessary hooks for running the DCPSInfoRepo within another
-  process. For example usage, see: $DDS_ROOT/dds/InfoRepo/DCPSInfoRepo.cpp.
+  the neccessary hooks for running the DCPSInfoRepo within another process.
+  For example usage, see: $DDS_ROOT/dds/InfoRepo/DCPSInfoRepo.cpp.
 
 
 =========================================================================
