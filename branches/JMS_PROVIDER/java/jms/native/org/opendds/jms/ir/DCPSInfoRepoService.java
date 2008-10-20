@@ -18,6 +18,15 @@ package org.opendds.jms.ir;
  * @version $Revision$
  */
 public final class DCPSInfoRepoService implements Runnable {
+
+    static {
+        String library = "opendds-jms-native";
+        if (Boolean.getBoolean("jni.nativeDebug")) {
+            library = library.concat("d");
+        }
+        System.loadLibrary(library);
+    }
+
     private long peer;
 
     /**

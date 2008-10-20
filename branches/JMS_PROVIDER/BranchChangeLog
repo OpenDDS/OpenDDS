@@ -1,3 +1,11 @@
+Mon Oct 20 22:43:37 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/build.xml:
+        * java/jms/native/opendds_jms_native.mpc:
+        * java/jms/native/org/opendds/jms/ir/DCPSInfoRepoService.java:
+
+          Fixed failing DCPSInfoRepoService tests.
+
 Mon Oct 20 21:03:42 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/build.xml:
