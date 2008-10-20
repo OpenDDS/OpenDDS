@@ -1,8 +1,9 @@
 Mon Oct 20 19:39:11 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
+        * dds/DCPS/StatusConditionImpl.cpp:
         * dds/DCPS/StatusConditionImpl.h:
 
-          Forgot to "svn add" this one last time.
+          Forgot to "svn add" these last time.
 
         * dds/DCPS/Definitions.h:
 
