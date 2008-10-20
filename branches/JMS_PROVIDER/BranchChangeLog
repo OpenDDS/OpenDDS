@@ -1,3 +1,11 @@
+Mon Oct 20 17:44:30 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/inforepo/native/org_opendds_inforepo_DCPSInfoRepoService.cpp:
+        * java/inforepo/src/org/opendds/inforepo/DCPSInfoRepoService.java:
+        * java/inforepo/test/org/opendds/inforepo/DCPSInfoRepoServiceTest.java:
+
+          Additional DCPSInfoRepoService refactorings.
+
 Mon Oct 20 16:44:33 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
           Back-merged from trunk (r1507:1521).

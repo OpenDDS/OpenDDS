@@ -6,7 +6,13 @@ package org.opendds.inforepo;
 
 /**
  * Class responsible for managing an in-process DCPSInfoRepo
- * instance.
+ * instance.  The general contract of this is object is such that
+ * only a single instance should exist at any given time.  Those who
+ * wish to create and destroy multiple DCPSInfoRepo instances within
+ * the same process should ensure the {@code shutdown()} method is
+ * always called with {@code finalize} as {@code true}. 
+ *
+ * @see     #shutdown(boolean)
  *
  * @author  Steven Stallion
  * @version $Revision$
@@ -55,12 +61,28 @@ public final class DCPSInfoRepoService implements Runnable {
 
     /**
      * Gracefully terminates a DCPSInfoRepo instance running on
-     * another thread.
+     * another thread.  By default, the {@code shutdown()} method
+     * defers DCPSInfoRepo finalization until the
+     * {@code DCPSInfoRepoService} is marked for collection.
      *
      * @throws  IllegalStateException if the DCPSInfoRepo instance
      *          has been finalized and marked for collection
      */
-    public native void shutdown();
+    public void shutdown() {
+        shutdown(false);
+    }
+
+    /**
+     * Gracefully terminates a DCPSInfoRepo instance running on
+     * another thread.
+     *
+     * @param   finalize indicates the DCPSInfoRepo instance should
+     *          be finalized after shuting down
+     *
+     * @throws  IllegalStateException if the DCPSInfoRepo instance
+     *          has been finalized and marked for collection
+     */
+    public native void shutdown(boolean finalize);
 
     @Override
     protected void finalize() throws Throwable {
