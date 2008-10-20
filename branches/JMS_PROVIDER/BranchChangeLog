@@ -1,3 +1,9 @@
+Mon Oct 20 20:16:42 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+
+          Added an #include.
+
 Mon Oct 20 19:39:11 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/StatusConditionImpl.cpp:

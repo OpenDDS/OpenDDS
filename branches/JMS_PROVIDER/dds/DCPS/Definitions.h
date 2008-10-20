@@ -10,6 +10,8 @@
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "ace/Message_Block.h"
 
+#include <functional>
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
