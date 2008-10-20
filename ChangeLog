@@ -6,7 +6,18 @@ Mon Oct 20 18:03:31 UTC 2008  Steven Stallion  <stallions@ociweb.com>
         * dds/InfoRepo/DCPSInfoRepoServ.cpp:
         * dds/InfoRepo/DCPSInfo_i.cpp:
 
-          DCPSInfoRepo refactorings.
+          DCPSInfoRepo refactorings:
+
+          - DCPSInfoRepo will no longer abort on an invalid Transport
+            configuration.
+          - Added catch all to DCPSInfoRepoServ::init to ensure 
+            failed initialization cleans up state correctly.
+          - Cleaned up DCPSInfoRepoServ interfaces (i.e. unused return
+            values, incorrect return types).
+          - Usage will no longer call ACE_OS::exit; now throws an
+            InitError instead.
+          - Service_Participant::shutdown is now resilient; assertion
+            replaced with conditional if CORBA::ORB is nil.
 
 Fri Oct 17 23:31:29 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
