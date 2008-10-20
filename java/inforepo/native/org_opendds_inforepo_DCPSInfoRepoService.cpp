@@ -12,8 +12,12 @@
 
 #include "dds/InfoRepo/DCPSInfoRepoServ.h"
 
-#include "opendds_inforepo_native_Export.h"
 #include "org_opendds_inforepo_DCPSInfoRepoService.h"
+
+#define JNI_init        Java_org_opendds_inforepo_DCPSInfoRepoService_init
+#define JNI_fini        Java_org_opendds_inforepo_DCPSInfoRepoService_fini
+#define JNI_run         Java_org_opendds_inforepo_DCPSInfoRepoService_run
+#define JNI_shutdown    Java_org_opendds_inforepo_DCPSInfoRepoService_shutdown
 
 namespace
 {
@@ -93,8 +97,7 @@ namespace
 }
 
 void JNICALL
-Java_org_opendds_inforepo_DCPSInfoRepoService_init(JNIEnv *env,
-    jobject self, jobjectArray args)
+JNI_init(JNIEnv *env, jobject self, jobjectArray args)
 {
     if (args == NULL) {
         throw_exception(env, "java/lang/NullPointerException");
@@ -130,8 +133,7 @@ Java_org_opendds_inforepo_DCPSInfoRepoService_init(JNIEnv *env,
 }
 
 void JNICALL
-Java_org_opendds_inforepo_DCPSInfoRepoService_fini(JNIEnv *env,
-    jobject self)
+JNI_fini(JNIEnv *env, jobject self)
 {
     InfoRepo *peer = get_InfoRepo_peer(env, self);
     if (peer != NULL) {
@@ -140,8 +142,7 @@ Java_org_opendds_inforepo_DCPSInfoRepoService_fini(JNIEnv *env,
 }
 
 void JNICALL
-Java_org_opendds_inforepo_DCPSInfoRepoService_run(JNIEnv *env,
-    jobject self)
+JNI_run(JNIEnv *env, jobject self)
 {
     InfoRepo *peer = get_InfoRepo_peer(env, self);
     if (peer == NULL) {
@@ -152,8 +153,7 @@ Java_org_opendds_inforepo_DCPSInfoRepoService_run(JNIEnv *env,
 }
 
 void JNICALL
-Java_org_opendds_inforepo_DCPSInfoRepoService_shutdown(JNIEnv *env,
-    jobject self)
+JNI_shutdown(JNIEnv *env, jobject self, jboolean finalize)
 {
     InfoRepo *peer = get_InfoRepo_peer(env, self);
     if (peer == NULL) {
@@ -161,4 +161,8 @@ Java_org_opendds_inforepo_DCPSInfoRepoService_shutdown(JNIEnv *env,
         return;
     }
     peer->shutdown();
+
+    if (finalize) {
+        JNI_fini(env, self);
+    }
 }
