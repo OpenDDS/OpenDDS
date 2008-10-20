@@ -1,3 +1,13 @@
+Mon Oct 20 19:23:33 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * DDS.mwc:
+
+          Removed java/inforepo from excludes.
+
+        * java/inforepo:
+
+          Removed these files.
+
 Mon Oct 20 19:21:43 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/OpenDDS.ipr:
