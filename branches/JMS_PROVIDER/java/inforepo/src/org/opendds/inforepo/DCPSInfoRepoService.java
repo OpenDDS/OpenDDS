@@ -6,11 +6,13 @@ package org.opendds.inforepo;
 
 /**
  * Class responsible for managing an in-process DCPSInfoRepo
- * instance.  The general contract of this is object is such that
- * only a single instance should exist at any given time.  Those who
- * wish to create and destroy multiple DCPSInfoRepo instances within
- * the same process should ensure the {@code shutdown()} method is
- * always called with {@code finalize} as {@code true}. 
+ * instance.
+ * <p/>
+ * The general contract of this is object is such that only a single
+ * instance should exist at any given time.  Those who wish to create
+ * and destroy multiple DCPSInfoRepo instances within the same
+ * process should ensure the {@code shutdown()} method is always
+ * called with {@code finalize} set as {@code true}.
  *
  * @see     #shutdown(boolean)
  *
