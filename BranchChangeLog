@@ -1,3 +1,9 @@
+Mon Oct 20 21:03:42 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/build.xml:
+
+          Dropped old version.properties artifact.
+
 Mon Oct 20 20:16:42 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Definitions.h:

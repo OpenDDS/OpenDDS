@@ -70,9 +70,6 @@
         <mkdir dir="${build.dir}"/>
         <mkdir dir="${build.dir}/classes"/>
 
-        <copy file="${basedir}/version.properties"
-              todir="${build.dir}"/>
-
         <!-- Update version.properties -->
         <propertyfile file="${build.dir}/version.properties">
             <entry key="version.dds" value="${version.dds}"/>
