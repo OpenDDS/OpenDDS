@@ -394,7 +394,7 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
       // change the ChangeFlagStatus after a listener call?
       publication_match_status_.total_count_change = 0;
     }
-
+    notify_status_condition();
     delete [] remote_associations;
   }
 
@@ -591,6 +591,7 @@ DataWriterImpl::update_incompatible_qos (
     //       ChangeFlagStatus after a listener call?
     offered_incompatible_qos_status_.total_count_change = 0;
   }
+  notify_status_condition();
 }
 
 ::DDS::ReturnCode_t

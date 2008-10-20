@@ -45,6 +45,9 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::execute ()
       this->status_.total_count - this->last_total_count_;
 //     this->status_.last_instance_handle = this->last_instance_handle_;
 
+    this->reader_impl_->set_status_changed_flag (
+      ::DDS::REQUESTED_DEADLINE_MISSED_STATUS, true);
+
     ::DDS::DataReaderListener * const listener =
         this->reader_impl_->listener_for (
           ::DDS::REQUESTED_DEADLINE_MISSED_STATUS);
@@ -62,6 +65,7 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::execute ()
       listener->on_requested_deadline_missed (this->reader_.in (),
                                               status);
     }
+    this->reader_impl_->notify_status_condition ();
   }
   else
   {

@@ -530,9 +530,11 @@ SubscriberImpl::notify_datareaders (
 
       if (it->second->local_reader_impl_->have_sample_states(
 							::DDS::NOT_READ_SAMPLE_STATE))
-	{
-	  listener->on_data_available(it->second->local_reader_objref_) ;
-	}
+        {
+          listener->on_data_available(it->second->local_reader_objref_);
+          it->second->local_reader_impl_->set_status_changed_flag(
+            ::DDS::DATA_AVAILABLE_STATUS, false);
+        }
     }
 }
 

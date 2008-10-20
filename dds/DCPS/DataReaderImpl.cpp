@@ -349,6 +349,7 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
         // Client will look at it so next time it looks the change should be 0
         this->subscription_match_status_.total_count_change = 0;
       }
+      notify_status_condition();
     }
 }
 
@@ -534,6 +535,36 @@ void DataReaderImpl::update_incompatible_qos (
       // change should be 0
       requested_incompatible_qos_status_.total_count_change = 0;
     }
+  notify_status_condition();
+}
+
+::DDS::ReadCondition_ptr DataReaderImpl::create_readcondition (
+    ::DDS::SampleStateMask sample_states,
+    ::DDS::ViewStateMask view_states,
+    ::DDS::InstanceStateMask instance_states)
+  ACE_THROW_SPEC ((CORBA::SystemException))
+{
+  return ::DDS::ReadCondition::_nil(); //TODO: impl
+}
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+::DDS::QueryCondition_ptr DataReaderImpl::create_querycondition (
+    ::DDS::SampleStateMask sample_states,
+    ::DDS::ViewStateMask view_states,
+    ::DDS::InstanceStateMask instance_states,
+    const char * query_expression,
+    const ::DDS::StringSeq & query_parameters)
+  ACE_THROW_SPEC ((CORBA::SystemException))
+{
+  return ::DDS::QueryCondition::_nil(); //TODO: impl
+}
+#endif
+
+::DDS::ReturnCode_t DataReaderImpl::delete_readcondition (
+    ::DDS::ReadCondition_ptr a_condition)
+  ACE_THROW_SPEC ((CORBA::SystemException))
+{
+  return DDS::RETCODE_UNSUPPORTED; //TODO: impl
 }
 
 ::DDS::ReturnCode_t DataReaderImpl::delete_contained_entities ()
@@ -2068,7 +2099,7 @@ void DataReaderImpl::notify_liveliness_change()
     liveliness_changed_status_.active_count_change = 0;
     liveliness_changed_status_.inactive_count_change = 0;
   }
-
+  notify_status_condition ();
   if( DCPS_debug_level > 9) {
     std::stringstream buffer;
     long key = GuidConverter( this->subscription_id_);
@@ -2093,6 +2124,14 @@ void DataReaderImpl::notify_liveliness_change()
     ));
   }
 }
+
+void DataReaderImpl::post_read_or_take()
+{
+  set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
+  get_subscriber_servant()->set_status_changed_flag(
+    ::DDS::DATA_ON_READERS_STATUS, false);
+}
+
 
 } // namespace DCPS
 } // namespace OpenDDS

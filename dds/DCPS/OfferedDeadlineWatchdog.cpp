@@ -42,6 +42,9 @@ OpenDDS::DCPS::OfferedDeadlineWatchdog::execute ()
     this->status_.total_count_change =
       this->status_.total_count - this->last_total_count_;
 
+    this->writer_impl_->set_status_changed_flag (
+      ::DDS::OFFERED_DEADLINE_MISSED_STATUS, true);
+
     ::DDS::DataWriterListener * const listener =
         this->writer_impl_->listener_for (
           ::DDS::OFFERED_DEADLINE_MISSED_STATUS);
@@ -59,6 +62,7 @@ OpenDDS::DCPS::OfferedDeadlineWatchdog::execute ()
       listener->on_offered_deadline_missed (this->writer_.in (),
                                             status);
     }
+    this->writer_impl_->notify_status_condition ();
   }
   else
   {

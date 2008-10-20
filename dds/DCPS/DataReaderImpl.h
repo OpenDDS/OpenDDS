@@ -197,6 +197,35 @@ namespace OpenDDS
         CORBA::SystemException
       ));
 
+    virtual ::DDS::ReadCondition_ptr create_readcondition (
+        ::DDS::SampleStateMask sample_states,
+        ::DDS::ViewStateMask view_states,
+        ::DDS::InstanceStateMask instance_states
+      )
+        ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+    virtual ::DDS::QueryCondition_ptr create_querycondition (
+        ::DDS::SampleStateMask sample_states,
+        ::DDS::ViewStateMask view_states,
+        ::DDS::InstanceStateMask instance_states,
+        const char * query_expression,
+        const ::DDS::StringSeq & query_parameters
+      )
+        ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
+#endif
+
+    virtual ::DDS::ReturnCode_t delete_readcondition (
+        ::DDS::ReadCondition_ptr a_condition
+      )
+        ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
+
       virtual ::DDS::ReturnCode_t delete_contained_entities (
         )
         ACE_THROW_SPEC ((
@@ -378,6 +407,8 @@ namespace OpenDDS
     protected:
 
       SubscriberImpl* get_subscriber_servant ();
+
+      void post_read_or_take ();
 
       // type specific DataReader's part of enable.
       virtual ::DDS::ReturnCode_t enable_specific (
