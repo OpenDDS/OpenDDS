@@ -368,7 +368,7 @@ Writer::~Writer()
 
   //We have to wait a while to avoid the remove_association from DCPSInfo
   //called after the transport is release.
-  ACE_OS::sleep (5);
+  ACE_OS::sleep (2);
 
   TheTransportFactory->release(PUB_TRAFFIC) ;
 }

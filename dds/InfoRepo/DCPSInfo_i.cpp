@@ -53,7 +53,7 @@ TAO_DDS_DCPSInfo_i::shutdown()
 CORBA::ORB_ptr
 TAO_DDS_DCPSInfo_i::orb()
 {
-  return CORBA::ORB::_duplicate( this->orb_);
+  return CORBA::ORB::_duplicate( this->orb_.in ());
 }
 
 CORBA::Boolean TAO_DDS_DCPSInfo_i::attach_participant (
