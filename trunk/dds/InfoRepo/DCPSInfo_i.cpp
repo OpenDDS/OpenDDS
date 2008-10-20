@@ -1978,34 +1978,43 @@ int TAO_DDS_DCPSInfo_i::init_transport (int listen_address_given,
                                         const char* listen_str)
 {
   int status = 0;
-
-  OpenDDS::DCPS::TransportImpl_rch trans_impl
-    = TheTransportFactory->create_transport_impl (OpenDDS::DCPS::BIT_ALL_TRAFFIC,
-                                                  ACE_TEXT("SimpleTcp"),
-                                                  OpenDDS::DCPS::DONT_AUTO_CONFIG);
-
-  OpenDDS::DCPS::TransportConfiguration_rch config
-    = TheTransportFactory->get_or_create_configuration (OpenDDS::DCPS::BIT_ALL_TRAFFIC,
-                                                        ACE_TEXT("SimpleTcp"));
-
-  config->datalink_release_delay_ = 0;
-
-  OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config
-    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
-
-  if (listen_address_given)
+  try
   {
-    tcp_config->local_address_ = ACE_INET_Addr (listen_str);
-    tcp_config->local_address_str_ = listen_str;
-  }
+    OpenDDS::DCPS::TransportImpl_rch trans_impl
+      = TheTransportFactory->create_transport_impl (OpenDDS::DCPS::BIT_ALL_TRAFFIC,
+                                                    ACE_TEXT("SimpleTcp"),
+                                                    OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-  if (trans_impl->configure(config.in()) != 0)
+    OpenDDS::DCPS::TransportConfiguration_rch config
+      = TheTransportFactory->get_or_create_configuration (OpenDDS::DCPS::BIT_ALL_TRAFFIC,
+                                                            ACE_TEXT("SimpleTcp"));
+
+    config->datalink_release_delay_ = 0;
+
+    OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config
+      = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
+
+    if (listen_address_given)
+    {
+      tcp_config->local_address_ = ACE_INET_Addr (listen_str);
+      tcp_config->local_address_str_ = listen_str;
+    }
+
+    if (trans_impl->configure(config.in()) != 0)
     {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::init_transport: ")
                  ACE_TEXT("Failed to configure the transport.\n")));
       status = 1;
     }
+  }
+  catch (...)
+  {
+    // TransportFactory is extremely varied in the exceptions that
+    // it throws on failure; do not allow exceptions to bubble up
+    // beyond this point.
+    status = 1;
+  }
   return status;
 }
 

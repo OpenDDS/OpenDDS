@@ -189,31 +189,34 @@ namespace OpenDDS
       try
         {
           ACE_GUARD (TAO_SYNCH_MUTEX, guard, this->factory_lock_);
-          ACE_ASSERT (! CORBA::is_nil (orb_.in ()));
-          if (! orb_from_user_)
-            {
-              orb_->shutdown (0);
-              this->wait ();
-            }
-          // Don't delete the participants - require the client code
-          // to delete participants 
+
+          if (!CORBA::is_nil (orb_.in ()))
+          {
+            if (! orb_from_user_)
+              {
+                orb_->shutdown (0);
+                this->wait ();
+              }
+            // Don't delete the participants - require the client code
+            // to delete participants 
 #if 0
-          //TBD return error code from this call
-          // -- non-empty entity will make this call return failure
-          if (dp_factory_impl_->delete_contained_participants () != ::DDS::RETCODE_OK)
-            {
-              ACE_ERROR ((LM_ERROR,
-                          ACE_TEXT ("(%P|%t) ERROR: Service_Participant::shutdown, ")
-                          ACE_TEXT ("delete_contained_participants failed.\n")));
-            }
+            //TBD return error code from this call
+            // -- non-empty entity will make this call return failure
+            if (dp_factory_impl_->delete_contained_participants () != ::DDS::RETCODE_OK)
+              {
+                ACE_ERROR ((LM_ERROR,
+                            ACE_TEXT ("(%P|%t) ERROR: Service_Participant::shutdown, ")
+                            ACE_TEXT ("delete_contained_participants failed.\n")));
+              }
 #endif
 
-          if (! orb_from_user_)
-            {
-              root_poa_->destroy (1, 1);
-              orb_->destroy ();
-            }
-          orb_ = CORBA::ORB::_nil ();
+            if (! orb_from_user_)
+              {
+                root_poa_->destroy (1, 1);
+                orb_->destroy ();
+              }
+            orb_ = CORBA::ORB::_nil ();
+          }
           dp_factory_ = ::DDS::DomainParticipantFactory::_nil ();
         }
       catch (const CORBA::Exception& ex)

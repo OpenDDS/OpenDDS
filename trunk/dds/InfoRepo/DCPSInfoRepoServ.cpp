@@ -41,7 +41,7 @@
 #include <string>
 #include <sstream>
 
-InfoRepo::InfoRepo (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
+InfoRepo::InfoRepo (int argc, ACE_TCHAR *argv[])
   : ior_file_ (ACE_TEXT("repo.ior"))
     , listen_address_given_ (0)
     , use_bits_ (true)
@@ -50,7 +50,17 @@ InfoRepo::InfoRepo (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
     , federator_( this->federatorConfig_)
     , federatorConfig_( argc, argv)
 {
-  init (argc, argv);
+  try
+  {
+    init ();
+  }
+  catch (...)
+  { 
+    if( this->finalized_ == false) {
+      this->finalize();
+    }
+    throw;
+  }
 }
 
 InfoRepo::~InfoRepo (void)
@@ -58,15 +68,12 @@ InfoRepo::~InfoRepo (void)
   if( this->finalized_ == false) {
     this->finalize();
   }
-  orb_->destroy ();
 }
 
-bool
+void
 InfoRepo::run (void)
 {
   orb_->run ();
-
-  return true;
 }
 
 void
@@ -74,8 +81,15 @@ InfoRepo::finalize()
 {
   info_ = 0;
   federator_.finalize();
+ 
   TheTransportFactory->release();
   TheServiceParticipant->shutdown ();
+ 
+  if (orb_) 
+  {
+    orb_->destroy ();
+  }
+ 
   this->finalized_ = true;
 }
 
@@ -85,7 +99,6 @@ InfoRepo::handle_exception( ACE_HANDLE /* fd */)
   if( this->finalized_ == false) {
     this->finalize();
   }
-  orb_->shutdown (0);
   return 0;
 }
 
@@ -163,8 +176,7 @@ InfoRepo::parse_args (int argc,
       else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-?")) == 0)
         {
           this->usage (argv[0]);
-          ACE_OS::exit (0);
-
+          throw InitError ("Usage");
         }
       // Anything else we just skip
 
@@ -175,14 +187,13 @@ InfoRepo::parse_args (int argc,
     }
 }
 
-bool
-InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
+void
+InfoRepo::init ()
 {
   ACE_Argv_Type_Converter cvt(
                             this->federatorConfig_.argc(),
                             this->federatorConfig_.argv()
                           );
-
   orb_ = CORBA::ORB_init (cvt.get_argc(), cvt.get_ASCII_argv(), "");
   info_ = new TAO_DDS_DCPSInfo_i(
       orb_.in(),
@@ -191,7 +202,7 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
       this->federatorConfig_.federationId());
 
   TAO_DDS_DCPSInfo_i* info_servant 
-    = dynamic_cast<TAO_DDS_DCPSInfo_i*>(this->info_.in());
+    = dynamic_cast<TAO_DDS_DCPSInfo_i*>(info_.in());
 
   // Install the DCPSInfo_i into the Federator::Manager.
   this->federator_.info() = info_servant;
@@ -223,7 +234,7 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
   PortableServer::ObjectId_var oid =
     PortableServer::string_to_ObjectId ("InfoRepo");
   info_poa_->activate_object_with_id (oid.in (),
-                                      this->info_.in());
+                                      info_.in());
   obj = info_poa_->id_to_reference(oid.in());
   // the object is created locally, so it is safe to do an 
   // _unchecked_narrow, this was needed to prevent an exception
@@ -238,7 +249,8 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
 
   // Initialize the DomainParticipantFactory
   ::DDS::DomainParticipantFactory_var dpf
-      = TheParticipantFactoryWithArgs(argc, argv);
+      = TheParticipantFactoryWithArgs(this->federatorConfig_.argc(),
+                                      this->federatorConfig_.argv());
 
   // We need parse the command line options for DCPSInfoRepo after parsing DCPS specific
   // command line options.
@@ -257,9 +269,9 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
     {
       if (0 != info_servant->init_transport(listen_address_given_, listen_address_str_.c_str()))
         {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("ERROR: Failed to initialize the transport!\n")),
-                           false);
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPSInfoRepo::init: ")
+                     ACE_TEXT("Unable to initialize transport.\n")));
+          throw InitError ("Unable to initialize transport.");
         }
     }
   else
@@ -361,7 +373,7 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
     }
 
     CORBA::Object_var obj
-      = this->orb_->string_to_object( this->federatorConfig_.federateIor().c_str());
+      = orb_->string_to_object( this->federatorConfig_.federateIor().c_str());
     if( CORBA::is_nil( obj.in())) {
       ACE_ERROR(( LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: could not resolve %s for initial federation.\n"),
@@ -386,8 +398,6 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
       this->federatorConfig_.federationDomain()
     );
   }
-
-  return true;
 }
 
 InfoRepo_Shutdown::InfoRepo_Shutdown (InfoRepo &ir)
