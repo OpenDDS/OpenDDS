@@ -14,10 +14,17 @@
 
 #include "org_opendds_inforepo_DCPSInfoRepoService.h"
 
-#define DCPSInfoRepoService_init        Java_org_opendds_inforepo_DCPSInfoRepoService_init
-#define DCPSInfoRepoService_fini        Java_org_opendds_inforepo_DCPSInfoRepoService_fini
-#define DCPSInfoRepoService_run         Java_org_opendds_inforepo_DCPSInfoRepoService_run
-#define DCPSInfoRepoService_shutdown    Java_org_opendds_inforepo_DCPSInfoRepoService_shutdown
+#define DCPSInfoRepoService_init \
+        Java_org_opendds_inforepo_DCPSInfoRepoService_init
+
+#define DCPSInfoRepoService_fini \
+        Java_org_opendds_inforepo_DCPSInfoRepoService_fini
+
+#define DCPSInfoRepoService_run \
+        Java_org_opendds_inforepo_DCPSInfoRepoService_run
+
+#define DCPSInfoRepoService_shutdown \
+        Java_org_opendds_inforepo_DCPSInfoRepoService_shutdown
 
 namespace
 {
