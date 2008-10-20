@@ -1,3 +1,9 @@
+Mon Oct 20 21:51:30 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Updated release notes with DCPSInfoRepo changes.
+
 Mon Oct 20 18:03:31 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
@@ -10,7 +16,7 @@ Mon Oct 20 18:03:31 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
           - DCPSInfoRepo will no longer abort on an invalid Transport
             configuration.
-          - Added catch all to DCPSInfoRepoServ::init to ensure 
+          - Added catch all to DCPSInfoRepoServ::init to ensure
             failed initialization cleans up state correctly.
           - Cleaned up DCPSInfoRepoServ interfaces (i.e. unused return
             values, incorrect return types).
