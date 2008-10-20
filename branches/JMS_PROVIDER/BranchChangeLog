@@ -1,3 +1,57 @@
+Mon Oct 20 18:44:30 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DdsDcpsInfrastructure.idl:
+
+          Added APIs for WaitSet, GuardCondition, and StatusCondition.
+
+        * dds/DdsDcpsSubscription.idl:
+        * bin/DCPS/HTemplate.pm:
+        * bin/DCPS/IDLTemplate.pm:
+
+          Added APIs for ReadCondition and QueryCondition.  These are not
+          currently implemented so they will return nil or UNSUPPORTED.
+
+        * dds/DCPS/ConditionImpl.h:
+        * dds/DCPS/ConditionImpl.cpp:
+        * dds/DCPS/GuardCondition.h:
+        * dds/DCPS/GuardCondition.cpp:
+        * dds/DCPS/WaitSet.h:
+        * dds/DCPS/WaitSet.cpp:
+
+          Implemented WaitSet and GuardCondition.
+
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/EntityImpl.h:
+        * dds/DCPS/EntityImpl.cpp:
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Implemented StatusCondition, including simplifying the representation
+          of StatusChangedFlag in EntityImpl to just use a StatusKindMask
+          instead of a std::map.
+
+        * java/dds/DDS/GuardCondition.java:
+        * java/dds/DDS/WaitSet.java:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * java/dds/dcps_java.mpc:
+
+          Added Java support for WaitSet and GuardCondition, which aren't fully
+          defined by IDL.
+
+        * java/idl2jni/codegen/im_jni.cpp:
+
+          Fixed a bug with inout sequences.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/GuardCondition:
+        * tests/DCPS/StatusCondition:
+
+          Added new tests for GuardCondition and StatusCondition (and WaitSet).
+
 Mon Oct 20 18:07:23 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
           Back-merged from trunk (r1521:1531)

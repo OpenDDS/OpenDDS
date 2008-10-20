@@ -125,6 +125,18 @@ local interface <%TYPE%>DataReader : DDS::DataReader {
                 in DDS::ViewStateMask view_states,
                 in DDS::InstanceStateMask instance_states);
 
+    DDS::ReturnCode_t read_w_condition(
+                inout <%TYPE%>Seq data_values,
+                inout DDS::SampleInfoSeq sample_infos,
+                in long max_samples,
+                in DDS::ReadCondition a_condition);
+
+    DDS::ReturnCode_t take_w_condition(
+                inout <%TYPE%>Seq data_values,
+                inout DDS::SampleInfoSeq sample_infos,
+                in long max_samples,
+                in DDS::ReadCondition a_condition);
+
     DDS::ReturnCode_t read_next_sample(
                 inout <%SCOPE%><%TYPE%> received_data,
                 inout DDS::SampleInfo sample_info);
@@ -168,6 +180,20 @@ local interface <%TYPE%>DataReader : DDS::DataReader {
                 in DDS::SampleStateMask sample_states,
                 in DDS::ViewStateMask view_states,
                 in DDS::InstanceStateMask instance_states);
+
+    DDS::ReturnCode_t read_next_instance_w_condition(
+                inout <%TYPE%>Seq data_values,
+                inout DDS::SampleInfoSeq sample_infos,
+                in long max_samples,
+                in DDS::InstanceHandle_t previous_handle,
+                in DDS::ReadCondition a_condition);
+
+    DDS::ReturnCode_t take_next_instance_w_condition(
+                inout <%TYPE%>Seq data_values,
+                inout DDS::SampleInfoSeq sample_infos,
+                in long max_samples,
+                in DDS::InstanceHandle_t previous_handle,
+                in DDS::ReadCondition a_condition);
 
     DDS::ReturnCode_t return_loan(
                 inout <%TYPE%>Seq received_data,

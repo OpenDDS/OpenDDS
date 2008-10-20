@@ -302,6 +302,20 @@ public:
       ::DDS::InstanceStateMask instance_states)
     ACE_THROW_SPEC ((CORBA::SystemException));
 
+  virtual ::DDS::ReturnCode_t read_w_condition (
+      ::<%MODULE%><%TYPE%>Seq & data_values,
+      ::DDS::SampleInfoSeq & sample_infos,
+      ::CORBA::Long max_samples,
+      ::DDS::ReadCondition_ptr a_condition)
+    ACE_THROW_SPEC ((CORBA::SystemException));
+    
+  virtual ::DDS::ReturnCode_t take_w_condition (
+      ::<%MODULE%><%TYPE%>Seq & data_values,
+      ::DDS::SampleInfoSeq & sample_infos,
+      ::CORBA::Long max_samples,
+      ::DDS::ReadCondition_ptr a_condition)
+    ACE_THROW_SPEC ((CORBA::SystemException));
+
   virtual DDS::ReturnCode_t read_next_sample (
       ::<%SCOPE%><%TYPE%> & received_data,
       ::DDS::SampleInfo & sample_info)
@@ -350,6 +364,22 @@ public:
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
       ::DDS::InstanceStateMask instance_states)
+    ACE_THROW_SPEC ((CORBA::SystemException));
+
+  virtual ::DDS::ReturnCode_t read_next_instance_w_condition (
+      ::<%MODULE%><%TYPE%>Seq & data_values,
+      ::DDS::SampleInfoSeq & sample_infos,
+      ::CORBA::Long max_samples,
+      ::DDS::InstanceHandle_t previous_handle,
+      ::DDS::ReadCondition_ptr a_condition)
+    ACE_THROW_SPEC ((CORBA::SystemException));
+
+  virtual ::DDS::ReturnCode_t take_next_instance_w_condition (
+      ::<%MODULE%><%TYPE%>Seq & data_values,
+      ::DDS::SampleInfoSeq & sample_infos,
+      ::CORBA::Long max_samples,
+      ::DDS::InstanceHandle_t previous_handle,
+      ::DDS::ReadCondition_ptr a_condition)
     ACE_THROW_SPEC ((CORBA::SystemException));
 
   virtual DDS::ReturnCode_t return_loan (

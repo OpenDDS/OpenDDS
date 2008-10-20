@@ -825,6 +825,8 @@ DDS::ReturnCode_t
     }
   }
 
+  post_read_or_take();
+
   if (count)
   {
     return ::DDS::RETCODE_OK;
@@ -965,8 +967,32 @@ DDS::ReturnCode_t
         break;
       }
     }
-
+  post_read_or_take();
   return count ? ::DDS::RETCODE_OK : ::DDS::RETCODE_NO_DATA;
+}
+
+DDS::ReturnCode_t
+<%TYPE%>DataReaderImpl::read_w_condition (
+    ::<%MODULE%><%TYPE%>Seq & received_data,
+    ::DDS::SampleInfoSeq & sample_info,
+    ::CORBA::Long max_samples,
+    ::DDS::ReadCondition_ptr a_condition)
+  ACE_THROW_SPEC ((CORBA::SystemException))
+{
+  post_read_or_take();
+  return ::DDS::RETCODE_UNSUPPORTED; //TODO: impl
+}
+
+DDS::ReturnCode_t
+<%TYPE%>DataReaderImpl::take_w_condition (
+    ::<%MODULE%><%TYPE%>Seq & received_data,
+    ::DDS::SampleInfoSeq & sample_info,
+    ::CORBA::Long max_samples,
+    ::DDS::ReadCondition_ptr a_condition)
+  ACE_THROW_SPEC ((CORBA::SystemException))
+{
+  post_read_or_take();
+  return ::DDS::RETCODE_UNSUPPORTED; //TODO: impl
 }
 
 DDS::ReturnCode_t
@@ -1037,7 +1063,7 @@ DDS::ReturnCode_t
       break;
     }
   }
-
+  post_read_or_take();
   return found_data ? ::DDS::RETCODE_OK : ::DDS::RETCODE_NO_DATA;
 }
 
@@ -1138,7 +1164,7 @@ DDS::ReturnCode_t
         break;
       }
     }
-
+  post_read_or_take();
   return found_data ? ::DDS::RETCODE_OK : ::DDS::RETCODE_NO_DATA;
 }
 
@@ -1225,6 +1251,8 @@ DDS::ReturnCode_t
       }
     }
   }
+
+  post_read_or_take();
 
   if (count)
   {
@@ -1366,7 +1394,7 @@ DDS::ReturnCode_t
                   ptr->rcvd_sample_.tail_);
     }
   }
-
+  post_read_or_take();
   return count ? ::DDS::RETCODE_OK : ::DDS::RETCODE_NO_DATA;
 }
 
@@ -1425,6 +1453,7 @@ DDS::ReturnCode_t
     }
   }
 
+  post_read_or_take();
   return ::DDS::RETCODE_NO_DATA;
 }
 
@@ -1481,10 +1510,35 @@ DDS::ReturnCode_t
       return status;
     }
   }
-
+  post_read_or_take();
   return ::DDS::RETCODE_NO_DATA;
 }
 
+DDS::ReturnCode_t
+<%TYPE%>DataReaderImpl::read_next_instance_w_condition (
+    ::<%MODULE%><%TYPE%>Seq & received_data,
+    ::DDS::SampleInfoSeq & info_seq,
+    ::CORBA::Long max_samples,
+    ::DDS::InstanceHandle_t a_handle,
+    ::DDS::ReadCondition_ptr a_condition)
+  ACE_THROW_SPEC ((CORBA::SystemException))
+{
+  post_read_or_take();
+  return ::DDS::RETCODE_UNSUPPORTED; //TODO: impl
+}
+
+DDS::ReturnCode_t
+<%TYPE%>DataReaderImpl::take_next_instance_w_condition (
+    ::<%MODULE%><%TYPE%>Seq & received_data,
+    ::DDS::SampleInfoSeq & info_seq,
+    ::CORBA::Long max_samples,
+    ::DDS::InstanceHandle_t a_handle,
+    ::DDS::ReadCondition_ptr a_condition)
+  ACE_THROW_SPEC ((CORBA::SystemException))
+{
+  post_read_or_take();
+  return ::DDS::RETCODE_UNSUPPORTED; //TODO: impl
+}
 
 void
 <%TYPE%>DataReaderImpl::release_loan (
@@ -1690,6 +1744,8 @@ void
         ::DDS::DataReaderListener* listener
             = listener_for (::DDS::SAMPLE_REJECTED_STATUS);
 
+        set_status_changed_flag (::DDS::SAMPLE_REJECTED_STATUS, true);
+
         sample_rejected_status_.last_reason =
           ::DDS::REJECTED_BY_INSTANCE_LIMIT;
         ++sample_rejected_status_.total_count;
@@ -1704,7 +1760,8 @@ void
           listener->on_sample_rejected(dr.in (),
                                        sample_rejected_status_);
         }  // do we want to do something if listener is nil???
-
+        notify_status_condition();
+        
         ACE_DES_FREE (instance_data,
                       data_allocator_->free,
                       <%TYPE%> );
@@ -1778,6 +1835,8 @@ void
         ++sample_lost_status_.total_count;
         ++sample_lost_status_.total_count_change;
 
+        set_status_changed_flag(::DDS::SAMPLE_LOST_STATUS, true);
+
         if (listener)
         {
           ACE_GUARD_RETURN (Reverse_Lock_t, unlock_guard, reverse_sample_lock_,
@@ -1785,12 +1844,18 @@ void
           ::DDS::DataReader_var dr = get_dr_obj_ref();
           listener->on_sample_lost(dr.in (), sample_lost_status_);
         }
+
+        notify_status_condition();
       }
 
       dec_ref_data_element(head_ptr);
     }
 
     OpenDDS::DCPS::SubscriberImpl* sub = get_subscriber_servant ();
+
+    sub->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, true);
+    set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, true);
+
     ::DDS::SubscriberListener* sub_listener =
         sub->listener_for(::DDS::DATA_ON_READERS_STATUS);
     if (sub_listener != 0)
@@ -1798,9 +1863,12 @@ void
       ACE_GUARD_RETURN (Reverse_Lock_t, unlock_guard, reverse_sample_lock_,
                         ::DDS::RETCODE_ERROR);
       sub_listener->on_data_on_readers(get_subscriber()) ;
+      sub->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
     }
     else
     {
+      sub->notify_status_condition();
+
       ::DDS::DataReaderListener* listener =
         listener_for (::DDS::DATA_AVAILABLE_STATUS);
 
@@ -1810,6 +1878,12 @@ void
                           ::DDS::RETCODE_ERROR);
         ::DDS::DataReader_var dr = get_dr_obj_ref();
         listener->on_data_available(dr.in ());
+        set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
+        sub->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
+      }
+      else
+      {
+        notify_status_condition();
       }
     }
   }

@@ -6,6 +6,8 @@
 #include "OpenDDS_DCPS_transport_SimpleMcastConfiguration.h"
 #include "OpenDDS_DCPS_transport_SimpleTcpConfiguration.h"
 #include "OpenDDS_DCPS_transport_SimpleUnreliableDgramConfiguration.h"
+#include "DDS_WaitSet.h"
+#include "DDS_GuardCondition.h"
 
 #include "idl2jni_runtime.h"
 #include "OpenDDS_jni_helpers.h"
@@ -25,6 +27,8 @@
 
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/PublisherImpl.h"
+#include "dds/DCPS/WaitSet.h"
+#include "dds/DCPS/GuardCondition.h"
 
 #include "DdsDcpsDomainJC.h"
 #include "DdsDcpsPublicationJC.h"
@@ -60,8 +64,7 @@ jobject JNICALL Java_OpenDDS_DCPS_TheParticipantFactory_WithArgs (JNIEnv *jni,
 // TheServiceParticipant
 
 
-void JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_shutdown (JNIEnv *,
-  jclass)
+void JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_shutdown (JNIEnv *, jclass)
 {
   TheServiceParticipant->shutdown ();
 }
@@ -678,4 +681,20 @@ Java_OpenDDS_DCPS_transport_SimpleMcastConfiguration_loadMcastConfig
   narrowTransportConfig (tc, ptr);
   jclass clazz = jni->FindClass (McastConfig::jclassName);
   toJava (jni, clazz, *tc, jThis, McastConfig::fields);
+}
+
+
+// WaitSet and GuardCondition
+
+jlong JNICALL Java_DDS_WaitSet__1jni_1init (JNIEnv *, jclass)
+{
+  return reinterpret_cast<jlong> (static_cast<CORBA::Object_ptr>(
+    new DDS::WaitSet));
+}
+
+
+jlong JNICALL Java_DDS_GuardCondition__1jni_1init(JNIEnv *, jclass)
+{
+  return reinterpret_cast<jlong> (static_cast<CORBA::Object_ptr>(
+    new DDS::GuardCondition));
 }
