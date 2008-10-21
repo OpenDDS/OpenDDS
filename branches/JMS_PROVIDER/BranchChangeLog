@@ -1,5 +1,6 @@
 Tue Oct 21 23:08:24 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
+        * java/dds/OpenDDS/DCPS/transport/AttachStatus.java:
         * java/dds/OpenDDS/DCPS/transport/TransportConfiguration.java:
 
           Now implements java.io.Serializable.
