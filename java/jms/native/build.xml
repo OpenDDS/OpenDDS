@@ -135,13 +135,13 @@
     <target name="all" depends="clean, compile"/>
 
     <target name="clean" if="makefile.available">
-        <exec executable="${make.executable}">
+        <exec executable="${make.executable}" failonerror="true">
             <arg line="${make.clean.arguments}"/>
         </exec>
     </target>
 
     <target name="mwc" unless="mwc.uptodate">
-        <exec executable="${perl.executable}">
+        <exec executable="${perl.executable}" failonerror="true">
             <arg value="${env.ACE_ROOT}/bin/mwc.pl"/>
             <arg line="-type ${mwc.type}"/>
             <arg line="-features ${mwc.features}"/>
@@ -149,7 +149,7 @@
     </target>
 
     <target name="compile" depends="mwc">
-        <exec executable="${make.executable}">
+        <exec executable="${make.executable}" failonerror="true">
             <arg line="${make.compile.arguments}"/>
         </exec>
     </target>
