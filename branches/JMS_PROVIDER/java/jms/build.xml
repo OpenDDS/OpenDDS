@@ -196,7 +196,6 @@
                  doctitle="OpenDDS ${version.dds} JMS API Specification"
                  windowtitle="${ant.project.name}">
             <link href="http://java.sun.com/j2se/${project.source}/docs/api/"/>
-            <link href="http://java.sun.com/javaee/5/docs/api/"/>
             <classpath refid="project.classpath"/>
             <packageset dir="${src.dir}"/>
             <packageset dir="${native.dir}"/>
