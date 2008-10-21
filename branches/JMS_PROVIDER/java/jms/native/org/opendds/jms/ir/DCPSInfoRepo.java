@@ -17,7 +17,7 @@ package org.opendds.jms.ir;
  * @author  Steven Stallion
  * @version $Revision$
  */
-public final class DCPSInfoRepoService implements Runnable {
+public final class DCPSInfoRepo implements Runnable {
 
     static {
         String library = "opendds-jms-native";
@@ -30,7 +30,7 @@ public final class DCPSInfoRepoService implements Runnable {
     private long peer;
 
     /**
-     * Constructs and initializes a DCPSInfoRepoService instance.
+     * Constructs and initializes a DCPSInfoRepo instance.
      *
      * @throws  IllegalArgumentException if an invalid argument
      *          causes DCPSInfoRepo initialization to fail
@@ -39,7 +39,7 @@ public final class DCPSInfoRepoService implements Runnable {
      * @throws  org.omg.CORBA.UNKNOWN if the DCPSInfoRepo fails
      *          internally with a CORBA exception
      */
-    public DCPSInfoRepoService(String[] args) {
+    public DCPSInfoRepo(String[] args) {
         init(args);
     }
 
@@ -61,7 +61,7 @@ public final class DCPSInfoRepoService implements Runnable {
      * Gracefully terminates a DCPSInfoRepo instance running on
      * another thread.  By default, the {@code shutdown()} method
      * defers DCPSInfoRepo finalization until the
-     * {@code DCPSInfoRepoService} is marked for collection.
+     * {@code DCPSInfoRepo} is marked for collection.
      *
      * @throws  IllegalStateException if the DCPSInfoRepo instance
      *          has been finalized and marked for collection

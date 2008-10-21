@@ -1,3 +1,20 @@
+Tue Oct 21 17:08:12 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/native/opendds_jms_native.mpc:
+        * java/jms/native/org/opendds/jms/ir/DCPSInfoRepo.java:
+        * java/jms/native/org_opendds_jms_ir_DCPSInfoRepo.cpp:
+        * java/jms/test/org/opendds/jms/ir/DCPSInfoRepoTest.java:
+        * java/jms/native/org/opendds/jms/ir/DCPSInfoRepoService.java:
+       
+          - Refactored DCPSInfoRepo classes.
+          - Added support for ACE 5.4.
+          - Fixed ACE_OS::strdup allocation issues.
+        
+        * java/jms/native/org_opendds_jms_ir_DCPSInfoRepoService.cpp:
+        * java/jms/test/org/opendds/jms/ir/DCPSInfoRepoServiceTest.java:
+
+          Removed these files.
+
 Mon Oct 20 22:43:37 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/build.xml:
