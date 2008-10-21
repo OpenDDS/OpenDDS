@@ -85,6 +85,7 @@ class UpdateListener
     RepoKey  federationId() const;
 
     void stop ();
+    void join ();
 
   private:
     /// Our Federation Id value.
