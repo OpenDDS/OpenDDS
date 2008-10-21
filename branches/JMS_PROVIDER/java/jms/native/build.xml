@@ -10,6 +10,8 @@
 
     <property environment="env"/>
 
+    <property file="${basedir}/../build.properties"/>
+
     <condition property="makefile" value="${basedir}/GNUmakefile">
         <os family="unix"/>
     </condition>
