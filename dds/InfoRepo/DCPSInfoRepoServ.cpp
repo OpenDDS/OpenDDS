@@ -16,6 +16,8 @@
 //If we need BIT support, pull in TCP so that static builds will have it.
 #if !defined(DDS_HAS_MINIMUM_BIT)
 #include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#include "PersistenceUpdater.h"
+#include "UpdateManager.h"
 #endif
 
 #include "tao/ORB_Core.h"

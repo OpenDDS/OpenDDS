@@ -1002,14 +1002,20 @@ PersistenceUpdater::storeUpdate( const ACE_Message_Block& data, BinSeq& storage)
 
 } // End of namespace Update
 
-typedef Update::PersistenceUpdater PersistenceUpdaterSvc;
+
+int
+PersistenceUpdaterSvc_Loader::init (void)
+{
+  return ACE_Service_Config::process_directive
+    (ace_svc_desc_PersistenceUpdaterSvc);
+  return 0;
+}
 
 // from the "ACE Programmers Guide (P. 424)
-
 ACE_FACTORY_DEFINE (ACE_Local_Service, PersistenceUpdaterSvc)
 
 ACE_STATIC_SVC_DEFINE (PersistenceUpdaterSvc,
-                         ACE_TEXT ("PersistenceUpdaterSvc_Static_Service"),
+                         ACE_TEXT ("PersistenceUpdaterSvc"),
                          ACE_SVC_OBJ_T,
                          &ACE_SVC_NAME (PersistenceUpdaterSvc),
                          ACE_Service_Type::DELETE_THIS |
