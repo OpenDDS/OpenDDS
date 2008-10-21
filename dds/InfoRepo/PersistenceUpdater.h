@@ -14,10 +14,13 @@
 
 #include "dds/DdsDcpsInfoUtilsC.h"
 
+
 #include "ace/Task.h"
 #include "ace/Hash_Map_With_Allocator_T.h"
 #include "ace/Malloc_T.h"
 #include "ace/MMAP_Memory_Pool.h"
+#include "ace/Service_Object.h"
+#include "ace/Service_Config.h"
 
 #include <string>
 
