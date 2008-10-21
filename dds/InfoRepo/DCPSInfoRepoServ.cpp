@@ -85,7 +85,7 @@ InfoRepo::finalize()
   TheTransportFactory->release();
   TheServiceParticipant->shutdown ();
  
-  if (orb_) 
+  if (! CORBA::is_nil (orb_.in ())) 
   {
     orb_->destroy ();
   }

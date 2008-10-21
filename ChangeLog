@@ -1,3 +1,13 @@
+Tue Oct 21 20:00:02 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Added Federation test.
+          
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+ 
+          Fixed a warning.
+
 Tue Oct 21 18:53:07 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/InfoRepo/DCPS_IR_Domain.cpp:
