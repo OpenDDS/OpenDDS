@@ -1,3 +1,10 @@
+Tue Oct 21 22:43:21 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/build.xml:
+
+          Added guard around jar target (prevents redundant archive
+          creation).
+
 Tue Oct 21 22:35:37 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/build.properties:
