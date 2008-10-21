@@ -1,9 +1,15 @@
+Tue Oct 21 18:53:07 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+
+          Eliminated a warning when built_in_topics=0.
+
 Mon Oct 20 22:08:36 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * DDS_release_notes.txt:
 
-	  Added short description of new dcps_ts.pl command line
-	  argument.
+          Added short description of new dcps_ts.pl command line
+          argument.
 
 Mon Oct 20 21:51:30 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
