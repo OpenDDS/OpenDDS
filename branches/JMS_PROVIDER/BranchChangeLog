@@ -1,3 +1,17 @@
+Tue Oct 21 16:16:12 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/ConditionImpl.h:
+        * dds/DCPS/ConditionImpl.cpp:
+        * dds/DCPS/StatusConditionImpl.cpp:
+
+          Changed Condition's lock to a recursive mutex.
+
+        * tests/DCPS/GuardCondition/GuardCondition.mpc:
+        * tests/DCPS/StatusCondition/StatusCondition.mpc:
+
+          Added an explicit "exename" since older versions of TAO don't
+          pick it up automatically.
+
 Tue Oct 21 17:20:00 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/build.properties:
