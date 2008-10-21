@@ -1,3 +1,12 @@
+Tue Oct 21 22:35:37 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/build.properties:
+        * java/jms/build.xml:
+        * java/jms/native/build.xml:
+
+          Windows builds should now default to debug. This feature is
+          controlled by the compile.debug property in build.properties.
+
 Tue Oct 21 20:48:24 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/native/org_opendds_jms_ir_DCPSInfoRepo.cpp:

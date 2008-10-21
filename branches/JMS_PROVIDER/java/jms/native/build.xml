@@ -79,10 +79,24 @@
     </condition>
 
     <!-- command line arguments -->
+    <condition property="vcbuild.config" value="Debug">
+        <and>
+            <os family="windows"/>
+            <istrue value="${compile.debug}"/>
+        </and>
+    </condition>
+    <condition property="vcbuild.config" value="Release">
+        <and>
+            <os family="windows"/>
+            <isfalse value="${compile.debug}"/>
+        </and>
+    </condition>
+
     <condition property="make.compile.arguments" value="">
         <os family="unix"/>
     </condition>
-    <condition property="make.compile.arguments" value="${makefile} Debug">
+    <condition property="make.compile.arguments"
+               value="${makefile} ${vcbuild.config}">
         <and>
             <os family="windows"/>
             <or>
@@ -91,14 +105,17 @@
             </or>
         </and>
     </condition>
-    <condition property="make.compile.arguments" value="/build Debug ${makefile}">
+    <condition property="make.compile.arguments"
+               value="/build ${vcbuild.config} ${makefile}">
         <os family="windows"/>
     </condition>
 
-    <condition property="make.clean.arguments" value="realclean">
+    <condition property="make.clean.arguments"
+               value="realclean">
         <os family="unix"/>
     </condition>
-    <condition property="make.clean.arguments" value="${makefile} /c">
+    <condition property="make.clean.arguments"
+               value="${makefile} /c">
         <and>
             <os family="windows"/>
             <or>
@@ -107,7 +124,8 @@
             </or>
         </and>
     </condition>
-    <condition property="make.clean.arguments" value="/clean Debug ${makefile}">
+    <condition property="make.clean.arguments"
+               value="/clean ${vcbuild.config} ${makefile}">
         <os family="windows"/>
     </condition>
 
