@@ -923,7 +923,7 @@ int DCPS_IR_Domain::init_built_in_topics_datawriters( bool federated)
 
   return 0;
 #else
-
+  ACE_UNUSED_ARG(federated);
   return 1;
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 }
