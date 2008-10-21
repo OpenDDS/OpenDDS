@@ -1,3 +1,10 @@
+Tue Oct 21 22:46:30 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/native/build.xml:
+
+          Native builds will now fail if mwc or make exit with a non-
+          zero return code.
+
 Tue Oct 21 22:43:21 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/build.xml:
