@@ -1,3 +1,9 @@
+Tue Oct 21 23:08:24 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/dds/OpenDDS/DCPS/transport/TransportConfiguration.java:
+
+          Now implements java.io.Serializable.
+
 Tue Oct 21 22:46:30 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/native/build.xml:
