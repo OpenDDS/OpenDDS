@@ -1,3 +1,9 @@
+Tue Oct 21 18:12:49 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * java/jms/native/org_opendds_jms_ir_DCPSInfoRepo.cpp:
+
+          Added a work-around for a compile error on 1.4a (extra #include).
+
 Tue Oct 21 16:16:12 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/ConditionImpl.h:
