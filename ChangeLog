@@ -1,21 +1,27 @@
+Tue Oct 21 22:24:39 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/mySvc.conf:
+        
+          Updated the service name.
+
 Tue Oct 21 22:05:28 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcp.cpp:
-     
+
           Removed a duplicate header.
 
         * dds/InfoRepo/DCPSInfoRepoServ.cpp:
-        
+
           Added includes to load service for static build.
-          
+
         * dds/InfoRepo/PersistenceUpdater.h:
         * dds/InfoRepo/PersistenceUpdater.cpp:
 
           Added Loader class for static intializing and
           loading service.
-          
+
         * tests/DCPS/Prst_delayed_subscriber/mySvc.conf:
-        
+
           Updated the service name.
 
 Tue Oct 21 20:00:02 UTC 2008  Yan Dai  <dai_y@ociweb.com>
@@ -23,9 +29,9 @@ Tue Oct 21 20:00:02 UTC 2008  Yan Dai  <dai_y@ociweb.com>
         * bin/dcps_tests.lst:
 
           Added Federation test.
-          
+
         * dds/InfoRepo/DCPSInfoRepoServ.cpp:
- 
+
           Fixed a warning.
 
 Tue Oct 21 18:53:07 UTC 2008  Adam Mitz  <mitza@ociweb.com>
