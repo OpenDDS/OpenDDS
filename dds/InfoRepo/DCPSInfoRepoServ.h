@@ -10,6 +10,7 @@
 #include <string>
 
 #include "ace/Event_Handler.h"
+#include "ace/Condition_Thread_Mutex.h"
 
 #include "tao/ORB_Core.h"
 
@@ -65,6 +66,9 @@ private:
   OpenDDS::Federator::Config      federatorConfig_;
 
   PortableServer::ServantBase_var info_;
+  ACE_Thread_Mutex lock_;
+  ACE_Condition_Thread_Mutex cond_;
+  bool shutdown_complete_;
 };
 
 class OpenDDS_DCPSInfoRepoServ_Export InfoRepo_Shutdown :

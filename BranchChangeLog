@@ -1,3 +1,21 @@
+Tue Oct 21 20:29:09 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepoServ.h:
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+
+          InfoRepo::shutdown() now blocks until the run() method has completed.
+
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/UpdateListener_T.h:
+        * dds/InfoRepo/UpdateListener_T.cpp:
+
+          Added a join() method to UpdateListener and calls to it in the 
+          ManagerImpl::finalize() method.
+
+        * java/jms/native/org_opendds_jms_ir_DCPSInfoRepo.cpp:
+
+          Call ACE::init() and ACE::fini().
+
 Tue Oct 21 18:12:49 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * java/jms/native/org_opendds_jms_ir_DCPSInfoRepo.cpp:

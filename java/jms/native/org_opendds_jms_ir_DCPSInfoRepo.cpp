@@ -8,6 +8,7 @@
 #include "ace/ace_wchar.h"
 #include "ace/OS_NS_stdlib.h"
 #include "ace/OS_NS_string.h"
+#include "ace/Init_ACE.h"
 
 #include "tao/Exception.h"
 
@@ -132,6 +133,8 @@ DCPSInfoRepo_init(JNIEnv *env, jobject self, jobjectArray args)
     return;
   }
 
+  ACE::init();
+
   jsize len = env->GetArrayLength(args) + 1;
 
   ACE_TCHAR **argv = to_argv(env, args, len);
@@ -167,6 +170,7 @@ DCPSInfoRepo_fini(JNIEnv *env, jobject self)
   if (peer != 0)
   {
     delete_InfoRepo_peer(env, self, peer);
+    ACE::fini();
   }
 }
 

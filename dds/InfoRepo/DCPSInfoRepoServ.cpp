@@ -49,6 +49,10 @@ InfoRepo::InfoRepo (int argc, ACE_TCHAR *argv[])
     , finalized_( false)
     , federator_( this->federatorConfig_)
     , federatorConfig_( argc, argv)
+    , info_()
+    , lock_()
+    , cond_(lock_)
+    , shutdown_complete_(false)
 {
   try
   {
@@ -73,7 +77,11 @@ InfoRepo::~InfoRepo (void)
 void
 InfoRepo::run (void)
 {
+  shutdown_complete_ = false;
   orb_->run ();
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  shutdown_complete_ = true;
+  cond_.signal();
 }
 
 void
@@ -106,6 +114,11 @@ void
 InfoRepo::shutdown (void)
 {
   this->orb_->orb_core()->reactor()->notify( this);
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  while (!this->shutdown_complete_)
+  {
+    cond_.wait();
+  }
 }
 
 void
