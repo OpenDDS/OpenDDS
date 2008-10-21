@@ -19,16 +19,16 @@
 #endif
 
 #define DCPSInfoRepo_init \
-        Java_org_opendds_jms_ir_DCPSInfoRepo_init
+  Java_org_opendds_jms_ir_DCPSInfoRepo_init
 
 #define DCPSInfoRepo_fini \
-        Java_org_opendds_jms_ir_DCPSInfoRepo_fini
+  Java_org_opendds_jms_ir_DCPSInfoRepo_fini
 
 #define DCPSInfoRepo_run \
-        Java_org_opendds_jms_ir_DCPSInfoRepo_run
+  Java_org_opendds_jms_ir_DCPSInfoRepo_run
 
 #define DCPSInfoRepo_shutdown \
-        Java_org_opendds_jms_ir_DCPSInfoRepo_shutdown
+  Java_org_opendds_jms_ir_DCPSInfoRepo_shutdown
 
 namespace
 {
