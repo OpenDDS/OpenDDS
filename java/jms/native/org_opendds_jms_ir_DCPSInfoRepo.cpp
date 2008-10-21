@@ -148,16 +148,21 @@ DCPSInfoRepo_init(JNIEnv *env, jobject self, jobjectArray args)
     catch (InfoRepo::InitError &e)
     {
       throw_exception(env, "java/lang/IllegalArgumentException",
-      e.msg_.c_str());
+        e.msg_.c_str());
+
+      ACE::fini();
     }
     catch (CORBA::Exception &e)
     {
       throw_exception(env, "org/omg/CORBA/UNKNOWN",
-      e._info().c_str());
+        e._info().c_str());
+
+      ACE::fini();
     }
     catch (...)
     {
       throw_exception(env, "java/lang/UnknownError");
+      ACE::fini();
     }
     delete_argv(env, argv, len);
   }
