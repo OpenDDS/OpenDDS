@@ -1,6 +1,8 @@
 package OpenDDS.DCPS.transport;
 
-public class AttachStatus {
+import java.io.Serializable;
+
+public class AttachStatus implements Serializable {
 
   public static final int _ATTACH_BAD_TRANSPORT = 0;
   public static final AttachStatus ATTACH_BAD_TRANSPORT = new AttachStatus(_ATTACH_BAD_TRANSPORT);
