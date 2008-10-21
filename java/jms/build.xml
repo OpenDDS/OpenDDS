@@ -163,7 +163,6 @@
                     <include name="**/*Test.java"/>
                 </fileset>
             </batchtest>
-            <jvmarg value="-ea"/> <!-- enable assertions -->
             <jvmarg line="${test.jvmargs}"/>
             <classpath refid="project.classpath"/>
         </junit>
