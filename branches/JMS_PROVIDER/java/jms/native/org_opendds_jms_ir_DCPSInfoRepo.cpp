@@ -4,6 +4,7 @@
 
 #include <jni.h>
 
+#include "ace/config-lite.h"
 #include "ace/ace_wchar.h"
 #include "ace/OS_NS_stdlib.h"
 #include "ace/OS_NS_string.h"
