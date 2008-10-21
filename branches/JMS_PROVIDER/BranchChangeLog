@@ -1,3 +1,9 @@
+Tue Oct 21 20:48:24 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/native/org_opendds_jms_ir_DCPSInfoRepo.cpp:
+
+          Added additional ACE::fini() calls to exception handlers.
+
 Tue Oct 21 20:29:09 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepoServ.h:
@@ -9,7 +15,7 @@ Tue Oct 21 20:29:09 UTC 2008  Adam Mitz  <mitza@ociweb.com>
         * dds/InfoRepo/UpdateListener_T.h:
         * dds/InfoRepo/UpdateListener_T.cpp:
 
-          Added a join() method to UpdateListener and calls to it in the 
+          Added a join() method to UpdateListener and calls to it in the
           ManagerImpl::finalize() method.
 
         * java/jms/native/org_opendds_jms_ir_DCPSInfoRepo.cpp:
