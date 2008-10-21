@@ -27,6 +27,9 @@
         </filterchain>
     </loadproperties>
 
+    <!-- Determine JAR name -->
+    <property name="jar.name" value="${ant.project.name}-${version.dds}.jar"/>
+
     <property file="build.properties"/>
 
     <!--
@@ -70,6 +73,14 @@
         <mkdir dir="${build.dir}"/>
         <mkdir dir="${build.dir}/classes"/>
 
+        <uptodate property="jar.uptodate"
+                  targetfile="${build.dir}/${jar.name}">
+            <srcfiles dir="${src.dir}"/>
+            <srcfiles dir="${native.dir}">
+                <include name="**/*.java"/>
+            </srcfiles>
+        </uptodate>
+
         <!-- Update version.properties -->
         <propertyfile file="${build.dir}/version.properties">
             <entry key="version.dds" value="${version.dds}"/>
@@ -104,9 +115,9 @@
         </javac>
     </target>
 
-    <target name="jar" depends="compile"
+    <target name="jar" depends="compile" unless="jar.uptodate"
             description="Archive compiled classes and resources">
-        <jar destfile="${build.dir}/${ant.project.name}-${version.dds}.jar"
+        <jar destfile="${build.dir}/${jar.name}"
              compress="${jar.compress}"
              index="${jar.index}">
             <fileset dir="${build.dir}/classes"/>
@@ -172,8 +183,8 @@
                     <include name="**/*Test.java"/>
                 </fileset>
             </batchtest>
-            <jvmarg value="-ea"/>   <!-- enable assertions -->
             <jvmarg line="${test.jvmargs}"/>
+            <jvmarg value="-ea"/>   <!-- enable assertions -->
             <classpath refid="project.classpath"/>
         </junit>
     </target>
