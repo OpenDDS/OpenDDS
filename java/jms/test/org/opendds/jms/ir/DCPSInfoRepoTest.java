@@ -10,52 +10,52 @@ import org.junit.Test;
  * @author  Steven Stallion
  * @version $Revision$
  */
-public class DCPSInfoRepoServiceTest {
+public class DCPSInfoRepoTest {
 
     @Test(expected = NullPointerException.class)
     public void errorWithNullArgs() {
-        new DCPSInfoRepoService(null);
+        new DCPSInfoRepo(null);
     }
 
     @Test(expected = NullPointerException.class)
     public void errorWithNullArg() {
-        new DCPSInfoRepoService(new String[] { "1", "2", null });
+        new DCPSInfoRepo(new String[] { "1", "2", null });
     }
 
     @Test(expected = IllegalStateException.class)
     public void errorRunAfterFini() {
-        DCPSInfoRepoService service =
-            new DCPSInfoRepoService(new String[] { "-NOBITS" });
+        DCPSInfoRepo repo =
+            new DCPSInfoRepo(new String[] { "-NOBITS" });
 
-        service.fini();
-        service.run();
+        repo.fini();
+        repo.run();
     }
 
     @Test(expected = IllegalStateException.class)
     public void errorShutdownAfterFini() {
-        DCPSInfoRepoService service =
-            new DCPSInfoRepoService(new String[] { "-NOBITS" });
+        DCPSInfoRepo repo =
+            new DCPSInfoRepo(new String[] { "-NOBITS" });
 
-        service.fini();
-        service.shutdown();
+        repo.fini();
+        repo.shutdown();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testUsage() {
-        new DCPSInfoRepoService(new String[] { "-?" });
+        new DCPSInfoRepo(new String[] { "-?" });
     }
 
     @Test
     public void testRunWithShutdown() throws Exception {
-        DCPSInfoRepoService service =
-            new DCPSInfoRepoService(new String[] { "-NOBITS" });
+        DCPSInfoRepo repo =
+            new DCPSInfoRepo(new String[] { "-NOBITS" });
 
-        Thread t = new Thread(service);
+        Thread t = new Thread(repo);
         t.start();
 
-        Thread.sleep(10000);
+        Thread.sleep(2500);
 
-        service.shutdown(true);
+        repo.shutdown(true);
         t.join();
     }
 }
