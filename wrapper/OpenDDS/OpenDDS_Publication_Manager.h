@@ -37,7 +37,9 @@ class OpenDDS_Publication_Manager : public Publication_Manager_Impl
 
   /// will create a topic instance using the domain manager
   /// memory management of the returned datawriter has to be done by the caller
-  virtual DDS::DataWriter_ptr access_topic (const Topic_Manager & topic);
+  virtual DDS::DataWriter_ptr access_topic (
+    const Topic_Manager & topic,
+    const Publication_Manager_Ptr & ref);
 
   /// unregisters and deletes the topic from the domain
   virtual void remove_topic (const Topic_Manager & topic);

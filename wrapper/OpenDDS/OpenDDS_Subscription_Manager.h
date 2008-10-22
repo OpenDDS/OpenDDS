@@ -45,7 +45,9 @@ class OpenDDS_Subscription_Manager : public Subscription_Manager_Impl
 
   /// will create a topic instance using the domain manager
   /// memory management of the returned datawriter has to be done by the caller
-  virtual void access_topic (const Topic_Manager & topic);
+  virtual void access_topic (
+    const Topic_Manager & topic,
+    const Subscription_Manager_Ptr & ref);
 
   /// unregisters and deletes the topic from the domain
   virtual void remove_topic (const Topic_Manager & topic);

@@ -16,7 +16,8 @@
 ACE_INLINE DDS::DataWriter_ptr
 Publication_Manager::access_topic (const Topic_Manager & topic)
 {
-  return manager_impl_->access_topic (topic);
+  return manager_impl_->access_topic (topic,
+				      manager_impl_);
 }
 
 ACE_INLINE void 

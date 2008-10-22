@@ -1,3 +1,37 @@
+Wed Oct 22 03:25:37 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
+
+        * wrapper/Subscription_Manager_Impl.cpp
+        * wrapper/Domain_Manager.h
+        * wrapper/Publication_Manager.h
+        * wrapper/Topic_Manager.cpp
+        * wrapper/Subscription_Manager.inl
+        * wrapper/Subscription_Manager.cpp
+        * wrapper/Reference_Counter_T.h
+        * wrapper/Domain_Manager_Impl.h
+        * wrapper/Publication_Manager_Impl.h
+        * wrapper/Topic_Manager_Impl.h
+        * wrapper/Domain_Manager.cpp
+        * wrapper/Domain_Manager.inl
+        * wrapper/Publication_Manager.cpp
+        * wrapper/Publication_Manager.inl
+        * wrapper/Subscription_Manager_Impl.h
+        * wrapper/OpenDDS/OpenDDS_Subscription_Manager.h
+        * wrapper/OpenDDS/OpenDDS_Publication_Manager.cpp
+        * wrapper/OpenDDS/OpenDDS_Domain_Manager.h
+        * wrapper/OpenDDS/OpenDDS_Publication_Manager.h
+        * wrapper/OpenDDS/OpenDDS_Subscription_Manager.cpp
+        * wrapper/OpenDDS/OpenDDS_Domain_Manager.cpp
+        * wrapper/Topic_Manager.h
+        * wrapper/Reference_Counter_T.cpp
+        * wrapper/Domain_Manager_Impl.cpp
+        * wrapper/Subscription_Manager.h
+        * wrapper/Publication_Manager_Impl.cpp
+        * wrapper/Topic_Manager_Impl.cpp:
+        
+          Replaced Reference_Counter_T class with 
+          ACE_Refcounted_Auto_Ptr in the memory management bridge 
+          classes.
+
 Tue Oct 21 23:22:55 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/InfoRepo/DCPS_IR_Domain.cpp:
