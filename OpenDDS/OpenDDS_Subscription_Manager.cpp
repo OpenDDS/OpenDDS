@@ -110,7 +110,9 @@ OpenDDS_Subscription_Manager::register_transport (
 }
 
 void
-OpenDDS_Subscription_Manager::access_topic (const Topic_Manager & topic)
+OpenDDS_Subscription_Manager::access_topic (
+    const Topic_Manager & topic,
+    const Subscription_Manager_Ptr & ref)
 {
   // Create a modifiable copy of the Topic_Manager
   Topic_Manager tm (topic);
@@ -121,7 +123,7 @@ OpenDDS_Subscription_Manager::access_topic (const Topic_Manager & topic)
   // the returned data reader is not used and therefore just stored
   // in a var class for following deletion
   DDS::DataReader_var dr =
-    tm.datareader (Subscription_Manager (this));
+    tm.datareader (Subscription_Manager (ref));
 }
 
 DDS::DataReader_ptr 

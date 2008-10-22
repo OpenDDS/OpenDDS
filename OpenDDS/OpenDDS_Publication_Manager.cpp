@@ -99,7 +99,8 @@ OpenDDS_Publication_Manager::register_transport (OpenDDS::DCPS::TransportIdType 
 }
 
 DDS::DataWriter_ptr
-OpenDDS_Publication_Manager::access_topic (const Topic_Manager & topic)
+OpenDDS_Publication_Manager::access_topic (const Topic_Manager & topic,
+					   const Publication_Manager_Ptr & ref)
 {
   // Create a modifiable copy of the Topic_Manager
   Topic_Manager tm (topic);
@@ -107,7 +108,7 @@ OpenDDS_Publication_Manager::access_topic (const Topic_Manager & topic)
   tm.create_topic (dm_);
 
   // return a new datawriter created by the topic manager
-  return tm.datawriter (Publication_Manager (this));
+  return tm.datawriter (Publication_Manager (ref));
 }
 
 void

@@ -16,14 +16,13 @@
 #include "Publication_Manager.inl"
 #endif
 
-
 Publication_Manager::Publication_Manager ()
   : manager_impl_ (0)
 {
 }
 
-Publication_Manager::Publication_Manager (Publication_Manager_Impl * impl)
-  : manager_impl_ (impl, true)
+Publication_Manager::Publication_Manager (const Publication_Manager_Ptr & impl)
+  : manager_impl_ (impl)
 {
 }
 
