@@ -89,7 +89,7 @@ InfoRepo::finalize()
 {
   info_ = 0;
   federator_.finalize();
- 
+
   TheTransportFactory->release();
   TheServiceParticipant->shutdown ();
  
@@ -114,6 +114,12 @@ void
 InfoRepo::shutdown (void)
 {
   this->orb_->orb_core()->reactor()->notify( this);
+}
+
+void
+InfoRepo::sync_shutdown ()
+{
+  shutdown();
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   while (!this->shutdown_complete_)
   {
