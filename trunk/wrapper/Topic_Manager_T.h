@@ -34,12 +34,6 @@ class Topic_Manager_T : public Topic_Manager_Impl
                      DDS::DataReaderListener::_nil (),		     
 		   bool create_new_topic = true);
 
-  /// copy ctor
-  Topic_Manager_T (const Topic_Manager_T & orig);
-
-  /// assignment operator
-  void operator= (const Topic_Manager_T & rhs);
-
   /// dtor
   virtual ~Topic_Manager_T ();
 
@@ -59,6 +53,13 @@ class Topic_Manager_T : public Topic_Manager_Impl
   /// this method returns a new datawriter created by a publisher
   /// memory management has to be done by the caller
   virtual DDS::DataWriter_ptr datawriter (const Publication_Manager & pm);
+
+ private:
+  /// copy ctor is private to prevent copies
+  Topic_Manager_T (const Topic_Manager_T & orig);
+
+  /// assignment operator is private to prevent copies
+  void operator= (const Topic_Manager_T & rhs);
 
  private:
   /// name of the topic to be registered

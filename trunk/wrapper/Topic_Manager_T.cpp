@@ -39,9 +39,10 @@ Topic_Manager_T <TYPE_SUPPORT, TS_IMPL>::Topic_Manager_T (
 template <typename TYPE_SUPPORT, typename TS_IMPL>
 Topic_Manager_T <TYPE_SUPPORT, TS_IMPL>::Topic_Manager_T (
     const Topic_Manager_T & orig)
-  : name_ (orig.name_),
+  : Topic_Manager_Impl (),
+    name_ (orig.name_),
     topic_ (DDS::Topic::_duplicate (orig.topic_.in ())),
-    type_ (TS_IMPL::_duplicate (orig.type_)),
+    type_ (TYPE_SUPPORT::_duplicate (orig.type_)),
     listener_ (DDS::DataReaderListener::_duplicate (orig.listener_))
 {
 }
@@ -56,8 +57,8 @@ Topic_Manager_T <TYPE_SUPPORT, TS_IMPL>::operator= (
     {
       name_ = rhs.name_;
       topic_ = DDS::Topic::_duplicate (rhs.topic_.in ());
-      type_ = TS_IMPL::_duplicate (rhs.type_);
-      listener_ = DDS::DataReaderListener::_duplicate (rhs);
+      type_ = TYPE_SUPPORT::_duplicate (rhs.type_);
+      listener_ = DDS::DataReaderListener::_duplicate (rhs.listener_);
     }
 }
 
