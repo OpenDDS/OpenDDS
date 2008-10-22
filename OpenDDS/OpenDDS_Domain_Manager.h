@@ -81,6 +81,9 @@ class OpenDDS_Domain_Manager : public Domain_Manager_Impl
 
   /// signal handler for external shutdown
   Exit_Signal_Handler exit_handler_;
+
+  /// counter for how many subscription_managers have been created
+  bool transport_initialized_;
 };
 
 #if defined (__ACE_INLINE__)
