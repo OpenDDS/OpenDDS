@@ -16,7 +16,7 @@
 #include <string>
 #include <ace/Refcounted_Auto_Ptr.h>
 #include <ace/Null_Mutex.h>
-#include <dds/DdsDcpsSubscriptionC.h>
+#include "wrapper_subscription.h"
 
 /// forward declarations
 class Topic_Manager;

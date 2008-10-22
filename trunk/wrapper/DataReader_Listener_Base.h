@@ -13,7 +13,7 @@
 #ifndef _DATAREADER_LISTENER_BASE_H_
 #define _DATAREADER_LISTENER_BASE_H_
 
-#include <dds/DdsDcpsSubscriptionS.h>
+#include "wrapper_subscription.h"
 #include "DDSWrapper_export.h"
 
 /**
@@ -24,7 +24,7 @@
  *        don't have to be redefined for each listener
  */
 class DDSWrapper_Export DataReader_Listener_Base
-  : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>
+  : public DDS::DataReaderListener
 {
 public:
   //Constructor

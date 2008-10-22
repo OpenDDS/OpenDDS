@@ -16,9 +16,10 @@
 #include <string>
 #include <ace/Refcounted_Auto_Ptr.h>
 #include <ace/Null_Mutex.h>
-#include <dds/DdsDcpsSubscriptionC.h>
-#include <dds/DdsDcpsPublicationC.h>
 #include "DDSWrapper_export.h"
+#include "wrapper_publication.h"
+#include "wrapper_subscription.h"
+
 
 /// forward declarations
 class Domain_Manager;
