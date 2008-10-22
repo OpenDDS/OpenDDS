@@ -35,7 +35,8 @@ OpenDDS_Domain_Manager::OpenDDS_Domain_Manager (int & argc,
   : dp_ (DDS::DomainParticipant::_nil ()),
     transport_impl_id_ (1),
     shutdown_lock_ (0),
-    exit_handler_ (shutdown_lock_)
+    exit_handler_ (shutdown_lock_),
+    transport_initialized_ (false)
 {
   // get the domain participant factory from the singleton 
   DDS::DomainParticipantFactory_var dpf =
@@ -95,11 +96,25 @@ OpenDDS_Domain_Manager::shutdown ()
 Subscription_Manager
 OpenDDS_Domain_Manager::subscription_manager (const Domain_Manager_Ptr & ref)
 {
-  // create new subscription manager
-  return Subscription_Manager (
-           Subscription_Manager_Ptr (
-             new OpenDDS_Subscription_Manager (Domain_Manager (ref), 
-					       transport_impl_id_)));
+  if (transport_initialized_)
+    {
+      // only create new subscription manager that gets a transport impl id the
+      // first time the method is called, since repeatedly registering a transport
+      // would result in an error
+      return Subscription_Manager (
+               Subscription_Manager_Ptr (
+                 new OpenDDS_Subscription_Manager (Domain_Manager (ref))));
+    }
+  else
+    {
+      transport_initialized_ = true;
+
+      // use the simple constructor for consecutive calls of this method
+      return Subscription_Manager (
+               Subscription_Manager_Ptr (
+                 new OpenDDS_Subscription_Manager (Domain_Manager (ref), 
+			                           transport_impl_id_)));
+    }
 }
 
 Subscription_Manager
@@ -115,11 +130,25 @@ OpenDDS_Domain_Manager::builtin_topic_subscriber (const Domain_Manager_Ptr & ref
 Publication_Manager
 OpenDDS_Domain_Manager::publication_manager (const Domain_Manager_Ptr & ref)
 {
-  // create new publication manager
-  return Publication_Manager (
-           Publication_Manager_Ptr (
-             new OpenDDS_Publication_Manager (Domain_Manager (ref),
-					      transport_impl_id_)));
+  if (transport_initialized_)
+    {
+      // only create new publication manager that gets a transport impl id the
+      // first time the method is called, since repeatedly registering a transport
+      // would result in an error
+      return Publication_Manager (
+               Publication_Manager_Ptr (
+                 new OpenDDS_Publication_Manager (Domain_Manager (ref))));
+    }
+  else
+    {
+      transport_initialized_ = true;
+
+      // use the simple constructor for consecutive calls of this method
+      return Publication_Manager (
+               Publication_Manager_Ptr (
+                 new OpenDDS_Publication_Manager (Domain_Manager (ref),
+		     			          transport_impl_id_)));
+    }
 }
 
 bool

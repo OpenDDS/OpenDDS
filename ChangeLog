@@ -1,3 +1,22 @@
+Wed Oct 22 22:08:10 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
+
+        * wrapper/Topic_Manager_T.h
+        * wrapper/Topic_Manager_T.cpp:
+        
+          Made corrections on copy ctor and assignment operator
+          and made them private.
+        
+        * wrapper/OpenDDS/OpenDDS_Subscription_Manager.h
+        * wrapper/OpenDDS/OpenDDS_Publication_Manager.cpp
+        * wrapper/OpenDDS/OpenDDS_Domain_Manager.h
+        * wrapper/OpenDDS/OpenDDS_Publication_Manager.h
+        * wrapper/OpenDDS/OpenDDS_Subscription_Manager.cpp
+        * wrapper/OpenDDS/OpenDDS_Domain_Manager.cpp:
+        
+          Changed register_transport functionality so that it is only
+          called once per Domain_Manager instance even if several
+          publishers or subscribers are created.
+
 Wed Oct 22 03:25:37 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
 
         * wrapper/Subscription_Manager_Impl.cpp

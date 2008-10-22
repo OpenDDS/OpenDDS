@@ -29,9 +29,9 @@ class OpenDDS_Subscription_Manager : public Subscription_Manager_Impl
 {
  public:
   /// ctor
-  /// will read dcps configuration and information about the used transport 
-  /// implementation from the command line and set up a domain participant 
-  /// with this.
+  OpenDDS_Subscription_Manager (const Domain_Manager & dm);
+
+  /// ctor with transport impl registration
   OpenDDS_Subscription_Manager (const Domain_Manager & dm,
 				OpenDDS::DCPS::TransportIdType transport_id);
 
@@ -61,6 +61,9 @@ class OpenDDS_Subscription_Manager : public Subscription_Manager_Impl
   virtual DDS::Subscriber_ptr subscriber () const;
 
  private:
+  /// initializes the publication manager
+  void init ();
+
   /// registers a transport implementation based on the passed id
   void register_transport (OpenDDS::DCPS::TransportIdType transport_id);
 
