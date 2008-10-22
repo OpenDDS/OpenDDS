@@ -15,7 +15,7 @@
 
 #include <ace/Refcounted_Auto_Ptr.h>
 #include <ace/Null_Mutex.h>
-#include <dds/DdsDcpsPublicationC.h>
+#include "wrapper_publication.h"
 
 /// forward declarations
 class Topic_Manager;
