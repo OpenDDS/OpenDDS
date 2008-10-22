@@ -70,7 +70,7 @@ namespace
   }
 
   void
-  delete_argv(JNIEnv *env, ACE_TCHAR **argv, jsize len)
+  delete_argv(JNIEnv *, ACE_TCHAR **argv, jsize len)
   {
     // Skip first element; argv[0] is a string literal.
     for (int i = 1; i < len; ++i)
@@ -200,7 +200,7 @@ DCPSInfoRepo_shutdown(JNIEnv *env, jobject self, jboolean finalize)
     throw_exception(env, "java/lang/IllegalStateException");
     return;
   }
-  peer->shutdown();
+  peer->sync_shutdown();
 
   if (finalize)
   {

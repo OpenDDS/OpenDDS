@@ -55,7 +55,7 @@ public class DCPSInfoRepoTest {
 
         Thread.sleep(2500);
 
-        repo.shutdown(true);
+        repo.shutdown();
         t.join();
     }
 }

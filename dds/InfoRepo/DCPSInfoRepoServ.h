@@ -1,3 +1,4 @@
+// -*- C++ -*-
 /*
  * $Id$
  */
@@ -35,7 +36,11 @@ public:
 
   /// ShutdownInterface used to schedule a shutdown.
   virtual void shutdown (void);
-  
+
+  /// shutdown() and wait for it to complete: cannot be called from the reactor
+  /// thread.
+  void sync_shutdown (void);
+
   /// Handler for the reactor to dispatch finalization activity to.
   virtual int handle_exception( ACE_HANDLE fd = ACE_INVALID_HANDLE);
 
