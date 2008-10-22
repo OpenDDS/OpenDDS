@@ -14,11 +14,18 @@
 #define _SUBSCRIPTION_MANAGER_IMPL_H_
 
 #include <string>
+#include <ace/Refcounted_Auto_Ptr.h>
+#include <ace/Null_Mutex.h>
 #include <dds/DdsDcpsSubscriptionC.h>
-#include "Reference_Counter_T.h"
 
-/// forward declaration
+/// forward declarations
 class Topic_Manager;
+class Subscription_Manager_Impl;
+
+/// this defines a reference counted pointer for a subscription manager
+/// implementation
+typedef class ACE_Refcounted_Auto_Ptr <Subscription_Manager_Impl, 
+				       ACE_Null_Mutex> Subscription_Manager_Ptr;
 
 /**
  * @class Subscription_Manager_Impl
@@ -27,19 +34,15 @@ class Topic_Manager;
  */
 class Subscription_Manager_Impl 
 {
-  /// this friend declaration is needed for reference counting purposes
-  friend class Reference_Counter_T <Subscription_Manager_Impl>;
-
  public:
-  // default ctor
-  Subscription_Manager_Impl ();
-
   /// destructor
   virtual ~Subscription_Manager_Impl ();
 
   /// will create a topic instance using the domain manager
   /// memory management of the returned datawriter has to be done by the caller
-  virtual void access_topic (const Topic_Manager & topic) = 0;
+  virtual void access_topic (
+    const Topic_Manager & topic,
+    const Subscription_Manager_Ptr & ref) = 0;
 
   /// unregisters and deletes the topic from the domain
   virtual void remove_topic (const Topic_Manager & topic) = 0;
@@ -52,10 +55,6 @@ class Subscription_Manager_Impl
   /// memory management of the returned publisher reference is done by the 
   /// Subscription_Manager_Impl itself
   virtual DDS::Subscriber_ptr subscriber () const = 0;
-
- protected:
-  /// reference count variable
-  unsigned long use_;
 };
 
 #endif /* _SUBSCRIPTION_MANAGER_IMPL_H_ */

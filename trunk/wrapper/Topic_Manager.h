@@ -32,6 +32,9 @@ class DDSWrapper_Export Topic_Manager
   /// ctor that takes ownership of the passed in impl pointer
   Topic_Manager (Topic_Manager_Impl * impl);
 
+  /// ctor for reference counted pointer
+  Topic_Manager (Topic_Manager_Ptr impl);
+
   /// copy constructor
   Topic_Manager (const Topic_Manager & copy);
 
@@ -59,7 +62,8 @@ class DDSWrapper_Export Topic_Manager
   DDS::DataWriter_ptr datawriter (const Publication_Manager & pm);
 
  private:
-  Reference_Counter_T <Topic_Manager_Impl> manager_impl_;
+  /// reference counted auto pointer containing the impl pointer
+  Topic_Manager_Ptr manager_impl_;
 };
 
 #if defined (__ACE_INLINE__)

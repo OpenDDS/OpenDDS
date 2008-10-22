@@ -46,14 +46,14 @@ class OpenDDS_Domain_Manager : public Domain_Manager_Impl
 
   /// getter method for the subscription manager, the caller is responsible for
   /// memory management
-  virtual Subscription_Manager subscription_manager ();
+  virtual Subscription_Manager subscription_manager (const Domain_Manager_Ptr & ref);
 
   /// returns a subscription manager for built-in topics
-  virtual Subscription_Manager builtin_topic_subscriber ();
+  virtual Subscription_Manager builtin_topic_subscriber (const Domain_Manager_Ptr & ref);
 
   /// getter method for the publication manager, the caller is responsible for
   /// memory management
-  virtual Publication_Manager publication_manager ();
+  virtual Publication_Manager publication_manager (const Domain_Manager_Ptr & ref);
 
   /// getter method for the internal domain participant
   /// the memory is managed by the OpenDDS_Domain_Manager

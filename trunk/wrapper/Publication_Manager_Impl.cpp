@@ -12,11 +12,6 @@
 
 #include "Publication_Manager_Impl.h"
 
-Publication_Manager_Impl::Publication_Manager_Impl ()
-  : use_ (1)
-{
-}
-
 Publication_Manager_Impl::~Publication_Manager_Impl ()
 {
 }

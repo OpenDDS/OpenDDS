@@ -93,29 +93,33 @@ OpenDDS_Domain_Manager::shutdown ()
 }
 
 Subscription_Manager
-OpenDDS_Domain_Manager::subscription_manager ()
+OpenDDS_Domain_Manager::subscription_manager (const Domain_Manager_Ptr & ref)
 {
   // create new subscription manager
   return Subscription_Manager (
-           new OpenDDS_Subscription_Manager (Domain_Manager (this), 
-					     transport_impl_id_));
+           Subscription_Manager_Ptr (
+             new OpenDDS_Subscription_Manager (Domain_Manager (ref), 
+					       transport_impl_id_)));
 }
 
 Subscription_Manager
-OpenDDS_Domain_Manager::builtin_topic_subscriber ()
+OpenDDS_Domain_Manager::builtin_topic_subscriber (const Domain_Manager_Ptr & ref)
 {
   return Subscription_Manager (
-           new OpenDDS_Subscription_Manager (Domain_Manager (this), 
-	                                     dp_->get_builtin_subscriber ()));
+           Subscription_Manager_Ptr (
+             new OpenDDS_Subscription_Manager (
+               Domain_Manager (ref), 
+	       dp_->get_builtin_subscriber ())));
 }
 
 Publication_Manager
-OpenDDS_Domain_Manager::publication_manager ()
+OpenDDS_Domain_Manager::publication_manager (const Domain_Manager_Ptr & ref)
 {
   // create new publication manager
   return Publication_Manager (
-           new OpenDDS_Publication_Manager (Domain_Manager (this), 
-					    transport_impl_id_));
+           Publication_Manager_Ptr (
+             new OpenDDS_Publication_Manager (Domain_Manager (ref),
+					      transport_impl_id_)));
 }
 
 bool

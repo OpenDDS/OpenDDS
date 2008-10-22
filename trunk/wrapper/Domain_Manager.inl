@@ -34,19 +34,19 @@ Domain_Manager::shutdown ()
 ACE_INLINE Subscription_Manager 
 Domain_Manager::subscription_manager ()
 {
-  return manager_impl_->subscription_manager ();
+  return manager_impl_->subscription_manager (manager_impl_);
 }
 
 ACE_INLINE Subscription_Manager
 Domain_Manager::builtin_topic_subscriber ()
 {
-  return manager_impl_->builtin_topic_subscriber ();
+  return manager_impl_->builtin_topic_subscriber (manager_impl_);
 }
 
 ACE_INLINE Publication_Manager 
 Domain_Manager::publication_manager ()
 {
-  return manager_impl_->publication_manager ();
+  return manager_impl_->publication_manager (manager_impl_);
 }
 
 ACE_INLINE DDS::DomainParticipant_ptr 

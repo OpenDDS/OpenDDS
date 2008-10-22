@@ -30,13 +30,13 @@ class DDSWrapper_Export Publication_Manager
   Publication_Manager ();
 
   /// ctor that takes ownership of the passed in impl pointer
-  Publication_Manager (Publication_Manager_Impl * impl);
+  Publication_Manager (const Publication_Manager_Ptr & impl);
 
   /// copy constructor
   Publication_Manager (const Publication_Manager & copy);
 
   /// assignment operator
-  void operator= (const Publication_Manager& copy);
+  void operator= (const Publication_Manager & copy);
 
   /// destructor
   ~Publication_Manager ();
@@ -54,7 +54,8 @@ class DDSWrapper_Export Publication_Manager
   DDS::Publisher_ptr publisher () const;
 
  private:
-  Reference_Counter_T <Publication_Manager_Impl> manager_impl_;
+  /// reference counted auto pointer containing the impl pointer
+  Publication_Manager_Ptr manager_impl_;
 };
 
 #if defined (__ACE_INLINE__)

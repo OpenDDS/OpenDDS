@@ -12,11 +12,6 @@
 
 #include "Domain_Manager_Impl.h"
 
-Domain_Manager_Impl::Domain_Manager_Impl ()
-  : use_ (1)
-{
-}
-
 Domain_Manager_Impl::~Domain_Manager_Impl ()
 {
 }
