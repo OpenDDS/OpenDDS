@@ -8,8 +8,6 @@
 #include "ace/Atomic_Op_T.h"
 #include "dds/DCPS/LocalObject.h"
 
-#include <map>
-
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -35,47 +33,52 @@ namespace OpenDDS
       EntityImpl ();
 
       ///Destructor
-      virtual ~EntityImpl (void);
+      virtual ~EntityImpl ();
 
+      virtual ::DDS::ReturnCode_t set_enabled (
+        )
+        ACE_THROW_SPEC ((
+          CORBA::SystemException
+        ));
 
+      virtual ::DDS::StatusCondition_ptr get_statuscondition (
+        )
+        ACE_THROW_SPEC ((
+          CORBA::SystemException
+        ));
 
-    virtual ::DDS::ReturnCode_t set_enabled (
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      virtual ::DDS::StatusKindMask get_status_changes (
+        )
+        ACE_THROW_SPEC ((
+          CORBA::SystemException
+        ));
 
-    virtual ::DDS::StatusKindMask get_status_changes (
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      virtual void set_deleted (bool state);
 
-
-    virtual void set_deleted (bool state);
-
-    virtual bool get_deleted ();
-
-    protected:
+      virtual bool get_deleted ();
 
       void set_status_changed_flag (::DDS::StatusKind status,
                                     bool status_changed_flag);
 
+      /// Call this *after* dispatching to listeners when the "changed status
+      /// flag" is enabled so that any waiting waitsets can be unblocked.
+      void notify_status_condition ();
+
+    protected:
       /// The flag indicates the entity is enabled.
       ACE_Atomic_Op<TAO_SYNCH_MUTEX, bool>       enabled_;
 
       /// The flag indicates the entity is being deleted.
       ACE_Atomic_Op<TAO_SYNCH_MUTEX, bool>       entity_deleted_;
 
-      typedef bool StatusChangedFlag;
-      typedef std::map< ::DDS::StatusKind, StatusChangedFlag > Statuses;
-
-      /// The map lists all status changed flag.
+    private:
+      /// The status_changes_ variable lists all status changed flag.
       /// The StatusChangedFlag becomes TRUE whenever the plain communication
       /// status changes and it is reset to FALSE each time the application
       /// accesses the plain communication status via the proper
       /// get_<plain communication status> operation on the Entity.
-      Statuses status_changes_;
+      DDS::StatusKindMask status_changes_;
+      DDS::StatusCondition_var status_condition_;
     };
 
   } // namespace DCPS

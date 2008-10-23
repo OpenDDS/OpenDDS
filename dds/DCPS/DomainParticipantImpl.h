@@ -286,6 +286,13 @@ namespace OpenDDS
         CORBA::SystemException
       ));
 
+    virtual ::DDS::ReturnCode_t get_current_time (
+        ::DDS::Time_t & current_time
+      )
+      ACE_THROW_SPEC ((
+        ::CORBA::SystemException
+      ));
+
     virtual ::DDS::ReturnCode_t enable (
       )
       ACE_THROW_SPEC ((

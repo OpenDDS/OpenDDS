@@ -85,6 +85,8 @@ module DDS
     ReturnCode_t set_default_topic_qos(in TopicQos qos);
 
     void get_default_topic_qos(inout TopicQos qos);
+
+    ReturnCode_t get_current_time( inout Time_t current_time);
   };
 
   local interface DomainParticipantFactory

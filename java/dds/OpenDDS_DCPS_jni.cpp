@@ -2,6 +2,9 @@
 #include "OpenDDS_DCPS_TheServiceParticipant.h"
 #include "OpenDDS_DCPS_transport_TheTransportFactory.h"
 #include "OpenDDS_DCPS_transport_TransportImpl.h"
+#include "DDS_WaitSet.h"
+#include "DDS_GuardCondition.h"
+
 #include "idl2jni_runtime.h"
 
 #include "dds/DCPS/Service_Participant.h"
@@ -9,6 +12,8 @@
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/PublisherImpl.h"
+#include "dds/DCPS/WaitSet.h"
+#include "dds/DCPS/GuardCondition.h"
 
 #include "DdsDcpsDomainJC.h"
 #include "DdsDcpsPublicationJC.h"
@@ -35,8 +40,7 @@ jobject JNICALL Java_OpenDDS_DCPS_TheParticipantFactory_WithArgs (JNIEnv *jni,
 }
 
 
-void JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_shutdown (JNIEnv *,
-  jclass)
+void JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_shutdown (JNIEnv *, jclass)
 {
   TheServiceParticipant->shutdown ();
 }
@@ -131,3 +135,20 @@ jobject JNICALL Java_OpenDDS_DCPS_transport_TransportImpl_attach_1to_1subscriber
   jmethodID mid = jni->GetMethodID (clazz, "<init>", "(I)V");
   return jni->NewObject (clazz, mid, static_cast<jint> (stat));
 }
+
+
+// WaitSet and GuardCondition
+
+jlong JNICALL Java_DDS_WaitSet__1jni_1init (JNIEnv *, jclass)
+{
+  return reinterpret_cast<jlong> (static_cast<CORBA::Object_ptr>(
+    new DDS::WaitSet));
+}
+
+
+jlong JNICALL Java_DDS_GuardCondition__1jni_1init(JNIEnv *, jclass)
+{
+  return reinterpret_cast<jlong> (static_cast<CORBA::Object_ptr>(
+    new DDS::GuardCondition));
+}
+

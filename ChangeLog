@@ -1,8 +1,61 @@
+Thu Oct 23 21:43:57 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DdsDcpsDomain.idl:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Implemented DomainParticipant::get_current_time().
+
+        * DDS_release_notes.txt:
+
+          Noted the following changes.  These were first developed on the
+          JMS_PROVIDER branch, but that branch has many other changes which
+          will be merged after 1.2.
+
+        * dds/DdsDcpsInfrastructure.idl:
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/ConditionImpl.h:
+        * dds/DCPS/ConditionImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/EntityImpl.h:
+        * dds/DCPS/EntityImpl.cpp:
+        * dds/DCPS/GuardCondition.h:
+        * dds/DCPS/GuardCondition.cpp:
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/StatusConditionImpl.h:
+        * dds/DCPS/StatusConditionImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/WaitSet.h:
+        * dds/DCPS/WaitSet.cpp:
+
+          Implemented WaitSet, GuardCondition, and StatusCondition.
+
+        * java/dds/DDS/GuardCondition.java:
+        * java/dds/DDS/WaitSet.java:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * java/dds/dcps_java.mpc:
+
+          Java bindings for WaitSet and GuardCondtion.
+
+        * java/idl2jni/codegen/im_jni.cpp:
+
+          Fixed a bug with inout sequences.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/GuardCondition:
+        * tests/DCPS/StatusCondition:
+
+          Added two new tests.
+
 Thu Oct 23 20:59:37 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
 
-          Fixed iterator incorrect move in processDeferred(). 
+          Fixed iterator incorrect move in processDeferred().
 
 Wed Oct 22 22:08:10 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
 

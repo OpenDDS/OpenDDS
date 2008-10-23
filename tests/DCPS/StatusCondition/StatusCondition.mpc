@@ -1,0 +1,5 @@
+project: dcpsexe_with_tcp {
+  TypeSupport_Files {
+    Messenger.idl
+  }
+}

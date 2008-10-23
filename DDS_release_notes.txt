@@ -2,6 +2,9 @@ Version 1.2 of OpenDDS.
 
 New to this version are the following changes:
 
+- Implemented the WaitSet, GuardCondition, and StatusCondition interfaces
+  from the OMG DDS specification.
+
 - Added the ability for using multiple repositories to provide redundant
   service metadata management.
 
