@@ -1,3 +1,34 @@
+Thu Oct 23 14:19:23 UTC 2008  Weiqi Gao  <gaow@ociweb.com>
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+
+          Temporary fix for a problem where the data durability cache's
+          allocator cannot be mmap-ed when the JVM is present.
+
+        * java/OpenDDS.ipr:
+
+          Trivial changes.
+
+        * java/jms/src/org/opendds/jms/AbstractMessageImpl.java:
+        * java/jms/src/org/opendds/jms/DataWriterPair.java:
+        * java/jms/src/org/opendds/jms/MessageID.java:
+        * java/jms/src/org/opendds/jms/StreamBodyFacade.java:
+        * java/jms/src/org/opendds/jms/TopicImpl.java:
+        * java/jms/src/org/opendds/jms/TopicMessageConsumerImpl.java:
+        * java/jms/src/org/opendds/jms/TopicMessageProducerImpl.java:
+
+          Implemented MessageProducer API in TopicMessageProducerImpl.
+          Added methods to related classes to support MessageProducer
+          functionality.
+
+        * java/jms/test/org/opendds/jms/BytesMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/MapMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/ObjectMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/TextMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/TopicMessageProducerImplTest.java:
+
+          Added tests for MessageProducer.
+
 Wed Oct 22 16:08:14 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepoServ.h:

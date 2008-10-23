@@ -5,11 +5,11 @@ import javax.jms.JMSException;
 import javax.jms.MessageEOFException;
 import javax.jms.MessageNotReadableException;
 import javax.jms.MessageNotWriteableException;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.fail;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.junit.Test;
 
 public class BytesMessageImplTest {
@@ -69,6 +69,51 @@ public class BytesMessageImplTest {
         }
     }
 
+    @Test
+    public void testReadUnsignedByte() throws JMSException {
+        BytesMessage bytesMessage = new BytesMessageImpl();
+        bytesMessage.writeByte(Byte.MIN_VALUE);
+        bytesMessage.writeByte((byte) -1);
+        bytesMessage.writeByte((byte) 0);
+        bytesMessage.writeByte((byte) 1);
+        bytesMessage.writeByte(Byte.MAX_VALUE);
+
+        bytesMessage.reset();
+
+        int i = bytesMessage.readUnsignedByte();
+        assertEquals(128, i);
+        i = bytesMessage.readUnsignedByte();
+        assertEquals(255, i);
+        i = bytesMessage.readUnsignedByte();
+        assertEquals(0, i);
+        i = bytesMessage.readUnsignedByte();
+        assertEquals(1, i);
+        i = bytesMessage.readUnsignedByte();
+        assertEquals(127, i);
+    }
+
+    @Test
+    public void testReadUnsignedShort() throws JMSException {
+        BytesMessage bytesMessage = new BytesMessageImpl();
+        bytesMessage.writeShort(Short.MIN_VALUE);
+        bytesMessage.writeShort((short) -1);
+        bytesMessage.writeShort((short) 0);
+        bytesMessage.writeShort((short) 1);
+        bytesMessage.writeShort(Short.MAX_VALUE);
+
+        bytesMessage.reset();
+
+        int i = bytesMessage.readUnsignedShort();
+        assertEquals(32768, i);
+        i = bytesMessage.readUnsignedShort();
+        assertEquals(65535, i);
+        i = bytesMessage.readUnsignedShort();
+        assertEquals(0, i);
+        i = bytesMessage.readUnsignedShort();
+        assertEquals(1, i);
+        i = bytesMessage.readUnsignedShort();
+        assertEquals(32767, i);
+    }
     @Test
     public void testWriteObjects() throws JMSException {
         BytesMessage bytesMessage = new BytesMessageImpl();
