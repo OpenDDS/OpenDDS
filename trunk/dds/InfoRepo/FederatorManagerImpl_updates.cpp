@@ -896,143 +896,167 @@ ManagerImpl::processDeferred()
     guard,
     this->deferred_lock_);
 
-  for( std::list< OwnerUpdate>::iterator current = this->deferredOwnerships_.begin();
-       current != this->deferredOwnerships_.end();
-       ++current) {
-    if( true == this->info_->changeOwnership( current->domain,
-                                              current->participant,
-                                              current->sender,
-                                              current->owner)) {
-      if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-        std::stringstream buffer;
-        long key = ::OpenDDS::DCPS::GuidConverter(
-                     const_cast< ::OpenDDS::DCPS::RepoId*>( &current->participant)
-                   );
-        buffer << current->participant << "(" << std::hex << key << ")";
-        ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDeferred( OwnerUpdate): ")
-          ACE_TEXT("repo %d - [ domain %d/ participant %s/ sender %d/ owner %d ]\n"),
-          this->id(),
-          current->domain,
-          buffer.str().c_str(),
-          current->sender,
-          current->owner
-        ));
+  {
+    std::list< OwnerUpdate>::iterator current = this->deferredOwnerships_.begin();
+    while (current != this->deferredOwnerships_.end())
+    {
+      if( true == this->info_->changeOwnership( current->domain,
+        current->participant,
+        current->sender,
+        current->owner)) {
+          if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+            std::stringstream buffer;
+            long key = ::OpenDDS::DCPS::GuidConverter(
+              const_cast< ::OpenDDS::DCPS::RepoId*>( &current->participant)
+              );
+            buffer << current->participant << "(" << std::hex << key << ")";
+            ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDeferred( OwnerUpdate): ")
+              ACE_TEXT("repo %d - [ domain %d/ participant %s/ sender %d/ owner %d ]\n"),
+              this->id(),
+              current->domain,
+              buffer.str().c_str(),
+              current->sender,
+              current->owner
+              ));
+          }
+          current = this->deferredOwnerships_.erase( current);
+        }
+      else
+      {
+        ++ current;
       }
-      current = this->deferredOwnerships_.erase( current);
     }
   }
 
-  for( std::list< TopicUpdate>::iterator current = this->deferredTopics_.begin();
-       current != this->deferredTopics_.end();
-       ++current) {
-    if( true == this->info_->add_topic( current->id,
-                                        current->domain,
-                                        current->participant,
-                                        current->topic,
-                                        current->datatype,
-                                        current->qos)) {
-      if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-        std::stringstream participantBuffer;
-        std::stringstream buffer;
-        long key = ::OpenDDS::DCPS::GuidConverter(
-                     const_cast< ::OpenDDS::DCPS::RepoId*>( &current->participant)
-                   );
-        participantBuffer << current->participant << "(" << std::hex << key << ")";
-        key = ::OpenDDS::DCPS::GuidConverter(
-                const_cast< ::OpenDDS::DCPS::RepoId*>( &current->id)
+  {
+    std::list< TopicUpdate>::iterator current = this->deferredTopics_.begin();
+    while (current != this->deferredTopics_.end())
+    {
+      if( true == this->info_->add_topic( current->id,
+        current->domain,
+        current->participant,
+        current->topic,
+        current->datatype,
+        current->qos)) {
+          if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+            std::stringstream participantBuffer;
+            std::stringstream buffer;
+            long key = ::OpenDDS::DCPS::GuidConverter(
+              const_cast< ::OpenDDS::DCPS::RepoId*>( &current->participant)
               );
-        buffer << current->id << "(" << std::hex << key << ")";
-        ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDeferred( TopicUpdate): ")
-          ACE_TEXT("repo %d - [ domain %d/ participant %s/ topic %s ]\n"),
-          this->id(),
-          current->domain,
-          participantBuffer.str().c_str(),
-          buffer.str().c_str()
-        ));
+            participantBuffer << current->participant << "(" << std::hex << key << ")";
+            key = ::OpenDDS::DCPS::GuidConverter(
+              const_cast< ::OpenDDS::DCPS::RepoId*>( &current->id)
+              );
+            buffer << current->id << "(" << std::hex << key << ")";
+            ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDeferred( TopicUpdate): ")
+              ACE_TEXT("repo %d - [ domain %d/ participant %s/ topic %s ]\n"),
+              this->id(),
+              current->domain,
+              participantBuffer.str().c_str(),
+              buffer.str().c_str()
+              ));
+          }
+          current = this->deferredTopics_.erase( current);
+        }
+      else
+      {
+        ++ current;
       }
-      current = this->deferredTopics_.erase( current);
     }
   }
 
-  for( std::list< PublicationUpdate>::iterator current = this->deferredPublications_.begin();
-       current != this->deferredPublications_.end();
-       ++current) {
-    ::OpenDDS::DCPS::TransportInterfaceInfo transportInfo;
-    transportInfo.transport_id = current->transport_id;
-    transportInfo.data         = current->transport_blob;
+  {
+    std::list< PublicationUpdate>::iterator current = this->deferredPublications_.begin();
+    while (current != this->deferredPublications_.end())
+    {
+      ::OpenDDS::DCPS::TransportInterfaceInfo transportInfo;
+      transportInfo.transport_id = current->transport_id;
+      transportInfo.data         = current->transport_blob;
 
-    if( true == this->info_->add_publication( current->domain,
-                                              current->participant,
-                                              current->topic,
-                                              current->id,
-                                              current->callback,
-                                              current->datawriter_qos,
-                                              transportInfo,
-                                              current->publisher_qos,
-                                              true)) {
-      if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-        std::stringstream participantBuffer;
-        std::stringstream buffer;
-        long key = ::OpenDDS::DCPS::GuidConverter(
-                     const_cast< ::OpenDDS::DCPS::RepoId*>( &current->participant)
-                   );
-        participantBuffer << current->participant << "(" << std::hex << key << ")";
-        key = ::OpenDDS::DCPS::GuidConverter(
-                const_cast< ::OpenDDS::DCPS::RepoId*>( &current->id)
+      if( true == this->info_->add_publication( current->domain,
+        current->participant,
+        current->topic,
+        current->id,
+        current->callback,
+        current->datawriter_qos,
+        transportInfo,
+        current->publisher_qos,
+        true)) {
+          if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+            std::stringstream participantBuffer;
+            std::stringstream buffer;
+            long key = ::OpenDDS::DCPS::GuidConverter(
+              const_cast< ::OpenDDS::DCPS::RepoId*>( &current->participant)
               );
-        buffer << current->id << "(" << std::hex << key << ")";
-        ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDeferred( PublicationUpdate): ")
-          ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
-          this->id(),
-          current->domain,
-          participantBuffer.str().c_str(),
-          buffer.str().c_str()
-        ));
+            participantBuffer << current->participant << "(" << std::hex << key << ")";
+            key = ::OpenDDS::DCPS::GuidConverter(
+              const_cast< ::OpenDDS::DCPS::RepoId*>( &current->id)
+              );
+            buffer << current->id << "(" << std::hex << key << ")";
+            ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDeferred( PublicationUpdate): ")
+              ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
+              this->id(),
+              current->domain,
+              participantBuffer.str().c_str(),
+              buffer.str().c_str()
+              ));
+          }
+          current = this->deferredPublications_.erase( current);
+        }
+      else
+      {
+        ++ current;
       }
-      current = this->deferredPublications_.erase( current);
     }
   }
 
-  for( std::list< SubscriptionUpdate>::iterator current = this->deferredSubscriptions_.begin();
-       current != this->deferredSubscriptions_.end();
-       ++current) {
-    ::OpenDDS::DCPS::TransportInterfaceInfo transportInfo;
-    transportInfo.transport_id = current->transport_id;
-    transportInfo.data         = current->transport_blob;
+  {
+    std::list< SubscriptionUpdate>::iterator current = this->deferredSubscriptions_.begin();
+    while (current != this->deferredSubscriptions_.end())
+    {
+      ::OpenDDS::DCPS::TransportInterfaceInfo transportInfo;
+      transportInfo.transport_id = current->transport_id;
+      transportInfo.data         = current->transport_blob;
 
-    if( true == this->info_->add_subscription( current->domain,
-                                               current->participant,
-                                               current->topic,
-                                               current->id,
-                                               current->callback,
-                                               current->datareader_qos,
-                                               transportInfo,
-                                               current->subscriber_qos,
-                                               true)) {
-      if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-        std::stringstream participantBuffer;
-        std::stringstream buffer;
-        long key = ::OpenDDS::DCPS::GuidConverter(
-                     const_cast< ::OpenDDS::DCPS::RepoId*>( &current->participant)
-                   );
-        participantBuffer << current->participant << "(" << std::hex << key << ")";
-        key = ::OpenDDS::DCPS::GuidConverter(
-                const_cast< ::OpenDDS::DCPS::RepoId*>( &current->id)
+      if( true == this->info_->add_subscription( current->domain,
+        current->participant,
+        current->topic,
+        current->id,
+        current->callback,
+        current->datareader_qos,
+        transportInfo,
+        current->subscriber_qos,
+        true)) {
+          if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+            std::stringstream participantBuffer;
+            std::stringstream buffer;
+            long key = ::OpenDDS::DCPS::GuidConverter(
+              const_cast< ::OpenDDS::DCPS::RepoId*>( &current->participant)
               );
-        buffer << current->id << "(" << std::hex << key << ")";
-        ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDeferred( SubscriptionUpdate): ")
-          ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
-          this->id(),
-          current->domain,
-          participantBuffer.str().c_str(),
-          buffer.str().c_str()
-        ));
+            participantBuffer << current->participant << "(" << std::hex << key << ")";
+            key = ::OpenDDS::DCPS::GuidConverter(
+              const_cast< ::OpenDDS::DCPS::RepoId*>( &current->id)
+              );
+            buffer << current->id << "(" << std::hex << key << ")";
+            ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDeferred( SubscriptionUpdate): ")
+              ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
+              this->id(),
+              current->domain,
+              participantBuffer.str().c_str(),
+              buffer.str().c_str()
+              ));
+          }
+          current = this->deferredSubscriptions_.erase( current);
+        }
+      else
+      {
+        ++ current;
       }
-      current = this->deferredSubscriptions_.erase( current);
     }
   }
 
