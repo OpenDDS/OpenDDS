@@ -5,6 +5,8 @@ New to this version are the following changes:
 - Implemented the WaitSet, GuardCondition, and StatusCondition interfaces
   from the OMG DDS specification.
 
+- Implemented DomainParticipant::get_current_time() from formal/07-01-01.
+
 - Added the ability for using multiple repositories to provide redundant
   service metadata management.
 
