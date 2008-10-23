@@ -16,7 +16,7 @@
 ACE_INLINE void
 Subscription_Manager::access_topic (const Topic_Manager & topic)
 {
-  manager_impl_->access_topic (topic);
+  manager_impl_->access_topic (topic, manager_impl_);
 }
 
 ACE_INLINE DDS::DataReader_ptr 

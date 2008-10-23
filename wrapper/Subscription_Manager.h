@@ -30,7 +30,7 @@ class DDSWrapper_Export Subscription_Manager
   Subscription_Manager ();
 
   /// ctor that takes ownership of the passed in impl pointer
-  Subscription_Manager (Subscription_Manager_Impl* impl);
+  Subscription_Manager (Subscription_Manager_Ptr impl);
 
   /// copy constructor
   Subscription_Manager (const Subscription_Manager & copy);
@@ -58,7 +58,8 @@ class DDSWrapper_Export Subscription_Manager
   DDS::Subscriber_ptr subscriber () const;
 
  private:
-  Reference_Counter_T <Subscription_Manager_Impl> manager_impl_;
+  /// reference counted auto pointer containing the impl pointer
+  Subscription_Manager_Ptr manager_impl_;
 };
 
 #if defined (__ACE_INLINE__)

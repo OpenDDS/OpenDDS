@@ -12,11 +12,6 @@
 
 #include "Subscription_Manager_Impl.h"
 
-Subscription_Manager_Impl::Subscription_Manager_Impl ()
-  : use_ (1)
-{
-}
-
 Subscription_Manager_Impl::~Subscription_Manager_Impl ()
 {
 }

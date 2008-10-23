@@ -26,9 +26,9 @@ class OpenDDS_Publication_Manager : public Publication_Manager_Impl
 {
  public:
   /// ctor
-  /// will read dcps configuration and information about the used transport 
-  /// implementation from the command line and set up a domain participant 
-  /// with this.
+  OpenDDS_Publication_Manager (const Domain_Manager & dm);
+
+  /// ctor with transport impl registration
   OpenDDS_Publication_Manager (const Domain_Manager & dm,
 			       OpenDDS::DCPS::TransportIdType transport_id);
 
@@ -37,7 +37,9 @@ class OpenDDS_Publication_Manager : public Publication_Manager_Impl
 
   /// will create a topic instance using the domain manager
   /// memory management of the returned datawriter has to be done by the caller
-  virtual DDS::DataWriter_ptr access_topic (const Topic_Manager & topic);
+  virtual DDS::DataWriter_ptr access_topic (
+    const Topic_Manager & topic,
+    const Publication_Manager_Ptr & ref);
 
   /// unregisters and deletes the topic from the domain
   virtual void remove_topic (const Topic_Manager & topic);
@@ -48,6 +50,9 @@ class OpenDDS_Publication_Manager : public Publication_Manager_Impl
   virtual DDS::Publisher_ptr publisher () const;
 
  private:
+  /// initializes the publication manager
+  void init ();
+
   /// registers a transport implementation based on the passed id
   void register_transport (OpenDDS::DCPS::TransportIdType transport_id);
 

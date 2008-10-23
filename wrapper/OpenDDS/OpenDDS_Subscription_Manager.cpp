@@ -32,21 +32,18 @@
 #endif
 
 OpenDDS_Subscription_Manager::OpenDDS_Subscription_Manager (
+  const Domain_Manager & dm)
+  : dm_ (dm)
+{
+  this->init ();
+}
+
+OpenDDS_Subscription_Manager::OpenDDS_Subscription_Manager (
   const Domain_Manager & dm,
   OpenDDS::DCPS::TransportIdType transport_impl_id)
   : dm_ (dm)
 {
-  // create the subscriber using default QoS.
-  sub_ = 
-    dm_.participant ()->create_subscriber (SUBSCRIBER_QOS_DEFAULT,
-			    DDS::SubscriberListener::_nil ());
-  
-  // check for successful creation
-  if (CORBA::is_nil (sub_.in ()))
-    {
-      std::cerr << "Failed to create subscriber."
-		<< std::endl;
-    }
+  this->init ();
 
   this->register_transport (transport_impl_id);
 }
@@ -60,6 +57,19 @@ OpenDDS_Subscription_Manager::OpenDDS_Subscription_Manager (
 
 OpenDDS_Subscription_Manager::~OpenDDS_Subscription_Manager ()
 {
+}
+
+void
+OpenDDS_Subscription_Manager::init ()
+{
+  // create the subscriber using default QoS.
+  sub_ = 
+    dm_.participant ()->create_subscriber (SUBSCRIBER_QOS_DEFAULT,
+			    DDS::SubscriberListener::_nil ());
+  
+  // check for successful creation
+  if (CORBA::is_nil (sub_.in ()))
+    throw Manager_Exception ("Failed to create subscriber.");
 }
 
 void 
@@ -110,7 +120,9 @@ OpenDDS_Subscription_Manager::register_transport (
 }
 
 void
-OpenDDS_Subscription_Manager::access_topic (const Topic_Manager & topic)
+OpenDDS_Subscription_Manager::access_topic (
+    const Topic_Manager & topic,
+    const Subscription_Manager_Ptr & ref)
 {
   // Create a modifiable copy of the Topic_Manager
   Topic_Manager tm (topic);
@@ -121,7 +133,7 @@ OpenDDS_Subscription_Manager::access_topic (const Topic_Manager & topic)
   // the returned data reader is not used and therefore just stored
   // in a var class for following deletion
   DDS::DataReader_var dr =
-    tm.datareader (Subscription_Manager (this));
+    tm.datareader (Subscription_Manager (ref));
 }
 
 DDS::DataReader_ptr 

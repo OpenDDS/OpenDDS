@@ -39,8 +39,8 @@ Domain_Manager::Domain_Manager (int & argc,
 {
 }
 
-Domain_Manager::Domain_Manager (Domain_Manager_Impl * impl)
-  : manager_impl_ (impl, true)
+Domain_Manager::Domain_Manager (Domain_Manager_Ptr impl)
+  : manager_impl_ (impl)
 {
 }
 

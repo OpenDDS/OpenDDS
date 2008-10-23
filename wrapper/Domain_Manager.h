@@ -55,7 +55,7 @@ class DDSWrapper_Export Domain_Manager
 		  DDS::DomainId_t domain_id);
 
   /// ctor that takes ownership of the passed in impl pointer
-  Domain_Manager (Domain_Manager_Impl * impl);
+  Domain_Manager (Domain_Manager_Ptr impl);
 
   /// copy constructor
   Domain_Manager (const Domain_Manager & copy);
@@ -86,7 +86,8 @@ class DDSWrapper_Export Domain_Manager
   DDS::DomainParticipant_ptr participant ();
 
  private:
-  Reference_Counter_T <Domain_Manager_Impl> manager_impl_;  
+  /// reference counted auto pointer containing the impl pointer
+  Domain_Manager_Ptr manager_impl_;  
 };
 
 #if defined (__ACE_INLINE__)
