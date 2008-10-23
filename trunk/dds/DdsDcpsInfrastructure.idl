@@ -204,6 +204,51 @@ module DDS {
 
     local interface Listener {};
 
+
+    // ----------------------------------------------------------------------
+    // Conditions
+    // ----------------------------------------------------------------------
+
+    local interface Condition {
+        boolean get_trigger_value();
+    };
+    
+    typedef sequence<Condition> ConditionSeq;
+
+    // WaitSet and GuardCondition can't be expressed in IDL because they are
+    // required by the spec to be default-constructable by the user
+    // (07-01-01 section 7.2.2 pgh 11).  Therefore in IDL we have WaitSetInterf
+    // and GuardConditionInterf.  Application code should #include
+    // "dds/DCPS/WaitSet.h", "dds/DCPS/GuardCondition.h" and construct heap
+    // objects with "new WaitSet()" and "new GuardCondition()".  Those objects
+    // (in the DDS namespace/package) implement the interfaces described below.
+    // In C++, these are reference-counted local CORBA objects.
+
+    local interface WaitSetInterf {
+        ReturnCode_t wait(
+            inout ConditionSeq active_conditions, 
+            in Duration_t timeout);
+        ReturnCode_t attach_condition(
+            in Condition cond);
+        ReturnCode_t detach_condition(
+            in Condition cond);
+        ReturnCode_t get_conditions(
+            inout ConditionSeq attached_conditions);
+    };
+
+    local interface GuardConditionInterf : Condition {
+        ReturnCode_t set_trigger_value(
+            in boolean value);
+    };
+
+
+    local interface StatusCondition : Condition {
+        StatusKindMask get_enabled_statuses();
+        ReturnCode_t set_enabled_statuses(
+            in StatusKindMask mask);
+        Entity get_entity();
+    };
+
     // Sample states to support reads
     typedef unsigned long SampleStateKind;
     typedef sequence <SampleStateKind> SampleStateSeq;
@@ -235,6 +280,7 @@ module DDS {
     typedef unsigned long InstanceStateMask;
     const InstanceStateMask ANY_INSTANCE_STATE = 0xffff;
     const InstanceStateMask NOT_ALIVE_INSTANCE_STATE= 0x006;
+
 
     // ----------------------------------------------------------------------
     // Qos
@@ -589,6 +635,8 @@ module DDS {
                 // Listener get_listener();
 
 		ReturnCode_t enable();
+
+    StatusCondition get_statuscondition();
 
     StatusKindMask get_status_changes();
 		};

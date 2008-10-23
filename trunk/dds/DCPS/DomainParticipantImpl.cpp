@@ -1420,6 +1420,21 @@ namespace OpenDDS
     {
       qos = default_topic_qos_;
     }
+    
+    ::DDS::ReturnCode_t
+    DomainParticipantImpl::get_current_time (
+        ::DDS::Time_t & current_time
+      )
+      ACE_THROW_SPEC ((
+        ::CORBA::SystemException
+      ))
+    {
+      current_time
+        = ::OpenDDS::DCPS::time_value_to_time(
+            ACE_OS::gettimeofday ()
+          );
+      return ::DDS::RETCODE_OK;
+    }
 
     ::DDS::ReturnCode_t
     DomainParticipantImpl::enable (

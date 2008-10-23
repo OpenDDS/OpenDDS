@@ -379,6 +379,8 @@ namespace OpenDDS
 
       SubscriberImpl* get_subscriber_servant ();
 
+      void post_read_or_take ();
+
       // type specific DataReader's part of enable.
       virtual ::DDS::ReturnCode_t enable_specific (
         )

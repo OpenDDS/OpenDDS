@@ -144,4 +144,6 @@ tests/DCPS/PersistentDurability/run_test.pl: !DCPS_MIN
 tests/DCPS/SetQosDeadline/run_test.pl: !DCPS_MIN
 tests/DCPS/SetQosPartition/run_test.pl: !DCPS_MIN
 tests/DCPS/StringKey/run_test.pl: !DCPS_MIN
+tests/DCPS/GuardCondition/run_test.pl: !DCPS_MIN
+tests/DCPS/StatusCondition/run_test.pl: !DCPS_MIN
 tests/DCPS/Federation/run_test.pl: !DCPS_MIN

@@ -90,6 +90,7 @@ string idl_mapping_jni::taoParam (AST_Type *decl, AST_Argument::Direction dir,
           param += "_out";
           addRef = false;
         }
+      else addRef = true;
       break;
     case AST_Decl::NT_union:
     case AST_Decl::NT_struct:
