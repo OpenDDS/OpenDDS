@@ -610,15 +610,14 @@ DCPS_IR_Domain::find_topic_description(
   }
 }
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
-int DCPS_IR_Domain::init_built_in_topics( bool federated)
-#else
+#if defined (DDS_HAS_MINIMUM_BIT)
 int DCPS_IR_Domain::init_built_in_topics( bool /* federated */)
-#endif
 {
-
-#if !defined (DDS_HAS_MINIMUM_BIT)
-
+  return 1;
+}
+#else
+int DCPS_IR_Domain::init_built_in_topics( bool federated)
+{
   // Indicates that BIT subscriber and datareaders should not be created.
   TheTransientKludge->enable (); 
 
@@ -677,10 +676,8 @@ int DCPS_IR_Domain::init_built_in_topics( bool /* federated */)
   useBIT_ = true;
 
   return 0;
-#else
-  return 1;
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
 }
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 
 
@@ -822,10 +819,14 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
 }
 
 
-
+#if defined (DDS_HAS_MINIMUM_BIT)
+int DCPS_IR_Domain::init_built_in_topics_datawriters( bool /* federated */)
+{
+  return 1;
+}
+#else
 int DCPS_IR_Domain::init_built_in_topics_datawriters( bool federated)
 {
-#if !defined (DDS_HAS_MINIMUM_BIT)
   try
     {
       ::DDS::DataWriter_var datawriter;
@@ -922,12 +923,8 @@ int DCPS_IR_Domain::init_built_in_topics_datawriters( bool federated)
     }
 
   return 0;
-#else
-
-  return 1;
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
 }
-
+#endif // defined (DDS_HAS_MINIMUM_BIT)
 
 
 int DCPS_IR_Domain::init_built_in_topics_transport ()

@@ -1,14 +1,18 @@
+Thu Oct 23 20:17:12 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+          Back-merged from trunk (r1531:1571)
+
 Thu Oct 23 17:24:33 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DdsDcpsDomain.idl:
 
-	  Added DomainParticipant::get_current_time() from
-	  formal/07-01-01.
+          Added DomainParticipant::get_current_time() from
+          formal/07-01-01.
 
         * dds/DCPS/DomainParticipantImpl.h:
         * dds/DCPS/DomainParticipantImpl.cpp:
 
-	  Implemented DomainParticipant::get_current_time().
+          Implemented DomainParticipant::get_current_time().
 
 Thu Oct 23 14:19:23 UTC 2008  Weiqi Gao  <gaow@ociweb.com>
 
