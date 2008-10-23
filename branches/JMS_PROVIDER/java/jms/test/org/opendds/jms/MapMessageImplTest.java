@@ -1,20 +1,20 @@
 package org.opendds.jms;
 
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
-import javax.jms.MessageNotWriteableException;
 import javax.jms.MessageFormatException;
+import javax.jms.MessageNotWriteableException;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.junit.Test;
-import java.util.Enumeration;
-import java.util.Set;
-import java.util.HashSet;
 
 public class MapMessageImplTest {
     private static final float FLOAT_EPSILON = 1e-6f;

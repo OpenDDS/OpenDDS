@@ -21,4 +21,12 @@ public class TopicImpl implements Topic {
     public String toString() {
         return null;
     }
+
+    /**
+     * TODO, placeholder, to be elaborated.
+     * @return The DDS Topic that this JMS TopicImpl represents
+     */
+    public DDS.Topic extractDDSTopic() {
+        throw new UnsupportedOperationException("Kaboom"); // TODO
+    }
 }

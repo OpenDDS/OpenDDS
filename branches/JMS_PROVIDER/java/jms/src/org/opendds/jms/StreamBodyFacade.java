@@ -3,7 +3,7 @@ package org.opendds.jms;
 import OpenDDS.JMS.MessageBody;
 import OpenDDS.JMS.StreamItem;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.List;import java.util.Arrays;
 import javax.jms.MessageEOFException;
 import javax.jms.MessageFormatException;
 import org.opendds.jms.util.ByteArrays;
@@ -26,9 +26,7 @@ public class StreamBodyFacade {
     public void absorbTheStreamBody() { // TODO locking
         if (mark == 0) {
             items.clear();
-            for (StreamItem item : body.theStreamBody()) {
-                items.add(item);
-            }
+            items.addAll(Arrays.asList(body.theStreamBody()));
         }
     }
 

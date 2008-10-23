@@ -1,11 +1,13 @@
 package org.opendds.jms;
 
-import static org.junit.Assert.*;
-import org.junit.Test;
-import javax.jms.ObjectMessage;
+import java.io.Serializable;
 import javax.jms.JMSException;
 import javax.jms.MessageNotWriteableException;
-import java.io.Serializable;
+import javax.jms.ObjectMessage;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
+import org.junit.Test;
 
 public class ObjectMessageImplTest {
     @Test

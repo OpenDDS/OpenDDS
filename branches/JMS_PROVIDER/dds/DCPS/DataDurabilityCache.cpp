@@ -702,7 +702,7 @@ OpenDDS::DCPS::DataDurabilityCache::make_allocator (
       //       starting at a different base address.
       static ACE_MMAP_Memory_Pool_Options const pool_options (
         ACE_DEFAULT_BASE_ADDR,
-        ACE_MMAP_Memory_Pool_Options::ALWAYS_FIXED,
+        ACE_MMAP_Memory_Pool_Options::FIRSTCALL_FIXED,
         false, // No need to sync each page.
         minimum_bytes,
         MAP_SHARED, // Written data must be reflected in the backing

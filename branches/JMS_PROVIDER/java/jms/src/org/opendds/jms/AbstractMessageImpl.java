@@ -42,6 +42,10 @@ public abstract class AbstractMessageImpl implements Message {
         this.bodyState = bodyState;
     }
 
+    public MessagePayload getPayload() {
+        return payload;
+    }
+
     // Message headers
     public String getJMSMessageID() throws JMSException {
         return headers.JMSMessageID;

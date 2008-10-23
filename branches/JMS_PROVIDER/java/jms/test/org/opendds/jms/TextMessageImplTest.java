@@ -1,10 +1,12 @@
 package org.opendds.jms;
 
-import static org.junit.Assert.*;
-import org.junit.Test;
-import javax.jms.TextMessage;
 import javax.jms.JMSException;
 import javax.jms.MessageNotWriteableException;
+import javax.jms.TextMessage;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
+import org.junit.Test;
 
 public class TextMessageImplTest {
     @Test
