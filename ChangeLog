@@ -1,3 +1,11 @@
+Thu Oct 23 22:47:51 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+	  Added implementation of DomainParticipant::get_current_time().
+	  This ChangeLog entry is late, the previous changeset contains
+	  the actual file modification.
+
 Thu Oct 23 21:43:57 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DdsDcpsDomain.idl:
