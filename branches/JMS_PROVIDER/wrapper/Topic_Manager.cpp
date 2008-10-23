@@ -22,7 +22,12 @@ Topic_Manager::Topic_Manager ()
 }
 
 Topic_Manager::Topic_Manager (Topic_Manager_Impl * impl)
-  : manager_impl_ (impl, true)
+  : manager_impl_ (Topic_Manager_Ptr (impl))
+{
+}
+
+Topic_Manager::Topic_Manager (Topic_Manager_Ptr impl)
+  : manager_impl_ (impl)
 {
 }
 

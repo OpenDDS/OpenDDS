@@ -32,9 +32,28 @@
 #endif
 
 OpenDDS_Publication_Manager::OpenDDS_Publication_Manager (
+  const Domain_Manager & dm)
+  : dm_ (dm)
+{
+  this->init ();
+}
+
+OpenDDS_Publication_Manager::OpenDDS_Publication_Manager (
   const Domain_Manager & dm,
   OpenDDS::DCPS::TransportIdType transport_impl_id)
   : dm_ (dm)
+{
+  this->init ();
+
+  this->register_transport (transport_impl_id);
+}
+
+OpenDDS_Publication_Manager::~OpenDDS_Publication_Manager ()
+{
+}
+
+void
+OpenDDS_Publication_Manager::init ()
 {
   // create the subscriber using default QoS.
   pub_ = 
@@ -43,14 +62,7 @@ OpenDDS_Publication_Manager::OpenDDS_Publication_Manager (
 
   // check for successful creation
   if (CORBA::is_nil (pub_.in ()))
-    std::cerr << "Failed to create subscriber."
-              << std::endl;
-
-  this->register_transport (transport_impl_id);
-}
-
-OpenDDS_Publication_Manager::~OpenDDS_Publication_Manager ()
-{
+    throw Manager_Exception ("Failed to create publisher.");
 }
 
 void
@@ -99,7 +111,8 @@ OpenDDS_Publication_Manager::register_transport (OpenDDS::DCPS::TransportIdType 
 }
 
 DDS::DataWriter_ptr
-OpenDDS_Publication_Manager::access_topic (const Topic_Manager & topic)
+OpenDDS_Publication_Manager::access_topic (const Topic_Manager & topic,
+					   const Publication_Manager_Ptr & ref)
 {
   // Create a modifiable copy of the Topic_Manager
   Topic_Manager tm (topic);
@@ -107,7 +120,7 @@ OpenDDS_Publication_Manager::access_topic (const Topic_Manager & topic)
   tm.create_topic (dm_);
 
   // return a new datawriter created by the topic manager
-  return tm.datawriter (Publication_Manager (this));
+  return tm.datawriter (Publication_Manager (ref));
 }
 
 void

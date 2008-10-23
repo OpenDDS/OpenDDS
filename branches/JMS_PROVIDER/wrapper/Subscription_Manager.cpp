@@ -21,8 +21,8 @@ Subscription_Manager::Subscription_Manager ()
 {
 }
 
-Subscription_Manager::Subscription_Manager (Subscription_Manager_Impl * impl)
-  : manager_impl_ (impl, true)
+Subscription_Manager::Subscription_Manager (Subscription_Manager_Ptr impl)
+  : manager_impl_ (impl)
 {
 }
 
