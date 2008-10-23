@@ -14,10 +14,13 @@
 
 #include "dds/DdsDcpsInfoUtilsC.h"
 
+
 #include "ace/Task.h"
 #include "ace/Hash_Map_With_Allocator_T.h"
 #include "ace/Malloc_T.h"
 #include "ace/MMAP_Memory_Pool.h"
+#include "ace/Service_Object.h"
+#include "ace/Service_Config.h"
 
 #include <string>
 
@@ -111,6 +114,30 @@ public:
 };
 
 } // End of namespace Update
+
+typedef Update::PersistenceUpdater PersistenceUpdaterSvc;
+
+ACE_STATIC_SVC_DECLARE (PersistenceUpdaterSvc)
+
+ACE_FACTORY_DECLARE (ACE_Local_Service, PersistenceUpdaterSvc)
+
+class OpenDDS_InfoRepoLib_Export PersistenceUpdaterSvc_Loader
+{
+public:
+  static int init (void);
+};
+
+#if defined(ACE_HAS_BROKEN_STATIC_CONSTRUCTORS)
+
+typedef int (*PersistenceUpdaterSvc_Loader) (void);
+
+static UpdateManagerSvc_Loader load = &UpdateManagerSvc_Loader::init;
+
+#else
+
+static int load = PersistenceUpdaterSvc_Loader::init ();
+
+#endif /* ACE_HAS_BROKEN_STATIC_CONSTRUCTORS */
 
 #endif // _PERSISTENCE_UPDATER_
 

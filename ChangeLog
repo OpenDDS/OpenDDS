@@ -1,3 +1,121 @@
+Wed Oct 22 22:08:10 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
+
+        * wrapper/Topic_Manager_T.h
+        * wrapper/Topic_Manager_T.cpp:
+        
+          Made corrections on copy ctor and assignment operator
+          and made them private.
+        
+        * wrapper/OpenDDS/OpenDDS_Subscription_Manager.h
+        * wrapper/OpenDDS/OpenDDS_Publication_Manager.cpp
+        * wrapper/OpenDDS/OpenDDS_Domain_Manager.h
+        * wrapper/OpenDDS/OpenDDS_Publication_Manager.h
+        * wrapper/OpenDDS/OpenDDS_Subscription_Manager.cpp
+        * wrapper/OpenDDS/OpenDDS_Domain_Manager.cpp:
+        
+          Changed register_transport functionality so that it is only
+          called once per Domain_Manager instance even if several
+          publishers or subscribers are created.
+
+Wed Oct 22 03:25:37 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
+
+        * wrapper/Subscription_Manager_Impl.cpp
+        * wrapper/Domain_Manager.h
+        * wrapper/Publication_Manager.h
+        * wrapper/Topic_Manager.cpp
+        * wrapper/Subscription_Manager.inl
+        * wrapper/Subscription_Manager.cpp
+        * wrapper/Reference_Counter_T.h
+        * wrapper/Domain_Manager_Impl.h
+        * wrapper/Publication_Manager_Impl.h
+        * wrapper/Topic_Manager_Impl.h
+        * wrapper/Domain_Manager.cpp
+        * wrapper/Domain_Manager.inl
+        * wrapper/Publication_Manager.cpp
+        * wrapper/Publication_Manager.inl
+        * wrapper/Subscription_Manager_Impl.h
+        * wrapper/OpenDDS/OpenDDS_Subscription_Manager.h
+        * wrapper/OpenDDS/OpenDDS_Publication_Manager.cpp
+        * wrapper/OpenDDS/OpenDDS_Domain_Manager.h
+        * wrapper/OpenDDS/OpenDDS_Publication_Manager.h
+        * wrapper/OpenDDS/OpenDDS_Subscription_Manager.cpp
+        * wrapper/OpenDDS/OpenDDS_Domain_Manager.cpp
+        * wrapper/Topic_Manager.h
+        * wrapper/Reference_Counter_T.cpp
+        * wrapper/Domain_Manager_Impl.cpp
+        * wrapper/Subscription_Manager.h
+        * wrapper/Publication_Manager_Impl.cpp
+        * wrapper/Topic_Manager_Impl.cpp:
+        
+          Replaced Reference_Counter_T class with 
+          ACE_Refcounted_Auto_Ptr in the memory management bridge 
+          classes.
+
+Tue Oct 21 23:22:55 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        
+          Fixed a warning.
+          
+        * dds/InfoRepo/PersistenceUpdater.h:
+
+          Added missing includes.
+          
+Tue Oct 21 22:24:39 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/mySvc.conf:
+
+          Updated the service name.
+
+Tue Oct 21 22:05:28 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcp.cpp:
+
+          Removed a duplicate header.
+
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+
+          Added includes to load service for static build.
+
+        * dds/InfoRepo/PersistenceUpdater.h:
+        * dds/InfoRepo/PersistenceUpdater.cpp:
+
+          Added Loader class for static intializing and
+          loading service.
+
+        * tests/DCPS/Prst_delayed_subscriber/mySvc.conf:
+
+          Updated the service name.
+
+Tue Oct 21 20:00:02 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Added Federation test.
+
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+
+          Fixed a warning.
+
+Tue Oct 21 18:53:07 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+
+          Eliminated a warning when built_in_topics=0.
+
+Mon Oct 20 22:08:36 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Added short description of new dcps_ts.pl command line
+          argument.
+
+Mon Oct 20 21:51:30 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Updated release notes with DCPSInfoRepo changes.
+
 Mon Oct 20 18:03:31 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
@@ -6,7 +124,18 @@ Mon Oct 20 18:03:31 UTC 2008  Steven Stallion  <stallions@ociweb.com>
         * dds/InfoRepo/DCPSInfoRepoServ.cpp:
         * dds/InfoRepo/DCPSInfo_i.cpp:
 
-          DCPSInfoRepo refactorings.
+          DCPSInfoRepo refactorings:
+
+          - DCPSInfoRepo will no longer abort on an invalid Transport
+            configuration.
+          - Added catch all to DCPSInfoRepoServ::init to ensure
+            failed initialization cleans up state correctly.
+          - Cleaned up DCPSInfoRepoServ interfaces (i.e. unused return
+            values, incorrect return types).
+          - Usage will no longer call ACE_OS::exit; now throws an
+            InitError instead.
+          - Service_Participant::shutdown is now resilient; assertion
+            replaced with conditional if CORBA::ORB is nil.
 
 Fri Oct 17 23:31:29 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
