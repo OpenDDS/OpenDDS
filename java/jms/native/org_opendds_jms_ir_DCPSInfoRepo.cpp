@@ -149,14 +149,11 @@ DCPSInfoRepo_init(JNIEnv *env, jobject self, jobjectArray args)
     {
       throw_exception(env, "java/lang/IllegalArgumentException",
         e.msg_.c_str());
-
       ACE::fini();
     }
     catch (CORBA::Exception &e)
     {
-      throw_exception(env, "org/omg/CORBA/UNKNOWN",
-        e._info().c_str());
-
+      throw_exception(env, "org/omg/CORBA/UNKNOWN", e._info().c_str());
       ACE::fini();
     }
     catch (...)
@@ -192,7 +189,7 @@ DCPSInfoRepo_run(JNIEnv *env, jobject self)
 }
 
 void JNICALL
-DCPSInfoRepo_shutdown(JNIEnv *env, jobject self, jboolean finalize)
+DCPSInfoRepo_shutdown(JNIEnv *env, jobject self)
 {
   InfoRepo *peer = get_InfoRepo_peer(env, self);
   if (peer == 0)
@@ -201,9 +198,4 @@ DCPSInfoRepo_shutdown(JNIEnv *env, jobject self, jboolean finalize)
     return;
   }
   peer->sync_shutdown();
-
-  if (finalize)
-  {
-    DCPSInfoRepo_fini(env, self);
-  }
 }

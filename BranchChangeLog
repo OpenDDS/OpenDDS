@@ -1,3 +1,24 @@
+Fri Oct 24 15:39:59 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/OpenDDS.ipr:
+
+          Updated project JDK to 1.5 (don't change this!).
+
+        * java/jms/native/org/opendds/jms/ir/DCPSInfoRepo.java:
+        * java/jms/native/org_opendds_jms_ir_DCPSInfoRepo.cpp:
+
+          Dropped shutdown(finalize) method (no longer supported).
+
+        * java/jms/test/org/opendds/jms/ir/DCPSInfoRepoTest.java:
+
+          Removed sleep in startWithStop test; shutdown() is now
+          synchronous.
+
+        * java/jms/src/org/opendds/jms/jmx/DCPSInfoRepo.java:
+        * java/jms/src/org/opendds/jms/jmx/DCPSInfoRepoMBean.java:
+
+          Removed these files.
+
 Thu Oct 23 20:17:12 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
           Back-merged from trunk (r1531:1571)
