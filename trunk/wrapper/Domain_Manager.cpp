@@ -58,7 +58,3 @@ Domain_Manager::operator= (const Domain_Manager& copy)
       manager_impl_ = copy.manager_impl_;
     }
 }
-
-Domain_Manager::~Domain_Manager ()
-{
-}
