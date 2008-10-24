@@ -34,6 +34,20 @@
 
 namespace
 {
+  class InitGuard
+  {
+  public:
+    InitGuard()
+    {
+      ACE::init();
+    }
+
+    ~InitGuard()
+    {
+      ACE::fini();
+    }
+  } init_guard;
+
   jfieldID
   get_peer_fieldID(JNIEnv *env, jobject self)
   {
@@ -133,8 +147,6 @@ DCPSInfoRepo_init(JNIEnv *env, jobject self, jobjectArray args)
     return;
   }
 
-  ACE::init();
-
   jsize len = env->GetArrayLength(args) + 1;
 
   ACE_TCHAR **argv = to_argv(env, args, len);
@@ -149,17 +161,14 @@ DCPSInfoRepo_init(JNIEnv *env, jobject self, jobjectArray args)
     {
       throw_exception(env, "java/lang/IllegalArgumentException",
         e.msg_.c_str());
-      ACE::fini();
     }
     catch (CORBA::Exception &e)
     {
       throw_exception(env, "org/omg/CORBA/UNKNOWN", e._info().c_str());
-      ACE::fini();
     }
     catch (...)
     {
       throw_exception(env, "java/lang/UnknownError");
-      ACE::fini();
     }
     delete_argv(env, argv, len);
   }
@@ -172,7 +181,6 @@ DCPSInfoRepo_fini(JNIEnv *env, jobject self)
   if (peer != 0)
   {
     delete_InfoRepo_peer(env, self, peer);
-    ACE::fini();
   }
 }
 
