@@ -9,10 +9,9 @@ package org.opendds.jms.ir;
  * instance.
  * <p/>
  * The general contract of this is object is such that only a single
- * instance should exist at any given time.  Those who wish to create
- * and destroy multiple DCPSInfoRepo instances within the same
- * process should ensure the {@code shutdown()} method is always
- * called with {@code finalize} set as {@code true}.
+ * instance may exist at any given time.  Care must be taken to
+ * ensure an existing DCPSInfoRepo instance is shutdown prior to
+ * creating additional instances.
  *
  * @author  Steven Stallion
  * @version $Revision$
@@ -53,34 +52,18 @@ public final class DCPSInfoRepo implements Runnable {
      * the {@code shutdown()} method.
      *
      * @throws  IllegalStateException if the DCPSInfoRepo instance
-     *          has been finalized and marked for collection
+     *          has been shutdown
      */
     public native void run();
 
     /**
      * Gracefully terminates a DCPSInfoRepo instance running on
-     * another thread.  By default, the {@code shutdown()} method
-     * defers DCPSInfoRepo finalization until the
-     * {@code DCPSInfoRepo} is marked for collection.
-     *
-     * @throws  IllegalStateException if the DCPSInfoRepo instance
-     *          has been finalized and marked for collection
-     */
-    public void shutdown() {
-        shutdown(false);
-    }
-
-    /**
-     * Gracefully terminates a DCPSInfoRepo instance running on
      * another thread.
      *
-     * @param   finalize indicates the DCPSInfoRepo instance should
-     *          be finalized after shuting down
-     *
      * @throws  IllegalStateException if the DCPSInfoRepo instance
-     *          has been finalized and marked for collection
+     *          has been shutdown
      */
-    public native void shutdown(boolean finalize);
+    public native void shutdown();
 
     @Override
     protected void finalize() throws Throwable {
