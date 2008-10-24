@@ -1,3 +1,10 @@
+Fri Oct 24 17:43:13 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dds_wrapper.mpb:
+
+          Changed the "after" to valid project name
+          (these are not library names).
+ 
 Fri Oct 24 13:54:33 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/ConditionImpl.h:
