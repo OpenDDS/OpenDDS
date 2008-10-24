@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Id$
+
+    Example DCPSInfoRepoService configuration.
+
+    This configuration will create a DCPSInfoRepo instance using the
+    SimpleTcp transport type which listens to localhost:7777.
+
+    Author:  Steven Stallion
+    Version: $Revision$
+-->
+<!DOCTYPE server PUBLIC "-//JBoss//DTD MBean Service 4.2//EN"
+    "http://www.jboss.org/j2ee/dtd/jboss-service_4_2.dtd">
+
+<server>
+    <mbean code="org.opendds.jms.jmx.DCPSInfoRepoService"
+           name="opendds:service=DCPSInfoRepo">
+        <attribute name="DCPSDebugLevel">10</attribute>
+        <attribute name="DCPSTransportType">SimpleTcp</attribute>
+        <attribute name="ORBDebugLevel">10</attribute>
+        <attribute name="ORBListenEndpoints">iiop://localhost:7777</attribute>
+        <attribute name="ORBLogFile">${jboss.server.log.dir}/DCPSInfoRepo.log</attribute>
+        <attribute name="VerboseTransportLogging">true</attribute>
+    </mbean>
+</server>

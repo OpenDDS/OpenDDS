@@ -1,0 +1,7 @@
+#
+# $Id$
+#
+
+org.opendds.jms.jmx.config.spi.impl.DCPSAttributeFormat
+org.opendds.jms.jmx.config.spi.impl.InfoRepoAttributeFormat
+org.opendds.jms.jmx.config.spi.impl.ORBAttributeFormat

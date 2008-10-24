@@ -1,3 +1,47 @@
+Fri Oct 24 22:38:07 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/OpenDDS.ipr:
+        * java/jms/doc/example:
+        * java/jms/doc/example/DCPSInfoRepoService:
+        * java/jms/doc/example/DCPSInfoRepoService/jboss-service.xml:
+        * java/jms/doc/example/ParticipantFactoryService:
+        * java/jms/doc/example/ParticipantFactoryService/jboss-service.xml:
+        * java/jms/lib/commons-logging-1.1.1.jar:
+        * java/jms/lib/junit-4.4.jar:
+        * java/jms/native/org_opendds_jms_ir_DCPSInfoRepo.cpp:
+        * java/jms/src/META-INF:
+        * java/jms/src/META-INF/services:
+        * java/jms/src/META-INF/services/org.opendds.jms.jmx.config.spi.AttributeFormat:
+        * java/jms/src/org/opendds/jms/jmx/DCPSAttributes.java:
+        * java/jms/src/org/opendds/jms/jmx/DCPSInfoRepoService.java:
+        * java/jms/src/org/opendds/jms/jmx/DCPSInfoRepoServiceMBean.java:
+        * java/jms/src/org/opendds/jms/jmx/InfoRepoAttributes.java:
+        * java/jms/src/org/opendds/jms/jmx/ORBAttributes.java:
+        * java/jms/src/org/opendds/jms/jmx/ParticipantFactoryService.java:
+        * java/jms/src/org/opendds/jms/jmx/ParticipantFactoryServiceMBean.java:
+        * java/jms/src/org/opendds/jms/jmx/ServiceMBean.java:
+        * java/jms/src/org/opendds/jms/jmx/config:
+        * java/jms/src/org/opendds/jms/jmx/config/AttributeWriter.java:
+        * java/jms/src/org/opendds/jms/jmx/config/Attributes.java:
+        * java/jms/src/org/opendds/jms/jmx/config/SvcConfDirective.java:
+        * java/jms/src/org/opendds/jms/jmx/config/TransportTypeHelper.java:
+        * java/jms/src/org/opendds/jms/jmx/config/spi:
+        * java/jms/src/org/opendds/jms/jmx/config/spi/AttributeFormat.java:
+        * java/jms/src/org/opendds/jms/jmx/config/spi/impl:
+        * java/jms/src/org/opendds/jms/jmx/config/spi/impl/DCPSAttributeFormat.java:
+        * java/jms/src/org/opendds/jms/jmx/config/spi/impl/InfoRepoAttributeFormat.java:
+        * java/jms/src/org/opendds/jms/jmx/config/spi/impl/ORBAttributeFormat.java:
+        * java/jms/test/org/opendds/jms/jmx:
+        * java/jms/test/org/opendds/jms/jmx/DCPSInfoRepoServiceTest.java:
+        * java/jms/test/org/opendds/jms/jmx/ParticipantFactoryServiceTest.java:
+       
+          Initial JMX configuration support for DCPSInfoRepo and
+          DomainParticipantFactory. 
+        
+        * java/jms/lib/junit-4.5.jar:
+
+          Removed this file.
+
 Fri Oct 24 15:39:59 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/OpenDDS.ipr:
