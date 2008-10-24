@@ -6,7 +6,7 @@
 #include "dds/DCPS/WaitSet.h"
 #include "dds/DCPS/Definitions.h"
 
-#include "ace/Thread_Mutex.h"
+#include "ace/Recursive_Thread_Mutex.h"
 
 #include <set>
 
@@ -32,7 +32,7 @@ namespace OpenDDS
 
       typedef std::set<DDS::WaitSet_var, VarLess<DDS::WaitSet> > WaitSetSet;
       WaitSetSet waitsets_;
-      ACE_Thread_Mutex lock_;
+      ACE_Recursive_Thread_Mutex lock_;
     };
   }
 }
