@@ -1,3 +1,15 @@
+Fri Oct 24 22:19:03 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
+
+        * wrapper/Domain_Manager.h
+        * wrapper/Domain_Manager.cpp
+        * wrapper/Publication_Manager.h
+        * wrapper/Publication_Manager.cpp
+        * wrapper/Subscription_Manager.h
+        * wrapper/Subscription_Manager.cpp:
+        
+          Removed empty destructors to fix compiler error with borland
+          CodeGear.
+
 Fri Oct 24 17:43:13 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * MPC/config/dds_wrapper.mpb:

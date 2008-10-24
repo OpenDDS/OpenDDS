@@ -40,7 +40,3 @@ Publication_Manager::operator= (const Publication_Manager & copy)
       manager_impl_ = copy.manager_impl_;
     }
 }
-
-Publication_Manager::~Publication_Manager ()
-{
-}
