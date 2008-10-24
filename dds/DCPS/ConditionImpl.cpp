@@ -9,7 +9,7 @@ void ConditionImpl::signal_all()
 
   WaitSetSet local_ws;
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, g, lock_);
     local_ws = waitsets_;
   }
 
@@ -23,7 +23,8 @@ void ConditionImpl::signal_all()
 DDS::ReturnCode_t ConditionImpl::attach_to_ws(DDS::WaitSet_ptr ws)
 {
   DDS::WaitSet_var wsv(DDS::WaitSet::_duplicate(ws));
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DDS::RETCODE_OUT_OF_RESOURCES);
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, lock_,
+                   DDS::RETCODE_OUT_OF_RESOURCES);
   return waitsets_.insert(wsv).second
     ? DDS::RETCODE_OK : DDS::RETCODE_PRECONDITION_NOT_MET;
 }
@@ -31,7 +32,8 @@ DDS::ReturnCode_t ConditionImpl::attach_to_ws(DDS::WaitSet_ptr ws)
 DDS::ReturnCode_t ConditionImpl::detach_from_ws(DDS::WaitSet_ptr ws)
 {
   DDS::WaitSet_var wsv(DDS::WaitSet::_duplicate(ws));
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DDS::RETCODE_OUT_OF_RESOURCES);
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, lock_,
+                   DDS::RETCODE_OUT_OF_RESOURCES);
   return waitsets_.erase(wsv)
     ? DDS::RETCODE_OK : DDS::RETCODE_PRECONDITION_NOT_MET;
 }
