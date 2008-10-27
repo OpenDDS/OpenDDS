@@ -69,6 +69,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   External_Trigger et(gc);
   et.activate();
   ret = ws->wait(active, infinite);
+  et.wait();
   if (ret != RETCODE_OK) return ret;
   if (active.length() != 1 || active[0] != gc) return 1;
 
@@ -102,6 +103,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   External_Trigger et2(gc2);
   et2.activate();
   ret = ws->wait(active, infinite);
+  et2.wait();
   if (ret != RETCODE_OK) return ret;
   if (active.length() != 1 || active[0] != gc2) return 1;
 
@@ -142,6 +144,5 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   // cleanup
   ws->detach_condition(gc);
   ws->detach_condition(gc2);
-  ACE_Thread_Manager::instance()->wait();
   return 0;
 }
