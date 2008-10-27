@@ -1,3 +1,11 @@
+Mon Oct 27 15:09:34 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/GuardCondition/GuardConditionTest.cpp:
+        * tests/DCPS/StatusCondition/StatusConditionTest.cpp:
+
+          Changed mechanism used for waiting for threads to terminate, the
+          old way was hanging on some linux systems (rome).
+
 Fri Oct 24 22:19:03 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
 
         * wrapper/Domain_Manager.h
@@ -6,7 +14,7 @@ Fri Oct 24 22:19:03 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
         * wrapper/Publication_Manager.cpp
         * wrapper/Subscription_Manager.h
         * wrapper/Subscription_Manager.cpp:
-        
+
           Removed empty destructors to fix compiler error with borland
           CodeGear.
 
@@ -16,7 +24,7 @@ Fri Oct 24 17:43:13 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
           Changed the "after" to valid project name
           (these are not library names).
- 
+
 Fri Oct 24 13:54:33 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/ConditionImpl.h:
