@@ -1990,7 +1990,7 @@ int TAO_DDS_DCPSInfo_i::init_transport (int listen_address_given,
                                                             ACE_TEXT("SimpleTcp"));
 
     config->datalink_release_delay_ = 0;
-
+    
     OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config
       = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
 
@@ -1998,6 +1998,7 @@ int TAO_DDS_DCPSInfo_i::init_transport (int listen_address_given,
     {
       tcp_config->local_address_ = ACE_INET_Addr (listen_str);
       tcp_config->local_address_str_ = listen_str;
+      tcp_config->conn_retry_attempts_ = 0;
     }
 
     if (trans_impl->configure(config.in()) != 0)

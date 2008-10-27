@@ -1,3 +1,19 @@
+Mon Oct 27 20:59:57 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Fixed a bug in add_pending_association() that 
+          check_fully_association by individual association does not
+          remove the fully associated pair in the pending list so 
+          fully_associated may be called multiple times for the same 
+          association. 
+          
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          Configured BIT transport to not attempt connect after lost
+          connection. This would avoid reconnect errors during repo
+          shutdown.
+          
 Mon Oct 27 15:09:34 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/GuardCondition/GuardConditionTest.cpp:
