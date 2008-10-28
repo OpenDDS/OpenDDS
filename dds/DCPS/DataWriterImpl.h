@@ -128,6 +128,8 @@ namespace OpenDDS
       virtual ::DDS::StatusKindMask get_status_changes ()
         ACE_THROW_SPEC ((CORBA::SystemException));
 
+      virtual void notify_status_condition ();
+
       virtual void add_associations (::OpenDDS::DCPS::RepoId yourId,
                                      const ReaderAssociationSeq & readers)
         ACE_THROW_SPEC ((CORBA::SystemException));

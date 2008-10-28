@@ -1,19 +1,53 @@
+Tue Oct 28 21:34:20 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        
+          Overloaded notify_status_condition() to get sample_lock_
+          before calling base class notify_status_condition(). This 
+          should resolve deadlock situation that two threads (
+          one calling notify_status_condition() and another calling 
+          data_received()) acquire DataReaderImpl sample_lock_ and 
+          ConditionImpl lock_ reversely.
+          
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Similar change as DataReaderImpl.
+          
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          Corrected conn_retry_attempts_ setting which should be set 0 
+          even the local_address is not configured. 
+       
+        * DCPS/transport/framework/DataLink.cpp:
+        
+          Added guard for accessing sub_map_ and pub_map_ in exist()
+          function.
+       
+        * tests/DCPS/sub_init_loop/publisher.cpp:
+
+          Changed history qos to be default(KEEP_LAST_HISTORY_QOS)
+          instead of KEEP_ALL_HISTORY_QOS as it's not required. 
+          This avoids publisher continue consume resouce after 
+          subscriber encounter deadlock.
+       
 Mon Oct 27 20:59:57 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportImpl.cpp:
 
-          Fixed a bug in add_pending_association() that 
+          Fixed a bug in add_pending_association() that
           check_fully_association by individual association does not
-          remove the fully associated pair in the pending list so 
-          fully_associated may be called multiple times for the same 
-          association. 
-          
+          remove the fully associated pair in the pending list so
+          fully_associated may be called multiple times for the same
+          association.
+
         * dds/InfoRepo/DCPSInfo_i.cpp:
 
           Configured BIT transport to not attempt connect after lost
           connection. This would avoid reconnect errors during repo
           shutdown.
-          
+
 Mon Oct 27 15:09:34 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/GuardCondition/GuardConditionTest.cpp:
