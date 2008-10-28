@@ -360,6 +360,9 @@ namespace OpenDDS
       bool have_sample_states(::DDS::SampleStateMask sample_states) const;
       bool have_view_states(::DDS::ViewStateMask view_states) const;
       bool have_instance_states(::DDS::InstanceStateMask instance_states) const;
+      bool contains_sample(::DDS::SampleStateMask sample_states,
+        ::DDS::ViewStateMask view_states,
+        ::DDS::InstanceStateMask instance_states);
 
       virtual void dds_demarshal(const ReceivedDataSample& sample) = 0;
       virtual void dispose(const ReceivedDataSample& sample);
@@ -443,6 +446,8 @@ namespace OpenDDS
 
       virtual void release_instance_i (::DDS::InstanceHandle_t handle) = 0;
 
+      bool has_readcondition(::DDS::ReadCondition_ptr a_condition);
+
       mutable SubscriptionInstanceMapType           instances_;
 
       ReceivedDataAllocator          *rd_allocator_;
@@ -462,6 +467,9 @@ namespace OpenDDS
       ::DDS::InstanceHandle_t         next_handle_;
 
     private:
+
+      /// Data has arrived into the cache, unblock waiting ReadConditions
+      void notify_read_conditions ();
 
       void notify_subscription_lost (const ::DDS::InstanceHandleSeq& handles);
 
@@ -559,6 +567,10 @@ namespace OpenDDS
       /// publications writing to this reader.
       WriterMapType writers_;
 
+      typedef
+        std::set< ::DDS::ReadCondition_var, VarLess< ::DDS::ReadCondition > >
+        ReadConditionSet;
+      ReadConditionSet read_conditions_;
     };
 
   } // namespace DCPS

@@ -212,7 +212,7 @@ const Sample_T*
 ZeroCopyDataSeq<Sample_T, DEF_MAX>::get_buffer() const
 {
   //If we're currently zero-copy we must become single copy in order to return
-  //a contigous buffer.  The only way to do this and meet the CORBA/C++ spec
+  //a contiguous buffer.  The only way to do this and meet the CORBA/C++ spec
   //interface is to cast-away the constness.
   if (is_zero_copy())
     const_cast<ZeroCopyDataSeq*>(this)->make_single_copy(max_slots());

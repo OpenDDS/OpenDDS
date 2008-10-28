@@ -172,7 +172,7 @@ DDS::InstanceHandle_t
   ::DDS::Time_t const source_timestamp =
     ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
   return register_w_timestamp (instance_data,
-                               ::OpenDDS::DCPS::HANDLE_NIL,
+                               ::DDS::HANDLE_NIL,
                                source_timestamp);
 }
 
@@ -236,7 +236,7 @@ DDS::ReturnCode_t
   ::DDS::InstanceHandle_t const registered_handle =
       this->get_instance_handle(instance_data);
 
-  if (registered_handle == ::OpenDDS::DCPS::HANDLE_NIL)
+  if (registered_handle == ::DDS::HANDLE_NIL)
   {
     // This case could be the instance is not registered yet or
     // already unregistered.
@@ -246,7 +246,7 @@ DDS::ReturnCode_t
                         ACE_TEXT("The instance is not registered.\n")),
                         ::DDS::RETCODE_ERROR);
   }
-  else if (handle != ::OpenDDS::DCPS::HANDLE_NIL && handle != registered_handle)
+  else if (handle != ::DDS::HANDLE_NIL && handle != registered_handle)
   {
     ACE_ERROR_RETURN ((LM_ERROR,
                        ACE_TEXT("(%P|%t) ")
@@ -352,10 +352,10 @@ DDS::ReturnCode_t
                     get_lock (),
                     ::DDS::RETCODE_ERROR);
 
-  if(instance_handle == ::OpenDDS::DCPS::HANDLE_NIL)
+  if(instance_handle == ::DDS::HANDLE_NIL)
   {
     instance_handle = this->get_instance_handle(instance_data);
-    if (instance_handle == ::OpenDDS::DCPS::HANDLE_NIL)
+    if (instance_handle == ::DDS::HANDLE_NIL)
     {
       ACE_ERROR_RETURN ((LM_ERROR,
                          ACE_TEXT("(%P|%t) ")
@@ -539,7 +539,7 @@ ACE_Message_Block*
   const ::<%SCOPE%><%TYPE%>& instance_data,
   const ::DDS::Time_t & source_timestamp)
 {
-  handle = ::OpenDDS::DCPS::HANDLE_NIL;
+  handle = ::DDS::HANDLE_NIL;
   InstanceMap::const_iterator it = instance_map_.find(instance_data);
 
   bool needs_creation = true;
@@ -605,7 +605,7 @@ ACE_Message_Block*
 
   if (it == instance_map_.end())
   {
-    return ::OpenDDS::DCPS::HANDLE_NIL;
+    return ::DDS::HANDLE_NIL;
   }
   else
   {
@@ -979,8 +979,20 @@ DDS::ReturnCode_t
     ::DDS::ReadCondition_ptr a_condition)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
-  post_read_or_take();
-  return ::DDS::RETCODE_UNSUPPORTED; //TODO: impl
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, guard, this->sample_lock_,
+                    ::DDS::RETCODE_ERROR);
+
+  if (!has_readcondition(a_condition))
+  {
+    return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+
+  ::DDS::ReturnCode_t ret = read(received_data, sample_info, max_samples,
+                                 a_condition->get_sample_state_mask(),
+                                 a_condition->get_view_state_mask(),
+                                 a_condition->get_instance_state_mask());
+  // TODO: apply QueryCondition
+  return ret;
 }
 
 DDS::ReturnCode_t
@@ -991,8 +1003,20 @@ DDS::ReturnCode_t
     ::DDS::ReadCondition_ptr a_condition)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
-  post_read_or_take();
-  return ::DDS::RETCODE_UNSUPPORTED; //TODO: impl
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, guard, this->sample_lock_,
+                    ::DDS::RETCODE_ERROR);
+
+  if (!has_readcondition(a_condition))
+  {
+    return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+
+  ::DDS::ReturnCode_t ret = take(received_data, sample_info, max_samples,
+                                 a_condition->get_sample_state_mask(),
+                                 a_condition->get_view_state_mask(),
+                                 a_condition->get_instance_state_mask());
+  // TODO: apply QueryCondition
+  return ret;
 }
 
 DDS::ReturnCode_t
@@ -1409,7 +1433,7 @@ DDS::ReturnCode_t
     ::DDS::InstanceStateMask instance_states)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
-  ::DDS::InstanceHandle_t handle(::OpenDDS::DCPS::HANDLE_NIL);
+  ::DDS::InstanceHandle_t handle(::DDS::HANDLE_NIL);
 
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
@@ -1419,7 +1443,7 @@ DDS::ReturnCode_t
   InstanceMap::iterator it;
   InstanceMap::iterator const the_end = instance_map_.end ();
 
-  if (a_handle == ::OpenDDS::DCPS::HANDLE_NIL)
+  if (a_handle == ::DDS::HANDLE_NIL)
   {
     it = instance_map_.begin ();
   }
@@ -1468,7 +1492,7 @@ DDS::ReturnCode_t
     ::DDS::InstanceStateMask instance_states)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
- ::DDS::InstanceHandle_t handle(::OpenDDS::DCPS::HANDLE_NIL);
+ ::DDS::InstanceHandle_t handle(::DDS::HANDLE_NIL);
 
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
@@ -1478,7 +1502,7 @@ DDS::ReturnCode_t
   InstanceMap::iterator it;
   InstanceMap::iterator const the_end = instance_map_.end ();
 
-  if (a_handle == ::OpenDDS::DCPS::HANDLE_NIL)
+  if (a_handle == ::DDS::HANDLE_NIL)
   {
     it = instance_map_.begin ();
   }
@@ -1523,8 +1547,21 @@ DDS::ReturnCode_t
     ::DDS::ReadCondition_ptr a_condition)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
-  post_read_or_take();
-  return ::DDS::RETCODE_UNSUPPORTED; //TODO: impl
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, guard, this->sample_lock_,
+                    ::DDS::RETCODE_ERROR);
+
+  if (!has_readcondition(a_condition))
+  {
+    return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+
+  ::DDS::ReturnCode_t ret =
+      read_next_instance(received_data, info_seq, max_samples, a_handle,
+                         a_condition->get_sample_state_mask(),
+                         a_condition->get_view_state_mask(),
+                         a_condition->get_instance_state_mask());
+  // TODO: apply QueryCondition
+  return ret;
 }
 
 DDS::ReturnCode_t
@@ -1536,8 +1573,21 @@ DDS::ReturnCode_t
     ::DDS::ReadCondition_ptr a_condition)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
-  post_read_or_take();
-  return ::DDS::RETCODE_UNSUPPORTED; //TODO: impl
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, guard, this->sample_lock_,
+                    ::DDS::RETCODE_ERROR);
+
+  if (!has_readcondition(a_condition))
+  {
+    return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+
+  ::DDS::ReturnCode_t ret =
+      take_next_instance(received_data, info_seq, max_samples, a_handle,
+                         a_condition->get_sample_state_mask(),
+                         a_condition->get_view_state_mask(),
+                         a_condition->get_instance_state_mask());
+  // TODO: apply QueryCondition
+  return ret;
 }
 
 void
@@ -1656,7 +1706,7 @@ void
   bool is_unregister_msg = header.message_id_ == OpenDDS::DCPS::UNREGISTER_INSTANCE;
 
 
-  DDS::InstanceHandle_t handle(::OpenDDS::DCPS::HANDLE_NIL);
+  DDS::InstanceHandle_t handle(::DDS::HANDLE_NIL);
 
   //!!! caller should already have the sample_lock_
   //We will unlock it before calling into listeners

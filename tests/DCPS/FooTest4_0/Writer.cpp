@@ -91,7 +91,7 @@ Writer::Writer(::DDS::DomainParticipant_ptr dp,
 
 void Writer::write (char message_id, const ::Xyz::Foo &foo)
 {
-  ::DDS::InstanceHandle_t handle (::OpenDDS::DCPS::HANDLE_NIL) ;
+  ::DDS::InstanceHandle_t handle (::DDS::HANDLE_NIL) ;
 
   switch(message_id)
   {
