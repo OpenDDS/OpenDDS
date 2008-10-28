@@ -1,3 +1,9 @@
+Tue Oct 28 14:41:38 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/doc/example/ParticipantFactoryService/jboss-service.xml:
+
+          Updated example configuration.
+
 Fri Oct 24 22:38:07 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/OpenDDS.ipr:
@@ -34,10 +40,10 @@ Fri Oct 24 22:38:07 UTC 2008  Steven Stallion  <stallions@ociweb.com>
         * java/jms/test/org/opendds/jms/jmx:
         * java/jms/test/org/opendds/jms/jmx/DCPSInfoRepoServiceTest.java:
         * java/jms/test/org/opendds/jms/jmx/ParticipantFactoryServiceTest.java:
-       
+
           Initial JMX configuration support for DCPSInfoRepo and
-          DomainParticipantFactory. 
-        
+          DomainParticipantFactory.
+
         * java/jms/lib/junit-4.5.jar:
 
           Removed this file.

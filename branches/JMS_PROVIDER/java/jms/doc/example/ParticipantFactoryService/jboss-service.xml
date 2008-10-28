@@ -2,7 +2,7 @@
 <!--
     $Id$
 
-    Example DCPSInfoRepoService configuration.
+    Example ParticipantFactoryService configuration.
 
     This configuration will create a DomainParticipantFactory
     instance which uses the SimpleTcp transport type and listens
@@ -18,6 +18,7 @@
     <mbean code="org.opendds.jms.jmx.ParticipantFactoryService"
            name="opendds:service=DomainParticipantFactory">
         <attribute name="DCPSDebugLevel">10</attribute>
+        <attribute name="DCPSInfoRepo">iiop://localhost:7777</attribute>
         <attribute name="DCPSTransportType">SimpleTcp</attribute>
         <attribute name="ORBDebugLevel">10</attribute>
         <attribute name="ORBListenEndpoints">iiop://localhost:8888</attribute>
