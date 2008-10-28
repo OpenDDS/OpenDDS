@@ -15,6 +15,7 @@
 #include "Transient_Kludge.h"
 #include "Util.h"
 #include "RequestedDeadlineWatchdog.h"
+#include "ReadConditionImpl.h"
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #if !defined (DDS_HAS_MINIMUM_BIT)
@@ -544,7 +545,11 @@ void DataReaderImpl::update_incompatible_qos (
     ::DDS::InstanceStateMask instance_states)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
-  return ::DDS::ReadCondition::_nil(); //TODO: impl
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_, 0);
+  DDS::ReadCondition_var rc = new OpenDDS::DCPS::ReadConditionImpl(
+    this, sample_states, view_states, instance_states);
+  read_conditions_.insert(rc);
+  return rc._retn();
 }
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
@@ -552,19 +557,31 @@ void DataReaderImpl::update_incompatible_qos (
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states,
-    const char * query_expression,
-    const ::DDS::StringSeq & query_parameters)
+    const char* query_expression,
+    const ::DDS::StringSeq& query_parameters)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_, 0);
   return ::DDS::QueryCondition::_nil(); //TODO: impl
 }
 #endif
+
+bool DataReaderImpl::has_readcondition(::DDS::ReadCondition_ptr a_condition)
+{
+  //sample lock already held
+  DDS::ReadCondition_var rc = DDS::ReadCondition::_duplicate(a_condition);
+  return read_conditions_.find(rc) != read_conditions_.end();
+}
 
 ::DDS::ReturnCode_t DataReaderImpl::delete_readcondition (
     ::DDS::ReadCondition_ptr a_condition)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
-  return DDS::RETCODE_UNSUPPORTED; //TODO: impl
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_,
+    DDS::RETCODE_OUT_OF_RESOURCES);
+  DDS::ReadCondition_var rc = DDS::ReadCondition::_duplicate(a_condition);
+  return read_conditions_.erase(rc)
+    ? DDS::RETCODE_OK : DDS::RETCODE_PRECONDITION_NOT_MET;
 }
 
 ::DDS::ReturnCode_t DataReaderImpl::delete_contained_entities ()
@@ -1033,6 +1050,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         this->dds_demarshal(sample);
 
         this->subscriber_servant_->data_received(this);
+        this->notify_read_conditions();
       }
       break;
 
@@ -1056,11 +1074,13 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     case DISPOSE_INSTANCE:
       this->writer_activity(sample.header_.publication_id_);
       this->dispose(sample);
+      this->notify_read_conditions();
       break;
 
     case UNREGISTER_INSTANCE:
       this->writer_activity(sample.header_.publication_id_);
       this->unregister(sample);
+      this->notify_read_conditions();
       break;
 
 
@@ -1073,6 +1093,15 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     }
 }
 
+void DataReaderImpl::notify_read_conditions()
+{
+  //sample lock is already held
+  for (ReadConditionSet::iterator it = read_conditions_.begin(),
+    end = read_conditions_.end(); it != end; ++it)
+    {
+      dynamic_cast<ConditionImpl*>(it->in())->signal_all();
+    }
+}
 
 SubscriberImpl* DataReaderImpl::get_subscriber_servant ()
 {
@@ -1149,6 +1178,39 @@ bool DataReaderImpl::have_instance_states(
       if (ptr->instance_state_.instance_state() & instance_states)
         {
           return true;
+        }
+    }
+  return false;
+}
+
+/// Fold-in the three separate loops of have_sample_states(),
+/// have_view_states(), and have_instance_states().  Takes the sample_lock_.
+bool DataReaderImpl::contains_sample(::DDS::SampleStateMask sample_states,
+  ::DDS::ViewStateMask view_states, ::DDS::InstanceStateMask instance_states) 
+{
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, false);
+  for (SubscriptionInstanceMapType::iterator iter = instances_.begin(),
+    end = instances_.end(); iter != end; ++iter)
+    {
+      SubscriptionInstance& inst = *iter->second;
+      if ((inst.instance_state_.view_state() & view_states) &&
+        (inst.instance_state_.instance_state() & instance_states))
+        {
+          //if the sample state mask is "don't care" we can skip the inner loop
+          //(as long as there's at least one sample)
+          if ((sample_states & ::DDS::ANY_SAMPLE_STATE)
+            == ::DDS::ANY_SAMPLE_STATE && inst.rcvd_sample_.head_)
+            {
+              return true;
+            }
+          for (ReceivedDataElement* item = inst.rcvd_sample_.head_; item != 0;
+            item = item->next_data_sample_)
+            {
+              if (item->sample_state_ & sample_states)
+                {
+                  return true;
+                }
+            }
         }
     }
   return false;

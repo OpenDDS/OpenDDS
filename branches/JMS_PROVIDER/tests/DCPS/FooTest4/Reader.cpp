@@ -163,7 +163,7 @@ Reader::start1 ()
     ::DDS::SampleInfoSeq si(num_reads_per_thread_) ;
     ::Xyz::Foo key_holder ;
 
-    ::DDS::InstanceHandle_t handle(::OpenDDS::DCPS::HANDLE_NIL) ;
+    ::DDS::InstanceHandle_t handle(::DDS::HANDLE_NIL) ;
     DDS::ReturnCode_t status  ;
     int num_print(0) ;
     if (use_take_)
@@ -206,7 +206,7 @@ Reader::start1 ()
           status = ::DDS::RETCODE_OK ;
           while (status != ::DDS::RETCODE_NO_DATA)
           {
-            handle = ::OpenDDS::DCPS::HANDLE_NIL ;
+            handle = ::DDS::HANDLE_NIL ;
             status = dr_servant->take_next_instance(foo, si,
                   1,
                   handle,
@@ -285,7 +285,7 @@ Reader::start1 ()
           status = ::DDS::RETCODE_OK ;
           while (status != ::DDS::RETCODE_NO_DATA)
           {
-            handle = ::OpenDDS::DCPS::HANDLE_NIL ;
+            handle = ::DDS::HANDLE_NIL ;
             status = dr_servant->read_next_instance(foo, si,
                   1,
                   handle,
