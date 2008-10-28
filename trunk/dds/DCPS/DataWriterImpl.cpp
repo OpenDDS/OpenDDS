@@ -1058,6 +1058,13 @@ DataWriterImpl::get_status_changes ()
   return EntityImpl::get_status_changes ();
 }
 
+void DataWriterImpl::notify_status_condition ()
+{
+  ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
+  this->EntityImpl::notify_status_condition ();
+}
+
+ 
 ::DDS::ReturnCode_t
 DataWriterImpl::register_instance(::DDS::InstanceHandle_t& handle,
                                   DataSample* data,

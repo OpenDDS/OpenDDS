@@ -150,7 +150,7 @@ int main (int argc, char *argv[])
       pub->get_default_datawriter_qos (dw_qos);
       // Make it KEEP_ALL history so we can verify the received
       // data without dropping.
-      dw_qos.history.kind = ::DDS::KEEP_ALL_HISTORY_QOS;
+      // dw_qos.history.kind = ::DDS::KEEP_ALL_HISTORY_QOS;
       dw_qos.reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
       //dw_qos.resource_limits.max_samples_per_instance = num_writes;
 

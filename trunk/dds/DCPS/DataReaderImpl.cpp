@@ -932,6 +932,13 @@ DataReaderImpl::get_status_changes ()
 }
 
 
+void DataReaderImpl::notify_status_condition ()
+{
+  ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
+  this->EntityImpl::notify_status_condition ();
+}
+
+
 void
 DataReaderImpl::writer_activity(PublicationId writer_id)
 {
