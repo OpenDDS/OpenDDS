@@ -1,3 +1,9 @@
+Tue Oct 28 22:21:05 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/ReadCondition/ReadConditionTest.cpp:
+
+          Treat RETCODE_NO_DATA as an expected condition instead of an error.
+
 Tue Oct 28 20:32:09 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms

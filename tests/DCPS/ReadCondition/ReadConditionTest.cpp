@@ -97,13 +97,16 @@ int run_test(int argc, ACE_TCHAR *argv[])
               MessageSeq data;
               SampleInfoSeq info;
               ret = mdr->take_w_condition(data, info, 3, dr_rc);
-              if (ret != RETCODE_OK)
+              if (ret != RETCODE_OK && ret != RETCODE_NO_DATA)
                 {
                   cout << "ERROR: take_w_condition returned " << ret << endl;
                   passed = false;
                   done = true;
                 }
-              received_data(data, mdw, msg);
+              if (ret == RETCODE_OK)
+                {
+                  received_data(data, mdw, msg);
+                }
               cout << "testing take_next_instance_w_condition" << endl;
               InstanceHandle_t handle = HANDLE_NIL;
               while (true)
