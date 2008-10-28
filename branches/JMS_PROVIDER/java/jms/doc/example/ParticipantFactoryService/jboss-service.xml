@@ -15,7 +15,7 @@
     "http://www.jboss.org/j2ee/dtd/jboss-service_4_2.dtd">
 
 <server>
-    <mbean code="org.opendds.jms.jmx.ParticipantFactoryService"
+    <mbean code="org.opendds.jmx.ParticipantFactoryService"
            name="opendds:service=DomainParticipantFactory">
         <attribute name="DCPSDebugLevel">10</attribute>
         <attribute name="DCPSInfoRepo">iiop://localhost:7777</attribute>

@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.List;import java.util.Arrays;
 import javax.jms.MessageEOFException;
 import javax.jms.MessageFormatException;
-import org.opendds.jms.util.ByteArrays;
-import org.opendds.jms.util.StreamItemConversion;
+import org.opendds.util.ByteArrays;
+import org.opendds.util.StreamItemConversion;
 
 public class StreamBodyFacade {
     private final MessageBody body;

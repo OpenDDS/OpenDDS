@@ -19,7 +19,7 @@ import DDS.DataWriterQos;
 import DDS.DURATION_INFINITY_SEC;
 import DDS.DURATION_INFINITY_NSEC;
 import DDS.DATAWRITER_QOS_DEFAULT;
-import org.opendds.jms.util.Objects;
+import org.opendds.util.Objects;
 import java.util.Map;
 import java.util.HashMap;
 
