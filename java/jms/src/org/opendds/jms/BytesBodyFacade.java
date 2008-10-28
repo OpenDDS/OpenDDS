@@ -11,7 +11,7 @@ import java.io.IOException;
 import javax.jms.JMSException;
 import javax.jms.MessageEOFException;
 import javax.jms.MessageFormatException;
-import org.opendds.jms.util.Objects;
+import org.opendds.util.Objects;
 
 public class BytesBodyFacade {
     private final MessageBody body;

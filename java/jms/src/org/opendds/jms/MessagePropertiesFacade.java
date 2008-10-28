@@ -11,9 +11,9 @@ import java.util.Map;
 import java.util.Set;
 import javax.jms.MessageFormatException;
 import org.omg.CORBA.SystemException;
-import org.opendds.jms.util.Identifiers;
-import org.opendds.jms.util.Objects;
-import org.opendds.jms.util.PropertyValueConversion;
+import org.opendds.util.Identifiers;
+import org.opendds.util.Objects;
+import org.opendds.util.PropertyValueConversion;
 
 /**
  * A facade over payload.theProperties, which, being a Java array

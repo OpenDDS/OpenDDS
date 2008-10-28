@@ -1,3 +1,9 @@
+Tue Oct 28 20:32:09 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms
+
+          Refactored package names.
+
 Tue Oct 28 16:58:23 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:

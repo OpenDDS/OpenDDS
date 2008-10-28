@@ -11,8 +11,8 @@ import javax.jms.MessageListener;
 import javax.jms.Destination;
 import DDS.Subscriber;
 import DDS.DomainParticipant;
-import org.opendds.jms.util.Objects;
-import org.opendds.jms.util.Strings;
+import org.opendds.util.Objects;
+import org.opendds.util.Strings;
 
 /**
  * @author  Steven Stallion

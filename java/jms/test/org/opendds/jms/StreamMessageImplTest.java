@@ -11,7 +11,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Test;
-import org.opendds.jms.util.ByteArrays;
+import org.opendds.util.ByteArrays;
 
 public class StreamMessageImplTest {
     private static final float FLOAT_EPSILON = 1e-6f;

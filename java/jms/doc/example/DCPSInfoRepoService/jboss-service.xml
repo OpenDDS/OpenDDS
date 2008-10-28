@@ -14,7 +14,7 @@
     "http://www.jboss.org/j2ee/dtd/jboss-service_4_2.dtd">
 
 <server>
-    <mbean code="org.opendds.jms.jmx.DCPSInfoRepoService"
+    <mbean code="org.opendds.jmx.DCPSInfoRepoService"
            name="opendds:service=DCPSInfoRepo">
         <attribute name="DCPSDebugLevel">10</attribute>
         <attribute name="DCPSTransportType">SimpleTcp</attribute>

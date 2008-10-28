@@ -8,8 +8,8 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.Enumeration;
 import java.util.Iterator;
-import org.opendds.jms.util.Objects;
-import org.opendds.jms.util.StreamItemConversion;
+import org.opendds.util.Objects;
+import org.opendds.util.StreamItemConversion;
 import javax.jms.MessageFormatException;
 
 public class MapBodyFacade {
