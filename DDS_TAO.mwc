@@ -4,7 +4,7 @@
 // Note: this workspace is not compatible with TAO 1.4a.  For 1.4a one could
 // either use DDS.mwc as well as $(TAO_ROOT)/TAOACE.mwc, or remove the lines
 // from this workspace that refer to projects that don't exist in 1.4a
-// (AnyTypeCode and ImR_Client).
+// (PI, CodecFactory, AnyTypeCode and ImR_Client).
 
 workspace {
   $(ACE_ROOT)/ace/ace.mpc
@@ -16,6 +16,8 @@ workspace {
   $(TAO_ROOT)/tao/IORTable.mpc
   $(TAO_ROOT)/tao/PortableServer.mpc
   $(TAO_ROOT)/tao/ImR_Client.mpc
+  $(TAO_ROOT)/tao/PI.mpc
+  $(TAO_ROOT)/tao/CodecFactory.mpc
   $(TAO_ROOT)/orbsvcs/orbsvcs/Svc_Utils.mpc
   dds
 }
