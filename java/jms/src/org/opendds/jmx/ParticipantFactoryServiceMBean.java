@@ -13,5 +13,5 @@ import DDS.DomainParticipantFactory;
 public interface ParticipantFactoryServiceMBean
     extends ServiceMBean, DCPSAttributes, ORBAttributes {
 
-    DomainParticipantFactory getDomainParticipantFactory();
+    DomainParticipantFactory getInstance();
 }
