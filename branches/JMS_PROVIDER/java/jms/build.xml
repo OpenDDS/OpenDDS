@@ -5,32 +5,33 @@
     Author:  Steven Stallion
     Version: $Revision$
 -->
-<project name="opendds-jms" default="jar" basedir=".">
+<project name="opendds-jms" default="rar" basedir=".">
     <property name="build.dir" value="${basedir}/build"/>
     <property name="doc.dir" value="${basedir}/doc"/>
     <property name="lib.dir" value="${basedir}/lib"/>
     <property name="native.dir" value="${basedir}/native"/>
+    <property name="resource.dir" value="${basedir}/resource"/>
     <property name="src.dir" value="${basedir}/src"/>
     <property name="test.dir" value="${basedir}/test"/>
 
     <property environment="env"/>
 
-    <!-- Determine project version -->
+    <!-- Determine OpenDDS version -->
     <loadproperties srcfile="${env.DDS_ROOT}/dds/Version.h">
         <filterchain>
             <deletecharacters chars="&quot;"/>
             <tokenfilter>
                 <replacestring from="#define DDS_MAJOR_VERSION" to="version.dds.major"/>
                 <replacestring from="#define DDS_MINOR_VERSION" to="version.dds.minor"/>
-                <replacestring from="#define DDS_VERSION" to="version.dds"/> <!-- project version -->
+                <replacestring from="#define DDS_VERSION" to="version.dds"/>
             </tokenfilter>
         </filterchain>
     </loadproperties>
 
-    <!-- Determine JAR name -->
-    <property name="jar.name" value="${ant.project.name}-${version.dds}.jar"/>
-
     <property file="build.properties"/>
+
+    <property name="project.version" value="${version.dds}"/>
+    <property name="project.filename" value="${ant.project.name}-${project.version}"/>
 
     <!--
         Project Paths
@@ -61,8 +62,8 @@
     <!--
         Project Targets
     -->
-    <target name="all" depends="clean, test, jar"
-            description="Meta target for: clean, test, jar"/>
+    <target name="all" depends="clean, test, rar"
+            description="Meta target for: clean, test, rar"/>
 
     <target name="clean" depends="javadoc.clean, test.clean, native.clean"
             description="Delete all build artifacts">
@@ -73,13 +74,22 @@
         <mkdir dir="${build.dir}"/>
         <mkdir dir="${build.dir}/classes"/>
 
-        <uptodate property="jar.uptodate"
-                  targetfile="${build.dir}/${jar.name}">
-            <srcfiles dir="${src.dir}"/>
-            <srcfiles dir="${native.dir}">
-                <include name="**/*.java"/>
-            </srcfiles>
-        </uptodate>
+        <condition property="lib.prefix" value="lib">
+            <os family="unix"/>
+        </condition>
+
+        <condition property="lib.suffix" value=".so">
+            <os family="unix"/>
+        </condition>
+        <condition property="lib.suffix" value="d.dll">
+            <and>
+                <os family="windows"/>
+                <isset property="compile.debug"/>
+            </and>
+        </condition>
+        <condition property="lib.suffix" value=".dll">
+            <os family="windows"/>
+        </condition>
 
         <!-- Update version.properties -->
         <propertyfile file="${build.dir}/version.properties">
@@ -115,9 +125,9 @@
         </javac>
     </target>
 
-    <target name="jar" depends="compile" unless="jar.uptodate"
+    <target name="jar" depends="compile"
             description="Archive compiled classes and resources">
-        <jar destfile="${build.dir}/${jar.name}"
+        <jar destfile="${build.dir}/${project.filename}.jar"
              compress="${jar.compress}"
              index="${jar.index}">
             <fileset dir="${build.dir}/classes"/>
@@ -131,12 +141,61 @@
                 <exclude name="**/*.java"/>
             </fileset>
 
-            <!-- Identify specification/implementation -->
             <manifest>
                 <attribute name="Specification-Title" value="Java Message Service (JMS)"/>
                 <attribute name="Specification-Version" value="${version.jms}"/>
                 <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
                 <attribute name="Implementation-Title" value="OpenDDS JMS Provider"/>
+                <attribute name="Implementation-Version" value="${version.dds}"/>
+                <attribute name="Implementation-URL" value="http://www.opendds.org/"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="rar" depends="jar"
+            description="Create a Resource Adapter Archive (RAR) under build/">
+        <jar destfile="${build.dir}/${project.filename}.rar">
+            <fileset dir="${resource.dir}"/>
+
+            <fileset dir="${build.dir}">
+                <include name="${project.filename}.jar"/>
+            </fileset>
+            <fileset dir="${native.dir}">
+                <include name="${lib.prefix}opendds-jms-native${lib.suffix}"/>
+            </fileset>
+
+            <fileset dir="${env.DDS_ROOT}/lib">
+                <include name="*.jar"/>
+                <include name="${lib.prefix}DCPSInfoRepoServ${lib.suffix}"/>
+                <include name="${lib.prefix}Federator${lib.suffix}"/>
+                <include name="${lib.prefix}InfoRepoLib${lib.suffix}"/>
+                <include name="${lib.prefix}OpenDDS_DCPS_Java${lib.suffix}"/>
+                <include name="${lib.prefix}OpenDDS_Dcps${lib.suffix}"/>
+                <include name="${lib.prefix}Federator${lib.suffix}"/>
+                <include name="${lib.prefix}idl2jni_runtime${lib.suffix}"/>
+                <include name="${lib.prefix}tao_java${lib.suffix}"/>
+                <include name="${lib.prefix}SimpleTcp${lib.suffix}"/>
+                <include name="${lib.prefix}SimpleUnreliableDgram${lib.suffix}"/>
+                <include name="${lib.prefix}ReliableMulticast${lib.suffix}"/>
+            </fileset>
+
+            <fileset dir="${env.ACE_ROOT}/lib">
+                <include name="${lib.prefix}ACE${lib.suffix}"/>
+                <include name="${lib.prefix}TAO${lib.suffix}"/>
+                <include name="${lib.prefix}TAO_AnyTypeCode${lib.suffix}"/>
+                <include name="${lib.prefix}TAO_CodecFactory${lib.suffix}"/>
+                <include name="${lib.prefix}TAO_Codeset${lib.suffix}"/>
+                <include name="${lib.prefix}TAO_IORTable${lib.suffix}"/>
+                <include name="${lib.prefix}TAO_PI${lib.suffix}"/>
+                <include name="${lib.prefix}TAO_PortableServer${lib.suffix}"/>
+                <include name="${lib.prefix}TAO_Svc_Utils${lib.suffix}"/>
+            </fileset>
+
+            <manifest>
+                <attribute name="Specification-Title" value="J2EE Connector Architecture (JCA)"/>
+                <attribute name="Specification-Version" value="${version.jca}"/>
+                <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+                <attribute name="Implementation-Title" value="OpenDDS JCA Resource Adapter"/>
                 <attribute name="Implementation-Version" value="${version.dds}"/>
                 <attribute name="Implementation-URL" value="http://www.opendds.org/"/>
             </manifest>
@@ -150,8 +209,7 @@
     <target name="test.init" depends="init">
         <mkdir dir="${build.dir}/tests"/>
 
-        <condition property="test.jvmargs"
-                   value="-Djni.nativeDebug=true">
+        <condition property="test.jvmargs" value="-Djni.nativeDebug=true">
             <and>
                 <os family="windows"/>
                 <istrue value="${compile.debug}"/>
