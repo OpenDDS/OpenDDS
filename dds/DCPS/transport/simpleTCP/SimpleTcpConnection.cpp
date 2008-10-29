@@ -71,6 +71,23 @@ OpenDDS::DCPS::SimpleTcpConnection::~SimpleTcpConnection()
 }
 
 
+void
+OpenDDS::DCPS::SimpleTcpConnection::disconnect()
+{
+  DBG_ENTRY_LVL("SimpleTcpConnection","disconnect",6);
+  this->peer().close();
+  this->connected_ = false;
+  if (! this->receive_strategy_.is_nil ())
+  {
+    SimpleTcpReceiveStrategy* rs
+      = dynamic_cast <SimpleTcpReceiveStrategy*> (this->receive_strategy_.in ());
+
+    rs->get_reactor()->remove_handler (this,       
+       ACE_Event_Handler::READ_MASK | ACE_Event_Handler::DONT_CALL);
+  }
+}
+
+
 // This can not be inlined due to circular dependencies disallowing
 // visibility into the receive strategy to call add_ref().  Oh well.
 void
@@ -779,15 +796,6 @@ OpenDDS::DCPS::SimpleTcpConnection::notify_lost_on_backpressure_timeout ()
         this->reconnect_state_ = LOST_STATE;
         notify_lost = true;
         
-        // Add remove_handler to solve access violation on connection object
-        // when reactor cleanup the event handles during shutdown.
-        SimpleTcpReceiveStrategy* rs
-          = dynamic_cast <SimpleTcpReceiveStrategy*> (this->receive_strategy_.in ());
-
-        rs->get_reactor()->remove_handler (this,
-          ACE_Event_Handler::READ_MASK |
-          ACE_Event_Handler::DONT_CALL);
-
         this->disconnect();
       }
   }

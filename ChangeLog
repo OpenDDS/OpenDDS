@@ -1,3 +1,19 @@
+Wed Oct 29 20:16:36 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+
+          Made disconnect() to unregister connection with reactor.
+          This would avoid access violation if reactor cleanup
+          handles after connection is destroyed.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
+
+          Made relink() check if connection is nil to avoid access
+          violation when trying to reconnect while datalink is
+          releasing.
+
 Wed Oct 29 19:33:47 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * docs/design/federation:
@@ -16,10 +32,10 @@ Wed Oct 29 19:33:47 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * docs/design/federation/images/UseCases.jpg:
         * docs/design/federation/images/info-dm.png:
 
-	  Added documentation with diagrams for the federation design.
-	  Point a browser at docs/design/federation/federation.html to
-	  view the entire documentation.  This replaces the earlier text
-	  file design documentation.
+          Added documentation with diagrams for the federation design.
+          Point a browser at docs/design/federation/federation.html to
+          view the entire documentation.  This replaces the earlier text
+          file design documentation.
 
         * docs/design/federation.txt:
 
