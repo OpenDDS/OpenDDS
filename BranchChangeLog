@@ -1,3 +1,10 @@
+Wed Oct 29 20:08:23 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Changed the locking so the WaitSet lock is always held before
+          the sample lock.
+
 Wed Oct 29 18:05:13 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:

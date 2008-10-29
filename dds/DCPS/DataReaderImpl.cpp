@@ -1096,8 +1096,10 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 void DataReaderImpl::notify_read_conditions()
 {
   //sample lock is already held
-  for (ReadConditionSet::iterator it = read_conditions_.begin(),
-    end = read_conditions_.end(); it != end; ++it)
+  ReadConditionSet local_read_conditions = read_conditions_;
+  ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+  for (ReadConditionSet::iterator it = local_read_conditions.begin(),
+    end = local_read_conditions.end(); it != end; ++it)
     {
       dynamic_cast<ConditionImpl*>(it->in())->signal_all();
     }
