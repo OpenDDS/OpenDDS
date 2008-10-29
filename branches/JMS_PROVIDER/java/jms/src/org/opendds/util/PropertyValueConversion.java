@@ -1,9 +1,11 @@
 package org.opendds.util;
 
-import java.util.BitSet;
+import javax.jms.MessageFormatException;
+
 import OpenDDS.JMS.PropertyValue;
 import OpenDDS.JMS.PropertyValueKind;
-import javax.jms.MessageFormatException;
+
+import static org.opendds.util.EnumComparator.compare;
 
 /**
  * JMS 1.1, 3.5.4
@@ -20,10 +22,6 @@ public class PropertyValueConversion {
         } else {
             throw new MessageFormatException("Cannot convert property to boolean");
         }
-    }
-
-    private static boolean compare(PropertyValueKind lhs, PropertyValueKind rhs) {
-        return lhs.value() == rhs.value();
     }
 
     public static byte convertToByte(PropertyValue propertyValue) throws MessageFormatException {

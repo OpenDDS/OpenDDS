@@ -1,3 +1,33 @@
+Wed Oct 29 21:11:56 UTC 2008  Weiqi Gao  <gaow@ociweb.com>
+
+        * java/OpenDDS.ipr:
+        * java/jms/opendds-jms.iml:
+
+          Trivial changes.
+
+        * java/jms/src/org/opendds/jms/AbstractMessageImpl.java:
+        * java/jms/src/org/opendds/jms/BytesMessageImpl.java:
+        * java/jms/src/org/opendds/jms/ConsumerDataReaderListener.java:
+        * java/jms/src/org/opendds/jms/MapMessageImpl.java:
+        * java/jms/src/org/opendds/jms/MessageFactory.java:
+        * java/jms/src/org/opendds/jms/ObjectMessageImpl.java:
+        * java/jms/src/org/opendds/jms/StreamMessageImpl.java:
+        * java/jms/src/org/opendds/jms/TextMessageImpl.java:
+        * java/jms/src/org/opendds/jms/TopicMessageConsumerImpl.java:
+
+        * java/jms/src/org/opendds/util/EnumComparator.java:
+        * java/jms/src/org/opendds/util/PropertyValueConversion.java:
+        * java/jms/src/org/opendds/util/StreamItemConversion.java:
+
+          Implemented MessageConsumer API in TopicMessageConsumerImpl.
+          Added methods to related classes to support MessageConsumer
+          functionality.
+
+        * java/jms/test/org/opendds/jms/TopicMessageConsumerImplTest.java:
+        * java/jms/test/org/opendds/jms/TopicMessageProducerImplTest.java:
+
+          Added tests for MessageConsumer.
+
 Wed Oct 29 20:08:23 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:

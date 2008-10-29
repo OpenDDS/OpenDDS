@@ -1,8 +1,11 @@
 package org.opendds.util;
 
-import OpenDDS.JMS.StreamItem;
-import OpenDDS.JMS.ItemKind;
 import javax.jms.MessageFormatException;
+
+import OpenDDS.JMS.ItemKind;
+import OpenDDS.JMS.StreamItem;
+
+import static org.opendds.util.EnumComparator.compare;
 
 /**
  * JMS 1.1, 3.11.3
@@ -21,9 +24,6 @@ public class StreamItemConversion {
         }
     }
 
-    private static boolean compare(ItemKind lhs, ItemKind rhs) {
-        return lhs.value() == rhs.value();
-    }
 
     public static byte convertToByte(StreamItem item) throws MessageFormatException {
         if (item == null) return Byte.valueOf(null);

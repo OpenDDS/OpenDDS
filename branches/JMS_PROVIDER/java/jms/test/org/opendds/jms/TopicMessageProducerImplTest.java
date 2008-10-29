@@ -35,7 +35,7 @@ public class TopicMessageProducerImplTest {
         assertTrue(true);
     }
 
-    // @Test Uncomment locally to run this test.  It depends on an externally running DCPSInfoRepo
+    @Test // Uncomment locally to run this test.  It depends on an externally running DCPSInfoRepo
     public void testSend() throws JMSException {
         // Hack, will use the new Java wrapper to start or stop the DCPSInfoRepo in a few days
         // wqg, Mon Oct 20 12:48:18 CDT 2008
@@ -173,7 +173,7 @@ public class TopicMessageProducerImplTest {
             "-ORBListenEndpoints", "iiop://127.0.0.1:12347",
             "-ORBDebugLevel", "10",
             "-DCPSDebugLevel", "10",
-            "-ORBLogFile", "test.log",
+            "-ORBLogFile", "TopicMessageProducerImplTest.log",
             "-DCPSConfigFile", "test.ini"
         };
         DomainParticipantFactory dpFactory = TheParticipantFactory.WithArgs(new StringSeqHolder(fakeArgs));
@@ -223,7 +223,7 @@ public class TopicMessageProducerImplTest {
                 new InputStreamReader(Runtime.getRuntime().exec("netstat -an").getInputStream()));
             String line = null;
             while ((line = bufferedReader.readLine()) != null) {
-                if (line.contains(":1111")) return true;
+                if (line.contains(":4096")) return true;
             }
             return false;
         } catch (IOException e) {

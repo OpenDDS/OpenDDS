@@ -3,12 +3,19 @@ package org.opendds.jms;
 import javax.jms.StreamMessage;
 import javax.jms.JMSException;
 import OpenDDS.JMS.StreamItem;
+import OpenDDS.JMS.MessagePayload;
 
 public class StreamMessageImpl extends AbstractMessageImpl implements StreamMessage {
     protected StreamBodyFacade streamBody;
 
     public StreamMessageImpl() {
         initBody();
+    }
+
+    public StreamMessageImpl(MessagePayload messagePayload, int handle) {
+        super(messagePayload, handle);
+        setBodyState(new MessageStateBodyReadOnly(this));
+        streamBody.reset();
     }
 
     private void initBody() {
@@ -167,7 +174,7 @@ public class StreamMessageImpl extends AbstractMessageImpl implements StreamMess
         streamBody.updateTheStreamBody();
     }
 
-    public void reset() throws JMSException {
+    public void reset() {
         getBodyState().makeReadable();
         streamBody.reset();
     }

@@ -4,12 +4,18 @@ import javax.jms.MapMessage;
 import javax.jms.JMSException;
 import java.util.Enumeration;
 import OpenDDS.JMS.MapItem;
+import OpenDDS.JMS.MessagePayload;
 
 public class MapMessageImpl extends AbstractMessageImpl implements MapMessage {
     protected MapBodyFacade mapBody;
 
     public MapMessageImpl() {
         initBody();
+    }
+
+    public MapMessageImpl(MessagePayload messagePayload, int handle) {
+        super(messagePayload, handle);
+        setBodyState(new MessageStateBodyNonWritable(this));
     }
 
     private void initBody() {

@@ -9,10 +9,16 @@ import java.io.IOException;
 import java.io.ByteArrayInputStream;
 import java.io.ObjectInputStream;
 import OpenDDS.JMS.MessageBodyKind;
+import OpenDDS.JMS.MessagePayload;
 
 public class ObjectMessageImpl extends AbstractMessageImpl implements ObjectMessage {
     public ObjectMessageImpl() {
         initObjectBody();
+    }
+
+    public ObjectMessageImpl(MessagePayload messagePayload, int handle) {
+        super(messagePayload, handle);
+        setBodyState(new MessageStateBodyNonWritable(this));
     }
 
     private void initObjectBody() {

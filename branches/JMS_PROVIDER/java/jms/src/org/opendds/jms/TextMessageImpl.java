@@ -3,9 +3,16 @@ package org.opendds.jms;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 
+import OpenDDS.JMS.MessagePayload;
+
 public class TextMessageImpl extends AbstractMessageImpl implements TextMessage {
     public TextMessageImpl() {
         initTextBody();
+    }
+
+    public TextMessageImpl(MessagePayload messagePayload, int handle) {
+        super(messagePayload, handle);
+        setBodyState(new MessageStateBodyReadOnly(this));
     }
 
     private void initTextBody() {

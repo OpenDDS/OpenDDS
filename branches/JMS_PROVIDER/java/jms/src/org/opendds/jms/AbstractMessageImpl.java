@@ -11,6 +11,7 @@ import OpenDDS.JMS.MessageBody;
 
 public abstract class AbstractMessageImpl implements Message {
     protected final MessagePayload payload;
+    protected int handle;
 
     // Convenience variables, should be kept in sync with payload
     protected final MessageHeader headers;
@@ -19,11 +20,28 @@ public abstract class AbstractMessageImpl implements Message {
     private MessageState propertiesState;
     private MessageState bodyState;
 
+    /**
+     * Construct a Message on the Producer side.
+     */
     protected AbstractMessageImpl() {
         this.payload = new MessagePayload(new MessageHeader(), new MessageProperty[0], new MessageBody());
         this.headers = payload.theHeader;
         this.properties = new MessagePropertiesFacade(payload);
         this.propertiesState = new MessageStateWritable();
+    }
+
+    /**
+     * Construct a Message on the Consumer side.
+     *
+     * @param messagePayload The MessagePayload of the Message
+     * @param handle The DDS instance instance handle of the MessagePayload
+     */
+    public AbstractMessageImpl(MessagePayload messagePayload, int handle) {
+        this.payload = messagePayload;
+        this.headers = payload.theHeader;
+        this.properties = new MessagePropertiesFacade(payload);
+        this.propertiesState = new MessageStatePropertiesNonWritable(this);
+        this.handle = handle;
     }
 
     public void setPropertiesState(MessageState propertiesState) {
