@@ -1,3 +1,10 @@
+Wed Oct 29 16:16:36 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/opendds-jms.iml:
+
+          Added src/ and test/ to project classpath (Fixes DCPSInfoRepo
+          errors when run from within IDEA).
+
 Tue Oct 28 22:21:05 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/ReadCondition/ReadConditionTest.cpp:
