@@ -1,3 +1,9 @@
+Wed Oct 29 20:48:24 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Added the qualifier !DDS_NO_ORBSVCS to tests that use TAO's orbsvcs.
+
 Wed Oct 29 20:16:36 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.inl:
