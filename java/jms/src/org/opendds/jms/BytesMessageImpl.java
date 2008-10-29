@@ -3,12 +3,19 @@ package org.opendds.jms;
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import OpenDDS.JMS.MessageBodyKind;
+import OpenDDS.JMS.MessagePayload;
 
 public class BytesMessageImpl extends AbstractMessageImpl implements BytesMessage {
     protected BytesBodyFacade bytesBody;
 
     public BytesMessageImpl() {
         initBody();
+    }
+
+    public BytesMessageImpl(MessagePayload messagePayload, int handle) {
+        super(messagePayload, handle);
+        setBodyState(new MessageStateBodyReadOnly(this));
+        bytesBody.reset();
     }
 
     private void initBody() {
@@ -184,7 +191,7 @@ public class BytesMessageImpl extends AbstractMessageImpl implements BytesMessag
         bytesBody.updateTheBytesBody();
     }
 
-    public void reset() throws JMSException {
+    public void reset() {
         getBodyState().makeReadable();
         bytesBody.reset();
     }
