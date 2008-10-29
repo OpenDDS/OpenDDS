@@ -1,3 +1,11 @@
+Wed Oct 29 18:18:29 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_TAO.mwc:
+
+          Added PI and CodecFactory.  They're not strictly needed but TAO will
+          try to load them at runtime and it will produce a confusing error
+          message (which is flagged as an error on the scoreboard).
+
 Wed Oct 29 17:41:05 UTC 2008  Ciju John  <johnc at ociweb dot com>
 
         * java/tests/dcps_java_tests.lst:
