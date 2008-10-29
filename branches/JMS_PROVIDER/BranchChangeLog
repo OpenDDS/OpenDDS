@@ -1,3 +1,14 @@
+Wed Oct 29 18:05:13 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+        * java/jms/doc/example/ParticipantFactoryService/jboss-service.xml:
+        * java/jms/src/org/opendds/jmx/DCPSInfoRepoService.java:
+        * java/jms/src/org/opendds/jmx/ParticipantFactoryService.java:
+        * java/jms/src/org/opendds/jmx/ParticipantFactoryServiceMBean.java:
+        * java/jms/src/org/opendds/jmx/ServiceMBean.java:
+
+          JMX configuration updates.
+
 Wed Oct 29 16:16:36 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/opendds-jms.iml:

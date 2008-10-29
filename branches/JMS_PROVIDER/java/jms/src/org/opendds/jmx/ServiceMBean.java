@@ -10,6 +10,8 @@ package org.opendds.jmx;
  */
 public interface ServiceMBean {
 
+    boolean isActive();
+
     void start() throws Exception;
 
     void stop() throws Exception;

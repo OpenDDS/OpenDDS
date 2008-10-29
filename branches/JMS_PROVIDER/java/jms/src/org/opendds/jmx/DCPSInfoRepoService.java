@@ -228,8 +228,12 @@ public class DCPSInfoRepoService implements DCPSInfoRepoServiceMBean {
 
     //
 
+    public boolean isActive() {
+        return active;
+    }
+
     public void start() throws Exception {
-        if (active) {
+        if (isActive()) {
             throw new IllegalStateException("DCPSInfoRepoService already started!");
         }
 
@@ -246,7 +250,7 @@ public class DCPSInfoRepoService implements DCPSInfoRepoServiceMBean {
     }
 
     public void stop() throws Exception {
-        if (!active) {
+        if (!isActive()) {
             throw new IllegalStateException("DCPSInfoRepoService already stopped!");
         }
 
@@ -264,7 +268,7 @@ public class DCPSInfoRepoService implements DCPSInfoRepoServiceMBean {
     }
 
     public void restart() throws Exception {
-        if (active) {
+        if (isActive()) {
             stop();
         }
         start();

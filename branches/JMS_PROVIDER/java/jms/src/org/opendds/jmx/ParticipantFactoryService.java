@@ -159,12 +159,16 @@ public class ParticipantFactoryService implements ParticipantFactoryServiceMBean
 
     //
 
-    public DomainParticipantFactory getDomainParticipantFactory() {
+    public DomainParticipantFactory getInstance() {
         return participantFactory;
     }
 
+    public boolean isActive() {
+        return active;
+    }
+
     public void start() throws Exception {
-        if (active) {
+        if (isActive()) {
             throw new IllegalStateException("DomainParticipantFactory already started!");
         }
 
@@ -183,7 +187,7 @@ public class ParticipantFactoryService implements ParticipantFactoryServiceMBean
     }
 
     public void stop() throws Exception {
-        if (!active) {
+        if (!isActive()) {
             throw new IllegalStateException("DomainParticipantFactory already stopped!");
         }
 
@@ -198,7 +202,7 @@ public class ParticipantFactoryService implements ParticipantFactoryServiceMBean
     }
 
     public void restart() throws Exception {
-        if (active) {
+        if (isActive()) {
             stop();
         }
         start();
