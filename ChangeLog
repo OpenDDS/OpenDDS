@@ -1,3 +1,30 @@
+Wed Oct 29 19:33:47 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * docs/design/federation:
+        * docs/design/federation/federation.html:
+        * docs/design/federation/images:
+        * docs/design/federation/images/Application.jpg:
+        * docs/design/federation/images/CreateParticipant.jpg:
+        * docs/design/federation/images/CreatePublication.jpg:
+        * docs/design/federation/images/CreateSubscription.jpg:
+        * docs/design/federation/images/CreateTopic.jpg:
+        * docs/design/federation/images/Federation.jpg:
+        * docs/design/federation/images/OpenDDS.jpg:
+        * docs/design/federation/images/PassOwnership.jpg:
+        * docs/design/federation/images/Repository.jpg:
+        * docs/design/federation/images/StartAndFederate.jpg:
+        * docs/design/federation/images/UseCases.jpg:
+        * docs/design/federation/images/info-dm.png:
+
+	  Added documentation with diagrams for the federation design.
+	  Point a browser at docs/design/federation/federation.html to
+	  view the entire documentation.  This replaces the earlier text
+	  file design documentation.
+
+        * docs/design/federation.txt:
+
+          Removed this file.
+
 Wed Oct 29 18:18:29 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * DDS_TAO.mwc:
