@@ -2,7 +2,7 @@
  * $Id$
  */
 
-package org.opendds.jmx.config;
+package org.opendds.config;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,26 +12,26 @@ import java.util.StringTokenizer;
  * @author  Steven Stallion
  * @version $Revision$
  */
-public class AttributeWriter {
-    private Attributes attributes;
+public class PropertyWriter {
+    private Configuration config;
 
     private List<String> args =
         new ArrayList<String>();
 
-    public AttributeWriter(Attributes attributes) {
-        this.attributes = attributes;
+    public PropertyWriter(Configuration config) {
+        this.config = config;
     }
 
-    public void writeIfSet(String arg, String attribute) {
-        if (attributes.isSet(attribute)) {
-            write(arg, attributes.get(attribute));
+    public void writeIfSet(String arg, String property) {
+        if (config.isSet(property)) {
+            write(arg, config.get(property));
         }
     }
 
-    public void writeDelimited(String attribute) {
-        if (attributes.isSet(attribute)) {
+    public void writeDelimited(String property) {
+        if (config.isSet(property)) {
             StringTokenizer stok = new StringTokenizer(
-                (String) attributes.get(attribute), Attributes.DELIMITERS);
+                (String) config.get(property), Configuration.DELIMITERS);
 
             while (stok.hasMoreTokens()) {
                 write(stok.nextToken());

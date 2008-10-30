@@ -2,19 +2,19 @@
  * $Id$
  */
 
-package org.opendds.jmx.config;
+package org.opendds.config;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.opendds.jmx.config.spi.AttributeFormat;
+import org.opendds.config.spi.PropertyFormat;
 import org.opendds.util.Strings;
 
 /**
  * @author  Steven Stallion
  * @version $Revision$
  */
-public class Attributes {
+public class Configuration {
     public static final String DELIMITERS = ";, \t\r\n\f";
 
     private Map<String, Object> attributes =
@@ -48,6 +48,6 @@ public class Attributes {
     }
 
     public String[] toArgs() {
-        return AttributeFormat.format(this);
+        return PropertyFormat.format(this);
     }
 }
