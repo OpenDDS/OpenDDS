@@ -1,7 +1,7 @@
 package org.opendds.jms;
 
-import javax.jms.MessageNotWriteableException;
 import javax.jms.MessageNotReadableException;
+import javax.jms.MessageNotWriteableException;
 
 public class MessageStatePropertiesNonWritable implements MessageState {
     private AbstractMessageImpl message;

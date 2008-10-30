@@ -1,13 +1,14 @@
 package org.opendds.jms;
 
-import javax.jms.Message;
-import javax.jms.JMSException;
-import javax.jms.Destination;
 import java.util.Enumeration;
-import OpenDDS.JMS.MessagePayload;
-import OpenDDS.JMS.MessageHeader;
-import OpenDDS.JMS.MessageProperty;
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.Message;
+
 import OpenDDS.JMS.MessageBody;
+import OpenDDS.JMS.MessageHeader;
+import OpenDDS.JMS.MessagePayload;
+import OpenDDS.JMS.MessageProperty;
 
 public abstract class AbstractMessageImpl implements Message {
     protected final MessagePayload payload;

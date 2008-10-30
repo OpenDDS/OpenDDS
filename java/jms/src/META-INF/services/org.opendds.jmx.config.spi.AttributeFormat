@@ -1,7 +1,0 @@
-#
-# $Id$
-#
-
-org.opendds.config.spi.impl.DCPSPropertyFormat
-org.opendds.config.spi.impl.InfoRepoPropertyFormat
-org.opendds.config.spi.impl.ORBPropertyFormat

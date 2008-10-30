@@ -1,8 +1,9 @@
 package org.opendds.jms;
 
-import javax.jms.MapMessage;
-import javax.jms.JMSException;
 import java.util.Enumeration;
+import javax.jms.JMSException;
+import javax.jms.MapMessage;
+
 import OpenDDS.JMS.MapItem;
 import OpenDDS.JMS.MessagePayload;
 

@@ -2,6 +2,7 @@ package org.opendds.jms;
 
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
+
 import OpenDDS.JMS.MessageBodyKind;
 import OpenDDS.JMS.MessagePayload;
 

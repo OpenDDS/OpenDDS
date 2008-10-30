@@ -1,9 +1,10 @@
 package org.opendds.jms;
 
-import javax.jms.StreamMessage;
 import javax.jms.JMSException;
-import OpenDDS.JMS.StreamItem;
+import javax.jms.StreamMessage;
+
 import OpenDDS.JMS.MessagePayload;
+import OpenDDS.JMS.StreamItem;
 
 public class StreamMessageImpl extends AbstractMessageImpl implements StreamMessage {
     protected StreamBodyFacade streamBody;

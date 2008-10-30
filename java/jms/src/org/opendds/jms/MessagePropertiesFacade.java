@@ -1,19 +1,19 @@
 package org.opendds.jms;
 
-import OpenDDS.JMS.MessagePayload;
-import OpenDDS.JMS.MessageProperty;
-import OpenDDS.JMS.PropertyValue;
-import OpenDDS.JMS.PropertyValueKind;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import javax.jms.MessageFormatException;
-import org.omg.CORBA.SystemException;
-import org.opendds.util.Identifiers;
-import org.opendds.util.Objects;
-import org.opendds.util.PropertyValueConversion;
+
+import OpenDDS.JMS.MessagePayload;
+import OpenDDS.JMS.MessageProperty;
+import OpenDDS.JMS.PropertyValue;
+
+import org.opendds.jms.util.Identifiers;
+import org.opendds.jms.util.Objects;
+import org.opendds.jms.util.PropertyValueConversion;
 
 /**
  * A facade over payload.theProperties, which, being a Java array

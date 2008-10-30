@@ -34,11 +34,11 @@ project: dcps_java {
     }
 
     Java_Files {
-        org/opendds/DCPSInfoRepo.java
+        org/opendds/jms/DCPSInfoRepo.java
     }
 
     JavaH_Files {
-        classes/org/opendds/DCPSInfoRepo.class
+        classes/org/opendds/jms/DCPSInfoRepo.class
     }
 
     TypeSupport_Files {

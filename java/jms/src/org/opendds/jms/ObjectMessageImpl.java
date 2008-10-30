@@ -1,13 +1,14 @@
 package org.opendds.jms;
 
-import javax.jms.ObjectMessage;
-import javax.jms.JMSException;
-import java.io.Serializable;
-import java.io.ObjectOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ByteArrayInputStream;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import javax.jms.JMSException;
+import javax.jms.ObjectMessage;
+
 import OpenDDS.JMS.MessageBodyKind;
 import OpenDDS.JMS.MessagePayload;
 

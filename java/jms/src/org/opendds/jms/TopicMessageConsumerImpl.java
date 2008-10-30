@@ -14,6 +14,7 @@ import DDS.ALIVE_INSTANCE_STATE;
 import DDS.Condition;
 import DDS.ConditionSeqHolder;
 import DDS.DATAREADER_QOS_DEFAULT;
+import DDS.DATA_AVAILABLE_STATUS;
 import DDS.DURATION_INFINITY_NSEC;
 import DDS.DURATION_INFINITY_SEC;
 import DDS.DataReader;
@@ -32,15 +33,14 @@ import DDS.SampleInfoSeqHolder;
 import DDS.Subscriber;
 import DDS.Topic;
 import DDS.WaitSet;
-import DDS.DATA_AVAILABLE_STATUS;
 import OpenDDS.JMS.MessagePayload;
 import OpenDDS.JMS.MessagePayloadDataReader;
 import OpenDDS.JMS.MessagePayloadDataReaderHelper;
 import OpenDDS.JMS.MessagePayloadSeqHolder;
 
 import static org.opendds.jms.MessageFactory.buildMessageFromPayload;
-import org.opendds.util.Objects;
-import org.opendds.util.Strings;
+import org.opendds.jms.util.Objects;
+import org.opendds.jms.util.Strings;
 
 /**
  * @author  Steven Stallion
@@ -56,7 +56,7 @@ public class TopicMessageConsumerImpl implements MessageConsumer {
     private Subscriber subscriber;
     private DomainParticipant participant;
     private MessagePayloadDataReader messagePayloadDataReader;
-    
+
     private boolean closed;
     private final WaitSet waitSet;
     private final GuardCondition closeToken;

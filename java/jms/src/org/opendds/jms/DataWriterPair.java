@@ -1,17 +1,18 @@
 package org.opendds.jms;
 
+import javax.jms.DeliveryMode;
+import javax.jms.Destination;
+
+import DDS.DATAWRITER_QOS_DEFAULT;
+import DDS.DataWriter;
+import DDS.DataWriterQos;
+import DDS.DataWriterQosHolder;
+import DDS.DomainParticipant;
+import DDS.DurabilityQosPolicyKind;
+import DDS.Publisher;
+import DDS.Topic;
 import OpenDDS.JMS.MessagePayloadDataWriter;
 import OpenDDS.JMS.MessagePayloadDataWriterHelper;
-import javax.jms.Destination;
-import javax.jms.DeliveryMode;
-import DDS.Publisher;
-import DDS.DomainParticipant;
-import DDS.Topic;
-import DDS.DataWriterQos;
-import DDS.DataWriter;
-import DDS.DATAWRITER_QOS_DEFAULT;
-import DDS.DurabilityQosPolicyKind;
-import DDS.DataWriterQosHolder;
 
 /**
  *
