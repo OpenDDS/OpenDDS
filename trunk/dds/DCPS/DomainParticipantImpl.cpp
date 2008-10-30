@@ -1471,17 +1471,6 @@ namespace OpenDDS
     }
 
 
-    ::DDS::StatusKindMask
-    DomainParticipantImpl::get_status_changes (
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ))
-    {
-      return EntityImpl::get_status_changes ();
-    }
-
-
     RepoId
     DomainParticipantImpl::get_id ()
     {

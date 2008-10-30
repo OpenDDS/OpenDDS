@@ -200,12 +200,6 @@ namespace OpenDDS
         CORBA::SystemException
       ));
 
-    virtual ::DDS::StatusKindMask get_status_changes (
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
-
     ACE_INLINE
     ACE_Recursive_Thread_Mutex&      get_pi_lock ()
     {

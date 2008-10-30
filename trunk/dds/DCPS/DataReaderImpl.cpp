@@ -919,19 +919,6 @@ DataReaderImpl::enable ()
   return ::DDS::RETCODE_OK;
 }
 
-::DDS::StatusKindMask
-DataReaderImpl::get_status_changes ()
-  ACE_THROW_SPEC ((CORBA::SystemException))
-{
-  return EntityImpl::get_status_changes ();
-}
-
-
-void DataReaderImpl::notify_status_condition ()
-{
-  this->EntityImpl::notify_status_condition ();
-}
-
 
 void
 DataReaderImpl::writer_activity(PublicationId writer_id)

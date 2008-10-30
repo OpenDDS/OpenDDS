@@ -299,11 +299,6 @@ namespace OpenDDS
         CORBA::SystemException
       ));
 
-    virtual ::DDS::StatusKindMask get_status_changes (
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
 
       /// Following methods are not the idl interfaces and are
       /// local operations.
