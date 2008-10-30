@@ -1050,18 +1050,6 @@ DataWriterImpl::enable ()
   return writer_enabled_result;
 }
 
-::DDS::StatusKindMask
-DataWriterImpl::get_status_changes ()
-  ACE_THROW_SPEC ((CORBA::SystemException))
-{
-  return EntityImpl::get_status_changes ();
-}
-
-void DataWriterImpl::notify_status_condition ()
-{
-  this->EntityImpl::notify_status_condition ();
-}
-
  
 ::DDS::ReturnCode_t
 DataWriterImpl::register_instance(::DDS::InstanceHandle_t& handle,

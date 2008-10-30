@@ -46,7 +46,7 @@ namespace OpenDDS
         CORBA::SystemException
       ))
       {
-        return ::DDS::StatusCondition::_duplicate(status_condition_);
+        return ::DDS::StatusCondition::_duplicate(status_condition_.in());
       }
 
     ::DDS::StatusKindMask

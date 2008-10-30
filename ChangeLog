@@ -1,3 +1,29 @@
+Thu Oct 30 17:00:49 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Added entries for bug fixes after 1.1 release.
+          
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.h:
+        * dds/DCPS/TopicImpl.cpp:
+
+          Removed non-necessary overload functions (get_status_changes()
+          and notify_status_condition()).
+
+        * dds/DCPS/EntityImpl.cpp:
+
+          Fixed a warning.
+          
 Wed Oct 29 23:53:35 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/EntityImpl.h:
@@ -8,8 +34,8 @@ Wed Oct 29 23:53:35 UTC 2008  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/DataReaderImpl.cpp:
         * dds/DCPS/DataWriterImpl.cpp:
 
-          Removed lock in get_status_changes() and 
-          notify_status_condition() as the status 
+          Removed lock in get_status_changes() and
+          notify_status_condition() as the status
           change is protected by EntityImpl lock. This
           should resolve potential deadlock when two threads
           acquire WaitSet lock and DataWriter/DataReader lock

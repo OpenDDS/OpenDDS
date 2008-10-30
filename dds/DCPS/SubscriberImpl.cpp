@@ -803,17 +803,6 @@ SubscriberImpl::enable (
 }
 
 
-::DDS::StatusKindMask
-SubscriberImpl::get_status_changes (
-				    )
-  ACE_THROW_SPEC ((
-		   CORBA::SystemException
-		   ))
-{
-  return EntityImpl::get_status_changes() ;
-}
-
-
 int
 SubscriberImpl::is_clean () const
 {

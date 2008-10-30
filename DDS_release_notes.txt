@@ -57,6 +57,28 @@ New to this version are the following changes:
   the neccessary hooks for running the DCPSInfoRepo within another process.
   For example usage, see: $DDS_ROOT/dds/InfoRepo/DCPSInfoRepo.cpp.
 
+- Fixed bug in DCPSInfoRepo that did not re-evaluate the compatibility and 
+  associations when QoS change is made. 
+    
+- Fixed bugs that affected connection establishment.
+  
+  Fixed DataWriterImpl to handle the case that remove_association is called 
+  before fully_associated is called.
+
+  Fixed a race condition that connection delay deletion removes new assocaitions.
+
+  Corrected fully association ack verification to fix issues when multiple 
+  associations of a datalink are added simultaneously.
+  
+- Added datalink_release_delay and removed keep_link configuration.
+
+  The datalink_release_delay is the delay for datalink release after no 
+  associations. It defaults to 10 seconds. This is to fix disconnect 
+  problem happened when removing and adding association related to 
+  same datalink during short period.
+
+  Removed keep_link which can be replaced with a big value of 
+  datalink_release_delay.
 
 =========================================================================
 
