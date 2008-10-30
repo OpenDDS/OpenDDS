@@ -1,3 +1,20 @@
+Wed Oct 29 23:53:35 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/EntityImpl.h:
+        * dds/DCPS/EntityImpl.cpp:
+
+          Added lock to protect the status_changes_.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Removed lock in get_status_changes() and 
+          notify_status_condition() as the status 
+          change is protected by EntityImpl lock. This
+          should resolve potential deadlock when two threads
+          acquire WaitSet lock and DataWriter/DataReader lock
+          in reverse order.
+
 Wed Oct 29 20:48:24 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:
