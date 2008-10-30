@@ -418,6 +418,7 @@ int main (int argc, char *argv[])
       }
   }
 
+      ACE_OS::sleep (1);
       sub->delete_contained_entities() ;
 
   { // make VC6 buid - avoid error C2374: 'i' : redefinition; multiple initialization
@@ -481,6 +482,7 @@ int main (int argc, char *argv[])
       }
   }
 
+      ACE_OS::sleep (1);
       sub->delete_contained_entities() ;
 
   { // make VC6 buid - avoid error C2374: 'i' : redefinition; multiple initialization
