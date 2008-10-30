@@ -147,7 +147,7 @@
                 <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
                 <attribute name="Implementation-Title" value="OpenDDS JMS Provider"/>
                 <attribute name="Implementation-Version" value="${version.dds}"/>
-                <attribute name="Implementation-URL" value="http://www.opendds.org/"/>
+                <attribute name="Implementation-Vendor" value="OpenDDS (http://www.opendds.org)"/>
             </manifest>
         </jar>
     </target>
@@ -195,9 +195,9 @@
                 <attribute name="Specification-Title" value="J2EE Connector Architecture (JCA)"/>
                 <attribute name="Specification-Version" value="${version.jca}"/>
                 <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
-                <attribute name="Implementation-Title" value="OpenDDS JCA Resource Adapter"/>
+                <attribute name="Implementation-Title" value="OpenDDS JMS Resource Adapter"/>
                 <attribute name="Implementation-Version" value="${version.dds}"/>
-                <attribute name="Implementation-URL" value="http://www.opendds.org/"/>
+                <attribute name="Implementation-Vendor" value="OpenDDS (http://www.opendds.org)"/>
             </manifest>
         </jar>
     </target>

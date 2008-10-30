@@ -2,7 +2,7 @@
  * $Id$
  */
 
-package org.opendds.jmx.config;
+package org.opendds.config;
 
 import java.util.ArrayList;
 import java.util.Collections;

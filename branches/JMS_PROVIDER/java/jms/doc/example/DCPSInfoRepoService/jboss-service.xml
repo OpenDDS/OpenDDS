@@ -15,7 +15,7 @@
 
 <server>
     <mbean code="org.opendds.jmx.DCPSInfoRepoService"
-           name="opendds:service=DCPSInfoRepo">
+           name="OpenDDS:service=DCPSInfoRepo">
         <attribute name="DCPSDebugLevel">10</attribute>
         <attribute name="DCPSTransportType">SimpleTcp</attribute>
         <attribute name="ORBDebugLevel">10</attribute>

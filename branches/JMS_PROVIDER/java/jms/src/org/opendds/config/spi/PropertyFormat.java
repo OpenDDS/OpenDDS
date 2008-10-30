@@ -2,7 +2,7 @@
  * $Id$
  */
 
-package org.opendds.jmx.config.spi;
+package org.opendds.config.spi;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -10,32 +10,32 @@ import java.util.List;
 
 import sun.misc.Service;
 
-import org.opendds.jmx.config.Attributes;
+import org.opendds.config.Configuration;
 
 /**
  * @author  Steven Stallion
  * @version $Revision$
  */
-public abstract class AttributeFormat {
-    private static List<AttributeFormat> instances =
-        new ArrayList<AttributeFormat>();
+public abstract class PropertyFormat {
+    private static List<PropertyFormat> instances =
+        new ArrayList<PropertyFormat>();
 
     static {
         registerAll();
     }
 
     public static void registerAll() {
-        Iterator itr = Service.providers(AttributeFormat.class);
+        Iterator itr = Service.providers(PropertyFormat.class);
         while (itr.hasNext()) {
-            register((AttributeFormat) itr.next());
+            register((PropertyFormat) itr.next());
         }
     }
 
-    public static void register(AttributeFormat instance) {
+    public static void register(PropertyFormat instance) {
         instances.add(instance);
     }
 
-    public static void unregister(AttributeFormat instance) {
+    public static void unregister(PropertyFormat instance) {
         instances.remove(instance);
     }
 
@@ -43,10 +43,10 @@ public abstract class AttributeFormat {
         instances.clear();
     }
 
-    public static String[] format(Attributes attributes) {
+    public static String[] format(Configuration attributes) {
         List<String> args = new ArrayList<String>();
 
-        for (AttributeFormat format : instances) {
+        for (PropertyFormat format : instances) {
             format.format(attributes, args);
         }
 
@@ -55,5 +55,5 @@ public abstract class AttributeFormat {
 
     //
 
-    protected abstract void format(Attributes attributes, List<String> args);
+    protected abstract void format(Configuration config, List<String> args);
 }

@@ -2,13 +2,13 @@
  * $Id$
  */
 
-package org.opendds.jmx;
+package org.opendds.config.props;
 
 /**
  * @author  Steven Stallion
  * @version $Revision$
  */
-public interface ORBAttributes {
+public interface ORBProperties {
     String ORB_LISTEN_ENDPOINTS_ATTR = "ORBListenEndpoints";
     String ORB_DEBUG_LEVEL_ATTR = "ORBDebugLevel";
     String ORB_LOG_FILE_ATTR = "ORBLogFile";

@@ -1,3 +1,9 @@
+Thu Oct 30 20:12:37 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms
+
+          Configuration refactoring.
+
 Wed Oct 29 22:28:15 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/build.xml:

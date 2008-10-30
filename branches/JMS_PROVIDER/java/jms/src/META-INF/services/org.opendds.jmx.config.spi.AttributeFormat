@@ -2,6 +2,6 @@
 # $Id$
 #
 
-org.opendds.jmx.config.spi.impl.DCPSAttributeFormat
-org.opendds.jmx.config.spi.impl.InfoRepoAttributeFormat
-org.opendds.jmx.config.spi.impl.ORBAttributeFormat
+org.opendds.config.spi.impl.DCPSPropertyFormat
+org.opendds.config.spi.impl.InfoRepoPropertyFormat
+org.opendds.config.spi.impl.ORBPropertyFormat

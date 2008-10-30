@@ -2,13 +2,13 @@
  * $Id$
  */
 
-package org.opendds.jmx;
+package org.opendds.config.props;
 
 /**
  * @author  Steven Stallion
  * @version $Revision$
  */
-public interface DCPSAttributes {
+public interface DCPSProperties {
     String DCPS_DEBUG_LEVEL_ATTR = "DCPSDebugLevel";
     String DCPS_CONFIG_FILE_ATTR = "DCPSConfigFile";
     String DCPS_INFOREPO_ATTR = "DCPSInfoRepo";

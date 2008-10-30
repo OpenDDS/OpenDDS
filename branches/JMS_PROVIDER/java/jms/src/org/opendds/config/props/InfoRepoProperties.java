@@ -2,13 +2,13 @@
  * $Id$
  */
 
-package org.opendds.jmx;
+package org.opendds.config.props;
 
 /**
  * @author  Steven Stallion
  * @version $Revision$
  */
-public interface InfoRepoAttributes {
+public interface InfoRepoProperties {
     String BIT_LISTEN_ADDRESS_ATTR = "BitListenAddress";
     String IOR_FILE_ATTR = "IORFile";
     String NOBITS_ATTR = "NOBITS";

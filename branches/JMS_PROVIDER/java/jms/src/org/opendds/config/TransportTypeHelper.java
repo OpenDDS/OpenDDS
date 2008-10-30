@@ -2,7 +2,7 @@
  * $Id$
  */
 
-package org.opendds.jmx.config;
+package org.opendds.config;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -73,7 +73,7 @@ public class TransportTypeHelper {
         new ArrayList<SvcConfDirective>();
 
     public TransportTypeHelper(String transportType) {
-        StringTokenizer stok = new StringTokenizer(transportType, Attributes.DELIMITERS);
+        StringTokenizer stok = new StringTokenizer(transportType, Configuration.DELIMITERS);
         while (stok.hasMoreTokens()) {
             String key = stok.nextToken();
 

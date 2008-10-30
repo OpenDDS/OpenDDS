@@ -8,7 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.opendds.DCPSInfoRepo;
-import org.opendds.jmx.config.Attributes;
+import org.opendds.config.Configuration;
 
 /**
  * @author  Steven Stallion
@@ -22,7 +22,7 @@ public class DCPSInfoRepoService implements DCPSInfoRepoServiceMBean {
     private DCPSInfoRepo instance;
     private Thread instanceThread;
 
-    private Attributes attributes = new Attributes();
+    private Configuration attributes = new Configuration();
 
     //
 
