@@ -79,6 +79,8 @@ namespace OpenDDS
       /// get_<plain communication status> operation on the Entity.
       DDS::StatusKindMask status_changes_;
       DDS::StatusCondition_var status_condition_;
+
+      ACE_Thread_Mutex    lock_;  
     };
 
   } // namespace DCPS

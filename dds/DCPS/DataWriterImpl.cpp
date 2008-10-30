@@ -1054,13 +1054,11 @@ DataWriterImpl::enable ()
 DataWriterImpl::get_status_changes ()
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
-  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, guard, this->lock_, 0);
   return EntityImpl::get_status_changes ();
 }
 
 void DataWriterImpl::notify_status_condition ()
 {
-  ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
   this->EntityImpl::notify_status_condition ();
 }
 
