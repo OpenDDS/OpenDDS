@@ -1,16 +1,18 @@
 package org.opendds.jms;
 
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import javax.jms.MessageFormatException;
+
+import OpenDDS.JMS.MapItem;
 import OpenDDS.JMS.MessageBody;
 import OpenDDS.JMS.StreamItem;
-import OpenDDS.JMS.MapItem;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.Enumeration;
-import java.util.Iterator;
-import org.opendds.util.Objects;
-import org.opendds.util.StreamItemConversion;
-import javax.jms.MessageFormatException;
+
+import org.opendds.jms.util.Objects;
+import org.opendds.jms.util.StreamItemConversion;
 
 public class MapBodyFacade {
     private final MessageBody body;

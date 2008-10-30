@@ -4,24 +4,26 @@
 
 package org.opendds.jms;
 
+import java.util.HashMap;
+import java.util.Map;
+import javax.jms.DeliveryMode;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageProducer;
-import javax.jms.DeliveryMode;
-import OpenDDS.JMS.MessagePayload;
-import OpenDDS.JMS.MessagePayloadDataWriter;
+
+import DDS.DATAWRITER_QOS_DEFAULT;
+import DDS.DURATION_INFINITY_NSEC;
+import DDS.DURATION_INFINITY_SEC;
+import DDS.DataWriterQos;
+import DDS.DataWriterQosHolder;
+import DDS.DomainParticipant;
 import DDS.HANDLE_NIL;
 import DDS.Publisher;
-import DDS.DomainParticipant;
-import DDS.DataWriterQosHolder;
-import DDS.DataWriterQos;
-import DDS.DURATION_INFINITY_SEC;
-import DDS.DURATION_INFINITY_NSEC;
-import DDS.DATAWRITER_QOS_DEFAULT;
-import org.opendds.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import OpenDDS.JMS.MessagePayload;
+import OpenDDS.JMS.MessagePayloadDataWriter;
+
+import org.opendds.jms.util.Objects;
 
 /**
  * @author  Steven Stallion
@@ -169,7 +171,7 @@ public class TopicMessageProducerImpl implements MessageProducer {
                      int deliveryMode,
                      int priority,
                      long timeToLive) throws JMSException {
-        
+
         if (dataWriterPair != null) {
             throw new UnsupportedOperationException("This MessageProducer is created with a Destination.");
         }

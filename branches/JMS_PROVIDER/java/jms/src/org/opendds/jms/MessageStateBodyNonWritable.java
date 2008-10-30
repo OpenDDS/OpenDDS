@@ -1,7 +1,7 @@
 package org.opendds.jms;
 
-import javax.jms.MessageNotWriteableException;
 import javax.jms.MessageNotReadableException;
+import javax.jms.MessageNotWriteableException;
 
 /**
  * Message body state where the message is not writable, but readable.

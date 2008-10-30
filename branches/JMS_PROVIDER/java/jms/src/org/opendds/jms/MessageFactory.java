@@ -2,9 +2,10 @@ package org.opendds.jms;
 
 import javax.jms.Message;
 
-import static org.opendds.util.EnumComparator.compare;
-import OpenDDS.JMS.MessagePayload;
 import OpenDDS.JMS.MessageBodyKind;
+import OpenDDS.JMS.MessagePayload;
+
+import static org.opendds.jms.util.EnumComparator.compare;
 
 public class MessageFactory {
     public static Message buildMessageFromPayload(MessagePayload messagePayload, int handle) {

@@ -1,3 +1,9 @@
+Thu Oct 30 20:31:31 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms
+
+          Major package refactorings.
+
 Thu Oct 30 20:12:37 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms

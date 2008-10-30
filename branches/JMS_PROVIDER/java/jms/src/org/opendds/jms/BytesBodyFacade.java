@@ -1,7 +1,5 @@
 package org.opendds.jms;
 
-import OpenDDS.JMS.MessageBody;
-import OpenDDS.JMS.MessageBodyKind;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -11,7 +9,11 @@ import java.io.IOException;
 import javax.jms.JMSException;
 import javax.jms.MessageEOFException;
 import javax.jms.MessageFormatException;
-import org.opendds.util.Objects;
+
+import OpenDDS.JMS.MessageBody;
+import OpenDDS.JMS.MessageBodyKind;
+
+import org.opendds.jms.util.Objects;
 
 public class BytesBodyFacade {
     private final MessageBody body;

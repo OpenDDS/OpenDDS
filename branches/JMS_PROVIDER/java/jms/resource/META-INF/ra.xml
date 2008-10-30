@@ -77,7 +77,7 @@
     </license>
 
     <resourceadapter>
-        <resourceadapter-class>org.opendds.resource.ResourceAdapterImpl</resourceadapter-class>
+        <resourceadapter-class>org.opendds.jms.resource.ResourceAdapterImpl</resourceadapter-class>
 
         <config-property>
             <config-property-name>Properties</config-property-name>
