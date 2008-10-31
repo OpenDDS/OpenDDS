@@ -9,16 +9,6 @@
     "http://www.jboss.org/j2ee/dtd/jboss-service_4_2.dtd">
 
 <server>
-    <mbean code="org.opendds.jms.management.ParticipantFactoryService"
-           name="OpenDDS:service=ParticipantFactoryService">
-        <attribute name="DCPSDebugLevel">10</attribute>
-        <attribute name="DCPSInfoRepo">iiop://localhost:6666/DCPSInfoRepo</attribute>
-        <attribute name="DCPSTransportType">SimpleTcp</attribute>
-        <attribute name="ORBDebugLevel">10</attribute>
-        <attribute name="ORBListenEndpoints">iiop://localhost:7777</attribute>
-        <attribute name="ORBLogFile">${jboss.server.log.dir}/DDS.log</attribute>
-    </mbean>
-
     <mbean code="org.opendds.jms.management.Destination"
            name="OpenDDS:destination=DefaultTopic,kind=Topic">
         <attribute name="JndiName">java:/DefaultTopic</attribute>

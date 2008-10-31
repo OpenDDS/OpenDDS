@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Id$
+
+    Author:  Steven Stallion
+    Version: $Revision$
+-->
+<!DOCTYPE connection-factories PUBLIC "-//JBoss//DTD MBean Service 4.2//EN"
+    "http://www.jboss.org/j2ee/dtd/jboss-ds_1_5.dtd">
+
+<connection-factories>
+    <mbean code="org.opendds.jms.management.ParticipantFactoryService"
+           name="OpenDDS:service=ParticipantFactoryService">
+        <attribute name="DCPSDebugLevel">10</attribute>
+        <attribute name="DCPSInfoRepo">iiop://localhost:6666/DCPSInfoRepo</attribute>
+        <attribute name="DCPSTransportType">SimpleTcp</attribute>
+        <attribute name="ORBDebugLevel">10</attribute>
+        <attribute name="ORBListenEndpoints">iiop://localhost:7777</attribute>
+        <attribute name="ORBLogFile">${jboss.server.log.dir}/DDS.log</attribute>
+    </mbean>
+
+    <no-tx-connection-factory>
+        <jndi-name>java:/ConnectionFactory</jndi-name>
+        <rar-name>opendds-jms-1.1.rar</rar-name>
+        <connection-definition>org.opendds.jms.resource.ConnectionFactoryImpl</connection-definition>
+        <config-property name="DomainParticipantQosPolicy" type="java.lang.String">
+            <!-- TODO -->
+        </config-property>
+        <config-property name="PublisherQosPolicy" type="java.lang.String">
+            <!-- TODO -->
+        </config-property>
+        <config-property name="PublisherTransport" type="java.lang.String">
+            <!-- TODO -->
+        </config-property>
+        <config-property name="SubscriberQosPolicy" type="java.lang.String">
+            <!-- TODO -->
+        </config-property>
+        <config-property name="SubscriberTransport" type="java.lang.String">
+            <!-- TODO -->
+        </config-property>
+        <max-pool-size>20</max-pool-size>
+        <depends>OpenDDS:service=ParticipantFactoryService</depends>
+    </no-tx-connection-factory>
+</connection-factories>
