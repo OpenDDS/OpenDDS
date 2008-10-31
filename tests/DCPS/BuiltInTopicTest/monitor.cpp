@@ -456,6 +456,19 @@ int main (int argc, char *argv[])
           1);
       }
 
+      if (CUR_PART_USER_DATA = PART_USER_DATA)
+      {
+        // Create synch file.
+        FILE* fp = ACE_OS::fopen ("monitor1_done", ACE_LIB_TEXT("w"));
+        int i = 0;
+        while (fp == 0 &&  i < 15)
+        {
+          ACE_DEBUG ((LM_DEBUG,
+            ACE_LIB_TEXT("creating monitor1 done\n")));
+          ACE_OS::sleep (1);
+          ++i;
+        }
+      }
       dpf->delete_participant(participant.in ());
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
