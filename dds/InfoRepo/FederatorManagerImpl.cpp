@@ -107,7 +107,7 @@ ManagerImpl::initialize()
 
   OwnerUpdateTypeSupportImpl* ownerUpdate = new OwnerUpdateTypeSupportImpl();
   if( ::DDS::RETCODE_OK != ownerUpdate->register_type(
-                             this->federationParticipant_,
+                             this->federationParticipant_.in (),
                              OWNERUPDATETYPENAME
                            )
     ) {
@@ -121,7 +121,7 @@ ManagerImpl::initialize()
 
   ParticipantUpdateTypeSupportImpl* participantUpdate = new ParticipantUpdateTypeSupportImpl();
   if( ::DDS::RETCODE_OK != participantUpdate->register_type(
-                             this->federationParticipant_,
+                             this->federationParticipant_.in (),
                              PARTICIPANTUPDATETYPENAME
                            )
     ) {
@@ -135,7 +135,7 @@ ManagerImpl::initialize()
 
   TopicUpdateTypeSupportImpl* topicUpdate = new TopicUpdateTypeSupportImpl();
   if( ::DDS::RETCODE_OK != topicUpdate->register_type(
-                             this->federationParticipant_,
+                             this->federationParticipant_.in (),
                              TOPICUPDATETYPENAME
                            )
     ) {
@@ -149,7 +149,7 @@ ManagerImpl::initialize()
 
   PublicationUpdateTypeSupportImpl* publicationUpdate = new PublicationUpdateTypeSupportImpl();
   if( ::DDS::RETCODE_OK != publicationUpdate->register_type(
-                             this->federationParticipant_,
+                             this->federationParticipant_.in (),
                              PUBLICATIONUPDATETYPENAME
                            )
     ) {
@@ -163,7 +163,7 @@ ManagerImpl::initialize()
 
   SubscriptionUpdateTypeSupportImpl* subscriptionUpdate = new SubscriptionUpdateTypeSupportImpl();
   if( ::DDS::RETCODE_OK != subscriptionUpdate->register_type(
-                             this->federationParticipant_,
+                             this->federationParticipant_.in (),
                              SUBSCRIPTIONUPDATETYPENAME
                            )
     ) {
@@ -978,7 +978,7 @@ ManagerImpl::finalize()
     }
 
   // Remove our local participant and contained entities.
-  if( 0 == CORBA::is_nil( this->federationParticipant_)) {
+  if( 0 == CORBA::is_nil( this->federationParticipant_.in ())) {
     if( ::DDS::RETCODE_PRECONDITION_NOT_MET
          == this->federationParticipant_->delete_contained_entities()
       ) {
@@ -989,7 +989,7 @@ ManagerImpl::finalize()
       ));
 
     } else if( ::DDS::RETCODE_PRECONDITION_NOT_MET
-               == TheParticipantFactory->delete_participant( this->federationParticipant_)
+               == TheParticipantFactory->delete_participant( this->federationParticipant_.in ())
              ) {
       ACE_ERROR ((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Federator::Manager ")
