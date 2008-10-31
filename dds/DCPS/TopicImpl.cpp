@@ -179,18 +179,6 @@ namespace OpenDDS
     }
 
 
-    ::DDS::StatusKindMask
-    TopicImpl::get_status_changes (
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ))
-    {
-      // TBD - Currently no supported QoS allow changes
-      // so it always returns 0 (No changes).
-      return 0;
-    }
-
     RepoId
     TopicImpl::get_id () const
     {

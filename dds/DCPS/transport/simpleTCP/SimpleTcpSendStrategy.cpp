@@ -120,7 +120,8 @@ void
 OpenDDS::DCPS::SimpleTcpSendStrategy::relink (bool do_suspend)
 {
   DBG_ENTRY_LVL("SimpleTcpSendStrategy","relink",6);
-  this->connection_->relink (do_suspend);
+  if (! this->connection_.is_nil ())
+    this->connection_->relink (do_suspend);
 }
 
 void

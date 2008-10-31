@@ -338,12 +338,6 @@ namespace OpenDDS
           CORBA::SystemException
         ));
 
-      virtual ::DDS::StatusKindMask get_status_changes (
-        )
-        ACE_THROW_SPEC ((
-          CORBA::SystemException
-        ));
-
       /// update liveliness info for this writer.
       void writer_activity(PublicationId writer_id);
 

@@ -458,7 +458,13 @@ OpenDDS::DCPS::TransportImpl::add_pending_association (RepoId  pub_id,
     }
   }
 
-  check_fully_association (pub_id, info);
+  // Acks for this new pending association may arrive at this time. 
+  // If check for individual association, it needs remove the association 
+  // from pending_association_sub_map_ so the fully_associated won't be
+  // called multiple times. To simplify, check by pub id since the 
+  // check_fully_association overloaded function clean the pending list 
+  // after calling fully_associated.
+  check_fully_association (pub_id);
 
   return 0;
 }
@@ -470,7 +476,6 @@ OpenDDS::DCPS::TransportImpl::demarshal_acks (ACE_Message_Block* acks, bool byte
   DBG_ENTRY_LVL("TransportImpl","demarshal_acks",6);
 
   GuardType guard(this->lock_);
-
   int status = this->acked_sub_map_.demarshal (acks, byte_order);
   if (status == -1)
     ACE_ERROR_RETURN((LM_ERROR,
@@ -569,6 +574,8 @@ bool OpenDDS::DCPS::TransportImpl::check_fully_association (const RepoId pub_id,
     pubiter->second->fully_associated (pub_id, 
                                        associations.num_associations_,
                                        associations.association_data_);
+
+    return true;
   }
   else if (ret && ::OpenDDS::DCPS::Transport_debug_level > 8)
   {
@@ -578,7 +585,7 @@ bool OpenDDS::DCPS::TransportImpl::check_fully_association (const RepoId pub_id,
       ACE_TEXT("(%P|%t)acked but DW is not registered:  %s \n"), buffer.str().c_str()));
   }
 
-  return ret;
+  return false;
 }
 
 

@@ -40,7 +40,3 @@ Subscription_Manager::operator= (const Subscription_Manager & copy)
       manager_impl_ = copy.manager_impl_;
     }
 }
-
-Subscription_Manager::~Subscription_Manager ()
-{
-}

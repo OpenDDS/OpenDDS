@@ -745,13 +745,6 @@ PublisherImpl::enable ()
   return ::DDS::RETCODE_OK;
 }
 
-::DDS::StatusKindMask
-PublisherImpl::get_status_changes ()
-  ACE_THROW_SPEC ((CORBA::SystemException))
-{
-  return EntityImpl::get_status_changes ();
-}
-
 
 int
 PublisherImpl::is_clean () const

@@ -5,7 +5,7 @@
 # list of configurations it does _not_ run on.
 #
 # Example: TAO/examples/foo/run_test.pl: !MINIMUM !ST
-# 
+#
 # Paths are relative to $DDS_ROOT
 
 java/tests/hello/run_test.pl
@@ -26,3 +26,8 @@ java/tests/messenger/subscriber/run_test.pl tcp
 java/tests/messenger/subscriber/run_test.pl udp
 java/tests/messenger/subscriber/run_test.pl mcast
 java/tests/messenger/subscriber/run_test.pl reliable_mcast
+
+java/tests/messenger/run_test.pl tcp
+java/tests/messenger/run_test.pl udp
+java/tests/messenger/run_test.pl mcast
+java/tests/messenger/run_test.pl reliable_mcast

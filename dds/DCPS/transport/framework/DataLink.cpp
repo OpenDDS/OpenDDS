@@ -859,15 +859,26 @@ OpenDDS::DCPS::DataLink::exist (const RepoId& remote_id,
 {
   if (pub_side)
   {
+    RepoIdSet_rch pubs;
+    {
+      GuardType guard(this->sub_map_lock_);
+      pubs = this->sub_map_.find(remote_id);
+    }
+
     GuardType guard(this->pub_map_lock_);
-    RepoIdSet_rch pubs = this->sub_map_.find(remote_id);
+    
     if (!pubs.is_nil())
       return pubs->exist (local_id, last);
   }
   else
   {
+    ReceiveListenerSet_rch subs;
+    {   
+      GuardType guard(this->pub_map_lock_);
+      subs = this->pub_map_.find(remote_id);
+    }
+
     GuardType guard(this->sub_map_lock_);
-    ReceiveListenerSet_rch subs = this->pub_map_.find(remote_id);
     if (!subs.is_nil())
       return subs->exist (local_id, last);
   }
