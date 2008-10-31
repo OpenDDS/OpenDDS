@@ -1,8 +1,25 @@
+Fri Oct 31 16:21:52 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticast.rc:
+        * dds/DCPS/transport/simpleTCP/SimpleTcp.rc:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram.rc:
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/DCPSInfoRepoServ.rc:
+        * dds/InfoRepo/Federator.rc:
+        * dds/InfoRepo/InfoRepoLib.rc:
+        * dds/OpenDDS_DCPS.rc:
+        * java/dds/dcps_java.rc:
+        * java/idl2jni/runtime/idl2jni_runtime.rc:
+        * java/tao/tao_java.rc:
+
+          Added resource files so that Windows DLLs get the version number and
+          library description embedded.
+
 Thu Oct 30 23:23:56 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/FooTest4/main.cpp:
 
-          Added delay between create_datareader and sub 
+          Added delay between create_datareader and sub
           delete_contained_entities to avoid test failure on slow
           machines that add_associations is not performed because
           of deleting.
