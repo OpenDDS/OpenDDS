@@ -9,7 +9,7 @@ import java.util.List;
 import org.opendds.jms.config.Configuration;
 import org.opendds.jms.config.PropertyWriter;
 import org.opendds.jms.config.SvcConfDirective;
-import org.opendds.jms.config.props.InfoRepoProperties;
+import org.opendds.jms.config.properties.InfoRepoProperties;
 import org.opendds.jms.config.spi.PropertyFormat;
 import org.opendds.jms.util.Strings;
 
@@ -23,33 +23,33 @@ public class InfoRepoPropertyFormat extends PropertyFormat {
         PropertyWriter writer = new PropertyWriter(config);
 
         writer.writeIfSet("-a",
-            InfoRepoProperties.BIT_LISTEN_ADDRESS_ATTR);
+            InfoRepoProperties.BIT_LISTEN_ADDRESS);
 
         writer.writeIfSet("-o",
-            InfoRepoProperties.IOR_FILE_ATTR);
+            InfoRepoProperties.IOR_FILE);
 
         writer.writeIfSet("-NOBITS",
-            InfoRepoProperties.NOBITS_ATTR);
+            InfoRepoProperties.NOBITS);
 
         writer.writeIfSet("-z",
-            InfoRepoProperties.VERBOSE_TRANSPORT_LOGGING_ATTR);
+            InfoRepoProperties.VERBOSE_TRANSPORT_LOGGING);
 
         writer.writeIfSet("-r",
-            InfoRepoProperties.RESURRECT_FROM_FILE_ATTR);
+            InfoRepoProperties.RESURRECT_FROM_FILE);
 
         writer.writeIfSet("-FederatorConfig",
-            InfoRepoProperties.FEDERATOR_CONFIG_ATTR);
+            InfoRepoProperties.FEDERATOR_CONFIG);
 
         writer.writeIfSet("-FederationId",
-            InfoRepoProperties.FEDERATION_ID_ATTR);
+            InfoRepoProperties.FEDERATION_ID);
 
         writer.writeIfSet("-FederateWith",
-            InfoRepoProperties.FEDERATE_WITH_ATTR);
+            InfoRepoProperties.FEDERATE_WITH);
 
         //
 
         String persistentFile =
-            config.get(InfoRepoProperties.PERSISTENT_FILE_ATTR);
+            config.get(InfoRepoProperties.PERSISTENT_FILE);
 
         if (!Strings.isEmpty(persistentFile)) {
             SvcConfDirective directive = new SvcConfDirective();
@@ -58,7 +58,7 @@ public class InfoRepoPropertyFormat extends PropertyFormat {
             directive.addOption("-file");
             directive.addOption(persistentFile);
 
-            writer.write(directive);
+            directive.writeTo(writer);
         }
 
         writer.writeTo(args);

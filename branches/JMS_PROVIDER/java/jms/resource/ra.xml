@@ -14,7 +14,7 @@
     <vendor-name>OpenDDS (http://www.opendds.org)</vendor-name>
 
     <eis-type>JMS Provider</eis-type>
-    <resourceadapter-version>@project.version@</resourceadapter-version>
+    <resourceadapter-version>@VERSION@</resourceadapter-version>
 
     <license>
         <description>
@@ -73,16 +73,23 @@
 
             OpenDDS copyright OCI. St. Louis MO USA, 2005
         </description>
-        <license-required>false</license-required>
+        <license-required>true</license-required>
     </license>
 
     <resourceadapter>
         <resourceadapter-class>org.opendds.jms.resource.ResourceAdapterImpl</resourceadapter-class>
 
         <config-property>
-            <config-property-name>Properties</config-property-name>
+            <config-property-name>DomainParticipantQosPolicy</config-property-name>
+            <config-property-type>java.lang.String</config-property-type>
+        </config-property>
+        <config-property>
+            <config-property-name>SubscriberQosPolicy</config-property-name>
+            <config-property-type>java.lang.String</config-property-type>
+        </config-property>
+        <config-property>
+            <config-property-name>PublisherQosPolicy</config-property-name>
             <config-property-type>java.lang.String</config-property-type>
         </config-property>
     </resourceadapter>
-
 </connector>

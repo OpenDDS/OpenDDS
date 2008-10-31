@@ -2,7 +2,7 @@
  * $Id$
  */
 
-package org.opendds.jms.jmx;
+package org.opendds.jms.management;
 
 import org.junit.Before;
 import org.junit.Test;
