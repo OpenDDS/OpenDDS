@@ -771,7 +771,7 @@ void DCPS_IR_Publication::set_bit_status (CORBA::Boolean isBIT)
 OpenDDS::DCPS::DataWriterRemote_ptr
 DCPS_IR_Publication::writer()
 {
-  return OpenDDS::DCPS::DataWriterRemote::_duplicate( this->writer_);
+  return OpenDDS::DCPS::DataWriterRemote::_duplicate( this->writer_.in());
 }
 
 bool DCPS_IR_Publication::compatibleQosChange (const ::DDS::DataWriterQos & qos)

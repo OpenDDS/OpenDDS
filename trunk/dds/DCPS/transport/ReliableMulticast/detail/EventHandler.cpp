@@ -30,10 +30,13 @@ OpenDDS::DCPS::ReliableMulticast::detail::EventHandler::send(
   const ACE_INET_Addr& dest
   )
 {
-  ACE_Guard<ACE_Thread_Mutex> lock(output_mutex_);
-  bool reregister = output_queue_.empty();
+  bool reregister =  false;
+  {
+    ACE_Guard<ACE_Thread_Mutex> lock(output_mutex_);
+    reregister = output_queue_.empty();
 
-  output_queue_.push(std::make_pair(std::string(buffer, size), dest));
+    output_queue_.push(std::make_pair(std::string(buffer, size), dest));
+  }
   if (reregister)
   {
     if (reactor()->register_handler(

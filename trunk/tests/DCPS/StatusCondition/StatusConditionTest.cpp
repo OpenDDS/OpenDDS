@@ -45,7 +45,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
   DomainParticipant_var dp = dpf->create_participant(23,
     PARTICIPANT_QOS_DEFAULT, 0);
   Messenger::MessageTypeSupport_var ts = new Messenger::MessageTypeSupportImpl;
-  ts->register_type(dp, ts->get_type_name());
+  ts->register_type(dp.in (), ts->get_type_name());
   Topic_var topic = dp->create_topic("MyTopic", ts->get_type_name(),
     TOPIC_QOS_DEFAULT, 0);
 
@@ -54,10 +54,10 @@ int run_test(int argc, ACE_TCHAR *argv[])
     TheTransportFactory->create_transport_impl(1, AUTO_CONFIG);
   PublisherImpl* pub_impl = dynamic_cast<PublisherImpl*> (pub.in());
   pub_impl->attach_transport(pub_tport.in());
-  DataWriter_var dw = pub->create_datawriter(topic, DATAWRITER_QOS_DEFAULT, 0);
+  DataWriter_var dw = pub->create_datawriter(topic.in (), DATAWRITER_QOS_DEFAULT, 0);
   StatusCondition_var cond = dw->get_statuscondition();
   cond->set_enabled_statuses(OFFERED_INCOMPATIBLE_QOS_STATUS);
-  ws->attach_condition(cond);
+  ws->attach_condition(cond.in ());
 
   Subscriber_var sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0);
   TransportImpl_rch sub_tport =
@@ -67,15 +67,15 @@ int run_test(int argc, ACE_TCHAR *argv[])
   DataReaderQos dr_qos;
   sub->get_default_datareader_qos(dr_qos);
   dr_qos.durability.kind = PERSISTENT_DURABILITY_QOS;
-  Waiter w(ws);
+  Waiter w(ws.in ());
   w.activate();
-  DataReader_var dr = sub->create_datareader(topic, dr_qos, 0);
+  DataReader_var dr = sub->create_datareader(topic.in (), dr_qos, 0);
   w.wait();
   bool passed = (w.result() == RETCODE_OK);
-  ws->detach_condition(cond);
+  ws->detach_condition(cond.in ());
 
   dp->delete_contained_entities();
-  dpf->delete_participant(dp);
+  dpf->delete_participant(dp.in ());
   return passed ? 0 : 1;
 }
 

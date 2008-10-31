@@ -119,7 +119,7 @@ Publisher::Publisher (int argc, char *argv[]) throw (Publisher::InitError)
   try
     {
       dpf_ = TheParticipantFactoryWithArgs (argc, argv);
-      if( this->dpf_ == 0) {
+      if( this->dpf_.in () == 0) {
         throw InitError ("Publisher::ctor> Failed to obtain the participant factory.");
       }
 
