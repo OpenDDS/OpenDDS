@@ -965,18 +965,6 @@ DataReaderImpl::enable ()
   return ::DDS::RETCODE_OK;
 }
 
-::DDS::StatusKindMask
-DataReaderImpl::get_status_changes ()
-  ACE_THROW_SPEC ((CORBA::SystemException))
-{
-  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-                    guard,
-                    this->sample_lock_,
-                    ::DDS::RETCODE_ERROR);
-
-  return EntityImpl::get_status_changes ();
-}
-
 
 void
 DataReaderImpl::writer_activity(PublicationId writer_id)

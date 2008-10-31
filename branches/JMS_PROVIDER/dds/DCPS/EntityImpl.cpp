@@ -56,6 +56,7 @@ namespace OpenDDS
         CORBA::SystemException
       ))
       {
+        ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, 0);
         return status_changes_;
       }
 
@@ -65,6 +66,7 @@ namespace OpenDDS
         ::DDS::StatusKind status,
         bool status_changed_flag)
       {
+        ACE_GUARD(ACE_Thread_Mutex, g, lock_);
         if (status_changed_flag)
           {
             status_changes_ |= status;

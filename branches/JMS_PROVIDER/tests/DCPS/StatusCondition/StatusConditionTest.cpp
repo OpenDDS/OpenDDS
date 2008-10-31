@@ -87,6 +87,5 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   // cleanup
   TheTransportFactory->release();
   TheServiceParticipant->shutdown ();
-  ACE_Thread_Manager::instance()->wait();
   return ret;
 }

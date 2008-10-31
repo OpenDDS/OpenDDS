@@ -1,18 +1,289 @@
+Thu Oct 30 23:23:56 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/FooTest4/main.cpp:
+
+          Added delay between create_datareader and sub 
+          delete_contained_entities to avoid test failure on slow
+          machines that add_associations is not performed because
+          of deleting.
+
+Thu Oct 30 17:00:49 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Added entries for bug fixes after 1.1 release.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.h:
+        * dds/DCPS/TopicImpl.cpp:
+
+          Removed non-necessary overload functions (get_status_changes()
+          and notify_status_condition()).
+
+        * dds/DCPS/EntityImpl.cpp:
+
+          Fixed a warning.
+
+Wed Oct 29 23:53:35 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/EntityImpl.h:
+        * dds/DCPS/EntityImpl.cpp:
+
+          Added lock to protect the status_changes_.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Removed lock in get_status_changes() and
+          notify_status_condition() as the status
+          change is protected by EntityImpl lock. This
+          should resolve potential deadlock when two threads
+          acquire WaitSet lock and DataWriter/DataReader lock
+          in reverse order.
+
+Wed Oct 29 20:48:24 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Added the qualifier !DDS_NO_ORBSVCS to tests that use TAO's orbsvcs.
+
+Wed Oct 29 20:16:36 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+
+          Made disconnect() to unregister connection with reactor.
+          This would avoid access violation if reactor cleanup
+          handles after connection is destroyed.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
+
+          Made relink() check if connection is nil to avoid access
+          violation when trying to reconnect while datalink is
+          releasing.
+
+Wed Oct 29 19:33:47 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * docs/design/federation:
+        * docs/design/federation/federation.html:
+        * docs/design/federation/images:
+        * docs/design/federation/images/Application.jpg:
+        * docs/design/federation/images/CreateParticipant.jpg:
+        * docs/design/federation/images/CreatePublication.jpg:
+        * docs/design/federation/images/CreateSubscription.jpg:
+        * docs/design/federation/images/CreateTopic.jpg:
+        * docs/design/federation/images/Federation.jpg:
+        * docs/design/federation/images/OpenDDS.jpg:
+        * docs/design/federation/images/PassOwnership.jpg:
+        * docs/design/federation/images/Repository.jpg:
+        * docs/design/federation/images/StartAndFederate.jpg:
+        * docs/design/federation/images/UseCases.jpg:
+        * docs/design/federation/images/info-dm.png:
+
+          Added documentation with diagrams for the federation design.
+          Point a browser at docs/design/federation/federation.html to
+          view the entire documentation.  This replaces the earlier text
+          file design documentation.
+
+        * docs/design/federation.txt:
+
+          Removed this file.
+
+Wed Oct 29 18:18:29 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_TAO.mwc:
+
+          Added PI and CodecFactory.  They're not strictly needed but TAO will
+          try to load them at runtime and it will produce a confusing error
+          message (which is flagged as an error on the scoreboard).
+
+Wed Oct 29 17:41:05 UTC 2008  Ciju John  <johnc at ociweb dot com>
+
+        * java/tests/dcps_java_tests.lst:
+        * java/tests/messenger/run_test.pl:
+          New test script to run java peers(publisher/subscriber)
+          simultaneously.
+
+Tue Oct 28 21:34:20 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Overloaded notify_status_condition() to get sample_lock_
+          before calling base class notify_status_condition(). This
+          should resolve deadlock situation that two threads (
+          one calling notify_status_condition() and another calling
+          data_received()) acquire DataReaderImpl sample_lock_ and
+          ConditionImpl lock_ reversely.
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Similar change as DataReaderImpl.
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          Corrected conn_retry_attempts_ setting which should be set 0
+          even the local_address is not configured.
+
+        * DCPS/transport/framework/DataLink.cpp:
+
+          Added guard for accessing sub_map_ and pub_map_ in exist()
+          function.
+
+        * tests/DCPS/sub_init_loop/publisher.cpp:
+
+          Changed history qos to be default(KEEP_LAST_HISTORY_QOS)
+          instead of KEEP_ALL_HISTORY_QOS as it's not required.
+          This avoids publisher continue consume resouce after
+          subscriber encounter deadlock.
+
+Mon Oct 27 20:59:57 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Fixed a bug in add_pending_association() that
+          check_fully_association by individual association does not
+          remove the fully associated pair in the pending list so
+          fully_associated may be called multiple times for the same
+          association.
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          Configured BIT transport to not attempt connect after lost
+          connection. This would avoid reconnect errors during repo
+          shutdown.
+
+Mon Oct 27 15:09:34 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/GuardCondition/GuardConditionTest.cpp:
+        * tests/DCPS/StatusCondition/StatusConditionTest.cpp:
+
+          Changed mechanism used for waiting for threads to terminate, the
+          old way was hanging on some linux systems (rome).
+
+Fri Oct 24 22:19:03 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
+
+        * wrapper/Domain_Manager.h
+        * wrapper/Domain_Manager.cpp
+        * wrapper/Publication_Manager.h
+        * wrapper/Publication_Manager.cpp
+        * wrapper/Subscription_Manager.h
+        * wrapper/Subscription_Manager.cpp:
+
+          Removed empty destructors to fix compiler error with borland
+          CodeGear.
+
+Fri Oct 24 17:43:13 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dds_wrapper.mpb:
+
+          Changed the "after" to valid project name
+          (these are not library names).
+
+Fri Oct 24 13:54:33 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/ConditionImpl.h:
+        * dds/DCPS/ConditionImpl.cpp:
+        * dds/DCPS/StatusConditionImpl.cpp:
+        * tests/DCPS/GuardCondition/GuardCondition.mpc:
+        * tests/DCPS/StatusCondition/StatusCondition.mpc:
+
+          Merged an additional fix from the branch that was mistakenly
+          left out of yesterday's merge.
+
+Thu Oct 23 22:47:51 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Added implementation of DomainParticipant::get_current_time().
+          This ChangeLog entry is late, the previous changeset contains
+          the actual file modification.
+
+Thu Oct 23 21:43:57 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DdsDcpsDomain.idl:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Implemented DomainParticipant::get_current_time().
+
+        * DDS_release_notes.txt:
+
+          Noted the following changes.  These were first developed on the
+          JMS_PROVIDER branch, but that branch has many other changes which
+          will be merged after 1.2.
+
+        * dds/DdsDcpsInfrastructure.idl:
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/ConditionImpl.h:
+        * dds/DCPS/ConditionImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/EntityImpl.h:
+        * dds/DCPS/EntityImpl.cpp:
+        * dds/DCPS/GuardCondition.h:
+        * dds/DCPS/GuardCondition.cpp:
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/StatusConditionImpl.h:
+        * dds/DCPS/StatusConditionImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/WaitSet.h:
+        * dds/DCPS/WaitSet.cpp:
+
+          Implemented WaitSet, GuardCondition, and StatusCondition.
+
+        * java/dds/DDS/GuardCondition.java:
+        * java/dds/DDS/WaitSet.java:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * java/dds/dcps_java.mpc:
+
+          Java bindings for WaitSet and GuardCondtion.
+
+        * java/idl2jni/codegen/im_jni.cpp:
+
+          Fixed a bug with inout sequences.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/GuardCondition:
+        * tests/DCPS/StatusCondition:
+
+          Added two new tests.
+
+Thu Oct 23 20:59:37 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
+
+          Fixed iterator incorrect move in processDeferred().
+
 Wed Oct 22 22:08:10 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
 
         * wrapper/Topic_Manager_T.h
         * wrapper/Topic_Manager_T.cpp:
-        
+
           Made corrections on copy ctor and assignment operator
           and made them private.
-        
+
         * wrapper/OpenDDS/OpenDDS_Subscription_Manager.h
         * wrapper/OpenDDS/OpenDDS_Publication_Manager.cpp
         * wrapper/OpenDDS/OpenDDS_Domain_Manager.h
         * wrapper/OpenDDS/OpenDDS_Publication_Manager.h
         * wrapper/OpenDDS/OpenDDS_Subscription_Manager.cpp
         * wrapper/OpenDDS/OpenDDS_Domain_Manager.cpp:
-        
+
           Changed register_transport functionality so that it is only
           called once per Domain_Manager instance even if several
           publishers or subscribers are created.
@@ -46,21 +317,21 @@ Wed Oct 22 03:25:37 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
         * wrapper/Subscription_Manager.h
         * wrapper/Publication_Manager_Impl.cpp
         * wrapper/Topic_Manager_Impl.cpp:
-        
-          Replaced Reference_Counter_T class with 
-          ACE_Refcounted_Auto_Ptr in the memory management bridge 
+
+          Replaced Reference_Counter_T class with
+          ACE_Refcounted_Auto_Ptr in the memory management bridge
           classes.
 
 Tue Oct 21 23:22:55 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/InfoRepo/DCPS_IR_Domain.cpp:
-        
+
           Fixed a warning.
-          
+
         * dds/InfoRepo/PersistenceUpdater.h:
 
           Added missing includes.
-          
+
 Tue Oct 21 22:24:39 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/BuiltInTopicTest/mySvc.conf:
@@ -3354,7 +3625,7 @@ Fri Jun  6 08:27:23 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
           Corrected some comments.
 
-Wed Jun  4 04:42:10 UTC 2008  Yan Dai  <dai_y@ociewb.com>
+Wed Jun  4 04:42:10 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportImpl.cpp:
 
@@ -3370,7 +3641,7 @@ Tue Jun  3 09:28:37 UTC 2007  Ossama Othman  <othmano@ociweb.com>
           Added equality check for DurabilityServiceQosPolicy member in
           TopicQos and DataWriterQos.
 
-Fri May 30 23:10:43 UTC 2008  Yan Dai  <dai_y@ociewb.com>
+Fri May 30 23:10:43 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/Reconnect/run_test.pl:
 
@@ -3378,7 +3649,7 @@ Fri May 30 23:10:43 UTC 2008  Yan Dai  <dai_y@ociewb.com>
           crash and restart instead of just fixed delay time. This expects to
           fix the reconnect sub test.
 
-Fri May 30 19:45:24 UTC 2008  Yan Dai  <dai_y@ociewb.com>
+Fri May 30 19:45:24 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/FooTest3_0/PubDriver.h:
         * tests/DCPS/FooTest3_0/PubDriver.cpp:
@@ -12940,7 +13211,7 @@ Thu Dec  7 15:18:32 UTC 2006  Ciju John  <johnc@ociweb.com>
         * dds/DdsDcps.mpc:
           Add DataLinkCleanupTask.* files.
 
-Wed Nov 29 17:09:30 UTC 2006  Ciju John  <johnc@ocieb.com>
+Wed Nov 29 17:09:30 UTC 2006  Ciju John  <johnc@ociweb.com>
 
         * tests/DCPS/FooTest3_0/SimpleSubscriber.cpp:
         * tests/transport/simple/SimpleDataWriter.cpp:

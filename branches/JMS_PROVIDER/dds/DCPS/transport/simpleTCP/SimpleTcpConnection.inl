@@ -11,16 +11,6 @@
 
 
 
-ACE_INLINE void
-OpenDDS::DCPS::SimpleTcpConnection::disconnect()
-{
-  DBG_ENTRY_LVL("SimpleTcpConnection","disconnect",6);
-  this->peer().close();
-  this->connected_ = false;
-}
-
-
-
 
 ACE_INLINE void
 OpenDDS::DCPS::SimpleTcpConnection::remove_receive_strategy()
