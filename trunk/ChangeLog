@@ -3625,7 +3625,7 @@ Fri Jun  6 08:27:23 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
           Corrected some comments.
 
-Wed Jun  4 04:42:10 UTC 2008  Yan Dai  <dai_y@ociewb.com>
+Wed Jun  4 04:42:10 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportImpl.cpp:
 
@@ -3641,7 +3641,7 @@ Tue Jun  3 09:28:37 UTC 2007  Ossama Othman  <othmano@ociweb.com>
           Added equality check for DurabilityServiceQosPolicy member in
           TopicQos and DataWriterQos.
 
-Fri May 30 23:10:43 UTC 2008  Yan Dai  <dai_y@ociewb.com>
+Fri May 30 23:10:43 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/Reconnect/run_test.pl:
 
@@ -3649,7 +3649,7 @@ Fri May 30 23:10:43 UTC 2008  Yan Dai  <dai_y@ociewb.com>
           crash and restart instead of just fixed delay time. This expects to
           fix the reconnect sub test.
 
-Fri May 30 19:45:24 UTC 2008  Yan Dai  <dai_y@ociewb.com>
+Fri May 30 19:45:24 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/FooTest3_0/PubDriver.h:
         * tests/DCPS/FooTest3_0/PubDriver.cpp:
@@ -13211,7 +13211,7 @@ Thu Dec  7 15:18:32 UTC 2006  Ciju John  <johnc@ociweb.com>
         * dds/DdsDcps.mpc:
           Add DataLinkCleanupTask.* files.
 
-Wed Nov 29 17:09:30 UTC 2006  Ciju John  <johnc@ocieb.com>
+Wed Nov 29 17:09:30 UTC 2006  Ciju John  <johnc@ociweb.com>
 
         * tests/DCPS/FooTest3_0/SimpleSubscriber.cpp:
         * tests/transport/simple/SimpleDataWriter.cpp:
