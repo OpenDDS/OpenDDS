@@ -1,11 +1,18 @@
+Fri Oct 31 19:16:26 UTC 2008  Ciju John  <johnc at ociweb dot com>
+
+        * java/tests/messenger/publisher/TestPublisher.java:
+        * java/tests/messenger/subscriber/DataReaderListenerImpl.java:
+        * java/tests/messenger/subscriber/TestSubscriber.java:
+          Verify returned objects. Check DDS return codes.
+
 Fri Oct 31 18:57:15 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/ReliableMulticast/detail/EventHandler.cpp:
 
           Fixed a potential deadlock that send thread and reactor event
-          thread acquire EventHandler lock and reactor internal lock 
+          thread acquire EventHandler lock and reactor internal lock
           reversely.
-          
+
         * dds/InfoRepo/DCPS_IR_Publication.cpp:
         * dds/InfoRepo/DCPS_IR_Subscription.cpp:
         * dds/InfoRepo/FederatorManagerImpl.cpp:
@@ -13,7 +20,7 @@ Fri Oct 31 18:57:15 UTC 2008  Yan Dai  <dai_y@ociweb.com>
         * tests/DCPS/StatusCondition/StatusConditionTest.cpp:
 
           Fixed warnings.
-          
+
 Fri Oct 31 18:39:03 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
