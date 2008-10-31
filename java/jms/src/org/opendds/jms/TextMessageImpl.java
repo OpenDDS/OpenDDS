@@ -10,8 +10,8 @@ public class TextMessageImpl extends AbstractMessageImpl implements TextMessage 
         initTextBody();
     }
 
-    public TextMessageImpl(MessagePayload messagePayload, int handle) {
-        super(messagePayload, handle);
+    public TextMessageImpl(MessagePayload messagePayload, int handle, SessionImpl sessionImpl) {
+        super(messagePayload, handle, sessionImpl);
         setBodyState(new MessageStateBodyReadOnly(this));
     }
 

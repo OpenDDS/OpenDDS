@@ -17,8 +17,8 @@ public class ObjectMessageImpl extends AbstractMessageImpl implements ObjectMess
         initObjectBody();
     }
 
-    public ObjectMessageImpl(MessagePayload messagePayload, int handle) {
-        super(messagePayload, handle);
+    public ObjectMessageImpl(MessagePayload messagePayload, int handle, SessionImpl sessionImpl) {
+        super(messagePayload, handle, sessionImpl);
         setBodyState(new MessageStateBodyNonWritable(this));
     }
 

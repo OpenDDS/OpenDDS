@@ -1,14 +1,14 @@
 package org.opendds.jms;
 
-import java.util.Enumeration;
-import javax.jms.Destination;
-import javax.jms.JMSException;
 import javax.jms.Message;
-
-import OpenDDS.JMS.MessageBody;
-import OpenDDS.JMS.MessageHeader;
+import javax.jms.JMSException;
+import javax.jms.Destination;
+import javax.jms.Session;
+import java.util.Enumeration;
 import OpenDDS.JMS.MessagePayload;
+import OpenDDS.JMS.MessageHeader;
 import OpenDDS.JMS.MessageProperty;
+import OpenDDS.JMS.MessageBody;
 
 public abstract class AbstractMessageImpl implements Message {
     protected final MessagePayload payload;
@@ -20,6 +20,9 @@ public abstract class AbstractMessageImpl implements Message {
 
     private MessageState propertiesState;
     private MessageState bodyState;
+
+    // JMS 1.1, 4.4.11, acknowledgement is a session-wide concept;
+    protected SessionImpl sessionImpl;
 
     /**
      * Construct a Message on the Producer side.
@@ -36,13 +39,15 @@ public abstract class AbstractMessageImpl implements Message {
      *
      * @param messagePayload The MessagePayload of the Message
      * @param handle The DDS instance instance handle of the MessagePayload
+     * @param sessionImpl
      */
-    public AbstractMessageImpl(MessagePayload messagePayload, int handle) {
+    public AbstractMessageImpl(MessagePayload messagePayload, int handle, SessionImpl sessionImpl) {
         this.payload = messagePayload;
         this.headers = payload.theHeader;
         this.properties = new MessagePropertiesFacade(payload);
         this.propertiesState = new MessageStatePropertiesNonWritable(this);
         this.handle = handle;
+        this.sessionImpl = sessionImpl;
     }
 
     public void setPropertiesState(MessageState propertiesState) {
@@ -282,8 +287,16 @@ public abstract class AbstractMessageImpl implements Message {
         properties.updateTheProperties();
     }
 
+    /**
+     * Send an acknowledgement to the session from where this Message is delivered.
+     * JMS 1.1, 4.4.11, this acknowledges this and all other Messages that have been
+     * delivered by its session.
+     *
+     * @throws JMSException
+     */
     public void acknowledge() throws JMSException {
-        throw new UnsupportedOperationException("Kaboom"); // TODO
+        if (sessionImpl.getAcknowledgeMode() != Session.CLIENT_ACKNOWLEDGE) return;
+        sessionImpl.doAcknowledge();
     }
 
     // Message body

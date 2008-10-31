@@ -4,6 +4,7 @@ import javax.jms.JMSException;
 import javax.jms.StreamMessage;
 
 import OpenDDS.JMS.MessagePayload;
+
 import OpenDDS.JMS.StreamItem;
 
 public class StreamMessageImpl extends AbstractMessageImpl implements StreamMessage {
@@ -13,8 +14,8 @@ public class StreamMessageImpl extends AbstractMessageImpl implements StreamMess
         initBody();
     }
 
-    public StreamMessageImpl(MessagePayload messagePayload, int handle) {
-        super(messagePayload, handle);
+    public StreamMessageImpl(MessagePayload messagePayload, int handle, SessionImpl sessionImpl) {
+        super(messagePayload, handle, sessionImpl);
         setBodyState(new MessageStateBodyReadOnly(this));
         streamBody.reset();
     }

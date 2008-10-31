@@ -7,6 +7,8 @@ import DDS.PUBLISHER_QOS_DEFAULT;
 import DDS.Publisher;
 import DDS.TOPIC_QOS_DEFAULT;
 import DDS.Topic;
+import DDS.Subscriber;
+import DDS.SUBSCRIBER_QOS_DEFAULT;
 import OpenDDS.DCPS.TheParticipantFactory;
 import OpenDDS.DCPS.transport.AttachStatus;
 import OpenDDS.DCPS.transport.TheTransportFactory;
@@ -21,6 +23,8 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageProducer;
 import javax.jms.TextMessage;
+import javax.jms.Session;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -47,8 +51,9 @@ public class TopicMessageProducerImplTest {
     private void doTestSend() throws JMSException {
         FakeObjects fakeObjects = createFakeObjects();
 
-        MessageProducer messageProducer = new TopicMessageProducerImpl(fakeObjects.destination,
-            fakeObjects.publisher, fakeObjects.participant);
+        Session session = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber);
+        MessageProducer messageProducer = session.createProducer(fakeObjects.destination);
+
         assertNotNull(messageProducer);
         messageProducer.send(fakeObjects.message);
         messageProducer.send(fakeObjects.message, DeliveryMode.NON_PERSISTENT, 5, 100000L);
@@ -67,8 +72,8 @@ public class TopicMessageProducerImplTest {
             assertEquals("This MessageProducer is created with a Destination.", e.getMessage());
         }
 
-        MessageProducer messageProducer2 = new TopicMessageProducerImpl(null,
-            fakeObjects.publisher, fakeObjects.participant);
+        session.createProducer(null);
+        MessageProducer messageProducer2 = session.createProducer(null);
         assertNotNull(messageProducer2);
         messageProducer2.send(fakeObjects.destination, fakeObjects.message);
         messageProducer2.send(fakeObjects.destination, fakeObjects.message, DeliveryMode.NON_PERSISTENT, 5, 100000L);
@@ -191,6 +196,15 @@ public class TopicMessageProducerImplTest {
         AttachStatus attachStatus = transport.attach_to_publisher(publisher);
         assertNotNull(attachStatus);
 
+        Subscriber subscriber = participant.create_subscriber(SUBSCRIBER_QOS_DEFAULT.get(), null);
+        assertNotNull(subscriber);
+
+        TransportImpl transport2 = TheTransportFactory.create_transport_impl(2, TheTransportFactory.AUTO_CONFIG);
+        assertNotNull(transport2);
+
+        AttachStatus attachStatus2 = transport2.attach_to_subscriber(subscriber);
+        assertNotNull(attachStatus2);
+
         final MessagePayloadTypeSupportImpl typeSupport = new MessagePayloadTypeSupportImpl();
         assertNotNull(typeSupport);
 
@@ -209,6 +223,7 @@ public class TopicMessageProducerImplTest {
 
         fakeObjects.destination = destination;
         fakeObjects.publisher = publisher;
+        fakeObjects.subscriber = subscriber;
         fakeObjects.participant = participant;
         fakeObjects.message = message;
 
@@ -234,6 +249,7 @@ public class TopicMessageProducerImplTest {
     private static class FakeObjects {
         public Destination destination;
         public Publisher publisher;
+        public Subscriber subscriber;
         public DomainParticipant participant;
         public Message message;
     }
