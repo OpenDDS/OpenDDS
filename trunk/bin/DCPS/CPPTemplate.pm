@@ -1425,6 +1425,7 @@ DDS::ReturnCode_t
                                                    instance_states);
     if (status != ::DDS::RETCODE_NO_DATA)
     {
+      post_read_or_take();
       return status;
     }
   }
@@ -1483,6 +1484,7 @@ DDS::ReturnCode_t
     if (status != ::DDS::RETCODE_NO_DATA)
     {
       total_samples();  // see if we are empty
+      post_read_or_take();
       return status;
     }
   }

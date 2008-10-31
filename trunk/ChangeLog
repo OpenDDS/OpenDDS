@@ -1,3 +1,10 @@
+Fri Oct 31 18:39:03 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+
+          read_next_instance() and take_next_instance() may exit from within
+          the for loop.  Call post_read_or_take() in these cases.
+
 Fri Oct 31 17:40:02 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * java/idl2jni/runtime/idl2jni_runtime.rc:
