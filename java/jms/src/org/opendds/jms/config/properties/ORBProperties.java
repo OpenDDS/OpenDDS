@@ -2,17 +2,17 @@
  * $Id$
  */
 
-package org.opendds.jms.config.props;
+package org.opendds.jms.config.properties;
 
 /**
  * @author  Steven Stallion
  * @version $Revision$
  */
 public interface ORBProperties {
-    String ORB_LISTEN_ENDPOINTS_ATTR = "ORBListenEndpoints";
-    String ORB_DEBUG_LEVEL_ATTR = "ORBDebugLevel";
-    String ORB_LOG_FILE_ATTR = "ORBLogFile";
-    String ORB_ARGS_ATTR = "ORBArgs";
+    String ORB_LISTEN_ENDPOINTS = "ORBListenEndpoints";
+    String ORB_DEBUG_LEVEL = "ORBDebugLevel";
+    String ORB_LOG_FILE = "ORBLogFile";
+    String ORB_ARGS = "ORBArgs";
 
     String getORBListenEndpoints();
 

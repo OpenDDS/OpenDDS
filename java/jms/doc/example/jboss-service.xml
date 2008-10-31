@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Id$
+
+    Author:  Steven Stallion
+    Version: $Revision$
+-->
+<!DOCTYPE server PUBLIC "-//JBoss//DTD MBean Service 4.2//EN"
+    "http://www.jboss.org/j2ee/dtd/jboss-service_4_2.dtd">
+
+<server>
+    <mbean code="org.opendds.jms.management.ParticipantFactoryService"
+           name="OpenDDS:service=ParticipantFactoryService">
+        <attribute name="DCPSDebugLevel">10</attribute>
+        <attribute name="DCPSInfoRepo">iiop://localhost:6666/DCPSInfoRepo</attribute>
+        <attribute name="DCPSTransportType">SimpleTcp</attribute>
+        <attribute name="ORBDebugLevel">10</attribute>
+        <attribute name="ORBListenEndpoints">iiop://localhost:7777</attribute>
+        <attribute name="ORBLogFile">${jboss.server.log.dir}/DDS.log</attribute>
+    </mbean>
+
+    <mbean code="org.opendds.jms.management.Destination"
+           name="OpenDDS:destination=DefaultTopic,kind=Topic">
+        <attribute name="JndiName">java:/DefaultTopic</attribute>
+    </mbean>
+
+    <mbean code="org.opendds.jms.management.Destination"
+           name="OpenDDS:destination=CustomTopic,kind=Topic">
+        <attribute name="JndiName">java:/CustomTopic</attribute>
+        <attribute name="DataReaderQosPolicy">
+            LIVELINESS.kind=AUTOMATIC
+            LIVELINESS.lease_duration=100
+        </attribute>
+        <attribute name="DataWriterQosPolicy">
+            LATENCY_BUDGET.duration=100
+            TRANSPORT_PRIORITY.value=100
+        </attribute>
+        <attribute name="TopicQosPolicy">
+            TOPIC_DATA.value=ExampleTopicData
+        </attribute>
+    </mbean>
+</server>

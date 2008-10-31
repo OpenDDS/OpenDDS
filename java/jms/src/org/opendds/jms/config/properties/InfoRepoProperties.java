@@ -2,22 +2,22 @@
  * $Id$
  */
 
-package org.opendds.jms.config.props;
+package org.opendds.jms.config.properties;
 
 /**
  * @author  Steven Stallion
  * @version $Revision$
  */
 public interface InfoRepoProperties {
-    String BIT_LISTEN_ADDRESS_ATTR = "BitListenAddress";
-    String IOR_FILE_ATTR = "IORFile";
-    String NOBITS_ATTR = "NOBITS";
-    String VERBOSE_TRANSPORT_LOGGING_ATTR = "VerboseTransportLogging";
-    String PERSISTENT_FILE_ATTR = "PersistentFile";
-    String RESURRECT_FROM_FILE_ATTR = "ResurrectFromFile";
-    String FEDERATOR_CONFIG_ATTR = "FederatorConfig";
-    String FEDERATION_ID_ATTR = "FederationId";
-    String FEDERATE_WITH_ATTR = "FederateWith";
+    String BIT_LISTEN_ADDRESS = "BitListenAddress";
+    String IOR_FILE = "IORFile";
+    String NOBITS = "NOBITS";
+    String VERBOSE_TRANSPORT_LOGGING = "VerboseTransportLogging";
+    String PERSISTENT_FILE = "PersistentFile";
+    String RESURRECT_FROM_FILE = "ResurrectFromFile";
+    String FEDERATOR_CONFIG = "FederatorConfig";
+    String FEDERATION_ID = "FederationId";
+    String FEDERATE_WITH = "FederateWith";
 
     String getBitListenAddress();
 

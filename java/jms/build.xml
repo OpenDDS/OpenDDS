@@ -154,18 +154,33 @@
 
     <target name="rar" depends="jar"
             description="Create a Resource Adapter Archive (RAR) under build/">
+        <!-- Update version tokens in descriptor -->
+        <copy file="${resource.dir}/ra.xml" todir="${build.dir}">
+            <filterset>
+                <filter token="VERSION" value="${project.version}"/>
+            </filterset>
+        </copy>
+
         <jar destfile="${build.dir}/${project.filename}.rar">
-            <fileset dir="${resource.dir}"/>
+            <zipfileset dir="${build.dir}" prefix="META-INF">
+                <include name="ra.xml"/>
+            </zipfileset>
 
             <fileset dir="${build.dir}">
                 <include name="${project.filename}.jar"/>
             </fileset>
-            <fileset dir="${native.dir}">
-                <include name="${lib.prefix}opendds-jms-native${lib.suffix}"/>
-            </fileset>
 
-            <fileset dir="${env.DDS_ROOT}/lib">
-                <include name="*.jar"/>
+            <zipfileset dir="${env.DDS_ROOT}/lib" prefix="lib">
+                <include name="OpenDDS_DCPS.jar"/>
+                <include name="i2jrt.jar"/>
+                <include name="tao_java.jar"/>
+            </zipfileset>
+
+            <zipfileset dir="${native.dir}" prefix="native">
+                <include name="${lib.prefix}opendds-jms-native${lib.suffix}"/>
+            </zipfileset>
+
+            <zipfileset dir="${env.DDS_ROOT}/lib" prefix="native">
                 <include name="${lib.prefix}DCPSInfoRepoServ${lib.suffix}"/>
                 <include name="${lib.prefix}Federator${lib.suffix}"/>
                 <include name="${lib.prefix}InfoRepoLib${lib.suffix}"/>
@@ -177,9 +192,9 @@
                 <include name="${lib.prefix}SimpleTcp${lib.suffix}"/>
                 <include name="${lib.prefix}SimpleUnreliableDgram${lib.suffix}"/>
                 <include name="${lib.prefix}ReliableMulticast${lib.suffix}"/>
-            </fileset>
+            </zipfileset>
 
-            <fileset dir="${env.ACE_ROOT}/lib">
+            <zipfileset dir="${env.ACE_ROOT}/lib" prefix="native">
                 <include name="${lib.prefix}ACE${lib.suffix}"/>
                 <include name="${lib.prefix}TAO${lib.suffix}"/>
                 <include name="${lib.prefix}TAO_AnyTypeCode${lib.suffix}"/>
@@ -189,7 +204,7 @@
                 <include name="${lib.prefix}TAO_PI${lib.suffix}"/>
                 <include name="${lib.prefix}TAO_PortableServer${lib.suffix}"/>
                 <include name="${lib.prefix}TAO_Svc_Utils${lib.suffix}"/>
-            </fileset>
+            </zipfileset>
 
             <manifest>
                 <attribute name="Specification-Title" value="J2EE Connector Architecture (JCA)"/>

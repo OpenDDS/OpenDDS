@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.opendds.jms.config.Configuration;
 import org.opendds.jms.config.PropertyWriter;
-import org.opendds.jms.config.props.ORBProperties;
+import org.opendds.jms.config.properties.ORBProperties;
 import org.opendds.jms.config.spi.PropertyFormat;
 
 /**
@@ -21,15 +21,15 @@ public class ORBPropertyFormat extends PropertyFormat {
         PropertyWriter writer = new PropertyWriter(config);
 
         writer.writeIfSet("-ORBListenEndpoints",
-            ORBProperties.ORB_LISTEN_ENDPOINTS_ATTR);
+            ORBProperties.ORB_LISTEN_ENDPOINTS);
 
         writer.writeIfSet("-ORBDebugLevel",
-            ORBProperties.ORB_DEBUG_LEVEL_ATTR);
+            ORBProperties.ORB_DEBUG_LEVEL);
 
         writer.writeIfSet("-ORBLogFile",
-            ORBProperties.ORB_LOG_FILE_ATTR);
+            ORBProperties.ORB_LOG_FILE);
 
-        writer.writeDelimited(ORBProperties.ORB_ARGS_ATTR);
+        writer.writeDelimited(ORBProperties.ORB_ARGS);
 
         writer.writeTo(args);
     }

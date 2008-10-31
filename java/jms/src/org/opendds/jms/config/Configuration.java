@@ -7,6 +7,8 @@ package org.opendds.jms.config;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.omg.CORBA.StringSeqHolder;
+
 import org.opendds.jms.config.spi.PropertyFormat;
 import org.opendds.jms.util.Strings;
 
@@ -49,5 +51,9 @@ public class Configuration {
 
     public String[] toArgs() {
         return PropertyFormat.format(this);
+    }
+
+    public StringSeqHolder toSeqHolder() {
+        return new StringSeqHolder(toArgs());
     }
 }

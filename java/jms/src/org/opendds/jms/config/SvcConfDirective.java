@@ -110,4 +110,9 @@ public class SvcConfDirective {
 
         return sbuf.toString();
     }
+
+    public void writeTo(PropertyWriter writer) {
+        writer.write("-ORBSvcConfDirective");
+        writer.write(toString());
+    }
 }

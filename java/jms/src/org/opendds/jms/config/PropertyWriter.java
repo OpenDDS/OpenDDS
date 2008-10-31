@@ -40,18 +40,11 @@ public class PropertyWriter {
     }
 
     public void write(String arg, Object value) {
-        if (value instanceof Boolean) {
-            write(arg);
+        write(arg);
 
-        } else {
-            write(arg);
+        if (!(value instanceof Boolean)) {
             write(value.toString());
         }
-    }
-
-    public void write(SvcConfDirective directive) {
-        write("-ORBSvcConfDirective");
-        write(directive.toString());
     }
 
     public void write(String value) {
