@@ -13,8 +13,8 @@ public class BytesMessageImpl extends AbstractMessageImpl implements BytesMessag
         initBody();
     }
 
-    public BytesMessageImpl(MessagePayload messagePayload, int handle) {
-        super(messagePayload, handle);
+    public BytesMessageImpl(MessagePayload messagePayload, int handle, SessionImpl sessionImpl) {
+        super(messagePayload, handle, sessionImpl);
         setBodyState(new MessageStateBodyReadOnly(this));
         bytesBody.reset();
     }

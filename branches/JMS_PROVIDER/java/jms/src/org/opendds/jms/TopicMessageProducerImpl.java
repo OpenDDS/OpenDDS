@@ -26,7 +26,7 @@ import OpenDDS.JMS.MessagePayloadDataWriter;
 import org.opendds.jms.util.Objects;
 
 /**
- * @author  Steven Stallion
+ * @author Steven Stallion
  * @version $Revision$
  */
 public class TopicMessageProducerImpl implements MessageProducer {
@@ -148,9 +148,7 @@ public class TopicMessageProducerImpl implements MessageProducer {
         if (dataWriterPair == null) {
             throw new UnsupportedOperationException("This MessageProducer is created without a Destination.");
         }
-        if (closed) {
-            throw new JMSException("This MessageProducer is closed.");
-        }
+        checkClosed();
         final MessagePayloadDataWriter dataWriter = dataWriterPair.getDataWriter(deliveryMode);
 
         validateMessage(message);
@@ -175,9 +173,7 @@ public class TopicMessageProducerImpl implements MessageProducer {
         if (dataWriterPair != null) {
             throw new UnsupportedOperationException("This MessageProducer is created with a Destination.");
         }
-        if (closed) {
-            throw new JMSException("This MessageProducer is closed.");
-        }
+        checkClosed();
         DataWriterPair dataWriterPair = getOrCreateDataWriterPair(destination);
         final MessagePayloadDataWriter dataWriter = dataWriterPair.getDataWriter(deliveryMode);
 
@@ -227,7 +223,7 @@ public class TopicMessageProducerImpl implements MessageProducer {
             qos.lifespan.duration.sec = DURATION_INFINITY_SEC.value;
             qos.lifespan.duration.nanosec = DURATION_INFINITY_NSEC.value;
         } else {
-            qos.lifespan.duration.sec = (int) timeToLive/1000;
+            qos.lifespan.duration.sec = (int) timeToLive / 1000;
             qos.lifespan.duration.nanosec = ((int) (timeToLive % 1000)) * 1000000;
         }
         dataWriter.set_qos(qos);
@@ -239,7 +235,6 @@ public class TopicMessageProducerImpl implements MessageProducer {
         dataWriter.write(payload, HANDLE_NIL.value);
     }
 
-
     public void close() throws JMSException {
         if (closed) return;
         if (dataWriterPair != null) {
@@ -250,5 +245,10 @@ public class TopicMessageProducerImpl implements MessageProducer {
             }
         }
         closed = true;
+    }
+
+    private void checkClosed() throws JMSException {
+        // JMS 1.1, 4.4.1
+        if (closed) throw new JMSException("This MessageProducer is closed.");
     }
 }

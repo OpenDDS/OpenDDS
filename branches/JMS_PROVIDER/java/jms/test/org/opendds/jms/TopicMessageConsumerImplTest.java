@@ -3,6 +3,8 @@ package org.opendds.jms;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
+import java.util.List;
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;
 import javax.jms.JMSException;
@@ -11,11 +13,13 @@ import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
 import javax.jms.TextMessage;
+import javax.jms.Session;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.omg.CORBA.StringSeqHolder;
 
@@ -51,13 +55,14 @@ public class TopicMessageConsumerImplTest {
             doTestClose(fakeObjects);
             doTestConsumer(fakeObjects);
             doTestMessageListener(fakeObjects);
+            doTestAcknowledgement(fakeObjects);
         }
 
     }
 
     private void doTestClose(FakeObjects fakeObjects) throws JMSException {
-        final MessageConsumer messageConsumer = new TopicMessageConsumerImpl(fakeObjects.destination,
-            fakeObjects.subscriber, fakeObjects.participant);
+        Session session = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber);
+        final MessageConsumer messageConsumer = session.createConsumer(fakeObjects.destination);
         assertNotNull(messageConsumer);
         final Thread thread = new Thread() {
             public void run() {
@@ -83,9 +88,61 @@ public class TopicMessageConsumerImplTest {
         }
     }
 
+    private void doTestConsumer(FakeObjects fakeObjects) throws JMSException {
+        Session session = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber);
+        final MessageConsumer messageConsumer = session.createConsumer(fakeObjects.destination);
+        assertNotNull(messageConsumer);
+
+        assertNull(messageConsumer.getMessageSelector());
+
+        // Fake out a MessageProducer and pump some messages
+        FakeMessageProducer fakeProducer = new FakeMessageProducer(fakeObjects);
+        final Thread fakeProducerThread = new Thread(fakeProducer);
+        fakeProducerThread.start();
+
+        final Message message = messageConsumer.receive();
+        assertNotNull(message);
+
+        final Message message2 = messageConsumer.receive(100000L);
+        assertNotNull(message2);
+
+        final Message message3 = messageConsumer.receiveNoWait();
+        assertNotNull(message3);
+
+        final Message message4 = messageConsumer.receiveNoWait();
+        assertNull(message4);
+
+        messageConsumer.close();
+        try {
+            messageConsumer.receive();
+            fail("Should throw");
+        } catch (IllegalStateException e) {
+            assertEquals("This MessageConsumer is closed.", e.getMessage());
+        }
+
+        try {
+            messageConsumer.receiveNoWait();
+        } catch (IllegalStateException e) {
+            assertEquals("This MessageConsumer is closed.", e.getMessage());
+        }
+
+        try {
+            messageConsumer.receive(100000L);
+        } catch (IllegalStateException e) {
+            assertEquals("This MessageConsumer is closed.", e.getMessage());
+        }
+
+        try {
+            fakeProducerThread.join();
+            fakeProducer.dispose();
+        } catch (InterruptedException e) {
+            // Don't care
+        }
+    }
+
     private void doTestMessageListener(FakeObjects fakeObjects) throws JMSException {
-        final MessageConsumer messageConsumer = new TopicMessageConsumerImpl(fakeObjects.destination,
-            fakeObjects.subscriber, fakeObjects.participant);
+        Session session = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber);
+        final MessageConsumer messageConsumer = session.createConsumer(fakeObjects.destination);
         assertNotNull(messageConsumer);
 
         MyMessageListener messageListener = new MyMessageListener();
@@ -117,12 +174,9 @@ public class TopicMessageConsumerImplTest {
         }
     }
 
-    private void doTestConsumer(FakeObjects fakeObjects) throws JMSException {
-        MessageConsumer messageConsumer = new TopicMessageConsumerImpl(fakeObjects.destination,
-            fakeObjects.subscriber, fakeObjects.participant);
-        assertNotNull(messageConsumer);
-
-        assertNull(messageConsumer.getMessageSelector());
+    private void doTestAcknowledgement(FakeObjects fakeObjects) throws JMSException {
+        ClientAcknowledgementSessionImpl session = new ClientAcknowledgementSessionImpl(fakeObjects);
+        final MessageConsumer messageConsumer = session.createConsumer(fakeObjects.destination);
 
         // Fake out a MessageProducer and pump some messages
         FakeMessageProducer fakeProducer = new FakeMessageProducer(fakeObjects);
@@ -136,15 +190,13 @@ public class TopicMessageConsumerImplTest {
         assertNotNull(message2);
 
         final Message message3 = messageConsumer.receiveNoWait();
-        assertNotNull(message3);
+        assertNull(message3);
 
-        final Message message4 = messageConsumer.receiveNoWait();
-        assertNull(message4);
+        assertEquals(2, session.getUnacknowledgedCount());
 
-        messageConsumer.close();
-        assertNull(messageConsumer.receive());
-        assertNull(messageConsumer.receiveNoWait());
-        assertNull(messageConsumer.receive(100000L));
+        message.acknowledge();
+
+        assertEquals(0, session.getUnacknowledgedCount());
 
         try {
             fakeProducerThread.join();
@@ -262,8 +314,8 @@ public class TopicMessageConsumerImplTest {
 
         private FakeMessageProducer(FakeObjects fakeObjects) throws JMSException {
             this.fakeObjects = fakeObjects;
-            messageProducer = new TopicMessageProducerImpl(fakeObjects.destination,
-                fakeObjects.publisher, fakeObjects.participant);
+            Session session = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber);
+            messageProducer = session.createProducer(fakeObjects.destination);
         }
 
         public void run() {
@@ -286,6 +338,26 @@ public class TopicMessageConsumerImplTest {
 
         public void dispose() throws JMSException {
             messageProducer.close();
+        }
+    }
+
+    private static class ClientAcknowledgementSessionImpl extends SessionImpl {
+        public ClientAcknowledgementSessionImpl(FakeObjects fakeObjects) {
+            super(false, Session.CLIENT_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber);
+        }
+
+        public int getUnacknowledgedCount() {
+            try {
+                final Field field = SessionImpl.class.getDeclaredField("unacknowledged");
+                field.setAccessible(true);
+                List<DataReaderHandlePair> unacknowledged = (List<DataReaderHandlePair>) field.get(this);
+                return unacknowledged.size();
+            } catch (NoSuchFieldException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
+            return Integer.MAX_VALUE; // Unexpected
         }
     }
 }

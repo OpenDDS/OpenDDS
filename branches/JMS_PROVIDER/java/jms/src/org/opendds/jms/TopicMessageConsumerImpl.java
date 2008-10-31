@@ -9,6 +9,7 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
+import javax.jms.Session;
 
 import DDS.ALIVE_INSTANCE_STATE;
 import DDS.Condition;
@@ -38,7 +39,7 @@ import OpenDDS.JMS.MessagePayloadDataReader;
 import OpenDDS.JMS.MessagePayloadDataReaderHelper;
 import OpenDDS.JMS.MessagePayloadSeqHolder;
 
-import static org.opendds.jms.MessageFactory.buildMessageFromPayload;
+import static org.opendds.jms.ConsumerMessageFactory.buildMessageFromPayload;
 import org.opendds.jms.util.Objects;
 import org.opendds.jms.util.Strings;
 
@@ -61,15 +62,10 @@ public class TopicMessageConsumerImpl implements MessageConsumer {
     private final WaitSet waitSet;
     private final GuardCondition closeToken;
 
-    public TopicMessageConsumerImpl(Destination destination, Subscriber subscriber, DomainParticipant participant) {
-        this(destination, null, false, subscriber, participant);
-    }
+    // JMS 1.1, 4.4.11,
+    private SessionImpl sessionImpl;
 
-    public TopicMessageConsumerImpl(Destination destination, String messageSelector, Subscriber subscriber, DomainParticipant participant) {
-        this(destination, messageSelector, false, subscriber, participant);
-    }
-
-    public TopicMessageConsumerImpl(Destination destination, String messageSelector, boolean nonLocal, Subscriber subscriber, DomainParticipant participant) {
+    public TopicMessageConsumerImpl(Destination destination, String messageSelector, boolean noLocal, Subscriber subscriber, DomainParticipant participant, SessionImpl sessionImpl) {
         Objects.ensureNotNull(subscriber);
         Objects.ensureNotNull(participant);
 
@@ -77,7 +73,7 @@ public class TopicMessageConsumerImpl implements MessageConsumer {
         this.subscriber = subscriber;
         this.participant = participant;
         this.messageSelector = messageSelector;
-        this.noLocal = nonLocal;
+        this.noLocal = noLocal;
 
         this.closed = false;
         this.messagePayloadDataReader = fromDestination(destination, subscriber, participant);
@@ -86,6 +82,7 @@ public class TopicMessageConsumerImpl implements MessageConsumer {
         this.waitSet = new WaitSet();
         this.waitSet.attach_condition(closeToken);
 
+        this.sessionImpl = sessionImpl;
     }
 
     private MessagePayloadDataReader fromDestination(Destination destination, Subscriber subscriber, DomainParticipant participant) {
@@ -106,27 +103,28 @@ public class TopicMessageConsumerImpl implements MessageConsumer {
         return Strings.isEmpty(messageSelector) ? null : messageSelector;
     }
 
-    public MessageListener getMessageListener() throws JMSException {
+    public MessageListener getMessageListener() {
         return messageListener;
     }
 
     public void setMessageListener(MessageListener messageListener) throws JMSException {
+        checkClosed();
         if (messageListener == null) {
             messagePayloadDataReader.set_listener(null, 0);
         } else {
-            messagePayloadDataReader.set_listener(new ConsumerDataReaderListener(this), DATA_AVAILABLE_STATUS.value);
+            messagePayloadDataReader.set_listener(new ConsumerDataReaderListener(this, sessionImpl), DATA_AVAILABLE_STATUS.value);
         }
         this.messageListener = messageListener;
     }
 
     public Message receive() throws JMSException {
-        if (closed) return null;
+        checkClosed();
         Duration_t duration = new Duration_t(DURATION_INFINITY_SEC.value, DURATION_INFINITY_NSEC.value);
         return doReceive(duration);
     }
 
     public Message receive(long timeout) throws JMSException {
-        if (closed) return null;
+        checkClosed();
         Duration_t duration = new Duration_t();
         if (timeout < 0) throw new IllegalArgumentException("The timeout specified is negative: " + timeout);
         if (timeout == 0) {
@@ -140,7 +138,7 @@ public class TopicMessageConsumerImpl implements MessageConsumer {
     }
 
     public Message receiveNoWait() throws JMSException {
-        if (closed) return null;
+        checkClosed();
         Duration_t duration = new Duration_t(0, 0);
         return doReceive(duration);
     }
@@ -182,7 +180,13 @@ public class TopicMessageConsumerImpl implements MessageConsumer {
                     int handle = sampleInfo.instance_handle;
                     waitSet.detach_condition(readCondition);
                     messagePayloadDataReader.delete_readcondition(readCondition);
-                    return buildMessageFromPayload(messagePayload, handle);
+                    AbstractMessageImpl message = buildMessageFromPayload(messagePayload, handle, sessionImpl);
+                    DataReaderHandlePair dataReaderHandlePair = new DataReaderHandlePair(messagePayloadDataReader, handle);
+                    sessionImpl.addToUnacknowledged(dataReaderHandlePair);
+                    if (sessionImpl.getAcknowledgeMode() != Session.CLIENT_ACKNOWLEDGE) {
+                        sessionImpl.doAcknowledge();
+                    }
+                    return message;
                 } else if (innerCondition._is_equivalent(closeToken)) {
                     // close() is called from another thread
                     waitSet.detach_condition(readCondition);
@@ -200,5 +204,10 @@ public class TopicMessageConsumerImpl implements MessageConsumer {
             subscriber.delete_datareader(messagePayloadDataReader);
         }
         this.closed = true;
+    }
+
+    private void checkClosed() {
+        // JMS 1.1, 4.4.1
+        if (closed) throw new IllegalStateException("This MessageConsumer is closed.");
     }
 }

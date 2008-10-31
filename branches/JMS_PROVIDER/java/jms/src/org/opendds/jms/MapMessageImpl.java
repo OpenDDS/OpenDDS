@@ -14,8 +14,8 @@ public class MapMessageImpl extends AbstractMessageImpl implements MapMessage {
         initBody();
     }
 
-    public MapMessageImpl(MessagePayload messagePayload, int handle) {
-        super(messagePayload, handle);
+    public MapMessageImpl(MessagePayload messagePayload, int handle, SessionImpl sessionImpl) {
+        super(messagePayload, handle, sessionImpl);
         setBodyState(new MessageStateBodyNonWritable(this));
     }
 
