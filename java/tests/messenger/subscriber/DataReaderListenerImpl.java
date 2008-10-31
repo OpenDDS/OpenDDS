@@ -15,13 +15,20 @@ public class DataReaderListenerImpl extends DDS._DataReaderListenerLocalBase {
         MessageHolder mh = new MessageHolder(new Message());
         SampleInfoHolder sih = new SampleInfoHolder(new SampleInfo(0, 0, 0,
             new DDS.Time_t(), 0, 0, 0, 0, 0, 0, 0, false));
-        mdr.take_next_sample(mh, sih);
-        System.out.println("Message: subject    = " + mh.value.subject);
-        System.out.println("         subject_id = " + mh.value.subject_id);
-        System.out.println("         from       = " + mh.value.from);
-        System.out.println("         count      = " + mh.value.count);
-        System.out.println("         text       = " + mh.value.text);
-        System.out.println("SampleInfo.sample_rank = " + sih.value.sample_rank);
+        int status  = mdr.take_next_sample(mh, sih);
+
+	if (status == RETCODE_OK.value) {
+	  System.out.println("Message: subject    = " + mh.value.subject);
+	  System.out.println("         subject_id = " + mh.value.subject_id);
+	  System.out.println("         from       = " + mh.value.from);
+	  System.out.println("         count      = " + mh.value.count);
+	  System.out.println("         text       = " + mh.value.text);
+	  System.out.println("SampleInfo.sample_rank = " + sih.value.sample_rank);
+	} else if (status == RETCODE_NO_DATA.value) {
+	  System.err.println ("ERROR: reader received DDS::RETCODE_NO_DATA!");
+	} else {
+	  System.err.println ("ERROR: read Message: Error: "+ status);
+	}
     }
 
     public void on_requested_deadline_missed(DDS.DataReader reader, DDS.RequestedDeadlineMissedStatus status) {
