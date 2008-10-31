@@ -1,3 +1,10 @@
+Fri Oct 31 17:40:02 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * java/idl2jni/runtime/idl2jni_runtime.rc:
+        * java/tao/tao_java.rc:
+
+          Fixed #include paths.
+
 Fri Oct 31 16:21:52 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/ReliableMulticast/ReliableMulticast.rc:
