@@ -1,3 +1,19 @@
+Fri Oct 31 23:01:18 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Added entry for a deadlock fix in reliable multicast transport. 
+          
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/prst_repo_run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+
+          Used file synch for qos change instead of using fixed time 
+          delay. This should fix prst_repo_run_test failure on some 
+          slow machines.
+
 Fri Oct 31 19:16:26 UTC 2008  Ciju John  <johnc at ociweb dot com>
 
         * java/tests/messenger/publisher/TestPublisher.java:

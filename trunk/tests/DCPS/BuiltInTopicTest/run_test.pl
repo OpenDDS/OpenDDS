@@ -30,9 +30,11 @@ $Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
 $Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
 $Monitor1 = PerlDDS::create_process ("monitor", " $opts -l 7");
 $Monitor2 = PerlDDS::create_process ("monitor", " $opts -u");
+$synch_file = "monitor1_done";
 
 $data_file = "test_run.data";
 unlink $data_file;
+unlink $synch_file;
 
 print $DCPSREPO->CommandLine() . "\n";
 print $Publisher->CommandLine() . "\n";
@@ -98,6 +100,7 @@ open (STDERR, ">&OLDERR");
 
 unlink $dcpsrepo_ior;
 #unlink $data_file;
+unlink $synch_file;
 
 if ($status == 0) {
   print "test PASSED.\n";

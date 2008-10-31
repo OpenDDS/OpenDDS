@@ -39,10 +39,13 @@ $num_messages = 60;
 $pub_opts = "$opts -DCPSConfigFile pub.ini -n $num_messages";
 $sub_opts = "$opts -DCPSConfigFile sub.ini -n $num_messages";
 $SRV_PORT = PerlACE::random_port();
+$synch_file = "monitor1_done";
 
 unlink $dcpsrepo_ior;
 unlink $info_prst_file;
 unlink $debugFile;
+unlink $synch_file;
+
 
 # If InfoRepo is running in persistent mode, use a
 #  static endpoint (instead of transient)
@@ -98,8 +101,9 @@ if ($ir != 0) {
     print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
     $status = 1;
 }
+
 unlink $dcpsrepo_ior;
- 
+
 print "Spawning second DCPSInfoRepo.\n";
 print $DCPSREPO->CommandLine() . "\n";
 $DCPSREPO->Spawn ();
@@ -115,13 +119,13 @@ print "Spawning second monitor.\n";
 
 print $Monitor2->CommandLine() . "\n";
 $Monitor2->Spawn ();
-
+ 
 $MonitorResult = $Monitor1->WaitKill (20);
 if ($MonitorResult != 0) {
     print STDERR "ERROR: Monitor1 returned $MonitorResult \n";
     $status = 1;
 }
-
+ 
 $MonitorResult = $Monitor2->WaitKill (300);
 if ($MonitorResult != 0) {
     print STDERR "ERROR: Monitor2 returned $MonitorResult \n";
@@ -154,6 +158,7 @@ open (STDERR, ">&OLDERR");
 unlink $dcpsrepo_ior;
 #unlink $data_file;
 unlink $info_prst_file;
+unlink $synch_file;
 
 if ($status == 0) {
   print "test PASSED.\n";
