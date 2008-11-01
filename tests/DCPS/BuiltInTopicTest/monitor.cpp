@@ -456,22 +456,20 @@ int main (int argc, char *argv[])
           1);
       }
 
+      dpf->delete_participant(participant.in ());
+      TheTransportFactory->release();
+      TheServiceParticipant->shutdown ();
+
       if (CUR_PART_USER_DATA = PART_USER_DATA)
       {
         // Create synch file.
         FILE* fp = ACE_OS::fopen ("monitor1_done", ACE_LIB_TEXT("w"));
-        int i = 0;
-        while (fp == 0 &&  i < 15)
+        if (fp != 0)
         {
-          ACE_DEBUG ((LM_DEBUG,
-            ACE_LIB_TEXT("creating monitor1 done\n")));
-          ACE_OS::sleep (1);
-          ++i;
+          ACE_DEBUG ((LM_DEBUG, ACE_LIB_TEXT("(%P|%t)monitor1 is done\n")));
+          ACE_OS::close (fp);
         }
       }
-      dpf->delete_participant(participant.in ());
-      TheTransportFactory->release();
-      TheServiceParticipant->shutdown ();
     }
   catch (CORBA::Exception& e)
     {

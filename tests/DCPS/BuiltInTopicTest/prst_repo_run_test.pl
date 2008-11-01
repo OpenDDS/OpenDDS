@@ -56,7 +56,7 @@ $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                     . "-orbendpoint iiop://:$SRV_PORT");
 $Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
 $Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
-$Monitor1 = PerlDDS::create_process ("monitor", " $opts -l 7");
+$Monitor1 = PerlDDS::create_process ("monitor", " $opts -l 5");
 $Monitor2 = PerlDDS::create_process ("monitor", " $opts -u");
 
 $data_file = "test_run_prst.data";
