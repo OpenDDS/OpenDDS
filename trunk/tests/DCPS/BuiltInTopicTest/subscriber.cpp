@@ -213,9 +213,10 @@ int main (int argc, char *argv[])
       while (fp == 0 &&  i < 15)
       {
         ACE_DEBUG ((LM_DEBUG,
-          ACE_LIB_TEXT("waiting monitor1 done ...\n")));
+          ACE_LIB_TEXT("(%P|%t)waiting monitor1 done ...\n")));
         ACE_OS::sleep (1);
         ++i;
+	      fp = ACE_OS::fopen (synch_fname, ACE_LIB_TEXT("r"));
       }
       if (fp != 0)
         ACE_OS::fclose (fp);
