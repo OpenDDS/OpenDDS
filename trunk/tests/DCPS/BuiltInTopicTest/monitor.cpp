@@ -467,7 +467,7 @@ int main (int argc, char *argv[])
         if (fp != 0)
         {
           ACE_DEBUG ((LM_DEBUG, ACE_LIB_TEXT("(%P|%t)monitor1 is done\n")));
-          ACE_OS::close (fp);
+          ACE_OS::fclose (fp);
         }
       }
     }
