@@ -1,3 +1,9 @@
+Sat Nov  1 16:18:46 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+
+          Fixed compile error (now using fclose() instead of close()).
+
 Sat Nov  1 07:54:55 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/BuiltInTopicTest/monitor.cpp:
