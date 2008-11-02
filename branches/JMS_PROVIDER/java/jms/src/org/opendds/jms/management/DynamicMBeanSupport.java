@@ -223,7 +223,7 @@ public abstract class DynamicMBeanSupport implements DynamicMBean, MBeanRegistra
 
             try {
                 info.add(new MBeanAttributeInfo(property.getName(), description,
-                    property.getReadMethod(), property.getWriteMethod());
+                    property.getReadMethod(), property.getWriteMethod()));
 
             } catch (IntrospectionException e) {
                 throw new IllegalArgumentException(e);
