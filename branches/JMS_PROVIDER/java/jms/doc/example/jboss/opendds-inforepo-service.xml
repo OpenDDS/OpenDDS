@@ -4,8 +4,8 @@
 
     Example DCPSInfoRepoService configuration.
 
-    This configuration will create a DCPSInfoRepo instance using the
-    SimpleTcp transport type which listens to localhost:7777.
+    This example will create a DCPSInfoRepo instance using the
+    SimpleTcp transport type which listens to localhost:6666.
 
     Author:  Steven Stallion
     Version: $Revision$

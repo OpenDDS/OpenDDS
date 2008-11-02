@@ -1,13 +1,17 @@
 /*
- * $
+ * $Id$
  */
 
 package org.opendds.jms.management;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.opendds.jms.management.annotation.Attribute;
+import org.opendds.jms.management.annotation.Constructor;
 import org.opendds.jms.management.annotation.Description;
 import org.opendds.jms.management.annotation.Operation;
 
@@ -15,26 +19,28 @@ import org.opendds.jms.management.annotation.Operation;
  * @author  Steven Stallion
  * @version $Revision$
  */
-@MBean(description = "OpenDDS Destination MBean")
+@Description("OpenDDS Destination MBean")
 public class Destination extends DynamicMBeanSupport implements ServiceMBean {
-    private static Log log = LogFactory.getLog(Destination.class);
+    private Log log;
 
     private boolean active;
+    private String jndiName;
 
-    private Attributes attributes = new Attributes();
+    private Context context;
 
-    public Destination() {
-        super();
+    @Constructor
+    public Destination() {}
 
-        attributes.register("JndiName", String.class);
+    @Attribute
+    @Description("Destination Name")
+    public String getDestination() {
+        return requireKeyProperty("destination");
     }
 
-    protected Attributes getAttributes() {
-        return attributes;
-    }
-
-    protected String getDescription() {
-        return "OpenDDS Destination Description";
+    @Attribute
+    @Description("Destination Type")
+    public String getType() {
+        return requireKeyProperty("type");
     }
 
     @Attribute
@@ -44,18 +50,28 @@ public class Destination extends DynamicMBeanSupport implements ServiceMBean {
 
     @Attribute
     public String getJndiName() {
-        return null;
+        return jndiName;
     }
 
-    public void setJndiName() {
-
+    public void setJndiName(String jndiName) {
+        this.jndiName = jndiName;
     }
 
     @Operation
     public void start() throws Exception {
         if (isActive()) {
-            throw new IllegalStateException("Destination already started!");
+            throw new IllegalStateException(getDestination() + " already started!");
         }
+
+        log = LogFactory.getLog(getDestination());
+        if (log.isInfoEnabled()) {
+            log.info(String.format("Binding to JNDI name '%s'", jndiName));
+        }
+
+        // TODO create TopicImpl
+
+        context = new InitialContext();
+        context.bind(jndiName, null); // TODO: bind TopicImpl instance
 
         active = true;
     }
@@ -63,8 +79,16 @@ public class Destination extends DynamicMBeanSupport implements ServiceMBean {
     @Operation
     public void stop() throws Exception {
         if (!isActive()) {
-            throw new IllegalStateException("Destination already stopped!");
+            throw new IllegalStateException(getDestination() + " already stopped!");
         }
+
+        if (log.isInfoEnabled()) {
+            log.info(String.format("Unbinding from JNDI name '%s'", jndiName));
+        }
+        log = null;
+
+        context.unbind(jndiName);
+        context = null;
 
         active = false;
     }

@@ -14,9 +14,10 @@ import java.util.List;
  */
 public class Classes {
 
-    public static Method findDeclaredMethod(Class clazz,
-                                            String methodName,
-                                            Object[] parameters) throws NoSuchMethodException {
+    public static Method findMethod(Class clazz,
+                                    String methodName,
+                                    Object[] parameters) throws NoSuchMethodException {
+
         Class[] parameterTypes = null;
         if (parameters != null) {
             parameterTypes = getTypes(parameters);
