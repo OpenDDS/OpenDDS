@@ -10,13 +10,13 @@
 
 <server>
     <mbean code="org.opendds.jms.management.Destination"
-           name="OpenDDS:destination=DefaultTopic,kind=Topic">
-        <attribute name="JndiName">java:/DefaultTopic</attribute>
+           name="OpenDDS:destination=DefaultTopic,type=Topic">
+        <attribute name="JndiName">DDS/DefaultTopic</attribute>
     </mbean>
 
     <mbean code="org.opendds.jms.management.Destination"
-           name="OpenDDS:destination=CustomTopic,kind=Topic">
-        <attribute name="JndiName">java:/CustomTopic</attribute>
+           name="OpenDDS:destination=CustomTopic,type=Topic">
+        <attribute name="JndiName">DDS/CustomTopic</attribute>
         <attribute name="DataReaderQosPolicy">
             LIVELINESS.kind=AUTOMATIC
             LIVELINESS.lease_duration=100
@@ -26,7 +26,7 @@
             TRANSPORT_PRIORITY.value=100
         </attribute>
         <attribute name="TopicQosPolicy">
-            TOPIC_DATA.value=ExampleTopicData
+            TOPIC_DATA.value=CustomTopicData
         </attribute>
     </mbean>
 </server>
