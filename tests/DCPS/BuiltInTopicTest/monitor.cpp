@@ -460,7 +460,7 @@ int main (int argc, char *argv[])
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
-      if (CUR_PART_USER_DATA = PART_USER_DATA)
+      if (CUR_PART_USER_DATA == PART_USER_DATA)
       {
         // Create synch file.
         FILE* fp = ACE_OS::fopen ("monitor1_done", ACE_LIB_TEXT("w"));
