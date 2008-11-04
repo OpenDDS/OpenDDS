@@ -24,7 +24,10 @@ public class TestSubscriber {
 	}
 
         MessageTypeSupportImpl servant = new MessageTypeSupportImpl();
-        servant.register_type(dp, "");
+        if (servant.register_type(dp, "") != RETCODE_OK.value) {
+	  System.err.println ("register_type failed");
+	  return;
+	}
         Topic top = dp.create_topic("Movie Discussion List",
                                     servant.get_type_name(),
                                     TOPIC_QOS_DEFAULT.get(), null);

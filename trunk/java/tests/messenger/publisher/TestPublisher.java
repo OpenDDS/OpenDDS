@@ -24,7 +24,10 @@ public class TestPublisher {
 	}
 
         MessageTypeSupportImpl servant = new MessageTypeSupportImpl();
-        servant.register_type(dp, "");
+        if (servant.register_type(dp, "") != RETCODE_OK.value) {
+	  System.err.println ("register_type failed");
+	  return;
+	}
         Topic top = dp.create_topic("Movie Discussion List",
                                     servant.get_type_name(),
                                     TOPIC_QOS_DEFAULT.get(), null);
@@ -41,7 +44,7 @@ public class TestPublisher {
 
         //OpenDDS-specific attachment of transport to publisher
         TransportImpl transport_impl =
-            TheTransportFactory.create_transport_impl(1,
+	  TheTransportFactory.create_transport_impl(1,
             TheTransportFactory.AUTO_CONFIG);
 	if (transport_impl == null) {
 	  System.err.println ("Transport implementation creation failed");
