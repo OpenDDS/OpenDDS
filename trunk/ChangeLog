@@ -1,7 +1,13 @@
+Tue Nov  4 16:46:56 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/GuardCondition/GuardConditionTest.cpp:
+
+          Fixed warnings.
+
 Mon Nov  3 16:20:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/BuiltInTopicTest/monitor.cpp:
-        
+
           Fixed incorrect string comparison(replace = with ==).
 
 Sat Nov  1 16:18:46 UTC 2008  Adam Mitz  <mitza@ociweb.com>
