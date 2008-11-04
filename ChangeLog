@@ -1,3 +1,10 @@
+Tue Nov  4 22:51:42 UTC 2008  Ciju John  <johnc at ociweb dot com>
+
+        * java/tests/messenger/publisher/TestPublisher.java:
+        * java/tests/messenger/subscriber/DataReaderListenerImpl.java:
+        * java/tests/messenger/subscriber/TestSubscriber.java:
+          Further error checking.
+
 Tue Nov  4 16:46:56 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/GuardCondition/GuardConditionTest.cpp:
