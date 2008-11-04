@@ -12,7 +12,7 @@ import org.junit.Test;
  * @version $Revision$
  */
 public class ParticipantFactoryServiceTest {
-    private ParticipantFactoryServiceMBean service;
+    private ParticipantFactoryService service;
 
     @Before
     public void setUp() {

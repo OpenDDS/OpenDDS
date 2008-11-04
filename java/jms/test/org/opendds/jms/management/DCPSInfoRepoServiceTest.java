@@ -4,6 +4,8 @@
 
 package org.opendds.jms.management;
 
+import javax.management.Attribute;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -12,12 +14,13 @@ import org.junit.Test;
  * @version $Revision$
  */
 public class DCPSInfoRepoServiceTest {
-    private DCPSInfoRepoServiceMBean service;
+    private DCPSInfoRepoService service;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         service = new DCPSInfoRepoService();
-        service.setNOBITS(true);
+
+        service.setAttribute(new Attribute("NOBITS", true));
     }
 
     @Test(expected = IllegalStateException.class)

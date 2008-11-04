@@ -1,3 +1,31 @@
+Tue Nov  4 19:42:25 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/OpenDDS.ipr:
+        * java/jms/doc/example/jboss/opendds-ds.xml:
+        * java/jms/doc/example/jboss/opendds-inforepo-service.xml:
+        * java/jms/src/org/opendds/jms/TopicImpl.java:
+        * java/jms/src/org/opendds/jms/management/DCPSInfoRepoService.java:
+        * java/jms/src/org/opendds/jms/management/Destination.java:
+        * java/jms/src/org/opendds/jms/management/DynamicAttributes.java:
+        * java/jms/src/org/opendds/jms/management/DynamicMBeanMetaData.java:
+        * java/jms/src/org/opendds/jms/management/DynamicMBeanSupport.java:
+        * java/jms/src/org/opendds/jms/management/ParticipantFactoryService.java:
+        * java/jms/src/org/opendds/jms/management/annotation/Attribute.java:
+        * java/jms/src/org/opendds/jms/management/annotation/Constructor.java:
+        * java/jms/src/org/opendds/jms/management/annotation/KeyProperty.java:
+        * java/jms/src/org/opendds/jms/util/BeanHelper.java:
+        * java/jms/src/org/opendds/jms/util/JndiHelper.java:
+        * java/jms/src/org/opendds/jms/util/Strings.java:
+        * java/jms/test/org/opendds/jms/management/DCPSInfoRepoServiceTest.java:
+        * java/jms/test/org/opendds/jms/management/ParticipantFactoryServiceTest.java:
+
+          Updated JMX configuration.
+
+        * java/jms/src/org/opendds/jms/management/DCPSInfoRepoServiceMBean.java:
+        * java/jms/src/org/opendds/jms/management/ParticipantFactoryServiceMBean.java:
+
+          Removed these files.
+
 Sun Nov  2 20:51:50 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms

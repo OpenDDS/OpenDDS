@@ -10,7 +10,7 @@
 
 <connection-factories>
     <mbean code="org.opendds.jms.management.ParticipantFactoryService"
-           name="OpenDDS:service=ParticipantFactoryService">
+           name="OpenDDS:service=DomainParticipantFactory">
         <attribute name="DCPSDebugLevel">10</attribute>
         <attribute name="DCPSInfoRepo">iiop://localhost:6666/DCPSInfoRepo</attribute>
         <attribute name="DCPSTransportType">SimpleTcp</attribute>
@@ -39,6 +39,6 @@
             <!-- TODO -->
         </config-property>
         <max-pool-size>20</max-pool-size>
-        <depends>OpenDDS:service=ParticipantFactoryService</depends>
+        <depends>OpenDDS:service=DomainParticipantFactory</depends>
     </no-tx-connection-factory>
 </connection-factories>

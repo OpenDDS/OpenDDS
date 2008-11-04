@@ -9,8 +9,11 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author  Steven Stallion
@@ -19,13 +22,16 @@ import java.util.Set;
 public class BeanHelper {
     private BeanInfo beanInfo;
 
-    public BeanHelper(Object instance) {
-        this(instance.getClass());
-    }
+    private Map<String, PropertyDescriptor> properties =
+        new HashMap<String, PropertyDescriptor>();
 
     public BeanHelper(Class clazz) {
         try {
             beanInfo = Introspector.getBeanInfo(clazz);
+
+            for (PropertyDescriptor property : beanInfo.getPropertyDescriptors()) {
+                properties.put(property.getName(), property);
+            }
 
         } catch (Exception e) {
             throw new IllegalArgumentException(e);
@@ -36,16 +42,30 @@ public class BeanHelper {
         return beanInfo;
     }
 
-    public Set<PropertyDescriptor> findAnnotatedProperties(Class<? extends Annotation> annotationClass) {
-        Set<PropertyDescriptor> properties = new LinkedHashSet<PropertyDescriptor>();
+    public boolean hasProperty(String name) {
+        return properties.containsKey(name);
+    }
 
-        for (PropertyDescriptor property : beanInfo.getPropertyDescriptors()) {
+    public Collection<PropertyDescriptor> getProperties() {
+        return Collections.unmodifiableCollection(properties.values());
+    }
+
+    public Collection<PropertyDescriptor> findAnnotatedProperties(Class<? extends Annotation> annotationClass) {
+        Collection<PropertyDescriptor> collection = new ArrayList<PropertyDescriptor>();
+
+        for (PropertyDescriptor property : properties.values()) {
             Method method = property.getReadMethod();
             if (method != null && method.isAnnotationPresent(annotationClass)) {
-                properties.add(property);
+                collection.add(property);
+
+            } else {
+                method = property.getWriteMethod();
+                if (method != null && method.isAnnotationPresent(annotationClass)) {
+                    collection.add(property);
+                }
             }
         }
 
-        return properties;
+        return collection;
     }
 }

@@ -10,6 +10,19 @@ package org.opendds.jms.util;
  */
 public class Strings {
 
+    public static String capitalize(String s) {
+        assert s != null;
+
+        StringBuffer sbuf = new StringBuffer();
+
+        sbuf.append(s.trim());
+
+        char first = sbuf.charAt(0);
+        sbuf.setCharAt(0, Character.toUpperCase(first));
+
+        return sbuf.toString();
+    }
+
     public static boolean hasLength(String s, int len) {
         return hasLength(s, len, true);
     }

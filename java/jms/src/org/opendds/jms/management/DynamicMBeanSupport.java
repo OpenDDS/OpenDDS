@@ -4,38 +4,30 @@
 
 package org.opendds.jms.management;
 
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+
+import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
 import javax.management.DynamicMBean;
-import javax.management.IntrospectionException;
 import javax.management.InvalidAttributeValueException;
+import javax.management.JMException;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanConstructorInfo;
 import javax.management.MBeanException;
 import javax.management.MBeanInfo;
-import javax.management.MBeanNotificationInfo;
 import javax.management.MBeanOperationInfo;
 import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
-import org.opendds.jms.management.annotation.Attribute;
-import org.opendds.jms.management.annotation.Constructor;
-import org.opendds.jms.management.annotation.Description;
-import org.opendds.jms.management.annotation.Operation;
-import org.opendds.jms.util.Annotations;
-import org.opendds.jms.util.BeanHelper;
-import org.opendds.jms.util.Classes;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.opendds.jms.util.Strings;
 
 /**
@@ -43,35 +35,31 @@ import org.opendds.jms.util.Strings;
  * @version $Revision$
  */
 public abstract class DynamicMBeanSupport implements DynamicMBean, MBeanRegistration {
-    private Map<String, Class> attributeTypes =
-        new HashMap<String, Class>();
+    private Log log = LogFactory.getLog(getClass());
 
-    private Map<String, MBeanAttributeInfo> attributeInfo =
-        new LinkedHashMap<String, MBeanAttributeInfo>();
+    private DynamicMBeanMetaData metadata = new DynamicMBeanMetaData(this);
 
-    private Map<String, Object> attributeValues =
-        new HashMap<String, Object>();
+    private DynamicAttributes attributes = new DynamicAttributes();
 
     protected MBeanServer server;
     protected ObjectName name;
 
     protected Boolean registrationDone;
 
-    protected String getKeyProperty(String key) {
-        return name.getKeyProperty(key);
-    }
-
-    protected String requireKeyProperty(String key) {
-        String value = getKeyProperty(key);
-        if (Strings.isEmpty(value)) {
-            throw new IllegalArgumentException(key + " is a required key property!");
-        }
-        return value;
-    }
-
-    public ObjectName preRegister(MBeanServer server, ObjectName name) {
+    public ObjectName preRegister(MBeanServer server, ObjectName name) throws Exception {
         this.server = server;
         this.name = name;
+
+        // Set ObjectName key properties
+        for (DynamicMBeanMetaData.KeyPropertyModel model : metadata.getKeyProperties()) {
+            String value = name.getKeyProperty(model.getName());
+
+            if (model.isRequired() && Strings.isEmpty(value)) {
+                throw new IllegalArgumentException(model.getName() + " is a required key property!");
+            }
+            model.setValue(this, value);
+        }
+
         return name;
     }
 
@@ -83,106 +71,128 @@ public abstract class DynamicMBeanSupport implements DynamicMBean, MBeanRegistra
 
     public void postDeregister() {}
 
-
-    public boolean isAttributeRegistered(String attribute) {
-        return attributeInfo.containsKey(attribute);
-    }
-
-    public void registerAttribute(String attribute, Class type) {
+    protected void registerAttribute(String attribute, Class type) {
         registerAttribute(attribute, type, null);
     }
 
-    public void registerAttribute(String attribute, Class type, String description) {
-        registerAttribute(attribute, type, description, true, true);
+    protected void registerAttribute(String attribute, Class type, String description) {
+        attributes.register(attribute, type, description, true, true);
     }
 
-    public void registerReadOnlyAttribute(String attribute, Class type) {
+    protected void registerReadOnlyAttribute(String attribute, Class type) {
         registerReadOnlyAttribute(attribute, type, null);
     }
 
-    public void registerReadOnlyAttribute(String attribute, Class type, String description) {
-        registerAttribute(attribute, type, description, true, false);
+    protected void registerReadOnlyAttribute(String attribute, Class type, String description) {
+        attributes.register(attribute, type, description, true, false);
     }
 
-    protected void registerAttribute(String attribute,
-                                     Class type,
-                                     String description,
-                                     boolean isReadable,
-                                     boolean isWritable) {
+    public Object getAttribute(String attribute)
+            throws AttributeNotFoundException, MBeanException, ReflectionException {
 
-        if (isAttributeRegistered(attribute)) {
-            throw new IllegalArgumentException("Attribute already registered: " + attribute);
+        DynamicMBeanMetaData.AttributeModel model = metadata.getAttribute(attribute);
+        if (model != null) {
+            try {
+                return model.getValue(this);
+
+            } catch (Exception e) {
+                throwException(e);
+            }
         }
 
-        attributeTypes.put(attribute, type);
-
-        attributeInfo.put(attribute, new MBeanAttributeInfo(attribute,
-            type.getName(), description, isReadable, isWritable, false));
+        // Dynamic Attribute
+        return attributes.getAttribute(attribute);
     }
 
-    public void unregisterAttribute(String attribute) {
-        attributeTypes.remove(attribute);
-        attributeInfo.remove(attribute);
-        attributeValues.remove(attribute);
-    }
+    public void setAttribute(Attribute attribute)
+        throws AttributeNotFoundException, InvalidAttributeValueException, MBeanException, ReflectionException {
 
-    public Class getAttributeType(String attribute) {
-        if (!isAttributeRegistered(attribute)) {
-            throw new IllegalArgumentException("Unknown attribute type: " + attribute);
-        }
-        return attributeTypes.get(attribute);
-    }
-
-    public Object getAttribute(String attribute) throws AttributeNotFoundException {
-        if (!isAttributeRegistered(attribute)) {
-            throw new AttributeNotFoundException();
-        }
-        return attributeValues.get(attribute);
-    }
-
-    public void setAttribute(javax.management.Attribute attribute) throws AttributeNotFoundException, InvalidAttributeValueException {
         String name = attribute.getName();
-        Object value = attribute.getValue();
 
-        MBeanAttributeInfo info = attributeInfo.get(name);
-        if (info == null) {
-            throw new AttributeNotFoundException();
+        DynamicMBeanMetaData.AttributeModel model = metadata.getAttribute(name);
+        if (model != null) {
+            if (model.isReadOnly()) {
+                throw new AttributeNotFoundException(name);
+            }
+
+            try {
+                model.setValue(this, attribute.getValue());
+                return;
+
+            } catch (Exception e) {
+                throwException(e);
+            }
         }
 
-        if (!getAttributeType(name).isAssignableFrom(value.getClass())) {
-            throw new InvalidAttributeValueException();
-        }
-
-        attributeValues.put(name, value);
+        // Dynamic Attribute
+        attributes.setAttribute(attribute);
     }
 
     public AttributeList getAttributes(String[] attributes) {
-        AttributeList values = new AttributeList();
+        AttributeList list = new AttributeList();
 
         for (String attribute : attributes) {
             try {
-                values.add(new javax.management.Attribute(attribute, getAttribute(attribute)));
+                list.add(new Attribute(attribute, getAttribute(attribute)));
 
-            } catch (Exception e) {}
+            } catch (Exception e) {
+                log.error("Unexpected problem getting attribute: " + attribute, e);
+            }
         }
 
-        return values;
+        return list;
     }
 
     public AttributeList setAttributes(AttributeList attributes) {
-        AttributeList values = new AttributeList();
+        AttributeList list = new AttributeList();
 
         Iterator itr = attributes.iterator();
         while (itr.hasNext()) {
-            javax.management.Attribute attribute = (javax.management.Attribute) itr.next();
+            Attribute attribute = (Attribute) itr.next();
             try {
                 setAttribute(attribute);
-                values.add(attribute);
+                list.add(attribute);
 
-            } catch (Exception e) {}
+            } catch (Exception e) {
+                log.error("Unexpected problem setting attribute: " + attribute.getName(), e);
+            }
         }
 
-        return values;
+        return list;
+    }
+
+    protected void verify() {
+        for (DynamicMBeanMetaData.AttributeModel model : metadata.getAttributes()) {
+            if (model.isRequired()) {
+                try {
+                    Object value = getAttribute(model.getName());
+                    if (value == null) {
+                        throw new IllegalStateException(model.getName() + " is a required attribute!");
+                    }
+
+                } catch (JMException e) {
+                    throw new IllegalStateException(e);
+                }
+            }
+        }
+    }
+
+    public Object invoke(String actionName,
+                         Object params[],
+                         String signature[]) throws MBeanException, ReflectionException {
+
+        DynamicMBeanMetaData.OperationModel model = metadata.getOperation(actionName);
+        if (model == null) {
+            throw new IllegalArgumentException(actionName);
+        }
+
+        try {
+            return model.invoke(this, params);
+
+        } catch (Exception e) {
+            throwException(e);
+        }
+        return null; // never reached
     }
 
     public MBeanInfo getMBeanInfo() {
@@ -191,100 +201,56 @@ public abstract class DynamicMBeanSupport implements DynamicMBean, MBeanRegistra
                              getAttributeInfo(),
                              getConstructorInfo(),
                              getOperationInfo(),
-                             getNotificationInfo());
+                             null); // TODO JMX Notification support
     }
 
     protected String getDescription() {
-        String description = null;
-
-        Description d = Annotations.getAnnotation(this, Description.class);
-        if (d != null) {
-            description = d.value();
-        }
-
-        return description;
+        return metadata.getDescription(this);
     }
 
     protected MBeanAttributeInfo[] getAttributeInfo() {
-        List<MBeanAttributeInfo> info = new ArrayList<MBeanAttributeInfo>();
+        Collection<MBeanAttributeInfo> values = new ArrayList<MBeanAttributeInfo>();
 
-        // Add dynamic attributes
-        info.addAll(attributeInfo.values());
-
-        // Add annotated attributes
-        BeanHelper helper = new BeanHelper(this);
-        for (PropertyDescriptor property : helper.findAnnotatedProperties(Attribute.class)) {
-            String description = null;
-
-            Description d = Annotations.getAnnotation(property.getReadMethod(), Description.class);
-            if (d != null) {
-                description = d.value();
-            }
-
-            try {
-                info.add(new MBeanAttributeInfo(property.getName(), description,
-                    property.getReadMethod(), property.getWriteMethod()));
-
-            } catch (IntrospectionException e) {
-                throw new IllegalArgumentException(e);
-            }
+        for (DynamicMBeanMetaData.AttributeModel model : metadata.getAttributes()) {
+            values.add(model.toAttributeInfo());
         }
 
-        return info.toArray(new MBeanAttributeInfo[info.size()]);
+        // Dynamic DynamicAttributes
+        values.addAll(attributes.getAttributeInfo());
+
+        return values.toArray(new MBeanAttributeInfo[values.size()]);
     }
 
     protected MBeanConstructorInfo[] getConstructorInfo() {
-        List<MBeanConstructorInfo> info = new ArrayList<MBeanConstructorInfo>();
+        Collection<MBeanConstructorInfo> values = new ArrayList<MBeanConstructorInfo>();
 
-        for (java.lang.reflect.Constructor constructor :
-                Annotations.findAnnotatedConstructors(this, Constructor.class)) {
-
-            String description = null;
-
-            Description d = Annotations.getAnnotation(constructor, Description.class);
-            if (d != null) {
-                description = d.value();
-            }
-
-            info.add(new MBeanConstructorInfo(description, constructor));
+        for (DynamicMBeanMetaData.ConstructorModel model : metadata.getConstructors()) {
+            values.add(model.toConstructorInfo());
         }
 
-        return info.toArray(new MBeanConstructorInfo[info.size()]);
+        return values.toArray(new MBeanConstructorInfo[values.size()]);
     }
 
     protected MBeanOperationInfo[] getOperationInfo() {
-        List<MBeanOperationInfo> info = new ArrayList<MBeanOperationInfo>();
+        Collection<MBeanOperationInfo> values = new ArrayList<MBeanOperationInfo>();
 
-        for (Method method : Annotations.findAnnotatedMethods(this, Operation.class)) {
-            String description = null;
+        for (DynamicMBeanMetaData.OperationModel model : metadata.getOperations()) {
+            values.add(model.toOperationInfo());
+        }
 
-            Description d = method.getAnnotation(Description.class);
-            if (d != null) {
-                description = d.value();
+        return values.toArray(new MBeanOperationInfo[values.size()]);
+    }
+
+    //
+
+    private static void throwException(Exception e) throws MBeanException, ReflectionException {
+        if (e instanceof InvocationTargetException) {
+            Throwable cause = e.getCause();
+
+            if (cause instanceof Exception) {
+                throw new MBeanException((Exception) cause);
             }
-
-            info.add(new MBeanOperationInfo(description, method));
         }
-
-        return info.toArray(new MBeanOperationInfo[info.size()]);
-    }
-
-    protected MBeanNotificationInfo[] getNotificationInfo() {
-        return null;
-    }
-
-    public Object invoke(String actionName,
-                         Object params[],
-                         String signature[]) throws MBeanException, ReflectionException {
-        try {
-            Method method = Classes.findMethod(getClass(), actionName, params);
-            return method.invoke(this, params);
-
-        } catch (InvocationTargetException e) {
-            throw new MBeanException(e);
-            
-        } catch (Exception e) {
-            throw new ReflectionException(e);
-        }
+        throw new ReflectionException(e);
     }
 }
