@@ -4,43 +4,57 @@
 
 package org.opendds.jms.management;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
+import java.io.Serializable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.opendds.jms.TopicImpl;
 import org.opendds.jms.management.annotation.Attribute;
-import org.opendds.jms.management.annotation.Constructor;
 import org.opendds.jms.management.annotation.Description;
+import org.opendds.jms.management.annotation.KeyProperty;
 import org.opendds.jms.management.annotation.Operation;
+import org.opendds.jms.util.JndiHelper;
+import org.opendds.jms.util.Strings;
 
 /**
  * @author  Steven Stallion
  * @version $Revision$
  */
 @Description("OpenDDS Destination MBean")
-public class Destination extends DynamicMBeanSupport implements ServiceMBean {
+public class Destination extends DynamicMBeanSupport implements Serializable, ServiceMBean {
     private Log log;
 
     private boolean active;
+    private String destination;
     private String jndiName;
+    private String type;
 
-    private Context context;
+    private JndiHelper helper = new JndiHelper();
 
-    @Constructor
-    public Destination() {}
-
-    @Attribute
-    @Description("Destination Name")
+    @Attribute(readOnly = true)
     public String getDestination() {
-        return requireKeyProperty("destination");
+        return destination;
     }
 
-    @Attribute
-    @Description("Destination Type")
+    @KeyProperty
+    public void setDestination(String destination) {
+        this.destination = destination;
+    }
+
+    @Attribute(readOnly = true)
     public String getType() {
-        return requireKeyProperty("type");
+        return type;
+    }
+
+    @KeyProperty
+    public void setType(String type) {
+        // Currently, only 'Topic' destination types are supported.
+        // This is a placeholder until Queuing support is added.
+        if (!"Topic".equals(type)) {
+            throw new IllegalArgumentException(type);
+        }
+        this.type = type;
     }
 
     @Attribute
@@ -48,12 +62,15 @@ public class Destination extends DynamicMBeanSupport implements ServiceMBean {
         return active;
     }
 
-    @Attribute
+    @Attribute(required = true)
     public String getJndiName() {
         return jndiName;
     }
 
     public void setJndiName(String jndiName) {
+        if (Strings.isEmpty(jndiName)) {
+            throw new IllegalArgumentException();
+        }
         this.jndiName = jndiName;
     }
 
@@ -63,15 +80,16 @@ public class Destination extends DynamicMBeanSupport implements ServiceMBean {
             throw new IllegalStateException(getDestination() + " already started!");
         }
 
+        verify();
+
         log = LogFactory.getLog(getDestination());
         if (log.isInfoEnabled()) {
-            log.info(String.format("Binding to JNDI name '%s'", jndiName));
+            log.info("Binding JNDI name: " + jndiName);
         }
 
-        // TODO create TopicImpl
+        TopicImpl topic = new TopicImpl();
 
-        context = new InitialContext();
-        context.bind(jndiName, null); // TODO: bind TopicImpl instance
+        helper.bind(jndiName, topic);
 
         active = true;
     }
@@ -83,12 +101,12 @@ public class Destination extends DynamicMBeanSupport implements ServiceMBean {
         }
 
         if (log.isInfoEnabled()) {
-            log.info(String.format("Unbinding from JNDI name '%s'", jndiName));
+            log.info("Unbinding JNDI name: " + jndiName);
         }
-        log = null;
 
-        context.unbind(jndiName);
-        context = null;
+        helper.unbind(jndiName);
+
+        log = null;
 
         active = false;
     }

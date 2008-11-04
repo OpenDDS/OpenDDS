@@ -12,7 +12,9 @@ import java.lang.annotation.Target;
 
 /**
  * Indicates an MBean attribute.  This type should be applied to
- * accessor (getter) methods only.
+ * accessor (getter) methods only.  If readOnly is false, and the
+ * accessor has an assocated mutator (setter), the attribute will
+ * be registered as writable.
  *
  * @author  Steven Stallion
  * @version $Revision$
@@ -22,4 +24,10 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface Attribute {}
+public @interface Attribute {
+    /** Indicates if the given attribute is read-only */
+    boolean readOnly() default false;
+
+    /** Indicates if the given attribute is required */
+    boolean required() default false;
+}

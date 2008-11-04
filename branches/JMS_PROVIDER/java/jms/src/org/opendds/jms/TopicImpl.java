@@ -4,6 +4,8 @@
 
 package org.opendds.jms;
 
+import java.io.Serializable;
+
 import javax.jms.JMSException;
 import javax.jms.Topic;
 
@@ -11,7 +13,7 @@ import javax.jms.Topic;
  * @author  Steven Stallion
  * @version $Revision$
  */
-public class TopicImpl implements Topic {
+public class TopicImpl implements Serializable, Topic {
 
     public String getTopicName() throws JMSException {
         return null;
