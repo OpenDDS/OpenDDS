@@ -5,7 +5,6 @@
 package org.opendds.jms.management;
 
 import java.io.Serializable;
-import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,12 +28,11 @@ public class Destination extends DynamicMBeanSupport implements Serializable, Se
 
     private boolean active;
     private String destination;
-    private String jndiName;
     private String type;
-
-    private Properties dataReaderQosPolicy;
-    private Properties dataWriterQosPolicy;
-    private Properties topicQosPolicy; 
+    private String jndiName;
+    private String dataReaderQosPolicy;
+    private String dataWriterQosPolicy;
+    private String topicQosPolicy;
 
     private JndiHelper helper = new JndiHelper();
 
@@ -77,41 +75,29 @@ public class Destination extends DynamicMBeanSupport implements Serializable, Se
 
     @Attribute
     public String getDataReaderQosPolicy() {
-        String value = null;
-        if (dataReaderQosPolicy != null) {
-            value = PropertiesHelper.valueOf(dataReaderQosPolicy);
-        }
-        return value;
+        return dataReaderQosPolicy;
     }
 
-    public void setDataReaderQosPolicy(String value) {
-        dataReaderQosPolicy = PropertiesHelper.forValue(value);
+    public void setDataReaderQosPolicy(String dataReaderQosPolicy) {
+        this.dataReaderQosPolicy = dataReaderQosPolicy;
     }
 
     @Attribute
     public String getDataWriterQosPolicy() {
-        String value = null;
-        if (dataWriterQosPolicy != null) {
-            value = PropertiesHelper.valueOf(dataWriterQosPolicy);
-        }
-        return value;
+        return dataWriterQosPolicy;
     }
 
-    public void setDataWriterQosPolicy(String value) {
-        dataWriterQosPolicy = PropertiesHelper.forValue(value);
+    public void setDataWriterQosPolicy(String dataWriterQosPolicy) {
+        this.dataWriterQosPolicy = dataWriterQosPolicy;
     }
 
     @Attribute
     public String getTopicQosPolicy() {
-        String value = null;
-        if (topicQosPolicy != null) {
-            value = PropertiesHelper.valueOf(topicQosPolicy);
-        }
-        return value;
+        return dataWriterQosPolicy;
     }
 
-    public void setTopicQosPolicy(String value) {
-        topicQosPolicy = PropertiesHelper.forValue(value);
+    public void setTopicQosPolicy(String topicQosPolicy) {
+        this.topicQosPolicy = topicQosPolicy;
     }
 
     @Attribute
@@ -134,10 +120,15 @@ public class Destination extends DynamicMBeanSupport implements Serializable, Se
 
         TopicImpl topic = new TopicImpl(destination);
 
-        topic.setDataReaderQosPolicy(dataReaderQosPolicy);
-        topic.setDataWriterQosPolicy(dataWriterQosPolicy);
-        topic.setTopicQosPolicy(topicQosPolicy);
-        
+        topic.setDataReaderQosPolicy(
+            PropertiesHelper.forValue(dataReaderQosPolicy));
+
+        topic.setDataWriterQosPolicy(
+            PropertiesHelper.forValue(dataWriterQosPolicy));
+
+        topic.setTopicQosPolicy(
+            PropertiesHelper.forValue(topicQosPolicy));
+
         helper.bind(jndiName, topic);
 
         active = true;
@@ -154,7 +145,6 @@ public class Destination extends DynamicMBeanSupport implements Serializable, Se
         }
 
         helper.unbind(jndiName);
-
         log = null;
 
         active = false;
