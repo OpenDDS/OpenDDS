@@ -13,10 +13,10 @@ import org.opendds.jms.management.DynamicMBeanSupport;
  * @version $Revision$
  */
 public class ORBArguments implements DynamicArgumentProvider {
-    private static final String ORB_LISTEN_ENDPOINTS = "ORBListenEndpoints";
-    private static final String ORB_DEBUG_LEVEL = "ORBDebugLevel";
-    private static final String ORB_LOG_FILE = "ORBLogFile";
-    private static final String ORB_ARGS = "ORBArgs";
+    public static final String ORB_LISTEN_ENDPOINTS = "ORBListenEndpoints";
+    public static final String ORB_DEBUG_LEVEL = "ORBDebugLevel";
+    public static final String ORB_LOG_FILE = "ORBLogFile";
+    public static final String ORB_ARGS = "ORBArgs";
 
     private DynamicMBeanSupport instance;
 
