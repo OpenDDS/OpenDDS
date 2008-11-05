@@ -62,9 +62,17 @@ jobject JNICALL Java_OpenDDS_DCPS_TheParticipantFactory_WithArgs (JNIEnv *jni,
 
 jobject JNICALL Java_OpenDDS_DCPS_TheParticipantFactory_getInstance (JNIEnv *jni, jclass)
 {
-  jobject j_dpf;
-  copyToJava (jni, j_dpf, TheParticipantFactory, true);
-  return j_dpf;
+  try
+    {
+      jobject j_dpf;
+      copyToJava (jni, j_dpf, TheParticipantFactory, true);
+      return j_dpf;
+    }
+  catch (const CORBA::SystemException &se)
+    {
+      throw_java_exception (jni, se);
+      return 0;
+    }
 }
 
 
