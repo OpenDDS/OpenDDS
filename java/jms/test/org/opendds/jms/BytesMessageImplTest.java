@@ -18,13 +18,13 @@ public class BytesMessageImplTest {
 
     @Test
     public void testNewlyCeratedBytesMessage() {
-        BytesMessage bytesMessage = new BytesMessageImpl();
+        BytesMessage bytesMessage = new BytesMessageImpl(null);
         assertNotNull(bytesMessage);
     }
 
     @Test
     public void testWriteAndReadBytes() throws JMSException {
-        BytesMessage bytesMessage = new BytesMessageImpl();
+        BytesMessage bytesMessage = new BytesMessageImpl(null);
 
         bytesMessage.writeBoolean(true);
         bytesMessage.writeByte((byte)63);
@@ -71,7 +71,7 @@ public class BytesMessageImplTest {
 
     @Test
     public void testReadUnsignedByte() throws JMSException {
-        BytesMessage bytesMessage = new BytesMessageImpl();
+        BytesMessage bytesMessage = new BytesMessageImpl(null);
         bytesMessage.writeByte(Byte.MIN_VALUE);
         bytesMessage.writeByte((byte) -1);
         bytesMessage.writeByte((byte) 0);
@@ -94,7 +94,7 @@ public class BytesMessageImplTest {
 
     @Test
     public void testReadUnsignedShort() throws JMSException {
-        BytesMessage bytesMessage = new BytesMessageImpl();
+        BytesMessage bytesMessage = new BytesMessageImpl(null);
         bytesMessage.writeShort(Short.MIN_VALUE);
         bytesMessage.writeShort((short) -1);
         bytesMessage.writeShort((short) 0);
@@ -116,7 +116,7 @@ public class BytesMessageImplTest {
     }
     @Test
     public void testWriteObjects() throws JMSException {
-        BytesMessage bytesMessage = new BytesMessageImpl();
+        BytesMessage bytesMessage = new BytesMessageImpl(null);
 
         bytesMessage.writeObject(Boolean.TRUE);
         bytesMessage.writeObject((byte) 63);
@@ -149,7 +149,7 @@ public class BytesMessageImplTest {
 
     @Test
     public void testReadBytesNormalOperation() throws JMSException {
-        BytesMessage bytesMessage = new BytesMessageImpl();
+        BytesMessage bytesMessage = new BytesMessageImpl(null);
         byte[] bytes = new byte[8];
         for (int i = 0; i < bytes.length; i++) bytes[i] = (byte) i;
         bytesMessage.writeBytes(bytes);
@@ -168,7 +168,7 @@ public class BytesMessageImplTest {
 
     @Test
     public void testReadBytesCornerCases() throws JMSException {
-        BytesMessage bytesMessage = new BytesMessageImpl();
+        BytesMessage bytesMessage = new BytesMessageImpl(null);
         byte[] bytes = new byte[8];
         for (int i = 0; i < bytes.length; i++) bytes[i] = (byte) i;
         bytesMessage.writeBytes(bytes);
@@ -188,7 +188,7 @@ public class BytesMessageImplTest {
 
     @Test
     public void testReadInWriteOnlyState() {
-        BytesMessage bytesMessage = new BytesMessageImpl();
+        BytesMessage bytesMessage = new BytesMessageImpl(null);
 
         cannotReadBoolean(bytesMessage);
         cannotReadByte(bytesMessage);
@@ -322,7 +322,7 @@ public class BytesMessageImplTest {
 
     @Test
     public void testWriteInReadonlyState() throws JMSException {
-        BytesMessage bytesMessage = new BytesMessageImpl();
+        BytesMessage bytesMessage = new BytesMessageImpl(null);
         bytesMessage.reset();
 
         cannotWriteBoolean(bytesMessage);
@@ -448,7 +448,7 @@ public class BytesMessageImplTest {
 
     @Test
     public void testClearBodyInReadOnlyState() throws JMSException {
-        BytesMessage bytesMessage = new BytesMessageImpl();
+        BytesMessage bytesMessage = new BytesMessageImpl(null);
         
         bytesMessage.reset();
         cannotWriteBoolean(bytesMessage);

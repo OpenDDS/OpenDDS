@@ -12,13 +12,13 @@ import org.junit.Test;
 public class ObjectMessageImplTest {
     @Test
     public void testNewlyCreatedObjectMessage() throws JMSException {
-        ObjectMessage objectMessage = new ObjectMessageImpl();
+        ObjectMessage objectMessage = new ObjectMessageImpl(null);
         assertNull(objectMessage.getObject());
     }
 
     @Test
     public void testSetAndGetObject() throws JMSException {
-        ObjectMessage objectMessage = new ObjectMessageImpl();
+        ObjectMessage objectMessage = new ObjectMessageImpl(null);
         Foo foo = new Foo("Hello OpenDDS JMS Provider");
         objectMessage.setObject(foo);
         assertEquals(foo, objectMessage.getObject());
@@ -26,7 +26,7 @@ public class ObjectMessageImplTest {
 
     @Test
     public void testCLearBody() throws JMSException {
-        ObjectMessage objectMessage = new ObjectMessageImpl();
+        ObjectMessage objectMessage = new ObjectMessageImpl(null);
         final Foo foo = new Foo("Hello OpenDDS JMS Provider");
         objectMessage.setObject(foo);
         assertEquals(foo, objectMessage.getObject());
@@ -37,7 +37,7 @@ public class ObjectMessageImplTest {
 
     @Test
     public void testSetObjectInNonWritableState() throws JMSException {
-        ObjectMessageImpl objectMessage = new ObjectMessageImpl();
+        ObjectMessageImpl objectMessage = new ObjectMessageImpl(null);
         final Foo foo = new Foo("Hello OpenDDS JMS Provider");
         objectMessage.setObject(foo);
         assertEquals(foo, objectMessage.getObject());
@@ -53,7 +53,7 @@ public class ObjectMessageImplTest {
 
     @Test
     public void testClearBodyInNonWritableState() throws JMSException {
-        ObjectMessageImpl objectMessage = new ObjectMessageImpl();
+        ObjectMessageImpl objectMessage = new ObjectMessageImpl(null);
         final Foo foo = new Foo("Hello OpenDDS JMS Provider");
         objectMessage.setObject(foo);
         assertEquals(foo, objectMessage.getObject());

@@ -9,7 +9,8 @@ import OpenDDS.JMS.MessagePayload;
 public class BytesMessageImpl extends AbstractMessageImpl implements BytesMessage {
     protected BytesBodyFacade bytesBody;
 
-    public BytesMessageImpl() {
+    public BytesMessageImpl(SessionImpl sessionImpl) {
+        super(sessionImpl);
         initBody();
     }
 

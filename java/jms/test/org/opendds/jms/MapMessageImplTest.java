@@ -22,13 +22,13 @@ public class MapMessageImplTest {
 
     @Test
     public void testNewlyCreatedMapMessage() {
-        MapMessage mapMessage = new MapMessageImpl();
+        MapMessage mapMessage = new MapMessageImpl(null);
         assertNotNull(mapMessage);
     }
 
     @Test
     public void testSetAndGetMapItems() throws JMSException {
-        MapMessage mapMessage = new MapMessageImpl();
+        MapMessage mapMessage = new MapMessageImpl(null);
 
         mapMessage.setBoolean("boolean", true);
         assertEquals(true, mapMessage.getBoolean("boolean"));
@@ -80,7 +80,7 @@ public class MapMessageImplTest {
 
     @Test
     public void testUpdatingMapItems() throws JMSException {
-        MapMessage mapMessage = new MapMessageImpl();
+        MapMessage mapMessage = new MapMessageImpl(null);
         populateMapItems(mapMessage);
 
         mapMessage.setBoolean("boolean", false);
@@ -147,7 +147,7 @@ public class MapMessageImplTest {
 
     @Test
     public void testSetMapItemsInNotWritableState() throws JMSException {
-        MapMessageImpl mapMessage = new MapMessageImpl();
+        MapMessageImpl mapMessage = new MapMessageImpl(null);
         mapMessage.setBodyState(new MessageStateBodyNonWritable(mapMessage));
 
         try {
@@ -243,7 +243,7 @@ public class MapMessageImplTest {
     // JMS 1.1, 3.11.3
     @Test
     public void testStreamItemConversion() throws JMSException {
-        MapMessage mapMessage = new MapMessageImpl();
+        MapMessage mapMessage = new MapMessageImpl(null);
         populateMapItems(mapMessage);
 
         // Successful conversions
@@ -462,7 +462,7 @@ public class MapMessageImplTest {
 
     @Test
     public void testStreamItemConversionFromNull() throws JMSException {
-        MapMessage mapMessage = new MapMessageImpl();
+        MapMessage mapMessage = new MapMessageImpl(null);
         mapMessage.setString("string", null);
 
         assertEquals(false, mapMessage.getBoolean("string"));
@@ -512,7 +512,7 @@ public class MapMessageImplTest {
 
     @Test
     public void testSetObject() throws JMSException {
-        MapMessage mapMessage = new MapMessageImpl();
+        MapMessage mapMessage = new MapMessageImpl(null);
 
         mapMessage.setObject("object", Boolean.TRUE);
         assertEquals(true, mapMessage.getBoolean("object"));
@@ -558,7 +558,7 @@ public class MapMessageImplTest {
 
     @Test
     public void testGetObject() throws JMSException {
-        MapMessage mapMessage = new MapMessageImpl();
+        MapMessage mapMessage = new MapMessageImpl(null);
         populateMapItems(mapMessage);
 
         assertEquals(Boolean.TRUE, mapMessage.getObject("boolean"));
@@ -582,7 +582,7 @@ public class MapMessageImplTest {
 
     @Test
     public void testGettingNonExistentMapItems() throws JMSException {
-        MapMessage mapMessage = new MapMessageImpl();
+        MapMessage mapMessage = new MapMessageImpl(null);
 
         assertEquals(false, mapMessage.getBoolean("nonexistent"));
 
@@ -642,7 +642,7 @@ public class MapMessageImplTest {
 
     @Test
     public void testGetMapNames() throws JMSException {
-        MapMessage mapMessage = new MapMessageImpl();
+        MapMessage mapMessage = new MapMessageImpl(null);
         populateMapItems(mapMessage);
 
         final Enumeration mapNames = mapMessage.getMapNames();
@@ -669,7 +669,7 @@ public class MapMessageImplTest {
 
     @Test
     public void testItemExists() throws JMSException {
-        MapMessage mapMessage = new MapMessageImpl();
+        MapMessage mapMessage = new MapMessageImpl(null);
         populateMapItems(mapMessage);
 
         assertTrue(mapMessage.itemExists("boolean"));
@@ -687,7 +687,7 @@ public class MapMessageImplTest {
 
     @Test
     public void testClearBody() throws JMSException {
-        MapMessage mapMessage = new MapMessageImpl();
+        MapMessage mapMessage = new MapMessageImpl(null);
         populateMapItems(mapMessage);
         assertTrue(mapMessage.getMapNames().hasMoreElements());
 
@@ -697,7 +697,7 @@ public class MapMessageImplTest {
 
     @Test
     public void testClearBodyInNonWritableState() throws JMSException {
-        MapMessageImpl mapMessage = new MapMessageImpl();
+        MapMessageImpl mapMessage = new MapMessageImpl(null);
         populateMapItems(mapMessage);
         assertTrue(mapMessage.getMapNames().hasMoreElements());
         mapMessage.setBodyState(new MessageStateBodyNonWritable(mapMessage));

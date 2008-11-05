@@ -13,7 +13,8 @@ import OpenDDS.JMS.MessageBodyKind;
 import OpenDDS.JMS.MessagePayload;
 
 public class ObjectMessageImpl extends AbstractMessageImpl implements ObjectMessage {
-    public ObjectMessageImpl() {
+    public ObjectMessageImpl(SessionImpl sessionImpl) {
+        super(sessionImpl);
         initObjectBody();
     }
 

@@ -10,7 +10,8 @@ import OpenDDS.JMS.StreamItem;
 public class StreamMessageImpl extends AbstractMessageImpl implements StreamMessage {
     protected StreamBodyFacade streamBody;
 
-    public StreamMessageImpl() {
+    public StreamMessageImpl(SessionImpl sessionImpl) {
+        super(sessionImpl);
         initBody();
     }
 

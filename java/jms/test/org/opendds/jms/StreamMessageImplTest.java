@@ -19,14 +19,14 @@ public class StreamMessageImplTest {
 
     @Test
     public void testNewlyCreatedStreamMessage() throws JMSException {
-        StreamMessage streamMessage = new StreamMessageImpl();
+        StreamMessage streamMessage = new StreamMessageImpl(null);
         assertNotNull(streamMessage);
     }
 
 
     @Test
     public void testWriteAndReadStreamItems() throws JMSException {
-        StreamMessage streamMessage = new StreamMessageImpl();
+        StreamMessage streamMessage = new StreamMessageImpl(null);
 
         streamMessage.writeBoolean(true);
         streamMessage.writeByte((byte) 63);
@@ -71,7 +71,7 @@ public class StreamMessageImplTest {
 
     @Test
     public void testWriteObjects() throws JMSException {
-        StreamMessage streamMessage = new StreamMessageImpl();
+        StreamMessage streamMessage = new StreamMessageImpl(null);
 
         streamMessage.writeObject(Boolean.TRUE);
         streamMessage.writeObject((byte) 63);
@@ -108,7 +108,7 @@ public class StreamMessageImplTest {
 
     @Test
     public void testReadObjects() throws JMSException {
-        StreamMessage streamMessage = new StreamMessageImpl();
+        StreamMessage streamMessage = new StreamMessageImpl(null);
         populateMessage(streamMessage);
         streamMessage.reset();
 
@@ -128,7 +128,7 @@ public class StreamMessageImplTest {
 
     @Test
     public void testReadBytesNormalOperation() throws JMSException {
-        StreamMessage streamMessage = new StreamMessageImpl();
+        StreamMessage streamMessage = new StreamMessageImpl(null);
         populateMessage(streamMessage);
 
         // Peel off some stream items so that we can get at the byte arrays
@@ -171,7 +171,7 @@ public class StreamMessageImplTest {
 
     @Test
     public void testReadBytesCornerCases() throws JMSException {
-        StreamMessage streamMessage = new StreamMessageImpl();
+        StreamMessage streamMessage = new StreamMessageImpl(null);
         populateMessage(streamMessage);
 
         // Peel off some stream items so that we can get at the byte arrays
@@ -214,7 +214,7 @@ public class StreamMessageImplTest {
 
     @Test
     public void testWriteStreamItemInNotWritableState() throws JMSException {
-        StreamMessage streamMessage = new StreamMessageImpl();
+        StreamMessage streamMessage = new StreamMessageImpl(null);
         streamMessage.reset();
 
         try {
@@ -308,7 +308,7 @@ public class StreamMessageImplTest {
 
     @Test
     public void testRereadStreamItems() throws JMSException {
-        StreamMessage streamMessage = new StreamMessageImpl();
+        StreamMessage streamMessage = new StreamMessageImpl(null);
         populateMessage(streamMessage);
         streamMessage.reset();
 
@@ -514,7 +514,7 @@ public class StreamMessageImplTest {
 
     @Test
     public void testClearBody() throws JMSException {
-        StreamMessage streamMessage = new StreamMessageImpl();
+        StreamMessage streamMessage = new StreamMessageImpl(null);
         populateMessage(streamMessage);
 
         streamMessage.clearBody();
@@ -530,7 +530,7 @@ public class StreamMessageImplTest {
 
     @Test
     public void testReset() throws JMSException {
-        StreamMessage streamMessage = new StreamMessageImpl();
+        StreamMessage streamMessage = new StreamMessageImpl(null);
         populateMessage(streamMessage);
 
         streamMessage.reset();

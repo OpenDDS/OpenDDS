@@ -1,3 +1,38 @@
+Wed Nov  5 22:06:45 UTC 2008  Weiqi Gao  <gaow@ociweb.com>
+
+        * java/OpenDDS.ipr:
+
+        * java/jms/src/org/opendds/jms/AbstractMessageImpl.java:
+        * java/jms/src/org/opendds/jms/BytesMessageImpl.java:
+        * java/jms/src/org/opendds/jms/ConnectionImpl.java:
+        * java/jms/src/org/opendds/jms/MapMessageImpl.java:
+        * java/jms/src/org/opendds/jms/ObjectMessageImpl.java:
+        * java/jms/src/org/opendds/jms/SessionImpl.java:
+        * java/jms/src/org/opendds/jms/StreamMessageImpl.java:
+        * java/jms/src/org/opendds/jms/TemporaryTopicID.java:
+        * java/jms/src/org/opendds/jms/TemporaryTopicImpl.java:
+        * java/jms/src/org/opendds/jms/TextMessageImpl.java:
+        * java/jms/src/org/opendds/jms/TopicImpl.java:
+        * java/jms/src/org/opendds/jms/TopicImplFactory.java:
+
+          Implemented temporary topics.
+
+        * java/jms/test/org/opendds/jms/AbstractMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/BytesMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/MapMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/ObjectMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/SessionImplTest.java:
+        * java/jms/test/org/opendds/jms/StreamMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/TextMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/TopicMessageConsumerImplTest.java:
+        * java/jms/test/org/opendds/jms/TopicMessageProducerImplTest.java:
+
+          Added tests for temporary topics.
+
+        * java/jms/src/org/opendds/jms/DestinationImpl.java:
+
+          Removed this file.
+
 Wed Nov  5 21:30:45 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/dds/OpenDDS/DCPS/TheParticipantFactory.java:

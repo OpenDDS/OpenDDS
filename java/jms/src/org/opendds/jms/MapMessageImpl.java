@@ -10,7 +10,8 @@ import OpenDDS.JMS.MessagePayload;
 public class MapMessageImpl extends AbstractMessageImpl implements MapMessage {
     protected MapBodyFacade mapBody;
 
-    public MapMessageImpl() {
+    public MapMessageImpl(SessionImpl sessionImpl) {
+        super(sessionImpl);
         initBody();
     }
 

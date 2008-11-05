@@ -12,8 +12,8 @@ import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
-import javax.jms.TextMessage;
 import javax.jms.Session;
+import javax.jms.TextMessage;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -61,7 +61,7 @@ public class TopicMessageConsumerImplTest {
     }
 
     private void doTestClose(FakeObjects fakeObjects) throws JMSException {
-        Session session = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber);
+        Session session = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, null);
         final MessageConsumer messageConsumer = session.createConsumer(fakeObjects.destination);
         assertNotNull(messageConsumer);
         final Thread thread = new Thread() {
@@ -89,7 +89,7 @@ public class TopicMessageConsumerImplTest {
     }
 
     private void doTestConsumer(FakeObjects fakeObjects) throws JMSException {
-        Session session = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber);
+        Session session = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, null);
         final MessageConsumer messageConsumer = session.createConsumer(fakeObjects.destination);
         assertNotNull(messageConsumer);
 
@@ -141,7 +141,7 @@ public class TopicMessageConsumerImplTest {
     }
 
     private void doTestMessageListener(FakeObjects fakeObjects) throws JMSException {
-        Session session = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber);
+        Session session = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, null);
         final MessageConsumer messageConsumer = session.createConsumer(fakeObjects.destination);
         assertNotNull(messageConsumer);
 
@@ -238,7 +238,7 @@ public class TopicMessageConsumerImplTest {
         final Topic topic = participant.create_topic("OpenDDS::MessagePayload", typeSupport.get_type_name(), TOPIC_QOS_DEFAULT.get(), null);
         assertNotNull(topic);
 
-        Destination destination = new TopicImpl("X") {
+        Destination destination = new TopicImpl("Topic 1") {
             public Topic createTopic() {
                 return topic;
             }
@@ -253,7 +253,7 @@ public class TopicMessageConsumerImplTest {
         AttachStatus attachStatus2 = transport2.attach_to_publisher(publisher);
         assertNotNull(attachStatus2);
 
-        TextMessage message = new TextMessageImpl();
+        TextMessage message = new TextMessageImpl(null);
 
         fakeObjects.destination = destination;
         fakeObjects.subscriber = subscriber;
@@ -314,7 +314,7 @@ public class TopicMessageConsumerImplTest {
 
         private FakeMessageProducer(FakeObjects fakeObjects) throws JMSException {
             this.fakeObjects = fakeObjects;
-            Session session = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber);
+            Session session = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, null);
             messageProducer = session.createProducer(fakeObjects.destination);
         }
 
@@ -343,7 +343,7 @@ public class TopicMessageConsumerImplTest {
 
     private static class ClientAcknowledgementSessionImpl extends SessionImpl {
         public ClientAcknowledgementSessionImpl(FakeObjects fakeObjects) {
-            super(false, Session.CLIENT_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber);
+            super(false, Session.CLIENT_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, null);
         }
 
         public int getUnacknowledgedCount() {
