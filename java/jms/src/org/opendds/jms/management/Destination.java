@@ -84,7 +84,7 @@ public class Destination extends DynamicMBeanSupport implements Serializable, Se
 
         log = LogFactory.getLog(getDestination());
         if (log.isInfoEnabled()) {
-            log.info("Binding JNDI name: " + jndiName);
+            log.info("Binding to JNDI name: " + jndiName);
         }
 
         TopicImpl topic = new TopicImpl();
