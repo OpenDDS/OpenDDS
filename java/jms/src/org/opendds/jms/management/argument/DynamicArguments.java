@@ -7,6 +7,8 @@ package org.opendds.jms.management.argument;
 import java.util.List;
 import java.util.ArrayList;
 
+import org.omg.CORBA.StringSeqHolder;
+
 import org.opendds.jms.management.DynamicMBeanSupport;
 
 /**
@@ -40,5 +42,9 @@ public class DynamicArguments {
         }
 
         return args.toArray(new String[args.size()]);
+    }
+
+    public StringSeqHolder toStringSeq() throws Exception {
+        return new StringSeqHolder(toArgs());
     }
 }
