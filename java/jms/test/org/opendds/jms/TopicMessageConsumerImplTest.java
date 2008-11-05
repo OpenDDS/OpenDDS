@@ -238,7 +238,7 @@ public class TopicMessageConsumerImplTest {
         final Topic topic = participant.create_topic("OpenDDS::MessagePayload", typeSupport.get_type_name(), TOPIC_QOS_DEFAULT.get(), null);
         assertNotNull(topic);
 
-        Destination destination = new TopicImpl() {
+        Destination destination = new TopicImpl("X") {
             public Topic createTopic() {
                 return topic;
             }
