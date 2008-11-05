@@ -59,7 +59,19 @@ public class JndiHelper {
             if (!en.hasMoreElements()) {
                 break;
             }
-            context = context.createSubcontext(comp);
+
+            Object obj = context.lookup(comp);
+            if (obj != null) {
+                if (obj instanceof Context) {
+                    context = (Context) obj; 
+
+                } else {
+                    break; // not a context
+                }
+
+            } else {
+                context = context.createSubcontext(comp);
+            }
         }
 
         return name;
