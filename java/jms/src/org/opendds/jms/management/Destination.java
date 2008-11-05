@@ -93,7 +93,7 @@ public class Destination extends DynamicMBeanSupport implements Serializable, Se
 
     @Attribute
     public String getTopicQosPolicy() {
-        return dataWriterQosPolicy;
+        return topicQosPolicy;
     }
 
     public void setTopicQosPolicy(String topicQosPolicy) {
