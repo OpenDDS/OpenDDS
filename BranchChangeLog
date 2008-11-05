@@ -1,3 +1,10 @@
+Wed Nov  5 21:30:45 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/dds/OpenDDS/DCPS/TheParticipantFactory.java:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+
+          Added getInstance() to TheParticipantFactory.
+
 Wed Nov  5 17:01:18 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/src/META-INF/ra.xml:

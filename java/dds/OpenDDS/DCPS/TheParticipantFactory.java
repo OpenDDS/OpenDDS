@@ -7,6 +7,9 @@ public final class TheParticipantFactory {
   public static native DDS.DomainParticipantFactory
     WithArgs(org.omg.CORBA.StringSeqHolder args);
 
+  public static native DDS.DomainParticipantFactory
+    getInstance();
+
   static {
     loadNativeLib();
   }
