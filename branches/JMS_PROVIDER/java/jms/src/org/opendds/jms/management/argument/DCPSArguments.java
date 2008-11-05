@@ -14,18 +14,18 @@ import org.opendds.jms.util.Strings;
  * @version $Revision$
  */
 public class DCPSArguments implements DynamicArgumentProvider {
-    private static final String DCPS_DEBUG_LEVEL = "DCPSDebugLevel";
-    private static final String DCPS_CONFIG_FILE = "DCPSConfigFile";
-    private static final String DCPS_INFOREPO = "DCPSInfoRepo";
-    private static final String DCPS_CHUNKS = "DCPSChunks";
-    private static final String DCPS_CHUNK_MULTIPLIER = "DCPSChunkMultiplier";
-    private static final String DCPS_LIVELINESS_FACTOR = "DCPSLivelinessFactor";
-    private static final String DCPS_BIT = "DCPSBit";
-    private static final String DCPS_BIT_TRANSPORT_ADDRESS = "DCPSBitTransportIPAddress";
-    private static final String DCPS_BIT_TRANSPORT_PORT = "DCPSBitTransportPort";
-    private static final String DCPS_BIT_LOOKUP_DURATION_MSEC = "DCPSBitLookupDurationMsec";
-    private static final String DCPS_TRANSPORT_DEBUG_LEVEL = "DCPSTransportDebugLevel";
-    private static final String DCPS_TRANSPORT_TYPE = "DCPSTransportType";
+    public static final String DCPS_DEBUG_LEVEL = "DCPSDebugLevel";
+    public static final String DCPS_CONFIG_FILE = "DCPSConfigFile";
+    public static final String DCPS_INFOREPO = "DCPSInfoRepo";
+    public static final String DCPS_CHUNKS = "DCPSChunks";
+    public static final String DCPS_CHUNK_MULTIPLIER = "DCPSChunkMultiplier";
+    public static final String DCPS_LIVELINESS_FACTOR = "DCPSLivelinessFactor";
+    public static final String DCPS_BIT = "DCPSBit";
+    public static final String DCPS_BIT_TRANSPORT_ADDRESS = "DCPSBitTransportIPAddress";
+    public static final String DCPS_BIT_TRANSPORT_PORT = "DCPSBitTransportPort";
+    public static final String DCPS_BIT_LOOKUP_DURATION_MSEC = "DCPSBitLookupDurationMsec";
+    public static final String DCPS_TRANSPORT_DEBUG_LEVEL = "DCPSTransportDebugLevel";
+    public static final String DCPS_TRANSPORT_TYPE = "DCPSTransportType";
 
     private DynamicMBeanSupport instance;
 

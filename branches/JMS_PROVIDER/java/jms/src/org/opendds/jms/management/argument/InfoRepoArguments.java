@@ -14,15 +14,15 @@ import org.opendds.jms.util.Strings;
  * @version $Revision$
  */
 public class InfoRepoArguments implements DynamicArgumentProvider {
-    private static final String BIT_LISTEN_ADDRESS = "BitListenAddress";
-    private static final String IOR_FILE = "IORFile";
-    private static final String NOBITS = "NOBITS";
-    private static final String VERBOSE_TRANSPORT_LOGGING = "VerboseTransportLogging";
-    private static final String PERSISTENT_FILE = "PersistentFile";
-    private static final String RESURRECT_FROM_FILE = "ResurrectFromFile";
-    private static final String FEDERATOR_CONFIG = "FederatorConfig";
-    private static final String FEDERATION_ID = "FederationId";
-    private static final String FEDERATE_WITH = "FederateWith";
+    public static final String BIT_LISTEN_ADDRESS = "BitListenAddress";
+    public static final String IOR_FILE = "IORFile";
+    public static final String NOBITS = "NOBITS";
+    public static final String VERBOSE_TRANSPORT_LOGGING = "VerboseTransportLogging";
+    public static final String PERSISTENT_FILE = "PersistentFile";
+    public static final String RESURRECT_FROM_FILE = "ResurrectFromFile";
+    public static final String FEDERATOR_CONFIG = "FederatorConfig";
+    public static final String FEDERATION_ID = "FederationId";
+    public static final String FEDERATE_WITH = "FederateWith";
 
     private DynamicMBeanSupport instance;
 
