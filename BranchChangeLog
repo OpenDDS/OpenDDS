@@ -1,3 +1,10 @@
+Wed Nov  5 16:23:01 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/OpenDDS.ipr:
+        * java/jms/src/org/opendds/jms/management/Destination.java:
+
+          Updated QoS Policy handling.
+
 Wed Nov  5 04:44:55 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/src/org/opendds/jms/DataWriterPair.java:
@@ -8,7 +15,7 @@ Wed Nov  5 04:44:55 UTC 2008  Steven Stallion  <stallions@ociweb.com>
         * java/jms/test/org/opendds/jms/TopicMessageConsumerImplTest.java:
         * java/jms/test/org/opendds/jms/TopicMessageProducerImplTest.java:
 
-	  Added QoS configuration support for Destinations.
+          Added QoS configuration support for Destinations.
 
 Wed Nov  5 02:08:06 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
