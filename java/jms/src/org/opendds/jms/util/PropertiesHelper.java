@@ -18,7 +18,10 @@ public class PropertiesHelper {
     public static Properties forValue(String value) {
         try {
             Properties properties = new Properties();
-            properties.load(new ByteArrayInputStream(value.getBytes()));
+
+            if (!Strings.isEmpty(value)) {
+                properties.load(new ByteArrayInputStream(value.getBytes()));
+            }
 
             return properties;
 

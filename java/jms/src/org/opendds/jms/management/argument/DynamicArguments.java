@@ -5,8 +5,11 @@
 package org.opendds.jms.management.argument;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.omg.CORBA.StringSeqHolder;
 
 import org.opendds.jms.management.DynamicMBeanSupport;
@@ -17,6 +20,8 @@ import org.opendds.jms.management.DynamicMBeanSupport;
  */
 public class DynamicArguments {
     public static final String DELIMS = ";, \t\r\n\f";
+
+    private static Log log = LogFactory.getLog(DynamicArguments.class);
 
     private DynamicMBeanSupport instance;
 
@@ -34,17 +39,40 @@ public class DynamicArguments {
         providers.add(provider);
     }
 
-    public String[] toArgs() throws Exception {
+    public List<String> asList() throws Exception {
         List<String> args = new ArrayList<String>();
 
         for (DynamicArgumentProvider provier : providers) {
             provier.addArgs(args);
         }
 
+        return args;
+    }
+
+    public String[] toArgs() throws Exception {
+        List<String> args = asList();
         return args.toArray(new String[args.size()]);
     }
 
     public StringSeqHolder toStringSeq() throws Exception {
         return new StringSeqHolder(toArgs());
+    }
+
+    @Override
+    public String toString() {
+        StringBuffer sbuf = new StringBuffer();
+        try {
+            Iterator<String> itr = asList().iterator();
+            while (itr.hasNext()) {
+                sbuf.append(itr.next());
+                if (itr.hasNext()) {
+                    sbuf.append(' ');
+                }
+            }
+
+        } catch (Exception e) {
+            log.error("Unexpected problem rendering toString()", e);
+        }
+        return sbuf.toString();
     }
 }

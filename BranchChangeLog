@@ -1,3 +1,13 @@
+Wed Nov  5 16:52:22 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/src/org/opendds/jms/management/DCPSInfoRepoService.java:
+        * java/jms/src/org/opendds/jms/management/ParticipantFactoryService.java:
+        * java/jms/src/org/opendds/jms/management/argument/DynamicArguments.java:
+        * java/jms/src/org/opendds/jms/util/PropertiesHelper.java:
+
+          Fixed minor bug in Destination. Added debug logging for
+          the DCPSInfoRepo and DomainParticipantFactory services.
+
 Wed Nov  5 16:23:01 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/OpenDDS.ipr:
