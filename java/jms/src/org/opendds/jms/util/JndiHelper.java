@@ -60,18 +60,19 @@ public class JndiHelper {
                 break;
             }
 
-            Object obj = context.lookup(comp);
-            if (obj != null) {
+            try {
+                Object obj = context.lookup(comp);
                 if (obj instanceof Context) {
-                    context = (Context) obj; 
+                    context = (Context) obj;
 
                 } else {
                     break; // not a context
                 }
+                continue;
 
-            } else {
-                context = context.createSubcontext(comp);
-            }
+            } catch (NamingException e) {}  
+
+            context = context.createSubcontext(comp);
         }
 
         return name;
