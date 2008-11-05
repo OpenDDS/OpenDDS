@@ -11,13 +11,13 @@ import org.junit.Test;
 public class TextMessageImplTest {
     @Test
     public void testNewlyCreatedTextMessage() throws JMSException {
-        TextMessage textMessage = new TextMessageImpl();
+        TextMessage textMessage = new TextMessageImpl(null);
         assertNull(textMessage.getText());
     }
 
     @Test
     public void testSetAndGetText() throws JMSException {
-        TextMessage textMessage = new TextMessageImpl();
+        TextMessage textMessage = new TextMessageImpl(null);
         final String greeting = "Hello OpenDDS JMS Provider";
         textMessage.setText(greeting);
         assertEquals(greeting, textMessage.getText());
@@ -25,7 +25,7 @@ public class TextMessageImplTest {
 
     @Test
     public void testClearBody() throws JMSException {
-        TextMessage textMessage = new TextMessageImpl();
+        TextMessage textMessage = new TextMessageImpl(null);
         final String greeting = "Hello OpenDDS JMS Provider";
         textMessage.setText(greeting);
         assertEquals(greeting, textMessage.getText());
@@ -36,7 +36,7 @@ public class TextMessageImplTest {
 
     @Test
     public void testSetTextInNotWritableState() throws JMSException {
-        TextMessageImpl textMessage = new TextMessageImpl();
+        TextMessageImpl textMessage = new TextMessageImpl(null);
         final String greeting = "Hello OpenDDS JMS Provider";
         textMessage.setText(greeting);
         assertEquals(greeting, textMessage.getText());
@@ -52,7 +52,7 @@ public class TextMessageImplTest {
 
     @Test
     public void testClearBodyInNotWritableState() throws JMSException {
-        TextMessageImpl textMessage = new TextMessageImpl();
+        TextMessageImpl textMessage = new TextMessageImpl(null);
         final String greeting = "Hello OpenDDS JMS Provider";
         textMessage.setText(greeting);
         assertEquals(greeting, textMessage.getText());

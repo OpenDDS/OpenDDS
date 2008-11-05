@@ -4,6 +4,8 @@
 
 package org.opendds.jms;
 
+import java.util.List;
+import java.util.ArrayList;
 import javax.jms.Connection;
 import javax.jms.ConnectionConsumer;
 import javax.jms.ConnectionMetaData;
@@ -19,6 +21,11 @@ import javax.jms.Topic;
  * @version $Revision$
  */
 public class ConnectionImpl implements Connection {
+    private List<TemporaryTopicImpl> temporaryTopics;
+
+    public ConnectionImpl() {
+        this.temporaryTopics = new ArrayList<TemporaryTopicImpl>();
+    }
 
     public String getClientID() throws JMSException {
         return null;
@@ -64,5 +71,13 @@ public class ConnectionImpl implements Connection {
     }
 
     public void close() throws JMSException {
+    }
+
+    public void addTemporaryTopic(TemporaryTopicImpl temporaryTopic) {
+        this.temporaryTopics.add(temporaryTopic);
+    }
+
+    public void removeTemporaryTopic(TemporaryTopicImpl temporaryTopic) {
+        this.temporaryTopics.remove(temporaryTopic);
     }
 }

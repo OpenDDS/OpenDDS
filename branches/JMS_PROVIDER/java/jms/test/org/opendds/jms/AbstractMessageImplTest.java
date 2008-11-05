@@ -3,6 +3,9 @@ package org.opendds.jms;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
 import javax.jms.BytesMessage;
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;
@@ -14,6 +17,8 @@ import javax.jms.MessageNotWriteableException;
 import javax.jms.ObjectMessage;
 import javax.jms.StreamMessage;
 import javax.jms.TextMessage;
+import javax.jms.Session;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -21,6 +26,22 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Test;
+import org.omg.CORBA.StringSeqHolder;
+
+import DDS.DomainParticipantFactory;
+import DDS.DomainParticipant;
+import DDS.PARTICIPANT_QOS_DEFAULT;
+import DDS.Subscriber;
+import DDS.SUBSCRIBER_QOS_DEFAULT;
+import DDS.Topic;
+import DDS.TOPIC_QOS_DEFAULT;
+import DDS.Publisher;
+import DDS.PUBLISHER_QOS_DEFAULT;
+import OpenDDS.DCPS.TheParticipantFactory;
+import OpenDDS.DCPS.transport.TransportImpl;
+import OpenDDS.DCPS.transport.TheTransportFactory;
+import OpenDDS.DCPS.transport.AttachStatus;
+import OpenDDS.JMS.MessagePayloadTypeSupportImpl;
 
 public class AbstractMessageImplTest {
     private static final float FLOAT_EPSILON = 1e-6f;
@@ -28,11 +49,11 @@ public class AbstractMessageImplTest {
 
     @Test
     public void testCreatingMessages() {
-        StreamMessage streamMessage = new StreamMessageImpl();
-        MapMessage mapMessage = new MapMessageImpl();
-        TextMessage textMessage = new TextMessageImpl();
-        ObjectMessage objectMessage = new ObjectMessageImpl();
-        BytesMessage bytesMessage = new BytesMessageImpl();
+        StreamMessage streamMessage = new StreamMessageImpl(null);
+        MapMessage mapMessage = new MapMessageImpl(null);
+        TextMessage textMessage = new TextMessageImpl(null);
+        ObjectMessage objectMessage = new ObjectMessageImpl(null);
+        BytesMessage bytesMessage = new BytesMessageImpl(null);
 
         assertNotNull(streamMessage);
         assertNotNull(mapMessage);
@@ -42,12 +63,24 @@ public class AbstractMessageImplTest {
     }
 
     @Test
-    public void testSettingAndGettingHeaders() throws JMSException {
-        Message message = new TextMessageImpl();
+    public void testSettingAndGettingDestinationHeaders() throws JMSException {
+        if (!dcpsInfoRepoRunning()) return;
+        FakeObjects fakeObjects = createFakeObjects();
+        final SessionImpl sessionImpl = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, fakeObjects.connection);
+        Message message = new TextMessageImpl(sessionImpl);
 
-        Destination destination = DestinationImpl.fromString("Test Destination");
+        Destination destination = TopicImplFactory.fromString("org.opendds.jms.TopicImpl[topicName=Test Destination]", null, null);
         message.setJMSDestination(destination);
-        assertEquals(destination, message.getJMSDestination());
+        assertEquals(destination.toString(), message.getJMSDestination().toString());
+
+        Destination destination2 = TopicImplFactory.fromString("org.opendds.jms.TopicImpl[topicName=Test Destination]", null, null);
+        message.setJMSReplyTo(destination2);
+        assertEquals(destination2.toString(), message.getJMSReplyTo().toString());
+    }
+
+    @Test
+    public void testSettingAndGettingNonDestinationHeaders() throws JMSException {
+        Message message = new TextMessageImpl(null);
 
         message.setJMSDeliveryMode(DeliveryMode.NON_PERSISTENT);
         assertEquals(DeliveryMode.NON_PERSISTENT, message.getJMSDeliveryMode());
@@ -65,10 +98,6 @@ public class AbstractMessageImplTest {
         final String testCorrelationID = "Test Correlation ID";
         message.setJMSCorrelationID(testCorrelationID);
         assertEquals(testCorrelationID, message.getJMSCorrelationID());
-
-        Destination destination2 = DestinationImpl.fromString("Test ReplyTo");
-        message.setJMSReplyTo(destination2);
-        assertEquals(destination2, message.getJMSReplyTo());
 
         message.setJMSRedelivered(true);
         assertEquals(true, message.getJMSRedelivered());
@@ -88,9 +117,24 @@ public class AbstractMessageImplTest {
         assertEquals(testPriority, message.getJMSPriority());
     }
 
+    private boolean dcpsInfoRepoRunning() {
+        // Temporary hack
+        try {
+            final BufferedReader bufferedReader = new BufferedReader(
+                new InputStreamReader(Runtime.getRuntime().exec("netstat -an").getInputStream()));
+            String line = null;
+            while ((line = bufferedReader.readLine()) != null) {
+                if (line.contains(":4096")) return true;
+            }
+            return false;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
     @Test
     public void testClearProperties() throws JMSException {
-        AbstractMessageImpl message = new MapMessageImpl();
+        AbstractMessageImpl message = new MapMessageImpl(null);
 
         message.setBooleanProperty("boolean", false);
         assertTrue(message.getPropertyNames().hasMoreElements());
@@ -113,7 +157,7 @@ public class AbstractMessageImplTest {
 
     @Test
     public void testSetAndGetProperties() throws JMSException {
-        Message message = new StreamMessageImpl();
+        Message message = new StreamMessageImpl(null);
 
         message.setBooleanProperty("boolean", true);
         assertEquals(true, message.getBooleanProperty("boolean"));
@@ -147,7 +191,7 @@ public class AbstractMessageImplTest {
 
     @Test
     public void testUpdatingProperties() throws JMSException {
-        Message message = new StreamMessageImpl();
+        Message message = new StreamMessageImpl(null);
         populateProperties(message);
 
         message.setBooleanProperty("boolean", false);
@@ -199,7 +243,7 @@ public class AbstractMessageImplTest {
      */
     @Test
     public void testSetPropertiesInNotWritableState() {
-        AbstractMessageImpl message = new StreamMessageImpl();
+        AbstractMessageImpl message = new StreamMessageImpl(null);
         message.setPropertiesState(new MessageStatePropertiesNonWritable(message));
 
         try {
@@ -273,7 +317,7 @@ public class AbstractMessageImplTest {
      */
     @Test
     public void testPropertyValueConversion() throws JMSException {
-        Message message = new BytesMessageImpl();
+        Message message = new BytesMessageImpl(null);
         populateProperties(message);
 
         // Successfull conversions
@@ -431,7 +475,7 @@ public class AbstractMessageImplTest {
      */
     @Test
     public void testPropertyValueConversionFromNull() throws JMSException {
-        Message message = new TextMessageImpl();
+        Message message = new TextMessageImpl(null);
         message.setStringProperty("string", null);
 
         assertEquals(false, message.getBooleanProperty("string"));
@@ -484,7 +528,7 @@ public class AbstractMessageImplTest {
      */
     @Test
     public void testSetObjectProperty() throws JMSException {
-        Message message = new ObjectMessageImpl();
+        Message message = new ObjectMessageImpl(null);
 
         message.setObjectProperty("object", Boolean.TRUE);
         assertEquals(true, message.getBooleanProperty("object"));
@@ -525,7 +569,7 @@ public class AbstractMessageImplTest {
      */
     @Test
     public void testGetObjectProperty() throws JMSException {
-        Message message = new BytesMessageImpl();
+        Message message = new BytesMessageImpl(null);
         populateProperties(message);
 
         assertEquals(Boolean.TRUE, message.getObjectProperty("boolean"));
@@ -542,7 +586,7 @@ public class AbstractMessageImplTest {
 
     @Test
     public void testGetPropertyNames() throws JMSException {
-        Message message = new TextMessageImpl();
+        Message message = new TextMessageImpl(null);
         populateProperties(message);
 
         final Enumeration propertyNames = message.getPropertyNames();
@@ -566,7 +610,7 @@ public class AbstractMessageImplTest {
 
     @Test
     public void testGettingNonExistentProperties() throws JMSException {
-        Message message = new StreamMessageImpl();
+        Message message = new StreamMessageImpl(null);
 
         assertEquals(false, message.getBooleanProperty("nonexistent"));
 
@@ -618,7 +662,7 @@ public class AbstractMessageImplTest {
 
     @Test
     public void testSettingPropertiesWithIllegalNames() throws JMSException {
-        Message message = new BytesMessageImpl();
+        Message message = new BytesMessageImpl(null);
 
         try {
             message.setBooleanProperty("illegal name", true);
@@ -686,7 +730,7 @@ public class AbstractMessageImplTest {
 
     @Test
     public void testGettingPropertiesWithIllegalNames() {
-        Message message = new TextMessageImpl();
+        Message message = new TextMessageImpl(null);
 
         try {
             message.getBooleanProperty("illegal name");
@@ -750,5 +794,73 @@ public class AbstractMessageImplTest {
         } catch (Exception e) {
             assertTrue(e instanceof IllegalArgumentException);
         }
+    }
+
+    private FakeObjects createFakeObjects() {
+        FakeObjects fakeObjects = new FakeObjects();
+
+        String[] fakeArgs = new String[]{"-ORBSvcConf", "tcp.conf",
+            "-ORBListenEndpoints", "iiop://127.0.0.1:12351",
+            "-ORBDebugLevel", "10",
+            "-DCPSDebugLevel", "10",
+            "-ORBLogFile", "AbstractMessageImplTest.log",
+            "-DCPSConfigFile", "test.ini"
+        };
+        DomainParticipantFactory dpFactory = TheParticipantFactory.WithArgs(new StringSeqHolder(fakeArgs));
+        assertNotNull(dpFactory);
+
+        DomainParticipant participant = dpFactory.create_participant(1, PARTICIPANT_QOS_DEFAULT.get(), null);
+        assertNotNull(participant);
+
+        Subscriber subscriber = participant.create_subscriber(SUBSCRIBER_QOS_DEFAULT.get(), null);
+        assertNotNull(subscriber);
+
+        TransportImpl transport = TheTransportFactory.create_transport_impl(1, TheTransportFactory.AUTO_CONFIG);
+        assertNotNull(transport);
+
+        AttachStatus attachStatus = transport.attach_to_subscriber(subscriber);
+        assertNotNull(attachStatus);
+
+        final MessagePayloadTypeSupportImpl typeSupport = new MessagePayloadTypeSupportImpl();
+        assertNotNull(typeSupport);
+
+        typeSupport.register_type(participant, "OpenDDS::MessagePayload");
+        final Topic topic = participant.create_topic("OpenDDS::MessagePayload", typeSupport.get_type_name(), TOPIC_QOS_DEFAULT.get(), null);
+        assertNotNull(topic);
+
+        Destination destination = new TopicImpl("Topic 1") {
+            public Topic extractDDSTopic() {
+                return topic;
+            }
+        };
+
+        Publisher publisher = participant.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null);
+        assertNotNull(publisher);
+
+        TransportImpl transport2 = TheTransportFactory.create_transport_impl(2, TheTransportFactory.AUTO_CONFIG);
+        assertNotNull(transport2);
+
+        AttachStatus attachStatus2 = transport2.attach_to_publisher(publisher);
+        assertNotNull(attachStatus2);
+
+        TextMessage message = new TextMessageImpl(null);
+
+        fakeObjects.connection = new ConnectionImpl();
+        fakeObjects.destination = destination;
+        fakeObjects.subscriber = subscriber;
+        fakeObjects.participant = participant;
+
+        fakeObjects.publisher = publisher;
+        fakeObjects.message = message;
+
+        return fakeObjects;
+    }
+    private static class FakeObjects {
+        public ConnectionImpl connection;
+        public Destination destination;
+        public Subscriber subscriber;
+        public DomainParticipant participant;
+        public Publisher publisher;
+        public TextMessage message;
     }
 }

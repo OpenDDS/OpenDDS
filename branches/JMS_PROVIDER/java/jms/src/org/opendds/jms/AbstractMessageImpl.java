@@ -27,11 +27,12 @@ public abstract class AbstractMessageImpl implements Message {
     /**
      * Construct a Message on the Producer side.
      */
-    protected AbstractMessageImpl() {
+    protected AbstractMessageImpl(SessionImpl sessionImpl) {
         this.payload = new MessagePayload(new MessageHeader(), new MessageProperty[0], new MessageBody());
         this.headers = payload.theHeader;
         this.properties = new MessagePropertiesFacade(payload);
         this.propertiesState = new MessageStateWritable();
+        this.sessionImpl = sessionImpl;
     }
 
     /**
@@ -104,7 +105,7 @@ public abstract class AbstractMessageImpl implements Message {
     }
 
     public Destination getJMSReplyTo() throws JMSException {
-        return DestinationImpl.fromString(headers.JMSReplyTo);
+        return TopicImplFactory.fromString(headers.JMSReplyTo, sessionImpl.getOwningConnection(), sessionImpl.getParticipant());
     }
 
     public void setJMSReplyTo(Destination destination) throws JMSException {
@@ -112,7 +113,7 @@ public abstract class AbstractMessageImpl implements Message {
     }
 
     public Destination getJMSDestination() throws JMSException {
-        return DestinationImpl.fromString(headers.JMSDestination);
+        return TopicImplFactory.fromString(headers.JMSDestination, sessionImpl.getOwningConnection(), sessionImpl.getParticipant());
     }
 
     public void setJMSDestination(Destination destination) throws JMSException {

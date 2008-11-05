@@ -28,11 +28,12 @@ import javax.jms.TemporaryTopic;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
+import javax.jms.Connection;
+import javax.jms.InvalidDestinationException;
 
 import DDS.Subscriber;
 import DDS.DomainParticipant;
 import DDS.Publisher;
-import DDS.NOT_NEW_VIEW_STATE;
 import DDS.ANY_INSTANCE_STATE;
 import DDS.ANY_SAMPLE_STATE;
 import DDS.ANY_VIEW_STATE;
@@ -64,13 +65,14 @@ public class SessionImpl implements Session {
     // JMS 1.1, 4.4.11, The sessions view of unacknowledged Messages, used in recover()
     private List<DataReaderHandlePair> unacknowledged;
     private Object lockForUnacknowledged;
+    private ConnectionImpl owningConnection;
 
     // OpenDDS stuff
     private DomainParticipant participant;
     private Publisher publisher;
     private Subscriber subscriber;
 
-    public SessionImpl(boolean transacted, int acknowledgeMode, DomainParticipant participant, Publisher publisher, Subscriber subscriber) {
+    public SessionImpl(boolean transacted, int acknowledgeMode, DomainParticipant participant, Publisher publisher, Subscriber subscriber, ConnectionImpl connection) {
         Objects.ensureNotNull(participant);
         Objects.ensureNotNull(publisher);
         Objects.ensureNotNull(subscriber);
@@ -86,6 +88,7 @@ public class SessionImpl implements Session {
         this.messageDeliveryExecutorService = Executors.newSingleThreadExecutor();
         this.unacknowledged = new LinkedList<DataReaderHandlePair>();
         this.lockForUnacknowledged = new Object();
+        this.owningConnection = connection;
     }
 
     public int getAcknowledgeMode() {
@@ -117,9 +120,25 @@ public class SessionImpl implements Session {
     public MessageConsumer createConsumer(Destination destination,
                                           String messageSelector,
                                           boolean noLocal) throws JMSException {
+        validateDestination(destination);
         MessageConsumer messageConsumer = new TopicMessageConsumerImpl(destination, messageSelector, noLocal, subscriber, participant, this);
         createdConsumers.add(messageConsumer);
         return messageConsumer;
+    }
+
+    private void validateDestination(Destination destination) throws InvalidDestinationException {
+        if (destination instanceof TopicImpl) {
+            if (destination instanceof TemporaryTopicImpl) {
+                TemporaryTopicImpl temporaryTopicImpl = (TemporaryTopicImpl) destination;
+                final Connection connectionForTemporaryTopic = temporaryTopicImpl.getConnection();
+                if (owningConnection != connectionForTemporaryTopic) {
+                    throw new InvalidDestinationException("Cannot create MessageConsumer for a TemporaryTopic from a foreign Connection: "
+                        + connectionForTemporaryTopic);
+                }
+            }
+        } else {
+            throw new InvalidDestinationException("An invalid destination is supplied: " + destination + ".");
+        }
     }
 
     public MessageProducer createProducer(Destination destination) throws JMSException {
@@ -170,46 +189,43 @@ public class SessionImpl implements Session {
     }
 
     public TemporaryTopic createTemporaryTopic() throws JMSException {
-        // TODO
-        return null;
+        return TemporaryTopicImpl.newTemporaryTopicImpl(owningConnection, participant);
     }
 
     public Message createMessage() throws JMSException {
-        // TODO
-        return null;
+        return new TextMessageImpl(this);
     }
 
     public BytesMessage createBytesMessage() throws JMSException {
-        // TODO
-        return null;
+        return new BytesMessageImpl(this);
     }
 
     public MapMessage createMapMessage() throws JMSException {
-        // TODO
-        return null;
+        return new MapMessageImpl(this);
     }
 
     public ObjectMessage createObjectMessage() throws JMSException {
-        return createObjectMessage(null);
+        return new ObjectMessageImpl(this);
     }
 
     public ObjectMessage createObjectMessage(Serializable object) throws JMSException {
-        // TODO
-        return null;
+        ObjectMessageImpl message = new ObjectMessageImpl(this);
+        message.setObject(object);
+        return message;
     }
 
     public StreamMessage createStreamMessage() throws JMSException {
-        // TODO
-        return null;
+        return new StreamMessageImpl(this);
     }
 
     public TextMessage createTextMessage() throws JMSException {
-        return createTextMessage(null);
+        return new TextMessageImpl(this);
     }
 
     public TextMessage createTextMessage(String text) throws JMSException {
-        // TODO
-        return null;
+        TextMessageImpl message = new TextMessageImpl(this);
+        message.setText(text);
+        return message;
     }
 
     public void run() {
@@ -260,5 +276,13 @@ public class SessionImpl implements Session {
         synchronized(lockForUnacknowledged) {
             unacknowledged.add(dataReaderHandlePair);
         }
+    }
+
+    ConnectionImpl getOwningConnection() {
+        return owningConnection;
+    }
+
+    DomainParticipant getParticipant() {
+        return participant;
     }
 }

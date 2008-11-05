@@ -6,7 +6,8 @@ import javax.jms.TextMessage;
 import OpenDDS.JMS.MessagePayload;
 
 public class TextMessageImpl extends AbstractMessageImpl implements TextMessage {
-    public TextMessageImpl() {
+    public TextMessageImpl(SessionImpl sessionImpl) {
+        super(sessionImpl);
         initTextBody();
     }
 

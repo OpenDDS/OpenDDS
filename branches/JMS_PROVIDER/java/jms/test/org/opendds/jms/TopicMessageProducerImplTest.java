@@ -51,7 +51,7 @@ public class TopicMessageProducerImplTest {
     private void doTestSend() throws JMSException {
         FakeObjects fakeObjects = createFakeObjects();
 
-        Session session = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber);
+        Session session = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, null);
         MessageProducer messageProducer = session.createProducer(fakeObjects.destination);
 
         assertNotNull(messageProducer);
@@ -212,13 +212,13 @@ public class TopicMessageProducerImplTest {
         final Topic topic = participant.create_topic("OpenDDS::MessagePayload", typeSupport.get_type_name(), TOPIC_QOS_DEFAULT.get(), null);
         assertNotNull(topic);
 
-        Destination destination = new TopicImpl("X") {
+        Destination destination = new TopicImpl("Topic1") {
             public Topic createTopic() {
                 return topic;
             }
         };
 
-        TextMessage message = new TextMessageImpl();
+        TextMessage message = new TextMessageImpl(null);
         message.setText("Hello OpenDDS JMS Provider");
 
         fakeObjects.destination = destination;

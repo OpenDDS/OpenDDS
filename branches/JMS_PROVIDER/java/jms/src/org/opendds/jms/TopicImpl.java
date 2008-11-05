@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.util.Properties;
 
 import javax.jms.Topic;
+import javax.jms.Destination;
 
 /**
  * @author  Steven Stallion
@@ -58,6 +59,13 @@ public class TopicImpl implements Serializable, Topic {
 
     @Override
     public String toString() {
-        return getTopicName();
+        StringBuilder sb = new StringBuilder(getClass().getName());
+        sb.append("[topicName=" + topicName + "]");
+        return sb.toString();
     }
+
+    static Destination fromTopicName(String topicName) {
+        return new TopicImpl(topicName);
+    }
+
 }
