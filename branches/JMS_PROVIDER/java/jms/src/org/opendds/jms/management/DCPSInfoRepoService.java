@@ -13,6 +13,8 @@ import org.opendds.jms.management.annotation.Constructor;
 import org.opendds.jms.management.annotation.Description;
 import org.opendds.jms.management.annotation.KeyProperty;
 import org.opendds.jms.management.annotation.Operation;
+import org.opendds.jms.management.argv.ArgumentFactory;
+import org.opendds.jms.management.argv.ArgumentFactoryBuilder;
 
 /**
  * @author  Steven Stallion
@@ -30,6 +32,20 @@ public class DCPSInfoRepoService extends DynamicMBeanSupport implements ServiceM
 
     @Constructor
     public DCPSInfoRepoService() {
+        ArgumentFactoryBuilder builder = new ArgumentFactoryBuilder();
+
+        builder.add(DCPSInfoRepoArgv.class);
+        builder.add(DCPSArgv.class);
+        builder.add(ORBArgv.class);
+
+        argumentFactory = builder.buildFactory();
+
+        Arguments args = new Arguments();
+
+        args.add(new DcpsInfoRepoArgs());
+        args.add(new ORBArgs());
+        args.add(new InfoRepo());
+
         // DCPSInfoRepo Dynamic Attributes
 
         // DCPS Dynamic Attributes
@@ -60,7 +76,7 @@ public class DCPSInfoRepoService extends DynamicMBeanSupport implements ServiceM
             log.info("Starting " + service);
         }
 
-        instance = new DCPSInfoRepo(null); //TODO args
+        instance = new DCPSInfoRepo(builder.buildArguments());
 
         instanceThread = new Thread(instance, "DCPSInfoRepo");
         instanceThread.start();

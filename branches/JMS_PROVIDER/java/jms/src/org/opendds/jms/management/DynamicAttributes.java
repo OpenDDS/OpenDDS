@@ -50,6 +50,10 @@ public class DynamicAttributes implements Serializable {
         return attributes.containsKey(attribute);
     }
 
+    public boolean hasAttribute(String attribute) {
+        return values.get(attribute) != null;
+    }
+
     public Object getAttribute(String attribute) throws AttributeNotFoundException {
         if (!isRegistered(attribute)) {
             throw new AttributeNotFoundException(attribute);

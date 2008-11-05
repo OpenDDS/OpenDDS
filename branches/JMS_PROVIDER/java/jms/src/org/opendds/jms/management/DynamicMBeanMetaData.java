@@ -84,12 +84,20 @@ public class DynamicMBeanMetaData implements Serializable {
         return findDescription(instance);
     }
 
+    public boolean hasKeyProperty(String name) {
+        return properties.containsKey(name);
+    }
+
     public Collection<KeyPropertyModel> getKeyProperties() {
         return Collections.unmodifiableCollection(properties.values());
     }
 
     public KeyPropertyModel getKeyProperty(String name) {
         return properties.get(name);
+    }
+
+    public boolean hasAttribute(String name) {
+        return attributes.containsKey(name);
     }
 
     public Collection<AttributeModel> getAttributes() {
@@ -102,6 +110,10 @@ public class DynamicMBeanMetaData implements Serializable {
 
     public Collection<ConstructorModel> getConstructors() {
         return Collections.unmodifiableCollection(constructors);
+    }
+
+    public boolean hasOperation(String name) {
+        return operations.containsKey(name);
     }
 
     public Collection<OperationModel> getOperations() {
