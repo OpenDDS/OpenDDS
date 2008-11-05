@@ -1,5 +1,5 @@
 /*
- * $
+ * $Id$
  */
 
 package org.opendds.jms.management.argument;
