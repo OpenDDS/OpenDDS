@@ -19,6 +19,7 @@ import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanConstructorInfo;
 import javax.management.MBeanException;
 import javax.management.MBeanInfo;
+import javax.management.MBeanNotificationInfo;
 import javax.management.MBeanOperationInfo;
 import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
@@ -201,7 +202,7 @@ public abstract class DynamicMBeanSupport implements DynamicMBean, MBeanRegistra
                              getAttributeInfo(),
                              getConstructorInfo(),
                              getOperationInfo(),
-                             null); // TODO JMX Notification support
+                             getNotificationInfo());
     }
 
     protected String getDescription() {
@@ -239,6 +240,10 @@ public abstract class DynamicMBeanSupport implements DynamicMBean, MBeanRegistra
         }
 
         return values.toArray(new MBeanOperationInfo[values.size()]);
+    }
+
+    protected MBeanNotificationInfo[] getNotificationInfo() {
+        return null;
     }
 
     //

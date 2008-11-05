@@ -4,8 +4,8 @@
 
 package org.opendds.jms.management.argument;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.omg.CORBA.StringSeqHolder;
 
