@@ -88,7 +88,15 @@
             <config-property-type>java.lang.String</config-property-type>
         </config-property>
         <config-property>
+            <config-property-name>SubscriberTransport</config-property-name>
+            <config-property-type>java.lang.String</config-property-type>
+        </config-property>
+        <config-property>
             <config-property-name>PublisherQosPolicy</config-property-name>
+            <config-property-type>java.lang.String</config-property-type>
+        </config-property>
+        <config-property>
+            <config-property-name>PublisherTransport</config-property-name>
             <config-property-type>java.lang.String</config-property-type>
         </config-property>
     </resourceadapter>

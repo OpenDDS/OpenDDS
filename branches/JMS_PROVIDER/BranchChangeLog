@@ -1,3 +1,10 @@
+Wed Nov  5 17:01:18 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/src/META-INF/ra.xml:
+        * java/jms/src/org/opendds/jms/management/Destination.java:
+
+          Minor bug fixes.
+
 Wed Nov  5 16:52:22 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/src/org/opendds/jms/management/DCPSInfoRepoService.java:
