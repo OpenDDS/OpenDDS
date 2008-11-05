@@ -13,8 +13,10 @@ import org.opendds.jms.management.annotation.Constructor;
 import org.opendds.jms.management.annotation.Description;
 import org.opendds.jms.management.annotation.KeyProperty;
 import org.opendds.jms.management.annotation.Operation;
-import org.opendds.jms.management.argv.ArgumentFactory;
-import org.opendds.jms.management.argv.ArgumentFactoryBuilder;
+import org.opendds.jms.management.argument.DCPSArguments;
+import org.opendds.jms.management.argument.DynamicArguments;
+import org.opendds.jms.management.argument.InfoRepoArguments;
+import org.opendds.jms.management.argument.ORBArguments;
 
 /**
  * @author  Steven Stallion
@@ -30,27 +32,13 @@ public class DCPSInfoRepoService extends DynamicMBeanSupport implements ServiceM
     private DCPSInfoRepo instance;
     private Thread instanceThread;
 
+    private DynamicArguments arguments = new DynamicArguments(this);
+
     @Constructor
     public DCPSInfoRepoService() {
-        ArgumentFactoryBuilder builder = new ArgumentFactoryBuilder();
-
-        builder.add(DCPSInfoRepoArgv.class);
-        builder.add(DCPSArgv.class);
-        builder.add(ORBArgv.class);
-
-        argumentFactory = builder.buildFactory();
-
-        Arguments args = new Arguments();
-
-        args.add(new DcpsInfoRepoArgs());
-        args.add(new ORBArgs());
-        args.add(new InfoRepo());
-
-        // DCPSInfoRepo Dynamic Attributes
-
-        // DCPS Dynamic Attributes
-
-        // ORB Dynamic Attributes
+        arguments.register(new InfoRepoArguments());
+        arguments.register(new DCPSArguments());
+        arguments.register(new ORBArguments());
     }
 
     @KeyProperty
@@ -76,7 +64,7 @@ public class DCPSInfoRepoService extends DynamicMBeanSupport implements ServiceM
             log.info("Starting " + service);
         }
 
-        instance = new DCPSInfoRepo(builder.buildArguments());
+        instance = new DCPSInfoRepo(arguments.toArgs());
 
         instanceThread = new Thread(instance, "DCPSInfoRepo");
         instanceThread.start();

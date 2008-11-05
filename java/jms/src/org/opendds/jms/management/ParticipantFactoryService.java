@@ -17,6 +17,9 @@ import org.opendds.jms.management.annotation.Constructor;
 import org.opendds.jms.management.annotation.Description;
 import org.opendds.jms.management.annotation.KeyProperty;
 import org.opendds.jms.management.annotation.Operation;
+import org.opendds.jms.management.argument.DCPSArguments;
+import org.opendds.jms.management.argument.DynamicArguments;
+import org.opendds.jms.management.argument.ORBArguments;
 
 /**
  * @author  Steven Stallion
@@ -31,11 +34,12 @@ public class ParticipantFactoryService extends DynamicMBeanSupport implements Se
 
     private DomainParticipantFactory instance;
 
+    private DynamicArguments arguments = new DynamicArguments(this);
+
     @Constructor
     public ParticipantFactoryService() {
-        // DCPS Dynamic Attributes
-
-        // ORB Dynamic Attributes
+        arguments.register(new DCPSArguments());
+        arguments.register(new ORBArguments());
     }
 
     @KeyProperty
@@ -66,7 +70,7 @@ public class ParticipantFactoryService extends DynamicMBeanSupport implements Se
             log.info("Starting " + service);
         }
 
-        instance = TheParticipantFactory.WithArgs(null); //TODO args
+        instance = TheParticipantFactory.WithArgs(arguments.toArgs());
         if (instance == null) {
             throw new IllegalStateException("Unable to initialize DomainParticipantFactory; please check logs.");
         }

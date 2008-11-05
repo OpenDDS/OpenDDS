@@ -138,6 +138,7 @@
             <fileset dir="${native.dir}/classes"/>
 
             <fileset dir="${src.dir}">
+                <exclude name="META-INF/ra.xml"/>
                 <exclude name="**/*.java"/>
             </fileset>
 
@@ -155,7 +156,7 @@
     <target name="rar" depends="jar"
             description="Create a Resource Adapter Archive (RAR) under build/">
         <!-- Update version tokens in descriptor -->
-        <copy file="${resource.dir}/ra.xml" todir="${build.dir}">
+        <copy file="${src.dir}/META-INF/ra.xml" todir="${build.dir}">
             <filterset>
                 <filter token="VERSION" value="${project.version}"/>
             </filterset>
