@@ -1,3 +1,15 @@
+Wed Nov  5 04:44:55 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/src/org/opendds/jms/DataWriterPair.java:
+        * java/jms/src/org/opendds/jms/TopicImpl.java:
+        * java/jms/src/org/opendds/jms/TopicMessageConsumerImpl.java:
+        * java/jms/src/org/opendds/jms/management/Destination.java:
+        * java/jms/src/org/opendds/jms/util/PropertiesHelper.java:
+        * java/jms/test/org/opendds/jms/TopicMessageConsumerImplTest.java:
+        * java/jms/test/org/opendds/jms/TopicMessageProducerImplTest.java:
+
+	  Added QoS configuration support for Destinations.
+
 Wed Nov  5 02:08:06 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/OpenDDS.ipr:
@@ -16,7 +28,7 @@ Wed Nov  5 02:08:06 UTC 2008  Steven Stallion  <stallions@ociweb.com>
         * java/jms/src/org/opendds/jms/management/argument/SvcConfDirective.java:
         * java/jms/src/org/opendds/jms/management/argument/TransportTypeHelper.java:
 
-	  Finalized JMX configuration changes.
+          Finalized JMX configuration changes.
 
 Wed Nov  5 02:00:18 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 

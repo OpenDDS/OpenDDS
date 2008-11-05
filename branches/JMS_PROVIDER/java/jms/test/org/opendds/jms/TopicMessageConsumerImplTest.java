@@ -239,7 +239,7 @@ public class TopicMessageConsumerImplTest {
         assertNotNull(topic);
 
         Destination destination = new TopicImpl() {
-            public Topic extractDDSTopic() {
+            public Topic createTopic() {
                 return topic;
             }
         };

@@ -51,7 +51,7 @@ public class DataWriterPair {
     private static Topic extractDDSTopicFromDestination(Destination destination, DomainParticipant participant) {
         // TODO placeholder, to be elaborated
         TopicImpl topicImpl = (TopicImpl) destination;
-        return topicImpl.extractDDSTopic();
+        return topicImpl.createTopic();
     }
 
     public MessagePayloadDataWriter getDataWriter(int deliveryMode) {
