@@ -70,7 +70,7 @@ public class ParticipantFactoryService extends DynamicMBeanSupport implements Se
             log.info("Starting " + service);
         }
 
-        instance = TheParticipantFactory.WithArgs(arguments.toArgs());
+        instance = TheParticipantFactory.WithArgs(arguments.toStringSeq());
         if (instance == null) {
             throw new IllegalStateException("Unable to initialize DomainParticipantFactory; please check logs.");
         }

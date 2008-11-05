@@ -39,7 +39,7 @@ public class ORBArguments implements DynamicArgumentProvider {
         writer.writeIfSet("-ORBDebugLevel", ORB_DEBUG_LEVEL);
         writer.writeIfSet("-ORBLogFile", ORB_LOG_FILE);
 
-        writer.writeDelimited(ORBProperties.ORB_ARGS);
+        writer.writeDelimited(ORB_ARGS);
 
         writer.writeTo(args);
     }
