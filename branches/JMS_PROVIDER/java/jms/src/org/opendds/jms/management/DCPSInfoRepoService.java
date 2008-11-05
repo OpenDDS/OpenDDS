@@ -41,6 +41,11 @@ public class DCPSInfoRepoService extends DynamicMBeanSupport implements ServiceM
         arguments.register(new ORBArguments());
     }
 
+    @Attribute(readOnly = true)
+    public String getService() {
+        return service;
+    }
+
     @KeyProperty
     public void setService(String service) {
         this.service = service;
