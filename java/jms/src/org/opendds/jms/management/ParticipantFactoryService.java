@@ -42,6 +42,11 @@ public class ParticipantFactoryService extends DynamicMBeanSupport implements Se
         arguments.register(new ORBArguments());
     }
 
+    @Attribute(readOnly = true)
+    public String getService() {
+        return service;
+    }
+
     @KeyProperty
     public void setService(String service) {
         this.service = service;
