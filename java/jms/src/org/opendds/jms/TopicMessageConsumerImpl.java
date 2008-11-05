@@ -96,7 +96,7 @@ public class TopicMessageConsumerImpl implements MessageConsumer {
     private Topic extractDDSTopicFromDestination(Destination destination, DomainParticipant participant) {
         // TODO placeholder, to be elaborated
         TopicImpl topicImpl = (TopicImpl) destination;
-        return topicImpl.extractDDSTopic();
+        return topicImpl.createTopic();
     }
 
     public String getMessageSelector() throws JMSException {

@@ -5,6 +5,7 @@
 package org.opendds.jms.management;
 
 import java.io.Serializable;
+import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -15,6 +16,7 @@ import org.opendds.jms.management.annotation.Description;
 import org.opendds.jms.management.annotation.KeyProperty;
 import org.opendds.jms.management.annotation.Operation;
 import org.opendds.jms.util.JndiHelper;
+import org.opendds.jms.util.PropertiesHelper;
 import org.opendds.jms.util.Strings;
 
 /**
@@ -29,6 +31,10 @@ public class Destination extends DynamicMBeanSupport implements Serializable, Se
     private String destination;
     private String jndiName;
     private String type;
+
+    private Properties dataReaderQosPolicy;
+    private Properties dataWriterQosPolicy;
+    private Properties topicQosPolicy; 
 
     private JndiHelper helper = new JndiHelper();
 
@@ -57,11 +63,6 @@ public class Destination extends DynamicMBeanSupport implements Serializable, Se
         this.type = type;
     }
 
-    @Attribute
-    public boolean isActive() {
-        return active;
-    }
-
     @Attribute(required = true)
     public String getJndiName() {
         return jndiName;
@@ -72,6 +73,50 @@ public class Destination extends DynamicMBeanSupport implements Serializable, Se
             throw new IllegalArgumentException();
         }
         this.jndiName = jndiName;
+    }
+
+    @Attribute
+    public String getDataReaderQosPolicy() {
+        String value = null;
+        if (dataReaderQosPolicy != null) {
+            value = PropertiesHelper.valueOf(dataReaderQosPolicy);
+        }
+        return value;
+    }
+
+    public void setDataReaderQosPolicy(String value) {
+        dataReaderQosPolicy = PropertiesHelper.forValue(value);
+    }
+
+    @Attribute
+    public String getDataWriterQosPolicy() {
+        String value = null;
+        if (dataWriterQosPolicy != null) {
+            value = PropertiesHelper.valueOf(dataWriterQosPolicy);
+        }
+        return value;
+    }
+
+    public void setDataWriterQosPolicy(String value) {
+        dataWriterQosPolicy = PropertiesHelper.forValue(value);
+    }
+
+    @Attribute
+    public String getTopicQosPolicy() {
+        String value = null;
+        if (topicQosPolicy != null) {
+            value = PropertiesHelper.valueOf(topicQosPolicy);
+        }
+        return value;
+    }
+
+    public void setTopicQosPolicy(String value) {
+        topicQosPolicy = PropertiesHelper.forValue(value);
+    }
+
+    @Attribute
+    public boolean isActive() {
+        return active;
     }
 
     @Operation
@@ -87,10 +132,12 @@ public class Destination extends DynamicMBeanSupport implements Serializable, Se
             log.info("Binding to JNDI name: " + jndiName);
         }
 
-        TopicImpl topic = new TopicImpl();
+        TopicImpl topic = new TopicImpl(destination);
 
-        // TODO Configure TopicImpl instance
-
+        topic.setDataReaderQosPolicy(dataReaderQosPolicy);
+        topic.setDataWriterQosPolicy(dataWriterQosPolicy);
+        topic.setTopicQosPolicy(topicQosPolicy);
+        
         helper.bind(jndiName, topic);
 
         active = true;
