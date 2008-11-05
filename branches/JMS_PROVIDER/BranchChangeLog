@@ -1,3 +1,36 @@
+Wed Nov  5 02:00:18 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/src/META-INF/ra.xml:
+
+	  Moved from resource/
+
+        * java/jms/resource:
+        * java/jms/resource/ra.xml:
+        * java/jms/src/META-INF/services:
+        * java/jms/src/META-INF/services/org.opendds.jms.config.spi.PropertyFormat:
+        * java/jms/src/org/opendds/jms/config:
+        * java/jms/src/org/opendds/jms/config/Configuration.java:
+        * java/jms/src/org/opendds/jms/config/PropertyWriter.java:
+        * java/jms/src/org/opendds/jms/config/properties:
+        * java/jms/src/org/opendds/jms/config/properties/DCPSProperties.java:
+        * java/jms/src/org/opendds/jms/config/properties/InfoRepoProperties.java:
+        * java/jms/src/org/opendds/jms/config/properties/ORBProperties.java:
+        * java/jms/src/org/opendds/jms/config/spi:
+        * java/jms/src/org/opendds/jms/config/spi/PropertyFormat.java:
+        * java/jms/src/org/opendds/jms/config/spi/impl:
+        * java/jms/src/org/opendds/jms/config/spi/impl/DCPSPropertyFormat.java:
+        * java/jms/src/org/opendds/jms/config/spi/impl/InfoRepoPropertyFormat.java:
+        * java/jms/src/org/opendds/jms/config/spi/impl/ORBPropertyFormat.java:
+        * java/jms/src/org/opendds/jms/management/argv:
+        * java/jms/src/org/opendds/jms/management/argv/ArgumentWriter.java:
+        * java/jms/src/org/opendds/jms/management/argv/DynamicArgumentProvider.java:
+        * java/jms/src/org/opendds/jms/management/argv/DynamicArguments.java:
+        * java/jms/src/org/opendds/jms/management/argv/ORBArguments.java:
+        * java/jms/src/org/opendds/jms/management/argv/SvcConfDirective.java:
+        * java/jms/src/org/opendds/jms/management/argv/TransportTypeHelper.java:
+
+          Removed these files.
+
 Tue Nov  4 19:42:25 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/OpenDDS.ipr:

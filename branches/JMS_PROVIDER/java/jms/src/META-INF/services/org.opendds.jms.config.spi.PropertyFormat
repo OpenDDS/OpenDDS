@@ -1,7 +1,0 @@
-#
-# $Id$
-#
-
-org.opendds.jms.config.spi.impl.DCPSPropertyFormat
-org.opendds.jms.config.spi.impl.InfoRepoPropertyFormat
-org.opendds.jms.config.spi.impl.ORBPropertyFormat
