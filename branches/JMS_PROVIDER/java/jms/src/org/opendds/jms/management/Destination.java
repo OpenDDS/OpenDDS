@@ -89,6 +89,8 @@ public class Destination extends DynamicMBeanSupport implements Serializable, Se
 
         TopicImpl topic = new TopicImpl();
 
+        // TODO Configure TopicImpl instance
+
         helper.bind(jndiName, topic);
 
         active = true;
