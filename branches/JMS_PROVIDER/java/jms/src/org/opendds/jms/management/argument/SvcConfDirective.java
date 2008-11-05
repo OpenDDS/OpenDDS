@@ -9,8 +9,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.opendds.jms.config.PropertyWriter;
-
 /**
  * @author  Steven Stallion
  * @version $Revision$
