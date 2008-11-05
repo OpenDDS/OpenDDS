@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.opendds.jms.config.Configuration;
 import org.opendds.jms.config.PropertyWriter;
-import org.opendds.jms.config.SvcConfDirective;
+import org.opendds.jms.management.argv.SvcConfDirective;
 import org.opendds.jms.config.properties.InfoRepoProperties;
 import org.opendds.jms.config.spi.PropertyFormat;
 import org.opendds.jms.util.Strings;

@@ -71,19 +71,19 @@ public abstract class DynamicMBeanSupport implements DynamicMBean, MBeanRegistra
 
     public void postDeregister() {}
 
-    protected void registerAttribute(String attribute, Class type) {
+    public void registerAttribute(String attribute, Class type) {
         registerAttribute(attribute, type, null);
     }
 
-    protected void registerAttribute(String attribute, Class type, String description) {
+    public void registerAttribute(String attribute, Class type, String description) {
         attributes.register(attribute, type, description, true, true);
     }
 
-    protected void registerReadOnlyAttribute(String attribute, Class type) {
+    public void registerReadOnlyAttribute(String attribute, Class type) {
         registerReadOnlyAttribute(attribute, type, null);
     }
 
-    protected void registerReadOnlyAttribute(String attribute, Class type, String description) {
+    public void registerReadOnlyAttribute(String attribute, Class type, String description) {
         attributes.register(attribute, type, description, true, false);
     }
 
@@ -161,7 +161,7 @@ public abstract class DynamicMBeanSupport implements DynamicMBean, MBeanRegistra
         return list;
     }
 
-    protected void verify() {
+    public void verify() {
         for (DynamicMBeanMetaData.AttributeModel model : metadata.getAttributes()) {
             if (model.isRequired()) {
                 try {
