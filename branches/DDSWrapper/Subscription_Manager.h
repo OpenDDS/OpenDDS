@@ -41,7 +41,9 @@ class DDSWrapper_Export Subscription_Manager
   /// will create a topic instance using the domain manager
   /// internally a datareader will be created which can be accessed
   /// through the lookup_datareader method
-  void access_topic (const Topic_Manager & topic);
+  void access_topic (const Topic_Manager & topic,
+		     const DDS::DataReaderQos & qos
+                       = DATAREADER_QOS_DEFAULT);
 
   /// unregisters and deletes the topic from the domain
   void remove_topic (const Topic_Manager & topic);

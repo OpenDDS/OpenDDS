@@ -20,7 +20,8 @@
 // implementation
 extern Domain_Manager_Impl * create_domain_manager (int & argc,
 						    char * argv[],
-						    DDS::DomainId_t domain_id);
+						    DDS::DomainId_t domain_id,
+						    const DDS::DomainParticipantQos & qos);
 
 Manager_Exception::Manager_Exception (const std::string& reason)
  : reason_ (reason)
@@ -34,8 +35,9 @@ Domain_Manager::Domain_Manager ()
 
 Domain_Manager::Domain_Manager (int & argc, 
 				char *argv[],
-				DDS::DomainId_t domain_id)
-  : manager_impl_ (create_domain_manager (argc, argv, domain_id))
+				DDS::DomainId_t domain_id,
+				const DDS::DomainParticipantQos & qos)
+  : manager_impl_ (create_domain_manager (argc, argv, domain_id, qos))
 {
 }
 

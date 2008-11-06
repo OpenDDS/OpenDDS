@@ -29,11 +29,13 @@ class OpenDDS_Subscription_Manager : public Subscription_Manager_Impl
 {
  public:
   /// ctor
-  OpenDDS_Subscription_Manager (const Domain_Manager & dm);
+  OpenDDS_Subscription_Manager (const Domain_Manager & dm,
+				const DDS::SubscriberQos & qos);
 
   /// ctor with transport impl registration
   OpenDDS_Subscription_Manager (const Domain_Manager & dm,
-				OpenDDS::DCPS::TransportIdType transport_id);
+				OpenDDS::DCPS::TransportIdType transport_id,
+				const DDS::SubscriberQos & qos);
 
   /// ctor
   /// will take control of an existing subscriber
@@ -47,6 +49,7 @@ class OpenDDS_Subscription_Manager : public Subscription_Manager_Impl
   /// memory management of the returned datawriter has to be done by the caller
   virtual void access_topic (
     const Topic_Manager & topic,
+    const DDS::DataReaderQos & qos,
     const Subscription_Manager_Ptr & ref);
 
   /// unregisters and deletes the topic from the domain
@@ -62,7 +65,7 @@ class OpenDDS_Subscription_Manager : public Subscription_Manager_Impl
 
  private:
   /// initializes the publication manager
-  void init ();
+  void init (const DDS::SubscriberQos & qos);
 
   /// registers a transport implementation based on the passed id
   void register_transport (OpenDDS::DCPS::TransportIdType transport_id);

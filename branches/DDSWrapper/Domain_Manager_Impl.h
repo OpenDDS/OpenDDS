@@ -46,7 +46,8 @@ class Domain_Manager_Impl
   /// getter method for the subscription manager, the caller is responsible for
   /// memory management
   virtual Subscription_Manager subscription_manager (
-    const Domain_Manager_Ptr & ref) = 0;
+    const Domain_Manager_Ptr & ref,
+    const DDS::SubscriberQos & qos) = 0;
 
   /// returns a subscription manager for built-in topics
   virtual Subscription_Manager builtin_topic_subscriber (
@@ -55,7 +56,8 @@ class Domain_Manager_Impl
   /// getter method for the publication manager, the caller is responsible for
   /// memory management
   virtual Publication_Manager publication_manager (
-    const Domain_Manager_Ptr & ref) = 0;
+    const Domain_Manager_Ptr & ref,
+    const DDS::PublisherQos & qos) = 0;
 
   /// getter method for the internal domain participant
   /// the memory is managed by the Domain_Manager_Impl
