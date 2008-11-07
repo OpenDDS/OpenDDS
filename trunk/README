@@ -14,7 +14,7 @@ team at Object Computing, Incorporated (http://www.ociweb.com) in
 St. Louis and Phoenix. It is released under the same generous license
 terms as ACE, TAO and MPC.
 
-This directory structure contains OpenDDS 1.2.
+This directory structure contains OpenDDS 1.3.
 
 
 ======================================================================
@@ -408,10 +408,6 @@ of samples.
 
 ======================================================================
 * Test Failures
-
-The StringKey test fails on TAO 1.6.6, so users of this TAO version
-should avoid using strings as keys or should consider switching to
-the latest OCI TAO patch or TAO 1.6.7 when it becomes available.
 
 Note: A list of tests that are run in the nightly automated build/test
       can be found in $DDS_ROOT/bin/dcps_tests.lst
