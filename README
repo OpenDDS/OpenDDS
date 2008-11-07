@@ -82,9 +82,9 @@ OpenDDS requires TAO for both IDL compilation as well as interaction
 with the DCPSInfoRepo. At a minimum, you must be at one of the following
 versions (or later) in order to properly compile OpenDDS:
 
-*** TAO 1.4a patch 21
-*** TAO 1.5a patch 8
-*** TAO 1.6.5
+*** TAO 1.4a patch 23
+*** TAO 1.5a patch 9
+*** TAO 1.6.6
 
 Note that the 1.xa releases are from OCI and can be obtained from
 http://www.theaceorb.com/. The DOC Group releases can be obtained from
@@ -408,6 +408,10 @@ of samples.
 
 ======================================================================
 * Test Failures
+
+The StringKey test fails on TAO 1.6.6, so users of this TAO version
+should avoid using strings as keys or should consider switching to
+the latest OCI TAO patch or TAO 1.6.7 when it becomes available.
 
 Note: A list of tests that are run in the nightly automated build/test
       can be found in $DDS_ROOT/bin/dcps_tests.lst
