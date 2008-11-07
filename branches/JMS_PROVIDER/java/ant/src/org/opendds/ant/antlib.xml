@@ -6,6 +6,9 @@
     Version: $Revision$
 -->
 <antlib>
+    <typedef name="libindex" uri="antlib:org.opendds.ant"
+             classname="org.opendds.ant.LibIndex"/>
+
     <typedef name="libfileset" uri="antlib:org.opendds.ant"
              classname="org.opendds.ant.LibFileSet"/>
 </antlib>
