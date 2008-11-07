@@ -45,8 +45,6 @@ namespace OpenDDS
     typedef Cached_Allocator_With_Overflow< ::OpenDDS::DCPS::ReceivedDataElement, ACE_Null_Mutex>
                 ReceivedDataAllocator;
 
-    //typedef ZeroCopyInfoSeq<DCPS_ZERO_COPY_SEQ_DEFAULT_SIZE> SampleInfoZCSeq;
-
     /// Keeps track of a DataWriter's liveliness for a DataReader.
     class OpenDDS_Dcps_Export WriterInfo {
       public:
@@ -414,12 +412,8 @@ namespace OpenDDS
           CORBA::SystemException
         )) = 0;
 
-      void sample_info(::DDS::SampleInfoSeq & info_seq,
-                       size_t start_idx, size_t count,
-                       ReceivedDataElement *ptr);
-
       void sample_info(::DDS::SampleInfo & sample_info,
-                       ReceivedDataElement *ptr);
+                       const ReceivedDataElement *ptr);
 
       CORBA::Long total_samples() const;
 

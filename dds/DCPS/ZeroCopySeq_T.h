@@ -47,6 +47,8 @@ namespace TAO
     {
     public:
 
+      typedef Sample_T value_type;
+
       /**
       * Construct a sequence of sample data values that supports
       * zero-copy reads.

@@ -57,7 +57,6 @@ module DDS {
     };
 
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
     local interface QueryCondition : ReadCondition {
         string         get_query_expression();
         ReturnCode_t   get_query_parameters(
@@ -65,7 +64,6 @@ module DDS {
         ReturnCode_t   set_query_parameters(
             in StringSeq query_parameters);
     };
-#endif
 
 
     local interface DataReader : Entity {
