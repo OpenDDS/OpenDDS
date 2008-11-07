@@ -79,23 +79,6 @@
         <mkdir dir="${build.dir}"/>
         <mkdir dir="${build.dir}/classes"/>
 
-        <condition property="lib.prefix" value="lib">
-            <os family="unix"/>
-        </condition>
-
-        <condition property="lib.suffix" value=".so">
-            <os family="unix"/>
-        </condition>
-        <condition property="lib.suffix" value="d.dll">
-            <and>
-                <os family="windows"/>
-                <isset property="compile.debug"/>
-            </and>
-        </condition>
-        <condition property="lib.suffix" value=".dll">
-            <os family="windows"/>
-        </condition>
-
         <!-- Update version.properties -->
         <propertyfile file="${build.dir}/version.properties">
             <entry key="version.dds" value="${version.dds}"/>
@@ -198,7 +181,7 @@
         <jar destfile="${build.dir}/${project.filename}.rar">
             <zipfileset dir="${build.dir}" prefix="META-INF">
                 <include name="ra.xml"/>
-                <!--<include name="LIBRARY.LIST"/>-->
+                <!--<include name="INDEX.LIBS"/>-->
             </zipfileset>
 
             <fileset dir="${build.dir}">
@@ -233,10 +216,10 @@
     <target name="test.init" depends="init">
         <mkdir dir="${build.dir}/tests"/>
 
-        <condition property="test.jvmargs" value="-Djni.nativeDebug=true">
+        <condition property="test.jvmargs" value="-Dopendds.native.debug=true">
             <and>
                 <os family="windows"/>
-                <istrue value="${compile.debug}"/>
+                <istrue value="${native.debug}"/>
             </and>
         </condition>
         <property name="test.jvmargs" value=""/>
@@ -265,8 +248,8 @@
                     <include name="**/*Test.java"/>
                 </fileset>
             </batchtest>
-            <jvmarg line="${test.jvmargs}"/>
             <jvmarg value="-ea"/>   <!-- enable assertions -->
+            <jvmarg line="${test.jvmargs}"/>
             <classpath refid="project.classpath"/>
         </junit>
     </target>
