@@ -1,3 +1,10 @@
+Fri Nov  7 17:54:40 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/Version.h:
+
+          Artificially set the branch's version number to 1.2.1
+          (trunk is now 1.2).
+
 Fri Nov  7 15:53:52 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
