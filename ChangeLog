@@ -1,3 +1,29 @@
+Fri Nov  7 20:46:44 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/Process.pm:
+        * bin/ProcessFactory.pm:
+        * bin/PerlDDS/Process.pm:
+        * bin/PerlDDS/ProcessFactory.pm:
+
+          Moved perl modules from bin/ to bin/PerlDDS to resolve
+          PerlDDS::Process not locatable issue when running with
+          -Config Coverage.
+
+        * bin/DDS_Run_Test.pm:
+
+          Added package name for using Process and ProcessFactory modules.
+
+        * dds/DCPS/transport/framework/TheTransportFactory.h:
+
+          Removed TheTransportFactory.inl include.
+           
+        * dds/DCPS/transport/framework/TheTransportFactory.inl:
+        * dds/DCPS/transport/framework/TheTransportFactory.cpp:
+
+          Removed these files as they are nothing and cause trouble
+          when compiling with test coverage option (-fprofile-arcs)
+          on some gcc compiler(1.4.1).
+
 Fri Nov  7 17:49:09 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/ReliableMulticast/ReliableMulticast.rc:

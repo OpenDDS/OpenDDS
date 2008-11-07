@@ -4,8 +4,8 @@
 # startup ARGV processing that is used by all tests.
 
 use PerlACE::Run_Test;
-use Process;
-use ProcessFactory;
+use PerlDDS::Process;
+use PerlDDS::ProcessFactory;
 use Cwd;
 
 package PerlDDS;
