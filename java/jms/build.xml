@@ -161,40 +161,6 @@
     <target name="rar" depends="jar"
             description="Create a Resource Adapter Archive (RAR) under build/">
         <!-- Collect native libraries to package -->
-        <fileset id="JMS.lib" dir="${native.dir}">
-            <or>
-                <opendds:library name="opendds-jms-native"/>
-            </or>
-        </fileset>
-        <fileset id="DDS.lib" dir="${env.DDS_ROOT}/lib">
-            <or>
-                <opendds:library name="DCPSInfoRepoServ"/>
-                <opendds:library name="Federator"/>
-                <opendds:library name="InfoRepoLib"/>
-                <opendds:library name="OpenDDS_DCPS_Java"/>
-                <opendds:library name="OpenDDS_Dcps"/>
-                <opendds:library name="idl2jni_runtime"/>
-                <opendds:library name="tao_java"/>
-                <opendds:library name="SimpleTcp"/>
-                <opendds:library name="SimpleUnreliableDgram"/>
-                <opendds:library name="ReliableMulticast"/>
-            </or>
-        </fileset>
-        <fileset id="ACE.lib" dir="${env.ACE_ROOT}/lib">
-            <or>
-                <opendds:library name="ACE"/>
-                <opendds:library name="TAO"/>
-                <opendds:library name="TAO_AnyTypeCode"/>
-                <opendds:library name="TAO_CodecFactory"/>
-                <opendds:library name="TAO_Codeset"/>
-                <opendds:library name="TAO_IORTable"/>
-                <opendds:library name="TAO_PI"/>
-                <opendds:library name="TAO_PortableServer"/>
-                <opendds:library name="TAO_Svc_Utils"/>
-            </or>
-        </fileset>
-
-
         <opendds:libfileset id="ACE.lib" dir="${env.ACE_ROOT}/lib">
             <include name="ACE"/>
             <include name="TAO"/>
@@ -206,7 +172,22 @@
             <include name="TAO_PortableServer"/>
             <include name="TAO_Svc_Utils"/>
         </opendds:libfileset>
-
+        <opendds:libfileset id="DDS.lib" dir="${env.DDS_ROOT}/lib">
+            <include name="DCPSInfoRepoServ"/>
+            <include name="Federator"/>
+            <include name="InfoRepoLib"/>
+            <include name="OpenDDS_DCPS_Java"/>
+            <include name="OpenDDS_Dcps"/>
+            <include name="idl2jni_runtime"/>
+            <include name="tao_java"/>
+            <include name="SimpleTcp"/>
+            <include name="SimpleUnreliableDgram"/>
+            <include name="ReliableMulticast"/>
+        </opendds:libfileset>
+        <opendds:libfileset id="JMS.lib" dir="${native.dir}">
+            <include name="opendds-jms-native"/>
+        </opendds:libfileset>
+        
         <!-- Update Resource Adapter descriptor -->
         <copy file="${src.dir}/META-INF/ra.xml" todir="${build.dir}">
             <filterset>
@@ -217,7 +198,7 @@
         <jar destfile="${build.dir}/${project.filename}.rar">
             <zipfileset dir="${build.dir}" prefix="META-INF">
                 <include name="ra.xml"/>
-                <!--<include name="INDEX.LIBS"/>-->
+                <!--<include name="LIBRARY.LIST"/>-->
             </zipfileset>
 
             <fileset dir="${build.dir}">
