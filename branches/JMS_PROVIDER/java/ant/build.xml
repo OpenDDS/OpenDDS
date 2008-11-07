@@ -5,14 +5,31 @@
     Author:  Steven Stallion
     Version: $Revision$
 -->
-<project name="opendds-ant-native" default="jar" basedir=".">
+<project name="opendds-ant" default="jar" basedir=".">
     <property name="build.dir" value="${basedir}/build"/>
     <property name="doc.dir" value="${basedir}/doc"/>
     <property name="lib.dir" value="${basedir}/lib"/>
     <property name="src.dir" value="${basedir}/src"/>
     <property name="test.dir" value="${basedir}/test"/>
+    
+    <property environment="env"/>
+
+    <!-- Determine OpenDDS version -->
+    <loadproperties srcfile="${env.DDS_ROOT}/dds/Version.h">
+        <filterchain>
+            <deletecharacters chars="&quot;"/>
+            <tokenfilter>
+                <replacestring from="#define DDS_MAJOR_VERSION" to="version.dds.major"/>
+                <replacestring from="#define DDS_MINOR_VERSION" to="version.dds.minor"/>
+                <replacestring from="#define DDS_VERSION" to="version.dds"/>
+            </tokenfilter>
+        </filterchain>
+    </loadproperties>
 
     <property file="build.properties"/>
+
+    <property name="project.version" value="${version.dds}"/>
+    <property name="project.filename" value="${ant.project.name}-${project.version}"/>
 
     <!--
         Project Paths
@@ -57,7 +74,7 @@
 
     <target name="jar" depends="compile"
             description="Archive compiled classes and resources">
-        <jar destfile="${build.dir}/${ant.project.name}.jar"
+        <jar destfile="${build.dir}/${project.filename}.jar"
              compress="${jar.compress}"
              index="${jar.index}">
             <fileset dir="${build.dir}/classes"/>
