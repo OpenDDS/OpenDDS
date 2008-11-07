@@ -412,7 +412,76 @@ public:
 
 
   private:
-    ::DDS::ReturnCode_t  store_instance_data(
+
+    ::DDS::ReturnCode_t read_i (
+      ::<%MODULE%><%TYPE%>Seq & received_data,
+      ::DDS::SampleInfoSeq & info_seq,
+      ::CORBA::Long max_samples,
+      ::DDS::SampleStateMask sample_states,
+      ::DDS::ViewStateMask view_states,
+      ::DDS::InstanceStateMask instance_states,
+      ::DDS::QueryCondition_ptr a_condition
+      );
+
+    ::DDS::ReturnCode_t take_i (
+      ::<%MODULE%><%TYPE%>Seq & received_data,
+      ::DDS::SampleInfoSeq & info_seq,
+      ::CORBA::Long max_samples,
+      ::DDS::SampleStateMask sample_states,
+      ::DDS::ViewStateMask view_states,
+      ::DDS::InstanceStateMask instance_states,
+      ::DDS::QueryCondition_ptr a_condition
+      );
+
+    DDS::ReturnCode_t
+    <%TYPE%>DataReaderImpl::read_instance_i (
+      ::<%MODULE%><%TYPE%>Seq & received_data,
+      ::DDS::SampleInfoSeq & info_seq,
+      ::CORBA::Long max_samples,
+      ::DDS::InstanceHandle_t a_handle,
+      ::DDS::SampleStateMask sample_states,
+      ::DDS::ViewStateMask view_states,
+      ::DDS::InstanceStateMask instance_states,
+      ::DDS::QueryCondition_ptr a_condition
+      );
+
+    DDS::ReturnCode_t
+    <%TYPE%>DataReaderImpl::take_instance_i (
+      ::<%MODULE%><%TYPE%>Seq & received_data,
+      ::DDS::SampleInfoSeq & info_seq,
+      ::CORBA::Long max_samples,
+      ::DDS::InstanceHandle_t a_handle,
+      ::DDS::SampleStateMask sample_states,
+      ::DDS::ViewStateMask view_states,
+      ::DDS::InstanceStateMask instance_states,
+      ::DDS::QueryCondition_ptr a_condition
+      );
+
+    DDS::ReturnCode_t
+    <%TYPE%>DataReaderImpl::read_next_instance_i (
+      ::<%MODULE%><%TYPE%>Seq & received_data,
+      ::DDS::SampleInfoSeq & info_seq,
+      ::CORBA::Long max_samples,
+      ::DDS::InstanceHandle_t a_handle,
+      ::DDS::SampleStateMask sample_states,
+      ::DDS::ViewStateMask view_states,
+      ::DDS::InstanceStateMask instance_states,
+      ::DDS::QueryCondition_ptr a_condition
+      );
+
+    DDS::ReturnCode_t
+    <%TYPE%>DataReaderImpl::take_next_instance_i (
+      ::<%MODULE%><%TYPE%>Seq & received_data,
+      ::DDS::SampleInfoSeq & info_seq,
+      ::CORBA::Long max_samples,
+      ::DDS::InstanceHandle_t a_handle,
+      ::DDS::SampleStateMask sample_states,
+      ::DDS::ViewStateMask view_states,
+      ::DDS::InstanceStateMask instance_states,
+      ::DDS::QueryCondition_ptr a_condition
+      );
+
+  ::DDS::ReturnCode_t store_instance_data(
          ::<%SCOPE%><%TYPE%> *instance_data,
          const OpenDDS::DCPS::DataSampleHeader& header
          );

@@ -1,3 +1,30 @@
+Fri Nov  7 15:53:52 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        * dds/DCPS/Comparator_T.h:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/InstanceState.h:
+        * dds/DCPS/InstanceState.inl:
+        * dds/DCPS/QueryConditionImpl.h:
+        * dds/DCPS/QueryConditionImpl.cpp:
+        * dds/DCPS/RakeData.h:
+        * dds/DCPS/RakeResults_T.h:
+        * dds/DCPS/RakeResults_T.cpp:
+        * dds/DCPS/WaitSet.cpp:
+        * dds/DCPS/ZeroCopySeq_T.h:
+        * dds/DdsDcpsSubscription.idl:
+
+          Implemented a limited form of QueryCondition.  Only the "ORDER BY"
+          clause in the query string is honored.  This requires some extra
+          support from tao_idl which is not yet committed.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/QueryCondition:
+
+          Added a test for QueryCondition.
+
 Wed Nov  5 22:06:45 UTC 2008  Weiqi Gao  <gaow@ociweb.com>
 
         * java/OpenDDS.ipr:

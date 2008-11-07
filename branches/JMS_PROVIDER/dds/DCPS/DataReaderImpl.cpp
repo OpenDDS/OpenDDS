@@ -15,7 +15,7 @@
 #include "Transient_Kludge.h"
 #include "Util.h"
 #include "RequestedDeadlineWatchdog.h"
-#include "ReadConditionImpl.h"
+#include "QueryConditionImpl.h"
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #if !defined (DDS_HAS_MINIMUM_BIT)
@@ -546,8 +546,8 @@ void DataReaderImpl::update_incompatible_qos (
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_, 0);
-  DDS::ReadCondition_var rc = new OpenDDS::DCPS::ReadConditionImpl(
-    this, sample_states, view_states, instance_states);
+  DDS::ReadCondition_var rc = new ReadConditionImpl(this, sample_states,
+    view_states, instance_states);
   read_conditions_.insert(rc);
   return rc._retn();
 }
@@ -562,14 +562,18 @@ void DataReaderImpl::update_incompatible_qos (
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_, 0);
-  return ::DDS::QueryCondition::_nil(); //TODO: impl
+  ::DDS::QueryCondition_var qc = new QueryConditionImpl(this, sample_states,
+    view_states, instance_states, query_expression, query_parameters);
+  ::DDS::ReadCondition_var rc = ::DDS::ReadCondition::_duplicate(qc);
+  read_conditions_.insert(rc);
+  return qc._retn();
 }
 #endif
 
 bool DataReaderImpl::has_readcondition(::DDS::ReadCondition_ptr a_condition)
 {
   //sample lock already held
-  DDS::ReadCondition_var rc = DDS::ReadCondition::_duplicate(a_condition);
+  ::DDS::ReadCondition_var rc = ::DDS::ReadCondition::_duplicate(a_condition);
   return read_conditions_.find(rc) != read_conditions_.end();
 }
 
@@ -578,10 +582,10 @@ bool DataReaderImpl::has_readcondition(::DDS::ReadCondition_ptr a_condition)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_,
-    DDS::RETCODE_OUT_OF_RESOURCES);
-  DDS::ReadCondition_var rc = DDS::ReadCondition::_duplicate(a_condition);
+    ::DDS::RETCODE_OUT_OF_RESOURCES);
+  ::DDS::ReadCondition_var rc = ::DDS::ReadCondition::_duplicate(a_condition);
   return read_conditions_.erase(rc)
-    ? DDS::RETCODE_OK : DDS::RETCODE_PRECONDITION_NOT_MET;
+    ? ::DDS::RETCODE_OK : ::DDS::RETCODE_PRECONDITION_NOT_MET;
 }
 
 ::DDS::ReturnCode_t DataReaderImpl::delete_contained_entities ()
@@ -1222,102 +1226,8 @@ DataReaderImpl::listener_for (::DDS::StatusKind kind)
     }
 }
 
-// zero-copy version of this metod
-void
-DataReaderImpl::sample_info(::DDS::SampleInfoSeq & info_seq,
-                            //x ::OpenDDS::DCPS::SampleInfoZCSeq & info_seq,
-                            size_t start_idx,
-                            size_t count,
-                            ReceivedDataElement *ptr)
-{
-  size_t end_idx = start_idx + count - 1;
-  for (size_t i = start_idx; i <= end_idx; i++)
-    {
-      info_seq[i].sample_rank = count - (i - start_idx + 1);
-
-      // generation_rank =
-      //    (MRSIC.disposed_generation_count +
-      //     MRSIC.no_writers_generation_count)
-      //  - (S.disposed_generation_count +
-      //     S.no_writers_generation_count)
-      //
-      //  info_seq[end_idx] == MRSIC
-      //  info_seq[i].generation_rank ==
-      //      (S.disposed_generation_count +
-      //      (S.no_writers_generation_count) -- calculated in
-      //            InstanceState::sample_info
-
-      info_seq[i].generation_rank =
-        (info_seq[end_idx].disposed_generation_count +
-         info_seq[end_idx].no_writers_generation_count) -
-        info_seq[i].generation_rank;
-
-      // absolute_generation_rank =
-      //     (MRS.disposed_generation_count +
-      //      MRS.no_writers_generation_count)
-      //   - (S.disposed_generation_count +
-      //      S.no_writers_generation_count)
-      //
-      // ptr == MRS
-      // info_seq[i].absolute_generation_rank ==
-      //    (S.disposed_generation_count +
-      //     S.no_writers_generation_count)-- calculated in
-      //            InstanceState::sample_info
-      //
-      info_seq[i].absolute_generation_rank =
-        (ptr->disposed_generation_count_ +
-         ptr->no_writers_generation_count_) -
-        info_seq[i].absolute_generation_rank;
-    }
-}
-
-//void DataReaderImpl::sample_info(::DDS::SampleInfoSeq & info_seq,
-//                               size_t start_idx, size_t count,
-//                               ReceivedDataElement *ptr)
-//{
-//  size_t end_idx = start_idx + count - 1;
-//  for (size_t i = start_idx; i <= end_idx; i++)
-//    {
-//      info_seq[i].sample_rank = count - (i - start_idx + 1);
-//
-//      // generation_rank =
-//      //    (MRSIC.disposed_generation_count +
-//      //     MRSIC.no_writers_generation_count)
-//      //  - (S.disposed_generation_count +
-//      //     S.no_writers_generation_count)
-//      //
-//      //  info_seq[end_idx] == MRSIC
-//      //  info_seq[i].generation_rank ==
-//      //      (S.disposed_generation_count +
-//      //      (S.no_writers_generation_count) -- calculated in
-//      //            InstanceState::sample_info
-//
-//      info_seq[i].generation_rank =
-//      (info_seq[end_idx].disposed_generation_count +
-//       info_seq[end_idx].no_writers_generation_count) -
-//      info_seq[i].generation_rank;
-//
-//      // absolute_generation_rank =
-//      //     (MRS.disposed_generation_count +
-//      //      MRS.no_writers_generation_count)
-//      //   - (S.disposed_generation_count +
-//      //      S.no_writers_generation_count)
-//      //
-//      // ptr == MRS
-//      // info_seq[i].absolute_generation_rank ==
-//      //    (S.disposed_generation_count +
-//      //     S.no_writers_generation_count)-- calculated in
-//      //            InstanceState::sample_info
-//      //
-//      info_seq[i].absolute_generation_rank =
-//      (ptr->disposed_generation_count_ +
-//       ptr->no_writers_generation_count_) -
-//      info_seq[i].absolute_generation_rank;
-//    }
-//}
-
 void DataReaderImpl::sample_info(::DDS::SampleInfo & sample_info,
-                                 ReceivedDataElement *ptr)
+                                 const ReceivedDataElement *ptr)
 {
 
   sample_info.sample_rank = 0;
