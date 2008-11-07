@@ -79,25 +79,58 @@
     <resourceadapter>
         <resourceadapter-class>org.opendds.jms.resource.ResourceAdapterImpl</resourceadapter-class>
 
-        <config-property>
-            <config-property-name>DomainParticipantQosPolicy</config-property-name>
-            <config-property-type>java.lang.String</config-property-type>
-        </config-property>
-        <config-property>
-            <config-property-name>SubscriberQosPolicy</config-property-name>
-            <config-property-type>java.lang.String</config-property-type>
-        </config-property>
-        <config-property>
-            <config-property-name>SubscriberTransport</config-property-name>
-            <config-property-type>java.lang.String</config-property-type>
-        </config-property>
-        <config-property>
-            <config-property-name>PublisherQosPolicy</config-property-name>
-            <config-property-type>java.lang.String</config-property-type>
-        </config-property>
-        <config-property>
-            <config-property-name>PublisherTransport</config-property-name>
-            <config-property-type>java.lang.String</config-property-type>
-        </config-property>
+        <outbound-resourceadapter>
+            <connection-definition>
+                <managedconnectionfactory-class>org.opendds.jms.resource.ManagedConnectionFactoryImpl</managedconnectionfactory-class>
+
+                <config-property>
+                    <config-property-name>DomainParticipantQosPolicy</config-property-name>
+                    <config-property-type>java.lang.String</config-property-type>
+                </config-property>
+                <config-property>
+                    <config-property-name>SubscriberQosPolicy</config-property-name>
+                    <config-property-type>java.lang.String</config-property-type>
+                </config-property>
+                <config-property>
+                    <config-property-name>SubscriberTransport</config-property-name>
+                    <config-property-type>java.lang.String</config-property-type>
+                </config-property>
+                <config-property>
+                    <config-property-name>PublisherQosPolicy</config-property-name>
+                    <config-property-type>java.lang.String</config-property-type>
+                </config-property>
+                <config-property>
+                    <config-property-name>PublisherTransport</config-property-name>
+                    <config-property-type>java.lang.String</config-property-type>
+                </config-property>
+
+                <connectionfactory-interface>javax.jms.ConnectionFactory</connectionfactory-interface>
+                <connectionfactory-impl-class>org.opendds.jms.ConnectionFactoryImpl</connectionfactory-impl-class>
+
+                <connection-interface>javax.jms.Connection</connection-interface>
+                <connection-impl-class>org.opendds.jms.ConnectionImpl</connection-impl-class>
+            </connection-definition>
+
+            <transaction-support>NoTransaction</transaction-support>
+
+            <reauthentication-support>false</reauthentication-support>
+        </outbound-resourceadapter>
+
+        <inbound-resourceadapter>
+            <messageadapter>
+                <messagelistener>
+                    <messagelistener-type>javax.jms.MessageListener</messagelistener-type>
+
+                    <activationspec>
+                        <activationspec-class>org.opendds.jms.resource.ActivactionSpecImpl</activationspec-class>
+                    </activationspec>
+                </messagelistener>
+            </messageadapter>
+        </inbound-resourceadapter>
+
+        <adminobject>
+            <adminobject-interface>javax.jms.Destination</adminobject-interface>
+            <adminobject-class>org.opendds.jms.TopicImpl</adminobject-class>
+        </adminobject>
     </resourceadapter>
 </connector>

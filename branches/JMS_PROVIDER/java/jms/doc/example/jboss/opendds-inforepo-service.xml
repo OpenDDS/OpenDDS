@@ -22,5 +22,6 @@
         <attribute name="ORBListenEndpoints">iiop://localhost:6666</attribute>
         <attribute name="ORBLogFile">${jboss.server.log.dir}/DDS.log</attribute>
         <attribute name="VerboseTransportLogging">true</attribute>
+        <depends>jboss.jca:service=RARDeployment,name=opendds-jms-@VERSION@.rar</depends>
     </mbean>
 </server>
