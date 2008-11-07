@@ -1,0 +1,8 @@
+project(SerializerTest): dcpsexe {
+  exename = SerializerTest
+
+  Source_Files {
+    SerializerTest.cpp
+  }
+}
+
