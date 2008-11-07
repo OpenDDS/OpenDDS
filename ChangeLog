@@ -1,3 +1,18 @@
+Fri Nov  7 17:49:09 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticast.rc:
+        * dds/DCPS/transport/simpleTCP/SimpleTcp.rc:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram.rc:
+        * dds/InfoRepo/DCPSInfoRepoServ.rc:
+        * dds/InfoRepo/Federator.rc:
+        * dds/InfoRepo/InfoRepoLib.rc:
+        * dds/OpenDDS_DCPS.rc:
+        * java/dds/dcps_java.rc:
+        * java/idl2jni/runtime/idl2jni_runtime.rc:
+        * java/tao/tao_java.rc:
+
+          Use the new DDS_MICRO_VERSION macro in the version info.
+
 Fri Nov  7 16:14:18 UTC 2008  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * DDS_release_notes.txt:
