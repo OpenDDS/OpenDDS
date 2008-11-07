@@ -11,7 +11,7 @@
     <property name="lib.dir" value="${basedir}/lib"/>
     <property name="src.dir" value="${basedir}/src"/>
     <property name="test.dir" value="${basedir}/test"/>
-    
+
     <property environment="env"/>
 
     <!-- Determine OpenDDS version -->
@@ -47,8 +47,8 @@
     <!--
         Project Targets
     -->
-    <target name="all" depends="clean, test, jar"
-            description="Meta target for: clean, test, jar"/>
+    <target name="all" depends="clean, test, deploy"
+            description="Meta target for: clean, test, deploy"/>
 
     <target name="clean" depends="test.clean"
             description="Delete all build artifacts">
@@ -82,6 +82,12 @@
                 <exclude name="**/*.java"/>
             </fileset>
         </jar>
+    </target>
+
+    <target name="deploy" depends="jar"
+            description="Deploy project JAR to interested sub-projects">
+        <copy file="${build.dir}/${project.filename}.jar"
+              todir="${env.DDS_ROOT}/java/jms/lib"/>
     </target>
 
     <target name="test.clean">

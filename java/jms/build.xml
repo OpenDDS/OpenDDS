@@ -144,7 +144,7 @@
     <target name="rar" depends="jar"
             description="Create a Resource Adapter Archive (RAR) under build/">
         <!-- Collect native libraries to package -->
-        <opendds:libfileset id="ACE.lib" dir="${env.ACE_ROOT}/lib">
+        <opendds:libfileset id="ACE+TAO.libs" dir="${env.ACE_ROOT}/lib">
             <include name="ACE"/>
             <include name="TAO"/>
             <include name="TAO_AnyTypeCode"/>
@@ -155,7 +155,7 @@
             <include name="TAO_PortableServer"/>
             <include name="TAO_Svc_Utils"/>
         </opendds:libfileset>
-        <opendds:libfileset id="DDS.lib" dir="${env.DDS_ROOT}/lib">
+        <opendds:libfileset id="DDS.libs" dir="${env.DDS_ROOT}/lib">
             <include name="DCPSInfoRepoServ"/>
             <include name="Federator"/>
             <include name="InfoRepoLib"/>
@@ -166,37 +166,43 @@
             <include name="SimpleTcp"/>
             <include name="SimpleUnreliableDgram"/>
             <include name="ReliableMulticast"/>
-        </opendds:libfileset>
-        <opendds:libfileset id="JMS.lib" dir="${native.dir}">
             <include name="opendds-jms-native"/>
         </opendds:libfileset>
-        
+
+        <!-- Create native library index for runtime -->
+        <opendds:libindex dir="${build.dir}" prefix="native">
+            <fileset refid="ACE+TAO.libs"/>
+            <fileset refid="DDS.libs"/>
+        </opendds:libindex>
+
         <!-- Update Resource Adapter descriptor -->
+        <echo message="[ra.xml] Updating resourceadapter-version to ${project.version}"/>
         <copy file="${src.dir}/META-INF/ra.xml" todir="${build.dir}">
             <filterset>
                 <filter token="VERSION" value="${project.version}"/>
             </filterset>
         </copy>
 
-        <jar destfile="${build.dir}/${project.filename}.rar">
-            <zipfileset dir="${build.dir}" prefix="META-INF">
-                <include name="ra.xml"/>
-                <!--<include name="INDEX.LIBS"/>-->
-            </zipfileset>
+        <jar destfile="${build.dir}/${project.filename}.rar"
+             compress="${rar.compress}"
+             index="${rar.index}">
 
             <fileset dir="${build.dir}">
                 <include name="${project.filename}.jar"/>
             </fileset>
-
-            <zipfileset dir="${env.DDS_ROOT}/lib" prefix="lib">
+            <fileset dir="${env.DDS_ROOT}/lib">
                 <include name="OpenDDS_DCPS.jar"/>
                 <include name="i2jrt.jar"/>
                 <include name="tao_java.jar"/>
-            </zipfileset>
+            </fileset>
 
-            <zipfileset refid="ACE.lib" prefix="native"/>
-            <zipfileset refid="DDS.lib" prefix="native"/>
-            <zipfileset refid="JMS.lib" prefix="native"/>
+            <zipfileset refid="ACE+TAO.libs" prefix="native"/>
+            <zipfileset refid="DDS.libs" prefix="native"/>
+
+            <metainf dir="${build.dir}">
+                <include name="ra.xml"/>
+                <include name="INDEX.LIBS"/>
+            </metainf>
 
             <manifest>
                 <attribute name="Specification-Title" value="J2EE Connector Architecture (JCA)"/>
