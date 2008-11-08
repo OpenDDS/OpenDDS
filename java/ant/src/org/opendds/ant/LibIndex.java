@@ -71,11 +71,11 @@ public class LibIndex extends Task {
 
     protected void createIndex(FileWriter writer) throws IOException {
         // Library-Index-Version
-        writer.write("Lib-Index-Version: 1.0");
+        writer.write("LibIndex-Version: 1.0");
         writer.write(ENTRY_SEPARATOR);
 
         // Creation-Stamp
-        writer.write("Lib-Index-Created: ");
+        writer.write("LibIndex-Created: ");
         writer.write(String.valueOf(System.currentTimeMillis()));
         writer.write(ENTRY_SEPARATOR);
 
