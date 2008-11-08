@@ -10,10 +10,16 @@
     Author:  Steven Stallion
     Version: $Revision$
 -->
-<!DOCTYPE server PUBLIC "-//JBoss//DTD MBean Service 4.2//EN"
-    "http://www.jboss.org/j2ee/dtd/jboss-service_4_2.dtd">
+<!DOCTYPE connection-factories PUBLIC "-//JBoss//DTD JBOSS JCA Config 1.5//EN"
+    "http://www.jboss.org/j2ee/dtd/jboss-ds_1_5.dtd">
 
-<server>
+<connection-factories>
+    <mbean code="org.opendds.jms.management.NativeLoaderService"
+           name="OpenDDS:service=NativeLoader">
+        <attribute name="NativeDirectory">${jboss.server.home.dir}/native</attribute>
+        <depends>jboss.jca:service=RARDeployment,name='opendds-jms-@VERSION@.rar'</depends>
+    </mbean>
+
     <mbean code="org.opendds.jms.management.DCPSInfoRepoService"
            name="OpenDDS:service=DCPSInfoRepo">
         <attribute name="DCPSDebugLevel">10</attribute>
@@ -22,6 +28,6 @@
         <attribute name="ORBListenEndpoints">iiop://localhost:6666</attribute>
         <attribute name="ORBLogFile">${jboss.server.log.dir}/DDS.log</attribute>
         <attribute name="VerboseTransportLogging">true</attribute>
-        <depends>jboss.jca:service=RARDeployment,name=opendds-jms-@VERSION@.rar</depends>
+        <depends>OpenDDS:service=NativeLoader</depends>
     </mbean>
-</server>
+</connection-factories>

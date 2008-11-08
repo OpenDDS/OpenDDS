@@ -5,21 +5,15 @@
 package org.opendds.ant;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
-import java.text.DateFormat;
 
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Task;
 import org.apache.tools.ant.DirectoryScanner;
+import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.FileSet;
-import sun.misc.JarIndex;
 
 /**
  * @author  Steven Stallion
@@ -44,7 +38,7 @@ public class LibIndex extends Task {
 
     public File getFile() {
         if (dir != null) {
-            file = new File(dir, "INDEX.LIBS");
+            file = new File(dir, DEFAULT_FILE);
         }
         return file;
     }
@@ -67,7 +61,7 @@ public class LibIndex extends Task {
 
     protected void verify() throws BuildException {
         if (dir == null && file == null) {
-            throw new BuildException("dir (or file) is a required attribute!");
+            throw new BuildException("dir or file must be specified!");
         }
 
         if (filesets.isEmpty()) {
@@ -77,17 +71,17 @@ public class LibIndex extends Task {
 
     protected void createIndex(FileWriter writer) throws IOException {
         // Library-Index-Version
-        writer.write("Library-Index-Version: 1.0");
+        writer.write("Lib-Index-Version: 1.0");
         writer.write(ENTRY_SEPARATOR);
 
         // Creation-Stamp
-        writer.write("Library-Creation-Stamp: ");
+        writer.write("Lib-Index-Created: ");
         writer.write(String.valueOf(System.currentTimeMillis()));
         writer.write(ENTRY_SEPARATOR);
 
         writer.write(ENTRY_SEPARATOR);
 
-        // File entries
+        // Library entries
         for (FileSet fileset : filesets) {
             DirectoryScanner ds = fileset.getDirectoryScanner();
             for (String file : ds.getIncludedFiles()) {
