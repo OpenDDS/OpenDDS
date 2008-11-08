@@ -42,7 +42,7 @@ RakeResults<SampleSeq>::RakeResults(SampleSeq& received_data,
   if (cond_)
     {
       CORBA::String_var query_var = cond_->get_query_expression();
-      std::string query = query_var;
+      std::string query(query_var);
       //FUTURE: Parse the "WHERE" clause, including get_query_parameters()
       size_t idx_orderby = query.find(ORDER_BY);
       do_sort_ = (idx_orderby != std::string::npos);
