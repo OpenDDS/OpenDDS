@@ -19,11 +19,11 @@ import java.util.Map;
  * @author  Steven Stallion
  * @version $Revision$
  */
-public class LibraryIndex {
+public class LibIndex {
     public static final String DEFAULT_RESOURCE = "META-INF/INDEX.LIBS";
 
-    public static final String VERSION_ATTRIBUTE = "Lib-Index-Version";
-    public static final String CREATED_ATTRIBUTE = "Lib-Index-Created";
+    public static final String VERSION_ATTRIBUTE = "LibIndex-Version";
+    public static final String CREATED_ATTRIBUTE = "LibIndex-Created";
 
     public static final String ATTRIBUTE_SEPARATOR = ":";
     public static final String RESOURCE_SEPARATOR = "/";
@@ -63,7 +63,7 @@ public class LibraryIndex {
     private List<Entry> entries =
         new ArrayList<Entry>();
 
-    public LibraryIndex(InputStream in) throws IOException {
+    public LibIndex(InputStream in) throws IOException {
         parse(in);
     }
 

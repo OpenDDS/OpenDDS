@@ -56,14 +56,14 @@ public class NativeLoader {
     }
 
     public void loadLibraries(ClassLoader loader) throws IOException {
-        Enumeration<URL> en = loader.getResources(LibraryIndex.DEFAULT_RESOURCE);
+        Enumeration<URL> en = loader.getResources(LibIndex.DEFAULT_RESOURCE);
         while (en.hasMoreElements()) {
             URL url = en.nextElement();
 
-            LibraryIndex index = new LibraryIndex(url.openStream());
+            LibIndex index = new LibIndex(url.openStream());
             long created = index.getCreated();
 
-            for (LibraryIndex.Entry entry : index.getEntries()) {
+            for (LibIndex.Entry entry : index.getEntries()) {
                 String name = entry.getName();
 
                 File file = new File(nativeDir, name);

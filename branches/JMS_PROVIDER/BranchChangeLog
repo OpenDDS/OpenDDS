@@ -1,3 +1,17 @@
+Sat Nov  8 23:10:36 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/ant/src/org/opendds/ant/LibIndex.java:
+        * java/jms/lib/opendds-ant-1.2.1.jar:
+        * java/jms/src/org/opendds/jms/loader/LibIndex.java:
+        * java/jms/src/org/opendds/jms/loader/NativeLoader.java:
+
+          Updated library index  attribute names (now named LibIndex to
+          match JarIndex naming).
+
+        * java/jms/src/org/opendds/jms/loader/LibraryIndex.java:
+
+          Removed this file.
+
 Sat Nov  8 23:02:08 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/OpenDDS.ipr:
