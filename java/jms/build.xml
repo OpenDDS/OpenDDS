@@ -222,7 +222,7 @@
     <target name="test.init" depends="init">
         <mkdir dir="${build.dir}/tests"/>
 
-        <condition property="test.jvmargs" value="-Dopendds.native.debug=true">
+        <condition property="test.jvmargs" value="-Djni.nativeDebug=true">
             <and>
                 <os family="windows"/>
                 <istrue value="${native.debug}"/>

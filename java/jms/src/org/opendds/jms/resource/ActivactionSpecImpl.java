@@ -1,13 +1,13 @@
 /*
- * $
+ * $Id$
  */
 
 package org.opendds.jms.resource;
 
+import javax.resource.ResourceException;
 import javax.resource.spi.ActivationSpec;
 import javax.resource.spi.InvalidPropertyException;
 import javax.resource.spi.ResourceAdapter;
-import javax.resource.ResourceException;
 
 /**
  * @author  Steven Stallion
@@ -16,14 +16,10 @@ import javax.resource.ResourceException;
 public class ActivactionSpecImpl implements ActivationSpec {
 
     public ResourceAdapter getResourceAdapter() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
-    public void setResourceAdapter(ResourceAdapter resourceAdapter) throws ResourceException {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
+    public void setResourceAdapter(ResourceAdapter adapter) throws ResourceException {}
 
-    public void validate() throws InvalidPropertyException {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
+    public void validate() throws InvalidPropertyException {}
 }

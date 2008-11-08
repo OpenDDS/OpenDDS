@@ -9,6 +9,12 @@
     "http://www.jboss.org/j2ee/dtd/jboss-ds_1_5.dtd">
 
 <connection-factories>
+    <mbean code="org.opendds.jms.management.NativeLoaderService"
+           name="OpenDDS:service=NativeLoader">
+        <attribute name="NativeDirectory">${jboss.server.home.dir}/native</attribute>
+        <depends>jboss.jca:service=RARDeployment,name='opendds-jms-@VERSION@.rar'</depends>
+    </mbean>
+
     <mbean code="org.opendds.jms.management.ParticipantFactoryService"
            name="OpenDDS:service=DomainParticipantFactory">
         <attribute name="DCPSDebugLevel">10</attribute>
@@ -17,9 +23,38 @@
         <attribute name="ORBDebugLevel">10</attribute>
         <attribute name="ORBListenEndpoints">iiop://localhost:7777</attribute>
         <attribute name="ORBLogFile">${jboss.server.log.dir}/DDS.log</attribute>
-        <depends>jboss.jca:service=RARDeployment,name=opendds-jms-@VERSION@.rar</depends>
+        <depends>OpenDDS:service=NativeLoader</depends>
     </mbean>
 
+    <!--
+        Destination configuration
+    -->
+    <mbean code="org.opendds.jms.management.Destination"
+           name="OpenDDS:destination=DefaultTopic,type=Topic">
+        <attribute name="JndiName">DDS/DefaultTopic</attribute>
+        <depends>OpenDDS:service=DomainParticipantFactory</depends>
+    </mbean>
+
+    <mbean code="org.opendds.jms.management.Destination"
+           name="OpenDDS:destination=CustomTopic,type=Topic">
+        <attribute name="JndiName">DDS/CustomTopic</attribute>
+        <attribute name="DataReaderQosPolicy">
+            LIVELINESS.kind=AUTOMATIC
+            LIVELINESS.lease_duration=100
+        </attribute>
+        <attribute name="DataWriterQosPolicy">
+            LATENCY_BUDGET.duration=100
+            TRANSPORT_PRIORITY.value=100
+        </attribute>
+        <attribute name="TopicQosPolicy">
+            TOPIC_DATA.value=CustomTopicData
+        </attribute>
+        <depends>OpenDDS:service=DomainParticipantFactory</depends>
+    </mbean>
+
+    <!--
+        ConnectionFactory configuration
+    -->
     <no-tx-connection-factory>
         <jndi-name>DDS/ConnectionFactory</jndi-name>
         <rar-name>opendds-jms-@VERSION@.rar</rar-name>

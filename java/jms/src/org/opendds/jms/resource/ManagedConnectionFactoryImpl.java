@@ -1,17 +1,17 @@
 /*
- * $
+ * $Id$
  */
 
 package org.opendds.jms.resource;
 
-import java.util.Set;
 import java.io.PrintWriter;
+import java.util.Set;
 
-import javax.resource.spi.ManagedConnectionFactory;
-import javax.resource.spi.ConnectionManager;
-import javax.resource.spi.ManagedConnection;
-import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.ResourceException;
+import javax.resource.spi.ConnectionManager;
+import javax.resource.spi.ConnectionRequestInfo;
+import javax.resource.spi.ManagedConnection;
+import javax.resource.spi.ManagedConnectionFactory;
 import javax.security.auth.Subject;
 
 /**
@@ -66,26 +66,27 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
     }
 
     public Object createConnectionFactory(ConnectionManager connectionManager) throws ResourceException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
     public Object createConnectionFactory() throws ResourceException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
-    public ManagedConnection createManagedConnection(Subject subject, ConnectionRequestInfo connectionRequestInfo) throws ResourceException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public ManagedConnection createManagedConnection(Subject subject,
+                                                     ConnectionRequestInfo requestInfo) throws ResourceException {
+        return null;
     }
 
-    public ManagedConnection matchManagedConnections(Set set, Subject subject, ConnectionRequestInfo connectionRequestInfo) throws ResourceException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public ManagedConnection matchManagedConnections(Set set,
+                                                     Subject subject,
+                                                     ConnectionRequestInfo requestInfo) throws ResourceException {
+        return null;
     }
 
-    public void setLogWriter(PrintWriter printWriter) throws ResourceException {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
+    public void setLogWriter(PrintWriter printWriter) throws ResourceException {}
 
     public PrintWriter getLogWriter() throws ResourceException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 }
