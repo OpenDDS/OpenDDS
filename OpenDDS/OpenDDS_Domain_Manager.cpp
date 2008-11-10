@@ -31,6 +31,36 @@
 
 OpenDDS_Domain_Manager::OpenDDS_Domain_Manager (int & argc, 
 				char* argv[], 
+				DDS::DomainId_t domain_id)
+  : dp_ (DDS::DomainParticipant::_nil ()),
+    transport_impl_id_ (1),
+    shutdown_lock_ (0),
+    exit_handler_ (shutdown_lock_),
+    transport_initialized_ (false)
+{
+  // get the domain participant factory from the singleton 
+  DDS::DomainParticipantFactory_var dpf =
+    OpenDDS::DCPS::Service_Participant::instance ()->
+      get_domain_participant_factory (argc, argv);
+
+  this->parse_args (argc, argv);
+
+  // create the participant named 'participant'.
+  dp_ = dpf->create_participant (domain_id,
+				 PARTICIPANT_QOS_DEFAULT,
+				 DDS::DomainParticipantListener::_nil ());
+
+  // check for successful creation
+  if (CORBA::is_nil (dp_.in ()))
+    throw Manager_Exception ("Failed to create domain participant.");
+
+  // add a the handler for the SIGINT signal here
+  ACE_Sig_Handler sig_handler;
+  sig_handler.register_handler (SIGINT, &exit_handler_);
+}
+
+OpenDDS_Domain_Manager::OpenDDS_Domain_Manager (int & argc, 
+				char* argv[], 
 				DDS::DomainId_t domain_id,
 				const DDS::DomainParticipantQos & qos)
   : dp_ (DDS::DomainParticipant::_nil ()),
