@@ -52,9 +52,17 @@ class DDSWrapper_Export Domain_Manager
   /// @param domain_id in which domain participant should be registered
   Domain_Manager (int & argc, 
 		  char *argv[],
+		  DDS::DomainId_t domain_id);
+
+  /// ctor
+  /// @param argc number of command line arguments
+  /// @param argv commandline arguments used for initialization
+  /// @param domain_id in which domain participant should be registered
+  /// @param qos for the domain participant
+  Domain_Manager (int & argc, 
+		  char *argv[],
 		  DDS::DomainId_t domain_id,
-		  const DDS::DomainParticipantQos & qos 
-                    = PARTICIPANT_QOS_DEFAULT);
+		  const DDS::DomainParticipantQos & qos);
 
   /// ctor that takes ownership of the passed in impl pointer
   Domain_Manager (Domain_Manager_Ptr impl);
