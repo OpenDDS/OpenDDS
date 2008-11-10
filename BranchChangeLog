@@ -2,10 +2,10 @@ Mon Nov 10 16:46:46 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
         * bin/DCPS/HTemplate.pm:
-
         * dds/DCPS/RakeResults_T.cpp:
-
         * tests/DCPS/QueryCondition/QueryConditionTest.cpp:
+
+          Fixes for GCC and SunCC.
 
 Sat Nov  8 23:10:36 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
