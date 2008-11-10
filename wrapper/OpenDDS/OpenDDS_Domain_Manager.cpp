@@ -59,6 +59,37 @@ OpenDDS_Domain_Manager::OpenDDS_Domain_Manager (int & argc,
   sig_handler.register_handler (SIGINT, &exit_handler_);
 }
 
+OpenDDS_Domain_Manager::OpenDDS_Domain_Manager (int & argc, 
+				char* argv[], 
+				DDS::DomainId_t domain_id,
+				const DDS::DomainParticipantQos & qos)
+  : dp_ (DDS::DomainParticipant::_nil ()),
+    transport_impl_id_ (1),
+    shutdown_lock_ (0),
+    exit_handler_ (shutdown_lock_),
+    transport_initialized_ (false)
+{
+  // get the domain participant factory from the singleton 
+  DDS::DomainParticipantFactory_var dpf =
+    OpenDDS::DCPS::Service_Participant::instance ()->
+      get_domain_participant_factory (argc, argv);
+
+  this->parse_args (argc, argv);
+
+  // create the participant named 'participant'.
+  dp_ = dpf->create_participant (domain_id,
+				 qos,
+				 DDS::DomainParticipantListener::_nil ());
+
+  // check for successful creation
+  if (CORBA::is_nil (dp_.in ()))
+    throw Manager_Exception ("Failed to create domain participant.");
+
+  // add a the handler for the SIGINT signal here
+  ACE_Sig_Handler sig_handler;
+  sig_handler.register_handler (SIGINT, &exit_handler_);
+}
+
 OpenDDS_Domain_Manager::~OpenDDS_Domain_Manager ()
 {
   // delete the participant's contained entities
@@ -94,16 +125,19 @@ OpenDDS_Domain_Manager::shutdown ()
 }
 
 Subscription_Manager
-OpenDDS_Domain_Manager::subscription_manager (const Domain_Manager_Ptr & ref)
+OpenDDS_Domain_Manager::subscription_manager (
+  const Domain_Manager_Ptr & ref,
+  const DDS::SubscriberQos & qos)
 {
   if (transport_initialized_)
     {
-      // only create new subscription manager that gets a transport impl id the
-      // first time the method is called, since repeatedly registering a transport
-      // would result in an error
+      // only create new subscription manager that gets a transport impl id 
+      // the first time the method is called, since repeatedly registering a 
+      // transport would result in an error
       return Subscription_Manager (
                Subscription_Manager_Ptr (
-                 new OpenDDS_Subscription_Manager (Domain_Manager (ref))));
+                 new OpenDDS_Subscription_Manager (Domain_Manager (ref), 
+						   qos)));
     }
   else
     {
@@ -113,7 +147,8 @@ OpenDDS_Domain_Manager::subscription_manager (const Domain_Manager_Ptr & ref)
       return Subscription_Manager (
                Subscription_Manager_Ptr (
                  new OpenDDS_Subscription_Manager (Domain_Manager (ref), 
-			                           transport_impl_id_)));
+			                           transport_impl_id_,
+						   qos)));
     }
 }
 
@@ -128,7 +163,8 @@ OpenDDS_Domain_Manager::builtin_topic_subscriber (const Domain_Manager_Ptr & ref
 }
 
 Publication_Manager
-OpenDDS_Domain_Manager::publication_manager (const Domain_Manager_Ptr & ref)
+OpenDDS_Domain_Manager::publication_manager (const Domain_Manager_Ptr & ref,
+					     const DDS::PublisherQos & qos)
 {
   if (transport_initialized_)
     {
@@ -137,7 +173,8 @@ OpenDDS_Domain_Manager::publication_manager (const Domain_Manager_Ptr & ref)
       // would result in an error
       return Publication_Manager (
                Publication_Manager_Ptr (
-                 new OpenDDS_Publication_Manager (Domain_Manager (ref))));
+                 new OpenDDS_Publication_Manager (Domain_Manager (ref),
+						  qos)));
     }
   else
     {
@@ -147,7 +184,8 @@ OpenDDS_Domain_Manager::publication_manager (const Domain_Manager_Ptr & ref)
       return Publication_Manager (
                Publication_Manager_Ptr (
                  new OpenDDS_Publication_Manager (Domain_Manager (ref),
-		     			          transport_impl_id_)));
+		     			          transport_impl_id_,
+						  qos)));
     }
 }
 

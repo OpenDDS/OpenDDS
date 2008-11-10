@@ -22,3 +22,16 @@ Domain_Manager_Impl * create_domain_manager (int & argc,
 				     argv,
 				     domain_id);
 }
+
+/// factory method for creating an OpenDDS domain manager
+/// this is used within the Domain_Manager class
+Domain_Manager_Impl * create_domain_manager (int & argc,
+					     char * argv[],
+					     DDS::DomainId_t domain_id,
+					     const DDS::DomainParticipantQos & qos)
+{
+  return new OpenDDS_Domain_Manager (argc,
+				     argv,
+				     domain_id,
+				     qos);
+}

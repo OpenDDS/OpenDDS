@@ -42,6 +42,7 @@ class Subscription_Manager_Impl
   /// memory management of the returned datawriter has to be done by the caller
   virtual void access_topic (
     const Topic_Manager & topic,
+    const DDS::DataReaderQos & qos,
     const Subscription_Manager_Ptr & ref) = 0;
 
   /// unregisters and deletes the topic from the domain
