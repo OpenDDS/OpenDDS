@@ -58,7 +58,8 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
   ReturnCode_t ret = RETCODE_OK;
   MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
-  Message sample = {0};
+  Message sample;
+  sample.key = 0;
   sample.name = "data_X";
   sample.nest.value = B;
   for (int i(0); i < 20; ++i, ++sample.key)

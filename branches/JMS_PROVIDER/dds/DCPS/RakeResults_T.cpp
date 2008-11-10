@@ -2,7 +2,8 @@
 #define RAKERESULTS_T_CPP
 
 #include "dds/DCPS/RakeResults_T.h"
-
+#include "dds/DCPS/SubscriptionInstance.h"
+#include "dds/DCPS/DataReaderImpl.h"
 
 namespace OpenDDS
 {
@@ -62,7 +63,9 @@ RakeResults<SampleSeq>::RakeResults(SampleSeq& received_data,
               //FUTURE: handle ASC / DESC as an extension to the DDS spec?
               cmp = create_qc_comparator(sample, fieldspec.c_str(), cmp);
             }
-          sorted_.swap(SortedSet(QueryConditionCmp(cmp)));
+          QueryConditionCmp comparator(cmp);
+          SortedSet actual_sort(comparator);
+          sorted_.swap(actual_sort);
         }
     }
 }
@@ -138,7 +141,7 @@ bool RakeResults<SampleSeq>::copy_into(FwdIter iter, FwdIter end,
 
       // 3. Record some info about per-instance SampleInfo (*_rank) so that
       //    we can fill in the ranks after the loop has completed
-      std::pair<InstanceMap::iterator, bool> result =
+      std::pair<typename InstanceMap::iterator, bool> result =
         inst_map.insert(std::make_pair(&inst, InstanceData()));
       InstanceData& id = result.first->second;
       if (result.second) // first time we've seen this Instance
@@ -169,8 +172,8 @@ bool RakeResults<SampleSeq>::copy_into(FwdIter iter, FwdIter end,
     }
 
   // Fill in the *_ranks in the SampleInfo, and set instance state (mrg)
-  for (InstanceMap::iterator i_iter(inst_map.begin()), i_end(inst_map.end());
-       i_iter != i_end; ++i_iter)
+  for (typename InstanceMap::iterator i_iter(inst_map.begin()),
+         i_end(inst_map.end()); i_iter != i_end; ++i_iter)
     {
       SubscriptionInstance& inst = *i_iter->first;
       InstanceData& id = i_iter->second;

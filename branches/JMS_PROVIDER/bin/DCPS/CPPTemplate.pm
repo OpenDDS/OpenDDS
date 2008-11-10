@@ -702,8 +702,6 @@ DDS::ReturnCode_t
 {
   ::<%MODULE%><%TYPE%>Seq::PrivateMemberAccess received_data_p(received_data);
 
-  ::CORBA::Long count(0);
-
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
                     this->sample_lock_,
@@ -783,8 +781,6 @@ DDS::ReturnCode_t
     ::DDS::QueryCondition_ptr a_condition)
 {
   ::<%MODULE%><%TYPE%>Seq::PrivateMemberAccess received_data_p(received_data);
-
-  ::CORBA::Long count(0);
 
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
@@ -1573,7 +1569,7 @@ void
                        ACE_TEXT("can not dispose or unregister a not registered instance. \n")),
                       ::DDS::RETCODE_ERROR);
   }
-  
+
   if (it == instance_map_.end())
   {
     OpenDDS::DCPS::SubscriptionInstance* instance = 0;
@@ -1617,7 +1613,7 @@ void
   {
     OpenDDS::DCPS::SubscriptionInstance* instance_ptr =
       get_handle_instance(handle);
-    
+
     // TBD - we also need to reject for > RESOURCE_LIMITS.max_samples
     //       and RESOURCE_LIMITS.max_instances.
     if ((this->qos_.resource_limits.max_samples_per_instance !=
@@ -1657,7 +1653,7 @@ void
                                        sample_rejected_status_);
         }  // do we want to do something if listener is nil???
         notify_status_condition();
-        
+
         ACE_DES_FREE (instance_data,
                       data_allocator_->free,
                       <%TYPE%> );
@@ -1800,7 +1796,7 @@ void
 <%TYPE%>DataReaderImpl::dispose(const OpenDDS::DCPS::ReceivedDataSample& sample)
 {
   //!!! caller should already have the sample_lock_
-  
+
   // The data sample in this dispose message does not contain any valid data.
   // What it needs here is the key value to identify the instance to dispose.
   // The demarshal push this "sample" to received sample list so the user 
@@ -1812,7 +1808,7 @@ void
 <%TYPE%>DataReaderImpl::unregister(const OpenDDS::DCPS::ReceivedDataSample& sample)
 {
   //!!! caller should already have the sample_lock_
-  
+
   // The data sample in this unregister message does not contain any valid data.
   // What it needs here is the key value to identify the instance to unregister.
   // The demarshal push this "sample" to received sample list so the user 
