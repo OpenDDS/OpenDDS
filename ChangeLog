@@ -1,3 +1,13 @@
+Mon Nov 10 18:03:02 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
+
+        * wrapper/Subscription_Manager.inl
+        * wrapper/Subscription_Manager_Impl.h
+        * wrapper/OpenDDS/OpenDDS_Subscription_Manager.h
+        * wrapper/OpenDDS/OpenDDS_Subscription_Manager.cpp
+        * wrapper/Subscription_Manager.h:
+        
+        Added get_default_datareader_qos method to Subscription_Manager.
+
 Mon Nov 10 16:17:22 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
 
         * wrapper/Topic_Manager_T.h

@@ -52,6 +52,9 @@ class Subscription_Manager_Impl
   virtual DDS::DataReader_ptr lookup_datareader (
                                 const std::string & topic_name) = 0;
 
+  /// creates and returns qos for data readers with the default values
+  virtual DDS::DataReaderQos get_default_datareader_qos () = 0;
+
   /// returns the underlying subsriber instance
   /// memory management of the returned publisher reference is done by the 
   /// Subscription_Manager_Impl itself
