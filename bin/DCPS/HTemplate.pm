@@ -433,8 +433,7 @@ public:
       ::DDS::QueryCondition_ptr a_condition
       );
 
-    DDS::ReturnCode_t
-    <%TYPE%>DataReaderImpl::read_instance_i (
+    DDS::ReturnCode_t read_instance_i (
       ::<%MODULE%><%TYPE%>Seq & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
@@ -445,8 +444,7 @@ public:
       ::DDS::QueryCondition_ptr a_condition
       );
 
-    DDS::ReturnCode_t
-    <%TYPE%>DataReaderImpl::take_instance_i (
+    DDS::ReturnCode_t take_instance_i (
       ::<%MODULE%><%TYPE%>Seq & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
@@ -457,8 +455,7 @@ public:
       ::DDS::QueryCondition_ptr a_condition
       );
 
-    DDS::ReturnCode_t
-    <%TYPE%>DataReaderImpl::read_next_instance_i (
+    DDS::ReturnCode_t read_next_instance_i (
       ::<%MODULE%><%TYPE%>Seq & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
@@ -469,8 +466,7 @@ public:
       ::DDS::QueryCondition_ptr a_condition
       );
 
-    DDS::ReturnCode_t
-    <%TYPE%>DataReaderImpl::take_next_instance_i (
+    DDS::ReturnCode_t take_next_instance_i (
       ::<%MODULE%><%TYPE%>Seq & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
