@@ -1,3 +1,31 @@
+Mon Nov 10 16:17:22 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
+
+        * wrapper/Topic_Manager_T.h
+        * wrapper/Domain_Manager.h
+        * wrapper/Topic_Manager.inl
+        * wrapper/Publication_Manager.h
+        * wrapper/Subscription_Manager.inl
+        * wrapper/Domain_Manager_Impl.h
+        * wrapper/Publication_Manager_Impl.h
+        * wrapper/Topic_Manager_T.cpp
+        * wrapper/Topic_Manager_Impl.h
+        * wrapper/Domain_Manager.inl
+        * wrapper/Domain_Manager.cpp
+        * wrapper/Publication_Manager.inl
+        * wrapper/Subscription_Manager_Impl.h
+        * wrapper/wrapper_config.h
+        * wrapper/OpenDDS/OpenDDS_Publication_Manager.cpp
+        * wrapper/OpenDDS/OpenDDS_Subscription_Manager.h
+        * wrapper/OpenDDS/OpenDDS_create_domain_manager.cpp
+        * wrapper/OpenDDS/OpenDDS_Domain_Manager.h
+        * wrapper/OpenDDS/OpenDDS_Publication_Manager.h
+        * wrapper/OpenDDS/OpenDDS_Subscription_Manager.cpp
+        * wrapper/OpenDDS/OpenDDS_Domain_Manager.cpp
+        * wrapper/Topic_Manager.h
+        * wrapper/Subscription_Manager.h:
+        
+        Added QoS policy support to the wrapper API.
+
 Fri Nov  7 20:46:44 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * bin/Process.pm:

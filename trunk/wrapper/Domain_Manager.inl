@@ -32,9 +32,9 @@ Domain_Manager::shutdown ()
 }
 
 ACE_INLINE Subscription_Manager 
-Domain_Manager::subscription_manager ()
+Domain_Manager::subscription_manager (const DDS::SubscriberQos & qos)
 {
-  return manager_impl_->subscription_manager (manager_impl_);
+  return manager_impl_->subscription_manager (manager_impl_, qos);
 }
 
 ACE_INLINE Subscription_Manager
@@ -44,9 +44,9 @@ Domain_Manager::builtin_topic_subscriber ()
 }
 
 ACE_INLINE Publication_Manager 
-Domain_Manager::publication_manager ()
+Domain_Manager::publication_manager (const DDS::PublisherQos & qos)
 {
-  return manager_impl_->publication_manager (manager_impl_);
+  return manager_impl_->publication_manager (manager_impl_, qos);
 }
 
 ACE_INLINE DDS::DomainParticipant_ptr 
