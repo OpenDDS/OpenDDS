@@ -160,3 +160,14 @@ OpenDDS_Subscription_Manager::remove_topic (const Topic_Manager & topic)
   // use topic manager to create the topic
   tm.delete_topic (dm_);
 }
+
+DDS::DataReaderQos
+OpenDDS_Subscription_Manager::get_default_datareader_qos ()
+{
+  // create QoS object and initialize it with the default values
+  DDS::DataReaderQos qos;
+  sub_->get_default_datareader_qos (qos);
+
+  // return the default qos
+  return qos;
+}

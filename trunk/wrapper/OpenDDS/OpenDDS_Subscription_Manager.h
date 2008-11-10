@@ -58,6 +58,9 @@ class OpenDDS_Subscription_Manager : public Subscription_Manager_Impl
   /// returns a data reader for a specific topic
   virtual DDS::DataReader_ptr lookup_datareader (const std::string & topic_name);
 
+  /// creates and returns qos for data readers with the default values
+  virtual DDS::DataReaderQos get_default_datareader_qos ();
+
   /// returns the underlying subsriber instance
   /// memory management of the returned subscriber reference is done by the 
   /// OpenDDS_Subscription_Manager itself
