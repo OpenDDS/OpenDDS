@@ -79,12 +79,22 @@
     <resourceadapter>
         <resourceadapter-class>org.opendds.jms.resource.ResourceAdapterImpl</resourceadapter-class>
 
+        <config-property>
+            <config-property-name>LoadNativeLibraries</config-property-name>
+            <config-property-type>java.lang.Boolean</config-property-type>
+            <config-property-value>false</config-property-value>
+        </config-property>
+        <config-property>
+            <config-property-name>NativeDirectory</config-property-name>
+            <config-property-type>java.lang.String</config-property-type>
+        </config-property>
+
         <outbound-resourceadapter>
             <connection-definition>
                 <managedconnectionfactory-class>org.opendds.jms.resource.ManagedConnectionFactoryImpl</managedconnectionfactory-class>
 
                 <config-property>
-                    <config-property-name>DomainParticipantQosPolicy</config-property-name>
+                    <config-property-name>ParticipantQosPolicy</config-property-name>
                     <config-property-type>java.lang.String</config-property-type>
                 </config-property>
                 <config-property>
@@ -92,15 +102,11 @@
                     <config-property-type>java.lang.String</config-property-type>
                 </config-property>
                 <config-property>
-                    <config-property-name>SubscriberTransport</config-property-name>
-                    <config-property-type>java.lang.String</config-property-type>
-                </config-property>
-                <config-property>
                     <config-property-name>PublisherQosPolicy</config-property-name>
                     <config-property-type>java.lang.String</config-property-type>
                 </config-property>
                 <config-property>
-                    <config-property-name>PublisherTransport</config-property-name>
+                    <config-property-name>TransportConfig</config-property-name>
                     <config-property-type>java.lang.String</config-property-type>
                 </config-property>
 

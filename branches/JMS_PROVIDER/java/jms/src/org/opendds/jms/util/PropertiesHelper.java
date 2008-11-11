@@ -7,6 +7,7 @@ package org.opendds.jms.util;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 /**
@@ -14,6 +15,20 @@ import java.util.Properties;
  * @version $Revision$
  */
 public class PropertiesHelper {
+
+    public static Properties forResource(String resource) {
+        try {
+            InputStream in = ClassLoaders.getResourceAsStream(resource);
+
+            Properties properties = new Properties();
+            properties.load(in);
+
+            return properties;
+
+        } catch (IOException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
 
     public static Properties forValue(String value) {
         try {
@@ -48,5 +63,44 @@ public class PropertiesHelper {
         this.properties = properties;
     }
 
-    // TODO
+    public boolean hasProperty(String key) {
+        return properties.containsKey(key);
+    }
+
+    public String getProperty(String key) {
+        return getProperty(key, null);
+    }
+
+    public String getProperty(String key, String defaultValue) {
+        return properties.getProperty(key, defaultValue);
+    }
+
+    public String requireProperty(String key) {
+        String value = properties.getProperty(key);
+        if (Strings.isEmpty(value)) {
+            throw new IllegalArgumentException(key + " is a required property!");
+        }
+        return value;
+    }
+
+    public Integer getIntProperty(String key) {
+        return getIntProperty(key, 0);
+    }
+
+    public Integer getIntProperty(String key, Integer defaultValue) {
+        String value = getProperty(key);
+
+        if (value == null) {
+            return defaultValue;
+        }
+
+        return Integer.valueOf(value);
+    }
+
+    public Integer requireIntProperty(String key) {
+        if (!hasProperty(key)) {
+            throw new IllegalArgumentException(key + " is a required property!");
+        }
+        return getIntProperty(key);
+    }
 }

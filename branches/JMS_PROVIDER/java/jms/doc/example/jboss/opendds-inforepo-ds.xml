@@ -14,12 +14,6 @@
     "http://www.jboss.org/j2ee/dtd/jboss-ds_1_5.dtd">
 
 <connection-factories>
-    <mbean code="org.opendds.jms.management.NativeLoaderService"
-           name="OpenDDS:service=NativeLoader">
-        <attribute name="NativeDirectory">${jboss.server.home.dir}/native</attribute>
-        <depends>jboss.jca:service=RARDeployment,name='opendds-jms-@VERSION@.rar'</depends>
-    </mbean>
-
     <mbean code="org.opendds.jms.management.DCPSInfoRepoService"
            name="OpenDDS:service=DCPSInfoRepo">
         <attribute name="DCPSDebugLevel">10</attribute>
@@ -28,6 +22,6 @@
         <attribute name="ORBListenEndpoints">iiop://localhost:6666</attribute>
         <attribute name="ORBLogFile">${jboss.server.log.dir}/DDS.log</attribute>
         <attribute name="VerboseTransportLogging">true</attribute>
-        <depends>OpenDDS:service=NativeLoader</depends>
+        <depends>jboss.jca:service=RARDeployment,name='opendds-jms-@VERSION@.rar'</depends>
     </mbean>
 </connection-factories>

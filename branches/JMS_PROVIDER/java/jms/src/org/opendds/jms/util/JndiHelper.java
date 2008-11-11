@@ -62,15 +62,14 @@ public class JndiHelper {
 
             try {
                 Object obj = context.lookup(comp);
-                if (obj instanceof Context) {
-                    context = (Context) obj;
-
-                } else {
-                    break; // not a context
+                if (!(obj instanceof Context)) {
+                    break; // not a context; abort
                 }
-                continue;
 
-            } catch (NamingException e) {}  
+                context = (Context) obj;
+                continue; // context already exists; skip
+
+            } catch (NamingException e) {}
 
             context = context.createSubcontext(comp);
         }
