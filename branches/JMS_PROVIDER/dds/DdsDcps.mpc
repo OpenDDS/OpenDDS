@@ -41,6 +41,7 @@ project: taolib, portableserver, core, dcps_bits, coverage_optional, built_in_to
     DdsDcpsDataWriterRemote.idl
     DdsDcpsInfoUtils.idl
     DdsDcpsTypeSupportExt.idl
+    DdsDcpsSubscriptionExt.idl
   }
 
   IDL_Files {

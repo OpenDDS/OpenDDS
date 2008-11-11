@@ -262,22 +262,6 @@ public:
     ACE_THROW_SPEC ((CORBA::SystemException));
 
   /**
-   * Initialize the DataReader object.
-   * Called as part of create_datareader.
-   */
-  virtual
-  void init (
-        OpenDDS::DCPS::TopicImpl*                a_topic,
-        const ::DDS::DataReaderQos &             qos,
-        ::DDS::DataReaderListener_ptr            a_listener,
-        OpenDDS::DCPS::DomainParticipantImpl*    participant,
-        OpenDDS::DCPS::SubscriberImpl*           subscriber,
-        ::DDS::DataReader_ptr                    dr_objref,
-        OpenDDS::DCPS::DataReaderRemote_ptr      dr_remote_objref
-      )
-    ACE_THROW_SPEC ((CORBA::SystemException));
-
-  /**
    * Do parts of enable specific to the datatype.
    * Called by DataReaderImpl::enable().
    */

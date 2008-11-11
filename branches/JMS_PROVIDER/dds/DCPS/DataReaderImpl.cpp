@@ -64,7 +64,8 @@ DataReaderImpl::DataReaderImpl (void) :
   last_deadline_missed_total_count_ (0),
   watchdog_ (),
   is_bit_ (false),
-  initialized_ (false)
+  initialized_ (false),
+  always_get_history_ (false)
 {
   CORBA::ORB_var orb = TheServiceParticipant->get_ORB ();
   reactor_ = orb->orb_core()->reactor();
@@ -137,6 +138,7 @@ DataReaderImpl::cleanup ()
 void DataReaderImpl::init (
                            TopicImpl*         a_topic,
                            const ::DDS::DataReaderQos &  qos,
+                           const DataReaderQosExt &      ext_qos,
                            ::DDS::DataReaderListener_ptr a_listener,
                            DomainParticipantImpl*        participant,
                            SubscriberImpl*               subscriber,
@@ -162,6 +164,8 @@ void DataReaderImpl::init (
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
   qos_ = qos;
+  always_get_history_ = ext_qos.durability.always_get_history;
+
   listener_ = ::DDS::DataReaderListener::_duplicate (a_listener);
 
   if (! CORBA::is_nil (listener_.in()))
@@ -1968,9 +1972,9 @@ DataReaderImpl::cache_lookup_instance_handles (const WriterIdSeq& ids,
 bool
 DataReaderImpl::data_expired (DataSampleHeader const & header) const
 {
-  // Expire historic data if QoS indicates VOLATILE_NO_HISTORY.
-  if (qos_.durability.kind <= ::DDS::VOLATILE_NO_HISTORY_DURABILITY_QOS
-      && header.historic_sample_)
+  // Expire historic data if QoS indicates VOLATILE.
+  if (!always_get_history_ && header.historic_sample_
+    && qos_.durability.kind == ::DDS::VOLATILE_DURABILITY_QOS)
   {
     if (DCPS_debug_level >= 8)
     {

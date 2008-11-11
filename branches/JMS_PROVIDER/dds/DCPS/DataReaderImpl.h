@@ -8,7 +8,7 @@
 #include "dcps_export.h"
 #include "EntityImpl.h"
 #include "dds/DdsDcpsTopicC.h"
-#include "dds/DdsDcpsSubscriptionS.h"
+#include "dds/DdsDcpsSubscriptionExtS.h"
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsTopicC.h"
 #include "dds/DdsDcpsDataReaderRemoteC.h"
@@ -185,6 +185,7 @@ namespace OpenDDS
     virtual void init (
         TopicImpl*                    a_topic,
         const ::DDS::DataReaderQos &  qos,
+        const DataReaderQosExt &      ext_qos,
         ::DDS::DataReaderListener_ptr a_listener,
         DomainParticipantImpl*        participant,
         SubscriberImpl*               subscriber,
@@ -549,6 +550,7 @@ namespace OpenDDS
 
       /// Flag indicates that the init() is called.
       bool                       initialized_;
+      bool                       always_get_history_;
 
       typedef std::map<PublicationId, WriterInfo, GUID_tKeyLessThan> WriterMapType;
 

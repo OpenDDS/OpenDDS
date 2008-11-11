@@ -1,3 +1,44 @@
+Tue Nov 11 21:08:42 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+
+          Removed <%TYPE%>DataReaderImpl::init() which only called the base.
+
+        * dds/DdsDcpsInfrastructure.idl:
+        * dds/DCPS/Qos_Helper.inl:
+
+          Removed the custom VOLATILE_NO_HISTORY_DURABILITY_QOS, it is
+          replaced with the new DurabilityQosPolicyExt (below).
+
+        * dds/DdsDcpsSubscriptionExt.idl:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DdsDcps.mpc:
+        * java/dds/dcps_java.mpc:
+
+          Added new DurabilityQosPolicyExt which belongs to DataReaderQosExt.
+          Added new SubscriberExt interface which allows the user to provide
+          the DataReaderQosExt when creating a data reader.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          VOLATILE durability readers no longer receive "historic" samples as
+          per the DDS spec.  The DurabilityQosPolicyExt (above) can be used to
+          restore the old OpenDDS behavior.
+
+        * tests/DCPS/PersistentDurability/subscriber.cpp:
+
+          Updated test to use the new DurabilityQosPolicyExt.
+
+        * MPC/config/idl2jni.mpb:
+
+          Reverted the change from
+          Tue Nov 11 16:46:41 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+          because it breaks backward-compatibility on other systems and is not
+          required on Mac OS X.
+
 Tue Nov 11 18:59:07 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/src/org/opendds/jms/management/DCPSInfoRepoService.java:

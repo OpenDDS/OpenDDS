@@ -1,6 +1,7 @@
 project: taolib_with_idl, portableserver, java {
 
-  includes   += $(DDS_ROOT)/java/idl2jni/runtime $(JAVA_HOME)/include
+  includes   += $(DDS_ROOT)/java/idl2jni/runtime $(JAVA_HOME)/include \
+                $(JAVA_HOME)/include/$(JAVA_PLATFORM)
   libpaths   += $(DDS_ROOT)/lib
   libs       += idl2jni_runtime
   after      += idl2jni_runtime idl2jni_codegen
@@ -11,12 +12,6 @@ project: taolib_with_idl, portableserver, java {
 
   javacflags += -classpath $(DDS_ROOT)/lib/i2jrt.jar
 
-  // Not all JVM's make use of the platform include directory, this
-  // feature should be enabled on these platforms (e.g. Mac OS X)
-
-  feature(!no_platform_include) {
-    includes  += $(JAVA_HOME)/include/$(JAVA_PLATFORM)
-  }
 
   // This Define_Custom makes use of $(DDS_ROOT)/MPC/modules/IDL2JNIHelper.pm
 

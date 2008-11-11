@@ -594,30 +594,6 @@ void
 {
 }
 
-void
-<%TYPE%>DataReaderImpl::init (
-        OpenDDS::DCPS::TopicImpl*         a_topic,
-        const ::DDS::DataReaderQos &          qos,
-        ::DDS::DataReaderListener_ptr         a_listener,
-        OpenDDS::DCPS::DomainParticipantImpl* participant,
-        OpenDDS::DCPS::SubscriberImpl*        subscriber,
-        ::DDS::DataReader_ptr                 dr_objref,
-        OpenDDS::DCPS::DataReaderRemote_ptr   dr_remote_objref
-      )
-        ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ))
-{
-  OpenDDS::DCPS::DataReaderImpl::init(a_topic,
-                                      qos,
-                                      a_listener,
-                                      participant,
-                                      subscriber,
-                                      dr_objref,
-                                      dr_remote_objref) ;
-
-}
-
 ::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::enable_specific ()
   ACE_THROW_SPEC ((CORBA::SystemException))
