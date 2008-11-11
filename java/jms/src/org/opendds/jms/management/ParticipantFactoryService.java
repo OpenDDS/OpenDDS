@@ -30,7 +30,7 @@ public class ParticipantFactoryService extends DynamicMBeanSupport implements Se
     private Log log;
 
     private String service;
-    private boolean active;
+    private boolean started;
 
     private DomainParticipantFactory instance;
 
@@ -53,8 +53,8 @@ public class ParticipantFactoryService extends DynamicMBeanSupport implements Se
     }
 
     @Attribute
-    public boolean isActive() {
-        return active;
+    public boolean isStarted() {
+        return started;
     }
 
     @Attribute
@@ -64,7 +64,7 @@ public class ParticipantFactoryService extends DynamicMBeanSupport implements Se
 
     @Operation
     public void start() throws Exception {
-        if (isActive()) {
+        if (isStarted()) {
             throw new IllegalStateException(service + " already started!");
         }
 
@@ -84,12 +84,12 @@ public class ParticipantFactoryService extends DynamicMBeanSupport implements Se
             throw new IllegalStateException("Unable to initialize DomainParticipantFactory; please check logs.");
         }
 
-        active = true;
+        started = true;
     }
 
     @Operation
     public void stop() throws Exception {
-        if (!isActive()) {
+        if (!isStarted()) {
             throw new IllegalStateException(service + " already stopped!");
         }
 
@@ -103,6 +103,6 @@ public class ParticipantFactoryService extends DynamicMBeanSupport implements Se
         instance = null;
         log = null;
 
-        active = false;
+        started = false;
     }
 }

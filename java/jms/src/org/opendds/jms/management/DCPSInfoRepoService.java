@@ -26,8 +26,8 @@ import org.opendds.jms.management.argument.ORBArguments;
 public class DCPSInfoRepoService extends DynamicMBeanSupport implements ServiceMBean {
     private Log log;
 
+    private boolean started;
     private String service;
-    private boolean active;
 
     private DCPSInfoRepo instance;
     private Thread instanceThread;
@@ -52,13 +52,13 @@ public class DCPSInfoRepoService extends DynamicMBeanSupport implements ServiceM
     }
 
     @Attribute
-    public boolean isActive() {
-        return active;
+    public boolean isStarted() {
+        return started;
     }
 
     @Operation
     public void start() throws Exception {
-        if (isActive()) {
+        if (isStarted()) {
             throw new IllegalStateException(service + " already started!");
         }
 
@@ -77,12 +77,12 @@ public class DCPSInfoRepoService extends DynamicMBeanSupport implements ServiceM
         instanceThread = new Thread(instance, "DCPSInfoRepo");
         instanceThread.start();
 
-        active = true;
+        started = true;
     }
 
     @Operation
     public void stop() throws Exception {
-        if (!isActive()) {
+        if (!isStarted()) {
             throw new IllegalStateException(service + " already stopped!");
         }
 
@@ -98,6 +98,6 @@ public class DCPSInfoRepoService extends DynamicMBeanSupport implements ServiceM
 
         log = null;
 
-        active = false;
+        started = false;
     }
 }
