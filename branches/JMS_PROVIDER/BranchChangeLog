@@ -1,3 +1,14 @@
+Tue Nov 11 17:04:08 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/OpenDDS.ipr:
+        * java/ant/opendds-ant.iml:
+        * java/jms/native:
+        * java/jms/native/build.xml:
+        * java/jms/opendds-jms.iml:
+
+          Added support for IntelliJ IDEA 8.0 and updated native/build.xml
+          to support the no_platform_include feature on Mac OS X platforms.
+
 Tue Nov 11 16:46:41 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * MPC/config/idl2jni.mpb:
