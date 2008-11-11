@@ -63,12 +63,7 @@
         <os name="SunOS"/>
     </condition>
     <condition property="make.executable" value="make">
-        <and>
-            <os family="unix"/>
-            <not>
-                <os name="SunOS"/>
-            </not>
-        </and>
+        <os family="unix"/>
     </condition>
     <condition property="make.executable" value="vcbuild">
         <and>

@@ -79,7 +79,7 @@
         <mkdir dir="${build.dir}"/>
         <mkdir dir="${build.dir}/classes"/>
 
-        <!-- Update version.properties -->
+        <!-- Create version.properties -->
         <propertyfile file="${build.dir}/version.properties">
             <entry key="version.dds" value="${version.dds}"/>
             <entry key="version.dds.major" value="${version.dds.major}"/>
@@ -256,7 +256,7 @@
                     <include name="**/*Test.java"/>
                 </fileset>
             </batchtest>
-            <jvmarg value="-ea"/>  <!-- enable assertions -->
+            <jvmarg value="-ea"/> <!-- Enable assertions -->
             <jvmarg line="${test.jvmargs}"/>
             <classpath refid="project.classpath"/>
         </junit>
