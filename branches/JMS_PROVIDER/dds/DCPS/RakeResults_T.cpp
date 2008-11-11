@@ -202,7 +202,7 @@ bool RakeResults<SampleSeq>::copy_to_user()
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   if (do_sort_)
     {
-      size_t len = std::min(sorted_.size(), max_samples_);
+      size_t len = std::min(sorted_.size(), static_cast<size_t>(max_samples_));
       received_data_p.internal_set_length(len);
       info_seq_.length(len);
       return copy_into(sorted_.begin(), sorted_.end(), received_data_p);
