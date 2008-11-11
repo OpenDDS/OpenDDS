@@ -44,15 +44,15 @@ public class LibFileSet extends FileSet {
 
                 sbuf.append('.');
 
-                if (Os.isFamily(Os.FAMILY_UNIX)) {
-                    sbuf.append("so");
-
-                } else if (Os.isFamily(Os.FAMILY_MAC)) {
+                if (Os.isFamily(Os.FAMILY_MAC)) {
                     sbuf.append("dylib");
 
-                } else { // Os.FAMILY_WINDOWS
+                } else if (Os.isFamily(Os.FAMILY_WINDOWS)) {
                     sbuf.append("DLL");
-                }
+
+		} else { // Os.FAMILY_UNIX
+                    sbuf.append("so");
+		}
 
                 entry.setName(sbuf.toString());
             }
