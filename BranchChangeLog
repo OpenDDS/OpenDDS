@@ -1,8 +1,15 @@
+Tue Nov 11 05:08:45 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/build_scripts/jni_check.pl:
+
+	  Added optional '_' prefix to JNI symbols (fixes breakage
+	  on Mac OS X).
+
 Tue Nov 11 03:38:10 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/RakeResults_T.cpp:
 
-	  Added static cast (fixes breakage on Mac OS X).
+          Added static cast (fixes breakage on Mac OS X).
 
 Mon Nov 10 16:46:46 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
