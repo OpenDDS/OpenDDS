@@ -656,8 +656,7 @@ namespace OpenDDS
     Qos_Helper::valid (::DDS::DurabilityQosPolicy const & qos)
     {
       return
-        (qos.kind == ::DDS::VOLATILE_NO_HISTORY_DURABILITY_QOS
-         || qos.kind == ::DDS::VOLATILE_DURABILITY_QOS
+        (qos.kind == ::DDS::VOLATILE_DURABILITY_QOS
          || qos.kind == ::DDS::TRANSIENT_LOCAL_DURABILITY_QOS
          || qos.kind == ::DDS::TRANSIENT_DURABILITY_QOS
          || qos.kind == ::DDS::PERSISTENT_DURABILITY_QOS)
