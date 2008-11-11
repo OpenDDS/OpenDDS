@@ -23,6 +23,9 @@
                file="${makefile}"/>
 
     <!-- MPC features and type -->
+    <condition property="mwc.features" value="java=1,no_platform_include=1">
+        <os family="mac"/>
+    </condition>    
     <property name="mwc.features" value="java=1"/>
 
     <condition property="mwc.type" value="gnuace">
