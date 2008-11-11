@@ -1,10 +1,20 @@
+Tue Nov 11 16:46:41 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * MPC/config/idl2jni.mpb:
+        * java/jms/native/opendds_jms_native.mpc:
+
+          Removed redundant include for Mac OS X. Added a new feature:
+          no_platform_include. This should be set on similar platforms
+          which do not use the platform include pattern in the Sun
+          JVM.
+
 Tue Nov 11 14:48:16 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/dds/OpenDDS_DCPS_jni.cpp:
         * java/dds/OpenDDS_jni_helpers.h:
 
-	  Fixed bad ACE_UINT32 to size_t conversion (fixes breakage
-	  on Mac OS X).
+          Fixed bad ACE_UINT32 to size_t conversion (fixes breakage
+          on Mac OS X).
 
 Tue Nov 11 06:23:49 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
