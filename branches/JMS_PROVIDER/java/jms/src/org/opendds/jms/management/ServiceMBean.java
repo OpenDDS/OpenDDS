@@ -10,7 +10,7 @@ package org.opendds.jms.management;
  */
 public interface ServiceMBean {
 
-    boolean isActive();
+    boolean isStarted();
 
     void start() throws Exception;
 

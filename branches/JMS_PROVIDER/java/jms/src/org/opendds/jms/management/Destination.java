@@ -11,6 +11,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.opendds.jms.TopicImpl;
 import org.opendds.jms.management.annotation.Attribute;
+import org.opendds.jms.management.annotation.Constructor;
 import org.opendds.jms.management.annotation.Description;
 import org.opendds.jms.management.annotation.KeyProperty;
 import org.opendds.jms.management.annotation.Operation;
@@ -26,7 +27,7 @@ import org.opendds.jms.util.Strings;
 public class Destination extends DynamicMBeanSupport implements Serializable, ServiceMBean {
     private Log log;
 
-    private boolean active;
+    private boolean started;
     private String destination;
     private String type;
     private String jndiName;
@@ -35,6 +36,9 @@ public class Destination extends DynamicMBeanSupport implements Serializable, Se
     private String topicQosPolicy;
 
     private JndiHelper helper = new JndiHelper();
+
+    @Constructor
+    public Destination() {}
 
     @Attribute(readOnly = true)
     public String getDestination() {
@@ -101,13 +105,13 @@ public class Destination extends DynamicMBeanSupport implements Serializable, Se
     }
 
     @Attribute
-    public boolean isActive() {
-        return active;
+    public boolean isStarted() {
+        return started;
     }
 
     @Operation
     public void start() throws Exception {
-        if (isActive()) {
+        if (isStarted()) {
             throw new IllegalStateException(getDestination() + " already started!");
         }
 
@@ -131,12 +135,12 @@ public class Destination extends DynamicMBeanSupport implements Serializable, Se
 
         helper.bind(jndiName, topic);
 
-        active = true;
+        started = true;
     }
 
     @Operation
     public void stop() throws Exception {
-        if (!isActive()) {
+        if (!isStarted()) {
             throw new IllegalStateException(getDestination() + " already stopped!");
         }
 
@@ -147,6 +151,6 @@ public class Destination extends DynamicMBeanSupport implements Serializable, Se
         helper.unbind(jndiName);
         log = null;
 
-        active = false;
+        started = false;
     }
 }
