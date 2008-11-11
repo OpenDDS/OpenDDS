@@ -1,9 +1,16 @@
+Tue Nov 11 05:56:12 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/ant/src/org/opendds/ant/LibFileSet.java:
+        * java/jms/lib/opendds-ant-1.2.1.jar:
+
+	  Updated to better support Mac OS X native library names.
+
 Tue Nov 11 05:08:45 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/build_scripts/jni_check.pl:
 
-	  Added optional '_' prefix to JNI symbols (fixes breakage
-	  on Mac OS X).
+          Added optional '_' prefix to JNI symbols (fixes breakage
+          on Mac OS X).
 
 Tue Nov 11 03:38:10 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
