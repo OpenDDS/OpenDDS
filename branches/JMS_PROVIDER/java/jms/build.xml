@@ -144,7 +144,8 @@
     <target name="rar" depends="jar"
             description="Create a Resource Adapter Archive (RAR) under build/">
         <!-- Collect native libraries to package -->
-        <opendds:libfileset id="ACE+TAO.libs" dir="${env.ACE_ROOT}/lib">
+        <opendds:libfileset id="ACE+TAO.libs" debug="${native.debug}"
+                            dir="${env.ACE_ROOT}/lib">
             <include name="ACE"/>
             <include name="TAO"/>
             <include name="TAO_AnyTypeCode"/>
@@ -155,7 +156,8 @@
             <include name="TAO_PortableServer"/>
             <include name="TAO_Svc_Utils"/>
         </opendds:libfileset>
-        <opendds:libfileset id="DDS.libs" dir="${env.DDS_ROOT}/lib">
+        <opendds:libfileset id="DDS.libs" debug="${native.debug}"
+                            dir="${env.DDS_ROOT}/lib">
             <include name="DCPSInfoRepoServ"/>
             <include name="Federator"/>
             <include name="InfoRepoLib"/>
@@ -254,7 +256,7 @@
                     <include name="**/*Test.java"/>
                 </fileset>
             </batchtest>
-            <jvmarg value="-ea"/>   <!-- enable assertions -->
+            <jvmarg value="-ea"/>  <!-- enable assertions -->
             <jvmarg line="${test.jvmargs}"/>
             <classpath refid="project.classpath"/>
         </junit>
@@ -278,6 +280,7 @@
                  doctitle="OpenDDS ${version.dds} JMS API Specification"
                  windowtitle="${ant.project.name}">
             <link href="http://java.sun.com/j2se/${project.source}/docs/api/"/>
+	    <link href="http://java.sun.com/javaee/5/docs/api/"/>
             <classpath refid="project.classpath"/>
             <packageset dir="${src.dir}"/>
             <packageset dir="${native.dir}"/>

@@ -87,6 +87,7 @@
         <config-property>
             <config-property-name>NativeDirectory</config-property-name>
             <config-property-type>java.lang.String</config-property-type>
+	    <config-property-value></config-property-value>
         </config-property>
 
         <outbound-resourceadapter>
@@ -106,7 +107,7 @@
                     <config-property-type>java.lang.String</config-property-type>
                 </config-property>
                 <config-property>
-                    <config-property-name>TransportConfig</config-property-name>
+                    <config-property-name>TransportConfiguration</config-property-name>
                     <config-property-type>java.lang.String</config-property-type>
                 </config-property>
 
