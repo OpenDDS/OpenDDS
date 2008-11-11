@@ -73,7 +73,7 @@ public class NativeLoader {
                 }
 
                 if (file.exists() && file.lastModified() > created) {
-                    continue; // file is up to date
+                    continue; // library is up to date
                 }
 
                 FileOutputStream out = null;
