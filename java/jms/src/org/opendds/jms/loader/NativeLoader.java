@@ -68,15 +68,12 @@ public class NativeLoader {
 
                 File file = new File(nativeDir, name);
 
-                if (file.exists() && file.lastModified() > created) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Library is up to date; skipping: " + file.getAbsolutePath());
-                    }
-                    continue;
+                if (log.isInfoEnabled()) {
+                    log.info("Loading native library: " + file.getAbsolutePath());
                 }
 
-                if (log.isDebugEnabled()) {
-                    log.debug("Extracting library: " + file.getAbsolutePath());
+                if (file.exists() && file.lastModified() > created) {
+                    continue; // file is up to date
                 }
 
                 FileOutputStream out = null;
