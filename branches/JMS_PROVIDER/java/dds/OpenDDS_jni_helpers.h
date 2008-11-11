@@ -4,6 +4,7 @@
 
 #include "idl2jni_jni.h"
 
+#include "ace/Basic_Types.h"
 #include "ace/INET_Addr.h"
 #include <string>
 
@@ -117,6 +118,18 @@ struct SizetField : SimpleField<C, size_t, jvmSig::INT, jint,
 
   SizetField (const char *j, memptr_t c)
     : SimpleField<C, size_t, jvmSig::INT, jint,
+        &JNIEnv::GetIntField, &JNIEnv::SetIntField> (j, c) {}
+};
+
+template <typename C>
+struct Uint32Field : SimpleField<C, ACE_UINT32, jvmSig::INT, jint,
+  &JNIEnv::GetIntField, &JNIEnv::SetIntField>
+{
+  typedef typename SimpleField<C, ACE_UINT32, jvmSig::INT, jint,
+    &JNIEnv::GetIntField, &JNIEnv::SetIntField>::memptr_t memptr_t;
+
+  Uint32Field (const char *j, memptr_t c)
+    : SimpleField<C, ACE_UINT32, jvmSig::INT, jint,
         &JNIEnv::GetIntField, &JNIEnv::SetIntField> (j, c) {}
 };
 

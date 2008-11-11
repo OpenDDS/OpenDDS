@@ -1,9 +1,17 @@
+Tue Nov 11 14:48:16 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * java/dds/OpenDDS_jni_helpers.h:
+
+	  Fixed bad ACE_UINT32 to size_t conversion (fixes breakage
+	  on Mac OS X).
+
 Tue Nov 11 06:23:49 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/build.xml:
         * java/jms/src/META-INF/ra.xml:
 
-	  Ant script updates; better defaults in ra.xml.
+          Ant script updates; better defaults in ra.xml.
 
         * java/jms/src/org/opendds/jms/management/NativeLoaderService.java:
 
