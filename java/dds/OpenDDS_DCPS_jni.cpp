@@ -229,9 +229,9 @@ namespace BaseConfig
   BoolField<Cfg> sb ("swapBytes", &Cfg::swap_bytes_);
   SizetField<Cfg> qmpp ("queueMessagesPerPool", &Cfg::queue_messages_per_pool_);
   SizetField<Cfg> qip ("queueInitialPools", &Cfg::queue_initial_pools_);
-  SizetField<Cfg> mps ("maxPacketSize", &Cfg::max_packet_size_);
+  Uint32Field<Cfg> mps ("maxPacketSize", &Cfg::max_packet_size_);
   SizetField<Cfg> mspp ("maxSamplesPerPacket", &Cfg::max_samples_per_packet_);
-  SizetField<Cfg> ops ("optimumPacketSize", &Cfg::optimum_packet_size_);
+  Uint32Field<Cfg> ops ("optimumPacketSize", &Cfg::optimum_packet_size_);
   BoolField<Cfg> tpc ("threadPerConnection", &Cfg::thread_per_connection_);
 
   BaseField<Cfg> *fields[] = {&sb, &qmpp, &qip, &mps, &mspp, &ops, &tpc};
