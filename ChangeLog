@@ -1,3 +1,9 @@
+Tue Nov 11 16:00:37 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * rules.dds.GNU:
+
+          Use the new DDS_MICRO_VERSION macro in the shared lib version #s.
+
 Mon Nov 10 18:03:02 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
 
         * wrapper/Subscription_Manager.inl
@@ -5,7 +11,7 @@ Mon Nov 10 18:03:02 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
         * wrapper/OpenDDS/OpenDDS_Subscription_Manager.h
         * wrapper/OpenDDS/OpenDDS_Subscription_Manager.cpp
         * wrapper/Subscription_Manager.h:
-        
+
         Added get_default_datareader_qos method to Subscription_Manager.
 
 Mon Nov 10 16:17:22 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
@@ -33,7 +39,7 @@ Mon Nov 10 16:17:22 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
         * wrapper/OpenDDS/OpenDDS_Domain_Manager.cpp
         * wrapper/Topic_Manager.h
         * wrapper/Subscription_Manager.h:
-        
+
         Added QoS policy support to the wrapper API.
 
 Fri Nov  7 20:46:44 UTC 2008  Yan Dai  <dai_y@ociweb.com>
@@ -54,7 +60,7 @@ Fri Nov  7 20:46:44 UTC 2008  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/transport/framework/TheTransportFactory.h:
 
           Removed TheTransportFactory.inl include.
-           
+
         * dds/DCPS/transport/framework/TheTransportFactory.inl:
         * dds/DCPS/transport/framework/TheTransportFactory.cpp:
 
