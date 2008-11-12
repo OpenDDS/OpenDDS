@@ -19,18 +19,17 @@ import javax.security.auth.Subject;
  * @version $Revision$
  */
 public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
-    private String domainParticipantQosPolicy;
+    private String participantQosPolicy;
     private String publisherQosPolicy;
-    private String publisherTransport;
     private String subscriberQoSPolicy;
-    private String subscriberTransport;
+    private String transportConfiguration;
 
-    public String getDomainParticipantQosPolicy() {
-        return domainParticipantQosPolicy;
+    public String getParticipantQosPolicy() {
+        return participantQosPolicy;
     }
 
-    public void setDomainParticipantQosPolicy(String domainParticipantQosPolicy) {
-        this.domainParticipantQosPolicy = domainParticipantQosPolicy;
+    public void setParticipantQosPolicy(String participantQosPolicy) {
+        this.participantQosPolicy = participantQosPolicy;
     }
 
     public String getPublisherQosPolicy() {
@@ -41,14 +40,6 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
         this.publisherQosPolicy = publisherQosPolicy;
     }
 
-    public String getPublisherTransport() {
-        return publisherTransport;
-    }
-
-    public void setPublisherTransport(String publisherTransport) {
-        this.publisherTransport = publisherTransport;
-    }
-
     public String getSubscriberQoSPolicy() {
         return subscriberQoSPolicy;
     }
@@ -57,12 +48,12 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
         this.subscriberQoSPolicy = subscriberQoSPolicy;
     }
 
-    public String getSubscriberTransport() {
-        return subscriberTransport;
+    public String getTransportConfiguration() {
+        return transportConfiguration;
     }
 
-    public void setSubscriberTransport(String subscriberTransport) {
-        this.subscriberTransport = subscriberTransport;
+    public void setTransportConfiguration(String transportConfiguration) {
+        this.transportConfiguration = transportConfiguration;
     }
 
     public Object createConnectionFactory(ConnectionManager connectionManager) throws ResourceException {
