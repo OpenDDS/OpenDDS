@@ -1,3 +1,9 @@
+Wed Nov 12 16:48:49 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.inl:
+
+          Fix some parameter issues.
+
 Tue Nov 11 23:58:51 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/Qos_Helper.inl:
