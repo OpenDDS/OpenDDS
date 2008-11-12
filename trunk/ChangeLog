@@ -1,3 +1,13 @@
+Wed Nov 12 04:44:21 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
+
+        * wrapper/OpenDDS/OpenDDS_Publication_Manager.cpp
+        * wrapper/OpenDDS/OpenDDS_Subscription_Manager.h
+        * wrapper/OpenDDS/OpenDDS_Publication_Manager.h
+        * wrapper/OpenDDS/OpenDDS_Subscription_Manager.cpp
+        * wrapper/OpenDDS/OpenDDS_Domain_Manager.cpp:
+        
+          Fixed problem with transport impl creation calls.
+
 Tue Nov 11 16:00:37 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * rules.dds.GNU:

@@ -28,10 +28,6 @@
 class OpenDDS_Subscription_Manager : public Subscription_Manager_Impl
 {
  public:
-  /// ctor
-  OpenDDS_Subscription_Manager (const Domain_Manager & dm,
-				const DDS::SubscriberQos & qos);
-
   /// ctor with transport impl registration
   OpenDDS_Subscription_Manager (const Domain_Manager & dm,
 				OpenDDS::DCPS::TransportIdType transport_id,
