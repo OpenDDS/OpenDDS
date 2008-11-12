@@ -16,6 +16,8 @@ import javax.management.AttributeNotFoundException;
 import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanAttributeInfo;
 
+import org.opendds.jms.util.Strings;
+
 /**
  * @author  Steven Stallion
  * @version $Revision$
@@ -70,10 +72,16 @@ public class DynamicAttributes implements Serializable {
             throw new AttributeNotFoundException(name);
         }
 
-        if (value != null && !model.isInstance(value)) {
-            throw new InvalidAttributeValueException(value.toString());
-        }
+        if (value != null) {
+            if(!model.isInstance(value)) {
+                throw new InvalidAttributeValueException(value.toString());
+            }
 
+            // Auto-expand String attributes
+            if (value instanceof String) {
+                value = Strings.expand((String) value);
+            }
+        }
         values.put(name, value);
     }
 

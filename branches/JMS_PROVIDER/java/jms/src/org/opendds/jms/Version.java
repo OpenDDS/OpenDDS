@@ -17,7 +17,8 @@ public class Version {
 
     public synchronized static Version getInstance() {
         if (instance == null) {
-            instance = new Version(PropertiesHelper.forResource("version.properties"));
+            instance = new Version(
+                PropertiesHelper.forResource("version.properties"));
         }
         return instance;
     }
