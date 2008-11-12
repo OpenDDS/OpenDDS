@@ -10,7 +10,7 @@ project(*Common) : dcps {
   dcps_ts_flags += --export=StockQuoterCommon_Export
 
   TypeSupport_Files {
-    StockQuoter.idl
+    StockQuoter.idl >> StockQuoterTypeSupport.idl StockQuoterTypeSupportImpl.h StockQuoterTypeSupportImpl.cpp
   }
 
   IDL_Files {
