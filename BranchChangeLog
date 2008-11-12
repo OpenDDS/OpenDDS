@@ -1,3 +1,9 @@
+Wed Nov 12 21:34:37 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * java/build_scripts/ant_wrapper.pl:
+
+          Relative paths for -d are now relative to $DDS_ROOT.
+
 Wed Nov 12 16:00:29 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/Lifespan/subscriber.cpp:
