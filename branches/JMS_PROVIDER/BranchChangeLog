@@ -1,3 +1,12 @@
+Wed Nov 12 16:00:29 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Lifespan/subscriber.cpp:
+        * tests/DCPS/TransientDurability/subscriber.cpp:
+        * tests/DCPS/TransientLocalTest/subscriber.cpp:
+
+          Updated tests that were depending on VOLATILE delivering
+          the historic samples.
+
 Tue Nov 11 21:08:42 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
