@@ -35,8 +35,7 @@ OpenDDS_Domain_Manager::OpenDDS_Domain_Manager (int & argc,
   : dp_ (DDS::DomainParticipant::_nil ()),
     transport_impl_id_ (1),
     shutdown_lock_ (0),
-    exit_handler_ (shutdown_lock_),
-    transport_initialized_ (false)
+    exit_handler_ (shutdown_lock_)
 {
   // get the domain participant factory from the singleton 
   DDS::DomainParticipantFactory_var dpf =
@@ -71,8 +70,7 @@ OpenDDS_Domain_Manager::OpenDDS_Domain_Manager (int & argc,
   : dp_ (DDS::DomainParticipant::_nil ()),
     transport_impl_id_ (1),
     shutdown_lock_ (0),
-    exit_handler_ (shutdown_lock_),
-    transport_initialized_ (false)
+    exit_handler_ (shutdown_lock_)
 {
   // get the domain participant factory from the singleton 
   DDS::DomainParticipantFactory_var dpf =

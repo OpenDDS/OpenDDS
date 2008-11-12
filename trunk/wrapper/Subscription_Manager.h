@@ -10,8 +10,8 @@
  */
 //=============================================================================
 
-#ifndef _SUBSCRIPTION_MANAGER_H_
-#define _SUBSCRIPTION_MANAGER_H_
+#ifndef DDS_WRAPPER_SUBSCRIPTION_MANAGER_H_
+#define DDS_WRAPPER_SUBSCRIPTION_MANAGER_H_
 
 #include "DDSWrapper_export.h"
 #include "Subscription_Manager_Impl.h"
@@ -68,4 +68,4 @@ class DDSWrapper_Export Subscription_Manager
 #include "Subscription_Manager.inl"
 #endif
 
-#endif /* _SUBSCRIPTION_MANAGER_H_ */
+#endif /* DDS_WRAPPER_SUBSCRIPTION_MANAGER_H_ */

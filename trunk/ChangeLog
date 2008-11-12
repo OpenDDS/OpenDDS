@@ -1,3 +1,35 @@
+Wed Nov 12 23:26:20 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
+
+        * wrapper/Topic_Manager_T.h
+        * wrapper/DataReader_Listener_Base.h
+        * wrapper/Domain_Manager.h
+        * wrapper/Topic_Manager.inl
+        * wrapper/Exit_Signal_Handler.h
+        * wrapper/Publication_Manager.h
+        * wrapper/Subscription_Manager.inl
+        * wrapper/Domain_Manager_Impl.h
+        * wrapper/wrapper_subscription.h
+        * wrapper/Publication_Manager_Impl.h
+        * wrapper/Topic_Manager_T.cpp
+        * wrapper/DataReader_Listener_Base.inl
+        * wrapper/Topic_Manager_Impl.h
+        * wrapper/Domain_Manager.inl
+        * wrapper/Publication_Manager.inl
+        * wrapper/Subscription_Manager_Impl.h
+        * wrapper/wrapper_config.h
+        * wrapper/OpenDDS/OpenDDS_Publication_Manager.inl
+        * wrapper/OpenDDS/OpenDDS_Subscription_Manager.h
+        * wrapper/OpenDDS/OpenDDS_Domain_Manager.h
+        * wrapper/OpenDDS/OpenDDS_Publication_Manager.h
+        * wrapper/OpenDDS/OpenDDS_Subscription_Manager.inl
+        * wrapper/OpenDDS/OpenDDS_Domain_Manager.cpp
+        * wrapper/OpenDDS/OpenDDS_Domain_Manager.inl
+        * wrapper/Topic_Manager.h
+        * wrapper/wrapper_publication.h
+        * wrapper/Subscription_Manager.h:
+        
+          Changed inclusion protection macro names (removed leading '_').
+
 Wed Nov 12 04:44:21 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
 
         * wrapper/OpenDDS/OpenDDS_Publication_Manager.cpp

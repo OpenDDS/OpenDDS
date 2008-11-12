@@ -10,8 +10,8 @@
  */
 //=============================================================================
 
-#ifndef _SUBSCRIPTION_MANAGER_INL_
-#define _SUBSCRIPTION_MANAGER_INL_
+#ifndef DDS_WRAPPER_SUBSCRIPTION_MANAGER_INL_
+#define DDS_WRAPPER_SUBSCRIPTION_MANAGER_INL_
 
 ACE_INLINE void
 Subscription_Manager::access_topic (const Topic_Manager & topic,
@@ -44,4 +44,4 @@ Subscription_Manager::subscriber () const
   return manager_impl_->subscriber ();
 }
 
-#endif /* _SUBSCRIPTION_MANAGER_INL_ */
+#endif /* DDS_WRAPPER_SUBSCRIPTION_MANAGER_INL_ */
