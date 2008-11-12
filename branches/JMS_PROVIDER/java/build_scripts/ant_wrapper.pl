@@ -4,13 +4,16 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 
 #
 # Calls Apache Ant in a specified directory (-d)
-# (using $ANT_HOME to find it).
+# (using $ANT_HOME to find it).  The -d directory
+# can either be absolute or relative to $DDS_ROOT.
 #
 
-use Env qw(ANT_HOME);
+use Env qw(ANT_HOME DDS_ROOT);
 use Getopt::Std;
 
 getopts('d:');
+
+chdir $DDS_ROOT;
 
 if (!chdir $opt_d) {
     print "ERROR: unable to chdir to \"$opt_d\"!\n";
