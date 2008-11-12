@@ -10,8 +10,8 @@
  */
 //=============================================================================
 
-#ifndef _TOPIC_MANAGER_T_CPP_
-#define _TOPIC_MANAGER_T_CPP_
+#ifndef DDS_WRAPPER_TOPIC_MANAGER_T_CPP_
+#define DDS_WRAPPER_TOPIC_MANAGER_T_CPP_
 
 #include <memory>
 #include <ace/streams.h>
@@ -164,4 +164,4 @@ Topic_Manager_T <TYPE_SUPPORT, TS_IMPL>::datawriter (const Publication_Manager &
   return dw._retn ();
 }
 
-#endif /* _TOPIC_MANAGER_T_CPP_ */
+#endif /* DDS_WRAPPER_TOPIC_MANAGER_T_CPP_ */

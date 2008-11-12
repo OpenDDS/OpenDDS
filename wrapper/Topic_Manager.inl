@@ -10,8 +10,8 @@
  */
 //=============================================================================
 
-#ifndef _TOPIC_MANAGER_INL_
-#define _TOPIC_MANAGER_INL_
+#ifndef DDS_WRAPPER_TOPIC_MANAGER_INL_
+#define DDS_WRAPPER_TOPIC_MANAGER_INL_
 
 ACE_INLINE std::string
 Topic_Manager::name () const
@@ -45,4 +45,4 @@ Topic_Manager::datawriter (const Publication_Manager & pm,
   return manager_impl_->datawriter (pm, qos);
 }
 
-#endif /* _TOPIC_MANAGER_INL_ */
+#endif /* DDS_WRAPPER_TOPIC_MANAGER_INL_ */

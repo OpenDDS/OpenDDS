@@ -6,12 +6,12 @@
  *
  *  $Id$
  *
- * @author   Friedhelm Wolf (fwolf@dre.vanderbilt.edu)
+ *  @author  Friedhelm Wolf (fwolf@dre.vanderbilt.edu)
  */
 //=============================================================================
 
-#ifndef _EXIT_SIGNAL_HANDLER_H_
-#define _EXIT_SIGNAL_HANDLER_H_
+#ifndef DDS_WRAPPER_EXIT_SIGNAL_HANDLER_H_
+#define DDS_WRAPPER_EXIT_SIGNAL_HANDLER_H_
 
 #include <ace/Event_Handler.h>
 #include <ace/Thread_Semaphore.h>
@@ -40,4 +40,4 @@ private:
   ACE_Thread_Semaphore & lock_;
 };
 
-#endif /* _EXIT_SIGNAL_HANDLER_H_ */
+#endif /* DDS_WRAPPER_EXIT_SIGNAL_HANDLER_H_ */
