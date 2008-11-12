@@ -59,6 +59,7 @@ int main (int argc, char *argv[])
       participant->get_default_topic_qos(topic_qos);
       topic_qos.lifespan.duration.sec = 10;
       topic_qos.lifespan.duration.nanosec = 0;
+      topic_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
       DDS::Topic_var topic =
         participant->create_topic ("Movie Discussion List",
                                    type_name.in (),
@@ -71,9 +72,9 @@ int main (int argc, char *argv[])
       }
 
       // Initialize the transport
-      OpenDDS::DCPS::TransportImpl_rch tcp_impl = 
+      OpenDDS::DCPS::TransportImpl_rch tcp_impl =
         TheTransportFactory->create_transport_impl (
-          transport_impl_id, 
+          transport_impl_id,
           ::OpenDDS::DCPS::AUTO_CONFIG);
 
       // Create the subscriber and attach to the corresponding
@@ -130,10 +131,8 @@ int main (int argc, char *argv[])
       }
 
       // Create the Datareaders
-      DDS::DataReaderQos dr_qos;
-      sub->get_default_datareader_qos (dr_qos);
       DDS::DataReader_var dr = sub->create_datareader(topic.in (),
-                                                      dr_qos,
+                                                      DATAREADER_QOS_USE_TOPIC_QOS,
                                                       listener.in ());
       if (CORBA::is_nil (dr.in ())) {
         cerr << "create_datareader failed." << endl;
