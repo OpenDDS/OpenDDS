@@ -128,7 +128,8 @@ Topic_Manager_T <TYPE_SUPPORT, TS_IMPL>::delete_topic (Domain_Manager & dm)
 
 template <typename TYPE_SUPPORT, typename TS_IMPL>
 DDS::DataReader_ptr 
-Topic_Manager_T <TYPE_SUPPORT, TS_IMPL>::datareader (const Subscription_Manager & sm)
+Topic_Manager_T <TYPE_SUPPORT, TS_IMPL>::datareader (const Subscription_Manager & sm,
+						     const DDS::DataReaderQos & qos)
 {
   // check if subscriber exists
   if (CORBA::is_nil (sm.subscriber ()))
@@ -138,7 +139,7 @@ Topic_Manager_T <TYPE_SUPPORT, TS_IMPL>::datareader (const Subscription_Manager 
   // use subscriber to create a datareader for the topic
   DDS::DataReader_var dr = 
     sm.subscriber ()->create_datareader (topic_.in (),
-					 DATAREADER_QOS_DEFAULT,
+					 qos,
 					 listener_.in ()); 
 
   return dr._retn ();
@@ -146,7 +147,8 @@ Topic_Manager_T <TYPE_SUPPORT, TS_IMPL>::datareader (const Subscription_Manager 
 
 template <typename TYPE_SUPPORT, typename TS_IMPL>
 DDS::DataWriter_ptr 
-Topic_Manager_T <TYPE_SUPPORT, TS_IMPL>::datawriter (const Publication_Manager & pm)
+Topic_Manager_T <TYPE_SUPPORT, TS_IMPL>::datawriter (const Publication_Manager & pm,
+						     const DDS::DataWriterQos & qos)
 {
   // check if subscriber exists
   if (CORBA::is_nil (pm.publisher ()))
@@ -156,7 +158,7 @@ Topic_Manager_T <TYPE_SUPPORT, TS_IMPL>::datawriter (const Publication_Manager &
   // use publisher to create a datawriter for the topic
   DDS::DataWriter_var dw = 
     pm.publisher ()->create_datawriter (topic_.in (),
-					DATAWRITER_QOS_DEFAULT,
+					qos,
 					DDS::DataWriterListener::_nil ()); 
 
   return dw._retn ();

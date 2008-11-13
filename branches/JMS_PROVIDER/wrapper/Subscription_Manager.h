@@ -41,10 +41,15 @@ class DDSWrapper_Export Subscription_Manager
   /// will create a topic instance using the domain manager
   /// internally a datareader will be created which can be accessed
   /// through the lookup_datareader method
-  void access_topic (const Topic_Manager & topic);
+  void access_topic (const Topic_Manager & topic,
+		     const DDS::DataReaderQos & qos
+                       = DATAREADER_QOS_DEFAULT);
 
   /// unregisters and deletes the topic from the domain
   void remove_topic (const Topic_Manager & topic);
+
+  /// creates and returns qos for data readers with the default values
+  DDS::DataReaderQos get_default_datareader_qos ();
 
   /// returns a data reader for a specific topic
   DDS::DataReader_ptr lookup_datareader (const std::string & topic_name);

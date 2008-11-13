@@ -855,7 +855,7 @@ void DCPS_IR_Subscription::set_bit_status (CORBA::Boolean isBIT)
 OpenDDS::DCPS::DataReaderRemote_ptr
 DCPS_IR_Subscription::reader()
 {
-  return OpenDDS::DCPS::DataReaderRemote::_duplicate( this->reader_);
+  return OpenDDS::DCPS::DataReaderRemote::_duplicate( this->reader_.in());
 }
 
 #if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
