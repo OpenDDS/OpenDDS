@@ -58,3 +58,18 @@ OpenDDS::DCPS::SimpleTcpConnection::get_remote_address ()
 {
   return this->remote_address_;
 }
+
+ACE_INLINE
+CORBA::Long&
+OpenDDS::DCPS::SimpleTcpConnection::priority()
+{
+  return this->priority_;
+}
+
+ACE_INLINE
+CORBA::Long
+OpenDDS::DCPS::SimpleTcpConnection::priority() const
+{
+  return this->priority_;
+}
+

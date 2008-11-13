@@ -7,6 +7,7 @@
 #include "SimpleUnreliableDgram_export.h"
 #include "dds/DCPS/transport/framework/DataLink.h"
 #include "ace/INET_Addr.h"
+#include "tao/Basic_Types.h"
 
 
 namespace OpenDDS
@@ -30,6 +31,9 @@ namespace OpenDDS
 
         int connect(TransportSendStrategy* send_strategy);
 
+        /// Accessors for priority.
+        CORBA::Long& priority();
+        CORBA::Long  priority() const;
 
       protected:
 
@@ -40,8 +44,10 @@ namespace OpenDDS
 
 
       private:
-
         ACE_INET_Addr remote_address_;
+
+        /// TRANSPORT_PRIORITY.value policy value.
+        CORBA::Long priority_;
     };
 
   } /* namespace DCPS */

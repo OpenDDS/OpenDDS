@@ -15,6 +15,7 @@
 #include "dds/DCPS/transport/framework/TransportReceiveStrategy_rch.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
+#include "dds/DCPS/transport/framework/PriorityKey.h"
 #include "ace/INET_Addr.h"
 #include "ace/Hash_Map_Manager.h"
 #include "ace/Synch.h"
@@ -77,14 +78,15 @@ namespace OpenDDS
         friend class SimpleUnreliableDgramReceiveStrategy;
 
         virtual void deliver_sample(ReceivedDataSample&  sample,
-                            const ACE_INET_Addr& remote_address);
+                            const ACE_INET_Addr& remote_address,
+                            CORBA::Long          priority);
 
         /// Map Type: (key) ACE_INET_Addr to (value) SimpleMcastDataLink_rch
         typedef ACE_Hash_Map_Manager_Ex
-                               <ACE_INET_Addr,
+                               <PriorityKey,
                                 SimpleUnreliableDgramDataLink_rch,
-                                ACE_Hash<ACE_INET_Addr>,
-                                ACE_Equal_To<ACE_INET_Addr>,
+                                ACE_Hash<PriorityKey>,
+                                ACE_Equal_To<PriorityKey>,
                                 ACE_Null_Mutex>              AddrLinkMap;
 
         typedef ACE_SYNCH_MUTEX         LockType;

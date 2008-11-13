@@ -28,7 +28,7 @@ OpenDDS::DCPS::DataLink*
 OpenDDS::DCPS::SimpleUnreliableDgramTransport::find_or_create_datalink
                          (const TransportInterfaceInfo& remote_info,
                           int                           connect_as_publisher,
-                          int                           /* priority */)
+                          int                           priority)
 {
   DBG_ENTRY_LVL("SimpleUnreliableDgramTransport","find_or_create_datalink",6);
 
@@ -62,7 +62,7 @@ OpenDDS::DCPS::SimpleUnreliableDgramTransport::find_or_create_datalink
 
   SimpleUnreliableDgramDataLink_rch link;
 
-  if (this->links_.find(remote_address,link) == 0)
+  if (this->links_.find( PriorityKey( priority, remote_address), link) == 0)
     {
       // This means we found a suitable DataLink.
       // We can return it now since we are done.
@@ -77,7 +77,7 @@ OpenDDS::DCPS::SimpleUnreliableDgramTransport::find_or_create_datalink
   link = new SimpleUnreliableDgramDataLink(remote_address, this);
 
   // Attempt to bind the SimpleUnreliableDgramDataLink to our links_ map.
-  if (this->links_.bind(remote_address,link) != 0)
+  if (this->links_.bind( PriorityKey( priority, remote_address), link) != 0)
     {
       // We failed to bind the new DataLink into our links_ map.
       ACE_ERROR((LM_ERROR,
@@ -87,6 +87,9 @@ OpenDDS::DCPS::SimpleUnreliableDgramTransport::find_or_create_datalink
       // On error, we return a NULL pointer.
       return 0;
     }
+
+  /// @TODO: The socket_ and send_strategy can be modified with priority
+  ///        information at this point.
 
   TransportSendStrategy_rch send_strategy 
     = new SimpleUnreliableDgramSendStrategy(this->config_.in(),
@@ -241,7 +244,8 @@ OpenDDS::DCPS::SimpleUnreliableDgramTransport::release_datalink_i(DataLink* link
   GuardType guard(this->links_lock_);
 
   // Attempt to remove the SimpleMcastDataLink from our links_ map.
-  if (this->links_.unbind(remote_address, released_link) != 0)
+  PriorityKey key( dgram_link->priority(), remote_address);
+  if (this->links_.unbind( key, released_link) != 0)
     {
       ACE_ERROR((LM_ERROR,
                  "(%P|%t) ERROR: Unable to locate DataLink in order to "
