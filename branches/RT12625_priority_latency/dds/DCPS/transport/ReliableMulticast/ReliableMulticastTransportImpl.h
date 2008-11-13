@@ -37,7 +37,8 @@ namespace OpenDDS
     protected:
       virtual OpenDDS::DCPS::DataLink* find_or_create_datalink(
         const TransportInterfaceInfo& remote_info,
-        int connect_as_publisher
+        int connect_as_publisher,
+        int priority
         );
 
       virtual int configure_i(TransportConfiguration* config);

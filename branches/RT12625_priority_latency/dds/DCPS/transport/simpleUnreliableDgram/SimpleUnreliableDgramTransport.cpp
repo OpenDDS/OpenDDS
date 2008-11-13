@@ -27,7 +27,8 @@ OpenDDS::DCPS::SimpleUnreliableDgramTransport::~SimpleUnreliableDgramTransport()
 OpenDDS::DCPS::DataLink*
 OpenDDS::DCPS::SimpleUnreliableDgramTransport::find_or_create_datalink
                          (const TransportInterfaceInfo& remote_info,
-                          int                           connect_as_publisher)
+                          int                           connect_as_publisher,
+                          int                           /* priority */)
 {
   DBG_ENTRY_LVL("SimpleUnreliableDgramTransport","find_or_create_datalink",6);
 

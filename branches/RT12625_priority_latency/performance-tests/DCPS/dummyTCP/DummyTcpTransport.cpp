@@ -53,7 +53,8 @@ OpenDDS::DCPS::DummyTcpTransport::~DummyTcpTransport()
 OpenDDS::DCPS::DataLink*
 OpenDDS::DCPS::DummyTcpTransport::find_or_create_datalink
 (const TransportInterfaceInfo& remote_info,
- int                           connect_as_publisher)
+ int                           connect_as_publisher,
+ CORBA::Long                   /* priority */)
 {
   DBG_ENTRY_LVL("DummyTcpTransport","find_or_create_datalink",5);
 

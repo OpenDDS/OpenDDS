@@ -113,9 +113,6 @@ OpenDDS::DCPS::TransportImpl::reserve_datalink
 {
   DBG_ENTRY_LVL("TransportImpl","reserve_datalink",6);
 
-  // Not used right now - not sure how it would apply either.
-  ACE_UNUSED_ARG(priority);
-
   // Ask our concrete subclass to find or create a (concrete) DataLink
   // that matches the supplied criterea.
 
@@ -124,7 +121,8 @@ OpenDDS::DCPS::TransportImpl::reserve_datalink
   // then the connection establishment logic will treat the local endpoint
   // as a publisher.  This knowledge dictates whether a passive or active
   // connection establishment procedure should be followed.
-  DataLink_rch link = this->find_or_create_datalink(remote_subscriber_info, 1);
+  DataLink_rch link
+    = this->find_or_create_datalink(remote_subscriber_info, 1, priority);
 
   if (link.is_nil())
     {
@@ -156,9 +154,6 @@ OpenDDS::DCPS::TransportImpl::reserve_datalink
 {
   DBG_ENTRY_LVL("TransportImpl","reserve_datalink",6);
 
-  // Not used right now - not sure how it would apply either.
-  ACE_UNUSED_ARG(priority);
-
   // Ask our concrete subclass to find or create a DataLink (actually, a
   // concrete subclass of DataLink) that matches the supplied criterea.
   // Since find_or_create() is pure virtual, the concrete subclass must
@@ -169,7 +164,8 @@ OpenDDS::DCPS::TransportImpl::reserve_datalink
   // then the connection establishment logic will treat the local endpoint
   // as a subscriber.  This knowledge dictates whether a passive or active
   // connection establishment procedure should be followed.
-  DataLink_rch link = this->find_or_create_datalink(remote_publisher_info,0);
+  DataLink_rch link
+    = this->find_or_create_datalink( remote_publisher_info, 0, priority);
 
   if (link.is_nil())
     {

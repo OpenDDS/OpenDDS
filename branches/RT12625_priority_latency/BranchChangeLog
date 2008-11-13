@@ -1,3 +1,20 @@
+Thu Nov 13 01:24:50 UTC 2008  Mike Martinez  <martinez_m@lab.ociweb.com>
+
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.h:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.cpp:
+
+          Move the TRANSPORT_PRIORITY.value policy value to the place(s)
+          where it will be used.
+
 Wed Nov 12 16:48:49 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/Qos_Helper.inl:
