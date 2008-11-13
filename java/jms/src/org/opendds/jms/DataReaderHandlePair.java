@@ -1,6 +1,5 @@
 package org.opendds.jms;
 
-import DDS.DataReader;
 import OpenDDS.JMS.MessagePayloadDataReader;
 
 /**

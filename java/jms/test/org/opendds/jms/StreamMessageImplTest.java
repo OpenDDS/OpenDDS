@@ -5,13 +5,15 @@ import javax.jms.MessageEOFException;
 import javax.jms.MessageFormatException;
 import javax.jms.MessageNotWriteableException;
 import javax.jms.StreamMessage;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Test;
-import org.opendds.jms.util.ByteArrays;
+
+import org.opendds.jms.common.lang.ByteArrays;
 
 public class StreamMessageImplTest {
     private static final float FLOAT_EPSILON = 1e-6f;

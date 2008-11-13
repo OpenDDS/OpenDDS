@@ -2,7 +2,7 @@
  * $Id$
  */
 
-package org.opendds.jms.loader;
+package org.opendds.jms.common.loader;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -84,8 +84,10 @@ public class LibIndex {
     }
 
     protected void parse(InputStream in) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
         boolean parsedHeader = false;
+
+        BufferedReader reader =
+            new BufferedReader(new InputStreamReader(in));
 
         String line;
         while ((line = reader.readLine()) != null) {

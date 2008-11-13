@@ -10,6 +10,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.opendds.jms.TopicImpl;
+import org.opendds.jms.common.lang.Strings;
+import org.opendds.jms.common.util.JndiHelper;
 import org.opendds.jms.management.annotation.Attribute;
 import org.opendds.jms.management.annotation.Constructor;
 import org.opendds.jms.management.annotation.Description;
@@ -18,8 +20,6 @@ import org.opendds.jms.management.annotation.Operation;
 import org.opendds.jms.qos.DataReaderQosPolicy;
 import org.opendds.jms.qos.DataWriterQosPolicy;
 import org.opendds.jms.qos.TopicQosPolicy;
-import org.opendds.jms.util.JndiHelper;
-import org.opendds.jms.util.Strings;
 
 /**
  * @author  Steven Stallion

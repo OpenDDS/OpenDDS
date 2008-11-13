@@ -2,7 +2,7 @@
  * $Id$
  */
 
-package org.opendds.jms.util;
+package org.opendds.jms.common.io;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,6 +21,9 @@ public class Streams {
     }
 
     public static void tie(InputStream in, OutputStream out) throws IOException {
+        assert in != null;
+        assert out != null;
+
         byte[] buffer = createBuffer();
 
         int read;

@@ -4,8 +4,9 @@
 
 package org.opendds.jms;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+
 import javax.jms.Connection;
 import javax.jms.ConnectionConsumer;
 import javax.jms.ConnectionMetaData;

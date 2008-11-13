@@ -2,7 +2,7 @@
  * $Id$
  */
 
-package org.opendds.jms.util;
+package org.opendds.jms.common.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -10,6 +10,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.regex.Pattern;
+
+import org.opendds.jms.common.lang.ClassLoaders;
+import org.opendds.jms.common.lang.Strings;
 
 /**
  * @author  Steven Stallion

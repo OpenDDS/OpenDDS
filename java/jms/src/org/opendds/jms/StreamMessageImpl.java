@@ -4,7 +4,6 @@ import javax.jms.JMSException;
 import javax.jms.StreamMessage;
 
 import OpenDDS.JMS.MessagePayload;
-
 import OpenDDS.JMS.StreamItem;
 
 public class StreamMessageImpl extends AbstractMessageImpl implements StreamMessage {

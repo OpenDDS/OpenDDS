@@ -1,39 +1,40 @@
 package org.opendds.jms;
 
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.IOException;
-import javax.jms.Session;
-import javax.jms.JMSException;
-import javax.jms.TemporaryTopic;
-import javax.jms.MessageConsumer;
+import java.io.InputStreamReader;
+
+import javax.jms.Destination;
 import javax.jms.InvalidDestinationException;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.ObjectMessage;
-import javax.jms.Message;
-import javax.jms.Destination;
+import javax.jms.Session;
+import javax.jms.TemporaryTopic;
 import javax.jms.TextMessage;
 
-import org.junit.Test;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
-import org.omg.CORBA.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import org.junit.Test;
+import org.omg.CORBA.StringSeqHolder;
 
 import DDS.DomainParticipant;
-import DDS.Publisher;
-import DDS.Subscriber;
 import DDS.DomainParticipantFactory;
 import DDS.PARTICIPANT_QOS_DEFAULT;
-import DDS.SUBSCRIBER_QOS_DEFAULT;
 import DDS.PUBLISHER_QOS_DEFAULT;
-import DDS.Topic;
+import DDS.Publisher;
+import DDS.SUBSCRIBER_QOS_DEFAULT;
+import DDS.Subscriber;
 import DDS.TOPIC_QOS_DEFAULT;
+import DDS.Topic;
 import OpenDDS.DCPS.TheParticipantFactory;
-import OpenDDS.DCPS.transport.TransportImpl;
-import OpenDDS.DCPS.transport.TheTransportFactory;
 import OpenDDS.DCPS.transport.AttachStatus;
+import OpenDDS.DCPS.transport.TheTransportFactory;
+import OpenDDS.DCPS.transport.TransportImpl;
 import OpenDDS.JMS.MessagePayloadTypeSupportImpl;
 
 public class SessionImplTest {

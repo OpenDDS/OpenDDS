@@ -6,6 +6,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
+
 import javax.jms.JMSException;
 import javax.jms.MessageEOFException;
 import javax.jms.MessageFormatException;
@@ -13,7 +14,7 @@ import javax.jms.MessageFormatException;
 import OpenDDS.JMS.MessageBody;
 import OpenDDS.JMS.MessageBodyKind;
 
-import org.opendds.jms.util.Objects;
+import org.opendds.jms.common.lang.Objects;
 
 public class BytesBodyFacade {
     private final MessageBody body;

@@ -1,4 +1,4 @@
-package org.opendds.jms.util;
+package org.opendds.jms.common.lang;
 
 public class ByteArrays {
     public static byte[] extractSubBytes(byte[] bytes, int i, int i1) {

@@ -32,7 +32,7 @@ import DDS.TransportPriorityQosPolicy;
  */
 public class QosPolicies {
 
-    public static DeadlineQosPolicy createDeadlineQosPolicy() {
+    public static DeadlineQosPolicy newDeadlineQosPolicy() {
         DeadlineQosPolicy policy = new DeadlineQosPolicy();
 
         policy.period = new Duration_t();
@@ -40,7 +40,7 @@ public class QosPolicies {
         return policy;
     }
 
-    public static DestinationOrderQosPolicy createDestinationOrderQosPolicy() {
+    public static DestinationOrderQosPolicy newDestinationOrderQosPolicy() {
         DestinationOrderQosPolicy policy = new DestinationOrderQosPolicy();
 
         policy.kind = DestinationOrderQosPolicyKind.BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS;
@@ -48,7 +48,7 @@ public class QosPolicies {
         return policy;
     }
 
-    public static DurabilityQosPolicy createDurabilityQosPolicy() {
+    public static DurabilityQosPolicy newDurabilityQosPolicy() {
         DurabilityQosPolicy policy = new DurabilityQosPolicy();
 
         policy.kind = DurabilityQosPolicyKind.VOLATILE_DURABILITY_QOS;
@@ -57,7 +57,7 @@ public class QosPolicies {
         return policy;
     }
 
-    public static DurabilityServiceQosPolicy createDurabilityServiceQosPolicy() {
+    public static DurabilityServiceQosPolicy newDurabilityServiceQosPolicy() {
         DurabilityServiceQosPolicy policy = new DurabilityServiceQosPolicy();
 
         policy.history_kind = HistoryQosPolicyKind.KEEP_LAST_HISTORY_QOS;
@@ -66,7 +66,7 @@ public class QosPolicies {
         return policy;
     }
 
-    public static HistoryQosPolicy createHistoryQosPolicy() {
+    public static HistoryQosPolicy newHistoryQosPolicy() {
         HistoryQosPolicy policy = new HistoryQosPolicy();
 
         policy.kind = HistoryQosPolicyKind.KEEP_LAST_HISTORY_QOS;
@@ -74,7 +74,7 @@ public class QosPolicies {
         return policy;
     }
 
-    public static LatencyBudgetQosPolicy createLatencyBudgetQosPolicy() {
+    public static LatencyBudgetQosPolicy newLatencyBudgetQosPolicy() {
         LatencyBudgetQosPolicy policy = new LatencyBudgetQosPolicy();
 
         policy.duration = new Duration_t();
@@ -82,7 +82,7 @@ public class QosPolicies {
         return policy;
     }
 
-    public static LifespanQosPolicy createLifespanQosPolicy() {
+    public static LifespanQosPolicy newLifespanQosPolicy() {
         LifespanQosPolicy policy = new LifespanQosPolicy();
 
         policy.duration = new Duration_t();
@@ -90,7 +90,7 @@ public class QosPolicies {
         return policy;
     }
 
-    public static LivelinessQosPolicy createLivelinessQosPolicy() {
+    public static LivelinessQosPolicy newLivelinessQosPolicy() {
         LivelinessQosPolicy policy = new LivelinessQosPolicy();
 
         policy.kind = LivelinessQosPolicyKind.AUTOMATIC_LIVELINESS_QOS;
@@ -99,7 +99,7 @@ public class QosPolicies {
         return policy;
     }
 
-    public static OwnershipQosPolicy createOwnershipQosPolicy() {
+    public static OwnershipQosPolicy newOwnershipQosPolicy() {
         OwnershipQosPolicy policy = new OwnershipQosPolicy();
 
         policy.kind = OwnershipQosPolicyKind.SHARED_OWNERSHIP_QOS;
@@ -107,7 +107,7 @@ public class QosPolicies {
         return policy;
     }
 
-    public static ReliabilityQosPolicy createReliabilityQosPolicy() {
+    public static ReliabilityQosPolicy newReliabilityQosPolicy() {
         ReliabilityQosPolicy policy = new ReliabilityQosPolicy();
 
         policy.kind = ReliabilityQosPolicyKind.BEST_EFFORT_RELIABILITY_QOS;
@@ -116,11 +116,11 @@ public class QosPolicies {
         return policy;
     }
 
-    public static ResourceLimitsQosPolicy createResourceLimitsQosPolicy() {
+    public static ResourceLimitsQosPolicy newResourceLimitsQosPolicy() {
         return new ResourceLimitsQosPolicy();
     }
 
-    public static TopicDataQosPolicy createTopicDataQosPolicy() {
+    public static TopicDataQosPolicy newTopicDataQosPolicy() {
         TopicDataQosPolicy policy = new TopicDataQosPolicy();
 
         policy.value = new byte[0];
@@ -128,27 +128,27 @@ public class QosPolicies {
         return policy;
     }
 
-    public static TopicQos createTopicQos() {
+    public static TopicQos newTopicQos() {
         TopicQos policy = new TopicQos();
 
-        policy.deadline = createDeadlineQosPolicy();
-        policy.destination_order = createDestinationOrderQosPolicy();
-        policy.durability = createDurabilityQosPolicy();
-        policy.durability_service = createDurabilityServiceQosPolicy();
-        policy.history = createHistoryQosPolicy();
-        policy.latency_budget = createLatencyBudgetQosPolicy();
-        policy.lifespan = createLifespanQosPolicy();
-        policy.liveliness = createLivelinessQosPolicy();
-        policy.ownership = createOwnershipQosPolicy();
-        policy.reliability = createReliabilityQosPolicy();
-        policy.resource_limits = createResourceLimitsQosPolicy();
-        policy.topic_data = createTopicDataQosPolicy();
-        policy.transport_priority = createTransportPriorityQosPolicy();
+        policy.deadline = newDeadlineQosPolicy();
+        policy.destination_order = newDestinationOrderQosPolicy();
+        policy.durability = newDurabilityQosPolicy();
+        policy.durability_service = newDurabilityServiceQosPolicy();
+        policy.history = newHistoryQosPolicy();
+        policy.latency_budget = newLatencyBudgetQosPolicy();
+        policy.lifespan = newLifespanQosPolicy();
+        policy.liveliness = newLivelinessQosPolicy();
+        policy.ownership = newOwnershipQosPolicy();
+        policy.reliability = newReliabilityQosPolicy();
+        policy.resource_limits = newResourceLimitsQosPolicy();
+        policy.topic_data = newTopicDataQosPolicy();
+        policy.transport_priority = newTransportPriorityQosPolicy();
 
         return policy;
     }
 
-    public static TransportPriorityQosPolicy createTransportPriorityQosPolicy() {
+    public static TransportPriorityQosPolicy newTransportPriorityQosPolicy() {
         return new TransportPriorityQosPolicy();
     }
 

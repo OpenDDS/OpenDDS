@@ -2,12 +2,14 @@
  * $Id$
  */
 
-package org.opendds.jms.util;
+package org.opendds.jms.common.io;
 
 import java.io.File;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.StringTokenizer;
+
+import org.opendds.jms.common.lang.Strings;
 
 /**
  * @author  Steven Stallion
@@ -41,15 +43,22 @@ public class Files {
 
         } while (temp.exists());
 
-        temp.mkdirs();
+        if (!temp.mkdirs()) {
+            throw new IOException("Unable to create temp directory: " + temp.getAbsolutePath());
+        }
+
         return temp;
     }
 
     public static File verifyDirectory(String dirName) throws IOException {
+        assert dirName != null;
+        
         File dir = new File(dirName);
 
         if (!dir.exists()) {
-            dir.mkdirs();
+            if (!dir.mkdirs()) {
+                throw new IOException("Unable to create directory: " + dir.getAbsolutePath());
+            }
 
         } else if (!dir.isDirectory()) {
             throw new IOException(dirName + " is not a directory!");
@@ -85,8 +94,9 @@ public class Files {
     }
 
     public static String addLibraryPath(String path) {
-        String libraryPath = getLibraryPath();
+        assert path != null;
 
+        String libraryPath = getLibraryPath();
         if (!isLibraryPathSet(path)) {
             StringBuffer sbuf = new StringBuffer(libraryPath);
 

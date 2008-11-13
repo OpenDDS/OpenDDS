@@ -3,14 +3,15 @@ package org.opendds.jms;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import javax.jms.MessageEOFException;
 import javax.jms.MessageFormatException;
 
 import OpenDDS.JMS.MessageBody;
 import OpenDDS.JMS.StreamItem;
 
-import org.opendds.jms.util.ByteArrays;
-import org.opendds.jms.util.StreamItemConversion;
+import org.opendds.jms.common.StreamItemConversion;
+import org.opendds.jms.common.lang.ByteArrays;
 
 public class StreamBodyFacade {
     private final MessageBody body;

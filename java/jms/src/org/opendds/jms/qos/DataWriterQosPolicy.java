@@ -13,25 +13,27 @@ import DDS.HistoryQosPolicyKind;
 import DDS.LivelinessQosPolicyKind;
 import DDS.ReliabilityQosPolicyKind;
 
-import org.opendds.jms.util.PropertiesHelper;
+import org.opendds.jms.common.util.PropertiesHelper;
 
 /**
  * @author  Steven Stallion
  * @version $Revision$
  */
 public class DataWriterQosPolicy implements QosPolicy<DataWriterQos> {
-    private PropertiesHelper helper;
+    private Properties properties;
 
     public DataWriterQosPolicy(String value) {
         this(PropertiesHelper.valueOf(value));
     }
 
     public DataWriterQosPolicy(Properties properties) {
-        helper = new PropertiesHelper(properties);
+        this.properties = properties;
     }
 
     public void setQos(DataWriterQos qos) {
         PropertiesHelper.Property property;
+
+        PropertiesHelper helper = new PropertiesHelper(properties);
 
         // USER_DATA QosPolicy
         property = helper.find("USER_DATA.value");

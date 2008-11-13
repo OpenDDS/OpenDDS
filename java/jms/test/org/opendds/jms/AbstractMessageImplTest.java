@@ -1,11 +1,12 @@
 package org.opendds.jms;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.IOException;
+
 import javax.jms.BytesMessage;
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;
@@ -15,9 +16,9 @@ import javax.jms.Message;
 import javax.jms.MessageFormatException;
 import javax.jms.MessageNotWriteableException;
 import javax.jms.ObjectMessage;
+import javax.jms.Session;
 import javax.jms.StreamMessage;
 import javax.jms.TextMessage;
-import javax.jms.Session;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -28,19 +29,19 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.omg.CORBA.StringSeqHolder;
 
-import DDS.DomainParticipantFactory;
 import DDS.DomainParticipant;
+import DDS.DomainParticipantFactory;
 import DDS.PARTICIPANT_QOS_DEFAULT;
-import DDS.Subscriber;
-import DDS.SUBSCRIBER_QOS_DEFAULT;
-import DDS.Topic;
-import DDS.TOPIC_QOS_DEFAULT;
-import DDS.Publisher;
 import DDS.PUBLISHER_QOS_DEFAULT;
+import DDS.Publisher;
+import DDS.SUBSCRIBER_QOS_DEFAULT;
+import DDS.Subscriber;
+import DDS.TOPIC_QOS_DEFAULT;
+import DDS.Topic;
 import OpenDDS.DCPS.TheParticipantFactory;
-import OpenDDS.DCPS.transport.TransportImpl;
-import OpenDDS.DCPS.transport.TheTransportFactory;
 import OpenDDS.DCPS.transport.AttachStatus;
+import OpenDDS.DCPS.transport.TheTransportFactory;
+import OpenDDS.DCPS.transport.TransportImpl;
 import OpenDDS.JMS.MessagePayloadTypeSupportImpl;
 
 public class AbstractMessageImplTest {

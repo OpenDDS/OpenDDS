@@ -16,7 +16,7 @@ import javax.management.AttributeNotFoundException;
 import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanAttributeInfo;
 
-import org.opendds.jms.util.Strings;
+import org.opendds.jms.common.lang.Strings;
 
 /**
  * @author  Steven Stallion

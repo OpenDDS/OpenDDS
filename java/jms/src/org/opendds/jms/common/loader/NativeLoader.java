@@ -2,7 +2,7 @@
  * $Id$
  */
 
-package org.opendds.jms.loader;
+package org.opendds.jms.common.loader;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -15,9 +15,9 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.opendds.jms.util.ClassLoaders;
-import org.opendds.jms.util.Files;
-import org.opendds.jms.util.Streams;
+import org.opendds.jms.common.io.Files;
+import org.opendds.jms.common.io.Streams;
+import org.opendds.jms.common.lang.ClassLoaders;
 
 /**
  * @author  Steven Stallion
