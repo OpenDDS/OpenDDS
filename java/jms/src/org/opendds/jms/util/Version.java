@@ -6,8 +6,6 @@ package org.opendds.jms.util;
 
 import java.util.Properties;
 
-import org.opendds.jms.util.PropertiesHelper;
-
 /**
  * @author  Steven Stallion
  * @version $Revision$
@@ -30,39 +28,39 @@ public class Version {
     }
 
     public String getDDSVersion() {
-        return helper.requireProperty("version.dds");
+        return helper.require("version.dds").getValue();
     }
 
     public int getDDSMajorVersion() {
-        return helper.requireIntProperty("version.dds.major");
+        return helper.require("version.dds.major").asInt();
     }
 
     public int getDDSMinorVersion() {
-        return helper.requireIntProperty("version.dds.minor");
+        return helper.require("version.dds.minor").asInt();
     }
 
     public String getJCAVersion() {
-        return helper.requireProperty("version.jca");
+        return helper.require("version.jca").getValue();
     }
 
     public int getJCAMajorVersion() {
-        return helper.requireIntProperty("version.jca.major");
+        return helper.require("version.jca.major").asInt();
     }
 
     public int getJCAMinorVersion() {
-        return helper.requireIntProperty("version.jca.minor");
+        return helper.require("version.jca.minor").asInt();
     }
 
     public String getJMSVersion() {
-        return helper.requireProperty("version.jms");
+        return helper.require("version.jms").getValue();
     }
 
     public int getJMSMajorVersion() {
-        return helper.requireIntProperty("version.jms.major");
+        return helper.require("version.jms.major").asInt();
     }
 
     public int getJMSMinorVersion() {
-        return helper.requireIntProperty("version.jms.minor");
+        return helper.require("version.jms.minor").asInt();
     }
 
     @Override

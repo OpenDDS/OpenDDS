@@ -7,7 +7,6 @@ package org.opendds.jms.qos;
 import java.util.Properties;
 
 import DDS.TopicQos;
-import DDS.TopicQosHolder;
 
 import org.opendds.jms.util.PropertiesHelper;
 
@@ -26,10 +25,6 @@ public class TopicQosPolicy implements QosPolicy<TopicQos> {
         helper = new PropertiesHelper(properties);
     }
 
-    public void setQos(TopicQosHolder holder) {
-        setQos(holder.value);
-    }
-
     public void setQos(TopicQos qos) {
         PropertiesHelper.Property property;
 
@@ -38,7 +33,7 @@ public class TopicQosPolicy implements QosPolicy<TopicQos> {
         // *_QOS_USE_TOPIC_QOS is not used by the JMS provider,
         // therefore we are only interested in TopicDataQosPolicy.
 
-        // TOPIC_DATA
+        // TOPIC_DATA QosPolicy
         property = helper.find("TOPIC_DATA.value");
         if (property.exists()) {
             qos.topic_data.value = property.asBytes();
