@@ -2,21 +2,18 @@
  * $Id$
  */
 
-package org.opendds.jms.management.argument;
+package org.opendds.jms.transport;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
+
+import org.opendds.jms.common.SvcConfDirective;
 
 /**
  * @author  Steven Stallion
  * @version $Revision$
  */
-public class TransportTypeHelper {
+public class TransportHelper {
     private static Map<String, SvcConfDirective> transports =
         new LinkedHashMap<String, SvcConfDirective>();
 
@@ -70,24 +67,13 @@ public class TransportTypeHelper {
         transports.put("ReliableMulticast", directive);
     }
 
-    private List<SvcConfDirective> directives =
-        new ArrayList<SvcConfDirective>();
-
-    public TransportTypeHelper(String transportType) {
-        StringTokenizer stok = new StringTokenizer(transportType, DynamicArguments.DELIMS);
-        while (stok.hasMoreTokens()) {
-            String key = stok.nextToken();
-
-            SvcConfDirective directive = transports.get(key);
-            if (directive == null) {
-                throw new IllegalArgumentException("Unknown transport type: " + key);
-            }
-
-            directives.add(directive);
+    public static SvcConfDirective getSvcConfDirective(String transportType) {
+        SvcConfDirective directive = transports.get(transportType);
+        if (directive == null) {
+            throw new IllegalArgumentException("Unknown transport type: " + transportType);
         }
+        return directive;
     }
 
-    public Collection<SvcConfDirective> getSvcConfDirectives() {
-        return Collections.unmodifiableCollection(directives);
-    }
+    //
 }

@@ -25,7 +25,6 @@ public class DCPSArguments implements DynamicArgumentProvider {
     public static final String DCPS_BIT_TRANSPORT_PORT = "DCPSBitTransportPort";
     public static final String DCPS_BIT_LOOKUP_DURATION_MSEC = "DCPSBitLookupDurationMsec";
     public static final String DCPS_TRANSPORT_DEBUG_LEVEL = "DCPSTransportDebugLevel";
-    public static final String DCPS_TRANSPORT_TYPE = "DCPSTransportType";
 
     private DynamicMBeanSupport instance;
 
@@ -45,7 +44,6 @@ public class DCPSArguments implements DynamicArgumentProvider {
         instance.registerAttribute(DCPS_BIT_TRANSPORT_PORT, Integer.class);
         instance.registerAttribute(DCPS_BIT_LOOKUP_DURATION_MSEC, Integer.class);
         instance.registerAttribute(DCPS_TRANSPORT_DEBUG_LEVEL, Integer.class);
-        instance.registerAttribute(DCPS_TRANSPORT_TYPE, String.class);
     }
 
     public void addArgs(List<String> args) throws Exception {
@@ -62,16 +60,6 @@ public class DCPSArguments implements DynamicArgumentProvider {
         writer.writeIfSet("-DCPSBitTransportPort", DCPS_BIT_TRANSPORT_PORT);
         writer.writeIfSet("-DCPSBitLookupDurationMsec", DCPS_BIT_LOOKUP_DURATION_MSEC);
         writer.writeIfSet("-DCPSTransportDebugLevel", DCPS_TRANSPORT_DEBUG_LEVEL);
-
-        String transportType =
-            (String) instance.getAttribute(DCPS_TRANSPORT_TYPE);
-
-        if (!Strings.isEmpty(transportType)) {
-            TransportTypeHelper helper = new TransportTypeHelper(transportType);
-            for (SvcConfDirective directive : helper.getSvcConfDirectives()) {
-                directive.writeTo(writer);
-            }
-        }
 
         writer.writeTo(args);
     }
