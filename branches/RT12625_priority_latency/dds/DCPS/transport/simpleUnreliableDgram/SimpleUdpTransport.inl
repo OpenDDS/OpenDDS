@@ -20,7 +20,8 @@ OpenDDS::DCPS::SimpleUdpTransport::SimpleUdpTransport()
 ACE_INLINE void
 OpenDDS::DCPS::SimpleUdpTransport::deliver_sample
                                      (ReceivedDataSample&  sample,
-                                      const ACE_INET_Addr& remote_address)
+                                      const ACE_INET_Addr& remote_address,
+                                      CORBA::Long          priority)
 {
   DBG_ENTRY_LVL("SimpleUdpTransport","deliver_sample",6);
 
@@ -29,7 +30,8 @@ OpenDDS::DCPS::SimpleUdpTransport::deliver_sample
   {
     GuardType guard(this->links_lock_);
 
-    if (this->links_.find(remote_address, link) != 0)
+    PriorityKey key( priority, remote_address);
+    if (this->links_.find( key, link) != 0)
       {
         ACE_ERROR((LM_ERROR,
                    "(%P|%t) ERROR: Unable to deliver received sample to DataLink.  "

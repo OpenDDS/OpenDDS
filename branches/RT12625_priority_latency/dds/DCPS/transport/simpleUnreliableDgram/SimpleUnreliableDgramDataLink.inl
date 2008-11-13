@@ -11,7 +11,8 @@ OpenDDS::DCPS::SimpleUnreliableDgramDataLink::SimpleUnreliableDgramDataLink
                                         (const ACE_INET_Addr& remote_address,
                                          TransportImpl* transport_impl)
   : DataLink(transport_impl),
-    remote_address_(remote_address)
+    remote_address_(remote_address),
+    priority_( 0) // Default TRANSPORT_PRIORITY.value is 0.
 {
   DBG_ENTRY_LVL("SimpleUnreliableDgramDataLink","SimpleUnreliableDgramDataLink",6);
 }
@@ -30,5 +31,19 @@ OpenDDS::DCPS::SimpleUnreliableDgramDataLink::connect(TransportSendStrategy* sen
 {
   DBG_ENTRY_LVL("SimpleUnreliableDgramDataLink","connect",6);
   return this->start(send_strategy,0);
+}
+
+ACE_INLINE
+CORBA::Long&
+OpenDDS::DCPS::SimpleUnreliableDgramDataLink::priority()
+{
+  return this->priority_;
+}
+
+ACE_INLINE
+CORBA::Long
+OpenDDS::DCPS::SimpleUnreliableDgramDataLink::priority() const
+{
+  return this->priority_;
 }
 

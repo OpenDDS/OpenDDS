@@ -18,6 +18,7 @@
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
+#include "dds/DCPS/transport/framework/PriorityKey.h"
 #include <map>
 
 namespace OpenDDS
@@ -56,7 +57,7 @@ namespace OpenDDS
       ReliableMulticastTransportConfiguration_rch configuration_;
       // JSP: Add transport configuration storage
       typedef std::map<
-        ACE_INET_Addr,
+        PriorityKey,
         OpenDDS::DCPS::ReliableMulticastDataLink_rch
         > ReliableMulticastDataLinkMap;
       ReliableMulticastDataLinkMap data_links_;

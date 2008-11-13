@@ -17,7 +17,7 @@ OpenDDS::DCPS::DataLink*
 OpenDDS::DCPS::ReliableMulticastTransportImpl::find_or_create_datalink(
   const TransportInterfaceInfo& remote_info,
   int connect_as_publisher,
-  CORBA::Long /* priority */
+  CORBA::Long priority
   )
 {
   // Get the remote address from the "blob" in the remote_info struct.
@@ -42,11 +42,13 @@ OpenDDS::DCPS::ReliableMulticastTransportImpl::find_or_create_datalink(
   OpenDDS::DCPS::ReliableMulticastDataLink_rch data_link;
 
   ReliableMulticastDataLinkMap::iterator iter =
-    data_links_.find(multicast_group_address);
+    data_links_.find( PriorityKey( priority, multicast_group_address));
   if (iter != data_links_.end())
   {
     return iter->second._retn();
   }
+
+  /// @TODO: The socket and thread and be conditioned with priority at this point.
 
   data_link = new OpenDDS::DCPS::ReliableMulticastDataLink(
     reactor_task_,
@@ -54,7 +56,7 @@ OpenDDS::DCPS::ReliableMulticastTransportImpl::find_or_create_datalink(
     multicast_group_address,
     *this
     );
-  data_links_[multicast_group_address] = data_link;
+  data_links_[ PriorityKey( priority, multicast_group_address)] = data_link;
   
   if (!data_link->connect(connect_as_publisher == 1))
   {

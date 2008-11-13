@@ -38,6 +38,7 @@ OpenDDS::DCPS::SimpleTcpConnection::SimpleTcpConnection()
   reconnect_task_ (this),
   reconnect_state_ (INIT_STATE),
   last_reconnect_attempted_ (ACE_Time_Value::zero),
+  priority_( 0), // TRANSPORT_PRIORITY.value default value - 0.
   shutdown_ (false)
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","SimpleTcpConnection",6);
@@ -350,6 +351,8 @@ OpenDDS::DCPS::SimpleTcpConnection::active_establishment
   this->local_address_ = local_address;
   this->tcp_config_ = tcp_config;
 
+  /// @TODO: Priority is valid and this point and needs to be utilized.
+
   // Safty check - This should not happen since is_connector_ defaults to
   // true and the role in a connection connector is not changed when reconnecting.
   if (this->is_connector_ == false)
@@ -451,6 +454,7 @@ int
 OpenDDS::DCPS::SimpleTcpConnection::active_connect
                                     (const ACE_INET_Addr& remote_address,
                                      const ACE_INET_Addr& local_address,
+                                     CORBA::Long          priority,
                                      SimpleTcpConfiguration_rch tcp_config)
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","active_connect",6);
@@ -458,6 +462,7 @@ OpenDDS::DCPS::SimpleTcpConnection::active_connect
 
   if (this->connected_ == true)
     return 0;
+  this->priority_ = priority;
   return this->active_establishment (remote_address,
                                      local_address,
                                      tcp_config);

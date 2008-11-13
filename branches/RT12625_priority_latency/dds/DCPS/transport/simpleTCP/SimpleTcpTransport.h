@@ -11,6 +11,7 @@
 #include "SimpleTcpDataLink_rch.h"
 #include "SimpleTcpConnection_rch.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
+#include "dds/DCPS/transport/framework/PriorityKey.h"
 #include "ace/INET_Addr.h"
 #include "ace/Hash_Map_Manager.h"
 #include "ace/Synch.h"
@@ -43,8 +44,7 @@ namespace OpenDDS
 
         SimpleTcpConfiguration* get_configuration();
 
-        int fresh_link (const ACE_INET_Addr&    remote_addr,
-                        SimpleTcpConnection_rch connection);
+        int fresh_link( SimpleTcpConnection_rch connection);
 
       protected:
 
@@ -87,6 +87,7 @@ namespace OpenDDS
 
         /// Called by find_or_create_datalink().
         int make_active_connection(const ACE_INET_Addr& remote_address,
+                                   CORBA::Long          priority,
                                    SimpleTcpDataLink*   link);
 
         /// Called by find_or_create_datalink().
@@ -99,12 +100,12 @@ namespace OpenDDS
                              SimpleTcpConnection* connection);
 
 
-        /// Map Type: (key) ACE_INET_Addr to (value) SimpleTcpDataLink_rch
+        /// Map Type: (key) PriorityKey to (value) SimpleTcpDataLink_rch
         typedef ACE_Hash_Map_Manager_Ex
-                               <ACE_INET_Addr,
+                               <PriorityKey,
                                 SimpleTcpDataLink_rch,
-                                ACE_Hash<ACE_INET_Addr>,
-                                ACE_Equal_To<ACE_INET_Addr>,
+                                ACE_Hash<PriorityKey>,
+                                ACE_Equal_To<PriorityKey>,
                                 ACE_Null_Mutex>              AddrLinkMap;
 
         /// Map Type: (key) ACE_INET_Addr to (value) SimpleTcpConnection_rch
