@@ -14,9 +14,10 @@
 #define _SUBSCRIPTION_MANAGER_INL_
 
 ACE_INLINE void
-Subscription_Manager::access_topic (const Topic_Manager & topic)
+Subscription_Manager::access_topic (const Topic_Manager & topic,
+				    const DDS::DataReaderQos & qos)
 {
-  manager_impl_->access_topic (topic, manager_impl_);
+  manager_impl_->access_topic (topic, qos, manager_impl_);
 }
 
 ACE_INLINE DDS::DataReader_ptr 
@@ -29,6 +30,12 @@ ACE_INLINE void
 Subscription_Manager::remove_topic (const Topic_Manager & topic)
 {
   return manager_impl_->remove_topic (topic);
+}
+
+ACE_INLINE DDS::DataReaderQos
+Subscription_Manager::get_default_datareader_qos ()
+{
+  return manager_impl_->get_default_datareader_qos ();
 }
 
 ACE_INLINE DDS::Subscriber_ptr

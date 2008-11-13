@@ -27,6 +27,9 @@ project(*InfoRepoLib): dcps, iortable, DCPSInfoRepo_bits, imr_client, svc_utils 
     UpdateManager_T.cpp
   }
 
+  Resource_Files {
+    InfoRepoLib.rc
+  }
 }
 
 
@@ -51,6 +54,10 @@ project(*DCPSInfoRepoServ): dcps, iortable, DCPSInfoRepo_bits, imr_client, svc_u
   
   Template_Files {
   } 
+
+  Resource_Files {
+    DCPSInfoRepoServ.rc
+  }
 }
 
 
@@ -97,6 +104,10 @@ project(*Federator): dcps, dcps_tcp, iortable {
     UpdateReceiver_T.cpp
     UpdateProcessor_T.cpp
   }
+
+  Resource_Files {
+    Federator.rc
+  }
 }
 
 
@@ -127,4 +138,6 @@ project(*InfoRepo): dcpsexe, iortable, DCPSInfoRepo_bits, imr_client, svc_utils 
   Template_Files {
   }
 
+  Resource_Files {
+  }
 }

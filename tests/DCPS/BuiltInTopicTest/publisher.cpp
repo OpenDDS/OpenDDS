@@ -31,6 +31,8 @@ char UPDATED_DW_USER_DATA[] = "Updated DataWriter UserData";
 char UPDATED_TOPIC_DATA[] = "Updated Topic TopicData";
 char UPDATED_GROUP_DATA[] = "Updated GroupData";
 
+char synch_fname[] = "monitor1_done";
+
 OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
 int num_messages = 10;
 
@@ -194,8 +196,20 @@ int main (int argc, char *argv[]) {
         exit(1);
       }
 
-      // Sleep 10 seconds to wait for first monitor retrive the bit data.
-      ACE_OS::sleep (10);
+      // wait for Monitor 1 done
+      FILE* fp = ACE_OS::fopen (synch_fname, ACE_LIB_TEXT("r"));
+      int i = 0;
+      while (fp == 0 &&  i < 15)
+      {
+        ACE_DEBUG ((LM_DEBUG,
+          ACE_LIB_TEXT("(%P|%t)waiting monitor1 done ...\n")));
+        ACE_OS::sleep (1);
+        ++ i;
+        fp = ACE_OS::fopen (synch_fname, ACE_LIB_TEXT("r"));
+      }
+
+      if (fp != 0)
+        ACE_OS::fclose (fp);
 
       // Now change the changeable qos. The second monitor should get the updated qos from BIT.
 
