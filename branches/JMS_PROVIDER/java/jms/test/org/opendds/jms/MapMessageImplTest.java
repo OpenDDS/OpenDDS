@@ -3,10 +3,12 @@ package org.opendds.jms;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
+
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.jms.MessageFormatException;
 import javax.jms.MessageNotWriteableException;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

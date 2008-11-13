@@ -5,14 +5,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
 import javax.jms.MessageFormatException;
 
 import OpenDDS.JMS.MapItem;
 import OpenDDS.JMS.MessageBody;
 import OpenDDS.JMS.StreamItem;
 
-import org.opendds.jms.util.Objects;
-import org.opendds.jms.util.StreamItemConversion;
+import org.opendds.jms.common.StreamItemConversion;
+import org.opendds.jms.common.lang.Objects;
 
 public class MapBodyFacade {
     private final MessageBody body;

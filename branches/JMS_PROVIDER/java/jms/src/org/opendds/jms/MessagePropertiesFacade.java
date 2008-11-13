@@ -5,15 +5,16 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
 import javax.jms.MessageFormatException;
 
 import OpenDDS.JMS.MessagePayload;
 import OpenDDS.JMS.MessageProperty;
 import OpenDDS.JMS.PropertyValue;
 
-import org.opendds.jms.util.Identifiers;
-import org.opendds.jms.util.Objects;
-import org.opendds.jms.util.PropertyValueConversion;
+import org.opendds.jms.common.Identifiers;
+import org.opendds.jms.common.PropertyValueConversion;
+import org.opendds.jms.common.lang.Objects;
 
 /**
  * A facade over payload.theProperties, which, being a Java array

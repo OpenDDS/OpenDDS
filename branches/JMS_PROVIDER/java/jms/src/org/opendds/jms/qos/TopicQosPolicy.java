@@ -8,25 +8,27 @@ import java.util.Properties;
 
 import DDS.TopicQos;
 
-import org.opendds.jms.util.PropertiesHelper;
+import org.opendds.jms.common.util.PropertiesHelper;
 
 /**
  * @author  Steven Stallion
  * @version $Revision$
  */
 public class TopicQosPolicy implements QosPolicy<TopicQos> {
-    private PropertiesHelper helper;
+    private Properties properties;
 
     public TopicQosPolicy(String value) {
         this(PropertiesHelper.valueOf(value));
     }
 
     public TopicQosPolicy(Properties properties) {
-        helper = new PropertiesHelper(properties);
+        this.properties = properties;
     }
 
     public void setQos(TopicQos qos) {
         PropertiesHelper.Property property;
+
+        PropertiesHelper helper = new PropertiesHelper(properties);
 
         // TopicQos QosPolicies which are shared with DataReaderQos
         // and DataWriterQos are considered to be informational only.

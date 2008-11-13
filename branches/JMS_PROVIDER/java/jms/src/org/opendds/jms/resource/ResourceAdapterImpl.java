@@ -15,10 +15,10 @@ import javax.transaction.xa.XAResource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.opendds.jms.loader.NativeLoader;
-import org.opendds.jms.util.Files;
-import org.opendds.jms.util.PropertiesHelper;
-import org.opendds.jms.util.Version;
+import org.opendds.jms.common.Version;
+import org.opendds.jms.common.io.Files;
+import org.opendds.jms.common.loader.NativeLoader;
+import org.opendds.jms.common.util.PropertiesHelper;
 
 /**
  * @author  Steven Stallion

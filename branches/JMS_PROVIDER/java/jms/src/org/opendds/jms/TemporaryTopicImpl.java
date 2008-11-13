@@ -7,14 +7,13 @@ package org.opendds.jms;
 import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.TemporaryTopic;
-import javax.jms.Destination;
 
 import DDS.DomainParticipant;
 import DDS.TOPIC_QOS_DEFAULT;
 import DDS.Topic;
 import OpenDDS.JMS.MessagePayloadTypeSupportImpl;
 
-import org.opendds.jms.util.Objects;
+import org.opendds.jms.common.lang.Objects;
 
 /**
  * @author  Steven Stallion

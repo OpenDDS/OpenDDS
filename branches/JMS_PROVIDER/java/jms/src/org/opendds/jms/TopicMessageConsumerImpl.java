@@ -40,8 +40,8 @@ import OpenDDS.JMS.MessagePayloadDataReaderHelper;
 import OpenDDS.JMS.MessagePayloadSeqHolder;
 
 import static org.opendds.jms.ConsumerMessageFactory.buildMessageFromPayload;
-import org.opendds.jms.util.Objects;
-import org.opendds.jms.util.Strings;
+import org.opendds.jms.common.lang.Objects;
+import org.opendds.jms.common.lang.Strings;
 
 /**
  * @author  Steven Stallion

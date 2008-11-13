@@ -29,7 +29,7 @@ import javax.management.ReflectionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.opendds.jms.util.Strings;
+import org.opendds.jms.common.lang.Strings;
 
 /**
  * @author  Steven Stallion

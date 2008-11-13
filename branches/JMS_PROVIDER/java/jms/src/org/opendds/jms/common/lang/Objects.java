@@ -2,7 +2,7 @@
  * $Id$
  */
 
-package org.opendds.jms.util;
+package org.opendds.jms.common.lang;
 
 /**
  * @author  Weiqi Gao

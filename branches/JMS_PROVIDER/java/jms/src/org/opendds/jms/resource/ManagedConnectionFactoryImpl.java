@@ -14,7 +14,7 @@ import javax.resource.spi.ManagedConnection;
 import javax.resource.spi.ManagedConnectionFactory;
 import javax.security.auth.Subject;
 
-import org.opendds.jms.util.Objects;
+import org.opendds.jms.common.lang.Objects;
 
 /**
  * @author  Steven Stallion

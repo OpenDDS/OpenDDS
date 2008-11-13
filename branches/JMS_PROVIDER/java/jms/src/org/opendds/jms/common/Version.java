@@ -2,9 +2,11 @@
  * $Id$
  */
 
-package org.opendds.jms.util;
+package org.opendds.jms.common;
 
 import java.util.Properties;
+
+import org.opendds.jms.common.util.PropertiesHelper;
 
 /**
  * @author  Steven Stallion

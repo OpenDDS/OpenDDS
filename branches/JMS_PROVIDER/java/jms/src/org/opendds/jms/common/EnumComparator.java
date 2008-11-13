@@ -1,4 +1,4 @@
-package org.opendds.jms.util;
+package org.opendds.jms.common;
 
 import OpenDDS.JMS.ItemKind;
 import OpenDDS.JMS.MessageBodyKind;

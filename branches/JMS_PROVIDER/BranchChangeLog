@@ -1,3 +1,10 @@
+Thu Nov 13 07:08:06 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/src/org/opendds/jms
+
+          Refactored util package to new common hierarchy. Fixed 
+          serialization issues in *QosPolicy.
+
 Thu Nov 13 05:29:37 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/OpenDDS.ipr:

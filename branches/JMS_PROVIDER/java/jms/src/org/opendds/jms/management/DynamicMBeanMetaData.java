@@ -21,13 +21,13 @@ import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanConstructorInfo;
 import javax.management.MBeanOperationInfo;
 
+import org.opendds.jms.common.lang.Annotations;
+import org.opendds.jms.common.lang.Strings;
+import org.opendds.jms.common.util.BeanHelper;
 import org.opendds.jms.management.annotation.Attribute;
 import org.opendds.jms.management.annotation.Description;
 import org.opendds.jms.management.annotation.KeyProperty;
 import org.opendds.jms.management.annotation.Operation;
-import org.opendds.jms.util.Annotations;
-import org.opendds.jms.util.BeanHelper;
-import org.opendds.jms.util.Strings;
 
 /**
  * @author  Steven Stallion

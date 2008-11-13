@@ -6,6 +6,7 @@ package org.opendds.jms;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;
 import javax.jms.JMSException;
@@ -23,7 +24,7 @@ import DDS.Publisher;
 import OpenDDS.JMS.MessagePayload;
 import OpenDDS.JMS.MessagePayloadDataWriter;
 
-import org.opendds.jms.util.Objects;
+import org.opendds.jms.common.lang.Objects;
 
 /**
  * @author Steven Stallion

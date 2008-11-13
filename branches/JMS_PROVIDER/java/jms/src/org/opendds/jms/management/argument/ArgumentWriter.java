@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.opendds.jms.common.lang.Strings;
 import org.opendds.jms.management.DynamicMBeanSupport;
-import org.opendds.jms.util.Strings;
 
 /**
  * @author  Steven Stallion

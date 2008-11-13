@@ -1,6 +1,7 @@
 package org.opendds.jms;
 
 import java.util.Enumeration;
+
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
 

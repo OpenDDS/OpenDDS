@@ -1,11 +1,11 @@
-package org.opendds.jms.util;
+package org.opendds.jms.common;
 
 import javax.jms.MessageFormatException;
 
 import OpenDDS.JMS.ItemKind;
 import OpenDDS.JMS.StreamItem;
 
-import static org.opendds.jms.util.EnumComparator.compare;
+import static org.opendds.jms.common.EnumComparator.compare;
 
 /**
  * JMS 1.1, 3.11.3

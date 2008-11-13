@@ -2,7 +2,7 @@
  * $Id$
  */
 
-package org.opendds.jms.util;
+package org.opendds.jms.common.lang;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;

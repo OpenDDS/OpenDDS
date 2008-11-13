@@ -5,6 +5,7 @@ import javax.jms.JMSException;
 import javax.jms.MessageEOFException;
 import javax.jms.MessageNotReadableException;
 import javax.jms.MessageNotWriteableException;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
