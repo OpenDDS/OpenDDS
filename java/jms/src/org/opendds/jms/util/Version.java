@@ -2,7 +2,7 @@
  * $Id$
  */
 
-package org.opendds.jms;
+package org.opendds.jms.util;
 
 import java.util.Properties;
 
@@ -18,7 +18,7 @@ public class Version {
     public synchronized static Version getInstance() {
         if (instance == null) {
             instance = new Version(
-                PropertiesHelper.forResource("version.properties"));
+                PropertiesHelper.forName("version.properties"));
         }
         return instance;
     }
@@ -63,5 +63,10 @@ public class Version {
 
     public int getJMSMinorVersion() {
         return helper.requireIntProperty("version.jms.minor");
+    }
+
+    @Override
+    public String toString() {
+        return "OpenDDS v" + getDDSVersion();
     }
 }

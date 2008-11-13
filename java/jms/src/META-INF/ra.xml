@@ -79,17 +79,6 @@
     <resourceadapter>
         <resourceadapter-class>org.opendds.jms.resource.ResourceAdapterImpl</resourceadapter-class>
 
-        <config-property>
-            <config-property-name>LoadNativeLibraries</config-property-name>
-            <config-property-type>java.lang.Boolean</config-property-type>
-            <config-property-value>true</config-property-value>
-        </config-property>
-        <config-property>
-            <config-property-name>NativeDirectory</config-property-name>
-            <config-property-type>java.lang.String</config-property-type>
-	    <config-property-value>${jboss.server.home.dir}/tmp/native</config-property-value>
-        </config-property>
-
         <outbound-resourceadapter>
             <connection-definition>
                 <managedconnectionfactory-class>org.opendds.jms.resource.ManagedConnectionFactoryImpl</managedconnectionfactory-class>

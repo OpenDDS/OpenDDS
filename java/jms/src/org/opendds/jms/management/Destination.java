@@ -15,8 +15,10 @@ import org.opendds.jms.management.annotation.Constructor;
 import org.opendds.jms.management.annotation.Description;
 import org.opendds.jms.management.annotation.KeyProperty;
 import org.opendds.jms.management.annotation.Operation;
+import org.opendds.jms.qos.DataReaderQosPolicy;
+import org.opendds.jms.qos.DataWriterQosPolicy;
+import org.opendds.jms.qos.TopicQosPolicy;
 import org.opendds.jms.util.JndiHelper;
-import org.opendds.jms.util.PropertiesHelper;
 import org.opendds.jms.util.Strings;
 
 /**
@@ -122,17 +124,10 @@ public class Destination extends DynamicMBeanSupport implements Serializable, Se
             log.info("Binding to JNDI name: " + jndiName);
         }
 
-        TopicImpl topic = new TopicImpl(destination);
-
-        topic.setDataReaderQosPolicy(
-            PropertiesHelper.forValue(dataReaderQosPolicy));
-
-        topic.setDataWriterQosPolicy(
-            PropertiesHelper.forValue(dataWriterQosPolicy));
-
-        topic.setTopicQosPolicy(
-            PropertiesHelper.forValue(topicQosPolicy));
-
+        TopicImpl topic = new TopicImpl(destination,
+                                        new DataReaderQosPolicy(dataReaderQosPolicy),
+                                        new DataWriterQosPolicy(dataWriterQosPolicy),
+                                        new TopicQosPolicy(topicQosPolicy));
         helper.bind(jndiName, topic);
 
         started = true;

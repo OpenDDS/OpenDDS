@@ -13,7 +13,7 @@ public class TopicImplFactory implements Destination {
         if (isTemporaryTopic(s)) {
             return TemporaryTopicImpl.fromTemporaryTopicIDString(toTemporaryTopicIDString(s), owningConnection, participant);
         } else if (isNonTemporaryTopic(s)){
-            return TopicImpl.fromTopicName(toTopicName(s));
+            return new TopicImpl(toTopicName(s));
         }
         throw new IllegalArgumentException("Cannot reconstruct Destination: " + s);
     }

@@ -62,7 +62,7 @@
         <config-property name="SubscriberQosPolicy" type="java.lang.String">
             <!-- TODO -->
         </config-property>
-        <config-property name="TransportConfig" type="java.lang.String">
+        <config-property name="TransportConfiguration" type="java.lang.String">
             <!-- TODO -->
         </config-property>
         <max-pool-size>20</max-pool-size>

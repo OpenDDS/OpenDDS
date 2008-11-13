@@ -9,16 +9,16 @@ import java.io.IOException;
 import javax.resource.spi.ActivationSpec;
 import javax.resource.spi.BootstrapContext;
 import javax.resource.spi.ResourceAdapter;
-import javax.resource.spi.ResourceAdapterInternalException;
 import javax.resource.spi.endpoint.MessageEndpointFactory;
 import javax.transaction.xa.XAResource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.opendds.jms.Version;
 import org.opendds.jms.loader.NativeLoader;
-import org.opendds.jms.util.Strings;
+import org.opendds.jms.util.Files;
+import org.opendds.jms.util.PropertiesHelper;
+import org.opendds.jms.util.Version;
 
 /**
  * @author  Steven Stallion
@@ -27,39 +27,39 @@ import org.opendds.jms.util.Strings;
 public class ResourceAdapterImpl implements ResourceAdapter {
     private static Log log = LogFactory.getLog(ResourceAdapterImpl.class);
 
-    private boolean loadNativeLibraries;
-    private String nativeDirectory;
+    static {
+        PropertiesHelper.Property property;
 
-    public Boolean getLoadNativeLibraries() {
-        return loadNativeLibraries;
-    }
+        PropertiesHelper helper =
+            PropertiesHelper.getSystemPropertiesHelper();
 
-    public void setLoadNativeLibraries(Boolean loadNativeLibraries) {
-        this.loadNativeLibraries = loadNativeLibraries;
-    }
+        property = helper.find("opendds.native.load");
+        if (property.exists() && property.asBoolean()) {
+            property = helper.require("opendds.native.dir");
 
-    public String getNativeDirectory() {
-        return nativeDirectory;
-    }
+            String dirName = property.getValue();
 
-    public void setNativeDirectory(String nativeDirectory) {
-        this.nativeDirectory = Strings.expand(nativeDirectory);
-    }
+            if (!Files.isLibraryPathSet(dirName)) {
+                log.warn(dirName + " is not set in java.library.path!");
+            }
 
-    public void start(BootstrapContext context) throws ResourceAdapterInternalException {
-        if (log.isInfoEnabled()) {
-            Version version = Version.getInstance();
-            log.info(String.format("Starting OpenDDS version %s", version.getDDSVersion()));
-        }
-
-        if (loadNativeLibraries) {
             try {
-                NativeLoader loader = new NativeLoader(nativeDirectory);
+                NativeLoader loader = new NativeLoader(dirName);
                 loader.loadLibraries();
 
             } catch (IOException e) {
-                throw new ResourceAdapterInternalException(e);
+                throw new IllegalStateException(e);
             }
+        }
+    }
+
+    private BootstrapContext context;
+
+    public void start(BootstrapContext context) {
+        this.context = context;
+
+        if (log.isInfoEnabled()) {
+            log.info("Starting " + Version.getInstance());
         }
     }
 
