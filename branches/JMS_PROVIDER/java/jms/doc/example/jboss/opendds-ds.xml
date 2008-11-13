@@ -33,12 +33,12 @@
            name="OpenDDS:destination=CustomTopic,type=Topic">
         <attribute name="JndiName">DDS/CustomTopic</attribute>
         <attribute name="DataReaderQosPolicy">
-            LIVELINESS.kind=AUTOMATIC
-            LIVELINESS.lease_duration=100
+            HISTORY.kind=KEEP_LAST
+            HISTORY.depth=1
         </attribute>
         <attribute name="DataWriterQosPolicy">
-            LATENCY_BUDGET.duration=100
-            TRANSPORT_PRIORITY.value=100
+            LATENCY_BUDGET.duration.sec=2
+            TRANSPORT_PRIORITY.value=4096
         </attribute>
         <attribute name="TopicQosPolicy">
             TOPIC_DATA.value=CustomTopicData

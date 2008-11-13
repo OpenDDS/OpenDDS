@@ -61,12 +61,12 @@ public class TopicImpl implements Serializable, Topic {
 
     public DDS.Topic createTopic(DomainParticipant participant) throws JMSException {
         TopicQosHolder holder =
-            new TopicQosHolder(QosPolicies.defaultTopicQos());
+            new TopicQosHolder(QosPolicies.createTopicQos());
 
         participant.get_default_topic_qos(holder);
 
         if (topicQosPolicy != null) {
-            topicQosPolicy.setQos(holder);
+            topicQosPolicy.setQos(holder.value);
         }
 
         DDS.Topic topic = participant.create_topic(topicName,
