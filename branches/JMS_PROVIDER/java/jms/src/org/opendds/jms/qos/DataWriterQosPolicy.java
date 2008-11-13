@@ -240,4 +240,10 @@ public class DataWriterQosPolicy implements QosPolicy<DataWriterQos> {
             qos.writer_data_lifecycle.autodispose_unregistered_instances = property.asBoolean();
         }
     }
+
+
+    @Override
+    public String toString() {
+        return PropertiesHelper.valueOf(properties);
+    }
 }
