@@ -140,7 +140,8 @@ namespace OpenDDS
         /// connected.
         virtual DataLink* find_or_create_datalink
                     (const TransportInterfaceInfo& remote_info,
-                     int                           connect_as_publisher) = 0;
+                     int                           connect_as_publisher,
+                     CORBA::Long                   priority) = 0;
 
         /// Concrete subclass gets a shot at the config object.  The subclass
         /// will likely downcast the TransportConfiguration object to a

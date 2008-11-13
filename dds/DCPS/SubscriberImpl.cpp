@@ -867,14 +867,9 @@ SubscriberImpl::add_associations (
   //           guard,
   //           this->si_lock_);
 
-  // TBD - pass the priority as part of the associations data
-  //       because there is a priority per remote publication.
-
-
- 
   this->add_publications(reader->get_subscription_id(),
 			 reader,
-			 writers[0].writerQos.transport_priority.value,
+			 0, // readers have no priority policy value.
 			 length,
 			 associations);
 }

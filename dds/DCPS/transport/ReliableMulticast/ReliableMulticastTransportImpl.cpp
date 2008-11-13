@@ -16,7 +16,8 @@
 OpenDDS::DCPS::DataLink*
 OpenDDS::DCPS::ReliableMulticastTransportImpl::find_or_create_datalink(
   const TransportInterfaceInfo& remote_info,
-  int connect_as_publisher
+  int connect_as_publisher,
+  CORBA::Long /* priority */
   )
 {
   // Get the remote address from the "blob" in the remote_info struct.
