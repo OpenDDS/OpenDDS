@@ -5,10 +5,17 @@
 package org.opendds.jms;
 
 import java.io.Serializable;
-import java.util.Properties;
 
+import javax.jms.JMSException;
 import javax.jms.Topic;
-import javax.jms.Destination;
+
+import DDS.DomainParticipant;
+import DDS.TopicQosHolder;
+
+import org.opendds.jms.qos.DataReaderQosPolicy;
+import org.opendds.jms.qos.DataWriterQosPolicy;
+import org.opendds.jms.qos.QosPolicies;
+import org.opendds.jms.qos.TopicQosPolicy;
 
 /**
  * @author  Steven Stallion
@@ -17,55 +24,63 @@ import javax.jms.Destination;
 public class TopicImpl implements Serializable, Topic {
     private String topicName;
 
-    private Properties dataReaderQosPolicy;
-    private Properties dataWriterQosPolicy;
-    private Properties topicQosPolicy;
+    private DataReaderQosPolicy dataReaderQosPolicy;
+    private DataWriterQosPolicy dataWriterQosPolicy;
+    private TopicQosPolicy topicQosPolicy;
 
     public TopicImpl(String topicName) {
+        this(topicName, null, null, null);
+    }
+
+    public TopicImpl(String topicName,
+                     DataReaderQosPolicy dataReaderQosPolicy,
+                     DataWriterQosPolicy dataWriterQosPolicy,
+                     TopicQosPolicy topicQosPolicy) {
+
         this.topicName = topicName;
+        this.dataReaderQosPolicy = dataReaderQosPolicy;
+        this.dataWriterQosPolicy = dataWriterQosPolicy;
+        this.topicQosPolicy = topicQosPolicy;
     }
 
     public String getTopicName() {
         return topicName;
     }
 
-    public Properties getDataReaderQosPolicy() {
+    public DataReaderQosPolicy getDataReaderQosPolicy() {
         return dataReaderQosPolicy;
     }
 
-    public void setDataReaderQosPolicy(Properties dataReaderQosPolicy) {
-        this.dataReaderQosPolicy = dataReaderQosPolicy;
-    }
-
-    public Properties getDataWriterQosPolicy() {
+    public DataWriterQosPolicy getDataWriterQosPolicy() {
         return dataWriterQosPolicy;
     }
 
-    public void setDataWriterQosPolicy(Properties dataWriterQosPolicy) {
-        this.dataWriterQosPolicy = dataWriterQosPolicy;
-    }
-
-    public Properties getTopicQosPolicy() {
+    public TopicQosPolicy getTopicQosPolicy() {
         return topicQosPolicy;
     }
 
-    public void setTopicQosPolicy(Properties topicQosPolicy) {
-        this.topicQosPolicy = topicQosPolicy;
-    }
+    public DDS.Topic createTopic(DomainParticipant participant) throws JMSException {
+        TopicQosHolder holder =
+            new TopicQosHolder(QosPolicies.defaultTopicQos());
 
-    public DDS.Topic createTopic() {
-        throw new UnsupportedOperationException();
+        participant.get_default_topic_qos(holder);
+
+        if (topicQosPolicy != null) {
+            topicQosPolicy.setQos(holder);
+        }
+
+        DDS.Topic topic = participant.create_topic(topicName,
+            "OpenDDS::JMS::MessagePayload", holder.value, null);
+
+        if (topic == null) {
+            throw new JMSException("Unable to create Topic; please check logs");
+        }
+
+        return topic;
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(getClass().getName());
-        sb.append("[topicName=" + topicName + "]");
-        return sb.toString();
+        return getTopicName();
     }
-
-    static Destination fromTopicName(String topicName) {
-        return new TopicImpl(topicName);
-    }
-
 }

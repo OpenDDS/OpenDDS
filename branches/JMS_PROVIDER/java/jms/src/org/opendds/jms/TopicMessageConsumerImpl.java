@@ -65,7 +65,7 @@ public class TopicMessageConsumerImpl implements MessageConsumer {
     // JMS 1.1, 4.4.11,
     private SessionImpl sessionImpl;
 
-    public TopicMessageConsumerImpl(Destination destination, String messageSelector, boolean noLocal, Subscriber subscriber, DomainParticipant participant, SessionImpl sessionImpl) {
+    public TopicMessageConsumerImpl(Destination destination, String messageSelector, boolean noLocal, Subscriber subscriber, DomainParticipant participant, SessionImpl sessionImpl) throws JMSException {
         Objects.ensureNotNull(subscriber);
         Objects.ensureNotNull(participant);
 
@@ -85,7 +85,7 @@ public class TopicMessageConsumerImpl implements MessageConsumer {
         this.sessionImpl = sessionImpl;
     }
 
-    private MessagePayloadDataReader fromDestination(Destination destination, Subscriber subscriber, DomainParticipant participant) {
+    private MessagePayloadDataReader fromDestination(Destination destination, Subscriber subscriber, DomainParticipant participant) throws JMSException {
         DDS.Topic ddsTopic = extractDDSTopicFromDestination(destination, participant);
         DataReaderQosHolder qosHolder = new DataReaderQosHolder(DATAREADER_QOS_DEFAULT.get());
         subscriber.get_default_datareader_qos(qosHolder);
@@ -93,10 +93,10 @@ public class TopicMessageConsumerImpl implements MessageConsumer {
         return MessagePayloadDataReaderHelper.narrow(reader);
     }
 
-    private Topic extractDDSTopicFromDestination(Destination destination, DomainParticipant participant) {
+    private Topic extractDDSTopicFromDestination(Destination destination, DomainParticipant participant) throws JMSException {
         // TODO placeholder, to be elaborated
         TopicImpl topicImpl = (TopicImpl) destination;
-        return topicImpl.createTopic();
+        return topicImpl.createTopic(null);
     }
 
     public String getMessageSelector() throws JMSException {

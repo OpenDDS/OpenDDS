@@ -14,6 +14,8 @@ import javax.resource.spi.ManagedConnection;
 import javax.resource.spi.ManagedConnectionFactory;
 import javax.security.auth.Subject;
 
+import org.opendds.jms.util.Objects;
+
 /**
  * @author  Steven Stallion
  * @version $Revision$
@@ -23,6 +25,8 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
     private String publisherQosPolicy;
     private String subscriberQoSPolicy;
     private String transportConfiguration;
+
+    private PrintWriter out;
 
     public String getParticipantQosPolicy() {
         return participantQosPolicy;
@@ -56,11 +60,19 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
         this.transportConfiguration = transportConfiguration;
     }
 
-    public Object createConnectionFactory(ConnectionManager connectionManager) throws ResourceException {
-        return null;
+    public PrintWriter getLogWriter() {
+        return out;
+    }
+
+    public void setLogWriter(PrintWriter out) {
+        this.out = out;
     }
 
     public Object createConnectionFactory() throws ResourceException {
+        return null;
+    }
+
+    public Object createConnectionFactory(ConnectionManager connectionManager) throws ResourceException {
         return null;
     }
 
@@ -75,9 +87,33 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
         return null;
     }
 
-    public void setLogWriter(PrintWriter printWriter) throws ResourceException {}
+    @Override
+    public int hashCode() {
+        // ManagedConnectionFactory.hashCode() must be defined in
+        // terms of its configuration:
+        return Objects.hashCode(participantQosPolicy,
+                                publisherQosPolicy,
+                                subscriberQoSPolicy,
+                                transportConfiguration);
+    }
 
-    public PrintWriter getLogWriter() throws ResourceException {
-        return null;
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+
+        if (!(o instanceof ManagedConnectionFactoryImpl)) {
+            return false;
+        }
+
+        ManagedConnectionFactoryImpl cf = (ManagedConnectionFactoryImpl) o;
+
+        // ManagedConnectionFactory.equals() must be defined in
+        // terms of its configuration:
+        return Objects.equalsWithNull(participantQosPolicy, cf.participantQosPolicy)
+            || Objects.equalsWithNull(publisherQosPolicy, cf.publisherQosPolicy)
+            || Objects.equalsWithNull(subscriberQoSPolicy, cf.subscriberQoSPolicy)
+            || Objects.equalsWithNull(transportConfiguration, cf.transportConfiguration);
     }
 }

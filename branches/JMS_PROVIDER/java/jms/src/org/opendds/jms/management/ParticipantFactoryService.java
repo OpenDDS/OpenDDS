@@ -76,12 +76,12 @@ public class ParticipantFactoryService extends DynamicMBeanSupport implements Se
         }
 
         if (log.isDebugEnabled()) {
-            log.debug(String.format("Initializing DomainParticipantFactory with arguments: \"%s\"", arguments));
+            log.debug(String.format("Creating DomainParticipantFactory with arguments: \"%s\"", arguments));
         }
         instance = TheParticipantFactory.WithArgs(arguments.toStringSeq());
 
         if (instance == null) {
-            throw new IllegalStateException("Unable to initialize DomainParticipantFactory; please check logs.");
+            throw new IllegalStateException("Unable to create DomainParticipantFactory; please check logs");
         }
 
         started = true;

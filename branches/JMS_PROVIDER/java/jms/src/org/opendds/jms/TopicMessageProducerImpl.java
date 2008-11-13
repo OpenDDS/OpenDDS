@@ -45,7 +45,7 @@ public class TopicMessageProducerImpl implements MessageProducer {
 
     private boolean closed;
 
-    public TopicMessageProducerImpl(Destination destination, Publisher publisher, DomainParticipant participant) {
+    public TopicMessageProducerImpl(Destination destination, Publisher publisher, DomainParticipant participant) throws JMSException {
         Objects.ensureNotNull(publisher);
         Objects.ensureNotNull(participant);
 
@@ -188,7 +188,7 @@ public class TopicMessageProducerImpl implements MessageProducer {
         dataWriterPair.destroy();
     }
 
-    private DataWriterPair getOrCreateDataWriterPair(Destination destination) {
+    private DataWriterPair getOrCreateDataWriterPair(Destination destination) throws JMSException {
         DataWriterPair dataWriterPair = dataWriterPairMap.get(destination);
         if (dataWriterPair == null) {
             dataWriterPair = DataWriterPair.fromDestination(destination, publisher, participant);

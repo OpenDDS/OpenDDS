@@ -9,6 +9,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 /**
  * @author  Steven Stallion
@@ -16,9 +17,13 @@ import java.util.Properties;
  */
 public class PropertiesHelper {
 
-    public static Properties forResource(String resource) {
+    public static PropertiesHelper getSystemPropertiesHelper() {
+        return new PropertiesHelper(System.getProperties());
+    }
+
+    public static Properties forName(String name) {
         try {
-            InputStream in = ClassLoaders.getResourceAsStream(resource);
+            InputStream in = ClassLoaders.getResourceAsStream(name);
 
             Properties properties = new Properties();
             properties.load(in);
@@ -30,7 +35,7 @@ public class PropertiesHelper {
         }
     }
 
-    public static Properties forValue(String value) {
+    public static Properties valueOf(String value) {
         try {
             Properties properties = new Properties();
 
@@ -57,10 +62,79 @@ public class PropertiesHelper {
         }
     }
 
+    //
+
+    public class Property {
+        private String key;
+
+        protected Property(String key) {
+            this.key = key;
+        }
+
+        public boolean exists() {
+            return hasProperty(key);
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public String getValue() {
+            return getProperty(key);
+        }
+
+        public String getValue(String defaultValue) {
+            return getProperty(key, defaultValue);
+        }
+
+        public Boolean asBoolean() {
+            return getBooleanProperty(key);
+        }
+
+        public Boolean asBoolean(Boolean defaultValue) {
+            return getBooleanProperty(key, defaultValue);
+        }
+
+        public byte[] asBytes() {
+            return getBytesProperty(key);
+        }
+
+        public byte[] asBytes(byte[] defaultValue) {
+            return getBytesProperty(key, defaultValue);
+        }
+
+        public Integer asInt() {
+            return getIntProperty(key);
+        }
+
+        public Integer asInt(Integer defaultValue) {
+            return getIntProperty(key, defaultValue);
+        }
+
+        public boolean equals(String value) {
+            return value != null && value.equals(getValue());
+        }
+
+        public boolean matches(String pattern) {
+            return Pattern.matches(pattern, getValue());
+        }
+    }
+
     private Properties properties;
 
     public PropertiesHelper(Properties properties) {
         this.properties = properties;
+    }
+
+    public Property find(String key) {
+        return new Property(key);
+    }
+
+    public Property require(String key) {
+        if (!hasProperty(key)) {
+            throw new IllegalArgumentException(key + " is a required property!");
+        }
+        return find(key);
     }
 
     public boolean hasProperty(String key) {
@@ -75,12 +149,32 @@ public class PropertiesHelper {
         return properties.getProperty(key, defaultValue);
     }
 
-    public String requireProperty(String key) {
-        String value = properties.getProperty(key);
-        if (Strings.isEmpty(value)) {
-            throw new IllegalArgumentException(key + " is a required property!");
+    public Boolean getBooleanProperty(String key) {
+        return getBooleanProperty(key, Boolean.FALSE);
+    }
+
+    public Boolean getBooleanProperty(String key, Boolean defaultValue) {
+        String value = getProperty(key);
+
+        if (value == null) {
+            return defaultValue;
         }
-        return value;
+
+        return Boolean.valueOf(value);
+    }
+
+    public byte[] getBytesProperty(String key) {
+        return getBytesProperty(key, null);
+    }
+
+    public byte[] getBytesProperty(String key, byte[] defaultValue) {
+        String value = getProperty(key);
+
+        if (value == null) {
+            return defaultValue;
+        }
+
+        return value.getBytes();
     }
 
     public Integer getIntProperty(String key) {
@@ -95,12 +189,5 @@ public class PropertiesHelper {
         }
 
         return Integer.valueOf(value);
-    }
-
-    public Integer requireIntProperty(String key) {
-        if (!hasProperty(key)) {
-            throw new IllegalArgumentException(key + " is a required property!");
-        }
-        return getIntProperty(key);
     }
 }

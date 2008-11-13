@@ -2,6 +2,7 @@ package org.opendds.jms;
 
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;
+import javax.jms.JMSException;
 
 import DDS.DATAWRITER_QOS_DEFAULT;
 import DDS.DataWriter;
@@ -28,7 +29,7 @@ public class DataWriterPair {
         this.publisher = publisher;
     }
 
-    public static DataWriterPair fromDestination(Destination destination, Publisher publisher, DomainParticipant participant) {
+    public static DataWriterPair fromDestination(Destination destination, Publisher publisher, DomainParticipant participant) throws JMSException {
         DDS.Topic ddsTopic = extractDDSTopicFromDestination(destination, participant);
 
         DataWriterQosHolder persistentQosHolder = new DataWriterQosHolder(DATAWRITER_QOS_DEFAULT.get());
@@ -48,10 +49,10 @@ public class DataWriterPair {
         return new DataWriterPair(persistentDW, volatileDW, publisher);
     }
 
-    private static Topic extractDDSTopicFromDestination(Destination destination, DomainParticipant participant) {
+    private static Topic extractDDSTopicFromDestination(Destination destination, DomainParticipant participant) throws JMSException {
         // TODO placeholder, to be elaborated
         TopicImpl topicImpl = (TopicImpl) destination;
-        return topicImpl.createTopic();
+        return topicImpl.createTopic(null);
     }
 
     public MessagePayloadDataWriter getDataWriter(int deliveryMode) {
