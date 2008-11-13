@@ -41,4 +41,9 @@ public class TopicQosPolicy implements QosPolicy<TopicQos> {
             qos.topic_data.value = property.asBytes();
         }
     }
+    
+    @Override
+    public String toString() {
+        return PropertiesHelper.valueOf(properties);
+    }
 }

@@ -192,4 +192,9 @@ public class DataReaderQosPolicy implements QosPolicy<DataReaderQos> {
             qos.reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec = property.asInt();
         }
     }
+
+    @Override
+    public String toString() {
+        return PropertiesHelper.valueOf(properties);
+    }
 }
