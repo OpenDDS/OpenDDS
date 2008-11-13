@@ -1,15 +1,31 @@
+Thu Nov 13 23:18:43 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tests/DCPS/Priority:
+        * tests/DCPS/Priority/DataReaderListener.h:
+        * tests/DCPS/Priority/DataReaderListener.cpp:
+        * tests/DCPS/Priority/DataWriterListener.h:
+        * tests/DCPS/Priority/DataWriterListener.cpp:
+        * tests/DCPS/Priority/Priority.mpc:
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Priority/README:
+        * tests/DCPS/Priority/Subscriber.cpp:
+        * tests/DCPS/Priority/Test.idl:
+        * tests/DCPS/Priority/run_test.pl:
+
+	  Adding test skeleton for TRANSPORT_PRIORITY.
+
 Thu Nov 13 20:13:55 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/transport/framework/PriorityKey.h:
         * dds/DCPS/transport/framework/PriorityKey.inl:
         * dds/DCPS/transport/framework/PriorityKey.cpp:
 
-	  Added complex key type for storing connection objects.
+          Added complex key type for storing connection objects.
 
         * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.h:
         * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.cpp:
 
-	  Store data links using priority/address complex key.
+          Store data links using priority/address complex key.
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.inl:
@@ -18,7 +34,7 @@ Thu Nov 13 20:13:55 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
 
-	  Store data links using priority/address complex key.
+          Store data links using priority/address complex key.
 
         * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastTransport.h:
         * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastTransport.inl:
@@ -31,7 +47,7 @@ Thu Nov 13 20:13:55 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.inl:
         * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.cpp:
 
-	  Store data links using priority/address complex key.
+          Store data links using priority/address complex key.
 
 Thu Nov 13 01:24:50 UTC 2008  Mike Martinez  <martinez_m@lab.ociweb.com>
 
