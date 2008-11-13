@@ -2,12 +2,14 @@
  * $Id$
  */
 
-package org.opendds.jms.management.argument;
+package org.opendds.jms.common;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
+import org.opendds.jms.management.argument.ArgumentWriter;
 
 /**
  * @author  Steven Stallion
