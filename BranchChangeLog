@@ -1,3 +1,16 @@
+Fri Nov 14 23:18:27 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tests/DCPS/Priority/Options.h:
+        * tests/DCPS/Priority/Options.inl:
+        * tests/DCPS/Priority/Options.cpp:
+        * tests/DCPS/Priority/Priority.mpc:
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Priority/run_test.pl:
+        * tests/DCPS/Priority/svc.conf:
+        * tests/DCPS/Priority/transport.ini:
+
+          Beginning some implementation of the testing.
+
 Thu Nov 13 23:18:43 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * tests/DCPS/Priority:
@@ -12,7 +25,7 @@ Thu Nov 13 23:18:43 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * tests/DCPS/Priority/Test.idl:
         * tests/DCPS/Priority/run_test.pl:
 
-	  Adding test skeleton for TRANSPORT_PRIORITY.
+          Adding test skeleton for TRANSPORT_PRIORITY.
 
 Thu Nov 13 20:13:55 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 

@@ -26,6 +26,7 @@ my $verbose;
 my $orbVerbose;
 my $dFile;
 my $transportDebug;
+my $repoDebug;
 my $noaction;
 
 #
@@ -45,6 +46,7 @@ GetOptions( "verbose!"            => \$verbose,
             "man"                 => \$man,
             "debug|d=i"           => \$debug,
             "tdebug|T=i"          => \$transportDebug,
+            "rdebug|R=i"          => \$repoDebug,
             "noaction|x"          => \$noaction,
             "dfile|f=s"           => \$dFile,
             "transport|t=s"       => \$transportType,
@@ -58,6 +60,7 @@ pod2usage( -verbose => 2) if $man ;
 
 # Verbosity.
 print "Debug==$debug\n"                   if $verbose and $debug;
+print "RepoDebug==$repoDebug\n"           if $verbose and $repoDebug;
 print "TransportDebug==$transportDebug\n" if $verbose and $transportDebug;
 print "DebugFile==$dFile\n"               if $verbose and $dFile;
 print "VerboseLogging==$orbVerbose\n"     if $verbose and $orbVerbose;
@@ -65,12 +68,16 @@ print "VerboseLogging==$orbVerbose\n"     if $verbose and $orbVerbose;
 # Files.
 my $repo_ior  = PerlACE::LocalFile("repo.ior");
 my $debugFile = PerlACE::LocalFile( $dFile) if $dFile;
+my $confFile  = PerlACE::LocalFile( "svc.conf");
+my $iniFile   = PerlACE::LocalFile( "transport.ini");
 
 # Clean out leftovers.
 unlink $repo_ior;
 
 my $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
-    : "-ORBSvcConf ../../tcp.conf";
+    : "-ORBSvcConf $confFile";
+
+my $common_opts = "-DCPSConfigFile $iniFile";
 
 # Perocess variables.
 my $REPO;
@@ -79,10 +86,7 @@ my @PUBS;
 
 # Establish process arguments.
 
-my $repoDebug;
 my $appDebug;
-
-$repoDebug = $debug if $debug;
 $appDebug  = $debug if $debug;
 
 my $verboseDebug;
@@ -94,7 +98,7 @@ $repoOpts .= "-DCPSDebugLevel $repoDebug " if $repoDebug;
 $repoOpts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
 $repoOpts .= "-ORBLogFile $debugFile " if ($repoDebug or $transportDebug) and $debugFile;
 
-my $appOpts = "$svc_config ";
+my $appOpts = "$svc_config $common_opts ";
 $appOpts .= $verboseDebug if $verboseDebug;
 $appOpts .= "-DCPSDebugLevel $appDebug " if $appDebug;
 $appOpts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
@@ -332,6 +336,8 @@ priority samples is demonstrated.
 =item B<./run_demo.pl -d 10 -T 4 -f test.log -t udp>
 
 =item B<./run_demo.pl -x -t mcast>
+
+=item B<./run_test.pl -vp2d10T4Vt mcast>
 
 =back
 

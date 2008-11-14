@@ -9,7 +9,7 @@ project(DDS*idl): dcps {
 }
 
 
-project(DDS*Publisher) : dcpsexe_with_tcp {
+project(DDS*Publisher) : dcpsexe_with_unreliable_dgram, dcps_reliable_multicast, dcps_tcp {
   exename = publisher
   after  += DDS*idl
 
@@ -19,11 +19,12 @@ project(DDS*Publisher) : dcpsexe_with_tcp {
 
   Source_Files {
     Publisher.cpp
+    Options.cpp
     DataWriterListener.cpp
   }
 }
 
-project(DDS*Subscriber) : dcpsexe_with_tcp {
+project(DDS*Subscriber) : dcpsexe_with_unreliable_dgram, dcps_reliable_multicast, dcps_tcp {
   exename = subscriber
   after  += DDS*idl
 
@@ -33,6 +34,7 @@ project(DDS*Subscriber) : dcpsexe_with_tcp {
 
   Source_Files {
     Subscriber.cpp
+    Options.cpp
     DataReaderListener.cpp
   }
 }
