@@ -4,52 +4,64 @@
 
 package org.opendds.jms;
 
-import java.util.Properties;
-
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
+
+import OpenDDS.DCPS.transport.TransportConfiguration;
+
+import org.opendds.jms.qos.ParticipantQosPolicy;
+import org.opendds.jms.qos.PublisherQosPolicy;
+import org.opendds.jms.qos.SubscriberQosPolicy;
 
 /**
  * @author  Steven Stallion
  * @version $Revision$
  */
 public class ConnectionFactoryImpl implements ConnectionFactory {
-    private Properties participantQosPolicy;
-    private Properties publisherQosPolicy;
-    private Properties subscriberQosPolicy;
-    private Properties transportConfiguration;
+    private int domainId;
+    private ParticipantQosPolicy participantQosPolicy;
+    private PublisherQosPolicy publisherQosPolicy;
+    private TransportConfiguration publisherTransport;
+    private SubscriberQosPolicy subscriberQosPolicy;
+    private TransportConfiguration subscriberTransport;
 
-    public Properties getParticipantQosPolicy() {
+    public ConnectionFactoryImpl(int domainId,
+                                 ParticipantQosPolicy participantQosPolicy,
+                                 PublisherQosPolicy publisherQosPolicy,
+                                 TransportConfiguration publisherTransport,
+                                 SubscriberQosPolicy subscriberQosPolicy,
+                                 TransportConfiguration subscriberTransport) {
+        this.domainId = domainId;
+        this.participantQosPolicy = participantQosPolicy;
+        this.publisherQosPolicy = publisherQosPolicy;
+        this.publisherTransport = publisherTransport;
+        this.subscriberQosPolicy = subscriberQosPolicy;
+        this.subscriberTransport = subscriberTransport;
+    }
+
+    public int getDomainId() {
+        return domainId;
+    }
+
+    public ParticipantQosPolicy getParticipantQosPolicy() {
         return participantQosPolicy;
     }
 
-    public void setParticipantQosPolicy(Properties participantQosPolicy) {
-        this.participantQosPolicy = participantQosPolicy;
-    }
-
-    public Properties getPublisherQosPolicy() {
+    public PublisherQosPolicy getPublisherQosPolicy() {
         return publisherQosPolicy;
     }
 
-    public void setPublisherQosPolicy(Properties publisherQosPolicy) {
-        this.publisherQosPolicy = publisherQosPolicy;
+    public TransportConfiguration getPublisherTransport() {
+        return publisherTransport;
     }
 
-    public Properties getSubscriberQosPolicy() {
+    public SubscriberQosPolicy getSubscriberQosPolicy() {
         return subscriberQosPolicy;
     }
 
-    public void setSubscriberQosPolicy(Properties subscriberQosPolicy) {
-        this.subscriberQosPolicy = subscriberQosPolicy;
-    }
-
-    public Properties getTransportConfiguration() {
-        return transportConfiguration;
-    }
-
-    public void setTransportConfiguration(Properties transportConfiguration) {
-        this.transportConfiguration = transportConfiguration;
+    public TransportConfiguration getSubscriberTransport() {
+        return subscriberTransport;
     }
 
     public Connection createConnection() throws JMSException {

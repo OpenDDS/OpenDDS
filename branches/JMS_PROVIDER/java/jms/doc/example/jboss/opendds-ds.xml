@@ -12,9 +12,9 @@
     <mbean code="org.opendds.jms.management.ParticipantFactoryService"
            name="OpenDDS:service=DomainParticipantFactory">
         <attribute name="DCPSDebugLevel">10</attribute>
-        <attribute name="DCPSInfoRepo">iiop://localhost:6666/DCPSInfoRepo</attribute>
+        <attribute name="DCPSInfoRepo">iiop://${jboss.bind.address}:6666/DCPSInfoRepo</attribute>
         <attribute name="ORBDebugLevel">10</attribute>
-        <attribute name="ORBListenEndpoints">iiop://localhost:6667</attribute>
+        <attribute name="ORBListenEndpoints">iiop://${jboss.bind.address}:6667</attribute>
         <attribute name="ORBLogFile">${jboss.server.log.dir}/DDS.log</attribute>
         <depends>jboss.jca:service=RARDeployment,name='opendds-jms-@VERSION@.rar'</depends>
     </mbean>
@@ -49,25 +49,36 @@
         ConnectionFactory configuration
     -->
     <no-tx-connection-factory>
-        <jndi-name>DDS/ConnectionFactory</jndi-name>
+        <jndi-name>DDS/DefaultConnectionFactory</jndi-name>
         <rar-name>opendds-jms-@VERSION@.rar</rar-name>
         <connection-definition>org.opendds.jms.resource.ConnectionFactoryImpl</connection-definition>
+        <config-property name="DomainId" type="java.lang.Integer">1</config-property>
         <config-property name="TransportType" type="java.lang.String">SimpleTcp</config-property>
-        <config-property name="DomainParticipantQosPolicy" type="java.lang.String">
+        <max-pool-size>20</max-pool-size>
+        <depends>OpenDDS:service=DomainParticipantFactory</depends>
+    </no-tx-connection-factory>
+
+    <no-tx-connection-factory>
+        <jndi-name>DDS/CustomConnectionFactory</jndi-name>
+        <rar-name>opendds-jms-@VERSION@.rar</rar-name>
+        <connection-definition>org.opendds.jms.resource.ConnectionFactoryImpl</connection-definition>
+        <config-property name="DomainId" type="java.lang.Integer">2</config-property>
+        <config-property name="ParticipantQosPolicy" type="java.lang.String">
             <!-- TODO -->
         </config-property>
         <config-property name="PublisherQosPolicy" type="java.lang.String">
             <!-- TODO -->
         </config-property>
-        <config-property name="PublisherTransportConfig" type="java.lang.String">
+        <config-property name="PublisherTransport" type="java.lang.String">
             <!-- TODO -->
         </config-property>
         <config-property name="SubscriberQosPolicy" type="java.lang.String">
             <!-- TODO -->
         </config-property>
-        <config-property name="SubscriberTransportConfig" type="java.lang.String">
+        <config-property name="SubscriberTransport" type="java.lang.String">
             <!-- TODO -->
         </config-property>
+        <config-property name="TransportType" type="java.lang.String">SimpleTcp</config-property>
         <max-pool-size>20</max-pool-size>
         <depends>OpenDDS:service=DomainParticipantFactory</depends>
     </no-tx-connection-factory>
