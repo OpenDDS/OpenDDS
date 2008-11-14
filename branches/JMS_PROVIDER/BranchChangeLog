@@ -1,3 +1,20 @@
+Fri Nov 14 21:01:56 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DdsDcps.mpc:
+        * dds/DdsDcpsDomainExt.idl:
+        * java/dds/dcps_java.mpc:
+
+          Added an OpenDDS-specific interface (DomainParticipantExt) which
+          allows the application to get two integers which, taken together,
+          are a unique ID for this DomainParticipant.
+
+        * java/jms/src/org/opendds/jms/ConnectionImpl.java:
+
+          Use the unique ID to create PARTITION QoS values that implement the
+          "noLocal" JMS semantics.
+
 Fri Nov 14 06:19:34 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/OpenDDS.ipr:
