@@ -10,7 +10,7 @@
 #include "dds/DdsDcpsPublicationC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DdsDcpsTopicC.h"
-#include "dds/DdsDcpsDomainS.h"
+#include "dds/DdsDcpsDomainExtS.h"
 #include "dds/DdsDcpsInfoC.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
@@ -51,7 +51,7 @@ namespace OpenDDS
     * the interface this class is implementing.
     */
     class OpenDDS_Dcps_Export DomainParticipantImpl
-      : public virtual OpenDDS::DCPS::LocalObject<DDS::DomainParticipant>,
+      : public virtual OpenDDS::DCPS::LocalObject<DomainParticipantExt>,
         public virtual OpenDDS::DCPS::EntityImpl
     {
     public:
@@ -307,6 +307,12 @@ namespace OpenDDS
       *  Return the id given by the DCPSInfo repositoy.
       */
       RepoId get_id ();
+
+      CORBA::Long get_federation_id ()
+        ACE_THROW_SPEC ((CORBA::SystemException));
+
+      CORBA::Long get_participant_id ()
+        ACE_THROW_SPEC ((CORBA::SystemException));
 
       /**
       *  Associate the servant with the object reference.
