@@ -6,9 +6,11 @@ package org.opendds.jms.qos;
 
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import DDS.DataReaderQos;
 import DDS.DestinationOrderQosPolicyKind;
-import DDS.DurabilityQosPolicyKind;
 import DDS.HistoryQosPolicyKind;
 import DDS.LivelinessQosPolicyKind;
 import DDS.ReliabilityQosPolicyKind;
@@ -20,6 +22,8 @@ import org.opendds.jms.common.util.PropertiesHelper;
  * @version $Revision$
  */
 public class DataReaderQosPolicy implements QosPolicy<DataReaderQos> {
+    private static Log log = LogFactory.getLog(DataReaderQosPolicy.class);
+
     private Properties properties;
 
     public DataReaderQosPolicy(String value) {
@@ -41,21 +45,10 @@ public class DataReaderQosPolicy implements QosPolicy<DataReaderQos> {
             qos.user_data.value = property.asBytes();
         }
 
-        // DURABILITY QosPolicy
+        // DURABILITY QosPolicy (reserved)
         property = helper.find("DURABILITY.kind");
         if (property.exists()) {
-            if (property.equals("VOLATILE")) {
-                qos.durability.kind = DurabilityQosPolicyKind.VOLATILE_DURABILITY_QOS;
-
-            } else if (property.equals("TRANSIENT_LOCAL")) {
-                qos.durability.kind = DurabilityQosPolicyKind.TRANSIENT_LOCAL_DURABILITY_QOS;
-
-            } else if (property.equals("TRANSIENT")) {
-                qos.durability.kind = DurabilityQosPolicyKind.TRANSIENT_DURABILITY_QOS;
-
-            } else if (property.equals("PERSISTENT")) {
-                qos.durability.kind = DurabilityQosPolicyKind.PERSISTENT_DURABILITY_QOS;
-            }
+            log.warn("DURABILITY QosPolicy is reserved for internal use!");
         }
 
         // DEADLINE QosPolicy

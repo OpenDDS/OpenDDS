@@ -6,9 +6,11 @@ package org.opendds.jms.qos;
 
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import DDS.DataWriterQos;
 import DDS.DestinationOrderQosPolicyKind;
-import DDS.DurabilityQosPolicyKind;
 import DDS.HistoryQosPolicyKind;
 import DDS.LivelinessQosPolicyKind;
 import DDS.ReliabilityQosPolicyKind;
@@ -20,6 +22,8 @@ import org.opendds.jms.common.util.PropertiesHelper;
  * @version $Revision$
  */
 public class DataWriterQosPolicy implements QosPolicy<DataWriterQos> {
+    private static Log log = LogFactory.getLog(DataWriterQosPolicy.class);
+
     private Properties properties;
 
     public DataWriterQosPolicy(String value) {
@@ -41,21 +45,10 @@ public class DataWriterQosPolicy implements QosPolicy<DataWriterQos> {
             qos.user_data.value = property.asBytes();
         }
 
-        // DURABILITY QosPolicy
+        // DURABILITY QosPolicy (reserved)
         property = helper.find("DURABILITY.kind");
         if (property.exists()) {
-            if (property.equals("VOLATILE")) {
-                qos.durability.kind = DurabilityQosPolicyKind.VOLATILE_DURABILITY_QOS;
-
-            } else if (property.equals("TRANSIENT_LOCAL")) {
-                qos.durability.kind = DurabilityQosPolicyKind.TRANSIENT_LOCAL_DURABILITY_QOS;
-
-            } else if (property.equals("TRANSIENT")) {
-                qos.durability.kind = DurabilityQosPolicyKind.TRANSIENT_DURABILITY_QOS;
-
-            } else if (property.equals("PERSISTENT")) {
-                qos.durability.kind = DurabilityQosPolicyKind.PERSISTENT_DURABILITY_QOS;
-            }
+            log.warn("DURABILITY QosPolicy is reserved for internal use!");
         }
 
         // DURABILITY_SERVICE QosPolicy
@@ -178,15 +171,15 @@ public class DataWriterQosPolicy implements QosPolicy<DataWriterQos> {
             qos.transport_priority.value = property.asInt();
         }
 
-        // LIFESPAN QosPolicy
+        // LIFESPAN QosPolicy (reserved)
         property = helper.find("LIFESPAN.duration.sec");
         if (property.exists()) {
-            qos.lifespan.duration.sec = property.asInt();
+            log.warn("LIFESPAN QosPolicy is reserved for internal use!");
         }
 
         property = helper.find("LIFESPAN.duration.nanosec");
         if (property.exists()) {
-            qos.lifespan.duration.nanosec = property.asInt();
+            log.warn("LIFESPAN QosPolicy is reserved for internal use!");
         }
 
         // DESTINATION_ORDER QosPolicy
@@ -240,7 +233,6 @@ public class DataWriterQosPolicy implements QosPolicy<DataWriterQos> {
             qos.writer_data_lifecycle.autodispose_unregistered_instances = property.asBoolean();
         }
     }
-
 
     @Override
     public String toString() {

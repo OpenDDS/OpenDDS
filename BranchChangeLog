@@ -1,3 +1,21 @@
+Fri Nov 14 06:19:34 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/OpenDDS.ipr:
+        * java/ant/opendds-ant.iml:
+        * java/jms/doc/example/jboss/opendds-ds.xml:
+        * java/jms/doc/example/jboss/opendds-inforepo-ds.xml:
+        * java/jms/opendds-jms.iml:
+        * java/jms/src/META-INF/ra.xml:
+        * java/jms/src/org/opendds/jms/ConnectionFactoryImpl.java:
+        * java/jms/src/org/opendds/jms/qos/DataReaderQosPolicy.java:
+        * java/jms/src/org/opendds/jms/qos/DataWriterQosPolicy.java:
+        * java/jms/src/org/opendds/jms/qos/ParticipantQosPolicy.java:
+        * java/jms/src/org/opendds/jms/qos/PublisherQosPolicy.java:
+        * java/jms/src/org/opendds/jms/qos/SubscriberQosPolicy.java:
+        * java/jms/src/org/opendds/jms/resource/ManagedConnectionFactoryImpl.java:
+
+          Updated QosPolicy implementations.
+
 Thu Nov 13 18:10:20 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/OpenDDS.ipr:

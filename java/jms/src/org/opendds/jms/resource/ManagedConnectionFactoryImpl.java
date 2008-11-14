@@ -21,12 +21,23 @@ import org.opendds.jms.common.lang.Objects;
  * @version $Revision$
  */
 public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
+    private Integer domainId;
     private String participantQosPolicy;
     private String publisherQosPolicy;
-    private String subscriberQoSPolicy;
-    private String transportConfiguration;
+    private String publisherTransport;
+    private String subscriberQosPolicy;
+    private String subscriberTransportConfig;
+    private String transportType;
 
     private PrintWriter out;
+
+    public Integer getDomainId() {
+        return domainId;
+    }
+
+    public void setDomainId(Integer domainId) {
+        this.domainId = domainId;
+    }
 
     public String getParticipantQosPolicy() {
         return participantQosPolicy;
@@ -44,20 +55,36 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
         this.publisherQosPolicy = publisherQosPolicy;
     }
 
-    public String getSubscriberQoSPolicy() {
-        return subscriberQoSPolicy;
+    public String getPublisherTransport() {
+        return publisherTransport;
     }
 
-    public void setSubscriberQoSPolicy(String subscriberQoSPolicy) {
-        this.subscriberQoSPolicy = subscriberQoSPolicy;
+    public void setPublisherTransport(String publisherTransport) {
+        this.publisherTransport = publisherTransport;
     }
 
-    public String getTransportConfiguration() {
-        return transportConfiguration;
+    public String getSubscriberQosPolicy() {
+        return subscriberQosPolicy;
     }
 
-    public void setTransportConfiguration(String transportConfiguration) {
-        this.transportConfiguration = transportConfiguration;
+    public void setSubscriberQosPolicy(String subscriberQosPolicy) {
+        this.subscriberQosPolicy = subscriberQosPolicy;
+    }
+
+    public String getSubscriberTransportConfig() {
+        return subscriberTransportConfig;
+    }
+
+    public void setSubscriberTransportConfig(String subscriberTransportConfig) {
+        this.subscriberTransportConfig = subscriberTransportConfig;
+    }
+
+    public String getTransportType() {
+        return transportType;
+    }
+
+    public void setTransportType(String transportType) {
+        this.transportType = transportType;
     }
 
     public PrintWriter getLogWriter() {
@@ -91,10 +118,13 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
     public int hashCode() {
         // ManagedConnectionFactory.hashCode() must be defined in
         // terms of its configuration:
-        return Objects.hashCode(participantQosPolicy,
+        return Objects.hashCode(domainId,
+                                participantQosPolicy,
                                 publisherQosPolicy,
-                                subscriberQoSPolicy,
-                                transportConfiguration);
+            publisherTransport,
+                                subscriberQosPolicy,
+                                subscriberTransportConfig,
+                                transportType);
     }
 
     @Override
@@ -111,9 +141,11 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
 
         // ManagedConnectionFactory.equals() must be defined in
         // terms of its configuration:
-        return Objects.equalsWithNull(participantQosPolicy, cf.participantQosPolicy)
+        return Objects.equalsWithNull(domainId, cf.domainId)
+            || Objects.equalsWithNull(participantQosPolicy, cf.participantQosPolicy)
             || Objects.equalsWithNull(publisherQosPolicy, cf.publisherQosPolicy)
-            || Objects.equalsWithNull(subscriberQoSPolicy, cf.subscriberQoSPolicy)
-            || Objects.equalsWithNull(transportConfiguration, cf.transportConfiguration);
+            || Objects.equalsWithNull(publisherTransport, cf.publisherTransport)
+            || Objects.equalsWithNull(subscriberQosPolicy, cf.subscriberQosPolicy)
+            || Objects.equalsWithNull(subscriberTransportConfig, cf.subscriberTransportConfig);
     }
 }
