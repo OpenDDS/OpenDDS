@@ -18,7 +18,7 @@ public final class TheParticipantFactory {
   // class loaded will have a static initializer which calls this function.
   // It is only made public so that other OpenDDS packages can use it.
   public static void loadNativeLib () {
-    String propVal = System.getProperty("jni.nativeDebug");
+    String propVal = System.getProperty("opendds.native.debug");
     if (propVal != null && ("1".equalsIgnoreCase(propVal) ||
         "y".equalsIgnoreCase(propVal) ||
         "yes".equalsIgnoreCase(propVal) ||

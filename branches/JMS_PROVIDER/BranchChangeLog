@@ -1,3 +1,15 @@
+Mon Nov 17 20:47:05 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/README:
+        * java/dds/OpenDDS/DCPS/TheParticipantFactory.java:
+        * java/idl2jni/codegen/im_java.cpp:
+        * java/idl2jni/runtime/i2jrt/ORB.java:
+        * java/idl2jni/runtime/i2jrt/TAOObject.java:
+        * java/jms/build.xml:
+        * java/jms/native/org/opendds/jms/DCPSInfoRepo.java:
+
+          Renamed jni.nativeDebug to opendds.native.debug.
+
 Mon Nov 17 20:04:43 UTC 2008  Weiqi Gao  <gaow@ociweb.com>
 
         * java/jms/src/org/opendds/jms/AbstractMessageImpl.java:
