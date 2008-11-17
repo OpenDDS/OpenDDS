@@ -20,7 +20,7 @@ public final class DCPSInfoRepo implements Runnable {
 
     static {
         String library = "opendds-jms-native";
-        if (Boolean.getBoolean("jni.nativeDebug")) {
+        if (Boolean.getBoolean("opendds.native.debug")) {
             library = library.concat("d");
         }
         System.loadLibrary(library);

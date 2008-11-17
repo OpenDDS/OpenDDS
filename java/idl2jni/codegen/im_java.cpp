@@ -106,7 +106,7 @@ namespace
       {
         nativeLoader = "\n"
           "  static {\n"
-          "    String propVal = System.getProperty(\"jni.nativeDebug\");\n"
+          "    String propVal = System.getProperty(\"opendds.native.debug\");\n"
           "    if (propVal != null && (\"1\".equalsIgnoreCase(propVal) ||\n"
           "        \"y\".equalsIgnoreCase(propVal) ||\n"
           "        \"yes\".equalsIgnoreCase(propVal) ||\n"
