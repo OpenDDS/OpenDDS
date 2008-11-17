@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.opendds.jms.common.SvcConfDirective;
 import org.opendds.jms.common.lang.Strings;
 import org.opendds.jms.management.DynamicMBeanSupport;
 
@@ -42,6 +43,11 @@ public class ArgumentWriter {
                 write(stok.nextToken());
             }
         }
+    }
+
+    public void writeSvcConfDirective(SvcConfDirective directive) {
+        write("-ORBSvConfDirective");
+        write(directive.toString());
     }
 
     public void write(String arg, Object value) {

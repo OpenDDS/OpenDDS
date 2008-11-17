@@ -72,11 +72,11 @@ public class ParticipantFactoryService extends DynamicMBeanSupport implements Se
 
         log = LogFactory.getLog(service);
         if (log.isInfoEnabled()) {
-            log.info("Starting " + service);
+            log.info("Creating " + service);
         }
 
         if (log.isDebugEnabled()) {
-            log.debug(String.format("Creating DomainParticipantFactory with arguments: \"%s\"", arguments));
+            log.debug(String.format("Creating with arguments: \"%s\"", arguments));
         }
         instance = TheParticipantFactory.WithArgs(arguments.toStringSeq());
 
@@ -91,10 +91,6 @@ public class ParticipantFactoryService extends DynamicMBeanSupport implements Se
     public void stop() throws Exception {
         if (!isStarted()) {
             throw new IllegalStateException(service + " already stopped!");
-        }
-
-        if (log.isInfoEnabled()) {
-            log.info("Stopping " + service);
         }
 
         TheTransportFactory.release();

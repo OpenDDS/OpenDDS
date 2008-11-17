@@ -21,9 +21,9 @@ import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanConstructorInfo;
 import javax.management.MBeanOperationInfo;
 
+import org.opendds.jms.common.beans.BeanHelper;
 import org.opendds.jms.common.lang.Annotations;
 import org.opendds.jms.common.lang.Strings;
-import org.opendds.jms.common.util.BeanHelper;
 import org.opendds.jms.management.annotation.Attribute;
 import org.opendds.jms.management.annotation.Description;
 import org.opendds.jms.management.annotation.KeyProperty;
@@ -46,28 +46,30 @@ public class DynamicMBeanMetaData implements Serializable {
     private Map<String, OperationModel> operations =
         new LinkedHashMap<String, OperationModel>();
 
+    private BeanHelper helper;
+
     public DynamicMBeanMetaData(DynamicMBean instance) {
         this(instance.getClass());
     }
 
     public DynamicMBeanMetaData(Class<? extends DynamicMBean> clazz) {
-        BeanHelper helper = new BeanHelper(clazz);
+        helper = new BeanHelper(clazz);
 
         // ObjectName Key Properties
-        for (PropertyDescriptor property : helper.findAnnotatedProperties(KeyProperty.class)) {
+        for (PropertyDescriptor property : helper.findAnnotatedDescriptors(KeyProperty.class)) {
             KeyPropertyModel model = new KeyPropertyModel(property);
             properties.put(model.name, model);
         }
 
         // MBean DynamicAttributes
-        for (PropertyDescriptor property : helper.findAnnotatedProperties(Attribute.class)) {
+        for (PropertyDescriptor property : helper.findAnnotatedDescriptors(Attribute.class)) {
             AttributeModel model = new AttributeModel(property);
             attributes.put(model.name, model);
         }
 
         // MBean Constructors
         for (Constructor constructor : Annotations.findAnnotatedConstructors(clazz,
-                org.opendds.jms.management.annotation.Constructor.class)) {
+            org.opendds.jms.management.annotation.Constructor.class)) {
 
             ConstructorModel model = new ConstructorModel(constructor);
             constructors.add(model);
@@ -126,19 +128,17 @@ public class DynamicMBeanMetaData implements Serializable {
 
     //
 
-    public static class KeyPropertyModel {
+    public class KeyPropertyModel {
+        private PropertyDescriptor descriptor;
         private String name;
-
         private boolean required;
 
-        private Method writeMethod;
-
-        protected KeyPropertyModel(PropertyDescriptor property) {
-            name = property.getName();
-            writeMethod = property.getWriteMethod();
+        protected KeyPropertyModel(PropertyDescriptor descriptor) {
+            this.descriptor = descriptor;
+            name = descriptor.getName();
 
             KeyProperty keyProperty =
-                Annotations.getAnnotation(writeMethod, KeyProperty.class);
+                Annotations.getAnnotation(descriptor.getWriteMethod(), KeyProperty.class);
 
             required = keyProperty.required();
         }
@@ -151,33 +151,30 @@ public class DynamicMBeanMetaData implements Serializable {
             return required;
         }
 
-        public void setValue(DynamicMBean instance, Object value) throws Exception {
-            writeMethod.invoke(instance, value);
+        public void setValue(DynamicMBean instance, Object value) {
+            helper.setProperty(instance, descriptor, value);
         }
     }
 
-    public static class AttributeModel {
+    public class AttributeModel {
+        private PropertyDescriptor descriptor;
         private String name;
         private String description;
-
+        private boolean readOnly;
         private boolean required;
 
-        private Method readMethod;
-        private Method writeMethod;
+        protected AttributeModel(PropertyDescriptor descriptor) {
+            this.descriptor = descriptor;
+            name = Strings.capitalize(descriptor.getName());
 
-        protected AttributeModel(PropertyDescriptor property) {
-            name = Strings.capitalize(property.getName());
-            readMethod = property.getReadMethod();
+            Method method = descriptor.getReadMethod();
 
-            description = findDescription(readMethod);
+            description = findDescription(method);
 
             Attribute attribute =
-                Annotations.getAnnotation(readMethod, Attribute.class);
+                Annotations.getAnnotation(method, Attribute.class);
 
-            if (!attribute.readOnly()) {
-                writeMethod = property.getWriteMethod();
-            }
-
+            readOnly = attribute.readOnly();
             required = attribute.required();
         }
 
@@ -194,20 +191,21 @@ public class DynamicMBeanMetaData implements Serializable {
         }
 
         public boolean isReadOnly() {
-            return writeMethod == null;
+            return readOnly;
         }
 
-        public Object getValue(DynamicMBean instance) throws Exception {
-            return readMethod.invoke(instance);
+        public Object getValue(DynamicMBean instance) {
+            return helper.getProperty(instance, descriptor);
         }
 
-        public void setValue(DynamicMBean instance, Object value) throws Exception {
-            writeMethod.invoke(instance, value);
+        public void setValue(DynamicMBean instance, Object value) {
+            helper.setProperty(instance, descriptor, value);
         }
 
         public MBeanAttributeInfo toAttributeInfo() {
             try {
-                return new MBeanAttributeInfo(name, description, readMethod, writeMethod);
+                return new MBeanAttributeInfo(name, description, descriptor.getReadMethod(),
+                    (readOnly ? null : descriptor.getWriteMethod()));
 
             } catch (IntrospectionException e) {
                 throw new IllegalStateException(e);
@@ -215,7 +213,7 @@ public class DynamicMBeanMetaData implements Serializable {
         }
     }
 
-    protected static class ConstructorModel {
+    public class ConstructorModel {
         private String description;
         private Constructor constructor;
 
@@ -233,10 +231,9 @@ public class DynamicMBeanMetaData implements Serializable {
         }
     }
 
-    protected static class OperationModel {
+    public class OperationModel {
         private String name;
         private String description;
-
         private Method method;
 
         public OperationModel(Method method) {
@@ -263,6 +260,8 @@ public class DynamicMBeanMetaData implements Serializable {
         }
     }
 
+    //
+    
     private static <T> String findDescription(T t) {
         String value = null;
 

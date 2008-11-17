@@ -17,7 +17,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.opendds.jms.common.Version;
 import org.opendds.jms.common.io.Files;
-import org.opendds.jms.common.loader.NativeLoader;
+import org.opendds.jms.common.util.NativeLoader;
 import org.opendds.jms.common.util.PropertiesHelper;
 
 /**
@@ -72,6 +72,6 @@ public class ResourceAdapterImpl implements ResourceAdapter {
                                      ActivationSpec activationSpec) {}
 
     public XAResource[] getXAResources(ActivationSpec[] activationSpecs) {
-        return null; // Transactions not supported!
+        return null; // transactions not supported!
     }
 }

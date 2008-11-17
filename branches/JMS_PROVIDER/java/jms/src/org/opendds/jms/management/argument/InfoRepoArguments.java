@@ -9,7 +9,7 @@ import java.util.List;
 import org.opendds.jms.common.SvcConfDirective;
 import org.opendds.jms.common.lang.Strings;
 import org.opendds.jms.management.DynamicMBeanSupport;
-import org.opendds.jms.transport.TransportHelper;
+import org.opendds.jms.transport.Transports;
 
 /**
  * @author  Steven Stallion
@@ -25,7 +25,7 @@ public class InfoRepoArguments implements DynamicArgumentProvider {
     public static final String FEDERATOR_CONFIG = "FederatorConfig";
     public static final String FEDERATION_ID = "FederationId";
     public static final String FEDERATE_WITH = "FederateWith";
-    public static final String TRANSPORT_TYPE = "TransportType";
+    public static final String TRANSPORT_TYPE = "Transport";
 
     private DynamicMBeanSupport instance;
 
@@ -68,17 +68,15 @@ public class InfoRepoArguments implements DynamicArgumentProvider {
             directive.addOption("-file");
             directive.addOption(persistentFile);
 
-            directive.writeTo(writer);
+            writer.writeSvcConfDirective(directive);
         }
 
         String transportType =
             (String) instance.getAttribute(TRANSPORT_TYPE);
 
         if (!Strings.isEmpty(transportType)) {
-            SvcConfDirective directive =
-                TransportHelper.getSvcConfDirective(transportType);
-
-            directive.writeTo(writer);
+            writer.writeSvcConfDirective(
+                Transports.getDirective(transportType));
         }
 
         writer.writeTo(args);

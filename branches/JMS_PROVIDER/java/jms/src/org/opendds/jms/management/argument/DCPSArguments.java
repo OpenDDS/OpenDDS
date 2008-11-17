@@ -6,7 +6,6 @@ package org.opendds.jms.management.argument;
 
 import java.util.List;
 
-import org.opendds.jms.common.lang.Strings;
 import org.opendds.jms.management.DynamicMBeanSupport;
 
 /**
