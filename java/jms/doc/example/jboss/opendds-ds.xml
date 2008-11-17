@@ -71,7 +71,6 @@
             PRESENTATION.coherent_access=true
         </config-property>
         <config-property name="PublisherTransport" type="java.lang.String">
-            id=21
             swapBytes=false
             maxPacketSize=1500
             maxSamplesPerPacket=7
@@ -81,7 +80,6 @@
             PRESENTATION.coherent_access=true
         </config-property>
         <config-property name="SubscriberTransport" type="java.lang.String">
-            id=22
             swapBytes=false
             maxPacketSize=1500
             maxSamplesPerPacket=7
