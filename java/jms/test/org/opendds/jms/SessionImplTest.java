@@ -3,6 +3,8 @@ package org.opendds.jms;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.List;
+import java.util.ArrayList;
 
 import javax.jms.Destination;
 import javax.jms.InvalidDestinationException;
@@ -14,6 +16,7 @@ import javax.jms.ObjectMessage;
 import javax.jms.Session;
 import javax.jms.TemporaryTopic;
 import javax.jms.TextMessage;
+import javax.jms.MessageListener;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -53,6 +56,9 @@ public class SessionImplTest {
             doTestCreateProducersForTemporaryTopic(fakeObjects, otherFakeObjects);
             doTestSendingMessageToTemporaryTopic(fakeObjects, otherFakeObjects);
             doTestReplyToScenario(fakeObjects);
+            doTestRecoverSync(fakeObjects);
+            doTestRecoverAsync(fakeObjects);
+            doTestClose(fakeObjects);
         }
     }
 
@@ -106,7 +112,6 @@ public class SessionImplTest {
         producer.close();
 //        producer2.close();
         temporaryTopic.delete();
-
     }
 
     private void doTestSendingMessageToTemporaryTopic(FakeObjects fakeObjects, FakeObjects otherFakeObjects) throws JMSException {
@@ -133,17 +138,18 @@ public class SessionImplTest {
         temporaryTopic.delete();
     }
 
-
     private void doTestReplyToScenario(FakeObjects fakeObjects) throws JMSException {
         // A JMSReplyTo header scenario
         Session session = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, fakeObjects.connection);
         final MessageProducer producer = session.createProducer(fakeObjects.destination);
         final MessageConsumer consumer = session.createConsumer(fakeObjects.destination);
-        final TemporaryTopic topic = session.createTemporaryTopic();
 
         // Send original with JMSReplyTo header set to a temporary Topic
         final TextMessage textMessage = session.createTextMessage("Hello");
+        final TemporaryTopic topic = session.createTemporaryTopic();
         textMessage.setJMSReplyTo(topic);
+        // Set up a consumer to receive replies on temporary topic
+        final MessageConsumer replyConsumer = session.createConsumer(topic);
         producer.send(textMessage);
 
         // Receive original
@@ -161,12 +167,140 @@ public class SessionImplTest {
         replyProducer.send(textMessage2);
 
         // Receive the reploy on the temporary topic
-        final MessageConsumer replyConsumer = session.createConsumer(topic);
         final Message message3 = replyConsumer.receive();
         assertNotNull(message3);
         assertTrue(message3 instanceof TextMessageImpl);
         final TextMessage textMessage3 = (TextMessage) message3;
         assertEquals("Goodbye", textMessage3.getText());
+
+        session.close();
+    }
+
+    private void doTestRecoverSync(FakeObjects fakeObjects) throws JMSException {
+        Session session = new SessionImpl(false, Session.CLIENT_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, fakeObjects.connection);
+        final MessageProducer producer = session.createProducer(fakeObjects.destination);
+        final MessageConsumer consumer = session.createConsumer(fakeObjects.destination);
+
+        final TextMessage textMessage = session.createTextMessage("Hello");
+        producer.send(textMessage);
+        textMessage.setText("Hello Again");
+        producer.send(textMessage);
+        textMessage.setText("Goodbye");
+        producer.send(textMessage);
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        final Message message = consumer.receive();
+        assertNotNull(message);
+        final Message message2 = consumer.receive();
+        assertNotNull(message);
+        final Message message3 = consumer.receive();
+        assertNotNull(message);
+
+        session.recover();
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        final Message message4 = consumer.receive();
+        assertNotNull(message4);
+        assertTrue(message4.getJMSRedelivered());
+        final Message message5 = consumer.receive();
+        assertNotNull(message5);
+        assertTrue(message5.getJMSRedelivered());
+        final Message message6 = consumer.receive();
+        assertNotNull(message6);
+        assertTrue(message6.getJMSRedelivered());
+
+        session.close();
+    }
+
+    private void doTestRecoverAsync(FakeObjects fakeObjects) throws JMSException {
+        Session session = new SessionImpl(false, Session.CLIENT_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, fakeObjects.connection);
+        final MessageProducer producer = session.createProducer(fakeObjects.destination);
+        final MessageConsumer consumer = session.createConsumer(fakeObjects.destination);
+        MyMessageListener myMessageListener = new MyMessageListener();
+        consumer.setMessageListener(myMessageListener);
+
+        try {
+            Thread.sleep(1000); // Let the listener settle in
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        final TextMessage textMessage = session.createTextMessage("Hello");
+        producer.send(textMessage);
+        textMessage.setText("Hello Again");
+        producer.send(textMessage);
+        textMessage.setText("Goodbye");
+        producer.send(textMessage);
+
+        try {
+            Thread.sleep(5000); // Let message delivery has a chance to complete
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        assertEquals(3, myMessageListener.getOnMessageCount());
+        assertEquals(0, myMessageListener.getRedeliveryCount());
+        List<String> texts = myMessageListener.getMessageTexts();
+        assertTrue(texts.contains("Hello"));
+        assertTrue(texts.contains("Hello Again"));
+        assertTrue(texts.contains("Goodbye"));
+
+        myMessageListener.reset();
+        session.recover();
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        assertEquals(3, myMessageListener.getOnMessageCount());
+        assertEquals(3, myMessageListener.getRedeliveryCount());
+        texts = myMessageListener.getMessageTexts();
+        assertTrue(texts.contains("Hello"));
+        assertTrue(texts.contains("Hello Again"));
+        assertTrue(texts.contains("Goodbye"));
+
+        session.close();
+    }
+
+    private void doTestClose(FakeObjects fakeObjects) throws JMSException {
+        Session session = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, fakeObjects.connection);
+        final MessageProducer producer = session.createProducer(fakeObjects.destination);
+        final MessageConsumer consumer = session.createConsumer(fakeObjects.destination);
+
+        session.close();
+
+        try {
+            session.createProducer(fakeObjects.destination);
+            fail("Should throw");
+        } catch (Exception e) {
+            assertEquals("This Session is closed.", e.getMessage());
+        }
+
+        try {
+            producer.setPriority(6);
+            fail("Should throw");
+        } catch (Exception e) {
+            assertEquals("This MessageProducer is closed.", e.getMessage());
+        }
+
+        try {
+            consumer.receiveNoWait();
+            fail("Should throw");
+        } catch (Exception e) {
+            assertEquals("This MessageConsumer is closed.", e.getMessage());
+        }
     }
 
     private boolean dcpsInfoRepoRunning() {
@@ -221,8 +355,8 @@ public class SessionImplTest {
         final MessagePayloadTypeSupportImpl typeSupport = new MessagePayloadTypeSupportImpl();
         assertNotNull(typeSupport);
 
-        typeSupport.register_type(participant, "OpenDDS::MessagePayload");
-        final Topic topic = participant.create_topic("OpenDDS::MessagePayload", typeSupport.get_type_name(), TOPIC_QOS_DEFAULT.get(), null);
+        typeSupport.register_type(participant, "OpenDDS::JMS::MessagePayload");
+        final Topic topic = participant.create_topic("OpenDDS::JMS::MessagePayload", typeSupport.get_type_name(), TOPIC_QOS_DEFAULT.get(), null);
         assertNotNull(topic);
 
         Destination destination = new TopicImpl("Topic 1") {
@@ -277,8 +411,8 @@ public class SessionImplTest {
         final MessagePayloadTypeSupportImpl typeSupport = new MessagePayloadTypeSupportImpl();
         assertNotNull(typeSupport);
 
-        typeSupport.register_type(participant, "OpenDDS::MessagePayload");
-        final Topic topic = participant.create_topic("OpenDDS::MessagePayload", typeSupport.get_type_name(), TOPIC_QOS_DEFAULT.get(), null);
+        typeSupport.register_type(participant, "OpenDDS::JMS::MessagePayload");
+        final Topic topic = participant.create_topic("OpenDDS::JMS::MessagePayload", typeSupport.get_type_name(), TOPIC_QOS_DEFAULT.get(), null);
         assertNotNull(topic);
 
         Destination destination = new TopicImpl("Topic 1") {
@@ -303,5 +437,42 @@ public class SessionImplTest {
         public Publisher publisher;
         public Subscriber subscriber;
         public Destination destination;
+    }
+
+    private class MyMessageListener implements MessageListener {
+        private int onMessageCount = 0;
+        private List<String> messageTexts = new ArrayList<String>();
+        private int redeliveryCount = 0;
+
+        public void onMessage(Message message) {
+            TextMessage textMessage = (TextMessage) message;
+            try {
+                String messageText = textMessage.getText();
+                messageTexts.add(messageText);
+                if (textMessage.getJMSRedelivered()) {
+                    redeliveryCount++;
+                }
+            } catch (JMSException e) {
+            }
+            onMessageCount++;
+        }
+
+        public int getOnMessageCount() {
+            return onMessageCount;
+        }
+
+        public List<String> getMessageTexts() {
+            return messageTexts;
+        }
+
+        public int getRedeliveryCount() {
+            return redeliveryCount;
+        }
+
+        public void reset() {
+            onMessageCount = 0;
+            messageTexts.clear();
+            redeliveryCount = 0;
+        }
     }
 }

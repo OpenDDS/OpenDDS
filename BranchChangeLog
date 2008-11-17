@@ -1,3 +1,28 @@
+Mon Nov 17 20:04:43 UTC 2008  Weiqi Gao  <gaow@ociweb.com>
+
+        * java/jms/src/org/opendds/jms/AbstractMessageImpl.java:
+        * java/jms/src/org/opendds/jms/ConsumerDataReaderListener.java:
+        * java/jms/src/org/opendds/jms/DataWriterPair.java:
+        * java/jms/src/org/opendds/jms/MessageDispatcher.java:
+        * java/jms/src/org/opendds/jms/SessionImpl.java:
+        * java/jms/src/org/opendds/jms/TemporaryTopicImpl.java:
+        * java/jms/src/org/opendds/jms/TopicImpl.java:
+        * java/jms/src/org/opendds/jms/TopicMessageConsumerImpl.java:
+        * java/jms/src/org/opendds/jms/TopicMessageProducerImpl.java:
+
+          Implemented close and recover() in SessionImpl.
+
+        * java/jms/test/org/opendds/jms/AbstractMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/SessionImplTest.java:
+        * java/jms/test/org/opendds/jms/TopicMessageConsumerImplTest.java:
+        * java/jms/test/org/opendds/jms/TopicMessageProducerImplTest.java:
+
+          Added tests for close() and recover() in SessionImpl.
+
+        * java/jms/src/org/opendds/jms/TopicImplFactory.java:
+
+          Removed this file.
+
 Mon Nov 17 19:48:29 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/OpenDDS.ipr:

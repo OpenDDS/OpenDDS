@@ -97,7 +97,8 @@ public class TopicMessageProducerImpl implements MessageProducer {
         return deliveryMode;
     }
 
-    public void setDeliveryMode(int deliveryMode) {
+    public void setDeliveryMode(int deliveryMode) throws JMSException {
+        checkClosed();
         validateDeliveryMode(deliveryMode);
         this.deliveryMode = deliveryMode;
     }
@@ -112,7 +113,8 @@ public class TopicMessageProducerImpl implements MessageProducer {
         return priority;
     }
 
-    public void setPriority(int priority) {
+    public void setPriority(int priority) throws JMSException {
+        checkClosed();
         validatePriority(priority);
         this.priority = priority;
     }
@@ -127,7 +129,8 @@ public class TopicMessageProducerImpl implements MessageProducer {
         return timeToLive;
     }
 
-    public void setTimeToLive(long timeToLive) {
+    public void setTimeToLive(long timeToLive) throws JMSException {
+        checkClosed();
         validateTimeTiLive(timeToLive);
         this.timeToLive = timeToLive;
     }

@@ -107,7 +107,7 @@ public abstract class AbstractMessageImpl implements Message {
     }
 
     public Destination getJMSReplyTo() throws JMSException {
-        return TopicImplFactory.fromString(headers.JMSReplyTo, sessionImpl.getOwningConnection(), sessionImpl.getParticipant());
+        return new TopicImpl(headers.JMSReplyTo);
     }
 
     public void setJMSReplyTo(Destination destination) throws JMSException {
@@ -115,7 +115,7 @@ public abstract class AbstractMessageImpl implements Message {
     }
 
     public Destination getJMSDestination() throws JMSException {
-        return TopicImplFactory.fromString(headers.JMSDestination, sessionImpl.getOwningConnection(), sessionImpl.getParticipant());
+        return new TopicImpl(headers.JMSDestination);
     }
 
     public void setJMSDestination(Destination destination) throws JMSException {
@@ -134,7 +134,7 @@ public abstract class AbstractMessageImpl implements Message {
         return headers.JMSRedelivered;
     }
 
-    public void setJMSRedelivered(boolean redelivered) throws JMSException {
+    public void setJMSRedelivered(boolean redelivered) {
         headers.JMSRedelivered = redelivered;
     }
 

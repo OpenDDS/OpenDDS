@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Map;
+import java.util.Collection;
 
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;
@@ -235,8 +237,8 @@ public class TopicMessageConsumerImplTest {
         final MessagePayloadTypeSupportImpl typeSupport = new MessagePayloadTypeSupportImpl();
         assertNotNull(typeSupport);
 
-        typeSupport.register_type(participant, "OpenDDS::MessagePayload");
-        final Topic topic = participant.create_topic("OpenDDS::MessagePayload", typeSupport.get_type_name(), TOPIC_QOS_DEFAULT.get(), null);
+        typeSupport.register_type(participant, "OpenDDS::JMS::MessagePayload");
+        final Topic topic = participant.create_topic("OpenDDS::JMS::MessagePayload", typeSupport.get_type_name(), TOPIC_QOS_DEFAULT.get(), null);
         assertNotNull(topic);
 
         Destination destination = new TopicImpl("Topic 1") {
@@ -351,12 +353,17 @@ public class TopicMessageConsumerImplTest {
             try {
                 final Field field = SessionImpl.class.getDeclaredField("unacknowledged");
                 field.setAccessible(true);
-                List<DataReaderHandlePair> unacknowledged = (List<DataReaderHandlePair>) field.get(this);
-                return unacknowledged.size();
+                Map<TopicMessageConsumerImpl, List<DataReaderHandlePair>> unacknowledged = (Map<TopicMessageConsumerImpl, List<DataReaderHandlePair>>) field.get(this);
+                final Collection<List<DataReaderHandlePair>> listCollection = unacknowledged.values();
+                int count = 0;
+                for (List<DataReaderHandlePair> pairs : listCollection) {
+                    count += pairs.size();
+                }
+                return count;
             } catch (NoSuchFieldException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                e.printStackTrace();
             } catch (IllegalAccessException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                e.printStackTrace();
             }
             return Integer.MAX_VALUE; // Unexpected
         }

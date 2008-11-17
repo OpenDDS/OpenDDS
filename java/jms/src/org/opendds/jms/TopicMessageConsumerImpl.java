@@ -4,6 +4,8 @@
 
 package org.opendds.jms;
 
+import java.util.List;
+
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -34,6 +36,8 @@ import DDS.SampleInfoSeqHolder;
 import DDS.Subscriber;
 import DDS.Topic;
 import DDS.WaitSet;
+import DDS.READ_SAMPLE_STATE;
+import DDS.NOT_NEW_VIEW_STATE;
 import OpenDDS.JMS.MessagePayload;
 import OpenDDS.JMS.MessagePayloadDataReader;
 import OpenDDS.JMS.MessagePayloadDataReaderHelper;
@@ -64,6 +68,7 @@ public class TopicMessageConsumerImpl implements MessageConsumer {
 
     // JMS 1.1, 4.4.11,
     private SessionImpl sessionImpl;
+    private List<DataReaderHandlePair> toBeRecovered;
 
     public TopicMessageConsumerImpl(Destination destination, String messageSelector, boolean noLocal, Subscriber subscriber, DomainParticipant participant, SessionImpl sessionImpl) throws JMSException {
         Objects.ensureNotNull(subscriber);
@@ -83,6 +88,7 @@ public class TopicMessageConsumerImpl implements MessageConsumer {
         this.waitSet.attach_condition(closeToken);
 
         this.sessionImpl = sessionImpl;
+        this.toBeRecovered = null;
     }
 
     private MessagePayloadDataReader fromDestination(Destination destination, Subscriber subscriber, DomainParticipant participant) throws JMSException {
@@ -96,7 +102,7 @@ public class TopicMessageConsumerImpl implements MessageConsumer {
     private Topic extractDDSTopicFromDestination(Destination destination, DomainParticipant participant) throws JMSException {
         // TODO placeholder, to be elaborated
         TopicImpl topicImpl = (TopicImpl) destination;
-        return topicImpl.createTopic(null);
+        return topicImpl.createTopic(participant);
     }
 
     public String getMessageSelector() throws JMSException {
@@ -120,7 +126,7 @@ public class TopicMessageConsumerImpl implements MessageConsumer {
     public Message receive() throws JMSException {
         checkClosed();
         Duration_t duration = new Duration_t(DURATION_INFINITY_SEC.value, DURATION_INFINITY_NSEC.value);
-        return doReceive(duration);
+        return doRecoverOrReceive(duration);
     }
 
     public Message receive(long timeout) throws JMSException {
@@ -134,13 +140,21 @@ public class TopicMessageConsumerImpl implements MessageConsumer {
             duration.sec = (int) timeout / 1000;
             duration.nanosec = ((int) (timeout % 1000)) * 1000;
         }
-        return doReceive(duration);
+        return doRecoverOrReceive(duration);
     }
 
     public Message receiveNoWait() throws JMSException {
         checkClosed();
         Duration_t duration = new Duration_t(0, 0);
-        return doReceive(duration);
+        return doRecoverOrReceive(duration);
+    }
+
+    private Message doRecoverOrReceive(Duration_t duration) throws JMSException {
+        if (toBeRecovered != null && !toBeRecovered.isEmpty()) {
+            return doRecoverSync();
+        } else {
+            return doReceive(duration);
+        }
     }
 
     private Message doReceive(Duration_t duration) throws JMSException {
@@ -182,7 +196,7 @@ public class TopicMessageConsumerImpl implements MessageConsumer {
                     messagePayloadDataReader.delete_readcondition(readCondition);
                     AbstractMessageImpl message = buildMessageFromPayload(messagePayload, handle, sessionImpl);
                     DataReaderHandlePair dataReaderHandlePair = new DataReaderHandlePair(messagePayloadDataReader, handle);
-                    sessionImpl.addToUnacknowledged(dataReaderHandlePair);
+                    sessionImpl.addToUnacknowledged(dataReaderHandlePair, this);
                     if (sessionImpl.getAcknowledgeMode() != Session.CLIENT_ACKNOWLEDGE) {
                         sessionImpl.doAcknowledge();
                     }
@@ -209,5 +223,51 @@ public class TopicMessageConsumerImpl implements MessageConsumer {
     private void checkClosed() {
         // JMS 1.1, 4.4.1
         if (closed) throw new IllegalStateException("This MessageConsumer is closed.");
+    }
+
+    void doRecover(List<DataReaderHandlePair> dataReaderHandlePairs) {
+        if (messageListener != null) {
+            doRecoverAsync(dataReaderHandlePairs);
+        } else {
+            toBeRecovered = dataReaderHandlePairs;
+        }
+    }
+
+    private void doRecoverAsync(List<DataReaderHandlePair> dataReaderHandlePairs) {
+        for (DataReaderHandlePair pair : dataReaderHandlePairs) {
+            final MessagePayloadDataReader reader = pair.getDataReader();
+            final int handle = pair.getInstanceHandle();
+            MessagePayloadSeqHolder payloads = new MessagePayloadSeqHolder(new MessagePayload[0]);
+            SampleInfoSeqHolder infos = new SampleInfoSeqHolder(new SampleInfo[0]);
+            int rc = reader.read_instance(payloads, infos, 1, handle, READ_SAMPLE_STATE.value, NOT_NEW_VIEW_STATE.value, ALIVE_INSTANCE_STATE.value);
+            if (rc != RETCODE_OK.value) continue;
+
+            MessagePayload messagePayload = payloads.value[0];
+            SampleInfo sampleInfo = infos.value[0];
+            AbstractMessageImpl message = buildMessageFromPayload(messagePayload, handle, sessionImpl);
+            message.setJMSRedelivered(true);
+            sessionImpl.getMessageDeliveryExecutorService().execute(new MessageDispatcher(message, pair, this, sessionImpl));
+        }
+    }
+
+    private Message doRecoverSync() {
+        while (true) {
+            final DataReaderHandlePair pair = toBeRecovered.remove(0);
+            final MessagePayloadDataReader reader = pair.getDataReader();
+            final int handle = pair.getInstanceHandle();
+            MessagePayloadSeqHolder payloads = new MessagePayloadSeqHolder(new MessagePayload[0]);
+            SampleInfoSeqHolder infos = new SampleInfoSeqHolder(new SampleInfo[0]);
+            int rc = reader.read_instance(payloads, infos, 1, handle, READ_SAMPLE_STATE.value, NOT_NEW_VIEW_STATE.value, ALIVE_INSTANCE_STATE.value);
+            if (rc != RETCODE_OK.value) continue;
+            MessagePayload messagePayload = payloads.value[0];
+            SampleInfo sampleInfo = infos.value[0];
+            AbstractMessageImpl message = buildMessageFromPayload(messagePayload, handle, sessionImpl);
+            message.setJMSRedelivered(true);
+            sessionImpl.addToUnacknowledged(pair, this);
+            if (sessionImpl.getAcknowledgeMode() != Session.CLIENT_ACKNOWLEDGE) {
+                sessionImpl.doAcknowledge();
+            }
+            return message;
+        }
     }
 }

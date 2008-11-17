@@ -52,7 +52,7 @@ public class DataWriterPair {
     private static Topic extractDDSTopicFromDestination(Destination destination, DomainParticipant participant) throws JMSException {
         // TODO placeholder, to be elaborated
         TopicImpl topicImpl = (TopicImpl) destination;
-        return topicImpl.createTopic(null);
+        return topicImpl.createTopic(participant);
     }
 
     public MessagePayloadDataWriter getDataWriter(int deliveryMode) {

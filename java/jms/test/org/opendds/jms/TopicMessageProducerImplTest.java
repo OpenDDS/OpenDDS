@@ -210,8 +210,8 @@ public class TopicMessageProducerImplTest {
         final MessagePayloadTypeSupportImpl typeSupport = new MessagePayloadTypeSupportImpl();
         assertNotNull(typeSupport);
 
-        typeSupport.register_type(participant, "OpenDDS::MessagePayload");
-        final Topic topic = participant.create_topic("OpenDDS::MessagePayload", typeSupport.get_type_name(), TOPIC_QOS_DEFAULT.get(), null);
+        typeSupport.register_type(participant, "OpenDDS::JMS::MessagePayload");
+        final Topic topic = participant.create_topic("OpenDDS::JMS::MessagePayload", typeSupport.get_type_name(), TOPIC_QOS_DEFAULT.get(), null);
         assertNotNull(topic);
 
         Destination destination = new TopicImpl("Topic1") {
