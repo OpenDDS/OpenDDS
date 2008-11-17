@@ -1,3 +1,29 @@
+Mon Nov 17 19:48:29 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/OpenDDS.ipr:
+        * java/ant/opendds-ant.iml:
+        * java/jms/opendds-jms.iml:
+        * java/jms/src/META-INF/services/org.opendds.jms.common.beans.spi.Type:
+        * java/jms/src/org/opendds/jms/common/beans/BeanHelper.java:
+        * java/jms/src/org/opendds/jms/common/beans/spi/BooleanType.java:
+        * java/jms/src/org/opendds/jms/common/beans/spi/ByteType.java:
+        * java/jms/src/org/opendds/jms/common/beans/spi/CharacterType.java:
+        * java/jms/src/org/opendds/jms/common/beans/spi/DoubleType.java:
+        * java/jms/src/org/opendds/jms/common/beans/spi/FloatType.java:
+        * java/jms/src/org/opendds/jms/common/beans/spi/IntegerType.java:
+        * java/jms/src/org/opendds/jms/common/beans/spi/LongType.java:
+        * java/jms/src/org/opendds/jms/common/beans/spi/ThreadSynchStrategyType.java:
+        * java/jms/src/org/opendds/jms/common/util/Serial.java:
+        * java/jms/src/org/opendds/jms/transport/Transports.java:
+        * java/jms/src/org/opendds/jms/transport/spi/ReliableMulticastTransport.java:
+        * java/jms/src/org/opendds/jms/transport/spi/SimpleMcastTransport.java:
+        * java/jms/src/org/opendds/jms/transport/spi/SimpleTcpTransport.java:
+        * java/jms/src/org/opendds/jms/transport/spi/SimpleUdpTransport.java:
+        * java/jms/src/org/opendds/jms/transport/spi/Transport.java:
+
+          Updates to transport configuration; removed uneccessary operation
+          on Transport subclasses. Added type conversion for ThreadSynStrategy.
+
 Mon Nov 17 17:16:41 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/InfoRepo/DCPS_Utils.cpp:

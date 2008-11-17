@@ -75,7 +75,7 @@ public class BeanHelper {
         for (PropertyDescriptor descriptor : descriptors.values()) {
             if (Annotations.isAnnotated(descriptor.getReadMethod(), annotationClass)
                 || Annotations.isAnnotated(descriptor.getWriteMethod(), annotationClass)) {
-                
+
                 collection.add(descriptor);
             }
         }
@@ -124,12 +124,16 @@ public class BeanHelper {
             throw new IntrospectionException(descriptor.getName() + " is a read-only property!");
         }
 
-        // Support automatic type conversion:
+        // Support automatic type conversion for non-null values:
         Class propertyType = descriptor.getPropertyType();
-        if (!propertyType.isAssignableFrom(value.getClass())) {
-            value = convertValue(value, propertyType);
+        if (value != null && !propertyType.isAssignableFrom(value.getClass())) {
+            Type type = registry.findType(propertyType);
+            if (type == null) {
+                throw new UnsupportedTypeException(value);
+            }
+            value = type.valueOf(value);
         }
-        
+
         try {
             method.invoke(instance, value);
 
@@ -144,15 +148,5 @@ public class BeanHelper {
             String name = (String) en.nextElement();
             setProperty(instance, name, properties.getProperty(name));
         }
-    }
-
-    //
-
-    private Object convertValue(Object value, Class propertyType) {
-        Type type = registry.findType(propertyType);
-        if (type == null) {
-            throw new UnsupportedTypeException(value);
-        }
-        return type.valueOf(value);
     }
 }

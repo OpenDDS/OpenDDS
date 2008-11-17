@@ -4,8 +4,6 @@
 
 package org.opendds.jms.transport.spi;
 
-import OpenDDS.DCPS.transport.ReliableMulticastConfiguration;
-
 import org.opendds.jms.common.SvcConfDirective;
 
 /**
@@ -16,10 +14,6 @@ public class ReliableMulticastTransport implements Transport {
 
     public String getName() {
         return "ReliableMulticast";
-    }
-
-    public Class getConfigurationClass() {
-        return ReliableMulticastConfiguration.class;
     }
 
     public SvcConfDirective getDirective() {

@@ -14,7 +14,5 @@ public interface Transport {
 
     String getName();
 
-    Class getConfigurationClass();
-
     SvcConfDirective getDirective();
 }
