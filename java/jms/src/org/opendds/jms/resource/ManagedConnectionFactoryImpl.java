@@ -121,7 +121,7 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
         return Objects.hashCode(domainId,
                                 participantQosPolicy,
                                 publisherQosPolicy,
-            publisherTransport,
+                                publisherTransport,
                                 subscriberQosPolicy,
                                 subscriberTransportConfig,
                                 transportType);

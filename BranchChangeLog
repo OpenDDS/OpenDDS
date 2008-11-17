@@ -1,3 +1,50 @@
+Mon Nov 17 07:25:58 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+        
+        * java/OpenDDS.ipr:
+        * java/jms/doc/example/jboss/opendds-ds.xml:
+        * java/jms/src/META-INF/services:
+        * java/jms/src/META-INF/services/org.opendds.jms.common.beans.spi.Type:
+        * java/jms/src/META-INF/services/org.opendds.jms.transport.spi.Transport:
+        * java/jms/src/org/opendds/jms/common/SvcConfDirective.java:
+        * java/jms/src/org/opendds/jms/common/beans:
+        * java/jms/src/org/opendds/jms/common/beans/BeanHelper.java:
+        * java/jms/src/org/opendds/jms/common/beans/IntrospectionException.java:
+        * java/jms/src/org/opendds/jms/common/beans/ReflectionException.java:
+        * java/jms/src/org/opendds/jms/common/beans/UnsupportedTypeException.java:
+        * java/jms/src/org/opendds/jms/common/beans/spi:
+        * java/jms/src/org/opendds/jms/common/beans/spi/BooleanType.java:
+        * java/jms/src/org/opendds/jms/common/beans/spi/ByteType.java:
+        * java/jms/src/org/opendds/jms/common/beans/spi/CharacterType.java:
+        * java/jms/src/org/opendds/jms/common/beans/spi/DoubleType.java:
+        * java/jms/src/org/opendds/jms/common/beans/spi/FloatType.java:
+        * java/jms/src/org/opendds/jms/common/beans/spi/IntegerType.java:
+        * java/jms/src/org/opendds/jms/common/beans/spi/LongType.java:
+        * java/jms/src/org/opendds/jms/common/beans/spi/StringType.java:
+        * java/jms/src/org/opendds/jms/common/beans/spi/Type.java:
+        * java/jms/src/org/opendds/jms/common/beans/spi/TypeRegistry.java:
+        * java/jms/src/org/opendds/jms/common/lang/Annotations.java:
+        * java/jms/src/org/opendds/jms/common/util/JndiHelper.java:
+        * java/jms/src/org/opendds/jms/common/util/LibIndex.java:
+        * java/jms/src/org/opendds/jms/common/util/NativeLoader.java:
+        * java/jms/src/org/opendds/jms/management/Destination.java:
+        * java/jms/src/org/opendds/jms/management/DynamicMBeanMetaData.java:
+        * java/jms/src/org/opendds/jms/management/ParticipantFactoryService.java:
+        * java/jms/src/org/opendds/jms/management/argument/ArgumentWriter.java:
+        * java/jms/src/org/opendds/jms/management/argument/DCPSArguments.java:
+        * java/jms/src/org/opendds/jms/management/argument/InfoRepoArguments.java:
+        * java/jms/src/org/opendds/jms/resource/ManagedConnectionFactoryImpl.java:
+        * java/jms/src/org/opendds/jms/resource/ResourceAdapterImpl.java:
+        * java/jms/src/org/opendds/jms/transport/Transports.java:
+        * java/jms/src/org/opendds/jms/transport/spi:
+        * java/jms/src/org/opendds/jms/transport/spi/ReliableMulticastTransport.java:
+        * java/jms/src/org/opendds/jms/transport/spi/SimpleMcastTransport.java:
+        * java/jms/src/org/opendds/jms/transport/spi/SimpleTcpTransport.java:
+        * java/jms/src/org/opendds/jms/transport/spi/SimpleUdpTransport.java:
+        * java/jms/src/org/opendds/jms/transport/spi/Transport.java:
+        * java/jms/src/org/opendds/jms/transport/spi/TransportRegistry.java:
+
+          Added transport configuration; general refactorings.
+
 Fri Nov 14 21:01:56 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DomainParticipantImpl.h:

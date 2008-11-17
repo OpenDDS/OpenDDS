@@ -59,7 +59,7 @@ public class Destination extends DynamicMBeanSupport implements Serializable, Se
 
     @KeyProperty
     public void setType(String type) {
-        // Currently, only 'Topic' destination types are supported.
+        // Currently, only 'Topic' destination types are getType.
         // This is a placeholder until Queuing support is added.
         if (!"Topic".equals(type)) {
             throw new IllegalArgumentException(type);

@@ -2,7 +2,7 @@
  * $Id$
  */
 
-package org.opendds.jms.common.loader;
+package org.opendds.jms.common.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;

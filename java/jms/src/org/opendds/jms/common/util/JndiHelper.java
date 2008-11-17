@@ -55,9 +55,8 @@ public class JndiHelper {
         while (en.hasMoreElements()) {
             String comp = en.nextElement();
 
-            // Ignore last component (not a context)
             if (!en.hasMoreElements()) {
-                break;
+                break; // ignore last component; not a context
             }
 
             try {
@@ -65,13 +64,11 @@ public class JndiHelper {
                 if (!(obj instanceof Context)) {
                     break; // not a context; abort
                 }
+                context = (Context) obj; // context exists
 
-                context = (Context) obj;
-                continue; // context already exists; skip
-
-            } catch (NamingException e) {}
-
-            context = context.createSubcontext(comp);
+            } catch (NamingException e) {
+                context = context.createSubcontext(comp);
+            }
         }
 
         return name;

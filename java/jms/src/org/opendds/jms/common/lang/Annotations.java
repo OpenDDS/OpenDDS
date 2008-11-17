@@ -16,6 +16,10 @@ import java.util.Set;
  */
 public class Annotations {
 
+    public static boolean isAnnotated(Method method, Class<? extends Annotation> annotationClass) {
+        return method != null && method.isAnnotationPresent(annotationClass);
+    }
+
     public static <A extends Annotation> A getAnnotation(Object obj, Class<A> annotationClass) {
         assert obj != null;
         assert annotationClass != null;

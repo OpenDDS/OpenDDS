@@ -64,19 +64,27 @@
         <connection-definition>org.opendds.jms.resource.ConnectionFactoryImpl</connection-definition>
         <config-property name="DomainId" type="java.lang.Integer">2</config-property>
         <config-property name="ParticipantQosPolicy" type="java.lang.String">
-            <!-- TODO -->
+            USER_DATA.value=CustomParticipantData
         </config-property>
         <config-property name="PublisherQosPolicy" type="java.lang.String">
-            <!-- TODO -->
+            PRESENTATION.access_scope=GROUP
+            PRESENTATION.coherent_access=true
         </config-property>
         <config-property name="PublisherTransport" type="java.lang.String">
-            <!-- TODO -->
+            id=21
+            swapBytes=false
+            maxPacketSize=1500
+            maxSamplesPerPacket=7
         </config-property>
         <config-property name="SubscriberQosPolicy" type="java.lang.String">
-            <!-- TODO -->
+            PRESENTATION.access_scope=GROUP
+            PRESENTATION.coherent_access=true
         </config-property>
         <config-property name="SubscriberTransport" type="java.lang.String">
-            <!-- TODO -->
+            id=22
+            swapBytes=false
+            maxPacketSize=1500
+            maxSamplesPerPacket=7
         </config-property>
         <config-property name="TransportType" type="java.lang.String">SimpleTcp</config-property>
         <max-pool-size>20</max-pool-size>

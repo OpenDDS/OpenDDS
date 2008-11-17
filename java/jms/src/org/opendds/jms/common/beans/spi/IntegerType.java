@@ -1,0 +1,36 @@
+/*
+ * $Id$
+ */
+ 
+package org.opendds.jms.common.beans.spi;
+
+import org.opendds.jms.common.beans.UnsupportedTypeException;
+
+/**
+ * @author  Steven Stallion
+ * @version $Revision$
+ */
+public class IntegerType implements Type<Integer> {
+
+    public Class<Integer> getType() {
+        return Integer.class;
+    }
+
+    public Integer defaultValue() {
+        return 0;
+    }
+
+    public Integer valueOf(Object o) {
+        if (o instanceof Boolean) {
+            return ((Boolean) o) ? 1 : 0;
+
+        } else if (o instanceof Number) {
+            return ((Number) o).intValue();
+
+        } else if (o instanceof String) {
+            return Integer.valueOf((String) o);
+        }
+
+        throw new UnsupportedTypeException(o);
+    }
+}
