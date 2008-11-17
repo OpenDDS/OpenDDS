@@ -61,7 +61,7 @@ public class ConsumerDataReaderListener extends _DataReaderListenerLocalBase {
         int handle = sampleInfo.instance_handle;
         AbstractMessageImpl message = buildMessageFromPayload(messagePayload, handle, sessionImpl);
         DataReaderHandlePair dataReaderHandlePair = new DataReaderHandlePair(reader, handle);
-        sessionImpl.getMessageDeliveryExecutorService().execute(new MessageDispatcher(message, dataReaderHandlePair));
+        sessionImpl.getMessageDeliveryExecutorService().execute(new MessageDispatcher(message, dataReaderHandlePair, consumer, sessionImpl));
     }
 
     private static boolean readOneSample(MessagePayloadDataReader reader, MessagePayloadSeqHolder payloads, SampleInfoSeqHolder infos) {
@@ -80,21 +80,23 @@ public class ConsumerDataReaderListener extends _DataReaderListenerLocalBase {
         // No-op
     }
 
-    private class MessageDispatcher implements Runnable {
-        private final AbstractMessageImpl message;
-        private final DataReaderHandlePair dataReaderHandlePair;
-
-        public MessageDispatcher(AbstractMessageImpl message, DataReaderHandlePair dataReaderHandlePair) {
-            this.message = message;
-            this.dataReaderHandlePair = dataReaderHandlePair;
-        }
-
-        public void run() {
-            consumer.getMessageListener().onMessage(message);
-            sessionImpl.addToUnacknowledged(dataReaderHandlePair);
-            if (sessionImpl.getAcknowledgeMode() != Session.CLIENT_ACKNOWLEDGE) {
-                sessionImpl.doAcknowledge();
-            }
-        }
-    }
+//    private class MessageDispatcher implements Runnable {
+//        private final AbstractMessageImpl message;
+//        private final DataReaderHandlePair dataReaderHandlePair;
+//        private final TopicMessageConsumerImpl consumer;
+//
+//        public MessageDispatcher(AbstractMessageImpl message, DataReaderHandlePair dataReaderHandlePair, TopicMessageConsumerImpl consumer) {
+//            this.message = message;
+//            this.dataReaderHandlePair = dataReaderHandlePair;
+//            this.consumer = consumer;
+//        }
+//
+//        public void run() {
+//            consumer.getMessageListener().onMessage(message);
+//            sessionImpl.addToUnacknowledged(dataReaderHandlePair, consumer);
+//            if (sessionImpl.getAcknowledgeMode() != Session.CLIENT_ACKNOWLEDGE) {
+//                sessionImpl.doAcknowledge();
+//            }
+//        }
+//    }
 }

@@ -12,6 +12,8 @@ import javax.jms.Topic;
 import DDS.DomainParticipant;
 import DDS.TopicQosHolder;
 
+import OpenDDS.JMS.MessagePayloadTypeSupportImpl;
+
 import org.opendds.jms.qos.DataReaderQosPolicy;
 import org.opendds.jms.qos.DataWriterQosPolicy;
 import org.opendds.jms.qos.QosPolicies;
@@ -68,6 +70,8 @@ public class TopicImpl implements Serializable, Topic {
             topicQosPolicy.setQos(holder.value);
         }
 
+        MessagePayloadTypeSupportImpl typeSupport = new MessagePayloadTypeSupportImpl();
+        typeSupport.register_type(participant, "OpenDDS::JMS::MessagePayload");
         DDS.Topic topic = participant.create_topic(topicName,
             "OpenDDS::JMS::MessagePayload", holder.value, null);
 

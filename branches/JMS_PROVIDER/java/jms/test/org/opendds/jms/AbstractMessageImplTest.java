@@ -70,11 +70,11 @@ public class AbstractMessageImplTest {
         final SessionImpl sessionImpl = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, fakeObjects.connection);
         Message message = new TextMessageImpl(sessionImpl);
 
-        Destination destination = TopicImplFactory.fromString("org.opendds.jms.TopicImpl[topicName=Test Destination]", null, null);
+        Destination destination = new TopicImpl("Test Destination");
         message.setJMSDestination(destination);
         assertEquals(destination.toString(), message.getJMSDestination().toString());
 
-        Destination destination2 = TopicImplFactory.fromString("org.opendds.jms.TopicImpl[topicName=Test Destination]", null, null);
+        Destination destination2 = new TopicImpl("Test Destination");
         message.setJMSReplyTo(destination2);
         assertEquals(destination2.toString(), message.getJMSReplyTo().toString());
     }
@@ -825,8 +825,8 @@ public class AbstractMessageImplTest {
         final MessagePayloadTypeSupportImpl typeSupport = new MessagePayloadTypeSupportImpl();
         assertNotNull(typeSupport);
 
-        typeSupport.register_type(participant, "OpenDDS::MessagePayload");
-        final Topic topic = participant.create_topic("OpenDDS::MessagePayload", typeSupport.get_type_name(), TOPIC_QOS_DEFAULT.get(), null);
+        typeSupport.register_type(participant, "OpenDDS::JMS::MessagePayload");
+        final Topic topic = participant.create_topic("OpenDDS::JMS::MessagePayload", typeSupport.get_type_name(), TOPIC_QOS_DEFAULT.get(), null);
         assertNotNull(topic);
 
         Destination destination = new TopicImpl("Topic 1") {

@@ -8,8 +8,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import java.util.concurrent.TimeUnit;
 
 import javax.jms.BytesMessage;
 import javax.jms.Connection;
@@ -63,14 +67,18 @@ public class SessionImpl implements Session {
     // JMS 1.1, 4.4.14, Asynchronous Message delivery thread
     private ExecutorService messageDeliveryExecutorService;
     // JMS 1.1, 4.4.11, The sessions view of unacknowledged Messages, used in recover()
-    private List<DataReaderHandlePair> unacknowledged;
-    private Object lockForUnacknowledged;
+    private Map<TopicMessageConsumerImpl, List<DataReaderHandlePair>> unacknowledged;
+    private final Object lockForUnacknowledged;
+    private Map<TopicMessageConsumerImpl, List<DataReaderHandlePair>> toBeRecovered;
     private ConnectionImpl owningConnection;
 
     // OpenDDS stuff
     private DomainParticipant participant;
     private Publisher publisher;
     private Subscriber subscriber;
+
+    private boolean closed;
+    private Object lockForClosed;
 
     public SessionImpl(boolean transacted, int acknowledgeMode, DomainParticipant participant, Publisher publisher, Subscriber subscriber, ConnectionImpl connection) {
         Objects.ensureNotNull(participant);
@@ -82,11 +90,12 @@ public class SessionImpl implements Session {
         this.subscriber = subscriber;
         this.publisher = publisher;
         this.participant = participant;
+        this.closed = false;
 
         this.createdProducers = new ArrayList<MessageProducer>();
         this.createdConsumers = new ArrayList<MessageConsumer>();
         this.messageDeliveryExecutorService = Executors.newSingleThreadExecutor();
-        this.unacknowledged = new LinkedList<DataReaderHandlePair>();
+        this.unacknowledged = new HashMap<TopicMessageConsumerImpl, List<DataReaderHandlePair>>();
         this.lockForUnacknowledged = new Object();
         this.owningConnection = connection;
     }
@@ -104,22 +113,26 @@ public class SessionImpl implements Session {
     }
 
     public void setMessageListener(MessageListener messageListener) throws JMSException {
+        checkClosed();
         // TODO what do a session level MessageListener do?
         this.messageListener = messageListener;
     }
 
     public MessageConsumer createConsumer(Destination destination) throws JMSException {
+        checkClosed();
         return createConsumer(destination, null, false);
     }
 
     public MessageConsumer createConsumer(Destination destination,
                                           String messageSelector) throws JMSException {
+        checkClosed();
         return createConsumer(destination, messageSelector, false);
     }
 
     public MessageConsumer createConsumer(Destination destination,
                                           String messageSelector,
                                           boolean noLocal) throws JMSException {
+        checkClosed();
         validateDestination(destination);
         MessageConsumer messageConsumer = new TopicMessageConsumerImpl(destination, messageSelector, noLocal, subscriber, participant, this);
         createdConsumers.add(messageConsumer);
@@ -129,6 +142,7 @@ public class SessionImpl implements Session {
     private void validateDestination(Destination destination) throws InvalidDestinationException {
         if (destination instanceof TopicImpl) {
             if (destination instanceof TemporaryTopicImpl) {
+                // JMS 1.1, 4.4.3
                 TemporaryTopicImpl temporaryTopicImpl = (TemporaryTopicImpl) destination;
                 final Connection connectionForTemporaryTopic = temporaryTopicImpl.getConnection();
                 if (owningConnection != connectionForTemporaryTopic) {
@@ -142,6 +156,7 @@ public class SessionImpl implements Session {
     }
 
     public MessageProducer createProducer(Destination destination) throws JMSException {
+        checkClosed();
         MessageProducer messageProducer = new TopicMessageProducerImpl(destination, publisher, participant);
         createdProducers.add(messageProducer);
         return messageProducer;
@@ -149,19 +164,21 @@ public class SessionImpl implements Session {
 
     public TopicSubscriber createDurableSubscriber(Topic topic,
                                                    String name) throws JMSException {
-        // TODO
-        return null;
+        checkClosed();
+        return createDurableSubscriber(topic, name, null, false);
     }
 
     public TopicSubscriber createDurableSubscriber(Topic topic,
                                                    String name,
                                                    String messageSelector,
                                                    boolean noLocal) throws JMSException {
+        checkClosed();
         // TODO
         return null;
     }
 
     public void unsubscribe(String name) throws JMSException {
+        checkClosed();
         // TODO
     }
 
@@ -184,52 +201,63 @@ public class SessionImpl implements Session {
     }
 
     public Topic createTopic(String topicName) throws JMSException {
+        checkClosed();
         // TODO
         return null;
     }
 
     public TemporaryTopic createTemporaryTopic() throws JMSException {
+        checkClosed();
         return TemporaryTopicImpl.newTemporaryTopicImpl(owningConnection, participant);
     }
 
     public Message createMessage() throws JMSException {
+        checkClosed();
         return new TextMessageImpl(this);
     }
 
     public BytesMessage createBytesMessage() throws JMSException {
+        checkClosed();
         return new BytesMessageImpl(this);
     }
 
     public MapMessage createMapMessage() throws JMSException {
+        checkClosed();
         return new MapMessageImpl(this);
     }
 
     public ObjectMessage createObjectMessage() throws JMSException {
+        checkClosed();
         return new ObjectMessageImpl(this);
     }
 
     public ObjectMessage createObjectMessage(Serializable object) throws JMSException {
+        checkClosed();
         ObjectMessageImpl message = new ObjectMessageImpl(this);
         message.setObject(object);
         return message;
     }
 
     public StreamMessage createStreamMessage() throws JMSException {
+        checkClosed();
         return new StreamMessageImpl(this);
     }
 
     public TextMessage createTextMessage() throws JMSException {
+        checkClosed();
         return new TextMessageImpl(this);
     }
 
     public TextMessage createTextMessage(String text) throws JMSException {
+        checkClosed();
         TextMessageImpl message = new TextMessageImpl(this);
         message.setText(text);
         return message;
     }
 
     public void run() {
-        throw new UnsupportedOperationException();
+        checkClosed();
+        // TODO
     }
 
     public void commit() throws JMSException {
@@ -241,40 +269,82 @@ public class SessionImpl implements Session {
     }
 
     public void recover() throws JMSException {
-        // TODO
-    }
-
-    public void close() throws JMSException {
-        // TODO
-    }
-
-    public ExecutorService getMessageDeliveryExecutorService() {
-        return messageDeliveryExecutorService;
-    }
-
-    void doAcknowledge() {
-        // TODO locking
-        List<DataReaderHandlePair> copy;
+        checkClosed();
         synchronized(lockForUnacknowledged) {
-            copy = new LinkedList<DataReaderHandlePair>(unacknowledged);
+            toBeRecovered = new HashMap<TopicMessageConsumerImpl, List<DataReaderHandlePair>>(unacknowledged);
             unacknowledged.clear();
         }
-        for (DataReaderHandlePair pair: copy) {
-            MessagePayloadDataReader dataReader = pair.getDataReader();
-            int instanceHandle = pair.getInstanceHandle();
-
-            MessagePayloadSeqHolder payloads = new MessagePayloadSeqHolder(new MessagePayload[0]);
-            SampleInfoSeqHolder infos = new SampleInfoSeqHolder(new SampleInfo[0]);
-            int rc = dataReader.take_instance(payloads, infos, 1, instanceHandle, ANY_SAMPLE_STATE.value, ANY_VIEW_STATE.value, ANY_INSTANCE_STATE.value);
-            if (rc == RETCODE_OK.value) {
-                // The instance handle is gone from the dataReader for some other reason.
+        if (transacted) throw new IllegalStateException("recover() called on a transacted Session.");
+        stopMessageDelivery();
+        if (messageListener != null) {
+            recoverAsync();
+        } else {
+            for (TopicMessageConsumerImpl consumer: toBeRecovered.keySet()) {
+                final List<DataReaderHandlePair> pairs = toBeRecovered.get(consumer);
+                consumer.doRecover(pairs);
             }
         }
     }
 
-    public void addToUnacknowledged(DataReaderHandlePair dataReaderHandlePair) {
+    private void recoverAsync() {
+        // TODO
+    }
+
+    private void stopMessageDelivery() {
+        // TODO should tell consumers to stop message delivery
+    }
+
+    public void close() throws JMSException {
+        if (closed) return;
+        for (MessageProducer producer: createdProducers) producer.close();
+        for (MessageConsumer consumer: createdConsumers) consumer.close();
+        messageDeliveryExecutorService.shutdown();
+        try {
+            messageDeliveryExecutorService.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
+        } catch (InterruptedException e) {
+            // restore interrupted status
+            Thread.currentThread().interrupt();
+        }
+        this.closed = true;
+    }
+
+    public void checkClosed() {
+        if (closed) throw new IllegalStateException("This Session is closed.");
+    }
+
+    ExecutorService getMessageDeliveryExecutorService() {
+        return messageDeliveryExecutorService;
+    }
+
+    void doAcknowledge() {
+        Map<TopicMessageConsumerImpl, List<DataReaderHandlePair>> copy;
         synchronized(lockForUnacknowledged) {
-            unacknowledged.add(dataReaderHandlePair);
+            copy = new HashMap<TopicMessageConsumerImpl, List<DataReaderHandlePair>>(unacknowledged);
+            unacknowledged.clear();
+        }
+        for (List<DataReaderHandlePair> pairList: copy.values()) {
+            for (DataReaderHandlePair pair: pairList) {
+                MessagePayloadDataReader dataReader = pair.getDataReader();
+                int instanceHandle = pair.getInstanceHandle();
+
+                MessagePayloadSeqHolder payloads = new MessagePayloadSeqHolder(new MessagePayload[0]);
+                SampleInfoSeqHolder infos = new SampleInfoSeqHolder(new SampleInfo[0]);
+                int rc = dataReader.take_instance(payloads, infos, 1, instanceHandle, ANY_SAMPLE_STATE.value, ANY_VIEW_STATE.value, ANY_INSTANCE_STATE.value);
+                if (rc == RETCODE_OK.value) {
+                    // The instance handle is gone from the dataReader for some other reason.
+                }
+            }
+        }
+    }
+
+    void addToUnacknowledged(DataReaderHandlePair dataReaderHandlePair, TopicMessageConsumerImpl consumer) {
+        synchronized(lockForUnacknowledged) {
+            List<DataReaderHandlePair> pairs = unacknowledged.get(consumer);
+            if (pairs == null) {
+                pairs = new ArrayList<DataReaderHandlePair>();
+                unacknowledged.put(consumer, pairs);
+            }
+            pairs.add(dataReaderHandlePair);
         }
     }
 

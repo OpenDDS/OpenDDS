@@ -40,7 +40,7 @@ public class TemporaryTopicImpl extends TopicImpl implements TemporaryTopic {
     private DDS.Topic createDDSTopic() {
         String temporaryTopicName = temporaryTopicID.toString();
         MessagePayloadTypeSupportImpl typeSupport = new MessagePayloadTypeSupportImpl();
-        typeSupport.register_type(participant, temporaryTopicName);
+        typeSupport.register_type(participant, "OpenDDS::JMS::MessagePayload");
         return participant.create_topic(temporaryTopicName, typeSupport.get_type_name(), TOPIC_QOS_DEFAULT.get(), null);
     }
 
@@ -64,18 +64,11 @@ public class TemporaryTopicImpl extends TopicImpl implements TemporaryTopic {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(getClass().getName());
-        sb.append("[temporaryTopicID=" + temporaryTopicID.toString() + "]");
-        return sb.toString();
+        return temporaryTopicID.toString();
     }
 
     static TemporaryTopicImpl newTemporaryTopicImpl(ConnectionImpl owningConnection, DomainParticipant participant) {
         TemporaryTopicID temporaryTopicID = TemporaryTopicID.createTemporaryTopicID();
-        return new TemporaryTopicImpl(temporaryTopicID, owningConnection, participant);
-    }
-
-    static TemporaryTopicImpl fromTemporaryTopicIDString(String temporaryTopicIDString, ConnectionImpl owningConnection, DomainParticipant participant) {
-        TemporaryTopicID temporaryTopicID = TemporaryTopicID.fromString(temporaryTopicIDString);
         return new TemporaryTopicImpl(temporaryTopicID, owningConnection, participant);
     }
 }
