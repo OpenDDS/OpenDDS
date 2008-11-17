@@ -4,8 +4,6 @@
 
 package org.opendds.jms.transport.spi;
 
-import OpenDDS.DCPS.transport.SimpleMcastConfiguration;
-
 import org.opendds.jms.common.SvcConfDirective;
 
 /**
@@ -16,10 +14,6 @@ public class SimpleMcastTransport implements Transport {
 
     public String getName() {
         return "SimpleMcast";
-    }
-
-    public Class getConfigurationClass() {
-        return SimpleMcastConfiguration.class;
     }
 
     public SvcConfDirective getDirective() {

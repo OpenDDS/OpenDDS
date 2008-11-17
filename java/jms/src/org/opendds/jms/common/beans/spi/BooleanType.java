@@ -1,7 +1,7 @@
 /*
  * $Id$
  */
- 
+
 package org.opendds.jms.common.beans.spi;
 
 import org.opendds.jms.common.beans.UnsupportedTypeException;
@@ -27,7 +27,6 @@ public class BooleanType implements Type<Boolean> {
         } else if (o instanceof String) {
             return Boolean.valueOf((String) o);
         }
-
         throw new UnsupportedTypeException(o);
     }
 }

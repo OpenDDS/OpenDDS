@@ -4,8 +4,6 @@
 
 package org.opendds.jms.transport.spi;
 
-import OpenDDS.DCPS.transport.SimpleTcpConfiguration;
-
 import org.opendds.jms.common.SvcConfDirective;
 
 /**
@@ -16,10 +14,6 @@ public class SimpleTcpTransport implements Transport {
 
     public String getName() {
         return "SimpleTcp";
-    }
-
-    public Class getConfigurationClass() {
-        return SimpleTcpConfiguration.class;
     }
     
     public SvcConfDirective getDirective() {

@@ -6,10 +6,12 @@ package org.opendds.jms.transport;
 
 import java.util.Properties;
 
+import OpenDDS.DCPS.transport.TheTransportFactory;
 import OpenDDS.DCPS.transport.TransportConfiguration;
 
 import org.opendds.jms.common.SvcConfDirective;
 import org.opendds.jms.common.beans.BeanHelper;
+import org.opendds.jms.common.util.Serial;
 import org.opendds.jms.transport.spi.Transport;
 import org.opendds.jms.transport.spi.TransportRegistry;
 
@@ -18,6 +20,7 @@ import org.opendds.jms.transport.spi.TransportRegistry;
  * @version $Revision$
  */
 public class Transports {
+    private static final Serial serial = new Serial();
     private static TransportRegistry registry = new TransportRegistry();
 
     static {
@@ -32,23 +35,20 @@ public class Transports {
         return transport.getDirective();
     }
 
-    public static Class getConfigurationClass(String transportType) {
-        Transport transport = registry.findTransport(transportType);
-        if (transport == null) {
-            throw new IllegalArgumentException(transportType);
+    public static TransportConfiguration createConfiguration(String transportType, Properties properties) {
+        TransportConfiguration configuration;
+
+        synchronized (serial) {
+            if (serial.overflowed()) {
+                throw new IllegalStateException("Insufficient transport ids available!");
+            }
+            configuration = TheTransportFactory.get_or_create_configuration(serial.next(), transportType);
         }
-        return transport.getConfigurationClass();
-    }
 
-    public static TransportConfiguration createConfiguration(String transportType,
-                                                             Properties properties) {
-        BeanHelper helper =
-            new BeanHelper(getConfigurationClass(transportType));
+        BeanHelper helper = new BeanHelper(configuration.getClass());
+        helper.setProperties(configuration, properties);
 
-        TransportConfiguration instance = (TransportConfiguration) helper.newInstance();
-        helper.setProperties(instance, properties);
-
-        return instance;
+        return configuration;
     }
 
     //

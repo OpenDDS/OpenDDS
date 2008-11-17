@@ -1,7 +1,7 @@
 /*
  * $Id$
  */
- 
+
 package org.opendds.jms.common.beans.spi;
 
 import org.opendds.jms.common.beans.UnsupportedTypeException;
@@ -26,7 +26,6 @@ public class CharacterType implements Type {
             String s = (String) o;
             return !Strings.isEmpty(s) ? s.charAt(0) : defaultValue();
         }
-
         throw new UnsupportedTypeException(o);
     }
 }

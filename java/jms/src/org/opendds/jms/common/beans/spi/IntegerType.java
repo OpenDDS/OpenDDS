@@ -1,7 +1,7 @@
 /*
  * $Id$
  */
- 
+
 package org.opendds.jms.common.beans.spi;
 
 import org.opendds.jms.common.beans.UnsupportedTypeException;
@@ -30,7 +30,6 @@ public class IntegerType implements Type<Integer> {
         } else if (o instanceof String) {
             return Integer.valueOf((String) o);
         }
-
         throw new UnsupportedTypeException(o);
     }
 }
