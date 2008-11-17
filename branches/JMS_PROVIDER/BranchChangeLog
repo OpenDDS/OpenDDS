@@ -1,5 +1,13 @@
+Mon Nov 17 17:16:41 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/InfoRepo/DCPS_Utils.cpp:
+
+          Take advantage of the new wildcard matching algorithm in ACE so that
+          PARTITION QoS supports character class ([...]) wildcards per the
+          DDS spec.
+
 Mon Nov 17 07:25:58 UTC 2008  Steven Stallion  <stallions@ociweb.com>
-        
+
         * java/OpenDDS.ipr:
         * java/jms/doc/example/jboss/opendds-ds.xml:
         * java/jms/src/META-INF/services:
