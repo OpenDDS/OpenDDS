@@ -4,16 +4,11 @@
 
 package org.opendds.jms.common.lang;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 /**
  * @author  Steven Stallion
  * @version $Revision$
  */
 public class Strings {
-    private static final Pattern EXPAND_PATTERN =
-        Pattern.compile("\\$\\{([\\w\\.]*)\\}");
 
     public static String capitalize(String s) {
         assert s != null;
@@ -24,25 +19,6 @@ public class Strings {
 
         char first = sbuf.charAt(0);
         sbuf.setCharAt(0, Character.toUpperCase(first));
-
-        return sbuf.toString();
-    }
-
-    public static String expand(String s) {
-        assert s != null;
-
-        Matcher matcher = EXPAND_PATTERN.matcher(s);
-
-        StringBuffer sbuf = new StringBuffer();
-
-        int group = 1;
-        while (matcher.find()) {
-            String property = System.getProperty(matcher.group(group++));
-            if (property != null) {
-                matcher.appendReplacement(sbuf, property);
-            }
-        }
-        matcher.appendTail(sbuf);
 
         return sbuf.toString();
     }
