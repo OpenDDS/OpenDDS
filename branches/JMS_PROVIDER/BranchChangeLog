@@ -1,3 +1,23 @@
+Tue Nov 18 19:43:22 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * java/idl2jni/codegen/im_java.cpp:
+        * java/idl2jni/codegen/im_jni.cpp:
+
+          Made idl2jni-generated code a little smarter in how it deals with
+          enums (only one Java object for each value) and inout parameters
+          (doesn't copy the object tree on the way back out).
+
+        * java/tests/complex_idl/ComplexIDLTest.java:
+
+          Verify that a complex object tree is not cloned when passed through
+          to a native method with "inout".
+
+        * java/tests/messenger/publisher/TestPublisher.java:
+        * java/tests/messenger/subscriber/DataReaderListenerImpl.java:
+        * java/tests/messenger/subscriber/TestSubscriber.java:
+
+          Fixed formatting and error messags.
+
 Tue Nov 18 14:13:05 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/OpenDDS.ipr:

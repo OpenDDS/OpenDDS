@@ -424,6 +424,18 @@ bool idl_mapping_java::gen_enum (UTL_ScopedName *name,
 {
   ostringstream oss;
   const char *enum_name = name->last_component ()->get_string ();
+  oss <<
+    "  private static " << enum_name << "[] __values = {\n";
+  for (size_t i = 0; i < contents.size (); ++i)
+    {
+      oss <<
+        "    new " << enum_name << '(' << i << ')';
+      if (i < contents.size () - 1) oss << ',';
+      oss << '\n';
+    }
+  oss
+    << "  };\n\n";
+
   unsigned long count (0);
   for (size_t i = 0; i < contents.size (); ++i)
     {
@@ -432,17 +444,24 @@ bool idl_mapping_java::gen_enum (UTL_ScopedName *name,
         "  public static final int _" << enumerator_name
         << " = " << count++ << ";\n"
         "  public static final " << enum_name << ' '
-        << enumerator_name << " = new " << enum_name << "(_"
-        << enumerator_name << ");\n\n";
+        << enumerator_name << " = __values[" << (count-1) << "];\n\n";
     }
 
   oss <<
-    "  public int value() { return _value; }\n"
-    "  private int _value;\n"
+    "  public int value() { return _value; }\n\n"
+    "  private int _value;\n\n"
     "  public static " << enum_name << " from_int(int value) {\n"
-    "    return new " << enum_name << "(value);\n"
-    "  }\n"
-    "  protected " << enum_name << "(int value) { _value = value; }\n";
+    "    if (value >= 0 && value < " << contents.size () << ") {\n"
+    "      return __values[value];\n"
+    "    } else {\n"
+    "      return new " << enum_name << "(value);\n"
+    "    }\n"
+    "  }\n\n"
+    "  protected " << enum_name << "(int value) { _value = value; }\n\n"
+    "  public Object readResolve()\n"
+    "      throws java.io.ObjectStreamException {\n"
+    "    return from_int(value());\n"
+    "  }\n\n";
 
   JavaName jn (name);
   return java_class_gen (jn, JCLASS,
