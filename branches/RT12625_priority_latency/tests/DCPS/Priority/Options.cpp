@@ -20,20 +20,31 @@ namespace { // anonymous namespace for file scope.
   //
   // Default values.
   //
-  const Options::TransportType DEFAULT_TRANSPORT_TYPE = Options::TCP;
 
+  const unsigned long DEFAULT_TEST_DOMAIN    = 521;
+  const unsigned long DEFAULT_TEST_PRIORITY  =   0;
+  const Test::Options::TransportType
+                      DEFAULT_TRANSPORT_TYPE = Test::Options::TCP;
+  const unsigned int  DEFAULT_TRANSPORT_KEY  =   1;
+  const long          DEFAULT_PUBLISHER_ID   =   1;
+  const char*         DEFAULT_TEST_TOPICNAME = "TestTopic";
+
+  // Map command line arguments to transport types and keys.
   const struct TransportTypeArgMappings {
-    std::string            optionName;
-    Options::TransportType transportType;
+    std::string optionName;
+    std::pair< Test::Options::TransportType, unsigned int>
+                transportInfo;
 
   } transportTypeArgMappings[] = {
-    { "tcp", Options::TCP },
-    { "udp", Options::UDP },
-    { "mc",  Options::MC },
-    { "rmc", Options::RMC }
+    { "tcp", std::make_pair( Test::Options::TCP, 1) },
+    { "udp", std::make_pair( Test::Options::UDP, 2) },
+    { "mc",  std::make_pair( Test::Options::MC,  3) },
+    { "rmc", std::make_pair( Test::Options::RMC, 4) }
   };
 
 } // end of anonymous namespace.
+
+namespace Test {
 
 // Command line argument definitions.
 const char* Options::TRANSPORT_TYPE_ARGUMENT = "-t";
@@ -44,7 +55,12 @@ Options::~Options()
 }
 
 Options::Options( int argc, char** argv, char** /* envp */)
- : transportType_( DEFAULT_TRANSPORT_TYPE)
+ : domain_(        DEFAULT_TEST_DOMAIN),
+   priority_(      DEFAULT_TEST_PRIORITY),
+   transportType_( DEFAULT_TRANSPORT_TYPE),
+   transportKey_(  DEFAULT_TRANSPORT_KEY),
+   publisherId_(   DEFAULT_PUBLISHER_ID),
+   topicName_(     DEFAULT_TEST_TOPICNAME)
 {
   ACE_Arg_Shifter parser( argc, argv);
   while( parser.is_anything_left()) {
@@ -56,7 +72,8 @@ Options::Options( int argc, char** argv, char** /* envp */)
            ++index
          ) {
         if( transportTypeArgMappings[ index].optionName == currentArg) {
-          this->transportType_ = transportTypeArgMappings[ index].transportType;
+          this->transportType_ = transportTypeArgMappings[ index].transportInfo.first;
+          this->transportKey_  = transportTypeArgMappings[ index].transportInfo.second;
           break;
         }
       }
@@ -81,16 +98,18 @@ Options::Options( int argc, char** argv, char** /* envp */)
 }
 
 std::ostream&
-operator<<( std::ostream& str, Options::TransportType value)
+operator<<( std::ostream& str, Test::Options::TransportType value)
 {
   switch( value) {
-    case Options::TCP: return str << "TCP";
-    case Options::UDP: return str << "UDP";
-    case Options::MC:  return str << "MC";
-    case Options::RMC: return str << "RMC";
+    case Test::Options::TCP: return str << "TCP";
+    case Test::Options::UDP: return str << "UDP";
+    case Test::Options::MC:  return str << "MC";
+    case Test::Options::RMC: return str << "RMC";
 
     default:
-    case Options::NONE: return str << "NONE";
+    case Test::Options::NONE: return str << "NONE";
   }
 }
+
+} // End of namespace Test
 

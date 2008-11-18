@@ -12,8 +12,7 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 
-namespace Test
-{
+namespace Test {
 
   class DataWriterListener
     : public virtual OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataWriterListener>
@@ -62,6 +61,6 @@ namespace Test
 
   };
 
-}
+} // End of namespace Test
 
 #endif  /* DATA_WRITER_LISTENER_H */

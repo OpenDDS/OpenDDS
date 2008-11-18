@@ -21,6 +21,7 @@ project(DDS*Publisher) : dcpsexe_with_unreliable_dgram, dcps_reliable_multicast,
     Publisher.cpp
     Options.cpp
     DataWriterListener.cpp
+    publisher_main.cpp
   }
 }
 
@@ -36,5 +37,6 @@ project(DDS*Subscriber) : dcpsexe_with_unreliable_dgram, dcps_reliable_multicast
     Subscriber.cpp
     Options.cpp
     DataReaderListener.cpp
+    subscriber_main.cpp
   }
 }
