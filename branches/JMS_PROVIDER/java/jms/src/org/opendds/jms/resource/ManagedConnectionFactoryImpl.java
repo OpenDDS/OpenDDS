@@ -14,7 +14,12 @@ import javax.resource.spi.ManagedConnection;
 import javax.resource.spi.ManagedConnectionFactory;
 import javax.security.auth.Subject;
 
+import org.opendds.jms.ConnectionFactoryImpl;
 import org.opendds.jms.common.lang.Objects;
+import org.opendds.jms.qos.ParticipantQosPolicy;
+import org.opendds.jms.qos.PublisherQosPolicy;
+import org.opendds.jms.qos.SubscriberQosPolicy;
+import org.opendds.jms.transport.TransportConfigurationFactory;
 
 /**
  * @author  Steven Stallion
@@ -26,10 +31,10 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
     private String publisherQosPolicy;
     private String publisherTransport;
     private String subscriberQosPolicy;
-    private String subscriberTransportConfig;
+    private String subscriberTransport;
     private String transportType;
 
-    private PrintWriter out;
+    private PrintWriter log;
 
     public Integer getDomainId() {
         return domainId;
@@ -71,12 +76,12 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
         this.subscriberQosPolicy = subscriberQosPolicy;
     }
 
-    public String getSubscriberTransportConfig() {
-        return subscriberTransportConfig;
+    public String getSubscriberTransport() {
+        return subscriberTransport;
     }
 
-    public void setSubscriberTransportConfig(String subscriberTransportConfig) {
-        this.subscriberTransportConfig = subscriberTransportConfig;
+    public void setSubscriberTransport(String subscriberTransport) {
+        this.subscriberTransport = subscriberTransport;
     }
 
     public String getTransportType() {
@@ -88,19 +93,31 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
     }
 
     public PrintWriter getLogWriter() {
-        return out;
+        return log;
     }
 
-    public void setLogWriter(PrintWriter out) {
-        this.out = out;
+    public void setLogWriter(PrintWriter log) {
+        this.log = log;
     }
 
-    public Object createConnectionFactory() throws ResourceException {
-        return null;
+    public Object createConnectionFactory() {
+        return createConnectionFactory(null);
     }
 
-    public Object createConnectionFactory(ConnectionManager connectionManager) throws ResourceException {
-        return null;
+    public Object createConnectionFactory(ConnectionManager connectionManager) {
+        TransportConfigurationFactory configFactory =
+            new TransportConfigurationFactory(transportType);
+
+        ConnectionFactoryImpl instance = new ConnectionFactoryImpl(connectionManager);
+
+        instance.setDomainId(domainId);
+        instance.setParticipantQosPolicy(new ParticipantQosPolicy(participantQosPolicy));
+        instance.setPublisherQosPolicy(new PublisherQosPolicy(publisherQosPolicy));
+        instance.setPublisherTransport(configFactory.createConfiguration(publisherTransport));
+        instance.setSubscriberQosPolicy(new SubscriberQosPolicy(subscriberQosPolicy));
+        instance.setSubscriberTransport(configFactory.createConfiguration(subscriberTransport));
+
+        return instance;
     }
 
     public ManagedConnection createManagedConnection(Subject subject,
@@ -116,14 +133,12 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
 
     @Override
     public int hashCode() {
-        // ManagedConnectionFactory.hashCode() must be defined in
-        // terms of its configuration:
         return Objects.hashCode(domainId,
                                 participantQosPolicy,
                                 publisherQosPolicy,
                                 publisherTransport,
                                 subscriberQosPolicy,
-                                subscriberTransportConfig,
+                                subscriberTransport,
                                 transportType);
     }
 
@@ -138,14 +153,12 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
         }
 
         ManagedConnectionFactoryImpl cf = (ManagedConnectionFactoryImpl) o;
-
-        // ManagedConnectionFactory.equals() must be defined in
-        // terms of its configuration:
         return Objects.equalsWithNull(domainId, cf.domainId)
             || Objects.equalsWithNull(participantQosPolicy, cf.participantQosPolicy)
             || Objects.equalsWithNull(publisherQosPolicy, cf.publisherQosPolicy)
             || Objects.equalsWithNull(publisherTransport, cf.publisherTransport)
             || Objects.equalsWithNull(subscriberQosPolicy, cf.subscriberQosPolicy)
-            || Objects.equalsWithNull(subscriberTransportConfig, cf.subscriberTransportConfig);
+            || Objects.equalsWithNull(subscriberTransport, cf.subscriberTransport)
+            || Objects.equalsWithNull(transportType, cf.transportType);
     }
 }

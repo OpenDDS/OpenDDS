@@ -25,7 +25,6 @@
     <mbean code="org.opendds.jms.management.Destination"
            name="OpenDDS:destination=DefaultTopic,type=Topic">
         <attribute name="JndiName">DDS/DefaultTopic</attribute>
-        <depends>OpenDDS:service=DomainParticipantFactory</depends>
     </mbean>
 
     <mbean code="org.opendds.jms.management.Destination"
@@ -42,7 +41,6 @@
         <attribute name="TopicQosPolicy">
             TOPIC_DATA.value=CustomTopicData
         </attribute>
-        <depends>OpenDDS:service=DomainParticipantFactory</depends>
     </mbean>
 
     <!--
@@ -51,7 +49,7 @@
     <no-tx-connection-factory>
         <jndi-name>DDS/DefaultConnectionFactory</jndi-name>
         <rar-name>opendds-jms-@VERSION@.rar</rar-name>
-        <connection-definition>org.opendds.jms.resource.ConnectionFactoryImpl</connection-definition>
+        <connection-definition>org.opendds.jms.ConnectionFactoryImpl</connection-definition>
         <config-property name="DomainId" type="java.lang.Integer">1</config-property>
         <config-property name="TransportType" type="java.lang.String">SimpleTcp</config-property>
         <max-pool-size>20</max-pool-size>
@@ -61,7 +59,7 @@
     <no-tx-connection-factory>
         <jndi-name>DDS/CustomConnectionFactory</jndi-name>
         <rar-name>opendds-jms-@VERSION@.rar</rar-name>
-        <connection-definition>org.opendds.jms.resource.ConnectionFactoryImpl</connection-definition>
+        <connection-definition>org.opendds.jms.ConnectionFactoryImpl</connection-definition>
         <config-property name="DomainId" type="java.lang.Integer">2</config-property>
         <config-property name="ParticipantQosPolicy" type="java.lang.String">
             USER_DATA.value=CustomParticipantData
