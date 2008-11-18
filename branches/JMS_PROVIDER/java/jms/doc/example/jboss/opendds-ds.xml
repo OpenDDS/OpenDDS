@@ -48,8 +48,9 @@
     -->
     <no-tx-connection-factory>
         <jndi-name>DDS/DefaultConnectionFactory</jndi-name>
+        <use-java-context>false</use-java-context>
         <rar-name>opendds-jms-@VERSION@.rar</rar-name>
-        <connection-definition>org.opendds.jms.ConnectionFactoryImpl</connection-definition>
+        <connection-definition>javax.jms.ConnectionFactory</connection-definition>
         <config-property name="DomainId" type="java.lang.Integer">1</config-property>
         <config-property name="TransportType" type="java.lang.String">SimpleTcp</config-property>
         <max-pool-size>20</max-pool-size>
@@ -58,8 +59,9 @@
 
     <no-tx-connection-factory>
         <jndi-name>DDS/CustomConnectionFactory</jndi-name>
+        <use-java-context>false</use-java-context>
         <rar-name>opendds-jms-@VERSION@.rar</rar-name>
-        <connection-definition>org.opendds.jms.ConnectionFactoryImpl</connection-definition>
+        <connection-definition>javax.jms.ConnectionFactory</connection-definition>
         <config-property name="DomainId" type="java.lang.Integer">2</config-property>
         <config-property name="ParticipantQosPolicy" type="java.lang.String">
             USER_DATA.value=CustomParticipantData
