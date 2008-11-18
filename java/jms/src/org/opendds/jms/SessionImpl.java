@@ -300,7 +300,7 @@ public class SessionImpl implements Session {
         for (MessageConsumer consumer: createdConsumers) consumer.close();
         messageDeliveryExecutorService.shutdown();
         try {
-            messageDeliveryExecutorService.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
+            messageDeliveryExecutorService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             // restore interrupted status
             Thread.currentThread().interrupt();

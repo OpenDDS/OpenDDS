@@ -31,7 +31,7 @@ sub new {
   my $jnid;
   if ($^O eq 'MSWin32') {
     $sep = ';';
-    $jnid = ' -Djni.nativeDebug=1'
+    $jnid = ' -Dopendds.native.debug=true'
       unless $PerlACE::Process::ExeSubDir =~ /Release/i;
   }
 
