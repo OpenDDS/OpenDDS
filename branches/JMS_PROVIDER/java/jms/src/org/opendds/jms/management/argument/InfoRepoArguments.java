@@ -25,7 +25,7 @@ public class InfoRepoArguments implements DynamicArgumentProvider {
     public static final String FEDERATOR_CONFIG = "FederatorConfig";
     public static final String FEDERATION_ID = "FederationId";
     public static final String FEDERATE_WITH = "FederateWith";
-    public static final String TRANSPORT_TYPE = "Transport";
+    public static final String TRANSPORT_TYPE = "TransportType";
 
     private DynamicMBeanSupport instance;
 
