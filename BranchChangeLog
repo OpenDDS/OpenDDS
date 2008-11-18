@@ -1,3 +1,12 @@
+Tue Nov 18 14:13:05 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/OpenDDS.ipr:
+        * java/ant/opendds-ant.iml:
+        * java/jms/doc/example/jboss/opendds-ds.xml:
+        * java/jms/opendds-jms.iml:
+
+          Configuration fixes.
+
 Mon Nov 17 20:47:05 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/README:
