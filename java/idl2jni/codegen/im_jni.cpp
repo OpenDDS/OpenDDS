@@ -441,8 +441,10 @@ bool idl_mapping_jni::gen_struct (UTL_ScopedName *name,
             "    copyToCxx (jni, target." + fname + ", obj);\n"
             "    jni->DeleteLocalRef (obj);\n";
           fieldsToJava +=
-            "    " + t + " obj = 0;\n"
-            "    copyToJava (jni, obj, source." + fname + ", true);\n"
+            "    " + t + " obj = createNewObject ? 0 : "
+            "static_cast<" + t + "> (jni->GetObjectField (target, fid));\n"
+            "    copyToJava (jni, obj, source." + fname
+            + ", createNewObject);\n"
             "    jni->SetObjectField (target, fid, obj);\n"
             "    jni->DeleteLocalRef (obj);\n";
         }
@@ -453,8 +455,10 @@ bool idl_mapping_jni::gen_struct (UTL_ScopedName *name,
             "    copyToCxx (jni, target." + fname + ", obj);\n"
             "    jni->DeleteLocalRef (obj);\n";
           fieldsToJava +=
-            "    jobject obj = 0;\n"
-            "    copyToJava (jni, obj, source." + fname + ", true);\n"
+            "    jobject obj = createNewObject ? 0 : "
+            "jni->GetObjectField (target, fid);\n"
+            "    copyToJava (jni, obj, source." + fname
+            + ", createNewObject);\n"
             "    jni->SetObjectField (target, fid, obj);\n"
             "    jni->DeleteLocalRef (obj);\n";
         }
@@ -628,7 +632,8 @@ bool idl_mapping_jni::gen_jarray_copies (UTL_ScopedName *name,
           loopCxx =
             "      jobject obj = jni->GetObjectArrayElement (arr, i);\n";
           loopJava =
-            "      jobject obj;\n";
+            "      jobject obj = createNewObject ? 0 : "
+            "jni->GetObjectArrayElement (arr, i);\n";
           if (useVar)
             {
               loopJava +=
@@ -647,7 +652,7 @@ bool idl_mapping_jni::gen_jarray_copies (UTL_ScopedName *name,
         "      jni->DeleteLocalRef (obj);\n";
       loopJava +=
         "      copyToJava (jni, obj, " + string (useVar ? "var" : "source[i]")
-        + ", true);\n"
+        + ", createNewObject);\n"
         "      jni->SetObjectArrayElement (arr, i, obj);\n"
         "      jni->DeleteLocalRef (obj);\n";
     }
@@ -656,12 +661,14 @@ bool idl_mapping_jni::gen_jarray_copies (UTL_ScopedName *name,
   toJavaBody <<
     "  jsize len = " << length << ";\n"
     "  " << actualJniType << "Array arr;\n"
+    "  if (!createNewObject && jni->GetArrayLength (target) < len) "
+    "createNewObject = true;\n"
     "  if (createNewObject)\n"
     "    {\n"
     << preNewArray <<
     "      arr = jni->New" << jniFn << "Array (len" << newArrayExtra << ");\n"
     "    }\n"
-    "  else //Array must be large enough already\n"
+    "  else\n"
     "    {\n"
     "      arr = target;\n"
     "    }\n"
@@ -857,9 +864,8 @@ namespace
               "      copyToCxx (_jni, _c_" + string (name) + ", _j_" + name
               + ");\n";
             argconv_out +=
-              "      _jni->DeleteLocalRef (_j_" + string (name) + ");\n"
-              "      copyToJava (_jni, _j_" + name + ", _c_" + name
-              + ", true);\n";
+              "      copyToJava (_jni, _j_" + string (name) + ", _c_"
+              + name + ");\n";
             tao_argconv_in +=
               "  " + jni + " _n_" + name + " = 0;\n"
               "  copyToJava (_jni, _n_" + name + ", " + name + ", true);\n";
@@ -1260,13 +1266,13 @@ bool idl_mapping_jni::gen_native (UTL_ScopedName *name, const char *)
         string elem_cxx (elem);
         // $elem_cxx =~ s/\//::/g;
         for (size_t iter = elem_cxx.find ('/'); iter != string::npos;
-          iter = elem_cxx.find ('/', iter + 1))
+             iter = elem_cxx.find ('/', iter + 1))
           {
             elem_cxx.replace (iter, 1, "::");
           }
         if (info) elem_cxx += "_var";
         return gen_jarray_copies (name, "L" + elem + ";", "Object", "jobject",
-            "jobjectArray", elem_cxx, true, "source.length ()");
+          "jobjectArray", elem_cxx, true, "source.length ()");
       }
     default:
       ; // fall through
@@ -1394,8 +1400,12 @@ bool idl_mapping_jni::gen_union (UTL_ScopedName *name,
             "        copyToCxx (jni, taoVal, value);\n"
             "        target." + br_name + " (taoVal);\n";
           copyToJava =
-            "        " + br_type + " obj = 0;\n"
-            "        copyToJava (jni, obj, source." + br_name + " (), true);\n"
+            "        jfieldID fid = jni->GetFieldID (clazz, \""
+            + string (br_name) + "\", \"" + br_sig + "\");\n"
+            "        " + br_type + " obj = createNewObject ? 0 : " + jniCast +
+            "jni->GetObjectField (target, fid)" + (jniCast.size () ? ")" : "")
+            + ";\n"
+            "        copyToJava (jni, obj, source." + br_name + " (), !obj);\n"
             "        jni->CallVoidMethod (target, mid, " + edisc + "obj);\n"
             "        jni->DeleteLocalRef (obj);\n";
       }
