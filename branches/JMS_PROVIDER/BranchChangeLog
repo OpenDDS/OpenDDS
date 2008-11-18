@@ -1,3 +1,10 @@
+Tue Nov 18 20:05:01 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Partition/Partition_Table.h:
+        * tests/DCPS/Partition/README:
+
+          Extended this test to use character class wildcards.
+
 Tue Nov 18 19:43:22 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * java/idl2jni/codegen/im_java.cpp:

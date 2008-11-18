@@ -51,7 +51,7 @@ namespace Test
     /// Partition Four
     char const * Four[] =
       {
-        "Wun?Two*Tree",  // A wildcard
+        "Wun?Two[0-9][!a-z]Tree",  // A wildcard
         0
       };
 
