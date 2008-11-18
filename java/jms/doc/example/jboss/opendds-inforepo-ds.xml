@@ -5,7 +5,7 @@
     Example DCPSInfoRepoService configuration.
 
     This configuration will create a DCPSInfoRepo instance using the
-    SimpleTcp transport type which listens to${jboss.bind.address}:6666.
+    SimpleTcp transport type which listens to ${jboss.bind.address}:6666.
 
     Author:  Steven Stallion
     Version: $Revision$
