@@ -8,7 +8,11 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include "ace/OS.h"
 #include <iosfwd>
+#include <string>
+
+namespace Test {
 
 class Options  {
   public:
@@ -32,21 +36,51 @@ class Options  {
     /// Virtual destructor.
     virtual ~Options();
 
+    /// Test domain.
+    protected: unsigned long& domain();
+    public:    unsigned long  domain() const;
+
+    /// Writer priority.
+    protected: unsigned long& priority();
+    public:    unsigned long  priority() const;
+
     /// Transport Type value.
     protected: TransportType& transportType();
     public:    TransportType  transportType() const;
+
+    /// Transport Key value, translated from the type.
+    protected: unsigned int& transportKey();
+    public:    unsigned int  transportKey() const;
 
     /// Publisher id value.
     protected: long& publisherId();
     public:    long  publisherId() const;
 
+    /// Test topic name.
+    protected: std::string& topicName();
+    public:    std::string topicName() const;
+
   private:
+    /// Test domain.
+    unsigned long domain_;
+
+    /// Writer priority.
+    unsigned long priority_;
+
     /// Transport Type value.
     TransportType transportType_;
 
+    /// Transport Key value.
+    unsigned int transportKey_;
+
     /// Publisher Id value.
     long publisherId_;
+
+    /// Topic name.
+    std::string topicName_;
 };
+
+} // End of namespace Test
 
 #if defined (__ACE_INLINE__)
 # include "Options.inl"

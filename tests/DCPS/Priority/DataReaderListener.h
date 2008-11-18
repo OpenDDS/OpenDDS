@@ -12,8 +12,8 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 
-namespace Test
-{
+namespace Test {
+
   class DataReaderListener
     : public virtual OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataReaderListener>
   {
@@ -72,12 +72,11 @@ namespace Test
     virtual void on_connection_deleted (DDS::DataReader_ptr)
       throw (CORBA::SystemException);
 
-  protected:
-
     // Destructor
     virtual ~DataReaderListener (void);
 
   };
-}
+
+} // End of namespace Test
 
 #endif /* DATA_READER_LISTENER_IMPL  */
