@@ -1,3 +1,10 @@
+Tue Nov 18 20:50:29 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/examples:
+        * java/examples/jms:
+
+          Added skeleton project for opendds-jms-example demo project.
+
 Tue Nov 18 20:05:01 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/Partition/Partition_Table.h:
