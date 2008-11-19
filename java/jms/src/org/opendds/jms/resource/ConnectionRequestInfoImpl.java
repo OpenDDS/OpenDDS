@@ -67,9 +67,13 @@ public class ConnectionRequestInfoImpl implements ConnectionRequestInfo, Seriali
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(domainId, participantQosPolicy,
-            publisherQosPolicy, publisherTransport,
-            subscriberQosPolicy, subscriberTransport);
+        return Objects.hashCode(
+            domainId,
+            participantQosPolicy,
+            publisherQosPolicy,
+            publisherTransport,
+            subscriberQosPolicy,
+            subscriberTransport);
     }
 
     @Override
