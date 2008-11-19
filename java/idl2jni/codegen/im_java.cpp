@@ -436,15 +436,14 @@ bool idl_mapping_java::gen_enum (UTL_ScopedName *name,
   oss
     << "  };\n\n";
 
-  unsigned long count (0);
   for (size_t i = 0; i < contents.size (); ++i)
     {
       const char *enumerator_name = contents[i]->local_name ()->get_string ();
       oss <<
         "  public static final int _" << enumerator_name
-        << " = " << count++ << ";\n"
+        << " = " << i << ";\n"
         "  public static final " << enum_name << ' '
-        << enumerator_name << " = __values[" << (count-1) << "];\n\n";
+        << enumerator_name << " = __values[" << i << "];\n\n";
     }
 
   oss <<
