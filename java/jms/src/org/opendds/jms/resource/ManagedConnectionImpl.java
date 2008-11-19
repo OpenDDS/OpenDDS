@@ -34,6 +34,7 @@ import org.opendds.jms.ConnectionImpl;
 import org.opendds.jms.PublisherManager;
 import org.opendds.jms.SubscriberManager;
 import org.opendds.jms.common.Version;
+import org.opendds.jms.common.lang.Objects;
 import org.opendds.jms.qos.ParticipantQosPolicy;
 import org.opendds.jms.qos.QosPolicies;
 
@@ -179,6 +180,11 @@ public class ManagedConnectionImpl implements ManagedConnection {
         throw new NotSupportedException(); // transactions not supported
     }
 
+    public boolean matches(Subject subject, ConnectionRequestInfo cxRequestInfo) {
+        return Objects.equals(this.subject, subject)
+            && Objects.equals(this.cxRequestInfo, cxRequestInfo);
+    }
+
     public synchronized void cleanup() throws ResourceException {
         checkDestroyed();
 
@@ -199,9 +205,7 @@ public class ManagedConnectionImpl implements ManagedConnection {
         checkDestroyed();
 
         cleanup();
-
         participant.delete_contained_entities();
-        notifyListeners(new ConnectionEvent(this, ConnectionEvent.CONNECTION_CLOSED));
 
         subject = null;
         cxRequestInfo = null;
@@ -211,6 +215,8 @@ public class ManagedConnectionImpl implements ManagedConnection {
         subscribers = null;
 
         destroyed = true;
+
+        notifyListeners(new ConnectionEvent(this, ConnectionEvent.CONNECTION_CLOSED));
     }
 
     protected void checkDestroyed() throws ResourceException {
