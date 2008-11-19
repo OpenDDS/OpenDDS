@@ -23,6 +23,13 @@ public class Strings {
         return sbuf.toString();
     }
 
+    public static StringBuilder fill(StringBuilder sb, char c, int len) {
+        for (int i = 0; i < len; ++i) {
+            sb.append(c);
+        }
+        return sb;
+    }
+
     public static boolean hasLength(String s, int len) {
         return hasLength(s, len, true);
     }
