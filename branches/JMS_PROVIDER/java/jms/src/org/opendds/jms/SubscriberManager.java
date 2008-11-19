@@ -1,14 +1,13 @@
 /*
  * $Id$
  */
- 
+
 package org.opendds.jms;
 
 import javax.jms.JMSException;
 import javax.resource.ResourceException;
 
 import DDS.DomainParticipant;
-import DDS.PartitionQosPolicy;
 import DDS.Subscriber;
 import DDS.SubscriberQosHolder;
 import OpenDDS.DCPS.transport.AttachStatus;
@@ -18,6 +17,7 @@ import org.opendds.jms.qos.QosPolicies;
 import org.opendds.jms.qos.SubscriberQosPolicy;
 import org.opendds.jms.resource.ConnectionRequestInfoImpl;
 import org.opendds.jms.resource.ManagedConnectionImpl;
+import org.opendds.jms.transport.TransportSupport;
 
 /**
  * @author  Steven Stallion
@@ -48,13 +48,11 @@ public class SubscriberManager extends TransportSupport {
 
         // Set PARTITION QosPolicy to support the noLocal client
         // specifier on created MessageConsumer instances:
-        PartitionQosPolicy partition;
         if (noLocal) {
-            partition = PartitionHelper.matchAll();
+            holder.value.partition = PartitionHelper.matchAll();
         } else {
-            partition = PartitionHelper.negate(connection.getConnectionId());
+            holder.value.partition = PartitionHelper.negate(connection.getConnectionId());
         }
-        holder.value.partition = partition;
 
         Subscriber subscriber = participant.create_subscriber(holder.value, null);
         if (subscriber == null) {

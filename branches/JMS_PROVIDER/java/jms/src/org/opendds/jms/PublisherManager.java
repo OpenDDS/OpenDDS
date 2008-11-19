@@ -1,7 +1,7 @@
 /*
  * $Id$
  */
- 
+
 package org.opendds.jms;
 
 import javax.jms.JMSException;
@@ -17,6 +17,7 @@ import org.opendds.jms.qos.PublisherQosPolicy;
 import org.opendds.jms.qos.QosPolicies;
 import org.opendds.jms.resource.ConnectionRequestInfoImpl;
 import org.opendds.jms.resource.ManagedConnectionImpl;
+import org.opendds.jms.transport.TransportSupport;
 
 /**
  * @author  Steven Stallion

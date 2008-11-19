@@ -1,7 +1,7 @@
 /*
  * $Id$
  */
- 
+
 package org.opendds.jms.common;
 
 import DDS.PartitionQosPolicy;
@@ -27,7 +27,7 @@ public class PartitionHelper {
 
         String[] parts = new String[len];
         for (int i = 0; i < len; ++i) {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder(len + 3);
 
             Strings.fill(sb, '?', i);
 

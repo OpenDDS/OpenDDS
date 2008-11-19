@@ -1,8 +1,8 @@
 /*
  * $Id$
  */
- 
-package org.opendds.jms;
+
+package org.opendds.jms.transport;
 
 import javax.resource.ResourceException;
 

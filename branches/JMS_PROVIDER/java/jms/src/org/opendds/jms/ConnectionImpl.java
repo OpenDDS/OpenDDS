@@ -17,15 +17,25 @@ import javax.jms.ServerSessionPool;
 import javax.jms.Session;
 import javax.jms.Topic;
 
+import org.opendds.jms.resource.ManagedConnectionImpl;
+
 /**
  * @author  Steven Stallion
  * @version $Revision$
  */
 public class ConnectionImpl implements Connection {
-    private List<TemporaryTopicImpl> temporaryTopics;
+    private ManagedConnectionImpl parent;
 
-    public ConnectionImpl() {
+    private List<TemporaryTopicImpl> temporaryTopics;
+    private boolean closed;
+
+    public ConnectionImpl(ManagedConnectionImpl parent) {
+        this.parent = parent;
         this.temporaryTopics = new ArrayList<TemporaryTopicImpl>();
+    }
+
+    public void setParent(ManagedConnectionImpl parent) {
+        this.parent = parent;
     }
 
     public String getClientID() throws JMSException {
@@ -152,5 +162,9 @@ public class ConnectionImpl implements Connection {
         for (int i = 0; i < part.name.length; ++i) {
             System.out.println("\t{" + part.name[i] + "}");
         }
+    }
+
+    public boolean isClosed() {
+        return closed;
     }
 }
