@@ -6,6 +6,8 @@ package org.opendds.jms.common;
 
 import DDS.PartitionQosPolicy;
 
+import org.opendds.jms.common.lang.Strings;
+
 /**
  * @author  Steven Stallion
  * @version $Revision$
@@ -22,20 +24,16 @@ public class PartitionHelper {
 
     public static PartitionQosPolicy negate(String s) {
         int len = s.length();
+
         String[] parts = new String[len];
-
         for (int i = 0; i < len; ++i) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
 
-            for (int j = 0; j < i; ++j) {
-                sb.append('?');
-            }
+            Strings.fill(sb, '?', i);
 
             sb.append("[!").append(s.charAt(i)).append("]");
 
-            for (int j = i + 1; j < len; ++j) {
-                sb.append('?');
-            }
+            Strings.fill(sb, '?', len - i - 1);
 
             parts[i] = sb.toString();
         }
