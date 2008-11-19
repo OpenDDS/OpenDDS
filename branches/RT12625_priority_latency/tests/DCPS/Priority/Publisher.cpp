@@ -7,7 +7,6 @@
 #include "Options.h"
 
 #include "TestTypeSupportImpl.h"
-#include "DataWriterListener.h"
 
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
@@ -30,19 +29,19 @@ namespace Test {
 
 Publisher::~Publisher()
 {
+  this->waiter_->detach_condition( this->status_.in());
+
   if( ! CORBA::is_nil( this->participant_.in())) {
     this->participant_->delete_contained_entities();
     TheParticipantFactory->delete_participant( this->participant_.in());
   }
   TheTransportFactory->release();
   TheServiceParticipant->shutdown();
-
-  // delete this->listener_;
 }
 
 Publisher::Publisher( const Options& options)
  : options_( options),
-   listener_( 0)
+   waiter_( new DDS::WaitSet)
 {
   // Create the DomainParticipant
   this->participant_
@@ -89,15 +88,6 @@ Publisher::Publisher( const Options& options)
       ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
       ACE_TEXT("created %s transport.\n"),
       buffer.str().c_str()
-    ));
-  }
-
-  // Create the listener.
-  this->listener_ = new DataWriterListener();
-  if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
-      ACE_TEXT("created writer listener.\n")
     ));
   }
 
@@ -226,7 +216,7 @@ Publisher::Publisher( const Options& options)
   this->writer_ = this->publisher_->create_datawriter(
                     this->topic_.in(),
                     writerQos,
-                    this->listener_
+                    DDS::DataWriterListener::_nil()
                   );
   if( CORBA::is_nil( this->writer_.in())) {
     ACE_ERROR((LM_ERROR,
@@ -242,12 +232,77 @@ Publisher::Publisher( const Options& options)
     ));
   }
 
+  // Grab, enable and attach the status condition for test synchronization.
+  this->status_ = this->writer_->get_statuscondition();
+  this->status_->set_enabled_statuses( DDS::PUBLICATION_MATCH_STATUS);
+  this->waiter_->attach_condition( this->status_.in());
+
+  if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
+      ACE_TEXT("created StatusCondition and WaitSet for test synchronization.\n")
+    ));
+  }
+
 }
 
 void
 Publisher::run()
 {
-  throw Test::Exception(); // Execute the test.
+  DDS::Duration_t   timeout = { SUBSCRIPTION_WAIT_TIME, 0};
+  DDS::ConditionSeq conditions;
+  DDS::PublicationMatchStatus matches = { 0, 0, 0};
+  do {
+    if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Publisher::run() - ")
+        ACE_TEXT("waiting for subscription to attach (total==%d, change==%d).\n"),
+        matches.total_count,
+        matches.total_count_change
+      ));
+    }
+    if( DDS::RETCODE_OK != this->waiter_->wait( conditions, timeout)) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Publisher::run() - ")
+        ACE_TEXT("failed to synchronize at start of test.\n")
+      ));
+      throw BadSyncException();
+    }
+    this->writer_->get_publication_match_status();
+
+  /// @TODO: Correct publication_match count bug.
+  } while( false && matches.total_count_change == 0);
+
+  if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) Publisher::run() - ")
+      ACE_TEXT("starting to publish samples.\n")
+    ));
+  }
+
+  Test::DataDataWriter_var dataWriter
+    = Test::DataDataWriter::_narrow( this->writer_.in());
+  Test::Data sample;
+  sample.key = 42;
+  for( unsigned int count = 0; count < this->options_.count(); ++count) {
+    sample.value = CORBA::string_dup( "This is a Test.");
+    dataWriter->write( sample, DDS::HANDLE_NIL);
+
+    if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Publisher::run() - ")
+        ACE_TEXT("wrote sample %d.\n"),
+        (1+count)
+      ));
+    }
+  }
+
+  if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) Publisher::run() - ")
+      ACE_TEXT("finished publishing samples.\n")
+    ));
+  }
 }
 
 } // End of namespace Test

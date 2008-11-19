@@ -3,6 +3,7 @@
 
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
+#include "dds/DCPS/WaitSet.h"
 
 namespace Test {
 
@@ -39,8 +40,11 @@ class Publisher {
     /// Writer.
     DDS::DataWriter_var writer_;
 
-    /// Writer listener.
-    DataWriterListener* listener_;
+    /// Blocking object for test synchronization.
+    DDS::WaitSet_var waiter_;
+
+    /// Blocking condition for test synchronization.
+    DDS::StatusCondition_var status_;
 };
 
 } // End of namespace Test

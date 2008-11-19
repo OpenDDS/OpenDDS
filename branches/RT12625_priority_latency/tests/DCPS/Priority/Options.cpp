@@ -23,6 +23,7 @@ namespace { // anonymous namespace for file scope.
 
   const unsigned long DEFAULT_TEST_DOMAIN    = 521;
   const unsigned long DEFAULT_TEST_PRIORITY  =   0;
+  const unsigned int  DEFAULT_SAMPLE_COUNT   =  10;
   const Test::Options::TransportType
                       DEFAULT_TRANSPORT_TYPE = Test::Options::TCP;
   const unsigned int  DEFAULT_TRANSPORT_KEY  =   1;
@@ -57,6 +58,7 @@ Options::~Options()
 Options::Options( int argc, char** argv, char** /* envp */)
  : domain_(        DEFAULT_TEST_DOMAIN),
    priority_(      DEFAULT_TEST_PRIORITY),
+   count_(         DEFAULT_SAMPLE_COUNT),
    transportType_( DEFAULT_TRANSPORT_TYPE),
    transportKey_(  DEFAULT_TRANSPORT_KEY),
    publisherId_(   DEFAULT_PUBLISHER_ID),

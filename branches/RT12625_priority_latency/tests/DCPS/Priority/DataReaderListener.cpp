@@ -28,6 +28,24 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
   Test::Data the_data;
   DDS::SampleInfo si;
   (void) dr->take_next_sample (the_data, si);
+
+  if( si.valid_data) {
+    if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) DataReaderListener::on_data_available() - ")
+        ACE_TEXT("received a valid sample: %03d: %s\n"),
+        the_data.key,
+        (const char*)the_data.value
+      ));
+    }
+
+  } else {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: DataReaderListener::on_data_available() - ")
+      ACE_TEXT("received an INVALID sample.\n")
+    ));
+  }
+
 }
 
 void
@@ -56,7 +74,7 @@ Test::DataReaderListener::on_liveliness_changed (
 
 void
 Test::DataReaderListener::on_subscription_match (
-    DDS::DataReader_ptr reader,
+    DDS::DataReader_ptr,
     const DDS::SubscriptionMatchStatus &)
   throw (CORBA::SystemException)
 {
