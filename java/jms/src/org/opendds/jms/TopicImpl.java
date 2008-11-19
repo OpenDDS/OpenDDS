@@ -11,7 +11,6 @@ import javax.jms.Topic;
 
 import DDS.DomainParticipant;
 import DDS.TopicQosHolder;
-
 import OpenDDS.JMS.MessagePayloadTypeSupportImpl;
 
 import org.opendds.jms.qos.DataReaderQosPolicy;
@@ -25,21 +24,19 @@ import org.opendds.jms.qos.TopicQosPolicy;
  */
 public class TopicImpl implements Serializable, Topic {
     private String topicName;
-
     private DataReaderQosPolicy dataReaderQosPolicy;
     private DataWriterQosPolicy dataWriterQosPolicy;
     private TopicQosPolicy topicQosPolicy;
 
     public TopicImpl(String topicName) {
-        this(topicName, null, null, null);
+        this.topicName = topicName;
     }
 
     public TopicImpl(String topicName,
                      DataReaderQosPolicy dataReaderQosPolicy,
                      DataWriterQosPolicy dataWriterQosPolicy,
                      TopicQosPolicy topicQosPolicy) {
-
-        this.topicName = topicName;
+        this(topicName);
         this.dataReaderQosPolicy = dataReaderQosPolicy;
         this.dataWriterQosPolicy = dataWriterQosPolicy;
         this.topicQosPolicy = topicQosPolicy;

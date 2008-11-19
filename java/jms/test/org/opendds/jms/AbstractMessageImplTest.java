@@ -44,6 +44,8 @@ import OpenDDS.DCPS.transport.TheTransportFactory;
 import OpenDDS.DCPS.transport.TransportImpl;
 import OpenDDS.JMS.MessagePayloadTypeSupportImpl;
 
+import org.opendds.jms.TopicImpl;
+
 public class AbstractMessageImplTest {
     private static final float FLOAT_EPSILON = 1e-6f;
     private static final double DOUBLE_EPSILON = 1e-12;
@@ -562,7 +564,7 @@ public class AbstractMessageImplTest {
         } catch (MessageFormatException e) {
             assertEquals("Invalid value passed in for setObjectProperty()", e.getMessage());
         }
-        
+
     }
 
     /**

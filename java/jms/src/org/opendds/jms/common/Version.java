@@ -17,8 +17,7 @@ public class Version {
 
     public synchronized static Version getInstance() {
         if (instance == null) {
-            instance = new Version(
-                PropertiesHelper.forName("version.properties"));
+            instance = new Version(PropertiesHelper.forName("version.properties"));
         }
         return instance;
     }
@@ -27,6 +26,10 @@ public class Version {
 
     protected Version(Properties properties) {
         helper = new PropertiesHelper(properties);
+    }
+
+    public String getProductName() {
+        return "OpenDDS";
     }
 
     public String getDDSVersion() {
@@ -67,6 +70,6 @@ public class Version {
 
     @Override
     public String toString() {
-        return "OpenDDS v" + getDDSVersion();
+        return String.format("%s v%s", getProductName(), getDDSVersion());
     }
 }
