@@ -1,3 +1,9 @@
+Wed Nov 19 02:14:04 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/idl2jni/codegen/im_java.cpp:
+
+          Fixed incorrect enum indices.
+
 Wed Nov 19 00:19:25 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/src/org/opendds/jms/ConnectionFactoryImpl.java:
