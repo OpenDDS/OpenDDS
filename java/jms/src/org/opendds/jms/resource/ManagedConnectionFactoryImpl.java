@@ -97,11 +97,18 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
 
     public void setLogWriter(PrintWriter log) {}
 
+    public void validate() {
+        require("TransportType", transportType);
+        require("DomainId", domainId);
+    }
+
     public Object createConnectionFactory() {
         return createConnectionFactory(null);
     }
 
     public Object createConnectionFactory(ConnectionManager cxManager) {
+        validate();
+
         TransportConfigurationFactory tcf =
             new TransportConfigurationFactory(transportType);
 
@@ -171,5 +178,13 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
             && Objects.equals(subscriberQosPolicy, mcf.subscriberQosPolicy)
             && Objects.equals(subscriberTransport, mcf.subscriberTransport)
             && Objects.equals(transportType, mcf.transportType);
+    }
+
+    //
+
+    private void require(String name, Object value) {
+        if (value == null) {
+            throw new IllegalArgumentException(name + " is a required config-property!");
+        }
     }
 }
