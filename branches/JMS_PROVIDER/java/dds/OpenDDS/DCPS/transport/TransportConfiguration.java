@@ -19,6 +19,8 @@ public abstract class TransportConfiguration implements Serializable {
         NULL_SYNCH
     }
 
+    public int getId() { return id; }
+
     private ThreadSynchStrategy sendThreadStrategy;
     public ThreadSynchStrategy getSendThreadStrategy() {
         return sendThreadStrategy;

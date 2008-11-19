@@ -1,3 +1,17 @@
+Wed Nov 19 05:55:32 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/dds/OpenDDS/DCPS/transport/TransportConfiguration.java:
+        * java/jms/src/org/opendds/jms/PublisherManager.java:
+        * java/jms/src/org/opendds/jms/SubscriberManager.java:
+        * java/jms/src/org/opendds/jms/TransportSupport.java:
+        * java/jms/src/org/opendds/jms/common/PartitionHelper.java:
+        * java/jms/src/org/opendds/jms/qos/QosPolicies.java:
+        * java/jms/src/org/opendds/jms/resource/ConnectionRequestInfoImpl.java:
+        * java/jms/src/org/opendds/jms/resource/ManagedConnectionFactoryImpl.java:
+        * java/jms/src/org/opendds/jms/resource/ManagedConnectionImpl.java:
+
+          Nightly commit; updates to ManagedConnectionImpl and friends.
+
 Wed Nov 19 02:14:04 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/idl2jni/codegen/im_java.cpp:

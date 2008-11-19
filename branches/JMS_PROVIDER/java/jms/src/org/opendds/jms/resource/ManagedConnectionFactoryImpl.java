@@ -118,7 +118,10 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
     public ManagedConnection createManagedConnection(Subject subject,
                                                      ConnectionRequestInfo cxRequestInfo) throws ResourceException {
 
-        return new ManagedConnectionImpl(subject, cxRequestInfo);
+        if (!(cxRequestInfo instanceof ConnectionRequestInfoImpl)) {
+            throw new IllegalArgumentException();
+        }
+        return new ManagedConnectionImpl(subject, (ConnectionRequestInfoImpl) cxRequestInfo);
     }
 
     public ManagedConnection matchManagedConnections(Set connectionSet,
@@ -129,10 +132,13 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(domainId,
+        return Objects.hashCode(
+            domainId,
             participantQosPolicy,
-            publisherQosPolicy, publisherTransport,
-            subscriberQosPolicy, subscriberTransport,
+            publisherQosPolicy,
+            publisherTransport,
+            subscriberQosPolicy,
+            subscriberTransport,
             transportType);
     }
 
