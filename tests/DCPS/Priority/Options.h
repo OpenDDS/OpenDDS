@@ -44,6 +44,10 @@ class Options  {
     protected: unsigned long& priority();
     public:    unsigned long  priority() const;
 
+    /// Test sample count to publish.
+    protected: unsigned int& count();
+    public:    unsigned int  count() const;
+
     /// Transport Type value.
     protected: TransportType& transportType();
     public:    TransportType  transportType() const;
@@ -66,6 +70,9 @@ class Options  {
 
     /// Writer priority.
     unsigned long priority_;
+
+    /// Sample count.
+    unsigned int count_;
 
     /// Transport Type value.
     TransportType transportType_;

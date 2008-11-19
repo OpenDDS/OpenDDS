@@ -20,7 +20,6 @@ project(DDS*Publisher) : dcpsexe_with_unreliable_dgram, dcps_reliable_multicast,
   Source_Files {
     Publisher.cpp
     Options.cpp
-    DataWriterListener.cpp
     publisher_main.cpp
   }
 }

@@ -67,12 +67,14 @@ print "VerboseLogging==$orbVerbose\n"     if $verbose and $orbVerbose;
 
 # Files.
 my $repo_ior  = PerlACE::LocalFile("repo.ior");
-my $debugFile = PerlACE::LocalFile( $dFile) if $dFile;
+my $debugFile;
+   $debugFile = PerlACE::LocalFile( $dFile) if $dFile;
 my $confFile  = PerlACE::LocalFile( "svc.conf");
 my $iniFile   = PerlACE::LocalFile( "transport.ini");
 
 # Clean out leftovers.
 unlink $repo_ior;
+unlink $debugFile if $debugFile;
 
 my $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : "-ORBSvcConf $confFile";
@@ -180,8 +182,8 @@ my $killDelay = 300;
 $status = $SUB->WaitKill( $killDelay);
 if( $status != 0) {
   print STDERR "ERROR: Subscriber returned $status\n";
+  ++$failed;
 }
-$failed += $status;
 $killDelay = 15;
 
 # Terminate the publishers.
@@ -190,8 +192,8 @@ for my $index ( 1 .. $pubCount) {
   $status = $PUB[ $index - 1]->WaitKill( $killDelay);
   if( $status != 0) {
     print STDERR "ERROR: Publisher $index returned $status\n";
+    ++$failed;
   }
-  $failed += $status;
 }
 
 # Terminate the repository.
@@ -200,8 +202,8 @@ print "\nStopping repository\n";
 $status = $REPO->TerminateWaitKill( 5);
 if( $status != 0) {
   print STDERR "ERROR: Repository returned $status\n";
+  ++$failed;
 }
-$failed += $status;
 
 # Clean up.
 

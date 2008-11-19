@@ -4,6 +4,11 @@
 #include <exception>
 
 namespace Test {
+  /// Delay (seconds) to wait for a subscription to be made at test start.
+  enum { SUBSCRIPTION_WAIT_TIME = 30};
+
+  /// Delay (seconds) to wait for a publication to be made at test start.
+  enum { PUBLICATION_WAIT_TIME = 30};
 
   class Exception : public virtual std::exception {
     public: virtual const char* what() const throw() { return "TestException"; }
@@ -51,6 +56,10 @@ namespace Test {
 
   class BadReaderException : public virtual Exception {
     public: virtual const char* what() const throw() { return "BadReader"; }
+  };
+
+  class BadSyncException : public virtual Exception {
+    public: virtual const char* what() const throw() { return "BadSync"; }
   };
 
 } // End of namespace Test

@@ -1,3 +1,25 @@
+Wed Nov 19 04:18:22 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tests/DCPS/Priority/DataReaderListener.cpp:
+        * tests/DCPS/Priority/Options.h:
+        * tests/DCPS/Priority/Options.inl:
+        * tests/DCPS/Priority/Options.cpp:
+        * tests/DCPS/Priority/Priority.mpc:
+        * tests/DCPS/Priority/Publisher.h:
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Priority/Subscriber.h:
+        * tests/DCPS/Priority/Subscriber.cpp:
+        * tests/DCPS/Priority/Test.h:
+        * tests/DCPS/Priority/run_test.pl:
+
+          Publisher and subscriber are passing data.  There remain some
+          test synchronization issues.
+
+        * tests/DCPS/Priority/DataWriterListener.h:
+        * tests/DCPS/Priority/DataWriterListener.cpp:
+
+          Removed these files.
+
 Tue Nov 18 01:30:29 UTC 2008  Mike Martinez  <martinez_m@lab.ociweb.com>
 
         * tests/DCPS/Priority/DataReaderListener.h:

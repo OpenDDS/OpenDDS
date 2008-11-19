@@ -30,6 +30,8 @@ namespace Test {
 
 Subscriber::~Subscriber()
 {
+  this->waiter_->detach_condition( this->status_.in());
+
   if( ! CORBA::is_nil( this->participant_.in())) {
     this->participant_->delete_contained_entities();
     TheParticipantFactory->delete_participant( this->participant_.in());
@@ -42,7 +44,8 @@ Subscriber::~Subscriber()
 
 Subscriber::Subscriber( const Options& options)
  : options_( options),
-   listener_( 0)
+   listener_( 0),
+   waiter_( new DDS::WaitSet)
 {
   // Create the DomainParticipant
   this->participant_
@@ -221,7 +224,7 @@ Subscriber::Subscriber( const Options& options)
   this->reader_ = this->subscriber_->create_datareader(
                     this->topic_.in(),
                     readerQos,
-                    this->listener_
+                    DDS::DataReaderListener::_nil()
                   );
   if( CORBA::is_nil( this->reader_.in())) {
     ACE_ERROR((LM_ERROR,
@@ -237,11 +240,51 @@ Subscriber::Subscriber( const Options& options)
     ));
   }
 
+  // Set the listener mask here so that we don't conflict with the
+  // StatusCondition(s) that we want to wait on in the main thread.
+  this->reader_->set_listener( this->listener_, DDS::DATA_AVAILABLE_STATUS);
+
+  // Grab, enable and attach the status condition for test synchronization.
+  this->status_ = this->reader_->get_statuscondition();
+  this->status_->set_enabled_statuses( DDS::LIVELINESS_CHANGED_STATUS);
+  this->waiter_->attach_condition( this->status_.in());
+
+  if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
+      ACE_TEXT("created StatusCondition and WaitSet for test synchronization.\n")
+    ));
+  }
+
 }
 
 void
 Subscriber::run()
 {
+  DDS::Duration_t   timeout = { PUBLICATION_WAIT_TIME, 0};
+  DDS::ConditionSeq conditions;
+  DDS::LivelinessChangedStatus matches = { 0, 0, 0, 0};
+  do {
+    if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Subscriber::run() - ")
+        ACE_TEXT("waiting for publication to %s (active==%d, change==%d).\n"),
+        (matches.active_count==0? "attach": "detach"),
+        matches.active_count,
+        matches.active_count_change
+      ));
+    }
+    if( DDS::RETCODE_OK != this->waiter_->wait( conditions, timeout)) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Subscriber::run() - ")
+        ACE_TEXT("failed to synchronize at start of test.\n")
+      ));
+      throw BadSyncException();
+    }
+    this->reader_->get_liveliness_changed_status();
+
+  } while( matches.active_count_change != -1);
+
   throw Test::Exception(); // Execute the test.
 }
 
