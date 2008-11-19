@@ -35,6 +35,8 @@ import OpenDDS.DCPS.transport.TheTransportFactory;
 import OpenDDS.DCPS.transport.TransportImpl;
 import OpenDDS.JMS.MessagePayloadTypeSupportImpl;
 
+import org.opendds.jms.TopicImpl;
+
 public class TopicMessageProducerImplTest {
     @Test
     public void testDummy() {

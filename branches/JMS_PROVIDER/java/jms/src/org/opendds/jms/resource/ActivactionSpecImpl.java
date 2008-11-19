@@ -28,7 +28,7 @@ public class ActivactionSpecImpl implements ActivationSpec, Serializable {
         }
 
         if (!(adapter instanceof ResourceAdapterImpl)) {
-            throw new ResourceException("Invalid ResourceAdapter instance: " + adapter);
+            throw new IllegalArgumentException();
         }
         this.adapter = (ResourceAdapterImpl) adapter;
     }

@@ -1,3 +1,24 @@
+Wed Nov 19 00:19:25 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/src/org/opendds/jms/ConnectionFactoryImpl.java:
+        * java/jms/src/org/opendds/jms/TopicImpl.java:
+        * java/jms/src/org/opendds/jms/common/JMSExceptionHelper.java:
+        * java/jms/src/org/opendds/jms/common/Version.java:
+        * java/jms/src/org/opendds/jms/common/lang/Objects.java:
+        * java/jms/src/org/opendds/jms/management/Destination.java:
+        * java/jms/src/org/opendds/jms/qos/QosPolicies.java:
+        * java/jms/src/org/opendds/jms/resource/ActivactionSpecImpl.java:
+        * java/jms/src/org/opendds/jms/resource/ConnectionRequestInfoImpl.java:
+        * java/jms/src/org/opendds/jms/resource/ManagedConnectionFactoryImpl.java:
+        * java/jms/src/org/opendds/jms/resource/ManagedConnectionImpl.java:
+        * java/jms/src/org/opendds/jms/resource/ResourceAdapterImpl.java:
+        * java/jms/test/org/opendds/jms/AbstractMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/SessionImplTest.java:
+        * java/jms/test/org/opendds/jms/TopicMessageConsumerImplTest.java:
+        * java/jms/test/org/opendds/jms/TopicMessageProducerImplTest.java:
+
+          Updates to resource adapter classes.
+
 Tue Nov 18 20:50:29 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/examples:

@@ -34,8 +34,6 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
     private String subscriberTransport;
     private String transportType;
 
-    private PrintWriter log;
-
     public Integer getDomainId() {
         return domainId;
     }
@@ -93,53 +91,49 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
     }
 
     public PrintWriter getLogWriter() {
-        return log;
+        return null; // logging disabled
     }
 
-    public void setLogWriter(PrintWriter log) {
-        this.log = log;
-    }
+    public void setLogWriter(PrintWriter log) {}
 
     public Object createConnectionFactory() {
         return createConnectionFactory(null);
     }
 
-    public Object createConnectionFactory(ConnectionManager connectionManager) {
-        TransportConfigurationFactory configFactory =
+    public Object createConnectionFactory(ConnectionManager cxManager) {
+        TransportConfigurationFactory tcf =
             new TransportConfigurationFactory(transportType);
 
-        ConnectionFactoryImpl instance = new ConnectionFactoryImpl(connectionManager);
+        ConnectionRequestInfo cxRequestInfo =
+            new ConnectionRequestInfoImpl(domainId,
+                new ParticipantQosPolicy(participantQosPolicy),
+                new PublisherQosPolicy(publisherQosPolicy),
+                tcf.createConfiguration(publisherTransport),
+                new SubscriberQosPolicy(subscriberQosPolicy),
+                tcf.createConfiguration(subscriberTransport));
 
-        instance.setDomainId(domainId);
-        instance.setParticipantQosPolicy(new ParticipantQosPolicy(participantQosPolicy));
-        instance.setPublisherQosPolicy(new PublisherQosPolicy(publisherQosPolicy));
-        instance.setPublisherTransport(configFactory.createConfiguration(publisherTransport));
-        instance.setSubscriberQosPolicy(new SubscriberQosPolicy(subscriberQosPolicy));
-        instance.setSubscriberTransport(configFactory.createConfiguration(subscriberTransport));
-
-        return instance;
+        return new ConnectionFactoryImpl(this, cxManager, cxRequestInfo);
     }
 
     public ManagedConnection createManagedConnection(Subject subject,
-                                                     ConnectionRequestInfo requestInfo) throws ResourceException {
-        return null;
+                                                     ConnectionRequestInfo cxRequestInfo) throws ResourceException {
+
+        return new ManagedConnectionImpl(subject, cxRequestInfo);
     }
 
-    public ManagedConnection matchManagedConnections(Set set,
+    public ManagedConnection matchManagedConnections(Set connectionSet,
                                                      Subject subject,
-                                                     ConnectionRequestInfo requestInfo) throws ResourceException {
+                                                     ConnectionRequestInfo cxRequestInfo) throws ResourceException {
         return null;
     }
 
     @Override
     public int hashCode() {
         return Objects.hashCode(domainId,
-                                participantQosPolicy,
-                                publisherQosPolicy,
-                                publisherTransport,
-                                subscriberQosPolicy,
-                                subscriberTransport,
-                                transportType);
+            participantQosPolicy,
+            publisherQosPolicy, publisherTransport,
+            subscriberQosPolicy, subscriberTransport,
+            transportType);
     }
 
     @Override
@@ -152,13 +146,13 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
             return false;
         }
 
-        ManagedConnectionFactoryImpl cf = (ManagedConnectionFactoryImpl) o;
-        return Objects.equalsWithNull(domainId, cf.domainId)
-            || Objects.equalsWithNull(participantQosPolicy, cf.participantQosPolicy)
-            || Objects.equalsWithNull(publisherQosPolicy, cf.publisherQosPolicy)
-            || Objects.equalsWithNull(publisherTransport, cf.publisherTransport)
-            || Objects.equalsWithNull(subscriberQosPolicy, cf.subscriberQosPolicy)
-            || Objects.equalsWithNull(subscriberTransport, cf.subscriberTransport)
-            || Objects.equalsWithNull(transportType, cf.transportType);
+        ManagedConnectionFactoryImpl mcf = (ManagedConnectionFactoryImpl) o;
+        return Objects.equals(domainId, mcf.domainId)
+            && Objects.equals(participantQosPolicy, mcf.participantQosPolicy)
+            && Objects.equals(publisherQosPolicy, mcf.publisherQosPolicy)
+            && Objects.equals(publisherTransport, mcf.publisherTransport)
+            && Objects.equals(subscriberQosPolicy, mcf.subscriberQosPolicy)
+            && Objects.equals(subscriberTransport, mcf.subscriberTransport)
+            && Objects.equals(transportType, mcf.transportType);
     }
 }

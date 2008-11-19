@@ -72,6 +72,6 @@ public class ResourceAdapterImpl implements ResourceAdapter {
                                      ActivationSpec activationSpec) {}
 
     public XAResource[] getXAResources(ActivationSpec[] activationSpecs) {
-        return null; // transactions not supported!
+        return null; // transactions not supported
     }
 }

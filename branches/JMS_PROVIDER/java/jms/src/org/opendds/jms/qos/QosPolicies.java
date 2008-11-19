@@ -7,6 +7,7 @@ package org.opendds.jms.qos;
 import DDS.DeadlineQosPolicy;
 import DDS.DestinationOrderQosPolicy;
 import DDS.DestinationOrderQosPolicyKind;
+import DDS.DomainParticipantQos;
 import DDS.DurabilityQosPolicy;
 import DDS.DurabilityQosPolicyKind;
 import DDS.DurabilityServiceQosPolicy;
@@ -105,6 +106,10 @@ public class QosPolicies {
         policy.kind = OwnershipQosPolicyKind.SHARED_OWNERSHIP_QOS;
 
         return policy;
+    }
+
+    public static DomainParticipantQos newParticipantQos() {
+        return null;
     }
 
     public static ReliabilityQosPolicy newReliabilityQosPolicy() {

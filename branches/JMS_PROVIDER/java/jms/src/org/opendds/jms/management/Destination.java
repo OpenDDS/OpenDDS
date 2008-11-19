@@ -59,7 +59,7 @@ public class Destination extends DynamicMBeanSupport implements Serializable, Se
 
     @KeyProperty
     public void setType(String type) {
-        // Currently, only 'Topic' destination types are getType.
+        // Currently, only 'Topic' destination types are supported.
         // This is a placeholder until Queuing support is added.
         if (!"Topic".equals(type)) {
             throw new IllegalArgumentException(type);
@@ -114,21 +114,22 @@ public class Destination extends DynamicMBeanSupport implements Serializable, Se
     @Operation
     public void start() throws Exception {
         if (isStarted()) {
-            throw new IllegalStateException(getDestination() + " already started!");
+            throw new IllegalStateException(destination + " already started!");
         }
 
         verify();
 
-        log = LogFactory.getLog(getDestination());
-        if (log.isInfoEnabled()) {
-            log.info("Binding to JNDI name: " + jndiName);
-        }
-
         TopicImpl topic = new TopicImpl(destination,
-                                        new DataReaderQosPolicy(dataReaderQosPolicy),
-                                        new DataWriterQosPolicy(dataWriterQosPolicy),
-                                        new TopicQosPolicy(topicQosPolicy));
+            new DataReaderQosPolicy(dataReaderQosPolicy),
+            new DataWriterQosPolicy(dataWriterQosPolicy),
+            new TopicQosPolicy(topicQosPolicy));
+
         helper.bind(jndiName, topic);
+
+        log = LogFactory.getLog(destination);
+        if (log.isInfoEnabled()) {
+            log.info("Bound to JNDI name: " + jndiName);
+        }
 
         started = true;
     }
@@ -136,7 +137,7 @@ public class Destination extends DynamicMBeanSupport implements Serializable, Se
     @Operation
     public void stop() throws Exception {
         if (!isStarted()) {
-            throw new IllegalStateException(getDestination() + " already stopped!");
+            throw new IllegalStateException(destination + " already stopped!");
         }
 
         if (log.isInfoEnabled()) {
