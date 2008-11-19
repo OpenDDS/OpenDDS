@@ -39,7 +39,7 @@ public class LibFileSet extends FileSet {
                 sbuf.append(name);
 
                 if (debug && Os.isFamily(Os.FAMILY_WINDOWS)) {
-                    sbuf.append("D");
+                    sbuf.append("d");
                 }
 
                 sbuf.append('.');
@@ -48,7 +48,7 @@ public class LibFileSet extends FileSet {
                     sbuf.append("dylib");
 
                 } else if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                    sbuf.append("DLL");
+                    sbuf.append("dll");
 
 		} else { // Os.FAMILY_UNIX
                     sbuf.append("so");
