@@ -1,55 +1,29 @@
 /*
  * $Id$
  */
- 
+
 package org.opendds.jms.common.beans.spi;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
-import sun.misc.Service;
+import org.opendds.jms.common.spi.ServiceRegistry;
 
 /**
  * @author  Steven Stallion
  * @version $Revision$
  */
-public class TypeRegistry {
-    private List<Type> types = new ArrayList<Type>();
+public class TypeRegistry extends ServiceRegistry<Type> {
 
-    public void registerAll() {
-        Iterator itr = Service.providers(Type.class);
-        while (itr.hasNext()) {
-            register((Type) itr.next());
-        }
-    }
-
-    public void register(Type type) {
-        types.add(type);
-    }
-
-    public void deregisterAll() {
-        types.clear();
-    }
-
-    public void deregister(Type type) {
-        types.remove(type);
+    protected Class<Type> getProviderClass() {
+        return Type.class;
     }
 
     public Type findType(Class clazz) {
         assert clazz != null;
 
-        for (Type type : types) {
+        for (Type type : providers) {
             if (clazz.equals(type.getType())) {
                 return type;
             }
         }
         return null;
-    }
-
-    public Collection<Type> getTypes() {
-        return Collections.unmodifiableCollection(types);
     }
 }

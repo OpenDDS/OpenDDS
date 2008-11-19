@@ -5,6 +5,8 @@
 package org.opendds.jms.common.lang;
 
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URL;
 
 /**
@@ -18,11 +20,27 @@ public class ClassLoaders {
     }
 
     public static URL getResource(String name) {
-        return verifyResource(name, getContextLoader().getResource(name));
+        return getResource(name, getContextLoader());
     }
 
+    public static URL getResource(String name, ClassLoader cl) {
+        return verifyResource(name, cl.getResource(name));
+    }
+
+    public static Reader getResourceAsReader(String name) {
+        return getResourceAsReader(name, getContextLoader());
+    }
+
+    public static Reader getResourceAsReader(String name, ClassLoader cl) {
+        return new InputStreamReader(getResourceAsStream(name, cl));
+    }
+    
     public static InputStream getResourceAsStream(String name) {
-        return verifyResource(name, getContextLoader().getResourceAsStream(name));
+        return getResourceAsStream(name, getContextLoader());
+    }
+
+    public static InputStream getResourceAsStream(String name, ClassLoader cl) {
+        return verifyResource(name, cl.getResourceAsStream(name));
     }
 
     private static <T> T verifyResource(String name, T t) {
