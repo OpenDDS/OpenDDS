@@ -67,62 +67,6 @@ public class PropertiesHelper {
 
     //
 
-    public class Property {
-        private String key;
-
-        protected Property(String key) {
-            this.key = key;
-        }
-
-        public boolean exists() {
-            return hasProperty(key);
-        }
-
-        public String getKey() {
-            return key;
-        }
-
-        public String getValue() {
-            return getProperty(key);
-        }
-
-        public String getValue(String defaultValue) {
-            return getProperty(key, defaultValue);
-        }
-
-        public Boolean asBoolean() {
-            return getBooleanProperty(key);
-        }
-
-        public Boolean asBoolean(Boolean defaultValue) {
-            return getBooleanProperty(key, defaultValue);
-        }
-
-        public byte[] asBytes() {
-            return getBytesProperty(key);
-        }
-
-        public byte[] asBytes(byte[] defaultValue) {
-            return getBytesProperty(key, defaultValue);
-        }
-
-        public Integer asInt() {
-            return getIntProperty(key);
-        }
-
-        public Integer asInt(Integer defaultValue) {
-            return getIntProperty(key, defaultValue);
-        }
-
-        public boolean equals(String value) {
-            return value != null && value.equals(getValue());
-        }
-
-        public boolean matches(String pattern) {
-            return Pattern.matches(pattern, getValue());
-        }
-    }
-
     private Properties properties;
 
     public PropertiesHelper(Properties properties) {
@@ -192,5 +136,63 @@ public class PropertiesHelper {
         }
 
         return Integer.valueOf(value);
+    }
+
+    //
+
+    public class Property {
+        private String key;
+
+        protected Property(String key) {
+            this.key = key;
+        }
+
+        public boolean exists() {
+            return hasProperty(key);
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public String getValue() {
+            return getProperty(key);
+        }
+
+        public String getValue(String defaultValue) {
+            return getProperty(key, defaultValue);
+        }
+
+        public Boolean asBoolean() {
+            return getBooleanProperty(key);
+        }
+
+        public Boolean asBoolean(Boolean defaultValue) {
+            return getBooleanProperty(key, defaultValue);
+        }
+
+        public byte[] asBytes() {
+            return getBytesProperty(key);
+        }
+
+        public byte[] asBytes(byte[] defaultValue) {
+            return getBytesProperty(key, defaultValue);
+        }
+
+        public Integer asInt() {
+            return getIntProperty(key);
+        }
+
+        public Integer asInt(Integer defaultValue) {
+            return getIntProperty(key, defaultValue);
+        }
+
+        public boolean equals(String value) {
+            return value != null && value.equals(getValue());
+        }
+
+        public boolean matches(String pattern) {
+            return Pattern.matches(pattern, getValue());
+        }
     }
 }

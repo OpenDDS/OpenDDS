@@ -1,3 +1,12 @@
+Wed Nov 19 23:01:45 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/src/org/opendds/jms/common/util/PropertiesHelper.java:
+        * java/jms/src/org/opendds/jms/resource/ManagedConnectionFactoryImpl.java:
+        * java/jms/src/org/opendds/jms/resource/ManagedConnectionImpl.java:
+        * java/jms/src/org/opendds/jms/resource/ResourceAdapterImpl.java:
+
+          Completed JCA message outflow.
+
 Wed Nov 19 21:30:06 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/lib/opendds-ant-1.2.1.jar:

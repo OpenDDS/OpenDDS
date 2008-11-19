@@ -5,6 +5,7 @@
 package org.opendds.jms.resource;
 
 import java.io.PrintWriter;
+import java.util.Iterator;
 import java.util.Set;
 
 import javax.resource.ResourceException;
@@ -127,6 +128,16 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
     public ManagedConnection matchManagedConnections(Set connectionSet,
                                                      Subject subject,
                                                      ConnectionRequestInfo cxRequestInfo) throws ResourceException {
+        Iterator itr = connectionSet.iterator();
+        while (itr.hasNext()) {
+            Object o = itr.next();
+            if (o instanceof ManagedConnectionImpl) {
+                ManagedConnectionImpl connection = (ManagedConnectionImpl) o;
+                if (connection.matches(subject, cxRequestInfo)) {
+                    return connection;
+                }
+            }
+        }
         return null;
     }
 

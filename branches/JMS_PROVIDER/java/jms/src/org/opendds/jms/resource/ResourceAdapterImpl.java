@@ -38,7 +38,6 @@ public class ResourceAdapterImpl implements ResourceAdapter {
             property = helper.require("opendds.native.dir");
 
             String dirName = property.getValue();
-
             if (!Files.isLibraryPathSet(dirName)) {
                 log.warn(dirName + " is not set in java.library.path!");
             }
