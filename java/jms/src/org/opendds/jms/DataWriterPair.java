@@ -33,11 +33,11 @@ public class DataWriterPair {
 
         DDS.Topic ddsTopic = extractDDSTopicFromDestination(connection, destination);
         Publisher publisher = connection.getPublisher();
-        
+
         DataWriterQosHolder persistentQosHolder = new DataWriterQosHolder(DATAWRITER_QOS_DEFAULT.get());
         publisher.get_default_datawriter_qos(persistentQosHolder);
         final DataWriterQos persistentQos = persistentQosHolder.value;
-        persistentQos.durability.kind = DurabilityQosPolicyKind.PERSISTENT_DURABILITY_QOS;
+        persistentQos.durability.kind = DurabilityQosPolicyKind.VOLATILE_DURABILITY_QOS; //TODO
         final DataWriter dataWriter = publisher.create_datawriter(ddsTopic, persistentQos, null);
         MessagePayloadDataWriter persistentDW = MessagePayloadDataWriterHelper.narrow(dataWriter);
 
