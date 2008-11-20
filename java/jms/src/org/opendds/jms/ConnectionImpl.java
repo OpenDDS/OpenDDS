@@ -147,13 +147,14 @@ public class ConnectionImpl implements Connection {
     }
 
     public TemporaryTopic createTemporaryTopic() {
-        TemporaryTopicImpl topic = new TemporaryTopicImpl();
-
-        synchronized (tempTopics) {
-            tempTopics.add(topic);
-        }
-
-        return topic;
+//        TemporaryTopicImpl topic = new TemporaryTopicImpl();
+//
+//        synchronized (tempTopics) {
+//            tempTopics.add(topic);
+//        }
+//
+//        return topic;
+        return null;
     }
 
     public synchronized void stop() throws JMSException {
