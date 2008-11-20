@@ -22,7 +22,7 @@ import org.opendds.jms.common.lang.Strings;
 import org.opendds.jms.qos.ParticipantQosPolicy;
 import org.opendds.jms.qos.PublisherQosPolicy;
 import org.opendds.jms.qos.SubscriberQosPolicy;
-import org.opendds.jms.transport.TransportConfigurationFactory;
+import org.opendds.jms.transport.TransportFactory;
 
 /**
  * @author  Steven Stallion
@@ -125,16 +125,16 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
     public Object createConnectionFactory(ConnectionManager cxManager) throws ResourceException {
         validate();
 
-        TransportConfigurationFactory tcf =
-            new TransportConfigurationFactory(transportType);
+        TransportFactory tf =
+            new TransportFactory(transportType);
 
         ConnectionRequestInfo cxRequestInfo =
             new ConnectionRequestInfoImpl(clientId, domainId,
                 new ParticipantQosPolicy(participantQosPolicy),
                 new PublisherQosPolicy(publisherQosPolicy),
-                tcf.createConfiguration(publisherTransport),
+                tf.createTransport(publisherTransport),
                 new SubscriberQosPolicy(subscriberQosPolicy),
-                tcf.createConfiguration(subscriberTransport));
+                tf.createTransport(subscriberTransport));
 
         return new ConnectionFactoryImpl(this, cxManager, cxRequestInfo);
     }

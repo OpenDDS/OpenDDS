@@ -19,14 +19,16 @@
 
 <h3>Actions</h3>
 
-<form name="Connection" method="GET" action="actions/createConnection&action=send">
+<form name="connection-1" method="GET" action="actions/createConnection">
     <input type="submit" value="Send"/>
+    <input type="hidden" name="action" value="send"/>
 </form>
 
 <br/>
 
-<form name="Connection" method="GET" action="actions/createConnection&action=receive">
+<form name="connection-2" method="GET" action="actions/createConnection">
     <input type="submit" value="Receive"/>
+    <input type="hidden" name="action" value="recieve"/>
 </form>
 
 </body>

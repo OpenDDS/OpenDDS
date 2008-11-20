@@ -78,7 +78,7 @@ public class QosPolicies {
     public static EntityFactoryQosPolicy newEntityFactoryQosPolicy() {
         return new EntityFactoryQosPolicy();
     }
-    
+
     public static GroupDataQosPolicy newGroupDataQosPolicy() {
         GroupDataQosPolicy policy = new GroupDataQosPolicy();
 
@@ -134,7 +134,7 @@ public class QosPolicies {
         policy.entity_factory = newEntityFactoryQosPolicy();
         policy.user_data = newUserDataQosPolicy();
 
-        return null;
+        return policy;
     }
 
     public static PartitionQosPolicy newPartitionQosPolicy() {

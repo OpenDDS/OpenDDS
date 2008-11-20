@@ -9,6 +9,7 @@ import java.io.Serializable;
 import javax.resource.spi.ConnectionRequestInfo;
 
 import OpenDDS.DCPS.transport.TransportConfiguration;
+import OpenDDS.DCPS.transport.TransportImpl;
 
 import org.opendds.jms.common.lang.Objects;
 import org.opendds.jms.qos.ParticipantQosPolicy;
@@ -24,17 +25,17 @@ public class ConnectionRequestInfoImpl implements ConnectionRequestInfo, Seriali
     private int domainId;
     private ParticipantQosPolicy participantQosPolicy;
     private PublisherQosPolicy publisherQosPolicy;
-    private TransportConfiguration publisherTransport;
+    private TransportImpl publisherTransport;
     private SubscriberQosPolicy subscriberQosPolicy;
-    private TransportConfiguration subscriberTransport;
+    private TransportImpl subscriberTransport;
 
     public ConnectionRequestInfoImpl(String clientId,
                                      int domainId,
                                      ParticipantQosPolicy participantQosPolicy,
                                      PublisherQosPolicy publisherQosPolicy,
-                                     TransportConfiguration publisherTransport,
+                                     TransportImpl publisherTransport,
                                      SubscriberQosPolicy subscriberQosPolicy,
-                                     TransportConfiguration subscriberTransport) {
+                                     TransportImpl subscriberTransport) {
         this.clientId = clientId;
         this.domainId = domainId;
         this.participantQosPolicy = participantQosPolicy;
@@ -60,7 +61,7 @@ public class ConnectionRequestInfoImpl implements ConnectionRequestInfo, Seriali
         return publisherQosPolicy;
     }
 
-    public TransportConfiguration getPublisherTransport() {
+    public TransportImpl getPublisherTransport() {
         return publisherTransport;
     }
 
@@ -68,7 +69,7 @@ public class ConnectionRequestInfoImpl implements ConnectionRequestInfo, Seriali
         return subscriberQosPolicy;
     }
 
-    public TransportConfiguration getSubscriberTransport() {
+    public TransportImpl getSubscriberTransport() {
         return subscriberTransport;
     }
 
@@ -95,7 +96,7 @@ public class ConnectionRequestInfoImpl implements ConnectionRequestInfo, Seriali
         }
 
         ConnectionRequestInfoImpl cxRequestInfo = (ConnectionRequestInfoImpl) o;
-        return Objects.equals(clientId, cxRequestInfo.clientId) 
+        return Objects.equals(clientId, cxRequestInfo.clientId)
             && Objects.equals(domainId, cxRequestInfo.domainId)
             && Objects.equals(participantQosPolicy, cxRequestInfo.participantQosPolicy)
             && Objects.equals(publisherQosPolicy, cxRequestInfo.publisherQosPolicy)
