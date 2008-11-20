@@ -1,3 +1,11 @@
+Thu Nov 20 21:24:39 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * java/dds/OpenDDS/DCPS/transport/AttachStatus.java:
+        * java/dds/dcps_java.mpc:
+
+          Changed this "enum" to use the new style enums where only one Java
+          object represents each enumeration value.
+
 Thu Nov 20 21:06:28 UTC 2008  Weiqi Gao  <gaow@ociweb.com>
 
         * java/jms/test/org/opendds/jms/AbstractMessageImplTest.java:
@@ -5,7 +13,7 @@ Thu Nov 20 21:06:28 UTC 2008  Weiqi Gao  <gaow@ociweb.com>
         * java/jms/test/org/opendds/jms/TopicMessageConsumerImplTest.java:
         * java/jms/test/org/opendds/jms/TopicMessageProducerImplTest.java:
 
-          Fixed broken build. 
+          Fixed broken build.
 
 Thu Nov 20 20:34:49 UTC 2008  Weiqi Gao  <gaow@ociweb.com>
 
