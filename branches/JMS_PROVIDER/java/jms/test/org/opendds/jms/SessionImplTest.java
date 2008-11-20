@@ -1,8 +1,5 @@
 package org.opendds.jms;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -17,6 +14,8 @@ import javax.jms.Session;
 import javax.jms.TemporaryTopic;
 import javax.jms.TextMessage;
 import javax.jms.MessageListener;
+import javax.security.auth.Subject;
+import javax.resource.ResourceException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -41,14 +40,16 @@ import OpenDDS.DCPS.transport.TransportImpl;
 import OpenDDS.JMS.MessagePayloadTypeSupportImpl;
 
 import org.opendds.jms.TopicImpl;
+import org.opendds.jms.resource.ManagedConnectionImpl;
+import org.opendds.jms.resource.ConnectionRequestInfoImpl;
 
 public class SessionImplTest {
 
     @Test
-    public void testSessionImpl() throws JMSException {
+    public void testSessionImpl() throws JMSException, ResourceException {
         // Hack, will use the new Java wrapper to start or stop the DCPSInfoRepo in a few days
         // wqg, Mon Oct 20 12:48:18 CDT 2008
-        if (dcpsInfoRepoRunning()) {
+        if (TestUtils.runWithInfoRepo()) {
             final FakeObjects fakeObjects = createFakeObjects();
             final FakeObjects otherFakeObjects = createOtherFakeObjects();
             // Order is significant
@@ -305,22 +306,7 @@ public class SessionImplTest {
         }
     }
 
-    private boolean dcpsInfoRepoRunning() {
-        // Temporary hack
-        try {
-            final BufferedReader bufferedReader = new BufferedReader(
-                new InputStreamReader(Runtime.getRuntime().exec("netstat -an").getInputStream()));
-            String line = null;
-            while ((line = bufferedReader.readLine()) != null) {
-                if (line.contains(":4096")) return true;
-            }
-            return false;
-        } catch (IOException e) {
-            return false;
-        }
-    }
-
-    private FakeObjects createFakeObjects() {
+    private FakeObjects createFakeObjects() throws ResourceException {
         FakeObjects fakeObjects = new FakeObjects();
 
         String[] fakeArgs = new String[]{"-ORBSvcConf", "tcp.conf",
@@ -367,7 +353,8 @@ public class SessionImplTest {
             }
         };
 
-        fakeObjects.connection = new ConnectionImpl();
+        fakeObjects.connection = new ConnectionImpl(new ManagedConnectionImpl(new Subject(), new ConnectionRequestInfoImpl("clientID", 2, null, null, null, null, null)));
+
         fakeObjects.participant = participant;
         fakeObjects.publisher = publisher;
         fakeObjects.subscriber = subscriber;
@@ -376,7 +363,7 @@ public class SessionImplTest {
         return fakeObjects;
     }
 
-    private FakeObjects createOtherFakeObjects() {
+    private FakeObjects createOtherFakeObjects() throws ResourceException {
         FakeObjects fakeObjects = new FakeObjects();
 
         String[] fakeArgs = new String[]{"-ORBSvcConf", "tcp.conf",
@@ -423,7 +410,7 @@ public class SessionImplTest {
             }
         };
 
-        fakeObjects.connection = new ConnectionImpl();
+        fakeObjects.connection = new ConnectionImpl(new ManagedConnectionImpl(new Subject(), new ConnectionRequestInfoImpl("clientID", 2, null, null, null, null, null)));
         fakeObjects.participant = participant;
         fakeObjects.publisher = publisher;
         fakeObjects.subscriber = subscriber;

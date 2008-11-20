@@ -1,8 +1,5 @@
 package org.opendds.jms;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
@@ -19,6 +16,8 @@ import javax.jms.ObjectMessage;
 import javax.jms.Session;
 import javax.jms.StreamMessage;
 import javax.jms.TextMessage;
+import javax.security.auth.Subject;
+import javax.resource.ResourceException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -45,6 +44,8 @@ import OpenDDS.DCPS.transport.TransportImpl;
 import OpenDDS.JMS.MessagePayloadTypeSupportImpl;
 
 import org.opendds.jms.TopicImpl;
+import org.opendds.jms.resource.ManagedConnectionImpl;
+import org.opendds.jms.resource.ConnectionRequestInfoImpl;
 
 public class AbstractMessageImplTest {
     private static final float FLOAT_EPSILON = 1e-6f;
@@ -66,19 +67,20 @@ public class AbstractMessageImplTest {
     }
 
     @Test
-    public void testSettingAndGettingDestinationHeaders() throws JMSException {
-        if (!dcpsInfoRepoRunning()) return;
-        FakeObjects fakeObjects = createFakeObjects();
-        final SessionImpl sessionImpl = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, fakeObjects.connection);
-        Message message = new TextMessageImpl(sessionImpl);
+    public void testSettingAndGettingDestinationHeaders() throws JMSException, ResourceException {
+        if (TestUtils.runWithInfoRepo()) {
+            FakeObjects fakeObjects = createFakeObjects();
+            final SessionImpl sessionImpl = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, fakeObjects.connection);
+            Message message = new TextMessageImpl(sessionImpl);
 
-        Destination destination = new TopicImpl("Test Destination");
-        message.setJMSDestination(destination);
-        assertEquals(destination.toString(), message.getJMSDestination().toString());
+            Destination destination = new TopicImpl("Test Destination");
+            message.setJMSDestination(destination);
+            assertEquals(destination.toString(), message.getJMSDestination().toString());
 
-        Destination destination2 = new TopicImpl("Test Destination");
-        message.setJMSReplyTo(destination2);
-        assertEquals(destination2.toString(), message.getJMSReplyTo().toString());
+            Destination destination2 = new TopicImpl("Test Destination");
+            message.setJMSReplyTo(destination2);
+            assertEquals(destination2.toString(), message.getJMSReplyTo().toString());
+        }
     }
 
     @Test
@@ -118,21 +120,6 @@ public class AbstractMessageImplTest {
         final int testPriority = 5;
         message.setJMSPriority(testPriority);
         assertEquals(testPriority, message.getJMSPriority());
-    }
-
-    private boolean dcpsInfoRepoRunning() {
-        // Temporary hack
-        try {
-            final BufferedReader bufferedReader = new BufferedReader(
-                new InputStreamReader(Runtime.getRuntime().exec("netstat -an").getInputStream()));
-            String line = null;
-            while ((line = bufferedReader.readLine()) != null) {
-                if (line.contains(":4096")) return true;
-            }
-            return false;
-        } catch (IOException e) {
-            return false;
-        }
     }
 
     @Test
@@ -799,7 +786,7 @@ public class AbstractMessageImplTest {
         }
     }
 
-    private FakeObjects createFakeObjects() {
+    private FakeObjects createFakeObjects() throws ResourceException {
         FakeObjects fakeObjects = new FakeObjects();
 
         String[] fakeArgs = new String[]{"-ORBSvcConf", "tcp.conf",
@@ -848,7 +835,7 @@ public class AbstractMessageImplTest {
 
         TextMessage message = new TextMessageImpl(null);
 
-        fakeObjects.connection = new ConnectionImpl();
+        fakeObjects.connection = new ConnectionImpl(new ManagedConnectionImpl(new Subject(), new ConnectionRequestInfoImpl("clientID", 2, null, null, null, null, null)));
         fakeObjects.destination = destination;
         fakeObjects.subscriber = subscriber;
         fakeObjects.participant = participant;

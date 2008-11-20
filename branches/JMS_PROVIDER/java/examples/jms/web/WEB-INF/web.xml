@@ -12,4 +12,13 @@
 
     <display-name>opendds-jms-example</display-name>
 
+    <servlet>
+        <servlet-name>OpenDDS JMS Provider Demos</servlet-name>
+        <servlet-class>org.opendds.jms.example.DemoServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>OpenDDS JMS Provider Demos</servlet-name>
+        <url-pattern>/actions/*</url-pattern>
+    </servlet-mapping>
 </web-app>
