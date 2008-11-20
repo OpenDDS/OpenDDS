@@ -11,12 +11,14 @@ import java.util.Set;
 import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionManager;
 import javax.resource.spi.ConnectionRequestInfo;
+import javax.resource.spi.IllegalStateException;
 import javax.resource.spi.ManagedConnection;
 import javax.resource.spi.ManagedConnectionFactory;
 import javax.security.auth.Subject;
 
 import org.opendds.jms.ConnectionFactoryImpl;
 import org.opendds.jms.common.lang.Objects;
+import org.opendds.jms.common.lang.Strings;
 import org.opendds.jms.qos.ParticipantQosPolicy;
 import org.opendds.jms.qos.PublisherQosPolicy;
 import org.opendds.jms.qos.SubscriberQosPolicy;
@@ -27,6 +29,7 @@ import org.opendds.jms.transport.TransportConfigurationFactory;
  * @version $Revision$
  */
 public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
+    private String clientId;
     private Integer domainId;
     private String participantQosPolicy;
     private String publisherQosPolicy;
@@ -34,6 +37,14 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
     private String subscriberQosPolicy;
     private String subscriberTransport;
     private String transportType;
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
 
     public Integer getDomainId() {
         return domainId;
@@ -97,23 +108,28 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
 
     public void setLogWriter(PrintWriter log) {}
 
-    public void validate() {
-        require("TransportType", transportType);
-        require("DomainId", domainId);
+    public void validate() throws ResourceException {
+        if (domainId == null) {
+            throw new IllegalStateException("DomainId is a required config-property!");
+        }
+
+        if (Strings.isEmpty(transportType)) {
+            throw new IllegalStateException("TransportType is a required config-property!");
+        }
     }
 
-    public Object createConnectionFactory() {
+    public Object createConnectionFactory() throws ResourceException {
         return createConnectionFactory(null);
     }
 
-    public Object createConnectionFactory(ConnectionManager cxManager) {
+    public Object createConnectionFactory(ConnectionManager cxManager) throws ResourceException {
         validate();
 
         TransportConfigurationFactory tcf =
             new TransportConfigurationFactory(transportType);
 
         ConnectionRequestInfo cxRequestInfo =
-            new ConnectionRequestInfoImpl(domainId,
+            new ConnectionRequestInfoImpl(clientId, domainId,
                 new ParticipantQosPolicy(participantQosPolicy),
                 new PublisherQosPolicy(publisherQosPolicy),
                 tcf.createConfiguration(publisherTransport),
@@ -151,6 +167,7 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
     @Override
     public int hashCode() {
         return Objects.hashCode(
+            clientId,
             domainId,
             participantQosPolicy,
             publisherQosPolicy,
@@ -171,20 +188,13 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
         }
 
         ManagedConnectionFactoryImpl mcf = (ManagedConnectionFactoryImpl) o;
-        return Objects.equals(domainId, mcf.domainId)
+        return Objects.equals(clientId, mcf.clientId)
+            && Objects.equals(domainId, mcf.domainId)
             && Objects.equals(participantQosPolicy, mcf.participantQosPolicy)
             && Objects.equals(publisherQosPolicy, mcf.publisherQosPolicy)
             && Objects.equals(publisherTransport, mcf.publisherTransport)
             && Objects.equals(subscriberQosPolicy, mcf.subscriberQosPolicy)
             && Objects.equals(subscriberTransport, mcf.subscriberTransport)
             && Objects.equals(transportType, mcf.transportType);
-    }
-
-    //
-
-    private void require(String name, Object value) {
-        if (value == null) {
-            throw new IllegalArgumentException(name + " is a required config-property!");
-        }
     }
 }

@@ -8,6 +8,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
@@ -52,8 +53,8 @@ public class ManagedConnectionImpl implements ManagedConnection {
     private SubscriberManager subscribers;
     private PrintWriter out;
 
-    private List<ConnectionImpl> handles =
-        new ArrayList<ConnectionImpl>();
+    private List<Connection> handles =
+        new ArrayList<Connection>();
 
     private List<ConnectionEventListener> listeners =
         new ArrayList<ConnectionEventListener>();
@@ -152,7 +153,7 @@ public class ManagedConnectionImpl implements ManagedConnection {
         }
 
         ConnectionImpl handle = (ConnectionImpl) o;
-        handle.setParent(this);
+        handle.setManagedConnection(this);
 
         synchronized (handles) {
             handles.add(handle);
@@ -189,13 +190,11 @@ public class ManagedConnectionImpl implements ManagedConnection {
         checkDestroyed();
 
         synchronized (handles) {
-            for (ConnectionImpl handle : handles) {
-                if (!handle.isClosed()) {
-                    try {
-                        handle.close();
+            for (Connection handle : handles) {
+                try {
+                    handle.close();
 
-                    } catch (JMSException e) {}
-                }
+                } catch (JMSException e) {}
             }
             handles.clear();
         }
