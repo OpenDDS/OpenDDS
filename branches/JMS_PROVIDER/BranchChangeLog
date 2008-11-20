@@ -1,3 +1,10 @@
+Thu Nov 20 18:55:41 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/examples/jms/conf/jboss/opendds-ds.xml:
+        * java/examples/jms/conf/jboss/opendds-inforepo-ds.xml:
+
+          Updated example configurations.
+
 Thu Nov 20 18:39:05 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/src/org/opendds/jms/ConnectionImpl.java:
@@ -7,7 +14,7 @@ Thu Nov 20 18:39:05 UTC 2008  Steven Stallion  <stallions@ociweb.com>
         * java/jms/src/org/opendds/jms/common/lang/Strings.java:
 
           Completed first pass of JCA integration.
-        
+
         * java/jms/src/org/opendds/jms/TemporaryTopicID.java:
 
           Removed this file.
