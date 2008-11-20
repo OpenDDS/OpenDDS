@@ -63,7 +63,7 @@ public class TopicMessageConsumerImplTest {
     }
 
     private void doTestClose(FakeObjects fakeObjects) throws JMSException {
-        Session session = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, null);
+        Session session = new SessionImpl(null, false, Session.AUTO_ACKNOWLEDGE);
         final MessageConsumer messageConsumer = session.createConsumer(fakeObjects.destination);
         assertNotNull(messageConsumer);
         final Thread thread = new Thread() {
@@ -91,7 +91,7 @@ public class TopicMessageConsumerImplTest {
     }
 
     private void doTestConsumer(FakeObjects fakeObjects) throws JMSException {
-        Session session = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, null);
+        Session session = new SessionImpl(null, false, Session.AUTO_ACKNOWLEDGE);
         final MessageConsumer messageConsumer = session.createConsumer(fakeObjects.destination);
         assertNotNull(messageConsumer);
 
@@ -143,7 +143,7 @@ public class TopicMessageConsumerImplTest {
     }
 
     private void doTestMessageListener(FakeObjects fakeObjects) throws JMSException {
-        Session session = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, null);
+        Session session = new SessionImpl(null, false, Session.AUTO_ACKNOWLEDGE);
         final MessageConsumer messageConsumer = session.createConsumer(fakeObjects.destination);
         assertNotNull(messageConsumer);
 
@@ -301,7 +301,7 @@ public class TopicMessageConsumerImplTest {
 
         private FakeMessageProducer(FakeObjects fakeObjects) throws JMSException {
             this.fakeObjects = fakeObjects;
-            Session session = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, null);
+            Session session = new SessionImpl(null, false, Session.AUTO_ACKNOWLEDGE);
             messageProducer = session.createProducer(fakeObjects.destination);
         }
 
@@ -330,7 +330,8 @@ public class TopicMessageConsumerImplTest {
 
     private static class ClientAcknowledgementSessionImpl extends SessionImpl {
         public ClientAcknowledgementSessionImpl(FakeObjects fakeObjects) {
-            super(false, Session.CLIENT_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, null);
+            super(null, false, Session.CLIENT_ACKNOWLEDGE);
+            // super(false, Session.CLIENT_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, null);
         }
 
         public int getUnacknowledgedCount() {

@@ -66,14 +66,14 @@ public class SessionImplTest {
     }
 
     private void doTestCreateTemporaryTopic(FakeObjects fakeObjects) throws JMSException {
-        Session session = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, fakeObjects.connection);
+        Session session = new SessionImpl(null, false, Session.AUTO_ACKNOWLEDGE);
         final TemporaryTopic topic = session.createTemporaryTopic();
         assertNotNull(topic);
         topic.delete();
     }
 
     private void doTestCreateConsumerForTemporaryTopic(FakeObjects fakeObjects) throws JMSException {
-        Session session = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, fakeObjects.connection);
+        Session session = new SessionImpl(null, false, Session.AUTO_ACKNOWLEDGE);
         final TemporaryTopic temporaryTopic = session.createTemporaryTopic();
         assertNotNull(temporaryTopic);
 
@@ -84,11 +84,11 @@ public class SessionImplTest {
     }
 
     private void doTestCreateConsumerForTemporaryTopicFromAnotherConnection(FakeObjects fakeObjects, FakeObjects otherFakeObjects) throws JMSException {
-        Session session = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, fakeObjects.connection);
+        Session session = new SessionImpl(null, false, Session.AUTO_ACKNOWLEDGE);
         final TemporaryTopic temporaryTopic = session.createTemporaryTopic();
         assertNotNull(temporaryTopic);
 
-        Session otherSession = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, otherFakeObjects.participant, otherFakeObjects.publisher, otherFakeObjects.subscriber, otherFakeObjects.connection);
+        Session otherSession = new SessionImpl(null, false, Session.AUTO_ACKNOWLEDGE);
         try {
             // JMS 1.1, 4.4.3
             otherSession.createConsumer(temporaryTopic);
@@ -101,14 +101,14 @@ public class SessionImplTest {
     }
 
     private void doTestCreateProducersForTemporaryTopic(FakeObjects fakeObjects, FakeObjects otherFakeObjects) throws JMSException {
-        Session session = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, fakeObjects.connection);
+        Session session = new SessionImpl(null, false, Session.AUTO_ACKNOWLEDGE);
         final TemporaryTopic temporaryTopic = session.createTemporaryTopic();
         assertNotNull(temporaryTopic);
 
         final MessageProducer producer = session.createProducer(temporaryTopic);
         assertNotNull(producer);
 
-        Session otherSession = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, otherFakeObjects.participant, otherFakeObjects.publisher, otherFakeObjects.subscriber, otherFakeObjects.connection);
+        Session otherSession = new SessionImpl(null, false, Session.AUTO_ACKNOWLEDGE);
         final MessageProducer producer2 = otherSession.createProducer(temporaryTopic);
         assertNotNull(producer2);
 
@@ -118,7 +118,7 @@ public class SessionImplTest {
     }
 
     private void doTestSendingMessageToTemporaryTopic(FakeObjects fakeObjects, FakeObjects otherFakeObjects) throws JMSException {
-        Session session = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, fakeObjects.connection);
+        Session session = new SessionImpl(null, false, Session.AUTO_ACKNOWLEDGE);
         final TemporaryTopic temporaryTopic = session.createTemporaryTopic();
 
         final MessageProducer producer = session.createProducer(temporaryTopic);
@@ -143,7 +143,7 @@ public class SessionImplTest {
 
     private void doTestReplyToScenario(FakeObjects fakeObjects) throws JMSException {
         // A JMSReplyTo header scenario
-        Session session = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, fakeObjects.connection);
+        Session session = new SessionImpl(null, false, Session.AUTO_ACKNOWLEDGE);
         final MessageProducer producer = session.createProducer(fakeObjects.destination);
         final MessageConsumer consumer = session.createConsumer(fakeObjects.destination);
 
@@ -180,7 +180,7 @@ public class SessionImplTest {
     }
 
     private void doTestRecoverSync(FakeObjects fakeObjects) throws JMSException {
-        Session session = new SessionImpl(false, Session.CLIENT_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, fakeObjects.connection);
+        Session session = new SessionImpl(null, false, Session.CLIENT_ACKNOWLEDGE);
         final MessageProducer producer = session.createProducer(fakeObjects.destination);
         final MessageConsumer consumer = session.createConsumer(fakeObjects.destination);
 
@@ -226,7 +226,7 @@ public class SessionImplTest {
     }
 
     private void doTestRecoverAsync(FakeObjects fakeObjects) throws JMSException {
-        Session session = new SessionImpl(false, Session.CLIENT_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, fakeObjects.connection);
+        Session session = new SessionImpl(null, false, Session.CLIENT_ACKNOWLEDGE);
         final MessageProducer producer = session.createProducer(fakeObjects.destination);
         final MessageConsumer consumer = session.createConsumer(fakeObjects.destination);
         MyMessageListener myMessageListener = new MyMessageListener();
@@ -278,7 +278,7 @@ public class SessionImplTest {
     }
 
     private void doTestClose(FakeObjects fakeObjects) throws JMSException {
-        Session session = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, fakeObjects.connection);
+        Session session = new SessionImpl(null, false, Session.AUTO_ACKNOWLEDGE);
         final MessageProducer producer = session.createProducer(fakeObjects.destination);
         final MessageConsumer consumer = session.createConsumer(fakeObjects.destination);
 

@@ -1,3 +1,12 @@
+Thu Nov 20 21:06:28 UTC 2008  Weiqi Gao  <gaow@ociweb.com>
+
+        * java/jms/test/org/opendds/jms/AbstractMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/SessionImplTest.java:
+        * java/jms/test/org/opendds/jms/TopicMessageConsumerImplTest.java:
+        * java/jms/test/org/opendds/jms/TopicMessageProducerImplTest.java:
+
+          Fixed broken build. 
+
 Thu Nov 20 20:34:49 UTC 2008  Weiqi Gao  <gaow@ociweb.com>
 
         * java/OpenDDS.ipr:
@@ -24,7 +33,7 @@ Thu Nov 20 20:34:49 UTC 2008  Weiqi Gao  <gaow@ociweb.com>
           Factored out dcpsInfoRepoRunning() into TestUtils.
           Added opendds.test.withInfoRepo property that controls if tests
           that are dependent on a running DCPSInfoRepo is run.
-        
+
           Tests code is still broken.  Will be fixed soon.
 
 Thu Nov 20 20:14:47 UTC 2008  Steven Stallion  <stallions@ociweb.com>
