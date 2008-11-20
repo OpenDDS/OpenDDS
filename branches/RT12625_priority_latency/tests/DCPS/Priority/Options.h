@@ -19,6 +19,9 @@ class Options  {
     /// Command line arguments.
     static const char* TRANSPORT_TYPE_ARGUMENT;   // Transport type
     static const char* PUBLISHER_ID_ARGUMENT;     // Publisher Id
+    static const char* COUNT_ARGUMENT;            // Sample count
+    static const char* PRIORITY_ARGUMENT;         // Priority
+    static const char* VERBOSE_ARGUMENT;          // Verbosity
 
     /// Types of transport implementations supported.
     enum TransportType {
@@ -35,6 +38,10 @@ class Options  {
 
     /// Virtual destructor.
     virtual ~Options();
+
+    /// Test verbosity.
+    protected: bool& verbose();
+    public:    bool  verbose() const;
 
     /// Test domain.
     protected: unsigned long& domain();
@@ -65,6 +72,9 @@ class Options  {
     public:    std::string topicName() const;
 
   private:
+    /// Test verbosity.
+    bool verbose_;
+
     /// Test domain.
     unsigned long domain_;
 

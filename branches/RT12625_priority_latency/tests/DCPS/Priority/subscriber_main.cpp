@@ -11,6 +11,8 @@
 int
 main( int argc, char *argv[])
 {
+  int result = -1;
+
   try {
     // Initialize DDS.
     TheParticipantFactoryWithArgs( argc, argv);
@@ -21,7 +23,7 @@ main( int argc, char *argv[])
     // Create the subscriber thingie.
     Test::Subscriber subscriber( options);
 
-    if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+    if( options.verbose()) {
       std::stringstream buffer;
       buffer << options.transportType();
       ACE_DEBUG((LM_DEBUG,
@@ -35,12 +37,23 @@ main( int argc, char *argv[])
     // Execute the test.
     subscriber.run();
 
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) subscriber_main() - ")
+      ACE_TEXT("test over after receiving %d of expected %d samples.\n"),
+      subscriber.count(),
+      options.count()
+    ));
+
+    // Test passes if expected and observed are the same.
+    if( subscriber.count() == options.count()) {
+      result = 0;
+    }
+
   } catch( CORBA::Exception& e) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) subscriber_main() - ")
       ACE_TEXT("CORBA exception caught during processing.\n")
     ));
-    return 1;
 
   } catch( Test::Exception e)  {
     ACE_ERROR((LM_ERROR,
@@ -48,10 +61,9 @@ main( int argc, char *argv[])
       ACE_TEXT("Test exception caught during processing: %s.\n"),
       e.what()
     ));
-    return 1;
 
   }
 
-  return 0;
+  return result;
 }
 

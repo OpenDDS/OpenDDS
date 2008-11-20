@@ -4,12 +4,20 @@
 #include "TestTypeSupportC.h"
 #include "TestTypeSupportImpl.h"
 
-Test::DataReaderListener::DataReaderListener()
+Test::DataReaderListener::DataReaderListener( const bool verbose)
+ : verbose_( verbose),
+   count_( 0)
 {
 }
 
 Test::DataReaderListener::~DataReaderListener ()
 {
+}
+
+unsigned int
+Test::DataReaderListener::count() const
+{
+  return this->count_;
 }
 
 void
@@ -25,27 +33,31 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
     return;
   }
 
-  Test::Data the_data;
-  DDS::SampleInfo si;
-  (void) dr->take_next_sample (the_data, si);
+  Test::Data      data;
+  DDS::SampleInfo info;
+  int             count = 0;
 
-  if( si.valid_data) {
-    if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) DataReaderListener::on_data_available() - ")
-        ACE_TEXT("received a valid sample: %03d: %s\n"),
-        the_data.key,
-        (const char*)the_data.value
+  while( DDS::RETCODE_OK == dr->take_next_sample( data, info)) {
+    if( info.valid_data) {
+      ++count;
+      if( this->verbose_) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DataReaderListener::on_data_available() - ")
+          ACE_TEXT("received valid sample(%d): %03d: %s\n"),
+          count,
+          data.key,
+          (const char*)data.value
+        ));
+      }
+    } else {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: DataReaderListener::on_data_available() - ")
+        ACE_TEXT("received an INVALID sample.\n")
       ));
     }
-
-  } else {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: DataReaderListener::on_data_available() - ")
-      ACE_TEXT("received an INVALID sample.\n")
-    ));
   }
 
+  this->count_ += count;
 }
 
 void
@@ -70,6 +82,11 @@ Test::DataReaderListener::on_liveliness_changed (
     const DDS::LivelinessChangedStatus &)
   throw (CORBA::SystemException)
 {
+  if( this->verbose_) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) DataReaderListener::on_liveliness_changed()")
+    ));
+  }
 }
 
 void

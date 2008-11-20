@@ -33,13 +33,11 @@ Subscriber::~Subscriber()
   this->waiter_->detach_condition( this->status_.in());
 
   if( ! CORBA::is_nil( this->participant_.in())) {
-    this->participant_->delete_contained_entities();
+    this->participant_->delete_contained_entities(); // Also deletes listener.
     TheParticipantFactory->delete_participant( this->participant_.in());
   }
   TheTransportFactory->release();
   TheServiceParticipant->shutdown();
-
-  // delete this->listener_;
 }
 
 Subscriber::Subscriber( const Options& options)
@@ -61,7 +59,7 @@ Subscriber::Subscriber( const Options& options)
     ));
     throw BadParticipantException();
 
-  } else if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+  } else if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
       ACE_TEXT("created participant in domain %d.\n"),
@@ -85,7 +83,7 @@ Subscriber::Subscriber( const Options& options)
     ));
     throw BadTransportException();
 
-  } else if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+  } else if( this->options_.verbose()) {
     std::stringstream buffer;
     buffer << this->options_.transportType();
     ACE_DEBUG((LM_DEBUG,
@@ -96,8 +94,8 @@ Subscriber::Subscriber( const Options& options)
   }
 
   // Create the listener.
-  this->listener_ = new DataReaderListener();
-  if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+  this->listener_ = new DataReaderListener( this->options_.verbose());
+  if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
       ACE_TEXT("created reader listener.\n")
@@ -115,7 +113,7 @@ Subscriber::Subscriber( const Options& options)
     ));
     throw BadTypeSupportException ();
 
-  } else if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+  } else if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
       ACE_TEXT("created type %s support.\n"),
@@ -138,7 +136,7 @@ Subscriber::Subscriber( const Options& options)
     ));
     throw BadTopicException();
 
-  } else if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+  } else if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
       ACE_TEXT("created topic %s.\n"),
@@ -158,7 +156,7 @@ Subscriber::Subscriber( const Options& options)
     ));
     throw BadSubscriberException();
 
-  } else if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+  } else if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
       ACE_TEXT("created subscriber.\n")
@@ -184,7 +182,7 @@ Subscriber::Subscriber( const Options& options)
     ));
     throw BadAttachException();
 
-  } else if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+  } else if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
       ACE_TEXT("attached transport to subscriber.\n")
@@ -233,7 +231,7 @@ Subscriber::Subscriber( const Options& options)
     ));
     throw BadReaderException();
 
-  } else if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+  } else if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
       ACE_TEXT("created reader.\n")
@@ -249,7 +247,7 @@ Subscriber::Subscriber( const Options& options)
   this->status_->set_enabled_statuses( DDS::LIVELINESS_CHANGED_STATUS);
   this->waiter_->attach_condition( this->status_.in());
 
-  if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+  if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
       ACE_TEXT("created StatusCondition and WaitSet for test synchronization.\n")
@@ -258,20 +256,24 @@ Subscriber::Subscriber( const Options& options)
 
 }
 
+unsigned int
+Subscriber::count() const
+{
+  return this->listener_->count();
+}
+
 void
 Subscriber::run()
 {
   DDS::Duration_t   timeout = { PUBLICATION_WAIT_TIME, 0};
   DDS::ConditionSeq conditions;
-  DDS::LivelinessChangedStatus matches = { 0, 0, 0, 0};
+  DDS::LivelinessChangedStatus changes = { 0, 0, 0, 0};
   do {
-    if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+    if( this->options_.verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Subscriber::run() - ")
-        ACE_TEXT("waiting for publication to %s (active==%d, change==%d).\n"),
-        (matches.active_count==0? "attach": "detach"),
-        matches.active_count,
-        matches.active_count_change
+        ACE_TEXT("waiting for publication to %s.\n"),
+        (changes.active_count==0? "attach": "detach")
       ));
     }
     if( DDS::RETCODE_OK != this->waiter_->wait( conditions, timeout)) {
@@ -281,11 +283,17 @@ Subscriber::run()
       ));
       throw BadSyncException();
     }
-    this->reader_->get_liveliness_changed_status();
+    changes = this->reader_->get_liveliness_changed_status();
 
-  } while( matches.active_count_change != -1);
+  } while( changes.active_count_change != -1);
 
-  throw Test::Exception(); // Execute the test.
+  if( this->options_.verbose()) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) Subscriber::run() - ")
+      ACE_TEXT("shutting down after publication was removed.\n")
+    ));
+  }
+
 }
 
 } // End of namespace Test

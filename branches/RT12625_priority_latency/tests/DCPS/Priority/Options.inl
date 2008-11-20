@@ -3,6 +3,20 @@
 // $Id$
 
 ACE_INLINE
+bool&
+Test::Options::verbose()
+{
+  return this->verbose_;
+}
+
+ACE_INLINE
+bool
+Test::Options::verbose() const
+{
+  return this->verbose_;
+}
+
+ACE_INLINE
 unsigned long&
 Test::Options::domain()
 {

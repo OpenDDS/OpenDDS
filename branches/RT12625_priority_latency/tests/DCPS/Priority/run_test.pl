@@ -33,7 +33,8 @@ my $noaction;
 # Specific options.
 #
 my $transportType = "tcp";
-my $pubCount = 1;
+my $samples       = 10;
+my $priorities    = "1";
 
 ########################################################################
 #
@@ -50,13 +51,19 @@ GetOptions( "verbose!"            => \$verbose,
             "noaction|x"          => \$noaction,
             "dfile|f=s"           => \$dFile,
             "transport|t=s"       => \$transportType,
-            "publishers|p=i"      => \$pubCount,
+            "samples|c=i"         => \$samples,
+            "priorities|p=s"      => \$priorities,
 
 ) or pod2usage( 0) ;
 pod2usage( 1)             if $help ;
 pod2usage( -verbose => 2) if $man ;
 #
 ########################################################################
+
+my @priorityList = split( ',', $priorities);
+my $pubCount = scalar @priorityList;
+print "Priorities==(" . join(',',@priorityList) . ")\n" if $verbose;
+print "Publishers==$pubCount\n"                       if $verbose;
 
 # Verbosity.
 print "Debug==$debug\n"                   if $verbose and $debug;
@@ -79,7 +86,8 @@ unlink $debugFile if $debugFile;
 my $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : "-ORBSvcConf $confFile";
 
-my $common_opts = "-DCPSConfigFile $iniFile";
+my $common_opts = "-DCPSConfigFile $iniFile ";
+$common_opts .= "-v " if $verbose;
 
 # Perocess variables.
 my $REPO;
@@ -122,6 +130,7 @@ if( PerlACE::is_vxworks_test()) {
 my $subArgs = "$appOpts ";
 $subArgs .= "-DCPSInfoRepo file://$repo_ior ";
 $subArgs .= "-t $transportType ";
+$subArgs .= "-c " . ($samples * $pubCount) . " ";
 if( PerlACE::is_vxworks_test()) {
   $SUB = new PerlACE::ProcessVX( "subscriber", $subArgs);
 } else {
@@ -132,7 +141,9 @@ for my $index ( 1 .. $pubCount) {
   my $pubArgs = "$appOpts ";
   $pubArgs .= "-DCPSInfoRepo file://$repo_ior ";
   $pubArgs .= "-t $transportType ";
+  $pubArgs .= "-c $samples ";
   $pubArgs .= "-i $index ";
+  $pubArgs .= "-p " . $priorityList[ $index - 1] . " ";
   if( PerlACE::is_vxworks_test()) {
     $PUB[ $index - 1] = new PerlACE::ProcessVX( "publisher", $pubArgs);
   } else {
@@ -166,6 +177,8 @@ if( PerlACE::waitforfile_timed( $repo_ior, 30) == -1) {
 print "\nSUBSCRIBER\n";
 print $SUB->CommandLine() . "\n";
 $SUB->Spawn();
+
+sleep 2; # Kluge around a startup race condition.
 
 # Fire up the publishers.
 
@@ -244,15 +257,25 @@ Options:
   -d NUMBER | --debug=NUMBER
                          set the DCPS debugging level
 
+  -T NUMBER | --tdebug=NUMBER
+                         set the DCPSTransportDebug debugging level
+
+  -R NUMBER | --rdebug=NUMBER
+                         set the DCPS debugging level for the repository
+
   -f FILE | --dfile=FILE set the filename for debug output
 
   -t NAME | --transport=NAME
                          use NAME transport for test execution - one of
                          (tcp, udp, mcast, rmcast), default tcp
 
-  -p NUMBER | --publishers=NUMBER
-                         number of publishers to start during the test -
-                         default 1
+  -c NUMBER | --samples=NUMBER
+                         number of samples to publish during the test -
+                         default 10
+
+  -p NUMBER | --priorities=NUMBER
+                         comma separated list of priorities to publish
+                         during the test - default is 1
 
 =head1 OPTIONS
 
@@ -295,6 +318,18 @@ Sets the -DCPSTransportDebugLevel option value.
 
 The default value is 0.
 
+=item B<-R NUMBER> | B<--rdebug=NUMBER>
+
+Sets the -DCPSDebugLevel option value for the repository process.
+
+The default value is 0.
+
+=item B<-T NUMBER> | B<--tdebug=NUMBER>
+
+Sets the -DCPSTransportDebugLevel option value.
+
+The default value is 0.
+
 =item B<-f FILE> | B<--dfile=FILE>
 
 Sets the -ORBLogFile option value.
@@ -313,9 +348,17 @@ Accepted values are:
 
 The default value is 'tcp'.
 
-=item B<-p FILE> | B<--publishers=NUMBER>
+=item B<-c FILE> | B<--samples=NUMBER>
 
-The number of publishers to start during the test.
+The number of samples to publish during the test.
+
+The default value is 10.
+
+=item B<-p FILE> | B<--priorities=NUMBER>
+
+List of priorities to assign to publishers for the test.  A separate
+publisher process is started to send samples at each specified priority
+level.  The list is a simple comman separated list of integer level values.
 
 The default value is 1.
 
@@ -339,7 +382,7 @@ priority samples is demonstrated.
 
 =item B<./run_demo.pl -x -t mcast>
 
-=item B<./run_test.pl -vp2d10T4Vt mcast>
+=item B<./run_test.pl -vd10T4Vt mcast -p 1,4,8>
 
 =back
 

@@ -57,7 +57,7 @@ Publisher::Publisher( const Options& options)
     ));
     throw BadParticipantException();
 
-  } else if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+  } else if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
       ACE_TEXT("created participant in domain %d.\n"),
@@ -81,7 +81,7 @@ Publisher::Publisher( const Options& options)
     ));
     throw BadTransportException();
 
-  } else if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+  } else if( this->options_.verbose()) {
     std::stringstream buffer;
     buffer << this->options_.transportType();
     ACE_DEBUG((LM_DEBUG,
@@ -102,7 +102,7 @@ Publisher::Publisher( const Options& options)
     ));
     throw BadTypeSupportException ();
 
-  } else if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+  } else if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
       ACE_TEXT("created type %s support.\n"),
@@ -125,7 +125,7 @@ Publisher::Publisher( const Options& options)
     ));
     throw BadTopicException();
 
-  } else if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+  } else if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
       ACE_TEXT("created topic %s.\n"),
@@ -145,7 +145,7 @@ Publisher::Publisher( const Options& options)
     ));
     throw BadPublisherException();
 
-  } else if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+  } else if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
       ACE_TEXT("created publisher.\n")
@@ -171,7 +171,7 @@ Publisher::Publisher( const Options& options)
     ));
     throw BadAttachException();
 
-  } else if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+  } else if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
       ACE_TEXT("attached transport to publisher.\n")
@@ -185,8 +185,6 @@ Publisher::Publisher( const Options& options)
   writerQos.durability.kind                          = ::DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
   writerQos.history.kind                             = ::DDS::KEEP_ALL_HISTORY_QOS;
   writerQos.resource_limits.max_samples_per_instance = ::DDS::LENGTH_UNLIMITED;
-  writerQos.reliability.max_blocking_time.sec        = 0;
-  writerQos.reliability.max_blocking_time.nanosec    = 0;
 
   // Reliability varies with the transport implementation.
   switch( this->options_.transportType()) {
@@ -225,7 +223,7 @@ Publisher::Publisher( const Options& options)
     ));
     throw BadWriterException();
 
-  } else if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+  } else if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
       ACE_TEXT("created writer.\n")
@@ -237,7 +235,7 @@ Publisher::Publisher( const Options& options)
   this->status_->set_enabled_statuses( DDS::PUBLICATION_MATCH_STATUS);
   this->waiter_->attach_condition( this->status_.in());
 
-  if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+  if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
       ACE_TEXT("created StatusCondition and WaitSet for test synchronization.\n")
@@ -253,7 +251,7 @@ Publisher::run()
   DDS::ConditionSeq conditions;
   DDS::PublicationMatchStatus matches = { 0, 0, 0};
   do {
-    if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+    if( this->options_.verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Publisher::run() - ")
         ACE_TEXT("waiting for subscription to attach (total==%d, change==%d).\n"),
@@ -268,12 +266,11 @@ Publisher::run()
       ));
       throw BadSyncException();
     }
-    this->writer_->get_publication_match_status();
+    matches = this->writer_->get_publication_match_status();
 
-  /// @TODO: Correct publication_match count bug.
-  } while( false && matches.total_count_change == 0);
+  } while( matches.total_count_change == 0);
 
-  if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+  if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Publisher::run() - ")
       ACE_TEXT("starting to publish samples.\n")
@@ -285,24 +282,32 @@ Publisher::run()
   Test::Data sample;
   sample.key = 42;
   for( unsigned int count = 0; count < this->options_.count(); ++count) {
-    sample.value = CORBA::string_dup( "This is a Test.");
+    std::stringstream buffer;
+    buffer << "This is sample " << std::dec << (1+count)
+           << " from publisher " << this->options_.publisherId()
+           << " at priority " << this->options_.priority() << "."
+           << std::ends;
+    sample.value = CORBA::string_dup( buffer.str().c_str());
     dataWriter->write( sample, DDS::HANDLE_NIL);
 
-    if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+    if( this->options_.verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Publisher::run() - ")
-        ACE_TEXT("wrote sample %d.\n"),
-        (1+count)
+        ACE_TEXT("publisher %d wrote sample %d at priority %d.\n"),
+        this->options_.publisherId(),
+        (1+count),
+        this->options_.priority()
       ));
     }
   }
 
-  if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+  if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Publisher::run() - ")
       ACE_TEXT("finished publishing samples.\n")
     ));
   }
+  ACE_OS::sleep( 2); /// @TODO: Kluge around a shutdown race condition.
 }
 
 } // End of namespace Test
