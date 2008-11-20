@@ -20,6 +20,7 @@ import org.opendds.jms.qos.SubscriberQosPolicy;
  * @version $Revision$
  */
 public class ConnectionRequestInfoImpl implements ConnectionRequestInfo, Serializable {
+    private String clientId;
     private int domainId;
     private ParticipantQosPolicy participantQosPolicy;
     private PublisherQosPolicy publisherQosPolicy;
@@ -27,18 +28,24 @@ public class ConnectionRequestInfoImpl implements ConnectionRequestInfo, Seriali
     private SubscriberQosPolicy subscriberQosPolicy;
     private TransportConfiguration subscriberTransport;
 
-    public ConnectionRequestInfoImpl(int domainId,
+    public ConnectionRequestInfoImpl(String clientId,
+                                     int domainId,
                                      ParticipantQosPolicy participantQosPolicy,
                                      PublisherQosPolicy publisherQosPolicy,
                                      TransportConfiguration publisherTransport,
                                      SubscriberQosPolicy subscriberQosPolicy,
                                      TransportConfiguration subscriberTransport) {
+        this.clientId = clientId;
         this.domainId = domainId;
         this.participantQosPolicy = participantQosPolicy;
         this.publisherQosPolicy = publisherQosPolicy;
         this.publisherTransport = publisherTransport;
         this.subscriberQosPolicy = subscriberQosPolicy;
         this.subscriberTransport = subscriberTransport;
+    }
+
+    public String getClientId() {
+        return clientId;
     }
 
     public int getDomainId() {
@@ -68,6 +75,7 @@ public class ConnectionRequestInfoImpl implements ConnectionRequestInfo, Seriali
     @Override
     public int hashCode() {
         return Objects.hashCode(
+            clientId,
             domainId,
             participantQosPolicy,
             publisherQosPolicy,
@@ -87,7 +95,8 @@ public class ConnectionRequestInfoImpl implements ConnectionRequestInfo, Seriali
         }
 
         ConnectionRequestInfoImpl cxRequestInfo = (ConnectionRequestInfoImpl) o;
-        return Objects.equals(domainId, cxRequestInfo.domainId)
+        return Objects.equals(clientId, cxRequestInfo.clientId) 
+            && Objects.equals(domainId, cxRequestInfo.domainId)
             && Objects.equals(participantQosPolicy, cxRequestInfo.participantQosPolicy)
             && Objects.equals(publisherQosPolicy, cxRequestInfo.publisherQosPolicy)
             && Objects.equals(publisherTransport, cxRequestInfo.publisherTransport)

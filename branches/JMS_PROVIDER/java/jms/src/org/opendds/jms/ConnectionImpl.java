@@ -5,6 +5,8 @@
 package org.opendds.jms;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 
 import javax.jms.Connection;
@@ -15,8 +17,15 @@ import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
 import javax.jms.ServerSessionPool;
 import javax.jms.Session;
+import javax.jms.TemporaryTopic;
 import javax.jms.Topic;
 
+import DDS.DomainParticipant;
+import DDS.Publisher;
+import DDS.Subscriber;
+
+import org.opendds.jms.common.Version;
+import org.opendds.jms.resource.ConnectionRequestInfoImpl;
 import org.opendds.jms.resource.ManagedConnectionImpl;
 
 /**
@@ -24,39 +33,91 @@ import org.opendds.jms.resource.ManagedConnectionImpl;
  * @version $Revision$
  */
 public class ConnectionImpl implements Connection {
-    private ManagedConnectionImpl parent;
-
-    private List<TemporaryTopicImpl> temporaryTopics;
+    private ManagedConnectionImpl connection;
+    private DomainParticipant participant;
+    private PublisherManager publishers;
+    private SubscriberManager subscribers;
+    private String clientId;
     private boolean closed;
+    private ExceptionListener listener;
 
-    public ConnectionImpl(ManagedConnectionImpl parent) {
-        this.parent = parent;
-        this.temporaryTopics = new ArrayList<TemporaryTopicImpl>();
+    private List<Session> sessions =
+        new ArrayList<Session>();
+
+    private List<TemporaryTopicImpl> tempTopics =
+        new ArrayList<TemporaryTopicImpl>();
+
+    public ConnectionImpl(ManagedConnectionImpl connection) {
+        this.connection = connection;
+
+        participant = connection.getParticipant();
+        publishers = connection.getPublishers();
+        subscribers = connection.getSubscribers();
+
+        ConnectionRequestInfoImpl cxRequestInfo = connection.getConnectionRequestInfo();
+        clientId = cxRequestInfo.getClientId();
     }
 
-    public void setParent(ManagedConnectionImpl parent) {
-        this.parent = parent;
+    public ManagedConnectionImpl getManagedConnection() {
+        return connection;
     }
 
-    public String getClientID() throws JMSException {
-        return null;
+    public void setManagedConnection(ManagedConnectionImpl connection) {
+        this.connection = connection;
     }
 
-    public void setClientID(String clientID) throws JMSException {
+    public DomainParticipant getParticipant() {
+        return participant;
     }
 
-    public ExceptionListener getExceptionListener() throws JMSException {
-        return null;
+    public Publisher getPublisher() throws JMSException {
+        try {
+            return publishers.getPublisher();
+
+        } catch (JMSException e) {
+            throw notifyListener(e);
+        }
     }
 
-    public void setExceptionListener(ExceptionListener listener) throws JMSException {
+    public Subscriber getLocalSubscriber() throws JMSException {
+        try {
+            return subscribers.getLocalSubscriber();
+
+        } catch (JMSException e) {
+            throw notifyListener(e);
+        }
     }
 
-    public ConnectionMetaData getMetaData() throws JMSException {
-        return null;
+    public Subscriber getRemoteSubscriber() throws JMSException {
+        try {
+            return subscribers.getRemoteSubscriber();
+
+        } catch (JMSException e) {
+            throw notifyListener(e);
+        }
     }
 
-    public void start() throws JMSException {
+    public String getClientID() {
+        return clientId;
+    }
+
+    public void setClientID(String clientId) {
+        this.clientId = clientId;
+    }
+
+    public ExceptionListener getExceptionListener() {
+        return listener;
+    }
+
+    public void setExceptionListener(ExceptionListener listener) {
+        this.listener = listener;
+    }
+
+    protected JMSException notifyListener(JMSException e) {
+        if (listener != null) {
+            listener.onException(e);
+        }
+        return e;
     }
 
     public ConnectionConsumer createConnectionConsumer(Destination destination,
@@ -74,97 +135,100 @@ public class ConnectionImpl implements Connection {
         throw new UnsupportedOperationException();
     }
 
-    public Session createSession(boolean transacted, int acknowledgeMode) throws JMSException {
+    public Session createSession(boolean transacted, int acknowledgeMode) {
+//        SessionImpl session = new SessionImpl(this, transacted, acknowledgeMode);
+//
+//        synchronized (sessions) {
+//            sessions.add(session);
+//        }
+//
+//        return session;
         return null;
     }
 
-    public void stop() throws JMSException {
-    }
+    public TemporaryTopic createTemporaryTopic() {
+        TemporaryTopicImpl topic = new TemporaryTopicImpl();
 
-    public void close() throws JMSException {
-    }
-
-    public void addTemporaryTopic(TemporaryTopicImpl temporaryTopic) {
-        this.temporaryTopics.add(temporaryTopic);
-    }
-
-    public void removeTemporaryTopic(TemporaryTopicImpl temporaryTopic) {
-        this.temporaryTopics.remove(temporaryTopic);
-    }
-
-    /* Below are helpers to get the PARTITION QoS according to this scheme:
-
-       - The OpenDDS JMS engine will not expose PARTITION QoS as
-         user-configurable, it will be reserved for the implementation.
-
-       - The OpenDDS JMS engine will use a unique ID for each Connection object
-         -- we will call these ConnectionIDs.  ConnectionIDs are strings
-         that are always 16 characters long.  Each character is a hex digit
-         ('0'..'9','a'..'f').  They are unique for each DomainParticipant and
-         obtained using an OpenDDS-specific method.
-
-       - Each DDS Publisher (owned by the JMS Connection) will have a PARTITION
-         list with one entry: its ConnectionID.
-
-       - Each JMS Connection will have two DDS Subscribers: I'll call them
-         LocalOK and NoLocal.  (These can be created on-demand instead of
-         eagerly.)  The Connection will determine which Subscriber to use when
-         creating DataReaders based on the JMS user's setting of the "noLocal"
-         flag:
-         - A LocalOK Subscriber will have a PARTITION list with one entry: "*"
-         - A NoLocal Subscriber will have a PARTITION list with 16 entries,
-           which is the logical negation of its connection ID.
-           Each entry follows this pattern (shown here for length == 3):
-             ConnectionID = "ABC" PARTITION = "[!A]??", "?[!B]?", "??[!C]"
-    */
-
-    private static DDS.PartitionQosPolicy makePublisherPartition(DDS.DomainParticipant dp) {
-        return new DDS.PartitionQosPolicy(new String[]{getConnectionId(dp)});
-    }
-
-    private static DDS.PartitionQosPolicy makeSubscriberPartition(DDS.DomainParticipant dp, boolean noLocal) {
-        if (!noLocal) return new DDS.PartitionQosPolicy(new String[]{"*"});
-
-        String cid = getConnectionId(dp);
-        final int N = 16;
-        assert cid.length() == N; //TODO: assert?
-        String[] parts = new String[N];
-        String question = "???????????????";
-        for (int i = 0; i < N; ++i) {
-            StringBuilder sb = new StringBuilder(N + 3);
-            sb.append(question, 0, i) // i question marks
-                .append("[!").append(cid.charAt(i)).append("]") // [!c]
-                .append(question, 0, N - 1 - i); // 15 - i question marks
-            parts[i] = sb.toString();
+        synchronized (tempTopics) {
+            tempTopics.add(topic);
         }
-        return new DDS.PartitionQosPolicy(parts);
+
+        return topic;
     }
 
-    private static String getConnectionId(DDS.DomainParticipant dp) {
-        OpenDDS.DCPS.DomainParticipantExt ext =
-            OpenDDS.DCPS.DomainParticipantExtHelper.narrow(dp);
-        assert ext != null; //TODO: assert?
-        return String.format("%08x%08x", ext.get_federation_id(),
-                             ext.get_participant_id());
+    public synchronized void stop() throws JMSException {
     }
 
-    //TODO: comment this out or move it to a real JUnit test
-    public static void main(String[] args) throws Exception {
-        DDS.DomainParticipantFactory dpf =
-            OpenDDS.DCPS.TheParticipantFactory.WithArgs(new org.omg.CORBA.StringSeqHolder(args));
-        DDS.DomainParticipant dp =
-            dpf.create_participant(411,
-                                   DDS.PARTICIPANT_QOS_DEFAULT.get(), null);
-
-        System.out.println("CID = {" + getConnectionId(dp) + "}");
-        DDS.PartitionQosPolicy part = makeSubscriberPartition(dp, true);
-        System.out.println("noLocal subscriber: " + part.name.length);
-        for (int i = 0; i < part.name.length; ++i) {
-            System.out.println("\t{" + part.name[i] + "}");
-        }
+    public synchronized void start() throws JMSException {
     }
 
     public boolean isClosed() {
         return closed;
+    }
+    
+    public synchronized void close() {
+        if (isClosed()) {
+            return;
+        }
+
+        synchronized (tempTopics) {
+            for (TemporaryTopic topic : tempTopics) {
+                try {
+                    topic.delete();
+
+                } catch (JMSException e) {}
+            }
+            tempTopics.clear();
+        }
+        
+        synchronized (sessions) {
+            for (Session session : sessions) {
+                try {
+                    session.close();
+                    
+                } catch (JMSException e) {}
+            }
+            sessions.clear();
+        }
+        
+        closed = true;
+    }
+
+    public ConnectionMetaData getMetaData() {
+        return new ConnectionMetaData() {
+            private Version version = Version.getInstance();
+
+            public String getJMSVersion() {
+                return version.getJMSVersion();
+            }
+
+            public int getJMSMajorVersion() {
+                return version.getJMSMajorVersion();
+            }
+
+            public int getJMSMinorVersion() {
+                return version.getJMSMinorVersion();
+            }
+
+            public String getJMSProviderName() {
+                return version.getProductName();
+            }
+
+            public String getProviderVersion() {
+                return version.getDDSVersion();
+            }
+
+            public int getProviderMajorVersion() {
+                return version.getDDSMajorVersion();
+            }
+
+            public int getProviderMinorVersion() {
+                return version.getDDSMinorVersion();
+            }
+
+            public Enumeration getJMSXPropertyNames() {
+                return Collections.enumeration(Collections.emptyList()); // not implemented
+            }
+        };
     }
 }
