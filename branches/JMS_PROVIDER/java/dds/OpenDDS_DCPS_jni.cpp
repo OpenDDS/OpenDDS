@@ -497,8 +497,9 @@ jobject JNICALL Java_OpenDDS_DCPS_transport_TransportImpl_attach_1to_1publisher
     dynamic_cast<OpenDDS::DCPS::PublisherImpl *> (pub.in ());
   OpenDDS::DCPS::AttachStatus stat = pub_impl->attach_transport (ti);
   jclass clazz = jni->FindClass ("OpenDDS/DCPS/transport/AttachStatus");
-  jmethodID mid = jni->GetMethodID (clazz, "<init>", "(I)V");
-  return jni->NewObject (clazz, mid, static_cast<jint> (stat));
+  jmethodID mid = jni->GetStaticMethodID (clazz, "from_int",
+                    "(I)LOpenDDS/DCPS/transport/AttachStatus;");
+  return jni->CallStaticObjectMethod (clazz, mid, static_cast<jint> (stat));
 }
 
 
@@ -512,8 +513,9 @@ jobject JNICALL Java_OpenDDS_DCPS_transport_TransportImpl_attach_1to_1subscriber
     dynamic_cast<OpenDDS::DCPS::SubscriberImpl *> (sub.in ());
   OpenDDS::DCPS::AttachStatus stat = sub_impl->attach_transport (ti);
   jclass clazz = jni->FindClass ("OpenDDS/DCPS/transport/AttachStatus");
-  jmethodID mid = jni->GetMethodID (clazz, "<init>", "(I)V");
-  return jni->NewObject (clazz, mid, static_cast<jint> (stat));
+  jmethodID mid = jni->GetStaticMethodID (clazz, "from_int",
+                    "(I)LOpenDDS/DCPS/transport/AttachStatus;");
+  return jni->CallStaticObjectMethod (clazz, mid, static_cast<jint> (stat));
 }
 
 

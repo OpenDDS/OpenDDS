@@ -1,3 +1,16 @@
+Thu Nov 20 21:47:34 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+
+          Updated the C++ side that uses the AttachStatus enum
+          (see prior commit).
+        
+        * java/tests/messenger/publisher/TestPublisher.java:
+        * java/tests/messenger/subscriber/TestSubscriber.java:
+
+          Changed these to use the AttachStatus object instead of
+          its int value.
+
 Thu Nov 20 21:24:39 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * java/dds/OpenDDS/DCPS/transport/AttachStatus.java:
