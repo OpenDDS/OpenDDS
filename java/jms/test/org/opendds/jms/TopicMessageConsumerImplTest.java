@@ -1,8 +1,5 @@
 package org.opendds.jms;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +51,7 @@ public class TopicMessageConsumerImplTest {
     public void testConsumer() throws JMSException {
         // Hack, will use the new Java wrapper to start or stop the DCPSInfoRepo in a few days
         // wqg, Mon Oct 20 12:48:18 CDT 2008
-        if (dcpsInfoRepoRunning()) {
+        if (TestUtils.runWithInfoRepo()) {
             final FakeObjects fakeObjects = createFakeObjects();
             // Order is significant
             doTestClose(fakeObjects);
@@ -268,21 +265,6 @@ public class TopicMessageConsumerImplTest {
         fakeObjects.message = message;
 
         return fakeObjects;
-    }
-
-    private boolean dcpsInfoRepoRunning() {
-        // Temporary hack
-        try {
-            final BufferedReader bufferedReader = new BufferedReader(
-                new InputStreamReader(Runtime.getRuntime().exec("netstat -an").getInputStream()));
-            String line = null;
-            while ((line = bufferedReader.readLine()) != null) {
-                if (line.contains(":4096")) return true;
-            }
-            return false;
-        } catch (IOException e) {
-            return false;
-        }
     }
 
     private static class FakeObjects {

@@ -61,6 +61,7 @@
         <war warfile="${build.dir}/${ant.project.name}.war"
              webxml="${web.dir}/WEB-INF/web.xml">
             <classes refid="project.resources"/>
+            <classes dir="${build.dir}/classes"/>
             <fileset dir="${web.dir}">
                 <exclude name="WEB-INF/web.xml"/> <!-- silly ant -->
             </fileset>
