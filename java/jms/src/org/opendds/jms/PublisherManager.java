@@ -11,28 +11,26 @@ import DDS.DomainParticipant;
 import DDS.Publisher;
 import DDS.PublisherQosHolder;
 import OpenDDS.DCPS.transport.AttachStatus;
+import OpenDDS.DCPS.transport.TransportImpl;
 
 import org.opendds.jms.common.PartitionHelper;
 import org.opendds.jms.qos.PublisherQosPolicy;
 import org.opendds.jms.qos.QosPolicies;
 import org.opendds.jms.resource.ConnectionRequestInfoImpl;
 import org.opendds.jms.resource.ManagedConnectionImpl;
-import org.opendds.jms.transport.TransportSupport;
 
 /**
  * @author  Steven Stallion
  * @version $Revision$
  */
-public class PublisherManager extends TransportSupport {
+public class PublisherManager {
     private ManagedConnectionImpl connection;
     private ConnectionRequestInfoImpl cxRequestInfo;
     private Publisher publisher;
 
     public PublisherManager(ManagedConnectionImpl connection) throws ResourceException {
         this.connection = connection;
-
         cxRequestInfo = connection.getConnectionRequestInfo();
-        createTransport(cxRequestInfo.getPublisherTransport());
     }
 
     protected Publisher createPublisher() throws JMSException {
@@ -54,7 +52,8 @@ public class PublisherManager extends TransportSupport {
             throw new JMSException("Unable to create Publisher; please check logs");
         }
 
-        if (transport.attach_to_publisher(publisher) != AttachStatus.ATTACH_OK) {
+        TransportImpl transport = cxRequestInfo.getPublisherTransport();
+        if (transport.attach_to_publisher(publisher).value() != AttachStatus._ATTACH_OK) {
             throw new JMSException("Unable to attach to transport; please check logs");
         }
 

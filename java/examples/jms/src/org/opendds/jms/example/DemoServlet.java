@@ -99,7 +99,7 @@ public class DemoServlet extends HttpServlet {
             Destination destination = (Destination) ctx.lookup("DDS/DefaultTopic");
             final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             final MessageConsumer consumer = session.createConsumer(destination, "", true);
-            final Message message = consumer.receive(5000);
+            final Message message = consumer.receive();
             TextMessage textMessage = (TextMessage) message;
             str = "TextMessage received: " + textMessage.getText();
         } catch (NamingException e) {

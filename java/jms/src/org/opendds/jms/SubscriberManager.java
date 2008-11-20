@@ -11,19 +11,19 @@ import DDS.DomainParticipant;
 import DDS.Subscriber;
 import DDS.SubscriberQosHolder;
 import OpenDDS.DCPS.transport.AttachStatus;
+import OpenDDS.DCPS.transport.TransportImpl;
 
 import org.opendds.jms.common.PartitionHelper;
 import org.opendds.jms.qos.QosPolicies;
 import org.opendds.jms.qos.SubscriberQosPolicy;
 import org.opendds.jms.resource.ConnectionRequestInfoImpl;
 import org.opendds.jms.resource.ManagedConnectionImpl;
-import org.opendds.jms.transport.TransportSupport;
 
 /**
  * @author  Steven Stallion
  * @version $Revision$
  */
-public class SubscriberManager extends TransportSupport {
+public class SubscriberManager {
     private ManagedConnectionImpl connection;
     private ConnectionRequestInfoImpl cxRequestInfo;
     private Subscriber remoteSubscriber;
@@ -31,9 +31,7 @@ public class SubscriberManager extends TransportSupport {
 
     public SubscriberManager(ManagedConnectionImpl connection) throws ResourceException {
         this.connection = connection;
-
         cxRequestInfo = connection.getConnectionRequestInfo();
-        createTransport(cxRequestInfo.getSubscriberTransport());
     }
 
     protected Subscriber createSubscriber(boolean noLocal) throws JMSException {
@@ -59,6 +57,7 @@ public class SubscriberManager extends TransportSupport {
             throw new JMSException("Unable to create Subscriber; please check logs");
         }
 
+        TransportImpl transport = cxRequestInfo.getSubscriberTransport();
         if (transport.attach_to_subscriber(subscriber) != AttachStatus.ATTACH_OK) {
             throw new JMSException("Unable to attach to transport; please check logs");
         }
