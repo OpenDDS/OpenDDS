@@ -1,25 +1,25 @@
 package org.opendds.jms.example;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletException;
-import javax.servlet.RequestDispatcher;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.DeliveryMode;
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageProducer;
+import javax.jms.Session;
+import javax.jms.TextMessage;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.jms.ConnectionFactory;
-import javax.jms.Connection;
-import javax.jms.JMSException;
-import javax.jms.Destination;
-import javax.jms.Session;
-import javax.jms.MessageProducer;
-import javax.jms.TextMessage;
-import javax.jms.MessageConsumer;
-import javax.jms.Message;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 public class DemoServlet extends HttpServlet {
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
@@ -66,6 +66,7 @@ public class DemoServlet extends HttpServlet {
             Destination destination = (Destination) ctx.lookup("DDS/DefaultTopic");
             final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             final MessageProducer producer = session.createProducer(destination);
+            producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
             final TextMessage textMessage = session.createTextMessage("Hello OpenDDS JMS Provider");
             producer.send(textMessage);
             str = "TextMessage send: " + textMessage.getText();
