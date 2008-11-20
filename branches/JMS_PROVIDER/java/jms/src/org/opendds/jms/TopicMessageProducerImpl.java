@@ -18,9 +18,7 @@ import DDS.DURATION_INFINITY_NSEC;
 import DDS.DURATION_INFINITY_SEC;
 import DDS.DataWriterQos;
 import DDS.DataWriterQosHolder;
-import DDS.DomainParticipant;
 import DDS.HANDLE_NIL;
-import DDS.Publisher;
 import OpenDDS.JMS.MessagePayload;
 import OpenDDS.JMS.MessagePayloadDataWriter;
 
@@ -31,6 +29,7 @@ import org.opendds.jms.common.lang.Objects;
  * @version $Revision$
  */
 public class TopicMessageProducerImpl implements MessageProducer {
+    private SessionImpl session;
     private Destination destination;
     private boolean disableMessageID;
     private boolean disableMessageTimestamp;
@@ -39,24 +38,18 @@ public class TopicMessageProducerImpl implements MessageProducer {
     private long timeToLive;
 
     // DDS related stuff
-    private Publisher publisher;
-    private DomainParticipant participant;
     private final DataWriterPair dataWriterPair; // For identified (constructed with a non-null Destination) MessageProducer
     private final Map<Destination, DataWriterPair> dataWriterPairMap;
 
     private boolean closed;
 
-    public TopicMessageProducerImpl(Destination destination, Publisher publisher, DomainParticipant participant) throws JMSException {
-        Objects.ensureNotNull(publisher);
-        Objects.ensureNotNull(participant);
-
+    public TopicMessageProducerImpl(SessionImpl session, Destination destination) throws JMSException {
+        this.session = session;
         this.destination = destination;
-        this.publisher = publisher;
-        this.participant = participant;
 
         initProducer();
         if (destination != null) {
-            this.dataWriterPair = DataWriterPair.fromDestination(destination, publisher, participant);
+            this.dataWriterPair = DataWriterPair.fromDestination(session, destination);
             this.dataWriterPairMap = null;
         } else {
             this.dataWriterPair = null;
@@ -195,7 +188,7 @@ public class TopicMessageProducerImpl implements MessageProducer {
     private DataWriterPair getOrCreateDataWriterPair(Destination destination) throws JMSException {
         DataWriterPair dataWriterPair = dataWriterPairMap.get(destination);
         if (dataWriterPair == null) {
-            dataWriterPair = DataWriterPair.fromDestination(destination, publisher, participant);
+            dataWriterPair = DataWriterPair.fromDestination(session, destination);
             dataWriterPairMap.put(destination, dataWriterPair);
         }
         return dataWriterPair;

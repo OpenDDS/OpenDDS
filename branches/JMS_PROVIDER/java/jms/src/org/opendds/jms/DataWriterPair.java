@@ -8,7 +8,6 @@ import DDS.DATAWRITER_QOS_DEFAULT;
 import DDS.DataWriter;
 import DDS.DataWriterQos;
 import DDS.DataWriterQosHolder;
-import DDS.DomainParticipant;
 import DDS.DurabilityQosPolicyKind;
 import DDS.Publisher;
 import DDS.Topic;
@@ -29,9 +28,12 @@ public class DataWriterPair {
         this.publisher = publisher;
     }
 
-    public static DataWriterPair fromDestination(Destination destination, Publisher publisher, DomainParticipant participant) throws JMSException {
-        DDS.Topic ddsTopic = extractDDSTopicFromDestination(destination, participant);
+    public static DataWriterPair fromDestination(SessionImpl session, Destination destination) throws JMSException {
+        ConnectionImpl connection = session.getOwningConnection();
 
+        DDS.Topic ddsTopic = extractDDSTopicFromDestination(connection, destination);
+        Publisher publisher = connection.getPublisher();
+        
         DataWriterQosHolder persistentQosHolder = new DataWriterQosHolder(DATAWRITER_QOS_DEFAULT.get());
         publisher.get_default_datawriter_qos(persistentQosHolder);
         final DataWriterQos persistentQos = persistentQosHolder.value;
@@ -49,10 +51,10 @@ public class DataWriterPair {
         return new DataWriterPair(persistentDW, volatileDW, publisher);
     }
 
-    private static Topic extractDDSTopicFromDestination(Destination destination, DomainParticipant participant) throws JMSException {
+    private static Topic extractDDSTopicFromDestination(ConnectionImpl connection, Destination destination) throws JMSException {
         // TODO placeholder, to be elaborated
         TopicImpl topicImpl = (TopicImpl) destination;
-        return topicImpl.createTopic(participant);
+        return topicImpl.toDDSTopic(connection);
     }
 
     public MessagePayloadDataWriter getDataWriter(int deliveryMode) {

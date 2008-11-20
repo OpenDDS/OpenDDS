@@ -4,8 +4,6 @@
 
 package org.opendds.jms;
 
-import java.util.EventListener;
-
 import javax.jms.InvalidDestinationException;
 import javax.jms.JMSException;
 import javax.jms.TemporaryTopic;
@@ -20,22 +18,11 @@ import org.opendds.jms.common.lang.Strings;
  * @version $Revision$
  */
 public class TemporaryTopicImpl extends TopicImpl implements TemporaryTopic {
-
-    public static interface TemporaryTopicListener extends EventListener {
-        void onDelete(TemporaryTopicImpl topic);
-    }
-
     private ConnectionImpl connection;
-    private TemporaryTopicListener listener;
 
     public TemporaryTopicImpl(ConnectionImpl connection) {
-        this(connection, null);
-    }
-
-    public TemporaryTopicImpl(ConnectionImpl connection, TemporaryTopicListener listener) {
         super(Strings.randomUuid());
         this.connection = connection;
-        this.listener = listener;
     }
 
     public void delete() throws JMSException {
@@ -43,10 +30,7 @@ public class TemporaryTopicImpl extends TopicImpl implements TemporaryTopic {
             DomainParticipant participant = connection.getParticipant();
             participant.delete_topic(topic);
         }
-
-        if (listener != null) {
-            listener.onDelete(this);
-        }
+        connection.deleteTemporaryTopic(this);
     }
 
     @Override
