@@ -46,7 +46,7 @@ public class ArgumentWriter {
     }
 
     public void writeSvcConfDirective(SvcConfDirective directive) {
-        write("-ORBSvConfDirective");
+        write("-ORBSvcConfDirective");
         write(directive.toString());
     }
 
