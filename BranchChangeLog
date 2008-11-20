@@ -1,3 +1,34 @@
+Thu Nov 20 20:22:19 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Removed setting the Writer status LIVELINESS_LOST and added
+          status changed indication sets for LIVELINESS_CHANGED where
+          required (not all change locations had set the indicator).
+
+        * dds/DCPS/ConditionImpl.cpp:
+        * dds/DCPS/StatusConditionImpl.cpp:
+
+          Added some debug level 10 diagnostic messages.
+
+        * tests/DCPS/Priority/DataReaderListener.h:
+        * tests/DCPS/Priority/DataReaderListener.cpp:
+        * tests/DCPS/Priority/Options.h:
+        * tests/DCPS/Priority/Options.inl:
+        * tests/DCPS/Priority/Options.cpp:
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Priority/Subscriber.h:
+        * tests/DCPS/Priority/Subscriber.cpp:
+        * tests/DCPS/Priority/Test.h:
+        * tests/DCPS/Priority/run_test.pl:
+        * tests/DCPS/Priority/subscriber_main.cpp:
+
+          Updated the testing to pass data at specified priorities.  This
+          currently has a single writer per publisher process.  There are
+          some startup and shutdown association management race
+          conditions and the multicast transports are not working
+          robustly.
+
 Thu Nov 20 19:40:30 UTC 2008  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger_ZeroCopy/DataReaderListener.h:

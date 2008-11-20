@@ -37,10 +37,10 @@ namespace { // anonymous namespace for file scope.
                 transportInfo;
 
   } transportTypeArgMappings[] = {
-    { "tcp", std::make_pair( Test::Options::TCP, 1) },
-    { "udp", std::make_pair( Test::Options::UDP, 2) },
-    { "mc",  std::make_pair( Test::Options::MC,  3) },
-    { "rmc", std::make_pair( Test::Options::RMC, 4) }
+    { "tcp", std::make_pair( Test::Options::TCP, 1) }, // [transport_impl_1]
+    { "udp", std::make_pair( Test::Options::UDP, 2) }, // [transport_impl_2]
+    { "mc",  std::make_pair( Test::Options::MC,  3) }, // [transport_impl_3]
+    { "rmc", std::make_pair( Test::Options::RMC, 4) }  // [transport_impl_4]
   };
 
 } // end of anonymous namespace.
@@ -50,13 +50,17 @@ namespace Test {
 // Command line argument definitions.
 const char* Options::TRANSPORT_TYPE_ARGUMENT = "-t";
 const char* Options::PUBLISHER_ID_ARGUMENT   = "-i";
+const char* Options::VERBOSE_ARGUMENT        = "-v";
+const char* Options::PRIORITY_ARGUMENT       = "-p";
+const char* Options::COUNT_ARGUMENT          = "-c";
 
 Options::~Options()
 {
 }
 
 Options::Options( int argc, char** argv, char** /* envp */)
- : domain_(        DEFAULT_TEST_DOMAIN),
+ : verbose_(       false),
+   domain_(        DEFAULT_TEST_DOMAIN),
    priority_(      DEFAULT_TEST_PRIORITY),
    count_(         DEFAULT_SAMPLE_COUNT),
    transportType_( DEFAULT_TRANSPORT_TYPE),
@@ -89,8 +93,20 @@ Options::Options( int argc, char** argv, char** /* envp */)
       }
       parser.consume_arg();
 
+    } else if( 0 != (currentArg = parser.get_the_parameter( PRIORITY_ARGUMENT))) {
+      this->priority_ = ACE_OS::atoi( currentArg);
+      parser.consume_arg();
+
+    } else if( 0 != (currentArg = parser.get_the_parameter( COUNT_ARGUMENT))) {
+      this->count_ = ACE_OS::atoi( currentArg);
+      parser.consume_arg();
+
     } else if( 0 != (currentArg = parser.get_the_parameter( PUBLISHER_ID_ARGUMENT))) {
       this->publisherId_ = ACE_OS::atoi( currentArg);
+      parser.consume_arg();
+
+    } else if( 0 <= (parser.cur_arg_strncasecmp( VERBOSE_ARGUMENT))) {
+      this->verbose_ = true;
       parser.consume_arg();
 
     } else {

@@ -20,7 +20,7 @@ namespace Test {
   public:
 
     //Constructor
-    DataReaderListener();
+    DataReaderListener( const bool verbose = false);
 
     virtual void on_requested_deadline_missed (
         DDS::DataReader_ptr reader,
@@ -75,8 +75,18 @@ namespace Test {
     virtual void on_connection_deleted (DDS::DataReader_ptr)
       throw (CORBA::SystemException);
 
+    /// Current number of samples that have been received.
+    unsigned int count() const;
+
     // Destructor
     virtual ~DataReaderListener (void);
+
+    private:
+      /// Verbosity flag.
+      bool verbose_;
+
+      /// Sample count.
+      unsigned int count_;
 
   };
 

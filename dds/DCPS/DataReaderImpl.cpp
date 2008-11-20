@@ -1482,8 +1482,10 @@ DataReaderImpl::writer_removed (PublicationId   writer_id,
     liveliness_changed = true;
   }
 
-  if (liveliness_changed)
+  if( liveliness_changed) {
+    set_status_changed_flag(::DDS::LIVELINESS_CHANGED_STATUS, true);
     this->notify_liveliness_change ();
+  }
 }
 
 void
@@ -1599,9 +1601,6 @@ DataReaderImpl::writer_became_dead (PublicationId   writer_id,
   //update the state to DEAD.
   state = WriterInfo::DEAD;
 
-  set_status_changed_flag(::DDS::LIVELINESS_LOST_STATUS,
-    true);
-
   if (liveliness_changed_status_.active_count < 0)
     {
       ACE_ERROR ((LM_ERROR,
@@ -1637,6 +1636,7 @@ DataReaderImpl::writer_became_dead (PublicationId   writer_id,
   // Call listener only when there are liveliness status changes.
   if (liveliness_changed)
   {
+    set_status_changed_flag(::DDS::LIVELINESS_CHANGED_STATUS, true);
     this->notify_liveliness_change ();
   }
 }

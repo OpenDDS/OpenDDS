@@ -21,6 +21,9 @@ class Subscriber {
     /// Execute the test.
     void run();
 
+    /// Number of samples received during the test.
+    unsigned int count() const;
+
   private:
     /// Test options.
     const Options& options_;
