@@ -40,7 +40,6 @@ import DDS.DomainParticipant;
 import DDS.RETCODE_OK;
 import DDS.SampleInfo;
 import DDS.SampleInfoSeqHolder;
-import DDS.Subscriber;
 import OpenDDS.JMS.MessagePayload;
 import OpenDDS.JMS.MessagePayloadDataReader;
 import OpenDDS.JMS.MessagePayloadSeqHolder;
@@ -122,16 +121,7 @@ public class SessionImpl implements Session {
                                           boolean noLocal) throws JMSException {
         checkClosed();
         validateDestination(destination);
-
-        Subscriber subscriber;
-        if (noLocal) {
-            subscriber = owningConnection.getRemoteSubscriber();
-
-        } else {
-            subscriber = owningConnection.getLocalSubscriber();
-        }
-
-        MessageConsumer messageConsumer = new TopicMessageConsumerImpl(destination, messageSelector, noLocal, subscriber, participant, this);
+        MessageConsumer messageConsumer = new TopicMessageConsumerImpl(this, destination, messageSelector, noLocal);
         createdConsumers.add(messageConsumer);
         return messageConsumer;
     }
@@ -144,7 +134,7 @@ public class SessionImpl implements Session {
 
     public MessageProducer createProducer(Destination destination) throws JMSException {
         checkClosed();
-        MessageProducer messageProducer = new TopicMessageProducerImpl(destination, owningConnection.getPublisher(), participant);
+        MessageProducer messageProducer = new TopicMessageProducerImpl(this, destination);
         createdProducers.add(messageProducer);
         return messageProducer;
     }

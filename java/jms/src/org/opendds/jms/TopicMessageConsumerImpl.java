@@ -22,11 +22,12 @@ import DDS.DURATION_INFINITY_NSEC;
 import DDS.DURATION_INFINITY_SEC;
 import DDS.DataReader;
 import DDS.DataReaderQosHolder;
-import DDS.DomainParticipant;
 import DDS.Duration_t;
 import DDS.GuardCondition;
 import DDS.NEW_VIEW_STATE;
+import DDS.NOT_NEW_VIEW_STATE;
 import DDS.NOT_READ_SAMPLE_STATE;
+import DDS.READ_SAMPLE_STATE;
 import DDS.RETCODE_OK;
 import DDS.RETCODE_TIMEOUT;
 import DDS.ReadCondition;
@@ -36,15 +37,12 @@ import DDS.SampleInfoSeqHolder;
 import DDS.Subscriber;
 import DDS.Topic;
 import DDS.WaitSet;
-import DDS.READ_SAMPLE_STATE;
-import DDS.NOT_NEW_VIEW_STATE;
 import OpenDDS.JMS.MessagePayload;
 import OpenDDS.JMS.MessagePayloadDataReader;
 import OpenDDS.JMS.MessagePayloadDataReaderHelper;
 import OpenDDS.JMS.MessagePayloadSeqHolder;
 
 import static org.opendds.jms.ConsumerMessageFactory.buildMessageFromPayload;
-import org.opendds.jms.common.lang.Objects;
 import org.opendds.jms.common.lang.Strings;
 
 /**
@@ -55,11 +53,9 @@ public class TopicMessageConsumerImpl implements MessageConsumer {
     private Destination destination;
     private String messageSelector;
     private MessageListener messageListener;
-    private boolean noLocal;
 
     // DDS related stuff
     private Subscriber subscriber;
-    private DomainParticipant participant;
     private MessagePayloadDataReader messagePayloadDataReader;
 
     private boolean closed;
@@ -70,39 +66,42 @@ public class TopicMessageConsumerImpl implements MessageConsumer {
     private SessionImpl sessionImpl;
     private List<DataReaderHandlePair> toBeRecovered;
 
-    public TopicMessageConsumerImpl(Destination destination, String messageSelector, boolean noLocal, Subscriber subscriber, DomainParticipant participant, SessionImpl sessionImpl) throws JMSException {
-        Objects.ensureNotNull(subscriber);
-        Objects.ensureNotNull(participant);
-
+    public TopicMessageConsumerImpl(SessionImpl sessionImpl, Destination destination, String messageSelector, boolean noLocal) throws JMSException {
+        this.sessionImpl = sessionImpl;
         this.destination = destination;
-        this.subscriber = subscriber;
-        this.participant = participant;
         this.messageSelector = messageSelector;
-        this.noLocal = noLocal;
+
+        ConnectionImpl connection = sessionImpl.getOwningConnection();
+
+        if (noLocal) {
+            subscriber = connection.getRemoteSubscriber();
+
+        } else {
+            subscriber = connection.getLocalSubscriber();
+        }
 
         this.closed = false;
-        this.messagePayloadDataReader = fromDestination(destination, subscriber, participant);
+        this.messagePayloadDataReader = fromDestination(destination, subscriber);
         this.closeToken = new GuardCondition();
         this.closeToken.set_trigger_value(false);
         this.waitSet = new WaitSet();
         this.waitSet.attach_condition(closeToken);
 
-        this.sessionImpl = sessionImpl;
         this.toBeRecovered = null;
     }
 
-    private MessagePayloadDataReader fromDestination(Destination destination, Subscriber subscriber, DomainParticipant participant) throws JMSException {
-        DDS.Topic ddsTopic = extractDDSTopicFromDestination(destination, participant);
+    private MessagePayloadDataReader fromDestination(Destination destination, Subscriber subscriber) throws JMSException {
+        DDS.Topic ddsTopic = extractDDSTopicFromDestination(destination);
         DataReaderQosHolder qosHolder = new DataReaderQosHolder(DATAREADER_QOS_DEFAULT.get());
         subscriber.get_default_datareader_qos(qosHolder);
         DataReader reader = subscriber.create_datareader(ddsTopic, qosHolder.value, null);
         return MessagePayloadDataReaderHelper.narrow(reader);
     }
 
-    private Topic extractDDSTopicFromDestination(Destination destination, DomainParticipant participant) throws JMSException {
+    private Topic extractDDSTopicFromDestination(Destination destination) throws JMSException {
         // TODO placeholder, to be elaborated
         TopicImpl topicImpl = (TopicImpl) destination;
-        return topicImpl.createTopic(participant);
+        return topicImpl.toDDSTopic(sessionImpl.getOwningConnection());
     }
 
     public String getMessageSelector() throws JMSException {

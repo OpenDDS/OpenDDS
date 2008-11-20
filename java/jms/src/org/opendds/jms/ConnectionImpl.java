@@ -44,8 +44,8 @@ public class ConnectionImpl implements Connection {
     private List<Session> sessions =
         new ArrayList<Session>();
 
-    private List<TemporaryTopicImpl> tempTopics =
-        new ArrayList<TemporaryTopicImpl>();
+    private List<TemporaryTopic> tempTopics =
+        new ArrayList<TemporaryTopic>();
 
     public ConnectionImpl(ManagedConnectionImpl connection) {
         this.connection = connection;
@@ -133,26 +133,17 @@ public class ConnectionImpl implements Connection {
     }
 
     public Session createSession(boolean transacted, int acknowledgeMode) {
-//        SessionImpl session = new SessionImpl(this, transacted, acknowledgeMode);
-//
-//        synchronized (sessions) {
-//            sessions.add(session);
-//        }
-//
-//        return session;
-        return null;
+        SessionImpl session = new SessionImpl(this, transacted, acknowledgeMode);
+
+        synchronized (sessions) {
+            sessions.add(session);
+        }
+
+        return session;
     }
 
-    public TemporaryTopic createTemporaryTopic() {
-        TemporaryTopicImpl topic = new TemporaryTopicImpl(this,
-            new TemporaryTopicImpl.TemporaryTopicListener() {
-                public void onDelete(TemporaryTopicImpl topic) {
-                    synchronized (tempTopics) {
-                        tempTopics.remove(topic);
-                    }
-                }
-            }
-        );
+    protected TemporaryTopic createTemporaryTopic() {
+        TemporaryTopicImpl topic = new TemporaryTopicImpl(this);
 
         synchronized (tempTopics) {
             tempTopics.add(topic);
@@ -161,10 +152,16 @@ public class ConnectionImpl implements Connection {
         return topic;
     }
 
-    public synchronized void stop() throws JMSException {
+    protected void deleteTemporaryTopic(TemporaryTopic topic) {
+        synchronized (tempTopics) {
+            tempTopics.remove(topic);
+        }
     }
 
     public synchronized void start() throws JMSException {
+    }
+
+    public synchronized void stop() throws JMSException {
     }
 
     public boolean isClosed() {
