@@ -51,7 +51,7 @@ public class TopicMessageProducerImplTest {
     private void doTestSend() throws JMSException {
         FakeObjects fakeObjects = createFakeObjects();
 
-        Session session = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, null);
+        Session session = new SessionImpl(null, false, Session.AUTO_ACKNOWLEDGE);
         MessageProducer messageProducer = session.createProducer(fakeObjects.destination);
 
         assertNotNull(messageProducer);

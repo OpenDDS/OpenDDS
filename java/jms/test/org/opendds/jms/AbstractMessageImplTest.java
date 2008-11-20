@@ -70,7 +70,7 @@ public class AbstractMessageImplTest {
     public void testSettingAndGettingDestinationHeaders() throws JMSException, ResourceException {
         if (TestUtils.runWithInfoRepo()) {
             FakeObjects fakeObjects = createFakeObjects();
-            final SessionImpl sessionImpl = new SessionImpl(false, Session.AUTO_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, fakeObjects.connection);
+            final SessionImpl sessionImpl = new SessionImpl(null, false, Session.AUTO_ACKNOWLEDGE);
             Message message = new TextMessageImpl(sessionImpl);
 
             Destination destination = new TopicImpl("Test Destination");
