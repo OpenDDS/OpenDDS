@@ -173,6 +173,14 @@ void DataReaderListenerImpl::on_subscription_lost (
 }
 
 
+void DataReaderListenerImpl::on_budget_exceeded (
+  ::DDS::DataReader_ptr)
+  throw (::CORBA::SystemException)
+{
+  ACE_DEBUG ((LM_DEBUG, "(%P|%t)received on_budget_exceeded \n"));
+}
+
+
 void DataReaderListenerImpl::on_connection_deleted (
   ::DDS::DataReader_ptr)
   throw (::CORBA::SystemException)

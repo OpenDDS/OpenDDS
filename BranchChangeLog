@@ -1,3 +1,57 @@
+Thu Nov 20 19:40:30 UTC 2008  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/DataReaderListener.h:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/DataReaderListener.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/FailoverListener.h:
+        * dds/DCPS/FailoverListener.cpp:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DdsDcpsSubscription.idl:
+        * dds/InfoRepo/DCPS_Utils.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/DataReaderListener.h:
+        * examples/DCPS/Messenger_IOGR_Imr/DataReaderListener.cpp:
+        * examples/DCPS/Messenger_Imr/DataReaderListener.h:
+        * examples/DCPS/Messenger_Imr/DataReaderListener.cpp:
+        * tests/DCPS/CompatibilityTest/DataReaderListener.h:
+        * tests/DCPS/CompatibilityTest/DataReaderListener.cpp:
+        * tests/DCPS/CorbaSeq/DataReaderListener.h:
+        * tests/DCPS/CorbaSeq/DataReaderListener.cpp:
+        * tests/DCPS/Deadline/DataReaderListener.h:
+        * tests/DCPS/Deadline/DataReaderListener.cpp:
+        * tests/DCPS/FooTest4_0/DataReaderListener.h:
+        * tests/DCPS/FooTest4_0/DataReaderListener.cpp:
+        * tests/DCPS/Lifespan/DataReaderListener.h:
+        * tests/DCPS/Lifespan/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTest/DataReaderListener.h:
+        * tests/DCPS/LivelinessTest/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTimeout/DataReaderListenerImpl.h:
+        * tests/DCPS/LivelinessTimeout/DataReaderListenerImpl.cpp:
+        * tests/DCPS/MultiTopicTest/DataReaderListener.h:
+        * tests/DCPS/MultiTopicTest/DataReaderListener.cpp:
+        * tests/DCPS/Partition/DataReaderListener.h:
+        * tests/DCPS/Partition/DataReaderListener.cpp:
+        * tests/DCPS/PersistentDurability/DataReaderListener.h:
+        * tests/DCPS/PersistentDurability/DataReaderListener.cpp:
+        * tests/DCPS/Priority/DataReaderListener.h:
+        * tests/DCPS/Priority/DataReaderListener.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/DataReaderListener.h:
+        * tests/DCPS/Prst_delayed_subscriber/DataReaderListener.cpp:
+        * tests/DCPS/Reconnect/DataReaderListener.h:
+        * tests/DCPS/Reconnect/DataReaderListener.cpp:
+        * tests/DCPS/SetQosDeadline/DataReaderListener.h:
+        * tests/DCPS/SetQosDeadline/DataReaderListener.cpp:
+        * tests/DCPS/SetQosPartition/DataReaderListener.h:
+        * tests/DCPS/SetQosPartition/DataReaderListener.cpp:
+        * tests/DCPS/TransientDurability/DataReaderListener.h:
+        * tests/DCPS/TransientDurability/DataReaderListener.cpp:
+        * tests/DCPS/TransientLocalTest/DataReaderListener.h:
+        * tests/DCPS/TransientLocalTest/DataReaderListener.cpp:
+
+          Added glue and callback methods for LATENCY_BUDGET QoS processing;
+          the addition of a callback required a lot of test code to be
+          modified.
+
 Wed Nov 19 04:18:22 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * tests/DCPS/Priority/DataReaderListener.cpp:

@@ -86,6 +86,10 @@ class FailoverListener
       DDS::DataReader_ptr reader)
     throw (CORBA::SystemException);
 
+    virtual void on_budget_exceeded (
+      DDS::DataReader_ptr reader)
+    throw (CORBA::SystemException);
+
   private:
     /// Our repository key.  If we trigger, this is the key to the
     /// repository that has been lost.

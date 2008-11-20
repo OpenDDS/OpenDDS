@@ -274,6 +274,9 @@ module OpenDDS {
       void on_connection_deleted(
         in ::DDS::DataReader reader);
 
+      // Called when the latency budget has been exceeded.
+      void on_budget_exceeded(
+        in ::DDS::DataReader reader);
     };
 
 
