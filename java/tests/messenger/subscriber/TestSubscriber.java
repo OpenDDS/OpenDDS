@@ -53,7 +53,7 @@ public class TestSubscriber {
         }
 
         AttachStatus stat = transport_impl.attach_to_subscriber(sub);
-        if(stat.value() != AttachStatus._ATTACH_OK) {
+        if(stat != AttachStatus.ATTACH_OK) {
             System.err.println("ERROR: Couldn't attach transport.");
             System.exit(1);
         }
