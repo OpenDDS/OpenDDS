@@ -4,6 +4,8 @@
 
 package org.opendds.jms.common.lang;
 
+import java.util.UUID;
+
 /**
  * @author  Steven Stallion
  * @version $Revision$
@@ -62,6 +64,10 @@ public class Strings {
         }
 
         return s.length() == 0;
+    }
+
+    public static String randomUuid() {
+        return UUID.randomUUID().toString();
     }
 
     //

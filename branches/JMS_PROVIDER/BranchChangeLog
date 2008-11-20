@@ -1,3 +1,17 @@
+Thu Nov 20 18:39:05 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/src/org/opendds/jms/ConnectionImpl.java:
+        * java/jms/src/org/opendds/jms/SessionImpl.java:
+        * java/jms/src/org/opendds/jms/TemporaryTopicImpl.java:
+        * java/jms/src/org/opendds/jms/TopicImpl.java:
+        * java/jms/src/org/opendds/jms/common/lang/Strings.java:
+
+          Completed first pass of JCA integration.
+        
+        * java/jms/src/org/opendds/jms/TemporaryTopicID.java:
+
+          Removed this file.
+
 Wed Nov 19 23:01:45 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/src/org/opendds/jms/common/util/PropertiesHelper.java:
