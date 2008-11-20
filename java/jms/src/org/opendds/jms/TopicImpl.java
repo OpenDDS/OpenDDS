@@ -11,7 +11,6 @@ import javax.jms.Topic;
 
 import DDS.DomainParticipant;
 import DDS.TopicQosHolder;
-import OpenDDS.JMS.MessagePayloadTypeSupportImpl;
 
 import org.opendds.jms.qos.DataReaderQosPolicy;
 import org.opendds.jms.qos.DataWriterQosPolicy;
@@ -28,6 +27,8 @@ public class TopicImpl implements Serializable, Topic {
     private DataWriterQosPolicy dataWriterQosPolicy;
     private TopicQosPolicy topicQosPolicy;
 
+    protected transient DDS.Topic topic;
+
     public TopicImpl(String topicName) {
         this.topicName = topicName;
     }
@@ -36,6 +37,7 @@ public class TopicImpl implements Serializable, Topic {
                      DataReaderQosPolicy dataReaderQosPolicy,
                      DataWriterQosPolicy dataWriterQosPolicy,
                      TopicQosPolicy topicQosPolicy) {
+
         this(topicName);
         this.dataReaderQosPolicy = dataReaderQosPolicy;
         this.dataWriterQosPolicy = dataWriterQosPolicy;
@@ -58,24 +60,22 @@ public class TopicImpl implements Serializable, Topic {
         return topicQosPolicy;
     }
 
-    public DDS.Topic createTopic(DomainParticipant participant) throws JMSException {
-        TopicQosHolder holder = new TopicQosHolder(QosPolicies.newTopicQos());
-
-        participant.get_default_topic_qos(holder);
-
-        if (topicQosPolicy != null) {
-            topicQosPolicy.setQos(holder.value);
-        }
-
-        MessagePayloadTypeSupportImpl typeSupport = new MessagePayloadTypeSupportImpl();
-        typeSupport.register_type(participant, "OpenDDS::JMS::MessagePayload");
-        DDS.Topic topic = participant.create_topic(topicName,
-            "OpenDDS::JMS::MessagePayload", holder.value, null);
-
+    public synchronized DDS.Topic toDDSTopic(ConnectionImpl connection) throws JMSException {
         if (topic == null) {
-            throw new JMSException("Unable to create Topic; please check logs");
-        }
+            TopicQosHolder holder = new TopicQosHolder(QosPolicies.newTopicQos());
 
+            DomainParticipant participant = connection.getParticipant();
+            participant.get_default_topic_qos(holder);
+
+            if (topicQosPolicy != null) {
+                topicQosPolicy.setQos(holder.value);
+            }
+
+            topic = participant.create_topic(topicName, connection.getTypeName(), holder.value, null);
+            if (topic == null) {
+                throw new JMSException("Unable to create Topic; please check logs");
+            }
+        }
         return topic;
     }
 

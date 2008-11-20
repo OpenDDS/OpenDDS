@@ -6,17 +6,14 @@ package org.opendds.jms;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 import java.util.concurrent.TimeUnit;
 
 import javax.jms.BytesMessage;
-import javax.jms.Connection;
 import javax.jms.Destination;
 import javax.jms.InvalidDestinationException;
 import javax.jms.JMSException;
@@ -40,7 +37,6 @@ import DDS.ANY_INSTANCE_STATE;
 import DDS.ANY_SAMPLE_STATE;
 import DDS.ANY_VIEW_STATE;
 import DDS.DomainParticipant;
-import DDS.Publisher;
 import DDS.RETCODE_OK;
 import DDS.SampleInfo;
 import DDS.SampleInfoSeqHolder;
@@ -48,8 +44,6 @@ import DDS.Subscriber;
 import OpenDDS.JMS.MessagePayload;
 import OpenDDS.JMS.MessagePayloadDataReader;
 import OpenDDS.JMS.MessagePayloadSeqHolder;
-
-import org.opendds.jms.common.lang.Objects;
 
 /**
  * @author  Steven Stallion
@@ -74,22 +68,17 @@ public class SessionImpl implements Session {
 
     // OpenDDS stuff
     private DomainParticipant participant;
-    private Publisher publisher;
-    private Subscriber subscriber;
 
     private boolean closed;
     private Object lockForClosed;
 
-    public SessionImpl(boolean transacted, int acknowledgeMode, DomainParticipant participant, Publisher publisher, Subscriber subscriber, ConnectionImpl connection) {
-        Objects.ensureNotNull(participant);
-        Objects.ensureNotNull(publisher);
-        Objects.ensureNotNull(subscriber);
-
+    public SessionImpl(ConnectionImpl owningConnection, boolean transacted, int acknowledgeMode) {
+        this.owningConnection = owningConnection;
         this.transacted = transacted;
         this.acknowledgeMode = acknowledgeMode;
-        this.subscriber = subscriber;
-        this.publisher = publisher;
-        this.participant = participant;
+
+        this.participant = owningConnection.getParticipant();
+
         this.closed = false;
 
         this.createdProducers = new ArrayList<MessageProducer>();
@@ -97,7 +86,6 @@ public class SessionImpl implements Session {
         this.messageDeliveryExecutorService = Executors.newSingleThreadExecutor();
         this.unacknowledged = new HashMap<TopicMessageConsumerImpl, List<DataReaderHandlePair>>();
         this.lockForUnacknowledged = new Object();
-        this.owningConnection = connection;
     }
 
     public int getAcknowledgeMode() {
@@ -134,30 +122,29 @@ public class SessionImpl implements Session {
                                           boolean noLocal) throws JMSException {
         checkClosed();
         validateDestination(destination);
+
+        Subscriber subscriber;
+        if (noLocal) {
+            subscriber = owningConnection.getRemoteSubscriber();
+
+        } else {
+            subscriber = owningConnection.getLocalSubscriber();
+        }
+
         MessageConsumer messageConsumer = new TopicMessageConsumerImpl(destination, messageSelector, noLocal, subscriber, participant, this);
         createdConsumers.add(messageConsumer);
         return messageConsumer;
     }
 
     private void validateDestination(Destination destination) throws InvalidDestinationException {
-        if (destination instanceof TopicImpl) {
-            if (destination instanceof TemporaryTopicImpl) {
-                // JMS 1.1, 4.4.3
-                TemporaryTopicImpl temporaryTopicImpl = (TemporaryTopicImpl) destination;
-                final Connection connectionForTemporaryTopic = temporaryTopicImpl.getConnection();
-                if (owningConnection != connectionForTemporaryTopic) {
-                    throw new InvalidDestinationException("Cannot create MessageConsumer for a TemporaryTopic from a foreign Connection: "
-                        + connectionForTemporaryTopic);
-                }
-            }
-        } else {
+        if (!(destination instanceof TopicImpl)) {
             throw new InvalidDestinationException("An invalid destination is supplied: " + destination + ".");
         }
     }
 
     public MessageProducer createProducer(Destination destination) throws JMSException {
         checkClosed();
-        MessageProducer messageProducer = new TopicMessageProducerImpl(destination, publisher, participant);
+        MessageProducer messageProducer = new TopicMessageProducerImpl(destination, owningConnection.getPublisher(), participant);
         createdProducers.add(messageProducer);
         return messageProducer;
     }
@@ -202,13 +189,12 @@ public class SessionImpl implements Session {
 
     public Topic createTopic(String topicName) throws JMSException {
         checkClosed();
-        // TODO
-        return null;
+        return new TopicImpl(topicName);
     }
 
     public TemporaryTopic createTemporaryTopic() throws JMSException {
         checkClosed();
-        return TemporaryTopicImpl.newTemporaryTopicImpl(owningConnection, participant);
+        return owningConnection.createTemporaryTopic();
     }
 
     public Message createMessage() throws JMSException {

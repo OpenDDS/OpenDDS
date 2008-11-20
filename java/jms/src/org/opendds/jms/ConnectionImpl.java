@@ -70,12 +70,16 @@ public class ConnectionImpl implements Connection {
         return participant;
     }
 
+    public String getTypeName() {
+        return connection.getTypeName();
+    }
+
     public Publisher getPublisher() throws JMSException {
         try {
             return publishers.getPublisher();
 
         } catch (JMSException e) {
-            throw notifyListener(e);
+            throw notifyExceptionListener(e);
         }
     }
 
@@ -84,7 +88,7 @@ public class ConnectionImpl implements Connection {
             return subscribers.getLocalSubscriber();
 
         } catch (JMSException e) {
-            throw notifyListener(e);
+            throw notifyExceptionListener(e);
         }
     }
 
@@ -93,7 +97,7 @@ public class ConnectionImpl implements Connection {
             return subscribers.getRemoteSubscriber();
 
         } catch (JMSException e) {
-            throw notifyListener(e);
+            throw notifyExceptionListener(e);
         }
     }
 
@@ -111,13 +115,6 @@ public class ConnectionImpl implements Connection {
 
     public void setExceptionListener(ExceptionListener listener) {
         this.listener = listener;
-    }
-
-    protected JMSException notifyListener(JMSException e) {
-        if (listener != null) {
-            listener.onException(e);
-        }
-        return e;
     }
 
     public ConnectionConsumer createConnectionConsumer(Destination destination,
@@ -147,14 +144,21 @@ public class ConnectionImpl implements Connection {
     }
 
     public TemporaryTopic createTemporaryTopic() {
-//        TemporaryTopicImpl topic = new TemporaryTopicImpl();
-//
-//        synchronized (tempTopics) {
-//            tempTopics.add(topic);
-//        }
-//
-//        return topic;
-        return null;
+        TemporaryTopicImpl topic = new TemporaryTopicImpl(this,
+            new TemporaryTopicImpl.TemporaryTopicListener() {
+                public void onDelete(TemporaryTopicImpl topic) {
+                    synchronized (tempTopics) {
+                        tempTopics.remove(topic);
+                    }
+                }
+            }
+        );
+
+        synchronized (tempTopics) {
+            tempTopics.add(topic);
+        }
+
+        return topic;
     }
 
     public synchronized void stop() throws JMSException {
@@ -166,10 +170,20 @@ public class ConnectionImpl implements Connection {
     public boolean isClosed() {
         return closed;
     }
-    
+
     public synchronized void close() {
         if (isClosed()) {
             return;
+        }
+
+        synchronized (sessions) {
+            for (Session session : sessions) {
+                try {
+                    session.close();
+
+                } catch (JMSException e) {}
+            }
+            sessions.clear();
         }
 
         synchronized (tempTopics) {
@@ -181,17 +195,7 @@ public class ConnectionImpl implements Connection {
             }
             tempTopics.clear();
         }
-        
-        synchronized (sessions) {
-            for (Session session : sessions) {
-                try {
-                    session.close();
-                    
-                } catch (JMSException e) {}
-            }
-            sessions.clear();
-        }
-        
+
         closed = true;
     }
 
@@ -231,5 +235,12 @@ public class ConnectionImpl implements Connection {
                 return Collections.enumeration(Collections.emptyList()); // not implemented
             }
         };
+    }
+
+    protected JMSException notifyExceptionListener(JMSException e) {
+        if (listener != null) {
+            listener.onException(e);
+        }
+        return e;
     }
 }
