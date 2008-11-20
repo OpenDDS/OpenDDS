@@ -330,6 +330,9 @@ namespace OpenDDS
       virtual void dispose(const ReceivedDataSample& sample);
       virtual void unregister(const ReceivedDataSample& sample);
 
+      void process_latency(const ReceivedDataSample& sample);
+      void notify_latency();
+
       CORBA::Long get_depth() const { return depth_; }
       size_t get_n_chunks() const { return n_chunks_; }
 

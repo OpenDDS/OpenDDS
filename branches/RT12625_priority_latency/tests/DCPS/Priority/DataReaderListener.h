@@ -69,6 +69,9 @@ namespace Test {
         const ::OpenDDS::DCPS::SubscriptionLostStatus & status)
       throw (CORBA::SystemException);
 
+    virtual void on_budget_exceeded (DDS::DataReader_ptr)
+      throw (CORBA::SystemException);
+
     virtual void on_connection_deleted (DDS::DataReader_ptr)
       throw (CORBA::SystemException);
 

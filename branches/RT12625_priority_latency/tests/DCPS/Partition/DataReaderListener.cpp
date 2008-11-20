@@ -135,6 +135,12 @@ Test::DataReaderListener::on_subscription_lost (
 }
 
 void
+Test::DataReaderListener::on_budget_exceeded (DDS::DataReader_ptr)
+  throw (CORBA::SystemException)
+{
+}
+
+void
 Test::DataReaderListener::on_connection_deleted (DDS::DataReader_ptr)
   throw (CORBA::SystemException)
 {

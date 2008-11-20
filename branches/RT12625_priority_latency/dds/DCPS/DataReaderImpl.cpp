@@ -991,6 +991,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         // This also adds to the sample container
         this->dds_demarshal(sample);
 
+        this->process_latency(sample);
+
         this->subscriber_servant_->data_received(this);
       }
       break;
@@ -1680,6 +1682,16 @@ void DataReaderImpl::unregister(const ReceivedDataSample& /* sample */)
   if( DCPS_debug_level > 0) {
     ACE_DEBUG ((LM_DEBUG, "(%P|%T) DataReaderImpl::unregister()\n"));
   }
+}
+
+
+void DataReaderImpl::process_latency(const ReceivedDataSample& sample)
+{
+}
+
+
+void DataReaderImpl::notify_latency()
+{
 }
 
 

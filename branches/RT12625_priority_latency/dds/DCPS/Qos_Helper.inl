@@ -682,8 +682,7 @@ namespace OpenDDS
     ACE_INLINE
     bool Qos_Helper::valid (const ::DDS::LatencyBudgetQosPolicy& qos)
     {
-      return
-        qos == TheServiceParticipant->initial_LatencyBudgetQosPolicy();
+      return true;
     }
 
 
