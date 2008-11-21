@@ -60,7 +60,7 @@ public class SubscriberManager {
         if (subscriber == null) {
             throw new JMSException("Unable to create Subscriber; please check logs");
         }
-        log.debug("Created %s %s", subscriber, holder.value);
+        log.debug("Created %s %s", subscriber, policy);
 
         TransportImpl transport = cxRequestInfo.getSubscriberTransport();
         if (transport.attach_to_subscriber(subscriber) != AttachStatus.ATTACH_OK) {
