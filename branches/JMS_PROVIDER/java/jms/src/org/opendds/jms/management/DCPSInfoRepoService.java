@@ -70,7 +70,7 @@ public class DCPSInfoRepoService extends DynamicMBeanSupport implements ServiceM
         }
 
         if (log.isDebugEnabled()) {
-            log.debug(String.format("Initializing DCPSInfoRepo with arguments: \"%s\"", arguments));
+            log.debug(String.format("Initializing with arguments \"%s\"", arguments));
         }
         instance = new DCPSInfoRepo(arguments.toArgs());
 

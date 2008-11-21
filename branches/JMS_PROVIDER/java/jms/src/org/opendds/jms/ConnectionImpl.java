@@ -25,6 +25,7 @@ import DDS.Publisher;
 import DDS.Subscriber;
 
 import org.opendds.jms.common.Version;
+import org.opendds.jms.common.util.ContextLog;
 import org.opendds.jms.resource.ConnectionRequestInfoImpl;
 import org.opendds.jms.resource.ManagedConnectionImpl;
 
@@ -34,6 +35,7 @@ import org.opendds.jms.resource.ManagedConnectionImpl;
  */
 public class ConnectionImpl implements Connection {
     private ManagedConnectionImpl connection;
+    private ContextLog log;
     private DomainParticipant participant;
     private PublisherManager publishers;
     private SubscriberManager subscribers;
@@ -50,6 +52,7 @@ public class ConnectionImpl implements Connection {
     public ConnectionImpl(ManagedConnectionImpl connection) {
         this.connection = connection;
 
+        log = connection.getLog();
         participant = connection.getParticipant();
         publishers = connection.getPublishers();
         subscribers = connection.getSubscribers();
@@ -64,6 +67,10 @@ public class ConnectionImpl implements Connection {
 
     public void setManagedConnection(ManagedConnectionImpl connection) {
         this.connection = connection;
+    }
+
+    public ContextLog getLog() {
+        return log;
     }
 
     public DomainParticipant getParticipant() {
@@ -138,6 +145,7 @@ public class ConnectionImpl implements Connection {
         synchronized (sessions) {
             sessions.add(session);
         }
+        log.debug("Created %s", session);
 
         return session;
     }
@@ -148,6 +156,7 @@ public class ConnectionImpl implements Connection {
         synchronized (tempTopics) {
             tempTopics.add(topic);
         }
+        log.debug("Created %s", topic);
 
         return topic;
     }
@@ -176,6 +185,8 @@ public class ConnectionImpl implements Connection {
         if (isClosed()) {
             return;
         }
+
+        log.debug("Closing %s", this);
 
         synchronized (sessions) {
             for (Session session : sessions) {
