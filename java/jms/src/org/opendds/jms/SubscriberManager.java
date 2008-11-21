@@ -7,6 +7,9 @@ package org.opendds.jms;
 import javax.jms.JMSException;
 import javax.resource.ResourceException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import DDS.DomainParticipant;
 import DDS.Subscriber;
 import DDS.SubscriberQosHolder;
@@ -24,6 +27,8 @@ import org.opendds.jms.resource.ManagedConnectionImpl;
  * @version $Revision$
  */
 public class SubscriberManager {
+    private static Log log = LogFactory.getLog(SubscriberManager.class);
+
     private ManagedConnectionImpl connection;
     private ConnectionRequestInfoImpl cxRequestInfo;
     private Subscriber remoteSubscriber;
@@ -56,10 +61,16 @@ public class SubscriberManager {
         if (subscriber == null) {
             throw new JMSException("Unable to create Subscriber; please check logs");
         }
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Created %s using %s", subscriber, holder.value));
+        }
 
         TransportImpl transport = cxRequestInfo.getSubscriberTransport();
         if (transport.attach_to_subscriber(subscriber) != AttachStatus.ATTACH_OK) {
-            throw new JMSException("Unable to attach to transport; please check logs");
+            throw new JMSException("Unable to attach to Transport; please check logs");
+        }
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Attached %s to %s", subscriber, transport));
         }
 
         return subscriber;

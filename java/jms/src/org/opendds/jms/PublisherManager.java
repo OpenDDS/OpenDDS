@@ -7,6 +7,9 @@ package org.opendds.jms;
 import javax.jms.JMSException;
 import javax.resource.ResourceException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import DDS.DomainParticipant;
 import DDS.Publisher;
 import DDS.PublisherQosHolder;
@@ -24,6 +27,8 @@ import org.opendds.jms.resource.ManagedConnectionImpl;
  * @version $Revision$
  */
 public class PublisherManager {
+    private static Log log = LogFactory.getLog(PublisherManager.class);
+
     private ManagedConnectionImpl connection;
     private ConnectionRequestInfoImpl cxRequestInfo;
     private Publisher publisher;
@@ -51,10 +56,16 @@ public class PublisherManager {
         if (publisher == null) {
             throw new JMSException("Unable to create Publisher; please check logs");
         }
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Created %s using %s", publisher, holder.value));
+        }
 
         TransportImpl transport = cxRequestInfo.getPublisherTransport();
         if (transport.attach_to_publisher(publisher).value() != AttachStatus._ATTACH_OK) {
             throw new JMSException("Unable to attach to transport; please check logs");
+        }
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Attached %s to %s", publisher, transport));
         }
 
         return publisher;
