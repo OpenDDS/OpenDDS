@@ -14,8 +14,8 @@ import org.opendds.jms.common.beans.UnsupportedTypeException;
  */
 public class ThreadSynchStrategyType implements Type<ThreadSynchStrategy> {
 
-    public Class<ThreadSynchStrategy> getType() {
-        return ThreadSynchStrategy.class;
+    public Class[] supportedTypes() {
+        return new Class[] { ThreadSynchStrategy.class };
     }
 
     public ThreadSynchStrategy defaultValue() {
@@ -27,7 +27,7 @@ public class ThreadSynchStrategyType implements Type<ThreadSynchStrategy> {
             return ThreadSynchStrategy.values()[((Number) o).intValue()];
 
         } else if (o instanceof String) {
-            return ThreadSynchStrategy.valueOf(getType(), (String) o);
+            return ThreadSynchStrategy.valueOf(ThreadSynchStrategy.class, (String) o);
         }
         throw new UnsupportedTypeException(o);
     }

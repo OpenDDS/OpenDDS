@@ -12,8 +12,8 @@ import org.opendds.jms.common.beans.UnsupportedTypeException;
  */
 public class DoubleType implements Type<Double> {
 
-    public Class<Double> getType() {
-        return Double.class;
+    public Class[] supportedTypes() {
+        return new Class[] { double.class, Double.class };
     }
 
     public Double defaultValue() {

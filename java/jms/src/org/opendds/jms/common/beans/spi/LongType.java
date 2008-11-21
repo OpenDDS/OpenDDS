@@ -12,8 +12,8 @@ import org.opendds.jms.common.beans.UnsupportedTypeException;
  */
 public class LongType implements Type<Long> {
 
-    public Class<Long> getType() {
-        return Long.class;
+    public Class[] supportedTypes() {
+        return new Class[] { long.class, Long.class };
     }
 
     public Long defaultValue() {

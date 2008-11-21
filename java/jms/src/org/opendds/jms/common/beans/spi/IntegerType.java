@@ -12,8 +12,8 @@ import org.opendds.jms.common.beans.UnsupportedTypeException;
  */
 public class IntegerType implements Type<Integer> {
 
-    public Class<Integer> getType() {
-        return Integer.class;
+    public Class[] supportedTypes() {
+        return new Class[] { int.class, Integer.class };
     }
 
     public Integer defaultValue() {
