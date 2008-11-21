@@ -84,6 +84,10 @@
                 <managedconnectionfactory-class>org.opendds.jms.resource.ManagedConnectionFactoryImpl</managedconnectionfactory-class>
 
                 <config-property>
+                    <config-property-name>ClientId</config-property-name>
+                    <config-property-type>java.lang.String</config-property-type>
+                </config-property>
+                <config-property>
                     <config-property-name>DomainId</config-property-name>
                     <config-property-type>java.lang.Integer</config-property-type>
                 </config-property>

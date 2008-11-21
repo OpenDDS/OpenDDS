@@ -20,9 +20,6 @@ import javax.resource.spi.ManagedConnectionMetaData;
 import javax.security.auth.Subject;
 import javax.transaction.xa.XAResource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import DDS.DomainParticipant;
 import DDS.DomainParticipantFactory;
 import DDS.DomainParticipantQosHolder;
@@ -37,6 +34,7 @@ import org.opendds.jms.PublisherManager;
 import org.opendds.jms.SubscriberManager;
 import org.opendds.jms.common.Version;
 import org.opendds.jms.common.lang.Objects;
+import org.opendds.jms.common.util.ContextLog;
 import org.opendds.jms.qos.ParticipantQosPolicy;
 import org.opendds.jms.qos.QosPolicies;
 
@@ -45,17 +43,18 @@ import org.opendds.jms.qos.QosPolicies;
  * @version $Revision$
  */
 public class ManagedConnectionImpl implements ManagedConnection {
-    private static Log log = LogFactory.getLog("DOMAIN|1");
+    private ContextLog log;
 
     private boolean destroyed;
+
     private Subject subject;
     private ConnectionRequestInfoImpl cxRequestInfo;
-    private int domainId;
+
+    private DomainParticipantFactory dpf;
     private DomainParticipant participant;
     private String typeName;
     private PublisherManager publishers;
     private SubscriberManager subscribers;
-    private PrintWriter out; // unused
 
     private List<ConnectionImpl> handles =
         new ArrayList<ConnectionImpl>();
@@ -65,18 +64,17 @@ public class ManagedConnectionImpl implements ManagedConnection {
 
     public ManagedConnectionImpl(Subject subject,
                                  ConnectionRequestInfoImpl cxRequestInfo) throws ResourceException {
+
+        log = new ContextLog("Domain", cxRequestInfo.getDomainId());
+
         this.subject = subject;
         this.cxRequestInfo = cxRequestInfo;
 
-        domainId = cxRequestInfo.getDomainId();
-
-        DomainParticipantFactory dpf = TheParticipantFactory.getInstance();
+        dpf = TheParticipantFactory.getInstance();
         if (dpf == null) {
             throw new ResourceException("Unable to get DomainParticipantFactory instance; please check logs");
         }
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("[%d] Using %s", domainId, dpf));
-        }
+        log.debug("Using %s", dpf);
 
         DomainParticipantQosHolder holder =
             new DomainParticipantQosHolder(QosPolicies.newParticipantQos());
@@ -90,33 +88,26 @@ public class ManagedConnectionImpl implements ManagedConnection {
         if (participant == null) {
             throw new ResourceException("Unable to create DomainParticipant; please check logs");
         }
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("[%d] Created %s %s", domainId, participant, holder.value));
-        }
+        log.debug("Created %s using %s", participant, holder.value);
+
+        log.debug("Connection ID is %s", getConnectionId());
 
         MessagePayloadTypeSupportImpl ts = new MessagePayloadTypeSupportImpl();
         if (ts.register_type(participant, "") != RETCODE_OK.value) {
             throw new ResourceException("Unable to register type; please check logs");
         }
         typeName = ts.get_type_name();
-
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("[DOM|%d] Registered %s", domainId, typeName));
-        }
+        log.debug("Registered %s", typeName);
 
         publishers = new PublisherManager(this);
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("[D|%d] Created %s", domainId, publishers));
-        }
+        log.debug("Created %s", publishers);
 
         subscribers = new SubscriberManager(this);
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("[%d] Created %s", domainId, subscribers));
-        }
+        log.debug("Created %s", subscribers);
+    }
 
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("[%d] Connection ID is %s", domainId, getConnectionId()));
-        }
+    public ContextLog getLog() {
+        return log;
     }
 
     public boolean isDestroyed() {
@@ -153,12 +144,10 @@ public class ManagedConnectionImpl implements ManagedConnection {
     }
 
     public PrintWriter getLogWriter() {
-        return out;
+        return null;
     }
 
-    public void setLogWriter(PrintWriter out) {
-        this.out = out;
-    }
+    public void setLogWriter(PrintWriter out) {}
 
     public void addConnectionEventListener(ConnectionEventListener listener) {
         synchronized (listeners) {
@@ -185,6 +174,7 @@ public class ManagedConnectionImpl implements ManagedConnection {
         synchronized (handles) {
             handles.add(handle);
         }
+        log.debug("Associated handle %s", handle);
     }
 
     public Object getConnection(Subject subject,
@@ -196,6 +186,7 @@ public class ManagedConnectionImpl implements ManagedConnection {
         synchronized (handles) {
             handles.add(handle);
         }
+        log.debug("Created handle %s", handle);
 
         return handle; // re-configuration not supported
     }
@@ -216,6 +207,8 @@ public class ManagedConnectionImpl implements ManagedConnection {
     public synchronized void cleanup() throws ResourceException {
         checkDestroyed();
 
+        log.debug("Cleaning up %s", this);
+
         synchronized (handles) {
             for (ConnectionImpl handle : handles) {
                 handle.close(false);
@@ -227,12 +220,17 @@ public class ManagedConnectionImpl implements ManagedConnection {
     public synchronized void destroy() throws ResourceException {
         checkDestroyed();
 
+        log.debug("Destroying %s", this);
+
         cleanup();
 
         participant.delete_contained_entities();
+        dpf.delete_participant(participant);
+        log.debug("Deleted %s", participant);
 
         subject = null;
         cxRequestInfo = null;
+        dpf = null;
         participant = null;
         typeName = null;
         publishers = null;

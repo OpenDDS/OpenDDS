@@ -76,7 +76,7 @@ public class ParticipantFactoryService extends DynamicMBeanSupport implements Se
         }
 
         if (log.isDebugEnabled()) {
-            log.debug(String.format("Creating with arguments: \"%s\"", arguments));
+            log.debug(String.format("Initializing with arguments \"%s\"", arguments));
         }
         instance = TheParticipantFactory.WithArgs(arguments.toStringSeq());
 

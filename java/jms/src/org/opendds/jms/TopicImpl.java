@@ -9,12 +9,10 @@ import java.io.Serializable;
 import javax.jms.JMSException;
 import javax.jms.Topic;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import DDS.DomainParticipant;
 import DDS.TopicQosHolder;
 
+import org.opendds.jms.common.util.ContextLog;
 import org.opendds.jms.qos.DataReaderQosPolicy;
 import org.opendds.jms.qos.DataWriterQosPolicy;
 import org.opendds.jms.qos.QosPolicies;
@@ -25,8 +23,6 @@ import org.opendds.jms.qos.TopicQosPolicy;
  * @version $Revision$
  */
 public class TopicImpl implements Serializable, Topic {
-    private static Log log = LogFactory.getLog(TopicImpl.class);
-
     private String topicName;
     private DataReaderQosPolicy dataReaderQosPolicy;
     private DataWriterQosPolicy dataWriterQosPolicy;
@@ -64,6 +60,8 @@ public class TopicImpl implements Serializable, Topic {
     }
 
     public DDS.Topic createDDSTopic(ConnectionImpl connection) throws JMSException {
+        ContextLog log = connection.getLog();
+
         TopicQosHolder holder = new TopicQosHolder(QosPolicies.newTopicQos());
 
         DomainParticipant participant = connection.getParticipant();
@@ -77,9 +75,7 @@ public class TopicImpl implements Serializable, Topic {
         if (topic == null) {
             throw new JMSException("Unable to create Topic; please check logs");
         }
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("Created %s using %s", topic, holder.value));
-        }
+        log.debug("Created %s using %s", topic, holder.value);
 
         return topic;
     }
