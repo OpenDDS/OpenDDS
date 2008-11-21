@@ -49,7 +49,7 @@ import org.opendds.jms.common.lang.Strings;
  * @author  Steven Stallion
  * @version $Revision$
  */
-public class TopicMessageConsumerImpl implements MessageConsumer {
+public class MessageConsumerImpl implements MessageConsumer {
     private Destination destination;
     private String messageSelector;
     private MessageListener messageListener;
@@ -66,7 +66,7 @@ public class TopicMessageConsumerImpl implements MessageConsumer {
     private SessionImpl sessionImpl;
     private List<DataReaderHandlePair> toBeRecovered;
 
-    public TopicMessageConsumerImpl(SessionImpl sessionImpl, Destination destination, String messageSelector, boolean noLocal) throws JMSException {
+    public MessageConsumerImpl(SessionImpl sessionImpl, Destination destination, String messageSelector, boolean noLocal) throws JMSException {
         this.sessionImpl = sessionImpl;
         this.destination = destination;
         this.messageSelector = messageSelector;
