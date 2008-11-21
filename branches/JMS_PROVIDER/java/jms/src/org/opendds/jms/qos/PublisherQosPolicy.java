@@ -32,6 +32,10 @@ public class PublisherQosPolicy implements QosPolicy<PublisherQos> {
     }
 
     public void setQos(PublisherQos qos) {
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Configuring %s %s", qos, PropertiesHelper.valueOf(properties)));
+        }
+
         PropertiesHelper.Property property;
 
         PropertiesHelper helper = new PropertiesHelper(properties);

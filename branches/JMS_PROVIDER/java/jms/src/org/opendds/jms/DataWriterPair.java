@@ -54,7 +54,7 @@ public class DataWriterPair {
     private static Topic extractDDSTopicFromDestination(ConnectionImpl connection, Destination destination) throws JMSException {
         // TODO placeholder, to be elaborated
         TopicImpl topicImpl = (TopicImpl) destination;
-        return topicImpl.toDDSTopic(connection);
+        return topicImpl.createDDSTopic(connection);
     }
 
     public MessagePayloadDataWriter getDataWriter(int deliveryMode) {

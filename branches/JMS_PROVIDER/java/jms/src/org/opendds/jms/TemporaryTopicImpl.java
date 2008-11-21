@@ -8,6 +8,9 @@ import javax.jms.InvalidDestinationException;
 import javax.jms.JMSException;
 import javax.jms.TemporaryTopic;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import DDS.DomainParticipant;
 import DDS.Topic;
 
@@ -18,6 +21,8 @@ import org.opendds.jms.common.lang.Strings;
  * @version $Revision$
  */
 public class TemporaryTopicImpl extends TopicImpl implements TemporaryTopic {
+    private static Log log = LogFactory.getLog(TemporaryTopicImpl.class);
+
     private ConnectionImpl connection;
 
     public TemporaryTopicImpl(ConnectionImpl connection) {
@@ -27,6 +32,9 @@ public class TemporaryTopicImpl extends TopicImpl implements TemporaryTopic {
 
     public void delete() throws JMSException {
         if (topic != null) {
+            if (log.isDebugEnabled()) {
+                log.debug(String.format("Deleting " + topic));
+            }
             DomainParticipant participant = connection.getParticipant();
             participant.delete_topic(topic);
         }
@@ -34,10 +42,10 @@ public class TemporaryTopicImpl extends TopicImpl implements TemporaryTopic {
     }
 
     @Override
-    public Topic toDDSTopic(ConnectionImpl connection) throws JMSException {
+    public Topic createDDSTopic(ConnectionImpl connection) throws JMSException {
         if (!connection.equals(this.connection)) {
             throw new InvalidDestinationException("TemporaryTopics may not be used with foreign Connections!");
         }
-        return super.toDDSTopic(connection);
+        return super.createDDSTopic(connection);
     }
 }

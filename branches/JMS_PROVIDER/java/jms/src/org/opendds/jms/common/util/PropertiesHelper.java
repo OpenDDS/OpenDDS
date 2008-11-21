@@ -5,9 +5,9 @@
 package org.opendds.jms.common.util;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Enumeration;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -54,15 +54,25 @@ public class PropertiesHelper {
     }
 
     public static String valueOf(Properties properties) {
-        try {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            properties.store(out, null);
+        StringBuilder sb = new StringBuilder();
 
-            return out.toString();
+        sb.append("[");
 
-        } catch (IOException e) {
-            throw new IllegalArgumentException(e);
+        Enumeration en = properties.propertyNames();
+        while (en.hasMoreElements()) {
+            String property = (String) en.nextElement();
+
+            sb.append(property);
+            sb.append("=");
+            sb.append(properties.getProperty(property));
+            
+            if (en.hasMoreElements()) {
+                sb.append(", ");
+            }
         }
+        sb.append("]");
+
+        return sb.toString();
     }
 
     //

@@ -9,6 +9,9 @@ import java.io.Serializable;
 import javax.jms.JMSException;
 import javax.jms.Topic;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import DDS.DomainParticipant;
 import DDS.TopicQosHolder;
 
@@ -22,12 +25,12 @@ import org.opendds.jms.qos.TopicQosPolicy;
  * @version $Revision$
  */
 public class TopicImpl implements Serializable, Topic {
+    private static Log log = LogFactory.getLog(TopicImpl.class);
+
     private String topicName;
     private DataReaderQosPolicy dataReaderQosPolicy;
     private DataWriterQosPolicy dataWriterQosPolicy;
     private TopicQosPolicy topicQosPolicy;
-
-    protected transient DDS.Topic topic;
 
     public TopicImpl(String topicName) {
         this.topicName = topicName;
@@ -60,22 +63,24 @@ public class TopicImpl implements Serializable, Topic {
         return topicQosPolicy;
     }
 
-    public synchronized DDS.Topic toDDSTopic(ConnectionImpl connection) throws JMSException {
-        if (topic == null) {
-            TopicQosHolder holder = new TopicQosHolder(QosPolicies.newTopicQos());
+    public DDS.Topic createDDSTopic(ConnectionImpl connection) throws JMSException {
+        TopicQosHolder holder = new TopicQosHolder(QosPolicies.newTopicQos());
 
-            DomainParticipant participant = connection.getParticipant();
-            participant.get_default_topic_qos(holder);
+        DomainParticipant participant = connection.getParticipant();
+        participant.get_default_topic_qos(holder);
 
-            if (topicQosPolicy != null) {
-                topicQosPolicy.setQos(holder.value);
-            }
-
-            topic = participant.create_topic(topicName, connection.getTypeName(), holder.value, null);
-            if (topic == null) {
-                throw new JMSException("Unable to create Topic; please check logs");
-            }
+        if (topicQosPolicy != null) {
+            topicQosPolicy.setQos(holder.value);
         }
+
+        DDS.Topic topic = participant.create_topic(topicName, connection.getTypeName(), holder.value, null);
+        if (topic == null) {
+            throw new JMSException("Unable to create Topic; please check logs");
+        }
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Created %s using %s", topic, holder.value));
+        }
+
         return topic;
     }
 

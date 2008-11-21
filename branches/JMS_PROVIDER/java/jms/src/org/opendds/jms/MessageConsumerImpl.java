@@ -101,7 +101,7 @@ public class MessageConsumerImpl implements MessageConsumer {
     private Topic extractDDSTopicFromDestination(Destination destination) throws JMSException {
         // TODO placeholder, to be elaborated
         TopicImpl topicImpl = (TopicImpl) destination;
-        return topicImpl.toDDSTopic(sessionImpl.getOwningConnection());
+        return topicImpl.createDDSTopic(sessionImpl.getOwningConnection());
     }
 
     public String getMessageSelector() throws JMSException {

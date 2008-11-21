@@ -20,7 +20,7 @@ import org.opendds.jms.common.util.PropertiesHelper;
  */
 public class SubscriberQosPolicy implements QosPolicy<SubscriberQos> {
     private static Log log = LogFactory.getLog(SubscriberQosPolicy.class);
-    
+
     private Properties properties;
 
     public SubscriberQosPolicy(String value) {
@@ -32,6 +32,10 @@ public class SubscriberQosPolicy implements QosPolicy<SubscriberQos> {
     }
 
     public void setQos(SubscriberQos qos) {
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Configuring %s %s", qos, PropertiesHelper.valueOf(properties)));
+        }
+        
         PropertiesHelper.Property property;
 
         PropertiesHelper helper = new PropertiesHelper(properties);

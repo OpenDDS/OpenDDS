@@ -20,6 +20,9 @@ import javax.resource.spi.ManagedConnectionMetaData;
 import javax.security.auth.Subject;
 import javax.transaction.xa.XAResource;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import DDS.DomainParticipant;
 import DDS.DomainParticipantFactory;
 import DDS.DomainParticipantQosHolder;
@@ -42,14 +45,17 @@ import org.opendds.jms.qos.QosPolicies;
  * @version $Revision$
  */
 public class ManagedConnectionImpl implements ManagedConnection {
+    private static Log log = LogFactory.getLog("DOMAIN|1");
+
     private boolean destroyed;
     private Subject subject;
     private ConnectionRequestInfoImpl cxRequestInfo;
+    private int domainId;
     private DomainParticipant participant;
     private String typeName;
     private PublisherManager publishers;
     private SubscriberManager subscribers;
-    private PrintWriter out;
+    private PrintWriter out; // unused
 
     private List<ConnectionImpl> handles =
         new ArrayList<ConnectionImpl>();
@@ -62,9 +68,14 @@ public class ManagedConnectionImpl implements ManagedConnection {
         this.subject = subject;
         this.cxRequestInfo = cxRequestInfo;
 
+        domainId = cxRequestInfo.getDomainId();
+
         DomainParticipantFactory dpf = TheParticipantFactory.getInstance();
         if (dpf == null) {
             throw new ResourceException("Unable to get DomainParticipantFactory instance; please check logs");
+        }
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("[%d] Using %s", domainId, dpf));
         }
 
         DomainParticipantQosHolder holder =
@@ -79,6 +90,9 @@ public class ManagedConnectionImpl implements ManagedConnection {
         if (participant == null) {
             throw new ResourceException("Unable to create DomainParticipant; please check logs");
         }
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("[%d] Created %s %s", domainId, participant, holder.value));
+        }
 
         MessagePayloadTypeSupportImpl ts = new MessagePayloadTypeSupportImpl();
         if (ts.register_type(participant, "") != RETCODE_OK.value) {
@@ -86,8 +100,23 @@ public class ManagedConnectionImpl implements ManagedConnection {
         }
         typeName = ts.get_type_name();
 
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("[DOM|%d] Registered %s", domainId, typeName));
+        }
+
         publishers = new PublisherManager(this);
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("[D|%d] Created %s", domainId, publishers));
+        }
+
         subscribers = new SubscriberManager(this);
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("[%d] Created %s", domainId, subscribers));
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("[%d] Connection ID is %s", domainId, getConnectionId()));
+        }
     }
 
     public boolean isDestroyed() {

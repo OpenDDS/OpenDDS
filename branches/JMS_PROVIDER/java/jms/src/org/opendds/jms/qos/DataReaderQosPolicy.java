@@ -35,6 +35,10 @@ public class DataReaderQosPolicy implements QosPolicy<DataReaderQos> {
     }
 
     public void setQos(DataReaderQos qos) {
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Configuring %s %s", qos, PropertiesHelper.valueOf(properties)));
+        }
+        
         PropertiesHelper.Property property;
 
         PropertiesHelper helper = new PropertiesHelper(properties);
