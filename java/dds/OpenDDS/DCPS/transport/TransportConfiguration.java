@@ -20,6 +20,8 @@ public abstract class TransportConfiguration implements Serializable {
     }
 
     public int getId() { return id; }
+    
+    public abstract String getType();
 
     private ThreadSynchStrategy sendThreadStrategy;
     public ThreadSynchStrategy getSendThreadStrategy() {

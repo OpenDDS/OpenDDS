@@ -9,6 +9,8 @@ public class ReliableMulticastConfiguration extends TransportConfiguration {
     native void saveSpecificConfig(long cfg);
     native void loadSpecificConfig(long cfg);
 
+    public String getType() { return "ReliableMulticast"; }
+
     private String localAddress;
     public String getLocalAddress() { return localAddress; }
     public void setLocalAddress(String la) { localAddress = la; }

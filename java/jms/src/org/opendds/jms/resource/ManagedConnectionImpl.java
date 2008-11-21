@@ -46,15 +46,13 @@ public class ManagedConnectionImpl implements ManagedConnection {
     private ContextLog log;
 
     private boolean destroyed;
-
     private Subject subject;
     private ConnectionRequestInfoImpl cxRequestInfo;
-
     private DomainParticipantFactory dpf;
     private DomainParticipant participant;
     private String typeName;
-    private PublisherManager publishers;
-    private SubscriberManager subscribers;
+    private PublisherManager publisherMgr;
+    private SubscriberManager subscriberMgr;
 
     private List<ConnectionImpl> handles =
         new ArrayList<ConnectionImpl>();
@@ -99,11 +97,11 @@ public class ManagedConnectionImpl implements ManagedConnection {
         typeName = ts.get_type_name();
         log.debug("Registered %s", typeName);
 
-        publishers = new PublisherManager(this);
-        log.debug("Created %s", publishers);
+        publisherMgr = new PublisherManager(this);
+        log.debug("Created %s", publisherMgr);
 
-        subscribers = new SubscriberManager(this);
-        log.debug("Created %s", subscribers);
+        subscriberMgr = new SubscriberManager(this);
+        log.debug("Created %s", subscriberMgr);
     }
 
     public ContextLog getLog() {
@@ -136,11 +134,11 @@ public class ManagedConnectionImpl implements ManagedConnection {
     }
 
     public PublisherManager getPublishers() {
-        return publishers;
+        return publisherMgr;
     }
 
     public SubscriberManager getSubscribers() {
-        return subscribers;
+        return subscriberMgr;
     }
 
     public PrintWriter getLogWriter() {
@@ -233,8 +231,8 @@ public class ManagedConnectionImpl implements ManagedConnection {
         dpf = null;
         participant = null;
         typeName = null;
-        publishers = null;
-        subscribers = null;
+        publisherMgr = null;
+        subscriberMgr = null;
 
         destroyed = true;
     }
@@ -272,6 +270,10 @@ public class ManagedConnectionImpl implements ManagedConnection {
         event.setConnectionHandle(handle);
 
         notifyListeners(event);
+    }
+
+    public void notifyError(Exception e) {
+        notifyListeners(new ConnectionEvent(this, ConnectionEvent.CONNECTION_ERROR_OCCURRED, e));
     }
 
     protected void notifyListeners(ConnectionEvent event) {

@@ -6,7 +6,9 @@ package org.opendds.jms.management.argument;
 
 import java.util.List;
 
+import org.opendds.jms.common.lang.Strings;
 import org.opendds.jms.management.DynamicMBeanSupport;
+import org.opendds.jms.transport.Transports;
 
 /**
  * @author  Steven Stallion
@@ -24,6 +26,7 @@ public class DCPSArguments implements DynamicArgumentProvider {
     public static final String DCPS_BIT_TRANSPORT_PORT = "DCPSBitTransportPort";
     public static final String DCPS_BIT_LOOKUP_DURATION_MSEC = "DCPSBitLookupDurationMsec";
     public static final String DCPS_TRANSPORT_DEBUG_LEVEL = "DCPSTransportDebugLevel";
+    public static final String TRANSPORT_TYPE = "TransportType";
 
     private DynamicMBeanSupport instance;
 
@@ -43,6 +46,7 @@ public class DCPSArguments implements DynamicArgumentProvider {
         instance.registerAttribute(DCPS_BIT_TRANSPORT_PORT, Integer.class);
         instance.registerAttribute(DCPS_BIT_LOOKUP_DURATION_MSEC, Integer.class);
         instance.registerAttribute(DCPS_TRANSPORT_DEBUG_LEVEL, Integer.class);
+        instance.registerAttribute(TRANSPORT_TYPE, String.class);
     }
 
     public void addArgs(List<String> args) throws Exception {
@@ -59,6 +63,14 @@ public class DCPSArguments implements DynamicArgumentProvider {
         writer.writeIfSet("-DCPSBitTransportPort", DCPS_BIT_TRANSPORT_PORT);
         writer.writeIfSet("-DCPSBitLookupDurationMsec", DCPS_BIT_LOOKUP_DURATION_MSEC);
         writer.writeIfSet("-DCPSTransportDebugLevel", DCPS_TRANSPORT_DEBUG_LEVEL);
+
+        String transportType =
+            (String) instance.getAttribute(TRANSPORT_TYPE);
+
+        if (!Strings.isEmpty(transportType)) {
+            writer.writeSvcConfDirective(
+                Transports.getDirective(transportType));
+        }
 
         writer.writeTo(args);
     }

@@ -125,16 +125,13 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
     public Object createConnectionFactory(ConnectionManager cxManager) throws ResourceException {
         validate();
 
-        TransportFactory tf =
-            new TransportFactory(transportType);
-
         ConnectionRequestInfo cxRequestInfo =
             new ConnectionRequestInfoImpl(clientId, domainId,
                 new ParticipantQosPolicy(participantQosPolicy),
                 new PublisherQosPolicy(publisherQosPolicy),
-                tf.createTransport(publisherTransport),
+                new TransportFactory(transportType, publisherTransport),
                 new SubscriberQosPolicy(subscriberQosPolicy),
-                tf.createTransport(subscriberTransport));
+                new TransportFactory(transportType, subscriberTransport));
 
         return new ConnectionFactoryImpl(this, cxManager, cxRequestInfo);
     }

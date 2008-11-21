@@ -13,58 +13,66 @@ import DDS.PublisherQosHolder;
 import OpenDDS.DCPS.transport.AttachStatus;
 import OpenDDS.DCPS.transport.TransportImpl;
 
+import org.opendds.jms.common.ExceptionHelper;
 import org.opendds.jms.common.PartitionHelper;
 import org.opendds.jms.common.util.ContextLog;
 import org.opendds.jms.qos.PublisherQosPolicy;
 import org.opendds.jms.qos.QosPolicies;
 import org.opendds.jms.resource.ConnectionRequestInfoImpl;
 import org.opendds.jms.resource.ManagedConnectionImpl;
+import org.opendds.jms.transport.TransportManager;
 
 /**
  * @author  Steven Stallion
  * @version $Revision$
  */
 public class PublisherManager {
-    private ContextLog log;
-
     private ManagedConnectionImpl connection;
     private ConnectionRequestInfoImpl cxRequestInfo;
     private Publisher publisher;
+    private TransportManager transportMgr;
 
     public PublisherManager(ManagedConnectionImpl connection) throws ResourceException {
         this.connection = connection;
+        this.cxRequestInfo = connection.getConnectionRequestInfo();
 
-        cxRequestInfo = connection.getConnectionRequestInfo();
-        log = connection.getLog();
+        transportMgr = new TransportManager(cxRequestInfo.getPublisherTransport());
     }
 
     protected Publisher createPublisher() throws JMSException {
-        PublisherQosHolder holder =
-            new PublisherQosHolder(QosPolicies.newPublisherQos());
+        try {
+            ContextLog log = connection.getLog();
 
-        DomainParticipant participant = connection.getParticipant();
-        participant.get_default_publisher_qos(holder);
+            PublisherQosHolder holder =
+                new PublisherQosHolder(QosPolicies.newPublisherQos());
 
-        PublisherQosPolicy policy = cxRequestInfo.getPublisherQosPolicy();
-        policy.setQos(holder.value);
+            DomainParticipant participant = connection.getParticipant();
+            participant.get_default_publisher_qos(holder);
 
-        // Set PARTITION QosPolicy to support the noLocal client
-        // specifier on created MessageConsumer instances:
-        holder.value.partition = PartitionHelper.match(connection.getConnectionId());
+            PublisherQosPolicy policy = cxRequestInfo.getPublisherQosPolicy();
+            policy.setQos(holder.value);
 
-        Publisher publisher = participant.create_publisher(holder.value, null);
-        if (publisher == null) {
-            throw new JMSException("Unable to create Publisher; please check logs");
+            // Set PARTITION QosPolicy to support the noLocal client
+            // specifier on created MessageConsumer instances:
+            holder.value.partition = PartitionHelper.match(connection.getConnectionId());
+
+            Publisher publisher = participant.create_publisher(holder.value, null);
+            if (publisher == null) {
+                throw new JMSException("Unable to create Publisher; please check logs");
+            }
+            log.debug("Created %s %s", publisher, policy);
+
+            TransportImpl transport = transportMgr.getTransport();
+            if (transport.attach_to_publisher(publisher).value() != AttachStatus._ATTACH_OK) {
+                throw new JMSException("Unable to attach to transport; please check logs");
+            }
+            log.debug("Attached %s to %s", publisher, transport);
+
+            return publisher;
+
+        } catch (Exception e) {
+            throw ExceptionHelper.notify(connection, e);
         }
-        log.debug("Created %s %s", publisher, policy);
-
-        TransportImpl transport = cxRequestInfo.getPublisherTransport();
-        if (transport.attach_to_publisher(publisher).value() != AttachStatus._ATTACH_OK) {
-            throw new JMSException("Unable to attach to transport; please check logs");
-        }
-        log.debug("Attached %s to %s", publisher, transport);
-
-        return publisher;
     }
 
     public synchronized Publisher getPublisher() throws JMSException {

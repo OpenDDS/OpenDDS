@@ -7,4 +7,5 @@ public class SimpleUdpConfiguration
         super(id);
     }
 
+    public String getType() { return "SimpleUdp"; }
 }
