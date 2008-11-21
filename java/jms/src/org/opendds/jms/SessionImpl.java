@@ -60,9 +60,9 @@ public class SessionImpl implements Session {
     // JMS 1.1, 4.4.14, Asynchronous Message delivery thread
     private ExecutorService messageDeliveryExecutorService;
     // JMS 1.1, 4.4.11, The sessions view of unacknowledged Messages, used in recover()
-    private Map<TopicMessageConsumerImpl, List<DataReaderHandlePair>> unacknowledged;
+    private Map<MessageConsumerImpl, List<DataReaderHandlePair>> unacknowledged;
     private final Object lockForUnacknowledged;
-    private Map<TopicMessageConsumerImpl, List<DataReaderHandlePair>> toBeRecovered;
+    private Map<MessageConsumerImpl, List<DataReaderHandlePair>> toBeRecovered;
     private ConnectionImpl owningConnection;
 
     // OpenDDS stuff
@@ -83,7 +83,7 @@ public class SessionImpl implements Session {
         this.createdProducers = new ArrayList<MessageProducer>();
         this.createdConsumers = new ArrayList<MessageConsumer>();
         this.messageDeliveryExecutorService = Executors.newSingleThreadExecutor();
-        this.unacknowledged = new HashMap<TopicMessageConsumerImpl, List<DataReaderHandlePair>>();
+        this.unacknowledged = new HashMap<MessageConsumerImpl, List<DataReaderHandlePair>>();
         this.lockForUnacknowledged = new Object();
     }
 
@@ -121,7 +121,7 @@ public class SessionImpl implements Session {
                                           boolean noLocal) throws JMSException {
         checkClosed();
         validateDestination(destination);
-        MessageConsumer messageConsumer = new TopicMessageConsumerImpl(this, destination, messageSelector, noLocal);
+        MessageConsumer messageConsumer = new MessageConsumerImpl(this, destination, messageSelector, noLocal);
         createdConsumers.add(messageConsumer);
         return messageConsumer;
     }
@@ -134,7 +134,7 @@ public class SessionImpl implements Session {
 
     public MessageProducer createProducer(Destination destination) throws JMSException {
         checkClosed();
-        MessageProducer messageProducer = new TopicMessageProducerImpl(this, destination);
+        MessageProducer messageProducer = new MessageProducerImpl(this, destination);
         createdProducers.add(messageProducer);
         return messageProducer;
     }
@@ -247,7 +247,7 @@ public class SessionImpl implements Session {
     public void recover() throws JMSException {
         checkClosed();
         synchronized(lockForUnacknowledged) {
-            toBeRecovered = new HashMap<TopicMessageConsumerImpl, List<DataReaderHandlePair>>(unacknowledged);
+            toBeRecovered = new HashMap<MessageConsumerImpl, List<DataReaderHandlePair>>(unacknowledged);
             unacknowledged.clear();
         }
         if (transacted) throw new IllegalStateException("recover() called on a transacted Session.");
@@ -255,7 +255,7 @@ public class SessionImpl implements Session {
         if (messageListener != null) {
             recoverAsync();
         } else {
-            for (TopicMessageConsumerImpl consumer: toBeRecovered.keySet()) {
+            for (MessageConsumerImpl consumer: toBeRecovered.keySet()) {
                 final List<DataReaderHandlePair> pairs = toBeRecovered.get(consumer);
                 consumer.doRecover(pairs);
             }
@@ -293,9 +293,9 @@ public class SessionImpl implements Session {
     }
 
     void doAcknowledge() {
-        Map<TopicMessageConsumerImpl, List<DataReaderHandlePair>> copy;
+        Map<MessageConsumerImpl, List<DataReaderHandlePair>> copy;
         synchronized(lockForUnacknowledged) {
-            copy = new HashMap<TopicMessageConsumerImpl, List<DataReaderHandlePair>>(unacknowledged);
+            copy = new HashMap<MessageConsumerImpl, List<DataReaderHandlePair>>(unacknowledged);
             unacknowledged.clear();
         }
         for (List<DataReaderHandlePair> pairList: copy.values()) {
@@ -313,7 +313,7 @@ public class SessionImpl implements Session {
         }
     }
 
-    void addToUnacknowledged(DataReaderHandlePair dataReaderHandlePair, TopicMessageConsumerImpl consumer) {
+    void addToUnacknowledged(DataReaderHandlePair dataReaderHandlePair, MessageConsumerImpl consumer) {
         synchronized(lockForUnacknowledged) {
             List<DataReaderHandlePair> pairs = unacknowledged.get(consumer);
             if (pairs == null) {

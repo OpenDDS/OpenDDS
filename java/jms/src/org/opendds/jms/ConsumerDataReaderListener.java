@@ -1,7 +1,5 @@
 package org.opendds.jms;
 
-import javax.jms.Session;
-
 import DDS.ALIVE_INSTANCE_STATE;
 import DDS.DataReader;
 import DDS.LivelinessChangedStatus;
@@ -25,10 +23,10 @@ import OpenDDS.JMS.MessagePayloadSeqHolder;
 import static org.opendds.jms.ConsumerMessageFactory.buildMessageFromPayload;
 
 public class ConsumerDataReaderListener extends _DataReaderListenerLocalBase {
-    private TopicMessageConsumerImpl consumer;
+    private MessageConsumerImpl consumer;
     private SessionImpl sessionImpl;
 
-    public ConsumerDataReaderListener(TopicMessageConsumerImpl consumer, SessionImpl sessionImpl) {
+    public ConsumerDataReaderListener(MessageConsumerImpl consumer, SessionImpl sessionImpl) {
         this.consumer = consumer;
         this.sessionImpl = sessionImpl;
     }
@@ -83,9 +81,9 @@ public class ConsumerDataReaderListener extends _DataReaderListenerLocalBase {
 //    private class MessageDispatcher implements Runnable {
 //        private final AbstractMessageImpl message;
 //        private final DataReaderHandlePair dataReaderHandlePair;
-//        private final TopicMessageConsumerImpl consumer;
+//        private final MessageConsumerImpl consumer;
 //
-//        public MessageDispatcher(AbstractMessageImpl message, DataReaderHandlePair dataReaderHandlePair, TopicMessageConsumerImpl consumer) {
+//        public MessageDispatcher(AbstractMessageImpl message, DataReaderHandlePair dataReaderHandlePair, MessageConsumerImpl consumer) {
 //            this.message = message;
 //            this.dataReaderHandlePair = dataReaderHandlePair;
 //            this.consumer = consumer;

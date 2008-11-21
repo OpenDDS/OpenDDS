@@ -23,12 +23,13 @@ import OpenDDS.JMS.MessagePayload;
 import OpenDDS.JMS.MessagePayloadDataWriter;
 
 import org.opendds.jms.common.lang.Objects;
+import org.opendds.jms.common.lang.Strings;
 
 /**
  * @author Steven Stallion
  * @version $Revision$
  */
-public class TopicMessageProducerImpl implements MessageProducer {
+public class MessageProducerImpl implements MessageProducer {
     private SessionImpl session;
     private Destination destination;
     private boolean disableMessageID;
@@ -43,7 +44,7 @@ public class TopicMessageProducerImpl implements MessageProducer {
 
     private boolean closed;
 
-    public TopicMessageProducerImpl(SessionImpl session, Destination destination) throws JMSException {
+    public MessageProducerImpl(SessionImpl session, Destination destination) throws JMSException {
         this.session = session;
         this.destination = destination;
 
@@ -200,7 +201,7 @@ public class TopicMessageProducerImpl implements MessageProducer {
     }
 
     private void populateMessageHeader(Destination destination, Message message, int deliveryMode, int priority, long timeToLive) throws JMSException {
-        final String id = MessageID.createMessageID().toString();
+        final String id = Strings.randomUuid();
         final long timestamp = System.currentTimeMillis();
         final long expiration = (timeToLive == 0L) ? 0L : (timestamp + timeToLive);
 

@@ -1,3 +1,21 @@
+Fri Nov 21 01:02:58 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/src/org/opendds/jms/ConsumerDataReaderListener.java:
+        * java/jms/src/org/opendds/jms/MessageConsumerImpl.java:
+        * java/jms/src/org/opendds/jms/MessageDispatcher.java:
+        * java/jms/src/org/opendds/jms/MessageProducerImpl.java:
+        * java/jms/src/org/opendds/jms/SessionImpl.java:
+        * java/jms/test/org/opendds/jms/TopicMessageConsumerImplTest.java:
+
+          Renamed TopicMessageConsumerImpl and TopicMessageProducerImpl to
+          MessageConsumerImpl and MessageProducerImpl respectively.
+
+        * java/jms/src/org/opendds/jms/MessageID.java:
+        * java/jms/src/org/opendds/jms/TopicMessageConsumerImpl.java:
+        * java/jms/src/org/opendds/jms/TopicMessageProducerImpl.java:
+
+          Removed these files.
+
 Fri Nov 21 00:56:48 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/src/org/opendds/jms/common/beans/BeanHelper.java:

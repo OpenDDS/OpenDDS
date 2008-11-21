@@ -338,7 +338,7 @@ public class TopicMessageConsumerImplTest {
             try {
                 final Field field = SessionImpl.class.getDeclaredField("unacknowledged");
                 field.setAccessible(true);
-                Map<TopicMessageConsumerImpl, List<DataReaderHandlePair>> unacknowledged = (Map<TopicMessageConsumerImpl, List<DataReaderHandlePair>>) field.get(this);
+                Map<MessageConsumerImpl, List<DataReaderHandlePair>> unacknowledged = (Map<MessageConsumerImpl, List<DataReaderHandlePair>>) field.get(this);
                 final Collection<List<DataReaderHandlePair>> listCollection = unacknowledged.values();
                 int count = 0;
                 for (List<DataReaderHandlePair> pairs : listCollection) {
