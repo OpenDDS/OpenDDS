@@ -79,7 +79,9 @@ public:
   throw (CORBA::SystemException);
 
   virtual void on_budget_exceeded(
-    DDS::DataReader_ptr reader)
+    DDS::DataReader_ptr reader,
+    const ::OpenDDS::DCPS::BudgetExceededStatus& status
+  )
   throw (CORBA::SystemException);
 
   virtual void on_connection_deleted (

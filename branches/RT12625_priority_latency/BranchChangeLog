@@ -1,3 +1,98 @@
+Fri Nov 21 22:57:32 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Stats_T.h:
+
+          Added a statistics gathering class.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Added LatencyStats structure to contain statistical data
+          summaries per writer.  Added the following members and methods:
+            WriterInfo::add_stat()
+              - add a latency datum to the statistics for a single writer
+                to a reader.
+            WriterInfo::get_stats()
+              - interface to collect current statistical values for a
+                single writer to a reader.
+            WriterInfo::reset_stats()
+              - interface to clear all statistical data for a single
+                writer to a reader.
+            WriterInfo::stats_
+              - new statistical accumulator member.
+            DataReaderImpl::process_latency()
+              - implemented this behavior to collect statistics and check
+                latency against budget policy value.
+            DataReaderImpl::notify_latency()
+              - implemented this behavior to callback on_budget_exceeded().
+            DataReaderImpl::get_latency_stats()
+              - implemented this to return a vector of LatencyStats
+                structures, one for each publication sending to the
+                reader.
+            DataReaderImpl::reset_latency_stats()
+              - implemented this to clear all statistics gathering state
+                for the reader.
+            DataReaderImpl::budget_exceeded_status_
+              - member to retain count of budget violations and handle of
+                most recent violator.
+
+        * dds/DCPS/Qos_Helper.inl:
+
+          Removed an unused argument warning.
+
+        * dds/DdsDcpsSubscription.idl:
+
+          Added BudgetExceededStatus structure definition and added a
+          parameter of this type to the
+          OpenDDS::DCPS::DataReaderListener::on_budget_exceeded()
+          callback.
+
+        * dds/DCPS/FailoverListener.h:
+        * dds/DCPS/FailoverListener.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/DataReaderListener.h:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/DataReaderListener.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/DataReaderListener.h:
+        * examples/DCPS/Messenger_IOGR_Imr/DataReaderListener.cpp:
+        * examples/DCPS/Messenger_Imr/DataReaderListener.h:
+        * examples/DCPS/Messenger_Imr/DataReaderListener.cpp:
+        * tests/DCPS/CompatibilityTest/DataReaderListener.h:
+        * tests/DCPS/CompatibilityTest/DataReaderListener.cpp:
+        * tests/DCPS/CorbaSeq/DataReaderListener.h:
+        * tests/DCPS/CorbaSeq/DataReaderListener.cpp:
+        * tests/DCPS/Deadline/DataReaderListener.h:
+        * tests/DCPS/Deadline/DataReaderListener.cpp:
+        * tests/DCPS/FooTest4_0/DataReaderListener.h:
+        * tests/DCPS/FooTest4_0/DataReaderListener.cpp:
+        * tests/DCPS/Lifespan/DataReaderListener.h:
+        * tests/DCPS/Lifespan/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTest/DataReaderListener.h:
+        * tests/DCPS/LivelinessTest/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTimeout/DataReaderListenerImpl.h:
+        * tests/DCPS/LivelinessTimeout/DataReaderListenerImpl.cpp:
+        * tests/DCPS/MultiTopicTest/DataReaderListener.h:
+        * tests/DCPS/MultiTopicTest/DataReaderListener.cpp:
+        * tests/DCPS/Partition/DataReaderListener.h:
+        * tests/DCPS/Partition/DataReaderListener.cpp:
+        * tests/DCPS/PersistentDurability/DataReaderListener.h:
+        * tests/DCPS/PersistentDurability/DataReaderListener.cpp:
+        * tests/DCPS/Priority/DataReaderListener.h:
+        * tests/DCPS/Priority/DataReaderListener.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/DataReaderListener.h:
+        * tests/DCPS/Prst_delayed_subscriber/DataReaderListener.cpp:
+        * tests/DCPS/Reconnect/DataReaderListener.h:
+        * tests/DCPS/Reconnect/DataReaderListener.cpp:
+        * tests/DCPS/SetQosDeadline/DataReaderListener.h:
+        * tests/DCPS/SetQosDeadline/DataReaderListener.cpp:
+        * tests/DCPS/SetQosPartition/DataReaderListener.h:
+        * tests/DCPS/SetQosPartition/DataReaderListener.cpp:
+        * tests/DCPS/TransientDurability/DataReaderListener.h:
+        * tests/DCPS/TransientDurability/DataReaderListener.cpp:
+        * tests/DCPS/TransientLocalTest/DataReaderListener.h:
+        * tests/DCPS/TransientLocalTest/DataReaderListener.cpp:
+
+          Added BudgetExceededStatus parameter to on_budget_exceeded()
+          callback.
+
 Thu Nov 20 20:22:19 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:

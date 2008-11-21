@@ -19,10 +19,12 @@
 #include "InstanceState.h"
 #include "Cached_Allocator_With_Overflow_T.h"
 #include "ZeroCopyInfoSeq_T.h"
+#include "Stats_T.h"
 
 #include "ace/String_Base.h"
 #include "ace/Reverse_Lock_T.h"
 
+#include <vector>
 #include <map>
 #include <memory>
 
@@ -46,6 +48,22 @@ namespace OpenDDS
                 ReceivedDataAllocator;
 
     //typedef ZeroCopyInfoSeq<DCPS_ZERO_COPY_SEQ_DEFAULT_SIZE> SampleInfoZCSeq;
+
+    /**
+     * @struct LatencyStats
+     *
+     * @brief Collection of latency statistics for a single publication.
+     */
+    struct LatencyStats {
+      unsigned long n;
+      double max;
+      double min;
+      long double mean;
+      long double variance;
+    };
+
+    /// Statistics collector type.
+    typedef Stats< double> StatisticsAccumulator;
 
     /// Keeps track of a DataWriter's liveliness for a DataReader.
     class OpenDDS_Dcps_Export WriterInfo {
@@ -73,12 +91,24 @@ namespace OpenDDS
         /// update liveliness when remove_association is called.
         void removed ();
 
+        /// Add a datum to the latency statistics.
+        void add_stat( const ACE_Time_Value& delay);
+
+        /// Extract the current latency statistics for this writer.
+        LatencyStats get_stats() const;
+
+        /// Reset the latency statistics for this writer.
+        void reset_stats();
+
       private:
         /// Timestamp of last write/dispose/assert_liveliness from this DataWriter
         ACE_Time_Value last_liveliness_activity_time_;
 
         /// State of the writer.
         WriterState state_;
+
+        /// Latency statistics for the DataWriter to this DataReader.
+        StatisticsAccumulator stats_;
 
         /// The DataReader owning this WriterInfo
         DataReaderImpl* reader_;
@@ -330,8 +360,10 @@ namespace OpenDDS
       virtual void dispose(const ReceivedDataSample& sample);
       virtual void unregister(const ReceivedDataSample& sample);
 
-      void process_latency(const ReceivedDataSample& sample);
-      void notify_latency();
+      void process_latency( const ReceivedDataSample& sample);
+      void notify_latency( PublicationId writer);
+      void get_latency_stats( std::vector< LatencyStats>& stats) const;
+      void reset_latency_stats();
 
       CORBA::Long get_depth() const { return depth_; }
       size_t get_n_chunks() const { return n_chunks_; }
@@ -481,6 +513,9 @@ namespace OpenDDS
       ::DDS::RequestedDeadlineMissedStatus  requested_deadline_missed_status_;
       ::DDS::RequestedIncompatibleQosStatus requested_incompatible_qos_status_;
       ::DDS::SubscriptionMatchStatus        subscription_match_status_;
+
+      // OpenDDS extended status.  This is only available via listener.
+      BudgetExceededStatus                  budget_exceeded_status_;
 
       /**
        * @todo The subscription_lost_status_ and

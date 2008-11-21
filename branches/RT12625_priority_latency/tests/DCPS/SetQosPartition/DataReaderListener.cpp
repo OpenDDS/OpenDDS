@@ -165,7 +165,9 @@ DataReaderListenerImpl::on_subscription_lost (
 }
 
 void
-DataReaderListenerImpl::on_budget_exceeded (DDS::DataReader_ptr)
+DataReaderListenerImpl::on_budget_exceeded (
+    DDS::DataReader_ptr,
+    const ::OpenDDS::DCPS::BudgetExceededStatus&)
   throw (CORBA::SystemException)
 {
   cerr << "DataReaderListenerImpl::on_budget_exceeded" << endl;

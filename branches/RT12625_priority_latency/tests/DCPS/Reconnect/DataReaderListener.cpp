@@ -174,7 +174,8 @@ void DataReaderListenerImpl::on_subscription_lost (
 
 
 void DataReaderListenerImpl::on_budget_exceeded (
-  ::DDS::DataReader_ptr)
+  ::DDS::DataReader_ptr,
+  const ::OpenDDS::DCPS::BudgetExceededStatus&)
   throw (::CORBA::SystemException)
 {
   ACE_DEBUG ((LM_DEBUG, "(%P|%t)received on_budget_exceeded \n"));

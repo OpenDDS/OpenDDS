@@ -240,6 +240,12 @@ module OpenDDS {
       ::DDS::InstanceHandleSeq publication_handles;
     };
 
+    struct BudgetExceededStatus {
+      long             total_count;
+      long             total_count_change;
+      ::DDS::InstanceHandle_t last_instance_handle;
+    };
+
     typedef SubscriptionLostStatus SubscriptionDisconnectedStatus;
     typedef SubscriptionLostStatus SubscriptionReconnectedStatus;
 
@@ -276,7 +282,8 @@ module OpenDDS {
 
       // Called when the latency budget has been exceeded.
       void on_budget_exceeded(
-        in ::DDS::DataReader reader);
+        in ::DDS::DataReader reader,
+        in BudgetExceededStatus status);
     };
 
 
