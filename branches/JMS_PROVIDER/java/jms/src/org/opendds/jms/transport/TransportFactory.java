@@ -68,8 +68,8 @@ public class TransportFactory {
         if (transport == null) {
             throw new ResourceException("Unable to create Transport; please check logs");
         }
-        transport.configure(configuration);
 
+        transport.configure(configuration);
         return transport;
     }
 }

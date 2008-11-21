@@ -1,7 +1,7 @@
 /*
  * $Id$
  */
- 
+
 package org.opendds.jms.common.beans.spi;
 
 /**
@@ -10,8 +10,8 @@ package org.opendds.jms.common.beans.spi;
  */
 public class StringType implements Type<String> {
 
-    public Class<String> getType() {
-        return String.class;
+    public Class[] supportedTypes() {
+        return new Class[] { String.class };
     }
 
     public String defaultValue() {

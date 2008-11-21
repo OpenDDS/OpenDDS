@@ -129,7 +129,7 @@ public class BeanHelper {
         if (value != null && !propertyType.isAssignableFrom(value.getClass())) {
             Type type = registry.findType(propertyType);
             if (type == null) {
-                throw new UnsupportedTypeException(value);
+                throw new UnsupportedTypeException(propertyType);
             }
             value = type.valueOf(value);
         }

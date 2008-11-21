@@ -13,8 +13,8 @@ import org.opendds.jms.common.lang.Strings;
  */
 public class CharacterType implements Type {
 
-    public Class<Character> getType() {
-        return Character.class;
+    public Class[] supportedTypes() {
+        return new Class[] { char.class, Character.class };
     }
 
     public Character defaultValue() {

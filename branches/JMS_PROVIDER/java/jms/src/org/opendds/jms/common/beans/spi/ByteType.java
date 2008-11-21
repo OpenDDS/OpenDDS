@@ -12,8 +12,8 @@ import org.opendds.jms.common.beans.UnsupportedTypeException;
  */
 public class ByteType implements Type<Byte> {
 
-    public Class<Byte> getType() {
-        return Byte.class;
+    public Class[] supportedTypes() {
+        return new Class[] { byte.class, Byte.class };
     }
 
     public Byte defaultValue() {

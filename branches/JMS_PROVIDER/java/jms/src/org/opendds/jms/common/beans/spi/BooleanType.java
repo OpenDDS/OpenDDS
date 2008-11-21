@@ -12,8 +12,8 @@ import org.opendds.jms.common.beans.UnsupportedTypeException;
  */
 public class BooleanType implements Type<Boolean> {
 
-    public Class<Boolean> getType() {
-        return Boolean.class;
+    public Class[] supportedTypes() {
+        return new Class[] { boolean.class, Boolean.class };
     }
 
     public Boolean defaultValue() {

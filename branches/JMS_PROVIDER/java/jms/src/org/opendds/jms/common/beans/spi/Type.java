@@ -10,7 +10,7 @@ package org.opendds.jms.common.beans.spi;
  */
 public interface Type<T> {
 
-    Class<T> getType();
+    Class[] supportedTypes();
 
     T defaultValue();
 

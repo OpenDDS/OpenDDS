@@ -12,8 +12,8 @@ import org.opendds.jms.common.beans.UnsupportedTypeException;
  */
 public class FloatType implements Type<Float> {
 
-    public Class<Float> getType() {
-        return Float.class;
+    public Class[] supportedTypes() {
+        return new Class[] { float.class, Float.class };
     }
 
     public Float defaultValue() {

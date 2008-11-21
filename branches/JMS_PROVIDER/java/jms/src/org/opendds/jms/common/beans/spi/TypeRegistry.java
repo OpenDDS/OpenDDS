@@ -4,6 +4,9 @@
 
 package org.opendds.jms.common.beans.spi;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.opendds.jms.common.spi.ServiceRegistry;
 
 /**
@@ -11,19 +14,23 @@ import org.opendds.jms.common.spi.ServiceRegistry;
  * @version $Revision$
  */
 public class TypeRegistry extends ServiceRegistry<Type> {
+    private Map<Class, Type> types =
+        new HashMap<Class, Type>();
 
     protected Class<Type> getProviderClass() {
         return Type.class;
     }
 
-    public Type findType(Class clazz) {
-        assert clazz != null;
+    @Override
+    public void register(Type type) {
+        super.register(type);
 
-        for (Type type : providers) {
-            if (clazz.equals(type.getType())) {
-                return type;
-            }
+        for (Class clazz : type.supportedTypes()) {
+            types.put(clazz, type);
         }
-        return null;
+    }
+
+    public Type findType(Class clazz) {
+        return types.get(clazz);
     }
 }
