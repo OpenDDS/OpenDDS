@@ -56,7 +56,7 @@ public class PublisherManager {
         if (publisher == null) {
             throw new JMSException("Unable to create Publisher; please check logs");
         }
-        log.debug("Created %s using %s", publisher, holder.value);
+        log.debug("Created %s %s", publisher, holder.value);
 
         TransportImpl transport = cxRequestInfo.getPublisherTransport();
         if (transport.attach_to_publisher(publisher).value() != AttachStatus._ATTACH_OK) {

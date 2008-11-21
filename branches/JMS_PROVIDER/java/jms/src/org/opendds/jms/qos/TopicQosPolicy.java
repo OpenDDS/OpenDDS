@@ -6,9 +6,6 @@ package org.opendds.jms.qos;
 
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import DDS.TopicQos;
 
 import org.opendds.jms.common.util.PropertiesHelper;
@@ -18,8 +15,6 @@ import org.opendds.jms.common.util.PropertiesHelper;
  * @version $Revision$
  */
 public class TopicQosPolicy implements QosPolicy<TopicQos> {
-    private static Log log = LogFactory.getLog(TopicQosPolicy.class);
-
     private Properties properties;
 
     public TopicQosPolicy(String value) {
@@ -31,10 +26,6 @@ public class TopicQosPolicy implements QosPolicy<TopicQos> {
     }
 
     public void setQos(TopicQos qos) {
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("Configuring %s %s", qos, PropertiesHelper.valueOf(properties)));
-        }
-
         PropertiesHelper.Property property;
 
         PropertiesHelper helper = new PropertiesHelper(properties);

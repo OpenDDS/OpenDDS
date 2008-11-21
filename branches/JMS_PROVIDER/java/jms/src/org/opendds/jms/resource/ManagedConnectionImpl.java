@@ -88,7 +88,7 @@ public class ManagedConnectionImpl implements ManagedConnection {
         if (participant == null) {
             throw new ResourceException("Unable to create DomainParticipant; please check logs");
         }
-        log.debug("Created %s using %s", participant, holder.value);
+        log.debug("Created %s %s", participant, holder.value);
 
         log.debug("Connection ID is %s", getConnectionId());
 
@@ -174,7 +174,7 @@ public class ManagedConnectionImpl implements ManagedConnection {
         synchronized (handles) {
             handles.add(handle);
         }
-        log.debug("Associated handle %s", handle);
+        log.debug("Associated %s", handle);
     }
 
     public Object getConnection(Subject subject,
@@ -186,7 +186,7 @@ public class ManagedConnectionImpl implements ManagedConnection {
         synchronized (handles) {
             handles.add(handle);
         }
-        log.debug("Created handle %s", handle);
+        log.debug("Created %s", handle);
 
         return handle; // re-configuration not supported
     }
