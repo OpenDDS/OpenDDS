@@ -96,6 +96,10 @@ DataReaderImpl::DataReaderImpl (void) :
   sample_rejected_status_.last_reason =
     ::DDS::REJECTED_BY_INSTANCE_LIMIT;
   sample_rejected_status_.last_instance_handle = ::DDS::HANDLE_NIL;
+
+  this->budget_exceeded_status_.total_count = 0;
+  this->budget_exceeded_status_.total_count_change = 0;
+  this->budget_exceeded_status_.last_instance_handle = ::DDS::HANDLE_NIL;
 }
 
 // This method is called when there are no longer any reference to the
@@ -991,7 +995,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         // This also adds to the sample container
         this->dds_demarshal(sample);
 
-        this->process_latency(sample);
+        this->process_latency( sample);
 
         this->subscriber_servant_->data_received(this);
       }
@@ -1452,6 +1456,29 @@ void OpenDDS::DCPS::WriterInfo::removed ()
   reader_->writer_removed (writer_id_, this->state_);
 }
 
+void OpenDDS::DCPS::WriterInfo::add_stat( const ACE_Time_Value& delay)
+{
+  double datum = delay.sec();
+  datum += delay.usec() / 1000000.0;
+  this->stats_.add( datum);
+}
+
+OpenDDS::DCPS::LatencyStats OpenDDS::DCPS::WriterInfo::get_stats() const
+{
+  LatencyStats value;
+  value.n        = this->stats_.n();
+  value.max      = this->stats_.max();
+  value.min      = this->stats_.min();
+  value.mean     = this->stats_.mean();
+  value.variance = this->stats_.var();
+  return value;
+}
+
+void OpenDDS::DCPS::WriterInfo::reset_stats()
+{
+  this->stats_.reset();
+}
+
 void
 DataReaderImpl::writer_removed (PublicationId   writer_id,
              WriterInfo::WriterState& state)
@@ -1685,15 +1712,98 @@ void DataReaderImpl::unregister(const ReceivedDataSample& /* sample */)
 }
 
 
-void DataReaderImpl::process_latency(const ReceivedDataSample& sample)
+void DataReaderImpl::process_latency( const ReceivedDataSample& sample)
 {
+  WriterMapType::iterator location
+    = this->writers_.find( sample.header_.publication_id_);
+  if( location != this->writers_.end()) {
+      // This starts as the current time.
+      ACE_Time_Value  latency = ACE_OS::gettimeofday ();
+
+      // The time interval starts at the send end.
+      DDS::Duration_t then = {
+                               sample.header_.source_timestamp_sec_,
+                               sample.header_.source_timestamp_nanosec_
+                             };
+
+      // latency delay in ACE_Time_Value format.
+      latency -= duration_to_time_value( then);
+
+      /// @TODO: Make this selectable so we don't collect stats if we
+      ///        don't want them.
+      location->second.add_stat( latency);
+
+      // Check latency against the budget.
+      if( time_value_to_duration( latency)
+          > this->qos_.latency_budget.duration) {
+        this->notify_latency( sample.header_.publication_id_);
+      }
+
+  } else {
+    ::OpenDDS::DCPS::GuidConverter readerConverter( this->subscription_id_);
+    ::OpenDDS::DCPS::GuidConverter writerConverter(
+      const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.header_.publication_id_)
+    );
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::process_latency() - ")
+      ACE_TEXT("reader %s is not associated with writer %s.\n"),
+      (const char*) readerConverter,
+      (const char*) writerConverter
+    ));
+  }
 }
 
 
-void DataReaderImpl::notify_latency()
+void DataReaderImpl::notify_latency( PublicationId writer)
 {
+  // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
+  // is given to this DataReader then narrow() fails.
+  DataReaderListener_var listener
+    = DataReaderListener::_narrow( this->listener_.in());
+  if( ! CORBA::is_nil( listener.in())) {
+    WriterIdSeq writerIds;
+    writerIds.length(1);
+    writerIds[ 0] = writer;
+
+    ::DDS::InstanceHandleSeq handles;
+    this->cache_lookup_instance_handles( writerIds, handles);
+
+    if( handles.length() >= 1) {
+      this->budget_exceeded_status_.last_instance_handle = handles[ 0];
+    } else {
+      this->budget_exceeded_status_.last_instance_handle = -1;
+    }
+
+    ++this->budget_exceeded_status_.total_count;
+    ++this->budget_exceeded_status_.total_count_change;
+
+    listener->on_budget_exceeded(
+      this->dr_local_objref_.in(),
+      this->budget_exceeded_status_
+    );
+
+    this->budget_exceeded_status_.total_count_change = 0;
+  }
 }
 
+void DataReaderImpl::get_latency_stats( std::vector< LatencyStats>& stats) const
+{
+  stats.clear();
+  for( WriterMapType::const_iterator current = this->writers_.begin();
+       current != this->writers_.end();
+       ++current) {
+    stats.push_back( current->second.get_stats());
+  }
+}
+
+void DataReaderImpl::reset_latency_stats()
+{
+  for( WriterMapType::iterator current = this->writers_.begin();
+       current != this->writers_.end();
+       ++current) {
+    current->second.reset_stats();
+  }
+}
 
 SubscriptionInstance*
 DataReaderImpl::get_handle_instance (::DDS::InstanceHandle_t handle)

@@ -171,7 +171,9 @@ throw (CORBA::SystemException)
 
 void
 FailoverListener::on_budget_exceeded (
-  DDS::DataReader_ptr /* reader */)
+  DDS::DataReader_ptr /* reader */,
+  const ::OpenDDS::DCPS::BudgetExceededStatus& /* status */
+)
 throw (CORBA::SystemException)
 {
   if( OpenDDS::DCPS::DCPS_debug_level > 0) {
