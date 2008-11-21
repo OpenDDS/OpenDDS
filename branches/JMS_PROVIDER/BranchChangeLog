@@ -1,3 +1,30 @@
+Fri Nov 21 19:21:10 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/dds/OpenDDS/DCPS/transport/ReliableMulticastConfiguration.java:
+        * java/dds/OpenDDS/DCPS/transport/SimpleMcastConfiguration.java:
+        * java/dds/OpenDDS/DCPS/transport/SimpleTcpConfiguration.java:
+        * java/dds/OpenDDS/DCPS/transport/SimpleUdpConfiguration.java:
+        * java/dds/OpenDDS/DCPS/transport/TransportConfiguration.java:
+        * java/examples/jms/conf/jboss/opendds-ds.xml:
+        * java/jms/src/org/opendds/jms/ConnectionFactoryImpl.java:
+        * java/jms/src/org/opendds/jms/PublisherManager.java:
+        * java/jms/src/org/opendds/jms/SubscriberManager.java:
+        * java/jms/src/org/opendds/jms/common/ExceptionHelper.java:
+        * java/jms/src/org/opendds/jms/management/argument/DCPSArguments.java:
+        * java/jms/src/org/opendds/jms/management/argument/InfoRepoArguments.java:
+        * java/jms/src/org/opendds/jms/resource/ConnectionRequestInfoImpl.java:
+        * java/jms/src/org/opendds/jms/resource/ManagedConnectionFactoryImpl.java:
+        * java/jms/src/org/opendds/jms/resource/ManagedConnectionImpl.java:
+        * java/jms/src/org/opendds/jms/transport/TransportFactory.java:
+        * java/jms/src/org/opendds/jms/transport/TransportManager.java:
+        * java/jms/src/org/opendds/jms/transport/Transports.java:
+
+          Updates for Milestone 2.
+
+        * java/jms/src/org/opendds/jms/common/JMSExceptionHelper.java:
+
+          Removed this file.
+
 Fri Nov 21 06:53:08 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/OpenDDS.ipr:

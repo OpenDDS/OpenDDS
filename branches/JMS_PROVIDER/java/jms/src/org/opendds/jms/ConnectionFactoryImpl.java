@@ -14,7 +14,7 @@ import javax.resource.spi.ConnectionManager;
 import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.ManagedConnectionFactory;
 
-import org.opendds.jms.common.JMSExceptionHelper;
+import org.opendds.jms.common.ExceptionHelper;
 
 /**
  * @author  Steven Stallion
@@ -54,7 +54,7 @@ public class ConnectionFactoryImpl implements ConnectionFactory, Serializable {
             return (Connection) cxManager.allocateConnection(mcf, cxRequestInfo);
 
         } catch (ResourceException e) {
-            throw JMSExceptionHelper.wrap(e);
+            throw ExceptionHelper.wrap(e);
         }
     }
 

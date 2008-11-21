@@ -25,7 +25,6 @@ public class InfoRepoArguments implements DynamicArgumentProvider {
     public static final String FEDERATOR_CONFIG = "FederatorConfig";
     public static final String FEDERATION_ID = "FederationId";
     public static final String FEDERATE_WITH = "FederateWith";
-    public static final String TRANSPORT_TYPE = "TransportType";
 
     private DynamicMBeanSupport instance;
 
@@ -43,7 +42,6 @@ public class InfoRepoArguments implements DynamicArgumentProvider {
         instance.registerAttribute(FEDERATOR_CONFIG, String.class);
         instance.registerAttribute(FEDERATION_ID, String.class);
         instance.registerAttribute(FEDERATE_WITH, String.class);
-        instance.registerAttribute(TRANSPORT_TYPE, String.class);
     }
 
     public void addArgs(List<String> args) throws Exception {
@@ -69,14 +67,6 @@ public class InfoRepoArguments implements DynamicArgumentProvider {
             directive.addOption(persistentFile);
 
             writer.writeSvcConfDirective(directive);
-        }
-
-        String transportType =
-            (String) instance.getAttribute(TRANSPORT_TYPE);
-
-        if (!Strings.isEmpty(transportType)) {
-            writer.writeSvcConfDirective(
-                Transports.getDirective(transportType));
         }
 
         writer.writeTo(args);

@@ -8,13 +8,11 @@ import java.io.Serializable;
 
 import javax.resource.spi.ConnectionRequestInfo;
 
-import OpenDDS.DCPS.transport.TransportConfiguration;
-import OpenDDS.DCPS.transport.TransportImpl;
-
 import org.opendds.jms.common.lang.Objects;
 import org.opendds.jms.qos.ParticipantQosPolicy;
 import org.opendds.jms.qos.PublisherQosPolicy;
 import org.opendds.jms.qos.SubscriberQosPolicy;
+import org.opendds.jms.transport.TransportFactory;
 
 /**
  * @author Steven Stallion
@@ -25,17 +23,17 @@ public class ConnectionRequestInfoImpl implements ConnectionRequestInfo, Seriali
     private int domainId;
     private ParticipantQosPolicy participantQosPolicy;
     private PublisherQosPolicy publisherQosPolicy;
-    private TransportImpl publisherTransport;
+    private TransportFactory publisherTransport;
     private SubscriberQosPolicy subscriberQosPolicy;
-    private TransportImpl subscriberTransport;
+    private TransportFactory subscriberTransport;
 
     public ConnectionRequestInfoImpl(String clientId,
                                      int domainId,
                                      ParticipantQosPolicy participantQosPolicy,
                                      PublisherQosPolicy publisherQosPolicy,
-                                     TransportImpl publisherTransport,
+                                     TransportFactory publisherTransport,
                                      SubscriberQosPolicy subscriberQosPolicy,
-                                     TransportImpl subscriberTransport) {
+                                     TransportFactory subscriberTransport) {
         this.clientId = clientId;
         this.domainId = domainId;
         this.participantQosPolicy = participantQosPolicy;
@@ -61,7 +59,7 @@ public class ConnectionRequestInfoImpl implements ConnectionRequestInfo, Seriali
         return publisherQosPolicy;
     }
 
-    public TransportImpl getPublisherTransport() {
+    public TransportFactory getPublisherTransport() {
         return publisherTransport;
     }
 
@@ -69,7 +67,7 @@ public class ConnectionRequestInfoImpl implements ConnectionRequestInfo, Seriali
         return subscriberQosPolicy;
     }
 
-    public TransportImpl getSubscriberTransport() {
+    public TransportFactory getSubscriberTransport() {
         return subscriberTransport;
     }
 

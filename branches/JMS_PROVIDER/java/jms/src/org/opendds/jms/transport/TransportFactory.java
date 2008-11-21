@@ -1,13 +1,12 @@
 /*
- * $Id$
+ * $
  */
 
 package org.opendds.jms.transport;
 
 import java.util.Properties;
 
-import javax.resource.ResourceException;
-import javax.resource.spi.IllegalStateException;
+import javax.jms.JMSException;
 
 import OpenDDS.DCPS.transport.TheTransportFactory;
 import OpenDDS.DCPS.transport.TransportConfiguration;
@@ -19,45 +18,55 @@ import org.opendds.jms.common.util.PropertiesHelper;
 import org.opendds.jms.common.util.Serial;
 
 /**
- * @author  Steven Stallion
+ * @author Steven Stallion
  * @version $Revision$
  */
 public class TransportFactory {
     private static final Serial serial = new Serial();
 
-    private String transportType;
+    private String type;
+    private Properties properties;
 
-    public TransportFactory(String transportType) {
-        this.transportType = transportType;
+    public TransportFactory(String type, String value) {
+        this(type, PropertiesHelper.valueOf(value));
     }
 
-    public TransportImpl createTransport(String value) throws ResourceException {
-        return createTransport(PropertiesHelper.valueOf(value));
+    public TransportFactory(String type, Properties properties) {
+        this.type = type;
+        this.properties = properties;
     }
 
-    public TransportImpl createTransport(Properties properties) throws ResourceException {
+    protected TransportConfiguration createConfiguration() throws JMSException {
         TransportConfiguration configuration;
+
         synchronized (serial) {
             if (serial.overflowed()) {
-                throw new IllegalStateException("Insufficient Transport IDs available!");
+                throw new JMSException("Insufficient Transport IDs available!");
             }
-            configuration = TheTransportFactory.get_or_create_configuration(serial.next(), transportType);
+            configuration = TheTransportFactory.get_or_create_configuration(serial.next(), type);
         }
 
-        ContextLog log = new ContextLog(transportType, configuration.getId()); 
+        ContextLog log = Transports.getLog(configuration);
+        log.debug("Configuring %s %s", configuration, PropertiesHelper.valueOf(properties));
 
         if (!properties.isEmpty()) {
             BeanHelper helper = new BeanHelper(configuration.getClass());
             helper.setProperties(configuration, properties);
         }
-        log.debug("Configured %s %s", configuration, PropertiesHelper.valueOf(properties));
+
+        return configuration;
+    }
+
+    public TransportImpl createTransport() throws JMSException {
+        TransportConfiguration configuration = createConfiguration();
 
         TransportImpl transport = TheTransportFactory.create_transport_impl(configuration.getId(), false);
         if (transport == null) {
-            throw new ResourceException("Unable to create Transport; please check logs");
+            throw new JMSException("Unable to create Transport; please check logs");
         }
         transport.configure(configuration);
 
+        ContextLog log = Transports.getLog(configuration);
         log.debug("Created %s", transport);
 
         return transport;

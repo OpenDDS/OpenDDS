@@ -21,6 +21,8 @@ public class SimpleMcastConfiguration
 
     private native void loadMcastConfig(long cfg);
 
+    public String getType() { return "SimpleMcast"; }
+
     private String multicastGroupAddress;
     public String getMulticastGroupAddress() { return multicastGroupAddress; }
     public void setMulticastGroupAddress(String mga) {
