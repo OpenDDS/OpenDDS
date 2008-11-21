@@ -46,12 +46,11 @@ public class TransportFactory {
 
         ContextLog log = new ContextLog(transportType, configuration.getId()); 
 
-        log.debug("Configuring %s %s", configuration, PropertiesHelper.valueOf(properties));
-
         if (!properties.isEmpty()) {
             BeanHelper helper = new BeanHelper(configuration.getClass());
             helper.setProperties(configuration, properties);
         }
+        log.debug("Configured %s %s", configuration, PropertiesHelper.valueOf(properties));
 
         TransportImpl transport = TheTransportFactory.create_transport_impl(configuration.getId(), false);
         if (transport == null) {
