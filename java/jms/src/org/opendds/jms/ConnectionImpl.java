@@ -169,6 +169,10 @@ public class ConnectionImpl implements Connection {
     }
 
     public synchronized void close() {
+        close(true);
+    }
+
+    public synchronized void close(boolean notify) {
         if (isClosed()) {
             return;
         }
@@ -194,6 +198,10 @@ public class ConnectionImpl implements Connection {
         }
 
         closed = true;
+
+        if (notify) {
+            connection.notifyClosed(this);
+        }
     }
 
     public ConnectionMetaData getMetaData() {

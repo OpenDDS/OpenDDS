@@ -1,3 +1,10 @@
+Fri Nov 21 00:41:29 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/src/org/opendds/jms/ConnectionImpl.java:
+        * java/jms/src/org/opendds/jms/resource/ManagedConnectionImpl.java:
+
+          Fixed closed connection notification issues on JBoss. 
+
 Thu Nov 20 22:55:13 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/OpenDDS.ipr:

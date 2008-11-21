@@ -8,8 +8,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.jms.Connection;
-import javax.jms.JMSException;
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionEvent;
@@ -53,8 +51,8 @@ public class ManagedConnectionImpl implements ManagedConnection {
     private SubscriberManager subscribers;
     private PrintWriter out;
 
-    private List<Connection> handles =
-        new ArrayList<Connection>();
+    private List<ConnectionImpl> handles =
+        new ArrayList<ConnectionImpl>();
 
     private List<ConnectionEventListener> listeners =
         new ArrayList<ConnectionEventListener>();
@@ -190,11 +188,8 @@ public class ManagedConnectionImpl implements ManagedConnection {
         checkDestroyed();
 
         synchronized (handles) {
-            for (Connection handle : handles) {
-                try {
-                    handle.close();
-
-                } catch (JMSException e) {}
+            for (ConnectionImpl handle : handles) {
+                handle.close(false);
             }
             handles.clear();
         }
@@ -204,6 +199,7 @@ public class ManagedConnectionImpl implements ManagedConnection {
         checkDestroyed();
 
         cleanup();
+
         participant.delete_contained_entities();
 
         subject = null;
@@ -214,14 +210,41 @@ public class ManagedConnectionImpl implements ManagedConnection {
         subscribers = null;
 
         destroyed = true;
+    }
 
-        notifyListeners(new ConnectionEvent(this, ConnectionEvent.CONNECTION_CLOSED));
+    public ManagedConnectionMetaData getMetaData() throws ResourceException {
+        return new ManagedConnectionMetaData() {
+            private Version version = Version.getInstance();
+
+            public String getEISProductName() {
+                return version.getProductName();
+            }
+
+            public String getEISProductVersion() {
+                return version.getDDSVersion();
+            }
+
+            public int getMaxConnections() {
+                return 0;
+            }
+
+            public String getUserName() {
+                return null; // authentication not supported
+            }
+        };
     }
 
     protected void checkDestroyed() throws ResourceException {
         if (isDestroyed()) {
             throw new IllegalStateException();
         }
+    }
+
+    public void notifyClosed(ConnectionImpl handle) {
+        ConnectionEvent event = new ConnectionEvent(this, ConnectionEvent.CONNECTION_CLOSED);
+        event.setConnectionHandle(handle);
+
+        notifyListeners(event);
     }
 
     protected void notifyListeners(ConnectionEvent event) {
@@ -250,27 +273,5 @@ public class ManagedConnectionImpl implements ManagedConnection {
                 }
             }
         }
-    }
-
-    public ManagedConnectionMetaData getMetaData() throws ResourceException {
-        return new ManagedConnectionMetaData() {
-            private Version version = Version.getInstance();
-
-            public String getEISProductName() {
-                return version.getProductName();
-            }
-
-            public String getEISProductVersion() {
-                return version.getDDSVersion();
-            }
-
-            public int getMaxConnections() {
-                return 0;
-            }
-
-            public String getUserName() {
-                return null; // authentication not supported
-            }
-        };
     }
 }
