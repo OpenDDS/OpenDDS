@@ -31,10 +31,6 @@ public class ParticipantQosPolicy implements QosPolicy<DomainParticipantQos> {
     }
 
     public void setQos(DomainParticipantQos qos) {
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("Configuring %s %s", qos, PropertiesHelper.valueOf(properties)));
-        }
-        
         PropertiesHelper.Property property;
 
         PropertiesHelper helper = new PropertiesHelper(properties);
@@ -50,5 +46,10 @@ public class ParticipantQosPolicy implements QosPolicy<DomainParticipantQos> {
         if (property.exists()) {
             log.warn("ENTITY_FACTORY QosPolicy is reserved for internal use!");
         }
+    }
+
+    @Override
+    public String toString() {
+        return PropertiesHelper.valueOf(properties);
     }
 }

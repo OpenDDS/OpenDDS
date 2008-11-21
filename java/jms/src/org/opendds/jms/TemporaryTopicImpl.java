@@ -34,7 +34,7 @@ public class TemporaryTopicImpl extends TopicImpl implements TemporaryTopic {
     @Override
     public Topic createDDSTopic(ConnectionImpl connection) throws JMSException {
         if (!connection.equals(this.connection)) {
-            throw new InvalidDestinationException("Invalid Connection instance!");
+            throw new InvalidDestinationException("Invalid Connection!");
         }
         
         if (topic == null) {

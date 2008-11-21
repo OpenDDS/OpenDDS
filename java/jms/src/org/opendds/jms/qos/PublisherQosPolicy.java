@@ -32,10 +32,6 @@ public class PublisherQosPolicy implements QosPolicy<PublisherQos> {
     }
 
     public void setQos(PublisherQos qos) {
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("Configuring %s %s", qos, PropertiesHelper.valueOf(properties)));
-        }
-
         PropertiesHelper.Property property;
 
         PropertiesHelper helper = new PropertiesHelper(properties);
@@ -84,5 +80,10 @@ public class PublisherQosPolicy implements QosPolicy<PublisherQos> {
         if (property.exists()) {
             log.warn("ENTITY_FACTORY QosPolicy is reserved for internal use!");
         }
+    }
+
+    @Override
+    public String toString() {
+        return PropertiesHelper.valueOf(properties);
     }
 }
