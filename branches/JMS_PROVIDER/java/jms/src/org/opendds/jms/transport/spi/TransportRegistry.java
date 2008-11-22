@@ -4,7 +4,7 @@
 
 package org.opendds.jms.transport.spi;
 
-import org.opendds.jms.common.spi.ServiceRegistry;
+import org.opendds.jms.common.util.ServiceRegistry;
 
 /**
  * @author  Steven Stallion

@@ -2,13 +2,15 @@
  * $Id$
  */
 
-package org.opendds.jms.common.spi;
+package org.opendds.jms.common.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
+import sun.misc.Service;
 
 /**
  * @author Steven Stallion
@@ -19,10 +21,11 @@ public abstract class ServiceRegistry<T> {
 
     protected abstract Class<T> getProviderClass();
 
+    @SuppressWarnings("unchecked")
     public void registerAll() {
-        Iterator<T> itr = Service.providers(getProviderClass());
+        Iterator itr = Service.providers(getProviderClass());
         while (itr.hasNext()) {
-            register(itr.next());
+            register((T) itr.next());
         }
     }
 

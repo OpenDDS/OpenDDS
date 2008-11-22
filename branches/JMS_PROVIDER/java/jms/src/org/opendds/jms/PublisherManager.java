@@ -61,6 +61,7 @@ public class PublisherManager {
                 throw new JMSException("Unable to create Publisher; please check logs");
             }
             log.debug("Created %s %s", publisher, policy);
+            log.debug("%s using PARTITION %s", publisher, holder.value.partition);
 
             TransportImpl transport = transportMgr.getTransport();
             if (transport.attach_to_publisher(publisher).value() != AttachStatus._ATTACH_OK) {

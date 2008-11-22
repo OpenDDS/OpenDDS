@@ -1,3 +1,22 @@
+Sat Nov 22 03:50:43 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/src/org/opendds/jms/PublisherManager.java:
+        * java/jms/src/org/opendds/jms/SubscriberManager.java:
+        * java/jms/src/org/opendds/jms/TemporaryTopicImpl.java:
+        * java/jms/src/org/opendds/jms/common/beans/spi/TypeRegistry.java:
+        * java/jms/src/org/opendds/jms/common/util/ContextLog.java:
+        * java/jms/src/org/opendds/jms/common/util/ServiceRegistry.java:
+        * java/jms/src/org/opendds/jms/resource/ManagedConnectionImpl.java:
+        * java/jms/src/org/opendds/jms/transport/spi/TransportRegistry.java:
+
+          Updated logging; refactored SPI.
+
+        * java/jms/src/org/opendds/jms/common/spi:
+        * java/jms/src/org/opendds/jms/common/spi/Service.java:
+        * java/jms/src/org/opendds/jms/common/spi/ServiceRegistry.java:
+
+          Removed these files.
+
 Fri Nov 21 19:21:10 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/dds/OpenDDS/DCPS/transport/ReliableMulticastConfiguration.java:
