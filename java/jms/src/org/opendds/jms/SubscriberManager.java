@@ -66,6 +66,7 @@ public class SubscriberManager {
                 throw new JMSException("Unable to create Subscriber; please check logs");
             }
             log.debug("Created %s %s", subscriber, policy);
+            log.debug("%s using PARTITION %s", subscriber, holder.value.partition.name);
 
             TransportImpl transport = transportMgr.getTransport();
             if (transport.attach_to_subscriber(subscriber) != AttachStatus.ATTACH_OK) {

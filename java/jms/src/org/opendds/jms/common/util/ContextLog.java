@@ -4,6 +4,8 @@
  
 package org.opendds.jms.common.util;
 
+import java.util.Arrays;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -13,7 +15,6 @@ import org.apache.commons.logging.LogFactory;
  */
 public class ContextLog {
     private Log log;
-
     private String context;
     private Object discriminator;
 
@@ -41,6 +42,12 @@ public class ContextLog {
         }
     }
 
+    public void debug(String message, String[] args) {
+        if (log.isDebugEnabled()) {
+            debug(message, Arrays.deepToString(args));
+        }
+    }
+
     public void debug(String message, Throwable cause) {
         if (log.isDebugEnabled()) {
             log.debug(message, cause);
@@ -50,6 +57,12 @@ public class ContextLog {
     public void info(String message, Object... args) {
         if (log.isInfoEnabled()) {
             log.info(String.format(message, args));
+        }
+    }
+
+    public void info(String message, String[] args) {
+        if (log.isInfoEnabled()) {
+            info(message, Arrays.deepToString(args));
         }
     }
 
@@ -65,6 +78,12 @@ public class ContextLog {
         }
     }
 
+    public void error(String message, String[] args) {
+        if (log.isErrorEnabled()) {
+            error(message, Arrays.deepToString(args));
+        }
+    }
+
     public void error(String message, Throwable cause) {
         if (log.isErrorEnabled()) {
             log.error(message, cause);
@@ -74,6 +93,12 @@ public class ContextLog {
     public void warn(String message, Object... args) {
         if (log.isWarnEnabled()) {
             log.warn(String.format(message, args));
+        }
+    }
+
+    public void warn(String message, String[] args) {
+        if (log.isWarnEnabled()) {
+            warn(message, Arrays.deepToString(args));
         }
     }
 

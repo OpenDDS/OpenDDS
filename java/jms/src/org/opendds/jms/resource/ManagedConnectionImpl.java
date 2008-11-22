@@ -44,7 +44,6 @@ import org.opendds.jms.qos.QosPolicies;
  */
 public class ManagedConnectionImpl implements ManagedConnection {
     private ContextLog log;
-
     private boolean destroyed;
     private Subject subject;
     private ConnectionRequestInfoImpl cxRequestInfo;

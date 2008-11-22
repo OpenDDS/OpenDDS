@@ -20,15 +20,11 @@ import org.opendds.jms.common.util.ContextLog;
  */
 public class TemporaryTopicImpl extends TopicImpl implements TemporaryTopic {
     private ConnectionImpl connection;
-    private ContextLog log;
-
     private transient DDS.Topic topic;
 
     public TemporaryTopicImpl(ConnectionImpl connection) {
         super(Strings.randomUuid());
-
         this.connection = connection;
-        this.log = connection.getLog();
     }
 
     @Override
@@ -36,7 +32,6 @@ public class TemporaryTopicImpl extends TopicImpl implements TemporaryTopic {
         if (!connection.equals(this.connection)) {
             throw new InvalidDestinationException("Invalid Connection!");
         }
-        
         if (topic == null) {
             topic = super.createDDSTopic(connection);
         }
@@ -45,7 +40,9 @@ public class TemporaryTopicImpl extends TopicImpl implements TemporaryTopic {
 
     public void delete() throws JMSException {
         if (topic != null) {
+            ContextLog log = connection.getLog();
             log.debug(String.format("Deleting %s", topic));
+
             DomainParticipant participant = connection.getParticipant();
             participant.delete_topic(topic);
         }

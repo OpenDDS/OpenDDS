@@ -7,7 +7,7 @@ package org.opendds.jms.common.beans.spi;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.opendds.jms.common.spi.ServiceRegistry;
+import org.opendds.jms.common.util.ServiceRegistry;
 
 /**
  * @author  Steven Stallion
