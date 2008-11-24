@@ -63,7 +63,8 @@ DataReaderImpl::DataReaderImpl (void) :
   last_deadline_missed_total_count_ (0),
   watchdog_ (),
   is_bit_ (false),
-  initialized_ (false)
+  initialized_ (false),
+  statistics_enabled_( false)
 {
   CORBA::ORB_var orb = TheServiceParticipant->get_ORB ();
   reactor_ = orb->orb_core()->reactor();
@@ -1463,14 +1464,16 @@ void OpenDDS::DCPS::WriterInfo::add_stat( const ACE_Time_Value& delay)
   this->stats_.add( datum);
 }
 
-OpenDDS::DCPS::LatencyStats OpenDDS::DCPS::WriterInfo::get_stats() const
+OpenDDS::DCPS::LatencyStats OpenDDS::DCPS::WriterInfo::get_stats( RepoId subscription) const
 {
   LatencyStats value;
-  value.n        = this->stats_.n();
-  value.max      = this->stats_.max();
-  value.min      = this->stats_.min();
-  value.mean     = this->stats_.mean();
-  value.variance = this->stats_.var();
+  value.subscription = subscription;
+  value.publication  = this->writer_id_;
+  value.n            = this->stats_.n();
+  value.max          = this->stats_.max();
+  value.min          = this->stats_.min();
+  value.mean         = this->stats_.mean();
+  value.variance     = this->stats_.var();
   return value;
 }
 
@@ -1729,9 +1732,9 @@ void DataReaderImpl::process_latency( const ReceivedDataSample& sample)
       // latency delay in ACE_Time_Value format.
       latency -= duration_to_time_value( then);
 
-      /// @TODO: Make this selectable so we don't collect stats if we
-      ///        don't want them.
-      location->second.add_stat( latency);
+      if( this->statistics_enabled()) {
+        location->second.add_stat( latency);
+      }
 
       // Check latency against the budget.
       if( time_value_to_duration( latency)
@@ -1792,7 +1795,7 @@ void DataReaderImpl::get_latency_stats( std::vector< LatencyStats>& stats) const
   for( WriterMapType::const_iterator current = this->writers_.begin();
        current != this->writers_.end();
        ++current) {
-    stats.push_back( current->second.get_stats());
+    stats.push_back( current->second.get_stats( this->get_subscription_id()));
   }
 }
 

@@ -1,3 +1,21 @@
+Mon Nov 24 16:47:46 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.inl:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+        statistics_enabled()
+          - added accessors to set and query the (new)
+            statistics gathering state.  The initial state is 'false'
+            which disables statistics gathering.
+        struct LatencyStats
+          - added a subscription and publication RepoId field to the
+            structure to allow correlating the statistics to the
+            association.
+        WriterInfo::get_stats()
+          - Added subscription id to interface, included copying out the
+            publication id of the writer into the structure.
+
 Fri Nov 21 22:57:32 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/Stats_T.h:

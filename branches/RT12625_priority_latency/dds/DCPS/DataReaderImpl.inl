@@ -2,6 +2,19 @@
 //
 // $Id$
 
+ACE_INLINE
+void
+OpenDDS::DCPS::DataReaderImpl::statistics_enabled( bool value)
+{
+  this->statistics_enabled_ = value;
+}
+
+ACE_INLINE
+bool
+OpenDDS::DCPS::DataReaderImpl::statistics_enabled() const
+{
+  return this->statistics_enabled_;
+}
 
 ACE_INLINE
 ::DDS::DataReader_ptr
