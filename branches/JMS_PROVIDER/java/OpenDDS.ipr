@@ -150,6 +150,15 @@
           </module>
         </modules>
       </facet-type>
+      <facet-type id="web">
+        <modules>
+          <module name="opendds-jms-example">
+            <files>
+              <file url="file://$PROJECT_DIR$/examples/jms/web/WEB-INF/web.xml" />
+            </files>
+          </module>
+        </modules>
+      </facet-type>
     </autodetection-disabled>
   </component>
   <component name="IdProvider" IDEtalkID="2A65B046F5DFB3A3B591B3D229D54817" />
@@ -326,7 +335,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/ant/opendds-ant.iml" filepath="$PROJECT_DIR$/ant/opendds-ant.iml" />
       <module fileurl="file://$PROJECT_DIR$/jms/opendds-jms.iml" filepath="$PROJECT_DIR$/jms/opendds-jms.iml" />
-      <module fileurl="file://$PROJECT_DIR$/examples/jms/opendds-jms-example.iml" filepath="$PROJECT_DIR$/examples/jms/opendds-jms-example.iml" />
+      <module fileurl="file://$PROJECT_DIR$/jms/compat/opendds-jms-compat.iml" filepath="$PROJECT_DIR$/jms/compat/opendds-jms-compat.iml" />
     </modules>
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_5" assert-keyword="true" jdk-15="true" project-jdk-name="1.5" project-jdk-type="JavaSDK" />
@@ -351,5 +360,10 @@
     <mapping directory="" vcs="svn" />
   </component>
   <component name="WebServicesPlugin" addRequiredLibraries="true" />
+  <component name="copyright">
+    <Base>
+      <setting name="state" value="2" />
+    </Base>
+  </component>
 </project>
 
