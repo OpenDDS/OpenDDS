@@ -21,7 +21,7 @@ module JMS {
         boolean JMSRedelivered;
         string JMSType;
         long long JMSExpiration;
-        long JMSPriority;
+        long TwentyMinusJMSPriority;
     };
 
     // Properties

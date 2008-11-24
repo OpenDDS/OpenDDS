@@ -15,6 +15,7 @@ import DDS.SampleLostStatus;
 import DDS.SampleRejectedStatus;
 import DDS.SubscriptionMatchStatus;
 import DDS._DataReaderListenerLocalBase;
+import DDS.LENGTH_UNLIMITED;
 import OpenDDS.JMS.MessagePayload;
 import OpenDDS.JMS.MessagePayloadDataReader;
 import OpenDDS.JMS.MessagePayloadDataReaderHelper;
@@ -54,18 +55,21 @@ public class ConsumerDataReaderListener extends _DataReaderListenerLocalBase {
 
         if (!readOneSample(reader, payloads, infos)) return;
 
-        MessagePayload messagePayload = payloads.value[0];
-        SampleInfo sampleInfo = infos.value[0];
-        int handle = sampleInfo.instance_handle;
-        AbstractMessageImpl message = buildMessageFromPayload(messagePayload, handle, sessionImpl);
-        DataReaderHandlePair dataReaderHandlePair = new DataReaderHandlePair(reader, handle);
-        sessionImpl.getMessageDeliveryExecutorService().execute(new MessageDispatcher(message, dataReaderHandlePair, consumer, sessionImpl));
+        int length = payloads.value.length;
+        for (int i = 0; i < length; i++) {
+            MessagePayload messagePayload = payloads.value[i];
+            SampleInfo sampleInfo = infos.value[i];
+            int handle = sampleInfo.instance_handle;
+            AbstractMessageImpl message = buildMessageFromPayload(messagePayload, handle, sessionImpl);
+            DataReaderHandlePair dataReaderHandlePair = new DataReaderHandlePair(reader, handle);
+            sessionImpl.getMessageDeliveryExecutorService().execute(new MessageDispatcher(message, dataReaderHandlePair, consumer, sessionImpl));
+        }
     }
 
     private static boolean readOneSample(MessagePayloadDataReader reader, MessagePayloadSeqHolder payloads, SampleInfoSeqHolder infos) {
-        ReadCondition readCondition = reader.create_readcondition(NOT_READ_SAMPLE_STATE.value,
-            NEW_VIEW_STATE.value, ALIVE_INSTANCE_STATE.value);
-        int rc = reader.read_w_condition(payloads, infos, 1, readCondition);
+        ReadCondition readCondition = reader.create_querycondition(NOT_READ_SAMPLE_STATE.value,
+            NEW_VIEW_STATE.value, ALIVE_INSTANCE_STATE.value, "ORDER BY theHeader.TwentyMinusJMSPriority", new String[] {});
+        int rc = reader.read_w_condition(payloads, infos, LENGTH_UNLIMITED.value, readCondition);
         reader.delete_readcondition(readCondition);
         return rc == RETCODE_OK.value;
     }
