@@ -13,23 +13,7 @@
     <property name="test.dir" value="${basedir}/test"/>
 
     <property environment="env"/>
-
-    <!-- Determine OpenDDS version -->
-    <loadproperties srcfile="${env.DDS_ROOT}/dds/Version.h">
-        <filterchain>
-            <deletecharacters chars="&quot;"/>
-            <tokenfilter>
-                <replacestring from="#define DDS_MAJOR_VERSION" to="version.dds.major"/>
-                <replacestring from="#define DDS_MINOR_VERSION" to="version.dds.minor"/>
-                <replacestring from="#define DDS_VERSION" to="version.dds"/>
-            </tokenfilter>
-        </filterchain>
-    </loadproperties>
-
     <property file="build.properties"/>
-
-    <property name="project.version" value="${version.dds}"/>
-    <property name="project.filename" value="${ant.project.name}-${project.version}"/>
 
     <!--
         Project Paths
@@ -74,7 +58,7 @@
 
     <target name="jar" depends="compile"
             description="Archive compiled classes and resources">
-        <jar destfile="${build.dir}/${project.filename}.jar"
+        <jar destfile="${build.dir}/${ant.project.name}.jar"
              compress="${jar.compress}"
              index="${jar.index}">
             <fileset dir="${build.dir}/classes"/>
@@ -86,7 +70,7 @@
 
     <target name="deploy" depends="jar"
             description="Deploy project JAR to interested sub-projects">
-        <copy file="${build.dir}/${project.filename}.jar"
+        <copy file="${build.dir}/${ant.project.name}.jar"
               todir="${env.DDS_ROOT}/java/jms/lib"/>
     </target>
 
@@ -121,8 +105,8 @@
                     <include name="**/*Test.java"/>
                 </fileset>
             </batchtest>
-            <jvmarg value="-ea"/>   <!-- enable assertions -->
             <classpath refid="project.classpath"/>
+            <jvmarg value="-ea"/> <!-- enable assertions -->
         </junit>
     </target>
 </project>

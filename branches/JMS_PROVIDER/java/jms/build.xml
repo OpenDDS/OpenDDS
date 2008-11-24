@@ -16,27 +16,20 @@
     <property name="test.dir" value="${basedir}/test"/>
 
     <property environment="env"/>
-
-    <!-- Determine OpenDDS version -->
-    <loadproperties srcfile="${env.DDS_ROOT}/dds/Version.h">
-        <filterchain>
-            <deletecharacters chars="&quot;"/>
-            <tokenfilter>
-                <replacestring from="#define DDS_MAJOR_VERSION" to="version.dds.major"/>
-                <replacestring from="#define DDS_MINOR_VERSION" to="version.dds.minor"/>
-                <replacestring from="#define DDS_VERSION" to="version.dds"/>
-            </tokenfilter>
-        </filterchain>
-    </loadproperties>
-
     <property file="build.properties"/>
-
-    <property name="project.version" value="${version.dds}"/>
-    <property name="project.filename" value="${ant.project.name}-${project.version}"/>
 
     <!--
         Project Paths
     -->
+    <taskdef uri="antlib:org.opendds.ant"
+             resource="org/opendds/ant/antlib.xml"
+             classpath="${lib.dir}/opendds-ant.jar"/>
+
+    <opendds:init/>
+
+    <property name="project.filename"
+              value="${ant.project.name}-${opendds.version}"/>
+
     <path id="project.classpath">
         <pathelement location="${build.dir}/classes"/>
         <pathelement location="${build.dir}/tests"/>
@@ -47,15 +40,12 @@
         <pathelement location="${test.dir}"/>
 
         <fileset dir="${lib.dir}"/>
-
         <fileset dir="${env.DDS_ROOT}/lib">
-            <include name="**/*.jar"/>
-        </fileset>
+            <include name="OpenDDS_DCPS.jar"/>
+            <include name="i2jrt.jar"/>
+            <include name="tao_java.jar"/>
+        </fileset>        
     </path>
-
-    <taskdef uri="antlib:org.opendds.ant"
-             resource="org/opendds/ant/antlib.xml"
-             classpathref="project.classpath"/>
 
     <macrodef name="antnative">
         <attribute name="target"/>
@@ -81,9 +71,9 @@
 
         <!-- Create version.properties -->
         <propertyfile file="${build.dir}/version.properties">
-            <entry key="version.dds" value="${version.dds}"/>
-            <entry key="version.dds.major" value="${version.dds.major}"/>
-            <entry key="version.dds.minor" value="${version.dds.minor}"/>
+            <entry key="version.dds" value="${opendds.version}"/>
+            <entry key="version.dds.major" value="${opendds.version.major}"/>
+            <entry key="version.dds.minor" value="${opendds.version.minor}"/>
             <entry key="version.jca" value="${version.jca}"/>
             <entry key="version.jca.minor" value="${version.jca.minor}"/>
             <entry key="version.jca.major" value="${version.jca.major}"/>
@@ -135,7 +125,7 @@
                 <attribute name="Specification-Version" value="${version.jms}"/>
                 <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
                 <attribute name="Implementation-Title" value="OpenDDS JMS Provider"/>
-                <attribute name="Implementation-Version" value="${version.dds}"/>
+                <attribute name="Implementation-Version" value="${opendds.version}"/>
                 <attribute name="Implementation-Vendor" value="OpenDDS (http://www.opendds.org)"/>
             </manifest>
         </jar>
@@ -178,10 +168,10 @@
         </opendds:libindex>
 
         <!-- Update Resource Adapter descriptor -->
-        <echo message="[ra.xml] Updating resourceadapter-version to ${project.version}"/>
+        <echo message="[ra.xml] Updating resourceadapter-version to ${opendds.version}"/>
         <copy file="${src.dir}/META-INF/ra.xml" todir="${build.dir}">
             <filterset>
-                <filter token="VERSION" value="${project.version}"/>
+                <filter token="VERSION" value="${opendds.version}"/>
             </filterset>
         </copy>
 
@@ -211,7 +201,7 @@
                 <attribute name="Specification-Version" value="${version.jca}"/>
                 <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
                 <attribute name="Implementation-Title" value="OpenDDS JMS Resource Adapter"/>
-                <attribute name="Implementation-Version" value="${version.dds}"/>
+                <attribute name="Implementation-Version" value="${opendds.version}"/>
                 <attribute name="Implementation-Vendor" value="OpenDDS (http://www.opendds.org)"/>
             </manifest>
         </jar>
@@ -247,11 +237,11 @@
 
     <target name="test" depends="test.compile"
             description="Run test suites under test/">
-        <junit haltonerror="true"
-               haltonfailure="true"
+        <junit haltonerror="false"
+               haltonfailure="false"
                printsummary="true"
                fork="true">
-            <formatter type="brief"/>
+            <formatter type="xml"/>
             <batchtest todir="${build.dir}/tests">
                 <fileset dir="${test.dir}">
                     <include name="**/*Test.java"/>
@@ -261,6 +251,15 @@
             <jvmarg line="${test.jvmargs}"/>
             <classpath refid="project.classpath"/>
         </junit>
+    </target>
+
+    <target name="test.report" depends="test">
+        <junitreport todir="${build.dir}/tests">
+            <fileset dir="${build.dir}/tests">
+                <include name="TEST-*.xml"/>
+            </fileset>
+            <report format="frames" todir="${build.dir}/tests/report"/>
+        </junitreport>
     </target>
 
     <target name="javadoc.clean">
@@ -278,10 +277,10 @@
                  author="true"
                  version="true"
                  overview="${doc.dir}/overview.html"
-                 doctitle="OpenDDS ${version.dds} JMS API Specification"
+                 doctitle="OpenDDS ${opendds.version} JMS API Specification"
                  windowtitle="${ant.project.name}">
             <link href="http://java.sun.com/j2se/${project.source}/docs/api/"/>
-	    <link href="http://java.sun.com/javaee/5/docs/api/"/>
+            <link href="http://java.sun.com/javaee/5/docs/api/"/>
             <classpath refid="project.classpath"/>
             <packageset dir="${src.dir}"/>
             <packageset dir="${native.dir}"/>
