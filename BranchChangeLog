@@ -1,3 +1,9 @@
+Mon Nov 24 20:47:10 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/compat:
+
+          Initial commit of compatibility testing project.
+
 Sat Nov 22 03:50:43 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/src/org/opendds/jms/PublisherManager.java:
