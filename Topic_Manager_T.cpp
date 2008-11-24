@@ -15,10 +15,7 @@
 
 #include <memory>
 #include <ace/streams.h>
-#include <dds/DCPS/Marked_Default_Qos.h>
-#include <dds/DdsDcpsTopicC.h>
-#include <dds/DdsDcpsDomainC.h>
-
+#include "wrapper_topic.h"
 #include "Domain_Manager.h"
 #include "Subscription_Manager.h"
 #include "Publication_Manager.h"
@@ -102,7 +99,7 @@ Topic_Manager_T <TYPE_SUPPORT, TS_IMPL>::create_topic (Domain_Manager & dm)
       DDS::Duration_t timeout = {1, 0};
 
       topic_ = dm.participant ()->find_topic (name_.c_str (),
-						timeout);
+					      timeout);
     }
 
   // check if topic creation was successful
