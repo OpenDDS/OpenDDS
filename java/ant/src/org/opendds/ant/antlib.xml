@@ -11,4 +11,20 @@
 
     <typedef name="libfileset" uri="antlib:org.opendds.ant"
              classname="org.opendds.ant.LibFileSet"/>
+
+    <macrodef name="init" uri="antlib:org.opendds.ant">
+        <sequential>
+            <fail message="DDS_ROOT is a required environment variable!" unless="env.DDS_ROOT"/>
+            <loadproperties srcfile="${env.DDS_ROOT}/dds/Version.h">
+                <filterchain>
+                    <deletecharacters chars="&quot;"/>
+                    <tokenfilter>
+                        <replacestring from="#define DDS_MAJOR_VERSION" to="opendds.version.major"/>
+                        <replacestring from="#define DDS_MINOR_VERSION" to="opendds.version.minor"/>
+                        <replacestring from="#define DDS_VERSION" to="opendds.version"/>
+                    </tokenfilter>
+                </filterchain>
+            </loadproperties>
+        </sequential>
+    </macrodef>
 </antlib>
