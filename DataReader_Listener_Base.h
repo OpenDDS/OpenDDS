@@ -10,8 +10,8 @@
  */
 //=============================================================================
 
-#ifndef _DATAREADER_LISTENER_BASE_H_
-#define _DATAREADER_LISTENER_BASE_H_
+#ifndef DDS_WRAPPER_DATAREADER_LISTENER_BASE_H_
+#define DDS_WRAPPER_DATAREADER_LISTENER_BASE_H_
 
 #include "wrapper_subscription.h"
 #include "DDSWrapper_export.h"
@@ -87,4 +87,4 @@ public:
 #include "DataReader_Listener_Base.inl"
 #endif
 
-#endif /* _DATAREADER_LISTENER_BASE_H_  */
+#endif /* DDS_WRAPPER_DATAREADER_LISTENER_BASE_H_  */

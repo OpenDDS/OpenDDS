@@ -10,8 +10,8 @@
  */
 //=============================================================================
 
-#ifndef _SUBSCRIPTION_MANAGER_IMPL_H_
-#define _SUBSCRIPTION_MANAGER_IMPL_H_
+#ifndef DDS_WRAPPER_SUBSCRIPTION_MANAGER_IMPL_H_
+#define DDS_WRAPPER_SUBSCRIPTION_MANAGER_IMPL_H_
 
 #include <string>
 #include <ace/Refcounted_Auto_Ptr.h>
@@ -52,10 +52,13 @@ class Subscription_Manager_Impl
   virtual DDS::DataReader_ptr lookup_datareader (
                                 const std::string & topic_name) = 0;
 
+  /// creates and returns qos for data readers with the default values
+  virtual DDS::DataReaderQos get_default_datareader_qos () = 0;
+
   /// returns the underlying subsriber instance
   /// memory management of the returned publisher reference is done by the 
   /// Subscription_Manager_Impl itself
   virtual DDS::Subscriber_ptr subscriber () const = 0;
 };
 
-#endif /* _SUBSCRIPTION_MANAGER_IMPL_H_ */
+#endif /* DDS_WRAPPER_SUBSCRIPTION_MANAGER_IMPL_H_ */

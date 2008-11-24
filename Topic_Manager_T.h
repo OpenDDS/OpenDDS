@@ -10,8 +10,8 @@
  */
 //=============================================================================
 
-#ifndef _TOPIC_MANAGER_T_H_
-#define _TOPIC_MANAGER_T_H_
+#ifndef DDS_WRAPPER_TOPIC_MANAGER_T_H_
+#define DDS_WRAPPER_TOPIC_MANAGER_T_H_
 
 #include "Topic_Manager_Impl.h"
 
@@ -82,4 +82,4 @@ class Topic_Manager_T : public Topic_Manager_Impl
 
 #include "Topic_Manager_T.cpp"
 
-#endif /* _TOPIC_MANAGER_T_H_ */
+#endif /* DDS_WRAPPER_TOPIC_MANAGER_T_H_ */

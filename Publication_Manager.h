@@ -10,8 +10,8 @@
  */
 //=============================================================================
 
-#ifndef _PUBLICATION_MANAGER_H_
-#define _PUBLICATION_MANAGER_H_
+#ifndef DDS_WRAPPER_PUBLICATION_MANAGER_H_
+#define DDS_WRAPPER_PUBLICATION_MANAGER_H_
 
 #include "DDSWrapper_export.h"
 #include "Publication_Manager_Impl.h"
@@ -64,4 +64,4 @@ class DDSWrapper_Export Publication_Manager
 #include "Publication_Manager.inl"
 #endif
 
-#endif /* _PUBLICATION_MANAGER_H_ */
+#endif /* DDS_WRAPPER_PUBLICATION_MANAGER_H_ */

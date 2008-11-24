@@ -10,8 +10,8 @@
  */
 //=============================================================================
 
-#ifndef _OPEN_DDS_PUBLICATION_MANAGER_H_
-#define _OPEN_DDS_PUBLICATION_MANAGER_H_
+#ifndef DDS_WRAPPER_OPEN_DDS_PUBLICATION_MANAGER_H_
+#define DDS_WRAPPER_OPEN_DDS_PUBLICATION_MANAGER_H_
 
 #include <dds/DCPS/transport/framework/TransportDefs.h>
 #include "Publication_Manager_Impl.h"
@@ -25,10 +25,6 @@
 class OpenDDS_Publication_Manager : public Publication_Manager_Impl
 {
  public:
-  /// ctor
-  OpenDDS_Publication_Manager (const Domain_Manager & dm,
-			       const DDS::PublisherQos & qos);
-
   /// ctor with transport impl registration
   OpenDDS_Publication_Manager (const Domain_Manager & dm,
 			       OpenDDS::DCPS::TransportIdType transport_id,
@@ -73,4 +69,4 @@ class OpenDDS_Publication_Manager : public Publication_Manager_Impl
 #include "OpenDDS_Publication_Manager.inl"
 #endif
 
-#endif /* _OPEN_DDS_PUBLICATION_MANAGER_H_ */
+#endif /* DDS_WRAPPER_OPEN_DDS_PUBLICATION_MANAGER_H_ */

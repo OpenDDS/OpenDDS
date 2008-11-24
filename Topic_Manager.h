@@ -10,8 +10,8 @@
  */
 //=============================================================================
 
-#ifndef _TOPIC_MANAGER_H_
-#define _TOPIC_MANAGER_H_
+#ifndef DDS_WRAPPER_TOPIC_MANAGER_H_
+#define DDS_WRAPPER_TOPIC_MANAGER_H_
 
 #include "Topic_Manager_Impl.h"
 #include "DDSWrapper_export.h"
@@ -72,4 +72,4 @@ class DDSWrapper_Export Topic_Manager
 #include "Topic_Manager.inl"
 #endif
 
-#endif /* _TOPIC_MANAGER_H_ */
+#endif /* DDS_WRAPPER_TOPIC_MANAGER_H_ */
