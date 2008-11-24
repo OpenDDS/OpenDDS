@@ -10,8 +10,8 @@
  */
 //=============================================================================
 
-#ifndef _OPEN_DDS_SUBSCRIPTION_MANAGER_H_
-#define _OPEN_DDS_SUBSCRIPTION_MANAGER_H_
+#ifndef DDS_WRAPPER_OPEN_DDS_SUBSCRIPTION_MANAGER_H_
+#define DDS_WRAPPER_OPEN_DDS_SUBSCRIPTION_MANAGER_H_
 
 #include <dds/DCPS/transport/framework/TransportDefs.h>
 #include "Subscription_Manager_Impl.h"
@@ -28,10 +28,6 @@
 class OpenDDS_Subscription_Manager : public Subscription_Manager_Impl
 {
  public:
-  /// ctor
-  OpenDDS_Subscription_Manager (const Domain_Manager & dm,
-				const DDS::SubscriberQos & qos);
-
   /// ctor with transport impl registration
   OpenDDS_Subscription_Manager (const Domain_Manager & dm,
 				OpenDDS::DCPS::TransportIdType transport_id,
@@ -58,6 +54,9 @@ class OpenDDS_Subscription_Manager : public Subscription_Manager_Impl
   /// returns a data reader for a specific topic
   virtual DDS::DataReader_ptr lookup_datareader (const std::string & topic_name);
 
+  /// creates and returns qos for data readers with the default values
+  virtual DDS::DataReaderQos get_default_datareader_qos ();
+
   /// returns the underlying subsriber instance
   /// memory management of the returned subscriber reference is done by the 
   /// OpenDDS_Subscription_Manager itself
@@ -81,4 +80,4 @@ class OpenDDS_Subscription_Manager : public Subscription_Manager_Impl
 #include "OpenDDS_Subscription_Manager.inl"
 #endif
 
-#endif /* _OPEN_DDS_SUBSCRIPTION_MANAGER_H_ */
+#endif /* DDS_WRAPPER_OPEN_DDS_SUBSCRIPTION_MANAGER_H_ */

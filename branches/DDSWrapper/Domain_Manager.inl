@@ -10,8 +10,8 @@
  */
 //=============================================================================
 
-#ifndef _DOMAIN_MANAGER_INL_
-#define _DOMAIN_MANAGER_INL_
+#ifndef DDS_WRAPPER_DOMAIN_MANAGER_INL_
+#define DDS_WRAPPER_DOMAIN_MANAGER_INL_
 
 ACE_INLINE std::string
 Manager_Exception::reason () const
@@ -55,4 +55,4 @@ Domain_Manager::participant ()
   return manager_impl_->participant ();
 }
 
-#endif /* _DOMAIN_MANAGER_INL_ */
+#endif /* DDS_WRAPPER_DOMAIN_MANAGER_INL_ */
