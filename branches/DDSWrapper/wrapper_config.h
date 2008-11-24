@@ -19,7 +19,7 @@
 # error Only one implementation config flag should be uncommented
 # endif
 
-#include "ccpp.h"
+#include "ccpp_dds_dcps.h"
 
 #elif !defined (OPEN_DDS_CONFIG)
 #define OPEN_DDS_CONFIG
