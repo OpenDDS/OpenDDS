@@ -55,6 +55,8 @@ namespace OpenDDS
      * @brief Collection of latency statistics for a single publication.
      */
     struct LatencyStats {
+      RepoId subscription;
+      RepoId publication;
       unsigned long n;
       double max;
       double min;
@@ -95,7 +97,7 @@ namespace OpenDDS
         void add_stat( const ACE_Time_Value& delay);
 
         /// Extract the current latency statistics for this writer.
-        LatencyStats get_stats() const;
+        LatencyStats get_stats( RepoId subscription) const;
 
         /// Reset the latency statistics for this writer.
         void reset_stats();
@@ -364,6 +366,8 @@ namespace OpenDDS
       void notify_latency( PublicationId writer);
       void get_latency_stats( std::vector< LatencyStats>& stats) const;
       void reset_latency_stats();
+      void statistics_enabled( bool value);
+      bool statistics_enabled() const;
 
       CORBA::Long get_depth() const { return depth_; }
       size_t get_n_chunks() const { return n_chunks_; }
@@ -556,6 +560,9 @@ namespace OpenDDS
 
       /// Flag indicates that the init() is called.
       bool                       initialized_;
+
+      /// Flag indicating status of statistics gathering.
+      bool statistics_enabled_;
 
       typedef std::map<PublicationId, WriterInfo, GUID_tKeyLessThan> WriterMapType;
 
