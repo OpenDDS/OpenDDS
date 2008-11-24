@@ -154,12 +154,15 @@ public abstract class AbstractMessageImpl implements Message {
         headers.JMSExpiration = expiration;
     }
 
+    // We use (20 - JMSPriority) in the IDL so that we can use "ORDER BY theHeader.TwentyMinusJMSPriority"
+    // in a QueryCondition in DDS to read the higher JMSPriority samples from the DataReader before lower JMSPriority
+    // samples.
     public int getJMSPriority() throws JMSException {
-        return headers.JMSPriority;
+        return 20 - headers.TwentyMinusJMSPriority;
     }
 
     public void setJMSPriority(int priority) throws JMSException {
-        headers.JMSPriority = priority;
+        headers.TwentyMinusJMSPriority = 20 - priority;
     }
 
     // Message properties

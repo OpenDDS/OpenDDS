@@ -157,8 +157,8 @@ public class MessageConsumerImpl implements MessageConsumer {
     }
 
     private Message doReceive(Duration_t duration) throws JMSException {
-        ReadCondition readCondition = messagePayloadDataReader.create_readcondition(NOT_READ_SAMPLE_STATE.value,
-                NEW_VIEW_STATE.value, ALIVE_INSTANCE_STATE.value);
+        ReadCondition readCondition = messagePayloadDataReader.create_querycondition(NOT_READ_SAMPLE_STATE.value,
+                NEW_VIEW_STATE.value, ALIVE_INSTANCE_STATE.value, "ORDER BY theHeader.TwentyMinusJMSPriority", new String[] {});
         int rc = waitSet.attach_condition(readCondition);
         if (rc != RETCODE_OK.value) {
             throw new JMSException("Cannot attach readCondition to OpenDDS WaitSet.");
