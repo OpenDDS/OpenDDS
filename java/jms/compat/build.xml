@@ -5,33 +5,33 @@
     Author:  Steven Stallion
     Version: $Revision$
 -->
-<project name="opendds-jms-compat" default="all" basedir=".">
+<project name="opendds-jms-compat" default="test" basedir="."
+         xmlns:opendds="antlib:org.opendds.ant">
+    
+    <property name="jms.basedir" value="${basedir}/.."/> 
+    <property name="jms.lib.dir" value="${jms.basedir}/lib"/>
+
     <property name="build.dir" value="${basedir}/build"/>
+    <property name="conf.dir" value="${basedir}/conf"/>
     <property name="lib.dir" value="${basedir}/lib"/>
     <property name="src.dir" value="${basedir}/src"/>
     <property name="test.dir" value="${basedir}/test"/>
     <property name="web.dir" value="${basedir}/web"/>
 
-    <property environment="env"/>
-
-    <!-- Determine OpenDDS version -->
-    <loadproperties srcfile="${env.DDS_ROOT}/dds/Version.h">
-        <filterchain>
-            <deletecharacters chars="&quot;"/>
-            <tokenfilter>
-                <replacestring from="#define DDS_MAJOR_VERSION" to="version.dds.major"/>
-                <replacestring from="#define DDS_MINOR_VERSION" to="version.dds.minor"/>
-                <replacestring from="#define DDS_VERSION" to="version.dds"/>
-            </tokenfilter>
-        </filterchain>
-    </loadproperties>
-
     <property file="build.properties"/>
-
+    
     <!--
         Project Paths
     -->
+    <taskdef uri="antlib:org.opendds.ant"
+             resource="org/opendds/ant/antlib.xml"
+             classpath="${jms.lib.dir}/opendds-ant.jar"/>
+
+    <opendds:init environment="env"/>
+
     <path id="project.classpath">
+        <fileset dir="${jms.lib.dir}"/>
+
         <pathelement location="${build.dir}/classes"/>
         <pathelement location="${build.dir}/tests"/>
 
@@ -42,10 +42,20 @@
         <fileset dir="${web.dir}/WEB-INF/lib"/>
     </path>
 
+    <taskdef resource="cargo.tasks"
+             classpathref="project.classpath"/>
+    
+    <macrodef name="antjms">
+        <attribute name="target"/>
+        <sequential>
+            <subant buildpath="${jms.basedir}" target="@{target}"/>
+        </sequential>
+    </macrodef>
+
     <!--
         Project Targets
     -->
-    <target name="all" depends="clean, test, ear"/>
+    <target name="all" depends="clean, jboss42x"/>
 
     <target name="clean">
         <delete dir="${build.dir}"/>
@@ -80,7 +90,7 @@
         </jar>
     </target>
 
-    <target name="war" depends="compile">
+    <target name="war" depends="test.compile">
         <war warfile="${build.dir}/modules/${ant.project.name}-web.war"
              webxml="${web.dir}/WEB-INF/web.xml">
             <classes dir="${build.dir}/tests"/>
@@ -91,11 +101,11 @@
     </target>
 
     <target name="ear" depends="ejb-jar, war">
-        <echo message="[service] Updating VERSION to ${version.dds}"/>
+        <echo message="[service] Updating VERSION to ${opendds.version}"/>
         <copy todir="${build.dir}">
             <fileset dir="${src.dir}/META-INF/service"/>
             <filterset>
-                <filter token="VERSION" value="${version.dds}"/>
+                <filter token="VERSION" value="${opendds.version}"/>
             </filterset>
         </copy>
 
@@ -114,8 +124,45 @@
         </ear>
     </target>
 
-    <target name="deploy" if="deploy.dir">
-        <copy file="${build.dir}/${ant.project.name}.ear" todir="${deploy.dir}"/>
+    <target name="bootstrap" depends="ear" unless="bootstrap.invoked">
+        <condition property="server.jvmargs"
+                   value="-Dopendds.native.debug=true">
+            <and>
+                <os family="windows"/>
+                <istrue value="${native.debug}"/>
+            </and>
+        </condition>
+        <property name="server.jvmargs" value=""/>
+
+        <antjms target="rar"/> <!-- ensure RAR is built -->
+
+        <echo message="[bootstrap] Starting DCPSInfoRepo in ${env.DDS_ROOT}"/>
+        <exec executable="${env.DDS_ROOT}/bin/DCPSInfoRepo" spawn="true">
+            <arg line="-ORBListenEndpoints iiop://:6666"/>
+            <arg line="-ORBSvcConf ${conf.dir}/tcp.conf"/>
+        </exec>
+        <property name="bootstrap.invoked" value="INVOKED"/>
+    </target>
+
+    <target name="jboss42x" depends="bootstrap" if="jboss42x.enabled">
+        <fail message="JBOSS_HOME is a required environment variable!" unless="env.JBOSS_HOME"/>
+
+        <echo message="[jboss42x] Using JBOSS_HOME: ${env.JBOSS_HOME}"/>
+        <cargo containerId="jboss42x" home="${env.JBOSS_HOME}" action="start" wait="false">
+            <configuration>
+                <property name="cargo.jvmargs" value="-ea ${server.jvmargs}"/> <!-- enable assertions -->
+
+                <!-- Deployables -->
+                <deployable type="rar" file="${jms.basedir}/build/opendds-jms-1.2.1.rar"/>
+                <deployable type="ear" file="${build.dir}/${ant.project.name}.ear"/>
+            </configuration>
+        </cargo>
+
+        <antcall target="test"/>
+
+        <cargo containerId="jboss42x" home="${env.JBOSS_HOME}" action="stop">
+            <configuration/>
+        </cargo>
     </target>
 
     <target name="test.clean">
@@ -126,7 +173,7 @@
         <mkdir dir="${build.dir}/tests"/>
     </target>
 
-    <target name="test.compile" depends="test.init, compile">
+    <target name="test.compile" depends="test.init">
         <javac srcdir="${test.dir}"
                destdir="${build.dir}/tests"
                debug="true"
@@ -151,7 +198,7 @@
         </junit>
     </target>
 
-    <target name="test.report" depends="test">
+    <target name="test.report">
         <junitreport todir="${build.dir}/tests">
             <fileset dir="${build.dir}/tests">
                 <include name="TEST-*.xml"/>
