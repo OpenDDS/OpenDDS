@@ -1,3 +1,14 @@
+Tue Nov 25 21:30:24 UTC 2008  Trevor Fields  <fields_t@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/FooTest5/common.h:
+        * tests/DCPS/FooTest5/run_test_multi_trans.pl:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        
+          Changed FooTest5 to test connecting to BIT (using TCP) while
+          data is sent using another transport.
+
 Wed Nov 12 23:26:20 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
 
         * wrapper/Topic_Manager_T.h
