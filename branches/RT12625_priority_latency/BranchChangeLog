@@ -1,3 +1,28 @@
+Tue Nov 25 21:02:44 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/framework/DirectPriorityMapper.h:
+        * dds/DCPS/transport/framework/DirectPriorityMapper.inl:
+        * dds/DCPS/transport/framework/DirectPriorityMapper.cpp:
+        * dds/DCPS/transport/framework/PriorityMapper.h:
+        * dds/DCPS/transport/framework/PriorityMapper.inl:
+        * dds/DCPS/transport/framework/PriorityMapper.cpp:
+
+          Added feature to map TRANSPORT_PRIORITY values to DiffServ
+          codepoint and thread priority values.  This includes an
+          abstract interface and a direct mapping implementation.  The
+          direct mapping simply maps an in-range priority value to the
+          mapped value and maps out of range values to the nearest
+          extremum.
+
+          For thread priorities, ordering is accounted for.  This means
+          that if priorities range from 0 (minimum) to a negative value
+          (maximum), then the TRANSPORT_PRIORITY value will be mapped
+          from [0,range] directly and out of range values will be mapped
+          to the closest extremum.  Increasing TRANSPORT_PRIORITY integer
+          values will always correspond to increasing thread priority
+          values.  See the block header in the DirectPriorityMapper
+          header for additional detail.
+
 Mon Nov 24 16:47:46 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
