@@ -61,7 +61,7 @@
           </containerElement>
           <containerElement type="facet" facetId="opendds-jms-compat/web/opendds-jms-compat-web">
             <attribute name="method" value="4" />
-            <attribute name="URI" value="opendds-jms-compat-web" />
+            <attribute name="URI" value="opendds-jms-compat-web.war" />
             <attribute name="contextRoot" value="opendds-jms-compat" />
           </containerElement>
         </packaging>
