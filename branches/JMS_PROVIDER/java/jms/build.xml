@@ -15,7 +15,6 @@
     <property name="src.dir" value="${basedir}/src"/>
     <property name="test.dir" value="${basedir}/test"/>
 
-    <property environment="env"/>
     <property file="build.properties"/>
 
     <!--
@@ -25,7 +24,7 @@
              resource="org/opendds/ant/antlib.xml"
              classpath="${lib.dir}/opendds-ant.jar"/>
 
-    <opendds:init/>
+    <opendds:init environment="env"/>
 
     <property name="project.filename"
               value="${ant.project.name}-${opendds.version}"/>
@@ -44,7 +43,7 @@
             <include name="OpenDDS_DCPS.jar"/>
             <include name="i2jrt.jar"/>
             <include name="tao_java.jar"/>
-        </fileset>        
+        </fileset>
     </path>
 
     <macrodef name="antnative">
@@ -69,18 +68,27 @@
         <mkdir dir="${build.dir}"/>
         <mkdir dir="${build.dir}/classes"/>
 
-        <!-- Create version.properties -->
-        <propertyfile file="${build.dir}/version.properties">
-            <entry key="version.dds" value="${opendds.version}"/>
-            <entry key="version.dds.major" value="${opendds.version.major}"/>
-            <entry key="version.dds.minor" value="${opendds.version.minor}"/>
-            <entry key="version.jca" value="${version.jca}"/>
-            <entry key="version.jca.minor" value="${version.jca.minor}"/>
-            <entry key="version.jca.major" value="${version.jca.major}"/>
-            <entry key="version.jms" value="${version.jms}"/>
-            <entry key="version.jms.minor" value="${version.jms.minor}"/>
-            <entry key="version.jms.major" value="${version.jms.major}"/>
-        </propertyfile>
+        <uptodate property="jar.uptodate"
+                  targetfile="${build.dir}/${project.filename}.jar">
+            <srcfiles dir="${src.dir}">
+                <exclude name="META-INF/ra.xml"/>
+            </srcfiles>
+            <srcfiles dir="${native.dir}">
+                <include name="**/*.java"/>
+            </srcfiles>
+        </uptodate>
+
+        <uptodate property="rar.uptodate"
+                  targetfile="${build.dir}/${project.filename}.rar">
+            <srcfiles dir="${build.dir}">
+                <include name="/${project.filename}.jar"/>
+            </srcfiles>
+            <srcfiles dir="${src.dir}/META-INF">
+                <include name="ra.xml"/>
+            </srcfiles>
+            <srcfiles dir="${env.ACE_ROOT}/lib"/>
+            <srcfiles dir="${env.DDS_ROOT}/lib"/>
+        </uptodate>
     </target>
 
     <target name="native.clean">
@@ -103,8 +111,18 @@
         </javac>
     </target>
 
-    <target name="jar" depends="compile"
+    <target name="jar" depends="compile" unless="jar.uptodate"
             description="Archive compiled classes and resources">
+        <!-- Create version.properties -->
+        <propertyfile file="${build.dir}/version.properties">
+            <entry key="version.dds" value="${opendds.version}"/>
+            <entry key="version.dds.major" value="${opendds.version.major}"/>
+            <entry key="version.dds.minor" value="${opendds.version.minor}"/>
+            <entry key="version.jms" value="${version.jms}"/>
+            <entry key="version.jms.minor" value="${version.jms.minor}"/>
+            <entry key="version.jms.major" value="${version.jms.major}"/>
+        </propertyfile>
+        
         <jar destfile="${build.dir}/${project.filename}.jar"
              compress="${jar.compress}"
              index="${jar.index}">
@@ -131,7 +149,7 @@
         </jar>
     </target>
 
-    <target name="rar" depends="jar"
+    <target name="rar" depends="jar" unless="rar.uptodate"
             description="Create a Resource Adapter Archive (RAR) under build/">
         <!-- Collect native libraries to package -->
         <opendds:libfileset id="ACE+TAO.libs" debug="${native.debug}"
