@@ -44,18 +44,6 @@ public class Version {
         return helper.require("version.dds.minor").asInt();
     }
 
-    public String getJCAVersion() {
-        return helper.require("version.jca").getValue();
-    }
-
-    public int getJCAMajorVersion() {
-        return helper.require("version.jca.major").asInt();
-    }
-
-    public int getJCAMinorVersion() {
-        return helper.require("version.jca.minor").asInt();
-    }
-
     public String getJMSVersion() {
         return helper.require("version.jms").getValue();
     }

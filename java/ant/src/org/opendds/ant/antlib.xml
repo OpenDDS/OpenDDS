@@ -13,8 +13,13 @@
              classname="org.opendds.ant.LibFileSet"/>
 
     <macrodef name="init" uri="antlib:org.opendds.ant">
+        <attribute name="environment"/>
         <sequential>
-            <fail message="DDS_ROOT is a required environment variable!" unless="env.DDS_ROOT"/>
+            <property environment="@{environment}"/> 
+
+            <fail message="ACE_ROOT is a required environment variable!" unless="@{environment}.ACE_ROOT"/>
+            <fail message="DDS_ROOT is a required environment variable!" unless="@{environment}.DDS_ROOT"/>
+
             <loadproperties srcfile="${env.DDS_ROOT}/dds/Version.h">
                 <filterchain>
                     <deletecharacters chars="&quot;"/>
