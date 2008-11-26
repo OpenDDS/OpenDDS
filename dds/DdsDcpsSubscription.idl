@@ -240,14 +240,26 @@ module OpenDDS {
       ::DDS::InstanceHandleSeq publication_handles;
     };
 
+    typedef SubscriptionLostStatus SubscriptionDisconnectedStatus;
+    typedef SubscriptionLostStatus SubscriptionReconnectedStatus;
+
     struct BudgetExceededStatus {
       long             total_count;
       long             total_count_change;
       ::DDS::InstanceHandle_t last_instance_handle;
     };
 
-    typedef SubscriptionLostStatus SubscriptionDisconnectedStatus;
-    typedef SubscriptionLostStatus SubscriptionReconnectedStatus;
+    /// Collection of latency statistics for a single association.
+    struct LatencyStatistics {
+      ::DDS::InstanceHandle_t publication;
+      unsigned long           n;
+      double                  max;
+      double                  min;
+      long                    mean;
+      long                    variance;
+    };
+
+    typedef sequence<LatencyStatistics> LatencyStatisticsSeq;
 
     local interface DataReaderListener : ::DDS::DataReaderListener {
 
