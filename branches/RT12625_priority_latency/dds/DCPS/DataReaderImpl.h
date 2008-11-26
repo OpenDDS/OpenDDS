@@ -49,21 +49,6 @@ namespace OpenDDS
 
     //typedef ZeroCopyInfoSeq<DCPS_ZERO_COPY_SEQ_DEFAULT_SIZE> SampleInfoZCSeq;
 
-    /**
-     * @struct LatencyStats
-     *
-     * @brief Collection of latency statistics for a single publication.
-     */
-    struct LatencyStats {
-      RepoId subscription;
-      RepoId publication;
-      unsigned long n;
-      double max;
-      double min;
-      long double mean;
-      long double variance;
-    };
-
     /// Statistics collector type.
     typedef Stats< double> StatisticsAccumulator;
 
@@ -97,7 +82,7 @@ namespace OpenDDS
         void add_stat( const ACE_Time_Value& delay);
 
         /// Extract the current latency statistics for this writer.
-        LatencyStats get_stats( RepoId subscription) const;
+        LatencyStatistics get_stats() const;
 
         /// Reset the latency statistics for this writer.
         void reset_stats();
@@ -364,10 +349,13 @@ namespace OpenDDS
 
       void process_latency( const ReceivedDataSample& sample);
       void notify_latency( PublicationId writer);
-      void get_latency_stats( std::vector< LatencyStats>& stats) const;
+
+      /// @TODO: Hoist these statistics methods up to the extended IDL
+      ///        OpenDDS::DCPS::DataReader implementation.
+      void get_latency_stats( LatencyStatisticsSeq& stats) const;
       void reset_latency_stats();
-      void statistics_enabled( bool value);
-      bool statistics_enabled() const;
+      void statistics_enabled( bool value); // as an IDL attribute
+      bool statistics_enabled() const;      // as an IDL attribute
 
       CORBA::Long get_depth() const { return depth_; }
       size_t get_n_chunks() const { return n_chunks_; }

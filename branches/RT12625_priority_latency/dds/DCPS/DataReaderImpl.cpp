@@ -935,7 +935,7 @@ DataReaderImpl::writer_activity(PublicationId writer_id)
       ACE_Time_Value when = ACE_OS::gettimeofday ();
       iter->second.received_activity (when);
 
-  } else {
+  } else if( DCPS_debug_level > 0) {
     // This may not be an error since it could happen that the sample
     // is delivered to the datareader after the write is dis-associated
     // with this datareader.
@@ -1464,16 +1464,28 @@ void OpenDDS::DCPS::WriterInfo::add_stat( const ACE_Time_Value& delay)
   this->stats_.add( datum);
 }
 
-OpenDDS::DCPS::LatencyStats OpenDDS::DCPS::WriterInfo::get_stats( RepoId subscription) const
+OpenDDS::DCPS::LatencyStatistics OpenDDS::DCPS::WriterInfo::get_stats() const
 {
-  LatencyStats value;
-  value.subscription = subscription;
-  value.publication  = this->writer_id_;
-  value.n            = this->stats_.n();
-  value.max          = this->stats_.max();
-  value.min          = this->stats_.min();
-  value.mean         = this->stats_.mean();
-  value.variance     = this->stats_.var();
+  WriterIdSeq writerIds;
+  writerIds.length(1);
+  writerIds[ 0] = this->writer_id_;
+
+  ::DDS::InstanceHandleSeq handles;
+  this->reader_->cache_lookup_instance_handles( writerIds, handles);
+
+  LatencyStatistics value;
+
+  if( handles.length() >= 1) {
+    value.publication = handles[ 0];
+  } else {
+    value.publication = -1;
+  }
+
+  value.n        = this->stats_.n();
+  value.max      = this->stats_.max();
+  value.min      = this->stats_.min();
+  value.mean     = this->stats_.mean();
+  value.variance = this->stats_.var();
   return value;
 }
 
@@ -1742,14 +1754,22 @@ void DataReaderImpl::process_latency( const ReceivedDataSample& sample)
         this->notify_latency( sample.header_.publication_id_);
       }
 
-  } else {
+  } else if( DCPS_debug_level > 0){
+    /// NB: This message is generated contemporaneously with a similar
+    ///     message from writer_activity().  That message is not marked
+    ///     as an error, so we follow that lead and leave this as an
+    ///     informational message, guarded by debug level.  This seems
+    ///     to be due to late samples (samples delivered after an
+    ///     association has been torn down).  We may want to promote this
+    ///     to a warning if other conditions causing this symptom are
+    ///     discovered.
     ::OpenDDS::DCPS::GuidConverter readerConverter( this->subscription_id_);
     ::OpenDDS::DCPS::GuidConverter writerConverter(
       const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.header_.publication_id_)
     );
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::process_latency() - ")
-      ACE_TEXT("reader %s is not associated with writer %s.\n"),
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) DataReaderImpl::process_latency() - ")
+      ACE_TEXT("reader %s is not associated with writer %s (late sample?).\n"),
       (const char*) readerConverter,
       (const char*) writerConverter
     ));
@@ -1789,13 +1809,14 @@ void DataReaderImpl::notify_latency( PublicationId writer)
   }
 }
 
-void DataReaderImpl::get_latency_stats( std::vector< LatencyStats>& stats) const
+void DataReaderImpl::get_latency_stats( LatencyStatisticsSeq& stats) const
 {
-  stats.clear();
+  stats.length( this->writers_.size());
+  int index = 0;
   for( WriterMapType::const_iterator current = this->writers_.begin();
        current != this->writers_.end();
-       ++current) {
-    stats.push_back( current->second.get_stats( this->get_subscription_id()));
+       ++current, ++index) {
+    stats[ index] = current->second.get_stats();
   }
 }
 

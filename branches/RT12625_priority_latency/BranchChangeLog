@@ -1,3 +1,37 @@
+Wed Nov 26 19:22:11 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          WriterInfo::get_stats() -
+            Removed subscription identifier from interface as it is no
+            longer used to fill the LatencyStatistics structures.
+
+          get_latency_stats() -
+            Changed container type from STL container to CORBA sequence
+            container.  This is in preparation of moving the statistics
+            interfaces to the extended OpenDDS::DCPS:DataReader IDL
+            definition.
+
+          process_latency() -
+            Demoted an error message in process_latency() where a
+            publication is not known at the time a sample is received.
+            This is similar to the situation in writer_activity()
+            which also checks and generates an informational message.
+            This condition is possible if samples are received after
+            an association has been torn down.  Currently these samples
+            are received regardless of the association status.  This
+            message is now guarded by the debug level as well.
+
+          writer_activity() -
+            Guard the message mentioned above with the debug level.
+
+        * dds/DdsDcpsSubscription.idl:
+
+          Hoisted LatencyStatistics structure into the IDL.  Included
+          sequence typedef for the type as well.  Modified to include the
+          publication InstanceHandle and remove the subscription identifier.
+
 Tue Nov 25 21:02:44 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/transport/framework/DirectPriorityMapper.h:
