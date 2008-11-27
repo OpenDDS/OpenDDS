@@ -13,6 +13,12 @@
 #ifndef DDS_WRAPPER_PUBLICATION_MANAGER_INL_
 #define DDS_WRAPPER_PUBLICATION_MANAGER_INL_
 
+ACE_INLINE bool
+Publication_Manager::null () const
+{
+  return manager_impl_.null ();
+}
+
 ACE_INLINE DDS::DataWriter_ptr
 Publication_Manager::access_topic (const Topic_Manager & topic,
 				   const DDS::DataWriterQos & qos)
