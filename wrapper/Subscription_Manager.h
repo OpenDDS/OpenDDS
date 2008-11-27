@@ -38,6 +38,9 @@ class DDSWrapper_Export Subscription_Manager
   /// assignment operator
   void operator= (const Subscription_Manager & copy);
 
+  /// checks for null reference
+  bool null () const;
+
   /// will create a topic instance using the domain manager
   /// internally a datareader will be created which can be accessed
   /// through the lookup_datareader method

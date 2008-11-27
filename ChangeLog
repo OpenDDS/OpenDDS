@@ -1,3 +1,17 @@
+Thu Nov 27 05:38:17 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
+
+        * wrapper/Domain_Manager.h
+        * wrapper/Topic_Manager.inl
+        * wrapper/Publication_Manager.h
+        * wrapper/Subscription_Manager.inl
+        * wrapper/Domain_Manager.inl
+        * wrapper/Publication_Manager.inl
+        * wrapper/Topic_Manager.h
+        * wrapper/Subscription_Manager.h:
+        
+          Added null () method to all Manager bridge classes to check for
+          null references.
+
 Tue Nov 25 21:30:24 UTC 2008  Trevor Fields  <fields_t@ociweb.com>
 
         * bin/dcps_tests.lst:

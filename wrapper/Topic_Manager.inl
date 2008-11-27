@@ -13,6 +13,12 @@
 #ifndef DDS_WRAPPER_TOPIC_MANAGER_INL_
 #define DDS_WRAPPER_TOPIC_MANAGER_INL_
 
+ACE_INLINE bool
+Topic_Manager::null () const
+{
+  return manager_impl_.null ();
+}
+
 ACE_INLINE std::string
 Topic_Manager::name () const
 {

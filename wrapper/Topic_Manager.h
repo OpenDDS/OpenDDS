@@ -44,6 +44,9 @@ class DDSWrapper_Export Topic_Manager
   /// dtor
   ~Topic_Manager ();
 
+  /// checks for null reference
+  bool null () const;
+
   /// getter method for the topic name
   std::string name () const;
 
