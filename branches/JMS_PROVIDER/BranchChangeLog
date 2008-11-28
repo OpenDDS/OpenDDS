@@ -1,3 +1,9 @@
+Fri Nov 28 08:43:26 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/compat/web/WEB-INF/lib/junit-remote-0.1.jar:
+
+          Updated to official 0.1 release JAR.
+
 Tue Nov 25 18:21:10 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/build.xml:
