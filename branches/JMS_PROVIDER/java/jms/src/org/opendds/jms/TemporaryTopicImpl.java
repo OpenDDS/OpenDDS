@@ -12,7 +12,7 @@ import DDS.DomainParticipant;
 import DDS.Topic;
 
 import org.opendds.jms.common.lang.Strings;
-import org.opendds.jms.common.util.ContextLog;
+import org.opendds.jms.common.util.Logger;
 
 /**
  * @author  Steven Stallion
@@ -40,8 +40,8 @@ public class TemporaryTopicImpl extends TopicImpl implements TemporaryTopic {
 
     public void delete() throws JMSException {
         if (topic != null) {
-            ContextLog log = connection.getLog();
-            log.debug(String.format("Deleting %s", topic));
+            Logger logger = connection.getLogger();
+            logger.debug("Deleting %s", topic);
 
             DomainParticipant participant = connection.getParticipant();
             participant.delete_topic(topic);

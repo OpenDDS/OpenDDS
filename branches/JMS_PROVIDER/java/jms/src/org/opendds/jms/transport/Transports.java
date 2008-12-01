@@ -7,7 +7,7 @@ package org.opendds.jms.transport;
 import OpenDDS.DCPS.transport.TransportConfiguration;
 
 import org.opendds.jms.common.SvcConfDirective;
-import org.opendds.jms.common.util.ContextLog;
+import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.transport.spi.Transport;
 import org.opendds.jms.transport.spi.TransportRegistry;
 
@@ -22,8 +22,8 @@ public class Transports {
         registry.registerAll();
     }
 
-    public static ContextLog getLog(TransportConfiguration configuration) {
-        return new ContextLog(configuration.getType(), configuration.getId());
+    public static Logger getLogger(TransportConfiguration configuration) {
+        return Logger.getLogger(configuration.getType(), configuration.getId());
     }
 
     public static SvcConfDirective getDirective(String transportType) {

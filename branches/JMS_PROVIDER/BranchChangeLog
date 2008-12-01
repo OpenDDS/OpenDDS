@@ -1,3 +1,63 @@
+Mon Dec  1 07:24:06 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/OpenDDS.ipr:
+        * java/ant/opendds-ant.iml:
+        * java/jms/build.xml:
+        * java/jms/compat/opendds-jms-compat.iml:
+        * java/jms/compat/src/META-INF/service/opendds-ds.xml:
+        * java/jms/lib/shared:
+        * java/jms/lib/shared/antlr-2.7.6.jar:
+        * java/jms/lib/shared/commons-collections-2.1.1.jar:
+        * java/jms/lib/shared/dom4j-1.6.1.jar:
+        * java/jms/lib/shared/hibernate-3.2.6.jar:
+        * java/jms/lib/shared/javassist-3.4.jar:
+        * java/jms/opendds-jms.iml:
+        * java/jms/src/META-INF/ra.xml:
+        * java/jms/src/org/opendds/jms/ConnectionImpl.java:
+        * java/jms/src/org/opendds/jms/PublisherManager.java:
+        * java/jms/src/org/opendds/jms/SubscriberManager.java:
+        * java/jms/src/org/opendds/jms/TemporaryTopicImpl.java:
+        * java/jms/src/org/opendds/jms/TopicImpl.java:
+        * java/jms/src/org/opendds/jms/common/lang/Classes.java:
+        * java/jms/src/org/opendds/jms/common/util/JndiHelper.java:
+        * java/jms/src/org/opendds/jms/common/util/LibIndex.java:
+        * java/jms/src/org/opendds/jms/common/util/Logger.java:
+        * java/jms/src/org/opendds/jms/common/util/NativeLoader.java:
+        * java/jms/src/org/opendds/jms/common/util/PropertiesHelper.java:
+        * java/jms/src/org/opendds/jms/management/DCPSInfoRepoService.java:
+        * java/jms/src/org/opendds/jms/management/Destination.java:
+        * java/jms/src/org/opendds/jms/management/DynamicAttributes.java:
+        * java/jms/src/org/opendds/jms/management/DynamicMBeanSupport.java:
+        * java/jms/src/org/opendds/jms/management/ParticipantFactoryService.java:
+        * java/jms/src/org/opendds/jms/management/PersistenceManagerService.java:
+        * java/jms/src/org/opendds/jms/management/argument/DynamicArguments.java:
+        * java/jms/src/org/opendds/jms/persistence:
+        * java/jms/src/org/opendds/jms/persistence/DurableSubscription.hbm.xml:
+        * java/jms/src/org/opendds/jms/persistence/DurableSubscription.java:
+        * java/jms/src/org/opendds/jms/persistence/DurableSubscriptionStore.java:
+        * java/jms/src/org/opendds/jms/persistence/PersistenceManager.java:
+        * java/jms/src/org/opendds/jms/qos/DataReaderQosPolicy.java:
+        * java/jms/src/org/opendds/jms/qos/DataWriterQosPolicy.java:
+        * java/jms/src/org/opendds/jms/qos/ParticipantQosPolicy.java:
+        * java/jms/src/org/opendds/jms/qos/PublisherQosPolicy.java:
+        * java/jms/src/org/opendds/jms/qos/SubscriberQosPolicy.java:
+        * java/jms/src/org/opendds/jms/qos/TopicQosPolicy.java:
+        * java/jms/src/org/opendds/jms/resource/ConnectionRequestInfoImpl.java:
+        * java/jms/src/org/opendds/jms/resource/ManagedConnectionFactoryImpl.java:
+        * java/jms/src/org/opendds/jms/resource/ManagedConnectionImpl.java:
+        * java/jms/src/org/opendds/jms/resource/ResourceAdapterImpl.java:
+        * java/jms/src/org/opendds/jms/transport/TransportFactory.java:
+        * java/jms/src/org/opendds/jms/transport/Transports.java:
+        * java/jms/test/org/opendds/jms/AbstractMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/SessionImplTest.java:
+        * java/jms/test/org/opendds/jms/TopicMessageConsumerImplTest.java:
+
+          Added initial support durable subscription persistence; refactored logging.
+
+        * java/jms/src/org/opendds/jms/common/util/ContextLog.java:
+
+          Removed this file.
+
 Fri Nov 28 08:43:26 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/compat/web/WEB-INF/lib/junit-remote-0.1.jar:

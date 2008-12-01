@@ -13,27 +13,24 @@ import org.apache.commons.logging.LogFactory;
  * @author  Steven Stallion
  * @version $Revision$
  */
-public class ContextLog {
+public class Logger {
+
+    public static Logger getLogger(String name) {
+        return new Logger(LogFactory.getLog(name));
+    }
+
+    public static Logger getLogger(String name, Object discriminator) {
+        return new Logger(LogFactory.getLog(name + "-" + discriminator));
+    }
+
+    public static Logger getLogger(Class clazz) {
+        return new Logger(LogFactory.getLog(clazz));
+    }
+
     private Log log;
-    private String context;
-    private Object discriminator;
 
-    public ContextLog(String context, Object discriminator) {
-        this.context = context;
-        this.discriminator = discriminator;
-        log = LogFactory.getLog(getLogName());
-    }
-
-    public String getContext() {
-        return context;
-    }
-
-    public Object getDiscriminator() {
-        return discriminator;
-    }
-
-    public String getLogName() {
-        return String.format("%s-%s", context, discriminator);
+    protected Logger(Log log) {
+        this.log = log;
     }
 
     public void debug(String message, Object... args) {

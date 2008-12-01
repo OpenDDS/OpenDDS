@@ -20,6 +20,14 @@
         <depends>jboss.jca:service=RARDeployment,name='opendds-jms-@VERSION@.rar'</depends>
     </mbean>
 
+    <mbean code="org.opendds.jms.management.PersistenceManagerService"
+           name="OpenDDS:service=PersistenceManager">
+        <attribute name="JndiName">DDS/PersistenceManager</attribute>
+        <attribute name="DataSource">java:/DefaultDS</attribute>
+        <attribute name="Dialect">org.hibernate.dialect.HSQLDialect</attribute>
+        <depends>jboss.jca:service=RARDeployment,name='opendds-jms-@VERSION@.rar'</depends>
+    </mbean>
+
     <!--
         Destination configuration
     -->
@@ -52,10 +60,12 @@
         <use-java-context>false</use-java-context>
         <rar-name>opendds-jms-@VERSION@.rar</rar-name>
         <connection-definition>javax.jms.ConnectionFactory</connection-definition>
-        <config-property name="DomainId" type="java.lang.Integer">1</config-property>
+        <config-property name="DomainID" type="java.lang.Integer">1</config-property>
         <config-property name="TransportType" type="java.lang.String">SimpleTcp</config-property>
+        <config-property name="PersistenceManager" type="java.lang.String">DDS/PersistenceManager</config-property>
         <max-pool-size>20</max-pool-size>
         <depends>OpenDDS:service=DomainParticipantFactory</depends>
+        <depends>OpenDDS:service=PersistenceManager</depends>
     </no-tx-connection-factory>
 
     <no-tx-connection-factory>
@@ -63,8 +73,8 @@
         <use-java-context>false</use-java-context>
         <rar-name>opendds-jms-@VERSION@.rar</rar-name>
         <connection-definition>javax.jms.ConnectionFactory</connection-definition>
-        <config-property name="ClientId" type="java.lang.String">CustomClientId</config-property>
-        <config-property name="DomainId" type="java.lang.Integer">2</config-property>
+        <config-property name="ClientID" type="java.lang.String">CustomClientID</config-property>
+        <config-property name="DomainID" type="java.lang.Integer">2</config-property>
         <config-property name="ParticipantQosPolicy" type="java.lang.String">
             USER_DATA.value=CustomParticipantData
         </config-property>

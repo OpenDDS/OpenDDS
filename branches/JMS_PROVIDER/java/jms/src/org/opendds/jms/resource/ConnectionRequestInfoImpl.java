@@ -9,6 +9,7 @@ import java.io.Serializable;
 import javax.resource.spi.ConnectionRequestInfo;
 
 import org.opendds.jms.common.lang.Objects;
+import org.opendds.jms.persistence.PersistenceManager;
 import org.opendds.jms.qos.ParticipantQosPolicy;
 import org.opendds.jms.qos.PublisherQosPolicy;
 import org.opendds.jms.qos.SubscriberQosPolicy;
@@ -26,6 +27,7 @@ public class ConnectionRequestInfoImpl implements ConnectionRequestInfo, Seriali
     private TransportFactory publisherTransport;
     private SubscriberQosPolicy subscriberQosPolicy;
     private TransportFactory subscriberTransport;
+    private PersistenceManager persistenceManager;
 
     public ConnectionRequestInfoImpl(String clientId,
                                      int domainId,
@@ -33,7 +35,8 @@ public class ConnectionRequestInfoImpl implements ConnectionRequestInfo, Seriali
                                      PublisherQosPolicy publisherQosPolicy,
                                      TransportFactory publisherTransport,
                                      SubscriberQosPolicy subscriberQosPolicy,
-                                     TransportFactory subscriberTransport) {
+                                     TransportFactory subscriberTransport,
+                                     PersistenceManager persistenceManager) {
         this.clientId = clientId;
         this.domainId = domainId;
         this.participantQosPolicy = participantQosPolicy;
@@ -41,13 +44,14 @@ public class ConnectionRequestInfoImpl implements ConnectionRequestInfo, Seriali
         this.publisherTransport = publisherTransport;
         this.subscriberQosPolicy = subscriberQosPolicy;
         this.subscriberTransport = subscriberTransport;
+        this.persistenceManager = persistenceManager;
     }
 
-    public String getClientId() {
+    public String getClientID() {
         return clientId;
     }
 
-    public int getDomainId() {
+    public int getDomainID() {
         return domainId;
     }
 
@@ -71,6 +75,10 @@ public class ConnectionRequestInfoImpl implements ConnectionRequestInfo, Seriali
         return subscriberTransport;
     }
 
+    public PersistenceManager getPersistenceManager() {
+        return persistenceManager;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hashCode(
@@ -80,7 +88,8 @@ public class ConnectionRequestInfoImpl implements ConnectionRequestInfo, Seriali
             publisherQosPolicy,
             publisherTransport,
             subscriberQosPolicy,
-            subscriberTransport);
+            subscriberTransport,
+            persistenceManager);
     }
 
     @Override
@@ -100,6 +109,7 @@ public class ConnectionRequestInfoImpl implements ConnectionRequestInfo, Seriali
             && Objects.equals(publisherQosPolicy, cxRequestInfo.publisherQosPolicy)
             && Objects.equals(publisherTransport, cxRequestInfo.publisherTransport)
             && Objects.equals(subscriberQosPolicy, cxRequestInfo.subscriberQosPolicy)
-            && Objects.equals(subscriberTransport, cxRequestInfo.subscriberTransport);
+            && Objects.equals(subscriberTransport, cxRequestInfo.subscriberTransport)
+            && Objects.equals(persistenceManager, cxRequestInfo.persistenceManager);
     }
 }

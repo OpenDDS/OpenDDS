@@ -15,7 +15,7 @@ import OpenDDS.DCPS.transport.TransportImpl;
 
 import org.opendds.jms.common.ExceptionHelper;
 import org.opendds.jms.common.PartitionHelper;
-import org.opendds.jms.common.util.ContextLog;
+import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.qos.PublisherQosPolicy;
 import org.opendds.jms.qos.QosPolicies;
 import org.opendds.jms.resource.ConnectionRequestInfoImpl;
@@ -30,18 +30,18 @@ public class PublisherManager {
     private ManagedConnectionImpl connection;
     private ConnectionRequestInfoImpl cxRequestInfo;
     private Publisher publisher;
-    private TransportManager transportMgr;
+    private TransportManager transportManager;
 
     public PublisherManager(ManagedConnectionImpl connection) throws ResourceException {
         this.connection = connection;
         this.cxRequestInfo = connection.getConnectionRequestInfo();
 
-        transportMgr = new TransportManager(cxRequestInfo.getPublisherTransport());
+        transportManager = new TransportManager(cxRequestInfo.getPublisherTransport());
     }
 
     protected Publisher createPublisher() throws JMSException {
         try {
-            ContextLog log = connection.getLog();
+            Logger logger = connection.getLogger();
 
             PublisherQosHolder holder =
                 new PublisherQosHolder(QosPolicies.newPublisherQos());
@@ -60,14 +60,14 @@ public class PublisherManager {
             if (publisher == null) {
                 throw new JMSException("Unable to create Publisher; please check logs");
             }
-            log.debug("Created %s %s", publisher, policy);
-            log.debug("%s using PARTITION %s", publisher, holder.value.partition);
+            logger.debug("Created %s %s", publisher, policy);
+            logger.debug("%s using PARTITION %s", publisher, holder.value.partition);
 
-            TransportImpl transport = transportMgr.getTransport();
+            TransportImpl transport = transportManager.getTransport();
             if (transport.attach_to_publisher(publisher).value() != AttachStatus._ATTACH_OK) {
                 throw new JMSException("Unable to attach to transport; please check logs");
             }
-            log.debug("Attached %s to %s", publisher, transport);
+            logger.debug("Attached %s to %s", publisher, transport);
 
             return publisher;
 

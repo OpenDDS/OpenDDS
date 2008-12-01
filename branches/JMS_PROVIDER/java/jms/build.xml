@@ -45,6 +45,8 @@
         <pathelement location="${test.dir}"/>
 
         <fileset dir="${lib.dir}"/>
+        <fileset dir="${lib.dir}/shared"/>
+
         <fileset refid="DDS.jars"/>
     </path>
 
@@ -88,6 +90,7 @@
             <srcfiles dir="${src.dir}/META-INF">
                 <include name="ra.xml"/>
             </srcfiles>
+            <srcfiles dir="${lib.dir}/shared"/>
             <srcfiles dir="${env.ACE_ROOT}/lib"/>
             <srcfiles dir="${env.DDS_ROOT}/lib"/>
         </uptodate>
@@ -116,7 +119,7 @@
     <target name="jar" depends="compile" unless="jar.uptodate"
             description="Archive compiled classes and resources">
         <!-- Create version.properties -->
-        <echo message="[version.properties] Updating project versions"/>
+        <echo message="[version.properties] Updating release versions"/>
         <propertyfile file="${build.dir}/version.properties">
             <entry key="version.dds" value="${opendds.version}"/>
             <entry key="version.dds.major" value="${opendds.version.major}"/>
@@ -204,6 +207,8 @@
                 <include name="${project.filename}.jar"/>
             </fileset>
 
+            <fileset dir="${lib.dir}/shared"/>
+            
             <fileset refid="DDS.jars"/>
 
             <zipfileset refid="ACE+TAO.libs" prefix="native"/>

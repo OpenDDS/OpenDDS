@@ -6,12 +6,10 @@ package org.opendds.jms.qos;
 
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import DDS.PresentationQosPolicyAccessScopeKind;
 import DDS.PublisherQos;
 
+import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.common.util.PropertiesHelper;
 
 /**
@@ -19,7 +17,7 @@ import org.opendds.jms.common.util.PropertiesHelper;
  * @version $Revision$
  */
 public class PublisherQosPolicy implements QosPolicy<PublisherQos> {
-    private static Log log = LogFactory.getLog(PublisherQosPolicy.class);
+    private static Logger logger = Logger.getLogger(PublisherQosPolicy.class);
 
     private Properties properties;
 
@@ -72,18 +70,18 @@ public class PublisherQosPolicy implements QosPolicy<PublisherQos> {
         // PARTITION QosPolicy (reserved)
         property = helper.find("PARTITION.name");
         if (property.exists()) {
-            log.warn("PARTITION QosPolicy is reserved for internal use!");
+            logger.warn("PARTITION QosPolicy is reserved for internal use!");
         }
 
         // ENTITY_FACTORY QosPolicy (reserved)
         property = helper.find("ENTITY_FACTORY.autoenable_created_entities");
         if (property.exists()) {
-            log.warn("ENTITY_FACTORY QosPolicy is reserved for internal use!");
+            logger.warn("ENTITY_FACTORY QosPolicy is reserved for internal use!");
         }
     }
 
     @Override
     public String toString() {
-        return PropertiesHelper.valueOf(properties);
+        return properties.toString();
     }
 }

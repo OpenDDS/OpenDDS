@@ -33,9 +33,10 @@ public class JndiHelper {
         return context;
     }
 
-    public Object lookup(String name) throws NamingException {
+    @SuppressWarnings("unchecked")
+    public <T> T lookup(String name) throws NamingException {
         Context context = getContext();
-        return context.lookup(name);
+        return (T) context.lookup(name);
     }
 
     public void bind(String name, Object value) throws NamingException {

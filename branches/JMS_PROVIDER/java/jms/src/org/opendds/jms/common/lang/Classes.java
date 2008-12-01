@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class Classes {
 
-    public static Method findMethod(Class clazz,
+    public static Method findMethod(Class<?> clazz,
                                     String methodName,
                                     Object[] parameters) throws NoSuchMethodException {
 

@@ -8,6 +8,7 @@ import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.Set;
 
+import javax.naming.NamingException;
 import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionManager;
 import javax.resource.spi.ConnectionRequestInfo;
@@ -19,6 +20,8 @@ import javax.security.auth.Subject;
 import org.opendds.jms.ConnectionFactoryImpl;
 import org.opendds.jms.common.lang.Objects;
 import org.opendds.jms.common.lang.Strings;
+import org.opendds.jms.common.util.JndiHelper;
+import org.opendds.jms.persistence.PersistenceManager;
 import org.opendds.jms.qos.ParticipantQosPolicy;
 import org.opendds.jms.qos.PublisherQosPolicy;
 import org.opendds.jms.qos.SubscriberQosPolicy;
@@ -37,6 +40,7 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
     private String subscriberQosPolicy;
     private String subscriberTransport;
     private String transportType;
+    private String persistenceManager;
 
     public String getClientId() {
         return clientId;
@@ -46,11 +50,11 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
         this.clientId = clientId;
     }
 
-    public Integer getDomainId() {
+    public Integer getDomainID() {
         return domainId;
     }
 
-    public void setDomainId(Integer domainId) {
+    public void setDomainID(Integer domainId) {
         this.domainId = domainId;
     }
 
@@ -102,6 +106,14 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
         this.transportType = transportType;
     }
 
+    public String getPersistenceManager() {
+        return persistenceManager;
+    }
+
+    public void setPersistenceManager(String persistenceManager) {
+        this.persistenceManager = persistenceManager;
+    }
+    
     public PrintWriter getLogWriter() {
         return null; // logging disabled
     }
@@ -125,13 +137,25 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
     public Object createConnectionFactory(ConnectionManager cxManager) throws ResourceException {
         validate();
 
+        PersistenceManager pm = null;
+        if (!Strings.isEmpty(persistenceManager)) {
+            JndiHelper helper = new JndiHelper();
+            try {
+                pm = helper.lookup(persistenceManager);
+
+            } catch (NamingException e) {
+                throw new ResourceException(e);
+            }
+        }
+
         ConnectionRequestInfo cxRequestInfo =
             new ConnectionRequestInfoImpl(clientId, domainId,
                 new ParticipantQosPolicy(participantQosPolicy),
                 new PublisherQosPolicy(publisherQosPolicy),
                 new TransportFactory(transportType, publisherTransport),
                 new SubscriberQosPolicy(subscriberQosPolicy),
-                new TransportFactory(transportType, subscriberTransport));
+                new TransportFactory(transportType, subscriberTransport),
+                pm);
 
         return new ConnectionFactoryImpl(this, cxManager, cxRequestInfo);
     }
@@ -171,7 +195,8 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
             publisherTransport,
             subscriberQosPolicy,
             subscriberTransport,
-            transportType);
+            transportType,
+            persistenceManager);
     }
 
     @Override
@@ -192,6 +217,7 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
             && Objects.equals(publisherTransport, mcf.publisherTransport)
             && Objects.equals(subscriberQosPolicy, mcf.subscriberQosPolicy)
             && Objects.equals(subscriberTransport, mcf.subscriberTransport)
-            && Objects.equals(transportType, mcf.transportType);
+            && Objects.equals(transportType, mcf.transportType)
+            && Objects.equals(persistenceManager, mcf.persistenceManager);
     }
 }

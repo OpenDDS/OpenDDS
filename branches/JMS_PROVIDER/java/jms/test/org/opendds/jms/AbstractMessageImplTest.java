@@ -835,7 +835,7 @@ public class AbstractMessageImplTest {
 
         TextMessage message = new TextMessageImpl(null);
 
-        fakeObjects.connection = new ConnectionImpl(new ManagedConnectionImpl(new Subject(), new ConnectionRequestInfoImpl("clientID", 2, null, null, null, null, null)));
+        fakeObjects.connection = new ConnectionImpl(new ManagedConnectionImpl(new Subject(), new ConnectionRequestInfoImpl("clientID", 2, null, null, null, null, null, null)));
         fakeObjects.destination = destination;
         fakeObjects.subscriber = subscriber;
         fakeObjects.participant = participant;

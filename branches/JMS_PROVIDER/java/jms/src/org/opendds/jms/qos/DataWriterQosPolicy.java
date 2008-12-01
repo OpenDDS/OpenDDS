@@ -6,15 +6,13 @@ package org.opendds.jms.qos;
 
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import DDS.DataWriterQos;
 import DDS.DestinationOrderQosPolicyKind;
 import DDS.HistoryQosPolicyKind;
 import DDS.LivelinessQosPolicyKind;
 import DDS.ReliabilityQosPolicyKind;
 
+import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.common.util.PropertiesHelper;
 
 /**
@@ -22,7 +20,7 @@ import org.opendds.jms.common.util.PropertiesHelper;
  * @version $Revision$
  */
 public class DataWriterQosPolicy implements QosPolicy<DataWriterQos> {
-    private static Log log = LogFactory.getLog(DataWriterQosPolicy.class);
+    private static Logger logger = Logger.getLogger(DataWriterQosPolicy.class);
 
     private Properties properties;
 
@@ -48,7 +46,7 @@ public class DataWriterQosPolicy implements QosPolicy<DataWriterQos> {
         // DURABILITY QosPolicy (reserved)
         property = helper.find("DURABILITY.kind");
         if (property.exists()) {
-            log.warn("DURABILITY QosPolicy is reserved for internal use!");
+            logger.warn("DURABILITY QosPolicy is reserved for internal use!");
         }
 
         // DURABILITY_SERVICE QosPolicy
@@ -174,12 +172,12 @@ public class DataWriterQosPolicy implements QosPolicy<DataWriterQos> {
         // LIFESPAN QosPolicy (reserved)
         property = helper.find("LIFESPAN.duration.sec");
         if (property.exists()) {
-            log.warn("LIFESPAN QosPolicy is reserved for internal use!");
+            logger.warn("LIFESPAN QosPolicy is reserved for internal use!");
         }
 
         property = helper.find("LIFESPAN.duration.nanosec");
         if (property.exists()) {
-            log.warn("LIFESPAN QosPolicy is reserved for internal use!");
+            logger.warn("LIFESPAN QosPolicy is reserved for internal use!");
         }
 
         // DESTINATION_ORDER QosPolicy
@@ -236,6 +234,6 @@ public class DataWriterQosPolicy implements QosPolicy<DataWriterQos> {
 
     @Override
     public String toString() {
-        return PropertiesHelper.valueOf(properties);
+        return properties.toString();
     }
 }

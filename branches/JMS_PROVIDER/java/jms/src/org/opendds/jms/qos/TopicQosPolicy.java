@@ -44,6 +44,6 @@ public class TopicQosPolicy implements QosPolicy<TopicQos> {
 
     @Override
     public String toString() {
-        return PropertiesHelper.valueOf(properties);
+        return properties.toString();
     }
 }

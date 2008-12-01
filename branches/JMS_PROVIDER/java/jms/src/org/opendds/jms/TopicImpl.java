@@ -12,7 +12,7 @@ import javax.jms.Topic;
 import DDS.DomainParticipant;
 import DDS.TopicQosHolder;
 
-import org.opendds.jms.common.util.ContextLog;
+import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.qos.DataReaderQosPolicy;
 import org.opendds.jms.qos.DataWriterQosPolicy;
 import org.opendds.jms.qos.QosPolicies;
@@ -60,7 +60,7 @@ public class TopicImpl implements Serializable, Topic {
     }
 
     public DDS.Topic createDDSTopic(ConnectionImpl connection) throws JMSException {
-        ContextLog log = connection.getLog();
+        Logger logger = connection.getLogger();
 
         TopicQosHolder holder = new TopicQosHolder(QosPolicies.newTopicQos());
 
@@ -75,7 +75,7 @@ public class TopicImpl implements Serializable, Topic {
         if (topic == null) {
             throw new JMSException("Unable to create Topic; please check logs");
         }
-        log.debug("Created %s %s", topic, topicQosPolicy);
+        logger.debug("Created %s %s", topic, topicQosPolicy);
 
         return topic;
     }
