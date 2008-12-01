@@ -7,8 +7,8 @@
 -->
 <project name="opendds-jms-compat" default="test" basedir="."
          xmlns:opendds="antlib:org.opendds.ant">
-    
-    <property name="jms.basedir" value="${basedir}/.."/> 
+
+    <property name="jms.basedir" value="${basedir}/.."/>
     <property name="jms.lib.dir" value="${jms.basedir}/lib"/>
 
     <property name="build.dir" value="${basedir}/build"/>
@@ -19,7 +19,7 @@
     <property name="web.dir" value="${basedir}/web"/>
 
     <property file="build.properties"/>
-    
+
     <!--
         Project Paths
     -->
@@ -44,7 +44,7 @@
 
     <taskdef resource="cargo.tasks"
              classpathref="project.classpath"/>
-    
+
     <macrodef name="antjms">
         <attribute name="target"/>
         <sequential>
@@ -124,7 +124,7 @@
         </ear>
     </target>
 
-    <target name="bootstrap" depends="ear" unless="bootstrap.invoked">
+    <target name="setup" depends="ear" unless="bootstrap.invoked">
         <condition property="server.jvmargs"
                    value="-Dopendds.native.debug=true">
             <and>
@@ -144,7 +144,13 @@
         <property name="bootstrap.invoked" value="INVOKED"/>
     </target>
 
-    <target name="jboss42x" depends="bootstrap" if="jboss42x.enabled">
+    <target name="teardown">
+        <exec executable="${env.DDS_ROOT}/bin/opendds_ir_ctl">
+            <arg line="kill localhost:6666"/>
+        </exec>
+    </target>
+
+    <target name="jboss42x" depends="setup" if="jboss42x.enabled">
         <fail message="JBOSS_HOME is a required environment variable!" unless="env.JBOSS_HOME"/>
 
         <echo message="[jboss42x] Using JBOSS_HOME: ${env.JBOSS_HOME}"/>
@@ -163,6 +169,7 @@
         <cargo containerId="jboss42x" home="${env.JBOSS_HOME}" action="stop">
             <configuration/>
         </cargo>
+        <antcall target="teardown"/>
     </target>
 
     <target name="test.clean">
