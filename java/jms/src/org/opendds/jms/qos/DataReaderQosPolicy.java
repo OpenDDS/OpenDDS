@@ -6,15 +6,13 @@ package org.opendds.jms.qos;
 
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import DDS.DataReaderQos;
 import DDS.DestinationOrderQosPolicyKind;
 import DDS.HistoryQosPolicyKind;
 import DDS.LivelinessQosPolicyKind;
 import DDS.ReliabilityQosPolicyKind;
 
+import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.common.util.PropertiesHelper;
 
 /**
@@ -22,7 +20,7 @@ import org.opendds.jms.common.util.PropertiesHelper;
  * @version $Revision$
  */
 public class DataReaderQosPolicy implements QosPolicy<DataReaderQos> {
-    private static Log log = LogFactory.getLog(DataReaderQosPolicy.class);
+    private static Logger logger = Logger.getLogger(DataReaderQosPolicy.class);
 
     private Properties properties;
 
@@ -48,7 +46,7 @@ public class DataReaderQosPolicy implements QosPolicy<DataReaderQos> {
         // DURABILITY QosPolicy (reserved)
         property = helper.find("DURABILITY.kind");
         if (property.exists()) {
-            log.warn("DURABILITY QosPolicy is reserved for internal use!");
+            logger.warn("DURABILITY QosPolicy is reserved for internal use!");
         }
 
         // DEADLINE QosPolicy
@@ -188,6 +186,6 @@ public class DataReaderQosPolicy implements QosPolicy<DataReaderQos> {
 
     @Override
     public String toString() {
-        return PropertiesHelper.valueOf(properties);
+        return properties.toString();
     }
 }

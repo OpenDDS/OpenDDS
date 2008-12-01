@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.management.Attribute;
 import javax.management.AttributeNotFoundException;
@@ -85,6 +86,19 @@ public class DynamicAttributes implements Serializable {
         }
 
         return values;
+    }
+
+    public Properties toProperties() {
+        Properties properties = new Properties();
+
+        for (Map.Entry<String, Object> entry : values.entrySet()) {
+            Object value = entry.getValue();
+            if (value != null) {
+                properties.setProperty(entry.getKey(), value.toString());
+            }
+        }
+
+        return properties;
     }
 
     //

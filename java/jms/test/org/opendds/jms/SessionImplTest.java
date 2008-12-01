@@ -353,7 +353,7 @@ public class SessionImplTest {
             }
         };
 
-        fakeObjects.connection = new ConnectionImpl(new ManagedConnectionImpl(new Subject(), new ConnectionRequestInfoImpl("clientID", 2, null, null, null, null, null)));
+        fakeObjects.connection = new ConnectionImpl(new ManagedConnectionImpl(new Subject(), new ConnectionRequestInfoImpl("clientID", 2, null, null, null, null, null, null)));
 
         fakeObjects.participant = participant;
         fakeObjects.publisher = publisher;
@@ -410,7 +410,7 @@ public class SessionImplTest {
             }
         };
 
-        fakeObjects.connection = new ConnectionImpl(new ManagedConnectionImpl(new Subject(), new ConnectionRequestInfoImpl("clientID", 2, null, null, null, null, null)));
+        fakeObjects.connection = new ConnectionImpl(new ManagedConnectionImpl(new Subject(), new ConnectionRequestInfoImpl("clientID", 2, null, null, null, null, null, null)));
         fakeObjects.participant = participant;
         fakeObjects.publisher = publisher;
         fakeObjects.subscriber = subscriber;

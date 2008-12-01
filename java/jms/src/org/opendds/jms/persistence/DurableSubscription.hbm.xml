@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Id$
+
+    Author:  Steven Stallion
+    Version: $Revision$
+-->
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+    <class name="org.opendds.jms.persistence.DurableSubscription"
+           table="DURABLE_SUBSCRIPTION">
+        <id name="id" column="ID">
+            <generator class="uuid"/>
+        </id>
+
+        <property name="clientID" column="CLIENT_ID"/>
+        <property name="name" column="NAME"/>
+
+        <set name="messages" table="ACKNOWLEDGED_MESSAGE">
+            <key column="ID"/>
+            <element type="string" column="MESSAGE_ID"/>            
+        </set>
+    </class>
+</hibernate-mapping>

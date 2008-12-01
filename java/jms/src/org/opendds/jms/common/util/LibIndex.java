@@ -15,18 +15,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.opendds.jms.common.lang.Strings;
+
 /**
  * @author  Steven Stallion
  * @version $Revision$
  */
 public class LibIndex {
     public static final String DEFAULT_RESOURCE = "META-INF/INDEX.LIBS";
-
-    public static final String VERSION_ATTRIBUTE = "LibIndex-Version";
-    public static final String CREATED_ATTRIBUTE = "LibIndex-Created";
-
-    public static final String ATTRIBUTE_SEPARATOR = ":";
-    public static final String RESOURCE_SEPARATOR = "/";
 
     public static class Entry {
         private String name;
@@ -36,7 +32,7 @@ public class LibIndex {
             this.resource = resource;
 
             // Determine library name (strip resource path)
-            int index = resource.lastIndexOf(RESOURCE_SEPARATOR);
+            int index = resource.lastIndexOf(":");
             if (index != -1) {
                 name = resource.substring(index + 1);
             } else {
@@ -68,11 +64,11 @@ public class LibIndex {
     }
 
     public String getVersion() {
-        return getAttribute(VERSION_ATTRIBUTE);
+        return getAttribute("LibIndex-Version");
     }
 
     public long getCreated() {
-        return Long.parseLong(getAttribute(CREATED_ATTRIBUTE));
+        return Long.parseLong(getAttribute("LibIndex-Created"));
     }
 
     public String getAttribute(String name) {
@@ -92,11 +88,11 @@ public class LibIndex {
         String line;
         while ((line = reader.readLine()) != null) {
             if (!parsedHeader) {
-                if ("".equals(line)) {
+                if (Strings.isEmpty(line)) {
                     parsedHeader = true;
 
                 } else {
-                    int index = line.indexOf(ATTRIBUTE_SEPARATOR);
+                    int index = line.indexOf(" ");
 
                     if (index == -1) {
                         throw new IOException("Invalid attribute: " + line);

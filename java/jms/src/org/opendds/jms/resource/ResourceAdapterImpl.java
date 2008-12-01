@@ -12,11 +12,9 @@ import javax.resource.spi.ResourceAdapter;
 import javax.resource.spi.endpoint.MessageEndpointFactory;
 import javax.transaction.xa.XAResource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.opendds.jms.common.Version;
 import org.opendds.jms.common.io.Files;
+import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.common.util.NativeLoader;
 import org.opendds.jms.common.util.PropertiesHelper;
 
@@ -25,7 +23,7 @@ import org.opendds.jms.common.util.PropertiesHelper;
  * @version $Revision$
  */
 public class ResourceAdapterImpl implements ResourceAdapter {
-    private static Log log = LogFactory.getLog(ResourceAdapterImpl.class);
+    private static Logger logger = Logger.getLogger(ResourceAdapterImpl.class);
 
     static {
         PropertiesHelper.Property property;
@@ -39,7 +37,7 @@ public class ResourceAdapterImpl implements ResourceAdapter {
 
             String dirName = property.getValue();
             if (!Files.isLibraryPathSet(dirName)) {
-                log.warn(dirName + " is not set in java.library.path!");
+                logger.warn("%s is not set in java.library.path!", dirName);
             }
 
             try {
@@ -57,9 +55,7 @@ public class ResourceAdapterImpl implements ResourceAdapter {
     public void start(BootstrapContext context) {
         this.context = context;
 
-        if (log.isInfoEnabled()) {
-            log.info("Starting " + Version.getInstance());
-        }
+        logger.info("Starting %s", Version.getInstance());
     }
 
     public void stop() {}

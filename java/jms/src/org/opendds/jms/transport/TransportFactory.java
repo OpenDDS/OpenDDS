@@ -13,7 +13,7 @@ import OpenDDS.DCPS.transport.TransportConfiguration;
 import OpenDDS.DCPS.transport.TransportImpl;
 
 import org.opendds.jms.common.beans.BeanHelper;
-import org.opendds.jms.common.util.ContextLog;
+import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.common.util.PropertiesHelper;
 import org.opendds.jms.common.util.Serial;
 
@@ -41,13 +41,13 @@ public class TransportFactory {
 
         synchronized (serial) {
             if (serial.overflowed()) {
-                throw new JMSException("Insufficient Transport IDs available!");
+                throw new JMSException("Insufficient Transport IDs available");
             }
             configuration = TheTransportFactory.get_or_create_configuration(serial.next(), type);
         }
 
-        ContextLog log = Transports.getLog(configuration);
-        log.debug("Configuring %s %s", configuration, PropertiesHelper.valueOf(properties));
+        Logger logger = Transports.getLogger(configuration);
+        logger.debug("Configuring %s %s", configuration, properties);
 
         if (!properties.isEmpty()) {
             BeanHelper helper = new BeanHelper(configuration.getClass());
@@ -66,8 +66,8 @@ public class TransportFactory {
         }
         transport.configure(configuration);
 
-        ContextLog log = Transports.getLog(configuration);
-        log.debug("Created %s", transport);
+        Logger logger = Transports.getLogger(configuration);
+        logger.debug("Created %s", transport);
 
         return transport;
     }

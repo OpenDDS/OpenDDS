@@ -15,7 +15,7 @@ import OpenDDS.DCPS.transport.TransportImpl;
 
 import org.opendds.jms.common.ExceptionHelper;
 import org.opendds.jms.common.PartitionHelper;
-import org.opendds.jms.common.util.ContextLog;
+import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.qos.QosPolicies;
 import org.opendds.jms.qos.SubscriberQosPolicy;
 import org.opendds.jms.resource.ConnectionRequestInfoImpl;
@@ -29,7 +29,7 @@ import org.opendds.jms.transport.TransportManager;
 public class SubscriberManager {
     private ManagedConnectionImpl connection;
     private ConnectionRequestInfoImpl cxRequestInfo;
-    private TransportManager transportMgr;
+    private TransportManager transportManager;
     private Subscriber remoteSubscriber;
     private Subscriber localSubscriber;
 
@@ -37,12 +37,12 @@ public class SubscriberManager {
         this.connection = connection;
         this.cxRequestInfo = connection.getConnectionRequestInfo();
 
-        transportMgr = new TransportManager(cxRequestInfo.getSubscriberTransport());
+        transportManager = new TransportManager(cxRequestInfo.getSubscriberTransport());
     }
 
     protected Subscriber createSubscriber(boolean noLocal) throws JMSException {
         try {
-            ContextLog log = connection.getLog();
+            Logger logger = connection.getLogger();
 
             SubscriberQosHolder holder =
                 new SubscriberQosHolder(QosPolicies.newSubscriberQos());
@@ -65,14 +65,14 @@ public class SubscriberManager {
             if (subscriber == null) {
                 throw new JMSException("Unable to create Subscriber; please check logs");
             }
-            log.debug("Created %s %s", subscriber, policy);
-            log.debug("%s using PARTITION %s", subscriber, holder.value.partition.name);
+            logger.debug("Created %s %s", subscriber, policy);
+            logger.debug("%s using PARTITION %s", subscriber, holder.value.partition.name);
 
-            TransportImpl transport = transportMgr.getTransport();
+            TransportImpl transport = transportManager.getTransport();
             if (transport.attach_to_subscriber(subscriber) != AttachStatus.ATTACH_OK) {
                 throw new JMSException("Unable to attach to Transport; please check logs");
             }
-            log.debug("Attached %s to %s", subscriber, transport);
+            logger.debug("Attached %s to %s", subscriber, transport);
 
             return subscriber;
 

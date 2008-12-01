@@ -6,12 +6,10 @@ package org.opendds.jms.management;
 
 import java.io.Serializable;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.opendds.jms.TopicImpl;
 import org.opendds.jms.common.lang.Strings;
 import org.opendds.jms.common.util.JndiHelper;
+import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.management.annotation.Attribute;
 import org.opendds.jms.management.annotation.Constructor;
 import org.opendds.jms.management.annotation.Description;
@@ -27,7 +25,7 @@ import org.opendds.jms.qos.TopicQosPolicy;
  */
 @Description("OpenDDS Destination MBean")
 public class Destination extends DynamicMBeanSupport implements Serializable, ServiceMBean {
-    private Log log;
+    private Logger logger;
 
     private boolean started;
     private String destination;
@@ -126,10 +124,8 @@ public class Destination extends DynamicMBeanSupport implements Serializable, Se
 
         helper.bind(jndiName, topic);
 
-        log = LogFactory.getLog(destination);
-        if (log.isInfoEnabled()) {
-            log.info("Bound to JNDI name: " + jndiName);
-        }
+        logger = Logger.getLogger(destination);
+        logger.info("Bound to JNDI name: %s", jndiName);
 
         started = true;
     }
@@ -140,12 +136,10 @@ public class Destination extends DynamicMBeanSupport implements Serializable, Se
             throw new IllegalStateException(destination + " already stopped!");
         }
 
-        if (log.isInfoEnabled()) {
-            log.info("Unbinding JNDI name: " + jndiName);
-        }
+        logger.info("Unbinding JNDI name: %s", jndiName);
 
         helper.unbind(jndiName);
-        log = null;
+        logger = null;
 
         started = false;
     }

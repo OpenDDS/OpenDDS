@@ -19,6 +19,7 @@ import javax.resource.spi.ManagedConnection;
 import javax.resource.spi.ManagedConnectionMetaData;
 import javax.security.auth.Subject;
 import javax.transaction.xa.XAResource;
+import javax.jms.JMSException;
 
 import DDS.DomainParticipant;
 import DDS.DomainParticipantFactory;
@@ -32,9 +33,10 @@ import OpenDDS.JMS.MessagePayloadTypeSupportImpl;
 import org.opendds.jms.ConnectionImpl;
 import org.opendds.jms.PublisherManager;
 import org.opendds.jms.SubscriberManager;
+import org.opendds.jms.persistence.PersistenceManager;
 import org.opendds.jms.common.Version;
 import org.opendds.jms.common.lang.Objects;
-import org.opendds.jms.common.util.ContextLog;
+import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.qos.ParticipantQosPolicy;
 import org.opendds.jms.qos.QosPolicies;
 
@@ -43,15 +45,16 @@ import org.opendds.jms.qos.QosPolicies;
  * @version $Revision$
  */
 public class ManagedConnectionImpl implements ManagedConnection {
-    private ContextLog log;
+    private Logger log;
+
     private boolean destroyed;
     private Subject subject;
     private ConnectionRequestInfoImpl cxRequestInfo;
     private DomainParticipantFactory dpf;
     private DomainParticipant participant;
     private String typeName;
-    private PublisherManager publisherMgr;
-    private SubscriberManager subscriberMgr;
+    private PublisherManager publisherManager;
+    private SubscriberManager subscriberManager;
 
     private List<ConnectionImpl> handles =
         new ArrayList<ConnectionImpl>();
@@ -62,7 +65,7 @@ public class ManagedConnectionImpl implements ManagedConnection {
     public ManagedConnectionImpl(Subject subject,
                                  ConnectionRequestInfoImpl cxRequestInfo) throws ResourceException {
 
-        log = new ContextLog("Domain", cxRequestInfo.getDomainId());
+        log = Logger.getLogger("Domain", cxRequestInfo.getDomainID());
 
         this.subject = subject;
         this.cxRequestInfo = cxRequestInfo;
@@ -81,7 +84,7 @@ public class ManagedConnectionImpl implements ManagedConnection {
         ParticipantQosPolicy policy = cxRequestInfo.getParticipantQosPolicy();
         policy.setQos(holder.value);
 
-        participant = dpf.create_participant(cxRequestInfo.getDomainId(), holder.value, null);
+        participant = dpf.create_participant(cxRequestInfo.getDomainID(), holder.value, null);
         if (participant == null) {
             throw new ResourceException("Unable to create DomainParticipant; please check logs");
         }
@@ -96,14 +99,14 @@ public class ManagedConnectionImpl implements ManagedConnection {
         typeName = ts.get_type_name();
         log.debug("Registered %s", typeName);
 
-        publisherMgr = new PublisherManager(this);
-        log.debug("Created %s", publisherMgr);
+        publisherManager = new PublisherManager(this);
+        log.debug("Created %s", publisherManager);
 
-        subscriberMgr = new SubscriberManager(this);
-        log.debug("Created %s", subscriberMgr);
+        subscriberManager = new SubscriberManager(this);
+        log.debug("Created %s", subscriberManager);
     }
 
-    public ContextLog getLog() {
+    public Logger getLogger() {
         return log;
     }
 
@@ -133,11 +136,11 @@ public class ManagedConnectionImpl implements ManagedConnection {
     }
 
     public PublisherManager getPublishers() {
-        return publisherMgr;
+        return publisherManager;
     }
 
     public SubscriberManager getSubscribers() {
-        return subscriberMgr;
+        return subscriberManager;
     }
 
     public PrintWriter getLogWriter() {
@@ -230,8 +233,8 @@ public class ManagedConnectionImpl implements ManagedConnection {
         dpf = null;
         participant = null;
         typeName = null;
-        publisherMgr = null;
-        subscriberMgr = null;
+        publisherManager = null;
+        subscriberManager = null;
 
         destroyed = true;
     }

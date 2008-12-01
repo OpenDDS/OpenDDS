@@ -4,10 +4,8 @@
 
 package org.opendds.jms.management;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.opendds.jms.DCPSInfoRepo;
+import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.management.annotation.Attribute;
 import org.opendds.jms.management.annotation.Constructor;
 import org.opendds.jms.management.annotation.Description;
@@ -24,7 +22,7 @@ import org.opendds.jms.management.argument.ORBArguments;
  */
 @Description("OpenDDS DCPSInfoRepo MBean")
 public class DCPSInfoRepoService extends DynamicMBeanSupport implements ServiceMBean {
-    private Log log;
+    private Logger logger;
 
     private boolean started;
     private String service;
@@ -64,14 +62,10 @@ public class DCPSInfoRepoService extends DynamicMBeanSupport implements ServiceM
 
         verify();
 
-        log = LogFactory.getLog(service);
-        if (log.isInfoEnabled()) {
-            log.info("Starting " + service);
-        }
+        logger = Logger.getLogger(service);
+        logger.info("Starting %s", service);
 
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("Initializing with arguments \"%s\"", arguments));
-        }
+        logger.debug("Initializing with arguments: \"%s\"", arguments);
         instance = new DCPSInfoRepo(arguments.toArgs());
 
         instanceThread = new Thread(instance, "DCPSInfoRepo");
@@ -86,9 +80,7 @@ public class DCPSInfoRepoService extends DynamicMBeanSupport implements ServiceM
             throw new IllegalStateException(service + " already stopped!");
         }
 
-        if (log.isInfoEnabled()) {
-            log.info("Stopping " + service);
-        }
+        logger.info("Stopping %s", service);
 
         instance.shutdown();
         instanceThread.join();
@@ -96,7 +88,7 @@ public class DCPSInfoRepoService extends DynamicMBeanSupport implements ServiceM
         instance = null;
         instanceThread = null;
 
-        log = null;
+        logger = null;
 
         started = false;
     }

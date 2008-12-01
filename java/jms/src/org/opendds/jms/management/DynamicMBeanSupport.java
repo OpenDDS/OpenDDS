@@ -26,26 +26,22 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.opendds.jms.common.lang.Strings;
+import org.opendds.jms.common.util.Logger;
 
 /**
  * @author  Steven Stallion
  * @version $Revision$
  */
 public abstract class DynamicMBeanSupport implements DynamicMBean, MBeanRegistration {
-    private Log log = LogFactory.getLog(getClass());
-
-    private DynamicMBeanMetaData metadata = new DynamicMBeanMetaData(this);
-
-    private DynamicAttributes attributes = new DynamicAttributes();
-
     protected MBeanServer server;
     protected ObjectName name;
-
     protected Boolean registrationDone;
+
+    protected DynamicMBeanMetaData metadata = new DynamicMBeanMetaData(this);
+    protected DynamicAttributes attributes = new DynamicAttributes();
+    
+    private Logger logger = Logger.getLogger(getClass());
 
     public ObjectName preRegister(MBeanServer server, ObjectName name) throws Exception {
         this.server = server;
@@ -125,7 +121,6 @@ public abstract class DynamicMBeanSupport implements DynamicMBean, MBeanRegistra
             }
         }
 
-        // Dynamic Attribute
         attributes.setAttribute(attribute);
     }
 
@@ -137,7 +132,7 @@ public abstract class DynamicMBeanSupport implements DynamicMBean, MBeanRegistra
                 list.add(new Attribute(attribute, getAttribute(attribute)));
 
             } catch (Exception e) {
-                log.error("Unexpected problem getting attribute: " + attribute, e);
+                logger.error("Unexpected problem getting attribute: " + attribute, e);
             }
         }
 
@@ -155,7 +150,7 @@ public abstract class DynamicMBeanSupport implements DynamicMBean, MBeanRegistra
                 list.add(attribute);
 
             } catch (Exception e) {
-                log.error("Unexpected problem setting attribute: " + attribute.getName(), e);
+                logger.error("Unexpected problem setting attribute: " + attribute.getName(), e);
             }
         }
 
@@ -216,7 +211,6 @@ public abstract class DynamicMBeanSupport implements DynamicMBean, MBeanRegistra
             values.add(model.toAttributeInfo());
         }
 
-        // Dynamic DynamicAttributes
         values.addAll(attributes.getAttributeInfo());
 
         return values.toArray(new MBeanAttributeInfo[values.size()]);

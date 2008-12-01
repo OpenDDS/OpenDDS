@@ -8,10 +8,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.omg.CORBA.StringSeqHolder;
 
+import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.management.DynamicMBeanSupport;
 
 /**
@@ -21,7 +20,7 @@ import org.opendds.jms.management.DynamicMBeanSupport;
 public class DynamicArguments {
     public static final String DELIMS = ";, \t\r\n\f";
 
-    private static Log log = LogFactory.getLog(DynamicArguments.class);
+    private static Logger logger = Logger.getLogger(DynamicArguments.class);
 
     private DynamicMBeanSupport instance;
 
@@ -71,7 +70,7 @@ public class DynamicArguments {
             }
 
         } catch (Exception e) {
-            log.error("Unexpected problem rendering toString()", e);
+            logger.error("Unexpected problem rendering toString(): %s", e.getMessage(), e);
         }
         return sbuf.toString();
     }

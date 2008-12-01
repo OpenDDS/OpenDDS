@@ -1,9 +1,9 @@
 package org.opendds.jms;
 
 import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Collection;
 
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;
@@ -37,8 +37,6 @@ import OpenDDS.DCPS.transport.AttachStatus;
 import OpenDDS.DCPS.transport.TheTransportFactory;
 import OpenDDS.DCPS.transport.TransportImpl;
 import OpenDDS.JMS.MessagePayloadTypeSupportImpl;
-
-import org.opendds.jms.TopicImpl;
 
 public class TopicMessageConsumerImplTest {
     @Test
@@ -334,6 +332,7 @@ public class TopicMessageConsumerImplTest {
             // super(false, Session.CLIENT_ACKNOWLEDGE, fakeObjects.participant, fakeObjects.publisher, fakeObjects.subscriber, null);
         }
 
+        @SuppressWarnings("unchecked")
         public int getUnacknowledgedCount() {
             try {
                 final Field field = SessionImpl.class.getDeclaredField("unacknowledged");

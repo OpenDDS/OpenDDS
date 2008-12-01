@@ -12,9 +12,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.opendds.jms.common.io.Files;
 import org.opendds.jms.common.io.Streams;
 import org.opendds.jms.common.lang.ClassLoaders;
@@ -24,7 +21,7 @@ import org.opendds.jms.common.lang.ClassLoaders;
  * @version $Revision$
  */
 public class NativeLoader {
-    private static Log log = LogFactory.getLog(NativeLoader.class);
+    private static Logger logger = Logger.getLogger(NativeLoader.class);
 
     private File nativeDir;
 
@@ -33,10 +30,7 @@ public class NativeLoader {
 
     public NativeLoader(String dirName) throws IOException {
         nativeDir = Files.verifyDirectory(dirName);
-
-        if (log.isDebugEnabled()) {
-            log.debug("Using native directory: " + nativeDir.getAbsolutePath());
-        }
+        logger.debug("Using native directory: %s", nativeDir.getAbsolutePath());
     }
 
     public File getNativeDirectory() {
@@ -67,10 +61,7 @@ public class NativeLoader {
                 String name = entry.getName();
 
                 File file = new File(nativeDir, name);
-
-                if (log.isInfoEnabled()) {
-                    log.info("Loading native library: " + file.getAbsolutePath());
-                }
+                logger.info("Loading native library: %s", file.getAbsolutePath());
 
                 if (file.exists() && file.lastModified() > created) {
                     continue; // library is up to date

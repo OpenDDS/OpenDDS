@@ -4,14 +4,12 @@
 
 package org.opendds.jms.management;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import DDS.DomainParticipantFactory;
 import OpenDDS.DCPS.TheParticipantFactory;
 import OpenDDS.DCPS.TheServiceParticipant;
 import OpenDDS.DCPS.transport.TheTransportFactory;
 
+import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.management.annotation.Attribute;
 import org.opendds.jms.management.annotation.Constructor;
 import org.opendds.jms.management.annotation.Description;
@@ -27,11 +25,10 @@ import org.opendds.jms.management.argument.ORBArguments;
  */
 @Description("OpenDDS DomainParticipantFactory MBean")
 public class ParticipantFactoryService extends DynamicMBeanSupport implements ServiceMBean {
-    private Log log;
+    private Logger log;
 
     private String service;
     private boolean started;
-
     private DomainParticipantFactory instance;
 
     private DynamicArguments arguments = new DynamicArguments(this);
@@ -70,14 +67,10 @@ public class ParticipantFactoryService extends DynamicMBeanSupport implements Se
 
         verify();
 
-        log = LogFactory.getLog(service);
-        if (log.isInfoEnabled()) {
-            log.info("Creating " + service);
-        }
+        log = Logger.getLogger(service);
+        log.info("Initializing %s", service);
 
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("Initializing with arguments \"%s\"", arguments));
-        }
+        log.debug("Initializing with arguments: \"%s\"", arguments);
         instance = TheParticipantFactory.WithArgs(arguments.toStringSeq());
 
         if (instance == null) {

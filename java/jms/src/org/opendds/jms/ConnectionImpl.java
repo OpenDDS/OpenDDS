@@ -25,7 +25,8 @@ import DDS.Publisher;
 import DDS.Subscriber;
 
 import org.opendds.jms.common.Version;
-import org.opendds.jms.common.util.ContextLog;
+import org.opendds.jms.common.util.Logger;
+import org.opendds.jms.persistence.PersistenceManager;
 import org.opendds.jms.resource.ConnectionRequestInfoImpl;
 import org.opendds.jms.resource.ManagedConnectionImpl;
 
@@ -34,12 +35,14 @@ import org.opendds.jms.resource.ManagedConnectionImpl;
  * @version $Revision$
  */
 public class ConnectionImpl implements Connection {
+    private Logger logger;
+
     private ManagedConnectionImpl connection;
-    private ContextLog log;
     private DomainParticipant participant;
     private PublisherManager publishers;
     private SubscriberManager subscribers;
     private String clientId;
+    private PersistenceManager persistenceManager;
     private boolean closed;
     private ExceptionListener listener;
 
@@ -52,13 +55,18 @@ public class ConnectionImpl implements Connection {
     public ConnectionImpl(ManagedConnectionImpl connection) {
         this.connection = connection;
 
-        log = connection.getLog();
+        logger = connection.getLogger();
         participant = connection.getParticipant();
         publishers = connection.getPublishers();
         subscribers = connection.getSubscribers();
 
         ConnectionRequestInfoImpl cxRequestInfo = connection.getConnectionRequestInfo();
-        clientId = cxRequestInfo.getClientId();
+        clientId = cxRequestInfo.getClientID();
+
+        persistenceManager = cxRequestInfo.getPersistenceManager();
+        if (persistenceManager == null) {
+            logger.warn("PersistenceManager not set; durable subscriptions unavailable");
+        }
     }
 
     public ManagedConnectionImpl getManagedConnection() {
@@ -69,12 +77,19 @@ public class ConnectionImpl implements Connection {
         this.connection = connection;
     }
 
-    public ContextLog getLog() {
-        return log;
+    public Logger getLogger() {
+        return logger;
     }
 
     public DomainParticipant getParticipant() {
         return participant;
+    }
+
+    public PersistenceManager getPersistenceManager() throws JMSException {
+        if (persistenceManager == null) {
+            throw new JMSException("PersistenceManager not set; durable subscriptions unavailable");
+        }
+        return persistenceManager;
     }
 
     public String getTypeName() {
@@ -145,7 +160,7 @@ public class ConnectionImpl implements Connection {
         synchronized (sessions) {
             sessions.add(session);
         }
-        log.debug("Created %s", session);
+        logger.debug("Created %s", session);
 
         return session;
     }
@@ -156,7 +171,7 @@ public class ConnectionImpl implements Connection {
         synchronized (tempTopics) {
             tempTopics.add(topic);
         }
-        log.debug("Created %s", topic);
+        logger.debug("Created %s", topic);
 
         return topic;
     }
@@ -186,7 +201,7 @@ public class ConnectionImpl implements Connection {
             return;
         }
 
-        log.debug("Closing %s", this);
+        logger.debug("Closing %s", this);
 
         synchronized (sessions) {
             for (Session session : sessions) {
