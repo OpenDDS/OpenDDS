@@ -1,3 +1,10 @@
+Mon Dec  1 22:38:29 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/compat/build.xml:
+
+          Added teardown task to halt DCPSInfoRepo instances using
+          opendds_ir_ctl.
+
 Mon Dec  1 22:34:49 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DdsDcpsInfo.idl:
