@@ -1,6 +1,6 @@
 
-project(*federation): dcpsexe_with_tcp {
-  exename   = federation
+project(*opendds_ir_ctl): dcpsexe_with_tcp {
+  exename   = opendds_ir_ctl
   exeout    = $(DDS_ROOT)/bin
   includes += $(DDS_ROOT)
   libpaths += $(DDS_ROOT)/lib
@@ -8,7 +8,7 @@ project(*federation): dcpsexe_with_tcp {
   after    += DCPSInfoRepo_Federator
 
   Source_Files {
-    federation.cpp
+    opendds_ir_ctl.cpp
   }
 
 }

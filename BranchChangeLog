@@ -1,3 +1,22 @@
+Mon Dec  1 22:34:49 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DdsDcpsInfo.idl:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/tools/opendds_ir_ctl:
+        * dds/tools/opendds_ir_ctl/opendds_ir_ctl.cpp:
+        * dds/tools/opendds_ir_ctl/opendds_ir_ctl.mpc:
+
+          Refactored federation tool (renamed to opendds_ir_ctl) and added
+          support for remote shutdown of DCPSInfoRepo instances.
+
+        * dds/tools/federation:
+        * dds/tools/federation/Federation.mpc:
+        * dds/tools/federation/federation.cpp:
+        * dds/tools/opendds_ir_ctl/Federation.mpc:
+        * dds/tools/opendds_ir_ctl/federation.cpp:
+
+          Removed these files.
+
 Mon Dec  1 07:24:06 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/OpenDDS.ipr:
