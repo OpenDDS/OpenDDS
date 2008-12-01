@@ -32,7 +32,7 @@ public class LibIndex {
             this.resource = resource;
 
             // Determine library name (strip resource path)
-            int index = resource.lastIndexOf(":");
+            int index = resource.lastIndexOf("/");
             if (index != -1) {
                 name = resource.substring(index + 1);
             } else {
@@ -92,7 +92,7 @@ public class LibIndex {
                     parsedHeader = true;
 
                 } else {
-                    int index = line.indexOf(" ");
+                    int index = line.indexOf(":");
 
                     if (index == -1) {
                         throw new IOException("Invalid attribute: " + line);

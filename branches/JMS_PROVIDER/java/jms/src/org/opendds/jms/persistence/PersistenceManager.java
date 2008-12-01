@@ -35,7 +35,7 @@ public class PersistenceManager implements Serializable {
 
     public Class[] getPersistentClasses() {
         return new Class[] {
-            DurableSubscription.class
+            AcknowledgedMessage.class
         };
     }
 

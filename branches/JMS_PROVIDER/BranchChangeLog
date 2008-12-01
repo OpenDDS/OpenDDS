@@ -1,3 +1,23 @@
+Mon Dec  1 23:32:52 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/OpenDDS.ipr:
+        * java/ant/opendds-ant.iml:
+        * java/jms/compat/opendds-jms-compat.iml:
+        * java/jms/opendds-jms.iml:
+        * java/jms/src/org/opendds/jms/DurableSubscription.java:
+        * java/jms/src/org/opendds/jms/common/util/LibIndex.java:
+        * java/jms/src/org/opendds/jms/persistence/AcknowledgedMessage.hbm.xml:
+        * java/jms/src/org/opendds/jms/persistence/AcknowledgedMessage.java:
+        * java/jms/src/org/opendds/jms/persistence/DurableSubscriptionStore.java:
+        * java/jms/src/org/opendds/jms/persistence/PersistenceManager.java:
+
+          Refactored PersistenceManager; fixed LibIndex bug.
+
+        * java/jms/src/org/opendds/jms/persistence/DurableSubscription.hbm.xml:
+        * java/jms/src/org/opendds/jms/persistence/DurableSubscription.java:
+
+          Removed these files.
+
 Mon Dec  1 22:38:29 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/compat/build.xml:

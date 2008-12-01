@@ -9,11 +9,14 @@ import java.io.Serializable;
 import javax.jms.JMSException;
 import javax.jms.Message;
 
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
+import org.opendds.jms.DurableSubscription;
 import org.opendds.jms.common.ExceptionHelper;
+import org.opendds.jms.common.lang.Strings;
 
 /**
  * @author  Steven Stallion
@@ -27,14 +30,12 @@ public class DurableSubscriptionStore implements Serializable {
     }
 
     public void acknowledge(DurableSubscription subscription, Message message) throws JMSException {
-        subscription.addAcknowledgedMessage(message);
-
         Session session = sessionFactory.openSession();
         Transaction transaction = null;
         try {
             transaction = session.beginTransaction();
 
-            session.saveOrUpdate(subscription);
+            session.save(new AcknowledgedMessage(subscription, requireMessageID(message)));
             transaction.commit();
 
         } catch (Exception e) {
@@ -51,8 +52,15 @@ public class DurableSubscriptionStore implements Serializable {
     public boolean acknowledged(DurableSubscription subscription, Message message) throws JMSException {
         Session session = sessionFactory.openSession();
         try {
-            session.refresh(subscription);
-            return subscription.isAcknowledged(message);
+            Query query = session.createQuery(
+                "select 1 from AcknowledgedMessage m "
+                + "where m.clientID = :clientID and m.name = :name and m.messageID = :messageID");
+
+            query.setString("clientID", subscription.getClientID());
+            query.setString("name", subscription.getName());
+            query.setString("messageID", requireMessageID(message));
+
+            return query.uniqueResult() != null;
 
         } catch (Exception e) {
             throw ExceptionHelper.wrap(e);
@@ -68,7 +76,14 @@ public class DurableSubscriptionStore implements Serializable {
         try {
             transaction = session.beginTransaction();
 
-            session.delete(subscription);
+            Query query = session.createQuery(
+                "delete from AcknowledgedMessage m "
+                + "where m.clientID = :clientID and m.name = :name");
+
+            query.setString("clientID", subscription.getClientID());
+            query.setString("name", subscription.getName());
+
+            query.executeUpdate();
             transaction.commit();
 
         } catch (Exception e) {
@@ -80,5 +95,15 @@ public class DurableSubscriptionStore implements Serializable {
         } finally {
             session.close();
         }
+    }
+
+    //
+
+    private static String requireMessageID(Message message) throws JMSException {
+        String messageID = message.getJMSMessageID();
+        if (Strings.isEmpty(messageID)) {
+            throw new JMSException("Message ID is required for durable subscriptions!");
+        }
+        return messageID;
     }
 }
