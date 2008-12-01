@@ -5,8 +5,13 @@
 package org.opendds.jms.persistence;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.jms.JMSException;
+import javax.jms.Message;
+
+import org.opendds.jms.common.lang.Strings;
 
 /**
  * @author  Steven Stallion
@@ -17,7 +22,7 @@ public class DurableSubscription implements Serializable {
     private String clientId;
     private String name;
 
-    private List<String> messages;
+    private Set<String> acknowledgedIds;
 
     public long getId() {
         return id;
@@ -43,14 +48,41 @@ public class DurableSubscription implements Serializable {
         this.name = name;
     }
 
-    public List<String> getMessages() {
-        if (messages == null) {
-            messages = new ArrayList<String>();
-        }
-        return messages;
+    public boolean isAcknowledged(Message message) {
+        return acknowledgedIds.contains(requireMessageID(message));
     }
 
-    public void setMessages(List<String> messages) {
-        this.messages = messages;
+    public Set<String> getAcknowledgedIds() {
+        if (acknowledgedIds == null) {
+            acknowledgedIds = new HashSet<String>();
+        }
+        return acknowledgedIds;
+    }
+
+    public void addAcknowledgedId(String acknowlegedId) {
+        getAcknowledgedIds().add(acknowlegedId);
+    }
+
+    public void setAcknowledgedIds(Set<String> acknowledgedIds) {
+        this.acknowledgedIds = acknowledgedIds;
+    }
+
+    public void addAcknowledgedMessage(Message message) {
+        addAcknowledgedId(requireMessageID(message));
+    }
+
+    //
+
+    private static String requireMessageID(Message message) {
+        try {
+            String messageId = message.getJMSMessageID();
+            if (Strings.isEmpty(messageId)) {
+                throw new IllegalArgumentException("Message ID is a required header field!");
+            }
+            return messageId;
+
+        } catch (JMSException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }

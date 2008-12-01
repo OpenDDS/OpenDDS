@@ -5,7 +5,6 @@
 package org.opendds.jms.persistence;
 
 import java.io.Serializable;
-import java.util.List;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -15,7 +14,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
 import org.opendds.jms.common.ExceptionHelper;
-import org.opendds.jms.common.lang.Strings;
 
 /**
  * @author  Steven Stallion
@@ -29,13 +27,7 @@ public class DurableSubscriptionStore implements Serializable {
     }
 
     public void acknowledge(DurableSubscription subscription, Message message) throws JMSException {
-        String messageId = message.getJMSMessageID();
-        if (Strings.isEmpty(messageId)) {
-            throw new JMSException("Unable to persist message without Message ID!");
-        }
-
-        List<String> messages = subscription.getMessages();
-        messages.add(messageId);
+        subscription.addAcknowledgedMessage(message);
 
         Session session = sessionFactory.openSession();
         Transaction transaction = null;
@@ -60,9 +52,7 @@ public class DurableSubscriptionStore implements Serializable {
         Session session = sessionFactory.openSession();
         try {
             session.refresh(subscription);
-
-            List<String> messages = subscription.getMessages();
-            return messages.contains(message.getJMSMessageID());
+            return subscription.isAcknowledged(message);
 
         } catch (Exception e) {
             throw ExceptionHelper.wrap(e);
