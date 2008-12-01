@@ -8,7 +8,7 @@
 #include "dcps_export.h"
 #include "EntityImpl.h"
 #include "dds/DdsDcpsTopicC.h"
-#include "dds/DdsDcpsSubscriptionS.h"
+#include "dds/DdsDcpsDataReaderExS.h"
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsTopicC.h"
 #include "dds/DdsDcpsDataReaderRemoteC.h"
@@ -119,7 +119,7 @@ namespace OpenDDS
     *
     */
     class OpenDDS_Dcps_Export DataReaderImpl
-      : public virtual DDS::DataReader,
+      : public virtual LocalObject< DataReaderEx>,
         public virtual EntityImpl,
         public virtual TransportReceiveListener,
         public virtual ACE_Event_Handler
@@ -326,6 +326,34 @@ namespace OpenDDS
           CORBA::SystemException
         ));
 
+      virtual void get_latency_stats (
+          ::OpenDDS::DCPS::LatencyStatisticsSeq & stats
+        )
+        ACE_THROW_SPEC ((
+          ::CORBA::SystemException
+        ));
+
+      virtual void reset_latency_stats (
+          void
+        )
+        ACE_THROW_SPEC ((
+          ::CORBA::SystemException
+        ));
+
+      virtual ::CORBA::Boolean statistics_enabled (
+          void
+        )
+        ACE_THROW_SPEC ((
+          ::CORBA::SystemException
+        ));
+
+      virtual void statistics_enabled (
+          ::CORBA::Boolean statistics_enabled
+        )
+        ACE_THROW_SPEC ((
+          ::CORBA::SystemException
+        ));
+
       /// update liveliness info for this writer.
       void writer_activity(PublicationId writer_id);
 
@@ -349,13 +377,6 @@ namespace OpenDDS
 
       void process_latency( const ReceivedDataSample& sample);
       void notify_latency( PublicationId writer);
-
-      /// @TODO: Hoist these statistics methods up to the extended IDL
-      ///        OpenDDS::DCPS::DataReader implementation.
-      void get_latency_stats( LatencyStatisticsSeq& stats) const;
-      void reset_latency_stats();
-      void statistics_enabled( bool value); // as an IDL attribute
-      bool statistics_enabled() const;      // as an IDL attribute
 
       CORBA::Long get_depth() const { return depth_; }
       size_t get_n_chunks() const { return n_chunks_; }

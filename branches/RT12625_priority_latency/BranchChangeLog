@@ -1,3 +1,73 @@
+Mon Dec  1 23:22:00 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+
+          Implement setting of the DiffServ codepoint value with a mapped
+          version of the TRANSPORT_PRIORITY QoS policy value.
+
+        * dds/DdsDcpsDataReaderEx.idl:
+        * dds/DdsDcpsSubscription.idl:
+
+          Moved OpenDDS specific interfaces out to there own file.
+          Extended the DataReader interface to include the statistics
+          methods for obtaining results from latency calculations.
+
+        * dds/DdsDcps.mpc:
+
+          Added the new IDL file with the DataReader extensions.
+
+        * bin/DCPS/IDLTemplate.pm:
+
+          Type specific DataReader now inheirits from the OpenDDS extended
+          DataReaderEx.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.inl:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Hoist the statistics method implementations into the IDL.
+
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/FailoverListener.h:
+
+          Include the new extended DataReader interface file.
+
+        * DevGuideExamples/DCPS/Messenger/DataReaderListener.h:
+        * DevGuideExamples/DCPS/Messenger/StackDataReaderListener.h:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/DataReaderListener.h:
+        * examples/DCPS/Messenger_IOGR_Imr/DataReaderListener.h:
+        * examples/DCPS/Messenger_Imr/DataReaderListener.h:
+        * performance-tests/DCPS/InfoRepo_population/DataReaderListener.h:
+        * performance-tests/DCPS/McastListenerTest/DataReaderListener.h:
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.h:
+        * performance-tests/DCPS/TCPProfilingTest/DataReaderListener.h:
+        * performance-tests/DCPS/TransportLatency/DataReaderListener.h:
+        * performance-tests/DCPS/UDPListenerTest/DataReaderListener.h:
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.h:
+        * tests/DCPS/CompatibilityTest/DataReaderListener.h:
+        * tests/DCPS/CorbaSeq/DataReaderListener.h:
+        * tests/DCPS/Deadline/DataReaderListener.h:
+        * tests/DCPS/Federation/DataReaderListener.h:
+        * tests/DCPS/FooTest4_0/DataReaderListener.h:
+        * tests/DCPS/FooTest5/DataReaderListener.h:
+        * tests/DCPS/Lifespan/DataReaderListener.h:
+        * tests/DCPS/LivelinessTest/DataReaderListener.h:
+        * tests/DCPS/LivelinessTimeout/DataReaderListenerImpl.h:
+        * tests/DCPS/MultiDPTest/DataReaderListener.h:
+        * tests/DCPS/MultiTopicTest/DataReaderListener.h:
+        * tests/DCPS/NotifyTest/DataReaderListener.h:
+        * tests/DCPS/Partition/DataReaderListener.h:
+        * tests/DCPS/PersistentDurability/DataReaderListener.h:
+        * tests/DCPS/Priority/DataReaderListener.h:
+        * tests/DCPS/Prst_delayed_subscriber/DataReaderListener.h:
+        * tests/DCPS/Reconnect/DataReaderListener.h:
+        * tests/DCPS/SetQosDeadline/DataReaderListener.h:
+        * tests/DCPS/SetQosPartition/DataReaderListener.h:
+        * tests/DCPS/StringKey/DataReaderListener.h:
+        * tests/DCPS/TransientDurability/DataReaderListener.h:
+        * tests/DCPS/TransientLocalTest/DataReaderListener.h:
+
 Wed Nov 26 19:22:11 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:

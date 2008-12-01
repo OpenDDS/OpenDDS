@@ -5,7 +5,7 @@
 #define DATAREADER_LISTENER_IMPL
 
 #include "ace/Synch.h"
-#include "dds/DdsDcpsSubscriptionS.h"
+#include "dds/DdsDcpsDataReaderExS.h"
 #include "TestStats.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
