@@ -8,7 +8,7 @@
 #include "Definitions.h"
 #include "TopicImpl.h"
 #include "dds/DdsDcpsPublicationC.h"
-#include "dds/DdsDcpsSubscriptionC.h"
+#include "dds/DdsDcpsDataReaderExC.h"
 #include "dds/DdsDcpsTopicC.h"
 #include "dds/DdsDcpsDomainS.h"
 #include "dds/DdsDcpsInfoC.h"

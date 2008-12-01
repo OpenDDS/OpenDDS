@@ -1809,7 +1809,11 @@ void DataReaderImpl::notify_latency( PublicationId writer)
   }
 }
 
-void DataReaderImpl::get_latency_stats( LatencyStatisticsSeq& stats) const
+void
+DataReaderImpl::get_latency_stats (
+  ::OpenDDS::DCPS::LatencyStatisticsSeq & stats
+)
+ACE_THROW_SPEC (( ::CORBA::SystemException))
 {
   stats.length( this->writers_.size());
   int index = 0;
@@ -1820,13 +1824,31 @@ void DataReaderImpl::get_latency_stats( LatencyStatisticsSeq& stats) const
   }
 }
 
-void DataReaderImpl::reset_latency_stats()
+void
+DataReaderImpl::reset_latency_stats ( void)
+ACE_THROW_SPEC (( ::CORBA::SystemException))
 {
   for( WriterMapType::iterator current = this->writers_.begin();
        current != this->writers_.end();
        ++current) {
     current->second.reset_stats();
   }
+}
+
+::CORBA::Boolean
+DataReaderImpl::statistics_enabled ( void)
+ACE_THROW_SPEC (( ::CORBA::SystemException))
+{
+  return this->statistics_enabled_;
+}
+
+void
+DataReaderImpl::statistics_enabled (
+  ::CORBA::Boolean statistics_enabled
+)
+ACE_THROW_SPEC (( ::CORBA::SystemException))
+{
+  this->statistics_enabled_ = statistics_enabled;
 }
 
 SubscriptionInstance*

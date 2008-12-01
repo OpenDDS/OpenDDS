@@ -4,7 +4,7 @@
 #ifndef DATAREADER_LISTENER_IMPL
 #define DATAREADER_LISTENER_IMPL
 
-#include "dds/DdsDcpsSubscriptionS.h"
+#include "dds/DdsDcpsDataReaderExS.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
