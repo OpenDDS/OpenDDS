@@ -18,7 +18,7 @@
         <property name="clientID" column="CLIENT_ID"/>
         <property name="name" column="NAME"/>
 
-        <set name="messages" table="ACKNOWLEDGED_MESSAGE">
+        <set name="acknowledgedIds" table="ACKNOWLEDGED_MESSAGE">
             <key column="ID"/>
             <element type="string" column="MESSAGE_ID"/>            
         </set>
