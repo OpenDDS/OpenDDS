@@ -59,6 +59,9 @@ namespace OpenDDS
       void teardown();
 
       /// Access the underlying socket.
+      /// N.B. This is valid only after being configure()ed.  If called
+      ///      prior, then a reference to an empty static ACE_SOCK_IO
+      ///      object will be returned.
       ACE_SOCK& socket();
 
     protected:

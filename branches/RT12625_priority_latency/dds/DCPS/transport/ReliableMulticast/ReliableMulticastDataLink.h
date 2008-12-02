@@ -41,6 +41,9 @@ namespace OpenDDS
       OpenDDS::DCPS::ReliableMulticastTransportImpl_rch& get_transport_impl();
 
       /// Access the underlying socket.
+      /// N.B. This is valid only for the publication end DataLink
+      ///      objects.  This transport distinguishes the endpoint role
+      ///      of individual DataLink objects.
       ACE_SOCK& socket();
 
     protected:
