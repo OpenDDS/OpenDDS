@@ -38,14 +38,18 @@ import org.opendds.jms.resource.ManagedConnectionImpl;
 public class ConnectionImpl implements Connection {
     private Logger logger;
 
+    private boolean closed;
+    private boolean started;
     private ManagedConnectionImpl connection;
     private DomainParticipant participant;
     private PublisherManager publishers;
     private SubscriberManager subscribers;
     private String clientID;
     private PersistenceManager persistenceManager;
-    private boolean closed;
-    private ExceptionListener listener;
+    private ExceptionListener exceptionListener;
+
+    private List<ConnectionStateListener> stateListeners =
+        new ArrayList<ConnectionStateListener>();
 
     private List<Session> sessions =
         new ArrayList<Session>();
@@ -138,11 +142,18 @@ public class ConnectionImpl implements Connection {
     }
 
     public ExceptionListener getExceptionListener() {
-        return listener;
+        return exceptionListener;
     }
 
     public void setExceptionListener(ExceptionListener listener) {
-        this.listener = listener;
+        this.exceptionListener = listener;
+    }
+
+    protected JMSException notifyExceptionListener(JMSException e) {
+        if (exceptionListener != null) {
+            exceptionListener.onException(e);
+        }
+        return e;
     }
 
     public ConnectionConsumer createConnectionConsumer(Destination destination,
@@ -188,12 +199,6 @@ public class ConnectionImpl implements Connection {
         }
     }
 
-    public synchronized void start() throws JMSException {
-    }
-
-    public synchronized void stop() throws JMSException {
-    }
-
     public boolean isClosed() {
         return closed;
     }
@@ -237,6 +242,70 @@ public class ConnectionImpl implements Connection {
         }
     }
 
+    public void addStateListener(ConnectionStateListener stateListener) {
+        synchronized (stateListeners) {
+            // notify listener of current state
+            if (isStarted()) {
+                notifyConnectionStarted(stateListener);
+            } else {
+                notifyConnectionStopped(stateListener);
+            }
+            stateListeners.add(stateListener);
+        }
+    }
+
+    public void removeStateListener(ConnectionStateListener stateListener) {
+        synchronized (stateListeners) {
+            stateListeners.remove(stateListener);
+        }
+    }
+
+    public boolean isStarted() {
+        return started;
+    }
+
+    public synchronized void start() throws JMSException {
+        if (isStarted()) {
+            return; // ignore
+        }
+
+        notifyStateListeners(ConnectionStateEvent.CONNECTION_STARTED);
+        started = true;
+    }
+
+    public synchronized void stop() throws JMSException {
+        if (!isStarted()) {
+            return; // ignore
+        }
+
+        notifyStateListeners(ConnectionStateEvent.CONNECTION_STOPPED);
+        started = false;
+    }
+
+    protected void notifyStateListeners(int eventId) {
+        synchronized (stateListeners) {
+            for (ConnectionStateListener stateListener : stateListeners) {
+                switch (eventId) {
+                    case ConnectionStateEvent.CONNECTION_STARTED:
+                        notifyConnectionStarted(stateListener);
+                        break;
+
+                    case ConnectionStateEvent.CONNECTION_STOPPED:
+                        notifyConnectionStopped(stateListener);
+                        break;
+                }
+            }
+        }
+    }
+
+    protected void notifyConnectionStarted(ConnectionStateListener stateListener) {
+        stateListener.connectionStarted(new ConnectionStateEvent(this, ConnectionStateEvent.CONNECTION_STARTED));
+    }
+
+    protected void notifyConnectionStopped(ConnectionStateListener stateListener) {
+        stateListener.connectionStarted(new ConnectionStateEvent(this, ConnectionStateEvent.CONNECTION_STOPPED));
+    }
+
     public ConnectionMetaData getMetaData() {
         return new ConnectionMetaData() {
             private Version version = Version.getInstance();
@@ -273,12 +342,5 @@ public class ConnectionImpl implements Connection {
                 return Collections.enumeration(Collections.emptyList()); // not implemented
             }
         };
-    }
-
-    protected JMSException notifyExceptionListener(JMSException e) {
-        if (listener != null) {
-            listener.onException(e);
-        }
-        return e;
     }
 }

@@ -1,3 +1,18 @@
+Tue Dec  2 20:49:25 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/src/org/opendds/jms/ConnectionImpl.java:
+        * java/jms/src/org/opendds/jms/ConnectionStateEvent.java:
+        * java/jms/src/org/opendds/jms/ConnectionStateListener.java:
+        * java/jms/src/org/opendds/jms/ConsumerDataReaderListener.java:
+        * java/jms/src/org/opendds/jms/MessageConsumerImpl.java:
+        * java/jms/src/org/opendds/jms/MessageDeliveryExecutor.java:
+        * java/jms/src/org/opendds/jms/MessageDeliveryHelper.java:
+        * java/jms/src/org/opendds/jms/SessionImpl.java:
+        * java/jms/src/org/opendds/jms/management/DynamicAttributes.java:
+
+          Added start() and stop() to ConnectionImpl. Fixed bad assertion
+          in DynamicAttributes.
+
 Tue Dec  2 19:23:50 UTC 2008  Weiqi Gao  <gaow@ociweb.com>
 
         * java/OpenDDS.ipr:

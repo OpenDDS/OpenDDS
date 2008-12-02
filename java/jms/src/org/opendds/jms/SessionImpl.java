@@ -9,9 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Executor;
 
 import javax.jms.BytesMessage;
 import javax.jms.Destination;
@@ -58,7 +56,7 @@ public class SessionImpl implements Session {
     // JMS 1.1, 4.4.1, Created consumers, need to close them when the session is closed
     private List<MessageConsumer> createdConsumers;
     // JMS 1.1, 4.4.14, Asynchronous Message delivery thread
-    private ExecutorService messageDeliveryExecutorService;
+    private MessageDeliveryExecutor executor;
     // JMS 1.1, 4.4.11, The sessions view of unacknowledged Messages, used in recover()
     private Map<MessageConsumerImpl, List<DataReaderHandlePair>> unacknowledged;
     private final Object lockForUnacknowledged;
@@ -82,7 +80,7 @@ public class SessionImpl implements Session {
 
         this.createdProducers = new ArrayList<MessageProducer>();
         this.createdConsumers = new ArrayList<MessageConsumer>();
-        this.messageDeliveryExecutorService = Executors.newSingleThreadExecutor();
+        this.executor = new MessageDeliveryExecutor(owningConnection);
         this.unacknowledged = new HashMap<MessageConsumerImpl, List<DataReaderHandlePair>>();
         this.lockForUnacknowledged = new Object();
     }
@@ -274,13 +272,7 @@ public class SessionImpl implements Session {
         if (closed) return;
         for (MessageProducer producer: createdProducers) producer.close();
         for (MessageConsumer consumer: createdConsumers) consumer.close();
-        messageDeliveryExecutorService.shutdown();
-        try {
-            messageDeliveryExecutorService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            // restore interrupted status
-            Thread.currentThread().interrupt();
-        }
+        executor.shutdown();
         this.closed = true;
     }
 
@@ -288,8 +280,8 @@ public class SessionImpl implements Session {
         if (closed) throw new IllegalStateException("This Session is closed.");
     }
 
-    ExecutorService getMessageDeliveryExecutorService() {
-        return messageDeliveryExecutorService;
+    Executor getMessageDeliveryExecutor() {
+        return executor;
     }
 
     void doAcknowledge() {

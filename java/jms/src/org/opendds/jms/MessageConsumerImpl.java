@@ -5,6 +5,9 @@
 package org.opendds.jms;
 
 import java.util.List;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.jms.Destination;
 import javax.jms.JMSException;
@@ -14,8 +17,6 @@ import javax.jms.MessageListener;
 import javax.jms.Session;
 
 import DDS.ALIVE_INSTANCE_STATE;
-import DDS.Condition;
-import DDS.ConditionSeqHolder;
 import DDS.DATAREADER_QOS_DEFAULT;
 import DDS.DATA_AVAILABLE_STATUS;
 import DDS.DURATION_INFINITY_NSEC;
@@ -50,6 +51,7 @@ import org.opendds.jms.common.lang.Strings;
  * @version $Revision$
  */
 public class MessageConsumerImpl implements MessageConsumer {
+    private ConnectionImpl connection;
     private Destination destination;
     private String messageSelector;
     private MessageListener messageListener;
@@ -66,16 +68,24 @@ public class MessageConsumerImpl implements MessageConsumer {
     private SessionImpl sessionImpl;
     private List<DataReaderHandlePair> toBeRecovered;
 
+    private MessageDeliveryHelper helper;
+
+    private Lock lock = new ReentrantLock();
+
+    private boolean idle;
+    private Condition idleCondition = lock.newCondition();
+
+    private boolean started;
+    private Condition startedCondition = lock.newCondition();
+
     public MessageConsumerImpl(SessionImpl sessionImpl, Destination destination, String messageSelector, boolean noLocal) throws JMSException {
         this.sessionImpl = sessionImpl;
         this.destination = destination;
         this.messageSelector = messageSelector;
-
-        ConnectionImpl connection = sessionImpl.getOwningConnection();
+        this.connection = sessionImpl.getOwningConnection();
 
         if (noLocal) {
             subscriber = connection.getRemoteSubscriber();
-
         } else {
             subscriber = connection.getLocalSubscriber();
         }
@@ -88,6 +98,8 @@ public class MessageConsumerImpl implements MessageConsumer {
         this.waitSet.attach_condition(closeToken);
 
         this.toBeRecovered = null;
+
+        this.helper = new MessageDeliveryHelper(connection);
     }
 
     private MessagePayloadDataReader fromDestination(Destination destination, Subscriber subscriber) throws JMSException {
@@ -149,11 +161,25 @@ public class MessageConsumerImpl implements MessageConsumer {
     }
 
     private Message doRecoverOrReceive(Duration_t duration) throws JMSException {
-        if (toBeRecovered != null && !toBeRecovered.isEmpty()) {
-            return doRecoverSync();
-        } else {
-            return doReceive(duration);
+        Message message = null;
+
+        helper.lock();
+        try {
+            helper.awaitStart();
+            helper.notifyBusy();
+
+            if (toBeRecovered != null && !toBeRecovered.isEmpty()) {
+                message = doRecoverSync();
+            } else {
+                message = doReceive(duration);
+            }
+
+        } catch (InterruptedException e) {
+        } finally {
+            helper.notifyIdle();
+            lock.unlock();
         }
+        return message;
     }
 
     private Message doReceive(Duration_t duration) throws JMSException {
@@ -164,7 +190,7 @@ public class MessageConsumerImpl implements MessageConsumer {
             throw new JMSException("Cannot attach readCondition to OpenDDS WaitSet.");
         }
 
-        ConditionSeqHolder conditions = new ConditionSeqHolder(new Condition[0]);
+        DDS.ConditionSeqHolder conditions = new DDS.ConditionSeqHolder(new DDS.Condition[0]);
 
         while (true) {
             rc = waitSet.wait(conditions, duration);
@@ -179,7 +205,7 @@ public class MessageConsumerImpl implements MessageConsumer {
             }
 
             for (int i = 0; i < conditions.value.length; i++) {
-                final Condition innerCondition = conditions.value[i];
+                final DDS.Condition innerCondition = conditions.value[i];
                 if (innerCondition._is_equivalent(readCondition)) {
                     ReadCondition innerReadCondition = ReadConditionHelper.narrow(innerCondition);
                     MessagePayloadSeqHolder payloads = new MessagePayloadSeqHolder(new MessagePayload[0]);
@@ -216,6 +242,7 @@ public class MessageConsumerImpl implements MessageConsumer {
             closeToken.set_trigger_value(true);
             subscriber.delete_datareader(messagePayloadDataReader);
         }
+        helper.release();
         this.closed = true;
     }
 
@@ -245,7 +272,7 @@ public class MessageConsumerImpl implements MessageConsumer {
             SampleInfo sampleInfo = infos.value[0];
             AbstractMessageImpl message = buildMessageFromPayload(messagePayload, handle, sessionImpl);
             message.setJMSRedelivered(true);
-            sessionImpl.getMessageDeliveryExecutorService().execute(new MessageDispatcher(message, pair, this, sessionImpl));
+            sessionImpl.getMessageDeliveryExecutor().execute(new MessageDispatcher(message, pair, this, sessionImpl));
         }
     }
 
