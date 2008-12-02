@@ -19,6 +19,13 @@ OpenDDS::DCPS::SimpleMcastSocket::get_handle() const
   return this->socket_.get_handle();
 }
 
+ACE_INLINE
+ACE_SOCK&
+OpenDDS::DCPS::SimpleMcastSocket::socket()
+{
+  DBG_ENTRY_LVL("SimpleMcastSocket","socket",6);
+  return this->socket_;
+}
 
 ACE_INLINE int
 OpenDDS::DCPS::SimpleMcastSocket::open_socket (ACE_INET_Addr& local_address,

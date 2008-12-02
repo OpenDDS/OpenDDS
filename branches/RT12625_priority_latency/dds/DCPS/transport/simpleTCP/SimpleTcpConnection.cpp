@@ -338,57 +338,6 @@ OpenDDS::DCPS::SimpleTcpConnection::set_sock_options (SimpleTcpConfiguration* tc
 #endif /* !ACE_DEFAULT_MAX_SOCKET_BUFSIZ */
 }
 
-void
-OpenDDS::DCPS::SimpleTcpConnection::set_dscp_codepoint( int cp)
-{
-/**
- * The following IPV6 code was lifted in spirit from the RTCORBA
- * implementation of setting the DiffServ codepoint.
- */
-  int result = 0;
-#if defined (ACE_HAS_IPV6)
-  ACE_INET_Addr local_address;
-  if( this->peer().get_local_addr( local_address) == -1)
-  else if( local_address.get_type() == AF_INET6)
-#if !defined (IPV6_TCLASS)
-  {
-    if( DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: SimpleTcpConnection::set_dscp_codepoint() - ")
-        ACE_TEXT("IPV6 TCLASS not supported yet, not setting codepoint %d.\n"),
-        cp
-      ));
-    }
-    return;
-  }
-#else /* IPV6_TCLASS */
-    result = this->peer().set_option(
-                IPPROTO_IPV6,
-                IPV6_TCLASS,
-                &cp,
-                sizeof(cp)
-             );
-
-  else // This is a bit tricky and might be hard to follow...
-
-#endif /* IPV6_TCLASS */
-#endif /* ACE_HAS_IPV6 */
-    result = this->peer().set_option(
-                IPPROTO_IP,
-                IP_TOS,
-                &cp,
-                sizeof(cp)
-             );
-
-  if( (result == -1) && (errno != ENOTSUP)) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: SimpleTcpConnection::set_dscp_codepoint() - ")
-      ACE_TEXT("failed to set the codepoint to %d errno %m\n"),
-      cp
-    ));
-  }
-}
-
 int
 OpenDDS::DCPS::SimpleTcpConnection::active_establishment
                                     (const ACE_INET_Addr& remote_address,
@@ -431,7 +380,7 @@ OpenDDS::DCPS::SimpleTcpConnection::active_establishment
 
   // Set the DiffServ codepoint according to the priority value.
   DirectPriorityMapper mapper( this->priority_);
-  this->set_dscp_codepoint( mapper.codepoint());
+  this->link_->set_dscp_codepoint( mapper.codepoint(), this->peer());
 
   set_sock_options(tcp_config.in ());
 

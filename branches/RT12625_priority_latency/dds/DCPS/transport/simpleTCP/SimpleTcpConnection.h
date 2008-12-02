@@ -82,7 +82,6 @@ namespace OpenDDS
         virtual int handle_close(ACE_HANDLE, ACE_Reactor_Mask);
 
         void set_sock_options (SimpleTcpConfiguration* tcp_config);
-        void set_dscp_codepoint( int cp);
 
         int reconnect (bool on_new_association = false);
 

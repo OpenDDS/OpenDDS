@@ -32,6 +32,9 @@ namespace OpenDDS
 
         virtual ACE_HANDLE get_handle() const = 0;
 
+        /// Access the underlying socket.
+        virtual ACE_SOCK& socket() = 0;
+
         virtual int handle_input(ACE_HANDLE);
         virtual int handle_close(ACE_HANDLE, ACE_Reactor_Mask);
 

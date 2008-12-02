@@ -15,6 +15,8 @@
 #include "dds/DCPS/transport/framework/TransportSendStrategy.h"
 #include "ace/Auto_Ptr.h"
 
+class ACE_SOCK;
+
 namespace OpenDDS
 {
 
@@ -55,6 +57,9 @@ namespace OpenDDS
         );
 
       void teardown();
+
+      /// Access the underlying socket.
+      ACE_SOCK& socket();
 
     protected:
       virtual void stop_i();

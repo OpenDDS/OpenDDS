@@ -55,6 +55,12 @@ OpenDDS::DCPS::ReliableMulticast::detail::EventHandler::get_handle() const
   return socket_.get_handle();
 }
 
+ACE_SOCK&
+OpenDDS::DCPS::ReliableMulticast::detail::EventHandler::socket()
+{
+  return socket_;
+}
+
 int
 OpenDDS::DCPS::ReliableMulticast::detail::EventHandler::handle_input(
   ACE_HANDLE fd

@@ -11,6 +11,7 @@
 
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
+#include "dds/DCPS/transport/framework/DirectPriorityMapper.h"
 #include <vector>
 
 
@@ -88,7 +89,12 @@ OpenDDS::DCPS::SimpleUnreliableDgramTransport::find_or_create_datalink
       return 0;
     }
 
-  /// @TODO: The socket_ and send_strategy can be modified with priority
+  // Set the DiffServ codepoint according to the TRANSPORT_PRIORITY
+  // policy value.
+  DirectPriorityMapper mapping( priority);
+  link->set_dscp_codepoint( mapping.codepoint(), this->socket_->socket());
+
+  /// @TODO: The send_strategy can be modified with priority
   ///        information at this point.
 
   TransportSendStrategy_rch send_strategy 
