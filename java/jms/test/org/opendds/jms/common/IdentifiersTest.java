@@ -1,9 +1,17 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms.common;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
+/**
+ * @author  Weiqi Gao
+ * @version $Revision$
+ */
 public class IdentifiersTest {
     @Test
     public void testIsValidIdentifier() {

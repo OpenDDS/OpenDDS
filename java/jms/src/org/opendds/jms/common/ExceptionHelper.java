@@ -1,5 +1,5 @@
 /*
- * $
+ * $Id$
  */
 
 package org.opendds.jms.common;
@@ -15,6 +15,8 @@ import org.opendds.jms.resource.ManagedConnectionImpl;
 public class ExceptionHelper {
 
     public static JMSException notify(ManagedConnectionImpl connection, Exception cause) {
+        assert connection != null;
+
         connection.notifyError(cause);
 
         if (cause instanceof JMSException) {

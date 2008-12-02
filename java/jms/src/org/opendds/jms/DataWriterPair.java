@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms;
 
 import javax.jms.DeliveryMode;
@@ -15,7 +19,8 @@ import OpenDDS.JMS.MessagePayloadDataWriter;
 import OpenDDS.JMS.MessagePayloadDataWriterHelper;
 
 /**
- *
+ * @author  Weiqi Gao
+ * @version $Revision$
  */
 public class DataWriterPair {
     private MessagePayloadDataWriter persistentDW;

@@ -20,6 +20,8 @@ public class AcknowledgedMessage implements Serializable {
     public AcknowledgedMessage() {}
 
     public AcknowledgedMessage(DurableSubscription subscription, String messageID) {
+        assert subscription != null;
+        
         this.clientID = subscription.getClientID();
         this.name = subscription.getName();
         this.messageID = messageID;

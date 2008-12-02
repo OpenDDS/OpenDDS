@@ -38,9 +38,9 @@ public abstract class DynamicMBeanSupport implements DynamicMBean, MBeanRegistra
     protected ObjectName name;
     protected Boolean registrationDone;
 
-    protected DynamicMBeanMetaData metadata = new DynamicMBeanMetaData(this);
     protected DynamicAttributes attributes = new DynamicAttributes();
-    
+    protected DynamicMBeanMetaData metadata = new DynamicMBeanMetaData(this);
+
     private Logger logger = Logger.getLogger(getClass());
 
     public ObjectName preRegister(MBeanServer server, ObjectName name) throws Exception {
@@ -104,6 +104,8 @@ public abstract class DynamicMBeanSupport implements DynamicMBean, MBeanRegistra
     public void setAttribute(Attribute attribute)
         throws AttributeNotFoundException, InvalidAttributeValueException, MBeanException, ReflectionException {
 
+        assert attribute != null;
+
         String name = attribute.getName();
 
         DynamicMBeanMetaData.AttributeModel model = metadata.getAttribute(name);
@@ -125,6 +127,8 @@ public abstract class DynamicMBeanSupport implements DynamicMBean, MBeanRegistra
     }
 
     public AttributeList getAttributes(String[] attributes) {
+        assert attributes != null;
+
         AttributeList list = new AttributeList();
 
         for (String attribute : attributes) {
@@ -140,6 +144,8 @@ public abstract class DynamicMBeanSupport implements DynamicMBean, MBeanRegistra
     }
 
     public AttributeList setAttributes(AttributeList attributes) {
+        assert attributes != null;
+
         AttributeList list = new AttributeList();
 
         Iterator itr = attributes.iterator();

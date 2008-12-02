@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms;
 
 import OpenDDS.JMS.MessageBodyKind;
@@ -5,6 +9,10 @@ import OpenDDS.JMS.MessagePayload;
 
 import static org.opendds.jms.common.EnumComparator.compare;
 
+/**
+ * @author  Weiqi Gao
+ * @version $Revision$
+ */
 public class ConsumerMessageFactory {
     /**
      * Creates the appropriate Message object from the underlying DDS MessagePayload.  This method is called

@@ -29,8 +29,9 @@ public class ParticipantQosPolicy implements QosPolicy<DomainParticipantQos> {
     }
 
     public void setQos(DomainParticipantQos qos) {
+        assert qos != null;
+        
         PropertiesHelper.Property property;
-
         PropertiesHelper helper = new PropertiesHelper(properties);
 
         // USER_DATA QosPolicy

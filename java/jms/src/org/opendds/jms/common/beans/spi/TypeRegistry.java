@@ -31,6 +31,8 @@ public class TypeRegistry extends ServiceRegistry<Type> {
     }
 
     public Type findType(Class clazz) {
+        assert clazz != null;
+
         return types.get(clazz);
     }
 }

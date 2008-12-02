@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms.common;
 
 import javax.jms.MessageFormatException;
@@ -8,7 +12,8 @@ import OpenDDS.JMS.PropertyValueKind;
 import static org.opendds.jms.common.EnumComparator.compare;
 
 /**
- * JMS 1.1, 3.5.4
+ * @author  Weiqi Gao
+ * @version $Revision$
  */
 public class PropertyValueConversion {
     public static boolean convertToBoolean(PropertyValue propertyValue) throws MessageFormatException {

@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms;
 
 import java.io.Serializable;
@@ -11,6 +15,10 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import org.junit.Test;
 
+/**
+ * @author  Weiqi Gao
+ * @version $Revision$
+ */
 public class ObjectMessageImplTest {
     @Test
     public void testNewlyCreatedObjectMessage() throws JMSException {

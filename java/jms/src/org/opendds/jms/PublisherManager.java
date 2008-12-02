@@ -35,10 +35,12 @@ public class PublisherManager {
     private TransportManager transportManager;
 
     public PublisherManager(ManagedConnectionImpl connection) throws ResourceException {
+        assert connection != null;
+
         this.connection = connection;
         this.cxRequestInfo = connection.getConnectionRequestInfo();
 
-        transportManager = new TransportManager(cxRequestInfo.getPublisherTransport());
+        this.transportManager = new TransportManager(cxRequestInfo.getPublisherTransport());
     }
 
     protected Publisher createPublisher() throws JMSException {

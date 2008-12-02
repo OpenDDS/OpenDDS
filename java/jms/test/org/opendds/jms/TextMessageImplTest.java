@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms;
 
 import javax.jms.JMSException;
@@ -9,6 +13,10 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import org.junit.Test;
 
+/**
+ * @author  Weiqi Gao
+ * @version $Revision$
+ */
 public class TextMessageImplTest {
     @Test
     public void testNewlyCreatedTextMessage() throws JMSException {

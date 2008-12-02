@@ -1,7 +1,12 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms;
 
 import DDS.ALIVE_INSTANCE_STATE;
 import DDS.DataReader;
+import DDS.LENGTH_UNLIMITED;
 import DDS.LivelinessChangedStatus;
 import DDS.NEW_VIEW_STATE;
 import DDS.NOT_READ_SAMPLE_STATE;
@@ -15,7 +20,6 @@ import DDS.SampleLostStatus;
 import DDS.SampleRejectedStatus;
 import DDS.SubscriptionMatchStatus;
 import DDS._DataReaderListenerLocalBase;
-import DDS.LENGTH_UNLIMITED;
 import OpenDDS.JMS.MessagePayload;
 import OpenDDS.JMS.MessagePayloadDataReader;
 import OpenDDS.JMS.MessagePayloadDataReaderHelper;
@@ -23,6 +27,10 @@ import OpenDDS.JMS.MessagePayloadSeqHolder;
 
 import static org.opendds.jms.ConsumerMessageFactory.buildMessageFromPayload;
 
+/**
+ * @author  Weiqi Gao
+ * @version $Revision$
+ */
 public class ConsumerDataReaderListener extends _DataReaderListenerLocalBase {
     private MessageConsumerImpl consumer;
     private SessionImpl sessionImpl;

@@ -1,21 +1,25 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.jms.Destination;
 import javax.jms.InvalidDestinationException;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
+import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
 import javax.jms.ObjectMessage;
 import javax.jms.Session;
 import javax.jms.TemporaryTopic;
 import javax.jms.TextMessage;
-import javax.jms.MessageListener;
-import javax.security.auth.Subject;
 import javax.resource.ResourceException;
+import javax.security.auth.Subject;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -39,10 +43,13 @@ import OpenDDS.DCPS.transport.TheTransportFactory;
 import OpenDDS.DCPS.transport.TransportImpl;
 import OpenDDS.JMS.MessagePayloadTypeSupportImpl;
 
-import org.opendds.jms.TopicImpl;
-import org.opendds.jms.resource.ManagedConnectionImpl;
 import org.opendds.jms.resource.ConnectionRequestInfoImpl;
+import org.opendds.jms.resource.ManagedConnectionImpl;
 
+/**
+ * @author  Weiqi Gao
+ * @version $Revision$
+ */
 public class SessionImplTest {
 
     @Test

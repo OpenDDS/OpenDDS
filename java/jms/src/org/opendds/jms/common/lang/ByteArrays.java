@@ -1,5 +1,13 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms.common.lang;
 
+/**
+ * @author  Weiqi Gao
+ * @version $Revision$
+ */
 public class ByteArrays {
     public static byte[] extractSubBytes(byte[] bytes, int i, int i1) {
         byte[] subBytes = new byte[i1];

@@ -23,6 +23,8 @@ public class Transports {
     }
 
     public static Logger getLogger(TransportConfiguration configuration) {
+        assert configuration != null;
+        
         return Logger.getLogger(configuration.getType(), configuration.getId());
     }
 

@@ -1,11 +1,18 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms;
 
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 /**
  * Some common code to all the tests.
+ *
+ * @author  Weiqi Gao
+ * @version $Revision$
  */
 public class TestUtils {
     static boolean runWithInfoRepo() {

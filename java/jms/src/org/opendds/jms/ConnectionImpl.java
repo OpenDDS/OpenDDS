@@ -53,17 +53,19 @@ public class ConnectionImpl implements Connection {
         new ArrayList<TemporaryTopic>();
 
     public ConnectionImpl(ManagedConnectionImpl connection) {
+        assert connection != null;
+
         this.connection = connection;
 
-        logger = connection.getLogger();
-        participant = connection.getParticipant();
-        publishers = connection.getPublishers();
-        subscribers = connection.getSubscribers();
+        this.logger = connection.getLogger();
+        this.participant = connection.getParticipant();
+        this.publishers = connection.getPublishers();
+        this.subscribers = connection.getSubscribers();
 
         ConnectionRequestInfoImpl cxRequestInfo = connection.getConnectionRequestInfo();
-        clientID = cxRequestInfo.getClientID();
+        this.clientID = cxRequestInfo.getClientID();
 
-        persistenceManager = cxRequestInfo.getPersistenceManager();
+        this.persistenceManager = cxRequestInfo.getPersistenceManager();
         if (persistenceManager == null) {
             logger.warn("PersistenceManager not bound; durable subscriptions are unavailable");
         }

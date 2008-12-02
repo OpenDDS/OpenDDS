@@ -45,7 +45,7 @@ import OpenDDS.JMS.MessagePayloadDataReader;
 import OpenDDS.JMS.MessagePayloadSeqHolder;
 
 /**
- * @author  Steven Stallion
+ * @author  Weiqi Gao
  * @version $Revision$
  */
 public class SessionImpl implements Session {

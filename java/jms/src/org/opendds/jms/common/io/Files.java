@@ -52,7 +52,7 @@ public class Files {
 
     public static File verifyDirectory(String dirName) throws IOException {
         assert dirName != null;
-        
+
         File dir = new File(dirName);
 
         if (!dir.exists()) {
@@ -90,6 +90,8 @@ public class Files {
     }
 
     public static String addLibraryPath(File directory) {
+        assert directory != null;
+        
         return addLibraryPath(directory.getAbsolutePath());
     }
 

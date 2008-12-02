@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms.common;
 
 import javax.jms.MessageFormatException;
@@ -8,7 +12,8 @@ import OpenDDS.JMS.StreamItem;
 import static org.opendds.jms.common.EnumComparator.compare;
 
 /**
- * JMS 1.1, 3.11.3
+ * @author  Weiqi Gao
+ * @version $Revision$
  */
 public class StreamItemConversion {
     public static boolean convertToBoolean(StreamItem item) throws MessageFormatException {

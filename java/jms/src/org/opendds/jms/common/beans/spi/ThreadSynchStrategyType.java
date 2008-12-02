@@ -23,6 +23,8 @@ public class ThreadSynchStrategyType implements Type<ThreadSynchStrategy> {
     }
 
     public ThreadSynchStrategy valueOf(Object o) {
+        assert o != null;
+        
         if (o instanceof Number) {
             return ThreadSynchStrategy.values()[((Number) o).intValue()];
 

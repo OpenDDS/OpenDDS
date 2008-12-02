@@ -1,10 +1,19 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms.common;
 
 import OpenDDS.JMS.ItemKind;
 import OpenDDS.JMS.MessageBodyKind;
 import OpenDDS.JMS.PropertyValueKind;
 
+/**
+ * @author  Weiqi Gao
+ * @version $Revision$
+ */
 public class EnumComparator {
+
     public static boolean compare(MessageBodyKind lhs, MessageBodyKind rhs) {
         return lhs.value() == rhs.value();
     }
@@ -16,5 +25,4 @@ public class EnumComparator {
     public static boolean compare(ItemKind lhs, ItemKind rhs) {
         return lhs.value() == rhs.value();
     }
-
 }

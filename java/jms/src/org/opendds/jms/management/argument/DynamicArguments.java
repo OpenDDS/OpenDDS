@@ -28,10 +28,14 @@ public class DynamicArguments {
         new ArrayList<DynamicArgumentProvider>();
 
     public DynamicArguments(DynamicMBeanSupport instance) {
+        assert instance != null;
+
         this.instance = instance;
     }
 
     public void register(DynamicArgumentProvider provider) {
+        assert provider != null;
+
         provider.setInstance(instance);
         provider.registerAttributes();
 
@@ -59,19 +63,19 @@ public class DynamicArguments {
 
     @Override
     public String toString() {
-        StringBuffer sbuf = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         try {
             Iterator<String> itr = asList().iterator();
             while (itr.hasNext()) {
-                sbuf.append(itr.next());
+                sb.append(itr.next());
                 if (itr.hasNext()) {
-                    sbuf.append(' ');
+                    sb.append(' ');
                 }
             }
 
         } catch (Exception e) {
             logger.error("Unexpected problem rendering toString(): %s", e.getMessage(), e);
         }
-        return sbuf.toString();
+        return sb.toString();
     }
 }

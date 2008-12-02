@@ -21,6 +21,8 @@ public class IntegerType implements Type<Integer> {
     }
 
     public Integer valueOf(Object o) {
+        assert o != null;
+        
         if (o instanceof Boolean) {
             return ((Boolean) o) ? 1 : 0;
 

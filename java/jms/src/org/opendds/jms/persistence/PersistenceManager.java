@@ -15,18 +15,17 @@ import org.hibernate.cfg.Configuration;
  * @version $Revision$
  */
 public class PersistenceManager implements Serializable {
-    private SessionFactory sessionFactory;
     private DurableSubscriptionStore durableSubscriptionStore;
 
     public PersistenceManager(Properties properties) {
         Configuration cfg = new Configuration();
-        cfg.setProperties(properties);
 
         for (Class persistentClass : getPersistentClasses()) {
             cfg.addClass(persistentClass);
         }
+        cfg.setProperties(properties);
 
-        sessionFactory = cfg.buildSessionFactory();
+        SessionFactory sessionFactory = cfg.buildSessionFactory();
 
         // Initialize persistence stores
         durableSubscriptionStore = new DurableSubscriptionStore(sessionFactory);
@@ -36,10 +35,6 @@ public class PersistenceManager implements Serializable {
         return new Class[] {
             AcknowledgedMessage.class
         };
-    }
-
-    public SessionFactory getSessionFactory() {
-        return sessionFactory;
     }
 
     public DurableSubscriptionStore getDurableSubscriptionStore() {

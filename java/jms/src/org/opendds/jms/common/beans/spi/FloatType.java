@@ -21,6 +21,8 @@ public class FloatType implements Type<Float> {
     }
 
     public Float valueOf(Object o) {
+        assert o != null;
+
         if (o instanceof Number) {
             return ((Number) o).floatValue();
 

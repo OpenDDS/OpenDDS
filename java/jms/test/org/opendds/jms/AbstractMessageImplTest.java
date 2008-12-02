@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms;
 
 import java.util.Enumeration;
@@ -16,8 +20,8 @@ import javax.jms.ObjectMessage;
 import javax.jms.Session;
 import javax.jms.StreamMessage;
 import javax.jms.TextMessage;
-import javax.security.auth.Subject;
 import javax.resource.ResourceException;
+import javax.security.auth.Subject;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -43,10 +47,13 @@ import OpenDDS.DCPS.transport.TheTransportFactory;
 import OpenDDS.DCPS.transport.TransportImpl;
 import OpenDDS.JMS.MessagePayloadTypeSupportImpl;
 
-import org.opendds.jms.TopicImpl;
-import org.opendds.jms.resource.ManagedConnectionImpl;
 import org.opendds.jms.resource.ConnectionRequestInfoImpl;
+import org.opendds.jms.resource.ManagedConnectionImpl;
 
+/**
+ * @author  Weiqi Gao
+ * @version $Revision$
+ */
 public class AbstractMessageImplTest {
     private static final float FLOAT_EPSILON = 1e-6f;
     private static final double DOUBLE_EPSILON = 1e-12;

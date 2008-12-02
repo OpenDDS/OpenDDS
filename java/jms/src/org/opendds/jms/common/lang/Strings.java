@@ -26,6 +26,9 @@ public class Strings {
     }
 
     public static StringBuilder fill(StringBuilder sb, char c, int len) {
+        assert sb != null;
+        assert len > -1;
+
         for (int i = 0; i < len; ++i) {
             sb.append(c);
         }
@@ -37,7 +40,7 @@ public class Strings {
     }
 
     public static boolean hasLength(String s, int len, boolean trim) {
-        assert len >= 0;
+        assert len > -1;
 
         if (s == null) {
             return false;

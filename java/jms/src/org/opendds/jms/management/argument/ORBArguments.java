@@ -21,6 +21,8 @@ public class ORBArguments implements DynamicArgumentProvider {
     private DynamicMBeanSupport instance;
 
     public void setInstance(DynamicMBeanSupport instance) {
+        assert instance != null;
+        
         this.instance = instance;
     }
 

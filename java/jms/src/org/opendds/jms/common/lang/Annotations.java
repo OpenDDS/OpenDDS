@@ -17,6 +17,8 @@ import java.util.Set;
 public class Annotations {
 
     public static boolean isAnnotated(Method method, Class<? extends Annotation> annotationClass) {
+        assert annotationClass != null;
+
         return method != null && method.isAnnotationPresent(annotationClass);
     }
 
@@ -47,6 +49,7 @@ public class Annotations {
 
     public static Set<Constructor> findAnnotatedConstructors(Object obj,
                                                              Class<? extends Annotation> annotationClass) {
+        assert obj != null;
 
         return findAnnotatedConstructors(obj.getClass(), annotationClass);
     }
@@ -69,7 +72,8 @@ public class Annotations {
 
     public static Set<Method> findAnnotatedMethods(Object obj,
                                                    Class<? extends Annotation> annotationClass) {
-
+        assert obj != null;
+        
         return findAnnotatedMethods(obj.getClass(), annotationClass);
     }
 

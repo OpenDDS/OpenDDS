@@ -33,8 +33,9 @@ public class DataReaderQosPolicy implements QosPolicy<DataReaderQos> {
     }
 
     public void setQos(DataReaderQos qos) {
-        PropertiesHelper.Property property;
+        assert qos != null;
 
+        PropertiesHelper.Property property;
         PropertiesHelper helper = new PropertiesHelper(properties);
 
         // USER_DATA QosPolicy

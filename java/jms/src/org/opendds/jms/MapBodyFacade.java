@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms;
 
 import java.util.Enumeration;
@@ -15,6 +19,10 @@ import OpenDDS.JMS.StreamItem;
 import org.opendds.jms.common.StreamItemConversion;
 import org.opendds.jms.common.lang.Objects;
 
+/**
+ * @author  Weiqi Gao
+ * @version $Revision$
+ */
 public class MapBodyFacade {
     private final MessageBody body;
     private final Map<String, StreamItem> items;

@@ -48,6 +48,9 @@ public class DynamicMBeanMetaData implements Serializable {
 
     private BeanHelper helper;
 
+    /**
+     * @throws  NullPointerException if instance is null
+     */
     public DynamicMBeanMetaData(DynamicMBean instance) {
         this(instance.getClass());
     }
@@ -134,13 +137,15 @@ public class DynamicMBeanMetaData implements Serializable {
         private boolean required;
 
         protected KeyPropertyModel(PropertyDescriptor descriptor) {
+            assert descriptor != null;
+
             this.descriptor = descriptor;
-            name = descriptor.getName();
+            this.name = descriptor.getName();
 
             KeyProperty keyProperty =
                 Annotations.getAnnotation(descriptor.getWriteMethod(), KeyProperty.class);
 
-            required = keyProperty.required();
+            this.required = keyProperty.required();
         }
 
         public String getName() {
@@ -164,18 +169,20 @@ public class DynamicMBeanMetaData implements Serializable {
         private boolean required;
 
         protected AttributeModel(PropertyDescriptor descriptor) {
+            assert descriptor != null;
+
             this.descriptor = descriptor;
-            name = Strings.capitalize(descriptor.getName());
+            this.name = Strings.capitalize(descriptor.getName());
 
             Method method = descriptor.getReadMethod();
 
-            description = findDescription(method);
+            this.description = findDescription(method);
 
             Attribute attribute =
                 Annotations.getAnnotation(method, Attribute.class);
 
-            readOnly = attribute.readOnly();
-            required = attribute.required();
+            this.readOnly = attribute.readOnly();
+            this.required = attribute.required();
         }
 
         public String getName() {
@@ -218,8 +225,10 @@ public class DynamicMBeanMetaData implements Serializable {
         private Constructor constructor;
 
         public ConstructorModel(Constructor constructor) {
+            assert constructor != null;
+
             this.constructor = constructor;
-            description = findDescription(constructor);
+            this.description = findDescription(constructor);
         }
 
         public String getDescription() {
@@ -237,10 +246,12 @@ public class DynamicMBeanMetaData implements Serializable {
         private Method method;
 
         public OperationModel(Method method) {
-            this.method = method;
-            name = method.getName();
+            assert method != null;
 
-            description = findDescription(method);
+            this.method = method;
+            this.name = method.getName();
+
+            this.description = findDescription(method);
         }
 
         public String getName() {
@@ -261,7 +272,7 @@ public class DynamicMBeanMetaData implements Serializable {
     }
 
     //
-    
+
     private static <T> String findDescription(T t) {
         String value = null;
 

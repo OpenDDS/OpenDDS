@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms;
 
 import javax.jms.MessageNotReadableException;
@@ -6,6 +10,9 @@ import javax.jms.MessageNotWriteableException;
 /**
  * Message body state where the message is readonly only, i.e., readable but not writable.
  * A freshly received or reset()-ed BytesMessage and StreamMessage is in this state.
+ *
+ * @author  Weiqi Gao
+ * @version $Revision$
  */
 public class MessageStateBodyReadOnly implements MessageState {
     private AbstractMessageImpl message;

@@ -30,6 +30,8 @@ public abstract class ServiceRegistry<T> {
     }
 
     public void register(T t) {
+        assert t != null;
+
         providers.add(t);
     }
 

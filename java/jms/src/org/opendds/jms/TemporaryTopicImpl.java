@@ -24,6 +24,9 @@ public class TemporaryTopicImpl extends TopicImpl implements TemporaryTopic {
 
     public TemporaryTopicImpl(ConnectionImpl connection) {
         super(Strings.randomUuid());
+
+        assert connection != null;
+
         this.connection = connection;
     }
 

@@ -17,6 +17,7 @@ public class Classes {
     public static Method findMethod(Class<?> clazz,
                                     String methodName,
                                     Object[] parameters) throws NoSuchMethodException {
+        assert clazz != null;
 
         Class[] parameterTypes = null;
         if (parameters != null) {
@@ -27,6 +28,8 @@ public class Classes {
     }
 
     public static Class[] getTypes(Object[] parameters) {
+        assert parameters != null;
+        
         List<Class> types = new ArrayList<Class>();
 
         for (Object parameter : parameters) {

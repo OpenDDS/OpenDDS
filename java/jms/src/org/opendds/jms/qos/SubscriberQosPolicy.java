@@ -30,8 +30,9 @@ public class SubscriberQosPolicy implements QosPolicy<SubscriberQos> {
     }
 
     public void setQos(SubscriberQos qos) {
+        assert qos != null;
+        
         PropertiesHelper.Property property;
-
         PropertiesHelper helper = new PropertiesHelper(properties);
 
         // GROUP_DATA QosPolicy

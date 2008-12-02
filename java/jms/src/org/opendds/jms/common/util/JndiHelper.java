@@ -23,6 +23,8 @@ public class JndiHelper {
     }
 
     public JndiHelper(Context context) {
+        assert context != null;
+
         this.context = context;
     }
 
@@ -50,6 +52,8 @@ public class JndiHelper {
     }
 
     public String verify(String name) throws NamingException {
+        assert name != null;
+        
         Context context = getContext();
 
         Enumeration<String> en = new CompositeName(name).getAll();

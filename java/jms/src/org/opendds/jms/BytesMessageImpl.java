@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms;
 
 import javax.jms.BytesMessage;
@@ -6,6 +10,10 @@ import javax.jms.JMSException;
 import OpenDDS.JMS.MessageBodyKind;
 import OpenDDS.JMS.MessagePayload;
 
+/**
+ * @author  Weiqi Gao
+ * @version $Revision$
+ */
 public class BytesMessageImpl extends AbstractMessageImpl implements BytesMessage {
     protected BytesBodyFacade bytesBody;
 

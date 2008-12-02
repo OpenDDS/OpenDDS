@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms;
 
 import java.util.Enumeration;
@@ -12,6 +16,10 @@ import OpenDDS.JMS.MessageHeader;
 import OpenDDS.JMS.MessagePayload;
 import OpenDDS.JMS.MessageProperty;
 
+/**
+ * @author  Weiqi Gao
+ * @version $Revision$
+ */
 public abstract class AbstractMessageImpl implements Message {
     protected final MessagePayload payload;
     protected int handle;
