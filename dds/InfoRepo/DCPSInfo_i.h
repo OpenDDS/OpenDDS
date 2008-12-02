@@ -446,7 +446,7 @@ public:
   ));
   
   /// Cause the entire repository to exit.
-  virtual void shutdown();
+  virtual void shutdown() ACE_THROW_SPEC (( ::CORBA::SystemException ));
 
   /**
    * @brief assert new ownership for a participant and its contained entities.
