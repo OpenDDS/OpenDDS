@@ -1,3 +1,9 @@
+Tue Dec  2 21:17:33 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/src/org/opendds/jms/common/util/JndiHelper.java:
+
+          Fixed bad assertion.
+
 Tue Dec  2 20:49:25 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/src/org/opendds/jms/ConnectionImpl.java:
