@@ -74,23 +74,6 @@ public class AbstractMessageImplTest {
     }
 
     @Test
-    public void testSettingAndGettingDestinationHeaders() throws JMSException, ResourceException {
-        if (TestUtils.runWithInfoRepo()) {
-            FakeObjects fakeObjects = createFakeObjects();
-            final SessionImpl sessionImpl = new SessionImpl(null, false, Session.AUTO_ACKNOWLEDGE);
-            Message message = new TextMessageImpl(sessionImpl);
-
-            Destination destination = new TopicImpl("Test Destination");
-            message.setJMSDestination(destination);
-            assertEquals(destination.toString(), message.getJMSDestination().toString());
-
-            Destination destination2 = new TopicImpl("Test Destination");
-            message.setJMSReplyTo(destination2);
-            assertEquals(destination2.toString(), message.getJMSReplyTo().toString());
-        }
-    }
-
-    @Test
     public void testSettingAndGettingNonDestinationHeaders() throws JMSException {
         Message message = new TextMessageImpl(null);
 

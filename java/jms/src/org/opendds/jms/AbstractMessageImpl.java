@@ -309,6 +309,7 @@ public abstract class AbstractMessageImpl implements Message {
      * @throws JMSException
      */
     public void acknowledge() throws JMSException {
+        sessionImpl.checkClosed();
         if (sessionImpl.getAcknowledgeMode() != Session.CLIENT_ACKNOWLEDGE) return;
         sessionImpl.doAcknowledge();
     }

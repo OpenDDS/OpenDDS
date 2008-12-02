@@ -42,6 +42,7 @@ import OpenDDS.DCPS.transport.TheTransportFactory;
 import OpenDDS.DCPS.transport.TransportImpl;
 import OpenDDS.JMS.MessagePayloadTypeSupportImpl;
 
+// TODO Remove this class once the functional tests in MessageConsumerImplTest are running
 /**
  * @author  Weiqi Gao
  * @version $Revision$

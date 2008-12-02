@@ -1,3 +1,31 @@
+Tue Dec  2 19:23:50 UTC 2008  Weiqi Gao  <gaow@ociweb.com>
+
+        * java/OpenDDS.ipr:
+
+        * java/jms/compat/test/org/opendds/jms/client/AbstractMessageImplTest.java:
+        * java/jms/compat/test/org/opendds/jms/client/MessageConsumerImplTest.java:
+        * java/jms/compat/test/org/opendds/jms/client/MessageProducerImplTest.java:
+        * java/jms/compat/test/org/opendds/jms/client/SessionImplTest.java:
+
+          Migrated functional tests to compat.  Some tests thst needs fixing are
+          commented out.
+
+        * java/jms/src/org/opendds/jms/AbstractMessageImpl.java:
+        * java/jms/src/org/opendds/jms/ConnectionImpl.java:
+
+          Added check for closed session in acknowledge().
+          Added check for administratively set client ID in setClientID().
+          Fixed CME in close().
+
+        * java/jms/test/org/opendds/jms/AbstractMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/SessionImplTest.java:
+        * java/jms/test/org/opendds/jms/TopicMessageConsumerImplTest.java:
+        * java/jms/test/org/opendds/jms/TopicMessageProducerImplTest.java:
+
+          Added TODO comments.  SessionImplTest, TopicMessageConsumerImplTest,
+          TopicMessageProducerImplTest will be removed once the compat tests
+          are fixed.
+
 Tue Dec  2 17:37:30 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/src/org/opendds/jms/AbstractMessageImpl.java:
