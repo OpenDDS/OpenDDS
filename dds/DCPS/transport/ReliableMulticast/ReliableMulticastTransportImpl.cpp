@@ -7,6 +7,7 @@
 #include "ReliableMulticastTransportConfiguration.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
+#include "dds/DCPS/transport/framework/DirectPriorityMapper.h"
 
 #if !defined (__ACE_INLINE__)
 #include "ReliableMulticastTransportImpl.inl"
@@ -48,7 +49,7 @@ OpenDDS::DCPS::ReliableMulticastTransportImpl::find_or_create_datalink(
     return iter->second._retn();
   }
 
-  /// @TODO: The socket and thread and be conditioned with priority at this point.
+  /// @TODO: The thread can be conditioned with priority at this point.
 
   data_link = new OpenDDS::DCPS::ReliableMulticastDataLink(
     reactor_task_,
@@ -57,7 +58,12 @@ OpenDDS::DCPS::ReliableMulticastTransportImpl::find_or_create_datalink(
     *this
     );
   data_links_[ PriorityKey( priority, multicast_group_address)] = data_link;
-  
+
+  // Set the DiffServ codepoint according to the TRANSPORT_PRIORITY
+  // policy value.
+  DirectPriorityMapper mapping( priority);
+  data_link->set_dscp_codepoint( mapping.codepoint(), data_link->socket());
+
   if (!data_link->connect(connect_as_publisher == 1))
   {
     ACE_ERROR_RETURN(

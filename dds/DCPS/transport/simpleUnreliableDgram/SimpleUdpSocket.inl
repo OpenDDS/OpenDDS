@@ -20,6 +20,14 @@ OpenDDS::DCPS::SimpleUdpSocket::get_handle() const
   return this->socket_.get_handle();
 }
 
+ACE_INLINE
+ACE_SOCK&
+OpenDDS::DCPS::SimpleUdpSocket::socket()
+{
+  DBG_ENTRY_LVL("SimpleUdpSocket","socket",6);
+  return this->socket_;
+}
+
 
 ACE_INLINE int
 OpenDDS::DCPS::SimpleUdpSocket::open_socket(ACE_INET_Addr& local_address,

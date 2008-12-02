@@ -20,6 +20,7 @@
 #include "ace/Synch.h"
 #include "ace/Event_Handler.h"
 
+class ACE_SOCK;
 
 namespace OpenDDS
 {
@@ -181,6 +182,12 @@ namespace OpenDDS
         // access violation during normal transport shutdown(transport_shutdown()).
         int handle_timeout (const ACE_Time_Value &tv,
                             const void * arg = 0);
+
+        // Set the DiffServ codepoint of the socket.  This is a stateless
+        // method and is here only because this is a convenient common
+        // location that can be reached by client code that needs to
+        // perform this behavior.
+        void set_dscp_codepoint( int cp, ACE_SOCK& socket);
 
        protected:
 

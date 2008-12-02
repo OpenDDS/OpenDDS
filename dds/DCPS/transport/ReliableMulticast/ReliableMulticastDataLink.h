@@ -40,6 +40,9 @@ namespace OpenDDS
 
       OpenDDS::DCPS::ReliableMulticastTransportImpl_rch& get_transport_impl();
 
+      /// Access the underlying socket.
+      ACE_SOCK& socket();
+
     protected:
       virtual void stop_i();
 

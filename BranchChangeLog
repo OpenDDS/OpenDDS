@@ -1,3 +1,48 @@
+Tue Dec  2 18:06:27 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Added the default Priority test to the regression.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+
+          Removed the DiffServ codepoint setting behavior from here to
+          allow other transports to use the same behavior implementation.
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Factored setting the DiffServ codepoint behavior to a stateless
+          method here as the closest ancestral location.
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastDataLink.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastDataLink.inl:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportSendStrategy.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportSendStrategy.cpp:
+        * dds/DCPS/transport/ReliableMulticast/detail/EventHandler.h:
+        * dds/DCPS/transport/ReliableMulticast/detail/EventHandler.cpp:
+
+          Exposed the underlying socket to allow options to be set.
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.cpp:
+
+          Set the socket DiffServ codepoint according to the
+          TRANSPORT_PRIORITY policy value.
+
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastSocket.h:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastSocket.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpSocket.h:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpSocket.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramSocket.h:
+
+          Exposed the underlying socket to allow options to be set.
+
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.cpp:
+
+          Set the socket DiffServ codepoint according to the
+          TRANSPORT_PRIORITY policy value.
+
 Mon Dec  1 23:22:00 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
