@@ -120,7 +120,6 @@ public class DynamicAttributes implements Serializable {
                               boolean isReadable,
                               boolean isWritable) {
             assert name != null;
-            assert description != null;
             assert type != null;
 
             this.name = name;

@@ -70,7 +70,7 @@ public class ConsumerDataReaderListener extends _DataReaderListenerLocalBase {
             int handle = sampleInfo.instance_handle;
             AbstractMessageImpl message = buildMessageFromPayload(messagePayload, handle, sessionImpl);
             DataReaderHandlePair dataReaderHandlePair = new DataReaderHandlePair(reader, handle);
-            sessionImpl.getMessageDeliveryExecutorService().execute(new MessageDispatcher(message, dataReaderHandlePair, consumer, sessionImpl));
+            sessionImpl.getMessageDeliveryExecutor().execute(new MessageDispatcher(message, dataReaderHandlePair, consumer, sessionImpl));
         }
     }
 
@@ -89,24 +89,4 @@ public class ConsumerDataReaderListener extends _DataReaderListenerLocalBase {
     public void on_sample_lost(DataReader dataReader, SampleLostStatus sampleLostStatus) {
         // No-op
     }
-
-//    private class MessageDispatcher implements Runnable {
-//        private final AbstractMessageImpl message;
-//        private final DataReaderHandlePair dataReaderHandlePair;
-//        private final MessageConsumerImpl consumer;
-//
-//        public MessageDispatcher(AbstractMessageImpl message, DataReaderHandlePair dataReaderHandlePair, MessageConsumerImpl consumer) {
-//            this.message = message;
-//            this.dataReaderHandlePair = dataReaderHandlePair;
-//            this.consumer = consumer;
-//        }
-//
-//        public void run() {
-//            consumer.getMessageListener().onMessage(message);
-//            sessionImpl.addToUnacknowledged(dataReaderHandlePair, consumer);
-//            if (sessionImpl.getAcknowledgeMode() != Session.CLIENT_ACKNOWLEDGE) {
-//                sessionImpl.doAcknowledge();
-//            }
-//        }
-//    }
 }
