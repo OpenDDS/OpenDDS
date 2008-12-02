@@ -99,6 +99,7 @@
         <jarDirectory url="file://$MODULE_DIR$/web/WEB-INF/lib" recursive="false" />
       </library>
     </orderEntry>
+    <orderEntry type="module" module-name="opendds-jms" />
   </component>
   <component name="copyright">
     <Base>

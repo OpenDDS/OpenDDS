@@ -41,7 +41,7 @@ public class ConnectionImpl implements Connection {
     private DomainParticipant participant;
     private PublisherManager publishers;
     private SubscriberManager subscribers;
-    private String clientId;
+    private String clientID;
     private PersistenceManager persistenceManager;
     private boolean closed;
     private ExceptionListener listener;
@@ -61,11 +61,11 @@ public class ConnectionImpl implements Connection {
         subscribers = connection.getSubscribers();
 
         ConnectionRequestInfoImpl cxRequestInfo = connection.getConnectionRequestInfo();
-        clientId = cxRequestInfo.getClientID();
+        clientID = cxRequestInfo.getClientID();
 
         persistenceManager = cxRequestInfo.getPersistenceManager();
         if (persistenceManager == null) {
-            logger.warn("PersistenceManager not set; durable subscriptions unavailable");
+            logger.warn("PersistenceManager not bound; durable subscriptions are unavailable");
         }
     }
 
@@ -87,7 +87,7 @@ public class ConnectionImpl implements Connection {
 
     public PersistenceManager getPersistenceManager() throws JMSException {
         if (persistenceManager == null) {
-            throw new JMSException("PersistenceManager not set; durable subscriptions unavailable");
+            throw new JMSException("PersistenceManager not bound; durable subscriptions are unavailable");
         }
         return persistenceManager;
     }
@@ -124,11 +124,11 @@ public class ConnectionImpl implements Connection {
     }
 
     public String getClientID() {
-        return clientId;
+        return clientID;
     }
 
-    public void setClientID(String clientId) {
-        this.clientId = clientId;
+    public void setClientID(String clientID) {
+        this.clientID = clientID;
     }
 
     public ExceptionListener getExceptionListener() {
