@@ -25,6 +25,7 @@ import DDS.Publisher;
 import DDS.Subscriber;
 
 import org.opendds.jms.common.Version;
+import org.opendds.jms.common.lang.Strings;
 import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.persistence.PersistenceManager;
 import org.opendds.jms.resource.ConnectionRequestInfoImpl;
@@ -130,6 +131,9 @@ public class ConnectionImpl implements Connection {
     }
 
     public void setClientID(String clientID) {
+        if (!Strings.isEmpty(this.clientID)) {
+            throw new IllegalStateException("The Client ID has been administratively specified.");
+        }
         this.clientID = clientID;
     }
 
@@ -216,10 +220,11 @@ public class ConnectionImpl implements Connection {
         }
 
         synchronized (tempTopics) {
-            for (TemporaryTopic topic : tempTopics) {
+            int size = tempTopics.size();
+            for (int i = size - 1; i >= 0; i--) {
+                TemporaryTopic topic = tempTopics.get(i);
                 try {
                     topic.delete();
-
                 } catch (JMSException e) {}
             }
             tempTopics.clear();

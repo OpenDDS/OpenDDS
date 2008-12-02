@@ -39,6 +39,7 @@ import OpenDDS.JMS.MessagePayloadTypeSupportImpl;
  * @author  Weiqi Gao
  * @version $Revision$
  */
+// TODO Remove this class once the functional tests in MessageProducerImplTest are running. 
 public class TopicMessageProducerImplTest {
     @Test
     public void testDummy() {
