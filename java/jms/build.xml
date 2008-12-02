@@ -131,7 +131,8 @@
 
         <jar destfile="${build.dir}/${project.filename}.jar"
              compress="${jar.compress}"
-             index="${jar.index}">
+             index="${jar.index}"
+             update="true">
             <fileset dir="${build.dir}/classes"/>
             <fileset dir="${build.dir}">
                 <include name="version.properties"/>
@@ -201,14 +202,14 @@
 
         <jar destfile="${build.dir}/${project.filename}.rar"
              compress="${rar.compress}"
-             index="${rar.index}">
-
+             index="${rar.index}"
+             update="true">
             <fileset dir="${build.dir}">
                 <include name="${project.filename}.jar"/>
             </fileset>
 
             <fileset dir="${lib.dir}/shared"/>
-            
+
             <fileset refid="DDS.jars"/>
 
             <zipfileset refid="ACE+TAO.libs" prefix="native"/>

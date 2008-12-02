@@ -81,7 +81,8 @@
     <target name="ejb-jar" depends="test.compile">
         <jar jarfile="${build.dir}/modules/${ant.project.name}-ejb.jar"
              compress="${jar.compress}"
-             index="${jar.index}">
+             index="${jar.index}"
+             update="true">
             <fileset dir="${build.dir}/classes"/>
             <fileset dir="${src.dir}">
                 <include name="META-INF/ejb-jar.xml"/>
@@ -92,7 +93,8 @@
 
     <target name="war" depends="test.compile">
         <war warfile="${build.dir}/modules/${ant.project.name}-web.war"
-             webxml="${web.dir}/WEB-INF/web.xml">
+             webxml="${web.dir}/WEB-INF/web.xml"
+             update="true">
             <classes dir="${build.dir}/tests"/>
             <fileset dir="${web.dir}">
                 <exclude name="WEB-INF/web.xml"/> <!-- silly ant -->
@@ -110,7 +112,8 @@
         </copy>
 
         <ear destfile="${build.dir}/${ant.project.name}.ear"
-             appxml="${src.dir}/META-INF/application.xml">
+             appxml="${src.dir}/META-INF/application.xml"
+             update="true">
             <fileset dir="${build.dir}/modules"/>
             <metainf dir="${src.dir}/META-INF">
                 <exclude name="application.xml"/> <!-- silly ant -->
@@ -136,7 +139,7 @@
 
         <antjms target="rar"/> <!-- ensure RAR is built -->
 
-        <echo message="[bootstrap] Starting DCPSInfoRepo in ${env.DDS_ROOT}"/>
+        <echo message="[setup] Starting DCPSInfoRepo under ${env.DDS_ROOT}"/>
         <exec executable="${env.DDS_ROOT}/bin/DCPSInfoRepo" spawn="true">
             <arg line="-ORBListenEndpoints iiop://:6666"/>
             <arg line="-ORBSvcConf ${conf.dir}/tcp.conf"/>
@@ -145,6 +148,7 @@
     </target>
 
     <target name="teardown">
+        <echo message="[teardown] Stopping DCPSInfoRepo under ${env.DDS_ROOT}"/>
         <exec executable="${env.DDS_ROOT}/bin/opendds_ir_ctl">
             <arg line="kill localhost:6666"/>
         </exec>
