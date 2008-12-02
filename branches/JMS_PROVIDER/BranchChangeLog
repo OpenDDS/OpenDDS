@@ -1,3 +1,9 @@
+Tue Dec  2 15:49:31 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfo_i.h:
+
+          Fixed compile error due to lack of exception specification.
+
 Tue Dec  2 02:46:41 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/compat/opendds-jms-compat.iml:
