@@ -1,3 +1,20 @@
+Tue Dec  2 22:06:03 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastDataLink.h:
+
+          Delay setting the DiffServ codepoint for this Transport
+          implementation until the socket has been created.
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.cpp:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportSendStrategy.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportSendStrategy.cpp:
+
+          Document the 'ended-ness' behavior of the ReliableMulticast
+          transport as it affects the access to the link socket.
+          Implement the return of a 'nil' object when the sending socket
+          has not been initialized (via a call to configure() in a
+          publication role).
+
 Tue Dec  2 18:06:27 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * bin/dcps_tests.lst:

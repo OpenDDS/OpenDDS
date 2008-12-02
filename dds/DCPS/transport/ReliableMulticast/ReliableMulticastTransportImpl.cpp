@@ -59,17 +59,29 @@ OpenDDS::DCPS::ReliableMulticastTransportImpl::find_or_create_datalink(
     );
   data_links_[ PriorityKey( priority, multicast_group_address)] = data_link;
 
-  // Set the DiffServ codepoint according to the TRANSPORT_PRIORITY
-  // policy value.
-  DirectPriorityMapper mapping( priority);
-  data_link->set_dscp_codepoint( mapping.codepoint(), data_link->socket());
-
   if (!data_link->connect(connect_as_publisher == 1))
   {
     ACE_ERROR_RETURN(
       (LM_ERROR, "(%P|%t) ERROR: Failed to connect data link.\n"),
       0
       );
+  }
+
+  //
+  // We only set the DiffServ codepoint on the sending side.  Since this
+  // Transport implementation distinguishes between the sending and
+  // receiving roles at this level, we only set on the publication end of
+  // connections.
+  //
+  if( connect_as_publisher) {
+    //
+    // Set the DiffServ codepoint according to the TRANSPORT_PRIORITY
+    // policy value.  We need to do this *after* the call to connect as
+    // that is where the underlying socket is actually created and
+    // initialized.
+    //
+    DirectPriorityMapper mapping( priority);
+    data_link->set_dscp_codepoint( mapping.codepoint(), data_link->socket());
   }
 
   return data_link._retn();

@@ -83,7 +83,14 @@ OpenDDS::DCPS::ReliableMulticastTransportSendStrategy::get_handle()
 ACE_SOCK&
 OpenDDS::DCPS::ReliableMulticastTransportSendStrategy::socket()
 {
-  return this->sender_->socket();
+  static ACE_SOCK_IO nilSocket;
+
+  if( this->sender_.get()) {
+    return this->sender_->socket();
+
+  } else {
+    return nilSocket;
+  }
 }
 
 ssize_t
