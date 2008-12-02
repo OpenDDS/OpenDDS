@@ -339,7 +339,12 @@ public class ConnectionImpl implements Connection {
             }
 
             public Enumeration getJMSXPropertyNames() {
-                return Collections.enumeration(Collections.emptyList()); // not implemented
+                List<String> names = new ArrayList<String>();
+
+                names.add("JMSXGroupID");  // required (see JMS 3.5.9)
+                names.add("JMSXGroupSeq"); // required (see JMS 3.5.9)
+
+                return Collections.enumeration(names);
             }
         };
     }
