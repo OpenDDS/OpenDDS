@@ -20,12 +20,11 @@ public class PersistenceManager implements Serializable {
 
     public PersistenceManager(Properties properties) {
         Configuration cfg = new Configuration();
+        cfg.setProperties(properties);
 
         for (Class persistentClass : getPersistentClasses()) {
             cfg.addClass(persistentClass);
         }
-
-        cfg.setProperties(properties);
 
         sessionFactory = cfg.buildSessionFactory();
 
