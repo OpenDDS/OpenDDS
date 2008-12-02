@@ -1,6 +1,7 @@
 Tue Dec  2 15:49:31 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
 
           Fixed compile error due to lack of exception specification.
 
