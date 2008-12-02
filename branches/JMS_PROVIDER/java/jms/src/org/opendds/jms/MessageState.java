@@ -1,10 +1,15 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms;
 
 import javax.jms.MessageNotReadableException;
 import javax.jms.MessageNotWriteableException;
 
 /**
- * // TODO Place holder, elaboration needed
+ * @author  Weiqi Gao
+ * @version $Revision$
  */
 public interface MessageState {
     /**

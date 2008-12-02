@@ -63,6 +63,8 @@ public class DynamicAttributes implements Serializable {
     }
 
     public void setAttribute(Attribute attribute) throws AttributeNotFoundException, InvalidAttributeValueException {
+        assert attribute != null;
+
         String name = attribute.getName();
         Object value = attribute.getValue();
 
@@ -117,6 +119,10 @@ public class DynamicAttributes implements Serializable {
                               String description,
                               boolean isReadable,
                               boolean isWritable) {
+            assert name != null;
+            assert description != null;
+            assert type != null;
+
             this.name = name;
             this.description = description;
             this.type = type;

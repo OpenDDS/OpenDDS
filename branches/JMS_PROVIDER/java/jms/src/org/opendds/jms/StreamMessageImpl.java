@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms;
 
 import javax.jms.JMSException;
@@ -6,6 +10,10 @@ import javax.jms.StreamMessage;
 import OpenDDS.JMS.MessagePayload;
 import OpenDDS.JMS.StreamItem;
 
+/**
+ * @author  Weiqi Gao
+ * @version $Revision$
+ */
 public class StreamMessageImpl extends AbstractMessageImpl implements StreamMessage {
     protected StreamBodyFacade streamBody;
 

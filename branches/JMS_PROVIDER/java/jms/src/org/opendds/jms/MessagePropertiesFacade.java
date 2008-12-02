@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms;
 
 import java.util.Enumeration;
@@ -19,6 +23,9 @@ import org.opendds.jms.common.lang.Objects;
 /**
  * A facade over payload.theProperties, which, being a Java array
  * is hard to manage
+ *
+ * @author  Weiqi Gao
+ * @version $Revision$
  */
 public class MessagePropertiesFacade {
     private final MessagePayload payload;

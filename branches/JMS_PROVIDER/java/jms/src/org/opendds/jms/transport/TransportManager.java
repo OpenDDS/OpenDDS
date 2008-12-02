@@ -17,6 +17,8 @@ public class TransportManager {
     private TransportImpl transport;
 
     public TransportManager(TransportFactory tf) {
+        assert tf != null;
+        
         this.tf = tf;
     }
 

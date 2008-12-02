@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms;
 
 import OpenDDS.JMS.MessagePayloadDataReader;
@@ -5,6 +9,9 @@ import OpenDDS.JMS.MessagePayloadDataReader;
 /**
  * An alternative representation of a MessagePayload that is used by SessionImpl during
  * the acknowledgement phase of the Message consumption
+ *
+ * @author  Weiqi Gao
+ * @version $Revision$
  */
 public class DataReaderHandlePair {
     private MessagePayloadDataReader dataReader;

@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms.common;
 
 import java.util.Arrays;
@@ -5,6 +9,10 @@ import java.util.List;
 
 import org.opendds.jms.common.lang.Strings;
 
+/**
+ * @author  Weiqi Gao
+ * @version $Revision$
+ */
 public class Identifiers {
     protected static List<String> forbidenNames = Arrays.asList("NULL", "TRUE", "FALSE",
         "NOT", "AND", "OR", "BETWEEN", "LIKE", "IN", "IS", "ESCAPE");

@@ -23,6 +23,8 @@ public class ArgumentWriter {
         new ArrayList<String>();
 
     public ArgumentWriter(DynamicMBeanSupport instance) {
+        assert instance != null;
+
         this.instance = instance;
     }
 
@@ -46,11 +48,15 @@ public class ArgumentWriter {
     }
 
     public void writeSvcConfDirective(SvcConfDirective directive) {
+        assert directive != null;
+
         write("-ORBSvcConfDirective");
         write(directive.toString());
     }
 
     public void write(String arg, Object value) {
+        assert value != null;
+
         write(arg);
 
         if (!(value instanceof Boolean)) {
@@ -59,10 +65,14 @@ public class ArgumentWriter {
     }
 
     public void write(String value) {
+        assert value != null;
+
         args.add(value);
     }
 
     public void writeTo(List<String> args) {
+        assert args != null;
+        
         args.addAll(this.args);
     }
 }

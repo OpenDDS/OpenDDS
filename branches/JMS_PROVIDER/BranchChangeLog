@@ -1,3 +1,110 @@
+Tue Dec  2 17:37:30 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/src/org/opendds/jms/AbstractMessageImpl.java:
+        * java/jms/src/org/opendds/jms/BytesBodyFacade.java:
+        * java/jms/src/org/opendds/jms/BytesMessageImpl.java:
+        * java/jms/src/org/opendds/jms/ConnectionFactoryImpl.java:
+        * java/jms/src/org/opendds/jms/ConnectionImpl.java:
+        * java/jms/src/org/opendds/jms/ConsumerDataReaderListener.java:
+        * java/jms/src/org/opendds/jms/ConsumerMessageFactory.java:
+        * java/jms/src/org/opendds/jms/DataReaderHandlePair.java:
+        * java/jms/src/org/opendds/jms/DataWriterPair.java:
+        * java/jms/src/org/opendds/jms/MapBodyFacade.java:
+        * java/jms/src/org/opendds/jms/MapMessageImpl.java:
+        * java/jms/src/org/opendds/jms/MessageConsumerImpl.java:
+        * java/jms/src/org/opendds/jms/MessageDispatcher.java:
+        * java/jms/src/org/opendds/jms/MessageProducerImpl.java:
+        * java/jms/src/org/opendds/jms/MessagePropertiesFacade.java:
+        * java/jms/src/org/opendds/jms/MessageState.java:
+        * java/jms/src/org/opendds/jms/MessageStateBodyNonWritable.java:
+        * java/jms/src/org/opendds/jms/MessageStateBodyReadOnly.java:
+        * java/jms/src/org/opendds/jms/MessageStateBodyWriteOnly.java:
+        * java/jms/src/org/opendds/jms/MessageStatePropertiesNonWritable.java:
+        * java/jms/src/org/opendds/jms/MessageStateWritable.java:
+        * java/jms/src/org/opendds/jms/ObjectMessageImpl.java:
+        * java/jms/src/org/opendds/jms/PublisherManager.java:
+        * java/jms/src/org/opendds/jms/SessionImpl.java:
+        * java/jms/src/org/opendds/jms/StreamBodyFacade.java:
+        * java/jms/src/org/opendds/jms/StreamMessageImpl.java:
+        * java/jms/src/org/opendds/jms/SubscriberManager.java:
+        * java/jms/src/org/opendds/jms/TemporaryTopicImpl.java:
+        * java/jms/src/org/opendds/jms/TextMessageImpl.java:
+        * java/jms/src/org/opendds/jms/TopicImpl.java:
+
+        * java/jms/src/org/opendds/jms/common/EnumComparator.java:
+        * java/jms/src/org/opendds/jms/common/ExceptionHelper.java:
+        * java/jms/src/org/opendds/jms/common/Identifiers.java:
+        * java/jms/src/org/opendds/jms/common/PropertyValueConversion.java:
+        * java/jms/src/org/opendds/jms/common/StreamItemConversion.java:
+
+        * java/jms/src/org/opendds/jms/common/beans/BeanHelper.java:
+        * java/jms/src/org/opendds/jms/common/beans/UnsupportedTypeException.java:
+
+        * java/jms/src/org/opendds/jms/common/beans/spi/BooleanType.java:
+        * java/jms/src/org/opendds/jms/common/beans/spi/ByteType.java:
+        * java/jms/src/org/opendds/jms/common/beans/spi/CharacterType.java:
+        * java/jms/src/org/opendds/jms/common/beans/spi/DoubleType.java:
+        * java/jms/src/org/opendds/jms/common/beans/spi/FloatType.java:
+        * java/jms/src/org/opendds/jms/common/beans/spi/IntegerType.java:
+        * java/jms/src/org/opendds/jms/common/beans/spi/LongType.java:
+        * java/jms/src/org/opendds/jms/common/beans/spi/StringType.java:
+        * java/jms/src/org/opendds/jms/common/beans/spi/ThreadSynchStrategyType.java:
+        * java/jms/src/org/opendds/jms/common/beans/spi/TypeRegistry.java:
+
+        * java/jms/src/org/opendds/jms/common/io/Files.java:
+
+        * java/jms/src/org/opendds/jms/common/lang/Annotations.java:
+        * java/jms/src/org/opendds/jms/common/lang/ByteArrays.java:
+        * java/jms/src/org/opendds/jms/common/lang/ClassLoaders.java:
+        * java/jms/src/org/opendds/jms/common/lang/Classes.java:
+        * java/jms/src/org/opendds/jms/common/lang/Strings.java:
+
+        * java/jms/src/org/opendds/jms/common/util/JndiHelper.java:
+        * java/jms/src/org/opendds/jms/common/util/LibIndex.java:
+        * java/jms/src/org/opendds/jms/common/util/NativeLoader.java:
+        * java/jms/src/org/opendds/jms/common/util/PropertiesHelper.java:
+        * java/jms/src/org/opendds/jms/common/util/ServiceRegistry.java:
+
+        * java/jms/src/org/opendds/jms/management/DynamicAttributes.java:
+        * java/jms/src/org/opendds/jms/management/DynamicMBeanMetaData.java:
+        * java/jms/src/org/opendds/jms/management/DynamicMBeanSupport.java:
+
+        * java/jms/src/org/opendds/jms/management/argument/ArgumentWriter.java:
+        * java/jms/src/org/opendds/jms/management/argument/DCPSArguments.java:
+        * java/jms/src/org/opendds/jms/management/argument/DynamicArguments.java:
+        * java/jms/src/org/opendds/jms/management/argument/InfoRepoArguments.java:
+        * java/jms/src/org/opendds/jms/management/argument/ORBArguments.java:
+
+        * java/jms/src/org/opendds/jms/persistence/AcknowledgedMessage.java:
+        * java/jms/src/org/opendds/jms/persistence/DurableSubscriptionStore.java:
+        * java/jms/src/org/opendds/jms/persistence/PersistenceManager.java:
+
+        * java/jms/src/org/opendds/jms/qos/DataReaderQosPolicy.java:
+        * java/jms/src/org/opendds/jms/qos/DataWriterQosPolicy.java:
+        * java/jms/src/org/opendds/jms/qos/ParticipantQosPolicy.java:
+        * java/jms/src/org/opendds/jms/qos/PublisherQosPolicy.java:
+        * java/jms/src/org/opendds/jms/qos/SubscriberQosPolicy.java:
+        * java/jms/src/org/opendds/jms/qos/TopicQosPolicy.java:
+
+        * java/jms/src/org/opendds/jms/transport/TransportFactory.java:
+        * java/jms/src/org/opendds/jms/transport/TransportManager.java:
+        * java/jms/src/org/opendds/jms/transport/Transports.java:
+
+        * java/jms/test/org/opendds/jms/AbstractMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/BytesMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/MapMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/ObjectMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/SessionImplTest.java:
+        * java/jms/test/org/opendds/jms/StreamMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/TestUtils.java:
+        * java/jms/test/org/opendds/jms/TextMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/TopicMessageConsumerImplTest.java:
+        * java/jms/test/org/opendds/jms/TopicMessageProducerImplTest.java:
+
+        * java/jms/test/org/opendds/jms/common/IdentifiersTest.java:
+
+          General formatting updates.
+
 Tue Dec  2 15:49:31 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/InfoRepo/DCPSInfo_i.h:

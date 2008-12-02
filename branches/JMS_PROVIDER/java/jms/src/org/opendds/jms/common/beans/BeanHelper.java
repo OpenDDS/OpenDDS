@@ -39,6 +39,8 @@ public class BeanHelper {
         new HashMap<String, PropertyDescriptor>();
 
     public BeanHelper(Class clazz) {
+        assert clazz != null;
+
         this.beanClass = clazz;
         try {
             beanInfo = Introspector.getBeanInfo(clazz);
@@ -88,6 +90,8 @@ public class BeanHelper {
     }
 
     public Object getProperty(Object instance, String property) {
+        assert property != null;
+
         PropertyDescriptor descriptor = descriptors.get(property);
         if (descriptor == null) {
             throw new IntrospectionException(property);
@@ -96,6 +100,9 @@ public class BeanHelper {
     }
 
     public Object getProperty(Object instance, PropertyDescriptor descriptor) {
+        assert instance != null;
+        assert descriptor != null;
+
         Method method = descriptor.getReadMethod();
         if (method == null) {
             throw new IntrospectionException(descriptor.getName() + " is a write-only property!");
@@ -110,6 +117,8 @@ public class BeanHelper {
     }
 
     public void setProperty(Object instance, String property, Object value) {
+        assert property != null;
+
         PropertyDescriptor descriptor = descriptors.get(property);
         if (descriptor == null) {
             throw new IntrospectionException(property);
@@ -119,6 +128,9 @@ public class BeanHelper {
 
     @SuppressWarnings("unchecked")
     public void setProperty(Object instance, PropertyDescriptor descriptor, Object value) {
+        assert instance != null;
+        assert descriptor != null;
+
         Method method = descriptor.getWriteMethod();
         if (method == null) {
             throw new IntrospectionException(descriptor.getName() + " is a read-only property!");
@@ -143,6 +155,8 @@ public class BeanHelper {
     }
 
     public void setProperties(Object instance, Properties properties) {
+        assert properties != null;
+        
         Enumeration en = properties.propertyNames();
         while (en.hasMoreElements()) {
             String name = (String) en.nextElement();

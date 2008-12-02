@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms;
 
 import java.lang.reflect.Field;
@@ -38,6 +42,10 @@ import OpenDDS.DCPS.transport.TheTransportFactory;
 import OpenDDS.DCPS.transport.TransportImpl;
 import OpenDDS.JMS.MessagePayloadTypeSupportImpl;
 
+/**
+ * @author  Weiqi Gao
+ * @version $Revision$
+ */
 public class TopicMessageConsumerImplTest {
     @Test
     public void testDummy() {

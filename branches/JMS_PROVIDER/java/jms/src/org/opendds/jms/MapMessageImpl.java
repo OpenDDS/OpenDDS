@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms;
 
 import java.util.Enumeration;
@@ -8,6 +12,10 @@ import javax.jms.MapMessage;
 import OpenDDS.JMS.MapItem;
 import OpenDDS.JMS.MessagePayload;
 
+/**
+ * @author  Weiqi Gao
+ * @version $Revision$
+ */
 public class MapMessageImpl extends AbstractMessageImpl implements MapMessage {
     protected MapBodyFacade mapBody;
 

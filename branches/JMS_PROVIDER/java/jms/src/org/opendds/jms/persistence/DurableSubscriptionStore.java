@@ -26,10 +26,15 @@ public class DurableSubscriptionStore implements Serializable {
     private SessionFactory sessionFactory;
 
     public DurableSubscriptionStore(SessionFactory sessionFactory) {
+        assert sessionFactory != null;
+
         this.sessionFactory = sessionFactory;
     }
 
     public void acknowledge(DurableSubscription subscription, Message message) throws JMSException {
+        assert subscription != null;
+        assert message != null;
+
         Session session = sessionFactory.openSession();
         Transaction transaction = null;
         try {
@@ -50,6 +55,9 @@ public class DurableSubscriptionStore implements Serializable {
     }
 
     public boolean acknowledged(DurableSubscription subscription, Message message) throws JMSException {
+        assert subscription != null;
+        assert message != null;
+
         Session session = sessionFactory.openSession();
         try {
             Query query = session.createQuery(
@@ -71,6 +79,8 @@ public class DurableSubscriptionStore implements Serializable {
     }
 
     public void unsubscribe(DurableSubscription subscription) throws JMSException {
+        assert subscription != null;
+        
         Session session = sessionFactory.openSession();
         Transaction transaction = null;
         try {

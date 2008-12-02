@@ -46,7 +46,7 @@ import static org.opendds.jms.ConsumerMessageFactory.buildMessageFromPayload;
 import org.opendds.jms.common.lang.Strings;
 
 /**
- * @author  Steven Stallion
+ * @author  Weiqi Gao
  * @version $Revision$
  */
 public class MessageConsumerImpl implements MessageConsumer {

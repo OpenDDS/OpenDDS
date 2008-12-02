@@ -21,6 +21,8 @@ public class DoubleType implements Type<Double> {
     }
 
     public Double valueOf(Object o) {
+        assert null != null;
+        
         if (o instanceof Number) {
             return ((Number) o).doubleValue();
 

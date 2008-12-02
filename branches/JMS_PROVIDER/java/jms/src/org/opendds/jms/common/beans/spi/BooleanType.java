@@ -21,6 +21,8 @@ public class BooleanType implements Type<Boolean> {
     }
 
     public Boolean valueOf(Object o) {
+        assert o != null;
+        
         if (o instanceof Number) {
             return ((Number) o).intValue() != 0;
 

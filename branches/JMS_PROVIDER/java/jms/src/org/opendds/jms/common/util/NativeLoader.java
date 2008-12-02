@@ -50,6 +50,8 @@ public class NativeLoader {
     }
 
     public void loadLibraries(ClassLoader loader) throws IOException {
+        assert loader != null;
+        
         Enumeration<URL> en = loader.getResources(LibIndex.DEFAULT_RESOURCE);
         while (en.hasMoreElements()) {
             URL url = en.nextElement();

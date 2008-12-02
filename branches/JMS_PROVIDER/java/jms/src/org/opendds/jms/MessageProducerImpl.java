@@ -26,7 +26,7 @@ import org.opendds.jms.common.lang.Objects;
 import org.opendds.jms.common.lang.Strings;
 
 /**
- * @author Steven Stallion
+ * @author  Weiqi Gao
  * @version $Revision$
  */
 public class MessageProducerImpl implements MessageProducer {

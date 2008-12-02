@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms;
 
 import java.io.ByteArrayInputStream;
@@ -16,6 +20,10 @@ import OpenDDS.JMS.MessageBodyKind;
 
 import org.opendds.jms.common.lang.Objects;
 
+/**
+ * @author  Weiqi Gao
+ * @version $Revision$
+ */
 public class BytesBodyFacade {
     private final MessageBody body;
     private DataInputStream input;

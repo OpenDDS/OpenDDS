@@ -22,6 +22,8 @@ public class CharacterType implements Type {
     }
 
     public Character valueOf(Object o) {
+        assert o != null;
+        
         if (o instanceof String) {
             String s = (String) o;
             return !Strings.isEmpty(s) ? s.charAt(0) : defaultValue();

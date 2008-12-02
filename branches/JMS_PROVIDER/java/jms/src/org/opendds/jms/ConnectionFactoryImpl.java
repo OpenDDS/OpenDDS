@@ -28,6 +28,10 @@ public class ConnectionFactoryImpl implements ConnectionFactory, Serializable {
     public ConnectionFactoryImpl(ManagedConnectionFactory mcf,
                                  ConnectionManager cxManager,
                                  ConnectionRequestInfo cxRequestInfo) {
+        assert mcf != null;
+        assert cxManager != null;
+        assert cxRequestInfo != null;
+
         this.mcf = mcf;
         this.cxManager = cxManager;
         this.cxRequestInfo = cxRequestInfo;

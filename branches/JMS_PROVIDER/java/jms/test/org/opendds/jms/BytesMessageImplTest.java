@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms;
 
 import javax.jms.BytesMessage;
@@ -13,6 +17,10 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Test;
 
+/**
+ * @author  Weiqi Gao
+ * @version $Revision$
+ */
 public class BytesMessageImplTest {
     private static final float FLOAT_EPSILON = 1e-6f;
     private static final double DOUBLE_EPSILON = 1e-12;
@@ -450,7 +458,7 @@ public class BytesMessageImplTest {
     @Test
     public void testClearBodyInReadOnlyState() throws JMSException {
         BytesMessage bytesMessage = new BytesMessageImpl(null);
-        
+
         bytesMessage.reset();
         cannotWriteBoolean(bytesMessage);
 

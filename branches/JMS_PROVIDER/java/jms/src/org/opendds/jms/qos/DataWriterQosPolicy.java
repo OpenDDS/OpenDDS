@@ -33,10 +33,11 @@ public class DataWriterQosPolicy implements QosPolicy<DataWriterQos> {
     }
 
     public void setQos(DataWriterQos qos) {
+        assert qos != null;
+
         PropertiesHelper.Property property;
-
         PropertiesHelper helper = new PropertiesHelper(properties);
-
+        
         // USER_DATA QosPolicy
         property = helper.find("USER_DATA.value");
         if (property.exists()) {

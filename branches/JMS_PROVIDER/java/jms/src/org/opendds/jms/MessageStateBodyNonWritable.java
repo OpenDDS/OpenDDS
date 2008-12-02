@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms;
 
 import javax.jms.MessageNotReadableException;
@@ -6,6 +10,9 @@ import javax.jms.MessageNotWriteableException;
 /**
  * Message body state where the message is not writable, but readable.
  * A freshly receiveed TextMessage, ObjectMessage and MapMessage that is in this state.
+ *
+ * @author  Weiqi Gao
+ * @version $Revision$
  */
 public class MessageStateBodyNonWritable implements MessageState {
     private AbstractMessageImpl message;

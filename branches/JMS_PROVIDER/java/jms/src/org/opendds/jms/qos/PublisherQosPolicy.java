@@ -30,8 +30,9 @@ public class PublisherQosPolicy implements QosPolicy<PublisherQos> {
     }
 
     public void setQos(PublisherQos qos) {
+        assert qos != null;
+        
         PropertiesHelper.Property property;
-
         PropertiesHelper helper = new PropertiesHelper(properties);
 
         // GROUP_DATA QosPolicy

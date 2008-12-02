@@ -29,6 +29,8 @@ public class LibIndex {
         private String resource;
 
         protected Entry(String resource) {
+            assert resource != null;
+
             this.resource = resource;
 
             // Determine library name (strip resource path)
@@ -49,6 +51,8 @@ public class LibIndex {
         }
 
         public InputStream openStream(ClassLoader loader) throws IOException {
+            assert loader != null;
+
             return loader.getResourceAsStream(resource);
         }
     }
@@ -80,6 +84,8 @@ public class LibIndex {
     }
 
     protected void parse(InputStream in) throws IOException {
+        assert in != null;
+
         boolean parsedHeader = false;
 
         BufferedReader reader =

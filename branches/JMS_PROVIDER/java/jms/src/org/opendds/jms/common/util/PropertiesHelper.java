@@ -40,6 +40,9 @@ public class PropertiesHelper {
     }
 
     public static void remap(Properties properties, Map<String, String> names) {
+        assert properties != null;
+        assert names != null;
+
         Enumeration en = properties.propertyNames();
         while (en.hasMoreElements()) {
             String name = (String) en.nextElement();
@@ -69,6 +72,8 @@ public class PropertiesHelper {
     private Properties properties;
 
     public PropertiesHelper(Properties properties) {
+        assert properties != null;
+        
         this.properties = properties;
     }
 

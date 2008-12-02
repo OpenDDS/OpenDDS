@@ -1,8 +1,16 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms;
 
 import javax.jms.Session;
 
-class MessageDispatcher implements Runnable {
+/**
+ * @author  Weiqi Gao
+ * @version $Revision$
+ */
+public class MessageDispatcher implements Runnable {
     private final AbstractMessageImpl message;
     private final DataReaderHandlePair dataReaderHandlePair;
     private final MessageConsumerImpl consumer;

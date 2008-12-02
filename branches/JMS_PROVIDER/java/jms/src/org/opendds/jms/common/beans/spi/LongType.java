@@ -21,6 +21,8 @@ public class LongType implements Type<Long> {
     }
 
     public Long valueOf(Object o) {
+        assert o != null;
+        
         if (o instanceof Number) {
             return ((Number) o).longValue();
 

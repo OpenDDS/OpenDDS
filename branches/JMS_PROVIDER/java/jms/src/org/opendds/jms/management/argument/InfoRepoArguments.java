@@ -9,7 +9,6 @@ import java.util.List;
 import org.opendds.jms.common.SvcConfDirective;
 import org.opendds.jms.common.lang.Strings;
 import org.opendds.jms.management.DynamicMBeanSupport;
-import org.opendds.jms.transport.Transports;
 
 /**
  * @author  Steven Stallion

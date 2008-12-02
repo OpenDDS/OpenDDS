@@ -36,10 +36,12 @@ public class SubscriberManager {
     private Subscriber localSubscriber;
 
     public SubscriberManager(ManagedConnectionImpl connection) throws ResourceException {
+        assert connection != null;
+        
         this.connection = connection;
         this.cxRequestInfo = connection.getConnectionRequestInfo();
 
-        transportManager = new TransportManager(cxRequestInfo.getSubscriberTransport());
+        this.transportManager = new TransportManager(cxRequestInfo.getSubscriberTransport());
     }
 
     protected Subscriber createSubscriber(boolean noLocal) throws JMSException {

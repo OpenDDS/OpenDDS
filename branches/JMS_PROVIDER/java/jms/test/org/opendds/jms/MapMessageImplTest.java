@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms;
 
 import java.util.Enumeration;
@@ -18,6 +22,10 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Test;
 
+/**
+ * @author  Weiqi Gao
+ * @version $Revision$
+ */
 public class MapMessageImplTest {
     private static final float FLOAT_EPSILON = 1e-6f;
     private static final double DOUBLE_EPSILON = 1e-12;

@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms;
 
 import java.util.ArrayList;
@@ -13,6 +17,10 @@ import OpenDDS.JMS.StreamItem;
 import org.opendds.jms.common.StreamItemConversion;
 import org.opendds.jms.common.lang.ByteArrays;
 
+/**
+ * @author  Weiqi Gao
+ * @version $Revision$
+ */
 public class StreamBodyFacade {
     private final MessageBody body;
     private final List<StreamItem> items;

@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms;
 
 import java.io.ByteArrayInputStream;
@@ -13,6 +17,10 @@ import javax.jms.ObjectMessage;
 import OpenDDS.JMS.MessageBodyKind;
 import OpenDDS.JMS.MessagePayload;
 
+/**
+ * @author  Weiqi Gao
+ * @version $Revision$
+ */
 public class ObjectMessageImpl extends AbstractMessageImpl implements ObjectMessage {
     public ObjectMessageImpl(SessionImpl sessionImpl) {
         super(sessionImpl);

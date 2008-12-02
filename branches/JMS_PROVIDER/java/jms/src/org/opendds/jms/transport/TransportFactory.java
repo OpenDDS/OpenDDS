@@ -32,6 +32,9 @@ public class TransportFactory {
     }
 
     public TransportFactory(String type, Properties properties) {
+        assert type != null;
+        assert properties != null;
+        
         this.type = type;
         this.properties = properties;
     }

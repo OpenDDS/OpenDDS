@@ -60,6 +60,8 @@ public class TopicImpl implements Serializable, Topic {
     }
 
     public DDS.Topic createDDSTopic(ConnectionImpl connection) throws JMSException {
+        assert connection != null;
+
         Logger logger = connection.getLogger();
 
         TopicQosHolder holder = new TopicQosHolder(QosPolicies.newTopicQos());

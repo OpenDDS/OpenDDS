@@ -26,8 +26,9 @@ public class TopicQosPolicy implements QosPolicy<TopicQos> {
     }
 
     public void setQos(TopicQos qos) {
-        PropertiesHelper.Property property;
+        assert qos != null;
 
+        PropertiesHelper.Property property;
         PropertiesHelper helper = new PropertiesHelper(properties);
 
         // TopicQos QosPolicies which are shared with DataReaderQos

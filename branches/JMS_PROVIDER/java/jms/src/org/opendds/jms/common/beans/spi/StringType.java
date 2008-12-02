@@ -19,6 +19,8 @@ public class StringType implements Type<String> {
     }
 
     public String valueOf(Object o) {
+        assert o != null;
+        
         return o.toString();
     }
 }

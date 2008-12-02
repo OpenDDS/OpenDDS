@@ -24,6 +24,8 @@ public class ClassLoaders {
     }
 
     public static URL getResource(String name, ClassLoader cl) {
+        assert name != null;
+
         return verifyResource(name, cl.getResource(name));
     }
 
@@ -34,12 +36,15 @@ public class ClassLoaders {
     public static Reader getResourceAsReader(String name, ClassLoader cl) {
         return new InputStreamReader(getResourceAsStream(name, cl));
     }
-    
+
     public static InputStream getResourceAsStream(String name) {
         return getResourceAsStream(name, getContextLoader());
     }
 
     public static InputStream getResourceAsStream(String name, ClassLoader cl) {
+        assert name != null;
+        assert cl != null;
+        
         return verifyResource(name, cl.getResourceAsStream(name));
     }
 
