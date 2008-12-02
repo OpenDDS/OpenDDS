@@ -32,8 +32,8 @@ import org.opendds.jms.transport.TransportFactory;
  * @version $Revision$
  */
 public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
-    private String clientId;
-    private Integer domainId;
+    private String clientID;
+    private Integer domainID;
     private String participantQosPolicy;
     private String publisherQosPolicy;
     private String publisherTransport;
@@ -42,20 +42,20 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
     private String transportType;
     private String persistenceManager;
 
-    public String getClientId() {
-        return clientId;
+    public String getClientID() {
+        return clientID;
     }
 
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
+    public void setClientID(String clientID) {
+        this.clientID = clientID;
     }
 
     public Integer getDomainID() {
-        return domainId;
+        return domainID;
     }
 
-    public void setDomainID(Integer domainId) {
-        this.domainId = domainId;
+    public void setDomainID(Integer domainID) {
+        this.domainID = domainID;
     }
 
     public String getParticipantQosPolicy() {
@@ -121,7 +121,7 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
     public void setLogWriter(PrintWriter log) {}
 
     public void validate() throws ResourceException {
-        if (domainId == null) {
+        if (domainID == null) {
             throw new IllegalStateException("DomainId is a required config-property!");
         }
 
@@ -137,11 +137,11 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
     public Object createConnectionFactory(ConnectionManager cxManager) throws ResourceException {
         validate();
 
-        PersistenceManager pm = null;
-        if (!Strings.isEmpty(persistenceManager)) {
+        PersistenceManager persistenceManager = null;
+        if (!Strings.isEmpty(this.persistenceManager)) {
             JndiHelper helper = new JndiHelper();
             try {
-                pm = helper.lookup(persistenceManager);
+                persistenceManager = helper.lookup(this.persistenceManager);
 
             } catch (NamingException e) {
                 throw new ResourceException(e);
@@ -149,13 +149,13 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
         }
 
         ConnectionRequestInfo cxRequestInfo =
-            new ConnectionRequestInfoImpl(clientId, domainId,
+            new ConnectionRequestInfoImpl(clientID, domainID,
                 new ParticipantQosPolicy(participantQosPolicy),
                 new PublisherQosPolicy(publisherQosPolicy),
                 new TransportFactory(transportType, publisherTransport),
                 new SubscriberQosPolicy(subscriberQosPolicy),
                 new TransportFactory(transportType, subscriberTransport),
-                pm);
+                persistenceManager);
 
         return new ConnectionFactoryImpl(this, cxManager, cxRequestInfo);
     }
@@ -188,8 +188,8 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
     @Override
     public int hashCode() {
         return Objects.hashCode(
-            clientId,
-            domainId,
+            clientID,
+            domainID,
             participantQosPolicy,
             publisherQosPolicy,
             publisherTransport,
@@ -210,8 +210,8 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
         }
 
         ManagedConnectionFactoryImpl mcf = (ManagedConnectionFactoryImpl) o;
-        return Objects.equals(clientId, mcf.clientId)
-            && Objects.equals(domainId, mcf.domainId)
+        return Objects.equals(clientID, mcf.clientID)
+            && Objects.equals(domainID, mcf.domainID)
             && Objects.equals(participantQosPolicy, mcf.participantQosPolicy)
             && Objects.equals(publisherQosPolicy, mcf.publisherQosPolicy)
             && Objects.equals(publisherTransport, mcf.publisherTransport)

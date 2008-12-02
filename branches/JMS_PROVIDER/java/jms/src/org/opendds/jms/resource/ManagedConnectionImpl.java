@@ -19,7 +19,6 @@ import javax.resource.spi.ManagedConnection;
 import javax.resource.spi.ManagedConnectionMetaData;
 import javax.security.auth.Subject;
 import javax.transaction.xa.XAResource;
-import javax.jms.JMSException;
 
 import DDS.DomainParticipant;
 import DDS.DomainParticipantFactory;
@@ -33,7 +32,6 @@ import OpenDDS.JMS.MessagePayloadTypeSupportImpl;
 import org.opendds.jms.ConnectionImpl;
 import org.opendds.jms.PublisherManager;
 import org.opendds.jms.SubscriberManager;
-import org.opendds.jms.persistence.PersistenceManager;
 import org.opendds.jms.common.Version;
 import org.opendds.jms.common.lang.Objects;
 import org.opendds.jms.common.util.Logger;

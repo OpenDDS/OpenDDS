@@ -26,7 +26,6 @@ public class DCPSInfoRepoService extends DynamicMBeanSupport implements ServiceM
 
     private boolean started;
     private String service;
-
     private DCPSInfoRepo instance;
     private Thread instanceThread;
 

@@ -4,6 +4,8 @@
 
 package org.opendds.jms;
 
+import java.util.Arrays;
+
 import javax.jms.JMSException;
 import javax.resource.ResourceException;
 
@@ -61,7 +63,7 @@ public class PublisherManager {
                 throw new JMSException("Unable to create Publisher; please check logs");
             }
             logger.debug("Created %s %s", publisher, policy);
-            logger.debug("%s using PARTITION %s", publisher, holder.value.partition);
+            logger.debug("%s using PARTITION %s", publisher, Arrays.deepToString(holder.value.partition.name));
 
             TransportImpl transport = transportManager.getTransport();
             if (transport.attach_to_publisher(publisher).value() != AttachStatus._ATTACH_OK) {

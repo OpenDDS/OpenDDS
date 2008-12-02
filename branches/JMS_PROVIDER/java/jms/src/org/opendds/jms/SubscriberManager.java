@@ -4,6 +4,8 @@
 
 package org.opendds.jms;
 
+import java.util.Arrays;
+
 import javax.jms.JMSException;
 import javax.resource.ResourceException;
 
@@ -66,7 +68,7 @@ public class SubscriberManager {
                 throw new JMSException("Unable to create Subscriber; please check logs");
             }
             logger.debug("Created %s %s", subscriber, policy);
-            logger.debug("%s using PARTITION %s", subscriber, holder.value.partition.name);
+            logger.debug("%s using PARTITION %s", subscriber, Arrays.deepToString(holder.value.partition.name));
 
             TransportImpl transport = transportManager.getTransport();
             if (transport.attach_to_subscriber(subscriber) != AttachStatus.ATTACH_OK) {

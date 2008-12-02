@@ -20,8 +20,8 @@ import org.opendds.jms.transport.TransportFactory;
  * @version $Revision$
  */
 public class ConnectionRequestInfoImpl implements ConnectionRequestInfo, Serializable {
-    private String clientId;
-    private int domainId;
+    private String clientID;
+    private int domainID;
     private ParticipantQosPolicy participantQosPolicy;
     private PublisherQosPolicy publisherQosPolicy;
     private TransportFactory publisherTransport;
@@ -29,16 +29,16 @@ public class ConnectionRequestInfoImpl implements ConnectionRequestInfo, Seriali
     private TransportFactory subscriberTransport;
     private PersistenceManager persistenceManager;
 
-    public ConnectionRequestInfoImpl(String clientId,
-                                     int domainId,
+    public ConnectionRequestInfoImpl(String clientID,
+                                     int domainID,
                                      ParticipantQosPolicy participantQosPolicy,
                                      PublisherQosPolicy publisherQosPolicy,
                                      TransportFactory publisherTransport,
                                      SubscriberQosPolicy subscriberQosPolicy,
                                      TransportFactory subscriberTransport,
                                      PersistenceManager persistenceManager) {
-        this.clientId = clientId;
-        this.domainId = domainId;
+        this.clientID = clientID;
+        this.domainID = domainID;
         this.participantQosPolicy = participantQosPolicy;
         this.publisherQosPolicy = publisherQosPolicy;
         this.publisherTransport = publisherTransport;
@@ -48,11 +48,11 @@ public class ConnectionRequestInfoImpl implements ConnectionRequestInfo, Seriali
     }
 
     public String getClientID() {
-        return clientId;
+        return clientID;
     }
 
     public int getDomainID() {
-        return domainId;
+        return domainID;
     }
 
     public ParticipantQosPolicy getParticipantQosPolicy() {
@@ -82,8 +82,8 @@ public class ConnectionRequestInfoImpl implements ConnectionRequestInfo, Seriali
     @Override
     public int hashCode() {
         return Objects.hashCode(
-            clientId,
-            domainId,
+            clientID,
+            domainID,
             participantQosPolicy,
             publisherQosPolicy,
             publisherTransport,
@@ -103,8 +103,8 @@ public class ConnectionRequestInfoImpl implements ConnectionRequestInfo, Seriali
         }
 
         ConnectionRequestInfoImpl cxRequestInfo = (ConnectionRequestInfoImpl) o;
-        return Objects.equals(clientId, cxRequestInfo.clientId)
-            && Objects.equals(domainId, cxRequestInfo.domainId)
+        return Objects.equals(clientID, cxRequestInfo.clientID)
+            && Objects.equals(domainID, cxRequestInfo.domainID)
             && Objects.equals(participantQosPolicy, cxRequestInfo.participantQosPolicy)
             && Objects.equals(publisherQosPolicy, cxRequestInfo.publisherQosPolicy)
             && Objects.equals(publisherTransport, cxRequestInfo.publisherTransport)

@@ -53,7 +53,7 @@ public class PersistenceManagerService extends DynamicMBeanSupport implements Se
         registerAttribute("MaxFetchDepth", Integer.class);
         registerAttribute("Password", String.class);
         registerAttribute("QuerySubstitutions", String.class);
-        registerAttribute("ShowSQL", Boolean.class);
+        registerAttribute("ShowSql", Boolean.class);
         registerAttribute("UseSqlComments", Boolean.class);
         registerAttribute("Username", String.class);
     }
@@ -82,7 +82,7 @@ public class PersistenceManagerService extends DynamicMBeanSupport implements Se
         return started;
     }
 
-    protected Map<String, String> remappedAttributes() {
+    protected Map<String, String> mappedPropertyNames() {
         Map<String, String> names = new HashMap<String, String>();
 
         names.put("CacheProviderClass", "hibernate.cache.provider_class");
@@ -103,8 +103,8 @@ public class PersistenceManagerService extends DynamicMBeanSupport implements Se
         names.put("MaxFetchDepth", "hibernate.max_fetch_depth");
         names.put("Password", "hibernate.connection.password");
         names.put("QuerySubstitutions", "hibernate.query.substitutions");
-        names.put("ShowSQL", "hibernate.show_sql");
-        names.put("UseSQLComments", "hibernate.use_sql_comments");
+        names.put("ShowSql", "hibernate.show_sql");
+        names.put("UseSqlComments", "hibernate.use_sql_comments");
         names.put("Username", "hibernate.connection.username");
 
         return names;
@@ -121,7 +121,7 @@ public class PersistenceManagerService extends DynamicMBeanSupport implements Se
         logger = Logger.getLogger(service);
 
         Properties properties = attributes.toProperties();
-        PropertiesHelper.remap(properties, remappedAttributes());
+        PropertiesHelper.remap(properties, mappedPropertyNames());
 
         logger.debug("Initializing with properties: %s", properties);
         instance = new PersistenceManager(properties);
