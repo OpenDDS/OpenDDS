@@ -65,14 +65,14 @@ public class MessageDeliveryHelper implements ConnectionStateListener {
         checkLock();
 
         start = true;
-        startCondition.notifyAll();
+        startCondition.signalAll();
     }
 
     public void notifyStop() {
         checkLock();
 
         start = false;
-        startCondition.notifyAll();
+        startCondition.signalAll();
     }
 
     public void awaitStart() throws InterruptedException {
@@ -87,14 +87,14 @@ public class MessageDeliveryHelper implements ConnectionStateListener {
         checkLock();
 
         busy = true;
-        busyCondition.notifyAll();
+        busyCondition.signalAll();
     }
 
     public void notifyIdle() {
         checkLock();
 
         busy = false;
-        busyCondition.notifyAll();
+        busyCondition.signalAll();
     }
 
     public void awaitIdle() throws InterruptedException {

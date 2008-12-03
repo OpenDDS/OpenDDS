@@ -64,7 +64,7 @@ public class DCPSInfoRepoService extends DynamicMBeanSupport implements ServiceM
         logger = Logger.getLogger(service);
         logger.info("Starting %s", service);
 
-        logger.debug("Initializing with arguments: \"%s\"", arguments);
+        logger.debug("Initializing with arguments %s", arguments);
         instance = new DCPSInfoRepo(arguments.toArgs());
 
         instanceThread = new Thread(instance, "DCPSInfoRepo");

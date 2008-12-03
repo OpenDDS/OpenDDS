@@ -70,7 +70,7 @@ public class ParticipantFactoryService extends DynamicMBeanSupport implements Se
         log = Logger.getLogger(service);
         log.info("Initializing %s", service);
 
-        log.debug("Initializing with arguments: \"%s\"", arguments);
+        log.debug("Initializing with arguments %s", arguments);
         instance = TheParticipantFactory.WithArgs(arguments.toStringSeq());
 
         if (instance == null) {
