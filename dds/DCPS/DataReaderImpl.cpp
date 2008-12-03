@@ -1748,6 +1748,15 @@ void DataReaderImpl::process_latency( const ReceivedDataSample& sample)
         location->second.add_stat( latency);
       }
 
+      if( DCPS_debug_level > 9){
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DataReaderImpl::process_latency() - ")
+          ACE_TEXT("measured latency of %dS, %dmS for current sample.\n"),
+          latency.sec(),
+          latency.msec()
+        ));
+      }
+
       // Check latency against the budget.
       if( time_value_to_duration( latency)
           > this->qos_.latency_budget.duration) {
