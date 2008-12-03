@@ -6,6 +6,8 @@
 #include "TransportImpl.h"
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/DataReaderImpl.h"
+#include "dds/DCPS/PublisherImpl.h"
+#include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/Util.h"
 #include "tao/debug.h"
 #include <sstream>
@@ -631,4 +633,24 @@ OpenDDS::DCPS::TransportImpl::remove_ack (RepoId pub_id, RepoId sub_id)
   this->acked_sub_map_.remove(pub_id, sub_id);
 }
 
+OpenDDS::DCPS::AttachStatus
+OpenDDS::DCPS::TransportImpl::attach (DDS::Publisher_ptr pub)
+{
+  OpenDDS::DCPS::PublisherImpl* pub_impl = dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub);
+  if (0 == pub)
+  {
+    return ATTACH_ERROR;
+  }
+  return pub_impl->attach_transport(this);
+}
 
+OpenDDS::DCPS::AttachStatus
+OpenDDS::DCPS::TransportImpl::attach (DDS::Subscriber_ptr sub)
+{
+  OpenDDS::DCPS::SubscriberImpl* sub_impl = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*> (sub);
+  if (0 == sub)
+  {
+    return ATTACH_ERROR;
+  }
+  return sub_impl->attach_transport(this);
+}
