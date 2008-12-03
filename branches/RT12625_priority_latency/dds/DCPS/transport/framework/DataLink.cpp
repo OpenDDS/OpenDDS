@@ -46,8 +46,14 @@ OpenDDS::DCPS::DataLink::DataLink(TransportImpl* impl)
       this->thr_per_con_send_task_ = new ThreadPerConnectionSendTask (this);
       if (this->thr_per_con_send_task_->open () == -1) {
         ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) Data::DataLink: ")
+          ACE_TEXT("(%P|%t) DataLink::DataLink: ")
           ACE_TEXT("failed to open ThreadPerConnectionSendTask\n")
+        ));
+
+      } else if( DCPS_debug_level > 4) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DataLink::DataLink - ")
+          ACE_TEXT("started new thread to send data with.\n")
         ));
       }
     }
