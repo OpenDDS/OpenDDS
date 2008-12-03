@@ -17,6 +17,7 @@ public class ORBArguments implements DynamicArgumentProvider {
     public static final String ORB_DEBUG_LEVEL = "ORBDebugLevel";
     public static final String ORB_LOG_FILE = "ORBLogFile";
     public static final String ORB_ARGS = "ORBArgs";
+    public static final String ORB_DIRECTIVES = "ORBDirectives";
 
     private DynamicMBeanSupport instance;
 
@@ -31,6 +32,7 @@ public class ORBArguments implements DynamicArgumentProvider {
         instance.registerAttribute(ORB_DEBUG_LEVEL, Integer.class);
         instance.registerAttribute(ORB_LOG_FILE, String.class);
         instance.registerAttribute(ORB_ARGS, String.class);
+        instance.registerAttribute(ORB_DIRECTIVES, String.class);
     }
 
     public void addArgs(List<String> args) throws Exception {
@@ -40,7 +42,8 @@ public class ORBArguments implements DynamicArgumentProvider {
         writer.writeIfSet("-ORBDebugLevel", ORB_DEBUG_LEVEL);
         writer.writeIfSet("-ORBLogFile", ORB_LOG_FILE);
 
-        writer.writeDelimited(ORB_ARGS);
+        writer.writeDelimitedIfSet(ORB_ARGS);
+        writer.writeMultiLineIfSet("-ORBSvcConfDirective", ORB_DIRECTIVES);
 
         writer.writeTo(args);
     }

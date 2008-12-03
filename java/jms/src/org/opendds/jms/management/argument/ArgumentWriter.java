@@ -4,6 +4,8 @@
 
 package org.opendds.jms.management.argument;
 
+import java.io.BufferedReader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -35,14 +37,29 @@ public class ArgumentWriter {
         }
     }
 
-    public void writeDelimited(String attribute) throws Exception {
+    public void writeDelimitedIfSet(String attribute) throws Exception {
         String value = (String) instance.getAttribute(attribute);
 
         if (!Strings.isEmpty(value)) {
             StringTokenizer stok = new StringTokenizer(value, DynamicArguments.DELIMS);
-
             while (stok.hasMoreTokens()) {
                 write(stok.nextToken());
+            }
+        }
+    }
+
+    public void writeMultiLineIfSet(String arg, String attribute) throws Exception {
+        String value = (String) instance.getAttribute(attribute);
+
+        if (!Strings.isEmpty(value)) {
+            BufferedReader reader = new BufferedReader(new StringReader(value));
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (Strings.isEmpty(line)) {
+                    continue;
+                }
+                write(arg, line.trim());
             }
         }
     }

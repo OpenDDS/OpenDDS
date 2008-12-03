@@ -16,6 +16,10 @@
         <attribute name="ORBDebugLevel">10</attribute>
         <attribute name="ORBListenEndpoints">iiop://:6667</attribute>
         <attribute name="ORBLogFile">${jboss.server.log.dir}/DDS.log</attribute>
+        <attribute name="ORBDirectives">
+            static Client_Strategy_Factory "-ORBWaitStrategy rw -ORBTransportMuxStrategy exclusive -ORBConnectStrategy blocked -ORBConnectionHandlerCleanup 1"
+            static Resource_Factory "-ORBFlushingStrategy blocking"
+        </attribute>
         <attribute name="TransportType">SimpleTcp</attribute>
         <depends>jboss.jca:service=RARDeployment,name='opendds-jms-@VERSION@.rar'</depends>
     </mbean>
