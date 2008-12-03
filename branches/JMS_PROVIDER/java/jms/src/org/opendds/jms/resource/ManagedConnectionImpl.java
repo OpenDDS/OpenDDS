@@ -43,7 +43,7 @@ import org.opendds.jms.qos.QosPolicies;
  * @version $Revision$
  */
 public class ManagedConnectionImpl implements ManagedConnection {
-    private Logger log;
+    private Logger logger;
 
     private boolean destroyed;
     private Subject subject;
@@ -63,7 +63,7 @@ public class ManagedConnectionImpl implements ManagedConnection {
     public ManagedConnectionImpl(Subject subject,
                                  ConnectionRequestInfoImpl cxRequestInfo) throws ResourceException {
 
-        log = Logger.getLogger("Domain", cxRequestInfo.getDomainID());
+        logger = Logger.getLogger("Domain", cxRequestInfo.getDomainID());
 
         this.subject = subject;
         this.cxRequestInfo = cxRequestInfo;
@@ -72,7 +72,7 @@ public class ManagedConnectionImpl implements ManagedConnection {
         if (dpf == null) {
             throw new ResourceException("Unable to get DomainParticipantFactory instance; please check logs");
         }
-        log.debug("Using %s", dpf);
+        logger.debug("Using %s", dpf);
 
         DomainParticipantQosHolder holder =
             new DomainParticipantQosHolder(QosPolicies.newParticipantQos());
@@ -86,26 +86,26 @@ public class ManagedConnectionImpl implements ManagedConnection {
         if (participant == null) {
             throw new ResourceException("Unable to create DomainParticipant; please check logs");
         }
-        log.debug("Created %s %s", participant, policy);
+        logger.debug("Created %s %s", participant, policy);
 
-        log.debug("Connection ID is %s", getConnectionId());
+        logger.debug("Connection ID is %s", getConnectionId());
 
         MessagePayloadTypeSupportImpl ts = new MessagePayloadTypeSupportImpl();
         if (ts.register_type(participant, "") != RETCODE_OK.value) {
             throw new ResourceException("Unable to register type; please check logs");
         }
         typeName = ts.get_type_name();
-        log.debug("Registered %s", typeName);
+        logger.debug("Registered %s", typeName);
 
         publisherManager = new PublisherManager(this);
-        log.debug("Created %s", publisherManager);
+        logger.debug("Created %s", publisherManager);
 
         subscriberManager = new SubscriberManager(this);
-        log.debug("Created %s", subscriberManager);
+        logger.debug("Created %s", subscriberManager);
     }
 
     public Logger getLogger() {
-        return log;
+        return logger;
     }
 
     public boolean isDestroyed() {
@@ -133,11 +133,11 @@ public class ManagedConnectionImpl implements ManagedConnection {
         return typeName;
     }
 
-    public PublisherManager getPublishers() {
+    public PublisherManager getPublisherManager() {
         return publisherManager;
     }
 
-    public SubscriberManager getSubscribers() {
+    public SubscriberManager getSubscriberManager() {
         return subscriberManager;
     }
 
@@ -172,7 +172,7 @@ public class ManagedConnectionImpl implements ManagedConnection {
         synchronized (handles) {
             handles.add(handle);
         }
-        log.debug("Associated %s", handle);
+        logger.debug("Associated %s", handle);
     }
 
     public Object getConnection(Subject subject,
@@ -184,7 +184,7 @@ public class ManagedConnectionImpl implements ManagedConnection {
         synchronized (handles) {
             handles.add(handle);
         }
-        log.debug("Created %s", handle);
+        logger.debug("Created %s", handle);
 
         return handle; // re-configuration not supported
     }
@@ -205,7 +205,7 @@ public class ManagedConnectionImpl implements ManagedConnection {
     public synchronized void cleanup() throws ResourceException {
         checkDestroyed();
 
-        log.debug("Cleaning up %s", this);
+        logger.debug("Cleaning up %s", this);
 
         synchronized (handles) {
             for (ConnectionImpl handle : handles) {
@@ -218,13 +218,13 @@ public class ManagedConnectionImpl implements ManagedConnection {
     public synchronized void destroy() throws ResourceException {
         checkDestroyed();
 
-        log.debug("Destroying %s", this);
+        logger.debug("Destroying %s", this);
 
         cleanup();
 
         participant.delete_contained_entities();
         dpf.delete_participant(participant);
-        log.debug("Deleted %s", participant);
+        logger.debug("Deleted %s", participant);
 
         subject = null;
         cxRequestInfo = null;
