@@ -42,8 +42,8 @@ public class ConnectionImpl implements Connection {
     private boolean started;
     private ManagedConnectionImpl connection;
     private DomainParticipant participant;
-    private PublisherManager publishers;
-    private SubscriberManager subscribers;
+    private PublisherManager publisherManager;
+    private SubscriberManager subscriberManager;
     private String clientID;
     private PersistenceManager persistenceManager;
     private ExceptionListener exceptionListener;
@@ -64,8 +64,8 @@ public class ConnectionImpl implements Connection {
 
         this.logger = connection.getLogger();
         this.participant = connection.getParticipant();
-        this.publishers = connection.getPublishers();
-        this.subscribers = connection.getSubscribers();
+        this.publisherManager = connection.getPublisherManager();
+        this.subscriberManager = connection.getSubscriberManager();
 
         ConnectionRequestInfoImpl cxRequestInfo = connection.getConnectionRequestInfo();
         this.clientID = cxRequestInfo.getClientID();
@@ -105,7 +105,7 @@ public class ConnectionImpl implements Connection {
 
     public Publisher getPublisher() throws JMSException {
         try {
-            return publishers.getPublisher();
+            return publisherManager.getPublisher();
 
         } catch (JMSException e) {
             throw notifyExceptionListener(e);
@@ -114,7 +114,7 @@ public class ConnectionImpl implements Connection {
 
     public Subscriber getLocalSubscriber() throws JMSException {
         try {
-            return subscribers.getLocalSubscriber();
+            return subscriberManager.getLocalSubscriber();
 
         } catch (JMSException e) {
             throw notifyExceptionListener(e);
@@ -123,7 +123,7 @@ public class ConnectionImpl implements Connection {
 
     public Subscriber getRemoteSubscriber() throws JMSException {
         try {
-            return subscribers.getRemoteSubscriber();
+            return subscriberManager.getRemoteSubscriber();
 
         } catch (JMSException e) {
             throw notifyExceptionListener(e);

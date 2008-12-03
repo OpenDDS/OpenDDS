@@ -1,3 +1,10 @@
+Wed Dec  3 01:34:37 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/src/org/opendds/jms/ConnectionImpl.java:
+        * java/jms/src/org/opendds/jms/resource/ManagedConnectionImpl.java:
+
+          Fixed SubscriberManager and PublisherManager naming.
+
 Wed Dec  3 01:19:21 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/OpenDDS.ipr:
