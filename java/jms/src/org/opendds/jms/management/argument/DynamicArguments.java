@@ -5,7 +5,7 @@
 package org.opendds.jms.management.argument;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Arrays;
 import java.util.List;
 
 import org.omg.CORBA.StringSeqHolder;
@@ -63,19 +63,11 @@ public class DynamicArguments {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
         try {
-            Iterator<String> itr = asList().iterator();
-            while (itr.hasNext()) {
-                sb.append(itr.next());
-                if (itr.hasNext()) {
-                    sb.append(' ');
-                }
-            }
+            return Arrays.deepToString(toArgs());
 
         } catch (Exception e) {
-            logger.error("Unexpected problem rendering toString(): %s", e.getMessage(), e);
+            throw new IllegalStateException(e);
         }
-        return sb.toString();
     }
 }
