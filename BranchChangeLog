@@ -1,3 +1,15 @@
+Wed Dec  3 20:44:56 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Added a diagnostic to provide latency information per sample
+          received.
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Added a diagnostic message when a thread is started to
+          specifically handle sending per connection.
+
 Tue Dec  2 22:06:03 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/transport/ReliableMulticast/ReliableMulticastDataLink.h:
