@@ -19,6 +19,8 @@
 #include "ace/OS_NS_sys_time.h"
 
 #include <string>
+#include <sstream>
+#include <fstream>
 #include <algorithm>
 
 // --------------------------------------------------
@@ -27,7 +29,26 @@ namespace
   /**
    * @todo Make the backing store name configurable.
    */
-  char const dds_backing_store[] = "OpenDDS-durable-data";
+  char const dds_backing_store[] = "OpenDDS-durable-data-dir";
+
+
+  void cleanup_directory (const std::vector<std::string> & path)
+  {
+    if (path.size () == 0) return;
+    using ::OpenDDS::FileSystemStorage::Directory;
+    Directory::Ptr dir = Directory::create (dds_backing_store);
+    dir = dir->get_dir (path);
+    Directory::Ptr parent = dir->parent ();
+    dir->remove ();
+    // clean up empty directories
+    while (!parent.is_nil () &&
+           (parent->begin_dirs () == parent->end_dirs ()))
+    {
+      Directory::Ptr to_delete = parent;
+      parent = parent->parent ();
+      to_delete->remove ();
+    }
+  }
 
   /**
    * @class Cleanup_Handler
@@ -47,12 +68,14 @@ namespace
 
     Cleanup_Handler (list_type & sample_list,
                      list_difference_type index,
-                     ACE_Allocator * allocator)
+                     ACE_Allocator * allocator,
+                     const std::vector<std::string> & path)
       : sample_list_ (sample_list)
       , index_ (index)
       , allocator_ (allocator)
       , tid_ (-1)
       , timer_ids_ (0)
+      , path_ (path)
     {
       this->reference_counting_policy ().value (
         ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
@@ -78,6 +101,8 @@ namespace
                     this->allocator_->free,
                     data_queue_type);
       queue = 0;
+
+      cleanup_directory (path_);
 
       // No longer any need to keep track of the timer ID.
       this->timer_ids_->remove (this->tid_);
@@ -122,6 +147,7 @@ namespace
     OpenDDS::DCPS::DataDurabilityCache::timer_id_list_type *
     timer_ids_;
 
+    std::vector<std::string> path_;
   };
 }
 
@@ -155,6 +181,26 @@ OpenDDS::DCPS
   // The user's data is stored in the first message block
   // continuation.
   ACE_Message_Block const * const data = element.sample_->cont ();
+  init (data);
+}
+
+
+OpenDDS::DCPS
+::DataDurabilityCache::sample_data_type::sample_data_type (
+  ::DDS::Time_t timestamp, const ACE_Message_Block & mb, ACE_Allocator * a)
+  : length_ (0)
+  , sample_ (0)
+  , source_timestamp_ (timestamp)
+  , allocator_ (a)
+{
+  init (&mb);
+}
+
+
+void
+OpenDDS::DCPS::DataDurabilityCache::sample_data_type::init
+  (const ACE_Message_Block * data)
+{
   this->length_ = data->total_length ();
 
   ACE_ALLOCATOR (this->sample_,
@@ -240,74 +286,117 @@ OpenDDS::DCPS::DataDurabilityCache::sample_data_type::set_allocator (
 OpenDDS::DCPS::DataDurabilityCache::DataDurabilityCache (
   ::DDS::DurabilityQosPolicyKind kind)
   : allocator_ (make_allocator (kind))
+  , kind_ (kind)
   , samples_ (0)
   , cleanup_timer_ids_ ()
   , lock_ ()
   , reactor_ (0)
 {
-  void * the_map = 0;
-  if (this->allocator_->find (dds_backing_store, the_map) == 0)
+  ACE_Allocator * const allocator = this->allocator_.get ();
+  ACE_NEW_MALLOC (
+    this->samples_,
+    static_cast<sample_map_type *> (
+      allocator->malloc (sizeof (sample_map_type))),
+    sample_map_type (allocator));
+
+  typedef DurabilityQueue<sample_data_type> data_queue_type;
+
+  if (this->kind_ == ::DDS::PERSISTENT_DURABILITY_QOS)
   {
-    // A sample map was found in the backing store.
-    this->samples_ = static_cast<sample_map_type *> (the_map);
-
-    ACE_Allocator * const allocator = this->allocator_.get ();
-
-    // Reset allocator address in case it differs from the value
-    // stored in the backing store.
-    sample_map_type::iterator const map_end = this->samples_->end ();
-    for (sample_map_type::iterator s = this->samples_->begin ();
-         s != map_end;
-         ++s)
+    // Read data from the filesystem and create the in-memory data structures
+    // as if we had called insert() once for each "datawriter" directory.
+    using OpenDDS::FileSystemStorage::Directory;
+    using OpenDDS::FileSystemStorage::File;
+    Directory::Ptr root_dir = Directory::create (dds_backing_store);
+    std::vector<std::string> path (4); // domain, topic, type, datawriter
+    for (Directory::DirectoryIterator domain = root_dir->begin_dirs (),
+         domain_end = root_dir->end_dirs (); domain != domain_end; ++domain)
     {
-      sample_list_type * const list = (*s).int_id_;
-      list->set_allocator (allocator);
-
-      size_t const len = list->size ();;
-      for (size_t l = 0; l != len; ++l)
+      path[0] = domain->name ();
+      ::DDS::DomainId_t domain_id;
       {
-        typedef DurabilityQueue<sample_data_type> data_queue_type;
-        data_queue_type * const q = (*list)[l];
+        std::istringstream iss (path[0]);
+        iss >> domain_id;
+      }
 
-        q->set_allocator (allocator);
+      for (Directory::DirectoryIterator topic = domain->begin_dirs (),
+           topic_end = domain->end_dirs (); topic != topic_end; ++topic)
+      {
+        path[1] = topic->name ();
 
-        typedef DurabilityQueue<sample_data_type> data_queue_type;
-        for (data_queue_type::ITERATOR j = q->begin ();
-             !j.done ();
-             j.advance ())
+        for (Directory::DirectoryIterator type = topic->begin_dirs (),
+             type_end = topic->end_dirs (); type != type_end; ++type)
         {
-          sample_data_type * data = 0;
-          if (j.next (data) != 0)
+          path[2] = type->name ();
+
+          key_type key (domain_id, path[1].c_str (), path[2].c_str (),
+                        allocator);
+          sample_list_type * sample_list = 0;
+          ACE_NEW_MALLOC (sample_list,
+            static_cast<sample_list_type *> (
+              allocator->malloc (sizeof (sample_list_type))),
+            sample_list_type (0, static_cast<data_queue_type *> (0),
+                              allocator));
+          this->samples_->bind (key, sample_list, allocator);
+
+          for (Directory::DirectoryIterator dw = type->begin_dirs (),
+               dw_end = type->end_dirs (); dw != dw_end; ++dw)
           {
-            data->set_allocator (allocator);
+            path[3] = dw->name ();
+
+            size_t old_len = sample_list->size ();
+            sample_list->size (old_len + 1);
+            data_queue_type *& slot = (*sample_list)[old_len];
+
+            // This variable is called "samples" in the insert() method be
+            // we already have a "samples_" which is the overall data structure.
+            data_queue_type * sample_queue = 0;
+            ACE_NEW_MALLOC (sample_queue,
+              static_cast<data_queue_type *> (
+                allocator->malloc (sizeof (data_queue_type))),
+              data_queue_type (allocator));
+
+            slot = sample_queue;
+            sample_queue->fs_path_ = path;
+
+            for (Directory::FileIterator file = dw->begin_files (),
+                 file_end = dw->end_files (); file != file_end; ++file)
+            {
+              std::ifstream is;
+              if (!file->read (is))
+              {
+                //TODO: error logging
+                continue;
+              }
+
+              ::DDS::Time_t timestamp;
+              is >> timestamp.sec >> timestamp.nanosec >> std::noskipws;
+              is.get(); // consume separator
+
+              const size_t CHUNK = 4096;
+              ACE_Message_Block mb (CHUNK);
+              ACE_Message_Block * current = &mb;
+              while (!is.eof ())
+              {
+                is.read (current->wr_ptr (), current->space ());
+                if (is.bad ()) break;
+                current->wr_ptr (is.gcount ());
+                if (current->space () == 0)
+                {
+                  ACE_Message_Block * old = current;
+                  current = new ACE_Message_Block (CHUNK);
+                  old->cont (current);
+                }
+              }
+
+              sample_queue->enqueue_tail (
+                sample_data_type (timestamp, mb, allocator));
+
+              if (mb.cont ()) mb.cont ()->release (); // delete the cont() chain
+            }
           }
         }
       }
-    }
-  }
-  else
-  {
-    // No backing store exists.  Create a new sample map.
-    ACE_NEW_MALLOC (
-      this->samples_,
-      static_cast<sample_map_type *> (
-        this->allocator_->malloc (sizeof (sample_map_type))),
-      sample_map_type (this->allocator_.get ()));
-
-    if (this->allocator_->bind (dds_backing_store,
-                                this->samples_) == -1)
-    {
-      if (OpenDDS::DCPS::DCPS_debug_level >= 1
-          && errno != ENOTSUP)
-      {
-        ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT ("(%P|%t) ERROR - Unable to bind data ")
-                    ACE_TEXT ("durability map\n")
-                    ACE_TEXT ("address to backing store name ")
-                    ACE_TEXT ("in allocator\n")));
-      }
- 
-      this->allocator_->remove ();
     }
   }
 
@@ -406,17 +495,37 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
                       type_name,
                       this->allocator_.get ());
   DataSampleList::iterator the_end (the_data.end ());
-
   sample_list_type * sample_list = 0;
 
   typedef DurabilityQueue<sample_data_type> data_queue_type;
   data_queue_type ** slot = 0;
   data_queue_type * samples = 0;  // sample_list_type::value_type
 
+  using OpenDDS::FileSystemStorage::Directory;
+  using OpenDDS::FileSystemStorage::File;
+  Directory::Ptr dir;
+  std::vector<std::string> path;
   {
     ACE_Allocator * const allocator = this->allocator_.get ();
 
     ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, guard, this->lock_, false);
+
+    if (this->kind_ == ::DDS::PERSISTENT_DURABILITY_QOS)
+    {
+      dir = Directory::create (dds_backing_store);
+      std::ostringstream oss;
+      oss << domain_id;
+      path.push_back (oss.str ());
+      path.push_back (topic_name);
+      path.push_back (type_name);
+      dir = dir->get_dir (path);
+      // dir is now the "type" directory, which is shared by all datawriters of
+      // the domain/topic/type.  We actually need a new directory per datawriter
+      // and this assumes that insert() is called once per datawriter, as is
+      // currently the case.
+      dir = dir->create_next_dir ();
+      path.push_back (dir->name ()); // for use by the Cleanup_Handler
+    }
 
     if (this->samples_->find (key, sample_list, allocator) != 0)
     {
@@ -464,18 +573,38 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
     // Insert the samples in to the sample list.
     *slot = samples;
 
+    if (!dir.is_nil ())
+    {
+      samples->fs_path_ = path;
+    }
+
     for (DataSampleList::iterator i (element); i != the_end; ++i)
     {
-      if (samples->enqueue_tail (
-            sample_data_type (*i,
-                              allocator)) != 0)
+      sample_data_type sample (*i, allocator);
+      if (samples->enqueue_tail (sample) != 0)
         return false;
+
+      if (!dir.is_nil ())
+      {
+        File::Ptr f = dir->create_next_file ();
+        std::ofstream os;
+        if (!f->write (os)) return false;
+
+        ::DDS::Time_t timestamp;
+        const char * data;
+        size_t len;
+        sample.get_sample (data, len, timestamp);
+
+        os << timestamp.sec << ' ' << timestamp.nanosec << ' ';
+        os.write (data, len);
+      }
     }
   }
 
   // -----------
 
   // Schedule cleanup timer.
+  //FUTURE: The cleanup delay needs to be persisted (if QoS is persistent)
   ACE_Time_Value const cleanup_delay (
     duration_to_time_value (qos.service_cleanup_delay));
 
@@ -496,7 +625,8 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
     Cleanup_Handler * const cleanup =
       new Cleanup_Handler (*sample_list,
                            slot - &(*sample_list)[0],
-                           this->allocator_.get ());
+                           this->allocator_.get (),
+                           path);
     ACE_Event_Handler_var safe_cleanup (cleanup);  // Transfer ownership
 
 
@@ -678,6 +808,8 @@ OpenDDS::DCPS::DataDurabilityCache::get_data (
      *       reinserted.
      */
     q->reset ();
+
+    cleanup_directory (q->fs_path_);
   }
 
   return true;
@@ -687,39 +819,8 @@ std::auto_ptr<ACE_Allocator>
 OpenDDS::DCPS::DataDurabilityCache::make_allocator (
   ::DDS::DurabilityQosPolicyKind kind)
 {
-  if (kind == ::DDS::PERSISTENT_DURABILITY_QOS)
-    {
-      typedef
-        ACE_Allocator_Adapter<
-          ACE_Malloc<ACE_MMAP_MEMORY_POOL, ACE_SYNCH_MUTEX> > allocator_type;
-
-      size_t const minimum_bytes = 1024;
-
-      // @note Each persistent DDS domain will have its own
-      //       mmap()-based allocator.  Do we need to worry about the
-      //       same base address value being used for all?  Probably
-      //       not since mmap() should return an unused region
-      //       starting at a different base address.
-      static ACE_MMAP_Memory_Pool_Options const pool_options (
-        ACE_DEFAULT_BASE_ADDR,
-        ACE_MMAP_Memory_Pool_Options::FIRSTCALL_FIXED,
-        false, // No need to sync each page.
-        minimum_bytes,
-        MAP_SHARED, // Written data must be reflected in the backing
-                    // store.  Fortunately, updates to the backing
-                    // store don't occur until sync()ing occurs or the
-                    // memory region is unmapped - the behavior
-                    // desired!
-        true,  // Guess on fault.
-        0,     // Windows LPSECURITY_ATTRIBUTES
-        /* 0 */ ACE_DEFAULT_FILE_PERMS);
-
-      return
-        std::auto_ptr<ACE_Allocator> (new allocator_type (dds_backing_store,
-                                                          0,
-                                                          &pool_options));
-    }
-
-  // kind == ::DDS::TRANSIENT_DURABILITY_QOS)
+  // The use of other Allocators has been removed but this function
+  // remains for the time being.
+  // TODO: clean up all the ACE_Allocator-related code
   return std::auto_ptr<ACE_Allocator> (new ACE_New_Allocator);
 }

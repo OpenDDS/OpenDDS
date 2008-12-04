@@ -1,3 +1,37 @@
+Thu Dec  4 23:53:02 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RcHandle_T.h:
+
+          Added operators == and != to RcHandle.
+
+        * dds/DCPS/FileSystemStorage.h:
+        * dds/DCPS/FileSystemStorage.cpp:
+        * docs/design/persistence.txt:
+
+          Added a new mini-library for storing collections of data on the
+          filesystem.  See the design document for details.  This is used for
+          DataDurabilityCache (below) and will eventually be used for InfoRepo
+          persistence as well.
+
+        * dds/DCPS/DataDurabilityCache.h:
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DurabilityQueue.h:
+
+          Removed the Virtual Memory mapping from DataDurabilityCache and
+          replaced it with FileSystemStorage (above) as the persistence layer.
+          This implements DURABILITY.kind == PERSISTENT in a way that doesn't
+          depend on the operating system giving us the same virtual address
+          for a memory-mapped file each time we run.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/FileSystemStorage:
+
+          Added a unit test for FileSystemStorage
+
+        * tests/DCPS/PersistentDurability/run_test.pl:
+
+          Adjusted this script for the new directory name.
+
 Thu Dec  4 03:40:15 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/compat/test/org/opendds/jms/client/SimpleTest.java:
