@@ -9,6 +9,7 @@ import javax.jms.ConnectionFactory;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
+import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -42,10 +43,12 @@ public class SimpleTest {
             MessageProducer producer = session.createProducer(topic);
             MessageConsumer consumer = session.createConsumer(topic);
 
-            Thread.sleep(10000); // wait for association
+            Thread.sleep(2500); // wait for association
 
             producer.send(session.createTextMessage("Hello, World!"));
-            assert consumer.receive() != null;
+
+            TextMessage message = (TextMessage) consumer.receive();
+            assert "Hello, World!".equals(message.getText());
 
         } finally {
             connection.close();
