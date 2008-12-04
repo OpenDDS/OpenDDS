@@ -1,9 +1,6 @@
-
-project(*opendds_ir_ctl): dcpsexe_with_tcp {
+project: dcpsexe_with_tcp {
   exename   = opendds_ir_ctl
   exeout    = $(DDS_ROOT)/bin
-  includes += $(DDS_ROOT)
-  libpaths += $(DDS_ROOT)/lib
   libs     += Federator
   after    += DCPSInfoRepo_Federator
 

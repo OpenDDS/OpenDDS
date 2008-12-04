@@ -661,7 +661,7 @@ bool idl_mapping_jni::gen_jarray_copies (UTL_ScopedName *name,
   toJavaBody <<
     "  jsize len = " << length << ";\n"
     "  " << actualJniType << "Array arr;\n"
-    "  if (!createNewObject && jni->GetArrayLength (target) < len) "
+    "  if (!createNewObject && jni->GetArrayLength (target) != len) "
     "createNewObject = true;\n"
     "  if (createNewObject)\n"
     "    {\n"
