@@ -10,6 +10,7 @@ use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use DDS_Run_Test;
+use File::Path;
 
 $status = 0;
 
@@ -28,9 +29,9 @@ unlink $dcpsrepo_ior;
 $data_file = "test_run.data";
 unlink $data_file;
 
-$durability_cache = "OpenDDS-durable-data"; # Current a fixed name
-                                            # used by OpenDDS.
-unlink $durability_cache;
+$durability_cache = "OpenDDS-durable-data-dir"; # Currently a fixed name
+                                                # is used by OpenDDS.
+rmtree($durability_cache) if -d $durability_cache;
 
 $DCPSREPO =
   PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
@@ -95,7 +96,7 @@ if ($ir != 0) {
 
 unlink $dcpsrepo_ior;
 unlink $data_file;
-unlink $durability_cache;
+rmtree($durability_cache) if -d $durability_cache;
 
 if ($status == 0) {
   print "test PASSED.\n";

@@ -8,6 +8,8 @@
 #include <ace/Unbounded_Queue.h>
 
 #include <algorithm>
+#include <vector>
+#include <string>
 
 namespace OpenDDS
 {
@@ -42,6 +44,7 @@ namespace OpenDDS
 
       DurabilityQueue (DurabilityQueue<T> const & rhs)
         : ACE_Unbounded_Queue<T> (rhs.allocator_)
+        , fs_path_ (rhs.fs_path_)
       {
         // Copied from ACE_Unbounded_Queue<>::copy_nodes().
         for (ACE_Node<T> *curr = rhs.head_->next_;
@@ -75,7 +78,12 @@ namespace OpenDDS
         std::swap (this->head_, rhs.head_);
         std::swap (this->cur_size_, rhs.current_size_);
         std::swap (this->allocator_, rhs.allocator_);
+        std::swap (this->fs_path_, rhs.fs_path_);
       }
+
+      //filesystem path
+      typedef std::vector<std::string> fs_path_t;
+      fs_path_t fs_path_;
     };
 
   }
