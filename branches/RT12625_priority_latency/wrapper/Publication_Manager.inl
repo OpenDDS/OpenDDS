@@ -20,9 +20,11 @@ Publication_Manager::null () const
 }
 
 ACE_INLINE DDS::DataWriter_ptr
-Publication_Manager::access_topic (const Topic_Manager & topic)
+Publication_Manager::access_topic (const Topic_Manager & topic,
+				   const DDS::DataWriterQos & qos)
 {
   return manager_impl_->access_topic (topic,
+				      qos,
 				      manager_impl_);
 }
 
@@ -30,6 +32,12 @@ ACE_INLINE void
 Publication_Manager::remove_topic (const Topic_Manager & topic)
 {
   return manager_impl_->remove_topic (topic);
+}
+
+ACE_INLINE DDS::DataWriterQos 
+Publication_Manager::get_default_datawriter_qos ()
+{
+  return manager_impl_->get_default_datawriter_qos ();
 }
 
 ACE_INLINE DDS::Publisher_ptr

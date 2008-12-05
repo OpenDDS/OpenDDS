@@ -1,3 +1,33 @@
+Fri Dec  5 19:33:41 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * wrapper/Domain_Manager.h:
+        * wrapper/Domain_Manager.inl:
+        * wrapper/Domain_Manager.cpp:
+        * wrapper/Domain_Manager_Impl.h:
+        * wrapper/OpenDDS/OpenDDS_Domain_Manager.h:
+        * wrapper/OpenDDS/OpenDDS_Domain_Manager.cpp:
+        * wrapper/OpenDDS/OpenDDS_Publication_Manager.h:
+        * wrapper/OpenDDS/OpenDDS_Publication_Manager.cpp:
+        * wrapper/OpenDDS/OpenDDS_Subscription_Manager.h:
+        * wrapper/OpenDDS/OpenDDS_Subscription_Manager.cpp:
+        * wrapper/OpenDDS/OpenDDS_create_domain_manager.cpp:
+        * wrapper/Publication_Manager.h:
+        * wrapper/Publication_Manager.inl:
+        * wrapper/Publication_Manager_Impl.h:
+        * wrapper/Subscription_Manager.h:
+        * wrapper/Subscription_Manager.inl:
+        * wrapper/Subscription_Manager_Impl.h:
+        * wrapper/Topic_Manager.h:
+        * wrapper/Topic_Manager.inl:
+        * wrapper/Topic_Manager_Impl.h:
+        * wrapper/Topic_Manager_T.h:
+        * wrapper/Topic_Manager_T.cpp:
+        * wrapper/wrapper_config.h:
+
+        Wholesale copy of wrapper code from trunk to branch.  Not sure
+        why but this didn't merge correctly, and no changes were made to
+        this code on the branch.
+
 Fri Dec  5 19:10:53 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         Merging trunk changes 1671:1805 out to branch.  See ChangeLog for

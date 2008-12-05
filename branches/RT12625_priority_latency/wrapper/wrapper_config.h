@@ -31,6 +31,8 @@
 # error Only one implementation config flag should be uncommented
 # endif
 
+#include <dds/DCPS/Marked_Default_Qos.h>
+
 #endif /* if defined */
 
 #endif /* DDS_WRAPPER_CONFIG_H_ */

@@ -33,10 +33,11 @@
 
 OpenDDS_Publication_Manager::OpenDDS_Publication_Manager (
   const Domain_Manager & dm,
-  OpenDDS::DCPS::TransportIdType transport_impl_id)
+  OpenDDS::DCPS::TransportIdType transport_impl_id,
+  const DDS::PublisherQos & qos)
   : dm_ (dm)
 {
-  this->init ();
+  this->init (qos);
 
   this->register_transport (transport_impl_id);
 }
@@ -46,11 +47,11 @@ OpenDDS_Publication_Manager::~OpenDDS_Publication_Manager ()
 }
 
 void
-OpenDDS_Publication_Manager::init ()
+OpenDDS_Publication_Manager::init (const DDS::PublisherQos & qos)
 {
   // create the subscriber using default QoS.
   pub_ = 
-    dm_.participant ()->create_publisher (PUBLISHER_QOS_DEFAULT,
+    dm_.participant ()->create_publisher (qos,
                                           DDS::PublisherListener::_nil ());
 
   // check for successful creation
@@ -104,6 +105,7 @@ OpenDDS_Publication_Manager::register_transport (OpenDDS::DCPS::TransportIdType 
 
 DDS::DataWriter_ptr
 OpenDDS_Publication_Manager::access_topic (const Topic_Manager & topic,
+					   const DDS::DataWriterQos & qos,
 					   const Publication_Manager_Ptr & ref)
 {
   // Create a modifiable copy of the Topic_Manager
@@ -112,7 +114,7 @@ OpenDDS_Publication_Manager::access_topic (const Topic_Manager & topic,
   tm.create_topic (dm_);
 
   // return a new datawriter created by the topic manager
-  return tm.datawriter (Publication_Manager (ref));
+  return tm.datawriter (Publication_Manager (ref), qos);
 }
 
 void
@@ -129,4 +131,15 @@ OpenDDS_Publication_Manager::remove_topic (const Topic_Manager & topic)
 
   // use topic manager to create the topic
   tm.delete_topic (dm_);
+}
+
+DDS::DataWriterQos
+OpenDDS_Publication_Manager::get_default_datawriter_qos ()
+{
+  // create QoS object and initialize it with the default values
+  DDS::DataWriterQos qos;
+  pub_->get_default_datawriter_qos (qos);
+
+  // return the default qos
+  return qos;
 }

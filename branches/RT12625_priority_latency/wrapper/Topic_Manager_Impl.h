@@ -54,11 +54,13 @@ class DDSWrapper_Export Topic_Manager_Impl
 
   /// this method returns a new datareader created by a subscriber
   /// memory management has to be done by the caller
-  virtual DDS::DataReader_ptr datareader (const Subscription_Manager & sm) = 0;
+  virtual DDS::DataReader_ptr datareader (const Subscription_Manager & sm,
+					  const DDS::DataReaderQos & qos) = 0;
 
   /// this method returns a new datawriter created by a publisher
   /// memory management has to be done by the caller
-  virtual DDS::DataWriter_ptr datawriter (const Publication_Manager & pm) = 0;
+  virtual DDS::DataWriter_ptr datawriter (const Publication_Manager & pm,
+					  const DDS::DataWriterQos & qos) = 0;
 };
 
 #endif /* DDS_WRAPPER_TOPIC_MANAGER_IMPL_H_ */

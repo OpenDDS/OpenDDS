@@ -42,6 +42,7 @@ class Subscription_Manager_Impl
   /// memory management of the returned datawriter has to be done by the caller
   virtual void access_topic (
     const Topic_Manager & topic,
+    const DDS::DataReaderQos & qos,
     const Subscription_Manager_Ptr & ref) = 0;
 
   /// unregisters and deletes the topic from the domain
@@ -50,6 +51,9 @@ class Subscription_Manager_Impl
   /// returns a data reader for a specific topic
   virtual DDS::DataReader_ptr lookup_datareader (
                                 const std::string & topic_name) = 0;
+
+  /// creates and returns qos for data readers with the default values
+  virtual DDS::DataReaderQos get_default_datareader_qos () = 0;
 
   /// returns the underlying subsriber instance
   /// memory management of the returned publisher reference is done by the 
