@@ -4,7 +4,7 @@
 
 package org.opendds.jms.transport.spi;
 
-import org.opendds.jms.common.SvcConfDirective;
+import org.opendds.jms.management.argument.SvcConfDirective;
 
 /**
  * @author  Steven Stallion
@@ -15,7 +15,7 @@ public class SimpleTcpTransport implements Transport {
     public String getName() {
         return "SimpleTcp";
     }
-    
+
     public SvcConfDirective getDirective() {
         SvcConfDirective directive = new SvcConfDirective();
 

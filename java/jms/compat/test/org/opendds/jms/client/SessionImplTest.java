@@ -1,21 +1,21 @@
 package org.opendds.jms.client;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
+import javax.jms.Destination;
 import javax.jms.InvalidDestinationException;
 import javax.jms.JMSException;
+import javax.jms.Message;
 import javax.jms.MessageConsumer;
-import javax.jms.Session;
-import javax.jms.TemporaryTopic;
+import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
 import javax.jms.ObjectMessage;
-import javax.jms.Message;
-import javax.jms.Destination;
+import javax.jms.Session;
+import javax.jms.TemporaryTopic;
 import javax.jms.TextMessage;
-import javax.jms.MessageListener;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
@@ -266,7 +266,7 @@ public class SessionImplTest {
             e.printStackTrace();
         }
 
-//  TODO Make this work again.       
+//  TODO Make this work again.
 //        assert 3 == myMessageListener.getOnMessageCount();
 //        assert 0 == myMessageListener.getRedeliveryCount();
 //        List<String> texts = myMessageListener.getMessageTexts();

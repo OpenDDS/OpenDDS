@@ -6,7 +6,6 @@ package org.opendds.jms.management.argument;
 
 import java.util.List;
 
-import org.opendds.jms.common.SvcConfDirective;
 import org.opendds.jms.common.lang.Strings;
 import org.opendds.jms.management.DynamicMBeanSupport;
 
@@ -62,10 +61,9 @@ public class InfoRepoArguments implements DynamicArgumentProvider {
             SvcConfDirective directive = new SvcConfDirective();
 
             directive.setServiceName("PersistenceUpdaterSvc");
-            directive.addOption("-file");
-            directive.addOption(persistentFile);
+            directive.addOptions("-file", persistentFile);
 
-            writer.writeSvcConfDirective(directive);
+            directive.writeTo(writer);
         }
 
         writer.writeTo(args);

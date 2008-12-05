@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import org.opendds.jms.common.SvcConfDirective;
 import org.opendds.jms.common.lang.Strings;
 import org.opendds.jms.management.DynamicMBeanSupport;
 
@@ -64,13 +63,6 @@ public class ArgumentWriter {
         }
     }
 
-    public void writeSvcConfDirective(SvcConfDirective directive) {
-        assert directive != null;
-
-        write("-ORBSvcConfDirective");
-        write(directive.toString());
-    }
-
     public void write(String arg, Object value) {
         assert value != null;
 
@@ -89,7 +81,7 @@ public class ArgumentWriter {
 
     public void writeTo(List<String> args) {
         assert args != null;
-        
+
         args.addAll(this.args);
     }
 }

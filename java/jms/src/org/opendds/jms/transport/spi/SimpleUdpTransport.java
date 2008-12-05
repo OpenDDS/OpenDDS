@@ -4,7 +4,7 @@
 
 package org.opendds.jms.transport.spi;
 
-import org.opendds.jms.common.SvcConfDirective;
+import org.opendds.jms.management.argument.SvcConfDirective;
 
 /**
  * @author  Steven Stallion
