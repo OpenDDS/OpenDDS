@@ -10,8 +10,8 @@
  */
 //=============================================================================
 
-#ifndef _PUBLICATION_MANAGER_H_
-#define _PUBLICATION_MANAGER_H_
+#ifndef DDS_WRAPPER_PUBLICATION_MANAGER_H_
+#define DDS_WRAPPER_PUBLICATION_MANAGER_H_
 
 #include "DDSWrapper_export.h"
 #include "Publication_Manager_Impl.h"
@@ -37,6 +37,9 @@ class DDSWrapper_Export Publication_Manager
 
   /// assignment operator
   void operator= (const Publication_Manager & copy);
+
+  /// checks for null reference
+  bool null () const;
 
   /// will create a topic instance using the domain manager
   /// memory management of the returned datawriter has to be done by the caller
@@ -64,4 +67,4 @@ class DDSWrapper_Export Publication_Manager
 #include "Publication_Manager.inl"
 #endif
 
-#endif /* _PUBLICATION_MANAGER_H_ */
+#endif /* DDS_WRAPPER_PUBLICATION_MANAGER_H_ */

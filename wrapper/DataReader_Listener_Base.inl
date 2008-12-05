@@ -10,8 +10,8 @@
  */
 //=============================================================================
 
-#ifndef _DATAREADER_LISTENER_BASE_INL_
-#define _DATAREADER_LISTENER_BASE_INL_
+#ifndef DDS_WRAPPER_DATAREADER_LISTENER_BASE_INL_
+#define DDS_WRAPPER_DATAREADER_LISTENER_BASE_INL_
 
 ACE_INLINE void 
 DataReader_Listener_Base::on_data_available(DDS::DataReader_ptr)
@@ -75,4 +75,4 @@ DataReader_Listener_Base::on_sample_lost (
 }
 
 
-#endif /* DATA_READER_LISTENER_IMPL_INL_ */
+#endif /* DDS_WRAPPER_DATAREADER_LISTENER_BASE_INL_ */

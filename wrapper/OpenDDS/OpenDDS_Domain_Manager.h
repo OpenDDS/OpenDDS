@@ -10,8 +10,8 @@
  */
 //=============================================================================
 
-#ifndef _OPEN_DDS_DOMAIN_MANAGER_H_
-#define _OPEN_DDS_DOMAIN_MANAGER_H_
+#ifndef DDS_WRAPPER_OPEN_DDS_DOMAIN_MANAGER_H_
+#define DDS_WRAPPER_OPEN_DDS_DOMAIN_MANAGER_H_
 
 #include <string>
 #include <ace/Thread_Semaphore.h>
@@ -95,13 +95,10 @@ class OpenDDS_Domain_Manager : public Domain_Manager_Impl
 
   /// signal handler for external shutdown
   Exit_Signal_Handler exit_handler_;
-
-  /// counter for how many subscription_managers have been created
-  bool transport_initialized_;
 };
 
 #if defined (__ACE_INLINE__)
 #include "OpenDDS_Domain_Manager.inl"
 #endif
 
-#endif /* _OPEN_DDS_DOMAIN_MANAGER_H_ */
+#endif /* DDS_WRAPPER_OPEN_DDS_DOMAIN_MANAGER_H_ */

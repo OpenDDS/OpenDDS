@@ -10,8 +10,14 @@
  */
 //=============================================================================
 
-#ifndef _PUBLICATION_MANAGER_INL_
-#define _PUBLICATION_MANAGER_INL_
+#ifndef DDS_WRAPPER_PUBLICATION_MANAGER_INL_
+#define DDS_WRAPPER_PUBLICATION_MANAGER_INL_
+
+ACE_INLINE bool
+Publication_Manager::null () const
+{
+  return manager_impl_.null ();
+}
 
 ACE_INLINE DDS::DataWriter_ptr
 Publication_Manager::access_topic (const Topic_Manager & topic,
@@ -40,4 +46,4 @@ Publication_Manager::publisher () const
   return manager_impl_->publisher ();
 }
 
-#endif /* _PUBLICATION_MANAGER_INL_ */
+#endif /* DDS_WRAPPER_PUBLICATION_MANAGER_INL_ */

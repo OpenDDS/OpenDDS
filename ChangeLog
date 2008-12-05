@@ -1,3 +1,78 @@
+Wed Dec  3 18:19:34 UTC 2008  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Add attach() member functions to attach publishers
+          and subscribers to the transport implementation.
+          This helps users avoid downcasting to the publisher
+          and subscriber implementations.
+
+        * DevGuideExamples/DCPS/Messenger/publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/stack_subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger/subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/subscriber.cpp:
+
+          Use new method to attach transports (and remove downcasts).
+ 
+Thu Nov 27 05:38:17 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
+
+        * wrapper/Domain_Manager.h
+        * wrapper/Topic_Manager.inl
+        * wrapper/Publication_Manager.h
+        * wrapper/Subscription_Manager.inl
+        * wrapper/Domain_Manager.inl
+        * wrapper/Publication_Manager.inl
+        * wrapper/Topic_Manager.h
+        * wrapper/Subscription_Manager.h:
+
+          Added null () method to all Manager bridge classes to check for
+          null references.
+
+Tue Nov 25 21:30:24 UTC 2008  Trevor Fields  <fields_t@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/FooTest5/common.h:
+        * tests/DCPS/FooTest5/run_test_multi_trans.pl:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+
+          Changed FooTest5 to test connecting to BIT (using TCP) while
+          data is sent using another transport.
+
+Wed Nov 12 23:26:20 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
+
+        * wrapper/Topic_Manager_T.h
+        * wrapper/DataReader_Listener_Base.h
+        * wrapper/Domain_Manager.h
+        * wrapper/Topic_Manager.inl
+        * wrapper/Exit_Signal_Handler.h
+        * wrapper/Publication_Manager.h
+        * wrapper/Subscription_Manager.inl
+        * wrapper/Domain_Manager_Impl.h
+        * wrapper/wrapper_subscription.h
+        * wrapper/Publication_Manager_Impl.h
+        * wrapper/Topic_Manager_T.cpp
+        * wrapper/DataReader_Listener_Base.inl
+        * wrapper/Topic_Manager_Impl.h
+        * wrapper/Domain_Manager.inl
+        * wrapper/Publication_Manager.inl
+        * wrapper/Subscription_Manager_Impl.h
+        * wrapper/wrapper_config.h
+        * wrapper/OpenDDS/OpenDDS_Publication_Manager.inl
+        * wrapper/OpenDDS/OpenDDS_Subscription_Manager.h
+        * wrapper/OpenDDS/OpenDDS_Domain_Manager.h
+        * wrapper/OpenDDS/OpenDDS_Publication_Manager.h
+        * wrapper/OpenDDS/OpenDDS_Subscription_Manager.inl
+        * wrapper/OpenDDS/OpenDDS_Domain_Manager.cpp
+        * wrapper/OpenDDS/OpenDDS_Domain_Manager.inl
+        * wrapper/Topic_Manager.h
+        * wrapper/wrapper_publication.h
+        * wrapper/Subscription_Manager.h:
+
+          Changed inclusion protection macro names (removed leading '_').
+
 Wed Nov 12 04:44:21 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
 
         * wrapper/OpenDDS/OpenDDS_Publication_Manager.cpp
@@ -5,7 +80,7 @@ Wed Nov 12 04:44:21 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
         * wrapper/OpenDDS/OpenDDS_Publication_Manager.h
         * wrapper/OpenDDS/OpenDDS_Subscription_Manager.cpp
         * wrapper/OpenDDS/OpenDDS_Domain_Manager.cpp:
-        
+
           Fixed problem with transport impl creation calls.
 
 Tue Nov 11 16:00:37 UTC 2008  Adam Mitz  <mitza@ociweb.com>

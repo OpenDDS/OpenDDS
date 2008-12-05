@@ -46,6 +46,7 @@ extern ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> num_reads;
 extern long op_interval_ms;
 extern long blocking_ms;
 extern int mixed_trans;
+extern int test_bit;
 
 extern OpenDDS::DCPS::TransportImpl_rch reader_tcp_impl;
 extern OpenDDS::DCPS::TransportImpl_rch reader_udp_impl;

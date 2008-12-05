@@ -6,12 +6,12 @@
  *
  *  $Id$
  *
- * @author   Friedhelm Wolf (fwolf@dre.vanderbilt.edu)
+ *  @author  Friedhelm Wolf (fwolf@dre.vanderbilt.edu)
  */
 //=============================================================================
 
-#ifndef _DDS_WRAPPER_PUBLICATION_H_
-#define _DDS_WRAPPER_PUBLICATION_H_
+#ifndef DDS_WRAPPER_PUBLICATION_H_
+#define DDS_WRAPPER_PUBLICATION_H_
 
 #include "wrapper_config.h"
 
@@ -23,4 +23,4 @@
 
 #endif
 
-#endif /* _DDS_WRAPPER_PUBLICATION_H_ */
+#endif /* DDS_WRAPPER_PUBLICATION_H_ */

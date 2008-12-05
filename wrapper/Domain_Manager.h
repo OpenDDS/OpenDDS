@@ -10,8 +10,8 @@
  */
 //=============================================================================
 
-#ifndef _DOMAIN_MANAGER_H_
-#define _DOMAIN_MANAGER_H_
+#ifndef DDS_WRAPPER_DOMAIN_MANAGER_H_
+#define DDS_WRAPPER_DOMAIN_MANAGER_H_
 
 #include "DDSWrapper_export.h"
 #include "Domain_Manager_Impl.h"
@@ -73,6 +73,9 @@ class DDSWrapper_Export Domain_Manager
   /// assignment operator
   void operator= (const Domain_Manager& copy);  
 
+  /// checks for null reference
+  bool null () const;
+
   /// this call blocks the thread until a SIGINT signal for the process is received
   void run ();
 
@@ -103,4 +106,4 @@ class DDSWrapper_Export Domain_Manager
 #include "Domain_Manager.inl"
 #endif
 
-#endif /* _DOMAIN_MANAGER_H_ */
+#endif /* DDS_WRAPPER_DOMAIN_MANAGER_H_ */
