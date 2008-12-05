@@ -89,11 +89,21 @@ namespace OpenDDS
         return this->ptr_;
       }
 
-      T *_retn (void)
+      T *_retn(void)
       {
         T* retval = this->ptr_;
         this->ptr_ = 0;
         return retval;
+      }
+
+      bool operator==(const RcHandle& rhs)
+      {
+        return in() == rhs.in();
+      }
+
+      bool operator!=(const RcHandle& rhs)
+      {
+        return in() != rhs.in();
       }
 
     private:
@@ -118,7 +128,6 @@ namespace OpenDDS
       /// The actual "unsmart" pointer to the T object.
       T* ptr_;
     };
-
 
   }  /* namespace DCPS */
 

@@ -1,3 +1,14 @@
+Fri Dec  5 23:23:24 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        Merged the JMS_PROVIDER branch (r1812) back to the trunk. 
+        That branch is now only for archival purposes.  Its ChangeLog
+        is now in the file $DDS_ROOT/history/ChangeLog-JMS_PROVIDER.
+
+        This changeset includes many improvements to the core OpenDDS
+        libraries as well as the incorporation of a JMS Provider based on
+        OpenDDS (located at $DDS_ROOT/java/jms).  Subsequent committs to the
+        release notes will detail all of the user-visible changes to OpenDDS.
+
 Wed Dec  3 18:19:34 UTC 2008  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportImpl.h:
@@ -15,7 +26,7 @@ Wed Dec  3 18:19:34 UTC 2008  Paul Calabrese  <calabrese_p@ociweb.com>
         * DevGuideExamples/DCPS/Messenger_ZeroCopy/subscriber.cpp:
 
           Use new method to attach transports (and remove downcasts).
- 
+
 Thu Nov 27 05:38:17 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
 
         * wrapper/Domain_Manager.h

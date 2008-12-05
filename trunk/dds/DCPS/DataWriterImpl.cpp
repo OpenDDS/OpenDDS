@@ -399,7 +399,7 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
   }
 
   // Support DURABILITY QoS
-  if( this->qos_.durability.kind != DDS::VOLATILE_DURABILITY_QOS) {
+  if( this->qos_.durability.kind > ::DDS::VOLATILE_DURABILITY_QOS) {
     // Tell the WriteDataContainer to resend all sending/sent
     // samples.
     this->data_container_->reenqueue_all (rd_ids,
@@ -1413,6 +1413,15 @@ DataWriterImpl::create_sample_data_message ( DataSample* data,
   ++instance->sequence_;
   header_data.source_timestamp_sec_ = source_timestamp.sec;
   header_data.source_timestamp_nanosec_ = source_timestamp.nanosec;
+
+  if (qos_.lifespan.duration.sec != ::DDS::DURATION_INFINITY_SEC
+    || qos_.lifespan.duration.nanosec != ::DDS::DURATION_INFINITY_NSEC)
+  {
+    header_data.lifespan_duration_ = true;
+    header_data.lifespan_duration_sec_ = qos_.lifespan.duration.sec;
+    header_data.lifespan_duration_nanosec_ = qos_.lifespan.duration.nanosec;
+  }
+
   header_data.coherency_group_ = 0;
   header_data.publication_id_ = publication_id_;
 

@@ -1450,10 +1450,26 @@ namespace OpenDDS
                             this->factory_lock_,
                             0);
 
-          if (this->persistent_data_cache_.get () == 0)
+          try
           {
+            if (this->persistent_data_cache_.get () == 0)
+            {
+              ACE_auto_ptr_reset (this->persistent_data_cache_,
+                                  new DataDurabilityCache (kind));
+            }
+          }
+          catch (const std::exception& ex)
+          {
+            if (DCPS_debug_level > 0)
+            {
+              ACE_ERROR((LM_ERROR,
+                ACE_TEXT("(%P|%t) Service_Participant::get_data_durability_cache ")
+                ACE_TEXT("failed to create PERSISTENT cache, falling back on ")
+                ACE_TEXT("TRANSIENT behavior: %C\n"), ex.what()
+              ));
+            }
             ACE_auto_ptr_reset (this->persistent_data_cache_,
-                                new DataDurabilityCache (kind));
+              new DataDurabilityCache (::DDS::TRANSIENT_DURABILITY_QOS));
           }
         }
 

@@ -209,6 +209,7 @@ module OpenDDS {
                 Invalid_Participant,
                 Invalid_Subscription);
 
+      void shutdown();
 
       //====== support built-in Topics
       // TBD for AAC - see design/DCPS/built_in_topics.txt

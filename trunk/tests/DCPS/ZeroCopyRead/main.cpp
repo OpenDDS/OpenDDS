@@ -1394,7 +1394,7 @@ int main (int argc, char *argv[])
 
         // since depth=1 the previous sample will be "lost"
         // from the instance container.
-        fast_dw->write(foo,  ::OpenDDS::DCPS::HANDLE_NIL /*don't use instance_handle_ because it is a different instance */);
+        fast_dw->write(foo,  ::DDS::HANDLE_NIL /*don't use instance_handle_ because it is a different instance */);
 
         // wait for write to propogate
         if (!wait_for_data(sub.in (), 5))

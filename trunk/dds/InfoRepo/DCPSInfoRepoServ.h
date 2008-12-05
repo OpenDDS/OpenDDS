@@ -1,3 +1,4 @@
+// -*- C++ -*-
 /*
  * $Id$
  */
@@ -10,6 +11,7 @@
 #include <string>
 
 #include "ace/Event_Handler.h"
+#include "ace/Condition_Thread_Mutex.h"
 
 #include "tao/ORB_Core.h"
 
@@ -34,7 +36,11 @@ public:
 
   /// ShutdownInterface used to schedule a shutdown.
   virtual void shutdown (void);
-  
+
+  /// shutdown() and wait for it to complete: cannot be called from the reactor
+  /// thread.
+  void sync_shutdown (void);
+
   /// Handler for the reactor to dispatch finalization activity to.
   virtual int handle_exception( ACE_HANDLE fd = ACE_INVALID_HANDLE);
 
@@ -65,6 +71,9 @@ private:
   OpenDDS::Federator::Config      federatorConfig_;
 
   PortableServer::ServantBase_var info_;
+  ACE_Thread_Mutex lock_;
+  ACE_Condition_Thread_Mutex cond_;
+  bool shutdown_complete_;
 };
 
 class OpenDDS_DCPSInfoRepoServ_Export InfoRepo_Shutdown :

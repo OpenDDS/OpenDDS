@@ -444,6 +444,9 @@ public:
     ::OpenDDS::DCPS::Invalid_Domain,
     ::OpenDDS::DCPS::Invalid_Participant
   ));
+  
+  /// Cause the entire repository to exit.
+  virtual void shutdown() ACE_THROW_SPEC (( ::CORBA::SystemException ));
 
   /**
    * @brief assert new ownership for a participant and its contained entities.
@@ -497,9 +500,6 @@ public:
   CORBA::ORB_ptr orb();
 
   bool init_persistence (void);
-
-  /// Cause the entire repository to exit.
-  void shutdown();
 
 private:
   DCPS_IR_Domain_Map domains_;

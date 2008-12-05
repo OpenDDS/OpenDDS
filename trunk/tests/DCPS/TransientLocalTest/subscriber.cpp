@@ -65,8 +65,8 @@ int main (int argc, char *argv[])
       }
 
       // Initialize the transport
-      OpenDDS::DCPS::TransportImpl_rch tcp_impl = 
-        TheTransportFactory->create_transport_impl (transport_impl_id, 
+      OpenDDS::DCPS::TransportImpl_rch tcp_impl =
+        TheTransportFactory->create_transport_impl (transport_impl_id,
                                                     ::OpenDDS::DCPS::AUTO_CONFIG);
 
       // Create the subscriber and attach to the corresponding
@@ -122,6 +122,7 @@ int main (int argc, char *argv[])
       // Create the Datareaders
       DDS::DataReaderQos dr_qos;
       sub->get_default_datareader_qos (dr_qos);
+      dr_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
       DDS::DataReader_var dr = sub->create_datareader(topic.in (),
                                                       dr_qos,
                                                       listener.in ());

@@ -3,6 +3,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "WriteDataContainer.h"
 #include "Service_Participant.h"
+#include "DataSampleHeader.h"
 #include "DataSampleList.h"
 #include "DataWriterImpl.h"
 #include "DataDurabilityCache.h"
@@ -540,6 +541,9 @@ WriteDataContainer::data_delivered (DataSampleListElement* sample)
     }
 
     // INSERT INTO DURABILITY CACHE HERE
+    ::OpenDDS::DCPS::DataSampleHeader::update_flag (sample->sample_,
+      HISTORIC_SAMPLE_FLAG);
+    
     sent_data_.enqueue_tail_next_send_sample (sample);
   }
 }

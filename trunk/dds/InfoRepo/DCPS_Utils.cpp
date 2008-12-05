@@ -8,13 +8,25 @@
 namespace
 {
   bool
+  is_wildcard (const char *str)
+  {
+    static const char wild[] = "?*[";
+    while (*str)
+    {
+      size_t i = ACE_OS::strcspn (str, wild);
+      if (!str[i]) return false; // no wildcard
+      if (i > 0 && str[i-1] == '\\') str += i + 1; // escaped wildcard
+      else return true;
+    }
+    return false;
+  }
+
+  bool
   matching_partitions (::DDS::PartitionQosPolicy const & pub,
                        ::DDS::PartitionQosPolicy const & sub)
   {
     ::DDS::StringSeq const & publisher_partitions  = pub.name;
     ::DDS::StringSeq const & subscriber_partitions = sub.name;
-
-    bool match = false;
 
     // Both publisher and subscriber are in the same (default)
     // partition if the partition string sequence lengths are both
@@ -23,73 +35,63 @@ namespace
     CORBA::ULong const sub_len = subscriber_partitions.length ();
 
     if (pub_len == 0 && sub_len == 0)
-      match = true;
+      return true;
     else if (pub_len == 0)
     {
       // Attempt to match an explicitly specified empty string
       // partition against the special zero length partition
       // sequence.
-      for (CORBA::ULong n = 0; n < sub_len && !match; ++n)
-        {
-          char const * const sname = subscriber_partitions[n];
-          if (*sname == 0)
-            match = true;
-        }
+      for (CORBA::ULong n = 0; n < sub_len; ++n)
+      {
+        char const * const sname = subscriber_partitions[n];
+        if (*sname == 0)
+          return true;
+      }
     }
-
-    // We currently don't support "[]" wildcards.  See pattern_match()
-    // function above for details.
-    static char const wildcard[] = "*?" /* "[[*?])" */;
 
     // @todo Really slow (O(n^2)) search.  Optimize if partition name
     //       sequences will potentially be very long.  If they remain
     //       short, optimizing may be unnecessary or simply not worth
     //       the trouble.
-    for (CORBA::ULong i = 0; i < pub_len && !match; ++i)
+    for (CORBA::ULong i = 0; i < pub_len; ++i)
+    {
+      char const * const pname = publisher_partitions[i];
+
+      if (sub_len == 0 && *pname == 0)
       {
-        char const * const pname = publisher_partitions[i];
-
-        if (sub_len == 0 && *pname == 0)
-        {
-          // Attempt to match an explicitly specified empty string
-          // partition against the special zero length partition
-          // sequence.
-          match = true;
-          continue;
-        }
-
-        // The DDS specification requires pattern matching
-        // capabilities corresponding to those provided by the POSIX
-        // fnmatch() function.  However, some platforms, such as
-        // Windows, do not provide such a function.  To be
-        // completely portable across all platforms we instead use
-        // ACE::wild_match().  Currently this prevents matching of
-        // patterns containing square brackets, i.e. "[]".
-        bool const pub_is_wildcard =
-          (ACE_OS::strcspn (pname, wildcard) != ACE_OS::strlen (pname));
-          // ACE::wild_match (wildcard, pname);
-
-        for (CORBA::ULong j = 0; j < sub_len && !match; ++j)
-          {
-            char const * const sname = subscriber_partitions[j];
-
-            bool const sub_is_wildcard =
-              (ACE_OS::strcspn (sname, wildcard) != ACE_OS::strlen (sname));
-            // ACE::wild_match (wildcard, sname);
-
-            if (pub_is_wildcard && sub_is_wildcard)
-              continue;
-
-            if (pub_is_wildcard)
-              match = ACE::wild_match (sname, pname);
-            else if (sub_is_wildcard)
-              match = ACE::wild_match (pname, sname);
-            else
-              match = (ACE_OS::strcmp (pname, sname) == 0);
-          }
+        // Attempt to match an explicitly specified empty string
+        // partition against the special zero length partition
+        // sequence.
+        return true;
       }
 
-    return match;
+      bool const pub_is_wildcard = is_wildcard (pname);
+
+      for (CORBA::ULong j = 0; j < sub_len; ++j)
+      {
+        char const * const sname = subscriber_partitions[j];
+
+        bool const sub_is_wildcard = is_wildcard (sname);
+
+        if (pub_is_wildcard && sub_is_wildcard)
+          continue;
+
+        bool match = false;
+        if (pub_is_wildcard)
+          match = ACE::wild_match (sname, pname, true, true);
+        //                                       ^ case-sensitive
+        //                                             ^ use character classes
+        else if (sub_is_wildcard)
+          match = ACE::wild_match (pname, sname, true, true);
+        else
+          match = (ACE_OS::strcmp (pname, sname) == 0);
+
+        if (match)
+          return true;
+      }
+    }
+
+    return false;
   }
 }
 
