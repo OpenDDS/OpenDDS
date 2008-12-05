@@ -51,12 +51,6 @@ public class MessageConsumerImplTest {
 
     @After
     public void tearDown() {
-        try {
-            System.out.println("Pause for a few seconds...");
-            Thread.sleep(10000);
-        } catch (Exception e) {
-            
-        }
         if (session != null) {
             try {
                 session.close();

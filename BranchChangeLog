@@ -1,3 +1,9 @@
+Fri Dec  5 20:53:52 UTC 2008  Weiqi Gao  <gaow@ociweb.com>
+
+        * java/jms/compat/test/org/opendds/jms/client/MessageConsumerImplTest.java:
+
+          Removed debug logging.
+
 Fri Dec  5 20:38:14 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
           Back-merged from trunk (r1687:1807).
