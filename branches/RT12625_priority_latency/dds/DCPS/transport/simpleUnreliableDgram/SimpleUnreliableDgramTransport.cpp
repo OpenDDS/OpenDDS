@@ -94,17 +94,18 @@ OpenDDS::DCPS::SimpleUnreliableDgramTransport::find_or_create_datalink
   DirectPriorityMapper mapping( priority);
   link->set_dscp_codepoint( mapping.codepoint(), this->socket_->socket());
 
-  /// @TODO: The send_strategy can be modified with priority
-  ///        information at this point.
-
   TransportSendStrategy_rch send_strategy 
-    = new SimpleUnreliableDgramSendStrategy(this->config_.in(),
-                                            remote_address,
-                                            this->socket_.in(),
-                                            new SimpleUnreliableDgramSynchResource(
-                                            this->socket_.in(),
-                                            this,
-							                              this->config_->max_output_pause_period_));
+    = new SimpleUnreliableDgramSendStrategy(
+            this->config_.in(),
+            remote_address,
+            this->socket_.in(),
+            new SimpleUnreliableDgramSynchResource(
+              this->socket_.in(),
+              this,
+	      this->config_->max_output_pause_period_
+            ),
+            priority
+          );
 
   if (link->connect(send_strategy.in()) != 0)
     {

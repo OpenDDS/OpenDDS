@@ -12,6 +12,7 @@
 #include "QueueRemoveVisitor.h"
 #include "PacketRemoveVisitor.h"
 #include "TransportDefs.h"
+#include "DirectPriorityMapper.h"
 #include "dds/DCPS/DataSampleList.h"
 #include "EntryExit.h"
 
@@ -33,7 +34,8 @@
 // just increases the ref count.
 OpenDDS::DCPS::TransportSendStrategy::TransportSendStrategy
 (TransportConfiguration* config,
- ThreadSynchResource*    synch_resource)
+ ThreadSynchResource*    synch_resource,
+ CORBA::Long             priority)
   : max_samples_(config->max_samples_per_packet_),
     optimum_size_(config->optimum_packet_size_),
     max_size_(config->max_packet_size_),
@@ -65,8 +67,9 @@ OpenDDS::DCPS::TransportSendStrategy::TransportSendStrategy
   this->config_ = config;
 
   // Create a ThreadSynch object just for us.
+  DirectPriorityMapper mapper( priority);
   this->synch_ = config->send_thread_strategy()->create_synch_object
-    (synch_resource);
+    (synch_resource, mapper.thread_priority());
 
   // We cache this value in data member since it doesn't change, and we
   // don't want to keep asking for it over and over.

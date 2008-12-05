@@ -148,7 +148,7 @@ OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink
   // on the connect_as_publisher argument.
   if (connect_as_publisher == 1)
     {
-      result = this->make_active_connection(remote_address, priority, link.in());
+      result = this->make_active_connection(remote_address, link.in());
 
       if (result != 0)
         {
@@ -488,7 +488,6 @@ OpenDDS::DCPS::SimpleTcpTransport::passive_connection
 int
 OpenDDS::DCPS::SimpleTcpTransport::make_active_connection
 (const ACE_INET_Addr& remote_address,
- CORBA::Long          priority,
  SimpleTcpDataLink*   link)
 {
   DBG_ENTRY_LVL("SimpleTcpTransport","make_active_connection",6);
@@ -499,7 +498,7 @@ OpenDDS::DCPS::SimpleTcpTransport::make_active_connection
   // Ask the connection object to attempt the active connection establishment.
   if (connection->active_connect (remote_address,
                                   this->tcp_config_->local_address_,
-                                  priority,
+                                  link->priority(),
                                   this->tcp_config_) != 0)
     {
       return -1;
@@ -577,13 +576,18 @@ OpenDDS::DCPS::SimpleTcpTransport::connect_datalink
 {
   DBG_ENTRY_LVL("SimpleTcpTransport","connect_datalink",6);
 
-  TransportSendStrategy_rch send_strategy =
-    new SimpleTcpSendStrategy(link,
-			      this->tcp_config_.in(),
-			      connection,
-			      new SimpleTcpSynchResource(connection,
-							 this->tcp_config_->max_output_pause_period_),
-            this->reactor_task_.in());
+  TransportSendStrategy_rch send_strategy
+    = new SimpleTcpSendStrategy(
+            link,
+            this->tcp_config_.in(),
+            connection,
+            new SimpleTcpSynchResource(
+                  connection,
+                  this->tcp_config_->max_output_pause_period_
+            ),
+            this->reactor_task_.in(),
+            link->priority()
+          );
 
   TransportReceiveStrategy_rch receive_strategy =
     new SimpleTcpReceiveStrategy(link,

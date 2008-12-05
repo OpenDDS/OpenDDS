@@ -45,7 +45,8 @@ namespace OpenDDS
       // We do not own synch_resource!
       ReliableMulticastTransportSendStrategy(
         OpenDDS::DCPS::ReliableMulticastTransportConfiguration& configuration,
-        OpenDDS::DCPS::ReliableMulticastThreadSynchResource* synch_resource
+        OpenDDS::DCPS::ReliableMulticastThreadSynchResource* synch_resource,
+        CORBA::Long priority
         );
       virtual ~ReliableMulticastTransportSendStrategy();
 
