@@ -10,7 +10,7 @@ use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use DDS_Run_Test;
-use File::Path;
+
 
 $status = 0;
 
@@ -21,6 +21,14 @@ $opts =
 $pub_opts = "$opts -DCPSConfigFile pub.ini";
 $sub_opts = "$opts -DCPSConfigFile sub.ini";
 
+
+sub rmtree {
+  # this invocation of the publisher just cleans up the durability files
+  my $name = shift;
+  my $Pub_delete = PerlDDS::create_process ("publisher", "$pub_opts -d $name");
+  $Pub_delete->SpawnWaitKill(60);
+}
+
 $dcpsrepo_ior = "repo.ior";
 $repo_bit_opt = $opts;
 
@@ -28,10 +36,6 @@ unlink $dcpsrepo_ior;
 
 $data_file = "test_run.data";
 unlink $data_file;
-
-$durability_cache = "OpenDDS-durable-data-dir"; # Currently a fixed name
-                                                # is used by OpenDDS.
-rmtree($durability_cache) if -d $durability_cache;
 
 $DCPSREPO =
   PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
@@ -53,6 +57,10 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
     $DCPSREPO->Kill ();
     exit 1;
 }
+
+$durability_cache = "OpenDDS-durable-data-dir"; # Currently a fixed name
+                                                # is used by OpenDDS.
+rmtree($durability_cache) if -d $durability_cache;
 
 $Publisher1->Spawn ();
 
@@ -88,6 +96,9 @@ if ($SubscriberResult != 0) {
     $status = 1;
 }
 
+
+rmtree($durability_cache) if -d $durability_cache;
+
 $ir = $DCPSREPO->TerminateWaitKill (5);
 if ($ir != 0) {
     print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
@@ -96,7 +107,6 @@ if ($ir != 0) {
 
 unlink $dcpsrepo_ior;
 unlink $data_file;
-rmtree($durability_cache) if -d $durability_cache;
 
 if ($status == 0) {
   print "test PASSED.\n";

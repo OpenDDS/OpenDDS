@@ -1,3 +1,11 @@
+Fri Dec  5 17:14:16 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/PersistentDurability/publisher.cpp:
+        * tests/DCPS/PersistentDurability/run_test.pl:
+
+          Moved the code that removes the data subdirectory from Perl to
+          C++ so we can handle absolute paths > 260 characters on Win32.
+
 Fri Dec  5 16:08:51 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataDurabilityCache.cpp:
