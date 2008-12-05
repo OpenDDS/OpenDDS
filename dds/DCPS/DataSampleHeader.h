@@ -30,6 +30,17 @@ namespace OpenDDS
       FULLY_ASSOCIATED
     };
 
+    enum DataSampleHeaderFlag {
+      LAST_SAMPLE_FLAG,
+      BYTE_ORDER_FLAG,
+      HISTORIC_SAMPLE_FLAG,
+      LIFESPAN_DURATION_FLAG,
+      RESERVED_1_FLAG,
+      RESERVED_2_FLAG,
+      RESERVED_3_FLAG,
+      RESERVED_4_FLAG
+    };
+
     /// The header message of a data sample.
     /// This header and the data sample are in different
     /// message block and will be chained together.
@@ -45,13 +56,19 @@ namespace OpenDDS
       /// 1 -  Message encoded using network byte order.
       bool byte_order_  : 1;
 
+      /// This flag indicates a sample has been resent from a
+      /// non-VOLATILE DataWriter.
+      bool historic_sample_ : 1;
+
+      /// This flag indicates the sample header contains non-default
+      /// LIFESPAN duration fields.
+      bool lifespan_duration_ :1;
+
       /// reservered bits
       bool reserved_1   : 1;
       bool reserved_2   : 1;
       bool reserved_3   : 1;
       bool reserved_4   : 1;
-      bool reserved_5   : 1;
-      bool reserved_6   : 1;
 
       //The size of the message including the entire header.
       ACE_UINT32 message_length_;
@@ -71,7 +88,16 @@ namespace OpenDDS
       /// SampleInfo structure supplied along with each data sample.
       ACE_INT32 source_timestamp_sec_;
       ACE_UINT32 source_timestamp_nanosec_; // Corresponding IDL is unsigned.
-
+      
+      /// The LIFESPAN duration field is generated from the DataWriter
+      /// or supplied by the application at the time of the write. This
+      /// field is used to determine if a given sample is considered
+      /// 'stale' and should be discarded by associated DataReader.
+      /// These fields are optional and are controlled by the
+      /// lifespan_duration_ flag.
+      ACE_INT32 lifespan_duration_sec_;
+      ACE_UINT32 lifespan_duration_nanosec_;  // Corresponding IDL is unsigned.
+      
       /// The COHERENCY_GROUP field is obtained from the Publisher as well, 
       /// in order to support the same scope as the SEQUENCE field.  
       /// The special value of 0 indicates that the sample is not 
@@ -81,6 +107,9 @@ namespace OpenDDS
       /// Identify the DataWriter that produced the sample data being 
       /// sent.
       PublicationId  publication_id_;
+      
+      static void update_flag (ACE_Message_Block* buffer,
+                               DataSampleHeaderFlag flag) ;
 
       /// Default constructor.
       DataSampleHeader() ;

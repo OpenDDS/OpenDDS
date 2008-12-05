@@ -8,7 +8,7 @@
 #include "dcps_export.h"
 #include "EntityImpl.h"
 #include "dds/DdsDcpsTopicC.h"
-#include "dds/DdsDcpsSubscriptionS.h"
+#include "dds/DdsDcpsSubscriptionExtS.h"
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsTopicC.h"
 #include "dds/DdsDcpsDataReaderRemoteC.h"
@@ -44,8 +44,6 @@ namespace OpenDDS
 
     typedef Cached_Allocator_With_Overflow< ::OpenDDS::DCPS::ReceivedDataElement, ACE_Null_Mutex>
                 ReceivedDataAllocator;
-
-    //typedef ZeroCopyInfoSeq<DCPS_ZERO_COPY_SEQ_DEFAULT_SIZE> SampleInfoZCSeq;
 
     /// Keeps track of a DataWriter's liveliness for a DataReader.
     class OpenDDS_Dcps_Export WriterInfo {
@@ -187,11 +185,41 @@ namespace OpenDDS
     virtual void init (
         TopicImpl*                    a_topic,
         const ::DDS::DataReaderQos &  qos,
+        const DataReaderQosExt &      ext_qos,
         ::DDS::DataReaderListener_ptr a_listener,
         DomainParticipantImpl*        participant,
         SubscriberImpl*               subscriber,
         ::DDS::DataReader_ptr         dr_objref,
         ::OpenDDS::DCPS::DataReaderRemote_ptr dr_remote_objref
+      )
+        ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
+
+    virtual ::DDS::ReadCondition_ptr create_readcondition (
+        ::DDS::SampleStateMask sample_states,
+        ::DDS::ViewStateMask view_states,
+        ::DDS::InstanceStateMask instance_states
+      )
+        ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+    virtual ::DDS::QueryCondition_ptr create_querycondition (
+        ::DDS::SampleStateMask sample_states,
+        ::DDS::ViewStateMask view_states,
+        ::DDS::InstanceStateMask instance_states,
+        const char * query_expression,
+        const ::DDS::StringSeq & query_parameters
+      )
+        ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
+#endif
+
+    virtual ::DDS::ReturnCode_t delete_readcondition (
+        ::DDS::ReadCondition_ptr a_condition
       )
         ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -325,6 +353,9 @@ namespace OpenDDS
       bool have_sample_states(::DDS::SampleStateMask sample_states) const;
       bool have_view_states(::DDS::ViewStateMask view_states) const;
       bool have_instance_states(::DDS::InstanceStateMask instance_states) const;
+      bool contains_sample(::DDS::SampleStateMask sample_states,
+        ::DDS::ViewStateMask view_states,
+        ::DDS::InstanceStateMask instance_states);
 
       virtual void dds_demarshal(const ReceivedDataSample& sample) = 0;
       virtual void dispose(const ReceivedDataSample& sample);
@@ -382,12 +413,8 @@ namespace OpenDDS
           CORBA::SystemException
         )) = 0;
 
-      void sample_info(::DDS::SampleInfoSeq & info_seq,
-                       size_t start_idx, size_t count,
-                       ReceivedDataElement *ptr);
-
       void sample_info(::DDS::SampleInfo & sample_info,
-                       ReceivedDataElement *ptr);
+                       const ReceivedDataElement *ptr);
 
       CORBA::Long total_samples() const;
 
@@ -408,6 +435,8 @@ namespace OpenDDS
 
       virtual void release_instance_i (::DDS::InstanceHandle_t handle) = 0;
 
+      bool has_readcondition(::DDS::ReadCondition_ptr a_condition);
+
       mutable SubscriptionInstanceMapType           instances_;
 
       ReceivedDataAllocator          *rd_allocator_;
@@ -427,6 +456,9 @@ namespace OpenDDS
       ::DDS::InstanceHandle_t         next_handle_;
 
     private:
+
+      /// Data has arrived into the cache, unblock waiting ReadConditions
+      void notify_read_conditions ();
 
       void notify_subscription_lost (const ::DDS::InstanceHandleSeq& handles);
 
@@ -518,12 +550,17 @@ namespace OpenDDS
 
       /// Flag indicates that the init() is called.
       bool                       initialized_;
+      bool                       always_get_history_;
 
       typedef std::map<PublicationId, WriterInfo, GUID_tKeyLessThan> WriterMapType;
 
       /// publications writing to this reader.
       WriterMapType writers_;
 
+      typedef
+        std::set< ::DDS::ReadCondition_var, VarLess< ::DDS::ReadCondition > >
+        ReadConditionSet;
+      ReadConditionSet read_conditions_;
     };
 
   } // namespace DCPS

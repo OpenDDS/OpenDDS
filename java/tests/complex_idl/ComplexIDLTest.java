@@ -155,6 +155,9 @@ public class ComplexIDLTest extends QuoteSupport {
                             SampleInfo si = new SampleInfo();
                             si.source_timestamp = new Time_t();
 
+                            // Verify idl2jni is "optimizing" object copies
+                            CastMember cast_pre_take = dh.value.payload.idl_quote().cast_member;
+
                             int result = reader.take_next_sample(dh, new SampleInfoHolder(si));
                             assert (result != RETCODE_ERROR.value);
 
@@ -162,6 +165,7 @@ public class ComplexIDLTest extends QuoteSupport {
 
                             switch (data.payload.discriminator().value()) {
                                 case DataType._DATA_IDL:
+                                    assert data.payload.idl_quote().cast_member == cast_pre_take;
                                     printQuote(data.payload.idl_quote());
                                     break;
 

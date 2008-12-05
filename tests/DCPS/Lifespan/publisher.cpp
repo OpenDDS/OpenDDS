@@ -57,9 +57,6 @@ int main (int argc, char *argv[]) {
       DDS::TopicQos topic_qos;
       participant->get_default_topic_qos(topic_qos);
 
-//       topic_qos.lifespan.duration.sec = 20;
-//       topic_qos.lifespan.duration.nanosec = 0;
-
       DDS::Topic_var topic =
         participant->create_topic ("Movie Discussion List",
                                    type_name.in (),
@@ -122,6 +119,9 @@ int main (int argc, char *argv[]) {
       dw_qos.reliability.kind  = ::DDS::RELIABLE_RELIABILITY_QOS;
       dw_qos.resource_limits.max_samples_per_instance = 1000;
       dw_qos.history.kind  = ::DDS::KEEP_ALL_HISTORY_QOS;
+      dw_qos.lifespan.duration.sec = 20;
+      dw_qos.lifespan.duration.nanosec = 0;
+
 
       ::DDS::DataWriterListener_var dwl (new DataWriterListenerImpl);
 

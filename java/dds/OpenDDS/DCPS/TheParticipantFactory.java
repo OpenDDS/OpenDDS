@@ -7,8 +7,18 @@ public final class TheParticipantFactory {
   public static native DDS.DomainParticipantFactory
     WithArgs(org.omg.CORBA.StringSeqHolder args);
 
+  public static native DDS.DomainParticipantFactory
+    getInstance();
+
   static {
-    String propVal = System.getProperty("jni.nativeDebug");
+    loadNativeLib();
+  }
+
+  // Even though this is public, the user shouldn't need to call it.  The first
+  // class loaded will have a static initializer which calls this function.
+  // It is only made public so that other OpenDDS packages can use it.
+  public static void loadNativeLib () {
+    String propVal = System.getProperty("opendds.native.debug");
     if (propVal != null && ("1".equalsIgnoreCase(propVal) ||
         "y".equalsIgnoreCase(propVal) ||
         "yes".equalsIgnoreCase(propVal) ||

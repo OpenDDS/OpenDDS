@@ -1477,6 +1477,21 @@ namespace OpenDDS
       return dp_id_;
     }
 
+    CORBA::Long
+    DomainParticipantImpl::get_federation_id()
+      ACE_THROW_SPEC ((CORBA::SystemException))
+    {
+      GuidConverter gc(dp_id_);
+      return gc.federationId();
+    }
+
+    CORBA::Long
+    DomainParticipantImpl::get_participant_id()
+      ACE_THROW_SPEC ((CORBA::SystemException))
+    {
+      GuidConverter gc(dp_id_);
+      return gc.participantId();
+    }
 
     ::DDS::Topic_ptr
     DomainParticipantImpl::create_topic_i (

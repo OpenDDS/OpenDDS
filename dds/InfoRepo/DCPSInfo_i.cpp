@@ -45,7 +45,7 @@ TAO_DDS_DCPSInfo_i::~TAO_DDS_DCPSInfo_i (void)
 }
 
 void
-TAO_DDS_DCPSInfo_i::shutdown()
+TAO_DDS_DCPSInfo_i::shutdown() ACE_THROW_SPEC ((CORBA::SystemException))
 {
   this->shutdown_->shutdown();
 }

@@ -20,7 +20,7 @@ Partition Contents      Description
 3         Amadeus       Will be matched by two different subscribers.
           Ziggie*dust
 
-4         Wun?Two*Tree  Will be matched by one subscribed.
+4         Wun?Two[0-9][!a-z]Tree  Will be matched by one subscribed.
 
 5         Not*A Match   Should not match, by design, since the closest
                         matching requested partition will also contain

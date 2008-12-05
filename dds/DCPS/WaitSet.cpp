@@ -12,6 +12,7 @@ namespace
   {
     size_t size = source.size();
     // If we're shortening the sequence we must manually nil-out the extra slots
+    // See DOC group bug 3481
     for (CORBA::ULong i = target.length(); i > size; --i)
       {
         target[i - 1] = DDS::Condition::_nil();
