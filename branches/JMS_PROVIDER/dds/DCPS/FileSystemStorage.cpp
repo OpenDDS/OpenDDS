@@ -210,18 +210,21 @@ namespace
   {
     using namespace OpenDDS::FileSystemStorage;
     DDS_Dirent dir(dirname.c_str());
-    for (CwdGuard cg(dirname); ACE_DIRENT* ent = dir.read();)
-      {
-        if (ent->d_name[0] == ACE_TEXT('.')) continue; // skip '.' and '..'
-        if (is_dir(ent->d_name))
-          {
-            recursive_remove(ent->d_name);
-          }
-        else // regular file
-          {
-            ACE_OS::unlink(ent->d_name);
-          }
-      }
+    {
+      CwdGuard cg(dirname);
+      for (ACE_DIRENT* ent = dir.read(); ent; ent = dir.read())
+        {
+          if (ent->d_name[0] == ACE_TEXT('.')) continue; // skip '.' and '..'
+          if (is_dir(ent->d_name))
+            {
+              recursive_remove(ent->d_name);
+            }
+          else // regular file
+            {
+              ACE_OS::unlink(ent->d_name);
+            }
+        }
+    }
     dds_rmdir(dirname.c_str());
   }
 

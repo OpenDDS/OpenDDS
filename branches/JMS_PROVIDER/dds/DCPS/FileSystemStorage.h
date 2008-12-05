@@ -77,28 +77,7 @@ namespace OpenDDS
     using OpenDDS::DCPS::RcObject;
     using OpenDDS::DCPS::RcHandle;
 
-    class Directory;
-
-
-    class OpenDDS_Dcps_Export File : public RcObject<ACE_SYNCH_MUTEX>
-    {
-    public:
-      typedef RcHandle<File> Ptr;
-
-      bool write(std::ofstream& stream);
-      bool read(std::ifstream& stream);
-      bool remove();
-      std::string name() const;
-      RcHandle<Directory> parent() const {return parent_;}
-
-    private:
-      friend class Directory;
-      File(const ACE_TString& fname_phys, const ACE_TString& logical,
-           Directory* parent);
-
-      ACE_TString physical_file_, physical_dir_, logical_relative_;
-      RcHandle<Directory> parent_;
-    };
+    class File;
 
 
     class OpenDDS_Dcps_Export Directory : public RcObject<ACE_SYNCH_MUTEX>
@@ -186,10 +165,10 @@ namespace OpenDDS
       FileIterator begin_files(); // files will be sorted
       FileIterator end_files();
 
-      File::Ptr get_file(const char* name);  // slash is not a separator
+      RcHandle<File> get_file(const char* name);  // slash is not a separator
 
       /// assumes all files in this dir are created with this API
-      File::Ptr create_next_file();
+      RcHandle<File> create_next_file();
 
       DirectoryIterator begin_dirs(); // dirs will be sorted
       DirectoryIterator end_dirs();
@@ -211,7 +190,7 @@ namespace OpenDDS
                 Directory* parent);
       void scan_dir(const ACE_TString& relative, DDS_Dirent& dir,
                     unsigned int overflow_index);
-      File::Ptr make_new_file(const ACE_TString& t_name);
+      RcHandle<File> make_new_file(const ACE_TString& t_name);
       void removing(const ACE_TString& logical_child, bool file);
       Directory::Ptr make_new_subdir(const ACE_TString& logical);
       ACE_TString add_entry(); // returns overflow directory prefix
@@ -225,6 +204,28 @@ namespace OpenDDS
       Map files_, dirs_; // logical -> physical
       std::map<ACE_TString, unsigned int> long_names_;
         // phys. prefix (before '.') -> next available counter #
+    };
+
+
+    class OpenDDS_Dcps_Export File : public RcObject<ACE_SYNCH_MUTEX>
+    {
+    public:
+      typedef RcHandle<File> Ptr;
+
+      bool write(std::ofstream& stream);
+      bool read(std::ifstream& stream);
+      bool remove();
+      std::string name() const;
+      Directory::Ptr parent() const {return parent_;}
+
+    private:
+      friend class Directory;
+      template <typename Item> friend class Directory::Iterator;
+      File(const ACE_TString& fname_phys, const ACE_TString& logical,
+           Directory* parent);
+
+      ACE_TString physical_file_, physical_dir_, logical_relative_;
+      Directory::Ptr parent_;
     };
 
 

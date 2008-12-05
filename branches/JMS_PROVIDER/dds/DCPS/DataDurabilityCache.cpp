@@ -817,7 +817,7 @@ OpenDDS::DCPS::DataDurabilityCache::get_data (
 
 std::auto_ptr<ACE_Allocator>
 OpenDDS::DCPS::DataDurabilityCache::make_allocator (
-  ::DDS::DurabilityQosPolicyKind kind)
+  ::DDS::DurabilityQosPolicyKind)
 {
   // The use of other Allocators has been removed but this function
   // remains for the time being.
