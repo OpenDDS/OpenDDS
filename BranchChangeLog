@@ -1,3 +1,11 @@
+Fri Dec  5 02:59:31 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/compat/src/META-INF/service/opendds-ds.xml:
+        * java/jms/src/org/opendds/jms/management/PersistenceManagerService.java:
+        * java/jms/src/org/opendds/jms/persistence/AcknowledgedMessage.hbm.xml:
+
+          Updated PersistenceManager.
+
 Fri Dec  5 01:10:05 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/compat/src/META-INF/service/opendds-ds.xml:
