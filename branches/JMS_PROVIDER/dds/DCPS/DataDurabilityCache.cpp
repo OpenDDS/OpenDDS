@@ -102,7 +102,22 @@ namespace
                     data_queue_type);
       queue = 0;
 
-      cleanup_directory (path_);
+      try
+      {
+        cleanup_directory (path_);
+      }
+      catch (const std::exception& ex)
+      {
+        if (OpenDDS::DCPS::DCPS_debug_level > 0)
+        {
+          ACE_ERROR((LM_ERROR,
+            ACE_TEXT("(%P|%t) Cleanup_Handler::handle_timout ")
+            ACE_TEXT("couldn't remove directory for PERSISTENT ")
+            ACE_TEXT("data: %C\n"), ex.what()
+          ));
+        }
+      }
+
 
       // No longer any need to keep track of the timer ID.
       this->timer_ids_->remove (this->tid_);
@@ -512,19 +527,34 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
 
     if (this->kind_ == ::DDS::PERSISTENT_DURABILITY_QOS)
     {
-      dir = Directory::create (dds_backing_store);
-      std::ostringstream oss;
-      oss << domain_id;
-      path.push_back (oss.str ());
-      path.push_back (topic_name);
-      path.push_back (type_name);
-      dir = dir->get_dir (path);
-      // dir is now the "type" directory, which is shared by all datawriters of
-      // the domain/topic/type.  We actually need a new directory per datawriter
-      // and this assumes that insert() is called once per datawriter, as is
-      // currently the case.
-      dir = dir->create_next_dir ();
-      path.push_back (dir->name ()); // for use by the Cleanup_Handler
+      try
+      {
+        dir = Directory::create (dds_backing_store);
+        std::ostringstream oss;
+        oss << domain_id;
+        path.push_back (oss.str ());
+        path.push_back (topic_name);
+        path.push_back (type_name);
+        dir = dir->get_dir (path);
+        // dir is now the "type" directory, which is shared by all datawriters
+        // of the domain/topic/type.  We actually need a new directory per
+        // datawriter and this assumes that insert() is called once per
+        // datawriter, as is currently the case.
+        dir = dir->create_next_dir ();
+        path.push_back (dir->name ()); // for use by the Cleanup_Handler
+      }
+      catch (const std::exception& ex)
+      {
+        if (DCPS_debug_level > 0)
+        {
+          ACE_ERROR((LM_ERROR,
+            ACE_TEXT("(%P|%t) DataDurabilityCache::insert ")
+            ACE_TEXT("couldn't create directory for PERSISTENT ")
+            ACE_TEXT("data: %C\n"), ex.what()
+          ));
+        }
+        dir = 0;
+      }
     }
 
     if (this->samples_->find (key, sample_list, allocator) != 0)
@@ -586,17 +616,31 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
 
       if (!dir.is_nil ())
       {
-        File::Ptr f = dir->create_next_file ();
-        std::ofstream os;
-        if (!f->write (os)) return false;
+        try
+        {
+          File::Ptr f = dir->create_next_file ();
+          std::ofstream os;
+          if (!f->write (os)) return false;
 
-        ::DDS::Time_t timestamp;
-        const char * data;
-        size_t len;
-        sample.get_sample (data, len, timestamp);
+          ::DDS::Time_t timestamp;
+          const char * data;
+          size_t len;
+          sample.get_sample (data, len, timestamp);
 
-        os << timestamp.sec << ' ' << timestamp.nanosec << ' ';
-        os.write (data, len);
+          os << timestamp.sec << ' ' << timestamp.nanosec << ' ';
+          os.write (data, len);
+        }
+        catch (const std::exception& ex)
+        {
+          if (DCPS_debug_level > 0)
+          {
+            ACE_ERROR((LM_ERROR,
+              ACE_TEXT("(%P|%t) DataDurabilityCache::insert ")
+              ACE_TEXT("couldn't write sample for PERSISTENT ")
+              ACE_TEXT("data: %C\n"), ex.what()
+            ));
+          }
+        }
       }
     }
   }
@@ -809,7 +853,21 @@ OpenDDS::DCPS::DataDurabilityCache::get_data (
      */
     q->reset ();
 
-    cleanup_directory (q->fs_path_);
+    try
+    {
+      cleanup_directory (q->fs_path_);
+    }
+    catch (const std::exception& ex)
+    {
+      if (DCPS_debug_level > 0)
+      {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) DataDurabilityCache::get_data ")
+          ACE_TEXT("couldn't remove directory for PERSISTENT ")
+          ACE_TEXT("data: %C\n"), ex.what()
+        ));
+      }
+    }
   }
 
   return true;
