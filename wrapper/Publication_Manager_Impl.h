@@ -10,8 +10,8 @@
  */
 //=============================================================================
 
-#ifndef _PUBLICATION_MANAGER_IMPL_H_
-#define _PUBLICATION_MANAGER_IMPL_H_
+#ifndef DDS_WRAPPER_PUBLICATION_MANAGER_IMPL_H_
+#define DDS_WRAPPER_PUBLICATION_MANAGER_IMPL_H_
 
 #include <ace/Refcounted_Auto_Ptr.h>
 #include <ace/Null_Mutex.h>
@@ -55,4 +55,4 @@ class Publication_Manager_Impl
   virtual DDS::Publisher_ptr publisher () const = 0;
 };
 
-#endif /* _PUBLICATION_MANAGER_IMPL_H_ */
+#endif /* DDS_WRAPPER_PUBLICATION_MANAGER_IMPL_H_ */

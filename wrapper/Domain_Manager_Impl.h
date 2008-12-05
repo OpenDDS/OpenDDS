@@ -10,8 +10,8 @@
  */
 //=============================================================================
 
-#ifndef _DOMAIN_MANAGER_IMPL_H_
-#define _DOMAIN_MANAGER_IMPL_H_
+#ifndef DDS_WRAPPER_DOMAIN_MANAGER_IMPL_H_
+#define DDS_WRAPPER_DOMAIN_MANAGER_IMPL_H_
 
 #include <ace/Refcounted_Auto_Ptr.h>
 #include <ace/Null_Mutex.h>
@@ -62,4 +62,4 @@ class Domain_Manager_Impl
   virtual DDS::DomainParticipant_ptr participant () = 0;
 };
 
-#endif /* _DOMAIN_MANAGER_IMPL_H_ */
+#endif /* DDS_WRAPPER_DOMAIN_MANAGER_IMPL_H_ */

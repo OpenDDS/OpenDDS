@@ -51,6 +51,7 @@ ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> num_reads = 0;
 long op_interval_ms = 0;
 long blocking_ms = 0;
 int mixed_trans = 0;
+int test_bit = 0;
 
 OpenDDS::DCPS::TransportImpl_rch reader_tcp_impl;
 OpenDDS::DCPS::TransportImpl_rch reader_udp_impl;

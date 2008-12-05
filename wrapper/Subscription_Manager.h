@@ -10,8 +10,8 @@
  */
 //=============================================================================
 
-#ifndef _SUBSCRIPTION_MANAGER_H_
-#define _SUBSCRIPTION_MANAGER_H_
+#ifndef DDS_WRAPPER_SUBSCRIPTION_MANAGER_H_
+#define DDS_WRAPPER_SUBSCRIPTION_MANAGER_H_
 
 #include "DDSWrapper_export.h"
 #include "Subscription_Manager_Impl.h"
@@ -38,6 +38,9 @@ class DDSWrapper_Export Subscription_Manager
   /// assignment operator
   void operator= (const Subscription_Manager & copy);
 
+  /// checks for null reference
+  bool null () const;
+
   /// will create a topic instance using the domain manager
   /// internally a datareader will be created which can be accessed
   /// through the lookup_datareader method
@@ -63,4 +66,4 @@ class DDSWrapper_Export Subscription_Manager
 #include "Subscription_Manager.inl"
 #endif
 
-#endif /* _SUBSCRIPTION_MANAGER_H_ */
+#endif /* DDS_WRAPPER_SUBSCRIPTION_MANAGER_H_ */

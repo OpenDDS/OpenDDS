@@ -32,13 +32,6 @@
 #endif
 
 OpenDDS_Subscription_Manager::OpenDDS_Subscription_Manager (
-  const Domain_Manager & dm)
-  : dm_ (dm)
-{
-  this->init ();
-}
-
-OpenDDS_Subscription_Manager::OpenDDS_Subscription_Manager (
   const Domain_Manager & dm,
   OpenDDS::DCPS::TransportIdType transport_impl_id)
   : dm_ (dm)
@@ -78,9 +71,8 @@ OpenDDS_Subscription_Manager::register_transport (
 {
   // Initialize the transport
   OpenDDS::DCPS::TransportImpl_rch transport_impl =
-    OpenDDS::DCPS::TransportFactory::instance ()->create_transport_impl (
-      transport_id,
-      ::OpenDDS::DCPS::AUTO_CONFIG);
+    OpenDDS::DCPS::TransportFactory::instance ()->obtain (
+      transport_id);
 
   // Attach the subscriber to the transport.
   OpenDDS::DCPS::SubscriberImpl* sub_impl =

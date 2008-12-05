@@ -35,8 +35,7 @@ OpenDDS_Domain_Manager::OpenDDS_Domain_Manager (int & argc,
   : dp_ (DDS::DomainParticipant::_nil ()),
     transport_impl_id_ (1),
     shutdown_lock_ (0),
-    exit_handler_ (shutdown_lock_),
-    transport_initialized_ (false)
+    exit_handler_ (shutdown_lock_)
 {
   // get the domain participant factory from the singleton 
   DDS::DomainParticipantFactory_var dpf =
@@ -53,6 +52,46 @@ OpenDDS_Domain_Manager::OpenDDS_Domain_Manager (int & argc,
   // check for successful creation
   if (CORBA::is_nil (dp_.in ()))
     throw Manager_Exception ("Failed to create domain participant.");
+
+  // create transport impl
+  OpenDDS::DCPS::TransportImpl_rch transport_impl =
+    OpenDDS::DCPS::TransportFactory::instance ()->create_transport_impl (
+      transport_impl_id_);
+
+  // add a the handler for the SIGINT signal here
+  ACE_Sig_Handler sig_handler;
+  sig_handler.register_handler (SIGINT, &exit_handler_);
+}
+
+OpenDDS_Domain_Manager::OpenDDS_Domain_Manager (int & argc, 
+				char* argv[], 
+				DDS::DomainId_t domain_id,
+				const DDS::DomainParticipantQos & qos)
+  : dp_ (DDS::DomainParticipant::_nil ()),
+    transport_impl_id_ (1),
+    shutdown_lock_ (0),
+    exit_handler_ (shutdown_lock_)
+{
+  // get the domain participant factory from the singleton 
+  DDS::DomainParticipantFactory_var dpf =
+    OpenDDS::DCPS::Service_Participant::instance ()->
+      get_domain_participant_factory (argc, argv);
+
+  this->parse_args (argc, argv);
+
+  // create the participant named 'participant'.
+  dp_ = dpf->create_participant (domain_id,
+				 qos,
+				 DDS::DomainParticipantListener::_nil ());
+
+  // check for successful creation
+  if (CORBA::is_nil (dp_.in ()))
+    throw Manager_Exception ("Failed to create domain participant.");
+
+  // create transport impl
+  OpenDDS::DCPS::TransportImpl_rch transport_impl =
+    OpenDDS::DCPS::TransportFactory::instance ()->create_transport_impl (
+      transport_impl_id_);
 
   // add a the handler for the SIGINT signal here
   ACE_Sig_Handler sig_handler;
@@ -96,6 +135,7 @@ OpenDDS_Domain_Manager::shutdown ()
 Subscription_Manager
 OpenDDS_Domain_Manager::subscription_manager (const Domain_Manager_Ptr & ref)
 {
+<<<<<<< .working
   if (transport_initialized_)
     {
       // only create new subscription manager that gets a transport impl id the
@@ -115,6 +155,14 @@ OpenDDS_Domain_Manager::subscription_manager (const Domain_Manager_Ptr & ref)
                  new OpenDDS_Subscription_Manager (Domain_Manager (ref), 
 			                           transport_impl_id_)));
     }
+=======
+  // use the simple constructor for consecutive calls of this method
+  return Subscription_Manager (
+    Subscription_Manager_Ptr (
+      new OpenDDS_Subscription_Manager (Domain_Manager (ref), 
+					transport_impl_id_,
+					qos)));
+>>>>>>> .merge-right.r1805
 }
 
 Subscription_Manager
@@ -130,6 +178,7 @@ OpenDDS_Domain_Manager::builtin_topic_subscriber (const Domain_Manager_Ptr & ref
 Publication_Manager
 OpenDDS_Domain_Manager::publication_manager (const Domain_Manager_Ptr & ref)
 {
+<<<<<<< .working
   if (transport_initialized_)
     {
       // only create new publication manager that gets a transport impl id the
@@ -149,6 +198,14 @@ OpenDDS_Domain_Manager::publication_manager (const Domain_Manager_Ptr & ref)
                  new OpenDDS_Publication_Manager (Domain_Manager (ref),
 		     			          transport_impl_id_)));
     }
+=======
+  // use the simple constructor for consecutive calls of this method
+  return Publication_Manager (
+    Publication_Manager_Ptr (
+      new OpenDDS_Publication_Manager (Domain_Manager (ref),
+				       transport_impl_id_,
+				       qos)));
+>>>>>>> .merge-right.r1805
 }
 
 bool
