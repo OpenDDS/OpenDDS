@@ -1,3 +1,10 @@
+Fri Dec  5 20:26:15 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Added error handling for uses of FileSystemStorage.
+
 Fri Dec  5 20:05:30 UTC 2008  Weiqi Gao  <gaow@ociweb.com>
 
         * java/OpenDDS.ipr:
