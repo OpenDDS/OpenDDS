@@ -42,7 +42,7 @@ public class DataWriterPair {
         DataWriterQosHolder persistentQosHolder = new DataWriterQosHolder(DATAWRITER_QOS_DEFAULT.get());
         publisher.get_default_datawriter_qos(persistentQosHolder);
         final DataWriterQos persistentQos = persistentQosHolder.value;
-        persistentQos.durability.kind = DurabilityQosPolicyKind.VOLATILE_DURABILITY_QOS; //TODO
+        persistentQos.durability.kind = DurabilityQosPolicyKind.PERSISTENT_DURABILITY_QOS;
         final DataWriter dataWriter = publisher.create_datawriter(ddsTopic, persistentQos, null);
         MessagePayloadDataWriter persistentDW = MessagePayloadDataWriterHelper.narrow(dataWriter);
 

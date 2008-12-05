@@ -17,6 +17,8 @@ import javax.management.AttributeNotFoundException;
 import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanAttributeInfo;
 
+import org.opendds.jms.common.util.PropertiesHelper;
+
 /**
  * @author  Steven Stallion
  * @version $Revision$
@@ -24,6 +26,9 @@ import javax.management.MBeanAttributeInfo;
 public class DynamicAttributes implements Serializable {
     private Map<String, DynamicAttributeModel> attributes =
         new LinkedHashMap<String, DynamicAttributeModel>();
+
+    private Map<String, String> mapped =
+        new HashMap<String, String>();
 
     private Map<String, Object> values =
         new HashMap<String, Object>();
@@ -42,8 +47,13 @@ public class DynamicAttributes implements Serializable {
             type, description, isReadable, isWritable));
     }
 
+    public void map(String attribute, String property) {
+        mapped.put(attribute, property);
+    }
+
     public void unregister(String attribute) {
         attributes.remove(attribute);
+        mapped.remove(attribute);
         values.remove(attribute);
     }
 
@@ -99,8 +109,7 @@ public class DynamicAttributes implements Serializable {
                 properties.setProperty(entry.getKey(), value.toString());
             }
         }
-
-        return properties;
+        return PropertiesHelper.remap(properties, mapped);
     }
 
     //

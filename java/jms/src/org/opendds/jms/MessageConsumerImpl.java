@@ -5,9 +5,6 @@
 package org.opendds.jms;
 
 import java.util.List;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.jms.Destination;
 import javax.jms.JMSException;
@@ -69,14 +66,6 @@ public class MessageConsumerImpl implements MessageConsumer {
     private List<DataReaderHandlePair> toBeRecovered;
 
     private MessageDeliveryHelper helper;
-
-    private Lock lock = new ReentrantLock();
-
-    private boolean idle;
-    private Condition idleCondition = lock.newCondition();
-
-    private boolean started;
-    private Condition startedCondition = lock.newCondition();
 
     public MessageConsumerImpl(SessionImpl sessionImpl, Destination destination, String messageSelector, boolean noLocal) throws JMSException {
         this.sessionImpl = sessionImpl;
@@ -177,7 +166,7 @@ public class MessageConsumerImpl implements MessageConsumer {
         } catch (InterruptedException e) {
         } finally {
             helper.notifyIdle();
-            lock.unlock();
+            helper.unlock();
         }
         return message;
     }

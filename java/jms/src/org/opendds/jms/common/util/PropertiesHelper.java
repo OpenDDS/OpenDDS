@@ -39,7 +39,7 @@ public class PropertiesHelper {
         }
     }
 
-    public static void remap(Properties properties, Map<String, String> names) {
+    public static Properties remap(Properties properties, Map<String, String> names) {
         assert properties != null;
         assert names != null;
 
@@ -50,6 +50,7 @@ public class PropertiesHelper {
             properties.setProperty(names.get(name), properties.getProperty(name));
             properties.remove(name);
         }
+        return properties;
     }
 
     public static Properties valueOf(String value) {
@@ -73,7 +74,7 @@ public class PropertiesHelper {
 
     public PropertiesHelper(Properties properties) {
         assert properties != null;
-        
+
         this.properties = properties;
     }
 

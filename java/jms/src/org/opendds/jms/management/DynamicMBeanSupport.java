@@ -69,11 +69,22 @@ public abstract class DynamicMBeanSupport implements DynamicMBean, MBeanRegistra
     public void postDeregister() {}
 
     public void registerAttribute(String attribute, Class type) {
-        registerAttribute(attribute, type, null);
+        registerAttribute(attribute, null, type);
+    }
+
+    public void registerAttribute(String attribute, String property, Class type) {
+        registerAttribute(attribute, property, type, null);
     }
 
     public void registerAttribute(String attribute, Class type, String description) {
+        registerAttribute(attribute, null, type, description);
+    }
+
+    public void registerAttribute(String attribute, String property, Class type, String description) {
         attributes.register(attribute, type, description, true, true);
+        if (!Strings.isEmpty(property)) {
+            attributes.map(attribute, property);
+        }
     }
 
     public void registerReadOnlyAttribute(String attribute, Class type) {
