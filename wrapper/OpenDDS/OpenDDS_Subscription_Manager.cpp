@@ -33,10 +33,11 @@
 
 OpenDDS_Subscription_Manager::OpenDDS_Subscription_Manager (
   const Domain_Manager & dm,
-  OpenDDS::DCPS::TransportIdType transport_impl_id)
+  OpenDDS::DCPS::TransportIdType transport_impl_id,
+  const DDS::SubscriberQos & qos)
   : dm_ (dm)
 {
-  this->init ();
+  this->init (qos);
 
   this->register_transport (transport_impl_id);
 }
@@ -53,12 +54,12 @@ OpenDDS_Subscription_Manager::~OpenDDS_Subscription_Manager ()
 }
 
 void
-OpenDDS_Subscription_Manager::init ()
+OpenDDS_Subscription_Manager::init (const DDS::SubscriberQos & qos)
 {
   // create the subscriber using default QoS.
   sub_ = 
-    dm_.participant ()->create_subscriber (SUBSCRIBER_QOS_DEFAULT,
-			    DDS::SubscriberListener::_nil ());
+    dm_.participant ()->create_subscriber (qos,
+					   DDS::SubscriberListener::_nil ());
   
   // check for successful creation
   if (CORBA::is_nil (sub_.in ()))
@@ -114,6 +115,7 @@ OpenDDS_Subscription_Manager::register_transport (
 void
 OpenDDS_Subscription_Manager::access_topic (
     const Topic_Manager & topic,
+    const DDS::DataReaderQos & qos,
     const Subscription_Manager_Ptr & ref)
 {
   // Create a modifiable copy of the Topic_Manager
@@ -125,7 +127,7 @@ OpenDDS_Subscription_Manager::access_topic (
   // the returned data reader is not used and therefore just stored
   // in a var class for following deletion
   DDS::DataReader_var dr =
-    tm.datareader (Subscription_Manager (ref));
+    tm.datareader (Subscription_Manager (ref), qos);
 }
 
 DDS::DataReader_ptr 
@@ -148,4 +150,15 @@ OpenDDS_Subscription_Manager::remove_topic (const Topic_Manager & topic)
 
   // use topic manager to create the topic
   tm.delete_topic (dm_);
+}
+
+DDS::DataReaderQos
+OpenDDS_Subscription_Manager::get_default_datareader_qos ()
+{
+  // create QoS object and initialize it with the default values
+  DDS::DataReaderQos qos;
+  sub_->get_default_datareader_qos (qos);
+
+  // return the default qos
+  return qos;
 }

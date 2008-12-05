@@ -44,10 +44,14 @@ class Publication_Manager_Impl
   ///            reference count
   virtual DDS::DataWriter_ptr access_topic (
     const Topic_Manager & topic,
+    const DDS::DataWriterQos & qos,
     const Publication_Manager_Ptr & ref) = 0;
 
   /// unregisters and deletes the topic from the domain
   virtual void remove_topic (const Topic_Manager & topic) = 0;
+
+  /// creates and returns qos for data writers with the default values
+  virtual DDS::DataWriterQos get_default_datawriter_qos () = 0;
 
   /// returns the underlying subsriber instance
   /// memory management of the returned publisher reference is done by the 
