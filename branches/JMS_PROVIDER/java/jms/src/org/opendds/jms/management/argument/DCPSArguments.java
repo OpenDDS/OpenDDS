@@ -32,7 +32,7 @@ public class DCPSArguments implements DynamicArgumentProvider {
 
     public void setInstance(DynamicMBeanSupport instance) {
         assert instance != null;
-        
+
         this.instance = instance;
     }
 
@@ -70,8 +70,8 @@ public class DCPSArguments implements DynamicArgumentProvider {
             (String) instance.getAttribute(TRANSPORT_TYPE);
 
         if (!Strings.isEmpty(transportType)) {
-            writer.writeSvcConfDirective(
-                Transports.getDirective(transportType));
+            SvcConfDirective directive = Transports.getDirective(transportType);
+            directive.writeTo(writer);
         }
 
         writer.writeTo(args);

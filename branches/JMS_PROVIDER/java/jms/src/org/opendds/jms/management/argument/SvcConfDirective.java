@@ -2,20 +2,20 @@
  * $Id$
  */
 
-package org.opendds.jms.common;
+package org.opendds.jms.management.argument;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.opendds.jms.management.argument.ArgumentWriter;
-
 /**
  * @author  Steven Stallion
  * @version $Revision$
  */
 public class SvcConfDirective {
+    public static String ARGUMENT_NAME = "-ORBSvcConfDirective";
+
     private boolean dynamic;
     private String serviceName;
     private String baseObjectType;
@@ -80,6 +80,12 @@ public class SvcConfDirective {
         options.add(option);
     }
 
+    public void addOptions(String... options) {
+        for (String option : options) {
+            addOption(option);
+        }
+    }
+
     @Override
     public String toString() {
         StringBuffer sbuf = new StringBuffer();
@@ -114,7 +120,7 @@ public class SvcConfDirective {
     }
 
     public void writeTo(ArgumentWriter writer) {
-        writer.write("-ORBSvcConfDirective");
+        writer.write(ARGUMENT_NAME);
         writer.write(toString());
     }
 }

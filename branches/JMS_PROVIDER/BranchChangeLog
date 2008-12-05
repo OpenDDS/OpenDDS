@@ -1,3 +1,28 @@
+Fri Dec  5 01:10:05 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/compat/src/META-INF/service/opendds-ds.xml:
+        * java/jms/compat/test/org/opendds/jms/client/SessionImplTest.java:
+        * java/jms/src/org/opendds/jms/management/argument/ArgumentWriter.java:
+        * java/jms/src/org/opendds/jms/management/argument/DCPSArguments.java:
+        * java/jms/src/org/opendds/jms/management/argument/InfoRepoArguments.java:
+        * java/jms/src/org/opendds/jms/management/argument/ORBArguments.java:
+        * java/jms/src/org/opendds/jms/management/argument/SvcConfDirective.java:
+        * java/jms/src/org/opendds/jms/transport/Transports.java:
+        * java/jms/src/org/opendds/jms/transport/spi/ReliableMulticastTransport.java:
+        * java/jms/src/org/opendds/jms/transport/spi/SimpleMcastTransport.java:
+        * java/jms/src/org/opendds/jms/transport/spi/SimpleTcpTransport.java:
+        * java/jms/src/org/opendds/jms/transport/spi/SimpleUdpTransport.java:
+        * java/jms/src/org/opendds/jms/transport/spi/Transport.java:
+        * java/jms/test/org/opendds/jms/AbstractMessageImplTest.java:
+        * java/jms/test/org/opendds/jms/SessionImplTest.java:
+
+          Optimized package imports. Added ORBDisableUpcalls option. Refactored
+          SvcConfDirective handling.
+
+        * java/jms/src/org/opendds/jms/common/SvcConfDirective.java:
+
+          Removed this file.
+
 Fri Dec  5 00:41:34 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/compat/src/META-INF/service/opendds-ds.xml:
