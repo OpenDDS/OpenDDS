@@ -1,3 +1,9 @@
+Fri Dec  5 05:01:43 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/build.xml:
+
+          Dropped old debug logging.
+
 Fri Dec  5 04:53:45 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/lib/shared/commons-logging-1.1.1.jar:

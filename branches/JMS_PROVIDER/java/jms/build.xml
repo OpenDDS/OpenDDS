@@ -119,7 +119,6 @@
     <target name="jar" depends="compile" unless="jar.uptodate"
             description="Archive compiled classes and resources">
         <!-- Create version.properties -->
-        <echo message="[version.properties] Updating release versions"/>
         <propertyfile file="${build.dir}/version.properties">
             <entry key="version.dds" value="${opendds.version}"/>
             <entry key="version.dds.major" value="${opendds.version.major}"/>
@@ -192,8 +191,7 @@
             <fileset refid="DDS.libs"/>
         </opendds:libindex>
 
-        <!-- Update Resource Adapter descriptor -->
-        <echo message="[ra.xml] Updating resourceadapter-version to ${opendds.version}"/>
+        <!-- Update Resource Adapter descriptor -->        
         <copy file="${src.dir}/META-INF/ra.xml" todir="${build.dir}">
             <filterset>
                 <filter token="VERSION" value="${opendds.version}"/>
