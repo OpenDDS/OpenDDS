@@ -24,7 +24,8 @@ namespace OpenDDS
       public:
 
         SimpleTcpDataLink(const ACE_INET_Addr& remote_address,
-                          SimpleTcpTransport*  transport_impl);
+                          SimpleTcpTransport*  transport_impl,
+                          CORBA::Long          priority = 0);
         virtual ~SimpleTcpDataLink();
 
         /// Accessor for the remote address.

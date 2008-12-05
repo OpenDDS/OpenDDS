@@ -22,8 +22,10 @@ namespace OpenDDS
 
         virtual ~ThreadSynchStrategy();
 
-        virtual ThreadSynch* create_synch_object
-                                   (ThreadSynchResource* synch_resource) = 0;
+        virtual ThreadSynch* create_synch_object(
+                               ThreadSynchResource* synch_resource,
+                               long                 priority
+                             ) = 0;
 
 
       protected:

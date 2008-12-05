@@ -32,7 +32,8 @@ namespace OpenDDS
         TransportReactorTask_rch& reactor_task,
         ReliableMulticastTransportConfiguration& configuration,
         const ACE_INET_Addr& multicast_group_address,
-        OpenDDS::DCPS::ReliableMulticastTransportImpl& transport_impl
+        OpenDDS::DCPS::ReliableMulticastTransportImpl& transport_impl,
+        CORBA::Long priority
         );
       virtual ~ReliableMulticastDataLink();
 

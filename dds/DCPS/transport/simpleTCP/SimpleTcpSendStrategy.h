@@ -29,7 +29,8 @@ namespace OpenDDS
                               SimpleTcpConfiguration* config,
                               SimpleTcpConnection*    connection,
                               SimpleTcpSynchResource* synch_resource,
-                              TransportReactorTask* task);
+                              TransportReactorTask*   task,
+                              CORBA::Long             priority);
         virtual ~SimpleTcpSendStrategy();
 
         /// This is called by the datalink object to associate with the "new" connection object.

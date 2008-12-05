@@ -26,7 +26,8 @@ namespace OpenDDS
         SimpleUnreliableDgramSendStrategy(TransportConfiguration* config,
                               const ACE_INET_Addr&    remote_address,
                               SimpleUnreliableDgramSocket*        socket,
-                              SimpleUnreliableDgramSynchResource* resource);
+                              SimpleUnreliableDgramSynchResource* resource,
+                              CORBA::Long                         priority);
         virtual ~SimpleUnreliableDgramSendStrategy();
 
       protected:

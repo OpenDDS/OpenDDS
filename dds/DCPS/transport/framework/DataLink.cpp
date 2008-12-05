@@ -28,8 +28,9 @@
 #endif /* __ACE_INLINE__ */
 
 /// Only called by our TransportImpl object.
-OpenDDS::DCPS::DataLink::DataLink(TransportImpl* impl)
-  : thr_per_con_send_task_ (0)
+OpenDDS::DCPS::DataLink::DataLink(TransportImpl* impl, CORBA::Long priority)
+  : thr_per_con_send_task_ (0),
+    priority_( priority)
 {
   DBG_ENTRY_LVL("DataLink","DataLink",6);
 

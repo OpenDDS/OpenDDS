@@ -6,14 +6,15 @@
 #include "TransportQueueElement.h"
 #include "DataLink.h"
 #include "ThreadPerConRemoveVisitor.h"
+#include "DirectPriorityMapper.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "dds/DCPS/DataSampleList.h"
 
 #include "ace/Auto_Ptr.h"
 
 OpenDDS::DCPS::ThreadPerConnectionSendTask::ThreadPerConnectionSendTask(
-  OpenDDS::DCPS::DataLink* link)
-  : lock_ (),
+  OpenDDS::DCPS::DataLink* link
+) : lock_ (),
     queue_ (1, 10),
     work_available_ (lock_),
     shutdown_initiated_ (false),
@@ -75,6 +76,10 @@ int OpenDDS::DCPS::ThreadPerConnectionSendTask::open(void*)
       "Task has previously been open()'ed.\n"),
       -1);
   }
+
+  /// @TODO: Map and apply the priority and scheduling stuff here.
+  DirectPriorityMapper mapper( this->link_->priority());
+  int priority = mapper.thread_priority();
 
   // Activate this task object with one worker thread.
   if (this->activate(THR_NEW_LWP | THR_JOINABLE, 1) != 0)

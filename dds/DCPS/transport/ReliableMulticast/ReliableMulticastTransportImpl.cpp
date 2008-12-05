@@ -55,7 +55,8 @@ OpenDDS::DCPS::ReliableMulticastTransportImpl::find_or_create_datalink(
     reactor_task_,
     *(configuration_.in()),
     multicast_group_address,
-    *this
+    *this,
+    priority
     );
   data_links_[ PriorityKey( priority, multicast_group_address)] = data_link;
 

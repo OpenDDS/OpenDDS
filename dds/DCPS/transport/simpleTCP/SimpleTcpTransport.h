@@ -87,7 +87,6 @@ namespace OpenDDS
 
         /// Called by find_or_create_datalink().
         int make_active_connection(const ACE_INET_Addr& remote_address,
-                                   CORBA::Long          priority,
                                    SimpleTcpDataLink*   link);
 
         /// Called by find_or_create_datalink().
