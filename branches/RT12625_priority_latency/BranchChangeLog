@@ -1,81 +1,32 @@
-Fri Dec  5 19:33:41 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+Fri Dec  5 20:14:46 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
-        * wrapper/Domain_Manager.h:
-        * wrapper/Domain_Manager.inl:
-        * wrapper/Domain_Manager.cpp:
-        * wrapper/Domain_Manager_Impl.h:
-        * wrapper/OpenDDS/OpenDDS_Domain_Manager.h:
-        * wrapper/OpenDDS/OpenDDS_Domain_Manager.cpp:
-        * wrapper/OpenDDS/OpenDDS_Publication_Manager.h:
-        * wrapper/OpenDDS/OpenDDS_Publication_Manager.cpp:
-        * wrapper/OpenDDS/OpenDDS_Subscription_Manager.h:
-        * wrapper/OpenDDS/OpenDDS_Subscription_Manager.cpp:
-        * wrapper/OpenDDS/OpenDDS_create_domain_manager.cpp:
-        * wrapper/Publication_Manager.h:
-        * wrapper/Publication_Manager.inl:
-        * wrapper/Publication_Manager_Impl.h:
-        * wrapper/Subscription_Manager.h:
-        * wrapper/Subscription_Manager.inl:
-        * wrapper/Subscription_Manager_Impl.h:
-        * wrapper/Topic_Manager.h:
-        * wrapper/Topic_Manager.inl:
-        * wrapper/Topic_Manager_Impl.h:
-        * wrapper/Topic_Manager_T.h:
-        * wrapper/Topic_Manager_T.cpp:
-        * wrapper/wrapper_config.h:
+          Merging trunk changes 1655:1805 out to branch.
 
-        Wholesale copy of wrapper code from trunk to branch.  Not sure
-        why but this didn't merge correctly, and no changes were made to
-        this code on the branch.
+        * BranchChangeLog:
+        * DDS_release_notes.txt:
+        * README:
+        * bin/DDS_Run_Test.pm:
+        * bin/PerlDDS:
+        * bin/PerlDDS/Process.pm:
+        * bin/PerlDDS/ProcessFactory.pm:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticast.rc:
+        * dds/DCPS/transport/framework/TheTransportFactory.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcp.rc:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram.rc:
+        * dds/InfoRepo/DCPSInfoRepoServ.rc:
+        * dds/InfoRepo/Federator.rc:
+        * dds/InfoRepo/InfoRepoLib.rc:
+        * dds/OpenDDS_DCPS.rc:
+        * java/dds/dcps_java.rc:
+        * java/idl2jni/runtime/idl2jni_runtime.rc:
+        * java/tao/tao_java.rc:
+        * bin/Process.pm:
+        * bin/ProcessFactory.pm:
 
-Fri Dec  5 19:10:53 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+        * dds/DCPS/transport/framework/TheTransportFactory.inl:
+        * dds/DCPS/transport/framework/TheTransportFactory.cpp:
 
-        Merging trunk changes 1671:1805 out to branch.  See ChangeLog for
-        detailed entries.
-
-        * ChangeLog:
-        * DevGuideExamples/DCPS/Messenger/publisher.cpp:
-        * DevGuideExamples/DCPS/Messenger/stack_subscriber.cpp:
-        * DevGuideExamples/DCPS/Messenger/subscriber.cpp:
-        * DevGuideExamples/DCPS/Messenger_ZeroCopy/publisher.cpp:
-        * DevGuideExamples/DCPS/Messenger_ZeroCopy/subscriber.cpp:
-        * bin/dcps_tests.lst:
-        * dds/DCPS/transport/framework/TransportImpl.h:
-        * dds/DCPS/transport/framework/TransportImpl.cpp:
-        * rules.dds.GNU:
-        * tests/DCPS/FooTest5/common.h:
-        * tests/DCPS/FooTest5/common.cpp:
-        * tests/DCPS/FooTest5/subscriber.cpp:
-        * wrapper/DataReader_Listener_Base.h:
-        * wrapper/DataReader_Listener_Base.inl:
-        * wrapper/Domain_Manager.h:
-        * wrapper/Domain_Manager.inl:
-        * wrapper/Domain_Manager_Impl.h:
-        * wrapper/Exit_Signal_Handler.h:
-        * wrapper/OpenDDS/OpenDDS_Domain_Manager.h:
-        * wrapper/OpenDDS/OpenDDS_Domain_Manager.inl:
-        * wrapper/OpenDDS/OpenDDS_Domain_Manager.cpp:
-        * wrapper/OpenDDS/OpenDDS_Publication_Manager.h:
-        * wrapper/OpenDDS/OpenDDS_Publication_Manager.inl:
-        * wrapper/OpenDDS/OpenDDS_Publication_Manager.cpp:
-        * wrapper/OpenDDS/OpenDDS_Subscription_Manager.h:
-        * wrapper/OpenDDS/OpenDDS_Subscription_Manager.inl:
-        * wrapper/OpenDDS/OpenDDS_Subscription_Manager.cpp:
-        * wrapper/Publication_Manager.h:
-        * wrapper/Publication_Manager.inl:
-        * wrapper/Publication_Manager_Impl.h:
-        * wrapper/Subscription_Manager.h:
-        * wrapper/Subscription_Manager.inl:
-        * wrapper/Subscription_Manager_Impl.h:
-        * wrapper/Topic_Manager.h:
-        * wrapper/Topic_Manager.inl:
-        * wrapper/Topic_Manager_Impl.h:
-        * wrapper/Topic_Manager_T.h:
-        * wrapper/Topic_Manager_T.cpp:
-        * wrapper/example/WrapperStockQuoter.mpc:
-        * wrapper/wrapper_config.h:
-        * wrapper/wrapper_publication.h:
-        * wrapper/wrapper_subscription.h:
+          Removed these files.
 
 Wed Dec  3 20:44:56 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
