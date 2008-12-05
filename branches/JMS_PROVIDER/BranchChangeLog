@@ -1,3 +1,13 @@
+Fri Dec  5 04:53:45 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/lib/shared/commons-logging-1.1.1.jar:
+
+          Moved commons-logging into shared (will be deployed with RAR).
+
+        * java/jms/lib/commons-logging-1.1.1.jar:
+
+          Removed this file.
+
 Fri Dec  5 04:41:32 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/compat/test/org/opendds/jms/client/SimpleTest.java:
