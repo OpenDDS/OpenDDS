@@ -35,6 +35,7 @@ import DDS.SampleInfoSeqHolder;
 import DDS.Subscriber;
 import DDS.Topic;
 import DDS.WaitSet;
+import DDS.DataReaderQos;
 import OpenDDS.JMS.MessagePayload;
 import OpenDDS.JMS.MessagePayloadDataReader;
 import OpenDDS.JMS.MessagePayloadDataReaderHelper;
@@ -42,6 +43,8 @@ import OpenDDS.JMS.MessagePayloadSeqHolder;
 
 import static org.opendds.jms.ConsumerMessageFactory.buildMessageFromPayload;
 import org.opendds.jms.common.lang.Strings;
+import org.opendds.jms.common.util.Logger;
+import org.opendds.jms.qos.DataReaderQosPolicy;
 
 /**
  * @author  Weiqi Gao
@@ -92,10 +95,22 @@ public class MessageConsumerImpl implements MessageConsumer {
     }
 
     private MessagePayloadDataReader fromDestination(Destination destination, Subscriber subscriber) throws JMSException {
+        Logger logger = sessionImpl.getOwningConnection().getLogger();
         DDS.Topic ddsTopic = extractDDSTopicFromDestination(destination);
+        DataReaderQosPolicy dataReaderQosPolicy = ((TopicImpl) destination).getDataReaderQosPolicy();
+
         DataReaderQosHolder qosHolder = new DataReaderQosHolder(DATAREADER_QOS_DEFAULT.get());
         subscriber.get_default_datareader_qos(qosHolder);
-        DataReader reader = subscriber.create_datareader(ddsTopic, qosHolder.value, null);
+
+        DataReaderQos readerQos = qosHolder.value;
+        if (dataReaderQosPolicy != null) {
+            dataReaderQosPolicy.setQos(readerQos);
+        }
+
+        DataReader reader = subscriber.create_datareader(ddsTopic, readerQos, null);
+
+        logger.debug("Created %s %s", reader, readerQos);
+
         return MessagePayloadDataReaderHelper.narrow(reader);
     }
 

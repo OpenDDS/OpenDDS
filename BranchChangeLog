@@ -1,3 +1,18 @@
+Fri Dec  5 20:05:30 UTC 2008  Weiqi Gao  <gaow@ociweb.com>
+
+        * java/OpenDDS.ipr:
+        * java/jms/compat/opendds-jms-compat.iml:
+
+        * java/jms/compat/test/org/opendds/jms/client/MessageConsumerImplTest.java:
+        * java/jms/compat/test/org/opendds/jms/client/SessionImplTest.java:
+
+          Added functional tests.
+
+        * java/jms/src/org/opendds/jms/DataWriterPair.java:
+        * java/jms/src/org/opendds/jms/MessageConsumerImpl.java:
+
+          Using QoS policies from TopicImpl when creating datareaders and datawriters.
+
 Fri Dec  5 17:14:16 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/PersistentDurability/publisher.cpp:
