@@ -10,7 +10,7 @@
 
 <hibernate-mapping>
     <class name="org.opendds.jms.persistence.AcknowledgedMessage"
-           table="ACKNOWLEDGED_MESSAGE">
+           table="OPENDDS_ACKNOWLEDGED_MESSAGE">
         <composite-id>
             <key-property name="clientID" column="CLIENT_ID"/>
             <key-property name="name" column="NAME"/>

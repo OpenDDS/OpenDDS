@@ -14,7 +14,6 @@
         <attribute name="DCPSDebugLevel">10</attribute>
         <attribute name="DCPSInfoRepo">iiop://localhost:6666/DCPSInfoRepo</attribute>
         <attribute name="ORBDebugLevel">10</attribute>
-        <attribute name="ORBDisableUpcalls">true</attribute>
         <attribute name="ORBListenEndpoints">iiop://:6667</attribute>
         <attribute name="ORBLogFile">${jboss.server.log.dir}/DDS.log</attribute>
         <attribute name="TransportType">SimpleTcp</attribute>
