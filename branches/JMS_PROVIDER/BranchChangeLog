@@ -1,3 +1,16 @@
+Fri Dec  5 00:41:34 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/compat/src/META-INF/service/opendds-ds.xml:
+        * java/jms/src/org/opendds/jms/DataWriterPair.java:
+        * java/jms/src/org/opendds/jms/MessageConsumerImpl.java:
+        * java/jms/src/org/opendds/jms/common/util/PropertiesHelper.java:
+        * java/jms/src/org/opendds/jms/management/DynamicAttributes.java:
+        * java/jms/src/org/opendds/jms/management/DynamicMBeanSupport.java:
+        * java/jms/src/org/opendds/jms/management/PersistenceManagerService.java:
+
+          Updated dynamic attributes support. Updated DataWriterPair to
+          support PERSISTENT. Fixed bad mutex behavior in MessageConsumerImpl.
+
 Thu Dec  4 23:53:02 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RcHandle_T.h:

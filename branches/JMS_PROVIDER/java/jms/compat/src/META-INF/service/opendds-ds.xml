@@ -29,6 +29,7 @@
         <attribute name="JndiName">DDS/PersistenceManager</attribute>
         <attribute name="DataSource">java:/DefaultDS</attribute>
         <attribute name="Dialect">org.hibernate.dialect.HSQLDialect</attribute>
+        <attribute name="Hbm2ddlAuto">update</attribute>
         <depends>jboss.jca:service=RARDeployment,name='opendds-jms-@VERSION@.rar'</depends>
     </mbean>
 
