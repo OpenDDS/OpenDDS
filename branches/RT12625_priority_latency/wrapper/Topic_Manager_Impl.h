@@ -10,8 +10,8 @@
  */
 //=============================================================================
 
-#ifndef _TOPIC_MANAGER_IMPL_H_
-#define _TOPIC_MANAGER_IMPL_H_
+#ifndef DDS_WRAPPER_TOPIC_MANAGER_IMPL_H_
+#define DDS_WRAPPER_TOPIC_MANAGER_IMPL_H_
 
 #include <string>
 #include <ace/Refcounted_Auto_Ptr.h>
@@ -61,4 +61,4 @@ class DDSWrapper_Export Topic_Manager_Impl
   virtual DDS::DataWriter_ptr datawriter (const Publication_Manager & pm) = 0;
 };
 
-#endif /* _TOPIC_MANAGER_IMPL_H_ */
+#endif /* DDS_WRAPPER_TOPIC_MANAGER_IMPL_H_ */

@@ -10,8 +10,8 @@
  */
 //=============================================================================
 
-#ifndef _SUBSCRIPTION_MANAGER_IMPL_H_
-#define _SUBSCRIPTION_MANAGER_IMPL_H_
+#ifndef DDS_WRAPPER_SUBSCRIPTION_MANAGER_IMPL_H_
+#define DDS_WRAPPER_SUBSCRIPTION_MANAGER_IMPL_H_
 
 #include <string>
 #include <ace/Refcounted_Auto_Ptr.h>
@@ -57,4 +57,4 @@ class Subscription_Manager_Impl
   virtual DDS::Subscriber_ptr subscriber () const = 0;
 };
 
-#endif /* _SUBSCRIPTION_MANAGER_IMPL_H_ */
+#endif /* DDS_WRAPPER_SUBSCRIPTION_MANAGER_IMPL_H_ */

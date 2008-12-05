@@ -6,12 +6,12 @@
  *
  *  $Id$
  *
- * @author   Friedhelm Wolf (fwolf@dre.vanderbilt.edu)
+ *  @author  Friedhelm Wolf (fwolf@dre.vanderbilt.edu)
  */
 //=============================================================================
 
-#ifndef _DDS_WRAPPER_CONFIG_H_
-#define _DDS_WRAPPER_CONFIG_H_
+#ifndef DDS_WRAPPER_CONFIG_H_
+#define DDS_WRAPPER_CONFIG_H_
 
 #if defined (OPEN_SPLICE_CONFIG)
 
@@ -33,4 +33,4 @@
 
 #endif /* if defined */
 
-#endif /* _DDS_WRAPPER_CONFIG_H_ */
+#endif /* DDS_WRAPPER_CONFIG_H_ */

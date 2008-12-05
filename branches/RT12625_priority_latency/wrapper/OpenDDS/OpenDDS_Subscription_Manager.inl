@@ -10,8 +10,8 @@
  */
 //=============================================================================
 
-#ifndef _OPEN_DDS_SUBSCRIPTION_MANAGER_INL_
-#define _OPEN_DDS_SUBSCRIPTION_MANAGER_INL_
+#ifndef DDS_WRAPPER_OPEN_DDS_SUBSCRIPTION_MANAGER_INL_
+#define DDS_WRAPPER_OPEN_DDS_SUBSCRIPTION_MANAGER_INL_
 
 ACE_INLINE DDS::Subscriber_ptr 
 OpenDDS_Subscription_Manager::subscriber () const
@@ -19,4 +19,4 @@ OpenDDS_Subscription_Manager::subscriber () const
   return sub_.in ();
 }
 
-#endif /* _OPEN_DDS_SUBSCRIPTION_MANAGER_INL_ */
+#endif /* DDS_WRAPPER_OPEN_DDS_SUBSCRIPTION_MANAGER_INL_ */

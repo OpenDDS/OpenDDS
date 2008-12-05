@@ -104,7 +104,7 @@ int main (int argc, ACE_TCHAR *argv[]) {
         exit(1);
       }
 
-      OpenDDS::DCPS::TransportImpl_rch tcp_impl =
+      OpenDDS::DCPS::TransportImpl_rch transport_impl =
         TheTransportFactory->create_transport_impl (transport_impl_id,
                                                     ::OpenDDS::DCPS::AUTO_CONFIG);
 
@@ -117,14 +117,7 @@ int main (int argc, ACE_TCHAR *argv[]) {
       }
 
       // Attach the publisher to the transport.
-      OpenDDS::DCPS::PublisherImpl* pub_impl =
-        dynamic_cast< OpenDDS::DCPS::PublisherImpl*>(pub.in ());
-      if (0 == pub_impl) {
-        cerr << "Failed to obtain publisher servant" << endl;
-        exit(1);
-      }
-
-      OpenDDS::DCPS::AttachStatus status = pub_impl->attach_transport(tcp_impl.in());
+      OpenDDS::DCPS::AttachStatus status = transport_impl->attach(pub.in());
       if (status != OpenDDS::DCPS::ATTACH_OK) {
         std::string status_str;
         switch (status) {

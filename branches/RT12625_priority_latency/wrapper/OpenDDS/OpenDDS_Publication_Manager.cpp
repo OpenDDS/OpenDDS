@@ -32,13 +32,6 @@
 #endif
 
 OpenDDS_Publication_Manager::OpenDDS_Publication_Manager (
-  const Domain_Manager & dm)
-  : dm_ (dm)
-{
-  this->init ();
-}
-
-OpenDDS_Publication_Manager::OpenDDS_Publication_Manager (
   const Domain_Manager & dm,
   OpenDDS::DCPS::TransportIdType transport_impl_id)
   : dm_ (dm)
@@ -70,9 +63,8 @@ OpenDDS_Publication_Manager::register_transport (OpenDDS::DCPS::TransportIdType 
 {
   // Initialize the transport
   OpenDDS::DCPS::TransportImpl_rch transport_impl =
-    OpenDDS::DCPS::TransportFactory::instance ()->create_transport_impl (
-      transport_id,
-      ::OpenDDS::DCPS::AUTO_CONFIG);
+    OpenDDS::DCPS::TransportFactory::instance ()->obtain (
+      transport_id);
 
   // Attach the publisher to the transport
   OpenDDS::DCPS::PublisherImpl* pub_impl =
