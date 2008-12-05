@@ -51,6 +51,12 @@ public class MessageConsumerImplTest {
 
     @After
     public void tearDown() {
+        try {
+            System.out.println("Pause for a few seconds...");
+            Thread.sleep(10000);
+        } catch (Exception e) {
+            
+        }
         if (session != null) {
             try {
                 session.close();
@@ -86,12 +92,10 @@ public class MessageConsumerImplTest {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
-                    // Don't care
                 }
                 try {
                     messageConsumer.close();
                 } catch (JMSException e) {
-                    // Don't care
                 }
             }
         };
@@ -101,69 +105,70 @@ public class MessageConsumerImplTest {
         try {
             thread.join();
         } catch (InterruptedException e) {
-            // Don't care
         }
     }
 
     @Test
-    public void receive() throws JMSException {
+    public void messageSelector() throws JMSException {
         final MessageConsumer messageConsumer = session.createConsumer(destination);
         assert messageConsumer != null;
-
         assert messageConsumer.getMessageSelector() == null;
+    }
 
-        // Fake out a MessageProducer and pump some messages
-        FakeMessageProducer fakeProducer = new FakeMessageProducer();
-        final Thread fakeProducerThread = new Thread(fakeProducer);
-        fakeProducerThread.start();
+    @Test
+    public void receive() throws JMSException {
+        MessageConsumer messageConsumer = session.createConsumer(destination);
+        assert messageConsumer != null;
 
-// TODO Make this work again       
-//        final Message message = messageConsumer.receive();
-//        assert message != null;
-//
-//        final Message message2 = messageConsumer.receive(100000L);
-//        assert message2 != null;
-//
-//        final Message message3 = messageConsumer.receiveNoWait();
-//        assert message3 != null;
-//
-//        final Message message4 = messageConsumer.receiveNoWait();
-//        assert message4 == null;
-//
-//        messageConsumer.close();
-//        try {
-//            messageConsumer.receive();
-//            assert false;
-//        } catch (IllegalStateException e) {
-//            assert "This MessageConsumer is closed.".equals(e.getMessage());
-//        }
-//
-//        try {
-//            messageConsumer.receiveNoWait();
-//            assert false;
-//        } catch (IllegalStateException e) {
-//            assert "This MessageConsumer is closed.".equals(e.getMessage());
-//        }
-//
-//        try {
-//            messageConsumer.receive(100000L);
-//            assert false;
-//        } catch (IllegalStateException e) {
-//            assert "This MessageConsumer is closed.".equals(e.getMessage());
-//        }
-//
+        MessageProducer messageProducer = session.createProducer(destination);
+
+        waitFor(2500); // wait for association
+
+        sendSomeMessages(messageProducer);
+
+        final Message message = messageConsumer.receive();
+        assert message != null;
+
+        final Message message2 = messageConsumer.receive(100000L);
+        assert message2 != null;
+
+        final Message message3 = messageConsumer.receiveNoWait();
+        assert message3 != null;
+
+        final Message message4 = messageConsumer.receiveNoWait();
+        assert message4 == null;
+
+        messageConsumer.close();
         try {
-            fakeProducerThread.join();
-            fakeProducer.dispose();
-        } catch (InterruptedException e) {
-            // Don't care
+            messageConsumer.receive();
+            assert false;
+        } catch (IllegalStateException e) {
+            assert "This MessageConsumer is closed.".equals(e.getMessage());
+        }
+
+        try {
+            messageConsumer.receiveNoWait();
+            assert false;
+        } catch (IllegalStateException e) {
+            assert "This MessageConsumer is closed.".equals(e.getMessage());
+        }
+
+        try {
+            messageConsumer.receive(100000L);
+            assert false;
+        } catch (IllegalStateException e) {
+            assert "This MessageConsumer is closed.".equals(e.getMessage());
         }
     }
 
     @Test
     public void messageListener() throws JMSException {
-        final MessageConsumer messageConsumer = session.createConsumer(destination);
+        MessageConsumer messageConsumer = session.createConsumer(destination);
         assert messageConsumer != null;
+
+        MessageProducer messageProducer = session.createProducer(destination);
+
+        waitFor(2500); // wait for association
 
         MyMessageListener messageListener = new MyMessageListener();
         messageConsumer.setMessageListener(messageListener);
@@ -174,59 +179,60 @@ public class MessageConsumerImplTest {
 
         messageConsumer.setMessageListener(messageListener);
 
-        // Fake out a MessageProducer and pump some messages
-        FakeMessageProducer fakeProducer = new FakeMessageProducer();
-        final Thread fakeProducerThread = new Thread(fakeProducer);
-        fakeProducerThread.start();
+        waitFor(2500); // wait for listener registration
+        
+        sendSomeMessages(messageProducer);
 
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            // Don't care
-        }
 // TODO Make this work again
 //        assert messageListener.getOnMessageCallCount() == 3;
-
-        try {
-            fakeProducerThread.join();
-            fakeProducer.dispose();
-        } catch (InterruptedException e) {
-            // Don't care
-        }
     }
 
     @Test
     public void acknowledgement() throws JMSException {
         session = connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
-        final MessageConsumer messageConsumer = session.createConsumer(destination);
+        MessageConsumer messageConsumer = session.createConsumer(destination);
+        assert messageConsumer != null;
 
-        // Fake out a MessageProducer and pump some messages
-        FakeMessageProducer fakeProducer = new FakeMessageProducer();
-        final Thread fakeProducerThread = new Thread(fakeProducer);
-        fakeProducerThread.start();
+        MessageProducer messageProducer = session.createProducer(destination);
+        assert messageProducer != null;
 
-// TODO Make this work again       
-//        final Message message = messageConsumer.receive();
-//        assert message != null;
-//
-//        final Message message2 = messageConsumer.receive(100000L);
-//        assert message2 != null;
-//
-//        final Message message3 = messageConsumer.receiveNoWait();
-//        assert message3 == null;
-//
-//        assert getUnacknowledgedCount(session) == 3;
-//
-//        message.acknowledge();
-//
-//        assert getUnacknowledgedCount(session) == 0;
-//
+        waitFor(2500); // wait for association
+
+        sendSomeMessages(messageProducer);
+
+        final Message message = messageConsumer.receive();
+        assert message != null;
+
+        final Message message2 = messageConsumer.receive(100000L);
+        assert message2 != null;
+
+        final Message message3 = messageConsumer.receiveNoWait();
+        assert message3 != null;
+
+        assert getUnacknowledgedCount(session) == 3;
+
+        message.acknowledge();
+
+        assert getUnacknowledgedCount(session) == 0;
+    }
+
+    private void sendSomeMessages(MessageProducer messageProducer) throws JMSException {
+        TextMessage textMessage = session.createTextMessage();
+
+        textMessage.setText("Hello OpenDDS JMS Provider");
+        messageProducer.send(textMessage);
+
+        textMessage.setText("Hello again OpenDDS JMS Provider");
+        messageProducer.send(textMessage, DeliveryMode.NON_PERSISTENT, 5, 100000L);
+
+        textMessage.setText("Goodbye OpenDDS JMS Provider");
+        messageProducer.send(textMessage);
+    }
+
+    private void waitFor(int millis) {
         try {
-            fakeProducerThread.join();
-            fakeProducer.dispose();
-        } catch (InterruptedException e) {
-            // Don't care
-        }
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {}
     }
 
     private int getUnacknowledgedCount(Session session) {
@@ -234,7 +240,7 @@ public class MessageConsumerImplTest {
             Class sessionClass = Class.forName("org.opendds.jms.SessionImpl");
             final Field field = sessionClass.getDeclaredField("unacknowledged");
             field.setAccessible(true);
-            Map unacknowledged = (Map) field.get(this);
+            Map unacknowledged = (Map) field.get(session);
             final Collection<List> listCollection = unacknowledged.values();
             int count = 0;
             for (List pairs : listCollection) {
@@ -266,44 +272,5 @@ public class MessageConsumerImplTest {
         public void onMessage(Message message) {
             onMessageCallCount++;
         }
-
-    }
-
-    private class FakeMessageProducer implements Runnable {
-
-        MessageProducer messageProducer;
-
-        private FakeMessageProducer() throws JMSException {
-            messageProducer = session.createProducer(destination);
-        }
-
-
-        public void run() {
-            try {
-                TextMessage textMessage = session.createTextMessage();
-
-                textMessage.setText("Hello OpenDDS JMS Provider");
-                messageProducer.send(textMessage);
-
-                textMessage.setText("Hello again OpenDDS JMS Provider");
-                messageProducer.send(textMessage, DeliveryMode.NON_PERSISTENT, 5, 100000L);
-
-                textMessage.setText("Goodbye OpenDDS JMS Provider");
-                messageProducer.send(textMessage);
-            } catch (JMSException e) {
-                // Don't care
-            }
-        }
-
-        public void dispose() throws JMSException {
-            try {
-                if (messageProducer != null) {
-                    messageProducer.close();
-                }
-            } catch (JMSException e) {
-                // Don't care
-            }
-        }
-
     }
 }
