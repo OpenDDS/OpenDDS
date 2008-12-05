@@ -8,6 +8,8 @@
 #include "dds/DCPS/RcObject_T.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/AssociationData.h"
+#include "dds/DdsDcpsSubscriptionC.h"
+#include "dds/DdsDcpsPublicationC.h"
 #include "TransportDefs.h"
 #include "TransportConfiguration.h"
 #include "TransportConfiguration_rch.h"
@@ -81,8 +83,8 @@ namespace OpenDDS
 
         /// Called by the DataLink to find the registered datawriter
         /// for the lost publication notification.
-      /// If a safe copy (safe_cpy) is requested, the callee is responsible
-      /// for bumping down the ref count.
+        /// If a safe copy (safe_cpy) is requested, the callee is responsible
+        /// for bumping down the ref count.
         DataWriterImpl* find_publication (RepoId pub_id, bool safe_cpy = false);
 
         /// Called by the SubscriberImpl to register datareader upon
@@ -95,8 +97,8 @@ namespace OpenDDS
 
         /// Called by the DataLink to find the registered datareader
         /// for the lost subscription notification.
-      /// If a safe copy (safe_cpy) is requested, the callee is responsible
-      /// for bumping down the ref count.
+        /// If a safe copy (safe_cpy) is requested, the callee is responsible
+        /// for bumping down the ref count.
         DataReaderImpl* find_subscription (RepoId sub_id, bool safe_cpy = false);
 
         /// Called when the receive strategy received the FULLY_ASSOCIATED
@@ -117,10 +119,17 @@ namespace OpenDDS
         /// this function to be noop.
         virtual void remove_ack (RepoId pub_id, RepoId sub_id);
 
-      /// Callback from teh DataLink to clean up any associated resources.
-      /// This usually is done when the DataLink is lost. The call is made with
-      /// no transport/DCPS locks held.
-      bool release_link_resources (DataLink* link);
+        /// Callback from teh DataLink to clean up any associated resources.
+        /// This usually is done when the DataLink is lost. The call is made with
+        /// no transport/DCPS locks held.
+        bool release_link_resources (DataLink* link);
+
+        /// Called by the application to attach this transport to a publisher.
+        OpenDDS::DCPS::AttachStatus attach (DDS::Publisher_ptr pub);
+                                                     
+        /// Called by the application to attach this transport to a subscriber.
+        OpenDDS::DCPS::AttachStatus attach (DDS::Subscriber_ptr pub);
+                                                     
 
       protected:
 
