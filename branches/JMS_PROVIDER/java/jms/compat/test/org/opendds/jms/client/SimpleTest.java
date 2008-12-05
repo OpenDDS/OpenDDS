@@ -28,7 +28,7 @@ import org.junit.runner.RunWith;
 public class SimpleTest {
 
     @Test
-    public void produceMessage() throws Exception {
+    public void localMessage() throws Exception {
         Context context = new InitialContext();
 
         Topic topic = (Topic) context.lookup("DDS/DefaultTopic");

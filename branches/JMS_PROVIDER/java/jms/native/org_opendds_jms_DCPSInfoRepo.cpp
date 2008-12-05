@@ -17,7 +17,7 @@
 #include "org_opendds_jms_DCPSInfoRepo.h"
 
 #if ACE_MAJOR_VERSION == 5 && ACE_MINOR_VERSION < 5
-#  define ACE_PRE_5_5
+# define ACE_PRE_5_5
 #endif
 
 #define DCPSInfoRepo_init \
