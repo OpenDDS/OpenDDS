@@ -1,3 +1,10 @@
+Sat Dec  6 22:56:15 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/FileSystemStorage.h:
+
+          ACE 5.4a doesn't define ACE_DIRENT so define it here based on the
+          ACE version.
+
 Sat Dec  6 20:59:16 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/FileSystemStorage.cpp:
