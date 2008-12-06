@@ -5,6 +5,8 @@
 #include "ace/Vector_T.h"
 #include "ace/OS_NS_sys_stat.h"
 #include "ace/OS_NS_macros.h"
+#include "ace/OS_NS_unistd.h"
+#include "ace/OS_NS_stdio.h"
 
 #include "ace/Version.h"
 #if ACE_MAJOR_VERSION == 5 && ACE_MINOR_VERSION < 5
