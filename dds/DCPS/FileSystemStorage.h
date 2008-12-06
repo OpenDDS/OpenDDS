@@ -7,6 +7,7 @@
 #include "dds/DCPS/RcObject_T.h"
 
 #include "ace/Synch_Traits.h"
+#include "ace/Version.h"
 #include "ace/SString.h"
 #include "ace/os_include/os_dirent.h"
 class ACE_Dirent;
@@ -56,6 +57,15 @@ namespace OpenDDS
 
     // For Win32 long path name support, used internally and not exported
 #ifdef ACE_WIN32
+
+#  if ACE_MAJOR_VERISON == 5 && ACE_MINOR_VERSION < 5
+#    ifdef ACE_USES_WCHAR
+#      define ACE_DIRENT wdirent
+#    else
+#      define ACE_DIRENT dirent
+#    endif // wchar
+#  endif // ACE 5.4
+
     struct DDS_DIR;
     class DDS_Dirent
     {
