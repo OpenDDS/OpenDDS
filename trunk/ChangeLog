@@ -1,6 +1,12 @@
+Sat Dec  6 20:59:16 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/FileSystemStorage.cpp:
+
+          Added #includes for required ACE headers.
+
 Fri Dec  5 23:23:24 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
-        Merged the JMS_PROVIDER branch (r1812) back to the trunk. 
+        Merged the JMS_PROVIDER branch (r1812) back to the trunk.
         That branch is now only for archival purposes.  Its ChangeLog
         is now in the file $DDS_ROOT/history/ChangeLog-JMS_PROVIDER.
 
