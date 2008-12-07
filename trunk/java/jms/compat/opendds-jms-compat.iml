@@ -5,6 +5,7 @@
       <configuration>
         <descriptors>
           <deploymentDescriptor name="ejb-jar.xml" url="file://$MODULE_DIR$/src/META-INF/ejb-jar.xml" optional="false" version="3.0" />
+          <deploymentDescriptor name="jboss.xml" url="file://$MODULE_DIR$/src/META-INF/jboss.xml" optional="false" version="4.2" />
         </descriptors>
         <ejbRoots>
           <root url="file://$MODULE_DIR$/src" />
@@ -49,6 +50,7 @@
       <configuration>
         <descriptors>
           <deploymentDescriptor name="application.xml" url="file://$MODULE_DIR$/src/META-INF/application.xml" optional="false" version="5" />
+          <deploymentDescriptor name="jboss-app.xml" url="file://$MODULE_DIR$/src/META-INF/jboss-app.xml" optional="false" version="4.2" />
         </descriptors>
         <building>
           <setting name="EXPLODED_URL" value="file://" />
