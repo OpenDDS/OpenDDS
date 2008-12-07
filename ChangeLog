@@ -1,3 +1,19 @@
+Sun Dec  7 05:47:46 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/ant/opendds-ant.iml:
+        * java/jms/compat/opendds-jms-compat.iml:
+        * java/jms/compat/src/META-INF/application.xml:
+        * java/jms/compat/src/META-INF/service/opendds-ds.xml:
+        * java/jms/src/org/opendds/jms/management/HibernatePersistenceService.java:
+        * java/jms/src/org/opendds/jms/persistence/HibernatePersistenceManager.java:
+        * java/jms/src/org/opendds/jms/persistence/PersistenceManager.java:
+       
+          Refactored PersistenceManager; updated IDEA project files. 
+        
+        * java/jms/src/org/opendds/jms/management/PersistenceManagerService.java:
+
+          Removed this file.
+
 Sun Dec  7 03:38:15 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/DataDurabilityCache.h:

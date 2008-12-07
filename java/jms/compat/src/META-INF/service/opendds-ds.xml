@@ -21,7 +21,7 @@
         <depends>jboss.jca:service=RARDeployment,name='opendds-jms-@VERSION@.rar'</depends>
     </mbean>
 
-    <mbean code="org.opendds.jms.management.PersistenceManagerService"
+    <mbean code="org.opendds.jms.management.HibernatePersistenceService"
            name="OpenDDS:service=PersistenceManager">
         <attribute name="JndiName">DDS/PersistenceManager</attribute>
         <attribute name="DataSource">java:/DefaultDS</attribute>
