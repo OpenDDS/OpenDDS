@@ -23,6 +23,7 @@
     <facet type="web" name="opendds-jms-compat-web">
       <configuration>
         <descriptors>
+          <deploymentDescriptor name="jboss-web.xml" url="file://$MODULE_DIR$/web/WEB-INF/jboss-web.xml" optional="false" version="4.2" />
           <deploymentDescriptor name="web.xml" url="file://$MODULE_DIR$/web/WEB-INF/web.xml" optional="false" version="2.5" />
         </descriptors>
         <webroots>
