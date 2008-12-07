@@ -18,7 +18,7 @@ $opts =
   new PerlACE::ConfigList->check_config ('STATIC')
   ? ''
   : "-ORBSvcConf tcp.conf";
-$pub_opts = "$opts -DCPSConfigFile pub.ini";
+$pub_opts = "$opts -DCPSConfigFile pub.ini -DCPSPersistentDataDir $DDS_ROOT/tests/DCPS/PersistentDurability/data";
 $sub_opts = "$opts -DCPSConfigFile sub.ini";
 
 

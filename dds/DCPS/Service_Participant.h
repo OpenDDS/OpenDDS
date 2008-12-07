@@ -458,6 +458,8 @@ namespace OpenDDS
       /// The @c PERSISTENT data durability cache.
       std::auto_ptr<DataDurabilityCache> persistent_data_cache_;
 
+      /// The @c PERSISTENT data durability directory.
+      ACE_CString persistent_data_dir_;
     };
 
 #   define TheServiceParticipant OpenDDS::DCPS::Service_Participant::instance()

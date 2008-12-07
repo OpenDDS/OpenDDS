@@ -197,8 +197,11 @@ namespace OpenDDS
                                           sample_list_type *> sample_map_type;
       typedef std::list<long> timer_id_list_type;
 
-      /// Constructor.
+      /// Constructors.
       DataDurabilityCache (::DDS::DurabilityQosPolicyKind kind);
+
+      DataDurabilityCache (::DDS::DurabilityQosPolicyKind kind,
+                           ACE_CString & data_dir);
 
       /// Destructor.
       ~DataDurabilityCache ();
@@ -228,6 +231,8 @@ namespace OpenDDS
       DataDurabilityCache (DataDurabilityCache const &);
       DataDurabilityCache & operator= (DataDurabilityCache const &);
 
+      void init();
+
       /// Make allocator suitable to support specified kind of
       /// @c DURABILITY.
       static std::auto_ptr<ACE_Allocator>
@@ -239,6 +244,8 @@ namespace OpenDDS
       std::auto_ptr<ACE_Allocator> const allocator_;
 
       ::DDS::DurabilityQosPolicyKind kind_;
+
+      ACE_CString data_dir_;
 
       /// Map of all data samples.
       sample_map_type * samples_;

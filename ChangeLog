@@ -1,3 +1,17 @@
+Sun Dec  7 03:38:15 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataDurabilityCache.h:
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * java/OpenDDS.ipr:
+        * java/jms/compat/src/META-INF/service/opendds-ds.xml:
+        * java/jms/src/org/opendds/jms/management/argument/DCPSArguments.java:
+        * tests/DCPS/PersistentDurability/run_test.pl:
+
+          Added configurable directory for FileSystemStorage. New DCPS option
+          added: -DCPSPersistentDataDir.
+
 Sat Dec  6 22:56:15 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/FileSystemStorage.h:

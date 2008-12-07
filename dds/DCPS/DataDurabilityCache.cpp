@@ -26,17 +26,13 @@
 // --------------------------------------------------
 namespace
 {
-  /**
-   * @todo Make the backing store name configurable.
-   */
-  char const dds_backing_store[] = "OpenDDS-durable-data-dir";
 
-
-  void cleanup_directory (const std::vector<std::string> & path)
+  void cleanup_directory (const std::vector<std::string> & path,
+                          const ACE_CString & data_dir)
   {
     if (path.size () == 0) return;
     using ::OpenDDS::FileSystemStorage::Directory;
-    Directory::Ptr dir = Directory::create (dds_backing_store);
+    Directory::Ptr dir = Directory::create (data_dir.c_str());
     dir = dir->get_dir (path);
     Directory::Ptr parent = dir->parent ();
     dir->remove ();
@@ -69,13 +65,15 @@ namespace
     Cleanup_Handler (list_type & sample_list,
                      list_difference_type index,
                      ACE_Allocator * allocator,
-                     const std::vector<std::string> & path)
+                     const std::vector<std::string> & path,
+                     const ACE_CString & data_dir)
       : sample_list_ (sample_list)
       , index_ (index)
       , allocator_ (allocator)
       , tid_ (-1)
       , timer_ids_ (0)
       , path_ (path)
+      , data_dir_ (data_dir)
     {
       this->reference_counting_policy ().value (
         ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
@@ -104,7 +102,7 @@ namespace
 
       try
       {
-        cleanup_directory (path_);
+        cleanup_directory (path_, this->data_dir_);
       }
       catch (const std::exception& ex)
       {
@@ -163,6 +161,8 @@ namespace
     timer_ids_;
 
     std::vector<std::string> path_;
+
+    ACE_CString data_dir_;
   };
 }
 
@@ -307,6 +307,25 @@ OpenDDS::DCPS::DataDurabilityCache::DataDurabilityCache (
   , lock_ ()
   , reactor_ (0)
 {
+  init();
+}
+
+OpenDDS::DCPS::DataDurabilityCache::DataDurabilityCache (
+  ::DDS::DurabilityQosPolicyKind kind,
+  ACE_CString & data_dir)
+  : allocator_ (make_allocator (kind))
+  , kind_ (kind)
+  , data_dir_ (data_dir)
+  , samples_ (0)
+  , cleanup_timer_ids_ ()
+  , lock_ ()
+  , reactor_ (0)
+{
+  init();
+}
+
+void OpenDDS::DCPS::DataDurabilityCache::init()
+{
   ACE_Allocator * const allocator = this->allocator_.get ();
   ACE_NEW_MALLOC (
     this->samples_,
@@ -322,7 +341,7 @@ OpenDDS::DCPS::DataDurabilityCache::DataDurabilityCache (
     // as if we had called insert() once for each "datawriter" directory.
     using OpenDDS::FileSystemStorage::Directory;
     using OpenDDS::FileSystemStorage::File;
-    Directory::Ptr root_dir = Directory::create (dds_backing_store);
+    Directory::Ptr root_dir = Directory::create (this->data_dir_.c_str());
     std::vector<std::string> path (4); // domain, topic, type, datawriter
     for (Directory::DirectoryIterator domain = root_dir->begin_dirs (),
          domain_end = root_dir->end_dirs (); domain != domain_end; ++domain)
@@ -529,7 +548,7 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
     {
       try
       {
-        dir = Directory::create (dds_backing_store);
+        dir = Directory::create (this->data_dir_.c_str());
         std::ostringstream oss;
         oss << domain_id;
         path.push_back (oss.str ());
@@ -670,7 +689,8 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
       new Cleanup_Handler (*sample_list,
                            slot - &(*sample_list)[0],
                            this->allocator_.get (),
-                           path);
+                           path,
+                           this->data_dir_);
     ACE_Event_Handler_var safe_cleanup (cleanup);  // Transfer ownership
 
 
@@ -855,7 +875,7 @@ OpenDDS::DCPS::DataDurabilityCache::get_data (
 
     try
     {
-      cleanup_directory (q->fs_path_);
+      cleanup_directory (q->fs_path_, this->data_dir_);
     }
     catch (const std::exception& ex)
     {
