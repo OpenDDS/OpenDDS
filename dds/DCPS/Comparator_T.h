@@ -10,6 +10,8 @@
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
+#include "ace/OS_NS_string.h"
+
 #include "RcHandle_T.h"
 #include "RcObject_T.h"
 #include "RakeData.h"

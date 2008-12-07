@@ -58,7 +58,7 @@ namespace OpenDDS
     // For Win32 long path name support, used internally and not exported
 #ifdef ACE_WIN32
 
-#  if ACE_MAJOR_VERISON == 5 && ACE_MINOR_VERSION < 5
+#  if ACE_MAJOR_VERSION == 5 && ACE_MINOR_VERSION < 5
 #    ifdef ACE_USES_WCHAR
 #      define ACE_DIRENT wdirent
 #    else
