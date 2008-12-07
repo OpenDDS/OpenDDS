@@ -25,6 +25,7 @@ public class DCPSArguments implements DynamicArgumentProvider {
     public static final String DCPS_BIT_TRANSPORT_ADDRESS = "DCPSBitTransportIPAddress";
     public static final String DCPS_BIT_TRANSPORT_PORT = "DCPSBitTransportPort";
     public static final String DCPS_BIT_LOOKUP_DURATION_MSEC = "DCPSBitLookupDurationMsec";
+    public static final String DCPS_PERSISTENT_DATA_DIR = "DCPSPersistentDataDir";
     public static final String DCPS_TRANSPORT_DEBUG_LEVEL = "DCPSTransportDebugLevel";
     public static final String TRANSPORT_TYPE = "TransportType";
 
@@ -47,6 +48,7 @@ public class DCPSArguments implements DynamicArgumentProvider {
         instance.registerAttribute(DCPS_BIT_TRANSPORT_ADDRESS, String.class);
         instance.registerAttribute(DCPS_BIT_TRANSPORT_PORT, Integer.class);
         instance.registerAttribute(DCPS_BIT_LOOKUP_DURATION_MSEC, Integer.class);
+        instance.registerAttribute(DCPS_PERSISTENT_DATA_DIR, String.class);
         instance.registerAttribute(DCPS_TRANSPORT_DEBUG_LEVEL, Integer.class);
         instance.registerAttribute(TRANSPORT_TYPE, String.class);
     }
@@ -64,6 +66,7 @@ public class DCPSArguments implements DynamicArgumentProvider {
         writer.writeIfSet("-DCPSBitTransportIPAddress", DCPS_BIT_TRANSPORT_ADDRESS);
         writer.writeIfSet("-DCPSBitTransportPort", DCPS_BIT_TRANSPORT_PORT);
         writer.writeIfSet("-DCPSBitLookupDurationMsec", DCPS_BIT_LOOKUP_DURATION_MSEC);
+        writer.writeIfSet("-DCPSPersistentDataDir", DCPS_PERSISTENT_DATA_DIR);
         writer.writeIfSet("-DCPSTransportDebugLevel", DCPS_TRANSPORT_DEBUG_LEVEL);
 
         String transportType =

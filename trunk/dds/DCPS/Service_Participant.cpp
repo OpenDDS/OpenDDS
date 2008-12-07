@@ -49,6 +49,9 @@ namespace OpenDDS
 
     static const ACE_TCHAR DEFAULT_REPO_IOR[] = ACE_TEXT("file://repo.ior");
 
+    static const ACE_CString DEFAULT_PERSISTENT_DATA_DIR =
+      ACE_TEXT_ALWAYS_CHAR("OpenDDS-durable-data-dir");
+
     static const ACE_TCHAR COMMON_SECTION_NAME[] = ACE_TEXT("common");
     static const ACE_TCHAR DOMAIN_SECTION_NAME[] = ACE_TEXT("domain");
     static const ACE_TCHAR REPO_SECTION_NAME[]   = ACE_TEXT("repository");
@@ -83,8 +86,8 @@ namespace OpenDDS
       federation_backoff_multiplier_( DEFAULT_FEDERATION_BACKOFF_MULTIPLIER),
       federation_liveliness_( DEFAULT_FEDERATION_LIVELINESS),
       transient_data_cache_ (),
-      persistent_data_cache_ ()
-
+      persistent_data_cache_ (),
+      persistent_data_dir_ (DEFAULT_PERSISTENT_DATA_DIR)
     {
       initialize();
     }
@@ -437,6 +440,11 @@ namespace OpenDDS
           else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSTransportDebugLevel"))) != 0)
             {
               ::OpenDDS::DCPS::Transport_debug_level = ACE_OS::atoi (currentArg);
+              arg_shifter.consume_arg ();
+            }
+          else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSPersistentDataDir"))) != 0)
+            {
+              this->persistent_data_dir_ = ACE_TEXT_ALWAYS_CHAR(currentArg);
               arg_shifter.consume_arg ();
             }
           else
@@ -1455,7 +1463,8 @@ namespace OpenDDS
             if (this->persistent_data_cache_.get () == 0)
             {
               ACE_auto_ptr_reset (this->persistent_data_cache_,
-                                  new DataDurabilityCache (kind));
+                                  new DataDurabilityCache (kind,
+                                  this->persistent_data_dir_));
             }
           }
           catch (const std::exception& ex)
