@@ -21,7 +21,7 @@
     <module id="opendds-jms-compat-web">
         <web>
             <web-uri>opendds-jms-compat-web.war</web-uri>
-            <context-root>opendds-jms-compat</context-root>
+            <context-root>/opendds-jms-compat</context-root>
         </web>
     </module>
 </application>

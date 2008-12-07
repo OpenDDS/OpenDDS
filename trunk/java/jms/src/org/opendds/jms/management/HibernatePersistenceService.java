@@ -13,6 +13,7 @@ import org.opendds.jms.management.annotation.Constructor;
 import org.opendds.jms.management.annotation.Description;
 import org.opendds.jms.management.annotation.KeyProperty;
 import org.opendds.jms.management.annotation.Operation;
+import org.opendds.jms.persistence.HibernatePersistenceManager;
 import org.opendds.jms.persistence.PersistenceManager;
 
 /**
@@ -20,7 +21,7 @@ import org.opendds.jms.persistence.PersistenceManager;
  * @version $Revision$
  */
 @Description("OpenDDS PersistenceManager MBean")
-public class PersistenceManagerService extends DynamicMBeanSupport implements ServiceMBean {
+public class HibernatePersistenceService extends DynamicMBeanSupport implements ServiceMBean {
     private Logger logger;
 
     private String service;
@@ -31,7 +32,7 @@ public class PersistenceManagerService extends DynamicMBeanSupport implements Se
     private JndiHelper helper = new JndiHelper();
 
     @Constructor
-    public PersistenceManagerService() {
+    public HibernatePersistenceService() {
         registerAttribute("CacheProviderClass", "hibernate.cache.provider_class", String.class);
         registerAttribute("CacheRegionPrefix", "hibernate.cache.region_prefix", String.class);
         registerAttribute("CacheUseMinimalPuts", "hibernate.cache.use_minimal_puts", Boolean.class);
@@ -92,7 +93,7 @@ public class PersistenceManagerService extends DynamicMBeanSupport implements Se
         Properties properties = attributes.toProperties();
 
         logger.debug("Initializing with properties: %s", properties);
-        instance = new PersistenceManager(properties);
+        instance = new HibernatePersistenceManager(properties);
 
         helper.bind(jndiName, instance);
         logger.info("Bound PersistenceManager '%s' to JNDI name '%s'", name, jndiName);
