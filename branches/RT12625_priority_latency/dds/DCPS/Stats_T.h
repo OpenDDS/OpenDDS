@@ -157,8 +157,6 @@ Stats<DataType>::add( DataType value)
   this->cn_ /= (this->n_ + 2);
   this->cn_ /= (this->n_ + 2);
 
-  this->n_ += 1; // Must follow internal variable updates.
-
   if( (this->n_ == 0) || (value < this->min_)) {
     this->min_ = value;
   }
@@ -166,6 +164,8 @@ Stats<DataType>::add( DataType value)
   if( (this->n_ == 0) || (value > this->max_)) {
     this->max_ = value;
   }
+
+  this->n_ += 1; // Must follow internal variable updates.
 }
 
 template< typename DataType>
