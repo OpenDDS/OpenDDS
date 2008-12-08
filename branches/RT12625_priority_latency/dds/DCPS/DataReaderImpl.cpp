@@ -996,7 +996,10 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         // This also adds to the sample container
         this->dds_demarshal(sample);
 
-        this->process_latency( sample);
+        // Only gather statistics about real samples, not registration data, etc.
+        if (header.message_id_ == SAMPLE_DATA) {
+          this->process_latency (sample);
+        }
 
         this->subscriber_servant_->data_received(this);
       }

@@ -137,7 +137,7 @@ void DataReaderListenerImpl::on_budget_exceeded (
   throw (CORBA::SystemException)
 {
   num_late_++;
-  cerr << this << ": DataReaderListenerImpl::on_budget_exceeded" << endl;
+  cerr << "DataReaderListenerImpl::on_budget_exceeded" << endl;
   ::OpenDDS::DCPS::LatencyStatisticsSeq stats;
   dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(reader)->get_latency_stats (stats);
   for (unsigned long i = 0; i < stats.length(); ++i)
