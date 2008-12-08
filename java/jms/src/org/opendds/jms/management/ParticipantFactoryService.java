@@ -62,7 +62,7 @@ public class ParticipantFactoryService extends DynamicMBeanSupport implements Se
     @Operation
     public void start() throws Exception {
         if (isStarted()) {
-            throw new IllegalStateException(service + " already started!");
+            throw new IllegalStateException(name + " is already started!");
         }
 
         verify();
@@ -83,7 +83,7 @@ public class ParticipantFactoryService extends DynamicMBeanSupport implements Se
     @Operation
     public void stop() throws Exception {
         if (!isStarted()) {
-            throw new IllegalStateException(service + " already stopped!");
+            throw new IllegalStateException(name + " is already stopped!");
         }
 
         TheTransportFactory.release();

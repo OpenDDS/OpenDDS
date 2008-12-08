@@ -112,7 +112,7 @@ public class Destination extends DynamicMBeanSupport implements Serializable, Se
     @Operation
     public void start() throws Exception {
         if (isStarted()) {
-            throw new IllegalStateException(destination + " already started!");
+            throw new IllegalStateException(name + " is already started!");
         }
 
         verify();
@@ -133,7 +133,7 @@ public class Destination extends DynamicMBeanSupport implements Serializable, Se
     @Operation
     public void stop() throws Exception {
         if (!isStarted()) {
-            throw new IllegalStateException(destination + " already stopped!");
+            throw new IllegalStateException(name + " is already stopped!");
         }
 
         logger.info("Unbinding JNDI name: %s", jndiName);

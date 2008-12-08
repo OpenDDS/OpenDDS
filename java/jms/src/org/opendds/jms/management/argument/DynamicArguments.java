@@ -10,7 +10,6 @@ import java.util.List;
 
 import org.omg.CORBA.StringSeqHolder;
 
-import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.management.DynamicMBeanSupport;
 
 /**
@@ -19,8 +18,6 @@ import org.opendds.jms.management.DynamicMBeanSupport;
  */
 public class DynamicArguments {
     public static final String DELIMS = ";, \t\r\n\f";
-
-    private static Logger logger = Logger.getLogger(DynamicArguments.class);
 
     private DynamicMBeanSupport instance;
 
@@ -52,19 +49,19 @@ public class DynamicArguments {
         return args;
     }
 
-    public String[] toArgs() throws Exception {
+    public String[] toArray() throws Exception {
         List<String> args = asList();
         return args.toArray(new String[args.size()]);
     }
 
     public StringSeqHolder toStringSeq() throws Exception {
-        return new StringSeqHolder(toArgs());
+        return new StringSeqHolder(toArray());
     }
 
     @Override
     public String toString() {
         try {
-            return Arrays.deepToString(toArgs());
+            return Arrays.deepToString(toArray());
 
         } catch (Exception e) {
             throw new IllegalStateException(e);
