@@ -54,8 +54,10 @@ int main (int argc, char *argv[]) {
         switch(c)
         {
         case 'o':
-          int off_secs = ACE_OS::atoi (get_opts.opt_arg ());
-          offset = ACE_Time_Value(off_secs);
+          {
+            int off_secs = ACE_OS::atoi (get_opts.opt_arg ());
+            offset = ACE_Time_Value(off_secs);
+          }
           break;
         case '?':
         default:

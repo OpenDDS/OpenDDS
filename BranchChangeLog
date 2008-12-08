@@ -1,3 +1,9 @@
+Mon Dec  8 20:13:27 UTC 2008  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * tests/DCPS/LatencyBudget/publisher.cpp:
+
+          Fixed an error on newer versions of gcc.
+
 Mon Dec  8 19:42:06 UTC 2008  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * tests/DCPS/LatencyBudget:
