@@ -1,3 +1,13 @@
+Mon Dec  8 21:25:09 UTC 2008  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Changed to only gather statistics for application sample data.
+
+        * tests/DCPS/LatencyBudget/DataReaderListener.cpp:
+
+          Changed test output slightly.
+
 Mon Dec  8 21:01:04 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/Stats_T.h:
