@@ -29,7 +29,8 @@ namespace OpenDDS
                               DummyTcpConfiguration* config,
                               DummyTcpConnection*    connection,
                               DummyTcpSynchResource* synch_resource,
-                              TransportReactorTask* task);
+                              TransportReactorTask* task,
+                              CORBA::Long            priority);
         virtual ~DummyTcpSendStrategy();
 
         /// This is called by the datalink object to associate with the "new" connection object.

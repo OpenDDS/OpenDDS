@@ -563,7 +563,8 @@ OpenDDS::DCPS::DummyTcpTransport::connect_datalink
 			      connection,
 			      new DummyTcpSynchResource(connection,
 							 this->tcp_config_->max_output_pause_period_),
-            this->reactor_task_.in());
+            this->reactor_task_.in(),
+            link->priority());
 
   TransportReceiveStrategy_rch receive_strategy =
     new DummyTcpReceiveStrategy(link,
