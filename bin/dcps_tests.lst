@@ -160,3 +160,5 @@ tests/DCPS/GuardCondition/run_test.pl: !DCPS_MIN
 tests/DCPS/StatusCondition/run_test.pl: !DCPS_MIN
 tests/DCPS/Federation/run_test.pl: !DCPS_MIN
 tests/DCPS/Priority/run_test.pl: !DCPS_MIN
+tests/DCPS/LatencyBudget/run_test.pl: !DCPS_MIN
+tests/DCPS/LatencyBudget/run_test.pl late: !DCPS_MIN
