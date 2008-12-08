@@ -20,7 +20,7 @@ import org.opendds.jms.persistence.PersistenceManager;
  * @author  Steven Stallion
  * @version $Revision$
  */
-@Description("OpenDDS PersistenceManager MBean")
+@Description("OpenDDS Hibernate PersistenceManager MBean")
 public class HibernatePersistenceService extends DynamicMBeanSupport implements ServiceMBean {
     private Logger logger;
 
@@ -66,7 +66,7 @@ public class HibernatePersistenceService extends DynamicMBeanSupport implements 
         this.service = service;
     }
 
-    @Attribute
+    @Attribute(required = true)
     public String getJndiName() {
         return jndiName;
     }
@@ -83,7 +83,7 @@ public class HibernatePersistenceService extends DynamicMBeanSupport implements 
     @Operation
     public void start() throws Exception {
         if (isStarted()) {
-            throw new IllegalStateException(service + " already started!");
+            throw new IllegalStateException(name + " is already started!");
         }
 
         verify();
@@ -104,7 +104,7 @@ public class HibernatePersistenceService extends DynamicMBeanSupport implements 
     @Operation
     public void stop() throws Exception {
         if (!isStarted()) {
-            throw new IllegalStateException(service + " already stopped!");
+            throw new IllegalStateException(name + " is already stopped!");
         }
 
         helper.unbind(jndiName);

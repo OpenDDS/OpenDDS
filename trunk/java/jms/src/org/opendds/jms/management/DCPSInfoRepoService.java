@@ -56,7 +56,7 @@ public class DCPSInfoRepoService extends DynamicMBeanSupport implements ServiceM
     @Operation
     public void start() throws Exception {
         if (isStarted()) {
-            throw new IllegalStateException(service + " already started!");
+            throw new IllegalStateException(name + " is already started!");
         }
 
         verify();
@@ -65,7 +65,7 @@ public class DCPSInfoRepoService extends DynamicMBeanSupport implements ServiceM
         logger.info("Starting %s", service);
 
         logger.debug("Initializing with arguments %s", arguments);
-        instance = new DCPSInfoRepo(arguments.toArgs());
+        instance = new DCPSInfoRepo(arguments.toArray());
 
         instanceThread = new Thread(instance, "DCPSInfoRepo");
         instanceThread.start();
@@ -76,7 +76,7 @@ public class DCPSInfoRepoService extends DynamicMBeanSupport implements ServiceM
     @Operation
     public void stop() throws Exception {
         if (!isStarted()) {
-            throw new IllegalStateException(service + " already stopped!");
+            throw new IllegalStateException(name + " is already stopped!");
         }
 
         logger.info("Stopping %s", service);
