@@ -1,3 +1,12 @@
+Mon Dec  8 17:20:31 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/DCPS/dummyTCP/DummyTcpSendStrategy.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpSendStrategy.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.cpp:
+
+          Modified the test interfaces to match the new actual
+          interfaces.
+
 Fri Dec  5 23:40:25 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/transport/ReliableMulticast/ReliableMulticastDataLink.h:
