@@ -1,3 +1,26 @@
+Mon Dec  8 19:42:06 UTC 2008  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * tests/DCPS/LatencyBudget:
+        * tests/DCPS/LatencyBudget/DataReaderListener.h:
+        * tests/DCPS/LatencyBudget/DataReaderListener.cpp:
+        * tests/DCPS/LatencyBudget/DataWriterListenerImpl.h:
+        * tests/DCPS/LatencyBudget/DataWriterListenerImpl.cpp:
+        * tests/DCPS/LatencyBudget/LatencyBudget.mpc:
+        * tests/DCPS/LatencyBudget/Messenger.idl:
+        * tests/DCPS/LatencyBudget/README:
+        * tests/DCPS/LatencyBudget/Writer.h:
+        * tests/DCPS/LatencyBudget/Writer.cpp:
+        * tests/DCPS/LatencyBudget/pub.ini:
+        * tests/DCPS/LatencyBudget/publisher.cpp:
+        * tests/DCPS/LatencyBudget/run_test.pl:
+        * tests/DCPS/LatencyBudget/sub.ini:
+        * tests/DCPS/LatencyBudget/subscriber.cpp:
+        * tests/DCPS/LatencyBudget/tcp.conf:
+
+          Added a test for LATENCY_BUDGET. The README file contains details
+          about running the test, which accepts either no arguments or the
+          "late" argument to test latency budget processing.
+
 Mon Dec  8 17:20:31 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/DCPS/dummyTCP/DummyTcpSendStrategy.h:
