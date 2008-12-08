@@ -1,3 +1,9 @@
+Mon Dec  8 21:01:04 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Stats_T.h:
+
+          Update max and min values before updating the sample number.
+
 Mon Dec  8 20:29:46 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DdsDcpsDataReaderEx.idl:
