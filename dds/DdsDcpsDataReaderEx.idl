@@ -29,8 +29,8 @@ module OpenDDS {
       unsigned long           n;
       double                  max;
       double                  min;
-      long                    mean;
-      long                    variance;
+      double                  mean;
+      double                  variance;
     };
 
     typedef sequence<LatencyStatistics> LatencyStatisticsSeq;

@@ -1,3 +1,11 @@
+Mon Dec  8 20:29:46 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DdsDcpsDataReaderEx.idl:
+
+          Changed mean and variance types in the LatencyStatistics
+          structure to be of floating point double types rather than an
+          integer type.
+
 Mon Dec  8 20:13:27 UTC 2008  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * tests/DCPS/LatencyBudget/publisher.cpp:
