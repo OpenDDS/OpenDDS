@@ -100,7 +100,7 @@ general overview of OpenDDS.
 
   3. Define environment variables
 
-     Unix:
+     Linux and Solaris:
        export ACE_ROOT=<full path to the ACE_wrappers directory>
        export TAO_ROOT=$ACE_ROOT/TAO
        export MPC_ROOT=$ACE_ROOT/MPC
@@ -110,8 +110,13 @@ general overview of OpenDDS.
        export JAVA_HOME=<full path to the Sun JDK>
        export JAVA_PLATFORM=linux    --OR--    export JAVA_PLATFORM=solaris
      Mac OS X:
-       Follow the instructions above for Unix omitting the JAVA_PLATFORM
-       environment variable.
+       export ACE_ROOT=<full path to the ACE_wrappers directory>
+       export TAO_ROOT=$ACE_ROOT/TAO
+       export MPC_ROOT=$ACE_ROOT/MPC
+       export DDS_ROOT=<full path to the DDS directory>
+       export PATH=$ACE_ROOT/bin:$DDS_ROOT/bin:$PATH
+       export DYLD_LIBRARY_PATH=$ACE_ROOT/lib:$DDS_ROOT/lib:$DYLD_LIBRARY_PATH
+       export JAVA_HOME=<full path to the Sun JDK>
      Windows:
        set ACE_ROOT=<full path to the ACE_wrappers directory>
        set TAO_ROOT=%ACE_ROOT%\TAO
