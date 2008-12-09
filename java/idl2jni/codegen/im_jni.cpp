@@ -399,7 +399,7 @@ bool idl_mapping_jni::gen_enum (UTL_ScopedName *name,
     c.sigToJava << "\n"
     "{\n"
     "  ACE_UNUSED_ARG (createNewObject);\n"
-    "  jclass clazz = jni->FindClass (\"" << enumJVMsig << "\");\n"
+    "  jclass clazz = findClass (jni, \"" << enumJVMsig << "\");\n"
     "  jmethodID factory = jni->GetStaticMethodID (clazz, \"from_int\", "
     "\"(I)L" << enumJVMsig << ";\");\n"
     "  target = jni->CallStaticObjectMethod (clazz, factory, source);\n"
@@ -479,7 +479,7 @@ bool idl_mapping_jni::gen_struct (UTL_ScopedName *name,
     "  jclass clazz;\n"
     "  if (createNewObject)\n"
     "    {\n"
-    "      clazz = jni->FindClass (\"" << structJVMsig << "\");\n"
+    "      clazz = findClass (jni, \"" << structJVMsig << "\");\n"
     "      jmethodID ctor = jni->GetMethodID (clazz, \"<init>\", \"()V\");\n"
     "      target = jni->NewObject (clazz, ctor);\n"
     "    }\n"
@@ -587,7 +587,7 @@ bool idl_mapping_jni::gen_jarray_copies (UTL_ScopedName *name,
             strlen (iter + 1) - 1 /* skip final ; */);
           ostringstream oss;
           oss <<
-            "      jclass c0 = jni->FindClass (\"" << basic << "\");\n";
+            "      jclass c0 = findClass (jni, \"" << basic << "\");\n";
           size_t ctr = 1;
           for (; iter > begin; --iter, ++ctr)
             {
@@ -615,7 +615,7 @@ bool idl_mapping_jni::gen_jarray_copies (UTL_ScopedName *name,
           loopJava =
             "      " + actualJniType + " obj;\n";
           preNewArray =
-            "      jclass clazz = jni->FindClass (\"" + jvmSig + "\");\n";
+            "      jclass clazz = findClass (jni, \"" + jvmSig + "\");\n";
           actualJniType = "jobject";
         }
       else //non-nested array of objects
@@ -644,7 +644,7 @@ bool idl_mapping_jni::gen_jarray_copies (UTL_ScopedName *name,
               loopJava += ";\n";
             }
           preNewArray =
-            "      jclass clazz = jni->FindClass (\"" + jvmClass + "\");\n";
+            "      jclass clazz = findClass (jni, \"" + jvmClass + "\");\n";
         }
       newArrayExtra = ", clazz, 0";
       loopCxx +=
@@ -886,7 +886,7 @@ namespace
           "      holderize (_jni, " + string (name) + ", _j_" + name + ", \""
           + jvmSig + "\");\n";
         tao_argconv_in +=
-          "  jclass _hc_" + string (name) + " = _jni->FindClass (\""
+          "  jclass _hc_" + string (name) + " = findClass (_jni, \""
           + holderSig + "\");\n"
           "  jmethodID _hm_" + name + " = _jni->GetMethodID (_hc_" + name
           + ", \"<init>\", \"()V\");\n"
@@ -904,7 +904,7 @@ namespace
         argconv_out +=
           "      " + jni + " _j_" + name;
         tao_argconv_in +=
-          "  jclass _hc_" + string (name) + " = _jni->FindClass (\""
+          "  jclass _hc_" + string (name) + " = findClass (_jni, \""
           + holderSig + "\");\n"
           "  jmethodID _hm_" + name + " = _jni->GetMethodID (_hc_" + name
           + ", \"<init>\", \"()V\");\n"
@@ -1137,7 +1137,7 @@ bool idl_mapping_jni::gen_interf (UTL_ScopedName *name, bool local,
     c.sigToCxx << "\n"
     "{\n"
     "  if (!source) return;\n"
-    "  jclass taoObjClazz = jni->FindClass (\"i2jrt/TAOObject\");\n"
+    "  jclass taoObjClazz = findClass (jni, \"i2jrt/TAOObject\");\n"
     "  if (jni->IsInstanceOf (source, taoObjClazz))\n"
     "    {\n"
     "      CORBA::Object_ptr c = recoverTaoObject (jni, source);\n"
@@ -1165,7 +1165,7 @@ bool idl_mapping_jni::gen_interf (UTL_ScopedName *name, bool local,
     "      target = 0;\n"
     "      return;\n"
     "    }\n"
-    "  jclass stubClazz = jni->FindClass (\"" << javaStub << "\");\n"
+    "  jclass stubClazz = findClass (jni, \"" << javaStub << "\");\n"
     "  jmethodID ctor = jni->GetMethodID (stubClazz, \"<init>\", \"(J)V\");\n"
     "  target = jni->NewObject (stubClazz, ctor, reinterpret_cast<jlong> (\n"
     "    CORBA::Object::_duplicate (source.in ())));\n"
@@ -1448,7 +1448,7 @@ bool idl_mapping_jni::gen_union (UTL_ScopedName *name,
     {
       string enum_sig = scoped_helper (discriminator->name (), "/");
       explicitDiscSetup =
-        "  jclass dclazz = jni->FindClass (\"" + enum_sig + "\");\n"
+        "  jclass dclazz = findClass (jni, \"" + enum_sig + "\");\n"
         "  jmethodID from_int = jni->GetStaticMethodID (dclazz, \"from_int\", "
         "\"(I)" + disc_sig + "\");\n"
         "  jobject jdisc = jni->CallStaticObjectMethod (dclazz, from_int, "
@@ -1482,7 +1482,7 @@ bool idl_mapping_jni::gen_union (UTL_ScopedName *name,
     "  jclass clazz;\n"
     "  if (createNewObject)\n"
     "    {\n"
-    "      clazz = jni->FindClass (\"" << unionJVMsig << "\");\n"
+    "      clazz = findClass (jni, \"" << unionJVMsig << "\");\n"
     "      jmethodID ctor = jni->GetMethodID (clazz, \"<init>\", \"()V\");\n"
     "      target = jni->NewObject (clazz, ctor);\n"
     "    }\n"
