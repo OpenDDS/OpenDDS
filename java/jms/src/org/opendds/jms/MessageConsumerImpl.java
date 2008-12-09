@@ -5,6 +5,7 @@
 package org.opendds.jms;
 
 import java.util.List;
+import java.util.ArrayList;
 
 import javax.jms.Destination;
 import javax.jms.JMSException;
@@ -36,6 +37,9 @@ import DDS.Subscriber;
 import DDS.Topic;
 import DDS.WaitSet;
 import DDS.DataReaderQos;
+import DDS.ANY_INSTANCE_STATE;
+import DDS.ANY_VIEW_STATE;
+import DDS.ANY_SAMPLE_STATE;
 import OpenDDS.JMS.MessagePayload;
 import OpenDDS.JMS.MessagePayloadDataReader;
 import OpenDDS.JMS.MessagePayloadDataReaderHelper;
@@ -47,11 +51,11 @@ import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.qos.DataReaderQosPolicy;
 
 /**
- * @author  Weiqi Gao
+ * @author Weiqi Gao
  * @version $Revision$
  */
 public class MessageConsumerImpl implements MessageConsumer {
-    private ConnectionImpl connection;
+    protected ConnectionImpl connection;
     private Destination destination;
     private String messageSelector;
     private MessageListener messageListener;
@@ -69,6 +73,10 @@ public class MessageConsumerImpl implements MessageConsumer {
     private List<DataReaderHandlePair> toBeRecovered;
 
     private MessageDeliveryHelper helper;
+
+    // JMS 1.1, 4.4.11, The sessions view of unacknowledged Messages, used in recover()
+    private List<DataReaderHandlePair> unacknowledged;
+    private final Object lockForUnacknowledged;
 
     public MessageConsumerImpl(SessionImpl sessionImpl, Destination destination, String messageSelector, boolean noLocal) throws JMSException {
         this.sessionImpl = sessionImpl;
@@ -92,6 +100,9 @@ public class MessageConsumerImpl implements MessageConsumer {
         this.toBeRecovered = null;
 
         this.helper = new MessageDeliveryHelper(connection);
+
+        this.unacknowledged = new ArrayList<DataReaderHandlePair>();
+        this.lockForUnacknowledged = new Object();
     }
 
     private MessagePayloadDataReader fromDestination(Destination destination, Subscriber subscriber) throws JMSException {
@@ -120,6 +131,10 @@ public class MessageConsumerImpl implements MessageConsumer {
         return topicImpl.createDDSTopic(sessionImpl.getOwningConnection());
     }
 
+    protected Destination getDestination() {
+        return destination;
+    }
+    
     public String getMessageSelector() throws JMSException {
         return Strings.isEmpty(messageSelector) ? null : messageSelector;
     }
@@ -188,7 +203,7 @@ public class MessageConsumerImpl implements MessageConsumer {
 
     private Message doReceive(Duration_t duration) throws JMSException {
         ReadCondition readCondition = messagePayloadDataReader.create_querycondition(NOT_READ_SAMPLE_STATE.value,
-                NEW_VIEW_STATE.value, ALIVE_INSTANCE_STATE.value, "ORDER BY theHeader.TwentyMinusJMSPriority", new String[] {});
+            NEW_VIEW_STATE.value, ALIVE_INSTANCE_STATE.value, "ORDER BY theHeader.TwentyMinusJMSPriority", new String[]{});
         int rc = waitSet.attach_condition(readCondition);
         if (rc != RETCODE_OK.value) {
             throw new JMSException("Cannot attach readCondition to OpenDDS WaitSet.");
@@ -224,6 +239,7 @@ public class MessageConsumerImpl implements MessageConsumer {
                     waitSet.detach_condition(readCondition);
                     messagePayloadDataReader.delete_readcondition(readCondition);
                     AbstractMessageImpl message = buildMessageFromPayload(messagePayload, handle, sessionImpl);
+                    if (isDurableAcknowledged(message)) continue;
                     DataReaderHandlePair dataReaderHandlePair = new DataReaderHandlePair(messagePayloadDataReader, handle);
                     sessionImpl.addToUnacknowledged(dataReaderHandlePair, this);
                     if (sessionImpl.getAcknowledgeMode() != Session.CLIENT_ACKNOWLEDGE) {
@@ -246,8 +262,13 @@ public class MessageConsumerImpl implements MessageConsumer {
             closeToken.set_trigger_value(true);
             subscriber.delete_datareader(messagePayloadDataReader);
         }
+        doDurableClose();
         helper.release();
         this.closed = true;
+    }
+
+    protected void doDurableClose() {
+        // No-op for non-durable subscriptions
     }
 
     private void checkClosed() {
@@ -255,7 +276,12 @@ public class MessageConsumerImpl implements MessageConsumer {
         if (closed) throw new IllegalStateException("This MessageConsumer is closed.");
     }
 
-    void doRecover(List<DataReaderHandlePair> dataReaderHandlePairs) {
+    void doRecover() {
+        List<DataReaderHandlePair> dataReaderHandlePairs = null;
+        synchronized (lockForUnacknowledged) {
+            dataReaderHandlePairs = new ArrayList<DataReaderHandlePair>(unacknowledged);
+            unacknowledged.clear();
+        }
         if (messageListener != null) {
             doRecoverAsync(dataReaderHandlePairs);
         } else {
@@ -275,6 +301,7 @@ public class MessageConsumerImpl implements MessageConsumer {
             MessagePayload messagePayload = payloads.value[0];
             SampleInfo sampleInfo = infos.value[0];
             AbstractMessageImpl message = buildMessageFromPayload(messagePayload, handle, sessionImpl);
+            if (isDurableAcknowledged(message)) continue;
             message.setJMSRedelivered(true);
             sessionImpl.getMessageDeliveryExecutor().execute(new MessageDispatcher(message, pair, this, sessionImpl));
         }
@@ -292,6 +319,7 @@ public class MessageConsumerImpl implements MessageConsumer {
             MessagePayload messagePayload = payloads.value[0];
             SampleInfo sampleInfo = infos.value[0];
             AbstractMessageImpl message = buildMessageFromPayload(messagePayload, handle, sessionImpl);
+            if (isDurableAcknowledged(message)) continue;
             message.setJMSRedelivered(true);
             sessionImpl.addToUnacknowledged(pair, this);
             if (sessionImpl.getAcknowledgeMode() != Session.CLIENT_ACKNOWLEDGE) {
@@ -300,4 +328,39 @@ public class MessageConsumerImpl implements MessageConsumer {
             return message;
         }
     }
+
+    protected boolean isDurableAcknowledged(AbstractMessageImpl message) {
+        return false;
+    }
+
+    public void doAcknowledge() {
+        List<DataReaderHandlePair> copy;
+        synchronized(lockForUnacknowledged) {
+            copy = new ArrayList<DataReaderHandlePair>(unacknowledged);
+            unacknowledged.clear();
+        }
+        for (DataReaderHandlePair pair : copy) {
+            MessagePayloadDataReader dataReader = pair.getDataReader();
+            int instanceHandle = pair.getInstanceHandle();
+
+            MessagePayloadSeqHolder payloads = new MessagePayloadSeqHolder(new MessagePayload[0]);
+            SampleInfoSeqHolder infos = new SampleInfoSeqHolder(new SampleInfo[0]);
+            int rc = dataReader.take_instance(payloads, infos, 1, instanceHandle, ANY_SAMPLE_STATE.value, ANY_VIEW_STATE.value, ANY_INSTANCE_STATE.value);
+            if (rc == RETCODE_OK.value) {
+                AbstractMessageImpl message = buildMessageFromPayload(payloads.value[0], instanceHandle, sessionImpl);
+                doDurableAcknowledge(message);
+            } else {
+                // The instance handle is gone from the dataReader for some other reason.
+            }
+        }
+    }
+
+    protected void doDurableAcknowledge(Message message) {
+        // No-op for non-durable subscriptions
+    }
+
+    public void addToUnacknowledged(DataReaderHandlePair dataReaderHandlePair) {
+        unacknowledged.add(dataReaderHandlePair);
+    }
+
 }

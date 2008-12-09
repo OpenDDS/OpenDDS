@@ -69,6 +69,7 @@ public class ConsumerDataReaderListener extends _DataReaderListenerLocalBase {
             SampleInfo sampleInfo = infos.value[i];
             int handle = sampleInfo.instance_handle;
             AbstractMessageImpl message = buildMessageFromPayload(messagePayload, handle, sessionImpl);
+            if (consumer.isDurableAcknowledged(message)) continue;
             DataReaderHandlePair dataReaderHandlePair = new DataReaderHandlePair(reader, handle);
             sessionImpl.getMessageDeliveryExecutor().execute(new MessageDispatcher(message, dataReaderHandlePair, consumer, sessionImpl));
         }

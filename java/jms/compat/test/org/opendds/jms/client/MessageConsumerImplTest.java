@@ -203,11 +203,11 @@ public class MessageConsumerImplTest {
         final Message message3 = messageConsumer.receiveNoWait();
         assert message3 != null;
 
-        assert getUnacknowledgedCount(session) == 3;
+        assert getUnacknowledgedCount(messageConsumer) == 3;
 
         message.acknowledge();
 
-        assert getUnacknowledgedCount(session) == 0;
+        assert getUnacknowledgedCount(messageConsumer) == 0;
     }
 
     private void sendSomeMessages(MessageProducer messageProducer) throws JMSException {
@@ -229,18 +229,13 @@ public class MessageConsumerImplTest {
         } catch (InterruptedException e) {}
     }
 
-    private int getUnacknowledgedCount(Session session) {
+    private int getUnacknowledgedCount(MessageConsumer messageConsumer) {
         try {
-            Class sessionClass = Class.forName("org.opendds.jms.SessionImpl");
+            Class sessionClass = Class.forName("org.opendds.jms.MessageConsumerImpl");
             final Field field = sessionClass.getDeclaredField("unacknowledged");
             field.setAccessible(true);
-            Map unacknowledged = (Map) field.get(session);
-            final Collection<List> listCollection = unacknowledged.values();
-            int count = 0;
-            for (List pairs : listCollection) {
-                count += pairs.size();
-            }
-            return count;
+            List unacknowledged = (List) field.get(messageConsumer);
+            return unacknowledged.size();
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {

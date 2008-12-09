@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionConsumer;
@@ -57,6 +59,9 @@ public class ConnectionImpl implements Connection {
     private List<TemporaryTopic> tempTopics =
         new ArrayList<TemporaryTopic>();
 
+    private Map<String, DurableMessageConsumerImpl> durableSubscriptions;
+    final private Object lockForurableSubscriptions;
+
     public ConnectionImpl(ManagedConnectionImpl connection) {
         assert connection != null;
 
@@ -74,6 +79,9 @@ public class ConnectionImpl implements Connection {
         if (persistenceManager == null) {
             logger.warn("PersistenceManager not bound; durable subscriptions are unavailable");
         }
+
+        this.durableSubscriptions = new HashMap<String, DurableMessageConsumerImpl>();
+        this.lockForurableSubscriptions = new Object();
     }
 
     public ManagedConnectionImpl getManagedConnection() {
@@ -196,6 +204,42 @@ public class ConnectionImpl implements Connection {
     protected void deleteTemporaryTopic(TemporaryTopic topic) {
         synchronized (tempTopics) {
             tempTopics.remove(topic);
+        }
+    }
+
+    void registerDurableSubscription(String name, DurableMessageConsumerImpl durableSubscription) {
+        synchronized(lockForurableSubscriptions) {
+            durableSubscriptions.put(name, durableSubscription);
+        }
+    }
+
+    DurableMessageConsumerImpl getDurableSubscriptionByname(String name) {
+        synchronized (lockForurableSubscriptions) {
+            return durableSubscriptions.get(name);
+        }
+    }
+
+    boolean hasDurableSubscription(String name) {
+        synchronized(lockForurableSubscriptions) {
+            return durableSubscriptions.containsKey(name);
+        }
+    }
+
+    void removeDurableSubscription(String name) {
+        synchronized(lockForurableSubscriptions) {
+            durableSubscriptions.remove(name);
+        }
+    }
+    
+    void unregisterDurableSubscription(String name) {
+        synchronized(lockForurableSubscriptions) {
+            durableSubscriptions.put(name, null);
+        }
+    }
+
+    void unsubscribeDurableSubscription(String name) {
+        synchronized(lockForurableSubscriptions) {
+            durableSubscriptions.remove(name);
         }
     }
 
