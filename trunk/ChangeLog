@@ -1,3 +1,18 @@
+Tue Dec  9 16:54:53 UTC 2008  Weiqi Gao  <gaow@ociweb.com>
+
+        * java/jms/compat/opendds-jms-compat.iml:
+
+          Trivial changes.
+
+        * java/jms/compat/test/org/opendds/jms/client/MessageConsumerImplTest.java:
+        * java/jms/src/org/opendds/jms/ConnectionImpl.java:
+        * java/jms/src/org/opendds/jms/ConsumerDataReaderListener.java:
+        * java/jms/src/org/opendds/jms/DurableMessageConsumerImpl.java:
+        * java/jms/src/org/opendds/jms/MessageConsumerImpl.java:
+        * java/jms/src/org/opendds/jms/SessionImpl.java:
+
+          Added support for durable subscribers.
+
 Tue Dec  9 05:38:57 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/INSTALL:

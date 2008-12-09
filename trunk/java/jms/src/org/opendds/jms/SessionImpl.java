@@ -6,9 +6,7 @@ package org.opendds.jms;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Executor;
 
 import javax.jms.BytesMessage;
@@ -31,16 +29,9 @@ import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
 
-import DDS.ANY_INSTANCE_STATE;
-import DDS.ANY_SAMPLE_STATE;
-import DDS.ANY_VIEW_STATE;
 import DDS.DomainParticipant;
-import DDS.RETCODE_OK;
-import DDS.SampleInfo;
-import DDS.SampleInfoSeqHolder;
-import OpenDDS.JMS.MessagePayload;
-import OpenDDS.JMS.MessagePayloadDataReader;
-import OpenDDS.JMS.MessagePayloadSeqHolder;
+
+import org.opendds.jms.persistence.DurableSubscriptionStore;
 
 /**
  * @author  Weiqi Gao
@@ -57,10 +48,6 @@ public class SessionImpl implements Session {
     private List<MessageConsumer> createdConsumers;
     // JMS 1.1, 4.4.14, Asynchronous Message delivery thread
     private MessageDeliveryExecutor executor;
-    // JMS 1.1, 4.4.11, The sessions view of unacknowledged Messages, used in recover()
-    private Map<MessageConsumerImpl, List<DataReaderHandlePair>> unacknowledged;
-    private final Object lockForUnacknowledged;
-    private Map<MessageConsumerImpl, List<DataReaderHandlePair>> toBeRecovered;
     private ConnectionImpl owningConnection;
 
     // OpenDDS stuff
@@ -81,8 +68,6 @@ public class SessionImpl implements Session {
         this.createdProducers = new ArrayList<MessageProducer>();
         this.createdConsumers = new ArrayList<MessageConsumer>();
         this.executor = new MessageDeliveryExecutor(owningConnection);
-        this.unacknowledged = new HashMap<MessageConsumerImpl, List<DataReaderHandlePair>>();
-        this.lockForUnacknowledged = new Object();
     }
 
     public int getAcknowledgeMode() {
@@ -148,13 +133,25 @@ public class SessionImpl implements Session {
                                                    String messageSelector,
                                                    boolean noLocal) throws JMSException {
         checkClosed();
-        // TODO
-        return null;
+        validateDestination(topic);
+        DurableMessageConsumerImpl messageConsumer = new DurableMessageConsumerImpl(this, name, topic, messageSelector, noLocal);
+        owningConnection.registerDurableSubscription(name, messageConsumer);
+        createdConsumers.add(messageConsumer);
+        return messageConsumer;
     }
 
     public void unsubscribe(String name) throws JMSException {
         checkClosed();
-        // TODO
+        String clientID = owningConnection.getClientID();
+        if (!owningConnection.hasDurableSubscription(name)) {
+            throw new InvalidDestinationException("No durable subscription is registered for [client: " + clientID + ", topic: " + name + "]");
+        }
+        if (owningConnection.getDurableSubscriptionByname(name) != null) {
+            throw new IllegalStateException("The durable topic " + name + " has an active subscriber in client " + clientID);
+        }
+        owningConnection.removeDurableSubscription(name);
+        DurableSubscriptionStore store = owningConnection.getPersistenceManager().getDurableSubscriptionStore();
+        store.unsubscribe(new DurableSubscription(owningConnection.getClientID(), name));
     }
 
     public Queue createQueue(String queueName) throws JMSException {
@@ -244,18 +241,14 @@ public class SessionImpl implements Session {
 
     public void recover() throws JMSException {
         checkClosed();
-        synchronized(lockForUnacknowledged) {
-            toBeRecovered = new HashMap<MessageConsumerImpl, List<DataReaderHandlePair>>(unacknowledged);
-            unacknowledged.clear();
-        }
         if (transacted) throw new IllegalStateException("recover() called on a transacted Session.");
         stopMessageDelivery();
         if (messageListener != null) {
             recoverAsync();
         } else {
-            for (MessageConsumerImpl consumer: toBeRecovered.keySet()) {
-                final List<DataReaderHandlePair> pairs = toBeRecovered.get(consumer);
-                consumer.doRecover(pairs);
+            for (MessageConsumer consumer: createdConsumers) {
+                MessageConsumerImpl consumerImpl = (MessageConsumerImpl) consumer;
+                consumerImpl.doRecover();
             }
         }
     }
@@ -285,35 +278,14 @@ public class SessionImpl implements Session {
     }
 
     void doAcknowledge() {
-        Map<MessageConsumerImpl, List<DataReaderHandlePair>> copy;
-        synchronized(lockForUnacknowledged) {
-            copy = new HashMap<MessageConsumerImpl, List<DataReaderHandlePair>>(unacknowledged);
-            unacknowledged.clear();
-        }
-        for (List<DataReaderHandlePair> pairList: copy.values()) {
-            for (DataReaderHandlePair pair: pairList) {
-                MessagePayloadDataReader dataReader = pair.getDataReader();
-                int instanceHandle = pair.getInstanceHandle();
-
-                MessagePayloadSeqHolder payloads = new MessagePayloadSeqHolder(new MessagePayload[0]);
-                SampleInfoSeqHolder infos = new SampleInfoSeqHolder(new SampleInfo[0]);
-                int rc = dataReader.take_instance(payloads, infos, 1, instanceHandle, ANY_SAMPLE_STATE.value, ANY_VIEW_STATE.value, ANY_INSTANCE_STATE.value);
-                if (rc == RETCODE_OK.value) {
-                    // The instance handle is gone from the dataReader for some other reason.
-                }
-            }
+        for (MessageConsumer consumer: createdConsumers) {
+            MessageConsumerImpl messageConsumerImpl = (MessageConsumerImpl) consumer;
+            messageConsumerImpl.doAcknowledge();
         }
     }
 
     void addToUnacknowledged(DataReaderHandlePair dataReaderHandlePair, MessageConsumerImpl consumer) {
-        synchronized(lockForUnacknowledged) {
-            List<DataReaderHandlePair> pairs = unacknowledged.get(consumer);
-            if (pairs == null) {
-                pairs = new ArrayList<DataReaderHandlePair>();
-                unacknowledged.put(consumer, pairs);
-            }
-            pairs.add(dataReaderHandlePair);
-        }
+        consumer.addToUnacknowledged(dataReaderHandlePair);
     }
 
     ConnectionImpl getOwningConnection() {
