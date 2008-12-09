@@ -129,6 +129,10 @@ namespace OpenDDS
                                                      
         /// Called by the application to attach this transport to a subscriber.
         OpenDDS::DCPS::AttachStatus attach (DDS::Subscriber_ptr pub);
+
+        /// Expose the configuration information so others can see what
+        /// we can do.
+        TransportConfiguration* config() const;
                                                      
 
       protected:

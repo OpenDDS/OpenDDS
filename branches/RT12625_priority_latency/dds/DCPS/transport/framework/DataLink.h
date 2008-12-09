@@ -196,6 +196,9 @@ namespace OpenDDS
         CORBA::Long& priority();
         CORBA::Long  priority() const;
 
+        /// Accessor for the scheduler used by this transport.
+        int scheduler() const;
+
        protected:
 
         /// This is how the subclass "announces" to this DataLink base class

@@ -77,13 +77,16 @@ int OpenDDS::DCPS::ThreadPerConnectionSendTask::open(void*)
       -1);
   }
 
-  /// @TODO: Map and apply the priority and scheduling stuff here.
   DirectPriorityMapper mapper( this->link_->priority());
   int priority = mapper.thread_priority();
 
+  long flags  = THR_NEW_LWP | THR_JOINABLE | ACE_SCOPE_THREAD;
+  if( this->link_->scheduler() >= 0) {
+    flags |= this->link_->scheduler();
+  }
+
   // Activate this task object with one worker thread.
-  if (this->activate(THR_NEW_LWP | THR_JOINABLE, 1) != 0)
-  {
+  if( this->activate( flags, 1, 0, priority) != 0) {
     // Assumes that when activate returns non-zero return code that
     // no threads were activated.
     ACE_ERROR_RETURN((LM_ERROR,

@@ -1,3 +1,51 @@
+Tue Dec  9 04:36:15 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Added accessor for configured scheduler policy information.
+
+        * dds/DCPS/transport/framework/PerConnectionSynch.h:
+        * dds/DCPS/transport/framework/PerConnectionSynch.inl:
+
+          Added scheduler policy value to interfaces.
+
+        * dds/DCPS/transport/framework/PerConnectionSynch.cpp:
+
+          Activate the thread with sheduling policy and priority.
+
+        * dds/DCPS/transport/framework/PerConnectionSynchStrategy.h:
+        * dds/DCPS/transport/framework/PerConnectionSynchStrategy.cpp:
+
+          Added scheduler policy value to interfaces.
+
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+
+          Activate the thread with sheduling policy and priority.
+
+        * dds/DCPS/transport/framework/ThreadSynchStrategy.h:
+
+          Added scheduler policy value to interfaces.
+
+        * dds/DCPS/transport/framework/TransportConfiguration.h:
+        * dds/DCPS/transport/framework/TransportConfiguration.inl:
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+
+          Added configurable scheduler policy specification.
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+
+          Expose the configuration information.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Create the synch object with priority and scheduling policy values.
+
+        * tests/DCPS/Priority/transport.ini:
+
+          Added scheduler policy specifications to test configuration.
+
 Mon Dec  8 22:29:48 UTC 2008  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * bin/dcps_tests.lst:

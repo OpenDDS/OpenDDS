@@ -68,8 +68,11 @@ OpenDDS::DCPS::TransportSendStrategy::TransportSendStrategy
 
   // Create a ThreadSynch object just for us.
   DirectPriorityMapper mapper( priority);
-  this->synch_ = config->send_thread_strategy()->create_synch_object
-    (synch_resource, mapper.thread_priority());
+  this->synch_ = config->send_thread_strategy()->create_synch_object(
+    synch_resource,
+    mapper.thread_priority(),
+    config->scheduler_
+  );
 
   // We cache this value in data member since it doesn't change, and we
   // don't want to keep asking for it over and over.
