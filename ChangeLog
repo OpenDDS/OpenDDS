@@ -1,3 +1,15 @@
+Tue Dec  9 02:33:46 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/idl2jni/runtime/i2jrt/Runtime.java:
+        * java/idl2jni/runtime/i2jrt_Runtime.cpp:
+        * java/idl2jni/runtime/idl2jni_runtime.h:
+        * java/idl2jni/runtime/idl2jni_runtime.cpp:
+        * java/idl2jni/runtime/idl2jni_runtime.mpc:
+        * java/jms/src/org/opendds/jms/resource/ResourceAdapterImpl.java:
+
+          Initial support for context class loading in attached native
+          threads.
+
 Tue Dec  9 00:14:16 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/INSTALL:

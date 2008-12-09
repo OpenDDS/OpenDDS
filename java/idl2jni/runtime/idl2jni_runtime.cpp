@@ -17,6 +17,8 @@
 #  include "tao/String_Const_Sequence_Element_T.h"
 #endif
 
+jobject JNIThreadAttacher::cl_;
+
 
 JStringMgr::JStringMgr (JNIEnv* jni, jstring input)
   : jni_ (jni)

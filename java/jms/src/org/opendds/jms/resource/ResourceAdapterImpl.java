@@ -12,8 +12,11 @@ import javax.resource.spi.ResourceAdapter;
 import javax.resource.spi.endpoint.MessageEndpointFactory;
 import javax.transaction.xa.XAResource;
 
+import i2jrt.Runtime;
+
 import org.opendds.jms.common.Version;
 import org.opendds.jms.common.io.Files;
+import org.opendds.jms.common.lang.ClassLoaders;
 import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.common.util.NativeLoader;
 import org.opendds.jms.common.util.PropertiesHelper;
@@ -48,6 +51,9 @@ public class ResourceAdapterImpl implements ResourceAdapter {
                 throw new IllegalStateException(e);
             }
         }
+
+        // Set runtime ClassLoader for native threads
+        Runtime.setClassLoader(ClassLoaders.getContextLoader());
     }
 
     private BootstrapContext context;
