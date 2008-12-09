@@ -293,25 +293,21 @@ public:
     : jvm_ (jvm)
     , jni_ (0)
   {
-    void *jni;
-    if (0 == jvm_->AttachCurrentThread (&jni, 0))
-      {
-        jni_ = reinterpret_cast<JNIEnv *> (jni);
+    if (jvm_->AttachCurrentThread ((void **)&jni_, 0) != 0)
+     {
+       // TODO failure
+     }
 
-        if (cl_ != 0)
-          {
-            jmethodID mid;
-            jclass cls = jni_->FindClass("java/lang/Thread");
+    jmethodID mid;
+    jclass cls = jni_->FindClass ("java/lang/Thread");
 
-            mid = jni_->GetStaticMethodID(cls,
-              "currentThread", "()Ljava/lang/Thread;");
-            jobject jobj = jni_->CallStaticObjectMethod(cls, mid);
+    mid = jni_->GetStaticMethodID (cls,
+      "currentThread", "()Ljava/lang/Thread;");
+    jobject jobj = jni_->CallStaticObjectMethod (cls, mid);
 
-            mid = jni_->GetMethodID(cls,
-              "setContextClassLoader", "(Ljava/lang/ClassLoader;)V");
-            jni_->CallVoidMethod(jobj, mid, cl_);
-          }
-      }
+    mid = jni_->GetMethodID (cls,
+      "setContextClassLoader", "(Ljava/lang/ClassLoader;)V");
+    jni_->CallVoidMethod (jobj, mid, cl_);
   }
 
   ~JNIThreadAttacher ()
