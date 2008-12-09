@@ -34,8 +34,12 @@ OpenDDS::DCPS::PerConnectionSynch::open(void*)
   // our svc() method, and then our close() method.
   this->shutdown_ = 0;
 
-  /// @TODO: Use this->priority_ and set the scheduling here.
-  return this->activate(THR_NEW_LWP | THR_JOINABLE, 1);
+  long flags;
+  flags  = THR_NEW_LWP | THR_JOINABLE | ACE_SCOPE_THREAD;
+  if( this->scheduler_ >= 0) {
+    flags |= this->scheduler_;
+  }
+  return this->activate( flags, 1, 0, this->priority_);
 }
 
 

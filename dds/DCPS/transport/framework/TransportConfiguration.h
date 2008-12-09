@@ -97,6 +97,10 @@ namespace OpenDDS
         /// associations are removed. The default value is 10 seconds.
         long datalink_release_delay_;
 
+        /// Scheduling policy to set if specified.  Default is to not set
+        /// the policy and leave this member with an unusable value (-1).
+        int scheduler_;
+
 
       protected:
 

@@ -22,7 +22,8 @@ namespace OpenDDS
 
         virtual ThreadSynch* create_synch_object(
                                ThreadSynchResource* synch_resource,
-                               long                 priority
+                               long                 priority,
+                               int                  scheduler
                              );
     };
 
