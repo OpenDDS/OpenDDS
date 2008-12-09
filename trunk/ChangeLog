@@ -1,3 +1,11 @@
+Tue Dec  9 05:28:24 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/idl2jni/runtime/i2jrt_Runtime.cpp:
+        * java/idl2jni/runtime/idl2jni_runtime.h:
+        * java/idl2jni/runtime/idl2jni_runtime.cpp:
+
+          Updated context class loading behavior.
+
 Tue Dec  9 02:33:46 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/idl2jni/runtime/i2jrt/Runtime.java:
