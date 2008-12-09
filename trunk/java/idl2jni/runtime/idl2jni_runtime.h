@@ -284,16 +284,33 @@ struct idl2jni_runtime_Export JniArgv
 class idl2jni_runtime_Export JNIThreadAttacher
 {
 public:
+  
+  static jobject getClassLoader() { return cl_; }
+  
+  static void setClassLoader(jobject cl) { cl_ = cl; }
 
   explicit JNIThreadAttacher (JavaVM *jvm)
     : jvm_ (jvm)
     , jni_ (0)
   {
-    JavaVMAttachArgs args = {JNI_VERSION_1_4, 0, 0};
     void *jni;
-    if (0 == jvm_->AttachCurrentThread (&jni, &args))
+    if (0 == jvm_->AttachCurrentThread (&jni, 0))
       {
         jni_ = reinterpret_cast<JNIEnv *> (jni);
+
+        if (cl_ != 0)
+          {
+            jmethodID mid;
+            jclass cls = jni_->FindClass("java/lang/Thread");
+
+            mid = jni_->GetStaticMethodID(cls,
+              "currentThread", "()Ljava/lang/Thread;");
+            jobject jobj = jni_->CallStaticObjectMethod(cls, mid);
+
+            mid = jni_->GetMethodID(cls,
+              "setContextClassLoader", "(Ljava/lang/ClassLoader;)V");
+            jni_->CallVoidMethod(jobj, mid, cl_);
+          }
       }
   }
 
@@ -305,6 +322,8 @@ public:
   JNIEnv *getJNI () { return jni_; }
 
 private:
+  static jobject cl_;
+
   JavaVM *jvm_;
   JNIEnv *jni_;
 };
