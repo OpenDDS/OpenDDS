@@ -1,3 +1,5 @@
+#include <string>
+
 #include "idl2jni_runtime.h"
 #include "idl2jni_BaseJavaPeer.h"
 
@@ -17,7 +19,20 @@
 #  include "tao/String_Const_Sequence_Element_T.h"
 #endif
 
-jobject JNIThreadAttacher::cl_ = 0;
+namespace
+{
+  /// Global ClassLoader ref
+  static jobject cl_ = 0;
+
+  jstring binary_name (JNIEnv *jni, const char *desc)
+  {
+    std::string name (desc);
+    std::size_t pos;
+    while ((pos = name.find('/')) != std::string::npos)
+      name[pos] = '.'; // replace separator
+    return jni->NewStringUTF (name.c_str ());
+  }
+}
 
 
 JStringMgr::JStringMgr (JNIEnv* jni, jstring input)
@@ -131,6 +146,28 @@ void copyToJava (JNIEnv *jni, jobject &target,
   const IDL2JNI_STRELM_CONST &source, bool)
 {
   target = jni->NewStringUTF (source);
+}
+
+
+jobject getClassLoader ()
+{
+  return cl_;
+}
+
+void setClassLoader (JNIEnv *jni, jobject cl)
+{
+  if (cl_ != 0) jni->DeleteGlobalRef (cl_);
+  cl_ = jni->NewGlobalRef (cl);
+}
+
+jclass findClass (JNIEnv *jni, const char *desc)
+{
+  if (cl_ == 0) return jni->FindClass (desc);
+  jstring name (binary_name (jni, desc));
+  jclass cls = jni->GetObjectClass (cl_);
+  jmethodID mid = jni->GetMethodID (cls,
+    "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
+  return reinterpret_cast<jclass> (jni->CallObjectMethod (cl_, mid, name));
 }
 
 

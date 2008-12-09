@@ -118,6 +118,16 @@ void copyToCxx (JNIEnv *jni,
 
 
 idl2jni_runtime_Export
+jobject getClassLoader();
+
+idl2jni_runtime_Export
+void setClassLoader(JNIEnv *, jobject);
+
+idl2jni_runtime_Export
+jclass findClass(JNIEnv *, const char *);
+
+
+idl2jni_runtime_Export
 CORBA::Object_ptr recoverTaoObject (JNIEnv *jni, jobject source);
 
 
@@ -284,30 +294,15 @@ struct idl2jni_runtime_Export JniArgv
 class idl2jni_runtime_Export JNIThreadAttacher
 {
 public:
-  
-  static jobject getClassLoader() { return cl_; }
-  
-  static void setClassLoader(jobject cl) { cl_ = cl; }
 
   explicit JNIThreadAttacher (JavaVM *jvm)
     : jvm_ (jvm)
     , jni_ (0)
   {
-    if (jvm_->AttachCurrentThread ((void **)&jni_, 0) != 0)
+    if (jvm_->AttachCurrentThread (reinterpret_cast<void **> (&jni_), 0) != 0)
      {
        // TODO failure
      }
-
-    jmethodID mid;
-    jclass cls = jni_->FindClass ("java/lang/Thread");
-
-    mid = jni_->GetStaticMethodID (cls,
-      "currentThread", "()Ljava/lang/Thread;");
-    jobject jobj = jni_->CallStaticObjectMethod (cls, mid);
-
-    mid = jni_->GetMethodID (cls,
-      "setContextClassLoader", "(Ljava/lang/ClassLoader;)V");
-    jni_->CallVoidMethod (jobj, mid, cl_);
   }
 
   ~JNIThreadAttacher ()
@@ -318,8 +313,6 @@ public:
   JNIEnv *getJNI () { return jni_; }
 
 private:
-  static jobject cl_;
-
   JavaVM *jvm_;
   JNIEnv *jni_;
 };
