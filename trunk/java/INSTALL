@@ -15,7 +15,7 @@ general overview of OpenDDS.
     these three platforms in both 32-bit and 64-bit variants in addition to the
     32-bit and 64-bit variants of the JDK distributed by Apple.  If you will be
     using a 64-bit JDK, make sure all the native libraries are also built for
-    64 bit.  Similarly, a 32-bit JDK must be matched with 32-bit native libs.
+    64-bit.  Similarly, a 32-bit JDK must be matched with 32-bit native libs.
 
   - C++ Compiler
 
@@ -36,7 +36,7 @@ general overview of OpenDDS.
       <http://www.microsoft.com/express/vc/>.
       If possible use the VC9 (VS2008) version because it fixes some annoying
       bugs with creating mixed-case directory names (which OpenDDS uses).
-    - GCC 4.1.x or later (earlier versions may work but haven't been tested)
+    - GCC 4.0.x or later (earlier versions may work but haven't been tested)
       Preferably, use the default gcc from your Linux or Mac OS X distribution.
     - Sun Studio 12 (SunCC 5.9) Earlier versions are known to have problems
       with some of the code in the OpenDDS Java bindings.
