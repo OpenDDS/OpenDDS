@@ -69,9 +69,7 @@ public class TopicImpl implements Serializable, Topic {
         DomainParticipant participant = connection.getParticipant();
         participant.get_default_topic_qos(holder);
 
-        if (topicQosPolicy != null) {
-            topicQosPolicy.setQos(holder.value);
-        }
+        topicQosPolicy.setQos(holder.value);
 
         DDS.Topic topic = participant.create_topic(topicName, connection.getTypeName(), holder.value, null);
         if (topic == null) {

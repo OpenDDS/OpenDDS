@@ -40,7 +40,6 @@ public class SubscriberManager {
 
         this.connection = connection;
         this.cxRequestInfo = connection.getConnectionRequestInfo();
-
         this.transportManager = new TransportManager(cxRequestInfo.getSubscriberTransport());
     }
 
@@ -60,7 +59,7 @@ public class SubscriberManager {
             // Set PARTITION QosPolicy to support the noLocal client
             // specifier on created MessageConsumer instances:
             if (noLocal) {
-                holder.value.partition = PartitionHelper.negate(connection.getConnectionId());                
+                holder.value.partition = PartitionHelper.negate(connection.getConnectionId());
             } else {
                 holder.value.partition = PartitionHelper.matchAll();
             }
