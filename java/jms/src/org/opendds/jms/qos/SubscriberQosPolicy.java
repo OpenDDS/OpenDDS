@@ -21,17 +21,21 @@ public class SubscriberQosPolicy implements QosPolicy<SubscriberQos> {
 
     private Properties properties;
 
-    public SubscriberQosPolicy(String value) {
-        this(PropertiesHelper.valueOf(value));
+    public SubscriberQosPolicy() {
+        this(new Properties());
     }
 
     public SubscriberQosPolicy(Properties properties) {
         this.properties = properties;
     }
 
+    public SubscriberQosPolicy(String value) {
+        this(PropertiesHelper.valueOf(value));
+    }
+
     public void setQos(SubscriberQos qos) {
         assert qos != null;
-        
+
         PropertiesHelper.Property property;
         PropertiesHelper helper = new PropertiesHelper(properties);
 

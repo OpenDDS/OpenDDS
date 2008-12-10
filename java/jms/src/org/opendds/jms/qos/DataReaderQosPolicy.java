@@ -24,12 +24,16 @@ public class DataReaderQosPolicy implements QosPolicy<DataReaderQos> {
 
     private Properties properties;
 
-    public DataReaderQosPolicy(String value) {
-        this(PropertiesHelper.valueOf(value));
+    public DataReaderQosPolicy() {
+        this(new Properties());
     }
 
     public DataReaderQosPolicy(Properties properties) {
         this.properties = properties;
+    }
+
+    public DataReaderQosPolicy(String value) {
+        this(PropertiesHelper.valueOf(value));
     }
 
     public void setQos(DataReaderQos qos) {

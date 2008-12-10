@@ -29,7 +29,10 @@ public class TopicImpl implements Serializable, Topic {
     private TopicQosPolicy topicQosPolicy;
 
     public TopicImpl(String topicName) {
-        this.topicName = topicName;
+        this(topicName,
+             new DataReaderQosPolicy(),
+             new DataWriterQosPolicy(),
+             new TopicQosPolicy());
     }
 
     public TopicImpl(String topicName,
@@ -37,7 +40,7 @@ public class TopicImpl implements Serializable, Topic {
                      DataWriterQosPolicy dataWriterQosPolicy,
                      TopicQosPolicy topicQosPolicy) {
 
-        this(topicName);
+        this.topicName = topicName;
         this.dataReaderQosPolicy = dataReaderQosPolicy;
         this.dataWriterQosPolicy = dataWriterQosPolicy;
         this.topicQosPolicy = topicQosPolicy;
@@ -82,6 +85,6 @@ public class TopicImpl implements Serializable, Topic {
 
     @Override
     public String toString() {
-        return getTopicName();
+        return String.format("%s [%s]", super.toString(), topicName);
     }
 }

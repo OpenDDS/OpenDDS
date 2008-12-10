@@ -308,6 +308,7 @@ namespace
       , cxx (idl_mapping_jni::scoped (name) + (useVar ? "_var" : ""))
     {
       be_global->add_include ("idl2jni_jni.h");
+      be_global->add_include ("idl2jni_runtime.h");
       ACE_CString ace_exporter = be_global->stub_export_macro ();
       bool use_exp = ace_exporter != "";
       exporter = use_exp ? (string (" ") + ace_exporter.c_str ()) : "";

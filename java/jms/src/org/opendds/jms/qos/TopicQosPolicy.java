@@ -17,12 +17,16 @@ import org.opendds.jms.common.util.PropertiesHelper;
 public class TopicQosPolicy implements QosPolicy<TopicQos> {
     private Properties properties;
 
-    public TopicQosPolicy(String value) {
-        this(PropertiesHelper.valueOf(value));
+    public TopicQosPolicy() {
+        this(new Properties());
     }
 
     public TopicQosPolicy(Properties properties) {
         this.properties = properties;
+    }
+
+    public TopicQosPolicy(String value) {
+        this(PropertiesHelper.valueOf(value));
     }
 
     public void setQos(TopicQos qos) {
