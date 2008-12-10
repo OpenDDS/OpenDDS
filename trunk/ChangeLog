@@ -1,3 +1,9 @@
+Wed Dec 10 15:09:39 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/INSTALL:
+
+          Marked Mac OS X as an experimental platform.
+
 Wed Dec 10 15:04:58 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/idl2jni/codegen/im_jni.cpp:
