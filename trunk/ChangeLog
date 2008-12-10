@@ -1,3 +1,15 @@
+Wed Dec 10 03:10:01 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * java/idl2jni/runtime/i2jrt_ORB.cpp:
+        * java/idl2jni/runtime/i2jrt_TAOObject.cpp:
+        * java/idl2jni/runtime/idl2jni_runtime.cpp:
+        * java/jms/src/org/opendds/jms/common/util/NativeLoader.java:
+        * java/jms/src/org/opendds/jms/resource/ResourceAdapterImpl.java:
+
+          Updated other FindClass usages. Moved bootstrap code to
+          NativeLoader.bootstrap().
+
 Tue Dec  9 22:42:50 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/native/org_opendds_jms_DCPSInfoRepo.cpp:

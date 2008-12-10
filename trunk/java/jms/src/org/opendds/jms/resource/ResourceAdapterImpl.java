@@ -4,22 +4,15 @@
 
 package org.opendds.jms.resource;
 
-import java.io.IOException;
-
 import javax.resource.spi.ActivationSpec;
 import javax.resource.spi.BootstrapContext;
 import javax.resource.spi.ResourceAdapter;
 import javax.resource.spi.endpoint.MessageEndpointFactory;
 import javax.transaction.xa.XAResource;
 
-import i2jrt.Runtime;
-
 import org.opendds.jms.common.Version;
-import org.opendds.jms.common.io.Files;
-import org.opendds.jms.common.lang.ClassLoaders;
 import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.common.util.NativeLoader;
-import org.opendds.jms.common.util.PropertiesHelper;
 
 /**
  * @author  Steven Stallion
@@ -29,31 +22,8 @@ public class ResourceAdapterImpl implements ResourceAdapter {
     private static Logger logger = Logger.getLogger(ResourceAdapterImpl.class);
 
     static {
-        PropertiesHelper.Property property;
-
-        PropertiesHelper helper =
-            PropertiesHelper.getSystemPropertiesHelper();
-
-        property = helper.find("opendds.native.load");
-        if (property.exists() && property.asBoolean()) {
-            property = helper.require("opendds.native.dir");
-
-            String dirName = property.getValue();
-            if (!Files.isLibraryPathSet(dirName)) {
-                logger.warn("%s is not set in java.library.path!", dirName);
-            }
-
-            try {
-                NativeLoader loader = new NativeLoader(dirName);
-                loader.loadLibraries();
-
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
-            }
-        }
-
-        // Set runtime ClassLoader for native threads
-        Runtime.setClassLoader(ClassLoaders.getContextLoader());
+        // Bootstrap native runtime
+        NativeLoader.bootstrap();
     }
 
     private BootstrapContext context;
