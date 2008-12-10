@@ -39,7 +39,6 @@ public class PublisherManager {
 
         this.connection = connection;
         this.cxRequestInfo = connection.getConnectionRequestInfo();
-
         this.transportManager = new TransportManager(cxRequestInfo.getPublisherTransport());
     }
 

@@ -18,8 +18,8 @@ import DDS.Topic;
 import OpenDDS.JMS.MessagePayloadDataWriter;
 import OpenDDS.JMS.MessagePayloadDataWriterHelper;
 
-import org.opendds.jms.qos.DataWriterQosPolicy;
 import org.opendds.jms.common.util.Logger;
+import org.opendds.jms.qos.DataWriterQosPolicy;
 
 /**
  * @author  Weiqi Gao
@@ -50,9 +50,7 @@ public class DataWriterPair {
         publisher.get_default_datawriter_qos(persistentQosHolder);
 
         final DataWriterQos persistentQos = persistentQosHolder.value;
-        if (dataWriterQosPolicy != null) {
-            dataWriterQosPolicy.setQos(persistentQos);
-        }
+        dataWriterQosPolicy.setQos(persistentQos);
 
         persistentQos.durability.kind = DurabilityQosPolicyKind.PERSISTENT_DURABILITY_QOS;
         final DataWriter dataWriter = publisher.create_datawriter(ddsTopic, persistentQos, null);
