@@ -28,7 +28,7 @@ namespace
   {
     std::string name (desc);
     std::size_t pos;
-    while ((pos = name.find('/')) != std::string::npos)
+    while ((pos = name.find ('/')) != std::string::npos)
       name[pos] = '.'; // replace separator
     return jni->NewStringUTF (name.c_str ());
   }

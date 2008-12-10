@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
+import i2jrt.Runtime;
+
 import org.opendds.jms.common.io.Files;
 import org.opendds.jms.common.io.Streams;
 import org.opendds.jms.common.lang.ClassLoaders;
@@ -23,12 +25,39 @@ import org.opendds.jms.common.lang.ClassLoaders;
 public class NativeLoader {
     private static Logger logger = Logger.getLogger(NativeLoader.class);
 
+    public static void bootstrap() {
+        // Set runtime ClassLoader for native threads
+        Runtime.setClassLoader(ClassLoaders.getContextLoader());
+
+        // Extract native libraries
+        PropertiesHelper helper = PropertiesHelper.getSystemPropertiesHelper();
+
+        PropertiesHelper.Property property;
+        property = helper.find("opendds.native.load");
+        if (property.exists() && property.asBoolean()) {
+            property = helper.require("opendds.native.dir");
+
+            String dirName = property.getValue();
+            if (!Files.isLibraryPathSet(dirName)) {
+                logger.warn("%s is not set in java.library.path!", dirName);
+            }
+
+            try {
+                NativeLoader loader = new NativeLoader(dirName);
+                loader.loadLibraries();
+
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+    }
+
     private File nativeDir;
 
     private List<File> loadedLibs =
         new ArrayList<File>();
 
-    public NativeLoader(String dirName) throws IOException {
+    protected NativeLoader(String dirName) throws IOException {
         nativeDir = Files.verifyDirectory(dirName);
         logger.debug("Using native directory: %s", nativeDir.getAbsolutePath());
     }
@@ -51,7 +80,7 @@ public class NativeLoader {
 
     public void loadLibraries(ClassLoader loader) throws IOException {
         assert loader != null;
-        
+
         Enumeration<URL> en = loader.getResources(LibIndex.DEFAULT_RESOURCE);
         while (en.hasMoreElements()) {
             URL url = en.nextElement();

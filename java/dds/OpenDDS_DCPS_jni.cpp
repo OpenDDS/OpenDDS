@@ -123,7 +123,7 @@ void JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_set_1repo_1ior
   if (dynamic_cast<const NAME *> (&te))                                   \
     {                                                                     \
       jclass clazz =                                                      \
-        jni->FindClass ("OpenDDS/DCPS/transport/" #NAME "Exception");     \
+        findClass (jni, "OpenDDS/DCPS/transport/" #NAME "Exception");     \
       jni->ThrowNew (clazz, "OpenDDS transport exception: " #NAME);       \
     }                                                                     \
   else
@@ -144,7 +144,7 @@ namespace
     // fallback case from if/else chain
       {
         jclass clazz =
-          jni->FindClass ("OpenDDS/DCPS/transport/TransportException");
+          findClass (jni, "OpenDDS/DCPS/transport/TransportException");
         jni->ThrowNew (clazz, "OpenDDS transport exception (unknown type)");
       }
   }
@@ -163,7 +163,7 @@ Java_OpenDDS_DCPS_transport_TheTransportFactory_create_1transport_1impl__IZ
       OpenDDS::DCPS::TransportImpl_rch transport =
         TheTransportFactory->create_transport_impl (id, auto_configure);
       jclass implClazz =
-        jni->FindClass ("OpenDDS/DCPS/transport/TransportImpl");
+        findClass (jni, "OpenDDS/DCPS/transport/TransportImpl");
       jmethodID ctor = jni->GetMethodID (implClazz, "<init>", "(J)V");
       return jni->NewObject (implClazz, ctor,
         reinterpret_cast<jlong> (transport._retn ()));
@@ -193,7 +193,7 @@ Java_OpenDDS_DCPS_transport_TheTransportFactory_create_1transport_1impl__ILjava_
         TheTransportFactory->create_transport_impl (id, typeCxx,
           auto_configure);
       jclass implClazz =
-        jni->FindClass ("OpenDDS/DCPS/transport/TransportImpl");
+        findClass (jni, "OpenDDS/DCPS/transport/TransportImpl");
       jmethodID ctor = jni->GetMethodID (implClazz, "<init>", "(J)V");
       return jni->NewObject (implClazz, ctor,
         reinterpret_cast<jlong> (transport._retn ()));
@@ -361,22 +361,22 @@ jobject get_or_create_impl (JNIEnv *jni, jint id, const ACE_TString &typeCxx)
   jclass clazz_specific = 0;
   if (typeCxx == TcpConfig::configName)
     {
-      clazz_specific = jni->FindClass (TcpConfig::jclassName);
+      clazz_specific = findClass (jni, TcpConfig::jclassName);
       loadLibIfNeeded (TcpConfig::svcName, TcpConfig::svcConfDir);
     }
   else if (typeCxx == RMcastConfig::configName)
     {
-      clazz_specific = jni->FindClass (RMcastConfig::jclassName);
+      clazz_specific = findClass (jni, RMcastConfig::jclassName);
       loadLibIfNeeded (RMcastConfig::svcName, RMcastConfig::svcConfDir);
     }
   else if (typeCxx == UdpConfig::configName)
     {
-      clazz_specific = jni->FindClass (UdpConfig::jclassNameUdp);
+      clazz_specific = findClass (jni, UdpConfig::jclassNameUdp);
       loadLibIfNeeded (UdpConfig::svcName, UdpConfig::svcConfDir);
     }
   else if (typeCxx == McastConfig::configName)
     {
-      clazz_specific = jni->FindClass (McastConfig::jclassName);
+      clazz_specific = findClass (jni, McastConfig::jclassName);
       loadLibIfNeeded (McastConfig::svcName, McastConfig::svcConfDir);
     }
   //unknown type, let OpenDDS find out and throw its exception from get_or_...
@@ -388,12 +388,12 @@ jobject get_or_create_impl (JNIEnv *jni, jint id, const ACE_TString &typeCxx)
   jobject jConf = jni->NewObject (clazz_specific, mid_ctor, id);
 
   // Configure common properties (TransportConfiguration)
-  jclass clazz_tc = jni->FindClass (BaseConfig::jclassName);
+  jclass clazz_tc = findClass (jni, BaseConfig::jclassName);
   toJava (jni, clazz_tc, *tc.in (), jConf, BaseConfig::fields);
   //   private ThreadSynchStrategy sendThreadStrategy;
   {
     ThreadSynchStrategy *tss = tc->send_thread_strategy ();
-    jclass enumClazz = jni->FindClass (BaseConfig::strategyClass);
+    jclass enumClazz = findClass (jni, BaseConfig::strategyClass);
     jfieldID enumFid;
     if (dynamic_cast<PerConnectionSynchStrategy *> (tss))
       {
@@ -496,7 +496,7 @@ jobject JNICALL Java_OpenDDS_DCPS_transport_TransportImpl_attach_1to_1publisher
   OpenDDS::DCPS::PublisherImpl *pub_impl =
     dynamic_cast<OpenDDS::DCPS::PublisherImpl *> (pub.in ());
   OpenDDS::DCPS::AttachStatus stat = pub_impl->attach_transport (ti);
-  jclass clazz = jni->FindClass ("OpenDDS/DCPS/transport/AttachStatus");
+  jclass clazz = findClass (jni, "OpenDDS/DCPS/transport/AttachStatus");
   jmethodID mid = jni->GetStaticMethodID (clazz, "from_int",
                     "(I)LOpenDDS/DCPS/transport/AttachStatus;");
   return jni->CallStaticObjectMethod (clazz, mid, static_cast<jint> (stat));
@@ -512,7 +512,7 @@ jobject JNICALL Java_OpenDDS_DCPS_transport_TransportImpl_attach_1to_1subscriber
   OpenDDS::DCPS::SubscriberImpl *sub_impl =
     dynamic_cast<OpenDDS::DCPS::SubscriberImpl *> (sub.in ());
   OpenDDS::DCPS::AttachStatus stat = sub_impl->attach_transport (ti);
-  jclass clazz = jni->FindClass ("OpenDDS/DCPS/transport/AttachStatus");
+  jclass clazz = findClass (jni, "OpenDDS/DCPS/transport/AttachStatus");
   jmethodID mid = jni->GetStaticMethodID (clazz, "from_int",
                     "(I)LOpenDDS/DCPS/transport/AttachStatus;");
   return jni->CallStaticObjectMethod (clazz, mid, static_cast<jint> (stat));
@@ -524,7 +524,7 @@ jint config_impl (JNIEnv *jni, jobject jThis, jobject jConf)
   using namespace OpenDDS::DCPS;
   TransportImpl *ti = recoverTransportImpl (jni, jThis);
 
-  jclass clazz_tc = jni->FindClass (BaseConfig::jclassName);
+  jclass clazz_tc = findClass (jni, BaseConfig::jclassName);
   jfieldID fid_id = jni->GetFieldID (clazz_tc, "id", "I");
   jint id = jni->GetIntField (jConf, fid_id);
   TransportConfiguration_rch tc =
@@ -537,7 +537,7 @@ jint config_impl (JNIEnv *jni, jobject jThis, jobject jConf)
     jfieldID fid = jni->GetFieldID (clazz_tc, "sendThreadStrategy",
       BaseConfig::strategySig);
     jobject enumVal = jni->GetObjectField (jConf, fid);
-    jclass enumClazz = jni->FindClass (BaseConfig::strategyClass);
+    jclass enumClazz = findClass (jni, BaseConfig::strategyClass);
     jfieldID fid_pc = jni->GetStaticFieldID (enumClazz, "PER_CONNECTION_SYNCH",
       BaseConfig::strategySig);
     jobject perConnection = jni->GetStaticObjectField (enumClazz, fid_pc);
@@ -610,7 +610,7 @@ Java_OpenDDS_DCPS_transport_SimpleTcpConfiguration_saveSpecificConfig
 {
   OpenDDS::DCPS::SimpleTcpConfiguration *tc;
   narrowTransportConfig (tc, ptr);
-  jclass clazz = jni->FindClass (TcpConfig::jclassName);
+  jclass clazz = findClass (jni, TcpConfig::jclassName);
   toCxx (jni, clazz, jThis, *tc, TcpConfig::fields);
 }
 
@@ -621,7 +621,7 @@ Java_OpenDDS_DCPS_transport_SimpleTcpConfiguration_loadSpecificConfig
 {
   OpenDDS::DCPS::SimpleTcpConfiguration *tc;
   narrowTransportConfig (tc, ptr);
-  jclass clazz = jni->FindClass (TcpConfig::jclassName);
+  jclass clazz = findClass (jni, TcpConfig::jclassName);
   toJava (jni, clazz, *tc, jThis, TcpConfig::fields);
 }
 
@@ -635,7 +635,7 @@ Java_OpenDDS_DCPS_transport_ReliableMulticastConfiguration_saveSpecificConfig
 {
   OpenDDS::DCPS::ReliableMulticastTransportConfiguration *tc;
   narrowTransportConfig (tc, ptr);
-  jclass clazz = jni->FindClass (RMcastConfig::jclassName);
+  jclass clazz = findClass (jni, RMcastConfig::jclassName);
   toCxx (jni, clazz, jThis, *tc, RMcastConfig::fields);
 }
 
@@ -646,7 +646,7 @@ Java_OpenDDS_DCPS_transport_ReliableMulticastConfiguration_loadSpecificConfig
 {
   OpenDDS::DCPS::ReliableMulticastTransportConfiguration *tc;
   narrowTransportConfig (tc, ptr);
-  jclass clazz = jni->FindClass (RMcastConfig::jclassName);
+  jclass clazz = findClass (jni, RMcastConfig::jclassName);
   toJava (jni, clazz, *tc, jThis, RMcastConfig::fields);
 }
 
@@ -660,7 +660,7 @@ Java_OpenDDS_DCPS_transport_SimpleUnreliableDgramConfiguration_saveSpecificConfi
 {
   OpenDDS::DCPS::SimpleUnreliableDgramConfiguration *tc;
   narrowTransportConfig (tc, ptr);
-  jclass clazz = jni->FindClass (UdpConfig::jclassName);
+  jclass clazz = findClass (jni, UdpConfig::jclassName);
   toCxx (jni, clazz, jThis, *tc, UdpConfig::fields);
 }
 
@@ -671,7 +671,7 @@ Java_OpenDDS_DCPS_transport_SimpleUnreliableDgramConfiguration_loadSpecificConfi
 {
   OpenDDS::DCPS::SimpleUnreliableDgramConfiguration *tc;
   narrowTransportConfig (tc, ptr);
-  jclass clazz = jni->FindClass (UdpConfig::jclassName);
+  jclass clazz = findClass (jni, UdpConfig::jclassName);
   toJava (jni, clazz, *tc, jThis, UdpConfig::fields);
 }
 
@@ -685,7 +685,7 @@ Java_OpenDDS_DCPS_transport_SimpleMcastConfiguration_saveMcastConfig
 {
   OpenDDS::DCPS::SimpleMcastConfiguration *tc;
   narrowTransportConfig (tc, ptr);
-  jclass clazz = jni->FindClass (McastConfig::jclassName);
+  jclass clazz = findClass (jni, McastConfig::jclassName);
   toCxx (jni, clazz, jThis, *tc, McastConfig::fields);
 }
 
@@ -696,7 +696,7 @@ Java_OpenDDS_DCPS_transport_SimpleMcastConfiguration_loadMcastConfig
 {
   OpenDDS::DCPS::SimpleMcastConfiguration *tc;
   narrowTransportConfig (tc, ptr);
-  jclass clazz = jni->FindClass (McastConfig::jclassName);
+  jclass clazz = findClass (jni, McastConfig::jclassName);
   toJava (jni, clazz, *tc, jThis, McastConfig::fields);
 }
 
