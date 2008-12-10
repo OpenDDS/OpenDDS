@@ -1,3 +1,14 @@
+Wed Dec 10 22:57:20 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Added notes for all of the changes merged in from the JMS_PROVIDER
+          branch last Friday.
+
+        * tests/DCPS/PersistentDurability/run_test.pl:
+
+          Updated for -DCPSPersistentDurabilityDir option.
+
 Wed Dec 10 15:09:39 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/INSTALL:

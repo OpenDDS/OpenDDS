@@ -58,8 +58,7 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
     exit 1;
 }
 
-$durability_cache = "OpenDDS-durable-data-dir"; # Currently a fixed name
-                                                # is used by OpenDDS.
+$durability_cache = 'data';
 rmtree($durability_cache) if -d $durability_cache;
 
 $Publisher1->Spawn ();
