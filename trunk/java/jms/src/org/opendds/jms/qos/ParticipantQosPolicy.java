@@ -20,17 +20,21 @@ public class ParticipantQosPolicy implements QosPolicy<DomainParticipantQos> {
 
     private Properties properties;
 
-    public ParticipantQosPolicy(String value) {
-        this(PropertiesHelper.valueOf(value));
+    public ParticipantQosPolicy() {
+        this(new Properties());
     }
 
     public ParticipantQosPolicy(Properties properties) {
         this.properties = properties;
     }
 
+    public ParticipantQosPolicy(String value) {
+        this(PropertiesHelper.valueOf(value));
+    }
+
     public void setQos(DomainParticipantQos qos) {
         assert qos != null;
-        
+
         PropertiesHelper.Property property;
         PropertiesHelper helper = new PropertiesHelper(properties);
 

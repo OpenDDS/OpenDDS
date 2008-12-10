@@ -21,17 +21,21 @@ public class PublisherQosPolicy implements QosPolicy<PublisherQos> {
 
     private Properties properties;
 
-    public PublisherQosPolicy(String value) {
-        this(PropertiesHelper.valueOf(value));
+    public PublisherQosPolicy() {
+        this(new Properties());
     }
 
     public PublisherQosPolicy(Properties properties) {
         this.properties = properties;
     }
 
+    public PublisherQosPolicy(String value) {
+        this(PropertiesHelper.valueOf(value));
+    }
+
     public void setQos(PublisherQos qos) {
         assert qos != null;
-        
+
         PropertiesHelper.Property property;
         PropertiesHelper helper = new PropertiesHelper(properties);
 

@@ -24,12 +24,16 @@ public class DataWriterQosPolicy implements QosPolicy<DataWriterQos> {
 
     private Properties properties;
 
-    public DataWriterQosPolicy(String value) {
-        this(PropertiesHelper.valueOf(value));
+    public DataWriterQosPolicy() {
+        this(new Properties());
     }
 
     public DataWriterQosPolicy(Properties properties) {
         this.properties = properties;
+    }
+
+    public DataWriterQosPolicy(String value) {
+        this(PropertiesHelper.valueOf(value));
     }
 
     public void setQos(DataWriterQos qos) {
@@ -37,7 +41,7 @@ public class DataWriterQosPolicy implements QosPolicy<DataWriterQos> {
 
         PropertiesHelper.Property property;
         PropertiesHelper helper = new PropertiesHelper(properties);
-        
+
         // USER_DATA QosPolicy
         property = helper.find("USER_DATA.value");
         if (property.exists()) {
