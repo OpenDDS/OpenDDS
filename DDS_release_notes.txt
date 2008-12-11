@@ -30,6 +30,9 @@ New to this version are the following changes:
   available in $DDS_ROOT/java/jms.  JMS Topics are supported (not queuing).
   See the README in that directory for more info.
 
+- The $DDS_ROOT/bin/federation utility has been renamed to opendds_ir_ctl
+  and now supports shutting down remote a non-federated DCPSInfoRepo process.
+
 =========================================================================
 
 Version 1.2 of OpenDDS.
