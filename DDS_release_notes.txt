@@ -118,6 +118,7 @@ New to this version are the following changes:
   datalink_release_delay.
 
 - Fixed a potential deadlock in reliable multicast transport.
+
 =========================================================================
 
 Version 1.1 of OpenDDS.
