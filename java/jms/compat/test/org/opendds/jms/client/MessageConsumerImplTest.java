@@ -177,8 +177,7 @@ public class MessageConsumerImplTest {
         
         sendSomeMessages(messageProducer);
 
-// TODO Make this work again
-//        assert messageListener.getOnMessageCallCount() == 3;
+        assert messageListener.getOnMessageCallCount() == 3;
     }
 
     @Test

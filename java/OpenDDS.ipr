@@ -363,7 +363,10 @@
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_5" assert-keyword="true" jdk-15="true" project-jdk-name="1.6" project-jdk-type="JavaSDK" />
   <component name="ProjectRunConfigurationManager">
-    <configuration default="false" name="JBoss 4.2.3.GA (debug)" type="Remote" factoryName="Remote">
+    <configuration default="false" name="JBoss 4.2.2.GA" type="Remote" factoryName="Remote">
+      <log_file path="$PROJECT_DIR$/../../../opt/jboss-4.2.2.GA/server/opendds/log/server.log" checked="true" skipped="true" show_all="false" alias="server.log" />
+      <log_file path="$PROJECT_DIR$/../../../opt/jboss-4.2.2.GA/server/opendds/log/DDS.log" checked="true" skipped="true" show_all="false" alias="DDS.log" />
+      <log_file path="$PROJECT_DIR$/../../../opt/jboss-4.2.2.GA/server/opendds/log/boot.log" checked="false" skipped="true" show_all="false" alias="boot.log" />
       <option name="USE_SOCKET_TRANSPORT" value="true" />
       <option name="SERVER_MODE" value="false" />
       <option name="SHMEM_ADDRESS" value="javadebug" />

@@ -119,14 +119,14 @@ public class SessionImplTest {
         final MessageProducer producer = session.createProducer(temporaryTopic);
         assert producer != null;
 
-// TODO Make this work again.
-//        Session otherSession = otherConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-//        final MessageProducer producer2 = otherSession.createProducer(temporaryTopic);
-//        assert producer2 != null;
+        Session otherSession = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        final MessageProducer producer2 = otherSession.createProducer(temporaryTopic);
+        assert producer2 != null;
 
         producer.close();
-//        producer2.close();
+        producer2.close();
         temporaryTopic.delete();
+        otherSession.close();
     }
 
     @Test
@@ -136,18 +136,19 @@ public class SessionImplTest {
         final MessageProducer producer = session.createProducer(temporaryTopic);
         final MessageConsumer consumer = session.createConsumer(temporaryTopic);
 
+        waitFor(2000); // wait for association
+
         ObjectMessage objectMessage = session.createObjectMessage();
         assert objectMessage != null;
         objectMessage.setObject(new Integer(1024));
 
         producer.send(objectMessage);
 
-// TODO Make this work again.
-//        final Message messageReceived = consumer.receive();
-//        assert messageReceived != null;
-//        assert messageReceived instanceof ObjectMessage;
-//        ObjectMessage objectMessageReceived = (ObjectMessage) messageReceived;
-//        assert (new Integer(1024)).equals(objectMessageReceived.getObject());
+        final Message messageReceived = consumer.receive();
+        assert messageReceived != null;
+        assert messageReceived instanceof ObjectMessage;
+        ObjectMessage objectMessageReceived = (ObjectMessage) messageReceived;
+        assert (new Integer(1024)).equals(objectMessageReceived.getObject());
 
         producer.close();
         consumer.close();
@@ -166,6 +167,8 @@ public class SessionImplTest {
         final MessageProducer producer = session.createProducer(destination);
         final MessageConsumer consumer = session.createConsumer(destination);
 
+        waitFor(2000); // wait for association
+
         // Send original with JMSReplyTo header set to a temporary Topic
         final TextMessage textMessage = session.createTextMessage("Hello");
         final TemporaryTopic topic = session.createTemporaryTopic();
@@ -174,21 +177,24 @@ public class SessionImplTest {
         final MessageConsumer replyConsumer = session.createConsumer(topic);
         producer.send(textMessage);
 
+        // Receive original
+        final Message message = consumer.receive();
+        assert message != null;
+        assert message instanceof TextMessage;
+        final TextMessage textMessage2 = (TextMessage) message;
+        assert "Hello".equals(textMessage2.getText());
+
+        // Getting JMSReplyTo from received message and send reply to it
+        final Destination replyTo = textMessage2.getJMSReplyTo();
+        final MessageProducer replyProducer = session.createProducer(replyTo);
+
+        waitFor(2000); // wait for association
+        
+        textMessage2.clearBody();
+        textMessage2.setText("Goodbye");
+        replyProducer.send(textMessage2);
+
 //  TODO Make this work again.
-//        // Receive original
-//        final Message message = consumer.receive();
-//        assert message != null;
-//        assert message instanceof TextMessage;
-//        final TextMessage textMessage2 = (TextMessage) message;
-//        assert "Hello".equals(textMessage2.getText());
-//
-//        // Getting JMSReplyTo from received message and send reply to it
-//        final Destination replyTo = textMessage2.getJMSReplyTo();
-//        final MessageProducer replyProducer = session.createProducer(replyTo);
-//        textMessage2.clearBody();
-//        textMessage2.setText("Goodbye");
-//        replyProducer.send(textMessage2);
-//
 //        // Receive the reploy on the temporary topic
 //        final Message message3 = replyConsumer.receive();
 //        assert message3 != null;
@@ -196,6 +202,11 @@ public class SessionImplTest {
 //        final TextMessage textMessage3 = (TextMessage) message3;
 //        assert "Goodbye".equals(textMessage3.getText());
 
+        producer.close();
+        consumer.close();
+        replyProducer.close();
+        replyConsumer.close();
+        topic.delete();
         session.close();
     }
 
@@ -220,14 +231,10 @@ public class SessionImplTest {
 //        assert message2 != null;
 //        final Message message3 = consumer.receive();
 //        assert message3 != null;
-//
+
 //        session.recover();
 //
-//        try {
-//            Thread.sleep(1000);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
+//        waitFor(1000);
 //
 //        final Message message4 = consumer.receive();
 //        assert message4 != null;
@@ -239,10 +246,12 @@ public class SessionImplTest {
 //        assert message6 != null;
 //        assert message6.getJMSRedelivered();
 
+        producer.close();
+        consumer.close();
         session.close();
     }
 
-//    @Test
+    @Test
     public void recoverAsync() throws JMSException {
         Session session = connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
         final MessageProducer producer = session.createProducer(destination);
@@ -250,11 +259,7 @@ public class SessionImplTest {
         MyMessageListener myMessageListener = new MyMessageListener();
         consumer.setMessageListener(myMessageListener);
 
-        try {
-            Thread.sleep(1000); // Let the listener settle in
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        waitFor(1000);
 
         final TextMessage textMessage = session.createTextMessage("Hello");
         producer.send(textMessage);
@@ -292,11 +297,11 @@ public class SessionImplTest {
 //        assert texts.contains("Hello");
 //        assert texts.contains("Hello Again");
 //        assert texts.contains("Goodbye");
-
+//
 //        session.close();
     }
 
-//    @Test
+    @Test
     public void close() throws JMSException {
         final MessageProducer producer = session.createProducer(destination);
         final MessageConsumer consumer = session.createConsumer(destination);
