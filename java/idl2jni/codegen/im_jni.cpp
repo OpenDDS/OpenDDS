@@ -1064,7 +1064,7 @@ namespace
           << "JavaPeer::" << opname_cxx << " (" << tao_args << ")\n"
           "  " << exception_spec << "\n"
           "{\n"
-          "  JNIThreadAttacher _jta (jvm_);\n"
+          "  JNIThreadAttacher _jta (jvm_, cl_);\n"
           "  JNIEnv *_jni = _jta.getJNI ();\n"
           << tao_argconv_in <<
           "  jclass _clazz = _jni->GetObjectClass (globalCallback_);\n"

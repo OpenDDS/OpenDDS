@@ -1,3 +1,20 @@
+Thu Dec 11 15:32:00 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/idl2jni/codegen/im_jni.cpp:
+        * java/idl2jni/runtime/idl2jni_BaseJavaPeer.h:
+        * java/idl2jni/runtime/idl2jni_runtime.h:
+        * java/idl2jni/runtime/idl2jni_runtime.cpp:
+        * java/idl2jni/runtime/idl2jni_runtime.mpc:
+        * java/jms/src/org/opendds/jms/common/util/NativeLoader.java:
+
+          Updated findClass to use the context class loader; JNITHreadAttacher
+          also updates the current thread's context class loader on attach.
+
+        * java/idl2jni/runtime/i2jrt/Runtime.java:
+        * java/idl2jni/runtime/i2jrt_Runtime.cpp:
+
+          Removed these files.
+
 Thu Dec 11 00:58:14 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * DDS_release_notes.txt:
