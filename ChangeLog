@@ -1,3 +1,10 @@
+Thu Dec 11 18:18:09 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/FileSystemStorage.cpp:
+
+          In the Win32-specific code, set errno when a directory-open
+          operation fails.
+
 Thu Dec 11 16:10:17 UTC 2008  Weiqi Gao  <gaow@ociweb.com>
 
         * java/jms/compat/test/org/opendds/jms/client/MessageConsumerImplTest.java:

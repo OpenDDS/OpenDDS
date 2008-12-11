@@ -281,9 +281,16 @@ int DDS_Dirent::open(const ACE_TCHAR* path)
 
    // Check if filename is a directory.
   DWORD fileAttribute = ::GetFileAttributesW(filename);
-   if (fileAttribute == INVALID_FILE_ATTRIBUTES
-       || !(fileAttribute & FILE_ATTRIBUTE_DIRECTORY))
-     return -1;
+  if (fileAttribute == INVALID_FILE_ATTRIBUTES)
+    {
+      ACE_OS::set_errno_to_last_error();
+      return -1;
+    }
+  if (!(fileAttribute & FILE_ATTRIBUTE_DIRECTORY))
+    {
+      errno = ENOTDIR;
+      return -1;
+    }
 
   size_t const lastchar = ACE_OS::strlen(filename);
   if (lastchar > 0)
