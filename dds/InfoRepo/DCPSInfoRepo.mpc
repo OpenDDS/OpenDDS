@@ -1,4 +1,4 @@
-project(*InfoRepoLib): dcps, iortable, DCPSInfoRepo_bits, svc_utils {
+project(*InfoRepoLib): dcps, iortable, DCPSInfoRepo_bits, imr_client, svc_utils {
   sharedname = InfoRepoLib
   dynamicflags = OPENDDS_INFOREPOLIB_BUILD_DLL
   libout     = $(DDS_ROOT)/lib
@@ -33,7 +33,7 @@ project(*InfoRepoLib): dcps, iortable, DCPSInfoRepo_bits, svc_utils {
 }
 
 
-project(*DCPSInfoRepoServ): dcps, iortable, DCPSInfoRepo_bits, svc_utils {
+project(*DCPSInfoRepoServ): dcps, iortable, DCPSInfoRepo_bits, imr_client, svc_utils {
   sharedname = DCPSInfoRepoServ
   dynamicflags = OPENDDS_DCPSINFOREPOSERV_BUILD_DLL
   libout     = $(DDS_ROOT)/lib
@@ -111,7 +111,7 @@ project(*Federator): dcps, dcps_tcp, iortable {
 }
 
 
-project(*InfoRepo): dcpsexe, iortable, DCPSInfoRepo_bits, svc_utils {
+project(*InfoRepo): dcpsexe, iortable, DCPSInfoRepo_bits, imr_client, svc_utils {
   exename = DCPSInfoRepo
   exeout  = $(DDS_ROOT)/bin
 

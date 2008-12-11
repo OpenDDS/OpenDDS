@@ -1,3 +1,9 @@
+Thu Dec 11 00:46:26 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+
+          Re-added imr_client dependency (required for static builds).
+
 Wed Dec 10 22:57:20 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * DDS_release_notes.txt:
