@@ -7,9 +7,9 @@ package org.opendds.jms;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionConsumer;
@@ -27,6 +27,7 @@ import DDS.Publisher;
 import DDS.Subscriber;
 
 import org.opendds.jms.common.Version;
+import org.opendds.jms.common.lang.Objects;
 import org.opendds.jms.common.lang.Strings;
 import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.persistence.PersistenceManager;
@@ -196,7 +197,9 @@ public class ConnectionImpl implements Connection {
         synchronized (tempTopics) {
             tempTopics.add(topic);
         }
-        logger.debug("Created %s", topic);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Created %s [%s]", Objects.toString(topic), topic);
+        }
 
         return topic;
     }
@@ -230,7 +233,7 @@ public class ConnectionImpl implements Connection {
             durableSubscriptions.remove(name);
         }
     }
-    
+
     void unregisterDurableSubscription(String name) {
         synchronized(lockForurableSubscriptions) {
             durableSubscriptions.put(name, null);

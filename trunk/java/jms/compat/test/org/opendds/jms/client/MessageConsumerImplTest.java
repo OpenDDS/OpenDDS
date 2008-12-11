@@ -162,8 +162,6 @@ public class MessageConsumerImplTest {
 
         MessageProducer messageProducer = session.createProducer(destination);
 
-        waitFor(2500); // wait for association
-
         MyMessageListener messageListener = new MyMessageListener();
         messageConsumer.setMessageListener(messageListener);
         assert messageListener == messageConsumer.getMessageListener();
@@ -174,8 +172,10 @@ public class MessageConsumerImplTest {
         messageConsumer.setMessageListener(messageListener);
 
         waitFor(2500); // wait for listener registration
-        
+
         sendSomeMessages(messageProducer);
+
+        waitFor(2500); // wait for listener callbacks
 
         assert messageListener.getOnMessageCallCount() == 3;
     }
