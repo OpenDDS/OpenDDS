@@ -116,12 +116,14 @@ void copyToCxx (JNIEnv *jni,
 }
 #endif
 
+idl2jni_runtime_Export
+jobject currentThread(JNIEnv *);
 
 idl2jni_runtime_Export
-jobject getClassLoader();
+jobject getContextClassLoader(JNIEnv *);
 
 idl2jni_runtime_Export
-void setClassLoader(JNIEnv *, jobject);
+void setContextClassLoader(JNIEnv *, jobject);
 
 idl2jni_runtime_Export
 jclass findClass(JNIEnv *, const char *);
@@ -295,14 +297,16 @@ class idl2jni_runtime_Export JNIThreadAttacher
 {
 public:
 
-  explicit JNIThreadAttacher (JavaVM *jvm)
+  explicit JNIThreadAttacher (JavaVM *jvm, jobject cl = 0)
     : jvm_ (jvm)
     , jni_ (0)
   {
     if (jvm_->AttachCurrentThread (reinterpret_cast<void **> (&jni_), 0) != 0)
-     {
+      {
        // TODO failure
-     }
+      }
+
+    if (cl != 0) setContextClassLoader (jni_, cl);
   }
 
   ~JNIThreadAttacher ()

@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
-import i2jrt.Runtime;
-
 import org.opendds.jms.common.io.Files;
 import org.opendds.jms.common.io.Streams;
 import org.opendds.jms.common.lang.ClassLoaders;
@@ -26,13 +24,9 @@ public class NativeLoader {
     private static Logger logger = Logger.getLogger(NativeLoader.class);
 
     public static void bootstrap() {
-        // Set runtime ClassLoader for native threads
-        Runtime.setClassLoader(ClassLoaders.getContextLoader());
-
-        // Extract native libraries
+        PropertiesHelper.Property property;
         PropertiesHelper helper = PropertiesHelper.getSystemPropertiesHelper();
 
-        PropertiesHelper.Property property;
         property = helper.find("opendds.native.load");
         if (property.exists() && property.asBoolean()) {
             property = helper.require("opendds.native.dir");
@@ -57,7 +51,7 @@ public class NativeLoader {
     private List<File> loadedLibs =
         new ArrayList<File>();
 
-    protected NativeLoader(String dirName) throws IOException {
+    public NativeLoader(String dirName) throws IOException {
         nativeDir = Files.verifyDirectory(dirName);
         logger.debug("Using native directory: %s", nativeDir.getAbsolutePath());
     }
