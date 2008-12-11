@@ -1,3 +1,10 @@
+Thu Dec 11 16:10:17 UTC 2008  Weiqi Gao  <gaow@ociweb.com>
+
+        * java/jms/compat/test/org/opendds/jms/client/MessageConsumerImplTest.java:
+        * java/jms/compat/test/org/opendds/jms/client/SessionImplTest.java:
+
+          Fixed some functional tests.
+
 Thu Dec 11 15:32:00 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/idl2jni/codegen/im_jni.cpp:
