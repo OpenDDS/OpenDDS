@@ -1,3 +1,10 @@
+Thu Dec 11 18:32:13 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/idl2jni/runtime/idl2jni_runtime.h:
+
+          Added exception for condition where native thread is unable to attach
+          to the JVM. Fixed void ** cast warning in GCC 4.1.x.
+
 Thu Dec 11 18:18:09 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/FileSystemStorage.cpp:
