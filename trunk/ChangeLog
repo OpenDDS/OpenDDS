@@ -1,3 +1,9 @@
+Thu Dec 11 00:58:14 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Added release note about opendds_ir_ctl changes.
+
 Thu Dec 11 00:46:26 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.mpc:
