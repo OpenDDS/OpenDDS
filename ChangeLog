@@ -1,3 +1,15 @@
+Thu Dec 11 23:16:48 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/OpenDDS.ipr:
+        * java/jms/compat/src/META-INF/service/opendds-inforepo-ds.xml:
+        * java/jms/compat/test/org/opendds/jms/client/MessageConsumerImplTest.java:
+        * java/jms/src/org/opendds/jms/ConnectionImpl.java:
+        * java/jms/src/org/opendds/jms/TopicImpl.java:
+        * java/jms/src/org/opendds/jms/common/lang/Objects.java:
+        * java/jms/src/org/opendds/jms/common/util/Logger.java:
+
+          Fixed compat test failures.
+
 Thu Dec 11 22:24:07 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/FileSystemStorage.cpp:

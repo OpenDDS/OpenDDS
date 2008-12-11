@@ -85,6 +85,6 @@ public class TopicImpl implements Serializable, Topic {
 
     @Override
     public String toString() {
-        return String.format("%s [%s]", super.toString(), topicName);
+        return getTopicName();
     }
 }

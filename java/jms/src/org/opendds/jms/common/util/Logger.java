@@ -1,7 +1,7 @@
 /*
  * $Id$
  */
- 
+
 package org.opendds.jms.common.util;
 
 import java.util.Arrays;
@@ -33,74 +33,90 @@ public class Logger {
         this.log = log;
     }
 
+    public boolean isDebugEnabled() {
+        return log.isDebugEnabled();
+    }
+
     public void debug(String message, Object... args) {
-        if (log.isDebugEnabled()) {
+        if (isDebugEnabled()) {
             log.debug(String.format(message, args));
         }
     }
 
     public void debug(String message, String[] args) {
-        if (log.isDebugEnabled()) {
+        if (isDebugEnabled()) {
             debug(message, Arrays.deepToString(args));
         }
     }
 
     public void debug(String message, Throwable cause) {
-        if (log.isDebugEnabled()) {
+        if (isDebugEnabled()) {
             log.debug(message, cause);
         }
     }
 
+    public boolean isInfoEnabled() {
+        return log.isInfoEnabled();
+    }
+
     public void info(String message, Object... args) {
-        if (log.isInfoEnabled()) {
+        if (isInfoEnabled()) {
             log.info(String.format(message, args));
         }
     }
 
     public void info(String message, String[] args) {
-        if (log.isInfoEnabled()) {
+        if (isInfoEnabled()) {
             info(message, Arrays.deepToString(args));
         }
     }
 
     public void info(String message, Throwable cause) {
-        if (log.isInfoEnabled()) {
+        if (isInfoEnabled()) {
             log.info(message, cause);
         }
     }
 
+    public boolean isErrorEnabled() {
+        return log.isErrorEnabled();
+    }
+
     public void error(String message, Object... args) {
-        if (log.isErrorEnabled()) {
+        if (isErrorEnabled()) {
             log.error(String.format(message, args));
         }
     }
 
     public void error(String message, String[] args) {
-        if (log.isErrorEnabled()) {
+        if (isErrorEnabled()) {
             error(message, Arrays.deepToString(args));
         }
     }
 
     public void error(String message, Throwable cause) {
-        if (log.isErrorEnabled()) {
+        if (isErrorEnabled()) {
             log.error(message, cause);
         }
     }
 
+    public boolean isWarnEnabled() {
+        return log.isWarnEnabled();
+    }
+
     public void warn(String message, Object... args) {
-        if (log.isWarnEnabled()) {
+        if (isWarnEnabled()) {
             log.warn(String.format(message, args));
         }
     }
 
     public void warn(String message, String[] args) {
-        if (log.isWarnEnabled()) {
+        if (isWarnEnabled()) {
             warn(message, Arrays.deepToString(args));
         }
     }
 
     public void warn(String message, Throwable cause) {
-        if (log.isWarnEnabled()) {
+        if (isWarnEnabled()) {
             log.warn(message, cause);
         }
     }

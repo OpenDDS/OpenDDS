@@ -6,6 +6,7 @@ package org.opendds.jms.common.lang;
 
 /**
  * @author  Weiqi Gao
+ * @author  Steven Stallion
  * @version $Revision$
  */
 public class Objects {
@@ -29,8 +30,19 @@ public class Objects {
                 value ^= o.hashCode();
             }
         }
-
         return value;
+    }
+
+    public static String toString(Object o) {
+        assert o != null;
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(o.getClass().getName());
+        sb.append('@');
+        sb.append(Integer.toHexString(o.hashCode()));
+
+        return sb.toString();
     }
 
     //
