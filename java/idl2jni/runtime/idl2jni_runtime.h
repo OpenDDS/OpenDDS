@@ -116,6 +116,7 @@ void copyToCxx (JNIEnv *jni,
 }
 #endif
 
+
 idl2jni_runtime_Export
 jobject currentThread(JNIEnv *);
 
@@ -301,11 +302,12 @@ public:
     : jvm_ (jvm)
     , jni_ (0)
   {
-    if (jvm_->AttachCurrentThread (reinterpret_cast<void **> (&jni_), 0) != 0)
+    void *jni;
+    if (jvm_->AttachCurrentThread (&jni, 0) != 0)
       {
-       // TODO failure
+	throw std::exception ();
       }
-
+    jni_ = reinterpret_cast<JNIEnv *> (jni);
     if (cl != 0) setContextClassLoader (jni_, cl);
   }
 
