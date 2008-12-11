@@ -614,7 +614,8 @@ Directory::Ptr Directory::make_new_subdir(const ACE_TString& t_name)
         "name as an existing file.");
     }
 
-  ACE_TString logical(t_name.c_str(), FSS_MAX_FILE_NAME);
+  ACE_TString logical(t_name.c_str(),
+                      (std::min)(FSS_MAX_FILE_NAME, t_name.length()));
   ACE_TString phys_prefix = add_entry();
   ACE_TString phys_base = b32h_encode(logical.c_str());
   if (t_name.length() >= FSS_MAX_FILE_NAME)
