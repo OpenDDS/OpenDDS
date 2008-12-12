@@ -139,7 +139,7 @@
 
         <antjms target="rar"/> <!-- ensure RAR is built -->
 
-        <echo message="[setup] Starting DCPSInfoRepo under ${env.DDS_ROOT}"/>
+        <echo message="[setup] Starting DCPSInfoRepo in ${env.DDS_ROOT}"/>
         <exec executable="${env.DDS_ROOT}/bin/DCPSInfoRepo" spawn="true">
             <arg line="-ORBListenEndpoints iiop://:6666"/>
             <arg line="-ORBSvcConf ${conf.dir}/tcp.conf"/>
@@ -148,7 +148,7 @@
     </target>
 
     <target name="teardown">
-        <echo message="[teardown] Stopping DCPSInfoRepo under ${env.DDS_ROOT}"/>
+        <echo message="[teardown] Stopping DCPSInfoRepo in ${env.DDS_ROOT}"/>
         <exec executable="${env.DDS_ROOT}/bin/opendds_ir_ctl">
             <arg line="kill localhost:6666"/>
         </exec>

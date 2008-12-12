@@ -1,3 +1,10 @@
+Fri Dec 12 05:39:25 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/compat/build.xml:
+        * java/jms/compat/test/org/opendds/jms/MessageConsumerImplTest.java:
+
+          Updated build output; Fixed MessageConsumerImplTest.java.
+
 Fri Dec 12 05:24:56 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/compat/src/META-INF/service/opendds-ir-ds.xml:
@@ -7,7 +14,7 @@ Fri Dec 12 05:24:56 UTC 2008  Steven Stallion  <stallions@ociweb.com>
         * java/jms/compat/test/org/opendds/jms/SessionImplTest.java:
 
           Package refactorings.
-        
+
         * java/jms/compat/src/META-INF/service/opendds-inforepo-ds.xml:
         * java/jms/compat/test/org/opendds/jms/client/AbstractMessageImplTest.java:
         * java/jms/compat/test/org/opendds/jms/client/MessageConsumerImplTest.java:
