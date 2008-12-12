@@ -1,3 +1,15 @@
+Fri Dec 12 00:46:41 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/OpenDDS.ipr:
+        * java/jms/compat/test/org/opendds/jms/client/MessageConsumerImplTest.java:
+        * java/jms/src/org/opendds/jms/DataWriterPair.java:
+        * java/jms/src/org/opendds/jms/MessageConsumerImpl.java:
+        * java/jms/src/org/opendds/jms/MessageProducerImpl.java:
+        * java/jms/src/org/opendds/jms/qos/QosPolicies.java:
+
+          More fixes to tests. Corrected default QoS behavior in
+          MessageConsumerImpl and MessageProducerImpl.
+
 Thu Dec 11 23:16:48 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/OpenDDS.ipr:

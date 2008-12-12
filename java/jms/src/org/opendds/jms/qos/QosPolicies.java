@@ -4,6 +4,8 @@
 
 package org.opendds.jms.qos;
 
+import DDS.DataReaderQos;
+import DDS.DataWriterQos;
 import DDS.DeadlineQosPolicy;
 import DDS.DestinationOrderQosPolicy;
 import DDS.DestinationOrderQosPolicyKind;
@@ -22,24 +24,67 @@ import DDS.LivelinessQosPolicy;
 import DDS.LivelinessQosPolicyKind;
 import DDS.OwnershipQosPolicy;
 import DDS.OwnershipQosPolicyKind;
+import DDS.OwnershipStrengthQosPolicy;
 import DDS.PartitionQosPolicy;
 import DDS.PresentationQosPolicy;
 import DDS.PresentationQosPolicyAccessScopeKind;
 import DDS.PublisherQos;
+import DDS.ReaderDataLifecycleQosPolicy;
 import DDS.ReliabilityQosPolicy;
 import DDS.ReliabilityQosPolicyKind;
 import DDS.ResourceLimitsQosPolicy;
 import DDS.SubscriberQos;
+import DDS.TimeBasedFilterQosPolicy;
 import DDS.TopicDataQosPolicy;
 import DDS.TopicQos;
 import DDS.TransportPriorityQosPolicy;
 import DDS.UserDataQosPolicy;
+import DDS.WriterDataLifecycleQosPolicy;
 
 /**
  * @author  Steven Stallion
  * @version $Revision$
  */
 public class QosPolicies {
+
+    public static DataReaderQos newDataReaderQos() {
+        DataReaderQos qos = new DataReaderQos();
+
+        qos.deadline = newDeadlineQosPolicy();
+        qos.destination_order = newDestinationOrderQosPolicy();
+        qos.durability = newDurabilityQosPolicy();
+        qos.history = newHistoryQosPolicy();
+        qos.latency_budget = newLatencyBudgetQosPolicy();
+        qos.liveliness = newLivelinessQosPolicy();
+        qos.reader_data_lifecycle = newReaderDataLifecycleQosPolicy();
+        qos.reliability = newReliabilityQosPolicy();
+        qos.resource_limits = newResourceLimitsQosPolicy();
+        qos.time_based_filter = newTimeBasedFilterQosPolicy();
+        qos.user_data = newUserDataQosPolicy();
+
+        return qos;
+    }
+
+    public static DataWriterQos newDataWriterQos() {
+        DataWriterQos qos = new DataWriterQos();
+
+        qos.deadline = newDeadlineQosPolicy();
+        qos.destination_order = newDestinationOrderQosPolicy();
+        qos.durability = newDurabilityQosPolicy();
+        qos.durability_service = newDurabilityServiceQosPolicy();
+        qos.history = newHistoryQosPolicy();
+        qos.latency_budget = newLatencyBudgetQosPolicy();
+        qos.lifespan = newLifespanQosPolicy();
+        qos.liveliness = newLivelinessQosPolicy();
+        qos.ownership_strength = newOwnershipStrengthQosPolicy();
+        qos.reliability = newReliabilityQosPolicy();
+        qos.resource_limits = newResourceLimitsQosPolicy();
+        qos.transport_priority = newTransportPriorityQosPolicy();
+        qos.user_data = newUserDataQosPolicy();
+        qos.writer_data_lifecycle = newWriterDataLifecycleQosPolicy();
+
+        return qos;
+    }
 
     public static DeadlineQosPolicy newDeadlineQosPolicy() {
         DeadlineQosPolicy policy = new DeadlineQosPolicy();
@@ -128,13 +173,17 @@ public class QosPolicies {
         return policy;
     }
 
+    public static OwnershipStrengthQosPolicy newOwnershipStrengthQosPolicy() {
+        return new OwnershipStrengthQosPolicy();
+    }
+
     public static DomainParticipantQos newParticipantQos() {
-        DomainParticipantQos policy = new DomainParticipantQos();
+        DomainParticipantQos qos = new DomainParticipantQos();
 
-        policy.entity_factory = newEntityFactoryQosPolicy();
-        policy.user_data = newUserDataQosPolicy();
+        qos.entity_factory = newEntityFactoryQosPolicy();
+        qos.user_data = newUserDataQosPolicy();
 
-        return policy;
+        return qos;
     }
 
     public static PartitionQosPolicy newPartitionQosPolicy() {
@@ -154,12 +203,20 @@ public class QosPolicies {
     }
 
     public static PublisherQos newPublisherQos() {
-        PublisherQos policy = new PublisherQos();
+        PublisherQos qos = new PublisherQos();
 
-        policy.entity_factory = newEntityFactoryQosPolicy();
-        policy.group_data = newGroupDataQosPolicy();
-        policy.partition = newPartitionQosPolicy();
-        policy.presentation = newPresentationQosPolicy();
+        qos.entity_factory = newEntityFactoryQosPolicy();
+        qos.group_data = newGroupDataQosPolicy();
+        qos.partition = newPartitionQosPolicy();
+        qos.presentation = newPresentationQosPolicy();
+
+        return qos;
+    }
+
+    public static ReaderDataLifecycleQosPolicy newReaderDataLifecycleQosPolicy() {
+        ReaderDataLifecycleQosPolicy policy = new ReaderDataLifecycleQosPolicy();
+
+        policy.autopurge_nowriter_samples_delay = new Duration_t();
 
         return policy;
     }
@@ -177,6 +234,14 @@ public class QosPolicies {
         return new ResourceLimitsQosPolicy();
     }
 
+    public static TimeBasedFilterQosPolicy newTimeBasedFilterQosPolicy() {
+        TimeBasedFilterQosPolicy policy = new TimeBasedFilterQosPolicy();
+
+        policy.minimum_separation = new Duration_t();
+
+        return policy;
+    }
+
     public static TopicDataQosPolicy newTopicDataQosPolicy() {
         TopicDataQosPolicy policy = new TopicDataQosPolicy();
 
@@ -186,34 +251,34 @@ public class QosPolicies {
     }
 
     public static SubscriberQos newSubscriberQos() {
-        SubscriberQos policy = new SubscriberQos();
+        SubscriberQos qos = new SubscriberQos();
 
-        policy.entity_factory = newEntityFactoryQosPolicy();
-        policy.group_data = newGroupDataQosPolicy();
-        policy.partition = newPartitionQosPolicy();
-        policy.presentation = newPresentationQosPolicy();
+        qos.entity_factory = newEntityFactoryQosPolicy();
+        qos.group_data = newGroupDataQosPolicy();
+        qos.partition = newPartitionQosPolicy();
+        qos.presentation = newPresentationQosPolicy();
 
-        return policy;
+        return qos;
     }
 
     public static TopicQos newTopicQos() {
-        TopicQos policy = new TopicQos();
+        TopicQos qos = new TopicQos();
 
-        policy.deadline = newDeadlineQosPolicy();
-        policy.destination_order = newDestinationOrderQosPolicy();
-        policy.durability = newDurabilityQosPolicy();
-        policy.durability_service = newDurabilityServiceQosPolicy();
-        policy.history = newHistoryQosPolicy();
-        policy.latency_budget = newLatencyBudgetQosPolicy();
-        policy.lifespan = newLifespanQosPolicy();
-        policy.liveliness = newLivelinessQosPolicy();
-        policy.ownership = newOwnershipQosPolicy();
-        policy.reliability = newReliabilityQosPolicy();
-        policy.resource_limits = newResourceLimitsQosPolicy();
-        policy.topic_data = newTopicDataQosPolicy();
-        policy.transport_priority = newTransportPriorityQosPolicy();
+        qos.deadline = newDeadlineQosPolicy();
+        qos.destination_order = newDestinationOrderQosPolicy();
+        qos.durability = newDurabilityQosPolicy();
+        qos.durability_service = newDurabilityServiceQosPolicy();
+        qos.history = newHistoryQosPolicy();
+        qos.latency_budget = newLatencyBudgetQosPolicy();
+        qos.lifespan = newLifespanQosPolicy();
+        qos.liveliness = newLivelinessQosPolicy();
+        qos.ownership = newOwnershipQosPolicy();
+        qos.reliability = newReliabilityQosPolicy();
+        qos.resource_limits = newResourceLimitsQosPolicy();
+        qos.topic_data = newTopicDataQosPolicy();
+        qos.transport_priority = newTransportPriorityQosPolicy();
 
-        return policy;
+        return qos;
     }
 
     public static TransportPriorityQosPolicy newTransportPriorityQosPolicy() {
@@ -226,6 +291,10 @@ public class QosPolicies {
         policy.value = new byte[0];
 
         return policy;
+    }
+
+    public static WriterDataLifecycleQosPolicy newWriterDataLifecycleQosPolicy() {
+        return new WriterDataLifecycleQosPolicy();
     }
 
     //

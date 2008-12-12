@@ -18,12 +18,10 @@ import DDS.ALIVE_INSTANCE_STATE;
 import DDS.ANY_INSTANCE_STATE;
 import DDS.ANY_SAMPLE_STATE;
 import DDS.ANY_VIEW_STATE;
-import DDS.DATAREADER_QOS_DEFAULT;
 import DDS.DATA_AVAILABLE_STATUS;
 import DDS.DURATION_INFINITY_NSEC;
 import DDS.DURATION_INFINITY_SEC;
 import DDS.DataReader;
-import DDS.DataReaderQos;
 import DDS.DataReaderQosHolder;
 import DDS.Duration_t;
 import DDS.GuardCondition;
@@ -49,6 +47,7 @@ import static org.opendds.jms.ConsumerMessageFactory.buildMessageFromPayload;
 import org.opendds.jms.common.lang.Strings;
 import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.qos.DataReaderQosPolicy;
+import org.opendds.jms.qos.QosPolicies;
 
 /**
  * @author Weiqi Gao
@@ -110,14 +109,13 @@ public class MessageConsumerImpl implements MessageConsumer {
         DDS.Topic ddsTopic = extractDDSTopicFromDestination(destination);
         DataReaderQosPolicy dataReaderQosPolicy = ((TopicImpl) destination).getDataReaderQosPolicy();
 
-        DataReaderQosHolder qosHolder = new DataReaderQosHolder(DATAREADER_QOS_DEFAULT.get());
-        subscriber.get_default_datareader_qos(qosHolder);
+        DataReaderQosHolder holder =
+            new DataReaderQosHolder(QosPolicies.newDataReaderQos());
+        subscriber.get_default_datareader_qos(holder);
 
-        DataReaderQos readerQos = qosHolder.value;
-        dataReaderQosPolicy.setQos(readerQos);
+        dataReaderQosPolicy.setQos(holder.value);
 
-        DataReader reader = subscriber.create_datareader(ddsTopic, readerQos, null);
-
+        DataReader reader = subscriber.create_datareader(ddsTopic, holder.value, null);
         logger.debug("Created %s %s", reader, dataReaderQosPolicy);
 
         return MessagePayloadDataReaderHelper.narrow(reader);

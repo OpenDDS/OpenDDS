@@ -13,10 +13,8 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageProducer;
 
-import DDS.DATAWRITER_QOS_DEFAULT;
 import DDS.DURATION_INFINITY_NSEC;
 import DDS.DURATION_INFINITY_SEC;
-import DDS.DataWriterQos;
 import DDS.DataWriterQosHolder;
 import DDS.HANDLE_NIL;
 import OpenDDS.JMS.MessagePayload;
@@ -24,6 +22,7 @@ import OpenDDS.JMS.MessagePayloadDataWriter;
 
 import org.opendds.jms.common.lang.Objects;
 import org.opendds.jms.common.lang.Strings;
+import org.opendds.jms.qos.QosPolicies;
 
 /**
  * @author  Weiqi Gao
@@ -214,17 +213,16 @@ public class MessageProducerImpl implements MessageProducer {
     }
 
     private void manipulateDataWriterQoS(MessagePayloadDataWriter dataWriter, long timeToLive) {
-        DataWriterQosHolder qosHolder = new DataWriterQosHolder(DATAWRITER_QOS_DEFAULT.get());
-        dataWriter.get_qos(qosHolder);
-        final DataWriterQos qos = qosHolder.value;
+        DataWriterQosHolder holder = new DataWriterQosHolder(QosPolicies.newDataWriterQos());
+        dataWriter.get_qos(holder);
         if (timeToLive == 0L) {
-            qos.lifespan.duration.sec = DURATION_INFINITY_SEC.value;
-            qos.lifespan.duration.nanosec = DURATION_INFINITY_NSEC.value;
+            holder.value.lifespan.duration.sec = DURATION_INFINITY_SEC.value;
+            holder.value.lifespan.duration.nanosec = DURATION_INFINITY_NSEC.value;
         } else {
-            qos.lifespan.duration.sec = (int) timeToLive / 1000;
-            qos.lifespan.duration.nanosec = ((int) (timeToLive % 1000)) * 1000000;
+            holder.value.lifespan.duration.sec = (int) timeToLive / 1000;
+            holder.value.lifespan.duration.nanosec = ((int) (timeToLive % 1000)) * 1000000;
         }
-        dataWriter.set_qos(qos);
+        dataWriter.set_qos(holder.value);
     }
 
     private void writeDataWithDataWriter(Message message, MessagePayloadDataWriter dataWriter) {
