@@ -128,7 +128,7 @@ namespace OpenDDS
         OpenDDS::DCPS::AttachStatus attach (DDS::Publisher_ptr pub);
                                                      
         /// Called by the application to attach this transport to a subscriber.
-        OpenDDS::DCPS::AttachStatus attach (DDS::Subscriber_ptr pub);
+        OpenDDS::DCPS::AttachStatus attach (DDS::Subscriber_ptr sub);
                                                      
 
       protected:
