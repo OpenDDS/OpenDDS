@@ -1,3 +1,15 @@
+Fri Dec 12 23:33:38 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+
+          Fixed a typo.
+
+        * java/build_scripts/jms_scoreboard.pl:
+
+          Added this new script which builds or tests the java/jms subtree
+          with one command, with test output that is compatible with the
+          DDS (ACE, TAO) scoreboard scripts.
+
 Fri Dec 12 05:39:25 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/compat/build.xml:
