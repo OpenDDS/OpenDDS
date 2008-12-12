@@ -1,4 +1,4 @@
-package org.opendds.jms.client;
+package org.opendds.jms;
 
 import java.lang.reflect.Field;
 import java.util.List;
