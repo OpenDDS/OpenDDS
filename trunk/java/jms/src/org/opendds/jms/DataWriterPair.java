@@ -8,9 +8,7 @@ import javax.jms.DeliveryMode;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 
-import DDS.DATAWRITER_QOS_DEFAULT;
 import DDS.DataWriter;
-import DDS.DataWriterQos;
 import DDS.DataWriterQosHolder;
 import DDS.DurabilityQosPolicyKind;
 import DDS.Publisher;
@@ -20,6 +18,7 @@ import OpenDDS.JMS.MessagePayloadDataWriterHelper;
 
 import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.qos.DataWriterQosPolicy;
+import org.opendds.jms.qos.QosPolicies;
 
 /**
  * @author  Weiqi Gao
@@ -46,28 +45,26 @@ public class DataWriterPair {
         DataWriterQosPolicy dataWriterQosPolicy = ((TopicImpl) destination).getDataWriterQosPolicy();
 
         // Create persistent data writer
-        DataWriterQosHolder persistentQosHolder = new DataWriterQosHolder(DATAWRITER_QOS_DEFAULT.get());
-        publisher.get_default_datawriter_qos(persistentQosHolder);
+        DataWriterQosHolder holder;
 
-        final DataWriterQos persistentQos = persistentQosHolder.value;
-        dataWriterQosPolicy.setQos(persistentQos);
+        holder = new DataWriterQosHolder(QosPolicies.newDataWriterQos());
+        publisher.get_default_datawriter_qos(holder);
 
-        persistentQos.durability.kind = DurabilityQosPolicyKind.PERSISTENT_DURABILITY_QOS;
-        final DataWriter dataWriter = publisher.create_datawriter(ddsTopic, persistentQos, null);
+        dataWriterQosPolicy.setQos(holder.value);
+
+        holder.value.durability.kind = DurabilityQosPolicyKind.PERSISTENT_DURABILITY_QOS;
+        final DataWriter dataWriter = publisher.create_datawriter(ddsTopic, holder.value, null);
         MessagePayloadDataWriter persistentDW = MessagePayloadDataWriterHelper.narrow(dataWriter);
         logger.debug("Created %s %s", persistentDW, dataWriterQosPolicy);
 
         // Create volatile data writer
-        DataWriterQosHolder volatileQosHolder = new DataWriterQosHolder(DATAWRITER_QOS_DEFAULT.get());
-        publisher.get_default_datawriter_qos(volatileQosHolder);
+        holder = new DataWriterQosHolder(QosPolicies.newDataWriterQos());
+        publisher.get_default_datawriter_qos(holder);
 
-        final DataWriterQos volatileQos = volatileQosHolder.value;
-        if (dataWriterQosPolicy != null) {
-            dataWriterQosPolicy.setQos(volatileQos);
-        }
+        dataWriterQosPolicy.setQos(holder.value);
 
-        volatileQos.durability.kind = DurabilityQosPolicyKind.VOLATILE_DURABILITY_QOS;
-        final DataWriter dataWriter2 = publisher.create_datawriter(ddsTopic, volatileQos, null);
+        holder.value.durability.kind = DurabilityQosPolicyKind.VOLATILE_DURABILITY_QOS;
+        final DataWriter dataWriter2 = publisher.create_datawriter(ddsTopic, holder.value, null);
         MessagePayloadDataWriter volatileDW = MessagePayloadDataWriterHelper.narrow(dataWriter2);
         logger.debug("Created %s %s", volatileDW, dataWriterQosPolicy);
 

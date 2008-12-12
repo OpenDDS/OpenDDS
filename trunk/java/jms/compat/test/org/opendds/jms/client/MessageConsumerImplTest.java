@@ -1,9 +1,7 @@
 package org.opendds.jms.client;
 
 import java.lang.reflect.Field;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
@@ -160,8 +158,6 @@ public class MessageConsumerImplTest {
         MessageConsumer messageConsumer = session.createConsumer(destination);
         assert messageConsumer != null;
 
-        MessageProducer messageProducer = session.createProducer(destination);
-
         MyMessageListener messageListener = new MyMessageListener();
         messageConsumer.setMessageListener(messageListener);
         assert messageListener == messageConsumer.getMessageListener();
@@ -171,11 +167,13 @@ public class MessageConsumerImplTest {
 
         messageConsumer.setMessageListener(messageListener);
 
-        waitFor(2500); // wait for listener registration
+        MessageProducer messageProducer = session.createProducer(destination);
+
+        waitFor(2500); // wait for association
 
         sendSomeMessages(messageProducer);
 
-        waitFor(2500); // wait for listener callbacks
+        waitFor(5000); // wait for listener
 
         assert messageListener.getOnMessageCallCount() == 3;
     }
