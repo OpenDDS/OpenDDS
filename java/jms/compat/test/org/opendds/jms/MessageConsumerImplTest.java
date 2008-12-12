@@ -155,8 +155,12 @@ public class MessageConsumerImplTest {
 
     @Test
     public void messageListener() throws JMSException {
+        MessageProducer messageProducer = session.createProducer(destination);
         MessageConsumer messageConsumer = session.createConsumer(destination);
+
         assert messageConsumer != null;
+
+        waitFor(2500); // wait for association
 
         MyMessageListener messageListener = new MyMessageListener();
         messageConsumer.setMessageListener(messageListener);
@@ -167,13 +171,9 @@ public class MessageConsumerImplTest {
 
         messageConsumer.setMessageListener(messageListener);
 
-        MessageProducer messageProducer = session.createProducer(destination);
-
-        waitFor(2500); // wait for association
-
         sendSomeMessages(messageProducer);
 
-        waitFor(5000); // wait for listener
+        waitFor(2500); // wait for listener
 
         assert messageListener.getOnMessageCallCount() == 3;
     }
