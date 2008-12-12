@@ -1,4 +1,4 @@
-package org.opendds.jms.client;
+package org.opendds.jms;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -189,7 +189,7 @@ public class SessionImplTest {
         final MessageProducer replyProducer = session.createProducer(replyTo);
 
         waitFor(2000); // wait for association
-        
+
         textMessage2.clearBody();
         textMessage2.setText("Goodbye");
         replyProducer.send(textMessage2);

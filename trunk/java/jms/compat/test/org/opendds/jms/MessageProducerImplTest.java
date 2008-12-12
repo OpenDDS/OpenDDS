@@ -1,4 +1,4 @@
-package org.opendds.jms.client;
+package org.opendds.jms;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
