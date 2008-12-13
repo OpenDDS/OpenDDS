@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <string>
 
 #include "idl2jni_runtime.h"
@@ -24,9 +25,14 @@ namespace
   jstring binary_name (JNIEnv *jni, const char *desc)
   {
     std::string name (desc);
-    std::size_t pos = 0;
-    while ((pos = name.find ('/', pos)) != std::string::npos)
-      name[pos] = '.'; // replace separator
+
+    std::string::iterator it = name.begin ();
+    for (;;)
+     {
+       it = std::find (it, name.end (), '/');
+       if (it == name.end ()) break;
+       *it++ = '.'; // replace separator
+     }
     return jni->NewStringUTF (name.c_str ());
   }
 }

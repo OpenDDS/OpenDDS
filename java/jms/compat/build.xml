@@ -103,7 +103,7 @@
     </target>
 
     <target name="ear" depends="ejb-jar, war">
-        <echo message="[service] Updating VERSION to ${opendds.version}"/>
+        <echo message="Updating VERSION to ${opendds.version}"/>
         <copy todir="${build.dir}">
             <fileset dir="${src.dir}/META-INF/service"/>
             <filterset>
@@ -139,7 +139,7 @@
 
         <antjms target="rar"/> <!-- ensure RAR is built -->
 
-        <echo message="[setup] Starting DCPSInfoRepo in ${env.DDS_ROOT}"/>
+        <echo message="Starting DCPSInfoRepo in ${env.DDS_ROOT}"/>
         <exec executable="${env.DDS_ROOT}/bin/DCPSInfoRepo" spawn="true">
             <arg line="-ORBListenEndpoints iiop://:6666"/>
             <arg line="-ORBSvcConf ${conf.dir}/tcp.conf"/>
@@ -148,7 +148,7 @@
     </target>
 
     <target name="teardown">
-        <echo message="[teardown] Stopping DCPSInfoRepo in ${env.DDS_ROOT}"/>
+        <echo message="Stopping DCPSInfoRepo in ${env.DDS_ROOT}"/>
         <exec executable="${env.DDS_ROOT}/bin/opendds_ir_ctl">
             <arg line="kill localhost:6666"/>
         </exec>
@@ -157,7 +157,7 @@
     <target name="jboss42x" depends="setup" if="jboss42x.enabled">
         <fail message="JBOSS_HOME is a required environment variable!" unless="env.JBOSS_HOME"/>
 
-        <echo message="[jboss42x] Using JBOSS_HOME: ${env.JBOSS_HOME}"/>
+        <echo message="Using JBOSS_HOME: ${env.JBOSS_HOME}"/>
         <cargo containerId="jboss42x" home="${env.JBOSS_HOME}" action="start" wait="false">
             <configuration>
                 <property name="cargo.jvmargs" value="-ea ${server.jvmargs}"/> <!-- enable assertions -->
