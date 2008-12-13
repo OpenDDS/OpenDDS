@@ -45,7 +45,7 @@ public class TemporaryTopicImpl extends TopicImpl implements TemporaryTopic {
         if (topic != null) {
             Logger logger = connection.getLogger();
             if (logger.isDebugEnabled()) {
-                logger.debug("Deleting %s", Strings.asIdentity(topic));
+                logger.debug("Deleting %s", Strings.asIdentity(this));
             }
 
             DomainParticipant participant = connection.getParticipant();
