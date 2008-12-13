@@ -21,47 +21,67 @@ import org.opendds.jms.common.lang.ClassLoaders;
  * @version $Revision$
  */
 public class NativeLoader {
+    private static final String NATIVE_DIR_PROPERTY = "opendds.native.dir";
     private static Logger logger = Logger.getLogger(NativeLoader.class);
 
     public static void bootstrap() {
-        PropertiesHelper.Property property;
+        if (libraryLoaded("opendds-jms-native")) {
+            return; // libraries already loaded
+        }
+        logger.warn("Broken RAR deployer detected; loading native libraries...");
+
         PropertiesHelper helper = PropertiesHelper.getSystemPropertiesHelper();
-
-        property = helper.find("opendds.native.load");
-        if (property.exists() && property.asBoolean()) {
-            property = helper.require("opendds.native.dir");
-
-            String dirName = property.getValue();
-            if (!Files.isLibraryPathSet(dirName)) {
-                logger.warn("%s is not set in java.library.path!", dirName);
+        try {
+            File parent = helper.getFileProperty(NATIVE_DIR_PROPERTY);
+            if (parent == null) {
+                logger.warn("%s is not set; Using temp directory "
+                    + "(HINT: This is probably not what you want!)", NATIVE_DIR_PROPERTY);
+                parent = Files.createTempDirectory("opendds-native");
+            }
+            if (!Files.isLibraryPathSet(parent)) {
+                logger.warn("%s is not set in java.library.path!", parent);
             }
 
-            try {
-                NativeLoader loader = new NativeLoader(dirName);
-                loader.loadLibraries();
+            NativeLoader loader = new NativeLoader(parent);
+            loader.loadLibraries();
 
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
-            }
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
         }
     }
 
-    private File nativeDir;
+    public static boolean libraryLoaded(String libname) {
+        try {
+            System.loadLibrary(resolveLibraryName(libname));
+            return true;
+
+        } catch (UnsatisfiedLinkError e) {}
+        return false;
+    }
+
+    public static String resolveLibraryName(String libname) {
+        if (Boolean.getBoolean("opendds.native.debug")) {
+            return libname.concat("d");
+        }
+        return libname;
+    }
+
+    private File parent;
 
     private List<File> loadedLibs =
         new ArrayList<File>();
 
-    public NativeLoader(String dirName) throws IOException {
-        nativeDir = Files.verifyDirectory(dirName);
-        logger.debug("Using native directory: %s", nativeDir.getAbsolutePath());
+    public NativeLoader(File parent) throws IOException {
+        logger.debug("Using native directory: %s", parent.getAbsolutePath());
+        this.parent = Files.verifyDirectory(parent);
     }
 
-    public File getNativeDirectory() {
-        return nativeDir;
+    public File getParentDirectory() {
+        return parent;
     }
 
-    public String getNativePath() {
-        return nativeDir.getAbsolutePath();
+    public String getParentPath() {
+        return parent.getAbsolutePath();
     }
 
     public File[] getLoadedLibraries() {
@@ -72,10 +92,10 @@ public class NativeLoader {
         loadLibraries(ClassLoaders.getContextLoader());
     }
 
-    public void loadLibraries(ClassLoader loader) throws IOException {
-        assert loader != null;
+    public void loadLibraries(ClassLoader cl) throws IOException {
+        assert cl != null;
 
-        Enumeration<URL> en = loader.getResources(LibIndex.DEFAULT_RESOURCE);
+        Enumeration<URL> en = cl.getResources(LibIndex.DEFAULT_RESOURCE);
         while (en.hasMoreElements()) {
             URL url = en.nextElement();
 
@@ -85,7 +105,7 @@ public class NativeLoader {
             for (LibIndex.Entry entry : index.getEntries()) {
                 String name = entry.getName();
 
-                File file = new File(nativeDir, name);
+                File file = new File(parent, name);
                 logger.info("Loading native library: %s", file.getAbsolutePath());
 
                 if (file.exists() && file.lastModified() > created) {
@@ -95,7 +115,7 @@ public class NativeLoader {
                 FileOutputStream out = null;
                 try {
                     out = new FileOutputStream(file);
-                    Streams.tie(entry.openStream(loader), out);
+                    Streams.tie(entry.openStream(cl), out);
 
                     loadedLibs.add(file);
 

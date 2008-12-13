@@ -68,7 +68,7 @@ public class SubscriberManager {
             if (subscriber == null) {
                 throw new JMSException("Unable to create Subscriber; please check logs");
             }
-            logger.debug("Created %s %s", subscriber, policy);
+            logger.debug("Created %s -> %s", subscriber, policy);
             logger.debug("%s using PARTITION %s", subscriber, Arrays.deepToString(holder.value.partition.name));
 
             TransportImpl transport = transportManager.getTransport();

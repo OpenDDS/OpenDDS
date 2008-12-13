@@ -27,7 +27,6 @@ import DDS.Publisher;
 import DDS.Subscriber;
 
 import org.opendds.jms.common.Version;
-import org.opendds.jms.common.lang.Objects;
 import org.opendds.jms.common.lang.Strings;
 import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.persistence.PersistenceManager;
@@ -198,7 +197,7 @@ public class ConnectionImpl implements Connection {
             tempTopics.add(topic);
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("Created %s [%s]", Objects.toString(topic), topic);
+            logger.debug("Created %s", Strings.asIdentity(topic));
         }
 
         return topic;

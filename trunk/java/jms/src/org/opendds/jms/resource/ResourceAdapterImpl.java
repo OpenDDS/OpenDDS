@@ -21,20 +21,16 @@ import org.opendds.jms.common.util.NativeLoader;
 public class ResourceAdapterImpl implements ResourceAdapter {
     private static Logger logger = Logger.getLogger(ResourceAdapterImpl.class);
 
-    static {
-        // Bootstrap native runtime
-        NativeLoader.bootstrap();
-    }
-
     private BootstrapContext context;
 
-    public void start(BootstrapContext context) {
+    public synchronized  void start(BootstrapContext context) {
         this.context = context;
 
         logger.info("Starting %s", Version.getInstance());
+        NativeLoader.bootstrap(); // load native libraries
     }
 
-    public void stop() {}
+    public synchronized void stop() {}
 
     public void endpointActivation(MessageEndpointFactory endpointFactory,
                                    ActivationSpec activationSpec) {}

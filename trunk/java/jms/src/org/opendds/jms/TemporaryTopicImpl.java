@@ -44,7 +44,9 @@ public class TemporaryTopicImpl extends TopicImpl implements TemporaryTopic {
     public void delete() throws JMSException {
         if (topic != null) {
             Logger logger = connection.getLogger();
-            logger.debug("Deleting %s", topic);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Deleting %s", Strings.asIdentity(topic));
+            }
 
             DomainParticipant participant = connection.getParticipant();
             participant.delete_topic(topic);

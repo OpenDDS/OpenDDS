@@ -13,6 +13,7 @@ import OpenDDS.DCPS.transport.TransportConfiguration;
 import OpenDDS.DCPS.transport.TransportImpl;
 
 import org.opendds.jms.common.beans.BeanHelper;
+import org.opendds.jms.common.lang.Strings;
 import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.common.util.PropertiesHelper;
 import org.opendds.jms.common.util.Serial;
@@ -34,7 +35,7 @@ public class TransportFactory {
     public TransportFactory(String type, Properties properties) {
         assert type != null;
         assert properties != null;
-        
+
         this.type = type;
         this.properties = properties;
     }
@@ -50,7 +51,9 @@ public class TransportFactory {
         }
 
         Logger logger = Transports.getLogger(configuration);
-        logger.debug("Configuring %s %s", configuration, properties);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Configuring %s with %s", configuration, Strings.asIdentity(properties));
+        }
 
         if (!properties.isEmpty()) {
             BeanHelper helper = new BeanHelper(configuration.getClass());

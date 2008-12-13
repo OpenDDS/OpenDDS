@@ -1,3 +1,36 @@
+Sat Dec 13 21:36:33 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/build.xml:
+
+          Added missing TAO_ImR_Client library dependency.
+
+        * java/jms/native/org_opendds_jms_DCPSInfoRepo.cpp:
+
+          Updated code style.
+
+        * java/jms/src/org/opendds/jms/ConnectionImpl.java:
+        * java/jms/src/org/opendds/jms/DataWriterPair.java:
+        * java/jms/src/org/opendds/jms/MessageConsumerImpl.java:
+        * java/jms/src/org/opendds/jms/PublisherManager.java:
+        * java/jms/src/org/opendds/jms/SubscriberManager.java:
+        * java/jms/src/org/opendds/jms/TemporaryTopicImpl.java:
+        * java/jms/src/org/opendds/jms/TopicImpl.java:
+        * java/jms/src/org/opendds/jms/common/Version.java:
+        * java/jms/src/org/opendds/jms/common/io/Files.java:
+        * java/jms/src/org/opendds/jms/common/lang/Strings.java:
+        * java/jms/src/org/opendds/jms/common/util/NativeLoader.java:
+        * java/jms/src/org/opendds/jms/common/util/PropertiesHelper.java:
+        * java/jms/src/org/opendds/jms/management/DCPSInfoRepoService.java:
+        * java/jms/src/org/opendds/jms/management/HibernatePersistenceService.java:
+        * java/jms/src/org/opendds/jms/management/ParticipantFactoryService.java:
+        * java/jms/src/org/opendds/jms/resource/ManagedConnectionImpl.java:
+        * java/jms/src/org/opendds/jms/resource/ResourceAdapterImpl.java:
+        * java/jms/src/org/opendds/jms/transport/TransportFactory.java:
+
+          Improved logging; Refined native library loading behavior.
+          NativeLoader now detects broken RAR deployers and alerts the user
+          before attempting to load native libraries manually.
+
 Sat Dec 13 00:46:38 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/idl2jni/runtime/idl2jni_runtime.cpp:

@@ -78,7 +78,7 @@ public class TopicImpl implements Serializable, Topic {
         if (topic == null) {
             throw new JMSException("Unable to create Topic; please check logs");
         }
-        logger.debug("Created %s %s", topic, topicQosPolicy);
+        logger.debug("Created %s -> %s", topic, topicQosPolicy);
 
         return topic;
     }

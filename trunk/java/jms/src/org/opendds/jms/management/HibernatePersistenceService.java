@@ -6,6 +6,7 @@ package org.opendds.jms.management;
 
 import java.util.Properties;
 
+import org.opendds.jms.common.lang.Strings;
 import org.opendds.jms.common.util.JndiHelper;
 import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.management.annotation.Attribute;
@@ -92,7 +93,9 @@ public class HibernatePersistenceService extends DynamicMBeanSupport implements 
 
         Properties properties = attributes.toProperties();
 
-        logger.debug("Initializing with properties: %s", properties);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Initializing with %s", Strings.asIdentity(properties));
+        }
         instance = new HibernatePersistenceManager(properties);
 
         helper.bind(jndiName, instance);

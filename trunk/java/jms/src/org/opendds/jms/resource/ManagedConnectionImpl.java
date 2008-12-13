@@ -86,7 +86,7 @@ public class ManagedConnectionImpl implements ManagedConnection {
         if (participant == null) {
             throw new ResourceException("Unable to create DomainParticipant; please check logs");
         }
-        logger.debug("Created %s %s", participant, policy);
+        logger.debug("Created %s -> %s", participant, policy);
 
         logger.debug("Connection ID is %s", getConnectionId());
 
