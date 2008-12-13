@@ -5,6 +5,7 @@
 package org.opendds.jms.management;
 
 import org.opendds.jms.DCPSInfoRepo;
+import org.opendds.jms.common.lang.Strings;
 import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.management.annotation.Attribute;
 import org.opendds.jms.management.annotation.Constructor;
@@ -64,7 +65,9 @@ public class DCPSInfoRepoService extends DynamicMBeanSupport implements ServiceM
         logger = Logger.getLogger(service);
         logger.info("Starting %s", service);
 
-        logger.debug("Initializing with arguments %s", arguments);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Initializing with %s", Strings.asIdentity(arguments));
+        }
         instance = new DCPSInfoRepo(arguments.toArray());
 
         instanceThread = new Thread(instance, "DCPSInfoRepo");

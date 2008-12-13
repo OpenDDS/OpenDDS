@@ -12,6 +12,12 @@ import java.util.UUID;
  */
 public class Strings {
 
+    public static String asIdentity(Object o) {
+        assert o != null;
+
+        return String.format("%s -> %s", Objects.toString(o), o.toString());
+    }
+
     public static String capitalize(String s) {
         assert s != null;
 

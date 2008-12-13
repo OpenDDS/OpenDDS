@@ -165,6 +165,7 @@
             <include name="TAO_AnyTypeCode"/>
             <include name="TAO_CodecFactory"/>
             <include name="TAO_Codeset"/>
+            <include name="TAO_ImR_Client"/>
             <include name="TAO_IORTable"/>
             <include name="TAO_PI"/>
             <include name="TAO_PortableServer"/>
@@ -175,13 +176,13 @@
             <include name="DCPSInfoRepoServ"/>
             <include name="Federator"/>
             <include name="InfoRepoLib"/>
-            <include name="OpenDDS_DCPS_Java"/>
             <include name="OpenDDS_Dcps"/>
-            <include name="idl2jni_runtime"/>
-            <include name="tao_java"/>
+            <include name="ReliableMulticast"/>
             <include name="SimpleTcp"/>
             <include name="SimpleUnreliableDgram"/>
-            <include name="ReliableMulticast"/>
+            <include name="OpenDDS_DCPS_Java"/>
+            <include name="idl2jni_runtime"/>
+            <include name="tao_java"/>
             <include name="opendds-jms-native"/>
         </opendds:libfileset>
 
@@ -191,7 +192,7 @@
             <fileset refid="DDS.libs"/>
         </opendds:libindex>
 
-        <!-- Update Resource Adapter descriptor -->        
+        <!-- Update Resource Adapter descriptor -->
         <copy file="${src.dir}/META-INF/ra.xml" todir="${build.dir}">
             <filterset>
                 <filter token="VERSION" value="${opendds.version}"/>

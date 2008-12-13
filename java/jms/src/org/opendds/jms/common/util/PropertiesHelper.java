@@ -5,6 +5,7 @@
 package org.opendds.jms.common.util;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
@@ -129,6 +130,20 @@ public class PropertiesHelper {
         return value.getBytes();
     }
 
+    public File getFileProperty(String key) {
+        return getFileProperty(key, null);
+    }
+
+    public File getFileProperty(String key, File defaultValue) {
+        String value = getProperty(key);
+
+        if (value == null) {
+            return defaultValue;
+        }
+
+        return new File(value);
+    }
+
     public Integer getIntProperty(String key) {
         return getIntProperty(key, 0);
     }
@@ -182,6 +197,14 @@ public class PropertiesHelper {
 
         public byte[] asBytes(byte[] defaultValue) {
             return getBytesProperty(key, defaultValue);
+        }
+
+        public File asFile() {
+            return getFileProperty(key);
+        }
+
+        public File asFile(File defaultValue) {
+            return getFileProperty(key, defaultValue);
         }
 
         public Integer asInt() {

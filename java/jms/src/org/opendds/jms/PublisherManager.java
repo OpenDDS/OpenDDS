@@ -63,8 +63,10 @@ public class PublisherManager {
             if (publisher == null) {
                 throw new JMSException("Unable to create Publisher; please check logs");
             }
-            logger.debug("Created %s %s", publisher, policy);
-            logger.debug("%s using PARTITION %s", publisher, Arrays.deepToString(holder.value.partition.name));
+            if (logger.isDebugEnabled()) {
+                logger.debug("Created %s -> %s", publisher, policy);
+                logger.debug("%s using PARTITION %s", publisher, Arrays.deepToString(holder.value.partition.name));
+            }
 
             TransportImpl transport = transportManager.getTransport();
             if (transport.attach_to_publisher(publisher).value() != AttachStatus._ATTACH_OK) {

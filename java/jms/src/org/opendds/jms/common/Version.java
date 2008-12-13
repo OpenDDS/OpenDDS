@@ -29,7 +29,7 @@ public class Version {
     }
 
     public String getProductName() {
-        return "OpenDDS";
+        return "OpenDDS JMS Provider";
     }
 
     public String getDDSVersion() {

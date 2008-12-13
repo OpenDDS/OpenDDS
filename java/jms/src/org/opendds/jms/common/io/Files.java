@@ -30,38 +30,36 @@ public class Files {
 
         File temp;
         do {
-            StringBuffer sbuf = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
 
-            sbuf.append(prefix);
-            sbuf.append(new SecureRandom().nextInt() & 0xffff);
+            sb.append(prefix);
+            sb.append(new SecureRandom().nextInt() & 0xffff);
 
             if (!Strings.isEmpty(suffix)) {
-                sbuf.append(suffix);
+                sb.append(suffix);
             }
 
-            temp = new File(getDefaultTempDirectory(), sbuf.toString());
+            temp = new File(getDefaultTempDirectory(), sb.toString());
 
         } while (temp.exists());
 
         if (!temp.mkdirs()) {
-            throw new IOException("Unable to create temp directory: " + temp.getAbsolutePath());
+            throw new IOException("Unable to create temp directory: " + temp);
         }
 
         return temp;
     }
 
-    public static File verifyDirectory(String dirName) throws IOException {
-        assert dirName != null;
-
-        File dir = new File(dirName);
+    public static File verifyDirectory(File dir) throws IOException {
+        assert dir != null;
 
         if (!dir.exists()) {
             if (!dir.mkdirs()) {
-                throw new IOException("Unable to create directory: " + dir.getAbsolutePath());
+                throw new IOException("Unable to create directory: " + dir);
             }
 
         } else if (!dir.isDirectory()) {
-            throw new IOException(dirName + " is not a directory!");
+            throw new IOException(dir + " is not a directory!");
         }
 
         return dir;
@@ -73,6 +71,11 @@ public class Files {
 
     public static void setLibraryPath(String libraryPath) {
         System.setProperty("java.library.path", libraryPath);
+    }
+
+    public static boolean isLibraryPathSet(File dir) {
+        return !dir.isFile()
+            && isLibraryPathSet(dir.getAbsolutePath());
     }
 
     public static boolean isLibraryPathSet(String path) {
@@ -91,7 +94,7 @@ public class Files {
 
     public static String addLibraryPath(File directory) {
         assert directory != null;
-        
+
         return addLibraryPath(directory.getAbsolutePath());
     }
 

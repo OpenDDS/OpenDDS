@@ -116,7 +116,7 @@ public class MessageConsumerImpl implements MessageConsumer {
         dataReaderQosPolicy.setQos(holder.value);
 
         DataReader reader = subscriber.create_datareader(ddsTopic, holder.value, null);
-        logger.debug("Created %s %s", reader, dataReaderQosPolicy);
+        logger.debug("Created %s -> %s", reader, dataReaderQosPolicy);
 
         return MessagePayloadDataReaderHelper.narrow(reader);
     }

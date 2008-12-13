@@ -9,6 +9,7 @@ import OpenDDS.DCPS.TheParticipantFactory;
 import OpenDDS.DCPS.TheServiceParticipant;
 import OpenDDS.DCPS.transport.TheTransportFactory;
 
+import org.opendds.jms.common.lang.Strings;
 import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.management.annotation.Attribute;
 import org.opendds.jms.management.annotation.Constructor;
@@ -25,7 +26,7 @@ import org.opendds.jms.management.argument.ORBArguments;
  */
 @Description("OpenDDS DomainParticipantFactory MBean")
 public class ParticipantFactoryService extends DynamicMBeanSupport implements ServiceMBean {
-    private Logger log;
+    private Logger logger;
 
     private String service;
     private boolean started;
@@ -67,10 +68,12 @@ public class ParticipantFactoryService extends DynamicMBeanSupport implements Se
 
         verify();
 
-        log = Logger.getLogger(service);
-        log.info("Initializing %s", service);
+        logger = Logger.getLogger(service);
+        logger.info("Initializing %s", service);
 
-        log.debug("Initializing with arguments %s", arguments);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Initializing with %s", Strings.asIdentity(arguments));
+        }
         instance = TheParticipantFactory.WithArgs(arguments.toStringSeq());
 
         if (instance == null) {
@@ -90,7 +93,7 @@ public class ParticipantFactoryService extends DynamicMBeanSupport implements Se
         TheServiceParticipant.shutdown();
 
         instance = null;
-        log = null;
+        logger = null;
 
         started = false;
     }
