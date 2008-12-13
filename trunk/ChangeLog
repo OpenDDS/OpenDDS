@@ -1,3 +1,17 @@
+Sat Dec 13 00:46:38 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/idl2jni/runtime/idl2jni_runtime.cpp:
+
+          Refactored binary_name.
+
+        * java/jms/compat/build.xml:
+
+          Removed debug logging.
+
+        * java/jms/src/org/opendds/jms/MessageProducerImpl.java:
+
+          Fixed DCPSInfoRepo error on send with destinaton.
+
 Fri Dec 12 23:33:38 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportImpl.h:

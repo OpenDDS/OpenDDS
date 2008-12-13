@@ -171,7 +171,7 @@ public class MessageProducerImpl implements MessageProducer {
             throw new UnsupportedOperationException("This MessageProducer is created with a Destination.");
         }
         checkClosed();
-        DataWriterPair dataWriterPair = getOrCreateDataWriterPair(destination);
+        DataWriterPair dataWriterPair = DataWriterPair.fromDestination(session, destination);
         final MessagePayloadDataWriter dataWriter = dataWriterPair.getDataWriter(deliveryMode);
 
         validateMessage(message);
@@ -183,15 +183,6 @@ public class MessageProducerImpl implements MessageProducer {
         writeDataWithDataWriter(message, dataWriter);
 
         dataWriterPair.destroy();
-    }
-
-    private DataWriterPair getOrCreateDataWriterPair(Destination destination) throws JMSException {
-        DataWriterPair dataWriterPair = dataWriterPairMap.get(destination);
-        if (dataWriterPair == null) {
-            dataWriterPair = DataWriterPair.fromDestination(session, destination);
-            dataWriterPairMap.put(destination, dataWriterPair);
-        }
-        return dataWriterPair;
     }
 
     private void validateMessage(Message message) {
