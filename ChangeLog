@@ -1,3 +1,21 @@
+Sat Dec 13 23:47:04 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/compat/build.xml:
+        * java/jms/compat/test/org/opendds/jms/MessageConsumerImplTest.java:
+        * java/jms/compat/test/org/opendds/jms/SessionImplTest.java:
+        * java/jms/compat/test/org/opendds/jms/client/SimpleTest.java:
+        * java/jms/src/org/opendds/jms/common/util/NativeLoader.java:
+        * java/jms/compat/test/org/opendds/jms/AbstractMessageImplTest.java:
+
+          Updated test suites.
+
+        * java/jms/test/org/opendds/jms/SessionImplTest.java:
+        * java/jms/test/org/opendds/jms/TestUtils.java:
+        * java/jms/test/org/opendds/jms/TopicMessageConsumerImplTest.java:
+        * java/jms/test/org/opendds/jms/TopicMessageProducerImplTest.java:
+
+          Removed these files.
+
 Sat Dec 13 21:36:33 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/build.xml:

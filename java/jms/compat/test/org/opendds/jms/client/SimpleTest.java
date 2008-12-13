@@ -43,7 +43,7 @@ public class SimpleTest {
             MessageProducer producer = session.createProducer(topic);
             MessageConsumer consumer = session.createConsumer(topic);
 
-            Thread.sleep(2500); // wait for association
+            Thread.sleep(5000); // wait for association
 
             producer.send(session.createTextMessage("Hello, World!"));
 

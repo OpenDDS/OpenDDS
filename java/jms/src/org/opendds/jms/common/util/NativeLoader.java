@@ -28,14 +28,14 @@ public class NativeLoader {
         if (libraryLoaded("opendds-jms-native")) {
             return; // libraries already loaded
         }
-        logger.warn("Broken RAR deployer detected; loading native libraries...");
+        logger.warn("Broken RAR deployer detected; loading native libraries");
 
         PropertiesHelper helper = PropertiesHelper.getSystemPropertiesHelper();
         try {
             File parent = helper.getFileProperty(NATIVE_DIR_PROPERTY);
             if (parent == null) {
-                logger.warn("%s is not set; Using temp directory "
-                    + "(HINT: This is probably not what you want!)", NATIVE_DIR_PROPERTY);
+                logger.warn("%s is not set; Using temporary directory " +
+                            "(HINT: This is probably not what you want!)", NATIVE_DIR_PROPERTY);
                 parent = Files.createTempDirectory("opendds-native");
             }
             if (!Files.isLibraryPathSet(parent)) {
