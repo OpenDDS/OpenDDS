@@ -18,6 +18,7 @@ import javax.jms.TemporaryTopic;
 import javax.jms.TextMessage;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.resource.ResourceException;
 
 import org.junit.After;
 import org.junit.Before;
@@ -35,7 +36,6 @@ import org.junit.runner.RunWith;
 @Remote(endpoint = "http://localhost:8080/opendds-jms-compat/")
 @RunWith(RemoteRunner.class)
 public class SessionImplTest {
-    private ConnectionFactory connectionFactory;
     private Destination destination;
     private Connection connection;
     private Connection otherConnection;
@@ -44,7 +44,7 @@ public class SessionImplTest {
     @Before
     public void setUp() throws NamingException, JMSException {
         InitialContext context = new InitialContext();
-        connectionFactory = (ConnectionFactory) context.lookup("DDS/DefaultConnectionFactory");
+        ConnectionFactory connectionFactory = (ConnectionFactory) context.lookup("DDS/DefaultConnectionFactory");
         destination = (Destination) context.lookup("DDS/DefaultTopic");
         connection = connectionFactory.createConnection();
         otherConnection = connectionFactory.createConnection();
@@ -136,11 +136,11 @@ public class SessionImplTest {
         final MessageProducer producer = session.createProducer(temporaryTopic);
         final MessageConsumer consumer = session.createConsumer(temporaryTopic);
 
-        waitFor(2000); // wait for association
+        waitFor(5000); // wait for association
 
         ObjectMessage objectMessage = session.createObjectMessage();
         assert objectMessage != null;
-        objectMessage.setObject(new Integer(1024));
+        objectMessage.setObject(1024);
 
         producer.send(objectMessage);
 
@@ -155,6 +155,17 @@ public class SessionImplTest {
         temporaryTopic.delete();
     }
 
+    @Test
+    public void testSettingAndGettingDestinationHeaders() throws JMSException, ResourceException {
+        Message message = session.createTextMessage();
+
+        message.setJMSDestination(destination);
+        assert destination.toString().equals(message.getJMSDestination().toString());
+
+        message.setJMSReplyTo(destination);
+        assert destination.toString().equals(message.getJMSReplyTo().toString());
+    }
+
     private void waitFor(int millis) {
         try {
             Thread.sleep(millis); // wait for association
@@ -167,7 +178,7 @@ public class SessionImplTest {
         final MessageProducer producer = session.createProducer(destination);
         final MessageConsumer consumer = session.createConsumer(destination);
 
-        waitFor(2000); // wait for association
+        waitFor(5000); // wait for association
 
         // Send original with JMSReplyTo header set to a temporary Topic
         final TextMessage textMessage = session.createTextMessage("Hello");
@@ -188,19 +199,18 @@ public class SessionImplTest {
         final Destination replyTo = textMessage2.getJMSReplyTo();
         final MessageProducer replyProducer = session.createProducer(replyTo);
 
-        waitFor(2000); // wait for association
+        waitFor(5000); // wait for association
 
         textMessage2.clearBody();
         textMessage2.setText("Goodbye");
         replyProducer.send(textMessage2);
 
-//  TODO Make this work again.
-//        // Receive the reploy on the temporary topic
-//        final Message message3 = replyConsumer.receive();
-//        assert message3 != null;
-//        assert message3 instanceof TextMessage;
-//        final TextMessage textMessage3 = (TextMessage) message3;
-//        assert "Goodbye".equals(textMessage3.getText());
+        // Receive the reploy on the temporary topic
+        final Message message3 = replyConsumer.receive();
+        assert message3 != null;
+        assert message3 instanceof TextMessage;
+        final TextMessage textMessage3 = (TextMessage) message3;
+        assert "Goodbye".equals(textMessage3.getText());
 
         producer.close();
         consumer.close();
@@ -212,10 +222,11 @@ public class SessionImplTest {
 
     @Test
     public void recoverSynch() throws JMSException {
+        Session session = connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
         final MessageProducer producer = session.createProducer(destination);
         final MessageConsumer consumer = session.createConsumer(destination);
 
-        waitFor(2500); // wait for association
+        waitFor(5000); // wait for association
 
         final TextMessage textMessage = session.createTextMessage("Hello");
         producer.send(textMessage);
@@ -224,30 +235,25 @@ public class SessionImplTest {
         textMessage.setText("Goodbye");
         producer.send(textMessage);
 
-// TODO Make this work again
-//        final Message message = consumer.receive();
-//        assert message != null;
-//        final Message message2 = consumer.receive();
-//        assert message2 != null;
-//        final Message message3 = consumer.receive();
-//        assert message3 != null;
+        final Message message = consumer.receive();
+        assert message != null;
+        final Message message2 = consumer.receive();
+        assert message2 != null;
+        final Message message3 = consumer.receive();
+        assert message3 != null;
 
-//        session.recover();
-//
-//        waitFor(1000);
-//
-//        final Message message4 = consumer.receive();
-//        assert message4 != null;
-//        assert message4.getJMSRedelivered();
-//        final Message message5 = consumer.receive();
-//        assert message5 != null;
-//        assert message5.getJMSRedelivered();
-//        final Message message6 = consumer.receive();
-//        assert message6 != null;
-//        assert message6.getJMSRedelivered();
+        session.recover();
 
-        producer.close();
-        consumer.close();
+        final Message message4 = consumer.receive();
+        assert message4 != null;
+        assert message4.getJMSRedelivered();
+        final Message message5 = consumer.receive();
+        assert message5 != null;
+        assert message5.getJMSRedelivered();
+        final Message message6 = consumer.receive();
+        assert message6 != null;
+        assert message6.getJMSRedelivered();
+
         session.close();
     }
 
@@ -256,10 +262,11 @@ public class SessionImplTest {
         Session session = connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
         final MessageProducer producer = session.createProducer(destination);
         final MessageConsumer consumer = session.createConsumer(destination);
+
         MyMessageListener myMessageListener = new MyMessageListener();
         consumer.setMessageListener(myMessageListener);
 
-        waitFor(1000);
+        waitFor(5000); // wait for association
 
         final TextMessage textMessage = session.createTextMessage("Hello");
         producer.send(textMessage);
@@ -268,37 +275,28 @@ public class SessionImplTest {
         textMessage.setText("Goodbye");
         producer.send(textMessage);
 
-        try {
-            Thread.sleep(5000); // Let message delivery has a chance to complete
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        waitFor(5000); // wait for listener
 
-//  TODO Make this work again.
-//        assert 3 == myMessageListener.getOnMessageCount();
-//        assert 0 == myMessageListener.getRedeliveryCount();
-//        List<String> texts = myMessageListener.getMessageTexts();
-//        assert texts.contains("Hello");
-//        assert texts.contains("Hello Again");
-//        assert texts.contains("Goodbye");
-//
-//        myMessageListener.reset();
-//        session.recover();
-//
-//        try {
-//            Thread.sleep(1000);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//
-//        assert 3 == myMessageListener.getOnMessageCount();
-//        assert 3 == myMessageListener.getRedeliveryCount();
-//        texts = myMessageListener.getMessageTexts();
-//        assert texts.contains("Hello");
-//        assert texts.contains("Hello Again");
-//        assert texts.contains("Goodbye");
-//
-//        session.close();
+        assert 3 == myMessageListener.getOnMessageCount();
+        assert 0 == myMessageListener.getRedeliveryCount();
+        List<String> texts = myMessageListener.getMessageTexts();
+        assert texts.contains("Hello");
+        assert texts.contains("Hello Again");
+        assert texts.contains("Goodbye");
+
+        myMessageListener.reset();
+        session.recover();
+
+        waitFor(5000); // wait for listener
+
+        assert 3 == myMessageListener.getOnMessageCount();
+        assert 3 == myMessageListener.getRedeliveryCount();
+        texts = myMessageListener.getMessageTexts();
+        assert texts.contains("Hello");
+        assert texts.contains("Hello Again");
+        assert texts.contains("Goodbye");
+
+        session.close();
     }
 
     @Test

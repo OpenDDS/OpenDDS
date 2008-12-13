@@ -103,7 +103,6 @@
     </target>
 
     <target name="ear" depends="ejb-jar, war">
-        <echo message="Updating VERSION to ${opendds.version}"/>
         <copy todir="${build.dir}">
             <fileset dir="${src.dir}/META-INF/service"/>
             <filterset>

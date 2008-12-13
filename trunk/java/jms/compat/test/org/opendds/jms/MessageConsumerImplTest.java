@@ -82,7 +82,7 @@ public class MessageConsumerImplTest {
         final Thread thread = new Thread() {
             public void run() {
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(5000);
                 } catch (InterruptedException e) {
                 }
                 try {
@@ -109,12 +109,12 @@ public class MessageConsumerImplTest {
 
     @Test
     public void receive() throws JMSException {
+        MessageProducer messageProducer = session.createProducer(destination);
+
         MessageConsumer messageConsumer = session.createConsumer(destination);
         assert messageConsumer != null;
 
-        MessageProducer messageProducer = session.createProducer(destination);
-
-        waitFor(2500); // wait for association
+        waitFor(5000); // wait for association
 
         sendSomeMessages(messageProducer);
 
@@ -160,7 +160,7 @@ public class MessageConsumerImplTest {
 
         assert messageConsumer != null;
 
-        waitFor(2500); // wait for association
+        waitFor(5000); // wait for association
 
         MyMessageListener messageListener = new MyMessageListener();
         messageConsumer.setMessageListener(messageListener);
@@ -173,7 +173,7 @@ public class MessageConsumerImplTest {
 
         sendSomeMessages(messageProducer);
 
-        waitFor(2500); // wait for listener
+        waitFor(5000); // wait for listener
 
         assert messageListener.getOnMessageCallCount() == 3;
     }
@@ -187,7 +187,7 @@ public class MessageConsumerImplTest {
         MessageProducer messageProducer = session.createProducer(destination);
         assert messageProducer != null;
 
-        waitFor(2500); // wait for association
+        waitFor(5000); // wait for association
 
         sendSomeMessages(messageProducer);
 
@@ -244,15 +244,10 @@ public class MessageConsumerImplTest {
     }
 
     private static class MyMessageListener implements MessageListener {
-
-        private int onMessageCallCount = 0;
+        private int onMessageCallCount;
 
         public int getOnMessageCallCount() {
             return onMessageCallCount;
-        }
-
-        public void setOnMessageCallCount(int onMessageCallCount) {
-            this.onMessageCallCount = onMessageCallCount;
         }
 
         public void onMessage(Message message) {
