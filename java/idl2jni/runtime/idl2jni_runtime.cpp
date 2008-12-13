@@ -28,11 +28,11 @@ namespace
 
     std::string::iterator it = name.begin ();
     for (;;)
-     {
-       it = std::find (it, name.end (), '/');
-       if (it == name.end ()) break;
-       *it++ = '.'; // replace separator
-     }
+      {
+        it = std::find (it, name.end (), '/');
+        if (it == name.end ()) break;
+        *it++ = '.'; // replace separator
+      }
     return jni->NewStringUTF (name.c_str ());
   }
 }
