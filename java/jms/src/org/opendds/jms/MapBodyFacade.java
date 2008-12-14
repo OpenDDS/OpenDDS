@@ -34,14 +34,14 @@ public class MapBodyFacade {
         this.body.theMapBody(new MapItem[0]);
     }
 
-    public void absorbTheMapBody() { // TODO add locking
+    public void absorbTheMapBody() {
         items.clear();
         for (MapItem item : body.theMapBody()) {
             items.put(item.name, item.value);
         }
     }
 
-    public void updateTheMapBody() { // TODO add locking
+    public void updateTheMapBody() {
         final Set<Map.Entry<String,StreamItem>> entries = items.entrySet();
         int size = entries.size();
         MapItem[] theNewMapBody = new MapItem[size];

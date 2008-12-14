@@ -35,7 +35,7 @@ public class DurableMessageConsumerImpl extends MessageConsumerImpl implements T
     }
 
     @Override
-    public void doAcknowledge() {
+    public void doAcknowledge() throws JMSException {
         super.doAcknowledge();
     }
 
@@ -44,18 +44,13 @@ public class DurableMessageConsumerImpl extends MessageConsumerImpl implements T
         try {
             durableSubscriptionStore.acknowledge(durableSubscription, message);
         } catch (JMSException e) {
-            // TODO What to do?
+            throw new IllegalStateException(e);
         }
     }
 
     @Override
-    protected boolean isDurableAcknowledged(AbstractMessageImpl message) {
-        try {
-            return durableSubscriptionStore.acknowledged(durableSubscription, message);
-        } catch (JMSException e) {
-            // TODO What to do?
-        }
-        return false;
+    protected boolean isDurableAcknowledged(AbstractMessageImpl message) throws JMSException {
+        return durableSubscriptionStore.acknowledged(durableSubscription, message);
     }
 
     @Override

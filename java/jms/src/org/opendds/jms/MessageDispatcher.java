@@ -4,6 +4,7 @@
 
 package org.opendds.jms;
 
+import javax.jms.JMSException;
 import javax.jms.Session;
 
 /**
@@ -27,7 +28,12 @@ public class MessageDispatcher implements Runnable {
         consumer.getMessageListener().onMessage(message);
         sessionImpl.addToUnacknowledged(dataReaderHandlePair, consumer);
         if (sessionImpl.getAcknowledgeMode() != Session.CLIENT_ACKNOWLEDGE) {
-            sessionImpl.doAcknowledge();
+            try {
+                sessionImpl.doAcknowledge();
+
+            } catch (JMSException e) {
+                throw new IllegalStateException(e);
+            }
         }
     }
 }

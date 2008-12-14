@@ -54,7 +54,6 @@ public class SessionImpl implements Session {
     private DomainParticipant participant;
 
     private boolean closed;
-    private Object lockForClosed;
 
     public SessionImpl(ConnectionImpl owningConnection, boolean transacted, int acknowledgeMode) {
         this.owningConnection = owningConnection;
@@ -84,7 +83,6 @@ public class SessionImpl implements Session {
 
     public void setMessageListener(MessageListener messageListener) throws JMSException {
         checkClosed();
-        // TODO what do a session level MessageListener do?
         this.messageListener = messageListener;
     }
 
@@ -227,8 +225,7 @@ public class SessionImpl implements Session {
     }
 
     public void run() {
-        checkClosed();
-        // TODO
+        throw new UnsupportedOperationException();
     }
 
     public void commit() throws JMSException {
@@ -242,23 +239,10 @@ public class SessionImpl implements Session {
     public void recover() throws JMSException {
         checkClosed();
         if (transacted) throw new IllegalStateException("recover() called on a transacted Session.");
-        stopMessageDelivery();
-        if (messageListener != null) {
-            recoverAsync();
-        } else {
-            for (MessageConsumer consumer: createdConsumers) {
-                MessageConsumerImpl consumerImpl = (MessageConsumerImpl) consumer;
-                consumerImpl.doRecover();
-            }
+        for (MessageConsumer consumer: createdConsumers) {
+            MessageConsumerImpl consumerImpl = (MessageConsumerImpl) consumer;
+            consumerImpl.doRecover();
         }
-    }
-
-    private void recoverAsync() {
-        // TODO
-    }
-
-    private void stopMessageDelivery() {
-        // TODO should tell consumers to stop message delivery
     }
 
     public void close() throws JMSException {
@@ -277,7 +261,7 @@ public class SessionImpl implements Session {
         return executor;
     }
 
-    void doAcknowledge() {
+    void doAcknowledge() throws JMSException {
         for (MessageConsumer consumer: createdConsumers) {
             MessageConsumerImpl messageConsumerImpl = (MessageConsumerImpl) consumer;
             messageConsumerImpl.doAcknowledge();

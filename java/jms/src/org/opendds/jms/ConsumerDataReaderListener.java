@@ -4,6 +4,8 @@
 
 package org.opendds.jms;
 
+import javax.jms.JMSException;
+
 import DDS.ALIVE_INSTANCE_STATE;
 import DDS.DataReader;
 import DDS.LENGTH_UNLIMITED;
@@ -69,7 +71,12 @@ public class ConsumerDataReaderListener extends _DataReaderListenerLocalBase {
             SampleInfo sampleInfo = infos.value[i];
             int handle = sampleInfo.instance_handle;
             AbstractMessageImpl message = buildMessageFromPayload(messagePayload, handle, sessionImpl);
-            if (consumer.isDurableAcknowledged(message)) continue;
+            try {
+                if (consumer.isDurableAcknowledged(message)) continue;
+
+            } catch (JMSException e) {
+                throw new IllegalStateException(e);
+            }
             DataReaderHandlePair dataReaderHandlePair = new DataReaderHandlePair(reader, handle);
             sessionImpl.getMessageDeliveryExecutor().execute(new MessageDispatcher(message, dataReaderHandlePair, consumer, sessionImpl));
         }

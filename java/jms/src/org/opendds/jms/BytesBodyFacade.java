@@ -36,19 +36,19 @@ public class BytesBodyFacade {
         this.output = new DataOutputStream(byteArrayOutputStream);
     }
 
-    public void absorbTheBytesBody() { // TODO locking
+    public void absorbTheBytesBody() {
         if (input == null) {
             input = new DataInputStream(new ByteArrayInputStream(body.theOctetSeqBody()));
         }
     }
 
-    public void updateTheBytesBody() { // TODO locking
+    public void updateTheBytesBody() {
         byte[] theNewBytesBody = byteArrayOutputStream.toByteArray();
         body.theOctetSeqBody(MessageBodyKind.BYTES_KIND, theNewBytesBody);
     }
 
     public long getBodyLength() {
-        throw new UnsupportedOperationException("Kaboom"); // TODO
+        throw new UnsupportedOperationException();
     }
 
     public boolean readBoolean() throws JMSException {
@@ -189,7 +189,7 @@ public class BytesBodyFacade {
         }
     }
 
-    public void reset() { // TODO locking
+    public void reset() {
         input = null;
         byteArrayOutputStream.reset();
     }

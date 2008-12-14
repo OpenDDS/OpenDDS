@@ -37,14 +37,14 @@ public class MessagePropertiesFacade {
         this.properties = new HashMap<String, PropertyValue>();
     }
 
-    public void absorbTheProperties() { // TODO add locking
+    public void absorbTheProperties() {
         properties.clear();
         for (MessageProperty property : payload.theProperties) {
             properties.put(property.name, property.value);
         }
     }
 
-    public void updateTheProperties() { // TODO add locking
+    public void updateTheProperties() {
         final Set<Map.Entry<String, PropertyValue>> entries = properties.entrySet();
         int size = entries.size();
         MessageProperty[] theNewProperties = new MessageProperty[size];
