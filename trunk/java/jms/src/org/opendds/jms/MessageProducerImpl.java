@@ -186,7 +186,6 @@ public class MessageProducerImpl implements MessageProducer {
     }
 
     private void validateMessage(Message message) {
-        // TODO place holder, to be elaborated
         Objects.ensureNotNull(message);
     }
 

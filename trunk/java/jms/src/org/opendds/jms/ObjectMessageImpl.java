@@ -17,6 +17,8 @@ import javax.jms.ObjectMessage;
 import OpenDDS.JMS.MessageBodyKind;
 import OpenDDS.JMS.MessagePayload;
 
+import org.opendds.jms.common.ExceptionHelper;
+
 /**
  * @author  Weiqi Gao
  * @version $Revision$
@@ -60,10 +62,9 @@ public class ObjectMessageImpl extends AbstractMessageImpl implements ObjectMess
             final Serializable retVal = (Serializable) ois.readObject();
             ois.close();
             return retVal;
-        } catch (IOException e) {
-            return null; // Can't happen
-        } catch (ClassNotFoundException e) {
-            return null; // TODO
+
+        } catch (Exception e) {
+            throw ExceptionHelper.wrap(e);
         }
     }
 

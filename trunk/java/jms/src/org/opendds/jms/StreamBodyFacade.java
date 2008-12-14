@@ -35,14 +35,14 @@ public class StreamBodyFacade {
         this.mark = 0;
     }
 
-    public void absorbTheStreamBody() { // TODO locking
+    public void absorbTheStreamBody() {
         if (mark == 0) {
             items.clear();
             items.addAll(Arrays.asList(body.theStreamBody()));
         }
     }
 
-    public void updateTheStreamBody() { // TODO locking
+    public void updateTheStreamBody() {
         final int size = items.size();
         StreamItem[] theNewStreamBody = new StreamItem[size];
         int i = 0;

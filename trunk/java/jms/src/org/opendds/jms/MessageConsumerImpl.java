@@ -122,7 +122,6 @@ public class MessageConsumerImpl implements MessageConsumer {
     }
 
     private Topic extractDDSTopicFromDestination(Destination destination) throws JMSException {
-        // TODO placeholder, to be elaborated
         TopicImpl topicImpl = (TopicImpl) destination;
         return topicImpl.createDDSTopic(sessionImpl.getOwningConnection());
     }
@@ -272,7 +271,7 @@ public class MessageConsumerImpl implements MessageConsumer {
         if (closed) throw new IllegalStateException("This MessageConsumer is closed.");
     }
 
-    void doRecover() {
+    void doRecover() throws JMSException {
         List<DataReaderHandlePair> dataReaderHandlePairs = null;
         synchronized (lockForUnacknowledged) {
             dataReaderHandlePairs = new ArrayList<DataReaderHandlePair>(unacknowledged);
@@ -285,7 +284,7 @@ public class MessageConsumerImpl implements MessageConsumer {
         }
     }
 
-    private void doRecoverAsync(List<DataReaderHandlePair> dataReaderHandlePairs) {
+    private void doRecoverAsync(List<DataReaderHandlePair> dataReaderHandlePairs) throws JMSException {
         for (DataReaderHandlePair pair : dataReaderHandlePairs) {
             final MessagePayloadDataReader reader = pair.getDataReader();
             final int handle = pair.getInstanceHandle();
@@ -303,7 +302,7 @@ public class MessageConsumerImpl implements MessageConsumer {
         }
     }
 
-    private Message doRecoverSync() {
+    private Message doRecoverSync() throws JMSException {
         while (true) {
             final DataReaderHandlePair pair = toBeRecovered.remove(0);
             final MessagePayloadDataReader reader = pair.getDataReader();
@@ -325,11 +324,11 @@ public class MessageConsumerImpl implements MessageConsumer {
         }
     }
 
-    protected boolean isDurableAcknowledged(AbstractMessageImpl message) {
+    protected boolean isDurableAcknowledged(AbstractMessageImpl message) throws JMSException {
         return false;
     }
 
-    public void doAcknowledge() {
+    public void doAcknowledge() throws JMSException {
         List<DataReaderHandlePair> copy;
         synchronized(lockForUnacknowledged) {
             copy = new ArrayList<DataReaderHandlePair>(unacknowledged);
