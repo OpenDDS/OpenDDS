@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms;
 
 import javax.jms.Connection;
@@ -19,9 +23,9 @@ import org.junit.remote.runner.RemoteRunner;
 import org.junit.runner.RunWith;
 
 /**
- * @author Weiqi Gao
+ * @author  Weiqi Gao
+ * @version $Revision$
  */
-
 @Remote(endpoint = "http://localhost:8080/opendds-jms-compat/")
 @RunWith(RemoteRunner.class)
 public class MessageProducerImplTest {

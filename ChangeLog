@@ -1,3 +1,14 @@
+Sun Dec 14 02:42:13 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/compat/test/org/opendds/jms/MessageConsumerImplTest.java:
+        * java/jms/compat/test/org/opendds/jms/MessageProducerImplTest.java:
+        * java/jms/compat/test/org/opendds/jms/SessionImplTest.java:
+        * java/jms/src/org/opendds/jms/DurableMessageConsumerImpl.java:
+        * java/jms/src/org/opendds/jms/MessageConsumerImpl.java:
+        * java/jms/src/org/opendds/jms/persistence/HibernatePersistenceManager.java:
+
+          Final round of re-formatting and import optimization.
+
 Sun Dec 14 00:06:46 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/src/org/opendds/jms/BytesBodyFacade.java:
