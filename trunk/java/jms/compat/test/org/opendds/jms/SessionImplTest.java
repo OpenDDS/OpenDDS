@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ */
+
 package org.opendds.jms;
 
 import java.util.ArrayList;
@@ -28,11 +32,9 @@ import org.junit.remote.runner.RemoteRunner;
 import org.junit.runner.RunWith;
 
 /**
- * Functional tests for SessionImpl.
- *
- * @author Weiqi Gao
+ * @author  Weiqi Gao
+ * @version $Revision$
  */
-
 @Remote(endpoint = "http://localhost:8080/opendds-jms-compat/")
 @RunWith(RemoteRunner.class)
 public class SessionImplTest {

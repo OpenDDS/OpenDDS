@@ -1,9 +1,9 @@
 package org.opendds.jms;
 
-import javax.jms.Topic;
-import javax.jms.TopicSubscriber;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.Topic;
+import javax.jms.TopicSubscriber;
 
 import org.opendds.jms.persistence.DurableSubscriptionStore;
 
