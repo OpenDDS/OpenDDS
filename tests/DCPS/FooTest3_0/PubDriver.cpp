@@ -658,6 +658,16 @@ PubDriver::unregister_test ()
                                handle);
 
   TEST_CHECK (ret == ::DDS::RETCODE_OK);
+
+  // Test control_dropped.
+  // Unregister_all will request transport to remove_all_control_msgs.
+  // which results the control_dropped call.
+  foo_datawriter_servant_->unregister_all ();
+
+  // The subscriber will wait a while after telling the
+  // publisher shutdown, so the unreigster message can still
+  // be sent out.
+  TEST_CHECK (foo_datawriter_servant_->control_dropped_count_ == 0);
 }
 
 
@@ -1015,16 +1025,6 @@ PubDriver::liveliness_test ()
   foo.sample_sequence = num_writes;
   ret = foo_datawriter_->write(foo,
                                handle);
-
-  // Test control_dropped.
-  // Unregister_all will request transport to remove_all_control_msgs.
-  // which results the control_dropped call.
-  datawriter_servant_->unregister_all ();
-
-  // The subscriber will wait a while after telling the
-  // publisher shutdown, so the unreigster message can still
-  // be sent out.
-  TEST_CHECK (datawriter_servant_->control_dropped_count_ == 0);
 }
 
 int

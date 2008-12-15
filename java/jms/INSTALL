@@ -39,7 +39,7 @@ a general overview of the OpenDDS Java bindings.
      UNIX    => cd $DDS_ROOT/java/jms
                 ant all
 
-     Windows => cd %DDS_ROOT%/java/jms
+     Windows => cd %DDS_ROOT%\java\jms
                 ant all
 
      NOTE: This will generate a JCA 1.5 compatible RAR (Resource Adapter

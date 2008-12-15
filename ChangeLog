@@ -1,3 +1,13 @@
+Mon Dec 15 23:36:26 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/INSTALL:
+
+          Fixed bad Windows path names.
+
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+
+          Fixed failing liveliness test; updated unregister test.
+
 Mon Dec 15 19:13:36 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * java/build_scripts/jms_scoreboard.pl:
