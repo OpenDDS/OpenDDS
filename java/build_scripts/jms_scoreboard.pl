@@ -55,6 +55,8 @@ for my $tgt (@targets) {
                     my $t = $3 . 's';
                     my $r = $1 + $2;
                     $overall_status += $r;
+                    s/Errors:/Errs:/; #we don't want this to get parsed as an
+                                      #'error' line on the scoreboard
                     print "$_\n\nauto_run_tests_finished: $testclass Time:$t ".
                         "Result:$r\n";
                 }
