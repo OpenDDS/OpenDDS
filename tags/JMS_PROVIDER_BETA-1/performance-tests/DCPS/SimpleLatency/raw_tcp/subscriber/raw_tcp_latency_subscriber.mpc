@@ -1,0 +1,11 @@
+project (DCPS_Perf*) : aceexe {
+  exename = raw_tcp_subscriber
+  exeout  = ..
+
+  includes += ../common
+
+  Source_Files {
+    TestDriver.cpp
+    main.cpp
+  }
+}

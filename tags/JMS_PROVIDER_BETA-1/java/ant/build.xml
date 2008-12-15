@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Id$
+
+    Author:  Steven Stallion
+    Version: $Revision$
+-->
+<project name="opendds-ant" default="jar" basedir=".">
+    <property name="build.dir" value="${basedir}/build"/>
+    <property name="doc.dir" value="${basedir}/doc"/>
+    <property name="lib.dir" value="${basedir}/lib"/>
+    <property name="src.dir" value="${basedir}/src"/>
+    <property name="test.dir" value="${basedir}/test"/>
+
+    <property environment="env"/>
+    <property file="build.properties"/>
+
+    <!--
+        Project Paths
+    -->
+    <path id="project.classpath">
+        <pathelement location="${build.dir}/classes"/>
+        <pathelement location="${build.dir}/tests"/>
+
+        <pathelement location="${src.dir}"/>
+        <pathelement location="${test.dir}"/>
+
+        <fileset dir="${lib.dir}"/>
+    </path>
+
+    <!--
+        Project Targets
+    -->
+    <target name="all" depends="clean, test, deploy"
+            description="Meta target for: clean, test, deploy"/>
+
+    <target name="clean" depends="test.clean"
+            description="Delete all build artifacts">
+        <delete dir="${build.dir}"/>
+    </target>
+
+    <target name="init">
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${build.dir}/classes"/>
+    </target>
+
+    <target name="compile" depends="init"
+            description="Compile classes under src/">
+        <javac srcdir="${src.dir}"
+               destdir="${build.dir}/classes"
+               debug="${compile.debug}"
+               deprecation="${compile.deprecation}"
+               optimize="${compile.optimize}"
+               source="${project.source}"
+               classpathref="project.classpath">
+        </javac>
+    </target>
+
+    <target name="jar" depends="compile"
+            description="Archive compiled classes and resources">
+        <jar destfile="${build.dir}/${ant.project.name}.jar"
+             compress="${jar.compress}"
+             index="${jar.index}">
+            <fileset dir="${build.dir}/classes"/>
+            <fileset dir="${src.dir}">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </jar>
+    </target>
+
+    <target name="deploy" depends="jar"
+            description="Deploy project JAR to interested sub-projects">
+        <copy file="${build.dir}/${ant.project.name}.jar"
+              todir="${env.DDS_ROOT}/java/jms/lib"/>
+    </target>
+
+    <target name="test.clean">
+        <delete dir="${build.dir}/tests"/>
+    </target>
+
+    <target name="test.init" depends="init">
+        <mkdir dir="${build.dir}/tests"/>
+    </target>
+
+    <target name="test.compile" depends="compile, test.init">
+        <javac srcdir="${test.dir}"
+               destdir="${build.dir}/tests"
+               debug="${compile.debug}"
+               deprecation="${compile.deprecation}"
+               optimize="${compile.optimize}"
+               source="${project.source}"
+               classpathref="project.classpath">
+        </javac>
+    </target>
+
+    <target name="test" depends="test.compile"
+            description="Run test suites under test/">
+        <junit haltonerror="true"
+               haltonfailure="true"
+               printsummary="true"
+               fork="true">
+            <formatter type="brief"/>
+            <batchtest todir="${build.dir}/tests">
+                <fileset dir="${test.dir}">
+                    <include name="**/*Test.java"/>
+                </fileset>
+            </batchtest>
+            <classpath refid="project.classpath"/>
+            <jvmarg value="-ea"/> <!-- enable assertions -->
+        </junit>
+    </target>
+</project>

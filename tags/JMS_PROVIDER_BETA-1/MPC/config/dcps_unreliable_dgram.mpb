@@ -1,0 +1,4 @@
+project {
+  libs        += SimpleUnreliableDgram
+  after       += SimpleUnreliableDgram
+}
