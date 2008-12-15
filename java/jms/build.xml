@@ -220,7 +220,7 @@
             </metainf>
 
             <manifest>
-                <attribute name="Specification-Title" value="J2EE Connector Architecture (JCA)"/>
+                <attribute name="Specification-Title" value="J2EE Connector Architecture"/>
                 <attribute name="Specification-Version" value="${version.jca}"/>
                 <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
                 <attribute name="Implementation-Title" value="OpenDDS JMS Resource Adapter"/>
