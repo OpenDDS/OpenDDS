@@ -1,3 +1,14 @@
+Mon Dec 15 05:57:16 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/README:
+        * java/jms/example:
+        * java/jms/example/jboss:
+        * java/jms/example/jboss/opendds-ds.xml:
+        * java/jms/example/jboss/opendds-ir-ds.xml:
+        * java/jms/compat/src/META-INF/service/opendds-ir-ds.xml:
+
+          Added documentation.
+
 Sun Dec 14 02:42:13 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/compat/test/org/opendds/jms/MessageConsumerImplTest.java:
