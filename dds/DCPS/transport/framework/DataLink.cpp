@@ -71,12 +71,6 @@ OpenDDS::DCPS::DataLink::~DataLink()
     }
 }
 
-int
-OpenDDS::DCPS::DataLink::scheduler() const
-{
-  return this->impl_->config()->scheduler_;
-}
-
 void
 OpenDDS::DCPS::DataLink::resume_send ()
 {

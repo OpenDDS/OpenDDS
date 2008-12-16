@@ -1,3 +1,36 @@
+Tue Dec 16 22:50:36 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Added scheduler specification via configuration file.
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Removed scheduler specification access.
+
+        * dds/DCPS/transport/framework/PerConnectionSynch.cpp:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+
+          Use Service_Participant scope scheduling policy.
+
+        * dds/DCPS/transport/framework/TransportConfiguration.h:
+        * dds/DCPS/transport/framework/TransportConfiguration.inl:
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+
+          Removed scheduler specification via configuration file.
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Use Service_Participant scope scheduling policy.
+
+        * tests/DCPS/Priority/transport.ini:
+
+          Move scheduling policy specification to [common] section.
+
 Tue Dec  9 04:36:15 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.h:
