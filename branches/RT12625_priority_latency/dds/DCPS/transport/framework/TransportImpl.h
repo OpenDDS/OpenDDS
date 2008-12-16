@@ -133,7 +133,6 @@ namespace OpenDDS
         /// Expose the configuration information so others can see what
         /// we can do.
         TransportConfiguration* config() const;
-                                                     
 
       protected:
 

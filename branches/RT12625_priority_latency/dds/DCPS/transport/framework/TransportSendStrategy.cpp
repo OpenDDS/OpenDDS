@@ -14,6 +14,7 @@
 #include "TransportDefs.h"
 #include "DirectPriorityMapper.h"
 #include "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/Service_Participant.h"
 #include "EntryExit.h"
 
 #if !defined (__ACE_INLINE__)
@@ -71,7 +72,7 @@ OpenDDS::DCPS::TransportSendStrategy::TransportSendStrategy
   this->synch_ = config->send_thread_strategy()->create_synch_object(
     synch_resource,
     mapper.thread_priority(),
-    config->scheduler_
+    TheServiceParticipant->scheduler()
   );
 
   // We cache this value in data member since it doesn't change, and we

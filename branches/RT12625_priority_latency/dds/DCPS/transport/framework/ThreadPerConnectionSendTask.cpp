@@ -9,6 +9,7 @@
 #include "DirectPriorityMapper.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/Service_Participant.h"
 
 #include "ace/Auto_Ptr.h"
 
@@ -80,9 +81,10 @@ int OpenDDS::DCPS::ThreadPerConnectionSendTask::open(void*)
   DirectPriorityMapper mapper( this->link_->priority());
   int priority = mapper.thread_priority();
 
-  long flags  = THR_NEW_LWP | THR_JOINABLE | ACE_SCOPE_THREAD;
-  if( this->link_->scheduler() >= 0) {
-    flags |= this->link_->scheduler();
+  long flags  = THR_NEW_LWP | THR_JOINABLE ;//|THR_SCOPE_PROCESS | THR_SCOPE_THREAD;
+  int policy = TheServiceParticipant->scheduler();
+  if( policy >= 0) {
+    flags |= policy;
   }
 
   // Activate this task object with one worker thread.

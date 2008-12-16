@@ -35,7 +35,7 @@ OpenDDS::DCPS::PerConnectionSynch::open(void*)
   this->shutdown_ = 0;
 
   long flags;
-  flags  = THR_NEW_LWP | THR_JOINABLE | ACE_SCOPE_THREAD;
+  flags  = THR_NEW_LWP | THR_JOINABLE ;//|THR_SCOPE_PROCESS | THR_SCOPE_THREAD;
   if( this->scheduler_ >= 0) {
     flags |= this->scheduler_;
   }

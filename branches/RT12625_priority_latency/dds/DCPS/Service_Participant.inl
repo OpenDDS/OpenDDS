@@ -271,5 +271,19 @@ namespace OpenDDS
       return this->federation_liveliness_;
     }
 
+    ACE_INLINE
+    int&
+    Service_Participant::scheduler()
+    {
+      return this->scheduler_;
+    }
+
+    ACE_INLINE
+    int
+    Service_Participant::scheduler() const
+    {
+      return this->scheduler_;
+    }
+
   } // namespace ::DDS
 } // namespace OpenDDS
