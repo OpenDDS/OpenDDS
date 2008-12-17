@@ -1,3 +1,10 @@
+Wed Dec 17 17:11:25 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Reset the thread scheduling policy value used for thread
+          activation if the process scheduling policy was not set.
+
 Tue Dec 16 22:50:36 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:
