@@ -7,8 +7,10 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # Build or test the java/jms subtree with one command.
 # Requires ANT_HOME, JAVA_HOME, and JBOSS_HOME to be set.
 
-use Env qw(ANT_HOME DDS_ROOT);
+use Env qw(ANT_HOME DDS_ROOT ACE_ROOT);
 use Cwd;
+use lib "$ACE_ROOT/bin";
+use PerlACE::Run_Test;
 
 chdir $DDS_ROOT;
 my $opt_d = 'java/jms';
@@ -39,7 +41,15 @@ for my $tgt (@targets) {
         chdir($tgt->[0]) or die "ERROR: Cannot chdir to $tgt->[0]";
     }
     my $extra = ($operation eq 'test') ? '-l ant.log' : '';
-    my $status = system("\"$ANT_HOME/bin/ant\" @ARGV $extra $tgt->[1]");
+    my $status;
+    if ($tgt->[1] eq 'jboss42x') {
+      my $PROC = new PerlACE::Process("$ANT_HOME/bin/ant",
+                                      "@ARGV $extra $tgt->[1]");
+      $status = $PROC->SpawnWaitKill(300);
+    }
+    else {
+      $status = system("\"$ANT_HOME/bin/ant\" @ARGV $extra $tgt->[1]");
+    }
     if ($operation eq 'test') {
         open LOG, 'ant.log' or die "ERROR: Can't open ant.log";
         my $testclass;
