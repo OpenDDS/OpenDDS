@@ -646,6 +646,8 @@ namespace OpenDDS
               ACE_TEXT("sched_params failed: %m.\n")
             ));
           }
+          // Reset the thread scheduler value if we did not succeed.
+          this->scheduler_ = -1;
 
         } else if( DCPS_debug_level > 0) {
           ACE_DEBUG((LM_WARNING,
