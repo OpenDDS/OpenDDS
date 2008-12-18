@@ -1,5 +1,5 @@
-project : dcps_tcp, dcps_unreliable_dgram, dcps_reliable_multicast {
-  after += DDSWrapper_OpenDDS
+project : wrapper_base {
+  after += DDSWrapper
   libs  += DDSWrapper
 
   includes += $(DDS_ROOT)/wrapper
