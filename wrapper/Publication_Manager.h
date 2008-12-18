@@ -38,9 +38,6 @@ class DDSWrapper_Export Publication_Manager
   /// assignment operator
   void operator= (const Publication_Manager & copy);
 
-  /// checks for null reference
-  bool null () const;
-
   /// will create a topic instance using the domain manager
   /// memory management of the returned datawriter has to be done by the caller
   DDS::DataWriter_ptr access_topic (const Topic_Manager & topic,

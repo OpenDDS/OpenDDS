@@ -73,9 +73,6 @@ class DDSWrapper_Export Domain_Manager
   /// assignment operator
   void operator= (const Domain_Manager& copy);  
 
-  /// checks for null reference
-  bool null () const;
-
   /// this call blocks the thread until a SIGINT signal for the process is received
   void run ();
 
