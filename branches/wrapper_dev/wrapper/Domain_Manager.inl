@@ -25,12 +25,6 @@ Domain_Manager::run ()
   manager_impl_->run ();
 }
 
-ACE_INLINE bool
-Domain_Manager::null () const
-{
-  return manager_impl_.null ();
-}
-
 ACE_INLINE void
 Domain_Manager::shutdown ()
 {

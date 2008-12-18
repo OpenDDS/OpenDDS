@@ -1,3 +1,47 @@
+Thu Dec 18 21:55:49 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
+
+        * wrapper/Domain_Manager.h
+        * wrapper/Topic_Manager.inl
+        * wrapper/Publication_Manager.h
+        * wrapper/example/OpenDDS
+        * wrapper/example/OpenDDS/ExchangeEventDataReaderListenerImpl.h
+        * wrapper/example/OpenDDS/pub_udp_conf.ini
+        * wrapper/example/OpenDDS/QuoteDataReaderListenerImpl.cpp
+        * wrapper/example/OpenDDS/StockQuoterCommon_Export.h
+        * wrapper/example/OpenDDS/sub_udp_conf.ini
+        * wrapper/example/OpenDDS/subscriber.cpp
+        * wrapper/example/OpenDDS/QuoteDataReaderListenerImpl.h
+        * wrapper/example/OpenDDS/StockQuoter.idl
+        * wrapper/example/OpenDDS/WrapperStockQuoter.mpc
+        * wrapper/example/OpenDDS/dds_tcp_conf.ini
+        * wrapper/example/OpenDDS/sub2_udp_conf.ini
+        * wrapper/example/OpenDDS/tcp.conf
+        * wrapper/example/OpenDDS/ExchangeEventDataReaderListenerImpl.cpp
+        * wrapper/example/OpenDDS/udp.conf
+        * wrapper/example/OpenDDS/run_test.pl
+        * wrapper/example/OpenDDS/publisher.cpp
+        * wrapper/example/README
+        * wrapper/Subscription_Manager.inl
+        * wrapper/Topic_Manager_T.cpp
+        * wrapper/Domain_Manager.inl
+        * wrapper/Publication_Manager.inl
+        * wrapper/wrapper_config.h
+        * wrapper/Topic_Manager.h
+        * wrapper/OpenSplice
+        * wrapper/OpenSplice/OpenSplice_Subscription_Manager.cpp
+        * wrapper/OpenSplice/OpenSplice_Subscription_Manager.inl
+        * wrapper/OpenSplice/OpenSplice_Domain_Manager.cpp
+        * wrapper/OpenSplice/OpenSplice_Domain_Manager.inl
+        * wrapper/OpenSplice/OpenSplice_Subscription_Manager.h
+        * wrapper/OpenSplice/OpenSplice_Publication_Manager.cpp
+        * wrapper/OpenSplice/OpenSplice_Publication_Manager.inl
+        * wrapper/OpenSplice/OpenSplice_create_domain_manager.cpp
+        * wrapper/OpenSplice/OpenSplice_Domain_Manager.h
+        * wrapper/OpenSplice/OpenSplice_Publication_Manager.h
+        * wrapper/Subscription_Manager.h:
+        
+          Added first version of OpenSplice port.
+
 Wed Dec 17 23:42:28 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * java/build_scripts/jms_scoreboard.pl:
