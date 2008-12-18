@@ -15,7 +15,6 @@
 
 #include <memory>
 #include <ace/streams.h>
-#include "wrapper_topic.h"
 #include "Domain_Manager.h"
 #include "Subscription_Manager.h"
 #include "Publication_Manager.h"
