@@ -1,0 +1,3 @@
+project: dcps {
+  exename = GuardConditionTest
+}
