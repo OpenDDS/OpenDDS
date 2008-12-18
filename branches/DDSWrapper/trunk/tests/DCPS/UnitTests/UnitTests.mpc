@@ -1,0 +1,7 @@
+project(*LivelinessCompatibility): dcpsexe {
+  exename   = *
+
+  Source_Files {
+    LivelinessCompatibility.cpp
+  }
+}

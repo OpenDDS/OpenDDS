@@ -1,0 +1,76 @@
+Last updated: 2/16/2006
+
+This is an analysis of possible non-standard hooks into the transport.
+
+What are the possible use cases?
+1) publisher detecting when a connection is lost.
+	[] need a hook.
+
+1b) publisher detecting when a connection is reestablished.
+	As of v0.7 lost connections are not reestablished.
+
+2) subscriber detecting when a connection is lost.
+	This can be done by setting liveliness.lease_duration != INFINITE
+	so you get a DataReaderListenerImpl::on_liveliness_changed callback.
+
+3) knowing when a reader subscribes
+	This is supported by the on_publication_match callback and BIT.
+
+4) knowing when a writer starts publishing (declares the intent to publish by creating a writer).
+	This is supported by the on_subscription_match and BIT.
+
+5) knowing when a reader unsubscribes?
+	BIT should support this by marking the reader's BIT sample as disposed.
+
+6) knowing when a writer stops publishing?
+	BIT should support this by marking the writer's BIT sample as disposed.
+
+7) reader knowing a sample was rejected ( RESOURCE_LIMITS QoS set - new value rejected)
+	This is supported by on_sample_rejected call.
+
+8) reader knowing a sample was lost   (RESOURCE_LIMITS == UNLIMITED - oldest value lost)
+	This is supported by on_sample_lost call.
+
+9) writer knowing a sample was dropped (on writing side because of backpressure).
+	[] need a hook.  Already have a hook from transport to datawriter.
+	Existing hook would say that the sample was dropped before sending 
+	to at least one reader but not how many or which readers.
+
+10) Has a sample been sent to all subscribers.
+	[] need a hook. Already have a hook from transport to datawriter.
+	Is part of proposed extensions to the spec. "Inspection of reliable status"
+
+11) Has a sample been sent to a specific subscriber.
+	[] need a hook.
+	Is part of proposed extensions to the spec. "Inspection of reliable status"
+
+
+
+
+========================= detailed analysis =========================
+1) publisher detecting when a connection is lost.
+
+The transport knows which entity ids are associated with each link/connection so when 
+it fails to establish or is lost after being established it could tell the publisher
+to call the appropriate listener.
+
+I suggest that we extend the PublisherListener to have communication_lost 
+and communication_reestablished callbacks.
+They will both have parameters similar to liveliness lost (the datawriter and status counts).
+
+Should we do the same for the subscription side even though it can use on_liveliness_changed
+to provide a similar functionality?
+
+1b) see 1) above.
+
+
+3,4,5,6) require that we get the BIT implementation to work properly.
+	3 and 4 have a limited solution (subscribe count but not specifically who) without BIT.
+
+9) & 10)
+We could extend the PublisherListener to provide a sample_dropped and a sample_delivered callbacks.
+Sample_delivered() would mean that it has been sent to all readers (for reliable it means they 
+all Acked it; for unreliable it just means it was sent).
+sample_dropped() would mean that it is being dropped and was not sent to one or more readers.
+It should include a count of sent_to and unsent_to associations.
+

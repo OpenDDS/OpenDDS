@@ -1,0 +1,4 @@
+This test verifies the fix of a bug in Registered_Data_Types that causes
+multiple domain participants within the same domain in a process
+can not register same data types. See RT8440.
+
