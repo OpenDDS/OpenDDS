@@ -137,36 +137,12 @@ OpenDDS_Domain_Manager::subscription_manager (
   const Domain_Manager_Ptr & ref,
   const DDS::SubscriberQos & qos)
 {
-<<<<<<< .working
-  if (transport_initialized_)
-    {
-      // only create new subscription manager that gets a transport impl id 
-      // the first time the method is called, since repeatedly registering a 
-      // transport would result in an error
-      return Subscription_Manager (
-               Subscription_Manager_Ptr (
-                 new OpenDDS_Subscription_Manager (Domain_Manager (ref), 
-						   qos)));
-    }
-  else
-    {
-      transport_initialized_ = true;
-
-      // use the simple constructor for consecutive calls of this method
-      return Subscription_Manager (
-               Subscription_Manager_Ptr (
-                 new OpenDDS_Subscription_Manager (Domain_Manager (ref), 
-			                           transport_impl_id_,
-						   qos)));
-    }
-=======
   // use the simple constructor for consecutive calls of this method
   return Subscription_Manager (
     Subscription_Manager_Ptr (
       new OpenDDS_Subscription_Manager (Domain_Manager (ref), 
 					transport_impl_id_,
 					qos)));
->>>>>>> .merge-right.r1756
 }
 
 Subscription_Manager
@@ -183,36 +159,12 @@ Publication_Manager
 OpenDDS_Domain_Manager::publication_manager (const Domain_Manager_Ptr & ref,
 					     const DDS::PublisherQos & qos)
 {
-<<<<<<< .working
-  if (transport_initialized_)
-    {
-      // only create new publication manager that gets a transport impl id the
-      // first time the method is called, since repeatedly registering a transport
-      // would result in an error
-      return Publication_Manager (
-               Publication_Manager_Ptr (
-                 new OpenDDS_Publication_Manager (Domain_Manager (ref),
-						  qos)));
-    }
-  else
-    {
-      transport_initialized_ = true;
-
-      // use the simple constructor for consecutive calls of this method
-      return Publication_Manager (
-               Publication_Manager_Ptr (
-                 new OpenDDS_Publication_Manager (Domain_Manager (ref),
-		     			          transport_impl_id_,
-						  qos)));
-    }
-=======
   // use the simple constructor for consecutive calls of this method
   return Publication_Manager (
     Publication_Manager_Ptr (
       new OpenDDS_Publication_Manager (Domain_Manager (ref),
 				       transport_impl_id_,
 				       qos)));
->>>>>>> .merge-right.r1756
 }
 
 bool
