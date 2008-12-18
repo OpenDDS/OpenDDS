@@ -1,0 +1,24 @@
+(1) Launch the simple_subscriber:
+
+  simple_subscriber -p 1:224.0.0.1:5555 -s 2:localhost:6666
+
+
+(2) Launch the simple_publisher:
+
+  simple_publisher -p 1:224.0.0.1:5555 -s 2:localhost
+
+
+This test is also an example of statically loading the SimpleMcast.
+
+ - The mcast.conf has static directive.
+
+   static DCPS_SimpleMcastLoader "-type SimpleMcast"
+ 
+ - The mpc file needs specify the dependency on SimpleMcast library.  
+ - The test code may need 
+    
+    #include "dds/DCPS/transport/simpleMCAST/SimpleMcast.h"
+ 
+    This would make sure Initializer is created before the Service 
+    Configurator open service configure file. The Initializer register
+    the SimpleMcastLoad service with service configurator.
