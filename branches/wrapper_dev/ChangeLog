@@ -1,15 +1,21 @@
+Fri Dec 19 01:14:55 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
+
+        * wrapper/DDSWrapper.mpc:
+        
+          Added new project file.
+
 Thu Dec 18 23:23:25 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
 
         * MPC/config/dds_wrapper.mpb
         * MPC/config/wrapper_base.mpb
         * MPC/config/wrapper_src.mpb
-        * wrapper/example/OpenDDS/WrapperStockQuoter.mpc:
         
           Added mpc switches for OpenSplice support.
-        
+
+        * wrapper/example/OpenDDS/WrapperStockQuoter.mpc:        
         * wrapper/DDSWrapper_OpenDDS.mpc:
         
-          Removed this file.
+          Removed these files.
 
 Thu Dec 18 21:55:49 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
 
