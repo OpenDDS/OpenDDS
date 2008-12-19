@@ -1,3 +1,10 @@
+Fri Dec 19 02:33:48 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
+
+        * MPC/config/wrapper_base.mpb
+        * MPC/config/dds_wrapper.mpb:
+        
+          Changed the structure of the MPC templates.
+
 Fri Dec 19 01:14:55 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
 
         * wrapper/DDSWrapper.mpc:

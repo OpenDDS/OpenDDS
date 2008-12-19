@@ -1,6 +1,4 @@
 project : wrapper_base {
   after += DDSWrapper
   libs  += DDSWrapper
-
-  includes += $(DDS_ROOT)/wrapper
 }
