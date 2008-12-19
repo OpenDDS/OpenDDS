@@ -1,4 +1,4 @@
-feature((ospl) : splicelib, portableserver {
+feature(ospl) : splicelib, portableserver {
   macros += OPEN_SPLICE_CONFIG
 }
 
