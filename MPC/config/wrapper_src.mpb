@@ -1,5 +1,7 @@
 feature (ospl) : wrapper_base {
 
+  libout = $(OSPL_HOME)/lib
+
   Source_Files {
     OpenSplice/OpenSplice_Domain_Manager.cpp
     OpenSplice/OpenSplice_Subscription_Manager.cpp

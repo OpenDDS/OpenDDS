@@ -56,6 +56,14 @@ public:
 
   /// this callback is called when the DataReader has found a DataWriter 
   /// that matches the topic and has compatible QoS.
+  virtual void on_subscription_matched (
+    DDS::DataReader_ptr reader,
+    const ::DDS::SubscriptionMatchedStatus & statu
+  )
+  throw (CORBA::SystemException);
+
+  /// this callback is called when the DataReader has found a DataWriter 
+  /// that matches the topic and has compatible QoS.
   virtual void on_subscription_match (
     DDS::DataReader_ptr reader,
     const DDS::SubscriptionMatchStatus & status

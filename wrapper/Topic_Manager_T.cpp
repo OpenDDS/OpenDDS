@@ -91,7 +91,12 @@ Topic_Manager_T <TYPE_SUPPORT, TS_IMPL>::create_topic (Domain_Manager & dm)
 	dm.participant ()->create_topic (name_.c_str (),
 					 type_name.in (),
 					 TOPIC_QOS_DEFAULT,
-					 ::DDS::TopicListener::_nil ());
+					 DDS::TopicListener::_nil (),
+#ifdef OPEN_SPLICE_CONFIG
+					 DDS::ANY_STATUS
+#endif
+					 );
+
     }
   else
     {
@@ -136,7 +141,11 @@ Topic_Manager_T <TYPE_SUPPORT, TS_IMPL>::datareader (const Subscription_Manager 
   DDS::DataReader_var dr = 
     sm.subscriber ()->create_datareader (topic_.in (),
 					 qos,
-					 listener_.in ()); 
+					 listener_.in (),
+#ifdef OPEN_SPLICE_CONFIG
+					 DDS::ANY_STATUS
+#endif 
+					 ); 
 
   return dr._retn ();
 }
@@ -155,7 +164,11 @@ Topic_Manager_T <TYPE_SUPPORT, TS_IMPL>::datawriter (const Publication_Manager &
   DDS::DataWriter_var dw = 
     pm.publisher ()->create_datawriter (topic_.in (),
 					qos,
-					DDS::DataWriterListener::_nil ()); 
+					DDS::DataWriterListener::_nil (),
+#ifdef OPEN_SPLICE_CONFIG
+					DDS::ANY_STATUS
+#endif
+					); 
 
   return dw._retn ();
 }
