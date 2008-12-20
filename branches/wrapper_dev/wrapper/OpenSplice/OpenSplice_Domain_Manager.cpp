@@ -27,9 +27,10 @@
 #include "OpenSplice_Domain_Manager.inl"
 #endif
 
-OpenSplice_Domain_Manager::OpenSplice_Domain_Manager (int & argc, 
-				char* argv[], 
-				DDS::DomainId_t domain_id)
+OpenSplice_Domain_Manager::OpenSplice_Domain_Manager (
+  int & argc, 
+  char* argv[], 
+  DDS::DomainId_t domain_id)
   : dp_ (DDS::DomainParticipant::_nil ()),
     shutdown_lock_ (0),
     exit_handler_ (shutdown_lock_)
@@ -49,6 +50,43 @@ OpenSplice_Domain_Manager::OpenSplice_Domain_Manager (int & argc,
   // create the participant named 'participant'.
   dp_ = dpf->create_participant (domain_id,
 				 PARTICIPANT_QOS_DEFAULT,
+				 DDS::DomainParticipantListener::_nil (),
+				 DDS::ANY_STATUS);
+
+  // check for successful creation
+  if (CORBA::is_nil (dp_.in ()))
+    throw Manager_Exception ("OpenSplice_Domain_Manager ctor failed to create "
+			     "domain participant.");
+
+  // add a the handler for the SIGINT signal here
+  ACE_Sig_Handler sig_handler;
+  sig_handler.register_handler (SIGINT, &exit_handler_);
+}
+
+OpenSplice_Domain_Manager::OpenSplice_Domain_Manager (
+  int & argc, 
+  char* argv[], 
+  DDS::DomainId_t domain_id,
+  const DDS::DomainParticipantQos & qos)
+  : dp_ (DDS::DomainParticipant::_nil ()),
+    shutdown_lock_ (0),
+    exit_handler_ (shutdown_lock_)
+{
+  // get the domain participant factory
+  DDS::DomainParticipantFactory_var dpf =
+    DDS::DomainParticipantFactory::get_instance ();
+
+  if (CORBA::is_nil (dpf.in ()))
+    throw Manager_Exception ("OpenSplice_Domain_Manager ctor could not get "
+			     "instance to DomainParticipant factory.");
+
+  if (!this->parse_args (argc, argv))
+    throw Manager_Exception ("OpenSplice_Domain_Manager ctor could process "
+			     "command line arguments.");
+
+  // create the participant named 'participant'.
+  dp_ = dpf->create_participant (domain_id,
+				 qos,
 				 DDS::DomainParticipantListener::_nil (),
 				 DDS::ANY_STATUS);
 

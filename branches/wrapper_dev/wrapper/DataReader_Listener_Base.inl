@@ -48,6 +48,15 @@ DataReader_Listener_Base::on_liveliness_changed (
 }
 
 ACE_INLINE void 
+DataReader_Listener_Base::on_subscription_matched (
+    DDS::DataReader_ptr,
+    const DDS::SubscriptionMatchedStatus &)
+  throw (CORBA::SystemException)
+{
+  // no op
+}
+
+ACE_INLINE void 
 DataReader_Listener_Base::on_subscription_match (
     DDS::DataReader_ptr,
     const DDS::SubscriptionMatchStatus &)

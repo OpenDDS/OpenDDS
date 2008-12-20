@@ -1,3 +1,45 @@
+Sat Dec 20 03:56:45 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
+
+        * MPC/config/wrapper_src.mpb:
+        
+          Added libout to $OSPL_HOME/lib.
+        
+        * wrapper/Topic_Manager_T.cpp:
+        
+          Used preprocessor macros to catch differences between OpenSplice
+          and OpenDDS.
+        
+        * wrapper/OpenDDS/OpenDDS_Domain_Manager.cpp:
+        
+          Cosmetic changes.
+        
+        * wrapper/OpenSplice/OpenSplice_Domain_Manager.cpp
+        * wrapper/OpenSplice/OpenSplice_create_domain_manager.cpp
+        * wrapper/OpenSplice/OpenSplice_Domain_Manager.h:
+        
+          Added DomainParticipantQos support.
+        
+        * wrapper/DataReader_Listener_Base.h
+        * wrapper/DataReader_Listener_Base.inl:        
+        
+          Added on_subscription_mathed () callback method, which seems to
+          differ from OpenDDS, which uses on_subscription_match ().
+        
+        * wrapper/example/OpenSplice
+        * wrapper/example/OpenSplice/ExchangeEventDataReaderListenerImpl.h
+        * wrapper/example/OpenSplice/QuoteDataReaderListenerImpl.cpp
+        * wrapper/example/OpenSplice/StockQuoterCommon_Export.h
+        * wrapper/example/OpenSplice/OpenSpliceStockQuoterWrapper.mpc
+        * wrapper/example/OpenSplice/StockQuoterDcps_impl.h
+        * wrapper/example/OpenSplice/subscriber.cpp
+        * wrapper/example/OpenSplice/QuoteDataReaderListenerImpl.h
+        * wrapper/example/OpenSplice/StockQuoter.idl
+        * wrapper/example/OpenSplice/ExchangeEventDataReaderListenerImpl.cpp
+        * wrapper/example/OpenSplice/run_test.pl
+        * wrapper/example/OpenSplice/publisher.cpp:
+        
+          Added example code for OpenSplice wrapper.
+        
 Fri Dec 19 02:33:48 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
 
         * MPC/config/wrapper_base.mpb

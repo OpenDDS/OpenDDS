@@ -30,8 +30,8 @@
 #endif
 
 OpenDDS_Domain_Manager::OpenDDS_Domain_Manager (int & argc, 
-				char* argv[], 
-				DDS::DomainId_t domain_id)
+						char* argv[], 
+						DDS::DomainId_t domain_id)
   : dp_ (DDS::DomainParticipant::_nil ()),
     transport_impl_id_ (1),
     shutdown_lock_ (0),
@@ -63,10 +63,11 @@ OpenDDS_Domain_Manager::OpenDDS_Domain_Manager (int & argc,
   sig_handler.register_handler (SIGINT, &exit_handler_);
 }
 
-OpenDDS_Domain_Manager::OpenDDS_Domain_Manager (int & argc, 
-				char* argv[], 
-				DDS::DomainId_t domain_id,
-				const DDS::DomainParticipantQos & qos)
+OpenDDS_Domain_Manager::OpenDDS_Domain_Manager (
+  int & argc, 
+  char* argv[], 
+  DDS::DomainId_t domain_id,
+  const DDS::DomainParticipantQos & qos)
   : dp_ (DDS::DomainParticipant::_nil ()),
     transport_impl_id_ (1),
     shutdown_lock_ (0),
