@@ -1,3 +1,15 @@
+Sun Dec 21 05:51:24 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/lib/opendds_ic/cpp_src/14a_compat.h:
+        * erlang/lib/opendds_ic/cpp_src/be_extern.h:
+        * erlang/lib/opendds_ic/cpp_src/be_global.h:
+        * erlang/lib/opendds_ic/cpp_src/be_global.cpp:
+        * erlang/lib/opendds_ic/cpp_src/be_init.cpp:
+        * erlang/lib/opendds_ic/cpp_src/main.cpp:
+        * erlang/lib/opendds_ic/opendds_ic.mpc:
+
+          Stubbed in minimal TAO_IDL BE support.
+
 Sun Dec 21 03:07:17 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * erlang:

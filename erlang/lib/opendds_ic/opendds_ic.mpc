@@ -2,16 +2,15 @@
 // $Id$
 //
 
-project: aceexe {
+project {
   exename   = opendds_ic
   exeout    = $(DDS_ROOT)/erlang/bin
 
   requires += erlang
   after    += TAO_IDL_FE
   
-  includes += $(ACE_ROOT) $(TAO_ROOT) \
-              $(TAO_ROOT)/TAO_IDL/fe $(TAO_ROOT)/TAO_IDL/include
-  libs     += ACE TAO_IDL_FE
+  includes += cpp_src $(TAO_ROOT) $(TAO_ROOT)/TAO_IDL/include $(TAO_ROOT)/TAO_IDL/fe 
+  libs     += TAO_IDL_FE
 
   Source_Files {
     cpp_src
