@@ -9,7 +9,7 @@ project {
   requires += erlang
   after    += TAO_IDL_FE
   
-  includes += cpp_src $(TAO_ROOT) $(TAO_ROOT)/TAO_IDL/include $(TAO_ROOT)/TAO_IDL/fe 
+  includes += cpp_src $(TAO_ROOT) $(TAO_ROOT)/TAO_IDL/include $(DDS_ROOT)
   libs     += TAO_IDL_FE
 
   Source_Files {

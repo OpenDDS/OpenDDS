@@ -1,3 +1,12 @@
+Sun Dec 21 15:16:16 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/lib/opendds_ic/cpp_src/be_extern.h:
+        * erlang/lib/opendds_ic/cpp_src/be_global.h:
+        * erlang/lib/opendds_ic/cpp_src/be_init.cpp:
+        * erlang/lib/opendds_ic/opendds_ic.mpc:
+
+          Trivial updates.
+
 Sun Dec 21 05:51:24 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * erlang/lib/opendds_ic/cpp_src/14a_compat.h:
