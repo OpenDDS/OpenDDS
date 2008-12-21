@@ -9,7 +9,7 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-class AST_Generator;
+#include "ast_generator.h"
 
 class BE_GlobalData
 {
