@@ -2,7 +2,6 @@
  * $Id$
  */
 
-#include "14a_compat.h"
 #include "be_extern.h"
 
 int
