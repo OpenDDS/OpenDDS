@@ -1,0 +1,15 @@
+project : dcps {
+  sharedname = idl_test1_lib
+  libout       = .
+
+  idlflags    += -Wb,export_macro=FooLib_Export -Wb,export_include=foolib_export.h
+  dynamicflags = FOOLIB_BUILD_DLL
+  pch_header   =
+  pch_source   =
+
+  IDL_Files {
+    FooDef.idl
+  }
+}
+
+
