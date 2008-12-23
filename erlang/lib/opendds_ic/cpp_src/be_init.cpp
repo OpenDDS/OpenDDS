@@ -2,7 +2,7 @@
  * $Id$
  */
 
-#include <iostream>
+#include "ace/Log_Msg.h"
 
 #include "dds/Version.h"
 
@@ -22,7 +22,9 @@ BE_post_init(BE_PI_CONST char **, long)
 void
 BE_version()
 {
-  std::cerr << "OPENDDS_IC_BE, version " << DDS_VERSION << std::endl;
+  ACE_DEBUG((LM_DEBUG,
+             "OPENDDS_IC_BE, version %s\n",
+             ACE_TEXT(DDS_VERSION)));
 }
 
 void
