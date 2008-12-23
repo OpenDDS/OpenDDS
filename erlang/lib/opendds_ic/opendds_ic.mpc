@@ -15,7 +15,7 @@ project: erlang {
   }
 
   Source_Files {
-    cpp_src
+    cpp_src/opendds_ic.erl >> opendds_ic
   }
 }
 
