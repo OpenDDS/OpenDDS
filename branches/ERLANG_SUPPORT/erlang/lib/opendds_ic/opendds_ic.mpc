@@ -2,20 +2,25 @@
 // $Id$
 //
 
-project: erlang {
-  exename   = opendds_ic
-  exeout    = $(DDS_ROOT)/erlang/bin
-  after    += TAO_IDL_FE
+project {
+  exename     = opendds_ic
+  exeout      = $(DDS_ROOT)/erlang/bin
+  after      += TAO_IDL_FE
 
-  includes += cpp_src $(TAO_ROOT) $(TAO_ROOT)/TAO_IDL/include $(DDS_ROOT)
-  libs     += TAO_IDL_FE
+  includes   += cpp_src $(TAO_ROOT) $(TAO_ROOT)/TAO_IDL \
+                $(TAO_ROOT)/TAO_IDL/include $(DDS_ROOT)
+  libs       += TAO_IDL_FE ACE
+
+  Source_Files {
+    cpp_src
+  }
+}
+
+project(*erl): erlang {
+  after       = opendds_ic
+  erlcflags  += -I./include -Wall
 
   Erlang_Files {
     src
   }
-
-  Source_Files {
-    cpp_src/opendds_ic.erl >> opendds_ic
-  }
 }
-

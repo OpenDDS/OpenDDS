@@ -9,7 +9,7 @@ project {
     automatic_in          = 1
     automatic_out         = 1
     command               = erlc
-    commandflags          = -o ebin -Wall
+    commandflags          = -o ebin
     generic_outputext     = .beam
     generic_pre_dirname   = ebin/
     inputext              = .erl

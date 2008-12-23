@@ -1,0 +1,8 @@
+//
+// $Id$
+//
+
+workspace {
+  $(DDS_ROOT)/dds
+  $(DDS_ROOT)/erlang/lib/opendds_ic
+}
