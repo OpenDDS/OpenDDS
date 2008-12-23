@@ -1,3 +1,11 @@
+Tue Dec 23 23:58:10 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/lib/opendds_ic/cpp_src:
+        * erlang/lib/opendds_ic/cpp_src/be_init.cpp:
+        * erlang/lib/opendds_ic/src/opendds_ic.erl:
+
+          Updated opendds_ic support.
+
 Tue Dec 23 18:55:25 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * MPC/config/erlang.mpb:
@@ -5,10 +13,10 @@ Tue Dec 23 18:55:25 UTC 2008  Steven Stallion  <stallions@ociweb.com>
         * erlang/lib/opendds_ic/opendds_ic.mpc:
 
           More MPC updates.
-        
+
         * erlang/lib/opendds_ic/cpp_src/main.cpp:
 
-          Cleaned up TAO_IDL includes.   
+          Cleaned up TAO_IDL includes.
 
 Tue Dec 23 03:31:07 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
