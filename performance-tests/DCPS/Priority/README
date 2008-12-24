@@ -1,0 +1,47 @@
+# $Id$
+
+This test attempts to characterize the performance of the TRANSPORT_LATENCY
+Quality of Service policy values.  See the Perl POD description embedded
+in the run_test.pl script in this directory for additional information
+about executing the tests.  Access this information most easily by
+executing:
+
+> ./run_test.pl --man
+
+which will format the POD as a manual page on the terminal.
+
+TEST SCENARIOS:
+
+  Factors to consider include:
+    Message Priority
+    Message size and statistics
+      Mean size
+      Maximum size
+      Minimum size
+      Size distribution and parameters
+        (Gaussian: average/variance)
+    Message rate and statistics
+      Mean rate
+      Rate distribution and parameters
+        (Poisson: average)
+    Number of hosts
+    Number of publication processes
+    Publications per process
+    Transport type
+
+1) TCP, 1 Host, 2 publication processes, 2 publications per process
+   process[12]/publication1:
+     priority:            10
+     max message size:  1200 bytes
+     min message size:   800 bytes
+     message statistics:
+       size:     gaussian/average==1000;deviation==150
+       interval: exponential/rate==100
+   process[12]/publication2:
+     priority:          ---unspecified (0)---
+     max message size:  1200 bytes
+     min message size:   800 bytes
+     message statistics:
+       size:     gaussian/average==1000;deviation==150
+       interval: exponential/rate==100
+

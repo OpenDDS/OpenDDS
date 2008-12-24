@@ -1,3 +1,33 @@
+Wed Dec 24 05:19:45 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/DCPS/Priority:
+        * performance-tests/DCPS/Priority/DataReaderListener.h:
+        * performance-tests/DCPS/Priority/DataReaderListener.cpp:
+        * performance-tests/DCPS/Priority/Options.h:
+        * performance-tests/DCPS/Priority/Options.inl:
+        * performance-tests/DCPS/Priority/Options.cpp:
+        * performance-tests/DCPS/Priority/Priority.mpc:
+        * performance-tests/DCPS/Priority/PublicationProfile.h:
+        * performance-tests/DCPS/Priority/PublicationProfile.cpp:
+        * performance-tests/DCPS/Priority/Publisher.h:
+        * performance-tests/DCPS/Priority/Publisher.cpp:
+        * performance-tests/DCPS/Priority/README:
+        * performance-tests/DCPS/Priority/Subscriber.h:
+        * performance-tests/DCPS/Priority/Subscriber.cpp:
+        * performance-tests/DCPS/Priority/Test.h:
+        * performance-tests/DCPS/Priority/Test.idl:
+        * performance-tests/DCPS/Priority/Writer.h:
+        * performance-tests/DCPS/Priority/Writer.cpp:
+        * performance-tests/DCPS/Priority/publisher_main.cpp:
+        * performance-tests/DCPS/Priority/run_test.pl:
+        * performance-tests/DCPS/Priority/scenario1.ini:
+        * performance-tests/DCPS/Priority/subscriber_main.cpp:
+        * performance-tests/DCPS/Priority/svc.conf:
+        * performance-tests/DCPS/Priority/transport.ini:
+
+	  Added new performance test directory for evaluating the
+	  TRANSPORT_PRIORITY implementation.
+
 Wed Dec 17 17:11:25 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
