@@ -16,9 +16,9 @@ project {
   }
 }
 
-project(*erl): erlang {
+project(*erl): erlang_otp {
   after       = opendds_ic
-  erlcflags  += -I./include -Wall
+  erlcflags  += -Wall
 
   Erlang_Files {
     src

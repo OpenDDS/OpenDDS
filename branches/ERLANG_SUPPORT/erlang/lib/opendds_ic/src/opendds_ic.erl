@@ -6,16 +6,20 @@
 
 -export([gen/1, gen/2]).
 
--define(LINE_MAX, 4096).
+-include("opendds_ic.hrl").
 
 gen(File) ->
-    gen(File, []).
+    gen0([File]).
 
 gen(File, Opts) ->
-    gen0(opendds_ic).
+    gen0(map_options(Opts) ++ [File]).
 
-gen0(Command) ->
-    loop(open_port({spawn, Command},
+%%----------------------------------------------------------------------
+%% Internal functions.
+%%----------------------------------------------------------------------
+
+gen0(Opts) ->
+    loop(open_port({spawn, command(Opts)},
                    [exit_status, in, {line, ?LINE_MAX}, stderr_to_stdout])).
 
 loop(Port) ->
@@ -24,12 +28,51 @@ loop(Port) ->
             ok;
 
         {Port, {exit_status, _Status}} ->
-            error; % non-zero status
+            error; % non-zero exit status
 
-        {Port, {data, Data}} ->
-            case Data of
-                {_Flag, Line} ->
-                    io:format("~s~n", [Line]),
-                    loop(Port)
-            end
+        {Port, {data, {_Flag, Line}}} ->
+            io:format("~s~n", [Line]),
+            loop(Port) % tail recursive
+    end.
+
+command(Opts) ->
+    string:join([?COMMAND|Opts], " ").
+
+map_options(Opts) ->
+    lists:map(fun map_option/1, Opts).
+
+map_option(Opt) ->
+    case Opt of
+        {local_escape, Escape} ->
+            string:concat("-A", Escape);
+        {dump} ->
+            "-d";
+        {preproc_cmd, Path} ->
+            string:concat("-Yp,", Path);
+        {preproc_flags, Flags} ->
+            string:concat("-Wp,", string:join(Flags, ","));
+        {preproc_to_stdout} ->
+            "-E";
+        {include, Dir} ->
+            string:concat("-I", Dir);
+        {define, Name} ->
+            string:concat("-D", Name);
+        {define, Name, Value} ->
+            string:concat("-D", Name) ++ string:concat("=", Value);
+        {undefine, Name} ->
+            string:concat("-U", Name);
+        {be_flags, Flags} ->
+            string:concat("-Wb,", string:join(Flags, ","));
+        {trace} ->
+            "-v";
+        {silent} ->
+            "-w";
+        {warn_case} ->
+            "-Cw";
+        {error_case} ->
+            "-Ce";
+        {tempdir, Dir} ->
+            string:concat("-t", Dir);
+        _Else ->
+            throw({invalid_option, Opt})
     end.
