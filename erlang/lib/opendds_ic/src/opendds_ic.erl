@@ -72,7 +72,7 @@ map_option(Opt) ->
         {error_case} ->
             "-Ce";
         {tempdir, Dir} ->
-            string:concat("-t", Dir);
+            string:concat("-t ", Dir);
         _Else ->
             throw({invalid_option, Opt})
     end.
