@@ -59,7 +59,7 @@ map_option(Opt) ->
             string:concat("-D", Name);
         {define, Name, Value} ->
             string:concat("-D", Name) ++ string:concat("=", Value);
-        {undefine, Name} ->
+        {undef, Name} ->
             string:concat("-U", Name);
         {be_flags, Flags} ->
             string:concat("-Wb,", string:join(Flags, ","));
