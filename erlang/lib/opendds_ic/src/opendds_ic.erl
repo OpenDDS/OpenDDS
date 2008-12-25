@@ -32,7 +32,7 @@ loop(Port) ->
 
         {Port, {data, {_Flag, Line}}} ->
             io:format("~s~n", [Line]),
-            loop(Port) % tail recursive
+            loop(Port) % tail-recursive
     end.
 
 command(Opts) ->
