@@ -43,12 +43,12 @@ map_options(Opts) ->
 
 map_option(Opt) ->
     case Opt of
-        {local_escape, Escape} ->
-            string:concat("-A", Escape);
+        {local_escape, Esc} ->
+            string:concat("-A", Esc);
         {dump} ->
             "-d";
-        {preproc_cmd, Path} ->
-            string:concat("-Yp,", Path);
+        {preproc_cmd, Cmd} ->
+            string:concat("-Yp,", Cmd);
         {preproc_flags, Flags} ->
             string:concat("-Wp,", string:join(Flags, ","));
         {preproc_to_stdout} ->
