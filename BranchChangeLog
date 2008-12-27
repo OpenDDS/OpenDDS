@@ -1,3 +1,13 @@
+Sat Dec 27 05:42:32 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/lib/opendds_ic/cpp_src/be_global.h:
+        * erlang/lib/opendds_ic/cpp_src/be_global.cpp:
+        * erlang/lib/opendds_ic/cpp_src/be_init.cpp:
+        * erlang/lib/opendds_ic/cpp_src/main.cpp:
+        * erlang/lib/opendds_ic/src/opendds_ic.erl:
+
+          Added additional command line arguments to opendds_ic.
+
 Thu Dec 25 05:27:56 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * erlang/lib/opendds_ic/include/opendds_ic.hrl:

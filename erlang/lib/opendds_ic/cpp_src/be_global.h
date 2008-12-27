@@ -35,7 +35,24 @@ public:
   AST_Generator *generator_init(void);
   // Create an AST node generator.
 
-  /// BE specific members
+  /// BE-specific methods
+  std::string output_dir(void) const;
+  void output_dir(const std::string &);
+
+  bool output_otp(void) const;
+  void output_otp(bool);
+
+  std::string stub_export_include(void) const;
+  void stub_export_include(const std::string &);
+
+  std::string stub_export_macro(void) const;
+  void stub_export_macro(const std::string &);
+
+private:
+  std::string output_dir_;
+  bool output_otp_;
+  std::string stub_export_include_;
+  std::string stub_export_macro_;
 };
 
 #endif /* OPENDDS_IC_BE_GLOBAL_H */
