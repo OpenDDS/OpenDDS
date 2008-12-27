@@ -2,8 +2,8 @@
  * $Id$
  */
 
-#include <iostream>
-#include <string>
+#include "ace/Basic_Types.h"
+#include "ace/Log_Msg.h"
 
 #include "be_global.h"
 
@@ -11,42 +11,34 @@ namespace
 {
   class BE_Arg {
   public:
-    BE_Arg(const std::string &s)
-    {
-      size_t pos = s.find('=');
-      this->name_ = s.substr(0, pos);
+    BE_Arg(const ACE_CString &s)
+    {      
+      ACE_Allocator::size_type pos = s.find('=');
+      this->name_ = s.substring(0, pos);
 
-      if (pos != std::string::npos) {
-        this->value_ = s.substr(pos + 1);
+      if (pos != ACE_CString::npos) {
+        this->value_ = s.substring(pos + 1);
       }
     }
-    
+
     ~BE_Arg()
     {
     }
 
-    std::string
-    name(void) const
-    {
-      return this->name_;
-    }
-    
-    std::string
-    value(void) const
-    {
-      return this->value_;
-    }
+    ACE_CString name(void) const { return this->name_; }
+    ACE_CString value(void) const { return this->value_; }
 
   private:
-    std::string name_;
-    std::string value_;
+    ACE_CString name_;
+    ACE_CString value_;
   };
 }
 
 BE_GlobalData *be_global = 0;
 
 BE_GlobalData::BE_GlobalData()
-  : output_otp_ (false)
+  : output_otp_(false),
+    suppress_skel_(false)
 {
 }
 
@@ -74,11 +66,11 @@ BE_GlobalData::prep_be_arg(char *arg_)
 
   } else if ("stub_export_macro" == arg.name()) {
     this->stub_export_macro_ = arg.value();
-  
+
   } else {
-    std::cerr
-      << "warning: unknown argument: " << arg.name()
-      << std::endl;
+    ACE_DEBUG((LM_WARNING,
+               ACE_TEXT("invalid argument: %s\n"),
+               ACE_TEXT(arg_)));
   }
 }
 
@@ -90,25 +82,34 @@ BE_GlobalData::arg_post_proc()
 void
 BE_GlobalData::usage() const
 {
-  std::cerr
-    << " -o <output_dir>\tOutput directory for the generated files. Default"
-    << " is current directory"
-    << std::endl;
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT(" -o <output_dir>\tOutput directory for the generated")
+             ACE_TEXT(" files. Default is current directory\n")));
 
-  std::cerr
-    << " -otp\t\t\tOutput directory uses the OTP layout. Generated files will"
-    << " be created in src, include, and cpp_src under <output_dir>"
-    << std::endl;
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT(" -otp\t\t\tOutput directory uses the OTP layout.")
+             ACE_TEXT(" Generated files will be created in src, include, and")
+             ACE_TEXT(" cpp_src under <output_dir>\n")));
 
-  std::cerr 
-    << " -Wb,stub_export_macro=<macro name>\t\tsets export macro for client"
-    << " files only"
-    << std::endl;
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT(" -Wb,skel_export_macro=<macro name>\t\tsets export")
+             ACE_TEXT(" macro for server files only\n")));
 
-  std::cerr
-    << " -Wb,stub_export_include=<include path>\t\tsets export include file"
-    << " for client only"
-    << std::endl;
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT(" -Wb,skel_export_include=<include path>\t\tsets")
+             ACE_TEXT(" export include file for server only\n")));
+
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT(" -Wb,stub_export_macro=<macro name>\t\tsets export")
+             ACE_TEXT(" macro for client files only\n")));
+
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT(" -Wb,stub_export_include=<include path>\t\tsets")
+             ACE_TEXT(" export include file for client only\n")));
+
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT(" -SS\t\t\tsuppress generating skeleton implementation")
+             ACE_TEXT(" and inline file (disabled by default)\n")));
 }
 
 AST_Generator *
@@ -117,38 +118,62 @@ BE_GlobalData::generator_init()
   return new(std::nothrow) AST_Generator;
 }
 
-std::string
+ACE_CString
+BE_GlobalData::skel_export_include() const
+{
+  return this->skel_export_include_;
+}
+
+void
+BE_GlobalData::skel_export_include(const ACE_CString &skel_export_include)
+{
+  this->skel_export_include_ = skel_export_include;
+}
+
+ACE_CString
+BE_GlobalData::skel_export_macro() const
+{
+  return this->skel_export_macro_;
+}
+
+void
+BE_GlobalData::skel_export_macro(const ACE_CString &skel_export_macro)
+{
+  this->skel_export_macro_ = skel_export_macro;
+}
+
+ACE_CString
 BE_GlobalData::stub_export_include() const
 {
   return this->stub_export_include_;
 }
 
 void
-BE_GlobalData::stub_export_include(const std::string &stub_export_include)
+BE_GlobalData::stub_export_include(const ACE_CString &stub_export_include)
 {
   this->stub_export_include_ = stub_export_include;
 }
 
-std::string
+ACE_CString
 BE_GlobalData::stub_export_macro() const
 {
   return this->stub_export_macro_;
 }
 
 void
-BE_GlobalData::stub_export_macro(const std::string &stub_export_macro)
+BE_GlobalData::stub_export_macro(const ACE_CString &stub_export_macro)
 {
   this->stub_export_macro_ = stub_export_macro;
 }
 
-std::string
+ACE_CString
 BE_GlobalData::output_dir() const
 {
   return this->output_dir_;
 }
 
 void
-BE_GlobalData::output_dir(const std::string &output_dir)
+BE_GlobalData::output_dir(const ACE_CString &output_dir)
 {
   this->output_dir_ = output_dir;
 }
