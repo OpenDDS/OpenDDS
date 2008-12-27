@@ -2,8 +2,8 @@
  * $Id$
  */
 
-#ifndef TAO_IC_14A_COMPAT_H
-#define TAO_IC_14A_COMPAT_H
+#ifndef TAO_IC_ACE_COMPAT_H
+#define TAO_IC_ACE_COMPAT_H
 
 #ifndef ACE_LACKS_PRAGMA_ONCE
 # pragma once
@@ -21,4 +21,4 @@
 # define BE_PI_CONST 
 #endif
 
-#endif /* TAO_IC_14A_COMPAT_H */
+#endif /* TAO_IC_ACE_COMPAT_H */

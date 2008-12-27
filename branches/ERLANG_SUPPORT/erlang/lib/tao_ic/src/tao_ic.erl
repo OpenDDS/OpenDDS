@@ -46,6 +46,7 @@ map_options(Opts) ->
 
 map_option(Opt) ->
     case Opt of
+        % frontend options
         {local_escape, Esc} ->
             string:concat("-A", Esc);
         {dump, true} ->
@@ -64,10 +65,6 @@ map_option(Opt) ->
             string:concat("-D", Name) ++ string:concat("=", Value);
         {undef, Name} ->
             string:concat("-U", Name);
-        {be, {stub_export_macro, Macro}} ->
-            string:concat("-Wb,stub_export_macro=", Macro);
-        {be, {stub_export_include, Include}} ->
-            string:concat("-Wb,stub_export_include=", Include);
         {trace, true} ->
             "-v";
         {silent, true} ->
@@ -76,12 +73,29 @@ map_option(Opt) ->
             "-Cw";
         {error_case, true} ->
             "-Ce";
-        {outputdir, Dir} ->
-            string:concat("-o ", Dir);
         {tempdir, Dir} ->
             string:concat("-t ", Dir);
+
+        % backend options
+        {be, T} ->
+            "-Wb," ++
+            case T of
+                {skel_export_macro, Macro} ->
+                    string:concat("skel_export_macro=", Macro);
+                {skel_export_include, Include} ->
+                    string:concat("skel_export_include=", Include);
+                {stub_export_macro, Macro} ->
+                    string:concat("stub_export_macro=", Macro);
+                {stub_export_include, Include} ->
+                    string:concat("stub_export_include=", Include)
+            end;
+        {suppress_skel, true} ->
+            "-SS";
         {otp, true} ->
             "-otp";
+        {outputdir, Dir} ->
+            string:concat("-o ", Dir);
+
         {_A, false} ->
             ""; % ignore option
         _Else ->

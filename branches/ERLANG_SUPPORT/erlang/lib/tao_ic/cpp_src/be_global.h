@@ -9,6 +9,8 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include "ace/Basic_Types.h"
+
 #include "ast_generator.h"
 
 class BE_GlobalData
@@ -36,23 +38,48 @@ public:
   // Create an AST node generator.
 
   /// BE-specific methods
-  std::string output_dir(void) const;
-  void output_dir(const std::string &);
+  ACE_CString output_dir(void) const;
+  void output_dir(const ACE_CString &);
 
   bool output_otp(void) const;
   void output_otp(bool);
 
-  std::string stub_export_include(void) const;
-  void stub_export_include(const std::string &);
+  ACE_CString skel_export_include(void) const;
+  void skel_export_include(const ACE_CString &);
 
-  std::string stub_export_macro(void) const;
-  void stub_export_macro(const std::string &);
+  ACE_CString skel_export_macro(void) const;
+  void skel_export_macro(const ACE_CString &);
+
+  ACE_CString stub_export_include(void) const;
+  void stub_export_include(const ACE_CString &);
+
+  ACE_CString stub_export_macro(void) const;
+  void stub_export_macro(const ACE_CString &);
+
+  bool suppress_skel(void) const;
+  void suppress_skel(bool);
 
 private:
-  std::string output_dir_;
+  ACE_CString output_dir_;
+  // -o
+
   bool output_otp_;
-  std::string stub_export_include_;
-  std::string stub_export_macro_;
+  // -otp
+  
+  ACE_CString skel_export_include_;
+  // -Wb,skel_export_include
+
+  ACE_CString skel_export_macro_;
+  // -Wb,skel_export_macro
+  
+  ACE_CString stub_export_include_;
+  // -Wb,stub_export_include
+  
+  ACE_CString stub_export_macro_;
+  // -Wb,stub_export_macro
+  
+  bool suppress_skel_;
+  // -SS
 };
 
 #endif /* TAO_IC_BE_GLOBAL_H */
