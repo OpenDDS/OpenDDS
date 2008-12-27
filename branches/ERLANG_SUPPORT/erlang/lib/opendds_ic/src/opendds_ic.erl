@@ -4,15 +4,18 @@
 
 -module(opendds_ic).
 
--export([gen/1, gen/2]).
+-export([gen/1, gen/2, version/0]).
 
 -include("opendds_ic.hrl").
 
 gen(File) ->
-    gen0([File]).
+    gen(File, []).
 
 gen(File, Opts) ->
-    gen0(map_options(Opts) ++ [File]).
+    gen0(map_options(Opts) ++ [to_list(File)]).
+
+version() ->
+    gen0(["-V"]).
 
 %%----------------------------------------------------------------------
 %% Internal functions.
@@ -45,13 +48,13 @@ map_option(Opt) ->
     case Opt of
         {local_escape, Esc} ->
             string:concat("-A", Esc);
-        {dump} ->
+        {dump, true} ->
             "-d";
         {preproc_cmd, Cmd} ->
             string:concat("-Yp,", Cmd);
         {preproc_flags, Flags} ->
             string:concat("-Wp,", string:join(Flags, ","));
-        {preproc_to_stdout} ->
+        {preproc_to_stdout, true} ->
             "-E";
         {include, Dir} ->
             string:concat("-I", Dir);
@@ -61,18 +64,31 @@ map_option(Opt) ->
             string:concat("-D", Name) ++ string:concat("=", Value);
         {undef, Name} ->
             string:concat("-U", Name);
-        {be_flags, Flags} ->
-            string:concat("-Wb,", string:join(Flags, ","));
-        {trace} ->
+        {be, {stub_export_macro, Macro}} ->
+            string:concat("-Wb,stub_export_macro=", Macro);
+        {be, {stub_export_include, Include}} ->
+            string:concat("-Wb,stub_export_include=", Include);
+        {trace, true} ->
             "-v";
-        {silent} ->
+        {silent, true} ->
             "-w";
-        {warn_case} ->
+        {warn_case, true} ->
             "-Cw";
-        {error_case} ->
+        {error_case, true} ->
             "-Ce";
+        {outputdir, Dir} ->
+            string:concat("-o ", Dir);
         {tempdir, Dir} ->
             string:concat("-t ", Dir);
+        {otp, true} ->
+            "-otp";
+        {_A, false} ->
+            ""; % ignore option
         _Else ->
             throw({invalid_option, Opt})
     end.
+
+to_list(A) when is_atom(A) ->
+    atom_to_list(A);
+to_list(L) when is_list(L) ->
+    L.

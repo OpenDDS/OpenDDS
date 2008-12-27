@@ -2,15 +2,24 @@
  * $Id$
  */
 
-#include "ace/Log_Msg.h"
+#include <iostream>
+#include <new>
 
+#include "ace/Log_Msg.h"
 #include "dds/Version.h"
 
 #include "be_extern.h"
+#include "global_extern.h"
 
 int
 BE_init(int &, char **)
 {
+  be_global = new(std::nothrow) BE_GlobalData;
+  if (be_global == 0) {
+    return -1;
+  }
+
+  idl_global->preserve_cpp_keywords(I_TRUE);
   return 0;
 }
 
@@ -22,9 +31,9 @@ BE_post_init(BE_PI_CONST char **, long)
 void
 BE_version()
 {
-  ACE_DEBUG((LM_DEBUG,
-             "OPENDDS_IC_BE, version %s\n",
-             ACE_TEXT(DDS_VERSION)));
+  std::cerr 
+    << "OPENDDS_IC_BE, version " << DDS_VERSION
+    << std::endl;
 }
 
 void

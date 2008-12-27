@@ -2,8 +2,8 @@
  * $Id$
  */
 
-// The following files are included which allows us to define our
-// own BE while reusing the original tao_idl FE.
+// The following files are included to reuse the original tao_idl
+// FE with our own custom BE (requires $TAO_ROOT/TAO_IDL).
 
 #include "tao_idl.cpp"
 
