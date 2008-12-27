@@ -2,8 +2,8 @@
  * $Id$
  */
 
-#ifndef OPENDDS_IC_BE_GLOBAL_H
-#define OPENDDS_IC_BE_GLOBAL_H
+#ifndef TAO_IC_BE_GLOBAL_H
+#define TAO_IC_BE_GLOBAL_H
 
 #ifndef ACE_LACKS_PRAGMA_ONCE
 # pragma once
@@ -55,4 +55,4 @@ private:
   std::string stub_export_macro_;
 };
 
-#endif /* OPENDDS_IC_BE_GLOBAL_H */
+#endif /* TAO_IC_BE_GLOBAL_H */

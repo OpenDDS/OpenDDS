@@ -3,7 +3,7 @@
 //
 
 project {
-  exename     = opendds_ic
+  exename     = tao_ic
   exeout      = $(DDS_ROOT)/erlang/bin
   after      += TAO_IDL_FE
 
@@ -17,7 +17,7 @@ project {
 }
 
 project(*erl): erlang_otp {
-  after       = opendds_ic
+  after       = tao_ic
   erlcflags  += -Wall
 
   Erlang_Files {

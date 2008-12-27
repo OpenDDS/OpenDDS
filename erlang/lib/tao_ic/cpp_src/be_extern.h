@@ -2,8 +2,8 @@
  * $Id$
  */
 
-#ifndef OPENDDS_IC_BE_EXTERN_H
-#define OPENDDS_IC_BE_EXTERN_H
+#ifndef TAO_IC_BE_EXTERN_H
+#define TAO_IC_BE_EXTERN_H
 
 #ifndef ACE_LACKS_PRAGMA_ONCE
 # pragma once
@@ -21,4 +21,4 @@ void  BE_produce(void);
 void  BE_abort(void);
 void  BE_cleanup(void);
 
-#endif /* OPENDDS_IC_BE_EXTERN_H */
+#endif /* TAO_IC_BE_EXTERN_H */

@@ -6,7 +6,7 @@
 #include <new>
 
 #include "ace/Log_Msg.h"
-#include "dds/Version.h"
+#include "tao/Version.h"
 
 #include "be_extern.h"
 #include "global_extern.h"
@@ -19,20 +19,20 @@ BE_init(int &, char **)
     return -1;
   }
 
-  idl_global->preserve_cpp_keywords(I_TRUE);
   return 0;
 }
 
 void
 BE_post_init(BE_PI_CONST char **, long)
 {
+  idl_global->preserve_cpp_keywords(I_TRUE);
 }
 
 void
 BE_version()
 {
   std::cerr 
-    << "OPENDDS_IC_BE, version " << DDS_VERSION
+    << "TAO_IC_BE, version " << TAO_VERSION
     << std::endl;
 }
 
