@@ -25,12 +25,14 @@ namespace
     {
     }
 
-    std::string name(void) const
+    std::string
+    name(void) const
     {
       return this->name_;
     }
     
-    std::string value(void) const
+    std::string
+    value(void) const
     {
       return this->value_;
     }
