@@ -1,3 +1,23 @@
+Sat Dec 27 19:47:40 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/DDS_erlang.mwc:
+        * erlang/lib/tao_ic/cpp_src/14a_compat.h:
+        * erlang/lib/tao_ic/cpp_src/be_extern.h:
+        * erlang/lib/tao_ic/cpp_src/be_global.h:
+        * erlang/lib/tao_ic/cpp_src/be_init.cpp:
+        * erlang/lib/tao_ic/include/tao_ic.hrl:
+        * erlang/lib/tao_ic/src/tao_ic.erl:
+        * erlang/lib/tao_ic/tao_ic.mpc:
+
+          Renamed opendds_ic to tao_idl; renamed opendds_tao to
+          tao.
+        
+        * erlang/lib/tao_ic/include/opendds_ic.hrl:
+        * erlang/lib/tao_ic/opendds_ic.mpc:
+        * erlang/lib/tao_ic/src/opendds_ic.erl:
+
+          Removed these files.
+
 Sat Dec 27 05:42:32 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * erlang/lib/opendds_ic/cpp_src/be_global.h:

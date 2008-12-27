@@ -4,5 +4,5 @@
 
 workspace {
   $(DDS_ROOT)/dds
-  $(DDS_ROOT)/erlang/lib/opendds_ic
+  $(DDS_ROOT)/erlang/lib/tao_ic
 }

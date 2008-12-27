@@ -2,11 +2,11 @@
 %%% $Id$
 %%%---------------------------------------------------------------------
 
--module(opendds_ic).
+-module(tao_ic).
 
 -export([gen/1, gen/2, version/0]).
 
--include("opendds_ic.hrl").
+-include("tao_ic.hrl").
 
 gen(File) ->
     gen(File, []).
