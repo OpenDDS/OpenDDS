@@ -3,9 +3,43 @@
  */
 
 #include <iostream>
-#include <new>
+#include <string>
 
 #include "be_global.h"
+
+namespace
+{
+  class BE_Arg {
+  public:
+    BE_Arg(const std::string &s)
+    {
+      size_t pos = s.find('=');
+      this->name_ = s.substr(0, pos);
+
+      if (pos != std::string::npos) {
+        this->value_ = s.substr(pos + 1);
+      }
+    }
+    
+    ~BE_Arg()
+    {
+    }
+
+    std::string name(void) const
+    {
+      return this->name_;
+    }
+    
+    std::string value(void) const
+    {
+      return this->value_;
+    }
+
+  private:
+    std::string name_;
+    std::string value_;
+  };
+}
 
 BE_GlobalData *be_global = 0;
 
@@ -29,8 +63,21 @@ BE_GlobalData::parse_args(long &, char **)
 }
 
 void
-BE_GlobalData::prep_be_arg(char *)
+BE_GlobalData::prep_be_arg(char *arg_)
 {
+  BE_Arg arg (arg_);
+
+  if ("stub_export_include" == arg.name()) {
+    this->stub_export_include_ = arg.value();
+
+  } else if ("stub_export_macro" == arg.name()) {
+    this->stub_export_macro_ = arg.value();
+  
+  } else {
+    std::cerr
+      << "warning: unknown argument: " << arg.name()
+      << std::endl;
+  }
 }
 
 void
