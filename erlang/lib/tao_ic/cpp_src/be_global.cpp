@@ -2,6 +2,7 @@
  * $Id$
  */
 
+#include "ace/Arg_Shifter.h"
 #include "ace/Basic_Types.h"
 #include "ace/Log_Msg.h"
 
@@ -11,7 +12,7 @@ namespace
 {
   class BE_Arg {
   public:
-    BE_Arg(const ACE_CString &s)
+    explicit BE_Arg(const ACE_CString &s)
     {      
       ACE_Allocator::size_type pos = s.find('=');
       this->name_ = s.substring(0, pos);
@@ -25,8 +26,23 @@ namespace
     {
     }
 
-    ACE_CString name(void) const { return this->name_; }
-    ACE_CString value(void) const { return this->value_; }
+    ACE_CString 
+    name(void) const
+    {
+      return this->name_;
+    }
+
+    ACE_CString
+    value(void) const
+    {
+      return this->value_;
+    }
+
+    bool
+    operator==(const char *s) const
+    {
+      return s == this->name_;
+    }
 
   private:
     ACE_CString name_;
@@ -52,24 +68,50 @@ BE_GlobalData::destroy()
 }
 
 void
-BE_GlobalData::parse_args(long &, char **)
+BE_GlobalData::parse_args(long &argc_, char **argv)
 {
+  int argc = static_cast<int>(argc_);
+  
+  ACE_Arg_Shifter_T<char> shifter(argc, argv);  
+  while (shifter.is_anything_left()) {
+    const char *arg = 0;
+
+    if ((arg = shifter.get_the_parameter("-o")) != 0) {
+      this->output_dir_ = arg;
+
+    } else if (shifter.cur_arg_strncasecmp("-otp") == 0) {
+      this->output_otp_ = true;
+
+    } else if (shifter.cur_arg_strncasecmp("-SS") == 0) {
+      this->suppress_skel_ = true;
+    
+    } else {
+      shifter.ignore_arg();
+    }
+  }
+  argc_ = argc; // update reference
 }
 
 void
 BE_GlobalData::prep_be_arg(char *arg_)
 {
-  BE_Arg arg (arg_);
+  BE_Arg arg(arg_);
 
-  if ("stub_export_include" == arg.name()) {
+  if (arg == "skel_export_include") {
+    this->skel_export_include_ = arg.value();
+
+  } else if (arg == "skel_export_macro") {
+    this->skel_export_macro_ = arg.value();
+
+  } else if (arg == "stub_export_include") {
     this->stub_export_include_ = arg.value();
 
-  } else if ("stub_export_macro" == arg.name()) {
+  } else if (arg == "stub_export_macro") {
     this->stub_export_macro_ = arg.value();
 
   } else {
     ACE_DEBUG((LM_WARNING,
-               ACE_TEXT("invalid argument: %s\n"),
+               ACE_TEXT("ignoring argument: %s\n"),
                ACE_TEXT(arg_)));
   }
 }
@@ -119,6 +161,30 @@ BE_GlobalData::generator_init()
 }
 
 ACE_CString
+BE_GlobalData::output_dir() const
+{
+  return this->output_dir_;
+}
+
+void
+BE_GlobalData::output_dir(const ACE_CString &output_dir)
+{
+  this->output_dir_ = output_dir;
+}
+
+bool
+BE_GlobalData::output_otp() const
+{
+  return this->output_otp_;
+}
+
+void
+BE_GlobalData::output_otp(bool output_otp)
+{
+  this->output_otp_ = output_otp;
+}
+
+ACE_CString
 BE_GlobalData::skel_export_include() const
 {
   return this->skel_export_include_;
@@ -164,28 +230,4 @@ void
 BE_GlobalData::stub_export_macro(const ACE_CString &stub_export_macro)
 {
   this->stub_export_macro_ = stub_export_macro;
-}
-
-ACE_CString
-BE_GlobalData::output_dir() const
-{
-  return this->output_dir_;
-}
-
-void
-BE_GlobalData::output_dir(const ACE_CString &output_dir)
-{
-  this->output_dir_ = output_dir;
-}
-
-bool
-BE_GlobalData::output_otp() const
-{
-  return this->output_otp_;
-}
-
-void
-BE_GlobalData::output_otp(bool output_otp)
-{
-  this->output_otp_ = output_otp;
 }

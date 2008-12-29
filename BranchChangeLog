@@ -1,3 +1,9 @@
+Mon Dec 29 22:25:44 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/lib/tao_ic/cpp_src/be_global.cpp:
+
+          Finalized arg parsing.
+
 Sat Dec 27 21:48:25 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * erlang/lib/tao_ic/cpp_src/ace_compat.h:
