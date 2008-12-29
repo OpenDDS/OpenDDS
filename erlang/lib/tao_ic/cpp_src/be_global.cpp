@@ -5,6 +5,7 @@
 #include "ace/Arg_Shifter.h"
 #include "ace/Basic_Types.h"
 #include "ace/Log_Msg.h"
+#include "ace/OS_Memory.h"
 
 #include "be_global.h"
 
@@ -157,7 +158,8 @@ BE_GlobalData::usage() const
 AST_Generator *
 BE_GlobalData::generator_init()
 {
-  return new(std::nothrow) AST_Generator;
+  AST_Generator *gen;
+  ACE_NEW_RETURN(gen, AST_Generator, 0);
 }
 
 ACE_CString

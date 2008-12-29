@@ -2,9 +2,9 @@
  * $Id$
  */
 
-#include <new>
-
 #include "ace/Log_Msg.h"
+#include "ace/OS_Memory.h"
+#include "ace/Version.h"
 #include "tao/Version.h"
 
 #include "ace_compat.h"
@@ -14,18 +14,16 @@
 int
 BE_init(int &, char **)
 {
-  be_global = new(std::nothrow) BE_GlobalData;
-  if (be_global == 0) {
-   return -1;
-  }
-
-  idl_global->preserve_cpp_keywords(I_TRUE);
+#if ACE_MAJOR_VERSION == 5 && ACE_MINOR_VERSION >= 5
+  ACE_NEW_RETURN(be_global, BE_GlobalData, -1);
+#endif
   return 0;
 }
 
 void
 BE_post_init(BE_PI_CONST char **, long)
 {
+  idl_global->preserve_cpp_keywords(I_TRUE);
 }
 
 void
