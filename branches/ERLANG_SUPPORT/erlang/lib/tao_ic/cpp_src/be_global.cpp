@@ -73,7 +73,7 @@ BE_GlobalData::parse_args(long &argc_, char **argv)
 {
   int argc = static_cast<int>(argc_);
   
-  ACE_Arg_Shifter_T<char> shifter(argc, argv);  
+  ACE_Arg_Shifter_T<char> shifter(argc, argv);
   while (shifter.is_anything_left()) {
     const char *arg = 0;
 
@@ -160,6 +160,7 @@ BE_GlobalData::generator_init()
 {
   AST_Generator *gen;
   ACE_NEW_RETURN(gen, AST_Generator, 0);
+  return gen;
 }
 
 ACE_CString
