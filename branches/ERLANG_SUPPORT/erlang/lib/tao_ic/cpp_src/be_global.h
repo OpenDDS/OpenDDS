@@ -61,22 +61,22 @@ public:
 
 private:
   ACE_CString output_dir_;
-  // -o
+  // -o <output_dir>
 
   bool output_otp_;
   // -otp
   
   ACE_CString skel_export_include_;
-  // -Wb,skel_export_include
+  // -Wb,skel_export_include=<include path>
 
   ACE_CString skel_export_macro_;
-  // -Wb,skel_export_macro
+  // -Wb,skel_export_macro=<macro name>
   
   ACE_CString stub_export_include_;
-  // -Wb,stub_export_include
+  // -Wb,stub_export_include=<include path>
   
   ACE_CString stub_export_macro_;
-  // -Wb,stub_export_macro
+  // -Wb,stub_export_macro=<macro name>
   
   bool suppress_skel_;
   // -SS

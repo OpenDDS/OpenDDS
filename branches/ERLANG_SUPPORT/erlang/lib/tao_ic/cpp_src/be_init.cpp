@@ -14,7 +14,7 @@
 int
 BE_init(int &, char **)
 {
-#if ACE_MAJOR_VERSION == 5 && ACE_MINOR_VERSION >= 5
+#ifdef ACE_PRE_5_5
   ACE_NEW_RETURN(be_global, BE_GlobalData, -1);
 #endif
   return 0;

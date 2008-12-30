@@ -112,7 +112,7 @@ BE_GlobalData::prep_be_arg(char *arg_)
 
   } else {
     ACE_DEBUG((LM_WARNING,
-               ACE_TEXT("ignoring argument: %s\n"),
+               ACE_TEXT("TAO_IC_BE: ignoring argument: %s\n"),
                ACE_TEXT(arg_)));
   }
 }
