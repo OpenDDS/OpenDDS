@@ -80,6 +80,8 @@ map_option(Opt) ->
         {be, T} ->
             "-Wb," ++
             case T of
+                {port_driver_name, Name} ->
+                    string:concat("port_driver_name=", Name);
                 {skel_export_macro, Macro} ->
                     string:concat("skel_export_macro=", Macro);
                 {skel_export_include, Include} ->
