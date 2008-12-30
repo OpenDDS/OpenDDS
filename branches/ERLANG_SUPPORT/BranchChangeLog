@@ -1,3 +1,9 @@
+Tue Dec 30 23:44:39 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/lib/tao_ic/src/tao_ic.erl:
+
+          Added missing be option for -Wb,port_driver_name.
+
 Tue Dec 30 21:50:30 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * erlang/lib/tao_ic/cpp_src/ace_compat.h:
