@@ -5,10 +5,6 @@
 #ifndef TAO_IC_BE_EXTERN_H
 #define TAO_IC_BE_EXTERN_H
 
-#ifndef ACE_LACKS_PRAGMA_ONCE
-# pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
-
 #include "ace_compat.h"
 #include "be_global.h"
 

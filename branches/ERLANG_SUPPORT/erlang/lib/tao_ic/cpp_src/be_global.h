@@ -5,16 +5,11 @@
 #ifndef TAO_IC_BE_GLOBAL_H
 #define TAO_IC_BE_GLOBAL_H
 
-#ifndef ACE_LACKS_PRAGMA_ONCE
-# pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
-
 #include "ace/Basic_Types.h"
 
 #include "ast_generator.h"
 
-class BE_GlobalData
-{
+class BE_GlobalData {
 public:
   BE_GlobalData(void);
   ~BE_GlobalData(void);
@@ -37,7 +32,7 @@ public:
   AST_Generator *generator_init(void);
   // Create an AST node generator.
 
-  /// BE-specific methods
+  // BE-specific methods:
   ACE_CString output_dir(void) const;
   void output_dir(const ACE_CString &);
 
@@ -64,28 +59,17 @@ public:
 
 private:
   ACE_CString output_dir_;
-  // -o <output_dir>
-
   bool output_otp_;
-  // -otp
-
+  
   ACE_CString port_driver_name_;
-  // -Wb,port_driver_name=<driver_name>
 
   ACE_CString skel_export_include_;
-  // -Wb,skel_export_include=<include path>
-
   ACE_CString skel_export_macro_;
-  // -Wb,skel_export_macro=<macro name>
   
   ACE_CString stub_export_include_;
-  // -Wb,stub_export_include=<include path>
-  
   ACE_CString stub_export_macro_;
-  // -Wb,stub_export_macro=<macro name>
   
-  bool suppress_skel_;
-  // -SS
+  bool suppress_skel_;  
 };
 
 #endif /* TAO_IC_BE_GLOBAL_H */

@@ -8,7 +8,7 @@ project {
   after      += TAO_IDL_FE
 
   includes   += cpp_src $(TAO_ROOT) $(TAO_ROOT)/TAO_IDL \
-                $(TAO_ROOT)/TAO_IDL/include $(DDS_ROOT)
+                $(TAO_ROOT)/TAO_IDL/include
   libs       += TAO_IDL_FE ACE
 
   Source_Files {
@@ -16,7 +16,7 @@ project {
   }
 }
 
-project(*erl): erlang_otp {
+project(*erl) : erlang_otp {
   after       = tao_ic
   erlcflags  += -Wall
 
