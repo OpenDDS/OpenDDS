@@ -73,7 +73,7 @@ for my $tgt (@targets) {
                     my $t = $3 . 's';
                     my $r = $1 + $2;
                     $overall_status += $r;
-                    if ($r > 0) {
+                    if ($r == 0) {
                       s/Errors:/Errs:/;
                       #we don't want this to get parsed as an 'error' line
                     }
