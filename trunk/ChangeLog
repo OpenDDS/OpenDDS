@@ -1,3 +1,11 @@
+Tue Dec 30 15:30:50 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * java/build_scripts/jms_scoreboard.pl:
+
+          Made the PerlACE::Process invocation of ant work on Win32.
+          Fixed a bug in the junit output post-processing logic that missed
+          flagging junit failures as scoreboard errors.
+
 Wed Dec 17 23:42:28 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * java/build_scripts/jms_scoreboard.pl:

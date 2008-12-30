@@ -43,8 +43,16 @@ for my $tgt (@targets) {
     my $extra = ($operation eq 'test') ? '-l ant.log' : '';
     my $status;
     if ($tgt->[1] eq 'jboss42x') {
-      my $PROC = new PerlACE::Process("$ANT_HOME/bin/ant",
-                                      "@ARGV $extra $tgt->[1]");
+      my $PROC;
+      if ($^O eq 'MSWin32') {
+        $PROC = new PerlACE::Process("$ENV{windir}\\system32\\cmd",
+                                     "/c $ANT_HOME/bin/ant @ARGV $extra " .
+                                     "$tgt->[1]");
+      }
+      else {
+        $PROC = new PerlACE::Process("$ANT_HOME/bin/ant",
+                                     "@ARGV $extra $tgt->[1]");
+      }
       $status = $PROC->SpawnWaitKill(300);
     }
     else {
@@ -65,8 +73,10 @@ for my $tgt (@targets) {
                     my $t = $3 . 's';
                     my $r = $1 + $2;
                     $overall_status += $r;
-                    s/Errors:/Errs:/; #we don't want this to get parsed as an
-                                      #'error' line on the scoreboard
+                    if ($r > 0) {
+                      s/Errors:/Errs:/;
+                      #we don't want this to get parsed as an 'error' line
+                    }
                     print "$_\n\nauto_run_tests_finished: $testclass Time:$t ".
                         "Result:$r\n";
                 }
