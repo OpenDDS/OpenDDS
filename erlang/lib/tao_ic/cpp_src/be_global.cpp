@@ -9,48 +9,34 @@
 
 #include "be_global.h"
 
-namespace
-{
-  static const char *DEFAULT_PORT_DRIVER_NAME = "port_driver";
+namespace {
+static const char *DEFAULT_PORT_DRIVER_NAME = "port_driver";
 
-  class BE_Arg {
-  public:
-    explicit BE_Arg(const ACE_CString &s)
-    {
-      ACE_Allocator::size_type pos = s.find('=');
-      this->name_ = s.substring(0, pos);
+class BE_Arg {
+public:
+  explicit BE_Arg(const ACE_CString &s)
+  {
+    ACE_Allocator::size_type pos = s.find('=');
+    this->name_ = s.substring(0, pos);
 
-      if (pos != ACE_CString::npos) {
-        this->value_ = s.substring(pos + 1);
-      }
+    if (pos != ACE_CString::npos) {
+      this->value_ = s.substring(pos + 1);
     }
+  }
 
-    ~BE_Arg()
-    {
-    }
+  ~BE_Arg()
+  {
+  }
 
-    ACE_CString
-    name(void) const
-    {
-      return this->name_;
-    }
+  ACE_CString name(void) const { return this->name_; }
+  ACE_CString value(void) const { return this->value_; }
 
-    ACE_CString
-    value(void) const
-    {
-      return this->value_;
-    }
+  bool operator==(const char *s) const { return s == this->name_; }
 
-    bool
-    operator==(const char *s) const
-    {
-      return s == this->name_;
-    }
-
-  private:
-    ACE_CString name_;
-    ACE_CString value_;
-  };
+private:
+  ACE_CString name_;
+  ACE_CString value_;
+};
 }
 
 BE_GlobalData *be_global = 0;
@@ -80,12 +66,15 @@ BE_GlobalData::parse_args(long &argc_, char **argv)
   while (shifter.is_anything_left()) {
     const char *arg = 0;
 
+    // -o <output_dir>
     if ((arg = shifter.get_the_parameter("-o")) != 0) {
       this->output_dir_ = arg;
 
+    // -otp
     } else if (shifter.cur_arg_strncasecmp("-otp") == 0) {
       this->output_otp_ = true;
 
+    // -SS
     } else if (shifter.cur_arg_strncasecmp("-SS") == 0) {
       this->suppress_skel_ = true;
     
@@ -101,18 +90,23 @@ BE_GlobalData::prep_be_arg(char *arg_)
 {
   BE_Arg arg(arg_);
 
+  // -Wb,port_driver_name=<driver_name>
   if (arg == "port_driver_name") {
     this->port_driver_name_ = arg.value();
 
+  // -Wb,skel_export_include=<include path>
   } else if (arg == "skel_export_include") {
     this->skel_export_include_ = arg.value();
 
+  // -Wb,skel_export_macro=<macro name>
   } else if (arg == "skel_export_macro") {
     this->skel_export_macro_ = arg.value();
 
+  // -Wb,stub_export_include=<include path>
   } else if (arg == "stub_export_include") {
     this->stub_export_include_ = arg.value();
 
+  // -Wb,stub_export_macro=<macro name>
   } else if (arg == "stub_export_macro") {
     this->stub_export_macro_ = arg.value();
 

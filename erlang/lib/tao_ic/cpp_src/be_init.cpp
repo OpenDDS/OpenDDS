@@ -14,9 +14,9 @@
 int
 BE_init(int &, char **)
 {
-#ifdef ACE_PRE_5_5
+#ifndef ACE_PRE_5_5
   ACE_NEW_RETURN(be_global, BE_GlobalData, -1);
-#endif
+#endif /* ACE_PRE_5_5 */
   return 0;
 }
 
