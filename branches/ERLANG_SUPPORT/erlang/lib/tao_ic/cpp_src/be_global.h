@@ -44,6 +44,9 @@ public:
   bool output_otp(void) const;
   void output_otp(bool);
 
+  ACE_CString port_driver_name(void) const;
+  void port_driver_name(const ACE_CString &);
+
   ACE_CString skel_export_include(void) const;
   void skel_export_include(const ACE_CString &);
 
@@ -65,7 +68,10 @@ private:
 
   bool output_otp_;
   // -otp
-  
+
+  ACE_CString port_driver_name_;
+  // -Wb,port_driver_name=<driver_name>
+
   ACE_CString skel_export_include_;
   // -Wb,skel_export_include=<include path>
 

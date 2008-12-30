@@ -11,10 +11,12 @@
 
 namespace
 {
+  static const char *DEFAULT_PORT_DRIVER_NAME = "port_driver";
+
   class BE_Arg {
   public:
     explicit BE_Arg(const ACE_CString &s)
-    {      
+    {
       ACE_Allocator::size_type pos = s.find('=');
       this->name_ = s.substring(0, pos);
 
@@ -27,7 +29,7 @@ namespace
     {
     }
 
-    ACE_CString 
+    ACE_CString
     name(void) const
     {
       return this->name_;
@@ -55,6 +57,7 @@ BE_GlobalData *be_global = 0;
 
 BE_GlobalData::BE_GlobalData()
   : output_otp_(false),
+    port_driver_name_(DEFAULT_PORT_DRIVER_NAME),
     suppress_skel_(false)
 {
 }
@@ -98,7 +101,10 @@ BE_GlobalData::prep_be_arg(char *arg_)
 {
   BE_Arg arg(arg_);
 
-  if (arg == "skel_export_include") {
+  if (arg == "port_driver_name") {
+    this->port_driver_name_ = arg.value();
+
+  } else if (arg == "skel_export_include") {
     this->skel_export_include_ = arg.value();
 
   } else if (arg == "skel_export_macro") {
@@ -112,8 +118,8 @@ BE_GlobalData::prep_be_arg(char *arg_)
 
   } else {
     ACE_DEBUG((LM_WARNING,
-               ACE_TEXT("TAO_IC_BE: ignoring argument: %s\n"),
-               ACE_TEXT(arg_)));
+               ACE_TEXT("TAO_IC_BE: ignoring unknown argument: %s\n"),
+               ACE_TEXT(arg.name().c_str())));
   }
 }
 
@@ -133,6 +139,12 @@ BE_GlobalData::usage() const
              ACE_TEXT(" -otp\t\t\tOutput directory uses the OTP layout.")
              ACE_TEXT(" Generated files will be created in src, include, and")
              ACE_TEXT(" cpp_src under <output_dir>\n")));
+
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT(" -Wb,port_driver_name=<driver_name>\t\tsets port")
+             ACE_TEXT(" driver name used to load the native runtime")
+             ACE_TEXT(" (default is %s)\n"),
+             ACE_TEXT(DEFAULT_PORT_DRIVER_NAME)));
 
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT(" -Wb,skel_export_macro=<macro name>\t\tsets export")
@@ -185,6 +197,18 @@ void
 BE_GlobalData::output_otp(bool output_otp)
 {
   this->output_otp_ = output_otp;
+}
+
+ACE_CString
+BE_GlobalData::port_driver_name() const
+{
+  return this->port_driver_name_;
+}
+
+void
+BE_GlobalData::port_driver_name(const ACE_CString &port_driver_name)
+{
+  this->port_driver_name_ = port_driver_name;
 }
 
 ACE_CString
