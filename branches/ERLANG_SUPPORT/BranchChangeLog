@@ -1,3 +1,9 @@
+Wed Dec 31 15:01:22 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/lib/tao_ic/src/tao_ic.erl:
+
+          Added exception for invalid be options.
+
 Tue Dec 30 23:44:39 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * erlang/lib/tao_ic/src/tao_ic.erl:
