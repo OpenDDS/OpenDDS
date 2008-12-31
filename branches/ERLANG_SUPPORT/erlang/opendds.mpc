@@ -1,0 +1,11 @@
+//
+// $Id$
+//
+
+project : erlang_otp {
+  erlcflags  += -Wall
+
+  Erlang_Files {
+    src
+  }
+}
