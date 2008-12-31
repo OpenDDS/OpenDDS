@@ -3,8 +3,10 @@
  */
 
 #include "ace/Log_Msg.h"
+#include "ace/OS_NS_stdlib.h"
 #include "ace/OS_Memory.h"
 #include "ace/Version.h"
+
 #include "tao/Version.h"
 
 #include "ace_compat.h"
@@ -30,21 +32,30 @@ void
 BE_version()
 {
   ACE_DEBUG((LM_DEBUG,
-             "TAO_IC_BE, version %s (Erlang Port Driver IDL BE)\n",
+             ACE_TEXT("TAO_IC_BE, version %s (Erlang Port Driver IDL BE)\n"),
              ACE_TEXT(TAO_VERSION)));
-}
-
-void
-BE_produce()
-{
 }
 
 void
 BE_abort()
 {
+  ACE_ERROR((LM_ERROR,
+             ACE_TEXT("TAO_IC_BE: aborting")));
+
+  BE_cleanup();
+
+  ACE_OS::exit(1);
 }
 
 void
 BE_cleanup()
 {
+  idl_global->destroy();
 }
+
+void
+BE_produce()
+{
+  
+}
+
