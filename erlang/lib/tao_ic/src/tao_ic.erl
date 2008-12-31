@@ -89,7 +89,9 @@ map_option(Opt) ->
                 {stub_export_macro, Macro} ->
                     string:concat("stub_export_macro=", Macro);
                 {stub_export_include, Include} ->
-                    string:concat("stub_export_include=", Include)
+                    string:concat("stub_export_include=", Include);
+                _Else ->
+                    throw({invalid_be_option, T})
             end;
         {suppress_skel, true} ->
             "-SS";
