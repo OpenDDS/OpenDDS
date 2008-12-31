@@ -1,3 +1,27 @@
+Wed Dec 31 20:45:06 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang:
+        * erlang/.erlang:
+        * erlang/DDS_erlang.mwc:
+        * erlang/lib/common:
+        * erlang/lib/common/.erlang:
+        * erlang/lib/common/common.mpc:
+        * erlang/lib/common/ebin:
+        * erlang/lib/common/include:
+        * erlang/lib/common/src:
+        * erlang/lib/common/src/error.erl:
+        * erlang/lib/common/src/lists_.erl:
+        * erlang/lib/tao:
+        * erlang/lib/tao/.erlang:
+        * erlang/lib/tao/tao.mpc:
+        * erlang/lib/tao_ic:
+        * erlang/lib/tao_ic/.erlang:
+        * erlang/lib/tao_ic/src/tao_ic.erl:
+        * erlang/lib/tao_ic/tao_ic.mpc:
+        * erlang/opendds.mpc:
+
+          Build changes; refactored tao_ic.erl.
+
 Wed Dec 31 15:01:22 UTC 2008  Steven Stallion  <stallions@ociweb.com>
 
         * erlang/lib/tao_ic/src/tao_ic.erl:

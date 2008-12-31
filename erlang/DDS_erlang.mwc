@@ -3,6 +3,8 @@
 //
 
 workspace {
-  $(DDS_ROOT)/dds
-  $(DDS_ROOT)/erlang/lib/tao_ic
+  opendds.mpc
+  lib/common/common.mpc
+  lib/tao/tao.mpc
+  lib/tao_ic/tao_ic.mpc
 }
