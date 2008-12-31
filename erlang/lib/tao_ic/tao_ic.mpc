@@ -3,21 +3,24 @@
 //
 
 project : erlang_otp {
+  after      += tao_ic_cpp common
+  erlcflags  += -Wall
+ 
+  Erlang_Files {
+    src
+  }
+}
+
+project(*cpp) {
   exename     = tao_ic
   exeout      = $(DDS_ROOT)/erlang/bin
-  after      += common TAO_IDL_FE
+  after      += TAO_IDL_FE
   
-  erlcflags  += -Wall
-
   includes   += cpp_src $(TAO_ROOT) $(TAO_ROOT)/TAO_IDL \
                 $(TAO_ROOT)/TAO_IDL/include
   libs       += TAO_IDL_FE ACE
   
   Source_Files {
     cpp_src
-  }
-  
-  Erlang_Files {
-    src
   }
 }
