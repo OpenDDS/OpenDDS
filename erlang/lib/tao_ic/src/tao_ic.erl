@@ -12,7 +12,7 @@ gen(File) ->
     gen(File, []).
 
 gen(File, Opts) ->
-    gen0(map_options(Opts) ++ [lists_:to_list(File)]).
+    gen0(map_options(Opts) ++ [lists@:to_list(File)]).
 
 version() ->
     gen0(["-V"]).
@@ -37,12 +37,12 @@ loop(Port) ->
     end.
 
 command(Opts) ->
-    Command = os:find_executable(?COMMAND),
-    case Command of
+    Cmd = os:find_executable(?COMMAND),
+    case Cmd of
         false ->
             error:badcmd(?COMMAND);
         _Else ->
-            string:join([Command|Opts], " ")
+            string:join([Cmd|Opts], " ")
     end.    
 
 map_options(Opts) ->

@@ -3,7 +3,7 @@
 //
 
 project : erlang_otp {
-  after      += tao_ic_cpp common
+  after      += common *cpp
   erlcflags  += -Wall
  
   Erlang_Files {
