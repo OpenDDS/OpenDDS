@@ -23,7 +23,7 @@ sub reset {
 
 sub files {
   my $self = shift;
-  my ($filename, $options) = @_;
+  my ($filename, @options) = @_;
 
   $self->push('files');
 
@@ -35,7 +35,7 @@ sub files {
     }, $filename);
   
   $self->push_list(@filenames);
-  $self->push($options);
+  $self->push_list(@options);
 
   $self->run();
 }

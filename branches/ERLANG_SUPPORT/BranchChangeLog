@@ -1,3 +1,13 @@
+Mon Jan  5 01:31:42 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/bin/Erlang/EDoc.pm:
+        * erlang/lib/common/doc/generate_edoc.pl:
+        * erlang/lib/tao_ic/doc/generate_edoc.pl:
+        * erlang/lib/tao_ic/doc/overview.edoc:
+        * erlang/lib/tao_ic/tao_ic.mpc:
+
+          Documentation updates.
+
 Sun Jan  4 18:51:09 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * erlang/bin/Erlang/EDoc.pm:
