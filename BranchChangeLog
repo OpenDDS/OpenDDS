@@ -1,3 +1,15 @@
+Mon Jan  5 19:58:53 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/lib/common/src/os@.erl:
+        * erlang/lib/common/src/os@.hrl:
+
+          Added new os extension module.
+
+        * erlang/lib/tao_ic/src/tao_ic.erl:
+        * erlang/lib/tao_ic/src/tao_ic.hrl:
+
+          Refactored out exec/2 behavior to os@.
+
 Mon Jan  5 01:31:42 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * erlang/bin/Erlang/EDoc.pm:

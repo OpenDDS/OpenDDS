@@ -12,7 +12,7 @@ gen(File) ->
     gen(File, []).
 
 gen(File, Opts) ->
-    gen0(map_options(Opts) ++ [lists@:to_list(File)]).
+    gen0(options(Opts) ++ [lists@:to_list(File)]).
 
 version() ->
     gen0(["-V"]).
@@ -22,33 +22,12 @@ version() ->
 %%----------------------------------------------------------------------
 
 gen0(Opts) ->
-    loop(open_port({spawn, command(Opts)},
-                   [exit_status, in, {line, ?LINE_MAX}, stderr_to_stdout])).
+    os@:exec(?COMMAND, Opts).
 
-loop(Port) ->
-    receive
-        {Port, {exit_status, 0}} ->
-            ok;
-        {Port, {exit_status, _Status}} ->
-            error; % non-zero exit status
-        {Port, {data, {_Flag, Line}}} ->
-            io:format("~s~n", [Line]),
-            loop(Port) % tail-recursive
-    end.
+options(Opts) ->
+    [option(Opt) || Opt <- Opts].
 
-command(Opts) ->
-    Cmd = os:find_executable(?COMMAND),
-    case Cmd of
-        false ->
-            error:badcmd(?COMMAND);
-        _Else ->
-            string:join([Cmd|Opts], " ")
-    end.    
-
-map_options(Opts) ->
-    [map_option(Opt) || Opt <- Opts].
-
-map_option(Opt) ->
+option(Opt) ->
     case Opt of
         {local_escape, Esc} ->
             "-A" ++ Esc;
