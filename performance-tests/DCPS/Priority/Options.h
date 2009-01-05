@@ -151,6 +151,9 @@ class Options  {
     /// Test domain.
     unsigned long domain_;
 
+    /// Process identifier.
+    long id_;
+
     /// Test duration in seconds: -1 indicates no timed termination.
     long duration_;
 

@@ -212,6 +212,14 @@ Publisher::Publisher( const Options& options)
       throw BadQosException();
   }
 
+  if( this->options_.verbose()) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
+      ACE_TEXT("starting to create %d publications.\n"),
+      this->options_.profiles().size()
+    ));
+  }
+
   // Build as many publications as are specified.
   for( unsigned int index = 0; index < this->options_.profiles().size(); ++index) {
     // This publications priority is needed when creating the writer.
@@ -314,10 +322,8 @@ Publisher::run()
     ACE_OS::sleep( duration);
 
   } else {
-    // Block forever.
-    ACE_SYNCH_MUTEX lock;
-    ACE_Condition< ACE_SYNCH_MUTEX> condition( lock);
-    condition.wait();
+    // Block the main thread, leaving the others working.
+    ACE_Thread_Manager::instance()->wait();
   }
 
   // Signal the writers to terminate.

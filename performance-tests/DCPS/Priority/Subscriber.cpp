@@ -265,7 +265,7 @@ Subscriber::count() const
 void
 Subscriber::run()
 {
-  DDS::Duration_t   timeout = { PUBLICATION_WAIT_TIME, 0};
+  DDS::Duration_t   timeout = { DDS::DURATION_INFINITY_SEC, DDS::DURATION_INFINITY_NSEC};
   DDS::ConditionSeq conditions;
   DDS::LivelinessChangedStatus changes = { 0, 0, 0, 0};
   do {

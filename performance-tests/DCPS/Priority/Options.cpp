@@ -23,12 +23,16 @@ namespace { // anonymous namespace for file scope.
   //
   // Default values.
   //
+  enum { DEFAULT_ID            =  -1};
+  enum { DEFAULT_TEST_DOMAIN   = 521};
+  enum { DEFAULT_TEST_DURATION =  60};
+  enum { DEFAULT_TRANSPORT_KEY =   1};
 
-  const unsigned long DEFAULT_TEST_DOMAIN    = 521;
-  const unsigned long DEFAULT_TEST_DURATION  =  -1;
+  // const unsigned long DEFAULT_TEST_DOMAIN    = 521;
+  // const unsigned long DEFAULT_TEST_DURATION  =  -1;
   const Test::Options::TransportType
                       DEFAULT_TRANSPORT_TYPE = Test::Options::TCP;
-  const unsigned int  DEFAULT_TRANSPORT_KEY  =   1;
+  // const unsigned int  DEFAULT_TRANSPORT_KEY  =   1;
   const char*         DEFAULT_TEST_TOPICNAME = "TestTopic";
 
   // Command line argument definitions.
@@ -36,6 +40,7 @@ namespace { // anonymous namespace for file scope.
   const char* VERBOSE_ARGUMENT        = "-v";
   const char* DURATION_ARGUMENT       = "-c";
   const char* SCENARIO_ARGUMENT       = "-f";
+  const char* ID_ARGUMENT             = "-i";
 
   // Scenario configuration file section names.
   const char* PUBLICATION_SECTION_NAME = "publication";
@@ -86,6 +91,7 @@ Options::~Options()
 Options::Options( int argc, char** argv, char** /* envp */)
  : verbose_(       false),
    domain_(        DEFAULT_TEST_DOMAIN),
+   id_(            DEFAULT_ID),
    duration_(      DEFAULT_TEST_DURATION),
    transportType_( DEFAULT_TRANSPORT_TYPE),
    transportKey_(  DEFAULT_TRANSPORT_KEY),
@@ -93,6 +99,13 @@ Options::Options( int argc, char** argv, char** /* envp */)
 {
   ACE_Arg_Shifter parser( argc, argv);
   while( parser.is_anything_left()) {
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::Options() - ")
+        ACE_TEXT("processing argument: %s.\n"),
+        parser.get_current()
+      ));
+    }
     const char* currentArg = 0;
     if( 0 != (currentArg = parser.get_the_parameter( TRANSPORT_TYPE_ARGUMENT))) {
       this->transportType_ = NONE;
@@ -122,6 +135,10 @@ Options::Options( int argc, char** argv, char** /* envp */)
       this->duration_ = ACE_OS::atoi( currentArg);
       parser.consume_arg();
 
+    } else if( 0 != (currentArg = parser.get_the_parameter( ID_ARGUMENT))) {
+      this->id_ = ACE_OS::atoi( currentArg);
+      parser.consume_arg();
+
     } else if( 0 != (currentArg = parser.get_the_parameter( SCENARIO_ARGUMENT))) {
       this->configureScenarios( currentArg);
       parser.consume_arg();
@@ -131,6 +148,11 @@ Options::Options( int argc, char** argv, char** /* envp */)
       parser.consume_arg();
 
     } else {
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) WARNING: Options::Options() - ")
+        ACE_TEXT("ignoring argument: %s.\n"),
+        parser.get_current()
+      ));
       parser.ignore_arg();
     }
   }
@@ -139,6 +161,14 @@ Options::Options( int argc, char** argv, char** /* envp */)
 void
 Options::configureScenarios( const char* filename)
 {
+  if( this->verbose()) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) Options::configureScenarios() - ")
+      ACE_TEXT("configuring using file: %s.\n"),
+      filename
+    ));
+  }
+
   ACE_Configuration_Heap heap;
   if( 0 != heap.open()) {
     ACE_ERROR((LM_ERROR,
@@ -169,6 +199,13 @@ Options::configureScenarios( const char* filename)
          ++index
        ) {
       if( transportTypeArgMappings[ index].optionName == transportString.c_str()) {
+        if( this->verbose()) {
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) Options::configureScenarios() - ")
+            ACE_TEXT("setting transport type to: %s.\n"),
+            transportString.c_str()
+          ));
+        }
         this->transportType_ = transportTypeArgMappings[ index].transportInfo.first;
         this->transportKey_  = transportTypeArgMappings[ index].transportInfo.second;
         break;
@@ -176,7 +213,7 @@ Options::configureScenarios( const char* filename)
     }
     if( this->transportType_ == NONE) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Options::Options() - ")
+        ACE_TEXT("(%P|%t) ERROR: Options::configureScenarios() - ")
         ACE_TEXT("unrecognized transport type: %s, defaulting to TCP.\n"),
         transportString.c_str()
       ));
@@ -185,9 +222,17 @@ Options::configureScenarios( const char* filename)
     }
   }
 
-  // Transport = tcp | udp | mc | rmc              OPTIONAL
+  // TestDuration = <seconds>                   OPTIONAL
   ACE_TString durationString;
   if( 0 == heap.get_string_value( root, DURATION_KEY_NAME, durationString)) {
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::configureScenarios() - ")
+        ACE_TEXT("setting test duration to: %d.\n"),
+        durationString.c_str()
+      ));
+    }
+    this->duration_ = ACE_OS::atoi( durationString.c_str());
   }
 
   // Find all of the [publication] sections.
