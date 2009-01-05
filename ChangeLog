@@ -1,3 +1,11 @@
+Mon Jan  5 19:53:24 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+
+          Removed the top-level const from the return type of domain_to_repo().
+          It served no purpose and generated a warning from GCC 4.3.
+
 Tue Dec 30 15:30:50 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * java/build_scripts/jms_scoreboard.pl:

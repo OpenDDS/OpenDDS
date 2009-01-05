@@ -216,7 +216,7 @@ namespace OpenDDS
                             const RepoKey repo);
 
       /// Convert domainId to repository key.
-      const RepoKey domain_to_repo (const ::DDS::DomainId_t domain) const;
+      RepoKey domain_to_repo (const ::DDS::DomainId_t domain) const;
 
       /// Failover to a new repository.
       void repository_lost( const RepoKey key);
