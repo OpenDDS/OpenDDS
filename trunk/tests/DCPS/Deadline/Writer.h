@@ -8,13 +8,16 @@
 #include "MessengerTypeSupportC.h"
 #include "DataWriterListenerImpl.h"
 #include <ace/Task.h>
+#include <ace/Synch_T.h>
 
 
 class Writer : public ACE_Task_Base
 {
 public:
 
-  Writer (::DDS::DataWriter_ptr writer);
+  Writer (::DDS::DataWriter_ptr writer,
+          CORBA::Long key,
+          ACE_Time_Value sleep_duration);
 
   void start ();
 
@@ -23,15 +26,26 @@ public:
   /** Lanch a thread to write. **/
   virtual int svc ();
 
+  ::DDS::InstanceHandle_t get_instance_handle();
+
+  ACE_Time_Value get_start_time ();
+
+  bool wait_for_start ();
+
 private:
 
   ::DDS::DataWriter_var writer_;
+  typedef ACE_SYNCH_MUTEX     LockType;
+  typedef ACE_Guard<LockType> GuardType;
 
-  // The lock used to synchronize the two write threads.
-  ACE_Thread_Mutex lock_;
-  // The flag used to synchronize the two write threads.
-  bool start_;
+  LockType lock_;
+  ACE_Condition<ACE_SYNCH_MUTEX> condition_;
+
+  bool associated_;
   DataWriterListenerImpl* dwl_servant_;
+  ::DDS::InstanceHandle_t instance_handle_;
+  CORBA::Long key_;
+  ACE_Time_Value sleep_duration_;
 };
 
 #endif /* WRITER_H */

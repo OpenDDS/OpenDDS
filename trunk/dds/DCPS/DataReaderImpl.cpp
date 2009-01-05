@@ -273,24 +273,6 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
       this->handle_timeout (now, this);
     }
     // else - no timer needed when LIVELINESS.lease_duration is INFINITE
-
-    // Setup the requested deadline watchdog if the configured deadline
-    // period is not the default (infinite).
-    ::DDS::Duration_t const deadline_period = this->qos_.deadline.period;
-    if (this->watchdog_.get () == 0
-        && (deadline_period.sec != ::DDS::DURATION_INFINITY_SEC
-            || deadline_period.nanosec != ::DDS::DURATION_INFINITY_NSEC))
-    {
-      ACE_auto_ptr_reset (this->watchdog_,
-                          new RequestedDeadlineWatchdog (
-                            this->reactor_,
-                            this->sample_lock_,
-                            this->qos_.deadline,
-                            this,
-                            this->dr_local_objref_.in (),
-                            this->requested_deadline_missed_status_,
-                            this->last_deadline_missed_total_count_));
-    }
   }
 
   if (! is_bit_)
@@ -652,9 +634,28 @@ bool DataReaderImpl::has_readcondition(::DDS::ReadCondition_ptr a_condition)
 
     // Reset the deadline timer if the period has changed.
     if (qos_.deadline.period.sec != qos.deadline.period.sec
-        || qos_.deadline.period.nanosec != qos.deadline.period.nanosec)
+      || qos_.deadline.period.nanosec != qos.deadline.period.nanosec)
     {
-      if (this->watchdog_.get ())
+      if (qos_.deadline.period.sec == ::DDS::DURATION_INFINITY_SEC
+        && qos_.deadline.period.nanosec == ::DDS::DURATION_INFINITY_NSEC)
+      {
+        ACE_auto_ptr_reset (this->watchdog_,
+          new RequestedDeadlineWatchdog (
+          this->reactor_,
+          this->sample_lock_,
+          qos.deadline,
+          this,
+          this->dr_local_objref_.in (),
+          this->requested_deadline_missed_status_,
+          this->last_deadline_missed_total_count_));
+      }
+      else if (qos.deadline.period.sec == ::DDS::DURATION_INFINITY_SEC
+        && qos.deadline.period.nanosec == ::DDS::DURATION_INFINITY_NSEC)
+      {
+        this->watchdog_->cancel_all ();
+        this->watchdog_.reset ();
+      }
+      else
       {
         this->watchdog_->reset_interval (
           duration_to_time_value (qos.deadline.period));
@@ -959,6 +960,25 @@ DataReaderImpl::enable ()
         duration_to_time_value (qos_.liveliness.lease_duration);
     }
 
+
+  // Setup the requested deadline watchdog if the configured deadline
+  // period is not the default (infinite).
+  ::DDS::Duration_t const deadline_period = this->qos_.deadline.period;
+  if (this->watchdog_.get () == 0
+    && (deadline_period.sec != ::DDS::DURATION_INFINITY_SEC
+    || deadline_period.nanosec != ::DDS::DURATION_INFINITY_NSEC))
+  {
+    ACE_auto_ptr_reset (this->watchdog_,
+      new RequestedDeadlineWatchdog (
+      this->reactor_,
+      this->sample_lock_,
+      this->qos_.deadline,
+      this,
+      this->dr_local_objref_.in (),
+      this->requested_deadline_missed_status_,
+      this->last_deadline_missed_total_count_));
+  }
+
   this->set_enabled ();
 
   CORBA::String_var name = topic_servant_->get_name ();
@@ -1029,11 +1049,6 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
         this->writer_activity(header.publication_id_);
 
-        // "Pet the dog" so that it doesn't callback on the listener
-        // the next time deadline timer expires.
-        if (this->watchdog_.get ())
-          this->watchdog_->signal ();
-
         // Verify data has not exceeded its lifespan.
         if (this->data_expired (header))
         {
@@ -1043,9 +1058,28 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         }
 
         // This also adds to the sample container
-        this->dds_demarshal(sample);
 
+        SubscriptionInstance* instance = 0;
+        bool is_new_instance = false;
+        this->dds_demarshal(sample, instance, is_new_instance);
+        
         this->subscriber_servant_->data_received(this);
+
+        if (this->watchdog_.get ())
+        {
+          instance->last_sample_tv_ = instance->cur_sample_tv_;
+          instance->cur_sample_tv_ = ACE_OS::gettimeofday (); 
+
+          if (is_new_instance)
+          {
+            this->watchdog_->schedule_timer (instance);
+          }
+          else
+          {
+            this->watchdog_->execute ((void const *)instance, false);
+          }
+        }
+
         this->notify_read_conditions();
       }
       break;
@@ -1068,14 +1102,24 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       break;
 
     case DISPOSE_INSTANCE:
-      this->writer_activity(sample.header_.publication_id_);
-      this->dispose(sample);
+      {
+        this->writer_activity(sample.header_.publication_id_);
+        SubscriptionInstance* instance = 0;
+        this->dispose(sample, instance);
+        if (this->watchdog_.get ())
+          this->watchdog_->cancel_timer (instance);
+      }
       this->notify_read_conditions();
       break;
 
     case UNREGISTER_INSTANCE:
-      this->writer_activity(sample.header_.publication_id_);
-      this->unregister(sample);
+      {
+        this->writer_activity(sample.header_.publication_id_);
+        SubscriptionInstance* instance = 0;
+        this->unregister(sample, instance);
+        if (this->watchdog_.get ())
+          this->watchdog_->cancel_timer (instance);
+      }
       this->notify_read_conditions();
       break;
 
@@ -1674,18 +1718,20 @@ DataReaderImpl::set_sample_rejected_status(
 }
 
 
-void DataReaderImpl::dispose(const ReceivedDataSample& /* sample */)
+void DataReaderImpl::dispose(const ReceivedDataSample&,
+                             SubscriptionInstance*&)
 {
   if( DCPS_debug_level > 0) {
-    ACE_DEBUG ((LM_DEBUG, "(%P|%T) DataReaderImpl::dispose()\n"));
+    ACE_DEBUG ((LM_DEBUG, "(%P|%t) DataReaderImpl::dispose()\n"));
   }
 }
 
 
-void DataReaderImpl::unregister(const ReceivedDataSample& /* sample */)
+void DataReaderImpl::unregister(const ReceivedDataSample&,
+                                SubscriptionInstance*&)
 {
   if( DCPS_debug_level > 0) {
-    ACE_DEBUG ((LM_DEBUG, "(%P|%T) DataReaderImpl::unregister()\n"));
+    ACE_DEBUG ((LM_DEBUG, "(%P|%t) DataReaderImpl::unregister()\n"));
   }
 }
 
@@ -1710,7 +1756,7 @@ DataReaderImpl::get_handle_instance (::DDS::InstanceHandle_t handle)
 ::DDS::InstanceHandle_t
 DataReaderImpl::get_next_handle ()
 {
-  return next_handle_++;
+  return ++next_handle_;
 }
 
 
@@ -2098,6 +2144,26 @@ void DataReaderImpl::post_read_or_take()
     ::DDS::DATA_ON_READERS_STATUS, false);
 }
 
+
+void DataReaderImpl::reschedule_deadline ()
+{
+  if (this->watchdog_.get() != 0)
+  {
+    for (SubscriptionInstanceMapType::iterator iter = this->instances_.begin();
+      iter != this->instances_.end();
+      ++iter)
+    {
+      if (iter->second->deadline_timer_id_ != -1)
+      {
+        if (this->watchdog_->reset_timer_interval (iter->second->deadline_timer_id_) == -1)
+        {
+          ACE_ERROR ((LM_ERROR, "(%P|%t)DataReaderImpl::reschedule_deadline "
+            "%p\n", "reset_timer_interval"));
+        }
+      }
+    }
+  }
+}
 
 } // namespace DCPS
 } // namespace OpenDDS

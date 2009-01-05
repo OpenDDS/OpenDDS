@@ -35,6 +35,7 @@ sub header {
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h"
 #include "dds/DCPS/DataBlockLockPool.h"
+#include "dds/DCPS/SubscriptionInstance.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -156,7 +157,6 @@ public:
       ::<%SCOPE%><%TYPE%> & key_holder,
       ::DDS::InstanceHandle_t handle)
     ACE_THROW_SPEC ((CORBA::SystemException));
-
 
   /**
    * Initialize the DataWriter object.
@@ -376,6 +376,10 @@ public:
       ::DDS::InstanceHandle_t handle)
     ACE_THROW_SPEC ((CORBA::SystemException));
 
+  ::DDS::InstanceHandle_t
+  <%TYPE%>DataReaderImpl::get_instance_handle(
+                  ::<%SCOPE%><%TYPE%> instance_data);
+
   virtual DDS::ReturnCode_t auto_return_loan(void* seq);
 
   void release_loan (::<%MODULE%><%TYPE%>Seq & received_data);
@@ -384,11 +388,15 @@ public:
 
  protected:
 
-    virtual void dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample& sample);
+    virtual void dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample& sample,
+                               OpenDDS::DCPS::SubscriptionInstance*& instance,
+                               bool & just_registered);
 
-    virtual void dispose(const OpenDDS::DCPS::ReceivedDataSample& sample);
+    virtual void dispose(const OpenDDS::DCPS::ReceivedDataSample& sample,
+                         OpenDDS::DCPS::SubscriptionInstance*& instance);
     
-    virtual void unregister(const OpenDDS::DCPS::ReceivedDataSample& sample);
+    virtual void unregister(const OpenDDS::DCPS::ReceivedDataSample& sample,
+                            OpenDDS::DCPS::SubscriptionInstance*& instance);
 
     //virtual OpenDDS::DCPS::DataReaderRemote_ptr get_datareaderremote_obj_ref ();
 
@@ -463,7 +471,9 @@ public:
 
   ::DDS::ReturnCode_t store_instance_data(
          ::<%SCOPE%><%TYPE%> *instance_data,
-         const OpenDDS::DCPS::DataSampleHeader& header
+         const OpenDDS::DCPS::DataSampleHeader& header,
+         OpenDDS::DCPS::SubscriptionInstance*& instance_ptr,
+         bool & just_registered
          );
 
     /// common input read* & take* input processing and precondition checks

@@ -22,7 +22,10 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DCPS/WatchdogTimer.h"
+#include <map>
+#include <vector>
 
 class ACE_Time_Value;
 
@@ -45,6 +48,7 @@ namespace OpenDDS
      * @note This class is by design OpenDDS agnostic so that it may
      *       eventually be used outside of OpenDDS.
      */
+
     class Watchdog
     {
     public:
@@ -55,9 +59,12 @@ namespace OpenDDS
 
       /// Destructor
       virtual ~Watchdog ();
-
-      /// Operation to be executed when the associated timer expires.
-      virtual void execute () = 0;
+      
+      /// Operation to be executed when the associated timer expires
+      /// or whenever samples are received/sent.
+      /// The @c timer_called flag indicates if it's called from
+      /// reator handle_timeout() or upon a sample receiving/sending.
+      virtual void execute (void const * act, bool timer_called) = 0;
 
       /// Reset the @c Watchdog timer interval, i.e. time between
       /// recurring timer expirations.
@@ -68,20 +75,32 @@ namespace OpenDDS
        */
       void reset_interval (ACE_Time_Value const & interval);
 
-      /// "Pet the dog", i.e. prevent the @c Watchdog from executing
-      /// on timeout.
-      // void signal ();
+      /// Schedure with the @c Watchdog timer interval, i.e. time between
+      /// recurring timer expirations.
+      long schedule_timer (void* const act, const ACE_Time_Value& interval);
 
-    private:
+      /// Cancel a specific timer.
+      int cancel_timer (long const & timer_id);
+
+      /// Cancel all associated timers.
+      void cancel_all ();
+
+      /// Re-schedule timer with new interval.
+      virtual void reschedule_deadline () = 0;
+
+      /// Reset interval for a specific timer.
+      int  reset_timer_interval (long const & timer_id);
+
+    protected:
 
       // Reactor with which the timer will be registered.
       ACE_Reactor * const reactor_;
-
+      
+      // Event handler that handles timeout.
       WatchdogTimer timer_;
 
-      /// Timer identifier.  Only necessary to cancel timer.
-      long timer_id_;
-
+      // Current time interval.
+      ACE_Time_Value interval_;
     };
 
   }

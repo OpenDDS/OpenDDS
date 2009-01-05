@@ -605,80 +605,81 @@ DataWriterImpl::set_qos (const ::DDS::DataWriterQos & qos)
       if (qos_ == qos)
         return ::DDS::RETCODE_OK;
 
-      if (enabled_.value())
+      if (! Qos_Helper::changeable (qos_, qos))
       {
-        if (! Qos_Helper::changeable (qos_, qos))
+        return ::DDS::RETCODE_IMMUTABLE_POLICY;
+      }
+      else
+      {
+        try
         {
-          return ::DDS::RETCODE_IMMUTABLE_POLICY;
-        }
-        else
-        {
-          try
+          DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
+          ::DDS::PublisherQos publisherQos;
+          this->publisher_servant_->get_qos(publisherQos);
+          CORBA::Boolean status
+            = repo->update_publication_qos(this->participant_servant_->get_domain_id(),
+                                        this->participant_servant_->get_id(),
+                                        this->publication_id_,
+                                        qos,
+                                        publisherQos);
+          if (status == 0)
           {
-            DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
-            ::DDS::PublisherQos publisherQos;
-            this->publisher_servant_->get_qos(publisherQos);
-            CORBA::Boolean status
-              = repo->update_publication_qos(this->participant_servant_->get_domain_id(),
-                                         this->participant_servant_->get_id(),
-                                         this->publication_id_,
-                                         qos,
-                                         publisherQos);
-            if (status == 0)
-            {
-              ACE_ERROR_RETURN ((LM_ERROR,
-                ACE_TEXT("(%P|%t) "
-                "DataWriterImpl::set_qos, ")
-                ACE_TEXT("qos is not compatible. \n")),
-                ::DDS::RETCODE_ERROR);
-            }
+            ACE_ERROR_RETURN ((LM_ERROR,
+              ACE_TEXT("(%P|%t) "
+              "DataWriterImpl::set_qos, ")
+              ACE_TEXT("qos is not compatible. \n")),
+              ::DDS::RETCODE_ERROR);
+          }
 
-          }
-          catch (const CORBA::SystemException& sysex)
-          {
-            sysex._tao_print_exception (
-              "ERROR: System Exception"
-              " in DataWriterImpl::set_qos");
-            return ::DDS::RETCODE_ERROR;
-          }
-          catch (const CORBA::UserException& userex)
-          {
-            userex._tao_print_exception (
-              "ERROR:  Exception"
-              " in DataWriterImpl::set_qos");
-            return ::DDS::RETCODE_ERROR;
-          }
+        }
+        catch (const CORBA::SystemException& sysex)
+        {
+          sysex._tao_print_exception (
+            "ERROR: System Exception"
+            " in DataWriterImpl::set_qos");
+          return ::DDS::RETCODE_ERROR;
+        }
+        catch (const CORBA::UserException& userex)
+        {
+          userex._tao_print_exception (
+            "ERROR:  Exception"
+            " in DataWriterImpl::set_qos");
+          return ::DDS::RETCODE_ERROR;
         }
       }
-
-      // Reset the deadline timer if the period has changed.
-      if (qos_.deadline.period.sec != qos.deadline.period.sec
-          || qos_.deadline.period.nanosec != qos.deadline.period.nanosec)
-      {
-        if (this->watchdog_.get ())
-        {
-          this->watchdog_->reset_interval (
-            duration_to_time_value (qos.deadline.period));
-        }
-      }
-
-      qos_ = qos;
-
-      return ::DDS::RETCODE_OK;
     }
+
     if (! (qos_ == qos))
     {
       // Reset the deadline timer if the period has changed.
       if (qos_.deadline.period.sec != qos.deadline.period.sec
-          || qos_.deadline.period.nanosec != qos.deadline.period.nanosec)
+        || qos_.deadline.period.nanosec != qos.deadline.period.nanosec)
       {
-        if (this->watchdog_.get ())
+        if (qos_.deadline.period.sec == ::DDS::DURATION_INFINITY_SEC
+          && qos_.deadline.period.nanosec == ::DDS::DURATION_INFINITY_NSEC)
+        {
+          ACE_auto_ptr_reset (this->watchdog_,
+            new OfferedDeadlineWatchdog (
+            this->reactor_,
+            this->lock_,
+            qos.deadline,
+            this,
+            this->dw_local_objref_.in (),
+            this->offered_deadline_missed_status_,
+            this->last_deadline_missed_total_count_));
+        }
+        else if (qos.deadline.period.sec == ::DDS::DURATION_INFINITY_SEC
+                 && qos.deadline.period.nanosec == ::DDS::DURATION_INFINITY_NSEC)
+        {
+          this->watchdog_->cancel_all ();
+          this->watchdog_.reset ();
+        }
+        else 
         {
           this->watchdog_->reset_interval (
             duration_to_time_value (qos.deadline.period));
         }
       }
-
       qos_ = qos;
       // TBD - when there are changable QoS supported
       //       this code may need to do something
@@ -688,6 +689,7 @@ DataWriterImpl::set_qos (const ::DDS::DataWriterQos & qos)
       //       the changes in Qos.
       // repo->set_qos(qos_);
     }
+
     return ::DDS::RETCODE_OK;
   }
   else
@@ -761,9 +763,6 @@ DataWriterImpl::get_offered_deadline_missed_status ()
 
   set_status_changed_flag (::DDS::OFFERED_DEADLINE_MISSED_STATUS, false);
 
-  this->offered_deadline_missed_status_.last_instance_handle =
-    ::DDS::HANDLE_NIL;
-
   this->offered_deadline_missed_status_.total_count_change =
     this->offered_deadline_missed_status_.total_count
     - this->last_deadline_missed_total_count_;
@@ -774,6 +773,8 @@ DataWriterImpl::get_offered_deadline_missed_status ()
 
   ::DDS::OfferedDeadlineMissedStatus const status =
       offered_deadline_missed_status_;
+
+  this->offered_deadline_missed_status_.total_count_change = 0;
 
   return status;
 }
@@ -952,7 +953,8 @@ DataWriterImpl::enable ()
                                             get_topic_name (),
                                             get_type_name (),
                                             durability_cache,
-                                            qos_.durability_service);
+                                            qos_.durability_service,
+                                            this->watchdog_);
 
   // +1 because we might allocate one before releasing another
   // TBD - see if this +1 can be removed.
@@ -1217,11 +1219,6 @@ DataWriterImpl::write (DataSample* data,
   }
 
   last_liveliness_activity_time_ = ACE_OS::gettimeofday ();
-
-  // "Pet the dog" so that it doesn't callback on the listener the
-  // next time deadline timer expires.
-  if (this->watchdog_.get ())
-    this->watchdog_->signal ();
 
   return this->publisher_servant_->data_available(this);
 }
@@ -1909,6 +1906,15 @@ DataWriterImpl::persist_data ()
   return this->data_container_->persist_data ();
 }
 
+
+void 
+DataWriterImpl::reschedule_deadline ()
+{
+  if (this->watchdog_.get() != 0)
+  {
+    this->data_container_->reschedule_deadline ();
+  }
+}
 
 
 } // namespace DCPS
