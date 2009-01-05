@@ -130,6 +130,7 @@ if( PerlACE::is_vxworks_test()) {
 my $subArgs = "$appOpts ";
 $subArgs .= "-DCPSInfoRepo file://$repo_ior ";
 $subArgs .= "-t $transportType ";
+$subArgs .= "-i 0 ";
 if( PerlACE::is_vxworks_test()) {
   $SUB = new PerlACE::ProcessVX( "subscriber", $subArgs);
 } else {
@@ -139,10 +140,10 @@ if( PerlACE::is_vxworks_test()) {
 for my $index ( 1 .. $pubCount) {
   my $pubArgs = "$appOpts ";
   $pubArgs .= "-DCPSInfoRepo file://$repo_ior ";
-  $pubArgs .= "-s $scenarioFile ";
+  $pubArgs .= "-f $scenarioFile ";
   $pubArgs .= "-t $transportType ";
   $pubArgs .= "-c $duration ";
-  $pubArgs .= "-p $pubCount ";
+  $pubArgs .= "-i $index ";
   if( PerlACE::is_vxworks_test()) {
     $PUB[ $index - 1] = new PerlACE::ProcessVX( "publisher", $pubArgs);
   } else {
@@ -266,15 +267,18 @@ Options:
 
   -t NAME | --transport=NAME
                          use NAME transport for test execution - one of
-                         (tcp, udp, mcast, rmcast), default tcp
+                         (tcp, udp, mc, rmc), default tcp
 
-  -c NUMBER | --samples=NUMBER
-                         number of samples to publish during the test -
-                         default 10
+  -c NUMBER | --duration=NUMBER
+                         time duration to execute the test
+                         default is 60 seconds
 
-  -p NUMBER | --priorities=NUMBER
-                         comma separated list of priorities to publish
-                         during the test - default is 1
+  -p NUMBER | --publishers=NUMBER
+                         number of publisher processes to start during testing
+                         default is 1
+
+  -s FILE | --scenario FILE
+                         file to read scenario configuration data from
 
 =head1 OPTIONS
 
@@ -340,26 +344,31 @@ The default value is 0.
 Establishes the transport type to use for the current test execution.
 
 Accepted values are:
-  tcp    - use the SimpleTCP transport;
-  udp    - use the SimpleUDP transport;
-  mcast  - use the SimplMcast transport;
-  rmcast - use the ReliableMcast transport.
+  tcp - use the SimpleTCP transport;
+  udp - use the SimpleUDP transport;
+  mc  - use the SimpleMcast transport;
+  rmc - use the ReliableMcast transport.
 
 The default value is 'tcp'.
 
-=item B<-c FILE> | B<--samples=NUMBER>
+=item B<-c FILE> | B<--duration=FILE>
 
-The number of samples to publish during the test.
+Amount of time to execute the test in seconds.
 
-The default value is 10.
+The default value is 60 seconds.
 
-=item B<-p FILE> | B<--priorities=NUMBER>
+=item B<-p NUMBER> | B<--publishers=NUMBER>
 
-List of priorities to assign to publishers for the test.  A separate
-publisher process is started to send samples at each specified priority
-level.  The list is a simple comman separated list of integer level values.
+Number of publisher processes to start for testing.
 
 The default value is 1.
+
+=item B<-s FILE> | B<--scenario=FILE>
+
+Scenario conifiguration file.
+
+There is no default value, and this file B<must> be specified for the
+test to execute.
 
 =back
 

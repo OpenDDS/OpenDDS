@@ -46,10 +46,10 @@ int
 PublicationProfile::interval() const
 {
   // Return an exponentially distributed number of microseconds.
-  return 1000000
-         * static_cast<int>(
-             - log( static_cast<double>( random()) / range) / this->rate_
-           );
+  return static_cast<int>(
+           1000000.0 *
+           -log( static_cast<double>( random()) / range) / this->rate_
+         );
 }
 
 int

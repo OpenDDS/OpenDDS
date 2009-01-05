@@ -4,6 +4,9 @@
 #include "TestTypeSupportC.h"
 #include "TestTypeSupportImpl.h"
 
+/// Control the spew.
+namespace { enum { BE_REALLY_VERBOSE = 1};}
+
 Test::DataReaderListener::DataReaderListener( const bool verbose)
  : verbose_( verbose),
    count_( 0)
@@ -40,12 +43,12 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
   while( DDS::RETCODE_OK == dr->take_next_sample( data, info)) {
     if( info.valid_data) {
       ++count;
-      if( this->verbose_) {
+      if( this->verbose_ && BE_REALLY_VERBOSE) {
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderListener::on_data_available() - ")
-          ACE_TEXT("received valid sample(%d): priority %d, length %d\n"),
-          count,
+          ACE_TEXT("received priority %d sample %d, length %d\n"),
           data.priority,
+          data.seq,
           data.buffer.length()
         ));
       }

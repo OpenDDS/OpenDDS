@@ -1,3 +1,44 @@
+Mon Jan  5 23:40:31 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+	  Capturing todays debugging.
+
+        * performance-tests/DCPS/Priority/DataReaderListener.cpp:
+
+	  Added more information to the diagnostic messaging and provided
+	  a mechanism to damp the spew.
+
+        * performance-tests/DCPS/Priority/Options.h:
+        * performance-tests/DCPS/Priority/Options.cpp:
+
+	  Added additional diagnostic messages.  Made the argument values
+	  correct.  Added extraction of duration value from configuration
+	  file.
+
+        * performance-tests/DCPS/Priority/PublicationProfile.cpp:
+
+	  Make the small number big before converting to an integer type.
+
+        * performance-tests/DCPS/Priority/Publisher.cpp:
+
+	  Added additional diagnostic message.  Changed main thread
+	  blocking to use Thread_Manager::wait().
+
+        * performance-tests/DCPS/Priority/Subscriber.cpp:
+
+	  Change the WaitSet::wait() timeout value to infinity.  This
+	  makes the test depend on loosing liveliness for the subscriber
+	  to terminate.
+
+        * performance-tests/DCPS/Priority/Writer.cpp:
+
+	  Enhanced the diagnostic messages.
+
+        * performance-tests/DCPS/Priority/run_test.pl:
+
+	  Updated the command line arguments to be correct and to map to
+	  the individual process arguments correctly.  Made the pod
+	  documentation correct for arguments.
+
 Wed Dec 24 05:19:45 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/DCPS/Priority:
@@ -25,8 +66,8 @@ Wed Dec 24 05:19:45 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * performance-tests/DCPS/Priority/svc.conf:
         * performance-tests/DCPS/Priority/transport.ini:
 
-	  Added new performance test directory for evaluating the
-	  TRANSPORT_PRIORITY implementation.
+          Added new performance test directory for evaluating the
+          TRANSPORT_PRIORITY implementation.
 
 Wed Dec 17 17:11:25 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
