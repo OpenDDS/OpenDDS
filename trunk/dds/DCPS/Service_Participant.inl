@@ -7,7 +7,7 @@ namespace OpenDDS
   namespace DCPS
   {
     ACE_INLINE
-    const Service_Participant::RepoKey
+    Service_Participant::RepoKey
     Service_Participant::domain_to_repo( const ::DDS::DomainId_t domain) const
     {
       DomainRepoMap::const_iterator where = this->domainRepoMap_.find( domain);
