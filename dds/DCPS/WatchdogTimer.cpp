@@ -16,9 +16,9 @@ OpenDDS::DCPS::WatchdogTimer::~WatchdogTimer ()
 int
 OpenDDS::DCPS::WatchdogTimer::handle_timeout (
   ACE_Time_Value const & /* current_time */,
-  void const * /* act */)
+  void const * act)
 {
-  this->watchdog_->execute ();
-
+  this->watchdog_->execute (act, true); 
   return 0;
 }
+

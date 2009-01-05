@@ -23,6 +23,7 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "dds/DCPS/Watchdog.h"
+#include "dds/DCPS/PublicationInstance.h"
 
 #include "ace/Reverse_Lock_T.h"
 
@@ -69,24 +70,24 @@ namespace OpenDDS
        * @c DDS::OfferedDeadlineMissed structure, and calls
        * @c DataWriterListener::on_requested_deadline_missed().
        */
-      virtual void execute ();
+      virtual void execute (void const * act, bool timer_called);
 
-      /// "Pet the dog", i.e. prevent the @c Watchdog from executing
-      /// on timeout.
-      void signal ();
+      // Schedule timer for the supplied instance.
+      void schedule_timer (PublicationInstance* instance);
+
+      // Cancel timer for the supplied instance.
+      void cancel_timer (PublicationInstance* instance);
+
+      /// Re-schedule timer for all instances of the DataWriter.
+      virtual void reschedule_deadline ();
+
 
     private:
 
       /// Lock for synchronization of @c status_ member.
-      lock_type & lock_;
-
-      /// Reverse lock used for releasing the @c lock_ listener upcall.
-      reverse_lock_type reverse_lock_;
-
-      /// Flag that indicates whether the watchdog has been signaled
-      /// to not execute upon timer expiration.  This flag is reset to
-      /// @c false after each deadline timeout.
-      bool signaled_;
+      lock_type & status_lock_;
+      /// Reverse lock used for releasing the @c status_lock_ listener upcall.
+      reverse_lock_type reverse_status_lock_;
 
       /// Pointer to the @c DataWriterImpl object from which the
       /// @c DataWriterListener is obtained.

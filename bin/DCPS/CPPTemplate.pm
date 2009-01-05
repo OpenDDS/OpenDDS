@@ -1494,9 +1494,29 @@ DDS::ReturnCode_t
   return ::DDS::RETCODE_ERROR;
 }
 
+
+::DDS::InstanceHandle_t
+ <%TYPE%>DataReaderImpl::get_instance_handle(
+                ::<%SCOPE%><%TYPE%> instance_data)
+{
+  InstanceMap::const_iterator const it = instance_map_.find(instance_data);
+
+  if (it == instance_map_.end())
+  {
+    return ::DDS::HANDLE_NIL;
+  }
+  else
+  {
+    return it->second;
+  }
+}
+
+
 void
 <%TYPE%>DataReaderImpl::dds_demarshal(
-  const OpenDDS::DCPS::ReceivedDataSample& sample)
+  const OpenDDS::DCPS::ReceivedDataSample& sample,
+  OpenDDS::DCPS::SubscriptionInstance*& instance,
+  bool & just_registered)
 {
   ::<%SCOPE%><%TYPE%> *data /* = new ::<%SCOPE%><%TYPE%>(instance_data) */ ;
 
@@ -1512,13 +1532,15 @@ void
 
   ser >> *data;
 
-  store_instance_data(data, sample.header_);
+  store_instance_data(data, sample.header_, instance, just_registered);
 }
 
 ::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::store_instance_data(
     ::<%SCOPE%><%TYPE%> *instance_data,
-    const OpenDDS::DCPS::DataSampleHeader& header )
+    const OpenDDS::DCPS::DataSampleHeader& header,
+    OpenDDS::DCPS::SubscriptionInstance*& instance_ptr,
+    bool & just_registered)
 {
   bool is_dispose_msg = header.message_id_ == OpenDDS::DCPS::DISPOSE_INSTANCE;
   bool is_unregister_msg = header.message_id_ == OpenDDS::DCPS::UNREGISTER_INSTANCE;
@@ -1548,6 +1570,7 @@ void
 
   if (it == instance_map_.end())
   {
+    just_registered = true;
     OpenDDS::DCPS::SubscriptionInstance* instance = 0;
     handle = get_next_handle();
     ACE_NEW_RETURN (instance,
@@ -1582,12 +1605,13 @@ void
   }
   else
   {
+    just_registered = false;
     handle = it->second;
   }
 
   if (header.message_id_ != OpenDDS::DCPS::INSTANCE_REGISTRATION)
   {
-    OpenDDS::DCPS::SubscriptionInstance* instance_ptr =
+    instance_ptr =
       get_handle_instance(handle);
 
     // TBD - we also need to reject for > RESOURCE_LIMITS.max_samples
@@ -1757,8 +1781,7 @@ void
   }
   else
   {
-    OpenDDS::DCPS::SubscriptionInstance* instance_ptr =
-      get_handle_instance(handle);
+    instance_ptr = this->get_handle_instance (handle);
     instance_ptr->instance_state_.lively(header.publication_id_);
     ACE_DES_FREE (instance_data,
                   data_allocator_->free,
@@ -1769,7 +1792,8 @@ void
 }
 
 void
-<%TYPE%>DataReaderImpl::dispose(const OpenDDS::DCPS::ReceivedDataSample& sample)
+<%TYPE%>DataReaderImpl::dispose(const OpenDDS::DCPS::ReceivedDataSample& sample,
+                                OpenDDS::DCPS::SubscriptionInstance*& instance)
 {
   //!!! caller should already have the sample_lock_
 
@@ -1777,11 +1801,13 @@ void
   // What it needs here is the key value to identify the instance to dispose.
   // The demarshal push this "sample" to received sample list so the user 
   // can be notified the dispose event.
-  this->dds_demarshal (sample);
+  bool just_registered = false;
+  this->dds_demarshal (sample, instance, just_registered);
 }
 
 void
-<%TYPE%>DataReaderImpl::unregister(const OpenDDS::DCPS::ReceivedDataSample& sample)
+<%TYPE%>DataReaderImpl::unregister(const OpenDDS::DCPS::ReceivedDataSample& sample,
+                                   OpenDDS::DCPS::SubscriptionInstance*& instance)
 {
   //!!! caller should already have the sample_lock_
 
@@ -1789,7 +1815,8 @@ void
   // What it needs here is the key value to identify the instance to unregister.
   // The demarshal push this "sample" to received sample list so the user 
   // can be notified the unregister event.
-  this->dds_demarshal (sample);
+  bool just_registered = false;
+  this->dds_demarshal (sample, instance, just_registered);
 }
 
 DDS::ReturnCode_t

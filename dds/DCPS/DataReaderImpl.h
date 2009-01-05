@@ -357,9 +357,13 @@ namespace OpenDDS
         ::DDS::ViewStateMask view_states,
         ::DDS::InstanceStateMask instance_states);
 
-      virtual void dds_demarshal(const ReceivedDataSample& sample) = 0;
-      virtual void dispose(const ReceivedDataSample& sample);
-      virtual void unregister(const ReceivedDataSample& sample);
+      virtual void dds_demarshal(const ReceivedDataSample& sample,
+                                 SubscriptionInstance*& instance,
+                                 bool & is_new_instance)= 0;
+      virtual void dispose(const ReceivedDataSample& sample,
+                           SubscriptionInstance*& instance);
+      virtual void unregister(const ReceivedDataSample& sample,
+                              SubscriptionInstance*& instance);
 
       CORBA::Long get_depth() const { return depth_; }
       size_t get_n_chunks() const { return n_chunks_; }
@@ -399,6 +403,9 @@ namespace OpenDDS
 
       /// Release the instance with the handle.
       void release_instance (::DDS::InstanceHandle_t handle);
+
+      // Reset time interval for each instance.
+      void reschedule_deadline ();
 
     protected:
 

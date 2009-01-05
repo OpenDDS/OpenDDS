@@ -1,3 +1,58 @@
+Mon Jan  5 20:45:31 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        Fixed deadline implementation bugs (See RT12629).
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/OfferedDeadlineWatchdog.h:
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/PublicationInstance.h:
+        * dds/DCPS/RequestedDeadlineWatchdog.h:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/SubscriptionInstance.h:
+        * dds/DCPS/Watchdog.h:
+        * dds/DCPS/Watchdog.cpp:
+        * dds/DCPS/WatchdogTimer.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          1)Made the deadline violations reported on a per-instance
+            basis instead of per Writer/Reader basis to be consistent
+            with DDS specification.
+          2)Added code to update for last_instance_handle field of the
+            deadline status.
+          3)Fixed bug that Deadline QOS is not changeable in the case
+            where a deadline was not initially specified.
+          4)Still used the fixed interval and require at least one sample
+            per interval, but made Deadline Watchdogs detect the deadline
+            missed if two samples are sent/received in two seperate deadline
+            interval but period between two samples is greater than missed
+            deadline interval.
+          5)To avoid overhead of timer cancellation and rescheduling upon 
+            each sample receiving/sending. The DataReader and DataWriter 
+            instance record the time of last sample and current sample. 
+            The watchdog will check missed deadline either when timer expires
+            or when a sample is received/sent. The timer is scheduled initially
+            upon new instance registration and is reschedule only in 4) case.
+
+        * tests/DCPS/Deadline/DataReaderListener.h:
+        * tests/DCPS/Deadline/DataReaderListener.cpp:
+        * tests/DCPS/Deadline/DataWriterListenerImpl.cpp:
+        * tests/DCPS/Deadline/Writer.h:
+        * tests/DCPS/Deadline/Writer.cpp:
+        * tests/DCPS/Deadline/publisher.cpp:
+        * tests/DCPS/Deadline/subscriber.cpp:
+
+          Updated to test the bug fixes.
+
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+          Accomodated with dds_demarshal() function signature changes.
+
 Mon Jan  5 19:53:24 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:

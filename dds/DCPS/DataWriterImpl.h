@@ -355,6 +355,9 @@ namespace OpenDDS
       /// @c DataWriter.
       bool persist_data ();
 
+      // Reset time interval for each instance.
+      void reschedule_deadline ();
+
     protected:
 
       /**

@@ -80,7 +80,8 @@ WriteDataContainer::WriteDataContainer(
   char const * topic_name,
   char const * type_name,
   DataDurabilityCache* durability_cache,
-  ::DDS::DurabilityServiceQosPolicy const & durability_service)
+  ::DDS::DurabilityServiceQosPolicy const & durability_service,
+  std::auto_ptr<OfferedDeadlineWatchdog>& watchdog)
   : depth_ (depth),
     should_block_ (should_block),
     max_blocking_time_ (max_blocking_time),
@@ -96,7 +97,8 @@ WriteDataContainer::WriteDataContainer(
     topic_name_  (topic_name),
     type_name_ (type_name),
     durability_cache_ (durability_cache),
-    durability_service_ (durability_service)
+    durability_service_ (durability_service),
+    watchdog_ (watchdog)
 {
 
   if (DCPS_debug_level >= 2)
@@ -136,6 +138,13 @@ WriteDataContainer::enqueue(
     get_handle_instance (instance_handle);
   // Extract the instance queue.
   DataSampleList& instance_list = instance->samples_;
+
+  if (this->watchdog_.get ())
+  {
+    instance->last_sample_tv_ = instance->cur_sample_tv_;
+    instance->cur_sample_tv_ = ACE_OS::gettimeofday (); 
+    this->watchdog_->execute ((void const *)instance, false);
+  }
 
   //
   // Enqueue to the next_send_sample_ thread of unsent_data_
@@ -251,6 +260,11 @@ WriteDataContainer::register_instance(
   // The registered_sample is shallow copied.
   registered_sample = instance->registered_sample_->duplicate ();
 
+  if (this->watchdog_.get ())
+  {
+    this->watchdog_->schedule_timer (instance);
+  }
+
   safe_instance.release (); // Safe to relinquish ownership.
 
   return ::DDS::RETCODE_OK;
@@ -288,6 +302,9 @@ WriteDataContainer::unregister(
 
   // Unregister the instance with typed DataWriter.
   writer->unregistered (instance_handle);
+
+  if (this->watchdog_.get ())
+    this->watchdog_->cancel_timer (instance);
 
   return ::DDS::RETCODE_OK;
 }
@@ -345,6 +362,9 @@ WriteDataContainer::dispose(::DDS::InstanceHandle_t instance_handle,
       return ret;
     }
   }
+
+  if (this->watchdog_.get ())
+    this->watchdog_->cancel_timer (instance);
 
   return ::DDS::RETCODE_OK;
 }
@@ -1084,6 +1104,23 @@ WriteDataContainer::persist_data ()
   }
 
   return result;
+}
+
+void WriteDataContainer::reschedule_deadline ()
+{
+  for (PublicationInstanceMapType::iterator iter = instances_.begin();
+    iter != instances_.end();
+    ++iter)
+  {
+    if (iter->second->deadline_timer_id_ != -1)
+    {
+      if (this->watchdog_->reset_timer_interval (iter->second->deadline_timer_id_) == -1)
+      {
+        ACE_ERROR ((LM_ERROR, "(%P|%t)WriteDataContainer::reschedule_deadline "
+          "%p\n", "reset_timer_interval"));
+      }
+    }
+  }
 }
 
 } // namespace OpenDDS

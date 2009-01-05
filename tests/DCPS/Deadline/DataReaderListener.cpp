@@ -11,7 +11,7 @@
 using namespace Messenger;
 
 DataReaderListenerImpl::DataReaderListenerImpl ()
-  : num_reads_(0)
+  : num_arrived_(0)
 {
 }
 
@@ -23,7 +23,7 @@ void
 DataReaderListenerImpl::on_data_available (DDS::DataReader_ptr)
   throw (CORBA::SystemException)
 {
-  num_reads_ ++;
+  num_arrived_ ++;
 }
 
 void
@@ -32,9 +32,9 @@ DataReaderListenerImpl::on_requested_deadline_missed (
     DDS::RequestedDeadlineMissedStatus const & status)
   throw (CORBA::SystemException)
 {
-  cerr << "DataReaderListenerImpl::on_requested_deadline_missed" << endl
-       << "  total_count        = " << status.total_count << endl
-       << "  total_count_change = " << status.total_count_change << endl;
+  ACE_DEBUG ((LM_DEBUG, "(%P|%t)%T DataReaderListenerImpl::on_requested_deadline_missed \n"));
+  ACE_DEBUG ((LM_DEBUG, "(%P|%t)%T total_count=%d total_count_change=%d last_instance_handle=%d\n",
+    status.total_count, status.total_count_change, status.last_instance_handle));
 }
 
 void
