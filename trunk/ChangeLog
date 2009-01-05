@@ -1,3 +1,11 @@
+Mon Jan  5 21:24:56 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.cpp:
+
+          Fixed datalink reference counting bug in find_or_create_datalink().
+          The problem can be reproduced if subscriber process creates two 
+          datareaders use same transport and associates with same datawriter.
+         
 Mon Jan  5 20:45:31 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
         Fixed deadline implementation bugs (See RT12629).
@@ -32,9 +40,9 @@ Mon Jan  5 20:45:31 UTC 2009  Yan Dai  <dai_y@ociweb.com>
             missed if two samples are sent/received in two seperate deadline
             interval but period between two samples is greater than missed
             deadline interval.
-          5)To avoid overhead of timer cancellation and rescheduling upon 
-            each sample receiving/sending. The DataReader and DataWriter 
-            instance record the time of last sample and current sample. 
+          5)To avoid overhead of timer cancellation and rescheduling upon
+            each sample receiving/sending. The DataReader and DataWriter
+            instance record the time of last sample and current sample.
             The watchdog will check missed deadline either when timer expires
             or when a sample is received/sent. The timer is scheduled initially
             upon new instance registration and is reschedule only in 4) case.
