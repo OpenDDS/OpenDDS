@@ -1,15 +1,22 @@
+Tue Jan  6 17:47:49 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+
+          Made arg passed to get_instance_handle() to be const reference.
+
 Tue Jan  6 16:02:59 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * bin/DCPS/HTemplate.pm:
 
-	  Removed a spurious scope specification from the
-	  get_instance_handle() method implementation.
+          Removed a spurious scope specification from the
+          get_instance_handle() method implementation.
 
         * dds/DCPS/DataReaderImpl.cpp:
 
-	  Added specification compliance change from RT12617 as code in
-	  this area has been changing and had nullified the patch added
-	  to that ticket.
+          Added specification compliance change from RT12617 as code in
+          this area has been changing and had nullified the patch added
+          to that ticket.
 
 Mon Jan  5 21:24:56 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
