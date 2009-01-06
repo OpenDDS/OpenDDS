@@ -376,9 +376,8 @@ public:
       ::DDS::InstanceHandle_t handle)
     ACE_THROW_SPEC ((CORBA::SystemException));
 
-  ::DDS::InstanceHandle_t
-  <%TYPE%>DataReaderImpl::get_instance_handle(
-                  ::<%SCOPE%><%TYPE%> instance_data);
+  ::DDS::InstanceHandle_t get_instance_handle(
+      ::<%SCOPE%><%TYPE%> instance_data);
 
   virtual DDS::ReturnCode_t auto_return_loan(void* seq);
 
