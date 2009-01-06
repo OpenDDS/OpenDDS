@@ -1,3 +1,10 @@
+Tue Jan  6 18:20:11 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:
+
+          Added the coverage base project to syncServer, it didn't have it
+          automatically because it's a TAO-only project (no DDS base projects).
+
 Tue Jan  6 17:47:49 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
