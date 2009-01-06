@@ -1,11 +1,24 @@
+Tue Jan  6 16:02:59 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * bin/DCPS/HTemplate.pm:
+
+	  Removed a spurious scope specification from the
+	  get_instance_handle() method implementation.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+	  Added specification compliance change from RT12617 as code in
+	  this area has been changing and had nullified the patch added
+	  to that ticket.
+
 Mon Jan  5 21:24:56 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.cpp:
 
           Fixed datalink reference counting bug in find_or_create_datalink().
-          The problem can be reproduced if subscriber process creates two 
+          The problem can be reproduced if subscriber process creates two
           datareaders use same transport and associates with same datawriter.
-         
+
 Mon Jan  5 20:45:31 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
         Fixed deadline implementation bugs (See RT12629).

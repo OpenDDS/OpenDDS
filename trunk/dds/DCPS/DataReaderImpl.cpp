@@ -1057,13 +1057,15 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
           break;
         }
 
-        // This also adds to the sample container
+        // This adds the reader to the set/list of readers with data.
+        this->subscriber_servant_->data_received(this);
+
+        // This also adds to the sample container and makes any callbacks
+        // and condition modifications.
 
         SubscriptionInstance* instance = 0;
         bool is_new_instance = false;
         this->dds_demarshal(sample, instance, is_new_instance);
-        
-        this->subscriber_servant_->data_received(this);
 
         if (this->watchdog_.get ())
         {
