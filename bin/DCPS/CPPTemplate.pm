@@ -563,7 +563,7 @@ ACE_Message_Block*
 
 ::DDS::InstanceHandle_t
  <%TYPE%>DataWriterImpl::get_instance_handle(
-                ::<%SCOPE%><%TYPE%> instance_data)
+                const ::<%SCOPE%><%TYPE%>& instance_data)
 {
   InstanceMap::const_iterator const it = instance_map_.find(instance_data);
 
@@ -1497,7 +1497,7 @@ DDS::ReturnCode_t
 
 ::DDS::InstanceHandle_t
  <%TYPE%>DataReaderImpl::get_instance_handle(
-                ::<%SCOPE%><%TYPE%> instance_data)
+                const ::<%SCOPE%><%TYPE%>& instance_data)
 {
   InstanceMap::const_iterator const it = instance_map_.find(instance_data);
 

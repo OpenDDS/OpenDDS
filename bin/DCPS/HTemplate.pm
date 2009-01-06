@@ -222,7 +222,7 @@ private:
    * Get the InstanceHandle for the given data.
    */
   ::DDS::InstanceHandle_t get_instance_handle(
-    ::<%SCOPE%><%TYPE%> instance_data);
+    const ::<%SCOPE%><%TYPE%>& instance_data);
 
    InstanceMap  instance_map_;
    size_t       marshaled_size_;
@@ -377,7 +377,7 @@ public:
     ACE_THROW_SPEC ((CORBA::SystemException));
 
   ::DDS::InstanceHandle_t get_instance_handle(
-      ::<%SCOPE%><%TYPE%> instance_data);
+      const ::<%SCOPE%><%TYPE%>& instance_data);
 
   virtual DDS::ReturnCode_t auto_return_loan(void* seq);
 
