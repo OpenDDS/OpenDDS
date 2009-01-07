@@ -2,13 +2,7 @@
 %%% $Id$
 %%%---------------------------------------------------------------------
 
--module(error).
-
--export([badarg/1, badcmd/1]).
-
-badarg(Arg) ->
-    throw({badarg, Arg}).
-
-badcmd(Cmd) ->
-    throw({badcmd, Cmd}).
+@title    tao
+@version  $Revision$
+@author   Steven Stallion <stallions@ociweb.com>
 

@@ -3,7 +3,6 @@
 %%%---------------------------------------------------------------------
 
 code:add_patha("ebin").
-code:add_pathz("lib/common/ebin").
-code:add_pathz("lib/tao/ebin").
 code:add_pathz("lib/tao_ic/ebin").
+code:add_pathz("lib/tao/ebin").
 

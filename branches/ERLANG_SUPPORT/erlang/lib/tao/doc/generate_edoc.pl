@@ -16,6 +16,8 @@ use Erlang::EDoc;
 
 my $edoc = new Erlang::EDoc;
 $edoc->files('../src',
-  '[{dir, "html"}]' 
+  '{dir, "html"}',
+  '{overview, "overview.edoc"}',
+  '{title, "Overview (tao)"}',
 );
 exit $!;
