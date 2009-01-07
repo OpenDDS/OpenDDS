@@ -4,7 +4,7 @@
 
 project : erlang_otp {
   custom_only   = 1
-  after        += common *cpp
+  after        += *cpp
   erlcflags    += -Wall
  
   Erlang_Files {

@@ -3,8 +3,7 @@
 //
 
 workspace {
-  opendds.mpc
-  lib/common/common.mpc
-  lib/tao/tao.mpc
   lib/tao_ic/tao_ic.mpc
+  lib/tao/tao.mpc
+  opendds.mpc
 }

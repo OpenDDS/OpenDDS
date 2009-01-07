@@ -12,7 +12,7 @@ gen(File) ->
     gen(File, []).
 
 gen(File, Opts) ->
-    gen0(options(Opts) ++ [lists@:to_list(File)]).
+    gen0(options(Opts) ++ [tao_util:to_list(File)]).
 
 version() ->
     gen0(["-V"]).
@@ -22,7 +22,7 @@ version() ->
 %%----------------------------------------------------------------------
 
 gen0(Opts) ->
-    os@:exec(?COMMAND, Opts).
+    tao_util:exec(?COMMAND, Opts).
 
 options(Opts) ->
     [option(Opt) || Opt <- Opts].
@@ -71,7 +71,7 @@ option(Opt) ->
                 {stub_export_include, Include} ->
                     "stub_export_include=" ++ Include;
                 _Else ->
-                    error:badarg(Opt)
+                    tao_error:badarg(Opt)
             end;
         {suppress_skel, true} ->
             "-SS";
@@ -83,5 +83,5 @@ option(Opt) ->
         {_A, false} ->
             ""; % ignore option
         _Else ->
-            error:badarg(Opt)
+            tao_error:badarg(Opt)
     end.

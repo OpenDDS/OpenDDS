@@ -3,6 +3,5 @@
 %%%---------------------------------------------------------------------
 
 code:add_patha("ebin").
-code:add_pathz("../common/ebin").
 code:add_pathz("../tao_ic/ebin").
 

@@ -1,3 +1,37 @@
+Wed Jan  7 04:21:01 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/.erlang:
+        * erlang/DDS_erlang.mwc:
+        * erlang/lib/tao/.erlang:
+        * erlang/lib/tao/doc/generate_edoc.pl:
+        * erlang/lib/tao/doc/overview.edoc:
+        * erlang/lib/tao/src/tao_error.erl:
+        * erlang/lib/tao/src/tao_util.erl:
+        * erlang/lib/tao/src/tao_util.hrl:
+        * erlang/lib/tao/tao.mpc:
+        * erlang/lib/tao_ic/.erlang:
+        * erlang/lib/tao_ic/src/tao_ic.erl:
+        * erlang/lib/tao_ic/tao_ic.mpc:
+
+          Refactored tao and common libraries.
+        
+        * erlang/lib/common:
+        * erlang/lib/common/.erlang:
+        * erlang/lib/common/common.mpc:
+        * erlang/lib/common/doc:
+        * erlang/lib/common/doc/generate_edoc.pl:
+        * erlang/lib/common/doc/html:
+        * erlang/lib/common/ebin:
+        * erlang/lib/common/include:
+        * erlang/lib/common/src:
+        * erlang/lib/common/src/error.erl:
+        * erlang/lib/common/src/lists@.erl:
+        * erlang/lib/common/src/os@.erl:
+        * erlang/lib/common/src/os@.hrl:
+        * erlang/lib/tao/include:
+
+          Removed these files.
+
 Mon Jan  5 19:58:53 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * erlang/lib/common/src/os@.erl:

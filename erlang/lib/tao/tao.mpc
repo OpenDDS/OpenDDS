@@ -3,7 +3,9 @@
 //
 
 project : erlang_otp {
-  erlcflags  += -Wall
+  custom_only  += 1
+  after        += tao_ic
+  erlcflags    += -Wall
 
   Erlang_Files {
     src
