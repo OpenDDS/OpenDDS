@@ -5,6 +5,8 @@
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
 #include "dds/DCPS/WaitSet.h"
 
+#include <map>
+
 namespace Test {
 
 class Options;
@@ -21,8 +23,14 @@ class Subscriber {
     /// Execute the test.
     void run();
 
-    /// Number of samples received during the test.
-    unsigned int count() const;
+    /// Number of samples received during the test from each writer.
+    const std::map< long, long>& counts() const;
+
+    /// Number of payload bytes received during the test from each writer.
+    const std::map< long, long>& bytes() const;
+
+    /// Priority of  writers.
+    const std::map< long, long>& priorities() const;
 
   private:
     /// Test options.

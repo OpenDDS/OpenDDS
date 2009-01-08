@@ -8,8 +8,7 @@
 namespace { enum { BE_REALLY_VERBOSE = 1};}
 
 Test::DataReaderListener::DataReaderListener( const bool verbose)
- : verbose_( verbose),
-   count_( 0)
+ : verbose_( verbose)
 {
 }
 
@@ -17,10 +16,22 @@ Test::DataReaderListener::~DataReaderListener ()
 {
 }
 
-unsigned int
-Test::DataReaderListener::count() const
+const std::map< long, long>&
+Test::DataReaderListener::counts() const
 {
-  return this->count_;
+  return this->counts_;
+}
+
+const std::map< long, long>&
+Test::DataReaderListener::bytes() const
+{
+  return this->bytes_;
+}
+
+const std::map< long, long>&
+Test::DataReaderListener::priorities() const
+{
+  return this->priorities_;
 }
 
 void
@@ -38,11 +49,12 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
 
   Test::Data      data;
   DDS::SampleInfo info;
-  int             count = 0;
 
   while( DDS::RETCODE_OK == dr->take_next_sample( data, info)) {
     if( info.valid_data) {
-      ++count;
+      ++this->counts_[ data.pid];
+      this->bytes_[ data.pid] += data.buffer.length();
+      this->priorities_[ data.pid] = data.priority; // faster than conditional.
       if( this->verbose_ && BE_REALLY_VERBOSE) {
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderListener::on_data_available() - ")
@@ -59,8 +71,6 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
       ));
     }
   }
-
-  this->count_ += count;
 }
 
 void

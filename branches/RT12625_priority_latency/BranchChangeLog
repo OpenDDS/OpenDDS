@@ -1,9 +1,28 @@
+Thu Jan  8 21:35:29 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/DCPS/Priority/DataReaderListener.h:
+        * performance-tests/DCPS/Priority/DataReaderListener.cpp:
+        * performance-tests/DCPS/Priority/Priority.mpc:
+        * performance-tests/DCPS/Priority/README:
+        * performance-tests/DCPS/Priority/Subscriber.h:
+        * performance-tests/DCPS/Priority/Subscriber.cpp:
+        * performance-tests/DCPS/Priority/Test.idl:
+        * performance-tests/DCPS/Priority/Writer.h:
+        * performance-tests/DCPS/Priority/Writer.cpp:
+        * performance-tests/DCPS/Priority/scenario1.ini:
+        * performance-tests/DCPS/Priority/scenario2.ini:
+        * performance-tests/DCPS/Priority/scenario3.ini:
+        * performance-tests/DCPS/Priority/scenario6.ini:
+        * performance-tests/DCPS/Priority/subscriber_main.cpp:
+
+	  Debugging and expanding this test.
+
 Tue Jan  6 23:26:34 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/DCPS/Priority/README:
 
-	  Updated scenario descriptions to include multiprocess and
-	  multihost conditions.  Included estimated network loads.
+          Updated scenario descriptions to include multiprocess and
+          multihost conditions.  Included estimated network loads.
 
 Mon Jan  5 23:40:31 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 

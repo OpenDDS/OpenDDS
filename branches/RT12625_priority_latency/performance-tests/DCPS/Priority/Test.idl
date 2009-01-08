@@ -8,6 +8,7 @@ typedef sequence<octet> OctetSeq;
 #pragma DCPS_DATA_KEY  "Test::Data priority"
   struct Data {
     long     priority;
+    long     pid;
     long     seq;
     OctetSeq buffer;
   };

@@ -1,4 +1,4 @@
-project(DDS*idl): dcps {
+project(perf*idl): dcps {
   // This project ensures the common components get built first.
 
   TypeSupport_Files {
@@ -9,7 +9,7 @@ project(DDS*idl): dcps {
 }
 
 
-project(DDS*Publisher) : dcpsexe_with_unreliable_dgram, dcps_reliable_multicast, dcps_tcp {
+project(perf*Publisher) : dcpsexe_with_unreliable_dgram, dcps_reliable_multicast, dcps_tcp {
   exename = publisher
   after  += DDS*idl
 
@@ -26,7 +26,7 @@ project(DDS*Publisher) : dcpsexe_with_unreliable_dgram, dcps_reliable_multicast,
   }
 }
 
-project(DDS*Subscriber) : dcpsexe_with_unreliable_dgram, dcps_reliable_multicast, dcps_tcp {
+project(perf*Subscriber) : dcpsexe_with_unreliable_dgram, dcps_reliable_multicast, dcps_tcp {
   exename = subscriber
   after  += DDS*idl
 

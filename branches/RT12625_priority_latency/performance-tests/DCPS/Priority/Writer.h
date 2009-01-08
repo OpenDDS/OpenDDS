@@ -40,6 +40,9 @@ class Writer : public ACE_Task_Base {
     /// DataWriter to write with.
     ::DDS::DataWriter_var writer_;
 
+    /// Hashed publication GUID_t value for this writer.
+    long publicationId_;
+
     /// Profile of this publication.
     const PublicationProfile& profile_;
 

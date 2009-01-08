@@ -5,6 +5,8 @@
 #include "PublicationProfile.h"
 #include "TestTypeSupportC.h"
 
+#include "dds/DCPS/DataWriterImpl.h"
+
 #include <sstream>
 
 /// Control the spew.
@@ -22,6 +24,17 @@ Writer::Writer(
     verbose_( verbose),
     done_( false)
 {
+  OpenDDS::DCPS::DataWriterImpl* writerImpl
+    = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>( this->writer_.in());
+  if( writerImpl) {
+    ::OpenDDS::DCPS::GUID_t id = writerImpl->get_publication_id();
+    ::OpenDDS::DCPS::GuidConverter converter( id);
+    this->publicationId_ = static_cast<long>( converter);
+
+  } else {
+    this->publicationId_ = -1;
+  }
+
 }
 
 Writer::~Writer()
@@ -80,6 +93,7 @@ Writer::svc ()
     Test::Data sample;
     sample.priority = this->profile_.priority();
     sample.seq      = ++count;
+    sample.pid      = this->publicationId_;
     sample.buffer.length( this->profile_.messageSize());
 
     dataWriter->write( sample, DDS::HANDLE_NIL);
