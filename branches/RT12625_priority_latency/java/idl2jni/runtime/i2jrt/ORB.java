@@ -34,7 +34,7 @@ public class ORB {
 
   static {
     String libName = "idl2jni_runtime";
-    String propVal = System.getProperty("jni.nativeDebug");
+    String propVal = System.getProperty("opendds.native.debug");
     if (propVal != null && ("1".equalsIgnoreCase(propVal) || 
         "y".equalsIgnoreCase(propVal) || "yes".equalsIgnoreCase(propVal) 
         || "t".equalsIgnoreCase(propVal) || 

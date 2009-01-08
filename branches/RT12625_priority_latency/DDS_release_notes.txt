@@ -2,6 +2,37 @@ Version 1.3 of OpenDDS.
 
 New to this version are the following changes:
 
+- Implemented the ReadCondition interface and associated operations
+  on the DataReader (such as read_w_condition).
+
+- Implemented the QueryCondition interface, but only queries of the form
+  "ORDER BY a[, b, c...]" have any effect.  In other words, it's a mechanism
+  that controls the order of the data-set received from any given read or
+  take operation.  The ORDER BY fields can be either primitive types
+  (including strings) or primitive types in nested structs (using a.b).
+
+- Corrected a bug in the LIFESPAN QoS implementation where the Topic QoS
+  was used.  Now the DataWriter QoS takes effect.
+
+- The PARTITION QoS policy now accepts character class wildcards using [].
+
+- The DURABILITY QoS implementation was corrected so that readers requesting
+  the VOLATLIE kind will not receive historic samples from writers.  Since
+  there were some use-cases for the old behavior, it is available through an
+  OpenDDS-specific interface -- see $DDS_ROOT/dds/DdsDcpsSubscriptionExt.idl.
+
+- When the writer's DURABILITY QoS is PERSISTENT, the format of the
+  data stored on the filesystem has changed.  Instead of a single file in the
+  current working directory, a directory is now used.  This is configurable
+  using the option -DCPSPersistentDataDir.
+
+- A Java Message Service 1.1 (JMS) provider built on top of OpenDDS is now
+  available in $DDS_ROOT/java/jms.  JMS Topics are supported (not queuing).
+  See the README in that directory for more info.
+
+- The $DDS_ROOT/bin/federation utility has been renamed to opendds_ir_ctl
+  and now supports shutting down a remote non-federated DCPSInfoRepo process.
+
 =========================================================================
 
 Version 1.2 of OpenDDS.
@@ -87,6 +118,7 @@ New to this version are the following changes:
   datalink_release_delay.
 
 - Fixed a potential deadlock in reliable multicast transport.
+
 =========================================================================
 
 Version 1.1 of OpenDDS.

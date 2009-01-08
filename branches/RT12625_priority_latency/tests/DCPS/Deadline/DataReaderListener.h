@@ -5,7 +5,7 @@
 #ifndef DATAREADER_LISTENER_IMPL
 #define DATAREADER_LISTENER_IMPL
 
-#include <dds/DdsDcpsDataReaderExS.h>
+#include <dds/DdsDcpsSubscriptionExtS.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -86,8 +86,8 @@ public:
   DDS::DataReader_ptr)
   throw (CORBA::SystemException);
 
-  long num_reads() const {
-    return num_reads_;
+  long num_arrived() const {
+    return num_arrived_;
   }
 
 protected:
@@ -98,7 +98,7 @@ protected:
 private:
 
   DDS::DataReader_var reader_;
-  long                  num_reads_;
+  long                  num_arrived_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */

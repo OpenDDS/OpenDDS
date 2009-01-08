@@ -185,6 +185,12 @@ UpdateListener< DataType, ReaderType>::stop ()
   this->receiver_.stop ();
 }
 
+template< class DataType, class ReaderType>
+void
+UpdateListener< DataType, ReaderType>::join ()
+{
+  this->receiver_.wait ();
+}
 
 }} // End of namespace OpenDDS::Federator
 

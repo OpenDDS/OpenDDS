@@ -4,7 +4,7 @@
 #ifndef TAO_DDS_DCPS_SUBSCRIBER_H
 #define TAO_DDS_DCPS_SUBSCRIBER_H
 
-#include "dds/DdsDcpsSubscriptionS.h"
+#include "dds/DdsDcpsSubscriptionExtS.h"
 #include "dds/DdsDcpsDataReaderRemoteC.h"
 #include "dds/DdsDcpsInfoC.h"
 #include "EntityImpl.h"
@@ -54,7 +54,7 @@ namespace OpenDDS
 
     //Class SubscriberImpl
     class OpenDDS_Dcps_Export SubscriberImpl
-      : public virtual OpenDDS::DCPS::LocalObject<DDS::Subscriber>,
+      : public virtual OpenDDS::DCPS::LocalObject<SubscriberExt>,
         public virtual EntityImpl,
         public virtual TransportInterface
     {
@@ -71,6 +71,16 @@ namespace OpenDDS
       virtual ::DDS::DataReader_ptr create_datareader (
         ::DDS::TopicDescription_ptr a_topic_desc,
         const ::DDS::DataReaderQos & qos,
+        ::DDS::DataReaderListener_ptr a_listener
+      )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
+
+      virtual ::DDS::DataReader_ptr create_opendds_datareader (
+        ::DDS::TopicDescription_ptr a_topic_desc,
+        const ::DDS::DataReaderQos & qos,
+        const DataReaderQosExt & ext_qos,
         ::DDS::DataReaderListener_ptr a_listener
       )
       ACE_THROW_SPEC ((
@@ -168,6 +178,13 @@ namespace OpenDDS
 
     virtual void get_default_datareader_qos (
         ::DDS::DataReaderQos & qos
+      )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
+
+    virtual void get_default_datareader_qos_ext (
+        DataReaderQosExt & qos
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException

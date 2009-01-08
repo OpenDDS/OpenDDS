@@ -936,6 +936,11 @@ ManagerImpl::finalize()
   participantListener_.stop ();
   publicationListener_.stop ();
   subscriptionListener_.stop ();
+  ownerListener_.join ();
+  topicListener_.join ();
+  participantListener_.join ();
+  publicationListener_.join ();
+  subscriptionListener_.join ();
 
   if( this->federated_) {
     try {

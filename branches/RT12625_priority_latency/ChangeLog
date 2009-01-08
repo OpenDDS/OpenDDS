@@ -1,3 +1,553 @@
+Tue Jan  6 18:20:11 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:
+
+          Added the coverage base project to syncServer, it didn't have it
+          automatically because it's a TAO-only project (no DDS base projects).
+
+Tue Jan  6 17:47:49 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+
+          Made arg passed to get_instance_handle() to be const reference.
+
+Tue Jan  6 16:02:59 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * bin/DCPS/HTemplate.pm:
+
+          Removed a spurious scope specification from the
+          get_instance_handle() method implementation.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Added specification compliance change from RT12617 as code in
+          this area has been changing and had nullified the patch added
+          to that ticket.
+
+Mon Jan  5 21:24:56 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.cpp:
+
+          Fixed datalink reference counting bug in find_or_create_datalink().
+          The problem can be reproduced if subscriber process creates two
+          datareaders use same transport and associates with same datawriter.
+
+Mon Jan  5 20:45:31 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        Fixed deadline implementation bugs (See RT12629).
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/OfferedDeadlineWatchdog.h:
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/PublicationInstance.h:
+        * dds/DCPS/RequestedDeadlineWatchdog.h:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/SubscriptionInstance.h:
+        * dds/DCPS/Watchdog.h:
+        * dds/DCPS/Watchdog.cpp:
+        * dds/DCPS/WatchdogTimer.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          1)Made the deadline violations reported on a per-instance
+            basis instead of per Writer/Reader basis to be consistent
+            with DDS specification.
+          2)Added code to update for last_instance_handle field of the
+            deadline status.
+          3)Fixed bug that Deadline QOS is not changeable in the case
+            where a deadline was not initially specified.
+          4)Still used the fixed interval and require at least one sample
+            per interval, but made Deadline Watchdogs detect the deadline
+            missed if two samples are sent/received in two seperate deadline
+            interval but period between two samples is greater than missed
+            deadline interval.
+          5)To avoid overhead of timer cancellation and rescheduling upon
+            each sample receiving/sending. The DataReader and DataWriter
+            instance record the time of last sample and current sample.
+            The watchdog will check missed deadline either when timer expires
+            or when a sample is received/sent. The timer is scheduled initially
+            upon new instance registration and is reschedule only in 4) case.
+
+        * tests/DCPS/Deadline/DataReaderListener.h:
+        * tests/DCPS/Deadline/DataReaderListener.cpp:
+        * tests/DCPS/Deadline/DataWriterListenerImpl.cpp:
+        * tests/DCPS/Deadline/Writer.h:
+        * tests/DCPS/Deadline/Writer.cpp:
+        * tests/DCPS/Deadline/publisher.cpp:
+        * tests/DCPS/Deadline/subscriber.cpp:
+
+          Updated to test the bug fixes.
+
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+          Accomodated with dds_demarshal() function signature changes.
+
+Mon Jan  5 19:53:24 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+
+          Removed the top-level const from the return type of domain_to_repo().
+          It served no purpose and generated a warning from GCC 4.3.
+
+Tue Dec 30 15:30:50 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * java/build_scripts/jms_scoreboard.pl:
+
+          Made the PerlACE::Process invocation of ant work on Win32.
+          Fixed a bug in the junit output post-processing logic that missed
+          flagging junit failures as scoreboard errors.
+
+Wed Dec 17 23:42:28 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * java/build_scripts/jms_scoreboard.pl:
+
+          Use PerlACE::Process to launch junit tests so that
+          we can enforce a timeout.
+
+Mon Dec 15 23:36:26 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/INSTALL:
+
+          Fixed bad Windows path names.
+
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+
+          Fixed failing liveliness test; updated unregister test.
+
+Mon Dec 15 19:13:36 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * java/build_scripts/jms_scoreboard.pl:
+
+          Adjusted test output to not print "Error" when there are none.
+
+Mon Dec 15 05:57:16 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/README:
+        * java/jms/example:
+        * java/jms/example/jboss:
+        * java/jms/example/jboss/opendds-ds.xml:
+        * java/jms/example/jboss/opendds-ir-ds.xml:
+        * java/jms/compat/src/META-INF/service/opendds-ir-ds.xml:
+
+          Added documentation.
+
+Sun Dec 14 02:42:13 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/compat/test/org/opendds/jms/MessageConsumerImplTest.java:
+        * java/jms/compat/test/org/opendds/jms/MessageProducerImplTest.java:
+        * java/jms/compat/test/org/opendds/jms/SessionImplTest.java:
+        * java/jms/src/org/opendds/jms/DurableMessageConsumerImpl.java:
+        * java/jms/src/org/opendds/jms/MessageConsumerImpl.java:
+        * java/jms/src/org/opendds/jms/persistence/HibernatePersistenceManager.java:
+
+          Final round of re-formatting and import optimization.
+
+Sun Dec 14 00:06:46 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/src/org/opendds/jms/BytesBodyFacade.java:
+        * java/jms/src/org/opendds/jms/ConsumerDataReaderListener.java:
+        * java/jms/src/org/opendds/jms/DataWriterPair.java:
+        * java/jms/src/org/opendds/jms/DurableMessageConsumerImpl.java:
+        * java/jms/src/org/opendds/jms/MapBodyFacade.java:
+        * java/jms/src/org/opendds/jms/MessageConsumerImpl.java:
+        * java/jms/src/org/opendds/jms/MessageDispatcher.java:
+        * java/jms/src/org/opendds/jms/MessageProducerImpl.java:
+        * java/jms/src/org/opendds/jms/MessagePropertiesFacade.java:
+        * java/jms/src/org/opendds/jms/ObjectMessageImpl.java:
+        * java/jms/src/org/opendds/jms/SessionImpl.java:
+        * java/jms/src/org/opendds/jms/StreamBodyFacade.java:
+
+          Completed remaining TODO items.
+
+Sat Dec 13 23:47:04 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/compat/build.xml:
+        * java/jms/compat/test/org/opendds/jms/MessageConsumerImplTest.java:
+        * java/jms/compat/test/org/opendds/jms/SessionImplTest.java:
+        * java/jms/compat/test/org/opendds/jms/client/SimpleTest.java:
+        * java/jms/src/org/opendds/jms/common/util/NativeLoader.java:
+        * java/jms/compat/test/org/opendds/jms/AbstractMessageImplTest.java:
+
+          Updated test suites.
+
+        * java/jms/test/org/opendds/jms/SessionImplTest.java:
+        * java/jms/test/org/opendds/jms/TestUtils.java:
+        * java/jms/test/org/opendds/jms/TopicMessageConsumerImplTest.java:
+        * java/jms/test/org/opendds/jms/TopicMessageProducerImplTest.java:
+
+          Removed these files.
+
+Sat Dec 13 21:36:33 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/build.xml:
+
+          Added missing TAO_ImR_Client library dependency.
+
+        * java/jms/native/org_opendds_jms_DCPSInfoRepo.cpp:
+
+          Updated code style.
+
+        * java/jms/src/org/opendds/jms/ConnectionImpl.java:
+        * java/jms/src/org/opendds/jms/DataWriterPair.java:
+        * java/jms/src/org/opendds/jms/MessageConsumerImpl.java:
+        * java/jms/src/org/opendds/jms/PublisherManager.java:
+        * java/jms/src/org/opendds/jms/SubscriberManager.java:
+        * java/jms/src/org/opendds/jms/TemporaryTopicImpl.java:
+        * java/jms/src/org/opendds/jms/TopicImpl.java:
+        * java/jms/src/org/opendds/jms/common/Version.java:
+        * java/jms/src/org/opendds/jms/common/io/Files.java:
+        * java/jms/src/org/opendds/jms/common/lang/Strings.java:
+        * java/jms/src/org/opendds/jms/common/util/NativeLoader.java:
+        * java/jms/src/org/opendds/jms/common/util/PropertiesHelper.java:
+        * java/jms/src/org/opendds/jms/management/DCPSInfoRepoService.java:
+        * java/jms/src/org/opendds/jms/management/HibernatePersistenceService.java:
+        * java/jms/src/org/opendds/jms/management/ParticipantFactoryService.java:
+        * java/jms/src/org/opendds/jms/resource/ManagedConnectionImpl.java:
+        * java/jms/src/org/opendds/jms/resource/ResourceAdapterImpl.java:
+        * java/jms/src/org/opendds/jms/transport/TransportFactory.java:
+
+          Improved logging; Refined native library loading behavior.
+          NativeLoader now detects broken RAR deployers and alerts the user
+          before attempting to load native libraries manually.
+
+Sat Dec 13 00:46:38 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/idl2jni/runtime/idl2jni_runtime.cpp:
+
+          Refactored binary_name.
+
+        * java/jms/compat/build.xml:
+
+          Removed debug logging.
+
+        * java/jms/src/org/opendds/jms/MessageProducerImpl.java:
+
+          Fixed DCPSInfoRepo error on send with destinaton.
+
+Fri Dec 12 23:33:38 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+
+          Fixed a typo.
+
+        * java/build_scripts/jms_scoreboard.pl:
+
+          Added this new script which builds or tests the java/jms subtree
+          with one command, with test output that is compatible with the
+          DDS (ACE, TAO) scoreboard scripts.
+
+Fri Dec 12 05:39:25 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/compat/build.xml:
+        * java/jms/compat/test/org/opendds/jms/MessageConsumerImplTest.java:
+
+          Updated build output; Fixed MessageConsumerImplTest.java.
+
+Fri Dec 12 05:24:56 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/compat/src/META-INF/service/opendds-ir-ds.xml:
+        * java/jms/compat/test/org/opendds/jms/AbstractMessageImplTest.java:
+        * java/jms/compat/test/org/opendds/jms/MessageConsumerImplTest.java:
+        * java/jms/compat/test/org/opendds/jms/MessageProducerImplTest.java:
+        * java/jms/compat/test/org/opendds/jms/SessionImplTest.java:
+
+          Package refactorings.
+
+        * java/jms/compat/src/META-INF/service/opendds-inforepo-ds.xml:
+        * java/jms/compat/test/org/opendds/jms/client/AbstractMessageImplTest.java:
+        * java/jms/compat/test/org/opendds/jms/client/MessageConsumerImplTest.java:
+        * java/jms/compat/test/org/opendds/jms/client/MessageProducerImplTest.java:
+        * java/jms/compat/test/org/opendds/jms/client/SessionImplTest.java:
+
+          Removed these files.
+
+Fri Dec 12 00:46:41 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/OpenDDS.ipr:
+        * java/jms/compat/test/org/opendds/jms/client/MessageConsumerImplTest.java:
+        * java/jms/src/org/opendds/jms/DataWriterPair.java:
+        * java/jms/src/org/opendds/jms/MessageConsumerImpl.java:
+        * java/jms/src/org/opendds/jms/MessageProducerImpl.java:
+        * java/jms/src/org/opendds/jms/qos/QosPolicies.java:
+
+          More fixes to tests. Corrected default QoS behavior in
+          MessageConsumerImpl and MessageProducerImpl.
+
+Thu Dec 11 23:16:48 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/OpenDDS.ipr:
+        * java/jms/compat/src/META-INF/service/opendds-inforepo-ds.xml:
+        * java/jms/compat/test/org/opendds/jms/client/MessageConsumerImplTest.java:
+        * java/jms/src/org/opendds/jms/ConnectionImpl.java:
+        * java/jms/src/org/opendds/jms/TopicImpl.java:
+        * java/jms/src/org/opendds/jms/common/lang/Objects.java:
+        * java/jms/src/org/opendds/jms/common/util/Logger.java:
+
+          Fixed compat test failures.
+
+Thu Dec 11 22:24:07 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/FileSystemStorage.cpp:
+
+          Fixed a bug that was due to me mistakenly thinking that
+          ACE_String_Base constructors worked like std::string.
+
+Thu Dec 11 18:32:13 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/idl2jni/runtime/idl2jni_runtime.h:
+
+          Added exception for condition where native thread is unable to attach
+          to the JVM. Fixed void ** cast warning in GCC 4.1.x.
+
+Thu Dec 11 18:18:09 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/FileSystemStorage.cpp:
+
+          In the Win32-specific code, set errno when a directory-open
+          operation fails.
+
+Thu Dec 11 16:10:17 UTC 2008  Weiqi Gao  <gaow@ociweb.com>
+
+        * java/jms/compat/test/org/opendds/jms/client/MessageConsumerImplTest.java:
+        * java/jms/compat/test/org/opendds/jms/client/SessionImplTest.java:
+
+          Fixed some functional tests.
+
+Thu Dec 11 15:32:00 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/idl2jni/codegen/im_jni.cpp:
+        * java/idl2jni/runtime/idl2jni_BaseJavaPeer.h:
+        * java/idl2jni/runtime/idl2jni_runtime.h:
+        * java/idl2jni/runtime/idl2jni_runtime.cpp:
+        * java/idl2jni/runtime/idl2jni_runtime.mpc:
+        * java/jms/src/org/opendds/jms/common/util/NativeLoader.java:
+
+          Updated findClass to use the context class loader; JNIThreadAttacher
+          also updates the current thread's context class loader on attach.
+
+        * java/idl2jni/runtime/i2jrt/Runtime.java:
+        * java/idl2jni/runtime/i2jrt_Runtime.cpp:
+
+          Removed these files.
+
+Thu Dec 11 00:58:14 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Added release note about opendds_ir_ctl changes.
+
+Thu Dec 11 00:46:26 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+
+          Re-added imr_client dependency (required for static builds).
+
+Wed Dec 10 22:57:20 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Added notes for all of the changes merged in from the JMS_PROVIDER
+          branch last Friday.
+
+        * tests/DCPS/PersistentDurability/run_test.pl:
+
+          Updated for -DCPSPersistentDurabilityDir option.
+
+Wed Dec 10 15:09:39 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/INSTALL:
+
+          Marked Mac OS X as an experimental platform.
+
+Wed Dec 10 15:04:58 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/idl2jni/codegen/im_jni.cpp:
+        * java/jms/src/org/opendds/jms/TopicImpl.java:
+        * java/jms/src/org/opendds/jms/qos/DataReaderQosPolicy.java:
+        * java/jms/src/org/opendds/jms/qos/DataWriterQosPolicy.java:
+        * java/jms/src/org/opendds/jms/qos/ParticipantQosPolicy.java:
+        * java/jms/src/org/opendds/jms/qos/PublisherQosPolicy.java:
+        * java/jms/src/org/opendds/jms/qos/SubscriberQosPolicy.java:
+        * java/jms/src/org/opendds/jms/qos/TopicQosPolicy.java:
+
+          Updated default QosPolicy behavior. Added additional include
+          in generated code to make use of new class loading behavior.
+
+Wed Dec 10 03:22:06 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/src/org/opendds/jms/DataWriterPair.java:
+        * java/jms/src/org/opendds/jms/MessageConsumerImpl.java:
+        * java/jms/src/org/opendds/jms/PublisherManager.java:
+        * java/jms/src/org/opendds/jms/SubscriberManager.java:
+        * java/jms/src/org/opendds/jms/TopicImpl.java:
+
+          Updated logging; Removed null checks on QosPolicies (will always
+          be set).
+
+Wed Dec 10 03:10:01 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * java/idl2jni/runtime/i2jrt_ORB.cpp:
+        * java/idl2jni/runtime/i2jrt_TAOObject.cpp:
+        * java/idl2jni/runtime/idl2jni_runtime.cpp:
+        * java/jms/src/org/opendds/jms/common/util/NativeLoader.java:
+        * java/jms/src/org/opendds/jms/resource/ResourceAdapterImpl.java:
+
+          Updated other FindClass usages. Moved bootstrap code to
+          NativeLoader.bootstrap().
+
+Tue Dec  9 22:42:50 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/native/org_opendds_jms_DCPSInfoRepo.cpp:
+
+          Updated style to match DDS proper; fixed deprecated casts.
+
+Tue Dec  9 22:04:28 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/idl2jni/codegen/im_jni.cpp:
+        * java/idl2jni/runtime/i2jrt_Runtime.cpp:
+        * java/idl2jni/runtime/idl2jni_runtime.h:
+        * java/idl2jni/runtime/idl2jni_runtime.cpp:
+
+          Completed support for a global ClassLoader; this fixes an issue
+          where ACE threads could not find classes defined in nested
+          ClassLoaders.
+
+Tue Dec  9 16:54:53 UTC 2008  Weiqi Gao  <gaow@ociweb.com>
+
+        * java/jms/compat/opendds-jms-compat.iml:
+
+          Trivial changes.
+
+        * java/jms/compat/test/org/opendds/jms/client/MessageConsumerImplTest.java:
+        * java/jms/src/org/opendds/jms/ConnectionImpl.java:
+        * java/jms/src/org/opendds/jms/ConsumerDataReaderListener.java:
+        * java/jms/src/org/opendds/jms/DurableMessageConsumerImpl.java:
+        * java/jms/src/org/opendds/jms/MessageConsumerImpl.java:
+        * java/jms/src/org/opendds/jms/SessionImpl.java:
+
+          Added support for durable subscribers.
+
+Tue Dec  9 05:38:57 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/INSTALL:
+
+          Minor edits.
+
+Tue Dec  9 05:28:24 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/idl2jni/runtime/i2jrt_Runtime.cpp:
+        * java/idl2jni/runtime/idl2jni_runtime.h:
+        * java/idl2jni/runtime/idl2jni_runtime.cpp:
+
+          Updated context class loading behavior.
+
+Tue Dec  9 02:33:46 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/idl2jni/runtime/i2jrt/Runtime.java:
+        * java/idl2jni/runtime/i2jrt_Runtime.cpp:
+        * java/idl2jni/runtime/idl2jni_runtime.h:
+        * java/idl2jni/runtime/idl2jni_runtime.cpp:
+        * java/idl2jni/runtime/idl2jni_runtime.mpc:
+        * java/jms/src/org/opendds/jms/resource/ResourceAdapterImpl.java:
+
+          Initial support for context class loading in attached native
+          threads.
+
+Tue Dec  9 00:14:16 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/INSTALL:
+
+          Updated INSTALL with instructions for building on Mac OS X.
+
+Mon Dec  8 19:28:27 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+
+          Dropped static dependency on imr_client (This should cause a
+          temporary failure on 1.4a builds - Ciju is working on a patch).
+
+        * java/ant/opendds-ant.iml:
+        * java/jms/compat/opendds-jms-compat.iml:
+        * java/jms/src/org/opendds/jms/management/DCPSInfoRepoService.java:
+        * java/jms/src/org/opendds/jms/management/Destination.java:
+        * java/jms/src/org/opendds/jms/management/HibernatePersistenceService.java:
+        * java/jms/src/org/opendds/jms/management/ParticipantFactoryService.java:
+        * java/jms/src/org/opendds/jms/management/argument/DynamicArguments.java:
+
+          Updates to JMX components: better logging; general refactoring.
+
+Sun Dec  7 22:35:41 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Comparator_T.h:
+
+          Added an #include needed for TAO 1.4a on some platforms.
+
+        * dds/DCPS/FileSystemStorage.h:
+
+          Fixed a typo in my commit from yesterday.
+
+Sun Dec  7 05:47:46 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * java/ant/opendds-ant.iml:
+        * java/jms/compat/opendds-jms-compat.iml:
+        * java/jms/compat/src/META-INF/application.xml:
+        * java/jms/compat/src/META-INF/service/opendds-ds.xml:
+        * java/jms/src/org/opendds/jms/management/HibernatePersistenceService.java:
+        * java/jms/src/org/opendds/jms/persistence/HibernatePersistenceManager.java:
+        * java/jms/src/org/opendds/jms/persistence/PersistenceManager.java:
+
+          Refactored PersistenceManager; updated IDEA project files.
+
+        * java/jms/src/org/opendds/jms/management/PersistenceManagerService.java:
+
+          Removed this file.
+
+Sun Dec  7 03:38:15 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataDurabilityCache.h:
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * java/OpenDDS.ipr:
+        * java/jms/compat/src/META-INF/service/opendds-ds.xml:
+        * java/jms/src/org/opendds/jms/management/argument/DCPSArguments.java:
+        * tests/DCPS/PersistentDurability/run_test.pl:
+
+          Added configurable directory for FileSystemStorage. New DCPS option
+          added: -DCPSPersistentDataDir.
+
+Sat Dec  6 22:56:15 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/FileSystemStorage.h:
+
+          ACE 5.4a doesn't define ACE_DIRENT so define it here based on the
+          ACE version.
+
+Sat Dec  6 20:59:16 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/FileSystemStorage.cpp:
+
+          Added #includes for required ACE headers.
+
+Fri Dec  5 23:23:24 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        Merged the JMS_PROVIDER branch (r1812) back to the trunk.
+        That branch is now only for archival purposes.  Its ChangeLog
+        is now in the file $DDS_ROOT/history/ChangeLog-JMS_PROVIDER.
+
+        This changeset includes many improvements to the core OpenDDS
+        libraries as well as the incorporation of a JMS Provider based on
+        OpenDDS (located at $DDS_ROOT/java/jms).  Subsequent committs to the
+        release notes will detail all of the user-visible changes to OpenDDS.
+
 Wed Dec  3 18:19:34 UTC 2008  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportImpl.h:
@@ -15,7 +565,7 @@ Wed Dec  3 18:19:34 UTC 2008  Paul Calabrese  <calabrese_p@ociweb.com>
         * DevGuideExamples/DCPS/Messenger_ZeroCopy/subscriber.cpp:
 
           Use new method to attach transports (and remove downcasts).
- 
+
 Thu Nov 27 05:38:17 UTC 2008  Friedhelm Wolf  <fwolf@dre.vanderbilt.edu>
 
         * wrapper/Domain_Manager.h

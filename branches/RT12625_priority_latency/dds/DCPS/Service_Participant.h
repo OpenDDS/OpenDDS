@@ -216,7 +216,7 @@ namespace OpenDDS
                             const RepoKey repo);
 
       /// Convert domainId to repository key.
-      const RepoKey domain_to_repo (const ::DDS::DomainId_t domain) const;
+      RepoKey domain_to_repo (const ::DDS::DomainId_t domain) const;
 
       /// Failover to a new repository.
       void repository_lost( const RepoKey key);
@@ -473,6 +473,8 @@ namespace OpenDDS
       /// The @c PERSISTENT data durability cache.
       std::auto_ptr<DataDurabilityCache> persistent_data_cache_;
 
+      /// The @c PERSISTENT data durability directory.
+      ACE_CString persistent_data_dir_;
     };
 
 #   define TheServiceParticipant OpenDDS::DCPS::Service_Participant::instance()

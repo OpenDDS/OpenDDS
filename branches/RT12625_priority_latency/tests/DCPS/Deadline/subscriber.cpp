@@ -29,6 +29,25 @@
 #include <cassert>
 
 OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
+static int const num_messages = 10;
+static ACE_Time_Value write_interval(0, 500000);
+
+const int NUM_INSTANCE = 2;
+const int MESG_RECEIVE_DURATION = 5;
+
+// Set up a 5 second recurring deadline.
+static DDS::Duration_t const DEADLINE_PERIOD =
+{
+  5,  // seconds
+    0   // nanoseconds
+};
+// Time to sleep waiting for deadline periods to expire
+long const NUM_EXPIRATIONS = 2;
+ACE_Time_Value const SLEEP_DURATION (
+                                     OpenDDS::DCPS::duration_to_time_value (DEADLINE_PERIOD)
+                                     * NUM_EXPIRATIONS
+                                     + ACE_Time_Value (1));
+
 
 int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
@@ -127,7 +146,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         DDS::DataReaderQos bogus_qos;
         sub->get_default_datareader_qos (bogus_qos);
       
-        // Set up a 1 second recurring deadline.  DataReader creation
+        // Set up a 2 second recurring deadline.  DataReader creation
         // should fail with this QoS since the requested deadline period
         // will be less than the test configured offered deadline
         // period.
@@ -180,34 +199,19 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       // Create the listener.
       DDS::DataReaderListener_var listener (new DataReaderListenerImpl);
+      DataReaderListenerImpl* listener_servant =
+        dynamic_cast<DataReaderListenerImpl*>(listener.in());
+
       if (CORBA::is_nil (listener.in ()))
       {
         cerr << "ERROR: listener is nil." << endl;
         exit(1);
       }
 
-
       DDS::DataReaderQos dr_qos; // Good QoS.
       sub->get_default_datareader_qos (dr_qos);
 
-      // Set up a 5 second recurring deadline.
-      static DDS::Duration_t const DEADLINE_PERIOD =
-        {
-          5,  // seconds
-          0   // nanoseconds
-        };
-
       assert (DEADLINE_PERIOD.sec > 1); // Requirement for the test.
-
-      // Time to sleep waiting for deadline periods to expire
-      long const NUM_EXPIRATIONS = 2;
-      ACE_Time_Value const SLEEP_DURATION (
-        OpenDDS::DCPS::duration_to_time_value (DEADLINE_PERIOD)
-        * 2
-        + ACE_Time_Value (1));
-
-      dr_qos.deadline.period.sec     = DEADLINE_PERIOD.sec;
-      dr_qos.deadline.period.nanosec = DEADLINE_PERIOD.nanosec;
 
       // First data reader will have a listener to test listener
       // callback on deadline expiration.
@@ -229,9 +233,51 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit(1);
       }
 
+      dr_qos.deadline.period.sec     = DEADLINE_PERIOD.sec;
+      dr_qos.deadline.period.nanosec = DEADLINE_PERIOD.nanosec;
+
+      // Reset qos to have deadline. The watch dog now starts.
+      if (dr1->set_qos (dr_qos) != ::DDS::RETCODE_OK 
+        || dr2->set_qos (dr_qos) != ::DDS::RETCODE_OK)
+      {
+        cerr << "ERROR: set deadline qos failed." << endl;
+        exit(1);
+      }
+      
+      Messenger::MessageDataReader_var message_dr1 =
+        Messenger::MessageDataReader::_narrow(dr1.in());
+
+      Messenger::MessageDataReaderImpl* dr1_svt = 
+        dynamic_cast<Messenger::MessageDataReaderImpl*>(message_dr1.in());
+
+      Messenger::MessageDataReader_var message_dr2 =
+        Messenger::MessageDataReader::_narrow(dr2.in());
+
+      Messenger::MessageDataReaderImpl* dr2_svt = 
+        dynamic_cast<Messenger::MessageDataReaderImpl*>(message_dr2.in());
+
+      int max_attempts = 10;
+      int attempts = 0;
+
+      // Synchronize with publisher. Wait until both associate with DataWriter.
+      while (attempts < max_attempts)
+      {
+        ::DDS::SubscriptionMatchStatus status1 = dr1->get_subscription_match_status ();
+        ::DDS::SubscriptionMatchStatus status2 = dr2->get_subscription_match_status ();
+        if (status1.total_count == 1 && status2.total_count == 1)
+          break;
+        ++ attempts;
+        ACE_OS::sleep (1);
+      }
+
+      if (attempts >= max_attempts)
+      {
+        cerr << "ERROR: failed to make associations. " << endl;
+        exit (1);
+      }
       // ----------------------------------------------
 
-      // Wait for deadline periods to expire.
+      // Wait for deadline periods to expire. 
       ACE_OS::sleep (SLEEP_DURATION);
 
       DDS::RequestedDeadlineMissedStatus deadline_status1 =
@@ -240,11 +286,39 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       DDS::RequestedDeadlineMissedStatus deadline_status2 =
         dr2->get_requested_deadline_missed_status();
 
-      if (deadline_status1.total_count != NUM_EXPIRATIONS
-          || deadline_status2.total_count != NUM_EXPIRATIONS)
+      Messenger::Message message;
+      message.subject_id = 99;
+      ::DDS::InstanceHandle_t dr1_hd1 = dr1_svt->get_instance_handle (message);
+      ::DDS::InstanceHandle_t dr2_hd1 = dr2_svt->get_instance_handle (message);
+      message.subject_id = 100;
+      ::DDS::InstanceHandle_t dr1_hd2 = dr1_svt->get_instance_handle (message);
+      ::DDS::InstanceHandle_t dr2_hd2 = dr2_svt->get_instance_handle (message);
+
+      if (deadline_status1.last_instance_handle != dr1_hd1 
+        && deadline_status1.last_instance_handle != dr1_hd2)
+      {
+        cerr << "ERROR: Expected DR1 last instance handle ("
+             << dr1_hd1 << " or " << dr1_hd2 << ") did not occur ("
+             << deadline_status1.last_instance_handle << ")" << endl;
+
+        exit (1);
+      }
+
+      if (deadline_status2.last_instance_handle != dr2_hd1 
+        && deadline_status2.last_instance_handle != dr2_hd2)
+      {
+        cerr << "ERROR: Expected DR2 last instance handle ("
+             << dr2_hd1 << " or " << dr2_hd2 << ") did not occur ("
+             << deadline_status2.last_instance_handle << endl;
+
+        exit (1);
+      }
+
+      if (deadline_status1.total_count != NUM_EXPIRATIONS * NUM_INSTANCE
+          || deadline_status2.total_count != NUM_EXPIRATIONS * NUM_INSTANCE)
       {
         cerr << "ERROR: Expected number of missed requested "
-             << "deadlines (" << NUM_EXPIRATIONS << ") " << "did " << endl
+             << "deadlines (" << NUM_EXPIRATIONS * NUM_INSTANCE << ") " << "did " << endl
              << "       not occur ("
              << deadline_status1.total_count << " and/or "
              << deadline_status2.total_count << ")." << endl;
@@ -252,8 +326,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit (1);
       }
 
-      if (deadline_status1.total_count_change != NUM_EXPIRATIONS
-          || deadline_status2.total_count_change != NUM_EXPIRATIONS)
+      if (deadline_status1.total_count_change != NUM_EXPIRATIONS * NUM_INSTANCE
+          || deadline_status2.total_count_change != NUM_EXPIRATIONS * NUM_INSTANCE)
       {
         cerr << "ERROR: Incorrect missed requested "
              << "deadline count change" << endl
@@ -261,23 +335,46 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
              << deadline_status1.total_count_change
              << " and/or "
              << deadline_status2.total_count_change
-             << " instead of " << NUM_EXPIRATIONS << ")."
+             << " instead of " << NUM_EXPIRATIONS * NUM_INSTANCE << ")."
              << endl;
 
         exit (1);
       }
 
-      // Wait for another set of deadline periods to expire.
-      ACE_OS::sleep (SLEEP_DURATION);
+      ACE_Time_Value no_miss_period = num_messages * write_interval;
+
+      // Wait for another set of deadline periods to expire after
+      // writing/receiving period.
+      ACE_OS::sleep (SLEEP_DURATION + no_miss_period);
 
       deadline_status1 = dr1->get_requested_deadline_missed_status();
       deadline_status2 = dr2->get_requested_deadline_missed_status();
 
-      if (deadline_status1.total_count != NUM_EXPIRATIONS * 2
-          || deadline_status2.total_count != NUM_EXPIRATIONS * 2)
+      if (deadline_status1.last_instance_handle != dr1_hd1 
+        && deadline_status1.last_instance_handle != dr1_hd2)
+      {
+        cerr << "ERROR: Expected DR1 last instance handle ("
+             << dr1_hd1 << " or " << dr1_hd2 << ") did not occur ("
+             << deadline_status1.last_instance_handle << ")" << endl;
+
+        exit (1);
+      }
+
+      if (deadline_status2.last_instance_handle != dr2_hd1 
+        && deadline_status2.last_instance_handle != dr2_hd2)
+      {
+        cerr << "ERROR: Expected DR2 last instance handle ("
+             << dr2_hd1 << " or " << dr2_hd2 << ") did not occur ("
+             << deadline_status2.last_instance_handle << endl;
+
+        exit (1);
+      }
+
+      if (deadline_status1.total_count != 2 * NUM_EXPIRATIONS * NUM_INSTANCE
+          || deadline_status2.total_count != 2 * NUM_EXPIRATIONS * NUM_INSTANCE)
       {
         cerr << "ERROR: Another expected number of missed requested "
-             << "deadlines (" << NUM_EXPIRATIONS * 2 << ")" << endl
+             << "deadlines (" << 2 * NUM_EXPIRATIONS * NUM_INSTANCE << ")" << endl
              << "       did not occur ("
              << deadline_status1.total_count << " and/or "
              << deadline_status2.total_count << ")." << endl;
@@ -285,8 +382,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit (1);
       }
 
-      if (deadline_status1.total_count_change != NUM_EXPIRATIONS
-          || deadline_status2.total_count_change != NUM_EXPIRATIONS)
+      if (deadline_status1.total_count_change != NUM_EXPIRATIONS * NUM_INSTANCE
+          || deadline_status2.total_count_change != NUM_EXPIRATIONS * NUM_INSTANCE)
       {
         cerr << "ERROR: Incorrect missed requested "
              << "deadline count" << endl
@@ -300,24 +397,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
 
-      // Create 3rd data reader to trigger the data writers to write.
-      DDS::DataReader_var dr3 =
-      sub->create_datareader (topic.in (),
-                              dr_qos,
-                              DDS::DataReaderListener::_nil ());
-
-      DataReaderListenerImpl* listener_servant =
-        dynamic_cast<DataReaderListenerImpl*>(listener.in());
       int expected = 10;
-      while ( listener_servant->num_reads() < expected) {
+      while ( listener_servant->num_arrived() < expected) {
         ACE_OS::sleep (1);
       }
-
-
-
-      // @todo We still need a check proper updating of the
-      //       @c DDS::RequestedDeadlineMissedStatus::last_instance_handle
-      //       field.
 
       if (!CORBA::is_nil (participant.in ())) {
         participant->delete_contained_entities();

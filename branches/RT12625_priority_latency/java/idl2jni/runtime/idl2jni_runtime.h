@@ -118,6 +118,19 @@ void copyToCxx (JNIEnv *jni,
 
 
 idl2jni_runtime_Export
+jobject currentThread(JNIEnv *);
+
+idl2jni_runtime_Export
+jobject getContextClassLoader(JNIEnv *);
+
+idl2jni_runtime_Export
+void setContextClassLoader(JNIEnv *, jobject);
+
+idl2jni_runtime_Export
+jclass findClass(JNIEnv *, const char *);
+
+
+idl2jni_runtime_Export
 CORBA::Object_ptr recoverTaoObject (JNIEnv *jni, jobject source);
 
 
@@ -285,16 +298,17 @@ class idl2jni_runtime_Export JNIThreadAttacher
 {
 public:
 
-  explicit JNIThreadAttacher (JavaVM *jvm)
+  explicit JNIThreadAttacher (JavaVM *jvm, jobject cl = 0)
     : jvm_ (jvm)
     , jni_ (0)
   {
-    JavaVMAttachArgs args = {JNI_VERSION_1_4, 0, 0};
     void *jni;
-    if (0 == jvm_->AttachCurrentThread (&jni, &args))
+    if (jvm_->AttachCurrentThread (&jni, 0) != 0)
       {
-        jni_ = reinterpret_cast<JNIEnv *> (jni);
+	throw std::exception ();
       }
+    jni_ = reinterpret_cast<JNIEnv *> (jni);
+    if (cl != 0) setContextClassLoader (jni_, cl);
   }
 
   ~JNIThreadAttacher ()

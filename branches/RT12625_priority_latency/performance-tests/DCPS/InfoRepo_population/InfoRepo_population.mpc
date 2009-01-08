@@ -10,7 +10,7 @@ project(*idl) : taoidldefaults {
 }
 
 
-project(*SyncServer) : taoexe, portableserver, iortable {
+project(*SyncServer) : taoexe, portableserver, iortable, coverage_optional {
   exename   = syncServer
   includes += ../Sync
   libs     += SyncServer

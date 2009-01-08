@@ -33,7 +33,8 @@ namespace OpenDDS
           group_id_ (0),
           registered_sample_ (registered_sample),
           unregistered_ (false),
-          instance_handle_(0)
+          instance_handle_(0),
+          deadline_timer_id_ (-1)
       {
       }
 
@@ -65,6 +66,12 @@ namespace OpenDDS
 
       /// The instance handle for the registered object
       ::DDS::InstanceHandle_t instance_handle_;
+
+      ACE_Time_Value   last_sample_tv_;
+
+      ACE_Time_Value   cur_sample_tv_;
+
+      long             deadline_timer_id_; 
     } ;
 
   }

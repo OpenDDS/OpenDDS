@@ -3,6 +3,7 @@
 #define idl2jni_BaseJavaPeer_H
 
 #include "idl2jni_runtime_Export.h"
+#include "idl2jni_runtime.h"
 #include "idl2jni_jni.h"
 #include "tao/LocalObject.h"
 
@@ -12,6 +13,7 @@ class idl2jni_runtime_Export IDL2JNI_BaseJavaPeer
 public:
   IDL2JNI_BaseJavaPeer (JNIEnv *jni, jobject local)
     : globalCallback_ (jni->NewGlobalRef (local))
+    , cl_ (jni->NewGlobalRef (getContextClassLoader (jni)))
   {
     jni->GetJavaVM (&jvm_);
   }
@@ -20,6 +22,7 @@ public:
 
 protected:
   jobject globalCallback_;
+  jobject cl_;
   JavaVM *jvm_;
 
 private: //unimplemented

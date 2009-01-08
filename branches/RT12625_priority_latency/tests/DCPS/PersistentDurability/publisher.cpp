@@ -14,6 +14,7 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
+#include <dds/DCPS/FileSystemStorage.h>
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #include <dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h>
 
@@ -31,12 +32,13 @@ using namespace Messenger;
 
 OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
 
-bool do_write = false;
+bool do_write = false, delete_data = false;
+const ACE_TCHAR *dir = ACE_TEXT("");
 
 int
 parse_args (int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, "w");
+  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("wd:"));
   int c;
 
   while ((c = get_opts ()) != -1)
@@ -46,11 +48,16 @@ parse_args (int argc, ACE_TCHAR *argv[])
         do_write = true;
         break;
 
+      case 'd':
+        delete_data = true;
+        dir = get_opts.opt_arg ();
+        break;
+
       case '?':
       default:
         ACE_ERROR_RETURN ((LM_ERROR,
                            "usage:  %s "
-                           "[-w]"
+                           "[-w] [-d directory]"
                            "\n",
                            argv [0]),
                           -1);
@@ -78,6 +85,16 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       if (parse_args (argc, argv) != 0)
         return -1;
+
+      if (delete_data)
+      {
+        using OpenDDS::FileSystemStorage::Directory;
+        Directory::create (ACE_TEXT_ALWAYS_CHAR (dir))->remove ();
+        dpf->delete_participant (participant);
+        TheTransportFactory->release ();
+        TheServiceParticipant->shutdown ();
+        return 0;
+      }
 
       MessageTypeSupport_var servant = new MessageTypeSupportImpl ();
 

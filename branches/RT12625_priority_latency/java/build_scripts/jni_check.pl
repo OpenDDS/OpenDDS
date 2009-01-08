@@ -19,7 +19,7 @@ if ($^O eq 'MSWin32') {
   @decorators = (['', '.dll'], ['', 'd.dll'], ['lib', '.dll']);
 } else {
   $nm = 'nm -g -P';
-  $pattern = '^(Java_\\S+) T ';
+  $pattern = '^_?(Java_\\S+) T ';
   @decorators = (['lib', '.so'], ['lib', '.sl'], ['lib', '.a'], ['lib', '.so'],
                  ['lib', '.dylib'], ['lib', '.so'], ['lib', '.dll']);
 }
