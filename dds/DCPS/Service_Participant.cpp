@@ -601,10 +601,12 @@ namespace OpenDDS
       // Establish the scheduler if specified.
       //
       if( this->schedulerString_.empty()) {
-        ACE_DEBUG((LM_WARNING,
-          ACE_TEXT("(%P|%t) INFO: Service_Participant::intializeScheduling() - ")
-          ACE_TEXT("no scheduling policy specified, not setting policy.\n")
-        ));
+        if( DCPS_debug_level > 0) {
+          ACE_DEBUG((LM_WARNING,
+            ACE_TEXT("(%P|%t) INFO: Service_Participant::intializeScheduling() - ")
+            ACE_TEXT("no scheduling policy specified, not setting policy.\n")
+          ));
+        }
 
       } else {
         //
@@ -658,7 +660,7 @@ namespace OpenDDS
           this->scheduler_ = -1;
 
         } else if( DCPS_debug_level > 0) {
-          ACE_DEBUG((LM_WARNING,
+          ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) Service_Participant::initializeScheduling() - ")
             ACE_TEXT("scheduling policy set to %s(%d).\n"),
             this->schedulerString_.c_str()
