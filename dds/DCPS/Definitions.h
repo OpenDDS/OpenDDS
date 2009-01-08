@@ -24,7 +24,6 @@ namespace OpenDDS
     typedef ACE_UINT16 CoherencyGroup ;
     typedef RepoId PublicationId;
    
-    const ::DDS::InstanceHandle_t HANDLE_NIL = 0;
     const ::CORBA::ULong DEFAULT_STATUS_KIND_MASK = 0xFFFF;
 
     /// Lolipop sequencing (never wrap to negative).
@@ -50,8 +49,8 @@ namespace OpenDDS
 
       /// Post-increment.
       SequenceNumber operator++(int) {
-	SequenceNumber value (*this);
-	++*this;
+        SequenceNumber value (*this);
+        ++*this;
         return value ;
       }
 

@@ -4,7 +4,7 @@
 #ifndef FAILOVERLISTENER_T_H
 #define FAILOVERLISTENER_T_H
 
-#include "dds/DdsDcpsDataReaderExC.h"
+#include "dds/DdsDcpsSubscriptionExtC.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

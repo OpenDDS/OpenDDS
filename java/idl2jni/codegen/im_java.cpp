@@ -65,7 +65,8 @@ namespace
   };
 
   bool java_class_gen (const JavaName &jn, JavaFileType jft, const char *body,
-    const char *extends = "")
+    const char *extends = "",
+    const char *implements = "")
   {
     string file, pkgdecl;
 
@@ -105,7 +106,7 @@ namespace
       {
         nativeLoader = "\n"
           "  static {\n"
-          "    String propVal = System.getProperty(\"jni.nativeDebug\");\n"
+          "    String propVal = System.getProperty(\"opendds.native.debug\");\n"
           "    if (propVal != null && (\"1\".equalsIgnoreCase(propVal) ||\n"
           "        \"y\".equalsIgnoreCase(propVal) ||\n"
           "        \"yes\".equalsIgnoreCase(propVal) ||\n"
@@ -125,6 +126,10 @@ namespace
     if (*extends)
       {
         oss << " extends " << extends;
+      }
+    if (*implements && jft != JINTERFACE)
+      {
+        oss << " implements " << implements;
       }
     oss << " {\n" <<
       body <<
@@ -419,28 +424,47 @@ bool idl_mapping_java::gen_enum (UTL_ScopedName *name,
 {
   ostringstream oss;
   const char *enum_name = name->last_component ()->get_string ();
-  unsigned long count (0);
+  oss <<
+    "  private static " << enum_name << "[] __values = {\n";
+  for (size_t i = 0; i < contents.size (); ++i)
+    {
+      oss <<
+        "    new " << enum_name << '(' << i << ')';
+      if (i < contents.size () - 1) oss << ',';
+      oss << '\n';
+    }
+  oss
+    << "  };\n\n";
+
   for (size_t i = 0; i < contents.size (); ++i)
     {
       const char *enumerator_name = contents[i]->local_name ()->get_string ();
       oss <<
         "  public static final int _" << enumerator_name
-        << " = " << count++ << ";\n"
+        << " = " << i << ";\n"
         "  public static final " << enum_name << ' '
-        << enumerator_name << " = new " << enum_name << "(_"
-        << enumerator_name << ");\n\n";
+        << enumerator_name << " = __values[" << i << "];\n\n";
     }
 
   oss <<
-    "  public int value() { return _value; }\n"
-    "  private int _value;\n"
+    "  public int value() { return _value; }\n\n"
+    "  private int _value;\n\n"
     "  public static " << enum_name << " from_int(int value) {\n"
-    "    return new " << enum_name << "(value);\n"
-    "  }\n"
-    "  protected " << enum_name << "(int value) { _value = value; }\n";
+    "    if (value >= 0 && value < " << contents.size () << ") {\n"
+    "      return __values[value];\n"
+    "    } else {\n"
+    "      return new " << enum_name << "(value);\n"
+    "    }\n"
+    "  }\n\n"
+    "  protected " << enum_name << "(int value) { _value = value; }\n\n"
+    "  public Object readResolve()\n"
+    "      throws java.io.ObjectStreamException {\n"
+    "    return from_int(value());\n"
+    "  }\n\n";
 
   JavaName jn (name);
-  return java_class_gen (jn, JCLASS, oss.str ().c_str ())
+  return java_class_gen (jn, JCLASS,
+      oss.str ().c_str (), "", "java.io.Serializable")
     && gen_helper (jn, repoid) && gen_holder (jn);
 }
 
@@ -468,7 +492,8 @@ bool idl_mapping_java::gen_struct (UTL_ScopedName *name,
     "  }\n";
 
   JavaName jn (name);
-  return java_class_gen (jn, JFINAL_CLASS, body.c_str ())
+  return java_class_gen (jn, JFINAL_CLASS,
+      body.c_str (), "", "java.io.Serializable")
     && gen_helper (jn, repoid) && gen_holder (jn);
 }
 
@@ -538,8 +563,8 @@ bool idl_mapping_java::gen_interf (UTL_ScopedName *name, bool local,
         }
     }
 
-  string extends_stub = string ("i2jrt.TAO") + (local ? "Local" : "")
-     + "Object implements " + jn.clazz_;
+  string extends_stub = string ("i2jrt.TAO") +
+    (local ? "Local" : "") + "Object";
 
   string allRepoIds = '"' + string (repoid) + '"',
     body_ops, body_stub =
@@ -579,15 +604,16 @@ bool idl_mapping_java::gen_interf (UTL_ScopedName *name, bool local,
       JavaName jn_lb (jn, "LocalBase", true);
       string lb =
         "  private String[] _type_ids = {" + allRepoIds + "};\n\n"
-        "  public String[] _ids() { return (String[])_type_ids.clone(); }\n",
-        ext = "org.omg.CORBA.LocalObject implements " + jn.clazz_;
-      ok = java_class_gen (jn_lb, JABSTRACT_CLASS, lb.c_str (), ext.c_str ());
+        "  public String[] _ids() { return (String[])_type_ids.clone(); }\n";
+      ok = java_class_gen (jn_lb, JABSTRACT_CLASS, lb.c_str (), 
+        "org.omg.CORBA.LocalObject", jn.clazz_.c_str ());
     }
 
   return ok && java_class_gen (jn, JINTERFACE, "", extends.c_str ())
     && java_class_gen (jn_ops, JINTERFACE, body_ops.c_str(),
                        extends_ops.c_str ())
-    && java_class_gen (jn_stub, JCLASS, body_stub.c_str(), extends_stub.c_str())
+    && java_class_gen (jn_stub, JCLASS, body_stub.c_str(),
+                       extends_stub.c_str (), jn.clazz_.c_str ())
     && gen_helper (jn, repoid, true) && gen_holder (jn);
 
   //FUTURE: server side
@@ -736,6 +762,7 @@ bool idl_mapping_java::gen_union (UTL_ScopedName *name,
     }
 
   JavaName jn (name);
-  return java_class_gen (jn, JFINAL_CLASS, body.c_str ())
+  return java_class_gen (jn, JFINAL_CLASS,
+      body.c_str (), "", "java.io.Serializable")
     && gen_helper (jn, repoid) && gen_holder (jn);
 }

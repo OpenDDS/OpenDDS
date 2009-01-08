@@ -1,3 +1,171 @@
+Thu Jan  8 22:41:06 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+          Merging trunk changes 1806:1948 out to branch.
+
+        * ChangeLog:
+        * DDS.mwc:
+        * DDS_release_notes.txt:
+        * DevGuideExamples/DCPS/Messenger/DataReaderListener.h:
+        * DevGuideExamples/DCPS/Messenger/StackDataReaderListener.h:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/DataReaderListener.h:
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        * bin/DCPS/IDLTemplate.pm:
+        * bin/JavaProcess.pm:
+        * bin/dcps_tests.lst:
+        * dds/DCPS/Comparator_T.h:
+        * dds/DCPS/ConditionImpl.cpp:
+        * dds/DCPS/DataDurabilityCache.h:
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/DurabilityQueue.h:
+        * dds/DCPS/EntityImpl.cpp:
+        * dds/DCPS/FailoverListener.h:
+        * dds/DCPS/FileSystemStorage.h:
+        * dds/DCPS/FileSystemStorage.cpp:
+        * dds/DCPS/InstanceState.h:
+        * dds/DCPS/InstanceState.inl:
+        * dds/DCPS/OfferedDeadlineWatchdog.h:
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/PublicationInstance.h:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/QueryConditionImpl.h:
+        * dds/DCPS/QueryConditionImpl.cpp:
+        * dds/DCPS/RakeData.h:
+        * dds/DCPS/RakeResults_T.h:
+        * dds/DCPS/RakeResults_T.cpp:
+        * dds/DCPS/RcHandle_T.h:
+        * dds/DCPS/ReadConditionImpl.h:
+        * dds/DCPS/ReadConditionImpl.cpp:
+        * dds/DCPS/RequestedDeadlineWatchdog.h:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/SubscriptionInstance.h:
+        * dds/DCPS/WaitSet.cpp:
+        * dds/DCPS/Watchdog.h:
+        * dds/DCPS/Watchdog.cpp:
+        * dds/DCPS/WatchdogTimer.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/ZeroCopySeq_T.h:
+        * dds/DCPS/ZeroCopySeq_T.inl:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.inl:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.cpp:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.cpp:
+        * dds/DCPS/transport/framework/NullSynchStrategy.h:
+        * dds/DCPS/transport/framework/TransportExceptions.h:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DdsDcps.mpc:
+        * dds/DdsDcpsDomainExt.idl:
+        * dds/DdsDcpsInfo.idl:
+        * dds/DdsDcpsSubscription.idl:
+        * dds/DdsDcpsSubscriptionExt.idl:
+        * dds/InfoRepo/DCPSInfoRepoServ.h:
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_Utils.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/UpdateListener_T.h:
+        * dds/InfoRepo/UpdateListener_T.cpp:
+        * dds/Version.h:
+        * dds/tools/opendds_ir_ctl:
+        * dds/tools/opendds_ir_ctl/opendds_ir_ctl.mpc:
+        * dds/tools/opendds_ir_ctl/opendds_ir_ctl.cpp:
+        * docs/design/persistence.txt:
+        * examples/DCPS/Messenger_IOGR_Imr/DataReaderListener.h:
+        * examples/DCPS/Messenger_Imr/DataReaderListener.h:
+        * history/ChangeLog-JMS_PROVIDER:
+        * java:
+        * performance-tests/DCPS/InfoRepo_population/DataReaderListener.h:
+        * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:
+        * performance-tests/DCPS/McastListenerTest/DataReaderListener.h:
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.h:
+        * performance-tests/DCPS/TCPProfilingTest/DataReaderListener.h:
+        * performance-tests/DCPS/TransportLatency/DataReaderListener.h:
+        * performance-tests/DCPS/UDPListenerTest/DataReaderListener.h:
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.h:
+        * tests/DCPS/CompatibilityTest/DataReaderListener.h:
+        * tests/DCPS/CorbaSeq/DataReaderListener.h:
+        * tests/DCPS/Deadline/DataReaderListener.h:
+        * tests/DCPS/Deadline/DataReaderListener.cpp:
+        * tests/DCPS/Deadline/DataWriterListenerImpl.cpp:
+        * tests/DCPS/Deadline/README:
+        * tests/DCPS/Deadline/Writer.h:
+        * tests/DCPS/Deadline/Writer.cpp:
+        * tests/DCPS/Deadline/publisher.cpp:
+        * tests/DCPS/Deadline/subscriber.cpp:
+        * tests/DCPS/Federation/DataReaderListener.h:
+        * tests/DCPS/FileSystemStorage:
+
+        * tests/DCPS/FileSystemStorage/FileSystemStorage.mpc:
+        * tests/DCPS/FileSystemStorage/FileSystemStorageTest.cpp:
+        * tests/DCPS/FileSystemStorage/run_test.pl:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest4/Reader.cpp:
+        * tests/DCPS/FooTest4_0/DataReaderListener.h:
+        * tests/DCPS/FooTest4_0/Writer.cpp:
+        * tests/DCPS/FooTest5/DataReaderListener.h:
+        * tests/DCPS/GuardCondition/GuardConditionTest.cpp:
+        * tests/DCPS/LatencyBudget/DataReaderListener.h:
+        * tests/DCPS/Lifespan/DataReaderListener.h:
+        * tests/DCPS/Lifespan/publisher.cpp:
+        * tests/DCPS/Lifespan/subscriber.cpp:
+        * tests/DCPS/LivelinessTest/DataReaderListener.h:
+        * tests/DCPS/LivelinessTimeout/DataReaderListenerImpl.h:
+        * tests/DCPS/MultiDPTest/DataReaderListener.h:
+        * tests/DCPS/MultiTopicTest/DataReaderListener.h:
+        * tests/DCPS/NotifyTest/DataReaderListener.h:
+        * tests/DCPS/Partition/DataReaderListener.h:
+        * tests/DCPS/Partition/Partition_Table.h:
+        * tests/DCPS/Partition/README:
+        * tests/DCPS/PersistentDurability/DataReaderListener.h:
+        * tests/DCPS/PersistentDurability/publisher.cpp:
+        * tests/DCPS/PersistentDurability/run_test.pl:
+        * tests/DCPS/PersistentDurability/subscriber.cpp:
+        * tests/DCPS/Priority/DataReaderListener.h:
+        * tests/DCPS/Prst_delayed_subscriber/DataReaderListener.h:
+        * tests/DCPS/QueryCondition:
+        * tests/DCPS/QueryCondition/Messenger.idl:
+        * tests/DCPS/QueryCondition/QueryCondition.mpc:
+        * tests/DCPS/QueryCondition/QueryConditionTest.cpp:
+        * tests/DCPS/QueryCondition/dcps.ini:
+        * tests/DCPS/QueryCondition/run_test.pl:
+        * tests/DCPS/ReadCondition:
+        * tests/DCPS/ReadCondition/Messenger.idl:
+        * tests/DCPS/ReadCondition/ReadCondition.mpc:
+        * tests/DCPS/ReadCondition/ReadConditionTest.cpp:
+        * tests/DCPS/ReadCondition/dcps.ini:
+        * tests/DCPS/ReadCondition/run_test.pl:
+        * tests/DCPS/Reconnect/DataReaderListener.h:
+        * tests/DCPS/SetQosDeadline/DataReaderListener.h:
+        * tests/DCPS/SetQosPartition/DataReaderListener.h:
+        * tests/DCPS/StatusCondition/StatusConditionTest.cpp:
+        * tests/DCPS/StringKey/DataReaderListener.h:
+        * tests/DCPS/TransientDurability/DataReaderListener.h:
+        * tests/DCPS/TransientDurability/subscriber.cpp:
+        * tests/DCPS/TransientLocalTest/DataReaderListener.h:
+        * tests/DCPS/TransientLocalTest/subscriber.cpp:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+        * dds/DdsDcpsDataReaderEx.idl:
+
+          Removed this file.
+
 Thu Jan  8 21:35:29 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/DCPS/Priority/DataReaderListener.h:
@@ -15,7 +183,7 @@ Thu Jan  8 21:35:29 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
         * performance-tests/DCPS/Priority/scenario6.ini:
         * performance-tests/DCPS/Priority/subscriber_main.cpp:
 
-	  Debugging and expanding this test.
+          Debugging and expanding this test.
 
 Tue Jan  6 23:26:34 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 

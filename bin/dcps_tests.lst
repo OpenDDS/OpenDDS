@@ -158,7 +158,10 @@ tests/DCPS/SetQosPartition/run_test.pl: !DCPS_MIN
 tests/DCPS/StringKey/run_test.pl: !DCPS_MIN
 tests/DCPS/GuardCondition/run_test.pl: !DCPS_MIN
 tests/DCPS/StatusCondition/run_test.pl: !DCPS_MIN
+tests/DCPS/ReadCondition/run_test.pl: !DCPS_MIN
+tests/DCPS/QueryCondition/run_test.pl: !DCPS_MIN
 tests/DCPS/Federation/run_test.pl: !DCPS_MIN
+tests/DCPS/FileSystemStorage/run_test.pl: !DCPS_MIN
 tests/DCPS/Priority/run_test.pl: !DCPS_MIN
 tests/DCPS/LatencyBudget/run_test.pl: !DCPS_MIN
 tests/DCPS/LatencyBudget/run_test.pl late: !DCPS_MIN

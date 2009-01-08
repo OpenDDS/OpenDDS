@@ -31,6 +31,22 @@
 using namespace Messenger;
 
 OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
+// Set up a 4 second recurring deadline.
+static DDS::Duration_t const DEADLINE_PERIOD = 
+{
+  4,  // seconds
+  0   // nanoseconds
+};
+        
+static int NUM_EXPIRATIONS = 2;
+
+// Time to sleep waiting for deadline periods to expire
+static ACE_Time_Value SLEEP_DURATION(
+          OpenDDS::DCPS::duration_to_time_value (DEADLINE_PERIOD)
+          * NUM_EXPIRATIONS
+          + ACE_Time_Value (1));
+
+static int NUM_WRITE_THREADS = 2;
 
 int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
   try
@@ -124,158 +140,136 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
       DDS::DataWriterQos dw_qos; // Good QoS.
       pub->get_default_datawriter_qos (dw_qos);
 
-      // Set up a 4 second recurring deadline.
-      static DDS::Duration_t const DEADLINE_PERIOD =
-        {
-          4,  // seconds
-          0   // nanoseconds
-        };
-
       assert (DEADLINE_PERIOD.sec > 1); // Requirement for the test.
-
-      // Time to sleep waiting for deadline periods to expire
-      long const NUM_EXPIRATIONS = 2;
-      ACE_Time_Value const SLEEP_DURATION (
-        OpenDDS::DCPS::duration_to_time_value (DEADLINE_PERIOD)
-        * 2
-        + ACE_Time_Value (1));
-
-      dw_qos.deadline.period.sec     = DEADLINE_PERIOD.sec;
-      dw_qos.deadline.period.nanosec = DEADLINE_PERIOD.nanosec;
 
       // First data writer will have a listener to test listener
       // callback on deadline expiration.
-      DDS::DataWriter_var dw1 =
+      DDS::DataWriter_var dw =
         pub->create_datawriter (topic.in (),
                                 dw_qos,
                                 listener.in ());
 
-      // Second data writer will not have a listener to test proper
-      // handling of a nil listener in the deadline handling code.
-      DDS::DataWriter_var dw2 =
-        pub->create_datawriter (topic.in (),
-                                dw_qos,
-                                DDS::DataWriterListener::_nil ());
-
-      if (CORBA::is_nil (dw1.in ()) || CORBA::is_nil (dw2.in ()))
+      if (CORBA::is_nil (dw.in ()))
       {
         cerr << "ERROR: create_datawriter failed." << endl;
         exit(1);
       }
 
-      // ----------------------------------------------
+      dw_qos.deadline.period.sec     = DEADLINE_PERIOD.sec;
+      dw_qos.deadline.period.nanosec = DEADLINE_PERIOD.nanosec;
 
-      // Wait for deadline periods to expire.
-      ACE_OS::sleep (SLEEP_DURATION);
-
-      DDS::OfferedDeadlineMissedStatus deadline_status1 =
-        dw1->get_offered_deadline_missed_status();
-
-      DDS::OfferedDeadlineMissedStatus deadline_status2 =
-        dw2->get_offered_deadline_missed_status();
-
-      if (deadline_status1.total_count != NUM_EXPIRATIONS
-          || deadline_status2.total_count != NUM_EXPIRATIONS)
+      // Set qos with deadline. The watch dog starts now.
+      if (dw->set_qos (dw_qos) != ::DDS::RETCODE_OK)
       {
-        cerr << "ERROR: Expected number of missed offered "
-             << "deadlines (" << NUM_EXPIRATIONS << ") " << "did " << endl
-             << "       not occur ("
-             << deadline_status1.total_count << " and/or "
-             << deadline_status2.total_count << ")." << endl;
-
-        exit (1);
+        cerr << "ERROR: set deadline qos failed." << endl;
+        exit(1);
       }
-
-      if (deadline_status1.total_count_change != NUM_EXPIRATIONS
-          || deadline_status2.total_count_change != NUM_EXPIRATIONS)
+      
       {
-        cerr << "ERROR: Incorrect missed offered "
-             << "deadline count change" << endl
-             << "       ("
-             << deadline_status1.total_count_change
-             << " and/or "
-             << deadline_status2.total_count_change
-             << " instead of " << NUM_EXPIRATIONS << ")."
-             << endl;
+        // Two threads use same datawriter to write different instances.
+        std::auto_ptr<Writer> writer1 (new Writer (dw.in (), 99, SLEEP_DURATION));
+        std::auto_ptr<Writer> writer2 (new Writer (dw.in (), 100, SLEEP_DURATION));
 
-        exit (1);
-      }
+        writer1->start ();
+        writer2->start ();
+        // ----------------------------------------------
 
-      // Wait for another set of deadline periods to expire.
-      ACE_OS::sleep (SLEEP_DURATION);
-
-      deadline_status1 = dw1->get_offered_deadline_missed_status();
-      deadline_status2 = dw2->get_offered_deadline_missed_status();
-
-      if (deadline_status1.total_count != NUM_EXPIRATIONS * 2
-          || deadline_status2.total_count != NUM_EXPIRATIONS * 2)
-      {
-        cerr << "ERROR: Another expected number of missed offered "
-             << "deadlines (" << NUM_EXPIRATIONS * 2 << ")" << endl
-             << "       did not occur ("
-             << deadline_status1.total_count << " and/or "
-             << deadline_status2.total_count << ")." << endl;
-
-        exit (1);
-      }
-
-      if (deadline_status1.total_count_change != NUM_EXPIRATIONS
-          || deadline_status2.total_count_change != NUM_EXPIRATIONS)
-      {
-        cerr << "ERROR: Incorrect missed offered "
-             << "deadline count" << endl
-             << "       change ("
-             << deadline_status1.total_count_change
-             << "and/or "
-             << deadline_status2.total_count_change
-             << " instead of " << NUM_EXPIRATIONS << ")." << endl;
-
-        exit (1);
-      }
-
-      {
-        // Just write with our first DataWriter since it has a listener.
-        std::auto_ptr<Writer> writer (new Writer (dw1.in ()));
-
-        int const max_attempts = 15;
-        int attempts = 1; 
-        while (attempts != max_attempts)
+        // Wait for fully associate with DataReaders.
+        if (writer1->wait_for_start () == false || writer2->wait_for_start () == false)
         {
-          // Wait for the third subscription before we proceed.
-          DDS::PublicationMatchStatus const publication_status =
-                     dw1->get_publication_match_status ();
-
-          if (publication_status.total_count == 3)
-            break;
-
-          ACE_OS::sleep (1);
-          ++attempts;
-        }
-
-        if (attempts == max_attempts)
-        {
-          cerr << "ERROR: subscriptions failed to match." << endl;
+          cerr << "ERROR: took too long to associate. " << endl;
           exit (1);
         }
 
-        writer->start ();
+        // Wait for a set of deadline periods to expire.
+        ACE_OS::sleep (SLEEP_DURATION);
+        ::DDS::InstanceHandle_t handle1 = writer1->get_instance_handle ();
+        ::DDS::InstanceHandle_t handle2 = writer2->get_instance_handle ();
 
-        // Get the offered deadline status to reset the
-        // total_count_change field to zero.
-        deadline_status1 = dw1->get_offered_deadline_missed_status();
+        DDS::OfferedDeadlineMissedStatus deadline_status =
+          dw->get_offered_deadline_missed_status();
 
-        // Cleanup
-        writer->end ();
+        if (deadline_status.total_count != NUM_EXPIRATIONS * NUM_WRITE_THREADS)
+        {
+          cerr << "ERROR: Unexpected number of missed offered "
+            << "deadlines (" << deadline_status.total_count 
+            << " instead of " << NUM_EXPIRATIONS * NUM_WRITE_THREADS << ") " 
+            << endl;
 
-        deadline_status1 = dw1->get_offered_deadline_missed_status();
+          exit (1);
+        }
 
-        if (deadline_status1.total_count_change != 0)
-          {
-            cerr << "ERROR: Offered deadlines unexpectedly missed"
-                 << endl;
+        if (deadline_status.total_count_change != NUM_EXPIRATIONS * NUM_WRITE_THREADS)
+        {
+          cerr << "ERROR: Incorrect missed offered "
+            << "deadline count change ("
+            << deadline_status.total_count_change
+            << ") instead of " << NUM_EXPIRATIONS * NUM_WRITE_THREADS
+            << endl;
 
-            exit (1);
-          }
+          exit (1);
+        }
+
+        if (deadline_status.last_instance_handle != handle1
+          && deadline_status.last_instance_handle != handle2)
+        {
+          cerr << "ERROR: Unexpected last instance handle "
+            << deadline_status.last_instance_handle << " instead of " 
+            << handle1 << " or " 
+            << handle2 << endl;
+          exit (1);
+        }
+
+        writer1->wait ();
+        writer2->wait ();
+
+        // Wait for another set of deadline periods to expire.
+        ACE_OS::sleep (SLEEP_DURATION);
+
+        deadline_status = dw->get_offered_deadline_missed_status();
+
+        if (deadline_status.total_count != NUM_EXPIRATIONS * NUM_WRITE_THREADS * 2)
+        {
+          cerr << "ERROR: Unexpected number of missed offered "
+            << "deadlines (" << deadline_status.total_count 
+            << " instead of " << NUM_EXPIRATIONS * NUM_WRITE_THREADS * 2 << ") " 
+            << endl;
+
+          exit (1);
+        }
+
+        if (deadline_status.total_count_change != NUM_EXPIRATIONS * NUM_WRITE_THREADS)
+        {
+          cerr << "ERROR: Incorrect missed offered "
+            << "deadline count change ("
+            << deadline_status.total_count_change
+            << ") instead of " << NUM_EXPIRATIONS * NUM_WRITE_THREADS
+            << endl;
+
+          exit (1);
+        }
+
+        if (deadline_status.last_instance_handle != handle1
+          && deadline_status.last_instance_handle != handle2)
+        {
+          cerr << "ERROR: Unexpected last instance handle "
+            << deadline_status.last_instance_handle << " instead of " 
+            << handle1 << " or " 
+            << handle2 << endl;
+          exit (1);
+        }
+
+
+        // Wait for datareader finish.
+        while (1)
+        {
+          ::DDS::InstanceHandleSeq handles;
+          dw->get_matched_subscriptions (handles);
+          if (handles.length () == 0)
+            break;
+          else
+            ACE_OS::sleep(1);
+        }
       }
 
       participant->delete_contained_entities();

@@ -46,7 +46,8 @@ OpenDDS::DCPS::ReliableMulticastTransportImpl::find_or_create_datalink(
     data_links_.find( PriorityKey( priority, multicast_group_address));
   if (iter != data_links_.end())
   {
-    return iter->second._retn();
+    data_link = iter->second;
+    return data_link._retn();
   }
 
   /// @TODO: The thread can be conditioned with priority at this point.

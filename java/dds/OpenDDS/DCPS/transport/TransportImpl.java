@@ -14,6 +14,8 @@ public final class TransportImpl {
         _jni_fini();
     }
 
+    public native int configure(TransportConfiguration config);
+
     public native AttachStatus attach_to_publisher(DDS.Publisher pub);
 
     public native AttachStatus attach_to_subscriber(DDS.Subscriber sub);

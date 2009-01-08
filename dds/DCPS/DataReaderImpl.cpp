@@ -15,6 +15,7 @@
 #include "Transient_Kludge.h"
 #include "Util.h"
 #include "RequestedDeadlineWatchdog.h"
+#include "QueryConditionImpl.h"
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #if !defined (DDS_HAS_MINIMUM_BIT)
@@ -64,6 +65,7 @@ DataReaderImpl::DataReaderImpl (void) :
   watchdog_ (),
   is_bit_ (false),
   initialized_ (false),
+  always_get_history_ (false),
   statistics_enabled_( false)
 {
   CORBA::ORB_var orb = TheServiceParticipant->get_ORB ();
@@ -141,6 +143,7 @@ DataReaderImpl::cleanup ()
 void DataReaderImpl::init (
                            TopicImpl*         a_topic,
                            const ::DDS::DataReaderQos &  qos,
+                           const DataReaderQosExt &      ext_qos,
                            ::DDS::DataReaderListener_ptr a_listener,
                            DomainParticipantImpl*        participant,
                            SubscriberImpl*               subscriber,
@@ -166,6 +169,8 @@ void DataReaderImpl::init (
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
   qos_ = qos;
+  always_get_history_ = ext_qos.durability.always_get_history;
+
   listener_ = ::DDS::DataReaderListener::_duplicate (a_listener);
 
   if (! CORBA::is_nil (listener_.in()))
@@ -273,24 +278,6 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
       this->handle_timeout (now, this);
     }
     // else - no timer needed when LIVELINESS.lease_duration is INFINITE
-
-    // Setup the requested deadline watchdog if the configured deadline
-    // period is not the default (infinite).
-    ::DDS::Duration_t const deadline_period = this->qos_.deadline.period;
-    if (this->watchdog_.get () == 0
-        && (deadline_period.sec != ::DDS::DURATION_INFINITY_SEC
-            || deadline_period.nanosec != ::DDS::DURATION_INFINITY_NSEC))
-    {
-      ACE_auto_ptr_reset (this->watchdog_,
-                          new RequestedDeadlineWatchdog (
-                            this->reactor_,
-                            this->sample_lock_,
-                            this->qos_.deadline,
-                            this,
-                            this->dr_local_objref_.in (),
-                            this->requested_deadline_missed_status_,
-                            this->last_deadline_missed_total_count_));
-    }
   }
 
   if (! is_bit_)
@@ -543,6 +530,55 @@ void DataReaderImpl::update_incompatible_qos (
   notify_status_condition();
 }
 
+::DDS::ReadCondition_ptr DataReaderImpl::create_readcondition (
+    ::DDS::SampleStateMask sample_states,
+    ::DDS::ViewStateMask view_states,
+    ::DDS::InstanceStateMask instance_states)
+  ACE_THROW_SPEC ((CORBA::SystemException))
+{
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_, 0);
+  DDS::ReadCondition_var rc = new ReadConditionImpl(this, sample_states,
+    view_states, instance_states);
+  read_conditions_.insert(rc);
+  return rc._retn();
+}
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+::DDS::QueryCondition_ptr DataReaderImpl::create_querycondition (
+    ::DDS::SampleStateMask sample_states,
+    ::DDS::ViewStateMask view_states,
+    ::DDS::InstanceStateMask instance_states,
+    const char* query_expression,
+    const ::DDS::StringSeq& query_parameters)
+  ACE_THROW_SPEC ((CORBA::SystemException))
+{
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_, 0);
+  ::DDS::QueryCondition_var qc = new QueryConditionImpl(this, sample_states,
+    view_states, instance_states, query_expression, query_parameters);
+  ::DDS::ReadCondition_var rc = ::DDS::ReadCondition::_duplicate(qc);
+  read_conditions_.insert(rc);
+  return qc._retn();
+}
+#endif
+
+bool DataReaderImpl::has_readcondition(::DDS::ReadCondition_ptr a_condition)
+{
+  //sample lock already held
+  ::DDS::ReadCondition_var rc = ::DDS::ReadCondition::_duplicate(a_condition);
+  return read_conditions_.find(rc) != read_conditions_.end();
+}
+
+::DDS::ReturnCode_t DataReaderImpl::delete_readcondition (
+    ::DDS::ReadCondition_ptr a_condition)
+  ACE_THROW_SPEC ((CORBA::SystemException))
+{
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_,
+    ::DDS::RETCODE_OUT_OF_RESOURCES);
+  ::DDS::ReadCondition_var rc = ::DDS::ReadCondition::_duplicate(a_condition);
+  return read_conditions_.erase(rc)
+    ? ::DDS::RETCODE_OK : ::DDS::RETCODE_PRECONDITION_NOT_MET;
+}
+
 ::DDS::ReturnCode_t DataReaderImpl::delete_contained_entities ()
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
@@ -603,9 +639,28 @@ void DataReaderImpl::update_incompatible_qos (
 
     // Reset the deadline timer if the period has changed.
     if (qos_.deadline.period.sec != qos.deadline.period.sec
-        || qos_.deadline.period.nanosec != qos.deadline.period.nanosec)
+      || qos_.deadline.period.nanosec != qos.deadline.period.nanosec)
     {
-      if (this->watchdog_.get ())
+      if (qos_.deadline.period.sec == ::DDS::DURATION_INFINITY_SEC
+        && qos_.deadline.period.nanosec == ::DDS::DURATION_INFINITY_NSEC)
+      {
+        ACE_auto_ptr_reset (this->watchdog_,
+          new RequestedDeadlineWatchdog (
+          this->reactor_,
+          this->sample_lock_,
+          qos.deadline,
+          this,
+          this->dr_local_objref_.in (),
+          this->requested_deadline_missed_status_,
+          this->last_deadline_missed_total_count_));
+      }
+      else if (qos.deadline.period.sec == ::DDS::DURATION_INFINITY_SEC
+        && qos.deadline.period.nanosec == ::DDS::DURATION_INFINITY_NSEC)
+      {
+        this->watchdog_->cancel_all ();
+        this->watchdog_.reset ();
+      }
+      else
       {
         this->watchdog_->reset_interval (
           duration_to_time_value (qos.deadline.period));
@@ -910,6 +965,25 @@ DataReaderImpl::enable ()
         duration_to_time_value (qos_.liveliness.lease_duration);
     }
 
+
+  // Setup the requested deadline watchdog if the configured deadline
+  // period is not the default (infinite).
+  ::DDS::Duration_t const deadline_period = this->qos_.deadline.period;
+  if (this->watchdog_.get () == 0
+    && (deadline_period.sec != ::DDS::DURATION_INFINITY_SEC
+    || deadline_period.nanosec != ::DDS::DURATION_INFINITY_NSEC))
+  {
+    ACE_auto_ptr_reset (this->watchdog_,
+      new RequestedDeadlineWatchdog (
+      this->reactor_,
+      this->sample_lock_,
+      this->qos_.deadline,
+      this,
+      this->dr_local_objref_.in (),
+      this->requested_deadline_missed_status_,
+      this->last_deadline_missed_total_count_));
+  }
+
   this->set_enabled ();
 
   CORBA::String_var name = topic_servant_->get_name ();
@@ -980,11 +1054,6 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
         this->writer_activity(header.publication_id_);
 
-        // "Pet the dog" so that it doesn't callback on the listener
-        // the next time deadline timer expires.
-        if (this->watchdog_.get ())
-          this->watchdog_->signal ();
-
         // Verify data has not exceeded its lifespan.
         if (this->data_expired (header))
         {
@@ -993,15 +1062,37 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
           break;
         }
 
-        // This also adds to the sample container
-        this->dds_demarshal(sample);
+        // This adds the reader to the set/list of readers with data.
+        this->subscriber_servant_->data_received(this);
 
         // Only gather statistics about real samples, not registration data, etc.
         if (header.message_id_ == SAMPLE_DATA) {
           this->process_latency (sample);
         }
 
-        this->subscriber_servant_->data_received(this);
+        // This also adds to the sample container and makes any callbacks
+        // and condition modifications.
+
+        SubscriptionInstance* instance = 0;
+        bool is_new_instance = false;
+        this->dds_demarshal(sample, instance, is_new_instance);
+
+        if (this->watchdog_.get ())
+        {
+          instance->last_sample_tv_ = instance->cur_sample_tv_;
+          instance->cur_sample_tv_ = ACE_OS::gettimeofday (); 
+
+          if (is_new_instance)
+          {
+            this->watchdog_->schedule_timer (instance);
+          }
+          else
+          {
+            this->watchdog_->execute ((void const *)instance, false);
+          }
+        }
+
+        this->notify_read_conditions();
       }
       break;
 
@@ -1023,13 +1114,25 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       break;
 
     case DISPOSE_INSTANCE:
-      this->writer_activity(sample.header_.publication_id_);
-      this->dispose(sample);
+      {
+        this->writer_activity(sample.header_.publication_id_);
+        SubscriptionInstance* instance = 0;
+        this->dispose(sample, instance);
+        if (this->watchdog_.get ())
+          this->watchdog_->cancel_timer (instance);
+      }
+      this->notify_read_conditions();
       break;
 
     case UNREGISTER_INSTANCE:
-      this->writer_activity(sample.header_.publication_id_);
-      this->unregister(sample);
+      {
+        this->writer_activity(sample.header_.publication_id_);
+        SubscriptionInstance* instance = 0;
+        this->unregister(sample, instance);
+        if (this->watchdog_.get ())
+          this->watchdog_->cancel_timer (instance);
+      }
+      this->notify_read_conditions();
       break;
 
 
@@ -1042,6 +1145,17 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     }
 }
 
+void DataReaderImpl::notify_read_conditions()
+{
+  //sample lock is already held
+  ReadConditionSet local_read_conditions = read_conditions_;
+  ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+  for (ReadConditionSet::iterator it = local_read_conditions.begin(),
+    end = local_read_conditions.end(); it != end; ++it)
+    {
+      dynamic_cast<ConditionImpl*>(it->in())->signal_all();
+    }
+}
 
 SubscriberImpl* DataReaderImpl::get_subscriber_servant ()
 {
@@ -1123,6 +1237,39 @@ bool DataReaderImpl::have_instance_states(
   return false;
 }
 
+/// Fold-in the three separate loops of have_sample_states(),
+/// have_view_states(), and have_instance_states().  Takes the sample_lock_.
+bool DataReaderImpl::contains_sample(::DDS::SampleStateMask sample_states,
+  ::DDS::ViewStateMask view_states, ::DDS::InstanceStateMask instance_states) 
+{
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, false);
+  for (SubscriptionInstanceMapType::iterator iter = instances_.begin(),
+    end = instances_.end(); iter != end; ++iter)
+    {
+      SubscriptionInstance& inst = *iter->second;
+      if ((inst.instance_state_.view_state() & view_states) &&
+        (inst.instance_state_.instance_state() & instance_states))
+        {
+          //if the sample state mask is "don't care" we can skip the inner loop
+          //(as long as there's at least one sample)
+          if ((sample_states & ::DDS::ANY_SAMPLE_STATE)
+            == ::DDS::ANY_SAMPLE_STATE && inst.rcvd_sample_.head_)
+            {
+              return true;
+            }
+          for (ReceivedDataElement* item = inst.rcvd_sample_.head_; item != 0;
+            item = item->next_data_sample_)
+            {
+              if (item->sample_state_ & sample_states)
+                {
+                  return true;
+                }
+            }
+        }
+    }
+  return false;
+}
+
 ::DDS::DataReaderListener*
 DataReaderImpl::listener_for (::DDS::StatusKind kind)
 {
@@ -1139,102 +1286,8 @@ DataReaderImpl::listener_for (::DDS::StatusKind kind)
     }
 }
 
-// zero-copy version of this metod
-void
-DataReaderImpl::sample_info(::DDS::SampleInfoSeq & info_seq,
-                            //x ::OpenDDS::DCPS::SampleInfoZCSeq & info_seq,
-                            size_t start_idx,
-                            size_t count,
-                            ReceivedDataElement *ptr)
-{
-  size_t end_idx = start_idx + count - 1;
-  for (size_t i = start_idx; i <= end_idx; i++)
-    {
-      info_seq[i].sample_rank = count - (i - start_idx + 1);
-
-      // generation_rank =
-      //    (MRSIC.disposed_generation_count +
-      //     MRSIC.no_writers_generation_count)
-      //  - (S.disposed_generation_count +
-      //     S.no_writers_generation_count)
-      //
-      //  info_seq[end_idx] == MRSIC
-      //  info_seq[i].generation_rank ==
-      //      (S.disposed_generation_count +
-      //      (S.no_writers_generation_count) -- calculated in
-      //            InstanceState::sample_info
-
-      info_seq[i].generation_rank =
-        (info_seq[end_idx].disposed_generation_count +
-         info_seq[end_idx].no_writers_generation_count) -
-        info_seq[i].generation_rank;
-
-      // absolute_generation_rank =
-      //     (MRS.disposed_generation_count +
-      //      MRS.no_writers_generation_count)
-      //   - (S.disposed_generation_count +
-      //      S.no_writers_generation_count)
-      //
-      // ptr == MRS
-      // info_seq[i].absolute_generation_rank ==
-      //    (S.disposed_generation_count +
-      //     S.no_writers_generation_count)-- calculated in
-      //            InstanceState::sample_info
-      //
-      info_seq[i].absolute_generation_rank =
-        (ptr->disposed_generation_count_ +
-         ptr->no_writers_generation_count_) -
-        info_seq[i].absolute_generation_rank;
-    }
-}
-
-//void DataReaderImpl::sample_info(::DDS::SampleInfoSeq & info_seq,
-//                               size_t start_idx, size_t count,
-//                               ReceivedDataElement *ptr)
-//{
-//  size_t end_idx = start_idx + count - 1;
-//  for (size_t i = start_idx; i <= end_idx; i++)
-//    {
-//      info_seq[i].sample_rank = count - (i - start_idx + 1);
-//
-//      // generation_rank =
-//      //    (MRSIC.disposed_generation_count +
-//      //     MRSIC.no_writers_generation_count)
-//      //  - (S.disposed_generation_count +
-//      //     S.no_writers_generation_count)
-//      //
-//      //  info_seq[end_idx] == MRSIC
-//      //  info_seq[i].generation_rank ==
-//      //      (S.disposed_generation_count +
-//      //      (S.no_writers_generation_count) -- calculated in
-//      //            InstanceState::sample_info
-//
-//      info_seq[i].generation_rank =
-//      (info_seq[end_idx].disposed_generation_count +
-//       info_seq[end_idx].no_writers_generation_count) -
-//      info_seq[i].generation_rank;
-//
-//      // absolute_generation_rank =
-//      //     (MRS.disposed_generation_count +
-//      //      MRS.no_writers_generation_count)
-//      //   - (S.disposed_generation_count +
-//      //      S.no_writers_generation_count)
-//      //
-//      // ptr == MRS
-//      // info_seq[i].absolute_generation_rank ==
-//      //    (S.disposed_generation_count +
-//      //     S.no_writers_generation_count)-- calculated in
-//      //            InstanceState::sample_info
-//      //
-//      info_seq[i].absolute_generation_rank =
-//      (ptr->disposed_generation_count_ +
-//       ptr->no_writers_generation_count_) -
-//      info_seq[i].absolute_generation_rank;
-//    }
-//}
-
 void DataReaderImpl::sample_info(::DDS::SampleInfo & sample_info,
-                                 ReceivedDataElement *ptr)
+                                 const ReceivedDataElement *ptr)
 {
 
   sample_info.sample_rank = 0;
@@ -1714,18 +1767,20 @@ DataReaderImpl::set_sample_rejected_status(
 }
 
 
-void DataReaderImpl::dispose(const ReceivedDataSample& /* sample */)
+void DataReaderImpl::dispose(const ReceivedDataSample&,
+                             SubscriptionInstance*&)
 {
   if( DCPS_debug_level > 0) {
-    ACE_DEBUG ((LM_DEBUG, "(%P|%T) DataReaderImpl::dispose()\n"));
+    ACE_DEBUG ((LM_DEBUG, "(%P|%t) DataReaderImpl::dispose()\n"));
   }
 }
 
 
-void DataReaderImpl::unregister(const ReceivedDataSample& /* sample */)
+void DataReaderImpl::unregister(const ReceivedDataSample&,
+                                SubscriptionInstance*&)
 {
   if( DCPS_debug_level > 0) {
-    ACE_DEBUG ((LM_DEBUG, "(%P|%T) DataReaderImpl::unregister()\n"));
+    ACE_DEBUG ((LM_DEBUG, "(%P|%t) DataReaderImpl::unregister()\n"));
   }
 }
 
@@ -1883,7 +1938,7 @@ DataReaderImpl::get_handle_instance (::DDS::InstanceHandle_t handle)
 ::DDS::InstanceHandle_t
 DataReaderImpl::get_next_handle ()
 {
-  return next_handle_++;
+  return ++next_handle_;
 }
 
 
@@ -2145,21 +2200,30 @@ DataReaderImpl::cache_lookup_instance_handles (const WriterIdSeq& ids,
 bool
 DataReaderImpl::data_expired (DataSampleHeader const & header) const
 {
-  // @@ Is getting the LIFESPAN value from the Topic sufficient?
-  ::DDS::TopicQos topic_qos;
-  this->topic_servant_->get_qos (topic_qos);
+  // Expire historic data if QoS indicates VOLATILE.
+  if (!always_get_history_ && header.historic_sample_
+    && qos_.durability.kind == ::DDS::VOLATILE_DURABILITY_QOS)
+  {
+    if (DCPS_debug_level >= 8)
+    {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) DataReaderImpl::data_expired: ")
+                 ACE_TEXT("Discarded historic data.\n")));
+    }
 
-  ::DDS::LifespanQosPolicy const & lifespan = topic_qos.lifespan;
+    return true;  // Data expired. 
+  }
 
-  if (lifespan.duration.sec != ::DDS::DURATION_INFINITY_SEC
-      || lifespan.duration.nanosec != ::DDS::DURATION_INFINITY_NSEC)
+  // The LIFESPAN_DURATION_FLAG is set when sample data is sent
+  // with a non-default LIFESPAN duration value.
+  if (header.lifespan_duration_)
   {
     // Finite lifespan.  Check if data has expired.
 
     ::DDS::Time_t const tmp =
       {
-        header.source_timestamp_sec_ + lifespan.duration.sec,
-        header.source_timestamp_nanosec_ + lifespan.duration.nanosec
+        header.source_timestamp_sec_ + header.lifespan_duration_sec_,
+        header.source_timestamp_nanosec_ + header.lifespan_duration_nanosec_
       };
 
     // We assume that the publisher host's clock and subcriber host's
@@ -2262,6 +2326,26 @@ void DataReaderImpl::post_read_or_take()
     ::DDS::DATA_ON_READERS_STATUS, false);
 }
 
+
+void DataReaderImpl::reschedule_deadline ()
+{
+  if (this->watchdog_.get() != 0)
+  {
+    for (SubscriptionInstanceMapType::iterator iter = this->instances_.begin();
+      iter != this->instances_.end();
+      ++iter)
+    {
+      if (iter->second->deadline_timer_id_ != -1)
+      {
+        if (this->watchdog_->reset_timer_interval (iter->second->deadline_timer_id_) == -1)
+        {
+          ACE_ERROR ((LM_ERROR, "(%P|%t)DataReaderImpl::reschedule_deadline "
+            "%p\n", "reset_timer_interval"));
+        }
+      }
+    }
+  }
+}
 
 } // namespace DCPS
 } // namespace OpenDDS

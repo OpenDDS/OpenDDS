@@ -50,6 +50,9 @@ namespace OpenDDS
 
     static const ACE_TCHAR DEFAULT_REPO_IOR[] = ACE_TEXT("file://repo.ior");
 
+    static const ACE_CString DEFAULT_PERSISTENT_DATA_DIR =
+      ACE_TEXT_ALWAYS_CHAR("OpenDDS-durable-data-dir");
+
     static const ACE_TCHAR COMMON_SECTION_NAME[] = ACE_TEXT("common");
     static const ACE_TCHAR DOMAIN_SECTION_NAME[] = ACE_TEXT("domain");
     static const ACE_TCHAR REPO_SECTION_NAME[]   = ACE_TEXT("repository");
@@ -85,8 +88,8 @@ namespace OpenDDS
       federation_liveliness_( DEFAULT_FEDERATION_LIVELINESS),
       scheduler_( -1),
       transient_data_cache_ (),
-      persistent_data_cache_ ()
-
+      persistent_data_cache_ (),
+      persistent_data_dir_ (DEFAULT_PERSISTENT_DATA_DIR)
     {
       initialize();
     }
@@ -449,6 +452,11 @@ namespace OpenDDS
           else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSTransportDebugLevel"))) != 0)
             {
               ::OpenDDS::DCPS::Transport_debug_level = ACE_OS::atoi (currentArg);
+              arg_shifter.consume_arg ();
+            }
+          else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSPersistentDataDir"))) != 0)
+            {
+              this->persistent_data_dir_ = ACE_TEXT_ALWAYS_CHAR(currentArg);
               arg_shifter.consume_arg ();
             }
           else
@@ -1540,10 +1548,27 @@ namespace OpenDDS
                             this->factory_lock_,
                             0);
 
-          if (this->persistent_data_cache_.get () == 0)
+          try
           {
+            if (this->persistent_data_cache_.get () == 0)
+            {
+              ACE_auto_ptr_reset (this->persistent_data_cache_,
+                                  new DataDurabilityCache (kind,
+                                  this->persistent_data_dir_));
+            }
+          }
+          catch (const std::exception& ex)
+          {
+            if (DCPS_debug_level > 0)
+            {
+              ACE_ERROR((LM_ERROR,
+                ACE_TEXT("(%P|%t) Service_Participant::get_data_durability_cache ")
+                ACE_TEXT("failed to create PERSISTENT cache, falling back on ")
+                ACE_TEXT("TRANSIENT behavior: %C\n"), ex.what()
+              ));
+            }
             ACE_auto_ptr_reset (this->persistent_data_cache_,
-                                new DataDurabilityCache (kind));
+              new DataDurabilityCache (::DDS::TRANSIENT_DURABILITY_QOS));
           }
         }
 

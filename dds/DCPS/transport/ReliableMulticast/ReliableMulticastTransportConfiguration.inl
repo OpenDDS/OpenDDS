@@ -2,7 +2,6 @@
 //
 // $Id$
 
-#include "ReliableMulticastTransportConfiguration.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include <sstream>
 
@@ -29,7 +28,4 @@ OpenDDS::DCPS::ReliableMulticastTransportConfiguration::ReliableMulticastTranspo
   multicast_group_address_str_ += out.str ();
 }
 
-ACE_INLINE
-OpenDDS::DCPS::ReliableMulticastTransportConfiguration::~ReliableMulticastTransportConfiguration()
-{
-}
+

@@ -6,7 +6,7 @@
 
 #include "ace/Synch.h"
 #include "ace/Array.h"
-#include "dds/DdsDcpsDataReaderExS.h"
+#include "dds/DdsDcpsSubscriptionExtS.h"
 #include "TestStats.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

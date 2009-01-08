@@ -12,6 +12,7 @@ java/tests/hello/run_test.pl
 java/tests/builtintopics/run_test.pl: !NO_BUILT_IN_TOPICS
 java/tests/complex_idl/run_test.pl
 java/tests/multirepo/run_test.pl
+java/tests/transport_config/run_test.pl
 
 #
 # The messenger tests are used to test each supported transport:

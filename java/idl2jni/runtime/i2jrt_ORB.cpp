@@ -37,7 +37,7 @@ jobject JNICALL Java_i2jrt_ORB_init (JNIEnv *jni, jclass clazz,
 
 CORBA::ORB_ptr recoverTaoORB (JNIEnv *jni, jobject source)
 {
-  jclass clazz = jni->FindClass ("i2jrt/ORB");
+  jclass clazz = findClass (jni, "i2jrt/ORB");
   jfieldID fid = jni->GetFieldID (clazz, "_jni_ptr", "J");
   jlong _jni_ptr = jni->GetLongField (source, fid);
   return reinterpret_cast<CORBA::ORB_ptr> (_jni_ptr);
@@ -75,7 +75,7 @@ jobject JNICALL Java_i2jrt_ORB_string_1to_1object (JNIEnv *jni, jobject jThis,
     {
       CORBA::Object_ptr tao_obj =
         recoverTaoORB (jni, jThis)->string_to_object (jsm.c_str ());
-      jclass clazz = jni->FindClass ("i2jrt/TAOObject");
+      jclass clazz = findClass (jni, "i2jrt/TAOObject");
       jmethodID ctor = jni->GetMethodID (clazz, "<init>", "(J)V");
       return jni->NewObject (clazz, ctor, reinterpret_cast<jlong> (tao_obj));
     }

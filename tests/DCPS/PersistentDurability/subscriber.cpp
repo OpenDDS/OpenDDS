@@ -130,13 +130,20 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         cerr << "listener is nil." << endl;
         exit(1);
       }
+      OpenDDS::DCPS::SubscriberExt_var sub_ext =
+        OpenDDS::DCPS::SubscriberExt::_narrow (sub);
 
-      // Create the Datareaders
+      // Create the Datareader
       DDS::DataReaderQos dr_qos;
       sub->get_default_datareader_qos (dr_qos);
-      DDS::DataReader_var dr = sub->create_datareader (topic.in (),
-                                                       dr_qos,
-                                                       listener.in ());
+      OpenDDS::DCPS::DataReaderQosExt dr_qos_ext;
+      sub_ext->get_default_datareader_qos_ext (dr_qos_ext);
+      dr_qos_ext.durability.always_get_history = true;
+      
+      DDS::DataReader_var dr =
+        sub_ext->create_opendds_datareader (topic.in (),
+                                            dr_qos, dr_qos_ext,
+                                            listener.in ());
       if (CORBA::is_nil (dr.in ())) {
         cerr << "create_datareader failed." << endl;
         exit(1);

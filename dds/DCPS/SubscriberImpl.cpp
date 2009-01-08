@@ -78,10 +78,28 @@ SubscriberImpl::~SubscriberImpl (void)
     }
 }
 
+
 ::DDS::DataReader_ptr
 SubscriberImpl::create_datareader (
 				   ::DDS::TopicDescription_ptr a_topic_desc,
 				   const ::DDS::DataReaderQos & qos,
+				   ::DDS::DataReaderListener_ptr a_listener
+				   )
+  ACE_THROW_SPEC ((
+		   CORBA::SystemException
+		   ))
+{
+  DataReaderQosExt ext_qos;
+  get_default_datareader_qos_ext(ext_qos);
+  return create_opendds_datareader(a_topic_desc, qos, ext_qos, a_listener);
+}
+
+
+::DDS::DataReader_ptr
+SubscriberImpl::create_opendds_datareader (
+				   ::DDS::TopicDescription_ptr a_topic_desc,
+				   const ::DDS::DataReaderQos & qos,
+                   const DataReaderQosExt & ext_qos,
 				   ::DDS::DataReaderListener_ptr a_listener
 				   )
   ACE_THROW_SPEC ((
@@ -171,6 +189,7 @@ SubscriberImpl::create_datareader (
 
   dr_servant->init (topic_servant,
 		    dr_qos,
+            ext_qos,
 		    a_listener,
 		    participant_,
 		    this,
@@ -747,6 +766,18 @@ SubscriberImpl::get_default_datareader_qos (
 		   ))
 {
   qos = default_datareader_qos_;
+}
+
+
+void
+SubscriberImpl::get_default_datareader_qos_ext (
+					    DataReaderQosExt & qos
+					    )
+  ACE_THROW_SPEC ((
+		   CORBA::SystemException
+		   ))
+{
+  qos.durability.always_get_history = false;
 }
 
 

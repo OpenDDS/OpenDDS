@@ -11,6 +11,12 @@ OpenDDS::DCPS::InstanceState::~InstanceState ()
 {
 }
 
+ACE_INLINE
+OpenDDS::DCPS::DataReaderImpl*
+OpenDDS::DCPS::InstanceState::data_reader() const
+{
+  return reader_;
+}
 
 ACE_INLINE
 void
@@ -30,11 +36,8 @@ ACE_INLINE
 bool
 OpenDDS::DCPS::InstanceState::most_recent_generation (ReceivedDataElement* item) const
 {
-  if (item->disposed_generation_count_ == this->disposed_generation_count_
-    && item->no_writers_generation_count_ == this->no_writers_generation_count_)
-    return true;
-  else
-    return false;
+  return item->disposed_generation_count_ == disposed_generation_count_
+    && item->no_writers_generation_count_ == no_writers_generation_count_;
 }
 
 

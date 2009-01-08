@@ -25,6 +25,7 @@
 #include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/DurabilityArray.h"
 #include "dds/DCPS/DurabilityQueue.h"
+#include "dds/DCPS/FileSystemStorage.h"
 
 #include "ace/Hash_Map_With_Allocator_T.h"
 #include "ace/Array_Base.h"
@@ -157,8 +158,11 @@ namespace OpenDDS
       public:
 
         sample_data_type ();
-        explicit sample_data_type (DataSampleListElement & element,
-                                   ACE_Allocator * allocator);
+        sample_data_type (DataSampleListElement & element,
+                          ACE_Allocator * allocator);
+        sample_data_type (::DDS::Time_t timestamp,
+                          const ACE_Message_Block & mb,
+                          ACE_Allocator * allocator);
         sample_data_type (sample_data_type const & rhs);
 
         ~sample_data_type ();
@@ -172,6 +176,7 @@ namespace OpenDDS
         void set_allocator (ACE_Allocator * allocator);
 
       private:
+        void init (const ACE_Message_Block * data);
 
         size_t length_;
         char * sample_;
@@ -192,8 +197,11 @@ namespace OpenDDS
                                           sample_list_type *> sample_map_type;
       typedef std::list<long> timer_id_list_type;
 
-      /// Constructor.
+      /// Constructors.
       DataDurabilityCache (::DDS::DurabilityQosPolicyKind kind);
+
+      DataDurabilityCache (::DDS::DurabilityQosPolicyKind kind,
+                           ACE_CString & data_dir);
 
       /// Destructor.
       ~DataDurabilityCache ();
@@ -221,7 +229,9 @@ namespace OpenDDS
 
       // Prevent copying.
       DataDurabilityCache (DataDurabilityCache const &);
-      DataDurabilityCache & operator=  (DataDurabilityCache const &);
+      DataDurabilityCache & operator= (DataDurabilityCache const &);
+
+      void init();
 
       /// Make allocator suitable to support specified kind of
       /// @c DURABILITY.
@@ -231,12 +241,11 @@ namespace OpenDDS
     private:
 
       /// Allocator used to allocate memory for sample map and lists.
-      /**
-       * This allocator will either be an ACE_New_Allocator for the
-       * TRANSIENT durability case or an mmap()-based allocator for
-       * PERSISTENT durability.
-       */
       std::auto_ptr<ACE_Allocator> const allocator_;
+
+      ::DDS::DurabilityQosPolicyKind kind_;
+
+      ACE_CString data_dir_;
 
       /// Map of all data samples.
       sample_map_type * samples_;

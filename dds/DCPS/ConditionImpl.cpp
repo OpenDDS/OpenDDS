@@ -28,9 +28,9 @@ void ConditionImpl::signal_all()
 
   for (WaitSetSet::iterator it = local_ws.begin(), end = local_ws.end();
     it != end; ++it)
-  {
-    (*it)->signal(this);
-  }
+    {
+      (*it)->signal(this);
+    }
 }
 
 DDS::ReturnCode_t ConditionImpl::attach_to_ws(DDS::WaitSet_ptr ws)

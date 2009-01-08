@@ -308,6 +308,7 @@ namespace
       , cxx (idl_mapping_jni::scoped (name) + (useVar ? "_var" : ""))
     {
       be_global->add_include ("idl2jni_jni.h");
+      be_global->add_include ("idl2jni_runtime.h");
       ACE_CString ace_exporter = be_global->stub_export_macro ();
       bool use_exp = ace_exporter != "";
       exporter = use_exp ? (string (" ") + ace_exporter.c_str ()) : "";
@@ -399,7 +400,7 @@ bool idl_mapping_jni::gen_enum (UTL_ScopedName *name,
     c.sigToJava << "\n"
     "{\n"
     "  ACE_UNUSED_ARG (createNewObject);\n"
-    "  jclass clazz = jni->FindClass (\"" << enumJVMsig << "\");\n"
+    "  jclass clazz = findClass (jni, \"" << enumJVMsig << "\");\n"
     "  jmethodID factory = jni->GetStaticMethodID (clazz, \"from_int\", "
     "\"(I)L" << enumJVMsig << ";\");\n"
     "  target = jni->CallStaticObjectMethod (clazz, factory, source);\n"
@@ -441,8 +442,10 @@ bool idl_mapping_jni::gen_struct (UTL_ScopedName *name,
             "    copyToCxx (jni, target." + fname + ", obj);\n"
             "    jni->DeleteLocalRef (obj);\n";
           fieldsToJava +=
-            "    " + t + " obj = 0;\n"
-            "    copyToJava (jni, obj, source." + fname + ", true);\n"
+            "    " + t + " obj = createNewObject ? 0 : "
+            "static_cast<" + t + "> (jni->GetObjectField (target, fid));\n"
+            "    copyToJava (jni, obj, source." + fname
+            + ", createNewObject);\n"
             "    jni->SetObjectField (target, fid, obj);\n"
             "    jni->DeleteLocalRef (obj);\n";
         }
@@ -453,8 +456,10 @@ bool idl_mapping_jni::gen_struct (UTL_ScopedName *name,
             "    copyToCxx (jni, target." + fname + ", obj);\n"
             "    jni->DeleteLocalRef (obj);\n";
           fieldsToJava +=
-            "    jobject obj = 0;\n"
-            "    copyToJava (jni, obj, source." + fname + ", true);\n"
+            "    jobject obj = createNewObject ? 0 : "
+            "jni->GetObjectField (target, fid);\n"
+            "    copyToJava (jni, obj, source." + fname
+            + ", createNewObject);\n"
             "    jni->SetObjectField (target, fid, obj);\n"
             "    jni->DeleteLocalRef (obj);\n";
         }
@@ -475,7 +480,7 @@ bool idl_mapping_jni::gen_struct (UTL_ScopedName *name,
     "  jclass clazz;\n"
     "  if (createNewObject)\n"
     "    {\n"
-    "      clazz = jni->FindClass (\"" << structJVMsig << "\");\n"
+    "      clazz = findClass (jni, \"" << structJVMsig << "\");\n"
     "      jmethodID ctor = jni->GetMethodID (clazz, \"<init>\", \"()V\");\n"
     "      target = jni->NewObject (clazz, ctor);\n"
     "    }\n"
@@ -583,7 +588,7 @@ bool idl_mapping_jni::gen_jarray_copies (UTL_ScopedName *name,
             strlen (iter + 1) - 1 /* skip final ; */);
           ostringstream oss;
           oss <<
-            "      jclass c0 = jni->FindClass (\"" << basic << "\");\n";
+            "      jclass c0 = findClass (jni, \"" << basic << "\");\n";
           size_t ctr = 1;
           for (; iter > begin; --iter, ++ctr)
             {
@@ -611,7 +616,7 @@ bool idl_mapping_jni::gen_jarray_copies (UTL_ScopedName *name,
           loopJava =
             "      " + actualJniType + " obj;\n";
           preNewArray =
-            "      jclass clazz = jni->FindClass (\"" + jvmSig + "\");\n";
+            "      jclass clazz = findClass (jni, \"" + jvmSig + "\");\n";
           actualJniType = "jobject";
         }
       else //non-nested array of objects
@@ -628,7 +633,8 @@ bool idl_mapping_jni::gen_jarray_copies (UTL_ScopedName *name,
           loopCxx =
             "      jobject obj = jni->GetObjectArrayElement (arr, i);\n";
           loopJava =
-            "      jobject obj;\n";
+            "      jobject obj = createNewObject ? 0 : "
+            "jni->GetObjectArrayElement (arr, i);\n";
           if (useVar)
             {
               loopJava +=
@@ -639,7 +645,7 @@ bool idl_mapping_jni::gen_jarray_copies (UTL_ScopedName *name,
               loopJava += ";\n";
             }
           preNewArray =
-            "      jclass clazz = jni->FindClass (\"" + jvmClass + "\");\n";
+            "      jclass clazz = findClass (jni, \"" + jvmClass + "\");\n";
         }
       newArrayExtra = ", clazz, 0";
       loopCxx +=
@@ -647,7 +653,7 @@ bool idl_mapping_jni::gen_jarray_copies (UTL_ScopedName *name,
         "      jni->DeleteLocalRef (obj);\n";
       loopJava +=
         "      copyToJava (jni, obj, " + string (useVar ? "var" : "source[i]")
-        + ", true);\n"
+        + ", createNewObject);\n"
         "      jni->SetObjectArrayElement (arr, i, obj);\n"
         "      jni->DeleteLocalRef (obj);\n";
     }
@@ -656,12 +662,14 @@ bool idl_mapping_jni::gen_jarray_copies (UTL_ScopedName *name,
   toJavaBody <<
     "  jsize len = " << length << ";\n"
     "  " << actualJniType << "Array arr;\n"
+    "  if (!createNewObject && jni->GetArrayLength (target) != len) "
+    "createNewObject = true;\n"
     "  if (createNewObject)\n"
     "    {\n"
     << preNewArray <<
     "      arr = jni->New" << jniFn << "Array (len" << newArrayExtra << ");\n"
     "    }\n"
-    "  else //Array must be large enough already\n"
+    "  else\n"
     "    {\n"
     "      arr = target;\n"
     "    }\n"
@@ -857,9 +865,8 @@ namespace
               "      copyToCxx (_jni, _c_" + string (name) + ", _j_" + name
               + ");\n";
             argconv_out +=
-              "      _jni->DeleteLocalRef (_j_" + string (name) + ");\n"
-              "      copyToJava (_jni, _j_" + name + ", _c_" + name
-              + ", true);\n";
+              "      copyToJava (_jni, _j_" + string (name) + ", _c_"
+              + name + ");\n";
             tao_argconv_in +=
               "  " + jni + " _n_" + name + " = 0;\n"
               "  copyToJava (_jni, _n_" + name + ", " + name + ", true);\n";
@@ -880,7 +887,7 @@ namespace
           "      holderize (_jni, " + string (name) + ", _j_" + name + ", \""
           + jvmSig + "\");\n";
         tao_argconv_in +=
-          "  jclass _hc_" + string (name) + " = _jni->FindClass (\""
+          "  jclass _hc_" + string (name) + " = findClass (_jni, \""
           + holderSig + "\");\n"
           "  jmethodID _hm_" + name + " = _jni->GetMethodID (_hc_" + name
           + ", \"<init>\", \"()V\");\n"
@@ -898,7 +905,7 @@ namespace
         argconv_out +=
           "      " + jni + " _j_" + name;
         tao_argconv_in +=
-          "  jclass _hc_" + string (name) + " = _jni->FindClass (\""
+          "  jclass _hc_" + string (name) + " = findClass (_jni, \""
           + holderSig + "\");\n"
           "  jmethodID _hm_" + name + " = _jni->GetMethodID (_hc_" + name
           + ", \"<init>\", \"()V\");\n"
@@ -1057,7 +1064,7 @@ namespace
           << "JavaPeer::" << opname_cxx << " (" << tao_args << ")\n"
           "  " << exception_spec << "\n"
           "{\n"
-          "  JNIThreadAttacher _jta (jvm_);\n"
+          "  JNIThreadAttacher _jta (jvm_, cl_);\n"
           "  JNIEnv *_jni = _jta.getJNI ();\n"
           << tao_argconv_in <<
           "  jclass _clazz = _jni->GetObjectClass (globalCallback_);\n"
@@ -1131,7 +1138,7 @@ bool idl_mapping_jni::gen_interf (UTL_ScopedName *name, bool local,
     c.sigToCxx << "\n"
     "{\n"
     "  if (!source) return;\n"
-    "  jclass taoObjClazz = jni->FindClass (\"i2jrt/TAOObject\");\n"
+    "  jclass taoObjClazz = findClass (jni, \"i2jrt/TAOObject\");\n"
     "  if (jni->IsInstanceOf (source, taoObjClazz))\n"
     "    {\n"
     "      CORBA::Object_ptr c = recoverTaoObject (jni, source);\n"
@@ -1159,7 +1166,7 @@ bool idl_mapping_jni::gen_interf (UTL_ScopedName *name, bool local,
     "      target = 0;\n"
     "      return;\n"
     "    }\n"
-    "  jclass stubClazz = jni->FindClass (\"" << javaStub << "\");\n"
+    "  jclass stubClazz = findClass (jni, \"" << javaStub << "\");\n"
     "  jmethodID ctor = jni->GetMethodID (stubClazz, \"<init>\", \"(J)V\");\n"
     "  target = jni->NewObject (stubClazz, ctor, reinterpret_cast<jlong> (\n"
     "    CORBA::Object::_duplicate (source.in ())));\n"
@@ -1260,13 +1267,13 @@ bool idl_mapping_jni::gen_native (UTL_ScopedName *name, const char *)
         string elem_cxx (elem);
         // $elem_cxx =~ s/\//::/g;
         for (size_t iter = elem_cxx.find ('/'); iter != string::npos;
-          iter = elem_cxx.find ('/', iter + 1))
+             iter = elem_cxx.find ('/', iter + 1))
           {
             elem_cxx.replace (iter, 1, "::");
           }
         if (info) elem_cxx += "_var";
         return gen_jarray_copies (name, "L" + elem + ";", "Object", "jobject",
-            "jobjectArray", elem_cxx, true, "source.length ()");
+          "jobjectArray", elem_cxx, true, "source.length ()");
       }
     default:
       ; // fall through
@@ -1394,8 +1401,12 @@ bool idl_mapping_jni::gen_union (UTL_ScopedName *name,
             "        copyToCxx (jni, taoVal, value);\n"
             "        target." + br_name + " (taoVal);\n";
           copyToJava =
-            "        " + br_type + " obj = 0;\n"
-            "        copyToJava (jni, obj, source." + br_name + " (), true);\n"
+            "        jfieldID fid = jni->GetFieldID (clazz, \""
+            + string (br_name) + "\", \"" + br_sig + "\");\n"
+            "        " + br_type + " obj = createNewObject ? 0 : " + jniCast +
+            "jni->GetObjectField (target, fid)" + (jniCast.size () ? ")" : "")
+            + ";\n"
+            "        copyToJava (jni, obj, source." + br_name + " (), !obj);\n"
             "        jni->CallVoidMethod (target, mid, " + edisc + "obj);\n"
             "        jni->DeleteLocalRef (obj);\n";
       }
@@ -1438,7 +1449,7 @@ bool idl_mapping_jni::gen_union (UTL_ScopedName *name,
     {
       string enum_sig = scoped_helper (discriminator->name (), "/");
       explicitDiscSetup =
-        "  jclass dclazz = jni->FindClass (\"" + enum_sig + "\");\n"
+        "  jclass dclazz = findClass (jni, \"" + enum_sig + "\");\n"
         "  jmethodID from_int = jni->GetStaticMethodID (dclazz, \"from_int\", "
         "\"(I)" + disc_sig + "\");\n"
         "  jobject jdisc = jni->CallStaticObjectMethod (dclazz, from_int, "
@@ -1472,7 +1483,7 @@ bool idl_mapping_jni::gen_union (UTL_ScopedName *name,
     "  jclass clazz;\n"
     "  if (createNewObject)\n"
     "    {\n"
-    "      clazz = jni->FindClass (\"" << unionJVMsig << "\");\n"
+    "      clazz = findClass (jni, \"" << unionJVMsig << "\");\n"
     "      jmethodID ctor = jni->GetMethodID (clazz, \"<init>\", \"()V\");\n"
     "      target = jni->NewObject (clazz, ctor);\n"
     "    }\n"

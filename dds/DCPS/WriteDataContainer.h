@@ -8,6 +8,8 @@
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsDataWriterRemoteC.h"
 #include "DataSampleList.h"
+#include "OfferedDeadlineWatchdog.h"
+
 #include "ace/Synch_T.h"
 
 #include <map>
@@ -121,7 +123,8 @@ namespace OpenDDS
         /// The data durability cache for unsent data.
         DataDurabilityCache * durability_cache,
         /// DURABILITY_SERVICE QoS specific to the DataWriter.
-        ::DDS::DurabilityServiceQosPolicy const & durability_service
+        ::DDS::DurabilityServiceQosPolicy const & durability_service,
+        std::auto_ptr<OfferedDeadlineWatchdog>& watchdog
         );
 
       /**
@@ -298,6 +301,9 @@ namespace OpenDDS
        */
       bool persist_data ();
 
+      // Reset time interval for each instance.
+      void reschedule_deadline ();
+
     private:
 
       // --------------------------
@@ -439,6 +445,7 @@ namespace OpenDDS
       /// DURABILITY_SERVICE QoS specific to the DataWriter.
       ::DDS::DurabilityServiceQosPolicy const & durability_service_;
 
+      std::auto_ptr<OfferedDeadlineWatchdog>& watchdog_;
     };
 
   } /// namespace OpenDDS

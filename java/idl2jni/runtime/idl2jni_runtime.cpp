@@ -1,3 +1,6 @@
+#include <algorithm>
+#include <string>
+
 #include "idl2jni_runtime.h"
 #include "idl2jni_BaseJavaPeer.h"
 
@@ -16,6 +19,23 @@
 #ifndef IDL2JNI_NO_INC_SCSET_H
 #  include "tao/String_Const_Sequence_Element_T.h"
 #endif
+
+namespace
+{
+  jstring binary_name (JNIEnv *jni, const char *desc)
+  {
+    std::string name (desc);
+
+    std::string::iterator it = name.begin ();
+    for (;;)
+      {
+        it = std::find (it, name.end (), '/');
+        if (it == name.end ()) break;
+        *it++ = '.'; // replace separator
+      }
+    return jni->NewStringUTF (name.c_str ());
+  }
+}
 
 
 JStringMgr::JStringMgr (JNIEnv* jni, jstring input)
@@ -129,6 +149,44 @@ void copyToJava (JNIEnv *jni, jobject &target,
   const IDL2JNI_STRELM_CONST &source, bool)
 {
   target = jni->NewStringUTF (source);
+}
+
+
+jobject currentThread (JNIEnv *jni)
+{
+  jclass cls = jni->FindClass ("java/lang/Thread");
+  jmethodID mid = jni->GetStaticMethodID (cls,
+    "currentThread", "()Ljava/lang/Thread;");
+  return jni->CallStaticObjectMethod (cls, mid);
+}
+
+jobject getContextClassLoader (JNIEnv *jni)
+{
+  jobject thread = currentThread (jni);
+  jclass cls = jni->GetObjectClass (thread);
+  jmethodID mid = jni->GetMethodID (cls,
+    "getContextClassLoader", "()Ljava/lang/ClassLoader;");
+  return jni->CallObjectMethod (thread, mid);
+}
+
+void setContextClassLoader (JNIEnv *jni, jobject cl)
+{
+  jobject thread = currentThread (jni);
+  jclass cls = jni->GetObjectClass (thread);
+  jmethodID mid = jni->GetMethodID (cls,
+    "setContextClassLoader", "(Ljava/lang/ClassLoader;)V");
+  jni->CallVoidMethod (thread, mid, cl);
+}
+
+jclass findClass (JNIEnv *jni, const char *desc)
+{
+  jobject cl = getContextClassLoader (jni);
+  if (cl == 0) return jni->FindClass (desc);
+  jclass cls = jni->GetObjectClass (cl);
+  jmethodID mid = jni->GetMethodID (cls,
+    "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
+  return reinterpret_cast<jclass> 
+    (jni->CallObjectMethod (cl, mid, binary_name (jni, desc)));
 }
 
 
@@ -360,4 +418,5 @@ IDL2JNI_BaseJavaPeer::~IDL2JNI_BaseJavaPeer ()
 {
   JNIThreadAttacher jta (jvm_);
   jta.getJNI ()->DeleteGlobalRef (globalCallback_);
+  jta.getJNI ()->DeleteGlobalRef (cl_);
 }
