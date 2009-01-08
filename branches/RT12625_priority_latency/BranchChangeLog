@@ -1,3 +1,9 @@
+Thu Jan  8 22:58:32 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+	  Reduce spew unless requested.
+
 Thu Jan  8 22:41:06 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
           Merging trunk changes 1806:1948 out to branch.
