@@ -3,7 +3,6 @@
  */
 
 #include "ace/Arg_Shifter.h"
-#include "ace/Basic_Types.h"
 #include "ace/Log_Msg.h"
 #include "ace/OS_Memory.h"
 
@@ -31,12 +30,20 @@ public:
   ACE_CString name(void) const { return this->name_; }
   ACE_CString value(void) const { return this->value_; }
 
-  bool operator==(const char *s) const { return s == this->name_; }
-
 private:
   ACE_CString name_;
   ACE_CString value_;
 };
+
+bool operator==(const BE_Arg &arg, const char *s)
+{ 
+  return arg.name() == s;
+}
+
+bool operator==(const char *s, const BE_Arg &arg)
+{ 
+  return s == arg.name();
+}
 }
 
 BE_GlobalData *be_global = 0;
@@ -91,23 +98,23 @@ BE_GlobalData::prep_be_arg(char *arg_)
   BE_Arg arg(arg_);
 
   // -Wb,port_driver_name=<driver_name>
-  if (arg == "port_driver_name") {
+  if ("port_driver_name" == arg) {
     this->port_driver_name_ = arg.value();
 
   // -Wb,skel_export_include=<include path>
-  } else if (arg == "skel_export_include") {
+  } else if ("skel_export_include" == arg) {
     this->skel_export_include_ = arg.value();
 
   // -Wb,skel_export_macro=<macro name>
-  } else if (arg == "skel_export_macro") {
+  } else if ("skel_export_macro" == arg) {
     this->skel_export_macro_ = arg.value();
 
   // -Wb,stub_export_include=<include path>
-  } else if (arg == "stub_export_include") {
+  } else if ("stub_export_include" == arg) {
     this->stub_export_include_ = arg.value();
 
   // -Wb,stub_export_macro=<macro name>
-  } else if (arg == "stub_export_macro") {
+  } else if ("stub_export_macro" == arg) {
     this->stub_export_macro_ = arg.value();
 
   } else {

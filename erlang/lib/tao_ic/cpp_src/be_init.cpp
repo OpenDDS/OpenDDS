@@ -5,12 +5,12 @@
 #include "ace/Log_Msg.h"
 #include "ace/OS_NS_stdlib.h"
 #include "ace/OS_Memory.h"
-#include "ace/Version.h"
-
-#include "tao/Version.h"
 
 #include "ace_compat.h"
+#include "ast_generator.h"
+#include "ast_root.h"
 #include "be_extern.h"
+#include "be_visitor.h"
 #include "global_extern.h"
 
 int
@@ -33,17 +33,17 @@ BE_version()
 {
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("TAO_IC_BE, version %s (Erlang Port Driver IDL BE)\n"),
-             ACE_TEXT(TAO_VERSION)));
+             ACE_TEXT(TAO_IC_VERSION)));
 }
 
 void
 BE_abort()
 {
   ACE_ERROR((LM_ERROR,
-             ACE_TEXT("TAO_IC_BE: aborting")));
+             ACE_TEXT("TAO_IC_BE: aborting...\n")));
 
   BE_cleanup();
-
+  
   ACE_OS::exit(1);
 }
 
@@ -56,6 +56,19 @@ BE_cleanup()
 void
 BE_produce()
 {
-  
-}
+  AST_Root *root = AST_Root::narrow_from_decl(idl_global->root());
+  if (root == 0) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("TAO_IC_BE: unable to narrow root node!\n")));
+    BE_abort();
+  }
 
+  be_visitor visitor;
+  if (root->ast_accept(&visitor) != 0) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("TAO_IC_BE: unable to accept BE visitor!\n")));
+    BE_abort();
+  }
+
+  BE_cleanup();
+}
