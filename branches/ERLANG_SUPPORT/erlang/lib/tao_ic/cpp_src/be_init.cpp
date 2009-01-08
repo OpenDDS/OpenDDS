@@ -39,12 +39,8 @@ BE_version()
 void
 BE_abort()
 {
-  ACE_ERROR((LM_ERROR,
-             ACE_TEXT("TAO_IC_BE: aborting...\n")));
-
-  BE_cleanup();
-  
-  ACE_OS::exit(1);
+  // Force SIGABRT for debugging...
+  ACE_ERROR((LM_ERROR, ACE_TEXT("%a\n")));
 }
 
 void
@@ -59,14 +55,16 @@ BE_produce()
   AST_Root *root = AST_Root::narrow_from_decl(idl_global->root());
   if (root == 0) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("TAO_IC_BE: unable to narrow root node!\n")));
+               ACE_TEXT("%N:%l: BE_produce()")
+               ACE_TEXT(" narrow_from_decl failed!\n")));
     BE_abort();
   }
 
   be_visitor visitor;
   if (root->ast_accept(&visitor) != 0) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("TAO_IC_BE: unable to accept BE visitor!\n")));
+               ACE_TEXT("%N:%l: BE_produce()")
+               ACE_TEXT(" ast_accept failed!\n")));
     BE_abort();
   }
 

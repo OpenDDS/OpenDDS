@@ -22,6 +22,26 @@ be_visitor::visit_decl(AST_Decl *node)
 int
 be_visitor::visit_scope(UTL_Scope *node)
 {
+  int error = 0;
+  
+  UTL_ScopeActiveIterator it (node, UTL_Scope::IK_decls);
+  while (!it.is_done()) {
+    AST_Decl *item = it.item();
+
+    if (item == 0) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("%N:%l: visit_scope()")
+                        ACE_TEXT(" invalid scope!\n")), -1);
+    }
+
+    if (item->ast_accept(this) != 0) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("%N:%l: visit_scope()")
+                        ACE_TEXT(" ast_accept failed!\n")), -1);
+    }
+
+    it.next();
+  }
   return 0;
 }
 
@@ -219,6 +239,11 @@ be_visitor::visit_typedef(AST_Typedef *node)
 int
 be_visitor::visit_root(AST_Root *node)
 {
+  if (this->visit_scope(node) != 0) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("%N:%l: visit_root()")
+                      ACE_TEXT(" visit_scope failed!\n")), -1);
+  }
   return 0;
 }
 
