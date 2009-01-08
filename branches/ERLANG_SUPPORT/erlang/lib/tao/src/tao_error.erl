@@ -11,4 +11,3 @@ badarg(Arg) ->
 
 badcmd(Cmd) ->
     throw({badcmd, Cmd}).
-

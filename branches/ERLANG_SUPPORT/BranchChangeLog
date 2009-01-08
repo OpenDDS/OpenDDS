@@ -1,3 +1,16 @@
+Thu Jan  8 06:08:16 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/lib/tao/src/tao_error.erl:
+        * erlang/lib/tao_ic/cpp_src:
+        * erlang/lib/tao_ic/cpp_src/be_extern.h:
+        * erlang/lib/tao_ic/cpp_src/be_global.cpp:
+        * erlang/lib/tao_ic/cpp_src/be_init.cpp:
+        * erlang/lib/tao_ic/cpp_src/be_visitor.h:
+        * erlang/lib/tao_ic/cpp_src/be_visitor.cpp:
+        * erlang/lib/tao_ic/tao_ic.mpc:
+
+          Initial support for be_visitor.
+
 Wed Jan  7 04:21:01 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * erlang/.erlang:
@@ -14,7 +27,7 @@ Wed Jan  7 04:21:01 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * erlang/lib/tao_ic/tao_ic.mpc:
 
           Refactored tao and common libraries.
-        
+
         * erlang/lib/common:
         * erlang/lib/common/.erlang:
         * erlang/lib/common/common.mpc:
