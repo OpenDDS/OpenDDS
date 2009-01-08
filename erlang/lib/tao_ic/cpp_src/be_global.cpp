@@ -119,7 +119,8 @@ BE_GlobalData::prep_be_arg(char *arg_)
 
   } else {
     ACE_DEBUG((LM_WARNING,
-               ACE_TEXT("TAO_IC_BE: ignoring unknown argument: %s\n"),
+               ACE_TEXT("%N:%l: prep_be_arg()")
+               ACE_TEXT(" ignoring unknown argument: %s\n"),
                ACE_TEXT(arg.name().c_str())));
   }
 }
