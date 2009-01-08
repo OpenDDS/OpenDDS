@@ -5,7 +5,7 @@
 #ifndef TAO_IC_BE_GLOBAL_H
 #define TAO_IC_BE_GLOBAL_H
 
-#include "ace/Basic_Types.h"
+#include "ace/SStringfwd.h"
 
 #include "ast_generator.h"
 
