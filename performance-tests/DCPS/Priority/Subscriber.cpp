@@ -256,10 +256,22 @@ Subscriber::Subscriber( const Options& options)
 
 }
 
-unsigned int
-Subscriber::count() const
+const std::map< long, long>&
+Subscriber::counts() const
 {
-  return this->listener_->count();
+  return this->listener_->counts();
+}
+
+const std::map< long, long>&
+Subscriber::bytes() const
+{
+  return this->listener_->bytes();
+}
+
+const std::map< long, long>&
+Subscriber::priorities() const
+{
+  return this->listener_->priorities();
 }
 
 void
