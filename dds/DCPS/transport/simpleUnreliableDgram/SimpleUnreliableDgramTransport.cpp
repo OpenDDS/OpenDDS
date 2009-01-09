@@ -251,7 +251,7 @@ OpenDDS::DCPS::SimpleUnreliableDgramTransport::release_datalink_i(DataLink* link
   GuardType guard(this->links_lock_);
 
   // Attempt to remove the SimpleMcastDataLink from our links_ map.
-  PriorityKey key( dgram_link->priority(), remote_address);
+  PriorityKey key( dgram_link->transport_priority(), remote_address);
   if (this->links_.unbind( key, released_link) != 0)
     {
       ACE_ERROR((LM_ERROR,

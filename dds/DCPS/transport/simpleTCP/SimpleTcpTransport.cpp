@@ -498,7 +498,7 @@ OpenDDS::DCPS::SimpleTcpTransport::make_active_connection
   // Ask the connection object to attempt the active connection establishment.
   if (connection->active_connect (remote_address,
                                   this->tcp_config_->local_address_,
-                                  link->priority(),
+                                  link->transport_priority(),
                                   this->tcp_config_) != 0)
     {
       return -1;
@@ -586,7 +586,7 @@ OpenDDS::DCPS::SimpleTcpTransport::connect_datalink
                   this->tcp_config_->max_output_pause_period_
             ),
             this->reactor_task_.in(),
-            link->priority()
+            link->transport_priority()
           );
 
   TransportReceiveStrategy_rch receive_strategy =

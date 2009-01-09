@@ -602,7 +602,7 @@ namespace OpenDDS
       //
       // Establish the scheduler if specified.
       //
-      if( this->schedulerString_.empty()) {
+      if( this->schedulerString_.length() == 0) {
         if( DCPS_debug_level > 0) {
           ACE_DEBUG((LM_WARNING,
             ACE_TEXT("(%P|%t) INFO: Service_Participant::intializeScheduling() - ")

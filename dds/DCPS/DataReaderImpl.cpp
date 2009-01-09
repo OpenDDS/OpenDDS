@@ -1515,7 +1515,7 @@ void OpenDDS::DCPS::WriterInfo::removed ()
 
 void OpenDDS::DCPS::WriterInfo::add_stat( const ACE_Time_Value& delay)
 {
-  double datum = delay.sec();
+  double datum = static_cast<double>( delay.sec());
   datum += delay.usec() / 1000000.0;
   this->stats_.add( datum);
 }

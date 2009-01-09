@@ -193,8 +193,8 @@ namespace OpenDDS
 
         /// Accessors for the TRANSPORT_PRIORITY value associated with
         /// this link.
-        CORBA::Long& priority();
-        CORBA::Long  priority() const;
+        CORBA::Long& transport_priority();
+        CORBA::Long  transport_priority() const;
 
        protected:
 
@@ -309,7 +309,7 @@ namespace OpenDDS
         RepoIdSetMap sub_map_releasing_;
 
         /// TRANSPORT_PRIORITY value associated with the link.
-        CORBA::Long priority_;
+        CORBA::Long transport_priority_;
 
 
     protected:
