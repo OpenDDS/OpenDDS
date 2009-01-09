@@ -12,8 +12,9 @@ OpenDDS::DCPS::SimpleUnreliableDgramSendStrategy::SimpleUnreliableDgramSendStrat
                                      (TransportConfiguration* config,
                                       const ACE_INET_Addr&    remote_address,
                                       SimpleUnreliableDgramSocket*        socket,
-                                      SimpleUnreliableDgramSynchResource* synch_resource)
-  : TransportSendStrategy(config, synch_resource),
+                                      SimpleUnreliableDgramSynchResource* synch_resource,
+                                      CORBA::Long                         priority)
+  : TransportSendStrategy(config, synch_resource, priority),
     remote_address_(remote_address)
 {
   DBG_ENTRY_LVL("SimpleUnreliableDgramSendStrategy","SimpleUnreliableDgramSendStrategy",6);

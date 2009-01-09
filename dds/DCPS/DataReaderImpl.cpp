@@ -65,7 +65,8 @@ DataReaderImpl::DataReaderImpl (void) :
   watchdog_ (),
   is_bit_ (false),
   initialized_ (false),
-  always_get_history_ (false)
+  always_get_history_ (false),
+  statistics_enabled_( false)
 {
   CORBA::ORB_var orb = TheServiceParticipant->get_ORB ();
   reactor_ = orb->orb_core()->reactor();
@@ -98,6 +99,10 @@ DataReaderImpl::DataReaderImpl (void) :
   sample_rejected_status_.last_reason =
     ::DDS::REJECTED_BY_INSTANCE_LIMIT;
   sample_rejected_status_.last_instance_handle = ::DDS::HANDLE_NIL;
+
+  this->budget_exceeded_status_.total_count = 0;
+  this->budget_exceeded_status_.total_count_change = 0;
+  this->budget_exceeded_status_.last_instance_handle = ::DDS::HANDLE_NIL;
 }
 
 // This method is called when there are no longer any reference to the
@@ -1004,7 +1009,7 @@ DataReaderImpl::writer_activity(PublicationId writer_id)
       ACE_Time_Value when = ACE_OS::gettimeofday ();
       iter->second.received_activity (when);
 
-  } else {
+  } else if( DCPS_debug_level > 0) {
     // This may not be an error since it could happen that the sample
     // is delivered to the datareader after the write is dis-associated
     // with this datareader.
@@ -1059,6 +1064,11 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
         // This adds the reader to the set/list of readers with data.
         this->subscriber_servant_->data_received(this);
+
+        // Only gather statistics about real samples, not registration data, etc.
+        if (header.message_id_ == SAMPLE_DATA) {
+          this->process_latency (sample);
+        }
 
         // This also adds to the sample container and makes any callbacks
         // and condition modifications.
@@ -1503,6 +1513,43 @@ void OpenDDS::DCPS::WriterInfo::removed ()
   reader_->writer_removed (writer_id_, this->state_);
 }
 
+void OpenDDS::DCPS::WriterInfo::add_stat( const ACE_Time_Value& delay)
+{
+  double datum = delay.sec();
+  datum += delay.usec() / 1000000.0;
+  this->stats_.add( datum);
+}
+
+OpenDDS::DCPS::LatencyStatistics OpenDDS::DCPS::WriterInfo::get_stats() const
+{
+  WriterIdSeq writerIds;
+  writerIds.length(1);
+  writerIds[ 0] = this->writer_id_;
+
+  ::DDS::InstanceHandleSeq handles;
+  this->reader_->cache_lookup_instance_handles( writerIds, handles);
+
+  LatencyStatistics value;
+
+  if( handles.length() >= 1) {
+    value.publication = handles[ 0];
+  } else {
+    value.publication = -1;
+  }
+
+  value.n        = this->stats_.n();
+  value.max      = this->stats_.max();
+  value.min      = this->stats_.min();
+  value.mean     = this->stats_.mean();
+  value.variance = this->stats_.var();
+  return value;
+}
+
+void OpenDDS::DCPS::WriterInfo::reset_stats()
+{
+  this->stats_.reset();
+}
+
 void
 DataReaderImpl::writer_removed (PublicationId   writer_id,
              WriterInfo::WriterState& state)
@@ -1533,8 +1580,10 @@ DataReaderImpl::writer_removed (PublicationId   writer_id,
     liveliness_changed = true;
   }
 
-  if (liveliness_changed)
+  if( liveliness_changed) {
+    set_status_changed_flag(::DDS::LIVELINESS_CHANGED_STATUS, true);
     this->notify_liveliness_change ();
+  }
 }
 
 void
@@ -1650,9 +1699,6 @@ DataReaderImpl::writer_became_dead (PublicationId   writer_id,
   //update the state to DEAD.
   state = WriterInfo::DEAD;
 
-  set_status_changed_flag(::DDS::LIVELINESS_LOST_STATUS,
-    true);
-
   if (liveliness_changed_status_.active_count < 0)
     {
       ACE_ERROR ((LM_ERROR,
@@ -1688,6 +1734,7 @@ DataReaderImpl::writer_became_dead (PublicationId   writer_id,
   // Call listener only when there are liveliness status changes.
   if (liveliness_changed)
   {
+    set_status_changed_flag(::DDS::LIVELINESS_CHANGED_STATUS, true);
     this->notify_liveliness_change ();
   }
 }
@@ -1737,6 +1784,139 @@ void DataReaderImpl::unregister(const ReceivedDataSample&,
   }
 }
 
+
+void DataReaderImpl::process_latency( const ReceivedDataSample& sample)
+{
+  WriterMapType::iterator location
+    = this->writers_.find( sample.header_.publication_id_);
+  if( location != this->writers_.end()) {
+      // This starts as the current time.
+      ACE_Time_Value  latency = ACE_OS::gettimeofday ();
+
+      // The time interval starts at the send end.
+      DDS::Duration_t then = {
+                               sample.header_.source_timestamp_sec_,
+                               sample.header_.source_timestamp_nanosec_
+                             };
+
+      // latency delay in ACE_Time_Value format.
+      latency -= duration_to_time_value( then);
+
+      if( this->statistics_enabled()) {
+        location->second.add_stat( latency);
+      }
+
+      if( DCPS_debug_level > 9){
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DataReaderImpl::process_latency() - ")
+          ACE_TEXT("measured latency of %dS, %dmS for current sample.\n"),
+          latency.sec(),
+          latency.msec()
+        ));
+      }
+
+      // Check latency against the budget.
+      if( time_value_to_duration( latency)
+          > this->qos_.latency_budget.duration) {
+        this->notify_latency( sample.header_.publication_id_);
+      }
+
+  } else if( DCPS_debug_level > 0){
+    /// NB: This message is generated contemporaneously with a similar
+    ///     message from writer_activity().  That message is not marked
+    ///     as an error, so we follow that lead and leave this as an
+    ///     informational message, guarded by debug level.  This seems
+    ///     to be due to late samples (samples delivered after an
+    ///     association has been torn down).  We may want to promote this
+    ///     to a warning if other conditions causing this symptom are
+    ///     discovered.
+    ::OpenDDS::DCPS::GuidConverter readerConverter( this->subscription_id_);
+    ::OpenDDS::DCPS::GuidConverter writerConverter(
+      const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.header_.publication_id_)
+    );
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) DataReaderImpl::process_latency() - ")
+      ACE_TEXT("reader %s is not associated with writer %s (late sample?).\n"),
+      (const char*) readerConverter,
+      (const char*) writerConverter
+    ));
+  }
+}
+
+
+void DataReaderImpl::notify_latency( PublicationId writer)
+{
+  // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
+  // is given to this DataReader then narrow() fails.
+  DataReaderListener_var listener
+    = DataReaderListener::_narrow( this->listener_.in());
+  if( ! CORBA::is_nil( listener.in())) {
+    WriterIdSeq writerIds;
+    writerIds.length(1);
+    writerIds[ 0] = writer;
+
+    ::DDS::InstanceHandleSeq handles;
+    this->cache_lookup_instance_handles( writerIds, handles);
+
+    if( handles.length() >= 1) {
+      this->budget_exceeded_status_.last_instance_handle = handles[ 0];
+    } else {
+      this->budget_exceeded_status_.last_instance_handle = -1;
+    }
+
+    ++this->budget_exceeded_status_.total_count;
+    ++this->budget_exceeded_status_.total_count_change;
+
+    listener->on_budget_exceeded(
+      this->dr_local_objref_.in(),
+      this->budget_exceeded_status_
+    );
+
+    this->budget_exceeded_status_.total_count_change = 0;
+  }
+}
+
+void
+DataReaderImpl::get_latency_stats (
+  ::OpenDDS::DCPS::LatencyStatisticsSeq & stats
+)
+ACE_THROW_SPEC (( ::CORBA::SystemException))
+{
+  stats.length( this->writers_.size());
+  int index = 0;
+  for( WriterMapType::const_iterator current = this->writers_.begin();
+       current != this->writers_.end();
+       ++current, ++index) {
+    stats[ index] = current->second.get_stats();
+  }
+}
+
+void
+DataReaderImpl::reset_latency_stats ( void)
+ACE_THROW_SPEC (( ::CORBA::SystemException))
+{
+  for( WriterMapType::iterator current = this->writers_.begin();
+       current != this->writers_.end();
+       ++current) {
+    current->second.reset_stats();
+  }
+}
+
+::CORBA::Boolean
+DataReaderImpl::statistics_enabled ( void)
+ACE_THROW_SPEC (( ::CORBA::SystemException))
+{
+  return this->statistics_enabled_;
+}
+
+void
+DataReaderImpl::statistics_enabled (
+  ::CORBA::Boolean statistics_enabled
+)
+ACE_THROW_SPEC (( ::CORBA::SystemException))
+{
+  this->statistics_enabled_ = statistics_enabled;
+}
 
 SubscriptionInstance*
 DataReaderImpl::get_handle_instance (::DDS::InstanceHandle_t handle)

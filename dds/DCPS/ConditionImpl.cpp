@@ -5,12 +5,25 @@ namespace OpenDDS { namespace DCPS {
 
 void ConditionImpl::signal_all()
 {
+  if( DCPS_debug_level > 9) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) ConditionImpl::signal_all()\n")
+    ));
+  }
   if (!get_trigger_value()) return;
 
   WaitSetSet local_ws;
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, g, lock_);
     local_ws = waitsets_;
+  }
+  if( DCPS_debug_level > 9) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) ConditionImpl::signal_all() - ")
+      ACE_TEXT("number of sets: %d, locally: %d.\n"),
+      this->waitsets_.size(),
+      local_ws.size()
+    ));
   }
 
   for (WaitSetSet::iterator it = local_ws.begin(), end = local_ws.end();

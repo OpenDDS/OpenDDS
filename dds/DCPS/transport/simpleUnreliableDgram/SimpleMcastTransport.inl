@@ -18,7 +18,8 @@ OpenDDS::DCPS::SimpleMcastTransport::SimpleMcastTransport()
 ACE_INLINE void
 OpenDDS::DCPS::SimpleMcastTransport::deliver_sample
                                      (ReceivedDataSample&  sample,
-                                      const ACE_INET_Addr& remote_address)
+                                      const ACE_INET_Addr& remote_address,
+                                      CORBA::Long          priority)
 {
   DBG_ENTRY_LVL("SimpleMcastTransport","deliver_sample",6);
 
@@ -31,7 +32,8 @@ OpenDDS::DCPS::SimpleMcastTransport::deliver_sample
 
     // Override the remote_address passed in - we are always going to be
     // receiving on our multicast address!
-    if (this->links_.find(this->multicast_group_address_, link) != 0)
+    PriorityKey key( priority, this->multicast_group_address_);
+    if (this->links_.find( key, link) != 0)
       {
         ACE_ERROR((LM_ERROR,
                    "(%P|%t) ERROR: Unable to deliver received sample to DataLink.  "

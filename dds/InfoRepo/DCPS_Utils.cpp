@@ -242,6 +242,18 @@ compatibleQOS (const ::DDS::DataWriterQos * writerQos,
                                     ::DDS::DEADLINE_QOS_POLICY_ID);
   }
 
+  // Check the LATENCY_BUDGET
+  //   The reader's duration must be greater than or equal to the writer's
+  if (readerQos->latency_budget.duration < writerQos->latency_budget.duration)
+  {
+    compatible = false;
+
+    increment_incompatibility_count(writerStatus,
+                                    ::DDS::LATENCYBUDGET_QOS_POLICY_ID);
+    increment_incompatibility_count(readerStatus,
+                                    ::DDS::LATENCYBUDGET_QOS_POLICY_ID);
+  }
+
   return compatible;
 }
 
@@ -249,14 +261,20 @@ compatibleQOS (const ::DDS::DataWriterQos * writerQos,
 bool should_check_compatibility_upon_change (const ::DDS::DataReaderQos & qos1,
                                              const ::DDS::DataReaderQos & qos2)
 {
-  return ! (qos1.deadline == qos2.deadline);
+  return !(
+    (qos1.deadline == qos2.deadline) &&
+    (qos1.latency_budget == qos2.latency_budget)
+    );
 }
 
 
 bool should_check_compatibility_upon_change (const ::DDS::DataWriterQos & qos1,
                                              const ::DDS::DataWriterQos & qos2)
 {
-  return ! (qos1.deadline == qos2.deadline);
+  return !(
+    (qos1.deadline == qos2.deadline) &&
+    (qos1.latency_budget == qos2.latency_budget)
+    );
 }
 
 
@@ -290,14 +308,20 @@ bool should_check_compatibility_upon_change (const ::DDS::DomainParticipantQos &
 bool should_check_association_upon_change (const ::DDS::DataReaderQos & qos1,
                                            const ::DDS::DataReaderQos & qos2)
 {
-  return !(qos1.deadline == qos2.deadline);
+  return !(
+    (qos1.deadline == qos2.deadline) &&
+    (qos1.latency_budget == qos2.latency_budget)
+    );
 }
 
 
 bool should_check_association_upon_change (const ::DDS::DataWriterQos & qos1,
                                            const ::DDS::DataWriterQos & qos2)
 {
-  return !(qos1.deadline == qos2.deadline);
+  return !(
+    (qos1.deadline == qos2.deadline) &&
+    (qos1.latency_budget == qos2.latency_budget)
+    );
 }
 
 

@@ -17,6 +17,7 @@
 #include "ace/Service_Config.h"
 #include "ace/Argv_Type_Converter.h"
 #include "ace/Auto_Ptr.h"
+#include "ace/Sched_Params.h"
 
 #include <vector>
 #include <sstream>
@@ -85,6 +86,7 @@ namespace OpenDDS
       federation_initial_backoff_seconds_( DEFAULT_FEDERATION_INITIAL_BACKOFF_SECONDS),
       federation_backoff_multiplier_( DEFAULT_FEDERATION_BACKOFF_MULTIPLIER),
       federation_liveliness_( DEFAULT_FEDERATION_LIVELINESS),
+      scheduler_( -1),
       transient_data_cache_ (),
       persistent_data_cache_ (),
       persistent_data_dir_ (DEFAULT_PERSISTENT_DATA_DIR)
@@ -298,7 +300,17 @@ namespace OpenDDS
                             }
                         }
                     }
-               
+
+                  // Establish the default scheduling mechanism and
+                  // priority here.  Sadly, the ORB is already
+                  // initialized so we have no influence over its
+                  // scheduling or thread priority(ies).
+
+                  /// @TODO: Move ORB intitialization to after the
+                  ///        configuration file is processed and the
+                  ///        initial scheduling policy and priority are
+                  ///        established.
+                  this->initializeScheduling();
 
                   CORBA::Object_var poa_object =
                     orb_->resolve_initial_references("RootPOA");
@@ -580,6 +592,81 @@ namespace OpenDDS
       initial_SubscriberQos_.partition = initial_PartitionQosPolicy_;
       initial_SubscriberQos_.group_data = initial_GroupDataQosPolicy_;
       initial_SubscriberQos_.entity_factory = initial_EntityFactoryQosPolicy_;
+    }
+
+    void
+    Service_Participant::initializeScheduling()
+    {
+      //
+      // Establish the scheduler if specified.
+      //
+      if( this->schedulerString_.empty()) {
+        if( DCPS_debug_level > 0) {
+          ACE_DEBUG((LM_WARNING,
+            ACE_TEXT("(%P|%t) INFO: Service_Participant::intializeScheduling() - ")
+            ACE_TEXT("no scheduling policy specified, not setting policy.\n")
+          ));
+        }
+
+      } else {
+        //
+        // Translate the scheduling policy to a usable value.
+        //
+        int ace_scheduler = ACE_SCHED_OTHER;
+        this->scheduler_  = THR_SCHED_DEFAULT;
+
+        if( this->schedulerString_ == "SCHED_RR") {
+          this->scheduler_ = THR_SCHED_RR;
+          ace_scheduler    = ACE_SCHED_RR;
+
+        } else if( this->schedulerString_ == "SCHED_FIFO") {
+          this->scheduler_ = THR_SCHED_FIFO;
+          ace_scheduler    = ACE_SCHED_FIFO;
+
+        } else if( this->schedulerString_ == "SCHED_OTHER") {
+          this->scheduler_ = THR_SCHED_DEFAULT;
+          ace_scheduler    = ACE_SCHED_OTHER;
+
+        } else {
+          ACE_DEBUG((LM_WARNING,
+            ACE_TEXT("(%P|%t) WARNING: Service_Participant::initializeScheduling() - ")
+            ACE_TEXT("unrecognized scheduling policy: %s, set to SCHED_OTHER.\n"),
+            this->schedulerString_.c_str()
+          ));
+        }
+
+        //
+        // Attempt to set the scheduling policy.
+        //
+        ACE_Sched_Params params(
+                           ace_scheduler,
+                           ACE_Sched_Params::priority_min( ace_scheduler),
+                           ACE_SCOPE_PROCESS
+                         );
+        if( ACE_OS::sched_params( params) != 0) {
+          if( ACE_OS::last_error() == EPERM) {
+            ACE_DEBUG((LM_WARNING,
+              ACE_TEXT("(%P|%t) WARNING: Service_Participant::initializeScheduling() - ")
+              ACE_TEXT("user is not superuser, requested scheduler not set.\n")
+            ));
+
+          } else {
+            ACE_ERROR((LM_ERROR,
+              ACE_TEXT("(%P|%t) ERROR: Service_Participant::initializeScheduling() - ")
+              ACE_TEXT("sched_params failed: %m.\n")
+            ));
+          }
+          // Reset the thread scheduler value if we did not succeed.
+          this->scheduler_ = -1;
+
+        } else if( DCPS_debug_level > 0) {
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) Service_Participant::initializeScheduling() - ")
+            ACE_TEXT("scheduling policy set to %s(%d).\n"),
+            this->schedulerString_.c_str()
+          ));
+        }
+      }
     }
 
     void
@@ -1237,6 +1324,11 @@ namespace OpenDDS
           GET_CONFIG_VALUE (this->cf_, sect, ACE_TEXT("FederationInitialBackoffSeconds"), this->federation_initial_backoff_seconds_, int)
           GET_CONFIG_VALUE (this->cf_, sect, ACE_TEXT("FederationBackoffMultiplier"), this->federation_backoff_multiplier_, int)
           GET_CONFIG_VALUE (this->cf_, sect, ACE_TEXT("FederationLivelinessDuration"), this->federation_liveliness_, int)
+
+          //
+          // Establish the scheduler if specified.
+          //
+          GET_CONFIG_STRING_VALUE (this->cf_, sect, ACE_TEXT("scheduler"), this->schedulerString_)
         }
 
       return 0;

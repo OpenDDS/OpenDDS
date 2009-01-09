@@ -15,6 +15,13 @@ OpenDDS::DCPS::TransportImpl::TransportImpl()
   DBG_ENTRY_LVL("TransportImpl","TransportImpl",6);
 }
 
+ACE_INLINE
+OpenDDS::DCPS::TransportConfiguration*
+OpenDDS::DCPS::TransportImpl::config() const
+{
+  return this->config_.in();
+}
+
 ACE_INLINE int
 OpenDDS::DCPS::TransportImpl::configure(TransportConfiguration* config)
 {

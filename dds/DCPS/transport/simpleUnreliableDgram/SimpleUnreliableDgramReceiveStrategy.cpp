@@ -54,6 +54,8 @@ OpenDDS::DCPS::SimpleUnreliableDgramReceiveStrategy::deliver_sample
 {
   DBG_ENTRY_LVL("SimpleUnreliableDgramReceiveStrategy","deliver_sample",6);
 
-  this->transport_->deliver_sample(sample, remote_address);
+  // Receive side does not honor the TRANSPORT_PRIORITY policy, assume
+  // default 0 for reception.
+  this->transport_->deliver_sample(sample, remote_address, 0);
 }
 

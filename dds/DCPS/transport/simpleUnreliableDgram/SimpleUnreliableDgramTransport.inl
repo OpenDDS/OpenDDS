@@ -15,7 +15,8 @@ OpenDDS::DCPS::SimpleUnreliableDgramTransport::SimpleUnreliableDgramTransport()
 ACE_INLINE void
 OpenDDS::DCPS::SimpleUnreliableDgramTransport::deliver_sample
                                      (ReceivedDataSample&  sample,
-                                      const ACE_INET_Addr& remote_address)
+                                      const ACE_INET_Addr& remote_address,
+                                      CORBA::Long          /* priority */)
 {
   DBG_ENTRY_LVL("SimpleMcastTransport","deliver_sample",6);
 

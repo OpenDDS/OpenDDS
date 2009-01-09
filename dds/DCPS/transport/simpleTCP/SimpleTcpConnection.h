@@ -52,6 +52,7 @@ namespace OpenDDS
         /// identify ourselves to the remote side.
         int active_connect(const ACE_INET_Addr& remote_address,
                            const ACE_INET_Addr& local_address,
+                           CORBA::Long          priority,
                            SimpleTcpConfiguration_rch tcp_config);
 
         /// This will be called by the DataLink (that "owns" us) when
@@ -114,6 +115,10 @@ namespace OpenDDS
       bool tear_link ();
 
         void shutdown ();
+
+        /// Access TRANSPORT_PRIORITY.value policy value if set.
+        CORBA::Long& priority();
+        CORBA::Long  priority() const;
 
       private:
 
@@ -182,6 +187,9 @@ namespace OpenDDS
 
         /// Last time the connection is re-established.
         ACE_Time_Value last_reconnect_attempted_;
+
+        /// TRANSPORT_PRIORITY.value policy value.
+        CORBA::Long priority_;
 
         /// shutdown flag
         bool shutdown_;

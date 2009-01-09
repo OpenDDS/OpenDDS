@@ -29,7 +29,7 @@ void OpenDDS::DCPS::SimpleTcpConnectionReplaceTask::execute (SimpleTcpConnection
 {
   DBG_ENTRY_LVL("SimpleTcpConnectionReplaceTask","execute",6);
 
-  this->trans_->fresh_link (con->get_remote_address(), con);
+  this->trans_->fresh_link( con);
 }
 
 

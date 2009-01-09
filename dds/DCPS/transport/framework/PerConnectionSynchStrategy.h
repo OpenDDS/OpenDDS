@@ -20,8 +20,11 @@ namespace OpenDDS
         PerConnectionSynchStrategy();
         virtual ~PerConnectionSynchStrategy();
 
-        virtual ThreadSynch* create_synch_object
-                                     (ThreadSynchResource* synch_resource);
+        virtual ThreadSynch* create_synch_object(
+                               ThreadSynchResource* synch_resource,
+                               long                 priority,
+                               int                  scheduler
+                             );
     };
 
   } /* namespace DCPS */

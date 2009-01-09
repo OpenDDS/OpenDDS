@@ -135,6 +135,14 @@ Test::DataReaderListener::on_subscription_lost (
 }
 
 void
+Test::DataReaderListener::on_budget_exceeded (
+    DDS::DataReader_ptr,
+    const ::OpenDDS::DCPS::BudgetExceededStatus&)
+  throw (CORBA::SystemException)
+{
+}
+
+void
 Test::DataReaderListener::on_connection_deleted (DDS::DataReader_ptr)
   throw (CORBA::SystemException)
 {

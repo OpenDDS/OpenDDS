@@ -23,6 +23,7 @@ namespace OpenDDS
         virtual ~SimpleMcastSocket();
 
         virtual ACE_HANDLE get_handle() const;
+        virtual ACE_SOCK& socket();
 
         virtual int open_socket (ACE_INET_Addr& local_address,
                  const ACE_INET_Addr& multicast_group_address,

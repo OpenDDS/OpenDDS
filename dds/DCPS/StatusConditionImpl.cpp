@@ -7,6 +7,14 @@ namespace OpenDDS { namespace DCPS {
 CORBA::Boolean StatusConditionImpl::get_trigger_value()
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
+  if( DCPS_debug_level > 9) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) StatusConditionImpl::get_trigger_value() - ")
+      ACE_TEXT("mask==0x%x, changes==0x%x.\n"),
+      this->mask_,
+      this->parent_->get_status_changes()
+    ));
+  }
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, lock_, false);
   return (parent_->get_status_changes() & mask_) > 0;
 }

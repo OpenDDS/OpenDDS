@@ -169,5 +169,18 @@ throw (CORBA::SystemException)
   }
 }
 
+void
+FailoverListener::on_budget_exceeded (
+  DDS::DataReader_ptr /* reader */,
+  const ::OpenDDS::DCPS::BudgetExceededStatus& /* status */
+)
+throw (CORBA::SystemException)
+{
+  if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) FailoverListener::on_budget_exceeded\n")));
+  }
+}
+
 }} // End of namespace OpenDDS::DCPS
 

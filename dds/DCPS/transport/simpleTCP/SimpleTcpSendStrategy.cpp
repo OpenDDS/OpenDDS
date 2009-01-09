@@ -16,8 +16,9 @@ OpenDDS::DCPS::SimpleTcpSendStrategy::SimpleTcpSendStrategy
                                       SimpleTcpConfiguration* config,
                                       SimpleTcpConnection*    connection,
                                       SimpleTcpSynchResource* synch_resource,
-                                      TransportReactorTask* task)
-  : TransportSendStrategy(config, synch_resource)
+                                      TransportReactorTask*   task,
+                                      CORBA::Long             priority)
+  : TransportSendStrategy(config, synch_resource, priority)
 {
   DBG_ENTRY_LVL("SimpleTcpSendStrategy","SimpleTcpSendStrategy",6);
 

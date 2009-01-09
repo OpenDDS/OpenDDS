@@ -10,9 +10,10 @@
 ACE_INLINE
 OpenDDS::DCPS::ReliableMulticastTransportSendStrategy::ReliableMulticastTransportSendStrategy(
   OpenDDS::DCPS::ReliableMulticastTransportConfiguration& configuration,
-  OpenDDS::DCPS::ReliableMulticastThreadSynchResource* synch_resource
+  OpenDDS::DCPS::ReliableMulticastThreadSynchResource* synch_resource,
+  CORBA::Long priority
   )
-  : OpenDDS::DCPS::TransportSendStrategy(&configuration, synch_resource)
+  : OpenDDS::DCPS::TransportSendStrategy(&configuration, synch_resource, priority)
 {
 }
 

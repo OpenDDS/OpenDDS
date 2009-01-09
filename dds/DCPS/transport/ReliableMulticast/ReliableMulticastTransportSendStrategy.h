@@ -15,6 +15,8 @@
 #include "dds/DCPS/transport/framework/TransportSendStrategy.h"
 #include "ace/Auto_Ptr.h"
 
+class ACE_SOCK;
+
 namespace OpenDDS
 {
 
@@ -43,7 +45,8 @@ namespace OpenDDS
       // We do not own synch_resource!
       ReliableMulticastTransportSendStrategy(
         OpenDDS::DCPS::ReliableMulticastTransportConfiguration& configuration,
-        OpenDDS::DCPS::ReliableMulticastThreadSynchResource* synch_resource
+        OpenDDS::DCPS::ReliableMulticastThreadSynchResource* synch_resource,
+        CORBA::Long priority
         );
       virtual ~ReliableMulticastTransportSendStrategy();
 
@@ -55,6 +58,12 @@ namespace OpenDDS
         );
 
       void teardown();
+
+      /// Access the underlying socket.
+      /// N.B. This is valid only after being configure()ed.  If called
+      ///      prior, then a reference to an empty static ACE_SOCK_IO
+      ///      object will be returned.
+      ACE_SOCK& socket();
 
     protected:
       virtual void stop_i();
