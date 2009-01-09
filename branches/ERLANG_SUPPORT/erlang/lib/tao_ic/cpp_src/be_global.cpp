@@ -44,7 +44,7 @@ bool operator==(const char *s, const BE_Arg &arg)
 { 
   return s == arg.name();
 }
-}
+} // namespace
 
 BE_GlobalData *be_global = 0;
 
@@ -118,7 +118,7 @@ BE_GlobalData::prep_be_arg(char *arg_)
     this->stub_export_macro_ = arg.value();
 
   } else {
-    ACE_DEBUG((LM_WARNING,
+    ACE_ERROR((LM_WARNING,
                ACE_TEXT("%N:%l: prep_be_arg()")
                ACE_TEXT(" ignoring unknown argument: %s\n"),
                ACE_TEXT(arg.name().c_str())));
@@ -133,38 +133,38 @@ BE_GlobalData::arg_post_proc()
 void
 BE_GlobalData::usage() const
 {
-  ACE_DEBUG((LM_DEBUG,
+  ACE_ERROR((LM_INFO,
              ACE_TEXT(" -o <output_dir>\tOutput directory for the generated")
              ACE_TEXT(" files. Default is current directory\n")));
 
-  ACE_DEBUG((LM_DEBUG,
+  ACE_ERROR((LM_INFO,
              ACE_TEXT(" -otp\t\t\tOutput directory uses the OTP layout.")
              ACE_TEXT(" Generated files will be created in src, include, and")
              ACE_TEXT(" cpp_src under <output_dir>\n")));
 
-  ACE_DEBUG((LM_DEBUG,
+  ACE_ERROR((LM_INFO,
              ACE_TEXT(" -Wb,port_driver_name=<driver_name>\t\tsets port")
              ACE_TEXT(" driver name used to load the native runtime")
              ACE_TEXT(" (default is %s)\n"),
              ACE_TEXT(DEFAULT_PORT_DRIVER_NAME)));
 
-  ACE_DEBUG((LM_DEBUG,
+  ACE_ERROR((LM_INFO,
              ACE_TEXT(" -Wb,skel_export_macro=<macro name>\t\tsets export")
              ACE_TEXT(" macro for server files only\n")));
 
-  ACE_DEBUG((LM_DEBUG,
+  ACE_ERROR((LM_INFO,
              ACE_TEXT(" -Wb,skel_export_include=<include path>\t\tsets")
              ACE_TEXT(" export include file for server only\n")));
 
-  ACE_DEBUG((LM_DEBUG,
+  ACE_ERROR((LM_INFO,
              ACE_TEXT(" -Wb,stub_export_macro=<macro name>\t\tsets export")
              ACE_TEXT(" macro for client files only\n")));
 
-  ACE_DEBUG((LM_DEBUG,
+  ACE_ERROR((LM_INFO,
              ACE_TEXT(" -Wb,stub_export_include=<include path>\t\tsets")
              ACE_TEXT(" export include file for client only\n")));
 
-  ACE_DEBUG((LM_DEBUG,
+  ACE_ERROR((LM_INFO,
              ACE_TEXT(" -SS\t\t\tsuppress generating skeleton implementation")
              ACE_TEXT(" and inline file (disabled by default)\n")));
 }

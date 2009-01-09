@@ -2,6 +2,8 @@
  * $Id$
  */
 
+#include "ace/Log_Msg.h"
+
 #include "ace_compat.h"
 #include "be_visitor.h"
 
@@ -14,16 +16,19 @@ be_visitor::~be_visitor()
 }
 
 int
-be_visitor::visit_decl(AST_Decl *node)
+be_visitor::visit_root(AST_Root *node)
 {
+  if (this->visit_scope(node) != 0) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("%N:%l: visit_root()")
+                      ACE_TEXT(" visit_scope failed!\n")), -1);
+  }
   return 0;
 }
 
 int
 be_visitor::visit_scope(UTL_Scope *node)
 {
-  int error = 0;
-  
   UTL_ScopeActiveIterator it (node, UTL_Scope::IK_decls);
   while (!it.is_done()) {
     AST_Decl *item = it.item();
@@ -46,103 +51,22 @@ be_visitor::visit_scope(UTL_Scope *node)
 }
 
 int
-be_visitor::visit_type(AST_Type *node)
-{
-  return 0;
-}
-
-int
-be_visitor::visit_predefined_type(AST_PredefinedType *node)
-{
-  return 0;
-}
-int
 be_visitor::visit_module(AST_Module *node)
 {
+  if (this->visit_scope(node) != 0) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("%N:%l: visit_module()")
+                      ACE_TEXT(" visit_scope failed!\n")), -1);
+  }
   return 0;
 }
 
 int
-be_visitor::visit_interface(AST_Interface *node)
+be_visitor::visit_constant(AST_Constant *node)
 {
-  return 0;
-}
 
-int
-be_visitor::visit_interface_fwd(AST_InterfaceFwd *node)
-{
-  return 0;
-}
 
-int
-be_visitor::visit_valuetype(AST_ValueType *node)
-{
-  return 0;
-}
 
-int
-be_visitor::visit_valuetype_fwd(AST_ValueTypeFwd *node)
-{
-  return 0;
-}
-
-int
-be_visitor::visit_component(AST_Component *node)
-{
-  return 0;
-}
-
-int
-be_visitor::visit_component_fwd(AST_ComponentFwd *node)
-{
-  return 0;
-}
-
-int
-be_visitor::visit_home(AST_Home *node)
-{
-  return 0;
-}
-
-int
-be_visitor::visit_eventtype(AST_EventType *node)
-{
-  return 0;
-}
-
-int
-be_visitor::visit_eventtype_fwd(AST_EventTypeFwd *node)
-{
-  return 0;
-}
-
-int
-be_visitor::visit_factory(AST_Factory *node)
-{
-  return 0;
-}
-
-int
-be_visitor::visit_structure(AST_Structure *node)
-{
-  return 0;
-}
-
-int
-be_visitor::visit_structure_fwd(AST_StructureFwd *node)
-{
-  return 0;
-}
-
-int
-be_visitor::visit_exception(AST_Exception *node)
-{
-  return 0;
-}
-
-int
-be_visitor::visit_expression(AST_Expression *node)
-{
   return 0;
 }
 
@@ -159,28 +83,23 @@ be_visitor::visit_enum_val(AST_EnumVal *node)
 }
 
 int
-be_visitor::visit_operation(AST_Operation *node)
+be_visitor::visit_exception(AST_Exception *node)
 {
   return 0;
 }
 
 int
-be_visitor::visit_field(AST_Field *node)
+be_visitor::visit_structure(AST_Structure *node)
 {
   return 0;
 }
 
 int
-be_visitor::visit_argument(AST_Argument *node)
+be_visitor::visit_structure_fwd(AST_StructureFwd *node)
 {
   return 0;
 }
 
-int
-be_visitor::visit_attribute(AST_Attribute *node)
-{
-  return 0;
-}
 
 int
 be_visitor::visit_union(AST_Union *node)
@@ -207,25 +126,7 @@ be_visitor::visit_union_label(AST_UnionLabel *node)
 }
 
 int
-be_visitor::visit_constant(AST_Constant *node)
-{
-  return 0;
-}
-
-int
-be_visitor::visit_array(AST_Array *node)
-{
-  return 0;
-}
-
-int
-be_visitor::visit_sequence(AST_Sequence *node)
-{
-  return 0;
-}
-
-int
-be_visitor::visit_string(AST_String *node)
+be_visitor::visit_native(AST_Native *node)
 {
   return 0;
 }
@@ -237,26 +138,135 @@ be_visitor::visit_typedef(AST_Typedef *node)
 }
 
 int
-be_visitor::visit_root(AST_Root *node)
+be_visitor::visit_interface(AST_Interface *node)
 {
-  if (this->visit_scope(node) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("%N:%l: visit_root()")
-                      ACE_TEXT(" visit_scope failed!\n")), -1);
-  }
   return 0;
 }
 
 int
-be_visitor::visit_native(AST_Native *node)
+be_visitor::visit_interface_fwd(AST_InterfaceFwd *node)
 {
   return 0;
+}
+
+int
+be_visitor::visit_type(AST_Type *)
+{
+  return 0; // not implemented
+}
+
+int
+be_visitor::visit_predefined_type(AST_PredefinedType *)
+{
+  return 0; // not implemented
+}
+
+int
+be_visitor::visit_valuetype(AST_ValueType *)
+{
+  return 0; // not implemented
+}
+
+int
+be_visitor::visit_valuetype_fwd(AST_ValueTypeFwd *)
+{
+  return 0; // not implemented
+}
+
+int
+be_visitor::visit_component(AST_Component *)
+{
+  return 0; // not implemented
+}
+
+int
+be_visitor::visit_component_fwd(AST_ComponentFwd *)
+{
+  return 0; // not implemented
+}
+
+int
+be_visitor::visit_home(AST_Home *)
+{
+  return 0; // not implemented
+}
+
+int
+be_visitor::visit_eventtype(AST_EventType *)
+{
+  return 0; // not implemented
+}
+
+int
+be_visitor::visit_eventtype_fwd(AST_EventTypeFwd *)
+{
+  return 0; // not implemented
+}
+
+int
+be_visitor::visit_factory(AST_Factory *)
+{
+  return 0; // not implemented
+}
+
+int
+be_visitor::visit_expression(AST_Expression *)
+{
+  return 0; // not implemented
+}
+
+int
+be_visitor::visit_operation(AST_Operation *)
+{
+  return 0; // not implemented
+}
+
+int
+be_visitor::visit_field(AST_Field *)
+{
+  return 0; // not implemented
+}
+
+int
+be_visitor::visit_argument(AST_Argument *)
+{
+  return 0; // not implemented
+}
+
+int
+be_visitor::visit_attribute(AST_Attribute *)
+{
+  return 0; // not implemented
+}
+
+int
+be_visitor::visit_sequence(AST_Sequence *)
+{
+  return 0; // not implemented
+}
+
+int
+be_visitor::visit_array(AST_Array *)
+{
+  return 0; // not implemented
+}
+
+int
+be_visitor::visit_string(AST_String *)
+{
+  return 0; // not implemented
+}
+
+int
+be_visitor::visit_decl(AST_Decl *)
+{
+  return 0; // not implemented
 }
 
 #ifndef ACE_PRE_5_5
 int
-be_visitor::visit_valuebox(AST_ValueBox *node)
+be_visitor::visit_valuebox(AST_ValueBox *)
 {
-  return 0;
+  return 0; // not implemented
 }
 #endif /* ACE_PRE_5_5 */
