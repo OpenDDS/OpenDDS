@@ -87,6 +87,8 @@ namespace OpenDDS
       federation_backoff_multiplier_( DEFAULT_FEDERATION_BACKOFF_MULTIPLIER),
       federation_liveliness_( DEFAULT_FEDERATION_LIVELINESS),
       scheduler_( -1),
+      priority_min_( 0),
+      priority_max_( 0),
       transient_data_cache_ (),
       persistent_data_cache_ (),
       persistent_data_dir_ (DEFAULT_PERSISTENT_DATA_DIR)
@@ -656,8 +658,9 @@ namespace OpenDDS
               ACE_TEXT("sched_params failed: %m.\n")
             ));
           }
-          // Reset the thread scheduler value if we did not succeed.
+          // Reset the scheduler value(s) if we did not succeed.
           this->scheduler_ = -1;
+          ace_scheduler    = ACE_SCHED_OTHER;
 
         } else if( DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
@@ -666,6 +669,12 @@ namespace OpenDDS
             this->schedulerString_.c_str()
           ));
         }
+
+        //
+        // Setup some scheduler specific information for later use.
+        //
+        this->priority_min_ = ACE_Sched_Params::priority_min( ace_scheduler, ACE_SCOPE_PROCESS);
+        this->priority_max_ = ACE_Sched_Params::priority_max( ace_scheduler, ACE_SCOPE_PROCESS);
       }
     }
 

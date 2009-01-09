@@ -251,6 +251,12 @@ namespace OpenDDS
       int  scheduler() const;
       //@}
 
+      /// Accessors for priority extremums for the current scheduler.
+      //@{
+      int priority_min() const;
+      int priority_max() const;
+      //@}
+
       /**
        * Accessors for @c bit_transport_port_.
        *
@@ -466,6 +472,12 @@ namespace OpenDDS
 
       /// Scheduling policy value used for setting thread priorities.
       int scheduler_;
+
+      /// Minimum priority value for the current scheduling policy.
+      int priority_min_;
+
+      /// Maximum priority value for the current scheduling policy.
+      int priority_max_;
 
       /// The @c TRANSIENT data durability cache.
       std::auto_ptr<DataDurabilityCache> transient_data_cache_;

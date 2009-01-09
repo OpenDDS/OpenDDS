@@ -1,10 +1,41 @@
+Fri Jan  9 17:08:42 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/DataReaderListener.h:
+
+	  Removed unnecessary inclusion of the extended Subscription
+	  header.
+
+        * dds/DdsDcpsSubscriptionExt.idl:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/Stats_T.h:
+
+	  Changed LatencyStatistics max and min members to be maximum and
+	  minumum.  Changed Stats::max() and Stats::min() to be maximum()
+	  and minimum().
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/Service_Participant.cpp:
+
+	  Derive the scheduler specific maximum and minimum thread
+	  priority values at the time the scheduler is setup.   Make
+	  these values available.
+
+        * dds/DCPS/transport/framework/DirectPriorityMapper.h:
+        * dds/DCPS/transport/framework/DirectPriorityMapper.cpp:
+
+	  Modified to use priority maximum and minumum values dervived in
+	  the Service_Participant when the scheduler is setup.
+	  Simplified derivation of the DSCP mapped value.
+
+
 Fri Jan  9 02:33:13 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
-	  Merged the Priority/Latency branch back onto the trunk.
-	  This feature branch implemented the TRANSPORT_PRIORITY and
-	  LATENCY_BUDGET Quality of service policies.  Additional
-	  details of the development can be found in the file
-	  'ChangeLog-RT12625_priority_latency'.
+          Merged the Priority/Latency branch back onto the trunk.
+          This feature branch implemented the TRANSPORT_PRIORITY and
+          LATENCY_BUDGET Quality of service policies.  Additional
+          details of the development can be found in the file
+          'ChangeLog-RT12625_priority_latency'.
 
         * DDS_release_notes.txt:
         * DevGuideExamples/DCPS/Messenger/DataReaderListener.h:

@@ -4,21 +4,15 @@
 
 #include "DCPS/DdsDcps_pch.h"
 #include "DCPS/debug.h"
-#include "ace/Log_Msg.h"
+#include "dds/DCPS/Service_Participant.h"
 
 #include "DirectPriorityMapper.h"
+
+#include <algorithm> // For std::min() and std::max()
 
 #if !defined (__ACE_INLINE__)
 #include "DirectPriorityMapper.inl"
 #endif /* __ACE_INLINE__ */
-
-// NOTE: This might make a call to sched_get_priority_min(SCHED_RR) if appropriate.
-const short
-OpenDDS::DCPS::DirectPriorityMapper::thread_min_ = ACE_THR_PRI_RR_MIN;
-
-// NOTE: This might make a call to sched_get_priority_max(SCHED_RR) if appropriate.
-const short
-OpenDDS::DCPS::DirectPriorityMapper::thread_max_ = ACE_THR_PRI_RR_MAX;
 
 OpenDDS::DCPS::DirectPriorityMapper::~DirectPriorityMapper()
 {
@@ -27,20 +21,13 @@ OpenDDS::DCPS::DirectPriorityMapper::~DirectPriorityMapper()
 short
 OpenDDS::DCPS::DirectPriorityMapper::codepoint() const
 {
-  short value;
+  static const CORBA::Long dscp_min = 0;
+  static const CORBA::Long dscp_max = 63;
 
   // We know that the DiffServ codepoints range from a low number to a
   // high number, with the high number being a higher priority - which
   // is the ordering that the TRANSPORT_PRIORIY value has.
-  if( this->priority() > this->dscp_max_) {
-    value = this->dscp_max_;
-  }
-
-  if( this->priority() < this->dscp_min_) {
-    value = this->dscp_min_;
-  }
-
-  value = this->priority();
+  short value = std::min( dscp_max, std::max( dscp_min, this->priority()));
 
   if( OpenDDS::DCPS::DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
@@ -57,17 +44,19 @@ OpenDDS::DCPS::DirectPriorityMapper::codepoint() const
 short
 OpenDDS::DCPS::DirectPriorityMapper::thread_priority() const
 {
-  static const int direction = (this->thread_max_ < this->thread_min_)? -1: 1;
-  static const int range = direction * (this->thread_max_ - this->thread_min_);
+  static const int thread_min = TheServiceParticipant->priority_min();
+  static const int thread_max = TheServiceParticipant->priority_max();
+  static const int direction  = (thread_max < thread_min)? -1: 1;
+  static const int range      = direction * (thread_max - thread_min);
 
-  short value = this->thread_min_ + direction * this->priority();
+  short value = thread_min + direction * this->priority();
 
   if( this->priority() < 0) {
-    value = this->thread_min_;
+    value = thread_min;
   }
 
   if( this->priority() > range) {
-    value = this->thread_max_;
+    value = thread_max;
   }
 
   if( OpenDDS::DCPS::DCPS_debug_level > 4) {

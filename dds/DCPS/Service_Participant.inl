@@ -285,5 +285,19 @@ namespace OpenDDS
       return this->scheduler_;
     }
 
+    ACE_INLINE
+    int
+    Service_Participant::priority_min() const
+    {
+      return this->priority_min_;
+    }
+
+    ACE_INLINE
+    int
+    Service_Participant::priority_max() const
+    {
+      return this->priority_max_;
+    }
+
   } // namespace ::DDS
 } // namespace OpenDDS

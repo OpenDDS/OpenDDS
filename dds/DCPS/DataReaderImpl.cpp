@@ -1538,8 +1538,8 @@ OpenDDS::DCPS::LatencyStatistics OpenDDS::DCPS::WriterInfo::get_stats() const
   }
 
   value.n        = this->stats_.n();
-  value.max      = this->stats_.max();
-  value.min      = this->stats_.min();
+  value.maximum  = this->stats_.maximum();
+  value.minimum  = this->stats_.minimum();
   value.mean     = this->stats_.mean();
   value.variance = this->stats_.var();
   return value;
