@@ -1,32 +1,57 @@
+Fri Jan  9 21:22:52 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+	  Explicitly cast a time_t value to a double to avoid compiler
+	  complaints.
+
+        * dds/DCPS/Service_Participant.cpp:
+
+	  Elide use of String_Base::empty() since it is not present in
+	  1.4a, which is a supported version.
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.cpp:
+
+	  Renamed priority() method to avoid hiding the base class
+	  Event_Handler::priority() method.
+
+        * tests/DCPS/LatencyBudget/DataReaderListener.cpp:
+
+	  Modified to use renamed maximum and minimum LatencyStatistics fields.
+
 Fri Jan  9 17:08:42 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/DataReaderListener.h:
 
-	  Removed unnecessary inclusion of the extended Subscription
-	  header.
+          Removed unnecessary inclusion of the extended Subscription
+          header.
 
         * dds/DdsDcpsSubscriptionExt.idl:
         * dds/DCPS/DataReaderImpl.cpp:
         * dds/DCPS/Stats_T.h:
 
-	  Changed LatencyStatistics max and min members to be maximum and
-	  minumum.  Changed Stats::max() and Stats::min() to be maximum()
-	  and minimum().
+          Changed LatencyStatistics max and min members to be maximum and
+          minumum.  Changed Stats::max() and Stats::min() to be maximum()
+          and minimum().
 
         * dds/DCPS/Service_Participant.h:
         * dds/DCPS/Service_Participant.inl:
         * dds/DCPS/Service_Participant.cpp:
 
-	  Derive the scheduler specific maximum and minimum thread
-	  priority values at the time the scheduler is setup.   Make
-	  these values available.
+          Derive the scheduler specific maximum and minimum thread
+          priority values at the time the scheduler is setup.   Make
+          these values available.
 
         * dds/DCPS/transport/framework/DirectPriorityMapper.h:
         * dds/DCPS/transport/framework/DirectPriorityMapper.cpp:
 
-	  Modified to use priority maximum and minumum values dervived in
-	  the Service_Participant when the scheduler is setup.
-	  Simplified derivation of the DSCP mapped value.
+          Modified to use priority maximum and minumum values dervived in
+          the Service_Participant when the scheduler is setup.
+          Simplified derivation of the DSCP mapped value.
 
 
 Fri Jan  9 02:33:13 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>

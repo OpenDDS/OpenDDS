@@ -30,7 +30,7 @@
 /// Only called by our TransportImpl object.
 OpenDDS::DCPS::DataLink::DataLink(TransportImpl* impl, CORBA::Long priority)
   : thr_per_con_send_task_ (0),
-    priority_( priority)
+    transport_priority_( priority)
 {
   DBG_ENTRY_LVL("DataLink","DataLink",6);
 
@@ -1072,8 +1072,10 @@ OpenDDS::DCPS::DataLink::set_dscp_codepoint( int cp, ACE_SOCK& socket)
   const char* which = "IPV4 TOS";
 #if defined (ACE_HAS_IPV6)
   ACE_INET_Addr local_address;
-  if( socket.get_local_addr( local_address) == -1)
-  else if( local_address.get_type() == AF_INET6)
+  if( socket.get_local_addr( local_address) == -1) {
+    return -1;
+
+  } else if( local_address.get_type() == AF_INET6)
 #if !defined (IPV6_TCLASS)
   {
     if( DCPS_debug_level > 0) {

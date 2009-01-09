@@ -144,8 +144,8 @@ void DataReaderListenerImpl::on_budget_exceeded (
   {
     cout << "stats[" << i << "]:" << endl;
     cout << "         n = " << stats[i].n << endl;
-    cout << "       max = " << stats[i].max << endl;
-    cout << "       min = " << stats[i].min << endl;
+    cout << "       max = " << stats[i].maximum << endl;
+    cout << "       min = " << stats[i].minimum << endl;
     cout << "      mean = " << stats[i].mean << endl;
     cout << "  variance = " << stats[i].variance << endl;
   }

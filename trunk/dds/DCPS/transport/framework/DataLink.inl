@@ -9,16 +9,16 @@
 
 ACE_INLINE
 CORBA::Long&
-OpenDDS::DCPS::DataLink::priority()
+OpenDDS::DCPS::DataLink::transport_priority()
 {
-  return this->priority_;
+  return this->transport_priority_;
 }
 
 ACE_INLINE
 CORBA::Long
-OpenDDS::DCPS::DataLink::priority() const
+OpenDDS::DCPS::DataLink::transport_priority() const
 {
-  return this->priority_;
+  return this->transport_priority_;
 }
 
 ACE_INLINE void
