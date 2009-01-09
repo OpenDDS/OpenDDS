@@ -10,9 +10,9 @@
 class generator_erl : public generator {
 public:
   generator_erl(void);
-  virtual ~generator_erl(void);
+  ~generator_erl(void);
 
-  virtual void generate_constant(AST_Constant *);
+  int generate_constant(AST_Constant *);
 };
 
 #endif /* TAO_IC_GENERATOR_ERL_H */

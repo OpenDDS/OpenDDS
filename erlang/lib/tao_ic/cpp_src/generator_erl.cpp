@@ -12,7 +12,8 @@ generator_erl::~generator_erl()
 {
 }
 
-void
+int
 generator_erl::generate_constant(AST_Constant *node)
 {
+  return 0;
 }

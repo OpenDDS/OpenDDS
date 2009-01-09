@@ -11,19 +11,35 @@
 
 class generator {
 public:
-  virtual ~generator(void) {}
+  virtual ~generator(void) {};
 
-  virtual void generate_constant(AST_Constant *) = 0;
+  virtual int generate_constant(AST_Constant *) = 0;
 };
 
-class generator_set : std::vector<class generator> {
+class generator_composite : public generator {
 public:
-  generator_set(void);
-  ~generator_set(void);
+  typedef std::vector<generator *>::iterator iterator;
+  typedef std::vector<generator *>::const_iterator const_iterator;
 
-  void add(const generator &);
+  generator_composite(bool);
+  ~generator_composite(void);
 
-  void generate_constant(AST_Constant *);
+  void add(generator *);
+
+  void delete_all(void);
+
+  iterator begin(void);
+  const_iterator begin(void) const;
+
+  iterator end(void);
+  const_iterator end(void) const;
+
+  // composite operations
+  int generate_constant(AST_Constant *);
+
+private:
+  bool auto_delete_;
+  std::vector<generator *> generators_;
 };
 
 #endif /* TAO_IC_GENERATOR_H */

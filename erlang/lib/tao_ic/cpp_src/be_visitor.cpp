@@ -6,9 +6,15 @@
 
 #include "ace_compat.h"
 #include "be_visitor.h"
+#include "generator.h"
+#include "generator_cpp.h"
+#include "generator_erl.h"
 
 be_visitor::be_visitor()
+  : generator_(true)
 {
+  generator_.add(new generator_cpp);
+  generator_.add(new generator_erl);
 }
 
 be_visitor::~be_visitor()
@@ -64,10 +70,7 @@ be_visitor::visit_module(AST_Module *node)
 int
 be_visitor::visit_constant(AST_Constant *node)
 {
-
-
-
-  return 0;
+  return this->generator_.generate_constant(node);
 }
 
 int
