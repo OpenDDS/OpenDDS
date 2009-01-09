@@ -33,7 +33,13 @@ OpenDDS::DCPS::PerConnectionSynch::open(void*)
   // Activate this object to start a new thread that will call
   // our svc() method, and then our close() method.
   this->shutdown_ = 0;
-  return this->activate(THR_NEW_LWP | THR_JOINABLE, 1);
+
+  long flags;
+  flags  = THR_NEW_LWP | THR_JOINABLE ;//|THR_SCOPE_PROCESS | THR_SCOPE_THREAD;
+  if( this->scheduler_ >= 0) {
+    flags |= this->scheduler_;
+  }
+  return this->activate( flags, 1, 0, this->priority_);
 }
 
 

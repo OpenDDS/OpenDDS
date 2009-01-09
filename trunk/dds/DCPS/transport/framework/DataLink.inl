@@ -7,6 +7,19 @@
 #include "ThreadPerConnectionSendTask.h"
 #include "EntryExit.h"
 
+ACE_INLINE
+CORBA::Long&
+OpenDDS::DCPS::DataLink::priority()
+{
+  return this->priority_;
+}
+
+ACE_INLINE
+CORBA::Long
+OpenDDS::DCPS::DataLink::priority() const
+{
+  return this->priority_;
+}
 
 ACE_INLINE void
 OpenDDS::DCPS::DataLink::send_start()

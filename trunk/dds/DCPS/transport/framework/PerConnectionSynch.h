@@ -20,7 +20,7 @@ namespace OpenDDS
     {
       public:
 
-        PerConnectionSynch(ThreadSynchResource* synch_resource);
+        PerConnectionSynch(ThreadSynchResource* synch_resource, long priority, int scheduler);
         virtual ~PerConnectionSynch();
 
         virtual void work_available();
@@ -46,6 +46,8 @@ namespace OpenDDS
         ConditionType condition_;
         int           work_available_;
         int           shutdown_;
+        long          priority_;
+        int           scheduler_;
     };
 
   } /* namespace DCPS */

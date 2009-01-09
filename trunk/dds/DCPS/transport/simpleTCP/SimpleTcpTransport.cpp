@@ -55,7 +55,8 @@ OpenDDS::DCPS::SimpleTcpTransport::~SimpleTcpTransport()
 OpenDDS::DCPS::DataLink*
 OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink
 (const TransportInterfaceInfo& remote_info,
- int                           connect_as_publisher)
+ int                           connect_as_publisher,
+ CORBA::Long                   priority)
 {
   DBG_ENTRY_LVL("SimpleTcpTransport","find_or_create_datalink",6);
 
@@ -88,7 +89,7 @@ OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink
     // First, we have to try to find an existing (connected) DataLink
     // that suits the caller's needs.
 
-    if (this->links_.find(remote_address,link) == 0)
+    if (this->links_.find( PriorityKey( priority, remote_address), link) == 0)
       {
 	SimpleTcpConnection_rch con = link->get_connection ();
 	if (con->is_connector () && ! con->is_connected ())
@@ -130,7 +131,7 @@ OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink
     GuardType guard(this->links_lock_);
 
     // Attempt to bind the SimpleTcpDataLink to our links_ map.
-    if (this->links_.bind(remote_address,link) != 0)
+    if (this->links_.bind( PriorityKey( priority, remote_address), link) != 0)
       {
 	// We failed to bind the new DataLink into our links_ map.
 	// On error, we return a NULL pointer.
@@ -174,7 +175,7 @@ OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink
       // return code from the unbind() call since we know that we just
       // did the bind() moments ago - and with the links_lock_ acquired
       // the whole time.
-      this->links_.unbind(remote_address);
+      this->links_.unbind( PriorityKey( priority, remote_address));
 
       // On error, return a NULL pointer.
       return 0;
@@ -414,15 +415,16 @@ OpenDDS::DCPS::SimpleTcpTransport::release_datalink_i(DataLink* link)
       return;
     }
 
-  // Get the remote address from the SimpleTcpDataLink to be used as a key.
-  ACE_INET_Addr remote_address = tcp_link->remote_address();
-
   SimpleTcpDataLink_rch released_link;
 
   GuardType guard(this->links_lock_);
 
   // Attempt to remove the SimpleTcpDataLink from our links_ map.
-  if (this->links_.unbind(remote_address, released_link) != 0)
+  PriorityKey key(
+                tcp_link->get_connection()->priority(),
+                tcp_link->remote_address()
+              );
+  if (this->links_.unbind( key, released_link) != 0)
     {
       ACE_ERROR((LM_ERROR,
                  "(%P|%t) ERROR: Unable to locate DataLink in order to "
@@ -496,6 +498,7 @@ OpenDDS::DCPS::SimpleTcpTransport::make_active_connection
   // Ask the connection object to attempt the active connection establishment.
   if (connection->active_connect (remote_address,
                                   this->tcp_config_->local_address_,
+                                  link->priority(),
                                   this->tcp_config_) != 0)
     {
       return -1;
@@ -573,13 +576,18 @@ OpenDDS::DCPS::SimpleTcpTransport::connect_datalink
 {
   DBG_ENTRY_LVL("SimpleTcpTransport","connect_datalink",6);
 
-  TransportSendStrategy_rch send_strategy =
-    new SimpleTcpSendStrategy(link,
-			      this->tcp_config_.in(),
-			      connection,
-			      new SimpleTcpSynchResource(connection,
-							 this->tcp_config_->max_output_pause_period_),
-            this->reactor_task_.in());
+  TransportSendStrategy_rch send_strategy
+    = new SimpleTcpSendStrategy(
+            link,
+            this->tcp_config_.in(),
+            connection,
+            new SimpleTcpSynchResource(
+                  connection,
+                  this->tcp_config_->max_output_pause_period_
+            ),
+            this->reactor_task_.in(),
+            link->priority()
+          );
 
   TransportReceiveStrategy_rch receive_strategy =
     new SimpleTcpReceiveStrategy(link,
@@ -601,15 +609,15 @@ OpenDDS::DCPS::SimpleTcpTransport::connect_datalink
 /// accepted connection is the re-established connection. If it is, then the "old" connection
 /// object in the datalink is replaced by the "new" connection object.
 int
-OpenDDS::DCPS::SimpleTcpTransport::fresh_link (const ACE_INET_Addr&    remote_address,
-                                           SimpleTcpConnection_rch connection)
+OpenDDS::DCPS::SimpleTcpTransport::fresh_link( SimpleTcpConnection_rch connection)
 {
   DBG_ENTRY_LVL("SimpleTcpTransport","fresh_link",6);
 
   SimpleTcpDataLink_rch link;
   GuardType guard(this->links_lock_);
 
-  if (this->links_.find(remote_address,link) == 0)
+  PriorityKey key( connection->priority(), connection->get_remote_address());
+  if (this->links_.find( key, link) == 0)
     {
       SimpleTcpConnection_rch old_con = link->get_connection ();
 

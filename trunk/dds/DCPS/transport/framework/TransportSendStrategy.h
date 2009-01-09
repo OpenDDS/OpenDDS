@@ -124,7 +124,8 @@ namespace OpenDDS
       protected:
 
         TransportSendStrategy(TransportConfiguration* config,
-                              ThreadSynchResource*    synch_resource);
+                              ThreadSynchResource*    synch_resource,
+                              CORBA::Long             priority);
 
         // Only our subclass knows how to do this.
         // Third arg is the "back-pressure" flag.  If send_bytes() returns

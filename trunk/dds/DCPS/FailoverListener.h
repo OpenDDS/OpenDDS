@@ -4,7 +4,7 @@
 #ifndef FAILOVERLISTENER_T_H
 #define FAILOVERLISTENER_T_H
 
-#include "dds/DCPS/SubscriberImpl.h"
+#include "dds/DdsDcpsSubscriptionExtC.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -84,6 +84,12 @@ class FailoverListener
 
     virtual void on_connection_deleted (
       DDS::DataReader_ptr reader)
+    throw (CORBA::SystemException);
+
+    virtual void on_budget_exceeded (
+      DDS::DataReader_ptr reader,
+      const ::OpenDDS::DCPS::BudgetExceededStatus& status
+    )
     throw (CORBA::SystemException);
 
   private:

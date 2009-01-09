@@ -2,7 +2,6 @@
 //
 // $Id$
 
-
 ACE_INLINE
 ::DDS::DataReader_ptr
 OpenDDS::DCPS::DataReaderImpl::get_dr_obj_ref() {

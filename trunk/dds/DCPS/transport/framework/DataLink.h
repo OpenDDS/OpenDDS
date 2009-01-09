@@ -20,6 +20,7 @@
 #include "ace/Synch.h"
 #include "ace/Event_Handler.h"
 
+class ACE_SOCK;
 
 namespace OpenDDS
 {
@@ -59,8 +60,10 @@ namespace OpenDDS
 
         /// A DataLink object is always created by a TransportImpl object.
         /// Thus, the TransportImpl object passed-in here is the object that
-        /// created this DataLink.
-        DataLink(TransportImpl* impl);
+        /// created this DataLink.  The ability to specifiy a priority
+        /// for individual links is included for construction so its
+        /// value can be available for activating any threads.
+        DataLink(TransportImpl* impl, CORBA::Long priority = 0);
         virtual ~DataLink();
 
         /// The resume_send is used in the case of reconnection
@@ -182,6 +185,17 @@ namespace OpenDDS
         int handle_timeout (const ACE_Time_Value &tv,
                             const void * arg = 0);
 
+        // Set the DiffServ codepoint of the socket.  This is a stateless
+        // method and is here only because this is a convenient common
+        // location that can be reached by client code that needs to
+        // perform this behavior.
+        void set_dscp_codepoint( int cp, ACE_SOCK& socket);
+
+        /// Accessors for the TRANSPORT_PRIORITY value associated with
+        /// this link.
+        CORBA::Long& priority();
+        CORBA::Long  priority() const;
+
        protected:
 
         /// This is how the subclass "announces" to this DataLink base class
@@ -293,6 +307,9 @@ namespace OpenDDS
         // snapshot of associations when the release_resource() is called.
         ReceiveListenerSetMap pub_map_releasing_;
         RepoIdSetMap sub_map_releasing_;
+
+        /// TRANSPORT_PRIORITY value associated with the link.
+        CORBA::Long priority_;
 
 
     protected:

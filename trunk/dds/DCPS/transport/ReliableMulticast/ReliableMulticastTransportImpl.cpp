@@ -7,6 +7,7 @@
 #include "ReliableMulticastTransportConfiguration.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
+#include "dds/DCPS/transport/framework/DirectPriorityMapper.h"
 
 #if !defined (__ACE_INLINE__)
 #include "ReliableMulticastTransportImpl.inl"
@@ -16,7 +17,8 @@
 OpenDDS::DCPS::DataLink*
 OpenDDS::DCPS::ReliableMulticastTransportImpl::find_or_create_datalink(
   const TransportInterfaceInfo& remote_info,
-  int connect_as_publisher
+  int connect_as_publisher,
+  CORBA::Long priority
   )
 {
   // Get the remote address from the "blob" in the remote_info struct.
@@ -41,27 +43,47 @@ OpenDDS::DCPS::ReliableMulticastTransportImpl::find_or_create_datalink(
   OpenDDS::DCPS::ReliableMulticastDataLink_rch data_link;
 
   ReliableMulticastDataLinkMap::iterator iter =
-    data_links_.find(multicast_group_address);
+    data_links_.find( PriorityKey( priority, multicast_group_address));
   if (iter != data_links_.end())
   {
     data_link = iter->second;
     return data_link._retn();
   }
 
+  /// @TODO: The thread can be conditioned with priority at this point.
+
   data_link = new OpenDDS::DCPS::ReliableMulticastDataLink(
     reactor_task_,
     *(configuration_.in()),
     multicast_group_address,
-    *this
+    *this,
+    priority
     );
-  data_links_[multicast_group_address] = data_link;
-  
+  data_links_[ PriorityKey( priority, multicast_group_address)] = data_link;
+
   if (!data_link->connect(connect_as_publisher == 1))
   {
     ACE_ERROR_RETURN(
       (LM_ERROR, "(%P|%t) ERROR: Failed to connect data link.\n"),
       0
       );
+  }
+
+  //
+  // We only set the DiffServ codepoint on the sending side.  Since this
+  // Transport implementation distinguishes between the sending and
+  // receiving roles at this level, we only set on the publication end of
+  // connections.
+  //
+  if( connect_as_publisher) {
+    //
+    // Set the DiffServ codepoint according to the TRANSPORT_PRIORITY
+    // policy value.  We need to do this *after* the call to connect as
+    // that is where the underlying socket is actually created and
+    // initialized.
+    //
+    DirectPriorityMapper mapping( priority);
+    data_link->set_dscp_codepoint( mapping.codepoint(), data_link->socket());
   }
 
   return data_link._retn();

@@ -5,7 +5,7 @@
 #ifndef DATA_READER_LISTENER_IMPL
 #define DATA_READER_LISTENER_IMPL
 
-#include <dds/DdsDcpsSubscriptionS.h>
+#include <dds/DdsDcpsSubscriptionExtS.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -67,6 +67,11 @@ namespace Test
     virtual void on_subscription_lost (
         DDS::DataReader_ptr reader,
         const ::OpenDDS::DCPS::SubscriptionLostStatus & status)
+      throw (CORBA::SystemException);
+
+    virtual void on_budget_exceeded (
+        DDS::DataReader_ptr reader,
+        const ::OpenDDS::DCPS::BudgetExceededStatus& status)
       throw (CORBA::SystemException);
 
     virtual void on_connection_deleted (DDS::DataReader_ptr)

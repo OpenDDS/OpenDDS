@@ -16,10 +16,11 @@
 #endif /* __ACE_INLINE__ */
 
 
-OpenDDS::DCPS::SimpleTcpDataLink::SimpleTcpDataLink
-                                        (const ACE_INET_Addr& remote_address,
-                                         OpenDDS::DCPS::SimpleTcpTransport*  transport_impl)
-  : DataLink(transport_impl),
+OpenDDS::DCPS::SimpleTcpDataLink::SimpleTcpDataLink(
+  const ACE_INET_Addr& remote_address,
+  OpenDDS::DCPS::SimpleTcpTransport*  transport_impl,
+  CORBA::Long priority
+) : DataLink(transport_impl, priority),
     remote_address_(remote_address),
     graceful_disconnect_sent_ (false)
 {

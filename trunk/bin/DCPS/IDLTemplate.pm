@@ -24,7 +24,7 @@ sub header {
 #include "dds/DdsDcpsInfrastructure.idl"
 #include "dds/DdsDcpsTopic.idl"
 #include "dds/DdsDcpsPublication.idl"
-#include "dds/DdsDcpsSubscription.idl"
+#include "dds/DdsDcpsSubscriptionExt.idl"
 #include "dds/DdsDcpsTypeSupportExt.idl"
 
 #include "<%SUBDIR%><%IDLFILE%>"
@@ -108,7 +108,7 @@ local interface <%TYPE%>DataWriter : DDS::DataWriter {
  * See the DDS specification, OMG formal/04-12-02, for a description of
  * this interface.
  */
-local interface <%TYPE%>DataReader : DDS::DataReader {
+local interface <%TYPE%>DataReader : OpenDDS::DCPS::DataReaderEx {
     DDS::ReturnCode_t read(
                 inout <%TYPE%>Seq received_data,
                 inout DDS::SampleInfoSeq info_seq,

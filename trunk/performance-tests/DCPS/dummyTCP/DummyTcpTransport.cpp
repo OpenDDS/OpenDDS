@@ -53,7 +53,8 @@ OpenDDS::DCPS::DummyTcpTransport::~DummyTcpTransport()
 OpenDDS::DCPS::DataLink*
 OpenDDS::DCPS::DummyTcpTransport::find_or_create_datalink
 (const TransportInterfaceInfo& remote_info,
- int                           connect_as_publisher)
+ int                           connect_as_publisher,
+ CORBA::Long                   /* priority */)
 {
   DBG_ENTRY_LVL("DummyTcpTransport","find_or_create_datalink",5);
 
@@ -562,7 +563,8 @@ OpenDDS::DCPS::DummyTcpTransport::connect_datalink
 			      connection,
 			      new DummyTcpSynchResource(connection,
 							 this->tcp_config_->max_output_pause_period_),
-            this->reactor_task_.in());
+            this->reactor_task_.in(),
+            link->priority());
 
   TransportReceiveStrategy_rch receive_strategy =
     new DummyTcpReceiveStrategy(link,

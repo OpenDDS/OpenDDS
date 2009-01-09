@@ -166,6 +166,21 @@ void DataReaderListenerImpl::on_subscription_match (
   }
 
 
+  void DataReaderListenerImpl::on_budget_exceeded (
+    ::DDS::DataReader_ptr reader,
+    const ::OpenDDS::DCPS::BudgetExceededStatus&
+  )
+  ACE_THROW_SPEC ((
+    CORBA::SystemException
+  ))
+  {
+    ACE_UNUSED_ARG(reader) ;
+
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_budget_exceeded \n")));
+  }
+
+
   void DataReaderListenerImpl::on_connection_deleted (
     ::DDS::DataReader_ptr reader
   )

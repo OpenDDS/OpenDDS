@@ -638,11 +638,11 @@ namespace OpenDDS
       return true;
     }
 
+    // All values of TRANSPORT_PRIORITY.value are accepted.
     ACE_INLINE
-    bool Qos_Helper::valid (const ::DDS::TransportPriorityQosPolicy& qos)
+    bool Qos_Helper::valid (const ::DDS::TransportPriorityQosPolicy& /* qos */)
     {
-      return
-        qos == TheServiceParticipant->initial_TransportPriorityQosPolicy();
+      return true;
     }
 
     ACE_INLINE
@@ -679,10 +679,9 @@ namespace OpenDDS
 
 
     ACE_INLINE
-    bool Qos_Helper::valid (const ::DDS::LatencyBudgetQosPolicy& qos)
+    bool Qos_Helper::valid (const ::DDS::LatencyBudgetQosPolicy& /* qos */)
     {
-      return
-        qos == TheServiceParticipant->initial_LatencyBudgetQosPolicy();
+      return true;
     }
 
 
@@ -924,10 +923,15 @@ namespace OpenDDS
 
     ACE_INLINE
     bool Qos_Helper::changeable (
-      const ::DDS::TransportPriorityQosPolicy& /* qos1 */,
-      const ::DDS::TransportPriorityQosPolicy& /* qos2 */)
+      const ::DDS::TransportPriorityQosPolicy& qos1,
+      const ::DDS::TransportPriorityQosPolicy& qos2)
     {
-      return true;
+      // formal/07-01-01 specifies that this is changeable.  OpenDDS as
+      // of Version 1.3 does not support dynamic modification of the
+      // priority of a single DataWriter TRANSPORT_PRIORITY.value.
+      //
+      // return true;
+      return qos1 == qos2;
     }
 
     ACE_INLINE

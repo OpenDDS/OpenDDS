@@ -10,6 +10,7 @@
 #include "SimpleTcpReceiveStrategy.h"
 #include "SimpleTcpSendStrategy.h"
 #include "SimpleTcpReconnectTask.h"
+#include "dds/DCPS/transport/framework/DirectPriorityMapper.h"
 #include "ace/os_include/netinet/os_tcp.h"
 
 #if !defined (__ACE_INLINE__)
@@ -38,6 +39,7 @@ OpenDDS::DCPS::SimpleTcpConnection::SimpleTcpConnection()
   reconnect_task_ (this),
   reconnect_state_ (INIT_STATE),
   last_reconnect_attempted_ (ACE_Time_Value::zero),
+  priority_( 0), // TRANSPORT_PRIORITY.value default value - 0.
   shutdown_ (false)
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","SimpleTcpConnection",6);
@@ -336,7 +338,6 @@ OpenDDS::DCPS::SimpleTcpConnection::set_sock_options (SimpleTcpConfiguration* tc
 #endif /* !ACE_DEFAULT_MAX_SOCKET_BUFSIZ */
 }
 
-
 int
 OpenDDS::DCPS::SimpleTcpConnection::active_establishment
                                     (const ACE_INET_Addr& remote_address,
@@ -349,6 +350,8 @@ OpenDDS::DCPS::SimpleTcpConnection::active_establishment
   this->remote_address_ = remote_address;
   this->local_address_ = local_address;
   this->tcp_config_ = tcp_config;
+
+  /// @TODO: Priority is valid and this point and needs to be utilized.
 
   // Safty check - This should not happen since is_connector_ defaults to
   // true and the role in a connection connector is not changed when reconnecting.
@@ -374,6 +377,10 @@ OpenDDS::DCPS::SimpleTcpConnection::active_establishment
     {
       this->connected_ = true;
     }
+
+  // Set the DiffServ codepoint according to the priority value.
+  DirectPriorityMapper mapper( this->priority_);
+  this->link_->set_dscp_codepoint( mapper.codepoint(), this->peer());
 
   set_sock_options(tcp_config.in ());
 
@@ -451,6 +458,7 @@ int
 OpenDDS::DCPS::SimpleTcpConnection::active_connect
                                     (const ACE_INET_Addr& remote_address,
                                      const ACE_INET_Addr& local_address,
+                                     CORBA::Long          priority,
                                      SimpleTcpConfiguration_rch tcp_config)
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","active_connect",6);
@@ -458,6 +466,7 @@ OpenDDS::DCPS::SimpleTcpConnection::active_connect
 
   if (this->connected_ == true)
     return 0;
+  this->priority_ = priority;
   return this->active_establishment (remote_address,
                                      local_address,
                                      tcp_config);

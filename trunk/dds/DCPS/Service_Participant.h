@@ -245,6 +245,12 @@ namespace OpenDDS
       int  federation_liveliness() const;
       //@}
 
+      /// Accessors for scheduling policy value.
+      //@{
+      int& scheduler();
+      int  scheduler() const;
+      //@}
+
       /**
        * Accessors for @c bit_transport_port_.
        *
@@ -295,6 +301,9 @@ namespace OpenDDS
 
       /// Initalize default qos.
       void initialize ();
+
+      /// Initialize the thread scheduling and initial priority.
+      void initializeScheduling();
 
       /**
        * Parse the command line for user options. e.g. "-DCPSInfo <iorfile>". 
@@ -451,6 +460,12 @@ namespace OpenDDS
 
       /// This FederationLivelinessDuration.
       int federation_liveliness_;
+
+      /// Scheduling policy value from configuration file.
+      ACE_TString schedulerString_;
+
+      /// Scheduling policy value used for setting thread priorities.
+      int scheduler_;
 
       /// The @c TRANSIENT data durability cache.
       std::auto_ptr<DataDurabilityCache> transient_data_cache_;

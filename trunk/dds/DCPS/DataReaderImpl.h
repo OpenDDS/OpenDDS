@@ -19,10 +19,12 @@
 #include "InstanceState.h"
 #include "Cached_Allocator_With_Overflow_T.h"
 #include "ZeroCopyInfoSeq_T.h"
+#include "Stats_T.h"
 
 #include "ace/String_Base.h"
 #include "ace/Reverse_Lock_T.h"
 
+#include <vector>
 #include <map>
 #include <memory>
 
@@ -44,6 +46,9 @@ namespace OpenDDS
 
     typedef Cached_Allocator_With_Overflow< ::OpenDDS::DCPS::ReceivedDataElement, ACE_Null_Mutex>
                 ReceivedDataAllocator;
+
+    /// Statistics collector type.
+    typedef Stats< double> StatisticsAccumulator;
 
     /// Keeps track of a DataWriter's liveliness for a DataReader.
     class OpenDDS_Dcps_Export WriterInfo {
@@ -71,12 +76,24 @@ namespace OpenDDS
         /// update liveliness when remove_association is called.
         void removed ();
 
+        /// Add a datum to the latency statistics.
+        void add_stat( const ACE_Time_Value& delay);
+
+        /// Extract the current latency statistics for this writer.
+        LatencyStatistics get_stats() const;
+
+        /// Reset the latency statistics for this writer.
+        void reset_stats();
+
       private:
         /// Timestamp of last write/dispose/assert_liveliness from this DataWriter
         ACE_Time_Value last_liveliness_activity_time_;
 
         /// State of the writer.
         WriterState state_;
+
+        /// Latency statistics for the DataWriter to this DataReader.
+        StatisticsAccumulator stats_;
 
         /// The DataReader owning this WriterInfo
         DataReaderImpl* reader_;
@@ -100,7 +117,7 @@ namespace OpenDDS
     *
     */
     class OpenDDS_Dcps_Export DataReaderImpl
-      : public virtual DDS::DataReader,
+      : public virtual LocalObject< DataReaderEx>,
         public virtual EntityImpl,
         public virtual TransportReceiveListener,
         public virtual ACE_Event_Handler
@@ -337,6 +354,34 @@ namespace OpenDDS
           CORBA::SystemException
         ));
 
+      virtual void get_latency_stats (
+          ::OpenDDS::DCPS::LatencyStatisticsSeq & stats
+        )
+        ACE_THROW_SPEC ((
+          ::CORBA::SystemException
+        ));
+
+      virtual void reset_latency_stats (
+          void
+        )
+        ACE_THROW_SPEC ((
+          ::CORBA::SystemException
+        ));
+
+      virtual ::CORBA::Boolean statistics_enabled (
+          void
+        )
+        ACE_THROW_SPEC ((
+          ::CORBA::SystemException
+        ));
+
+      virtual void statistics_enabled (
+          ::CORBA::Boolean statistics_enabled
+        )
+        ACE_THROW_SPEC ((
+          ::CORBA::SystemException
+        ));
+
       /// update liveliness info for this writer.
       void writer_activity(PublicationId writer_id);
 
@@ -364,6 +409,9 @@ namespace OpenDDS
                            SubscriptionInstance*& instance);
       virtual void unregister(const ReceivedDataSample& sample,
                               SubscriptionInstance*& instance);
+
+      void process_latency( const ReceivedDataSample& sample);
+      void notify_latency( PublicationId writer);
 
       CORBA::Long get_depth() const { return depth_; }
       size_t get_n_chunks() const { return n_chunks_; }
@@ -518,6 +566,9 @@ namespace OpenDDS
       ::DDS::RequestedIncompatibleQosStatus requested_incompatible_qos_status_;
       ::DDS::SubscriptionMatchStatus        subscription_match_status_;
 
+      // OpenDDS extended status.  This is only available via listener.
+      BudgetExceededStatus                  budget_exceeded_status_;
+
       /**
        * @todo The subscription_lost_status_ and
        *       subscription_reconnecting_status_ are left here for
@@ -558,6 +609,9 @@ namespace OpenDDS
       /// Flag indicates that the init() is called.
       bool                       initialized_;
       bool                       always_get_history_;
+
+      /// Flag indicating status of statistics gathering.
+      bool statistics_enabled_;
 
       typedef std::map<PublicationId, WriterInfo, GUID_tKeyLessThan> WriterMapType;
 

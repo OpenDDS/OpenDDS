@@ -11,6 +11,7 @@
 
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
+#include "dds/DCPS/transport/framework/DirectPriorityMapper.h"
 #include <vector>
 
 
@@ -27,7 +28,8 @@ OpenDDS::DCPS::SimpleUnreliableDgramTransport::~SimpleUnreliableDgramTransport()
 OpenDDS::DCPS::DataLink*
 OpenDDS::DCPS::SimpleUnreliableDgramTransport::find_or_create_datalink
                          (const TransportInterfaceInfo& remote_info,
-                          int                           connect_as_publisher)
+                          int                           connect_as_publisher,
+                          int                           priority)
 {
   DBG_ENTRY_LVL("SimpleUnreliableDgramTransport","find_or_create_datalink",6);
 
@@ -61,7 +63,7 @@ OpenDDS::DCPS::SimpleUnreliableDgramTransport::find_or_create_datalink
 
   SimpleUnreliableDgramDataLink_rch link;
 
-  if (this->links_.find(remote_address,link) == 0)
+  if (this->links_.find( PriorityKey( priority, remote_address), link) == 0)
     {
       // This means we found a suitable DataLink.
       // We can return it now since we are done.
@@ -76,7 +78,7 @@ OpenDDS::DCPS::SimpleUnreliableDgramTransport::find_or_create_datalink
   link = new SimpleUnreliableDgramDataLink(remote_address, this);
 
   // Attempt to bind the SimpleUnreliableDgramDataLink to our links_ map.
-  if (this->links_.bind(remote_address,link) != 0)
+  if (this->links_.bind( PriorityKey( priority, remote_address), link) != 0)
     {
       // We failed to bind the new DataLink into our links_ map.
       ACE_ERROR((LM_ERROR,
@@ -87,14 +89,23 @@ OpenDDS::DCPS::SimpleUnreliableDgramTransport::find_or_create_datalink
       return 0;
     }
 
+  // Set the DiffServ codepoint according to the TRANSPORT_PRIORITY
+  // policy value.
+  DirectPriorityMapper mapping( priority);
+  link->set_dscp_codepoint( mapping.codepoint(), this->socket_->socket());
+
   TransportSendStrategy_rch send_strategy 
-    = new SimpleUnreliableDgramSendStrategy(this->config_.in(),
-                                            remote_address,
-                                            this->socket_.in(),
-                                            new SimpleUnreliableDgramSynchResource(
-                                            this->socket_.in(),
-                                            this,
-							                              this->config_->max_output_pause_period_));
+    = new SimpleUnreliableDgramSendStrategy(
+            this->config_.in(),
+            remote_address,
+            this->socket_.in(),
+            new SimpleUnreliableDgramSynchResource(
+              this->socket_.in(),
+              this,
+	      this->config_->max_output_pause_period_
+            ),
+            priority
+          );
 
   if (link->connect(send_strategy.in()) != 0)
     {
@@ -240,7 +251,8 @@ OpenDDS::DCPS::SimpleUnreliableDgramTransport::release_datalink_i(DataLink* link
   GuardType guard(this->links_lock_);
 
   // Attempt to remove the SimpleMcastDataLink from our links_ map.
-  if (this->links_.unbind(remote_address, released_link) != 0)
+  PriorityKey key( dgram_link->priority(), remote_address);
+  if (this->links_.unbind( key, released_link) != 0)
     {
       ACE_ERROR((LM_ERROR,
                  "(%P|%t) ERROR: Unable to locate DataLink in order to "

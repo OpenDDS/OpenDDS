@@ -30,7 +30,8 @@ namespace OpenDDS
                                  (TransportInterfaceInfo& local_info) const;
 
         virtual void deliver_sample(ReceivedDataSample&  sample,
-                            const ACE_INET_Addr& remote_address);
+                            const ACE_INET_Addr& remote_address,
+                            CORBA::Long          priority);
 
       private:
   

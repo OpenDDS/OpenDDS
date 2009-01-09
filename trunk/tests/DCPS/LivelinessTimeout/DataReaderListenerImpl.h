@@ -4,7 +4,7 @@
 #ifndef DATAREADER_LISTENER_IMPL_H
 #define DATAREADER_LISTENER_IMPL_H
 
-#include "dds/DdsDcpsSubscriptionS.h"
+#include "dds/DdsDcpsSubscriptionExtS.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -99,6 +99,14 @@ public:
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
+    ));
+
+  virtual void on_budget_exceeded (
+      ::DDS::DataReader_ptr,
+      const ::OpenDDS::DCPS::BudgetExceededStatus& status
+    )
+    ACE_THROW_SPEC ((
+      ::CORBA::SystemException
     ));
 
   virtual void on_connection_deleted (

@@ -19,6 +19,7 @@
 #include "tao/ORB_Core.h"
 #include "tao/debug.h"
 #include "ace/Reactor.h"
+#include "ace/SOCK.h"
 
 #include <sstream>
 
@@ -27,8 +28,9 @@
 #endif /* __ACE_INLINE__ */
 
 /// Only called by our TransportImpl object.
-OpenDDS::DCPS::DataLink::DataLink(TransportImpl* impl)
-  : thr_per_con_send_task_ (0)
+OpenDDS::DCPS::DataLink::DataLink(TransportImpl* impl, CORBA::Long priority)
+  : thr_per_con_send_task_ (0),
+    priority_( priority)
 {
   DBG_ENTRY_LVL("DataLink","DataLink",6);
 
@@ -45,8 +47,14 @@ OpenDDS::DCPS::DataLink::DataLink(TransportImpl* impl)
       this->thr_per_con_send_task_ = new ThreadPerConnectionSendTask (this);
       if (this->thr_per_con_send_task_->open () == -1) {
         ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) Data::DataLink: ")
+          ACE_TEXT("(%P|%t) DataLink::DataLink: ")
           ACE_TEXT("failed to open ThreadPerConnectionSendTask\n")
+        ));
+
+      } else if( DCPS_debug_level > 4) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DataLink::DataLink - ")
+          ACE_TEXT("started new thread to send data with.\n")
         ));
       }
     }
@@ -1051,5 +1059,68 @@ OpenDDS::DCPS::DataLink::handle_timeout (const ACE_Time_Value &/*tv*/,
   this->_remove_ref ();
 
   return 0;
+}
+
+void
+OpenDDS::DCPS::DataLink::set_dscp_codepoint( int cp, ACE_SOCK& socket)
+{
+/**
+ * The following IPV6 code was lifted in spirit from the RTCORBA
+ * implementation of setting the DiffServ codepoint.
+ */
+  int result = 0;
+  const char* which = "IPV4 TOS";
+#if defined (ACE_HAS_IPV6)
+  ACE_INET_Addr local_address;
+  if( socket.get_local_addr( local_address) == -1)
+  else if( local_address.get_type() == AF_INET6)
+#if !defined (IPV6_TCLASS)
+  {
+    if( DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: DataLink::set_dscp_codepoint() - ")
+        ACE_TEXT("IPV6 TCLASS not supported yet, not setting codepoint %d.\n"),
+        cp
+      ));
+    }
+    return;
+  }
+#else /* IPV6_TCLASS */
+  {
+    which = "IPV6 TCLASS";
+    result = socket.set_option(
+                IPPROTO_IPV6,
+                IPV6_TCLASS,
+                &cp,
+                sizeof(cp)
+             );
+
+  } else // This is a bit tricky and might be hard to follow...
+
+#endif /* IPV6_TCLASS */
+#endif /* ACE_HAS_IPV6 */
+    result = socket.set_option(
+                IPPROTO_IP,
+                IP_TOS,
+                &cp,
+                sizeof(cp)
+             );
+
+  if( (result == -1) && (errno != ENOTSUP)) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: DataLink::set_dscp_codepoint() - ")
+      ACE_TEXT("failed to set the %s codepoint to %d errno %m\n"),
+      which,
+      cp
+    ));
+
+  } else if( DCPS_debug_level > 4) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) DataLink::set_dscp_codepoint() - ")
+        ACE_TEXT("set %s codepoint to %d.\n"),
+        which,
+        cp
+      ));
+    }
 }
 
