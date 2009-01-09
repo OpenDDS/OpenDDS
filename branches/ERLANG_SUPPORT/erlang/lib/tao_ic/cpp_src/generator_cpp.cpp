@@ -12,7 +12,8 @@ generator_cpp::~generator_cpp()
 {
 }
 
-void
+int
 generator_cpp::generate_constant(AST_Constant *node)
 {
+  return 0;
 }

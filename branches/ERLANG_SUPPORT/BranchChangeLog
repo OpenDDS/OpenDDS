@@ -1,3 +1,16 @@
+Fri Jan  9 20:57:08 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/lib/tao_ic/cpp_src/be_visitor.h:
+        * erlang/lib/tao_ic/cpp_src/be_visitor.cpp:
+        * erlang/lib/tao_ic/cpp_src/generator.h:
+        * erlang/lib/tao_ic/cpp_src/generator.cpp:
+        * erlang/lib/tao_ic/cpp_src/generator_cpp.h:
+        * erlang/lib/tao_ic/cpp_src/generator_cpp.cpp:
+        * erlang/lib/tao_ic/cpp_src/generator_erl.h:
+        * erlang/lib/tao_ic/cpp_src/generator_erl.cpp:
+
+          tao_ic updates.
+
 Thu Jan  8 06:08:16 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * erlang/lib/tao/src/tao_error.erl:
