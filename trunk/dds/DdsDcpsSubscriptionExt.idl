@@ -54,8 +54,8 @@ module OpenDDS
     struct LatencyStatistics {
       ::DDS::InstanceHandle_t publication;
       unsigned long           n;
-      double                  max;
-      double                  min;
+      double                  maximum;
+      double                  minimum;
       double                  mean;
       double                  variance;
     };

@@ -45,19 +45,6 @@ namespace OpenDDS { namespace DCPS {
 
         /// Access the mapped thread priority value.
         virtual short thread_priority() const;
-
-      private:
-        // Minimum value of thread priority values.
-        static const short thread_min_;
-
-        // Maximum value of thread priority values.
-        static const short thread_max_;
-
-        // Minimum value of DiffServ codepoint values.
-        static const short dscp_min_ = 0;
-
-        // Maximum value of DiffServ codepoint values.
-        static const short dscp_max_ = 63;
     };
 
 } } // End of namespace OpenDDS::DCPS

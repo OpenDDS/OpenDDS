@@ -11,7 +11,7 @@
 /**
  * @class Stats< DataType>
  *
- * @brief Accumulates average, n, variance, min, and max statistics
+ * @brief Accumulates average, n, variance, minimum, and maximum statistics
  */
 template< typename DataType>
 class Stats {
@@ -40,10 +40,10 @@ class Stats {
     long double var() const;
 
     /// Access the minimum value.
-    DataType min() const;
+    DataType minimum() const;
 
     /// Access the maximum value.
-    DataType max() const;
+    DataType maximum() const;
 
     /// Access the number of values accumulated.
     unsigned long n() const;
@@ -51,8 +51,8 @@ class Stats {
   private:
     // Direct statistics.
     unsigned long n_;
-    DataType      min_;
-    DataType      max_;
+    DataType      minimum_;
+    DataType      maximum_;
 
     // Internal variables have the largest range and highest precision possible.
     long double an_ ;
@@ -74,8 +74,8 @@ Stats<DataType>&
 Stats<DataType>::operator=( const Stats& rhs)
 {
   this->n_        = rhs.n_;
-  this->min_      = rhs.min_;
-  this->max_      = rhs.max_;
+  this->minimum_  = rhs.minimum_;
+  this->maximum_  = rhs.maximum_;
   this->an_       = rhs.an_ ;
   this->bn_       = rhs.bn_ ;
   this->cn_       = rhs.cn_ ;
@@ -89,8 +89,8 @@ void
 Stats<DataType>::reset()
 {
   this->n_        = 0;
-  this->min_      = static_cast<DataType>(0);
-  this->max_      = static_cast<DataType>(0);
+  this->minimum_  = static_cast<DataType>(0);
+  this->maximum_  = static_cast<DataType>(0);
   this->an_       = 0.0;
   this->bn_       = 0.0;
   this->cn_       = 0.0;
@@ -157,12 +157,12 @@ Stats<DataType>::add( DataType value)
   this->cn_ /= (this->n_ + 2);
   this->cn_ /= (this->n_ + 2);
 
-  if( (this->n_ == 0) || (value < this->min_)) {
-    this->min_ = value;
+  if( (this->n_ == 0) || (value < this->minimum_)) {
+    this->minimum_ = value;
   }
 
-  if( (this->n_ == 0) || (value > this->max_)) {
-    this->max_ = value;
+  if( (this->n_ == 0) || (value > this->maximum_)) {
+    this->maximum_ = value;
   }
 
   this->n_ += 1; // Must follow internal variable updates.
@@ -203,19 +203,19 @@ Stats<DataType>::var() const
 template< typename DataType>
 inline
 DataType
-Stats<DataType>::min() const
+Stats<DataType>::minimum() const
 {
   /// @TODO: return qNaN with no data.
-  return (this->n_ == 0)? 0: this->min_;
+  return (this->n_ == 0)? 0: this->minimum_;
 }
 
 template< typename DataType>
 inline
 DataType
-Stats<DataType>::max() const
+Stats<DataType>::maximum() const
 {
   /// @TODO: return qNaN with no data.
-  return (this->n_ == 0)? 0: this->max_;
+  return (this->n_ == 0)? 0: this->maximum_;
 }
 
 template< typename DataType>
