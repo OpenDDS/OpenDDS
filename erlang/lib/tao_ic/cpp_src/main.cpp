@@ -3,7 +3,7 @@
  */
 
 // The following files are included to reuse the original tao_idl
-// FE with our own custom BE (requires $TAO_ROOT/TAO_IDL).
+// driver with TAO_IDL_FE and our own custom BE (see: be_extern.h).
 
 #include "tao_idl.cpp"
 

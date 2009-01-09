@@ -31,7 +31,7 @@ BE_post_init(BE_PI_CONST char **, long)
 void
 BE_version()
 {
-  ACE_DEBUG((LM_DEBUG,
+  ACE_ERROR((LM_INFO,
              ACE_TEXT("TAO_IC_BE, version %s (Erlang Port Driver IDL BE)\n"),
              ACE_TEXT(TAO_IC_VERSION)));
 }
@@ -39,8 +39,8 @@ BE_version()
 void
 BE_abort()
 {
-  // Force SIGABRT for debugging...
-  ACE_ERROR((LM_ERROR, ACE_TEXT("%a\n")));
+  ACE_ERROR((LM_CRITICAL,
+             ACE_TEXT("%a\n")));
 }
 
 void
