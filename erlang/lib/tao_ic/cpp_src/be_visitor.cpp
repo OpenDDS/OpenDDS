@@ -6,7 +6,6 @@
 
 #include "ace_compat.h"
 #include "be_visitor.h"
-#include "generator.h"
 #include "generator_cpp.h"
 #include "generator_erl.h"
 
@@ -64,13 +63,23 @@ be_visitor::visit_module(AST_Module *node)
                       ACE_TEXT("%N:%l: visit_module()")
                       ACE_TEXT(" visit_scope failed!\n")), -1);
   }
+  if (!this->generator_.generate_module(node)) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("%N:%l: visit_module()")
+                      ACE_TEXT(" generate_module failed!\n")), -1);
+  }
   return 0;
 }
 
 int
 be_visitor::visit_constant(AST_Constant *node)
 {
-  return this->generator_.generate_constant(node);
+  if (!this->generator_.generate_constant(node)) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("%N:%l: visit_constant()")
+                      ACE_TEXT(" generate_constant failed!\n")), -1);
+  }  
+  return 0;
 }
 
 int

@@ -12,7 +12,9 @@ public:
   generator_cpp(void);
   ~generator_cpp(void);
 
-  int generate_constant(AST_Constant *);
+  bool generate_module(AST_Module *);
+
+  bool generate_constant(AST_Constant *);
 };
 
 #endif /* TAO_IC_GENERATOR_CPP_H */

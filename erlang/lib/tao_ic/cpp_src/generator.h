@@ -8,12 +8,16 @@
 #include <vector>
 
 #include "ast_constant.h"
+#include "ast_module.h"
+#include "utl_identifier.h"
 
 class generator {
 public:
   virtual ~generator(void) {};
 
-  virtual int generate_constant(AST_Constant *) = 0;
+  virtual bool generate_module(AST_Module *) = 0;
+
+  virtual bool generate_constant(AST_Constant *) = 0;
 };
 
 class generator_composite : public generator {
@@ -35,7 +39,9 @@ public:
   const_iterator end(void) const;
 
   // composite operations
-  int generate_constant(AST_Constant *);
+  bool generate_module(AST_Module *);
+
+  bool generate_constant(AST_Constant *);
 
 private:
   bool auto_delete_;

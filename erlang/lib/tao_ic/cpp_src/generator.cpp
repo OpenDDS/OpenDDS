@@ -60,14 +60,26 @@ generator_composite::end() const
   return this->generators_.end();
 }
 
-int
-generator_composite::generate_constant(AST_Constant *node)
+bool
+generator_composite::generate_module(AST_Module *node)
 {
-  int error = 0;
   generator_composite::iterator it = this->begin();
   for (; it != this->end(); ++it) {
-    error |= (*it)->generate_constant(node);
-    if (error) break;
+    if (!(*it)->generate_module(node)) {
+      return false;
+    }
   }
-  return error;
+  return true;
+}
+
+bool
+generator_composite::generate_constant(AST_Constant *node)
+{
+  generator_composite::iterator it = this->begin();
+  for (; it != this->end(); ++it) {
+    if (!(*it)->generate_constant(node)) {
+      return false;
+    }
+  }
+  return true;
 }
