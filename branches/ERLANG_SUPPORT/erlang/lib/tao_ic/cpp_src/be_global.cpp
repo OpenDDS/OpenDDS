@@ -8,6 +8,8 @@
 
 #include "be_global.h"
 
+BE_GlobalData *be_global = 0;
+
 namespace {
 static const char *DEFAULT_PORT_DRIVER_NAME = "port_driver";
 
@@ -45,8 +47,6 @@ bool operator==(const char *s, const BE_Arg &arg)
   return s == arg.name();
 }
 } // namespace
-
-BE_GlobalData *be_global = 0;
 
 BE_GlobalData::BE_GlobalData()
   : output_otp_(false),
