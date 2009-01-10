@@ -8,7 +8,6 @@
 #include "ast_argument.h"
 #include "ast_array.h"
 #include "ast_attribute.h"
-#include "ace_compat.h"
 #include "ast_component.h"
 #include "ast_component_fwd.h"
 #include "ast_constant.h"
@@ -39,16 +38,16 @@
 #include "ast_union_branch.h"
 #include "ast_union_fwd.h"
 #include "ast_union_label.h"
-
-#ifndef ACE_PRE_5_5
-# include "ast_valuebox.h"
-#endif /* ACE_PRE_5_5 */
-
 #include "ast_valuetype.h"
 #include "ast_valuetype_fwd.h"
 #include "ast_visitor.h"
 #include "utl_scope.h"
 
+#ifndef ACE_PRE_5_5
+# include "ast_valuebox.h"
+#endif /* ACE_PRE_5_5 */
+
+#include "ace_compat.h"
 #include "generator.h"
 
 class be_visitor : public ast_visitor {
