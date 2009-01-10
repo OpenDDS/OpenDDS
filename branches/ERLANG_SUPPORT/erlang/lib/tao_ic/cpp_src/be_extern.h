@@ -10,7 +10,7 @@
 #include "ace_compat.h"
 #include "be_global.h"
 
-#define TAO_IC_VERSION (DDS_VERSION ".0")
+#define TAO_IC_VERSION (DDS_VERSION)
 
 extern BE_GlobalData *be_global;
 
