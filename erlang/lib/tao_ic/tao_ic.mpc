@@ -17,7 +17,7 @@ project(*cpp) {
   exeout        = $(DDS_ROOT)/erlang/bin
   after        += TAO_IDL_FE
   
-  includes     += cpp_src $(DDS_ROOT) $(TAO_ROOT) \
+  includes     += cpp_src $(TAO_ROOT) \
                   $(TAO_ROOT)/TAO_IDL $(TAO_ROOT)/TAO_IDL/include
   libs         += TAO_IDL_FE ACE
   

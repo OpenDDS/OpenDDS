@@ -5,12 +5,12 @@
 #ifndef TAO_IC_BE_EXTERN_H
 #define TAO_IC_BE_EXTERN_H
 
-#include "dds/Version.h"
+#include "tao/Version.h"
 
 #include "ace_compat.h"
 #include "be_global.h"
 
-#define TAO_IC_VERSION (DDS_VERSION)
+#define TAO_IC_VERSION (TAO_VERSION)
 
 extern BE_GlobalData *be_global;
 
