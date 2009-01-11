@@ -13,7 +13,7 @@
 
 class generator {
 public:
-  virtual ~generator(void) {};
+  virtual ~generator(void) {}
 
   virtual bool generate_module(AST_Module *) = 0;
 
