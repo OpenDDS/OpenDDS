@@ -49,7 +49,7 @@ main( int argc, char *argv[])
       result = 0;
     }
 
-  } catch( CORBA::Exception& e) {
+  } catch( CORBA::Exception& /* e */) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) subscriber_main() - ")
       ACE_TEXT("CORBA exception caught during processing.\n")

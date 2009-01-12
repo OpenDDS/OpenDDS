@@ -36,7 +36,7 @@ main( int argc, char *argv[])
     // Execute the test.
     publisher.run();
 
-  } catch( CORBA::Exception& e) {
+  } catch( CORBA::Exception& /* e */) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) publisher_main() - ")
       ACE_TEXT("CORBA exception caught during processing.\n")
