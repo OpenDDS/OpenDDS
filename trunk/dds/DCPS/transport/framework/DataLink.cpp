@@ -1073,7 +1073,7 @@ OpenDDS::DCPS::DataLink::set_dscp_codepoint( int cp, ACE_SOCK& socket)
 #if defined (ACE_HAS_IPV6)
   ACE_INET_Addr local_address;
   if( socket.get_local_addr( local_address) == -1) {
-    return -1;
+    return ;
 
   } else if( local_address.get_type() == AF_INET6)
 #if !defined (IPV6_TCLASS)
