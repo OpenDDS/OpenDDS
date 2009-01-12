@@ -1,8 +1,17 @@
+Mon Jan 12 21:40:57 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/DCPS/Priority/publisher_main.cpp:
+        * performance-tests/DCPS/Priority/subscriber_main.cpp:
+        * tests/DCPS/Priority/publisher_main.cpp:
+        * tests/DCPS/Priority/subscriber_main.cpp:
+
+	  Hide unused catch parameter to remove compiler warnings.
+
 Mon Jan 12 21:25:31 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:
 
-	  Remove value from return in a void method.
+          Remove value from return in a void method.
 
 Mon Jan 12 19:00:48 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
