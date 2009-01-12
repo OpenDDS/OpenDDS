@@ -1,14 +1,27 @@
+Mon Jan 12 19:00:48 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/framework/NullSynchStrategy.h:
+        * dds/DCPS/transport/framework/NullSynchStrategy.cpp:
+        * dds/DCPS/transport/framework/PoolSynchStrategy.h:
+        * dds/DCPS/transport/framework/PoolSynchStrategy.cpp:
+
+	  Modify to use the modern signature for create_synch_object().
+
+        * performance-tests/DCPS/Priority/PublicationProfile.cpp:
+
+	  Changed from the POSIX random() call to C98 rand() calls.
+
 Fri Jan  9 21:22:52 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
 
-	  Explicitly cast a time_t value to a double to avoid compiler
-	  complaints.
+          Explicitly cast a time_t value to a double to avoid compiler
+          complaints.
 
         * dds/DCPS/Service_Participant.cpp:
 
-	  Elide use of String_Base::empty() since it is not present in
-	  1.4a, which is a supported version.
+          Elide use of String_Base::empty() since it is not present in
+          1.4a, which is a supported version.
 
         * dds/DCPS/transport/framework/DataLink.h:
         * dds/DCPS/transport/framework/DataLink.inl:
@@ -16,12 +29,12 @@ Fri Jan  9 21:22:52 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
         * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.cpp:
 
-	  Renamed priority() method to avoid hiding the base class
-	  Event_Handler::priority() method.
+          Renamed priority() method to avoid hiding the base class
+          Event_Handler::priority() method.
 
         * tests/DCPS/LatencyBudget/DataReaderListener.cpp:
 
-	  Modified to use renamed maximum and minimum LatencyStatistics fields.
+          Modified to use renamed maximum and minimum LatencyStatistics fields.
 
 Fri Jan  9 17:08:42 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 

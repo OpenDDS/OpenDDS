@@ -5,7 +5,7 @@
 #include "dds/DCPS/debug.h"
 #include "PublicationProfile.h"
 
-#include <stdlib.h>  // For random()
+#include <stdlib.h>  // For rand()
 #include <math.h>    // For log() and sqrt()
 #include <algorithm> // for max() and min()
 
@@ -48,7 +48,7 @@ PublicationProfile::interval() const
   // Return an exponentially distributed number of microseconds.
   return static_cast<int>(
            1000000.0 *
-           -log( static_cast<double>( random()) / range) / this->rate_
+           -log( static_cast<double>( rand()) / range) / this->rate_
          );
 }
 
@@ -68,8 +68,8 @@ PublicationProfile::messageSize() const
   // Generate a non-zero random point within the unit circle.
   while( (s == 0.0) || (s >= 1.0)) {
     // Random point in the square [-1,1],[-1,1].
-    x = 2.0 * static_cast<double>( random() / range) - 1.0;
-    y = 2.0 * static_cast<double>( random() / range) - 1.0;
+    x = 2.0 * static_cast<double>( rand() / range) - 1.0;
+    y = 2.0 * static_cast<double>( rand() / range) - 1.0;
 
     // Magnitude of the point vector.
     s = x * x + y * y;
