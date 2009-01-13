@@ -8,7 +8,7 @@
 
 using namespace std;
 
-generator_composite::generator_composite(bool auto_delete = false)
+generator_composite::generator_composite(bool auto_delete)
   : auto_delete_(auto_delete)
 {
 }
@@ -61,21 +61,9 @@ generator_composite::end() const
 }
 
 bool
-generator_composite::generate_module(AST_Module *node)
-{
-  generator_composite::iterator it = this->begin();
-  for (; it != this->end(); ++it) {
-    if (!(*it)->generate_module(node)) {
-      return false;
-    }
-  }
-  return true;
-}
-
-bool
 generator_composite::generate_constant(AST_Constant *node)
 {
-  generator_composite::iterator it = this->begin();
+  generator_composite::iterator it(this->begin());
   for (; it != this->end(); ++it) {
     if (!(*it)->generate_constant(node)) {
       return false;
