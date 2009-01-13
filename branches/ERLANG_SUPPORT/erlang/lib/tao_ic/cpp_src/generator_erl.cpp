@@ -2,8 +2,6 @@
  * $Id$
  */
 
-#include <iostream>
-
 #include "ast_expression.h"
 #include "utl_string.h"
 
@@ -90,7 +88,7 @@ generator_erl::generate_constant(AST_Constant *node)
     return false; // not supported
   }
   
-  out << "." << endl;
+  out << '.' << endl;
 
   return true;
 }
