@@ -1,18 +1,32 @@
+Tue Jan 13 23:31:18 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/dds:
+        * java/idl2jni/codegen:
+        * java/idl2jni/codegen/idl2jni_visitor.cpp:
+        * java/idl2jni/codegen/idl_mapping.h:
+        * java/idl2jni/codegen/idl_mapping.cpp:
+        * java/idl2jni/codegen/im_java.cpp:
+        * java/idl2jni/codegen/im_jni.cpp:
+        * java/idl2jni/tests/simple/idl2jni_test_simple.mpc:
+        * java/idl2jni/tests/simple/simple.idl:
+
+          Added support for IDL attributes (idl2jni).
+
 Tue Jan 13 18:17:43 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:
 
-	  Demoted failure to set IPV4 TOS field to an informational
-	  message.
+          Demoted failure to set IPV4 TOS field to an informational
+          message.
 
         * performance-tests/DCPS/Priority/Options.h:
 
-	  Included configuration files before use of pragma once.
+          Included configuration files before use of pragma once.
 
         * performance-tests/DCPS/Priority/PublicationProfile.cpp:
 
-	  Undef min and max in order to use the STL algorithm versions of
-	  these functions.
+          Undef min and max in order to use the STL algorithm versions of
+          these functions.
 
 Mon Jan 12 22:41:27 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 

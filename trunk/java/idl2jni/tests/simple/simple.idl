@@ -88,6 +88,8 @@ module simple {
     TestArrayTypedef op1(in TestEnum p1, inout unsigned short p2,
                          out TestSeqTypedef p3, out string p4);
     TestUnion4 opu(in TestUnion1 p1, inout TestUnion2 p2, out TestUnion1 p4);
+
+    attribute long attr1;
   };
 
   typedef sequence<TestUnion2> TestUnion2Seq;
@@ -121,6 +123,9 @@ module simple {
     TestArrayTypedef primArray(in TestArrayTypedef p1,
                                inout TestArrayTypedef p2,
                                out TestArrayTypedef p3);
+
+    attribute long attr1;
+    attribute double attr2;
   };
 
 #ifdef USE_LOCAL

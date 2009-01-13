@@ -175,11 +175,14 @@ idl2jni_visitor::visit_interface (AST_Interface *node)
   vector<AST_Interface *> inherits_flat (node->inherits_flat (),
     node->inherits_flat () + node->n_inherits_flat ());
 
+  vector<AST_Attribute *> attrs;
+  scope2vector (attrs, node, AST_Decl::NT_attr);
+
   vector<AST_Operation *> ops;
   scope2vector (ops, node, AST_Decl::NT_op);
 
   error_ |= !map_target_.gen_interf (node->name (), node->is_local (),
-    inherits, inherits_flat, ops, node->repoID ());
+    inherits, inherits_flat, attrs, ops, node->repoID ());
 
   if (this->visit_scope (node) == -1)
     {
