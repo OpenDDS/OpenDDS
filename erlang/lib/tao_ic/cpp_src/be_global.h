@@ -36,6 +36,12 @@ public:
   ACE_CString output_dir(void) const;
   void output_dir(const ACE_CString &);
 
+  ACE_CString output_dir_include(void) const;
+
+  ACE_CString output_dir_src(void) const;
+
+  ACE_CString output_dir_src_cpp(void) const;
+
   bool output_otp(void) const;
   void output_otp(bool);
 

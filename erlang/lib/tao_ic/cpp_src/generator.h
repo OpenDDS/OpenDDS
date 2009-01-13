@@ -15,9 +15,7 @@ class generator {
 public:
   virtual ~generator(void) {}
 
-  virtual bool generate_module(AST_Module *) = 0;
-
-  virtual bool generate_constant(AST_Constant *) = 0;
+  virtual bool generate_constant(AST_Constant *) { return true; }
 };
 
 class generator_composite : public generator {
@@ -25,7 +23,7 @@ public:
   typedef std::vector<generator *>::iterator iterator;
   typedef std::vector<generator *>::const_iterator const_iterator;
 
-  generator_composite(bool);
+  explicit generator_composite(bool = false);
   ~generator_composite(void);
 
   void add(generator *);
@@ -39,12 +37,11 @@ public:
   const_iterator end(void) const;
 
   // composite operations
-  bool generate_module(AST_Module *);
-
   bool generate_constant(AST_Constant *);
 
 private:
   bool auto_delete_;
+
   std::vector<generator *> generators_;
 };
 

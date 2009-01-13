@@ -1,3 +1,22 @@
+Tue Jan 13 07:17:07 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/lib/tao_ic:
+        * erlang/lib/tao_ic/cpp_src/ace_compat.h:
+        * erlang/lib/tao_ic/cpp_src/be_global.h:
+        * erlang/lib/tao_ic/cpp_src/be_global.cpp:
+        * erlang/lib/tao_ic/cpp_src/be_init.cpp:
+        * erlang/lib/tao_ic/cpp_src/be_visitor.cpp:
+        * erlang/lib/tao_ic/cpp_src/erl_helper.h:
+        * erlang/lib/tao_ic/cpp_src/erl_helper.cpp:
+        * erlang/lib/tao_ic/cpp_src/generator.h:
+        * erlang/lib/tao_ic/cpp_src/generator.cpp:
+        * erlang/lib/tao_ic/cpp_src/generator_cpp.h:
+        * erlang/lib/tao_ic/cpp_src/generator_cpp.cpp:
+        * erlang/lib/tao_ic/cpp_src/generator_erl.h:
+        * erlang/lib/tao_ic/cpp_src/generator_erl.cpp:
+
+          Added support for constants.
+
 Fri Jan  9 20:57:08 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * erlang/lib/tao_ic/cpp_src/be_visitor.h:

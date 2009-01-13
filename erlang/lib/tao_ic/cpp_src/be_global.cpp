@@ -2,22 +2,25 @@
  * $Id$
  */
 
-#include "ace/Arg_Shifter.h"
+#include "ace/Default_Constants.h"
 #include "ace/Log_Msg.h"
 #include "ace/OS_Memory.h"
+#include "ace/OS_NS_string.h"
 
+#include "ace_compat.h"
 #include "be_global.h"
 
 BE_GlobalData *be_global = 0;
 
 namespace {
-static const char *DEFAULT_PORT_DRIVER_NAME = "port_driver";
+const char *DEFAULT_PORT_DRIVER_NAME = "port_driver";
 
 class BE_Arg {
 public:
-  explicit BE_Arg(const ACE_CString &s)
+  explicit
+  BE_Arg(const ACE_CString &s)
   {
-    ACE_Allocator::size_type pos = s.find('=');
+    ACE_CString::size_type pos = s.find('=');
     this->name_ = s.substring(0, pos);
 
     if (pos != ACE_CString::npos) {
@@ -37,14 +40,24 @@ private:
   ACE_CString value_;
 };
 
-bool operator==(const BE_Arg &arg, const char *s)
+bool operator==(const BE_Arg &lhs, const char *rhs)
 { 
-  return arg.name() == s;
+  return lhs.name() == rhs;
 }
 
-bool operator==(const char *s, const BE_Arg &arg)
+bool operator==(const char *lhs, const BE_Arg &rhs)
 { 
-  return s == arg.name();
+  return lhs == rhs.name();
+}
+
+ACE_CString normalize_path(const char *s_)
+{
+  ACE_CString s(s_);
+  if (!s.is_empty() // ensure non-empty path ends with separator
+      && s[s.length() - 1] != ACE_DIRECTORY_SEPARATOR_CHAR_A) {
+    s += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  }
+  return s;
 }
 } // namespace
 
@@ -65,31 +78,22 @@ BE_GlobalData::destroy()
 }
 
 void
-BE_GlobalData::parse_args(long &argc_, char **argv)
+BE_GlobalData::parse_args(long &ac, char **av)
 {
-  int argc = static_cast<int>(argc_);
-  
-  ACE_Arg_Shifter_T<char> shifter(argc, argv);
-  while (shifter.is_anything_left()) {
-    const char *arg = 0;
+  const char *a = av[ac];
 
-    // -o <output_dir>
-    if ((arg = shifter.get_the_parameter("-o")) != 0) {
-      this->output_dir_ = arg;
+  // -o <output_dir>
+  if (ACE_OS::strcmp("-o", a) == 0) {
+    this->output_dir_ = normalize_path(av[++ac]);
 
-    // -otp
-    } else if (shifter.cur_arg_strncasecmp("-otp") == 0) {
-      this->output_otp_ = true;
+  // -otp
+  } else if (ACE_OS::strcmp("-otp", a) == 0) {
+    this->output_otp_ = true;
 
-    // -SS
-    } else if (shifter.cur_arg_strncasecmp("-SS") == 0) {
-      this->suppress_skel_ = true;
-    
-    } else {
-      shifter.ignore_arg();
-    }
+  // -SS
+  } else if (ACE_OS::strcmp("-SS", a) == 0) {
+    this->suppress_skel_ = true;
   }
-  argc_ = argc; // update reference
 }
 
 void
@@ -187,6 +191,36 @@ void
 BE_GlobalData::output_dir(const ACE_CString &output_dir)
 {
   this->output_dir_ = output_dir;
+}
+
+ACE_CString
+BE_GlobalData::output_dir_include() const
+{
+  ACE_CString s(this->output_dir_);
+  if (this->output_otp_) {
+    s += normalize_path("include");
+  }
+  return s;
+}
+
+ACE_CString
+BE_GlobalData::output_dir_src() const
+{
+  ACE_CString s(this->output_dir_);
+  if (this->output_otp_) {
+    s += normalize_path("src");
+  }
+  return s;
+}
+
+ACE_CString
+BE_GlobalData::output_dir_src_cpp() const
+{
+  ACE_CString s(this->output_dir_);
+  if (this->output_otp_) {
+    s += normalize_path("cpp_src");
+  }
+  return s;
 }
 
 bool
