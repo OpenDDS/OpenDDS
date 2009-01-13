@@ -514,6 +514,19 @@ bool idl_mapping_java::gen_typedef (UTL_ScopedName *name, AST_Type *base,
 
 namespace
 {
+  string attr_signature_r (AST_Attribute *attr)
+  {
+    return idl_mapping_java::type (attr->field_type ())
+      + ' ' + attr->local_name ()->get_string () + "()";
+  }
+
+  string attr_signature_w (AST_Attribute *attr)
+  {
+    const char *name = attr->local_name ()->get_string ();
+    return string("void ") + name + '('
+      + idl_mapping_java::type (attr->field_type ()) + ' ' + name + ')';
+  }
+
   string op_signature (AST_Operation *op)
   {
     string signature =
@@ -543,6 +556,7 @@ namespace
 bool idl_mapping_java::gen_interf (UTL_ScopedName *name, bool local,
   const std::vector<AST_Interface *> &inherits,
   const std::vector<AST_Interface *> &inherits_flat,
+  const std::vector<AST_Attribute *> &attrs,
   const std::vector<AST_Operation *> &ops, const char *repoid)
 {
   JavaName jn (name);
@@ -571,6 +585,25 @@ bool idl_mapping_java::gen_interf (UTL_ScopedName *name, bool local,
     "  protected " + jn_stub.clazz_ + "(long ptr) {\n"
     "    super(ptr);\n"
     "  }\n\n";
+  for (size_t i = 0; i < attrs.size (); ++i)
+    {
+      AST_Attribute *attr = attrs[i];
+
+      string signature = attr_signature_r (attr);
+      body_ops +=
+        "  " + signature + ";\n";
+      body_stub +=
+        "  public native " + signature + ";\n\n";
+
+      if (!attr->readonly ())
+        {
+          string signature = attr_signature_w (attr);
+          body_ops +=
+            "  " + signature + ";\n";
+          body_stub +=
+            "  public native " + signature + ";\n\n";
+        }
+    }
   for (size_t i = 0; i < ops.size (); ++i)
     {
       string signature = op_signature (ops[i]);
@@ -589,7 +622,22 @@ bool idl_mapping_java::gen_interf (UTL_ScopedName *name, bool local,
       for (; !it.is_done (); it.next ())
         {
           AST_Decl *item = it.item ();
-          if (item->node_type () == AST_Decl::NT_op)
+          if (item->node_type () == AST_Decl::NT_attr)
+            {
+              AST_Attribute *attr = AST_Attribute::narrow_from_decl (item);
+
+              string signature = attr_signature_r (attr);
+              body_stub +=
+                "  public native " + signature + ";\n\n";
+
+              if (!attr->readonly ())
+                {
+                  string signature = attr_signature_w (attr);
+                  body_stub +=
+                    "  public native " + signature + ";\n\n";
+                }
+            }
+          else if (item->node_type () == AST_Decl::NT_op)
             {
               AST_Operation *op = AST_Operation::narrow_from_decl (item);
               body_stub +=

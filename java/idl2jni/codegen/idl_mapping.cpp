@@ -72,12 +72,14 @@ bool composite_mapping::gen_typedef (UTL_ScopedName *name, AST_Type *base,
 bool composite_mapping::gen_interf (UTL_ScopedName *name, bool local,
   const std::vector<AST_Interface *> &inherits,
   const std::vector<AST_Interface *> &inh_flat,
+  const std::vector<AST_Attribute *> &attrs,
   const std::vector<AST_Operation *> &ops, const char *repoid)
 {
   for (vector<idl_mapping *>::iterator it (components_.begin ());
     it != components_.end (); ++it)
     {
-      if (!(*it)->gen_interf (name, local, inherits, inh_flat, ops, repoid))
+      if (!(*it)->gen_interf (name, local, inherits, inh_flat,
+          attrs, ops, repoid))
         return false;
     }
   return true;

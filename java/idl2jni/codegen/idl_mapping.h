@@ -28,6 +28,7 @@ public:
   virtual bool gen_interf (UTL_ScopedName *name, bool local,
     const std::vector<AST_Interface *> &inherits,
     const std::vector<AST_Interface *> &inherits_flat,
+    const std::vector<AST_Attribute *> &attrs,
     const std::vector<AST_Operation *> &ops, const char *repoid) = 0;
 
   virtual bool gen_interf_fwd (UTL_ScopedName *name) = 0;
@@ -60,6 +61,7 @@ public:
   bool gen_interf (UTL_ScopedName *name, bool local,
     const std::vector<AST_Interface *> &inherits,
     const std::vector<AST_Interface *> &inherits_flat,
+    const std::vector<AST_Attribute *> &attrs,
     const std::vector<AST_Operation *> &ops, const char *repoid);
 
   bool gen_interf_fwd (UTL_ScopedName *name);
@@ -100,6 +102,7 @@ public:
   bool gen_interf (UTL_ScopedName *name, bool local,
     const std::vector<AST_Interface *> &inherits,
     const std::vector<AST_Interface *> &inherits_flat,
+    const std::vector<AST_Attribute *> &attrs,
     const std::vector<AST_Operation *> &ops, const char *repoid);
 
   bool gen_interf_fwd (UTL_ScopedName *)
@@ -140,6 +143,7 @@ public:
   bool gen_interf (UTL_ScopedName *name, bool local,
     const std::vector<AST_Interface *> &inherits,
     const std::vector<AST_Interface *> &inherits_flat,
+    const std::vector<AST_Attribute *> &attrs,
     const std::vector<AST_Operation *> &ops, const char *repoid);
 
   bool gen_interf_fwd (UTL_ScopedName *name);

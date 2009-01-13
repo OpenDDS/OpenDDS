@@ -741,41 +741,53 @@ namespace
     return cpp_key_tbl_.lookup (word, ACE_OS::strlen (word));
   }
 
-
-  string escape_underscores (const char *str)
+  string &escape_name (string &s)
   {
-    // The only escape we need to enforce is: _ => _1
-    string name (str);
-    for (size_t i = name.find ('_'); i != string::npos;
-      i = name.find ('_', i + 1))
+    for (size_t i = 0; i < s.length(); ++i)
       {
-        name.insert (i + 1, 1, '1');
+        switch (s[i])
+          {
+          case '/':
+            s[i] = '_';
+            break;
+          case '_':
+            s.replace (i, 1, "_1");
+            break;
+          case ';':
+            s.replace (i, 1, "_2");
+            break;
+          case '[':
+            s.replace (i, 1, "_3");
+            break;
+          }
       }
-    return name;
+    return s;
   }
 
-
-  string jni_function_name (const char *jvmClass, const char *method)
+  string jni_function_name (const char *jvmClass, const char *method,
+    vector<string> *params = 0)
   {
-    string method_esc_und = escape_underscores (method);
-    string className = escape_underscores (jvmClass);
-    for (size_t i = className.find ('/'); i != string::npos;
-      i = className.find ('/', i + 1))
-      {
-        className[i] = '_';
-      }
-
     // According to the JNI spec, a native method name consists of:
     // the prefix Java_
-    return string ("Java_")
+    string name("Java_");
     // a mangled fully-qualified class name
-      + className
+    name += escape_name (string (jvmClass));
     // an underscore ("_") separator
-      + '_'
+    name += '_';
     // a mangled method name
-      + method_esc_und;
-    // for overloaded native methods, ...snip...
-    //   -> IDL guarantees no overloads
+    name += escape_name (string (method));
+
+    if (params != 0)
+      {
+        name += '_';
+        vector<string>::iterator it = params->begin ();
+        for (; it != params->end (); ++it)
+          {
+            name += escape_name (*it);
+          }
+      }
+
+    return name;
   }
 
 
@@ -951,6 +963,210 @@ namespace
     return suffix;
   }
 
+  void write_native_attribute_r (UTL_ScopedName *name, const char *javaStub,
+    AST_Attribute *attr, bool local)
+  {
+    const char *attrname = attr->local_name ()->get_string ();
+    string cxx = idl_mapping_jni::scoped (name);
+    string fnName = jni_function_name (javaStub, attrname);
+    string retconv, ret_exception, tao_retconv, array_cast;
+    string ret = idl_mapping_jni::type (attr->field_type ());
+    string retval = idl_mapping_jni::taoType (attr->field_type ());
+    string tao_ret = idl_mapping_jni::taoParam (attr->field_type (),
+      AST_Argument::dir_IN /*ignored*/, true);
+    string tao_retval = ret;
+    string jniFn = idl_mapping_jni::jniFnName (attr->field_type ());
+    string ret_jsig = idl_mapping_jni::jvmSignature (attr->field_type ());
+    string suffix, extra_type, extra_init, extra_retn;
+    bool is_array = isArray (attr->field_type ()),
+      is_objref = isObjref (attr->field_type ());
+    if (is_array || attr->field_type ()->size_type () != AST_Type::FIXED)
+      {
+        if (!is_array && !is_objref) suffix = ".in ()";
+        if (is_array || isSSU (attr->field_type ()))
+          {
+            extra_type = "_var";
+            extra_init = " = new " + retval;
+            retval = varify (retval);
+          }
+        extra_retn = "._retn ()";
+      }
+    if (ret.size () > 5 && ret.substr (ret.size() - 5) == "Array")
+      array_cast = "static_cast<" + ret + "> (";
+    retval += " _c_ret = ";
+    tao_retval += " _j_ret = ";
+    retconv = "      return _c_ret;\n";
+    tao_retconv = "  return _j_ret;\n";
+    ret_exception = "  return 0;\n";
+    if (!isPrimitive (attr->field_type ()))
+      {
+        retconv =
+          "      " + ret + " _j_ret = 0;\n"
+          "      copyToJava (_jni, _j_ret, _c_ret" + suffix + ", true);\n"
+          "      return _j_ret;\n";
+        tao_retconv =
+          "  " + idl_mapping_jni::taoType (attr->field_type ()) + extra_type
+          + " _c_ret" + extra_init + ";\n"
+          "  copyToCxx (_jni, _c_ret, _j_ret);\n"
+          "  return _c_ret" + extra_retn + ";\n";
+      }
+
+    //for the JavaPeer (local interfaces only)
+    string tao_args, java_args, args_jsig, tao_argconv_in, tao_argconv_out;
+
+    //for the Stub/TAOPeer (all interfaces)
+    string args, cxx_args, argconv_in, argconv_out;
+
+    if (local)
+      {
+        string attrname_cxx = isCxxKeyword (attrname) ? (string ("_cxx_")
+          + attrname) : attrname,
+          exception_spec = "ACE_THROW_SPEC ((CORBA::SystemException))";
+        //FUTURE: support user exceptions
+        be_global->stub_header_ <<
+          "  " << tao_ret << ' ' << attrname_cxx << " (" << tao_args << ")\n"
+          "    " << exception_spec << ";\n\n";
+        be_global->stub_impl_ <<
+          tao_ret << ' ' << idl_mapping_jni::scoped_helper (name, "_")
+          << "JavaPeer::" << attrname_cxx << " (" << tao_args << ")\n"
+          "  " << exception_spec << "\n"
+          "{\n"
+          "  JNIThreadAttacher _jta (jvm_, cl_);\n"
+          "  JNIEnv *_jni = _jta.getJNI ();\n"
+          << tao_argconv_in <<
+          "  jclass _clazz = _jni->GetObjectClass (globalCallback_);\n"
+          "  jmethodID _mid = _jni->GetMethodID (_clazz, \"" << attrname
+          << "\", \"(" << args_jsig << ")" << ret_jsig << "\");\n"
+          "  " << tao_retval << array_cast << "_jni->Call" << jniFn
+          << "Method (globalCallback_, _mid" << java_args
+          << ((array_cast == "") ? "" : ")") << ");\n"
+          "  jthrowable _excep = _jni->ExceptionOccurred ();\n"
+          "  if (_excep) throw_cxx_exception (_jni, _excep);\n"
+          << tao_argconv_out
+          << tao_retconv <<
+          "}\n\n";
+      }
+
+    be_global->stub_impl_ <<
+      "extern \"C\" JNIEXPORT " << ret << " JNICALL\n" <<
+      fnName << " (JNIEnv *_jni, jobject _jthis" << args << ")\n"
+      "{\n"
+      "  CORBA::Object_ptr _this_obj = recoverTaoObject (_jni, _jthis);\n"
+      "  try\n"
+      "    {\n"
+      "      " << cxx << "_var _this = " << cxx << "::_narrow (_this_obj);\n"
+      << argconv_in <<
+      "      " << retval << "_this->" << (isCxxKeyword (attrname)
+        ? "_cxx_" : "")
+      << attrname << " (" << cxx_args << ");\n"
+      << argconv_out
+      << retconv <<
+      //FUTURE: catch declared user exceptions
+      "    }\n"
+      "  catch (const CORBA::SystemException &_se)\n"
+      "    {\n"
+      "      throw_java_exception (_jni, _se);\n"
+      "    }\n"
+      << ret_exception <<
+      "}\n\n";
+  }
+
+  void write_native_attribute_w (UTL_ScopedName *name, const char *javaStub,
+    AST_Attribute *attr, bool local)
+  {
+    const char *attrname = attr->local_name ()->get_string ();
+    string ret = "void";
+    string cxx = idl_mapping_jni::scoped (name);
+    string retval, retconv, ret_exception;
+    //for the JavaPeer (local interfaces only)
+    string ret_jsig = "V", jniFn = "Void", tao_ret = "void",
+      tao_retval, tao_retconv, array_cast;
+
+    //for the JavaPeer (local interfaces only)
+    string java_args, tao_argconv_in, tao_argconv_out;
+
+    //for the Stub/TAOPeer (all interfaces)
+    string cxx_args, argconv_in, argconv_out;
+
+    string argname = string(attrname) + '_';
+    string args = ", " + idl_mapping_jni::type (attr->field_type ())
+      + ' ' + argname;
+    string tao_args = idl_mapping_jni::taoParam (attr->field_type (),
+      AST_Argument::dir_IN /*ignored*/) + ' ' + argname;
+    if (isPrimitive (attr->field_type ()))
+      {
+        cxx_args = argname + string (", ");
+        java_args = string (", ") + argname;
+      }
+    else
+      {
+        string suffix = arg_conversion (attrname, attr->field_type (),
+          AST_Argument::dir_IN /*ignored*/, argconv_in,
+          argconv_out, tao_argconv_in, tao_argconv_out);
+        cxx_args = string ("_c_") + attrname + suffix + ", ";
+        java_args = ", " + string ("_j_") + attrname;
+      }
+    cxx_args.resize (cxx_args.size () - 2);
+
+    // NOTE: mutating attribute functions should always be overloaded:
+    vector<string> params;
+    params.push_back(idl_mapping_jni::jvmSignature (attr->field_type ()));
+
+    string fnName = jni_function_name (javaStub, attrname, &params);
+    
+    if (local)
+      {
+        string attrname_cxx = isCxxKeyword (attrname) ? (string ("_cxx_")
+          + attrname) : attrname,
+          exception_spec = "ACE_THROW_SPEC ((CORBA::SystemException))";
+        //FUTURE: support user exceptions
+        be_global->stub_header_ <<
+          "  " << tao_ret << ' ' << attrname_cxx << " (" << tao_args << ")\n"
+          "    " << exception_spec << ";\n\n";
+        be_global->stub_impl_ <<
+          tao_ret << ' ' << idl_mapping_jni::scoped_helper (name, "_")
+          << "JavaPeer::" << attrname_cxx << " (" << tao_args << ")\n"
+          "  " << exception_spec << "\n"
+          "{\n"
+          "  JNIThreadAttacher _jta (jvm_, cl_);\n"
+          "  JNIEnv *_jni = _jta.getJNI ();\n"
+          << tao_argconv_in <<
+          "  jclass _clazz = _jni->GetObjectClass (globalCallback_);\n"
+          "  jmethodID _mid = _jni->GetMethodID (_clazz, \"" << attrname
+          << "\", \"(" << params[0] << ")" << ret_jsig << "\");\n"
+          "  " << tao_retval << array_cast << "_jni->Call" << jniFn
+          << "Method (globalCallback_, _mid" << java_args
+          << ((array_cast == "") ? "" : ")") << ");\n"
+          "  jthrowable _excep = _jni->ExceptionOccurred ();\n"
+          "  if (_excep) throw_cxx_exception (_jni, _excep);\n"
+          << tao_argconv_out
+          << tao_retconv <<
+          "}\n\n";
+      }
+
+    be_global->stub_impl_ <<
+      "extern \"C\" JNIEXPORT " << ret << " JNICALL\n" <<
+      fnName << " (JNIEnv *_jni, jobject _jthis" << args << ")\n"
+      "{\n"
+      "  CORBA::Object_ptr _this_obj = recoverTaoObject (_jni, _jthis);\n"
+      "  try\n"
+      "    {\n"
+      "      " << cxx << "_var _this = " << cxx << "::_narrow (_this_obj);\n"
+      << argconv_in <<
+      "      " << retval << "_this->" << (isCxxKeyword (attrname)
+        ? "_cxx_" : "")
+      << attrname << " (" << cxx_args << ");\n"
+      << argconv_out
+      << retconv <<
+      //FUTURE: catch declared user exceptions
+      "    }\n"
+      "  catch (const CORBA::SystemException &_se)\n"
+      "    {\n"
+      "      throw_java_exception (_jni, _se);\n"
+      "    }\n"
+      << ret_exception <<
+      "}\n\n";
+  }
 
   void write_native_operation (UTL_ScopedName *name, const char *javaStub,
     AST_Operation *op, bool local)
@@ -1123,6 +1339,7 @@ namespace
 bool idl_mapping_jni::gen_interf (UTL_ScopedName *name, bool local,
   const std::vector<AST_Interface *> &inherits,
   const std::vector<AST_Interface *> &inherits_flat,
+  const std::vector<AST_Attribute *> &attrs,
   const std::vector<AST_Operation *> &ops, const char *)
 {
   string javaInterf = scoped_helper (name, "/"),
@@ -1217,12 +1434,25 @@ bool idl_mapping_jni::gen_interf (UTL_ScopedName *name, bool local,
     }
 
   // implement native methods for the stub (w/ inherits_flat)
+  for (size_t i = 0; i < attrs.size (); ++i)
+    {
+      AST_Attribute *attr = attrs[i];
+
+      write_native_attribute_r (name, javaStub.c_str (), attr, local);
+      if (!attr->readonly ())
+      {
+        write_native_attribute_w (name, javaStub.c_str (), attr, local);
+      }
+    }
+
   for (size_t i = 0; i < ops.size (); ++i)
     {
       write_native_operation (name, javaStub.c_str (), ops[i], local);
     }
 
   if (local) c.hfile << "};\n\n";
+
+  // LOCAL SHOULD NOT BE GENERATED BEYOND THIS POINT!
 
   for (size_t i = 0; i < inherits_flat.size (); ++i)
     {
@@ -1231,7 +1461,18 @@ bool idl_mapping_jni::gen_interf (UTL_ScopedName *name, bool local,
       for (; !it.is_done (); it.next ())
         {
           AST_Decl *item = it.item ();
-          if (item->node_type () == AST_Decl::NT_op)
+          if (item->node_type () == AST_Decl::NT_attr)
+            {
+              AST_Attribute *attr = AST_Attribute::narrow_from_decl (item);
+
+              write_native_attribute_r (name, javaStub.c_str (), attr, false);
+              if (!attr->readonly ())
+                {
+                  write_native_attribute_w (name, javaStub.c_str (),
+                    attr, false);
+                }
+            }
+          else if (item->node_type () == AST_Decl::NT_op)
             {
               AST_Operation *op = AST_Operation::narrow_from_decl (item);
               write_native_operation (name, javaStub.c_str (), op, false);
