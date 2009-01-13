@@ -5,6 +5,15 @@
 #include "dds/DCPS/debug.h"
 #include "PublicationProfile.h"
 
+// Deconflict macros from ACE and STL algorithms.
+#ifdef min
+#undef min
+#endif /* min */
+
+#ifdef max
+#undef max
+#endif /* max */
+
 #include <stdlib.h>  // For rand()
 #include <math.h>    // For log() and sqrt()
 #include <algorithm> // for max() and min()
