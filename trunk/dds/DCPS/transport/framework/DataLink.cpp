@@ -1109,9 +1109,10 @@ OpenDDS::DCPS::DataLink::set_dscp_codepoint( int cp, ACE_SOCK& socket)
              );
 
   if( (result == -1) && (errno != ENOTSUP)) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: DataLink::set_dscp_codepoint() - ")
-      ACE_TEXT("failed to set the %s codepoint to %d errno %m\n"),
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) DataLink::set_dscp_codepoint() - ")
+      ACE_TEXT("failed to set the %s codepoint to %d: %m, ")
+      ACE_TEXT("try running as supersuser.\n"),
       which,
       cp
     ));

@@ -1,10 +1,26 @@
+Tue Jan 13 18:17:43 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+	  Demoted failure to set IPV4 TOS field to an informational
+	  message.
+
+        * performance-tests/DCPS/Priority/Options.h:
+
+	  Included configuration files before use of pragma once.
+
+        * performance-tests/DCPS/Priority/PublicationProfile.cpp:
+
+	  Undef min and max in order to use the STL algorithm versions of
+	  these functions.
+
 Mon Jan 12 22:41:27 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/DCPS/Priority/Options.cpp:
         * tests/DCPS/Priority/Options.cpp:
 
-	  Explicitly use unsigned constants to intialize pairs to
-	  eliminate a Sun compiler error.
+          Explicitly use unsigned constants to intialize pairs to
+          eliminate a Sun compiler error.
 
 Mon Jan 12 21:40:57 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
