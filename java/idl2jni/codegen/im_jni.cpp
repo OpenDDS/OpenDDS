@@ -741,6 +741,8 @@ namespace
     return cpp_key_tbl_.lookup (word, ACE_OS::strlen (word));
   }
 
+  static const char name_sep = '_';
+
   string &escape_name (string &s)
   {
     for (size_t i = 0; i < s.length(); ++i)
@@ -748,7 +750,7 @@ namespace
         switch (s[i])
           {
           case '/':
-            s[i] = '_';
+            s[i] = name_sep;
             break;
           case '_':
             s.replace (i, 1, "_1");
@@ -767,19 +769,22 @@ namespace
   string jni_function_name (const char *jvmClass, const char *method,
     vector<string> *params = 0)
   {
+    string classname (jvmClass);
+    string methodname (method);
+
     // According to the JNI spec, a native method name consists of:
     // the prefix Java_
     string name("Java_");
     // a mangled fully-qualified class name
-    name += escape_name (string (jvmClass));
+    name += escape_name (classname);
     // an underscore ("_") separator
-    name += '_';
+    name += name_sep;
     // a mangled method name
-    name += escape_name (string (method));
+    name += escape_name (methodname);
 
     if (params != 0)
       {
-        name += '_';
+        name += name_sep;
         vector<string>::iterator it = params->begin ();
         for (; it != params->end (); ++it)
           {
