@@ -6,14 +6,12 @@ Wed Jan 14 16:46:22 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
 Tue Jan 13 23:31:18 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
-        * java/dds:
         * java/idl2jni/codegen:
         * java/idl2jni/codegen/idl2jni_visitor.cpp:
         * java/idl2jni/codegen/idl_mapping.h:
         * java/idl2jni/codegen/idl_mapping.cpp:
         * java/idl2jni/codegen/im_java.cpp:
         * java/idl2jni/codegen/im_jni.cpp:
-        * java/idl2jni/tests/simple/idl2jni_test_simple.mpc:
         * java/idl2jni/tests/simple/simple.idl:
 
           Added support for IDL attributes (idl2jni).
