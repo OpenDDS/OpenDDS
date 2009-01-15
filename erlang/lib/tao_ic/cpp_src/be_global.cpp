@@ -201,6 +201,16 @@ BE_GlobalData::get_cpp_src_dir(string &s) const
   get_output_dir(s, "cpp_src");
 }
 
+void
+BE_GlobalData::get_output_dir(string &s, const char *dirname) const
+{
+  s += this->output_dir_;
+  if (this->output_otp_) {
+    s += dirname;
+  }
+  normalize_path(s);
+}
+
 string
 BE_GlobalData::output_dir() const
 {
@@ -241,14 +251,4 @@ string
 BE_GlobalData::stub_export_macro() const
 {
   return this->stub_export_macro_;
-}
-
-void
-BE_GlobalData::get_output_dir(string &s, const char *dirname) const
-{
-  s += this->output_dir_;
-  if (this->output_otp_) {
-    s += dirname;
-  }
-  normalize_path(s);
 }
