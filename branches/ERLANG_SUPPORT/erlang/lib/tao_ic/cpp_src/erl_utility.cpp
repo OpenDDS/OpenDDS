@@ -168,13 +168,8 @@ erl_module::to_module_name(AST_Decl *node)
   return s;
 }
 
-erl_literal::erl_literal(AST_Expression *expr)
-  : str_(to_str(expr->ev()))
-{
-}
-
-erl_literal::erl_literal(AST_Expression::AST_ExprValue *ev)
-  : str_(to_str(ev))
+erl_literal::erl_literal(AST_Expression *e)
+  : str_(to_str(e))
 {
 }
 
@@ -189,10 +184,11 @@ erl_literal::str() const
 }
 
 string
-erl_literal::to_str(AST_Expression::AST_ExprValue *ev)
+erl_literal::to_str(AST_Expression *e)
 {
   ostringstream os;
 
+  AST_Expression::AST_ExprValue *ev = e->ev();
   switch (ev->et) {
   case AST_Expression::EV_short:
     os << ev->u.sval;

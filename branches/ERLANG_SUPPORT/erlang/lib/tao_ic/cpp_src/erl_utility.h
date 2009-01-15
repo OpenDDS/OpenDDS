@@ -61,13 +61,12 @@ private:
 class erl_literal {
 public:
   explicit erl_literal(AST_Expression *);
-  explicit erl_literal(AST_Expression::AST_ExprValue *);
 
   ~erl_literal(void);
 
   std::string str(void) const;
 
-  static std::string to_str(AST_Expression::AST_ExprValue *);
+  static std::string to_str(AST_Expression *);
 
 private:
   const std::string str_;
