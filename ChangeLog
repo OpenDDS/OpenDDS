@@ -1,88 +1,94 @@
+Thu Jan 15 22:52:38 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/dds/dcps_java.mpc:
+
+          Corrected bad idl2jni dependency.
+
 Thu Jan 15 15:21:32 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
 
-	  Increased debug level for an annoying cached data diagnostic
-	  message from 5 to 8.
+          Increased debug level for an annoying cached data diagnostic
+          message from 5 to 8.
 
         * dds/DCPS/PublisherImpl.cpp:
 
-	  Added a diagnostic message identifying the number of
-	  subscriptions added to individual publications during
-	  add_associations processing.
+          Added a diagnostic message identifying the number of
+          subscriptions added to individual publications during
+          add_associations processing.
 
         * dds/DCPS/transport/ReliableMulticast/ReliableMulticastDataLink.cpp:
 
-	  Added priority to constructor arguments for data link.
+          Added priority to constructor arguments for data link.
 
         * dds/DCPS/transport/framework/PerConnectionSynch.h:
         * dds/DCPS/transport/framework/PerConnectionSynch.inl:
         * dds/DCPS/transport/framework/PerConnectionSynch.cpp:
 
-	  Renamed the priority member to dds_priority_ to avoid any
-	  potential conflict with base class members.  Added a diagnostic
-	  message during thread activation.
+          Renamed the priority member to dds_priority_ to avoid any
+          potential conflict with base class members.  Added a diagnostic
+          message during thread activation.
 
         * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
 
-	  Modified to map transport_priority instead of (possibly base
-	  class) priority value.  Added a diagnostic message during
-	  thread activation.
+          Modified to map transport_priority instead of (possibly base
+          class) priority value.  Added a diagnostic message during
+          thread activation.
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.inl:
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
 
-	  Changed priority member and method to transport_priority to
-	  avoid potential conflicts with base class elements.
+          Changed priority member and method to transport_priority to
+          avoid potential conflicts with base class elements.
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
 
-	  Added priority to constructor arguments for data link.  Form
-	  PriorityKey value using explicit transport_priority value.
-	  Extended diagnostic messages.
+          Added priority to constructor arguments for data link.  Form
+          PriorityKey value using explicit transport_priority value.
+          Extended diagnostic messages.
 
         * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramDataLink.h:
         * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramDataLink.inl:
 
-	  Added priority to constructor arguments and passed this value
-	  to the base class DataLink constructor.  Removed the local
-	  priority member and method, using the base class values
-	  instead.
+          Added priority to constructor arguments and passed this value
+          to the base class DataLink constructor.  Removed the local
+          priority member and method, using the base class values
+          instead.
 
         * performance-tests/DCPS/Priority/DataReaderListener.h:
         * performance-tests/DCPS/Priority/DataReaderListener.cpp:
 
-	  Turn off per message verbosity.  Add total_message and
-	  valid_message counter interfaces and management.
+          Turn off per message verbosity.  Add total_message and
+          valid_message counter interfaces and management.
 
         * performance-tests/DCPS/Priority/Publisher.cpp:
 
-	  Added information about writer priority to diagnostic message
-	  during creation.  Correct _var access idiom.  Added number of
-	  subscriptions to diagnostic message at start of publication.
-	  Added total sent messages summary at end of publication.
+          Added information about writer priority to diagnostic message
+          during creation.  Correct _var access idiom.  Added number of
+          subscriptions to diagnostic message at start of publication.
+          Added total sent messages summary at end of publication.
 
         * performance-tests/DCPS/Priority/Subscriber.h:
         * performance-tests/DCPS/Priority/Subscriber.cpp:
 
-	  Expose listener total and valid messages interfaces from this
-	  class.  Change shutdown criteria to be lack of *any* attached
-	  publications and extend diagnostic message with related
-	  information.
+          Expose listener total and valid messages interfaces from this
+          class.  Change shutdown criteria to be lack of *any* attached
+          publications and extend diagnostic message with related
+          information.
 
         * performance-tests/DCPS/Priority/Writer.h:
         * performance-tests/DCPS/Priority/Writer.cpp:
 
-	  Add sent message count interface and management.
+          Add sent message count interface and management.
 
         * performance-tests/DCPS/Priority/publisher_main.cpp:
 
-	  Change verbosity from DCPS to local command line argument.
+          Change verbosity from DCPS to local command line argument.
 
         * performance-tests/DCPS/Priority/subscriber_main.cpp:
 
-	  Add total and valid message information to the result summary.
+          Add total and valid message information to the result summary.
 
 Wed Jan 14 16:46:22 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
