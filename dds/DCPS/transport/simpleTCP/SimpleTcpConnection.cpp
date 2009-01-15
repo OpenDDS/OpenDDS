@@ -39,7 +39,7 @@ OpenDDS::DCPS::SimpleTcpConnection::SimpleTcpConnection()
   reconnect_task_ (this),
   reconnect_state_ (INIT_STATE),
   last_reconnect_attempted_ (ACE_Time_Value::zero),
-  priority_( 0), // TRANSPORT_PRIORITY.value default value - 0.
+  transport_priority_( 0), // TRANSPORT_PRIORITY.value default value - 0.
   shutdown_ (false)
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","SimpleTcpConnection",6);
@@ -379,7 +379,7 @@ OpenDDS::DCPS::SimpleTcpConnection::active_establishment
     }
 
   // Set the DiffServ codepoint according to the priority value.
-  DirectPriorityMapper mapper( this->priority_);
+  DirectPriorityMapper mapper( this->transport_priority_);
   this->link_->set_dscp_codepoint( mapper.codepoint(), this->peer());
 
   set_sock_options(tcp_config.in ());
@@ -466,7 +466,7 @@ OpenDDS::DCPS::SimpleTcpConnection::active_connect
 
   if (this->connected_ == true)
     return 0;
-  this->priority_ = priority;
+  this->transport_priority_ = priority;
   return this->active_establishment (remote_address,
                                      local_address,
                                      tcp_config);

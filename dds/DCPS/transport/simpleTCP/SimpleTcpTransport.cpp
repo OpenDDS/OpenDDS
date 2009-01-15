@@ -125,7 +125,7 @@ OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink
   // and attempt the "create" part of "find_or_create_datalink".
 
   // Here is where we actually create the DataLink.
-  link = new SimpleTcpDataLink(remote_address, this);
+  link = new SimpleTcpDataLink(remote_address, this, priority);
 
   { // guard scope
     GuardType guard(this->links_lock_);
@@ -421,7 +421,7 @@ OpenDDS::DCPS::SimpleTcpTransport::release_datalink_i(DataLink* link)
 
   // Attempt to remove the SimpleTcpDataLink from our links_ map.
   PriorityKey key(
-                tcp_link->get_connection()->priority(),
+                tcp_link->get_connection()->transport_priority(),
                 tcp_link->remote_address()
               );
   if (this->links_.unbind( key, released_link) != 0)
@@ -576,6 +576,14 @@ OpenDDS::DCPS::SimpleTcpTransport::connect_datalink
 {
   DBG_ENTRY_LVL("SimpleTcpTransport","connect_datalink",6);
 
+  if( DCPS_debug_level > 4) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) SimpleTcpTransport::connect_datalink() - ")
+      ACE_TEXT("creating send strategy with priority %d.\n"),
+      link->transport_priority()
+    ));
+  }
+
   TransportSendStrategy_rch send_strategy
     = new SimpleTcpSendStrategy(
             link,
@@ -616,7 +624,7 @@ OpenDDS::DCPS::SimpleTcpTransport::fresh_link( SimpleTcpConnection_rch connectio
   SimpleTcpDataLink_rch link;
   GuardType guard(this->links_lock_);
 
-  PriorityKey key( connection->priority(), connection->get_remote_address());
+  PriorityKey key( connection->transport_priority(), connection->get_remote_address());
   if (this->links_.find( key, link) == 0)
     {
       SimpleTcpConnection_rch old_con = link->get_connection ();

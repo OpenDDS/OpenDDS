@@ -256,6 +256,18 @@ Subscriber::Subscriber( const Options& options)
 
 }
 
+int
+Subscriber::total_messages() const
+{
+  return this->listener_->total_messages();
+}
+
+int
+Subscriber::valid_messages() const
+{
+  return this->listener_->valid_messages();
+}
+
 const std::map< long, long>&
 Subscriber::counts() const
 {
@@ -284,8 +296,10 @@ Subscriber::run()
     if( this->options_.verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Subscriber::run() - ")
-        ACE_TEXT("waiting for publication to %s.\n"),
-        (changes.active_count==0? "attach": "detach")
+        ACE_TEXT("waiting for publication to %s, ")
+        ACE_TEXT("%d active publications.\n"),
+        (changes.active_count==0? "attach": "detach"),
+        changes.active_count
       ));
     }
     if( DDS::RETCODE_OK != this->waiter_->wait( conditions, timeout)) {
@@ -297,7 +311,7 @@ Subscriber::run()
     }
     changes = this->reader_->get_liveliness_changed_status();
 
-  } while( changes.active_count_change != -1);
+  } while( changes.active_count > 0);
 
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
@@ -305,7 +319,6 @@ Subscriber::run()
       ACE_TEXT("shutting down after publication was removed.\n")
     ));
   }
-
 }
 
 } // End of namespace Test

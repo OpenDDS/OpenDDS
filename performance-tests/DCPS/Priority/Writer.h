@@ -36,6 +36,9 @@ class Writer : public ACE_Task_Base {
     void start();
     void stop();
 
+    /// State access
+    int messages() const;
+
   private:
     /// DataWriter to write with.
     ::DDS::DataWriter_var writer_;
@@ -51,6 +54,9 @@ class Writer : public ACE_Task_Base {
 
     /// Completion indicator.
     bool done_;
+
+    /// Count of messages sent by this publication.
+    int messages_;
 
     /// Lock for synchronizing access to the methods.
     ACE_SYNCH_MUTEX lock_;

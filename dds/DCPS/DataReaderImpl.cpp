@@ -2180,7 +2180,7 @@ DataReaderImpl::cache_lookup_instance_handles (const WriterIdSeq& ids,
     else
     {
       hdls[i] = iter->second;
-      if( DCPS_debug_level > 4) {
+      if( DCPS_debug_level > 7) {
         ::OpenDDS::DCPS::GuidConverter converter(
           const_cast< ::OpenDDS::DCPS::RepoId*>( &ids[ i])
         );

@@ -21,7 +21,7 @@ main( int argc, char *argv[])
     // Create the publisher thingie.
     Test::Publisher publisher( options);
 
-    if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+    if( options.verbose()) {
       std::stringstream buffer;
       buffer << options.transportType();
       ACE_DEBUG((LM_DEBUG,

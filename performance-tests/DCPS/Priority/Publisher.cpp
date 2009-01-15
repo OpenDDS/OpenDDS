@@ -242,8 +242,10 @@ Publisher::Publisher( const Options& options)
     } else if( this->options_.verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
-        ACE_TEXT("created writer for publication %s.\n"),
-        this->options_.profiles()[ index]->name().c_str()
+        ACE_TEXT("created writer for publication %s ")
+        ACE_TEXT("with priority %d.\n"),
+        this->options_.profiles()[ index]->name().c_str(),
+        writerQos.transport_priority.value
       ));
     }
 
@@ -259,7 +261,7 @@ Publisher::Publisher( const Options& options)
     // The first publication is fine for obtaining a status condition to
     // synchronize the beginning of publication.
     //
-    if( CORBA::is_nil( this->status_)) {
+    if( CORBA::is_nil( this->status_.in())) {
       // Grab, enable and attach the status condition for test synchronization.
       this->writer_ = DDS::DataWriter::_duplicate( writer.in());
       this->status_ = writer->get_statuscondition();
@@ -305,7 +307,8 @@ Publisher::run()
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Publisher::run() - ")
-      ACE_TEXT("starting to publish samples.\n")
+      ACE_TEXT("starting to publish samples with %d matched subscriptions.\n"),
+      matches.total_count
     ));
   }
 
@@ -340,6 +343,15 @@ Publisher::run()
        ++current
      ) {
     // Join and clean up.
+    if( this->options_.verbose()) {
+      current->second->wait();
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Publisher::run() - ")
+        ACE_TEXT("publication %s stopping after sending %d messages.\n"),
+        current->first.c_str(),
+        current->second->messages()
+      ));
+    }
     delete current->second;
   }
   this->publications_.clear();
@@ -350,7 +362,6 @@ Publisher::run()
       ACE_TEXT("finished publishing samples.\n")
     ));
   }
-  ACE_OS::sleep( 2); /// @TODO: Kluge around a shutdown race condition.
 }
 
 } // End of namespace Test

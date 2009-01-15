@@ -117,8 +117,8 @@ namespace OpenDDS
         void shutdown ();
 
         /// Access TRANSPORT_PRIORITY.value policy value if set.
-        CORBA::Long& priority();
-        CORBA::Long  priority() const;
+        CORBA::Long& transport_priority();
+        CORBA::Long  transport_priority() const;
 
       private:
 
@@ -189,7 +189,7 @@ namespace OpenDDS
         ACE_Time_Value last_reconnect_attempted_;
 
         /// TRANSPORT_PRIORITY.value policy value.
-        CORBA::Long priority_;
+        CORBA::Long transport_priority_;
 
         /// shutdown flag
         bool shutdown_;

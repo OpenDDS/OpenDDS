@@ -23,6 +23,12 @@ class Subscriber {
     /// Execute the test.
     void run();
 
+    /// Total number of messages received by the subscriber.
+    int total_messages() const;
+
+    /// Valid number of messages received by the subscriber.
+    int valid_messages() const;
+
     /// Number of samples received during the test from each writer.
     const std::map< long, long>& counts() const;
 

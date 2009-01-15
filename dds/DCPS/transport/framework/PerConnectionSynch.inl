@@ -14,7 +14,7 @@ OpenDDS::DCPS::PerConnectionSynch::PerConnectionSynch(
     condition_(this->lock_),
     work_available_(0),
     shutdown_(0),
-    priority_( priority),
+    dds_priority_( priority),
     scheduler_( scheduler)
 {
   DBG_ENTRY_LVL("PerConnectionSynch","PerConnectionSynch",6);
