@@ -10,6 +10,7 @@
 class generator_erl : public generator {
 public:
   generator_erl(void);
+
   ~generator_erl(void);
 
   bool generate_constant(AST_Constant *);

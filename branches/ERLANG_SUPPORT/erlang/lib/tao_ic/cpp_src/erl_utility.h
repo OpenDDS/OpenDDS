@@ -2,8 +2,8 @@
  * $Id$
  */
 
-#ifndef TAO_IC_ERL_HELPER_H
-#define TAO_IC_ERL_HELPER_H
+#ifndef TAO_IC_ERL_UTILITY_H
+#define TAO_IC_ERL_UTILITY_H
 
 #include <fstream>
 #include <ostream>
@@ -11,15 +11,15 @@
 #include <vector>
 
 #include "ast_decl.h"
+#include "ast_expression.h"
 
 class erl_module {
 public:
   static const char *ext;
 
   explicit erl_module(AST_Decl *);
-  ~erl_module(void);
 
-  const char *name(void) const;
+  ~erl_module(void);
 
   void add_export(const char *);
 
@@ -27,7 +27,7 @@ public:
 
   void add_include(const char *);
 
-  const char *filename(void);
+  const char *filename(void) const;
 
   void generate_header(void);
 
@@ -37,44 +37,42 @@ public:
 
   std::ostream &open_stream(bool = true);
 
-  static const char *to_list(std::vector<const char *> &);
+  std::string to_list(std::vector<const char *> &);
 
-  static const char *to_name(AST_Decl *);
+  std::string to_module_name(AST_Decl *);
 
 private:
-  const char *name_;
+  const std::string module_name_;
 
+  std::string filename_;
+
+  std::ofstream os_;
+
+  // Module exports (list)
   std::vector<const char *> exports_;
+
+  // Module imports (list)
   std::vector<const char *> imports_;
 
+  // Module includes
   std::vector<const char *> includes_;
-
-  std::ofstream out_;
-};
-
-enum erl_type {
-  ERL_INTEGER,
-  ERL_FLOAT,
-  ERL_STRING,
-  ERL_CHAR,
-  ERL_BINARY,
-  ERL_RECORD
 };
 
 class erl_literal {
 public:
   explicit erl_literal(AST_Expression *);
+  explicit erl_literal(AST_Expression::AST_ExprValue *);
+
   ~erl_literal(void);
 
-  erl_type type(void) const;
+  std::string str(void) const;
 
-  const char *c_str(void) const;
+  static std::string to_str(AST_Expression::AST_ExprValue *);
 
 private:
-  const char *data_;
-  erl_type type_;  
+  const std::string str_;
 };
 
-ostream &operator<<(ostream &os, const erl_value &value);
+ostream &operator<<(ostream &, const erl_literal &);
 
-#endif /* TAO_IC_ERL_HELPER_H */
+#endif /* TAO_IC_ERL_UTILITY_H */

@@ -13,7 +13,7 @@
 
 class generator {
 public:
-  virtual ~generator(void) {}
+  virtual ~generator(void);
 
   virtual bool generate_constant(AST_Constant *) { return true; }
 };
@@ -24,6 +24,7 @@ public:
   typedef std::vector<generator *>::const_iterator const_iterator;
 
   explicit generator_composite(bool = false);
+
   ~generator_composite(void);
 
   void add(generator *);

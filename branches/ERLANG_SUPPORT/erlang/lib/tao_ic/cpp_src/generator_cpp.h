@@ -10,6 +10,7 @@
 class generator_cpp : public generator {
 public:
   generator_cpp(void);
+
   ~generator_cpp(void);
 };
 
