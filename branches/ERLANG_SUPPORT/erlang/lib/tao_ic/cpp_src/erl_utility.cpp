@@ -78,7 +78,7 @@ erl_module::generate_header()
 void
 erl_module::generate_attributes()
 {
-  this->os_ << "-module('" << this->module_name_ << "')." << endl;
+  this->os_ << "-module(" << this->module_name_ << ")." << endl;
 
   if (!this->imports_.empty()) {
     this->os_ << "-import(" << to_list(this->imports_) << ")." << endl;
@@ -145,14 +145,26 @@ string
 erl_module::to_module_name(AST_Decl *node)
 {
   // Flattened (C-style) IDL names are used for erlang module names.
-  // Names are converted to lower case, and should always be escaped
-  // (single quoted) in generated source:
+  // Module names are stripped of leading underscores and converted
+  // to lower case.
+  
   string s(node->flat_name());
 
-  string::iterator it(s.begin());
-  for (; it != s.end(); ++it) {
-    *it = tolower(*it);
+  { // strip leading underscores
+    string::iterator it(s.begin());
+    while (it != s.end()) {
+      if (*it != '_') break;
+      it = s.erase(it);
+    }
   }
+
+  { // convert to lower case
+    string::iterator it(s.begin());
+    for (; it != s.end(); ++it) {
+      *it = tolower(*it);
+    }
+  }
+
   return s;
 }
 
