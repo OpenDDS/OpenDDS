@@ -2,13 +2,16 @@
  * $Id$
  */
 
+#include <cstring>
+#include <string>
+
 #include "ace/Default_Constants.h"
 #include "ace/Log_Msg.h"
-#include "ace/OS_Memory.h"
-#include "ace/OS_NS_string.h"
 
 #include "ace_compat.h"
 #include "be_global.h"
+
+using namespace std;
 
 BE_GlobalData *be_global = 0;
 
@@ -18,13 +21,13 @@ const char *DEFAULT_PORT_DRIVER_NAME = "port_driver";
 class BE_Arg {
 public:
   explicit
-  BE_Arg(const ACE_CString &s)
+  BE_Arg(const string &s)
   {
-    ACE_CString::size_type pos = s.find('=');
-    this->name_ = s.substring(0, pos);
+    size_t pos = s.find('=');
+    this->name_ = s.substr(0, pos);
 
-    if (pos != ACE_CString::npos) {
-      this->value_ = s.substring(pos + 1);
+    if (pos != string::npos) {
+      this->value_ = s.substr(pos + 1);
     }
   }
 
@@ -32,12 +35,12 @@ public:
   {
   }
 
-  ACE_CString name(void) const { return this->name_; }
-  ACE_CString value(void) const { return this->value_; }
+  string name() const { return this->name_; }
+  string value() const { return this->value_; }
 
 private:
-  ACE_CString name_;
-  ACE_CString value_;
+  string name_;
+  string value_;
 };
 
 bool operator==(const BE_Arg &lhs, const char *rhs)
@@ -50,14 +53,12 @@ bool operator==(const char *lhs, const BE_Arg &rhs)
   return lhs == rhs.name();
 }
 
-ACE_CString normalize_path(const char *s_)
+void normalize_path(string &s)
 {
-  ACE_CString s(s_);
-  if (!s.is_empty() // ensure non-empty path ends with separator
-      && s[s.length() - 1] != ACE_DIRECTORY_SEPARATOR_CHAR_A) {
+  size_t len = s.length();
+  if (len > 0 && s[len - 1] != ACE_DIRECTORY_SEPARATOR_CHAR_A) {
     s += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   }
-  return s;
 }
 } // namespace
 
@@ -83,15 +84,16 @@ BE_GlobalData::parse_args(long &ac, char **av)
   const char *a = av[ac];
 
   // -o <output_dir>
-  if (ACE_OS::strcmp("-o", a) == 0) {
-    this->output_dir_ = normalize_path(av[++ac]);
+  if (strcmp("-o", a) == 0) {
+    this->output_dir_ = av[++ac];
+    normalize_path(this->output_dir_);
 
   // -otp
-  } else if (ACE_OS::strcmp("-otp", a) == 0) {
+  } else if (strcmp("-otp", a) == 0) {
     this->output_otp_ = true;
 
   // -SS
-  } else if (ACE_OS::strcmp("-SS", a) == 0) {
+  } else if (strcmp("-SS", a) == 0) {
     this->suppress_skel_ = true;
   }
 }
@@ -181,46 +183,28 @@ BE_GlobalData::generator_init()
   return gen;
 }
 
-ACE_CString
-BE_GlobalData::output_dir() const
+void
+BE_GlobalData::get_include_dir(string &s) const
 {
-  return this->output_dir_;
+  get_output_dir(s, "include");
 }
 
 void
-BE_GlobalData::output_dir(const ACE_CString &output_dir)
+BE_GlobalData::get_src_dir(string &s) const
 {
-  this->output_dir_ = output_dir;
+  get_output_dir(s, "src");
 }
 
-ACE_CString
-BE_GlobalData::output_dir_include() const
+void
+BE_GlobalData::get_cpp_src_dir(string &s) const
 {
-  ACE_CString s(this->output_dir_);
-  if (this->output_otp_) {
-    s += normalize_path("include");
-  }
-  return s;
+  get_output_dir(s, "cpp_src");
 }
 
-ACE_CString
-BE_GlobalData::output_dir_src() const
+string
+BE_GlobalData::output_dir() const
 {
-  ACE_CString s(this->output_dir_);
-  if (this->output_otp_) {
-    s += normalize_path("src");
-  }
-  return s;
-}
-
-ACE_CString
-BE_GlobalData::output_dir_src_cpp() const
-{
-  ACE_CString s(this->output_dir_);
-  if (this->output_otp_) {
-    s += normalize_path("cpp_src");
-  }
-  return s;
+  return this->output_dir_;
 }
 
 bool
@@ -229,68 +213,42 @@ BE_GlobalData::output_otp() const
   return this->output_otp_;
 }
 
-void
-BE_GlobalData::output_otp(bool output_otp)
-{
-  this->output_otp_ = output_otp;
-}
-
-ACE_CString
+string
 BE_GlobalData::port_driver_name() const
 {
   return this->port_driver_name_;
 }
 
-void
-BE_GlobalData::port_driver_name(const ACE_CString &port_driver_name)
-{
-  this->port_driver_name_ = port_driver_name;
-}
-
-ACE_CString
+string
 BE_GlobalData::skel_export_include() const
 {
   return this->skel_export_include_;
 }
 
-void
-BE_GlobalData::skel_export_include(const ACE_CString &skel_export_include)
-{
-  this->skel_export_include_ = skel_export_include;
-}
-
-ACE_CString
+string
 BE_GlobalData::skel_export_macro() const
 {
   return this->skel_export_macro_;
 }
 
-void
-BE_GlobalData::skel_export_macro(const ACE_CString &skel_export_macro)
-{
-  this->skel_export_macro_ = skel_export_macro;
-}
-
-ACE_CString
+string
 BE_GlobalData::stub_export_include() const
 {
   return this->stub_export_include_;
 }
 
-void
-BE_GlobalData::stub_export_include(const ACE_CString &stub_export_include)
-{
-  this->stub_export_include_ = stub_export_include;
-}
-
-ACE_CString
+string
 BE_GlobalData::stub_export_macro() const
 {
   return this->stub_export_macro_;
 }
 
 void
-BE_GlobalData::stub_export_macro(const ACE_CString &stub_export_macro)
+BE_GlobalData::get_output_dir(string &s, const char *dirname) const
 {
-  this->stub_export_macro_ = stub_export_macro;
+  s += this->output_dir_;
+  if (this->output_otp_) {
+    s += dirname;
+  }
+  normalize_path(s);
 }

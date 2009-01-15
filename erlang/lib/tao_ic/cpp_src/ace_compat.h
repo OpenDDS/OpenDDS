@@ -21,7 +21,4 @@
 # define BE_PI_CONST 
 #endif /* ACE_PRE_5_5 */
 
-#define ACE_PATH(s) \
-        (s ACE_DIRECTORY_SEPARATOR_STR_A);
-
 #endif /* TAO_IC_ACE_COMPAT_H */

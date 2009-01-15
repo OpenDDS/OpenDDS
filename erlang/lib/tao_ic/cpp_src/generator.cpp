@@ -8,6 +8,10 @@
 
 using namespace std;
 
+generator::~generator()
+{
+}
+
 generator_composite::generator_composite(bool auto_delete)
   : auto_delete_(auto_delete)
 {

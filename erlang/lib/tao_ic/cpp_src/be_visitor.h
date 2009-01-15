@@ -53,6 +53,7 @@
 class be_visitor : public ast_visitor {
 public:
   be_visitor(void);
+
   ~be_visitor(void);
 
   int visit_decl(AST_Decl *);
