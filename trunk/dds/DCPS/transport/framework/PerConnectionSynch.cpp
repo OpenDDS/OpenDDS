@@ -3,6 +3,7 @@
 // $Id$
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "PerConnectionSynch.h"
+#include "dds/DCPS/debug.h"
 
 
 #if !defined (__ACE_INLINE__)
@@ -39,7 +40,16 @@ OpenDDS::DCPS::PerConnectionSynch::open(void*)
   if( this->scheduler_ >= 0) {
     flags |= this->scheduler_;
   }
-  return this->activate( flags, 1, 0, this->priority_);
+  if( DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) PerConnectionSynch::open(): ")
+      ACE_TEXT("activating thread with flags 0x%08.8x ")
+      ACE_TEXT("and priority %d.\n"),
+      flags,
+      this->dds_priority_
+    ));
+  }
+  return this->activate( flags, 1, 0, this->dds_priority_);
 }
 
 

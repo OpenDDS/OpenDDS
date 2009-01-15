@@ -778,6 +778,17 @@ void PublisherImpl::add_associations (const ReaderAssociationSeq & readers,
       associations[i].remote_data_ = readers[i].readerTransInfo;
     }
 
+  if( DCPS_debug_level > 4) {
+    ::OpenDDS::DCPS::GUID_t pubId = writer->get_publication_id();
+    ::OpenDDS::DCPS::GuidConverter converter( pubId);
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) PublisherImpl::add_associations(): ")
+      ACE_TEXT("adding %d subscriptions to publication %s with priority %d.\n"),
+      length,
+      (const char*) converter,
+      writer_qos.transport_priority.value
+    ));
+  }
   this->add_subscriptions (writer->get_publication_id (),
                            writer_qos.transport_priority.value,
                            length,

@@ -5,15 +5,29 @@
 #include "TestTypeSupportImpl.h"
 
 /// Control the spew.
-namespace { enum { BE_REALLY_VERBOSE = 1};}
+namespace { enum { BE_REALLY_VERBOSE = 0};}
 
 Test::DataReaderListener::DataReaderListener( const bool verbose)
- : verbose_( verbose)
+ : verbose_( verbose),
+   total_messages_( 0),
+   valid_messages_( 0)
 {
 }
 
 Test::DataReaderListener::~DataReaderListener ()
 {
+}
+
+int
+Test::DataReaderListener::total_messages() const
+{
+  return this->total_messages_;
+}
+
+int
+Test::DataReaderListener::valid_messages() const
+{
+  return this->valid_messages_;
 }
 
 const std::map< long, long>&
@@ -51,8 +65,10 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
   DDS::SampleInfo info;
 
   while( DDS::RETCODE_OK == dr->take_next_sample( data, info)) {
+    ++this->total_messages_;
     if( info.valid_data) {
       ++this->counts_[ data.pid];
+      ++this->valid_messages_;
       this->bytes_[ data.pid] += data.buffer.length();
       this->priorities_[ data.pid] = data.priority; // faster than conditional.
       if( this->verbose_ && BE_REALLY_VERBOSE) {

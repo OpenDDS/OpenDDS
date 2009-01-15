@@ -21,7 +21,7 @@ OpenDDS::DCPS::ReliableMulticastDataLink::ReliableMulticastDataLink(
   OpenDDS::DCPS::ReliableMulticastTransportImpl& transport_impl,
   CORBA::Long priority
   )
-  : OpenDDS::DCPS::DataLink(&transport_impl)
+  : OpenDDS::DCPS::DataLink(&transport_impl, priority)
   , local_address_(configuration.local_address_)
   , multicast_group_address_(multicast_group_address)
   , sender_history_size_(configuration.sender_history_size_)

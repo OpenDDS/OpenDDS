@@ -78,13 +78,23 @@ int OpenDDS::DCPS::ThreadPerConnectionSendTask::open(void*)
       -1);
   }
 
-  DirectPriorityMapper mapper( this->link_->priority());
+  DirectPriorityMapper mapper( this->link_->transport_priority());
   int priority = mapper.thread_priority();
 
   long flags  = THR_NEW_LWP | THR_JOINABLE ;//|THR_SCOPE_PROCESS | THR_SCOPE_THREAD;
   int policy = TheServiceParticipant->scheduler();
   if( policy >= 0) {
     flags |= policy;
+  }
+
+  if( DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) ThreadPerConnectionSendTask::open(): ")
+      ACE_TEXT("activating thread with flags 0x%08.8x ")
+      ACE_TEXT("and priority %d.\n"),
+      flags,
+      priority
+    ));
   }
 
   // Activate this task object with one worker thread.

@@ -78,6 +78,12 @@ namespace Test {
     virtual void on_connection_deleted (DDS::DataReader_ptr)
       throw (CORBA::SystemException);
 
+    /// Number of messages received by this listener over its lifetime.
+    int total_messages() const;
+
+    /// Number of valid messages received by this listener over its lifetime.
+    int valid_messages() const;
+
     /// Current number of samples that have been received from a writer.
     const std::map< long, long>& counts() const;
 
@@ -93,6 +99,12 @@ namespace Test {
     private:
       /// Verbosity flag.
       bool verbose_;
+
+      /// Total number of messages received by this listener.
+      int total_messages_;
+
+      /// Number of valid messages received by this listener.
+      int valid_messages_;
 
       /// Sample counts.
       std::map< long, long> counts_;

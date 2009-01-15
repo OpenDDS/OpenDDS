@@ -22,7 +22,8 @@ Writer::Writer(
 ) : writer_( ::DDS::DataWriter::_duplicate( writer)),
     profile_( profile),
     verbose_( verbose),
-    done_( false)
+    done_( false),
+    messages_( 0)
 {
   OpenDDS::DCPS::DataWriterImpl* writerImpl
     = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>( this->writer_.in());
@@ -78,6 +79,12 @@ Writer::stop()
 }
 
 int
+Writer::messages() const
+{
+  return this->messages_;
+}
+
+int
 Writer::svc ()
 {
   ACE_DEBUG((LM_DEBUG,
@@ -97,6 +104,7 @@ Writer::svc ()
     sample.buffer.length( this->profile_.messageSize());
 
     dataWriter->write( sample, DDS::HANDLE_NIL);
+    ++this->messages_;
 
     // Determine the interval to next message here so it can be mentioned
     // in the diagnostic messsage.  Note that this results in an

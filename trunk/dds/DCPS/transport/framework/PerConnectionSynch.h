@@ -46,7 +46,7 @@ namespace OpenDDS
         ConditionType condition_;
         int           work_available_;
         int           shutdown_;
-        long          priority_;
+        long          dds_priority_;
         int           scheduler_;
     };
 

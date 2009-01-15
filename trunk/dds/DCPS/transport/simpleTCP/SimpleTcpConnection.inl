@@ -61,15 +61,15 @@ OpenDDS::DCPS::SimpleTcpConnection::get_remote_address ()
 
 ACE_INLINE
 CORBA::Long&
-OpenDDS::DCPS::SimpleTcpConnection::priority()
+OpenDDS::DCPS::SimpleTcpConnection::transport_priority()
 {
-  return this->priority_;
+  return this->transport_priority_;
 }
 
 ACE_INLINE
 CORBA::Long
-OpenDDS::DCPS::SimpleTcpConnection::priority() const
+OpenDDS::DCPS::SimpleTcpConnection::transport_priority() const
 {
-  return this->priority_;
+  return this->transport_priority_;
 }
 
