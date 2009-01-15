@@ -146,7 +146,7 @@ erl_module::to_module_name(AST_Decl *node)
 {
   // Flattened (C-style) IDL names are used for erlang module names.
   // Module names are stripped of leading underscores and converted
-  // to lower case.
+  // to lower case to ensure compatibility.
   
   string s(node->flat_name());
 
