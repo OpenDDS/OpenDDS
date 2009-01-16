@@ -104,11 +104,11 @@ WriteDataContainer::WriteDataContainer(
   if (DCPS_debug_level >= 2)
   {
     ACE_DEBUG ((LM_DEBUG,
-                "(%P|%t)WriteDataContainer "
+                "(%P|%t) WriteDataContainer "
                 "sample_list_element_allocator %x with %d chunks\n",
                 &sample_list_element_allocator_, n_chunks_));
     ACE_DEBUG ((LM_DEBUG,
-                "(%P|%t)WriteDataContainer "
+                "(%P|%t) WriteDataContainer "
                 "transport_send_element_allocator %x with %d chunks\n",
                 &transport_send_element_allocator_, n_chunks_));
   }
@@ -117,6 +117,30 @@ WriteDataContainer::WriteDataContainer(
 
 WriteDataContainer::~WriteDataContainer()
 {
+  if( this->unsent_data_.size_ > 0) {
+    ACE_DEBUG((LM_WARNING,
+      ACE_TEXT("(%P|%t) WARNING: WriteDataContainer::~WriteDataContainer() - ")
+      ACE_TEXT("destroyed with %d samples unsent.\n"),
+      this->unsent_data_.size_
+    ));
+  }
+  if( this->sending_data_.size_ > 0) {
+    ACE_DEBUG((LM_WARNING,
+      ACE_TEXT("(%P|%t) WARNING: WriteDataContainer::~WriteDataContainer() - ")
+      ACE_TEXT("destroyed with %d samples sending.\n"),
+      this->sending_data_.size_
+    ));
+  }
+  if( this->sent_data_.size_ > 0) {
+    if( DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) WriteDataContainer::~WriteDataContainer() - ")
+        ACE_TEXT("destroyed with %d samples sent.\n"),
+        this->sent_data_.size_
+      ));
+    }
+  }
+
   if (! shutdown_)
   {
     ACE_ERROR((LM_ERROR,
@@ -1116,7 +1140,7 @@ void WriteDataContainer::reschedule_deadline ()
     {
       if (this->watchdog_->reset_timer_interval (iter->second->deadline_timer_id_) == -1)
       {
-        ACE_ERROR ((LM_ERROR, "(%P|%t)WriteDataContainer::reschedule_deadline "
+        ACE_ERROR ((LM_ERROR, "(%P|%t) WriteDataContainer::reschedule_deadline "
           "%p\n", "reset_timer_interval"));
       }
     }

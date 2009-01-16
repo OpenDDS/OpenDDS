@@ -516,6 +516,40 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
       this->publication_id_);
   }
 
+  // Mirror the PUBLICATION_MATCH_STATUS processing from
+  // fully_associated() here.
+  if( !this->is_bit_) {
+    // Re-acquire the lock.
+    ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
+
+    // Derive the change in the number of subscriptions reading this writer.
+    int matchedSubscriptions = this->id_to_handle_map_.size();
+    this->publication_match_status_.total_count_change
+      = matchedSubscriptions - this->publication_match_status_.total_count;
+
+    // Only process status if the number of subscriptions has changed.
+    if( this->publication_match_status_.total_count_change != 0) {
+      this->publication_match_status_.total_count = matchedSubscriptions;
+      this->publication_match_status_.last_subscription_handle
+        = handles[ rds_len - 1];
+
+      set_status_changed_flag (::DDS::PUBLICATION_MATCH_STATUS, true);
+
+      ::DDS::DataWriterListener* listener
+        = this->listener_for( ::DDS::SUBSCRIPTION_MATCH_STATUS);
+      if( listener != 0) {
+        listener->on_publication_match(
+          this->dw_local_objref_.in(),
+          this->publication_match_status_
+        );
+
+        // Listener consumes the change.
+        this->publication_match_status_.total_count_change = 0;
+      }
+      this->notify_status_condition();
+    }
+  }
+
   // If this remove_association is invoked when the InfoRepo
   // detects a lost reader then make a callback to notify
   // subscription lost.

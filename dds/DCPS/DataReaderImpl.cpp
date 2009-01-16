@@ -115,6 +115,17 @@ DataReaderImpl::~DataReaderImpl (void)
     {
       delete rd_allocator_;
     }
+
+  CORBA::Long count = this->total_samples();
+  if( count > 0) {
+    ::OpenDDS::DCPS::GuidConverter converter( this->subscription_id_);
+    ACE_DEBUG((LM_WARNING,
+      ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::~DataReaderImpl() - ")
+      ACE_TEXT("reader %s terminating with %s samples unread.\n"),
+      (const char*) converter,
+      count
+    ));
+  }
 }
 
 // this method is called when delete_datawriter is called.
@@ -442,6 +453,36 @@ void DataReaderImpl::remove_associations (
   }
 
   this->subscriber_servant_->remove_associations(updated_writers, this->subscription_id_);
+
+  // Mirror the add_associations SUBSCRIPTION_MATCHED_STATUS processing.
+  if( !this->is_bit_) {
+    // Derive the change in the number of publications writing to this reader.
+    int matchedPublications = this->id_to_handle_map_.size();
+    this->subscription_match_status_.total_count_change
+      = matchedPublications - this->subscription_match_status_.total_count;
+
+    // Only process status if the number of publications has changed.
+    if( this->subscription_match_status_.total_count_change != 0) {
+      this->subscription_match_status_.total_count = matchedPublications;
+      this->subscription_match_status_.last_publication_handle
+        = handles[ wr_len - 1];
+
+      set_status_changed_flag (::DDS::SUBSCRIPTION_MATCH_STATUS, true);
+
+      ::DDS::DataReaderListener* listener
+        = listener_for (::DDS::SUBSCRIPTION_MATCH_STATUS);
+      if( listener != 0) {
+        listener->on_subscription_match(
+          dr_local_objref_.in (),
+          this->subscription_match_status_
+        );
+
+        // Client will look at it so next time it looks the change should be 0
+        this->subscription_match_status_.total_count_change = 0;
+      }
+      notify_status_condition();
+    }
+  }
 
   // If this remove_association is invoked when the InfoRepo
   // detects a lost writer then make a callback to notify

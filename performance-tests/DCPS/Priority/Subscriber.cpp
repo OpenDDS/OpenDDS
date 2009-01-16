@@ -33,7 +33,7 @@ Subscriber::~Subscriber()
   this->waiter_->detach_condition( this->status_.in());
 
   if( ! CORBA::is_nil( this->participant_.in())) {
-    this->participant_->delete_contained_entities(); // Also deletes listener.
+    this->participant_->delete_contained_entities();
     TheParticipantFactory->delete_participant( this->participant_.in());
   }
   TheTransportFactory->release();
@@ -244,7 +244,7 @@ Subscriber::Subscriber( const Options& options)
 
   // Grab, enable and attach the status condition for test synchronization.
   this->status_ = this->reader_->get_statuscondition();
-  this->status_->set_enabled_statuses( DDS::LIVELINESS_CHANGED_STATUS);
+  this->status_->set_enabled_statuses( DDS::SUBSCRIPTION_MATCH_STATUS);
   this->waiter_->attach_condition( this->status_.in());
 
   if( this->options_.verbose()) {
@@ -291,15 +291,13 @@ Subscriber::run()
 {
   DDS::Duration_t   timeout = { DDS::DURATION_INFINITY_SEC, DDS::DURATION_INFINITY_NSEC};
   DDS::ConditionSeq conditions;
-  DDS::LivelinessChangedStatus changes = { 0, 0, 0, 0};
+  DDS::SubscriptionMatchStatus matches = { 0, 0, 0};
   do {
     if( this->options_.verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Subscriber::run() - ")
-        ACE_TEXT("waiting for publication to %s, ")
-        ACE_TEXT("%d active publications.\n"),
-        (changes.active_count==0? "attach": "detach"),
-        changes.active_count
+        ACE_TEXT("%d publications attached.\n"),
+        matches.total_count
       ));
     }
     if( DDS::RETCODE_OK != this->waiter_->wait( conditions, timeout)) {
@@ -309,14 +307,14 @@ Subscriber::run()
       ));
       throw BadSyncException();
     }
-    changes = this->reader_->get_liveliness_changed_status();
+    matches = this->reader_->get_subscription_match_status();
 
-  } while( changes.active_count > 0);
+  } while( matches.total_count > 0);
 
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Subscriber::run() - ")
-      ACE_TEXT("shutting down after publication was removed.\n")
+      ACE_TEXT("shutting down after all publications were removed.\n")
     ));
   }
 }

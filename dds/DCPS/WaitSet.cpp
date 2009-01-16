@@ -58,11 +58,32 @@ ReturnCode_t WaitSet::attach_condition(Condition_ptr cond)
 ReturnCode_t WaitSet::detach_condition(Condition_ptr cond)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, lock_,
+    RETCODE_OUT_OF_RESOURCES);
+  return detach_i (cond);
+}
+
+ReturnCode_t WaitSet::detach_conditions(const ConditionSeq& conds)
+  ACE_THROW_SPEC ((CORBA::SystemException))
+{
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, lock_,
+    RETCODE_OUT_OF_RESOURCES);
+  for (CORBA::ULong i = 0; i < conds.length(); ++i)
+    {
+      ReturnCode_t ret = detach_i (conds[ i]);
+      if( ret != RETCODE_OK)
+        {
+          return ret;
+        }
+    }
+  return RETCODE_OK;
+}
+
+ReturnCode_t WaitSet::detach_i(const Condition_ptr cond)
+{
   using OpenDDS::DCPS::ConditionImpl;
   Condition_var condv(Condition::_duplicate(cond));
 
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, lock_,
-    RETCODE_OUT_OF_RESOURCES);
   ConditionImpl* ci = dynamic_cast<ConditionImpl*>(cond);
   if (!ci) return RETCODE_BAD_PARAMETER;
   ReturnCode_t ret = ci->detach_from_ws(this);

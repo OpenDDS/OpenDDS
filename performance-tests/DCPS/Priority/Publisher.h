@@ -43,17 +43,11 @@ class Publisher {
     /// Publisher.
     DDS::Publisher_var publisher_;
 
-    /// Writer used to synchronize start of publication.
-    DDS::DataWriter_var writer_;
-
     /// Publications.
     PublicationMap publications_;
 
     /// Blocking object for test synchronization.
     DDS::WaitSet_var waiter_;
-
-    /// Blocking condition for test synchronization.
-    DDS::StatusCondition_var status_;
 };
 
 } // End of namespace Test

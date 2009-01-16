@@ -2,6 +2,10 @@ Version 1.3 of OpenDDS.
 
 New to this version are the following changes:
 
+- Extended the implementation of the DataReader SUBSCRIPTION_MATCH_STATUS
+  and DataWriter PUBLICATION_MATCH_STATUS to include decrementing the
+  total_count when associations are removed.
+
 - Implemented the TRANSPORT_PRIORITY Quality of service policy using the
   policy value to set thread priorities and DiffServ codepoint values.
   The current implementation does not honor the Changeable behavior of
