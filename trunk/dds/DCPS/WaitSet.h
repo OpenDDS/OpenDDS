@@ -58,12 +58,18 @@ namespace DDS
     ReturnCode_t get_conditions (ConditionSeq& attached_conditions)
       ACE_THROW_SPEC ((CORBA::SystemException));
 
+    /// Convenience method for detaching multiple conditions,
+    /// for example when shutting down.
+    ReturnCode_t detach_conditions (const ConditionSeq& conditions)
+      ACE_THROW_SPEC ((CORBA::SystemException));
+
     static WaitSet_ptr _duplicate(WaitSet_ptr obj);
 
     typedef std::set<Condition_var,
       OpenDDS::DCPS::VarLess<Condition> > ConditionSet;
 
   private:
+    ReturnCode_t detach_i(const Condition_ptr cond);
     void signal(Condition_ptr cond);
     friend class OpenDDS::DCPS::ConditionImpl;
 

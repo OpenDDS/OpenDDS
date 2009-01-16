@@ -43,6 +43,17 @@ OpenDDS::DCPS::TransportReceiveStrategy::TransportReceiveStrategy()
 OpenDDS::DCPS::TransportReceiveStrategy::~TransportReceiveStrategy()
 {
   DBG_ENTRY_LVL("TransportReceiveStrategy","~TransportReceiveStrategy",6);
+
+  if( this->receive_buffers_[ this->buffer_index_] != 0) {
+    size_t size = this->receive_buffers_[ this->buffer_index_]->total_length();
+    if( size > 0) {
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) WARNING: TransportReceiveStrategy::~TransportReceiveStrategy() - ")
+        ACE_TEXT("terminating with %d unprocessed bytes.\n"),
+        size
+      ));
+    }
+  }
 }
 
 /// Note that this is just an initial implementation.  We may take

@@ -115,6 +115,17 @@ OpenDDS::DCPS::TransportSendStrategy::~TransportSendStrategy()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","~TransportSendStrategy",6);
 
+  if( this->pkt_chain_ != 0) {
+    size_t size = this->pkt_chain_->total_length();
+    if( size > 0) {
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) WARNING: TransportSendStrategy::~TransportSendStrategy() - ")
+        ACE_TEXT("terminating with %d unsent bytes.\n"),
+        size
+      ));
+    }
+  }
+
   // We created the header_block_ in our ctor, so we should release() it.
   //MJM: blech.
   if (this->header_block_)

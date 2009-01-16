@@ -34,7 +34,9 @@ namespace Test {
 
 Publisher::~Publisher()
 {
-  this->waiter_->detach_condition( this->status_.in());
+  DDS::ConditionSeq conditions;
+  this->waiter_->get_conditions( conditions);
+  this->waiter_->detach_conditions( conditions);
 
   if( ! CORBA::is_nil( this->participant_.in())) {
     this->participant_->delete_contained_entities();
@@ -258,22 +260,19 @@ Publisher::Publisher( const Options& options)
             );
 
     //
-    // The first publication is fine for obtaining a status condition to
-    // synchronize the beginning of publication.
+    // Grab, enable and attach the status condition for test
+    // synchronization of the current publication.
     //
-    if( CORBA::is_nil( this->status_.in())) {
-      // Grab, enable and attach the status condition for test synchronization.
-      this->writer_ = DDS::DataWriter::_duplicate( writer.in());
-      this->status_ = writer->get_statuscondition();
-      this->status_->set_enabled_statuses( DDS::PUBLICATION_MATCH_STATUS);
-      this->waiter_->attach_condition( this->status_.in());
+    DDS::StatusCondition_var status = writer->get_statuscondition();
+    status->set_enabled_statuses( DDS::PUBLICATION_MATCH_STATUS);
+    this->waiter_->attach_condition( status.in());
 
-      if( this->options_.verbose()) {
-        ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
-          ACE_TEXT("created StatusCondition and WaitSet for test synchronization.\n")
-        ));
-      }
+    if( this->options_.verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
+        ACE_TEXT("created StatusCondition and WaitSet for publication %s.\n"),
+        this->options_.profiles()[ index]->name().c_str()
+      ));
     }
   }
 }
@@ -284,13 +283,14 @@ Publisher::run()
   DDS::Duration_t   timeout = { SUBSCRIPTION_WAIT_TIME, 0};
   DDS::ConditionSeq conditions;
   DDS::PublicationMatchStatus matches = { 0, 0, 0};
+  unsigned int cummulative_count = 0;
   do {
     if( this->options_.verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Publisher::run() - ")
-        ACE_TEXT("waiting for subscription to attach (total==%d, change==%d).\n"),
-        matches.total_count,
-        matches.total_count_change
+        ACE_TEXT("%d of %d subscriptions attached, waiting for more.\n"),
+        cummulative_count,
+        this->publications_.size()
       ));
     }
     if( DDS::RETCODE_OK != this->waiter_->wait( conditions, timeout)) {
@@ -300,15 +300,27 @@ Publisher::run()
       ));
       throw BadSyncException();
     }
-    matches = this->writer_->get_publication_match_status();
+    for( unsigned long index = 0; index < conditions.length(); ++index) {
+      DDS::StatusCondition_var condition
+        = DDS::StatusCondition::_narrow( conditions[ index].in());
 
-  } while( matches.total_count_change == 0);
+      DDS::DataWriter_var writer = DDS::DataWriter::_narrow( condition->get_entity());
+      if( !CORBA::is_nil( writer.in())) {
+        DDS::StatusKindMask changes = writer->get_status_changes();
+        if( changes & DDS::PUBLICATION_MATCH_STATUS) {
+          matches = writer->get_publication_match_status();
+          cummulative_count += matches.total_count_change;
+        }
+      }
+    }
+
+  } while( cummulative_count < this->publications_.size());
 
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Publisher::run() - ")
       ACE_TEXT("starting to publish samples with %d matched subscriptions.\n"),
-      matches.total_count
+      cummulative_count
     ));
   }
 
