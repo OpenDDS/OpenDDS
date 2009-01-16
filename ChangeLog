@@ -1,50 +1,57 @@
+Fri Jan 16 22:37:23 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+
+	  Use the local value of transport_priority in the link to avoid
+	  release ordering issues.
+
 Fri Jan 16 04:14:06 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
-	* DDS_release_notes.txt
+        * DDS_release_notes.txt
 
-	  Updated with SUBSCRIPTION/PUBLICATION_MATCH_STATUS
-	  implementation changes.
+          Updated with SUBSCRIPTION/PUBLICATION_MATCH_STATUS
+          implementation changes.
 
         * dds/DCPS/DataReaderImpl.cpp:
 
-	  Added diagnostic in destructor to notify of any remaining data.
-	  Implement SUBSCRIPTION_MATCH_STATUS processing to reduce the
-	  total_count when remove_associations is called.
+          Added diagnostic in destructor to notify of any remaining data.
+          Implement SUBSCRIPTION_MATCH_STATUS processing to reduce the
+          total_count when remove_associations is called.
 
         * dds/DCPS/DataWriterImpl.cpp:
 
-	  Implement PUBLICATION_MATCH_STATUS processing to reduce the
-	  total_count when remove_associations() is called.
+          Implement PUBLICATION_MATCH_STATUS processing to reduce the
+          total_count when remove_associations() is called.
 
         * dds/DCPS/WaitSet.h:
         * dds/DCPS/WaitSet.cpp:
 
-	  detach_conditions() - new convenience method to allow detaching
-	                        multiple conditions using one call.
-	  detach_i() - factored detach processing for use by single and
-	               multiple interface methods.
+          detach_conditions() - new convenience method to allow detaching
+                                multiple conditions using one call.
+          detach_i() - factored detach processing for use by single and
+                       multiple interface methods.
 
         * dds/DCPS/WriteDataContainer.cpp:
         * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
 
-	  Added diagnostics in destructors to notify when there is data
-	  that has not been sent downstream.
+          Added diagnostics in destructors to notify when there is data
+          that has not been sent downstream.
 
         * performance-tests/DCPS/Priority/Publisher.h:
         * performance-tests/DCPS/Priority/Publisher.cpp:
 
-	  Obsoleted the writer and status members.  These are no longer
-	  necessary since each Writer will now contribute a status
-	  condition to the wait set.  Change the startup synchronization
-	  to wait for each Writer to have a subscription matched before
-	  starting to publish from any Writer.
+          Obsoleted the writer and status members.  These are no longer
+          necessary since each Writer will now contribute a status
+          condition to the wait set.  Change the startup synchronization
+          to wait for each Writer to have a subscription matched before
+          starting to publish from any Writer.
 
         * performance-tests/DCPS/Priority/Subscriber.cpp:
 
-	  Changed from using the LIVELINESS_CHANGED_STATUS to using
-	  SUBSCRIPTION_MATCH_STATUS and terminating the subscriber once
-	  there are no more subscriptions.
+          Changed from using the LIVELINESS_CHANGED_STATUS to using
+          SUBSCRIPTION_MATCH_STATUS and terminating the subscriber once
+          there are no more subscriptions.
 
 Thu Jan 15 22:52:38 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 

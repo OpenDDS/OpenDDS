@@ -421,7 +421,7 @@ OpenDDS::DCPS::SimpleTcpTransport::release_datalink_i(DataLink* link)
 
   // Attempt to remove the SimpleTcpDataLink from our links_ map.
   PriorityKey key(
-                tcp_link->get_connection()->transport_priority(),
+                tcp_link->transport_priority(),
                 tcp_link->remote_address()
               );
   if (this->links_.unbind( key, released_link) != 0)
