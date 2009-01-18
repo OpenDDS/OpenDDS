@@ -6,7 +6,7 @@ project : erlang {
   Define_Custom(TAO_IC) {
     automatic_in        = 1
     automatic_out       = 1
-    command             = $(DDS_ROOT)/erlang/bin/tao_ic
+    command             = tao_ic
     commandflags        =
     dependent           = $(DDS_ROOT)/erlang/bin/tao_ic
     inputext            = .idl
