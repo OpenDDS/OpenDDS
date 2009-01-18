@@ -1,3 +1,26 @@
+Sun Jan 18 04:20:24 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * MPC/modules/IDL2JNIHelper.pm:
+        * MPC/modules/IDLHelper.pm:
+        * erlang/MPC:
+        * erlang/MPC/config:
+        * erlang/MPC/config/MPC.cfg:
+        * erlang/MPC/config/tao_ic.mpb:
+        * erlang/MPC/config/tao_ic_otp.mpb:
+        * erlang/MPC/modules:
+        * erlang/MPC/modules/TAO_ICHelper.pm:
+        * erlang/bin/mwc.pl:
+        * erlang/lib/tao_ic/test/.erlang:
+        * erlang/lib/tao_ic/test/cpp_src:
+        * erlang/lib/tao_ic/test/ebin:
+        * erlang/lib/tao_ic/test/include:
+        * erlang/lib/tao_ic/test/src:
+        * erlang/lib/tao_ic/test/tao_ic_test.mpc:
+        * erlang/lib/tao_ic/test/test:
+        * erlang/lib/tao_ic/test/test/constant.idl:
+
+          MPC updates to support tao_ic.
+
 Thu Jan 15 04:33:41 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * erlang/lib/tao_ic:
