@@ -1,4 +1,4 @@
-package IDL2JNIHelper;
+package IDLHelper;
 
 # ************************************************************
 # Description   : Assist in determining the output from idl2jni.
@@ -13,24 +13,17 @@ package IDL2JNIHelper;
 # ************************************************************
 
 use strict;
-use FileHandle;
 
 use CommandHelper;
-our @ISA = qw(CommandHelper);
+use Exporter qw(import);
+use FileHandle;
 
-use IDLHelper qw(%types);
+our @ISA = qw(CommandHelper);
 
 # ************************************************************
 # Data Section
 # ************************************************************
 
-my $helper = 'Helper';
-my $holder = 'Holder';
-my @local  = ('LocalBase', 'TAOPeer');
-my $ops    = 'Operations';
-my $stub   = 'Stub';
-my $ext    = '.java';
-my $tsreg  = 'TypeSupport\.idl';
 my %types  = ('const'           => 0x01,
               'enum'            => 0x07,
               'native'          => 0x06,
@@ -40,7 +33,7 @@ my %types  = ('const'           => 0x01,
               'local interface' => 0x2f,
               'typedef'         => 0x06,
               'simple typedef'  => 0x04,
-             );
+              );
 
 my %idl_keywords = ('abstract' => 1,
                     'any' => 1,
@@ -108,6 +101,8 @@ my %idl_keywords = ('abstract' => 1,
                     'wstring' => 1,
                    );
 
+my $tsreg  = 'TypeSupport\.idl';
+
 # ************************************************************
 # "Friendly" interface for TYPESUPPORTHelper.pm
 # ************************************************************
@@ -120,7 +115,7 @@ sub do_cached_parse {
   my %mparams;
   my @include;
   if (defined $flags) {
-    foreach my $arg (split(/\s+/, $flags)) {
+    foreach my $arg (split /\s+/, $flags) {
       if ($arg =~ /^\-D(\w+)(?:=(.+))?/) {
         $macros{$1} = $2 || 1;
       }
@@ -154,15 +149,18 @@ sub get_output {
   ## Get the file names based on the type and name of each entry
   my @filenames;
   foreach my $ent (@$data) {
-    push(@filenames, $self->get_filenames(@$ent));
+    my($type, @scope) = @$ent;
+    push @filenames, $self->get_filenames($flags, $type, @scope);
   }
 
   ## Return the file name list
   return \@filenames;
 }
 
-sub get_outputexts {
-  return ['\\' . $ext];
+sub get_filenames {
+  ## This method is called with the base directory and filename and
+  ## expects an array of filenames to be tied to the source file.
+  return ();
 }
 
 sub get_tied {
@@ -175,56 +173,33 @@ sub get_tied {
 
   foreach my $f (@$files) {
     if ($f eq "$file$ts") {
-      print "TIED: $file -> $f\n";
       push(@$tied, $f);
       last;
     }
   }
 
-  return $tied, 'java_files';
+  return $tied, $self->get_component_name;
+}
+
+sub get_component_name {
+  ## This method is called with no arguments and expects a string
+  ## containing the component name to tie generated files together.
+  return "";
 }
 
 # ************************************************************
 # File Processing Subroutine Section
 # ************************************************************
 
-sub get_filenames {
-  my($self, $type, $dir, $name) = @_;
-  my $bits = $types{$type};
-  my @filenames;
-
-  ## Get the file names based on the type of data structure
-  push(@filenames, $dir . $name . $ext)                if ($bits & 0x01);
-  push(@filenames, $dir . $name . $holder. $ext)       if ($bits & 0x02);
-  push(@filenames, $dir . $name . $helper. $ext)       if ($bits & 0x04);
-  push(@filenames, $dir . $name . $ops . $ext)         if ($bits & 0x08);
-  push(@filenames, $dir . '_' . $name . $stub . $ext)  if ($bits & 0x10);
-  if ($bits & 0x20) {
-    foreach my $local_suffix (@local) {
-      push(@filenames, $dir . '_' . $name . $local_suffix . $ext);
-    }
-  }
-  return @filenames;
-}
-
 sub get_scope {
   my($self, $state) = @_;
-  my $scope = '';
+  my @scope = ();
 
-  ## Go through each entry and build up the scope using '/' as the
-  ## separator.
   foreach my $entry (@$state) {
-    if ($$entry[0] eq 'module') {
-      $scope .= $$entry[1] . '/';
-    }
-    else {
-      ## If it's not a module, then the word 'Package' will be part of
-      ## the directory structure.
-      $scope .= $$entry[1] . 'Package/';
-    }
+    push @scope, $$entry[1];
   }
 
-  return $scope;
+  return @scope;
 }
 
 sub cached_parse {
@@ -371,8 +346,9 @@ sub parse {
                      if ($simple && $single eq 'typedef' && $str !~ /^\s*\[/);
 
               ## Get the scope and put the entry in the data array
-              my $scope = $self->get_scope(\@state);
-              push(@data, [$single, $scope, $name]);
+              my @scope = $self->get_scope(\@state);
+              push @scope, $name;
+              push(@data, [$single, @scope]);
 
               ## Reset this so that we don't continue adding entries
               $single = undef;
@@ -431,8 +407,9 @@ sub parse {
             $local = undef;
           }
 
-          my $scope = $self->get_scope(\@state);
-          splice(@$entry, 1, 0, $scope);
+          my @scope = $self->get_scope(\@state);
+          ## TODO Verify scope is created correctly! ##
+          splice(@$entry, 1, 0, @scope);
 
           ## Save the entry in the data array
           push(@data, $entry);

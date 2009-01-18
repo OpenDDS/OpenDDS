@@ -1,0 +1,11 @@
+//
+// $Id$
+//
+
+project : tao_ic_otp {
+  erlcflags    += -Wall
+
+  TAO_IC_Files {
+    test
+  }
+}

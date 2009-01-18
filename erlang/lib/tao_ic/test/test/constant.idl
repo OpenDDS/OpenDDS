@@ -1,0 +1,18 @@
+module simple {
+  const short const_short = 0;
+  const unsigned short const_ushort = 0;
+
+  const long const_long = 0;
+  const unsigned long const_ulong = 0;
+
+  const float const_float = 0.0;
+  const double const_double = 0.0;
+
+  const char const_char = ' ';
+
+  const octet const_octet = 0;
+
+  const boolean const_bool = FALSE;
+
+  const string const_string = "";
+};
