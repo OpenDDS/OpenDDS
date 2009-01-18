@@ -19,20 +19,21 @@ use Exporter qw(import);
 use FileHandle;
 
 our @ISA = qw(CommandHelper);
+our @EXPORT_OK = qw(%types);
 
 # ************************************************************
 # Data Section
 # ************************************************************
 
-my %types  = ('const'           => 0x01,
-              'enum'            => 0x07,
-              'native'          => 0x06,
-              'struct'          => 0x07,
-              'union'           => 0x07,
-              'interface'       => 0x1f,
-              'local interface' => 0x2f,
-              'typedef'         => 0x06,
-              'simple typedef'  => 0x04,
+our %types  = ('const'           => 0x01,
+               'enum'            => 0x07,
+               'native'          => 0x06,
+               'struct'          => 0x07,
+               'union'           => 0x07,
+               'interface'       => 0x1f,
+               'local interface' => 0x2f,
+               'typedef'         => 0x06,
+               'simple typedef'  => 0x04,
               );
 
 my %idl_keywords = ('abstract' => 1,
