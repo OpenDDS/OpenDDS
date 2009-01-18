@@ -35,6 +35,14 @@ my $ext    = '.java';
 # File Processing Subroutine Section
 # ************************************************************
 
+sub get_component_name {
+  return "Java_Files";
+}
+
+sub get_outputexts {
+  return ["\\.java"];
+}
+
 sub get_filenames {
   my $self = shift;
   my($flags, $type, @scope) = @_;
