@@ -1,3 +1,10 @@
+Sun Jan 18 05:28:41 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * MPC/modules/IDL2JNIHelper.pm:
+        * MPC/modules/IDLHelper.pm:
+
+          Refactored idl2jni to use the new IDLHelper module.
+
 Sun Jan 18 04:20:24 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * MPC/modules/IDL2JNIHelper.pm:
