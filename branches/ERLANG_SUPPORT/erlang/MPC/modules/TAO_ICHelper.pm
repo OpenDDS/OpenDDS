@@ -92,17 +92,12 @@ sub get_output_dir {
   return $output_dir;
 }
 
-sub get_src_dir {
-  my $self = shift;
-  
-  return $self->get_output_dir("src");
-}
-
 sub get_src_file {
   my $self = shift;
   my($name) = @_;
-  
-  return $self->get_src_dir . $name . ".erl";
+
+  my $dir = $self->get_output_dir("src");
+  return $dir . $name . ".erl";
 }
 
 1;
