@@ -1,3 +1,12 @@
+Sun Jan 18 05:56:46 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/MPC/config/tao_ic.mpb:
+        * erlang/lib/tao_ic/src/tao_ic.erl:
+        * erlang/lib/tao_ic/src/tao_ic.hrl:
+        * erlang/opendds.mpc:
+
+          Project build updates.
+
 Sun Jan 18 05:28:41 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * MPC/modules/IDL2JNIHelper.pm:
