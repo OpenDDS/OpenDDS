@@ -121,7 +121,7 @@ DataReaderImpl::~DataReaderImpl (void)
     ::OpenDDS::DCPS::GuidConverter converter( this->subscription_id_);
     ACE_DEBUG((LM_WARNING,
       ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::~DataReaderImpl() - ")
-      ACE_TEXT("reader %s terminating with %s samples unread.\n"),
+      ACE_TEXT("reader %s terminating with %d samples unread.\n"),
       (const char*) converter,
       count
     ));
