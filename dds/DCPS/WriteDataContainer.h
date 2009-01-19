@@ -14,6 +14,7 @@
 
 #include <map>
 #include <set>
+#include <memory>
 
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
