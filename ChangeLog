@@ -1,9 +1,15 @@
+Mon Jan 19 08:05:20 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.h:
+
+          Fixed compilation errors on newer version gcc (4.3.2).
+
 Fri Jan 16 22:37:23 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
 
-	  Use the local value of transport_priority in the link to avoid
-	  release ordering issues.
+          Use the local value of transport_priority in the link to avoid
+          release ordering issues.
 
 Fri Jan 16 04:14:06 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 

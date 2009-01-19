@@ -124,7 +124,7 @@ namespace OpenDDS
         DataDurabilityCache * durability_cache,
         /// DURABILITY_SERVICE QoS specific to the DataWriter.
         ::DDS::DurabilityServiceQosPolicy const & durability_service,
-        std::auto_ptr<OfferedDeadlineWatchdog>& watchdog
+        std::auto_ptr<OfferedDeadlineWatchdog> & watchdog
         );
 
       /**
@@ -445,7 +445,7 @@ namespace OpenDDS
       /// DURABILITY_SERVICE QoS specific to the DataWriter.
       ::DDS::DurabilityServiceQosPolicy const & durability_service_;
 
-      std::auto_ptr<OfferedDeadlineWatchdog>& watchdog_;
+      std::auto_ptr<OfferedDeadlineWatchdog> & watchdog_;
     };
 
   } /// namespace OpenDDS
