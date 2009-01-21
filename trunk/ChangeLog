@@ -1,3 +1,12 @@
+Wed Jan 21 21:39:50 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Added reverse_pi_lock_ to fix some deadlock situations that
+          threads acquire locks(PublisherImpl pi_lock_, TransportInterface
+          reservation_lock and TransportImpl lock_) in reverse order.
+
 Wed Jan 21 20:08:32 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/README:
@@ -87,6 +96,10 @@ Mon Jan 19 08:09:27 UTC 2009  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/WriteDataContainer.h:
 
           Added missing include of memory to fix compilation errors.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Fixed an access violation due to incorrect log format.
 
 Mon Jan 19 08:05:20 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 

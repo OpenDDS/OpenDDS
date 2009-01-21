@@ -12,6 +12,7 @@
 #include "DataSampleList.h"
 #include "dds/DCPS/transport/framework/TransportInterface.h"
 #include "ace/Synch.h"
+#include "ace/Reverse_Lock_T.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -292,10 +293,13 @@ namespace OpenDDS
         /// Start of current aggregation period. - NOT USED IN FIRST IMPL
       ACE_Time_Value                aggregation_period_start_;
 
+      typedef ACE_Recursive_Thread_Mutex  lock_type;
+      typedef ACE_Reverse_Lock<lock_type> reverse_lock_type;
       /// The recursive lock to protect datawriter map and suspend count.
       /// It also projects the TransportInterface (it must be held when
       /// calling any TransportInterface method).
-      mutable ACE_Recursive_Thread_Mutex    pi_lock_;
+      mutable lock_type                   pi_lock_;
+      reverse_lock_type                   reverse_pi_lock_;
 
       /// The catched available data while suspending.
       DataSampleList                available_data_list_;
