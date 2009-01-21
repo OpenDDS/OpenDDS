@@ -5,5 +5,5 @@
 workspace {
   lib/tao_ic/tao_ic.mpc
   lib/tao/tao.mpc
-  opendds.mpc
+  dds.mpc
 }

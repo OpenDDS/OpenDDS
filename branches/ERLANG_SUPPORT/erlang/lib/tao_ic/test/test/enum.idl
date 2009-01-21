@@ -1,0 +1,7 @@
+//
+// $Id$
+//
+
+module foo {
+  enum enum_ { a, b, c, d, e };
+};

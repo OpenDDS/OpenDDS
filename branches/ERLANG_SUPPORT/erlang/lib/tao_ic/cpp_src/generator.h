@@ -8,14 +8,16 @@
 #include <vector>
 
 #include "ast_constant.h"
-#include "ast_module.h"
-#include "utl_identifier.h"
+#include "ast_enum.h"
+#include "ast_enum_val.h"
 
 class generator {
 public:
   virtual ~generator(void);
 
-  virtual bool generate_constant(AST_Constant *) { return true; }
+  virtual bool generate_constant(AST_Constant *);
+
+  virtual bool generate_enum(AST_Enum *, std::vector<AST_EnumVal *> &);
 };
 
 class generator_composite : public generator {
@@ -32,13 +34,13 @@ public:
   void delete_all(void);
 
   iterator begin(void);
-  const_iterator begin(void) const;
 
   iterator end(void);
-  const_iterator end(void) const;
 
   // composite operations
   bool generate_constant(AST_Constant *);
+
+  bool generate_enum(AST_Enum *, std::vector<AST_EnumVal *> &);
 
 private:
   bool auto_delete_;

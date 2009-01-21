@@ -9,6 +9,25 @@
 #include "generator_cpp.h"
 #include "generator_erl.h"
 
+using namespace std;
+
+namespace {
+template <typename T>
+void find_children(UTL_Scope *node,
+                   vector<T *> &nodes,
+                   AST_Decl::NodeType node_type)
+{
+  UTL_ScopeActiveIterator it(node, UTL_Scope::IK_decls);
+  while (!it.is_done()) {
+    AST_Decl *item = it.item();
+    if (item->node_type() == node_type) {
+      nodes.push_back(T::narrow_from_decl(item));
+    }
+    it.next();
+  }
+}
+} // namespace
+
 be_visitor::be_visitor()
   : generator_(true) // auto_delete
 {
@@ -23,7 +42,7 @@ be_visitor::~be_visitor()
 int
 be_visitor::visit_root(AST_Root *node)
 {
-  if (this->visit_scope(node) != 0) {
+  if (visit_scope(node) != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("%N:%l: visit_root()")
                       ACE_TEXT(" visit_scope failed!\n")), -1);
@@ -58,7 +77,7 @@ be_visitor::visit_scope(UTL_Scope *node)
 int
 be_visitor::visit_module(AST_Module *node)
 {
-  if (this->visit_scope(node) != 0) {
+  if (visit_scope(node) != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("%N:%l: visit_module()")
                       ACE_TEXT(" visit_scope failed!\n")), -1);
@@ -69,7 +88,7 @@ be_visitor::visit_module(AST_Module *node)
 int
 be_visitor::visit_constant(AST_Constant *node)
 {
-  if (!this->generator_.generate_constant(node)) {
+  if (!generator_.generate_constant(node)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("%N:%l: visit_constant()")
                       ACE_TEXT(" generate_constant failed!\n")), -1);
@@ -80,6 +99,14 @@ be_visitor::visit_constant(AST_Constant *node)
 int
 be_visitor::visit_enum(AST_Enum *node)
 {
+  vector<AST_EnumVal *> values;
+  find_children(node, values, AST_Decl::NT_enum_val);
+
+  if (!generator_.generate_enum(node, values)) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("%N:%l: visit_enum()")
+                      ACE_TEXT(" generate_enum failed!\n")), -1);
+  }
   return 0;
 }
 
