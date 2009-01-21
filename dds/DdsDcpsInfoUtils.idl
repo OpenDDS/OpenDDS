@@ -29,6 +29,10 @@ module OpenDDS
       /// Informationn about the transport instance that is opaque to all but
       /// code specific to that transport implementation.
       TransportInterfaceBLOB data;
+
+      /// This encodes the TRANSPORT_PRIORITY DataWriter Qos policy value
+      /// for publications.  The value is set to 0 for subscriptions.
+      long publication_transport_priority;
     };
 
     // Status returned by a topic operation

@@ -332,7 +332,7 @@ OpenDDS::DCPS::SimpleTcpTransport::shutdown_i()
   {
     GuardType guard(this->connections_lock_);
 
-    this->connections_.unbind_all();
+    this->connections_.clear();
 
     // TBD SOON - Need to set some flag to tell those threads waiting on
     //            the connections_updated_ condition that there is no hope
@@ -430,6 +430,17 @@ OpenDDS::DCPS::SimpleTcpTransport::release_datalink_i(DataLink* link)
                  "(%P|%t) ERROR: Unable to locate DataLink in order to "
                  "release and it.\n"));
     }
+
+  if( DCPS_debug_level > 9) {
+    std::stringstream buffer;
+    buffer << *link;
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) SimpleTcpTransport::release_datalink_i() - ")
+      ACE_TEXT("link with priority %d released.\n%s"),
+      link->transport_priority(),
+      buffer.str().c_str()
+    ));
+  }
 }
 
 
@@ -455,21 +466,40 @@ OpenDDS::DCPS::SimpleTcpTransport::passive_connection
   // Take ownership of the passed-in connection pointer.
   SimpleTcpConnection_rch connection_obj = connection;
 
+  if( DCPS_debug_level > 9) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) SimpleTcpTransport::passive connection() - ")
+      ACE_TEXT("established with %s:%d.\n"),
+      remote_address.get_host_name(),
+      remote_address.get_port_number()
+    ));
+  }
+
   {
     GuardType guard(this->connections_lock_);
 
     VDBG_LVL ((LM_DEBUG, "(%P|%t) # of bef connections: %d\n"
-	       , this->connections_.current_size()), 5);
+	       , this->connections_.size()), 5);
 
-    if (this->connections_.bind(remote_address,connection_obj) != 0)
-      {
-        ACE_ERROR((LM_ERROR,
-		   "(%P|%t) ERROR: Unable to bind SimpleTcpConnection object "
-		   "to the connections_ map.\n"));
-      }
+    // Check and report and problems.
+    PriorityKey key( connection->transport_priority(), remote_address);
+    ConnectionMap::iterator where = this->connections_.find( key);
+    if( where != this->connections_.end()) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: SimpleTcpTransport::passive_connection() - ")
+        ACE_TEXT("connection with %s:%d at priority %d already exists, ")
+        ACE_TEXT("overwriting previously established connection.\n"),
+        remote_address.get_host_name(),
+        remote_address.get_port_number(),
+        connection->transport_priority()
+      ));
+    }
+
+    // Swap in the new connection.
+    this->connections_[ key] = connection_obj;
 
     VDBG_LVL ((LM_DEBUG, "(%P|%t) # of aftr connections: %d\n"
-	       , this->connections_.current_size()), 5);
+	       , this->connections_.size()), 5);
 
     // Regardless of the outcome of the bind operation, let's tell any threads
     // that are wait()'ing on the connections_updated_ condition to check
@@ -495,6 +525,19 @@ OpenDDS::DCPS::SimpleTcpTransport::make_active_connection
   // Create the connection object here.
   SimpleTcpConnection_rch connection = new SimpleTcpConnection();
 
+  if( DCPS_debug_level > 9) {
+    std::stringstream buffer;
+    buffer << *link;
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) SimpleTcpTransport::make_active connection() - ")
+      ACE_TEXT("established with %s:%d and priority %d.\n%s"),
+      remote_address.get_host_name(),
+      remote_address.get_port_number(),
+      link->transport_priority(),
+      buffer.str().c_str()
+    ));
+  }
+
   // Ask the connection object to attempt the active connection establishment.
   if (connection->active_connect (remote_address,
                                   this->tcp_config_->local_address_,
@@ -517,6 +560,19 @@ OpenDDS::DCPS::SimpleTcpTransport::make_passive_connection
 
   SimpleTcpConnection_rch connection;
 
+  if( DCPS_debug_level > 9) {
+    std::stringstream buffer;
+    buffer << *link;
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) SimpleTcpTransport::make_passive connection() - ")
+      ACE_TEXT("established with %s:%d and priority %d.\n%s"),
+      remote_address.get_host_name(),
+      remote_address.get_port_number(),
+      link->transport_priority(),
+      buffer.str().c_str()
+    ));
+  }
+
   ACE_Time_Value abs_timeout (0);
   if (this->tcp_config_->passive_connect_duration_ != 0)
     {
@@ -524,6 +580,8 @@ OpenDDS::DCPS::SimpleTcpTransport::make_passive_connection
 		       this->tcp_config_->passive_connect_duration_%1000 * 1000);
       abs_timeout += ACE_OS::gettimeofday ();
     }
+
+  PriorityKey key( link->transport_priority(), remote_address);
 
   VDBG_LVL ((LM_DEBUG, "(%P|%t) DBG:   "
 	     "Passive connect timeout: %d milliseconds (0 == forever).\n",
@@ -546,9 +604,11 @@ OpenDDS::DCPS::SimpleTcpTransport::make_passive_connection
 	  }
 
 	// check if theres already a connection waiting
-	if (this->connections_.unbind(remote_address,connection) == 0) {
-	  // break out and continue with connection establishment
-	  break;
+        ConnectionMap::iterator position = this->connections_.find( key);
+        if( position != this->connections_.end()) {
+          connection = position->second;
+          this->connections_.erase( position);
+	  break; // break out and continue with connection establishment
 	}
 
 	// Now lets wait for an update

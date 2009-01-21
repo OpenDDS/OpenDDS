@@ -213,11 +213,13 @@ OpenDDS::DCPS::TransportInterface::add_associations
               ));
             }
             // Local subscriber, remote publisher.
-            link = this->impl_->reserve_datalink(remote_associations[i].remote_data_,
-                                                 remote_id,
-                                                 local_id,
-                                                 receive_listener,
-                                                 priority);
+            link = this->impl_->reserve_datalink(
+                     remote_associations[i].remote_data_,
+                     remote_id,
+                     local_id,
+                     receive_listener,
+                     remote_associations[i].remote_data_.publication_transport_priority
+                   );
           }
 
         if (link.is_nil())

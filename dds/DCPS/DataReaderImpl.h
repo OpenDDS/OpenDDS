@@ -47,9 +47,6 @@ namespace OpenDDS
     typedef Cached_Allocator_With_Overflow< ::OpenDDS::DCPS::ReceivedDataElement, ACE_Null_Mutex>
                 ReceivedDataAllocator;
 
-    /// Statistics collector type.
-    typedef Stats< double> StatisticsAccumulator;
-
     /// Keeps track of a DataWriter's liveliness for a DataReader.
     class OpenDDS_Dcps_Export WriterInfo {
       public:
@@ -76,6 +73,26 @@ namespace OpenDDS
         /// update liveliness when remove_association is called.
         void removed ();
 
+      private:
+        /// Timestamp of last write/dispose/assert_liveliness from this DataWriter
+        ACE_Time_Value last_liveliness_activity_time_;
+
+        /// State of the writer.
+        WriterState state_;
+
+        /// The DataReader owning this WriterInfo
+        DataReaderImpl* reader_;
+
+        /// DCPSInfoRepo ID of the DataWriter
+        PublicationId writer_id_;
+      };
+
+    /// Elements stored for managing statistical data.
+    class WriterStats {
+      public:
+        /// Default constructor.
+        WriterStats();
+
         /// Add a datum to the latency statistics.
         void add_stat( const ACE_Time_Value& delay);
 
@@ -86,21 +103,9 @@ namespace OpenDDS
         void reset_stats();
 
       private:
-        /// Timestamp of last write/dispose/assert_liveliness from this DataWriter
-        ACE_Time_Value last_liveliness_activity_time_;
-
-        /// State of the writer.
-        WriterState state_;
-
         /// Latency statistics for the DataWriter to this DataReader.
-        StatisticsAccumulator stats_;
-
-        /// The DataReader owning this WriterInfo
-        DataReaderImpl* reader_;
-
-        /// DCPSInfoRepo ID of the DataWriter
-        PublicationId writer_id_;
-      };
+        Stats< double> stats_;
+    };
 
 
 
@@ -613,10 +618,14 @@ namespace OpenDDS
       /// Flag indicating status of statistics gathering.
       bool statistics_enabled_;
 
-      typedef std::map<PublicationId, WriterInfo, GUID_tKeyLessThan> WriterMapType;
+      typedef std::map< PublicationId, WriterInfo,  GUID_tKeyLessThan> WriterMapType;
+      typedef std::map< PublicationId, WriterStats, GUID_tKeyLessThan> StatsMapType;
 
       /// publications writing to this reader.
       WriterMapType writers_;
+
+      /// Statistics for this reader, collected for each writer.
+      StatsMapType statistics_;
 
       typedef
         std::set< ::DDS::ReadCondition_var, VarLess< ::DDS::ReadCondition > >

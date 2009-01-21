@@ -1,7 +1,74 @@
+Wed Jan 21 04:48:42 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DdsDcpsInfoUtils.idl:
+
+	  Added publication_transport_priority field to
+	  TransportInterfaceInfo structure.
+
+        * dds/DCPS/PublisherImpl.cpp:
+
+	  Assign TransportInterfaceInfo.publication_transport_priority
+	  value from the DataWriterQos::transport_priority value.
+
+        * dds/DCPS/SubscriberImpl.cpp:
+
+	  Default TransportInterfaceInfo.publication_transport_priority
+	  value to 0.
+
+        * dds/DCPS/transport/framework/TransportInterface.cpp:
+
+	  Add new TransportInterafaceInfo.publication_transport_priority
+	  value from association data as priority for subscription when
+	  calling reserve_datalink() for new publications.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+
+	  Extended/corrected diagnostic messagse.  Removed stale code
+	  review comments from 1Q5.  Extend the initial handshake data to
+	  include sending and receiving the publication transport
+	  priority.  Store the received transport_priority value when
+	  accepting new connections.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+
+	  Extended diagnostic messages.  Changed the connections mapping
+	  to be keyed with a PriorityKey type and modified to use an STL
+	  map.  Use the connection transport_priority value for the key
+	  when accepting new connections.  This will be derived from the
+	  additional initial handshake data.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.cpp:
+
+	  Added new diagnostic message.
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+	  Added new diagnostic messages.  Added insertion operator onto
+	  std::ostream to produce formatted diagnostic data about current
+	  link utilization.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+	  Factored statistics gathering behavior into a separate object
+	  type and maintain a separate map of statistics values that
+	  persists beyond the lifetime of the writers for which the
+	  statistics are gathered.
+
+        * performance-tests/DCPS/Priority/DataReaderListener.cpp:
+        * performance-tests/DCPS/Priority/Subscriber.h:
+        * performance-tests/DCPS/Priority/Subscriber.cpp:
+        * performance-tests/DCPS/Priority/subscriber_main.cpp:
+
+	  Added statistics gathering and reporting to test execution.
+	  Added new diagnostic messages.
+
 Mon Jan 19 08:09:27 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/WriteDataContainer.h:
-        
+
           Added missing include of memory to fix compilation errors.
 
 Mon Jan 19 08:05:20 UTC 2009  Yan Dai  <dai_y@ociweb.com>

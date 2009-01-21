@@ -20,6 +20,8 @@
 #include "ace/Synch.h"
 #include "ace/Event_Handler.h"
 
+#include <iosfwd> // For operator<<() diagnostic formatter.
+
 class ACE_SOCK;
 
 namespace OpenDDS
@@ -271,6 +273,10 @@ namespace OpenDDS
         /// more than one TransportInterface (and each could be driven by
         /// a different thread).
       //LockType lock_;
+
+
+        /// Convenience function for diagnostic information.
+        OpenDDS_Dcps_Export friend std::ostream& operator<<( std::ostream& str, const DataLink& value);
 
         /// Map associating each publisher_id with a set of
         /// TransportReceiveListener objects (each with an associated

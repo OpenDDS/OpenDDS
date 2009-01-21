@@ -107,13 +107,8 @@ namespace OpenDDS
                                 ACE_Equal_To<PriorityKey>,
                                 ACE_Null_Mutex>              AddrLinkMap;
 
-        /// Map Type: (key) ACE_INET_Addr to (value) SimpleTcpConnection_rch
-        typedef ACE_Hash_Map_Manager_Ex
-                               <ACE_INET_Addr,
-                                SimpleTcpConnection_rch,
-                                ACE_Hash<ACE_INET_Addr>,
-                                ACE_Equal_To<ACE_INET_Addr>,
-                                ACE_Null_Mutex>              AddrConnectionMap;
+        typedef std::map< PriorityKey, SimpleTcpDataLink_rch>   LinkMap;
+        typedef std::map< PriorityKey, SimpleTcpConnection_rch> ConnectionMap;
 
         typedef ACE_SYNCH_MUTEX         LockType;
         typedef ACE_Guard<LockType>     GuardType;
@@ -146,7 +141,7 @@ namespace OpenDDS
 
         /// Map of passive connection objects that need to be paired
         /// with a DataLink.
-        AddrConnectionMap connections_;
+        ConnectionMap connections_;
 
         /// Condition that will be signal()'ed whenever something has been
         /// inserted into connections_.

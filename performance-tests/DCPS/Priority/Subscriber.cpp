@@ -219,12 +219,13 @@ Subscriber::Subscriber( const Options& options)
   }
 
   // Create the reader.
-  this->reader_ = this->subscriber_->create_datareader(
-                    this->topic_.in(),
-                    readerQos,
-                    DDS::DataReaderListener::_nil()
-                  );
-  if( CORBA::is_nil( this->reader_.in())) {
+  ::DDS::DataReader_var reader
+    = this->subscriber_->create_datareader(
+        this->topic_.in(),
+        readerQos,
+        DDS::DataReaderListener::_nil()
+      );
+  if( CORBA::is_nil( reader.in())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Subscriber::Subscriber() - ")
       ACE_TEXT("failed to create reader.\n")
@@ -237,6 +238,20 @@ Subscriber::Subscriber( const Options& options)
       ACE_TEXT("created reader.\n")
     ));
   }
+
+  this->reader_ = ::OpenDDS::DCPS::DataReaderEx::_narrow( reader.in());
+  if( CORBA::is_nil( this->reader_.in())) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: Subscriber::Subscriber() - ")
+      ACE_TEXT("failed to narrow reader to extract statistics.\n")
+    ));
+    throw BadReaderException();
+  }
+
+  // Clear and start statistics gathering.  Ideally we would want to
+  // configurably delay the start here to avoid edge effects.
+  this->reader_->reset_latency_stats();
+  this->reader_->statistics_enabled( true);
 
   // Set the listener mask here so that we don't conflict with the
   // StatusCondition(s) that we want to wait on in the main thread.
@@ -317,6 +332,24 @@ Subscriber::run()
       ACE_TEXT("shutting down after all publications were removed.\n")
     ));
   }
+}
+
+std::ostream&
+operator<<( std::ostream& str, const Subscriber& value)
+{
+  ::OpenDDS::DCPS::LatencyStatisticsSeq statistics;
+  value.reader_->get_latency_stats( statistics);
+  str << " --- statistical summary ---" << std::endl;
+  for( unsigned long index = 0; index < statistics.length(); ++index) {
+    str << "  Writer[ " << statistics[ index].publication << "]" << std::endl;
+    str << "     samples: " << statistics[ index].n << std::endl;
+    str << "        mean: " << statistics[ index].mean << std::endl;
+    str << "     minimum: " << statistics[ index].minimum << std::endl;
+    str << "     maximum: " << statistics[ index].maximum << std::endl;
+    str << "    variance: " << statistics[ index].variance << std::endl;
+  }
+
+  return str;
 }
 
 } // End of namespace Test

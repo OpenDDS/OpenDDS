@@ -259,6 +259,9 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
           WriterInfo( this, writer_id)
         )
       );
+      this->statistics_.insert(
+        StatsMapType::value_type( writer_id, WriterStats())
+      );
       if( DCPS_debug_level > 4) {
         ::OpenDDS::DCPS::GuidConverter converter( writer_id);
         ACE_DEBUG((LM_DEBUG,
@@ -1554,39 +1557,32 @@ void OpenDDS::DCPS::WriterInfo::removed ()
   reader_->writer_removed (writer_id_, this->state_);
 }
 
-void OpenDDS::DCPS::WriterInfo::add_stat( const ACE_Time_Value& delay)
+OpenDDS::DCPS::WriterStats::WriterStats()
+{
+}
+
+void OpenDDS::DCPS::WriterStats::add_stat( const ACE_Time_Value& delay)
 {
   double datum = static_cast<double>( delay.sec());
   datum += delay.usec() / 1000000.0;
   this->stats_.add( datum);
 }
 
-OpenDDS::DCPS::LatencyStatistics OpenDDS::DCPS::WriterInfo::get_stats() const
+OpenDDS::DCPS::LatencyStatistics OpenDDS::DCPS::WriterStats::get_stats() const
 {
-  WriterIdSeq writerIds;
-  writerIds.length(1);
-  writerIds[ 0] = this->writer_id_;
-
-  ::DDS::InstanceHandleSeq handles;
-  this->reader_->cache_lookup_instance_handles( writerIds, handles);
-
   LatencyStatistics value;
 
-  if( handles.length() >= 1) {
-    value.publication = handles[ 0];
-  } else {
-    value.publication = -1;
-  }
+  value.publication = -1;
+  value.n           = this->stats_.n();
+  value.maximum     = this->stats_.maximum();
+  value.minimum     = this->stats_.minimum();
+  value.mean        = this->stats_.mean();
+  value.variance    = this->stats_.var();
 
-  value.n        = this->stats_.n();
-  value.maximum  = this->stats_.maximum();
-  value.minimum  = this->stats_.minimum();
-  value.mean     = this->stats_.mean();
-  value.variance = this->stats_.var();
   return value;
 }
 
-void OpenDDS::DCPS::WriterInfo::reset_stats()
+void OpenDDS::DCPS::WriterStats::reset_stats()
 {
   this->stats_.reset();
 }
@@ -1828,9 +1824,9 @@ void DataReaderImpl::unregister(const ReceivedDataSample&,
 
 void DataReaderImpl::process_latency( const ReceivedDataSample& sample)
 {
-  WriterMapType::iterator location
-    = this->writers_.find( sample.header_.publication_id_);
-  if( location != this->writers_.end()) {
+  StatsMapType::iterator location
+    = this->statistics_.find( sample.header_.publication_id_);
+  if( location != this->statistics_.end()) {
       // This starts as the current time.
       ACE_Time_Value  latency = ACE_OS::gettimeofday ();
 
@@ -1923,12 +1919,24 @@ DataReaderImpl::get_latency_stats (
 )
 ACE_THROW_SPEC (( ::CORBA::SystemException))
 {
-  stats.length( this->writers_.size());
+  stats.length( this->statistics_.size());
   int index = 0;
-  for( WriterMapType::const_iterator current = this->writers_.begin();
-       current != this->writers_.end();
+  for( StatsMapType::const_iterator current = this->statistics_.begin();
+       current != this->statistics_.end();
        ++current, ++index) {
     stats[ index] = current->second.get_stats();
+
+    // Extract the Instance handle for the current writer, if it still exists.
+    WriterIdSeq writerIds;
+    writerIds.length(1);
+    writerIds[ 0] = current->first;
+
+    ::DDS::InstanceHandleSeq handles;
+    this->cache_lookup_instance_handles( writerIds, handles);
+
+    if( handles.length() >= 1) {
+      stats[ index].publication = handles[ 0];
+    }
   }
 }
 
@@ -1936,8 +1944,8 @@ void
 DataReaderImpl::reset_latency_stats ( void)
 ACE_THROW_SPEC (( ::CORBA::SystemException))
 {
-  for( WriterMapType::iterator current = this->writers_.begin();
-       current != this->writers_.end();
+  for( StatsMapType::iterator current = this->statistics_.begin();
+       current != this->statistics_.end();
        ++current) {
     current->second.reset_stats();
   }

@@ -950,6 +950,8 @@ SubscriberImpl::reader_enabled(
       info->local_reader_objref_->get_qos(qos);
 
       OpenDDS::DCPS::TransportInterfaceInfo trans_conf_info = connection_info ();
+      trans_conf_info.publication_transport_priority = 0;
+
       DCPSInfo_var repo = TheServiceParticipant->get_repository( this->domain_id_);
       info->subscription_id_
 	= repo->add_subscription( this->domain_id_,
