@@ -74,9 +74,10 @@ The following JMX MBeans are provided:
         The ORBDirectives attribute allows the user to define
         ORBSvcConfDirectives manually.  Directives must defined one per line.
 
-      ORBDisableUpcalls
-        The ORBDisableUpcalls attribute provides a convenience mechanism for
-        disabling upcalls in TAO.  For more information see the OCI TAO FAQ.
+      ORBDisableNestedUpcalls
+        The ORBDisableNestedUpcalls attribute provides a convenience mechanism
+        for disabling upcalls in TAO.  For more information see the OCI
+        TAO FAQ.
 
       TransportType
         The TransportType attribute defines the default DCPS transport type.

@@ -16,7 +16,7 @@ public class ORBArguments implements DynamicArgumentProvider {
     public static final String ORB_LISTEN_ENDPOINTS = "ORBListenEndpoints";
     public static final String ORB_DEBUG_LEVEL = "ORBDebugLevel";
     public static final String ORB_DIRECTIVES = "ORBDirectives";
-    public static final String ORB_DISABLE_UPCALLS = "ORBDisableUpcalls";
+    public static final String ORB_DISABLE_NESTED_UPCALLS = "ORBDisableNestedUpcalls";
     public static final String ORB_LOG_FILE = "ORBLogFile";
     public static final String ORB_ARGS = "ORBArgs";
 
@@ -32,7 +32,7 @@ public class ORBArguments implements DynamicArgumentProvider {
         instance.registerAttribute(ORB_LISTEN_ENDPOINTS, String.class);
         instance.registerAttribute(ORB_DEBUG_LEVEL, Integer.class);
         instance.registerAttribute(ORB_DIRECTIVES, String.class);
-        instance.registerAttribute(ORB_DISABLE_UPCALLS, Boolean.class);
+        instance.registerAttribute(ORB_DISABLE_NESTED_UPCALLS, Boolean.class);
         instance.registerAttribute(ORB_LOG_FILE, String.class);
         instance.registerAttribute(ORB_ARGS, String.class);
     }
@@ -47,10 +47,10 @@ public class ORBArguments implements DynamicArgumentProvider {
         writer.writeDelimitedIfSet(ORB_ARGS);
         writer.writeMultiLineIfSet(SvcConfDirective.ARGUMENT_NAME, ORB_DIRECTIVES);
 
-        Boolean disableUpcalls =
-            (Boolean) instance.getAttribute(ORB_DISABLE_UPCALLS);
+        Boolean disableNestedUpcalls =
+            (Boolean) instance.getAttribute(ORB_DISABLE_NESTED_UPCALLS);
 
-        if (disableUpcalls != null && disableUpcalls) {
+        if (disableNestedUpcalls != null && disableNestedUpcalls) {
             SvcConfDirective directive;
 
             directive = new SvcConfDirective();
