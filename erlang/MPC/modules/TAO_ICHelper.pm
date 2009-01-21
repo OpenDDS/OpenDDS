@@ -27,8 +27,8 @@ sub get_filenames {
   
   my $name = $self->get_scoped_name(@scope);
   my @filenames;
-  
-  if ("const" eq $type) {
+
+  if ($type eq 'const' or $type eq 'enum') {
     push @filenames, $self->get_src_file($name);
   }
   

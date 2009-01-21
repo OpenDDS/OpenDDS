@@ -13,6 +13,22 @@
 #include "ast_decl.h"
 #include "ast_expression.h"
 
+class erl_name {
+public:
+  explicit erl_name(AST_Decl *, bool = true);
+
+  ~erl_name(void);
+
+  std::string str(void) const;
+
+  operator std::string() const;
+
+private:
+  std::string str_;
+
+  friend std::ostream &operator<<(std::ostream &, const erl_name &);
+};
+
 class erl_module {
 public:
   static const char *ext;
@@ -21,13 +37,13 @@ public:
 
   ~erl_module(void);
 
-  void add_export(const char *);
-
-  void add_import(const char *);
-
-  void add_include(const char *);
-
   const char *filename(void) const;
+
+  void add_export(const std::string &);
+
+  void add_import(const std::string &);
+
+  void add_include(const std::string &);
 
   void generate_header(void);
 
@@ -37,25 +53,23 @@ public:
 
   std::ostream &open_stream(bool = true);
 
-  std::string to_list(std::vector<const char *> &);
-
-  std::string to_module_name(AST_Decl *);
-
 private:
-  const std::string module_name_;
+  erl_name name_;
 
   std::string filename_;
 
   std::ofstream os_;
 
   // Module exports (list)
-  std::vector<const char *> exports_;
+  std::vector<std::string> exports_;
 
   // Module imports (list)
-  std::vector<const char *> imports_;
+  std::vector<std::string> imports_;
 
   // Module includes
-  std::vector<const char *> includes_;
+  std::vector<std::string> includes_;
+
+  friend std::ostream &operator<<(std::ostream &, const erl_module &);
 };
 
 class erl_literal {
@@ -69,9 +83,11 @@ public:
   static std::string to_str(AST_Expression *);
 
 private:
-  const std::string str_;
+  std::string str_;
+
+  friend std::ostream &operator<<(std::ostream &, const erl_literal &);
 };
 
-ostream &operator<<(ostream &, const erl_literal &);
+std::string to_list(std::vector<std::string> &);
 
 #endif /* TAO_IC_ERL_UTILITY_H */

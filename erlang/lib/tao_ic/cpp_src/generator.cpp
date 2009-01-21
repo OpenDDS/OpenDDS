@@ -12,6 +12,18 @@ generator::~generator()
 {
 }
 
+bool
+generator::generate_constant(AST_Constant *)
+{
+  return true;
+}
+
+bool
+generator::generate_enum(AST_Enum *, vector<AST_EnumVal *> &)
+{
+  return true;
+}
+
 generator_composite::generator_composite(bool auto_delete)
   : auto_delete_(auto_delete)
 {
@@ -19,57 +31,58 @@ generator_composite::generator_composite(bool auto_delete)
 
 generator_composite::~generator_composite()
 {
-  if (this->auto_delete_) {
-    this->delete_all();
+  if (auto_delete_) {
+    delete_all();
   }
 }
 
 void
 generator_composite::add(generator *gen)
 {
-  this->generators_.push_back(gen);
+  generators_.push_back(gen);
 }
 
 void
 generator_composite::delete_all()
 {
-  generator_composite::iterator it = this->begin();
-  while (it != this->end()) {
+  generator_composite::iterator it = begin();
+  while (it != end()) {
     delete *it++;
   }
-  this->generators_.clear();
+  generators_.clear();
 }
 
 generator_composite::iterator
 generator_composite::begin()
 {
-  return this->generators_.begin();
-}
-
-generator_composite::const_iterator
-generator_composite::begin() const
-{
-  return this->generators_.begin();
+  return generators_.begin();
 }
 
 generator_composite::iterator
 generator_composite::end()
 {
-  return this->generators_.end();
-}
-
-generator_composite::const_iterator
-generator_composite::end() const
-{
-  return this->generators_.end();
+  return generators_.end();
 }
 
 bool
 generator_composite::generate_constant(AST_Constant *node)
 {
-  generator_composite::iterator it(this->begin());
-  for (; it != this->end(); ++it) {
+  generator_composite::iterator it(begin());
+  for (; it != end(); ++it) {
     if (!(*it)->generate_constant(node)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool
+generator_composite::generate_enum(AST_Enum *node,
+                                   vector<AST_EnumVal *> &values)
+{
+  generator_composite::iterator it(begin());
+  for (; it != end(); ++it) {
+    if (!(*it)->generate_enum(node, values)) {
       return false;
     }
   }

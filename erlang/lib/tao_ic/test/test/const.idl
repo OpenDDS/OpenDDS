@@ -1,0 +1,18 @@
+module foo {
+  const short short_ = 0;
+  const unsigned short unsigned_short_ = 0;
+
+  const long long_ = 0;
+  const unsigned long unsigned_long_ = 0;
+
+  const float float_ = 0.0;
+  const double double_ = 0.0;
+
+  const char char_ = ' ';
+
+  const octet octet_ = 0;
+
+  const boolean boolean_ = FALSE;
+
+  const string string_ = "";
+};

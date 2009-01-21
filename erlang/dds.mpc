@@ -5,6 +5,7 @@
 project : tao_ic_otp {
   after      += tao
   erlcflags  += -I lib/tao/include -Wall
+  taoicflags += -I$(DDS_ROOT)
 
   TAO_IC_Files {
     $(DDS_ROOT)/dds/DdsDcpsInfrastructure.idl
