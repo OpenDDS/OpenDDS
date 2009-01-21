@@ -95,6 +95,7 @@ main( int argc, char *argv[])
     }
     buffer << "Total messages received: " << std::dec << subscriber.total_messages() << std::endl;
     buffer << "Valid messages received: " << std::dec << subscriber.valid_messages() << std::endl;
+    buffer << subscriber << std::endl;
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) subscriber_main() - ")
       ACE_TEXT("test over:\n%s"),

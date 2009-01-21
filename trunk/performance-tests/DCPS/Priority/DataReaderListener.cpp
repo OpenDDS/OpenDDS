@@ -4,6 +4,8 @@
 #include "TestTypeSupportC.h"
 #include "TestTypeSupportImpl.h"
 
+#include <sstream>
+
 /// Control the spew.
 namespace { enum { BE_REALLY_VERBOSE = 0};}
 
@@ -84,6 +86,38 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DataReaderListener::on_data_available() - ")
         ACE_TEXT("received an INVALID sample.\n")
+      ));
+    }
+  }
+
+  if( this->verbose_ && BE_REALLY_VERBOSE) {
+    ::OpenDDS::DCPS::DataReaderEx_var readerex
+      = ::OpenDDS::DCPS::DataReaderEx::_narrow( reader);
+    if( !CORBA::is_nil( readerex.in())) {
+      ::OpenDDS::DCPS::LatencyStatisticsSeq statistics;
+      readerex->get_latency_stats( statistics);
+      std::stringstream buffer;
+      for( unsigned long index = 0; index < statistics.length(); ++index) {
+        buffer << "Writer[ " << statistics[ index].publication << "] - ";
+        buffer << "samples==" << statistics[ index].n;
+        buffer << ", mean==" << statistics[ index].mean;
+        buffer << ", minimum==" << statistics[ index].minimum;
+        buffer << ", maximum==" << statistics[ index].maximum;
+        buffer << ", variance==" << statistics[ index].variance;
+        buffer << std::endl;
+      }
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) DataReaderListener::on_data_available() - ")
+        ACE_TEXT("statistics for %d writers at sample %d:\n%s"),
+        statistics.length(),
+        this->total_messages_,
+        buffer.str().c_str()
+      ));
+
+    } else {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: DataReaderListener::on_data_available() - ")
+        ACE_TEXT("failed to narrow extended reader to gather statistics.\n")
       ));
     }
   }

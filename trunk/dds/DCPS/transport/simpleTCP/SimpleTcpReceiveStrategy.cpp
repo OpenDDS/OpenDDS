@@ -8,6 +8,7 @@
 #include "SimpleTcpTransport.h"
 #include "SimpleTcpDataLink.h"
 
+#include <sstream>
 
 #if !defined (__ACE_INLINE__)
 #include "SimpleTcpReceiveStrategy.inl"
@@ -101,6 +102,19 @@ OpenDDS::DCPS::SimpleTcpReceiveStrategy::start_i()
 
   // Give the reactor its own "copy" of the reference to the connection object.
   this->connection_->_add_ref();
+
+  if( DCPS_debug_level > 9) {
+    std::stringstream buffer;
+    buffer << *this->link_.in();
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) SimpleTcpReceiveStrategy::start_i() - ")
+      ACE_TEXT("link:\n%sconnected to %s:%d ")
+      ACE_TEXT("registering with reactor to receive.\n"),
+      buffer.str().c_str(),
+      this->connection_->get_remote_address().get_host_name(),
+      this->connection_->get_remote_address().get_port_number()
+    ));
+  }
 
   if (this->reactor_task_->get_reactor()->register_handler
                                       (this->connection_.in(),

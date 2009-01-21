@@ -2,10 +2,12 @@
 // $Id$
 
 #include "dds/DdsDcpsDomainC.h"
+#include "dds/DdsDcpsSubscriptionExtC.h"
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
 #include "dds/DCPS/WaitSet.h"
 
 #include <map>
+#include <iosfwd>
 
 namespace Test {
 
@@ -38,6 +40,9 @@ class Subscriber {
     /// Priority of  writers.
     const std::map< long, long>& priorities() const;
 
+    /// Stream out statistics values.
+    friend std::ostream& operator<<( std::ostream& str, const Subscriber& value);
+
   private:
     /// Test options.
     const Options& options_;
@@ -55,7 +60,7 @@ class Subscriber {
     DDS::Subscriber_var subscriber_;
 
     /// Reader.
-    DDS::DataReader_var reader_;
+    OpenDDS::DCPS::DataReaderEx_var reader_;
 
     /// Reader listener.
     DataReaderListener* listener_;

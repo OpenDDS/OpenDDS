@@ -141,9 +141,10 @@ OpenDDS::DCPS::SimpleTcpConnection::open(void* arg)
     {
       // The cast failed.
       ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: Failed to cast void* arg to "
-                        "SimpleTcpAcceptor* type.\n"),
-                       -1);
+        ACE_TEXT("(%P|%t) ERROR: SimpleTcpConnection::open() - ")
+        ACE_TEXT("failed to cast void* arg to ")
+        ACE_TEXT("SimpleTcpAcceptor* type.\n")),
+      -1);
     }
 
   // Now we need to ask the SimpleTcpAcceptor object to provide us with
@@ -154,8 +155,9 @@ OpenDDS::DCPS::SimpleTcpConnection::open(void* arg)
     {
       // The acceptor gave us a nil transport (smart) pointer.
       ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: Acceptor's transport is nil.\n"),
-                       -1);
+        ACE_TEXT("(%P|%t) ERROR: SimpleTcpConnection::open() - ")
+        ACE_TEXT("acceptor's transport is nil.\n")),
+      -1);
     }
 
   SimpleTcpConfiguration* tcp_config = acceptor->get_configuration();
@@ -176,11 +178,13 @@ OpenDDS::DCPS::SimpleTcpConnection::open(void* arg)
   if (this->peer().recv_n(&nlen,
                           sizeof(ACE_UINT32)) == -1)
     {
-         ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: Unable to receive the length of address string "
-                        "from the remote (active) side of the connection."
-                        " %p\n", "recv_n"),
-                         -1);
+       ACE_ERROR_RETURN((LM_ERROR,
+         ACE_TEXT("(%P|%t) ERROR: SimpleTcpConnection::open() - ")
+         ACE_TEXT("unable to receive the length of address string ")
+         ACE_TEXT("from the remote (active) side of the connection. ")
+         ACE_TEXT("%p\n"),
+         "recv_n"),
+       -1);
     }
  
   ACE_UINT32 len = ntohl(nlen);
@@ -190,11 +194,13 @@ OpenDDS::DCPS::SimpleTcpConnection::open(void* arg)
   if (this->peer().recv_n(buf,
                           len) == -1)
     {
-         ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: Unable to receive the address string "
-                        "from the remote (active) side of the connection."
-                        " %p\n", "recv_n"),
-                         -1);
+       ACE_ERROR_RETURN((LM_ERROR,
+         ACE_TEXT("(%P|%t) ERROR: SimpleTcpConnection::open() - ")
+         ACE_TEXT("unable to receive the address string ")
+         ACE_TEXT("from the remote (active) side of the connection. ")
+         ACE_TEXT("%p\n"),
+         "recv_n"),
+       -1);
     }
 
   NetworkAddress network_order_address(buf);
@@ -203,33 +209,24 @@ OpenDDS::DCPS::SimpleTcpConnection::open(void* arg)
 
   delete[] buf;
 
-
-//MJM: vvv CONNECTION ESTABLISHMENT CHANGES vvv
-
-//MJM: Add code to send a response to the other side that the
-//MJM: connection is ready to receive at this point.  It may be
-//MJM: necessary to do this higher in the layers to make sure that we
-//MJM: really are ready to receive.
-
-//MJM: This is the only really tricky bit, since I have not really
-//MJM: investigated enough to know where the connection is considered
-//MJM: complete on this end.  I think that it will be when the datalink
-//MJM: is placed in all the containers.
-
-//MJM: This is also where this end needs to call back the
-//MJM: TransportInterface method that will eventually signal() the
-//MJM: wait()ing add_associations() call.  It may not be necessary on
-//MJM: this (passive) to actually perform the wait() and signal()
-//MJM: operations.  There is enough information in the
-//MJM: add_associations() call to differentiate the cases.
-
-//MJM: ^^^ CONNECTION ESTABLISHMENT CHANGES ^^^
-
+  ACE_UINT32 priority = 0;
+  if (this->peer().recv_n(&priority, sizeof(ACE_UINT32)) == -1)
+    {
+       ACE_ERROR_RETURN((LM_ERROR,
+         ACE_TEXT("(%P|%t) ERROR: SimpleTcpConnection::open() - ")
+         ACE_TEXT("unable to receive the publication transport priority ")
+         ACE_TEXT("from the remote (active) side of the connection. ")
+         ACE_TEXT("%p\n"),
+         "recv_n"),
+       -1);
+    }
+  this->transport_priority_ = ntohl( priority);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-    "SimpleTcpConnection::open %X %s:%d->%s:%d reconnect_state = %d\n", this,
+    "SimpleTcpConnection::open %X %s:%d->%s:%d, priority==%d, reconnect_state = %d\n", this,
     this->remote_address_.get_host_addr (), this->remote_address_.get_port_number (),
     this->local_address_.get_host_addr (), this->local_address_.get_port_number (),
+    this->transport_priority_,
     this->reconnect_state_));
 
   // Now it is time to announce (and give) ourselves to the
@@ -415,15 +412,16 @@ OpenDDS::DCPS::SimpleTcpConnection::active_establishment
                        -1);
     }
 
-
-//MJM: vvv CONNECTION ESTABLISHMENT CHANGES vvv
-
-//MJM: Add code to receive a response from the other side that the
-//MJM: connection is ready to receive at this point.  Block until it is
-//MJM: received.  Then call the method in the TransportInterface that
-//MJM: the add_associations() call is wait()ing on.
-
-//MJM: ^^^ CONNECTION ESTABLISHMENT CHANGES ^^^
+  ACE_UINT32 npriority = htonl( this->transport_priority_);
+  if (this->peer().send_n( &npriority, sizeof(ACE_UINT32)) == -1)
+    {
+      // TBD later - Anything we are supposed to do to close the connection.
+      ACE_ERROR_RETURN((LM_ERROR,
+                        "(%P|%t) ERROR: Unable to send publication priority to "
+                        "the passive side to complete the active connection "
+                        "establishment.\n"),
+                       -1);
+    }
 
   return 0;
 }

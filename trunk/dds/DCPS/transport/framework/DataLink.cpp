@@ -21,7 +21,8 @@
 #include "ace/Reactor.h"
 #include "ace/SOCK.h"
 
-#include <sstream>
+#include <iostream>     // For operator<<() diagnostic formatting.
+#include <sstream>      // For Guid value conversion formatting.
 
 #if !defined (__ACE_INLINE__)
 #include "DataLink.inl"
@@ -93,6 +94,18 @@ OpenDDS::DCPS::DataLink::make_reservation(RepoId subscriber_id,  /* remote */
   int pub_result      = 0;
   int sub_result      = 0;
   int pub_undo_result = 0;
+
+  if( DCPS_debug_level > 9) {
+    GuidConverter local( publisher_id);
+    GuidConverter remote( subscriber_id);
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) DataLink::make_reservation() - ")
+      ACE_TEXT("creating association local: publisher %s ")
+      ACE_TEXT("<--> with remote subscriber %s.\n"),
+      (const char*)local,
+      (const char*)remote
+    ));
+  }
 
   {
     GuardType guard (this->strategy_lock_);
@@ -190,6 +203,18 @@ OpenDDS::DCPS::DataLink::make_reservation
   int sub_result      = 0;
   int pub_result      = 0;
   int sub_undo_result = 0;
+
+  if( DCPS_debug_level > 9) {
+    GuidConverter local( subscriber_id);
+    GuidConverter remote( publisher_id);
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) DataLink::make_reservation() - ")
+      ACE_TEXT("creating association local subscriber: %s ")
+      ACE_TEXT("<--> with remote publisher %s.\n"),
+      (const char*)local,
+      (const char*)remote
+    ));
+  }
 
   {
     GuardType guard (this->strategy_lock_);
@@ -292,6 +317,19 @@ OpenDDS::DCPS::DataLink::release_reservations(RepoId          remote_id,
                                           DataLinkSetMap& released_locals)
 {
   DBG_ENTRY_LVL("DataLink","release_reservations",6);
+
+  if( DCPS_debug_level > 9) {
+    GuidConverter local( local_id);
+    GuidConverter remote( remote_id);
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) DataLink::release_reservations() - ")
+      ACE_TEXT("releasing association local: %s ")
+      ACE_TEXT("<--> with remote %s.\n"),
+      (const char*)local,
+      (const char*)remote
+    ));
+  }
+
 
   // See if the remote_id is a publisher_id.
   ReceiveListenerSet_rch listener_set;
@@ -1126,4 +1164,35 @@ OpenDDS::DCPS::DataLink::set_dscp_codepoint( int cp, ACE_SOCK& socket)
       ));
     }
 }
+
+namespace OpenDDS { namespace DCPS {
+
+std::ostream&
+operator<<( std::ostream& str, const DataLink& value)
+{
+  str << "   There are " << value.pub_map_.map().size()
+      << " publications currently associated with this link:"
+      << std::endl;
+  for( ReceiveListenerSetMap::MapType::const_iterator
+       pubLocation = value.pub_map_.map().begin();
+       pubLocation != value.pub_map_.map().end();
+       ++pubLocation) {
+    for( ReceiveListenerSet::MapType::const_iterator
+         subLocation = pubLocation->second->map().begin();
+         subLocation != pubLocation->second->map().end();
+         ++subLocation) {
+      GuidConverter pub(
+        const_cast< ::OpenDDS::DCPS::RepoId*>( &pubLocation->first)
+      );
+      GuidConverter sub(
+        const_cast< ::OpenDDS::DCPS::RepoId*>( &subLocation->first)
+      );
+      str << (const char*)pub << " --> " << (const char*)sub
+          << "   " << std::endl;
+    }
+  }
+  return str;
+}
+
+}} // End of namespace OpenDDS::DCPS
 

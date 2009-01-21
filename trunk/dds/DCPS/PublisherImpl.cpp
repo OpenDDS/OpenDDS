@@ -838,6 +838,7 @@ PublisherImpl::writer_enabled(
 
       OpenDDS::DCPS::TransportInterfaceInfo trans_conf_info =
         connection_info ();
+      trans_conf_info.publication_transport_priority = qos.transport_priority.value;
 
       DCPSInfo_var repo = TheServiceParticipant->get_repository( this->domain_id_);
       info->publication_id_ =
