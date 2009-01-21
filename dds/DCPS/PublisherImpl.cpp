@@ -50,7 +50,8 @@ PublisherImpl::PublisherImpl (const ::DDS::PublisherQos &   qos,
     participant_ (participant),
     suspend_depth_count_ (0),
     sequence_number_ (),
-    aggregation_period_start_ (ACE_Time_Value::zero)
+    aggregation_period_start_ (ACE_Time_Value::zero),
+    reverse_pi_lock_ (pi_lock_)
 {
   if (! CORBA::is_nil (a_listener))
     {
@@ -296,6 +297,14 @@ PublisherImpl::delete_datawriter (::DDS::DataWriter_ptr a_datawriter)
     }
 
     publication_map_.erase (publication_id);
+
+
+    // Release pi_lock_ before making call to transport layer to avoid 
+    // some deadlock situations that threads acquire locks(PublisherImpl 
+    // pi_lock_, TransportInterface reservation_lock and TransportImpl
+    // lock_) in reverse order.
+    ACE_GUARD_RETURN (reverse_lock_type, reverse_monitor, this->reverse_pi_lock_, 
+                      ::DDS::RETCODE_ERROR);
 
     // Call remove association before unregistering the datawriter
     // with the transport, otherwise some callbacks resulted from
