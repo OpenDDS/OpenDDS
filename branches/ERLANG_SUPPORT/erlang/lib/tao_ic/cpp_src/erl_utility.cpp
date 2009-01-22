@@ -29,19 +29,17 @@ erl_name::erl_name(AST_Decl *node, bool local)
     s += node->flat_name();
   }
 
-  { // strip leading underscores
-    string::iterator it(s.begin());
-    while (it != s.end()) {
-      if (*it != '_') break;
-      it = s.erase(it);
+  // Strip leading underscores
+  for (string::iterator it(s.begin()); it != s.end(); ++it) {
+    if (*it != '_') {
+      break;
     }
+    it = s.erase(it);
   }
 
-  { // convert to lower case
-    string::iterator it(s.begin());
-    for (; it != s.end(); ++it) {
-      *it = tolower(*it);
-    }
+  // Convert remainder to lower case
+  for (string::iterator it(s.begin()); it != s.end(); ++it) {
+    *it = tolower(*it);
   }
 
   str_ = s;
@@ -143,8 +141,8 @@ void
 erl_module::generate_includes()
 {
   if (!includes_.empty()) {
-    vector<string>::iterator it (includes_.begin());
-    for (; it != includes_.end(); ++it) {
+    for (vector<string>::iterator it (includes_.begin());
+         it != includes_.end(); ++it) {
       os_ << "-include(\"" << *it << "\")." << endl;
     }
     os_ << endl;

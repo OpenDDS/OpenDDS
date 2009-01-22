@@ -45,9 +45,8 @@ generator_composite::add(generator *gen)
 void
 generator_composite::delete_all()
 {
-  generator_composite::iterator it = begin();
-  while (it != end()) {
-    delete *it++;
+  for (iterator it(begin()); it != end(); ++it) {
+    delete *it;
   }
   generators_.clear();
 }
@@ -67,8 +66,7 @@ generator_composite::end()
 bool
 generator_composite::generate_constant(AST_Constant *node)
 {
-  generator_composite::iterator it(begin());
-  for (; it != end(); ++it) {
+  for (iterator it(begin()); it != end(); ++it) {
     if (!(*it)->generate_constant(node)) {
       return false;
     }
@@ -80,8 +78,7 @@ bool
 generator_composite::generate_enum(AST_Enum *node,
                                    vector<AST_EnumVal *> &values)
 {
-  generator_composite::iterator it(begin());
-  for (; it != end(); ++it) {
+  for (iterator it(begin()); it != end(); ++it) {
     if (!(*it)->generate_enum(node, values)) {
       return false;
     }

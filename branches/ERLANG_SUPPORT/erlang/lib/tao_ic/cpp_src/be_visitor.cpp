@@ -17,13 +17,14 @@ void find_children(UTL_Scope *node,
                    vector<T *> &nodes,
                    AST_Decl::NodeType node_type)
 {
-  UTL_ScopeActiveIterator it(node, UTL_Scope::IK_decls);
-  while (!it.is_done()) {
+  for (UTL_ScopeActiveIterator it(node, UTL_Scope::IK_decls);
+       !it.is_done(); it.next()) {
+  
     AST_Decl *item = it.item();
+  
     if (item->node_type() == node_type) {
       nodes.push_back(T::narrow_from_decl(item));
     }
-    it.next();
   }
 }
 } // namespace
@@ -53,8 +54,9 @@ be_visitor::visit_root(AST_Root *node)
 int
 be_visitor::visit_scope(UTL_Scope *node)
 {
-  UTL_ScopeActiveIterator it (node, UTL_Scope::IK_decls);
-  while (!it.is_done()) {
+  for (UTL_ScopeActiveIterator it (node, UTL_Scope::IK_decls);
+       !it.is_done(); it.next()) {
+    
     AST_Decl *item = it.item();
 
     if (item == 0) {
@@ -68,9 +70,8 @@ be_visitor::visit_scope(UTL_Scope *node)
                         ACE_TEXT("%N:%l: visit_scope()")
                         ACE_TEXT(" ast_accept failed!\n")), -1);
     }
-
-    it.next();
   }
+  
   return 0;
 }
 
