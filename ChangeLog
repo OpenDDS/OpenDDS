@@ -1,3 +1,17 @@
+Thu Jan 22 17:51:27 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Moved operator<<(ostream&, const DataLink&) to the global namespace.
+          It would be nicer in the same namespace but Visual C++ and many
+          versions of GCC are confused by the mix of overloaded operators in
+          the global namespace and OpenDDS::DCPS.
+
+        * java/dds/dcps_java_optional.mpb:
+
+          Removed trailing whitespace.
+
 Wed Jan 21 21:39:50 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/PublisherImpl.h:
