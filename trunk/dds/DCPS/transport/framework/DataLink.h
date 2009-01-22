@@ -26,6 +26,18 @@ class ACE_SOCK;
 
 namespace OpenDDS
 {
+  namespace DCPS
+  {
+    class DataLink;
+  }
+}
+
+OpenDDS_Dcps_Export
+std::ostream& operator<<(std::ostream& str,
+                         const OpenDDS::DCPS::DataLink& value);
+
+namespace OpenDDS
+{
 
   namespace DCPS
   {
@@ -276,7 +288,7 @@ namespace OpenDDS
 
 
         /// Convenience function for diagnostic information.
-        OpenDDS_Dcps_Export friend std::ostream& operator<<( std::ostream& str, const DataLink& value);
+        friend std::ostream& ::operator<<(std::ostream& str, const DataLink& value);
 
         /// Map associating each publisher_id with a set of
         /// TransportReceiveListener objects (each with an associated

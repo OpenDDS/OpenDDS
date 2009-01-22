@@ -1165,11 +1165,11 @@ OpenDDS::DCPS::DataLink::set_dscp_codepoint( int cp, ACE_SOCK& socket)
     }
 }
 
-namespace OpenDDS { namespace DCPS {
 
 std::ostream&
-operator<<( std::ostream& str, const DataLink& value)
+operator<<(std::ostream& str, const OpenDDS::DCPS::DataLink& value)
 {
+  using namespace OpenDDS::DCPS;
   str << "   There are " << value.pub_map_.map().size()
       << " publications currently associated with this link:"
       << std::endl;
@@ -1193,6 +1193,3 @@ operator<<( std::ostream& str, const DataLink& value)
   }
   return str;
 }
-
-}} // End of namespace OpenDDS::DCPS
-
