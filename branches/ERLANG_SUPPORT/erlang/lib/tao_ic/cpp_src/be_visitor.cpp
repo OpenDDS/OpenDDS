@@ -11,19 +11,20 @@
 
 using namespace std;
 
-namespace {
+namespace
+{
 template <typename T>
-void find_children(UTL_Scope *node,
-                   vector<T *> &nodes,
+void find_children(vector<T*>& values,
+                   UTL_Scope* node,
                    AST_Decl::NodeType node_type)
 {
   for (UTL_ScopeActiveIterator it(node, UTL_Scope::IK_decls);
-       !it.is_done(); it.next()) {
-  
-    AST_Decl *item = it.item();
-  
-    if (item->node_type() == node_type) {
-      nodes.push_back(T::narrow_from_decl(item));
+       !it.is_done(); it.next())
+  {
+    AST_Decl* item = it.item();
+    if (item->node_type() == node_type)
+    {
+      values.push_back(T::narrow_from_decl(item));
     }
   }
 }
@@ -37,13 +38,12 @@ be_visitor::be_visitor()
 }
 
 be_visitor::~be_visitor()
-{
-}
+{}
 
-int
-be_visitor::visit_root(AST_Root *node)
+int be_visitor::visit_root(AST_Root* node)
 {
-  if (visit_scope(node) != 0) {
+  if (visit_scope(node) != 0)
+  {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("%N:%l: visit_root()")
                       ACE_TEXT(" visit_scope failed!\n")), -1);
@@ -51,34 +51,33 @@ be_visitor::visit_root(AST_Root *node)
   return 0;
 }
 
-int
-be_visitor::visit_scope(UTL_Scope *node)
+int be_visitor::visit_scope(UTL_Scope* node)
 {
   for (UTL_ScopeActiveIterator it (node, UTL_Scope::IK_decls);
-       !it.is_done(); it.next()) {
-    
+       !it.is_done(); it.next())
+  {
     AST_Decl *item = it.item();
-
-    if (item == 0) {
+    if (item == 0)
+    {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: visit_scope()")
                         ACE_TEXT(" invalid scope!\n")), -1);
     }
 
-    if (item->ast_accept(this) != 0) {
+    if (item->ast_accept(this) != 0)
+    {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: visit_scope()")
                         ACE_TEXT(" ast_accept failed!\n")), -1);
     }
   }
-  
   return 0;
 }
 
-int
-be_visitor::visit_module(AST_Module *node)
+int be_visitor::visit_module(AST_Module* node)
 {
-  if (visit_scope(node) != 0) {
+  if (visit_scope(node) != 0)
+  {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("%N:%l: visit_module()")
                       ACE_TEXT(" visit_scope failed!\n")), -1);
@@ -86,24 +85,24 @@ be_visitor::visit_module(AST_Module *node)
   return 0;
 }
 
-int
-be_visitor::visit_constant(AST_Constant *node)
+int be_visitor::visit_constant(AST_Constant* node)
 {
-  if (!generator_.generate_constant(node)) {
+  if (!generator_.generate_constant(node))
+  {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("%N:%l: visit_constant()")
                       ACE_TEXT(" generate_constant failed!\n")), -1);
-  }  
+  }
   return 0;
 }
 
-int
-be_visitor::visit_enum(AST_Enum *node)
+int be_visitor::visit_enum(AST_Enum* node)
 {
-  vector<AST_EnumVal *> values;
-  find_children(node, values, AST_Decl::NT_enum_val);
+  vector<AST_EnumVal*> values;
+  find_children(values, node, AST_Decl::NT_enum_val);
 
-  if (!generator_.generate_enum(node, values)) {
+  if (!generator_.generate_enum(node, values))
+  {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("%N:%l: visit_enum()")
                       ACE_TEXT(" generate_enum failed!\n")), -1);
@@ -111,197 +110,202 @@ be_visitor::visit_enum(AST_Enum *node)
   return 0;
 }
 
-int
-be_visitor::visit_enum_val(AST_EnumVal *node)
+int be_visitor::visit_enum_val(AST_EnumVal* node)
+{
+  return 0; // see: visit_enum
+}
+
+int be_visitor::visit_exception(AST_Exception* node)
 {
   return 0;
 }
 
-int
-be_visitor::visit_exception(AST_Exception *node)
+int be_visitor::visit_structure(AST_Structure* node)
 {
   return 0;
 }
 
-int
-be_visitor::visit_structure(AST_Structure *node)
+int be_visitor::visit_structure_fwd(AST_StructureFwd* node)
 {
   return 0;
 }
 
-int
-be_visitor::visit_structure_fwd(AST_StructureFwd *node)
+int be_visitor::visit_union(AST_Union* node)
 {
   return 0;
 }
 
-
-int
-be_visitor::visit_union(AST_Union *node)
+int be_visitor::visit_union_fwd(AST_UnionFwd* node)
 {
   return 0;
 }
 
-int
-be_visitor::visit_union_fwd(AST_UnionFwd *node)
+int be_visitor::visit_union_branch(AST_UnionBranch* node)
 {
   return 0;
 }
 
-int
-be_visitor::visit_union_branch(AST_UnionBranch *node)
+int be_visitor::visit_union_label(AST_UnionLabel* node)
 {
   return 0;
 }
 
-int
-be_visitor::visit_union_label(AST_UnionLabel *node)
+int be_visitor::visit_native(AST_Native* node)
 {
   return 0;
 }
 
-int
-be_visitor::visit_native(AST_Native *node)
+int be_visitor::visit_typedef(AST_Typedef* node)
 {
   return 0;
 }
 
-int
-be_visitor::visit_typedef(AST_Typedef *node)
+int be_visitor::visit_interface(AST_Interface* node)
 {
   return 0;
 }
 
-int
-be_visitor::visit_interface(AST_Interface *node)
+int be_visitor::visit_interface_fwd(AST_InterfaceFwd* node)
 {
   return 0;
 }
 
-int
-be_visitor::visit_interface_fwd(AST_InterfaceFwd *node)
+int be_visitor::visit_predefined_type(AST_PredefinedType*)
 {
   return 0;
 }
 
-int
-be_visitor::visit_type(AST_Type *)
+int be_visitor::visit_type(AST_Type*)
 {
-  return 0; // not implemented
+  ACE_ERROR_RETURN((LM_ERROR,
+                    ACE_TEXT("%N:%l: visit_type()")
+                    ACE_TEXT(" not implemented!\n")), -1);
 }
 
-int
-be_visitor::visit_predefined_type(AST_PredefinedType *)
+int be_visitor::visit_valuetype(AST_ValueType*)
 {
-  return 0; // not implemented
+  ACE_ERROR_RETURN((LM_ERROR,
+                    ACE_TEXT("%N:%l: visit_valuetype()")
+                    ACE_TEXT(" not implemented!\n")), -1);
 }
 
-int
-be_visitor::visit_valuetype(AST_ValueType *)
+int be_visitor::visit_valuetype_fwd(AST_ValueTypeFwd*)
 {
-  return 0; // not implemented
+  ACE_ERROR_RETURN((LM_ERROR,
+                    ACE_TEXT("%N:%l: visit_valuetype_fwd()")
+                    ACE_TEXT(" not implemented!\n")), -1);
 }
 
-int
-be_visitor::visit_valuetype_fwd(AST_ValueTypeFwd *)
+int be_visitor::visit_component(AST_Component*)
 {
-  return 0; // not implemented
+  ACE_ERROR_RETURN((LM_ERROR,
+                    ACE_TEXT("%N:%l: visit_component()")
+                    ACE_TEXT(" not implemented!\n")), -1);
 }
 
-int
-be_visitor::visit_component(AST_Component *)
+int be_visitor::visit_component_fwd(AST_ComponentFwd*)
 {
-  return 0; // not implemented
+  ACE_ERROR_RETURN((LM_ERROR,
+                    ACE_TEXT("%N:%l: visit_component_fwd()")
+                    ACE_TEXT(" not implemented!\n")), -1);
 }
 
-int
-be_visitor::visit_component_fwd(AST_ComponentFwd *)
+int be_visitor::visit_home(AST_Home*)
 {
-  return 0; // not implemented
+  ACE_ERROR_RETURN((LM_ERROR,
+                    ACE_TEXT("%N:%l: visit_home()")
+                    ACE_TEXT(" not implemented!\n")), -1);
 }
 
-int
-be_visitor::visit_home(AST_Home *)
+int be_visitor::visit_eventtype(AST_EventType*)
 {
-  return 0; // not implemented
+  ACE_ERROR_RETURN((LM_ERROR,
+                    ACE_TEXT("%N:%l: visit_eventtype()")
+                    ACE_TEXT(" not implemented!\n")), -1);
 }
 
-int
-be_visitor::visit_eventtype(AST_EventType *)
+int be_visitor::visit_eventtype_fwd(AST_EventTypeFwd*)
 {
-  return 0; // not implemented
+  ACE_ERROR_RETURN((LM_ERROR,
+                    ACE_TEXT("%N:%l: visit_eventtype_fwd()")
+                    ACE_TEXT(" not implemented!\n")), -1);
 }
 
-int
-be_visitor::visit_eventtype_fwd(AST_EventTypeFwd *)
+int be_visitor::visit_factory(AST_Factory*)
 {
-  return 0; // not implemented
+  ACE_ERROR_RETURN((LM_ERROR,
+                    ACE_TEXT("%N:%l: visit_factory()")
+                    ACE_TEXT(" not implemented!\n")), -1);
 }
 
-int
-be_visitor::visit_factory(AST_Factory *)
+int be_visitor::visit_expression(AST_Expression*)
 {
-  return 0; // not implemented
+  ACE_ERROR_RETURN((LM_ERROR,
+                    ACE_TEXT("%N:%l: visit_expression()")
+                    ACE_TEXT(" not implemented!\n")), -1);
 }
 
-int
-be_visitor::visit_expression(AST_Expression *)
+int be_visitor::visit_operation(AST_Operation*)
 {
-  return 0; // not implemented
+  ACE_ERROR_RETURN((LM_ERROR,
+                    ACE_TEXT("%N:%l: visit_operation()")
+                    ACE_TEXT(" not implemented!\n")), -1);
 }
 
-int
-be_visitor::visit_operation(AST_Operation *)
+int be_visitor::visit_field(AST_Field*)
 {
-  return 0; // not implemented
+  ACE_ERROR_RETURN((LM_ERROR,
+                    ACE_TEXT("%N:%l: visit_field()")
+                    ACE_TEXT(" not implemented!\n")), -1);
 }
 
-int
-be_visitor::visit_field(AST_Field *)
+int be_visitor::visit_argument(AST_Argument*)
 {
-  return 0; // not implemented
+  ACE_ERROR_RETURN((LM_ERROR,
+                    ACE_TEXT("%N:%l: visit_argument()")
+                    ACE_TEXT(" not implemented!\n")), -1);
 }
 
-int
-be_visitor::visit_argument(AST_Argument *)
+int be_visitor::visit_attribute(AST_Attribute*)
 {
-  return 0; // not implemented
+  ACE_ERROR_RETURN((LM_ERROR,
+                    ACE_TEXT("%N:%l: visit_attribute()")
+                    ACE_TEXT(" not implemented!\n")), -1);
 }
 
-int
-be_visitor::visit_attribute(AST_Attribute *)
+int be_visitor::visit_sequence(AST_Sequence*)
 {
-  return 0; // not implemented
+  ACE_ERROR_RETURN((LM_ERROR,
+                    ACE_TEXT("%N:%l: visit_sequence()")
+                    ACE_TEXT(" not implemented!\n")), -1);
 }
 
-int
-be_visitor::visit_sequence(AST_Sequence *)
+int be_visitor::visit_array(AST_Array*)
 {
-  return 0; // not implemented
+  ACE_ERROR_RETURN((LM_ERROR,
+                    ACE_TEXT("%N:%l: visit_array()")
+                    ACE_TEXT(" not implemented!\n")), -1);
 }
 
-int
-be_visitor::visit_array(AST_Array *)
+int be_visitor::visit_string(AST_String*)
 {
-  return 0; // not implemented
+  ACE_ERROR_RETURN((LM_ERROR,
+                    ACE_TEXT("%N:%l: visit_string()")
+                    ACE_TEXT(" not implemented!\n")), -1);
 }
 
-int
-be_visitor::visit_string(AST_String *)
+int be_visitor::visit_decl(AST_Decl*)
 {
-  return 0; // not implemented
-}
-
-int
-be_visitor::visit_decl(AST_Decl *)
-{
-  return 0; // not implemented
+  ACE_ERROR_RETURN((LM_ERROR,
+                    ACE_TEXT("%N:%l: visit_decl()")
+                    ACE_TEXT(" not implemented!\n")), -1);
 }
 
 #ifndef ACE_PRE_5_5
-int
-be_visitor::visit_valuebox(AST_ValueBox *)
+int be_visitor::visit_valuebox(AST_ValueBox*)
 {
-  return 0; // not implemented
+  ACE_ERROR_RETURN((LM_ERROR,
+                    ACE_TEXT("%N:%l: visit_valuebox()")
+                    ACE_TEXT(" not implemented!\n")), -1);
 }
 #endif /* ACE_PRE_5_5 */

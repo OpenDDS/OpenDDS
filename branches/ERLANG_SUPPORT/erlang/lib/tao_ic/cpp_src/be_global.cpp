@@ -13,24 +13,28 @@
 
 using namespace std;
 
-BE_GlobalData *be_global = 0;
+BE_GlobalData* be_global = 0;
 
-namespace {
-const char *DEFAULT_PORT_DRIVER_NAME = "port_driver";
+namespace
+{
+const char* DEFAULT_PORT_DRIVER_NAME = "port_driver";
 
-class BE_Arg {
+class BE_Arg
+{
 public:
-  explicit BE_Arg(const string &s)
+  explicit BE_Arg(const string& s)
   {
     size_t pos = s.find('=');
     name_ = s.substr(0, pos);
 
-    if (pos != string::npos) {
+    if (pos != string::npos)
+    {
       value_ = s.substr(pos + 1);
     }
   }
 
-  ~BE_Arg() {}
+  ~BE_Arg()
+  {}
 
   string name() const { return name_; }
   string value() const { return value_; }
@@ -38,22 +42,23 @@ public:
 private:
   string name_;
   string value_;
+
+  friend bool operator==(const BE_Arg& lhs, const char* rhs)
+  {
+    return lhs.name_ == rhs;
+  }
+
+  friend bool operator==(const char* lhs, const BE_Arg& rhs)
+  {
+    return lhs == rhs.name_;
+  }
 };
 
-bool operator==(const BE_Arg &lhs, const char *rhs)
-{ 
-  return lhs.name() == rhs;
-}
-
-bool operator==(const char *lhs, const BE_Arg &rhs)
-{ 
-  return lhs == rhs.name();
-}
-
-void normalize_path(string &s)
+void normalize_path(string& s)
 {
   size_t len = s.length();
-  if (len > 0 && s[len - 1] != ACE_DIRECTORY_SEPARATOR_CHAR_A) {
+  if (len > 0 && s[len - 1] != ACE_DIRECTORY_SEPARATOR_CHAR_A)
+  {
     s += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   }
 }
@@ -63,64 +68,59 @@ BE_GlobalData::BE_GlobalData()
   : output_otp_(false),
     port_driver_name_(DEFAULT_PORT_DRIVER_NAME),
     suppress_skel_(false)
-{
-}
+{}
 
 BE_GlobalData::~BE_GlobalData()
-{
-}
+{}
 
-void
-BE_GlobalData::destroy()
-{
-}
+void BE_GlobalData::destroy()
+{}
 
-void
-BE_GlobalData::parse_args(long &ac, char **av)
+void BE_GlobalData::parse_args(long& ac, char** av)
 {
-  const char *a = av[ac];
+  const char* a = av[ac];
 
-  // -o <output_dir>
-  if (strcmp("-o", a) == 0) {
+  if (strcmp("-o", a) == 0)
+  {
     output_dir_ = av[++ac];
     normalize_path(output_dir_);
-
-  // -otp
-  } else if (strcmp("-otp", a) == 0) {
+  }
+  else if (strcmp("-otp", a) == 0)
+  {
     output_otp_ = true;
-
-  // -SS
-  } else if (strcmp("-SS", a) == 0) {
+  }
+  else if (strcmp("-SS", a) == 0)
+  {
     suppress_skel_ = true;
   }
 }
 
-void
-BE_GlobalData::prep_be_arg(char *arg_)
+void BE_GlobalData::prep_be_arg(char* s)
 {
-  BE_Arg arg(arg_);
+  BE_Arg arg(s);
 
-  // -Wb,port_driver_name=<driver_name>
-  if ("port_driver_name" == arg) {
+  if ("port_driver_name" == arg)
+  {
     port_driver_name_ = arg.value();
-
-  // -Wb,skel_export_include=<include path>
-  } else if ("skel_export_include" == arg) {
+  }
+  else if ("skel_export_include" == arg)
+  {
     skel_export_include_ = arg.value();
-
-  // -Wb,skel_export_macro=<macro name>
-  } else if ("skel_export_macro" == arg) {
+  }
+  else if ("skel_export_macro" == arg)
+  {
     skel_export_macro_ = arg.value();
-
-  // -Wb,stub_export_include=<include path>
-  } else if ("stub_export_include" == arg) {
+  }
+  else if ("stub_export_include" == arg)
+  {
     stub_export_include_ = arg.value();
-
-  // -Wb,stub_export_macro=<macro name>
-  } else if ("stub_export_macro" == arg) {
+  }
+  else if ("stub_export_macro" == arg)
+  {
     stub_export_macro_ = arg.value();
-
-  } else {
+  }
+  else
+  {
     ACE_ERROR((LM_WARNING,
                ACE_TEXT("%N:%l: prep_be_arg()")
                ACE_TEXT(" ignoring unknown argument: %s\n"),
@@ -128,13 +128,10 @@ BE_GlobalData::prep_be_arg(char *arg_)
   }
 }
 
-void
-BE_GlobalData::arg_post_proc()
-{
-}
+void BE_GlobalData::arg_post_proc()
+{}
 
-void
-BE_GlobalData::usage() const
+void BE_GlobalData::usage() const
 {
   ACE_ERROR((LM_INFO,
              ACE_TEXT(" -o <output_dir>\tOutput directory for the generated")
@@ -172,80 +169,69 @@ BE_GlobalData::usage() const
              ACE_TEXT(" and inline file (disabled by default)\n")));
 }
 
-AST_Generator *
-BE_GlobalData::generator_init()
+AST_Generator* BE_GlobalData::generator_init()
 {
-  AST_Generator *gen;
+  AST_Generator* gen;
   ACE_NEW_RETURN(gen, AST_Generator, 0);
   return gen;
 }
 
-void
-BE_GlobalData::get_include_dir(string &s) const
+void BE_GlobalData::get_include_dir(string& s) const
 {
   get_output_dir(s, "include");
 }
 
-void
-BE_GlobalData::get_src_dir(string &s) const
+void BE_GlobalData::get_src_dir(string& s) const
 {
   get_output_dir(s, "src");
 }
 
-void
-BE_GlobalData::get_cpp_src_dir(string &s) const
+void BE_GlobalData::get_cpp_src_dir(string& s) const
 {
   get_output_dir(s, "cpp_src");
 }
 
-void
-BE_GlobalData::get_output_dir(string &s, const char *dirname) const
+void BE_GlobalData::get_output_dir(string& s, const char* dirname) const
 {
   s += output_dir_;
-  if (output_otp_) {
+  if (output_otp_)
+  {
     s += dirname;
   }
   normalize_path(s);
 }
 
-string
-BE_GlobalData::output_dir() const
+string BE_GlobalData::output_dir() const
 {
   return output_dir_;
 }
 
-bool
-BE_GlobalData::output_otp() const
+bool BE_GlobalData::output_otp() const
 {
   return output_otp_;
 }
 
-string
-BE_GlobalData::port_driver_name() const
+string BE_GlobalData::port_driver_name() const
 {
   return port_driver_name_;
 }
 
-string
-BE_GlobalData::skel_export_include() const
+string BE_GlobalData::skel_export_include() const
 {
   return skel_export_include_;
 }
 
-string
-BE_GlobalData::skel_export_macro() const
+string BE_GlobalData::skel_export_macro() const
 {
   return skel_export_macro_;
 }
 
-string
-BE_GlobalData::stub_export_include() const
+string BE_GlobalData::stub_export_include() const
 {
   return stub_export_include_;
 }
 
-string
-BE_GlobalData::stub_export_macro() const
+string BE_GlobalData::stub_export_macro() const
 {
   return stub_export_macro_;
 }

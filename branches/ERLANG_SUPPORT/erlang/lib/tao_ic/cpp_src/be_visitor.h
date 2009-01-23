@@ -50,86 +50,87 @@
 #include "ace_compat.h"
 #include "generator.h"
 
-class be_visitor : public ast_visitor {
+class be_visitor : public ast_visitor
+{
 public:
   be_visitor(void);
 
   ~be_visitor(void);
 
-  int visit_decl(AST_Decl *);
+  int visit_decl(AST_Decl* node);
 
-  int visit_scope(UTL_Scope *);
+  int visit_scope(UTL_Scope* node);
 
-  int visit_type(AST_Type *);
+  int visit_type(AST_Type* node);
 
-  int visit_predefined_type(AST_PredefinedType *);
+  int visit_predefined_type(AST_PredefinedType* node);
 
-  int visit_module(AST_Module *);
+  int visit_module(AST_Module* node);
 
-  int visit_interface(AST_Interface *);
+  int visit_interface(AST_Interface* node);
 
-  int visit_interface_fwd(AST_InterfaceFwd *);
+  int visit_interface_fwd(AST_InterfaceFwd* node);
 
-  int visit_valuetype(AST_ValueType *);
+  int visit_valuetype(AST_ValueType* node);
 
-  int visit_valuetype_fwd(AST_ValueTypeFwd *);
+  int visit_valuetype_fwd(AST_ValueTypeFwd* node);
 
-  int visit_component(AST_Component *);
+  int visit_component(AST_Component* node);
 
-  int visit_component_fwd(AST_ComponentFwd *);
+  int visit_component_fwd(AST_ComponentFwd* node);
 
-  int visit_home(AST_Home *);
+  int visit_home(AST_Home* node);
 
-  int visit_eventtype(AST_EventType *);
+  int visit_eventtype(AST_EventType* node);
 
-  int visit_eventtype_fwd(AST_EventTypeFwd *);
+  int visit_eventtype_fwd(AST_EventTypeFwd* node);
 
-  int visit_factory(AST_Factory *);
+  int visit_factory(AST_Factory* node);
 
-  int visit_structure(AST_Structure *);
+  int visit_structure(AST_Structure* node);
 
-  int visit_structure_fwd(AST_StructureFwd *);
+  int visit_structure_fwd(AST_StructureFwd* node);
 
-  int visit_exception(AST_Exception *);
+  int visit_exception(AST_Exception* node);
 
-  int visit_expression(AST_Expression *);
+  int visit_expression(AST_Expression* node);
 
-  int visit_enum(AST_Enum *);
+  int visit_enum(AST_Enum* node);
 
-  int visit_enum_val(AST_EnumVal *);
+  int visit_enum_val(AST_EnumVal* node);
 
-  int visit_operation(AST_Operation *);
+  int visit_operation(AST_Operation* node);
 
-  int visit_field(AST_Field *);
+  int visit_field(AST_Field* node);
 
-  int visit_argument(AST_Argument *);
+  int visit_argument(AST_Argument* node);
 
-  int visit_attribute(AST_Attribute *);
+  int visit_attribute(AST_Attribute* node);
 
-  int visit_union(AST_Union *);
+  int visit_union(AST_Union* node);
 
-  int visit_union_fwd(AST_UnionFwd *);
+  int visit_union_fwd(AST_UnionFwd* node);
 
-  int visit_union_branch(AST_UnionBranch *);
+  int visit_union_branch(AST_UnionBranch* node);
 
-  int visit_union_label(AST_UnionLabel *);
+  int visit_union_label(AST_UnionLabel* node);
 
-  int visit_constant(AST_Constant *);
+  int visit_constant(AST_Constant* node);
 
-  int visit_array(AST_Array *);
+  int visit_array(AST_Array* node);
 
-  int visit_sequence(AST_Sequence *);
+  int visit_sequence(AST_Sequence* node);
 
-  int visit_string(AST_String *);
+  int visit_string(AST_String* node);
 
-  int visit_typedef(AST_Typedef *);
+  int visit_typedef(AST_Typedef* node);
 
-  int visit_root(AST_Root *);
+  int visit_root(AST_Root* node);
 
-  int visit_native(AST_Native *);
+  int visit_native(AST_Native* node);
 
 #ifndef ACE_PRE_5_5
-  int visit_valuebox(AST_ValueBox *);
+  int visit_valuebox(AST_ValueBox* node);
 #endif /* ACE_PRE_5_5 */
 
 private:

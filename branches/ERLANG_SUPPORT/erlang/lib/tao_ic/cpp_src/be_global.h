@@ -7,7 +7,8 @@
 
 #include "ast_generator.h"
 
-class BE_GlobalData {
+class BE_GlobalData
+{
 public:
   BE_GlobalData(void);
 
@@ -15,9 +16,9 @@ public:
 
   void destroy(void);
 
-  void parse_args(long &, char **);
+  void parse_args(long& ac, char** av);
 
-  void prep_be_arg(char *);
+  void prep_be_arg(char* s);
 
   void arg_post_proc(void);
 
@@ -25,11 +26,11 @@ public:
 
   AST_Generator *generator_init(void);
 
-  void get_include_dir(std::string &) const;
+  void get_include_dir(std::string& s) const;
 
-  void get_src_dir(std::string &) const;
+  void get_src_dir(std::string& s) const;
 
-  void get_cpp_src_dir(std::string &) const;
+  void get_cpp_src_dir(std::string& s) const;
 
   std::string output_dir(void) const;
 
@@ -61,7 +62,7 @@ private:
 
   bool suppress_skel_;
 
-  void get_output_dir(std::string &, const char *) const;
+  void get_output_dir(std::string& s, const char* dirname) const;
 };
 
 #endif /* TAO_IC_BE_GLOBAL_H */

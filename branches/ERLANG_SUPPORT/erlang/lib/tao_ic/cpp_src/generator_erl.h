@@ -7,15 +7,16 @@
 
 #include "generator.h"
 
-class generator_erl : public generator {
+class generator_erl : public generator
+{
 public:
   generator_erl(void);
 
   ~generator_erl(void);
 
-  bool generate_constant(AST_Constant *);
+  bool generate_constant(AST_Constant* node);
 
-  bool generate_enum(AST_Enum *, std::vector<AST_EnumVal *> &);
+  bool generate_enum(AST_Enum* node, std::vector<AST_EnumVal*>& values);
 };
 
 #endif /* TAO_IC_GENERATOR_ERL_H */

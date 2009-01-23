@@ -13,9 +13,10 @@
 #include "ast_decl.h"
 #include "ast_expression.h"
 
-class erl_name {
+class erl_name
+{
 public:
-  explicit erl_name(AST_Decl *, bool = true);
+  explicit erl_name(AST_Decl* node, bool local = true);
 
   ~erl_name(void);
 
@@ -26,24 +27,25 @@ public:
 private:
   std::string str_;
 
-  friend std::ostream &operator<<(std::ostream &, const erl_name &);
+  friend std::ostream& operator<<(std::ostream& os, const erl_name& val);
 };
 
-class erl_module {
+class erl_module
+{
 public:
-  static const char *ext;
+  static const char* ext;
 
-  explicit erl_module(AST_Decl *);
+  explicit erl_module(AST_Decl* node);
 
   ~erl_module(void);
 
-  const char *filename(void) const;
+  const char* filename(void) const;
 
-  void add_export(const std::string &);
+  void add_export(const std::string& s);
 
-  void add_import(const std::string &);
+  void add_import(const std::string& s);
 
-  void add_include(const std::string &);
+  void add_include(const std::string& s);
 
   void generate_header(void);
 
@@ -51,7 +53,7 @@ public:
 
   void generate_includes(void);
 
-  std::ostream &open_stream(bool = true);
+  std::ostream& open_stream(bool auto_generate = true);
 
 private:
   erl_name name_;
@@ -69,25 +71,26 @@ private:
   // Module includes
   std::vector<std::string> includes_;
 
-  friend std::ostream &operator<<(std::ostream &, const erl_module &);
+  friend std::ostream& operator<<(std::ostream& os, const erl_module& val);
 };
 
-class erl_literal {
+class erl_literal
+{
 public:
-  explicit erl_literal(AST_Expression *);
+  explicit erl_literal(AST_Expression* e);
 
   ~erl_literal(void);
 
   std::string str(void) const;
 
-  static std::string to_str(AST_Expression *);
+  static std::string to_str(AST_Expression* e);
 
 private:
   std::string str_;
 
-  friend std::ostream &operator<<(std::ostream &, const erl_literal &);
+  friend std::ostream& operator<<(std::ostream& os, const erl_literal& val);
 };
 
-std::string to_list(std::vector<std::string> &);
+std::string to_list(std::vector<std::string>& v);
 
 #endif /* TAO_IC_ERL_UTILITY_H */

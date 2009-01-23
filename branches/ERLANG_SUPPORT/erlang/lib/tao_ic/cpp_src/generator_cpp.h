@@ -7,7 +7,8 @@
 
 #include "generator.h"
 
-class generator_cpp : public generator {
+class generator_cpp : public generator
+{
 public:
   generator_cpp(void);
 
