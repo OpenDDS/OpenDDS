@@ -3,7 +3,7 @@
 //
 
 project : tao_ic, erlang_otp {
-  taoicflags             += -otp
+  taoicflags += -otp
 
   Modify_Custom(TAO_IC) {
     output_follows_input  = 0
