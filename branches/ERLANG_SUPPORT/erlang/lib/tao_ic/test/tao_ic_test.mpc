@@ -3,7 +3,7 @@
 //
 
 project : tao_ic_otp {
-  erlcflags    += -Wall
+  erlcflags  += -I include -Wall
 
   TAO_IC_Files {
     test
