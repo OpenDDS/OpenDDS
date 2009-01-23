@@ -1,3 +1,12 @@
+Fri Jan 23 17:05:16 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Compiler/idl_test3_lib/FooDef.idl:
+
+          In the DOC codebase, the tao_idl compiler has recently changed
+          its handling of bounded strings (bug 3524) and the DCPS custom
+          serialization is not compatible with this yet.  For now we'll make
+          these test strings unbounded.
+
 Thu Jan 22 17:51:27 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.h:
