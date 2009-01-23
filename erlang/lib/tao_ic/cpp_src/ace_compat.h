@@ -15,10 +15,10 @@
 # include "idl_bool.h"
 # define BE_PI_CONST const
 #else
-  typedef bool idl_bool;
+typedef bool idl_bool;
 # define I_TRUE true
 # define I_FALSE false
-# define BE_PI_CONST 
+# define BE_PI_CONST
 #endif /* ACE_PRE_5_5 */
 
 #endif /* TAO_IC_ACE_COMPAT_H */

@@ -12,10 +12,10 @@
 
 #define TAO_IC_VERSION (TAO_VERSION)
 
-extern BE_GlobalData *be_global;
+extern BE_GlobalData* be_global;
 
-int BE_init(int &, char **);
-void BE_post_init(BE_PI_CONST char **, long);
+int BE_init(int& argc, char** argv);
+void BE_post_init(BE_PI_CONST char** DRV_files, long DRV_nfiles);
 void BE_version(void);
 void BE_abort(void);
 void BE_cleanup(void);

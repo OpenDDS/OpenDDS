@@ -16,29 +16,32 @@
 
 using namespace std;
 
-erl_name::erl_name(AST_Decl *node, bool local)
+erl_name::erl_name(AST_Decl* node, bool local)
 {
-  // Flattened (C-style) IDL names are used for fully qualified
-  // names. Names are stripped of leading underscores and converted
-  // to lower case to ensure compatibility.
+  // Flattened (C-style) IDL names are used for fully qualified (non-local)
+  // names. Names are stripped of leading underscores and converted to
+  // lower case to ensure compatibility.
   string s;
 
-  if (local) {
+  if (local)
+  {
     s += node->local_name()->get_string();
-  } else {
+  }
+  else
+  {
     s += node->flat_name();
   }
 
   // Strip leading underscores
-  for (string::iterator it(s.begin()); it != s.end(); ++it) {
-    if (*it != '_') {
-      break;
-    }
+  for (string::iterator it(s.begin()); it != s.end(); ++it)
+  {
+    if (*it != '_') break;
     it = s.erase(it);
   }
 
   // Convert remainder to lower case
-  for (string::iterator it(s.begin()); it != s.end(); ++it) {
+  for (string::iterator it(s.begin()); it != s.end(); ++it)
+  {
     *it = tolower(*it);
   }
 
@@ -46,11 +49,9 @@ erl_name::erl_name(AST_Decl *node, bool local)
 }
 
 erl_name::~erl_name()
-{
-}
+{}
 
-string
-erl_name::str() const
+string erl_name::str() const
 {
   return str_;
 }
@@ -60,15 +61,14 @@ erl_name::operator string() const
   return str_;
 }
 
-ostream &
-operator<<(ostream &os, const erl_name &val)
+ostream& operator<<(ostream& os, const erl_name& val)
 {
   return os << val.str_;
 }
 
-const char *erl_module::ext = ".erl";
+const char* erl_module::ext = ".erl";
 
-erl_module::erl_module(AST_Decl *node)
+erl_module::erl_module(AST_Decl* node)
   : name_(erl_name(node, false))
 {
   be_global->get_src_dir(filename_);
@@ -79,37 +79,33 @@ erl_module::erl_module(AST_Decl *node)
 
 erl_module::~erl_module()
 {
-  if (os_.is_open()) {
+  if (os_.is_open())
+  {
     os_.close();
   }
 }
 
-const char *
-erl_module::filename() const
+const char* erl_module::filename() const
 {
   return filename_.c_str();
 }
 
-void
-erl_module::add_export(const string &s)
+void erl_module::add_export(const string& s)
 {
   exports_.push_back(s);
 }
 
-void
-erl_module::add_import(const string &s)
+void erl_module::add_import(const string& s)
 {
   imports_.push_back(s);
 }
 
-void
-erl_module::add_include(const string &s)
+void erl_module::add_include(const string& s)
 {
   includes_.push_back(s);
 }
 
-void
-erl_module::generate_header()
+void erl_module::generate_header()
 {
   os_ << "%%" << endl
       << "%%" << " $" << "Id" << "$" << endl // avoid keyword expansion
@@ -124,37 +120,39 @@ erl_module::generate_header()
       << "%%" << endl;
 }
 
-void
-erl_module::generate_attributes()
+void erl_module::generate_attributes()
 {
   os_ << "-module(" << name_ << ")." << endl;
-  if (!imports_.empty()) {
+  if (!imports_.empty())
+  {
     os_ << "-import(" << to_list(imports_) << ")." << endl;
   }
-  if (!exports_.empty()) {
+  if (!exports_.empty())
+  {
     os_ << "-export(" << to_list(exports_) << ")." << endl;
   }
   os_ << endl;
 }
 
-void
-erl_module::generate_includes()
+void erl_module::generate_includes()
 {
-  if (!includes_.empty()) {
+  if (!includes_.empty())
+  {
     for (vector<string>::iterator it (includes_.begin());
-         it != includes_.end(); ++it) {
+         it != includes_.end(); ++it)
+    {
       os_ << "-include(\"" << *it << "\")." << endl;
     }
     os_ << endl;
   }
 }
 
-ostream &
-erl_module::open_stream(bool auto_generate)
+ostream& erl_module::open_stream(bool auto_generate)
 {
   os_.open(filename());
 
-  if (auto_generate) {
+  if (auto_generate)
+  {
     // Generate source header
     generate_header();
 
@@ -168,34 +166,30 @@ erl_module::open_stream(bool auto_generate)
   return os_;
 }
 
-ostream &
-operator<<(ostream &os, const erl_module &val)
+ostream& operator<<(ostream& os, const erl_module& val)
 {
   return os << val.name_;
 }
 
-erl_literal::erl_literal(AST_Expression *e)
+erl_literal::erl_literal(AST_Expression* e)
   : str_(to_str(e))
-{
-}
+{}
 
 erl_literal::~erl_literal()
-{
-}
+{}
 
-string
-erl_literal::str() const
+string erl_literal::str() const
 {
   return str_;
 }
 
-string
-erl_literal::to_str(AST_Expression *e)
+string erl_literal::to_str(AST_Expression* e)
 {
   ostringstream os;
 
-  AST_Expression::AST_ExprValue *ev = e->ev();
-  switch (ev->et) {
+  AST_Expression::AST_ExprValue* ev = e->ev();
+  switch (ev->et)
+  {
   case AST_Expression::EV_short:
     os << ev->u.sval;
     break;
@@ -253,22 +247,22 @@ erl_literal::to_str(AST_Expression *e)
   return os.str();
 }
 
-ostream &
-operator<<(ostream &os, const erl_literal &val)
+ostream& operator<<(ostream& os, const erl_literal& val)
 {
   return os << val.str_;
 }
 
-string
-to_list(vector<std::string> &val)
+string to_list(vector<std::string>& v)
 {
   ostringstream os;
 
   os << "[";
-  vector<string>::iterator it(val.begin());
-  while (it != val.end()) {
+  vector<string>::iterator it(v.begin());
+  while (it != v.end())
+  {
     os << *it++;
-    if (it != val.end()) {
+    if (it != v.end())
+    {
       os << ", ";
     }
   }
