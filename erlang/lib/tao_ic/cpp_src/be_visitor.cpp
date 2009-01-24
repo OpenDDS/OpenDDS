@@ -76,28 +76,45 @@ int be_visitor::visit_scope(UTL_Scope* node)
 
 int be_visitor::visit_module(AST_Module* node)
 {
+  if (node->imported())
+  {
+    return 0; // ignore includes
+  }
+
   if (visit_scope(node) != 0)
   {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("%N:%l: visit_module()")
                       ACE_TEXT(" visit_scope failed!\n")), -1);
   }
+
   return 0;
 }
 
 int be_visitor::visit_constant(AST_Constant* node)
 {
+  if (node->imported())
+  {
+    return 0; // ignore includes
+  }
+
   if (!generator_.generate_constant(node))
   {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("%N:%l: visit_constant()")
                       ACE_TEXT(" generate_constant failed!\n")), -1);
   }
+  
   return 0;
 }
 
 int be_visitor::visit_enum(AST_Enum* node)
 {
+  if (node->imported())
+  {
+    return 0; // ignore includes
+  }
+
   vector<AST_EnumVal*> values;
   find_children(values, node, AST_Decl::NT_enum_val);
 
@@ -107,12 +124,13 @@ int be_visitor::visit_enum(AST_Enum* node)
                       ACE_TEXT("%N:%l: visit_enum()")
                       ACE_TEXT(" generate_enum failed!\n")), -1);
   }
+  
   return 0;
 }
 
 int be_visitor::visit_enum_val(AST_EnumVal* node)
 {
-  return 0; // see: visit_enum
+  return 0; // visited by visit_enum
 }
 
 int be_visitor::visit_exception(AST_Exception* node)
