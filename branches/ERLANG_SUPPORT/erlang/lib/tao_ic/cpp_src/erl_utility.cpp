@@ -69,7 +69,7 @@ ostream& operator<<(ostream& os, const erl_name& val)
 const char* erl_module::ext = ".erl";
 
 erl_module::erl_module(AST_Decl* node)
-  : name_(erl_name(node, false))
+  : name_(erl_name(node, false)) // non-local (fully qualified)
 {
   be_global->get_src_dir(filename_);
 
