@@ -1,11 +1,34 @@
+Mon Jan 26 23:12:03 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tests/transport/dds_comparative/Pub.h:
+        * tests/transport/dds_comparative/Sub.h:
+        * tests/transport/mcast_simple/PubDriver.cpp:
+        * tests/transport/mcast_simple/SubDriver.cpp:
+        * tests/transport/mcast_simple_n/PubDriver.cpp:
+        * tests/transport/mcast_simple_n/SubDriver.cpp:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SubDriver.cpp:
+        * tests/transport/simple_bp_rm/PubDriver.cpp:
+        * tests/transport/simple_bp_rm/SubDriver.cpp:
+        * tests/transport/simple_n/PubDriver.cpp:
+        * tests/transport/simple_n/SubDriver.cpp:
+        * tests/transport/udp_simple/PubDriver.cpp:
+        * tests/transport/udp_simple/SubDriver.cpp:
+        * tests/transport/udp_simple_n/PubDriver.cpp:
+        * tests/transport/udp_simple_n/SubDriver.cpp:
+
+	  Additional tests that explicitly set the TransportInterfaceInfo
+	  that now set the new 'publication_transport_priority' attribute
+	  value as well.
+
 Mon Jan 26 22:41:09 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * tests/DCPS/Partition/DataReaderListener.cpp:
         * tests/DCPS/Partition/DataWriterListener.cpp:
 
-	  Modified the association state gathering to account for the
-	  fully implemented PUBLICATION/SUBSCRIPTION_MATCH
-	  StatusConditions.
+          Modified the association state gathering to account for the
+          fully implemented PUBLICATION/SUBSCRIPTION_MATCH
+          StatusConditions.
 
 Mon Jan 26 21:01:53 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
