@@ -19,8 +19,6 @@ Test::DataWriterListener::~DataWriterListener ()
                   ACE_TEXT ("does not match expected (%d).\n"),
                   matches,
                   this->expected_matches_));
-
-      exit (1);
     }
 }
 
@@ -60,10 +58,12 @@ Test::DataWriterListener::on_liveliness_lost (
 void
 Test::DataWriterListener::on_publication_match (
     ::DDS::DataWriter_ptr writer,
-    ::DDS::PublicationMatchStatus const & /* status */)
+    ::DDS::PublicationMatchStatus const& status)
   ACE_THROW_SPEC ((::CORBA::SystemException))
 {
-  ++this->publication_matches_;
+  if( status.total_count_change > 0) {
+    this->publication_matches_ += status.total_count_change;
+  }
 
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("(%P|%t) ")

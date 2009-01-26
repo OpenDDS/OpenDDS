@@ -83,10 +83,12 @@ Test::DataReaderListener::on_liveliness_changed (
 void
 Test::DataReaderListener::on_subscription_match (
     DDS::DataReader_ptr reader,
-    const DDS::SubscriptionMatchStatus &)
+    const DDS::SubscriptionMatchStatus& status)
   throw (CORBA::SystemException)
 {
-  ++this->subscription_matches_;
+  if( status.total_count_change > 0) {
+    this->subscription_matches_ += status.total_count_change;
+  }
 
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("(%P|%t) ")
