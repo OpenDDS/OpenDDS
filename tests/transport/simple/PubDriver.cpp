@@ -249,6 +249,7 @@ PubDriver::run()
   OpenDDS::DCPS::AssociationData subscriptions[1];
   subscriptions[0].remote_id_                = this->sub_id_;
   subscriptions[0].remote_data_.transport_id = 1;  // TBD - not right
+  subscriptions[0].remote_data_.publication_transport_priority = 0;
 
   OpenDDS::DCPS::NetworkAddress network_order_address(this->sub_addr_str_);
 

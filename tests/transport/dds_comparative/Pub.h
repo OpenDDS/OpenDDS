@@ -95,6 +95,7 @@ class Pub : public OpenDDS::DCPS::TransportInterface
         {
           assoc_data.remote_id_ = this->sub_id_;
           assoc_data.remote_data_.transport_id = 1;
+          assoc_data.remote_data_.publication_transport_priority = 0;
 
           OpenDDS::DCPS::NetworkAddress network_order_address(this->sub_addr_str_);
 
