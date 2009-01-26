@@ -1,13 +1,22 @@
+Mon Jan 26 22:41:09 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tests/DCPS/Partition/DataReaderListener.cpp:
+        * tests/DCPS/Partition/DataWriterListener.cpp:
+
+	  Modified the association state gathering to account for the
+	  fully implemented PUBLICATION/SUBSCRIPTION_MATCH
+	  StatusConditions.
+
 Mon Jan 26 21:01:53 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * tests/DCPS/LivelinessTest/subscriber.cpp:
 
-	  Expanded the test failure message to be useful.  Relocated the
-	  test status determination to occur prior to shutting down the
-	  service and added a gratuitous delay in lieu of synchronization
-	  at the end of the test.
-	  TODO: Rewrite this test to use StatusConditions for test
-	        synchronization rather than files and delays.
+          Expanded the test failure message to be useful.  Relocated the
+          test status determination to occur prior to shutting down the
+          service and added a gratuitous delay in lieu of synchronization
+          at the end of the test.
+          TODO: Rewrite this test to use StatusConditions for test
+                synchronization rather than files and delays.
 
 Mon Jan 26 18:02:35 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
