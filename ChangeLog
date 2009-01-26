@@ -1,3 +1,19 @@
+Mon Jan 26 18:02:35 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/SubDriver.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/SubDriver.cpp:
+        * tests/transport/simple_bp/PubDriver.cpp:
+        * tests/transport/simple_bp/SubDriver.cpp:
+
+	  These tests explicitly set the TransportInterfaceInfo structure
+	  within an internal AssociationData sequence to substitute the
+	  actions of the repository.  These need to set the newly added
+	  publication_transport_priority field as well.
+
 Fri Jan 23 17:05:16 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/Compiler/idl_test3_lib/FooDef.idl:

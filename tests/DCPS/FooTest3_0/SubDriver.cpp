@@ -381,6 +381,7 @@ SubDriver::run()
     {
       publications[i].remote_id_                = ids[i];
       publications[i].remote_data_.transport_id = ALL_TRAFFIC; // TBD later - wrong
+      publications[i].remote_data_.publication_transport_priority = 0;
 
       OpenDDS::DCPS::NetworkAddress network_order_address(this->pub_addr_str_);
 
