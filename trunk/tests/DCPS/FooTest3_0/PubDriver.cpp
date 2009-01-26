@@ -1142,6 +1142,7 @@ void PubDriver::add_subscription (
   ::OpenDDS::DCPS::ReaderAssociationSeq associations;
   associations.length (1);
   associations[0].readerTransInfo.transport_id = 1; // TBD - not right
+  associations[0].readerTransInfo.publication_transport_priority = 0;
 
   OpenDDS::DCPS::NetworkAddress network_order_address(sub_addr);
 
