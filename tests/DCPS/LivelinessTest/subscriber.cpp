@@ -379,6 +379,50 @@ int main (int argc, char *argv[])
       ACE_OS::fclose(readers_completed);
       ACE_OS::fclose(writers_completed);
 
+      //
+      // We need to wait for liveliness to go away here.
+      //
+      ACE_OS::sleep( 5);
+
+      //
+      // Determine the test status at this point.
+      //
+      ACE_OS::fprintf (stderr, "**********\n") ;
+      ACE_OS::fprintf (stderr, "drl_servant->liveliness_changed_count() = %d\n",
+                     drl_servant->liveliness_changed_count()) ;
+      ACE_OS::fprintf (stderr, "drl_servant->no_writers_generation_count() = %d\n",
+                     drl_servant->no_writers_generation_count()) ;
+      ACE_OS::fprintf (stderr, "********** use_take=%d\n", use_take) ;
+      
+      if( drl_servant->liveliness_changed_count() < 2 + 2 * num_unlively_periods) {
+        status = 1;
+        // Some error condition.
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: subscriber - ")
+          ACE_TEXT("test failed first condition.\n")
+        ));
+
+      } else if( drl_servant->verify_last_liveliness_status () == false) {
+        status = 1;
+        // Some other error condition.
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: subscriber - ")
+          ACE_TEXT("test failed second condition.\n")
+        ));
+
+      } else if( drl_servant->no_writers_generation_count() != (use_take==1 ? 0 : num_unlively_periods) ) {
+        status = 1;
+        // Yet another error condition.
+
+        // if use take then the instance had "no samples" when it got NO_WRITERS and
+        // hence the instance state terminated and then started again so
+        // no_writers_generation_count should = 0.
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: subscriber - ")
+          ACE_TEXT("test failed third condition.\n")
+        ));
+      }
+
       ACE_DEBUG((LM_DEBUG,ACE_TEXT("(%P|%t) %T publisher is finish - cleanup subscriber\n") ));
 
       // clean up subscriber objects
@@ -398,25 +442,6 @@ int main (int argc, char *argv[])
 
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
-
-      ACE_OS::fprintf (stderr, "**********\n") ;
-      ACE_OS::fprintf (stderr, "drl_servant->liveliness_changed_count() = %d\n",
-                     drl_servant->liveliness_changed_count()) ;
-      ACE_OS::fprintf (stderr, "drl_servant->no_writers_generation_count() = %d\n",
-                     drl_servant->no_writers_generation_count()) ;
-      ACE_OS::fprintf (stderr, "********** use_take=%d\n", use_take) ;
-      
-      if ((drl_servant->liveliness_changed_count() < 2 + 2 * num_unlively_periods) ||
-          (drl_servant->verify_last_liveliness_status () == false) ||
-          (drl_servant->no_writers_generation_count() != (use_take==1 ? 0 : num_unlively_periods) ))
-      {
-        // if use take then the instance had "no samples" when it got NO_WRITERS and
-        // hence the instance state terminated and then started again so
-        // no_writers_generation_count should = 0.
-        ACE_ERROR ((LM_ERROR,
-           ACE_TEXT("(%P|%t) Test failed. \n")));
-          return 1;
-      }
 
     }
   catch (const TestException&)
