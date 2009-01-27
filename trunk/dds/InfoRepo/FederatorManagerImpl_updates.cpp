@@ -173,6 +173,8 @@ ManagerImpl::create( const Update::UWActor& writer)
   sample.callback       = writer.callback.c_str();
   sample.transport_id   = writer.transportInterfaceInfo.transport_id;
   sample.transport_blob = writer.transportInterfaceInfo.data;
+  sample.publication_transport_priority
+                        = writer.transportInterfaceInfo.publication_transport_priority;
   sample.datawriter_qos = writer.drdwQos;
   sample.publisher_qos  = writer.pubsubQos;
 
@@ -727,6 +729,8 @@ ManagerImpl::processCreate( const PublicationUpdate* sample, const ::DDS::Sample
   ::OpenDDS::DCPS::TransportInterfaceInfo transportInfo;
   transportInfo.transport_id = sample->transport_id;
   transportInfo.data         = sample->transport_blob;
+  transportInfo.publication_transport_priority
+                             = sample->publication_transport_priority;
 
   if( false == this->info_->add_publication( sample->domain,
                                              sample->participant,
@@ -781,6 +785,7 @@ ManagerImpl::processCreate( const SubscriptionUpdate* sample, const ::DDS::Sampl
   ::OpenDDS::DCPS::TransportInterfaceInfo transportInfo;
   transportInfo.transport_id = sample->transport_id;
   transportInfo.data         = sample->transport_blob;
+  transportInfo.publication_transport_priority = 0;
 
   if( false == this->info_->add_subscription( sample->domain,
                                               sample->participant,
@@ -975,6 +980,8 @@ ManagerImpl::processDeferred()
       ::OpenDDS::DCPS::TransportInterfaceInfo transportInfo;
       transportInfo.transport_id = current->transport_id;
       transportInfo.data         = current->transport_blob;
+      transportInfo.publication_transport_priority
+                                 = current->publication_transport_priority;
 
       if( true == this->info_->add_publication( current->domain,
         current->participant,
@@ -1021,6 +1028,7 @@ ManagerImpl::processDeferred()
       ::OpenDDS::DCPS::TransportInterfaceInfo transportInfo;
       transportInfo.transport_id = current->transport_id;
       transportInfo.data         = current->transport_blob;
+      transportInfo.publication_transport_priority = 0;
 
       if( true == this->info_->add_subscription( current->domain,
         current->participant,
@@ -1583,6 +1591,8 @@ ManagerImpl::pushState( Manager_ptr peer)
         publicationSample.callback       = callback.in();
         publicationSample.transport_id   = p->get_transportInterfaceInfo().transport_id;
         publicationSample.transport_blob = p->get_transportInterfaceInfo().data;
+        publicationSample.publication_transport_priority
+          = p->get_transportInterfaceInfo().publication_transport_priority;
         publicationSample.datawriter_qos = *p->get_datawriter_qos();
         publicationSample.publisher_qos  = *p->get_publisher_qos();
 

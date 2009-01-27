@@ -1,3 +1,12 @@
+Tue Jan 27 00:18:06 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/Federator.idl:
+        * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
+
+	  Added the 'publication_transport_priority' attribute to the
+	  PublicationUpdate structure explicitly since it does not nest
+	  the actual data type.
+
 Mon Jan 26 23:12:03 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * tests/transport/dds_comparative/Pub.h:
@@ -17,9 +26,9 @@ Mon Jan 26 23:12:03 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
         * tests/transport/udp_simple_n/PubDriver.cpp:
         * tests/transport/udp_simple_n/SubDriver.cpp:
 
-	  Additional tests that explicitly set the TransportInterfaceInfo
-	  that now set the new 'publication_transport_priority' attribute
-	  value as well.
+          Additional tests that explicitly set the TransportInterfaceInfo
+          that now set the new 'publication_transport_priority' attribute
+          value as well.
 
 Mon Jan 26 22:41:09 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
