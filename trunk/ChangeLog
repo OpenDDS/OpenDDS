@@ -1,3 +1,15 @@
+Tue Jan 27 23:00:47 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_ts.pl:
+
+          Changed how the input idl file is #included by the generated idl
+          file so that all generated files can be kept in a spearate
+          directory from the source files.  If the source file is in a
+          subdirectory "src" then -Isrc needs to be passed to tao_idl when
+          it compiles the generated idl file.  Thanks to Brad Howes
+          <howes at ll dot mit dot edu> for his mailing list post that
+          motivated this change.
+
 Tue Jan 27 22:29:55 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/Compiler/idl_test3_lib/FooDef.idl:
