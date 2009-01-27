@@ -3,12 +3,6 @@
 //    char, octet, boolean, string
 // where as all of the integer and float types are just one case.
 
-#ifdef USE_BOUNDED_STRING
-# define STRING_BOUND <7>
-#else
-# define STRING_BOUND
-#endif
-
 module Xyz {
 
 #pragma DCPS_DATA_TYPE "Xyz::Foo"
@@ -19,7 +13,7 @@ module Xyz {
 
   // basic arrays
   typedef boolean    ArrayOfBoolean[5];
-  typedef  string STRING_BOUND ArrayOfString[5];
+  typedef  string<7> ArrayOfString[5];
   typedef    char    ArrayOfChar[5];
   typedef   octet    ArrayOfOctet[5];
   typedef    long    ArrayOfLong[5];
@@ -35,7 +29,7 @@ module Xyz {
 
   // needed to detect duplicate overload problems
   typedef boolean    ArrayOfBoolean2[5];
-  typedef  string STRING_BOUND ArrayOfString2[5];
+  typedef  string<7> ArrayOfString2[5];
   typedef    char    ArrayOfChar2[5];
   typedef   octet    ArrayOfOctet2[5];
   typedef    long    ArrayOfLong2[5];
@@ -111,7 +105,7 @@ module Xyz {
   typedef sequence<SeqOfLong,4>    SeqOfSeqOfLong;
   typedef sequence<SeqOfAnEnum,4>  SeqOfSeqOfAnEnum;
 
-  typedef string STRING_BOUND SevenStr;
+  typedef string<7> SevenStr;
   struct AStruct {
     double  f1;
     float   f2;

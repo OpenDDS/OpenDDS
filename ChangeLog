@@ -1,11 +1,18 @@
+Tue Jan 27 22:29:55 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Compiler/idl_test3_lib/FooDef.idl:
+
+          Reverted Fri Jan 23 17:05:16 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+          because the tao_idl compiler in the DOC repository has been fixed.
+
 Tue Jan 27 00:18:06 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/Federator.idl:
         * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
 
-	  Added the 'publication_transport_priority' attribute to the
-	  PublicationUpdate structure explicitly since it does not nest
-	  the actual data type.
+          Added the 'publication_transport_priority' attribute to the
+          PublicationUpdate structure explicitly since it does not nest
+          the actual data type.
 
 Mon Jan 26 23:12:03 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
