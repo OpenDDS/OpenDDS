@@ -179,7 +179,7 @@ if( $backup) {
 
 my $idl_content = DCPS::IDLTemplate::header();
 $idl_content =~ s/<%SUBDIR%>/$subdir/g;
-$idl_content =~ s/<%IDLFILE%>/$idlfile/g;
+$idl_content =~ s/<%IDLFILE%>/$idlbase.idl/g;
 
 my $h_content = DCPS::HTemplate::header();
 $h_content =~ s/<%IDLBASE%>/$idlbase/g;
