@@ -124,6 +124,9 @@ module OpenDDS { module Federator {
       // Information about the transport instance that is opaque to all but
       // code specific to that transport implementation.
       CORBA::OctetSeq                     transport_blob;
+
+      // The publication TRANSPORT_PRIORITY value.
+      long                                publication_transport_priority;
     };
 
     // Constant values.
