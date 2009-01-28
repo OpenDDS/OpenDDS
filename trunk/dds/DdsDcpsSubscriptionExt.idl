@@ -6,6 +6,7 @@
 /// OpenDDS extensions to the DDS Subscription Module
 
 #include "dds/DdsDcpsSubscription.idl"
+#include "dds/DdsDcpsGuid.idl"
 
 module OpenDDS
 {
@@ -52,7 +53,7 @@ module OpenDDS
 
     /// Collection of latency statistics for a single association.
     struct LatencyStatistics {
-      ::DDS::InstanceHandle_t publication;
+      GUID_t                  publication;
       unsigned long           n;
       double                  maximum;
       double                  minimum;
