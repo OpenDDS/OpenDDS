@@ -355,15 +355,13 @@ Publisher::run()
        ++current
      ) {
     // Join and clean up.
-    if( this->options_.verbose()) {
-      current->second->wait();
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Publisher::run() - ")
-        ACE_TEXT("publication %s stopping after sending %d messages.\n"),
-        current->first.c_str(),
-        current->second->messages()
-      ));
-    }
+    current->second->wait();
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) Publisher::run() - ")
+      ACE_TEXT("publication %s stopping after sending %d messages.\n"),
+      current->first.c_str(),
+      current->second->messages()
+    ));
     delete current->second;
   }
   this->publications_.clear();

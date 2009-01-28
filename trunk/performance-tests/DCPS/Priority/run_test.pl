@@ -178,8 +178,6 @@ print "\nSUBSCRIBER\n";
 print $SUB->CommandLine() . "\n";
 $SUB->Spawn();
 
-sleep 2; # Kluge around a startup race condition.
-
 # Fire up the publishers.
 
 for my $index ( 1 .. $pubCount) {
@@ -192,6 +190,7 @@ for my $index ( 1 .. $pubCount) {
 # otherwise.
 
 my $killDelay = 300;
+   $killDelay = $duration + 60 if $duration;
 $status = $SUB->WaitKill( $killDelay);
 if( $status != 0) {
   print STDERR "ERROR: Subscriber returned $status\n";
