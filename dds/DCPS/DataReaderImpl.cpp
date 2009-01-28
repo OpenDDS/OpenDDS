@@ -1572,7 +1572,7 @@ OpenDDS::DCPS::LatencyStatistics OpenDDS::DCPS::WriterStats::get_stats() const
 {
   LatencyStatistics value;
 
-  value.publication = -1;
+  value.publication = GUID_UNKNOWN;
   value.n           = this->stats_.n();
   value.maximum     = this->stats_.maximum();
   value.minimum     = this->stats_.minimum();
@@ -1925,18 +1925,7 @@ ACE_THROW_SPEC (( ::CORBA::SystemException))
        current != this->statistics_.end();
        ++current, ++index) {
     stats[ index] = current->second.get_stats();
-
-    // Extract the Instance handle for the current writer, if it still exists.
-    WriterIdSeq writerIds;
-    writerIds.length(1);
-    writerIds[ 0] = current->first;
-
-    ::DDS::InstanceHandleSeq handles;
-    this->cache_lookup_instance_handles( writerIds, handles);
-
-    if( handles.length() >= 1) {
-      stats[ index].publication = handles[ 0];
-    }
+    stats[ index].publication = current->first;
   }
 }
 

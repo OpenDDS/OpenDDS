@@ -1,3 +1,13 @@
+Wed Jan 28 22:57:01 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DdsDcpsSubscriptionExt.idl:
+
+	  Modified the publication attribute of the LatencyStatistics
+	  structure to be of GUID_t type.  This is more useful as the
+	  lifetime of the previous InstanceHandle_t type expired prior to
+	  the statistics being gathered in common scenarios.
+
 Tue Jan 27 23:00:47 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_ts.pl:
