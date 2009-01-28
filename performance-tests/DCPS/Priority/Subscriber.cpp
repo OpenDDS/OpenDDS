@@ -341,7 +341,8 @@ operator<<( std::ostream& str, const Subscriber& value)
   value.reader_->get_latency_stats( statistics);
   str << " --- statistical summary ---" << std::endl;
   for( unsigned long index = 0; index < statistics.length(); ++index) {
-    str << "  Writer[ " << statistics[ index].publication << "]" << std::endl;
+    ::OpenDDS::DCPS::GuidConverter converter( statistics[ index].publication);
+    str << "  Writer[ " << (const char*)converter << "]" << std::endl;
     str << "     samples: " << statistics[ index].n << std::endl;
     str << "        mean: " << statistics[ index].mean << std::endl;
     str << "     minimum: " << statistics[ index].minimum << std::endl;

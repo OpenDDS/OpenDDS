@@ -1,12 +1,33 @@
+Wed Jan 28 23:05:39 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/DCPS/Priority/DataReaderListener.h:
+        * performance-tests/DCPS/Priority/DataReaderListener.cpp:
+
+	  Added ability to conditionally compile in zero copy take in
+	  place of take_next_sample calls.
+
+        * performance-tests/DCPS/Priority/Publisher.cpp:
+
+	  Unconditionally print a summary of test messages at end.
+
+        * performance-tests/DCPS/Priority/Subscriber.cpp:
+
+	  Modified to use the new 'publication' attribute type in the
+	  LatencyStatistics structure.
+
+        * performance-tests/DCPS/Priority/run_test.pl:
+
+	  Removed delay from test execution.
+
 Wed Jan 28 22:57:01 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
         * dds/DdsDcpsSubscriptionExt.idl:
 
-	  Modified the publication attribute of the LatencyStatistics
-	  structure to be of GUID_t type.  This is more useful as the
-	  lifetime of the previous InstanceHandle_t type expired prior to
-	  the statistics being gathered in common scenarios.
+          Modified the publication attribute of the LatencyStatistics
+          structure to be of GUID_t type.  This is more useful as the
+          lifetime of the previous InstanceHandle_t type expired prior to
+          the statistics being gathered in common scenarios.
 
 Tue Jan 27 23:00:47 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 

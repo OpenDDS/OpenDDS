@@ -63,6 +63,47 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
     return;
   }
 
+#ifdef ZERO_COPY_TAKE
+  enum { SAMPLES_PER_TAKE = 10};
+  Test::DataSeq      data( 0);
+  DDS::SampleInfoSeq info( 0);
+
+  while( DDS::RETCODE_OK == dr->take(
+                              data,
+                              info,
+                              SAMPLES_PER_TAKE,
+                              DDS::ANY_SAMPLE_STATE,
+                              DDS::ANY_VIEW_STATE,
+                              DDS::ANY_INSTANCE_STATE
+                            )
+       ) {
+    this->total_messages_ += data.length();
+    for( unsigned long index = 0; index < data.length(); ++index) {
+      if( info[ index].valid_data) {
+        ++this->valid_messages_;
+      } else {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: DataReaderListener::on_data_available() - ")
+          ACE_TEXT("received an INVALID sample.\n")
+        ));
+      }
+      this->bytes_[ data[ index].pid] += data[ index].buffer.length();
+      this->priorities_[ data[ index].pid] = data[ index].priority; // Faster than a conditional.
+      if( this->verbose_ && BE_REALLY_VERBOSE) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DataReaderListener::on_data_available() - ")
+          ACE_TEXT("received %d samples.\n"),
+          data.length()
+        ));
+      }
+    }
+    // Do this here since we are not going out of scope before we might
+    // call the take() again.  This resets the length to 0 for us as well
+    // as managing memory.
+    dr->return_loan( data, info);
+  }
+
+#else /* ZERO_COPY_TAKE */
   Test::Data      data;
   DDS::SampleInfo info;
 
@@ -89,6 +130,7 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
       ));
     }
   }
+#endif /* ZERO_COPY_TAKE */
 
   if( this->verbose_ && BE_REALLY_VERBOSE) {
     ::OpenDDS::DCPS::DataReaderEx_var readerex
@@ -99,7 +141,7 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
       std::stringstream buffer;
       for( unsigned long index = 0; index < statistics.length(); ++index) {
         buffer << "Writer[ " << statistics[ index].publication << "] - ";
-        buffer << "samples==" << statistics[ index].n;
+        buffer << "samples==" << std::dec << statistics[ index].n;
         buffer << ", mean==" << statistics[ index].mean;
         buffer << ", minimum==" << statistics[ index].minimum;
         buffer << ", maximum==" << statistics[ index].maximum;

@@ -19,7 +19,6 @@ namespace Test {
     : public virtual OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataReaderListener>
   {
   public:
-
     //Constructor
     DataReaderListener( const bool verbose = false);
 
