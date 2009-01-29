@@ -11,4 +11,8 @@ project: dcpsexe_with_tcp {
     SimpleTypeSupport.idl
   }
 
+  Source_Files {
+    *.cpp
+    SimpleTypeSupportImpl.cpp
+  }
 }

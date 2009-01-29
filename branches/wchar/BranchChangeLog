@@ -1,3 +1,12 @@
+Thu Jan 29 00:09:21 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * examples/DCPS/DistributedContent/DistributedContent.mpc:
+        * tests/DCPS/FooType/FooType.mpc:
+        * tests/DCPS/ViewState/ViewState.mpc:
+        * tests/DCPS/ZeroCopyRead/ZeroCopyRead.mpc:
+
+          Added the *TypeSupportImpl.cpp to Source_Files.
+
 Wed Dec 12 22:25:38 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * examples/DCPS/IntroductionToOpenDDS/StockQuoter.mpc:
