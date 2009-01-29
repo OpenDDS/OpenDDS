@@ -34,7 +34,7 @@ my $noaction;
 #
 my $transportType = "tcp";
 my $samples       = 10;
-my $priorities    = "1";
+my $priority      = "1";
 
 ########################################################################
 #
@@ -52,7 +52,7 @@ GetOptions( "verbose!"            => \$verbose,
             "dfile|f=s"           => \$dFile,
             "transport|t=s"       => \$transportType,
             "samples|c=i"         => \$samples,
-            "priorities|p=s"      => \$priorities,
+            "priority|p=s"        => \$priority,
 
 ) or pod2usage( 0) ;
 pod2usage( 1)             if $help ;
@@ -60,10 +60,7 @@ pod2usage( -verbose => 2) if $man ;
 #
 ########################################################################
 
-my @priorityList = split( ',', $priorities);
-my $pubCount = scalar @priorityList;
-print "Priorities==(" . join(',',@priorityList) . ")\n" if $verbose;
-print "Publishers==$pubCount\n"                       if $verbose;
+print "Priority==$priority\n" if $verbose;
 
 # Verbosity.
 print "Debug==$debug\n"                   if $verbose and $debug;
@@ -92,7 +89,7 @@ $common_opts .= "-v " if $verbose;
 # Perocess variables.
 my $REPO;
 my $SUB;
-my @PUBS;
+my $PUB;
 
 # Establish process arguments.
 
@@ -130,25 +127,22 @@ if( PerlACE::is_vxworks_test()) {
 my $subArgs = "$appOpts ";
 $subArgs .= "-DCPSInfoRepo file://$repo_ior ";
 $subArgs .= "-t $transportType ";
-$subArgs .= "-c " . ($samples * $pubCount) . " ";
+$subArgs .= "-c " . (2 * $samples) . " ";
 if( PerlACE::is_vxworks_test()) {
   $SUB = new PerlACE::ProcessVX( "subscriber", $subArgs);
 } else {
   $SUB = new PerlACE::Process( "subscriber", $subArgs);
 }
 
-for my $index ( 1 .. $pubCount) {
-  my $pubArgs = "$appOpts ";
-  $pubArgs .= "-DCPSInfoRepo file://$repo_ior ";
-  $pubArgs .= "-t $transportType ";
-  $pubArgs .= "-c $samples ";
-  $pubArgs .= "-i $index ";
-  $pubArgs .= "-p " . $priorityList[ $index - 1] . " ";
-  if( PerlACE::is_vxworks_test()) {
-    $PUB[ $index - 1] = new PerlACE::ProcessVX( "publisher", $pubArgs);
-  } else {
-    $PUB[ $index - 1] = new PerlACE::Process( "publisher", $pubArgs);
-  }
+my $pubArgs = "$appOpts ";
+$pubArgs .= "-DCPSInfoRepo file://$repo_ior ";
+$pubArgs .= "-t $transportType ";
+$pubArgs .= "-c $samples ";
+$pubArgs .= "-p " . $priority . " ";
+if( PerlACE::is_vxworks_test()) {
+  $PUB = new PerlACE::ProcessVX( "publisher", $pubArgs);
+} else {
+  $PUB = new PerlACE::Process( "publisher", $pubArgs);
 }
 
 # Be verbose.
@@ -156,9 +150,7 @@ for my $index ( 1 .. $pubCount) {
 if( $noaction) {
   print $REPO->CommandLine() . "\n" if $verbose;
   print $SUB->CommandLine() . "\n" if $verbose;
-  for my $index ( 1 .. $pubCount) {
-    print $PUB[ $index - 1]->CommandLine() . "\n" if $verbose;
-  }
+  print $PUB->CommandLine() . "\n" if $verbose;
   exit;
 }
 
@@ -178,15 +170,11 @@ print "\nSUBSCRIBER\n";
 print $SUB->CommandLine() . "\n";
 $SUB->Spawn();
 
-sleep 2; # Kluge around a startup race condition.
+# Fire up the publisher.
 
-# Fire up the publishers.
-
-for my $index ( 1 .. $pubCount) {
-  print "\nPUBLISHER $index\n";
-  print $PUB[ $index - 1]->CommandLine() . "\n";
-  $PUB[ $index - 1]->Spawn();
-}
+print "\nPUBLISHER\n";
+print $PUB->CommandLine() . "\n";
+$PUB->Spawn();
 
 # Wait for subscriber to terminate nicely.  Kill it after 5 minutes
 # otherwise.
@@ -199,14 +187,12 @@ if( $status != 0) {
 }
 $killDelay = 15;
 
-# Terminate the publishers.
+# Terminate the publisher.
 
-for my $index ( 1 .. $pubCount) {
-  $status = $PUB[ $index - 1]->WaitKill( $killDelay);
-  if( $status != 0) {
-    print STDERR "ERROR: Publisher $index returned $status\n";
-    ++$failed;
-  }
+$status = $PUB->WaitKill( $killDelay);
+if( $status != 0) {
+  print STDERR "ERROR: Publisher returned $status\n";
+  ++$failed;
 }
 
 # Terminate the repository.
@@ -271,10 +257,10 @@ Options:
 
   -c NUMBER | --samples=NUMBER
                          number of samples to publish during the test -
-                         default 10
+                         default 10 per publication
 
-  -p NUMBER | --priorities=NUMBER
-                         comma separated list of priorities to publish
+  -p NUMBER | --priority=NUMBER
+                         comma separated list of priority to publish
                          during the test - default is 1
 
 =head1 OPTIONS
@@ -352,25 +338,21 @@ The default value is 'tcp'.
 
 The number of samples to publish during the test.
 
-The default value is 10.
+The default value is 10 per publication.
 
-=item B<-p FILE> | B<--priorities=NUMBER>
+=item B<-p FILE> | B<--priority=NUMBER>
 
-List of priorities to assign to publishers for the test.  A separate
-publisher process is started to send samples at each specified priority
-level.  The list is a simple comman separated list of integer level values.
+Priority to assign to publications for the test.
 
-The default value is 1.
+The default value is 5.
 
 =back
 
 =head1 DESCRIPTION
 
 This test verifies the TRANSPORT_PRIORITY QoS policy support in OpenDDS.
-It does so by creating publishers and subscribers and establishing
-associations between them at different priority levels.  The ability for
-higher priority samples to be delivered preferentially over the lower
-priority samples is demonstrated.
+It does so by creating 2 publications and a single subscriber and establishing
+associations between them at different priority levels.
 
 =head1 EXAMPLES
 
@@ -382,7 +364,7 @@ priority samples is demonstrated.
 
 =item B<./run_demo.pl -x -t mcast>
 
-=item B<./run_test.pl -vd10T4Vt mcast -p 1,4,8>
+=item B<./run_test.pl -vd10T4Vt mcast -p 8>
 
 =back
 

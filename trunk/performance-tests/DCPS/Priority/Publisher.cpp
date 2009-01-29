@@ -270,7 +270,7 @@ Publisher::Publisher( const Options& options)
     if( this->options_.verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
-        ACE_TEXT("created StatusCondition and WaitSet for publication %s.\n"),
+        ACE_TEXT("created StatusCondition for publication %s.\n"),
         this->options_.profiles()[ index]->name().c_str()
       ));
     }
@@ -280,7 +280,7 @@ Publisher::Publisher( const Options& options)
 void
 Publisher::run()
 {
-  DDS::Duration_t   timeout = { SUBSCRIPTION_WAIT_TIME, 0};
+  DDS::Duration_t   timeout = { DDS::DURATION_INFINITY_SEC, DDS::DURATION_INFINITY_NSEC};
   DDS::ConditionSeq conditions;
   DDS::PublicationMatchStatus matches = { 0, 0, 0};
   unsigned int cummulative_count = 0;
