@@ -1,23 +1,31 @@
+Thu Jan 29 05:35:56 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/build.properties:
+        * java/jms/build.xml:
+
+          Removed source compatibility flags; cases unpredictable behavior
+          when used with JDK 1.6 compilers (reported against 1.6.0_11).
+
 Wed Jan 28 23:05:39 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/DCPS/Priority/DataReaderListener.h:
         * performance-tests/DCPS/Priority/DataReaderListener.cpp:
 
-	  Added ability to conditionally compile in zero copy take in
-	  place of take_next_sample calls.
+          Added ability to conditionally compile in zero copy take in
+          place of take_next_sample calls.
 
         * performance-tests/DCPS/Priority/Publisher.cpp:
 
-	  Unconditionally print a summary of test messages at end.
+          Unconditionally print a summary of test messages at end.
 
         * performance-tests/DCPS/Priority/Subscriber.cpp:
 
-	  Modified to use the new 'publication' attribute type in the
-	  LatencyStatistics structure.
+          Modified to use the new 'publication' attribute type in the
+          LatencyStatistics structure.
 
         * performance-tests/DCPS/Priority/run_test.pl:
 
-	  Removed delay from test execution.
+          Removed delay from test execution.
 
 Wed Jan 28 22:57:01 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
