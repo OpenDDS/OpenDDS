@@ -1,9 +1,27 @@
+Thu Jan 29 22:42:32 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * java/dds/dcps_java.mpc:
+
+          Due to yesterday's change to dds/DdsDcpsSubscriptionExt.idl,
+          the file DdsDcpsGuid.idl needs to also be visible to Java apps.
+
+        * java/idl2jni/codegen/im_java.cpp:
+
+          Fixed a bug in IDL octet constants (Java bytes).
+
+        * java/idl2jni/codegen/im_jni.cpp:
+
+          Use pass-by-reference for C++ arrays so that they don't decay
+          to pointers.  This will support the arrays in DdsDcpsGuid.idl but
+          not the general case of multiple IDL array typedefs for the same
+          element type and size.
+
 Thu Jan 29 17:54:16 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/DCPS/Priority/Publisher.cpp:
         * performance-tests/DCPS/Priority/Test.h:
 
-	  Removed obsolete code.  Extended some diagnostics.
+          Removed obsolete code.  Extended some diagnostics.
 
         * tests/DCPS/Priority/DataReaderListener.cpp:
         * tests/DCPS/Priority/Publisher.h:
@@ -13,10 +31,10 @@ Thu Jan 29 17:54:16 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
         * tests/DCPS/Priority/run_test.pl:
         * tests/DCPS/Priority/subscriber_main.cpp:
 
-	  Switched to using PUBLICATION/SUBCRIPTION_MATCH_STATUS for test
-	  synchronization and using LocalObject<>_var lifetime management
-	  for the reader listener.  Limited to a single publisher process
-	  with 2 publications.
+          Switched to using PUBLICATION/SUBCRIPTION_MATCH_STATUS for test
+          synchronization and using LocalObject<>_var lifetime management
+          for the reader listener.  Limited to a single publisher process
+          with 2 publications.
 
 Thu Jan 29 05:35:56 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
