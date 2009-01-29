@@ -29,7 +29,9 @@ namespace Test {
 
 Publisher::~Publisher()
 {
-  this->waiter_->detach_condition( this->status_.in());
+  DDS::ConditionSeq conditions;
+  this->waiter_->get_conditions( conditions);
+  this->waiter_->detach_conditions( conditions);
 
   if( ! CORBA::is_nil( this->participant_.in())) {
     this->participant_->delete_contained_entities();
@@ -207,38 +209,70 @@ Publisher::Publisher( const Options& options)
       throw BadQosException();
   }
 
-  // Actually set the priority finally.
-  writerQos.transport_priority.value = this->options_.priority();
-
   // Create the writer.
-  this->writer_ = this->publisher_->create_datawriter(
+  this->writer_[0] = this->publisher_->create_datawriter(
                     this->topic_.in(),
                     writerQos,
                     DDS::DataWriterListener::_nil()
                   );
-  if( CORBA::is_nil( this->writer_.in())) {
+  if( CORBA::is_nil( this->writer_[0].in())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Publisher::Publisher() - ")
-      ACE_TEXT("failed to create writer.\n")
+      ACE_TEXT("failed to create writer[0].\n")
     ));
     throw BadWriterException();
 
   } else if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
-      ACE_TEXT("created writer.\n")
+      ACE_TEXT("created writer[0].\n")
     ));
   }
 
   // Grab, enable and attach the status condition for test synchronization.
-  this->status_ = this->writer_->get_statuscondition();
-  this->status_->set_enabled_statuses( DDS::PUBLICATION_MATCH_STATUS);
-  this->waiter_->attach_condition( this->status_.in());
+  this->status_[0] = this->writer_[0]->get_statuscondition();
+  this->status_[0]->set_enabled_statuses( DDS::PUBLICATION_MATCH_STATUS);
+  this->waiter_->attach_condition( this->status_[0].in());
 
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
-      ACE_TEXT("created StatusCondition and WaitSet for test synchronization.\n")
+      ACE_TEXT("created StatusCondition[0] for test synchronization.\n")
+    ));
+  }
+
+  // Actually set the priority finally.
+  writerQos.transport_priority.value = this->options_.priority();
+
+  // Create the writer.
+  this->writer_[1] = this->publisher_->create_datawriter(
+                    this->topic_.in(),
+                    writerQos,
+                    DDS::DataWriterListener::_nil()
+                  );
+  if( CORBA::is_nil( this->writer_[1].in())) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: Publisher::Publisher() - ")
+      ACE_TEXT("failed to create writer[1].\n")
+    ));
+    throw BadWriterException();
+
+  } else if( this->options_.verbose()) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
+      ACE_TEXT("created writer[1].\n")
+    ));
+  }
+
+  // Grab, enable and attach the status condition for test synchronization.
+  this->status_[1] = this->writer_[1]->get_statuscondition();
+  this->status_[1]->set_enabled_statuses( DDS::PUBLICATION_MATCH_STATUS);
+  this->waiter_->attach_condition( this->status_[1].in());
+
+  if( this->options_.verbose()) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
+      ACE_TEXT("created StatusCondition[1] for test synchronization.\n")
     ));
   }
 
@@ -247,16 +281,16 @@ Publisher::Publisher( const Options& options)
 void
 Publisher::run()
 {
-  DDS::Duration_t   timeout = { SUBSCRIPTION_WAIT_TIME, 0};
+  DDS::Duration_t   timeout = { DDS::DURATION_INFINITY_SEC, DDS::DURATION_INFINITY_NSEC};
   DDS::ConditionSeq conditions;
   DDS::PublicationMatchStatus matches = { 0, 0, 0};
+  unsigned int cummulative_count = 0;
   do {
     if( this->options_.verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Publisher::run() - ")
-        ACE_TEXT("waiting for subscription to attach (total==%d, change==%d).\n"),
-        matches.total_count,
-        matches.total_count_change
+        ACE_TEXT("%d of 2 subscriptions attached, waiting for more.\n"),
+        cummulative_count
       ));
     }
     if( DDS::RETCODE_OK != this->waiter_->wait( conditions, timeout)) {
@@ -266,9 +300,30 @@ Publisher::run()
       ));
       throw BadSyncException();
     }
-    matches = this->writer_->get_publication_match_status();
+    for( unsigned long index = 0; index < conditions.length(); ++index) {
+      DDS::StatusCondition_var condition
+        = DDS::StatusCondition::_narrow( conditions[ index].in());
 
-  } while( matches.total_count_change == 0);
+      DDS::DataWriter_var writer = DDS::DataWriter::_narrow( condition->get_entity());
+      if( !CORBA::is_nil( writer.in())) {
+        DDS::StatusKindMask changes = writer->get_status_changes();
+        if( changes & DDS::PUBLICATION_MATCH_STATUS) {
+          matches = writer->get_publication_match_status();
+          cummulative_count += matches.total_count_change;
+        }
+      }
+    }
+
+  } while( cummulative_count < 2);
+
+  /// Kluge to ensure that the remote/subscriber side endpoints have
+  /// been fully associated before starting to send.  This appears to be
+  /// a race between the association creation and use and the BuiltIn
+  /// Topic data becoming available.  There is no existing mechanism (nor
+  /// should there be) to prevent an association from exchanging data
+  /// prior to the remote endpoint information becoming available via the
+  /// BuiltIn Topic publications.
+  ACE_OS::sleep( 2);
 
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
@@ -277,37 +332,38 @@ Publisher::run()
     ));
   }
 
-  Test::DataDataWriter_var dataWriter
-    = Test::DataDataWriter::_narrow( this->writer_.in());
-  Test::Data sample;
-  sample.key = 42;
+  Test::DataDataWriter_var writer0
+    = Test::DataDataWriter::_narrow( this->writer_[0].in());
+  Test::DataDataWriter_var writer1
+    = Test::DataDataWriter::_narrow( this->writer_[1].in());
+  Test::Data sample0;
+  Test::Data sample1;
+  sample0.key = 24;
+  sample1.key = 42;
   for( unsigned int count = 0; count < this->options_.count(); ++count) {
-    std::stringstream buffer;
-    buffer << "This is sample " << std::dec << (1+count)
-           << " from publisher " << this->options_.publisherId()
-           << " at priority " << this->options_.priority() << "."
+    std::stringstream buffer0;
+    buffer0 << "This is sample " << std::dec << (1+count)
+           << " from publication 0 at default priority"
            << std::ends;
-    sample.value = CORBA::string_dup( buffer.str().c_str());
-    dataWriter->write( sample, DDS::HANDLE_NIL);
+    sample0.value = CORBA::string_dup( buffer0.str().c_str());
+    writer0->write( sample0, DDS::HANDLE_NIL);
 
-    if( this->options_.verbose()) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Publisher::run() - ")
-        ACE_TEXT("publisher %d wrote sample %d at priority %d.\n"),
-        this->options_.publisherId(),
-        (1+count),
-        this->options_.priority()
-      ));
-    }
+    std::stringstream buffer1;
+    buffer1 << "This is sample " << std::dec << (1+count)
+           << " from publication 1 at priority "
+           << std::dec << this->options_.priority()
+           << std::ends;
+    sample1.value = CORBA::string_dup( buffer1.str().c_str());
+    writer1->write( sample1, DDS::HANDLE_NIL);
   }
 
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Publisher::run() - ")
-      ACE_TEXT("finished publishing samples.\n")
+      ACE_TEXT("finished publishing %d samples.\n"),
+      2 * this->options_.count()
     ));
   }
-  ACE_OS::sleep( 2); /// @TODO: Kluge around a shutdown race condition.
 }
 
 } // End of namespace Test

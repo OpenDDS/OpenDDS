@@ -4,14 +4,6 @@
 #include <exception>
 
 namespace Test {
-  /// Delay (seconds) to wait for a subscription to be made at test start.
-  enum { SUBSCRIPTION_WAIT_TIME = 30};
-
-  /// Delay (seconds) to wait for a publication to publish.
-  enum { PUBLICATION_WAIT_TIME = 30};
-
-  /// Heartbeat interval for publications.
-  enum { PUBLICATION_LIVELINESS_INTERVAL = 5 };
 
   class Exception : public virtual std::exception {
     public: virtual const char* what() const throw() { return "TestException"; }
