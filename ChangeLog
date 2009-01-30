@@ -1,3 +1,10 @@
+Fri Jan 30 15:49:16 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * java/tests/complex_idl/ComplexIDLTest.java:
+
+          on_publication_match() is now also called when the association
+          goes away.  Updated the test to check for this.
+
 Fri Jan 30 15:21:26 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * performance-tests/DCPS/Priority/Priority.mpc:
