@@ -563,17 +563,20 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
 
 void DataWriterImpl::remove_all_associations ()
 {
-
   OpenDDS::DCPS::ReaderIdSeq readers;
-
-  CORBA::ULong size = readers_.size();
-  readers.length(size);
- 
-  IdSet::iterator itEnd = readers_.end ();
-  int i = 0;
-  for (IdSet::iterator it = readers_.begin (); it != itEnd; ++it)
+  CORBA::ULong size;
   {
-     readers[i ++] = *it;
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
+
+    size = readers_.size();
+    readers.length(size);
+
+    IdSet::iterator itEnd = readers_.end ();
+    int i = 0;
+    for (IdSet::iterator it = readers_.begin (); it != itEnd; ++it)
+    {
+       readers[i ++] = *it;
+    }
   }
 
   try
