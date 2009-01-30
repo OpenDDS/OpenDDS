@@ -39,6 +39,7 @@ project(perf*Subscriber) : dcpsexe_with_unreliable_dgram, dcps_reliable_multicas
     Options.cpp
     DataReaderListener.cpp
     PublicationProfile.cpp
+    Commas.cpp
     subscriber_main.cpp
   }
 }

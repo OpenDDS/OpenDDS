@@ -85,6 +85,8 @@ DataWriterImpl::DataWriterImpl (void)
 
   publication_match_status_.total_count = 0;
   publication_match_status_.total_count_change = 0;
+  publication_match_status_.current_count = 0;
+  publication_match_status_.current_count_change = 0;
   publication_match_status_.last_subscription_handle = ::DDS::HANDLE_NIL;
 }
 
@@ -352,6 +354,8 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
         // update the publication_match_status_
         ++publication_match_status_.total_count;
         ++publication_match_status_.total_count_change;
+        ++publication_match_status_.current_count;
+        ++publication_match_status_.current_count_change;
         if (bind(id_to_handle_map_, rd_ids[i], handles[i]) != 0)
         {
           ::OpenDDS::DCPS::GuidConverter converter(
@@ -393,6 +397,7 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
       // TBD - why does the spec say to change this but not
       // change the ChangeFlagStatus after a listener call?
       publication_match_status_.total_count_change = 0;
+      publication_match_status_.current_count_change = 0;
     }
     notify_status_condition();
     delete [] remote_associations;
@@ -524,12 +529,16 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
 
     // Derive the change in the number of subscriptions reading this writer.
     int matchedSubscriptions = this->id_to_handle_map_.size();
-    this->publication_match_status_.total_count_change
-      = matchedSubscriptions - this->publication_match_status_.total_count;
+    this->publication_match_status_.current_count_change
+      = matchedSubscriptions - this->publication_match_status_.current_count;
 
     // Only process status if the number of subscriptions has changed.
-    if( this->publication_match_status_.total_count_change != 0) {
-      this->publication_match_status_.total_count = matchedSubscriptions;
+    if( this->publication_match_status_.current_count_change != 0) {
+      this->publication_match_status_.current_count = matchedSubscriptions;
+
+      /// Section 7.1.4.1: total_count will not decrement.
+
+      /// @TODO: Reconcile this with the verbiage in section 7.1.4.1
       this->publication_match_status_.last_subscription_handle
         = handles[ rds_len - 1];
 
@@ -545,6 +554,7 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
 
         // Listener consumes the change.
         this->publication_match_status_.total_count_change = 0;
+        this->publication_match_status_.current_count_change = 0;
       }
       this->notify_status_condition();
     }
@@ -843,6 +853,7 @@ DataWriterImpl::get_publication_match_status ()
   set_status_changed_flag (::DDS::PUBLICATION_MATCH_STATUS, false);
   ::DDS::PublicationMatchStatus status = publication_match_status_;
   publication_match_status_.total_count_change = 0;
+  publication_match_status_.current_count_change = 0;
   return status;
 }
 

@@ -282,7 +282,7 @@ Publisher::run()
 {
   DDS::Duration_t   timeout = { DDS::DURATION_INFINITY_SEC, DDS::DURATION_INFINITY_NSEC};
   DDS::ConditionSeq conditions;
-  DDS::PublicationMatchStatus matches = { 0, 0, 0};
+  DDS::PublicationMatchStatus matches = { 0, 0, 0, 0, 0};
   unsigned int cummulative_count = 0;
   do {
     if( this->options_.verbose()) {
@@ -309,12 +309,16 @@ Publisher::run()
         DDS::StatusKindMask changes = writer->get_status_changes();
         if( changes & DDS::PUBLICATION_MATCH_STATUS) {
           matches = writer->get_publication_match_status();
-          cummulative_count += matches.total_count_change;
+          cummulative_count += matches.current_count_change;
         }
       }
     }
 
   } while( cummulative_count < this->publications_.size());
+
+  // Kluge to bias the race between BuiltinTopic samples and application
+  // samples towards the BuiltinTopics during association establishment.
+  ACE_OS::sleep( 2);
 
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,

@@ -65,6 +65,9 @@ class Subscriber {
     /// Reader listener.
     DataReaderListener* listener_;
 
+    /// Reader listener lifetime management.
+    OpenDDS::DCPS::LocalObject_var safe_listener_;
+
     /// Blocking object for test synchronization.
     DDS::WaitSet_var waiter_;
 

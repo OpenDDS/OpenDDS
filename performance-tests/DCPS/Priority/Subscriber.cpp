@@ -95,6 +95,7 @@ Subscriber::Subscriber( const Options& options)
 
   // Create the listener.
   this->listener_ = new DataReaderListener( this->options_.verbose());
+  this->safe_listener_ = this->listener_;
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
@@ -306,13 +307,13 @@ Subscriber::run()
 {
   DDS::Duration_t   timeout = { DDS::DURATION_INFINITY_SEC, DDS::DURATION_INFINITY_NSEC};
   DDS::ConditionSeq conditions;
-  DDS::SubscriptionMatchStatus matches = { 0, 0, 0};
+  DDS::SubscriptionMatchStatus matches = { 0, 0, 0, 0, 0};
   do {
     if( this->options_.verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Subscriber::run() - ")
         ACE_TEXT("%d publications attached.\n"),
-        matches.total_count
+        matches.current_count
       ));
     }
     if( DDS::RETCODE_OK != this->waiter_->wait( conditions, timeout)) {
@@ -324,7 +325,7 @@ Subscriber::run()
     }
     matches = this->reader_->get_subscription_match_status();
 
-  } while( matches.total_count > 0);
+  } while( matches.current_count > 0);
 
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,

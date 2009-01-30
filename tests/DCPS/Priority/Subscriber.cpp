@@ -268,7 +268,7 @@ Subscriber::run()
 {
   DDS::Duration_t   timeout = { DDS::DURATION_INFINITY_SEC, DDS::DURATION_INFINITY_NSEC};
   DDS::ConditionSeq conditions;
-  DDS::SubscriptionMatchStatus matches = { 0, 0, 0};
+  DDS::SubscriptionMatchStatus matches = { 0, 0, 0, 0, 0};
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Subscriber::run() - ")
@@ -289,11 +289,11 @@ Subscriber::run()
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Subscriber::run() - ")
         ACE_TEXT("%d publications attached.\n"),
-        matches.total_count
+        matches.current_count
       ));
     }
 
-  } while( matches.total_count > 0);
+  } while( matches.current_count > 0);
 
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
