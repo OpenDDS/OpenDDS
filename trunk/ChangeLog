@@ -1,3 +1,9 @@
+Fri Jan 30 03:56:16 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Fixed SEGV in remove_all_associations.
+
 Thu Jan 29 22:42:32 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * java/dds/dcps_java.mpc:
