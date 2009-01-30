@@ -1639,7 +1639,7 @@ void
         set_status_changed_flag (::DDS::SAMPLE_REJECTED_STATUS, true);
 
         sample_rejected_status_.last_reason =
-          ::DDS::REJECTED_BY_INSTANCE_LIMIT;
+          ::DDS::REJECTED_BY_SAMPLES_PER_INSTANCE_LIMIT;
         ++sample_rejected_status_.total_count;
         ++sample_rejected_status_.total_count_change;
         sample_rejected_status_.last_instance_handle = handle;

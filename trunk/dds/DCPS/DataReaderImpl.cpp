@@ -71,10 +71,12 @@ DataReaderImpl::DataReaderImpl (void) :
   CORBA::ORB_var orb = TheServiceParticipant->get_ORB ();
   reactor_ = orb->orb_core()->reactor();
 
-  liveliness_changed_status_.active_count = 0;
-  liveliness_changed_status_.inactive_count = 0;
-  liveliness_changed_status_.active_count_change = 0;
-  liveliness_changed_status_.inactive_count_change = 0;
+  liveliness_changed_status_.alive_count = 0;
+  liveliness_changed_status_.not_alive_count = 0;
+  liveliness_changed_status_.alive_count_change = 0;
+  liveliness_changed_status_.not_alive_count_change = 0;
+  liveliness_changed_status_.last_publication_handle =
+    ::DDS::HANDLE_NIL;
 
   requested_deadline_missed_status_.total_count = 0;
   requested_deadline_missed_status_.total_count_change = 0;
@@ -88,6 +90,8 @@ DataReaderImpl::DataReaderImpl (void) :
 
   subscription_match_status_.total_count = 0;
   subscription_match_status_.total_count_change = 0;
+  subscription_match_status_.current_count = 0;
+  subscription_match_status_.current_count_change = 0;
   subscription_match_status_.last_publication_handle =
     ::DDS::HANDLE_NIL;
 
@@ -96,8 +100,7 @@ DataReaderImpl::DataReaderImpl (void) :
 
   sample_rejected_status_.total_count = 0;
   sample_rejected_status_.total_count_change = 0;
-  sample_rejected_status_.last_reason =
-    ::DDS::REJECTED_BY_INSTANCE_LIMIT;
+  sample_rejected_status_.last_reason = ::DDS::NOT_REJECTED;
   sample_rejected_status_.last_instance_handle = ::DDS::HANDLE_NIL;
 
   this->budget_exceeded_status_.total_count = 0;
@@ -330,12 +333,15 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
 
       // We need to adjust these after the insertions have all completed
       // since insertions are not guaranteed to increase the number of
-      // matched publications.
+      // currently matched publications.
       int matchedPublications = this->id_to_handle_map_.size();
-      this->subscription_match_status_.total_count_change
-        = matchedPublications - this->subscription_match_status_.total_count;
-      this->subscription_match_status_.total_count
-        = matchedPublications;
+      this->subscription_match_status_.current_count_change
+        = matchedPublications - this->subscription_match_status_.current_count;
+      this->subscription_match_status_.current_count = matchedPublications;
+
+      ++this->subscription_match_status_.total_count;
+      ++this->subscription_match_status_.total_count_change;
+
       this->subscription_match_status_.last_publication_handle
         = handles[ wr_len - 1];
 
@@ -354,6 +360,7 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
 
         // Client will look at it so next time it looks the change should be 0
         this->subscription_match_status_.total_count_change = 0;
+        this->subscription_match_status_.current_count_change = 0;
       }
       notify_status_condition();
     }
@@ -461,12 +468,16 @@ void DataReaderImpl::remove_associations (
   if( !this->is_bit_) {
     // Derive the change in the number of publications writing to this reader.
     int matchedPublications = this->id_to_handle_map_.size();
-    this->subscription_match_status_.total_count_change
-      = matchedPublications - this->subscription_match_status_.total_count;
+    this->subscription_match_status_.current_count_change
+      = matchedPublications - this->subscription_match_status_.current_count;
 
     // Only process status if the number of publications has changed.
-    if( this->subscription_match_status_.total_count_change != 0) {
-      this->subscription_match_status_.total_count = matchedPublications;
+    if( this->subscription_match_status_.current_count_change != 0) {
+      this->subscription_match_status_.current_count = matchedPublications;
+
+      /// Section 7.1.4.1: total_count will not decrement.
+
+      /// @TODO: Reconcile this with the verbiage in section 7.1.4.1
       this->subscription_match_status_.last_publication_handle
         = handles[ wr_len - 1];
 
@@ -482,6 +493,7 @@ void DataReaderImpl::remove_associations (
 
         // Client will look at it so next time it looks the change should be 0
         this->subscription_match_status_.total_count_change = 0;
+        this->subscription_match_status_.current_count_change = 0;
       }
       notify_status_condition();
     }
@@ -801,8 +813,8 @@ void DataReaderImpl::get_qos (
   ::DDS::LivelinessChangedStatus status =
       liveliness_changed_status_;
 
-  liveliness_changed_status_.active_count_change = 0;
-  liveliness_changed_status_.inactive_count_change = 0;
+  liveliness_changed_status_.alive_count_change = 0;
+  liveliness_changed_status_.not_alive_count_change = 0;
 
   return status;
 }
@@ -859,6 +871,7 @@ DataReaderImpl::get_subscription_match_status ()
   set_status_changed_flag (::DDS::SUBSCRIPTION_MATCH_STATUS, false);
   ::DDS::SubscriptionMatchStatus status = subscription_match_status_;
   subscription_match_status_.total_count_change = 0;
+  subscription_match_status_.current_count_change = 0;
 
   return status ;
 }
@@ -1605,15 +1618,15 @@ DataReaderImpl::writer_removed (PublicationId   writer_id,
   bool liveliness_changed = false;
   if (state == WriterInfo::ALIVE)
   {
-    -- liveliness_changed_status_.active_count;
-    -- liveliness_changed_status_.active_count_change;
+    -- liveliness_changed_status_.alive_count;
+    -- liveliness_changed_status_.alive_count_change;
     liveliness_changed = true;
   }
 
   if (state == WriterInfo::DEAD)
   {
-    -- liveliness_changed_status_.inactive_count;
-    -- liveliness_changed_status_.inactive_count_change;
+    -- liveliness_changed_status_.not_alive_count;
+    -- liveliness_changed_status_.not_alive_count_change;
     liveliness_changed = true;
   }
 
@@ -1649,34 +1662,34 @@ DataReaderImpl::writer_became_alive (PublicationId writer_id,
   bool liveliness_changed = false;
   if (state != WriterInfo::ALIVE)
   {
-    liveliness_changed_status_.active_count++;
-    liveliness_changed_status_.active_count_change++;
+    liveliness_changed_status_.alive_count++;
+    liveliness_changed_status_.alive_count_change++;
     liveliness_changed = true;
   }
 
   if (state == WriterInfo::DEAD)
   {
-    liveliness_changed_status_.inactive_count--;
-    liveliness_changed_status_.inactive_count_change--;
+    liveliness_changed_status_.not_alive_count--;
+    liveliness_changed_status_.not_alive_count_change--;
     liveliness_changed = true;
   }
 
   set_status_changed_flag(::DDS::LIVELINESS_CHANGED_STATUS, true);
 
-  if (liveliness_changed_status_.active_count < 0)
+  if (liveliness_changed_status_.alive_count < 0)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::writer_became_alive: ")
-                  ACE_TEXT(" invalid liveliness_changed_status active count - %d.\n"),
-      liveliness_changed_status_.active_count));
+                  ACE_TEXT(" invalid liveliness_changed_status alive count - %d.\n"),
+      liveliness_changed_status_.alive_count));
       return;
     }
-  if (liveliness_changed_status_.inactive_count < 0)
+  if (liveliness_changed_status_.not_alive_count < 0)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::writer_became_alive: ")
-                  ACE_TEXT(" invalid liveliness_changed_status inactive count - %d .\n"),
-      liveliness_changed_status_.inactive_count));
+                  ACE_TEXT(" invalid liveliness_changed_status not alive count - %d .\n"),
+      liveliness_changed_status_.not_alive_count));
       return;
     }
 
@@ -1719,37 +1732,37 @@ DataReaderImpl::writer_became_dead (PublicationId   writer_id,
 
   if (state == OpenDDS::DCPS::WriterInfo::NOT_SET)
   {
-    liveliness_changed_status_.inactive_count++;
-    liveliness_changed_status_.inactive_count_change++;
+    liveliness_changed_status_.not_alive_count++;
+    liveliness_changed_status_.not_alive_count_change++;
     liveliness_changed = true;
   }
 
   if (state == WriterInfo::ALIVE)
   {
-    liveliness_changed_status_.active_count--;
-    liveliness_changed_status_.active_count_change--;
-    liveliness_changed_status_.inactive_count++;
-    liveliness_changed_status_.inactive_count_change++;
+    liveliness_changed_status_.alive_count--;
+    liveliness_changed_status_.alive_count_change--;
+    liveliness_changed_status_.not_alive_count++;
+    liveliness_changed_status_.not_alive_count_change++;
     liveliness_changed = true;
   }
 
   //update the state to DEAD.
   state = WriterInfo::DEAD;
 
-  if (liveliness_changed_status_.active_count < 0)
+  if (liveliness_changed_status_.alive_count < 0)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::writer_became_dead: ")
-                  ACE_TEXT(" invalid liveliness_changed_status active count - %d.\n"),
-      liveliness_changed_status_.active_count));
+                  ACE_TEXT(" invalid liveliness_changed_status alive count - %d.\n"),
+      liveliness_changed_status_.alive_count));
       return;
     }
-  if (liveliness_changed_status_.inactive_count < 0)
+  if (liveliness_changed_status_.not_alive_count < 0)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::writer_became_dead: ")
-                  ACE_TEXT(" invalid liveliness_changed_status inactive count - %d.\n"),
-      liveliness_changed_status_.inactive_count));
+                  ACE_TEXT(" invalid liveliness_changed_status not alive count - %d.\n"),
+      liveliness_changed_status_.not_alive_count));
       return;
     }
 
@@ -1762,7 +1775,7 @@ DataReaderImpl::writer_became_dead (PublicationId   writer_id,
       SubscriptionInstance *ptr = iter->second;
 
       ptr->instance_state_.writer_became_dead (
-        writer_id, liveliness_changed_status_.active_count, when);
+        writer_id, liveliness_changed_status_.alive_count, when);
 
       iter = next;
     }
@@ -2328,8 +2341,8 @@ void DataReaderImpl::notify_liveliness_change()
     listener->on_liveliness_changed (dr_local_objref_.in (),
       liveliness_changed_status_);
 
-    liveliness_changed_status_.active_count_change = 0;
-    liveliness_changed_status_.inactive_count_change = 0;
+    liveliness_changed_status_.alive_count_change = 0;
+    liveliness_changed_status_.not_alive_count_change = 0;
   }
   notify_status_condition ();
   if( DCPS_debug_level > 9) {

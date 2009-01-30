@@ -1,3 +1,42 @@
+Fri Jan 30 23:28:13 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * DDS_release_notes.txt
+        * dds/DdsDcpsInfrastructure.idl:
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+	  Migrated behaviors for Communication Status entities to conform
+	  to specification version 1.2 (formal/07-01-01).  This included
+	  member name changes to LivelinessChangedStatus, modifying and
+	  extending the SampleRejectedStatusKind enumeration and adding
+	  members to the PublicationMatchStatus and SubscriptionMatchStatus
+	  structures.
+
+        * performance-tests/DCPS/McastListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/UDPListenerTest/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTest/DataReaderListener.h:
+        * tests/DCPS/LivelinessTest/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTimeout/DataReaderListenerImpl.cpp:
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Priority/Subscriber.cpp:
+
+	  Use the new definitions and behaviors for Communication Status
+	  entities.
+
+        * performance-tests/DCPS/Priority/Commas.h:
+        * performance-tests/DCPS/Priority/Commas.cpp:
+        * performance-tests/DCPS/Priority/Priority.mpc:
+        * performance-tests/DCPS/Priority/Publisher.cpp:
+        * performance-tests/DCPS/Priority/Subscriber.h:
+        * performance-tests/DCPS/Priority/Subscriber.cpp:
+        * performance-tests/DCPS/Priority/subscriber_main.cpp:
+
+	  Continuing test development and extension.  This included
+	  Listener lifetime management as well as use of the updated
+	  Communication Status entities.  Commas was added as a
+	  formatting abstraction for test results output.
+
 Fri Jan 30 15:49:16 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * java/tests/complex_idl/ComplexIDLTest.java:

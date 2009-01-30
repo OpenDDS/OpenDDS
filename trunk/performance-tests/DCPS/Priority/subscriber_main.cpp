@@ -3,6 +3,7 @@
 
 #include "Test.h"
 #include "Options.h"
+#include "Commas.h"
 #include "Subscriber.h"
 #include "dds/DCPS/Service_Participant.h"
 
@@ -61,37 +62,12 @@ main( int argc, char *argv[])
         bytes = where->second;
       }
 
-      // Formatting magic.
-      int triples[ 20];
-      int index = 0;
-
       // Form the message for this writer.
       buffer << "   writer[ 0x" << std::hex << current->first << "] == "
-             << std::dec;
+             << Commas( current->second) << " samples / "
+             << Commas( bytes) << " bytes recieved at priority "
+             << std::dec << priority << "." << std::endl;
 
-      for( long value = current->second; value != 0; value /= 1000)
-        triples[ index++] = value % 1000;
-
-      for( char fillchar = ' '; index > 0;) {
-        buffer << std::setfill( fillchar) << std::setw( 3) << triples[ --index];
-        fillchar = '0';
-        if( index != 0) buffer << ",";
-        else            buffer << " ";
-      }
-
-      buffer << "samples / ";
-
-      for( long value = bytes; value != 0; value /= 1000) triples[ index++] = value % 1000;
-
-      for( char fillchar = ' '; index > 0;) {
-        buffer << std::setfill( fillchar) << std::setw( 3) << triples[ --index];
-        fillchar = '0';
-        if( index != 0) buffer << ",";
-        else            buffer << " ";
-      }
-
-      buffer << "bytes recieved at priority " << std::dec << priority
-             << "." << std::endl;
     }
     buffer << "Total messages received: " << std::dec << subscriber.total_messages() << std::endl;
     buffer << "Valid messages received: " << std::dec << subscriber.valid_messages() << std::endl;
