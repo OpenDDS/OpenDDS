@@ -93,7 +93,7 @@ public class ComplexIDLTest extends QuoteSupport {
 
                 public void on_publication_match(DataWriter dw, PublicationMatchStatus status) {
                     try {
-                        if (status.total_count == 0) return;
+                        if (status.current_count == 0) return;
                         // Don't run the rest of this method if the callback is
                         // due to the datareader going away.
 
