@@ -6,8 +6,4 @@ project(DDS*Node) : dcpsexe {
     FileInfo.idl
   }
 
-  Source_Files {
-    *.cpp
-    FileInfoTypeSupportImpl.cpp
-  }
 }

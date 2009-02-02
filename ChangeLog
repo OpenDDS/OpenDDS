@@ -1,3 +1,9 @@
+Mon Feb  2 20:04:46 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * examples/DCPS/DistributedContent/DistributedContent.mpc:
+
+          Removed the explicit Source_Files section, it is not needed.
+
 Mon Feb  2 15:31:56 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * performance-tests/DCPS/Sync/SyncClient_i.cpp:
