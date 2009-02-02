@@ -1,3 +1,9 @@
+Mon Feb  2 15:31:56 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/DCPS/Sync/SyncClient_i.cpp:
+
+          Fixed warning on GCC 4.3: assign string constants to const char *.
+
 Sat Jan 31 23:17:53 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * java/tests/complex_idl/ComplexIDLTest.java:
