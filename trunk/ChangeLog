@@ -1,3 +1,10 @@
+Tue Feb  3 19:19:35 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/build.properties:
+        * java/jms/build.xml:
+
+          Reverted changes from r2014.
+
 Mon Feb  2 20:04:46 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * examples/DCPS/DistributedContent/DistributedContent.mpc:
