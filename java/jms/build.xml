@@ -111,6 +111,7 @@
                debug="${compile.debug}"
                deprecation="${compile.deprecation}"
                optimize="${compile.optimize}"
+               source="${project.source}"
                classpathref="project.classpath">
         </javac>
     </target>
