@@ -1,3 +1,9 @@
+Wed Feb  4 00:04:09 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * docs/design/lockmap.txt:
+
+	  Added (partial) documentation of lock usage as of this date.
+
 Tue Feb  3 19:19:35 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/build.properties:
