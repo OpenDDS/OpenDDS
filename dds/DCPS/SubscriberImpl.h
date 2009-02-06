@@ -9,6 +9,7 @@
 #include "dds/DdsDcpsInfoC.h"
 #include "EntityImpl.h"
 #include "Definitions.h"
+#include "DataCollector_T.h"
 #include "dds/DCPS/transport/framework/TransportInterface.h"
 #include "ace/Synch.h"
 
@@ -238,6 +239,17 @@ namespace OpenDDS
 
     ::DDS::SubscriberListener* listener_for (::DDS::StatusKind kind);
 
+    /// @name Raw Latency Statistics Configuration Interfaces
+    /// @{
+
+    /// Configure the size of the raw data collection buffer.
+    unsigned int& raw_latency_buffer_size();
+
+    /// Configure the type of the raw data collection buffer.
+    DataCollector< double>::OnFull& raw_latency_buffer_type();
+
+    /// @}
+
     private:
 
       ::DDS::SubscriberQos          qos_;
@@ -254,6 +266,12 @@ namespace OpenDDS
       ::DDS::DomainParticipant_var  participant_objref_;
 
       ::DDS::DomainId_t             domain_id_;
+
+      /// Bound (or initial reservation) of raw latency buffers.
+      unsigned int raw_latency_buffer_size_;
+
+      /// Type of raw latency data buffers.
+      DataCollector< double>::OnFull raw_latency_buffer_type_;
 
       /// this lock protects the data structures in this class.
       /// It also projects the TransportInterface (it must be held when

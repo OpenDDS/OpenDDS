@@ -50,7 +50,9 @@ SubscriberImpl::SubscriberImpl (const ::DDS::SubscriberQos & qos,
     listener_mask_(DEFAULT_STATUS_KIND_MASK),
     fast_listener_ (0),
     participant_(participant),
-    domain_id_( participant->get_domain_id())
+    domain_id_( participant->get_domain_id()),
+    raw_latency_buffer_size_( 0),
+    raw_latency_buffer_type_( DataCollector< double>::KeepOldest)
 {
   //Note: OK to duplicate a nil.
   listener_ = ::DDS::SubscriberListener::_duplicate(a_listener);
@@ -186,6 +188,12 @@ SubscriberImpl::create_opendds_datareader (
   //this is the client reference to the DataReaderRemoteImpl
   ::OpenDDS::DCPS::DataReaderRemote_var dr_remote_obj = 
       servant_to_remote_reference(reader_remote_impl);
+
+  // Propagate the latency buffer data collection configuration.
+  // @TODO: Determine whether we want to exclude the Builtin Topic
+  //        readers from data gathering.
+  dr_servant->raw_latency_buffer_size() = this->raw_latency_buffer_size_;
+  dr_servant->raw_latency_buffer_type() = this->raw_latency_buffer_type_;
 
   dr_servant->init (topic_servant,
 		    dr_qos,
@@ -1026,6 +1034,19 @@ SubscriberImpl::listener_for (::DDS::StatusKind kind)
       return fast_listener_;
     }
 }
+
+unsigned int&
+SubscriberImpl::raw_latency_buffer_size()
+{
+  return this->raw_latency_buffer_size_;
+}
+
+DataCollector< double>::OnFull&
+SubscriberImpl::raw_latency_buffer_type()
+{
+  return this->raw_latency_buffer_type_;
+}
+ 
 
 } // namespace DCPS
 } // namespace OpenDDS
