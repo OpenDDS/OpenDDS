@@ -21,76 +21,81 @@ namespace
     return false;
   }
 
-  bool
-  matching_partitions (::DDS::PartitionQosPolicy const & pub,
-                       ::DDS::PartitionQosPolicy const & sub)
+  class PartitionName
   {
-    ::DDS::StringSeq const & publisher_partitions  = pub.name;
-    ::DDS::StringSeq const & subscriber_partitions = sub.name;
+  public:
+    PartitionName(const char* name)
+      : name_(name),
+        wildcard_(is_wildcard(name))
+    {}
 
-    // Both publisher and subscriber are in the same (default)
-    // partition if the partition string sequence lengths are both
-    // zero.
-    CORBA::ULong const pub_len = publisher_partitions.length ();
-    CORBA::ULong const sub_len = subscriber_partitions.length ();
-
-    if (pub_len == 0 && sub_len == 0)
-      return true;
-    else if (pub_len == 0)
+    bool matches(const PartitionName& n)
     {
-      // Attempt to match an explicitly specified empty string
-      // partition against the special zero length partition
-      // sequence.
-      for (CORBA::ULong n = 0; n < sub_len; ++n)
-      {
-        char const * const sname = subscriber_partitions[n];
-        if (*sname == 0)
-          return true;
-      }
+      if (wildcard_ && n.wildcard_)
+        return false; // wildcards never match
+     
+      if (wildcard_)
+        return ACE::wild_match(n.name_, name_, true, true);
+      
+      else if (n.wildcard_)
+        return ACE::wild_match(name_, n.name_, true, true);
+      
+      else
+        return ACE_OS::strcmp(name_, n.name_) == 0;
     }
 
-    // @todo Really slow (O(n^2)) search.  Optimize if partition name
-    //       sequences will potentially be very long.  If they remain
-    //       short, optimizing may be unnecessary or simply not worth
-    //       the trouble.
-    for (CORBA::ULong i = 0; i < pub_len; ++i)
-    {
-      char const * const pname = publisher_partitions[i];
+  private:
+    const char* name_;
+    bool wildcard_;
+  };
 
-      if (sub_len == 0 && *pname == 0)
-      {
-        // Attempt to match an explicitly specified empty string
-        // partition against the special zero length partition
-        // sequence.
+  bool
+  matches_name(const DDS::PartitionQosPolicy& qos, const PartitionName& name)
+  {
+    for (CORBA::ULong i = 0; i < qos.name.length(); ++i)    
+    {
+      PartitionName qos_name(qos.name[i]);
+      if (qos_name.matches(name))
         return true;
-      }
+    }
+    return false;
+  }
+  
+  bool
+  matches_default(const DDS::PartitionQosPolicy& qos)
+  {
+    if (qos.name.length() == 0)
+      return true; // default
 
-      bool const pub_is_wildcard = is_wildcard (pname);
+    for (CORBA::ULong i = 0; i < qos.name.length(); ++i)
+    {
+      if (*qos.name[i] == 0)
+        return true; // default (empty string)
+    }
+    return false;
+  }
 
-      for (CORBA::ULong j = 0; j < sub_len; ++j)
-      {
-        char const * const sname = subscriber_partitions[j];
+  bool
+  matching_partitions(const DDS::PartitionQosPolicy& pub,
+                      const DDS::PartitionQosPolicy& sub)
+  {
+    if (matches_default(pub))
+    { 
+      if (matches_default(sub))
+        return true;
 
-        bool const sub_is_wildcard = is_wildcard (sname);
-
-        if (pub_is_wildcard && sub_is_wildcard)
-          continue;
-
-        bool match = false;
-        if (pub_is_wildcard)
-          match = ACE::wild_match (sname, pname, true, true);
-        //                                       ^ case-sensitive
-        //                                             ^ use character classes
-        else if (sub_is_wildcard)
-          match = ACE::wild_match (pname, sname, true, true);
-        else
-          match = (ACE_OS::strcmp (pname, sname) == 0);
-
-        if (match)
-          return true;
-      }
+      // Zero-length sequences should be treated the same as a
+      // sequence of length 1 that contains an empty string:
+      if (pub.name.length() == 0)
+        return matches_name(sub, "");
     }
 
+    for (CORBA::ULong i = 0; i < pub.name.length(); ++i)
+    {
+      const char* name = pub.name[i];
+      if (matches_name(sub, name))
+        return true;
+    }
     return false;
   }
 }

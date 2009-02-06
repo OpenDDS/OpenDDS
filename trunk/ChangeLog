@@ -1,16 +1,24 @@
+Fri Feb  6 23:55:54 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/InfoRepo/DCPS_Utils.cpp:
+        * tests/DCPS/Partition/Partition_Table.h:
+
+          Fixed PARTITION matching logic to correctly match the zero
+          length sequence against an fnmatch expression.
+
 Fri Feb  6 22:26:58 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/SubscriberImpl.h:
         * dds/DCPS/SubscriberImpl.cpp:
 
-	  Added the ability to configure the Latency data collection
-	  parameters via the subscriber.  This avoids a race between
-	  configuring the readers and establishment of associations.
+          Added the ability to configure the Latency data collection
+          parameters via the subscriber.  This avoids a race between
+          configuring the readers and establishment of associations.
 
         * performance-tests/DCPS/Priority/Subscriber.cpp:
 
-	  Use the new Subscriber scope data collection configuration
-	  mechansim.
+          Use the new Subscriber scope data collection configuration
+          mechansim.
 
 Fri Feb  6 20:46:42 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
