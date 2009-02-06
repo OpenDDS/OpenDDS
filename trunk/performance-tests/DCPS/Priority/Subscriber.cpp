@@ -176,6 +176,20 @@ Subscriber::Subscriber( const Options& options)
     throw BadServantException();
   }
 
+  // Configure the raw data gathering.
+  servant->raw_latency_buffer_size() = this->options_.raw_buffer_size();
+  servant->raw_latency_buffer_type() = this->options_.raw_buffer_type();
+  if( this->options_.verbose()) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
+      ACE_TEXT("configured to capture %d latency measurements of type %d ")
+      ACE_TEXT("per writer to file %s.\n"),
+      this->options_.raw_buffer_size(),
+      this->options_.raw_buffer_type(),
+      this->options_.rawOutputFilename().c_str()
+    ));
+  }
+
   if( ::OpenDDS::DCPS::ATTACH_OK
    != servant->attach_transport( this->transport_.in())) {
     ACE_ERROR((LM_ERROR,
@@ -254,31 +268,6 @@ Subscriber::Subscriber( const Options& options)
   // configurably delay the start here to avoid edge effects.
   this->reader_->reset_latency_stats();
   this->reader_->statistics_enabled( true);
-
-  // Configure the raw data gathering.
-  OpenDDS::DCPS::DataReaderImpl* readerImpl
-    = dynamic_cast< OpenDDS::DCPS::DataReaderImpl*>( this->reader_.in());
-  if( readerImpl != 0) {
-    readerImpl->raw_latency_buffer_size() = this->options_.raw_buffer_size();
-    readerImpl->raw_latency_buffer_type() = this->options_.raw_buffer_type();
-    if( this->options_.verbose()) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
-        ACE_TEXT("configured to capture %d latency measurements of type %d ")
-        ACE_TEXT("per writer to file %s.\n"),
-        this->options_.raw_buffer_size(),
-        this->options_.raw_buffer_type(),
-        this->options_.rawOutputFilename().c_str()
-      ));
-    }
-
-  } else {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Subscriber::Subscriber() - ")
-      ACE_TEXT("failed to derive reader implementation.\n")
-    ));
-    throw BadReaderException();
-  }
 
   // Set the listener mask here so that we don't conflict with the
   // StatusCondition(s) that we want to wait on in the main thread.
