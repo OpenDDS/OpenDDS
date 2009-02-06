@@ -87,6 +87,48 @@ Test::Options::topicName()
 }
 
 ACE_INLINE
+std::string&
+Test::Options::rawOutputFilename()
+{
+  return this->rawOutputFilename_;
+}
+
+ACE_INLINE
+std::string
+Test::Options::rawOutputFilename() const
+{
+  return this->rawOutputFilename_;
+}
+
+ACE_INLINE
+unsigned int&
+Test::Options::raw_buffer_size()
+{
+  return this->raw_buffer_size_;
+}
+
+ACE_INLINE
+unsigned int
+Test::Options::raw_buffer_size() const
+{
+  return this->raw_buffer_size_;
+}
+
+ACE_INLINE
+OpenDDS::DCPS::DataCollector< double>::OnFull&
+Test::Options::raw_buffer_type()
+{
+  return this->raw_buffer_type_;
+}
+
+ACE_INLINE
+OpenDDS::DCPS::DataCollector< double>::OnFull
+Test::Options::raw_buffer_type() const
+{
+  return this->raw_buffer_type_;
+}
+
+ACE_INLINE
 const Test::Options::ProfileContainer&
 Test::Options::profiles() const
 {

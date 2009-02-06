@@ -11,6 +11,7 @@
 
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
+#include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
@@ -254,6 +255,31 @@ Subscriber::Subscriber( const Options& options)
   this->reader_->reset_latency_stats();
   this->reader_->statistics_enabled( true);
 
+  // Configure the raw data gathering.
+  OpenDDS::DCPS::DataReaderImpl* readerImpl
+    = dynamic_cast< OpenDDS::DCPS::DataReaderImpl*>( this->reader_.in());
+  if( readerImpl != 0) {
+    readerImpl->raw_latency_buffer_size() = this->options_.raw_buffer_size();
+    readerImpl->raw_latency_buffer_type() = this->options_.raw_buffer_type();
+    if( this->options_.verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
+        ACE_TEXT("configured to capture %d latency measurements of type %d ")
+        ACE_TEXT("per writer to file %s.\n"),
+        this->options_.raw_buffer_size(),
+        this->options_.raw_buffer_type(),
+        this->options_.rawOutputFilename().c_str()
+      ));
+    }
+
+  } else {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: Subscriber::Subscriber() - ")
+      ACE_TEXT("failed to derive reader implementation.\n")
+    ));
+    throw BadReaderException();
+  }
+
   // Set the listener mask here so that we don't conflict with the
   // StatusCondition(s) that we want to wait on in the main thread.
   this->reader_->set_listener( this->listener_, DDS::DATA_AVAILABLE_STATUS);
@@ -351,6 +377,35 @@ operator<<( std::ostream& str, const Subscriber& value)
     str << "    variance: " << statistics[ index].variance << std::endl;
   }
 
+  return str;
+}
+
+std::ostream&
+Subscriber::rawData( std::ostream& str) const
+{
+  // Configure the raw data gathering and extract the raw latency data
+  // container.
+  OpenDDS::DCPS::DataReaderImpl* readerImpl
+    = dynamic_cast< OpenDDS::DCPS::DataReaderImpl*>( this->reader_.in());
+  if( readerImpl == 0) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: Subscriber::Subscriber() - ")
+      ACE_TEXT("failed to derive reader implementation.\n")
+    ));
+    throw BadReaderException();
+  }
+
+  int index = 0;
+  for( OpenDDS::DCPS::DataReaderImpl::StatsMapType::const_iterator current
+         = readerImpl->raw_latency_statistics().begin();
+       current != readerImpl->raw_latency_statistics().end();
+       ++current, ++index) {
+    ::OpenDDS::DCPS::GuidConverter converter(
+      const_cast< ::OpenDDS::DCPS::RepoId*>( &current->first)
+    );
+    str << std::endl << "  Writer[ " << (const char*)converter << "]" << std::endl;
+    current->second.raw_data( str);
+  }
   return str;
 }
 

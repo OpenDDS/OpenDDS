@@ -88,10 +88,13 @@ namespace OpenDDS
       };
 
     /// Elements stored for managing statistical data.
-    class WriterStats {
+    class OpenDDS_Dcps_Export WriterStats {
       public:
         /// Default constructor.
-        WriterStats();
+        WriterStats(
+          int amount = 0,
+          DataCollector< double>::OnFull type = DataCollector< double>::KeepOldest
+        );
 
         /// Add a datum to the latency statistics.
         void add_stat( const ACE_Time_Value& delay);
@@ -101,6 +104,9 @@ namespace OpenDDS
 
         /// Reset the latency statistics for this writer.
         void reset_stats();
+
+        /// Dump any raw data.
+        std::ostream& raw_data( std::ostream& str) const;
 
       private:
         /// Latency statistics for the DataWriter to this DataReader.
@@ -132,6 +138,9 @@ namespace OpenDDS
       typedef std::map<
         ::DDS::InstanceHandle_t,
         SubscriptionInstance*> SubscriptionInstanceMapType;
+
+      /// Type of collection of statistics for writers to this reader.
+      typedef std::map< PublicationId, WriterStats, GUID_tKeyLessThan> StatsMapType;
 
       //Constructor
       DataReaderImpl (void);
@@ -387,6 +396,20 @@ namespace OpenDDS
           ::CORBA::SystemException
         ));
 
+      /// @name Raw Latency Statistics Interfaces
+      /// @{
+
+      /// Expose the statistics container.
+      const StatsMapType& raw_latency_statistics() const;
+
+      /// Configure the size of the raw data collection buffer.
+      unsigned int& raw_latency_buffer_size();
+
+      /// Configure the type of the raw data collection buffer.
+      DataCollector< double>::OnFull& raw_latency_buffer_type();
+
+      /// @}
+
       /// update liveliness info for this writer.
       void writer_activity(PublicationId writer_id);
 
@@ -618,14 +641,18 @@ namespace OpenDDS
       /// Flag indicating status of statistics gathering.
       bool statistics_enabled_;
 
-      typedef std::map< PublicationId, WriterInfo,  GUID_tKeyLessThan> WriterMapType;
-      typedef std::map< PublicationId, WriterStats, GUID_tKeyLessThan> StatsMapType;
-
       /// publications writing to this reader.
+      typedef std::map< PublicationId, WriterInfo,  GUID_tKeyLessThan> WriterMapType;
       WriterMapType writers_;
 
       /// Statistics for this reader, collected for each writer.
       StatsMapType statistics_;
+
+      /// Bound (or initial reservation) of raw latency buffer.
+      unsigned int raw_latency_buffer_size_;
+
+      /// Type of raw latency data buffer.
+      DataCollector< double>::OnFull raw_latency_buffer_type_;
 
       typedef
         std::set< ::DDS::ReadCondition_var, VarLess< ::DDS::ReadCondition > >

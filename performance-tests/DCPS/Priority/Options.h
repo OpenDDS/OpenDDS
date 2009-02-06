@@ -13,6 +13,9 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include /**/ "ace/OS.h"
+
+#include "dds/DCPS/DataCollector_T.h"
+
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -142,6 +145,18 @@ class Options  {
     protected: std::string& topicName();
     public:    std::string topicName() const;
 
+    /// Raw data output file.
+    protected: std::string& rawOutputFilename();
+    public:    std::string  rawOutputFilename() const;
+
+    /// Raw latency data buffer size.
+    protected: unsigned int& raw_buffer_size();
+    public:    unsigned int  raw_buffer_size() const;
+
+    /// Raw latency data buffer type.
+    protected: OpenDDS::DCPS::DataCollector< double>::OnFull& raw_buffer_type();
+    public:    OpenDDS::DCPS::DataCollector< double>::OnFull  raw_buffer_type() const;
+
     /// Publication profile container.
     const ProfileContainer& profiles() const;
 
@@ -169,6 +184,15 @@ class Options  {
 
     /// Topic name for test.
     std::string topicName_;
+
+    /// Raw data output file.
+    std::string rawOutputFilename_;
+
+    /// Raw latency data buffer size.
+    unsigned int raw_buffer_size_;
+
+    /// Raw latency data buffer type.
+    OpenDDS::DCPS::DataCollector< double>::OnFull raw_buffer_type_;
 
     /// PublicationProfile container.
     ProfileContainer publicationProfiles_;
