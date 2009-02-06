@@ -1,0 +1,39 @@
+
+project(DDS*idl): dcps {
+  // This project ensures the common components get built first.
+
+  TypeSupport_Files {
+    Messenger.idl
+  }
+
+  custom_only = 1
+}
+
+
+project(DDS*Publisher) : dcpsexe {
+  exename = publisher
+  after  += DDS*idl
+
+  TypeSupport_Files {
+    Messenger.idl
+  }
+
+  Source_Files {
+    publisher.cpp
+    Writer.cpp
+  }
+}
+
+project(DDS*Subscriber) : dcpsexe {
+  exename = subscriber
+  after  += DDS*idl
+
+  TypeSupport_Files {
+    Messenger.idl
+  }
+
+  Source_Files {
+    subscriber.cpp
+    DataReaderListener.cpp
+  }
+}
