@@ -8,16 +8,24 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include "DataCollector_T.h"
+
+namespace OpenDDS { namespace DCPS {
+
 /**
  * @class Stats< DataType>
  *
  * @brief Accumulates average, n, variance, minimum, and maximum statistics
  */
 template< typename DataType>
-class Stats {
+class Stats : public DataCollector< DataType> {
   public:
     /// Default constructor.
-    Stats();
+    Stats(
+      unsigned int amount = 0,
+      typename DataCollector< DataType>::OnFull type
+        = DataCollector< DataType>::OnFull::KeepOldest
+    );
 
     /// Default bitwise copy is sufficient.
 
@@ -63,7 +71,10 @@ class Stats {
 
 template< typename DataType>
 inline
-Stats<DataType>::Stats()
+Stats<DataType>::Stats(
+  unsigned int amount,
+  typename DataCollector< DataType>::OnFull type
+) : DataCollector< DataType>( amount, type)
 {
   this->reset();
 }
@@ -102,6 +113,9 @@ inline
 void
 Stats<DataType>::add( DataType value)
 {
+  // Save the raw value if configured to.
+  this->collect( value);
+
   // Slide rule style calculations.
   long double term;
 
@@ -225,6 +239,8 @@ Stats<DataType>::n() const
 {
   return this->n_;
 }
+
+}} // End of namespace OpenDDS::DCPS
 
 #endif // OPENDDS_DCPS_STATS_T_H
 

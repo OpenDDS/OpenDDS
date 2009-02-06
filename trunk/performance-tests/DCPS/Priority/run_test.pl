@@ -25,6 +25,7 @@ my $help;
 my $verbose;
 my $orbVerbose;
 my $dFile;
+my $rawData;
 my $transportDebug;
 my $repoDebug;
 my $noaction;
@@ -51,6 +52,7 @@ GetOptions( "verbose!"            => \$verbose,
             "rdebug|R=i"          => \$repoDebug,
             "noaction|x"          => \$noaction,
             "dfile|f=s"           => \$dFile,
+            "rawdatafile|r=s"     => \$rawData,
             "transport|t=s"       => \$transportType,
             "duration|c=i"        => \$duration,
             "publishers|p=i"      => \$pubCount,
@@ -64,6 +66,7 @@ pod2usage( -verbose => 2) if $man ;
 
 # Verbosity.
 print "ScenarioFile==$scenarioFile\n"     if $verbose;
+print "RawDataFile==$rawData\n"           if $verbose;
 print "Publishers==$pubCount\n"           if $verbose;
 
 print "Debug==$debug\n"                   if $verbose and $debug;
@@ -130,6 +133,7 @@ if( PerlACE::is_vxworks_test()) {
 my $subArgs = "$appOpts ";
 $subArgs .= "-DCPSInfoRepo file://$repo_ior ";
 $subArgs .= "-t $transportType ";
+$subArgs .= "-r $rawData " if $rawData;
 $subArgs .= "-i 0 ";
 if( PerlACE::is_vxworks_test()) {
   $SUB = new PerlACE::ProcessVX( "subscriber", $subArgs);
@@ -276,6 +280,9 @@ Options:
                          number of publisher processes to start during testing
                          default is 1
 
+  -r FILE | --rawdatafile FILE
+                         file to write collected data to at end of test
+
   -s FILE | --scenario FILE
                          file to read scenario configuration data from
 
@@ -361,6 +368,13 @@ The default value is 60 seconds.
 Number of publisher processes to start for testing.
 
 The default value is 1.
+
+=item B<-r FILE> | B<--rawdatafile=FILE>
+
+Raw data output filename.  This file is where any raw latency data
+collected during the test will be written.
+
+There is no default value, so no data will be reported by default.
 
 =item B<-s FILE> | B<--scenario=FILE>
 

@@ -39,7 +39,26 @@ OpenDDS::DCPS::WriterInfo::received_activity (const ACE_Time_Value& when)
   return 1;
 }
 
+ACE_INLINE
+const OpenDDS::DCPS::DataReaderImpl::StatsMapType&
+OpenDDS::DCPS::DataReaderImpl::raw_latency_statistics() const
+{
+  return this->statistics_;
+}
 
+ACE_INLINE
+unsigned int&
+OpenDDS::DCPS::DataReaderImpl::raw_latency_buffer_size()
+{
+  return this->raw_latency_buffer_size_;
+}
+
+ACE_INLINE
+OpenDDS::DCPS::DataCollector< double>::OnFull&
+OpenDDS::DCPS::DataReaderImpl::raw_latency_buffer_type()
+{
+  return this->raw_latency_buffer_type_;
+}
  
 
 

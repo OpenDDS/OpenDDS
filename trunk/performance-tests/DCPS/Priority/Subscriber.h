@@ -40,6 +40,9 @@ class Subscriber {
     /// Priority of  writers.
     const std::map< long, long>& priorities() const;
 
+    /// Format and dump raw data to a stream.
+    std::ostream& rawData( std::ostream& str) const;
+
     /// Stream out statistics values.
     friend std::ostream& operator<<( std::ostream& str, const Subscriber& value);
 

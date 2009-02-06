@@ -66,7 +66,9 @@ DataReaderImpl::DataReaderImpl (void) :
   is_bit_ (false),
   initialized_ (false),
   always_get_history_ (false),
-  statistics_enabled_( false)
+  statistics_enabled_( false),
+  raw_latency_buffer_size_( 0),
+  raw_latency_buffer_type_( DataCollector< double>::KeepOldest)
 {
   CORBA::ORB_var orb = TheServiceParticipant->get_ORB ();
   reactor_ = orb->orb_core()->reactor();
@@ -263,7 +265,13 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
         )
       );
       this->statistics_.insert(
-        StatsMapType::value_type( writer_id, WriterStats())
+        StatsMapType::value_type(
+          writer_id,
+          WriterStats(
+            this->raw_latency_buffer_size_,
+            this->raw_latency_buffer_type_
+          )
+        )
       );
       if( DCPS_debug_level > 4) {
         ::OpenDDS::DCPS::GuidConverter converter( writer_id);
@@ -1570,7 +1578,10 @@ void OpenDDS::DCPS::WriterInfo::removed ()
   reader_->writer_removed (writer_id_, this->state_);
 }
 
-OpenDDS::DCPS::WriterStats::WriterStats()
+OpenDDS::DCPS::WriterStats::WriterStats(
+  int amount,
+  DataCollector< double>::OnFull type
+) : stats_( amount, type)
 {
 }
 
@@ -1598,6 +1609,12 @@ OpenDDS::DCPS::LatencyStatistics OpenDDS::DCPS::WriterStats::get_stats() const
 void OpenDDS::DCPS::WriterStats::reset_stats()
 {
   this->stats_.reset();
+}
+
+std::ostream& OpenDDS::DCPS::WriterStats::raw_data( std::ostream& str) const
+{
+  str << this->stats_.size() << " samples out of " << this->stats_.n() << std::endl;
+  return str << this->stats_;
 }
 
 void
