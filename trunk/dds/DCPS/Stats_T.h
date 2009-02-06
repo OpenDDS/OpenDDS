@@ -24,7 +24,7 @@ class Stats : public DataCollector< DataType> {
     Stats(
       unsigned int amount = 0,
       typename DataCollector< DataType>::OnFull type
-        = DataCollector< DataType>::OnFull::KeepOldest
+        = DataCollector< DataType>::KeepOldest
     );
 
     /// Default bitwise copy is sufficient.
