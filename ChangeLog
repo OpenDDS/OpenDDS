@@ -1,25 +1,31 @@
+Fri Feb  6 20:46:42 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/Stats_T.h:
+
+          Fixed scoping issue.
+
 Fri Feb  6 15:47:29 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DataCollector_T.h:
         * dds/DCPS/DataCollector_T.inl:
         * dds/DCPS/DataCollector_T.cpp:
 
-	  New data collection implementation.
+          New data collection implementation.
 
         * dds/DCPS/Stats_T.h:
 
-	  Added data collection implementation as a base class.  Moved
-	  this to within the OpenDDS::DCPS namespace.
+          Added data collection implementation as a base class.  Moved
+          this to within the OpenDDS::DCPS namespace.
 
         * dds/DCPS/DataReaderImpl.h:
         * dds/DCPS/DataReaderImpl.inl:
         * dds/DCPS/DataReaderImpl.cpp:
 
-	  Added configuration of data collection implementation and
-	  exposed the statistical information via C++ interface to allow
-	  gathering raw latency data.  Defaults all result in no data
-	  being collected, so there should be no impact to code that does
-	  not explicitly enable the feature.
+          Added configuration of data collection implementation and
+          exposed the statistical information via C++ interface to allow
+          gathering raw latency data.  Defaults all result in no data
+          being collected, so there should be no impact to code that does
+          not explicitly enable the feature.
 
         * performance-tests/DCPS/Priority/Options.h:
         * performance-tests/DCPS/Priority/Options.inl:
@@ -29,13 +35,13 @@ Fri Feb  6 15:47:29 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
         * performance-tests/DCPS/Priority/run_test.pl:
         * performance-tests/DCPS/Priority/subscriber_main.cpp:
 
-	  Updated to configure data collection and produce raw data
-	  output when requested.
+          Updated to configure data collection and produce raw data
+          output when requested.
 
         * tests/DCPS/Priority/Options.h:
 
-	  Moved includes before the conditional use of 'pragma once'
-	  to avoid compiler complaints.
+          Moved includes before the conditional use of 'pragma once'
+          to avoid compiler complaints.
 
 Wed Feb  4 00:04:09 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
