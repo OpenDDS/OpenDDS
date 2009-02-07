@@ -34,9 +34,9 @@ erl_identifier::erl_identifier(UTL_ScopedName *name)
   while (!it.is_done())
   {
     Identifier* item = it.item();
+    it.next(); // advance iterator
       
     str_ += item->get_string();
-    it.next(); // advance iterator
 
     if (!it.is_done())
       str_ += sep;
