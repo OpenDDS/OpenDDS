@@ -23,13 +23,13 @@ repo_identifier::repo_identifier(UTL_ScopedName* name)
   while (!it.is_done())
   {
     Identifier* item = it.item();
+    it.next(); // advance iterator
   
     string s(item->get_string());
-    it.next(); // advance iterator
-
     if (s.empty()) continue;
       
     os << s;
+
     if (!it.is_done())
       os << '/';
   }
