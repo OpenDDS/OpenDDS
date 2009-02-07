@@ -28,8 +28,9 @@ sub get_filenames {
   my $name = $self->get_scoped_name(@scope);
   my @filenames;
 
-  if ($type eq 'const' or $type eq 'enum') {
-    push @filenames, $self->get_src_file($name);
+  push @filenames, $self->get_src_file($name);
+  if ($type eq 'struct') {
+    push @filenames, $self->get_include_file($name);
   }
   
   return @filenames; 
@@ -98,6 +99,14 @@ sub get_src_file {
 
   my $dir = $self->get_output_dir("src");
   return $dir . $name . ".erl";
+}
+
+sub get_include_file {
+  my $self = shift;
+  my($name) = @_;
+
+  my $dir = $self->get_output_dir("include");
+  return $dir . $name . ".hrl";
 }
 
 1;

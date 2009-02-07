@@ -10,13 +10,15 @@
 class generator_erl : public generator
 {
 public:
-  generator_erl(void);
+  generator_erl();
 
-  ~generator_erl(void);
+  ~generator_erl();
 
   bool generate_constant(AST_Constant* node);
 
-  bool generate_enum(AST_Enum* node, std::vector<AST_EnumVal*>& values);
+  bool generate_enum(AST_Enum* node, std::vector<AST_EnumVal*>& v);
+
+  bool generate_structure(AST_Structure* node, std::vector<AST_Field*>& v);
 };
 
 #endif /* TAO_IC_GENERATOR_ERL_H */

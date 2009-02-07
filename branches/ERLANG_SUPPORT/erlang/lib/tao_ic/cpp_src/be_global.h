@@ -10,46 +10,49 @@
 class BE_GlobalData
 {
 public:
-  BE_GlobalData(void);
+  BE_GlobalData();
 
-  ~BE_GlobalData(void);
+  ~BE_GlobalData();
 
-  void destroy(void);
+  void destroy();
 
   void parse_args(long& ac, char** av);
 
   void prep_be_arg(char* s);
 
-  void arg_post_proc(void);
+  void arg_post_proc();
 
-  void usage(void) const;
+  void usage() const;
 
-  AST_Generator *generator_init(void);
+  AST_Generator *generator_init();
 
   void get_include_dir(std::string& s) const;
 
   void get_src_dir(std::string& s) const;
 
   void get_cpp_src_dir(std::string& s) const;
+  
+  void get_output_dir(std::string& s, const char* dirname) const;
 
-  std::string output_dir(void) const;
+  std::string output_dir() const;
 
-  bool output_otp(void) const;
+  bool output_otp() const;
 
-  std::string port_driver_name(void) const;
+  std::string port_driver_name() const;
 
-  std::string skel_export_include(void) const;
+  std::string skel_export_include() const;
 
-  std::string skel_export_macro(void) const;
+  std::string skel_export_macro() const;
 
-  std::string stub_export_include(void) const;
+  std::string stub_export_include() const;
 
-  std::string stub_export_macro(void) const;
+  std::string stub_export_macro() const;
 
-  bool suppress_skel(void) const;
+  bool suppress_skel() const;
 
 private:
   std::string output_dir_;
+
   bool output_otp_;
 
   std::string port_driver_name_;
@@ -61,8 +64,6 @@ private:
   std::string stub_export_macro_;
 
   bool suppress_skel_;
-
-  void get_output_dir(std::string& s, const char* dirname) const;
 };
 
 #endif /* TAO_IC_BE_GLOBAL_H */
