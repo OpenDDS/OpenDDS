@@ -1,0 +1,14 @@
+//
+// $Id$
+//
+
+module foo {
+  struct struct_ {
+    long x;
+  };
+
+  struct struct_nested_ {
+    string s;
+    struct_ t;
+  };
+};
