@@ -10,9 +10,9 @@
 class generator_cpp : public generator
 {
 public:
-  generator_cpp(void);
+  generator_cpp();
 
-  ~generator_cpp(void);
+  ~generator_cpp();
 };
 
 #endif /* TAO_IC_GENERATOR_CPP_H */

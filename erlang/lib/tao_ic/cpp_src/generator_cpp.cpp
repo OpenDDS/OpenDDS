@@ -7,7 +7,9 @@
 using namespace std;
 
 generator_cpp::generator_cpp()
-{}
+{
+}
 
 generator_cpp::~generator_cpp()
-{}
+{
+}
