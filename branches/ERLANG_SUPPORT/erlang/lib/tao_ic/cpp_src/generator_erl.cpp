@@ -19,6 +19,7 @@ generator_erl::~generator_erl()
 bool
 generator_erl::generate_constant(AST_Constant* node)
 {
+  // Generate module (.erl)
   erl_module module(node->name());
 
   module.add_export("value/0");
@@ -34,9 +35,10 @@ generator_erl::generate_constant(AST_Constant* node)
 bool
 generator_erl::generate_enum(AST_Enum* node, vector<AST_EnumVal*>& v)
 {
+  // Generate module (.erl)
   erl_module module(node->name());
 
-  // Generate exports (arity always 0)
+  /// Generate exports (arity always 0)
   for (vector<AST_EnumVal*>::iterator it(v.begin()); it != v.end(); ++it)
   {
     module.add_export((*it)->local_name(), 0);
@@ -48,7 +50,7 @@ generator_erl::generate_enum(AST_Enum* node, vector<AST_EnumVal*>& v)
   ostream& os = module.open_stream();
   if (!os) return false; // bad stream
 
-  // Generate functions
+  /// Generate functions
   for (vector<AST_EnumVal*>::iterator it(v.begin()); it != v.end(); ++it)
   {
     os << erl_identifier((*it)->local_name()) << "() -> {?MODULE, " <<
@@ -94,15 +96,15 @@ generator_erl::generate_structure(AST_Structure* node, vector<AST_Field*>& v)
     ostream& os = module.open_stream();
     if (!os) return false; // bad stream
 
-    // Generate repository identifier (id/0)
+    /// Generate repository identifier (id/0)
     os << "id() -> \"" << repo_identifier(node->name()) << "\"." << endl
        << endl; // empty line
 
-    // Generate default ctor (new/0)
+    /// Generate default ctor (new/0)
     os << "new() -> #" << module << "{}." << endl
        << endl; // empty line
 
-    // Generate parameterized ctor (new/N)
+    /// Generate parameterized ctor (new/N)
     os << "new(" << fields.as_param_list() << ") -> #" << module <<
           "{" << fields.as_init_list() << "}." << endl;
   }
