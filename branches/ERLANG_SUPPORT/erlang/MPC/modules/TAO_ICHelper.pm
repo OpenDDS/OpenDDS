@@ -28,6 +28,16 @@ sub get_filenames {
   my $name = $self->get_scoped_name(@scope);
   my @filenames;
 
+  #
+  # TODO Temporary hack until all types are supported
+  #
+  if ($type ne 'const' and
+      $type ne 'enum' and
+      $type ne 'struct') {
+    
+    return @filenames; # ignore type
+  }
+  
   push @filenames, $self->get_src_file($name);
   if ($type eq 'struct') {
     push @filenames, $self->get_include_file($name);
