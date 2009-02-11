@@ -1,10 +1,10 @@
 // -*- C++ -*-
 // $Id$
 
+#include "Subscriber.h"
 #include "Test.h"
 #include "Options.h"
 #include "Commas.h"
-#include "Subscriber.h"
 #include "dds/DCPS/Service_Participant.h"
 
 #include <iomanip>

@@ -110,7 +110,6 @@ class Options  {
       MC,       // SimpleUnreliableMcast
       RMC       // ReliableMulticast
     };
-    friend std::ostream& operator<<( std::ostream& str, TransportType value);
 
     /// Container type for publication profiles.
     typedef std::vector< PublicationProfile*> ProfileContainer;
@@ -199,6 +198,8 @@ class Options  {
 };
 
 } // End of namespace Test
+
+std::ostream& operator<<(std::ostream& str, Test::Options::TransportType value);
 
 #if defined (__ACE_INLINE__)
 # include "Options.inl"

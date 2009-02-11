@@ -1,9 +1,9 @@
 // -*- C++ -*-
 // $Id$
 
+#include "Publisher.h"
 #include "Test.h"
 #include "Options.h"
-#include "Publisher.h"
 #include "dds/DCPS/Service_Participant.h"
 
 #include <sstream>
