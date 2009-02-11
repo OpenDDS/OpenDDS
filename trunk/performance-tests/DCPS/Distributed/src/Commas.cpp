@@ -13,7 +13,7 @@ Commas::operator()( std::ostream& str) const
   short triples[ 8]; // Large enough to hold 64 bit values.
   short index = 0;
   for( long value = this->value_; value != 0; value /= 1000) {
-    triples[ index++] = static_cast<short>( value % 1000);
+    triples[ index++] = value % 1000;
   }
 
   char original = str.fill(' ');

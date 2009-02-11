@@ -1,3 +1,16 @@
+Wed Feb 11 20:13:01 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/DCPS/Distributed:
+
+	  Added new test directory to hold distributed testing support.
+	  Initially this will be used to support RT12484.
+
+        * performance-tests/DCPS/Priority/Commas.h:
+        * performance-tests/DCPS/Priority/Commas.cpp:
+
+	  Corrected an obsolete pragma and type conversion complaint from
+	  some compilers.
+
 Wed Feb 11 19:49:23 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/native/org_opendds_jms_DCPSInfoRepo.cpp:
