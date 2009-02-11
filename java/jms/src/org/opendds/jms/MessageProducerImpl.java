@@ -22,6 +22,7 @@ import OpenDDS.JMS.MessagePayloadDataWriter;
 
 import org.opendds.jms.common.lang.Objects;
 import org.opendds.jms.common.lang.Strings;
+import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.qos.QosPolicies;
 
 /**
@@ -29,6 +30,7 @@ import org.opendds.jms.qos.QosPolicies;
  * @version $Revision$
  */
 public class MessageProducerImpl implements MessageProducer {
+    private Logger logger;
     private SessionImpl session;
     private Destination destination;
     private boolean disableMessageID;
@@ -45,6 +47,7 @@ public class MessageProducerImpl implements MessageProducer {
 
     public MessageProducerImpl(SessionImpl session, Destination destination) throws JMSException {
         this.session = session;
+        this.logger = session.getOwningConnection().getLogger();
         this.destination = destination;
 
         initProducer();
@@ -223,6 +226,9 @@ public class MessageProducerImpl implements MessageProducer {
 
     public void close() throws JMSException {
         if (closed) return;
+
+        logger.debug("Closing %s", this);
+
         if (dataWriterPair != null) {
             dataWriterPair.destroy();
         } else {
