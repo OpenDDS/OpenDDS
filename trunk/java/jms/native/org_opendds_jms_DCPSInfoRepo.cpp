@@ -24,15 +24,16 @@ namespace
 {
 struct InitGuard
 {
-InitGuard()
-{
-  ACE::init();
-}
+  InitGuard()
+  {
+    ACE::init();
+  }
 
-~InitGuard()
-{
-  ACE::fini();
-}
+  ~InitGuard()
+  {
+    ACE::fini();
+  }
+  
 } init_guard;
 
 jfieldID
