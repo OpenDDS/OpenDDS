@@ -54,6 +54,7 @@ import org.opendds.jms.qos.QosPolicies;
  * @version $Revision$
  */
 public class MessageConsumerImpl implements MessageConsumer {
+    private Logger logger;
     protected ConnectionImpl connection;
     private Destination destination;
     private String messageSelector;
@@ -83,6 +84,8 @@ public class MessageConsumerImpl implements MessageConsumer {
         this.messageSelector = messageSelector;
         this.connection = sessionImpl.getOwningConnection();
 
+        this.logger = connection.getLogger();
+
         if (noLocal) {
             subscriber = connection.getRemoteSubscriber();
         } else {
@@ -105,7 +108,6 @@ public class MessageConsumerImpl implements MessageConsumer {
     }
 
     private MessagePayloadDataReader fromDestination(Destination destination, Subscriber subscriber) throws JMSException {
-        Logger logger = sessionImpl.getOwningConnection().getLogger();
         DDS.Topic ddsTopic = extractDDSTopicFromDestination(destination);
         DataReaderQosPolicy dataReaderQosPolicy = ((TopicImpl) destination).getDataReaderQosPolicy();
 
@@ -253,6 +255,9 @@ public class MessageConsumerImpl implements MessageConsumer {
 
     public void close() throws JMSException {
         if (closed) return;
+
+        logger.debug("Closing %s", this);
+
         if (messagePayloadDataReader != null) {
             closeToken.set_trigger_value(true);
             subscriber.delete_datareader(messagePayloadDataReader);

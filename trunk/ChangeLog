@@ -1,3 +1,18 @@
+Wed Feb 11 19:49:23 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/native/org_opendds_jms_DCPSInfoRepo.cpp:
+
+          Updated to new DDS code standards.
+
+        * java/jms/src/org/opendds/jms/ConnectionFactoryImpl.java:
+        * java/jms/src/org/opendds/jms/MessageConsumerImpl.java:
+        * java/jms/src/org/opendds/jms/MessageProducerImpl.java:
+        * java/jms/src/org/opendds/jms/SessionImpl.java:
+        * java/jms/src/org/opendds/jms/resource/ManagedConnectionFactoryImpl.java:
+        * java/jms/src/org/opendds/jms/resource/ResourceAdapterImpl.java:
+
+          Added additional debug logging.
+
 Wed Feb 11 18:35:38 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * performance-tests/DCPS/Priority/Options.h:

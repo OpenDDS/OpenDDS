@@ -21,6 +21,7 @@ import org.opendds.jms.ConnectionFactoryImpl;
 import org.opendds.jms.common.lang.Objects;
 import org.opendds.jms.common.lang.Strings;
 import org.opendds.jms.common.util.JndiHelper;
+import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.persistence.PersistenceManager;
 import org.opendds.jms.qos.ParticipantQosPolicy;
 import org.opendds.jms.qos.PublisherQosPolicy;
@@ -32,6 +33,8 @@ import org.opendds.jms.transport.TransportFactory;
  * @version $Revision$
  */
 public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
+    private static Logger logger = Logger.getLogger(ManagedConnectionFactoryImpl.class);
+
     private String clientID;
     private Integer domainID;
     private String participantQosPolicy;
@@ -113,7 +116,7 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
     public void setPersistenceManager(String persistenceManager) {
         this.persistenceManager = persistenceManager;
     }
-    
+
     public PrintWriter getLogWriter() {
         return null; // logging disabled
     }
@@ -157,7 +160,10 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
                 new TransportFactory(transportType, subscriberTransport),
                 persistenceManager);
 
-        return new ConnectionFactoryImpl(this, cxManager, cxRequestInfo);
+        Object mcf = new ConnectionFactoryImpl(this, cxManager, cxRequestInfo);
+        logger.debug("Created %s", mcf);
+
+        return mcf;
     }
 
     public ManagedConnection createManagedConnection(Subject subject,
@@ -166,7 +172,11 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
         if (!(cxRequestInfo instanceof ConnectionRequestInfoImpl)) {
             throw new IllegalArgumentException();
         }
-        return new ManagedConnectionImpl(subject, (ConnectionRequestInfoImpl) cxRequestInfo);
+
+        ManagedConnection mc = new ManagedConnectionImpl(subject, (ConnectionRequestInfoImpl) cxRequestInfo);
+        logger.debug("Created %s", mc);
+
+        return mc;
     }
 
     public ManagedConnection matchManagedConnections(Set connectionSet,
