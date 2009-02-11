@@ -22,9 +22,8 @@
 
 namespace
 {
-class InitGuard
+struct InitGuard
 {
-public:
 InitGuard()
 {
   ACE::init();
