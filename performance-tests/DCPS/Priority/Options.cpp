@@ -342,6 +342,8 @@ Options::configureScenarios( const char* filename)
   }
 }
 
+} // End of namespace Test
+
 std::ostream&
 operator<<( std::ostream& str, Test::Options::TransportType value)
 {
@@ -356,5 +358,4 @@ operator<<( std::ostream& str, Test::Options::TransportType value)
   }
 }
 
-} // End of namespace Test
 
