@@ -234,6 +234,12 @@ namespace OpenDDS
       DataSampleList get_sent_data() ;
 
       /**
+       * Returns if pending data exists.  This includes released,
+       * sending, and unsent data.
+       */
+      bool pending_data();
+
+      /**
        * Acknowledge the delivery of data.  The sample that resides in
        * this container will be moved from sending_data_ list to the
        * internal sent_data_ list or released from the released_data_
@@ -304,6 +310,12 @@ namespace OpenDDS
 
       // Reset time interval for each instance.
       void reschedule_deadline ();
+
+      /**
+       * Block until pending samples have either been delivered
+       * or dropped.
+       */
+      void wait_pending();
 
     private:
 
@@ -405,6 +417,7 @@ namespace OpenDDS
       /// operations will not lock.
       ACE_Recursive_Thread_Mutex                lock_;
       ACE_Condition<ACE_Recursive_Thread_Mutex> condition_;
+      ACE_Condition<ACE_Recursive_Thread_Mutex> empty_condition_;
 
       /// The number of chunks that sample_list_element_allocator_
       /// needs initialize.

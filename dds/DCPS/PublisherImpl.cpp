@@ -306,10 +306,13 @@ PublisherImpl::delete_datawriter (::DDS::DataWriter_ptr a_datawriter)
     ACE_GUARD_RETURN (reverse_lock_type, reverse_monitor, this->reverse_pi_lock_, 
                       ::DDS::RETCODE_ERROR);
 
+    // Wait for pending samples to drain prior to removing associations
+    // and unregistering the publication.
+    dw_servant->wait_pending();
+
     // Call remove association before unregistering the datawriter
     // with the transport, otherwise some callbacks resulted from
     // remove_association may lost.
-
     dw_servant->remove_all_associations();
 
 

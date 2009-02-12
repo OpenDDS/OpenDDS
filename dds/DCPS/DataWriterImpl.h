@@ -358,6 +358,9 @@ namespace OpenDDS
       // Reset time interval for each instance.
       void reschedule_deadline ();
 
+      /// Wait for pending samples to drain.
+      void wait_pending();
+
     protected:
 
       /**

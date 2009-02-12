@@ -17,6 +17,7 @@
 
 #include "ace/Task.h"
 #include "ace/Configuration.h"
+#include "ace/Time_Value.h"
 
 #include <map>
 #include <memory>
@@ -250,6 +251,9 @@ namespace OpenDDS
       int& scheduler();
       int  scheduler() const;
       //@}
+
+      /// Accessor for pending data timeout.
+      ACE_Time_Value pending_timeout() const;
 
       /// Accessors for priority extremums for the current scheduler.
       //@{
@@ -487,6 +491,10 @@ namespace OpenDDS
 
       /// The @c PERSISTENT data durability directory.
       ACE_CString persistent_data_dir_;
+
+      /// Number of seconds to wait on pending samples to be sent
+      /// or dropped.
+      ACE_Time_Value pending_timeout_;
     };
 
 #   define TheServiceParticipant OpenDDS::DCPS::Service_Participant::instance()
