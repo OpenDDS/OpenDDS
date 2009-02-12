@@ -34,6 +34,9 @@ New to this version are the following changes:
 
 - The PARTITION QoS policy now accepts character class wildcards using [].
 
+- Corrected a bug in the PARTITION QoS implementation where the default
+  QoS would not match against the '*' wildcard.
+
 - The DURABILITY QoS implementation was corrected so that readers requesting
   the VOLATLIE kind will not receive historic samples from writers.  Since
   there were some use-cases for the old behavior, it is available through an
