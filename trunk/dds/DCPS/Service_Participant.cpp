@@ -91,7 +91,8 @@ namespace OpenDDS
       priority_max_( 0),
       transient_data_cache_ (),
       persistent_data_cache_ (),
-      persistent_data_dir_ (DEFAULT_PERSISTENT_DATA_DIR)
+      persistent_data_dir_ (DEFAULT_PERSISTENT_DATA_DIR),
+      pending_timeout_(0)
     {
       initialize();
     }
@@ -460,6 +461,11 @@ namespace OpenDDS
             {
               this->persistent_data_dir_ = ACE_TEXT_ALWAYS_CHAR(currentArg);
               arg_shifter.consume_arg ();
+            }
+          else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSPendingTimeout"))) != 0)
+            {
+              this->pending_timeout_ = ACE_OS::atoi(currentArg);
+              arg_shifter.consume_arg();
             }
           else
             {

@@ -1,15 +1,31 @@
+Thu Feb 12 19:45:38 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Changed delete_datawriter behavior to wait for pending samples
+          to drain before removing associations.  The timeout may be
+          controlled with the -DCPSPendingTimeout which takes an interval
+          in seconds as its argument.
+
 Wed Feb 11 20:13:01 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/DCPS/Distributed:
 
-	  Added new test directory to hold distributed testing support.
-	  Initially this will be used to support RT12484.
+          Added new test directory to hold distributed testing support.
+          Initially this will be used to support RT12484.
 
         * performance-tests/DCPS/Priority/Commas.h:
         * performance-tests/DCPS/Priority/Commas.cpp:
 
-	  Corrected an obsolete pragma and type conversion complaint from
-	  some compilers.
+          Corrected an obsolete pragma and type conversion complaint from
+          some compilers.
 
 Wed Feb 11 19:49:23 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 

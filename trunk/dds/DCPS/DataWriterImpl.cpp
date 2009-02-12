@@ -1954,7 +1954,6 @@ DataWriterImpl::persist_data ()
   return this->data_container_->persist_data ();
 }
 
-
 void 
 DataWriterImpl::reschedule_deadline ()
 {
@@ -1964,6 +1963,11 @@ DataWriterImpl::reschedule_deadline ()
   }
 }
 
+void
+DataWriterImpl::wait_pending()
+{
+  this->data_container_->wait_pending();
+}
 
 } // namespace DCPS
 } // namespace OpenDDS

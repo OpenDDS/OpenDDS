@@ -286,6 +286,13 @@ namespace OpenDDS
     }
 
     ACE_INLINE
+    ACE_Time_Value
+    Service_Participant::pending_timeout() const
+    {
+      return this->pending_timeout_;
+    }
+
+    ACE_INLINE
     int
     Service_Participant::priority_min() const
     {
