@@ -51,6 +51,11 @@ New to this version are the following changes:
 - The $DDS_ROOT/bin/federation utility has been renamed to opendds_ir_ctl
   and now supports shutting down a remote non-federated DCPSInfoRepo process.
 
+- Deleting a DataWriter from a Publisher now blocks until pending samples have
+  been delivered by the underlying transport.  By default, the DataWriter will
+  block indefinitely.  To change the default blocking behavior, you may
+  specify a number of seconds to block with the -DCPSPendingTimeout option.
+
 =========================================================================
 
 Version 1.2 of OpenDDS.
