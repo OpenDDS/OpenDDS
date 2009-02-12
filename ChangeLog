@@ -1,3 +1,9 @@
+Thu Feb 12 20:11:18 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Updated release notes with DataWriterImpl changes.
+
 Thu Feb 12 19:45:38 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.h:
