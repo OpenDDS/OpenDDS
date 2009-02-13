@@ -11,7 +11,7 @@ class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>
 {
 public:
-  DataReaderListenerImpl(int& received_samples);
+  DataReaderListenerImpl(size_t& received_samples);
 
   virtual ~DataReaderListenerImpl();
 
@@ -50,7 +50,7 @@ public:
     throw (CORBA::SystemException);
 
 private:
-  int& received_samples_;
+  size_t& received_samples_;
 };
 
 #endif /* DCPS_THRASHER_DATAREADERLISTENERIMPL_H */
