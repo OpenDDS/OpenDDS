@@ -27,10 +27,14 @@ ProgressIndicator::operator++()
   ++curr_;
 
   std::size_t pct = curr_ / double(max_) * 100;
-  if (pct > last_ || pct == last_)
+  if (pct > last_)
   {
     ACE_DEBUG((LM_DEBUG, format_, last_, curr_));
     last_ += inc_;
+  }
+  else if (curr_ == max_)
+  {
+    ACE_DEBUG((LM_DEBUG, format_, 100, curr_));
   }
   
   return *this;

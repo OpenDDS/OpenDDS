@@ -11,12 +11,35 @@ use lib "$DDS_ROOT/bin";
 use lib "$ACE_ROOT/bin";
 use DDS_Run_Test;
 
-$status = 0;
-
 $opts = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : "-ORBSvcConf tcp.conf";
-$pub_opts = "$opts -s 1 -t 100";
-$sub_opts = "$opts -n 100";
+$pub_opts = "$opts ";
+$sub_opts = "$opts ";
+
+my $arg = shift;
+if ($arg eq 'low') {
+  $pub_opts .= "-t 4 -s 256";
+  $sub_opts .= "-n 1024";
+
+} elsif ($arg eq 'medium') {
+  $pub_opts .= "-t 16 -s 64";
+  $sub_opts .= "-n 1024";
+
+} elsif ($arg eq 'high') {
+  $pub_opts .= "-t 32 -s 32";
+  $sub_opts .= "-n 1024";
+
+} elsif ($arg eq 'aggressive') {
+  $pub_opts .= "-t 1024 -s 1";
+  $sub_opts .= "-n 1024";
+
+} else { # default (i.e. lazy)
+  $pub_opts .= "-t 1 -s 1024";
+  $sub_opts .= "-n 1024";
+}
+
+$status = 0;
+
 
 $dcpsrepo_ior = "repo.ior";
 $repo_bit_opt = $opts;

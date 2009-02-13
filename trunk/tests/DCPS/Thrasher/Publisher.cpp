@@ -53,7 +53,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 {
   parse_args(argc, argv);
   
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) PUBLISHER STARTED\n")));
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) -> PUBLISHER STARTED\n")));
   
   try
   {
@@ -75,7 +75,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     return 1;
   }
   
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) PUBLISHER FINISHED\n")));
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) <- PUBLISHER FINISHED\n")));
              
   return 0;
 }

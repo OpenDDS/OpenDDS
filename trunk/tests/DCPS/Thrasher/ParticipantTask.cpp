@@ -36,7 +36,7 @@ ParticipantTask::svc()
 {
   try
   {
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)  PARTICIPANT STARTED\n")));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    -> PARTICIPANT STARTED\n")));
 
     // Create Participant
     DDS::DomainParticipant_var participant =
@@ -84,9 +84,6 @@ ParticipantTask::svc()
                         ACE_TEXT("%N:%l: svc()")
                         ACE_TEXT(" attach_transport failed!\n")), 1);
     
-    ACE_DEBUG((LM_INFO,
-               ACE_TEXT("(%P|%t)   PARTICIPANT TRANSPORT: %d\n"), transportId));
-
     // Register Type (FooType)
     FooTypeSupport_var ts = new FooTypeSupportImpl;
     if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK)
@@ -158,7 +155,7 @@ ParticipantTask::svc()
     // pathways related to publication; we should be especially dull
     // and write only one sample at a time per writer.
 
-    ProgressIndicator progress("(%P|%t)   PARTICIPANT %d%% (%d samples sent)\n",
+    ProgressIndicator progress("(%P|%t)       PARTICIPANT %d%% (%d samples sent)\n",
                                samples_per_thread_);
 
     for (std::size_t i = 0; i < samples_per_thread_; ++i)
@@ -186,7 +183,7 @@ ParticipantTask::svc()
     return 1;
   }
     
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)  PARTICIPANT FINISHED\n")));
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    <- PARTICIPANT FINISHED\n")));
 
   return 0;
 }
