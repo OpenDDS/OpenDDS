@@ -5,9 +5,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
-use Env (DDS_ROOT);
+use Env qw(DDS_ROOT ACE_ROOT @LD_LIBRARY_PATH);
+BEGIN { unshift @LD_LIBRARY_PATH, "../FooType"; }
 use lib "$DDS_ROOT/bin";
-use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use DDS_Run_Test;
 

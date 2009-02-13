@@ -157,7 +157,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       { DDS::DURATION_INFINITY_SEC, DDS::DURATION_INFINITY_NSEC };
 
     DDS::ConditionSeq conditions; 
-    DDS::SubscriptionMatchStatus matches = {0};
+    DDS::SubscriptionMatchStatus matches = {0, 0, 0, 0, 0};
     do
     {
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK)
