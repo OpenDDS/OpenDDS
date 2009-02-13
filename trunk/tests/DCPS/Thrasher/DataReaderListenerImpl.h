@@ -5,13 +5,18 @@
 #ifndef DCPS_THRASHER_DATAREADERLISTENERIMPL_H
 #define DCPS_THRASHER_DATAREADERLISTENERIMPL_H
 
+#include <cstdlib>
+
 #include <dds/DdsDcpsSubscriptionS.h>
+
+#include "ProgressIndicator.h"
 
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>
 {
 public:
-  DataReaderListenerImpl(size_t& received_samples);
+  DataReaderListenerImpl(std::size_t& received_samples,
+                         const ProgressIndicator& progress);
 
   virtual ~DataReaderListenerImpl();
 
@@ -50,7 +55,9 @@ public:
     throw (CORBA::SystemException);
 
 private:
-  size_t& received_samples_;
+  std::size_t& received_samples_;
+
+  ProgressIndicator progress_;
 };
 
 #endif /* DCPS_THRASHER_DATAREADERLISTENERIMPL_H */
