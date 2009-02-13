@@ -154,7 +154,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
    
     ws->detach_condition(cond);
 
-    // Cleanup!
+    // Clean-up!
     participant->delete_contained_entities();
     dpf->delete_participant(participant.in());
 
