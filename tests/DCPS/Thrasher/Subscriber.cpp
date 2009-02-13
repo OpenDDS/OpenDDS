@@ -53,7 +53,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 {
   parse_args(argc, argv);
   
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) SUBSCRIBER STARTED\n")));
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) -> SUBSCRIBER STARTED\n")));
              
   try
   {
@@ -124,7 +124,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     // Create DataReader
     ProgressIndicator progress =
-      ProgressIndicator("(%P|%t)  SUBSCRIBER %d%% (%d samples received)\n",
+      ProgressIndicator("(%P|%t)    SUBSCRIBER %d%% (%d samples received)\n",
                         expected_samples);
 
     DDS::DataReaderListener_var listener =
@@ -184,7 +184,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     return 1;
   }
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) SUBSCRIBER FINISHED\n")));
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) <- SUBSCRIBER FINISHED\n")));
 
   return !received_samples == expected_samples; 
 }
