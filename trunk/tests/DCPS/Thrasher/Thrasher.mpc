@@ -17,7 +17,7 @@ project(publisher): dcpsexe_with_tcp {
 }
 
 project(subscriber): dcpsexe_with_tcp {
-  exename   = publisher
+  exename   = subscriber
   
   after    += DcpsFooType
   libs     += DcpsFooType
