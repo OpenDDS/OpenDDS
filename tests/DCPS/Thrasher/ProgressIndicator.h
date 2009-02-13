@@ -12,7 +12,7 @@ class ProgressIndicator
 public:
   ProgressIndicator(const char* format,
                     const std::size_t max,
-                    const std::size_t inc = 10);
+                    unsigned grad = 10);
 
   ~ProgressIndicator();
 
@@ -20,12 +20,12 @@ public:
 
 private:
   const char* format_;
-  
+ 
   const std::size_t max_;
-  const std::size_t inc_;
-
   std::size_t curr_;
-  std::size_t last_;
+  
+  unsigned grad_;
+  unsigned last_; 
 };
 
 #endif /* DCPS_THRASHER_PROGRESSINDICATOR_H */

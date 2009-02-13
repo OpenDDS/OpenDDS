@@ -186,5 +186,8 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
   ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) <- SUBSCRIBER FINISHED\n")));
 
-  return !received_samples == expected_samples; 
+  if (received_samples != expected_samples)
+    return 1;
+
+  return 0;
 }
