@@ -46,6 +46,7 @@ Subscriber::Subscriber( const Options& options)
    listener_( 0),
    waiter_( new DDS::WaitSet)
 {
+#if 0
   // Create the DomainParticipant
   this->participant_
     = TheParticipantFactory->create_participant(
@@ -284,6 +285,7 @@ Subscriber::Subscriber( const Options& options)
       ACE_TEXT("created StatusCondition and WaitSet for test synchronization.\n")
     ));
   }
+#endif
 
 }
 

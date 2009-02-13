@@ -124,9 +124,9 @@ $testArgs .= "-f $scenarioFile ";
 $testArgs .= "-r $rawData " if $rawData;
 $testArgs .= "-i 0 ";
 if( PerlACE::is_vxworks_test()) {
-  $TEST = new PerlACE::ProcessVX( "testprocess", $testArgs);
+  $TEST = new PerlACE::ProcessVX( "$FindBin::Bin/testprocess", $testArgs);
 } else {
-  $TEST = new PerlACE::Process( "testprocess", $testArgs);
+  $TEST = new PerlACE::Process( "$FindBin::Bin/testprocess", $testArgs);
 }
 
 # Be verbose.

@@ -1,11 +1,12 @@
 // -*- C++ -*-
 // $Id$
 
-#include "Publisher.h"
+#include "Process.h"
 
 #include "Test.h"
 #include "Options.h"
 #include "Writer.h"
+// #include "Reader.h"
 
 #include "TestTypeSupportImpl.h"
 
@@ -31,11 +32,14 @@
 
 namespace Test {
 
-Publisher::~Publisher()
+Process::~Process()
 {
   DDS::ConditionSeq conditions;
-  this->waiter_->get_conditions( conditions);
-  this->waiter_->detach_conditions( conditions);
+  this->publicationWaiter_->get_conditions( conditions);
+  this->publicationWaiter_->detach_conditions( conditions);
+
+  this->subscriptionWaiter_->get_conditions( conditions);
+  this->subscriptionWaiter_->detach_conditions( conditions);
 
   if( ! CORBA::is_nil( this->participant_.in())) {
     this->participant_->delete_contained_entities();
@@ -45,9 +49,10 @@ Publisher::~Publisher()
   TheServiceParticipant->shutdown();
 }
 
-Publisher::Publisher( const Options& options)
+Process::Process( const Options& options)
  : options_( options),
-   waiter_( new DDS::WaitSet)
+   publicationWaiter_( new DDS::WaitSet),
+   subscriptionWaiter_( new DDS::WaitSet)
 {
 #if 0
   // Create the DomainParticipant
@@ -59,14 +64,14 @@ Publisher::Publisher( const Options& options)
       );
   if( CORBA::is_nil( this->participant_.in())) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Publisher::Publisher() - ")
+      ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
       ACE_TEXT("failed to create a participant.\n")
     ));
     throw BadParticipantException();
 
   } else if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
+      ACE_TEXT("(%P|%t) Process::Process() - ")
       ACE_TEXT("created participant in domain %d.\n"),
       this->options_.domain()
     ));
@@ -82,7 +87,7 @@ Publisher::Publisher( const Options& options)
     std::stringstream buffer;
     buffer << this->options_.transportType();
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Publisher::Publisher() - ")
+      ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
       ACE_TEXT("failed to create %s transport.\n"),
       buffer.str().c_str()
     ));
@@ -92,7 +97,7 @@ Publisher::Publisher( const Options& options)
     std::stringstream buffer;
     buffer << this->options_.transportType();
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
+      ACE_TEXT("(%P|%t) Process::Process() - ")
       ACE_TEXT("created %s transport.\n"),
       buffer.str().c_str()
     ));
@@ -103,7 +108,7 @@ Publisher::Publisher( const Options& options)
   if( ::DDS::RETCODE_OK
    != testData->register_type( this->participant_.in(), 0)) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Publisher::Publisher() - ")
+      ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
       ACE_TEXT("unable to install type %s support.\n"),
       testData->get_type_name()
     ));
@@ -111,7 +116,7 @@ Publisher::Publisher( const Options& options)
 
   } else if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
+      ACE_TEXT("(%P|%t) Process::Process() - ")
       ACE_TEXT("created type %s support.\n"),
       testData->get_type_name()
     ));
@@ -126,7 +131,7 @@ Publisher::Publisher( const Options& options)
                  );
   if( CORBA::is_nil( this->topic_.in())) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Publisher::Publisher() - ")
+      ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
       ACE_TEXT("failed to create topic %s.\n"),
       this->options_.topicName().c_str()
     ));
@@ -134,7 +139,7 @@ Publisher::Publisher( const Options& options)
 
   } else if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
+      ACE_TEXT("(%P|%t) Process::Process() - ")
       ACE_TEXT("created topic %s.\n"),
       this->options_.topicName().c_str()
     ));
@@ -147,14 +152,14 @@ Publisher::Publisher( const Options& options)
                      );
   if( CORBA::is_nil( this->publisher_.in())) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Publisher::Publisher() - ")
+      ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
       ACE_TEXT("failed to create publisher.\n")
     ));
     throw BadPublisherException();
 
   } else if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
+      ACE_TEXT("(%P|%t) Process::Process() - ")
       ACE_TEXT("created publisher.\n")
     ));
   }
@@ -164,7 +169,7 @@ Publisher::Publisher( const Options& options)
     = dynamic_cast< ::OpenDDS::DCPS::PublisherImpl*>( this->publisher_.in());
   if( 0 == servant) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Publisher::Publisher() - ")
+      ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
       ACE_TEXT("failed to narrow publisher servant.\n")
     ));
     throw BadServantException();
@@ -173,14 +178,14 @@ Publisher::Publisher( const Options& options)
   if( ::OpenDDS::DCPS::ATTACH_OK
    != servant->attach_transport( this->transport_.in())) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Publisher::Publisher() - ")
+      ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
       ACE_TEXT("failed to attach transport to publisher.\n")
     ));
     throw BadAttachException();
 
   } else if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
+      ACE_TEXT("(%P|%t) Process::Process() - ")
       ACE_TEXT("attached transport to publisher.\n")
     ));
   }
@@ -208,7 +213,7 @@ Publisher::Publisher( const Options& options)
     case Options::NONE:
     default:
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Publisher::Publisher() - ")
+        ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
         ACE_TEXT("unrecognized transport when setting up Qos policies.\n")
       ));
       throw BadQosException();
@@ -216,7 +221,7 @@ Publisher::Publisher( const Options& options)
 
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
+      ACE_TEXT("(%P|%t) Process::Process() - ")
       ACE_TEXT("starting to create %d publications.\n"),
       this->options_.profiles().size()
     ));
@@ -236,14 +241,14 @@ Publisher::Publisher( const Options& options)
         );
     if( CORBA::is_nil( writer.in())) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Publisher::Publisher() - ")
+        ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
         ACE_TEXT("failed to create writer.\n")
       ));
       throw BadWriterException();
 
     } else if( this->options_.verbose()) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
+        ACE_TEXT("(%P|%t) Process::Process() - ")
         ACE_TEXT("created writer for publication %s ")
         ACE_TEXT("with priority %d.\n"),
         this->options_.profiles()[ index]->name().c_str(),
@@ -269,7 +274,7 @@ Publisher::Publisher( const Options& options)
 
     if( this->options_.verbose()) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
+        ACE_TEXT("(%P|%t) Process::Process() - ")
         ACE_TEXT("created StatusCondition for publication %s.\n"),
         this->options_.profiles()[ index]->name().c_str()
       ));
@@ -279,7 +284,7 @@ Publisher::Publisher( const Options& options)
 }
 
 void
-Publisher::run()
+Process::run()
 {
   DDS::Duration_t   timeout = { DDS::DURATION_INFINITY_SEC, DDS::DURATION_INFINITY_NSEC};
   DDS::ConditionSeq conditions;
@@ -288,15 +293,15 @@ Publisher::run()
   do {
     if( this->options_.verbose()) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Publisher::run() - ")
+        ACE_TEXT("(%P|%t) Process::run() - ")
         ACE_TEXT("%d of %d subscriptions attached, waiting for more.\n"),
         cummulative_count,
         this->publications_.size()
       ));
     }
-    if( DDS::RETCODE_OK != this->waiter_->wait( conditions, timeout)) {
+    if( DDS::RETCODE_OK != this->publicationWaiter_->wait( conditions, timeout)) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Publisher::run() - ")
+        ACE_TEXT("(%P|%t) ERROR: Process::run() - ")
         ACE_TEXT("failed to synchronize at start of test.\n")
       ));
       throw BadSyncException();
@@ -323,7 +328,7 @@ Publisher::run()
 
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Publisher::run() - ")
+      ACE_TEXT("(%P|%t) Process::run() - ")
       ACE_TEXT("starting to publish samples with %d matched subscriptions.\n"),
       cummulative_count
     ));
@@ -362,7 +367,7 @@ Publisher::run()
     // Join and clean up.
     current->second->wait();
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Publisher::run() - ")
+      ACE_TEXT("(%P|%t) Process::run() - ")
       ACE_TEXT("publication %s stopping after sending %d messages.\n"),
       current->first.c_str(),
       current->second->messages()
@@ -373,7 +378,7 @@ Publisher::run()
 
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Publisher::run() - ")
+      ACE_TEXT("(%P|%t) Process::run() - ")
       ACE_TEXT("finished publishing samples.\n")
     ));
   }

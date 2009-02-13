@@ -16,7 +16,7 @@ class Writer : public ACE_Task_Base {
     /// Construct with a writer and a profile.
     Writer(
       ::DDS::DataWriter_ptr     writer,
-      const PublicationProfile& profile,
+      // const PublicationProfile& profile,
       bool                      verbose = false
     );
 
@@ -47,7 +47,7 @@ class Writer : public ACE_Task_Base {
     long publicationId_;
 
     /// Profile of this publication.
-    const PublicationProfile& profile_;
+    // const PublicationProfile& profile_;
 
     /// Verbosity indication.
     bool verbose_;

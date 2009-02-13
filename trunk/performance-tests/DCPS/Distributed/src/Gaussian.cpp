@@ -2,8 +2,7 @@
 //
 // $Id$
 
-#include "dds/DCPS/debug.h"
-#include "PublicationProfile.h"
+#include "Gaussian.h"
 
 // Deconflict macros from ACE and STL algorithms.
 #ifdef min
@@ -26,48 +25,13 @@ namespace { // Anonymous namespace for file scope.
 
 namespace Test {
 
-PublicationProfile::PublicationProfile(
-  const std::string& name,
-  int priority,
-  int rate,
-  int size,
-  int deviation,
-  int max,
-  int min
-
-) : name_( name),
-    priority_( priority),
-    rate_( static_cast<double>( rate)),
-    mean_( static_cast<double>( size)),
-    deviation_( static_cast<double>( deviation)),
-    sizeAvailable_( false),
-    max_( max),
-    min_( min)
-{
-  // Seed here if you want to.
-}
-
-PublicationProfile::~PublicationProfile()
-{
-}
-
-int
-PublicationProfile::interval() const
-{
-  // Return an exponentially distributed number of microseconds.
-  return static_cast<int>(
-           1000000.0 *
-           -log( static_cast<double>( rand()) / range) / this->rate_
-         );
-}
-
-int
-PublicationProfile::messageSize() const
+double
+Gaussian::value() const
 {
   // Return previously calculated deviate if we have one.
-  if( this->sizeAvailable_) {
-    this->sizeAvailable_ = false;
-    return this->nextSize_;
+  if( this->valueAvailable_) {
+    this->valueAvailable_ = false;
+    return this->nextValue_;
   }
 
   double x;       /// Uniformly random location on the X-axis.
@@ -92,22 +56,18 @@ PublicationProfile::messageSize() const
   //
 
   // Z-adjusted to the desired mean and deviation.
-  int value = static_cast<int>(
-                ((y * factor) * this->deviation_) + this->mean_
-              );
+  double value = ((y * factor) * this->deviation_) + this->mean_;
 
   //  Bounded by the specified maximum and minimum values.
-  this->sizeAvailable_ = true;
-  this->nextSize_ = std::min( this->max_, std::max( this->min_, value));
+  this->valueAvailable_ = true;
+  this->nextValue_ = std::min( this->max_, std::max( this->min_, value));
 
   //
   // And return the other of the two generated deviates.
   //
 
   // Z-adjusted to the desired mean and deviation.
-  value = static_cast<int>(
-            ((x * factor) * this->deviation_) + this->mean_
-          );
+  value = ((x * factor) * this->deviation_) + this->mean_;
 
   //  Bounded by the specified maximum and minimum values.
   return std::min( this->max_, std::max( this->min_, value));

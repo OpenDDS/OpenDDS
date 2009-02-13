@@ -64,24 +64,24 @@ cp $ACE_ROOT/bin/PerlACE/ProcessVX_Unix.pm  $PKG/bin/PerlACE/ProcessVX_Unix.pm
 cp $ACE_ROOT/bin/PerlACE/TestTarget_LVRT.pm $PKG/bin/PerlACE/TestTarget_LVRT.pm
 
 # Executables
-cp $DDS_ROOT/bin/DCPSInfoRepo   $PKG/bin/DCPSInfoRepo
-cp $DDS_ROOT/bin/opendds_ir_ctl $PKG/bin/opendds_ir_ctl
-cp bin/testprocess              $PKG/bin/testprocess
-cp bin/run_test                 $PKG/bin/run_test
-cp bin/runcmd                   $PKG/bin/runcmd
+cp $DDS_ROOT/bin/DCPSInfoRepo                                   $PKG/bin/DCPSInfoRepo
+cp $DDS_ROOT/bin/opendds_ir_ctl                                 $PKG/bin/opendds_ir_ctl
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/bin/testprocess $PKG/bin/testprocess
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/bin/run_test    $PKG/bin/run_test
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/bin/runcmd      $PKG/bin/runcmd
 
 mkdir -p $PKG/etc
 
 # Configuration
-cp etc/svc.conf      $PKG/etc/svc.conf
-cp etc/transport.ini $PKG/etc/transport.ini
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/etc/svc.conf      $PKG/etc/svc.conf
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/etc/transport.ini $PKG/etc/transport.ini
 
 mkdir -p $PKG/tests
 
 # Test scenarios
-cp tests/scenario1.ini $PKG/tests/scenario1.ini
-cp tests/scenario1.ini $PKG/tests/scenario2.ini
-cp tests/scenario1.ini $PKG/tests/scenario2b.ini
-cp tests/scenario1.ini $PKG/tests/scenario3.ini
-cp tests/scenario1.ini $PKG/tests/scenario6.ini
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/scenario1.ini $PKG/tests/scenario1.ini
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/scenario1.ini $PKG/tests/scenario2.ini
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/scenario1.ini $PKG/tests/scenario2b.ini
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/scenario1.ini $PKG/tests/scenario3.ini
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/scenario1.ini $PKG/tests/scenario6.ini
 

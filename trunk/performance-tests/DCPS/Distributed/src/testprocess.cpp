@@ -1,7 +1,7 @@
 // -*- C++ -*-
 // $Id$
 
-#include "Publisher.h"
+#include "Process.h"
 #include "Test.h"
 #include "Options.h"
 #include "dds/DCPS/Service_Participant.h"
@@ -18,33 +18,23 @@ main( int argc, char *argv[])
     // Initialize the test.
     const Test::Options options( argc, argv);
 
-    // Create the publisher thingie.
-    Test::Publisher publisher( options);
-
-    if( options.verbose()) {
-      std::stringstream buffer;
-      buffer << options.transportType();
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) publisher_main() - ")
-        ACE_TEXT("started with transport %s(%d).\n"),
-        buffer.str().c_str(),
-        options.transportKey()
-      ));
-    }
+    // Create the process thingie.
+    Test::Process process( options);
 
     // Execute the test.
-    publisher.run();
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) testprocess() - starting.\n")));
+    process.run();
 
   } catch( CORBA::Exception& /* e */) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) publisher_main() - ")
+      ACE_TEXT("(%P|%t) testprocess() - ")
       ACE_TEXT("CORBA exception caught during processing.\n")
     ));
     return 1;
 
   } catch( Test::Exception e)  {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) publisher_main() - ")
+      ACE_TEXT("(%P|%t) testprocess() - ")
       ACE_TEXT("Test exception caught during processing: %s.\n"),
       e.what()
     ));
@@ -52,6 +42,7 @@ main( int argc, char *argv[])
 
   }
 
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) testprocess() - terminating normally.\n")));
   return 0;
 }
 
