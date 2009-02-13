@@ -17,38 +17,44 @@
 #include "DataReaderListenerImpl.h"
 #include "FooTypeTypeSupportImpl.h"
 
-size_t expected_samples = 0;
-size_t received_samples = 0;
+#ifdef ACE_AS_STATIC_LIBS                                                   
+# include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>                         
+#endif            
 
-void
-parse_args(int& argc, ACE_TCHAR** argv)
+namespace
 {
-  ACE_Arg_Shifter shifter(argc, argv);
- 
-  while (shifter.is_anything_left())
-  {
-    const ACE_TCHAR* arg;
+  std::size_t expected_samples = 1024;
+  std::size_t received_samples = 0;
 
-    if ((arg = shifter.get_the_parameter("-n")))
+  void
+  parse_args(int& argc, ACE_TCHAR** argv)
+  {
+    ACE_Arg_Shifter shifter(argc, argv);
+   
+    while (shifter.is_anything_left())
     {
-      expected_samples = ACE_OS::atoi(arg);
-      shifter.consume_arg();
-    }
-    else
-    {
-      shifter.ignore_arg();
+      const ACE_TCHAR* arg;
+
+      if ((arg = shifter.get_the_parameter("-n")))
+      {
+        expected_samples = ACE_OS::atoi(arg);
+        shifter.consume_arg();
+      }
+      else
+      {
+        shifter.ignore_arg();
+      }
     }
   }
-}
+} // namespace
 
 int
 ACE_TMAIN(int argc, ACE_TCHAR** argv)
 {
   parse_args(argc, argv);
   
-  ACE_DEBUG((LM_INFO,
-             ACE_TEXT("(%P|%t) SUBSCRIBER STARTED :: expected_samples = %d\n"),
-             expected_samples));
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) SUBSCRIBER STARTED\n")));
+             
   try
   {
     DDS::DomainParticipantFactory_var dpf =
@@ -77,7 +83,9 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     // Attach Transport
     OpenDDS::DCPS::TransportImpl_rch transport =
-      TheTransportFactory->create_transport_impl(1); // subscriber.ini
+      TheTransportFactory->create_transport_impl(
+          OpenDDS::DCPS::DEFAULT_SIMPLE_TCP_ID,
+          "SimpleTcp");
 
     OpenDDS::DCPS::SubscriberImpl* subscriber_i =
       dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(subscriber.in());
@@ -115,8 +123,12 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
                         ACE_TEXT(" create_topic failed!\n")), 1);
 
     // Create DataReader
+    ProgressIndicator progress =
+      ProgressIndicator("(%P|%t)  SUBSCRIBER %d%% (%d samples received)\n",
+                        expected_samples);
+
     DDS::DataReaderListener_var listener =
-      new DataReaderListenerImpl(received_samples);
+      new DataReaderListenerImpl(received_samples, progress);
 
     DDS::DataReaderQos reader_qos;
     subscriber->get_default_datareader_qos(reader_qos);
@@ -156,7 +168,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       matches = reader->get_subscription_match_status();
     }
     while (matches.current_count > 0);
-   
+
     ws->detach_condition(cond);
 
     // Clean-up!
@@ -171,10 +183,8 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     e._tao_print_exception("caught in main()");
     return 1;
   }
-  
-  ACE_DEBUG((LM_INFO,
-             ACE_TEXT("(%P|%t) SUBSCRIBER FINISHED :: received_samples = %d\n"),
-             received_samples));
+
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) SUBSCRIBER FINISHED\n")));
 
   return !received_samples == expected_samples; 
 }

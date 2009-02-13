@@ -13,6 +13,8 @@ project(publisher): dcpsexe_with_tcp {
 
   Source_Files {
     Publisher.cpp
+    ParticipantTask.cpp
+    ProgressIndicator.cpp
   }
 }
 
@@ -28,5 +30,6 @@ project(subscriber): dcpsexe_with_tcp {
   Source_Files {
     Subscriber.cpp
     DataReaderListenerImpl.cpp
+    ProgressIndicator.cpp
   }
 }

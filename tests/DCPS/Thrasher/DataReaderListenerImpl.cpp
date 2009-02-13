@@ -5,8 +5,10 @@
 #include "DataReaderListenerImpl.h"
 #include "FooTypeTypeSupportC.h"
 
-DataReaderListenerImpl::DataReaderListenerImpl(size_t& received_samples)
-  : received_samples_(received_samples)
+DataReaderListenerImpl::DataReaderListenerImpl(std::size_t& received_samples,
+                                               const ProgressIndicator& progress)
+  : received_samples_(received_samples),
+    progress_(progress)
 {}
 
 DataReaderListenerImpl::~DataReaderListenerImpl()
@@ -32,16 +34,12 @@ DataReaderListenerImpl::on_data_available(
 
   Foo foo;
   DDS::SampleInfo si;
-  
-  if (reader_i->take_next_sample(foo, si) != DDS::RETCODE_OK)
-  {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("%N:%l: on_data_available()")
-               ACE_TEXT(" take_next_sample failed!\n")));
-    return;
-  }
 
-  ++this->received_samples_;
+  while (reader_i->take_next_sample(foo, si) == DDS::RETCODE_OK)
+  {
+    ++received_samples_;
+    ++progress_;
+  }
 }
 
 void
