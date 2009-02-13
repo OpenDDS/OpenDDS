@@ -1,3 +1,62 @@
+Fri Feb 13 02:29:08 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/DCPS/Distributed/bin/run_test:
+
+	  Located the test executable relative to the $FindBin::Bin
+	  directory.
+
+        * performance-tests/DCPS/Distributed/src/EntityProfiles.h:
+
+	  Defined configuration structures for all test configuration
+	  parameters defined in datamodel.
+
+        * performance-tests/DCPS/Distributed/src/Exponential.h:
+        * performance-tests/DCPS/Distributed/src/Exponential.cpp:
+        * performance-tests/DCPS/Distributed/src/Gaussian.h:
+        * performance-tests/DCPS/Distributed/src/Gaussian.cpp:
+
+	  Migrated and generalized statistical deviate generation from
+	  the original PublicationProfile implementation.
+
+        * performance-tests/DCPS/Distributed/src/Options.h:
+        * performance-tests/DCPS/Distributed/src/Options.inl:
+        * performance-tests/DCPS/Distributed/src/Options.cpp:
+
+	  Begain implementation of test configuration according to
+	  scenario configuration datamodel.
+
+        * performance-tests/DCPS/Distributed/src/Process.h:
+        * performance-tests/DCPS/Distributed/src/Process.cpp:
+        * performance-tests/DCPS/Distributed/src/testprocess.cpp:
+
+	  Added this as the test process implementation including all
+	  participants, topics, publications and subscriptions in the
+	  configuration specification.  This is currently stubbed.
+
+        * performance-tests/DCPS/Distributed/src/Publisher.cpp:
+        * performance-tests/DCPS/Distributed/src/Subscriber.cpp:
+        * performance-tests/DCPS/Distributed/src/Writer.h:
+        * performance-tests/DCPS/Distributed/src/Writer.cpp:
+
+	  Stubbed these until the configuration implementation is
+	  complete.
+
+        * performance-tests/DCPS/Distributed/src/TestProcess.mpc:
+
+	  Updated with new and removed files.
+
+        * performance-tests/DCPS/Distributed/tools/mkpkg:
+
+	  Modified to create a distribution target from entirely from
+	  environment rooted directories.
+
+        * performance-tests/DCPS/Distributed/src/PublicationProfile.h:
+        * performance-tests/DCPS/Distributed/src/PublicationProfile.cpp:
+
+          Removed these files.  The features in this class were migrated
+	  to the Exponential and Gaussian classes as more general purpose
+	  behaviors to support the new test configuration mechanism.
+
 Thu Feb 12 20:13:12 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * DDS_release_notes.txt:

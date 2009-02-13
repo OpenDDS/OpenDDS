@@ -17,17 +17,23 @@ Test::Options::verbose() const
 }
 
 ACE_INLINE
-unsigned long&
-Test::Options::domain()
+bool&
+Test::Options::configured()
 {
-  return this->domain_;
+  return this->configured_;
 }
 
 ACE_INLINE
-unsigned long
-Test::Options::domain() const
+bool
+Test::Options::configured() const
 {
-  return this->domain_;
+  return this->configured_;
+}
+
+ACE_INLINE
+Test::Options::operator bool() const
+{
+  return this->configured_;
 }
 
 ACE_INLINE
@@ -42,48 +48,6 @@ long
 Test::Options::duration() const
 {
   return this->duration_;
-}
-
-ACE_INLINE
-Test::Options::TransportType
-Test::Options::transportType() const
-{
-  return this->transportType_;
-}
-
-ACE_INLINE
-Test::Options::TransportType&
-Test::Options::transportType()
-{
-  return this->transportType_;
-}
-
-ACE_INLINE
-unsigned int
-Test::Options::transportKey() const
-{
-  return this->transportKey_;
-}
-
-ACE_INLINE
-unsigned int&
-Test::Options::transportKey()
-{
-  return this->transportKey_;
-}
-
-ACE_INLINE
-std::string
-Test::Options::topicName() const
-{
-  return this->topicName_;
-}
-
-ACE_INLINE
-std::string&
-Test::Options::topicName()
-{
-  return this->topicName_;
 }
 
 ACE_INLINE
@@ -129,9 +93,30 @@ Test::Options::raw_buffer_type() const
 }
 
 ACE_INLINE
-const Test::Options::ProfileContainer&
-Test::Options::profiles() const
+const Test::Options::ParticipantMap&
+Test::Options::participantMap() const
 {
-  return this->publicationProfiles_;
+  return this->participantMap_;
+}
+
+ACE_INLINE
+const Test::Options::TopicMap&
+Test::Options::topicMap() const
+{
+  return this->topicMap_;
+}
+
+ACE_INLINE
+const Test::Options::PublicationMap&
+Test::Options::publicationMap() const
+{
+  return this->publicationMap_;
+}
+
+ACE_INLINE
+const Test::Options::SubscriptionMap&
+Test::Options::subscriptionMap() const
+{
+  return this->subscriptionMap_;
 }
 

@@ -2,7 +2,6 @@
 //
 // $Id$
 #include "Writer.h"
-#include "PublicationProfile.h"
 #include "TestTypeSupportC.h"
 
 #include "dds/DCPS/DataWriterImpl.h"
@@ -17,11 +16,11 @@ namespace Test {
 
 Writer::Writer(
   ::DDS::DataWriter_ptr writer,
-  const PublicationProfile& profile,
+  // const PublicationProfile& profile,
   bool verbose
 
 ) : writer_( ::DDS::DataWriter::_duplicate( writer)),
-    profile_( profile),
+    // profile_( profile),
     verbose_( verbose),
     done_( false),
     messages_( 0)
@@ -54,7 +53,7 @@ Writer::open( void*)
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Writer::open() - ")
       ACE_TEXT("failed to activate the %s publication thread.\n"),
-      this->profile_.name().c_str()
+      "BOB"// this->profile_.name().c_str()
     ));
   }
   return result;
@@ -88,10 +87,11 @@ Writer::messages() const
 int
 Writer::svc ()
 {
+#if 0
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) Writer::svc() - ")
     ACE_TEXT("processing publication %s.\n"),
-    this->profile_.name().c_str()
+    "BOB"// this->profile_.name().c_str()
   ));
 
   int count = 0;
@@ -144,6 +144,7 @@ Writer::svc ()
       this->profile_.name().c_str()
     ));
   }
+#endif
   return 0;
 }
 
