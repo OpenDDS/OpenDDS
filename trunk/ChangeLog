@@ -1,14 +1,25 @@
+Fri Feb 13 20:59:01 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/Thrasher/ParticipantTask.cpp:
+        * tests/DCPS/Thrasher/run_test.pl:
+
+          Added support for programmatic transport configuration.
+
+        * tests/DCPS/Thrasher/publisher.ini:
+
+          Removed this file.
+
 Fri Feb 13 20:52:40 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * tests/DCPS/Thrasher/ParticipantTask.cpp:
         * tests/DCPS/Thrasher/Subscriber.cpp:
 
-	  Extended initializers to explicitly cover all members.
+          Extended initializers to explicitly cover all members.
 
         * tests/DCPS/Thrasher/run_test.pl:
 
-	  Added ../FooType to LD_LIBRARY_PATH before starting the test
-	  executables.
+          Added ../FooType to LD_LIBRARY_PATH before starting the test
+          executables.
 
 Fri Feb 13 20:42:13 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 

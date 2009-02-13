@@ -15,8 +15,8 @@ $status = 0;
 
 $opts = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : "-ORBSvcConf tcp.conf";
-$pub_opts = "$opts -DCPSConfigFile publisher.ini -s 1024 -t 4";
-$sub_opts = "$opts -n 4096";
+$pub_opts = "$opts -s 1 -t 100";
+$sub_opts = "$opts -n 100";
 
 $dcpsrepo_ior = "repo.ior";
 $repo_bit_opt = $opts;
