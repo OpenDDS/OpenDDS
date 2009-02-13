@@ -28,7 +28,7 @@ DataReaderListenerImpl::on_data_available(
   
   // The following is intentionally inefficient to simulate
   // backpressure with multiple writers; we should be especially
-  // dull take only one sample at a time.
+  // dull and take only one sample at a time.
 
   Foo foo;
   DDS::SampleInfo si;
