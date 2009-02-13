@@ -171,5 +171,5 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
              ACE_TEXT("(%P|%t) SUBSCRIBER FINISHED :: received_samples: %d\n"),
              received_samples));
 
-  return !!received_samples != expected_samples; 
+  return !received_samples == expected_samples; 
 }
