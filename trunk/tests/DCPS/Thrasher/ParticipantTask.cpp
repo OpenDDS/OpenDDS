@@ -136,7 +136,7 @@ ParticipantTask::svc()
       { DDS::DURATION_INFINITY_SEC, DDS::DURATION_INFINITY_NSEC };
 
     DDS::ConditionSeq conditions; 
-    DDS::PublicationMatchStatus matches = {0};
+    DDS::PublicationMatchStatus matches = {0, 0, 0, 0, 0};
     do
     {
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK)

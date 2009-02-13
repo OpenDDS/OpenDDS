@@ -78,6 +78,11 @@ namespace { // anonymous namespace for file scope.
   const char* TRANSPORTPRIORITY_KEYNAME                   = "TransportPriority";
   const char* LIFESPANDURATION_KEYNAME                    = "LifespanDuration";
   const char* OWNERSHIPKIND_KEYNAME                       = "OwnershipKind";
+  const char* PRESENTATION_KEYNAME                        = "Presentation";
+  const char* PRESENTATIONCOHERENT_KEYNAME                = "PresentationCoherent";
+  const char* PRESENTATIONORDERED_KEYNAME                 = "PresentationOrdered";
+  const char* PARTITION_KEYNAME                           = "Partition";
+  const char* GROUPDATA_KEYNAME                           = "GroupData";
 
 } // end of anonymous namespace.
 
@@ -1036,8 +1041,8 @@ Options::loadTopic(
 
 void
 Options::loadPublication(
-  ACE_Configuration_Heap& /* heap */,
-  ACE_Configuration_Section_Key& /* sectionKey */,
+  ACE_Configuration_Heap& heap,
+  ACE_Configuration_Section_Key& sectionKey,
   std::string sectionName
 )
 {
@@ -1047,7 +1052,7 @@ Options::loadPublication(
    *   Presentation                        = <string> # One of INSTANCE, TOPIC, GROUP
    *   PresentationCoherent                = <bool> # Boolean: numeric 0 or 1
    *   PresentationOrdered                 = <bool> # Boolean: numeric 0 or 1
-   *   Partition                           = <string> # Multiple keys allowed.
+   *   Partition                           = <string> # Only single value supported
    *   GroupData                           = <string>
    *   EntityFactory                       = <bool> # Boolean: numeric 0 or 1
    *   # DataWriter Qos Policy values
@@ -1097,6 +1102,112 @@ Options::loadPublication(
   profile->writerQos    = TheServiceParticipant->initial_DataWriterQos();
   ACE_TString valueString;
 
+  // Presentation                        = <string> # One of INSTANCE, TOPIC, GROUP
+  valueString.clear();
+  heap.get_string_value( sectionKey, PRESENTATION_KEYNAME, valueString);
+  if( !valueString.empty()) {
+    if( valueString == "INSTANCE") {
+      profile->publisherQos.presentation.access_scope = ::DDS::INSTANCE_PRESENTATION_QOS;
+
+    } else if( valueString == "TOPIC") {
+      profile->publisherQos.presentation.access_scope = ::DDS::TOPIC_PRESENTATION_QOS;
+
+    } else if( valueString == "GROUP") {
+      profile->publisherQos.presentation.access_scope = ::DDS::GROUP_PRESENTATION_QOS;
+
+    } else {
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) loadPublication() - ")
+        ACE_TEXT("unrecognized value for %s: %s - ")
+        ACE_TEXT("not assigning a value.\n"),
+        PRESENTATION_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        PRESENTATION_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+  }
+
+  // PresentationCoherent                = <bool> # Boolean: numeric 0 or 1
+  valueString.clear();
+  if( 0 == heap.get_string_value( sectionKey, PRESENTATIONCOHERENT_KEYNAME, valueString)) {
+    profile->publisherQos.presentation.coherent_access
+      = ACE_OS::atoi( valueString.c_str());
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        PRESENTATIONCOHERENT_KEYNAME,
+        profile->publisherQos.presentation.coherent_access
+      ));
+    }
+  }
+
+  // PresentationOrdered                 = <bool> # Boolean: numeric 0 or 1
+  valueString.clear();
+  if( 0 == heap.get_string_value( sectionKey, PRESENTATIONORDERED_KEYNAME, valueString)) {
+    profile->publisherQos.presentation.ordered_access
+      = ACE_OS::atoi( valueString.c_str());
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        PRESENTATIONORDERED_KEYNAME,
+        profile->publisherQos.presentation.ordered_access
+      ));
+    }
+  }
+
+  // Partition                           = <string> # Only single value supported
+
+  // GroupData                           = <string>
+  valueString.clear();
+  heap.get_string_value( sectionKey, GROUPDATA_KEYNAME, valueString);
+  if( !valueString.empty()) {
+    profile->publisherQos.group_data.value.length( valueString.length());
+    profile->publisherQos.group_data.value.replace(
+      valueString.length(),
+      valueString.length(),
+      const_cast<CORBA::Octet*>(
+        reinterpret_cast<const CORBA::Octet*>( valueString.c_str())
+      )
+    );
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        GROUPDATA_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+  }
+
+  // EntityFactory                       = <bool> # Boolean: numeric 0 or 1
+  valueString.clear();
+  if( 0 == heap.get_string_value( sectionKey, ENTITYFACTORY_KEYNAME, valueString)) {
+    profile->publisherQos.entity_factory.autoenable_created_entities
+      = ACE_OS::atoi( valueString.c_str());
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        ENTITYFACTORY_KEYNAME,
+        profile->publisherQos.entity_factory.autoenable_created_entities
+      ));
+    }
+  }
+
   // Store the profile for the current participant.
   this->publicationMap_[ sectionName] = profile;
 }
@@ -1114,7 +1225,7 @@ Options::loadSubscription(
    *   Presentation                        = <string> # One of INSTANCE, TOPIC, GROUP
    *   PresentationCoherent                = <bool> # Boolean: numeric 0 or 1
    *   PresentationOrdered                 = <bool> # Boolean: numeric 0 or 1
-   *   Partition                           = <string> # Multiple keys allowed.
+   *   Partition                           = <string> # Only single value supported
    *   GroupData                           = <string>
    *   EntityFactory                       = <bool> # Boolean: numeric 0 or 1
    *   # DataReader Qos Policy values
