@@ -61,8 +61,12 @@ ParticipantTask::svc()
 
     // Attach Transport
     OpenDDS::DCPS::TransportIdType transportId = ++transportIds;
+
+    OpenDDS::DCPS::TransportConfiguration_rch config =
+      TheTransportFactory->get_or_create_configuration(transportId, "SimpleTcp");
+
     OpenDDS::DCPS::TransportImpl_rch transport =
-      TheTransportFactory->create_transport_impl(transportId, "SimpleTcp");
+      TheTransportFactory->create_transport_impl(transportId);
 
     OpenDDS::DCPS::PublisherImpl* publisher_i =
       dynamic_cast<OpenDDS::DCPS::PublisherImpl*>(publisher.in());
@@ -169,7 +173,7 @@ ParticipantTask::svc()
       ++progress;
     }
    
-    // NOTE: This is intentional! 
+    // This is intentional! 
     publisher->delete_datawriter(writer);
     
     // Clean-up!
