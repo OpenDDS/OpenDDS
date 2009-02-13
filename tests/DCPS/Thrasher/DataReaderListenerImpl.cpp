@@ -5,7 +5,7 @@
 #include "DataReaderListenerImpl.h"
 #include "FooTypeTypeSupportC.h"
 
-DataReaderListenerImpl::DataReaderListenerImpl(int& received_samples)
+DataReaderListenerImpl::DataReaderListenerImpl(size_t& received_samples)
   : received_samples_(received_samples)
 {}
 

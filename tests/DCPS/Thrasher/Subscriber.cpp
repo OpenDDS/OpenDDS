@@ -17,8 +17,8 @@
 #include "DataReaderListenerImpl.h"
 #include "FooTypeTypeSupportImpl.h"
 
-int expected_samples = 0;
-int received_samples = 0;
+size_t expected_samples = 0;
+size_t received_samples = 0;
 
 void
 parse_args(int& argc, ACE_TCHAR** argv)
