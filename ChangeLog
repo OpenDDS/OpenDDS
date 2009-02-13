@@ -66,8 +66,8 @@ Fri Feb 13 05:37:18 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * tests/DCPS/Thrasher/publisher.ini:
         * tests/DCPS/Thrasher/subscriber.ini:
 
-        Initial pass of the Thrasher DCPS stress test. This commit
-        includes the subscribing side of the test.
+          Initial pass of the Thrasher DCPS stress test. This commit
+          includes the subscribing side of the test.
 
 Fri Feb 13 02:29:08 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
