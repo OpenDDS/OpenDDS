@@ -47,7 +47,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
   parse_args(argc, argv);
   
   ACE_DEBUG((LM_INFO,
-             ACE_TEXT("(%P|%t) SUBSCRIBER STARTED :: expected_samples: %d\n"),
+             ACE_TEXT("(%P|%t) SUBSCRIBER STARTED :: expected_samples = %d\n"),
              expected_samples));
   try
   {
@@ -168,7 +168,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
   }
   
   ACE_DEBUG((LM_INFO,
-             ACE_TEXT("(%P|%t) SUBSCRIBER FINISHED :: received_samples: %d\n"),
+             ACE_TEXT("(%P|%t) SUBSCRIBER FINISHED :: received_samples = %d\n"),
              received_samples));
 
   return !received_samples == expected_samples; 
