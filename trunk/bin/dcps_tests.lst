@@ -170,3 +170,4 @@ tests/DCPS/Thrasher/run_test.pl low: !DCPS_MIN
 tests/DCPS/Thrasher/run_test.pl medium: !DCPS_MIN
 tests/DCPS/Thrasher/run_test.pl high: !DCPS_MIN
 tests/DCPS/Thrasher/run_test.pl aggressive: !DCPS_MIN
+tests/DCPS/Thrasher/run_test.pl single: !DCPS_MIN

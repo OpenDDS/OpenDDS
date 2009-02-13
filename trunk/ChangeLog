@@ -1,3 +1,15 @@
+Fri Feb 13 22:38:09 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/Thrasher/ParticipantTask.cpp:
+        * tests/DCPS/Thrasher/ProgressIndicator.h:
+        * tests/DCPS/Thrasher/ProgressIndicator.cpp:
+        * tests/DCPS/Thrasher/Subscriber.cpp:
+        * tests/DCPS/Thrasher/run_test.pl:
+
+          Final pass at Thrasher tests.  Added new test on scoreboard
+          to help catch single sample failures.
+
 Fri Feb 13 21:32:23 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * bin/dcps_tests.lst:
