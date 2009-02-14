@@ -26,7 +26,7 @@ ProgressIndicator::operator++()
 {
   ++curr_;
 
-  int pct = curr_ / double(max_) * 100;
+  unsigned pct = curr_ / double(max_) * 100;
   if (pct > last_)
   {
     ACE_DEBUG((LM_DEBUG, format_, pct, curr_));

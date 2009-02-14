@@ -20,11 +20,10 @@ public:
 
 private:
   const char* format_;
- 
   const std::size_t max_;
-  std::size_t curr_;
-  
   unsigned grad_;
+  
+  std::size_t curr_;
   unsigned last_; 
 };
 
