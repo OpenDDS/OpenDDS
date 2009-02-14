@@ -1,3 +1,11 @@
+Sat Feb 14 16:58:56 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/Thrasher/DataReaderListenerImpl.cpp:
+        * tests/DCPS/Thrasher/ProgressIndicator.h:
+        * tests/DCPS/Thrasher/ProgressIndicator.cpp:
+
+          Fixed gcc warnings.
+
 Fri Feb 13 22:38:09 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * bin/dcps_tests.lst:

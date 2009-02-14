@@ -44,42 +44,42 @@ DataReaderListenerImpl::on_data_available(
 
 void
 DataReaderListenerImpl::on_requested_deadline_missed(
-    DDS::DataReader_ptr reader,
-    const DDS::RequestedDeadlineMissedStatus& status)
+    DDS::DataReader_ptr,
+    const DDS::RequestedDeadlineMissedStatus&)
   throw (CORBA::SystemException)
 {}
 
 void
 DataReaderListenerImpl::on_requested_incompatible_qos(
-    DDS::DataReader_ptr reader,
-    const DDS::RequestedIncompatibleQosStatus& status)
+    DDS::DataReader_ptr,
+    const DDS::RequestedIncompatibleQosStatus&)
   throw (CORBA::SystemException)
 {}
 
 void
 DataReaderListenerImpl::on_liveliness_changed(
-    DDS::DataReader_ptr reader,
-    const DDS::LivelinessChangedStatus& status)
+    DDS::DataReader_ptr,
+    const DDS::LivelinessChangedStatus&)
   throw (CORBA::SystemException)
 {}
 
 void
 DataReaderListenerImpl::on_subscription_match(
-    DDS::DataReader_ptr reader,
-    const DDS::SubscriptionMatchStatus& status)
+    DDS::DataReader_ptr,
+    const DDS::SubscriptionMatchStatus&)
   throw (CORBA::SystemException)
 {}
 
 void
 DataReaderListenerImpl::on_sample_rejected(
-    DDS::DataReader_ptr reader,
-    const DDS::SampleRejectedStatus& status)
+    DDS::DataReader_ptr,
+    const DDS::SampleRejectedStatus&)
   throw (CORBA::SystemException)
 {}
 
 void
 DataReaderListenerImpl::on_sample_lost(
-    DDS::DataReader_ptr reader,
-    const DDS::SampleLostStatus& status)
+    DDS::DataReader_ptr,
+    const DDS::SampleLostStatus&)
   throw (CORBA::SystemException)
 {}
