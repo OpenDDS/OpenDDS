@@ -1,3 +1,11 @@
+Mon Feb 16 15:36:52 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/DCPS/Distributed/src/Options.cpp:
+
+          Same change as in:
+          Wed Feb 11 18:35:38 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+          To allow SunCC to compile this test.
+
 Mon Feb 16 15:30:43 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * performance-tests/DCPS/Distributed/src/Options.h:

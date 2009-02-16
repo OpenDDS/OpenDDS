@@ -3,8 +3,8 @@
 // $Id$
 
 #include "dds/DCPS/debug.h"
-#include "Options.h"
 #include "EntityProfiles.h"
+#include "Options.h"
 #include "ace/Arg_Shifter.h"
 #include "ace/Log_Priority.h"
 #include "ace/Log_Msg.h"
