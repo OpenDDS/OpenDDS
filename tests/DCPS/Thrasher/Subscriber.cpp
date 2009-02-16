@@ -169,6 +169,9 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     }
     while (matches.current_count > 0);
 
+    /// Stop after receiving data.
+    ACE_OS::sleep( 5);
+
     ws->detach_condition(cond);
 
     // Clean-up!

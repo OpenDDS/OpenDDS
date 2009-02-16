@@ -17,6 +17,10 @@ $opts = new PerlACE::ConfigList->check_config ('STATIC') ? ''
 $pub_opts = "$opts ";
 $sub_opts = "$opts ";
 
+# $sub_opts .= "-DCPSDebugLevel 4 -ORBVerboseLogging 1 ";
+# $pub_opts .= "-DCPSBit 0 ";
+# $sub_opts .= "-DCPSBit 0 ";
+
 my $arg = shift;
 if ($arg eq 'low') {
   $pub_opts .= "-t 8 -s 128";
@@ -57,6 +61,8 @@ $Subscriber = PerlDDS::create_process("subscriber", "$sub_opts");
 
 $Publisher = PerlDDS::create_process("publisher", "$pub_opts ");
 
+
+print $DCPSREPO->CommandLine() . "\n";
 $DCPSREPO->Spawn();
 if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
     print STDERR "ERROR: waiting for DCPSInfo IOR file\n";
@@ -64,7 +70,10 @@ if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
     exit 1;
 }
 
+print $Subscriber->CommandLine() . "\n";
 $Subscriber->Spawn();
+
+print $Publisher->CommandLine() . "\n";
 $Publisher->Spawn();
 
 $SubscriberResult = $Subscriber->WaitKill(300);
@@ -73,7 +82,7 @@ if ($SubscriberResult != 0) {
   $status = 1;
 }
 
-$PublisherResult = $Publisher->WaitKill (300);
+$PublisherResult = $Publisher->WaitKill (15);
 if ($PublisherResult != 0) {
   print STDERR "ERROR: publisher returned $PublisherResult \n";
   $status = 1;

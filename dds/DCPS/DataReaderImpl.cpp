@@ -216,8 +216,9 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
                                        const OpenDDS::DCPS::WriterAssociationSeq & writers)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
-  DBG_ENTRY_LVL("DataReaderImpl","add_associations",6);
-
+  //
+  // The following block is for diagnostic purposes only.
+  //
   if (DCPS_debug_level >= 1)
   {
     ::OpenDDS::DCPS::GuidConverter readerConverter( yourId);
@@ -234,6 +235,10 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
     ));
   }
 
+  //
+  // This block prevents adding associations to deleted readers.
+  // Presumably this is a "good thing(tm)".
+  //
   if (entity_deleted_ == true)
   {
     if (DCPS_debug_level >= 1)
@@ -243,16 +248,28 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
     return;
   }
 
+  //
+  // We are being called back from the repository before we are done
+  // processing after our call to the repository that caused this call
+  // (from the repository) to be made.
+  //
   if (GUID_UNKNOWN == subscription_id_)
   {
     // add_associations was invoked before DCSPInfoRepo::add_subscription() returned.
     subscription_id_ = yourId;
   }
 
+  //
+  // We do the following while holding the publication_handle_lock_.
+  //
   {
     ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->publication_handle_lock_);
 
-    // keep track of writers associate with this reader
+    //
+    // For each writer in the list of writers to associate with, we
+    // create a WriterInfo and a WriterStats object and store them in
+    // our internal maps.
+    //
     CORBA::ULong wr_len = writers.length ();
     for (CORBA::ULong i = 0; i < wr_len; i++)
     {
@@ -283,11 +300,17 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
       }
     }
 
-    // add associations to the transport before using
-    // Built-In Topic support and telling the listener.
-    // This call appears to be idempotent.
+    //
+    // Propagate the add_associations processing down into the Transport
+    // layer here.  This will establish the transport support and reserve
+    // usage of an existing connection or initiate creation of a new
+    // connection if no suitable connection is available.
+    //
     this->subscriber_servant_->add_associations(writers, this, qos_);
 
+    //
+    // LIVELINESS policy timers are managed here.
+    //
     if (liveliness_lease_duration_  != ACE_Time_Value::zero)
     {
       // this call will start the timer if it is not already set
@@ -303,10 +326,22 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
       this->handle_timeout (now, this);
     }
     // else - no timer needed when LIVELINESS.lease_duration is INFINITE
-  }
 
+  }
+  //
+  // We no longer hold the publication_handle_lock_.
+  //
+
+  //
+  // We only do the following processing for readers that are *not*
+  // readers of Builtin Topics.
+  //
   if (! is_bit_)
     {
+      //
+      // We derive a list of writer Id values corresponding to the writer
+      // argument list.
+      //
       WriterIdSeq wr_ids;
       CORBA::ULong wr_len = writers.length ();
       wr_ids.length (wr_len);
@@ -316,10 +351,18 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
         wr_ids[i] = writers[i].writerId;
       }
 
+      //
+      // Here we convert the list of writer Id values to local handle
+      // values.
+      //
       ::DDS::InstanceHandleSeq handles;
       if (this->bit_lookup_instance_handles (wr_ids, handles) == false)
         return;
 
+      //
+      // We acquire the publication_handle_lock_ for the remainder of our
+      // processing.
+      //
       ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->publication_handle_lock_);
       wr_len = handles.length ();
 
@@ -455,15 +498,19 @@ void DataReaderImpl::remove_associations (
 
   if (! is_bit_)
   {
-    // The writer should be in the id_to_handle map at this time so
-    // log with error.
+    // The writer should be in the id_to_handle map at this time.  Note
+    // it if it not there.
     if (this->cache_lookup_instance_handles (updated_writers, handles) == false)
     {
-      ACE_ERROR ((LM_ERROR, "(%P|%t) DataReaderImpl::remove_associations: "
-        "cache_lookup_instance_handles failed.\n"));
-      return;
+      if( DCPS_debug_level > 4) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations: ")
+          ACE_TEXT("cache_lookup_instance_handles failed.\n")
+        ));
+      }
     }
 
+    /// @TODO: wr_len bounds updated_writers at this point.
     for (CORBA::ULong i = 0; i < wr_len; ++i)
     {
       id_to_handle_map_.erase(writers[i]);
@@ -1074,7 +1121,7 @@ DataReaderImpl::writer_activity(PublicationId writer_id)
       ACE_Time_Value when = ACE_OS::gettimeofday ();
       iter->second.received_activity (when);
 
-  } else if( DCPS_debug_level > 0) {
+  } else if( DCPS_debug_level > 4) {
     // This may not be an error since it could happen that the sample
     // is delivered to the datareader after the write is dis-associated
     // with this datareader.
