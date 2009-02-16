@@ -1,3 +1,17 @@
+Mon Feb 16 15:30:43 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/DCPS/Distributed/src/Options.h:
+        * performance-tests/DCPS/Distributed/src/Options.cpp:
+        * performance-tests/DCPS/Distributed/src/Writer.h:
+
+          Fixed warnings and compile errors with TAO 1.4a (ACE_String_Base
+          has no empty() method, use length().)
+
+        * tests/DCPS/Thrasher/run_test.pl:
+
+          Perl scripts should not reference LD_LIBRARY_PATH directly.
+          Changed to use the helper function for adding to the runtime path.
+
 Sat Feb 14 16:58:56 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * tests/DCPS/Thrasher/DataReaderListenerImpl.cpp:

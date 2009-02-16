@@ -463,7 +463,7 @@ Options::loadParticipant(
   // UserData      = <string>     OPTIONAL
   valueString.clear();
   heap.get_string_value( sectionKey, USERDATA_KEYNAME, valueString);
-  if( !valueString.empty()) {
+  if (valueString.length() > 0) {
     profile->qos.user_data.value.length( valueString.length());
     profile->qos.user_data.value.replace(
       valueString.length(),
@@ -548,7 +548,7 @@ Options::loadTopic(
 
   // TopicData                           = <string>
   heap.get_string_value( sectionKey, TOPICDATA_KEYNAME, valueString);
-  if( !valueString.empty()) {
+  if (valueString.length() > 0) {
     profile->qos.topic_data.value.length( valueString.length());
     profile->qos.topic_data.value.replace(
       valueString.length(),
@@ -571,7 +571,7 @@ Options::loadTopic(
   // Durability                          = <string> # One of VOLATILE, LOCAL, TRANSIENT, PERSISTENT
   valueString.clear();
   heap.get_string_value( sectionKey, DURABILITY_KEYNAME, valueString);
-  if( !valueString.empty()) {
+  if (valueString.length() > 0) {
     if( valueString == "VOLATILE") {
       profile->qos.durability.kind = ::DDS::VOLATILE_DURABILITY_QOS;
 
@@ -607,7 +607,7 @@ Options::loadTopic(
   // DurabilityServiceDuration           = <number>
   valueString.clear();
   heap.get_string_value( sectionKey, DURABILITYSERVICEDURATION_KEYNAME, valueString);
-  if( !valueString.empty()) {
+  if (valueString.length() > 0) {
     profile->qos.durability_service.service_cleanup_delay.nanosec = 0;
     profile->qos.durability_service.service_cleanup_delay.sec
       = ACE_OS::atoi( valueString.c_str());
@@ -625,7 +625,7 @@ Options::loadTopic(
   // DurabilityServiceHistoryKind        = <string> # One of ALL, LAST
   valueString.clear();
   heap.get_string_value( sectionKey, DURABILITYSERVICEHISTORYKIND_KEYNAME, valueString);
-  if( !valueString.empty()) {
+  if (valueString.length() > 0) {
     if( valueString == "ALL") {
       profile->qos.durability_service.history_kind = ::DDS::KEEP_ALL_HISTORY_QOS;
 
@@ -655,7 +655,7 @@ Options::loadTopic(
   // DurabilityServiceHistoryDepth       = <number>
   valueString.clear();
   heap.get_string_value( sectionKey, DURABILITYSERVICEHISTORYDEPTH_KEYNAME, valueString);
-  if( !valueString.empty()) {
+  if (valueString.length() > 0) {
     profile->qos.durability_service.history_depth = ACE_OS::atoi( valueString.c_str());
     if( this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
@@ -671,7 +671,7 @@ Options::loadTopic(
   // DurabilityServiceSamples            = <number>
   valueString.clear();
   heap.get_string_value( sectionKey, DURABILITYSERVICESAMPLES_KEYNAME, valueString);
-  if( !valueString.empty()) {
+  if (valueString.length() > 0) {
     profile->qos.durability_service.max_samples = ACE_OS::atoi( valueString.c_str());
     if( this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
@@ -687,7 +687,7 @@ Options::loadTopic(
   // DurabilityServiceInstances          = <number>
   valueString.clear();
   heap.get_string_value( sectionKey, DURABILITYSERVICEINSTANCES_KEYNAME, valueString);
-  if( !valueString.empty()) {
+  if (valueString.length() > 0) {
     profile->qos.durability_service.max_instances = ACE_OS::atoi( valueString.c_str());
     if( this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
@@ -703,7 +703,7 @@ Options::loadTopic(
   // DurabilityServiceSamplesPerInstance = <number>
   valueString.clear();
   heap.get_string_value( sectionKey, DURABILITYSERVICESAMPLESPERINSTANCE_KEYNAME, valueString);
-  if( !valueString.empty()) {
+  if (valueString.length() > 0) {
     profile->qos.durability_service.max_samples_per_instance
       = ACE_OS::atoi( valueString.c_str());
     if( this->verbose()) {
@@ -720,7 +720,7 @@ Options::loadTopic(
   // Deadline                            = <number>
   valueString.clear();
   heap.get_string_value( sectionKey, DEADLINE_KEYNAME, valueString);
-  if( !valueString.empty()) {
+  if (valueString.length() > 0) {
     profile->qos.deadline.period.nanosec = 0;
     profile->qos.deadline.period.sec = ACE_OS::atoi( valueString.c_str());
     if( this->verbose()) {
@@ -737,7 +737,7 @@ Options::loadTopic(
   // LatencyBudget                       = <number>
   valueString.clear();
   heap.get_string_value( sectionKey, LATENCYBUDGET_KEYNAME, valueString);
-  if( !valueString.empty()) {
+  if (valueString.length() > 0) {
     profile->qos.latency_budget.duration.nanosec = 0;
     profile->qos.latency_budget.duration.sec = ACE_OS::atoi( valueString.c_str());
     if( this->verbose()) {
@@ -754,7 +754,7 @@ Options::loadTopic(
   // LivelinessKind                      = <string> # One of AUTOMATIC, PARTICIPANT, TOPIC
   valueString.clear();
   heap.get_string_value( sectionKey, LIVELINESSKIND_KEYNAME, valueString);
-  if( !valueString.empty()) {
+  if (valueString.length() > 0) {
     if( valueString == "AUTOMATIC") {
       profile->qos.liveliness.kind = ::DDS::AUTOMATIC_LIVELINESS_QOS;
 
@@ -787,7 +787,7 @@ Options::loadTopic(
   // LivelinessDuration                  = <number>
   valueString.clear();
   heap.get_string_value( sectionKey, LIVELINESSDURATION_KEYNAME, valueString);
-  if( !valueString.empty()) {
+  if (valueString.length() > 0) {
     profile->qos.liveliness.lease_duration.nanosec = 0;
     profile->qos.liveliness.lease_duration.sec = ACE_OS::atoi( valueString.c_str());
     if( this->verbose()) {
@@ -804,7 +804,7 @@ Options::loadTopic(
   // ReliabilityKind                     = <string> # One of BEST_EFFORT, RELIABLE
   valueString.clear();
   heap.get_string_value( sectionKey, RELIABILITYKIND_KEYNAME, valueString);
-  if( !valueString.empty()) {
+  if (valueString.length() > 0) {
     if( valueString == "BEST_EFFORT") {
       profile->qos.reliability.kind = ::DDS::BEST_EFFORT_RELIABILITY_QOS;
 
@@ -834,7 +834,7 @@ Options::loadTopic(
   // ReliabilityMaxBlocking              = <number>
   valueString.clear();
   heap.get_string_value( sectionKey, RELIABILITYMAXBLOCKING_KEYNAME, valueString);
-  if( !valueString.empty()) {
+  if (valueString.length() > 0) {
     profile->qos.reliability.max_blocking_time.nanosec = 0;
     profile->qos.reliability.max_blocking_time.sec = ACE_OS::atoi( valueString.c_str());
     if( this->verbose()) {
@@ -851,7 +851,7 @@ Options::loadTopic(
   // DestinationOrder                    = <string> # One of SOURCE, RECEPTION
   valueString.clear();
   heap.get_string_value( sectionKey, DESTINATIONORDER_KEYNAME, valueString);
-  if( !valueString.empty()) {
+  if (valueString.length() > 0) {
     if( valueString == "SOURCE") {
       profile->qos.destination_order.kind = ::DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS;
 
@@ -881,7 +881,7 @@ Options::loadTopic(
   // HistoryKind                         = <string> # One of ALL, LAST
   valueString.clear();
   heap.get_string_value( sectionKey, HISTORYKIND_KEYNAME, valueString);
-  if( !valueString.empty()) {
+  if (valueString.length() > 0) {
     if( valueString == "ALL") {
       profile->qos.history.kind = ::DDS::KEEP_ALL_HISTORY_QOS;
 
@@ -911,7 +911,7 @@ Options::loadTopic(
   // HistoryDepth                        = <number>
   valueString.clear();
   heap.get_string_value( sectionKey, HISTORYDEPTH_KEYNAME, valueString);
-  if( !valueString.empty()) {
+  if (valueString.length() > 0) {
     profile->qos.history.depth = ACE_OS::atoi( valueString.c_str());
     if( this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
@@ -927,7 +927,7 @@ Options::loadTopic(
   // ResourceMaxSamples                  = <number>
   valueString.clear();
   heap.get_string_value( sectionKey, RESOURCEMAXSAMPLES_KEYNAME, valueString);
-  if( !valueString.empty()) {
+  if (valueString.length() > 0) {
     profile->qos.resource_limits.max_samples = ACE_OS::atoi( valueString.c_str());
     if( this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
@@ -943,7 +943,7 @@ Options::loadTopic(
   // ResourceMaxInstances                = <number>
   valueString.clear();
   heap.get_string_value( sectionKey, RESOURCEMAXINSTANCES_KEYNAME, valueString);
-  if( !valueString.empty()) {
+  if (valueString.length() > 0) {
     profile->qos.resource_limits.max_instances = ACE_OS::atoi( valueString.c_str());
     if( this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
@@ -959,7 +959,7 @@ Options::loadTopic(
   // ResourceMaxSamplesPerInstance       = <number>
   valueString.clear();
   heap.get_string_value( sectionKey, RESOURCEMAXSAMPLESPERINSTANCE_KEYNAME, valueString);
-  if( !valueString.empty()) {
+  if (valueString.length() > 0) {
     profile->qos.resource_limits.max_samples_per_instance = ACE_OS::atoi( valueString.c_str());
     if( this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
@@ -975,7 +975,7 @@ Options::loadTopic(
   // TransportPriority                   = <number>
   valueString.clear();
   heap.get_string_value( sectionKey, TRANSPORTPRIORITY_KEYNAME, valueString);
-  if( !valueString.empty()) {
+  if (valueString.length() > 0) {
     profile->qos.transport_priority.value = ACE_OS::atoi( valueString.c_str());
     if( this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
@@ -991,7 +991,7 @@ Options::loadTopic(
   // LifespanDuration                    = <number>
   valueString.clear();
   heap.get_string_value( sectionKey, LIFESPANDURATION_KEYNAME, valueString);
-  if( !valueString.empty()) {
+  if (valueString.length() > 0) {
     profile->qos.lifespan.duration.nanosec = 0;
     profile->qos.lifespan.duration.sec = ACE_OS::atoi( valueString.c_str());
     if( this->verbose()) {
@@ -1008,7 +1008,7 @@ Options::loadTopic(
   // OwnershipKind                       = <string> # One of SHARED, EXCLUSIVE
   valueString.clear();
   heap.get_string_value( sectionKey, OWNERSHIPKIND_KEYNAME, valueString);
-  if( !valueString.empty()) {
+  if (valueString.length() > 0) {
     if( valueString == "SHARED") {
       profile->qos.ownership.kind = ::DDS::SHARED_OWNERSHIP_QOS;
 
@@ -1105,7 +1105,7 @@ Options::loadPublication(
   // Presentation                        = <string> # One of INSTANCE, TOPIC, GROUP
   valueString.clear();
   heap.get_string_value( sectionKey, PRESENTATION_KEYNAME, valueString);
-  if( !valueString.empty()) {
+  if (valueString.length() > 0) {
     if( valueString == "INSTANCE") {
       profile->publisherQos.presentation.access_scope = ::DDS::INSTANCE_PRESENTATION_QOS;
 
@@ -1172,7 +1172,7 @@ Options::loadPublication(
   // GroupData                           = <string>
   valueString.clear();
   heap.get_string_value( sectionKey, GROUPDATA_KEYNAME, valueString);
-  if( !valueString.empty()) {
+  if (valueString.length() > 0) {
     profile->publisherQos.group_data.value.length( valueString.length());
     profile->publisherQos.group_data.value.replace(
       valueString.length(),
