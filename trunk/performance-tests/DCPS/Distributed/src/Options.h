@@ -25,10 +25,10 @@ class ACE_Configuration_Section_Key;
 
 namespace Test {
 
-  class ParticipantProfile;
-  class TopicProfile;
-  class PublicationProfile;
-  class SubscriptionProfile;
+  struct ParticipantProfile;
+  struct TopicProfile;
+  struct PublicationProfile;
+  struct SubscriptionProfile;
 
 /**
  * @class Options

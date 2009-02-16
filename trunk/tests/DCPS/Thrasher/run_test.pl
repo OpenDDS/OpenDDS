@@ -5,11 +5,12 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
-use Env qw(DDS_ROOT ACE_ROOT @LD_LIBRARY_PATH);
-BEGIN { unshift @LD_LIBRARY_PATH, "../FooType"; }
+use Env qw(DDS_ROOT ACE_ROOT);
 use lib "$DDS_ROOT/bin";
 use lib "$ACE_ROOT/bin";
 use DDS_Run_Test;
+
+PerlDDS::add_lib_path('../FooType');
 
 $opts = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : "-ORBSvcConf tcp.conf";

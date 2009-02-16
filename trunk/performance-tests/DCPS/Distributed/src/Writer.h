@@ -9,7 +9,7 @@
 
 namespace Test {
 
-class PublicationProfile;
+struct PublicationProfile;
 
 class Writer : public ACE_Task_Base {
   public:
