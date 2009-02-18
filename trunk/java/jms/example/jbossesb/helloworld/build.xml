@@ -5,7 +5,7 @@
     Author:  Steven Stallion
     Version: $Revision$
 -->
-<project name="helloworld" default="compile" basedir=".">
+<project name="opendds-helloworld" default="compile" basedir=".">
     <property name="common.dir" value="${basedir}/../common"/>
     <property name="build.dir" value="${basedir}/build"/>
     <property name="lib.dir" value="${basedir}/lib"/>
