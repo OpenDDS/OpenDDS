@@ -5,7 +5,7 @@
     Author:  Steven Stallion
     Version: $Revision$
 -->
-<project name="opendds-esb-router" default="compile" basedir=".">
+<project name="opendds-router" default="compile" basedir=".">
     <property name="common.dir" value="${basedir}/../common"/>
     <property name="build.dir" value="${basedir}/build"/>
     <property name="lib.dir" value="${basedir}/lib"/>
@@ -58,7 +58,7 @@
                 <include name="META-INF/*"/>
             </fileset>
             <fileset dir="${build.dir}">
-                <include name="opendds-esb-router.jar"/>
+                <include name="${ant.project.name}.jar"/>
             </fileset>
         </jar>
     </target>
