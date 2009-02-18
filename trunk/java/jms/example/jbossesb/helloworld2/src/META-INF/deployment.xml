@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Id$
+-->
+<jbossesb-deployment>
+    <depends>OpenDDS:destination=Topic,type=Topic</depends>
+    <depends>jboss.esb:deployment=opendds-router.esb</depends>
+</jbossesb-deployment>
