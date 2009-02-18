@@ -42,8 +42,8 @@ a general overview of the OpenDDS Java bindings.
      Windows => cd %DDS_ROOT%\java\jms
                 ant all
 
-     NOTE: This will generate a JCA 1.5 compatible RAR (Resource Adapter
-     aRchive) under build and run a series of unit tests to verify the build.
+     NOTE: This will create a JCA 1.5 compatible RAR (Resource Adapter
+     aRchive) under build and run a series of unit tests for verification.
 
 
 ======================================================================
