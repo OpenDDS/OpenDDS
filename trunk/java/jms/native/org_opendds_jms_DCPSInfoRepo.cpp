@@ -68,9 +68,7 @@ throw_exception(JNIEnv* env, const char* name, const char* message = 0)
 {
   jclass throwable = env->FindClass(name);
   if (throwable != 0)
-  {
     env->ThrowNew(throwable, message);
-  }
 }
 
 void

@@ -1,3 +1,9 @@
+Wed Feb 18 23:24:36 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/native/org_opendds_jms_DCPSInfoRepo.cpp:
+
+          Minor formatting changes.
+
 Wed Feb 18 20:50:14 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/example/jbossesb/router:
