@@ -27,7 +27,7 @@
                               maxThreads="32"
                               is-gateway="false"/>
             </listeners>
-            <actions>
+            <actions mep="OneWay">
                 <action name="action"
                         class="org.jboss.soa.esb.actions.SystemPrintln">
                     <property name="printfull" value="true"/>
