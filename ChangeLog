@@ -1,31 +1,37 @@
+Wed Feb 18 13:51:45 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/example/jbossesb:
+
+          Renamed from jboss-esb.
+
 Mon Feb 16 22:16:27 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
 
-	  Started annotating some routines to help understand what the
-	  desired behavior is.  Increased the debug level at which some
-	  diagnostic messages are produced.  Demoted an error message
-	  to a diagnostic message and resume processing rather than
-	  terminating it.
+          Started annotating some routines to help understand what the
+          desired behavior is.  Increased the debug level at which some
+          diagnostic messages are produced.  Demoted an error message
+          to a diagnostic message and resume processing rather than
+          terminating it.
 
         * dds/DCPS/Service_Participant.h:
         * dds/DCPS/Service_Participant.cpp:
 
-	  Added a lock to be used for guarding access to internal maps.
-	  Changed the init_bit_transport_impl() method to be by domain
-	  rather than repository key.  Changed the RepoTransportMap to be
-	  keyed by domain rather than repository key.  Guarded internal
-	  map accesses using the new lock.
+          Added a lock to be used for guarding access to internal maps.
+          Changed the init_bit_transport_impl() method to be by domain
+          rather than repository key.  Changed the RepoTransportMap to be
+          keyed by domain rather than repository key.  Guarded internal
+          map accesses using the new lock.
 
         * tests/DCPS/Thrasher/Subscriber.cpp:
 
-	  Added a delay to account for a known reception issue at test
-	  termination time.
+          Added a delay to account for a known reception issue at test
+          termination time.
 
         * tests/DCPS/Thrasher/run_test.pl:
 
-	  Added some diagnostics and (commented) additional diagnostic
-	  parameter specifications.
+          Added some diagnostics and (commented) additional diagnostic
+          parameter specifications.
 
 Mon Feb 16 15:36:52 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
