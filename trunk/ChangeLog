@@ -1,3 +1,9 @@
+Wed Feb 18 20:50:14 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/example/jbossesb/router:
+
+          Added first pass at ESB JMS message router.
+
 Wed Feb 18 15:28:52 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/INSTALL:
