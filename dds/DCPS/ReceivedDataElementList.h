@@ -5,6 +5,8 @@
 #ifndef TAO_DDS_DCPS_RECEIVEDDATAELEMENTLIST_H
 #define TAO_DDS_DCPS_RECEIVEDDATAELEMENTLIST_H
 
+#include "ace/Recursive_Thread_Mutex.h"
+
 #include "dcps_export.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 
@@ -78,9 +80,12 @@ namespace OpenDDS
       /// the previous data sample in the ReceivedDataElementList
       ReceivedDataElement *previous_data_sample_ ;
 
-
       /// the next data sample in the ReceivedDataElementList
       ReceivedDataElement *next_data_sample_ ;
+
+      /// Silly external lock to handle atomic inc/dec operations.
+      ACE_Recursive_Thread_Mutex lock_;
+
     } ; // class ReceivedDataElement
 
     class OpenDDS_Dcps_Export ReceivedDataElementList
