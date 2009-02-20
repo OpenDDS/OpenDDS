@@ -829,7 +829,7 @@ namespace OpenDDS
                   // Attach each DomainParticipant in this domain to this
                   // repository.
                   RepoId id = current->svt_->get_id();
-                  repoList.push_back( std::make_pair( location->second.in(), id));
+                  repoList.push_back(std::make_pair(location->second, id));
                   if( DCPS_debug_level > 0) {
                     ::OpenDDS::DCPS::GuidConverter converter( id);
                     ACE_DEBUG((LM_DEBUG,

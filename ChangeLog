@@ -1,3 +1,10 @@
+Fri Feb 20 16:14:01 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Removed a .in().  In this case we need the _var, not the _ptr.
+          This resolves a compiler error on SunCC.
+
 Fri Feb 20 15:08:32 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * java/jms/README:
