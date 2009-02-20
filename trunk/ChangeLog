@@ -1,8 +1,14 @@
+Fri Feb 20 15:08:32 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * java/jms/README:
+
+          Reworded some of the Windows build info.
+
 Thu Feb 19 15:45:47 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
         * dds/DCPS/ReceivedDataElementList.h:
-        
+
           Fixed silly double-delete condition in ReceivedDataElementList.
           NOTE: This container should be re-thought out!
 
