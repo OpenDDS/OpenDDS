@@ -32,10 +32,6 @@ ProgressIndicator::operator++()
     ACE_DEBUG((LM_DEBUG, format_, pct, curr_));
     last_ += grad_;
   }
-  else if (curr_ == max_)
-  {
-    ACE_DEBUG((LM_DEBUG, format_, 100, curr_));
-  }
   
   return *this;
 }
