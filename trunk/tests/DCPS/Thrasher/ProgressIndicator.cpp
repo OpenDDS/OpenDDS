@@ -15,7 +15,7 @@ ProgressIndicator::ProgressIndicator(const char* format,
     max_(max),
     grad_(grad),
     curr_(0),
-    last_(grad_)
+    last_(grad_ - 1)
 {}
 
 ProgressIndicator::~ProgressIndicator()
