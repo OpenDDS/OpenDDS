@@ -23,8 +23,8 @@ private:
   const std::size_t max_;
   const std::size_t grad_;
   
-  std::size_t curr_;
   std::size_t last_; 
+  std::size_t curr_;
 };
 
 #endif /* DCPS_THRASHER_PROGRESSINDICATOR_H */
