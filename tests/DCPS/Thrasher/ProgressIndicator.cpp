@@ -10,7 +10,7 @@
 
 ProgressIndicator::ProgressIndicator(const char* format,
                                      const std::size_t max,
-                                     unsigned grad)
+                                     const std::size_t grad)
   : format_(format),
     max_(max),
     grad_(grad),
@@ -26,13 +26,13 @@ ProgressIndicator::operator++()
 {
   ++curr_;
 
-  unsigned pct = curr_ / double(max_) * 100;
+  std::size_t pct = std::size_t(curr_ / double(max_) * 100);
   if (pct > last_)
   {
     ACE_DEBUG((LM_DEBUG, format_, pct, curr_));
     last_ += grad_;
   }
-  else if (curr_ >= max_)
+  else if (curr_ == max_)
   {
     ACE_DEBUG((LM_DEBUG, format_, 100, curr_));
   }
