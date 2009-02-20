@@ -16,12 +16,10 @@ ProgressIndicator::ProgressIndicator(const char* format,
     grad_(grad),
     last_(grad_ - 1),
     curr_(0)
-{
-}
+{}
 
 ProgressIndicator::~ProgressIndicator()
-{
-}
+{}
 
 ProgressIndicator&
 ProgressIndicator::operator++()
