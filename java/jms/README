@@ -232,7 +232,8 @@ resource adapter:
     platforms.  All restrictions defined in $DDS_ROOT/java/README must
     be observed.
   - On Windows platforms, the 'opendds.native.debug' system property should
-    be set to 'true' if OpenDDS was built with the debug=1 platform macro.
+    be set to 'true' if OpenDDS was built in "debug" mode (native libraries
+    have names ending in d.dll).
     Failure to set this system property will result in incorrect library
     loading behavior.
   - Some application servers do not correctly load native libraries packaged
