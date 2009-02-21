@@ -60,7 +60,7 @@ generator_erl::generate_enum(AST_Enum* node, vector<AST_EnumVal*>& v)
   os << endl // empty line
      << "from_int(I) -> {?MODULE, I}." << endl
      << endl // empty line
-     << "value(E) -> {?MODULE, I} = E, I." << endl;
+     << "value({?MODULE, I}) -> I." << endl;
 
   return true;
 }
