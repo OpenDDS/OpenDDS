@@ -2,7 +2,7 @@
 # $Id$
 #
 
-package Erlang::EDoc;
+package PerlDDS::EDoc;
 
 use strict;
 use warnings;

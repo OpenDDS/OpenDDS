@@ -14,7 +14,7 @@ project : erlang_otp {
 
 project(*cpp) {
   exename       = tao_ic
-  exeout        = $(DDS_ROOT)/erlang/bin
+  exeout        = $(DDS_ROOT)/bin
   after        += TAO_IDL_FE
   
   includes     += cpp_src $(TAO_ROOT) \
