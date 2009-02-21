@@ -1,3 +1,10 @@
+Sat Feb 21 21:02:48 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * lang:
+        * erlang:
+
+          Moved erlang support under new lang subdirectory.
+
 Sat Feb  7 21:50:27 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * erlang/MPC/modules/TAO_ICHelper.pm:
