@@ -10,11 +10,11 @@ use strict;
 use warnings;
 
 use Env qw(DDS_ROOT);
-use lib qq($DDS_ROOT/erlang/bin);
+use lib qq($DDS_ROOT/bin);
 
-use Erlang::EDoc;
+use PerlDDS::EDoc;
 
-my $edoc = new Erlang::EDoc;
+my $edoc = new PerlDDS::EDoc;
 $edoc->files('../src',
   '{dir, "html"}',
   '{overview, "overview.edoc"}',
