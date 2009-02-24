@@ -52,8 +52,7 @@
     <target name="esb" depends="jar">
         <jar jarfile="${build.dir}/${ant.project.name}.esb"
              compress="${esb.compress}"
-             index="${esb.index}"
-             update="true">
+             index="${esb.index}">
             <fileset dir="${src.dir}">
                 <include name="META-INF/*"/>
             </fileset>

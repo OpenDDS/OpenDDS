@@ -1,3 +1,13 @@
+Tue Feb 24 16:18:09 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/build.xml:
+        * java/jms/example/jbossesb/helloworld/build.xml:
+        * java/jms/example/jbossesb/helloworld2/build.xml:
+        * java/jms/example/jbossesb/router/build.xml:
+        * performance-tests/DCPS/Distributed/src/Options.cpp:
+
+          Fixed nightly build warnings.
+
 Fri Feb 20 20:34:32 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * tests/DCPS/Thrasher/ProgressIndicator.h:

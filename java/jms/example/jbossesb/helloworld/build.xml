@@ -53,8 +53,7 @@
     <target name="esb" depends="init">
         <jar jarfile="${build.dir}/${ant.project.name}.esb"
              compress="${jar.compress}"
-             index="${jar.index}"
-             update="true">
+             index="${jar.index}">
             <fileset dir="${src.dir}">
                 <include name="opendds-ds.xml"/>
                 <include name="META-INF/*"/>

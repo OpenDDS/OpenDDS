@@ -81,8 +81,10 @@ namespace { // anonymous namespace for file scope.
   const char* PRESENTATION_KEYNAME                        = "Presentation";
   const char* PRESENTATIONCOHERENT_KEYNAME                = "PresentationCoherent";
   const char* PRESENTATIONORDERED_KEYNAME                 = "PresentationOrdered";
-  const char* PARTITION_KEYNAME                           = "Partition";
   const char* GROUPDATA_KEYNAME                           = "GroupData";
+#if 0
+  const char* PARTITION_KEYNAME                           = "Partition";
+#endif
 
 } // end of anonymous namespace.
 
