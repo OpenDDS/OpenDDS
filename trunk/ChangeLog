@@ -4,7 +4,9 @@ Tue Feb 24 17:29:25 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * dds/DCPS/Service_Participant.inl:
         * dds/DCPS/transport/framework/PerConnectionSynch.h:
 
-          Fixed ACE_Task_Base flags type mismatch.
+          Fixed ACE_Task_Base flags type mismatch.  Added missing
+          THR_EXPLICIT_SCHED flag and defaulted to THR_INHERIT_SCHED
+          when no scheduler is defined.
 
 Tue Feb 24 16:18:09 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
