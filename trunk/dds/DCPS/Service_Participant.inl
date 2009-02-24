@@ -272,14 +272,14 @@ namespace OpenDDS
     }
 
     ACE_INLINE
-    int&
+    long&
     Service_Participant::scheduler()
     {
       return this->scheduler_;
     }
 
     ACE_INLINE
-    int
+    long 
     Service_Participant::scheduler() const
     {
       return this->scheduler_;

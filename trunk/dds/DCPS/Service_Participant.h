@@ -248,8 +248,8 @@ namespace OpenDDS
 
       /// Accessors for scheduling policy value.
       //@{
-      int& scheduler();
-      int  scheduler() const;
+      long& scheduler();
+      long  scheduler() const;
       //@}
 
       /// Accessor for pending data timeout.
@@ -475,7 +475,7 @@ namespace OpenDDS
       ACE_TString schedulerString_;
 
       /// Scheduling policy value used for setting thread priorities.
-      int scheduler_;
+      long scheduler_;
 
       /// Minimum priority value for the current scheduling policy.
       int priority_min_;

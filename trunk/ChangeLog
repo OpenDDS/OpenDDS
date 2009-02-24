@@ -1,3 +1,11 @@
+Tue Feb 24 17:29:25 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/transport/framework/PerConnectionSynch.h:
+
+          Fixed ACE_Task_Base flags type mismatch.
+
 Tue Feb 24 16:18:09 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/build.xml:
