@@ -38,7 +38,9 @@ OpenDDS::DCPS::PerConnectionSynch::open(void*)
   long flags;
   flags  = THR_NEW_LWP | THR_JOINABLE ;//|THR_SCOPE_PROCESS | THR_SCOPE_THREAD;
   if( this->scheduler_ >= 0) {
-    flags |= this->scheduler_;
+    flags |= THR_EXPLICIT_SCHED | this->scheduler_;
+  } else {
+    flags |= THR_INHERIT_SCHED;
   }
   if( DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
