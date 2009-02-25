@@ -770,7 +770,7 @@ int main (int argc, char *argv[])
         copyInfo = info2;
         if (   copy.length() != data2.length() 
             || copy[0].count != data2[0].count
-            || item->ref_count_ != 4)
+            || item->ref_count() != 4)
           {
             ACE_ERROR ((LM_ERROR,
                 ACE_TEXT("(%P|%t) t1 ERROR: assignment operator failed\n") ));
@@ -781,10 +781,10 @@ int main (int argc, char *argv[])
 
         check_return_loan_status(status, copy, 0, 0, "t1 return_loan copy");
 
-        if (item->ref_count_ != 3)
+        if (item->ref_count() != 3)
         {
             ACE_ERROR ((LM_ERROR,
-                ACE_TEXT("(%P|%t) t1 ERROR: bad ref count %d expecting 3\n"), item->ref_count_ ));
+                ACE_TEXT("(%P|%t) t1 ERROR: bad ref count %d expecting 3\n"), item->ref_count() ));
             test_failed = 1;
         }
 
@@ -793,10 +793,10 @@ int main (int argc, char *argv[])
 
         check_return_loan_status(status, data2, 0, 0, "t1 return_loan2");
 
-        if (item->ref_count_ != 2)
+        if (item->ref_count() != 2)
         {
             ACE_ERROR ((LM_ERROR,
-                ACE_TEXT("(%P|%t) t4 ERROR: bad ref count %d expecting 2\n"), item->ref_count_ ));
+                ACE_TEXT("(%P|%t) t4 ERROR: bad ref count %d expecting 2\n"), item->ref_count() ));
             test_failed = 1;
         }
         status = fast_dr->return_loan(data1, info1 );
@@ -804,10 +804,10 @@ int main (int argc, char *argv[])
         check_return_loan_status(status, data1, 0, 0, "t1 return_loan1");
 
         // just the instance container should have a reference.
-        if (item->ref_count_ != 1)
+        if (item->ref_count() != 1)
         {
             ACE_ERROR ((LM_ERROR,
-                ACE_TEXT("(%P|%t) t4 ERROR: bad ref count %d expecting 1\n"), item->ref_count_ ));
+                ACE_TEXT("(%P|%t) t4 ERROR: bad ref count %d expecting 1\n"), item->ref_count() ));
             test_failed = 1;
         }
       } // t1
@@ -1139,26 +1139,26 @@ int main (int argc, char *argv[])
 
             Test::SimpleSeq::PrivateMemberAccess data2_p(data2);
             item = data2_p.get_ptr(0);
-            if (item->ref_count_ != 3)
+            if (item->ref_count() != 3)
             {
                 ACE_ERROR ((LM_ERROR,
-                        ACE_TEXT("(%P|%t) t4 ERROR: bad ref count %d expecting 3\n"), item->ref_count_ ));
+                        ACE_TEXT("(%P|%t) t4 ERROR: bad ref count %d expecting 3\n"), item->ref_count() ));
                 test_failed = 1;
             }
 
         } // data2 goes out of scope here and automatically return_loan'd
-            if (item->ref_count_ != 2)
+            if (item->ref_count() != 2)
             {
                 ACE_ERROR ((LM_ERROR,
-                        ACE_TEXT("(%P|%t) t4 ERROR: bad ref count %d expecting 2\n"), item->ref_count_ ));
+                        ACE_TEXT("(%P|%t) t4 ERROR: bad ref count %d expecting 2\n"), item->ref_count() ));
                 test_failed = 1;
             }
       } // t4
       // just the instance container should have a reference.
-        if (item->ref_count_ != 1)
+        if (item->ref_count() != 1)
         {
             ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("(%P|%t) t4 ERROR: bad ref count %d expecting 1\n"), item->ref_count_ ));
+                    ACE_TEXT("(%P|%t) t4 ERROR: bad ref count %d expecting 1\n"), item->ref_count() ));
             test_failed = 1;
         }
 
