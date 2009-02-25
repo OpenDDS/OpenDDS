@@ -23,7 +23,7 @@ namespace { // anonymous namespace for file scope.
   //
   // Default values.
   //
-  enum { DEFAULT_TEST_DURATION   =   20};
+  enum { DEFAULT_TEST_DURATION   =   -1};
   enum { DEFAULT_RAW_BUFFER_SIZE =  500};
   enum { DEFAULT_DOMAINID        =  521};
   enum { DEFAULT_PRIORITY        =    0};
@@ -33,16 +33,23 @@ namespace { // anonymous namespace for file scope.
   enum { DEFAULT_DEVIATION       =  300};
   enum { DEFAULT_RATE            =  100};
 
-  const std::string   DEFAULT_RAW_OUTPUT_FILENAME = std::string();
+  const std::string DEFAULT_RAW_OUTPUT_FILENAME = std::string();
   const OpenDDS::DCPS::DataCollector< double>::OnFull
-                      DEFAULT_RAW_BUFFER_TYPE
-                        = OpenDDS::DCPS::DataCollector< double>::KeepNewest;
+                    DEFAULT_RAW_BUFFER_TYPE
+                      = OpenDDS::DCPS::DataCollector< double>::KeepNewest;
 
   // Command line argument definitions.
-  const char* VERBOSE_ARGUMENT           = "-v";
-  const char* DURATION_ARGUMENT          = "-c";
-  const char* SCENARIO_ARGUMENT          = "-f";
-  const char* RAW_DATA_FILENAME_ARGUMENT = "-r";
+  const char* VERBOSE_ARGUMENT             = "-v";
+  const char* DURATION_ARGUMENT            = "-d";
+  const char* SCENARIO_ARGUMENT            = "-f";
+  const char* RAW_DATA_BUFFERSIZE_ARGUMENT = "-s";
+  const char* RAW_DATA_BUFFERTYPE_ARGUMENT = "-t";
+  const char* RAW_DATA_FILENAME_ARGUMENT   = "-r";
+
+  // BUFFERTYPE argument values.
+  const char* UNBOUNDED_BUFFERTYPE  = "unbounded";
+  const char* KEEPNEWEST_BUFFERTYPE = "newest";
+  const char* KEEPOLDEST_BUFFERTYPE = "oldest";
 
   // Scenario configuration file section names.
   const char* PARTICIPANT_SECTIONNAME  = "participant";
@@ -78,13 +85,27 @@ namespace { // anonymous namespace for file scope.
   const char* TRANSPORTPRIORITY_KEYNAME                   = "TransportPriority";
   const char* LIFESPANDURATION_KEYNAME                    = "LifespanDuration";
   const char* OWNERSHIPKIND_KEYNAME                       = "OwnershipKind";
+  const char* OWNERSHIPSTRENGTH_KEYNAME                   = "OwnershipStrength";
   const char* PRESENTATION_KEYNAME                        = "Presentation";
   const char* PRESENTATIONCOHERENT_KEYNAME                = "PresentationCoherent";
   const char* PRESENTATIONORDERED_KEYNAME                 = "PresentationOrdered";
   const char* GROUPDATA_KEYNAME                           = "GroupData";
-#if 0
   const char* PARTITION_KEYNAME                           = "Partition";
-#endif
+  const char* TIMEBASEDFILTER_KEYNAME                     = "TimeBasedFilter";
+  const char* WRITERDATALIFECYCLE_KEYNAME                 = "WriterDataLifecycle";
+  const char* READERDATALIFECYCLE_KEYNAME                 = "ReaderDataLifecycle";
+  const char* PARTICIPANT_KEYNAME                         = "Participant";
+  const char* TOPIC_KEYNAME                               = "Topic";
+  const char* TRANSPORTINDEX_KEYNAME                      = "TransportIndex";
+  const char* MESSAGESOURCE_KEYNAME                       = "MessageSource";
+  const char* MESSAGERATE_KEYNAME                         = "MessageRate";
+  const char* MESSAGESIZE_KEYNAME                         = "MessageSize";
+  const char* MESSAGEMAX_KEYNAME                          = "MessageMax";
+  const char* MESSAGEMIN_KEYNAME                          = "MessageMin";
+  const char* MESSAGEDEVIATION_KEYNAME                    = "MessageDeviation";
+  const char* DATACOLLECTIONFILE_KEYNAME                  = "DataCollectionFile";
+  const char* DATACOLLECTIONBOUND_KEYNAME                 = "DataCollectionBound";
+  const char* DATACOLLECTIONRETENTION_KEYNAME             = "DataCollectionRetention";
 
 } // end of anonymous namespace.
 
@@ -92,37 +113,37 @@ namespace Test {
 
 Options::~Options()
 {
-  for( ParticipantMap::iterator current = this->participantMap_.begin();
-       current != this->participantMap_.end();
+  for( ParticipantProfileMap::iterator current = this->participantProfileMap_.begin();
+       current != this->participantProfileMap_.end();
        ++current
      ) {
     delete current->second;
   }
-  this->participantMap_.clear();
+  this->participantProfileMap_.clear();
 
-  for( TopicMap::iterator current = this->topicMap_.begin();
-       current != this->topicMap_.end();
+  for( TopicProfileMap::iterator current = this->topicProfileMap_.begin();
+       current != this->topicProfileMap_.end();
        ++current
      ) {
     delete current->second;
   }
-  this->topicMap_.clear();
+  this->topicProfileMap_.clear();
 
-  for( PublicationMap::iterator current = this->publicationMap_.begin();
-       current != this->publicationMap_.end();
+  for( PublicationProfileMap::iterator current = this->publicationProfileMap_.begin();
+       current != this->publicationProfileMap_.end();
        ++current
      ) {
     delete current->second;
   }
-  this->publicationMap_.clear();
+  this->publicationProfileMap_.clear();
 
-  for( SubscriptionMap::iterator current = this->subscriptionMap_.begin();
-       current != this->subscriptionMap_.end();
+  for( SubscriptionProfileMap::iterator current = this->subscriptionProfileMap_.begin();
+       current != this->subscriptionProfileMap_.end();
        ++current
      ) {
     delete current->second;
   }
-  this->subscriptionMap_.clear();
+  this->subscriptionProfileMap_.clear();
 }
 
 Options::Options( int argc, char** argv, char** /* envp */)
@@ -130,8 +151,8 @@ Options::Options( int argc, char** argv, char** /* envp */)
    configured_(        true),
    duration_(          DEFAULT_TEST_DURATION),
    rawOutputFilename_( DEFAULT_RAW_OUTPUT_FILENAME),
-   raw_buffer_size_(   DEFAULT_RAW_BUFFER_SIZE),
-   raw_buffer_type_(   DEFAULT_RAW_BUFFER_TYPE)
+   rawBufferSize_(   DEFAULT_RAW_BUFFER_SIZE),
+   rawBufferType_(   DEFAULT_RAW_BUFFER_TYPE)
 {
   ACE_Arg_Shifter parser( argc, argv);
   while( parser.is_anything_left()) {
@@ -151,12 +172,51 @@ Options::Options( int argc, char** argv, char** /* envp */)
       this->configureScenarios( currentArg);
       parser.consume_arg();
 
+    } else if( 0 != (currentArg = parser.get_the_parameter( RAW_DATA_BUFFERSIZE_ARGUMENT))) {
+      this->rawBufferSize_ = ACE_OS::atoi( currentArg);
+      parser.consume_arg();
+
+    } else if( 0 != (currentArg = parser.get_the_parameter( RAW_DATA_BUFFERTYPE_ARGUMENT))) {
+      std::string bufferType = currentArg;
+      if( bufferType == UNBOUNDED_BUFFERTYPE) {
+        this->rawBufferType_ = ::OpenDDS::DCPS::DataCollector<double>::Unbounded;
+
+      } else if( bufferType == KEEPNEWEST_BUFFERTYPE) {
+        this->rawBufferType_ = ::OpenDDS::DCPS::DataCollector<double>::KeepNewest;
+
+      } else if( bufferType == KEEPOLDEST_BUFFERTYPE) {
+        this->rawBufferType_ = ::OpenDDS::DCPS::DataCollector<double>::KeepOldest;
+
+      } else {
+        if( this->verbose()) {
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) Options::Options() - ")
+            ACE_TEXT("unrecognized value for %s argument: %s, using default.\n"),
+            RAW_DATA_BUFFERTYPE_ARGUMENT,
+            currentArg
+          ));
+        }
+      }
+      parser.consume_arg();
+
     } else if( 0 != (currentArg = parser.get_the_parameter( RAW_DATA_FILENAME_ARGUMENT))) {
       this->rawOutputFilename_ = currentArg;
+      if( this->verbose()) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) Options::Options() - ")
+          ACE_TEXT("Setting VERBOSE mode.\n")
+        ));
+      }
       parser.consume_arg();
 
     } else if( 0 <= (parser.cur_arg_strncasecmp( VERBOSE_ARGUMENT))) {
       this->verbose_ = true;
+      if( this->verbose()) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) Options::Options() - ")
+          ACE_TEXT("Setting VERBOSE mode.\n")
+        ));
+      }
       parser.consume_arg();
 
     } else {
@@ -212,51 +272,6 @@ Options::configureScenarios( const char* filename)
 
   // Read and process the DDS Entity specification sections.
   this->configureEntities( heap);
-
-#if 0
-    // Priority = <number>
-    ACE_TString priorityString;
-    unsigned long priority = DEFAULT_PRIORITY;
-    if( 0 == heap.get_string_value( sectionKey, PRIORITY_KEY_NAME, priorityString)) {
-      priority = ACE_OS::atoi( priorityString.c_str());
-    }
-
-    // MessageMax = <bytes_per_message>
-    ACE_TString maxString;
-    unsigned long max = DEFAULT_MAX;
-    if( 0 == heap.get_string_value( sectionKey, MAX_KEY_NAME, maxString)) {
-      max = ACE_OS::atoi( maxString.c_str());
-    }
-
-    // MessageMin = <bytes_per_message>
-    ACE_TString minString;
-    unsigned long min = DEFAULT_MIN;
-    if( 0 == heap.get_string_value( sectionKey, MIN_KEY_NAME, minString)) {
-      min = ACE_OS::atoi( minString.c_str());
-    }
-
-    // MessageSize = <bytes_per_message>
-    ACE_TString sizeString;
-    unsigned long size = DEFAULT_SIZE;
-    if( 0 == heap.get_string_value( sectionKey, SIZE_KEY_NAME, sizeString)) {
-      size = ACE_OS::atoi( sizeString.c_str());
-    }
-
-    // MessageDeviation = <number>
-    ACE_TString deviationString;
-    unsigned long deviation = DEFAULT_DEVIATION;
-    if( 0 == heap.get_string_value( sectionKey, DEVIATION_KEY_NAME, deviationString)) {
-      deviation = ACE_OS::atoi( deviationString.c_str());
-    }
-
-    // MessageRate = <messages_per_second>
-    ACE_TString rateString;
-    unsigned long rate = DEFAULT_RATE;
-    if( 0 == heap.get_string_value( sectionKey, RATE_KEY_NAME, rateString)) {
-      rate = ACE_OS::atoi( rateString.c_str());
-    }
-#endif
-
 }
 
 void
@@ -502,7 +517,7 @@ Options::loadParticipant(
   }
 
   // Store the profile for the current participant.
-  this->participantMap_[ sectionName] = profile;
+  this->participantProfileMap_[ sectionName] = profile;
 }
 
 void
@@ -538,6 +553,8 @@ Options::loadTopic(
    *   TransportPriority                   = <number>
    *   LifespanDuration                    = <number>
    *   OwnershipKind                       = <string> # One of SHARED, EXCLUSIVE
+   *   # Test execution parameters
+   *   Participant                         = <string> # One of participant <name>
    */
 
   // Note that this requires that the Service Participant already be
@@ -570,7 +587,7 @@ Options::loadTopic(
     }
   }
 
-  // Durability                          = <string> # One of VOLATILE, LOCAL, TRANSIENT, PERSISTENT
+  // Durability = <string> # One of VOLATILE, LOCAL, TRANSIENT, PERSISTENT
   valueString.clear();
   heap.get_string_value( sectionKey, DURABILITY_KEYNAME, valueString);
   if (valueString.length() > 0) {
@@ -1037,8 +1054,24 @@ Options::loadTopic(
     }
   }
 
+  // Participant      = <string> # One of participant <name>
+  valueString.clear();
+  heap.get_string_value( sectionKey, PARTICIPANT_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->participant = valueString.c_str();
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadTopic() - ")
+        ACE_TEXT("  [topic/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        PARTICIPANT_KEYNAME,
+        profile->participant.c_str()
+      ));
+    }
+  }
+
   // Store the profile for the current participant.
-  this->topicMap_[ sectionName] = profile;
+  this->topicProfileMap_[ sectionName] = profile;
 }
 
 void
@@ -1084,7 +1117,6 @@ Options::loadPublication(
    *   OwnershipStrength                   = <number>
    *   WriterDataLifecycle                 = <bool> # Boolean: numeric 0 or 1
    *   # Test execution parameters
-   *   Participant      = <string> # One of participant <name>
    *   Topic            = <string> # One of topic <name>
    *   TransportIndex   = <number> # Index into transport configurations
    *   MessageSource    = <string> # One of subscription <name>
@@ -1100,8 +1132,9 @@ Options::loadPublication(
   // since we have not created any Entities yet, we go to the initial
   // default values rather than to the containing Entity.
   PublicationProfile* profile = new PublicationProfile();
-  profile->publisherQos = TheServiceParticipant->initial_PublisherQos();
-  profile->writerQos    = TheServiceParticipant->initial_DataWriterQos();
+  profile->publisherQos  = TheServiceParticipant->initial_PublisherQos();
+  profile->writerQos     = TheServiceParticipant->initial_DataWriterQos();
+  profile->writerQosMask = 0;
   ACE_TString valueString;
 
   // Presentation                        = <string> # One of INSTANCE, TOPIC, GROUP
@@ -1170,6 +1203,21 @@ Options::loadPublication(
   }
 
   // Partition                           = <string> # Only single value supported
+  valueString.clear();
+  heap.get_string_value( sectionKey, PARTITION_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->publisherQos.partition.name.length( 1);
+    profile->publisherQos.partition.name[0] = ACE_OS::strdup( valueString.c_str());
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        PARTITION_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+  }
 
   // GroupData                           = <string>
   valueString.clear();
@@ -1210,50 +1258,736 @@ Options::loadPublication(
     }
   }
 
+  // Durability = <string> # One of VOLATILE, LOCAL, TRANSIENT, PERSISTENT
+  valueString.clear();
+  heap.get_string_value( sectionKey, DURABILITY_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    if( valueString == "VOLATILE") {
+      profile->writerQos.durability.kind = ::DDS::VOLATILE_DURABILITY_QOS;
+      profile->writerQosMask |= SetDurabilityQos;
+
+    } else if( valueString == "LOCAL") {
+      profile->writerQos.durability.kind = ::DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
+      profile->writerQosMask |= SetDurabilityQos;
+
+    } else if( valueString == "TRANSIENT") {
+      profile->writerQos.durability.kind = ::DDS::TRANSIENT_DURABILITY_QOS;
+      profile->writerQosMask |= SetDurabilityQos;
+
+    } else if( valueString == "PERSISTENT") {
+      profile->writerQos.durability.kind = ::DDS::PERSISTENT_DURABILITY_QOS;
+      profile->writerQosMask |= SetDurabilityQos;
+
+    } else {
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) loadPublication() - ")
+        ACE_TEXT("unrecognized value for %s: %s - ")
+        ACE_TEXT("not assigning a value.\n"),
+        DURABILITY_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        DURABILITY_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+  }
+
+  // DurabilityServiceDuration           = <number>
+  valueString.clear();
+  heap.get_string_value( sectionKey, DURABILITYSERVICEDURATION_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->writerQos.durability_service.service_cleanup_delay.nanosec = 0;
+    profile->writerQos.durability_service.service_cleanup_delay.sec
+      = ACE_OS::atoi( valueString.c_str());
+    profile->writerQosMask |= SetDurabilityServiceDurationQos;
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        DURABILITYSERVICEDURATION_KEYNAME,
+        profile->writerQos.durability_service.service_cleanup_delay.sec
+      ));
+    }
+  }
+
+  // DurabilityServiceHistoryKind        = <string> # One of ALL, LAST
+  valueString.clear();
+  heap.get_string_value( sectionKey, DURABILITYSERVICEHISTORYKIND_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    if( valueString == "ALL") {
+      profile->writerQos.durability_service.history_kind = ::DDS::KEEP_ALL_HISTORY_QOS;
+      profile->writerQosMask |= SetDurabilityServiceHistoryKindQos;
+
+    } else if( valueString == "LAST") {
+      profile->writerQos.durability_service.history_kind = ::DDS::KEEP_LAST_HISTORY_QOS;
+      profile->writerQosMask |= SetDurabilityServiceHistoryKindQos;
+
+    } else {
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) loadPublication() - ")
+        ACE_TEXT("unrecognized value for %s: %s - ")
+        ACE_TEXT("not assigning a value.\n"),
+        DURABILITYSERVICEHISTORYKIND_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        DURABILITYSERVICEHISTORYKIND_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+  }
+
+  // DurabilityServiceHistoryDepth       = <number>
+  valueString.clear();
+  heap.get_string_value( sectionKey, DURABILITYSERVICEHISTORYDEPTH_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->writerQos.durability_service.history_depth = ACE_OS::atoi( valueString.c_str());
+    profile->writerQosMask |= SetDurabilityServiceHistoryDepthQos;
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        DURABILITYSERVICEHISTORYDEPTH_KEYNAME,
+        profile->writerQos.durability_service.history_depth
+      ));
+    }
+  }
+
+  // DurabilityServiceSamples            = <number>
+  valueString.clear();
+  heap.get_string_value( sectionKey, DURABILITYSERVICESAMPLES_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->writerQos.durability_service.max_samples = ACE_OS::atoi( valueString.c_str());
+    profile->writerQosMask |= SetDurabilityServiceSamplesQos;
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        DURABILITYSERVICESAMPLES_KEYNAME,
+        profile->writerQos.durability_service.max_samples
+      ));
+    }
+  }
+
+  // DurabilityServiceInstances          = <number>
+  valueString.clear();
+  heap.get_string_value( sectionKey, DURABILITYSERVICEINSTANCES_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->writerQos.durability_service.max_instances = ACE_OS::atoi( valueString.c_str());
+    profile->writerQosMask |= SetDurabilityServiceInstancesQos;
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        DURABILITYSERVICEINSTANCES_KEYNAME,
+        profile->writerQos.durability_service.max_instances
+      ));
+    }
+  }
+
+  // DurabilityServiceSamplesPerInstance = <number>
+  valueString.clear();
+  heap.get_string_value( sectionKey, DURABILITYSERVICESAMPLESPERINSTANCE_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->writerQos.durability_service.max_samples_per_instance
+      = ACE_OS::atoi( valueString.c_str());
+    profile->writerQosMask |= SetDurabilityServiceSamplesPerInstanceQos;
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        DURABILITYSERVICESAMPLESPERINSTANCE_KEYNAME,
+        profile->writerQos.durability_service.max_samples_per_instance
+      ));
+    }
+  }
+
+  // Deadline                            = <number>
+  valueString.clear();
+  heap.get_string_value( sectionKey, DEADLINE_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->writerQos.deadline.period.nanosec = 0;
+    profile->writerQos.deadline.period.sec = ACE_OS::atoi( valueString.c_str());
+    profile->writerQosMask |= SetDeadlineQos;
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        DEADLINE_KEYNAME,
+        profile->writerQos.deadline.period.sec
+      ));
+    }
+  }
+
+  // LatencyBudget                       = <number>
+  valueString.clear();
+  heap.get_string_value( sectionKey, LATENCYBUDGET_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->writerQos.latency_budget.duration.nanosec = 0;
+    profile->writerQos.latency_budget.duration.sec = ACE_OS::atoi( valueString.c_str());
+    profile->writerQosMask |= SetLatencyBudgetQos;
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        LATENCYBUDGET_KEYNAME,
+        profile->writerQos.latency_budget.duration.sec
+      ));
+    }
+  }
+
+  // LivelinessKind                      = <string> # One of AUTOMATIC, PARTICIPANT, TOPIC
+  valueString.clear();
+  heap.get_string_value( sectionKey, LIVELINESSKIND_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    if( valueString == "AUTOMATIC") {
+      profile->writerQos.liveliness.kind = ::DDS::AUTOMATIC_LIVELINESS_QOS;
+      profile->writerQosMask |= SetLivelinessKindQos;
+
+    } else if( valueString == "PARTICIPANT") {
+      profile->writerQos.liveliness.kind = ::DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
+      profile->writerQosMask |= SetLivelinessKindQos;
+
+    } else if( valueString == "TOPIC") {
+      profile->writerQos.liveliness.kind = ::DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS;
+      profile->writerQosMask |= SetLivelinessKindQos;
+
+    } else {
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) loadPublication() - ")
+        ACE_TEXT("unrecognized value for %s: %s - ")
+        ACE_TEXT("not assigning a value.\n"),
+        LIVELINESSKIND_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        LIVELINESSKIND_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+  }
+
+  // LivelinessDuration                  = <number>
+  valueString.clear();
+  heap.get_string_value( sectionKey, LIVELINESSDURATION_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->writerQos.liveliness.lease_duration.nanosec = 0;
+    profile->writerQos.liveliness.lease_duration.sec = ACE_OS::atoi( valueString.c_str());
+    profile->writerQosMask |= SetLivelinessDurationQos;
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        LIVELINESSDURATION_KEYNAME,
+        profile->writerQos.liveliness.lease_duration.sec
+      ));
+    }
+  }
+
+  // ReliabilityKind                     = <string> # One of BEST_EFFORT, RELIABLE
+  valueString.clear();
+  heap.get_string_value( sectionKey, RELIABILITYKIND_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    if( valueString == "BEST_EFFORT") {
+      profile->writerQos.reliability.kind = ::DDS::BEST_EFFORT_RELIABILITY_QOS;
+      profile->writerQosMask |= SetReliabilityKindQos;
+
+    } else if( valueString == "RELIABLE") {
+      profile->writerQos.reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
+      profile->writerQosMask |= SetReliabilityKindQos;
+
+    } else {
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) loadPublication() - ")
+        ACE_TEXT("unrecognized value for %s: %s - ")
+        ACE_TEXT("not assigning a value.\n"),
+        RELIABILITYKIND_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        RELIABILITYKIND_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+  }
+
+  // ReliabilityMaxBlocking              = <number>
+  valueString.clear();
+  heap.get_string_value( sectionKey, RELIABILITYMAXBLOCKING_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->writerQos.reliability.max_blocking_time.nanosec = 0;
+    profile->writerQos.reliability.max_blocking_time.sec = ACE_OS::atoi( valueString.c_str());
+    profile->writerQosMask |= SetReliabilityMaxBlockingQos;
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        RELIABILITYMAXBLOCKING_KEYNAME,
+        profile->writerQos.reliability.max_blocking_time.sec
+      ));
+    }
+  }
+
+  // DestinationOrder                    = <string> # One of SOURCE, RECEPTION
+  valueString.clear();
+  heap.get_string_value( sectionKey, DESTINATIONORDER_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    if( valueString == "SOURCE") {
+      profile->writerQos.destination_order.kind = ::DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS;
+      profile->writerQosMask |= SetDestinationOrderQos;
+
+    } else if( valueString == "RECEPTION") {
+      profile->writerQos.destination_order.kind = ::DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS;
+      profile->writerQosMask |= SetDestinationOrderQos;
+
+    } else {
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) loadPublication() - ")
+        ACE_TEXT("unrecognized value for %s: %s - ")
+        ACE_TEXT("not assigning a value.\n"),
+        DESTINATIONORDER_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        DESTINATIONORDER_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+  }
+
+  // HistoryKind                         = <string> # One of ALL, LAST
+  valueString.clear();
+  heap.get_string_value( sectionKey, HISTORYKIND_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    if( valueString == "ALL") {
+      profile->writerQos.history.kind = ::DDS::KEEP_ALL_HISTORY_QOS;
+      profile->writerQosMask |= SetHistoryKindQos;
+
+    } else if( valueString == "LAST") {
+      profile->writerQos.history.kind = ::DDS::KEEP_LAST_HISTORY_QOS;
+      profile->writerQosMask |= SetHistoryKindQos;
+
+    } else {
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) loadPublication() - ")
+        ACE_TEXT("unrecognized value for %s: %s - ")
+        ACE_TEXT("not assigning a value.\n"),
+        HISTORYKIND_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        HISTORYKIND_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+  }
+
+  // HistoryDepth                        = <number>
+  valueString.clear();
+  heap.get_string_value( sectionKey, HISTORYDEPTH_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->writerQos.history.depth = ACE_OS::atoi( valueString.c_str());
+    profile->writerQosMask |= SetHistoryDepthQos;
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        HISTORYDEPTH_KEYNAME,
+        profile->writerQos.history.depth
+      ));
+    }
+  }
+
+  // ResourceMaxSamples                  = <number>
+  valueString.clear();
+  heap.get_string_value( sectionKey, RESOURCEMAXSAMPLES_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->writerQos.resource_limits.max_samples = ACE_OS::atoi( valueString.c_str());
+    profile->writerQosMask |= SetResourceMaxSamplesQos;
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        RESOURCEMAXSAMPLES_KEYNAME,
+        profile->writerQos.resource_limits.max_samples
+      ));
+    }
+  }
+
+  // ResourceMaxInstances                = <number>
+  valueString.clear();
+  heap.get_string_value( sectionKey, RESOURCEMAXINSTANCES_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->writerQos.resource_limits.max_instances = ACE_OS::atoi( valueString.c_str());
+    profile->writerQosMask |= SetResourceMaxInstancesQos;
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        RESOURCEMAXINSTANCES_KEYNAME,
+        profile->writerQos.resource_limits.max_instances
+      ));
+    }
+  }
+
+  // ResourceMaxSamplesPerInstance       = <number>
+  valueString.clear();
+  heap.get_string_value( sectionKey, RESOURCEMAXSAMPLESPERINSTANCE_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->writerQos.resource_limits.max_samples_per_instance = ACE_OS::atoi( valueString.c_str());
+    profile->writerQosMask |= SetResourceMaxSamplesPerInstanceQos;
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        RESOURCEMAXSAMPLESPERINSTANCE_KEYNAME,
+        profile->writerQos.resource_limits.max_samples_per_instance
+      ));
+    }
+  }
+
+  // TransportPriority                   = <number>
+  valueString.clear();
+  heap.get_string_value( sectionKey, TRANSPORTPRIORITY_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->writerQos.transport_priority.value = ACE_OS::atoi( valueString.c_str());
+    profile->writerQosMask |= SetTransportPriorityQos;
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        TRANSPORTPRIORITY_KEYNAME,
+        profile->writerQos.transport_priority.value
+      ));
+    }
+  }
+
+  // Lifespan                            = <number>
+  valueString.clear();
+  heap.get_string_value( sectionKey, LIFESPANDURATION_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->writerQos.lifespan.duration.nanosec = 0;
+    profile->writerQos.lifespan.duration.sec = ACE_OS::atoi( valueString.c_str());
+    profile->writerQosMask |= SetLifespanQos;
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        LIFESPANDURATION_KEYNAME,
+        profile->writerQos.lifespan.duration.sec
+      ));
+    }
+  }
+
+  // UserData                            = <string>
+  valueString.clear();
+  heap.get_string_value( sectionKey, USERDATA_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->writerQosMask |= SetUserDataQos;
+    profile->writerQos.user_data.value.length( valueString.length());
+    profile->writerQos.user_data.value.replace(
+      valueString.length(),
+      valueString.length(),
+      const_cast<CORBA::Octet*>(
+        reinterpret_cast<const CORBA::Octet*>( valueString.c_str())
+      )
+    );
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        USERDATA_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+  }
+
+  // #VERSION1.2# OwnershipKind                       = <string> # One of SHARED, EXCLUSIVE
+#ifdef VERSION_1_2
+  valueString.clear();
+  heap.get_string_value( sectionKey, OWNERSHIPKIND_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    if( valueString == "SHARED") {
+      profile->writerQos.ownership.kind = ::DDS::SHARED_OWNERSHIP_QOS;
+      profile->writerQosMask |= SetOwnershipKindQos;
+
+    } else if( valueString == "EXCLUSIVE") {
+      profile->writerQos.ownership.kind = ::DDS::EXCLUSIVE_OWNERSHIP_QOS;
+      profile->writerQosMask |= SetOwnershipKindQos;
+
+    } else {
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) loadPublication() - ")
+        ACE_TEXT("unrecognized value for %s: %s - ")
+        ACE_TEXT("not assigning a value.\n"),
+        OWNERSHIPKIND_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [topic/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        OWNERSHIPKIND_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+  }
+#endif /* VERSION_1_2 */
+
+  // OwnershipStrength                   = <number>
+  valueString.clear();
+  heap.get_string_value( sectionKey, OWNERSHIPSTRENGTH_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->writerQos.ownership_strength.value = ACE_OS::atoi( valueString.c_str());
+    profile->writerQosMask |= SetOwnershipStrengthQos;
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        OWNERSHIPSTRENGTH_KEYNAME,
+        profile->writerQos.ownership_strength.value
+      ));
+    }
+  }
+
+  // WriterDataLifecycle                 = <bool> # Boolean: numeric 0 or 1
+  valueString.clear();
+  if( 0 == heap.get_string_value( sectionKey, WRITERDATALIFECYCLE_KEYNAME, valueString)) {
+    profile->writerQos.writer_data_lifecycle.autodispose_unregistered_instances
+      = ACE_OS::atoi( valueString.c_str());
+    profile->writerQosMask |= SetWriterDataLifecycleQos;
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        WRITERDATALIFECYCLE_KEYNAME,
+        profile->writerQos.writer_data_lifecycle.autodispose_unregistered_instances
+      ));
+    }
+  }
+
+  // Topic            = <string> # One of topic <name>
+  valueString.clear();
+  heap.get_string_value( sectionKey, TOPIC_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->topic = valueString.c_str();
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        TOPIC_KEYNAME,
+        profile->topic.c_str()
+      ));
+    }
+  }
+
+  // TransportIndex   = <number> # Index into transport configurations
+  valueString.clear();
+  heap.get_string_value( sectionKey, TRANSPORTINDEX_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->transport = ACE_OS::atoi( valueString.c_str());
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        TRANSPORTINDEX_KEYNAME,
+        profile->transport
+      ));
+    }
+  }
+
+  // MessageSource    = <string> # One of subscription <name>
+  valueString.clear();
+  heap.get_string_value( sectionKey, MESSAGESOURCE_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->source = valueString.c_str();
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        MESSAGESOURCE_KEYNAME,
+        profile->source.c_str()
+      ));
+    }
+  }
+
+  // MessageRate      = <number> # Samples per second
+  valueString.clear();
+  heap.get_string_value( sectionKey, MESSAGERATE_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->rate.rate() = ACE_OS::atoi( valueString.c_str());
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        MESSAGERATE_KEYNAME,
+        profile->rate.rate()
+      ));
+    }
+  }
+
+  // MessageSize      = <number> # bytes per sample
+  valueString.clear();
+  heap.get_string_value( sectionKey, MESSAGESIZE_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->size.mean() = ACE_OS::atoi( valueString.c_str());
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        MESSAGESIZE_KEYNAME,
+        profile->size.mean()
+      ));
+    }
+  }
+
+  // MessageMax       = <number> # upper bound for size
+  valueString.clear();
+  heap.get_string_value( sectionKey, MESSAGEMAX_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->size.maximum() = ACE_OS::atoi( valueString.c_str());
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        MESSAGEMAX_KEYNAME,
+        profile->size.maximum()
+      ));
+    }
+  }
+
+  // MessageMin       = <number> # lower bound for size
+  valueString.clear();
+  heap.get_string_value( sectionKey, MESSAGEMIN_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->size.minimum() = ACE_OS::atoi( valueString.c_str());
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        MESSAGEMIN_KEYNAME,
+        profile->size.minimum()
+      ));
+    }
+  }
+
+  // MessageDeviation = <number> # standard deviation for size
+  valueString.clear();
+  heap.get_string_value( sectionKey, MESSAGEDEVIATION_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->size.deviation() = ACE_OS::atoi( valueString.c_str());
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        MESSAGEDEVIATION_KEYNAME,
+        profile->size.deviation()
+      ));
+    }
+  }
+
   // Store the profile for the current participant.
-  this->publicationMap_[ sectionName] = profile;
+  this->publicationProfileMap_[ sectionName] = profile;
 }
 
 void
 Options::loadSubscription(
-  ACE_Configuration_Heap& /* heap */,
-  ACE_Configuration_Section_Key& /* sectionKey */,
+  ACE_Configuration_Heap& heap,
+  ACE_Configuration_Section_Key& sectionKey,
   std::string sectionName
 )
 {
   /**
    * [subscription/<name>]
    *   # Subscriber Qos Policy values
-   *   Presentation                        = <string> # One of INSTANCE, TOPIC, GROUP
-   *   PresentationCoherent                = <bool> # Boolean: numeric 0 or 1
-   *   PresentationOrdered                 = <bool> # Boolean: numeric 0 or 1
-   *   Partition                           = <string> # Only single value supported
-   *   GroupData                           = <string>
-   *   EntityFactory                       = <bool> # Boolean: numeric 0 or 1
+   *   Presentation                  = <string> # One of INSTANCE, TOPIC, GROUP
+   *   PresentationCoherent          = <bool> # Boolean: numeric 0 or 1
+   *   PresentationOrdered           = <bool> # Boolean: numeric 0 or 1
+   *   Partition                     = <string> # Only single value supported
+   *   GroupData                     = <string>
+   *   EntityFactory                 = <bool> # Boolean: numeric 0 or 1
    *   # DataReader Qos Policy values
-   *   Durability                          = <string> # One of VOLATILE, LOCAL, TRANSIENT, PERSISTENT
-   *   Deadline                            = <number>
-   *   LatencyBudget                       = <number>
-   *   LivelinessKind                      = <string> # One of AUTOMATIC, PARTICIPANT, TOPIC
-   *   LivelinessDuration                  = <number>
-   *   ReliabilityKind                     = <string> # One of BEST_EFFORT, RELIABLE
-   *   ReliabilityMaxBlocking              = <number>
-   *   DestinationOrder                    = <string> # One of SOURCE, RECEPTION
-   *   HistoryKind                         = <string> # One of ALL, LAST
-   *   HistoryDepth                        = <number>
-   *   ResourceMaxSamples                  = <number>
-   *   ResourceMaxInstances                = <number>
-   *   ResourceMaxSamplesPerInstance       = <number>
-   *   UserData                            = <string>
-   *   TimeBasedFilter                     = <number>
-   *   ReaderDataLifecycle                 = <bool> # Boolean: numeric 0 or 1
+   *   Durability                    = <string> # One of VOLATILE, LOCAL, TRANSIENT, PERSISTENT
+   *   Deadline                      = <number>
+   *   LatencyBudget                 = <number>
+   *   LivelinessKind                = <string> # One of AUTOMATIC, PARTICIPANT, TOPIC
+   *   LivelinessDuration            = <number>
+   *   ReliabilityKind               = <string> # One of BEST_EFFORT, RELIABLE
+   *   ReliabilityMaxBlocking        = <number>
+   *   DestinationOrder              = <string> # One of SOURCE, RECEPTION
+   *   HistoryKind                   = <string> # One of ALL, LAST
+   *   HistoryDepth                  = <number>
+   *   ResourceMaxSamples            = <number>
+   *   ResourceMaxInstances          = <number>
+   *   ResourceMaxSamplesPerInstance = <number>
+   *   UserData                      = <string>
+   *   TimeBasedFilter               = <number>
+   *   ReaderDataLifecycle           = <number>
    *   # Test execution parameters
-   *   Participant                         = <string> # One of participant <name>
-   *   Topic                               = <string> # One of topic <name>
-   *   TransportIndex                      = <number> # Index into transport configurations
-   *   DataCollectionFile                  = <string> # Filename for collected data
-   *   DataCollectionBound                 = <number>
-   *   DataCollectionRetention             = <string> # One of ALL, OLDEST, NEWEST
+   *   Topic                         = <string> # One of topic <name>
+   *   TransportIndex                = <number> # Index into transport configurations
+   *   DataCollectionFile            = <string> # Filename for collected data
+   *   DataCollectionBound           = <number>
+   *   DataCollectionRetention       = <string> # One of ALL, OLDEST, NEWEST
    */
 
   // Note that this requires that the Service Participant already be
@@ -1263,10 +1997,602 @@ Options::loadSubscription(
   SubscriptionProfile* profile = new SubscriptionProfile();
   profile->subscriberQos = TheServiceParticipant->initial_SubscriberQos();
   profile->readerQos     = TheServiceParticipant->initial_DataReaderQos();
+  profile->readerQosMask = 0;
   ACE_TString valueString;
 
+  // Presentation                        = <string> # One of INSTANCE, TOPIC, GROUP
+  valueString.clear();
+  heap.get_string_value( sectionKey, PRESENTATION_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    if( valueString == "INSTANCE") {
+      profile->subscriberQos.presentation.access_scope = ::DDS::INSTANCE_PRESENTATION_QOS;
+
+    } else if( valueString == "TOPIC") {
+      profile->subscriberQos.presentation.access_scope = ::DDS::TOPIC_PRESENTATION_QOS;
+
+    } else if( valueString == "GROUP") {
+      profile->subscriberQos.presentation.access_scope = ::DDS::GROUP_PRESENTATION_QOS;
+
+    } else {
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) loadSubscription() - ")
+        ACE_TEXT("unrecognized value for %s: %s - ")
+        ACE_TEXT("not assigning a value.\n"),
+        PRESENTATION_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        PRESENTATION_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+  }
+
+  // PresentationCoherent                = <bool> # Boolean: numeric 0 or 1
+  valueString.clear();
+  if( 0 == heap.get_string_value( sectionKey, PRESENTATIONCOHERENT_KEYNAME, valueString)) {
+    profile->subscriberQos.presentation.coherent_access
+      = ACE_OS::atoi( valueString.c_str());
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        PRESENTATIONCOHERENT_KEYNAME,
+        profile->subscriberQos.presentation.coherent_access
+      ));
+    }
+  }
+
+  // PresentationOrdered                 = <bool> # Boolean: numeric 0 or 1
+  valueString.clear();
+  if( 0 == heap.get_string_value( sectionKey, PRESENTATIONORDERED_KEYNAME, valueString)) {
+    profile->subscriberQos.presentation.ordered_access
+      = ACE_OS::atoi( valueString.c_str());
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        PRESENTATIONORDERED_KEYNAME,
+        profile->subscriberQos.presentation.ordered_access
+      ));
+    }
+  }
+
+  // Partition                           = <string> # Only single value supported
+  valueString.clear();
+  heap.get_string_value( sectionKey, PARTITION_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->subscriberQos.partition.name.length( 1);
+    profile->subscriberQos.partition.name[0] = ACE_OS::strdup( valueString.c_str());
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        PARTITION_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+  }
+
+  // GroupData                           = <string>
+  valueString.clear();
+  heap.get_string_value( sectionKey, GROUPDATA_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->subscriberQos.group_data.value.length( valueString.length());
+    profile->subscriberQos.group_data.value.replace(
+      valueString.length(),
+      valueString.length(),
+      const_cast<CORBA::Octet*>(
+        reinterpret_cast<const CORBA::Octet*>( valueString.c_str())
+      )
+    );
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        GROUPDATA_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+  }
+
+  // EntityFactory                       = <bool> # Boolean: numeric 0 or 1
+  valueString.clear();
+  if( 0 == heap.get_string_value( sectionKey, ENTITYFACTORY_KEYNAME, valueString)) {
+    profile->subscriberQos.entity_factory.autoenable_created_entities
+      = ACE_OS::atoi( valueString.c_str());
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        ENTITYFACTORY_KEYNAME,
+        profile->subscriberQos.entity_factory.autoenable_created_entities
+      ));
+    }
+  }
+
+  // Durability = <string> # One of VOLATILE, LOCAL, TRANSIENT, PERSISTENT
+  valueString.clear();
+  heap.get_string_value( sectionKey, DURABILITY_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    if( valueString == "VOLATILE") {
+      profile->readerQos.durability.kind = ::DDS::VOLATILE_DURABILITY_QOS;
+      profile->readerQosMask |= SetDurabilityQos;
+
+    } else if( valueString == "LOCAL") {
+      profile->readerQos.durability.kind = ::DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
+      profile->readerQosMask |= SetDurabilityQos;
+
+    } else if( valueString == "TRANSIENT") {
+      profile->readerQos.durability.kind = ::DDS::TRANSIENT_DURABILITY_QOS;
+      profile->readerQosMask |= SetDurabilityQos;
+
+    } else if( valueString == "PERSISTENT") {
+      profile->readerQos.durability.kind = ::DDS::PERSISTENT_DURABILITY_QOS;
+      profile->readerQosMask |= SetDurabilityQos;
+
+    } else {
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) loadSubscription() - ")
+        ACE_TEXT("unrecognized value for %s: %s - ")
+        ACE_TEXT("not assigning a value.\n"),
+        DURABILITY_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        DURABILITY_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+  }
+
+  // Deadline                            = <number>
+  valueString.clear();
+  heap.get_string_value( sectionKey, DEADLINE_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->readerQos.deadline.period.nanosec = 0;
+    profile->readerQos.deadline.period.sec = ACE_OS::atoi( valueString.c_str());
+    profile->readerQosMask |= SetDeadlineQos;
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        DEADLINE_KEYNAME,
+        profile->readerQos.deadline.period.sec
+      ));
+    }
+  }
+
+  // LatencyBudget                       = <number>
+  valueString.clear();
+  heap.get_string_value( sectionKey, LATENCYBUDGET_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->readerQos.latency_budget.duration.nanosec = 0;
+    profile->readerQos.latency_budget.duration.sec = ACE_OS::atoi( valueString.c_str());
+    profile->readerQosMask |= SetLatencyBudgetQos;
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        LATENCYBUDGET_KEYNAME,
+        profile->readerQos.latency_budget.duration.sec
+      ));
+    }
+  }
+
+  // LivelinessKind                      = <string> # One of AUTOMATIC, PARTICIPANT, TOPIC
+  valueString.clear();
+  heap.get_string_value( sectionKey, LIVELINESSKIND_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    if( valueString == "AUTOMATIC") {
+      profile->readerQos.liveliness.kind = ::DDS::AUTOMATIC_LIVELINESS_QOS;
+      profile->readerQosMask |= SetLivelinessKindQos;
+
+    } else if( valueString == "PARTICIPANT") {
+      profile->readerQos.liveliness.kind = ::DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
+      profile->readerQosMask |= SetLivelinessKindQos;
+
+    } else if( valueString == "TOPIC") {
+      profile->readerQos.liveliness.kind = ::DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS;
+      profile->readerQosMask |= SetLivelinessKindQos;
+
+    } else {
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) loadSubscription() - ")
+        ACE_TEXT("unrecognized value for %s: %s - ")
+        ACE_TEXT("not assigning a value.\n"),
+        LIVELINESSKIND_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        LIVELINESSKIND_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+  }
+
+  // LivelinessDuration                  = <number>
+  valueString.clear();
+  heap.get_string_value( sectionKey, LIVELINESSDURATION_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->readerQos.liveliness.lease_duration.nanosec = 0;
+    profile->readerQos.liveliness.lease_duration.sec = ACE_OS::atoi( valueString.c_str());
+    profile->readerQosMask |= SetLivelinessDurationQos;
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        LIVELINESSDURATION_KEYNAME,
+        profile->readerQos.liveliness.lease_duration.sec
+      ));
+    }
+  }
+
+  // ReliabilityKind                     = <string> # One of BEST_EFFORT, RELIABLE
+  valueString.clear();
+  heap.get_string_value( sectionKey, RELIABILITYKIND_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    if( valueString == "BEST_EFFORT") {
+      profile->readerQos.reliability.kind = ::DDS::BEST_EFFORT_RELIABILITY_QOS;
+      profile->readerQosMask |= SetReliabilityKindQos;
+
+    } else if( valueString == "RELIABLE") {
+      profile->readerQos.reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
+      profile->readerQosMask |= SetReliabilityKindQos;
+
+    } else {
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) loadSubscription() - ")
+        ACE_TEXT("unrecognized value for %s: %s - ")
+        ACE_TEXT("not assigning a value.\n"),
+        RELIABILITYKIND_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        RELIABILITYKIND_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+  }
+
+  // ReliabilityMaxBlocking              = <number>
+  valueString.clear();
+  heap.get_string_value( sectionKey, RELIABILITYMAXBLOCKING_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->readerQos.reliability.max_blocking_time.nanosec = 0;
+    profile->readerQos.reliability.max_blocking_time.sec = ACE_OS::atoi( valueString.c_str());
+    profile->readerQosMask |= SetReliabilityMaxBlockingQos;
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        RELIABILITYMAXBLOCKING_KEYNAME,
+        profile->readerQos.reliability.max_blocking_time.sec
+      ));
+    }
+  }
+
+  // DestinationOrder                    = <string> # One of SOURCE, RECEPTION
+  valueString.clear();
+  heap.get_string_value( sectionKey, DESTINATIONORDER_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    if( valueString == "SOURCE") {
+      profile->readerQos.destination_order.kind = ::DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS;
+      profile->readerQosMask |= SetDestinationOrderQos;
+
+    } else if( valueString == "RECEPTION") {
+      profile->readerQos.destination_order.kind = ::DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS;
+      profile->readerQosMask |= SetDestinationOrderQos;
+
+    } else {
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) loadSubscription() - ")
+        ACE_TEXT("unrecognized value for %s: %s - ")
+        ACE_TEXT("not assigning a value.\n"),
+        DESTINATIONORDER_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        DESTINATIONORDER_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+  }
+
+  // HistoryKind                         = <string> # One of ALL, LAST
+  valueString.clear();
+  heap.get_string_value( sectionKey, HISTORYKIND_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    if( valueString == "ALL") {
+      profile->readerQos.history.kind = ::DDS::KEEP_ALL_HISTORY_QOS;
+      profile->readerQosMask |= SetHistoryKindQos;
+
+    } else if( valueString == "LAST") {
+      profile->readerQos.history.kind = ::DDS::KEEP_LAST_HISTORY_QOS;
+      profile->readerQosMask |= SetHistoryKindQos;
+
+    } else {
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) loadSubscription() - ")
+        ACE_TEXT("unrecognized value for %s: %s - ")
+        ACE_TEXT("not assigning a value.\n"),
+        HISTORYKIND_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        HISTORYKIND_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+  }
+
+  // HistoryDepth                        = <number>
+  valueString.clear();
+  heap.get_string_value( sectionKey, HISTORYDEPTH_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->readerQos.history.depth = ACE_OS::atoi( valueString.c_str());
+    profile->readerQosMask |= SetHistoryDepthQos;
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        HISTORYDEPTH_KEYNAME,
+        profile->readerQos.history.depth
+      ));
+    }
+  }
+
+  // ResourceMaxSamples                  = <number>
+  valueString.clear();
+  heap.get_string_value( sectionKey, RESOURCEMAXSAMPLES_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->readerQos.resource_limits.max_samples = ACE_OS::atoi( valueString.c_str());
+    profile->readerQosMask |= SetResourceMaxSamplesQos;
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        RESOURCEMAXSAMPLES_KEYNAME,
+        profile->readerQos.resource_limits.max_samples
+      ));
+    }
+  }
+
+  // ResourceMaxInstances                = <number>
+  valueString.clear();
+  heap.get_string_value( sectionKey, RESOURCEMAXINSTANCES_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->readerQos.resource_limits.max_instances = ACE_OS::atoi( valueString.c_str());
+    profile->readerQosMask |= SetResourceMaxInstancesQos;
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        RESOURCEMAXINSTANCES_KEYNAME,
+        profile->readerQos.resource_limits.max_instances
+      ));
+    }
+  }
+
+  // ResourceMaxSamplesPerInstance       = <number>
+  valueString.clear();
+  heap.get_string_value( sectionKey, RESOURCEMAXSAMPLESPERINSTANCE_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->readerQos.resource_limits.max_samples_per_instance = ACE_OS::atoi( valueString.c_str());
+    profile->readerQosMask |= SetResourceMaxSamplesPerInstanceQos;
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        RESOURCEMAXSAMPLESPERINSTANCE_KEYNAME,
+        profile->readerQos.resource_limits.max_samples_per_instance
+      ));
+    }
+  }
+
+  // UserData                            = <string>
+  valueString.clear();
+  heap.get_string_value( sectionKey, USERDATA_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->readerQosMask |= SetUserDataQos;
+    profile->readerQos.user_data.value.length( valueString.length());
+    profile->readerQos.user_data.value.replace(
+      valueString.length(),
+      valueString.length(),
+      const_cast<CORBA::Octet*>(
+        reinterpret_cast<const CORBA::Octet*>( valueString.c_str())
+      )
+    );
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        USERDATA_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+  }
+
+  // TimeBasedFilter               = <number>
+  valueString.clear();
+  heap.get_string_value( sectionKey, TIMEBASEDFILTER_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->readerQos.time_based_filter.minimum_separation.nanosec = 0;
+    profile->readerQos.time_based_filter.minimum_separation.sec
+      = ACE_OS::atoi( valueString.c_str());
+    profile->readerQosMask |= SetTimeBasedFilterQos;
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        TIMEBASEDFILTER_KEYNAME,
+        profile->readerQos.time_based_filter.minimum_separation.sec
+      ));
+    }
+  }
+
+  // ReaderDataLifecycle           = <number>
+  valueString.clear();
+  if( 0 == heap.get_string_value( sectionKey, READERDATALIFECYCLE_KEYNAME, valueString)) {
+    profile->readerQos.reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec = 0;
+    profile->readerQos.reader_data_lifecycle.autopurge_nowriter_samples_delay.sec
+      = ACE_OS::atoi( valueString.c_str());
+    profile->readerQosMask |= SetReaderDataLifecycleQos;
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        READERDATALIFECYCLE_KEYNAME,
+        profile->readerQos.reader_data_lifecycle.autopurge_nowriter_samples_delay.sec
+      ));
+    }
+  }
+
+  // Topic            = <string> # One of topic <name>
+  valueString.clear();
+  heap.get_string_value( sectionKey, TOPIC_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->topic = valueString.c_str();
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        TOPIC_KEYNAME,
+        profile->topic.c_str()
+      ));
+    }
+  }
+
+  // TransportIndex   = <number> # Index into transport configurations
+  valueString.clear();
+  heap.get_string_value( sectionKey, TRANSPORTINDEX_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->transport = ACE_OS::atoi( valueString.c_str());
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        TRANSPORTINDEX_KEYNAME,
+        profile->transport
+      ));
+    }
+  }
+
+  // DataCollectionFile            = <string> # Filename for collected data
+  valueString.clear();
+  heap.get_string_value( sectionKey, DATACOLLECTIONFILE_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->datafile = valueString.c_str();
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        DATACOLLECTIONFILE_KEYNAME,
+        profile->datafile.c_str()
+      ));
+    }
+  }
+
+  // DataCollectionBound           = <number>
+  valueString.clear();
+  heap.get_string_value( sectionKey, DATACOLLECTIONBOUND_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->bound = ACE_OS::atoi( valueString.c_str());
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        DATACOLLECTIONBOUND_KEYNAME,
+        profile->bound
+      ));
+    }
+  }
+
+  // DataCollectionRetention       = <string> # One of ALL, OLDEST, NEWEST
+  valueString.clear();
+  heap.get_string_value( sectionKey, DATACOLLECTIONRETENTION_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    if( valueString == "ALL") {
+      profile->retention = ::OpenDDS::DCPS::DataCollector<double>::Unbounded;
+
+    } else if( valueString == "OLDEST") {
+      profile->retention = ::OpenDDS::DCPS::DataCollector<double>::KeepOldest;
+
+    } else if( valueString == "NEWEST") {
+      profile->retention = ::OpenDDS::DCPS::DataCollector<double>::KeepNewest;
+
+    } else {
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) loadSubscription() - ")
+        ACE_TEXT("unrecognized value for %s: %s - ")
+        ACE_TEXT("not assigning a value.\n"),
+        DATACOLLECTIONRETENTION_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        DATACOLLECTIONRETENTION_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+  }
+
   // Store the profile for the current participant.
-  this->subscriptionMap_[ sectionName] = profile;
+  this->subscriptionProfileMap_[ sectionName] = profile;
 }
 
 } // End of namespace Test

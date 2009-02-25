@@ -12,6 +12,36 @@
 
 namespace Test {
 
+enum QosMaskBits {
+  SetDeadlineQos                            = 0x00000001,
+  SetDestinationOrderQos                    = 0x00000002,
+  SetDurabilityQos                          = 0x00000004,
+  SetDurabilityServiceDurationQos           = 0x00000008,
+  SetDurabilityServiceHistoryDepthQos       = 0x00000010,
+  SetDurabilityServiceHistoryKindQos        = 0x00000020,
+  SetDurabilityServiceInstancesQos          = 0x00000040,
+  SetDurabilityServiceSamplesPerInstanceQos = 0x00000080,
+  SetDurabilityServiceSamplesQos            = 0x00000100,
+  SetHistoryDepthQos                        = 0x00000200,
+  SetHistoryKindQos                         = 0x00000400,
+  SetLatencyBudgetQos                       = 0x00000800,
+  SetLifespanQos                            = 0x00001000,
+  SetLivelinessDurationQos                  = 0x00002000,
+  SetLivelinessKindQos                      = 0x00004000,
+//SetOwnershipKindQos                       = 0x00008000,
+  SetOwnershipStrengthQos                   = 0x00010000,
+  SetReaderDataLifecycleQos                 = 0x00020000,
+  SetReliabilityKindQos                     = 0x00040000,
+  SetReliabilityMaxBlockingQos              = 0x00080000,
+  SetResourceMaxInstancesQos                = 0x00100000,
+  SetResourceMaxSamplesPerInstanceQos       = 0x00200000,
+  SetResourceMaxSamplesQos                  = 0x00400000,
+  SetTimeBasedFilterQos                     = 0x00800000,
+  SetTransportPriorityQos                   = 0x01000000,
+  SetUserDataQos                            = 0x02000000,
+  SetWriterDataLifecycleQos                 = 0x04000000
+};
+
 /**
  * [participant/<name>]
  *   # Participant Qos Policy values
@@ -27,8 +57,10 @@ struct ParticipantProfile  {
 /**
  * [topic/<name>]
  *   # Topic Qos Policy values
+ *   Participant = <string> # One of participant <name>
  */
 struct TopicProfile {
+  std::string     participant;
   ::DDS::TopicQos qos;
 };
 
@@ -37,7 +69,6 @@ struct TopicProfile {
  *   # Publisher Qos Policy values
  *   # DataWriter Qos Policy values
  *   # Test execution parameters
- *   Participant      = <string> # One of participant <name>
  *   Topic            = <string> # One of topic <name>
  *   TransportIndex   = <number> # Index into transport configurations
  *   MessageSource    = <string> # One of subscription <name>
@@ -48,7 +79,6 @@ struct TopicProfile {
  *   MessageDeviation = <number> # standard deviation for size
  */
 struct PublicationProfile {
-  std::string          participant;
   std::string          topic;
   unsigned int         transport;
   std::string          source;
@@ -56,6 +86,9 @@ struct PublicationProfile {
   Exponential          rate;
   ::DDS::PublisherQos  publisherQos;
   ::DDS::DataWriterQos writerQos;
+  unsigned int         writerQosMask;
+
+  void copyToWriterQos( ::DDS::DataWriterQos& qos);
 };
 
 /**
@@ -63,15 +96,13 @@ struct PublicationProfile {
  *   # Subscriber Qos Policy values
  *   # DataReader Qos Policy values
  *   # Test execution parameters
- *   Participant                         = <string> # One of participant <name>
- *   Topic                               = <string> # One of topic <name>
- *   TransportIndex                      = <number> # Index into transport configurations
- *   DataCollectionFile                  = <string> # Filename for collected data
- *   DataCollectionBound                 = <number>
- *   DataCollectionRetention             = <string> # One of ALL, OLDEST, NEWEST
+ *   Topic                   = <string> # One of topic <name>
+ *   TransportIndex          = <number> # Index into transport configurations
+ *   DataCollectionFile      = <string> # Filename for collected data
+ *   DataCollectionBound     = <number>
+ *   DataCollectionRetention = <string> # One of ALL, OLDEST, NEWEST
  */
 struct SubscriptionProfile {
-  std::string          participant;
   std::string          topic;
   unsigned int         transport;
   std::string          datafile;
@@ -80,6 +111,9 @@ struct SubscriptionProfile {
                        retention;
   ::DDS::SubscriberQos subscriberQos;
   ::DDS::DataReaderQos readerQos;
+  unsigned int         readerQosMask;
+
+  void copyToReaderQos( ::DDS::DataReaderQos& qos);
 };
 
 } // End of namespace Test

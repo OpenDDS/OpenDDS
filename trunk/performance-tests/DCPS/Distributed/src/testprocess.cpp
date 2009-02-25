@@ -18,12 +18,15 @@ main( int argc, char *argv[])
     // Initialize the test.
     const Test::Options options( argc, argv);
 
-    // Create the process thingie.
-    Test::Process process( options);
+    // Only run if we have a valid configuration.
+    if( options) {
+      // Create the process thingie.
+      Test::Process process( options);
 
-    // Execute the test.
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) testprocess() - starting.\n")));
-    process.run();
+      // Execute the test.
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) testprocess() - starting.\n")));
+      process.run();
+    }
 
   } catch( CORBA::Exception& /* e */) {
     ACE_ERROR((LM_ERROR,

@@ -510,10 +510,9 @@ void DataReaderImpl::remove_associations (
       }
     }
 
-    /// @TODO: wr_len bounds updated_writers at this point.
     for (CORBA::ULong i = 0; i < wr_len; ++i)
     {
-      id_to_handle_map_.erase(writers[i]);
+      id_to_handle_map_.erase( updated_writers[i]);
     }
   }
 

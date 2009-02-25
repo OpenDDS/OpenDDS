@@ -21,10 +21,10 @@ project(dtpProcess) : dcpsexe_with_unreliable_dgram, dcps_reliable_multicast, dc
   Source_Files {
     Exponential.cpp
     Gaussian.cpp
+    EntityProfiles.cpp
     Options.cpp
-    Writer.cpp
-    Publisher.cpp
-    Subscriber.cpp
+    Publication.cpp
+    // Subscription.cpp
     DataReaderListener.cpp
     Process.cpp
     testprocess.cpp

@@ -66,57 +66,57 @@ Test::Options::rawOutputFilename() const
 
 ACE_INLINE
 unsigned int&
-Test::Options::raw_buffer_size()
+Test::Options::rawBufferSize()
 {
-  return this->raw_buffer_size_;
+  return this->rawBufferSize_;
 }
 
 ACE_INLINE
 unsigned int
-Test::Options::raw_buffer_size() const
+Test::Options::rawBufferSize() const
 {
-  return this->raw_buffer_size_;
+  return this->rawBufferSize_;
 }
 
 ACE_INLINE
 OpenDDS::DCPS::DataCollector< double>::OnFull&
-Test::Options::raw_buffer_type()
+Test::Options::rawBufferType()
 {
-  return this->raw_buffer_type_;
+  return this->rawBufferType_;
 }
 
 ACE_INLINE
 OpenDDS::DCPS::DataCollector< double>::OnFull
-Test::Options::raw_buffer_type() const
+Test::Options::rawBufferType() const
 {
-  return this->raw_buffer_type_;
+  return this->rawBufferType_;
 }
 
 ACE_INLINE
-const Test::Options::ParticipantMap&
-Test::Options::participantMap() const
+const Test::Options::ParticipantProfileMap&
+Test::Options::participantProfileMap() const
 {
-  return this->participantMap_;
+  return this->participantProfileMap_;
 }
 
 ACE_INLINE
-const Test::Options::TopicMap&
-Test::Options::topicMap() const
+const Test::Options::TopicProfileMap&
+Test::Options::topicProfileMap() const
 {
-  return this->topicMap_;
+  return this->topicProfileMap_;
 }
 
 ACE_INLINE
-const Test::Options::PublicationMap&
-Test::Options::publicationMap() const
+const Test::Options::PublicationProfileMap&
+Test::Options::publicationProfileMap() const
 {
-  return this->publicationMap_;
+  return this->publicationProfileMap_;
 }
 
 ACE_INLINE
-const Test::Options::SubscriptionMap&
-Test::Options::subscriptionMap() const
+const Test::Options::SubscriptionProfileMap&
+Test::Options::subscriptionProfileMap() const
 {
-  return this->subscriptionMap_;
+  return this->subscriptionProfileMap_;
 }
 

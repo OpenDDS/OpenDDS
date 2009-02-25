@@ -108,7 +108,6 @@ ParticipantTask::svc()
     DDS::DataWriterQos writer_qos;
     publisher->get_default_datawriter_qos(writer_qos);
 
-    writer_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
     writer_qos.history.depth = samples_per_thread_;
 
     DDS::DataWriter_var writer =

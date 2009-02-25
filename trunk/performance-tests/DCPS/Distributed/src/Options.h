@@ -43,9 +43,22 @@ namespace Test {
  *   -v
  *      Be verbose when executing.
  *
- *   -c <seconds>
+ *   -d <seconds>
  *      Run test for <seconds> seconds.  If not specified, the test will
  *      not terminate until killed by an external signal.
+ *
+ *   -t <type> (one of "unbounded", "newest" or "oldest")
+ *      Configure the raw latency data gathering by configured DataReader
+ *      entities to be of the specified type.
+ *
+ *   -s <size>
+ *      Gather <size> amount of raw latency data from any configured
+ *      DataReader entities.  If this is specified when the type is as
+ *      "unbounded" it is used as a preallocation hint.
+ *
+ *   -r <file>
+ *      Place raw latency data from configured DataReader entities into
+ *      this file.
  *
  *   -f <file>
  *      Extract detailed scenario parameters from <file>.  The format of
@@ -69,20 +82,30 @@ namespace Test {
  *        [topic/<name>]
  *        [publication/<name>]
  *        [subscription/<name>]
+ *
+ * NOTE: The order on the command line determines the final value of a
+ *       configurable element.  For example: if more than one value is
+ *       given on the command line for test duration ('-d 5 -d 2') then
+ *       the rightmost value will be used.  Likewise if a value is
+ *       configured on both the command line and in a configuration file,
+ *       the processing order is honored.  This means that it is
+ *       preferable to specify the configuration file first on the
+ *       command line so that the remaining values can override the
+ *       values from the command line.
  */
 class Options  {
   public:
     /// Container type for participant profiles.
-    typedef std::map< std::string, ParticipantProfile*> ParticipantMap;
+    typedef std::map< std::string, ParticipantProfile*> ParticipantProfileMap;
 
     /// Container type for topic profiles.
-    typedef std::map< std::string, TopicProfile*> TopicMap;
+    typedef std::map< std::string, TopicProfile*> TopicProfileMap;
 
     /// Container type for publication profiles.
-    typedef std::map< std::string, PublicationProfile*> PublicationMap;
+    typedef std::map< std::string, PublicationProfile*> PublicationProfileMap;
 
     /// Container type for subscription profiles.
-    typedef std::map< std::string, SubscriptionProfile*> SubscriptionMap;
+    typedef std::map< std::string, SubscriptionProfile*> SubscriptionProfileMap;
 
     /// Default constructor.
     Options( int argc, char** argv, char** envp = 0);
@@ -110,25 +133,25 @@ class Options  {
     public:    std::string  rawOutputFilename() const;
 
     /// Raw latency data buffer size.
-    protected: unsigned int& raw_buffer_size();
-    public:    unsigned int  raw_buffer_size() const;
+    protected: unsigned int& rawBufferSize();
+    public:    unsigned int  rawBufferSize() const;
 
     /// Raw latency data buffer type.
-    protected: OpenDDS::DCPS::DataCollector< double>::OnFull& raw_buffer_type();
-    public:    OpenDDS::DCPS::DataCollector< double>::OnFull  raw_buffer_type() const;
+    protected: OpenDDS::DCPS::DataCollector< double>::OnFull& rawBufferType();
+    public:    OpenDDS::DCPS::DataCollector< double>::OnFull  rawBufferType() const;
 
   public:
     /// Participant profile container.
-    const ParticipantMap& participantMap() const;
+    const ParticipantProfileMap& participantProfileMap() const;
 
     /// Topic profile container.
-    const TopicMap& topicMap() const;
+    const TopicProfileMap& topicProfileMap() const;
 
     /// Publication profile container.
-    const PublicationMap& publicationMap() const;
+    const PublicationProfileMap& publicationProfileMap() const;
 
     /// Subscription profile container.
-    const SubscriptionMap& subscriptionMap() const;
+    const SubscriptionProfileMap& subscriptionProfileMap() const;
 
   private:
     /// Configure scenario information from a file.
@@ -178,22 +201,22 @@ class Options  {
     std::string rawOutputFilename_;
 
     /// Raw latency data buffer size.
-    unsigned int raw_buffer_size_;
+    unsigned int rawBufferSize_;
 
     /// Raw latency data buffer type.
-    OpenDDS::DCPS::DataCollector< double>::OnFull raw_buffer_type_;
+    OpenDDS::DCPS::DataCollector< double>::OnFull rawBufferType_;
 
     /// Participant profiles.
-    ParticipantMap  participantMap_;
+    ParticipantProfileMap  participantProfileMap_;
 
     /// Topic profiles.
-    TopicMap        topicMap_;
+    TopicProfileMap        topicProfileMap_;
 
     /// Publication profiles.
-    PublicationMap  publicationMap_;
+    PublicationProfileMap  publicationProfileMap_;
 
     /// Subscription profiles.
-    SubscriptionMap subscriptionMap_;
+    SubscriptionProfileMap subscriptionProfileMap_;
 };
 
 } // End of namespace Test
