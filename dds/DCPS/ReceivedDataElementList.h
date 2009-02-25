@@ -47,6 +47,11 @@ namespace OpenDDS
           return ++this->ref_count_;
       }
 
+      long ref_count()
+      {
+          return this->ref_count_.value();
+      }
+
       /// Data sample received
       void *registered_data_;  // ugly, but works....
 

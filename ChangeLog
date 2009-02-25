@@ -1,3 +1,10 @@
+Wed Feb 25 16:26:48 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/ReceivedDataElementList.h:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+
+          Fixed failing tests.
+
 Wed Feb 25 00:35:07 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
