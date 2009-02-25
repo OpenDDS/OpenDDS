@@ -29,11 +29,11 @@ namespace OpenDDS
             sample_state_(::DDS::NOT_READ_SAMPLE_STATE),
             disposed_generation_count_(0),
             no_writers_generation_count_(0),
-            ref_count_(1),
             zero_copy_cnt_(0),
             sequence_(0),
             previous_data_sample_(0),
-            next_data_sample_(0)
+            next_data_sample_(0),
+            ref_count_(1)
       {
       }
 
