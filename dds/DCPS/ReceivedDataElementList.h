@@ -5,7 +5,8 @@
 #ifndef TAO_DDS_DCPS_RECEIVEDDATAELEMENTLIST_H
 #define TAO_DDS_DCPS_RECEIVEDDATAELEMENTLIST_H
 
-#include "ace/Recursive_Thread_Mutex.h"
+#include "ace/Atomic_Op_T.h"
+#include "ace/Thread_Mutex.h"
 
 #include "dcps_export.h"
 #include "dds/DdsDcpsInfrastructureC.h"
@@ -28,7 +29,7 @@ namespace OpenDDS
             sample_state_(::DDS::NOT_READ_SAMPLE_STATE),
             disposed_generation_count_(0),
             no_writers_generation_count_(0),
-            ref_count_(0),
+            ref_count_(1),
             zero_copy_cnt_(0),
             sequence_(0),
             previous_data_sample_(0),
@@ -36,15 +37,12 @@ namespace OpenDDS
       {
       }
 
-      int dec_ref() 
+      long dec_ref() 
       {
-          // since we do not know the type of the sample
-          // we let the caller cleanup this object 
-          // (including the sample) after returning.
           return --this->ref_count_;
       }
 
-      int inc_ref()
+      long inc_ref()
       {
           return ++this->ref_count_;
       }
@@ -67,12 +65,9 @@ namespace OpenDDS
       /// at the time the sample was received
       size_t no_writers_generation_count_ ;
 
-      /// Reference count > 1 if it has been loaned
-      int ref_count_;
-
       /// This is needed to know if delete DataReader should fail with 
       /// PRECONDITION_NOT_MET because there are outstanding loans.
-      int zero_copy_cnt_;
+      ACE_Atomic_Op<ACE_Thread_Mutex, long> zero_copy_cnt_;
 
       /// The data sample's sequence number
       ACE_INT16   sequence_ ;
@@ -83,8 +78,8 @@ namespace OpenDDS
       /// the next data sample in the ReceivedDataElementList
       ReceivedDataElement *next_data_sample_ ;
 
-      /// Silly external lock to handle atomic inc/dec operations.
-      ACE_Recursive_Thread_Mutex lock_;
+    private:
+      ACE_Atomic_Op<ACE_Thread_Mutex, long> ref_count_;
 
     } ; // class ReceivedDataElement
 

@@ -1424,12 +1424,6 @@ void
 {
   using ::OpenDDS::DCPS::ReceivedDataElement;
     
-  // Account for silly locking behavior in ReceiveDataElement.
-  // (stallions 2009/02/19)
-  ACE_GUARD(ACE_Recursive_Thread_Mutex,
-            guard,
-            item->lock_);
-
   if (0 == item->dec_ref())
   {
     if (item->registered_data_ != 0)
@@ -1716,16 +1710,6 @@ void
     instance_ptr->last_sequence_ = header.sequence_;
 
     instance_ptr->rcvd_sample_.add(ptr);
-
-    // Account for silly locking behavior in ReceiveDataElement.
-    // (stallions 2009/02/19)
-    {
-      ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                       guard,
-                       ptr->lock_,
-                       ::DDS::RETCODE_ERROR);
-      ptr->inc_ref();
-    }
 
     if (instance_ptr->rcvd_sample_.size_ > get_depth())
     {

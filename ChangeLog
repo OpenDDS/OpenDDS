@@ -1,9 +1,17 @@
+Wed Feb 25 00:35:07 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/ReceivedDataElementList.h:
+
+          Fixes to ReceivedDataElement ref counting behavior.
+
 Wed Feb 25 00:29:33 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
 
-	  Corrected code that modified an old container to modify the
-	  correct container.
+          Corrected code that modified an old container to modify the
+          correct container.
 
         * performance-tests/DCPS/Distributed/src/EntityProfiles.h:
         * performance-tests/DCPS/Distributed/src/EntityProfiles.cpp:
@@ -17,13 +25,13 @@ Wed Feb 25 00:29:33 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
         * performance-tests/DCPS/Distributed/src/TestProcess.mpc:
         * performance-tests/DCPS/Distributed/src/testprocess.cpp:
 
-	  Capturing intermediate state of current work in progress.
+          Capturing intermediate state of current work in progress.
 
         * tests/DCPS/Thrasher/ParticipantTask.cpp:
         * tests/DCPS/Thrasher/Subscriber.cpp:
         * tests/DCPS/Thrasher/run_test.pl:
 
-	  Minor updates to add some diagnostic helpers in the script.
+          Minor updates to add some diagnostic helpers in the script.
 
         * performance-tests/DCPS/Distributed/src/Writer.h:
         * performance-tests/DCPS/Distributed/src/Writer.cpp:
