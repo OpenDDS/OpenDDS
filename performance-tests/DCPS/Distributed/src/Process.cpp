@@ -5,8 +5,8 @@
 
 #include "Test.h"
 #include "Options.h"
-#include "Writer.h"
-// #include "Reader.h"
+#include "Publication.h"
+// #include "Subscription.h"
 
 #include "TestTypeSupportImpl.h"
 
@@ -41,10 +41,12 @@ Process::~Process()
   this->subscriptionWaiter_->get_conditions( conditions);
   this->subscriptionWaiter_->detach_conditions( conditions);
 
+/**
   if( ! CORBA::is_nil( this->participant_.in())) {
     this->participant_->delete_contained_entities();
     TheParticipantFactory->delete_participant( this->participant_.in());
   }
+ */
   TheTransportFactory->release();
   TheServiceParticipant->shutdown();
 }
@@ -382,6 +384,18 @@ Process::run()
       ACE_TEXT("finished publishing samples.\n")
     ));
   }
+}
+
+std::ostream&
+Process::rawData( std::ostream& str) const
+{
+  return str;
+}
+
+std::ostream&
+Process::summaryData( std::ostream& str) const
+{
+  return str;
 }
 
 } // End of namespace Test

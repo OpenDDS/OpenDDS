@@ -1,3 +1,35 @@
+Wed Feb 25 00:29:33 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+	  Corrected code that modified an old container to modify the
+	  correct container.
+
+        * performance-tests/DCPS/Distributed/src/EntityProfiles.h:
+        * performance-tests/DCPS/Distributed/src/EntityProfiles.cpp:
+        * performance-tests/DCPS/Distributed/src/Options.h:
+        * performance-tests/DCPS/Distributed/src/Options.inl:
+        * performance-tests/DCPS/Distributed/src/Options.cpp:
+        * performance-tests/DCPS/Distributed/src/Process.h:
+        * performance-tests/DCPS/Distributed/src/Process.cpp:
+        * performance-tests/DCPS/Distributed/src/Publication.h:
+        * performance-tests/DCPS/Distributed/src/Publication.cpp:
+        * performance-tests/DCPS/Distributed/src/TestProcess.mpc:
+        * performance-tests/DCPS/Distributed/src/testprocess.cpp:
+
+	  Capturing intermediate state of current work in progress.
+
+        * tests/DCPS/Thrasher/ParticipantTask.cpp:
+        * tests/DCPS/Thrasher/Subscriber.cpp:
+        * tests/DCPS/Thrasher/run_test.pl:
+
+	  Minor updates to add some diagnostic helpers in the script.
+
+        * performance-tests/DCPS/Distributed/src/Writer.h:
+        * performance-tests/DCPS/Distributed/src/Writer.cpp:
+
+          Removed these files.
+
 Tue Feb 24 17:29:25 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:

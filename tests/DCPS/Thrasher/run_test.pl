@@ -17,9 +17,12 @@ $opts = new PerlACE::ConfigList->check_config ('STATIC') ? ''
 $pub_opts = "$opts ";
 $sub_opts = "$opts ";
 
-# $sub_opts .= "-DCPSDebugLevel 4 -ORBVerboseLogging 1 ";
+my $runTop ;# = 1;
+# $pub_opts .= "-DCPSDebugLevel 1 -ORBVerboseLogging 0 ";
+# $sub_opts .= "-DCPSDebugLevel 1 -ORBVerboseLogging 0 ";
 # $pub_opts .= "-DCPSBit 0 ";
 # $sub_opts .= "-DCPSBit 0 ";
+# $pub_opts .= "-DCPSChunks 1 ";
 
 my $arg = shift;
 if ($arg eq 'low') {
@@ -75,6 +78,10 @@ $Subscriber->Spawn();
 
 print $Publisher->CommandLine() . "\n";
 $Publisher->Spawn();
+
+my $topargs = "top -bd1 -p $Publisher->{PROCESS} >publisher-sizes.log &";
+print "TOP COMMAND: " . $topargs . "\n";
+system("$topargs") if $runTop;
 
 $SubscriberResult = $Subscriber->WaitKill(300);
 if ($SubscriberResult != 0) {
