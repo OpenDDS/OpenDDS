@@ -2387,7 +2387,7 @@ DataReaderImpl::num_zero_copies()
       for (OpenDDS::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_;
             item != 0; item = item->next_data_sample_)
         {
-            loans += item->zero_copy_cnt_;
+            loans += item->zero_copy_cnt_.value();
         }
     }
 
