@@ -82,21 +82,18 @@ generator_erl::generate_structure(AST_Structure* node, vector<AST_Field*>& v)
     
     module.add_export("id/0");
     module.add_export("new/0");
-    
     module.add_export("new", fields.size());
 
     ostream& os = module.open_stream();
     if (!os) return false; // bad stream
 
-    /// Generate repository identifier function (id/0)
+    /// Generate functions
     os << "id() -> \"" << repo_identifier(node->name()) << "\"." << endl
        << endl;
 
-    /// Generate default ctor (new/0)
     os << "new() -> #" << module << "{}." << endl
        << endl;
 
-    /// Generate parameterized ctor (new/N)
     os << "new(" << fields.as_param_list() << ") -> #" << module <<
           "{" << fields.as_init_list() << "}." << endl;
   }
