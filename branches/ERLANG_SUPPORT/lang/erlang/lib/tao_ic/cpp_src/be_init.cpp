@@ -54,17 +54,21 @@ BE_produce()
 {
   AST_Root* root = AST_Root::narrow_from_decl(idl_global->root());
   if (root == 0)
+  {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("%N:%l: BE_produce()")
                ACE_TEXT(" narrow_from_decl failed!\n")
                ACE_TEXT("%r"), BE_abort));
+  }
 
   be_visitor visitor;
   if (root->ast_accept(&visitor) != 0)
+  {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("%N:%l: BE_produce()")
                ACE_TEXT(" ast_accept failed!\n")
                ACE_TEXT("%r"), BE_abort));
+  }
 
   BE_cleanup();
 }

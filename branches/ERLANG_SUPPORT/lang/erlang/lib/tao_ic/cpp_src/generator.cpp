@@ -29,15 +29,12 @@ generator::generate_structure(AST_Structure*, vector<AST_Field*>&)
 }
 
 
-generator_composite::generator_composite(bool auto_delete)
-  : auto_delete_(auto_delete)
+generator_composite::generator_composite()
 {
 }
 
 generator_composite::~generator_composite()
 {
-  if (auto_delete_)
-    delete_all();
 }
 
 void

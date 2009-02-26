@@ -15,27 +15,8 @@ const char* repo_identifier::prefix = "IDL";
 const char* repo_identifier::version = "1.0";
 
 repo_identifier::repo_identifier(UTL_ScopedName* name)
+  : str_(to_str(name))
 {
-  ostringstream os;
-
-  os << prefix << ':';
-  UTL_IdListActiveIterator it(name);
-  while (!it.is_done())
-  {
-    Identifier* item = it.item();
-    it.next(); // advance iterator
-  
-    string s(item->get_string());
-    if (s.empty()) continue;
-      
-    os << s;
-
-    if (!it.is_done())
-      os << '/';
-  }
-  os << ':' << version;
-
-  str_ = os.str();
 }
 
 repo_identifier::~repo_identifier()
@@ -48,13 +29,40 @@ repo_identifier::str() const
   return str_;
 }
 
+string
+repo_identifier::to_str(UTL_ScopedName* name)
+{
+  ostringstream os;
+
+  os << prefix << ':';
+  UTL_IdListActiveIterator it(name);
+  while (!it.is_done())
+  {
+    Identifier* item = it.item();
+    it.next();
+  
+    string s(item->get_string());
+    
+    if (s.empty()) continue; // ignore
+      
+    os << s;
+    if (!it.is_done())
+    {
+      os << '/';
+    }
+  }
+  os << ':' << version;
+
+  return os.str();
+}
+
 repo_identifier::operator string() const
 {
   return str_;
 }
 
 ostream&
-operator<<(ostream& os, const repo_identifier& r)
+operator<<(ostream& os, const repo_identifier& rhs)
 {
-  return os << r.str_;
+  return os << rhs.str_;
 }

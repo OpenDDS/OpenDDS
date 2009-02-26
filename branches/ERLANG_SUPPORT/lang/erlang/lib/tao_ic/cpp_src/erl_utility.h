@@ -21,6 +21,7 @@ public:
   static const char* sep;
 
   erl_identifier(const char* name);
+  
   erl_identifier(Identifier* name);
   erl_identifier(UTL_ScopedName* name);
 
@@ -33,11 +34,11 @@ public:
   operator std::string() const;
 
 private:
-  void init();
-  
   std::string str_;
   
-  friend std::ostream& operator<<(std::ostream& os, const erl_identifier& e);
+  void init();
+  
+  friend std::ostream& operator<<(std::ostream& os, const erl_identifier& rhs);
 };
 
 class erl_identifier_list
@@ -47,6 +48,9 @@ public:
   typedef std::vector<erl_identifier>::const_iterator const_iterator;
 
   erl_identifier_list();
+
+  template <typename InputIterator>
+  erl_identifier_list(InputIterator first, InputIterator last);
 
   ~erl_identifier_list();
 
@@ -67,24 +71,26 @@ public:
 private:
   std::vector<erl_identifier> v_;
 
-  friend std::ostream& operator<<(std::ostream& os, const erl_identifier_list& e);
+  friend std::ostream& operator<<(std::ostream& os, const erl_identifier_list& rhs);
 };
 
 class erl_literal
 {
 public:
-  explicit erl_literal(AST_Expression* e);
+  explicit erl_literal(AST_Expression* expr);
 
   ~erl_literal();
 
   std::string str() const;
 
+  static std::string to_str(AST_Expression* expr);
+  
   operator std::string() const;
 
 private:
   std::string str_;
   
-  friend std::ostream& operator<<(std::ostream& os, const erl_literal& e);
+  friend std::ostream& operator<<(std::ostream& os, const erl_literal& rhs);
 };
 
 class erl_file
@@ -99,11 +105,11 @@ public:
   std::ostream& open_stream();
 
 protected:
+  std::ofstream os_;
+
   erl_file();
 
   virtual void write_header() = 0;
-  
-  std::ofstream os_;
 };
 
 class erl_header : public erl_file
@@ -147,8 +153,11 @@ public:
 
   const char* filename();
  
-  void add_export(const std::string& function);
-  void add_export(const erl_identifier& name, int arity); 
+  void add_export(const std::string& fn);
+  void add_export(const erl_identifier& fn_name, int fn_arity);
+
+  template <typename InputIterator>
+  void add_exports(InputIterator first, InputIterator last, int fn_arity);
 
   void add_include(const std::string& file);
 
@@ -164,7 +173,7 @@ private:
 
   std::vector<std::string> includes_;
   
-  friend std::ostream& operator<<(std::ostream& os, const erl_module& e);
+  friend std::ostream& operator<<(std::ostream& os, const erl_module& rhs);
 };
 
 std::string to_list(std::vector<std::string>& v);

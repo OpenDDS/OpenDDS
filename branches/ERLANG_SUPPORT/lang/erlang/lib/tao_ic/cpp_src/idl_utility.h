@@ -21,13 +21,15 @@ public:
   ~repo_identifier();
 
   std::string str() const;
+  
+  static std::string to_str(UTL_ScopedName* name);
 
   operator std::string() const;
 
 private:
   std::string str_;
   
-  friend std::ostream& operator<<(std::ostream& os, const repo_identifier& r);
+  friend std::ostream& operator<<(std::ostream& os, const repo_identifier& rhs);
 };
 
 #endif /* TAO_IC_IDL_UTILITY_H */
