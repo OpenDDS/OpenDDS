@@ -1,3 +1,27 @@
+Thu Feb 26 23:30:51 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/DCPS/Distributed/src/DataReaderListener.h:
+        * performance-tests/DCPS/Distributed/src/DataReaderListener.cpp:
+        * performance-tests/DCPS/Distributed/src/EntityProfiles.h:
+        * performance-tests/DCPS/Distributed/src/Options.cpp:
+        * performance-tests/DCPS/Distributed/src/Process.h:
+        * performance-tests/DCPS/Distributed/src/Process.cpp:
+        * performance-tests/DCPS/Distributed/src/Publication.h:
+        * performance-tests/DCPS/Distributed/src/Publication.cpp:
+        * performance-tests/DCPS/Distributed/src/Subscription.h:
+        * performance-tests/DCPS/Distributed/src/Subscription.cpp:
+        * performance-tests/DCPS/Distributed/src/TestProcess.mpc:
+        * performance-tests/DCPS/Distributed/src/testprocess.cpp:
+
+	  First working version of dynamically configurable test process.
+
+        * performance-tests/DCPS/Distributed/src/Publisher.h:
+        * performance-tests/DCPS/Distributed/src/Publisher.cpp:
+        * performance-tests/DCPS/Distributed/src/Subscriber.h:
+        * performance-tests/DCPS/Distributed/src/Subscriber.cpp:
+
+          Removed these files.
+
 Wed Feb 25 16:26:48 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/ReceivedDataElementList.h:

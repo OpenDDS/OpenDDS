@@ -5,35 +5,18 @@
 
 #include "Test.h"
 #include "Options.h"
+#include "EntityProfiles.h"
 #include "Publication.h"
-// #include "Subscription.h"
-
+#include "Subscription.h"
 #include "TestTypeSupportImpl.h"
 
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/Marked_Default_Qos.h"
-#include "dds/DCPS/PublisherImpl.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
-#include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpConfiguration.h"
-#include "dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastConfiguration.h"
-#include "dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.h"
-
-#ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
-#include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram.h"
-#include "dds/DCPS/transport/ReliableMulticast/ReliableMulticast.h"
-#endif
-
-// #include "ace/Null_Mutex.h"
-#include "ace/Condition_T.h"
-
-#include <sstream>
 
 namespace Test {
 
 Process::~Process()
 {
+  // Clean up the wait conditions.
   DDS::ConditionSeq conditions;
   this->publicationWaiter_->get_conditions( conditions);
   this->publicationWaiter_->detach_conditions( conditions);
@@ -41,14 +24,26 @@ Process::~Process()
   this->subscriptionWaiter_->get_conditions( conditions);
   this->subscriptionWaiter_->detach_conditions( conditions);
 
-/**
-  if( ! CORBA::is_nil( this->participant_.in())) {
-    this->participant_->delete_contained_entities();
-    TheParticipantFactory->delete_participant( this->participant_.in());
+  // Clean up the participants and their resources.
+  for( ParticipantMap::iterator current = this->participants_.begin();
+       current != this->participants_.end();
+       ++current
+     ) {
+    current->second->delete_contained_entities();
+    TheParticipantFactory->delete_participant( current->second.ptr());
   }
- */
+
+  // Clean up the rest of the service resources.
   TheTransportFactory->release();
   TheServiceParticipant->shutdown();
+
+  // Close the output files.
+  for( OutputFileMap::iterator current = this->outputFiles_.begin();
+       current != this->outputFiles_.end();
+       ++current
+     ) {
+    current->second->rdbuf()->close();
+  }
 }
 
 Process::Process( const Options& options)
@@ -56,233 +51,317 @@ Process::Process( const Options& options)
    publicationWaiter_( new DDS::WaitSet),
    subscriptionWaiter_( new DDS::WaitSet)
 {
-#if 0
-  // Create the DomainParticipant
-  this->participant_
-    = TheParticipantFactory->create_participant(
-        this->options_.domain(),
-        PARTICIPANT_QOS_DEFAULT,
-        DDS::DomainParticipantListener::_nil()
-      );
-  if( CORBA::is_nil( this->participant_.in())) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
-      ACE_TEXT("failed to create a participant.\n")
-    ));
-    throw BadParticipantException();
-
-  } else if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Process::Process() - ")
-      ACE_TEXT("created participant in domain %d.\n"),
-      this->options_.domain()
-    ));
-  }
-
-  // Create the transport.
-  this->transport_
-    = TheTransportFactory->create_transport_impl(
-        this->options_.transportKey(),
-        OpenDDS::DCPS::AUTO_CONFIG
-      );
-  if( this->transport_.is_nil()) {
-    std::stringstream buffer;
-    buffer << this->options_.transportType();
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
-      ACE_TEXT("failed to create %s transport.\n"),
-      buffer.str().c_str()
-    ));
-    throw BadTransportException();
-
-  } else if( this->options_.verbose()) {
-    std::stringstream buffer;
-    buffer << this->options_.transportType();
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Process::Process() - ")
-      ACE_TEXT("created %s transport.\n"),
-      buffer.str().c_str()
-    ));
-  }
-
-  // Create and register the type support.
-  DataTypeSupportImpl* testData = new DataTypeSupportImpl();
-  if( ::DDS::RETCODE_OK
-   != testData->register_type( this->participant_.in(), 0)) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
-      ACE_TEXT("unable to install type %s support.\n"),
-      testData->get_type_name()
-    ));
-    throw BadTypeSupportException ();
-
-  } else if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Process::Process() - ")
-      ACE_TEXT("created type %s support.\n"),
-      testData->get_type_name()
-    ));
-  }
-
-  // Create the topic.
-  this->topic_ = this->participant_->create_topic(
-                   this->options_.topicName().c_str(),
-                   testData->get_type_name(),
-                   TOPIC_QOS_DEFAULT,
-                   ::DDS::TopicListener::_nil()
-                 );
-  if( CORBA::is_nil( this->topic_.in())) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
-      ACE_TEXT("failed to create topic %s.\n"),
-      this->options_.topicName().c_str()
-    ));
-    throw BadTopicException();
-
-  } else if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Process::Process() - ")
-      ACE_TEXT("created topic %s.\n"),
-      this->options_.topicName().c_str()
-    ));
-  }
-
-  // Create the publisher.
-  this->publisher_ = this->participant_->create_publisher(
-                       PUBLISHER_QOS_DEFAULT,
-                       ::DDS::PublisherListener::_nil()
-                     );
-  if( CORBA::is_nil( this->publisher_.in())) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
-      ACE_TEXT("failed to create publisher.\n")
-    ));
-    throw BadPublisherException();
-
-  } else if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Process::Process() - ")
-      ACE_TEXT("created publisher.\n")
-    ));
-  }
-
-  // Attach the transport to the publisher.
-  ::OpenDDS::DCPS::PublisherImpl* servant
-    = dynamic_cast< ::OpenDDS::DCPS::PublisherImpl*>( this->publisher_.in());
-  if( 0 == servant) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
-      ACE_TEXT("failed to narrow publisher servant.\n")
-    ));
-    throw BadServantException();
-  }
-
-  if( ::OpenDDS::DCPS::ATTACH_OK
-   != servant->attach_transport( this->transport_.in())) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
-      ACE_TEXT("failed to attach transport to publisher.\n")
-    ));
-    throw BadAttachException();
-
-  } else if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Process::Process() - ")
-      ACE_TEXT("attached transport to publisher.\n")
-    ));
-  }
-
-  // Writer Qos policy values.
-  ::DDS::DataWriterQos writerQos;
-  this->publisher_->get_default_datawriter_qos( writerQos);
-
-  writerQos.durability.kind                          = ::DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
-  writerQos.history.kind                             = ::DDS::KEEP_ALL_HISTORY_QOS;
-  writerQos.resource_limits.max_samples_per_instance = ::DDS::LENGTH_UNLIMITED;
-
-  // Reliability varies with the transport implementation.
-  switch( this->options_.transportType()) {
-    case Options::TCP:
-    case Options::RMC:
-      writerQos.reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
-      break;
-
-    case Options::UDP:
-    case Options::MC:
-      writerQos.reliability.kind = ::DDS::BEST_EFFORT_RELIABILITY_QOS;
-      break;
-
-    case Options::NONE:
-    default:
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
-        ACE_TEXT("unrecognized transport when setting up Qos policies.\n")
-      ));
-      throw BadQosException();
-  }
-
-  if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Process::Process() - ")
-      ACE_TEXT("starting to create %d publications.\n"),
-      this->options_.profiles().size()
-    ));
-  }
-
-  // Build as many publications as are specified.
-  for( unsigned int index = 0; index < this->options_.profiles().size(); ++index) {
-    // This publications priority is needed when creating the writer.
-    writerQos.transport_priority.value = this->options_.profiles()[ index]->priority();
-
-    // Create the writer.
-    DDS::DataWriter_var writer
-      = this->publisher_->create_datawriter(
-          this->topic_.in(),
-          writerQos,
-          DDS::DataWriterListener::_nil()
+  for( Options::ParticipantProfileMap::const_iterator current
+         = this->options_.participantProfileMap().begin();
+       current != this->options_.participantProfileMap().end();
+       ++current
+     ) {
+    // Create the current participant.
+    this->participants_[ current->first]
+      = TheParticipantFactory->create_participant(
+          current->second->domainId,
+          current->second->qos,
+          DDS::DomainParticipantListener::_nil()
         );
-    if( CORBA::is_nil( writer.in())) {
+    if( CORBA::is_nil( this->participants_[ current->first].in())) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
-        ACE_TEXT("failed to create writer.\n")
+        ACE_TEXT("failed to create participant %s.\n"),
+        current->first.c_str()
       ));
-      throw BadWriterException();
+      throw BadParticipantException();
 
     } else if( this->options_.verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Process::Process() - ")
-        ACE_TEXT("created writer for publication %s ")
-        ACE_TEXT("with priority %d.\n"),
-        this->options_.profiles()[ index]->name().c_str(),
-        writerQos.transport_priority.value
+        ACE_TEXT("created participant %s in domain %d.\n"),
+        current->first.c_str(),
+        current->second->domainId
       ));
     }
 
-    // Create a publication and store it.
-    this->publications_[ this->options_.profiles()[ index]->name()]
-      = new Writer(
-              writer.in(),
-              *this->options_.profiles()[ index],
+    // Create and register the type support in this participant.  We do
+    // this here since there is only a single data type defined for the
+    // verification test framework at this time.
+    DataTypeSupportImpl* testData = new DataTypeSupportImpl();
+    if( ::DDS::RETCODE_OK
+     != testData->register_type( this->participants_[ current->first].in(), 0)) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
+        ACE_TEXT("unable to install type %s support into participant %s.\n"),
+        testData->get_type_name(),
+        current->first.c_str()
+      ));
+      throw BadTypeSupportException ();
+
+    } else if( this->options_.verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Process::Process() - ")
+        ACE_TEXT("created type %s support in participant %s.\n"),
+        testData->get_type_name(),
+        current->first.c_str()
+      ));
+    }
+
+    // Save the data type name for later use in creating Topics.
+    if( this->dataTypeName_.empty()) {
+      this->dataTypeName_ = testData->get_type_name();
+    }
+  }
+
+  for( Options::TopicProfileMap::const_iterator current
+         = this->options_.topicProfileMap().begin();
+       current != this->options_.topicProfileMap().end();
+       ++current
+     ) {
+    // Grab the participant in which this topic will be installed.
+    ParticipantMap::iterator participantLocation
+      = this->participants_.find( current->second->participant);
+    if( participantLocation == this->participants_.end()) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
+        ACE_TEXT("failed to obtain participant %s for topic %s.\n"),
+        current->second->participant.c_str(),
+        current->first.c_str()
+      ));
+      throw BadParticipantException();
+    }
+    DDS::DomainParticipant_var participant = participantLocation->second;
+
+    // Create the topic.
+    this->topics_[ current->first]
+      = participant->create_topic(
+          current->first.c_str(),
+          this->dataTypeName_.c_str(),
+          current->second->qos,
+          DDS::TopicListener::_nil()
+        );
+    if( CORBA::is_nil( this->topics_[ current->first].in())) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
+        ACE_TEXT("failed to create topic %s in participant %s.\n"),
+        current->first.c_str(),
+        current->second->participant.c_str()
+      ));
+      throw BadTopicException();
+
+    } else if( this->options_.verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Process::Process() - ")
+        ACE_TEXT("created topic %s in participant %s.\n"),
+        current->first.c_str(),
+        current->second->participant.c_str()
+      ));
+    }
+  }
+
+  for( Options::SubscriptionProfileMap::const_iterator current
+         = this->options_.subscriptionProfileMap().begin();
+       current != this->options_.subscriptionProfileMap().end();
+       ++current
+     ) {
+    // Grab the topic for which this subscription will be created.
+    TopicMap::iterator topicLocation
+      = this->topics_.find( current->second->topic);
+    if( topicLocation == this->topics_.end()) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
+        ACE_TEXT("failed to obtain topic %s for subscription %s.\n"),
+        current->second->topic.c_str(),
+        current->first.c_str()
+      ));
+      throw BadTopicException();
+    }
+    DDS::Topic_var topic = topicLocation->second;
+
+    // Grab the participant in which this subscription will be installed.
+    Options::TopicProfileMap::const_iterator where
+      = this->options_.topicProfileMap().find( current->second->topic);
+    if( where == this->options_.topicProfileMap().end()) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
+        ACE_TEXT("failed to find topic profile %s for subscription %s.\n"),
+        current->second->topic.c_str(),
+        current->first.c_str()
+      ));
+      throw BadTopicException();
+    }
+    ParticipantMap::iterator participantLocation
+      = this->participants_.find( where->second->participant);
+    if( participantLocation == this->participants_.end()) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
+        ACE_TEXT("failed to obtain participant %s for subscription %s.\n"),
+        where->second->participant.c_str(),
+        current->first.c_str()
+      ));
+      throw BadParticipantException();
+    }
+    DDS::DomainParticipant_var participant = participantLocation->second;
+
+    // Extract the output filename, if any.
+    if( !current->second->datafile.empty()) {
+      OutputFileMap::iterator where
+        = this->outputFiles_.find( current->second->datafile);
+      if( where == this->outputFiles_.end()) {
+        this->outputFiles_.insert(
+          OutputFileMap::value_type(
+            current->second->datafile,
+            new std::ofstream()
+          )
+        );
+      }
+    }
+
+    // Create the subscription.
+    this->subscriptions_[ current->first]
+      = new Subscription(
+              current->first.c_str(),
+              current->second,
               this->options_.verbose()
             );
+    if( this->subscriptions_[ current->first] == 0) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
+        ACE_TEXT("failed to create subscription %s in participant %s.\n"),
+        current->first.c_str(),
+        where->second->participant.c_str()
+      ));
+      throw BadTopicException();
 
-    //
-    // Grab, enable and attach the status condition for test
-    // synchronization of the current publication.
-    //
-    DDS::StatusCondition_var status = writer->get_statuscondition();
-    status->set_enabled_statuses( DDS::PUBLICATION_MATCH_STATUS);
-    this->waiter_->attach_condition( status.in());
+    } else if( this->options_.verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Process::Process() - ")
+        ACE_TEXT("created subscription %s in participant %s.\n"),
+        current->first.c_str(),
+        where->second->participant.c_str()
+      ));
+    }
+
+    // Enable the subscription.
+    this->subscriptions_[ current->first]->enable( participant, topic);
+
+    // Extract the subscription status condition.
+    DDS::StatusCondition_var status
+      = this->subscriptions_[ current->first]->get_statuscondition();
+    status->set_enabled_statuses( DDS::SUBSCRIPTION_MATCH_STATUS);
+    this->subscriptionWaiter_->attach_condition( status.in());
 
     if( this->options_.verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Process::Process() - ")
-        ACE_TEXT("created StatusCondition for publication %s.\n"),
-        this->options_.profiles()[ index]->name().c_str()
+        ACE_TEXT("extracted StatusCondition for ")
+        ACE_TEXT("subscription %s in participant %s.\n"),
+        current->first.c_str(),
+        where->second->participant.c_str()
       ));
     }
   }
-#endif
+
+  for( Options::PublicationProfileMap::const_iterator current
+         = this->options_.publicationProfileMap().begin();
+       current != this->options_.publicationProfileMap().end();
+       ++current
+     ) {
+    // Grab the topic for which this subscription will be created.
+    TopicMap::iterator topicLocation
+      = this->topics_.find( current->second->topic);
+    if( topicLocation == this->topics_.end()) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
+        ACE_TEXT("failed to obtain topic %s for publication %s.\n"),
+        current->second->topic.c_str(),
+        current->first.c_str()
+      ));
+      throw BadTopicException();
+    }
+    DDS::Topic_var topic = topicLocation->second;
+
+    // Grab the participant in which this subscription will be installed.
+    Options::TopicProfileMap::const_iterator where
+      = this->options_.topicProfileMap().find( current->second->topic);
+    if( where == this->options_.topicProfileMap().end()) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
+        ACE_TEXT("failed to find topic profile %s for publication %s.\n"),
+        current->second->topic.c_str(),
+        current->first.c_str()
+      ));
+      throw BadTopicException();
+    }
+    ParticipantMap::iterator participantLocation
+      = this->participants_.find( where->second->participant);
+    if( participantLocation == this->participants_.end()) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
+        ACE_TEXT("failed to obtain participant %s for publication %s.\n"),
+        where->second->participant.c_str(),
+        current->first.c_str()
+      ));
+      throw BadParticipantException();
+    }
+    DDS::DomainParticipant_var participant = participantLocation->second;
+
+    // Create the publication.
+    this->publications_[ current->first]
+      = new Publication(
+              current->first.c_str(),
+              current->second,
+              this->options_.verbose()
+            );
+    if( this->publications_[ current->first] == 0) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
+        ACE_TEXT("failed to create publication %s in participant %s.\n"),
+        current->first.c_str(),
+        where->second->participant.c_str()
+      ));
+      throw BadTopicException();
+
+    } else if( this->options_.verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Process::Process() - ")
+        ACE_TEXT("created publication %s in participant %s.\n"),
+        current->first.c_str(),
+        where->second->participant.c_str()
+      ));
+    }
+
+    // Enable the publication.
+    this->publications_[ current->first]->enable( participant, topic);
+
+    // Extract the publication status condition.
+    DDS::StatusCondition_var status
+      = this->publications_[ current->first]->get_statuscondition();
+    status->set_enabled_statuses( DDS::PUBLICATION_MATCH_STATUS);
+    this->publicationWaiter_->attach_condition( status.in());
+
+    if( this->options_.verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Process::Process() - ")
+        ACE_TEXT("extracted StatusCondition for ")
+        ACE_TEXT("publication %s in participant %s.\n"),
+        current->first.c_str(),
+        where->second->participant.c_str()
+      ));
+    }
+
+    // Now attach any wrap arounds.
+    if( !current->second->source.empty()) {
+      Subscription* subscription
+        = this->subscriptions_[ current->second->source];
+
+      subscription->set_destination( this->publications_[ current->first]);
+    }
+  }
+
+  // Go ahead and get the output files opened and ready for use.
+  for( OutputFileMap::iterator current = this->outputFiles_.begin();
+       current != this->outputFiles_.end();
+       ++current
+     ) {
+    current->second->open( current->first.c_str());
+  }
 }
 
 void
@@ -290,13 +369,13 @@ Process::run()
 {
   DDS::Duration_t   timeout = { DDS::DURATION_INFINITY_SEC, DDS::DURATION_INFINITY_NSEC};
   DDS::ConditionSeq conditions;
-  DDS::PublicationMatchStatus matches = { 0, 0, 0, 0, 0};
+  DDS::PublicationMatchStatus publicationMatches = { 0, 0, 0, 0, 0};
   unsigned int cummulative_count = 0;
   do {
     if( this->options_.verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Process::run() - ")
-        ACE_TEXT("%d of %d subscriptions attached, waiting for more.\n"),
+        ACE_TEXT("%d of %d subscriptions attached to publications, waiting for more.\n"),
         cummulative_count,
         this->publications_.size()
       ));
@@ -316,12 +395,14 @@ Process::run()
       if( !CORBA::is_nil( writer.in())) {
         DDS::StatusKindMask changes = writer->get_status_changes();
         if( changes & DDS::PUBLICATION_MATCH_STATUS) {
-          matches = writer->get_publication_match_status();
-          cummulative_count += matches.current_count_change;
+          publicationMatches = writer->get_publication_match_status();
+          cummulative_count += publicationMatches.current_count_change;
         }
       }
     }
 
+  // @NOTE: This currently makes the simplifying assumption that there
+  // is a single subscription for each publication.
   } while( cummulative_count < this->publications_.size());
 
   // Kluge to bias the race between BuiltinTopic samples and application
@@ -384,17 +465,117 @@ Process::run()
       ACE_TEXT("finished publishing samples.\n")
     ));
   }
+
+  //
+  // At this point the process has completed sending all data and
+  // stopped any forwarding.  We wait for the subscriptions to
+  // become unassociated before we shut down entirely.
+  //
+
+  DDS::SubscriptionMatchStatus subscriptionMatches = { 0, 0, 0, 0, 0};
+  unsigned int current_count;
+  do {
+    if( DDS::RETCODE_OK != this->subscriptionWaiter_->wait( conditions, timeout)) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Process::run() - ")
+        ACE_TEXT("failed to synchronize subscription conditions.\n")
+      ));
+      throw BadSyncException();
+    }
+
+    // At this point, we do not actually care what *caused* the thread to
+    // unblock, we just want to determine if *any* subscription still has
+    // an actively associated writer.
+    current_count = 0;
+    this->subscriptionWaiter_->get_conditions( conditions);
+    for( unsigned long index = 0; index < conditions.length(); ++index) {
+      DDS::StatusCondition_var condition
+        = DDS::StatusCondition::_narrow( conditions[ index].in());
+
+      DDS::DataReader_var reader = DDS::DataReader::_narrow( condition->get_entity());
+      if( !CORBA::is_nil( reader.in())) {
+        // Again, we do not actually care what the event or change was,
+        // we just take this opportunity to determine the current status
+        // of associations.
+        subscriptionMatches = reader->get_subscription_match_status();
+        current_count += subscriptionMatches.current_count;
+      }
+    }
+
+    if( this->options_.verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Process::run() - ")
+        ACE_TEXT("waiting for %d remote publications to finish.\n"),
+        current_count
+      ));
+    }
+
+  } while( current_count > 0);
+
+  // At this point, we are done sending and receiving data, so we can go
+  // ahead and write any data that was requested.
+
+  // Summary data.
+  for( Options::SubscriptionProfileMap::const_iterator current
+         = this->options_.subscriptionProfileMap().begin();
+       current != this->options_.subscriptionProfileMap().end();
+       ++current
+     ) {
+    if( !current->second->datafile.empty()) {
+      std::ostream& file = *this->outputFiles_[ current->second->datafile];
+      file << std::endl << "SUBSCRIPTION " << current->first
+           << " SUMMARY DATA" << std::endl;
+      this->subscriptions_[ current->first]->summaryData( file);
+    }
+  }
+
+  // Detailed data.
+  for( Options::SubscriptionProfileMap::const_iterator current
+         = this->options_.subscriptionProfileMap().begin();
+       current != this->options_.subscriptionProfileMap().end();
+       ++current
+     ) {
+    if( !current->second->datafile.empty()) {
+      std::ostream& file = *this->outputFiles_[ current->second->datafile];
+      file << std::endl << "SUBSCRIPTION " << current->first
+           << " DETAILED DATA" << std::endl;
+      this->subscriptions_[ current->first]->rawData( file);
+    }
+  }
+
+  if( this->options_.verbose()) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) Process::run() - ")
+      ACE_TEXT("shutting down after all subscriptions have no writers.\n")
+    ));
+  }
 }
 
 std::ostream&
 Process::rawData( std::ostream& str) const
 {
+  for( SubscriptionMap::const_iterator current = this->subscriptions_.begin();
+       current != this->subscriptions_.end();
+       ++current
+     ) {
+    str << std::endl << "SUBSCRIPTION " << current->first
+        << " DETAILED DATA" << std::endl;
+    current->second->rawData( str);
+  }
   return str;
 }
 
 std::ostream&
 Process::summaryData( std::ostream& str) const
 {
+  for( SubscriptionMap::const_iterator current = this->subscriptions_.begin();
+       current != this->subscriptions_.end();
+       ++current
+     ) {
+    str << std::endl << "SUBSCRIPTION " << current->first
+        << " SUMMARY DATA" << std::endl;
+    current->second->summaryData( str);
+  }
   return str;
 }
 

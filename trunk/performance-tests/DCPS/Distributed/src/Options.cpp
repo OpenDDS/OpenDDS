@@ -204,7 +204,8 @@ Options::Options( int argc, char** argv, char** /* envp */)
       if( this->verbose()) {
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) Options::Options() - ")
-          ACE_TEXT("Setting VERBOSE mode.\n")
+          ACE_TEXT("Setting raw latency data output file to %s.\n"),
+          currentArg
         ));
       }
       parser.consume_arg();

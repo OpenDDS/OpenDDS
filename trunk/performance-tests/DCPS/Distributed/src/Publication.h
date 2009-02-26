@@ -6,7 +6,7 @@
 
 #include "Process.h"
 
-#include <dds/DdsDcpsPublicationC.h>
+#include "TestTypeSupportC.h"
 #include <ace/Task.h>
 
 #include <string>
@@ -27,18 +27,16 @@ class Publication : public ACE_Task_Base {
     /// Virtual destructor.
     virtual ~Publication();
 
-    //
-    // Task_Base methods.
-    //
-
+    //@{ @name Task_Base interfaces.
     virtual int open(void*);
     virtual int svc();
     virtual int close( u_long flags = 0);
+    //@}
 
-
-    /// Thread control.
+    //@{ @name Thread control.
     void start();
     void stop();
+    //@}
 
     /// Resource management.
     void enable(
@@ -49,8 +47,17 @@ class Publication : public ACE_Task_Base {
     /// State access
     int messages() const;
 
-    /// Access to the writer internal status values.
+    //@{ @name DataWriter interfaces.
     ::DDS::StatusCondition_ptr get_statuscondition();
+    ::DDS::DataWriterListener_ptr get_listener();
+    ::DDS::ReturnCode_t set_listener(
+                          ::DDS::DataWriterListener_ptr a_listener,
+                          ::DDS::StatusKindMask mask
+                        );
+    //@}
+
+    // Publish a data sample from an external source.
+    void write( const Test::Data& sample);
 
   private:
     /// Name of this publication.
@@ -72,7 +79,7 @@ class Publication : public ACE_Task_Base {
     int messages_;
 
     /// The writer for the publication.
-    ::DDS::DataWriter_var writer_;
+    Test::DataDataWriter_var writer_;
 
     /// Lock for synchronizing access to the methods.
     ACE_SYNCH_MUTEX lock_;

@@ -1,35 +1,88 @@
 // $Id$
 
 #include "DataReaderListener.h"
+#include "Publication.h"
 #include "TestTypeSupportC.h"
 #include "TestTypeSupportImpl.h"
 
+#include "dds/DCPS/Qos_Helper.h"
+
+#include <iostream>
+#include <iomanip>
 #include <sstream>
 
 /// Control the spew.
 namespace { enum { BE_REALLY_VERBOSE = 0};}
 
-Test::DataReaderListener::DataReaderListener( const bool verbose)
- : verbose_( verbose),
-   total_messages_( 0),
-   valid_messages_( 0)
+Test::DataReaderListener::WriterStats::WriterStats(
+  int bound,
+  OpenDDS::DCPS::DataCollector< double>::OnFull type
+) : stats_( bound, type)
 {
 }
 
-Test::DataReaderListener::~DataReaderListener ()
+void
+Test::DataReaderListener::WriterStats::add_stat( DDS::Duration_t delay)
 {
+  double datum = static_cast<double>( delay.sec);
+  datum += static_cast<double>( delay.nanosec) / 1000000000.0;
+  this->stats_.add( datum);
+}
+
+std::ostream&
+Test::DataReaderListener::WriterStats::summaryData( std::ostream& str) const
+{
+  str << std::dec;
+  str << "     samples: " << this->stats_.n() << std::endl;
+  str << "        mean: " << this->stats_.mean() << std::endl;
+  str << "     minimum: " << this->stats_.minimum() << std::endl;
+  str << "     maximum: " << this->stats_.maximum() << std::endl;
+  str << "    variance: " << this->stats_.var() << std::endl;
+  return str;
+}
+
+std::ostream&
+Test::DataReaderListener::WriterStats::rawData( std::ostream& str) const
+{
+  str << this->stats_.size() << " samples out of " << this->stats_.n() << std::endl;
+  return str << this->stats_;
+}
+
+Test::DataReaderListener::DataReaderListener(
+  bool collectData,
+  int rawDataBound,
+  OpenDDS::DCPS::DataCollector< double>::OnFull rawDataType,
+  bool verbose
+) : collectData_( collectData),
+    verbose_( verbose),
+    totalMessages_( 0),
+    validMessages_( 0),
+    rawDataBound_( rawDataBound),
+    rawDataType_( rawDataType),
+    destination_( 0)
+{
+}
+
+Test::DataReaderListener::~DataReaderListener()
+{
+}
+
+void
+Test::DataReaderListener::set_destination( Publication* publication)
+{
+  this->destination_ = publication;
 }
 
 int
 Test::DataReaderListener::total_messages() const
 {
-  return this->total_messages_;
+  return this->totalMessages_;
 }
 
 int
 Test::DataReaderListener::valid_messages() const
 {
-  return this->valid_messages_;
+  return this->validMessages_;
 }
 
 const std::map< long, long>&
@@ -50,70 +103,92 @@ Test::DataReaderListener::priorities() const
   return this->priorities_;
 }
 
+std::ostream&
+Test::DataReaderListener::summaryData( std::ostream& str) const
+{
+  for( StatsMap::const_iterator current = this->stats_.begin();
+       current != this->stats_.end();
+       ++current
+     ) {
+    str << "  Writer[ 0x" << std::hex << std::setw(8) << current->first << "]" << std::endl;
+    current->second.summaryData( str);
+  }
+  return str;
+}
+
+std::ostream&
+Test::DataReaderListener::rawData( std::ostream& str) const
+{
+  for( StatsMap::const_iterator current = this->stats_.begin();
+       current != this->stats_.end();
+       ++current
+     ) {
+    str << "  Writer[ 0x" << std::hex << std::setw(8) << current->first << "]" << std::endl;
+    current->second.rawData( str);
+  }
+  return str;
+}
+
 void
 Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
   throw (CORBA::SystemException)
 {
-  Test::DataDataReader_var dr = Test::DataDataReader::_narrow (reader);
+  DataDataReader_var dr = DataDataReader::_narrow (reader);
   if (CORBA::is_nil (dr.in ())) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT ("(%P|%t) Test::DataReaderListener::on_data_available() - ")
+      ACE_TEXT ("(%P|%t) DataReaderListener::on_data_available() - ")
       ACE_TEXT ("data on unexpected reader type.\n")
     ));
     return;
   }
 
-#ifdef ZERO_COPY_TAKE
-  enum { SAMPLES_PER_TAKE = 10};
-  Test::DataSeq      data( 0);
-  DDS::SampleInfoSeq info( 0);
+  // Mark the reception time of all samples read during this call as now.
+  // This is the closest we can come to determining what the actual
+  // reception timestamp is without hacking the service internals.
+  // This actually does reflect delays experienced by applications more
+  // accurately since this is where an application first observes any
+  // received data.
+  ACE_Time_Value now = ACE_OS::gettimeofday ();
 
-  while( DDS::RETCODE_OK == dr->take(
-                              data,
-                              info,
-                              SAMPLES_PER_TAKE,
-                              DDS::ANY_SAMPLE_STATE,
-                              DDS::ANY_VIEW_STATE,
-                              DDS::ANY_INSTANCE_STATE
-                            )
-       ) {
-    this->total_messages_ += data.length();
-    for( unsigned long index = 0; index < data.length(); ++index) {
-      if( info[ index].valid_data) {
-        ++this->valid_messages_;
-      } else {
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: DataReaderListener::on_data_available() - ")
-          ACE_TEXT("received an INVALID sample.\n")
-        ));
-      }
-      this->bytes_[ data[ index].pid] += data[ index].buffer.length();
-      this->priorities_[ data[ index].pid] = data[ index].priority; // Faster than a conditional.
-      if( this->verbose_ && BE_REALLY_VERBOSE) {
-        ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) DataReaderListener::on_data_available() - ")
-          ACE_TEXT("received %d samples.\n"),
-          data.length()
-        ));
-      }
-    }
-    // Do this here since we are not going out of scope before we might
-    // call the take() again.  This resets the length to 0 for us as well
-    // as managing memory.
-    dr->return_loan( data, info);
-  }
-
-#else /* ZERO_COPY_TAKE */
-  Test::Data      data;
+  Data            data;
   DDS::SampleInfo info;
 
   while( DDS::RETCODE_OK == dr->take_next_sample( data, info)) {
-    ++this->total_messages_;
+    ++this->totalMessages_;
     if( info.valid_data) {
       ++this->counts_[ data.pid];
-      ++this->valid_messages_;
+      ++this->validMessages_;
       this->bytes_[ data.pid] += data.buffer.length();
       this->priorities_[ data.pid] = data.priority; // faster than conditional.
+
+      // Forwared the current sample if there is a destination for it.
+      if( this->destination_) {
+        this->destination_->write( data);
+      }
+
+      // Collect the (presumably) round trip statistics at this point.
+      if( this->collectData_) {
+        // This does not affect any existing value and inserts only if
+        // no value for this writer is currently present.
+        std::pair< StatsMap::iterator, bool> result = this->stats_.insert(
+          StatsMap::value_type(
+            data.pid,
+            WriterStats( this->rawDataBound_, this->rawDataType_)
+          )
+        );
+
+        // This is a very annoying series of conversions.
+        DDS::Duration_t sent_time = {
+          info.source_timestamp.sec,
+          info.source_timestamp.nanosec
+        };
+        result.first->second.add_stat(
+          OpenDDS::DCPS::time_value_to_duration(
+            now - OpenDDS::DCPS::duration_to_time_value( sent_time)
+          )
+        );
+      }
+
       if( this->verbose_ && BE_REALLY_VERBOSE) {
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderListener::on_data_available() - ")
@@ -130,7 +205,6 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
       ));
     }
   }
-#endif /* ZERO_COPY_TAKE */
 
   if( this->verbose_ && BE_REALLY_VERBOSE) {
     ::OpenDDS::DCPS::DataReaderEx_var readerex
@@ -152,7 +226,7 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
         ACE_TEXT("(%P|%t) DataReaderListener::on_data_available() - ")
         ACE_TEXT("statistics for %d writers at sample %d:\n%s"),
         statistics.length(),
-        this->total_messages_,
+        this->totalMessages_,
         buffer.str().c_str()
       ));
 
@@ -187,17 +261,12 @@ Test::DataReaderListener::on_liveliness_changed (
     const DDS::LivelinessChangedStatus &)
   throw (CORBA::SystemException)
 {
-  if( this->verbose_) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DataReaderListener::on_liveliness_changed()")
-    ));
-  }
 }
 
 void
 Test::DataReaderListener::on_subscription_match (
     DDS::DataReader_ptr,
-    const DDS::SubscriptionMatchStatus &)
+    const DDS::SubscriptionMatchStatus&)
   throw (CORBA::SystemException)
 {
 }
