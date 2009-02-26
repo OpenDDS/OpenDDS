@@ -62,7 +62,7 @@ public:
   iterator end();
   const_iterator end() const;
 
-  size_t size() const;
+  std::size_t size() const;
 
   std::string as_param_list() const;
 
