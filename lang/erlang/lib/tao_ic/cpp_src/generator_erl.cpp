@@ -2,9 +2,10 @@
  * $Id$
  */
 
+#include "generator_erl.h"
+
 #include "erl_utility.h"
 #include "idl_utility.h"
-#include "generator_erl.h"
 
 using namespace std;
 
@@ -38,12 +39,8 @@ generator_erl::generate_enum(AST_Enum* node, vector<AST_EnumVal*>& v)
   // Generate module (.erl)
   erl_module module(node->name());
 
-  /// Generate exports (arity always 0)
-  for (vector<AST_EnumVal*>::iterator it(v.begin()); it != v.end(); ++it)
-  {
-    module.add_export((*it)->local_name(), 0);
-  }
-
+  module.add_exports(v.begin(), v.end(), 0);
+  
   module.add_export("from_int/1");
   module.add_export("value/1");
 
@@ -57,9 +54,9 @@ generator_erl::generate_enum(AST_Enum* node, vector<AST_EnumVal*>& v)
           erl_literal((*it)->constant_value()) << "}." << endl;
   }
 
-  os << endl // empty line
+  os << endl
      << "from_int(I) -> {?MODULE, I}." << endl
-     << endl // empty line
+     << endl
      << "value({?MODULE, I}) -> I." << endl;
 
   return true;
@@ -71,13 +68,7 @@ generator_erl::generate_structure(AST_Structure* node, vector<AST_Field*>& v)
   erl_header header(node->name());
   erl_module module(node->name());
 
-  erl_identifier_list fields;
-
-  // Gather record fields
-  for (vector<AST_Field*>::iterator it(v.begin()); it != v.end(); ++it)
-  {
-    fields.add((*it)->local_name());
-  }
+  erl_identifier_list fields(v.begin(), v.end());
  
   { // Generate header (.hrl)
     ostream& os = header.open_stream();
@@ -91,18 +82,19 @@ generator_erl::generate_structure(AST_Structure* node, vector<AST_Field*>& v)
     
     module.add_export("id/0");
     module.add_export("new/0");
+    
     module.add_export("new", fields.size());
 
     ostream& os = module.open_stream();
     if (!os) return false; // bad stream
 
-    /// Generate repository identifier (id/0)
+    /// Generate repository identifier function (id/0)
     os << "id() -> \"" << repo_identifier(node->name()) << "\"." << endl
-       << endl; // empty line
+       << endl;
 
     /// Generate default ctor (new/0)
     os << "new() -> #" << module << "{}." << endl
-       << endl; // empty line
+       << endl;
 
     /// Generate parameterized ctor (new/N)
     os << "new(" << fields.as_param_list() << ") -> #" << module <<

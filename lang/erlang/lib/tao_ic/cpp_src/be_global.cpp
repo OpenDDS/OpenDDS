@@ -28,7 +28,9 @@ public:
     name_ = s.substr(0, pos);
 
     if (pos != string::npos)
+    {
       value_ = s.substr(pos + 1);
+    }
   }
 
   ~BE_Arg()
@@ -36,6 +38,7 @@ public:
   }
 
   string name() const { return name_; }
+
   string value() const { return value_; }
 
 private:
@@ -60,7 +63,9 @@ normalize_path(string& s)
 {
   size_t len = s.length();
   if (len > 0 && s[len - 1] != ACE_DIRECTORY_SEPARATOR_CHAR_A)
+  {
     s += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  }
 }
 } // namespace
 
@@ -210,7 +215,9 @@ BE_GlobalData::get_output_dir(string& s, const char* dirname) const
   s += output_dir_;
  
   if (output_otp_)
+  {
     s += dirname;
+  }
   
   normalize_path(s);
 }

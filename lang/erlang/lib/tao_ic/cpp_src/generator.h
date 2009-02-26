@@ -31,11 +31,11 @@ public:
   typedef std::vector<generator*>::iterator iterator;
   typedef std::vector<generator*>::const_iterator const_iterator;
 
-  explicit generator_composite(bool auto_delete = false);
+  generator_composite();
 
   ~generator_composite();
 
-  void add(generator *gen);
+  void add(generator *g);
 
   void delete_all();
 
@@ -53,8 +53,6 @@ public:
   bool generate_structure(AST_Structure* node, std::vector<AST_Field*>& v);
 
 private:
-  bool auto_delete_;
-
   std::vector<generator*> generators_;
 };
 

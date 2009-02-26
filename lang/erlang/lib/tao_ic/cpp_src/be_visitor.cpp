@@ -13,21 +13,23 @@ using namespace std;
 
 namespace
 {
-template <typename T> void
-find_children(vector<T*>& v, UTL_Scope* node, AST_Decl::NodeType type)
+template <typename T>
+void
+find_children(UTL_Scope* node, vector<T*>& v, AST_Decl::NodeType type)
 {
   for (UTL_ScopeActiveIterator it(node, UTL_Scope::IK_decls);
        !it.is_done(); it.next())
   {
     AST_Decl* item = it.item();
     if (item->node_type() == type)
+    {
       v.push_back(T::narrow_from_decl(item));
+    }
   }
 }
 } // namespace
 
 be_visitor::be_visitor()
-  : generator_(true) // auto_delete
 {
   generator_.add(new generator_cpp);
   generator_.add(new generator_erl);
@@ -35,15 +37,18 @@ be_visitor::be_visitor()
 
 be_visitor::~be_visitor()
 {
+  generator_.delete_all();
 }
 
 int
 be_visitor::visit_root(AST_Root* node)
 {
   if (visit_scope(node) != 0)
+  {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("%N:%l: visit_root()")
                       ACE_TEXT(" visit_scope failed!\n")), -1);
+  }
   return 0;
 }
 
@@ -55,14 +60,18 @@ be_visitor::visit_scope(UTL_Scope* node)
   {
     AST_Decl *item = it.item();
     if (item == 0)
+    {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: visit_scope()")
                         ACE_TEXT(" invalid scope!\n")), -1);
+    }
 
     if (item->ast_accept(this) != 0)
+    {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: visit_scope()")
                         ACE_TEXT(" ast_accept failed!\n")), -1);
+    }
   }
   return 0;
 }
@@ -70,13 +79,14 @@ be_visitor::visit_scope(UTL_Scope* node)
 int
 be_visitor::visit_module(AST_Module* node)
 {
-  if (node->imported())
-    return 0; // ignore includes
+  if (node->imported()) return 0; // ignore
 
   if (visit_scope(node) != 0)
+  {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("%N:%l: visit_module()")
                       ACE_TEXT(" visit_scope failed!\n")), -1);
+  }
   
   return 0;
 }
@@ -84,13 +94,14 @@ be_visitor::visit_module(AST_Module* node)
 int
 be_visitor::visit_constant(AST_Constant* node)
 {
-  if (node->imported())
-    return 0; // ignore includes
+  if (node->imported()) return 0; // ignore
 
   if (!generator_.generate_constant(node))
+  {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("%N:%l: visit_constant()")
                       ACE_TEXT(" generate_constant failed!\n")), -1);
+  }
   
   return 0;
 }
@@ -98,16 +109,35 @@ be_visitor::visit_constant(AST_Constant* node)
 int
 be_visitor::visit_enum(AST_Enum* node)
 {
-  if (node->imported())
-    return 0; // ignore includes
+  if (node->imported()) return 0; // ignore
 
   vector<AST_EnumVal*> v;
-  find_children(v, node, AST_Decl::NT_enum_val);
+  find_children(node, v, AST_Decl::NT_enum_val);
 
   if (!generator_.generate_enum(node, v))
+  {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("%N:%l: visit_enum()")
                       ACE_TEXT(" generate_enum failed!\n")), -1);
+  }
+  
+  return 0;
+}
+
+int
+be_visitor::visit_structure(AST_Structure* node)
+{
+  if (node->imported()) return 0; // ignore
+
+  vector<AST_Field*> v;
+  find_children(node, v, AST_Decl::NT_field);
+
+  if (!generator_.generate_structure(node, v))
+  {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("%N:%l: visit_structure()")
+                      ACE_TEXT(" generate_structure failed!\n")), -1);
+  }
   
   return 0;
 }
@@ -115,29 +145,12 @@ be_visitor::visit_enum(AST_Enum* node)
 int
 be_visitor::visit_enum_val(AST_EnumVal* node)
 {
-  return 0; // visited by visit_enum
+  return 0;
 }
 
 int
 be_visitor::visit_exception(AST_Exception* node)
 {
-  return 0;
-}
-
-int
-be_visitor::visit_structure(AST_Structure* node)
-{
-  if (node->imported())
-    return 0; // ignore includes
-
-  vector<AST_Field*> v;
-  find_children(v, node, AST_Decl::NT_field);
-
-  if (!generator_.generate_structure(node, v))
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("%N:%l: visit_structure()")
-                      ACE_TEXT(" generate_structure failed!\n")), -1);
-  
   return 0;
 }
 

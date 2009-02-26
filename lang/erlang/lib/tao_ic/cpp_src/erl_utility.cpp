@@ -34,12 +34,13 @@ erl_identifier::erl_identifier(UTL_ScopedName *name)
   while (!it.is_done())
   {
     Identifier* item = it.item();
-    it.next(); // advance iterator
+    it.next();
       
     str_ += item->get_string();
-
     if (!it.is_done())
+    {
       str_ += sep;
+    }
   }
   init();
 }
@@ -87,14 +88,24 @@ erl_identifier::operator string() const
 }
 
 ostream&
-operator<<(ostream& os, const erl_identifier& e)
+operator<<(ostream& os, const erl_identifier& rhs)
 {
-  return os << e.str_;
+  return os << rhs.str_;
 }
 
 
 erl_identifier_list::erl_identifier_list()
 {
+}
+
+template <typename InputIterator>
+erl_identifier_list::erl_identifier_list(InputIterator first,
+                                         InputIterator last)
+{
+  for (InputIterator it(first); it != last; ++it)
+  {
+    add((*it)->local_name());
+  }
 }
 
 erl_identifier_list::~erl_identifier_list()
@@ -147,7 +158,9 @@ erl_identifier_list::as_param_list() const
   {
     os << (*it++).as_var();
     if (it != end())
+    {
       os << ", ";
+    }
   }
 
   return os.str(); 
@@ -164,33 +177,52 @@ erl_identifier_list::as_init_list() const
     erl_identifier name = *it++;
    
     os << name << "=" << name.as_var();
-    
     if (it != end())
+    {
       os << ", ";
+    }
   }
 
   return os.str(); 
 }
 
 ostream&
-operator<<(ostream& os, const erl_identifier_list& e)
+operator<<(ostream& os, const erl_identifier_list& rhs)
 {
-  erl_identifier_list::const_iterator it(e.begin());
-  while (it != e.end())
+  erl_identifier_list::const_iterator it(rhs.begin());
+  while (it != rhs.end())
   {
     os << *it++;
-    if (it != e.end())
+    if (it != rhs.end())
+    {
       os << ", ";
+    }
   }
   return os;
 }
 
 
-erl_literal::erl_literal(AST_Expression* e)
+erl_literal::erl_literal(AST_Expression* expr)
+  : str_(to_str(expr))
+{
+}
+
+erl_literal::~erl_literal()
+{
+}
+
+string
+erl_literal::str() const
+{
+  return str_;
+}
+
+string
+erl_literal::to_str(AST_Expression* expr)
 {
   ostringstream os;
 
-  AST_Expression::AST_ExprValue* ev = e->ev();
+  AST_Expression::AST_ExprValue* ev = expr->ev();
   switch (ev->et)
   {
   case AST_Expression::EV_short:
@@ -247,17 +279,7 @@ erl_literal::erl_literal(AST_Expression* e)
     break; // not supported
   }
 
-  str_ = os.str();
-}
-
-erl_literal::~erl_literal()
-{
-}
-
-string
-erl_literal::str() const
-{
-  return str_;
+  return os.str();
 }
 
 erl_literal::operator string() const
@@ -266,9 +288,9 @@ erl_literal::operator string() const
 }
 
 ostream&
-operator<<(ostream& os, const erl_literal& e)
+operator<<(ostream& os, const erl_literal& rhs)
 {
-  return os << e.str_;
+  return os << rhs.str_;
 }
 
 
@@ -279,7 +301,9 @@ erl_file::erl_file()
 erl_file::~erl_file()
 {
   if (os_.is_open())
+  {
     os_.close();
+  }
 }
 
 ostream&
@@ -327,7 +351,9 @@ erl_header::erl_header(UTL_ScopedName* name)
 erl_header::~erl_header()
 {
   if (os_.is_open())
+  {
     write_footer();
+  }
 }
 
 string
@@ -353,13 +379,13 @@ erl_header::write_header()
 {
   os_ << "-ifndef(" << guard_ << ")." << endl
       << "-define(" << guard_ << ", true)." << endl
-      << endl; // empty line
+      << endl;
 }
 
 void
 erl_header::write_footer()
 {
-  os_ << endl // empty line
+  os_ << endl
       << "-endif." << endl;
 }
 
@@ -391,19 +417,29 @@ erl_module::filename()
 }
 
 void
-erl_module::add_export(const string& function)
+erl_module::add_export(const string& fn)
 {
-  exports_.push_back(function);
+  exports_.push_back(fn);
 }
 
 void
-erl_module::add_export(const erl_identifier& name, int arity)
+erl_module::add_export(const erl_identifier& fn_name, int fn_arity)
 {
   ostringstream os;
 
-  os << name << "/" << arity;
+  os << fn_name << "/" << fn_arity;
 
   add_export(os.str());
+}
+
+template <typename InputIterator>
+void
+erl_module::add_exports(InputIterator first, InputIterator last, int fn_arity)
+{
+  for (InputIterator it(first); it != last; ++it)
+  {
+    add_export((*it)->local_name(), fn_arity);
+  }
 }
 
 void
@@ -419,9 +455,10 @@ erl_module::write_header()
   os_ << "-module(" << name_ << ")." << endl;
  
   if (!exports_.empty())
+  {
     os_ << "-export(" << to_list(exports_) << ")." << endl;
-  
-  os_ << endl; // empty line
+  }
+  os_ << endl;
 
   // Generate includes
   if (!includes_.empty())
@@ -431,14 +468,14 @@ erl_module::write_header()
     {
       os_ << "-include(\"" << *it << "\")." << endl;
     }
-    os_ << endl; // empty line
+    os_ << endl;
   }
 }
 
 ostream&
-operator<<(ostream& os, const erl_module& e)
+operator<<(ostream& os, const erl_module& rhs)
 {
-  return os << e.name_;
+  return os << rhs.name_;
 }
 
 
