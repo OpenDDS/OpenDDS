@@ -6,8 +6,10 @@
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DCPS/WaitSet.h"
 
+#include <string>
 #include <map>
-#include <iosfwd>
+#include <iostream>
+#include <fstream>
 
 namespace Test {
 
@@ -22,6 +24,9 @@ class Process {
 
     /// Topic container.
     typedef std::map< std::string, DDS::Topic_var> TopicMap;
+
+    /// Output file container.
+    typedef std::map< std::string, std::ofstream*> OutputFileMap;
 
     /// Publication container.
     typedef std::map< std::string, Publication*> PublicationMap;
@@ -50,6 +55,12 @@ class Process {
 
     /// DomainParticipants.
     ParticipantMap participants_;
+
+    /// Typename of the only data type in the test framework.
+    std::string dataTypeName_;
+
+    /// Output files for summary and raw data.
+    OutputFileMap outputFiles_;
 
     /// Topics.
     TopicMap topics_;

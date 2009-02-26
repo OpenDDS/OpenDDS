@@ -24,7 +24,7 @@ project(dtpProcess) : dcpsexe_with_unreliable_dgram, dcps_reliable_multicast, dc
     EntityProfiles.cpp
     Options.cpp
     Publication.cpp
-    // Subscription.cpp
+    Subscription.cpp
     DataReaderListener.cpp
     Process.cpp
     testprocess.cpp

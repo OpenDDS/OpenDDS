@@ -4,7 +4,6 @@
 #include "Test.h"
 #include "Publication.h"
 #include "EntityProfiles.h"
-#include "TestTypeSupportC.h"
 
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/Qos_Helper.h"
@@ -61,7 +60,10 @@ Publication::close( u_long /* flags */)
 void
 Publication::start()
 {
-  this->open( 0);
+  if( this->profile_->source.empty()) {
+    // Run as a separate thread if we are generating data.
+    this->open( 0);
+  }
 }
 
 void
@@ -80,10 +82,82 @@ Publication::messages() const
 ::DDS::StatusCondition_ptr
 Publication::get_statuscondition()
 {
+  if( !this->enabled_) {
+    if( this->verbose_) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Publication::get_statuscondition() - publication %s: ")
+        ACE_TEXT("not enabled, declining to process.\n"),
+        this->name_.c_str()
+      ));
+    }
+    return ::DDS::StatusCondition::_nil();
+  }
+
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, ::DDS::StatusCondition::_nil());
 
   // We do not need to hold the condition so we do not duplicate it.
   return this->writer_->get_statuscondition();
+}
+
+::DDS::DataWriterListener_ptr
+Publication::get_listener()
+{
+  if( !this->enabled_) {
+    if( this->verbose_) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Publication::get_listener() - publication %s: ")
+        ACE_TEXT("not enabled, declining to process.\n"),
+        this->name_.c_str()
+      ));
+    }
+    return ::DDS::DataWriterListener::_nil();
+  }
+
+  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, ::DDS::DataWriterListener::_nil());
+
+  // We do not need to hold the listener so we do not duplicate it.
+  return this->writer_->get_listener();
+}
+
+::DDS::ReturnCode_t
+Publication::set_listener(
+  ::DDS::DataWriterListener_ptr a_listener,
+  ::DDS::StatusKindMask mask
+)
+{
+  if( !this->enabled_) {
+    if( this->verbose_) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Publication::set_listener() - publication %s: ")
+        ACE_TEXT("not enabled, declining to process.\n"),
+        this->name_.c_str()
+      ));
+    }
+    return ::DDS::RETCODE_NOT_ENABLED;
+  }
+
+  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, ::DDS::RETCODE_NOT_ENABLED);
+
+  return this->writer_->set_listener( a_listener, mask);
+}
+
+void
+Publication::write( const Test::Data& sample)
+{
+  // Only forward if we have not been stopped.
+  if( !this->done_) {
+    ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->lock_);
+    if( DDS::RETCODE_OK != this->writer_->write( sample, DDS::HANDLE_NIL)) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) Publication::write() - publication %s: ")
+        ACE_TEXT("failed to forward sample: pid: %d, seq: %d, priority: %d.\n"),
+          this->name_.c_str(),
+          sample.pid,
+          sample.seq,
+          sample.priority
+      ));
+    }
+  }
 }
 
 void
@@ -172,12 +246,13 @@ Publication::enable(
   this->profile_->copyToWriterQos( writerQos);
 
   // Create the writer.
-  this->writer_ = publisher->create_datawriter(
-                    topic,
-                    writerQos,
-                    ::DDS::DataWriterListener::_nil()
-                  );
-  if( CORBA::is_nil( this->writer_.in())) {
+  DDS::DataWriter_var writer
+    = publisher->create_datawriter(
+        topic,
+        writerQos,
+        ::DDS::DataWriterListener::_nil()
+      );
+  if( CORBA::is_nil( writer.in())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) Publication::enable() - publication %s: ")
       ACE_TEXT("failed to create writer.\n"),
@@ -189,6 +264,23 @@ Publication::enable(
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Publication::enable() - publication %s: ")
       ACE_TEXT("created writer.\n"),
+      this->name_.c_str()
+    ));
+  }
+
+  this->writer_ = Test::DataDataWriter::_narrow( writer.in());
+  if( CORBA::is_nil( this->writer_.in())) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) Publication::enable() - publication %s: ")
+      ACE_TEXT("failed to narrow writer for Test::Data type.\n"),
+      this->name_.c_str()
+    ));
+    throw BadWriterException();
+
+  } else if( this->verbose_) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) Publication::enable() - publication %s: ")
+      ACE_TEXT("narrowed writer for Test::Data type.\n"),
       this->name_.c_str()
     ));
   }
@@ -218,9 +310,6 @@ Publication::svc ()
     ));
   }
 
-  Test::DataDataWriter_var dataWriter
-    = Test::DataDataWriter::_narrow( this->writer_.in());
-
   OpenDDS::DCPS::DataWriterImpl* servant
     = dynamic_cast< OpenDDS::DCPS::DataWriterImpl*>( this->writer_.in());
   OpenDDS::DCPS::RepoId guid = servant->get_publication_id();
@@ -245,7 +334,7 @@ Publication::svc ()
 
     {
       ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, 0);
-      dataWriter->write( sample, DDS::HANDLE_NIL);
+      this->writer_->write( sample, DDS::HANDLE_NIL);
     }
     ++this->messages_;
 

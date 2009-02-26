@@ -28,7 +28,7 @@ enum QosMaskBits {
   SetLifespanQos                            = 0x00001000,
   SetLivelinessDurationQos                  = 0x00002000,
   SetLivelinessKindQos                      = 0x00004000,
-//SetOwnershipKindQos                       = 0x00008000,
+  SetOwnershipKindQos                       = 0x00008000,
   SetOwnershipStrengthQos                   = 0x00010000,
   SetReaderDataLifecycleQos                 = 0x00020000,
   SetReliabilityKindQos                     = 0x00040000,
@@ -50,7 +50,7 @@ enum QosMaskBits {
  */
 struct ParticipantProfile  {
   int domainId;
-  ::DDS::DomainParticipantQos
+  DDS::DomainParticipantQos
       qos;
 };
 
@@ -60,8 +60,8 @@ struct ParticipantProfile  {
  *   Participant = <string> # One of participant <name>
  */
 struct TopicProfile {
-  std::string     participant;
-  ::DDS::TopicQos qos;
+  std::string   participant;
+  DDS::TopicQos qos;
 };
 
 /**
@@ -79,14 +79,14 @@ struct TopicProfile {
  *   MessageDeviation = <number> # standard deviation for size
  */
 struct PublicationProfile {
-  std::string          topic;
-  unsigned int         transport;
-  std::string          source;
-  Gaussian             size;
-  Exponential          rate;
-  ::DDS::PublisherQos  publisherQos;
-  ::DDS::DataWriterQos writerQos;
-  unsigned int         writerQosMask;
+  std::string        topic;
+  unsigned int       transport;
+  std::string        source;
+  Gaussian           size;
+  Exponential        rate;
+  DDS::PublisherQos  publisherQos;
+  DDS::DataWriterQos writerQos;
+  unsigned int       writerQosMask;
 
   void copyToWriterQos( ::DDS::DataWriterQos& qos);
 };
@@ -103,15 +103,15 @@ struct PublicationProfile {
  *   DataCollectionRetention = <string> # One of ALL, OLDEST, NEWEST
  */
 struct SubscriptionProfile {
-  std::string          topic;
-  unsigned int         transport;
-  std::string          datafile;
-  int                  bound;
-  ::OpenDDS::DCPS::DataCollector<double>::OnFull
-                       retention;
-  ::DDS::SubscriberQos subscriberQos;
-  ::DDS::DataReaderQos readerQos;
-  unsigned int         readerQosMask;
+  std::string        topic;
+  unsigned int       transport;
+  std::string        datafile;
+  int                bound;
+  OpenDDS::DCPS::DataCollector<double>::OnFull
+                     retention;
+  DDS::SubscriberQos subscriberQos;
+  DDS::DataReaderQos readerQos;
+  unsigned int       readerQosMask;
 
   void copyToReaderQos( ::DDS::DataReaderQos& qos);
 };

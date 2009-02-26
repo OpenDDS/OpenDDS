@@ -6,7 +6,7 @@
 #include "Options.h"
 #include "dds/DCPS/Service_Participant.h"
 
-#include <sstream>
+#include <iostream>
 
 int
 main( int argc, char *argv[])
@@ -26,6 +26,8 @@ main( int argc, char *argv[])
       // Execute the test.
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) testprocess() - starting.\n")));
       process.run();
+
+      std::cout << process << std::endl;
     }
 
   } catch( CORBA::Exception& /* e */) {
