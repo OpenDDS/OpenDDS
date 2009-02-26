@@ -10,9 +10,9 @@ use strict;
 use warnings;
 
 use Env qw(DDS_ROOT);
-use lib qq($DDS_ROOT/bin);
+use lib qq($DDS_ROOT/lib/perl);
 
-use PerlDDS::EDoc;
+use Erlang::EDoc;
 
 my $edoc = new PerlDDS::EDoc;
 $edoc->files('../src',

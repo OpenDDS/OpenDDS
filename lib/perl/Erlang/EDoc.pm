@@ -2,7 +2,7 @@
 # $Id$
 #
 
-package PerlDDS::EDoc;
+package OpenDDS::Erlang::EDoc;
 
 use strict;
 use warnings;
