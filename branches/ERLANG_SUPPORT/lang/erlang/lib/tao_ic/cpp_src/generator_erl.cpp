@@ -47,7 +47,6 @@ generator_erl::generate_enum(AST_Enum* node, vector<AST_EnumVal*>& v)
   ostream& os = module.open_stream();
   if (!os) return false; // bad stream
 
-  /// Generate functions
   for (vector<AST_EnumVal*>::iterator it(v.begin()); it != v.end(); ++it)
   {
     os << erl_identifier((*it)->local_name()) << "() -> {?MODULE, " <<
@@ -82,12 +81,12 @@ generator_erl::generate_structure(AST_Structure* node, vector<AST_Field*>& v)
     
     module.add_export("id/0");
     module.add_export("new/0");
+    
     module.add_export("new", fields.size());
 
     ostream& os = module.open_stream();
     if (!os) return false; // bad stream
 
-    /// Generate functions
     os << "id() -> \"" << repo_identifier(node->name()) << "\"." << endl
        << endl;
 
