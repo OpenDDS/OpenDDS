@@ -1,3 +1,10 @@
+Fri Feb 27 16:19:31 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/DCPS/Distributed/src/Publication.cpp:
+
+	  Convert to long *after* scaling.  This eliminates a compiler
+	  warning as well.
+
 Thu Feb 26 23:30:51 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/DCPS/Distributed/src/DataReaderListener.h:
@@ -13,7 +20,7 @@ Thu Feb 26 23:30:51 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
         * performance-tests/DCPS/Distributed/src/TestProcess.mpc:
         * performance-tests/DCPS/Distributed/src/testprocess.cpp:
 
-	  First working version of dynamically configurable test process.
+          First working version of dynamically configurable test process.
 
         * performance-tests/DCPS/Distributed/src/Publisher.h:
         * performance-tests/DCPS/Distributed/src/Publisher.cpp:
