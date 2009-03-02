@@ -470,7 +470,9 @@ to_list(vector<string>& v)
   {
     os << *it++;
     if (it != v.end())
+    {
       os << ", ";
+    }
   }
   os << "]";
 
