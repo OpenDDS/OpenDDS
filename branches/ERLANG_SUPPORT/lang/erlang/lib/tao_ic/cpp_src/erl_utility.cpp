@@ -98,16 +98,6 @@ erl_identifier_list::erl_identifier_list()
 {
 }
 
-template <typename InputIterator>
-erl_identifier_list::erl_identifier_list(InputIterator first,
-                                         InputIterator last)
-{
-  for (InputIterator it(first); it != last; ++it)
-  {
-    add((*it)->local_name());
-  }
-}
-
 erl_identifier_list::~erl_identifier_list()
 {
 }
@@ -430,16 +420,6 @@ erl_module::add_export(const erl_identifier& fn_name, int fn_arity)
   os << fn_name << "/" << fn_arity;
 
   add_export(os.str());
-}
-
-template <typename InputIterator>
-void
-erl_module::add_exports(InputIterator first, InputIterator last, int fn_arity)
-{
-  for (InputIterator it(first); it != last; ++it)
-  {
-    add_export((*it)->local_name(), fn_arity);
-  }
 }
 
 void

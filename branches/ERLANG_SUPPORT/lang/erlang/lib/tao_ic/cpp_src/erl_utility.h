@@ -50,7 +50,13 @@ public:
   erl_identifier_list();
 
   template <typename InputIterator>
-  erl_identifier_list(InputIterator first, InputIterator last);
+  erl_identifier_list(InputIterator first, InputIterator last)
+  {
+    for (InputIterator it(first); it != last; ++it)
+    {
+      add((*it)->local_name());
+    }
+  }
 
   ~erl_identifier_list();
 
@@ -157,7 +163,13 @@ public:
   void add_export(const erl_identifier& fn_name, int fn_arity);
 
   template <typename InputIterator>
-  void add_exports(InputIterator first, InputIterator last, int fn_arity);
+  void add_exports(InputIterator first, InputIterator last, int fn_arity)
+  {
+    for (InputIterator it(first); it != last; ++it)
+    {
+      add_export((*it)->local_name(), fn_arity);
+    }
+  }
 
   void add_include(const std::string& file);
 
