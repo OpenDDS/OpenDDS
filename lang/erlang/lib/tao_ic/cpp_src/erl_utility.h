@@ -20,7 +20,6 @@ public:
   static const char* sep;
 
   erl_identifier(const char* name);
-  
   erl_identifier(Identifier* name);
   erl_identifier(UTL_ScopedName* name);
 
