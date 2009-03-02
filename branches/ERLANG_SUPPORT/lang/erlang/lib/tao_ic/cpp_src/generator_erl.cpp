@@ -39,6 +39,7 @@ generator_erl::generate_enum(AST_Enum* node, vector<AST_EnumVal*>& v)
   // Generate module (.erl)
   erl_module module(node->name());
 
+  /// AST_EnumVal exports (arity always 0)
   module.add_exports(v.begin(), v.end(), 0);
   
   module.add_export("from_int/1");
@@ -81,7 +82,6 @@ generator_erl::generate_structure(AST_Structure* node, vector<AST_Field*>& v)
     
     module.add_export("id/0");
     module.add_export("new/0");
-    
     module.add_export("new", fields.size());
 
     ostream& os = module.open_stream();
