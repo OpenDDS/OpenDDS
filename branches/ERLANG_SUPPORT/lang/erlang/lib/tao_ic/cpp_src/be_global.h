@@ -5,6 +5,8 @@
 #ifndef TAO_IC_BE_GLOBAL_H
 #define TAO_IC_BE_GLOBAL_H
 
+#include <string>
+
 #include "ast_generator.h"
 
 class BE_GlobalData
