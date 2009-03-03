@@ -11,25 +11,29 @@ class Gaussian  {
     /// Default constructor.
     Gaussian();
 
-    //@{ @name Mean value.
+    /// @name Mean value.
+    /// @{
     double& mean();
     double  mean() const;
-    //@}
+    ///@}
 
-    //@{ @name Standard deviation.
+    /// @name Standard deviation.
+    /// @{
     double& deviation();
     double  deviation() const;
-    //@}
+    /// @}
 
-    //@{ @name Upper bound.
+    /// @name Upper bound.
+    /// @{
     double& maximum();
     double  maximum() const;
-    //@}
+    /// @}
 
-    //@{ @name Lower bound.
+    /// @name Lower bound.
+    /// @{
     double& minimum();
     double  minimum() const;
-    //@}
+    /// @}
 
     /**
      * @brief Next gaussian distributed value.
@@ -92,7 +96,6 @@ inline
 double
 Gaussian::mean() const
 {
-  this->valueAvailable_ = false;
   return this->mean_;
 }
 
@@ -108,7 +111,6 @@ inline
 double
 Gaussian::deviation() const
 {
-  this->valueAvailable_ = false;
   return this->deviation_;
 }
 
@@ -124,7 +126,6 @@ inline
 double
 Gaussian::maximum() const
 {
-  this->valueAvailable_ = false;
   return this->max_;
 }
 
@@ -140,7 +141,6 @@ inline
 double
 Gaussian::minimum() const
 {
-  this->valueAvailable_ = false;
   return this->min_;
 }
 

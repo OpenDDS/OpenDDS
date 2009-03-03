@@ -27,16 +27,18 @@ class Publication : public ACE_Task_Base {
     /// Virtual destructor.
     virtual ~Publication();
 
-    //@{ @name Task_Base interfaces.
+    /// @name Task_Base interfaces.
+    /// @{
     virtual int open(void*);
     virtual int svc();
     virtual int close( u_long flags = 0);
-    //@}
+    /// @}
 
-    //@{ @name Thread control.
+    /// @name Thread control.
+    /// @{
     void start();
     void stop();
-    //@}
+    /// @}
 
     /// Resource management.
     void enable(
@@ -47,14 +49,15 @@ class Publication : public ACE_Task_Base {
     /// State access
     int messages() const;
 
-    //@{ @name DataWriter interfaces.
+    /// @name DataWriter interfaces.
+    /// @{
     ::DDS::StatusCondition_ptr get_statuscondition();
     ::DDS::DataWriterListener_ptr get_listener();
     ::DDS::ReturnCode_t set_listener(
                           ::DDS::DataWriterListener_ptr a_listener,
                           ::DDS::StatusKindMask mask
                         );
-    //@}
+    /// @}
 
     // Publish a data sample from an external source.
     void write( const Test::Data& sample);

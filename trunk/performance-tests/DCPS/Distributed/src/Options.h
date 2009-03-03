@@ -116,29 +116,41 @@ class Options  {
     /// Indication of configuration status.
     operator bool() const;
 
-    /// Test verbosity.
+    /// @name Test verbosity.
+    /// @{
     protected: bool& verbose();
     public:    bool  verbose() const;
+    /// @}
 
-    /// Successful configuration state.
+    /// @name Successful configuration state.
+    /// @{
     protected: bool& configured();
     public:    bool  configured() const;
+    /// @}
 
-    /// Test duration.
+    /// @name Test duration.
+    /// @{
     protected: long& duration();
     public:    long  duration() const;
+    /// @}
 
-    /// Raw data output file.
+    /// @name Raw data output file.
+    /// @{
     protected: std::string& rawOutputFilename();
     public:    std::string  rawOutputFilename() const;
+    /// @}
 
-    /// Raw latency data buffer size.
+    /// @name Raw latency data buffer size.
+    /// @{
     protected: unsigned int& rawBufferSize();
     public:    unsigned int  rawBufferSize() const;
+    /// @}
 
-    /// Raw latency data buffer type.
+    /// @name Raw latency data buffer type.
+    /// @{
     protected: OpenDDS::DCPS::DataCollector< double>::OnFull& rawBufferType();
     public:    OpenDDS::DCPS::DataCollector< double>::OnFull  rawBufferType() const;
+    /// @}
 
   public:
     /// Participant profile container.
