@@ -10,13 +10,12 @@ use FindBin;
 my $projectRoot;
 BEGIN { $projectRoot = "$FindBin::Bin/.."; }
 
-# Locate the link libraries
-use Env qw(@LD_LIBRARY_PATH);
-unshift @LD_LIBRARY_PATH, "$projectRoot/lib";
-
 # Locate the Perl modules
 use lib "$projectRoot/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
+
+# Locate the link libraries
+PerlDDS::add_lib_path( "$projectRoot/lib");
 
 use Getopt::Long qw( :config bundling) ;
 use Pod::Usage ;
@@ -34,6 +33,7 @@ my $verbose;
 my $orbVerbose;
 my $dFile;
 my $rawData;
+my $rawSize = 4 * 1024;
 my $transportDebug;
 my $repoDebug;
 my $noaction;
@@ -41,13 +41,18 @@ my $noaction;
 #
 # Specific options.
 #
-my $transportType = "tcp";
-my $repoHost = "localhost";
+my $duration;
+my $startRepo;
+my $startTest;
+my $repoHost = "localhost:2112";
+my $iniFile  = $projectRoot . "/etc/transport.ini";
 my $scenarioFile;
 
 ########################################################################
 #
 # Process the command line.
+#
+#   -v -V -? -d -T -R -x -f -r -h -s -i -S -P -t
 #
 GetOptions( "verbose!"            => \$verbose,
             "v"                   => \$verbose,
@@ -60,17 +65,28 @@ GetOptions( "verbose!"            => \$verbose,
             "noaction|x"          => \$noaction,
             "dfile|f=s"           => \$dFile,
             "rawdatafile|r=s"     => \$rawData,
-            "transport|t=s"       => \$transportType,
             "repohost|h=s"        => \$repoHost,
+            "inifile|i=s"         => \$iniFile,
             "scenario|s=s"        => \$scenarioFile,
+            "startrepo|S"         => \$startRepo,
+            "starttest|T"         => \$startTest,
+            "duration|t"          => \$duration,
 
 ) or pod2usage( 0) ;
-pod2usage( 1)             if $help or not $scenarioFile;
+pod2usage( 1)             if $help or ($startTest and not $scenarioFile);
 pod2usage( -verbose => 2) if $man;
 #
 ########################################################################
 
 # Verbosity.
+print "Commands will be printed only and not executed.\n"
+                                          if $verbose and $noaction;
+print "Repository will be started\n"      if $verbose and $startRepo;
+print "Test process will be started\n"    if $verbose and $startTest;
+print "Test will execute for at least $duration seconds before terminating\n"
+                                          if $verbose and $duration;
+print "Test will execute continuously and not terminate\n"
+                                          if $verbose and not $duration;
 print "ProjectRoot==$projectRoot\n"       if $verbose;
 print "RepoHost==$repoHost\n"             if $verbose;
 print "ScenarioFile==$scenarioFile\n"     if $verbose;
@@ -82,23 +98,28 @@ print "TransportDebug==$transportDebug\n" if $verbose and $transportDebug;
 print "DebugFile==$dFile\n"               if $verbose and $dFile;
 print "VerboseLogging==$orbVerbose\n"     if $verbose and $orbVerbose;
 
+# Kill processes after specified duration plus a one minute grace period
+# if they do not terminate independently.
+my $killDelay = 60;
+$killDelay += $duration if $duration;
+
 # Files.
+my $repo_ior  = PerlACE::LocalFile("repo.ior");
 my $debugFile;
    $debugFile = PerlACE::LocalFile( $dFile) if $dFile;
 my $confFile  = $projectRoot . "/etc/svc.conf";
-my $iniFile   = $projectRoot . "/etc/transport.ini";
 
 # Clean out leftovers.
 unlink $repo_ior;
 unlink $debugFile if $debugFile;
 
-my $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
+my $common_opts = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : "-ORBSvcConf $confFile";
-
-my $common_opts = "-DCPSConfigFile $iniFile ";
-$common_opts .= "-v " if $verbose;
+$common_opts .= $verboseDebug if $verboseDebug;
+$common_opts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
 
 # Process variables.
+my $REPO;
 my $TEST;
 
 # Establish process arguments.
@@ -109,48 +130,84 @@ $appDebug  = $debug if $debug;
 my $verboseDebug;
 $verboseDebug = "-ORBVerboseLogging 1 " if $orbVerbose;
 
-my $appOpts = "$svc_config $common_opts ";
-$appOpts .= $verboseDebug if $verboseDebug;
-$appOpts .= "-DCPSDebugLevel $appDebug " if $appDebug;
-$appOpts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
-$appOpts .= "-ORBLogFile $debugFile " if ($appDebug or $transportDebug) and $debugFile;
+my $repoOpts = "$common_opts ";
+$repoOpts .= "-ORBListenEndpoints $repoHost " if $repoHost;
+$repoOpts .= "-DCPSDebugLevel $repoDebug " if $repoDebug;
+$repoOpts .= "-ORBLogFile $debugFile " if ($repoDebug or $transportDebug) and $debugFile;
+
+my $testOpts = "$common_opts ";
+$testOpts .= "-v " if $verbose;
+$testOpts .= "-DCPSConfigFile $iniFile " if $iniFile;
+$testOpts .= "-DCPSDebugLevel $appDebug " if $appDebug;
+$testOpts .= "-ORBLogFile $debugFile " if ($appDebug or $transportDebug) and $debugFile;
+$testOpts .= "-DCPSInfoRepo corbaloc:iiop:$repoHost/DCPSInfoRepo ";
+$testOpts .= "-d $duration " if $duration;
+$testOpts .= "-t newest -s $rawSize -r $rawData " if $rawData;
+$testOpts .= "-f $scenarioFile ";
 
 # Define the processes.
 
-my $testArgs = "$appOpts ";
-$testArgs .= "-DCPSInfoRepo corbaloc:iiop:$repoHost/DCPSInfoRepo ";
-$testArgs .= "-t $transportType ";
-$testArgs .= "-f $scenarioFile ";
-$testArgs .= "-r $rawData " if $rawData;
-$testArgs .= "-i 0 ";
+my $repoArgs = "$repoOpts -o $repo_ior ";
+if( PerlACE::is_vxworks_test()) {
+  $REPO = new PerlACE::ProcessVX( "$FindBin::Bin/DCPSInfoRepo", $repoArgs);
+} else {
+  $REPO = new PerlACE::Process( "$FindBin::Bin/DCPSInfoRepo", $repoArgs);
+}
+
+my $testArgs = "$testOpts ";
 if( PerlACE::is_vxworks_test()) {
   $TEST = new PerlACE::ProcessVX( "$FindBin::Bin/testprocess", $testArgs);
 } else {
   $TEST = new PerlACE::Process( "$FindBin::Bin/testprocess", $testArgs);
 }
 
-# Be verbose.
-
 if( $noaction) {
-  print $TEST->CommandLine() . "\n" if $verbose;
+  # Be verbose.
+  print $REPO->CommandLine() . "\n" if $verbose and $startRepo;
+  print $TEST->CommandLine() . "\n" if $verbose and $startTest;
   exit;
 }
 
-# Fire up the test process.
+if( $startRepo) {
+  # Fire up the repository
+  print "\nREPO\n";
+  print $REPO->CommandLine() . "\n";
+  $REPO->Spawn();
+}
 
-print "\nTEST\n";
-print $TEST->CommandLine() . "\n";
-$TEST->Spawn();
+if( $startTest) {
+  # Fire up the test process.
+  print "\nTEST\n";
+  print $TEST->CommandLine() . "\n";
+  $TEST->Spawn();
 
-# Wait for the testprocess to terminate nicely.  Kill it after 5 minutes
-# otherwise.
+  # block forever if no duration was specified.
+  sleep if not $duration;
 
-my $killDelay = 300;
-   $killDelay = $duration + 60 if $duration;
-$status = $TEST->WaitKill( $killDelay);
-if( $status != 0) {
-  print STDERR "ERROR: Test returned $status\n";
-  ++$failed;
+  # Wait for the testprocess to terminate nicely.
+
+  $status = $TEST->WaitKill( $killDelay);
+  if( $status != 0) {
+    print STDERR "ERROR: Test returned $status\n";
+    ++$failed;
+  }
+  $killDelay = 5;
+}
+
+# Terminate the repository.
+
+if( $startRepo) {
+  # block forever if no duration was specified and we haven't already
+  # been released from this obligation.
+  sleep if not $duration and not $startTest;
+
+  print "\nStopping repository\n";
+  $status = $REPO->TerminateWaitKill( $killDelay);
+  if( $status != 0) {
+    print STDERR "ERROR: Repository returned $status\n";
+    ++$failed;
+  }
+  unlink $repo_ior;
 }
 
 # Report results.
@@ -196,19 +253,25 @@ Options:
 
   -f FILE | --dfile=FILE set the filename for debug output
 
-  -t NAME | --transport=NAME
-                         use NAME transport for test execution - one of
-                         (tcp, udp, mc, rmc), default tcp
-
   -h FQDN | --repohost FQDN
                          fully qualified domain name (and port) for
                          connecting to repository
+
+  -i FILE | --inifile FILE
+                         file for configuring the OpenDDS service
 
   -s FILE | --scenario FILE
                          file defining the test scenario to execute
 
   -r FILE | --rawdatafile FILE
                          file to write collected data to at end of test
+
+  -t NUMBER | --duration=NUMBER
+                         limit the duration of test execution
+
+  -S | --startrepo       start a repository
+
+  -T | --starttest       start a testprocess
 
 =head1 OPTIONS
 
@@ -263,23 +326,31 @@ Sets the -DCPSTransportDebugLevel option value.
 
 The default value is 0.
 
+=item B<-t NUMBER> | B<--duration=NUMBER>
+
+Limits the execution time of the test.  If not specified, then any test
+or repository process that is started will execute until the script is
+interrupted.
+
+The default value is unspecified.
+
+=item B<-S> | B<--startrepo>
+
+Causes a repository process to be started.
+
+The default value is to not start a repository process.
+
+=item B<-T> | B<--starttest>
+
+Causes a test process to be started.
+
+The default value is to not start a test process.
+
 =item B<-f FILE> | B<--dfile=FILE>
 
 Sets the -ORBLogFile option value.
 
 The default value is 0.
-
-=item B<-t NAME> | B<--transport=NAME>
-
-Establishes the transport type to use for the current test execution.
-
-Accepted values are:
-  tcp - use the SimpleTCP transport;
-  udp - use the SimpleUDP transport;
-  mc  - use the SimpleMcast transport;
-  rmc - use the ReliableMcast transport.
-
-The default value is 'tcp'.
 
 =item h<-r FQDN> | B<--repohost=FQDN>
 
@@ -287,6 +358,15 @@ This is the fully qualified domain name and port where the OpenDDS
 repository may be found.
 
 The default value is 'localhost:2112'.
+
+=item B<-i FILE> | B<--inifile=FILE>
+
+OpenDDS configuration filename.  This defines the configuration
+information for the OpenDDS service itself.
+
+The default is to use the file located in the 'etc' directory relative
+from the project root (the parent directory of the directory where the
+command was executed from) with filename 'transport.ini'.
 
 =item B<-s FILE> | B<--scenario=FILE>
 
@@ -309,11 +389,7 @@ There is no default value, so no data will be reported by default.
 
 =head1 DESCRIPTION
 
-This test verifies the TRANSPORT_PRIORITY QoS policy support in OpenDDS.
-It does so by creating publishers and subscribers and establishing
-associations between them at different priority levels.  The ability for
-higher priority samples to be delivered preferentially over the lower
-priority samples is demonstrated.
+TBD
 
 =head1 EXAMPLES
 
@@ -321,11 +397,11 @@ priority samples is demonstrated.
 
 =item B<./run_test -vx -s s1.ini>
 
-=item B<./run_test -d 10 -T 4 -s test.ini -f test.log -t udp -h localhost:2038>
+=item B<./run_test -d 10 -T 4 -s test.ini -f test.log -h localhost:2038>
 
 =item B<./run_test -x -t mcast -s scenario1.ini>
 
-=item B<./run_test -vd10T4Vt mcast -s test.ini -h machine.domain.com:2112>
+=item B<./run_test -vd10T4V -s test.ini -h machine.domain.com:2112>
 
 =back
 
