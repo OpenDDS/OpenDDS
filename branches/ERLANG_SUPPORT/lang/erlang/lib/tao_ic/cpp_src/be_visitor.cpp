@@ -143,67 +143,67 @@ be_visitor::visit_structure(AST_Structure* node)
 }
 
 int
-be_visitor::visit_enum_val(AST_EnumVal* node)
+be_visitor::visit_enum_val(AST_EnumVal*)
 {
   return 0;
 }
 
 int
-be_visitor::visit_exception(AST_Exception* node)
+be_visitor::visit_exception(AST_Exception*)
 {
   return 0;
 }
 
 int
-be_visitor::visit_structure_fwd(AST_StructureFwd* node)
+be_visitor::visit_structure_fwd(AST_StructureFwd*)
 {
   return 0;
 }
 
 int
-be_visitor::visit_union(AST_Union* node)
+be_visitor::visit_union(AST_Union*)
 {
   return 0;
 }
 
 int
-be_visitor::visit_union_fwd(AST_UnionFwd* node)
+be_visitor::visit_union_fwd(AST_UnionFwd*)
 {
   return 0;
 }
 
 int
-be_visitor::visit_union_branch(AST_UnionBranch* node)
+be_visitor::visit_union_branch(AST_UnionBranch*)
 {
   return 0;
 }
 
 int
-be_visitor::visit_union_label(AST_UnionLabel* node)
+be_visitor::visit_union_label(AST_UnionLabel*)
 {
   return 0;
 }
 
 int
-be_visitor::visit_native(AST_Native* node)
+be_visitor::visit_native(AST_Native*)
 {
   return 0;
 }
 
 int
-be_visitor::visit_typedef(AST_Typedef* node)
+be_visitor::visit_typedef(AST_Typedef*)
 {
   return 0;
 }
 
 int
-be_visitor::visit_interface(AST_Interface* node)
+be_visitor::visit_interface(AST_Interface*)
 {
   return 0;
 }
 
 int
-be_visitor::visit_interface_fwd(AST_InterfaceFwd* node)
+be_visitor::visit_interface_fwd(AST_InterfaceFwd*)
 {
   return 0;
 }
