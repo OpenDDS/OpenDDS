@@ -1,3 +1,10 @@
+Tue Mar  3 18:31:36 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * lang/erlang/lib/tao_ic/cpp_src/be_global.h:
+        * lang/erlang/lib/tao_ic/cpp_src/be_global.cpp:
+
+          Corrected includes for std::string.
+
 Mon Mar  2 18:45:06 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * lang/erlang/lib/tao_ic/cpp_src/erl_utility.h:

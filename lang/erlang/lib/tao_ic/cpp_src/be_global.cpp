@@ -3,7 +3,6 @@
  */
 
 #include <cstring>
-#include <string>
 
 #include "ace/Default_Constants.h"
 #include "ace/Log_Msg.h"
