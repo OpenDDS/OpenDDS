@@ -12,6 +12,9 @@
 
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
+#include <iostream>
+#include <fstream>
+
 namespace Test {
 
 Process::~Process()
@@ -316,7 +319,7 @@ Process::Process( const Options& options)
         current->first.c_str(),
         where->second->participant.c_str()
       ));
-      throw BadTopicException();
+      throw BadPublisherException();
 
     } else if( this->options_.verbose()) {
       ACE_DEBUG((LM_DEBUG,
@@ -350,7 +353,16 @@ Process::Process( const Options& options)
     if( !current->second->source.empty()) {
       Subscription* subscription
         = this->subscriptions_[ current->second->source];
-
+      if( subscription == 0) {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
+          ACE_TEXT("failed to obtain subscription %s ")
+          ACE_TEXT("to forward for publication %s.\n"),
+          where->second->participant.c_str(),
+          current->first.c_str()
+        ));
+        throw BadSubscriberException();
+      }
       subscription->set_destination( this->publications_[ current->first]);
     }
   }
@@ -522,10 +534,29 @@ Process::run()
        ++current
      ) {
     if( !current->second->datafile.empty()) {
-      std::ostream& file = *this->outputFiles_[ current->second->datafile];
-      file << std::endl << "SUBSCRIPTION " << current->first
-           << " SUMMARY DATA" << std::endl;
-      this->subscriptions_[ current->first]->summaryData( file);
+      OutputFileMap::iterator where
+        = this->outputFiles_.find( current->second->datafile);
+      if( where != this->outputFiles_.end()) {
+        if( where->second) {
+          *where->second << std::endl << "SUBSCRIPTION " << current->first
+                         << " SUMMARY DATA" << std::endl;
+          this->subscriptions_[ current->first]->summaryData( *where->second);
+
+        } else {
+          ACE_ERROR((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR: Process::run() - ")
+            ACE_TEXT("output file not active for subscription: %s.\n"),
+            current->first.c_str()
+          ));
+
+        }
+      } else {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: Process::run() - ")
+          ACE_TEXT("output file not found for subscription: %s.\n"),
+          current->first.c_str()
+        ));
+      }
     }
   }
 
@@ -536,10 +567,29 @@ Process::run()
        ++current
      ) {
     if( !current->second->datafile.empty()) {
-      std::ostream& file = *this->outputFiles_[ current->second->datafile];
-      file << std::endl << "SUBSCRIPTION " << current->first
-           << " DETAILED DATA" << std::endl;
-      this->subscriptions_[ current->first]->rawData( file);
+      OutputFileMap::iterator where
+        = this->outputFiles_.find( current->second->datafile);
+      if( where != this->outputFiles_.end()) {
+        if( where->second) {
+          *where->second << std::endl << "SUBSCRIPTION " << current->first
+                         << " DETAILED DATA" << std::endl;
+          this->subscriptions_[ current->first]->rawData( *where->second);
+
+        } else {
+          ACE_ERROR((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR: Process::run() - ")
+            ACE_TEXT("output file not active for subscription: %s.\n"),
+            current->first.c_str()
+          ));
+
+        }
+      } else {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: Process::run() - ")
+          ACE_TEXT("output file not found for subscription: %s.\n"),
+          current->first.c_str()
+        ));
+      }
     }
   }
 
@@ -552,20 +602,6 @@ Process::run()
 }
 
 std::ostream&
-Process::rawData( std::ostream& str) const
-{
-  for( SubscriptionMap::const_iterator current = this->subscriptions_.begin();
-       current != this->subscriptions_.end();
-       ++current
-     ) {
-    str << std::endl << "SUBSCRIPTION " << current->first
-        << " DETAILED DATA" << std::endl;
-    current->second->rawData( str);
-  }
-  return str;
-}
-
-std::ostream&
 Process::summaryData( std::ostream& str) const
 {
   for( SubscriptionMap::const_iterator current = this->subscriptions_.begin();
@@ -575,6 +611,20 @@ Process::summaryData( std::ostream& str) const
     str << std::endl << "SUBSCRIPTION " << current->first
         << " SUMMARY DATA" << std::endl;
     current->second->summaryData( str);
+  }
+  return str;
+}
+
+std::ostream&
+Process::rawData( std::ostream& str) const
+{
+  for( SubscriptionMap::const_iterator current = this->subscriptions_.begin();
+       current != this->subscriptions_.end();
+       ++current
+     ) {
+    str << std::endl << "SUBSCRIPTION " << current->first
+        << " DETAILED DATA" << std::endl;
+    current->second->rawData( str);
   }
   return str;
 }

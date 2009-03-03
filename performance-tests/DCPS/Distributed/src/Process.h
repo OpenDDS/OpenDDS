@@ -8,8 +8,7 @@
 
 #include <string>
 #include <map>
-#include <iostream>
-#include <fstream>
+#include <iosfwd>
 
 namespace Test {
 
@@ -19,6 +18,22 @@ class Subscription;
 
 class Process {
   public:
+    /// Construct with option information.
+    Process( const Options& options);
+
+    /// Destructor.
+    ~Process();
+
+    /// Execute the test.
+    void run();
+
+    /// Format and dump summary data to a stream.
+    std::ostream& summaryData( std::ostream& str) const;
+
+    /// Format and dump raw data to a stream.
+    std::ostream& rawData( std::ostream& str) const;
+
+  private:
     /// Participant container.
     typedef std::map< std::string, DDS::DomainParticipant_var> ParticipantMap;
 
@@ -34,22 +49,6 @@ class Process {
     /// Subscription container.
     typedef std::map< std::string, Subscription*> SubscriptionMap;
 
-    /// Construct with option information.
-    Process( const Options& options);
-
-    /// Destructor.
-    ~Process();
-
-    /// Execute the test.
-    void run();
-
-    /// Format and dump raw data to a stream.
-    std::ostream& rawData( std::ostream& str) const;
-
-    /// Format and dump summary data to a stream.
-    std::ostream& summaryData( std::ostream& str) const;
-
-  private:
     /// Test options.
     const Options& options_;
 

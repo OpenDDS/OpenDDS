@@ -36,7 +36,8 @@ class Subscription {
       DDS::Topic_ptr             topic
     );
 
-    //@{ @name State access
+    /// @name State access
+    /// @{
 
     /// Number of received messages.
     int total_messages() const;
@@ -53,11 +54,12 @@ class Subscription {
     /// Priority of  writers.
     const std::map< long, long>& priorities() const;
 
-    //@}
+    /// @}
 
-    //@{ @name DataReader interfaces.
+    /// @name DataReader interfaces.
+    /// @{
     DDS::StatusCondition_ptr get_statuscondition();
-    //@}
+    /// @}
 
     /// Establish a forwarding destination.
     void set_destination( Publication* publication);

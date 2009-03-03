@@ -335,13 +335,13 @@ Publication::svc ()
     {
       ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, 0);
       this->writer_->write( sample, DDS::HANDLE_NIL);
+      ++this->messages_;
     }
-    ++this->messages_;
 
     // Determine the interval to next message here so it can be mentioned
     // in the diagnostic messsage.
     long microseconds
-      = static_cast<long>( 1000000.0 * this->profile_->rate.value());
+      = static_cast<long>( 1.0e6 * this->profile_->rate.value());
     ACE_Time_Value interval( 0, microseconds);
 
     if( this->verbose_ && BE_REALLY_VERBOSE) {

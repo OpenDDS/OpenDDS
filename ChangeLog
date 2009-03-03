@@ -1,8 +1,23 @@
+Tue Mar  3 17:52:31 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/DCPS/Distributed/src/DataReaderListener.cpp:
+        * performance-tests/DCPS/Distributed/src/Exponential.h:
+        * performance-tests/DCPS/Distributed/src/Gaussian.h:
+        * performance-tests/DCPS/Distributed/src/Options.h:
+        * performance-tests/DCPS/Distributed/src/Options.cpp:
+        * performance-tests/DCPS/Distributed/src/Process.h:
+        * performance-tests/DCPS/Distributed/src/Process.cpp:
+        * performance-tests/DCPS/Distributed/src/Publication.h:
+        * performance-tests/DCPS/Distributed/src/Publication.cpp:
+        * performance-tests/DCPS/Distributed/src/Subscription.h:
+
+	  Miscellaneous cleanup of test execution process.
+
 Tue Mar  3 15:44:15 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/DCPS/Distributed/tools/mkpkg:
 
-	  Removed dependence on specific library decorators.
+          Removed dependence on specific library decorators.
 
 Tue Mar  3 15:37:20 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 

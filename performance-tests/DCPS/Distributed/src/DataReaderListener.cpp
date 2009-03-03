@@ -25,7 +25,7 @@ void
 Test::DataReaderListener::WriterStats::add_stat( DDS::Duration_t delay)
 {
   double datum = static_cast<double>( delay.sec);
-  datum += static_cast<double>( delay.nanosec) / 1000000000.0;
+  datum += 1.0e-9 * static_cast<double>( delay.nanosec);
   this->stats_.add( datum);
 }
 
@@ -106,6 +106,7 @@ Test::DataReaderListener::priorities() const
 std::ostream&
 Test::DataReaderListener::summaryData( std::ostream& str) const
 {
+  char fill = str.fill( '0');
   for( StatsMap::const_iterator current = this->stats_.begin();
        current != this->stats_.end();
        ++current
@@ -113,12 +114,14 @@ Test::DataReaderListener::summaryData( std::ostream& str) const
     str << "  Writer[ 0x" << std::hex << std::setw(8) << current->first << "]" << std::endl;
     current->second.summaryData( str);
   }
+  str.fill( fill);
   return str;
 }
 
 std::ostream&
 Test::DataReaderListener::rawData( std::ostream& str) const
 {
+  char fill = str.fill( '0');
   for( StatsMap::const_iterator current = this->stats_.begin();
        current != this->stats_.end();
        ++current
@@ -126,6 +129,7 @@ Test::DataReaderListener::rawData( std::ostream& str) const
     str << "  Writer[ 0x" << std::hex << std::setw(8) << current->first << "]" << std::endl;
     current->second.rawData( str);
   }
+  str.fill( fill);
   return str;
 }
 
@@ -161,7 +165,7 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
       this->bytes_[ data.pid] += data.buffer.length();
       this->priorities_[ data.pid] = data.priority; // faster than conditional.
 
-      // Forwared the current sample if there is a destination for it.
+      // Forward the current sample if there is a destination for it.
       if( this->destination_) {
         this->destination_->write( data);
       }

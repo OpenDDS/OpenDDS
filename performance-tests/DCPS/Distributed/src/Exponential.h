@@ -11,10 +11,11 @@ class Exponential  {
     /// Default constructor.
     Exponential();
 
-    //@{ @name Interval rate.
+    /// @name Interval rate.
+    /// @{
     double& rate();
     double  rate() const;
-    //@}
+    /// @}
 
     /**
      * @brief Exponentially distributed interval.

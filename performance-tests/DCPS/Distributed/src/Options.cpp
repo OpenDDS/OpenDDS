@@ -243,6 +243,7 @@ Options::configureScenarios( const char* filename)
       ACE_TEXT("(%P|%t) ERROR: Options::configureScenarios() - ")
       ACE_TEXT("failed to open() configuration heap.\n")
     ));
+    this->configured_ = false;
     return;
   }
 
@@ -252,6 +253,7 @@ Options::configureScenarios( const char* filename)
       ACE_TEXT("(%P|%t) ERROR: Options::configureScenarios() - ")
       ACE_TEXT("failed to import configuration file.\n")
     ));
+    this->configured_ = false;
     return;
   }
 
@@ -592,6 +594,15 @@ Options::loadTopic(
   valueString.clear();
   heap.get_string_value( sectionKey, DURABILITY_KEYNAME, valueString);
   if (valueString.length() > 0) {
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadTopic() - ")
+        ACE_TEXT("  [topic/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        DURABILITY_KEYNAME,
+        valueString.c_str()
+      ));
+    }
     if( valueString == "VOLATILE") {
       profile->qos.durability.kind = ::DDS::VOLATILE_DURABILITY_QOS;
 
@@ -609,15 +620,6 @@ Options::loadTopic(
         ACE_TEXT("(%P|%t) loadTopic() - ")
         ACE_TEXT("unrecognized value for %s: %s - ")
         ACE_TEXT("not assigning a value.\n"),
-        DURABILITY_KEYNAME,
-        valueString.c_str()
-      ));
-    }
-    if( this->verbose()) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Options::loadTopic() - ")
-        ACE_TEXT("  [topic/%s] %s == %s.\n"),
-        sectionName.c_str(),
         DURABILITY_KEYNAME,
         valueString.c_str()
       ));
@@ -646,6 +648,15 @@ Options::loadTopic(
   valueString.clear();
   heap.get_string_value( sectionKey, DURABILITYSERVICEHISTORYKIND_KEYNAME, valueString);
   if (valueString.length() > 0) {
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadTopic() - ")
+        ACE_TEXT("  [topic/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        DURABILITYSERVICEHISTORYKIND_KEYNAME,
+        valueString.c_str()
+      ));
+    }
     if( valueString == "ALL") {
       profile->qos.durability_service.history_kind = ::DDS::KEEP_ALL_HISTORY_QOS;
 
@@ -657,15 +668,6 @@ Options::loadTopic(
         ACE_TEXT("(%P|%t) loadTopic() - ")
         ACE_TEXT("unrecognized value for %s: %s - ")
         ACE_TEXT("not assigning a value.\n"),
-        DURABILITYSERVICEHISTORYKIND_KEYNAME,
-        valueString.c_str()
-      ));
-    }
-    if( this->verbose()) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Options::loadTopic() - ")
-        ACE_TEXT("  [topic/%s] %s == %s.\n"),
-        sectionName.c_str(),
         DURABILITYSERVICEHISTORYKIND_KEYNAME,
         valueString.c_str()
       ));
@@ -775,6 +777,15 @@ Options::loadTopic(
   valueString.clear();
   heap.get_string_value( sectionKey, LIVELINESSKIND_KEYNAME, valueString);
   if (valueString.length() > 0) {
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadTopic() - ")
+        ACE_TEXT("  [topic/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        LIVELINESSKIND_KEYNAME,
+        valueString.c_str()
+      ));
+    }
     if( valueString == "AUTOMATIC") {
       profile->qos.liveliness.kind = ::DDS::AUTOMATIC_LIVELINESS_QOS;
 
@@ -789,15 +800,6 @@ Options::loadTopic(
         ACE_TEXT("(%P|%t) loadTopic() - ")
         ACE_TEXT("unrecognized value for %s: %s - ")
         ACE_TEXT("not assigning a value.\n"),
-        LIVELINESSKIND_KEYNAME,
-        valueString.c_str()
-      ));
-    }
-    if( this->verbose()) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Options::loadTopic() - ")
-        ACE_TEXT("  [topic/%s] %s == %s.\n"),
-        sectionName.c_str(),
         LIVELINESSKIND_KEYNAME,
         valueString.c_str()
       ));
@@ -825,6 +827,15 @@ Options::loadTopic(
   valueString.clear();
   heap.get_string_value( sectionKey, RELIABILITYKIND_KEYNAME, valueString);
   if (valueString.length() > 0) {
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadTopic() - ")
+        ACE_TEXT("  [topic/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        RELIABILITYKIND_KEYNAME,
+        valueString.c_str()
+      ));
+    }
     if( valueString == "BEST_EFFORT") {
       profile->qos.reliability.kind = ::DDS::BEST_EFFORT_RELIABILITY_QOS;
 
@@ -836,15 +847,6 @@ Options::loadTopic(
         ACE_TEXT("(%P|%t) loadTopic() - ")
         ACE_TEXT("unrecognized value for %s: %s - ")
         ACE_TEXT("not assigning a value.\n"),
-        RELIABILITYKIND_KEYNAME,
-        valueString.c_str()
-      ));
-    }
-    if( this->verbose()) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Options::loadTopic() - ")
-        ACE_TEXT("  [topic/%s] %s == %s.\n"),
-        sectionName.c_str(),
         RELIABILITYKIND_KEYNAME,
         valueString.c_str()
       ));
@@ -872,6 +874,15 @@ Options::loadTopic(
   valueString.clear();
   heap.get_string_value( sectionKey, DESTINATIONORDER_KEYNAME, valueString);
   if (valueString.length() > 0) {
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadTopic() - ")
+        ACE_TEXT("  [topic/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        DESTINATIONORDER_KEYNAME,
+        valueString.c_str()
+      ));
+    }
     if( valueString == "SOURCE") {
       profile->qos.destination_order.kind = ::DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS;
 
@@ -887,21 +898,21 @@ Options::loadTopic(
         valueString.c_str()
       ));
     }
-    if( this->verbose()) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Options::loadTopic() - ")
-        ACE_TEXT("  [topic/%s] %s == %s.\n"),
-        sectionName.c_str(),
-        DESTINATIONORDER_KEYNAME,
-        valueString.c_str()
-      ));
-    }
   }
 
   // HistoryKind                         = <string> # One of ALL, LAST
   valueString.clear();
   heap.get_string_value( sectionKey, HISTORYKIND_KEYNAME, valueString);
   if (valueString.length() > 0) {
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadTopic() - ")
+        ACE_TEXT("  [topic/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        HISTORYKIND_KEYNAME,
+        valueString.c_str()
+      ));
+    }
     if( valueString == "ALL") {
       profile->qos.history.kind = ::DDS::KEEP_ALL_HISTORY_QOS;
 
@@ -913,15 +924,6 @@ Options::loadTopic(
         ACE_TEXT("(%P|%t) loadTopic() - ")
         ACE_TEXT("unrecognized value for %s: %s - ")
         ACE_TEXT("not assigning a value.\n"),
-        HISTORYKIND_KEYNAME,
-        valueString.c_str()
-      ));
-    }
-    if( this->verbose()) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Options::loadTopic() - ")
-        ACE_TEXT("  [topic/%s] %s == %s.\n"),
-        sectionName.c_str(),
         HISTORYKIND_KEYNAME,
         valueString.c_str()
       ));
@@ -1029,6 +1031,15 @@ Options::loadTopic(
   valueString.clear();
   heap.get_string_value( sectionKey, OWNERSHIPKIND_KEYNAME, valueString);
   if (valueString.length() > 0) {
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadTopic() - ")
+        ACE_TEXT("  [topic/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        OWNERSHIPKIND_KEYNAME,
+        valueString.c_str()
+      ));
+    }
     if( valueString == "SHARED") {
       profile->qos.ownership.kind = ::DDS::SHARED_OWNERSHIP_QOS;
 
@@ -1040,15 +1051,6 @@ Options::loadTopic(
         ACE_TEXT("(%P|%t) loadTopic() - ")
         ACE_TEXT("unrecognized value for %s: %s - ")
         ACE_TEXT("not assigning a value.\n"),
-        OWNERSHIPKIND_KEYNAME,
-        valueString.c_str()
-      ));
-    }
-    if( this->verbose()) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Options::loadTopic() - ")
-        ACE_TEXT("  [topic/%s] %s == %s.\n"),
-        sectionName.c_str(),
         OWNERSHIPKIND_KEYNAME,
         valueString.c_str()
       ));
@@ -1142,6 +1144,15 @@ Options::loadPublication(
   valueString.clear();
   heap.get_string_value( sectionKey, PRESENTATION_KEYNAME, valueString);
   if (valueString.length() > 0) {
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        PRESENTATION_KEYNAME,
+        valueString.c_str()
+      ));
+    }
     if( valueString == "INSTANCE") {
       profile->publisherQos.presentation.access_scope = ::DDS::INSTANCE_PRESENTATION_QOS;
 
@@ -1156,15 +1167,6 @@ Options::loadPublication(
         ACE_TEXT("(%P|%t) loadPublication() - ")
         ACE_TEXT("unrecognized value for %s: %s - ")
         ACE_TEXT("not assigning a value.\n"),
-        PRESENTATION_KEYNAME,
-        valueString.c_str()
-      ));
-    }
-    if( this->verbose()) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
-        ACE_TEXT("  [publication/%s] %s == %s.\n"),
-        sectionName.c_str(),
         PRESENTATION_KEYNAME,
         valueString.c_str()
       ));
@@ -1263,6 +1265,15 @@ Options::loadPublication(
   valueString.clear();
   heap.get_string_value( sectionKey, DURABILITY_KEYNAME, valueString);
   if (valueString.length() > 0) {
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        DURABILITY_KEYNAME,
+        valueString.c_str()
+      ));
+    }
     if( valueString == "VOLATILE") {
       profile->writerQos.durability.kind = ::DDS::VOLATILE_DURABILITY_QOS;
       profile->writerQosMask |= SetDurabilityQos;
@@ -1284,15 +1295,6 @@ Options::loadPublication(
         ACE_TEXT("(%P|%t) loadPublication() - ")
         ACE_TEXT("unrecognized value for %s: %s - ")
         ACE_TEXT("not assigning a value.\n"),
-        DURABILITY_KEYNAME,
-        valueString.c_str()
-      ));
-    }
-    if( this->verbose()) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
-        ACE_TEXT("  [publication/%s] %s == %s.\n"),
-        sectionName.c_str(),
         DURABILITY_KEYNAME,
         valueString.c_str()
       ));
@@ -1322,6 +1324,15 @@ Options::loadPublication(
   valueString.clear();
   heap.get_string_value( sectionKey, DURABILITYSERVICEHISTORYKIND_KEYNAME, valueString);
   if (valueString.length() > 0) {
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        DURABILITYSERVICEHISTORYKIND_KEYNAME,
+        valueString.c_str()
+      ));
+    }
     if( valueString == "ALL") {
       profile->writerQos.durability_service.history_kind = ::DDS::KEEP_ALL_HISTORY_QOS;
       profile->writerQosMask |= SetDurabilityServiceHistoryKindQos;
@@ -1335,15 +1346,6 @@ Options::loadPublication(
         ACE_TEXT("(%P|%t) loadPublication() - ")
         ACE_TEXT("unrecognized value for %s: %s - ")
         ACE_TEXT("not assigning a value.\n"),
-        DURABILITYSERVICEHISTORYKIND_KEYNAME,
-        valueString.c_str()
-      ));
-    }
-    if( this->verbose()) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
-        ACE_TEXT("  [publication/%s] %s == %s.\n"),
-        sectionName.c_str(),
         DURABILITYSERVICEHISTORYKIND_KEYNAME,
         valueString.c_str()
       ));
@@ -1459,6 +1461,15 @@ Options::loadPublication(
   valueString.clear();
   heap.get_string_value( sectionKey, LIVELINESSKIND_KEYNAME, valueString);
   if (valueString.length() > 0) {
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        LIVELINESSKIND_KEYNAME,
+        valueString.c_str()
+      ));
+    }
     if( valueString == "AUTOMATIC") {
       profile->writerQos.liveliness.kind = ::DDS::AUTOMATIC_LIVELINESS_QOS;
       profile->writerQosMask |= SetLivelinessKindQos;
@@ -1476,15 +1487,6 @@ Options::loadPublication(
         ACE_TEXT("(%P|%t) loadPublication() - ")
         ACE_TEXT("unrecognized value for %s: %s - ")
         ACE_TEXT("not assigning a value.\n"),
-        LIVELINESSKIND_KEYNAME,
-        valueString.c_str()
-      ));
-    }
-    if( this->verbose()) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
-        ACE_TEXT("  [publication/%s] %s == %s.\n"),
-        sectionName.c_str(),
         LIVELINESSKIND_KEYNAME,
         valueString.c_str()
       ));
@@ -1513,6 +1515,15 @@ Options::loadPublication(
   valueString.clear();
   heap.get_string_value( sectionKey, RELIABILITYKIND_KEYNAME, valueString);
   if (valueString.length() > 0) {
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        RELIABILITYKIND_KEYNAME,
+        valueString.c_str()
+      ));
+    }
     if( valueString == "BEST_EFFORT") {
       profile->writerQos.reliability.kind = ::DDS::BEST_EFFORT_RELIABILITY_QOS;
       profile->writerQosMask |= SetReliabilityKindQos;
@@ -1526,15 +1537,6 @@ Options::loadPublication(
         ACE_TEXT("(%P|%t) loadPublication() - ")
         ACE_TEXT("unrecognized value for %s: %s - ")
         ACE_TEXT("not assigning a value.\n"),
-        RELIABILITYKIND_KEYNAME,
-        valueString.c_str()
-      ));
-    }
-    if( this->verbose()) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
-        ACE_TEXT("  [publication/%s] %s == %s.\n"),
-        sectionName.c_str(),
         RELIABILITYKIND_KEYNAME,
         valueString.c_str()
       ));
@@ -1563,6 +1565,15 @@ Options::loadPublication(
   valueString.clear();
   heap.get_string_value( sectionKey, DESTINATIONORDER_KEYNAME, valueString);
   if (valueString.length() > 0) {
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        DESTINATIONORDER_KEYNAME,
+        valueString.c_str()
+      ));
+    }
     if( valueString == "SOURCE") {
       profile->writerQos.destination_order.kind = ::DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS;
       profile->writerQosMask |= SetDestinationOrderQos;
@@ -1580,21 +1591,21 @@ Options::loadPublication(
         valueString.c_str()
       ));
     }
-    if( this->verbose()) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
-        ACE_TEXT("  [publication/%s] %s == %s.\n"),
-        sectionName.c_str(),
-        DESTINATIONORDER_KEYNAME,
-        valueString.c_str()
-      ));
-    }
   }
 
   // HistoryKind                         = <string> # One of ALL, LAST
   valueString.clear();
   heap.get_string_value( sectionKey, HISTORYKIND_KEYNAME, valueString);
   if (valueString.length() > 0) {
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        HISTORYKIND_KEYNAME,
+        valueString.c_str()
+      ));
+    }
     if( valueString == "ALL") {
       profile->writerQos.history.kind = ::DDS::KEEP_ALL_HISTORY_QOS;
       profile->writerQosMask |= SetHistoryKindQos;
@@ -1608,15 +1619,6 @@ Options::loadPublication(
         ACE_TEXT("(%P|%t) loadPublication() - ")
         ACE_TEXT("unrecognized value for %s: %s - ")
         ACE_TEXT("not assigning a value.\n"),
-        HISTORYKIND_KEYNAME,
-        valueString.c_str()
-      ));
-    }
-    if( this->verbose()) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
-        ACE_TEXT("  [publication/%s] %s == %s.\n"),
-        sectionName.c_str(),
         HISTORYKIND_KEYNAME,
         valueString.c_str()
       ));
@@ -1755,6 +1757,15 @@ Options::loadPublication(
   valueString.clear();
   heap.get_string_value( sectionKey, OWNERSHIPKIND_KEYNAME, valueString);
   if (valueString.length() > 0) {
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [topic/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        OWNERSHIPKIND_KEYNAME,
+        valueString.c_str()
+      ));
+    }
     if( valueString == "SHARED") {
       profile->writerQos.ownership.kind = ::DDS::SHARED_OWNERSHIP_QOS;
       profile->writerQosMask |= SetOwnershipKindQos;
@@ -1768,15 +1779,6 @@ Options::loadPublication(
         ACE_TEXT("(%P|%t) loadPublication() - ")
         ACE_TEXT("unrecognized value for %s: %s - ")
         ACE_TEXT("not assigning a value.\n"),
-        OWNERSHIPKIND_KEYNAME,
-        valueString.c_str()
-      ));
-    }
-    if( this->verbose()) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
-        ACE_TEXT("  [topic/%s] %s == %s.\n"),
-        sectionName.c_str(),
         OWNERSHIPKIND_KEYNAME,
         valueString.c_str()
       ));
@@ -2005,6 +2007,15 @@ Options::loadSubscription(
   valueString.clear();
   heap.get_string_value( sectionKey, PRESENTATION_KEYNAME, valueString);
   if (valueString.length() > 0) {
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        PRESENTATION_KEYNAME,
+        valueString.c_str()
+      ));
+    }
     if( valueString == "INSTANCE") {
       profile->subscriberQos.presentation.access_scope = ::DDS::INSTANCE_PRESENTATION_QOS;
 
@@ -2019,15 +2030,6 @@ Options::loadSubscription(
         ACE_TEXT("(%P|%t) loadSubscription() - ")
         ACE_TEXT("unrecognized value for %s: %s - ")
         ACE_TEXT("not assigning a value.\n"),
-        PRESENTATION_KEYNAME,
-        valueString.c_str()
-      ));
-    }
-    if( this->verbose()) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
-        ACE_TEXT("  [subscription/%s] %s == %s.\n"),
-        sectionName.c_str(),
         PRESENTATION_KEYNAME,
         valueString.c_str()
       ));
@@ -2126,6 +2128,15 @@ Options::loadSubscription(
   valueString.clear();
   heap.get_string_value( sectionKey, DURABILITY_KEYNAME, valueString);
   if (valueString.length() > 0) {
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        DURABILITY_KEYNAME,
+        valueString.c_str()
+      ));
+    }
     if( valueString == "VOLATILE") {
       profile->readerQos.durability.kind = ::DDS::VOLATILE_DURABILITY_QOS;
       profile->readerQosMask |= SetDurabilityQos;
@@ -2147,15 +2158,6 @@ Options::loadSubscription(
         ACE_TEXT("(%P|%t) loadSubscription() - ")
         ACE_TEXT("unrecognized value for %s: %s - ")
         ACE_TEXT("not assigning a value.\n"),
-        DURABILITY_KEYNAME,
-        valueString.c_str()
-      ));
-    }
-    if( this->verbose()) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
-        ACE_TEXT("  [subscription/%s] %s == %s.\n"),
-        sectionName.c_str(),
         DURABILITY_KEYNAME,
         valueString.c_str()
       ));
@@ -2202,6 +2204,15 @@ Options::loadSubscription(
   valueString.clear();
   heap.get_string_value( sectionKey, LIVELINESSKIND_KEYNAME, valueString);
   if (valueString.length() > 0) {
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        LIVELINESSKIND_KEYNAME,
+        valueString.c_str()
+      ));
+    }
     if( valueString == "AUTOMATIC") {
       profile->readerQos.liveliness.kind = ::DDS::AUTOMATIC_LIVELINESS_QOS;
       profile->readerQosMask |= SetLivelinessKindQos;
@@ -2219,15 +2230,6 @@ Options::loadSubscription(
         ACE_TEXT("(%P|%t) loadSubscription() - ")
         ACE_TEXT("unrecognized value for %s: %s - ")
         ACE_TEXT("not assigning a value.\n"),
-        LIVELINESSKIND_KEYNAME,
-        valueString.c_str()
-      ));
-    }
-    if( this->verbose()) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
-        ACE_TEXT("  [subscription/%s] %s == %s.\n"),
-        sectionName.c_str(),
         LIVELINESSKIND_KEYNAME,
         valueString.c_str()
       ));
@@ -2256,6 +2258,15 @@ Options::loadSubscription(
   valueString.clear();
   heap.get_string_value( sectionKey, RELIABILITYKIND_KEYNAME, valueString);
   if (valueString.length() > 0) {
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        RELIABILITYKIND_KEYNAME,
+        valueString.c_str()
+      ));
+    }
     if( valueString == "BEST_EFFORT") {
       profile->readerQos.reliability.kind = ::DDS::BEST_EFFORT_RELIABILITY_QOS;
       profile->readerQosMask |= SetReliabilityKindQos;
@@ -2269,15 +2280,6 @@ Options::loadSubscription(
         ACE_TEXT("(%P|%t) loadSubscription() - ")
         ACE_TEXT("unrecognized value for %s: %s - ")
         ACE_TEXT("not assigning a value.\n"),
-        RELIABILITYKIND_KEYNAME,
-        valueString.c_str()
-      ));
-    }
-    if( this->verbose()) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
-        ACE_TEXT("  [subscription/%s] %s == %s.\n"),
-        sectionName.c_str(),
         RELIABILITYKIND_KEYNAME,
         valueString.c_str()
       ));
@@ -2306,6 +2308,15 @@ Options::loadSubscription(
   valueString.clear();
   heap.get_string_value( sectionKey, DESTINATIONORDER_KEYNAME, valueString);
   if (valueString.length() > 0) {
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        DESTINATIONORDER_KEYNAME,
+        valueString.c_str()
+      ));
+    }
     if( valueString == "SOURCE") {
       profile->readerQos.destination_order.kind = ::DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS;
       profile->readerQosMask |= SetDestinationOrderQos;
@@ -2323,21 +2334,21 @@ Options::loadSubscription(
         valueString.c_str()
       ));
     }
-    if( this->verbose()) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
-        ACE_TEXT("  [subscription/%s] %s == %s.\n"),
-        sectionName.c_str(),
-        DESTINATIONORDER_KEYNAME,
-        valueString.c_str()
-      ));
-    }
   }
 
   // HistoryKind                         = <string> # One of ALL, LAST
   valueString.clear();
   heap.get_string_value( sectionKey, HISTORYKIND_KEYNAME, valueString);
   if (valueString.length() > 0) {
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        HISTORYKIND_KEYNAME,
+        valueString.c_str()
+      ));
+    }
     if( valueString == "ALL") {
       profile->readerQos.history.kind = ::DDS::KEEP_ALL_HISTORY_QOS;
       profile->readerQosMask |= SetHistoryKindQos;
@@ -2351,15 +2362,6 @@ Options::loadSubscription(
         ACE_TEXT("(%P|%t) loadSubscription() - ")
         ACE_TEXT("unrecognized value for %s: %s - ")
         ACE_TEXT("not assigning a value.\n"),
-        HISTORYKIND_KEYNAME,
-        valueString.c_str()
-      ));
-    }
-    if( this->verbose()) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
-        ACE_TEXT("  [subscription/%s] %s == %s.\n"),
-        sectionName.c_str(),
         HISTORYKIND_KEYNAME,
         valueString.c_str()
       ));
@@ -2563,6 +2565,15 @@ Options::loadSubscription(
   valueString.clear();
   heap.get_string_value( sectionKey, DATACOLLECTIONRETENTION_KEYNAME, valueString);
   if (valueString.length() > 0) {
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
+        ACE_TEXT("  [subscription/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        DATACOLLECTIONRETENTION_KEYNAME,
+        valueString.c_str()
+      ));
+    }
     if( valueString == "ALL") {
       profile->retention = ::OpenDDS::DCPS::DataCollector<double>::Unbounded;
 
@@ -2577,15 +2588,6 @@ Options::loadSubscription(
         ACE_TEXT("(%P|%t) loadSubscription() - ")
         ACE_TEXT("unrecognized value for %s: %s - ")
         ACE_TEXT("not assigning a value.\n"),
-        DATACOLLECTIONRETENTION_KEYNAME,
-        valueString.c_str()
-      ));
-    }
-    if( this->verbose()) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
-        ACE_TEXT("  [subscription/%s] %s == %s.\n"),
-        sectionName.c_str(),
         DATACOLLECTIONRETENTION_KEYNAME,
         valueString.c_str()
       ));
