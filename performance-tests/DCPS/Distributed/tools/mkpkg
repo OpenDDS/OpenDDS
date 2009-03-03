@@ -11,35 +11,35 @@ rm -rf $PKG
 mkdir -p $PKG/lib
 
 # Statically linked
-cp $DDS_ROOT/lib/libDCPSInfoRepoServ.so.1.2.1 $PKG/lib/libDCPSInfoRepoServ.so.1.2.1
-cp $DDS_ROOT/lib/libFederator.so.1.2.1        $PKG/lib/libFederator.so.1.2.1
-cp $DDS_ROOT/lib/libInfoRepoLib.so.1.2.1      $PKG/lib/libInfoRepoLib.so.1.2.1
-cp $DDS_ROOT/lib/libOpenDDS_Dcps.so.1.2.1     $PKG/lib/libOpenDDS_Dcps.so.1.2.1
+cp $DDS_ROOT/lib/libDCPSInfoRepoServ.so.* $PKG/lib/
+cp $DDS_ROOT/lib/libFederator.so.*        $PKG/lib/
+cp $DDS_ROOT/lib/libInfoRepoLib.so.*      $PKG/lib/
+cp $DDS_ROOT/lib/libOpenDDS_Dcps.so.*     $PKG/lib/
 
 # For statically linked
-cp $DDS_ROOT/lib/libReliableMulticast.so.1.2.1     $PKG/lib/libReliableMulticast.so.1.2.1
-cp $DDS_ROOT/lib/libSimpleTcp.so.1.2.1             $PKG/lib/libSimpleTcp.so.1.2.1
-cp $DDS_ROOT/lib/libSimpleUnreliableDgram.so.1.2.1 $PKG/lib/libSimpleUnreliableDgram.so.1.2.1
+cp $DDS_ROOT/lib/libReliableMulticast.so.*     $PKG/lib/
+cp $DDS_ROOT/lib/libSimpleTcp.so.*             $PKG/lib/
+cp $DDS_ROOT/lib/libSimpleUnreliableDgram.so.* $PKG/lib/
 
 # For dynamic linking
-(cd $PKG/lib; ln -s libReliableMulticast.so.1.2.1     libReliableMulticast.so)
-(cd $PKG/lib; ln -s libSimpleTcp.so.1.2.1             libSimpleTcp.so)
-(cd $PKG/lib; ln -s libSimpleUnreliableDgram.so.1.2.1 libSimpleUnreliableDgram.so)
+(cd $PKG/lib; ln -s libReliableMulticast.so.*     libReliableMulticast.so)
+(cd $PKG/lib; ln -s libSimpleTcp.so.*             libSimpleTcp.so)
+(cd $PKG/lib; ln -s libSimpleUnreliableDgram.so.* libSimpleUnreliableDgram.so)
 
 # Statically linked
-cp $ACE_ROOT/lib/libACE.so.5.5a_p10                $PKG/lib/libACE.so.5.5a_p10
-cp $ACE_ROOT/lib/libTAO_AnyTypeCode.so.1.5a_p10    $PKG/lib/libTAO_AnyTypeCode.so.1.5a_p10
-cp $ACE_ROOT/lib/libTAO_ImR_Client.so.1.5a_p10     $PKG/lib/libTAO_ImR_Client.so.1.5a_p10
-cp $ACE_ROOT/lib/libTAO_IORTable.so.1.5a_p10       $PKG/lib/libTAO_IORTable.so.1.5a_p10
-cp $ACE_ROOT/lib/libTAO_PortableServer.so.1.5a_p10 $PKG/lib/libTAO_PortableServer.so.1.5a_p10
-cp $ACE_ROOT/lib/libTAO.so.1.5a_p10                $PKG/lib/libTAO.so.1.5a_p10
-cp $ACE_ROOT/lib/libTAO_Svc_Utils.so.1.5a_p10      $PKG/lib/libTAO_Svc_Utils.so.1.5a_p10
+cp $ACE_ROOT/lib/libACE.so.5.5a*                $PKG/lib/
+cp $ACE_ROOT/lib/libTAO_AnyTypeCode.so.1.5a*    $PKG/lib/
+cp $ACE_ROOT/lib/libTAO_ImR_Client.so.1.5a*     $PKG/lib/
+cp $ACE_ROOT/lib/libTAO_IORTable.so.1.5a*       $PKG/lib/
+cp $ACE_ROOT/lib/libTAO_PortableServer.so.1.5a* $PKG/lib/
+cp $ACE_ROOT/lib/libTAO.so.1.5a*                $PKG/lib/
+cp $ACE_ROOT/lib/libTAO_Svc_Utils.so.1.5a*      $PKG/lib/
 
 # Dynamically linked
-cp $ACE_ROOT/lib/libTAO_Codeset.so               $PKG/lib/libTAO_Codeset.so
-cp $ACE_ROOT/lib/libTAO_PI.so                    $PKG/lib/libTAO_PI.so
-cp $ACE_ROOT/lib/libTAO_CodecFactory.so.1.5a_p10 $PKG/lib/libTAO_CodecFactory.so.1.5a_p10
-cp $ACE_ROOT/lib/libTAO_AnyTypeCode.so.1.5a_p10  $PKG/lib/libTAO_AnyTypeCode.so.1.5a_p10
+cp $ACE_ROOT/lib/libTAO_Codeset.so            $PKG/lib/
+cp $ACE_ROOT/lib/libTAO_PI.so                 $PKG/lib/
+cp $ACE_ROOT/lib/libTAO_CodecFactory.so.1.5a* $PKG/lib/
+cp $ACE_ROOT/lib/libTAO_AnyTypeCode.so.1.5a*  $PKG/lib/
 
 mkdir -p $PKG/bin/PerlDDS
 mkdir -p $PKG/bin/PerlACE

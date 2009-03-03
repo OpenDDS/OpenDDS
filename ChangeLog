@@ -1,12 +1,18 @@
+Tue Mar  3 15:44:15 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/DCPS/Distributed/tools/mkpkg:
+
+	  Removed dependence on specific library decorators.
+
 Tue Mar  3 15:37:20 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/DCPS/Distributed/bin/run_test:
 
-	  Updates for executing new test executables.
+          Updates for executing new test executables.
 
         * performance-tests/DCPS/Distributed/tools/mkpkg:
 
-	  Modified test to work portably for null case.
+          Modified test to work portably for null case.
 
 Fri Feb 27 16:19:31 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
