@@ -1,7 +1,7 @@
 #!/bin/bash -x
 
 PKG=$1
-if test x"$PKG" -eq x""
+if test x"$PKG" == x""
 then
   PKG=pkg
 fi
