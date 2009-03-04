@@ -1,0 +1,83 @@
+
+Some testing scenarios
+
+NOTATION:
+filenames are abbreviations for the following constructs:
+  scenario<i>-host<j>-process<k>
+with the abbreviated filenames appearing as:
+  s<i>-h<j>-p<k>.ini
+
+within a file, publications and subscriptions are described.  To fully
+specify these, participants and topics need to be defined as well.  If
+the scenario does not require more than one of these (participants or
+topics) then they may be implied in the brief synopses below.
+
+notation for publications and subscriptions below follows a loose
+convention of:
+
+  <name>: <property> [ , <property> ...]
+
+where <name> uniquely identifies the publication or subscription and each
+<property> is a non-default setting for that entity.
+
+########################################################################
+# scenario 1 - simple loopback: send to remote, forwarded back to sender
+#              the 1000 messages/sec rate will result in 2000
+#              messages/sec traversing the network.
+s1-h1-p1.ini: Process1
+  pub1: topic=state, size=144, max=500, min=100, dev=50, rate=1000, transport=1
+  sub2: topic=state, collect data, transport=2
+
+s1-h2-p1.ini: Process2
+  sub1: topic=state, transport=1
+  pub2: topic=state, source=sub1, transport=2
+
+########################################################################
+# scenario 2
+#
+# 3 hosts, 2 processes per host,
+# 1 simulation state path through all processes,
+# each process publishes control data and status data,
+# all processes receive control data,
+# one process receives status data.
+#
+s2-h1-p1.ini: TestProcess1
+  sub1: topic=state,   partition=link6, transport=1
+  pub1: topic=state,   partition=link1, size=144, max=500,  min=100, dev=50,  rate=1000, priority=5,  transport=2
+  pub2: topic=control, size=80,  max=120,  min=40,  dev=20,  rate=20, priority=10, transport=3
+  pub3: topic=status,  size=200, max=1000, min=100, dev=500, rate=10, transport=4
+  sub2: topic=control, transport=5
+
+s2-h1-p2.ini: TestProcess2
+  sub3: topic=state,  partition=link1, transport=1
+  pub4: topic=state,  partition=link2, source=sub3, priority=5, transport=2
+  pub5: topic=status, size=200, max=1000, min=100, dev=500, rate=10, transport=3
+  sub4: topic=control, transport=4
+
+s2-h2-p1.ini: TestProcess3
+  sub5: topic=state, partition=link2, transport=1
+  pub6: topic=state, partition=link3, source=sub5, priority=5, transport=2
+  pub7: topic=control, size=80,  max=120,  min=40,  dev=20,  rate=20, priority=10, transport=3
+  pub8: topic=status,  size=200, max=1000, min=100, dev=500, rate=10, transport=4
+  sub6: topic=control, transport=5
+
+s2-h2-p2.ini: TestProcess4
+  sub7: topic=state, partition=link3, transport=1
+  pub9: topic=state, partition=link4, source=sub7, priority=5, transport=2
+  puba: topic=status,  size=200, max=1000, min=100, dev=500, rate=10, transport=3
+  sub8: topic=control, transport=4
+  sub9: topic=status,  transport=5
+
+s2-h3-p1.ini: TestProcess5
+  suba: topic=state, partition=link4, transport=1
+  pubb: topic=state, partition=link5, source=suba, priority=5, transport=2
+  pubc: topic=control, size=80,  max=120,  min=40,  dev=20,  rate=20, priority=10, transport=3
+  pubd: topic=status,  size=200, max=1000, min=100, dev=500, rate=10, transport=4
+  subb: topic=control, transport=5
+
+s2-h3-p2.ini: TestProcess6
+  subc: topic=state, partition=link5, transport=1
+  pube: topic=state, partition=link6, source=subc, priority=5, transport=2
+  pubf: topic=status,  size=200, max=1000, min=100, dev=500, rate=10, transport=3
+  subd: topic=control, transport=4
+

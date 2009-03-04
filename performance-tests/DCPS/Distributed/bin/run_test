@@ -14,8 +14,21 @@ BEGIN { $projectRoot = "$FindBin::Bin/.."; }
 use lib "$projectRoot/bin";
 use DDS_Run_Test;
 
+########################################
+#
 # Locate the link libraries
-PerlDDS::add_lib_path( "$projectRoot/lib");
+# PerlDDS::add_lib_path( "$projectRoot/lib");
+#  NOTE: add_lib_path() does not appear to export the path to the
+#        subprocess sufficiently for use by our subprocesses.
+use Env qw( @LD_LIBRARY_PATH @LIB_PATH @SHLIB_PATH @PATH);
+unshift @LD_LIBRARY_PATH, "$projectRoot/lib";
+unshift @LIB_PATH,        "$projectRoot/lib";
+unshift @SHLIB_PATH,      "$projectRoot/lib";
+
+# I find this a particularly heinous setting.
+if( $^O eq 'MSWin32') { unshift @PATH, "$projectRoot/lib"; }
+#
+########################################
 
 use Getopt::Long qw( :config bundling) ;
 use Pod::Usage ;
@@ -44,9 +57,9 @@ my $noaction;
 my $duration;
 my $startRepo;
 my $startTest;
-my $repoHost = "localhost:2112";
+my $repoHost;
 my $iniFile  = $projectRoot . "/etc/transport.ini";
-my $scenarioFile;
+my $scenarios;
 
 ########################################################################
 #
@@ -67,16 +80,19 @@ GetOptions( "verbose!"            => \$verbose,
             "rawdatafile|r=s"     => \$rawData,
             "repohost|h=s"        => \$repoHost,
             "inifile|i=s"         => \$iniFile,
-            "scenario|s=s"        => \$scenarioFile,
+            "scenario|s=s"        => \$scenarios,
             "startrepo|S"         => \$startRepo,
-            "starttest|T"         => \$startTest,
+            "starttest|P"         => \$startTest,
             "duration|t"          => \$duration,
 
 ) or pod2usage( 0) ;
-pod2usage( 1)             if $help or ($startTest and not $scenarioFile);
+pod2usage( 1)             if $help or ($startTest and not $scenarios);
 pod2usage( -verbose => 2) if $man;
 #
 ########################################################################
+
+# Extract the individual scenarios.
+my @scenario = split( ',', $scenarios);
 
 # Verbosity.
 print "Commands will be printed only and not executed.\n"
@@ -89,7 +105,8 @@ print "Test will execute continuously and not terminate\n"
                                           if $verbose and not $duration;
 print "ProjectRoot==$projectRoot\n"       if $verbose;
 print "RepoHost==$repoHost\n"             if $verbose;
-print "ScenarioFile==$scenarioFile\n"     if $verbose;
+print scalar(@scenario) . " scenarios==" . join(', ', @scenario) . "\n"
+                                          if $verbose;
 print "RawDataFile==$rawData\n"           if $verbose and $rawData;
 
 print "Debug==$debug\n"                   if $verbose and $debug;
@@ -120,7 +137,7 @@ $common_opts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
 
 # Process variables.
 my $REPO;
-my $TEST;
+my @TEST;
 
 # Establish process arguments.
 
@@ -135,6 +152,7 @@ $repoOpts .= "-ORBListenEndpoints $repoHost " if $repoHost;
 $repoOpts .= "-DCPSDebugLevel $repoDebug " if $repoDebug;
 $repoOpts .= "-ORBLogFile $debugFile " if ($repoDebug or $transportDebug) and $debugFile;
 
+my $index = 0;
 my $testOpts = "$common_opts ";
 $testOpts .= "-v " if $verbose;
 $testOpts .= "-DCPSConfigFile $iniFile " if $iniFile;
@@ -143,7 +161,6 @@ $testOpts .= "-ORBLogFile $debugFile " if ($appDebug or $transportDebug) and $de
 $testOpts .= "-DCPSInfoRepo corbaloc:iiop:$repoHost/DCPSInfoRepo ";
 $testOpts .= "-d $duration " if $duration;
 $testOpts .= "-t newest -s $rawSize -r $rawData " if $rawData;
-$testOpts .= "-f $scenarioFile ";
 
 # Define the processes.
 
@@ -154,17 +171,22 @@ if( PerlACE::is_vxworks_test()) {
   $REPO = new PerlACE::Process( "$FindBin::Bin/DCPSInfoRepo", $repoArgs);
 }
 
-my $testArgs = "$testOpts ";
-if( PerlACE::is_vxworks_test()) {
-  $TEST = new PerlACE::ProcessVX( "$FindBin::Bin/testprocess", $testArgs);
-} else {
-  $TEST = new PerlACE::Process( "$FindBin::Bin/testprocess", $testArgs);
+for my $index ( 1 .. scalar(@scenario)) {
+  my $testArgs = "$testOpts "
+               . "-f $scenario[ $index - 1] ";
+  if( PerlACE::is_vxworks_test()) {
+    $TEST[ $index - 1] = new PerlACE::ProcessVX( "$FindBin::Bin/testprocess", $testArgs);
+  } else {
+    $TEST[ $index - 1] = new PerlACE::Process( "$FindBin::Bin/testprocess", $testArgs);
+  }
 }
 
 if( $noaction) {
   # Be verbose.
   print $REPO->CommandLine() . "\n" if $verbose and $startRepo;
-  print $TEST->CommandLine() . "\n" if $verbose and $startTest;
+  foreach my $test (@TEST) {
+    print $test->CommandLine() . "\n" if $verbose and $startTest;
+  }
   exit;
 }
 
@@ -176,22 +198,26 @@ if( $startRepo) {
 }
 
 if( $startTest) {
-  # Fire up the test process.
-  print "\nTEST\n";
-  print $TEST->CommandLine() . "\n";
-  $TEST->Spawn();
+  # Fire up the test processes.
+  for my $index ( 1 .. scalar(@scenario)) {
+    print "\nTEST $index\n";
+    print $TEST[ $index - 1]->CommandLine() . "\n";
+    $TEST[ $index - 1]->Spawn();
+  }
 
   # block forever if no duration was specified.
   sleep if not $duration;
 
   # Wait for the testprocess to terminate nicely.
 
-  $status = $TEST->WaitKill( $killDelay);
-  if( $status != 0) {
-    print STDERR "ERROR: Test returned $status\n";
-    ++$failed;
+  for my $index ( 1 .. scalar(@scenario)) {
+    $status = $TEST[ $index - 1]->WaitKill( $killDelay);
+    if( $status != 0) {
+      print STDERR "ERROR: Test $index returned $status\n";
+      ++$failed;
+    }
+    $killDelay = 5;
   }
-  $killDelay = 5;
 }
 
 # Terminate the repository.
@@ -260,8 +286,8 @@ Options:
   -i FILE | --inifile FILE
                          file for configuring the OpenDDS service
 
-  -s FILE | --scenario FILE
-                         file defining the test scenario to execute
+  -s FILELIST | --scenario FILELIST
+                         list of files defining the test scenario(s) to execute
 
   -r FILE | --rawdatafile FILE
                          file to write collected data to at end of test
@@ -271,7 +297,7 @@ Options:
 
   -S | --startrepo       start a repository
 
-  -T | --starttest       start a testprocess
+  -P | --starttest       start a testprocess
 
 =head1 OPTIONS
 
@@ -340,7 +366,7 @@ Causes a repository process to be started.
 
 The default value is to not start a repository process.
 
-=item B<-T> | B<--starttest>
+=item B<-P> | B<--starttest>
 
 Causes a test process to be started.
 
@@ -352,7 +378,7 @@ Sets the -ORBLogFile option value.
 
 The default value is 0.
 
-=item h<-r FQDN> | B<--repohost=FQDN>
+=item B<-h FQDN> | B<--repohost=FQDN>
 
 This is the fully qualified domain name and port where the OpenDDS
 repository may be found.
@@ -368,12 +394,14 @@ The default is to use the file located in the 'etc' directory relative
 from the project root (the parent directory of the directory where the
 command was executed from) with filename 'transport.ini'.
 
-=item B<-s FILE> | B<--scenario=FILE>
+=item B<-s FILELIST> | B<--scenario=FILELIST>
 
-Test scenario definition filename.  This defines the scenario to execute
+Test scenario definition filenames.  This defines the scenarios to execute
 for the test.  This names an 'ini' style file that contains information
 about all publications and subscriptions to execute for this test
-execution.
+execution.  This can be one or more filenames, separated by commas.  One
+test process will be started (if requested) to process each named
+scenario configuration file.
 
 There is no default value, and the test will not execute if not
 specified.

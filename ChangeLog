@@ -1,3 +1,39 @@
+Wed Mar  4 04:40:37 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/DCPS/Distributed/bin/run_test:
+
+	  Changed mechanism to add to the library path since the module
+	  add_lib_path was not exporting adequately for the subprocess to
+	  access the updated values.  Modified scenario specification to
+	  be a list of files with each file corresponding to starting a
+	  testprocess executable to process it.  Minor cleanup of a
+	  command line argument collision.
+
+        * performance-tests/DCPS/Distributed/tests/README:
+        * performance-tests/DCPS/Distributed/tests/s1-h1-p1.ini:
+        * performance-tests/DCPS/Distributed/tests/s1-h2-p1.ini:
+        * performance-tests/DCPS/Distributed/tests/s2-h1-p1.ini:
+        * performance-tests/DCPS/Distributed/tests/s2-h1-p2.ini:
+        * performance-tests/DCPS/Distributed/tests/s2-h2-p1.ini:
+        * performance-tests/DCPS/Distributed/tests/s2-h2-p2.ini:
+        * performance-tests/DCPS/Distributed/tests/s2-h3-p1.ini:
+        * performance-tests/DCPS/Distributed/tests/s2-h3-p2.ini:
+
+	  Added new scenario definitions and configuration files.
+
+        * performance-tests/DCPS/Distributed/tools/mkpkg:
+
+	  Changed copy targets to be directory only.  Changed from old
+	  scenarios to new scenarios.
+
+        * performance-tests/DCPS/Distributed/tests/scenario1.ini:
+        * performance-tests/DCPS/Distributed/tests/scenario2.ini:
+        * performance-tests/DCPS/Distributed/tests/scenario2b.ini:
+        * performance-tests/DCPS/Distributed/tests/scenario3.ini:
+        * performance-tests/DCPS/Distributed/tests/scenario6.ini:
+
+          Removed these files.
+
 Tue Mar  3 17:52:31 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/DCPS/Distributed/src/DataReaderListener.cpp:
@@ -11,7 +47,7 @@ Tue Mar  3 17:52:31 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
         * performance-tests/DCPS/Distributed/src/Publication.cpp:
         * performance-tests/DCPS/Distributed/src/Subscription.h:
 
-	  Miscellaneous cleanup of test execution process.
+          Miscellaneous cleanup of test execution process.
 
 Tue Mar  3 15:44:15 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
