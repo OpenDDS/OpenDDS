@@ -4,6 +4,7 @@
 #include "Process.h"
 #include "Test.h"
 #include "Options.h"
+#include "Shutdown.h"
 #include "dds/DCPS/Service_Participant.h"
 
 #include <iostream>
@@ -21,7 +22,12 @@ main( int argc, char *argv[])
     // Only run if we have a valid configuration.
     if( options) {
       // Create the process thingie.
-      Test::Process process( options);
+      Test::Process  process( options);
+
+      // Install a signal handler to shutdown testing gracefully.
+      Test::Shutdown shutdown( process);
+      Service_Shutdown service_shutdown( shutdown);
+
 
       // Execute the test.
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) testprocess() - starting.\n")));

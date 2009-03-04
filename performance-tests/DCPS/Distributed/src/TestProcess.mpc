@@ -9,7 +9,7 @@ project(dtpIdl): dcps {
 }
 
 
-project(dtpProcess) : dcpsexe_with_unreliable_dgram, dcps_reliable_multicast, dcps_tcp {
+project(dtpProcess) : dcpsexe_with_unreliable_dgram, dcps_reliable_multicast, dcps_tcp, svc_utils {
   exename = testprocess
   exeout  = ../bin
   after  += dtpIdl

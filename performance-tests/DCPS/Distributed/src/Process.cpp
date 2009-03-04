@@ -52,7 +52,8 @@ Process::~Process()
 Process::Process( const Options& options)
  : options_( options),
    publicationWaiter_( new DDS::WaitSet),
-   subscriptionWaiter_( new DDS::WaitSet)
+   subscriptionWaiter_( new DDS::WaitSet),
+   condition_( this->lock_)
 {
   for( Options::ParticipantProfileMap::const_iterator current
          = this->options_.participantProfileMap().begin();
@@ -377,6 +378,12 @@ Process::Process( const Options& options)
 }
 
 void
+Process::unblock()
+{
+  this->condition_.signal();
+}
+
+void
 Process::run()
 {
   DDS::Duration_t   timeout = { DDS::DURATION_INFINITY_SEC, DDS::DURATION_INFINITY_NSEC};
@@ -438,12 +445,13 @@ Process::run()
 
   // Execute test for specified duration, or block until terminated externally.
   if( this->options_.duration() > 0) {
-    ACE_Time_Value duration( this->options_.duration(), 0);
-    ACE_OS::sleep( duration);
+    ACE_Time_Value when = ACE_OS::gettimeofday()
+                        + ACE_Time_Value( this->options_.duration(), 0);
+    this->condition_.wait( &when);
 
   } else {
     // Block the main thread, leaving the others working.
-    ACE_Thread_Manager::instance()->wait();
+    this->condition_.wait();
   }
 
   // Signal the writers to terminate.
