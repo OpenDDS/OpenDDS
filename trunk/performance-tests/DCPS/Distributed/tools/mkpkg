@@ -45,43 +45,46 @@ mkdir -p $PKG/bin/PerlDDS
 mkdir -p $PKG/bin/PerlACE
 
 # Perl modules
-cp $DDS_ROOT/bin/DDS_Run_Test.pm            $PKG/bin/DDS_Run_Test.pm
-cp $DDS_ROOT/bin/PerlDDS/ProcessFactory.pm  $PKG/bin/PerlDDS/ProcessFactory.pm
-cp $DDS_ROOT/bin/PerlDDS/Process.pm         $PKG/bin/PerlDDS/Process.pm
+cp $DDS_ROOT/bin/DDS_Run_Test.pm            $PKG/bin/
+cp $DDS_ROOT/bin/PerlDDS/ProcessFactory.pm  $PKG/bin/PerlDDS/
+cp $DDS_ROOT/bin/PerlDDS/Process.pm         $PKG/bin/PerlDDS/
 
-cp $ACE_ROOT/bin/PerlACE/ConfigList.pm      $PKG/bin/PerlACE/ConfigList.pm
-cp $ACE_ROOT/bin/PerlACE/Process_Unix.pm    $PKG/bin/PerlACE/Process_Unix.pm
-cp $ACE_ROOT/bin/PerlACE/ProcessVX_Win32.pm $PKG/bin/PerlACE/ProcessVX_Win32.pm
-cp $ACE_ROOT/bin/PerlACE/TestTarget.pm      $PKG/bin/PerlACE/TestTarget.pm
-cp $ACE_ROOT/bin/PerlACE/MSProject.pm       $PKG/bin/PerlACE/MSProject.pm
-cp $ACE_ROOT/bin/PerlACE/Process_VMS.pm     $PKG/bin/PerlACE/Process_VMS.pm
-cp $ACE_ROOT/bin/PerlACE/Process_Win32.pm   $PKG/bin/PerlACE/Process_Win32.pm
-cp $ACE_ROOT/bin/PerlACE/ProcessLVRT.pm     $PKG/bin/PerlACE/ProcessLVRT.pm
-cp $ACE_ROOT/bin/PerlACE/ProcessVX.pm       $PKG/bin/PerlACE/ProcessVX.pm
-cp $ACE_ROOT/bin/PerlACE/Run_Test.pm        $PKG/bin/PerlACE/Run_Test.pm
-cp $ACE_ROOT/bin/PerlACE/Process.pm         $PKG/bin/PerlACE/Process.pm
-cp $ACE_ROOT/bin/PerlACE/ProcessVX_Unix.pm  $PKG/bin/PerlACE/ProcessVX_Unix.pm
-cp $ACE_ROOT/bin/PerlACE/TestTarget_LVRT.pm $PKG/bin/PerlACE/TestTarget_LVRT.pm
+cp $ACE_ROOT/bin/PerlACE/ConfigList.pm      $PKG/bin/PerlACE/
+cp $ACE_ROOT/bin/PerlACE/Process_Unix.pm    $PKG/bin/PerlACE/
+cp $ACE_ROOT/bin/PerlACE/ProcessVX_Win32.pm $PKG/bin/PerlACE/
+cp $ACE_ROOT/bin/PerlACE/TestTarget.pm      $PKG/bin/PerlACE/
+cp $ACE_ROOT/bin/PerlACE/MSProject.pm       $PKG/bin/PerlACE/
+cp $ACE_ROOT/bin/PerlACE/Process_VMS.pm     $PKG/bin/PerlACE/
+cp $ACE_ROOT/bin/PerlACE/Process_Win32.pm   $PKG/bin/PerlACE/
+cp $ACE_ROOT/bin/PerlACE/ProcessLVRT.pm     $PKG/bin/PerlACE/
+cp $ACE_ROOT/bin/PerlACE/ProcessVX.pm       $PKG/bin/PerlACE/
+cp $ACE_ROOT/bin/PerlACE/Run_Test.pm        $PKG/bin/PerlACE/
+cp $ACE_ROOT/bin/PerlACE/Process.pm         $PKG/bin/PerlACE/
+cp $ACE_ROOT/bin/PerlACE/ProcessVX_Unix.pm  $PKG/bin/PerlACE/
+cp $ACE_ROOT/bin/PerlACE/TestTarget_LVRT.pm $PKG/bin/PerlACE/
 
 # Executables
-cp $DDS_ROOT/bin/DCPSInfoRepo                                   $PKG/bin/DCPSInfoRepo
-cp $DDS_ROOT/bin/opendds_ir_ctl                                 $PKG/bin/opendds_ir_ctl
-cp $DDS_ROOT/performance-tests/DCPS/Distributed/bin/testprocess $PKG/bin/testprocess
-cp $DDS_ROOT/performance-tests/DCPS/Distributed/bin/run_test    $PKG/bin/run_test
-cp $DDS_ROOT/performance-tests/DCPS/Distributed/bin/runcmd      $PKG/bin/runcmd
+cp $DDS_ROOT/bin/DCPSInfoRepo                                   $PKG/bin/
+cp $DDS_ROOT/bin/opendds_ir_ctl                                 $PKG/bin/
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/bin/testprocess $PKG/bin/
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/bin/run_test    $PKG/bin/
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/bin/runcmd      $PKG/bin/
 
 mkdir -p $PKG/etc
 
 # Configuration
-cp $DDS_ROOT/performance-tests/DCPS/Distributed/etc/svc.conf      $PKG/etc/svc.conf
-cp $DDS_ROOT/performance-tests/DCPS/Distributed/etc/transport.ini $PKG/etc/transport.ini
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/etc/svc.conf      $PKG/etc/
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/etc/transport.ini $PKG/etc/
 
 mkdir -p $PKG/tests
 
 # Test scenarios
-cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/scenario1.ini $PKG/tests/scenario1.ini
-cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/scenario1.ini $PKG/tests/scenario2.ini
-cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/scenario1.ini $PKG/tests/scenario2b.ini
-cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/scenario1.ini $PKG/tests/scenario3.ini
-cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/scenario1.ini $PKG/tests/scenario6.ini
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/s1-h1-p1.ini $PKG/tests/
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/s1-h2-p1.ini $PKG/tests/
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/s2-h1-p1.ini $PKG/tests/
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/s2-h1-p2.ini $PKG/tests/
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/s2-h2-p1.ini $PKG/tests/
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/s2-h2-p2.ini $PKG/tests/
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/s2-h3-p1.ini $PKG/tests/
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/s2-h3-p2.ini $PKG/tests/
 
