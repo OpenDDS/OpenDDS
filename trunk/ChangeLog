@@ -1,13 +1,39 @@
+Wed Mar  4 23:45:06 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/DCPS/Distributed/src/Process.h:
+        * performance-tests/DCPS/Distributed/src/Process.cpp:
+
+	  Added an ACE_Condition to use for causing the main thread to
+	  wait during test execution.  This allows a signal handler to
+	  signal this condition to gracefully unblock the process and
+	  allow data to be gathered after this event.  Added the
+	  unblock() method for supporting this as well.
+
+        * performance-tests/DCPS/Distributed/src/TestProcess.mpc:
+
+	  Made the test process a svc_util to bring in the TAO
+	  Shutdown_Functor support used for signal handling.
+
+        * performance-tests/DCPS/Distributed/src/Shutdown.h:
+
+	  Local implementation of Shutdown_Functor signal handling
+	  actions.
+
+        * performance-tests/DCPS/Distributed/src/testprocess.cpp:
+
+	  Instantiate the signal handling object to catch signals and
+	  shutdown the main processing thread gracefully.
+
 Wed Mar  4 04:40:37 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/DCPS/Distributed/bin/run_test:
 
-	  Changed mechanism to add to the library path since the module
-	  add_lib_path was not exporting adequately for the subprocess to
-	  access the updated values.  Modified scenario specification to
-	  be a list of files with each file corresponding to starting a
-	  testprocess executable to process it.  Minor cleanup of a
-	  command line argument collision.
+          Changed mechanism to add to the library path since the module
+          add_lib_path was not exporting adequately for the subprocess to
+          access the updated values.  Modified scenario specification to
+          be a list of files with each file corresponding to starting a
+          testprocess executable to process it.  Minor cleanup of a
+          command line argument collision.
 
         * performance-tests/DCPS/Distributed/tests/README:
         * performance-tests/DCPS/Distributed/tests/s1-h1-p1.ini:
@@ -19,12 +45,12 @@ Wed Mar  4 04:40:37 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
         * performance-tests/DCPS/Distributed/tests/s2-h3-p1.ini:
         * performance-tests/DCPS/Distributed/tests/s2-h3-p2.ini:
 
-	  Added new scenario definitions and configuration files.
+          Added new scenario definitions and configuration files.
 
         * performance-tests/DCPS/Distributed/tools/mkpkg:
 
-	  Changed copy targets to be directory only.  Changed from old
-	  scenarios to new scenarios.
+          Changed copy targets to be directory only.  Changed from old
+          scenarios to new scenarios.
 
         * performance-tests/DCPS/Distributed/tests/scenario1.ini:
         * performance-tests/DCPS/Distributed/tests/scenario2.ini:

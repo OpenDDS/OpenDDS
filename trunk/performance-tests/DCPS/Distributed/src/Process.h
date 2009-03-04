@@ -6,6 +6,8 @@
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DCPS/WaitSet.h"
 
+#include "ace/Synch_T.h"
+
 #include <string>
 #include <map>
 #include <iosfwd>
@@ -26,6 +28,9 @@ class Process {
 
     /// Execute the test.
     void run();
+
+    /// Signal the internal condition so that we no longer are waiting.
+    void unblock();
 
     /// Format and dump summary data to a stream.
     std::ostream& summaryData( std::ostream& str) const;
@@ -75,6 +80,12 @@ class Process {
 
     /// Blocking object for subscription synchronization.
     DDS::WaitSet_var subscriptionWaiter_;
+
+    /// Lock for our condition.
+    ACE_Recursive_Thread_Mutex lock_;
+
+    /// Condition for blocking the main thread.
+    ACE_Condition<ACE_Recursive_Thread_Mutex> condition_;
 };
 
 } // End of namespace Test
