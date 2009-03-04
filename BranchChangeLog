@@ -1,3 +1,9 @@
+Wed Mar  4 16:37:25 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * lang/erlang/lib/tao_ic/tao_ic.mpc:
+
+          Fixes for non-gnuace builds.
+
 Tue Mar  3 18:31:36 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * lang/erlang/lib/tao_ic/cpp_src/be_global.h:
