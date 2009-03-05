@@ -1,7 +1,7 @@
-//
-// $Id$
-//
+/*
+ * $Id$
+ */
 
 module foo {
-  enum enum_ { a, b, c, d, e };
+  enum enum_0 { a, b, c, d, e };
 };

@@ -1,14 +1,14 @@
-//
-// $Id$
-//
+/*
+ * $Id$
+ */
 
 module foo {
-  struct struct_ {
+  struct struct_0 {
     long x;
   };
 
-  struct struct_nested_ {
+  struct struct_1 {
     string s;
-    struct_ t;
+    struct_0 t;
   };
 };

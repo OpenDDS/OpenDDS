@@ -1,3 +1,19 @@
+Thu Mar  5 06:26:33 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * DDS.mwc:
+        * MPC/config/erlang_dds.mpb:
+        * MPC/config/erlang_tao.mpb:
+        * MPC/config/tao_ic.mpb:
+        * lang/erlang/dds.mpc:
+        * lang/erlang/lib/tao/tao.mpc:
+        * lang/erlang/lib/tao_ic/test/tao_ic_test.mpc:
+        * lang/erlang/lib/tao_ic/test/test/const.idl:
+        * lang/erlang/lib/tao_ic/test/test/enum.idl:
+        * lang/erlang/lib/tao_ic/test/test/struct.idl:
+        * lang/erlang/lib/tao_ic/test/test/union.idl:
+
+          Various MPC tweaks and test updates.
+
 Wed Mar  4 16:37:25 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * lang/erlang/lib/tao_ic/tao_ic.mpc:

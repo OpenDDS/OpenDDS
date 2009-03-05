@@ -2,9 +2,8 @@
 // $Id$
 //
 
-project : tao_ic_otp {
-  after      += tao
-  erlcflags  += -I include -I lib/tao/include -Wall
+project : erlang_otp, erlang_tao, tao_ic_otp {
+  erlcflags  += -I include -Wall
   taoicflags += -I$(DDS_ROOT) -SS
 
   TAO_IC_Files {
