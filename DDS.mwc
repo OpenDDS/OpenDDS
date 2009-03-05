@@ -9,8 +9,8 @@ workspace {
   }
 
   // These projects use separate workspaces:
-  exclude {
-    lang
-  }
+//  exclude {
+//    lang
+//  }
 }
 
