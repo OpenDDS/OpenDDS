@@ -147,7 +147,19 @@ Publication::write( const Test::Data& sample)
   // Only forward if we have not been stopped.
   if( !this->done_) {
     ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->lock_);
-    if( DDS::RETCODE_OK != this->writer_->write( sample, DDS::HANDLE_NIL)) {
+    if( DDS::RETCODE_OK == this->writer_->write( sample, DDS::HANDLE_NIL)) {
+      ++this->messages_;
+      if( this->verbose_ && BE_REALLY_VERBOSE) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) Publication::write() - publication %s: ")
+          ACE_TEXT("forwarded sample %d at priority %d.\n"),
+          this->name_.c_str(),
+          this->messages_,
+          this->profile_->writerQos.transport_priority.value
+        ));
+      }
+
+    } else {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) Publication::write() - publication %s: ")
         ACE_TEXT("failed to forward sample: pid: %d, seq: %d, priority: %d.\n"),

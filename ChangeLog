@@ -1,28 +1,46 @@
+Thu Mar  5 21:03:12 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/DCPS/Distributed/src/Process.h:
+        * performance-tests/DCPS/Distributed/src/Process.cpp:
+
+	  Added GuardCondition and termination flag to aid in managing
+	  test control using signals.
+
+        * performance-tests/DCPS/Distributed/src/Publication.cpp:
+
+	  Added diagnostic information and manage message count for
+	  forwarding in addition to generated messages.
+
+        * performance-tests/DCPS/Distributed/tests/s1-h1-p1.ini:
+        * performance-tests/DCPS/Distributed/tests/s1-h2-p1.ini:
+
+	  Added partition information for simple scenario.
+
 Wed Mar  4 23:45:06 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/DCPS/Distributed/src/Process.h:
         * performance-tests/DCPS/Distributed/src/Process.cpp:
 
-	  Added an ACE_Condition to use for causing the main thread to
-	  wait during test execution.  This allows a signal handler to
-	  signal this condition to gracefully unblock the process and
-	  allow data to be gathered after this event.  Added the
-	  unblock() method for supporting this as well.
+          Added an ACE_Condition to use for causing the main thread to
+          wait during test execution.  This allows a signal handler to
+          signal this condition to gracefully unblock the process and
+          allow data to be gathered after this event.  Added the
+          unblock() method for supporting this as well.
 
         * performance-tests/DCPS/Distributed/src/TestProcess.mpc:
 
-	  Made the test process a svc_util to bring in the TAO
-	  Shutdown_Functor support used for signal handling.
+          Made the test process a svc_util to bring in the TAO
+          Shutdown_Functor support used for signal handling.
 
         * performance-tests/DCPS/Distributed/src/Shutdown.h:
 
-	  Local implementation of Shutdown_Functor signal handling
-	  actions.
+          Local implementation of Shutdown_Functor signal handling
+          actions.
 
         * performance-tests/DCPS/Distributed/src/testprocess.cpp:
 
-	  Instantiate the signal handling object to catch signals and
-	  shutdown the main processing thread gracefully.
+          Instantiate the signal handling object to catch signals and
+          shutdown the main processing thread gracefully.
 
 Wed Mar  4 04:40:37 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 

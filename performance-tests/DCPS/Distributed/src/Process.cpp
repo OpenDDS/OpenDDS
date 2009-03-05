@@ -53,7 +53,9 @@ Process::Process( const Options& options)
  : options_( options),
    publicationWaiter_( new DDS::WaitSet),
    subscriptionWaiter_( new DDS::WaitSet),
-   condition_( this->lock_)
+   guardCondition_( new DDS::GuardCondition),
+   condition_( this->lock_),
+   terminated_( false)
 {
   for( Options::ParticipantProfileMap::const_iterator current
          = this->options_.participantProfileMap().begin();
@@ -262,6 +264,10 @@ Process::Process( const Options& options)
     }
   }
 
+  // Add our GuardCondition to the subscription WaitSet so that we can
+  // command it to stop waiting.
+  this->subscriptionWaiter_->attach_condition( this->guardCondition_.in());
+
   for( Options::PublicationProfileMap::const_iterator current
          = this->options_.publicationProfileMap().begin();
        current != this->options_.publicationProfileMap().end();
@@ -380,6 +386,14 @@ Process::Process( const Options& options)
 void
 Process::unblock()
 {
+  if( this->options_.verbose()) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) Process::unblock() - ")
+      ACE_TEXT("unblocking main thread and unsticking termination conditions.\n")
+    ));
+  }
+  this->terminated_ = true;
+  this->guardCondition_->set_trigger_value( true);
   this->condition_.signal();
 }
 
@@ -445,13 +459,31 @@ Process::run()
 
   // Execute test for specified duration, or block until terminated externally.
   if( this->options_.duration() > 0) {
-    ACE_Time_Value when = ACE_OS::gettimeofday()
-                        + ACE_Time_Value( this->options_.duration(), 0);
+    ACE_Time_Value when = ACE_Time_Value( this->options_.duration(), 0)
+                        + ACE_OS::gettimeofday();
+
+    if( this->options_.verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Process::run() - ")
+        ACE_TEXT("blocking main thread for %d seconds, until %d.\n"),
+        this->options_.duration(),
+        when.sec()
+      ));
+    }
     this->condition_.wait( &when);
 
   } else {
     // Block the main thread, leaving the others working.
-    this->condition_.wait();
+    if( this->options_.verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Process::run() - ")
+        ACE_TEXT("blocking main thread until signaled by user.\n")
+      ));
+    }
+    // Only unblock and continue on a commanded termination.
+    while( !this->terminated_) {
+      this->condition_.wait();
+    }
   }
 
   // Signal the writers to terminate.
@@ -509,16 +541,19 @@ Process::run()
     current_count = 0;
     this->subscriptionWaiter_->get_conditions( conditions);
     for( unsigned long index = 0; index < conditions.length(); ++index) {
+      // Extract the current Condition.
       DDS::StatusCondition_var condition
         = DDS::StatusCondition::_narrow( conditions[ index].in());
-
-      DDS::DataReader_var reader = DDS::DataReader::_narrow( condition->get_entity());
-      if( !CORBA::is_nil( reader.in())) {
-        // Again, we do not actually care what the event or change was,
-        // we just take this opportunity to determine the current status
-        // of associations.
-        subscriptionMatches = reader->get_subscription_match_status();
-        current_count += subscriptionMatches.current_count;
+      if( !CORBA::is_nil( condition.in())) {
+        // Its not our GuardCondition, go ahead and extract the reader.
+        DDS::DataReader_var reader = DDS::DataReader::_narrow( condition->get_entity());
+        if( !CORBA::is_nil( reader.in())) {
+          // Again, we do not actually care what the event or change was,
+          // we just take this opportunity to determine the current status
+          // of associations.
+          subscriptionMatches = reader->get_subscription_match_status();
+          current_count += subscriptionMatches.current_count;
+        }
       }
     }
 
@@ -530,7 +565,7 @@ Process::run()
       ));
     }
 
-  } while( current_count > 0);
+  } while( !this->terminated_ && current_count > 0);
 
   // At this point, we are done sending and receiving data, so we can go
   // ahead and write any data that was requested.

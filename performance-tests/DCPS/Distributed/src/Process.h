@@ -4,6 +4,7 @@
 #define PROCESS_H
 
 #include "dds/DdsDcpsDomainC.h"
+#include "dds/DCPS/GuardCondition.h"
 #include "dds/DCPS/WaitSet.h"
 
 #include "ace/Synch_T.h"
@@ -81,11 +82,17 @@ class Process {
     /// Blocking object for subscription synchronization.
     DDS::WaitSet_var subscriptionWaiter_;
 
+    /// Mechanism to unblock the WaitSet on command.
+    DDS::GuardCondition_var guardCondition_;
+
     /// Lock for our condition.
     ACE_Recursive_Thread_Mutex lock_;
 
     /// Condition for blocking the main thread.
     ACE_Condition<ACE_Recursive_Thread_Mutex> condition_;
+
+    /// Flag indicating that we have been commanded to terminate.
+    bool terminated_;
 };
 
 } // End of namespace Test
