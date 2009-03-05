@@ -2,7 +2,7 @@
 // $Id$
 //
 
-project : tao_ic_otp {
+project : erlang_otp, tao_ic_otp {
   erlcflags  += -I include -Wall
 
   TAO_IC_Files {

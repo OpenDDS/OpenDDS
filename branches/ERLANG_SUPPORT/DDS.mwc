@@ -8,5 +8,9 @@ workspace {
     java/jms
   }
 
+  // These projects use separate workspaces:
+  exclude {
+    lang
+  }
 }
 

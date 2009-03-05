@@ -2,11 +2,9 @@
 // $Id$
 //
 
-project : tao_ic_otp {
-  custom_only   = 1
-  after        += tao_ic
+project : erlang_otp, tao_ic_otp {
   erlcflags    += -I include -Wall
-  taoicflags += -I$(DDS_ROOT) -SS
+  taoicflags   += -SS
 
   Erlang_Files {
     src
