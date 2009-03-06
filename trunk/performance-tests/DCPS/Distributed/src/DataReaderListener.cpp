@@ -44,7 +44,8 @@ Test::DataReaderListener::WriterStats::summaryData( std::ostream& str) const
 std::ostream&
 Test::DataReaderListener::WriterStats::rawData( std::ostream& str) const
 {
-  str << this->stats_.size() << " samples out of " << this->stats_.n() << std::endl;
+  str << std::dec << this->stats_.size()
+      << " samples out of " << this->stats_.n() << std::endl;
   return str << this->stats_;
 }
 

@@ -459,18 +459,27 @@ Process::run()
 
   // Execute test for specified duration, or block until terminated externally.
   if( this->options_.duration() > 0) {
-    ACE_Time_Value when = ACE_Time_Value( this->options_.duration(), 0)
-                        + ACE_OS::gettimeofday();
+    ACE_Time_Value now = ACE_OS::gettimeofday();
+    ACE_Time_Value when = now + ACE_Time_Value( this->options_.duration(), 0);
 
     if( this->options_.verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Process::run() - ")
-        ACE_TEXT("blocking main thread for %d seconds, until %d.\n"),
+        ACE_TEXT("blocking main thread for %d seconds, ")
+	ACE_TEXT("from %d until %d.\n"),
         this->options_.duration(),
+	now.sec(),
         when.sec()
       ));
     }
-    this->condition_.wait( &when);
+    int value = this->condition_.wait( &when);
+    if( value != 0) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Process::run() - ")
+        ACE_TEXT("unblocked main thread: %p.\n"),
+        "wait"
+      ));
+    }
 
   } else {
     // Block the main thread, leaving the others working.
@@ -482,8 +491,23 @@ Process::run()
     }
     // Only unblock and continue on a commanded termination.
     while( !this->terminated_) {
-      this->condition_.wait();
+      int value = this->condition_.wait();
+      if( value != 0) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) Process::run() - ")
+          ACE_TEXT("unblocked main thread: %p.\n"),
+          "wait"
+        ));
+      }
     }
+  }
+  if( this->options_.verbose()) {
+    ACE_Time_Value now = ACE_OS::gettimeofday();
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) Process::run() - ")
+      ACE_TEXT("continuing main thread at %d, starting to terminate.\n"),
+      now.sec()
+    ));
   }
 
   // Signal the writers to terminate.

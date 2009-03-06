@@ -86,10 +86,10 @@ class Process {
     DDS::GuardCondition_var guardCondition_;
 
     /// Lock for our condition.
-    ACE_Recursive_Thread_Mutex lock_;
+    ACE_SYNCH_MUTEX lock_;
 
     /// Condition for blocking the main thread.
-    ACE_Condition<ACE_Recursive_Thread_Mutex> condition_;
+    ACE_Condition<ACE_SYNCH_MUTEX> condition_;
 
     /// Flag indicating that we have been commanded to terminate.
     bool terminated_;
