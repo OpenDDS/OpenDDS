@@ -183,10 +183,7 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
         );
 
         // This is a very annoying series of conversions.
-        DDS::Duration_t sent_time = {
-          info.source_timestamp.sec,
-          info.source_timestamp.nanosec
-        };
+        DDS::Duration_t sent_time = { data.sec, data.nanosec };
         result.first->second.add_stat(
           OpenDDS::DCPS::time_value_to_duration(
             now - OpenDDS::DCPS::duration_to_time_value( sent_time)
