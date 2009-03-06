@@ -1,8 +1,14 @@
+Fri Mar  6 20:05:57 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/DDS_Run_Test.pm:
+
+          Added support for MacOS X (DYLD_LIBRARY_PATH).
+
 Fri Mar  6 17:51:38 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/Messenger.mpc:
         * DevGuideExamples/DCPS/Messenger/stack_subscriber.cpp:
-        
+
           Reworked this example as the entire premise before was
           faulty.  Removed use of the StackDataReaderListener;
           any reference-counted object should be usable on the
@@ -42,7 +48,7 @@ Fri Mar  6 17:51:38 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
         * tests/DCPS/StringKey/DataReaderListener.cpp:
         * tests/DCPS/TransientDurability/DataReaderListener.cpp:
         * tests/DCPS/TransientLocalTest/DataReaderListener.cpp:
-        
+
           Removed old comments related to reference_to_servant<> and
           some other behavior that pre-dates the conversion to local
           objects.  Also removed some related dead code (#ifdef-ed out).
@@ -52,9 +58,9 @@ Fri Mar  6 16:48:35 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/DCPS/Distributed/src/DataReaderListener.cpp:
 
-	  Measure round trip time from application layer timestamp
-	  carried in the data sample.  This had been using the hop
-	  generated source_timestamp.
+          Measure round trip time from application layer timestamp
+          carried in the data sample.  This had been using the hop
+          generated source_timestamp.
 
         * performance-tests/DCPS/Distributed/tests/README:
         * performance-tests/DCPS/Distributed/tests/s2-h1-p1.ini:
@@ -63,10 +69,10 @@ Fri Mar  6 16:48:35 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
         * performance-tests/DCPS/Distributed/tests/s2-h2-p2.ini:
         * performance-tests/DCPS/Distributed/tests/s2-h3-p1.ini:
 
-	  Added intermediate subscribers to originating process in order
-	  to collect more round trip data.  Changed data collection files
-	  to use ".data" as an extension rather than "_data" as part of
-	  the filename.
+          Added intermediate subscribers to originating process in order
+          to collect more round trip data.  Changed data collection files
+          to use ".data" as an extension rather than "_data" as part of
+          the filename.
 
 Fri Mar  6 02:55:31 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 

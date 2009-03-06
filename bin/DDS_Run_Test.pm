@@ -75,10 +75,10 @@ sub swap_lib_path {
 
   # Set the library path supporting various platforms.
     swap_path('PATH', $new_value, $orig_value);
+    swap_path('DYLD_LIBRARY_PATH', $new_value, $orig_value);
     swap_path('LD_LIBRARY_PATH', $new_value, $orig_value);
     swap_path('LIBPATH', $new_value, $orig_value);
     swap_path('SHLIB_PATH', $new_value, $orig_value);
-
 }
 
 sub add_lib_path {
