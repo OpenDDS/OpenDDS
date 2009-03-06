@@ -806,7 +806,7 @@ void DataReaderImpl::get_qos (
                    ))
 {
   listener_mask_ = mask;
-  //note: OK to duplicate  and reference_to_servant a nil object ref
+  //note: OK to duplicate  a nil object ref
   listener_ = ::DDS::DataReaderListener::_duplicate(a_listener);
   fast_listener_ = listener_.in ();
   return ::DDS::RETCODE_OK;

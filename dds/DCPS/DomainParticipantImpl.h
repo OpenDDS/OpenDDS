@@ -336,9 +336,6 @@ namespace OpenDDS
     private:
 
       /** The implementation of create_topic.
-      *   The TopicMap owns the reference bumped by narrow in the
-      *   servant_to_reference and the returned topic is a duplicate
-      *   topic in the TopicMap.
       */
       ::DDS::Topic_ptr create_topic_i (
           const RepoId topic_id,

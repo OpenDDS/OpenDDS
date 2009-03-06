@@ -51,6 +51,6 @@ project(DDS*StackSubscriber) : dcpsexe_with_tcp, dcps_unreliable_dgram, dcps_rel
 
   Source_Files {
     stack_subscriber.cpp
-    StackDataReaderListener.cpp
+    DataReaderListener.cpp
   }
 }
