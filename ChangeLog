@@ -1,20 +1,36 @@
+Fri Mar  6 02:55:31 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/DCPS/Distributed/src/DataReaderListener.cpp:
+
+	  Force decimal format for size reports.
+
+        * performance-tests/DCPS/Distributed/src/Process.h:
+
+	  Change mutex type to ACE_SYNCH_MUTEX to avoid platform
+	  dependent problem with wait() call.
+
+        * performance-tests/DCPS/Distributed/src/Process.cpp:
+
+	  Extend diagnostic messaging around the test duration
+	  processing.
+
 Thu Mar  5 21:03:12 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/DCPS/Distributed/src/Process.h:
         * performance-tests/DCPS/Distributed/src/Process.cpp:
 
-	  Added GuardCondition and termination flag to aid in managing
-	  test control using signals.
+          Added GuardCondition and termination flag to aid in managing
+          test control using signals.
 
         * performance-tests/DCPS/Distributed/src/Publication.cpp:
 
-	  Added diagnostic information and manage message count for
-	  forwarding in addition to generated messages.
+          Added diagnostic information and manage message count for
+          forwarding in addition to generated messages.
 
         * performance-tests/DCPS/Distributed/tests/s1-h1-p1.ini:
         * performance-tests/DCPS/Distributed/tests/s1-h2-p1.ini:
 
-	  Added partition information for simple scenario.
+          Added partition information for simple scenario.
 
 Wed Mar  4 23:45:06 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
