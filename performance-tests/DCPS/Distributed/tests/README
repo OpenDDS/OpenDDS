@@ -25,12 +25,12 @@ where <name> uniquely identifies the publication or subscription and each
 #              the 1000 messages/sec rate will result in 2000
 #              messages/sec traversing the network.
 s1-h1-p1.ini: Process1
-  pub1: topic=state, size=144, max=500, min=100, dev=50, rate=1000, transport=1
-  sub2: topic=state, collect data, transport=2
+  pub1: topic=state, partition=link1, size=144, max=500, min=100, dev=50, rate=1000, transport=1
+  sub2: topic=state, partition=link2, collect data, transport=2
 
 s1-h2-p1.ini: Process2
-  sub1: topic=state, transport=1
-  pub2: topic=state, source=sub1, transport=2
+  sub1: topic=state, partition=link1, transport=1
+  pub2: topic=state, partition=link2, source=sub1, transport=2
 
 ########################################################################
 # scenario 2
@@ -42,11 +42,15 @@ s1-h2-p1.ini: Process2
 # one process receives status data.
 #
 s2-h1-p1.ini: TestProcess1
-  sub1: topic=state,   partition=link6, transport=1
-  pub1: topic=state,   partition=link1, size=144, max=500,  min=100, dev=50,  rate=1000, priority=5,  transport=2
-  pub2: topic=control, size=80,  max=120,  min=40,  dev=20,  rate=20, priority=10, transport=3
-  pub3: topic=status,  size=200, max=1000, min=100, dev=500, rate=10, transport=4
-  sub2: topic=control, transport=5
+  sub1:  topic=state,   partition=link6, transport=1
+  subl2: topic=state,   partition=link2, transport=1
+  subl3: topic=state,   partition=link3, transport=1
+  subl4: topic=state,   partition=link4, transport=1
+  subl5: topic=state,   partition=link5, transport=1
+  pub1:  topic=state,   partition=link1, size=144, max=500,  min=100, dev=50,  rate=1000, priority=5,  transport=2
+  pub2:  topic=control, size=80,  max=120,  min=40,  dev=20,  rate=20, priority=10, transport=3
+  pub3:  topic=status,  size=200, max=1000, min=100, dev=500, rate=10, transport=4
+  sub2:  topic=control, transport=5
 
 s2-h1-p2.ini: TestProcess2
   sub3: topic=state,  partition=link1, transport=1

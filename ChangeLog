@@ -1,18 +1,38 @@
+Fri Mar  6 16:48:35 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/DCPS/Distributed/src/DataReaderListener.cpp:
+
+	  Measure round trip time from application layer timestamp
+	  carried in the data sample.  This had been using the hop
+	  generated source_timestamp.
+
+        * performance-tests/DCPS/Distributed/tests/README:
+        * performance-tests/DCPS/Distributed/tests/s2-h1-p1.ini:
+        * performance-tests/DCPS/Distributed/tests/s2-h1-p2.ini:
+        * performance-tests/DCPS/Distributed/tests/s2-h2-p1.ini:
+        * performance-tests/DCPS/Distributed/tests/s2-h2-p2.ini:
+        * performance-tests/DCPS/Distributed/tests/s2-h3-p1.ini:
+
+	  Added intermediate subscribers to originating process in order
+	  to collect more round trip data.  Changed data collection files
+	  to use ".data" as an extension rather than "_data" as part of
+	  the filename.
+
 Fri Mar  6 02:55:31 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/DCPS/Distributed/src/DataReaderListener.cpp:
 
-	  Force decimal format for size reports.
+          Force decimal format for size reports.
 
         * performance-tests/DCPS/Distributed/src/Process.h:
 
-	  Change mutex type to ACE_SYNCH_MUTEX to avoid platform
-	  dependent problem with wait() call.
+          Change mutex type to ACE_SYNCH_MUTEX to avoid platform
+          dependent problem with wait() call.
 
         * performance-tests/DCPS/Distributed/src/Process.cpp:
 
-	  Extend diagnostic messaging around the test duration
-	  processing.
+          Extend diagnostic messaging around the test duration
+          processing.
 
 Thu Mar  5 21:03:12 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
