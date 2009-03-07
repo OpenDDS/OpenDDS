@@ -4,10 +4,10 @@
 
 module foo {
   const short short_0 = 0;
-  const unsigned short unsigned_short_0 = 0;
+  const unsigned short short_1 = 0;
 
   const long long_0 = 0;
-  const unsigned long unsigned_long_0 = 0;
+  const unsigned long long_1 = 0;
 
   const float float_0 = 0.0;
   const double double_0 = 0.0;
