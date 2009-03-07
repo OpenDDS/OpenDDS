@@ -1,3 +1,11 @@
+Sat Mar  7 01:45:51 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * lang/erlang/lib/tao/doc/generate_edoc.pl:
+        * lang/erlang/lib/tao_ic/doc/generate_edoc.pl:
+        * lib/perl/Erlang/EDoc.pm:
+
+          Fixed refactored perl modules.
+
 Thu Mar  5 06:26:33 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * DDS.mwc:

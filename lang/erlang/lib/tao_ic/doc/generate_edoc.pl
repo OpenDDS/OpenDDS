@@ -14,7 +14,7 @@ use lib qq($DDS_ROOT/lib/perl);
 
 use Erlang::EDoc;
 
-my $edoc = new PerlDDS::EDoc;
+my $edoc = new Erlang::EDoc;
 $edoc->files('../src',
   '{dir, "html"}',
   '{overview, "overview.edoc"}',
