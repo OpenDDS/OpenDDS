@@ -2,9 +2,8 @@
  * $Id$
  */
 
-#include "generator_erl.h"
-
 #include "erl_utility.h"
+#include "generator_erl.h"
 
 using namespace std;
 
