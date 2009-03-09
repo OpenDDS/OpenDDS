@@ -41,18 +41,6 @@ be_visitor::~be_visitor()
 }
 
 int
-be_visitor::visit_root(AST_Root* node)
-{
-  if (visit_scope(node) != 0)
-  {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("%N:%l: visit_root()")
-                      ACE_TEXT(" visit_scope failed!\n")), -1);
-  }
-  return 0;
-}
-
-int
 be_visitor::visit_scope(UTL_Scope* node)
 {
   for (UTL_ScopeActiveIterator it (node, UTL_Scope::IK_decls);
@@ -77,6 +65,18 @@ be_visitor::visit_scope(UTL_Scope* node)
                         ACE_TEXT("%N:%l: visit_scope()")
                         ACE_TEXT(" ast_accept failed!\n")), -1);
     }
+  }
+  return 0;
+}
+
+int
+be_visitor::visit_root(AST_Root* node)
+{
+  if (visit_scope(node) != 0)
+  {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("%N:%l: visit_root()")
+                      ACE_TEXT(" visit_scope failed!\n")), -1);
   }
   return 0;
 }
