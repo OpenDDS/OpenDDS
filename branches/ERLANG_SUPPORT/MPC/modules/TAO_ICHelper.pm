@@ -12,37 +12,47 @@ use IDLHelper;
 our @ISA = qw(IDLHelper);
 
 sub get_component_name {
-  return "Erlang_Files";
+  return 'Erlang_Files';
 }
 
 sub get_outputexts {
-  return ["\\.erl", "\\.hrl"];
+  return ['\\.erl', '\\.hrl'];
 }
 
 sub get_filenames {
   my $self = shift;
   my($flags, $type, @scope) = @_;
+  
+  my @filenames;
 
   $self->parse_flags($flags);
   
-  my $name = $self->get_scoped_name(@scope);
-  my @filenames;
+  # Constants are defined in a module header. IDLHelper.pm will
+  # remove any duplicates as a result multiple invocations:
+  if ($type eq 'const') {
+    pop @scope; # remove const name (module name)
 
-  #
-  # TODO Temporary hack until all types are supported
-  #
-  if ($type ne 'const' and
-      $type ne 'enum' and
-      $type ne 'struct') {
-    
-    return @filenames; # ignore type
-  }
-  
-  push @filenames, $self->get_src_file($name);
-  if ($type eq 'struct') {
+    my $name = $self->get_scoped_name(@scope);
     push @filenames, $self->get_include_file($name);
+
+  } else {
+    #
+    # TODO TEMPORARY HACK
+    #
+    if ($type ne 'enum' and
+        $type ne 'struct') {
+      return @filenames;
+    }
+
+    my $name = $self->get_scoped_name(@scope);
+    push @filenames, $self->get_src_file($name);
+
+    # Structured types have a corresponding header which contain
+    # a record definition:
+    if ($type eq 'struct') {
+      push @filenames, $self->get_include_file($name);
+    }
   }
-  
   return @filenames; 
 }
 
@@ -57,8 +67,8 @@ sub parse_flags {
     my $flag = @flags[$i];
 
     # tao_ic flags we care about:
-    $self->{otp} = 1                    if $flag eq "-otp";
-    $self->{output_dir} = @flags[++$i]  if $flag eq "-o";
+    $self->{otp} = 1                    if $flag eq '-otp';
+    $self->{output_dir} = @flags[++$i]  if $flag eq '-o';
   }
 }
 
@@ -103,20 +113,20 @@ sub get_output_dir {
   return $output_dir;
 }
 
-sub get_src_file {
-  my $self = shift;
-  my($name) = @_;
-
-  my $dir = $self->get_output_dir("src");
-  return $dir . $name . ".erl";
-}
-
 sub get_include_file {
   my $self = shift;
   my($name) = @_;
 
-  my $dir = $self->get_output_dir("include");
-  return $dir . $name . ".hrl";
+  my $dir = $self->get_output_dir('include');
+  return $dir . $name . '.hrl';
+}
+
+sub get_src_file {
+  my $self = shift;
+  my($name) = @_;
+
+  my $dir = $self->get_output_dir('src');
+  return $dir . $name . '.erl';
 }
 
 1;

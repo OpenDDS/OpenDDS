@@ -1,3 +1,26 @@
+Mon Mar  9 05:20:33 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * MPC/config/erlang_dds.mpb:
+        * MPC/config/erlang_tao.mpb:
+        * MPC/modules/IDLHelper.pm:
+        * MPC/modules/TAO_ICHelper.pm:
+        * lang/erlang/dds.mpc:
+        * lang/erlang/lib/tao/tao.mpc:
+        * lang/erlang/lib/tao_ic/cpp_src/be_visitor.cpp:
+        * lang/erlang/lib/tao_ic/cpp_src/generator.h:
+        * lang/erlang/lib/tao_ic/cpp_src/generator.cpp:
+        * lang/erlang/lib/tao_ic/cpp_src/generator_erl.h:
+        * lang/erlang/lib/tao_ic/cpp_src/generator_erl.cpp:
+        * lang/erlang/lib/tao_ic/tao_ic.mpc:
+        * lang/erlang/lib/tao_ic/test/tao_ic_test.mpc:
+
+          Refactored const generation.
+
+        * lang/erlang/lib/tao_ic/cpp_src/idl_utility.h:
+        * lang/erlang/lib/tao_ic/cpp_src/idl_utility.cpp:
+
+          Removed these files.
+
 Sat Mar  7 01:45:51 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * lang/erlang/lib/tao/doc/generate_edoc.pl:

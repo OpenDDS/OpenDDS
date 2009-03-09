@@ -11,6 +11,7 @@
 #include "ast_enum.h"
 #include "ast_enum_val.h"
 #include "ast_field.h"
+#include "ast_module.h"
 #include "ast_structure.h"
 
 class generator
@@ -18,7 +19,7 @@ class generator
 public:
   virtual ~generator();
 
-  virtual bool generate_constant(AST_Constant* node);
+  virtual bool generate_module(AST_Module* node, std::vector<AST_Constant*>& v);
 
   virtual bool generate_enum(AST_Enum* node, std::vector<AST_EnumVal*>& v);
                              
@@ -46,7 +47,7 @@ public:
   const_iterator end() const;
 
   // Composite operations
-  bool generate_constant(AST_Constant* node);
+  bool generate_module(AST_Module* node, std::vector<AST_Constant*>& v);
 
   bool generate_enum(AST_Enum* node, std::vector<AST_EnumVal*>& v);
                      
