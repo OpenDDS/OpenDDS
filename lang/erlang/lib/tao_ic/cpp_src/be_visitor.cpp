@@ -66,7 +66,10 @@ be_visitor::visit_scope(UTL_Scope* node)
                         ACE_TEXT(" invalid scope!\n")), -1);
     }
 
-    if (item->imported()) continue; // ignore #include
+    if (item->imported())
+    {
+      continue; // ignore #include
+    }
 
     if (item->ast_accept(this) != 0)
     {
