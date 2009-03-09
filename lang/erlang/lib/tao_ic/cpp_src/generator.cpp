@@ -11,7 +11,7 @@ generator::~generator()
 }
 
 bool
-generator::generate_constant(AST_Constant*)
+generator::generate_module(AST_Module*, vector<AST_Constant*>&)
 {
   return true;
 }
@@ -78,12 +78,14 @@ generator_composite::end() const
 }
 
 bool
-generator_composite::generate_constant(AST_Constant* node)
+generator_composite::generate_module(AST_Module* node, vector<AST_Constant*>& v)
 {
   for (iterator it(begin()); it != end(); ++it)
   {
-    if (!(*it)->generate_constant(node))
+    if (!(*it)->generate_module(node, v))
+    {
       return false;
+    }
   }
   return true;
 }
@@ -94,7 +96,9 @@ generator_composite::generate_enum(AST_Enum* node, vector<AST_EnumVal*>& v)
   for (iterator it(begin()); it != end(); ++it)
   {
     if (!(*it)->generate_enum(node, v))
+    {
       return false;
+    }
   }
   return true;
 }
@@ -105,7 +109,9 @@ generator_composite::generate_structure(AST_Structure* node, vector<AST_Field*>&
   for (iterator it(begin()); it != end(); ++it)
   {
     if (!(*it)->generate_structure(node, v))
+    {
       return false;
+    }
   }
   return true;
 }

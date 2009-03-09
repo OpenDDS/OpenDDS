@@ -5,7 +5,6 @@
 #include "generator_erl.h"
 
 #include "erl_utility.h"
-#include "idl_utility.h"
 
 using namespace std;
 
@@ -18,17 +17,20 @@ generator_erl::~generator_erl()
 }
 
 bool
-generator_erl::generate_constant(AST_Constant* node)
+generator_erl::generate_module(AST_Module* node, vector<AST_Constant*>& v)
 {
-  // Generate module (.erl)
-  erl_module module(node->name());
+  // Generate header (.hrl)
+  erl_header header(node->name());
 
-  module.add_export("value/0");
-
-  ostream& os = module.open_stream();
+  ostream& os = header.open_stream();
   if (!os) return false; // bad stream
 
-  os << "value() -> " << erl_literal(node->constant_value()) << "." << endl;
+  /// Generate constants
+  for (vector<AST_Constant*>::iterator it(v.begin()); it != v.end(); ++it)
+  {
+    os << "-define(" << (*it)->local_name()->get_string() << ", "
+       << erl_literal((*it)->constant_value()) << ")." << endl;
+  }
 
   return true;
 }
@@ -87,7 +89,7 @@ generator_erl::generate_structure(AST_Structure* node, vector<AST_Field*>& v)
     ostream& os = module.open_stream();
     if (!os) return false; // bad stream
 
-    os << "id() -> \"" << repo_identifier(node->name()) << "\"." << endl
+    os << "id() -> \"" << node->repoID() << "\"." << endl
        << endl;
 
     os << "new() -> #" << module << "{}." << endl

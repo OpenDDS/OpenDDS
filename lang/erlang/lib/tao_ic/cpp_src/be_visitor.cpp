@@ -66,6 +66,8 @@ be_visitor::visit_scope(UTL_Scope* node)
                         ACE_TEXT(" invalid scope!\n")), -1);
     }
 
+    if (item->imported()) continue; // ignore #include
+
     if (item->ast_accept(this) != 0)
     {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -79,38 +81,35 @@ be_visitor::visit_scope(UTL_Scope* node)
 int
 be_visitor::visit_module(AST_Module* node)
 {
-  if (node->imported()) return 0; // ignore
-
+  vector<AST_Constant*> v;
+  find_children(node, v, AST_Decl::NT_const);
+  
+  // Only generate artifacts for modules containing constants. This
+  // avoids a nasty side-effect of overwriting module headers for
+  // multiple invocations on source which share the same namespace.
+  if (!v.empty())
+  {
+    if (!generator_.generate_module(node, v))
+    {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("%N:%l: visit_module()")
+                        ACE_TEXT(" generate_constants failed!\n")), -1);
+    }
+  }
+  
   if (visit_scope(node) != 0)
   {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("%N:%l: visit_module()")
                       ACE_TEXT(" visit_scope failed!\n")), -1);
   }
-  
-  return 0;
-}
 
-int
-be_visitor::visit_constant(AST_Constant* node)
-{
-  if (node->imported()) return 0; // ignore
-
-  if (!generator_.generate_constant(node))
-  {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("%N:%l: visit_constant()")
-                      ACE_TEXT(" generate_constant failed!\n")), -1);
-  }
-  
   return 0;
 }
 
 int
 be_visitor::visit_enum(AST_Enum* node)
 {
-  if (node->imported()) return 0; // ignore
-
   vector<AST_EnumVal*> v;
   find_children(node, v, AST_Decl::NT_enum_val);
 
@@ -120,15 +119,12 @@ be_visitor::visit_enum(AST_Enum* node)
                       ACE_TEXT("%N:%l: visit_enum()")
                       ACE_TEXT(" generate_enum failed!\n")), -1);
   }
-  
   return 0;
 }
 
 int
 be_visitor::visit_structure(AST_Structure* node)
 {
-  if (node->imported()) return 0; // ignore
-
   vector<AST_Field*> v;
   find_children(node, v, AST_Decl::NT_field);
 
@@ -138,7 +134,12 @@ be_visitor::visit_structure(AST_Structure* node)
                       ACE_TEXT("%N:%l: visit_structure()")
                       ACE_TEXT(" generate_structure failed!\n")), -1);
   }
-  
+  return 0;
+}
+
+int
+be_visitor::visit_constant(AST_Constant*)
+{
   return 0;
 }
 

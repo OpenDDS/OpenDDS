@@ -4,5 +4,5 @@
 
 project : erlang {
   after      += dds
-  erlcflags  += -I $(DDS_ROOT)/lang/erlang/include
+  erlcflags  += -I$(DDS_ROOT)/lang/erlang/include
 }

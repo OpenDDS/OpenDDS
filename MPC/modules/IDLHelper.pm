@@ -144,15 +144,19 @@ sub get_typesupport_info {
 sub get_output {
   my($self, $file, $flags) = @_;
 
+  my @filenames;
+  my %seen;
+
   ## Parse the IDL file and get back the types and names
   my $data = $self->do_cached_parse($file, $flags);
 
   ## Get the file names based on the type and name of each entry
-  my @filenames;
+  my @tmp;
   foreach my $ent (@$data) {
     my($type, @scope) = @$ent;
-    push @filenames, $self->get_filenames($flags, $type, @scope);
+    push @tmp, $self->get_filenames($flags, $type, @scope);
   }
+  @filenames = grep(!$seen{$_}++, @tmp); # remove duplicates
 
   ## Return the file name list
   return \@filenames;

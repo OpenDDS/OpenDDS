@@ -3,7 +3,7 @@
 //
 
 project : erlang_otp, tao_ic_otp {
-  erlcflags    += -I include -Wall
+  erlcflags    += -I./include -Wall
   taoicflags   += -SS
 
   Erlang_Files {
