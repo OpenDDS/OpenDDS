@@ -93,7 +93,7 @@ be_visitor::visit_module(AST_Module* node)
     {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: visit_module()")
-                        ACE_TEXT(" generate_constants failed!\n")), -1);
+                        ACE_TEXT(" generate_module failed!\n")), -1);
     }
   }
   
