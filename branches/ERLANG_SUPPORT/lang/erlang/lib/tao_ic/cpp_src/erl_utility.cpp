@@ -4,7 +4,6 @@
 
 #include <cstring>
 #include <iterator>
-#include <sstream>
 
 #include "global_extern.h"
 
@@ -15,12 +14,6 @@
 using namespace std;
 
 const char* erl_identifier::sep = "_";
-
-erl_identifier::erl_identifier(const char* name)
-  : str_(name)
-{
-  init();
-}
 
 erl_identifier::erl_identifier(Identifier* name)
   : str_(name->get_string())
@@ -413,16 +406,6 @@ erl_module::add_export(const string& fn)
 }
 
 void
-erl_module::add_export(const erl_identifier& fn_name, int fn_arity)
-{
-  ostringstream os;
-
-  os << fn_name << "/" << fn_arity;
-
-  add_export(os.str());
-}
-
-void
 erl_module::add_include(const string& file)
 {
   includes_.push_back(file);
@@ -477,4 +460,16 @@ to_list(vector<string>& v)
   os << "]";
 
   return os.str();
+}
+
+ostream&
+operator<<(ostream& os, AST_Expression* rhs)
+{
+  return os << erl_literal(rhs);
+}
+
+ostream&
+operator<<(ostream& os, Identifier* rhs)
+{
+  return os << erl_identifier(rhs);
 }
