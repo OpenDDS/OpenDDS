@@ -16,20 +16,17 @@ generator_erl::~generator_erl()
 }
 
 bool
-generator_erl::generate_module(AST_Module* node, vector<AST_Constant*>& v)
+generator_erl::generate_constant(AST_Constant* node)
 {
-  // Generate header (.hrl)
-  erl_header header(node->name());
+  // Generate module (.erl)
+  erl_module module(node->name());
 
-  ostream& os = header.open_stream();
+  module.add_export("value/0");
+
+  ostream& os = module.open_stream();
   if (!os) return false; // bad stream
 
-  /// Generate constants
-  for (vector<AST_Constant*>::iterator it(v.begin()); it != v.end(); ++it)
-  {
-    os << "-define(" << (*it)->local_name()->get_string() << ", "
-       << erl_literal((*it)->constant_value()) << ")." << endl;
-  }
+  os << "value() -> " << erl_literal(node->constant_value()) << "." << endl;
 
   return true;
 }

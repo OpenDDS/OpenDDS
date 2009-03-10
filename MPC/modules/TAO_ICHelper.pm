@@ -27,32 +27,24 @@ sub get_filenames {
 
   $self->parse_flags($flags);
   
-  # Constants are defined in a module header. IDLHelper.pm will
-  # remove any duplicates as a result multiple invocations:
-  if ($type eq 'const') {
-    pop @scope; # remove const name (module name)
-
-    my $name = $self->get_scoped_name(@scope);
-    push @filenames, $self->get_include_file($name);
-
-  } else {
-    #
-    # TODO TEMPORARY HACK
-    #
-    if ($type ne 'enum' and
-        $type ne 'struct') {
-      return @filenames;
-    }
-
-    my $name = $self->get_scoped_name(@scope);
-    push @filenames, $self->get_src_file($name);
-
-    # Structured types have a corresponding header which contain
-    # a record definition:
-    if ($type eq 'struct') {
-      push @filenames, $self->get_include_file($name);
-    }
+  #
+  # TODO TEMPORARY HACK
+  #
+  if ($type ne 'const' and
+      $type ne 'enum' and
+      $type ne 'struct') {
+    return @filenames;
   }
+
+  my $name = $self->get_scoped_name(@scope);
+  push @filenames, $self->get_src_file($name);
+
+  # Structured types have a corresponding header which contain
+  # a record definition:
+  if ($type eq 'struct') {
+    push @filenames, $self->get_include_file($name);
+  }
+  
   return @filenames; 
 }
 

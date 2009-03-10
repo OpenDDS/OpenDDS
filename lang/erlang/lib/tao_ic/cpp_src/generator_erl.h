@@ -14,7 +14,7 @@ public:
 
   ~generator_erl();
 
-  bool generate_module(AST_Module* node, std::vector<AST_Constant*>& v);
+  bool generate_constant(AST_Constant* node);
 
   bool generate_enum(AST_Enum* node, std::vector<AST_EnumVal*>& v);
 
