@@ -5,8 +5,9 @@
 #ifndef TAO_IC_ERL_UTILITY_H
 #define TAO_IC_ERL_UTILITY_H
 
-#include <fstream>
 #include <ostream>
+#include <fstream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -19,7 +20,6 @@ class erl_identifier
 public:
   static const char* sep;
 
-  erl_identifier(const char* name);
   erl_identifier(Identifier* name);
   erl_identifier(UTL_ScopedName* name);
 
@@ -158,14 +158,23 @@ public:
   const char* filename();
  
   void add_export(const std::string& fn);
-  void add_export(const erl_identifier& fn_name, int fn_arity);
+
+  template <typename T>
+  void add_export(const T& name, int arity)
+  {
+    ostringstream os;
+
+    os << name << "/" << arity;
+
+    add_export(os.str());
+  }
 
   template <typename InputIterator>
-  void add_exports(InputIterator first, InputIterator last, int fn_arity)
+  void add_exports(InputIterator first, InputIterator last, int arity)
   {
     for (InputIterator it(first); it != last; ++it)
     {
-      add_export((*it)->local_name(), fn_arity);
+      add_export((*it)->local_name(), arity);
     }
   }
 
@@ -187,5 +196,9 @@ private:
 };
 
 std::string to_list(std::vector<std::string>& v);
+
+std::ostream& operator<<(ostream& os, AST_Expression* rhs);
+
+std::ostream& operator<<(ostream& os, Identifier* rhs);
 
 #endif /* TAO_IC_ERL_UTILITY_H */

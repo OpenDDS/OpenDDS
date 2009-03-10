@@ -1,3 +1,11 @@
+Tue Mar 10 02:10:29 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * lang/erlang/lib/tao_ic/cpp_src/erl_utility.h:
+        * lang/erlang/lib/tao_ic/cpp_src/erl_utility.cpp:
+        * lang/erlang/lib/tao_ic/cpp_src/generator_erl.cpp:
+
+          Minor updates to stream handling.
+
 Tue Mar 10 01:16:13 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * MPC/modules/TAO_ICHelper.pm:

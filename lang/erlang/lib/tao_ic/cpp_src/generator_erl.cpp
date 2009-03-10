@@ -26,7 +26,7 @@ generator_erl::generate_constant(AST_Constant* node)
   ostream& os = module.open_stream();
   if (!os) return false; // bad stream
 
-  os << "value() -> " << erl_literal(node->constant_value()) << "." << endl;
+  os << "value() -> " << node->constant_value() << "." << endl;
 
   return true;
 }
@@ -48,8 +48,8 @@ generator_erl::generate_enum(AST_Enum* node, vector<AST_EnumVal*>& v)
 
   for (vector<AST_EnumVal*>::iterator it(v.begin()); it != v.end(); ++it)
   {
-    os << erl_identifier((*it)->local_name()) << "() -> {?MODULE, " <<
-          erl_literal((*it)->constant_value()) << "}." << endl;
+    os << (*it)->local_name() << "() -> {?MODULE, " <<
+          (*it)->constant_value() << "}." << endl;
   }
 
   os << endl
