@@ -162,7 +162,7 @@ public:
   template <typename T>
   void add_export(const T& name, int arity)
   {
-    ostringstream os;
+    std::ostringstream os;
 
     os << name << "/" << arity;
 
