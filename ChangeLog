@@ -1,3 +1,9 @@
+Thu Mar 12 18:59:55 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/DCPS/Distributed/tools/mkpkg:
+
+	  Update with moved scenario configuration files.
+
 Thu Mar 12 18:53:51 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/DCPS/Distributed/tests/s1-p1.ini:
@@ -9,7 +15,7 @@ Thu Mar 12 18:53:51 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
         * performance-tests/DCPS/Distributed/tests/s2-p5.ini:
         * performance-tests/DCPS/Distributed/tests/s2-p6.ini:
 
-	  Renamed these files to better reflect their semantics.
+          Renamed these files to better reflect their semantics.
 
         * performance-tests/DCPS/Distributed/tests/s1-h1-p1.ini:
         * performance-tests/DCPS/Distributed/tests/s1-h2-p1.ini:
