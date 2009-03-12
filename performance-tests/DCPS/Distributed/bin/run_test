@@ -83,7 +83,7 @@ GetOptions( "verbose!"            => \$verbose,
             "scenario|s=s"        => \$scenarios,
             "startrepo|S"         => \$startRepo,
             "starttest|P"         => \$startTest,
-            "duration|t"          => \$duration,
+            "duration|t=i"        => \$duration,
 
 ) or pod2usage( 0) ;
 pod2usage( 1)             if $help or ($startTest and not $scenarios);

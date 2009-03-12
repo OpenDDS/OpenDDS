@@ -365,7 +365,7 @@ Process::Process( const Options& options)
           ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
           ACE_TEXT("failed to obtain subscription %s ")
           ACE_TEXT("to forward for publication %s.\n"),
-          where->second->participant.c_str(),
+          current->second->source.c_str(),
           current->first.c_str()
         ));
         throw BadSubscriberException();
