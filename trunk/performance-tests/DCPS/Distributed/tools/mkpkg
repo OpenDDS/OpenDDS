@@ -79,12 +79,15 @@ cp $DDS_ROOT/performance-tests/DCPS/Distributed/etc/transport.ini $PKG/etc/
 mkdir -p $PKG/tests
 
 # Test scenarios
-cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/s1-h1-p1.ini $PKG/tests/
-cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/s1-h2-p1.ini $PKG/tests/
-cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/s2-h1-p1.ini $PKG/tests/
-cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/s2-h1-p2.ini $PKG/tests/
-cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/s2-h2-p1.ini $PKG/tests/
-cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/s2-h2-p2.ini $PKG/tests/
-cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/s2-h3-p1.ini $PKG/tests/
-cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/s2-h3-p2.ini $PKG/tests/
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/s1-p1.ini $PKG/tests/
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/s1-p2.ini $PKG/tests/
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/s2-p1.ini $PKG/tests/
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/s2-p2.ini $PKG/tests/
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/s2-p3.ini $PKG/tests/
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/s2-p4.ini $PKG/tests/
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/s2-p5.ini $PKG/tests/
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/s2-p6.ini $PKG/tests/
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/s3-p1.ini $PKG/tests/
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/s3-p2.ini $PKG/tests/
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/s3-p3.ini $PKG/tests/
 
