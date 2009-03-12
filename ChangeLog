@@ -1,31 +1,55 @@
+Thu Mar 12 18:53:51 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/DCPS/Distributed/tests/s1-p1.ini:
+        * performance-tests/DCPS/Distributed/tests/s1-p2.ini:
+        * performance-tests/DCPS/Distributed/tests/s2-p1.ini:
+        * performance-tests/DCPS/Distributed/tests/s2-p2.ini:
+        * performance-tests/DCPS/Distributed/tests/s2-p3.ini:
+        * performance-tests/DCPS/Distributed/tests/s2-p4.ini:
+        * performance-tests/DCPS/Distributed/tests/s2-p5.ini:
+        * performance-tests/DCPS/Distributed/tests/s2-p6.ini:
+
+	  Renamed these files to better reflect their semantics.
+
+        * performance-tests/DCPS/Distributed/tests/s1-h1-p1.ini:
+        * performance-tests/DCPS/Distributed/tests/s1-h2-p1.ini:
+        * performance-tests/DCPS/Distributed/tests/s2-h1-p1.ini:
+        * performance-tests/DCPS/Distributed/tests/s2-h1-p2.ini:
+        * performance-tests/DCPS/Distributed/tests/s2-h2-p1.ini:
+        * performance-tests/DCPS/Distributed/tests/s2-h2-p2.ini:
+        * performance-tests/DCPS/Distributed/tests/s2-h3-p1.ini:
+        * performance-tests/DCPS/Distributed/tests/s2-h3-p2.ini:
+
+          Removed these files.
+
 Thu Mar 12 18:45:08 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
 
-	  Ensure size is reported in decimal notation.
+          Ensure size is reported in decimal notation.
 
         * performance-tests/DCPS/Distributed/bin/run_test:
 
-	  Actually extract the duration value from the command line.
+          Actually extract the duration value from the command line.
 
         * performance-tests/DCPS/Distributed/doc/scenarios:
         * performance-tests/DCPS/Distributed/doc/tests:
 
-	  Updated documentation to reflect current usage and scenarios.
+          Updated documentation to reflect current usage and scenarios.
 
         * performance-tests/DCPS/Distributed/etc/transport.ini:
 
-	  Updated for use by current scenario configurations.
+          Updated for use by current scenario configurations.
 
         * performance-tests/DCPS/Distributed/src/DataReaderListener.cpp:
         * performance-tests/DCPS/Distributed/src/Publication.cpp:
 
-	  Changed time gathering to use the high resolution timer
-	  interface.
+          Changed time gathering to use the high resolution timer
+          interface.
 
         * performance-tests/DCPS/Distributed/src/Process.cpp:
 
-	  Corrected a diagnostic message.
+          Corrected a diagnostic message.
 
         * performance-tests/DCPS/Distributed/tests/README:
         * performance-tests/DCPS/Distributed/tests/s1-h1-p1.ini:
@@ -37,14 +61,14 @@ Thu Mar 12 18:45:08 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
         * performance-tests/DCPS/Distributed/tests/s2-h3-p1.ini:
         * performance-tests/DCPS/Distributed/tests/s2-h3-p2.ini:
 
-	  Corrected scenario definitions with results of intitial
-	  executions.  Made documentation reflect actual configuration.
+          Corrected scenario definitions with results of intitial
+          executions.  Made documentation reflect actual configuration.
 
         * performance-tests/DCPS/Distributed/tests/s3-p1.ini:
         * performance-tests/DCPS/Distributed/tests/s3-p2.ini:
         * performance-tests/DCPS/Distributed/tests/s3-p3.ini:
 
-	  Added a new, simpler, scenario.
+          Added a new, simpler, scenario.
 
 Tue Mar 10 16:25:41 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
