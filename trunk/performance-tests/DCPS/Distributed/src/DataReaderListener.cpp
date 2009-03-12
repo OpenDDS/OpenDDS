@@ -7,6 +7,8 @@
 
 #include "dds/DCPS/Qos_Helper.h"
 
+#include "ace/High_Res_Timer.h"
+
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -153,7 +155,7 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
   // This actually does reflect delays experienced by applications more
   // accurately since this is where an application first observes any
   // received data.
-  ACE_Time_Value now = ACE_OS::gettimeofday ();
+  ACE_Time_Value now = ACE_High_Res_Timer::gettimeofday_hr();
 
   Data            data;
   DDS::SampleInfo info;

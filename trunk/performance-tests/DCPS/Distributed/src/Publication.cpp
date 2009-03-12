@@ -10,6 +10,8 @@
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
 
+#include "ace/High_Res_Timer.h"
+
 #include <sstream>
 
 /// Control the spew.
@@ -339,7 +341,7 @@ Publication::svc ()
     sample.pid      = pid;
     sample.buffer.length( size);
 
-    ACE_Time_Value  start = ACE_OS::gettimeofday ();
+    ACE_Time_Value  start = ACE_High_Res_Timer::gettimeofday_hr();
     DDS::Duration_t stamp = ::OpenDDS::DCPS::time_value_to_duration( start);
     sample.sec     = stamp.sec;
     sample.nanosec = stamp.nanosec;
@@ -369,7 +371,7 @@ Publication::svc ()
     }
 
     // Wait the remainder of the interval before sending the next message.
-    ACE_Time_Value now = ACE_OS::gettimeofday ();
+    ACE_Time_Value now = ACE_High_Res_Timer::gettimeofday_hr();
     interval -= (now - start);
     if( interval > ACE_Time_Value::zero) {
       ACE_OS::sleep( interval);

@@ -1659,7 +1659,8 @@ void OpenDDS::DCPS::WriterStats::reset_stats()
 
 std::ostream& OpenDDS::DCPS::WriterStats::raw_data( std::ostream& str) const
 {
-  str << this->stats_.size() << " samples out of " << this->stats_.n() << std::endl;
+  str << std::dec << this->stats_.size()
+      << " samples out of " << this->stats_.n() << std::endl;
   return str << this->stats_;
 }
 
