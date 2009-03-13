@@ -9,6 +9,8 @@
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/PublisherImpl.h"
+#include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/RepoIdConverter.h"
 
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
@@ -21,8 +23,8 @@
 
 #include /**/ "tao/debug.h"
 
-#include <sstream>
 #include <algorithm>
+#include <sstream>
 
 namespace { // Anonymous namespace for predicate functor definitions.
 
@@ -41,14 +43,12 @@ class IsTheTopic {
 
 } // End of anonymous namespace.
 
-DCPS_IR_Domain::DCPS_IR_Domain (::DDS::DomainId_t id, GuidGenerator& generator)
-:
- id_(id),
- participantIdGenerator_( generator),
- useBIT_(false)
+DCPS_IR_Domain::DCPS_IR_Domain (DDS::DomainId_t id, RepoIdGenerator& generator)
+ : id_(id),
+   participantIdGenerator_( generator),
+   useBIT_(false)
 {
 }
-
 
 
 DCPS_IR_Domain::~DCPS_IR_Domain()
@@ -84,7 +84,9 @@ DCPS_IR_Domain::participant( const OpenDDS::DCPS::RepoId& id) const
 int DCPS_IR_Domain::add_participant(DCPS_IR_Participant* participant)
 {
   OpenDDS::DCPS::RepoId participantId = participant->get_id ();
-  CORBA::Long key = ::OpenDDS::DCPS::GuidConverter( participantId);
+  OpenDDS::DCPS::RepoIdConverter converter(participantId);
+
+  CORBA::Long key = converter.checksum();
 
   DCPS_IR_Participant_Map::iterator where
     = this->participants_.find( participantId);
@@ -97,13 +99,11 @@ int DCPS_IR_Domain::add_participant(DCPS_IR_Participant* participant)
     publish_participant_bit(participant);
 
     if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
-      std::stringstream buffer;
-      buffer << participantId << "(" << std::hex << key << ")";
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DCPS_IR_Domain::add_participant: ")
         ACE_TEXT("added participant %s in domain %d ")
         ACE_TEXT("at 0x%x.\n"),
-        buffer.str().c_str(),
+        std::string(converter).c_str(),
         id_,
         participant
       ));
@@ -111,12 +111,10 @@ int DCPS_IR_Domain::add_participant(DCPS_IR_Participant* participant)
 
   } else {
     if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
-      std::stringstream buffer;
-      buffer << participantId << "(" << std::hex << key << ")";
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) WARNING: DCPS_IR_Domain::add_participant: ")
         ACE_TEXT("attempt to add already existing participant %s in domain %d.\n"),
-        buffer.str().c_str(),
+        std::string(converter).c_str(),
         id_
       ));
     }
@@ -127,8 +125,7 @@ int DCPS_IR_Domain::add_participant(DCPS_IR_Participant* participant)
   if( location != this->participantKeyToIdMap_.end()) {
     if( !(participantId == location->second)) {
       std::stringstream buffer;
-      buffer << participantId << "(" << std::hex << key << ")";
-      buffer << ", existing Id: " << location->second;
+      buffer << converter << ", existing Id: " << location->second;
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::add_participant: ")
         ACE_TEXT("Domain %d attempt to add duplicate key 0x%x ")
@@ -171,16 +168,11 @@ int DCPS_IR_Domain::remove_participant(const OpenDDS::DCPS::RepoId& participantI
     this->participants_.erase( where);
 
     if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
-      std::stringstream buffer;
-      long key = ::OpenDDS::DCPS::GuidConverter(
-                   const_cast<OpenDDS::DCPS::GUID_t*>(&participantId)
-                 );
-      buffer << participantId << "(" << std::hex << key << ")";
-
+      OpenDDS::DCPS::RepoIdConverter converter(participantId);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DCPS_IR_Domain::remove_participant: ")
         ACE_TEXT("removed participant %s at 0x%x from domain %d.\n"),
-        buffer.str().c_str(),
+        std::string(converter).c_str(),
         participant,
         id_
       ));
@@ -191,16 +183,11 @@ int DCPS_IR_Domain::remove_participant(const OpenDDS::DCPS::RepoId& participantI
     return 0;
 
   } else {
-    std::stringstream buffer;
-    long key = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast<OpenDDS::DCPS::GUID_t*>(&participantId)
-               );
-    buffer << participantId << "(" << std::hex << key << ")";
-
+    OpenDDS::DCPS::RepoIdConverter converter(participantId);
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::remove_participant: ")
       ACE_TEXT("unable to find participant %s in domain %d.\n"),
-      buffer.str().c_str(),
+      std::string(converter).c_str(),
       id_
     ));
     return 1;
@@ -304,18 +291,13 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i (OpenDDS::DCPS::RepoId& t
             {
               if (::OpenDDS::DCPS::DCPS_debug_level > 0)
                 {
-                  std::stringstream buffer;
-                  long handle;
-                  handle = ::OpenDDS::DCPS::GuidConverter( topicId);
-                  buffer << topicId
-                         << "(" << std::hex << handle << ")";
-
+                  OpenDDS::DCPS::RepoIdConverter converter(topicId);
                   ACE_DEBUG((LM_DEBUG,
                     ACE_TEXT("(%P|%t) DCPS_IR_Domain::add_topic_i: ")
                     ACE_TEXT("Domain %d successfully added topic %s ")
                     ACE_TEXT("at 0x%x.\n"),
                     this->id_,
-                    buffer.str().c_str(),
+                    std::string(converter).c_str(),
                     topic
                   ));
                 }
@@ -324,13 +306,14 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i (OpenDDS::DCPS::RepoId& t
               // Keep a reference to easily locate the topic by id.
               this->idToTopicMap_[ topicId] = topic;
 
-              CORBA::Long key = ::OpenDDS::DCPS::GuidConverter( topicId);
+              OpenDDS::DCPS::RepoIdConverter converter(topicId);
+              CORBA::Long key = converter.checksum();
+
               KeyToIdMap::iterator where = this->topicKeyToIdMap_.find( key);
               if( where != this->topicKeyToIdMap_.end()) {
                 if( !(topicId == where->second)) {
                   std::stringstream buffer;
-                  buffer << topicId << "(" << std::hex << key << ")";
-                  buffer << ", existing Id: " << where->second;
+                  buffer << converter << ", existing Id: " << where->second;
                   ACE_ERROR((LM_ERROR,
                     ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::add_topic_i: ")
                     ACE_TEXT("Domain %d attempt to add duplicate key 0x%x ")
@@ -361,17 +344,12 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i (OpenDDS::DCPS::RepoId& t
           case 1:
             if (::OpenDDS::DCPS::DCPS_debug_level > 0)
             {
-              std::stringstream buffer;
-              long handle;
-              handle = ::OpenDDS::DCPS::GuidConverter( topicId);
-              buffer << topicId
-                     << "(" << std::hex << handle << ")";
-
+              OpenDDS::DCPS::RepoIdConverter converter(topicId);
               ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) WARNING: DCPS_IR_Domain::add_topic_i: ")
                 ACE_TEXT("Domain %d declined to add duplicate topic %s at 0x%x.\n"),
                 this->id_,
-                buffer.str().c_str(),
+                std::string(converter).c_str(),
                 topic
               ));
             }
@@ -383,17 +361,12 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i (OpenDDS::DCPS::RepoId& t
 
           case -1:
             {
-              std::stringstream buffer;
-              long handle;
-              handle = ::OpenDDS::DCPS::GuidConverter( topicId);
-              buffer << topicId
-                     << "(" << std::hex << handle << ")";
-
+              OpenDDS::DCPS::RepoIdConverter converter(topicId);
               ACE_ERROR((LM_ERROR,
                 ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::add_topic_i: ")
                 ACE_TEXT("Domain %d failed to add topic %s at 0x%x.\n"),
                 this->id_,
-                buffer.str().c_str(),
+                std::string(converter).c_str(),
                 topic
               ));
               topicStatus = OpenDDS::DCPS::NOT_FOUND;
@@ -408,15 +381,12 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i (OpenDDS::DCPS::RepoId& t
 
     case 1:
       if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
-        std::stringstream buffer;
-        long handle;
-        handle = ::OpenDDS::DCPS::GuidConverter( topicId);
-        buffer << topicId
-               << "(" << std::hex << handle << ")";
-
+        OpenDDS::DCPS::RepoIdConverter converter(topicId);
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WARNING: DCPS_IR_Domain::add_topic ")
           ACE_TEXT("Unable to add topic 0x%x id %s to Topic Description\n"),
-          topic, buffer.str().c_str()));
+          topic,
+          std::string(converter).c_str()
+        ));
       }
       topicStatus = OpenDDS::DCPS::NOT_FOUND;
       topicId = OpenDDS::DCPS::GUID_UNKNOWN;
@@ -425,15 +395,12 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i (OpenDDS::DCPS::RepoId& t
 
     case -1:
       {
-        std::stringstream buffer;
-        long handle;
-        handle = ::OpenDDS::DCPS::GuidConverter( topicId);
-        buffer << topicId
-               << "(" << std::hex << handle << ")";
-
+        OpenDDS::DCPS::RepoIdConverter converter(topicId);
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::add_topic ")
           ACE_TEXT("Unable to add topic 0x%x id %s to Topic Description\n"),
-          topic, buffer.str().c_str()));
+          topic,
+          std::string(converter).c_str()
+        ));
         topicStatus = OpenDDS::DCPS::NOT_FOUND;
         topicId = OpenDDS::DCPS::GUID_UNKNOWN;
         delete topic;
@@ -459,15 +426,12 @@ DCPS_IR_Domain::find_topic( const char* topicName, DCPS_IR_Topic*& topic)
     topic = (*which)->get_first_topic();
 
     if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
-      std::stringstream buffer;
       OpenDDS::DCPS::RepoId topicId = topic->get_id();
-      long key = ::OpenDDS::DCPS::GuidConverter( topicId);
-      buffer << topicId << "(" << std::hex << key << ")";
-
+      OpenDDS::DCPS::RepoIdConverter converter(topicId);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DCPS_IR_Domain::find_topic: ")
         ACE_TEXT("located topic %s in domain %d.\n"),
-        buffer.str().c_str(),
+        std::string(converter).c_str(),
         id_
       ));
     }
@@ -527,26 +491,15 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::remove_topic(DCPS_IR_Participant* par
 
   if (part->remove_topic_reference(topic->get_id(), topic) != 0)
     {
-      std::stringstream participantIdBuffer;
-      std::stringstream topicIdBuffer;
-      OpenDDS::DCPS::RepoId participantId = part->get_id();
-      OpenDDS::DCPS::RepoId topicId       = topic->get_id();
-      long handle;
-
-      handle = ::OpenDDS::DCPS::GuidConverter( participantId);
-      participantIdBuffer << participantId << "(" << std::hex << handle << ")";
-
-      handle = ::OpenDDS::DCPS::GuidConverter( topicId);
-      topicIdBuffer << topicId << "(" << std::hex << handle << ")";
-
+      OpenDDS::DCPS::RepoIdConverter part_converter(part->get_id());
+      OpenDDS::DCPS::RepoIdConverter topic_converter(topic->get_id());
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Domain %d Topic %d ")
-        ACE_TEXT("was not correctly removed from Participant %d"),
+        ACE_TEXT("(%P|%t) ERROR: Domain %d Topic %C ")
+        ACE_TEXT("was not correctly removed from Participant %C"),
         id_,
-        topicIdBuffer.str().c_str(),
-        participantIdBuffer.str().c_str()
+        std::string(topic_converter).c_str(),
+        std::string(part_converter).c_str()
       ));
-
     }
 
   // Dispose the BIT information
@@ -1144,19 +1097,13 @@ void DCPS_IR_Domain::remove_dead_participants ()
           dead = *iter;
           ++iter;
 
-          std::stringstream buffer;
-          long handle;
-          OpenDDS::DCPS::RepoId participantId = dead->get_id();
-          handle = ::OpenDDS::DCPS::GuidConverter( participantId);
-          buffer << participantId
-                 << "(" << std::hex << handle << ")";
-
+          OpenDDS::DCPS::RepoIdConverter converter(dead->get_id());
           ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::remove_dead_participants () ")
             ACE_TEXT("Removing dead participant 0x%x id %s\n"),
             dead,
-            buffer.str().c_str()
-            ));
+            std::string(converter).c_str()
+          ));
           deadParticipants_.remove(dead);
 
           dead->set_alive(0);
@@ -1313,21 +1260,16 @@ void DCPS_IR_Domain::publish_participant_bit (DCPS_IR_Participant* participant)
 #if !defined (DDS_HAS_MINIMUM_BIT)
   if (useBIT_)
     {
-      /// @TODO: FIXME!
-
-      // I do *not* know what this test is intended to discriminate.  I
-      // am going to err on the side of not causing an error for now.
-      OpenDDS::DCPS::RepoId id = participant->get_id();
-      OpenDDS::DCPS::GuidConverter converter( id);
-      if( converter != 1)
+      if(!participant->is_bit())
         {
           try
           {
-            const ::DDS::DomainParticipantQos* participantQos = participant->get_qos ();
+            const OpenDDS::DCPS::RepoId id = participant->get_id();
+            const DDS::DomainParticipantQos* participantQos = participant->get_qos ();
 
             ::DDS::ParticipantBuiltinTopicData data;
             data.key[0] = id_;
-            data.key[1] = converter;
+            data.key[1] = OpenDDS::DCPS::RepoIdConverter(id).checksum();
             data.key[2]= 0;
             data.user_data = participantQos->user_data;
 
@@ -1391,8 +1333,8 @@ void DCPS_IR_Domain::publish_topic_bit (DCPS_IR_Topic* topic)
 
             ::DDS::TopicBuiltinTopicData data;
             data.key[0] = id_;
-            data.key[1] = OpenDDS::DCPS::GuidConverter( participantId);
-            data.key[2] = OpenDDS::DCPS::GuidConverter( topicId);
+            data.key[1] = OpenDDS::DCPS::RepoIdConverter(participantId).checksum();
+            data.key[2] = OpenDDS::DCPS::RepoIdConverter(topicId).checksum();
             data.name = desc->get_name();
             data.type_name = desc->get_dataTypeName();
             data.durability = topicQos->durability;
@@ -1473,10 +1415,10 @@ void DCPS_IR_Domain::publish_subscription_bit (DCPS_IR_Subscription* subscriptio
 
             ::DDS::SubscriptionBuiltinTopicData data;
             data.key[0] = id_;
-            data.key[1] = OpenDDS::DCPS::GuidConverter( participantId);
-            data.key[2] = OpenDDS::DCPS::GuidConverter( subscriptionId);
+            data.key[1] = OpenDDS::DCPS::RepoIdConverter(participantId).checksum();
+            data.key[2] = OpenDDS::DCPS::RepoIdConverter(subscriptionId).checksum();
             data.participant_key[0] = id_;
-            data.participant_key[1] = OpenDDS::DCPS::GuidConverter( participantId);
+            data.participant_key[1] = OpenDDS::DCPS::RepoIdConverter(participantId).checksum();
             data.participant_key[2] = 0;
             data.topic_name = desc->get_name();
             data.type_name = desc->get_dataTypeName();
@@ -1497,8 +1439,8 @@ void DCPS_IR_Domain::publish_subscription_bit (DCPS_IR_Subscription* subscriptio
             if( where != this->subscriptionKeyToIdMap_.end()) {
               if( !(subscriptionId == where->second)) {
                 std::stringstream buffer;
-                buffer << subscriptionId << "(" << std::hex << data.key[2] << ")";
-                buffer << ", existing Id: " << where->second;
+                OpenDDS::DCPS::RepoIdConverter converter(subscriptionId);
+                buffer << converter << ", existing Id: " << where->second;
                 ACE_ERROR((LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::publish_subscription_bit: ")
                   ACE_TEXT("Domain %d attempt to add duplicate key 0x%x ")
@@ -1583,10 +1525,10 @@ void DCPS_IR_Domain::publish_publication_bit (DCPS_IR_Publication* publication)
 
             ::DDS::PublicationBuiltinTopicData data;
             data.key[0] = id_;
-            data.key[1] = OpenDDS::DCPS::GuidConverter( participantId);
-            data.key[2] = OpenDDS::DCPS::GuidConverter( publicationId);
+            data.key[1] = OpenDDS::DCPS::RepoIdConverter(participantId).checksum();
+            data.key[2] = OpenDDS::DCPS::RepoIdConverter(publicationId).checksum();
             data.participant_key[0] = id_;
-            data.participant_key[1] = OpenDDS::DCPS::GuidConverter( participantId);
+            data.participant_key[1] = OpenDDS::DCPS::RepoIdConverter(participantId).checksum();
             data.participant_key[2] = 0;
             data.topic_name = desc->get_name();
             data.type_name = desc->get_dataTypeName();
@@ -1607,8 +1549,8 @@ void DCPS_IR_Domain::publish_publication_bit (DCPS_IR_Publication* publication)
             if( where != this->publicationKeyToIdMap_.end()) {
               if( !(publicationId == where->second)) {
                 std::stringstream buffer;
-                buffer << publicationId << "(" << std::hex << data.key[2] << ")";
-                buffer << ", existing Id: " << where->second;
+                OpenDDS::DCPS::RepoIdConverter converter(publicationId);
+                buffer << converter << ", existing Id: " << where->second;
                 ACE_ERROR((LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::publish_publication_bit: ")
                   ACE_TEXT("Domain %d attempt to add duplicate key 0x%x ")
@@ -1680,14 +1622,13 @@ void DCPS_IR_Domain::dispose_participant_bit (DCPS_IR_Participant* participant)
 
             if (::DDS::RETCODE_OK != retGetKey)
               {
+                OpenDDS::DCPS::RepoIdConverter converter(participant->get_id());
                 ACE_ERROR((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::dispose_participant_bit ")
-                          ACE_TEXT("Unable to get_key_value for participant ptr 0x%x handle %d.  ")
-                          ACE_TEXT("Call returned %d.\n"),
-                          participant,
-                          handle,
-                          retGetKey
-                          ));
+                  ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::dispose_participant_bit ")
+                  ACE_TEXT("Unable to get_key_value for participant %C handle %d.\n"),
+                  std::string(converter).c_str(),
+                  handle
+                ));
               }
 
             ::DDS::ReturnCode_t retDispose =
@@ -1695,14 +1636,13 @@ void DCPS_IR_Domain::dispose_participant_bit (DCPS_IR_Participant* participant)
                                                 handle);
             if (::DDS::RETCODE_OK != retDispose)
               {
+                OpenDDS::DCPS::RepoIdConverter converter(participant->get_id());
                 ACE_ERROR((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::dispose_participant_bit ")
-                          ACE_TEXT("Unable to dispose for participant ptr 0x%x handle %d.  ")
-                          ACE_TEXT("Call returned %d.\n"),
-                          participant,
-                          handle,
-                          retDispose
-                          ));
+                  ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::dispose_participant_bit ")
+                  ACE_TEXT("Unable to dispose for participant %C handle %d.\n"),
+                  std::string(converter).c_str(),
+                  handle
+                ));
               }
 
           }

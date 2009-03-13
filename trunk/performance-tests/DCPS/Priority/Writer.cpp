@@ -6,6 +6,7 @@
 #include "TestTypeSupportC.h"
 
 #include "dds/DCPS/DataWriterImpl.h"
+#include "dds/DCPS/RepoIdConverter.h"
 
 #include <sstream>
 
@@ -28,9 +29,8 @@ Writer::Writer(
   OpenDDS::DCPS::DataWriterImpl* writerImpl
     = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>( this->writer_.in());
   if( writerImpl) {
-    ::OpenDDS::DCPS::GUID_t id = writerImpl->get_publication_id();
-    ::OpenDDS::DCPS::GuidConverter converter( id);
-    this->publicationId_ = static_cast<long>( converter);
+    OpenDDS::DCPS::RepoIdConverter converter(writerImpl->get_publication_id());
+    this->publicationId_ = converter.checksum();
 
   } else {
     this->publicationId_ = -1;

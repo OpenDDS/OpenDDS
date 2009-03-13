@@ -6,6 +6,7 @@
 #include "EntityProfiles.h"
 
 #include "dds/DCPS/DataWriterImpl.h"
+#include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
@@ -326,9 +327,8 @@ Publication::svc ()
 
   OpenDDS::DCPS::DataWriterImpl* servant
     = dynamic_cast< OpenDDS::DCPS::DataWriterImpl*>( this->writer_.in());
-  OpenDDS::DCPS::RepoId guid = servant->get_publication_id();
-  OpenDDS::DCPS::GuidConverter converter( guid);
-  int pid = converter;
+  
+  int pid = OpenDDS::DCPS::RepoIdConverter(servant->get_publication_id()).checksum();
 
   int count = 0;
   while( this->done_ == false) {

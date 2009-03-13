@@ -6,6 +6,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
+#include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/DomainParticipantImpl.h"
 #include "dds/DCPS/TopicImpl.h"
@@ -229,7 +230,7 @@ void test_bit_participant ()
 
       OpenDDS::DCPS::RepoId participantId = participant_servant->get_id();
       TEST_CHECK (part_data[0].key[0] == TEST_DOMAIN);
-      TEST_CHECK (part_data[0].key[1] == OpenDDS::DCPS::GuidConverter( participantId));
+      TEST_CHECK (part_data[0].key[1] == OpenDDS::DCPS::RepoIdConverter(participantId).checksum());
       TEST_CHECK (part_data[0].key[2] == 0);
     }
   catch (...)
@@ -273,7 +274,7 @@ void test_bit_topic ()
 
       OpenDDS::DCPS::RepoId participantId = participant_servant->get_id();
       TEST_CHECK (topic_data[0].key[0] == TEST_DOMAIN);
-      TEST_CHECK (topic_data[0].key[1] == OpenDDS::DCPS::GuidConverter( participantId));
+      TEST_CHECK (topic_data[0].key[1] == OpenDDS::DCPS::RepoIdConverter(participantId).checksum());
 
       topic_servant->get_qos (topic_qos);
 
@@ -338,11 +339,11 @@ void test_bit_publication ()
       OpenDDS::DCPS::RepoId participantId = participant_servant->get_id();
       OpenDDS::DCPS::RepoId publicationId = datawriter_servant->get_publication_id();
       TEST_CHECK (the_pub_data.key[0] == TEST_DOMAIN);
-      TEST_CHECK (the_pub_data.key[1] == OpenDDS::DCPS::GuidConverter( participantId));
-      TEST_CHECK (the_pub_data.key[2] == OpenDDS::DCPS::GuidConverter( publicationId));
+      TEST_CHECK (the_pub_data.key[1] == OpenDDS::DCPS::RepoIdConverter(participantId).checksum());
+      TEST_CHECK (the_pub_data.key[2] == OpenDDS::DCPS::RepoIdConverter(publicationId).checksum());
 
       TEST_CHECK (the_pub_data.participant_key[0] == TEST_DOMAIN);
-      TEST_CHECK (the_pub_data.participant_key[1] == OpenDDS::DCPS::GuidConverter( participantId));
+      TEST_CHECK (the_pub_data.participant_key[1] == OpenDDS::DCPS::RepoIdConverter(participantId).checksum());
       TEST_CHECK (the_pub_data.participant_key[2] == 0);
 
       TEST_CHECK (ACE_OS::strcmp (the_pub_data.topic_name.in (), TEST_TOPIC) == 0);
@@ -407,11 +408,11 @@ void test_bit_subscription ()
       OpenDDS::DCPS::RepoId participantId  = participant_servant->get_id();
       OpenDDS::DCPS::RepoId subscriptionId = datareader_servant->get_subscription_id();
       TEST_CHECK (the_sub_data.key[0] == TEST_DOMAIN);
-      TEST_CHECK (the_sub_data.key[1] == OpenDDS::DCPS::GuidConverter( participantId));
-      TEST_CHECK (the_sub_data.key[2] == OpenDDS::DCPS::GuidConverter( subscriptionId));
+      TEST_CHECK (the_sub_data.key[1] == OpenDDS::DCPS::RepoIdConverter(participantId).checksum());
+      TEST_CHECK (the_sub_data.key[2] == OpenDDS::DCPS::RepoIdConverter(subscriptionId).checksum());
 
       TEST_CHECK (the_sub_data.participant_key[0] == TEST_DOMAIN);
-      TEST_CHECK (the_sub_data.participant_key[1] == OpenDDS::DCPS::GuidConverter( participantId));
+      TEST_CHECK (the_sub_data.participant_key[1] == OpenDDS::DCPS::RepoIdConverter(participantId).checksum());
       TEST_CHECK (the_sub_data.participant_key[2] == 0);
 
       TEST_CHECK (ACE_OS::strcmp (the_sub_data.topic_name.in (), TEST_TOPIC) == 0);
