@@ -3,6 +3,9 @@
 // $Id$
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
+#include "dds/DCPS/RepoIdConverter.h"
+
 #include "TransportInterface.h"
 
 #if !defined (__ACE_INLINE__)
@@ -177,13 +180,13 @@ OpenDDS::DCPS::TransportInterface::add_associations
                 remote_associations[i].remote_data_.data.length(),
                 ebuffer, sizeof(ebuffer)
               ) ;
-              ::OpenDDS::DCPS::GuidConverter localConverter( local_id);
-              ::OpenDDS::DCPS::GuidConverter remoteConverter( remote_id);
+              RepoIdConverter local_converter(local_id);
+              RepoIdConverter remote_converter(remote_id);
               ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) TransportInterface::add_associations: ")
                 ACE_TEXT("publication %s to subscription %s.\n%s\n"),
-                (const char*) localConverter,
-                (const char*) remoteConverter,
+                std::string(local_converter).c_str(),
+                std::string(remote_converter).c_str(),
                 ebuffer
               ));
             }
@@ -202,13 +205,13 @@ OpenDDS::DCPS::TransportInterface::add_associations
                 remote_associations[i].remote_data_.data.length(),
                 ebuffer, sizeof(ebuffer)
               ) ;
-              ::OpenDDS::DCPS::GuidConverter localConverter( local_id);
-              ::OpenDDS::DCPS::GuidConverter remoteConverter( remote_id);
+              RepoIdConverter local_converter(local_id);
+              RepoIdConverter remote_converter(remote_id);
               ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) TransportInterface::add_associations: ")
                 ACE_TEXT("subscription %s to publication %s.\n%s\n"),
-                (const char*) localConverter,
-                (const char*) remoteConverter,
+                std::string(local_converter).c_str(),
+                std::string(remote_converter).c_str(),
                 ebuffer
               ));
             }
@@ -225,16 +228,16 @@ OpenDDS::DCPS::TransportInterface::add_associations
         if (link.is_nil())
           {
             // reserve_datalink failure
-            ::OpenDDS::DCPS::GuidConverter localConverter( local_id);
-            ::OpenDDS::DCPS::GuidConverter remoteConverter( remote_id);
+            RepoIdConverter local_converter(local_id);
+            RepoIdConverter remote_converter(remote_id);
             ACE_ERROR_RETURN((LM_ERROR,
               ACE_TEXT("(%P|%t) ERROR: Failed to reserve a DataLink with the ")
               ACE_TEXT("TransportImpl for association from local ")
               ACE_TEXT("[%s %s] to remote [%s %s].\n"),
               local_id_str,
-              (const char*) localConverter,
+              std::string(local_converter).c_str(),
               remote_id_str,
-              (const char*) remoteConverter
+              std::string(remote_converter).c_str()
             ),-1);
           }
 
@@ -294,12 +297,12 @@ OpenDDS::DCPS::TransportInterface::add_associations
             else
               {
                 // The remote_set->insert_link() failed.
-                ::OpenDDS::DCPS::GuidConverter converter( remote_id);
+                RepoIdConverter converter(remote_id);
                 ACE_ERROR((LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: Failed to insert DataLink into remote_map_ ")
                   ACE_TEXT("(DataLinkSetMap) for remote [%s %s].\n"),
                   remote_id_str,
-                  (const char*) converter
+                  std::string(converter).c_str()
                 ));
               }
 
@@ -310,12 +313,12 @@ OpenDDS::DCPS::TransportInterface::add_associations
         else
           {
             // The local_set->insert_link() failed.
-            ::OpenDDS::DCPS::GuidConverter converter( local_id);
+            RepoIdConverter converter(local_id);
             ACE_ERROR((LM_ERROR,
               ACE_TEXT("(%P|%t) ERROR: Failed to insert DataLink into ")
               ACE_TEXT("local_map_ for local [%s %s].\n"),
               local_id_str,
-              (const char*) converter
+              std::string(converter).c_str()
             ));
           }
 

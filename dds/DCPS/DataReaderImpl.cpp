@@ -16,6 +16,7 @@
 #include "Util.h"
 #include "RequestedDeadlineWatchdog.h"
 #include "QueryConditionImpl.h"
+#include "RepoIdConverter.h"
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #if !defined (DDS_HAS_MINIMUM_BIT)
@@ -123,11 +124,11 @@ DataReaderImpl::~DataReaderImpl (void)
 
   CORBA::Long count = this->total_samples();
   if( count > 0) {
-    ::OpenDDS::DCPS::GuidConverter converter( this->subscription_id_);
+    RepoIdConverter converter(subscription_id_);
     ACE_DEBUG((LM_WARNING,
       ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::~DataReaderImpl() - ")
       ACE_TEXT("reader %s terminating with %d samples unread.\n"),
-      (const char*) converter,
+      std::string(converter).c_str(),
       count
     ));
   }
@@ -221,16 +222,14 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
   //
   if (DCPS_debug_level >= 1)
   {
-    ::OpenDDS::DCPS::GuidConverter readerConverter( yourId);
-    ::OpenDDS::DCPS::GuidConverter writerConverter(
-      const_cast< ::OpenDDS::DCPS::RepoId*>( &writers[ 0].writerId)
-    );
+    RepoIdConverter reader_converter(yourId);
+    RepoIdConverter writer_converter(writers[0].writerId);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::add_associations - ")
       ACE_TEXT("bit %d local %s remote %s num remotes %d \n"),
       is_bit_,
-      (const char*) readerConverter,
-      (const char*) writerConverter,
+      std::string(reader_converter).c_str(),
+      std::string(writer_converter).c_str(),
       writers.length()
     ));
   }
@@ -291,11 +290,11 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
         )
       );
       if( DCPS_debug_level > 4) {
-        ::OpenDDS::DCPS::GuidConverter converter( writer_id);
+        RepoIdConverter converter(writer_id);
         ACE_DEBUG((LM_DEBUG,
           "(%P|%t) DataReaderImpl::add_associations: "
           "inserted writer %s.\n",
-          (const char*) converter
+          std::string(converter).c_str()
         ));
       }
     }
@@ -316,11 +315,11 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
       // this call will start the timer if it is not already set
       ACE_Time_Value now = ACE_OS::gettimeofday ();
       if (DCPS_debug_level >= 5) {
-        ::OpenDDS::DCPS::GuidConverter converter( this->subscription_id_);
+        RepoIdConverter converter(subscription_id_);
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderImpl::add_associations: ")
           ACE_TEXT("starting/resetting liveliness timer for reader %s\n"),
-          (const char*) converter
+          std::string(converter).c_str()
         ));
       }
       this->handle_timeout (now, this);
@@ -372,11 +371,11 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
           RepoIdToHandleMap::value_type( wr_ids[ index], handles[ index])
         );
         if( DCPS_debug_level > 4) {
-          ::OpenDDS::DCPS::GuidConverter converter( wr_ids[ index]);
+          RepoIdConverter converter(wr_ids[index]);
           ACE_DEBUG((LM_WARNING,
             ACE_TEXT("(%P|%t) DataReaderImpl::add_associations: ")
             ACE_TEXT("id_to_handle_map_[ %s] = 0x%x.\n"),
-            (const char*) converter,
+            std::string(converter).c_str(),
             handles[index]
           ));
         }
@@ -430,16 +429,14 @@ void DataReaderImpl::remove_associations (
 
   if (DCPS_debug_level >= 1)
   {
-    ::OpenDDS::DCPS::GuidConverter readerConverter( this->subscription_id_);
-    ::OpenDDS::DCPS::GuidConverter writerConverter(
-      const_cast< ::OpenDDS::DCPS::RepoId*>( &writers[ 0])
-    );
+    RepoIdConverter reader_converter(subscription_id_);
+    RepoIdConverter writer_converter(writers[0]);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations: ")
       ACE_TEXT("bit %d local %s remote %s num remotes %d \n"),
       is_bit_,
-      (const char*) readerConverter,
-      (const char*) writerConverter,
+      std::string(reader_converter).c_str(),
+      std::string(writer_converter).c_str(),
       writers.length ()
     ));
   }
@@ -472,11 +469,11 @@ void DataReaderImpl::remove_associations (
     {
       if (DCPS_debug_level >= 1)
       {
-        ::OpenDDS::DCPS::GuidConverter converter( writer_id);
+        RepoIdConverter converter(writer_id);
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations: ")
           ACE_TEXT("the writer local %s was already removed.\n"),
-          (const char*) converter
+          std::string(converter).c_str()
         ));
       }
     }
@@ -1124,13 +1121,13 @@ DataReaderImpl::writer_activity(PublicationId writer_id)
     // This may not be an error since it could happen that the sample
     // is delivered to the datareader after the write is dis-associated
     // with this datareader.
-    ::OpenDDS::DCPS::GuidConverter readerConverter( this->subscription_id_);
-    ::OpenDDS::DCPS::GuidConverter writerConverter( writer_id);
+    RepoIdConverter reader_converter(subscription_id_);
+    RepoIdConverter writer_converter(writer_id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::writer_activity: ")
       ACE_TEXT("reader %s is not associated with writer %s.\n"),
-      (const char*) readerConverter,
-      (const char*) writerConverter
+      std::string(reader_converter).c_str(),
+      std::string(writer_converter).c_str()
     ));
   }
 }
@@ -1147,11 +1144,11 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   if( DCPS_debug_level > 9) {
     std::stringstream buffer;
     buffer << sample.header_ << std::ends;
-    ::OpenDDS::DCPS::GuidConverter converter( this->subscription_id_);
+    RepoIdConverter converter(subscription_id_);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::data_received: ")
       ACE_TEXT("%s received sample: %s.\n"),
-      (const char*) converter,
+      std::string(converter).c_str(),
       buffer.str().c_str()
     ));
   }
@@ -1457,11 +1454,11 @@ DataReaderImpl::handle_timeout (const ACE_Time_Value &tv,
     {
 
       if (DCPS_debug_level >= 5) {
-        ::OpenDDS::DCPS::GuidConverter converter( this->subscription_id_);
+        RepoIdConverter converter(subscription_id_);
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderImpl::handle_timeout: ")
           ACE_TEXT(" canceling timer for reader %s.\n"),
-          (const char*) converter
+          std::string(converter).c_str()
         ));
       }
 
@@ -1504,11 +1501,11 @@ DataReaderImpl::handle_timeout (const ACE_Time_Value &tv,
   }
 
   if (DCPS_debug_level >= 5) {
-    ::OpenDDS::DCPS::GuidConverter converter( this->subscription_id_);
+    RepoIdConverter converter(subscription_id_);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::handle_timeout: ")
       ACE_TEXT("reader %s has %d live writers; from_reactor=%d\n"),
-      (const char*) converter,
+      std::string(converter).c_str(),
       alive_writers,
       arg == this ? 0 : 1
     ));
@@ -1585,13 +1582,13 @@ OpenDDS::DCPS::WriterInfo::WriterInfo (DataReaderImpl* reader,
     writer_id_(writer_id)
 {
   if (DCPS_debug_level >= 5) {
-    ::OpenDDS::DCPS::GuidConverter writerConverter( writer_id);
-    ::OpenDDS::DCPS::GuidConverter readerConverter( reader->subscription_id_);
+    RepoIdConverter writer_converter(writer_id);
+    RepoIdConverter reader_converter(reader->subscription_id_);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) WriterInfo::WriterInfo: ")
       ACE_TEXT("writer %s added to reader %s.\n"),
-      (const char*) writerConverter,
-      (const char*) readerConverter
+      std::string(writer_converter).c_str(),
+      std::string(reader_converter).c_str()
     ));
   }
 }
@@ -1669,13 +1666,13 @@ DataReaderImpl::writer_removed (PublicationId   writer_id,
              WriterInfo::WriterState& state)
 {
   if (DCPS_debug_level >= 5) {
-    ::OpenDDS::DCPS::GuidConverter readerConverter( this->subscription_id_);
-    ::OpenDDS::DCPS::GuidConverter writerConverter( writer_id);
+    RepoIdConverter reader_converter(subscription_id_);
+    RepoIdConverter writer_converter(writer_id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::writer_removed: ")
       ACE_TEXT("reader %s from writer %s.\n"),
-      (const char*) readerConverter,
-      (const char*) writerConverter
+      std::string(reader_converter).c_str(),
+      std::string(writer_converter).c_str()
     ));
   }
 
@@ -1708,13 +1705,13 @@ DataReaderImpl::writer_became_alive (PublicationId writer_id,
   if (DCPS_debug_level >= 5) {
     std::stringstream buffer;
     buffer << state;
-    ::OpenDDS::DCPS::GuidConverter readerConverter( this->subscription_id_);
-    ::OpenDDS::DCPS::GuidConverter writerConverter( writer_id);
+    RepoIdConverter reader_converter(subscription_id_);
+    RepoIdConverter writer_converter(writer_id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::writer_became_alive: ")
       ACE_TEXT("reader %s from writer %s state %s.\n"),
-      (const char*) readerConverter,
-      (const char*) writerConverter,
+      std::string(reader_converter).c_str(),
+      std::string(writer_converter).c_str(),
       buffer.str().c_str()
     ));
   }
@@ -1780,13 +1777,13 @@ DataReaderImpl::writer_became_dead (PublicationId   writer_id,
   if (DCPS_debug_level >= 5) {
     std::stringstream buffer;
     buffer << state;
-    ::OpenDDS::DCPS::GuidConverter readerConverter( this->subscription_id_);
-    ::OpenDDS::DCPS::GuidConverter writerConverter( writer_id);
+    RepoIdConverter reader_converter(subscription_id_);
+    RepoIdConverter writer_converter(writer_id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::writer_became_dead: ")
       ACE_TEXT("reader %s from writer%s state %s.\n"),
-      (const char*) readerConverter,
-      (const char*) writerConverter,
+      std::string(reader_converter).c_str(),
+      std::string(writer_converter).c_str(),
       buffer.str().c_str()
     ));
   }
@@ -1944,15 +1941,13 @@ void DataReaderImpl::process_latency( const ReceivedDataSample& sample)
     ///     association has been torn down).  We may want to promote this
     ///     to a warning if other conditions causing this symptom are
     ///     discovered.
-    ::OpenDDS::DCPS::GuidConverter readerConverter( this->subscription_id_);
-    ::OpenDDS::DCPS::GuidConverter writerConverter(
-      const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.header_.publication_id_)
-    );
+    RepoIdConverter reader_converter(subscription_id_);
+    RepoIdConverter writer_converter(sample.header_.publication_id_);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::process_latency() - ")
       ACE_TEXT("reader %s is not associated with writer %s (late sample?).\n"),
-      (const char*) readerConverter,
-      (const char*) writerConverter
+      std::string(reader_converter).c_str(),
+      std::string(writer_converter).c_str()
     ));
   }
 }
@@ -2186,11 +2181,7 @@ DataReaderImpl::bit_lookup_instance_handles (const WriterIdSeq& ids,
     const char* separator = "";
     std::stringstream buffer;
     for( unsigned long i = 0; i < size; ++i) {
-      long handle;
-      handle = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &ids[i])
-               );
-      buffer << separator << ids[i] << "(" << std::hex << handle << ")";
+      buffer << separator << RepoIdConverter(ids[i]);
       separator = ", ";
     }
     ACE_DEBUG((LM_DEBUG,
@@ -2231,13 +2222,11 @@ DataReaderImpl::bit_lookup_instance_handles (const WriterIdSeq& ids,
       ));
       for (CORBA::ULong i = 0; i < num_wrts; ++i)
       {
-        ::OpenDDS::DCPS::GuidConverter converter(
-          const_cast< ::OpenDDS::DCPS::RepoId*>( &ids[ i])
-        );
+        RepoIdConverter converter(ids[i]);
         ACE_DEBUG((LM_WARNING,
           ACE_TEXT("(%P|%t) DataReaderImpl::bit_lookup_instance_handles: ")
           ACE_TEXT("writer %s has handle 0x%x.\n"),
-          (const char*) converter,
+          std::string(converter).c_str(),
           hdls[i]
         ));
       }
@@ -2250,17 +2239,13 @@ DataReaderImpl::bit_lookup_instance_handles (const WriterIdSeq& ids,
     hdls.length (num_wrts);
     for (CORBA::ULong i = 0; i < num_wrts; i++)
     {
-      hdls[i] = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &ids[i])
-               );
+      hdls[i] = RepoIdConverter(ids[i]).checksum();
       if( DCPS_debug_level > 4) {
-        ::OpenDDS::DCPS::GuidConverter converter(
-          const_cast< ::OpenDDS::DCPS::RepoId*>( &ids[ i])
-        );
+        RepoIdConverter converter(ids[i]);
         ACE_DEBUG((LM_WARNING,
           ACE_TEXT("(%P|%t) DataReaderImpl::bit_lookup_instance_handles: ")
           ACE_TEXT("using hash as handle for writer %s.\n"),
-          (const char*) converter
+          std::string(converter).c_str()
         ));
       }
     }
@@ -2281,13 +2266,11 @@ DataReaderImpl::cache_lookup_instance_handles (const WriterIdSeq& ids,
     RepoIdToHandleMap::iterator iter = id_to_handle_map_.find(ids[i]);
     if (iter == id_to_handle_map_.end())
     {
-      ::OpenDDS::DCPS::GuidConverter converter(
-        const_cast< ::OpenDDS::DCPS::RepoId*>( &ids[ i])
-      );
+      RepoIdConverter converter(ids[i]);
       ACE_DEBUG((LM_WARNING,
         ACE_TEXT("(%P|%t) DataReaderImpl::cache_lookup_instance_handles: ")
         ACE_TEXT("could not find instance handle for writer %s.\n"),
-        (const char*) converter
+        std::string(converter).c_str()
       ));
       hdls[i] = -1;
       ret = false;
@@ -2296,13 +2279,11 @@ DataReaderImpl::cache_lookup_instance_handles (const WriterIdSeq& ids,
     {
       hdls[i] = iter->second;
       if( DCPS_debug_level > 7) {
-        ::OpenDDS::DCPS::GuidConverter converter(
-          const_cast< ::OpenDDS::DCPS::RepoId*>( &ids[ i])
-        );
+        RepoIdConverter converter(ids[i]);
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderImpl::cache_lookup_instance_handles: ")
           ACE_TEXT("instance handle for writer %s == 0x%x.\n"),
-          (const char*) converter,
+          std::string(converter).c_str(),
           hdls[i]
         ));
       }
@@ -2411,15 +2392,13 @@ void DataReaderImpl::notify_liveliness_change()
   notify_status_condition ();
   if( DCPS_debug_level > 9) {
     std::stringstream buffer;
-    long key = GuidConverter( this->subscription_id_);
-    buffer << "subscription " << this->subscription_id_ << "(" << key << ")";
+    buffer << "subscription " << RepoIdConverter(subscription_id_);
     buffer << ", listener at: 0x" << std::hex << this->fast_listener_;
     for( WriterMapType::iterator current = this->writers_.begin();
          current != this->writers_.end();
          ++current) {
       RepoId id = current->first;
-      key = GuidConverter( id);
-      buffer << std::endl << "\tNOTIFY: writer[ " << id << "(" << key << ")] == ";
+      buffer << std::endl << "\tNOTIFY: writer[ " << RepoIdConverter(id) << "] == ";
       buffer << current->second.get_state();
     }
     buffer << std::endl;

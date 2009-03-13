@@ -8,7 +8,7 @@
 #include "DCPS_IR_Domain.h"
 #include "DCPS_IR_Participant.h"
 
-#include <sstream>
+#include "dds/DCPS/RepoIdConverter.h"
 
 namespace OpenDDS { namespace Federator {
 
@@ -50,23 +50,15 @@ ManagerImpl::create( const Update::UTopic& topic)
   sample.qos         = topic.topicQos;
 
   if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-    std::stringstream participantBuffer;
-    std::stringstream buffer;
-    long key = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.participant)
-               );
-    participantBuffer << sample.participant << "(" << std::hex << key << ")";
-    key = ::OpenDDS::DCPS::GuidConverter(
-            const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.id)
-          );
-    buffer << sample.id << "(" << std::hex << key << ")";
+    OpenDDS::DCPS::RepoIdConverter part_converter(sample.participant);
+    OpenDDS::DCPS::RepoIdConverter topic_converter(sample.id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::create( TopicUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ topic %s ]\n"),
       this->id(),
       sample.domain,
-      participantBuffer.str().c_str(),
-      buffer.str().c_str()
+      std::string(part_converter).c_str(),
+      std::string(topic_converter).c_str()
     ));
   }
 
@@ -91,17 +83,13 @@ ManagerImpl::create( const Update::UParticipant& participant)
   sample.qos    = participant.participantQos;
 
   if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-    std::stringstream buffer;
-    long key = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.id)
-               );
-    buffer << sample.id << "(" << std::hex << key << ")";
+    OpenDDS::DCPS::RepoIdConverter converter(sample.id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::create( ParticipantUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s ]\n"),
       this->id(),
       sample.domain,
-      buffer.str().c_str()
+      std::string(converter).c_str()
     ));
   }
 
@@ -131,23 +119,15 @@ ManagerImpl::create( const Update::URActor& reader)
   sample.subscriber_qos = reader.pubsubQos;
 
   if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-    std::stringstream participantBuffer;
-    std::stringstream buffer;
-    long key = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.participant)
-               );
-    participantBuffer << sample.participant << "(" << std::hex << key << ")";
-    key = ::OpenDDS::DCPS::GuidConverter(
-            const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.id)
-          );
-    buffer << sample.id << "(" << std::hex << key << ")";
+    OpenDDS::DCPS::RepoIdConverter part_converter(sample.participant);
+    OpenDDS::DCPS::RepoIdConverter sub_converter(sample.id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::create( SubscriptionUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
       this->id(),
       sample.domain,
-      participantBuffer.str().c_str(),
-      buffer.str().c_str()
+      std::string(part_converter).c_str(),
+      std::string(sub_converter).c_str()
     ));
   }
 
@@ -179,23 +159,15 @@ ManagerImpl::create( const Update::UWActor& writer)
   sample.publisher_qos  = writer.pubsubQos;
 
   if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-    std::stringstream participantBuffer;
-    std::stringstream buffer;
-    long key = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.participant)
-               );
-    participantBuffer << sample.participant << "(" << std::hex << key << ")";
-    key = ::OpenDDS::DCPS::GuidConverter(
-            const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.id)
-          );
-    buffer << sample.id << "(" << std::hex << key << ")";
+    OpenDDS::DCPS::RepoIdConverter part_converter(sample.participant);
+    OpenDDS::DCPS::RepoIdConverter pub_converter(sample.id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::create( PublicationUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
       this->id(),
       sample.domain,
-      participantBuffer.str().c_str(),
-      buffer.str().c_str()
+      std::string(part_converter).c_str(),
+      std::string(pub_converter).c_str()
     ));
   }
 
@@ -219,17 +191,13 @@ ManagerImpl::create( const Update::OwnershipData& data)
   sample.owner       = data.owner;
 
   if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-    std::stringstream buffer;
-    long key = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.participant)
-               );
-    buffer << sample.participant << "(" << std::hex << key << ")";
+    OpenDDS::DCPS::RepoIdConverter converter(sample.participant);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::create( OwnerUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ sender %d/ owner %d ]\n"),
       this->id(),
       sample.domain,
-      buffer.str().c_str(),
+      std::string(converter).c_str(),
       sample.sender,
       sample.owner
     ));
@@ -270,23 +238,15 @@ ManagerImpl::destroy(
         sample.participant = id.participant;
 
         if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-          std::stringstream participantBuffer;
-          std::stringstream buffer;
-          long key = ::OpenDDS::DCPS::GuidConverter(
-                       const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.participant)
-                     );
-          participantBuffer << sample.participant << "(" << std::hex << key << ")";
-          key = ::OpenDDS::DCPS::GuidConverter(
-                  const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.id)
-                );
-          buffer << sample.id << "(" << std::hex << key << ")";
+          OpenDDS::DCPS::RepoIdConverter part_converter(sample.participant);
+          OpenDDS::DCPS::RepoIdConverter topic_converter(sample.id);
           ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) Federator::ManagerImpl::destroy( TopicUpdate): ")
             ACE_TEXT("repo %d - [ domain %d/ participant %s/ topic %s ]\n"),
             this->id(),
             sample.domain,
-            participantBuffer.str().c_str(),
-            buffer.str().c_str()
+            std::string(part_converter).c_str(),
+            std::string(topic_converter).c_str()
           ));
         }
 
@@ -309,17 +269,13 @@ ManagerImpl::destroy(
         sample.id     = id.id;
 
         if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-          std::stringstream buffer;
-          long key = ::OpenDDS::DCPS::GuidConverter(
-                       const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.id)
-                     );
-          buffer << sample.id << "(" << std::hex << key << ")";
+          OpenDDS::DCPS::RepoIdConverter converter(sample.id);
           ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) Federator::ManagerImpl::destroy( ParticipantUpdate): ")
             ACE_TEXT("repo %d - [ domain %d/ participant %s ]\n"),
             this->id(),
             sample.domain,
-            buffer.str().c_str()
+            std::string(converter).c_str()
           ));
         }
 
@@ -346,23 +302,15 @@ ManagerImpl::destroy(
             sample.id             = id.id;
 
             if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-              std::stringstream participantBuffer;
-              std::stringstream buffer;
-              long key = ::OpenDDS::DCPS::GuidConverter(
-                           const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.participant)
-                         );
-              participantBuffer << sample.participant << "(" << std::hex << key << ")";
-              key = ::OpenDDS::DCPS::GuidConverter(
-                      const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.id)
-                    );
-              buffer << sample.id << "(" << std::hex << key << ")";
+              OpenDDS::DCPS::RepoIdConverter part_converter(sample.participant);
+              OpenDDS::DCPS::RepoIdConverter pub_converter(sample.id);
               ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) Federator::ManagerImpl::destroy( PublicationUpdate): ")
                 ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
                 this->id(),
                 sample.domain,
-                participantBuffer.str().c_str(),
-                buffer.str().c_str()
+                std::string(part_converter).c_str(),
+                std::string(pub_converter).c_str()
               ));
             }
 
@@ -386,23 +334,15 @@ ManagerImpl::destroy(
             sample.id             = id.id;
 
             if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-              std::stringstream participantBuffer;
-              std::stringstream buffer;
-              long key = ::OpenDDS::DCPS::GuidConverter(
-                           const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.participant)
-                         );
-              participantBuffer << sample.participant << "(" << std::hex << key << ")";
-              key = ::OpenDDS::DCPS::GuidConverter(
-                      const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.id)
-                    );
-              buffer << sample.id << "(" << std::hex << key << ")";
+              OpenDDS::DCPS::RepoIdConverter part_converter(sample.participant);
+              OpenDDS::DCPS::RepoIdConverter sub_converter(sample.id);
               ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) Federator::ManagerImpl::destroy( SubscriptionUpdate): ")
                 ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
                 this->id(),
                 sample.domain,
-                participantBuffer.str().c_str(),
-                buffer.str().c_str()
+                std::string(part_converter).c_str(),
+                std::string(sub_converter).c_str()
               ));
             }
 
@@ -431,17 +371,13 @@ ManagerImpl::update( const Update::IdPath& id, const ::DDS::DomainParticipantQos
   sample.qos    = qos;
 
   if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-    std::stringstream buffer;
-    long key = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.id)
-               );
-    buffer << sample.id << "(" << std::hex << key << ")";
+    OpenDDS::DCPS::RepoIdConverter converter(sample.id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::update( ParticipantUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s ]\n"),
       this->id(),
       sample.domain,
-      buffer.str().c_str()
+      std::string(converter).c_str()
     ));
   }
 
@@ -466,23 +402,15 @@ ManagerImpl::update( const Update::IdPath& id, const ::DDS::TopicQos& qos)
   sample.qos         = qos;
 
   if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-    std::stringstream participantBuffer;
-    std::stringstream buffer;
-    long key = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.participant)
-               );
-    participantBuffer << sample.participant << "(" << std::hex << key << ")";
-    key = ::OpenDDS::DCPS::GuidConverter(
-            const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.id)
-          );
-    buffer << sample.id << "(" << std::hex << key << ")";
+    OpenDDS::DCPS::RepoIdConverter part_converter(sample.participant);
+    OpenDDS::DCPS::RepoIdConverter topic_converter(sample.id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::update( TopicUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ topic %s ]\n"),
       this->id(),
       sample.domain,
-      participantBuffer.str().c_str(),
-      buffer.str().c_str()
+      std::string(part_converter).c_str(),
+      std::string(topic_converter).c_str()
     ));
   }
 
@@ -507,23 +435,15 @@ ManagerImpl::update( const Update::IdPath& id, const ::DDS::DataWriterQos& qos)
   sample.datawriter_qos = qos;
 
   if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-    std::stringstream participantBuffer;
-    std::stringstream buffer;
-    long key = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.participant)
-               );
-    participantBuffer << sample.participant << "(" << std::hex << key << ")";
-    key = ::OpenDDS::DCPS::GuidConverter(
-            const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.id)
-          );
-    buffer << sample.id << "(" << std::hex << key << ")";
+    OpenDDS::DCPS::RepoIdConverter part_converter(sample.participant);
+    OpenDDS::DCPS::RepoIdConverter pub_converter(sample.id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::update( WriterUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
       this->id(),
       sample.domain,
-      participantBuffer.str().c_str(),
-      buffer.str().c_str()
+      std::string(part_converter).c_str(),
+      std::string(pub_converter).c_str()
     ));
   }
 
@@ -548,23 +468,15 @@ ManagerImpl::update( const Update::IdPath& id, const ::DDS::PublisherQos& qos)
   sample.publisher_qos  = qos;
 
   if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-    std::stringstream participantBuffer;
-    std::stringstream buffer;
-    long key = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.participant)
-               );
-    participantBuffer << sample.participant << "(" << std::hex << key << ")";
-    key = ::OpenDDS::DCPS::GuidConverter(
-            const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.id)
-          );
-    buffer << sample.id << "(" << std::hex << key << ")";
+    OpenDDS::DCPS::RepoIdConverter part_converter(sample.participant);
+    OpenDDS::DCPS::RepoIdConverter pub_converter(sample.id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::update( PublisherUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
       this->id(),
       sample.domain,
-      participantBuffer.str().c_str(),
-      buffer.str().c_str()
+      std::string(part_converter).c_str(),
+      std::string(pub_converter).c_str()
     ));
   }
 
@@ -589,23 +501,15 @@ ManagerImpl::update( const Update::IdPath& id, const ::DDS::DataReaderQos& qos)
   sample.datareader_qos = qos;
 
   if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-    std::stringstream participantBuffer;
-    std::stringstream buffer;
-    long key = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.participant)
-               );
-    participantBuffer << sample.participant << "(" << std::hex << key << ")";
-    key = ::OpenDDS::DCPS::GuidConverter(
-            const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.id)
-          );
-    buffer << sample.id << "(" << std::hex << key << ")";
+    OpenDDS::DCPS::RepoIdConverter part_converter(sample.participant);
+    OpenDDS::DCPS::RepoIdConverter sub_converter(sample.id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::update( ReaderUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
       this->id(),
       sample.domain,
-      participantBuffer.str().c_str(),
-      buffer.str().c_str()
+      std::string(part_converter).c_str(),
+      std::string(sub_converter).c_str()
     ));
   }
 
@@ -630,23 +534,15 @@ ManagerImpl::update( const Update::IdPath& id, const ::DDS::SubscriberQos& qos)
   sample.subscriber_qos = qos;
 
   if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-    std::stringstream participantBuffer;
-    std::stringstream buffer;
-    long key = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.participant)
-               );
-    participantBuffer << sample.participant << "(" << std::hex << key << ")";
-    key = ::OpenDDS::DCPS::GuidConverter(
-            const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.id)
-          );
-    buffer << sample.id << "(" << std::hex << key << ")";
+    OpenDDS::DCPS::RepoIdConverter part_converter(sample.participant);
+    OpenDDS::DCPS::RepoIdConverter sub_converter(sample.id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::update( SubscriberUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
       this->id(),
       sample.domain,
-      participantBuffer.str().c_str(),
-      buffer.str().c_str()
+      std::string(part_converter).c_str(),
+      std::string(sub_converter).c_str()
     ));
   }
 
@@ -663,17 +559,13 @@ void
 ManagerImpl::processCreate( const OwnerUpdate* sample, const ::DDS::SampleInfo* /* info */)
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-    std::stringstream buffer;
-    long key = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample->participant)
-               );
-    buffer << sample->participant << "(" << std::hex << key << ")";
+    OpenDDS::DCPS::RepoIdConverter converter(sample->participant);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processCreate( OwnerUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ sender %d/ owner %d ]\n"),
       this->id(),
       sample->domain,
-      buffer.str().c_str(),
+      std::string(converter).c_str(),
       sample->sender,
       sample->owner
     ));
@@ -706,23 +598,15 @@ void
 ManagerImpl::processCreate( const PublicationUpdate* sample, const ::DDS::SampleInfo* /* info */)
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-    std::stringstream participantBuffer;
-    std::stringstream buffer;
-    long key = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample->participant)
-               );
-    participantBuffer << sample->participant << "(" << std::hex << key << ")";
-    key = ::OpenDDS::DCPS::GuidConverter(
-            const_cast< ::OpenDDS::DCPS::RepoId*>( &sample->id)
-          );
-    buffer << sample->id << "(" << std::hex << key << ")";
+    OpenDDS::DCPS::RepoIdConverter part_converter(sample->participant);
+    OpenDDS::DCPS::RepoIdConverter pub_converter(sample->id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processCreate( PublicationUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
       this->id(),
       sample->domain,
-      participantBuffer.str().c_str(),
-      buffer.str().c_str()
+      std::string(part_converter).c_str(),
+      std::string(pub_converter).c_str()
     ));
   }
 
@@ -762,23 +646,15 @@ void
 ManagerImpl::processCreate( const SubscriptionUpdate* sample, const ::DDS::SampleInfo* /* info */)
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-    std::stringstream participantBuffer;
-    std::stringstream buffer;
-    long key = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample->participant)
-               );
-    participantBuffer << sample->participant << "(" << std::hex << key << ")";
-    key = ::OpenDDS::DCPS::GuidConverter(
-            const_cast< ::OpenDDS::DCPS::RepoId*>( &sample->id)
-          );
-    buffer << sample->id << "(" << std::hex << key << ")";
+    OpenDDS::DCPS::RepoIdConverter part_converter(sample->participant);
+    OpenDDS::DCPS::RepoIdConverter sub_converter(sample->id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processCreate( SubscriptionUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
       this->id(),
       sample->domain,
-      participantBuffer.str().c_str(),
-      buffer.str().c_str()
+      std::string(part_converter).c_str(),
+      std::string(sub_converter).c_str()
     ));
   }
 
@@ -817,17 +693,13 @@ void
 ManagerImpl::processCreate( const ParticipantUpdate* sample, const ::DDS::SampleInfo* /* info */)
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-    std::stringstream buffer;
-    long key = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample->id)
-               );
-    buffer << sample->id << "(" << std::hex << key << ")";
+    OpenDDS::DCPS::RepoIdConverter converter(sample->id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processCreate( ParticipantUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ owner %d ]\n"),
       this->id(),
       sample->domain,
-      buffer.str().c_str(),
+      std::string(converter).c_str(),
       sample->owner
     ));
   }
@@ -850,23 +722,15 @@ void
 ManagerImpl::processCreate( const TopicUpdate* sample, const ::DDS::SampleInfo* /* info */)
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-    std::stringstream participantBuffer;
-    std::stringstream buffer;
-    long key = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample->participant)
-               );
-    participantBuffer << sample->participant << "(" << std::hex << key << ")";
-    key = ::OpenDDS::DCPS::GuidConverter(
-            const_cast< ::OpenDDS::DCPS::RepoId*>( &sample->id)
-          );
-    buffer << sample->id << "(" << std::hex << key << ")";
+    OpenDDS::DCPS::RepoIdConverter part_converter(sample->participant);
+    OpenDDS::DCPS::RepoIdConverter topic_converter(sample->id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processCreate( TopicUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ topic %s ]\n"),
       this->id(),
       sample->domain,
-      participantBuffer.str().c_str(),
-      buffer.str().c_str()
+      std::string(part_converter).c_str(),
+      std::string(topic_converter).c_str()
     ));
   }
 
@@ -910,17 +774,13 @@ ManagerImpl::processDeferred()
         current->sender,
         current->owner)) {
           if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-            std::stringstream buffer;
-            long key = ::OpenDDS::DCPS::GuidConverter(
-              const_cast< ::OpenDDS::DCPS::RepoId*>( &current->participant)
-              );
-            buffer << current->participant << "(" << std::hex << key << ")";
+            OpenDDS::DCPS::RepoIdConverter converter(current->participant);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDeferred( OwnerUpdate): ")
               ACE_TEXT("repo %d - [ domain %d/ participant %s/ sender %d/ owner %d ]\n"),
               this->id(),
               current->domain,
-              buffer.str().c_str(),
+              std::string(converter).c_str(),
               current->sender,
               current->owner
               ));
@@ -945,24 +805,16 @@ ManagerImpl::processDeferred()
         current->datatype,
         current->qos)) {
           if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-            std::stringstream participantBuffer;
-            std::stringstream buffer;
-            long key = ::OpenDDS::DCPS::GuidConverter(
-              const_cast< ::OpenDDS::DCPS::RepoId*>( &current->participant)
-              );
-            participantBuffer << current->participant << "(" << std::hex << key << ")";
-            key = ::OpenDDS::DCPS::GuidConverter(
-              const_cast< ::OpenDDS::DCPS::RepoId*>( &current->id)
-              );
-            buffer << current->id << "(" << std::hex << key << ")";
+            OpenDDS::DCPS::RepoIdConverter part_converter(current->participant);
+            OpenDDS::DCPS::RepoIdConverter topic_converter(current->id);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDeferred( TopicUpdate): ")
               ACE_TEXT("repo %d - [ domain %d/ participant %s/ topic %s ]\n"),
               this->id(),
               current->domain,
-              participantBuffer.str().c_str(),
-              buffer.str().c_str()
-              ));
+              std::string(part_converter).c_str(),
+              std::string(topic_converter).c_str()
+            ));
           }
           current = this->deferredTopics_.erase( current);
         }
@@ -993,24 +845,16 @@ ManagerImpl::processDeferred()
         current->publisher_qos,
         true)) {
           if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-            std::stringstream participantBuffer;
-            std::stringstream buffer;
-            long key = ::OpenDDS::DCPS::GuidConverter(
-              const_cast< ::OpenDDS::DCPS::RepoId*>( &current->participant)
-              );
-            participantBuffer << current->participant << "(" << std::hex << key << ")";
-            key = ::OpenDDS::DCPS::GuidConverter(
-              const_cast< ::OpenDDS::DCPS::RepoId*>( &current->id)
-              );
-            buffer << current->id << "(" << std::hex << key << ")";
+            OpenDDS::DCPS::RepoIdConverter part_converter(current->participant);
+            OpenDDS::DCPS::RepoIdConverter pub_converter(current->id);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDeferred( PublicationUpdate): ")
               ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
               this->id(),
               current->domain,
-              participantBuffer.str().c_str(),
-              buffer.str().c_str()
-              ));
+              std::string(part_converter).c_str(),
+              std::string(pub_converter).c_str()
+            ));
           }
           current = this->deferredPublications_.erase( current);
         }
@@ -1040,24 +884,16 @@ ManagerImpl::processDeferred()
         current->subscriber_qos,
         true)) {
           if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-            std::stringstream participantBuffer;
-            std::stringstream buffer;
-            long key = ::OpenDDS::DCPS::GuidConverter(
-              const_cast< ::OpenDDS::DCPS::RepoId*>( &current->participant)
-              );
-            participantBuffer << current->participant << "(" << std::hex << key << ")";
-            key = ::OpenDDS::DCPS::GuidConverter(
-              const_cast< ::OpenDDS::DCPS::RepoId*>( &current->id)
-              );
-            buffer << current->id << "(" << std::hex << key << ")";
+            OpenDDS::DCPS::RepoIdConverter part_converter(current->participant);
+            OpenDDS::DCPS::RepoIdConverter sub_converter(current->id);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDeferred( SubscriptionUpdate): ")
               ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
               this->id(),
               current->domain,
-              participantBuffer.str().c_str(),
-              buffer.str().c_str()
-              ));
+              std::string(part_converter).c_str(),
+              std::string(sub_converter).c_str()
+            ));
           }
           current = this->deferredSubscriptions_.erase( current);
         }
@@ -1074,17 +910,13 @@ void
 ManagerImpl::processUpdateQos1( const OwnerUpdate* sample, const ::DDS::SampleInfo* /* info */)
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-    std::stringstream buffer;
-    long key = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample->participant)
-               );
-    buffer << sample->participant << "(" << std::hex << key << ")";
+    OpenDDS::DCPS::RepoIdConverter converter(sample->participant);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateQos1( OwnerUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ sender %d/ owner %d ]\n"),
       this->id(),
       sample->domain,
-      buffer.str().c_str(),
+      std::string(converter).c_str(),
       sample->sender,
       sample->owner
     ));
@@ -1112,23 +944,15 @@ void
 ManagerImpl::processUpdateQos1( const PublicationUpdate* sample, const ::DDS::SampleInfo* /* info */)
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-    std::stringstream participantBuffer;
-    std::stringstream buffer;
-    long key = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample->participant)
-               );
-    participantBuffer << sample->participant << "(" << std::hex << key << ")";
-    key = ::OpenDDS::DCPS::GuidConverter(
-            const_cast< ::OpenDDS::DCPS::RepoId*>( &sample->id)
-          );
-    buffer << sample->id << "(" << std::hex << key << ")";
+    OpenDDS::DCPS::RepoIdConverter part_converter(sample->participant);
+    OpenDDS::DCPS::RepoIdConverter pub_converter(sample->id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateQos1( PublicationUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
       this->id(),
       sample->domain,
-      participantBuffer.str().c_str(),
-      buffer.str().c_str()
+      std::string(part_converter).c_str(),
+      std::string(pub_converter).c_str()
     ));
   }
 
@@ -1144,23 +968,15 @@ void
 ManagerImpl::processUpdateQos2( const PublicationUpdate* sample, const ::DDS::SampleInfo* /* info */)
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-    std::stringstream participantBuffer;
-    std::stringstream buffer;
-    long key = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample->participant)
-               );
-    participantBuffer << sample->participant << "(" << std::hex << key << ")";
-    key = ::OpenDDS::DCPS::GuidConverter(
-            const_cast< ::OpenDDS::DCPS::RepoId*>( &sample->id)
-          );
-    buffer << sample->id << "(" << std::hex << key << ")";
+    OpenDDS::DCPS::RepoIdConverter part_converter(sample->participant);
+    OpenDDS::DCPS::RepoIdConverter pub_converter(sample->id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateQos2( PublicationUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
       this->id(),
       sample->domain,
-      participantBuffer.str().c_str(),
-      buffer.str().c_str()
+      std::string(part_converter).c_str(),
+      std::string(pub_converter).c_str()
     ));
   }
 
@@ -1176,23 +992,15 @@ void
 ManagerImpl::processUpdateQos1( const SubscriptionUpdate* sample, const ::DDS::SampleInfo* /* info */)
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-    std::stringstream participantBuffer;
-    std::stringstream buffer;
-    long key = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample->participant)
-               );
-    participantBuffer << sample->participant << "(" << std::hex << key << ")";
-    key = ::OpenDDS::DCPS::GuidConverter(
-            const_cast< ::OpenDDS::DCPS::RepoId*>( &sample->id)
-          );
-    buffer << sample->id << "(" << std::hex << key << ")";
+    OpenDDS::DCPS::RepoIdConverter part_converter(sample->participant);
+    OpenDDS::DCPS::RepoIdConverter sub_converter(sample->id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateQos1( SubscriptionUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
       this->id(),
       sample->domain,
-      participantBuffer.str().c_str(),
-      buffer.str().c_str()
+      std::string(part_converter).c_str(),
+      std::string(sub_converter).c_str()
     ));
   }
 
@@ -1208,23 +1016,15 @@ void
 ManagerImpl::processUpdateQos2( const SubscriptionUpdate* sample, const ::DDS::SampleInfo* /* info */)
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-    std::stringstream participantBuffer;
-    std::stringstream buffer;
-    long key = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample->participant)
-               );
-    participantBuffer << sample->participant << "(" << std::hex << key << ")";
-    key = ::OpenDDS::DCPS::GuidConverter(
-            const_cast< ::OpenDDS::DCPS::RepoId*>( &sample->id)
-          );
-    buffer << sample->id << "(" << std::hex << key << ")";
+    OpenDDS::DCPS::RepoIdConverter part_converter(sample->participant);
+    OpenDDS::DCPS::RepoIdConverter sub_converter(sample->id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateQos2( SubscriptionUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
       this->id(),
       sample->domain,
-      participantBuffer.str().c_str(),
-      buffer.str().c_str()
+      std::string(part_converter).c_str(),
+      std::string(sub_converter).c_str()
     ));
   }
 
@@ -1240,17 +1040,13 @@ void
 ManagerImpl::processUpdateQos1( const ParticipantUpdate* sample, const ::DDS::SampleInfo* /* info */)
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-    std::stringstream buffer;
-    long key = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample->id)
-               );
-    buffer << sample->id << "(" << std::hex << key << ")";
+    OpenDDS::DCPS::RepoIdConverter converter(sample->id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateQos1( ParticipantUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s ]\n"),
       this->id(),
       sample->domain,
-      buffer.str().c_str()
+      std::string(converter).c_str()
     ));
   }
 
@@ -1265,23 +1061,15 @@ void
 ManagerImpl::processUpdateQos1( const TopicUpdate* sample, const ::DDS::SampleInfo* /* info */)
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-    std::stringstream participantBuffer;
-    std::stringstream buffer;
-    long key = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample->participant)
-               );
-    participantBuffer << sample->participant << "(" << std::hex << key << ")";
-    key = ::OpenDDS::DCPS::GuidConverter(
-            const_cast< ::OpenDDS::DCPS::RepoId*>( &sample->id)
-          );
-    buffer << sample->id << "(" << std::hex << key << ")";
+    OpenDDS::DCPS::RepoIdConverter part_converter(sample->participant);
+    OpenDDS::DCPS::RepoIdConverter topic_converter(sample->id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateQos1( TopicUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ topic %s ]\n"),
       this->id(),
       sample->domain,
-      participantBuffer.str().c_str(),
-      buffer.str().c_str()
+      std::string(part_converter).c_str(),
+      std::string(topic_converter).c_str()
     ));
   }
 
@@ -1297,17 +1085,13 @@ void
 ManagerImpl::processDelete( const OwnerUpdate* sample, const ::DDS::SampleInfo* /* info */)
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-    std::stringstream buffer;
-    long key = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample->participant)
-               );
-    buffer << sample->participant << "(" << std::hex << key << ")";
+    OpenDDS::DCPS::RepoIdConverter converter(sample->participant);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDelete( OwnerUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ sender %d/ owner %d ]\n"),
       this->id(),
       sample->domain,
-      buffer.str().c_str(),
+      std::string(converter).c_str(),
       sample->sender,
       sample->owner
     ));
@@ -1335,23 +1119,15 @@ void
 ManagerImpl::processDelete( const PublicationUpdate* sample, const ::DDS::SampleInfo* /* info */)
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-    std::stringstream participantBuffer;
-    std::stringstream buffer;
-    long key = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample->participant)
-               );
-    participantBuffer << sample->participant << "(" << std::hex << key << ")";
-    key = ::OpenDDS::DCPS::GuidConverter(
-            const_cast< ::OpenDDS::DCPS::RepoId*>( &sample->id)
-          );
-    buffer << sample->id << "(" << std::hex << key << ")";
+    OpenDDS::DCPS::RepoIdConverter part_converter(sample->participant);
+    OpenDDS::DCPS::RepoIdConverter pub_converter(sample->id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDelete( PublicationUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
       this->id(),
       sample->domain,
-      participantBuffer.str().c_str(),
-      buffer.str().c_str()
+      std::string(part_converter).c_str(),
+      std::string(pub_converter).c_str()
     ));
   }
 
@@ -1377,23 +1153,15 @@ void
 ManagerImpl::processDelete( const SubscriptionUpdate* sample, const ::DDS::SampleInfo* /* info */)
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-    std::stringstream participantBuffer;
-    std::stringstream buffer;
-    long key = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample->participant)
-               );
-    participantBuffer << sample->participant << "(" << std::hex << key << ")";
-    key = ::OpenDDS::DCPS::GuidConverter(
-            const_cast< ::OpenDDS::DCPS::RepoId*>( &sample->id)
-          );
-    buffer << sample->id << "(" << std::hex << key << ")";
+    OpenDDS::DCPS::RepoIdConverter part_converter(sample->participant);
+    OpenDDS::DCPS::RepoIdConverter sub_converter(sample->id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDelete( SubscriptionUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
       this->id(),
       sample->domain,
-      participantBuffer.str().c_str(),
-      buffer.str().c_str()
+      std::string(part_converter).c_str(),
+      std::string(sub_converter).c_str()
     ));
   }
   
@@ -1418,17 +1186,13 @@ void
 ManagerImpl::processDelete( const ParticipantUpdate* sample, const ::DDS::SampleInfo* /* info */)
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-    std::stringstream buffer;
-    long key = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample->id)
-               );
-    buffer << sample->id << "(" << std::hex << key << ")";
+    OpenDDS::DCPS::RepoIdConverter converter(sample->id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDelete( ParticipantUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s ]\n"),
       this->id(),
       sample->domain,
-      buffer.str().c_str()
+      std::string(converter).c_str()
     ));
   }
 
@@ -1442,23 +1206,15 @@ void
 ManagerImpl::processDelete( const TopicUpdate* sample, const ::DDS::SampleInfo* /* info */)
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
-    std::stringstream participantBuffer;
-    std::stringstream buffer;
-    long key = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample->participant)
-               );
-    participantBuffer << sample->participant << "(" << std::hex << key << ")";
-    key = ::OpenDDS::DCPS::GuidConverter(
-            const_cast< ::OpenDDS::DCPS::RepoId*>( &sample->id)
-          );
-    buffer << sample->id << "(" << std::hex << key << ")";
+    OpenDDS::DCPS::RepoIdConverter part_converter(sample->participant);
+    OpenDDS::DCPS::RepoIdConverter topic_converter(sample->id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDelete( TopicUpdate): ")
       ACE_TEXT("repo %d - [ domain %d/ participant %s/ topic %s ]\n"),
       this->id(),
       sample->domain,
-      participantBuffer.str().c_str(),
-      buffer.str().c_str()
+      std::string(part_converter).c_str(),
+      std::string(topic_converter).c_str()
     ));
   }
 

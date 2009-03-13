@@ -2,6 +2,9 @@
 //
 // $Id$
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
+#include "dds/DCPS/RepoIdConverter.h"
+
 #include "ReceiveListenerSet.h"
 
 
@@ -27,13 +30,11 @@ OpenDDS::DCPS::ReceiveListenerSet::exist (const RepoId& local_id,
   TransportReceiveListener* listener = 0;
   if (find(map_, local_id, listener) == -1)
   {
-    ::OpenDDS::DCPS::GuidConverter converter(
-      const_cast< ::OpenDDS::DCPS::RepoId*>( &local_id)
-    );
+    OpenDDS::DCPS::RepoIdConverter converter(local_id);
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ReceiveListenerSet::exist: ")
       ACE_TEXT("could not find local %s.\n"),
-      (const char*) converter
+      std::string(converter).c_str()
     ));
 
     return false;
@@ -41,13 +42,11 @@ OpenDDS::DCPS::ReceiveListenerSet::exist (const RepoId& local_id,
 
   if (listener == 0)
   {
-    ::OpenDDS::DCPS::GuidConverter converter(
-      const_cast< ::OpenDDS::DCPS::RepoId*>( &local_id)
-    );
+    OpenDDS::DCPS::RepoIdConverter converter(local_id);
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ReceiveListenerSet::exist: ")
       ACE_TEXT("listener for local %s is nil.\n"),
-      (const char*) converter
+      std::string(converter).c_str()
     ));
 
     return false;

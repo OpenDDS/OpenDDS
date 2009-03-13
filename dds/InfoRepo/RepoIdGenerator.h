@@ -1,23 +1,30 @@
-// -*- C++ -*-
-//
-// $Id$
-#ifndef GUIDGENERATOR_H
-#define GUIDGENERATOR_H
+/*
+ * $Id$
+ */
 
-#include "inforepo_export.h"
+#ifndef REPOIDGENERATOR_H
+#define REPOIDGENERATOR_H
+
+#include "tao/Basic_Types.h"
+
+#include "dds/DdsDcpsInfoUtilsC.h"
+#include "dds/DdsDcpsGuidC.h"
+
 #include "dds/DCPS/GuidUtils.h"
 
+#include "inforepo_export.h"
+
 /**
- * @class GuidGenerator
+ * @class RepoIdGenerator
  *
- * @brief Create GUID values for use within DDS.
+ * @brief Create RepoId values for use within DDS.
  *
  * Internal to the OpenDDS repository, the Repository Identifiers that
  * uniquely identify all DDS Entities within the service managed by this
  * (and other federated) repositories consist of GUID values.
  *
- * These GUID (Global Unique IDentifiers?) values are based on the RTPS
- * specification (formal/08-04-09) GUID values.  They use the same
+ * These GUID (Global Unique IDentifiers) values are based on the RTPS
+ * specification (formal/08-04-09) GUID_t values.  They use the same
  * structure.  The VendorId value is applied in the first 2 bytes of the
  * prefix.  The remainder of the Participant Id value is composed of the
  * OpenDDS specific Federation Id value (the identifier of the repository
@@ -76,58 +83,65 @@
  * Where the VendorId value used for OpenDDS is the one for
  * Object Computing, Inc. == 0x03.
  */
-class OpenDDS_InfoRepoLib_Export GuidGenerator {
-  public:
-    /**
-     * @brief construct with at least a FederationId value.
-     *
-     * @param  federation  identifier for the repository.
-     * @param  participant identifier for the participant.
-     * @param  kind        type of Entities to generate Id values for.
-     * @return GUID_t      generated unique identifier value.
-     *
-     * If the @c kind is KIND_PARTICIPANT then the generator will generate
-     * Participant GUID values.  Otherwise it will generate the specified
-     * type of Entity values within the specified Participant.
-     */
-    GuidGenerator(
-      long federation,
-      long participant = 0,
-      OpenDDS::DCPS::EntityKind kind = OpenDDS::DCPS::KIND_PARTICIPANT
-    );
+class OpenDDS_InfoRepoLib_Export RepoIdGenerator
+{
+public:
+  static const unsigned KeyBits;
 
-    /// Virtual destructor.
-    virtual ~GuidGenerator();
+  static const unsigned KeyMask;
 
-    /// Obtain the next GUID value.
-    OpenDDS::DCPS::GUID_t next();
+  /**
+   * @brief construct with at least a FederationId value.
+   *
+   * @param  federation  identifier for the repository.
+   * @param  participant identifier for the participant.
+   * @param  kind        type of Entities to generate Id values for.
+   * @return GUID_t      generated unique identifier value.
+   *
+   * If the @c kind is KIND_PARTICIPANT then the generator will generate
+   * Participant RepoId values.  Otherwise it will generate the specified
+   * type of Entity values within the specified Participant.
+   */
+  RepoIdGenerator(
+    long federation,
+    long participant = 0,
+    OpenDDS::DCPS::EntityKind kind = OpenDDS::DCPS::KIND_PARTICIPANT
+  );
 
-    /**
-     * Set the minimum of the last key (or participant) value used.
-     *
-     * @param key the smallest value that the last generated key can be
-     *
-     * If the supplied @c key value is larger than the actual last
-     * generated key value, the new key value replaces the old one.
-     */
-    void last( long key);
+  /// Virtual destructor.
+  virtual ~RepoIdGenerator();
 
-  private:
-    /// Type of Entity to generate GUID values for.
-    OpenDDS::DCPS::EntityKind kind_;
+  /// Obtain the next RepoId value.
+  OpenDDS::DCPS::RepoId next();
 
-    /// Unique identifier for the repository.
-    long federation_;
+  /**
+   * Set the minimum of the last key (or participant) value used.
+   *
+   * @param key the smallest value that the last generated key can be
+   *
+   * If the supplied @c key value is larger than the actual last
+   * generated key value, the new key value replaces the old one.
+   */
+  void last( long key);
 
-    /// Unique identifier for the DomainParticipant.
-    long participant_;
+private:
+  /// Type of Entity to generate GUID values for.
+  OpenDDS::DCPS::EntityKind kind_;
 
-    /// Unique value for the EntityKey.
-    long lastKey_;
+  /// Unique identifier for the repository.
+  long federation_;
 
-    /// Cached entityKind encoded value.
-    CORBA::Octet kindCode_;
+  /// Unique identifier for the DomainParticipant.
+  long participant_;
+
+  /// Unique value for the EntityKey.
+  long lastKey_;
+
+  /// Cached entityKind encoded value.
+  CORBA::Octet kindCode_;
+
+  OpenDDS::DCPS::GUID_t create_guid(long participant);
 };
 
-#endif /* GUIDGENERATOR_H  */
+#endif /* REPOIDGENERATOR_H  */
 

@@ -4,7 +4,7 @@
 #include "UpdateManager.h"
 #include "ArrDelAdapter.h"
 
-#include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/RepoIdConverter.h"
 
 #include "ace/Malloc_T.h"
 #include "ace/MMAP_Memory_Pool.h"
@@ -13,7 +13,6 @@
 #include "ace/Dynamic_Service.h"
 
 #include <algorithm>
-#include <sstream>
 
 namespace Update {
 
@@ -187,8 +186,7 @@ PersistenceUpdater::IdType_ExtId::operator== (const IdType_ExtId& ext) const
 unsigned long
 PersistenceUpdater::IdType_ExtId::hash (void) const
 {
-  OpenDDS::DCPS::RepoId guid = id_;
-  return OpenDDS::DCPS::GuidConverter( guid);
+  return OpenDDS::DCPS::RepoIdConverter(id_).checksum();
 };
 
 PersistenceUpdater::PersistenceUpdater (void)
@@ -794,15 +792,11 @@ PersistenceUpdater::update( const IdPath& id, const ::DDS::DomainParticipantQos&
     this->storeUpdate( dst, part_data->participantQos.second);
 
   } else {
-    std::stringstream buffer;
-    long key = OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &id.id)
-               );
-    buffer << id.id << "(" << key << ")";
+    OpenDDS::DCPS::RepoIdConverter converter(id.id);
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) PersistenceUpdater::update: ")
       ACE_TEXT("participant %s not found\n"),
-      buffer.str().c_str()
+      std::string(converter).c_str()
     ));
   }
 }
@@ -821,15 +815,11 @@ PersistenceUpdater::update( const IdPath& id, const ::DDS::TopicQos& qos)
     this->storeUpdate( dst, topic_data->topicQos.second);
 
   } else {
-    std::stringstream buffer;
-    long key = OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &id.id)
-               );
-    buffer << id.id << "(" << key << ")";
+    OpenDDS::DCPS::RepoIdConverter converter(id.id);
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) PersistenceUpdater::update: ")
       ACE_TEXT("topic %s not found\n"),
-      buffer.str().c_str()
+      std::string(converter).c_str()
     ));
   }
 }
@@ -848,15 +838,11 @@ PersistenceUpdater::update( const IdPath& id, const ::DDS::DataWriterQos& qos)
     this->storeUpdate( dst, actor_data->drdwQos.second);
 
   } else {
-    std::stringstream buffer;
-    long key = OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &id.id)
-               );
-    buffer << id.id << "(" << key << ")";
+    OpenDDS::DCPS::RepoIdConverter converter(id.id);
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) PersistenceUpdater::update(writerQos): ")
       ACE_TEXT("publication %s not found\n"),
-      buffer.str().c_str()
+      std::string(converter).c_str()
     ));
   }
 }
@@ -875,15 +861,11 @@ PersistenceUpdater::update( const IdPath& id, const ::DDS::PublisherQos& qos)
     this->storeUpdate( dst, actor_data->pubsubQos.second);
 
   } else {
-    std::stringstream buffer;
-    long key = OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &id.id)
-               );
-    buffer << id.id << "(" << key << ")";
+    OpenDDS::DCPS::RepoIdConverter converter(id.id);
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) PersistenceUpdater::update(publisherQos): ")
       ACE_TEXT("publication %s not found\n"),
-      buffer.str().c_str()
+      std::string(converter).c_str()
     ));
   }
 }
@@ -902,15 +884,11 @@ PersistenceUpdater::update( const IdPath& id, const ::DDS::DataReaderQos& qos)
     this->storeUpdate( dst, actor_data->drdwQos.second);
 
   } else {
-    std::stringstream buffer;
-    long key = OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &id.id)
-               );
-    buffer << id.id << "(" << key << ")";
+    OpenDDS::DCPS::RepoIdConverter converter(id.id);
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) PersistenceUpdater::update(readerQos): ")
       ACE_TEXT("subscription %s not found\n"),
-      buffer.str().c_str()
+      std::string(converter).c_str()
     ));
   }
 }
@@ -929,15 +907,11 @@ PersistenceUpdater::update( const IdPath& id, const ::DDS::SubscriberQos& qos)
     this->storeUpdate( dst, actor_data->pubsubQos.second);
 
   } else {
-    std::stringstream buffer;
-    long key = OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &id.id)
-               );
-    buffer << id.id << "(" << key << ")";
+    OpenDDS::DCPS::RepoIdConverter converter(id.id);
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) PersistenceUpdater::update(subscriberQos): ")
       ACE_TEXT("subscription %s not found\n"),
-      buffer.str().c_str()
+      std::string(converter).c_str()
     ));
   }
 }
@@ -973,15 +947,11 @@ PersistenceUpdater::destroy( const IdPath& id, ItemType type, ActorType)
       break;
     default:
       {
-        std::stringstream buffer;
-        long key = OpenDDS::DCPS::GuidConverter(
-                     const_cast< ::OpenDDS::DCPS::RepoId*>( &id.id)
-                   );
-        buffer << id.id << "(" << std::hex << key << ")";
+        OpenDDS::DCPS::RepoIdConverter converter(id.id);
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P | %t) PersistenceUpdater::destroy: ")
           ACE_TEXT("unknown entity - %s.\n"),
-          buffer.str().c_str()
+          std::string(converter).c_str()
         ));
       }
     }

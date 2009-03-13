@@ -15,10 +15,10 @@
 #include /**/ "dds/DdsDcpsInfrastructureC.h"
 #include /**/ "dds/DdsDcpsInfoS.h"
 
-#include "GuidGenerator.h"
+#include "RepoIdGenerator.h"
 
 #include /**/ "dds/DdsDcpsDomainC.h"
-#include /**/ "dds/DdsDcpsGuidC.h"
+#include /**/ "dds/DdsDcpsInfoUtilsC.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include /**/ "dds/DdsDcpsInfrastructureTypeSupportC.h"
@@ -64,7 +64,7 @@ class DCPS_IR_Publication;
 class OpenDDS_InfoRepoLib_Export DCPS_IR_Domain
 {
 public:
-  DCPS_IR_Domain(::DDS::DomainId_t id, GuidGenerator& generator);
+  DCPS_IR_Domain(DDS::DomainId_t id, RepoIdGenerator& generator);
 
   ~DCPS_IR_Domain();
 
@@ -198,7 +198,7 @@ private:
 
   // Participant GUID Id generator.  The remaining Entities have their
   // values generated within the containing Participant.
-  GuidGenerator& participantIdGenerator_;
+  RepoIdGenerator& participantIdGenerator_;
 
   /// all the participants
   DCPS_IR_Participant_Map participants_;

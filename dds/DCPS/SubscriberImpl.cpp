@@ -17,6 +17,7 @@
 #include "DataSampleList.h"
 #include "AssociationData.h"
 #include "Transient_Kludge.h"
+#include "RepoIdConverter.h"
 #include "dds/DCPS/transport/framework/TransportInterface.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/transport/framework/DataLinkSet.h"
@@ -234,12 +235,12 @@ SubscriberImpl::create_opendds_datareader (
 					dr_servant) == -1)
     {
       RepoId id = dr_servant->get_subscription_id();
-      ::OpenDDS::DCPS::GuidConverter converter( id);
+      RepoIdConverter converter(id);
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("SubscriberImpl::create_datareader: ")
         ACE_TEXT("failed to register datareader %s with TransportImpl.\n"),
-        (const char*) converter
+        std::string(converter).c_str()
       ));
       return ::DDS::DataReader::_nil ();
     }
@@ -273,11 +274,11 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
     if (dr_subscriber.in() != this)
     {
         RepoId id = dr_servant->get_subscription_id();
-        ::OpenDDS::DCPS::GuidConverter converter( id);
+        RepoIdConverter converter(id);
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) SubscriberImpl::delete_datareader: ")
           ACE_TEXT("data reader %s doesn't belong to this subscriber.\n"),
-          (const char*) converter
+          std::string(converter).c_str()
         ));
         return ::DDS::RETCODE_PRECONDITION_NOT_MET;
     }
@@ -314,13 +315,13 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
     {
       CORBA::String_var topic_name = dr_servant->get_topic_name();
       RepoId id = dr_servant->get_subscription_id ();
-      ::OpenDDS::DCPS::GuidConverter converter( id);
+      RepoIdConverter converter(id);
       ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("SubscriberImpl::delete_datareader: ")
         ACE_TEXT("datareader(topic_name=%s) %s not found.\n"),
         topic_name.in(),
-        (const char*) converter
+        std::string(converter).c_str()
       ),::DDS::RETCODE_ERROR);
     }
 
@@ -372,12 +373,12 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
   // Unregister the DataReader object with the TransportImpl.
   else if (impl->unregister_subscription (subscription_id) == -1)
     {
-      ::OpenDDS::DCPS::GuidConverter converter( subscription_id);
+      RepoIdConverter converter(subscription_id);
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("SubscriberImpl::delete_datareader: ")
         ACE_TEXT("failed to unregister datareader %s with TransportImpl.\n"),
-        (const char*) converter
+        std::string(converter).c_str()
       ));
       return ::DDS::RETCODE_ERROR;
     }
@@ -607,11 +608,11 @@ SubscriberImpl::set_qos (
                 = idToQosMap.insert(DrIdToQosMap::value_type(id, qos));
               if (pair.second == false)
               {
-                ::OpenDDS::DCPS::GuidConverter converter( id);
+                RepoIdConverter converter(id);
                 ACE_ERROR_RETURN((LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::set_qos: ")
                   ACE_TEXT("insert %s to DrIdToQosMap failed.\n"), 
-                  (const char*) converter
+                  std::string(converter).c_str()
                 ),::DDS::RETCODE_ERROR);
               }
             }

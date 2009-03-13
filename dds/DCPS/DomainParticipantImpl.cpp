@@ -9,6 +9,7 @@
 #include "SubscriberImpl.h"
 #include "Marked_Default_Qos.h"
 #include "Registered_Data_Types.h"
+#include "RepoIdConverter.h"
 #include "Transient_Kludge.h"
 #include "FailoverListener.h"
 #include "Util.h"
@@ -1043,11 +1044,11 @@ namespace OpenDDS
       try
         {
           if( DCPS_debug_level >= 4) {
-            ::OpenDDS::DCPS::GuidConverter converter( this->dp_id_);
+            RepoIdConverter converter(dp_id_);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("%P|%t) DomainParticipantImpl::ignore_participant: ")
               ACE_TEXT("%s ignoring handle==%d, key==%x.\n"),
-              (const char*) converter,
+              std::string(converter).c_str(),
               handle,
               ignoreKey
             ));
@@ -1057,11 +1058,11 @@ namespace OpenDDS
                                           dp_id_,
                                           ignoreKey);
           if( DCPS_debug_level >= 4) {
-            ::OpenDDS::DCPS::GuidConverter converter( this->dp_id_);
+            RepoIdConverter converter(dp_id_);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_participant: ")
               ACE_TEXT("%s repo call returned.\n"),
-              (const char*) converter
+              std::string(converter).c_str()
             ));
           }
         }
@@ -1121,11 +1122,11 @@ namespace OpenDDS
       try
         {
           if( DCPS_debug_level >= 4) {
-            ::OpenDDS::DCPS::GuidConverter converter( this->dp_id_);
+            RepoIdConverter converter(dp_id_);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("%P|%t) DomainParticipantImpl::ignore_topic: ")
               ACE_TEXT("%s ignoring handle==%d, key==%x.\n"),
-              (const char*) converter,
+              std::string(converter).c_str(),
               handle,
               ignoreKey
             ));
@@ -1191,11 +1192,11 @@ namespace OpenDDS
       try
         {
           if( DCPS_debug_level >= 4) {
-            ::OpenDDS::DCPS::GuidConverter converter( this->dp_id_);
+            RepoIdConverter converter(dp_id_);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("%P|%t) DomainParticipantImpl::ignore_publication: ")
               ACE_TEXT("%s ignoring handle==%d, key==%x.\n"),
-              (const char*) converter,
+              std::string(converter).c_str(),
               handle,
               ignoreKey
             ));
@@ -1261,11 +1262,11 @@ namespace OpenDDS
       try
         {
           if( DCPS_debug_level >= 4) {
-            ::OpenDDS::DCPS::GuidConverter converter( this->dp_id_);
+            RepoIdConverter converter(dp_id_);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("%P|%t) DomainParticipantImpl::ignore_subscription: ")
               ACE_TEXT("%s ignoring handle==%d, key==%x.\n"),
-              (const char*) converter,
+              std::string(converter).c_str(),
               handle,
               ignoreKey
             ));
@@ -1481,16 +1482,16 @@ namespace OpenDDS
     DomainParticipantImpl::get_federation_id()
       ACE_THROW_SPEC ((CORBA::SystemException))
     {
-      GuidConverter gc(dp_id_);
-      return gc.federationId();
+      RepoIdConverter converter(dp_id_);
+      return converter.federationId();
     }
 
     CORBA::Long
     DomainParticipantImpl::get_participant_id()
       ACE_THROW_SPEC ((CORBA::SystemException))
     {
-      GuidConverter gc(dp_id_);
-      return gc.participantId();
+      RepoIdConverter converter(dp_id_);
+      return converter.participantId();
     }
 
     ::DDS::Topic_ptr

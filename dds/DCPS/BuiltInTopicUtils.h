@@ -17,7 +17,7 @@
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "Service_Participant.h"
-#include "GuidUtils.h"
+#include "RepoIdConverter.h"
 #include "dds/DCPS/DomainParticipantImpl.h"
 
 #include <sstream>
@@ -293,12 +293,12 @@ namespace OpenDDS {
               /// @TODO: FIXME This fails on fragmented sample sets.
               for (CORBA::ULong i = 0; i < repoid_len; ++i)
                 {
-                  ::OpenDDS::DCPS::GuidConverter converter( const_cast<GUID_t*>( &repoids[i]));
+                  ::OpenDDS::DCPS::RepoIdConverter converter(repoids[i]);
                   if (DCPS_debug_level >= 10) {
                     ACE_DEBUG((LM_DEBUG,
                       ACE_TEXT("(%P|%t) BIT_Helper::repo_ids_to_instance_handles: ")
                       ACE_TEXT("repoId %s\n"),
-                      (const char*)converter
+                      std::string(converter).c_str()
                     ));
                   }
                   for (CORBA::ULong j = 0; j < data_len; ++j)
@@ -315,7 +315,7 @@ namespace OpenDDS {
                           infos[j].instance_handle
                         ));
                       }
-                      if( data[j].key[key_pos] == (CORBA::Long)((long) converter))
+                      if( data[j].key[key_pos] == (CORBA::Long)converter.checksum())
                         {
                           handles[i] = infos[j].instance_handle;
                           ++count;

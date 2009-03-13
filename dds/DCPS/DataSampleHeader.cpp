@@ -5,6 +5,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "DataSampleHeader.h"
 #include "Serializer.h"
+#include "RepoIdConverter.h"
 
 #include <iostream>
 
@@ -186,11 +187,7 @@ std::ostream& operator<<( std::ostream& str, const OpenDDS::DCPS::DataSampleHead
   str << "(" << std::dec << value.lifespan_duration_sec_ << "/";
   str << std::dec << value.lifespan_duration_nanosec_ << "), ";
   str << std::dec << value.coherency_group_ << ", ";
-
-  long key = OpenDDS::DCPS::GuidConverter(
-               const_cast< OpenDDS::DCPS::GUID_t*>( &value.publication_id_)
-             );
-  str << value.publication_id_ << "(" << std::hex << key << ")";
+  str << OpenDDS::DCPS::RepoIdConverter(value.publication_id_);
 
   str << "]";
   return str;

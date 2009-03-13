@@ -6,6 +6,7 @@
 #include "DataLinkSet_rch.h"
 
 #include "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/Util.h"
 #include "TransportImpl.h"
 #include "TransportSendListener.h"
@@ -166,13 +167,11 @@ OpenDDS::DCPS::DataLinkSet::find_link(const RepoId remoteId,
           {
             if (unbind(map_, itr->first) != 0)
             {
-              ::OpenDDS::DCPS::GuidConverter converter(
-                const_cast< ::OpenDDS::DCPS::RepoId*>( &localId)
-              );
+              RepoIdConverter converter(localId);
               ACE_ERROR((LM_ERROR,
                 ACE_TEXT("(%P|%t) DataLinkSet::find_link: ")
                 ACE_TEXT("cannot remove link for localId %s pub_side is %s.\n"),
-                (const char*) converter,
+                std::string(converter).c_str(),
                 (pub_side? "true": "false")
               ));
             }

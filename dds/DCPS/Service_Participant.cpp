@@ -5,6 +5,7 @@
 #include "Service_Participant.h"
 #include "BuiltInTopicUtils.h"
 #include "DataDurabilityCache.h"
+#include "RepoIdConverter.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
@@ -831,11 +832,11 @@ namespace OpenDDS
                   RepoId id = current->svt_->get_id();
                   repoList.push_back(std::make_pair(location->second, id));
                   if( DCPS_debug_level > 0) {
-                    ::OpenDDS::DCPS::GuidConverter converter( id);
+                    RepoIdConverter converter(id);
                     ACE_DEBUG((LM_DEBUG,
                       ACE_TEXT("(%P|%t) Service_Participant::set_repo_domain: ")
                       ACE_TEXT("participant %s attached to Repo[ %d].\n"),
-                      (const char*) converter,
+                      std::string(converter).c_str(),
                       key
                     ));
                   }

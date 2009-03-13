@@ -31,6 +31,7 @@ module OpenDDS
 
     // Vendor specific Kinds have the following bit pattern: 01xx_xxxx
     const octet ENTITYKIND_OPENDDS_TOPIC        = 0x45;
+    const octet ENTITYKIND_OPENDDS_PARTICIPANT  = 0xc1;
 
 // Specifying the GUID type as a DCPS data type with a complex key forces
 // the generation of the logical less than functor for the type.

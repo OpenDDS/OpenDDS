@@ -13,6 +13,7 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
+#include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpConfiguration.h"
@@ -357,8 +358,8 @@ operator<<( std::ostream& str, const Subscriber& value)
   value.reader_->get_latency_stats( statistics);
   str << " --- statistical summary ---" << std::endl;
   for( unsigned long index = 0; index < statistics.length(); ++index) {
-    ::OpenDDS::DCPS::GuidConverter converter( statistics[ index].publication);
-    str << "  Writer[ " << (const char*)converter << "]" << std::endl;
+    OpenDDS::DCPS::RepoIdConverter converter(statistics[ index].publication);
+    str << "  Writer[ " << converter << "]" << std::endl;
     str << "     samples: " << statistics[ index].n << std::endl;
     str << "        mean: " << statistics[ index].mean << std::endl;
     str << "     minimum: " << statistics[ index].minimum << std::endl;
@@ -389,10 +390,8 @@ Subscriber::rawData( std::ostream& str) const
          = readerImpl->raw_latency_statistics().begin();
        current != readerImpl->raw_latency_statistics().end();
        ++current, ++index) {
-    ::OpenDDS::DCPS::GuidConverter converter(
-      const_cast< ::OpenDDS::DCPS::RepoId*>( &current->first)
-    );
-    str << std::endl << "  Writer[ " << (const char*)converter << "]" << std::endl;
+    OpenDDS::DCPS::GuidConverter converter(current->first);
+    str << std::endl << "  Writer[ " << converter << "]" << std::endl;
     current->second.raw_data( str);
   }
   return str;

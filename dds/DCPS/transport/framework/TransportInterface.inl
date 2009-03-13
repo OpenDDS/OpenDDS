@@ -9,6 +9,7 @@
 #include "DataLink.h"
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/RepoIdConverter.h"
 #include "ace/Message_Block.h"
 #include "EntryExit.h"
 
@@ -210,12 +211,12 @@ OpenDDS::DCPS::TransportInterface::send(const DataSampleList& samples)
           //       associated with any remote subscriber ids" case.
 
           if( DCPS_debug_level > 4) {
-            ::OpenDDS::DCPS::GuidConverter converter( cur->publication_id_);
+            OpenDDS::DCPS::RepoIdConverter converter(cur->publication_id_);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) TransportInterface::send: ")
               ACE_TEXT("no links for publication %s, ")
               ACE_TEXT("not sending %d samples.\n"),
-              (const char*) converter,
+              std::string(converter).c_str(),
               samples.size_
             ));
           }
