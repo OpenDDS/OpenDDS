@@ -2,10 +2,10 @@
  * $Id$
  */
 
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
 #include <iostream>
 #include <iomanip>
-
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
 #include "ace/ACE.h"
 #include "ace/OS_NS_string.h"
@@ -17,7 +17,7 @@ operator<<( std::ostream& str, const OpenDDS::DCPS::GUID_t& value)
 {
   const CORBA::Octet* octets = reinterpret_cast<const CORBA::Octet*>( &value);
   for( unsigned int index = 0; index < sizeof(value); ++index) {
-    if( index>0 && index%4 == 0) str << ".";
+    if( index>0 && index%4 == 0) str << (const char *)".";
     unsigned short byte = octets[index];
     str << std::hex << std::setfill('0') << std::setw(2) << byte;
   }

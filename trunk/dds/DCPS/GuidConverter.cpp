@@ -1,6 +1,8 @@
 /*
  * $Id$
  */
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
 #include <iomanip>
 #include <sstream>
 

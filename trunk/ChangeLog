@@ -1,3 +1,11 @@
+Fri Mar 13 23:06:11 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/GuidConverter.cpp:
+        * dds/DCPS/GuidUtils.cpp:
+        * dds/DCPS/RepoIdConverter.cpp:
+
+          Fixed VC++ compile errors in the previous checkin.
+
 Fri Mar 13 20:19:27 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/BuiltInTopicUtils.h:
@@ -78,7 +86,7 @@ Fri Mar 13 20:19:27 UTC 2009  Steven Stallion  <stallions@ociweb.com>
           codebase for InstanceHandle_t refactoring (i.e. removed
           conflicting conversion operators).  RepoId should now be treated
           as an opaque type.
-        
+
         * dds/InfoRepo/DCPS_IR_Domain.cpp:
 
           Fixed an issue which caused built-in-topic participants to
