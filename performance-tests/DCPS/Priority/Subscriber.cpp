@@ -351,8 +351,10 @@ Subscriber::run()
   }
 }
 
+}
+
 std::ostream&
-operator<<( std::ostream& str, const Subscriber& value)
+operator<<( std::ostream& str, const Test::Subscriber& value)
 {
   ::OpenDDS::DCPS::LatencyStatisticsSeq statistics;
   value.reader_->get_latency_stats( statistics);
@@ -369,6 +371,9 @@ operator<<( std::ostream& str, const Subscriber& value)
 
   return str;
 }
+
+namespace Test
+{
 
 std::ostream&
 Subscriber::rawData( std::ostream& str) const

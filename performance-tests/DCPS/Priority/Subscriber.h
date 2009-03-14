@@ -9,7 +9,15 @@
 #include <map>
 #include <iosfwd>
 
-namespace Test {
+namespace Test
+{
+  class Subscriber;
+}
+
+std::ostream& operator<<(std::ostream& str, const Test::Subscriber& value);
+
+namespace Test
+{
 
 class Options;
 class DataReaderListener;
@@ -44,7 +52,7 @@ class Subscriber {
     std::ostream& rawData( std::ostream& str) const;
 
     /// Stream out statistics values.
-    friend std::ostream& operator<<( std::ostream& str, const Subscriber& value);
+    friend std::ostream& ::operator<<(std::ostream& str, const Subscriber& value);
 
   private:
     /// Test options.
