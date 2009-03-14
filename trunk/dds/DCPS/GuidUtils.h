@@ -79,7 +79,7 @@ get_entity_kind(EntityKind kind)
 inline OpenDDS_Dcps_Export GUID_t
 create_empty_guid()
 {
-  GUID_t guid =
+  GUID_t guid = {
     { VENDORID_OCI[0],
       VENDORID_OCI[1],
       0,
@@ -91,9 +91,9 @@ create_empty_guid()
       0,
       0,
       0,
-      0,
-      ENTITYID_UNKNOWN
-    };
+      0
+    }, ENTITYID_UNKNOWN
+  };
   return guid;
 }
 

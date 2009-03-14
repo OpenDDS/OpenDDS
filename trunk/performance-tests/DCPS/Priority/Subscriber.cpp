@@ -390,7 +390,7 @@ Subscriber::rawData( std::ostream& str) const
          = readerImpl->raw_latency_statistics().begin();
        current != readerImpl->raw_latency_statistics().end();
        ++current, ++index) {
-    OpenDDS::DCPS::GuidConverter converter(current->first);
+    OpenDDS::DCPS::RepoIdConverter converter(current->first);
     str << std::endl << "  Writer[ " << converter << "]" << std::endl;
     current->second.raw_data( str);
   }
