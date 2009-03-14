@@ -1,3 +1,13 @@
+Sat Mar 14 16:07:32 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/GuidUtils.h:
+        * dds/DCPS/RepoIdConverter.h:
+        * dds/DCPS/RepoIdConverter.cpp:
+        * performance-tests/DCPS/Priority/Subscriber.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+
+          Fixes to warnings/errors for GCC and VC++.
+
 Fri Mar 13 23:06:11 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/GuidConverter.cpp:

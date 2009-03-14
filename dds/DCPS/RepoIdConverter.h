@@ -5,6 +5,8 @@
 #ifndef DCPS_REPOIDCONVERTER_H
 #define DCPS_REPOIDCONVERTER_H
 
+#include <ostream>
+
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 
@@ -71,5 +73,8 @@ public:
 
 } // namespace
 } // namespace
+
+OpenDDS_Dcps_Export std::ostream&
+operator<<(std::ostream& os, const OpenDDS::DCPS::RepoIdConverter& rhs);
 
 #endif /* DCPS_REPOIDCONVERTER_H */
