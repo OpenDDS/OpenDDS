@@ -59,6 +59,9 @@ New to this version are the following changes:
   block indefinitely.  To change the default blocking behavior, you may
   specify a number of seconds to block with the -DCPSPendingTimeout option.
 
+- Instance handles are now compliant with version 1.2 of the DDS
+  specification.
+
 =========================================================================
 
 Version 1.2 of OpenDDS.

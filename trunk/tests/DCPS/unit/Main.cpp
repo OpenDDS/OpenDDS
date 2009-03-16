@@ -343,7 +343,7 @@ void run_next_sample_test (ssize_t size)
   // converted from legacy code and should be treated as such!
   OpenDDS::DCPS::GUID_t guid = OpenDDS::DCPS::create_empty_guid();
 
-  guid.guidPrefix[7] = 1; // participantId = 1
+  guid.guidPrefix[11] = 1; // participantId = 1
   guid.entityId.entityKind = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
   guid.entityId.entityKey[2] = 0;
 
@@ -435,7 +435,7 @@ void run_next_send_sample_test (ssize_t size)
   // converted from legacy code and should be treated as such!
   OpenDDS::DCPS::GUID_t guid = OpenDDS::DCPS::create_empty_guid();
 
-  guid.guidPrefix[7] = 1; // participantId = 1
+  guid.guidPrefix[11] = 1; // participantId = 1
   guid.entityId.entityKind = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
   guid.entityId.entityKey[2] = 0;
 
@@ -540,7 +540,7 @@ void run_next_instance_sample_test (ssize_t size)
   // converted from legacy code and should be treated as such!
   OpenDDS::DCPS::GUID_t guid = OpenDDS::DCPS::create_empty_guid();
 
-  guid.guidPrefix[7] = 1; // participantId = 1
+  guid.guidPrefix[11] = 1; // participantId = 1
   guid.entityId.entityKind = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
   guid.entityId.entityKey[2] = 0;
 
