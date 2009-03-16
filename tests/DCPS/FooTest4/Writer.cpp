@@ -74,7 +74,7 @@ Writer::start ()
       // converted from legacy code and should be treated as such!
       sample.header_.publication_id_ = OpenDDS::DCPS::create_empty_guid();
 
-      sample.header_.publication_id_.guidPrefix[7] = 1; // participantId = 1
+      sample.header_.publication_id_.guidPrefix[11] = 1; // participantId = 1
       sample.header_.publication_id_.entityId.entityKind = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
       sample.header_.publication_id_.entityId.entityKey[2] = 1;
 

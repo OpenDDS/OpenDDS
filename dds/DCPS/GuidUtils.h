@@ -121,11 +121,11 @@ operator==( const OpenDDS::DCPS::GUID_t& lhs, const OpenDDS::DCPS::GUID_t& rhs)
 
 // Serialize to ASCII Hex string: "xxxx.xxxx.xxxx.xxxx"
 OpenDDS_Dcps_Export std::ostream&
-operator<<( std::ostream& str, const OpenDDS::DCPS::GUID_t& value);
+operator<<(std::ostream& os, const OpenDDS::DCPS::GUID_t& rhs);
 
 // Deserialize from ASCII Hex string: "xxxx.xxxx.xxxx.xxxx"
 OpenDDS_Dcps_Export std::istream&
-operator>>( std::istream& str, OpenDDS::DCPS::GUID_t& value);
+operator>>(std::istream& is, OpenDDS::DCPS::GUID_t& rhs);
 
 #endif /* GUIDUTILS_H */
 

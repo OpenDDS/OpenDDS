@@ -4,6 +4,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
+#include <cstdlib>
 #include <iostream>
 #include <iomanip>
 
@@ -12,40 +13,65 @@
 
 #include "GuidUtils.h"
 
-std::ostream&
-operator<<( std::ostream& str, const OpenDDS::DCPS::GUID_t& value)
+namespace
 {
-  const CORBA::Octet* octets = reinterpret_cast<const CORBA::Octet*>( &value);
-  for( unsigned int index = 0; index < sizeof(value); ++index) {
-    if( index>0 && index%4 == 0) str << (const char *)".";
-    unsigned short byte = octets[index];
-    str << std::hex << std::setfill('0') << std::setw(2) << byte;
+inline std::ostream&
+sep(std::ostream& os)
+{
+  return os << ".";
+}
+
+inline std::ostream&
+setopts(std::ostream& os)
+{
+  return os << std::hex << std::setfill('0') << std::setw(2);
+}
+
+} // namespace
+
+std::ostream&
+operator<<(std::ostream& os, const OpenDDS::DCPS::GUID_t& rhs)
+{
+  std::size_t len;
+  
+  len = sizeof (rhs.guidPrefix) / sizeof (CORBA::Octet);
+  for (std::size_t i = 0; i < len; ++i)
+  {
+    os << setopts << unsigned(rhs.guidPrefix[i]);
+    if ((i + 1) % 4 == 0) os << sep;
   }
-  return str;
+
+  len = sizeof (rhs.entityId.entityKey) / sizeof (CORBA::Octet);
+  for (std::size_t i = 0; i < len; ++i)
+  {
+    os << setopts << unsigned(rhs.entityId.entityKey[i]);
+  }
+  os << setopts << unsigned(rhs.entityId.entityKind);
+  
+  return os;
 }
 
 std::istream&
-operator>>( std::istream& str, OpenDDS::DCPS::GUID_t& value)
+operator>>(std::istream& is, OpenDDS::DCPS::GUID_t& rhs)
 {
-  // Brute force read.
   char discard;
   unsigned long word;
 
-  str >> std::hex >> word;
-  OpenDDS::DCPS::fill_guid(value.guidPrefix, word, 4);
-  str >> discard;
+  is >> std::hex >> word;
+  OpenDDS::DCPS::fill_guid(rhs.guidPrefix, word, 4);
+  is >> discard; // sep
 
-  str >> std::hex >> word;
-  OpenDDS::DCPS::fill_guid(value.guidPrefix + 4, word, 4);
-  str >> discard;
+  is >> std::hex >> word;
+  OpenDDS::DCPS::fill_guid(rhs.guidPrefix + 4, word, 4);
+  is >> discard; // sep
 
-  str >> std::hex >> word;
-  OpenDDS::DCPS::fill_guid(value.guidPrefix + 8, word, 4);
-  str >> discard;
+  is >> std::hex >> word;
+  OpenDDS::DCPS::fill_guid(rhs.guidPrefix + 8, word, 4);
+  is >> discard; // sep
 
-  str >> std::hex >> word;
-  OpenDDS::DCPS::fill_guid(value.entityId.entityKey, word, 3);
-  OpenDDS::DCPS::fill_guid(&value.entityId.entityKind, word);
+  is >> std::hex >> word;
+  OpenDDS::DCPS::fill_guid(rhs.entityId.entityKey, word >> 8, 3);
+  OpenDDS::DCPS::fill_guid(&rhs.entityId.entityKind, word);
   
-  return str;
+  return is;
 }

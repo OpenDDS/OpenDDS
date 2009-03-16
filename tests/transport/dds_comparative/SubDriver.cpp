@@ -237,7 +237,7 @@ SubDriver::parse_arg_p(const char* arg, bool& flag)
   // converted from legacy code and should be treated as such!
   OpenDDS::DCPS::GUID_t guid = OpenDDS::DCPS::create_empty_guid();
 
-  guid.guidPrefix[7] = 1; // participantId = 1
+  guid.guidPrefix[11] = 1; // participantId = 1
   guid.entityId.entityKind = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
   guid.entityId.entityKey[2] = ACE_OS::atoi(pub_id_str.c_str());
 
@@ -299,7 +299,7 @@ SubDriver::parse_arg_s(const char* arg, bool& flag)
   // converted from legacy code and should be treated as such!
   OpenDDS::DCPS::GUID_t guid = OpenDDS::DCPS::create_empty_guid();
 
-  guid.guidPrefix[7] = 1; // participantId = 1
+  guid.guidPrefix[11] = 1; // participantId = 1
   guid.entityId.entityKind = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
   guid.entityId.entityKey[2] = ACE_OS::atoi(sub_id_str.c_str());
 
