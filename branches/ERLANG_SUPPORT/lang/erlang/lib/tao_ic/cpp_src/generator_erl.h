@@ -2,8 +2,8 @@
  * $Id$
  */
 
-#ifndef TAO_IC_GENERATOR_ERL_H
-#define TAO_IC_GENERATOR_ERL_H
+#ifndef GENERATOR_ERL_H
+#define GENERATOR_ERL_H
 
 #include "generator.h"
 
@@ -21,4 +21,4 @@ public:
   bool generate_structure(AST_Structure* node, std::vector<AST_Field*>& v);
 };
 
-#endif /* TAO_IC_GENERATOR_ERL_H */
+#endif /* GENERATOR_ERL_H */

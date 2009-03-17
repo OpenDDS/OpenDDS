@@ -2,8 +2,8 @@
  * $Id$
  */
 
-#ifndef TAO_IC_BE_GLOBAL_H
-#define TAO_IC_BE_GLOBAL_H
+#ifndef BE_GLOBAL_H
+#define BE_GLOBAL_H
 
 #include <string>
 
@@ -68,4 +68,4 @@ private:
   bool suppress_skel_;
 };
 
-#endif /* TAO_IC_BE_GLOBAL_H */
+#endif /* BE_GLOBAL_H */

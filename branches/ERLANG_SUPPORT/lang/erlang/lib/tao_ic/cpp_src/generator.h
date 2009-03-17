@@ -2,8 +2,8 @@
  * $Id$
  */
 
-#ifndef TAO_IC_GENERATOR_H
-#define TAO_IC_GENERATOR_H
+#ifndef GENERATOR_H
+#define GENERATOR_H
 
 #include <vector>
 
@@ -57,4 +57,4 @@ private:
   std::vector<generator*> generators_;
 };
 
-#endif /* TAO_IC_GENERATOR_H */
+#endif /* GENERATOR_H */

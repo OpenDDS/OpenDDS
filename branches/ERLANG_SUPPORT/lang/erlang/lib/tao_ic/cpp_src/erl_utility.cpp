@@ -461,15 +461,3 @@ to_list(vector<string>& v)
 
   return os.str();
 }
-
-ostream&
-operator<<(ostream& os, AST_Expression* rhs)
-{
-  return os << erl_literal(rhs);
-}
-
-ostream&
-operator<<(ostream& os, Identifier* rhs)
-{
-  return os << erl_identifier(rhs);
-}

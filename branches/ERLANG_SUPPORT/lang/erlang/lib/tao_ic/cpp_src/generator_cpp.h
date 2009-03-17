@@ -2,8 +2,8 @@
  * $Id$
  */
 
-#ifndef TAO_IC_GENERATOR_CPP_H
-#define TAO_IC_GENERATOR_CPP_H
+#ifndef GENERATOR_CPP_H
+#define GENERATOR_CPP_H
 
 #include "generator.h"
 
@@ -15,4 +15,4 @@ public:
   ~generator_cpp();
 };
 
-#endif /* TAO_IC_GENERATOR_CPP_H */
+#endif /* GENERATOR_CPP_H */

@@ -2,8 +2,8 @@
  * $Id$
  */
 
-#ifndef TAO_IC_ACE_COMPAT_H
-#define TAO_IC_ACE_COMPAT_H
+#ifndef ACE_COMPAT_H
+#define ACE_COMPAT_H
 
 #include "ace/Version.h"
 
@@ -21,4 +21,4 @@ typedef bool idl_bool;
 # define BE_PI_CONST
 #endif /* ACE_PRE_5_5 */
 
-#endif /* TAO_IC_ACE_COMPAT_H */
+#endif /* ACE_COMPAT_H */

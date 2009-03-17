@@ -2,8 +2,8 @@
  * $Id$
  */
 
-#ifndef TAO_IC_ERL_UTILITY_H
-#define TAO_IC_ERL_UTILITY_H
+#ifndef ERL_UTILITY_H
+#define ERL_UTILITY_H
 
 #include <ostream>
 #include <fstream>
@@ -169,7 +169,7 @@ public:
     add_export(os.str());
   }
 
-  template <typename InputIterator>
+  template <class InputIterator>
   void add_exports(InputIterator first, InputIterator last, int arity)
   {
     for (InputIterator it(first); it != last; ++it)
@@ -197,8 +197,4 @@ private:
 
 std::string to_list(std::vector<std::string>& v);
 
-std::ostream& operator<<(ostream& os, AST_Expression* rhs);
-
-std::ostream& operator<<(ostream& os, Identifier* rhs);
-
-#endif /* TAO_IC_ERL_UTILITY_H */
+#endif /* ERL_UTILITY_H */
