@@ -13,6 +13,8 @@
 #include "ast_field.h"
 #include "ast_module.h"
 #include "ast_structure.h"
+#include "ast_union.h"
+#include "ast_union_branch.h"
 
 class generator
 {
