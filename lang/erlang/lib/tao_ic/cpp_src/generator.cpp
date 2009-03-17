@@ -6,6 +6,10 @@
 
 using namespace std;
 
+generator::generator()
+{
+}
+
 generator::~generator()
 {
 }
