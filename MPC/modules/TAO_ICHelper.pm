@@ -32,7 +32,8 @@ sub get_filenames {
   #
   if ($type ne 'const' and
       $type ne 'enum' and
-      $type ne 'struct') {
+      $type ne 'struct' and
+      $type ne 'union') {
     return @filenames;
   }
 
