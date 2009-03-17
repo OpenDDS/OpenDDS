@@ -103,6 +103,12 @@ be_visitor::visit_constant(AST_Constant* node)
 }
 
 int
+be_visitor::visit_enum_val(AST_EnumVal*)
+{
+  return 0;
+}
+
+int
 be_visitor::visit_enum(AST_Enum* node)
 {
   vector<AST_EnumVal*> v;
@@ -133,37 +139,7 @@ be_visitor::visit_structure(AST_Structure* node)
 }
 
 int
-be_visitor::visit_enum_val(AST_EnumVal*)
-{
-  return 0;
-}
-
-int
-be_visitor::visit_exception(AST_Exception*)
-{
-  return 0;
-}
-
-int
 be_visitor::visit_structure_fwd(AST_StructureFwd*)
-{
-  return 0;
-}
-
-int
-be_visitor::visit_union(AST_Union*)
-{
-  return 0;
-}
-
-int
-be_visitor::visit_union_fwd(AST_UnionFwd*)
-{
-  return 0;
-}
-
-int
-be_visitor::visit_union_branch(AST_UnionBranch*)
 {
   return 0;
 }
@@ -175,6 +151,35 @@ be_visitor::visit_union_label(AST_UnionLabel*)
 }
 
 int
+be_visitor::visit_union_branch(AST_UnionBranch*)
+{
+  return 0;
+}
+
+int
+be_visitor::visit_union(AST_Union* node)
+{
+  vector<AST_UnionBranch*> v;
+  find_children(node, v, AST_Decl::NT_union_branch);
+
+  if (!generator_.generate_union(node, v))
+  {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("%N:%l: visit_union()")
+                      ACE_TEXT(" generate_union failed!\n")), -1);
+  }
+  return 0;
+}
+
+int
+be_visitor::visit_union_fwd(AST_UnionFwd*)
+{
+  return 0;
+}
+
+//
+
+int
 be_visitor::visit_native(AST_Native*)
 {
   return 0;
@@ -182,6 +187,12 @@ be_visitor::visit_native(AST_Native*)
 
 int
 be_visitor::visit_typedef(AST_Typedef*)
+{
+  return 0;
+}
+
+int
+be_visitor::visit_exception(AST_Exception*)
 {
   return 0;
 }

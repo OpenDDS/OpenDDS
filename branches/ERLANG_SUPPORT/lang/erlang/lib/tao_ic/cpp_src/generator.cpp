@@ -28,6 +28,12 @@ generator::generate_structure(AST_Structure*, vector<AST_Field*>&)
   return true;
 }
 
+bool
+generator::generate_union(AST_Union*, vector<AST_UnionBranch*>&)
+{
+  return true;
+}
+
 
 generator_composite::generator_composite()
 {
@@ -109,6 +115,19 @@ generator_composite::generate_structure(AST_Structure* node, vector<AST_Field*>&
   for (iterator it(begin()); it != end(); ++it)
   {
     if (!(*it)->generate_structure(node, v))
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool
+generator_composite::generate_union(AST_Union* node, vector<AST_UnionBranch*>& v)
+{
+  for (iterator it(begin()); it != end(); ++it)
+  {
+    if (!(*it)->generate_union(node, v))
     {
       return false;
     }

@@ -29,10 +29,10 @@ erl_identifier::erl_identifier(UTL_ScopedName *name)
     Identifier* item = it.item();
     it.next();
       
-    str_ += item->get_string();
+    str_.append(item->get_string());
     if (!it.is_done())
     {
-      str_ += sep;
+      str_.append(sep);
     }
   }
   init();
@@ -320,7 +320,7 @@ erl_header::erl_header(UTL_ScopedName* name)
 {
   // Initialize filename_
   be_global->get_include_dir(filename_);
-  filename_ += basename();
+  filename_.append(basename());
  
   // Initialize guard_
   for (string::iterator it(guard_.begin());
@@ -328,7 +328,7 @@ erl_header::erl_header(UTL_ScopedName* name)
   {
     *it = toupper(*it);
   }
-  guard_ += "_HRL";
+  guard_.append("_HRL");
 }
 
 erl_header::~erl_header()
@@ -380,7 +380,7 @@ erl_module::erl_module(UTL_ScopedName* name)
 {
   // Initialize filename_
   be_global->get_src_dir(filename_);
-  filename_ += basename();
+  filename_.append(basename());
 }
 
 erl_module::~erl_module()

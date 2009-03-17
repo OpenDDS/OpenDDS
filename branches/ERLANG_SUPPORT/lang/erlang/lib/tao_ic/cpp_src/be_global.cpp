@@ -63,7 +63,7 @@ normalize_path(string& s)
   size_t len = s.length();
   if (len > 0 && s[len - 1] != ACE_DIRECTORY_SEPARATOR_CHAR_A)
   {
-    s += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+    s.append(ACE_DIRECTORY_SEPARATOR_CHAR_A);
   }
 }
 } // namespace
@@ -211,13 +211,11 @@ BE_GlobalData::get_cpp_src_dir(string& s) const
 void
 BE_GlobalData::get_output_dir(string& s, const char* dirname) const
 {
-  s += output_dir_;
- 
+  s.append(output_dir_);
   if (output_otp_)
   {
-    s += dirname;
+    s.append(dirname);
   }
-  
   normalize_path(s);
 }
 

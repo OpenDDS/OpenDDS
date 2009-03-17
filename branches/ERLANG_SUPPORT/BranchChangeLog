@@ -1,3 +1,16 @@
+Tue Mar 17 04:13:00 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * lang/erlang/lib/tao_ic/cpp_src/be_global.cpp:
+        * lang/erlang/lib/tao_ic/cpp_src/be_visitor.cpp:
+        * lang/erlang/lib/tao_ic/cpp_src/erl_utility.h:
+        * lang/erlang/lib/tao_ic/cpp_src/erl_utility.cpp:
+        * lang/erlang/lib/tao_ic/cpp_src/generator.h:
+        * lang/erlang/lib/tao_ic/cpp_src/generator.cpp:
+        * lang/erlang/lib/tao_ic/cpp_src/generator_erl.h:
+        * lang/erlang/lib/tao_ic/cpp_src/generator_erl.cpp:
+
+          Nightly commit.
+
 Tue Mar 17 03:08:42 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * lang/erlang/lib/tao_ic/cpp_src/ace_compat.h:
