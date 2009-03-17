@@ -2,8 +2,8 @@
  * $Id$
  */
 
-#ifndef TAO_IC_BE_VISITOR_H
-#define TAO_IC_BE_VISITOR_H
+#ifndef BE_VISITOR_H
+#define BE_VISITOR_H
 
 #include "ast_argument.h"
 #include "ast_array.h"
@@ -137,4 +137,4 @@ private:
   generator_composite generator_;
 };
 
-#endif /* TAO_IC_BE_VISITOR_H */
+#endif /* BE_VISITOR_H */

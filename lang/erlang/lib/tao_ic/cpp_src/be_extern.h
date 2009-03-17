@@ -2,8 +2,8 @@
  * $Id$
  */
 
-#ifndef TAO_IC_BE_EXTERN_H
-#define TAO_IC_BE_EXTERN_H
+#ifndef BE_EXTERN_H
+#define BE_EXTERN_H
 
 #include "tao/Version.h"
 
@@ -26,4 +26,4 @@ void BE_cleanup();
 
 void BE_produce();
 
-#endif /* TAO_IC_BE_EXTERN_H */
+#endif /* BE_EXTERN_H */
