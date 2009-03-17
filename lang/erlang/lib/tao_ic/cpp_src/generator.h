@@ -19,6 +19,8 @@
 class generator
 {
 public:
+  generator();
+
   virtual ~generator();
 
   virtual bool generate_constant(AST_Constant* node);
