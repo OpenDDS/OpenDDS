@@ -104,5 +104,11 @@ generator_erl::generate_structure(AST_Structure* node, vector<AST_Field*>& v)
 bool
 generator_erl::generate_union(AST_Union* node, vector<AST_UnionBranch*>& v)
 {
+  // Generate module (.erl)
+  erl_module module(node->name());
+
+  ostream& os = module.open_stream();
+  if (!os) return false; // bad stream
+
   return true;
 }
