@@ -174,7 +174,7 @@ public:
   {
     for (InputIterator it(first); it != last; ++it)
     {
-      add_export((*it)->local_name(), arity);
+      add_export<erl_identifier>((*it)->local_name(), arity);
     }
   }
 

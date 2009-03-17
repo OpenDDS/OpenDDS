@@ -51,7 +51,7 @@ generator_erl::generate_enum(AST_Enum* node, vector<AST_EnumVal*>& v)
   for (vector<AST_EnumVal*>::iterator it(v.begin()); it != v.end(); ++it)
   {
     os << erl_identifier((*it)->local_name()) << "() -> {?MODULE, " <<
-          erl_constant((*it)->constant_value()) << "}." << endl;
+          erl_literal((*it)->constant_value()) << "}." << endl;
   }
 
   os << endl
@@ -98,5 +98,11 @@ generator_erl::generate_structure(AST_Structure* node, vector<AST_Field*>& v)
           "{" << fields.as_init_list() << "}." << endl;
   }
 
+  return true;
+}
+
+bool
+generator_erl::generate_union(AST_Union* node, vector<AST_UnionBranch*>& v)
+{
   return true;
 }

@@ -24,6 +24,8 @@ public:
   virtual bool generate_enum(AST_Enum* node, std::vector<AST_EnumVal*>& v);
                              
   virtual bool generate_structure(AST_Structure* node, std::vector<AST_Field*>& v);
+
+  virtual bool generate_union(AST_Union* node, std::vector<AST_UnionBranch*>& v);
 };
 
 class generator_composite : public generator
@@ -52,6 +54,8 @@ public:
   bool generate_enum(AST_Enum* node, std::vector<AST_EnumVal*>& v);
                      
   bool generate_structure(AST_Structure* node, std::vector<AST_Field*>& v);
+
+  bool generate_union(AST_Union* node, std::vector<AST_UnionBranch*>& v);
 
 private:
   std::vector<generator*> generators_;
