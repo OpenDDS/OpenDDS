@@ -63,7 +63,7 @@ normalize_path(string& s)
   size_t len = s.length();
   if (len > 0 && s[len - 1] != ACE_DIRECTORY_SEPARATOR_CHAR_A)
   {
-    s.append(ACE_DIRECTORY_SEPARATOR_CHAR_A);
+    s.push_back(ACE_DIRECTORY_SEPARATOR_CHAR_A);
   }
 }
 } // namespace
