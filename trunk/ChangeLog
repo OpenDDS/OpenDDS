@@ -1,3 +1,14 @@
+Wed Mar 18 13:39:33 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/BuiltInTopicUtils.h:
+        * dds/DCPS/GuidBuilder.h:
+        * dds/DCPS/GuidBuilder.cpp:
+        * dds/DCPS/RepoIdBuilder.h:
+        * dds/DCPS/RepoIdConverter.h:
+        * dds/DCPS/RepoIdConverter.cpp:
+
+          GCC and VC++ fixes to warnings/errors.
+
 Wed Mar 18 05:08:43 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/BuiltInTopicUtils.h:

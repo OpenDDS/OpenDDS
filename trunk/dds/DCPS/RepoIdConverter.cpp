@@ -51,9 +51,3 @@ RepoIdConverter::operator DDS::InstanceHandle_t() const
 
 } // namespace
 } // namespace
-
-std::ostream&
-operator<<(std::ostream& os, const OpenDDS::DCPS::RepoIdConverter& rhs)
-{
-  return os << std::string(rhs);
-}
