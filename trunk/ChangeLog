@@ -1,3 +1,9 @@
+Wed Mar 18 13:50:20 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/InfoRepo/RepoIdGenerator.cpp:
+
+          Fixed header include order.  PCH include must come first in the cpp.
+
 Wed Mar 18 13:39:33 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/BuiltInTopicUtils.h:

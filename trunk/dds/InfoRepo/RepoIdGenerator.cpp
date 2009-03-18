@@ -2,12 +2,11 @@
  * $Id$
  */
 
-#include "ace/Log_Msg.h"
-
-#include "dds/DCPS/RepoIdBuilder.h"
-
 #include "DcpsInfo_pch.h"
+
 #include "RepoIdGenerator.h"
+#include "dds/DCPS/RepoIdBuilder.h"
+#include "ace/Log_Msg.h"
 
 const unsigned RepoIdGenerator::KeyBits = 24;
 
