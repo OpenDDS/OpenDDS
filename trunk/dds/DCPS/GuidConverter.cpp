@@ -37,6 +37,13 @@ GuidConverter::vendorId() const
 }
 
 long
+GuidConverter::entityId() const
+{
+  return entityKey() << 8
+       | guid_.entityId.entityKind;
+}
+
+long
 GuidConverter::entityKey() const
 {
   return guid_.entityId.entityKey[0] << 16
@@ -60,11 +67,8 @@ GuidConverter::entityKind() const
   case ENTITYKIND_USER_WRITER_WITH_KEY:
     return KIND_WRITER;
 
-  case ENTITYKIND_OPENDDS_PARTICIPANT:
-    if (entityKey() == 1)
-    {
+  case ENTITYKIND_BUILTIN_PARTICIPANT:
       return KIND_PARTICIPANT;
-    }
 
   case ENTITYKIND_USER_UNKNOWN:
   case ENTITYKIND_BUILTIN_UNKNOWN:

@@ -57,57 +57,6 @@ enum EntityKind {     // EntityId_t.entityKind value(s)
   KIND_TOPIC          // 0x3f & 0x05
 };
 
-inline OpenDDS_Dcps_Export CORBA::Octet
-get_entity_kind(EntityKind kind)
-{
-  switch (kind)
-  {
-  case KIND_WRITER:
-    return ENTITYKIND_USER_WRITER_WITH_KEY;
-
-  case KIND_READER:
-    return ENTITYKIND_USER_READER_WITH_KEY;
-
-  case KIND_TOPIC:
-    return ENTITYKIND_OPENDDS_TOPIC;
-
-  default:
-    return ENTITYKIND_USER_UNKNOWN;
-  }
-}
-
-inline OpenDDS_Dcps_Export GUID_t
-create_empty_guid()
-{
-  GUID_t guid = {
-    { VENDORID_OCI[0],
-      VENDORID_OCI[1],
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-    }, ENTITYID_UNKNOWN
-  };
-  return guid;
-}
-
-template <typename T>
-inline OpenDDS_Dcps_Export void
-fill_guid(T* begin, long value, std::size_t len = 1)
-{
-  for (std::size_t i = 0; i < len; ++i)
-  {
-    unsigned shift = (len - i - 1) * 8;
-    begin[i] = static_cast<CORBA::Octet>((0xff & (value >> shift)));
-  }
-}
-
 } // namespace
 } // namespace
 

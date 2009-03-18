@@ -138,7 +138,7 @@ module OpenDDS {
       // ignore participant when matching/associating pubs & subs
       void ignore_domain_participant (in ::DDS::DomainId_t domainId,
                                       in RepoId myParticipantId,
-                                      in long   ignoreKey)
+                                      in RepoId ignoreId)
         raises (Invalid_Domain,
                 Invalid_Participant);
 
@@ -146,7 +146,7 @@ module OpenDDS {
       // ignore topic when matching/associating pubs & subs
       void ignore_topic (in ::DDS::DomainId_t domainId,
                          in RepoId myParticipantId,
-                         in long   ignoreKey)
+                         in RepoId ignoreId)
         raises (Invalid_Domain,
                 Invalid_Participant,
                 Invalid_Topic);
@@ -155,7 +155,7 @@ module OpenDDS {
       // ignore subscription when matching/associating pubs & subs
       void ignore_subscription (in ::DDS::DomainId_t domainId,
                                 in RepoId myParticipantId,
-                                in long   ignoreKey)
+                                in RepoId ignoreId)
         raises (Invalid_Domain,
                 Invalid_Participant,
                 Invalid_Subscription);
@@ -164,7 +164,7 @@ module OpenDDS {
       // ignore publication when matching/associating pubs & subs
       void ignore_publication (in ::DDS::DomainId_t domainId,
                                in RepoId myParticipantId,
-                               in long   ignoreKey)
+                               in RepoId ignoreId)
         raises (Invalid_Domain,
                 Invalid_Participant,
                 Invalid_Publication);

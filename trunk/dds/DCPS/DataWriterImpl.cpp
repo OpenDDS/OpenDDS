@@ -1867,7 +1867,7 @@ DataWriterImpl::bit_lookup_instance_handles (const ReaderIdSeq& ids,
     for (CORBA::ULong i = 0; i < num_rds; ++i)
     {
       RepoIdConverter converter(ids[i]);
-      hdls[i] = converter.checksum();
+      hdls[i] = DDS::InstanceHandle_t(converter);
       if( DCPS_debug_level > 4) {
         ACE_DEBUG((LM_WARNING,
           ACE_TEXT("(%P|%t) DataWriterImpl::bit_lookup_instance_handles: ")

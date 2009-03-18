@@ -73,6 +73,9 @@ public:
   /// Extract the VendorId value.
   long vendorId() const;
 
+  /// Extract the EntityId value.
+  long entityId() const;
+
   /// Extract the EntityKey value.
   long entityKey() const;
 

@@ -1306,7 +1306,7 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant (
 void TAO_DDS_DCPSInfo_i::ignore_domain_participant (
     ::DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& myParticipantId,
-    CORBA::Long ignoreKey
+    const OpenDDS::DCPS::RepoId& ignoreId
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -1328,10 +1328,9 @@ void TAO_DDS_DCPSInfo_i::ignore_domain_participant (
   if( 0 == partPtr) {
     throw OpenDDS::DCPS::Invalid_Participant();
   }
-
-  OpenDDS::DCPS::RepoId ignoreId = where->second->participant( ignoreKey);
-  partPtr->ignore_participant( ignoreId);
-
+  
+  partPtr->ignore_participant(ignoreId);
+  
   where->second->remove_dead_participants();
 }
 
@@ -1339,7 +1338,7 @@ void TAO_DDS_DCPSInfo_i::ignore_domain_participant (
 void TAO_DDS_DCPSInfo_i::ignore_topic (
     ::DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& myParticipantId,
-    CORBA::Long ignoreKey
+    const OpenDDS::DCPS::RepoId& ignoreId
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -1362,9 +1361,8 @@ void TAO_DDS_DCPSInfo_i::ignore_topic (
   if( 0 == partPtr) {
     throw OpenDDS::DCPS::Invalid_Participant();
   }
-
-  OpenDDS::DCPS::RepoId ignoreId = where->second->topic( ignoreKey);
-  partPtr->ignore_topic( ignoreId);
+  
+  partPtr->ignore_topic(ignoreId);
 
   where->second->remove_dead_participants();
 }
@@ -1373,7 +1371,7 @@ void TAO_DDS_DCPSInfo_i::ignore_topic (
 void TAO_DDS_DCPSInfo_i::ignore_subscription (
     ::DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& myParticipantId,
-    CORBA::Long ignoreKey
+    const OpenDDS::DCPS::RepoId& ignoreId
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -1397,8 +1395,7 @@ void TAO_DDS_DCPSInfo_i::ignore_subscription (
     throw OpenDDS::DCPS::Invalid_Participant();
   }
 
-  OpenDDS::DCPS::RepoId ignoreId = where->second->subscription( ignoreKey);
-  partPtr->ignore_subscription( ignoreId);
+  partPtr->ignore_subscription(ignoreId);
 
   where->second->remove_dead_participants();
 }
@@ -1407,7 +1404,7 @@ void TAO_DDS_DCPSInfo_i::ignore_subscription (
 void TAO_DDS_DCPSInfo_i::ignore_publication (
     ::DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& myParticipantId,
-    CORBA::Long ignoreKey
+    const OpenDDS::DCPS::RepoId& ignoreId
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -1431,8 +1428,7 @@ void TAO_DDS_DCPSInfo_i::ignore_publication (
     throw OpenDDS::DCPS::Invalid_Participant();
   }
 
-  OpenDDS::DCPS::RepoId ignoreId = where->second->publication( ignoreKey);
-  partPtr->ignore_publication( ignoreId);
+  partPtr->ignore_publication(ignoreId);
 
   where->second->remove_dead_participants();
 }

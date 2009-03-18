@@ -11,7 +11,7 @@
 #include "ace/ACE.h"
 #include "ace/OS_NS_string.h"
 
-#include "GuidUtils.h"
+#include "GuidBuilder.h"
 
 namespace
 {
@@ -54,24 +54,25 @@ operator<<(std::ostream& os, const OpenDDS::DCPS::GUID_t& rhs)
 std::istream&
 operator>>(std::istream& is, OpenDDS::DCPS::GUID_t& rhs)
 {
+  long word;
   char discard;
-  unsigned long word;
+  
+  OpenDDS::DCPS::GuidBuilder builder(rhs);
 
   is >> std::hex >> word;
-  OpenDDS::DCPS::fill_guid(rhs.guidPrefix, word, 4);
+  builder.guidPrefix0(word);
   is >> discard; // sep
 
   is >> std::hex >> word;
-  OpenDDS::DCPS::fill_guid(rhs.guidPrefix + 4, word, 4);
+  builder.guidPrefix1(word);
   is >> discard; // sep
 
   is >> std::hex >> word;
-  OpenDDS::DCPS::fill_guid(rhs.guidPrefix + 8, word, 4);
+  builder.guidPrefix2(word);
   is >> discard; // sep
 
   is >> std::hex >> word;
-  OpenDDS::DCPS::fill_guid(rhs.entityId.entityKey, word >> 8, 3);
-  OpenDDS::DCPS::fill_guid(&rhs.entityId.entityKind, word);
+  builder.entityId(word);
   
   return is;
 }

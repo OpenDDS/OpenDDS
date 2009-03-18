@@ -228,10 +228,16 @@ void test_bit_participant ()
       ::DDS::DomainParticipantQos part_qos;
       participant_servant->get_qos (part_qos);
 
-      OpenDDS::DCPS::RepoId participantId = participant_servant->get_id();
-      TEST_CHECK (part_data[0].key[0] == TEST_DOMAIN);
-      TEST_CHECK (part_data[0].key[1] == OpenDDS::DCPS::RepoIdConverter(participantId).checksum());
-      TEST_CHECK (part_data[0].key[2] == 0);
+      // BuiltinTopicKey_t is initialized from its corresponding RepoId.
+      // This test verifies that the conversion was done correctly.
+      OpenDDS::DCPS::RepoIdConverter converter(participant_servant->get_id());
+      
+      DDS::BuiltinTopicKey_t key;
+      converter.get_BuiltinTopicKey(key);
+
+      TEST_CHECK (part_data[0].key[0] == key[0]);
+      TEST_CHECK (part_data[0].key[1] == key[1]);
+      TEST_CHECK (part_data[0].key[2] == key[2]);
     }
   catch (...)
     {
@@ -271,10 +277,17 @@ void test_bit_topic ()
       TEST_CHECK (info_len == 1);
 
       ::DDS::TopicQos topic_qos;
+      
+      // BuiltinTopicKey_t is initialized from its corresponding RepoId.
+      // This test verifies that the conversion was done correctly.
+      OpenDDS::DCPS::RepoIdConverter converter(topic_servant->get_id());
+      
+      DDS::BuiltinTopicKey_t key;
+      converter.get_BuiltinTopicKey(key);
 
-      OpenDDS::DCPS::RepoId participantId = participant_servant->get_id();
-      TEST_CHECK (topic_data[0].key[0] == TEST_DOMAIN);
-      TEST_CHECK (topic_data[0].key[1] == OpenDDS::DCPS::RepoIdConverter(participantId).checksum());
+      TEST_CHECK (topic_data[0].key[0] == key[0]);
+      TEST_CHECK (topic_data[0].key[1] == key[1]);
+      TEST_CHECK (topic_data[0].key[2] == key[2]);
 
       topic_servant->get_qos (topic_qos);
 
@@ -336,15 +349,27 @@ void test_bit_publication ()
       ::DDS::DataWriterQos dw_qos;
       datawriter->get_qos (dw_qos);
 
-      OpenDDS::DCPS::RepoId participantId = participant_servant->get_id();
-      OpenDDS::DCPS::RepoId publicationId = datawriter_servant->get_publication_id();
-      TEST_CHECK (the_pub_data.key[0] == TEST_DOMAIN);
-      TEST_CHECK (the_pub_data.key[1] == OpenDDS::DCPS::RepoIdConverter(participantId).checksum());
-      TEST_CHECK (the_pub_data.key[2] == OpenDDS::DCPS::RepoIdConverter(publicationId).checksum());
+      // BuiltinTopicKey_t is initialized from its corresponding RepoId.
+      // This test verifies that the conversion was done correctly.
+      OpenDDS::DCPS::RepoIdConverter pub_converter(datawriter_servant->get_publication_id());
+      
+      DDS::BuiltinTopicKey_t pub_key;
+      pub_converter.get_BuiltinTopicKey(pub_key);
 
-      TEST_CHECK (the_pub_data.participant_key[0] == TEST_DOMAIN);
-      TEST_CHECK (the_pub_data.participant_key[1] == OpenDDS::DCPS::RepoIdConverter(participantId).checksum());
-      TEST_CHECK (the_pub_data.participant_key[2] == 0);
+      TEST_CHECK (the_pub_data.key[0] == pub_key[0]);
+      TEST_CHECK (the_pub_data.key[1] == pub_key[1]);
+      TEST_CHECK (the_pub_data.key[2] == pub_key[2]);
+
+      // BuiltinTopicKey_t is initialized from its corresponding RepoId.
+      // This test verifies that the conversion was done correctly.
+      OpenDDS::DCPS::RepoIdConverter part_converter(participant_servant->get_id());
+      
+      DDS::BuiltinTopicKey_t part_key;
+      part_converter.get_BuiltinTopicKey(part_key);
+
+      TEST_CHECK (the_pub_data.participant_key[0] == part_key[0]);
+      TEST_CHECK (the_pub_data.participant_key[1] == part_key[1]);
+      TEST_CHECK (the_pub_data.participant_key[2] == part_key[2]);
 
       TEST_CHECK (ACE_OS::strcmp (the_pub_data.topic_name.in (), TEST_TOPIC) == 0);
       TEST_CHECK (ACE_OS::strcmp (the_pub_data.type_name.in (), TEST_TOPIC_TYPE) == 0);
@@ -405,15 +430,27 @@ void test_bit_subscription ()
       ::DDS::DataReaderQos dr_qos;
       datareader->get_qos (dr_qos);
 
-      OpenDDS::DCPS::RepoId participantId  = participant_servant->get_id();
-      OpenDDS::DCPS::RepoId subscriptionId = datareader_servant->get_subscription_id();
-      TEST_CHECK (the_sub_data.key[0] == TEST_DOMAIN);
-      TEST_CHECK (the_sub_data.key[1] == OpenDDS::DCPS::RepoIdConverter(participantId).checksum());
-      TEST_CHECK (the_sub_data.key[2] == OpenDDS::DCPS::RepoIdConverter(subscriptionId).checksum());
+      // BuiltinTopicKey_t is initialized from its corresponding RepoId.
+      // This test verifies that the conversion was done correctly.
+      OpenDDS::DCPS::RepoIdConverter sub_converter(datareader_servant->get_subscription_id());
+      
+      DDS::BuiltinTopicKey_t sub_key;
+      sub_converter.get_BuiltinTopicKey(sub_key);
 
-      TEST_CHECK (the_sub_data.participant_key[0] == TEST_DOMAIN);
-      TEST_CHECK (the_sub_data.participant_key[1] == OpenDDS::DCPS::RepoIdConverter(participantId).checksum());
-      TEST_CHECK (the_sub_data.participant_key[2] == 0);
+      TEST_CHECK (the_sub_data.key[0] == sub_key[0]);
+      TEST_CHECK (the_sub_data.key[1] == sub_key[1]);
+      TEST_CHECK (the_sub_data.key[2] == sub_key[2]);
+
+      // BuiltinTopicKey_t is initialized from its corresponding RepoId.
+      // This test verifies that the conversion was done correctly.
+      OpenDDS::DCPS::RepoIdConverter part_converter(participant_servant->get_id());
+      
+      DDS::BuiltinTopicKey_t part_key;
+      part_converter.get_BuiltinTopicKey(part_key);
+
+      TEST_CHECK (the_sub_data.participant_key[0] == part_key[0]);
+      TEST_CHECK (the_sub_data.participant_key[1] == part_key[1]);
+      TEST_CHECK (the_sub_data.participant_key[2] == part_key[2]);
 
       TEST_CHECK (ACE_OS::strcmp (the_sub_data.topic_name.in (), TEST_TOPIC) == 0);
       TEST_CHECK (ACE_OS::strcmp (the_sub_data.type_name.in (), TEST_TOPIC_TYPE) == 0);

@@ -2239,9 +2239,9 @@ DataReaderImpl::bit_lookup_instance_handles (const WriterIdSeq& ids,
     hdls.length (num_wrts);
     for (CORBA::ULong i = 0; i < num_wrts; i++)
     {
-      hdls[i] = RepoIdConverter(ids[i]).checksum();
+      RepoIdConverter converter(ids[i]);
+      hdls[i] = DDS::InstanceHandle_t(converter);
       if( DCPS_debug_level > 4) {
-        RepoIdConverter converter(ids[i]);
         ACE_DEBUG((LM_WARNING,
           ACE_TEXT("(%P|%t) DataReaderImpl::bit_lookup_instance_handles: ")
           ACE_TEXT("using hash as handle for writer %s.\n"),

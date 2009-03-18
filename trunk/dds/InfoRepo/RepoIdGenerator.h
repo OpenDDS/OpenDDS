@@ -136,11 +136,6 @@ private:
 
   /// Unique value for the EntityKey.
   long lastKey_;
-
-  /// Cached entityKind encoded value.
-  CORBA::Octet kindCode_;
-
-  OpenDDS::DCPS::GUID_t create_guid(long participant);
 };
 
 #endif /* REPOIDGENERATOR_H  */

@@ -69,6 +69,10 @@ public:
   long federationId() const;
 
   long participantId() const;
+
+  void get_BuiltinTopicKey(DDS::BuiltinTopicKey_t& key) const;
+
+  operator DDS::InstanceHandle_t() const;
 };
 
 } // namespace
