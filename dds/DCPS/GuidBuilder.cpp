@@ -14,7 +14,7 @@ fill_guid(CORBA::Octet* begin, long value, std::size_t len)
   for (std::size_t i = 0; i < len; ++i)
   {
     unsigned shift = (len - i - 1) << 3;
-    begin[i] = static_cast<CORBA::Octet>((0xff & (value >> shift)));
+    begin[i] = static_cast<CORBA::Octet>(0xff & (value >> shift));
   }
 }
 
@@ -27,18 +27,15 @@ namespace DCPS
 GuidBuilder::GuidBuilder(GUID_t& guid)
   : guid_(guid)
 {
+  // Initialize VendorId
   guid_.guidPrefix[0] = VENDORID_OCI[0];
   guid_.guidPrefix[1] = VENDORID_OCI[1];
+  guid_.guidPrefix[2] = 0x00;
+  guid_.guidPrefix[3] = 0x00;
 }
 
 GuidBuilder::~GuidBuilder()
 {
-}
-
-void
-GuidBuilder::guidPrefix0(long p0)
-{
-  fill_guid(guid_.guidPrefix, p0, 4);
 }
 
 void
