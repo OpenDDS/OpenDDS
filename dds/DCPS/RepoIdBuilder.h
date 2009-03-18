@@ -16,7 +16,7 @@ namespace OpenDDS
 {
 namespace DCPS
 {
-class RepoIdBuilder : public GuidBuilder
+class OpenDDS_Dcps_Export RepoIdBuilder : public GuidBuilder
 {
 public:
   explicit RepoIdBuilder(RepoId& repoId);

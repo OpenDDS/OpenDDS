@@ -15,7 +15,7 @@ namespace OpenDDS
 {
 namespace DCPS
 {
-class GuidBuilder
+class OpenDDS_Dcps_Export GuidBuilder
 {
 public:
   explicit GuidBuilder(GUID_t& guid);

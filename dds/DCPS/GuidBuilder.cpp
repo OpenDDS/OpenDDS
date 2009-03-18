@@ -63,7 +63,7 @@ void
 GuidBuilder::entityId(long entityId)
 {
   entityKey(entityId >> 8);
-  entityKind(0xff & entityId);
+  entityKind(static_cast<CORBA::Octet>(0xff & entityId));
 }
 
 void

@@ -78,7 +78,4 @@ public:
 } // namespace
 } // namespace
 
-OpenDDS_Dcps_Export std::ostream&
-operator<<(std::ostream& os, const OpenDDS::DCPS::RepoIdConverter& rhs);
-
 #endif /* DCPS_REPOIDCONVERTER_H */
