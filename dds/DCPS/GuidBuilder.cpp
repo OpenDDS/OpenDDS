@@ -30,12 +30,16 @@ GuidBuilder::GuidBuilder(GUID_t& guid)
   // Initialize VendorId
   guid_.guidPrefix[0] = VENDORID_OCI[0];
   guid_.guidPrefix[1] = VENDORID_OCI[1];
-  guid_.guidPrefix[2] = 0x00;
-  guid_.guidPrefix[3] = 0x00;
 }
 
 GuidBuilder::~GuidBuilder()
 {
+}
+
+void
+GuidBuilder::guidPrefix0(long p0)
+{
+  fill_guid(guid_.guidPrefix, p0, 4);
 }
 
 void
