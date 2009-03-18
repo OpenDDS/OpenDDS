@@ -18,6 +18,7 @@ namespace DCPS
 class OpenDDS_Dcps_Export GuidBuilder
 {
 public:
+  GuidBuilder();
   explicit GuidBuilder(GUID_t& guid);
 
   ~GuidBuilder();
@@ -34,7 +35,10 @@ public:
   void entityKind(CORBA::Octet entityKind);
   void entityKind(EntityKind kind); 
 
+  operator GUID_t();
+
 private:
+  GUID_t  guid_cxx_;
   GUID_t& guid_;
 };
 

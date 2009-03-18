@@ -172,22 +172,23 @@ main (int argc, char *argv[])
           ACE_DEBUG((LM_INFO,
                      ACE_TEXT("Ignoring all entities with 1 and 2\n") ));
           
-          OpenDDS::DCPS::RepoId repoId; 
-          OpenDDS::DCPS::RepoIdBuilder builder(repoId);
+          OpenDDS::DCPS::RepoIdBuilder builder;
           
           builder.entityKey(1);
+          OpenDDS::DCPS::RepoId repoId_1(builder);
           
-          info->ignore_domain_participant(domainId, dpId, repoId);
-          info->ignore_topic(domainId, dpId, repoId);
-          info->ignore_publication(domainId, dpId, repoId);
-          info->ignore_subscription(domainId, dpId, repoId);
+          info->ignore_domain_participant(domainId, dpId, repoId_1);
+          info->ignore_topic(domainId, dpId, repoId_1);
+          info->ignore_publication(domainId, dpId, repoId_1);
+          info->ignore_subscription(domainId, dpId, repoId_1);
 
           builder.entityKey(2);
+          OpenDDS::DCPS::RepoId repoId_2(builder);
 
-          info->ignore_domain_participant(domainId, dpId, repoId);
-          info->ignore_topic(domainId, dpId, repoId);
-          info->ignore_publication(domainId, dpId, repoId);
-          info->ignore_subscription(domainId, dpId, repoId);
+          info->ignore_domain_participant(domainId, dpId, repoId_2);
+          info->ignore_topic(domainId, dpId, repoId_2);
+          info->ignore_publication(domainId, dpId, repoId_2);
+          info->ignore_subscription(domainId, dpId, repoId_2);
         }
 
 
@@ -263,15 +264,16 @@ main (int argc, char *argv[])
         {
           ACE_DEBUG((LM_INFO,
                      ACE_TEXT("Ignoring all entities with 3\n") ));
-          OpenDDS::DCPS::RepoId repoId;
-          OpenDDS::DCPS::RepoIdBuilder builder(repoId);
+          
+          OpenDDS::DCPS::RepoIdBuilder builder;
 
           builder.entityKey(3);
+          OpenDDS::DCPS::RepoId repoId_3(builder);
 
-          info->ignore_domain_participant(domainId, dpId, repoId);
-          info->ignore_topic(domainId, dpId, repoId);
-          info->ignore_publication(domainId, dpId, repoId);
-          info->ignore_subscription(domainId, dpId, repoId);
+          info->ignore_domain_participant(domainId, dpId, repoId_3);
+          info->ignore_topic(domainId, dpId, repoId_3);
+          info->ignore_publication(domainId, dpId, repoId_3);
+          info->ignore_subscription(domainId, dpId, repoId_3);
 
           run_time = ACE_Time_Value(15,0);
           orb->run(run_time);

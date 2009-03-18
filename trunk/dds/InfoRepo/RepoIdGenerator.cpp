@@ -33,9 +33,7 @@ RepoIdGenerator::next()
   // Generate a new key value.
   ++this->lastKey_;
 
-  OpenDDS::DCPS::RepoId repoId;
-    
-  OpenDDS::DCPS::RepoIdBuilder builder(repoId);
+  OpenDDS::DCPS::RepoIdBuilder builder;
   builder.federationId(federation_);
 
   // Generate a Participant GUID value.
@@ -74,7 +72,7 @@ RepoIdGenerator::next()
     builder.entityKind(kind_);
   }
   
-  return repoId;
+  return OpenDDS::DCPS::RepoId(builder);
 }
 
 void

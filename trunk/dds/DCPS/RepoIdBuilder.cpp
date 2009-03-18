@@ -10,6 +10,10 @@ namespace OpenDDS
 {
 namespace DCPS
 {
+RepoIdBuilder::RepoIdBuilder()
+{
+}
+
 RepoIdBuilder::RepoIdBuilder(RepoId& repoId)
   : GuidBuilder(repoId)
 {
@@ -19,13 +23,13 @@ RepoIdBuilder::~RepoIdBuilder()
 {
 }
 
-void
+inline void
 RepoIdBuilder::federationId(long federationId)
 {
   guidPrefix1(federationId);
 }
 
-void
+inline void
 RepoIdBuilder::participantId(long participantId)
 {
   guidPrefix2(participantId); 

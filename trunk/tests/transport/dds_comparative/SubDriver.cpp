@@ -233,15 +233,15 @@ SubDriver::parse_arg_p(const char* arg, bool& flag)
   std::string pub_id_str(arg_str,0,pos);
   std::string pub_addr_str(arg_str,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
 
-  OpenDDS::DCPS::RepoId repoId;
-
   // RepoIds are conventionally created and managed by the DCPSInfoRepo. Those
   // generated here are for the sole purpose of verifying internal behavior.
-  OpenDDS::DCPS::RepoIdBuilder builder(repoId);
+  OpenDDS::DCPS::RepoIdBuilder builder;
 
   builder.participantId(1);
   builder.entityKey(ACE_OS::atoi(pub_id_str.c_str()));
   builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
+  
+  OpenDDS::DCPS::RepoId repoId(builder);
 
   ACE_INET_Addr pub_addr(pub_addr_str.c_str());
 
@@ -296,15 +296,15 @@ SubDriver::parse_arg_s(const char* arg, bool& flag)
   std::string sub_id_str(arg_str,0,pos);
   this->sub_addr_str_ = std::string (arg_str,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
   
-  OpenDDS::DCPS::RepoId repoId;
-
   // RepoIds are conventionally created and managed by the DCPSInfoRepo. Those
   // generated here are for the sole purpose of verifying internal behavior.
-  OpenDDS::DCPS::RepoIdBuilder builder(repoId);
+  OpenDDS::DCPS::RepoIdBuilder builder;
 
   builder.participantId(1);
   builder.entityKey(ACE_OS::atoi(sub_id_str.c_str()));
   builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
+  
+  OpenDDS::DCPS::RepoId repoId(builder);
 
   this->local_address_ = ACE_INET_Addr(this->sub_addr_str_.c_str());
 

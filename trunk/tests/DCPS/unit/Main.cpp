@@ -338,15 +338,15 @@ void run_next_sample_test (ssize_t size)
 
   OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (OpenDDS::DCPS::TransportSendElement));
 
-  OpenDDS::DCPS::RepoId repoId;
-  
   // RepoIds are conventionally created and managed by the DCPSInfoRepo. Those
   // generated here are for the sole purpose of verifying internal behavior.
-  OpenDDS::DCPS::RepoIdBuilder builder(repoId);
+  OpenDDS::DCPS::RepoIdBuilder builder;
 
   builder.participantId(1);
   builder.entityKey(0);
   builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
+  
+  OpenDDS::DCPS::RepoId repoId(builder);
 
   { // make VC6 buid - avoid error C2374: 'i' : redefinition; multiple initialization
   for (ssize_t i = 0; i < size; i ++)
@@ -431,15 +431,15 @@ void run_next_send_sample_test (ssize_t size)
 
   OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (OpenDDS::DCPS::TransportSendElement));
   
-  OpenDDS::DCPS::RepoId repoId;
-  
   // RepoIds are conventionally created and managed by the DCPSInfoRepo. Those
   // generated here are for the sole purpose of verifying internal behavior.
-  OpenDDS::DCPS::RepoIdBuilder builder(repoId);
+  OpenDDS::DCPS::RepoIdBuilder builder;
 
   builder.participantId(1);
   builder.entityKey(0);
   builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
+ 
+  OpenDDS::DCPS::RepoId repoId(builder);
 
   for (ssize_t i = 0; i < pub_id_middle; i ++)
   {
@@ -537,15 +537,15 @@ void run_next_instance_sample_test (ssize_t size)
 
   OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (OpenDDS::DCPS::TransportSendElement));
 
-  OpenDDS::DCPS::RepoId repoId;
-  
   // RepoIds are conventionally created and managed by the DCPSInfoRepo. Those
   // generated here are for the sole purpose of verifying internal behavior.
-  OpenDDS::DCPS::RepoIdBuilder builder(repoId);
+  OpenDDS::DCPS::RepoIdBuilder builder;
 
   builder.participantId(1);
   builder.entityKey(0);
   builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
+  
+  OpenDDS::DCPS::RepoId repoId(builder);
 
   for (ssize_t i = 0; i < size; i ++)
   {
