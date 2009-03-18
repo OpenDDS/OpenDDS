@@ -30,7 +30,7 @@ Writer::Writer(
     = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>( this->writer_.in());
   if( writerImpl) {
     OpenDDS::DCPS::RepoIdConverter converter(writerImpl->get_publication_id());
-    this->publicationId_ = converter.checksum();
+    this->publicationId_ = DDS::InstanceHandle_t(converter);
 
   } else {
     this->publicationId_ = -1;

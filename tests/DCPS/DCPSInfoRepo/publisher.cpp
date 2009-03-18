@@ -171,6 +171,7 @@ main (int argc, char *argv[])
         {
           ACE_DEBUG((LM_INFO,
                      ACE_TEXT("Ignoring all entities with 1 and 2\n") ));
+          /* FIXME
           info->ignore_domain_participant(domainId, dpId, 1);
           info->ignore_topic(domainId, dpId, 1);
           info->ignore_publication(domainId, dpId, 1);
@@ -180,6 +181,7 @@ main (int argc, char *argv[])
           info->ignore_topic(domainId, dpId, 2);
           info->ignore_publication(domainId, dpId, 2);
           info->ignore_subscription(domainId, dpId, 2);
+          */
         }
 
 
@@ -255,10 +257,12 @@ main (int argc, char *argv[])
         {
           ACE_DEBUG((LM_INFO,
                      ACE_TEXT("Ignoring all entities with 3\n") ));
+          /* FIXME
           info->ignore_domain_participant(domainId, dpId, 3);
           info->ignore_topic(domainId, dpId, 3);
           info->ignore_publication(domainId, dpId, 3);
           info->ignore_subscription(domainId, dpId, 3);
+          */
 
           run_time = ACE_Time_Value(15,0);
           orb->run(run_time);

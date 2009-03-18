@@ -17,6 +17,7 @@
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "Service_Participant.h"
+#include "RepoIdBuilder.h"
 #include "RepoIdConverter.h"
 #include "dds/DCPS/DomainParticipantImpl.h"
 
@@ -77,18 +78,8 @@ namespace OpenDDS {
            DomainParticipantImpl*         dp,
            const char*                    bit_name,
            const ::DDS::InstanceHandle_t& handle,
-           CORBA::Long&                   repoKey)
+           ::OpenDDS::DCPS::RepoId&       repoId)
        {
-         // The index in BuiltinTopicKey_t[3] for entity templatized in this function.
-         // If the data is read from the participant BIT datareader then the key position
-         // is 1; otherwise it's 2.
-         int key_pos = 2;
-
-         if (ACE_OS::strcmp (bit_name, BUILT_IN_PARTICIPANT_TOPIC) == 0)
-           {
-             key_pos = 1;
-           }
-
          BIT_DataSeq data;
          ::DDS::ReturnCode_t ret
            = instance_handle_to_bit_data (dp, bit_name, handle, data);
@@ -104,14 +95,9 @@ namespace OpenDDS {
              ), ret);
            }
 
-         repoKey = data[0].key[key_pos];
-         if (repoKey == 0)
-           {
-             ACE_ERROR_RETURN((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: BIT_Helper::instance_handle_to_repo_key: ")
-                 ACE_TEXT(" got invalid repo key. \n")
-             ), ::DDS::RETCODE_ERROR);
-           }
+         ::OpenDDS::DCPS::RepoIdBuilder builder(repoId);
+         builder.from_BuiltinTopicKey(data[0].key);
+         
          return ::DDS::RETCODE_OK;
        }
 
@@ -208,155 +194,16 @@ namespace OpenDDS {
             const IdSeq&                    repoids,
             ::DDS::InstanceHandleSeq&       handles)
         {
-          // we should never have more than 1000 BIT values.  Right? :)
-          const CORBA::ULong max_samples = 1000;
+          ::CORBA::ULong repoids_len = repoids.length();
+          handles.length(repoids_len);
 
-          // The index in BuiltinTopicKey_t[3] for entity templatized in this function.
-          // If the data is read from the participant BIT datareader then the key position
-          // is 1; otherwise it's 2.
-          int key_pos = 2;
-
-          if (ACE_OS::strcmp (bit_name, BUILT_IN_PARTICIPANT_TOPIC) == 0)
-            {
-              key_pos = 1;
-            }
-
-          ::DDS::Subscriber_var bit_subscriber
-            = dp->get_builtin_subscriber () ;
-
-          ::DDS::DataReader_var reader
-            = bit_subscriber->lookup_datareader (bit_name) ;
-          if (CORBA::is_nil (reader.in ()))
-            {
-              ACE_ERROR_RETURN ((LM_DEBUG,
-                   "ERROR: repo_ids_to_instance_handles() %s not found.\n",
-                   bit_name),
-                   ::DDS::RETCODE_ERROR);
-            }
-
-          BIT_Reader_var bit_reader = BIT_Reader::_narrow (reader.in ());
-          if (CORBA::is_nil (bit_reader.in ()))
-            {
-              ACE_ERROR_RETURN ((LM_DEBUG,
-                   "ERROR: repo_ids_to_instance_handles() %s narrow failed.\n",
-                   bit_name),
-                   ::DDS::RETCODE_ERROR);
-            }
-
-          BIT_DataSeq data(max_samples);
-          ::DDS::SampleInfoSeq infos(max_samples);
-
-          ACE_Time_Value due = ACE_OS::gettimeofday ()
-            + ACE_Time_Value (TheServiceParticipant->bit_lookup_duration_msec () / 1000,
-                             (TheServiceParticipant->bit_lookup_duration_msec () % 1000)*1000);
-
-          DDS::ReturnCode_t ret = ::DDS::RETCODE_OK;
-
-          // Look for the data from builtin topic datareader until we get results or
-          // timeout.
-          // This is to resolve the problem of lookup return nothing. This could happen
-          // when the add_association is called before the builtin topic datareader got
-          // the published data.
-
-          CORBA::ULong repoid_len = repoids.length ();
-          handles.length (repoid_len);
-          while (1)
-            {
-              ret = bit_reader->read (data,
-                                      infos,
-                                      max_samples, //TBD: should be UNLIMITED
-                                      ::DDS::ANY_SAMPLE_STATE,
-                                      ::DDS::ANY_VIEW_STATE,
-                                      ::DDS::ANY_INSTANCE_STATE);
-
-              if (ret != ::DDS::RETCODE_OK && ret != ::DDS::RETCODE_NO_DATA)
-                {
-                  ACE_ERROR_RETURN ((LM_ERROR,
-                                    ACE_TEXT("(%P|%t) ERROR: BIT_Helper::repo_ids_to_instance_handles, ")
-                                    ACE_TEXT(" read BIT data returned error %d. \n"),
-                                    ret),
-                                    ret);
-                }
-
-              CORBA::ULong data_len = data.length ();
-
-              if (DCPS_debug_level >= 10) {
-                ACE_DEBUG((LM_DEBUG,
-                  ACE_TEXT("(%P|%t) BIT_Helper::repo_ids_to_instance_handles, ")
-                  ACE_TEXT("processing %d received samples.\n"),
-                  data_len
-                ));
-              }
-
-              CORBA::ULong count = 0;
-
-              /// @TODO: FIXME This fails on fragmented sample sets.
-              for (CORBA::ULong i = 0; i < repoid_len; ++i)
-                {
-                  ::OpenDDS::DCPS::RepoIdConverter converter(repoids[i]);
-                  if (DCPS_debug_level >= 10) {
-                    ACE_DEBUG((LM_DEBUG,
-                      ACE_TEXT("(%P|%t) BIT_Helper::repo_ids_to_instance_handles: ")
-                      ACE_TEXT("repoId %s\n"),
-                      std::string(converter).c_str()
-                    ));
-                  }
-                  for (CORBA::ULong j = 0; j < data_len; ++j)
-                    {
-                      if (DCPS_debug_level >= 10) {
-                        ACE_DEBUG((LM_DEBUG,
-			  ACE_TEXT("(%P|%t) BIT_Helper::repo_ids_to_instance_handles: ")
-                          ACE_TEXT("%s sample[ %d], key == [%d, 0x%x, 0x%x], handle == %d\n"),
-		          bit_name,
-                          j,
-		          data[j].key[0],
-		          data[j].key[1],
-		          data[j].key[2],
-                          infos[j].instance_handle
-                        ));
-                      }
-                      if( data[j].key[key_pos] == (CORBA::Long)converter.checksum())
-                        {
-                          handles[i] = infos[j].instance_handle;
-                          ++count;
-                          break;
-                        }
-                    }
-                }
-
-              if (count < repoid_len)
-                {
-
-                  ACE_Time_Value now = ACE_OS::gettimeofday ();
-                  if (now < due)
-                    {
-                      if (DCPS_debug_level >= 10)
-                        ACE_DEBUG((LM_DEBUG,
-                            ACE_TEXT("(%P|%t) BIT_Helper::repo_ids_to_instance_handles, ")
-                            ACE_TEXT("missing some instance handles - trying again\n")));
-
-                      ACE_Time_Value tv = due - now;
-                      if (tv > ACE_Time_Value (0, 100000))
-                        {
-                          tv = ACE_Time_Value (0, 100000);
-                        }
-                      ACE_OS::sleep (tv);
-                    }
-                  else
-                    {
-                       ACE_ERROR((LM_ERROR,
-                            ACE_TEXT("(%P|%t) BIT_Helper::repo_ids_to_instance_handles, ")
-                            ACE_TEXT("timed out\n")));
-                       return ::DDS::RETCODE_TIMEOUT;
-                    }
-                }
-              else
-                {
-                  return ::DDS::RETCODE_OK;
-                }
-            }
+          for (::CORBA::ULong i = 1; i < repoids_len; ++i)
+          {
+            ::OpenDDS::DCPS::RepoIdConverter converter(repoids[i]);
+            handles[i] = ::DDS::InstanceHandle_t(converter);
+          }
+          return ::DDS::RETCODE_OK;
         }
-
     };
 
     inline

@@ -4,6 +4,8 @@
 
 #include "ace/Log_Msg.h"
 
+#include "dds/DCPS/RepoIdBuilder.h"
+
 #include "DcpsInfo_pch.h"
 #include "RepoIdGenerator.h"
 
@@ -18,8 +20,7 @@ RepoIdGenerator::RepoIdGenerator(
 ) : kind_( kind),
     federation_( federation),
     participant_( participant),
-    lastKey_( 0),
-    kindCode_(OpenDDS::DCPS::get_entity_kind(kind))
+    lastKey_( 0)
 {
 }
 
@@ -32,6 +33,11 @@ RepoIdGenerator::next()
 {
   // Generate a new key value.
   ++this->lastKey_;
+
+  OpenDDS::DCPS::RepoId repoId;
+    
+  OpenDDS::DCPS::RepoIdBuilder builder(repoId);
+  builder.federationId(federation_);
 
   // Generate a Participant GUID value.
   if( this->kind_ == OpenDDS::DCPS::KIND_PARTICIPANT) {
@@ -47,11 +53,8 @@ RepoIdGenerator::next()
       ));
     }
   
-    OpenDDS::DCPS::GUID_t guid = create_guid(lastKey_);
-   
-    guid.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
-   
-    return guid;
+    builder.participantId(lastKey_);
+    builder.entityId(OpenDDS::DCPS::ENTITYID_PARTICIPANT);
 
   // Generate an Entity GUID value.
   } else {
@@ -66,14 +69,13 @@ RepoIdGenerator::next()
         ACE_TEXT("Next key will be a duplicate!\n")
       ));
     }
-  
-    OpenDDS::DCPS::GUID_t guid = create_guid(participant_);
-    
-    OpenDDS::DCPS::fill_guid(guid.entityId.entityKey, lastKey_, 3);
-    guid.entityId.entityKind = kindCode_;
-    
-    return guid;
+
+    builder.participantId(participant_);
+    builder.entityKey(lastKey_);
+    builder.entityKind(kind_);
   }
+  
+  return repoId;
 }
 
 void
@@ -82,15 +84,4 @@ RepoIdGenerator::last( long key)
   if( key > this->lastKey_) {
     this->lastKey_ = key;
   }
-}
-
-OpenDDS::DCPS::GUID_t
-RepoIdGenerator::create_guid(long participant)
-{
-  OpenDDS::DCPS::GUID_t guid = OpenDDS::DCPS::create_empty_guid();
-  
-  OpenDDS::DCPS::fill_guid(guid.guidPrefix + 4, federation_, 4);
-  OpenDDS::DCPS::fill_guid(guid.guidPrefix + 8, participant, 4);
-
-  return guid;
 }
