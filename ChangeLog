@@ -1,3 +1,12 @@
+Thu Mar 19 13:45:03 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/GuidBuilder.h:
+        * dds/DCPS/GuidBuilder.cpp:
+        * dds/DCPS/RepoIdBuilder.h:
+        * dds/DCPS/RepoIdBuilder.cpp:
+
+          GCC fixes to warnings/errors.
+
 Wed Mar 18 22:27:36 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/GuidBuilder.h:
