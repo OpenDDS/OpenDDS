@@ -43,26 +43,26 @@ additional state which need purging.
 InstanceHandle_t:
 0...2...........8...............16.............24...............32
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|type(4)|                     sequence(28)                      |
+|kind(4)|                     sequence(28)                      |
 +---------------+---------------+---------------+---------------+
 
-InstanceHandleType Enumeration:
-0x00   TYPE_UNKNOWN
-0x01   TYPE_PARTICIPANT
-0x02   TYPE_TOPIC
-0x03   TYPE_SUBSCRIBER
-0x04   TYPE_PUBLISHER
-0x05   TYPE_DATAREADER
-0x06   TYPE_DATAWRITER
-0x0F   TYPE_DATA
+InstanceHandleKind Enumeration:
+0x00   KIND_UNKNOWN
+0x01   KIND_PARTICIPANT
+0x02   KIND_TOPIC
+0x03   KIND_SUBSCRIBER
+0x04   KIND_PUBLISHER
+0x05   KIND_DATAREADER
+0x06   KIND_DATAWRITER
+0x0F   KIND_DATA
 
 The InstanceHandle_t type is currently a typedef to a CORBA long in
 DdsDcpsInfrastructure.idl (this will not change).  The lower 4 bits of the
-overall 32-bit value contains a type field (InstanceHandleType) that indicates
-the type of handle.  The upper 28 bits are a sequence which allows for up to
-268,435,456 instance handles be assigned per type.
+overall 32-bit value contains a kind field (InstanceHandleKind) that indicates
+the kind of handle.  The upper 28 bits are a sequence which allows for up to
+268,435,456 instance handles be assigned per kind.
 
-The InstanceHandleType field allows the DomainParticipantImpl to perform
+The InstanceHandleKind field allows the DomainParticipantImpl to perform
 additional error checking in the various ignore_* operations.  If a data
 instance handle is passed to an ignore operation, it is assumed that it 
 corresponds to an entity referenced by a Builtin Topic.  The RepoId will
