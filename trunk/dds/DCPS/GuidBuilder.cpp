@@ -127,4 +127,4 @@ GuidBuilder::entityKind(EntityKind kind)
 }
 
 } // namespace
-} // namespace:
+} // namespace
