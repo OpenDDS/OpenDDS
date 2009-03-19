@@ -85,13 +85,6 @@ GuidBuilder::entityId(EntityId_t entityId)
 }
 
 void
-GuidBuilder::entityId(long entityId)
-{
-  entityKey(entityId >> 8);
-  entityKind(static_cast<CORBA::Octet>(0xff & entityId));
-}
-
-void
 GuidBuilder::entityKey(long entityKey)
 {
   fill_guid(guid_.entityId.entityKey, entityKey, 3);
@@ -127,11 +120,6 @@ GuidBuilder::entityKind(EntityKind kind)
     guid_.entityId.entityKind =
       ENTITYKIND_USER_UNKNOWN;
   }
-}
-
-GuidBuilder::operator GUID_t()
-{
-  return guid_;
 }
 
 } // namespace

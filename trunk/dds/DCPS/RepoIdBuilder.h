@@ -24,11 +24,22 @@ public:
 
   ~RepoIdBuilder();
 
-  void federationId(long federationId);
+  void federationId(long federationId)
+  {
+    guidPrefix1(federationId);
+  }
 
-  void participantId(long participantId);
+  void participantId(long participantId)
+  {
+    guidPrefix2(participantId); 
+  }
 
-  void from_BuiltinTopicKey(DDS::BuiltinTopicKey_t key);
+  void from_BuiltinTopicKey(DDS::BuiltinTopicKey_t key)
+  {
+    federationId(key[0]);
+    participantId(key[1]);
+    entityId(key[2]);
+  }
 };
 
 } // namespace
