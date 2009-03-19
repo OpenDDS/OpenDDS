@@ -35,7 +35,7 @@ public:
 } // namespace
 
 #ifdef __ACE_INLINE__
-# include "GuidBuilder.inl"
+# include "RepoIdBuilder.inl"
 #endif /* __ACE_INLINE__ */
 
 #endif /* DCPS_REPOIDBUILDER_H */
