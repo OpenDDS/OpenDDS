@@ -27,13 +27,13 @@ public:
   void guidPrefix1(long p1);
   void guidPrefix2(long p2);
   
+  void entityId(EntityId_t entityId);
+  void entityId(long entityId);
+  
   void entityKey(long entityKey);
  
   void entityKind(CORBA::Octet entityKind);
   void entityKind(EntityKind kind); 
-  
-  void entityId(EntityId_t entityId);
-  void entityId(long entityId);
 
   operator GUID_t();
 

@@ -7,7 +7,7 @@ namespace OpenDDS
 namespace DCPS
 {
 ACE_INLINE void
-GuidBuilder::entityId(long entityId);
+GuidBuilder::entityId(long entityId)
 {
   entityKey(entityId >> 8);
   entityKind(static_cast<CORBA::Octet>(0xff & entityId));

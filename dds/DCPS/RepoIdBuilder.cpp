@@ -7,7 +7,7 @@
 #include "RepoIdBuilder.h"
 
 #ifndef __ACE_INLINE__
-# include "GuidBuilder.inl"
+# include "RepoIdBuilder.inl"
 #endif /* __ACE_INLINE__ */
 
 namespace OpenDDS
