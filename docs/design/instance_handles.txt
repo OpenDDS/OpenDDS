@@ -1,13 +1,16 @@
 Last updated: 3/19/2009
 Steven Stallion
 
-As a part of DDS 1.2 specification compliance (formal/07-01-01)
-InstanceHandle_t requires refactoring. Currently, instance handles are either
-derived from an associated RepoId assigned by the DCPSInfoRepo or generated
-as a sequence.  Due to the increased scope and wider use presented in the
-updated specification, a new generation scheme is required.
+The DDS 1.2 specification (formal/07-01-01) adds additional operations which
+affect the scope and use of instance handles.  Instance handles are now
+made available via the get_instance_handle operation (Entity).  It is also
+possible for a given DomainParticipant to assert whether or not it contains
+a given entity through the use of contains_entity.  Currently, instance handles
+are either derived from an associated RepoId assigned by the DCPSInfoRepo or
+generated as a sequence.  Due to the increased scope and wider use presented
+in the updated specification, a new generation scheme is required.
 
-Instance handles should be divided into two categories:
+Instance handles shall be divided into two categories:
 - Entity instance handles
 - Data instance handles
 
