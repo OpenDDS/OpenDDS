@@ -33,14 +33,9 @@ public:
   void entityKind(EntityKind kind); 
   
   void entityId(EntityId_t entityId);
-  
-  void entityId(long entityId)
-  {
-    entityKey(entityId >> 8);
-    entityKind(static_cast<CORBA::Octet>(0xff & entityId));
-  }
+  void entityId(long entityId);
 
-  operator GUID_t() { return guid_; }
+  operator GUID_t();
 
 private:
   GUID_t  guid_cxx_;
@@ -49,5 +44,9 @@ private:
 
 } // namespace
 } // namespace
+
+#ifdef __ACE_INLINE__
+# include "GuidBuilder.inl"
+#endif /* __ACE_INLINE__ */
 
 #endif /* DCPS_REPOIDBUILDER_H */

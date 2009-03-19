@@ -6,6 +6,10 @@
 
 #include "GuidBuilder.h"
 
+#ifndef __ACE_INLINE__
+# include "GuidBuilder.inl"
+#endif /* __ACE_INLINE__ */
+
 namespace
 {
 inline OpenDDS::DCPS::GUID_t

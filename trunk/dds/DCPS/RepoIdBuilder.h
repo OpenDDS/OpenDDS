@@ -24,25 +24,18 @@ public:
 
   ~RepoIdBuilder();
 
-  void federationId(long federationId)
-  {
-    guidPrefix1(federationId);
-  }
+  void federationId(long federationId);
 
-  void participantId(long participantId)
-  {
-    guidPrefix2(participantId); 
-  }
+  void participantId(long participantId);
 
-  void from_BuiltinTopicKey(DDS::BuiltinTopicKey_t key)
-  {
-    federationId(key[0]);
-    participantId(key[1]);
-    entityId(key[2]);
-  }
+  void from_BuiltinTopicKey(DDS::BuiltinTopicKey_t key);
 };
 
 } // namespace
 } // namespace
+
+#ifdef __ACE_INLINE__
+# include "GuidBuilder.inl"
+#endif /* __ACE_INLINE__ */
 
 #endif /* DCPS_REPOIDBUILDER_H */
