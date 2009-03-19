@@ -6,6 +6,10 @@
 
 #include "RepoIdBuilder.h"
 
+#ifndef __ACE_INLINE__
+# include "GuidBuilder.inl"
+#endif /* __ACE_INLINE__ */
+
 namespace OpenDDS
 {
 namespace DCPS
@@ -24,4 +28,4 @@ RepoIdBuilder::~RepoIdBuilder()
 }
 
 } // namespace
-} // namespace:
+} // namespace
