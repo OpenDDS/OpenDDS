@@ -1027,7 +1027,7 @@ namespace OpenDDS
                             ::DDS::RETCODE_NOT_ENABLED);
         }
 
-      OpenDDS::DCPS::RepoId ignoreId;
+      RepoId ignoreId = RepoIdBuilder::create();
 
       BIT_Helper_1 < ::DDS::ParticipantBuiltinTopicDataDataReader,
                ::DDS::ParticipantBuiltinTopicDataDataReader_var,
@@ -1104,7 +1104,7 @@ namespace OpenDDS
                             ::DDS::RETCODE_NOT_ENABLED);
         }
 
-      OpenDDS::DCPS::RepoId ignoreId;
+      RepoId ignoreId = RepoIdBuilder::create();
 
       BIT_Helper_1 < ::DDS::TopicBuiltinTopicDataDataReader,
                ::DDS::TopicBuiltinTopicDataDataReader_var,
@@ -1173,7 +1173,7 @@ namespace OpenDDS
                             ::DDS::RETCODE_NOT_ENABLED);
         }
 
-      OpenDDS::DCPS::RepoId ignoreId;
+      RepoId ignoreId = RepoIdBuilder::create();
 
       BIT_Helper_1 < ::DDS::PublicationBuiltinTopicDataDataReader,
                ::DDS::PublicationBuiltinTopicDataDataReader_var,
@@ -1242,7 +1242,7 @@ namespace OpenDDS
                             ::DDS::RETCODE_NOT_ENABLED);
         }
 
-      OpenDDS::DCPS::RepoId ignoreId;
+      RepoId ignoreId = RepoIdBuilder::create();
 
       BIT_Helper_1 < ::DDS::SubscriptionBuiltinTopicDataDataReader,
                ::DDS::SubscriptionBuiltinTopicDataDataReader_var,

@@ -23,6 +23,8 @@ public:
 
   ~GuidBuilder();
 
+  static GUID_t create();
+
   void guidPrefix0(long p0);  
   void guidPrefix1(long p1);
   void guidPrefix2(long p2);

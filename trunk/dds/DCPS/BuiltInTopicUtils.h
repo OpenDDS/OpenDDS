@@ -88,7 +88,7 @@ namespace OpenDDS {
            {
              ACE_ERROR_RETURN((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: BIT_Helper::instance_handle_to_repo_key: ")
-                 ACE_TEXT("failed to find builtin topic data for instance %d, ")
+                 ACE_TEXT("failed to find builtin topic data for instance 0x%x, ")
                  ACE_TEXT("error %d.\n"),
                  handle,
                  ret
@@ -128,58 +128,64 @@ namespace OpenDDS {
           // the published data.
           while (1)
             {
-              ::DDS::SampleInfoSeq the_info(1);
-              BIT_DataSeq the_data(1);
-              ret = bit_reader->read_instance (the_data,
-                                               the_info,
-                                               1,
-                                               handle,
-                                               ::DDS::ANY_SAMPLE_STATE,
-                                               ::DDS::ANY_VIEW_STATE,
-                                               ::DDS::ANY_INSTANCE_STATE);
+              ::DDS::SampleInfoSeq the_info;
+              BIT_DataSeq the_data;
+              ret = bit_reader->read(the_data,
+                                     the_info,
+                                     ::DDS::LENGTH_UNLIMITED, // zero-copy
+                                     ::DDS::ANY_SAMPLE_STATE,
+                                     ::DDS::ANY_VIEW_STATE,
+                                     ::DDS::ANY_INSTANCE_STATE);
 
               if (ret != ::DDS::RETCODE_OK && ret != ::DDS::RETCODE_NO_DATA)
                 {
                   ACE_ERROR_RETURN ((LM_ERROR,
                                     ACE_TEXT("(%P|%t) ERROR: BIT_Helper::instance_handle_to_repo_id, ")
-                                    ACE_TEXT(" read instance %d returned error %d. \n"),
+                                    ACE_TEXT(" read instance 0x%x returned error %d. \n"),
                                     handle, ret),
                                     ret);
                 }
-              else if (the_data.length () != 1)
+                
+              // FIXME
+              // This is a temporary hack to work around the entity/data
+              // instance handle mismatch when data handles are passed
+              // to ignore_*. see: docs/design/instance-handles.txt
+              for (CORBA::ULong i = 0; i < the_data.length(); ++i)
+              {
+                if (the_data[i].key[2] == handle)
                 {
-                  ACE_Time_Value now = ACE_OS::gettimeofday ();
-                  if (now < due)
-                    {
-                      if (DCPS_debug_level >= 10)
-                        ACE_DEBUG((LM_DEBUG,
-                             ACE_TEXT("(%P|%t) BIT_Helper::instance_handle_to_repo_id, ")
-                             ACE_TEXT(" BIT reader read_instance failed - trying again. \n")));
+                  data.length(1);
+                  data[0] = the_data[i];
+                  
+                  return ::DDS::RETCODE_OK;
+                }
+              }
 
-                      ACE_Time_Value tv = due - now;
-                      if (tv > ACE_Time_Value (0, 100000))
-                        {
-                          tv = ACE_Time_Value (0, 100000);
-                        }
-                      ACE_OS::sleep (tv);
-                    }
-                  else
+              ACE_Time_Value now = ACE_OS::gettimeofday ();
+              if (now < due)
+                {
+                  if (DCPS_debug_level >= 10)
+                    ACE_DEBUG((LM_DEBUG,
+                         ACE_TEXT("(%P|%t) BIT_Helper::instance_handle_to_repo_id, ")
+                         ACE_TEXT(" BIT reader read_instance failed - trying again. \n")));
+
+                  ACE_Time_Value tv = due - now;
+                  if (tv > ACE_Time_Value (0, 100000))
                     {
-                      ACE_ERROR_RETURN ((LM_ERROR,
-                                ACE_TEXT("(%P|%t) ERROR: BIT_Helper::instance_handle_to_repo_id, ")
-                                ACE_TEXT(" timout. \n")),
-                                ::DDS::RETCODE_ERROR);
-                      return ::DDS::RETCODE_TIMEOUT;
+                      tv = ACE_Time_Value (0, 100000);
                     }
+                  ACE_OS::sleep (tv);
                 }
               else
                 {
-                  data = the_data;
-                  return ::DDS::RETCODE_OK; // success
+                  ACE_ERROR_RETURN ((LM_ERROR,
+                            ACE_TEXT("(%P|%t) ERROR: BIT_Helper::instance_handle_to_repo_id, ")
+                            ACE_TEXT(" timeout. \n")),
+                            ::DDS::RETCODE_ERROR);
+                  return ::DDS::RETCODE_TIMEOUT;
                 }
             }
-        }
-
+       }
     };
 
 
@@ -197,7 +203,7 @@ namespace OpenDDS {
           ::CORBA::ULong repoids_len = repoids.length();
           handles.length(repoids_len);
 
-          for (::CORBA::ULong i = 1; i < repoids_len; ++i)
+          for (::CORBA::ULong i = 0; i < repoids_len; ++i)
           {
             ::OpenDDS::DCPS::RepoIdConverter converter(repoids[i]);
             handles[i] = ::DDS::InstanceHandle_t(converter);

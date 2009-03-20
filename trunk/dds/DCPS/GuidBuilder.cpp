@@ -12,27 +12,6 @@
 
 namespace
 {
-inline OpenDDS::DCPS::GUID_t
-create_guid()
-{
-  OpenDDS::DCPS::GUID_t guid = {
-    { OpenDDS::DCPS::VENDORID_OCI[0],
-      OpenDDS::DCPS::VENDORID_OCI[1],
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-    }, OpenDDS::DCPS::ENTITYID_UNKNOWN
-  };
-  return guid;
-}
-  
 inline void
 fill_guid(CORBA::Octet* begin, long value, std::size_t len)
 {
@@ -50,7 +29,7 @@ namespace OpenDDS
 namespace DCPS
 {
 GuidBuilder::GuidBuilder()
-  : guid_cxx_(create_guid()),
+  : guid_cxx_(create()),
     guid_(guid_cxx_)
 {
 }
@@ -62,6 +41,27 @@ GuidBuilder::GuidBuilder(GUID_t& guid)
 
 GuidBuilder::~GuidBuilder()
 {
+}
+
+GUID_t
+GuidBuilder::create()
+{
+  GUID_t guid = {
+    { VENDORID_OCI[0],
+      VENDORID_OCI[1],
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    }, ENTITYID_UNKNOWN
+  };
+  return guid;
 }
 
 void

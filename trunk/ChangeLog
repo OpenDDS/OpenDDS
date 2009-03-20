@@ -1,3 +1,14 @@
+Fri Mar 20 22:48:32 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/BuiltInTopicUtils.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/GuidBuilder.h:
+        * dds/DCPS/GuidBuilder.cpp:
+        * tests/DCPS/BuiltInTopic/common.cpp:
+
+          Fixed failing builtin topic tests.
+
 Thu Mar 19 22:04:12 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * docs/design/instance_handles.txt:
