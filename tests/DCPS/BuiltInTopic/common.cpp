@@ -221,7 +221,7 @@ int ignore ()
       }
 
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) IGNORE_PARTICIPANT,  ignored participant %s has handle %d.\n"),
+        ACE_TEXT("(%P|%t) IGNORE_PARTICIPANT,  ignored participant %s has handle 0x%x.\n"),
         ignoreBuffer.str().c_str(),
         handles[0]
       ));
@@ -278,7 +278,7 @@ int ignore ()
       }
 
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) IGNORE_TOPIC,  ignored topic %s has handle %d.\n"),
+        ACE_TEXT("(%P|%t) IGNORE_TOPIC,  ignored topic %s has handle 0x%x.\n"),
         ignoreBuffer.str().c_str(),
         handles[0]
       ));
@@ -289,7 +289,7 @@ int ignore ()
       {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT("(%P|%t) IGNORE_TOPIC, ")
-                    ACE_TEXT(" ignore_topic %d return error %d\n"),
+                    ACE_TEXT(" ignore_topic 0x%x return error %d\n"),
                     handles[0], ret));
         return -1;
       }
@@ -335,7 +335,7 @@ int ignore ()
       }
 
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) IGNORE_PUBLICATION,  ignored topic %s has handle %d.\n"),
+        ACE_TEXT("(%P|%t) IGNORE_PUBLICATION,  ignored topic %s has handle 0x%x.\n"),
         ignoreBuffer.str().c_str(),
         handles[0]
       ));
@@ -346,7 +346,7 @@ int ignore ()
       {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT("(%P|%t) IGNORE_PUBLICATION, ")
-                    ACE_TEXT(" ignore_publication %d return error %d\n"),
+                    ACE_TEXT(" ignore_publication 0x%x return error %d\n"),
                     handles[0], ret));
         return -1;
       }
@@ -391,7 +391,7 @@ int ignore ()
       }
 
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) IGNORE_SUBSCRIPTION,  ignored topic %s has handle %d.\n"),
+        ACE_TEXT("(%P|%t) IGNORE_SUBSCRIPTION,  ignored topic %s has handle 0x%x.\n"),
         ignoreBuffer.str().c_str(),
         handles[0]
       ));
@@ -402,7 +402,7 @@ int ignore ()
       {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT("(%P|%t) IGNORE_SUBSCRIPTION, ")
-                    ACE_TEXT(" ignore_subscription %d returned error %d\n"),
+                    ACE_TEXT(" ignore_subscription 0x%x returned error %d\n"),
                     handles[0], ret));
         return -1;
       }
@@ -501,7 +501,7 @@ int read (int expect_success)
         if (!expect_success)
         {
           ACE_ERROR_RETURN ((LM_ERROR,
-                             ACE_TEXT("(%P|%t) ERROR: received a message but did not expect too!\n"))
+                             ACE_TEXT("(%P|%t) ERROR: received an unexpected sample!\n"))
                              , -1);
 
         }
