@@ -197,7 +197,7 @@ void
 ZeroCopyDataSeq<Sample_T, DEF_MAX>::make_single_copy(CORBA::ULong maximum)
 {
   CORBA::ULong currentSize(ptrs_.size());
-  ZeroCopyDataSeq<Sample_T, DEF_MAX> sc(std::max(maximum, currentSize));
+  ZeroCopyDataSeq<Sample_T, DEF_MAX> sc((std::max)(maximum, currentSize));
   sc.length(ptrs_.size());
   for (CORBA::ULong i(0); i < ptrs_.size(); ++i)
     {
