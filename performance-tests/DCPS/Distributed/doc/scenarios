@@ -93,10 +93,10 @@ Or with only 2 hosts:
 #     p4sub3:   topic=status,  transport=14
 #   Process 5:
 #     p4pub1:   topic=state,   partition=link4, source=sub7, priority=5, transport=10
-#     p4pub2:   topic=status,  size=200, max=1000, min=100, dev=500, rate=10, transport=11
-#     p4sub1:   topic=state,   partition=link3, transport=12
-#     p4sub2:   topic=control, transport=13
-#     p4sub3:   topic=status,  transport=14
+#     p4pub2:   topic=control, size=80,  max=120,  min=40,  dev=20,  rate=20, priority=10, transport=11
+#     p4pub3:   topic=status,  size=200, max=1000, min=100, dev=500, rate=10, transport=12
+#     p4sub1:   topic=state,   partition=link3, transport=13
+#     p4sub2:   topic=control, transport=14
 #   Process 6:
 #     p6pub1:   topic=state,   partition=link6, source=subc, priority=5, transport=10
 #     p6pub2:   topic=status,  size=200, max=1000, min=100, dev=500, rate=10, transport=11
