@@ -78,8 +78,8 @@ include:
    run_test script is needed on each host as the script will start a
    process for each specified scenario configuration file.
 
-   For example to run scenario 2 on 3 hosts the following invocations
-   would be used:
+   An example of starting the execution of 2 processes on each of 3
+   hosts for scenario2 is:
 
    Host1> bin/run_test -v -P \
             -DCPSInfoRepo corbaloc:iiop:repohost.domain:<port>/DCPSInfoRepo \
@@ -93,8 +93,70 @@ include:
             -DCPSInfoRepo corbaloc:iiop:repohost.domain:<port>/DCPSInfoRepo \
             -s tests/s2-p3.ini,tests/s2-p6.ini
 
-   If a duration is not specified for the test (-t <seconds>) then use
-   <Ctl-C> to stop each test process.
+Some examples of executing tests on multiple hosts is included here.  Use
+this as a guide as your local network configuratio and directory
+structures are likely to be unique to your environment.
+
+In all of the examples below, it is best to start the testprocess
+execution (invocations of bin/run_tests ... -P ...) in the order shown
+and within a few seconds of each other.
+
+If a duration is not specified for the test (-t <seconds>) then use '>
+pkill -INT testprocess' to stop the testprocess executions gracefully so
+that they will report collected data at test termination.  This should
+be done on the hosts in the same order that the test scripts were started.
+
+A simple example to execute scenario1 is:
+
+   host1> make
+   host1> tools/mkpkg testing
+   host1> tar jcf scenario1.tar.bz2 testing
+   host1> scp scenario1.tar.bz2 host2:
+   host1> cd testing
+   host1> bin/run_test -v -S -h iiop://host1.localdomain:2809
+
+   ...then in another window on host1...
+
+   host1> cd testing
+   host1> sudo bin/run_test -v -P -t 60 -h host1.localdomain \
+          -i etc/transport.ini -s s1-p1.ini
+
+   ...and on host2...
+
+   host2> tar xf scenario1.tar.bz2
+   host2> cd testing
+   host2> sudo bin/run_test -v -P -h host1.localdomain \
+          -i etc/transport.ini -s s1-p2.ini
+
+A more complex example executing scenario3 on 3 hosts is:
+
+   host1> make
+   host1> tools/mkpkg testing
+   host1> tar jcf scenario3.tar.bz2 testing
+   host1> scp scenario3.tar.bz2 host2:
+   host1> scp scenario3.tar.bz2 host3:
+   host1> cd testing
+   host1> bin/run_test -v -S -h iiop://host1.localdomain:2809
+
+   ...then in another window on host1...
+
+   host1> cd testing
+   host1> sudo bin/run_test -v -P -t 60 -h host1.localdomain \
+          -i etc/transport.ini -s s3-p1.ini
+
+   ...and on host2...
+
+   host2> tar xf scenario3.tar.bz2
+   host2> cd testing
+   host2> sudo bin/run_test -v -P -h host1.localdomain \
+          -i etc/transport.ini -s s3-p2.ini
+
+   ...and on host3...
+
+   host3> tar xf scenario3.tar.bz2
+   host3> cd testing
+   host3> sudo bin/run_test -v -P -h host1.localdomain \
+          -i etc/transport.ini -s s3-p3.ini
 
 An example of executing a custom defined scenario using files created in
 tests/myscenario-p*.ini and etc/myconfig.ini is:
@@ -103,24 +165,24 @@ tests/myscenario-p*.ini and etc/myconfig.ini is:
    host1> tools/mkpkg testing
    host1> cp tests/mysecenario-p*.ini testing/tests
    host1> cp etc/myconfig.ini testing/etc
-   host1> tar jcf testing.tar.bz2 testing
-   host1> scp testing.tar.bz2 host2:
-   host1> scp testing.tar.bz2 host3:
+   host1> tar jcf custom.tar.bz2 testing
+   host1> scp custom.tar.bz2 host2:
+   host1> scp custom.tar.bz2 host3:
    host1> cd testing
    host1> bin/run_test -v -S -h iiop://host1.localdomain:2525
 
-   ...then...
+   ...then in another window on host1...
 
    host1> cd testing
    host1> sudo bin/run_test -v -P -t 60 -h host1.localdomain:2525 \
           -i etc/myconfig.ini -s myscenario-p1.ini
 
-   host2> tar xf testing.tar.bz2
+   host2> tar xf custom.tar.bz2
    host2> cd testing
    host2> sudo bin/run_test -v -P -h host1.localdomain:2525 \
           -i etc/myconfig.ini -s myscenario-p2.ini
 
-   host3> tar xf testing.tar.bz2
+   host3> tar xf custom.tar.bz2
    host3> cd testing
    host3> sudo bin/run_test -v -P -h host1.localdomain:2525 \
           -i etc/myconfig.ini -s myscenario-p3.ini
