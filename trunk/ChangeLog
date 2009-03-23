@@ -1,3 +1,9 @@
+Mon Mar 23 17:18:36 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/ZeroCopySeq_T.inl:
+
+          Prevent std::max() from being clobbered by #define max.
+
 Fri Mar 20 22:48:32 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
