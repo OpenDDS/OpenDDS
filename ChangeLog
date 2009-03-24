@@ -1,14 +1,26 @@
+Tue Mar 24 15:44:01 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench:
+
+	  Moved DCPS/Distributed to this location.  We have been
+	  documenting this as OpenDDS-Bench so this is a more appropriate
+	  home for this testbench.
+
+        * performance-tests/DCPS/Distributed:
+
+          Removed these files.
+
 Mon Mar 23 17:55:45 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/DCPS/Distributed/doc/scenarios:
         * performance-tests/DCPS/Distributed/doc/tests:
 
-	  Updated documentation about scenarios.
+          Updated documentation about scenarios.
 
         * performance-tests/DCPS/Distributed/tests/s2-p2.ini:
 
-	  Changed transport indices to match documentation and not be
-	  shared.
+          Changed transport indices to match documentation and not be
+          shared.
 
 Mon Mar 23 17:18:36 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
