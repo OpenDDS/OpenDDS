@@ -1,14 +1,21 @@
+Wed Mar 25 20:09:41 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/datamodel.txt:
+
+	  Add data model defining the allowed scenario configuration
+	  files Key values.
+
 Wed Mar 25 15:15:09 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/src/Commas.h:
         * performance-tests/Bench/src/Commas.cpp:
 
-	  Inline the insertion operator definition.
+          Inline the insertion operator definition.
 
         * performance-tests/Bench/src/TestProcess.mpc:
         * performance-tests/Bench/tools/mkpkg:
 
-	  Updates to accomodate the new location of the Bench software.
+          Updates to accomodate the new location of the Bench software.
 
 Tue Mar 24 15:44:01 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
