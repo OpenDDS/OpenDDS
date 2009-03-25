@@ -27,8 +27,3 @@ Commas::operator()( std::ostream& str) const
   return str;
 }
 
-std::ostream& operator<<( std::ostream& str, const Commas& value)
-{
-  return value( str);
-}
-

@@ -12,14 +12,24 @@
 
 class Commas {
   public:
-    Commas( long value) : value_( value) { }
+    Commas( long value);
     std::ostream& operator()( std::ostream& str) const;
 
   private:
     long value_;
 };
 
-std::ostream& operator<<( std::ostream& str, const Commas& value);
+inline
+Commas::Commas( long value)
+ : value_( value)
+{
+}
+
+inline
+std::ostream& operator<<( std::ostream& str, const Commas& value)
+{
+  return value( str);
+}
 
 #endif // COMMAS_H
 
