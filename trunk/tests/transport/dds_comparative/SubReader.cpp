@@ -3,10 +3,11 @@
 // $Id$
 #include "SubReader.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
+#include "dds/DCPS/GuidBuilder.h"
 
 
 SubReader::SubReader()
-  : sub_id_( OpenDDS::DCPS::GUID_UNKNOWN),
+  : sub_id_(OpenDDS::DCPS::GuidBuilder::create ()),
     data_size_(0),
     num_expected_(0),
     num_received_(0)

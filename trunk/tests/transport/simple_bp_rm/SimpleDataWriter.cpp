@@ -7,13 +7,14 @@
 #include "dds/DCPS/DataSampleHeader.h"
 #include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
+#include "dds/DCPS/GuidBuilder.h"
 #include "ace/OS.h"
 #include <sstream>
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 SimpleDataWriter::SimpleDataWriter()
-  : pub_id_( OpenDDS::DCPS::GUID_UNKNOWN),
+  : pub_id_ (OpenDDS::DCPS::GuidBuilder::create ()),
     num_sent_(0),
     num_to_send_(0),
     num_delivered_(0),

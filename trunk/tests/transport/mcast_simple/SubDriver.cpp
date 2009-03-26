@@ -18,6 +18,8 @@
 
 
 SubDriver::SubDriver()
+: pub_id_(OpenDDS::DCPS::GuidBuilder::create ()),
+  sub_id_(OpenDDS::DCPS::GuidBuilder::create ())
 {
   DBG_ENTRY("SubDriver","SubDriver");
 }
@@ -41,6 +43,8 @@ SubDriver::run(int& argc, char* argv[])
                                         argv,
                                         "TAO_DDS_DCPS");
   TheServiceParticipant->set_ORB (orb.in());
+  DDS::DomainParticipantFactory_var dpf;
+  dpf = TheParticipantFactoryWithArgs(argc, argv);
 
   parse_args(argc, argv);
   init();

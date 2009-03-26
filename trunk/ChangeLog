@@ -1,9 +1,53 @@
+Thu Mar 26 22:11:54 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/transport/dds_comparative/Pub.cpp:
+        * tests/transport/dds_comparative/PubWriter.cpp:
+        * tests/transport/dds_comparative/Sub.cpp:
+        * tests/transport/dds_comparative/SubReader.cpp:
+        * tests/transport/mcast_simple/PubDriver.cpp:
+        * tests/transport/mcast_simple/SimpleDataReader.cpp:
+        * tests/transport/mcast_simple/SimpleDataWriter.cpp:
+        * tests/transport/mcast_simple/SubDriver.cpp:
+        * tests/transport/mcast_simple_n/PubDriver.cpp:
+        * tests/transport/mcast_simple_n/SimpleDataReader.cpp:
+        * tests/transport/mcast_simple_n/SimpleDataWriter.cpp:
+        * tests/transport/mcast_simple_n/SimpleSubscriber.cpp:
+        * tests/transport/mcast_simple_n/SubDriver.cpp:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SimpleDataReader.cpp:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+        * tests/transport/simple/SubDriver.cpp:
+        * tests/transport/simple_bp/PubDriver.cpp:
+        * tests/transport/simple_bp/SimpleDataReader.cpp:
+        * tests/transport/simple_bp/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp/SubDriver.cpp:
+        * tests/transport/simple_bp_rm/PubDriver.cpp:
+        * tests/transport/simple_bp_rm/SimpleDataReader.cpp:
+        * tests/transport/simple_bp_rm/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp_rm/SubDriver.cpp:
+        * tests/transport/simple_n/PubDriver.cpp:
+        * tests/transport/simple_n/SimpleDataReader.cpp:
+        * tests/transport/simple_n/SimpleDataWriter.cpp:
+        * tests/transport/simple_n/SubDriver.cpp:
+        * tests/transport/udp_simple/PubDriver.cpp:
+        * tests/transport/udp_simple/SimpleDataReader.cpp:
+        * tests/transport/udp_simple/SimpleDataWriter.cpp:
+        * tests/transport/udp_simple/SubDriver.cpp:
+        * tests/transport/udp_simple_n/PubDriver.cpp:
+        * tests/transport/udp_simple_n/SimpleDataReader.cpp:
+        * tests/transport/udp_simple_n/SimpleDataWriter.cpp:
+        * tests/transport/udp_simple_n/SubDriver.cpp:
+
+          Fixed the test failure due to RepoId not initialized and added 
+          TheParticipantFactoryWithArgs call to enable DCPS debug level 
+          to help debugging.
+          
 Wed Mar 25 20:09:41 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/doc/datamodel.txt:
 
-	  Add data model defining the allowed scenario configuration
-	  files Key values.
+          Add data model defining the allowed scenario configuration
+          files Key values.
 
 Wed Mar 25 15:15:09 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
