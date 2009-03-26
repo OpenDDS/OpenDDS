@@ -6,6 +6,7 @@
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/transport/framework/TransportInterface.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
+#include "dds/DCPS/GuidBuilder.h"
 #include <string>
 
 

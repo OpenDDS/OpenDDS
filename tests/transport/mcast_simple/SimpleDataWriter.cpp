@@ -7,6 +7,7 @@
 #include "dds/DCPS/DataSampleHeader.h"
 #include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
+#include "dds/DCPS/GuidBuilder.h"
 #include "ace/OS.h"
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
@@ -14,7 +15,8 @@
 
 
 SimpleDataWriter::SimpleDataWriter()
-  : delivered_test_message_(0)
+: pub_id_(OpenDDS::DCPS::GuidBuilder::create ()),
+  delivered_test_message_(0)
 {
   DBG_ENTRY("SimpleDataWriter","SimpleDataWriter");
 }

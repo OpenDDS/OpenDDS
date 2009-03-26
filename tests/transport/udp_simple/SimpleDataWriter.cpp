@@ -10,11 +10,13 @@
 #include "ace/OS.h"
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
+#include "dds/DCPS/GuidBuilder.h"
 #include "ace/SString.h"
 
 
 SimpleDataWriter::SimpleDataWriter()
-  : delivered_test_message_(0)
+: pub_id_ (OpenDDS::DCPS::GuidBuilder::create ()),
+  delivered_test_message_(0)
 {
   DBG_ENTRY("SimpleDataWriter","SimpleDataWriter");
 }

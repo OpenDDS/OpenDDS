@@ -20,6 +20,8 @@
 
 
 SubDriver::SubDriver()
+: pub_id_ (OpenDDS::DCPS::GuidBuilder::create ()),
+  sub_id_ (OpenDDS::DCPS::GuidBuilder::create ())
 {
   DBG_ENTRY("SubDriver","SubDriver");
 }
@@ -35,11 +37,14 @@ void
 SubDriver::run(int& argc, char* argv[])
 {
   DBG_ENTRY_LVL("SubDriver","run",6);
+
   CORBA::ORB_var orb = CORBA::ORB_init (argc,
                                         argv,
                                         "TAO_DDS_DCPS");
 
   TheServiceParticipant->set_ORB (orb.in());
+  DDS::DomainParticipantFactory_var dpf;
+  dpf = TheParticipantFactoryWithArgs(argc, argv);
 
   parse_args(argc, argv);
   init();
@@ -181,7 +186,6 @@ SubDriver::init()
 
   tcp_config->local_address_ = this->sub_addr_;
   tcp_config->local_address_str_ = this->sub_addr_str_;
-
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Configure the (ALL_TRAFFIC) TransportImpl object.\n"));
 
