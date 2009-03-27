@@ -1,0 +1,21 @@
+
+This directory contains support for executing tests across a distributed
+environment.  It includes test source code, scripts and package building
+tools for creating and executing distributed tests.
+
+Directories here include:
+  bin   - target for built executables and location of test execution
+          scripts.
+  doc   - more detailed descriptions of the testing, its setup and
+          execution.
+  etc   - location of test configuration information.
+  lib   - target for built link libraries and Perl modules.
+  src   - location of test source code.
+  tests - location of test scenario configuration data.
+  tools - location of packaging and support tools.
+
+NOTE: At this time, these tests and scripts are written for a Unix-style
+      environment only.  They rely on the use of the bash shell
+      interpreter and expect the ability to execute remote commands via
+      ssh.
+
