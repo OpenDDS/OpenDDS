@@ -628,18 +628,18 @@ OpenDDS::DCPS::IncompatibleQosStatus* DCPS_IR_Publication::get_incompatibleQosSt
 }
 
 
-OpenDDS::DCPS::RepoId DCPS_IR_Publication::get_id ()
+const OpenDDS::DCPS::RepoId& DCPS_IR_Publication::get_id () const
 {
   return id_;
 }
 
-OpenDDS::DCPS::RepoId DCPS_IR_Publication::get_topic_id ()
+const OpenDDS::DCPS::RepoId& DCPS_IR_Publication::get_topic_id () const
 {
   return topic_->get_id();
 }
 
 
-OpenDDS::DCPS::RepoId DCPS_IR_Publication::get_participant_id ()
+const OpenDDS::DCPS::RepoId& DCPS_IR_Publication::get_participant_id () const
 {
   return participant_->get_id();
 }
