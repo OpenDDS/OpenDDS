@@ -135,7 +135,7 @@ public:
   ///  domain's list of dead participants for removal
   void mark_dead ();
 
-  OpenDDS::DCPS::RepoId get_id ();
+  const OpenDDS::DCPS::RepoId& get_id () const;
 
   CORBA::Boolean is_alive ();
   void set_alive (CORBA::Boolean alive);

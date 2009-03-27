@@ -1,3 +1,20 @@
+Fri Mar 27 04:19:15 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic.h:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+
+          Made the get_id() and get_*_id () to return reference instead
+          of value so the GuidConverter constructed with a valid guid
+          reference instead of temporary memory which may be overwritten.
+          This resolved BuiltInTopic test failure due to bogus key value
+          from builtin topic data.
+          
 Thu Mar 26 22:11:54 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
         * tests/transport/dds_comparative/Pub.cpp:
@@ -38,10 +55,10 @@ Thu Mar 26 22:11:54 UTC 2009  Yan Dai  <dai_y@ociweb.com>
         * tests/transport/udp_simple_n/SimpleDataWriter.cpp:
         * tests/transport/udp_simple_n/SubDriver.cpp:
 
-          Fixed the test failure due to RepoId not initialized and added 
-          TheParticipantFactoryWithArgs call to enable DCPS debug level 
+          Fixed the test failure due to RepoId not initialized and added
+          TheParticipantFactoryWithArgs call to enable DCPS debug level
           to help debugging.
-          
+
 Wed Mar 25 20:09:41 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/doc/datamodel.txt:

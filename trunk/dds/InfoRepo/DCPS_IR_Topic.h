@@ -91,8 +91,8 @@ public:
   void reevaluate_associations (DCPS_IR_Subscription* subscription);
 
 
-  OpenDDS::DCPS::RepoId get_id () const;
-  OpenDDS::DCPS::RepoId get_participant_id () const;
+  const OpenDDS::DCPS::RepoId& get_id () const;
+  const OpenDDS::DCPS::RepoId& get_participant_id () const;
 
   /// Return pointer to the Topic Description
   /// Domain retains ownership
