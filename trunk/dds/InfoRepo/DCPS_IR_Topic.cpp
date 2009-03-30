@@ -292,13 +292,13 @@ int DCPS_IR_Topic::remove_subscription_reference (DCPS_IR_Subscription* subscrip
 
 
 
-const OpenDDS::DCPS::RepoId& DCPS_IR_Topic::get_id () const
+OpenDDS::DCPS::RepoId DCPS_IR_Topic::get_id () const
 {
   return id_;
 }
 
 
-const OpenDDS::DCPS::RepoId& DCPS_IR_Topic::get_participant_id () const
+OpenDDS::DCPS::RepoId DCPS_IR_Topic::get_participant_id () const
 {
   return participant_->get_id();
 }

@@ -703,7 +703,7 @@ void DCPS_IR_Participant::mark_dead ()
 }
 
 
-const OpenDDS::DCPS::RepoId& DCPS_IR_Participant::get_id () const
+OpenDDS::DCPS::RepoId DCPS_IR_Participant::get_id ()
 {
   return id_;
 }
