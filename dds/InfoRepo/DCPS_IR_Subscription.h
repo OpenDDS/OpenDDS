@@ -148,9 +148,9 @@ public:
   /// Subscription retains ownership
   OpenDDS::DCPS::IncompatibleQosStatus* get_incompatibleQosStatus (); 
 
-  const OpenDDS::DCPS::RepoId& get_id () const;
-  const OpenDDS::DCPS::RepoId& get_topic_id () const;
-  const OpenDDS::DCPS::RepoId& get_participant_id () const;
+  OpenDDS::DCPS::RepoId get_id ();
+  OpenDDS::DCPS::RepoId get_topic_id ();
+  OpenDDS::DCPS::RepoId get_participant_id ();
 
   DCPS_IR_Topic_Description* get_topic_description();
 

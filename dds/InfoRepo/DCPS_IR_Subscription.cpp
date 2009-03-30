@@ -710,19 +710,19 @@ void DCPS_IR_Subscription::reevaluate_association (DCPS_IR_Publication* publicat
 }
 
 
-const OpenDDS::DCPS::RepoId& DCPS_IR_Subscription::get_id () const
+OpenDDS::DCPS::RepoId DCPS_IR_Subscription::get_id ()
 {
   return id_;
 }
 
 
-const OpenDDS::DCPS::RepoId& DCPS_IR_Subscription::get_topic_id () const
+OpenDDS::DCPS::RepoId DCPS_IR_Subscription::get_topic_id ()
 {
   return topic_->get_id();
 }
 
 
-const OpenDDS::DCPS::RepoId& DCPS_IR_Subscription::get_participant_id () const
+OpenDDS::DCPS::RepoId DCPS_IR_Subscription::get_participant_id ()
 {
   return participant_->get_id();
 }
