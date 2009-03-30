@@ -1,3 +1,9 @@
+Mon Mar 30 20:18:04 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/design/instance_handles.txt:
+
+          Updated design document with comments from Adam and Mike.
+
 Mon Mar 30 18:57:51 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
         * dds/InfoRepo/DCPS_IR_Participant.h:
@@ -9,9 +15,9 @@ Mon Mar 30 18:57:51 UTC 2009  Yan Dai  <dai_y@ociweb.com>
         * dds/InfoRepo/DCPS_IR_Topic.h:
         * dds/InfoRepo/DCPS_IR_Topic.cpp:
 
-          Rolled back last commit which may cause access violation if the 
+          Rolled back last commit which may cause access violation if the
           lifetime is a problem.
-          
+
 Fri Mar 27 04:19:15 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
         * dds/InfoRepo/DCPS_IR_Participant.h:
