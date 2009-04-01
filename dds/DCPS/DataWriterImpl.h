@@ -93,6 +93,10 @@ namespace OpenDDS
       virtual ::DDS::Topic_ptr get_topic ()
         ACE_THROW_SPEC ((CORBA::SystemException));
 
+      virtual ::DDS::ReturnCode_t wait_for_acknowledgments (
+          const ::DDS::Duration_t & max_wait)
+        ACE_THROW_SPEC ((::CORBA::SystemException));
+
       virtual ::DDS::Publisher_ptr get_publisher ()
         ACE_THROW_SPEC ((CORBA::SystemException));
 
@@ -232,6 +236,9 @@ namespace OpenDDS
        * message is delivered.
        */
       void control_delivered (ACE_Message_Block* sample);
+
+      /// Deliver a requested SAMPLE_ACK message to this writer.
+      void deliver_ack( const DataSampleHeader& header, DataSample* data);
 
       /**
        * Accessor of the associated topic name.
@@ -511,6 +518,15 @@ namespace OpenDDS
 
       /// Flag indicates that the init() is called.
       bool                       initialized_;
+
+      /// Lock used for wait_for_acks() processing.
+      ACE_SYNCH_MUTEX wfaLock_;
+
+      /// Used to block in wait_for_acks().
+      ACE_Condition< ACE_SYNCH_MUTEX> wfaCondition_;
+
+      typedef std::map<RepoId, SequenceNumber, GUID_tKeyLessThan> RepoIdToSequenceMap;
+      RepoIdToSequenceMap idToSequence_;
 
       IdSet                  pending_readers_;
    };
