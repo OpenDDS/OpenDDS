@@ -146,13 +146,13 @@ namespace OpenDDS {
                                     ret);
                 }
                 
-              // FIXME
               // This is a temporary hack to work around the entity/data
               // instance handle mismatch when data handles are passed
               // to ignore_*. see: docs/design/instance-handles.txt
               for (CORBA::ULong i = 0; i < the_data.length(); ++i)
               {
-                if (the_data[i].key[2] == handle)
+                if (the_info[i].instance_handle == handle ||
+                    the_data[i].key[2] == handle)
                 {
                   data.length(1);
                   data[0] = the_data[i];
