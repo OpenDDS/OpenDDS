@@ -112,6 +112,7 @@ OpenDDS::DCPS::TransportImpl::reserve_datalink
                       (const TransportInterfaceInfo& remote_subscriber_info,
                        RepoId                        subscriber_id,
                        RepoId                        publisher_id,
+                       TransportSendListener*        send_listener,
                        CORBA::Long                   priority)
 {
   DBG_ENTRY_LVL("TransportImpl","reserve_datalink",6);
@@ -141,7 +142,11 @@ OpenDDS::DCPS::TransportImpl::reserve_datalink
       ),0);
     }
 
-  link->make_reservation(subscriber_id,publisher_id);
+  link->make_reservation(
+    subscriber_id,
+    publisher_id,
+    send_listener
+  );
 
   return link._retn();
 }

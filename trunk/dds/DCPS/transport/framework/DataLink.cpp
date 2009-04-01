@@ -88,8 +88,11 @@ OpenDDS::DCPS::DataLink::resume_send ()
 /// Return Codes: 0 means successful reservation made.
 ///              -1 means failure.
 int
-OpenDDS::DCPS::DataLink::make_reservation(RepoId subscriber_id,  /* remote */
-                                      RepoId publisher_id)   /* local */
+OpenDDS::DCPS::DataLink::make_reservation(
+  RepoId subscriber_id,  /* remote */
+  RepoId publisher_id,   /* local */
+  TransportSendListener* send_listener
+)
 {
   DBG_ENTRY_LVL("DataLink","make_reservation",6);
   int pub_result      = 0;
@@ -120,6 +123,9 @@ OpenDDS::DCPS::DataLink::make_reservation(RepoId subscriber_id,  /* remote */
     // Update our pub_map_.  The last argument is a 0 because remote
     // subscribers don't have a TransportReceiveListener object.
     pub_result = this->pub_map_.insert(publisher_id,subscriber_id,0);
+
+    // Take advantage of the lock and store the send listener as well.
+    this->send_listeners_[ publisher_id] = send_listener;
   }
 
   if (pub_result == 0)
@@ -502,13 +508,24 @@ OpenDDS::DCPS::DataLink::ack_received( ReceivedDataSample& sample)
   );
   serializer >> publication;
 
-/** This is pointless.
-  {
-    GuardType guard(this->pub_map_lock_);
-    ReceiveListenerSet_rch listener_set
-      = this->pub_map_.find( publication);
+  TransportSendListener* listener;
+  { GuardType guard(this->pub_map_lock_);
+    IdToSendListenerMap::const_iterator where
+      = this->send_listeners_.find( publication);
+    if( where == this->send_listeners_.end()) {
+      RepoIdConverter converter( publication);
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) DataLink::ack_received: ")
+        ACE_TEXT("listener for publication %s not found.\n"),
+        std::string(converter).c_str()
+      ));
+      return;
+    }
+
+    listener = where->second;
   }
- **/
+
+  listener->deliver_ack( sample.header_, sample.sample_);
 }
 
 /// No locking needed because the caller (release_reservations()) should

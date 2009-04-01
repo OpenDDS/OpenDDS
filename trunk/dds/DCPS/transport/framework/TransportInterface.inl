@@ -138,6 +138,7 @@ OpenDDS::DCPS::TransportInterface::remove_all_control_msgs(RepoId pub_id)
 ACE_INLINE int
 OpenDDS::DCPS::TransportInterface::add_subscriptions
                                     (RepoId                 publisher_id,
+                                     TransportSendListener* send_listener,
                                      CORBA::Long            priority,
                                      ssize_t                size,
                                      const AssociationData* subscriptions)
@@ -149,7 +150,8 @@ OpenDDS::DCPS::TransportInterface::add_subscriptions
                                 "publisher_id",
                                 "subscriber_id",
                                 size,
-                                subscriptions);
+                                subscriptions,
+                                0, send_listener);
 }
 
 
@@ -169,7 +171,7 @@ OpenDDS::DCPS::TransportInterface::add_publications
                                 "publisher_id",
                                 size,
                                 publications,
-                                receive_listener);
+                                receive_listener, 0);
 }
 
 
