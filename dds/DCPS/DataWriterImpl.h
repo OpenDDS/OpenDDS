@@ -238,7 +238,7 @@ namespace OpenDDS
       void control_delivered (ACE_Message_Block* sample);
 
       /// Deliver a requested SAMPLE_ACK message to this writer.
-      void deliver_ack( const DataSampleHeader& header, DataSample* data);
+      virtual void deliver_ack( const DataSampleHeader& header, DataSample* data);
 
       /**
        * Accessor of the associated topic name.

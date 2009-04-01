@@ -94,6 +94,7 @@ namespace OpenDDS
         /// the transport interface.
         /// Returns 0 if successful, -1 if unsuccessful
         int add_subscriptions(RepoId                 publisher_id,
+                              TransportSendListener* send_listener,
                               CORBA::Long            priority,
                               ssize_t                size,
                               const AssociationData* subscriptions);
@@ -165,7 +166,8 @@ namespace OpenDDS
                         const char*               remote_id_str,
                         size_t                    num_remote_associations,
                         const AssociationData*    remote_associations,
-                        TransportReceiveListener* receive_listener = 0);
+                        TransportReceiveListener* receive_listener = 0,
+                        TransportSendListener*    send_listener = 0);
 
 
         typedef ACE_SYNCH_MUTEX     LockType;

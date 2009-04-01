@@ -800,6 +800,7 @@ void PublisherImpl::add_associations (const ReaderAssociationSeq & readers,
     ));
   }
   this->add_subscriptions (writer->get_publication_id (),
+                           writer,
                            writer_qos.transport_priority.value,
                            length,
                            associations);

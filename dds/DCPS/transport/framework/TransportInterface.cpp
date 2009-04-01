@@ -143,7 +143,8 @@ OpenDDS::DCPS::TransportInterface::add_associations
                           const char*               remote_id_str,
                           size_t                    num_remote_associations,
                           const AssociationData*    remote_associations,
-                          TransportReceiveListener* receive_listener)
+                          TransportReceiveListener* receive_listener,
+                          TransportSendListener*    send_listener)
 {
   DBG_ENTRY_LVL("TransportInterface","add_associations",6);
 
@@ -194,6 +195,7 @@ OpenDDS::DCPS::TransportInterface::add_associations
             link = this->impl_->reserve_datalink(remote_associations[i].remote_data_,
                                                  remote_id,
                                                  local_id,
+                                                 send_listener,
                                                  priority);
           }
         else

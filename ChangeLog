@@ -1,3 +1,64 @@
+Wed Apr  1 22:21:56 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+
+	  deliver_ack() - now virtual implementation of
+	                  base TransportSendListener method.
+
+        * dds/DCPS/PublisherImpl.cpp:
+
+	  Honor the changed add_subscriptions() method interface.
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+	  Added a mapping of publication Id values to
+	  TransportSendListeners for calling back with SAMPLE_ACK
+	  messages.
+
+	  make_reservation() - added TransportSendListener parameter.
+	                       Add the listener to the listener map.
+
+          ack_received() - finished implementation to call back listener
+	                   for the publication identified by the
+			   SAMPLE_ACK message.
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+	  make_reservation() - added TransportSendListener parameter.
+
+        * dds/DCPS/transport/framework/TransportInterface.h:
+        * dds/DCPS/transport/framework/TransportInterface.inl:
+        * dds/DCPS/transport/framework/TransportInterface.cpp:
+
+	  add_associations() - added TransportSendListener parameter.
+			       Forward the listener to the
+			       link->reserve_datalink() call.
+
+          add_subscriptions() - added TransportSendListener parameter
+	                        that is forwarded to add_associations().
+
+          add_publications() - forward nil TransportSendListener parameter
+	                       to add_associations().
+
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+
+	  deliver_ack() - added this method for handling callbacks for
+	                  SAMPLE_ACK messages.
+
+        * tests/transport/dds_comparative/Pub.cpp:
+        * tests/transport/mcast_simple/SimplePublisher.cpp:
+        * tests/transport/mcast_simple_n/SimplePublisher.cpp:
+        * tests/transport/simple/SimplePublisher.cpp:
+        * tests/transport/simple_bp/SimplePublisher.cpp:
+        * tests/transport/simple_bp_rm/SimplePublisher.cpp:
+        * tests/transport/simple_n/SimplePublisher.cpp:
+        * tests/transport/udp_simple/SimplePublisher.cpp:
+        * tests/transport/udp_simple_n/SimplePublisher.cpp:
+
+	  Honor the changed add_subscriptions() method interface.
+
 Wed Apr  1 22:53:28 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/BuiltInTopicUtils.h:

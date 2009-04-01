@@ -156,7 +156,7 @@ Pub::init_add_subscriptions()
       this->subs_[i].as_association(subs[i]);
     }
 
-  int result = this->add_subscriptions(this->pub_id_, 0, num_subs, subs);
+  int result = this->add_subscriptions(this->pub_id_, 0, 0, num_subs, subs);
 
   delete [] subs;
 
