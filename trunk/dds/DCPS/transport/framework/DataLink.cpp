@@ -492,6 +492,24 @@ OpenDDS::DCPS::DataLink::data_received(ReceivedDataSample& sample)
   return 0;
 }
 
+void
+OpenDDS::DCPS::DataLink::ack_received( ReceivedDataSample& sample)
+{
+  RepoId publication = GUID_UNKNOWN;
+  ::TAO::DCPS::Serializer serializer(
+    sample.sample_,
+    sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER
+  );
+  serializer >> publication;
+
+/** This is pointless.
+  {
+    GuardType guard(this->pub_map_lock_);
+    ReceiveListenerSet_rch listener_set
+      = this->pub_map_.find( publication);
+  }
+ **/
+}
 
 /// No locking needed because the caller (release_reservations()) should
 /// have already acquired our lock_.

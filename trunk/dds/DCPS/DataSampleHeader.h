@@ -27,7 +27,9 @@ namespace OpenDDS
       UNREGISTER_INSTANCE,
       DISPOSE_INSTANCE,
       GRACEFUL_DISCONNECT,
-      FULLY_ASSOCIATED
+      FULLY_ASSOCIATED,
+      REQUEST_ACK,
+      SAMPLE_ACK
     };
 
     enum DataSampleHeaderFlag {

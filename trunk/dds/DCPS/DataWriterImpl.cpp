@@ -70,7 +70,8 @@ DataWriterImpl::DataWriterImpl (void)
     watchdog_ (),
     cancel_timer_ (false),
     is_bit_ (false),
-    initialized_ (false)
+    initialized_ (false),
+    wfaCondition_( this->wfaLock_)
 {
   liveliness_lost_status_.total_count = 0;
   liveliness_lost_status_.total_count_change = 0;
@@ -759,6 +760,133 @@ DataWriterImpl::get_topic ()
   return ::DDS::Topic::_duplicate (topic_objref_.in ());
 }
 
+::DDS::ReturnCode_t
+DataWriterImpl::wait_for_acknowledgments (const ::DDS::Duration_t & max_wait)
+ACE_THROW_SPEC ((::CORBA::SystemException))
+{
+  if( this->readers_.size() == 0) {
+    if( DCPS_debug_level > 0) {
+      RepoIdConverter converter( this->publication_id_);
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_acknowledgments() - ")
+        ACE_TEXT("%s not blocking due to no associated subscriptions.\n"),
+        std::string(converter).c_str()
+      ));
+    }
+    return ::DDS::RETCODE_OK;
+  }
+
+  ACE_Time_Value when = ACE_OS::gettimeofday();
+  SequenceNumber target = this->sequence_number_;
+
+  size_t dataSize = sizeof( target.value_); // Assume no padding.
+  dataSize += _dcps_find_size( max_wait);
+
+  ACE_Message_Block* data;
+  ACE_NEW_RETURN(
+    data,
+    ACE_Message_Block( dataSize),
+    ::DDS::RETCODE_OUT_OF_RESOURCES
+  );
+
+  ::TAO::DCPS::Serializer serializer(
+    data,
+    this->get_publisher_servant()->swap_bytes()
+  );
+  serializer << target.value_;
+  serializer << max_wait;
+
+  if( DCPS_debug_level > 0) {
+    RepoIdConverter converter( this->publication_id_);
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_acknowledgments() - ")
+      ACE_TEXT("%s sending REQUEST_ACK message for sequence %d ")
+      ACE_TEXT("to %d subscriptions.\n"),
+      std::string(converter).c_str(),
+      target.value_,
+      this->readers_.size()
+    ));
+  }
+
+  ::DDS::Time_t now = time_value_to_time(when);
+  ACE_Message_Block* ack_request =
+    this->create_control_message(REQUEST_ACK, data, now);
+
+  SendControlStatus status;
+  { // This reaches all associated subscriptions.
+    ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publisher_servant_->get_pi_lock());
+    status = this->publisher_servant_->send_control(
+               this->publication_id_,
+               this,
+               ack_request
+             );
+  }
+  if (status == SEND_CONTROL_ERROR) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::wait_for_acknowledgments() - ")
+      ACE_TEXT("failed to send REQUEST_ACK message. \n")
+    ));
+    return ::DDS::RETCODE_ERROR;
+  }
+
+  when += duration_to_time_value(max_wait);
+
+  // Protect the wait-fer-acks blocking.
+  ACE_GUARD_RETURN(
+    ACE_SYNCH_MUTEX,
+    wfaGuard,
+    this->wfaLock_,
+    ::DDS::RETCODE_ERROR
+  );
+  while( 0 == this->wfaCondition_.wait( &when)) {
+    // We use the values from the set of readers to index into the sequence
+    // map.  Any readers_ that have not responded will have the default,
+    // smallest, value which will cause the wait to continue.
+    bool done = true;
+
+    // Protect the readers_ set.
+    {
+      ACE_GUARD_RETURN(
+        ACE_Recursive_Thread_Mutex,
+        readersGuard,
+        this->lock_,
+        ::DDS::RETCODE_ERROR
+      );
+      for( IdSet::const_iterator current = this->readers_.begin();
+           current != this->readers_.end();
+           ++current
+         ) {
+        if( this->idToSequence_[ *current] < target) {
+          done = false;
+        }
+      }
+    }
+    if( done) {
+      if( DCPS_debug_level > 0) {
+        RepoIdConverter converter( this->publication_id_);
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_acknowledgments() - ")
+          ACE_TEXT("%s unblocking for sequence %d.\n"),
+          std::string(converter).c_str(),
+          target.value_
+        ));
+      }
+      return ::DDS::RETCODE_OK;
+    }
+  }
+
+  RepoIdConverter converter( this->publication_id_);
+  ACE_DEBUG((LM_WARNING,
+    ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::wait_for_acknowledgments() - ")
+    ACE_TEXT("%s timed out waiting for sequence %d to be acknowledged ")
+    ACE_TEXT("from %d subscriptions.\n"),
+    std::string(converter).c_str(),
+    target.value_,
+    this->readers_.size()
+  ));
+  return ::DDS::RETCODE_TIMEOUT;
+}
+
 ::DDS::Publisher_ptr
 DataWriterImpl::get_publisher ()
   ACE_THROW_SPEC (( CORBA::SystemException ))
@@ -1435,8 +1563,8 @@ DataWriterImpl::create_sample_data_message ( DataSample* data,
     ? !TAO_ENCAP_BYTE_ORDER
     : TAO_ENCAP_BYTE_ORDER;
   header_data.message_length_ = data->total_length ();
-  header_data.sequence_ = instance->sequence_.value_;
-  ++instance->sequence_;
+  header_data.sequence_ = this->sequence_number_.value_;
+  ++this->sequence_number_;
   header_data.source_timestamp_sec_ = source_timestamp.sec;
   header_data.source_timestamp_nanosec_ = source_timestamp.nanosec;
 
@@ -1502,6 +1630,27 @@ DataWriterImpl::control_delivered(ACE_Message_Block* sample)
   DBG_ENTRY_LVL("DataWriterImpl","control_delivered",6);
   ++control_delivered_count_;
   sample->release ();
+}
+
+void
+DataWriterImpl::deliver_ack(
+  const DataSampleHeader& header,
+  DataSample*             data
+)
+{
+  SequenceNumber ack;
+
+  ::TAO::DCPS::Serializer serializer(
+    data,
+    this->get_publisher_servant()->swap_bytes()
+  );
+  serializer >> ack.value_;
+
+  ACE_GUARD( ACE_SYNCH_MUTEX, guard, this->wfaLock_);
+  if( this->idToSequence_[ header.publication_id_] < ack) {
+    this->idToSequence_[ header.publication_id_] = ack;
+    this->wfaCondition_.broadcast();
+  }
 }
 
 PublisherImpl*

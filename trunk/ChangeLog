@@ -1,3 +1,44 @@
+Wed Apr  1 02:18:37 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.cpp:
+
+	  Added new MessageId values for REQUEST_ACK and SAMPLE_ACK.
+	  Change serialization of publication Id field to use generated
+	  type support instead of using a memcpy.
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+	  wait_for_acknowledgments() - added initial implementation.
+	  deliver_ack() - added initial implementation.
+	  write() - modified to use DataWriter scope sequence values.
+
+	  Added wfaLock_ and wfaCondition to manage blocking in the
+	  wait_for_acknowledgments() method.  Added idToSequence mapping
+	  to track recieved acknowledgments.
+
+        * dds/DCPS/Definitions.h:
+
+	  Corrected SequenceNumber implementation.
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+	  ack_received() - added to receive SAMPLE_ACK messages.  Started
+	                   initial implementation.  This is currently
+			   stubbed and does not actually forward the
+			   messages to the DataWriter.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.cpp:
+
+	  deliver_sample() - added clause to forward SAMPLE_ACK messages
+	                     to the DataLink.
+
+        * dds/DdsDcpsPublication.idl:
+
+	  DataWriter::wait_for_acknowledgments() - added.
+
 Mon Mar 30 20:18:04 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * docs/design/instance_handles.txt:
