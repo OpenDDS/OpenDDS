@@ -12,6 +12,8 @@
 
 #include "dds/DdsDcpsInfrastructureC.h"
 
+#include "dcps_export.h"
+
 namespace OpenDDS
 {
 namespace DCPS
@@ -20,7 +22,7 @@ const unsigned HANDLE_KINDSZ = 8;
 
 const DDS::InstanceHandle_t HANDLE_UNKNOWN(0);
 
-class InstanceHandleHelper
+class OpenDDS_Dcps_Export InstanceHandleHelper
 {
 public:
   explicit InstanceHandleHelper(DDS::InstanceHandle_t handle);
@@ -47,7 +49,7 @@ private:
   DDS::InstanceHandle_t handle_;
 };
 
-class InstanceHandleGenerator
+class OpenDDS_Dcps_Export InstanceHandleGenerator
 {
 public:
   explicit InstanceHandleGenerator(CORBA::Octet kind, long begin = 0);
