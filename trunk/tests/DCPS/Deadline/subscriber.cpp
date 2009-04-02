@@ -288,11 +288,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       Messenger::Message message;
       message.subject_id = 99;
-      ::DDS::InstanceHandle_t dr1_hd1 = dr1_svt->get_instance_handle (message);
-      ::DDS::InstanceHandle_t dr2_hd1 = dr2_svt->get_instance_handle (message);
+      ::DDS::InstanceHandle_t dr1_hd1 = dr1_svt->find_instance_handle (message);
+      ::DDS::InstanceHandle_t dr2_hd1 = dr2_svt->find_instance_handle (message);
       message.subject_id = 100;
-      ::DDS::InstanceHandle_t dr1_hd2 = dr1_svt->get_instance_handle (message);
-      ::DDS::InstanceHandle_t dr2_hd2 = dr2_svt->get_instance_handle (message);
+      ::DDS::InstanceHandle_t dr1_hd2 = dr1_svt->find_instance_handle (message);
+      ::DDS::InstanceHandle_t dr2_hd2 = dr2_svt->find_instance_handle (message);
 
       if (deadline_status1.last_instance_handle != dr1_hd1 
         && deadline_status1.last_instance_handle != dr1_hd2)

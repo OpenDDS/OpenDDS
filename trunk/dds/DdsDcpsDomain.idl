@@ -53,6 +53,8 @@ module DDS
 
     ReturnCode_t delete_contained_entities();
 
+    boolean contains_entity(in InstanceHandle_t a_handle);
+
     ReturnCode_t set_qos(in DomainParticipantQos qos);
 
     void get_qos(inout DomainParticipantQos qos);

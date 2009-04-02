@@ -77,14 +77,18 @@ namespace OpenDDS
       typedef std::map<PublicationId, DataSampleList> DataSampleListMap;
 
       ///Constructor
-      PublisherImpl (const ::DDS::PublisherQos & qos,
+      PublisherImpl (DDS::InstanceHandle_t handle,
+                     const ::DDS::PublisherQos & qos,
                      ::DDS::PublisherListener_ptr a_listener,
                      DomainParticipantImpl*       participant);
 
       ///Destructor
       virtual ~PublisherImpl (void);
 
+    virtual DDS::InstanceHandle_t get_instance_handle()
+      ACE_THROW_SPEC ((CORBA::SystemException));
 
+    bool contains_writer(DDS::InstanceHandle_t a_handle);
 
     virtual ::DDS::DataWriter_ptr create_datawriter (
         ::DDS::Topic_ptr a_topic,
@@ -260,6 +264,8 @@ namespace OpenDDS
     ::DDS::PublisherListener* listener_for (::DDS::StatusKind kind);
 
     private:
+      DDS::InstanceHandle_t         handle_;
+
       /// Publisher QoS policy list.
       ::DDS::PublisherQos           qos_;
       /// Default datawriter Qos policy list.

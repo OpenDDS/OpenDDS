@@ -14,6 +14,8 @@
 #include "FailoverListener.h"
 #include "Util.h"
 
+#include "dds/DdsDcpsGuidC.h"
+
 #include <sstream>
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
@@ -64,7 +66,9 @@ namespace OpenDDS
         domain_id_(domain_id),
         dp_id_(dp_id),
         federated_( federated),
-        failoverListener_( 0)
+        failoverListener_( 0),
+        subscriber_handles_(ENTITYKIND_OPENDDS_SUBSCRIBER),
+        publisher_handles_(ENTITYKIND_OPENDDS_PUBLISHER)
     {
       DDS::ReturnCode_t ret;
       ret = this->set_listener(a_listener, DEFAULT_STATUS_KIND_MASK);
@@ -118,7 +122,8 @@ namespace OpenDDS
 
       PublisherImpl* pub = 0;
       ACE_NEW_RETURN(pub,
-                     PublisherImpl(pub_qos,
+                     PublisherImpl(publisher_handles_.next(),
+                                   pub_qos,
                                    a_listener,
                                    this),
                      ::DDS::Publisher::_nil());
@@ -244,7 +249,8 @@ namespace OpenDDS
 
       SubscriberImpl* sub = 0 ;
       ACE_NEW_RETURN(sub,
-                     SubscriberImpl(sub_qos,
+                     SubscriberImpl(subscriber_handles_.next(),
+                                    sub_qos,
                                     a_listener,
                                     this),
                      ::DDS::Subscriber::_nil());
@@ -902,6 +908,65 @@ namespace OpenDDS
       return ret;
     }
 
+    CORBA::Boolean
+    DomainParticipantImpl::contains_entity(DDS::InstanceHandle_t a_handle)
+      ACE_THROW_SPEC ((CORBA::SystemException))
+    {
+      InstanceHandleHelper helper(a_handle);
+
+      /// Check top-level containers for Topic, Subscriber,
+      /// and Publisher instances.
+      if (helper.is_topic())
+      {
+        for (TopicMap::iterator it(topics_.begin());
+             it != topics_.end(); ++it)
+        {
+          if (helper.matches(it->second.pair_.svt_))
+            return true;
+        }
+      }
+      else if (helper.is_subscriber())
+      {
+        for (SubscriberSet::iterator it(subscribers_.begin());
+             it != subscribers_.end(); ++it)
+        {
+          if (helper.matches(it->svt_))
+            return true;
+        }
+      }
+      else if (helper.is_publisher())
+      {
+        for (PublisherSet::iterator it(publishers_.begin());
+             it != publishers_.end(); ++it)
+        {
+          if (helper.matches(it->svt_))
+            return true;
+        }
+      }
+
+      /// Recurse into SubscriberImpl and PublisherImpl for
+      /// DataReader and DataWriter instances respectively.
+      else if (helper.is_datareader())
+      {
+        for (SubscriberSet::iterator it(subscribers_.begin());
+             it != subscribers_.end(); ++it)
+        {
+          if (it->svt_->contains_reader(a_handle))
+            return true;
+        }
+      }
+      else if (helper.is_datawriter())
+      {
+        for (PublisherSet::iterator it(publishers_.begin());
+             it != publishers_.end(); ++it)
+        {
+          if (it->svt_->contains_writer(a_handle))
+            return true;
+        }
+      }
+
+      return false;
+    }
 
     ::DDS::ReturnCode_t
     DomainParticipantImpl::set_qos (
@@ -1471,6 +1536,14 @@ namespace OpenDDS
     DomainParticipantImpl::get_id ()
     {
       return dp_id_;
+    }
+
+    DDS::InstanceHandle_t
+    DomainParticipantImpl::get_instance_handle()
+      ACE_THROW_SPEC ((CORBA::SystemException))
+    {
+      RepoIdConverter converter(dp_id_);
+      return DDS::InstanceHandle_t(converter);
     }
 
     CORBA::Long

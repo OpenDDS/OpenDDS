@@ -213,6 +213,13 @@ void DataReaderImpl::init (
   initialized_ = true;
 }
 
+DDS::InstanceHandle_t
+DataReaderImpl::get_instance_handle()
+  ACE_THROW_SPEC ((CORBA::SystemException))
+{
+  RepoIdConverter converter(subscription_id_);
+  return DDS::InstanceHandle_t(converter);
+}
 
 void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
                                        const OpenDDS::DCPS::WriterAssociationSeq & writers)

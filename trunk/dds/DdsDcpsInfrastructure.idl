@@ -646,6 +646,8 @@ module DDS {
     StatusCondition get_statuscondition();
 
     StatusKindMask get_status_changes();
+
+    InstanceHandle_t get_instance_handle();
 		};
 
 

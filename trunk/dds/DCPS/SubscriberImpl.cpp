@@ -41,10 +41,12 @@ namespace OpenDDS
 #endif
 
 // Implementation skeleton constructor
-SubscriberImpl::SubscriberImpl (const ::DDS::SubscriberQos & qos,
+SubscriberImpl::SubscriberImpl (DDS::InstanceHandle_t handle,
+                                const ::DDS::SubscriberQos & qos,
 				::DDS::SubscriberListener_ptr a_listener,
 				DomainParticipantImpl*       participant)
-  : qos_(qos),
+  : handle_(handle),
+    qos_(qos),
     default_datareader_qos_(
 			    TheServiceParticipant->initial_DataReaderQos()),
 
@@ -81,6 +83,26 @@ SubscriberImpl::~SubscriberImpl (void)
     }
 }
 
+DDS::InstanceHandle_t
+SubscriberImpl::get_instance_handle()
+  ACE_THROW_SPEC ((CORBA::SystemException))
+{
+  return handle_;
+}
+
+bool
+SubscriberImpl::contains_reader(DDS::InstanceHandle_t a_handle)
+{
+  InstanceHandleHelper helper(a_handle);
+
+  for (DataReaderSet::iterator it(datareader_set_.begin());
+       it != datareader_set_.end(); ++it)
+  {
+    if (helper.matches(*it))
+      return true;
+  } 
+  return false;
+}
 
 ::DDS::DataReader_ptr
 SubscriberImpl::create_datareader (

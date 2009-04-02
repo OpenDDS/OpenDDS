@@ -38,10 +38,12 @@ const CoherencyGroup DEFAULT_GROUP_ID = 0;
 //      cannot be false.
 
 // Implementation skeleton constructor
-PublisherImpl::PublisherImpl (const ::DDS::PublisherQos &   qos,
+PublisherImpl::PublisherImpl (DDS::InstanceHandle_t handle,
+                              const ::DDS::PublisherQos &   qos,
                               ::DDS::PublisherListener_ptr a_listener,
                               DomainParticipantImpl*       participant)
-  : qos_(qos),
+  : handle_(handle),
+    qos_(qos),
     default_datawriter_qos_(TheServiceParticipant->initial_DataWriterQos ()),
     listener_mask_(DEFAULT_STATUS_KIND_MASK),
     listener_ (::DDS::PublisherListener::_duplicate(a_listener)),
@@ -76,6 +78,27 @@ PublisherImpl::~PublisherImpl (void)
       ACE_TEXT("PublisherImpl::~PublisherImpl, ")
       ACE_TEXT("some datawriters still exist.\n")));
     }
+}
+
+DDS::InstanceHandle_t
+PublisherImpl::get_instance_handle()
+  ACE_THROW_SPEC ((CORBA::SystemException))
+{
+  return handle_;
+}
+
+bool
+PublisherImpl::contains_writer(DDS::InstanceHandle_t a_handle)
+{
+  InstanceHandleHelper helper(a_handle);
+
+  for (DataWriterMap::iterator it(datawriter_map_.begin());
+       it != datawriter_map_.end(); ++it)
+  {
+    if (helper.matches(it->second->local_writer_objref_))
+      return true;
+  } 
+  return false;
 }
 
 ::DDS::DataWriter_ptr

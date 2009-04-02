@@ -202,7 +202,7 @@ DDS::ReturnCode_t
                     ::DDS::RETCODE_ERROR);
 
   ::DDS::InstanceHandle_t const registered_handle =
-      this->get_instance_handle(instance_data);
+      this->find_instance_handle(instance_data);
 
   if (registered_handle == ::DDS::HANDLE_NIL)
   {
@@ -320,7 +320,7 @@ DDS::ReturnCode_t
 
   if(instance_handle == ::DDS::HANDLE_NIL)
   {
-    instance_handle = this->get_instance_handle(instance_data);
+    instance_handle = this->find_instance_handle(instance_data);
     if (instance_handle == ::DDS::HANDLE_NIL)
     {
       ACE_ERROR_RETURN ((LM_ERROR,
@@ -562,7 +562,7 @@ ACE_Message_Block*
 }
 
 ::DDS::InstanceHandle_t
- <%TYPE%>DataWriterImpl::get_instance_handle(
+ <%TYPE%>DataWriterImpl::find_instance_handle(
                 const ::<%SCOPE%><%TYPE%>& instance_data)
 {
   InstanceMap::const_iterator const it = instance_map_.find(instance_data);
@@ -1497,7 +1497,7 @@ DDS::ReturnCode_t
 
 
 ::DDS::InstanceHandle_t
- <%TYPE%>DataReaderImpl::get_instance_handle(
+ <%TYPE%>DataReaderImpl::find_instance_handle(
                 const ::<%SCOPE%><%TYPE%>& instance_data)
 {
   InstanceMap::const_iterator const it = instance_map_.find(instance_data);

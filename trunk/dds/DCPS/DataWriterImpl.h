@@ -76,6 +76,9 @@ namespace OpenDDS
       ///Destructor
       virtual ~DataWriterImpl (void);
 
+      virtual DDS::InstanceHandle_t get_instance_handle()
+        ACE_THROW_SPEC ((CORBA::SystemException));
+
       virtual ::DDS::ReturnCode_t set_qos (const ::DDS::DataWriterQos & qos)
         ACE_THROW_SPEC ((CORBA::SystemException));
 

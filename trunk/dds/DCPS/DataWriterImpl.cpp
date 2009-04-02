@@ -184,6 +184,14 @@ DataWriterImpl::init (
   initialized_ = true;
 }
 
+DDS::InstanceHandle_t
+DataWriterImpl::get_instance_handle()
+  ACE_THROW_SPEC ((CORBA::SystemException))
+{
+  RepoIdConverter converter(publication_id_);
+  return DDS::InstanceHandle_t(converter);
+}
+
 void
 DataWriterImpl::add_associations ( ::OpenDDS::DCPS::RepoId yourId,
                                    const ReaderAssociationSeq & readers )
