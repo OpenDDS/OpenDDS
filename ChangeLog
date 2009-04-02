@@ -1,28 +1,60 @@
+Thu Apr  2 22:15:19 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        * tests/DCPS/Deadline/subscriber.cpp:
+
+          Refactored conflicting get_instance_handle operation to
+          find_instance_handle.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/EntityImpl.h:
+        * dds/DCPS/InstanceHandle.h:
+        * dds/DCPS/InstanceHandle.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.h:
+        * dds/DCPS/TopicImpl.cpp:
+        * dds/DdsDcpsDomain.idl:
+        * dds/DdsDcpsGuid.idl:
+        * dds/DdsDcpsInfrastructure.idl:
+
+          Added support for get_instance_handle and contains_entity
+          operations.  This brings instance handle support up to
+          specification 1.2 (formal/07-01-01) compliance.
+
 Thu Apr  2 21:16:18 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
         * dds/DCPS/DataReaderImpl.cpp:
 
-	  data_received()   - added check and call to send SAMPLE_ACK
-	                      message when needed to SAMPLE_DATA
-			      handling.  Added stanza for handling
-			      received REQUEST_ACK messages.
+          data_received()   - added check and call to send SAMPLE_ACK
+                              message when needed to SAMPLE_DATA
+                              handling.  Added stanza for handling
+                              received REQUEST_ACK messages.
           send_sample_ack() - stub for implementing the creation and
-	                      sending of the SAMPLE_ACK message.
+                              sending of the SAMPLE_ACK message.
 
-	  WriterInfo::ack_deadlines_ - list of sequence / time pairs
-	                               holding the deadlines to send
-				       SAMPLE_ACK messages for individual
-				       sequence values.
-	  WriterInfo::should_ack()   - determine if a SAMPLE_ACK message
-	                               should be sent.
-	  WriterInfo::ack_deadline() - establish a deadline for a given
-	                               sequence number.
+          WriterInfo::ack_deadlines_ - list of sequence / time pairs
+                                       holding the deadlines to send
+                                       SAMPLE_ACK messages for individual
+                                       sequence values.
+          WriterInfo::should_ack()   - determine if a SAMPLE_ACK message
+                                       should be sent.
+          WriterInfo::ack_deadline() - establish a deadline for a given
+                                       sequence number.
 
         * docs/design/wait_for_acks.txt:
 
-	  Design document for the wait_for_acknowledgment()
-	  implementation.
+          Design document for the wait_for_acknowledgment()
+          implementation.
 
 Wed Apr  1 22:21:56 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 

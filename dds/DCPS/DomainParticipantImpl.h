@@ -6,6 +6,7 @@
 
 #include "EntityImpl.h"
 #include "Definitions.h"
+#include "InstanceHandle.h"
 #include "TopicImpl.h"
 #include "dds/DdsDcpsPublicationC.h"
 #include "dds/DdsDcpsSubscriptionExtC.h"
@@ -34,9 +35,9 @@ namespace OpenDDS
 {
   namespace DCPS
   {
+    class FailoverListener;
     class PublisherImpl;
     class SubscriberImpl;
-    class FailoverListener;
 
     /**
     * @class DomainParticipantImpl
@@ -101,6 +102,8 @@ namespace OpenDDS
       ///Destructor
       virtual ~DomainParticipantImpl (void);
 
+    virtual DDS::InstanceHandle_t get_instance_handle()
+      ACE_THROW_SPEC ((CORBA::SystemException));
 
     virtual ::DDS::Publisher_ptr create_publisher (
       const ::DDS::PublisherQos & qos,
@@ -175,6 +178,9 @@ namespace OpenDDS
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
+
+    virtual CORBA::Boolean contains_entity(DDS::InstanceHandle_t a_handle)
+      ACE_THROW_SPEC ((CORBA::SystemException));
 
     virtual ::DDS::ReturnCode_t set_qos (
         const ::DDS::DomainParticipantQos & qos
@@ -423,6 +429,11 @@ namespace OpenDDS
 
       /// Listener to initiate failover with.
       FailoverListener*      failoverListener_;
+
+      /// Instance handle generators for non-repo backed entities
+      /// (i.e. subscribers and publishers).
+      InstanceHandleGenerator subscriber_handles_;
+      InstanceHandleGenerator publisher_handles_;
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
       /// The datareader for built in topic participant.

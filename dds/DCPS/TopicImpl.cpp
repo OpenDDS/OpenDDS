@@ -185,6 +185,13 @@ namespace OpenDDS
       return id_;
     }
 
+    DDS::InstanceHandle_t
+    TopicImpl::get_instance_handle()
+      ACE_THROW_SPEC ((CORBA::SystemException))
+    {
+      RepoIdConverter converter(id_);
+      return DDS::InstanceHandle_t(converter);
+    }
 
   } // namespace DCPS
 } // namespace OpenDDS

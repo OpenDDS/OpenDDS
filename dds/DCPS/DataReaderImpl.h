@@ -165,6 +165,8 @@ namespace OpenDDS
       //Destructor
       virtual ~DataReaderImpl (void);
 
+      virtual DDS::InstanceHandle_t get_instance_handle()
+        ACE_THROW_SPEC ((CORBA::SystemException));
 
       virtual void add_associations (
           ::OpenDDS::DCPS::RepoId yourId,

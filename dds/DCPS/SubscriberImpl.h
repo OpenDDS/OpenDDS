@@ -62,12 +62,18 @@ namespace OpenDDS
     public:
 
       //Constructor
-      SubscriberImpl (const ::DDS::SubscriberQos & qos,
+      SubscriberImpl (DDS::InstanceHandle_t handle,
+                      const ::DDS::SubscriberQos & qos,
                       ::DDS::SubscriberListener_ptr a_listener,
                       DomainParticipantImpl*       participant);
 
       //Destructor
       virtual ~SubscriberImpl (void);
+
+      virtual DDS::InstanceHandle_t get_instance_handle()
+        ACE_THROW_SPEC ((CORBA::SystemException));
+
+      bool contains_reader(DDS::InstanceHandle_t a_handle);
 
       virtual ::DDS::DataReader_ptr create_datareader (
         ::DDS::TopicDescription_ptr a_topic_desc,
@@ -251,6 +257,7 @@ namespace OpenDDS
     /// @}
 
     private:
+      DDS::InstanceHandle_t         handle_;
 
       ::DDS::SubscriberQos          qos_;
       ::DDS::DataReaderQos          default_datareader_qos_;
