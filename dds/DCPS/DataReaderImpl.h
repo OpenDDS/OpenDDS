@@ -25,6 +25,7 @@
 #include "ace/Reverse_Lock_T.h"
 
 #include <vector>
+#include <list>
 #include <map>
 #include <memory>
 
@@ -73,9 +74,25 @@ namespace OpenDDS
         /// update liveliness when remove_association is called.
         void removed ();
 
+        /// Determine if a SAMPLE_ACK message should be sent to this
+        /// publication.
+        /// N.B. This method consumes the REQUEST_ACK message when
+        ///      returning true: it is the reponsibility of the calling
+        ///      code to generate the SAMPLE_ACK response in this case.
+        bool should_ack( const DataSampleHeader& header, ACE_Time_Value now);
+
+        /// Set the time after which we no longer need to generate a
+        /// SAMPLE_ACK for this sequence value.
+        void ack_deadline( SequenceNumber sequence, ACE_Time_Value when);
+
       private:
         /// Timestamp of last write/dispose/assert_liveliness from this DataWriter
         ACE_Time_Value last_liveliness_activity_time_;
+
+
+        /// Times after which we no longer need to respond to a REQUEST_ACK message.
+        typedef std::list< std::pair< SequenceNumber, ACE_Time_Value> > DeadlineList;
+        DeadlineList ack_deadlines_;
 
         /// State of the writer.
         WriterState state_;
@@ -539,6 +556,8 @@ namespace OpenDDS
       ::DDS::InstanceHandle_t         next_handle_;
 
     private:
+      /// Send a SAMPLE_ACK message in response to a REQUEST_ACK message.
+      void send_sample_ack( const DataSampleHeader& header);
 
       /// Data has arrived into the cache, unblock waiting ReadConditions
       void notify_read_conditions ();

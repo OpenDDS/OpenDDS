@@ -1,51 +1,77 @@
+Thu Apr  2 21:16:18 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+	  data_received()   - added check and call to send SAMPLE_ACK
+	                      message when needed to SAMPLE_DATA
+			      handling.  Added stanza for handling
+			      received REQUEST_ACK messages.
+          send_sample_ack() - stub for implementing the creation and
+	                      sending of the SAMPLE_ACK message.
+
+	  WriterInfo::ack_deadlines_ - list of sequence / time pairs
+	                               holding the deadlines to send
+				       SAMPLE_ACK messages for individual
+				       sequence values.
+	  WriterInfo::should_ack()   - determine if a SAMPLE_ACK message
+	                               should be sent.
+	  WriterInfo::ack_deadline() - establish a deadline for a given
+	                               sequence number.
+
+        * docs/design/wait_for_acks.txt:
+
+	  Design document for the wait_for_acknowledgment()
+	  implementation.
+
 Wed Apr  1 22:21:56 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.h:
 
-	  deliver_ack() - now virtual implementation of
-	                  base TransportSendListener method.
+          deliver_ack() - now virtual implementation of
+                          base TransportSendListener method.
 
         * dds/DCPS/PublisherImpl.cpp:
 
-	  Honor the changed add_subscriptions() method interface.
+          Honor the changed add_subscriptions() method interface.
 
         * dds/DCPS/transport/framework/DataLink.h:
         * dds/DCPS/transport/framework/DataLink.cpp:
 
-	  Added a mapping of publication Id values to
-	  TransportSendListeners for calling back with SAMPLE_ACK
-	  messages.
+          Added a mapping of publication Id values to
+          TransportSendListeners for calling back with SAMPLE_ACK
+          messages.
 
-	  make_reservation() - added TransportSendListener parameter.
-	                       Add the listener to the listener map.
+          make_reservation() - added TransportSendListener parameter.
+                               Add the listener to the listener map.
 
           ack_received() - finished implementation to call back listener
-	                   for the publication identified by the
-			   SAMPLE_ACK message.
+                           for the publication identified by the
+                           SAMPLE_ACK message.
 
         * dds/DCPS/transport/framework/TransportImpl.h:
         * dds/DCPS/transport/framework/TransportImpl.cpp:
 
-	  make_reservation() - added TransportSendListener parameter.
+          make_reservation() - added TransportSendListener parameter.
 
         * dds/DCPS/transport/framework/TransportInterface.h:
         * dds/DCPS/transport/framework/TransportInterface.inl:
         * dds/DCPS/transport/framework/TransportInterface.cpp:
 
-	  add_associations() - added TransportSendListener parameter.
-			       Forward the listener to the
-			       link->reserve_datalink() call.
+          add_associations() - added TransportSendListener parameter.
+                               Forward the listener to the
+                               link->reserve_datalink() call.
 
           add_subscriptions() - added TransportSendListener parameter
-	                        that is forwarded to add_associations().
+                                that is forwarded to add_associations().
 
           add_publications() - forward nil TransportSendListener parameter
-	                       to add_associations().
+                               to add_associations().
 
         * dds/DCPS/transport/framework/TransportSendListener.h:
 
-	  deliver_ack() - added this method for handling callbacks for
-	                  SAMPLE_ACK messages.
+          deliver_ack() - added this method for handling callbacks for
+                          SAMPLE_ACK messages.
 
         * tests/transport/dds_comparative/Pub.cpp:
         * tests/transport/mcast_simple/SimplePublisher.cpp:
@@ -57,7 +83,7 @@ Wed Apr  1 22:21:56 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
         * tests/transport/udp_simple/SimplePublisher.cpp:
         * tests/transport/udp_simple_n/SimplePublisher.cpp:
 
-	  Honor the changed add_subscriptions() method interface.
+          Honor the changed add_subscriptions() method interface.
 
 Wed Apr  1 22:53:28 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
