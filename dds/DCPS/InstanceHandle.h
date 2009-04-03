@@ -39,8 +39,8 @@ public:
 
   bool is_datawriter();
 
-  template <class T_ptr>
-  bool matches(const T_ptr& t)
+  template <typename T_ptr>
+  bool matches(T_ptr t)
   {
     return t->get_instance_handle() == handle_;
   }
