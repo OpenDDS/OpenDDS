@@ -10,6 +10,7 @@
 #include "DomainParticipantImpl.h"
 #include "Service_Participant.h"
 #include "Qos_Helper.h"
+#include "RepoIdConverter.h"
 #include "TopicImpl.h"
 #include "Serializer.h"
 #include "SubscriberImpl.h"
@@ -17,7 +18,6 @@
 #include "Util.h"
 #include "RequestedDeadlineWatchdog.h"
 #include "QueryConditionImpl.h"
-#include "RepoIdConverter.h"
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #if !defined (DDS_HAS_MINIMUM_BIT)
