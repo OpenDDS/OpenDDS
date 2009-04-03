@@ -1,3 +1,9 @@
+Fri Apr  3 21:34:54 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Updated release notes with instance handle changes.
+
 Fri Apr  3 21:16:36 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/InstanceHandle.h:

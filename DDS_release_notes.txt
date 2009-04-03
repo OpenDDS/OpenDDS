@@ -60,7 +60,8 @@ New to this version are the following changes:
   specify a number of seconds to block with the -DCPSPendingTimeout option.
 
 - Instance handles are now compliant with version 1.2 of the DDS
-  specification.
+  specification.  Additionally, the contains_entity and get_instance_handle
+  operations have been implemented.
 
 =========================================================================
 
