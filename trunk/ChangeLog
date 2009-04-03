@@ -1,3 +1,10 @@
+Fri Apr  3 21:16:36 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/InstanceHandle.h:
+        * dds/DCPS/InstanceHandle.cpp:
+
+          Style changes.
+
 Fri Apr  3 14:08:31 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:

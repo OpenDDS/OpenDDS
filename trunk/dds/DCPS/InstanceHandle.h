@@ -18,7 +18,7 @@ namespace OpenDDS
 {
 namespace DCPS
 {
-const unsigned HANDLE_KINDSZ = 8;
+const unsigned HANDLE_KINDSZ(8);
 
 const DDS::InstanceHandle_t HANDLE_UNKNOWN(0);
 
