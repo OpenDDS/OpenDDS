@@ -84,7 +84,7 @@ DDS::InstanceHandle_t
 InstanceHandleGenerator::next()
 {
   DDS::InstanceHandle_t handle(kind_);
-  return handle |= (++sequence_ << HANDLE_KINDSZ);
+  return handle |= ++sequence_ << HANDLE_KINDSZ;
 }
 
 } // namespace
