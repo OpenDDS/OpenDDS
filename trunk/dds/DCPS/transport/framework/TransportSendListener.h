@@ -16,7 +16,7 @@ namespace OpenDDS
   {
 
     struct DataSampleListElement;
-    class  DataSampleHeader;
+    struct DataSampleHeader;
     typedef ACE_Message_Block DataSample;
 
     class OpenDDS_Dcps_Export TransportSendListener

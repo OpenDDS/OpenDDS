@@ -60,6 +60,8 @@ namespace OpenDDS
                                        TransportSendListener* listener,
                                        ACE_Message_Block*     msg);
 
+        void send_response( RepoId sub_id, ACE_Message_Block* response);
+
       // ciju: This method was called without any locks held held from TransportInterface.
         int remove_sample(const DataSampleListElement* sample, bool dropped_by_transport);
 

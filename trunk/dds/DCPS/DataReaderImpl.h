@@ -559,7 +559,7 @@ namespace OpenDDS
 
     private:
       /// Send a SAMPLE_ACK message in response to a REQUEST_ACK message.
-      void send_sample_ack( const DataSampleHeader& header);
+      void send_sample_ack( const DataSampleHeader& header, ::DDS::Time_t when);
 
       /// Data has arrived into the cache, unblock waiting ReadConditions
       void notify_read_conditions ();

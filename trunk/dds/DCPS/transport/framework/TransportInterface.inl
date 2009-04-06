@@ -75,6 +75,32 @@ OpenDDS::DCPS::TransportInterface::send_control(RepoId                 pub_id,
     }
 }
 
+ACE_INLINE void
+OpenDDS::DCPS::TransportInterface::send_response(
+  RepoId             pub_id,
+  ACE_Message_Block* msg
+)
+{
+  DBG_ENTRY_LVL("TransportInterface","send_response",6);
+
+  // Can a remote Publication ever be connected by more than one link?
+  DataLinkSet_rch links = this->remote_map_.find_set( pub_id);
+  if( links.is_nil()) {
+    // No link to publication.
+    msg->release();
+    RepoIdConverter converter( pub_id);
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: TransportInterface::send_response() - ")
+      ACE_TEXT("unable to find link to send SAMPLE_ACK message on to ")
+      ACE_TEXT("reach publication %s.\n"),
+      std::string( converter).c_str()
+    ));
+
+  } else {
+    links->send_response( pub_id, msg);
+  }
+
+}
 
 ACE_INLINE int
 OpenDDS::DCPS::TransportInterface::remove_sample
