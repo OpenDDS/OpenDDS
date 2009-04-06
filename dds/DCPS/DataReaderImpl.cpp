@@ -1196,8 +1196,10 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         WriterMapType::iterator where
           = this->writers_.find( header.publication_id_);
         if( where != this->writers_.end()) {
-          if( where->second.should_ack( header, ACE_OS::gettimeofday())) {
-            this->send_sample_ack( header);
+          ACE_Time_Value now = ACE_OS::gettimeofday();
+          if( where->second.should_ack( header, now)) {
+            ::DDS::Time_t timenow = time_value_to_time(now);
+            this->send_sample_ack( header, timenow);
           }
 
         } else {
@@ -1253,7 +1255,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
           where->second.ack_deadline( ack, deadline);
 
           if( where->second.should_ack( sample.header_, now)) {
-            this->send_sample_ack( sample.header_);
+            ::DDS::Time_t timenow = time_value_to_time(now);
+            this->send_sample_ack( sample.header_, timenow);
           }
 
         } else {
@@ -1321,9 +1324,56 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 }
 
 void
-DataReaderImpl::send_sample_ack( const DataSampleHeader& header)
+DataReaderImpl::send_sample_ack( const DataSampleHeader& header, ::DDS::Time_t when)
 {
-  /// @TODO: Implement this.
+  size_t dataSize = sizeof( header.sequence_);
+  dataSize += _dcps_find_size( header.publication_id_);
+
+  ACE_Message_Block* data;
+  ACE_NEW( data, ACE_Message_Block( dataSize));
+
+  bool doSwap    = this->subscriber_servant_->swap_bytes();
+  bool byteOrder = (doSwap? !TAO_ENCAP_BYTE_ORDER: TAO_ENCAP_BYTE_ORDER);
+
+  ::TAO::DCPS::Serializer serializer( data, doSwap);
+  serializer << header.publication_id_;
+  serializer << header.sequence_;
+
+  DataSampleHeader outbound_header;
+  outbound_header.message_id_               = SAMPLE_ACK;
+  outbound_header.byte_order_               = byteOrder,
+  outbound_header.message_length_           = data->total_length ();
+  outbound_header.sequence_                 = 0;
+  outbound_header.source_timestamp_sec_     = when.sec;
+  outbound_header.source_timestamp_nanosec_ = when.nanosec;
+  outbound_header.coherency_group_          = 0;
+  outbound_header.publication_id_           = this->subscription_id_;
+
+  ACE_Message_Block* sample_ack;
+  ACE_NEW(
+    sample_ack,
+    ACE_Message_Block(
+      outbound_header.max_marshaled_size(),
+      ACE_Message_Block::MB_DATA,
+      data // cont
+    )
+  );
+  sample_ack << outbound_header;
+
+  if( DCPS_debug_level > 0) {
+    RepoIdConverter subscriptionBuffer( this->subscription_id_);
+    RepoIdConverter publicationBuffer(  header.publication_id_);
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) DataReaderImpl::send_sample_ack() - ")
+      ACE_TEXT("%s sending SAMPLE_ACK message with sequence 0x%x ")
+      ACE_TEXT("to publication %s.\n"),
+      std::string( subscriptionBuffer).c_str(),
+      header.sequence_,
+      std::string( publicationBuffer).c_str()
+    ));
+  }
+
+  this->subscriber_servant_->send_response( header.publication_id_, sample_ack);
 }
 
 void DataReaderImpl::notify_read_conditions()

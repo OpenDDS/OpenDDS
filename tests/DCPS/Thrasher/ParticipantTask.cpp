@@ -170,7 +170,13 @@ ParticipantTask::svc()
       ++progress;
     }
    
-    // This is intentional! 
+    DDS::Duration_t interval = { 30, 0};
+    if( DDS::RETCODE_OK != writer->wait_for_acknowledgments( interval)) {
+      ACE_ERROR_RETURN((LM_ERROR,
+        ACE_TEXT("%P:%t: ERROR svc() - ")
+        ACE_TEXT("timed out waiting for acks!\n")
+      ), 1);
+    }
     publisher->delete_datawriter(writer);
     
     // Clean-up!

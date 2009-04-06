@@ -58,6 +58,10 @@ namespace OpenDDS
                                        TransportSendListener* listener,
                                        ACE_Message_Block*     msg);
 
+        /// Send a response message back to a publication.
+        void send_response( RepoId             pub_id,
+                            ACE_Message_Block* msg);
+
         /// Called to remove the sample from any DataLink queues that it
         /// may be stuck in.  This basically means that the caller wants
         /// his loan back.  We always acknowledge that we are returning
