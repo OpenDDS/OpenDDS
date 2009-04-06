@@ -1,3 +1,11 @@
+Mon Apr  6 21:28:25 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/GuidConverter.h:
+
+          Changed const ref member to value; fixes broken GCC 3.x
+          and some VC++ compiler behavior.  This fixes the remainder
+          of failing BuiltinTopic tests.
+
 Fri Apr  3 21:34:54 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * DDS_release_notes.txt:
