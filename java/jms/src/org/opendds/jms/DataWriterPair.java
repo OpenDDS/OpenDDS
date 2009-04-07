@@ -4,6 +4,10 @@
 
 package org.opendds.jms;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;
 import javax.jms.JMSException;
@@ -11,6 +15,7 @@ import javax.jms.JMSException;
 import DDS.DataWriter;
 import DDS.DataWriterQosHolder;
 import DDS.DurabilityQosPolicyKind;
+import DDS.Duration_t;
 import DDS.Publisher;
 import DDS.Topic;
 import OpenDDS.JMS.MessagePayloadDataWriter;
@@ -25,6 +30,8 @@ import org.opendds.jms.qos.QosPolicies;
  * @version $Revision$
  */
 public class DataWriterPair {
+    private Logger logger = Logger.getLogger(DataWriterPair.class);
+
     private MessagePayloadDataWriter persistentDW;
     private MessagePayloadDataWriter volatileDW;
     private Publisher publisher;
@@ -83,7 +90,36 @@ public class DataWriterPair {
     }
 
     public void destroy() {
-        publisher.delete_datawriter(persistentDW);
-        publisher.delete_datawriter(volatileDW);
+        ExecutorService executor = Executors.newCachedThreadPool();
+
+        executor.submit(new DataWriterAck(persistentDW));
+        executor.submit(new DataWriterAck(volatileDW));
+
+        try {
+            executor.awaitTermination(30, TimeUnit.SECONDS);
+
+        } catch (InterruptedException e) {
+            logger.warn("destroy() interrupted; possible data loss!");
+
+        } finally {
+            publisher.delete_datawriter(persistentDW);
+            publisher.delete_datawriter(volatileDW);
+        }
+    }
+
+    //
+
+    private static class DataWriterAck implements Runnable {
+        private DataWriter writer;
+
+        public DataWriterAck(DataWriter writer) {
+            this.writer = writer;
+        }
+
+        public void run() {
+            // Wait for sent messages to be acknowledged; the max_time
+            // duration should eventually become configurable.
+            writer.wait_for_acknowledgments(new Duration_t(30, 0));
+        }
     }
 }
