@@ -86,8 +86,6 @@ public:
   operator std::string() const;
 
 protected:
-  // N.B. A copy is made intentionally due to broken behavior
-  //      in GCC 3.x and some VC++ compilers.      
   const GUID_t guid_;
 };
 

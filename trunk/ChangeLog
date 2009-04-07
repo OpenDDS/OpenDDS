@@ -1,3 +1,10 @@
+Tue Apr  7 16:05:36 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/GuidConverter.h:
+
+          Dropped comment; behavior is consistent with Section 12.2.5
+          of n2798=08-0308 (per Adam Mitz).
+
 Tue Apr  7 15:47:11 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * tests/DCPS/Thrasher/Subscriber.cpp:
