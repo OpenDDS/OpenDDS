@@ -95,6 +95,7 @@ public class DataWriterPair {
         executor.submit(new DataWriterAck(persistentDW));
         executor.submit(new DataWriterAck(volatileDW));
 
+        executor.shutdown();
         try {
             executor.awaitTermination(30, TimeUnit.SECONDS);
 
