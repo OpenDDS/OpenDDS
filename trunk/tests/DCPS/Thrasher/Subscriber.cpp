@@ -134,7 +134,6 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     subscriber->get_default_datareader_qos(reader_qos);
 
     reader_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
-    reader_qos.history.depth = expected_samples;
 
     DDS::DataReader_var reader =
       subscriber->create_datareader(topic.in(),

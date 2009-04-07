@@ -1,34 +1,40 @@
+Tue Apr  7 15:47:11 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/Thrasher/Subscriber.cpp:
+
+          Removed uneccessary history depth.
+
 Mon Apr  6 21:23:22 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
         * dds/DCPS/DataReaderImpl.cpp:
 
-	  data_received()   - cache time values for use as arguments.
-	  send_sample_ack() - implement sending of SAMPLE_ACK messages.
+          data_received()   - cache time values for use as arguments.
+          send_sample_ack() - implement sending of SAMPLE_ACK messages.
 
         * dds/DCPS/transport/framework/DataLinkSet.h:
         * dds/DCPS/transport/framework/DataLinkSet.inl:
 
-	  send_response() - new method to send SAMPLE_ACK messages from a
-	                    subscription to a publication.
+          send_response() - new method to send SAMPLE_ACK messages from a
+                            subscription to a publication.
 
         * dds/DCPS/transport/framework/SendResponseListener.h:
 
-	  Null listener to release response samples.
+          Null listener to release response samples.
 
         * dds/DCPS/transport/framework/TransportInterface.h:
         * dds/DCPS/transport/framework/TransportInterface.inl:
 
-	  send_response() - new method to send SAMPLE_ACK messages from a
-	                    subscription to a publication.
+          send_response() - new method to send SAMPLE_ACK messages from a
+                            subscription to a publication.
 
         * dds/DCPS/transport/framework/TransportSendListener.h:
 
-	  Correct forward declaration.
+          Correct forward declaration.
 
         * tests/DCPS/Thrasher/ParticipantTask.cpp:
 
-	  Add call to wait_for_acknowledgments() before shutting down.
+          Add call to wait_for_acknowledgments() before shutting down.
 
 Mon Apr  6 21:28:25 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
