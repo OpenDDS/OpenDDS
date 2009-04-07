@@ -6,7 +6,7 @@
     Version: $Revision$
 -->
 <project name="opendds-helloworld" default="compile" basedir=".">
-    <property name="common.dir" value="${basedir}/../common"/>
+    <property name="shared.dir" value="${basedir}/../shared"/>
     <property name="build.dir" value="${basedir}/build"/>
     <property name="lib.dir" value="${basedir}/lib"/>
     <property name="src.dir" value="${basedir}/src"/>
@@ -21,7 +21,7 @@
         <pathelement location="${build.dir}/classes"/>
         <pathelement location="${src.dir}"/>
 
-        <fileset dir="${common.dir}/lib"/>
+        <fileset dir="${shared.dir}/lib"/>
         <fileset dir="${web.dir}/WEB-INF/lib"/>
     </path>
 

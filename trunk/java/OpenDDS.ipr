@@ -359,6 +359,7 @@
       <module fileurl="file://$PROJECT_DIR$/ant/opendds-ant.iml" filepath="$PROJECT_DIR$/ant/opendds-ant.iml" />
       <module fileurl="file://$PROJECT_DIR$/jms/opendds-jms.iml" filepath="$PROJECT_DIR$/jms/opendds-jms.iml" />
       <module fileurl="file://$PROJECT_DIR$/jms/compat/opendds-jms-compat.iml" filepath="$PROJECT_DIR$/jms/compat/opendds-jms-compat.iml" />
+      <module fileurl="file://$PROJECT_DIR$/jms/example/jbossesb/router/opendds-router.iml" filepath="$PROJECT_DIR$/jms/example/jbossesb/router/opendds-router.iml" />
     </modules>
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_5" assert-keyword="true" jdk-15="true" project-jdk-name="1.5" project-jdk-type="JavaSDK" />

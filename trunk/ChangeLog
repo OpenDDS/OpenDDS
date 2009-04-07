@@ -1,3 +1,25 @@
+Tue Apr  7 18:02:02 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/OpenDDS.ipr:
+        * java/ant/opendds-ant.iml:
+        * java/jms/example/jbossas:
+        * java/jms/example/jbossesb/helloworld/build.xml:
+        * java/jms/example/jbossesb/helloworld2/build.xml:
+        * java/jms/example/jbossesb/router/build.xml:
+        * java/jms/example/jbossesb/shared:
+
+          JMS example re-org.
+        
+        * java/jms/example/jboss:
+        * java/jms/example/jboss/opendds-ds.xml:
+        * java/jms/example/jboss/opendds-ir-ds.xml:
+        * java/jms/example/jbossesb/common:
+        * java/jms/example/jbossesb/common/lib:
+        * java/jms/example/jbossesb/common/lib/javaee-5.0.jar:
+        * java/jms/example/jbossesb/common/lib/jbossesb-rosetta.jar:
+
+          Removed these files.
+
 Tue Apr  7 16:55:59 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/src/org/opendds/jms/DataWriterPair.java:
