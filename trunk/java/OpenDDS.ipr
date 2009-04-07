@@ -171,6 +171,12 @@
               <file url="file://$PROJECT_DIR$/examples/jms/web/WEB-INF/web.xml" />
             </files>
           </module>
+          <module name="opendds-jms">
+            <files>
+              <file url="file://$PROJECT_DIR$/jms/example/jbossesb/helloworld/web/WEB-INF/web.xml" />
+              <file url="file://$PROJECT_DIR$/jms/example/jbossesb/helloworld2/web/WEB-INF/web.xml" />
+            </files>
+          </module>
         </modules>
       </facet-type>
       <facet-type id="jpa">

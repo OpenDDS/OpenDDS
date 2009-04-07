@@ -43,7 +43,8 @@ The following JMX MBeans are provided:
 
  1. org.opendds.jms.management.ParticipantFactoryService (required)
     This component is responsible for initializing the DomainParticipantFactory
-    for use by JMS clients.
+    for use by JMS clients.  Only one instance of this component may be
+    configured per process (JVM instance).
 
     This component supports the following attributes:
 
@@ -57,6 +58,7 @@ The following JMX MBeans are provided:
       DCPSBitTransportIPAddress
       DCPSBitTransportPort
       DCPSBitLookupDurationMsec
+      DCPSPendingTimeout
       DCPSPersistentDataDir
       DCPSTransportDebugLevel
       ORBListenEndpoints
@@ -200,6 +202,13 @@ JMS Provider and may not be used by JMS client code:
   - ENTITY_FACTORY
   - LIFESPAN
   - PARTITION
+
+The above policies are used internally to configure a number of builtin
+JMS provider behaviors.  These QoS policies will be applied based on arguments
+passed to the JMS provider, including:
+  - JMS message persistence (i.e. DeliveryMode)
+  - JMS message time to live (i.e. TTL)
+  - JMS noLocal delivery (inhibits messages sent on the same Connection)
 
 For a list of supported QoS policies, please review the OpenDDS documentation.
 
