@@ -1,3 +1,14 @@
+Tue Apr  7 18:29:38 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/README:
+
+          Added requested documentation on internally used QoS policies and
+          ParticipantFactoryService restrictions.
+
+        * java/jms/src/org/opendds/jms/management/argument/DCPSArguments.java:
+
+          Added support for -DCPSPendingTimeout.
+
 Tue Apr  7 18:02:02 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * java/OpenDDS.ipr:
@@ -9,7 +20,7 @@ Tue Apr  7 18:02:02 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * java/jms/example/jbossesb/shared:
 
           JMS example re-org.
-        
+
         * java/jms/example/jboss:
         * java/jms/example/jboss/opendds-ds.xml:
         * java/jms/example/jboss/opendds-ir-ds.xml:
