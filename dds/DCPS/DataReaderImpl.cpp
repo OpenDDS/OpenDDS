@@ -315,6 +315,30 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
     //
     this->subscriber_servant_->add_associations(writers, this, qos_);
 
+    // Check if any publications have already sent a REQUEST_ACK message.
+    wr_len = writers.length ();
+    for( unsigned int index = 0; index < wr_len; ++index) {
+      WriterMapType::iterator where
+        = this->writers_.find( writers[ index].writerId);
+      if( where != this->writers_.end()) {
+        ACE_Time_Value now = ACE_OS::gettimeofday();
+
+        ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
+        if( where->second.should_ack( now)) {
+          SequenceNumber sequence = where->second.last_sequence();
+          ::DDS::Time_t timenow = time_value_to_time(now);
+          bool result = this->send_sample_ack(
+                          writers[ index].writerId,
+                          sequence.value_,
+                          timenow
+                        );
+          if( result) {
+            where->second.clear_acks( sequence);
+          }
+        }
+      }
+    }
+
     //
     // LIVELINESS policy timers are managed here.
     //
@@ -1196,10 +1220,19 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         WriterMapType::iterator where
           = this->writers_.find( header.publication_id_);
         if( where != this->writers_.end()) {
+          where->second.last_sequence( SequenceNumber(header.sequence_));
+
           ACE_Time_Value now = ACE_OS::gettimeofday();
-          if( where->second.should_ack( header, now)) {
+          if( where->second.should_ack( now)) {
             ::DDS::Time_t timenow = time_value_to_time(now);
-            this->send_sample_ack( header, timenow);
+            bool result = this->send_sample_ack(
+                            header.publication_id_,
+                            header.sequence_,
+                            timenow
+                          );
+            if( result) {
+              where->second.clear_acks( SequenceNumber(header.sequence_));
+            }
           }
 
         } else {
@@ -1246,6 +1279,18 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         serializer >> ack.value_;
         serializer >> delay;
 
+        if( DCPS_debug_level > 9) {
+          RepoIdConverter debugConverter( sample.header_.publication_id_);
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) DataReaderImpl::data_received() - ")
+            ACE_TEXT("publication %s received REQUEST_ACK for sequence 0x%x ")
+            ACE_TEXT("valid for the next %d seconds.\n"),
+            std::string( debugConverter).c_str(),
+            ACE_UINT16(ack.value_),
+            delay.sec
+          ));
+        }
+
         WriterMapType::iterator where
           = this->writers_.find( sample.header_.publication_id_);
         if( where != this->writers_.end()) {
@@ -1254,9 +1299,16 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
           where->second.ack_deadline( ack, deadline);
 
-          if( where->second.should_ack( sample.header_, now)) {
+          if( where->second.should_ack( now)) {
             ::DDS::Time_t timenow = time_value_to_time(now);
-            this->send_sample_ack( sample.header_, timenow);
+            bool result = this->send_sample_ack(
+                            sample.header_.publication_id_,
+                            ack.value_,
+                            timenow
+                          );
+            if( result) {
+              where->second.clear_acks( ack);
+            }
           }
 
         } else {
@@ -1323,21 +1375,25 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     }
 }
 
-void
-DataReaderImpl::send_sample_ack( const DataSampleHeader& header, ::DDS::Time_t when)
+bool
+DataReaderImpl::send_sample_ack(
+  const RepoId& publication,
+  ACE_INT16 sequence,
+  ::DDS::Time_t when
+)
 {
-  size_t dataSize = sizeof( header.sequence_);
-  dataSize += _dcps_find_size( header.publication_id_);
+  size_t dataSize = sizeof( sequence);
+  dataSize += _dcps_find_size( publication);
 
   ACE_Message_Block* data;
-  ACE_NEW( data, ACE_Message_Block( dataSize));
+  ACE_NEW_RETURN( data, ACE_Message_Block( dataSize), false);
 
   bool doSwap    = this->subscriber_servant_->swap_bytes();
   bool byteOrder = (doSwap? !TAO_ENCAP_BYTE_ORDER: TAO_ENCAP_BYTE_ORDER);
 
   ::TAO::DCPS::Serializer serializer( data, doSwap);
-  serializer << header.publication_id_;
-  serializer << header.sequence_;
+  serializer << publication;
+  serializer << sequence;
 
   DataSampleHeader outbound_header;
   outbound_header.message_id_               = SAMPLE_ACK;
@@ -1350,30 +1406,30 @@ DataReaderImpl::send_sample_ack( const DataSampleHeader& header, ::DDS::Time_t w
   outbound_header.publication_id_           = this->subscription_id_;
 
   ACE_Message_Block* sample_ack;
-  ACE_NEW(
+  ACE_NEW_RETURN(
     sample_ack,
     ACE_Message_Block(
       outbound_header.max_marshaled_size(),
       ACE_Message_Block::MB_DATA,
       data // cont
-    )
+    ), false
   );
   sample_ack << outbound_header;
 
   if( DCPS_debug_level > 0) {
     RepoIdConverter subscriptionBuffer( this->subscription_id_);
-    RepoIdConverter publicationBuffer(  header.publication_id_);
+    RepoIdConverter publicationBuffer(  publication);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::send_sample_ack() - ")
       ACE_TEXT("%s sending SAMPLE_ACK message with sequence 0x%x ")
       ACE_TEXT("to publication %s.\n"),
       std::string( subscriptionBuffer).c_str(),
-      header.sequence_,
+      ACE_UINT16(sequence),
       std::string( publicationBuffer).c_str()
     ));
   }
 
-  this->subscriber_servant_->send_response( header.publication_id_, sample_ack);
+  return this->subscriber_servant_->send_response( publication, sample_ack);
 }
 
 void DataReaderImpl::notify_read_conditions()
@@ -1743,9 +1799,47 @@ void OpenDDS::DCPS::WriterInfo::removed ()
   reader_->writer_removed (writer_id_, this->state_);
 }
 
+SequenceNumber
+OpenDDS::DCPS::WriterInfo::last_sequence() const
+{
+  // sample_lock_ is held by the caller.
+  
+  return this->last_sequence_;
+}
+
+void
+OpenDDS::DCPS::WriterInfo::last_sequence(
+  SequenceNumber sequence
+)
+{
+  // sample_lock_ is held by the caller.
+
+  if( this->last_sequence_ < sequence) {
+    this->last_sequence_ = sequence;
+  }
+}
+
+void
+OpenDDS::DCPS::WriterInfo::clear_acks(
+  SequenceNumber sequence
+)
+{
+  // sample_lock_ is held by the caller.
+
+  DeadlineList::iterator current
+    = this->ack_deadlines_.begin();
+  while( current != this->ack_deadlines_.end()) {
+    if( current->first <= sequence) {
+      current = this->ack_deadlines_.erase( current);
+
+    } else {
+      break;
+    }
+  }
+}
+
 bool
 OpenDDS::DCPS::WriterInfo::should_ack(
-  const DataSampleHeader& header,
   ACE_Time_Value now
 )
 {
@@ -1764,10 +1858,7 @@ OpenDDS::DCPS::WriterInfo::should_ack(
 
     } else {
       // NOTE: This assumes no out of order reception.
-      SequenceNumber sequence( header.sequence_);
-      if( current->first < sequence) {
-        // This call consumes the REQUEST_ACK message.
-        this->ack_deadlines_.erase( current);
+      if( current->first <= this->last_sequence_) {
         return true;
       }
       ++current;
@@ -1790,6 +1881,7 @@ OpenDDS::DCPS::WriterInfo::ack_deadline( SequenceNumber sequence, ACE_Time_Value
          = this->ack_deadlines_.begin();
        current != this->ack_deadlines_.end();
        ++current) {
+    // Insertion sort.
     if( sequence < current->first) {
       this->ack_deadlines_.insert(
         current,
@@ -1803,6 +1895,9 @@ OpenDDS::DCPS::WriterInfo::ack_deadline( SequenceNumber sequence, ACE_Time_Value
         current->second = when;
       }
       return;
+
+    } else {
+      break;
     }
   }
 }

@@ -1,3 +1,77 @@
+Wed Apr  8 01:30:15 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+	  WriterInfo::last_sequence() - accessor and mutator added to
+	    store that actual last observed sequence value.
+          WriterInfo::clear_acks() - factored out the removal of requests
+	    from the storage to allow processing to occur via different
+	    mechanisms.
+          WriterInfo::should_ack() - refactored removal of stored
+	    requests to clear_acks(); makes comparison with stored last
+	    observed sequence value rather than requiring it as an
+	    argument.
+	  DataReaderImpl::send_sample_ack() - indicated success of
+	    response generation with return value; simplified header
+	    argument to add two explicit arguments with a sequence value
+	    to ack and the publication to which the ack should be
+	    directed.
+	  DataReaderImpl::add_associations() - added check for any ack
+	    requests on association establishment and send the response
+	    if appropriate.
+	  DataReaderImpl::data_received() - modify ack response
+	    generation to be dual staged, setting the observed value
+	    before the check and clearing the stored ack only on sending
+	    of a successful response.  Added some more diagnostics.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+	  Changed sequence numbering to preincrement so that the first
+	  sequence number will be larger than the initial value of the
+	  type and the member value will always contain the value that
+	  was included with the last sent message.  Cleaned up some
+	  diagnostic messages.	Added some more.
+
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+	  Added a diagnostic message to destructor to note if the
+	  containers are not empty.  Removed annoying code review comment
+	  from 1Q05.
+
+        * dds/DCPS/transport/framework/DataLinkSetMap.h:
+        * dds/DCPS/transport/framework/DataLinkSetMap.cpp:
+
+	  dump() - diagnostic aid.
+
+        * dds/DCPS/transport/framework/SendResponseListener.h:
+        * dds/DCPS/transport/framework/SendResponseListener.cpp:
+
+	  Refactored to include a cpp file for the virtual function
+	  implementations.
+
+        * dds/DCPS/transport/framework/TransportInterface.h:
+        * dds/DCPS/transport/framework/TransportInterface.inl:
+
+	  send_response() - return indication of response sending status;
+	    demoted error message to a warning and added a dump of the
+	    link map with the warning message.  Removed an annoying code
+	    review comment from 1Q05.
+
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.cpp:
+
+	  Removed annoying code review comments from 1Q05.
+
+        * tests/DCPS/Thrasher/Subscriber.cpp:
+        * tests/DCPS/Thrasher/run_test.pl:
+
+	  Extended diagnostic capabilities: made individual return codes
+	  distinguishable and reported mismatched expected results;
+	  added the ability to examine the generated command lines
+	  without needing to execute them.
+
 Tue Apr  7 18:29:38 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/README:

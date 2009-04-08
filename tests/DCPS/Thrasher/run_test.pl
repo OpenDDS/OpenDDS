@@ -23,6 +23,8 @@ my $runTop ;# = 1;
 # $pub_opts .= "-DCPSBit 0 ";
 # $sub_opts .= "-DCPSBit 0 ";
 # $pub_opts .= "-DCPSChunks 1 ";
+my $norun;
+# $norun = 1;
 
 my $arg = shift;
 if ($arg eq 'low') {
@@ -64,6 +66,12 @@ $Subscriber = PerlDDS::create_process("subscriber", "$sub_opts");
 
 $Publisher = PerlDDS::create_process("publisher", "$pub_opts ");
 
+if( $norun) {
+  print $DCPSREPO->CommandLine() . "\n";
+  print $Subscriber->CommandLine() . "\n";
+  print $Publisher->CommandLine() . "\n";
+  exit;
+}
 
 print $DCPSREPO->CommandLine() . "\n";
 $DCPSREPO->Spawn();

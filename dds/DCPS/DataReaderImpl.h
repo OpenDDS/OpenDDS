@@ -74,12 +74,20 @@ namespace OpenDDS
         /// update liveliness when remove_association is called.
         void removed ();
 
+        /// Update the last observed sequence number from this publication.
+        void last_sequence( SequenceNumber sequence);
+
+        /// Access the most recently observed sequence number from this publication.
+        SequenceNumber last_sequence() const;
+
+        /// Remove ack requests prior to the given sequence.
+        /// NOTE: This removes *all* ack requests for this publication
+        ///       satisfied by this sequence.
+        void clear_acks( SequenceNumber sequence);
+
         /// Determine if a SAMPLE_ACK message should be sent to this
         /// publication.
-        /// N.B. This method consumes the REQUEST_ACK message when
-        ///      returning true: it is the reponsibility of the calling
-        ///      code to generate the SAMPLE_ACK response in this case.
-        bool should_ack( const DataSampleHeader& header, ACE_Time_Value now);
+        bool should_ack( ACE_Time_Value now);
 
         /// Set the time after which we no longer need to generate a
         /// SAMPLE_ACK for this sequence value.
@@ -89,6 +97,8 @@ namespace OpenDDS
         /// Timestamp of last write/dispose/assert_liveliness from this DataWriter
         ACE_Time_Value last_liveliness_activity_time_;
 
+        /// Last observed data sample sequence number from this writer.
+        SequenceNumber last_sequence_;
 
         /// Times after which we no longer need to respond to a REQUEST_ACK message.
         typedef std::list< std::pair< SequenceNumber, ACE_Time_Value> > DeadlineList;
@@ -559,7 +569,11 @@ namespace OpenDDS
 
     private:
       /// Send a SAMPLE_ACK message in response to a REQUEST_ACK message.
-      void send_sample_ack( const DataSampleHeader& header, ::DDS::Time_t when);
+      bool send_sample_ack(
+             const RepoId& publication,
+             ACE_INT16 sequence,
+             ::DDS::Time_t when
+           );
 
       /// Data has arrived into the cache, unblock waiting ReadConditions
       void notify_read_conditions ();

@@ -79,7 +79,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     if (CORBA::is_nil(subscriber.in()))
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
-                        ACE_TEXT(" create_subscriber failed!\n")), 1);
+                        ACE_TEXT(" create_subscriber failed!\n")), 2);
 
     // Attach Transport
     OpenDDS::DCPS::TransportImpl_rch transport =
@@ -93,7 +93,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     if (subscriber_i == 0)
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
-                        ACE_TEXT(" dynamic_cast failed!\n")), 1);
+                        ACE_TEXT(" dynamic_cast failed!\n")), 3);
 
     OpenDDS::DCPS::AttachStatus status =
       subscriber_i->attach_transport(transport.in());
@@ -101,14 +101,14 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     if (status != OpenDDS::DCPS::ATTACH_OK)
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
-                        ACE_TEXT(" attach_transport failed!\n")), 1);
+                        ACE_TEXT(" attach_transport failed!\n")), 4);
 
     // Register Type (FooType)
     FooTypeSupport_var ts = new FooTypeSupportImpl;
     if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK)
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
-                        ACE_TEXT(" register_type failed!\n")), 1);
+                        ACE_TEXT(" register_type failed!\n")), 5);
 
     // Create Topic (FooTopic)
     DDS::Topic_var topic =
@@ -120,7 +120,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     if (CORBA::is_nil(topic.in()))
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
-                        ACE_TEXT(" create_topic failed!\n")), 1);
+                        ACE_TEXT(" create_topic failed!\n")), 6);
 
     // Create DataReader
     ProgressIndicator progress =
@@ -143,7 +143,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     if (CORBA::is_nil(reader.in()))
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
-                        ACE_TEXT(" create_datareader failed!\n")), 1);
+                        ACE_TEXT(" create_datareader failed!\n")), 7);
 
     // Block until Publisher completes
     DDS::StatusCondition_var cond = reader->get_statuscondition();
@@ -162,7 +162,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK)
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
-                          ACE_TEXT(" wait failed!\n")), 1);
+                          ACE_TEXT(" wait failed!\n")), 8);
 
       matches = reader->get_subscription_match_status();
     }
@@ -180,13 +180,21 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
   catch (const CORBA::Exception& e)
   {
     e._tao_print_exception("caught in main()");
-    return 1;
+    return 9;
   }
 
   ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) <- SUBSCRIBER FINISHED\n")));
 
-  if (received_samples != expected_samples)
-    return 1;
+  if (received_samples != expected_samples) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) ERROR subscriber - ")
+      ACE_TEXT("received %d of expected %d samples.\n"),
+      received_samples,
+      expected_samples
+    ));
+    return 10;
+  }
 
   return 0;
 }
+

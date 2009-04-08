@@ -59,7 +59,7 @@ namespace OpenDDS
                                        ACE_Message_Block*     msg);
 
         /// Send a response message back to a publication.
-        void send_response( RepoId             pub_id,
+        bool send_response( RepoId             pub_id,
                             ACE_Message_Block* msg);
 
         /// Called to remove the sample from any DataLink queues that it
