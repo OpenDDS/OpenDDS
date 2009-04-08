@@ -77,8 +77,6 @@ OpenDDS::DCPS::DataLinkSet::remove_links(DataLinkSet* released_set)
 
       if (unbind(map_, link_id) != 0)
         {
-          //MJM: This is an excellent candidate location for a level driven
-          //MJM: diagnostic (ORBDebugLevel 4).
           // Just report to the log that we tried.
           VDBG((LM_DEBUG,
             ACE_TEXT("(%P|%t) DataLinkSet::remove_links: ")

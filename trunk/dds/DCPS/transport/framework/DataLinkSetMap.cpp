@@ -23,6 +23,22 @@ OpenDDS::DCPS::DataLinkSetMap::~DataLinkSetMap()
   DBG_ENTRY_LVL("DataLinkSetMap","~DataLinkSetMap",6);
 }
 
+void
+OpenDDS::DCPS::DataLinkSetMap::dump()
+{
+  GuardType guard(this->map_lock_);
+
+  for( MapType::const_iterator current = this->map_.begin();
+       current != this->map_.end();
+       ++current) { 
+    RepoIdConverter converter( current->first);
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) DataLinkSetMap::dump() - ")
+      ACE_TEXT("contains link for %s.\n"),
+      std::string( converter).c_str()
+    ));
+  }
+}
 
 OpenDDS::DCPS::DataLinkSet*
 OpenDDS::DCPS::DataLinkSetMap::find_or_create_set(RepoId id)

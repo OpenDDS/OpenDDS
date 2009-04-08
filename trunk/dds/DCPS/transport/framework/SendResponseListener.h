@@ -21,15 +21,13 @@ namespace OpenDDS { namespace DCPS {
     class OpenDDS_Dcps_Export SendResponseListener
       : public TransportSendListener {
       public:
-        SendResponseListener() { }
-        virtual ~SendResponseListener() { }
+        virtual ~SendResponseListener();
 
-        virtual void data_delivered(DataSampleListElement* /* sample */) { }
+        virtual void data_delivered(DataSampleListElement* sample);
         virtual void data_dropped(
-                       DataSampleListElement* /* sample */,
-                       bool /* dropped_by_transport */
-                     )
-                     { }
+                       DataSampleListElement* sample,
+                       bool dropped_by_transport
+                     );
 
         virtual void control_delivered(ACE_Message_Block* sample);
         virtual void control_dropped(
@@ -39,23 +37,6 @@ namespace OpenDDS { namespace DCPS {
     };
 
 }}  // namespace OpenDDS::DCPS
-
-inline
-void
-OpenDDS::DCPS::SendResponseListener::control_delivered( ACE_Message_Block* sample)
-{
-  if( sample) sample->release();
-}
-
-inline
-void
-OpenDDS::DCPS::SendResponseListener::control_dropped(
-  ACE_Message_Block* sample,
-  bool /* dropped_by_transport */
-)
-{
-  if( sample) sample->release();
-}
 
 #endif /* OPENDDS_DCPS_SENDRESPONSELISTENER_H */
 

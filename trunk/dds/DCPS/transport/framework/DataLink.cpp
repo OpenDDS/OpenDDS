@@ -65,7 +65,17 @@ OpenDDS::DCPS::DataLink::DataLink(TransportImpl* impl, CORBA::Long priority)
 OpenDDS::DCPS::DataLink::~DataLink()
 {
   DBG_ENTRY_LVL("DataLink","~DataLink",6);
-  
+
+  if( (this->pub_map_.size() > 0) || (this->sub_map_.size() > 0)) {
+    ACE_ERROR ((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: DataLink::~DataLink() - ")
+      ACE_TEXT("link still in use by %d publications ")
+      ACE_TEXT("and %d subscriptions when deleted!\n"),
+      this->pub_map_.size(),
+      this->sub_map_.size()
+    ));
+  }
+
   if (this->thr_per_con_send_task_ != 0)
     {
       this->thr_per_con_send_task_->close (1);
@@ -79,9 +89,6 @@ OpenDDS::DCPS::DataLink::resume_send ()
    if (!this->send_strategy_->isDirectMode())
      this->send_strategy_->resume_send();
 }
-
-//MJM: Include the return value meanings to the header documentation as
-//MJM: well.
 
 /// Only called by our TransportImpl object.
 ///

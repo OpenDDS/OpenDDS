@@ -75,7 +75,7 @@ OpenDDS::DCPS::TransportInterface::send_control(RepoId                 pub_id,
     }
 }
 
-ACE_INLINE void
+ACE_INLINE bool
 OpenDDS::DCPS::TransportInterface::send_response(
   RepoId             pub_id,
   ACE_Message_Block* msg
@@ -83,21 +83,23 @@ OpenDDS::DCPS::TransportInterface::send_response(
 {
   DBG_ENTRY_LVL("TransportInterface","send_response",6);
 
-  // Can a remote Publication ever be connected by more than one link?
   DataLinkSet_rch links = this->remote_map_.find_set( pub_id);
   if( links.is_nil()) {
     // No link to publication.
     msg->release();
     RepoIdConverter converter( pub_id);
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: TransportInterface::send_response() - ")
+    ACE_DEBUG((LM_WARNING,
+      ACE_TEXT("(%P|%t) WARNING: TransportInterface::send_response() - ")
       ACE_TEXT("unable to find link to send SAMPLE_ACK message on to ")
       ACE_TEXT("reach publication %s.\n"),
       std::string( converter).c_str()
     ));
+    this->remote_map_.dump();
+    return false;
 
   } else {
     links->send_response( pub_id, msg);
+    return true;
   }
 
 }
@@ -137,8 +139,6 @@ OpenDDS::DCPS::TransportInterface::remove_sample
   // there are no samples to even attempt to remove.  This isn't considered
   // an error condition (which would require a -1 to be returned) - it just
   // means we do nothing except return 0.
-//MJM: What is the use-case for this not being an error?  I am trying to
-//MJM: think of one, but have been unsuccessful so far.
   return -1;
 }
 
@@ -155,8 +155,6 @@ OpenDDS::DCPS::TransportInterface::remove_all_control_msgs(RepoId pub_id)
       return pub_links->remove_all_control_msgs(pub_id);
     }
 
-//MJM: What is the use-case for this not being an error?  I am trying to
-//MJM: think of one, but have been unsuccessful so far.
   return 0;
 }
 

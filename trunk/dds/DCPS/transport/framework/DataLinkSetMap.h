@@ -87,6 +87,9 @@ namespace OpenDDS
         /// Make the map_ empty.
         void clear();
 
+        /// Diagnostic aid.
+        void dump(); // Not const to allow use of map_lock_
+
       private:
 
         typedef ACE_SYNCH_MUTEX     LockType;
