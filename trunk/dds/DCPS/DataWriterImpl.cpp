@@ -846,7 +846,7 @@ ACE_THROW_SPEC ((::CORBA::SystemException))
     this->wfaLock_,
     ::DDS::RETCODE_ERROR
   );
-  while( 0 == this->wfaCondition_.wait( &when)) {
+  do {
     // We use the values from the set of readers to index into the sequence
     // map.  Any readers_ that have not responded will have the default,
     // smallest, value which will cause the wait to continue.
@@ -881,7 +881,8 @@ ACE_THROW_SPEC ((::CORBA::SystemException))
       }
       return ::DDS::RETCODE_OK;
     }
-  }
+
+  } while( 0 == this->wfaCondition_.wait( &when));
 
   RepoIdConverter converter( this->publication_id_);
   ACE_DEBUG((LM_WARNING,
