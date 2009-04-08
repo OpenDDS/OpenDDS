@@ -67,8 +67,8 @@ OpenDDS::DCPS::DataLink::~DataLink()
   DBG_ENTRY_LVL("DataLink","~DataLink",6);
 
   if( (this->pub_map_.size() > 0) || (this->sub_map_.size() > 0)) {
-    ACE_ERROR ((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: DataLink::~DataLink() - ")
+    ACE_DEBUG ((LM_WARNING,
+      ACE_TEXT("(%P|%t) WARNING: DataLink::~DataLink() - ")
       ACE_TEXT("link still in use by %d publications ")
       ACE_TEXT("and %d subscriptions when deleted!\n"),
       this->pub_map_.size(),
