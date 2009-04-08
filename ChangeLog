@@ -1,13 +1,27 @@
+Wed Apr  8 21:59:22 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          wait_for_acknowledgments() - modified to perform check for
+            previous ACK values before waiting.  This covers the case
+            where previous wait calls have been made and the received ACK
+            value is sufficient to not block the caller.
+
+        * tests/DCPS/WaitForAck:
+        * bin/dcps_tests.lst:
+
+          Added regression test.
+
 Wed Apr  8 15:42:27 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:
 
-	  Demoted error message in destructor to warning to allow tests
-	  to pass which are not cleaning up entirely.
+          Demoted error message in destructor to warning to allow tests
+          to pass which are not cleaning up entirely.
 
         * dds/DCPS/transport/framework/SendResponseListener.cpp:
 
-	  Inlclude precompiled headers.
+          Inlclude precompiled headers.
 
 Wed Apr  8 01:30:15 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
