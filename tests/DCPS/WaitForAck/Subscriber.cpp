@@ -166,11 +166,7 @@ Subscriber::Subscriber( const Options& options)
   // Reader Qos policy values.
   ::DDS::DataReaderQos readerQos;
   subscriber->get_default_datareader_qos( readerQos);
-
-  readerQos.durability.kind                          = ::DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
-  readerQos.history.kind                             = ::DDS::KEEP_ALL_HISTORY_QOS;
-  readerQos.resource_limits.max_samples_per_instance = ::DDS::LENGTH_UNLIMITED;
-  readerQos.reliability.kind                         = ::DDS::RELIABLE_RELIABILITY_QOS;
+  readerQos.reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
 
   // Create the readers.
   for( int index = 0; index < 2; ++index) {

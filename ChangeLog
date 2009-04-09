@@ -1,3 +1,27 @@
+Thu Apr  9 21:41:50 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+	  Added removal of subscription ACK sequence storage for readers
+	  that become unassociated.
+
+        * tests/DCPS/WaitForAck/Options.cpp:
+
+	  Demoted a warning message to appear only during debug.
+
+        * tests/DCPS/WaitForAck/Publisher.cpp:
+
+	  Updated internal comments.
+
+        * tests/DCPS/WaitForAck/Subscriber.cpp:
+
+	  Removed unnecessary QoS values.  Leave history defaulted to
+	  discard incomming samples.
+
+        * tests/DCPS/WaitForAck/run_test.pl:
+
+	  Added the script.
+
 Wed Apr  8 21:59:22 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:

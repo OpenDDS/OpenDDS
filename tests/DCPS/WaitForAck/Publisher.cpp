@@ -292,18 +292,10 @@ Publisher::run()
     this->publications_[ index]->start();
   }
 
-  //////////////////////////////////////////////////////////////////////
-  // Start test execution here.
-
+  // Allow some traffic to occur before making any wait() calls.
   ACE_OS::sleep( 2);
 
   ::DDS::Duration_t delay = { 5, 0 }; // Wait for up to 5 seconds.
-
-  // This will result in a REQUEST_ACK sent from each writer to all
-  // readers and the wait will not unblock until all subscriptions have
-  // replied with a SAMPLE_ACK message indicating that the ACK message
-  // has been observed at that reader.
-
   for( unsigned int index = 0; index < this->publications_.size(); ++index) {
     // First wait on this writer.
     ::DDS::ReturnCode_t result
@@ -319,13 +311,12 @@ Publisher::run()
     }
   }
 
-  // Test complete here.
-  //////////////////////////////////////////////////////////////////////
-
   // Signal the writers to terminate.
   for( unsigned int index = 0; index < this->publications_.size(); ++index) {
     this->publications_[ index]->stop();
   }
+
+  // Additional wait() calls will be made by each thread during shutdown.
 
   // Separate loop so the termination messages can be handled concurrently.
   for( unsigned int index = 0; index < this->publications_.size(); ++index) {
