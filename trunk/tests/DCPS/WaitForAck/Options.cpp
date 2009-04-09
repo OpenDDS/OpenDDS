@@ -61,11 +61,13 @@ Options::Options( int argc, char** argv, char** /* envp */)
       parser.consume_arg();
 
     } else {
-      ACE_DEBUG((LM_WARNING,
-        ACE_TEXT("(%P|%t) WARNING: Options::Options() - ")
-        ACE_TEXT("ignoring argument: %s.\n"),
-        parser.get_current()
-      ));
+      if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_WARNING,
+          ACE_TEXT("(%P|%t) WARNING: Options::Options() - ")
+          ACE_TEXT("ignoring argument: %s.\n"),
+          parser.get_current()
+        ));
+      }
       parser.ignore_arg();
     }
   }

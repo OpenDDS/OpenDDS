@@ -446,6 +446,8 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
   ::DDS::InstanceHandleSeq handles;
 
   {
+    // Ensure the same acquisition order as in wait_for_acknowledgments().
+    ACE_GUARD (ACE_SYNCH_MUTEX, wfaGuard, this->wfaLock_);
     ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
     //Remove the readers from fully associated reader list. 
@@ -465,6 +467,19 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
         ++ fully_associated_len;
         fully_associated_readers.length (fully_associated_len);
         fully_associated_readers [fully_associated_len - 1] = readers[i]; 
+
+        // Remove this reader from the ACK sequence map if its there.
+        // This is where we need to be holding the wfaLock_ obtained
+        // above.
+        RepoIdToSequenceMap::iterator where
+          = this->idToSequence_.find( readers[i]);
+        if( where != this->idToSequence_.end()) {
+          this->idToSequence_.erase( where);
+
+          // It is possible that this subscription was causing the wait
+          // to continue, so give the opportunity to find out.
+          this->wfaCondition_.broadcast();
+        }
 
         ++ rds_len;
         rds.length (rds_len);
