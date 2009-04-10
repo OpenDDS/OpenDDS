@@ -1,0 +1,67 @@
+// -*- C++ -*-
+// $Id$
+#ifndef TAO_DDS_DCPS_GUID_IDL
+#define TAO_DDS_DCPS_GUID_IDL
+
+module OpenDDS
+{
+  module DCPS
+  {
+    // Vendor Id value from RTPS specification.
+    typedef octet GuidVendorId_t[2];
+
+    // GUID prefix bytes - uniquely specify the participant.
+    typedef octet GuidPrefix_t[12];
+
+    // Key portion of Entity identifier.
+    typedef octet EntityKey_t[3];
+
+    // Uniquely identify each entity within a participant.
+    struct EntityId_t {
+      EntityKey_t entityKey;
+      octet       entityKind;
+    };
+
+    const octet ENTITYKIND_BUILTIN_UNKNOWN      = 0xc0;
+    const octet ENTITYKIND_BUILTIN_PARTICIPANT  = 0xc1;
+    const octet ENTITYKIND_USER_UNKNOWN         = 0x00;
+    const octet ENTITYKIND_USER_WRITER_WITH_KEY = 0x02;
+    const octet ENTITYKIND_USER_WRITER_NO_KEY   = 0x03;
+    const octet ENTITYKIND_USER_READER_NO_KEY   = 0x04;
+    const octet ENTITYKIND_USER_READER_WITH_KEY = 0x07;
+
+    // Vendor specific Kinds have the following bit pattern: 01xx_xxxx
+    const octet ENTITYKIND_OPENDDS_SUBSCRIBER   = 0x41;
+    const octet ENTITYKIND_OPENDDS_PUBLISHER    = 0x42;
+
+    const octet ENTITYKIND_OPENDDS_TOPIC        = 0x45;
+
+// Specifying the GUID type as a DCPS data type with a complex key forces
+// the generation of the logical less than functor for the type.
+#pragma DCPS_DATA_TYPE "OpenDDS::DCPS::GUID_t"
+#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::GUID_t guidPrefix[11]"
+#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::GUID_t guidPrefix[10]"
+#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::GUID_t guidPrefix[ 9]"
+#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::GUID_t guidPrefix[ 8]"
+#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::GUID_t guidPrefix[ 7]"
+#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::GUID_t guidPrefix[ 6]"
+#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::GUID_t guidPrefix[ 5]"
+#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::GUID_t guidPrefix[ 4]"
+#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::GUID_t guidPrefix[ 3]"
+#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::GUID_t guidPrefix[ 2]"
+#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::GUID_t guidPrefix[ 1]"
+#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::GUID_t guidPrefix[ 0]"
+#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::GUID_t entityId.entityKey[2]"
+#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::GUID_t entityId.entityKey[1]"
+#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::GUID_t entityId.entityKey[0]"
+#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::GUID_t entityId.entityKind"
+
+    // The actual GUID itself.
+    struct GUID_t {
+      GuidPrefix_t guidPrefix;
+      EntityId_t   entityId;
+    };
+
+}; }; // module OpenDDS::DCPS
+
+#endif // TAO_DDS_DCPS_GUID_IDL

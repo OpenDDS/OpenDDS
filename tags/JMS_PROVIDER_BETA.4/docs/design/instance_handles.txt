@@ -1,0 +1,77 @@
+Last updated: 3/30/2009
+Steven Stallion
+
+The DDS 1.2 specification (formal/07-01-01) adds additional operations which
+affect the scope and use of instance handles.  Instance handles are now
+made available via the Entity::get_instance_handle operation.  It is also
+possible for a given DomainParticipant to assert whether or not it contains
+a given entity through the use of contains_entity operation.  Currently,
+instance handles are either derived from an associated RepoId assigned by the
+DCPSInfoRepo or generated as a sequence.  Due to the increased scope and wider
+use presented in the updated specification, a new generation scheme is
+required.
+
+Instance handles will now be divided into two categories:
+- Entity instance handles
+- Data instance handles
+
+Entity instance handles are assigned to both local and remote entities
+by the DomainParticipantImpl.  At the time an entity instance handle is
+created, a corresonding RepoId must be available and associated for remote
+entities.  These RepoIds are used when calling the DCPSInfoRepo for the
+various ignore_* operations.
+
+When a new entity instance handle is created for a remote entity, the
+DomainParticipantImpl should verify that the given RepoId has not already
+been associated.  If it has, the previously assigned instance handle should
+be used.  If it has not, a new instance handle should be generated and
+associated with the given RepoId in a map managed by the DomainParticipantImpl.
+
+Per the specification, the contains_entity operation may recurse through a 
+DomainParticipant's Subscriber and Publisher.
+
+Entity instance handles should have their state periodically purged when
+entities are either deleted or disassociated.  
+
+Data instance handles are scoped to the associated DataReaderImpl or
+DataWriterImpl which created it.  These instance handles are not intended 
+to be mixed with entity instance handles.  The sole exception to this rule is
+when a Builtin Topic is used to lookup an entity which is then passed to one
+of the ignore_* operations on the DomainParticipant (see below).
+
+Unlike entity instance handles, data instance handles do not maintain any
+additional state which need purging.
+
+The InstanceHandle_t type is currently a typedef to a CORBA long in
+DdsDcpsInfrastructure.idl.  The lower 4 bits of the overall 32-bit value
+contains a kind field (InstanceHandleKind) that indicates the kind of handle.
+The upper 28 bits are a sequence which allows for up to 268,435,456 instance
+handles be assigned per kind.
+
+InstanceHandle_t:
+31..............24..............16..............8.......4.......0
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                         sequence(28)                  |kind(4)|
++---------------+---------------+---------------+---------------+
+      (MSB)                                           (LSB)
+
+The InstanceHandleKind field allows the DomainParticipantImpl to perform
+additional error checking in the various ignore_* operations.  If a data
+instance handle is passed to an ignore operation, it is assumed that it 
+corresponds to an entity referenced by a Builtin Topic.  The RepoId will
+then be generated from the BuiltinTopicKey_t for that instance and used.
+
+InstanceHandleKind Enumeration:
+0x0 KIND_UNKNOWN
+0x1 KIND_PARTICIPANT
+0x2 KIND_TOPIC
+0x3 KIND_SUBSCRIBER
+0x4 KIND_PUBLISHER
+0x5 KIND_DATAREADER
+0x6 KIND_DATAWRITER
+0xF KIND_DATA
+
+The DCPSInfoRepo must have all references to InstanceHandle_t removed.  As the
+scope and responsibility for generating these values has now shifted to
+DomainParticipantImpl, it is no longer neccessary (or correct) for the
+DCPSInfoRepo to be aware of an assigned instance handle.
