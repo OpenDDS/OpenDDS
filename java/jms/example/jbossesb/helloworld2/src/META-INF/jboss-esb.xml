@@ -27,6 +27,7 @@
                         class="org.opendds.esb.actions.routing.JmsRouter">
                     <property name="connection-factory" value="DDS/ConnectionFactory"/>
                     <property name="dest-name" value="DDS/Topic"/>
+                    <property name="maxThreads" value="32"/>
                 </action>
             </actions>
         </service>

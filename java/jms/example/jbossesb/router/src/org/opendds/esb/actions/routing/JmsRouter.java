@@ -4,67 +4,101 @@
 
 package org.opendds.esb.actions.routing;
 
-import java.util.concurrent.LinkedBlockingQueue;
-
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
+import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.ObjectMessage;
 import javax.jms.Session;
 import javax.naming.InitialContext;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jboss.soa.esb.ConfigurationException;
 import org.jboss.soa.esb.actions.ActionLifecycleException;
-import org.jboss.soa.esb.actions.ActionProcessingException;
 import org.jboss.soa.esb.actions.routing.AbstractRouter;
 import org.jboss.soa.esb.helpers.ConfigTree;
 import org.jboss.soa.esb.message.Message;
 import org.jboss.soa.esb.util.Util;
 
 import org.opendds.esb.helpers.ConfigTreeHelper;
+import org.opendds.esb.helpers.ThreadedQueue;
 
 /**
+ * JMS Message Router implementation which focuses on simple, yet
+ * efficient processing.  Each sending thread maintains a single set
+ * of resources for the lifetime of the router instance.  This ensures
+ * resource thrashing does not occur as in other implementations.
+ * <p/>
+ * A number of features remain to be implemented:
+ * <li>
+ *  <ul>ESB Message unwrapping (i.e. unwrap)</ul>
+ *  <ul>Endpoint addressing (i.e. jndi-context-factory, busidref)</ul>
+ *  <ul>JMS QoS policies (i.e. persistent, priority, time-to-live)</ul>
+ * </li>
+ *
  * @author  Steven Stallion
  * @version $Revision$
  */
 public class JmsRouter extends AbstractRouter {
+    private static Log log = LogFactory.getLog(JmsRouter.class);
+
     private Connection connection;
     private Destination destination;
 
-    private LinkedBlockingQueue<Message> messages =
-        new LinkedBlockingQueue<Message>();
+    private ThreadedQueue<Message> messages;
 
-    private class RouterThread extends Thread {
-        private Session session;
-        private MessageProducer producer;
+    private class MessageListener implements ThreadedQueue.QueueListener<Message> {
+        private class MessageContext {
+            private Session session;
+            private MessageProducer producer;
 
-        public RouterThread() throws Exception {
-            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-            producer = session.createProducer(destination);
+            public MessageContext(Session session, MessageProducer producer) {
+                this.session = session;
+                this.producer = producer;
+            }
+
+            public Session getSession() {
+                return session;
+            }
+
+            public MessageProducer getMessageProducer() {
+                return producer;
+            }
         }
 
-        @Override
-        public void run() {
-            try {
-                while (!interrupted()) {
-                    Message m = messages.take();
+        private ThreadLocal<MessageContext> contextLocal =
+            new ThreadLocal<MessageContext>() {
+                @Override
+                protected MessageContext initialValue() {
                     try {
-                        ObjectMessage message = session.createObjectMessage();
-                        message.setObject(Util.serialize(m));
+                        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+                        return new MessageContext(session, session.createProducer(destination));
 
-                        producer.send(message);
-
-                    } catch (Exception e) {
-                        // TODO
+                    } catch (JMSException e) {
+                        throw new IllegalStateException(e);
                     }
                 }
+            };
 
-            } catch (InterruptedException e) {}
+        public void dequeue(Message message) {
+            try {
+                MessageContext context = contextLocal.get();
+
+                Session session = context.getSession();
+                MessageProducer producer = context.getMessageProducer();
+
+                ObjectMessage objMessage = session.createObjectMessage();
+                objMessage.setObject(Util.serialize(message));
+
+                producer.send(objMessage);
+
+            } catch (Exception e) {
+                log.warn("Unexpected problem routing message: " + e.getMessage(), e);
+            }
         }
     }
-
-    private RouterThread routerThread;
 
     public JmsRouter(ConfigTree config) throws ConfigurationException {
         super(config);
@@ -72,14 +106,15 @@ public class JmsRouter extends AbstractRouter {
             InitialContext ctx = new InitialContext();
 
             ConnectionFactory cf = (ConnectionFactory) ctx.lookup(
-                ConfigTreeHelper.requireProperty(config, "connection-factory"));
+                ConfigTreeHelper.requireAttribute(config, "connection-factory"));
 
             connection = cf.createConnection();
 
             destination = (Destination) ctx.lookup(
-                ConfigTreeHelper.requireProperty(config, "dest-name"));
+                ConfigTreeHelper.requireAttribute(config, "dest-name"));
 
-            routerThread = new RouterThread();
+            messages = new ThreadedQueue<Message>(new MessageListener(),
+                ConfigTreeHelper.getAttribute(config, "maxThreads"));
 
         } catch (Exception e) {
             throw new ConfigurationException(e);
@@ -88,31 +123,36 @@ public class JmsRouter extends AbstractRouter {
 
     @Override
     public void initialise() throws ActionLifecycleException {
+        log.info("Starting OpenDDS JMS Router");
+        if (log.isDebugEnabled()) {
+            log.info("Initializing " + messages.numberOfThreads() + " sending thread(s)");
+        }
+
         super.initialise();
-        routerThread.start();
+        messages.start();
     }
 
-    public void route(Object o) throws ActionProcessingException {
+    public void route(Object o) {
         if (!(o instanceof Message)) {
             throw new IllegalArgumentException();
         }
-
-        try {
-            messages.put((Message) o);
-
-        } catch (InterruptedException e) {
-            // TODO
-        }
+        messages.enqueue((Message) o);
     }
 
     @Override
     public void destroy() throws ActionLifecycleException {
-        routerThread.interrupt();
-        try {
-            routerThread.join();
+        log.info("Stopping OpenDDS JMS Router");
 
-        } catch (InterruptedException e) {}
+        messages.shutdown();
+        try {
+            connection.close();
+
+        } catch (JMSException e) {}
 
         super.destroy();
+
+        if (!messages.isEmpty()) {
+            log.warn(messages.size() + " message(s) unsent; consider increasing max-threads!");
+        }
     }
 }

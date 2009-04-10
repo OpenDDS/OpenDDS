@@ -1,9 +1,21 @@
+Fri Apr 10 21:02:54 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/example/jbossesb/helloworld2/src/META-INF/jboss-esb.xml:
+        * java/jms/example/jbossesb/helloworld2/src/org/opendds/jms/example/helloworld/HelloWorldServlet.java:
+        * java/jms/example/jbossesb/router/src/org/opendds/esb/actions/routing/JmsRouter.java:
+        * java/jms/example/jbossesb/router/src/org/opendds/esb/helpers/ConfigTreeHelper.java:
+        * java/jms/example/jbossesb/router/src/org/opendds/esb/helpers/ThreadedQueue.java:
+        * java/jms/example/jbossesb/shared/lib/commons-logging-1.1.1.jar:
+
+          Updates to JmsRouter; added support for multiple sending threads
+          (defaults to 1) with the maxThreads config attribute.
+
 Fri Apr 10 20:59:18 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * DDS_release_notes.txt:
 
-	  Add DataWriter::wait_for_acknowledgments() implementation to
-	  notes.
+          Add DataWriter::wait_for_acknowledgments() implementation to
+          notes.
 
 Fri Apr 10 14:53:24 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
