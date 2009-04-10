@@ -1,9 +1,16 @@
+Fri Apr 10 20:59:18 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+	  Add DataWriter::wait_for_acknowledgments() implementation to
+	  notes.
+
 Fri Apr 10 14:53:24 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * tests/DCPS/WaitForAck/tcp.conf:
         * tests/DCPS/WaitForAck/transport.ini:
 
-	  Finish adding required files for the test.
+          Finish adding required files for the test.
 
 Thu Apr  9 21:41:50 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
