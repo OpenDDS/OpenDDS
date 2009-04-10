@@ -33,7 +33,7 @@ public class HelloWorldServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         int numberOfSamples = Integer.parseInt(request.getParameter("numberOfSamples"));
         long delay = Long.parseLong(request.getParameter("delay"));
-        
+ 
         try {
             Message message = MessageFactory.getInstance().getMessage();
             message.getBody().add("Hello World!");
