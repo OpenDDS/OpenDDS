@@ -63,6 +63,8 @@ New to this version are the following changes:
   specification.  Additionally, the contains_entity and get_instance_handle
   operations have been implemented.
 
+- Implemented DataWriter::wait_for_acknowledgments() from formal/07-01-01.
+
 =========================================================================
 
 Version 1.2 of OpenDDS.
