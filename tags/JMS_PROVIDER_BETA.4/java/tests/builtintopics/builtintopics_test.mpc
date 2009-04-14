@@ -1,6 +1,0 @@
-// $Id$
-project: dcps_tcp, dcps_java {
-    requires    += built_in_topics 
-    after       += messenger_idl_test
-    javacflags  += -classpath ../messenger/messenger_idl/messenger_idl_test.jar
-}

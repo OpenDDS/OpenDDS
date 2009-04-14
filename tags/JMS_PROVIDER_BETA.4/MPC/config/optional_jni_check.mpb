@@ -1,5 +1,0 @@
-feature(jni_check) {
-
-  postbuild += $(DDS_ROOT)<%slash%>java<%slash%>build_scripts<%slash%>jni_check.pl <%libout%><%slash%><%sharedname%>
-
-}
