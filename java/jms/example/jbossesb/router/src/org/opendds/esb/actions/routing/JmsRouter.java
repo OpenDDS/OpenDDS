@@ -34,7 +34,7 @@ import org.opendds.esb.helpers.ThreadedQueue;
  * A number of features remain to be implemented:
  * <li>
  *  <ul>ESB Message unwrapping (i.e. unwrap)</ul>
- *  <ul>Endpoint addressing (i.e. jndi-context-factory, busidref)</ul>
+ *  <ul>Advanced endpoints (i.e. jndi-context-factory, busidref)</ul>
  *  <ul>JMS QoS policies (i.e. persistent, priority, time-to-live)</ul>
  * </li>
  *
@@ -125,7 +125,7 @@ public class JmsRouter extends AbstractRouter {
     public void initialise() throws ActionLifecycleException {
         log.info("Starting OpenDDS JMS Router");
         if (log.isDebugEnabled()) {
-            log.info("Initializing " + messages.numberOfThreads() + " sending thread(s)");
+            log.debug("Initializing " + messages.numberOfThreads() + " sending thread(s)");
         }
 
         super.initialise();
@@ -144,15 +144,16 @@ public class JmsRouter extends AbstractRouter {
         log.info("Stopping OpenDDS JMS Router");
 
         messages.shutdown();
-        try {
-            connection.close();
-
-        } catch (JMSException e) {}
-
-        super.destroy();
-
         if (!messages.isEmpty()) {
-            log.warn(messages.size() + " message(s) unsent; consider increasing max-threads!");
+            log.warn(messages.size() + " message(s) unsent; consider increasing maxThreads!");
         }
+
+        if (connection != null) {
+            try {
+                connection.close();
+
+            } catch (JMSException e) {}
+        }
+        super.destroy();
     }
 }

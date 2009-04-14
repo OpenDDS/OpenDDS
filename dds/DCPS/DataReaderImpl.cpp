@@ -2480,12 +2480,7 @@ DataReaderImpl::bit_lookup_instance_handles (const WriterIdSeq& ids,
       ::DDS::PublicationBuiltinTopicDataSeq,
       WriterIdSeq > hh;
 
-    ::DDS::ReturnCode_t ret
-      = hh.repo_ids_to_instance_handles(participant_servant_,
-      BUILT_IN_PUBLICATION_TOPIC,
-      ids,
-      hdls);
-
+    DDS::ReturnCode_t ret = hh.repo_ids_to_instance_handles(ids, hdls);
     if (ret != ::DDS::RETCODE_OK)
     {
       ACE_ERROR ((LM_ERROR,
