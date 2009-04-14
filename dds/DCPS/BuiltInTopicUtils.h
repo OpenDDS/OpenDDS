@@ -193,10 +193,7 @@ namespace OpenDDS {
     class BIT_Helper_2
     {
       public:
-        // FIXME
         ::DDS::ReturnCode_t repo_ids_to_instance_handles (
-            DomainParticipantImpl*,      // dp,
-            const char*,                 // bit_name,
             const IdSeq&                    repoids,
             ::DDS::InstanceHandleSeq&       handles)
         {
