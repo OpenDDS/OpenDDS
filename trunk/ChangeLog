@@ -1,3 +1,15 @@
+Tue Apr 14 20:20:57 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/BuiltInTopicUtils.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Removed unused parameters.
+
+        * java/jms/example/jbossesb/router/src/org/opendds/esb/actions/routing/JmsRouter.java:
+
+          Minor corrections.
+
 Fri Apr 10 21:02:54 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/example/jbossesb/helloworld2/src/META-INF/jboss-esb.xml:
