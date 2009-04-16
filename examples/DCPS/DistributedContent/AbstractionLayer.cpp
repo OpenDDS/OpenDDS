@@ -154,11 +154,7 @@ AbstractionLayer::init_DDS(int& argc, char *argv[])
                 ::OpenDDS::DCPS::ReaderIdSeq > bit_helper;
 
   // Get the instance id of data writer from the Built-In Topic data
-  ::DDS::ReturnCode_t ret =
-      bit_helper.repo_ids_to_instance_handles(dp_servant,
-                                              ::OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC,
-                                              ignore_ids,
-                                              handles);
+  DDS::ReturnCode_t ret = bit_helper.repo_ids_to_instance_handles(ignore_ids, handles);
   if (ret != ::DDS::RETCODE_OK) {
     ACE_ERROR ((LM_ERROR,
       ACE_TEXT("ERROR - Failed to get data writer id: repo_ids_to_instance_handles returned error %d\n"),

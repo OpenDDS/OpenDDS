@@ -1,3 +1,11 @@
+Thu Apr 16 17:52:24 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * examples/DCPS/DistributedContent/AbstractionLayer.cpp:
+        * tests/DCPS/BuiltInTopic/common.cpp:
+
+          Fixed missing updates for parameter changes in
+          BuiltinTopicUtils.h.
+
 Tue Apr 14 20:20:57 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/BuiltInTopicUtils.h:
