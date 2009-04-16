@@ -205,12 +205,7 @@ int ignore ()
                     ::DDS::ParticipantBuiltinTopicDataSeq,
                     ::OpenDDS::DCPS::ReaderIdSeq > hh;
 
-      ::DDS::ReturnCode_t ret
-        = hh.repo_ids_to_instance_handles(participant_servant,
-          ::OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
-          ignore_ids,
-          handles);
-
+      DDS::ReturnCode_t ret = hh.repo_ids_to_instance_handles(ignore_ids, handles);
       if (ret != ::DDS::RETCODE_OK)
       {
         ACE_ERROR ((LM_ERROR,
@@ -262,12 +257,7 @@ int ignore ()
                     ::DDS::TopicBuiltinTopicDataSeq,
                     ::OpenDDS::DCPS::ReaderIdSeq > hh;
 
-      ::DDS::ReturnCode_t ret
-        = hh.repo_ids_to_instance_handles(participant_servant,
-          ::OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC,
-          ignore_ids,
-          handles);
-
+      DDS::ReturnCode_t ret = hh.repo_ids_to_instance_handles(ignore_ids, handles);
       if (ret != ::DDS::RETCODE_OK)
       {
         ACE_ERROR ((LM_ERROR,
@@ -319,12 +309,7 @@ int ignore ()
                     ::DDS::PublicationBuiltinTopicDataSeq,
                     ::OpenDDS::DCPS::ReaderIdSeq > hh;
 
-      ::DDS::ReturnCode_t ret
-        = hh.repo_ids_to_instance_handles(participant_servant,
-          ::OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC,
-          ignore_ids,
-          handles);
-
+      DDS::ReturnCode_t ret = hh.repo_ids_to_instance_handles(ignore_ids, handles);
       if (ret != ::DDS::RETCODE_OK)
       {
         ACE_ERROR ((LM_ERROR,
@@ -375,12 +360,7 @@ int ignore ()
                     ::DDS::SubscriptionBuiltinTopicDataSeq,
                     ::OpenDDS::DCPS::ReaderIdSeq > hh;
 
-      ::DDS::ReturnCode_t ret
-        = hh.repo_ids_to_instance_handles(participant_servant,
-          ::OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC,
-          ignore_ids,
-          handles);
-
+      DDS::ReturnCode_t ret = hh.repo_ids_to_instance_handles(ignore_ids, handles);
       if (ret != ::DDS::RETCODE_OK)
       {
         ACE_ERROR ((LM_ERROR,
