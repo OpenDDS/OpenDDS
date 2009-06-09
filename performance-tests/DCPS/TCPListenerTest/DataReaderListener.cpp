@@ -3,14 +3,8 @@
 // $Id$
 #include "DataReaderListener.h"
 #include "dds/DCPS/Service_Participant.h"
-#include "../TypeNoKeyBounded/Pt128TypeSupportC.h"
-#include "../TypeNoKeyBounded/Pt512TypeSupportC.h"
-#include "../TypeNoKeyBounded/Pt2048TypeSupportC.h"
-#include "../TypeNoKeyBounded/Pt8192TypeSupportC.h"
-#include "../TypeNoKeyBounded/Pt128TypeSupportImpl.h"
-#include "../TypeNoKeyBounded/Pt512TypeSupportImpl.h"
-#include "../TypeNoKeyBounded/Pt2048TypeSupportImpl.h"
-#include "../TypeNoKeyBounded/Pt8192TypeSupportImpl.h"
+#include "../TypeNoKeyBounded/PTDefTypeSupportC.h"
+#include "../TypeNoKeyBounded/PTDefTypeSupportImpl.h"
 
 extern long subscriber_delay_msec; // from common.h
 
@@ -158,6 +152,9 @@ void DataReaderListenerImpl::on_requested_incompatible_qos (
   {
     ACE_UNUSED_ARG(reader);
     ACE_UNUSED_ARG(status);
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_requested_incompatible_qos policyId=%d\n"),
+      status.last_policy_id));
   }
 
 

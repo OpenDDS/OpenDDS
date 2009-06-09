@@ -13,20 +13,20 @@
 
 OpenDDS::DCPS::DataLinkSetMap::DataLinkSetMap()
 {
-  DBG_ENTRY_LVL("DataLinkSetMap","DataLinkSetMap",5);
+  DBG_ENTRY_LVL("DataLinkSetMap","DataLinkSetMap",6);
 }
 
 
 OpenDDS::DCPS::DataLinkSetMap::~DataLinkSetMap()
 {
-  DBG_ENTRY_LVL("DataLinkSetMap","~DataLinkSetMap",5);
+  DBG_ENTRY_LVL("DataLinkSetMap","~DataLinkSetMap",6);
 }
 
 
 OpenDDS::DCPS::DataLinkSet*
 OpenDDS::DCPS::DataLinkSetMap::find_or_create_set(RepoId id)
 {
-  DBG_ENTRY_LVL("DataLinkSetMap","find_or_create_set",5);
+  DBG_ENTRY_LVL("DataLinkSetMap","find_or_create_set",6);
   DataLinkSet_rch link_set;
 
   GuardType guard(this->map_lock_);
@@ -53,7 +53,7 @@ OpenDDS::DCPS::DataLinkSetMap::find_or_create_set(RepoId id)
 OpenDDS::DCPS::DataLinkSet*
 OpenDDS::DCPS::DataLinkSetMap::find_set(RepoId id)
 {
-  DBG_ENTRY_LVL("DataLinkSetMap","find_set",5);
+  DBG_ENTRY_LVL("DataLinkSetMap","find_set",6);
   DataLinkSet_rch link_set;
   GuardType guard(this->map_lock_);
 
@@ -71,7 +71,7 @@ OpenDDS::DCPS::DataLinkSetMap::find_set(RepoId id,
                                     const RepoId* remoteIds, 
                                     const CORBA::ULong num_targets)
 {
-  DBG_ENTRY_LVL("DataLinkSetMap","find_set",5);
+  DBG_ENTRY_LVL("DataLinkSetMap","find_set",6);
   DataLinkSet_rch link_set;
   GuardType guard(this->map_lock_);
 
@@ -90,7 +90,7 @@ OpenDDS::DCPS::DataLinkSetMap::find_set(RepoId id,
 int
 OpenDDS::DCPS::DataLinkSetMap::insert_link(RepoId id, DataLink* link)
 {
-  DBG_ENTRY_LVL("DataLinkSetMap","insert_link",5);
+  DBG_ENTRY_LVL("DataLinkSetMap","insert_link",6);
 
   DataLinkSet_rch link_set = 0;
   link_set = find_or_create_set (id);
@@ -109,7 +109,7 @@ OpenDDS::DCPS::DataLinkSetMap::release_reservations
                                         DataLinkSetMap& released_locals,
                                         const bool pub_side)
 {
-  DBG_ENTRY_LVL("DataLinkSetMap","release_reservations",5);
+  DBG_ENTRY_LVL("DataLinkSetMap","release_reservations",6);
   // Note: The keys are known to always represent "remote ids" in this
   //       context.  The released map represents released "local id" to
   //       DataLink associations that result from removing the remote ids
@@ -122,10 +122,19 @@ OpenDDS::DCPS::DataLinkSetMap::release_reservations
 
       if (find (this->map_, remote_ids[i], link_set) != 0)
       {
+        ::OpenDDS::DCPS::GuidConverter remoteConverter(
+          const_cast< ::OpenDDS::DCPS::RepoId*>( &remote_ids[ i])
+        );
+        ::OpenDDS::DCPS::GuidConverter localConverter(
+          const_cast< ::OpenDDS::DCPS::RepoId*>( &local_id)
+        );
         ACE_ERROR((LM_ERROR,
-          "(%P|%t) ERROR: Failed to find remote_id (%d) "
-          "from map_ for local_id %d. Skipping this remote_id.\n",
-          remote_ids[i], local_id));
+          ACE_TEXT("(%P|%t) ERROR: DataLinkSetMap::release_reservations: ")
+          ACE_TEXT("failed to find remote_id %C ")
+          ACE_TEXT("in map for local_id %C. Skipping this remote_id.\n"),
+          (const char*) remoteConverter,
+          (const char*) localConverter
+        ));
         continue;
       }
 
@@ -136,10 +145,15 @@ OpenDDS::DCPS::DataLinkSetMap::release_reservations
       {
         if (unbind(map_, remote_ids[i]) != 0)
         {
+          ::OpenDDS::DCPS::GuidConverter converter(
+            const_cast< ::OpenDDS::DCPS::RepoId*>( &remote_ids[ i])
+          );
           VDBG((LM_DEBUG,
-            "(%P|%t) Warning: Failed to unbind remote_id (%d) "
-            "from map_. Skipping this remote_id.\n",
-            remote_ids[i]));
+            ACE_TEXT("(%P|%t) WARNING: DataLinkSetMap::release_reservations: ")
+            ACE_TEXT("failed to unbind remote_id %C ")
+            ACE_TEXT("from map. Skipping this remote_id.\n"),
+            (const char*) converter
+          ));
 
           continue;
         }
@@ -162,7 +176,7 @@ OpenDDS::DCPS::DataLinkSetMap::release_reservations
 void
 OpenDDS::DCPS::DataLinkSetMap::release_all_reservations()
 {
-  DBG_ENTRY_LVL("DataLinkSetMap","release_all_reservations",5);
+  DBG_ENTRY_LVL("DataLinkSetMap","release_all_reservations",6);
   // TBD SOON - IMPLEMENT DataLinkSetMap::release_all_reservations()
 }
 
@@ -184,7 +198,7 @@ void
 OpenDDS::DCPS::DataLinkSetMap::remove_released
                                      (const DataLinkSetMap& released_locals)
 {
-  DBG_ENTRY_LVL("DataLinkSetMap","remove_released",5);
+  DBG_ENTRY_LVL("DataLinkSetMap","remove_released",6);
   // Iterate over the released_locals map where each entry in the map
   // represents a local_id and its set of DataLinks that have become invalid
   // due to the releasing of remote_id reservations from the DataLinks.
@@ -201,10 +215,13 @@ OpenDDS::DCPS::DataLinkSetMap::remove_released
       // Find the DataLinkSet in our map_ that has the local_id as the key.
       if (find (map_, local_id, link_set) != 0)
       {
+        ::OpenDDS::DCPS::GuidConverter converter( local_id);
         VDBG((LM_DEBUG,
-          "(%P|%t) Released local_id (%d) is not associated with "
-          "any DataLinkSet in map_. Skipping local_id.\n",
-          local_id));
+          ACE_TEXT("(%P|%t) DataLinkSetMap::remove_released: ")
+          ACE_TEXT("released local_id %C is not associated with ")
+          ACE_TEXT("any DataLinkSet in map. Skipping local_id.\n"),
+          (const char*) converter
+        ));
         continue;
       }
 
@@ -227,10 +244,13 @@ OpenDDS::DCPS::DataLinkSetMap::remove_released
             // link_set in the map_ using the key just a few steps earlier.
 
             // Just issue a warning.
+            ::OpenDDS::DCPS::GuidConverter converter( local_id);
             VDBG((LM_DEBUG,
-              "(%P|%t) Failed to unbind released local_id (%d) "
-              "from the map_.\n",
-              local_id));
+              ACE_TEXT("(%P|%t) DataLinkSetMap:remove_released: ")
+              ACE_TEXT("failed to unbind released local_id %C ")
+              ACE_TEXT("from the map.\n"),
+              (const char*) converter
+            ));
           }
           
           continue; // This prevents the deadlock from trying to acquire lock twice
@@ -244,7 +264,7 @@ OpenDDS::DCPS::DataLinkSetMap::remove_released
 void
 OpenDDS::DCPS::DataLinkSetMap::clear()
 {
-  DBG_ENTRY_LVL("DataLinkSetMap","clear",5);
+  DBG_ENTRY_LVL("DataLinkSetMap","clear",6);
   GuardType guard(this->map_lock_);
   this->map_.clear();
 }

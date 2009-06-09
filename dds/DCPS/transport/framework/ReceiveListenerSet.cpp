@@ -12,7 +12,7 @@
 
 OpenDDS::DCPS::ReceiveListenerSet::~ReceiveListenerSet()
 {
-  DBG_ENTRY_LVL("ReceiveListenerSet","~ReceiveListenerSet",5);
+  DBG_ENTRY_LVL("ReceiveListenerSet","~ReceiveListenerSet",6);
 }
 
 
@@ -27,18 +27,30 @@ OpenDDS::DCPS::ReceiveListenerSet::exist (const RepoId& local_id,
   TransportReceiveListener* listener = 0;
   if (find(map_, local_id, listener) == -1)
   {
-    ACE_ERROR ((LM_ERROR, "(%P|%t)ReceiveListenerSet::exist could not find local %d \n",
-      local_id));
+    ::OpenDDS::DCPS::GuidConverter converter(
+      const_cast< ::OpenDDS::DCPS::RepoId*>( &local_id)
+    );
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ReceiveListenerSet::exist: ")
+      ACE_TEXT("could not find local %C.\n"),
+      (const char*) converter
+    ));
 
     return false;
   }
 
   if (listener == 0)
   {
-     ACE_ERROR ((LM_ERROR, "(%P|%t)ReceiveListenerSet::exist listener for local %d is nil\n",
-       local_id));
+    ::OpenDDS::DCPS::GuidConverter converter(
+      const_cast< ::OpenDDS::DCPS::RepoId*>( &local_id)
+    );
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ReceiveListenerSet::exist: ")
+      ACE_TEXT("listener for local %C is nil.\n"),
+      (const char*) converter
+    ));
 
-     return false;
+    return false;
   }
 
   last = map_.size() == 1;
@@ -68,4 +80,11 @@ OpenDDS::DCPS::ReceiveListenerSet::exist (const RepoId& local_id)
   return (find(map_, local_id, listener) == -1 ? false : true);
 }
 
+
+void 
+OpenDDS::DCPS::ReceiveListenerSet::clear ()
+{
+  GuardType guard(this->lock_);
+  this->map_.clear();
+}
 

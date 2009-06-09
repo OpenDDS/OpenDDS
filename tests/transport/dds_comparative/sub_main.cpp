@@ -1,6 +1,7 @@
 // -*- C++ -*-
 //
 // $Id$
+#include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "SubDriver.h"
 #include "TestException.h"
 #include "ace/Log_Msg.h"

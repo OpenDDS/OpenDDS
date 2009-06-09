@@ -10,6 +10,8 @@
 #ifndef DCPS_IR_SUBSCRIPTION_H
 #define DCPS_IR_SUBSCRIPTION_H
 
+#include  "inforepo_export.h"
+#include /**/ "UpdateDataTypes.h"
 #include /**/ "dds/DdsDcpsInfrastructureC.h"
 #include /**/ "dds/DdsDcpsSubscriptionC.h"
 #include /**/ "dds/DdsDcpsInfoC.h"
@@ -36,7 +38,7 @@ class DCPS_IR_Topic;
  *
  *
  */
-class DCPS_IR_Subscription
+class OpenDDS_InfoRepoLib_Export DCPS_IR_Subscription
 {
 public:
   DCPS_IR_Subscription (OpenDDS::DCPS::RepoId id,
@@ -64,11 +66,14 @@ public:
   /// The notify_lost flag true indicates this remove_associations is called
   /// when the InfoRepo detects this subscription is lost because of the failure
   /// of invocation on this subscription.
+  /// The notify_both_side parameter indicates if it needs call pub to remove
+  /// association as well.
   /// This method can mark the participant dead
   /// Returns 0 if successful
   int remove_associated_publication (DCPS_IR_Publication* pub,
                                      CORBA::Boolean sendNotify,
-                                     CORBA::Boolean notify_lost);
+                                     CORBA::Boolean notify_lost,
+                                     bool notify_both_side = false);
 
   /// Removes all the associated publications
   /// This method can mark the participant dead
@@ -106,6 +111,33 @@ public:
   /// Subscription retains ownership
   const ::DDS::SubscriberQos* get_subscriber_qos ();
 
+    
+  /// Update the DataReader or Subscriber qos and also publish the qos 
+  /// changes to datereader BIT.
+  bool set_qos (const ::DDS::DataReaderQos & qos,
+                const ::DDS::SubscriberQos & subscriberQos,
+                Update::SpecificQos& specificQos);
+
+  /// Update DataReaderQos only.
+  void set_qos( const ::DDS::DataReaderQos& qos);
+
+  /// Update SubscriberQos only.
+  void set_qos( const ::DDS::SubscriberQos& qos);
+
+  // Verify the existing associations. This may result removal of
+  // associations. The existing associations have to be removed before
+  // adding new association and may need some delay. Otherwise, if  
+  // two DataWriters uses same Datalink and add an association happens 
+  // before remove an association then the new association will fail to 
+  // connect.
+  void reevaluate_existing_associations ();
+
+  // Re-evaluate the association between this subscription and the provided
+  // publication. If they are already associated and not compatible then
+  // they will be dis-associated. If they are not already associated then
+  // the new association will be added.
+  void reevaluate_association (DCPS_IR_Publication* publication);
+
   /// get the transport ID of the transport implementation type.
   OpenDDS::DCPS::TransportInterfaceId   get_transport_id () const;
 
@@ -130,7 +162,18 @@ public:
   CORBA::Boolean is_bit ();
   void set_bit_status (CORBA::Boolean isBIT);
 
+  // Expose the datareader.
+  OpenDDS::DCPS::DataReaderRemote_ptr reader();
+
 private:
+  /// Check compatibility between provided DataReader QoS and the QoS of
+  /// this subscription associated DataWriters.
+  bool compatibleQosChange (const ::DDS::DataReaderQos & qos);
+ 
+  /// Check compatibility between provided Subscriber QoS and the QoS of
+  /// this subscription associated DataWriters's Publishers.
+  bool compatibleQosChange (const ::DDS::SubscriberQos & qos);
+
   OpenDDS::DCPS::RepoId id_;
   DCPS_IR_Participant* participant_;
   DCPS_IR_Topic* topic_;

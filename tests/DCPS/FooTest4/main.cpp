@@ -20,7 +20,7 @@
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/TransportConfiguration.h"
-#include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
 #ifdef ACE_AS_STATIC_LIBS
 #include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
@@ -114,11 +114,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // and then get application specific parameters.
       parse_args (argc, argv);
 
-
-      ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl;
-
-      ::Xyz::FooTypeSupport_var fts =
-        OpenDDS::DCPS::servant_to_reference (fts_servant);
+      ::Xyz::FooTypeSupport_var fts (new ::Xyz::FooTypeSupportImpl);
 
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,
@@ -169,7 +165,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       // Attach the subscriber to the transport.
       OpenDDS::DCPS::SubscriberImpl* sub_impl
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl>(sub.in ());
+        = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(sub.in ());
 
       if (0 == sub_impl)
         {
@@ -422,6 +418,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
   }
 
+      ACE_OS::sleep (1);
       sub->delete_contained_entities() ;
 
   { // make VC6 buid - avoid error C2374: 'i' : redefinition; multiple initialization
@@ -485,6 +482,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
   }
 
+      ACE_OS::sleep (1);
       sub->delete_contained_entities() ;
 
   { // make VC6 buid - avoid error C2374: 'i' : redefinition; multiple initialization
@@ -577,6 +575,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       dp->delete_topic(topic.in ());
       dpf->delete_participant(dp.in ());
 
+      ACE_OS::sleep (2);
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 

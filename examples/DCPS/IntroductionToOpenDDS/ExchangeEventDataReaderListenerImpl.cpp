@@ -7,8 +7,8 @@
 // *******************************************************************
 
 #include "ExchangeEventDataReaderListenerImpl.h"
-#include "ExchangeEventTypeSupportC.h"
-#include "ExchangeEventTypeSupportImpl.h"
+#include "StockQuoterTypeSupportC.h"
+#include "StockQuoterTypeSupportImpl.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <ace/streams.h>
 
@@ -43,41 +43,49 @@ void ExchangeEventDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr 
       ACE_OS::exit(1);
     }
 
-    StockQuoter::ExchangeEvent exchange_evt;
-    DDS::SampleInfo si ;
-    DDS::ReturnCode_t status = exchange_evt_dr->take_next_sample(exchange_evt, si) ;
+    int count = 0;
+    while(true) {
+      StockQuoter::ExchangeEvent exchange_evt;
+      DDS::SampleInfo si ;
+      DDS::ReturnCode_t status = exchange_evt_dr->take_next_sample(exchange_evt, si) ;
 
-    if (status == DDS::RETCODE_OK) {
-      cout << "ExchangeEvent: exchange  = " << exchange_evt.exchange.in() << endl;
+      if (status == DDS::RETCODE_OK) {
+        ++count;
+        cout << "ExchangeEvent: exchange  = " << exchange_evt.exchange.in() << endl;
 
-      switch ( exchange_evt.event ) {
-        case StockQuoter::TRADING_OPENED:
-          cout << "               event     = TRADING_OPENED" << endl;
-          break;
-        case StockQuoter::TRADING_CLOSED: {
-          cout << "               event     = TRADING_CLOSED" << endl;
-          ACE_Guard<ACE_Mutex> guard(this->lock_);
-          this->is_exchange_closed_received_ = 1;
-          break;
+        switch ( exchange_evt.event ) {
+          case StockQuoter::TRADING_OPENED:
+            cout << "               event     = TRADING_OPENED" << endl;
+            break;
+          case StockQuoter::TRADING_CLOSED: {
+            cout << "               event     = TRADING_CLOSED" << endl;
+            ACE_Guard<ACE_Mutex> guard(this->lock_);
+            this->is_exchange_closed_received_ = 1;
+            break;
+          }
+          case StockQuoter::TRADING_SUSPENDED:
+            cout << "               event     = TRADING_SUSPENDED" << endl;
+            break;
+          case StockQuoter::TRADING_RESUMED:
+            cout << "               event     = TRADING_RESUMED" << endl;
+            break;
+          default:
+            cerr << "ERROR: reader received unknown ExchangeEvent: " << exchange_evt.event << endl;
         }
-        case StockQuoter::TRADING_SUSPENDED:
-          cout << "               event     = TRADING_SUSPENDED" << endl;
-          break;
-        case StockQuoter::TRADING_RESUMED:
-          cout << "               event     = TRADING_RESUMED" << endl;
-          break;
-        default:
-          cerr << "ERROR: reader received unknown ExchangeEvent: " << exchange_evt.event << endl;
-      }
 
       cout << "               timestamp = " << exchange_evt.timestamp      << endl;
 
-      cout << "SampleInfo.sample_rank = " << si.sample_rank << endl;
-    } else if (status == DDS::RETCODE_NO_DATA) {
-      cerr << "ERROR: reader received DDS::RETCODE_NO_DATA!" << endl;
-    } else {
-      cerr << "ERROR: read ExchangeEvent: Error: " <<  status << endl;
+        cout << "SampleInfo.sample_rank        = " << si.sample_rank << endl;
+        cout << "SampleInfo.instance_handle    = " << hex << si.instance_handle << endl;
+        cout << "SampleInfo.publication_handle = " << hex << si.publication_handle << endl;
+      } else if (status == DDS::RETCODE_NO_DATA) {
+        cerr << "INFO: reading complete after " << count << " samples." << endl;
+        break;
+      } else {
+        cerr << "ERROR: read ExchangeEvent: Error: " <<  status << endl;
+      }
     }
+
   } catch (CORBA::Exception& e) {
     cerr << "Exception caught in read:" << endl << e << endl;
     ACE_OS::exit(1);

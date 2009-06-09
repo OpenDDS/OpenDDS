@@ -12,14 +12,14 @@
 
 OpenDDS::DCPS::NullSynch::~NullSynch()
 {
-  DBG_ENTRY_LVL("NullSynch","~NullSynch",5);
+  DBG_ENTRY_LVL("NullSynch","~NullSynch",6);
 }
 
 
 void
 OpenDDS::DCPS::NullSynch::work_available()
 {
-  DBG_ENTRY_LVL("NullSynch","work_available",5);
+  DBG_ENTRY_LVL("NullSynch","work_available",6);
 
   ACE_ERROR((LM_ERROR,
              "(%P|%t) INTERNAL ERROR - NullSynch::work_available() "

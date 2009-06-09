@@ -10,7 +10,7 @@
 ACE_INLINE void
 OpenDDS::DCPS::DataLinkSet::send(DataSampleListElement* sample)
 {
-  DBG_ENTRY_LVL("DataLinkSet","send",5);
+  DBG_ENTRY_LVL("DataLinkSet","send",6);
   VDBG_LVL((LM_DEBUG,"(%P|%t) DBG: DataLinkSet::send element %@.\n"
             , sample), 5);
 
@@ -48,7 +48,7 @@ OpenDDS::DCPS::DataLinkSet::send_control(RepoId                 pub_id,
                                      TransportSendListener* listener,
                                      ACE_Message_Block*     msg)
 {
-  DBG_ENTRY_LVL("DataLinkSet","send_control",5);
+  DBG_ENTRY_LVL("DataLinkSet","send_control",6);
   //Optimized - use cached allocator.
   TransportSendControlElement* send_element = 0;
 
@@ -81,7 +81,7 @@ ACE_INLINE int
 OpenDDS::DCPS::DataLinkSet::remove_sample(const DataSampleListElement* sample,
                                       bool  dropped_by_transport)
 {
-  DBG_ENTRY_LVL("DataLinkSet","remove_sample",5);
+  DBG_ENTRY_LVL("DataLinkSet","remove_sample",6);
   int status = 0;
 
   GuardType guard(this->lock_);
@@ -106,7 +106,7 @@ OpenDDS::DCPS::DataLinkSet::remove_sample(const DataSampleListElement* sample,
 ACE_INLINE int
 OpenDDS::DCPS::DataLinkSet::remove_all_control_msgs(RepoId pub_id)
 {
-  DBG_ENTRY_LVL("DataLinkSet","remove_all_control_msgs",5);
+  DBG_ENTRY_LVL("DataLinkSet","remove_all_control_msgs",6);
 
   GuardType guard(this->lock_);
 
@@ -131,7 +131,7 @@ OpenDDS::DCPS::DataLinkSet::remove_all_control_msgs(RepoId pub_id)
 ACE_INLINE void
 OpenDDS::DCPS::DataLinkSet::send_start(DataLinkSet* link_set)
 {
-  DBG_ENTRY_LVL("DataLinkSet","send_start",5);
+  DBG_ENTRY_LVL("DataLinkSet","send_start",6);
 
   GuardType guard1(this->lock_);
   GuardType guard2(link_set->lock_);
@@ -168,7 +168,7 @@ OpenDDS::DCPS::DataLinkSet::send_start(DataLinkSet* link_set)
 ACE_INLINE void
 OpenDDS::DCPS::DataLinkSet::send_stop()
 {
-  DBG_ENTRY_LVL("DataLinkSet","send_stop",5);
+  DBG_ENTRY_LVL("DataLinkSet","send_stop",6);
   // Iterate over our map_ and tell each DataLink about the send_stop() event.
 
   GuardType guard(this->lock_);

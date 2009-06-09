@@ -11,6 +11,7 @@
 #include "SimpleTcpDataLink_rch.h"
 #include "SimpleTcpConnection_rch.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
+#include "dds/DCPS/transport/framework/PriorityKey.h"
 #include "ace/INET_Addr.h"
 #include "ace/Hash_Map_Manager.h"
 #include "ace/Synch.h"
@@ -43,8 +44,7 @@ namespace OpenDDS
 
         SimpleTcpConfiguration* get_configuration();
 
-        int fresh_link (const ACE_INET_Addr&    remote_addr,
-                        SimpleTcpConnection_rch connection);
+        int fresh_link( SimpleTcpConnection_rch connection);
 
       protected:
 
@@ -53,7 +53,8 @@ namespace OpenDDS
         /// and return it.
         virtual DataLink* find_or_create_datalink
                           (const TransportInterfaceInfo& remote_info,
-                           int                           connect_as_publisher);
+                           int                           connect_as_publisher,
+                           int                           priority);
 
         virtual int configure_i(TransportConfiguration* config);
 
@@ -98,21 +99,16 @@ namespace OpenDDS
                              SimpleTcpConnection* connection);
 
 
-        /// Map Type: (key) ACE_INET_Addr to (value) SimpleTcpDataLink_rch
+        /// Map Type: (key) PriorityKey to (value) SimpleTcpDataLink_rch
         typedef ACE_Hash_Map_Manager_Ex
-                               <ACE_INET_Addr,
+                               <PriorityKey,
                                 SimpleTcpDataLink_rch,
-                                ACE_Hash<ACE_INET_Addr>,
-                                ACE_Equal_To<ACE_INET_Addr>,
+                                ACE_Hash<PriorityKey>,
+                                ACE_Equal_To<PriorityKey>,
                                 ACE_Null_Mutex>              AddrLinkMap;
 
-        /// Map Type: (key) ACE_INET_Addr to (value) SimpleTcpConnection_rch
-        typedef ACE_Hash_Map_Manager_Ex
-                               <ACE_INET_Addr,
-                                SimpleTcpConnection_rch,
-                                ACE_Hash<ACE_INET_Addr>,
-                                ACE_Equal_To<ACE_INET_Addr>,
-                                ACE_Null_Mutex>              AddrConnectionMap;
+        typedef std::map< PriorityKey, SimpleTcpDataLink_rch>   LinkMap;
+        typedef std::map< PriorityKey, SimpleTcpConnection_rch> ConnectionMap;
 
         typedef ACE_SYNCH_MUTEX         LockType;
         typedef ACE_Guard<LockType>     GuardType;
@@ -145,7 +141,7 @@ namespace OpenDDS
 
         /// Map of passive connection objects that need to be paired
         /// with a DataLink.
-        AddrConnectionMap connections_;
+        ConnectionMap connections_;
 
         /// Condition that will be signal()'ed whenever something has been
         /// inserted into connections_.

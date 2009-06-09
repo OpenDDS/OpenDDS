@@ -1,47 +1,35 @@
-project: taolib, portableserver, core, dcps_bits {
-
+project: taolib, portableserver, core, dcps_bits, coverage_optional, built_in_topic_support {
   requires    += exceptions
-
   sharedname   = OpenDDS_Dcps
   dynamicflags = OPENDDS_DCPS_BUILD_DLL
   libout       = $(DDS_ROOT)/lib
-  includes    += $(DDS_ROOT) 
-
+  includes    += $(DDS_ROOT)
   pch_header   = DCPS/DdsDcps_pch.h
   pch_source   = DCPS/DdsDcps_pch.cpp
 
   //The following is only to make the PCH work, client projects should not have
   //this as an include path.
-  includes    += $(DDS_ROOT)/dds
+  includes += $(DDS_ROOT)/dds
+
+  idlflags += -Wb,pch_include=DCPS/DdsDcps_pch.h -Wb,export_macro=OpenDDS_Dcps_Export -Wb,export_include=dds/DCPS/dcps_export.h -I$(DDS_ROOT)
 
   Source_Files {
-    DCPS/*.cpp
-    DCPS/transport/framework/*.cpp
+    DCPS
+    DCPS/transport/framework
   }
 
   Header_Files {
-    DCPS/dcps_export.h
-    DCPS/ZeroCopySeq_T.h
-    DCPS/ZeroCopyInfoSeq_T.h
-    DCPS/ZeroCopyAllocator_T.h
-  }
-  
-  Inline_Files {
-    *.inl
+    DCPS
   }
 
   Template_Files {
-    DCPS/ZeroCopySeq_T.cpp
-    DCPS/ZeroCopyInfoSeq_T.cpp
-    DCPS/ZeroCopyAllocator_T.cpp
+    DCPS
   }
 
   IDL_Files {
     // DDS specification defined
     //
-    // Do not put DdsDcpsInfrastructure.idl here or it will 
-    //           override was is in dcps_bits.mpb 
-    // ^^^ DdsDcpsInfrastructure.idl
+    // Do not put DdsDcpsInfrastructure.idl here -- see below
     DdsDcpsDomain.idl
     DdsDcpsPublication.idl
     DdsDcpsSubscription.idl
@@ -49,12 +37,14 @@ project: taolib, portableserver, core, dcps_bits {
     DdsDcps.idl
     // OpenDDS specific below
     DdsDcpsInfo.idl
+    DdsDcpsSubscriptionExt.idl
     DdsDcpsDataReaderRemote.idl
     DdsDcpsDataWriterRemote.idl
     DdsDcpsInfoUtils.idl
     DdsDcpsTypeSupportExt.idl
+    DdsDcpsSubscriptionExt.idl
+    DdsDcpsDomainExt.idl
   }
-
 
   IDL_Files {
     idlflags += -Gdcpsonly
@@ -62,4 +52,9 @@ project: taolib, portableserver, core, dcps_bits {
     CorbaSeq/*.idl
   }
 
+  IDL_Files {
+    idlflags += -Gdcps
+    DdsDcpsGuid.idl
+    DdsDcpsInfrastructure.idl
+  }
 }

@@ -17,8 +17,7 @@
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/TopicDescriptionImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
-#include "tests/DCPS/FooType5/FooTypeSupportImpl.h"
-#include "tests/DCPS/FooType5/FooNoKeyTypeSupportImpl.h"
+#include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 // Add the TransportImpl.h before TransportImpl_rch.h is included to
@@ -163,6 +162,7 @@ void init_dcps_objects (int i)
   {
     ACE_INET_Addr reader_address (reader_address_str[i].c_str());
     reader_tcp_config->local_address_ = reader_address;
+    reader_tcp_config->local_address_str_ = reader_address_str[i].c_str();
   }
   // else use default address - OS assigned.
 
@@ -185,8 +185,7 @@ void init_dcps_objects (int i)
 
   // Attach the subscriber to the transport.
   OpenDDS::DCPS::SubscriberImpl* sub_impl
-    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl>
-    (subscriber[i].in ());
+    = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(subscriber[i].in ());
 
   if (0 == sub_impl)
     {
@@ -252,9 +251,7 @@ void init_listener()
 {
   for (int i = 0; i < 2; ++i)
   {
-    DataReaderListenerImpl* listener_servant = new DataReaderListenerImpl();
-
-    listener[i] = ::OpenDDS::DCPS::servant_to_reference(listener_servant);
+    listener[i] = new DataReaderListenerImpl();
 
     if (CORBA::is_nil (listener[i].in ()))
       {

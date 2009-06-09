@@ -8,7 +8,7 @@
 #include "dcps_export.h"
 #include "EntityImpl.h"
 #include "dds/DdsDcpsTopicC.h"
-#include "dds/DdsDcpsSubscriptionS.h"
+#include "dds/DdsDcpsSubscriptionExtS.h"
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsTopicC.h"
 #include "dds/DdsDcpsDataReaderRemoteC.h"
@@ -19,11 +19,14 @@
 #include "InstanceState.h"
 #include "Cached_Allocator_With_Overflow_T.h"
 #include "ZeroCopyInfoSeq_T.h"
-
+#include "Stats_T.h"
 
 #include "ace/String_Base.h"
+#include "ace/Reverse_Lock_T.h"
 
+#include <vector>
 #include <map>
+#include <memory>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -37,17 +40,18 @@ namespace OpenDDS
   {
     class SubscriberImpl;
     class DomainParticipantImpl;
-    class SubscriptionInstance ;
+    class SubscriptionInstance;
     class TopicImpl;
+    class RequestedDeadlineWatchdog;
 
     typedef Cached_Allocator_With_Overflow< ::OpenDDS::DCPS::ReceivedDataElement, ACE_Null_Mutex>
                 ReceivedDataAllocator;
 
-    //typedef ZeroCopyInfoSeq<DCPS_ZERO_COPY_SEQ_DEFAULT_SIZE> SampleInfoZCSeq;
-
     /// Keeps track of a DataWriter's liveliness for a DataReader.
     class OpenDDS_Dcps_Export WriterInfo {
       public:
+        enum WriterState { NOT_SET, ALIVE, DEAD };
+
         WriterInfo (); // needed for maps
 
         WriterInfo (DataReaderImpl* reader,
@@ -64,14 +68,17 @@ namespace OpenDDS
         int received_activity (const ACE_Time_Value& when);
 
         /// returns 1 if the DataWriter is lively; otherwise returns 0.
-        int is_alive () { return is_alive_; };
+        WriterState get_state () { return state_; };
+
+        /// update liveliness when remove_association is called.
+        void removed ();
 
       private:
         /// Timestamp of last write/dispose/assert_liveliness from this DataWriter
         ACE_Time_Value last_liveliness_activity_time_;
 
-        /// 1 if the DataWrite is "alive"
-        int is_alive_;
+        /// State of the writer.
+        WriterState state_;
 
         /// The DataReader owning this WriterInfo
         DataReaderImpl* reader_;
@@ -79,6 +86,26 @@ namespace OpenDDS
         /// DCPSInfoRepo ID of the DataWriter
         PublicationId writer_id_;
       };
+
+    /// Elements stored for managing statistical data.
+    class WriterStats {
+      public:
+        /// Default constructor.
+        WriterStats();
+
+        /// Add a datum to the latency statistics.
+        void add_stat( const ACE_Time_Value& delay);
+
+        /// Extract the current latency statistics for this writer.
+        LatencyStatistics get_stats() const;
+
+        /// Reset the latency statistics for this writer.
+        void reset_stats();
+
+      private:
+        /// Latency statistics for the DataWriter to this DataReader.
+        Stats< double> stats_;
+    };
 
 
 
@@ -95,7 +122,7 @@ namespace OpenDDS
     *
     */
     class OpenDDS_Dcps_Export DataReaderImpl
-      : public virtual DDS::DataReader,
+      : public virtual LocalObject< DataReaderEx>,
         public virtual EntityImpl,
         public virtual TransportReceiveListener,
         public virtual ACE_Event_Handler
@@ -151,12 +178,23 @@ namespace OpenDDS
                                 const void *arg);
 
     /// tell instances when a DataWriter transitions to being alive
+    /// The writer state is inout parameter, it has to be set ALIVE before
+    /// handle_timeout is called since some subroutine use the state.
     void writer_became_alive (PublicationId         writer_id,
-                              const ACE_Time_Value& when);
+                              const ACE_Time_Value& when,
+                              WriterInfo::WriterState& state);
 
-    /// tell instances when a DataWriter transitions to NOT_ALIVE
+    /// tell instances when a DataWriter transitions to DEAD
+    /// The writer state is inout parameter, the state is set to DEAD
+    /// when it returns.
     void writer_became_dead (PublicationId         writer_id,
-                             const ACE_Time_Value& when);
+                             const ACE_Time_Value& when,
+                             WriterInfo::WriterState& state);
+
+    /// tell instance when a DataWriter is removed.
+    /// The liveliness status need update.
+    void writer_removed (PublicationId   writer_id,
+                         WriterInfo::WriterState& state);
 
     virtual int handle_close (ACE_HANDLE,
                               ACE_Reactor_Mask);
@@ -169,12 +207,41 @@ namespace OpenDDS
     virtual void init (
         TopicImpl*                    a_topic,
         const ::DDS::DataReaderQos &  qos,
+        const DataReaderQosExt &      ext_qos,
         ::DDS::DataReaderListener_ptr a_listener,
         DomainParticipantImpl*        participant,
         SubscriberImpl*               subscriber,
-        ::DDS::Subscriber_ptr         subscriber_objref,
         ::DDS::DataReader_ptr         dr_objref,
         ::OpenDDS::DCPS::DataReaderRemote_ptr dr_remote_objref
+      )
+        ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
+
+    virtual ::DDS::ReadCondition_ptr create_readcondition (
+        ::DDS::SampleStateMask sample_states,
+        ::DDS::ViewStateMask view_states,
+        ::DDS::InstanceStateMask instance_states
+      )
+        ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+    virtual ::DDS::QueryCondition_ptr create_querycondition (
+        ::DDS::SampleStateMask sample_states,
+        ::DDS::ViewStateMask view_states,
+        ::DDS::InstanceStateMask instance_states,
+        const char * query_expression,
+        const ::DDS::StringSeq & query_parameters
+      )
+        ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
+#endif
+
+    virtual ::DDS::ReturnCode_t delete_readcondition (
+        ::DDS::ReadCondition_ptr a_condition
       )
         ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -292,38 +359,69 @@ namespace OpenDDS
           CORBA::SystemException
         ));
 
-      virtual ::DDS::StatusKindMask get_status_changes (
+      virtual void get_latency_stats (
+          ::OpenDDS::DCPS::LatencyStatisticsSeq & stats
         )
         ACE_THROW_SPEC ((
-          CORBA::SystemException
+          ::CORBA::SystemException
+        ));
+
+      virtual void reset_latency_stats (
+          void
+        )
+        ACE_THROW_SPEC ((
+          ::CORBA::SystemException
+        ));
+
+      virtual ::CORBA::Boolean statistics_enabled (
+          void
+        )
+        ACE_THROW_SPEC ((
+          ::CORBA::SystemException
+        ));
+
+      virtual void statistics_enabled (
+          ::CORBA::Boolean statistics_enabled
+        )
+        ACE_THROW_SPEC ((
+          ::CORBA::SystemException
         ));
 
       /// update liveliness info for this writer.
       void writer_activity(PublicationId writer_id);
 
       /// process a message that has been received - could be control or a data sample.
-      virtual void data_received(const ReceivedDataSample& sample) ;
+      virtual void data_received(const ReceivedDataSample& sample);
 
-      SubscriberImpl* get_subscriber_servant ();
-
-      RepoId get_subscription_id() const ;
-      void set_subscription_id(RepoId subscription_id) ;
+      RepoId get_subscription_id() const;
+      void set_subscription_id(RepoId subscription_id);
 
       ::DDS::DataReader_ptr get_dr_obj_ref();
 
       char *get_topic_name() const;
 
-      bool have_sample_states(::DDS::SampleStateMask sample_states) const ;
-      bool have_view_states(::DDS::ViewStateMask view_states) const ;
+      bool have_sample_states(::DDS::SampleStateMask sample_states) const;
+      bool have_view_states(::DDS::ViewStateMask view_states) const;
       bool have_instance_states(::DDS::InstanceStateMask instance_states) const;
+      bool contains_sample(::DDS::SampleStateMask sample_states,
+        ::DDS::ViewStateMask view_states,
+        ::DDS::InstanceStateMask instance_states);
 
-      virtual void dds_demarshal(const ReceivedDataSample& sample) = 0;
-      virtual void dispose(const ReceivedDataSample& sample) ;
+      virtual void dds_demarshal(const ReceivedDataSample& sample,
+                                 SubscriptionInstance*& instance,
+                                 bool & is_new_instance)= 0;
+      virtual void dispose(const ReceivedDataSample& sample,
+                           SubscriptionInstance*& instance);
+      virtual void unregister(const ReceivedDataSample& sample,
+                              SubscriptionInstance*& instance);
 
-      CORBA::Long get_depth() const { return depth_ ; }
-      size_t get_n_chunks() const { return n_chunks_ ; }
+      void process_latency( const ReceivedDataSample& sample);
+      void notify_latency( PublicationId writer);
 
-      void liveliness_lost() ;
+      CORBA::Long get_depth() const { return depth_; }
+      size_t get_n_chunks() const { return n_chunks_; }
+
+      void liveliness_lost();
 
       void remove_all_associations();
 
@@ -331,6 +429,7 @@ namespace OpenDDS
       void notify_subscription_reconnected (const WriterIdSeq& pubids);
       void notify_subscription_lost (const WriterIdSeq& pubids);
       void notify_connection_deleted ();
+      void notify_liveliness_change ();
 
       bool is_bit () const;
 
@@ -357,8 +456,15 @@ namespace OpenDDS
 
       /// Release the instance with the handle.
       void release_instance (::DDS::InstanceHandle_t handle);
-      
+
+      // Reset time interval for each instance.
+      void reschedule_deadline ();
+
     protected:
+
+      SubscriberImpl* get_subscriber_servant ();
+
+      void post_read_or_take ();
 
       // type specific DataReader's part of enable.
       virtual ::DDS::ReturnCode_t enable_specific (
@@ -367,18 +473,14 @@ namespace OpenDDS
           CORBA::SystemException
         )) = 0;
 
-      void sample_info(::DDS::SampleInfoSeq & info_seq,
-                       size_t start_idx, size_t count,
-                       ReceivedDataElement *ptr) ;
-
       void sample_info(::DDS::SampleInfo & sample_info,
-                       ReceivedDataElement *ptr) ;
+                       const ReceivedDataElement *ptr);
 
-      CORBA::Long total_samples() const ;
+      CORBA::Long total_samples() const;
 
-      void set_sample_lost_status(const ::DDS::SampleLostStatus& status) ;
+      void set_sample_lost_status(const ::DDS::SampleLostStatus& status);
       void set_sample_rejected_status(
-              const ::DDS::SampleRejectedStatus& status) ;
+              const ::DDS::SampleRejectedStatus& status);
 
 //remove document this!
       SubscriptionInstance* get_handle_instance (
@@ -393,82 +495,117 @@ namespace OpenDDS
 
       virtual void release_instance_i (::DDS::InstanceHandle_t handle) = 0;
 
-      mutable SubscriptionInstanceMapType           instances_ ;
+      bool has_readcondition(::DDS::ReadCondition_ptr a_condition);
 
-      ReceivedDataAllocator          *rd_allocator_ ;
+      mutable SubscriptionInstanceMapType           instances_;
+
+      ReceivedDataAllocator          *rd_allocator_;
       ::DDS::DataReaderQos            qos_;
 
+      // Status conditions accessible by subclasses.
       ::DDS::SampleRejectedStatus sample_rejected_status_;
       ::DDS::SampleLostStatus sample_lost_status_;
 
       /// lock protecting sample container as well as statuses.
       ACE_Recursive_Thread_Mutex                sample_lock_;
 
+      typedef ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> Reverse_Lock_t;
+      Reverse_Lock_t reverse_sample_lock_;
+
       /// The instance handle for the next new instance.
       ::DDS::InstanceHandle_t         next_handle_;
 
     private:
 
+      /// Data has arrived into the cache, unblock waiting ReadConditions
+      void notify_read_conditions ();
+
+      void notify_subscription_lost (const ::DDS::InstanceHandleSeq& handles);
+
       /// Lookup the instance handles by the publication repo ids
       /// via the bit datareader.
       bool bit_lookup_instance_handles (const WriterIdSeq& ids,
                                          ::DDS::InstanceHandleSeq & hdls);
-
-      /// Lookup the cache to get the instance handle by the publication repo ids.
+ 
+      /// Lookup the cache to get the instance handle by the
+      /// publication repo ids.
       bool cache_lookup_instance_handles (const WriterIdSeq& ids,
                                          ::DDS::InstanceHandleSeq & hdls);
+
+      /// Check if the received data sample expired.
+      /**
+       * @note Expiration will only occur if the application
+       *       configured a finite duration in the Topic's LIFESPAN
+       *       QoS policy.
+       */
+      bool data_expired (DataSampleHeader const & header) const;
 
       friend class WriterInfo;
 
       friend class ::DDS_TEST; //allows tests to get at dr_remote_objref_
 
       TopicImpl*                      topic_servant_;
-      ::DDS::TopicDescription_var     topic_desc_ ;
+      ::DDS::TopicDescription_var     topic_desc_;
       ::DDS::StatusKindMask           listener_mask_;
       ::DDS::DataReaderListener_var   listener_;
       ::DDS::DataReaderListener*  fast_listener_;
       DomainParticipantImpl*          participant_servant_;
       ::DDS::DomainId_t               domain_id_;
       SubscriberImpl*                 subscriber_servant_;
-      ::DDS::Subscriber_var           subscriber_objref_;
       DataReaderRemote_var            dr_remote_objref_;
       ::DDS::DataReader_var           dr_local_objref_;
       RepoId                          subscription_id_;
 
-      CORBA::Long                     depth_ ;
-      size_t                          n_chunks_ ;
+      CORBA::Long                     depth_;
+      size_t                          n_chunks_;
 
-      ACE_Recursive_Thread_Mutex      publication_handle_lock_ ;
+      ACE_Recursive_Thread_Mutex      publication_handle_lock_;
 
-      typedef std::map<RepoId, DDS::InstanceHandle_t> RepoIdToHandleMap;
-
+      typedef std::map<RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan> RepoIdToHandleMap;
       RepoIdToHandleMap               id_to_handle_map_;
-      ::DDS::InstanceHandleSeq        publication_handles_;
 
 
       // Status conditions.
-      ::DDS::LivelinessChangedStatus        liveliness_changed_status_ ;
-      ::DDS::RequestedDeadlineMissedStatus  requested_deadline_missed_status_ ;
-      ::DDS::RequestedIncompatibleQosStatus requested_incompatible_qos_status_ ;
-      ::DDS::SubscriptionMatchStatus        subscription_match_status_ ;
+      ::DDS::LivelinessChangedStatus        liveliness_changed_status_;
+      ::DDS::RequestedDeadlineMissedStatus  requested_deadline_missed_status_;
+      ::DDS::RequestedIncompatibleQosStatus requested_incompatible_qos_status_;
+      ::DDS::SubscriptionMatchStatus        subscription_match_status_;
 
-      // TODO:
-      // The subscription_lost_status_ and subscription_reconnecting_status_
-      // are left here for future use when we add get_subscription_lost_status() and
-      // get_subscription_reconnecting_status() methods.
+      // OpenDDS extended status.  This is only available via listener.
+      BudgetExceededStatus                  budget_exceeded_status_;
+
+      /**
+       * @todo The subscription_lost_status_ and
+       *       subscription_reconnecting_status_ are left here for
+       *       future use when we add get_subscription_lost_status()
+       *       and get_subscription_reconnecting_status() methods.
+       */
       // Statistics of the lost subscriptions due to lost connection.
-      SubscriptionLostStatus               subscription_lost_status_;
-      // Statistics of the subscriptions that are associated with a reconnecting datalink.
-      // SubscriptionReconnectingStatus       subscription_reconnecting_status_;
+      SubscriptionLostStatus              subscription_lost_status_;
+      // Statistics of the subscriptions that are associated with a
+      // reconnecting datalink.
+      // SubscriptionReconnectingStatus      subscription_reconnecting_status_;
 
 
       /// The orb's reactor to be used to register the liveliness
       /// timer.
       ACE_Reactor*               reactor_;
+
       /// The time interval for checking liveliness.
+      /// TBD: Should this be initialized with
+      ///      ::DDS::DURATION_INFINITY_SEC and ::DDS::DURATION_INFINITY_NSEC
+      ///      instead of ACE_Time_Value::zero to be consistent with default
+      ///      duration qos ? Or should we simply use the ACE_Time_Value::zero
+      ///      to indicate the INFINITY duration ?
       ACE_Time_Value             liveliness_lease_duration_;
+
       /// liveliness timer id; -1 if no timer is set
-      int liveliness_timer_id_;
+      long liveliness_timer_id_;
+
+      CORBA::Long last_deadline_missed_total_count_;
+      /// Watchdog responsible for reporting missed offered
+      /// deadlines.
+      std::auto_ptr<RequestedDeadlineWatchdog> watchdog_;
 
       /// Flag indicates that this datareader is a builtin topic
       /// datareader.
@@ -476,12 +613,24 @@ namespace OpenDDS
 
       /// Flag indicates that the init() is called.
       bool                       initialized_;
+      bool                       always_get_history_;
 
-      typedef std::map<PublicationId, WriterInfo> WriterMapType;
+      /// Flag indicating status of statistics gathering.
+      bool statistics_enabled_;
 
+      typedef std::map< PublicationId, WriterInfo,  GUID_tKeyLessThan> WriterMapType;
+      typedef std::map< PublicationId, WriterStats, GUID_tKeyLessThan> StatsMapType;
 
       /// publications writing to this reader.
       WriterMapType writers_;
+
+      /// Statistics for this reader, collected for each writer.
+      StatsMapType statistics_;
+
+      typedef
+        std::set< ::DDS::ReadCondition_var, VarLess< ::DDS::ReadCondition > >
+        ReadConditionSet;
+      ReadConditionSet read_conditions_;
     };
 
   } // namespace DCPS
@@ -491,5 +640,7 @@ namespace OpenDDS
 # include "DataReaderImpl.inl"
 #endif  /* __ACE_INLINE__ */
 
+// Insertion of WriterState enumeration values;
+ostream& operator<<( ostream& str, OpenDDS::DCPS::WriterInfo::WriterState value);
 
 #endif /* TAO_DDS_DCPS_DATAREADER_H  */

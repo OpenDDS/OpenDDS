@@ -12,6 +12,7 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "dds/DCPS/transport/ReliableMulticast/ReliableMulticast_Export.h"
+#include <cstring>
 
 namespace OpenDDS
 {

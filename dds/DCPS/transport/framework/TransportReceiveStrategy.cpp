@@ -19,10 +19,9 @@ OpenDDS::DCPS::TransportReceiveStrategy::TransportReceiveStrategy()
     data_allocator_(DATA_BLOCKS),
     buffer_index_(0)
 {
-  //ACE_DEBUG ((LM_DEBUG, "(%P|%t) %@ TransportReceiveStrategy::TransportReceiveStrategy\n", this));
-  DBG_ENTRY_LVL("TransportReceiveStrategy","TransportReceiveStrategy",5);
+  DBG_ENTRY_LVL("TransportReceiveStrategy","TransportReceiveStrategy",6);
 
-  if (DCPS_debug_level >= 2)
+  if (::OpenDDS::DCPS::Transport_debug_level >= 2)
     {
       ACE_DEBUG((LM_DEBUG,"(%P|%t) TransportReceiveStrategy-mb"
                      " Cached_Allocator_With_Overflow %x with %d chunks\n",
@@ -43,9 +42,18 @@ OpenDDS::DCPS::TransportReceiveStrategy::TransportReceiveStrategy()
 
 OpenDDS::DCPS::TransportReceiveStrategy::~TransportReceiveStrategy()
 {
-  //ACE_DEBUG ((LM_DEBUG, "(%P|%t) TransportReceiveStrategy::~TransportReceiveStrategy\n"));
-  //fflush (stdout);
-  DBG_ENTRY_LVL("TransportReceiveStrategy","~TransportReceiveStrategy",5);
+  DBG_ENTRY_LVL("TransportReceiveStrategy","~TransportReceiveStrategy",6);
+
+  if( this->receive_buffers_[ this->buffer_index_] != 0) {
+    size_t size = this->receive_buffers_[ this->buffer_index_]->total_length();
+    if( size > 0) {
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) WARNING: TransportReceiveStrategy::~TransportReceiveStrategy() - ")
+        ACE_TEXT("terminating with %d unprocessed bytes.\n"),
+        size
+      ));
+    }
+  }
 }
 
 /// Note that this is just an initial implementation.  We may take
@@ -58,7 +66,7 @@ OpenDDS::DCPS::TransportReceiveStrategy::~TransportReceiveStrategy()
 int
 OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
 {
-  DBG_ENTRY_LVL("TransportReceiveStrategy","handle_input",5);
+  DBG_ENTRY_LVL("TransportReceiveStrategy","handle_input",6);
 
   //
   // What we will be doing here:
@@ -460,7 +468,7 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
                 ACE_TCHAR xbuffer[4096];
                 int xbytes =
                         this->receive_buffers_[this->buffer_index_]->length();
-                if (xbytes > 8) { xbytes = 8; }
+                if (xbytes > 11) { xbytes = 11; }
                 ACE::format_hexdump
                        (this->receive_buffers_[this->buffer_index_]->rd_ptr(),
                         xbytes, xbuffer, sizeof(xbuffer)) ;
@@ -634,13 +642,11 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
 
             if( initial == this->buffer_index_)
               {
-                //
-                // All buffers are empty, we have no more data to process.
-                //
-                VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-                           "We have 'consumed' all of the received data.  "
-                           "We are done (for now)\n"));
-                return 0;
+                // At this point we have a data sample with no data.
+                // This is actually Ok, since some control messages -
+                // specifically the DATAWRITER_LIVELINESS messages
+                // contain no data.
+                break;
               }
           }
 
@@ -801,6 +807,11 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
             this->receive_sample_.sample_->release() ;
             this->receive_sample_.sample_ = 0 ;
           }
+
+        if( amount == 0) {
+          // Relinquish control if there is no more data to process.
+          return 0;
+        }
 
       } // End of while( this->receive_transport_header_.length_ > 0)
 

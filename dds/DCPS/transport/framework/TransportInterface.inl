@@ -16,7 +16,7 @@ ACE_INLINE
 OpenDDS::DCPS::TransportInterface::TransportInterface()
   : swap_bytes_(0)
 {
-  DBG_ENTRY_LVL("TransportInterface","TransportInterface",5);
+  DBG_ENTRY_LVL("TransportInterface","TransportInterface",6);
   this->send_links_ = new DataLinkSet();
 }
 
@@ -30,7 +30,7 @@ OpenDDS::DCPS::TransportInterface::TransportInterface()
 ACE_INLINE const OpenDDS::DCPS::TransportInterfaceInfo&
 OpenDDS::DCPS::TransportInterface::connection_info() const
 {
-  DBG_ENTRY_LVL("TransportInterface","connection_info",5);
+  DBG_ENTRY_LVL("TransportInterface","connection_info",6);
   return this->connection_info_;
 }
 
@@ -38,7 +38,7 @@ OpenDDS::DCPS::TransportInterface::connection_info() const
 ACE_INLINE int
 OpenDDS::DCPS::TransportInterface::swap_bytes() const
 {
-  DBG_ENTRY_LVL("TransportInterface","swap_bytes",5);
+  DBG_ENTRY_LVL("TransportInterface","swap_bytes",6);
   return this->swap_bytes_;
 }
 
@@ -48,7 +48,7 @@ OpenDDS::DCPS::TransportInterface::send_control(RepoId                 pub_id,
                                             TransportSendListener* listener,
                                             ACE_Message_Block*     msg)
 {
-  DBG_ENTRY_LVL("TransportInterface","send_control",5);
+  DBG_ENTRY_LVL("TransportInterface","send_control",6);
 
   DataLinkSet_rch pub_links = this->local_map_.find_set(pub_id);
 
@@ -80,7 +80,7 @@ OpenDDS::DCPS::TransportInterface::remove_sample
                                      (const DataSampleListElement* sample,
                                       bool  dropped_by_transport)
 {
-  DBG_ENTRY_LVL("TransportInterface","remove_sample",5);
+  DBG_ENTRY_LVL("TransportInterface","remove_sample",6);
 
   // ciju: After discussions with Tim B., we feel strongly feel that
   // this section should be protected with some sort of locking mechanism.
@@ -119,7 +119,7 @@ OpenDDS::DCPS::TransportInterface::remove_sample
 ACE_INLINE int
 OpenDDS::DCPS::TransportInterface::remove_all_control_msgs(RepoId pub_id)
 {
-  DBG_ENTRY_LVL("TransportInterface","remove_all_control_msgs",5);
+  DBG_ENTRY_LVL("TransportInterface","remove_all_control_msgs",6);
 
   DataLinkSet_rch pub_links = this->local_map_.find_set(pub_id);
 
@@ -141,7 +141,7 @@ OpenDDS::DCPS::TransportInterface::add_subscriptions
                                      ssize_t                size,
                                      const AssociationData* subscriptions)
 {
-  DBG_ENTRY_LVL("TransportInterface","add_subscriptions",5);
+  DBG_ENTRY_LVL("TransportInterface","add_subscriptions",6);
   // Delegate to generic add_associations operation
   return this->add_associations(publisher_id,
                                 priority,
@@ -160,7 +160,7 @@ OpenDDS::DCPS::TransportInterface::add_publications
                                     ssize_t                   size,
                                     const AssociationData*    publications)
 {
-  DBG_ENTRY_LVL("TransportInterface","add_publications",5);
+  DBG_ENTRY_LVL("TransportInterface","add_publications",6);
   // Delegate to generic add_associations operation
   return this->add_associations(subscriber_id,
                                 priority,
@@ -175,7 +175,7 @@ OpenDDS::DCPS::TransportInterface::add_publications
 ACE_INLINE void
 OpenDDS::DCPS::TransportInterface::send(const DataSampleList& samples)
 {
-  DBG_ENTRY_LVL("TransportInterface","send",5);
+  DBG_ENTRY_LVL("TransportInterface","send",6);
 
   DataSampleListElement* cur = samples.head_;
 
@@ -209,12 +209,17 @@ OpenDDS::DCPS::TransportInterface::send(const DataSampleList& samples)
           // NOTE: This is the "local publisher id is not currently
           //       associated with any remote subscriber ids" case.
 
-          VDBG_LVL((LM_DEBUG,"(%P|%t) DBG: "
-               "TransportInterface::send no links for %d\n",
-               cur->publication_id_),5);
+          if( DCPS_debug_level > 4) {
+            ::OpenDDS::DCPS::GuidConverter converter( cur->publication_id_);
+            ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) TransportInterface::send: ")
+              ACE_TEXT("no links for publication %C, ")
+              ACE_TEXT("not sending %d samples.\n"),
+              (const char*) converter,
+              samples.size_
+            ));
+          }
 
-          VDBG_LVL((LM_DEBUG,"(%P|%t) DBG: No DataLinkSet found. Dropping %d elements.\n"
-                    , samples.size_), 5);
           // We tell the send_listener_ that all of the remote subscriber ids
           // that wanted the data (all zero of them) have indeed received
           // the data.

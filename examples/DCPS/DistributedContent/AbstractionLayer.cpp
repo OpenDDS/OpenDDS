@@ -29,7 +29,7 @@ AbstractionLayer::init_DDS(int& argc, ACE_TCHAR *argv[])
   // Initialize the Participant Factory
   dpf_ = TheParticipantFactoryWithArgs (argc, argv);
   if (CORBA::is_nil (dpf_.in ()) ) {
-    ACE_ERROR((LM_ERROR, 
+    ACE_ERROR((LM_ERROR,
       ACE_TEXT("ERROR - Create participant factory failed.\n") ));
     return false;
   }
@@ -37,14 +37,14 @@ AbstractionLayer::init_DDS(int& argc, ACE_TCHAR *argv[])
 
   // Create participant
   dp_ = dpf_->create_participant (DOMAINID,
-                                  PARTICIPANT_QOS_DEFAULT, 
+                                  PARTICIPANT_QOS_DEFAULT,
                                   DDS::DomainParticipantListener::_nil ());
   if (CORBA::is_nil (dp_.in ()) ) {
-    ACE_ERROR((LM_ERROR, 
+    ACE_ERROR((LM_ERROR,
       ACE_TEXT("ERROR - Create participant failed.\n") ));
     return false;
   }
-  
+
   // Initialize the transports (uses SimpleTcp transport)
   // The code in this section would need to be changed if the system needs to
   //  use another transport type.
@@ -59,7 +59,7 @@ AbstractionLayer::init_DDS(int& argc, ACE_TCHAR *argv[])
   pub_ = dp_->create_publisher (PUBLISHER_QOS_DEFAULT,
                                 DDS::PublisherListener::_nil ());
   if (CORBA::is_nil (pub_.in ()) ) {
-    ACE_ERROR((LM_ERROR, 
+    ACE_ERROR((LM_ERROR,
       ACE_TEXT("ERROR - Create publisher failed.\n") ));
     return false;
   }
@@ -67,21 +67,21 @@ AbstractionLayer::init_DDS(int& argc, ACE_TCHAR *argv[])
 
   // Attach the transport protocol with the publishing entity
   OpenDDS::DCPS::PublisherImpl* p_impl =
-    OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub_.in ());
+    dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub_.in ());
   p_impl->attach_transport (pub_tcp_impl_.in ());
 
 
   // Create topic for datawriter and datareader
   DistributedContent::FileDiffTypeSupportImpl* fileinfo_dt =
                 new DistributedContent::FileDiffTypeSupportImpl();
-  fileinfo_dt->register_type (dp_.in (), 
+  fileinfo_dt->register_type (dp_.in (),
                               "DistributedContent::FileDiff");
    topic_ = dp_->create_topic ("fileinfo_topic", // topic name
                                "DistributedContent::FileDiff", // topic type
-                               TOPIC_QOS_DEFAULT, 
+                               TOPIC_QOS_DEFAULT,
                                DDS::TopicListener::_nil ());
   if (CORBA::is_nil (topic_.in ()) ) {
-    ACE_ERROR((LM_ERROR, 
+    ACE_ERROR((LM_ERROR,
       ACE_TEXT("ERROR - Create topic failed.\n") ));
     return false;
   }
@@ -91,7 +91,7 @@ AbstractionLayer::init_DDS(int& argc, ACE_TCHAR *argv[])
   sub_ = dp_->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
                                 DDS::SubscriberListener::_nil());
   if (CORBA::is_nil (sub_.in ()) ) {
-    ACE_ERROR((LM_ERROR, 
+    ACE_ERROR((LM_ERROR,
       ACE_TEXT("ERROR - Create subscriber failed.\n") ));
     return false;
   }
@@ -99,13 +99,12 @@ AbstractionLayer::init_DDS(int& argc, ACE_TCHAR *argv[])
 
   // Attach the transport protocol with the subscribing entity
   OpenDDS::DCPS::SubscriberImpl* sub_impl =
-    OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl> (sub_.in ());
+    dynamic_cast<OpenDDS::DCPS::SubscriberImpl*> (sub_.in ());
   sub_impl->attach_transport(sub_tcp_impl_.in());
 
 
   // Create the listener for datareader
-  FileInfoListener* listener_servant = new FileInfoListener(this);
-  listener_ = ::OpenDDS::DCPS::servant_to_reference(listener_servant);
+  listener_ = new FileInfoListener(this);
 
 
   // Create the datareader
@@ -124,7 +123,7 @@ AbstractionLayer::init_DDS(int& argc, ACE_TCHAR *argv[])
   // We need the servants of the Domain Participant and the Data Reader to
   // get information to set up the ignore.
   ::OpenDDS::DCPS::DomainParticipantImpl* dp_servant =
-    ::OpenDDS::DCPS::reference_to_servant< ::OpenDDS::DCPS::DomainParticipantImpl>(dp_.in());
+    dynamic_cast< ::OpenDDS::DCPS::DomainParticipantImpl*>(dp_.in());
   if (0 == dp_servant ) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("ERROR - Servant dereference of domain participant failed.\n") ));
@@ -132,7 +131,7 @@ AbstractionLayer::init_DDS(int& argc, ACE_TCHAR *argv[])
   }
 
   ::OpenDDS::DCPS::DataReaderImpl* dr_servant =
-    ::OpenDDS::DCPS::reference_to_servant< ::OpenDDS::DCPS::DataReaderImpl>(dr_.in());
+    dynamic_cast< ::OpenDDS::DCPS::DataReaderImpl*>(dr_.in());
   if (0 == dr_servant ) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("ERROR - Servant dereference of data reader failed.\n") ));
@@ -183,13 +182,13 @@ AbstractionLayer::init_DDS(int& argc, ACE_TCHAR *argv[])
                                  DATAWRITER_QOS_DEFAULT,
                                  DDS::DataWriterListener::_nil ());
   if (CORBA::is_nil (dw_.in ()) ) {
-    ACE_ERROR((LM_ERROR, 
+    ACE_ERROR((LM_ERROR,
       ACE_TEXT("ERROR - Create data writer failed.\n") ));
     return false;
   }
 
   // Narrow down the data writer to the FileDiffDataWriter
-  filediff_writer_ = DistributedContent::FileDiffDataWriter::_narrow (dw_);
+  filediff_writer_ = DistributedContent::FileDiffDataWriter::_narrow (dw_.in());
   if (CORBA::is_nil (filediff_writer_.in ()) ) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("ERROR - Narrow of data writer failed.\n") ));
@@ -206,7 +205,7 @@ void
 AbstractionLayer::shutdown_DDS()
 {
 
-  // Clean up all the entities in the participant 
+  // Clean up all the entities in the participant
   dp_->delete_contained_entities ();
 
   // Clean up the participant
@@ -251,9 +250,8 @@ AbstractionLayer::receive_diff(const DistributedContent::FileDiff& diff)
 bool
 AbstractionLayer::send_diff(const DistributedContent::FileDiff& diff)
 {
-  // Have the writer publish the diff 
+  // Have the writer publish the diff
   DDS::ReturnCode_t result = filediff_writer_->write(diff, handle_);
 
   return (result == DDS::RETCODE_OK);
 }
-

@@ -11,7 +11,7 @@
 
 
 #include "DataReaderListener.h"
-#include "MessageTypeSupportImpl.h"
+#include "MessengerTypeSupportImpl.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/SubscriberImpl.h>
@@ -109,7 +109,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
       // Initialize the transport
-      OpenDDS::DCPS::TransportImpl_rch tcp_impl =
+      OpenDDS::DCPS::TransportImpl_rch transport_impl =
         TheTransportFactory->create_transport_impl (transport_impl_id,
                                                     ::OpenDDS::DCPS::AUTO_CONFIG);
 
@@ -124,15 +124,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
       // Attach the subscriber to the transport.
-      OpenDDS::DCPS::SubscriberImpl* sub_impl =
-        ::OpenDDS::DCPS::reference_to_servant< OpenDDS::DCPS::SubscriberImpl,
-                                           DDS::Subscriber_ptr> (sub.in ());
-      if (0 == sub_impl) {
-        cerr << "Failed to obtain subscriber servant\n" << endl;
-        exit(1);
-      }
-
-      OpenDDS::DCPS::AttachStatus status = sub_impl->attach_transport(tcp_impl.in());
+      OpenDDS::DCPS::AttachStatus status = transport_impl->attach(sub.in());
       if (status != OpenDDS::DCPS::ATTACH_OK) {
         std::string status_str;
         switch (status) {
@@ -155,9 +147,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
       // activate the listener
-      DataReaderListenerImpl        listener_servant;
-      DDS::DataReaderListener_var listener =
-        ::OpenDDS::DCPS::servant_to_reference(&listener_servant);
+      DDS::DataReaderListener_var listener (new DataReaderListenerImpl);
+      DataReaderListenerImpl* listener_servant =
+        dynamic_cast<DataReaderListenerImpl*>(listener.in());
 
       if (CORBA::is_nil (listener.in ())) {
         cerr << "listener is nil." << endl;
@@ -177,7 +169,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
 
       int expected = 10;
-      while ( listener_servant.num_reads() < expected) {
+      while ( listener_servant->num_reads() < expected) {
         ACE_OS::sleep (1);
       }
 

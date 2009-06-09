@@ -7,11 +7,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 
 #!!!!!!! Must build with SPECIAL DEFINES - see README !!!!
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
-#Clean the Foo.txt file which is used as a storage of the 
+#Clean the Foo.txt file which is used as a storage of the
 #data written.
 
 unlink "Foo.txt";
@@ -29,44 +31,44 @@ $history_depth=1;
 $blocking_write=0;
 
 # single datawriter single instances blocking write test
-if ($ARGV[0] eq 'b') { 
-  $blocking_write=1; 
+if ($ARGV[0] eq 'b') {
+  $blocking_write=1;
   $max_samples_per_instance=1;
 }
 # multiple instances test
-elsif ($ARGV[0] eq 'mi') { 
-  $multiple_instance=1;
-  $num_threads_to_write=5;
-  $num_writes_per_thread=2;
-  $num_writers=1; 
-}
-# multiple datawriters with multiple instances test
-elsif ($ARGV[0] eq 'mw') {  
-  $multiple_instance=1;
-  $num_threads_to_write=5;
-  $num_writes_per_thread=2;
-  $num_writers=4; 
-}
-
-# multiple instances with blocking write test
-elsif ($ARGV[0] eq 'mib') { 
+elsif ($ARGV[0] eq 'mi') {
   $multiple_instance=1;
   $num_threads_to_write=5;
   $num_writes_per_thread=2;
   $num_writers=1;
-  $blocking_write=1; 
-  $max_samples_per_instance=1;
 }
-# multiple datawriters with multiple instances and blocking write test
-elsif ($ARGV[0] eq 'mwb') {  
+# multiple datawriters with multiple instances test
+elsif ($ARGV[0] eq 'mw') {
   $multiple_instance=1;
   $num_threads_to_write=5;
   $num_writes_per_thread=2;
-  $num_writers=4; 
-  $blocking_write=1; 
+  $num_writers=4;
+}
+
+# multiple instances with blocking write test
+elsif ($ARGV[0] eq 'mib') {
+  $multiple_instance=1;
+  $num_threads_to_write=5;
+  $num_writes_per_thread=2;
+  $num_writers=1;
+  $blocking_write=1;
   $max_samples_per_instance=1;
 }
-elsif ($ARGV[0] eq '') { 
+# multiple datawriters with multiple instances and blocking write test
+elsif ($ARGV[0] eq 'mwb') {
+  $multiple_instance=1;
+  $num_threads_to_write=5;
+  $num_writes_per_thread=2;
+  $num_writers=4;
+  $blocking_write=1;
+  $max_samples_per_instance=1;
+}
+elsif ($ARGV[0] eq '') {
   #default test - single datawriter single instance and non-blocking test.
 }
 else {
@@ -76,30 +78,28 @@ else {
 
 $num_writes=$num_threads_to_write * $num_writes_per_thread * $num_writers;
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("dcps_ir.ior");
-# The pub_id_fname can not be a full path because the 
-# pub_id_fname will be part of the parameter of the -p option 
+$dcpsrepo_ior = "dcps_ir.ior";
+# The pub_id_fname can not be a full path because the
+# pub_id_fname will be part of the parameter of the -p option
 # which will be parsed using ':' delimiter.
 $pub_id_fname = "pub_id.txt";
-$pub_port = 5555;
-$sub_port = 6666;
+$pub_port = PerlACE::random_port();
+$sub_port = PerlACE::random_port();
 $sub_id = 1;
 
-unlink $dcpsrepo_ior; 
+unlink $dcpsrepo_ior;
 unlink $pub_id_file;
-
-$DCPSREPO = new PerlACE::Process ("../../../../DDS/DCPSInfoRepo",
-                             "-o $dcpsrepo_ior"
-                             . " -d $domains_file -ORBDebugLevel 1");
-
-
 
 # test multiple cases
 $parameters = " -DCPSInfoRepo file://$dcpsrepo_ior -t $num_threads_to_write -w $num_writers"
               . " -m $multiple_instance -i $num_writes_per_thread "
               . " -n $max_samples_per_instance -d $history_depth -b $blocking_write";
-$FooTest3 = new PerlACE::Process ("FooTest3", $parameters);
+
+$DCPSREPO = PerlDDS::create_process ("../../../../DDS/DCPSInfoRepo",
+                               "-o $dcpsrepo_ior"
+                               . " -ORBDebugLevel 1");
+
+$FooTest3 = PerlDDS::create_process ("FooTest3", $parameters);
 
 print STDERR "FooTest3 $parameters\n";
 

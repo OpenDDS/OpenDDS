@@ -21,8 +21,5 @@ namespace OpenDDS
 
 } /* namespace OpenDDS */
 
-#if defined (__ACE_INLINE__)
-#include "TheTransportFactory.inl"
-#endif /* __ACE_INLINE__ */
 
 #endif  /* OPENDDS_DCPS_THETRANSPORTFACTORY_H */

@@ -12,14 +12,14 @@
 
 OpenDDS::DCPS::SimpleUnreliableDgramSendStrategy::~SimpleUnreliableDgramSendStrategy()
 {
-  DBG_ENTRY_LVL("SimpleUnreliableDgramSendStrategy","~SimpleUnreliableDgramSendStrategy",5);
+  DBG_ENTRY_LVL("SimpleUnreliableDgramSendStrategy","~SimpleUnreliableDgramSendStrategy",6);
 }
 
 
 ssize_t
 OpenDDS::DCPS::SimpleUnreliableDgramSendStrategy::send_bytes(const iovec iov[], int n, int& bp)
 {
-  DBG_ENTRY_LVL("SimpleUnreliableDgramSendStrategy","send_bytes",5);
+  DBG_ENTRY_LVL("SimpleUnreliableDgramSendStrategy","send_bytes",6);
 
   return this->non_blocking_send (iov, n, bp);
 }

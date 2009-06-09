@@ -140,18 +140,23 @@ int run_domain_test ()
                               ::DDS::DomainParticipantListener::_nil ());
 
   TEST_CHECK (! CORBA::is_nil (new_dp.in ()));
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) run_domain_test: ")
+    ACE_TEXT("(! CORBA::is_nil (new_dp.in ()))")
+    ACE_TEXT("\n")
+  ));
 
   ::DDS::DomainId_t domain_id
     = new_dp->get_domain_id ();
 
   TEST_CHECK (domain_id == MY_DOMAIN);
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) run_domain_test: ")
+    ACE_TEXT("(domain_id == MY_DOMAIN)")
+    ACE_TEXT("\n")
+  ));
 
-  MyTypeSupportImpl* fts_servant = new MyTypeSupportImpl();
-  OpenDDS::DCPS::LocalObject_var safe_servant = fts_servant;
-
-
-  MyTypeSupport_var fts =
-    OpenDDS::DCPS::servant_to_reference (fts_servant);
+  MyTypeSupport_var fts (new MyTypeSupportImpl);
 
   if (::DDS::RETCODE_OK != fts->register_type(new_dp.in (), MY_TYPE))
     {
@@ -165,14 +170,17 @@ int run_domain_test ()
     = dpf->lookup_participant(MY_DOMAIN);
 
   OpenDDS::DCPS::DomainParticipantImpl* new_dp_servant
-    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::DomainParticipantImpl>
-    (new_dp.in());
+    = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(new_dp.in());
 
   OpenDDS::DCPS::DomainParticipantImpl* looked_dp_servant
-    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::DomainParticipantImpl>
-    (looked_dp.in ());
+    = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(looked_dp.in ());
 
   TEST_CHECK (looked_dp_servant == new_dp_servant);
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) run_domain_test: ")
+    ACE_TEXT("(looked_dp_servant == new_dp_servant)")
+    ACE_TEXT("\n")
+  ));
 
   // create topic
   ::DDS::Topic_var new_topic
@@ -182,8 +190,7 @@ int run_domain_test ()
                            ::DDS::TopicListener::_nil ());
 
   OpenDDS::DCPS::TopicImpl* new_topic_servant
-    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::TopicImpl>
-    (new_topic.in ());
+    = dynamic_cast<OpenDDS::DCPS::TopicImpl*>(new_topic.in ());
 
   ::DDS::Duration_t timeout;
   timeout.sec = static_cast<long>(find_topic_timeout.sec ());
@@ -194,38 +201,68 @@ int run_domain_test ()
     = new_dp->find_topic(MY_TOPIC, timeout);
 
   ::OpenDDS::DCPS::TopicImpl* found_topic_servant
-    = ::OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::TopicImpl>
+    = dynamic_cast<OpenDDS::DCPS::TopicImpl*>
     (found_topic.in ());
 
   TEST_CHECK (new_topic_servant == found_topic_servant);
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) run_domain_test: ")
+    ACE_TEXT("(new_topic_servant == found_topic_servant)")
+    ACE_TEXT("\n")
+  ));
 
   // find existent topicdescription
   ::DDS::TopicDescription_var found_topicdescription
     = new_dp->lookup_topicdescription(MY_TOPIC);
 
   TEST_CHECK (! CORBA::is_nil (found_topicdescription.in ()));
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) run_domain_test: ")
+    ACE_TEXT("(! CORBA::is_nil (found_topicdescription.in ()))")
+    ACE_TEXT("\n")
+  ));
 
   // widen the topicdescription to topic
   ::DDS::Topic_var widened_topic
     = ::DDS::Topic::_narrow(found_topicdescription.in ());
 
   TEST_CHECK (! CORBA::is_nil (widened_topic.in ()));
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) run_domain_test: ")
+    ACE_TEXT("(! CORBA::is_nil (widened_topic.in ()))")
+    ACE_TEXT("\n")
+  ));
 
   ACE_ERROR((LM_ERROR,
     "We expect to see an error message from delete_participant\n"));
   ret = dpf->delete_participant(new_dp.in ());
 
   TEST_CHECK (ret == ::DDS::RETCODE_PRECONDITION_NOT_MET);
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) run_domain_test: ")
+    ACE_TEXT("(ret == ::DDS::RETCODE_PRECONDITION_NOT_MET)")
+    ACE_TEXT("\n")
+  ));
 
   // delete existent topic first time
   ret = new_dp->delete_topic(found_topic.in ());
 
   TEST_CHECK (ret == ::DDS::RETCODE_OK);
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) run_domain_test: ")
+    ACE_TEXT("(ret == ::DDS::RETCODE_OK)")
+    ACE_TEXT("\n")
+  ));
 
   // delete existent topic second time
   ret = new_dp->delete_topic(new_topic.in ());
 
   TEST_CHECK (ret == ::DDS::RETCODE_OK);
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) run_domain_test: ")
+    ACE_TEXT("(ret == ::DDS::RETCODE_OK)")
+    ACE_TEXT("\n")
+  ));
 
   // an extra delete existent topic
   ACE_ERROR((LM_ERROR,
@@ -233,6 +270,11 @@ int run_domain_test ()
   ret = new_dp->delete_topic(new_topic.in ());
 
   TEST_CHECK (ret == ::DDS::RETCODE_ERROR);
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) run_domain_test: ")
+    ACE_TEXT("(ret == ::DDS::RETCODE_ERROR)")
+    ACE_TEXT("\n")
+  ));
 
   // Look up the topicdescription after the topic is deleted will
   // return nil.
@@ -240,10 +282,15 @@ int run_domain_test ()
     = new_dp->lookup_topicdescription(MY_TOPIC);
 
   TEST_CHECK (CORBA::is_nil(found_topicdescription.in ()));
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) run_domain_test: ")
+    ACE_TEXT("(CORBA::is_nil(found_topicdescription.in ()))")
+    ACE_TEXT("\n")
+  ));
 
   // find a non-existent topic - return nil
   ACE_High_Res_Timer timer;
-  ACE_Time_Value elapsedTime;
+  ACE_Time_Value elapsedTime(0, 0);
   timer.start ();
   found_topic = new_dp->find_topic(OTHER_TOPIC, timeout);
   timer.stop();
@@ -251,18 +298,31 @@ int run_domain_test ()
   ACE_Time_Value tenMillis (0, 10000);
   elapsedTime += tenMillis;
   // some systems can be short by up to 10 milliseconds
-  TEST_CHECK (CORBA::is_nil(found_topic.in ())
-              && elapsedTime >= find_topic_timeout);
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) run_domain_test: ")
+    ACE_TEXT("(CORBA::is_nil(found_topic.in ()) && elapsedTime.msec() >= find_topic_timeout.msec())")
+    ACE_TEXT("\n")
+  ));
 
   // delete the existent participant
   ret = dpf->delete_participant(new_dp.in ());
 
   TEST_CHECK (ret == ::DDS::RETCODE_OK);
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) run_domain_test: ")
+    ACE_TEXT("(ret == ::DDS::RETCODE_OK)")
+    ACE_TEXT("\n")
+  ));
 
   // lookup the participant after it's deleted - return nil
   looked_dp = dpf->lookup_participant(MY_DOMAIN);
 
   TEST_CHECK (CORBA::is_nil(looked_dp.in ()));
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) run_domain_test: ")
+    ACE_TEXT("(CORBA::is_nil(looked_dp.in ()))")
+    ACE_TEXT("\n")
+  ));
 
   return 0;
 }
@@ -278,11 +338,16 @@ void run_next_sample_test (ssize_t size)
 
   OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (OpenDDS::DCPS::TransportSendElement));
 
+  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 1
+  converter.kind()             = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
+  converter.key()[2]           = 0;
+
   { // make VC6 buid - avoid error C2374: 'i' : redefinition; multiple initialization
   for (ssize_t i = 0; i < size; i ++)
   {
+    converter.key()[2] = i;
     DataSampleListElement* sample
-      = new DataSampleListElement (i, 0, 0, &trans_allocator);
+      = new DataSampleListElement( converter, 0, 0, &trans_allocator);
     if (i == pub_id_middle)
     {
       middle = sample;
@@ -299,6 +364,11 @@ void run_next_sample_test (ssize_t size)
     if (current_size == 0)
     {
       TEST_CHECK (ret == false);
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) run_next_sample_test: ")
+        ACE_TEXT("(ret == false)")
+        ACE_TEXT("\n")
+      ));
     }
     else
     {
@@ -318,7 +388,18 @@ void run_next_sample_test (ssize_t size)
     DataSampleListElement* sample;
     TEST_CHECK (list.dequeue_head_next_sample (sample)
                 == true);
-    TEST_CHECK (sample->publication_id_ == i);
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) run_next_sample_test: ")
+      ACE_TEXT("(list.dequeue_head_next_sample (sample) == true)")
+      ACE_TEXT("\n")
+    ));
+    converter.key()[2] = i;
+    TEST_CHECK (sample->publication_id_ == converter);
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) run_next_sample_test: ")
+      ACE_TEXT("(sample->publication_id_ == converter)")
+      ACE_TEXT("\n")
+    ));
     delete sample;
   }
   }
@@ -326,6 +407,11 @@ void run_next_sample_test (ssize_t size)
   TEST_CHECK (list.head_ == 0
               && list.tail_ == 0
               && list.size_ == 0);
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) run_next_sample_test: ")
+    ACE_TEXT("(list.head_ == 0 && list.tail_ == 0 && list.size_ == 0)")
+    ACE_TEXT("\n")
+  ));
 }
 
 void run_next_send_sample_test (ssize_t size)
@@ -339,18 +425,24 @@ void run_next_send_sample_test (ssize_t size)
 
   OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (OpenDDS::DCPS::TransportSendElement));
 
+  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 1
+  converter.kind()             = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
+  converter.key()[2]           = 0;
+
   for (ssize_t i = 0; i < pub_id_middle; i ++)
   {
+    converter.key()[2] = i;
     DataSampleListElement* sample
-      = new DataSampleListElement (i, 0, 0, &trans_allocator);
+      = new DataSampleListElement( converter, 0, 0, &trans_allocator);
     list.enqueue_tail_next_send_sample (sample);
   }
 
   { // make VC6 buid - avoid error C2374: 'i' : redefinition; multiple initialization
   for (ssize_t i = pub_id_middle; i < size; i ++)
   {
+    converter.key()[2] = i;
     DataSampleListElement* sample
-      = new DataSampleListElement (i, 0, 0, &trans_allocator);
+      = new DataSampleListElement( converter, 0, 0, &trans_allocator);
     if (i == pub_id_middle)
     {
       middle = sample;
@@ -369,10 +461,20 @@ void run_next_send_sample_test (ssize_t size)
     if (current_size == 0)
     {
       TEST_CHECK (ret == false);
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) run_next_send_sample_test: ")
+        ACE_TEXT("(ret == false)")
+        ACE_TEXT("\n")
+      ));
     }
     else
     {
       TEST_CHECK (ret == true);
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) run_next_send_sample_test: ")
+        ACE_TEXT("(ret == true)")
+        ACE_TEXT("\n")
+      ));
     }
   }
 
@@ -388,13 +490,29 @@ void run_next_send_sample_test (ssize_t size)
     DataSampleListElement* sample;
     TEST_CHECK (list.dequeue_head_next_send_sample (sample)
                 == true);
-    TEST_CHECK (sample->publication_id_ == i);
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) run_next_send_sample_test: ")
+      ACE_TEXT("(list.dequeue_head_next_send_sample (sample) == true)")
+      ACE_TEXT("\n")
+    ));
+    converter.key()[2] = i;
+    TEST_CHECK (sample->publication_id_ == converter);
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) run_next_send_sample_test: ")
+      ACE_TEXT("(sample->publication_id_ == converter)")
+      ACE_TEXT("\n")
+    ));
     delete sample;
   }
   }
   TEST_CHECK (list.head_ == 0
               && list.tail_ == 0
               && list.size_ == 0);
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) run_next_send_sample_test: ")
+    ACE_TEXT("(list.head_ == 0 && list.tail_ == 0 && list.size_ == 0)")
+    ACE_TEXT("\n")
+  ));
 }
 
 void run_next_instance_sample_test (ssize_t size)
@@ -407,10 +525,15 @@ void run_next_instance_sample_test (ssize_t size)
 
   OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (OpenDDS::DCPS::TransportSendElement));
 
+  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 1
+  converter.kind()             = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
+  converter.key()[2]           = 0;
+
   for (ssize_t i = 0; i < size; i ++)
   {
+    converter.key()[2] = i;
     DataSampleListElement* sample
-      = new DataSampleListElement (i, 0, 0, &trans_allocator);
+      = new DataSampleListElement( converter, 0, 0, &trans_allocator);
     if (i == pub_id_middle)
     {
       middle = sample;
@@ -427,10 +550,20 @@ void run_next_instance_sample_test (ssize_t size)
     if (current_size == 0)
     {
       TEST_CHECK (ret == false);
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) run_next_instance_sample_test: ")
+        ACE_TEXT("(ret == false)")
+        ACE_TEXT("\n")
+      ));
     }
     else
     {
       TEST_CHECK (ret == true);
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) run_next_instance_sample_test: ")
+        ACE_TEXT("(ret == true)")
+        ACE_TEXT("\n")
+      ));
     }
   }
 
@@ -446,13 +579,29 @@ void run_next_instance_sample_test (ssize_t size)
     DataSampleListElement* sample;
     TEST_CHECK (list.dequeue_head_next_instance_sample (sample)
                 == true);
-    TEST_CHECK (sample->publication_id_ == i);
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) run_next_instance_sample_test: ")
+      ACE_TEXT("(list.dequeue_head_next_instance_sample (sample) == true)")
+      ACE_TEXT("\n")
+    ));
+    converter.key()[2] = i;
+    TEST_CHECK (sample->publication_id_ == converter);
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) run_next_instance_sample_test: ")
+      ACE_TEXT("(sample->publication_id_ == converter)")
+      ACE_TEXT("\n")
+    ));
     delete sample;
   }
   }
   TEST_CHECK (list.head_ == 0
               && list.tail_ == 0
               && list.size_ == 0);
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) run_next_instance_sample_test: ")
+    ACE_TEXT("")
+    ACE_TEXT("\n")
+  ));
 }
 
 int
@@ -503,6 +652,11 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       int ret = run_domain_test ();
       TEST_CHECK (ret == 0);
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) main: ")
+        ACE_TEXT("(ret == 0)")
+        ACE_TEXT("\n")
+      ));
 
       for (ssize_t i = 0; i < 6; i ++)
       {

@@ -9,14 +9,13 @@
 #include "TransportImpl_rch.h"
 #include "TransportImplFactory_rch.h"
 #include "TransportReactorTask_rch.h"
-//borland #include "TransportGenerator.h"
+#include "TransportGenerator.h"
 #include "TransportGenerator_rch.h"
 #include "TransportConfiguration_rch.h"
 #include "ace/Synch.h"
 #include "ace/Configuration.h"
 
 #include <map>
-#include <string>
 
 namespace OpenDDS
 {

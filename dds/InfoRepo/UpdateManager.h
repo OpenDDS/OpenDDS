@@ -1,5 +1,4 @@
 // -*- C++ -*-
-
 /**
  * @file      UpdateManager.h
  *
@@ -9,12 +8,12 @@
  *
  * @author Ciju John <johnc@ociweb.com>
  */
-
-
 #ifndef _UPDATE_MANAGER_
 #define _UPDATE_MANAGER_
 
+#include "inforepo_export.h"
 #include "UpdateDataTypes.h"
+#include "Updater.h"
 
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
@@ -28,42 +27,21 @@
 
 // forward declarations
 class TAO_DDS_DCPSInfo_i;
-class Updater;
 
-class UpdateManager : public ACE_Service_Object
+namespace Update {
+
+class OpenDDS_InfoRepoLib_Export Manager : public ACE_Service_Object
 {
  public:
-  typedef struct TopicStrt< ::DDS::TopicQos &, std::string> UTopic; // U == upstream
-  typedef struct ParticipantStrt< ::DDS::DomainParticipantQos &> UParticipant;
-  typedef struct ActorStrt< ::DDS::PublisherQos &
-                            , ::DDS::DataWriterQos &
-                            , std::string
-                            , OpenDDS::DCPS::TransportInterfaceInfo &> UWActor;
-  typedef struct ActorStrt< ::DDS::SubscriberQos &
-                            , ::DDS::DataReaderQos &
-                            , std::string
-                            , OpenDDS::DCPS::TransportInterfaceInfo &> URActor;
-  typedef struct ImageData<UTopic*, UParticipant*, URActor*, UWActor*> UImage;
+  Manager (void);
 
-  // ciju: The below aggregative structures should probably be using
-  // refreences rather than real object.
-  // TBD: Make the above mentioned changes.
-  typedef struct TopicStrt<QosSeq, std::string> DTopic; // D == downstream
-  typedef struct ParticipantStrt<QosSeq> DParticipant;
-  typedef struct ActorStrt<QosSeq, QosSeq, std::string, BinSeq> DActor;
-
-  typedef struct ImageData<DTopic, DParticipant, DActor, DActor> DImage;
-
-  UpdateManager (void);
-
-  virtual ~UpdateManager (void);
+  virtual ~Manager (void);
 
   /// Shared object initializer
   virtual int init (int argc, ACE_TCHAR *argv[]);
 
   /// Shared object finalizer
   virtual int fini (void);
-
 
   // mechanism for InfoRepo object to be registered.
   void add (TAO_DDS_DCPSInfo_i* info);
@@ -76,8 +54,6 @@ class UpdateManager : public ACE_Service_Object
   /// Force a clean shutdown.
   // void shutdown (void);
 
-  // void unregisterCallback (void);
-
   /// Upstream request for a fresh image
   /// Currently handled synchronously via 'pushImage'
   /// TBD: Replace with an asynchronous model.
@@ -86,20 +62,16 @@ class UpdateManager : public ACE_Service_Object
   /// Downstream request to push image
   void pushImage (const DImage& image);
 
-  /// Upstream request to persist data.
-  void add (const UTopic& topic);
-  void add (const UParticipant& participant);
+  // Propagate creation of entities.
+  template< class UType>
+  void create( const UType& info);
 
-  template <typename UA>
-  void add (const UA& actor);
+  // Propagate QoS updates.
+  template< class QosType>
+  void update( const IdPath& id, const QosType& qos);
 
-  /// Upstream request to remove entries
-  // Remove an entity (but not children) from persistence.
-  void remove (ItemType type, const IdType& id);
-
-  // Persist updated Qos parameters for an entity.
-  void updateQos(const ItemType& itemType, const IdType& id
-			 , const QosSeq& qos);
+  // Propagate destruction of entities.
+  void destroy( const IdPath& id, ItemType type, ActorType actor = DataWriter);
 
   // Downstream request to push persisted data
   void add (const DTopic& topic);
@@ -110,19 +82,30 @@ class UpdateManager : public ACE_Service_Object
   typedef std::set <Updater*> Updaters;
 
   // required to break an include dependency loop
-  void add (Updater* updater, const DActor& actor);
+  //void add (Updater* updater, const DActor& actor);
 
   TAO_DDS_DCPSInfo_i* info_;
   Updaters updaters_;
 };
 
-#include "UpdateManager.inl"
+} // End of namespace Update
 
-ACE_STATIC_SVC_DECLARE (UpdateManager)
+#if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
+#include "UpdateManager_T.cpp"
+#endif /* ACE_TEMPLATES_REQUIRE_SOURCE */
 
-ACE_FACTORY_DECLARE (ACE_Local_Service, UpdateManager)
+#if defined (ACE_TEMPLATES_REQUIRE_PRAGMA)
+#pragma message ("UpdateManager_T.cpp template inst")
+#pragma implementation ("UpdateManager_T.cpp")
+#endif /* ACE_TEMPLATES_REQUIRE_PRAGMA */
 
-class UpdateManager_Loader
+typedef Update::Manager UpdateManagerSvc;
+
+ACE_STATIC_SVC_DECLARE (UpdateManagerSvc)
+
+ACE_FACTORY_DECLARE (ACE_Local_Service, UpdateManagerSvc)
+
+class OpenDDS_InfoRepoLib_Export UpdateManagerSvc_Loader
 {
 public:
   static int init (void);
@@ -130,15 +113,15 @@ public:
 
 #if defined(ACE_HAS_BROKEN_STATIC_CONSTRUCTORS)
 
-typedef int (*UpdateManager_Loader) (void);
+typedef int (*UpdateManagerSvc_Loader) (void);
 
-static UpdateManager_Loader ldr =
-&UpdateManager_Loader::init;
+static UpdateManagerSvc_Loader ldr =
+&UpdateManagerSvc_Loader::init;
 
 #else
 
 static int ldr =
-UpdateManager_Loader::init ();
+UpdateManagerSvc_Loader::init ();
 
 #endif /* ACE_HAS_BROKEN_STATIC_CONSTRUCTORS */
 

@@ -5,21 +5,23 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 use Sys::Hostname;
 
 
 my $status = 0;
 
-my $domains_file = PerlACE::LocalFile ("domain_ids");
-my $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+my $dcpsrepo_ior = "repo.ior";
+my $dcpsrepo_port = PerlACE::random_port();
 
 # BuiltIn Topic (bit) support required for ignore_* operations
 # simple_tcp.conf contains the instructions to automatically load the SimpleTcp
 #  transport.
-my $RepoOpts = "-ORBSvcConf simple_tcp.conf -d $domains_file  -ORBEndpoint iiop://:2007";
+my $RepoOpts = "-ORBSvcConf simple_tcp.conf -ORBEndpoint iiop://:$dcpsrepo_port";
 
 # simple_tcp.conf contains the instructions to automatically load the SimpleTcp
 #  transport.
@@ -29,11 +31,11 @@ my $node_1_opts = "$opts -n node_1 -d files1 -DCPSInfoRepo corbaloc:iiop:127.0.0
 my $node_2_opts = "$opts -n node_2 -d files2 -DCPSInfoRepo corbaloc:iiop:127.0.0.1:2007/DCPSInfoRepo";
 my $node_3_opts = "$opts -n node_3 -d files3 -f starter.bin -DCPSInfoRepo corbaloc:iiop:127.0.0.1:2007/DCPSInfoRepo";
 
-my $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo", $RepoOpts);
+my $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo", $RepoOpts);
 
-my $Node1 = new PerlACE::Process ("node", " $node_1_opts");
-my $Node2 = new PerlACE::Process ("node", " $node_2_opts");
-my $Node3 = new PerlACE::Process ("node", " $node_3_opts");
+my $Node1 = PerlDDS::create_process ("node", " $node_1_opts");
+my $Node2 = PerlDDS::create_process ("node", " $node_2_opts");
+my $Node3 = PerlDDS::create_process ("node", " $node_3_opts");
 
 
 sub CleanupOutput {

@@ -8,13 +8,15 @@
 #include "Definitions.h"
 #include "Dynamic_Cached_Allocator_With_Overflow_T.h"
 
+#include <iterator>
+
 namespace OpenDDS
 {
 
   namespace DCPS
   {
     const CORBA::ULong MAX_READERS_PER_ELEM = 5;
-    typedef Dynamic_Cached_Allocator_With_Overflow<ACE_Null_Mutex>
+    typedef Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex>
                                               TransportSendElementAllocator;
     
     const int MAX_READERS_TO_RESEND = 5;
@@ -92,6 +94,8 @@ namespace OpenDDS
 //remove check all calling locations of the above and rename to send both
       ~DataSampleListElement ();
 
+      DataSampleListElement & operator= (DataSampleListElement const & elem);
+
       /// Message being sent which includes the DataSampleHeader message block
       /// and DataSample message block.
       DataSample*            sample_ ;
@@ -104,6 +108,9 @@ namespace OpenDDS
       /// Group Id used downstream.
       /// This is not used in the first implementation (INSTANCE level)
       CoherencyGroup         group_id_ ;
+
+      /// Timestamp for the sample when it was first written.
+      ::DDS::Time_t source_timestamp_;
 
       /// Used to make removal from the
       /// container _much_ more efficient.
@@ -137,9 +144,54 @@ namespace OpenDDS
     };
 
     /**
+     * @struct DataSampleListIterator
+     *
+     * @brief @c DataSampleList STL-style iterator implementation.
+     *
+     * This class implements a STL-style iterator for the OpenDDS
+     * @c DataSampleList class.  The resulting iterator may be used
+     * @c with the STL generic algorithms.  It is meant for iteration
+     * @c over the "send samples" in a @c DataSampleList.
+     */
+    class OpenDDS_Dcps_Export DataSampleListIterator
+      : public std::iterator<std::bidirectional_iterator_tag,
+                             DataSampleListElement>
+    {
+    public:
+
+      /// Default constructor.
+      /**
+       * This constructor is used when constructing an "end" iterator.
+       */
+      DataSampleListIterator();
+
+      DataSampleListIterator(DataSampleListElement* head,
+                             DataSampleListElement* tail,
+                             DataSampleListElement* current);
+      DataSampleListIterator(DataSampleListIterator const & rhs);
+
+      DataSampleListIterator& operator=(DataSampleListIterator const & rhs);
+      bool operator==(DataSampleListIterator& rhs) const;
+      bool operator!=(DataSampleListIterator& rhs) const;
+      DataSampleListIterator& operator++();
+      DataSampleListIterator  operator++(int);
+      DataSampleListIterator& operator--();
+      DataSampleListIterator  operator--(int);
+      reference operator*();
+      pointer operator->();
+      
+    private:
+
+      DataSampleListElement* head_;
+      DataSampleListElement* tail_;
+      DataSampleListElement* current_;
+
+    };
+
+    /**
     * Lists include a pointer to both the head and tail elements of the
     * list.  Cache the number of elements in the list so that we don't have
-    * to traverse the list to find this information.  For most lists that
+    * to traverse the list to ind this information.  For most lists that
     * we manage, we append to the tail and remove from the head.  There are
     * some lists where we remove from the middle, which are not handled by
     * this list structure.
@@ -147,6 +199,10 @@ namespace OpenDDS
     class OpenDDS_Dcps_Export DataSampleList {
 
     public:
+
+      /// STL-style bidirectional iterator type.
+      typedef DataSampleListIterator iterator;
+
       /// Default constructor clears the list.
       DataSampleList();
       
@@ -200,6 +256,12 @@ namespace OpenDDS
       /// will make it linked before appending.
       void enqueue_tail_next_send_sample (DataSampleList list);
 
+      /// Return iterator to beginning of list.
+      iterator begin();
+
+      /// Return iterator to end of list.
+      iterator end();
+
       /// The first element of the list.
       DataSampleListElement* head_ ;
 
@@ -211,7 +273,7 @@ namespace OpenDDS
       //TBD size is never negative so should be size_t but this ripples through
       // the transport code so leave it for now. SHH
 
-    } ;
+    };
 
     /// Used to allocator the DataSampleListElement object.
     typedef Cached_Allocator_With_Overflow<DataSampleListElement, ACE_Null_Mutex>  

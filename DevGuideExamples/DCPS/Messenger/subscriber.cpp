@@ -11,7 +11,7 @@
 
 
 #include "DataReaderListener.h"
-#include "MessageTypeSupportImpl.h"
+#include "MessengerTypeSupportImpl.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/SubscriberImpl.h>
@@ -61,12 +61,15 @@ parse_args (int argc, ACE_TCHAR *argv[])
       else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_mcast_sub")) == 0) {
         transport_impl_id = OpenDDS::DCPS::DEFAULT_SIMPLE_MCAST_SUB_ID;
       }
+      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_reliable_mcast_sub")) == 0) {
+        transport_impl_id = OpenDDS::DCPS::DEFAULT_RELIABLE_MULTICAST_SUB_ID;
+      }
       break;
     case '?':
     default:
       ACE_ERROR_RETURN ((LM_ERROR,
         "usage:  %s "
-        "-t <tcp/udp/default> "
+        "-t <tcp/udp/mcast/reliable_mcast/default_tcp/default_udp/default_mcast_sub/default_reliable_mcast_sub> "
         "\n",
         argv [0]),
         -1);
@@ -131,14 +134,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
       // Attach the subscriber to the transport.
-      OpenDDS::DCPS::SubscriberImpl* sub_impl =
-        OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl> (sub.in ());
-      if (0 == sub_impl) {
-        cerr << "Failed to obtain subscriber servant\n" << endl;
-        exit(1);
-      }
-
-      OpenDDS::DCPS::AttachStatus status = sub_impl->attach_transport(transport_impl.in());
+      OpenDDS::DCPS::AttachStatus status = transport_impl->attach(sub.in());
       if (status != OpenDDS::DCPS::ATTACH_OK) {
         std::string status_str;
         switch (status) {
@@ -161,9 +157,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
       // activate the listener
-      DataReaderListenerImpl        listener_servant;
-      DDS::DataReaderListener_var listener =
-        ::OpenDDS::DCPS::servant_to_reference(&listener_servant);
+      DDS::DataReaderListener_var listener (new DataReaderListenerImpl);
+      DataReaderListenerImpl* listener_servant =
+        dynamic_cast<DataReaderListenerImpl*>(listener.in());
 
       if (CORBA::is_nil (listener.in ())) {
         cerr << "listener is nil." << endl;
@@ -181,7 +177,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
 
       int expected = 10;
-      while ( listener_servant.num_reads() < expected) {
+      while ( listener_servant->num_reads() < expected) {
         ACE_OS::sleep (1);
       }
 

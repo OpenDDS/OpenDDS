@@ -6,6 +6,7 @@
 #include "ace/INET_Addr.h"
 #include "ace/String_Base.h"
 #include "TestC.h"
+#include <string>
 
 #include <vector>
 
@@ -46,6 +47,7 @@ class SubDriver
 
     ACE_TString       pub_id_fname_;
     ACE_INET_Addr     pub_addr_;
+    ACE_TString       pub_addr_str_;
 
     OpenDDS::DCPS::RepoId sub_id_;
     ACE_TString       sub_addr_;
@@ -57,6 +59,8 @@ class SubDriver
     int               shutdown_pub_;
     int               add_new_subscription_;
     int               shutdown_delay_secs_;
+
+    ACE_TString       sub_ready_filename_;
 };
 
 #endif

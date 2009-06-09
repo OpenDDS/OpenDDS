@@ -5,9 +5,11 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 use Getopt::Long qw( :config bundling) ;
 
@@ -69,15 +71,15 @@ my $publisherArgs = "$svc_config -p $publisherId:$publisherHost:$publisherPort "
 #
 # Create the test objects.
 #
-my $subscriber = new PerlACE::Process( $subscriberCmd, $subscriberArgs) ;
-my $publisher  = new PerlACE::Process( $publisherCmd,  $publisherArgs) ;
+$subscriber = PerlDDS::create_process( $subscriberCmd, $subscriberArgs) ;
+$publisher  = PerlDDS::create_process( $publisherCmd,  $publisherArgs) ;
 
 #
 # Fire up the subscriber first.
 #
 print $subscriber->CommandLine() . "\n";
 $subscriber->Spawn() ;
-if (PerlACE::waitforfile_timed ($subreadyfile, 5) == -1) {
+if (PerlACE::waitforfile_timed ($subreadyfile, 30) == -1) {
     print STDERR "ERROR: waiting for subscriber file\n";
     $subscriber->Kill ();
     exit 1;

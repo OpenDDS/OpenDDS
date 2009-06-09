@@ -28,7 +28,7 @@ OpenDDS::DCPS::ReliableMulticastTransportConfiguration::load(
   {
     ACE_TCHAR section [50];
     ACE_OS::sprintf (section, ACE_TEXT("%s%d")
-                     , ACE_TEXT_ALWAYS_CHAR(TRANSPORT_SECTION_NAME_PREFIX), id);
+                     , TRANSPORT_SECTION_NAME_PREFIX, id);
     const ACE_Configuration_Section_Key &root = config.root_section ();
     ACE_Configuration_Section_Key trans_sect;
     if (config.open_section (root, section, 0, trans_sect) != 0) {
@@ -41,27 +41,15 @@ OpenDDS::DCPS::ReliableMulticastTransportConfiguration::load(
     GET_CONFIG_STRING_VALUE(config, trans_sect, ACE_TEXT("local_address"), str);
     if (str != ACE_TEXT(""))
     {
-      local_address_.set(str.c_str());
-    }
-    else
-    {
-      ACE_ERROR_RETURN(
-        (LM_ERROR, ACE_TEXT("(%P|%t) ERROR: No local_address configuration value specified.\n")),
-        -1
-        );
+      this->local_address_str_ = str;
+      this->local_address_.set (str.c_str ());
     }
 
     GET_CONFIG_STRING_VALUE(config, trans_sect, ACE_TEXT("multicast_group_address"), str);
     if (str != ACE_TEXT(""))
     {
-      multicast_group_address_.set(str.c_str());
-    }
-    else
-    {
-      ACE_ERROR_RETURN(
-        (LM_ERROR, ACE_TEXT("(%P|%t) ERROR: No multicast_group_address configuration value specified.\n")),
-        -1
-        );
+      this->multicast_group_address_str_ = str;
+      this->multicast_group_address_.set (multicast_group_address_str_.c_str ());
     }
 
     GET_CONFIG_VALUE(config, trans_sect, ACE_TEXT("receiver"), receiver_, bool);
@@ -71,4 +59,8 @@ OpenDDS::DCPS::ReliableMulticastTransportConfiguration::load(
     GET_CONFIG_VALUE(config, trans_sect, ACE_TEXT("receiver_buffer_size"), receiver_buffer_size_, size_t);
   }
   return result;
+}
+
+OpenDDS::DCPS::ReliableMulticastTransportConfiguration::~ReliableMulticastTransportConfiguration()
+{
 }

@@ -8,16 +8,18 @@
 #include "dds/DCPS/RcObject_T.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/AssociationData.h"
+#include "dds/DdsDcpsSubscriptionC.h"
+#include "dds/DdsDcpsPublicationC.h"
 #include "TransportDefs.h"
-//borland #include "TransportConfiguration.h"
+#include "TransportConfiguration.h"
 #include "TransportConfiguration_rch.h"
-//borland #include "TransportReactorTask.h"
+#include "TransportReactorTask.h"
 #include "TransportReactorTask_rch.h"
 #include "RepoIdSetMap.h"
 #include "DataLinkCleanupTask.h"
 #include "ace/Synch.h"
-#include "ace/Vector_T.h"
 #include <map>
+#include <vector>
 
 namespace OpenDDS
 {
@@ -37,10 +39,9 @@ namespace OpenDDS
     {
       ssize_t num_associations_;
       const AssociationData* association_data_;
-      enum Association_Status status_;
     };
 
-    typedef ACE_Vector<AssociationInfo> AssociationInfoList;
+    typedef std::vector<AssociationInfo> AssociationInfoList;
 
     /** The TransportImpl class includes the abstract methods that must be implemented 
     *   by any implementation to provide data delivery service to the DCPS implementation. 
@@ -82,8 +83,8 @@ namespace OpenDDS
 
         /// Called by the DataLink to find the registered datawriter
         /// for the lost publication notification.
-      /// If a safe copy (safe_cpy) is requested, the callee is responsible
-      /// for bumping down the ref count.
+        /// If a safe copy (safe_cpy) is requested, the callee is responsible
+        /// for bumping down the ref count.
         DataWriterImpl* find_publication (RepoId pub_id, bool safe_cpy = false);
 
         /// Called by the SubscriberImpl to register datareader upon
@@ -96,22 +97,42 @@ namespace OpenDDS
 
         /// Called by the DataLink to find the registered datareader
         /// for the lost subscription notification.
-      /// If a safe copy (safe_cpy) is requested, the callee is responsible
-      /// for bumping down the ref count.
+        /// If a safe copy (safe_cpy) is requested, the callee is responsible
+        /// for bumping down the ref count.
         DataReaderImpl* find_subscription (RepoId sub_id, bool safe_cpy = false);
 
         /// Called when the receive strategy received the FULLY_ASSOCIATED
         /// message.
         int demarshal_acks (ACE_Message_Block* acks, bool byte_order);
 
-        /// Return true if all the subscriptions to a datawriter are
+        /// Return true if the subscriptions to a datawriter is
         /// acknowledged, otherwise return false.
-        virtual bool acked (RepoId pub_id);
+        /// In current supported transports, only SimpleTCP requires acknowledgment.
+        /// Other transports do not need acknowledgment from subscriber side so these
+        /// transports need override this function to always return true.
+        virtual bool acked (RepoId pub_id, RepoId sub_id);
 
-      /// Callback from teh DataLink to clean up any associated resources.
-      /// This usually is done when the DataLink is lost. The call is made with
-      /// no transport/DCPS locks held.
-      bool release_link_resources (DataLink* link);
+        /// Remove the pub_id-sub_id pair from ack map.
+        /// In current supported transports, only SimpleTCP requires acknowledgment so
+        /// it does remove the ack from ack map.
+        /// Other transports has empty ack map so these transports need override 
+        /// this function to be noop.
+        virtual void remove_ack (RepoId pub_id, RepoId sub_id);
+
+        /// Callback from teh DataLink to clean up any associated resources.
+        /// This usually is done when the DataLink is lost. The call is made with
+        /// no transport/DCPS locks held.
+        bool release_link_resources (DataLink* link);
+
+        /// Called by the application to attach this transport to a publisher.
+        OpenDDS::DCPS::AttachStatus attach (DDS::Publisher_ptr pub);
+                                                     
+        /// Called by the application to attach this transport to a subscriber.
+        OpenDDS::DCPS::AttachStatus attach (DDS::Subscriber_ptr sub);
+
+        /// Expose the configuration information so others can see what
+        /// we can do.
+        TransportConfiguration* config() const;
 
       protected:
 
@@ -131,7 +152,8 @@ namespace OpenDDS
         /// connected.
         virtual DataLink* find_or_create_datalink
                     (const TransportInterfaceInfo& remote_info,
-                     int                           connect_as_publisher) = 0;
+                     int                           connect_as_publisher,
+                     CORBA::Long                   priority) = 0;
 
         /// Concrete subclass gets a shot at the config object.  The subclass
         /// will likely downcast the TransportConfiguration object to a
@@ -198,11 +220,11 @@ namespace OpenDDS
 
         /// Called by our friend, the TransportInterface, to attach
         /// itself to this TransportImpl object.
-        AttachStatus attach_interface(TransportInterface* interface);
+        AttachStatus attach_interface(TransportInterface* transport_interface);
 
         /// Called by our friend, the TransportInterface, to detach
         /// itself to this TransportImpl object.
-        void detach_interface(TransportInterface* interface);
+        void detach_interface(TransportInterface* transport_interface);
 
         /// Called by our friend, the TransportInterface, to reserve
         /// a DataLink for a remote subscription association
@@ -242,8 +264,7 @@ protected:
 
 
         /// Called on publisher side as the last step of the add_associations().
-        /// The pending publications are added to the pending_sub_map_
-        /// and the association data are cached to pending_association_sub_map_.
+        /// The pending publications are cached to pending_association_sub_map_.
         /// If the transport already received the FULLY_ASSOCIATED acks from
         /// subscribers then the transport will notify the datawriter fully
         /// association and the associations will be
@@ -259,8 +280,11 @@ private:
         /// This method is called when the FULLY_ASSOCIATED ack of the pending
         /// associations is received. If the datawriter is registered, the
         /// datawriter will be notified, otherwise the status of the pending
-        /// associations will be marked as FULLTY_ASSOCIATED.
-        void fully_associated (RepoId pub_id);
+        /// associations will be marked as FULLTY_ASSOCIATED. 
+        void check_fully_association ();
+        void check_fully_association (const RepoId pub_id);
+        bool check_fully_association (const RepoId pub_id, 
+                                      AssociationInfo& associations);
 
         /// Called by our friend, the TransportInterface.
         /// Accessor for the TransportInterfaceInfo.  Accepts a reference
@@ -281,11 +305,11 @@ private:
         typedef ACE_SYNCH_MUTEX     LockType;
         typedef ACE_Guard<LockType> GuardType;
 
-        typedef std::map<RepoId, DataWriterImpl*>            PublicationObjectMap;
+        typedef std::map<RepoId, DataWriterImpl*, GUID_tKeyLessThan>      PublicationObjectMap;
 
-        typedef std::map<RepoId, DataReaderImpl*>            SubscriptionObjectMap;
+        typedef std::map<RepoId, DataReaderImpl*, GUID_tKeyLessThan>      SubscriptionObjectMap;
 
-        typedef std::map<RepoId, AssociationInfoList*>       PendingAssociationsMap;
+        typedef std::map<RepoId, AssociationInfoList*, GUID_tKeyLessThan> PendingAssociationsMap;
 
         /// The collection of the DataWriterImpl objects that are created by
         /// the PublisherImpl currently "attached" to this TransportImpl.
@@ -324,11 +348,8 @@ private:
         /// Fully association acknowledged map. pubid -> *subid
         RepoIdSetMap acked_sub_map_;
 
-        /// Pending association map. pubid -> *subid
-        RepoIdSetMap pending_sub_map_;
-
-      /// smart ptr to the associated DL cleanup task
-      DataLinkCleanupTask dl_clean_task_;
+        /// smart ptr to the associated DL cleanup task
+        DataLinkCleanupTask dl_clean_task_;
 
     };
 

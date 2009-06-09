@@ -2,8 +2,8 @@
 //
 // $Id$
 #include "DataReaderListener.h"
-#include "MessageTypeSupportC.h"
-#include "MessageTypeSupportImpl.h"
+#include "MessengerTypeSupportC.h"
+#include "MessengerTypeSupportImpl.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <ace/streams.h>
 
@@ -27,7 +27,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
   try {
     ::Messenger::MessageDataReader_var message_dr = ::Messenger::MessageDataReader::_narrow(reader);
     if (CORBA::is_nil (message_dr.in ())) {
-      cerr << "read: _narrow failed." << endl;
+      cerr << "DataReaderListener: read: _narrow failed." << endl;
       exit(1);
     }
 
@@ -41,19 +41,20 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     //DDS::ReturnCode_t status = dr_servant->take_next_sample(message, si) ;
 
     if (status == DDS::RETCODE_OK) {
-      cout << "Message: subject    = " << message.subject.in() << endl
-           << "         subject_id = " << message.subject_id   << endl
-           << "         from       = " << message.from.in()    << endl
-           << "         count      = " << message.count        << endl
-           << "         text       = " << message.text.in()    << endl;
-      cout << "SampleInfo.sample_rank = " << si.sample_rank << endl;
+      cout << "DataReaderListener:" << endl
+           << "   Message: subject    = " << message.subject.in() << endl
+           << "            subject_id = " << message.subject_id   << endl
+           << "            from       = " << message.from.in()    << endl
+           << "            count      = " << message.count        << endl
+           << "            text       = " << message.text.in()    << endl;
+      cout << "   SampleInfo.sample_rank = " << si.sample_rank << endl;
     } else if (status == DDS::RETCODE_NO_DATA) {
-      cerr << "ERROR: reader received DDS::RETCODE_NO_DATA!" << endl;
+      cerr << "DataReaderListener: ERROR: reader received DDS::RETCODE_NO_DATA!" << endl;
     } else {
-      cerr << "ERROR: read Message: Error: " <<  status << endl;
+      cerr << "DataReaderListener: ERROR: read Message: Error: " <<  status << endl;
     }
   } catch (CORBA::Exception& e) {
-    cerr << "Exception caught in read:" << endl << e << endl;
+    cerr << "DataReaderListener: Exception caught in read:" << endl << e << endl;
     exit(1);
   }
 }

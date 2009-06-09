@@ -9,7 +9,7 @@ ACE_INLINE
 OpenDDS::DCPS::TransportHeader::TransportHeader()
   : length_(0)
 {
-  DBG_SUB_ENTRY("TransportHeader","TransportHeader",1);
+  DBG_ENTRY_LVL("TransportHeader","TransportHeader",6);
 
   this->byte_order_ = TAO_ENCAP_BYTE_ORDER;
   this->packet_id_[0] = supported_id_[0];
@@ -24,7 +24,7 @@ OpenDDS::DCPS::TransportHeader::TransportHeader()
 ACE_INLINE
 OpenDDS::DCPS::TransportHeader::TransportHeader(ACE_Message_Block* buffer)
 {
-  DBG_SUB_ENTRY("TransportHeader","TransportHeader",2);
+  DBG_ENTRY_LVL("TransportHeader","TransportHeader",6);
   this->init(buffer);
 }
 
@@ -32,7 +32,7 @@ OpenDDS::DCPS::TransportHeader::TransportHeader(ACE_Message_Block* buffer)
 ACE_INLINE
 OpenDDS::DCPS::TransportHeader::TransportHeader(ACE_Message_Block& buffer)
 {
-  DBG_SUB_ENTRY("TransportHeader","TransportHeader",3);
+  DBG_ENTRY_LVL("TransportHeader","TransportHeader",6);
   this->init(&buffer);
 }
 
@@ -41,7 +41,7 @@ ACE_INLINE
 OpenDDS::DCPS::TransportHeader&
 OpenDDS::DCPS::TransportHeader::operator=(ACE_Message_Block* buffer)
 {
-  DBG_SUB_ENTRY("TransportHeader","operator=",1);
+  DBG_ENTRY_LVL("TransportHeader","operator=",6);
   this->init(buffer);
   return *this;
 }
@@ -51,7 +51,7 @@ ACE_INLINE
 OpenDDS::DCPS::TransportHeader&
 OpenDDS::DCPS::TransportHeader::operator=(ACE_Message_Block& buffer)
 {
-  DBG_SUB_ENTRY("TransportHeader","operator=",2);
+  DBG_ENTRY_LVL("TransportHeader","operator=",6);
   this->init(&buffer);
   return *this;
 }
@@ -61,7 +61,7 @@ ACE_INLINE
 size_t
 OpenDDS::DCPS::TransportHeader::max_marshaled_size()
 {
-  DBG_ENTRY_LVL("TransportHeader","max_marshaled_size",5);
+  DBG_ENTRY_LVL("TransportHeader","max_marshaled_size",6);
   // Representation takes no extra space for encoding.
   return sizeof(this->byte_order_) + sizeof(this->packet_id_) + sizeof(this->length_) ;
 }
@@ -71,7 +71,7 @@ ACE_INLINE
 bool
 OpenDDS::DCPS::TransportHeader::valid() const
 {
-  DBG_ENTRY_LVL("TransportHeader","valid",5);
+  DBG_ENTRY_LVL("TransportHeader","valid",6);
 
   const char* valid_bytes = reinterpret_cast<const char*>(supported_id_);
   const char* check_bytes = reinterpret_cast<const char*>(this->packet_id_);
@@ -95,7 +95,7 @@ ACE_INLINE
 void
 OpenDDS::DCPS::TransportHeader::init(ACE_Message_Block* buffer)
 {
-  DBG_ENTRY_LVL("TransportHeader","init",5);
+  DBG_ENTRY_LVL("TransportHeader","init",6);
 
   TAO::DCPS::Serializer reader(buffer);
 

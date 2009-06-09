@@ -12,7 +12,7 @@
 
 OpenDDS::DCPS::SimpleUnreliableDgramReceiveStrategy::~SimpleUnreliableDgramReceiveStrategy()
 {
-  DBG_ENTRY_LVL("SimpleUnreliableDgramReceiveStrategy","~SimpleUnreliableDgramReceiveStrategy",5);
+  DBG_ENTRY_LVL("SimpleUnreliableDgramReceiveStrategy","~SimpleUnreliableDgramReceiveStrategy",6);
 }
 
 
@@ -21,7 +21,7 @@ OpenDDS::DCPS::SimpleUnreliableDgramReceiveStrategy::receive_bytes(iovec        
                                                    int            n,
                                                    ACE_INET_Addr& remote_addr)
 {
-  DBG_ENTRY_LVL("SimpleUnreliableDgramReceiveStrategy","receive_bytes",5);
+  DBG_ENTRY_LVL("SimpleUnreliableDgramReceiveStrategy","receive_bytes",6);
   return this->socket_->receive_bytes(iov, n, remote_addr);
 }
 
@@ -29,7 +29,7 @@ OpenDDS::DCPS::SimpleUnreliableDgramReceiveStrategy::receive_bytes(iovec        
 int
 OpenDDS::DCPS::SimpleUnreliableDgramReceiveStrategy::start_i()
 {
-  DBG_ENTRY_LVL("SimpleUnreliableDgramReceiveStrategy","start_i",5);
+  DBG_ENTRY_LVL("SimpleUnreliableDgramReceiveStrategy","start_i",6);
   return this->socket_->set_receive_strategy(this,this->task_.in());
 }
 
@@ -37,7 +37,7 @@ OpenDDS::DCPS::SimpleUnreliableDgramReceiveStrategy::start_i()
 void
 OpenDDS::DCPS::SimpleUnreliableDgramReceiveStrategy::stop_i()
 {
-  DBG_ENTRY_LVL("SimpleUnreliableDgramReceiveStrategy","stop_i",5);
+  DBG_ENTRY_LVL("SimpleUnreliableDgramReceiveStrategy","stop_i",6);
 
   this->socket_->remove_receive_strategy();
 
@@ -52,8 +52,10 @@ OpenDDS::DCPS::SimpleUnreliableDgramReceiveStrategy::deliver_sample
                                         (ReceivedDataSample&  sample,
                                          const ACE_INET_Addr& remote_address)
 {
-  DBG_ENTRY_LVL("SimpleUnreliableDgramReceiveStrategy","deliver_sample",5);
+  DBG_ENTRY_LVL("SimpleUnreliableDgramReceiveStrategy","deliver_sample",6);
 
-  this->transport_->deliver_sample(sample, remote_address);
+  // Receive side does not honor the TRANSPORT_PRIORITY policy, assume
+  // default 0 for reception.
+  this->transport_->deliver_sample(sample, remote_address, 0);
 }
 

@@ -5,31 +5,34 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
+$debug  ;# = 10;
 
 $opts = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : "-ORBSvcConf tcp.conf";
+$opts .= " -DCPSDebugLevel $debug " if $debug;
 $pub_opts = "$opts -DCPSConfigFile pub.ini";
 $sub_opts = "$opts -DCPSConfigFile sub.ini";
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+$dcpsrepo_ior = "repo.ior";
 $repo_bit_opt = $opts;
 
 unlink $dcpsrepo_ior;
 
-$data_file = PerlACE::LocalFile ("test_run.data");
+$data_file = "test_run.data";
 unlink $data_file;
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-				  "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file");
-$Subscriber = new PerlACE::Process ("subscriber", "$sub_opts");
-$Publisher = new PerlACE::Process ("publisher", "$pub_opts " .
-                                   "-ORBLogFile $data_file");
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                    "$repo_bit_opt -o $dcpsrepo_ior ");
+$Subscriber = PerlDDS::create_process ("subscriber", "$sub_opts");
+$Publisher = PerlDDS::create_process ("publisher", "$pub_opts " .
+                                     "-ORBLogFile $data_file");
 
 print $DCPSREPO->CommandLine() . "\n";
 print $Publisher->CommandLine() . "\n";
@@ -44,14 +47,18 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
 
 $Publisher->Spawn ();
     
-open (DATA, $data_file);
+if (PerlACE::waitforfile_timed ($data_file, 30) == -1) {
+    print STDERR "ERROR: waiting for Publisher file\n";
+    $Publisher->Kill ();
+    $DCPSREPO->Kill ();
+    exit 1;
+}
 
-while ($line = <DATA>)
-{
- if ($line =~ /Done writing/)
-   {
-    break;
-   }
+if (PerlACE::waitforfileoutput_timed ($data_file, "Done writing", 90) == -1) {
+    print STDERR "ERROR: waiting for Publisher output.\n";
+    $Publisher->Kill ();
+    $DCPSREPO->Kill ();
+    exit 1;
 }
 
 #Sleep for 2 seconds after publisher send all samples to avoid the timing issue

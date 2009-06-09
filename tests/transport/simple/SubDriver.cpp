@@ -10,6 +10,7 @@
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/AssociationData.h"
+#include "dds/DCPS/Service_Participant.h"
 #include "SimpleSubscriber.h"
 #include <ace/Arg_Shifter.h>
 #include <ace/OS.h>
@@ -32,7 +33,12 @@ SubDriver::~SubDriver()
 void
 SubDriver::run(int& argc, ACE_TCHAR* argv[])
 {
-  DBG_SUB_ENTRY("SubDriver","run",1);
+  DBG_ENTRY_LVL("SubDriver","run",6);
+  CORBA::ORB_var orb = CORBA::ORB_init (argc,
+                                        argv,
+                                        "TAO_DDS_DCPS");
+
+  TheServiceParticipant->set_ORB (orb.in());
 
   parse_args(argc, argv);
   init();
@@ -173,6 +179,7 @@ SubDriver::init()
              "Set the config->local_address_ to our (local) sub_addr_.\n"));
 
   tcp_config->local_address_ = this->sub_addr_;
+  tcp_config->local_address_str_ = this->sub_addr_str_;
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Configure the (ALL_TRAFFIC) TransportImpl object.\n"));
@@ -195,7 +202,7 @@ SubDriver::init()
 void
 SubDriver::run()
 {
-  DBG_SUB_ENTRY("SubDriver","run",2);
+  DBG_ENTRY_LVL("SubDriver","run",6);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Create the 'publications' (array of AssociationData).\n"));
@@ -204,14 +211,19 @@ SubDriver::run()
   OpenDDS::DCPS::AssociationData publications[1];
   publications[0].remote_id_                = this->pub_id_;
   publications[0].remote_data_.transport_id = ALL_TRAFFIC; // TBD later - wrong
+  publications[0].remote_data_.publication_transport_priority = 0;
 
-  OpenDDS::DCPS::NetworkAddress network_order_address(this->pub_addr_);
+  OpenDDS::DCPS::NetworkAddress network_order_address(this->pub_addr_str_);
 
-  publications[0].remote_data_.data =
-         OpenDDS::DCPS::TransportInterfaceBLOB
-                                   (sizeof(OpenDDS::DCPS::NetworkAddress),
-                                    sizeof(OpenDDS::DCPS::NetworkAddress),
-                                    (CORBA::Octet*)(&network_order_address));
+  ACE_OutputCDR cdr;
+  cdr << network_order_address;
+  size_t len = cdr.total_length ();
+
+  publications[0].remote_data_.data
+    = OpenDDS::DCPS::TransportInterfaceBLOB
+    (len,
+    len,
+    (CORBA::Octet*)(cdr.buffer ()));
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Initialize our SimpleSubscriber object.\n"));
@@ -246,6 +258,7 @@ SubDriver::run()
 
   // Tear-down the entire Transport Framework.
   TheTransportFactory->release();
+  TheServiceParticipant->shutdown();
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "TheTransportFactory has finished releasing.\n"));
@@ -285,13 +298,16 @@ SubDriver::parse_pub_arg(const ACE_TString& arg)
 
   // Parse the pub_id from left of ':' char, and remainder to right of ':'.
   ACE_TString pub_id_str(arg.c_str(), pos);
-  ACE_TString pub_addr_str(arg.c_str() + pos + 1);
+  this->pub_addr_str_ = arg.c_str() + pos + 1;
 
-  this->pub_id_ = ACE_OS::atoi(pub_id_str.c_str());
+  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 1
+  converter.kind()   = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
+  converter.key()[2] = ACE_OS::atoi( pub_id_str.c_str());
+  this->pub_id_ = converter;
 
   // Find the (only) ':' char in the remainder, and make sure it is in
   // a legal spot.
-  if ((pos = pub_addr_str.find(ACE_TEXT(':'))) == ACE_TString::npos) {
+  if ((pos = this->pub_addr_str_.find(ACE_TEXT(':'))) == ACE_TString::npos) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) Bad -p command-line value (%s). "
                "Missing second ':' char.\n",
@@ -316,7 +332,7 @@ SubDriver::parse_pub_arg(const ACE_TString& arg)
   }
 
   // Use the remainder as the "stringified" ACE_INET_Addr.
-  this->pub_addr_ = ACE_INET_Addr(pub_addr_str.c_str());
+  this->pub_addr_ = ACE_INET_Addr(this->pub_addr_str_.c_str());
 
   return 0;
 }
@@ -355,12 +371,15 @@ SubDriver::parse_sub_arg(const ACE_TString& arg)
 
   // Parse the sub_id from left of ':' char, and remainder to right of ':'.
   ACE_TString sub_id_str(arg.c_str(), pos);
-  ACE_TString sub_addr_str(arg.c_str() + pos + 1);
+  this->sub_addr_str_ = arg.c_str() + pos + 1;
 
-  this->sub_id_ = ACE_OS::atoi(sub_id_str.c_str());
+  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 2
+  converter.kind()   = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
+  converter.key()[2] = ACE_OS::atoi( sub_id_str.c_str());
+  this->sub_id_ = converter;
 
   // Use the remainder as the "stringified" ACE_INET_Addr.
-  this->sub_addr_ = ACE_INET_Addr(sub_addr_str.c_str());
+  this->sub_addr_ = ACE_INET_Addr(this->sub_addr_str_.c_str());
 
   return 0;
 }

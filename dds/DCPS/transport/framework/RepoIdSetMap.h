@@ -24,7 +24,7 @@ namespace OpenDDS
     {
       public:
 
-        typedef std::map<RepoId, RepoIdSet_rch> MapType;
+        typedef std::map<RepoId, RepoIdSet_rch, GUID_tKeyLessThan> MapType;
 
         RepoIdSetMap();
         virtual ~RepoIdSetMap();
@@ -50,14 +50,17 @@ namespace OpenDDS
         /// size of this map, list of key(repoid)-value(RepoIdSet).
         ACE_Message_Block* marshal (bool byte_order);
 
-        /// Check if two RepoIdSetMaps have same contents.
-        bool is_subset (RepoIdSetMap& map, RepoId id);
-        
         /// Demarshal the serialized data of a RepoIdSetMap. 
         int demarshal (ACE_Message_Block* acks, bool byte_order);
         
         /// List the key of this map.
         void get_keys (RepoIdSet& keys);
+
+        void operator= (const RepoIdSetMap &);
+
+        void clear ();
+
+        void dump ();
 
     private:
 

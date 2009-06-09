@@ -9,7 +9,7 @@
 ACE_INLINE
 OpenDDS::DCPS::ReceiveListenerSet::ReceiveListenerSet()
 {
-  DBG_ENTRY_LVL("ReceiveListenerSet","ReceiveListenerSet",5);
+  DBG_ENTRY_LVL("ReceiveListenerSet","ReceiveListenerSet",6);
 }
 
 
@@ -17,7 +17,7 @@ ACE_INLINE int
 OpenDDS::DCPS::ReceiveListenerSet::insert(RepoId                    subscriber_id,
                                       TransportReceiveListener* listener)
 {
-  DBG_ENTRY_LVL("ReceiveListenerSet","insert",5);
+  DBG_ENTRY_LVL("ReceiveListenerSet","insert",6);
   GuardType guard(this->lock_);
   return bind(map_, subscriber_id, listener);
 }
@@ -26,7 +26,7 @@ OpenDDS::DCPS::ReceiveListenerSet::insert(RepoId                    subscriber_i
 ACE_INLINE int
 OpenDDS::DCPS::ReceiveListenerSet::remove(RepoId subscriber_id)
 {
-  DBG_ENTRY_LVL("ReceiveListenerSet","remove",5);
+  DBG_ENTRY_LVL("ReceiveListenerSet","remove",6);
   GuardType guard(this->lock_);
   if (unbind(map_, subscriber_id) != 0)
     {
@@ -43,7 +43,7 @@ OpenDDS::DCPS::ReceiveListenerSet::remove(RepoId subscriber_id)
 ACE_INLINE ssize_t
 OpenDDS::DCPS::ReceiveListenerSet::size() const
 {
-  DBG_ENTRY_LVL("ReceiveListenerSet","size",5);
+  DBG_ENTRY_LVL("ReceiveListenerSet","size",6);
   GuardType guard(this->lock_);
   return map_.size();
 }
@@ -52,7 +52,7 @@ OpenDDS::DCPS::ReceiveListenerSet::size() const
 ACE_INLINE void
 OpenDDS::DCPS::ReceiveListenerSet::data_received(const ReceivedDataSample& sample)
 {
-  DBG_ENTRY_LVL("ReceiveListenerSet","data_received",5);
+  DBG_ENTRY_LVL("ReceiveListenerSet","data_received",6);
 
   GuardType guard(this->lock_);
 
@@ -69,18 +69,16 @@ OpenDDS::DCPS::ReceiveListenerSet::data_received(const ReceivedDataSample& sampl
 }
 
 
-// ACE_INLINE OpenDDS::DCPS::ReceiveListenerSet::MapType&
-// OpenDDS::DCPS::ReceiveListenerSet::map()
-// {
-//   DBG_SUB_ENTRY("ReceiveListenerSet","map",1);
-//   return this->map_;
-// }
+ACE_INLINE OpenDDS::DCPS::ReceiveListenerSet::MapType& 
+OpenDDS::DCPS::ReceiveListenerSet::map()
+{
+  return this->map_;
+}
 
 
-// ACE_INLINE const OpenDDS::DCPS::ReceiveListenerSet::MapType&
-// OpenDDS::DCPS::ReceiveListenerSet::map() const
-// {
-//   DBG_SUB_ENTRY("ReceiveListenerSet","map",2);
-//   return this->map_;
-// }
+ACE_INLINE const OpenDDS::DCPS::ReceiveListenerSet::MapType&
+OpenDDS::DCPS::ReceiveListenerSet::map() const
+{
+  return this->map_;
+}
 

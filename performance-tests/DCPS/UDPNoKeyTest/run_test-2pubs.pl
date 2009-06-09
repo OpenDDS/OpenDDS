@@ -5,13 +5,15 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 
-PerlACE::add_lib_path('../TypeNoKeyBounded');
+PerlDDS::add_lib_path('../TypeNoKeyBounded');
 
 
 # single reader with single instances test
@@ -23,16 +25,14 @@ $pub1_addr='localhost:34567';
 $pub2_addr='localhost:34568';
 $sub_addr='localhost:45678';
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+$dcpsrepo_ior = "repo.ior";
 $repo_bit_conf = "-NOBITS";
 $app_bit_conf = "-DCPSBit 0";
 
 unlink $dcpsrepo_ior; 
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "$repo_bit_conf -o $dcpsrepo_ior"
-                             . " -d $domains_file");
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                             "$repo_bit_conf -o $dcpsrepo_ior ");
 
 
 print $DCPSREPO->CommandLine(), "\n";
@@ -44,7 +44,7 @@ $sub_parameters = "-ORBSvcConf udp.conf $app_bit_conf -a $sub_addr -p $num_write
 #use -mxs $num_messages to avoid using the heap 
 #   (could be less than $num_messages but I am not sure of the limit).
 
-$Subscriber = new PerlACE::Process ("subscriber", $sub_parameters);
+$Subscriber = PerlDDS::create_process ("subscriber", $sub_parameters);
 print $Subscriber->CommandLine(), "\n";
 
 $pub1_parameters = "-ORBSvcConf udp.conf $app_bit_conf -a $pub1_addr -p 1"
@@ -52,7 +52,7 @@ $pub1_parameters = "-ORBSvcConf udp.conf $app_bit_conf -a $pub1_addr -p 1"
               . " -n $num_messages -d $data_size" 
               . " -msi 1000 -mxs 1000 -i 0 -h 225000";
 
-$Publisher1 = new PerlACE::Process ("publisher", $pub1_parameters);
+$Publisher1 = PerlDDS::create_process ("publisher", $pub1_parameters);
 print $Publisher1->CommandLine(), "\n";
 
 $pub2_parameters = "-ORBSvcConf udp.conf $app_bit_conf -a $pub2_addr -p 1"
@@ -60,7 +60,7 @@ $pub2_parameters = "-ORBSvcConf udp.conf $app_bit_conf -a $pub2_addr -p 1"
               . " -n $num_messages -d $data_size" 
               . " -msi 1000 -mxs 1000 -i 1 -h 225000";
 
-$Publisher2 = new PerlACE::Process ("publisher", $pub2_parameters);
+$Publisher2 = PerlDDS::create_process ("publisher", $pub2_parameters);
 print $Publisher2->CommandLine(), "\n";
 
 

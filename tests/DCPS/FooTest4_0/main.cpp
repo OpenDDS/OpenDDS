@@ -18,7 +18,7 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/TopicDescriptionImpl.h"
-#include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
 #ifdef ACE_AS_STATIC_LIBS
 #include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
@@ -83,11 +83,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // and then get application specific parameters.
       parse_args (argc, argv);
 
-
-      ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl;
-
-      ::Xyz::FooTypeSupport_var fts =
-        OpenDDS::DCPS::servant_to_reference (fts_servant);
+      ::Xyz::FooTypeSupport_var fts (new ::Xyz::FooTypeSupportImpl);
 
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,
@@ -133,7 +129,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       ::DDS::SampleInfo si ={::DDS::NOT_READ_SAMPLE_STATE, ::DDS::NOT_NEW_VIEW_STATE
 			     , ::DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE
 			     , {0, 0}, ::DDS::HANDLE_NIL
-			     , 0, 0, 0, 0, 0};
+			     , 0, 0, 0, 0, 0, ::DDS::HANDLE_NIL, false};
 
       reader = new Reader(dp.in (), history_depth, max_samples_per_instance) ;
 
@@ -210,7 +206,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       si_map['A'].instance_state = ::DDS::ALIVE_INSTANCE_STATE ;
       si_map['A'].disposed_generation_count = 2;
       si_map['A'].no_writers_generation_count = 0;
-      si_map['A'].sample_rank = 3;
+      // two addition dispose "sample" after 'A'.
+      si_map['A'].sample_rank = 3 + 2;
       si_map['A'].generation_rank = 2;
       si_map['A'].absolute_generation_rank = 2;
 
@@ -223,7 +220,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       si_map['B'].instance_state = ::DDS::ALIVE_INSTANCE_STATE ;
       si_map['B'].disposed_generation_count = 2 ;
       si_map['B'].no_writers_generation_count = 0 ;
-      si_map['B'].sample_rank = 2 ;
+      // two addition dispose "sample" after 'B'.
+      si_map['B'].sample_rank = 2 + 2;
       si_map['B'].generation_rank = 2 ;
       si_map['B'].absolute_generation_rank = 2 ;
 
@@ -232,8 +230,21 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       si.instance_state = ::DDS::ALIVE_INSTANCE_STATE ;
       si.disposed_generation_count = 2 ;
       si.no_writers_generation_count = 0 ;
-      si.sample_rank = 1 ;
-      si.generation_rank = 1 ;
+
+      // one addition dispose "sample" after.
+      si.sample_rank = 1 + 1;
+      // disposed_generation_count = 1 when receiving "C" 
+      // while disposed_generation_count = 0 when receiving "A" and "B"
+      // so 
+      //   S.disposed_generation_count = 1 
+      //   MRSIC.disposed_generation_count = 2
+      //   MRSIC.no_writers_generation_count = S.no_writers_generation_count = 0
+      //   
+      //
+      //   si.generation_rank =
+      //    (MRSIC.disposed_generation_count + MRSIC.no_writers_generation_count)
+      //     - (S.disposed_generation_count + S.no_writers_generation_count)
+      si.generation_rank = 1 ; 
       si.absolute_generation_rank = 1 ;
       si_map['C'] = si ;
 
@@ -242,7 +253,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       si.instance_state  = ::DDS::ALIVE_INSTANCE_STATE ;
       si.disposed_generation_count = 2 ;
       si.no_writers_generation_count = 0 ;
-      si.sample_rank = 0 ;
+      // no addition dispose "sample"
+      si.sample_rank = 0;
       si.generation_rank =  0 ;
       si.absolute_generation_rank = 0 ;
       si_map['D'] = si ;
@@ -254,7 +266,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // has not received any new samples after dispose.
       si_map['X'].disposed_generation_count = 0 ;
       si_map['X'].no_writers_generation_count = 0 ;
-      si_map['X'].sample_rank = 1 ;
+      // one addition dispose "sample"
+      si_map['X'].sample_rank = 1 + 1;
       si_map['X'].generation_rank = 0 ;
       si_map['X'].absolute_generation_rank = 0 ;
 
@@ -263,7 +276,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       si.instance_state = ::DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE ;
       si.disposed_generation_count = 0 ;
       si.no_writers_generation_count = 0 ;
-      si.sample_rank = 0 ;
+      // one addition dispose "sample"
+      si.sample_rank = 0 + 1;
       si.generation_rank = 0 ;
       si.absolute_generation_rank = 0 ;
       si_map['Y'] = si ;
@@ -300,7 +314,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       si.instance_state = ::DDS::ALIVE_INSTANCE_STATE ;
       si.disposed_generation_count = 0 ;
       si.no_writers_generation_count = 0 ;
-      si.sample_rank = 0 ;
+      si.sample_rank = 0;
       si.generation_rank = 0 ;
       si.absolute_generation_rank = 0 ;
       si_map['c'] = si ;

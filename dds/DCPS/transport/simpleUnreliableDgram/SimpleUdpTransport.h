@@ -29,11 +29,13 @@ namespace OpenDDS
                                  (TransportInterfaceInfo& local_info) const;
 
         virtual void deliver_sample(ReceivedDataSample&  sample,
-                            const ACE_INET_Addr& remote_address);
+                            const ACE_INET_Addr& remote_address,
+                            CORBA::Long          priority);
 
       private:
 
-        ACE_INET_Addr local_address_;
+        ACE_TString    local_address_str_;
+        ACE_INET_Addr  local_address_;
     };
 
   } /* namespace DCPS */

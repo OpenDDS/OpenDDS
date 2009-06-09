@@ -22,7 +22,7 @@ OpenDDS::DCPS::TransportHeader::supported_id_[6]
 ACE_CDR::Boolean
 operator<<(ACE_Message_Block& buffer, OpenDDS::DCPS::TransportHeader& value)
 {
-  EntryExit dbg_1( "TransportHeader","operator<<", 0 );
+  DBG_ENTRY_LVL( "TransportHeader","operator<<",6);
 
   TAO::DCPS::Serializer writer(&buffer, value.byte_order_ != TAO_ENCAP_BYTE_ORDER);
   writer << ACE_OutputCDR::from_octet (value.byte_order_);
@@ -37,7 +37,7 @@ operator<<(ACE_Message_Block& buffer, OpenDDS::DCPS::TransportHeader& value)
 ACE_CDR::Boolean
 operator<<(ACE_Message_Block*& buffer, OpenDDS::DCPS::TransportHeader& value)
 {
-  EntryExit dbg_2( "TransportHeader","operator<<", 0 );
+  DBG_ENTRY_LVL( "TransportHeader","operator<<",6);
 
   TAO::DCPS::Serializer writer(buffer, value.byte_order_ != TAO_ENCAP_BYTE_ORDER);
   writer << ACE_OutputCDR::from_octet (value.byte_order_);

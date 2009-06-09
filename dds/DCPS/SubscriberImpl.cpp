@@ -23,6 +23,9 @@
 
 #include "tao/debug.h"
 
+#include "ace/Auto_Ptr.h"
+#include "ace/Vector_T.h"
+
 
 namespace OpenDDS
 {
@@ -39,9 +42,7 @@ namespace OpenDDS
 // Implementation skeleton constructor
 SubscriberImpl::SubscriberImpl (const ::DDS::SubscriberQos & qos,
 				::DDS::SubscriberListener_ptr a_listener,
-				DomainParticipantImpl*       participant,
-				::DDS::DomainParticipant_ptr
-				participant_objref)
+				DomainParticipantImpl*       participant)
   : qos_(qos),
     default_datareader_qos_(
 			    TheServiceParticipant->initial_DataReaderQos()),
@@ -49,25 +50,19 @@ SubscriberImpl::SubscriberImpl (const ::DDS::SubscriberQos & qos,
     listener_mask_(DEFAULT_STATUS_KIND_MASK),
     fast_listener_ (0),
     participant_(participant),
-    participant_objref_ (::DDS::DomainParticipant::_duplicate (participant_objref)),
-    repository_ (TheServiceParticipant->get_repository ())
+    domain_id_( participant->get_domain_id())
 {
-  participant_->_add_ref ();
-
   //Note: OK to duplicate a nil.
   listener_ = ::DDS::SubscriberListener::_duplicate(a_listener);
   if (! CORBA::is_nil (a_listener))
     {
-      fast_listener_ =
-        reference_to_servant<DDS::SubscriberListener> (listener_.in ());
+      fast_listener_ = listener_.in ();
     }
 }
 
 // Implementation skeleton destructor
 SubscriberImpl::~SubscriberImpl (void)
 {
-  participant_->_remove_ref ();
-
   // Tell the transport to detach this
   // Subscriber/TransportInterface.
   this->detach_transport ();
@@ -83,12 +78,28 @@ SubscriberImpl::~SubscriberImpl (void)
     }
 }
 
-//Note: caller should NOT assign to DataReader_var (without _duplicate'ing)
-//      because it will steal the framework's reference.
+
 ::DDS::DataReader_ptr
 SubscriberImpl::create_datareader (
 				   ::DDS::TopicDescription_ptr a_topic_desc,
 				   const ::DDS::DataReaderQos & qos,
+				   ::DDS::DataReaderListener_ptr a_listener
+				   )
+  ACE_THROW_SPEC ((
+		   CORBA::SystemException
+		   ))
+{
+  DataReaderQosExt ext_qos;
+  get_default_datareader_qos_ext(ext_qos);
+  return create_opendds_datareader(a_topic_desc, qos, ext_qos, a_listener);
+}
+
+
+::DDS::DataReader_ptr
+SubscriberImpl::create_opendds_datareader (
+				   ::DDS::TopicDescription_ptr a_topic_desc,
+				   const ::DDS::DataReaderQos & qos,
+                   const DataReaderQosExt & ext_qos,
 				   ::DDS::DataReaderListener_ptr a_listener
 				   )
   ACE_THROW_SPEC ((
@@ -106,7 +117,7 @@ SubscriberImpl::create_datareader (
 
   ::DDS::DataReaderQos dr_qos;
 
-  TopicImpl* topic_servant = reference_to_servant<TopicImpl> (a_topic_desc);
+  TopicImpl* topic_servant = dynamic_cast<TopicImpl*> (a_topic_desc);
 
   if (qos == DATAREADER_QOS_DEFAULT)
     {
@@ -154,7 +165,7 @@ SubscriberImpl::create_datareader (
       ACE_ERROR ((LM_ERROR,
 		  ACE_TEXT("(%P|%t) ERROR: ")
 		  ACE_TEXT("SubscriberImpl::create_datareader, ")
-		  ACE_TEXT("typesupport(topic_name=%s) is nil.\n"),
+		  ACE_TEXT("typesupport(topic_name=%C) is nil.\n"),
 		  name.in ()));
       return ::DDS::DataReader::_nil ();
     }
@@ -162,27 +173,28 @@ SubscriberImpl::create_datareader (
     ::DDS::DataReader_var dr_obj = typesupport->create_datareader();
 
   DataReaderImpl* dr_servant =
-    reference_to_servant<DataReaderImpl> (dr_obj.in ());
+    dynamic_cast<DataReaderImpl*> (dr_obj.in ());
 
   DataReaderRemoteImpl* reader_remote_impl = 0;
   ACE_NEW_RETURN(reader_remote_impl,
-                    DataReaderRemoteImpl(dr_servant),
-                    ::DDS::DataReader::_nil());
+		 DataReaderRemoteImpl(dr_servant),
+		 ::DDS::DataReader::_nil());
 
+  //this is taking ownership of the DataReaderRemoteImpl (server side) allocated above
+  PortableServer::ServantBase_var reader_remote(reader_remote_impl);
+
+  //this is the client reference to the DataReaderRemoteImpl
   ::OpenDDS::DCPS::DataReaderRemote_var dr_remote_obj = 
       servant_to_remote_reference(reader_remote_impl);
 
-  DomainParticipantImpl* participant =
-    reference_to_servant<DomainParticipantImpl> (participant_objref_.in ());
-
   dr_servant->init (topic_servant,
 		    dr_qos,
+            ext_qos,
 		    a_listener,
-		    participant,
+		    participant_,
 		    this,
-		    subscriber_objref_.in (),
 		    dr_obj.in (),
-            dr_remote_obj.in ());
+		    dr_remote_obj.in ());
 
   if ((this->enabled_ == true)
       && (qos_.entity_factory.autoenable_created_entities == 1))
@@ -213,11 +225,14 @@ SubscriberImpl::create_datareader (
   else if (impl->register_subscription (dr_servant->get_subscription_id(),
 					dr_servant) == -1)
     {
-      ACE_ERROR ((LM_ERROR,
-		  ACE_TEXT("(%P|%t) ERROR: ")
-		  ACE_TEXT("SubscriberImpl::create_datareader, ")
-		  ACE_TEXT("failed to register datareader %d with TransportImpl.\n"),
-		  dr_servant->get_subscription_id()));
+      RepoId id = dr_servant->get_subscription_id();
+      ::OpenDDS::DCPS::GuidConverter converter( id);
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("SubscriberImpl::create_datareader: ")
+        ACE_TEXT("failed to register datareader %C with TransportImpl.\n"),
+        (const char*) converter
+      ));
       return ::DDS::DataReader::_nil ();
     }
 
@@ -231,7 +246,7 @@ SubscriberImpl::create_datareader (
 SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
-  DBG_ENTRY_LVL("SubscriberImpl","delete_datareader",5);
+  DBG_ENTRY_LVL("SubscriberImpl","delete_datareader",6);
 
   ACE_TRACE(ACE_TEXT("SubscriberImpl::delete_datareader"));
   if (enabled_ == false)
@@ -243,12 +258,22 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
     }
 
   DataReaderImpl* dr_servant
-    = reference_to_servant<DataReaderImpl> (a_datareader);
+    = dynamic_cast<DataReaderImpl*> (a_datareader);
 
-  if (dr_servant->get_subscriber_servant () != this)
+  {
+    ::DDS::Subscriber_var dr_subscriber(dr_servant->get_subscriber ());
+    if (dr_subscriber.in() != this)
     {
-      return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+        RepoId id = dr_servant->get_subscription_id();
+        ::OpenDDS::DCPS::GuidConverter converter( id);
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) SubscriberImpl::delete_datareader: ")
+          ACE_TEXT("data reader %C doesn't belong to this subscriber.\n"),
+          (const char*) converter
+        ));
+        return ::DDS::RETCODE_PRECONDITION_NOT_MET;
     }
+  }
 
   int loans = dr_servant->num_zero_copies ();
   if (0 != loans)
@@ -281,17 +306,20 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
     {
       CORBA::String_var topic_name = dr_servant->get_topic_name();
       RepoId id = dr_servant->get_subscription_id ();
+      ::OpenDDS::DCPS::GuidConverter converter( id);
       ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("SubscriberImpl::delete_datareader, ")
-        ACE_TEXT("The datareader(topic_name=%s id=%d) is not found\n"),
-        topic_name.in (), id),
-        ::DDS::RETCODE_ERROR);
+        ACE_TEXT("SubscriberImpl::delete_datareader: ")
+        ACE_TEXT("datareader(topic_name=%C) %C not found.\n"),
+        topic_name.in(),
+        (const char*) converter
+      ),::DDS::RETCODE_ERROR);
     }
 
     dr_info = it->second;
       
     datareader_map_.erase(it) ;
+
     datareader_set_.erase(dr_servant) ;
   }
 
@@ -299,10 +327,10 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
 
   try
     {
-      this->repository_->remove_subscription(
-					     participant_->get_domain_id (),
-					     participant_->get_id (),
-					     subscription_id) ;
+      DCPSInfo_var repo = TheServiceParticipant->get_repository( this->domain_id_);
+      repo->remove_subscription( this->domain_id_,
+			         participant_->get_id (),
+			         subscription_id) ;
     }
   catch (const CORBA::SystemException& sysex)
     {
@@ -336,11 +364,13 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
   // Unregister the DataReader object with the TransportImpl.
   else if (impl->unregister_subscription (subscription_id) == -1)
     {
-      ACE_ERROR ((LM_ERROR,
-		  ACE_TEXT("(%P|%t) ERROR: ")
-		  ACE_TEXT("SubscriberImpl::delete_datareader, ")
-		  ACE_TEXT("failed to unregister datareader %d with TransportImpl.\n"),
-		  subscription_id));
+      ::OpenDDS::DCPS::GuidConverter converter( subscription_id);
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("SubscriberImpl::delete_datareader: ")
+        ACE_TEXT("failed to unregister datareader %C with TransportImpl.\n"),
+        (const char*) converter
+      ));
       return ::DDS::RETCODE_ERROR;
     }
 
@@ -355,6 +385,7 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
   // from the datareader map.
 
   dr_servant->_remove_ref ();
+  dr_servant = 0;
 
   return ::DDS::RETCODE_OK;
 }
@@ -391,7 +422,7 @@ SubscriberImpl::delete_contained_entities (
 
     DataReaderMap::iterator it;
     DataReaderMap::iterator itEnd = datareader_map_.end ();
-    for (it = datareader_map_.begin (); it != datareader_map_.end (); ++it)
+    for (it = datareader_map_.begin (); it != itEnd; ++it)
     {
        drs.push_back (it->second->local_reader_objref_);
     }
@@ -451,7 +482,7 @@ SubscriberImpl::lookup_datareader (
           ACE_DEBUG ((LM_DEBUG,
 		      ACE_TEXT("(%P|%t) ")
 		      ACE_TEXT("SubscriberImpl::lookup_datareader, ")
-		      ACE_TEXT("The datareader(topic_name=%s) is not found\n"),
+		      ACE_TEXT("The datareader(topic_name=%C) is not found\n"),
 		      topic_name));
         }
       return ::DDS::DataReader::_nil ();
@@ -518,9 +549,11 @@ SubscriberImpl::notify_datareaders (
 
       if (it->second->local_reader_impl_->have_sample_states(
 							::DDS::NOT_READ_SAMPLE_STATE))
-	{
-	  listener->on_data_available(it->second->local_reader_objref_) ;
-	}
+        {
+          listener->on_data_available(it->second->local_reader_objref_);
+          it->second->local_reader_impl_->set_status_changed_flag(
+            ::DDS::DATA_AVAILABLE_STATUS, false);
+        }
     }
 }
 
@@ -535,24 +568,90 @@ SubscriberImpl::set_qos (
 {
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos))
     {
+      if (qos_ == qos)
+        return ::DDS::RETCODE_OK;
+
       if (enabled_ == true)
+      {
+        if (! Qos_Helper::changeable (qos_, qos))
         {
-          if (! Qos_Helper::changeable (qos_, qos))
-	    {
-	      return ::DDS::RETCODE_IMMUTABLE_POLICY;
-	    }
+          return ::DDS::RETCODE_IMMUTABLE_POLICY;
         }
-      if (! (qos_ == qos)) // no != operator ?
+        else
         {
           qos_ = qos;
-          // TBD - when there are changable QoS supported
-          //       this code may need to do something
-          //       with the changed values.
-          // TBD - when there are changable QoS then we
-          //       need to tell the DCPSInfo/repo about
-          //       the changes in Qos.
-          // repo->set_qos(qos_);
+
+          DrIdToQosMap idToQosMap;
+          {
+            ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+              guard,
+              this->si_lock_,
+              ::DDS::RETCODE_ERROR);
+            DataReaderMap::const_iterator endIter = datareader_map_.end(); 
+            for (DataReaderMap::const_iterator iter = datareader_map_.begin() ;
+              iter != endIter ; ++iter)
+            {
+              DataReaderImpl* reader = iter->second->local_reader_impl_; 
+              ::DDS::DataReaderQos qos;
+              reader->get_qos(qos); 
+              RepoId id = reader->get_subscription_id();
+              std::pair<DrIdToQosMap::iterator, bool> pair
+                = idToQosMap.insert(DrIdToQosMap::value_type(id, qos));
+              if (pair.second == false)
+              {
+                ::OpenDDS::DCPS::GuidConverter converter( id);
+                ACE_ERROR_RETURN((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::set_qos: ")
+                  ACE_TEXT("insert %C to DrIdToQosMap failed.\n"), 
+                  (const char*) converter
+                ),::DDS::RETCODE_ERROR);
+              }
+            }
+          }
+
+          DrIdToQosMap::iterator iter = idToQosMap.begin ();
+          while (iter != idToQosMap.end())
+          {
+            try
+            {
+              DCPSInfo_var repo = TheServiceParticipant->get_repository( this->domain_id_);
+              CORBA::Boolean status 
+                = repo->update_subscription_qos( this->domain_id_,
+                                                          participant_->get_id (), 
+                                                          iter->first,
+                                                          iter->second,
+                                                          this->qos_);
+
+              if (status == 0)
+              {
+                ACE_ERROR_RETURN ((LM_ERROR,
+                  ACE_TEXT("(%P|%t) SubscriberImpl::set_qos, ")
+                  ACE_TEXT("failed on compatiblity check. \n")),
+                  ::DDS::RETCODE_ERROR);
+              }
+            }
+            catch (const CORBA::SystemException& sysex)
+            {
+              sysex._tao_print_exception (
+                "ERROR: System Exception"
+                " in SubscriberImpl::set_qos");
+              return ::DDS::RETCODE_ERROR;
+            }
+            catch (const CORBA::UserException& userex)
+            {
+              userex._tao_print_exception (
+                "ERROR:  Exception"
+                " in SubscriberImpl::set_qos");
+              return ::DDS::RETCODE_ERROR;
+            }
+
+            ++iter;
+          } 
         }
+      }
+      else
+        qos_ = qos;
+        
       return ::DDS::RETCODE_OK;
     }
   else
@@ -586,8 +685,7 @@ SubscriberImpl::set_listener (
   listener_mask_ = mask;
   //note: OK to duplicate  and reference_to_servant a nil object ref
   listener_ = ::DDS::SubscriberListener::_duplicate(a_listener);
-  fast_listener_
-    = reference_to_servant<DDS::SubscriberListener> (listener_.in ());
+  fast_listener_ = listener_.in ();
   return ::DDS::RETCODE_OK;
 }
 
@@ -634,7 +732,7 @@ SubscriberImpl::get_participant (
 		   CORBA::SystemException
 		   ))
 {
-  return ::DDS::DomainParticipant::_duplicate (participant_objref_.in ());
+  return ::DDS::DomainParticipant::_duplicate (participant_);
 }
 
 
@@ -667,6 +765,18 @@ SubscriberImpl::get_default_datareader_qos (
 		   ))
 {
   qos = default_datareader_qos_;
+}
+
+
+void
+SubscriberImpl::get_default_datareader_qos_ext (
+					    DataReaderQosExt & qos
+					    )
+  ACE_THROW_SPEC ((
+		   CORBA::SystemException
+		   ))
+{
+  qos.durability.always_get_history = false;
 }
 
 
@@ -723,17 +833,6 @@ SubscriberImpl::enable (
 }
 
 
-::DDS::StatusKindMask
-SubscriberImpl::get_status_changes (
-				    )
-  ACE_THROW_SPEC ((
-		   CORBA::SystemException
-		   ))
-{
-  return EntityImpl::get_status_changes() ;
-}
-
-
 int
 SubscriberImpl::is_clean () const
 {
@@ -753,7 +852,6 @@ SubscriberImpl::data_received(DataReaderImpl *reader)
   ACE_GUARD (ACE_Recursive_Thread_Mutex,
 	     guard,
 	     this->si_lock_);
-
   datareader_set_.insert(reader) ;
 }
 
@@ -767,10 +865,10 @@ SubscriberImpl::data_received(DataReaderImpl *reader)
 
 void
 SubscriberImpl::add_associations (
-				  const WriterAssociationSeq & writers,
-				  DataReaderImpl* reader,
-				  const ::DDS::DataReaderQos reader_qos
-				  )
+  const WriterAssociationSeq & writers,
+  DataReaderImpl* reader,
+  const ::DDS::DataReaderQos /* reader_qos */
+  )
 {
   if (entity_deleted_ == true)
     {
@@ -781,10 +879,13 @@ SubscriberImpl::add_associations (
       return;
     }
 
-  size_t length = writers.length ();
+  size_t const length = writers.length ();
   AssociationData* associations = new AssociationData [length];
 
-  for (size_t i = 0; i < length; i++)
+  // TransportInterface does not take ownership
+  ACE_Auto_Array_Ptr<AssociationData> safe_associations (associations);
+
+  for (size_t i = 0; i < length; ++i)
     {
       associations[i].remote_id_ = writers[i].writerId;
       associations[i].remote_data_ = writers[i].writerTransInfo;
@@ -796,20 +897,11 @@ SubscriberImpl::add_associations (
   //           guard,
   //           this->si_lock_);
 
-  // TBD - pass the priority as part of the associations data
-  //       because there is a priority per remote publication.
-
-
- 
   this->add_publications(reader->get_subscription_id(),
-			                   reader,
-			                   writers[0].writerQos.transport_priority.value,
-			                   length,
-			                   associations);
-
-  ACE_UNUSED_ARG(reader_qos) ;  // for now...
-
-  delete []associations; // TransportInterface does not take ownership
+			 reader,
+			 0, // readers have no priority policy value.
+			 length,
+			 associations);
 }
 
 void
@@ -857,15 +949,25 @@ SubscriberImpl::reader_enabled(
       info->local_reader_objref_->get_qos(qos);
 
       OpenDDS::DCPS::TransportInterfaceInfo trans_conf_info = connection_info ();
+      trans_conf_info.publication_transport_priority = 0;
+
+      DCPSInfo_var repo = TheServiceParticipant->get_repository( this->domain_id_);
       info->subscription_id_
-	= this->repository_->add_subscription(
-					      participant_->get_domain_id (),
-					      participant_->get_id (),
-					      info->topic_id_,
-					      info->remote_reader_objref_,
-					      qos,
-					      trans_conf_info,
-					      qos_) ;
+	= repo->add_subscription( this->domain_id_,
+			          participant_->get_id (),
+			          info->topic_id_,
+			          info->remote_reader_objref_,
+			          qos,
+			          trans_conf_info,
+			          this->qos_) ;
+
+      if (info->subscription_id_ == OpenDDS::DCPS::GUID_UNKNOWN)
+      {
+        ACE_ERROR ((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::reader_enabled, ")
+          ACE_TEXT("add_subscription returned invalid id. \n")));
+        return;
+      }
       info->local_reader_impl_->set_subscription_id (info->subscription_id_);
     }
   catch (const CORBA::SystemException& sysex)
@@ -887,7 +989,7 @@ SubscriberImpl::reader_enabled(
     ACE_DEBUG ((LM_DEBUG,
 		ACE_TEXT("(%P|%t) ")
 		ACE_TEXT("SubscriberImpl::reader_enabled, ")
-		ACE_TEXT("datareader(topic_name=%s) enabled\n"),
+		ACE_TEXT("datareader(topic_name=%C) enabled\n"),
 		topic_name));
 
   DataReaderMap::iterator it
@@ -898,7 +1000,7 @@ SubscriberImpl::reader_enabled(
     {
       ACE_ERROR ((LM_ERROR,
 		  ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::reader_enabled, ")
-		  ACE_TEXT("insert datareader(topic_name=%s) failed. \n"),
+		  ACE_TEXT("insert datareader(topic_name=%C) failed. \n"),
 		  topic_name));
       return;
     }
@@ -922,20 +1024,6 @@ SubscriberImpl::listener_for (::DDS::StatusKind kind)
     {
       return fast_listener_;
     }
-}
-
-void
-SubscriberImpl::set_object_reference (const ::DDS::Subscriber_ptr& sub)
-{
-  if (! CORBA::is_nil (subscriber_objref_.in ()))
-    {
-      ACE_ERROR ((LM_ERROR,
-		  ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::set_object_reference, ")
-		  ACE_TEXT("This subscriber is already activated. \n")));
-      return;
-    }
-
-  subscriber_objref_ = ::DDS::Subscriber::_duplicate (sub);
 }
 
 } // namespace DCPS

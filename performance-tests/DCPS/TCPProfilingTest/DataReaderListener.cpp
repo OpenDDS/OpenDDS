@@ -3,8 +3,8 @@
 // $Id$
 #include "DataReaderListener.h"
 #include "dds/DCPS/Service_Participant.h"
-#include "testMsgTypeSupportC.h"
-#include "testMsgTypeSupportImpl.h"
+#include "testMessageTypeSupportC.h"
+#include "testMessageTypeSupportImpl.h"
 
 extern long subscriber_delay_msec; // from common.h
 
@@ -19,8 +19,7 @@ int read (::DDS::DataReader_ptr reader, bool useZeroCopy)
 
   ::profilingTest::testMsgDataReader_ptr pt_dr = var_dr.ptr();
   ::profilingTest::testMsgDataReaderImpl* dr_servant =
-      ::OpenDDS::DCPS::reference_to_servant< ::profilingTest::testMsgDataReaderImpl, ::profilingTest::testMsgDataReader_ptr>
-              (pt_dr);
+      dynamic_cast< ::profilingTest::testMsgDataReaderImpl*>(pt_dr);
 
   if (subscriber_delay_msec)
     {

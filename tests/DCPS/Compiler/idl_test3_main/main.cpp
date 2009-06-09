@@ -206,7 +206,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     if (try_marshaling<Xyz::StructOfArrayOfOctet>(val, val_out, 
                             DONT_CHECK_MS, ARRAY_LEN, "Xyz::StructOfArrayOfOctet"))
       {
-        for (CORBA::ULong ii =0; ii < ARRAY_LEN;ii++)
+        for (CORBA::Octet ii =0; ii < ARRAY_LEN;ii++)
           {
             if (val_out.f[ii] != ii)
               {
@@ -370,7 +370,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     if (try_marshaling<Xyz::SeqOfOctet>(val, val_out, 
                             DONT_CHECK_MS, SEQ_LEN_SIZE+SEQ_LEN, "Xyz::SeqOfOctet"))
       {
-        for (CORBA::ULong ii =0; ii < SEQ_LEN;ii++)
+        for (CORBA::Octet ii =0; ii < SEQ_LEN;ii++)
           {
             if (val_out[ii] != ii)
               {

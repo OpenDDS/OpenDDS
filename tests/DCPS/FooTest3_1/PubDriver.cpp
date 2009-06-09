@@ -2,8 +2,8 @@
 #include "PubDriver.h"
 #include "Writer.h"
 #include "TestException.h"
-#include "tests/DCPS/FooType3/FooTypeSupportC.h"
-#include "tests/DCPS/FooType3/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType3/FooDefTypeSupportC.h"
+#include "tests/DCPS/FooType3/FooDefTypeSupportImpl.h"
 #include "tests/DCPS/FooType3/FooDefC.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
@@ -16,6 +16,7 @@
 
 #include <ace/Arg_Shifter.h>
 #include <string>
+#include <sstream>
 
 const long  MY_DOMAIN   = 411;
 const char* MY_TOPIC    = "foo";
@@ -28,7 +29,7 @@ PubDriver::PubDriver()
   datawriters_ (0),
   writers_ (0),
   pub_id_fname_ (ACE_TEXT("pub_id.txt")),
-  sub_id_ (0),
+  sub_id_ ( OpenDDS::DCPS::GUID_UNKNOWN),
   block_on_write_ (0),
   num_threads_to_write_ (0),
   multiple_instances_ (0),
@@ -40,7 +41,8 @@ PubDriver::PubDriver()
   write_delay_msec_ (0),
   check_data_dropped_ (0),
   pub_driver_ior_ ("pubdriver.ior"),
-  shutdown_ (false)
+  shutdown_ (false),
+  sub_ready_filename_(ACE_TEXT("sub_ready.txt"))
 {
 }
 
@@ -199,6 +201,11 @@ PubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
       check_data_dropped_ = ACE_OS::atoi (current_arg);
       arg_shifter.consume_arg ();
     }
+    else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-f"))) != 0)
+	  {
+	    sub_ready_filename_ = current_arg;
+	    arg_shifter.consume_arg ();
+	  }
     // The '-?' option
     else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-?")) == 0) {
       ACE_DEBUG((LM_DEBUG,
@@ -258,14 +265,12 @@ PubDriver::init(int& argc, ACE_TCHAR *argv[])
   ACE_OS::fprintf (output_file, "%s", ior_string.in ());
   ACE_OS::fclose (output_file);
 
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) IOR written to file.\n")));
+
   datawriters_ = new ::DDS::DataWriter_var[num_datawriters_];
   writers_ = new Writer* [num_datawriters_];
 
-  ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl();
-
-  ::Xyz::FooTypeSupport_var fts =
-    ::OpenDDS::DCPS::servant_to_reference (fts_servant);
-
+  ::Xyz::FooTypeSupport_var fts (new ::Xyz::FooTypeSupportImpl);
 
   participant_ =
     dpf->create_participant(MY_DOMAIN,
@@ -279,6 +284,7 @@ PubDriver::init(int& argc, ACE_TCHAR *argv[])
         ACE_TEXT ("Failed to register the FooTypeSupport.")));
     }
 
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Publisher participant created.\n")));
 
   ::DDS::TopicQos topic_qos;
   participant_->get_default_topic_qos(topic_qos);
@@ -332,12 +338,13 @@ PubDriver::init(int& argc, ACE_TCHAR *argv[])
                                     ::DDS::DataWriterListener::_nil());
     TEST_CHECK (! CORBA::is_nil (datawriters_[i].in ()));
   }
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Publisher created %d datawriters.\n"), num_datawriters_));
 }
 
 void
 PubDriver::end()
 {
-  ACE_DEBUG((LM_DEBUG, "(%P|%t)PubDriver::end \n"));
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) PubDriver::end \n"));
 
   // Record samples been written in the Writer's data map.
   // Verify the number of instances and the number of samples
@@ -379,6 +386,8 @@ PubDriver::end()
 void
 PubDriver::run()
 {
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) PubDriver::run() entered.\n"));
+
   FILE* fp = ACE_OS::fopen (pub_id_fname_.c_str (), ACE_LIB_TEXT("w"));
   if (fp == 0)
   {
@@ -392,34 +401,54 @@ PubDriver::run()
   for (int i = 0; i < num_datawriters_; i ++)
   {
     ::Xyz::FooDataWriterImpl* datawriter_servant
-      = OpenDDS::DCPS::reference_to_servant< ::Xyz::FooDataWriterImpl>
+      = dynamic_cast< ::Xyz::FooDataWriterImpl*>
       (datawriters_[i].in ());
     OpenDDS::DCPS::PublicationId pub_id = datawriter_servant->get_publication_id ();
+    std::stringstream buffer;
+    buffer << pub_id;
 
     // Write the publication id to a file.
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT("(%P|%t) PubDriver::run, ")
-                ACE_TEXT(" Write to %s: pub_id=%d. \n"),
+                ACE_TEXT(" Write to %s: pub_id=%s.\n"),
                 pub_id_fname_.c_str (),
-                pub_id));
+                buffer.str().c_str()));
 
-    ACE_OS::fprintf (fp, "%d\n", pub_id);
+    ACE_OS::fprintf (fp, "%s\n", buffer.str().c_str());
   }
 
   fclose (fp);
+
+  // Wait for the subscriber to be ready to accept connection.
+  FILE* readers_ready = 0;
+  do
+    {
+      ACE_Time_Value small(0,250000);
+      ACE_OS::sleep (small);
+      readers_ready = ACE_OS::fopen (sub_ready_filename_.c_str (), ACE_LIB_TEXT("r"));
+    } while (0 == readers_ready);
+
+  ACE_OS::fclose(readers_ready);
+
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) PubDriver::run() - subscriber has indicated willingness to connect.\n"));
 
   // Set up the subscriptions.
   ::OpenDDS::DCPS::ReaderAssociationSeq associations;
   associations.length (1);
   associations[0].readerTransInfo.transport_id = 1; // TBD - not right
+  associations[0].readerTransInfo.publication_transport_priority = 0;
 
-  OpenDDS::DCPS::NetworkAddress network_order_address(this->sub_addr_);
+  OpenDDS::DCPS::NetworkAddress network_order_address(this->sub_addr_str_);
+
+  ACE_OutputCDR cdr;
+  cdr << network_order_address;
+  size_t len = cdr.total_length ();
+
   associations[0].readerTransInfo.data
     = OpenDDS::DCPS::TransportInterfaceBLOB
-                                   (sizeof(OpenDDS::DCPS::NetworkAddress),
-                                    sizeof(OpenDDS::DCPS::NetworkAddress),
-                                    (CORBA::Octet*)(&network_order_address));
-
+    (len,
+    len,
+    (CORBA::Octet*)(cdr.buffer ()));
 
   associations[0].readerId = this->sub_id_;
   associations[0].subQos = TheServiceParticipant->initial_SubscriberQos ();
@@ -429,7 +458,7 @@ PubDriver::run()
   for (int i = 0; i < num_datawriters_; i ++)
   {
     ::Xyz::FooDataWriterImpl* datawriter_servant
-      = OpenDDS::DCPS::reference_to_servant< ::Xyz::FooDataWriterImpl>
+      = dynamic_cast< ::Xyz::FooDataWriterImpl*>
       (datawriters_[i].in ());
     OpenDDS::DCPS::PublicationId pub_id = datawriter_servant->get_publication_id ();
 
@@ -439,6 +468,8 @@ PubDriver::run()
     dw_remote->add_associations (pub_id, associations);
   }
   }
+
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) PubDriver::run() - add_associations called directly.\n"));
 
   // Let the subscriber catch up before we broadcast.
   ACE_OS::sleep (2);
@@ -462,6 +493,8 @@ PubDriver::run()
     writers_[i]->start ();
   }
   }
+
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) PubDriver::run() - writers started.\n"));
 }
 
 int
@@ -495,10 +528,10 @@ PubDriver::parse_pub_arg(const ACE_TString& arg)
 
   // Parse the pub_id from left of ':' char, and remainder to right of ':'.
   ACE_TString pub_id_str(arg.c_str(), pos);
-  ACE_TString pub_addr_str(arg.c_str() + pos + 1);
+  this->pub_addr_str_ = arg.c_str() + pos + 1;
 
   this->pub_id_fname_ = pub_id_str.c_str();
-  this->pub_addr_ = ACE_INET_Addr(pub_addr_str.c_str());
+  this->pub_addr_ = ACE_INET_Addr(this->pub_addr_str_.c_str());
 
   return 0;
 }
@@ -534,12 +567,15 @@ PubDriver::parse_sub_arg(const ACE_TString& arg)
 
   // Parse the sub_id from left of ':' char, and remainder to right of ':'.
   ACE_TString sub_id_str(arg.c_str(), pos);
-  ACE_TString sub_addr_str(arg.c_str() + pos + 1);
+  this->sub_addr_str_  = arg.c_str() + pos + 1;
 
-  this->sub_id_ = ACE_OS::atoi(sub_id_str.c_str());
+  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 1
+  converter.kind()   = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
+  converter.key()[2] = ACE_OS::atoi(sub_id_str.c_str());
+  this->sub_id_ = converter;
 
   // Use the remainder as the "stringified" ACE_INET_Addr.
-  this->sub_addr_ = ACE_INET_Addr(sub_addr_str.c_str());
+  this->sub_addr_ = ACE_INET_Addr(this->sub_addr_str_.c_str());
 
   return 0;
 }
@@ -567,6 +603,7 @@ void PubDriver::attach_to_transport ()
     = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
 
   tcp_config->local_address_ = this->pub_addr_;
+  tcp_config->local_address_str_ = this->pub_addr_str_;
 
   if (transport_impl->configure(config.in ()) != 0)
     {
@@ -577,7 +614,7 @@ void PubDriver::attach_to_transport ()
 
   // Attach the Publisher with the TransportImpl.
   OpenDDS::DCPS::PublisherImpl* pub_servant
-    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (publisher_.in ());
+    = dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (publisher_.in ());
 
   TEST_CHECK (pub_servant != 0);
 

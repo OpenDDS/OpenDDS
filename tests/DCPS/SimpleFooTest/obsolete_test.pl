@@ -5,28 +5,28 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 
-PerlACE::add_lib_path('../FooType');
+PerlDDS::add_lib_path('../FooType');
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("dcps_ir.ior");
+$dcpsrepo_ior = "dcps_ir.ior";
 
-
-$DCPSREPO = new PerlACE::Process ("../../../../DDS/DCPSInfoRepo",
-                            "-o $dcpsrepo_ior"
-                            . " -d $domains_file -ORBDebugLevel 1");
+$DCPSREPO = PerlDDS::create_process ("$DDS_ROOT/bin/DCPSInfoRepo",
+                              "-o $dcpsrepo_ior"
+                              . " -ORBDebugLevel 1");
 
 
-$FooTest = new PerlACE::Process ("SimpleFooTest",
-                            "-DCPSInfoRepo file://$dcpsrepo_ior");
+$FooTest = PerlDDS::create_process ("SimpleFooTest",
+                              "-DCPSInfoRepo file://$dcpsrepo_ior");
 
 $DCPSREPO->Spawn ();
-if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 5) == -1) {
+if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
     print STDERR "ERROR: cannot find file <$dcpsrepo_ior>\n";
     $REPO->Kill (); $REPO->TimedWait (1);
     exit 1;

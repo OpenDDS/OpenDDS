@@ -14,7 +14,7 @@
 
 OpenDDS::DCPS::TransportConfiguration::~TransportConfiguration()
 {
-  DBG_ENTRY_LVL("TransportConfiguration","~TransportConfiguration",5);
+  DBG_ENTRY_LVL("TransportConfiguration","~TransportConfiguration",6);
   delete this->send_thread_strategy_;
 }
 
@@ -24,7 +24,7 @@ OpenDDS::DCPS::TransportConfiguration::load (const TransportIdType& id
 {
   ACE_TCHAR section [50];
   ACE_OS::sprintf (section, ACE_TEXT("%s%u")
-                   , ACE_TEXT_ALWAYS_CHAR(TRANSPORT_SECTION_NAME_PREFIX), id);
+                   , TRANSPORT_SECTION_NAME_PREFIX, id);
   const ACE_Configuration_Section_Key &root = cf.root_section ();
   ACE_Configuration_Section_Key sect;
   if (cf.open_section (root, section, 0, sect) != 0)
@@ -39,7 +39,7 @@ OpenDDS::DCPS::TransportConfiguration::load (const TransportIdType& id
   GET_CONFIG_VALUE (cf, sect, ACE_TEXT("optimum_packet_size"), this->optimum_packet_size_, ACE_UINT32)
   GET_CONFIG_STRING_VALUE (cf, sect, ACE_TEXT("transport_type"), this->transport_type_)
   GET_CONFIG_VALUE (cf, sect, ACE_TEXT("thread_per_connection"), this->thread_per_connection_, bool)
-  GET_CONFIG_VALUE (cf, sect, ACE_TEXT("keep_link"), this->keep_link_, bool)
+  GET_CONFIG_VALUE (cf, sect, ACE_TEXT("datalink_release_delay"), this->datalink_release_delay_, int)
 
   adjust_config_value ();
   return 0;

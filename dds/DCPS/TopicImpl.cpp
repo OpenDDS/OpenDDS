@@ -6,6 +6,7 @@
 #include "Qos_Helper.h"
 #include "Definitions.h"
 #include "Service_Participant.h"
+#include "DomainParticipantImpl.h"
 
 
 namespace OpenDDS
@@ -54,21 +55,53 @@ namespace OpenDDS
     {
       if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos))
         {
+          if (qos_ == qos)
+            return ::DDS::RETCODE_OK;
+
           if (enabled_.value())
             {
               if (! Qos_Helper::changeable (qos_, qos))
                 {
                   return ::DDS::RETCODE_IMMUTABLE_POLICY;
                 }
+              else 
+                {
+                  qos_ = qos;
+                  DomainParticipantImpl* part = dynamic_cast<DomainParticipantImpl*> (this->participant_);
+
+                  try
+                  {
+                    DCPSInfo_var repo = TheServiceParticipant->get_repository(part->get_domain_id());
+                    CORBA::Boolean status 
+                      = repo->update_topic_qos(this->id_, part->get_domain_id(), part->get_id(), qos_);
+
+                    if (status == 0)
+                    {
+                      ACE_ERROR_RETURN ((LM_ERROR,
+                        ACE_TEXT("(%P|%t) TopicImpl::set_qos, ")
+                        ACE_TEXT("failed on compatiblity check. \n")),
+                        ::DDS::RETCODE_ERROR);
+                    }
+                  }
+                  catch (const CORBA::SystemException& sysex)
+                  {
+                    sysex._tao_print_exception (
+                      "ERROR: System Exception"
+                      " in TopicImpl::set_qos");
+                    return ::DDS::RETCODE_ERROR;
+                  }
+                  catch (const CORBA::UserException& userex)
+                  {
+                    userex._tao_print_exception (
+                      "ERROR:  Exception"
+                      " in TopicImpl::set_qos");
+                    return ::DDS::RETCODE_ERROR;
+                  }
+                }
             }
-          if (! (qos_ == qos))
-            {
-              qos_ = qos;
-              // TBD - when there are changable QoS then we
-              //       need to tell the DCPSInfo/repo about
-              //       the changes in Qos.
-              // repo->set_qos(qos_);
-            }
+          else 
+            qos_ = qos;
+
           return ::DDS::RETCODE_OK;
         }
       else
@@ -102,8 +135,7 @@ namespace OpenDDS
       listener_mask_ = mask;
       //note: OK to duplicate  and reference_to_servant a nil object ref
       listener_ = ::DDS::TopicListener::_duplicate(a_listener);
-      fast_listener_ =
-        reference_to_servant<DDS::TopicListener> (listener_.in ());
+      fast_listener_ = listener_.in ();
       return ::DDS::RETCODE_OK;
     }
 
@@ -145,18 +177,6 @@ namespace OpenDDS
       return this->set_enabled ();
     }
 
-
-    ::DDS::StatusKindMask
-    TopicImpl::get_status_changes (
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ))
-    {
-      // TBD - Currently no supported QoS allow changes
-      // so it always returns 0 (No changes).
-      return 0;
-    }
 
     RepoId
     TopicImpl::get_id () const

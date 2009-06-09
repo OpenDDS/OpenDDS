@@ -1,49 +1,40 @@
 
 project(*Common) : dcps {
-  sharedname = StockQuoterCommon
-  libout = .
+  sharedname     = StockQuoterCommon
+  dynamicflags   = STOCKQUOTERCOMMON_BUILD_DLL
+  libout         = .
   requires += tao_orbsvcs
-
-  includes += $(TAO_ROOT)/orbsvcs
-  idlflags += -I$(TAO_ROOT)/orbsvcs
-  idlflags += -Wb,export_macro=StockQuoterCommon_Export
-  idlflags += -Wb,export_include=StockQuoterCommon_Export.h
+  includes      += $(TAO_ROOT)/orbsvcs
+  idlflags      += -I$(TAO_ROOT)/orbsvcs \
+                   -Wb,export_macro=StockQuoterCommon_Export \
+                   -Wb,export_include=StockQuoterCommon_Export.h
   dcps_ts_flags += --export=StockQuoterCommon_Export
-  dynamicflags = STOCKQUOTERCOMMON_BUILD_DLL
 
   TypeSupport_Files {
-    StockQuoter.idl >> QuoteTypeSupport.idl QuoteTypeSupportImpl.h QuoteTypeSupportImpl.cpp \
-                       ExchangeEventTypeSupport.idl ExchangeEventTypeSupportImpl.h ExchangeEventTypeSupportImpl.cpp
-  }
-
-  IDL_Files {
-    ExchangeEventTypeSupport.idl
-    QuoteTypeSupport.idl
     StockQuoter.idl
   }
 
-  Header_Files {
-    ExchangeEventTypeSupportImpl.h
-    QuoteTypeSupportImpl.h
+  IDL_Files {
+    StockQuoterTypeSupport.idl
+    StockQuoter.idl
   }
 
-  Source_Files {
-   ExchangeEventTypeSupportImpl.cpp
-    QuoteTypeSupportImpl.cpp
+  // We only want the generated files
+  Header_Files {
   }
-} 
+
+  // We only want the generated files
+  Source_Files {
+  }
+}
 
 project(*Publisher) : dcpsexe, svc_utils {
-  after += *Common
+  after    += *Common
   exename   = publisher
   requires += tao_orbsvcs
 
   includes += $(TAO_ROOT)/orbsvcs
-  libs += StockQuoterCommon
-  dynamicflags = STOCKQUOTERCOMMON_HAS_DLL
-
-  TypeSupport_Files {
-  }
+  libs     += StockQuoterCommon
 
   IDL_Files {
   }
@@ -67,16 +58,12 @@ project(*Publisher) : dcpsexe, svc_utils {
 
 
 project(*Subscriber) : dcpsexe {
-  after += *Common
+  after    += *Common
   exename   = subscriber
   requires += tao_orbsvcs
 
   includes += $(TAO_ROOT)/orbsvcs
-  libs += StockQuoterCommon
-  dynamicflags = STOCKQUOTERCOMMON_HAS_DLL
-
-  TypeSupport_Files {
-  }
+  libs     += StockQuoterCommon
 
   IDL_Files {
   }

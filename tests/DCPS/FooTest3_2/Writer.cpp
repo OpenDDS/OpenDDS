@@ -9,7 +9,7 @@
 #include "TestException.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/DataWriterImpl.h"
-#include "tests/DCPS/FooType3Unbounded/FooTypeSupportC.h"
+#include "tests/DCPS/FooType3Unbounded/FooDefTypeSupportC.h"
 #include "tests/DCPS/common/TestSupport.h"
 
 const int default_key = 101010;
@@ -36,7 +36,7 @@ Writer::Writer(PubDriver*            pubdriver,
   pubdriver_ (pubdriver)
 {
   writer_servant_
-    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::DataWriterImpl>(writer_.in());
+    = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(writer_.in());
   unbound_data_.length (5);
   for (CORBA::ULong i = 0; i < 5; i ++)
   {

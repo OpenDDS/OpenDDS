@@ -16,10 +16,11 @@ OpenDDS::DCPS::SimpleTcpSendStrategy::SimpleTcpSendStrategy
                                       SimpleTcpConfiguration* config,
                                       SimpleTcpConnection*    connection,
                                       SimpleTcpSynchResource* synch_resource,
-                                      TransportReactorTask* task)
-  : TransportSendStrategy(config, synch_resource)
+                                      TransportReactorTask*   task,
+                                      CORBA::Long             priority)
+  : TransportSendStrategy(config, synch_resource, priority)
 {
-  DBG_ENTRY_LVL("SimpleTcpSendStrategy","SimpleTcpSendStrategy",5);
+  DBG_ENTRY_LVL("SimpleTcpSendStrategy","SimpleTcpSendStrategy",6);
 
   // Keep a "copy" of the connection reference for ourselves
   connection->_add_ref();
@@ -41,13 +42,13 @@ OpenDDS::DCPS::SimpleTcpSendStrategy::SimpleTcpSendStrategy
 
 OpenDDS::DCPS::SimpleTcpSendStrategy::~SimpleTcpSendStrategy()
 {
-  DBG_ENTRY_LVL("SimpleTcpSendStrategy","~SimpleTcpSendStrategy",5);
+  DBG_ENTRY_LVL("SimpleTcpSendStrategy","~SimpleTcpSendStrategy",6);
 }
 
 int
 OpenDDS::DCPS::SimpleTcpSendStrategy::reset(SimpleTcpConnection* connection)
 {
-  DBG_ENTRY_LVL("SimpleTcpSendStrategy","reset",5);
+  DBG_ENTRY_LVL("SimpleTcpSendStrategy","reset",6);
 
   // Sanity check - this connection is passed in from the constructor and
   // it should not be nil.
@@ -67,18 +68,10 @@ OpenDDS::DCPS::SimpleTcpSendStrategy::reset(SimpleTcpConnection* connection)
                        -1);
     }
 
-  // Unregister the old handle
-  this->reactor_task_->get_reactor()->remove_handler
-                                             (this->connection_.in(),
-                                              ACE_Event_Handler::READ_MASK |
-                                              ACE_Event_Handler::DONT_CALL);
-
   // This will cause the connection_ object to drop its reference to this
   // TransportSendStrategy object.
   this->connection_->remove_send_strategy();
 
-  // Take back the "copy" we made (see start_i() implementation).
-  this->connection_->_remove_ref();
 
   // Replace with a new connection.
   connection->_add_ref ();
@@ -90,20 +83,6 @@ OpenDDS::DCPS::SimpleTcpSendStrategy::reset(SimpleTcpConnection* connection)
   // reference (to this object) that we pass-in here.
   this->connection_->set_send_strategy(this);
 
-  // Give the reactor its own "copy" of the reference to the connection object.
-  this->connection_->_add_ref();
-
-  if (this->reactor_task_->get_reactor()->register_handler
-                                      (this->connection_.in(),
-                                       ACE_Event_Handler::READ_MASK) == -1)
-    {
-      // Take back the "copy" we made.
-      this->connection_->_remove_ref();
-      ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: SimpleTcpSendStrategy::reset SimpleTcpConnection can't register with "
-                        "reactor\n"),
-                       -1);
-    }
 
   return 0;
 }
@@ -112,7 +91,7 @@ OpenDDS::DCPS::SimpleTcpSendStrategy::reset(SimpleTcpConnection* connection)
 ssize_t
 OpenDDS::DCPS::SimpleTcpSendStrategy::send_bytes(const iovec iov[], int n, int& bp)
 {
-  DBG_ENTRY_LVL("SimpleTcpSendStrategy","send_bytes",5);
+  DBG_ENTRY_LVL("SimpleTcpSendStrategy","send_bytes",6);
 
   return this->non_blocking_send (iov, n, bp);
 }
@@ -141,14 +120,15 @@ OpenDDS::DCPS::SimpleTcpSendStrategy::send_bytes_i (const iovec iov[], int n)
 void
 OpenDDS::DCPS::SimpleTcpSendStrategy::relink (bool do_suspend)
 {
-  DBG_ENTRY_LVL("SimpleTcpSendStrategy","relink",5);
-  this->connection_->relink (do_suspend);
+  DBG_ENTRY_LVL("SimpleTcpSendStrategy","relink",6);
+  if (! this->connection_.is_nil ())
+    this->connection_->relink (do_suspend);
 }
 
 void
 OpenDDS::DCPS::SimpleTcpSendStrategy::stop_i()
 {
-  DBG_ENTRY_LVL("SimpleTcpSendStrategy","stop_i",5);
+  DBG_ENTRY_LVL("SimpleTcpSendStrategy","stop_i",6);
 
   // This will cause the connection_ object to drop its reference to this
   // TransportSendStrategy object.

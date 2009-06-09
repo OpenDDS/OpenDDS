@@ -8,6 +8,7 @@
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject_T.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
+#include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/Serializer.h"
 #include "ace/Synch.h"
 
@@ -23,7 +24,7 @@ namespace OpenDDS
     {
       public:
 
-        typedef std::map<RepoId, RepoId> MapType;
+        typedef std::map<RepoId, RepoId, GUID_tKeyLessThan> MapType;
 
         RepoIdSet();
         virtual ~RepoIdSet();
@@ -41,11 +42,10 @@ namespace OpenDDS
         /// stream: size of map, list of keys in the map.
         void serialize(TAO::DCPS::Serializer & serializer);
 
-        /// Check if contents in the two RepoIdSet are same.
-        bool is_subset (RepoIdSet& map);
-
         bool exist (const RepoId& remote_id, 
                     bool& last);
+
+        void clear ();
 
       private:
 

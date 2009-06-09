@@ -14,22 +14,22 @@ OpenDDS::DCPS::SimpleTcpConnectionReplaceTask::SimpleTcpConnectionReplaceTask(
   SimpleTcpTransport* trans)
   : trans_ (trans)
 {
-  DBG_ENTRY_LVL("SimpleTcpConnectionReplaceTask","SimpleTcpConnectionReplaceTask",5);
+  DBG_ENTRY_LVL("SimpleTcpConnectionReplaceTask","SimpleTcpConnectionReplaceTask",6);
 }
 
 
 OpenDDS::DCPS::SimpleTcpConnectionReplaceTask::~SimpleTcpConnectionReplaceTask()
 {
-  DBG_ENTRY_LVL("SimpleTcpConnectionReplaceTask","~SimpleTcpConnectionReplaceTask",5);
+  DBG_ENTRY_LVL("SimpleTcpConnectionReplaceTask","~SimpleTcpConnectionReplaceTask",6);
 }
 
 
 
 void OpenDDS::DCPS::SimpleTcpConnectionReplaceTask::execute (SimpleTcpConnection_rch& con)
 {
-  DBG_ENTRY_LVL("SimpleTcpConnectionReplaceTask","execute",5);
+  DBG_ENTRY_LVL("SimpleTcpConnectionReplaceTask","execute",6);
 
-  this->trans_->fresh_link (con->get_remote_address(), con);
+  this->trans_->fresh_link( con);
 }
 
 

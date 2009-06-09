@@ -16,7 +16,7 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/PublisherImpl.h"
-#include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 #ifdef ACE_AS_STATIC_LIBS
@@ -31,7 +31,7 @@
 #include "common.h"
 
 OpenDDS::DCPS::TransportImpl_rch writer_transport_impl;
-static const ACE_TCHAR * writer_address_str = ACE_TEXT("");
+static const ACE_TCHAR * writer_address_str = ACE_TEXT("localhost:0");
 static int writer_address_given = 0;
 
 
@@ -61,6 +61,7 @@ static int init_writer_tranport ()
 
       ACE_INET_Addr writer_address (writer_address_str);
       writer_udp_config->local_address_ = writer_address;
+      writer_udp_config->local_address_str_ = writer_address_str;
 
       if (writer_transport_impl->configure(writer_config.in()) != 0)
         {
@@ -87,6 +88,7 @@ static int init_writer_tranport ()
         {
           ACE_INET_Addr writer_address (writer_address_str);
           writer_tcp_config->local_address_ = writer_address;
+          writer_tcp_config->local_address_str_ = writer_address_str;
         }
         // else use default address - OS assigned.
 
@@ -241,12 +243,7 @@ int main (int argc, ACE_TCHAR *argv[])
       // and then get application specific parameters.
       parse_args (argc, argv);
 
-
-      ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl;
-      OpenDDS::DCPS::LocalObject_var safe_servant = fts_servant;
-
-      ::Xyz::FooTypeSupport_var fts =
-        OpenDDS::DCPS::servant_to_reference (fts_servant);
+      ::Xyz::FooTypeSupport_var fts(new ::Xyz::FooTypeSupportImpl);
 
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,
@@ -306,7 +303,7 @@ int main (int argc, ACE_TCHAR *argv[])
 
       // Attach the publisher to the transport.
       OpenDDS::DCPS::PublisherImpl* pub_impl
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub.in ());
+        = dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub.in ());
 
       if (0 == pub_impl)
       {
@@ -461,6 +458,12 @@ int main (int argc, ACE_TCHAR *argv[])
       dp->delete_topic(topic.in ());
       dpf->delete_participant(dp.in ());
 
+      // Moved TransportImpl reference release from just before exit from main
+      // to here. This intended to fix the access violation in some optimize
+      // build on linux during shutdown. I think TransportImpl object cleanup
+      // may reference some resouces that already released.
+      writer_transport_impl = 0;
+
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
@@ -477,9 +480,5 @@ int main (int argc, ACE_TCHAR *argv[])
       return 1;
     }
 
-  // Note: The TransportImpl reference SHOULD be deleted before exit from
-  //       main if the concrete transport libraries are loaded dynamically.
-  //       Otherwise cleanup after main() will encount access vilation.
-  writer_transport_impl = 0;
   return status;
 }

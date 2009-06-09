@@ -12,9 +12,13 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "ReliableMulticast_Export.h"
+#include "ReliableMulticastTransportConfiguration.h"
+#include "ReliableMulticastDataLink.h"
 #include "ReliableMulticastRcHandles.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
+#include "dds/DCPS/transport/framework/TransportReactorTask.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
+#include "dds/DCPS/transport/framework/PriorityKey.h"
 #include <map>
 
 namespace OpenDDS
@@ -34,7 +38,8 @@ namespace OpenDDS
     protected:
       virtual OpenDDS::DCPS::DataLink* find_or_create_datalink(
         const TransportInterfaceInfo& remote_info,
-        int connect_as_publisher
+        int connect_as_publisher,
+        int priority
         );
 
       virtual int configure_i(TransportConfiguration* config);
@@ -45,13 +50,14 @@ namespace OpenDDS
 
       virtual void release_datalink_i(OpenDDS::DCPS::DataLink* link);
 
-      virtual bool acked(RepoId);
+      virtual bool acked(RepoId, RepoId);
+      virtual void remove_ack (RepoId pub_id, RepoId sub_id);
 
     private:
-      ReliableMulticastTransportConfiguration* configuration_;
+      ReliableMulticastTransportConfiguration_rch configuration_;
       // JSP: Add transport configuration storage
       typedef std::map<
-        ACE_INET_Addr,
+        PriorityKey,
         OpenDDS::DCPS::ReliableMulticastDataLink_rch
         > ReliableMulticastDataLinkMap;
       ReliableMulticastDataLinkMap data_links_;

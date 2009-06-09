@@ -10,7 +10,7 @@
 // ============================================================================
 
 
-#include "MessageTypeSupportImpl.h"
+#include "MessengerTypeSupportImpl.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/SubscriberImpl.h>
@@ -150,8 +150,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
           // Attach the subscriber to the transport.
           OpenDDS::DCPS::SubscriberImpl* sub_impl =
-            ::OpenDDS::DCPS::reference_to_servant
-            < OpenDDS::DCPS::SubscriberImpl, DDS::Subscriber_ptr> (sub.in ());
+            dynamic_cast< OpenDDS::DCPS::SubscriberImpl*> (sub.in ());
           if (0 == sub_impl) {
             ACE_ERROR_RETURN ((LM_ERROR,
                                "(%P|%t) Failed to obtain subscriber servant.\n")
@@ -207,7 +206,13 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
               ACE_Time_Value small (0,250000);
               ACE_OS::sleep (small);
             }
-            //ACE_OS::sleep (2);
+
+          // Add sleep to let the fully_associted message arrive datawriter 
+          // before remove_associations is called upon delete_datareader, 
+          // otherwise the datawriter will encounter bit lookup timeout upon 
+          // fully associated.
+          ACE_Time_Value small (0,250000);
+	        ACE_OS::sleep (small);
 
           if (verbose) {
             ACE_DEBUG ((LM_DEBUG, "(%P|%t) *** Destroying Subscriber\n"));
@@ -220,8 +225,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           participant->delete_subscriber(sub.in());
           dr = DDS::DataReader::_nil ();
           sub = DDS::Subscriber::_nil();
-          if (count < sub_reinit_itr)
-            ACE_OS::sleep (3);
         }
 
       if (!CORBA::is_nil (participant.in ())) {

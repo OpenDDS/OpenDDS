@@ -9,7 +9,7 @@
  */
 // ============================================================================
 
-#include "MessageTypeSupportImpl.h"
+#include "MessengerTypeSupportImpl.h"
 #include "Writer.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
@@ -60,12 +60,15 @@ parse_args (int argc, ACE_TCHAR *argv[])
       else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_mcast_pub")) == 0) {
         transport_impl_id = OpenDDS::DCPS::DEFAULT_SIMPLE_MCAST_PUB_ID;
       }
+      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_reliable_mcast_pub")) == 0) {
+        transport_impl_id = OpenDDS::DCPS::DEFAULT_RELIABLE_MULTICAST_PUB_ID;
+      }
       break;
     case '?':
     default:
       ACE_ERROR_RETURN ((LM_ERROR,
         "usage:  %s "
-        "-t <tcp/udp/default> "
+        "-t <tcp/udp/mcast/reliable_mcast/default_tcp/default_udp/default_mcast_pub/default_reliable_mcast_pub> "
         "\n",
         argv [0]),
         -1);
@@ -112,7 +115,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
         exit(1);
       }
 
-      OpenDDS::DCPS::TransportImpl_rch tcp_impl =
+      OpenDDS::DCPS::TransportImpl_rch transport_impl =
         TheTransportFactory->create_transport_impl (transport_impl_id,
                                                     ::OpenDDS::DCPS::AUTO_CONFIG);
 
@@ -125,14 +128,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       }
 
       // Attach the publisher to the transport.
-      OpenDDS::DCPS::PublisherImpl* pub_impl =
-        OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub.in ());
-      if (0 == pub_impl) {
-        cerr << "Failed to obtain publisher servant" << endl;
-        exit(1);
-      }
-
-      OpenDDS::DCPS::AttachStatus status = pub_impl->attach_transport(tcp_impl.in());
+      OpenDDS::DCPS::AttachStatus status = transport_impl->attach(pub.in());
       if (status != OpenDDS::DCPS::ATTACH_OK) {
         std::string status_str;
         switch (status) {

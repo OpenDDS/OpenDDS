@@ -10,6 +10,7 @@
 #include "SimpleTcpReceiveStrategy.h"
 #include "SimpleTcpSendStrategy.h"
 #include "SimpleTcpReconnectTask.h"
+#include "dds/DCPS/transport/framework/DirectPriorityMapper.h"
 #include "ace/os_include/netinet/os_tcp.h"
 
 #if !defined (__ACE_INLINE__)
@@ -38,9 +39,10 @@ OpenDDS::DCPS::SimpleTcpConnection::SimpleTcpConnection()
   reconnect_task_ (this),
   reconnect_state_ (INIT_STATE),
   last_reconnect_attempted_ (ACE_Time_Value::zero),
+  transport_priority_( 0), // TRANSPORT_PRIORITY.value default value - 0.
   shutdown_ (false)
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","SimpleTcpConnection",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","SimpleTcpConnection",6);
 
   // Open the reconnect task
   if (this->reconnect_task_.open ())
@@ -53,7 +55,7 @@ OpenDDS::DCPS::SimpleTcpConnection::SimpleTcpConnection()
 
 OpenDDS::DCPS::SimpleTcpConnection::~SimpleTcpConnection()
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","~SimpleTcpConnection",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","~SimpleTcpConnection",6);
 
   // Remove the reference of the old connection object
   // or the reference of new connection object.
@@ -71,13 +73,30 @@ OpenDDS::DCPS::SimpleTcpConnection::~SimpleTcpConnection()
 }
 
 
+void
+OpenDDS::DCPS::SimpleTcpConnection::disconnect()
+{
+  DBG_ENTRY_LVL("SimpleTcpConnection","disconnect",6);
+  this->peer().close();
+  this->connected_ = false;
+  if (! this->receive_strategy_.is_nil ())
+  {
+    SimpleTcpReceiveStrategy* rs
+      = dynamic_cast <SimpleTcpReceiveStrategy*> (this->receive_strategy_.in ());
+
+    rs->get_reactor()->remove_handler (this,       
+       ACE_Event_Handler::READ_MASK | ACE_Event_Handler::DONT_CALL);
+  }
+}
+
+
 // This can not be inlined due to circular dependencies disallowing
 // visibility into the receive strategy to call add_ref().  Oh well.
 void
 OpenDDS::DCPS::SimpleTcpConnection::set_receive_strategy
                                  (TransportReceiveStrategy* receive_strategy)
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","set_receive_strategy",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","set_receive_strategy",6);
 
   // Make a "copy" for ourselves
   receive_strategy->_add_ref();
@@ -89,7 +108,7 @@ void
 OpenDDS::DCPS::SimpleTcpConnection::set_send_strategy
                                  (SimpleTcpSendStrategy* send_strategy)
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","set_send_strategy",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","set_send_strategy",6);
 
   // Make a "copy" for ourselves
   send_strategy->_add_ref();
@@ -100,7 +119,7 @@ OpenDDS::DCPS::SimpleTcpConnection::set_send_strategy
 int
 OpenDDS::DCPS::SimpleTcpConnection::open(void* arg)
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","open",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","open",6);
 
   // A safety check - This should not happen since the is_connector_
   // defaults to true and open() is called after the ACE_Aceptor
@@ -122,9 +141,10 @@ OpenDDS::DCPS::SimpleTcpConnection::open(void* arg)
     {
       // The cast failed.
       ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: Failed to cast void* arg to "
-                        "SimpleTcpAcceptor* type.\n"),
-                       -1);
+        ACE_TEXT("(%P|%t) ERROR: SimpleTcpConnection::open() - ")
+        ACE_TEXT("failed to cast void* arg to ")
+        ACE_TEXT("SimpleTcpAcceptor* type.\n")),
+      -1);
     }
 
   // Now we need to ask the SimpleTcpAcceptor object to provide us with
@@ -135,8 +155,9 @@ OpenDDS::DCPS::SimpleTcpConnection::open(void* arg)
     {
       // The acceptor gave us a nil transport (smart) pointer.
       ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: Acceptor's transport is nil.\n"),
-                       -1);
+        ACE_TEXT("(%P|%t) ERROR: SimpleTcpConnection::open() - ")
+        ACE_TEXT("acceptor's transport is nil.\n")),
+      -1);
     }
 
   SimpleTcpConfiguration* tcp_config = acceptor->get_configuration();
@@ -152,46 +173,60 @@ OpenDDS::DCPS::SimpleTcpConnection::open(void* arg)
   // in this case) will supply its listening ACE_INET_Addr as the first
   // message it sends to the socket.  This is a one-way connection
   // establishment protocol message.
-  NetworkAddress network_order_address;
 
-  if (this->peer().recv_n((char*)(&network_order_address),
-                          sizeof(network_order_address)) == -1)
+  ACE_UINT32 nlen = 0;
+  if (this->peer().recv_n(&nlen,
+                          sizeof(ACE_UINT32)) == -1)
     {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: Unable to receive the remote_address "
-                        "from the remote (active) side of the connection."
-                        " %p\n", "recv_n"),
-                       -1);
+       ACE_ERROR_RETURN((LM_ERROR,
+         ACE_TEXT("(%P|%t) ERROR: SimpleTcpConnection::open() - ")
+         ACE_TEXT("unable to receive the length of address string ")
+         ACE_TEXT("from the remote (active) side of the connection. ")
+         ACE_TEXT("%p\n"),
+         "recv_n"),
+       -1);
     }
+ 
+  ACE_UINT32 len = ntohl(nlen);
+
+  char * buf = new char [len];
+
+  if (this->peer().recv_n(buf,
+                          len) == -1)
+    {
+       ACE_ERROR_RETURN((LM_ERROR,
+         ACE_TEXT("(%P|%t) ERROR: SimpleTcpConnection::open() - ")
+         ACE_TEXT("unable to receive the address string ")
+         ACE_TEXT("from the remote (active) side of the connection. ")
+         ACE_TEXT("%p\n"),
+         "recv_n"),
+       -1);
+    }
+
+  NetworkAddress network_order_address(ACE_TEXT_CHAR_TO_TCHAR(buf));
 
   network_order_address.to_addr(this->remote_address_);
 
-//MJM: vvv CONNECTION ESTABLISHMENT CHANGES vvv
+  delete[] buf;
 
-//MJM: Add code to send a response to the other side that the
-//MJM: connection is ready to receive at this point.  It may be
-//MJM: necessary to do this higher in the layers to make sure that we
-//MJM: really are ready to receive.
-
-//MJM: This is the only really tricky bit, since I have not really
-//MJM: investigated enough to know where the connection is considered
-//MJM: complete on this end.  I think that it will be when the datalink
-//MJM: is placed in all the containers.
-
-//MJM: This is also where this end needs to call back the
-//MJM: TransportInterface method that will eventually signal() the
-//MJM: wait()ing add_associations() call.  It may not be necessary on
-//MJM: this (passive) to actually perform the wait() and signal()
-//MJM: operations.  There is enough information in the
-//MJM: add_associations() call to differentiate the cases.
-
-//MJM: ^^^ CONNECTION ESTABLISHMENT CHANGES ^^^
-
+  ACE_UINT32 priority = 0;
+  if (this->peer().recv_n(&priority, sizeof(ACE_UINT32)) == -1)
+    {
+       ACE_ERROR_RETURN((LM_ERROR,
+         ACE_TEXT("(%P|%t) ERROR: SimpleTcpConnection::open() - ")
+         ACE_TEXT("unable to receive the publication transport priority ")
+         ACE_TEXT("from the remote (active) side of the connection. ")
+         ACE_TEXT("%p\n"),
+         "recv_n"),
+       -1);
+    }
+  this->transport_priority_ = ntohl( priority);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-    "SimpleTcpConnection::open %X %s:%d->%s:%d reconnect_state = %d\n", this,
+    "SimpleTcpConnection::open %X %C:%d->%C:%d, priority==%d, reconnect_state = %d\n", this,
     this->remote_address_.get_host_addr (), this->remote_address_.get_port_number (),
     this->local_address_.get_host_addr (), this->local_address_.get_port_number (),
+    this->transport_priority_,
     this->reconnect_state_));
 
   // Now it is time to announce (and give) ourselves to the
@@ -207,7 +242,7 @@ OpenDDS::DCPS::SimpleTcpConnection::open(void* arg)
 int
 OpenDDS::DCPS::SimpleTcpConnection::handle_input(ACE_HANDLE)
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","handle_input",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","handle_input",6);
 
   TransportReceiveStrategy_rch rs = this->receive_strategy_;
 
@@ -223,13 +258,14 @@ OpenDDS::DCPS::SimpleTcpConnection::handle_input(ACE_HANDLE)
 int
 OpenDDS::DCPS::SimpleTcpConnection::close(u_long)
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","close",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","close",6);
 
   // TBD SOON - Find out exactly when close() is called.
   //            I have no clue when and who might call this.
 
-  this->peer().close();
-  this->connected_ = false;
+  if (!this->send_strategy_.is_nil())
+    this->send_strategy_->terminate_send ();
+  this->disconnect();
   return 0;
 }
 
@@ -237,14 +273,15 @@ OpenDDS::DCPS::SimpleTcpConnection::close(u_long)
 int
 OpenDDS::DCPS::SimpleTcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","handle_close",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","handle_close",6);
 
   // TBD SOON - Find out exactly when handle_close() is called.
   //            My guess is that it happens if the reactor is closed
   //            while we are still registered with the reactor.  Right?
 
-  this->peer().close();
-  this->connected_ = false;
+  if (!this->send_strategy_.is_nil())
+    this->send_strategy_->terminate_send ();
+  this->disconnect();
   return 0;
 }
 
@@ -298,19 +335,20 @@ OpenDDS::DCPS::SimpleTcpConnection::set_sock_options (SimpleTcpConfiguration* tc
 #endif /* !ACE_DEFAULT_MAX_SOCKET_BUFSIZ */
 }
 
-
 int
 OpenDDS::DCPS::SimpleTcpConnection::active_establishment
                                     (const ACE_INET_Addr& remote_address,
                                      const ACE_INET_Addr& local_address,
                                      SimpleTcpConfiguration_rch tcp_config)
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","active_establishment",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","active_establishment",6);
 
   // Cache these values for reconnecting.
   this->remote_address_ = remote_address;
   this->local_address_ = local_address;
   this->tcp_config_ = tcp_config;
+
+  /// @TODO: Priority is valid and this point and needs to be utilized.
 
   // Safty check - This should not happen since is_connector_ defaults to
   // true and the role in a connection connector is not changed when reconnecting.
@@ -337,6 +375,10 @@ OpenDDS::DCPS::SimpleTcpConnection::active_establishment
       this->connected_ = true;
     }
 
+  // Set the DiffServ codepoint according to the priority value.
+  DirectPriorityMapper mapper( this->transport_priority_);
+  this->link_->set_dscp_codepoint( mapper.codepoint(), this->peer());
+
   set_sock_options(tcp_config.in ());
 
   // In order to complete the connection establishment from the active
@@ -344,27 +386,42 @@ OpenDDS::DCPS::SimpleTcpConnection::active_establishment
   // It will use that as an "identifier" of sorts.  To the other
   // (passive) side, our local_address that we send here will be known
   // as the remote_address.
-  NetworkAddress network_order_address(local_address);
+  ACE_UINT32 len = tcp_config_->local_address_str_.length () + 1;
 
-  if (this->peer().send_n((char*)(&network_order_address),
-                          sizeof(network_order_address)) == -1)
+  ACE_UINT32 nlen = htonl(len);
+
+  if (this->peer().send_n( &nlen,
+                           sizeof (ACE_UINT32)) == -1)
     {
       // TBD later - Anything we are supposed to do to close the connection.
       ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: Unable to send our local_address_ to "
+                        "(%P|%t) ERROR: Unable to send address string length to "
                         "the passive side to complete the active connection "
                         "establishment.\n"),
                        -1);
     }
 
-//MJM: vvv CONNECTION ESTABLISHMENT CHANGES vvv
+  if (this->peer().send_n( ACE_TEXT_ALWAYS_CHAR(tcp_config_->local_address_str_.c_str()),
+                           len)  == -1)
+    {
+      // TBD later - Anything we are supposed to do to close the connection.
+      ACE_ERROR_RETURN((LM_ERROR,
+                        "(%P|%t) ERROR: Unable to send our address to "
+                        "the passive side to complete the active connection "
+                        "establishment.\n"),
+                       -1);
+    }
 
-//MJM: Add code to receive a response from the other side that the
-//MJM: connection is ready to receive at this point.  Block until it is
-//MJM: received.  Then call the method in the TransportInterface that
-//MJM: the add_associations() call is wait()ing on.
-
-//MJM: ^^^ CONNECTION ESTABLISHMENT CHANGES ^^^
+  ACE_UINT32 npriority = htonl( this->transport_priority_);
+  if (this->peer().send_n( &npriority, sizeof(ACE_UINT32)) == -1)
+    {
+      // TBD later - Anything we are supposed to do to close the connection.
+      ACE_ERROR_RETURN((LM_ERROR,
+                        "(%P|%t) ERROR: Unable to send publication priority to "
+                        "the passive side to complete the active connection "
+                        "establishment.\n"),
+                       -1);
+    }
 
   return 0;
 }
@@ -380,7 +437,7 @@ OpenDDS::DCPS::SimpleTcpConnection::active_establishment
 int
 OpenDDS::DCPS::SimpleTcpConnection::reconnect (bool on_new_association)
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","reconnect",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","reconnect",6);
 
   if (on_new_association)
     return this->active_reconnect_on_new_association ();
@@ -396,9 +453,27 @@ OpenDDS::DCPS::SimpleTcpConnection::reconnect (bool on_new_association)
 
 
 int
+OpenDDS::DCPS::SimpleTcpConnection::active_connect
+                                    (const ACE_INET_Addr& remote_address,
+                                     const ACE_INET_Addr& local_address,
+                                     CORBA::Long          priority,
+                                     SimpleTcpConfiguration_rch tcp_config)
+{
+  DBG_ENTRY_LVL("SimpleTcpConnection","active_connect",6);
+  GuardType guard (this->reconnect_lock_);
+
+  if (this->connected_ == true)
+    return 0;
+  this->transport_priority_ = priority;
+  return this->active_establishment (remote_address,
+                                     local_address,
+                                     tcp_config);
+}
+
+int
 OpenDDS::DCPS::SimpleTcpConnection::active_reconnect_on_new_association ()
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","active_reconnect_on_new_association",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","active_reconnect_on_new_association",6);
   GuardType guard (this->reconnect_lock_);
 
   if (this->connected_ == true)
@@ -421,7 +496,7 @@ OpenDDS::DCPS::SimpleTcpConnection::active_reconnect_on_new_association ()
 int
 OpenDDS::DCPS::SimpleTcpConnection::passive_reconnect_i ()
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","passive_reconnect_i",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","passive_reconnect_i",6);
   GuardType guard (this->reconnect_lock_);
 
   // The passive_reconnect_timer_id_ is used as flag to allow the timer scheduled just once.
@@ -477,13 +552,13 @@ OpenDDS::DCPS::SimpleTcpConnection::passive_reconnect_i ()
 int
 OpenDDS::DCPS::SimpleTcpConnection::active_reconnect_i ()
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","active_reconnect_i",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","active_reconnect_i",6);
 
   GuardType guard (this->reconnect_lock_);
   int ret = -1;
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-    "active_reconnect_i(%s:%d->%s:%d) reconnect_state = %d\n",
+    "active_reconnect_i(%C:%d->%C:%d) reconnect_state = %d\n",
     this->remote_address_.get_host_addr (), this->remote_address_.get_port_number (),
     this->local_address_.get_host_addr (), this->local_address_.get_port_number (),
     this->reconnect_state_));
@@ -504,8 +579,8 @@ OpenDDS::DCPS::SimpleTcpConnection::active_reconnect_i ()
       // Suspend send once.
       this->send_strategy_->suspend_send ();
 
-      this->peer ().close ();
-      this->connected_ = false;
+      this->disconnect();
+
       if (this->tcp_config_->conn_retry_attempts_ > 0)
       {
         this->link_->notify (DataLink::DISCONNECTED);
@@ -540,13 +615,13 @@ OpenDDS::DCPS::SimpleTcpConnection::active_reconnect_i ()
         {
           if (this->tcp_config_->conn_retry_attempts_ > 0)
             {
-              ACE_DEBUG ((LM_DEBUG, "(%P|%t) we tried and failed to re-establish connection to %s:%d.\n",
+              ACE_DEBUG ((LM_DEBUG, "(%P|%t) we tried and failed to re-establish connection to %C:%d.\n",
                           this->remote_address_.get_host_addr (),
                           this->remote_address_.get_port_number ()));
             }
           else
             {
-              ACE_DEBUG ((LM_DEBUG, "(%P|%t) we did not try to re-establish connection to %s:%d.\n",
+              ACE_DEBUG ((LM_DEBUG, "(%P|%t) we did not try to re-establish connection to %C:%d.\n",
                           this->remote_address_.get_host_addr (),
                           this->remote_address_.get_port_number ()));
             }
@@ -557,7 +632,7 @@ OpenDDS::DCPS::SimpleTcpConnection::active_reconnect_i ()
         }
       else
         {
-          ACE_DEBUG ((LM_DEBUG, "(%P|%t)re-established connection to %s:%d.\n",
+          ACE_DEBUG ((LM_DEBUG, "(%P|%t)re-established connection to %C:%d.\n",
             this->remote_address_.get_host_addr (),
             this->remote_address_.get_port_number ()));
           this->reconnect_state_ = RECONNECTED_STATE;
@@ -578,7 +653,7 @@ int
 OpenDDS::DCPS::SimpleTcpConnection::handle_timeout (const ACE_Time_Value &,
                                                 const void *)
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","handle_timeout",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","handle_timeout",6);
 
   this->reconnect_state_ = PASSIVE_TIMEOUT_CALLED_STATE;
   GuardType guard (this->reconnect_lock_);
@@ -624,7 +699,7 @@ OpenDDS::DCPS::SimpleTcpConnection::handle_timeout (const ACE_Time_Value &,
 void
 OpenDDS::DCPS::SimpleTcpConnection::transfer (SimpleTcpConnection* connection)
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","transfer",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","transfer",6);
 
   GuardType guard (this->reconnect_lock_);
 
@@ -698,7 +773,7 @@ OpenDDS::DCPS::SimpleTcpConnection::transfer (SimpleTcpConnection* connection)
   connection->old_con_ = this;
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-        "transfer(%s:%d->%s:%d) passive reconnected. new con %X   "
+        "transfer(%C:%d->%C:%d) passive reconnected. new con %X   "
         " old con %X \n",
         this->remote_address_.get_host_addr (), this->remote_address_.get_port_number (),
         this->local_address_.get_host_addr (), this->local_address_.get_port_number (),
@@ -719,7 +794,7 @@ OpenDDS::DCPS::SimpleTcpConnection::transfer (SimpleTcpConnection* connection)
 void
 OpenDDS::DCPS::SimpleTcpConnection::notify_lost_on_backpressure_timeout ()
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","notify_lost_on_backpressure_timeout",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","notify_lost_on_backpressure_timeout",6);
   bool notify_lost = false;
   {
     GuardType guard (this->reconnect_lock_);
@@ -727,8 +802,8 @@ OpenDDS::DCPS::SimpleTcpConnection::notify_lost_on_backpressure_timeout ()
       {
         this->reconnect_state_ = LOST_STATE;
         notify_lost = true;
-        this->peer ().close ();
-        this->connected_ = false;
+        
+        this->disconnect();
       }
   }
 
@@ -746,7 +821,7 @@ OpenDDS::DCPS::SimpleTcpConnection::notify_lost_on_backpressure_timeout ()
 void
 OpenDDS::DCPS::SimpleTcpConnection::relink (bool do_suspend)
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","relink",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","relink",6);
 
   if (do_suspend && ! this->send_strategy_.is_nil ())
     this->send_strategy_->suspend_send ();
@@ -758,7 +833,7 @@ OpenDDS::DCPS::SimpleTcpConnection::relink (bool do_suspend)
 bool
 OpenDDS::DCPS::SimpleTcpConnection::tear_link ()
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","tear_link",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","tear_link",6);
 
   return this->link_->release_resources ();
 }
@@ -766,7 +841,7 @@ OpenDDS::DCPS::SimpleTcpConnection::tear_link ()
 void
 OpenDDS::DCPS::SimpleTcpConnection::shutdown ()
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","shutdown",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","shutdown",6);
   this->shutdown_ = true;
 
   this->reconnect_task_.close (1);

@@ -42,6 +42,7 @@ class SubDriver
     Sub subscriber_;
 
     ACE_INET_Addr local_address_;
+    ACE_TString   sub_addr_str_;
 };
 
 #endif

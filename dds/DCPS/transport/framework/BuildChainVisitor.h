@@ -26,10 +26,6 @@ namespace OpenDDS
         BuildChainVisitor();
         virtual ~BuildChainVisitor();
 
-        // The using declaration is added to resolve the "hides virtual functions"
-        // compilation warnings on Solaris.
-        using BasicQueueVisitor<TransportQueueElement>::visit_element;
-
         virtual int visit_element(TransportQueueElement* element);
 
         /// Accessor to extract the chain, leaving the head_ and tail_

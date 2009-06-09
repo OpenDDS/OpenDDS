@@ -5,9 +5,11 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 
@@ -63,16 +65,15 @@ elsif ($ARGV[0] ne '') {
     exit 1;
 }
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+$dcpsrepo_ior = "repo.ior";
 $repo_bit_opt = "-NOBITS";
 
 unlink $dcpsrepo_ior;
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-				  "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file");
-$Subscriber = new PerlACE::Process ("subscriber", " $sub_opts");
-$Publisher = new PerlACE::Process ("publisher", " $pub_opts");
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+				  "$repo_bit_opt -o $dcpsrepo_ior ");
+$Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
+$Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
 
 print $DCPSREPO->CommandLine() . "\n";
 $DCPSREPO->Spawn ();

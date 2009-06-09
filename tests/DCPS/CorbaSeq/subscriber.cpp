@@ -11,7 +11,7 @@
 
 
 #include "DataReaderListener.h"
-#include "MessageTypeSupportImpl.h"
+#include "MessengerTypeSupportImpl.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/SubscriberImpl.h>
@@ -81,8 +81,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
     // Attach the subscriber to the transport.
     OpenDDS::DCPS::SubscriberImpl* sub_impl =
-      ::OpenDDS::DCPS::reference_to_servant< OpenDDS::DCPS::SubscriberImpl,
-                                         DDS::Subscriber_ptr> (sub.in ());
+      dynamic_cast< OpenDDS::DCPS::SubscriberImpl* > (sub.in ());
     if (0 == sub_impl) {
       cerr << "Failed to obtain subscriber servant\n" << endl;
       exit(1);
@@ -111,13 +110,13 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     }
 
     // activate the listener
-    DataReaderListenerImpl        listener_servant;
-    DDS::DataReaderListener_var listener =
-      DDS::DataReaderListener::_narrow (&listener_servant);
+    DDS::DataReaderListener_var listener (new DataReaderListenerImpl);
     if (CORBA::is_nil (listener.in ())) {
       cerr << "listener is nil." << endl;
       exit(1);
     }
+    DataReaderListenerImpl* listener_servant =
+      dynamic_cast<DataReaderListenerImpl*>(listener.in());
 
     // Create the Datareaders
     DDS::DataReaderQos dr_qos;
@@ -132,7 +131,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
 
     int expected = 10;
-    while ( listener_servant.num_reads() < expected) {
+    while ( listener_servant->num_reads() < expected) {
       ACE_OS::sleep (1);
     }
 

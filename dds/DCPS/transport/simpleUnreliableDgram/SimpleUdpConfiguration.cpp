@@ -12,7 +12,7 @@
 
 OpenDDS::DCPS::SimpleUdpConfiguration::~SimpleUdpConfiguration()
 {
-  DBG_ENTRY_LVL("SimpleUdpConfiguration","~SimpleUdpConfiguration",5);
+  DBG_ENTRY_LVL("SimpleUdpConfiguration","~SimpleUdpConfiguration",6);
 }
 
 int
@@ -33,7 +33,7 @@ OpenDDS::DCPS::SimpleUdpConfiguration::load (const TransportIdType& id,
 
   ACE_TCHAR section [50];
   ACE_OS::sprintf (section, ACE_TEXT("%s%d")
-                   , ACE_TEXT_ALWAYS_CHAR(TRANSPORT_SECTION_NAME_PREFIX), id);
+                   , TRANSPORT_SECTION_NAME_PREFIX, id);
   const ACE_Configuration_Section_Key &root = cf.root_section ();
   ACE_Configuration_Section_Key trans_sect;
   if (cf.open_section (root, section, 0, trans_sect) != 0)
@@ -45,7 +45,8 @@ OpenDDS::DCPS::SimpleUdpConfiguration::load (const TransportIdType& id,
   GET_CONFIG_STRING_VALUE (cf, trans_sect, ACE_TEXT("local_address"), local_address);
   if (local_address != ACE_TEXT(""))
   {
-    this->local_address_.set (local_address.c_str ());
+    this->local_address_str_ = local_address;
+    this->local_address_.set (local_address_str_.c_str ());
   }
 
   GET_CONFIG_VALUE (cf, trans_sect, ACE_TEXT("max_output_pause_period"),

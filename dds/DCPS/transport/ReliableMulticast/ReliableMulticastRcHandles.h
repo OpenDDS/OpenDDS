@@ -22,9 +22,11 @@ namespace OpenDDS
 
     class ReliableMulticastDataLink;
     class ReliableMulticastTransportImpl;
+    class ReliableMulticastTransportConfiguration;
 
     typedef RcHandle<ReliableMulticastDataLink> ReliableMulticastDataLink_rch;
     typedef RcHandle<ReliableMulticastTransportImpl> ReliableMulticastTransportImpl_rch;
+    typedef RcHandle<ReliableMulticastTransportConfiguration> ReliableMulticastTransportConfiguration_rch;
 
   } /* namespace DCPS */
 

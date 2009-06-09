@@ -13,7 +13,7 @@
 
 OpenDDS::DCPS::SimpleUnreliableDgramDataLink::~SimpleUnreliableDgramDataLink()
 {
-  DBG_ENTRY_LVL("SimpleUnreliableDgramDataLink","~SimpleUnreliableDgramDataLink",5);
+  DBG_ENTRY_LVL("SimpleUnreliableDgramDataLink","~SimpleUnreliableDgramDataLink",6);
 }
 
 
@@ -21,7 +21,7 @@ OpenDDS::DCPS::SimpleUnreliableDgramDataLink::~SimpleUnreliableDgramDataLink()
 void
 OpenDDS::DCPS::SimpleUnreliableDgramDataLink::stop_i()
 {
-  DBG_ENTRY_LVL("SimpleUnreliableDgramDataLink","stop_i",5);
+  DBG_ENTRY_LVL("SimpleUnreliableDgramDataLink","stop_i",6);
 
   // Nothing to do here.
 }

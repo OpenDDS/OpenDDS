@@ -7,19 +7,54 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 
 use Sys::Hostname;
 
-use Env (ACE_ROOT);
-use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
 use Env (DDS_ROOT);
 use lib "$DDS_ROOT/bin";
+use Env (ACE_ROOT);
+use lib "$ACE_ROOT/bin";
+use DDS_Run_Test;
 use CrossSyncDDS;
 
 $| = 1;
 my $status = 0;
+my $use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
 
-my $pub_config_file = "$ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/pub.ini";
-my $sub_config_file = "$ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/sub.ini";
-$CS = new CrossSyncDDS (1, PerlACE::uniqueid(), PerlACE::uniqueid()
+my $file_prefix = "$ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger";
+my $pub_config_file = "$file_prefix/pub.ini";
+my $sub_config_file = "$file_prefix/sub.ini";
+my $opts = $use_svc_config ? "-ORBSvcConf $file_prefix/tcp.conf" : '';
+my $pub_opts = "";
+my $sub_opts = "";
+my $repo_bit_opt = $opts;
+
+if ($ARGV[0] eq 'udp') {
+    $opts .= ($use_svc_config ?
+		  " -ORBSvcConf $file_prefix/udp.conf " : '')
+	. "-t udp";
+    $pub_config_file = "$file_prefix/pub_udp.ini";
+    $sub_config_file = "$file_prefix/sub_udp.ini";
+}
+elsif ($ARGV[0] eq 'mcast') {
+    $opts .= ($use_svc_config ?
+		  " -ORBSvcConf $file_prefix/mcast.conf " : '')
+	. "-t mcast";
+    $pub_config_file = "$file_prefix/pub_mcast.ini";
+    $sub_config_file = "$file_prefix/sub_mcast.ini";
+}
+elsif ($ARGV[0] eq 'reliable_mcast') {
+    $opts .= ($use_svc_config ?
+	      " -ORBSvcConf $file_prefix/reliable_mcast.conf " : '')
+        . "-t reliable_mcast";
+    $pub_config_file = "$file_prefix/pub_reliable_mcast.ini";
+    $sub_config_file = "$file_prefix/sub_reliable_mcast.ini";
+}
+elsif ($ARGV[0] eq 'default_mcast') {
+    $opts .= ($use_svc_config ?
+		  " -ORBSvcConf $file_prefix/mcast.conf " : '');
+    $pub_opts = "-t default_mcast_pub";
+    $sub_opts = "-t default_mcast_sub";
+}
+
+$CS = new CrossSyncDDS (1, PerlACE::random_port(), PerlACE::random_port()
 			, $pub_config_file, $sub_config_file);
 if (!$CS) {
     print "Crossplatform test pre-reqs not met. Skipping...\n";
@@ -36,22 +71,9 @@ if ($role == -1) {
     exit -1;
 }
 
-my $svc_conf = '';
-my $repo_bit_opt = '';
-if (!new PerlACE::ConfigList->check_config ('STATIC')) {
-  $repo_bit_opt = "-ORBSvcConf $ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/tcp.conf";
-  if ($ARGV[0] eq 'udp') {
-    $svc_conf = " -ORBSvcConf $ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/udp.conf ";
-  }
-  else {
-    $svc_conf = " -ORBSvcConf $ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/tcp.conf";
-  }
-}
-
 @ports = $CS->boot_ports ();
 my($port1) = 10001 + @ports[0];
-my $domains_file = "$ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/domain_ids";
-my $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+my $dcpsrepo_ior = "repo.ior";
 my $repo_host;
 if ($role == CrossSync::SERVER) {
     $repo_host = $CS->self();
@@ -59,25 +81,23 @@ if ($role == CrossSync::SERVER) {
     $repo_host = $CS->peer();
 }
 my $common_args = "-DCPSInfoRepo corbaloc:iiop:$repo_host:$port1/DCPSInfoRepo"
-    . " $svc_conf";
+    . " $opts";
 
 unlink $dcpsrepo_ior;
 
-$Subscriber = new PerlACE::Process
-    ("$ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/subscriber",
-     "-DCPSConfigFile $sub_config_file $common_args");
-#$Subscriber = new PerlACE::Process ("subscriber",
-#                                    "-DCPSConfigFile $sub_config_file $common_args");
-$Publisher = new PerlACE::Process
-    ("$ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/publisher",
-     "-DCPSConfigFile $pub_config_file $common_args");
+$Subscriber = PerlDDS::create_process
+      ("$ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/subscriber",
+       "-DCPSConfigFile $sub_config_file $common_args $sub_opts");
+$Publisher = PerlDDS::create_process
+      ("$ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/publisher",
+       "-DCPSConfigFile $pub_config_file $common_args $pub_opts");
 
 if ($role == CrossSync::SERVER) {
     unlink $dcpsrepo_ior;
-    $DCPSREPO = new PerlACE::Process
-	("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-	 "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file "
-	 . "-ORBEndpoint iiop://:$port1");
+    $DCPSREPO = PerlDDS::create_process
+          ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+           "$repo_bit_opt -o $dcpsrepo_ior "
+           . "-ORBEndpoint iiop://:$port1");
 
     print $DCPSREPO->CommandLine(). "\n";
     $DCPSREPO->Spawn ();
@@ -128,3 +148,5 @@ if ($status == 0) {
 }
 
 exit $status;
+
+#  LocalWords:  eval

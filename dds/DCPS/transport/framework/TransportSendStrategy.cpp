@@ -12,7 +12,9 @@
 #include "QueueRemoveVisitor.h"
 #include "PacketRemoveVisitor.h"
 #include "TransportDefs.h"
+#include "DirectPriorityMapper.h"
 #include "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/Service_Participant.h"
 #include "EntryExit.h"
 
 #if !defined (__ACE_INLINE__)
@@ -33,7 +35,8 @@
 // just increases the ref count.
 OpenDDS::DCPS::TransportSendStrategy::TransportSendStrategy
 (TransportConfiguration* config,
- ThreadSynchResource*    synch_resource)
+ ThreadSynchResource*    synch_resource,
+ CORBA::Long             priority)
   : max_samples_(config->max_samples_per_packet_),
     optimum_size_(config->optimum_packet_size_),
     max_size_(config->max_packet_size_),
@@ -59,20 +62,24 @@ OpenDDS::DCPS::TransportSendStrategy::TransportSendStrategy
     graceful_disconnecting_ (false),
     link_released_ (true)
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","TransportSendStrategy",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","TransportSendStrategy",6);
 
   config->_add_ref ();
   this->config_ = config;
 
   // Create a ThreadSynch object just for us.
-  this->synch_ = config->send_thread_strategy()->create_synch_object
-    (synch_resource);
+  DirectPriorityMapper mapper( priority);
+  this->synch_ = config->send_thread_strategy()->create_synch_object(
+    synch_resource,
+    mapper.thread_priority(),
+    TheServiceParticipant->scheduler()
+  );
 
   // We cache this value in data member since it doesn't change, and we
   // don't want to keep asking for it over and over.
   this->max_header_size_ = this->header_.max_marshaled_size();
 
-  if (DCPS_debug_level >= 2)
+  if (::OpenDDS::DCPS::Transport_debug_level >= 2)
     {
       ACE_DEBUG ((LM_DEBUG, "(%P|%t)TransportSendStrategy header_db_allocator %x with 1 chunks\n",
 		  &header_db_allocator_));
@@ -106,7 +113,18 @@ OpenDDS::DCPS::TransportSendStrategy::TransportSendStrategy
 
 OpenDDS::DCPS::TransportSendStrategy::~TransportSendStrategy()
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","~TransportSendStrategy",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","~TransportSendStrategy",6);
+
+  if( this->pkt_chain_ != 0) {
+    size_t size = this->pkt_chain_->total_length();
+    if( size > 0) {
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) WARNING: TransportSendStrategy::~TransportSendStrategy() - ")
+        ACE_TEXT("terminating with %d unsent bytes.\n"),
+        size
+      ));
+    }
+  }
 
   // We created the header_block_ in our ctor, so we should release() it.
   //MJM: blech.
@@ -141,14 +159,14 @@ OpenDDS::DCPS::TransportSendStrategy::~TransportSendStrategy()
 OpenDDS::DCPS::TransportSendStrategy::WorkOutcome
 OpenDDS::DCPS::TransportSendStrategy::perform_work()
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","perform_work",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","perform_work",6);
 
   SendPacketOutcome outcome;
 
   { // scope for the guard(this->lock_);
     GuardType guard(this->lock_);
 
-    VDBG_LVL((LM_DEBUG, "(%P|%t) DBG: perform_work mode: %s\n", mode_as_str (this->mode_)), 5);
+    VDBG_LVL((LM_DEBUG, "(%P|%t) DBG: perform_work mode: %C\n", mode_as_str (this->mode_)), 5);
 
     if (this->mode_ == MODE_TERMINATED)
       {
@@ -178,7 +196,7 @@ OpenDDS::DCPS::TransportSendStrategy::perform_work()
     if (this->mode_ != MODE_QUEUE && this->mode_ != MODE_SUSPEND)
       {
         VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
-                  "Entered perform_work() and mode_ is %s - just return "
+                  "Entered perform_work() and mode_ is %C - just return "
                   "WORK_OUTCOME_NO_MORE_TO_DO.\n", mode_as_str (this->mode_)), 5);
         return WORK_OUTCOME_NO_MORE_TO_DO;
       }
@@ -385,7 +403,7 @@ OpenDDS::DCPS::TransportSendStrategy::adjust_packet_after_send
 (ssize_t num_bytes_sent,
  UseDelayedNotification delay_notification)
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","adjust_packet_after_send",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","adjust_packet_after_send",6);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
 	"Adjusting the current packet because %d bytes of the packet "
@@ -718,7 +736,7 @@ OpenDDS::DCPS::TransportSendStrategy::adjust_packet_after_send
 void
 OpenDDS::DCPS::TransportSendStrategy::send_delayed_notifications()
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","send_delayed_notifications",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","send_delayed_notifications",6);
 
   TransportQueueElement* sample = NULL;
   SendMode mode = MODE_NOT_SET;
@@ -795,7 +813,7 @@ OpenDDS::DCPS::TransportSendStrategy::send_delayed_notifications()
 void
 OpenDDS::DCPS::TransportSendStrategy::terminate_send (bool graceful_disconnecting)
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","terminate_send",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","terminate_send",6);
 
   bool reset_flag = true;
 
@@ -803,7 +821,7 @@ OpenDDS::DCPS::TransportSendStrategy::terminate_send (bool graceful_disconnectin
     GuardType guard(this->lock_);
 
     // If the terminate_send call due to a non-graceful disconnection before
-    // a datalink shutdown then we will not try to send the graceful disconnect 
+    // a datalink shutdown then we will not try to send the graceful disconnect
     // message.
     if ((this->mode_ == MODE_TERMINATED || this->mode_ == MODE_SUSPEND)
       && ! this->graceful_disconnecting_)
@@ -830,7 +848,10 @@ OpenDDS::DCPS::TransportSendStrategy::terminate_send (bool graceful_disconnectin
 void
 OpenDDS::DCPS::TransportSendStrategy::clear (SendMode mode)
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","clear",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","clear",6);
+  
+  // Notify the Elements that were sent.
+  this->send_delayed_notifications();
 
   QueueType* elems = 0;
   QueueType* queue = 0;
@@ -868,9 +889,6 @@ OpenDDS::DCPS::TransportSendStrategy::clear (SendMode mode)
     this->mode_before_suspend_ = MODE_NOT_SET;
   }
 
-  // Notify the Elements that were sent.
-  this->send_delayed_notifications();
-
   // We need remove the queued elements outside the lock,
   // otherwise we have a deadlock situation when remove vistor
   // calls the data_droped on each dropped elements.
@@ -886,10 +904,11 @@ OpenDDS::DCPS::TransportSendStrategy::clear (SendMode mode)
 }
 
 
+
 void
 OpenDDS::DCPS::TransportSendStrategy::send(TransportQueueElement* element, bool relink)
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","send",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","send",6);
 
   {
     GuardType guard(this->lock_);
@@ -941,7 +960,7 @@ OpenDDS::DCPS::TransportSendStrategy::send(TransportQueueElement* element, bool 
 	if (this->mode_ == MODE_QUEUE || this->mode_ == MODE_SUSPEND)
 	  {
 	    VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
-		      "this->mode_ == %s, so queue elem and leave.\n", mode_as_str (this->mode_)), 5);
+		      "this->mode_ == %C, so queue elem and leave.\n", mode_as_str (this->mode_)), 5);
 
 	    this->queue_->put(element);
 	    if (this->mode_ != MODE_SUSPEND)
@@ -1149,7 +1168,7 @@ OpenDDS::DCPS::TransportSendStrategy::send(TransportQueueElement* element, bool 
 void
 OpenDDS::DCPS::TransportSendStrategy::send_stop()
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","send_stop",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","send_stop",6);
   {
     GuardType guard(this->lock_);
 
@@ -1204,7 +1223,7 @@ OpenDDS::DCPS::TransportSendStrategy::send_stop()
     if (this->mode_ == MODE_QUEUE || this->mode_ == MODE_SUSPEND)
       {
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-	      "But since we are in %s, we don't have to do "
+	      "But since we are in %C, we don't have to do "
 	      "anything more in this important send_stop().\n",
 	      mode_as_str(this->mode_)));
         // We don't do anything if we are in MODE_QUEUE.  Just leave.
@@ -1250,7 +1269,7 @@ int
 OpenDDS::DCPS::TransportSendStrategy::remove_sample_i (QueueRemoveVisitor& simple_rem_vis,
 						   PacketRemoveVisitor& pac_rem_vis)
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","remove_sample_i",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","remove_sample_i",6);
 
   //GuardType guard(this->lock_);
 
@@ -1369,7 +1388,7 @@ int
 OpenDDS::DCPS::TransportSendStrategy::remove_sample
 (const DataSampleListElement* sample)
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","remove_sample",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","remove_sample",6);
 
   VDBG_LVL ((LM_DEBUG, "(%P|%t)  Removing sample: %@", sample),5);
 
@@ -1389,7 +1408,7 @@ OpenDDS::DCPS::TransportSendStrategy::remove_sample
 void
 OpenDDS::DCPS::TransportSendStrategy::remove_all_control_msgs(RepoId pub_id)
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","remove_all_control_msgs",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","remove_all_control_msgs",6);
 
   GuardType guard(this->lock_);
 
@@ -1406,7 +1425,7 @@ OpenDDS::DCPS::TransportSendStrategy::remove_all_control_msgs(RepoId pub_id)
 void
 OpenDDS::DCPS::TransportSendStrategy::direct_send( bool relink )
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","direct_send",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","direct_send",6);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
 	"Prepare the current packet for a direct send attempt.\n"));
@@ -1529,7 +1548,7 @@ OpenDDS::DCPS::TransportSendStrategy::direct_send( bool relink )
 void
 OpenDDS::DCPS::TransportSendStrategy::get_packet_elems_from_queue()
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","get_packet_elems_from_queue",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","get_packet_elems_from_queue",6);
 
   TransportQueueElement* element = this->queue_->peek();
 
@@ -1601,7 +1620,7 @@ OpenDDS::DCPS::TransportSendStrategy::get_packet_elems_from_queue()
 void
 OpenDDS::DCPS::TransportSendStrategy::prepare_packet()
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","prepare_packet",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","prepare_packet",6);
   /*
   // Shift elements from not_yet_pac_q_ to queue_
   // This is where the intermediary elements finally become
@@ -1661,7 +1680,7 @@ OpenDDS::DCPS::TransportSendStrategy::prepare_packet()
 OpenDDS::DCPS::TransportSendStrategy::SendPacketOutcome
 OpenDDS::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_notification)
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","send_packet",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","send_packet",6);
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
 	    "Populate the iovec array using the pkt_chain_.\n"), 5);

@@ -2,14 +2,15 @@
 #define PUBDRIVER_H
 
 #include "dds/DdsDcpsC.h"
-#include "tests/DCPS/FooType3/FooTypeSupportC.h"
-#include "tests/DCPS/FooType3/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType3/FooDefTypeSupportC.h"
+#include "tests/DCPS/FooType3/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/DataWriterImpl.h"
 #include "TestS.h"
 #include "ace/INET_Addr.h"
 #include "ace/Task.h"
 #include "ace/String_Base.h"
+#include <string>
 
 class PubDriver
   : public ACE_Task_Base,
@@ -41,8 +42,8 @@ class PubDriver
 
 
     virtual void add_new_subscription (
-      CORBA::Long       reader_id,
-      const char *      sub_addr
+      const OpenDDS::DCPS::RepoId& reader_id,
+      const char *                 sub_addr
       )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -77,8 +78,8 @@ class PubDriver
     int parse_sub_arg(const ACE_TString& arg);
 
     void add_subscription (
-    CORBA::Long       reader_id,
-    const ACE_TCHAR *      sub_addr
+      const OpenDDS::DCPS::RepoId& reader_id,
+      const ACE_TCHAR* sub_addr
     );
 
     void attach_to_transport ();
@@ -94,6 +95,7 @@ class PubDriver
 
     ACE_TString       pub_id_fname_;
     ACE_INET_Addr     pub_addr_;
+    ACE_TString       pub_addr_str_;
 
     OpenDDS::DCPS::RepoId sub_id_;
     ACE_TString       sub_addr_;
@@ -103,6 +105,8 @@ class PubDriver
     ACE_CString       pub_driver_ior_;
     int               add_new_subscription_;
     int               shutdown_;
+
+    ACE_TString       sub_ready_filename_;
 };
 
 #endif

@@ -10,15 +10,31 @@
 #include "ReceiveListenerSetMap.h"
 #include "RepoIdSetMap.h"
 #include "TransportImpl_rch.h"
-//borland #include "TransportSendStrategy.h"
+#include "TransportSendStrategy.h"
 #include "TransportSendStrategy.h"
 #include "TransportSendStrategy_rch.h"
-//borland #include "TransportReceiveStrategy.h"
+#include "TransportReceiveStrategy.h"
 #include "TransportReceiveStrategy_rch.h"
 #include "dds/DCPS/transport/framework/QueueTaskBase_T.h"
 
 #include "ace/Synch.h"
+#include "ace/Event_Handler.h"
 
+#include <iosfwd> // For operator<<() diagnostic formatter.
+
+class ACE_SOCK;
+
+namespace OpenDDS
+{
+  namespace DCPS
+  {
+    class DataLink;
+  }
+}
+
+OpenDDS_Dcps_Export
+std::ostream& operator<<(std::ostream& str,
+                         const OpenDDS::DCPS::DataLink& value);
 
 namespace OpenDDS
 {
@@ -44,7 +60,7 @@ namespace OpenDDS
      * 2) Own ThreadPerConnectionSendTask object which is used when thread_per_connection
      *    is enabled.
      */
-    class OpenDDS_Dcps_Export DataLink : public RcObject<ACE_SYNCH_MUTEX>
+    class OpenDDS_Dcps_Export DataLink : public RcObject<ACE_SYNCH_MUTEX>, public ACE_Event_Handler
     {
       friend class DataLinkCleanupTask;
 
@@ -58,8 +74,10 @@ namespace OpenDDS
 
         /// A DataLink object is always created by a TransportImpl object.
         /// Thus, the TransportImpl object passed-in here is the object that
-        /// created this DataLink.
-        DataLink(TransportImpl* impl);
+        /// created this DataLink.  The ability to specifiy a priority
+        /// for individual links is included for construction so its
+        /// value can be available for activating any threads.
+        DataLink(TransportImpl* impl, CORBA::Long priority = 0);
         virtual ~DataLink();
 
         /// The resume_send is used in the case of reconnection
@@ -149,6 +167,8 @@ namespace OpenDDS
 
         // Call-back from the concrete transport object.
         // The connection has been broken. No locks are being held.
+        // Take a snapshot of current associations which will be removed
+        // by DataLinkCleanupTask.
         bool release_resources ();
 
         // Used by SimpleUdp and SimpleMcast to inform the send strategy to
@@ -165,6 +185,30 @@ namespace OpenDDS
                     const RepoId& local_id,
                     const bool&   pub_side,
                     bool& last);
+
+        /// This is called by DataLinkCleanupTask thread to remove the associations
+        /// based on the snapshot in release_resources().
+        void clear_associations ();
+
+        // The second parameter (zero or non-zero) indicates whether the 
+        // impl_->release_datalink() needs be called. The impl_->release_datalink()
+        // may result in the DataLink object deletion. Any access of DataLink object
+        // after that will get access violation. It's ok to release link in 
+        // remove_association path (release_reservations()), but it would cause
+        // access violation during normal transport shutdown(transport_shutdown()).
+        int handle_timeout (const ACE_Time_Value &tv,
+                            const void * arg = 0);
+
+        // Set the DiffServ codepoint of the socket.  This is a stateless
+        // method and is here only because this is a convenient common
+        // location that can be reached by client code that needs to
+        // perform this behavior.
+        void set_dscp_codepoint( int cp, ACE_SOCK& socket);
+
+        /// Accessors for the TRANSPORT_PRIORITY value associated with
+        /// this link.
+        CORBA::Long& transport_priority();
+        CORBA::Long  transport_priority() const;
 
        protected:
 
@@ -229,6 +273,10 @@ namespace OpenDDS
                                   ReceiveListenerSet_rch& listener_set,
                                   DataLinkSetMap&      released_subscribers);
 
+        /// Save current sub and pub association maps for releasing and create
+        /// empty maps for new associations.
+        void prepare_release ();
+
         typedef ACE_SYNCH_MUTEX     LockType;
 
 
@@ -237,6 +285,10 @@ namespace OpenDDS
         /// more than one TransportInterface (and each could be driven by
         /// a different thread).
       //LockType lock_;
+
+
+        /// Convenience function for diagnostic information.
+        friend std::ostream& ::operator<<(std::ostream& str, const DataLink& value);
 
         /// Map associating each publisher_id with a set of
         /// TransportReceiveListener objects (each with an associated
@@ -270,6 +322,14 @@ namespace OpenDDS
 
         LockType released_local_lock_;
 
+        // snapshot of associations when the release_resource() is called.
+        ReceiveListenerSetMap pub_map_releasing_;
+        RepoIdSetMap sub_map_releasing_;
+
+        /// TRANSPORT_PRIORITY value associated with the link.
+        CORBA::Long transport_priority_;
+
+
     protected:
 
       typedef ACE_Guard<LockType> GuardType;
@@ -277,8 +337,11 @@ namespace OpenDDS
         /// The transport send strategy object for this DataLink.
         TransportSendStrategy_rch send_strategy_;
 
-      LockType strategy_lock_;
+        LockType strategy_lock_;
 
+        /// Configurable delay in milliseconds that the datalink 
+        /// should be released after all associations are removed. 
+        ACE_Time_Value datalink_release_delay_;
     };
 
   }  /* namespace DCPS */

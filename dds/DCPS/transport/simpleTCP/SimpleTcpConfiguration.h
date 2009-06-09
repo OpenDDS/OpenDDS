@@ -29,6 +29,12 @@ namespace OpenDDS
         /// passive connections.
         ACE_INET_Addr local_address_;
 
+        /// The address string used to provide to DCPSInfoRepo.
+        /// This string is either from configuration file or default
+        /// to hostname:port. The hostname is fully qualified hostname
+        /// and the port is randomly picked by os.
+        ACE_TString local_address_str_;
+
         bool enable_nagle_algorithm_;
 
         /// The initial retry delay in milliseconds.

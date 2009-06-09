@@ -303,7 +303,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       // Attach the subscriber to the transport.
       OpenDDS::DCPS::SubscriberImpl* sub_impl
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl>(sub.in());
+        = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(sub.in());
 
       if (0 == sub_impl)
       {
@@ -317,7 +317,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       // Attach the publisher to the transport.
       OpenDDS::DCPS::PublisherImpl* pub_impl
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub.in ());
+        = dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub.in ());
 
       if (0 == pub_impl)
       {
@@ -380,8 +380,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
       Test::SimpleDataWriterImpl* fast_dw =
-        OpenDDS::DCPS::reference_to_servant<Test::SimpleDataWriterImpl>
-        (foo_dw.in ());
+        dynamic_cast<Test::SimpleDataWriterImpl*>(foo_dw.in ());
 
       Test::SimpleDataReader_var foo_dr
         = Test::SimpleDataReader::_narrow(dr.in ());
@@ -393,8 +392,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
       Test::SimpleDataReaderImpl* fast_dr =
-        OpenDDS::DCPS::reference_to_servant<Test::SimpleDataReaderImpl>
-        (foo_dr.in ());
+        dynamic_cast<Test::SimpleDataReaderImpl*>(foo_dr.in ());
 
 
       // wait for association establishement before writing.
@@ -522,10 +520,43 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
              
           // The datareader will receive the DISPOSE message and change the
           // instance state from ALIVE to NOT ALIVE.
+          // The dispose sample is an invalid data sample which is used for notification.
+          // Upon receiving dispose, a NEW sample is created which marks InstanceState 
+          // has NOT_READ_SAMPLE, but won't change the view state. The view state is
+          // changed to NEW_VIEW when data sample is received.
           fast_dw->dispose(foo1, handle);
 
+          //// wait for dispose sample to propogate
+          if (!wait_for_data(sub.in (), 5))
+            ACE_ERROR_RETURN ((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR: timeout waiting for data.\n")),
+            1);
+
+          // Read the dispose sample so the view state be NOT_NEW and 
+          // sample state be READ before next write/read 
+          max_samples = 1;
+
+          Test::SimpleSeq     disposeData (max_samples);
+          ::DDS::SampleInfoSeq disposeDataInfo;
+
+          status = fast_dr->read(  disposeData 
+            , disposeDataInfo
+            , max_samples
+            , ::DDS::NOT_READ_SAMPLE_STATE
+            , ::DDS::ANY_VIEW_STATE
+            , ::DDS::ANY_INSTANCE_STATE );
+
+          // verify dispose sample
+          if (disposeDataInfo[0].valid_data == 1 
+            || disposeDataInfo[0].instance_state != DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
+            {
+              ACE_ERROR ((LM_ERROR,
+                ACE_TEXT("(%P|%t) ERROR: failed to verify DISPOSE sample.\n") ));
+              test_failed = 1;
+            }
+
           // Write sample after dispose. The datareader will change the 
-          // view state from NOT NEW to NEW.
+          // view state from NOT_NEW to NEW.
           ::Test::Simple foo3;
           foo3.key  = 1; 
           foo3.count = 3;
@@ -587,12 +618,18 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             , ::DDS::ANY_VIEW_STATE
             , ::DDS::ANY_INSTANCE_STATE );
 
+          check_read_status(status, data4, 4, "read samples from most recent generation");
 
-          check_read_status(status, data4, 3, "read samples from most recent generation");
+          if (info4[2].valid_data == 1)
+          {
+             ACE_ERROR ((LM_ERROR,
+              ACE_TEXT("(%P|%t) ERROR: expected an invalid data sample (dispose notification).\n") ));
+             test_failed = 1;
+          }
 
           if (info4[0].view_state != ::DDS::NEW_VIEW_STATE 
             || info4[1].view_state != ::DDS::NEW_VIEW_STATE
-            || info4[2].view_state != ::DDS::NEW_VIEW_STATE)
+            || info4[3].view_state != ::DDS::NEW_VIEW_STATE)
           {
             ACE_ERROR ((LM_ERROR,
               ACE_TEXT("(%P|%t) ERROR: expected NEW view state.\n") ));
@@ -600,7 +637,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           }
 
           if (data4[0].count != foo1.count || data4[1].count != foo2.count 
-            || data4[2].count != foo3.count)
+            || data4[3].count != foo3.count)
           {
             ACE_ERROR ((LM_ERROR,
               ACE_TEXT("(%P|%t) ERROR: read samples from most recent generation")
@@ -622,11 +659,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             , ::DDS::ANY_INSTANCE_STATE );
 
 
-          check_read_status(status, data5, 3, "read after read most recent generation samples");
+          check_read_status(status, data5, 4, "read after read most recent generation samples");
 
           if (info5[0].view_state != ::DDS::NOT_NEW_VIEW_STATE 
             || info5[1].view_state != ::DDS::NOT_NEW_VIEW_STATE
-            || info5[2].view_state != ::DDS::NOT_NEW_VIEW_STATE)
+            || info5[3].view_state != ::DDS::NOT_NEW_VIEW_STATE)
           {
             ACE_ERROR ((LM_ERROR,
               ACE_TEXT("(%P|%t) ERROR: expected NOT NEW view state.\n") ));
@@ -634,7 +671,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           }
 
           if (data5[0].count != foo1.count || data5[1].count != foo2.count
-            || data5[2].count != foo3.count)
+            || data5[3].count != foo3.count)
           {
             ACE_ERROR ((LM_ERROR,
               ACE_TEXT("(%P|%t) ERROR: read after read most recent generation samples ")
@@ -675,12 +712,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             , ::DDS::ANY_INSTANCE_STATE );
 
 
-          check_read_status(status, data6, 4, "first read");
+          check_read_status(status, data6, 5, "first read");
 
           if (info6[0].view_state != ::DDS::NOT_NEW_VIEW_STATE
             || info6[1].view_state != ::DDS::NOT_NEW_VIEW_STATE
-            || info6[2].view_state != ::DDS::NOT_NEW_VIEW_STATE
-            || info6[3].view_state != ::DDS::NEW_VIEW_STATE)
+            || info6[3].view_state != ::DDS::NOT_NEW_VIEW_STATE
+            || info6[4].view_state != ::DDS::NEW_VIEW_STATE)
           {
             ACE_ERROR ((LM_ERROR,
               ACE_TEXT("(%P|%t) ERROR: un expected view state.\n") ));
@@ -688,7 +725,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           }
 
           if (data6[0].count != foo1.count || data6[1].count != foo2.count
-            || data6[2].count != foo3.count || data6[3].count != xfoo.count)
+            || data6[3].count != foo3.count || data6[4].count != xfoo.count)
           {
             // test to see the accessing the "lost" (because of history.depth)
             // but still held by zero-copy sequence value works.
@@ -711,6 +748,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       }//dp scope
 
+      reader_transport_impl = 0;
+      writer_transport_impl = 0;
+
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
@@ -727,10 +767,5 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       return 1;
     }
 
-  // Note: The TransportImpl reference SHOULD be deleted before exit from
-  //       main if the concrete transport libraries are loaded dynamically.
-  //       Otherwise cleanup after main() will encounter an access violation.
-  reader_transport_impl = 0;
-  writer_transport_impl = 0;
   return test_failed;
 }

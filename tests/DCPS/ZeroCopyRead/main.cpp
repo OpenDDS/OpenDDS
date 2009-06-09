@@ -530,7 +530,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       // Attach the subscriber to the transport.
       OpenDDS::DCPS::SubscriberImpl* sub_impl
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl>(sub.in());
+        = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(sub.in());
 
       if (0 == sub_impl)
       {
@@ -544,7 +544,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       // Attach the publisher to the transport.
       OpenDDS::DCPS::PublisherImpl* pub_impl
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub.in ());
+        = dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub.in ());
 
       if (0 == pub_impl)
       {
@@ -606,8 +606,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
       Test::SimpleDataWriterImpl* fast_dw =
-        OpenDDS::DCPS::reference_to_servant<Test::SimpleDataWriterImpl>
-        (foo_dw.in ());
+        dynamic_cast<Test::SimpleDataWriterImpl*>(foo_dw.in ());
 
       Test::SimpleDataReader_var foo_dr
         = Test::SimpleDataReader::_narrow(dr.in ());
@@ -619,8 +618,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
       Test::SimpleDataReaderImpl* fast_dr =
-        OpenDDS::DCPS::reference_to_servant<Test::SimpleDataReaderImpl>
-        (foo_dr.in ());
+        dynamic_cast<Test::SimpleDataReaderImpl*>(foo_dr.in ());
 
 
       // wait for association establishement before writing.
@@ -647,7 +645,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       for (CORBA::ULong ii =0; ii < incomp->policies.length (); ii++)
         {
           if (incomp->policies[ii].policy_id
-                        == ::DDS::TRANSPORTTYPE_QOS_POLICY_ID)
+                        == ::OpenDDS::TRANSPORTTYPE_QOS_POLICY_ID)
             incompatible_transport_found = 1;
         }
 
@@ -1396,7 +1394,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
         // since depth=1 the previous sample will be "lost"
         // from the instance container.
-        fast_dw->write(foo,  ::OpenDDS::DCPS::HANDLE_NIL /*don't use instance_handle_ because it is a different instance */);
+        fast_dw->write(foo,  ::DDS::HANDLE_NIL /*don't use instance_handle_ because it is a different instance */);
 
         // wait for write to propogate
         if (!wait_for_data(sub.in (), 5))
@@ -1751,6 +1749,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       //done above - in the tests sub->delete_datareader(dr.in ());
       dp->delete_subscriber(sub.in ());
 
+      reader_transport_impl = 0;
+      writer_transport_impl = 0;
+
       // clean up common objects
       dp->delete_topic(topic.in ());
       dpf->delete_participant(dp.in ());
@@ -1774,10 +1775,5 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       return 1;
     }
 
-  // Note: The TransportImpl reference SHOULD be deleted before exit from
-  //       main if the concrete transport libraries are loaded dynamically.
-  //       Otherwise cleanup after main() will encounter an access violation.
-  reader_transport_impl = 0;
-  writer_transport_impl = 0;
   return test_failed;
 }

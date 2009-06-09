@@ -5,15 +5,17 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 
-PerlACE::add_lib_path('../idl_test3_lib');
+PerlDDS::add_lib_path('../idl_test3_lib');
 
-$TESTDVR = new PerlACE::Process ("idl_test3");
+$TESTDVR = PerlDDS::create_process ("idl_test3");
 
 $status = $TESTDVR->SpawnWaitKill (300);
 

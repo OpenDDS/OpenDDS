@@ -18,21 +18,21 @@ OpenDDS::DCPS::ReliableMulticastDataLink::ReliableMulticastDataLink(
   TransportReactorTask_rch& reactor_task,
   ReliableMulticastTransportConfiguration& configuration,
   const ACE_INET_Addr& multicast_group_address,
-  OpenDDS::DCPS::ReliableMulticastTransportImpl& transport_impl
+  OpenDDS::DCPS::ReliableMulticastTransportImpl& transport_impl,
+  CORBA::Long priority
   )
-  : OpenDDS::DCPS::DataLink(&transport_impl)
+  : OpenDDS::DCPS::DataLink(&transport_impl, priority)
   , local_address_(configuration.local_address_)
   , multicast_group_address_(multicast_group_address)
   , sender_history_size_(configuration.sender_history_size_)
   , receiver_buffer_size_(configuration.receiver_buffer_size_)
   , is_publisher_(false)
   , reactor_task_(reactor_task)
-  , transport_impl_(&transport_impl)
+  , transport_impl_(&transport_impl, false)
   , receive_strategy_(*this)
-  , send_strategy_(configuration, new OpenDDS::DCPS::ReliableMulticastThreadSynchResource)
+  , send_strategy_(configuration, new OpenDDS::DCPS::ReliableMulticastThreadSynchResource, priority)
   , running_(false)
 {
-  transport_impl_->_add_ref();
 }
 
 bool

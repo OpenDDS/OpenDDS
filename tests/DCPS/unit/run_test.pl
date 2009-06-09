@@ -5,16 +5,24 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
-my $debug = 0;
+my $debugFile;
+my $debug;
+# $debug = 10;
+$debugFile = "test.log";
+my $debugOpts = "";
+$debugOpts .= "-DCPSDebugLevel $debug " if $debug;
+$debugOpts .= "-ORBLogFile $debugFile ";
 
-$testoutputfilename = "test.log";
+unlink $debugFile;
 
-$iorfile = PerlACE::LocalFile ("repo.ior");
+$iorfile = "repo.ior";
 unlink $iorfile;
 $client_orb = 0;
 
@@ -25,23 +33,23 @@ if ($ARGV[0] eq "-client_orb") {
 $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : "-ORBSvcConf ../../tcp.conf";
 
-$REPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo"
-			      , "-o $iorfile -d domain_ids $svc_config");
+$REPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo"
+                              , "$debugOpts -o $iorfile $svc_config");
 
-$CL = new PerlACE::Process ("DdsDcps_UnitTest",
-                            "-DCPSInfoRepo file://$iorfile $svc_config " .
-                            "-c $client_orb -ORBLogFile $testoutputfilename");
+$CL = PerlDDS::create_process ("DdsDcps_UnitTest",
+                              "$debugOpts -DCPSInfoRepo file://$iorfile $svc_config " .
+                              "-c $client_orb ");
 
-print $REPO->CommandLine() . "\n" if $debug ;
+print $REPO->CommandLine() . "\n";
 $REPO->Spawn ();
 
-if (PerlACE::waitforfile_timed ($iorfile, 5) == -1) {
+if (PerlACE::waitforfile_timed ($iorfile, 30) == -1) {
     print STDERR "ERROR: cannot find file <$iorfile>\n";
     $REPO->Kill (); $REPO->TimedWait (1);
     exit 1;
 }
 
-print $CL->CommandLine() . "\n" if $debug ;
+print $CL->CommandLine() . "\n";
 
 $client = $CL->SpawnWaitKill (30);
 

@@ -11,18 +11,18 @@
 
 DCPS_SimpleTcpLoader::DCPS_SimpleTcpLoader (void)
 {
-  DBG_ENTRY_LVL("DCPS_SimpleTcpLoader","DCPS_SimpleTcpLoader",5);
+  DBG_ENTRY_LVL("DCPS_SimpleTcpLoader","DCPS_SimpleTcpLoader",6);
 }
 
 DCPS_SimpleTcpLoader::~DCPS_SimpleTcpLoader (void)
 {
-  DBG_ENTRY_LVL("DCPS_SimpleTcpLoader","~DCPS_SimpleTcpLoader",5);
+  DBG_ENTRY_LVL("DCPS_SimpleTcpLoader","~DCPS_SimpleTcpLoader",6);
 }
 
 int
 DCPS_SimpleTcpLoader::init (int argc, ACE_TCHAR* argv[])
 {
-  DBG_ENTRY_LVL("DCPS_SimpleTcpLoader","init",5);
+  DBG_ENTRY_LVL("DCPS_SimpleTcpLoader","init",6);
 
   static int initialized = 0;
 

@@ -65,13 +65,13 @@ parse_args (int argc,
       const ACE_TCHAR *currentArg = 0;
 
       if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-c"))) != 0)
-	{
-	  arg_shifter.consume_arg ();
-	}
+  {
+    arg_shifter.consume_arg ();
+  }
       else
-	{
-	  arg_shifter.ignore_arg ();
-	}
+  {
+    arg_shifter.ignore_arg ();
+  }
     }
 }
 
@@ -419,13 +419,13 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                       0.1f,
                       0.2,
 #if ACE_SIZEOF_LONG_DOUBLE == 16
-                      0x89abcdef01234567,
+                      0x89abcdef01234567LL,
 #else
                       {{0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77}},
 #endif
                       0x1a,
                       0xb2,
-		      const_cast<ACE_CDR::Char *>(string),
+          const_cast<ACE_CDR::Char *>(string),
                       wstring
   } ;
   Values observed ;
@@ -447,7 +447,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     expectedArray.floatValue[i] = (float) 1.0 / (float) i;
     expectedArray.doubleValue[i] = (double) 3.0 / (double) i;
 #if ACE_SIZEOF_LONG_DOUBLE == 16
-    expectedArray.longdoubleValue[i] = 0x89abcdef01234567;
+    expectedArray.longdoubleValue[i] = 0x89abcdef01234567LL;
 #else
     ACE_CDR::LongDouble ldarray = {{0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77}};
     expectedArray.longdoubleValue[i] = ldarray;

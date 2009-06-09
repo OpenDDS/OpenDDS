@@ -12,10 +12,10 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/SubscriberImpl.h"
-#include "tests/DCPS/FooType4/FooTypeSupportC.h"
-#include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportC.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
-static const char * reader_address_str = "127.0.0.1:16789";
+static const ACE_TCHAR* reader_address_str = ACE_TEXT("localhost:16789");
 
 Reader::Reader(::DDS::DomainParticipant_ptr dp,
                int history_depth,
@@ -42,7 +42,7 @@ Reader::Reader(::DDS::DomainParticipant_ptr dp,
 
   // Attach the subscriber to the transport.
   OpenDDS::DCPS::SubscriberImpl* sub_impl
-    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl> (sub_.in ());
+    = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*> (sub_.in ());
 
   if (0 == sub_impl)
   {
@@ -72,8 +72,7 @@ Reader::Reader(::DDS::DomainParticipant_ptr dp,
 	  static_cast<CORBA::Long> (max_blocking_time.sec ());
   dr_qos.liveliness.lease_duration.nanosec = 0 ;
 
-  ::DDS::DataReaderListener_var drl
-    = ::OpenDDS::DCPS::servant_to_reference(&drl_servant_);
+  ::DDS::DataReaderListener_var drl (new DataReaderListenerImpl);
 
   ::DDS::DataReader_var dr = sub_->create_datareader(description.in (),
                                 dr_qos,
@@ -151,7 +150,7 @@ Reader::read (const SampleInfoMap& si_map,
       }
 
       ::Xyz::FooDataReaderImpl* dr_servant =
-        OpenDDS::DCPS::reference_to_servant<Xyz::FooDataReaderImpl> (foo_dr.in ());
+        dynamic_cast<Xyz::FooDataReaderImpl*> (foo_dr.in ());
 
       DDS::ReturnCode_t status  ;
       status = dr_servant->read(foo, si,
@@ -164,11 +163,19 @@ Reader::read (const SampleInfoMap& si_map,
       {
         for (CORBA::ULong i = 0 ; i < si.length() ; i++)
         {
+          // skip the dispose notification sample.
+          if (si[i].valid_data == 0)
+          {
+            ACE_OS::printf ("got SampleInfo[%d] dispose sample\n", i);
+            continue;
+          }
+ 
           ACE_OS::printf ("foo[%d] - %c : x = %f y = %f, key = %d\n",
-                          i, foo[i].c, foo[i].x, foo[i].y, foo[i].key);
+            i, foo[i].c, foo[i].x, foo[i].y, foo[i].key);
           PrintSampleInfo(si[i]) ;
 
           SampleInfoMap::const_iterator it = si_map.find(foo[i].c);
+
           if (it == si_map.end())
           {
             ACE_OS::printf ("read - Error: %c not returned\n", foo[i].c) ;
@@ -220,6 +227,7 @@ int Reader::init_transport ()
 
   ACE_INET_Addr reader_address (reader_address_str);
   reader_tcp_config->local_address_ = reader_address;
+  reader_tcp_config->local_address_str_ = reader_address_str;
 
   if (reader_transport_impl->configure(reader_config.in()) != 0)
     {
@@ -240,7 +248,7 @@ Reader::~Reader()
 
   //We have to wait a while to avoid the remove_association from DCPSInfo
   //called after the transport is release.
-  ACE_OS::sleep (5);
+  ACE_OS::sleep (2);
 
   TheTransportFactory->release(SUB_TRAFFIC) ;
 }

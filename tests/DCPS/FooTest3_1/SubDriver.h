@@ -46,14 +46,18 @@ class SubDriver
 
     ACE_TString       pub_id_fname_;
     ACE_INET_Addr     pub_addr_;
+    ACE_TString       pub_addr_str_; 
 
     OpenDDS::DCPS::RepoId sub_id_;
     ACE_INET_Addr     sub_addr_;
+    ACE_TString       sub_addr_str_;
 
     int               num_writes_;
     int               receive_delay_msec_;
     ::Test::TestPubDriver_var pub_driver_;
     ACE_CString       pub_driver_ior_;
+
+    ACE_TString       sub_ready_filename_;
 };
 
 #endif

@@ -13,16 +13,14 @@
 // gets a bit circular in the dependencies.  Oh well.
 OpenDDS::DCPS::SimpleTcpAcceptor::SimpleTcpAcceptor
                                          (SimpleTcpTransport* transport_impl)
+: transport_(transport_impl, false)
 {
-  DBG_ENTRY_LVL("SimpleTcpAcceptor","SimpleTcpAcceptor",5);
-  // Keep a reference for ourselves
-  transport_impl->_add_ref();
-  this->transport_ = transport_impl;
+  DBG_ENTRY_LVL("SimpleTcpAcceptor","SimpleTcpAcceptor",6);
 }
 
 OpenDDS::DCPS::SimpleTcpAcceptor::~SimpleTcpAcceptor()
 {
-  DBG_ENTRY_LVL("SimpleTcpAcceptor","~SimpleTcpAcceptor",5);
+  DBG_ENTRY_LVL("SimpleTcpAcceptor","~SimpleTcpAcceptor",6);
 }
 
 OpenDDS::DCPS::SimpleTcpConfiguration*
@@ -35,7 +33,7 @@ OpenDDS::DCPS::SimpleTcpAcceptor::get_configuration()
 OpenDDS::DCPS::SimpleTcpTransport*
 OpenDDS::DCPS::SimpleTcpAcceptor::transport()
 {
-  DBG_ENTRY_LVL("SimpleTcpAcceptor","transport",5);
+  DBG_ENTRY_LVL("SimpleTcpAcceptor","transport",6);
   // Return a new reference to the caller (the caller is responsible for
   // the reference).
   SimpleTcpTransport_rch tmp = this->transport_;
@@ -46,7 +44,7 @@ OpenDDS::DCPS::SimpleTcpAcceptor::transport()
 void
 OpenDDS::DCPS::SimpleTcpAcceptor::transport_shutdown()
 {
-  DBG_ENTRY_LVL("SimpleTcpAcceptor","transport_shutdown",5);
+  DBG_ENTRY_LVL("SimpleTcpAcceptor","transport_shutdown",6);
 
   // Drop the reference to the SimpleTcpTransport object.
   this->transport_ = 0;

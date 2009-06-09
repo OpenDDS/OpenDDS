@@ -9,13 +9,17 @@
  */
 // ============================================================================
 
-#include "MessageTypeSupportImpl.h"
+#include "MessengerTypeSupportImpl.h"
 #include "Writer.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #include <dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h>
+
+#ifdef ACE_AS_STATIC_LIBS
+#include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
+#endif
 
 #include <ace/streams.h>
 #include "ace/Get_Opt.h"
@@ -121,7 +125,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
 
       // Attach the publisher to the transport.
       OpenDDS::DCPS::PublisherImpl* pub_impl =
-        OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub.in ());
+        dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub.in ());
       if (0 == pub_impl) {
         cerr << "Failed to obtain publisher servant" << endl;
         exit(1);

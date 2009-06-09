@@ -17,7 +17,13 @@ OpenDDS::DCPS::ReliableMulticastTransportImpl::~ReliableMulticastTransportImpl()
 
 ACE_INLINE
 bool
-OpenDDS::DCPS::ReliableMulticastTransportImpl::acked(RepoId)
+OpenDDS::DCPS::ReliableMulticastTransportImpl::acked(RepoId, RepoId)
 {
   return true;
+}
+
+ACE_INLINE void 
+OpenDDS::DCPS::ReliableMulticastTransportImpl::remove_ack (RepoId /*pub_id*/, RepoId /*sub_id*/)
+{
+  //noop
 }

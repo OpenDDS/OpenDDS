@@ -5,7 +5,7 @@
 #define WRITER_H
 
 #include "dds/DdsDcpsSubscriptionC.h"
-#include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
 class Writer 
 {

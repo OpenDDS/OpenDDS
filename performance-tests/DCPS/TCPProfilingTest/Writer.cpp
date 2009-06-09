@@ -3,8 +3,8 @@
 // $Id$
 #include "Writer.h"
 //#include "TestException.h"
-#include "testMsgTypeSupportC.h"
-#include "testMsgTypeSupportImpl.h"
+#include "testMessageTypeSupportC.h"
+#include "testMessageTypeSupportImpl.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "ace/OS_NS_unistd.h"
 
@@ -33,8 +33,7 @@ void write (long id,
   ACE_ASSERT (! CORBA::is_nil (pt_dw.in ()));
 
   ::profilingTest::testMsgDataWriterImpl* pt_servant =
-    ::OpenDDS::DCPS::reference_to_servant< ::profilingTest::testMsgDataWriterImpl, ::profilingTest::testMsgDataWriter_ptr>
-            (pt_dw.in ());
+    dynamic_cast< ::profilingTest::testMsgDataWriterImpl*>(pt_dw.in ());
 
   ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("%T (%P|%t) Writer::svc starting to write.\n")));
@@ -128,12 +127,12 @@ Writer::svc ()
       if (handles.length() == 0)
         {
           finished_sending_ = true;
-          done_condition_.signal(); // tell publisher look if I am finished.
         }
     }
 
   ACE_DEBUG((LM_DEBUG,
               ACE_TEXT(" %P|%t Writer::svc finished.\n")));
+  done_condition_.signal(); // tell publisher look if I am finished.
   return 0;
 }
 

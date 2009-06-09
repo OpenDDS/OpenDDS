@@ -12,9 +12,9 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/PublisherImpl.h"
-#include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
-static const char * writer_address_str = "127.0.0.1:29876";
+static const ACE_TCHAR* writer_address_str = ACE_TEXT("localhost:29876");
 
 Writer::Writer(::DDS::DomainParticipant_ptr dp,
                ::DDS::Topic_ptr topic,
@@ -42,7 +42,7 @@ Writer::Writer(::DDS::DomainParticipant_ptr dp,
 
   // Attach the publisher to the transport.
   OpenDDS::DCPS::PublisherImpl* pub_impl
-    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub_.in ());
+    = dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub_.in ());
 
   if (0 == pub_impl)
   {
@@ -60,6 +60,9 @@ Writer::Writer(::DDS::DomainParticipant_ptr dp,
   dw_qos.history.depth = history_depth  ;
   dw_qos.resource_limits.max_samples_per_instance =
             max_samples_per_instance ;
+  dw_qos.liveliness.lease_duration.sec =
+	  static_cast<CORBA::Long> (max_blocking_time.sec ());
+  dw_qos.liveliness.lease_duration.nanosec = 0 ;
 
   dw_ = pub_->create_datawriter(topic,
                                 dw_qos,
@@ -81,14 +84,14 @@ Writer::Writer(::DDS::DomainParticipant_ptr dp,
     throw TestException() ;
   }
 
-  fast_dw_ =
-    OpenDDS::DCPS::reference_to_servant< ::Xyz::FooDataWriterImpl> (foo_dw.in ());
+  fast_dw_ = 
+    dynamic_cast< ::Xyz::FooDataWriterImpl*> (foo_dw.in ());
 
 }
 
 void Writer::write (char message_id, const ::Xyz::Foo &foo)
 {
-  ::DDS::InstanceHandle_t handle (::OpenDDS::DCPS::HANDLE_NIL) ;
+  ::DDS::InstanceHandle_t handle (::DDS::HANDLE_NIL) ;
 
   switch(message_id)
   {
@@ -342,6 +345,7 @@ int Writer::init_transport ()
 
   ACE_INET_Addr writer_address (writer_address_str);
   writer_tcp_config->local_address_ = writer_address;
+  writer_tcp_config->local_address_str_ = writer_address_str;
 
   if (writer_transport_impl->configure(writer_config.in()) != 0)
     {
@@ -364,7 +368,7 @@ Writer::~Writer()
 
   //We have to wait a while to avoid the remove_association from DCPSInfo
   //called after the transport is release.
-  ACE_OS::sleep (5);
+  ACE_OS::sleep (2);
 
   TheTransportFactory->release(PUB_TRAFFIC) ;
 }

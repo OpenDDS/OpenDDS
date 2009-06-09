@@ -5,13 +5,15 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 # Set the library path for the client to be able to load
 # the FooTyoe* library.
-PerlACE::add_lib_path('../FooType3');
+PerlDDS::add_lib_path('../FooType3');
 
 $status = 0;
 
@@ -23,6 +25,8 @@ $shutdown_pub = 1;
 $add_new_subscription = 0;
 $num_subscribers = 1;
 $shutdown_delay_secs=10;
+$sub_ready_file = "sub_ready.txt";
+
 $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : "-ORBSvcConf ../../tcp.conf";
 
@@ -52,8 +56,8 @@ elsif ($ARGV[0] eq 'liveliness') {
 }
 
 #Disabled the reenqueue_all test since we changed to not use the TransientKludge,
-#as the condition of reenqueue_all, the TRANSIENT_LOCAL durability is supported. 
-#This reenqueue_all test will not be applicable in the new TRANSIENT_LOCAL 
+#as the condition of reenqueue_all, the TRANSIENT_LOCAL durability is supported.
+#This reenqueue_all test will not be applicable in the new TRANSIENT_LOCAL
 #implementation.
 
 #elsif ($ARGV[0] eq 'reenqueue_all') { # transient_local support test
@@ -79,16 +83,15 @@ else {
     exit 1;
 }
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("dcps_ir.ior");
-$pubdriver_ior = PerlACE::LocalFile ("pubdriver.ior");
+$dcpsrepo_ior = "dcps_ir.ior";
+$pubdriver_ior = "pubdriver.ior";
 # The pub_id_fname can not be a full path because the
 # pub_id_fname will be part of the parameter of the -p option
 # which will be parsed using ':' delimiter.
 $pub_id_fname = "pub_id.txt";
 
-$pub_port = 5555;
-$sub_port = 6666;
+$pub_port = PerlACE::random_port();
+$sub_port = PerlACE::random_port();
 $sub_id = 1;
 $history_depth=10;
 $repo_bit_conf = "-NOBITS";
@@ -97,29 +100,29 @@ $app_bit_conf = "-DCPSBit 0";
 unlink $dcpsrepo_ior;
 unlink $pub_id_fname;
 unlink $pubdriver_ior;
+unlink $sub_ready_file;
 
-
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                  "$repo_bit_conf -o $dcpsrepo_ior"
-                                  . " -d $domains_file");
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                    "$svc_config $repo_bit_conf -o $dcpsrepo_ior ");
 print $DCPSREPO->CommandLine(), "\n";
 
-$publisher = new PerlACE::Process ("FooTest3_publisher",
-				   "$svc_config "
-                                   . "$app_bit_conf -p $pub_id_fname:localhost:$pub_port "
-                                   . "-s $sub_id:localhost:$sub_port "
-                                   . " -DCPSInfoRepo file://$dcpsrepo_ior -d $history_depth"
-                                   . " -t $test_to_run -DCPSChunks $n_chunks -v $pubdriver_ior");
+$publisher = PerlDDS::create_process ("FooTest3_publisher",
+                                     "$svc_config "
+                                     . "$app_bit_conf -p $pub_id_fname:localhost:$pub_port "
+                                     . "-s $sub_id:localhost:$sub_port "
+                                     . " -DCPSInfoRepo file://$dcpsrepo_ior -d $history_depth"
+                                     . " -t $test_to_run -DCPSChunks $n_chunks -v $pubdriver_ior"
+                                     . " -f $sub_ready_file");
 
 print $publisher->CommandLine(), "\n";
 
-$subscriber = new PerlACE::Process ("FooTest3_subscriber",
-				    "$svc_config "
-				    . "-p $pub_id_fname:localhost:$pub_port "
-                                    . "$app_bit_conf -s $sub_id:localhost:$sub_port -n $num_writes "
-                                    . "-v file://$pubdriver_ior -x $shutdown_pub "
-                                    . "-a $add_new_subscription -d $shutdown_delay_secs");
-
+$subscriber = PerlDDS::create_process ("FooTest3_subscriber",
+                                      "$svc_config "
+                                      . "-p $pub_id_fname:localhost:$pub_port "
+                                      . "$app_bit_conf -s $sub_id:localhost:$sub_port -n $num_writes "
+                                      . "-v file://$pubdriver_ior -x $shutdown_pub "
+                                      . "-a $add_new_subscription -d $shutdown_delay_secs "
+                                      . "-f $sub_ready_file");
 
 print $subscriber->CommandLine(), "\n";
 
@@ -147,12 +150,12 @@ if ($num_subscribers == 2)
     $add_new_subscription = 1;
     $num_writes = 2; # 2 writes
 
-    $subscriber2 = new PerlACE::Process ("FooTest3_subscriber",
-					 "$svc_config "
-					 . "-p $pub_id_fname:localhost:$pub_port "
-					 . "-s $sub_id:localhost:$sub_port -n $num_writes "
-					 . "-v file://$pubdriver_ior -x 1 -a 1 "
-					 . "-d $shutdown_delay_secs");
+    $subscriber2 = PerlDDS::create_process ("FooTest3_subscriber",
+                                           "$svc_config "
+                                           . "-p $pub_id_fname:localhost:$pub_port "
+                                           . "-s $sub_id:localhost:$sub_port -n $num_writes "
+                                           . "-v file://$pubdriver_ior -x 1 -a 1 "
+                                           . "-d $shutdown_delay_secs -f $sub_ready_file");
 
     print $subscriber2->CommandLine(), "\n";
 
@@ -183,6 +186,12 @@ $ir = $DCPSREPO->TerminateWaitKill(5);
 if ($ir != 0) {
     print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
     $status = 1;
+}
+
+if ($status == 0) {
+  print "test PASSED.\n";
+} else {
+  print STDERR "test FAILED.\n";
 }
 
 exit $status;

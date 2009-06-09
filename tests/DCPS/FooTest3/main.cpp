@@ -16,7 +16,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/TopicDescriptionImpl.h"
-#include "tests/DCPS/FooType3/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType3/FooDefTypeSupportImpl.h"
 #include "tests/DCPS/common/TestSupport.h"
 
 #include "ace/Arg_Shifter.h"
@@ -106,10 +106,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
-      ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl();
-
-      ::Xyz::FooTypeSupport_var fts =
-        OpenDDS::DCPS::servant_to_reference (fts_servant);
+      ::Xyz::FooTypeSupport_var fts (new ::Xyz::FooTypeSupportImpl);
 
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,

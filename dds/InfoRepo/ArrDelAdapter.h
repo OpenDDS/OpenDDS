@@ -1,7 +1,8 @@
+// -*- C++ -*-
+
 #ifndef _ARR_DEL_ADAPTER_
 #define _ARR_DEL_ADAPTER_
 
-#include <memory>
 
 /// A auto_ptr implementation to handle
 ///  array memory management.

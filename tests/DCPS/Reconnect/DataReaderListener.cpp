@@ -2,8 +2,8 @@
 //
 // $Id$
 #include "DataReaderListener.h"
-#include "MessageTypeSupportC.h"
-#include "MessageTypeSupportImpl.h"
+#include "MessengerTypeSupportC.h"
+#include "MessengerTypeSupportImpl.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <ace/streams.h>
 
@@ -170,6 +170,15 @@ void DataReaderListenerImpl::on_subscription_lost (
     //ACE_DEBUG ((LM_DEBUG ,
     //  "(%P|%t)on_subscription_lost  writer %d \n", status.publication_handles[i]));
   }
+}
+
+
+void DataReaderListenerImpl::on_budget_exceeded (
+  ::DDS::DataReader_ptr,
+  const ::OpenDDS::DCPS::BudgetExceededStatus&)
+  throw (::CORBA::SystemException)
+{
+  ACE_DEBUG ((LM_DEBUG, "(%P|%t)received on_budget_exceeded \n"));
 }
 
 

@@ -47,6 +47,8 @@ namespace TAO
     {
     public:
 
+      typedef Sample_T value_type;
+
       /**
       * Construct a sequence of sample data values that supports
       * zero-copy reads.
@@ -104,7 +106,7 @@ namespace TAO
       class PrivateMemberAccess
       {
       public:
-        PrivateMemberAccess(ZeroCopyDataSeq& seq)
+        explicit PrivateMemberAccess(ZeroCopyDataSeq& seq)
           : seq_(seq) {}
 
         CORBA::ULong max_slots() const { return seq_.max_slots(); }

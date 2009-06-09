@@ -2,12 +2,14 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
      & eval 'exec perl -S $0 $argv:q'
      if 0;
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use lib "$ENV{ACE_ROOT}/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
-$SUB_1 = new PerlACE::Process("raw_tcp_subscriber",
+$SUB_1 = PerlDDS::create_process("raw_tcp_subscriber",
                               "-p 1 -n 4000 -d 19 -s 5555");
-$PUB_1 = new PerlACE::Process("raw_tcp_publisher",
+$PUB_1 = PerlDDS::create_process("raw_tcp_publisher",
                               "-p 1 -n 4000 -d 19 -s localhost:5555");
 
 my $status = 0;

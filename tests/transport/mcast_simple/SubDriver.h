@@ -40,7 +40,7 @@ class SubDriver
 
     OpenDDS::DCPS::RepoId pub_id_;
     ACE_INET_Addr     pub_addr_;
-
+    ACE_TString       pub_addr_str_;
     OpenDDS::DCPS::RepoId sub_id_;
 };
 

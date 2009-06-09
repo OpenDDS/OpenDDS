@@ -14,7 +14,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 
-#include "tests/DCPS/FooType/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType/FooTypeTypeSupportImpl.h"
 
 #include "ace/Get_Opt.h"
 
@@ -61,13 +61,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     {
       ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
-
-      FooTypeSupportImpl* fts_servant = new FooTypeSupportImpl();
-      OpenDDS::DCPS::LocalObject_var safe_servant = fts_servant;
-
-      FooTypeSupport_var fts =
-        OpenDDS::DCPS::servant_to_reference (fts_servant);
-
+      FooTypeSupport_var fts (new FooTypeSupportImpl);
 
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,
@@ -123,8 +117,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       TEST_CHECK (! CORBA::is_nil (description.in ()));
 
       OpenDDS::DCPS::TopicDescriptionImpl* ti =
-        OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::TopicDescriptionImpl>
-        (description.in ());
+        dynamic_cast<OpenDDS::DCPS::TopicDescriptionImpl*>(description.in ());
       TEST_CHECK (ti != 0);
 
       ::DDS::DataReader_var dr =

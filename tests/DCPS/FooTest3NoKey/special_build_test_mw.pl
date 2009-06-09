@@ -5,13 +5,15 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 # Set the library path for the client to be able to load
 # the FooTyoe* library.
-PerlACE::add_lib_path('../FooType3NoKey');
+PerlDDS::add_lib_path('../FooType3NoKey');
 
 #Clean the Foo.txt file which is used as a storage of the 
 #data written.
@@ -24,27 +26,25 @@ $num_threads_to_write=5;
 $num_writes_per_thread=2;
 $num_writers=2;
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("dcps_ir.ior");
+$dcpsrepo_ior = "dcps_ir.ior";
 
 unlink $dcpsrepo_ior; 
 
-$DCPSREPO = new PerlACE::Process ("../../../../DDS/DCPSInfoRepo",
-                             "-o $dcpsrepo_ior"
-                             . " -d $domains_file");
+$DCPSREPO = PerlDDS::create_process ("../../../../DDS/DCPSInfoRepo",
+                               "-o $dcpsrepo_ior ");
 
 #Test with multiple write threads and non blocking write.
-$FooTest_1 = new PerlACE::Process ("FooTest3NoKey",
-                            "-DCPSInfoRepo file://$dcpsrepo_ior "
-                            . "-t $num_threads_to_write -i $num_writes_per_thread "
-                            . "-w $num_writers");
+$FooTest_1 = PerlDDS::create_process ("FooTest3NoKey",
+                              "-DCPSInfoRepo file://$dcpsrepo_ior "
+                              . "-t $num_threads_to_write -i $num_writes_per_thread "
+                              . "-w $num_writers");
 
 #Test write block waiting for available space with RELIABLE and 
 #KEEP_ALL qos.
-$FooTest_2 = new PerlACE::Process ("FooTest3NoKey",
-                            "-DCPSInfoRepo file://$dcpsrepo_ior "
-                            . "-b 1 -t $num_threads_to_write -i $num_writes_per_thread "
-                            . "-w $num_writers");
+$FooTest_2 = PerlDDS::create_process ("FooTest3NoKey",
+                              "-DCPSInfoRepo file://$dcpsrepo_ior "
+                              . "-b 1 -t $num_threads_to_write -i $num_writes_per_thread "
+                              . "-w $num_writers");
 
 $DCPSREPO->Spawn ();
 

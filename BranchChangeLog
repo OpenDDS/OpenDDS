@@ -1,3 +1,12 @@
+Tue Jun  9 20:48:07 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * many files
+
+	  Merged in changes from trunk between the branching-off point and
+	  r2013.  Fixed compile problems with uses_wchar=1 and a few runtime
+	  issues.  There are still runtime failures in a number of tests, but
+	  those are being deferred until the next round of merges.
+	
 Thu Jan 29 00:09:21 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * examples/DCPS/DistributedContent/DistributedContent.mpc:

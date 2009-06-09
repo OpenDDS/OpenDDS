@@ -67,6 +67,10 @@ main (int argc, ACE_TCHAR *argv[])
                             ACE_TEXT("(%P|%t) Nil DomainParticipantFactory returned!\n")),
                             2);
         }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 1 passed.\n")));
+        }
 
       dpFactory_noargs = TheParticipantFactory;
       if ( CORBA::is_nil (dpFactory_noargs.in()) )
@@ -75,6 +79,10 @@ main (int argc, ACE_TCHAR *argv[])
                             ACE_TEXT("(%P|%t) Nil DomainParticipantFactory returned when no args given!\n")),
                             2);
         }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 2 passed.\n")));
+        }
 
       if (dpFactory.in() != dpFactory_noargs.in() )
         {
@@ -82,22 +90,27 @@ main (int argc, ACE_TCHAR *argv[])
                             ACE_TEXT("(%P|%t) Different DomainParticipantFactories returned!\n")),
                             2);
         }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 3 passed.\n")));
+        }
 
 
 
       // --
       // Check the DomainParticipantFactory
       // --
+      ::DDS::DomainParticipantListener_var dpListener (new OPENDDS_DCPS_DomainParticipantListener_i);
 
-      OPENDDS_DCPS_DomainParticipantListener_i* dpListenerImpl = new OPENDDS_DCPS_DomainParticipantListener_i;
-
-      ::DDS::DomainParticipantListener_var dpListener =
-        ::OpenDDS::DCPS::servant_to_reference (dpListenerImpl);
       if ( CORBA::is_nil (dpListener.in()) )
         {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) Nil DomainParticipantListener returned!\n")),
                             3);
+        }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 4 passed.\n")));
         }
 
       ::DDS::DomainParticipantQos dPQosInitialDefault;
@@ -116,6 +129,10 @@ main (int argc, ACE_TCHAR *argv[])
                             ACE_TEXT("(%P|%t) Was able to set invalid default Participant QOS!\n")),
                             3);
         }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 5 passed.\n")));
+        }
 
       ::DDS::DomainParticipantQos dPQosNewDefault;
       dpFactory->get_default_participant_qos (dPQosNewDefault);
@@ -126,6 +143,10 @@ main (int argc, ACE_TCHAR *argv[])
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) Incorrect default Participant QOS was returned in the get!\n")),
                             3);
+        }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 6 passed.\n")));
         }
 
       ::DDS::DomainParticipant_var testParticipant;
@@ -141,6 +162,10 @@ main (int argc, ACE_TCHAR *argv[])
                             ACE_TEXT("(%P|%t) Invalid QOS returned a DomainParticipant!\n")),
                             4);
         }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 7 passed.\n")));
+        }
 
       ::DDS::ReturnCode_t deleteParticipantReturnCode =
       dpFactory->delete_participant(testParticipant.in ());
@@ -149,6 +174,10 @@ main (int argc, ACE_TCHAR *argv[])
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) Invalid Participant was deleted!\n")),
                             4);
+        }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 8 passed.\n")));
         }
 
       testParticipant =
@@ -161,6 +190,10 @@ main (int argc, ACE_TCHAR *argv[])
                             ACE_TEXT("(%P|%t) Nil DomainParticipant returned!\n")),
                             5);
         }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 9 passed.\n")));
+        }
 
 
       deleteParticipantReturnCode =
@@ -170,6 +203,10 @@ main (int argc, ACE_TCHAR *argv[])
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) Valid Participant was not deleted!\n")),
                             5);
+        }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 10 passed.\n")));
         }
 
       /* Cant do the below because the delete_participant doesnt handle it
@@ -182,6 +219,7 @@ main (int argc, ACE_TCHAR *argv[])
                             5);
         }
       */
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 11 skipped.\n")));
 
       ::DDS::DomainParticipantFactory_var firstInstance =
         dpFactory->get_instance();
@@ -190,6 +228,10 @@ main (int argc, ACE_TCHAR *argv[])
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) Nil DomainParticipantFactory returned on first call!\n")),
                             6);
+        }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 12 passed.\n")));
         }
 
       ::DDS::DomainParticipantFactory_var secondInstance =
@@ -200,12 +242,20 @@ main (int argc, ACE_TCHAR *argv[])
                             ACE_TEXT("(%P|%t) Nil DomainParticipantFactory returned on second call!\n")),
                             6);
         }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 13 passed.\n")));
+        }
 
       if (firstInstance.in() != secondInstance.in())
         {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) DomainParticipantFactory instances don't match!\n")),
                             6);
+        }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 14 passed.\n")));
         }
 
 
@@ -225,6 +275,10 @@ main (int argc, ACE_TCHAR *argv[])
                             ACE_TEXT("(%P|%t) Nil DomainParticipant returned in DomainParticipant test!\n")),
                             7);
         }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 15 passed.\n")));
+        }
 
       ::DDS::DomainParticipantQos participantInitialQOS;
       participant->get_qos(participantInitialQOS);
@@ -235,6 +289,10 @@ main (int argc, ACE_TCHAR *argv[])
                             ACE_TEXT("(%P|%t) Participant has incorrect QOS!\n")),
                             7);
         }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 16 passed.\n")));
+        }
 
       ::DDS::ReturnCode_t setQosReturnCode =
         participant->set_qos(dPQosChangedEntityFactory);
@@ -244,6 +302,10 @@ main (int argc, ACE_TCHAR *argv[])
                             ACE_TEXT("(%P|%t) Was able to set invalid Participant QOS!\n")),
                             7);
         }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 17 passed.\n")));
+        }
 
       ::DDS::DomainParticipantListener_var participantInitialListener;
       participantInitialListener = participant->get_listener();
@@ -252,6 +314,10 @@ main (int argc, ACE_TCHAR *argv[])
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) DomainParticipant returned a nil listener when expected a valid!\n")),
                             7);
+        }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 18 passed.\n")));
         }
 
       ::DDS::ReturnCode_t setListenerReturnCode =
@@ -263,6 +329,10 @@ main (int argc, ACE_TCHAR *argv[])
                             ACE_TEXT("(%P|%t) Was unable to set valid Participant listener!\n")),
                             7);
         }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 19 passed.\n")));
+        }
 
       ::DDS::DomainParticipantListener_var participantListener;
       participantListener = participant->get_listener();
@@ -272,12 +342,20 @@ main (int argc, ACE_TCHAR *argv[])
                             ACE_TEXT("(%P|%t) DomainParticipant returned a nil listener!\n")),
                             7);
         }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 20 passed.\n")));
+        }
 
       if (participantListener.in() != dpListener.ptr())
         {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) DomainParticipant listener returned is not the listener set!\n")),
                             7);
+        }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 21 passed.\n")));
         }
 
 
@@ -288,6 +366,10 @@ main (int argc, ACE_TCHAR *argv[])
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) DomainParticipant returned the incorrect domain id!\n")),
                             7);
+        }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 22 passed.\n")));
         }
 
 
@@ -310,6 +392,10 @@ main (int argc, ACE_TCHAR *argv[])
                             ACE_TEXT("(%P|%t) Was able to set invalid default Publisher QOS!\n")),
                             8);
         }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 23 passed.\n")));
+        }
 
       ::DDS::PublisherQos pubQosNewDefault;
       participant->get_default_publisher_qos (pubQosNewDefault);
@@ -320,6 +406,10 @@ main (int argc, ACE_TCHAR *argv[])
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) Incorrect default Publisher QOS was returned in the get!\n")),
                             8);
+        }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 24 passed.\n")));
         }
 
 
@@ -332,6 +422,10 @@ main (int argc, ACE_TCHAR *argv[])
                             ACE_TEXT("(%P|%t) DomainParticipant returned a nil publisher!\n")),
                             8);
         }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 25 passed.\n")));
+        }
 
       ::DDS::ReturnCode_t deletePubReturnCode =
       participant->delete_publisher(publisher.in ());
@@ -340,6 +434,10 @@ main (int argc, ACE_TCHAR *argv[])
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) Publisher was NOT deleted!\n")),
                             8);
+        }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 26 passed.\n")));
         }
 
 
@@ -361,6 +459,10 @@ main (int argc, ACE_TCHAR *argv[])
                             ACE_TEXT("(%P|%t) Was able to set invalid default Subscriber QOS!\n")),
                             9);
         }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 27 passed.\n")));
+        }
 
       ::DDS::SubscriberQos subQosNewDefault;
       participant->get_default_subscriber_qos (subQosNewDefault);
@@ -371,6 +473,10 @@ main (int argc, ACE_TCHAR *argv[])
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) Incorrect default Subscriber QOS was returned in the get!\n")),
                             9);
+        }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 28 passed.\n")));
         }
 
 
@@ -383,6 +489,10 @@ main (int argc, ACE_TCHAR *argv[])
                             ACE_TEXT("(%P|%t) DomainParticipant returned a nil Subscriber!\n")),
                             9);
         }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 29 passed.\n")));
+        }
 
       ::DDS::ReturnCode_t deleteSubReturnCode =
       participant->delete_subscriber(subscriber.in ());
@@ -391,6 +501,10 @@ main (int argc, ACE_TCHAR *argv[])
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) Subscriber was NOT deleted!\n")),
                             9);
+        }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 30 passed.\n")));
         }
 
 
@@ -403,6 +517,10 @@ main (int argc, ACE_TCHAR *argv[])
                             ACE_TEXT("(%P|%t) DomainParticipant returned a nil publisher!\n")),
                             10);
         }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 31 passed.\n")));
+        }
       subscriber = participant->create_subscriber (subInitialQos,
                                                  ::DDS::SubscriberListener::_nil());
       if (CORBA::is_nil (subscriber.in ()) )
@@ -410,6 +528,10 @@ main (int argc, ACE_TCHAR *argv[])
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) DomainParticipant returned a nil Subscriber!\n")),
                             10);
+        }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 32 passed.\n")));
         }
 
       ::DDS::ReturnCode_t deleteEntriesReturnCode =
@@ -419,6 +541,10 @@ main (int argc, ACE_TCHAR *argv[])
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) DomainParticipant failed to delete_contained_entities!\n")),
                             10);
+        }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 33 passed.\n")));
         }
 
 
@@ -432,9 +558,14 @@ main (int argc, ACE_TCHAR *argv[])
                             ACE_TEXT("(%P|%t) Valid Participant was not deleted!\n")),
                             7);
         }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 34 passed.\n")));
+        }
 
      TheTransportFactory->release();
      TheServiceParticipant->shutdown();
+     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) All tests completed without exceptions.\n")));
     }
   catch (const CORBA::Exception& ex)
     {

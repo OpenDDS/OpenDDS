@@ -53,7 +53,8 @@ namespace OpenDDS
         /// and return it.
         virtual DataLink* find_or_create_datalink
                           (const TransportInterfaceInfo& remote_info,
-                           int                           connect_as_publisher);
+                           int                           connect_as_publisher,
+                           CORBA::Long                   priority);
 
         virtual int configure_i(TransportConfiguration* config);
 

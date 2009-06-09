@@ -24,9 +24,9 @@ const char* MY_TYPE     = "Foo";
 const char* MY_TYPE_FOR_UDP = "FooUdp";
 const char* MY_TYPE_FOR_MCAST = "FooMcast";
 const char* MY_TYPE_FOR_RELIABLE_MULTICAST = "FooReliableMulticast";
-const ACE_TCHAR* reader_address_str = ACE_TEXT("");
-const ACE_TCHAR* multicast_group_address_str = ACE_TEXT("");
-const ACE_TCHAR* writer_address_str = ACE_TEXT("");
+const ACE_TCHAR* reader_address_str = ACE_TEXT("localhost:0");
+ACE_TString multicast_group_address_str;
+const ACE_TCHAR* writer_address_str = ACE_TEXT("localhost:0");
 int reader_address_given = 0;
 int multicast_group_address_given = 0;
 int writer_address_given = 0;
@@ -51,6 +51,7 @@ ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> num_reads = 0;
 long op_interval_ms = 0;
 long blocking_ms = 0;
 int mixed_trans = 0;
+int test_bit = 0;
 
 OpenDDS::DCPS::TransportImpl_rch reader_tcp_impl;
 OpenDDS::DCPS::TransportImpl_rch reader_udp_impl;
@@ -106,9 +107,11 @@ int init_reader_transport ()
 
 
       ACE_INET_Addr reader_address (reader_address_str);
-      ACE_INET_Addr multicast_group_address (multicast_group_address_str);
+      ACE_INET_Addr multicast_group_address (multicast_group_address_str.c_str());
       reader_mcast_config->local_address_ = reader_address;
+      reader_mcast_config->local_address_str_ = reader_address_str;
       reader_mcast_config->multicast_group_address_ = multicast_group_address;
+      reader_mcast_config->multicast_group_address_str_ = multicast_group_address_str;
       reader_mcast_config->receiver_ = true;
 
       if (reader_mcast_impl->configure(reader_config.in()) != 0)
@@ -150,9 +153,11 @@ int init_reader_transport ()
 
 
       ACE_INET_Addr reader_address (reader_address_str);
-      ACE_INET_Addr multicast_group_address (multicast_group_address_str);
+      ACE_INET_Addr multicast_group_address (multicast_group_address_str.c_str());
       reader_reliable_multicast_config->local_address_ = reader_address;
+      reader_reliable_multicast_config->local_address_str_ = reader_address_str;
       reader_reliable_multicast_config->multicast_group_address_ = multicast_group_address;
+      reader_reliable_multicast_config->multicast_group_address_str_ = multicast_group_address_str;
       reader_reliable_multicast_config->receiver_ = true;
 
       if (reader_reliable_multicast_impl->configure(reader_config.in()) != 0)
@@ -189,6 +194,7 @@ int init_reader_transport ()
 
           ACE_INET_Addr reader_address (reader_address_str);
           reader_udp_config->local_address_ = reader_address;
+          reader_udp_config->local_address_str_ = reader_address_str;
 
           if (reader_udp_impl->configure(reader_config.in()) != 0)
             {
@@ -216,6 +222,7 @@ int init_reader_transport ()
             {
               ACE_INET_Addr reader_address (reader_address_str);
               reader_tcp_config->local_address_ = reader_address;
+              reader_tcp_config->local_address_str_ = reader_address_str;
             }
           // else use default address - OS assigned.
 
@@ -261,6 +268,7 @@ int init_writer_transport ()
 
       ACE_INET_Addr writer_address (writer_address_str);
       writer_mcast_config->multicast_group_address_ = writer_address;
+      writer_mcast_config->multicast_group_address_str_ = writer_address_str;
 
       if (writer_mcast_impl->configure(writer_config.in()) != 0)
         {
@@ -294,6 +302,7 @@ int init_writer_transport ()
 
       ACE_INET_Addr writer_address (writer_address_str);
       writer_reliable_multicast_config->multicast_group_address_ = writer_address;
+      writer_reliable_multicast_config->multicast_group_address_str_ = writer_address_str;
 
       if (writer_reliable_multicast_impl->configure(writer_config.in()) != 0)
         {
@@ -329,6 +338,7 @@ int init_writer_transport ()
 
       ACE_INET_Addr writer_address (writer_address_str);
       writer_udp_config->local_address_ = writer_address;
+      writer_udp_config->local_address_str_ = writer_address_str;
 
       if (writer_udp_impl->configure(writer_config.in()) != 0)
       {
@@ -357,6 +367,7 @@ int init_writer_transport ()
       {
         ACE_INET_Addr writer_address (writer_address_str);
         writer_tcp_config->local_address_ = writer_address;
+        writer_tcp_config->local_address_str_ = writer_address_str;
       }
       // else use default address - OS assigned.
 

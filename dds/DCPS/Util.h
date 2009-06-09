@@ -15,7 +15,8 @@ namespace OpenDDS
     {
       if (c.find(first) == c.end())
       {
-        if (c.insert(typename Container::value_type(first, second)).second)
+        typedef typename Container::value_type container_value_type;
+        if (c.insert(container_value_type(first, second)).second)
         {
           return 0;
         }
