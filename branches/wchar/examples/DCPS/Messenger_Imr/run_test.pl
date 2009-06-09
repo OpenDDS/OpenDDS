@@ -5,9 +5,11 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 use Sys::Hostname;
 
 my $useImr = 1;
@@ -16,32 +18,34 @@ if ($ARGV[0] eq 'noImr') {
 }
 
 my $status = 0;
-
-my $opts =  "-ORBSvcConf ../../tcp.conf";
-my $pub_opts = "$opts -DCPSConfigFile pub.ini -orbendpoint iiop://:12345";
+my $use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
+my $pub_port = PerlACE::random_port();
+my $opts = $use_svc_config ? "-ORBSvcConf ../../../tests/tcp.conf" : '';
+my $pub_opts = "$opts -DCPSConfigFile pub.ini -orbendpoint iiop://:$pub_port";
 my $sub_opts = "$opts -DCPSConfigFile sub.ini";
 
 #my $OBJ_REF_STYLE = "-orbobjrefstyle url";
-my $domains_file = PerlACE::LocalFile ("domain_ids");
-my $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+my $dcpsrepo_ior = "repo.ior";
 
-my $implrepo_ior = PerlACE::LocalFile ("imr.ior");
-my $activator_ior = PerlACE::LocalFile ("activator.ior");
+my $implrepo_ior = "imr.ior";
+my $activator_ior = "activator.ior";
 my $imr_init_ref = "-ORBInitRef ImplRepoService=file://$implrepo_ior";
 my $implrepo_server = "$ENV{TAO_ROOT}/orbsvcs/ImplRepo_Service/ImplRepo_Service";
 my $imr_activator = "$ENV{TAO_ROOT}/orbsvcs/ImplRepo_Service/ImR_Activator";
 my $tao_imr = "$ENV{ACE_ROOT}/bin/tao_imr";
-my $RepoOpts = "-NOBITS -o $dcpsrepo_ior -d $domains_file $OBJ_REF_STYLE";
+my $RepoOpts = "$opts -NOBITS -o $dcpsrepo_ior $OBJ_REF_STYLE";
 if ($useImr == 1) {
     $RepoOpts = $RepoOpts . " -ORBuseimr 1 $imr_init_ref";
 }
 
-my $ImR = new PerlACE::Process ($implrepo_server, "-o $implrepo_ior $OBJ_REF_STYLE -orbendpoint iiop://:12346");
-my $Act = new PerlACE::Process ($imr_activator, "-o $activator_ior $imr_init_ref $OBJ_REF_STYLE -orbendpoint iiop://:12347");
-my $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo", $RepoOpts);
-my $imr_util = new PerlACE::Process ("$tao_imr");
-my $Subscriber = new PerlACE::Process ("subscriber", " $sub_opts");
-my $Publisher = new PerlACE::Process ("publisher", " $pub_opts");
+my $ImR_port = PerlACE::random_port();
+my $Act_port = PerlACE::random_port();
+my $ImR = PerlDDS::create_process ($implrepo_server, "-o $implrepo_ior $OBJ_REF_STYLE -orbendpoint iiop://:$ImR_port");
+my $Act = PerlDDS::create_process ($imr_activator, "-o $activator_ior $imr_init_ref $OBJ_REF_STYLE -orbendpoint iiop://:$Act_port");
+my $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo", $RepoOpts);
+my $imr_util = PerlDDS::create_process ("$tao_imr");
+my $Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
+my $Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
 
 # We want the tao_imr executable to be found exactly in the path
 # given, without being modified by the value of -ExeSubDir.
@@ -78,12 +82,12 @@ sub SpawnWait {
 CleanupOutput();
 
 if ($useImr == 1) {
-    if (SpawnWait($ImR, $implrepo_ior, 10) != 0) {
+    if (SpawnWait($ImR, $implrepo_ior, 30) != 0) {
 	$ImR->Kill();
 	exit 1;
     }
 
-    if (SpawnWait($Act, $activator_ior, 10) != 0) {
+    if (SpawnWait($Act, $activator_ior, 30) != 0) {
 	$ImR->Kill();
 	$Act->Kill();
 	exit 1;

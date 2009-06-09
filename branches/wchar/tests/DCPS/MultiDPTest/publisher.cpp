@@ -17,8 +17,7 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/PublisherImpl.h"
-#include "tests/DCPS/FooType5/FooTypeSupportImpl.h"
-#include "tests/DCPS/FooType5/FooNoKeyTypeSupportImpl.h"
+#include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
@@ -33,7 +32,7 @@ OpenDDS::DCPS::TransportImpl_rch writer_impl;
 ::DDS::DataWriter_var datawriter[2];
 Writer* writers[2];
 int writer_address_given = 0;
-ACE_TString writer_address_str;
+ACE_TString writer_address_str = ACE_TEXT("localhost:0");
 
 /// parse the command line arguments
 int parse_args (int argc, ACE_TCHAR *argv[])
@@ -149,6 +148,7 @@ void init ()
     {
       ACE_INET_Addr writer_address (writer_address_str.c_str ());
       writer_tcp_config->local_address_ = writer_address;
+      writer_tcp_config->local_address_str_ = writer_address_str.c_str ();
     }
     // else use default address - OS assigned.
 
@@ -172,7 +172,7 @@ void init ()
 
   // Attach the publisher to the transport.
   OpenDDS::DCPS::PublisherImpl* pub_impl
-    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl>
+    = dynamic_cast<OpenDDS::DCPS::PublisherImpl*>
     (publisher.in ());
 
   if (0 == pub_impl)

@@ -9,7 +9,7 @@
 
 
 SimpleDataReader::SimpleDataReader()
-  : sub_id_(0),
+  : sub_id_( OpenDDS::DCPS::GUID_UNKNOWN),
     received_test_message_(0)
 {
 }

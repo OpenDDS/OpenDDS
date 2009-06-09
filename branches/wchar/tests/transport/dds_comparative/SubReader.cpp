@@ -6,7 +6,7 @@
 
 
 SubReader::SubReader()
-  : sub_id_(0),
+  : sub_id_( OpenDDS::DCPS::GUID_UNKNOWN),
     data_size_(0),
     num_expected_(0),
     num_received_(0)

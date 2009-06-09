@@ -1,7 +1,6 @@
 // $Id$
 #include "SimpleTcp_pch.h"
 #include "SimpleTcp.h"
-#include "SimpleTcp_export.h"
 #include "SimpleTcpLoader.h"
 #include "tao/debug.h"
 #include "ace/Dynamic_Service.h"

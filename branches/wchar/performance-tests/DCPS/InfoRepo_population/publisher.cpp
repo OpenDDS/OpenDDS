@@ -11,7 +11,7 @@
 
 #include "SyncClientExt_i.h"
 
-#include "MessageTypeSupportImpl.h"
+#include "MessengerTypeSupportImpl.h"
 #include "Writer.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
@@ -57,6 +57,8 @@ private:
   std::vector<DDS::Topic_var> topic_;
   std::vector<DDS::Publisher_var> pub_;
   std::vector<DDS::DataWriter_var> dw_;
+
+  std::vector< OpenDDS::DCPS::TransportImpl_rch> transports_;
 
   std::auto_ptr<SyncClientExt_i> sync_client_;
 };
@@ -109,7 +111,7 @@ Publisher::parse_args (int argc, ACE_TCHAR *argv[])
   return true;
 }
 
-Publisher::Publisher (int argc, ACE_TCHAR *argv[]) throw (InitError)
+Publisher::Publisher (int argc, ACE_TCHAR *argv[]) throw (Publisher::InitError)
   : topic_count_ (1), participant_count_ (1), writer_count_ (1)
   , control_file_ ("barrier_file"), subscriber_count_(1)
   , transport_impl_id_ (1)
@@ -117,6 +119,9 @@ Publisher::Publisher (int argc, ACE_TCHAR *argv[]) throw (InitError)
   try
     {
       dpf_ = TheParticipantFactoryWithArgs (argc, argv);
+      if( this->dpf_.in () == 0) {
+        throw InitError ("Publisher::ctor> Failed to obtain the participant factory.");
+      }
 
       if (!this->parse_args (argc, argv)) {
         throw InitError ("Publisher::ctor> Failed to parse args.");
@@ -149,6 +154,7 @@ Publisher::Publisher (int argc, ACE_TCHAR *argv[]) throw (InitError)
   topic_.resize (topic_count_);
   pub_.resize (writer_count_);
   dw_.resize (writer_count_);
+  this->transports_.resize( this->writer_count_);
 }
 
 bool
@@ -207,10 +213,38 @@ Publisher::run (void)
         }
       topic_timer.stop();
 
-      // Initialize the transport
-      OpenDDS::DCPS::TransportImpl_rch tcp_impl =
-        TheTransportFactory->create_transport_impl (transport_impl_id_,
-                                                    ::OpenDDS::DCPS::AUTO_CONFIG);
+      // Initialize the transports
+      for( size_t count = 0; count < writer_count_; ++count) {
+        this->transports_[ count]
+          = TheTransportFactory->obtain( this->transport_impl_id_ + count);
+
+        if( false == this->transports_[ count].is_nil()) {
+          // Only create transports that need to be.
+          continue;
+        }
+
+        this->transports_[ count]
+          = TheTransportFactory->create_transport_impl(
+              this->transport_impl_id_ + count,
+              ACE_TEXT("SimpleTcp"),
+              ::OpenDDS::DCPS::DONT_AUTO_CONFIG
+            );
+
+        OpenDDS::DCPS::TransportConfiguration_rch config
+          = TheTransportFactory->create_configuration(
+              this->transport_impl_id_ + count,
+              ACE_TEXT("SimpleTcp")
+            );
+
+        if( this->transports_[ count]->configure( config.in()) != 0) {
+          ACE_ERROR((LM_ERROR,
+            ACE_TEXT("%T (%P|%t) ERROR: TCP ")
+            ACE_TEXT("failed to configure the transport.\n")
+          ));
+          return false;
+        }
+      }
+
       ACE_High_Res_Timer pub_timer;
       pub_timer.start();
       for (size_t count = 0; count < writer_count_; count++)
@@ -227,15 +261,17 @@ Publisher::run (void)
           }
 
           OpenDDS::DCPS::PublisherImpl* pub_impl =
-            ::OpenDDS::DCPS::reference_to_servant< OpenDDS::DCPS::PublisherImpl,
-            DDS::Publisher_ptr>(pub_[count].in ());
+            dynamic_cast< OpenDDS::DCPS::PublisherImpl*>(pub_[count].in ());
           if (0 == pub_impl) {
             cerr << "Failed to obtain publisher servant" << endl;
             return false;
           }
 
           // Attach the publisher to the transport.
-          OpenDDS::DCPS::AttachStatus status = pub_impl->attach_transport(tcp_impl.in());
+          OpenDDS::DCPS::AttachStatus status
+            = pub_impl->attach_transport(
+                this->transports_[ count].in()
+              );
           if (status != OpenDDS::DCPS::ATTACH_OK)
             {
               std::string status_str;

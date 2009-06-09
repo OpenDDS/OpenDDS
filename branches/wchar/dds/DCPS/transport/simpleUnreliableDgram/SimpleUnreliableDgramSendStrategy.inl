@@ -12,11 +12,12 @@ OpenDDS::DCPS::SimpleUnreliableDgramSendStrategy::SimpleUnreliableDgramSendStrat
                                      (TransportConfiguration* config,
                                       const ACE_INET_Addr&    remote_address,
                                       SimpleUnreliableDgramSocket*        socket,
-                                      SimpleUnreliableDgramSynchResource* synch_resource)
-  : TransportSendStrategy(config, synch_resource),
+                                      SimpleUnreliableDgramSynchResource* synch_resource,
+                                      CORBA::Long                         priority)
+  : TransportSendStrategy(config, synch_resource, priority),
     remote_address_(remote_address)
 {
-  DBG_ENTRY_LVL("SimpleUnreliableDgramSendStrategy","SimpleUnreliableDgramSendStrategy",5);
+  DBG_ENTRY_LVL("SimpleUnreliableDgramSendStrategy","SimpleUnreliableDgramSendStrategy",6);
 
   // Keep a "copy" of the reference to the SimpleUdpSocket object
   // for ourselves.
@@ -29,7 +30,7 @@ ACE_INLINE
 void
 OpenDDS::DCPS::SimpleUnreliableDgramSendStrategy::stop_i()
 {
-  DBG_ENTRY_LVL("SimpleUnreliableDgramSendStrategy","stop_i",5);
+  DBG_ENTRY_LVL("SimpleUnreliableDgramSendStrategy","stop_i",6);
   //TODO: noop
 }
 

@@ -83,7 +83,9 @@ public:
   }
   
   virtual void release_instance_i(DDS::InstanceHandle_t) {}
-  virtual void dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample&) {}
+  virtual void dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample&, 
+                             OpenDDS::DCPS::SubscriptionInstance *&,
+                             bool &) {}
   virtual void dec_ref_data_element(OpenDDS::DCPS::ReceivedDataElement *) {}
 
 };

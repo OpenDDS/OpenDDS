@@ -8,11 +8,14 @@
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "SimpleUnreliableDgramDataLink.h"
 #include "SimpleUnreliableDgramDataLink_rch.h"
+#include "SimpleUnreliableDgramSocket.h"
 #include "SimpleUnreliableDgramSocket_rch.h"
 #include "SimpleUnreliableDgramConfiguration.h"
 #include "SimpleUnreliableDgramConfiguration_rch.h"
 #include "dds/DCPS/transport/framework/TransportReceiveStrategy_rch.h"
+#include "dds/DCPS/transport/framework/TransportReactorTask.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
+#include "dds/DCPS/transport/framework/PriorityKey.h"
 #include "ace/INET_Addr.h"
 #include "ace/Hash_Map_Manager.h"
 #include "ace/Synch.h"
@@ -49,7 +52,8 @@ namespace OpenDDS
 
         virtual DataLink* find_or_create_datalink
                           (const TransportInterfaceInfo& remote_info,
-                           int                           connect_as_publisher);
+                           int                           connect_as_publisher,
+                           CORBA::Long                   priority);
 
         virtual int configure_i(TransportConfiguration* config);
  
@@ -60,7 +64,8 @@ namespace OpenDDS
         virtual int connection_info_i
                                  (TransportInterfaceInfo& local_info) const = 0;
 
-        virtual bool acked (RepoId);
+        virtual bool acked (RepoId, RepoId);
+        virtual void remove_ack (RepoId pub_id, RepoId sub_id);
 
         virtual void notify_lost_on_backpressure_timeout ();
 
@@ -73,14 +78,15 @@ namespace OpenDDS
         friend class SimpleUnreliableDgramReceiveStrategy;
 
         virtual void deliver_sample(ReceivedDataSample&  sample,
-                            const ACE_INET_Addr& remote_address);
+                            const ACE_INET_Addr& remote_address,
+                            CORBA::Long          priority);
 
         /// Map Type: (key) ACE_INET_Addr to (value) SimpleMcastDataLink_rch
         typedef ACE_Hash_Map_Manager_Ex
-                               <ACE_INET_Addr,
+                               <PriorityKey,
                                 SimpleUnreliableDgramDataLink_rch,
-                                ACE_Hash<ACE_INET_Addr>,
-                                ACE_Equal_To<ACE_INET_Addr>,
+                                ACE_Hash<PriorityKey>,
+                                ACE_Equal_To<PriorityKey>,
                                 ACE_Null_Mutex>              AddrLinkMap;
 
         typedef ACE_SYNCH_MUTEX         LockType;

@@ -9,7 +9,7 @@
  */
 // ============================================================================
 
-#include "MessageTypeSupportImpl.h"
+#include "MessengerTypeSupportImpl.h"
 #include "Writer.h"
 #include "DataWriterListener.h"
 #include <dds/DCPS/Service_Participant.h>
@@ -20,6 +20,7 @@
 #include <dds/DCPS/transport/framework/TransportDebug.h>
 #include <ace/streams.h>
 #include <ace/Get_Opt.h>
+#include <string>
 
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
@@ -39,11 +40,12 @@ int expected_lost_pub_notification = 0;
 int actual_lost_pub_notification = 0;
 int expected_deleted_connections = 1;
 int num_deleted_connections = 0;
+ACE_TString local_address;
 
 /// parse the command line arguments
 int parse_args (int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT ("va:n:i:l:d:"));
+  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT ("va:n:i:l:d:x:"));
   int c;
 
   while ((c = get_opts ()) != -1)
@@ -67,6 +69,9 @@ int parse_args (int argc, ACE_TCHAR *argv[])
       case 'd':
         expected_deleted_connections = ACE_OS::atoi (get_opts.opt_arg ());
         break;
+      case 'x':
+        local_address = get_opts.opt_arg ();
+        break;
       case '?':
       default:
         ACE_ERROR_RETURN ((LM_ERROR,
@@ -76,6 +81,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
                            "-i <write_delay_ms> "
                            "-l <expected_lost_pub_notification> "
                            "-d <expected_deleted_connections> "
+                           "-x <local_address> "
                            "-v "
                            "\n",
                            argv [0]),
@@ -125,9 +131,31 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       exit(1);
     }
 
+    // Initialize the transport
     OpenDDS::DCPS::TransportImpl_rch tcp_impl =
-      TheTransportFactory->create_transport_impl (TCP_IMPL_ID,
-                                                  ::OpenDDS::DCPS::AUTO_CONFIG);
+        TheTransportFactory->create_transport_impl (TCP_IMPL_ID,
+                                                    ACE_TEXT ("SimpleTcp"),
+                                                    OpenDDS::DCPS::DONT_AUTO_CONFIG);
+
+    OpenDDS::DCPS::TransportConfiguration_rch writer_config
+      = TheTransportFactory->create_configuration (TCP_IMPL_ID, ACE_TEXT ("SimpleTcp"));
+
+    OpenDDS::DCPS::SimpleTcpConfiguration* writer_tcp_config
+      = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
+
+    writer_tcp_config->local_address_ = ACE_INET_Addr (local_address.c_str ());
+    writer_tcp_config->local_address_str_ = local_address;
+    // This is needed for bp_timeout test.
+    writer_tcp_config->max_output_pause_period_ = 2000;
+
+    // This is needed to get the connection deletion callback.
+    writer_tcp_config->datalink_release_delay_ = 0;
+
+    if (tcp_impl->configure(writer_config.in()) != 0)
+    {
+      cerr << "Failed to configure the transport." << endl;
+      exit(1);
+    }
 
     DDS::Publisher_var pub =
       participant->create_publisher(PUBLISHER_QOS_DEFAULT,
@@ -139,7 +167,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
 
     // Attach the publisher to the transport.
     OpenDDS::DCPS::PublisherImpl* pub_impl =
-      OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub.in ());
+      dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub.in ());
     if (0 == pub_impl) {
       cerr << "Failed to obtain publisher servant" << endl;
       exit(1);
@@ -168,9 +196,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
     }
 
     // activate the listener
-    DataWriterListenerImpl listener_servant;
-    DDS::DataWriterListener_var listener =
-      ::OpenDDS::DCPS::servant_to_reference (&listener_servant);
+    DDS::DataWriterListener_var listener (new DataWriterListenerImpl);
     if (CORBA::is_nil (listener.in ())) {
       cerr << "listener is nil." << endl;
       exit(1);

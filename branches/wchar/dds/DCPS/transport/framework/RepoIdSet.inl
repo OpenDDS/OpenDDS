@@ -9,7 +9,7 @@
 ACE_INLINE
 OpenDDS::DCPS::RepoIdSet::RepoIdSet()
 {
-  DBG_ENTRY_LVL("RepoIdSet","RepoIdSet",5);
+  DBG_ENTRY_LVL("RepoIdSet","RepoIdSet",6);
 }
 
 
@@ -17,7 +17,7 @@ OpenDDS::DCPS::RepoIdSet::RepoIdSet()
 ACE_INLINE int
 OpenDDS::DCPS::RepoIdSet::insert_id(RepoId key, RepoId value)
 {
-  DBG_ENTRY_LVL("RepoIdSet","insert_id",5);
+  DBG_ENTRY_LVL("RepoIdSet","insert_id",6);
   return bind(map_, key, value);
 }
 
@@ -25,7 +25,7 @@ OpenDDS::DCPS::RepoIdSet::insert_id(RepoId key, RepoId value)
 ACE_INLINE int
 OpenDDS::DCPS::RepoIdSet::remove_id(RepoId id)
 {
-  DBG_ENTRY_LVL("RepoIdSet","remove_id",5);
+  DBG_ENTRY_LVL("RepoIdSet","remove_id",6);
   int result = unbind(map_, id);
 
   if (result != 0)
@@ -40,7 +40,7 @@ OpenDDS::DCPS::RepoIdSet::remove_id(RepoId id)
 ACE_INLINE size_t
 OpenDDS::DCPS::RepoIdSet::size() const
 {
-  DBG_ENTRY_LVL("RepoIdSet","size",5);
+  DBG_ENTRY_LVL("RepoIdSet","size",6);
   return map_.size();
 }
 
@@ -48,7 +48,7 @@ OpenDDS::DCPS::RepoIdSet::size() const
 ACE_INLINE OpenDDS::DCPS::RepoIdSet::MapType&
 OpenDDS::DCPS::RepoIdSet::map()
 {
-  DBG_SUB_ENTRY("RepoIdSet","map",1);
+  DBG_ENTRY_LVL("RepoIdSet","map",6);
   return this->map_;
 }
 
@@ -56,7 +56,6 @@ OpenDDS::DCPS::RepoIdSet::map()
 ACE_INLINE const OpenDDS::DCPS::RepoIdSet::MapType&
 OpenDDS::DCPS::RepoIdSet::map() const
 {
-  DBG_SUB_ENTRY("RepoIdSet","map",2);
+  DBG_ENTRY_LVL("RepoIdSet","map",6);
   return this->map_;
 }
-

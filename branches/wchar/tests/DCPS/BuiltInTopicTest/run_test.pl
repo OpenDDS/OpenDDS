@@ -5,9 +5,11 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 
@@ -17,20 +19,22 @@ $opts = new PerlACE::ConfigList->check_config ('STATIC')
 $pub_opts = "$opts -DCPSConfigFile pub.ini";
 $sub_opts = "$opts -DCPSConfigFile sub.ini";
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+$dcpsrepo_ior = "repo.ior";
 $repo_bit_opt = $opts eq '' ? '' : '-ORBSvcConf tcp.conf';
 
 unlink $dcpsrepo_ior;
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-				  "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file");
-$Subscriber = new PerlACE::Process ("subscriber", " $sub_opts");
-$Publisher = new PerlACE::Process ("publisher", " $pub_opts");
-$Monitor1 = new PerlACE::Process ("monitor", " $opts -l 7");
-$Monitor2 = new PerlACE::Process ("monitor", " $opts");
-$data_file = PerlACE::LocalFile ("test_run.data");
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                    "$repo_bit_opt -o $dcpsrepo_ior ");
+$Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
+$Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
+$Monitor1 = PerlDDS::create_process ("monitor", " $opts -l 7");
+$Monitor2 = PerlDDS::create_process ("monitor", " $opts -u");
+$synch_file = "monitor1_done";
+
+$data_file = "test_run.data";
 unlink $data_file;
+unlink $synch_file;
 
 print $DCPSREPO->CommandLine() . "\n";
 print $Publisher->CommandLine() . "\n";
@@ -56,7 +60,7 @@ $Monitor1->Spawn ();
 $Publisher->Spawn ();
 $Subscriber->Spawn ();
  
-sleep (5);
+sleep (15);
 
 $Monitor2->Spawn ();
 
@@ -96,6 +100,7 @@ open (STDERR, ">&OLDERR");
 
 unlink $dcpsrepo_ior;
 #unlink $data_file;
+unlink $synch_file;
 
 if ($status == 0) {
   print "test PASSED.\n";

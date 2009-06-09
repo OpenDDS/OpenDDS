@@ -5,9 +5,11 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 
@@ -23,20 +25,19 @@ if (!new PerlACE::ConfigList->check_config ('STATIC')) {
   }
 }
 
-my($port1) = 10001 + PerlACE::uniqueid() ;
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+my($port1) = PerlACE::random_port();
+$dcpsrepo_ior = "repo.ior";
 $common_args = "-DCPSInfoRepo corbaloc:iiop:localhost:$port1/DCPSInfoRepo"
     . " $svc_conf";
 
 unlink $dcpsrepo_ior;
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-				  "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file "
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+				  "$repo_bit_opt -o $dcpsrepo_ior "
                                 . "-ORBEndpoint iiop://localhost:$port1");
-$Subscriber = new PerlACE::Process ("subscriber",
+$Subscriber = PerlDDS::create_process ("subscriber",
                                     "-DCPSConfigFile sub.ini $common_args");
-$Publisher = new PerlACE::Process ("publisher",
+$Publisher = PerlDDS::create_process ("publisher",
                                    "-DCPSConfigFile pub.ini $common_args");
 
 $DCPSREPO->Spawn ();

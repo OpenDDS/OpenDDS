@@ -8,6 +8,7 @@
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/AssociationData.h"
+#include "dds/DCPS/Service_Participant.h"
 #include "SimpleSubscriber.h"
 #include "tests/DCPS/common/TestSupport.h"
 
@@ -16,12 +17,15 @@
 #include <ace/Argv_Type_Converter.h>
 #include <string>
 
+#include <sstream>
+
 SubDriver::SubDriver()
 : pub_id_fname_ (ACE_TEXT("pub_id.txt")),
-  sub_id_ (0),
+  sub_id_ ( OpenDDS::DCPS::GUID_UNKNOWN),
   num_writes_ (0),
   receive_delay_msec_ (0),
-  pub_driver_ior_ ("file://pubdriver.ior")
+  pub_driver_ior_ ("file://pubdriver.ior"),
+  sub_ready_filename_(ACE_TEXT("sub_ready.txt"))
 {
 }
 
@@ -110,6 +114,11 @@ SubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
       receive_delay_msec_ = ACE_OS::atoi (current_arg);
       arg_shifter.consume_arg ();
     }
+    else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-f"))) != 0)
+    {
+      sub_ready_filename_ = current_arg;
+      arg_shifter.consume_arg ();
+    }
     // The '-?' option
     else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-?")) == 0) {
       ACE_DEBUG((LM_DEBUG,
@@ -149,6 +158,7 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
   orb_ = CORBA::ORB_init (conv.get_argc (),
                           conv.get_ASCII_argv (),
                           "TAO_DDS_DCPS");
+  TheServiceParticipant->set_ORB (orb_.in());
 
   OpenDDS::DCPS::TransportImpl_rch transport_impl
     = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, ACE_TEXT("SimpleTcp"), OpenDDS::DCPS::DONT_AUTO_CONFIG);
@@ -160,6 +170,7 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
     = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
 
   tcp_config->local_address_ = this->sub_addr_;
+  tcp_config->local_address_str_ = this->sub_addr_str_;
 
   if (transport_impl->configure(config.in ()) != 0)
     {
@@ -167,6 +178,16 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
                  "(%P|%t) Failed to configure the transport impl\n"));
       throw TestException();
     }
+
+  // Indicate that the subscriber is ready to accept connection
+  FILE* readers_ready = ACE_OS::fopen (sub_ready_filename_.c_str (), ACE_LIB_TEXT("w"));
+  if (readers_ready == 0)
+  {
+    ACE_ERROR ((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR Unable to create subscriber ready file\n")));
+  }
+  else
+    ACE_OS::fclose(readers_ready);
   // And we are done with the init().
 }
 
@@ -192,15 +213,22 @@ SubDriver::run()
     }
     else
     {
-      ::OpenDDS::DCPS::PublicationId pub_id = 0;
-      while (fscanf (fp, "%d\n", &pub_id) != EOF)
+      // This could be made cleaner by losing the old C-style I/O.
+      ::OpenDDS::DCPS::PublicationId pub_id = OpenDDS::DCPS::GUID_UNKNOWN;
+      char charBuffer[64];
+      while (fscanf (fp, "%s\n", &charBuffer[0]) != EOF)
       {
-        ids.push_back (pub_id);
+        std::stringstream buffer( charBuffer);
+        buffer >> pub_id;
+        ids.push_back ( OpenDDS::DCPS::GuidConverter( pub_id));
+
+        std::stringstream idBuffer;
+        idBuffer << pub_id;
         ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT("(%P|%t) SubDriver::run, ")
-              ACE_TEXT(" Got from %s: pub_id=%d. \n"),
+              ACE_TEXT(" Got from %s: pub_id=%s. \n"),
               pub_id_fname_.c_str (),
-              pub_id));
+              idBuffer.str().c_str()));
       }
       ACE_OS::fclose (fp);
       break;
@@ -225,13 +253,19 @@ SubDriver::run()
   {
     publications[i].remote_id_                = ids[i];
     publications[i].remote_data_.transport_id = ALL_TRAFFIC; // TBD later - wrong
+    publications[i].remote_data_.publication_transport_priority = 0;
 
-    OpenDDS::DCPS::NetworkAddress network_order_address(this->pub_addr_);
+    OpenDDS::DCPS::NetworkAddress network_order_address(this->pub_addr_str_);
+
+    ACE_OutputCDR cdr;
+    cdr << network_order_address;
+    size_t len = cdr.total_length ();
+
     publications[i].remote_data_.data
       = OpenDDS::DCPS::TransportInterfaceBLOB
-                  (sizeof(OpenDDS::DCPS::NetworkAddress),
-                   sizeof(OpenDDS::DCPS::NetworkAddress),
-                   (CORBA::Octet*)(&network_order_address));
+      (len,
+      len,
+      (CORBA::Octet*)(cdr.buffer ()));
   }
 
   this->subscriber_.init(ALL_TRAFFIC,
@@ -255,6 +289,7 @@ SubDriver::run()
   ACE_OS::sleep (5);
   // Tear-down the entire Transport Framework.
   TheTransportFactory->release();
+  TheServiceParticipant->shutdown();
 }
 
 int
@@ -288,10 +323,10 @@ SubDriver::parse_pub_arg(const ACE_TString& arg)
 
   // Parse the pub_id from left of ':' char, and remainder to right of ':'.
   ACE_TString pub_id_str(arg.c_str(), pos);
-  ACE_TString pub_addr_str(arg.c_str() + pos + 1);
+  this->pub_addr_str_ = arg.c_str() + pos + 1;
 
   this->pub_id_fname_ = pub_id_str.c_str();
-  this->pub_addr_ = ACE_INET_Addr(pub_addr_str.c_str());
+  this->pub_addr_ = ACE_INET_Addr(this->pub_addr_str_.c_str());
 
   return 0;
 }
@@ -327,12 +362,15 @@ SubDriver::parse_sub_arg(const ACE_TString& arg)
 
   // Parse the sub_id from left of ':' char, and remainder to right of ':'.
   ACE_TString sub_id_str(arg.c_str(), pos);
-  ACE_TString sub_addr_str(arg.c_str() + pos + 1);
+  this->sub_addr_str_ =arg.c_str() + pos + 1;
 
-  this->sub_id_ = ACE_OS::atoi(sub_id_str.c_str());
+  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 1
+  converter.kind()   = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
+  converter.key()[2] = ACE_OS::atoi(sub_id_str.c_str());
+  this->sub_id_ = converter;
 
   // Use the remainder as the "stringified" ACE_INET_Addr.
-  this->sub_addr_ = ACE_INET_Addr(sub_addr_str.c_str());
+  this->sub_addr_ = ACE_INET_Addr(this->sub_addr_str_.c_str());
 
   return 0;
 }

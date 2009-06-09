@@ -6,7 +6,7 @@
 ACE_INLINE int
 OpenDDS::DCPS::TransportSendStrategy::start()
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","start",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","start",6);
 
   // Since we (the TransportSendStrategy object) are a reference-counted
   // object, but the synch_ object doesn't necessarily know this, we need
@@ -32,7 +32,7 @@ OpenDDS::DCPS::TransportSendStrategy::start()
 ACE_INLINE void
 OpenDDS::DCPS::TransportSendStrategy::stop()
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","stop",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","stop",6);
 
   this->synch_->unregister_worker();
 
@@ -54,7 +54,7 @@ OpenDDS::DCPS::TransportSendStrategy::stop()
 ACE_INLINE void
 OpenDDS::DCPS::TransportSendStrategy::send_start()
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","send_start",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","send_start",6);
 
   GuardType guard(this->lock_);
   if (! this->link_released_)
@@ -65,7 +65,7 @@ OpenDDS::DCPS::TransportSendStrategy::send_start()
 ACE_INLINE void
 OpenDDS::DCPS::TransportSendStrategy::link_released (bool flag)
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","link_released",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","link_released",6);
 
   GuardType guard(this->lock_);
   this->link_released_ = flag;
@@ -75,7 +75,7 @@ OpenDDS::DCPS::TransportSendStrategy::link_released (bool flag)
 ACE_INLINE void
 OpenDDS::DCPS::TransportSendStrategy::relink (bool)
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","relink",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","relink",6);
   // The subsclass needs implement this function for re-establishing
   // the link upon send failure.
 }
@@ -84,7 +84,7 @@ OpenDDS::DCPS::TransportSendStrategy::relink (bool)
 ACE_INLINE void
 OpenDDS::DCPS::TransportSendStrategy::suspend_send ()
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","suspend_send",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","suspend_send",6);
   GuardType guard(this->lock_);
 
   if (this->mode_ != MODE_TERMINATED && this->mode_ != MODE_SUSPEND)
@@ -98,7 +98,7 @@ OpenDDS::DCPS::TransportSendStrategy::suspend_send ()
 ACE_INLINE void
 OpenDDS::DCPS::TransportSendStrategy::resume_send ()
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","resume_send",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","resume_send",6);
   GuardType guard(this->lock_);
   // If this send strategy is reused when the connection is reestablished, then
   // we need re-initialize the mode_ and mode_before_suspend_.

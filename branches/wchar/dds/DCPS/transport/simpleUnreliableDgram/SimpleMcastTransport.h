@@ -6,6 +6,7 @@
 
 #include "SimpleUnreliableDgram_export.h"
 #include "SimpleUnreliableDgramTransport.h"
+#include <string>
 
 
 namespace OpenDDS
@@ -29,11 +30,13 @@ namespace OpenDDS
                                  (TransportInterfaceInfo& local_info) const;
 
         virtual void deliver_sample(ReceivedDataSample&  sample,
-                            const ACE_INET_Addr& remote_address);
+                            const ACE_INET_Addr& remote_address,
+                            CORBA::Long          priority);
 
       private:
   
         ACE_INET_Addr local_address_;
+        ACE_TString   multicast_group_address_str_;
         ACE_INET_Addr multicast_group_address_;
         bool receiver_;
     };

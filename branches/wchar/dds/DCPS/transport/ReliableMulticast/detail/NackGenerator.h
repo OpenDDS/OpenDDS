@@ -15,6 +15,7 @@
 #include "Packet.h"
 #include <set>
 #include <vector>
+#include <iterator>
 
 namespace OpenDDS
 {

@@ -18,7 +18,7 @@
 #include "dds/DCPS/TopicDescriptionImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DdsDcpsSubscriptionC.h"
-#include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 #ifdef ACE_AS_STATIC_LIBS
@@ -31,7 +31,7 @@
 #include "common.h"
 
 OpenDDS::DCPS::TransportImpl_rch reader_transport_impl;
-static const ACE_TCHAR * reader_address_str = ACE_TEXT("");
+static const ACE_TCHAR * reader_address_str = ACE_TEXT("localhost:0");
 static int reader_address_given = 0;
 
 static int init_reader_tranport ()
@@ -62,6 +62,8 @@ static int init_reader_tranport ()
 
       ACE_INET_Addr reader_address (reader_address_str);
       reader_udp_config->local_address_ = reader_address;
+      reader_udp_config->local_address_str_ = reader_address_str;
+
 
       if (reader_transport_impl->configure(reader_config.in()) != 0)
         {
@@ -88,6 +90,7 @@ static int init_reader_tranport ()
         {
           ACE_INET_Addr reader_address (reader_address_str);
           reader_tcp_config->local_address_ = reader_address;
+          reader_tcp_config->local_address_str_ = reader_address_str;
         }
         // else use default address - OS assigned.
 
@@ -197,11 +200,7 @@ int main (int argc, ACE_TCHAR *argv[])
       // and then get application specific parameters.
       parse_args (argc, argv);
 
-
-      ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl;
-
-      ::Xyz::FooTypeSupport_var fts =
-        OpenDDS::DCPS::servant_to_reference (fts_servant);
+      ::Xyz::FooTypeSupport_var fts (new ::Xyz::FooTypeSupportImpl);
 
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,
@@ -272,7 +271,7 @@ int main (int argc, ACE_TCHAR *argv[])
 
       // Attach the subscriber to the transport.
       OpenDDS::DCPS::SubscriberImpl* sub_impl
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl> (sub.in ());
+        = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*> (sub.in ());
 
       if (0 == sub_impl)
       {
@@ -324,10 +323,9 @@ int main (int argc, ACE_TCHAR *argv[])
       dr_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC ;
       dr_qos.liveliness.lease_duration.nanosec = 0 ;
 
-      DataReaderListenerImpl drl_servant ;
-
-      ::DDS::DataReaderListener_var drl
-        = ::OpenDDS::DCPS::servant_to_reference(&drl_servant);
+      ::DDS::DataReaderListener_var drl (new DataReaderListenerImpl);
+      DataReaderListenerImpl* drl_servant =
+        dynamic_cast<DataReaderListenerImpl*>(drl.in());
 
       ::DDS::DataReader_var dr ;
 
@@ -381,6 +379,50 @@ int main (int argc, ACE_TCHAR *argv[])
       ACE_OS::fclose(readers_completed);
       ACE_OS::fclose(writers_completed);
 
+      //
+      // We need to wait for liveliness to go away here.
+      //
+      ACE_OS::sleep( 5);
+
+      //
+      // Determine the test status at this point.
+      //
+      ACE_OS::fprintf (stderr, "**********\n") ;
+      ACE_OS::fprintf (stderr, "drl_servant->liveliness_changed_count() = %d\n",
+                     drl_servant->liveliness_changed_count()) ;
+      ACE_OS::fprintf (stderr, "drl_servant->no_writers_generation_count() = %d\n",
+                     drl_servant->no_writers_generation_count()) ;
+      ACE_OS::fprintf (stderr, "********** use_take=%d\n", use_take) ;
+      
+      if( drl_servant->liveliness_changed_count() < 2 + 2 * num_unlively_periods) {
+        status = 1;
+        // Some error condition.
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: subscriber - ")
+          ACE_TEXT("test failed first condition.\n")
+        ));
+
+      } else if( drl_servant->verify_last_liveliness_status () == false) {
+        status = 1;
+        // Some other error condition.
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: subscriber - ")
+          ACE_TEXT("test failed second condition.\n")
+        ));
+
+      } else if( drl_servant->no_writers_generation_count() != (use_take==1 ? 0 : num_unlively_periods) ) {
+        status = 1;
+        // Yet another error condition.
+
+        // if use take then the instance had "no samples" when it got NO_WRITERS and
+        // hence the instance state terminated and then started again so
+        // no_writers_generation_count should = 0.
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: subscriber - ")
+          ACE_TEXT("test failed third condition.\n")
+        ));
+      }
+
       ACE_DEBUG((LM_DEBUG,ACE_TEXT("(%P|%t) %T publisher is finish - cleanup subscriber\n") ));
 
       // clean up subscriber objects
@@ -392,26 +434,14 @@ int main (int argc, ACE_TCHAR *argv[])
       dp->delete_topic(topic.in ());
       dpf->delete_participant(dp.in ());
 
+      // Moved TransportImpl reference release from just before exit from main
+      // to here. This intended to fix the access violation in some optimize
+      // build on linux during shutdown. I assume TransportImpl object cleanup
+      // may reference some resouces that already released.
+      reader_transport_impl = 0;
+
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
-
-      ACE_OS::fprintf (stderr, "**********\n") ;
-      ACE_OS::fprintf (stderr, "drl_servant.liveliness_changed_count() = %d\n",
-                     drl_servant.liveliness_changed_count()) ;
-      ACE_OS::fprintf (stderr, "drl_servant.no_writers_generation_count() = %d\n",
-                     drl_servant.no_writers_generation_count()) ;
-      ACE_OS::fprintf (stderr, "********** use_take=%d\n", use_take) ;
-
-      if ((drl_servant.liveliness_changed_count() != 2 + 2 * num_unlively_periods) ||
-        (drl_servant.no_writers_generation_count() != (use_take==1 ? 0 : num_unlively_periods) ))
-      {
-        // if use take then the instance had "no samples" when it got NO_WRITERS and
-        // hence the instance state terminated and then started again so
-        // no_writers_generation_count should = 0.
-        ACE_ERROR ((LM_ERROR,
-           ACE_TEXT("(%P|%t) Unexpected no_writers_generation_count or liveliness_changed_count \n")));
-          return 1;
-      }
 
     }
   catch (const TestException&)
@@ -426,9 +456,5 @@ int main (int argc, ACE_TCHAR *argv[])
       return 1;
     }
 
-  // Note: The TransportImpl reference SHOULD be deleted before exit from
-  //       main if the concrete transport libraries are loaded dynamically.
-  //       Otherwise cleanup after main() will encount access vilation.
-  reader_transport_impl = 0;
   return status;
 }

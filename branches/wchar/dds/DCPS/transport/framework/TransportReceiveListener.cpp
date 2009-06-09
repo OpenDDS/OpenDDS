@@ -13,12 +13,12 @@
 
 OpenDDS::DCPS::TransportReceiveListener::TransportReceiveListener()
 {
-  DBG_ENTRY_LVL("TransportReceiveListener","TransportReceiveListener",5);
+  DBG_ENTRY_LVL("TransportReceiveListener","TransportReceiveListener",6);
 }
 
 
 OpenDDS::DCPS::TransportReceiveListener::~TransportReceiveListener()
 {
-  DBG_ENTRY_LVL("TransportReceiveListener","~TransportReceiveListener",5);
+  DBG_ENTRY_LVL("TransportReceiveListener","~TransportReceiveListener",6);
 }
 

@@ -12,7 +12,7 @@
 #include "SyncClientExt_i.h"
 
 #include "DataReaderListener.h"
-#include "MessageTypeSupportImpl.h"
+#include "MessengerTypeSupportImpl.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/SubscriberImpl.h>
@@ -55,6 +55,8 @@ private:
   std::vector<DDS::Topic_var> topic_;
   std::vector<DDS::Subscriber_var> subs_;
   std::vector<DDS::DataReader_var> dr_;
+
+  std::vector< OpenDDS::DCPS::TransportImpl_rch> transports_;
 
   std::auto_ptr<SyncClientExt_i> sync_client_;
 };
@@ -108,7 +110,7 @@ Subscriber::parse_args (int argc, ACE_TCHAR *argv[])
   return true;
 }
 
-Subscriber::Subscriber (int argc, ACE_TCHAR *argv[]) throw (InitError)
+Subscriber::Subscriber (int argc, ACE_TCHAR *argv[]) throw (Subscriber::InitError)
   : topic_count_ (1), participant_count_ (1), reader_count_(1)
   , control_file_ ("barrier_file"), publisher_count_ (1)
   , transport_impl_id_ (1)
@@ -146,6 +148,7 @@ Subscriber::Subscriber (int argc, ACE_TCHAR *argv[]) throw (InitError)
   topic_.resize (topic_count_);
   subs_.resize (reader_count_);
   dr_.resize (reader_count_);
+  this->transports_.resize( this->reader_count_);
 }
 
 bool
@@ -228,10 +231,38 @@ Subscriber::run (void)
         }
       topic_timer.stop();
 
-      // Initialize the transport
-      OpenDDS::DCPS::TransportImpl_rch tcp_impl =
-        TheTransportFactory->create_transport_impl (transport_impl_id_,
-                                                    ::OpenDDS::DCPS::AUTO_CONFIG);
+      // Initialize the transports
+      for( size_t count = 0; count < reader_count_; ++count) {
+        this->transports_[ count]
+          = TheTransportFactory->obtain( this->transport_impl_id_ + count);
+
+        if( false == this->transports_[ count].is_nil()) {
+          // Only create transports that need to be.
+          continue;
+        }
+
+        this->transports_[ count]
+          = TheTransportFactory->create_transport_impl(
+              this->transport_impl_id_ + count,
+              ACE_TEXT("SimpleTcp"),
+              ::OpenDDS::DCPS::DONT_AUTO_CONFIG
+            );
+
+        OpenDDS::DCPS::TransportConfiguration_rch config
+          = TheTransportFactory->create_configuration(
+              this->transport_impl_id_ + count,
+              ACE_TEXT("SimpleTcp")
+            );
+
+        if( this->transports_[ count]->configure( config.in()) != 0) {
+          ACE_ERROR((LM_ERROR,
+            ACE_TEXT("%T (%P|%t) ERROR: TCP ")
+            ACE_TEXT("failed to configure the transport.\n")
+          ));
+          return false;
+        }
+      }
+
       ACE_High_Res_Timer sub_timer;
       sub_timer.start();
       for (size_t count = 0; count < reader_count_; count++)
@@ -247,15 +278,17 @@ Subscriber::run (void)
           }
 
           OpenDDS::DCPS::SubscriberImpl* sub_impl =
-            ::OpenDDS::DCPS::reference_to_servant< OpenDDS::DCPS::SubscriberImpl,
-            DDS::Subscriber_ptr> (subs_[count].in ());
+            dynamic_cast< OpenDDS::DCPS::SubscriberImpl*> (subs_[count].in ());
           if (0 == sub_impl) {
             cerr << "Failed to obtain subscriber servant\n" << endl;
             return false;
           }
 
           // Attach the subscriber to the transport.
-          OpenDDS::DCPS::AttachStatus status = sub_impl->attach_transport(tcp_impl.in());
+          OpenDDS::DCPS::AttachStatus status
+            = sub_impl->attach_transport(
+                this->transports_[ count].in()
+              );
           if (status != OpenDDS::DCPS::ATTACH_OK)
             {
               std::string status_str;
@@ -278,18 +311,6 @@ Subscriber::run (void)
               exit(1);
             }
         }
-
-      /*
-        // activate the listener
-        DataReaderListenerImpl        listener_servant;
-        DDS::DataReaderListener_var listener =
-        ::OpenDDS::DCPS::servant_to_reference(&listener_servant);
-
-        if (CORBA::is_nil (listener.in ())) {
-        cerr << "listener is nil." << endl;
-        exit(1);
-        }
-      */
 
       // Create the Datareaders
       DDS::DataReaderQos dr_qos;

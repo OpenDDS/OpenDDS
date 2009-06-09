@@ -28,7 +28,7 @@ class ACE_Data_Block ;
   ACE_TString stringvalue;                                                     \
   if (CF.get_string_value (SECT, KEY, stringvalue) == -1)                      \
   {                                                                            \
-    if (DCPS_debug_level > 0)                                                  \
+    if (::OpenDDS::DCPS::Transport_debug_level > 0)                            \
     {                                                                          \
       ACE_DEBUG ((LM_WARNING,                                                  \
                   ACE_TEXT ("(%P|%t)\"%s\" is not defined in config ")         \
@@ -38,7 +38,7 @@ class ACE_Data_Block ;
   }                                                                            \
   else  if (stringvalue == ACE_TEXT(""))                                       \
   {                                                                            \
-    if (DCPS_debug_level > 0)                                                  \
+    if (::OpenDDS::DCPS::Transport_debug_level > 0)                            \
     {                                                                          \
       ACE_DEBUG ((LM_WARNING,                                                  \
                 ACE_TEXT ("(%P|%t)missing VALUE for \"%s\" in config ")        \
@@ -59,7 +59,7 @@ class ACE_Data_Block ;
   ACE_TString stringvalue;                                                     \
   if (CF.get_string_value (SECT, KEY, stringvalue) == -1)                      \
   {                                                                            \
-    if (DCPS_debug_level > 0)                                                  \
+    if (::OpenDDS::DCPS::Transport_debug_level > 0)                            \
     {                                                                          \
       ACE_DEBUG ((LM_WARNING,                                                  \
                   ACE_TEXT ("(%P|%t)\"%s\" is not defined in config ")         \
@@ -69,7 +69,7 @@ class ACE_Data_Block ;
   }                                                                            \
   else  if (stringvalue == ACE_TEXT(""))                                       \
   {                                                                            \
-    if (DCPS_debug_level > 0)                                                  \
+    if (::OpenDDS::DCPS::Transport_debug_level > 0)                            \
     {                                                                          \
       ACE_DEBUG ((LM_WARNING,                                                  \
                   ACE_TEXT ("(%P|%t)missing VALUE for \"%s\" in config ")      \
@@ -88,7 +88,7 @@ class ACE_Data_Block ;
   ACE_TString stringvalue;                                                     \
   if (CF.get_string_value (SECT, KEY, stringvalue) == -1)                      \
   {                                                                            \
-    if (DCPS_debug_level > 0)                                                  \
+    if (::OpenDDS::DCPS::Transport_debug_level > 0)                            \
     {                                                                          \
       ACE_DEBUG ((LM_WARNING,                                                  \
                   ACE_TEXT ("(%P|%t)\"%s\" is not defined in config ")         \
@@ -98,7 +98,7 @@ class ACE_Data_Block ;
   }                                                                            \
   else  if (stringvalue == ACE_TEXT(""))                                       \
   {                                                                            \
-    if (DCPS_debug_level > 0)                                                  \
+    if (::OpenDDS::DCPS::Transport_debug_level > 0)                            \
     {                                                                          \
       ACE_DEBUG ((LM_WARNING,                                                  \
                 ACE_TEXT ("(%P|%t)missing VALUE for \"%s\" in config ")        \
@@ -214,14 +214,6 @@ namespace OpenDDS
         DEFAULT_CONFIG_MAX_SAMPLES_PER_PACKET = 10,
         DEFAULT_CONFIG_OPTIMUM_PACKET_SIZE    = 4096
       };
-
-
-    enum Association_Status
-    {
-      Fully_Associated,
-      Not_Fully_Associated,
-      Association_Error
-    };
 
   } /* namespace DCPS */
 

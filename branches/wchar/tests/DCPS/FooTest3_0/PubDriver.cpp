@@ -1,7 +1,5 @@
 #include "PubDriver.h"
 #include "TestException.h"
-#include "tests/DCPS/FooType3/FooTypeSupportC.h"
-#include "tests/DCPS/FooType3/FooTypeSupportImpl.h"
 #include "tests/DCPS/FooType3/FooDefC.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
@@ -13,6 +11,7 @@
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Transient_Kludge.h"
+#include "dds/DCPS/GuidUtils.h"
 #include "DomainParticipantListener.h"
 #include "DataWriterListener.h"
 #include "PublisherListener.h"
@@ -20,6 +19,7 @@
 
 #include <ace/Arg_Shifter.h>
 #include <string>
+#include <sstream>
 
 const long  MY_DOMAIN   = 411;
 const char* MY_TOPIC    = "foo";
@@ -39,12 +39,13 @@ PubDriver::PubDriver()
   datawriter_servant_ (0),
   foo_datawriter_servant_ (0),
   pub_id_fname_ (ACE_TEXT("pub_id.txt")),
-  sub_id_ (0),
+  sub_id_ (GUID_UNKNOWN),
   history_depth_ (1),
   test_to_run_ (REGISTER_TEST),
   pub_driver_ior_ ("pubdriver.ior"),
   add_new_subscription_ (0),
-  shutdown_ (0)
+  shutdown_ (0),
+  sub_ready_filename_(ACE_TEXT("sub_ready.txt"))
 {
 }
 
@@ -158,6 +159,11 @@ PubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
     {
       pub_driver_ior_ = ACE_TEXT_ALWAYS_CHAR(current_arg);
       arg_shifter.consume_arg ();
+    }    
+    else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-f"))) != 0)
+    {
+      sub_ready_filename_ = current_arg;
+      arg_shifter.consume_arg ();
     }
     // The '-?' option
     else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-?")) == 0) {
@@ -220,10 +226,7 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
 
   ::DDS::ReturnCode_t ret = ::DDS::RETCODE_OK;
 
-  ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl();
-
-  ::Xyz::FooTypeSupport_var fts =
-    ::OpenDDS::DCPS::servant_to_reference (fts_servant);
+  ::Xyz::FooTypeSupport_var fts (new ::Xyz::FooTypeSupportImpl);
 
   participant_ =
     dpf->create_participant(MY_DOMAIN,
@@ -262,7 +265,7 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
   TEST_CHECK (! CORBA::is_nil (publisher_.in ()));
 
   publisher_servant_
-    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl>
+    = dynamic_cast<OpenDDS::DCPS::PublisherImpl*>
     (publisher_.in ());
 
   attach_to_transport ();
@@ -331,9 +334,9 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
   // the topics should point to the same servant
   // but not the same Object Reference.
   TopicImpl* topic_got_servant
-    = reference_to_servant<TopicImpl> (topic_got.in ());
+    = dynamic_cast<TopicImpl*> (topic_got.in ());
   TopicImpl* topic_servant
-    = reference_to_servant<TopicImpl> (topic_.in ());
+    = dynamic_cast<TopicImpl*> (topic_.in ());
 
   TEST_CHECK (topic_got_servant == topic_servant);
 
@@ -381,7 +384,7 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
   TEST_CHECK (! CORBA::is_nil (datawriter_.in ()));
 
   datawriter_servant_
-    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::DataWriterImpl> (datawriter_.in ());
+    = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*> (datawriter_.in ());
 
   foo_datawriter_
     = ::Xyz::FooDataWriter::_narrow(datawriter_.in ());
@@ -389,7 +392,7 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
   TEST_CHECK (! CORBA::is_nil (foo_datawriter_.in ()));
 
   foo_datawriter_servant_
-    = OpenDDS::DCPS::reference_to_servant<Xyz::FooDataWriterImpl>
+    = dynamic_cast<Xyz::FooDataWriterImpl*>
     (foo_datawriter_.in ());
 
   TEST_CHECK (foo_datawriter_servant_ != 0);
@@ -439,20 +442,33 @@ PubDriver::run()
   }
 
   OpenDDS::DCPS::PublicationId pub_id = datawriter_servant_->get_publication_id ();
+  std::stringstream buffer;
+  buffer << pub_id;
 
   // Write the publication id to a file.
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT("(%P|%t) PubDriver::run, ")
-              ACE_TEXT(" Write to %s: pub_id=%d. \n"),
+              ACE_TEXT(" Write to %s: pub_id=%s. \n"),
               pub_id_fname_.c_str (),
-              pub_id));
+              buffer.str().c_str()));
 
-  ACE_OS::fprintf (fp, "%d\n", pub_id);
+  ACE_OS::fprintf (fp, "%s\n", buffer.str().c_str());
   fclose (fp);
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT("(%P|%t) PubDriver::run, ")
               ACE_TEXT(" Wait for subscriber start. \n")));
+
+  // Wait for the subscriber to be ready to accept connection.
+  FILE* readers_ready = 0;
+  do
+    {
+      ACE_Time_Value small(0,250000);
+      ACE_OS::sleep (small);
+      readers_ready = ACE_OS::fopen (sub_ready_filename_.c_str (), ACE_LIB_TEXT("r"));
+    } while (0 == readers_ready);
+
+  ACE_OS::fclose(readers_ready);
 
   // Set up the subscriptions.
   add_subscription (this->sub_id_, this->sub_addr_.c_str ());
@@ -642,6 +658,16 @@ PubDriver::unregister_test ()
                                handle);
 
   TEST_CHECK (ret == ::DDS::RETCODE_OK);
+
+  // Test control_dropped.
+  // Unregister_all will request transport to remove_all_control_msgs.
+  // which results the control_dropped call.
+  foo_datawriter_servant_->unregister_all ();
+
+  // The subscriber will wait a while after telling the
+  // publisher shutdown, so the unreigster message can still
+  // be sent out.
+  TEST_CHECK (foo_datawriter_servant_->control_dropped_count_ == 0);
 }
 
 
@@ -692,26 +718,16 @@ PubDriver::listener_test ()
 {
   // Create DomainParticipantListener, PublisherListener and
   // DataWriterListener.
-  DomainParticipantListenerImpl* dpl_servant;
-  ACE_NEW (dpl_servant,
-           DomainParticipantListenerImpl());
+  ::DDS::DomainParticipantListener_var dpl(new DomainParticipantListenerImpl);
 
-  ::DDS::DomainParticipantListener_var dpl
-    = ::OpenDDS::DCPS::servant_to_reference (dpl_servant);
+  ::DDS::PublisherListener_var pl (new PublisherListenerImpl);
 
-  PublisherListenerImpl* pl_servant;
-  ACE_NEW (pl_servant,
-           PublisherListenerImpl());
+  ::DDS::DataWriterListener_var dwl (new DataWriterListenerImpl);
 
-  ::DDS::PublisherListener_var pl
-    = ::OpenDDS::DCPS::servant_to_reference (pl_servant);
-
-  DataWriterListenerImpl* dwl_servant;
-  ACE_NEW (dwl_servant,
-           DataWriterListenerImpl());
-
-  ::DDS::DataWriterListener_var dwl
-    = ::OpenDDS::DCPS::servant_to_reference (dwl_servant);
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) PubDriver::listener_test: ")
+    ACE_TEXT("set_listener/get_listener.\n")
+  ));
 
   // Test set_listener/get_listener for DomainParticipant.
   ::DDS::DomainParticipantListener_var dpl_got
@@ -750,6 +766,11 @@ PubDriver::listener_test ()
   dwl_got = foo_datawriter_->get_listener ();
 
   TEST_CHECK (dwl_got.in () == dwl.in ());
+
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) PubDriver::listener_test: ")
+    ACE_TEXT("update_incompatible_qos/get_offered_incompatible_qos_status.\n")
+  ));
 
   // Test update_incompatible_qos/get_offered_incompatible_qos_status
   // and listener for specific status kind.
@@ -828,9 +849,14 @@ PubDriver::listener_test ()
 
   TEST_CHECK (ret == ::DDS::RETCODE_OK
               && subscription_handles.length () == 1
-              && subscription_handles[0] == this->sub_id_);
+              && subscription_handles[0] == OpenDDS::DCPS::GuidConverter(this->sub_id_));
 
   // Test get_publication_match_status.
+
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) PubDriver::listener_test: ")
+    ACE_TEXT("get_publication_match_status.\n")
+  ));
 
   // The PUBLICATION_MATCH_STATUS status is updated when add_association.
   // One subscription is added already.
@@ -841,12 +867,17 @@ PubDriver::listener_test ()
   // The listener is set after add_association, so the total_count_change
   // should be 1 since the datawriter is associated with one datareader.
   TEST_CHECK (match_status.total_count_change == 1);
-  TEST_CHECK (match_status.last_subscription_handle == this->sub_id_);
+  TEST_CHECK (match_status.last_subscription_handle == OpenDDS::DCPS::GuidConverter(this->sub_id_));
 
   // Call register_test to send a few messages to remote subscriber.
   register_test ();
 
   //Test remove_associations
+
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) PubDriver::listener_test: ")
+    ACE_TEXT("remove_associations.\n")
+  ));
 
   ::OpenDDS::DCPS::ReaderIdSeq reader_ids;
   reader_ids.length (1);
@@ -858,6 +889,11 @@ PubDriver::listener_test ()
   ret = foo_datawriter_->get_matched_subscriptions (subscription_handles);
 
   TEST_CHECK (ret == ::DDS::RETCODE_OK && subscription_handles.length () == 0);
+
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) PubDriver::listener_test: ")
+    ACE_TEXT("get_offered_deadline_missed_status.\n")
+  ));
 
   // The OfferedDeadlineMissedStatus and OfferedDeadlineMissedStatus are not
   // supported currently. The status got should be the same as initial status.
@@ -989,16 +1025,6 @@ PubDriver::liveliness_test ()
   foo.sample_sequence = num_writes;
   ret = foo_datawriter_->write(foo,
                                handle);
-
-  // Test control_dropped.
-  // Unregister_all will request transport to remove_all_control_msgs.
-  // which results the control_dropped call.
-  datawriter_servant_->unregister_all ();
-
-  // The subscriber will wait a while after telling the
-  // publisher shutdown, so the unreigster message can still
-  // be sent out.
-  TEST_CHECK (datawriter_servant_->control_dropped_count_ == 0);
 }
 
 int
@@ -1032,10 +1058,10 @@ PubDriver::parse_pub_arg(const ACE_TString& arg)
 
   // Parse the pub_id from left of ':' char, and remainder to right of ':'.
   ACE_TString pub_id_str(arg.c_str(), pos);
-  ACE_TString pub_addr_str(arg.c_str() + pos + 1);
+  this->pub_addr_str_ = arg.c_str() + pos + 1;
 
   this->pub_id_fname_ = pub_id_str.c_str();
-  this->pub_addr_ = ACE_INET_Addr(pub_addr_str.c_str());
+  this->pub_addr_ = ACE_INET_Addr(this->pub_addr_str_.c_str());
 
   return 0;
 }
@@ -1073,7 +1099,10 @@ PubDriver::parse_sub_arg(const ACE_TString& arg)
   ACE_TString sub_id_str(arg.c_str(), pos);
   ACE_TString sub_addr_str(arg.c_str() + pos + 1);
 
-  this->sub_id_ = ACE_OS::atoi(sub_id_str.c_str());
+  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 1
+  converter.kind()   = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
+  converter.key()[2] = ACE_OS::atoi(sub_id_str.c_str());
+  this->sub_id_ = converter;
 
   // Use the remainder as the "stringified" ACE_INET_Addr.
   this->sub_addr_ = sub_addr_str.c_str();
@@ -1092,8 +1121,8 @@ void PubDriver::shutdown (
 
 
 void PubDriver::add_new_subscription (
-    CORBA::Long       reader_id,
-    const char*       sub_addr
+    const OpenDDS::DCPS::RepoId& reader_id,
+    const char *                 sub_addr
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -1106,21 +1135,26 @@ void PubDriver::add_new_subscription (
 
 
 void PubDriver::add_subscription (
-    CORBA::Long       reader_id,
-    const ACE_TCHAR * sub_addr
+    const OpenDDS::DCPS::RepoId& reader_id,
+    const ACE_TCHAR* sub_addr
     )
 {
   ::OpenDDS::DCPS::ReaderAssociationSeq associations;
   associations.length (1);
   associations[0].readerTransInfo.transport_id = 1; // TBD - not right
+  associations[0].readerTransInfo.publication_transport_priority = 0;
 
-  ACE_INET_Addr sub_inet_addr(sub_addr);
-  OpenDDS::DCPS::NetworkAddress network_order_address(sub_inet_addr);
+  OpenDDS::DCPS::NetworkAddress network_order_address(sub_addr);
+
+  ACE_OutputCDR cdr;
+  cdr << network_order_address;
+  size_t len = cdr.total_length ();
+
   associations[0].readerTransInfo.data
     = OpenDDS::DCPS::TransportInterfaceBLOB
-                                   (sizeof(OpenDDS::DCPS::NetworkAddress),
-                                    sizeof(OpenDDS::DCPS::NetworkAddress),
-                                    (CORBA::Octet*)(&network_order_address));
+    (len,
+    len,
+    (CORBA::Octet*)(cdr.buffer ()));
 
 
   associations[0].readerId = reader_id;
@@ -1144,6 +1178,7 @@ void PubDriver::attach_to_transport ()
     = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
 
   tcp_config->local_address_ = this->pub_addr_;
+  tcp_config->local_address_str_ = this->pub_addr_str_;
 
   if (transport_impl->configure(config.in ()) != 0)
     {

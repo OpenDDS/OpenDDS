@@ -17,7 +17,7 @@
 #include "dds/DCPS/TopicDescriptionImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/PublisherImpl.h"
-#include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 #include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpConfiguration.h"
@@ -31,8 +31,8 @@
 const long  MY_DOMAIN   = 411;
 const char* MY_TOPIC    = "foo";
 const char* MY_TYPE     = "foo";
-ACE_TString reader_address_str; // = "localhost:16701";
-ACE_TString writer_address_str; // = "localhost:29803";
+ACE_TString reader_address_str = ACE_TEXT("localhost:0");
+ACE_TString writer_address_str = ACE_TEXT("localhost:0");
 int reader_address_given = 0;
 int writer_address_given = 0;
 
@@ -92,6 +92,7 @@ int init_tranport ()
 
       ACE_INET_Addr reader_address (reader_address_str.c_str ());
       reader_udp_config->local_address_ = reader_address;
+      reader_udp_config->local_address_str_ = reader_address_str;
 
       if (reader_transport_impl->configure(reader_config.in()) != 0)
         {
@@ -118,6 +119,7 @@ int init_tranport ()
         {
           ACE_INET_Addr reader_address (reader_address_str.c_str ());
           reader_tcp_config->local_address_ = reader_address;
+          reader_tcp_config->local_address_str_ = reader_address_str;
         }
         // else use default address - OS assigned.
 
@@ -153,6 +155,7 @@ int init_tranport ()
 
       ACE_INET_Addr writer_address (writer_address_str.c_str ());
       writer_udp_config->local_address_ = writer_address;
+      writer_udp_config->local_address_str_ = writer_address_str;
 
       if (writer_transport_impl->configure(writer_config.in()) != 0)
         {
@@ -178,6 +181,7 @@ int init_tranport ()
         {
           ACE_INET_Addr writer_address (writer_address_str.c_str());
           writer_tcp_config->local_address_ = writer_address;
+          writer_tcp_config->local_address_str_ = writer_address_str;
         }
         // else use default address - OS assigned.
 
@@ -332,10 +336,7 @@ int main (int argc, ACE_TCHAR *argv[])
       // and then get application specific parameters.
       parse_args (argc, argv);
 
-      ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl;
-
-      ::Xyz::FooTypeSupport_var fts =
-        OpenDDS::DCPS::servant_to_reference (fts_servant);
+      ::Xyz::FooTypeSupport_var fts (new ::Xyz::FooTypeSupportImpl);
 
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,
@@ -417,7 +418,7 @@ int main (int argc, ACE_TCHAR *argv[])
 
       // Attach the subscriber to the transport.
       OpenDDS::DCPS::SubscriberImpl* sub_impl
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl> (sub.in ());
+        = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*> (sub.in ());
 
       if (0 == sub_impl)
       {
@@ -431,7 +432,7 @@ int main (int argc, ACE_TCHAR *argv[])
 
       // Attach the publisher to the transport.
       OpenDDS::DCPS::PublisherImpl* pub_impl
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub.in ());
+        = dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub.in ());
 
       if (0 == pub_impl)
       {
@@ -491,7 +492,7 @@ int main (int argc, ACE_TCHAR *argv[])
       }
 
       ::Xyz::FooDataWriterImpl* fast_dw
-        = OpenDDS::DCPS::reference_to_servant<Xyz::FooDataWriterImpl>(foo_dw.in());
+        = dynamic_cast<Xyz::FooDataWriterImpl*>(foo_dw.in());
 
       ::Xyz::FooDataReader_var foo_dr
         = ::Xyz::FooDataReader::_narrow(dr.in ());
@@ -503,7 +504,7 @@ int main (int argc, ACE_TCHAR *argv[])
       }
 
       ::Xyz::FooDataReaderImpl* fast_dr
-        = OpenDDS::DCPS::reference_to_servant<Xyz::FooDataReaderImpl>(foo_dr.in());
+        = dynamic_cast<Xyz::FooDataReaderImpl*>(foo_dr.in());
 
 
       // wait for association establishement before writing.
@@ -520,7 +521,7 @@ int main (int argc, ACE_TCHAR *argv[])
       for (CORBA::ULong ii =0; ii < incomp->policies.length (); ii++)
         {
           if (incomp->policies[ii].policy_id
-                        == ::DDS::TRANSPORTTYPE_QOS_POLICY_ID)
+                        == ::OpenDDS::TRANSPORTTYPE_QOS_POLICY_ID)
             incompatible_transport_found = 1;
         }
 
@@ -643,6 +644,9 @@ cleanup:
       dp->delete_topic(topic.in ());
       dpf->delete_participant(dp.in ());
 
+      reader_transport_impl = 0;
+      writer_transport_impl = 0;
+
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
@@ -659,10 +663,5 @@ cleanup:
       return 1;
     }
 
-  // Note: The TransportImpl reference SHOULD be deleted before exit from
-  //       main if the concrete transport libraries are loaded dynamically.
-  //       Otherwise cleanup after main() will encount access vilation.
-  reader_transport_impl = 0;
-  writer_transport_impl = 0;
   return test_failed;
 }

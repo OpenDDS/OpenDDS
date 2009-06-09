@@ -8,16 +8,17 @@
 ACE_INLINE
 OpenDDS::DCPS::SimpleUnreliableDgramTransport::SimpleUnreliableDgramTransport()
 {
-  DBG_ENTRY_LVL("SimpleUnreliableDgramTransport","SimpleUnreliableDgramTransport",5);
+  DBG_ENTRY_LVL("SimpleUnreliableDgramTransport","SimpleUnreliableDgramTransport",6);
 }
 
 
 ACE_INLINE void
 OpenDDS::DCPS::SimpleUnreliableDgramTransport::deliver_sample
                                      (ReceivedDataSample&  sample,
-                                      const ACE_INET_Addr& remote_address)
+                                      const ACE_INET_Addr& remote_address,
+                                      CORBA::Long          /* priority */)
 {
-  DBG_ENTRY_LVL("SimpleMcastTransport","deliver_sample",5);
+  DBG_ENTRY_LVL("SimpleMcastTransport","deliver_sample",6);
 
   ACE_UNUSED_ARG(sample);
   ACE_UNUSED_ARG(remote_address);
@@ -30,9 +31,17 @@ OpenDDS::DCPS::SimpleUnreliableDgramTransport::deliver_sample
 
 
 ACE_INLINE bool
-OpenDDS::DCPS::SimpleUnreliableDgramTransport::acked (RepoId)
+OpenDDS::DCPS::SimpleUnreliableDgramTransport::acked (RepoId, RepoId)
 {
   return true;
 }
+
+
+ACE_INLINE void 
+OpenDDS::DCPS::SimpleUnreliableDgramTransport::remove_ack (RepoId /*pub_id*/, RepoId /*sub_id*/)
+{
+  //noop
+}
+
 
 

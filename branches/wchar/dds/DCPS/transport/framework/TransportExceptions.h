@@ -4,6 +4,8 @@
 #ifndef OPENDDS_DCPS_TRANSPORT_EXCEPTIONS_H
 #define OPENDDS_DCPS_TRANSPORT_EXCEPTIONS_H
 
+#include "dds/DCPS/dcps_export.h"
+
 namespace OpenDDS
 {
   namespace DCPS
@@ -11,13 +13,13 @@ namespace OpenDDS
 
     namespace Transport
     {
-      class Exception {};
-      class NotFound       : public Exception {};
-      class Duplicate      : public Exception {};
-      class UnableToCreate : public Exception {};
-      class MiscProblem    : public Exception {};
-      class NotConfigured  : public Exception {};
-      class ConfigurationConflict  : public Exception {};
+      class OpenDDS_Dcps_Export Exception { public: virtual ~Exception() {} };
+      class OpenDDS_Dcps_Export NotFound       : public Exception {};
+      class OpenDDS_Dcps_Export Duplicate      : public Exception {};
+      class OpenDDS_Dcps_Export UnableToCreate : public Exception {};
+      class OpenDDS_Dcps_Export MiscProblem    : public Exception {};
+      class OpenDDS_Dcps_Export NotConfigured  : public Exception {};
+      class OpenDDS_Dcps_Export ConfigurationConflict  : public Exception {};
     }
 
   }  /* namespace DCPS */

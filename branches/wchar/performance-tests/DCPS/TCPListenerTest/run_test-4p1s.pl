@@ -5,13 +5,15 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 
-PerlACE::add_lib_path('../TypeNoKeyBounded');
+PerlDDS::add_lib_path('../TypeNoKeyBounded');
 
 
 # single reader with single instances test
@@ -21,16 +23,18 @@ $num_writers=4;
 $num_readers=1;
 $num_msgs_btwn_rec=20;
 $pub_writer_id=0;
-$repo_bit_conf = "-NOBITS";
-$app_bit_conf = "-DCPSBit 0";
+$repo_bit_conf = "-NOBITS ";
+$app_bit_conf = "-DCPSBit 0 ";
 $use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
 
 if ($ARGV[0] eq 'bit') {
   $repo_bit_conf = $use_svc_config ? "-ORBSvcConf ../../tcp.conf" : '';
-  $app_bit_conf = "";
+  $app_bit_conf = $use_svc_config ? "-ORBSvcConf ../../tcp.conf" : '';
 }
 elsif ($ARGV[0] eq '') {
   # default test with bit off
+  $repo_bit_conf .= $use_svc_config ? "-ORBSvcConf ../../tcp.conf" : '';
+  $app_bit_conf .= $use_svc_config ? "-ORBSvcConf ../../tcp.conf" : '';
 }
 else {
   print STDERR "ERROR: invalid parameter $ARGV[0] \n";
@@ -42,18 +46,17 @@ else {
 # (possibly allocated by not yet queue by the transport because of greedy read).
 $num_samples=$num_msgs_btwn_rec + 20;
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+$dcpsrepo_ior = "repo.ior";
 
 unlink $dcpsrepo_ior;
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "$repo_bit_conf -o $dcpsrepo_ior"
-                             . " -d $domains_file ");
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                             "$repo_bit_conf -o $dcpsrepo_ior ");
 
 print $DCPSREPO->CommandLine(), "\n";
 
-$svc_config = $use_svc_config ? " -ORBSvcConf ../../tcp.conf " : '';
+$svc_config = ($use_svc_config && $app_bit_conf eq '')
+    ? " -ORBSvcConf ../../tcp.conf " : '';
 $sub_parameters = "$app_bit_conf -DCPSConfigFile conf.ini "
 #              . " -DCPSDebugLevel 6"
    . "$svc_config"
@@ -65,7 +68,7 @@ $sub_parameters = "$app_bit_conf -DCPSConfigFile conf.ini "
 #use -mxs $num_messages to avoid using the heap
 #   (could be less than $num_messages but I am not sure of the limit).
 
-$Sub1 = new PerlACE::Process ("subscriber", $sub_parameters);
+$Sub1 = PerlDDS::create_process ("subscriber", $sub_parameters);
 print $Sub1->CommandLine(), "\n";
 
 
@@ -78,16 +81,16 @@ $pub_parameters = "$app_bit_conf -DCPSConfigFile conf.ini "
               . " -n $num_messages -d $data_size"
               . " -msi 1000 -mxs 1000";
 
-$Pub1 = new PerlACE::Process ("publisher", $pub_parameters . " -i $pub_writer_id");
+$Pub1 = PerlDDS::create_process ("publisher", $pub_parameters . " -i $pub_writer_id");
 print $Pub1->CommandLine(), "\n";
 $pub_writer_id++;
-$Pub2 = new PerlACE::Process ("publisher", $pub_parameters . " -i $pub_writer_id");
+$Pub2 = PerlDDS::create_process ("publisher", $pub_parameters . " -i $pub_writer_id");
 print $Pub2->CommandLine(), "\n";
 $pub_writer_id++;
-$Pub3 = new PerlACE::Process ("publisher", $pub_parameters . " -i $pub_writer_id");
+$Pub3 = PerlDDS::create_process ("publisher", $pub_parameters . " -i $pub_writer_id");
 print $Pub3->CommandLine(), "\n";
 $pub_writer_id++;
-$Pub4 = new PerlACE::Process ("publisher", $pub_parameters . " -i $pub_writer_id");
+$Pub4 = PerlDDS::create_process ("publisher", $pub_parameters . " -i $pub_writer_id");
 print $Pub4->CommandLine(), "\n";
 $pub_writer_id++;
 
@@ -110,39 +113,45 @@ $Pub3->Spawn ();
 $Pub4->Spawn ();
 
 
-$Pub1Result = $Pub1->WaitKill (1200);
+$wait_to_kill = 200;
+$Pub1Result = $Pub1->WaitKill ($wait_to_kill);
 if ($Pub1Result != 0) {
     print STDERR "ERROR: publisher 1 returned $Pub1Result \n";
     $status = 1;
+    $wait_to_kill = 0;
 }
 
 
-$Pub2Result = $Pub2->WaitKill (1200);
+$Pub2Result = $Pub2->WaitKill ($wait_to_kill);
 if ($Pub2Result != 0) {
     print STDERR "ERROR: publisher 2 returned $Pub2Result \n";
     $status = 1;
+    $wait_to_kill = 0;
 }
 
 
-$Pub3Result = $Pub3->WaitKill (1200);
+$Pub3Result = $Pub3->WaitKill ($wait_to_kill);
 if ($Pub3Result != 0) {
     print STDERR "ERROR: publisher 3 returned $Pub3Result \n";
     $status = 1;
+    $wait_to_kill = 0;
 }
 
 
-$Pub4Result = $Pub4->WaitKill (1200);
+$Pub4Result = $Pub4->WaitKill ($wait_to_kill);
 if ($Pub4Result != 0) {
     print STDERR "ERROR: publisher 4 returned $Pub4Result \n";
     $status = 1;
+    $wait_to_kill = 0;
 }
 
 
 
-$Sub1Result = $Sub1->WaitKill (1200);
+$Sub1Result = $Sub1->WaitKill ($wait_to_kill);
 if ($Sub1Result != 0) {
     print STDERR "ERROR: subscriber 1 returned $Sub1Result\n";
     $status = 1;
+    $wait_to_kill = 0;
 }
 
 
@@ -151,6 +160,7 @@ $ir = $DCPSREPO->TerminateWaitKill(10);
 if ($ir != 0) {
     print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
     $status = 1;
+    $wait_to_kill = 0;
 }
 
 

@@ -7,6 +7,7 @@
 #include "SimpleUnreliableDgram_export.h"
 #include "dds/DCPS/transport/framework/DataLink.h"
 #include "ace/INET_Addr.h"
+#include "tao/Basic_Types.h"
 
 
 namespace OpenDDS
@@ -21,15 +22,17 @@ namespace OpenDDS
     {
       public:
 
-        SimpleUnreliableDgramDataLink(const ACE_INET_Addr& remote_address,
-                          TransportImpl*  transport_impl);
+        SimpleUnreliableDgramDataLink(
+          const ACE_INET_Addr& remote_address,
+          TransportImpl*       transport_impl,
+          CORBA::Long          priority = 0
+        );
         virtual ~SimpleUnreliableDgramDataLink();
 
         /// Accessor for the remote address.
         const ACE_INET_Addr& remote_address() const;
 
         int connect(TransportSendStrategy* send_strategy);
-
 
       protected:
 
@@ -40,7 +43,6 @@ namespace OpenDDS
 
 
       private:
-
         ACE_INET_Addr remote_address_;
     };
 

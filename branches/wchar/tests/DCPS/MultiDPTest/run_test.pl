@@ -5,13 +5,15 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 
-PerlACE::add_lib_path('../FooType5');
+PerlDDS::add_lib_path('../FooType5');
 
 # single reader with single instances test
 
@@ -23,13 +25,12 @@ $sub_addr2 = "localhost:16702";
 $pub_addr = "localhost:29803";
 $sequence_length=10;
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+$dcpsrepo_ior = "repo.ior";
 
-$subscriber_completed = PerlACE::LocalFile ("subscriber_finished.txt");
-$subscriber_ready = PerlACE::LocalFile ("subscriber_ready.txt");
-$publisher_completed = PerlACE::LocalFile ("publisher_finished.txt");
-$publisher_ready = PerlACE::LocalFile ("publisher_ready.txt");
+$subscriber_completed = "subscriber_finished.txt";
+$subscriber_ready = "subscriber_ready.txt";
+$publisher_completed = "publisher_finished.txt";
+$publisher_ready = "publisher_ready.txt";
 
 unlink $dcpsrepo_ior;
 unlink $subscriber_completed;
@@ -40,27 +41,24 @@ unlink $publisher_ready;
 $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : " -ORBSvcConf ../../tcp.conf ";
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "$svc_config -o $dcpsrepo_ior"
-#                             . " -ORBDebugLevel 1"
-                             . " -d $domains_file");
-print $DCPSREPO->CommandLine(), "\n";
-
-
 # test multiple cases
 $sub_parameters = "$svc_config -s $sub_addr1 -s $sub_addr2 "
               . " -m $num_instances_per_writer -i $num_samples_per_instance";
-
-$Subscriber = new PerlACE::Process ("subscriber", $sub_parameters);
-print $Subscriber->CommandLine(), "\n";
 
 $pub_parameters = "$svc_config -p $pub_addr "
               . " -m $num_instances_per_writer -i $num_samples_per_instance";
 
 
-$Publisher = new PerlACE::Process ("publisher", $pub_parameters);
-print $Publisher->CommandLine(), "\n";
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+  #                                 . " -ORBDebugLevel 1"
+                                    "$svc_config -o $dcpsrepo_ior ");
+print $DCPSREPO->CommandLine(), "\n";
 
+$Subscriber = PerlDDS::create_process ("subscriber", $sub_parameters);
+print $Subscriber->CommandLine(), "\n";
+
+$Publisher = PerlDDS::create_process ("publisher", $pub_parameters);
+print $Publisher->CommandLine(), "\n";
 
 $DCPSREPO->Spawn ();
 

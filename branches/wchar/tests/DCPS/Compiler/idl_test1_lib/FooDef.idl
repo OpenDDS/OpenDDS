@@ -24,9 +24,10 @@ module Xyz {
 #pragma DCPS_DATA_TYPE "Xyz::AStruct"
 #pragma DCPS_DATA_KEY "Xyz::AStruct v1"
   // +12
+  typedef sequence<short> ShortSeq;
   struct AStruct {
     long v1;
-    sequence<short> v2s; //,2 -- was bounded with
+    ShortSeq v2s; //,2 -- was bounded with
   };
 
   typedef AStruct ArrayOfAStruct[3];
@@ -76,6 +77,8 @@ module Xyz {
 #pragma DCPS_DATA_KEY "Xyz::Foo key"
 #pragma DCPS_DATA_KEY "Xyz::Foo xcolor"
 
+  typedef octet OctetArray[3];
+
   // Example user defined "Foo" structure
   struct Foo {
     long key;  //4
@@ -83,13 +86,13 @@ module Xyz {
     //ArrayOfShorts shorts;
     octet octer; //+1 > 5
     ColorX xcolor; //+4 > 9
-    octet ooo[3]; //+3 > 12
+    OctetArray ooo; //+3 > 12
     UShortSeq ushrtseq; //+4+6 > 22
     AStruct thestruct; //+4+8 > 34
     AStructSeq theStructSeq; //+4+36 > 74
     //string<5> theString; //+4+5 > 83
     string theString;
-    AStruct structArray[3]; //+36 > 119
+    ArrayOfAStruct structArray; //+36 > 119
     float x; //+4 > 123
     float y; //+4 = 127
     AUnion theUnion; //+4+4 =135

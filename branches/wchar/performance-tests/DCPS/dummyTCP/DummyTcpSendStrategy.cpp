@@ -17,8 +17,9 @@ OpenDDS::DCPS::DummyTcpSendStrategy::DummyTcpSendStrategy
                                       DummyTcpConfiguration* config,
                                       DummyTcpConnection*    connection,
                                       DummyTcpSynchResource* synch_resource,
-                                      TransportReactorTask* task)
-  : TransportSendStrategy(config, synch_resource)
+                                      TransportReactorTask* task,
+                                      CORBA::Long            priority)
+  : TransportSendStrategy(config, synch_resource, priority)
 {
   DBG_ENTRY_LVL("DummyTcpSendStrategy","DummyTcpSendStrategy",5);
 

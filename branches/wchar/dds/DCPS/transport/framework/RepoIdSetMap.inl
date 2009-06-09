@@ -8,14 +8,14 @@
 ACE_INLINE
 OpenDDS::DCPS::RepoIdSetMap::RepoIdSetMap()
 {
-  DBG_ENTRY_LVL("RepoIdSetMap","RepoIdSetMap",5);
+  DBG_ENTRY_LVL("RepoIdSetMap","RepoIdSetMap",6);
 }
 
 
 ACE_INLINE OpenDDS::DCPS::RepoIdSet*
 OpenDDS::DCPS::RepoIdSetMap::find(RepoId key)
 {
-  DBG_ENTRY_LVL("RepoIdSetMap","find",5);
+  DBG_ENTRY_LVL("RepoIdSetMap","find",6);
   RepoIdSet_rch value;
 
   if (OpenDDS::DCPS::find(map_, key, value) != 0)
@@ -30,7 +30,7 @@ OpenDDS::DCPS::RepoIdSetMap::find(RepoId key)
 ACE_INLINE size_t
 OpenDDS::DCPS::RepoIdSetMap::size() const
 {
-  DBG_ENTRY_LVL("RepoIdSetMap","size",5);
+  DBG_ENTRY_LVL("RepoIdSetMap","size",6);
   return this->map_.size();
 }
 
@@ -38,7 +38,7 @@ OpenDDS::DCPS::RepoIdSetMap::size() const
 ACE_INLINE OpenDDS::DCPS::RepoIdSet*
 OpenDDS::DCPS::RepoIdSetMap::find_or_create(RepoId key)
 {
-  DBG_ENTRY_LVL("RepoIdSetMap","find_or_create",5);
+  DBG_ENTRY_LVL("RepoIdSetMap","find_or_create",6);
   RepoIdSet_rch value;
 
   if (OpenDDS::DCPS::find(map_, key, value) != 0)
@@ -63,7 +63,7 @@ OpenDDS::DCPS::RepoIdSetMap::find_or_create(RepoId key)
 ACE_INLINE OpenDDS::DCPS::RepoIdSetMap::MapType&
 OpenDDS::DCPS::RepoIdSetMap::map()
 {
-  DBG_SUB_ENTRY("RepoIdSetMap","map",1);
+  DBG_ENTRY_LVL("RepoIdSetMap","map",6);
   return this->map_;
 }
 
@@ -71,7 +71,7 @@ OpenDDS::DCPS::RepoIdSetMap::map()
 ACE_INLINE const OpenDDS::DCPS::RepoIdSetMap::MapType&
 OpenDDS::DCPS::RepoIdSetMap::map() const
 {
-  DBG_SUB_ENTRY("RepoIdSetMap","map",2);
+  DBG_ENTRY_LVL("RepoIdSetMap","map",6);
   return this->map_;
 }
 
@@ -79,7 +79,7 @@ OpenDDS::DCPS::RepoIdSetMap::map() const
 ACE_INLINE size_t
 OpenDDS::DCPS::RepoIdSetMap::marshaled_size ()
 {
-  DBG_ENTRY_LVL("RepoIdSetMap","marshaled_size",5);
+  DBG_ENTRY_LVL("RepoIdSetMap","marshaled_size",6);
 
   // serialize len for the map size and set size information.
   size_t size = (this->size () + 1) * sizeof (CORBA::ULong);
@@ -100,4 +100,3 @@ OpenDDS::DCPS::RepoIdSetMap::marshaled_size ()
 
   return size;
 }
-

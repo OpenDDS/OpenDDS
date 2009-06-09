@@ -34,8 +34,11 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::ZeroCopyDataSeq(
   const ZeroCopyDataSeq& frm)
   : loaner_(frm.loaner_)
   , ptrs_(frm.ptrs_.size(),
-          (frm.ptrs_.allocator_ == &frm.default_allocator_)
-          ? &default_allocator_ : frm.ptrs_.allocator_)
+          (frm.ptrs_.allocator_ ==
+           static_cast<const ACE_Allocator*>(&frm.default_allocator_))
+          ? &default_allocator_
+          : const_cast<ACE_Allocator*>(frm.ptrs_.allocator_))
+            //The constructor of ptrs_ requires a non-const ptr to ACE_Alloc.
   , sc_maximum_(frm.sc_maximum_)
   , sc_length_(0) //initialized below
   , sc_buffer_(frm.sc_maximum_ ? allocbuf(frm.sc_maximum_) : 0)

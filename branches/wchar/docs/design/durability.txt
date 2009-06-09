@@ -1,0 +1,163 @@
+
+DURABILITY
+(RxO == YES ; Mutable == NO)
+[ Topic, DataReader, DataWriter ]
+
+Default == VOLATILE, with "service_cleanup_delay" == 0.
+
+This policy, along with the LIFESPAN, HISTORY and RESOURCE_LIMITS policy
+values, determines the lifetime of data written to DataWriters.  This data
+is potentially made available to DataReaders which join after the data
+has been written and delivered to the previously existing subscribers.
+This policy is implemented entirely by the instance data container of
+the DataWriter.  This container is required and bounded by the HISTORY
+and RESOURCE_LIMITS policies.
+
+This policy is considered during the creation of associations between
+DataWriters and DataReaders.  The value of both sides of the association
+must be compatible in order for an association to be created.  This value
+of this policy may not change after the associated Entity is enabled.
+
+The VOLATILE value requires no behavior for implementation.  Data may be
+discarded at any time after delivery, and is not available to DataReaders
+which join after data is written; these readers will receive only
+data written after they join.  This is the default value and must be
+implemented to comply with the specification.
+
+The TRANSIENT_LOCAL value requires that the contents of the instance
+data container last for the lifetime of the DataWriter for that
+instance.  Support for this value must be implemented to comply with
+the specification.
+
+The TRANSIENT value requires that the contents of the instance data
+container last for potentially longer than the DataWriter.  It is not
+required to outlive the process in which it was created.  The value of
+the "service_cleanup_delay" is used to determine when to discard data
+for this value.  Support for this value is optional by the implementation.
+
+The PERSISTENT value requires that the contents of the instance data
+container last for potentially longer than the process in which they
+are created.  This implies that the data must be stored in a persistent
+store and can be reloaded in cases where the originating process is
+terminated before the data expires.  The retention and discarding of data
+for this value is determined in the same way as for the TRANSIENT value.
+The only difference between this value and the TRANSIENT value is that
+data can last longer than the originating process for the PERSISTENT
+value.  Support for this value is optional by the implementation.
+
+Implementation notes:
+
+The KIND=PERSISTENT implementation synchronizes the data samples for
+an instance with a backing store.  This synchronization will be done
+as close as possible to the creation of the data sample to allow the
+retention of as much data as possible.  OpenDDS will not block write
+processing to wait for the backing store to be synchronized.
+
+A single backing store will be used for all instances implementing this
+policy value within a single executing process.  The Service_Participant
+manages the backing store itself.  On systems that support it, a
+directly memory mapped file should be used to provide the backing store.
+Best efforts will be made to keep the data consistent in the presence of
+catastrophic process termination, but no guarantees are made.
+
+When a process is started and creates its Service_Participant it can be
+configured to attach to a single backing store.  The backing store will be
+read at startup and any instance data present will be loaded into memory.
+It will be checked to see if it has aged off for any reason and discarded
+if it is not still active.  Active samples are then made available to the
+service entities identically to the way they are made available in the
+KIND==TRANSIENT case.  It may not be possible to check for all possible
+mechanisms to age off the instance data until the DomainParticipant and
+Publisher entities or even the DataWriters have been created in order
+to check the QoS policy values.
+
+The KIND==TRANSIENT implementation is described by the specification as
+being implemented using a fictitious built-in "persistence service".
+This service has a DataReader that matches the instances having the
+TRANSIENT or PERSISTENT values and the DataWriter provides the instance
+samples to newly joining DataReaders that have the corresponding policy
+value.
+
+While it is tempting to implement this fictitious persistence service, it
+is not possible to obtain the desired behavior by simply creating new
+DataWriter and DataReader objects.  The interactions of DataWriters and
+DataReaders with the repository and the establishment of associations
+between the fictitious entities and the actual entities would complicate
+the existing service operations.  The associations would likely be
+attempted through a transport implementation as well.
+
+To provide this level of service, the QoS policy values need to be
+checked by the originating Publisher as associations are made.  Only for
+cases where a DataReader has requested TRANSIENT or PERSISTENT data and
+it is provided by the DataWriter will data be sent to the newly joining
+subscriber.  The Topic and the DURABILITY_SERVICE QoS policy values are
+used as the fictitious persistence service entity policy values for cases
+where a full association is not made with actual service entities.
+
+In the case where a new subscriber is registered with the repository for
+a publication which has available samples to be delivered but which has
+no current DataWriter the fictitious DataWriter will send the available
+samples.
+
+Where a DataWriter is created, writes data, and is deleted before a
+DataReader has been associated with it, the fictitious DataReader will
+receive the samples and they will be stored.
+
+  DCPSInfoRepo
+    Compatibility processing, see spec.
+
+  Topic
+    No implementation processing required.
+
+  DataReader
+    No implementation processing required.
+
+  DataWriter
+    kind==VOLATILE
+      No implementation processing required.
+
+    kind==TRANSIENT_LOCAL
+      No implementation processing required.  The instance data is
+      stored in WriteDataContainer objects which provide this level
+      of DURABILITY.
+
+    kind==TRANSIENT
+
+    kind==PERSISTENT (Optional for compliance)
+      This operates identically to the TRANSIENT behavior described
+      above.
+
+  Publisher
+    kind==VOLATILE
+      No implementation processing required.
+
+    kind==TRANSIENT_LOCAL
+      No implementation processing required.
+
+    kind==TRANSIENT
+      TBD
+
+    kind==PERSISTENT (Optional for compliance)
+      This operates identically to the TRANSIENT behavior described above.
+      It also synchronizes the durable samples with the backing storage
+      via the Service_Participant.
+
+      When a DataWriter is being created, the Publisher will check the
+      backing store managed by the Service_Participant and if there are
+      available instance samples that match the new DataWriter the data
+      will be transferred to it.
+
+  Service_Participant
+    kind==VOLATILE
+      No implementation processing required.
+
+    kind==TRANSIENT_LOCAL
+      No implementation processing required.
+
+    kind==TRANSIENT
+      TBD
+
+    kind==PERSISTENT
+      TBD
+
+

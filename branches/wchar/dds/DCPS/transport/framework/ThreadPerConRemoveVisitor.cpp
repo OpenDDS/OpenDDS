@@ -20,10 +20,10 @@ OpenDDS::DCPS::ThreadPerConRemoveVisitor::~ThreadPerConRemoveVisitor()
 
 
 int
-OpenDDS::DCPS::ThreadPerConRemoveVisitor::visit_element(SendRequest* element,
-                                                    int&         remove)
+OpenDDS::DCPS::ThreadPerConRemoveVisitor::visit_element_remove(SendRequest* element,
+                                                               int&         remove)
 {
-  DBG_ENTRY("ThreadPerConRemoveVisitor","visit_element");
+  DBG_ENTRY("ThreadPerConRemoveVisitor","visit_element_remove");
 
   if ((this->sample_ != 0) && (element->op_ == SEND) && (*(element->element_) == this->sample_))
     {

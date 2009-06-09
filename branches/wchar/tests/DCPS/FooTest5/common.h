@@ -9,6 +9,7 @@
 #include  "ace/Time_Value.h"
 #include  "ace/SString.h"
 #include  "ace/Atomic_Op.h"
+#include  <string>
 
 const long  MY_DOMAIN = 411;
 extern const char* MY_TOPIC;
@@ -20,7 +21,7 @@ extern const char* MY_TYPE_FOR_UDP;
 extern const char* MY_TYPE_FOR_MCAST;
 extern const char* MY_TYPE_FOR_RELIABLE_MULTICAST;
 extern const ACE_TCHAR* reader_address_str;
-extern const ACE_TCHAR* multicast_group_address_str;
+extern ACE_TString multicast_group_address_str;
 extern const ACE_TCHAR* writer_address_str;
 extern int reader_address_given;
 extern int multicast_group_address_given;
@@ -45,6 +46,7 @@ extern ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> num_reads;
 extern long op_interval_ms;
 extern long blocking_ms;
 extern int mixed_trans;
+extern int test_bit;
 
 extern OpenDDS::DCPS::TransportImpl_rch reader_tcp_impl;
 extern OpenDDS::DCPS::TransportImpl_rch reader_udp_impl;

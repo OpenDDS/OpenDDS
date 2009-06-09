@@ -11,6 +11,12 @@ OpenDDS::DCPS::InstanceState::~InstanceState ()
 {
 }
 
+ACE_INLINE
+OpenDDS::DCPS::DataReaderImpl*
+OpenDDS::DCPS::InstanceState::data_reader() const
+{
+  return reader_;
+}
 
 ACE_INLINE
 void
@@ -30,11 +36,8 @@ ACE_INLINE
 bool
 OpenDDS::DCPS::InstanceState::most_recent_generation (ReceivedDataElement* item) const
 {
-  if (item->disposed_generation_count_ == this->disposed_generation_count_
-    && item->no_writers_generation_count_ == this->no_writers_generation_count_)
-    return true;
-  else
-    return false;
+  return item->disposed_generation_count_ == disposed_generation_count_
+    && item->no_writers_generation_count_ == no_writers_generation_count_;
 }
 
 
@@ -49,6 +52,7 @@ void OpenDDS::DCPS::InstanceState::sample_info(::DDS::SampleInfo& si,
   si.no_writers_generation_count = no_writers_generation_count_ ;
   si.source_timestamp = de->source_timestamp_ ;
   si.instance_handle = handle_ ;
+  si.valid_data = de->registered_data_ != 0;
 /*
  * These are actually calculated later...
  */
@@ -94,13 +98,15 @@ size_t OpenDDS::DCPS::InstanceState::no_writers_generation_count() const
 
 ACE_INLINE
 void
-OpenDDS::DCPS::InstanceState::data_was_received()
+OpenDDS::DCPS::InstanceState::data_was_received(const PublicationId& writer_id)
 {
   //
   // Update the view state here, since only sample data received affects
   // this state value.  Then manage the data sample only transistions
   // here.  Let the lively() method manage the other transitions.
   //
+
+  writers_.insert (writer_id);
 
   switch( this->view_state_)
     {
@@ -137,9 +143,10 @@ OpenDDS::DCPS::InstanceState::data_was_received()
 
 ACE_INLINE
 void
-OpenDDS::DCPS::InstanceState::lively(PublicationId         writer_id)
+OpenDDS::DCPS::InstanceState::lively(const PublicationId& writer_id)
 {
-  ACE_UNUSED_ARG(writer_id);
+  writers_.insert (writer_id);
+
   //
   // Manage transisitions in the instance state that do not require a
   // data sample, but merely the notion of liveliness.

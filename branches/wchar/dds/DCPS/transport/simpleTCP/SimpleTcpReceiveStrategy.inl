@@ -8,7 +8,7 @@
 ACE_INLINE ACE_Reactor*
 OpenDDS::DCPS::SimpleTcpReceiveStrategy::get_reactor()
 {
-  DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","get_reactor",5);
+  DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","get_reactor",6);
   return this->reactor_task_->get_reactor ();
 }
 

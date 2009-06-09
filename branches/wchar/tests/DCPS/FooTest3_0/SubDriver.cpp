@@ -8,6 +8,7 @@
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/AssociationData.h"
+#include "dds/DCPS/Service_Participant.h"
 #include "SimpleSubscriber.h"
 #include "tests/DCPS/common/TestSupport.h"
 #include <ace/Arg_Shifter.h>
@@ -15,14 +16,17 @@
 #include <ace/Argv_Type_Converter.h>
 #include <string>
 
+#include <sstream>
+
 SubDriver::SubDriver()
   : pub_id_fname_ (ACE_TEXT("pub_id.txt")),
-    sub_id_ (0),
+    sub_id_ (OpenDDS::DCPS::GUID_UNKNOWN),
     num_writes_ (0),
     pub_driver_ior_ ("file://pubdriver.ior"),
     shutdown_pub_ (1),
     add_new_subscription_ (0),
-    shutdown_delay_secs_ (10)
+    shutdown_delay_secs_ (10),
+    sub_ready_filename_(ACE_TEXT("sub_ready.txt"))
 {
 }
 
@@ -59,99 +63,105 @@ SubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
   while (arg_shifter.is_anything_left())
     {
       // The '-p' option
-      if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-p")))) {
-	if (got_p) {
-	  ACE_ERROR((LM_ERROR,
-		     "(%P|%t) Only one -p allowed on command-line.\n"));
-	  throw TestException();
-	}
+      if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-p"))))
+        {
+          if (got_p)
+            {
+              ACE_ERROR((LM_ERROR, "(%P|%t) Only one -p allowed on command-line.\n"));
+              throw TestException();
+            }
 
-	int result = parse_pub_arg(current_arg);
-	arg_shifter.consume_arg();
+          int result = parse_pub_arg(current_arg);
+          arg_shifter.consume_arg();
 
-	if (result != 0) {
-	  ACE_ERROR((LM_ERROR,
-		     "(%P|%t) Failed to parse -p command-line arg.\n"));
-	  throw TestException();
-	}
+          if (result != 0)
+            {
+              ACE_ERROR((LM_ERROR, "(%P|%t) Failed to parse -p command-line arg.\n"));
+              throw TestException();
+            }
 
-	got_p = true;
-      }
+          got_p = true;
+        }
       else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-n"))) != 0)
-	{
-	  num_writes_ = ACE_OS::atoi (current_arg);
-	  arg_shifter.consume_arg ();
-	}
+        {
+          num_writes_ = ACE_OS::atoi (current_arg);
+          arg_shifter.consume_arg ();
+        }
       else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-v"))) != 0)
-	{
-	  pub_driver_ior_ = ACE_TEXT_ALWAYS_CHAR(current_arg);
-	  arg_shifter.consume_arg ();
-	}
-      // A '-s' option
+        {
+          pub_driver_ior_ = ACE_TEXT_ALWAYS_CHAR(current_arg);
+          arg_shifter.consume_arg ();
+        }
       else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-s"))))
-	{
-	  if (got_s) {
-	    ACE_ERROR((LM_ERROR,
-		       "(%P|%t) Only one -s allowed on command-line.\n"));
-	    throw TestException();
-	  }
+        {
+          if (got_s)
+            {
+              ACE_ERROR((LM_ERROR, "(%P|%t) Only one -s allowed on command-line.\n"));
+              throw TestException();
+            }
 
-	  int result = parse_sub_arg(current_arg);
-	  arg_shifter.consume_arg();
+          int result = parse_sub_arg(current_arg);
+          arg_shifter.consume_arg();
 
-	  if (result != 0) {
-	    ACE_ERROR((LM_ERROR,
-		       "(%P|%t) Failed to parse -s command-line arg.\n"));
-	    throw TestException();
-	  }
+          if (result != 0)
+            {
+              ACE_ERROR((LM_ERROR,"(%P|%t) Failed to parse -s command-line arg.\n"));
+              throw TestException();
+            }
 
-	  got_s = true;
-	}
+          got_s = true;
+        }
       else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-a"))) != 0)
-	{
-	  add_new_subscription_ = ACE_OS::atoi (current_arg);
-	  arg_shifter.consume_arg ();
-	}
+        {
+          add_new_subscription_ = ACE_OS::atoi (current_arg);
+          arg_shifter.consume_arg ();
+        }
       else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-x"))) != 0)
-	{
-	  shutdown_pub_ = ACE_OS::atoi (current_arg);
-	  arg_shifter.consume_arg ();
-	}
+        {
+          shutdown_pub_ = ACE_OS::atoi (current_arg);
+          arg_shifter.consume_arg ();
+        }
       else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-d"))) != 0)
-	{
-	  shutdown_delay_secs_ = ACE_OS::atoi (current_arg);
-	  arg_shifter.consume_arg ();
-	}
-      // The '-?' option
-      else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-?")) == 0) {
-	ACE_DEBUG((LM_DEBUG,
-		   "usage: %s "
-		   "-p pub_id:pub_host:pub_port\n"
-		   "-s sub_id:sub_host:sub_port\n"
-		   "-n Expected initial messages\n"
-		   , argv[0]));
+        {
+          shutdown_delay_secs_ = ACE_OS::atoi (current_arg);
+          arg_shifter.consume_arg ();
+        }
+      else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-f"))) != 0)
+        {
+          sub_ready_filename_ = current_arg;
+          arg_shifter.consume_arg ();
+        }
+      else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-?")) == 0)
+        {
+          ACE_DEBUG((LM_DEBUG,
+                 "usage: %s "
+                 "-p pub_id:pub_host:pub_port\n"
+                 "-s sub_id:sub_host:sub_port\n"
+                 "-n Expected initial messages\n"
+                 , argv[0]));
 
-	arg_shifter.consume_arg();
-	throw TestException();
-      }
+          arg_shifter.consume_arg();
+          throw TestException();
+        }
       // Anything else we just skip
-      else {
-	arg_shifter.ignore_arg();
-      }
+      else
+        {
+          arg_shifter.ignore_arg();
+        }
     }
 
   // Make sure we got the required arguments:
-  if (!got_p) {
-    ACE_ERROR((LM_ERROR,
-               "(%P|%t) -p command-line option not specified (required).\n"));
-    throw TestException();
-  }
+  if (!got_p)
+    {
+      ACE_ERROR((LM_ERROR, "(%P|%t) -p command-line option not specified (required).\n"));
+      throw TestException();
+    }
 
-  if (!got_s) {
-    ACE_ERROR((LM_ERROR,
-               "(%P|%t) -s command-line option not specified (required).\n"));
-    throw TestException();
-  }
+  if (!got_s)
+    {
+      ACE_ERROR((LM_ERROR, "(%P|%t) -s command-line option not specified (required).\n"));
+      throw TestException();
+    }
 }
 
 
@@ -164,6 +174,7 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
                           conv.get_ASCII_argv (),
                           "TAO_DDS_DCPS");
 
+  TheServiceParticipant->set_ORB (orb_.in());
   // Now we can ask TheTransportFactory to create a TransportImpl object
   // using the SIMPLE_TCP type_id.  We also supply an identifier for this
   // particular TransportImpl object that will be created.  This is known
@@ -190,6 +201,7 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
     = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
 
   tcp_config->local_address_ = ACE_INET_Addr (this->sub_addr_.c_str ());
+  tcp_config->local_address_str_ = this->sub_addr_.c_str ();
 
   // Supply the config object to the TranportImpl object via its configure()
   // method.
@@ -200,6 +212,15 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
       throw TestException();
     }
 
+  // Indicate that the subscriber is ready to accept connection
+  FILE* readers_ready = ACE_OS::fopen (sub_ready_filename_.c_str (), ACE_LIB_TEXT("w"));
+  if (readers_ready == 0)
+  {
+    ACE_ERROR ((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR Unable to create subscriber ready file\n")));
+  }
+  else
+    ACE_OS::fclose(readers_ready);
   // And we are done with the init().
 }
 
@@ -233,7 +254,7 @@ public:
   virtual int svc (void)
   {
     ::Test::TestPubDriver_var pub_driver;
-    OpenDDS::DCPS::RepoId sub_id = 0;
+    OpenDDS::DCPS::RepoId sub_id = OpenDDS::DCPS::GUID_UNKNOWN;
     ACE_CString       sub_addr;
     int delay = -1;
 
@@ -304,6 +325,7 @@ SubDriver::run()
               ACE_TEXT(" Wait for %s. \n"),
               pub_id_fname_.c_str ()));
 
+
   PublicationIds ids;
 
   // Wait for the publication id file created by the publisher.
@@ -317,15 +339,22 @@ SubDriver::run()
 	}
       else
 	{
-	  ::OpenDDS::DCPS::PublicationId pub_id = 0;
-	  while (fscanf (fp, "%d\n", &pub_id) != EOF)
+          // this could be made cleaner by losing the old C-style I/O.
+	  ::OpenDDS::DCPS::PublicationId pub_id = OpenDDS::DCPS::GUID_UNKNOWN;
+          char charBuffer[64];
+	  while (fscanf (fp, "%s\n", &charBuffer[0]) != EOF)
 	    {
-	      ids.push_back (pub_id);
+              std::stringstream buffer( charBuffer);
+              buffer >> pub_id;
+	      ids.push_back ( OpenDDS::DCPS::GuidConverter( pub_id));
+
+              std::stringstream idbuffer;
+              idbuffer << pub_id;
 	      ACE_DEBUG ((LM_DEBUG,
 			  ACE_TEXT("(%P|%t) SubDriver::run, ")
-			  ACE_TEXT(" Got from %s: pub_id=%d. \n"),
+			  ACE_TEXT(" Got from %s: pub_id=%s.\n"),
 			  pub_id_fname_.c_str (),
-			  pub_id));
+			  idbuffer.str().c_str()));
 	    }
 	  ACE_OS::fclose (fp);
 	  break;
@@ -355,13 +384,20 @@ SubDriver::run()
     {
       publications[i].remote_id_                = ids[i];
       publications[i].remote_data_.transport_id = ALL_TRAFFIC; // TBD later - wrong
+      publications[i].remote_data_.publication_transport_priority = 0;
 
-      OpenDDS::DCPS::NetworkAddress network_order_address(this->pub_addr_);
+      OpenDDS::DCPS::NetworkAddress network_order_address(this->pub_addr_str_);
+
+      ACE_OutputCDR cdr;
+      cdr << network_order_address;
+      size_t len = cdr.total_length ();
+
       publications[i].remote_data_.data
-	= OpenDDS::DCPS::TransportInterfaceBLOB
-	(sizeof(OpenDDS::DCPS::NetworkAddress),
-	 sizeof(OpenDDS::DCPS::NetworkAddress),
-	 (CORBA::Octet*)(&network_order_address));
+        = OpenDDS::DCPS::TransportInterfaceBLOB
+        (len,
+        len,
+        (CORBA::Octet*)(cdr.buffer ()));
+
     }
 
   Pub_Invoke_Task pub_invoke_task;
@@ -410,6 +446,7 @@ SubDriver::run()
 
   // Tear-down the entire Transport Framework.
   TheTransportFactory->release();
+  TheServiceParticipant->shutdown();
 }
 
 int
@@ -443,10 +480,10 @@ SubDriver::parse_pub_arg(const ACE_TString& arg)
 
   // Parse the pub_id from left of ':' char, and remainder to right of ':'.
   ACE_TString pub_id_str(arg.c_str(), pos);
-  ACE_TString pub_addr_str(arg.c_str() + pos + 1);
+  this->pub_addr_str_ = arg.c_str() + pos + 1;
 
   this->pub_id_fname_ = pub_id_str.c_str();
-  this->pub_addr_ = ACE_INET_Addr(pub_addr_str.c_str());
+  this->pub_addr_ = ACE_INET_Addr(this->pub_addr_str_.c_str());
 
   return 0;
 }
@@ -484,7 +521,10 @@ SubDriver::parse_sub_arg(const ACE_TString& arg)
   ACE_TString sub_id_str(arg.c_str(), pos);
   ACE_TString sub_addr_str(arg.c_str() + pos + 1);
 
-  this->sub_id_ = ACE_OS::atoi(sub_id_str.c_str());
+  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 1
+  converter.kind()   = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
+  converter.key()[2] = ACE_OS::atoi(sub_id_str.c_str());
+  this->sub_id_ = converter;
 
   this->sub_addr_ = sub_addr_str.c_str();
 

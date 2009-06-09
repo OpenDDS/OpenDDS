@@ -40,9 +40,11 @@ class PubDriver
 
     OpenDDS::DCPS::RepoId pub_id_;
     ACE_INET_Addr     pub_addr_;
+    ACE_TString       pub_addr_str_;
 
     OpenDDS::DCPS::RepoId sub_id_;
     ACE_INET_Addr     sub_addr_;
+    ACE_TString       sub_addr_str_;
 
     unsigned num_msgs_;
     unsigned msg_size_;

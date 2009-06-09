@@ -15,15 +15,17 @@ endif
 ifndef DDS_ROOT
   DDS_ROOT = $(TAO_ROOT)/DDS
 endif
+DDS_ROOT := $(subst \,/,$(DDS_ROOT))
 
-ifeq (,$(findstring -L$(DDS_ROOT)/ciao,$(LDFLAGS)))
-  LDFLAGS += -L$(DDS_ROOT)/dds
+ifeq (,$(findstring -L$(DDS_ROOT)/lib,$(LDFLAGS)))
+  LDFLAGS += -L$(DDS_ROOT)/lib
 endif
 ifeq (,$(findstring -I$(DDS_ROOT),$(INCLDIRS)))
   INCLDIRS += -I$(DDS_ROOT)
 endif
 
 # Set defaults for gnumake macros corresponding to MPC features used by DDS
+# This is needed for features used in requires/avoids statements in .mpc files
 built_in_topics ?= 1
 tao_orbsvcs ?= 1
 
@@ -35,9 +37,11 @@ tao_orbsvcs ?= 1
 ifeq (cmd,$(findstring cmd,$(SHELL)))
 DDS_MAJOR_VERSION := $(shell awk "/DDS_MAJOR_VERSION/ { print $$3}" ${DDS_ROOT}/dds/Version.h)
 DDS_MINOR_VERSION := $(shell awk "/DDS_MINOR_VERSION/ { print $$3}" ${DDS_ROOT}/dds/Version.h)
+DDS_MICRO_VERSION := $(shell awk "/DDS_MICRO_VERSION/ { print $$3}" ${DDS_ROOT}/dds/Version.h)
 else
 DDS_MAJOR_VERSION := $(shell awk '/DDS_MAJOR_VERSION/ { print $$3}' ${DDS_ROOT}/dds/Version.h)
 DDS_MINOR_VERSION := $(shell awk '/DDS_MINOR_VERSION/ { print $$3}' ${DDS_ROOT}/dds/Version.h)
+DDS_MICRO_VERSION := $(shell awk '/DDS_MICRO_VERSION/ { print $$3}' ${DDS_ROOT}/dds/Version.h)
 endif
 
 # Version number of the libraries
@@ -46,12 +50,12 @@ ifeq ($(versioned_so),1)
   # Only set SOVERSION for DDS if versioning is turned on and SOVERION is
   # blank, which gives users to ability to override it.
   ifeq ($(SOVERSION),)
-    SOVERSION = .$(DDS_MAJOR_VERSION).$(DDS_MINOR_VERSION)
+    SOVERSION = .$(DDS_MAJOR_VERSION).$(DDS_MINOR_VERSION).$(DDS_MICRO_VERSION)
   endif # SOVERSION
 
   # Name that will be written into the dynamic library
   #
   ifneq ($(SONAME),)
-    SONAME = $(SHLIB).$(DDS_MAJOR_VERSION).$(DDS_MINOR_VERSION)
+    SONAME = $(SHLIB).$(DDS_MAJOR_VERSION).$(DDS_MINOR_VERSION).$(DDS_MICRO_VERSION)
   endif # SONAME
 endif # versioned_so

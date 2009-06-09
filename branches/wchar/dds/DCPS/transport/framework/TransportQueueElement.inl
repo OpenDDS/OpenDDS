@@ -11,7 +11,7 @@ OpenDDS::DCPS::TransportQueueElement::TransportQueueElement(int initial_count)
   : sub_loan_count_(initial_count),
     dropped_(false)
 {
-  DBG_ENTRY_LVL("TransportQueueElement","TransportQueueElement",5);
+  DBG_ENTRY_LVL("TransportQueueElement","TransportQueueElement",6);
 }
 
 
@@ -20,7 +20,7 @@ bool
 OpenDDS::DCPS::TransportQueueElement::operator==
                                      (const ACE_Message_Block* sample) const
 {
-  DBG_ENTRY_LVL("TransportQueueElement","operator==",5);
+  DBG_ENTRY_LVL("TransportQueueElement","operator==",6);
   return (sample->rd_ptr() == this->msg()->rd_ptr());
 }
 
@@ -29,7 +29,7 @@ ACE_INLINE
 void
 OpenDDS::DCPS::TransportQueueElement::data_dropped(bool dropped_by_transport)
 {
-  DBG_ENTRY_LVL("TransportQueueElement","data_dropped",5);
+  DBG_ENTRY_LVL("TransportQueueElement","data_dropped",6);
   this->dropped_ = true;
   this->decision_made(dropped_by_transport);
 }
@@ -39,7 +39,7 @@ ACE_INLINE
 void
 OpenDDS::DCPS::TransportQueueElement::data_delivered()
 {
-  DBG_ENTRY_LVL("TransportQueueElement","data_delivered",5);
+  DBG_ENTRY_LVL("TransportQueueElement","data_delivered",6);
   bool dropped = false;
   this->decision_made(dropped);
 }
@@ -49,7 +49,7 @@ ACE_INLINE
 void
 OpenDDS::DCPS::TransportQueueElement::decision_made(bool dropped_by_transport)
 {
-  DBG_ENTRY_LVL("TransportQueueElement","decision_made",5);
+  DBG_ENTRY_LVL("TransportQueueElement","decision_made",6);
 
   int new_count;
 

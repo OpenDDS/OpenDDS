@@ -6,7 +6,7 @@
 
 #include "DataReaderListener.h"
 #include "dds/DdsDcpsSubscriptionC.h"
-#include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 #include "common.h"
 
 class Reader 
@@ -30,7 +30,6 @@ private:
   int max_samples_per_instance_ ;
   ::DDS::DomainParticipant_var dp_ ;
   ::DDS::Subscriber_var sub_;
-  DataReaderListenerImpl drl_servant_;
 };
 
 #endif /* READER_H */

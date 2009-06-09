@@ -5,6 +5,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "EntityImpl.h"
+#include "StatusConditionImpl.h"
 
 namespace OpenDDS
 {
@@ -13,12 +14,14 @@ namespace OpenDDS
     // Implementation skeleton constructor
     EntityImpl::EntityImpl ()
       : enabled_(false),
-        entity_deleted_(false)
+        entity_deleted_(false),
+        status_changes_(0),
+        status_condition_(new StatusConditionImpl(this))
       {
       }
 
     // Implementation skeleton destructor
-    EntityImpl::~EntityImpl (void)
+    EntityImpl::~EntityImpl ()
       {
       }
 
@@ -36,6 +39,15 @@ namespace OpenDDS
         return ::DDS::RETCODE_OK;
       }
 
+    ::DDS::StatusCondition_ptr
+    EntityImpl::get_statuscondition(
+      )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
+      {
+        return ::DDS::StatusCondition::_duplicate(status_condition_);
+      }
 
     ::DDS::StatusKindMask
     EntityImpl::get_status_changes (
@@ -44,22 +56,8 @@ namespace OpenDDS
         CORBA::SystemException
       ))
       {
-        ::DDS::StatusKindMask status_changed = 0;
-        if (enabled_ == true)
-          {
-            // iterator status
-            Statuses::iterator it;
-            for (it = status_changes_.begin ();
-                 it != status_changes_.end ();
-                 it ++)
-              {
-                if (it->second == true)
-                  {
-                    status_changed |= it->first;
-                  }
-              }
-          }
-        return status_changed;
+        ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, 0);
+        return status_changes_;
       }
 
 
@@ -68,22 +66,14 @@ namespace OpenDDS
         ::DDS::StatusKind status,
         bool status_changed_flag)
       {
-        Statuses::iterator it = status_changes_.find (status);
-
-        if (it == status_changes_.end ())
+        ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+        if (status_changed_flag)
           {
-            std::pair<Statuses::iterator, bool> pair
-              = status_changes_.insert(Statuses::value_type(status, status_changed_flag));
-            if (pair.second == false)
-              {
-                ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: EntityImpl::set_status_changed_flag, ")
-                            ACE_TEXT("insert status failed. \n")));
-              }
+            status_changes_ |= status;
           }
-        else
+        else 
           {
-            it->second = status_changed_flag;
+            status_changes_ &= ~status;
           }
       }
 
@@ -109,6 +99,12 @@ namespace OpenDDS
         return deleted_state;
       }
 
+      void
+      EntityImpl::notify_status_condition ()
+      {
+        dynamic_cast<StatusConditionImpl*>(status_condition_.in())
+          ->signal_all();
+      }
 
   } // namespace DCPS
 } // namespace OpenDDS

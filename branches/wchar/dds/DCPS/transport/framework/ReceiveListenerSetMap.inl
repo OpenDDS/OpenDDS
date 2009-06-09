@@ -8,7 +8,7 @@
 ACE_INLINE
 OpenDDS::DCPS::ReceiveListenerSetMap::ReceiveListenerSetMap()
 {
-  DBG_ENTRY_LVL("ReceiveListenerSetMap","ReceiveListenerSetMap",5);
+  DBG_ENTRY_LVL("ReceiveListenerSetMap","ReceiveListenerSetMap",6);
 }
 
 
@@ -16,7 +16,7 @@ OpenDDS::DCPS::ReceiveListenerSetMap::ReceiveListenerSetMap()
 ACE_INLINE OpenDDS::DCPS::ReceiveListenerSet*
 OpenDDS::DCPS::ReceiveListenerSetMap::find(RepoId publisher_id)
 {
-  DBG_ENTRY_LVL("ReceiveListenerSetMap","find",5);
+  DBG_ENTRY_LVL("ReceiveListenerSetMap","find",6);
   ReceiveListenerSet_rch listener_set;
 
   if (OpenDDS::DCPS::find(map_, publisher_id, listener_set) != 0)
@@ -32,7 +32,7 @@ OpenDDS::DCPS::ReceiveListenerSetMap::find(RepoId publisher_id)
 ACE_INLINE OpenDDS::DCPS::ReceiveListenerSet*
 OpenDDS::DCPS::ReceiveListenerSetMap::find_or_create(RepoId publisher_id)
 {
-  DBG_ENTRY_LVL("ReceiveListenerSetMap","find_or_create",5);
+  DBG_ENTRY_LVL("ReceiveListenerSetMap","find_or_create",6);
   ReceiveListenerSet_rch listener_set;
 
   if (OpenDDS::DCPS::find(map_, publisher_id, listener_set) != 0)
@@ -58,7 +58,7 @@ OpenDDS::DCPS::ReceiveListenerSetMap::find_or_create(RepoId publisher_id)
 ACE_INLINE OpenDDS::DCPS::ReceiveListenerSet*
 OpenDDS::DCPS::ReceiveListenerSetMap::remove_set(RepoId publisher_id)
 {
-  DBG_ENTRY_LVL("ReceiveListenerSetMap","remove_set",5);
+  DBG_ENTRY_LVL("ReceiveListenerSetMap","remove_set",6);
   ReceiveListenerSet_rch listener_set;
 
   if (unbind(map_, publisher_id, listener_set) != 0)
@@ -78,7 +78,7 @@ OpenDDS::DCPS::ReceiveListenerSetMap::remove_set(RepoId publisher_id)
 ACE_INLINE ssize_t
 OpenDDS::DCPS::ReceiveListenerSetMap::size() const
 {
-  DBG_ENTRY_LVL("ReceiveListenerSetMap","size",5);
+  DBG_ENTRY_LVL("ReceiveListenerSetMap","size",6);
   return map_.size();
 }
 
@@ -86,7 +86,7 @@ OpenDDS::DCPS::ReceiveListenerSetMap::size() const
 ACE_INLINE int
 OpenDDS::DCPS::ReceiveListenerSetMap::data_received(ReceivedDataSample& sample)
 {
-  DBG_ENTRY_LVL("ReceiveListenerSetMap","data_received",5);
+  DBG_ENTRY_LVL("ReceiveListenerSetMap","data_received",6);
 
   char* ptr = sample.sample_->rd_ptr ();
 
@@ -108,7 +108,7 @@ OpenDDS::DCPS::ReceiveListenerSetMap::data_received(ReceivedDataSample& sample)
 ACE_INLINE OpenDDS::DCPS::ReceiveListenerSetMap::MapType&
 OpenDDS::DCPS::ReceiveListenerSetMap::map()
 {
-  DBG_SUB_ENTRY("ReceiveListenerSetMap","map",1);
+  DBG_ENTRY_LVL("ReceiveListenerSetMap","map",6);
   return map_;
 }
 
@@ -116,6 +116,6 @@ OpenDDS::DCPS::ReceiveListenerSetMap::map()
 ACE_INLINE const OpenDDS::DCPS::ReceiveListenerSetMap::MapType&
 OpenDDS::DCPS::ReceiveListenerSetMap::map() const
 {
-  DBG_SUB_ENTRY("ReceiveListenerSetMap","map",2);
+  DBG_ENTRY_LVL("ReceiveListenerSetMap","map",6);
   return map_;
 }

@@ -1,8 +1,9 @@
 // -*- C++ -*-
+//
 // $Id$
-#ifndef TAO_DDS_DCPS_INFRASTRUCTURE_IDL
-#define TAO_DDS_DCPS_INFRASTRUCTURE_IDL
 
+#ifndef OPENDDS_DCPS_INFRASTRUCTURE_IDL
+#define OPENDDS_DCPS_INFRASTRUCTURE_IDL
 
 #define DOMAINID_TYPE_NATIVE long
 #define HANDLE_TYPE_NATIVE long
@@ -32,7 +33,8 @@
 
 module DDS {
 
-// make the IDL compiler produce include of zero-copy read info sequence template
+// Make the IDL compiler produce include of zero-copy read info
+// sequence template.
 #pragma DCPS_SUPPORT_ZERO_COPY_READ
 
     typedef DOMAINID_TYPE_NATIVE DomainId_t;
@@ -202,6 +204,51 @@ module DDS {
 
     local interface Listener {};
 
+
+    // ----------------------------------------------------------------------
+    // Conditions
+    // ----------------------------------------------------------------------
+
+    local interface Condition {
+        boolean get_trigger_value();
+    };
+    
+    typedef sequence<Condition> ConditionSeq;
+
+    // WaitSet and GuardCondition can't be expressed in IDL because they are
+    // required by the spec to be default-constructable by the user
+    // (07-01-01 section 7.2.2 pgh 11).  Therefore in IDL we have WaitSetInterf
+    // and GuardConditionInterf.  Application code should #include
+    // "dds/DCPS/WaitSet.h", "dds/DCPS/GuardCondition.h" and construct heap
+    // objects with "new WaitSet()" and "new GuardCondition()".  Those objects
+    // (in the DDS namespace/package) implement the interfaces described below.
+    // In C++, these are reference-counted local CORBA objects.
+
+    local interface WaitSetInterf {
+        ReturnCode_t wait(
+            inout ConditionSeq active_conditions, 
+            in Duration_t timeout);
+        ReturnCode_t attach_condition(
+            in Condition cond);
+        ReturnCode_t detach_condition(
+            in Condition cond);
+        ReturnCode_t get_conditions(
+            inout ConditionSeq attached_conditions);
+    };
+
+    local interface GuardConditionInterf : Condition {
+        ReturnCode_t set_trigger_value(
+            in boolean value);
+    };
+
+
+    local interface StatusCondition : Condition {
+        StatusKindMask get_enabled_statuses();
+        ReturnCode_t set_enabled_statuses(
+            in StatusKindMask mask);
+        Entity get_entity();
+    };
+
     // Sample states to support reads
     typedef unsigned long SampleStateKind;
     typedef sequence <SampleStateKind> SampleStateSeq;
@@ -234,6 +281,7 @@ module DDS {
     const InstanceStateMask ANY_INSTANCE_STATE = 0xffff;
     const InstanceStateMask NOT_ALIVE_INSTANCE_STATE= 0x006;
 
+
     // ----------------------------------------------------------------------
     // Qos
     // ----------------------------------------------------------------------
@@ -258,7 +306,7 @@ module DDS {
     const string GROUPDATA_QOS_POLICY_NAME           = "GroupData";
     const string TRANSPORTPRIORITY_QOS_POLICY_NAME   = "TransportPriority";
     const string LIFESPAN_QOS_POLICY_NAME            = "Lifespan";
-    const string TRANSPORTTYPE_QOS_POLICY_NAME       = "TransportType"; // TAO Specific
+    const string DURABILITYSERVICE_POLICY_NAME       = "DurabilityService";
 
     const QosPolicyId_t USERDATA_QOS_POLICY_ID            = 1;
     const QosPolicyId_t DURABILITY_QOS_POLICY_ID          = 2;
@@ -281,18 +329,19 @@ module DDS {
     const QosPolicyId_t GROUPDATA_QOS_POLICY_ID           = 19;
     const QosPolicyId_t TRANSPORTPRIORITY_QOS_POLICY_ID   = 20;
     const QosPolicyId_t LIFESPAN_QOS_POLICY_ID            = 21;
-    const QosPolicyId_t TRANSPORTTYPE_QOS_POLICY_ID       = 22; // TAO specific
+    const QosPolicyId_t DURABILITYSERVICE_QOS_POLICY_ID   = 22;
 
+    typedef sequence<octet> OctetSeq;
     struct UserDataQosPolicy {
-		sequence<octet> value;
+		OctetSeq value;
 		};
 
     struct TopicDataQosPolicy {
-		sequence<octet> value;
+		OctetSeq value;
 		};
 
     struct GroupDataQosPolicy {
-		sequence<octet> value;
+		OctetSeq value;
 		};
 
     struct TransportPriorityQosPolicy {
@@ -414,6 +463,15 @@ module DDS {
 		Duration_t autopurge_nowriter_samples_delay;
 		};
 
+    struct DurabilityServiceQosPolicy {
+        Duration_t              service_cleanup_delay;
+        HistoryQosPolicyKind    history_kind;
+        long                    history_depth;
+        long                    max_samples;
+        long                    max_instances;
+        long                    max_samples_per_instance;
+    };
+
     struct DomainParticipantQos {
 		UserDataQosPolicy user_data;
 		EntityFactoryQosPolicy entity_factory;
@@ -422,6 +480,7 @@ module DDS {
     struct TopicQos {
 		TopicDataQosPolicy topic_data;
 		DurabilityQosPolicy durability;
+                DurabilityServiceQosPolicy durability_service;
 		DeadlineQosPolicy deadline;
 		LatencyBudgetQosPolicy latency_budget;
 		LivelinessQosPolicy liveliness;
@@ -436,6 +495,7 @@ module DDS {
 
     struct DataWriterQos {
 		DurabilityQosPolicy durability;
+                DurabilityServiceQosPolicy durability_service;
 		DeadlineQosPolicy deadline;
 		LatencyBudgetQosPolicy latency_budget;
 		LivelinessQosPolicy liveliness;
@@ -481,7 +541,7 @@ module DDS {
     // ----------------------------------------------------------------------
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
-// These pragmas are TAO specific
+// These pragmas are OpenDDS-specific.
 #pragma DCPS_DATA_TYPE "DDS::ParticipantBuiltinTopicData"
 #pragma DCPS_DATA_KEY  "DDS::ParticipantBuiltinTopicData key[0]"
 #pragma DCPS_DATA_KEY  "DDS::ParticipantBuiltinTopicData key[1]"
@@ -491,7 +551,7 @@ module DDS {
       UserDataQosPolicy user_data;
     };
 
-// These pragmas are TAO specific
+// These pragmas are OpenDDS-specific.
 #pragma DCPS_DATA_TYPE "DDS::TopicBuiltinTopicData"
 #pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key[0]"
 #pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key[1]"
@@ -501,6 +561,7 @@ module DDS {
 		string name;
 		string type_name;
 		DurabilityQosPolicy durability;
+                DurabilityServiceQosPolicy durability_service;
 		DeadlineQosPolicy deadline;
 		LatencyBudgetQosPolicy latency_budget;
 		LivelinessQosPolicy liveliness;
@@ -514,7 +575,7 @@ module DDS {
 		TopicDataQosPolicy topic_data;
 		};
 
-// These pragmas are TAO specific
+// These pragmas are OpenDDS-specific.
 #pragma DCPS_DATA_TYPE "DDS::PublicationBuiltinTopicData"
 #pragma DCPS_DATA_KEY  "DDS::PublicationBuiltinTopicData key[0]"
 #pragma DCPS_DATA_KEY  "DDS::PublicationBuiltinTopicData key[1]"
@@ -525,6 +586,7 @@ module DDS {
 		string topic_name;
 		string type_name;
 		DurabilityQosPolicy durability;
+                DurabilityServiceQosPolicy durability_service;
 		DeadlineQosPolicy deadline;
 		LatencyBudgetQosPolicy latency_budget;
 		LivelinessQosPolicy liveliness;
@@ -538,7 +600,7 @@ module DDS {
 		GroupDataQosPolicy group_data;
 		};
 
-// These pragmas are TAO specific
+// These pragmas are OpenDDS-specific.
 #pragma DCPS_DATA_TYPE "DDS::SubscriptionBuiltinTopicData"
 #pragma DCPS_DATA_KEY  "DDS::SubscriptionBuiltinTopicData key[0]"
 #pragma DCPS_DATA_KEY  "DDS::SubscriptionBuiltinTopicData key[1]"
@@ -574,6 +636,8 @@ module DDS {
 
 		ReturnCode_t enable();
 
+    StatusCondition get_statuscondition();
+
     StatusKindMask get_status_changes();
 		};
 
@@ -589,6 +653,8 @@ module DDS {
 		long sample_rank;
 		long generation_rank;
 		long absolute_generation_rank;
+    InstanceHandle_t publication_handle;
+    boolean valid_data;
 		};
 
     native SampleInfoSeq; // support zero-copy read
@@ -596,4 +662,17 @@ module DDS {
 
 };
 
-#endif /* TAO_DDS_DCPS_INFRASTRUCTURE_IDL */
+module OpenDDS
+{
+
+  const string TRANSPORTTYPE_QOS_POLICY_NAME = "TransportType";
+
+  // OpenDDS-specific QosPolicyId_t values start from the maximum
+  // QosPolicyId_t (a 32-bit signed integer) and decrement as new
+  // OpenDDS-specific values are added.  The goal is to avoid
+  // potential conflicts with new OMG defined QosPolicyId_t values.
+  const ::DDS::QosPolicyId_t TRANSPORTTYPE_QOS_POLICY_ID = 0x7fffffff;
+
+};
+
+#endif  /* OPENDDS_DCPS_INFRASTRUCTURE_IDL */

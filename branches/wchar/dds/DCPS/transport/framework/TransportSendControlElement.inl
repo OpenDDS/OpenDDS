@@ -17,6 +17,6 @@ OpenDDS::DCPS::TransportSendControlElement::TransportSendControlElement
     msg_(msg_block),
     allocator_(allocator)
 {
-  DBG_ENTRY_LVL("TransportSendControlElement","TransportSendControlElement",5);
+  DBG_ENTRY_LVL("TransportSendControlElement","TransportSendControlElement",6);
 }
 

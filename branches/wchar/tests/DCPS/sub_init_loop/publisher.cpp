@@ -9,7 +9,7 @@
  */
 // ============================================================================
 
-#include "MessageTypeSupportImpl.h"
+#include "MessengerTypeSupportImpl.h"
 #include "Writer.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
@@ -118,22 +118,22 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit(1);
       }
 
-    // Attach the publisher to the transport.
-    OpenDDS::DCPS::PublisherImpl* pub_impl =
-      OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub.in ());
-    if (0 == pub_impl) {
-      cerr << "Failed to obtain publisher servant" << endl;
-      exit(1);
-    }
+      // Attach the publisher to the transport.
+      OpenDDS::DCPS::PublisherImpl* pub_impl =
+        dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub.in ());
+      if (0 == pub_impl) {
+        cerr << "Failed to obtain publisher servant" << endl;
+        exit(1);
+      }
 
-    OpenDDS::DCPS::AttachStatus status = pub_impl->attach_transport(tcp_impl.in());
+      pub_impl->attach_transport(tcp_impl.in());
 
       // Create the datawriter
       DDS::DataWriterQos dw_qos;
       pub->get_default_datawriter_qos (dw_qos);
       // Make it KEEP_ALL history so we can verify the received
       // data without dropping.
-      dw_qos.history.kind = ::DDS::KEEP_ALL_HISTORY_QOS;
+      // dw_qos.history.kind = ::DDS::KEEP_ALL_HISTORY_QOS;
       dw_qos.reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
       //dw_qos.resource_limits.max_samples_per_instance = num_writes;
 

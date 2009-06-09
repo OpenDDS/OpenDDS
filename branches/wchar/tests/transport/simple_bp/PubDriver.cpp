@@ -8,6 +8,7 @@
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/AssociationData.h"
+#include "dds/DCPS/Service_Participant.h"
 #include "SimplePublisher.h"
 #include <ace/Arg_Shifter.h>
 
@@ -27,6 +28,12 @@ PubDriver::~PubDriver()
 void
 PubDriver::run(int& argc, ACE_TCHAR* argv[])
 {
+  CORBA::ORB_var orb = CORBA::ORB_init (argc,
+                                        argv,
+                                        "TAO_DDS_DCPS");
+
+  TheServiceParticipant->set_ORB (orb.in());
+
   parse_args(argc, argv);
   init();
   run();
@@ -180,6 +187,7 @@ PubDriver::init()
     = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
 
   tcp_config->local_address_ = this->pub_addr_;
+  tcp_config->local_address_str_ = this->pub_addr_str_;
 
   if (transport_impl->configure(config.in()) != 0)
     {
@@ -197,13 +205,19 @@ PubDriver::run()
   OpenDDS::DCPS::AssociationData subscriptions[1];
   subscriptions[0].remote_id_                = this->sub_id_;
   subscriptions[0].remote_data_.transport_id = 1;  // TBD - not right
+  subscriptions[0].remote_data_.publication_transport_priority = 0;
 
-  OpenDDS::DCPS::NetworkAddress network_order_address(this->sub_addr_);
+  OpenDDS::DCPS::NetworkAddress network_order_address(this->sub_addr_str_);
 
-  subscriptions[0].remote_data_.data = OpenDDS::DCPS::TransportInterfaceBLOB
-                       (sizeof(OpenDDS::DCPS::NetworkAddress),
-                        sizeof(OpenDDS::DCPS::NetworkAddress),
-                        (CORBA::Octet*)(&network_order_address));
+  ACE_OutputCDR cdr;
+  cdr << network_order_address;
+  size_t len = cdr.total_length ();
+
+  subscriptions[0].remote_data_.data
+    = OpenDDS::DCPS::TransportInterfaceBLOB
+    (len,
+    len,
+    (CORBA::Octet*)(cdr.buffer ()));
 
   this->publisher_.init(ALL_TRAFFIC,
                         this->pub_id_,
@@ -227,6 +241,7 @@ PubDriver::run()
 
   // Tear-down the entire Transport Framework.
   TheTransportFactory->release();
+  TheServiceParticipant->shutdown();
 }
 
 
@@ -261,9 +276,12 @@ PubDriver::parse_pub_arg(const ACE_TString& arg)
 
   // Parse the pub_id from left of ':' char, and remainder to right of ':'.
   ACE_TString pub_id_str(arg.c_str(), pos);
-  ACE_TString pub_addr_str(arg.c_str() + pos + 1);
-  this->pub_id_ = ACE_OS::atoi(pub_id_str.c_str());
-  this->pub_addr_ = ACE_INET_Addr(pub_addr_str.c_str());
+  this->pub_addr_str_ = arg.c_str() + pos + 1;
+  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 1
+  converter.kind()   = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
+  converter.key()[2] = ACE_OS::atoi( pub_id_str.c_str());
+  this->pub_id_ = converter;
+  this->pub_addr_ = ACE_INET_Addr(this->pub_addr_str_.c_str());
 
   return 0;
 }
@@ -299,14 +317,17 @@ PubDriver::parse_sub_arg(const ACE_TString& arg)
   }
 
   // Parse the sub_id from left of ':' char, and remainder to right of ':'.
-  ACE_TString sub_id_str(arg.c_str (), pos);
-  ACE_TString sub_addr_str(arg.c_str () + pos + 1);
+  ACE_TString sub_id_str(arg.c_str(), pos);
+  this->sub_addr_str_ = arg.c_str() + pos + 1;
 
-  this->sub_id_ = ACE_OS::atoi(sub_id_str.c_str());
+  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 2
+  converter.kind()   = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
+  converter.key()[2] = ACE_OS::atoi( sub_id_str.c_str());
+  this->sub_id_ = converter;
 
   // Find the (only) ':' char in the remainder, and make sure it is in
   // a legal spot.
-  if ((pos = sub_addr_str.find(ACE_TEXT(':'))) == std::string::npos) {
+  if ((pos = this->sub_addr_str_.find(ACE_TEXT(':'))) == std::string::npos) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) Bad -p command-line value (%s). "
                "Missing second ':' char.\n",
@@ -331,7 +352,7 @@ PubDriver::parse_sub_arg(const ACE_TString& arg)
   }
 
   // Use the remainder as the "stringified" ACE_INET_Addr.
-  this->sub_addr_ = ACE_INET_Addr(sub_addr_str.c_str());
+  this->sub_addr_ = ACE_INET_Addr(this->sub_addr_str_.c_str());
 
   return 0;
 }

@@ -2,12 +2,12 @@
 //
 // $Id$
 #include "Writer.h"
-#include "MessageTypeSupportC.h"
+#include "MessengerTypeSupportC.h"
 #include <ace/OS_NS_unistd.h>
 #include <ace/streams.h>
 
 const int num_instances_per_writer = 1;
-const int num_messages = 10;
+extern int num_messages;
 
 Writer::Writer(::DDS::DataWriter_ptr writer)
 : writer_ (::DDS::DataWriter::_duplicate (writer)),
@@ -59,7 +59,7 @@ Writer::svc ()
     ::Messenger::MessageDataWriter_var message_dw
       = ::Messenger::MessageDataWriter::_narrow(writer_.in());
     if (CORBA::is_nil (message_dw.in ())) {
-      cerr << "Data Writer could not be narrowed"<< endl;
+      cerr << "Writer: Data Writer could not be narrowed"<< endl;
       exit(1);
     }
 
@@ -79,7 +79,7 @@ Writer::svc ()
 
       if (ret != ::DDS::RETCODE_OK) {
         ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("(%P|%t)ERROR  Writer::svc, ")
+                    ACE_TEXT("(%P|%t) Writer::svc ERROR, ")
                     ACE_TEXT ("%dth write() returned %d.\n"),
                     i, ret));
         if (ret == ::DDS::RETCODE_TIMEOUT) {
@@ -91,7 +91,7 @@ Writer::svc ()
       ACE_OS::sleep(1);
     }
   } catch (CORBA::Exception& e) {
-    cerr << "Exception caught in svc:" << endl
+    cerr << "Writer: Exception caught in svc:" << endl
 	 << e << endl;
   }
 

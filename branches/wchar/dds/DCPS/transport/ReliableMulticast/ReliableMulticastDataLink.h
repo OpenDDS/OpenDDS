@@ -32,13 +32,20 @@ namespace OpenDDS
         TransportReactorTask_rch& reactor_task,
         ReliableMulticastTransportConfiguration& configuration,
         const ACE_INET_Addr& multicast_group_address,
-        OpenDDS::DCPS::ReliableMulticastTransportImpl& transport_impl
+        OpenDDS::DCPS::ReliableMulticastTransportImpl& transport_impl,
+        CORBA::Long priority
         );
       virtual ~ReliableMulticastDataLink();
 
       bool connect(bool is_publisher);
 
       OpenDDS::DCPS::ReliableMulticastTransportImpl_rch& get_transport_impl();
+
+      /// Access the underlying socket.
+      /// N.B. This is valid only for the publication end DataLink
+      ///      objects.  This transport distinguishes the endpoint role
+      ///      of individual DataLink objects.
+      ACE_SOCK& socket();
 
     protected:
       virtual void stop_i();

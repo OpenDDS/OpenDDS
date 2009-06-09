@@ -6,9 +6,9 @@
 #include "../common/TestException.h"
 #include "../common/TestSupport.h"
 #include "dds/DCPS/Service_Participant.h"
-#include "tests/DCPS/MultiTopicTypes/Foo1TypeSupportC.h"
-#include "tests/DCPS/MultiTopicTypes/Foo2TypeSupportC.h"
-#include "tests/DCPS/MultiTopicTypes/Foo3TypeSupportC.h"
+#include "tests/DCPS/MultiTopicTypes/Foo1DefTypeSupportC.h"
+#include "tests/DCPS/MultiTopicTypes/Foo2DefTypeSupportC.h"
+#include "tests/DCPS/MultiTopicTypes/Foo3DefTypeSupportC.h"
 
 #include "ace/OS_NS_unistd.h"
 

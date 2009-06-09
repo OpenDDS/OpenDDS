@@ -4,7 +4,7 @@
 #ifndef TAO_DDS_DCPS_SUBSCRIBER_H
 #define TAO_DDS_DCPS_SUBSCRIBER_H
 
-#include "dds/DdsDcpsSubscriptionS.h"
+#include "dds/DdsDcpsSubscriptionExtS.h"
 #include "dds/DdsDcpsDataReaderRemoteC.h"
 #include "dds/DdsDcpsInfoC.h"
 #include "EntityImpl.h"
@@ -49,9 +49,12 @@ namespace OpenDDS
     // list depending on Presentation Qos.
     typedef std::set<DataReaderImpl *> DataReaderSet ;
 
+    // DataReader id to qos map.
+    typedef std::map<RepoId, ::DDS::DataReaderQos, GUID_tKeyLessThan> DrIdToQosMap;
+
     //Class SubscriberImpl
     class OpenDDS_Dcps_Export SubscriberImpl
-      : public virtual OpenDDS::DCPS::LocalObject<DDS::Subscriber>,
+      : public virtual OpenDDS::DCPS::LocalObject<SubscriberExt>,
         public virtual EntityImpl,
         public virtual TransportInterface
     {
@@ -60,8 +63,7 @@ namespace OpenDDS
       //Constructor
       SubscriberImpl (const ::DDS::SubscriberQos & qos,
                       ::DDS::SubscriberListener_ptr a_listener,
-                      DomainParticipantImpl*       participant,
-                      ::DDS::DomainParticipant_ptr participant_objref);
+                      DomainParticipantImpl*       participant);
 
       //Destructor
       virtual ~SubscriberImpl (void);
@@ -69,6 +71,16 @@ namespace OpenDDS
       virtual ::DDS::DataReader_ptr create_datareader (
         ::DDS::TopicDescription_ptr a_topic_desc,
         const ::DDS::DataReaderQos & qos,
+        ::DDS::DataReaderListener_ptr a_listener
+      )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
+
+      virtual ::DDS::DataReader_ptr create_opendds_datareader (
+        ::DDS::TopicDescription_ptr a_topic_desc,
+        const ::DDS::DataReaderQos & qos,
+        const DataReaderQosExt & ext_qos,
         ::DDS::DataReaderListener_ptr a_listener
       )
       ACE_THROW_SPEC ((
@@ -171,6 +183,13 @@ namespace OpenDDS
         CORBA::SystemException
       ));
 
+    virtual void get_default_datareader_qos_ext (
+        DataReaderQosExt & qos
+      )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
+
     virtual ::DDS::ReturnCode_t copy_from_topic_qos (
         ::DDS::DataReaderQos & a_datareader_qos,
         const ::DDS::TopicQos & a_topic_qos
@@ -185,11 +204,6 @@ namespace OpenDDS
         CORBA::SystemException
       ));
 
-    virtual ::DDS::StatusKindMask get_status_changes (
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
 
     /** This method is not defined in the IDL and is defined for
     *  internal use.
@@ -206,11 +220,6 @@ namespace OpenDDS
         const WriterIdSeq& writers,
         const RepoId&      reader
       ) ;
-
-    /*
-     * Cache the subscriber's object reference.
-     */
-     void set_object_reference (const ::DDS::Subscriber_ptr& sub) ;
 
     // called by DataReaderImpl::data_received
     void data_received(DataReaderImpl *reader);
@@ -243,9 +252,8 @@ namespace OpenDDS
 
       DomainParticipantImpl*        participant_;
       ::DDS::DomainParticipant_var  participant_objref_;
-      ::DDS::Subscriber_var         subscriber_objref_;
 
-      DCPSInfo_var                  repository_;
+      ::DDS::DomainId_t             domain_id_;
 
       /// this lock protects the data structures in this class.
       /// It also projects the TransportInterface (it must be held when

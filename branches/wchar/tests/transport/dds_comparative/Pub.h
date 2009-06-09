@@ -34,7 +34,8 @@ class Pub : public OpenDDS::DCPS::TransportInterface
 
     /// Add a remote subscriber
     void add_remote_subscriber(OpenDDS::DCPS::RepoId    sub_id,
-                               const ACE_INET_Addr& sub_addr);
+                               const ACE_INET_Addr& sub_addr,
+                               const ACE_TString&   sub_addr_str);
 
     /// Initialize the publisher.  This causes this publisher to attach itself
     /// to the appropriate TransportImpl object, followed by a call to
@@ -82,22 +83,31 @@ class Pub : public OpenDDS::DCPS::TransportInterface
     {
       OpenDDS::DCPS::RepoId sub_id_;
       ACE_INET_Addr     sub_addr_;
+      ACE_TString       sub_addr_str_;
 
-      SubInfo(OpenDDS::DCPS::RepoId sub_id, const ACE_INET_Addr& sub_addr)
-        : sub_id_(sub_id), sub_addr_(sub_addr)
+      SubInfo(OpenDDS::DCPS::RepoId sub_id, 
+              const ACE_INET_Addr& sub_addr,
+              const ACE_TString& sub_addr_str)
+        : sub_id_(sub_id), sub_addr_(sub_addr), sub_addr_str_(sub_addr_str)
         {}
 
       void as_association(OpenDDS::DCPS::AssociationData& assoc_data)
         {
           assoc_data.remote_id_ = this->sub_id_;
           assoc_data.remote_data_.transport_id = 1;
+          assoc_data.remote_data_.publication_transport_priority = 0;
 
-          OpenDDS::DCPS::NetworkAddress network_order_address(this->sub_addr_);
+          OpenDDS::DCPS::NetworkAddress network_order_address(this->sub_addr_str_);
 
-          assoc_data.remote_data_.data = OpenDDS::DCPS::TransportInterfaceBLOB
-                                   (sizeof(OpenDDS::DCPS::NetworkAddress),
-                                    sizeof(OpenDDS::DCPS::NetworkAddress),
-                                    (CORBA::Octet*)(&network_order_address));
+          ACE_OutputCDR cdr;
+          cdr << network_order_address;
+          size_t len = cdr.total_length ();
+
+          assoc_data.remote_data_.data
+            = OpenDDS::DCPS::TransportInterfaceBLOB
+            (len,
+            len,
+            (CORBA::Octet*)(cdr.buffer ()));
         }
     };
 

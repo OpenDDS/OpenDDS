@@ -12,7 +12,7 @@
 
 OpenDDS::DCPS::SimpleMcastSocket::~SimpleMcastSocket()
 {
-  DBG_ENTRY_LVL("SimpleMcastSocket","~SimpleMcastSocket",5);
+  DBG_ENTRY_LVL("SimpleMcastSocket","~SimpleMcastSocket",6);
 }
 
 

@@ -5,31 +5,34 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 my $debug = 0 ;
 
-$domains_file = PerlACE::LocalFile ("domainids.txt");
-$dcpsrepo_ior = PerlACE::LocalFile ("dcps_ir.ior");
+$dcpsrepo_ior = "dcps_ir.ior";
+
+$svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
+    : "-ORBSvcConf ../../tcp.conf";
 
 unlink $dcpsrepo_ior;
 
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                    "$svc_config -NOBITS -o $dcpsrepo_ior ");
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                  "-NOBITS -o $dcpsrepo_ior -d $domains_file");
+$PUBLISHER = PerlDDS::create_process ("publisher",
+                              "-k file://$dcpsrepo_ior -q");
 
-$PUBLISHER = new PerlACE::Process ("publisher",
-                            "-k file://$dcpsrepo_ior -q");
-
-$SUBSCRIBER = new PerlACE::Process ("subscriber",
-                            "-k file://$dcpsrepo_ior");
+$SUBSCRIBER = PerlDDS::create_process ("subscriber",
+                              "-k file://$dcpsrepo_ior");
 
 print $DCPSREPO->CommandLine() . "\n" if $debug ;
 $DCPSREPO->Spawn ();
-if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 10) == -1) {
+if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
     print STDERR "ERROR: cannot find file <$dcpsrepo_ior>\n";
     $DCPSREPO->Kill (); $DCPSREPO->TimedWait (1);
     exit 1;

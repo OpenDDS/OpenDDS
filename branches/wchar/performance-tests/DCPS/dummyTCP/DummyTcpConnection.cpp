@@ -344,7 +344,7 @@ OpenDDS::DCPS::DummyTcpConnection::active_establishment
   // It will use that as an "identifier" of sorts.  To the other
   // (passive) side, our local_address that we send here will be known
   // as the remote_address.
-  NetworkAddress network_order_address(local_address);
+  NetworkAddress network_order_address(this->tcp_config_->local_address_str_);
 
   if (this->peer().send_n((char*)(&network_order_address),
                           sizeof(network_order_address)) == -1)

@@ -8,16 +8,13 @@
 #include "Definitions.h"
 #include "TopicImpl.h"
 #include "dds/DdsDcpsPublicationC.h"
-#include "dds/DdsDcpsSubscriptionC.h"
+#include "dds/DdsDcpsSubscriptionExtC.h"
 #include "dds/DdsDcpsTopicC.h"
-#include "dds/DdsDcpsDomainS.h"
+#include "dds/DdsDcpsDomainExtS.h"
 #include "dds/DdsDcpsInfoC.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
-#include "dds/ParticipantBuiltinTopicDataTypeSupportC.h"
-#include "dds/PublicationBuiltinTopicDataTypeSupportC.h"
-#include "dds/SubscriptionBuiltinTopicDataTypeSupportC.h"
-#include "dds/TopicBuiltinTopicDataTypeSupportC.h"
+#include "dds/DdsDcpsInfrastructureTypeSupportC.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
@@ -39,6 +36,7 @@ namespace OpenDDS
   {
     class PublisherImpl;
     class SubscriberImpl;
+    class FailoverListener;
 
     /**
     * @class DomainParticipantImpl
@@ -53,7 +51,7 @@ namespace OpenDDS
     * the interface this class is implementing.
     */
     class OpenDDS_Dcps_Export DomainParticipantImpl
-      : public virtual OpenDDS::DCPS::LocalObject<DDS::DomainParticipant>,
+      : public virtual OpenDDS::DCPS::LocalObject<DomainParticipantExt>,
         public virtual OpenDDS::DCPS::EntityImpl
     {
     public:
@@ -97,7 +95,8 @@ namespace OpenDDS
       DomainParticipantImpl (const ::DDS::DomainId_t&             domain_id,
                              const RepoId&                        dp_id,
                              const ::DDS::DomainParticipantQos &  qos,
-                             ::DDS::DomainParticipantListener_ptr a_listener);
+                             ::DDS::DomainParticipantListener_ptr a_listener,
+                             bool                                 federated = false);
 
       ///Destructor
       virtual ~DomainParticipantImpl (void);
@@ -287,17 +286,19 @@ namespace OpenDDS
         CORBA::SystemException
       ));
 
+    virtual ::DDS::ReturnCode_t get_current_time (
+        ::DDS::Time_t & current_time
+      )
+      ACE_THROW_SPEC ((
+        ::CORBA::SystemException
+      ));
+
     virtual ::DDS::ReturnCode_t enable (
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
-    virtual ::DDS::StatusKindMask get_status_changes (
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
 
       /// Following methods are not the idl interfaces and are
       /// local operations.
@@ -306,6 +307,12 @@ namespace OpenDDS
       *  Return the id given by the DCPSInfo repositoy.
       */
       RepoId get_id ();
+
+      CORBA::Long get_federation_id ()
+        ACE_THROW_SPEC ((CORBA::SystemException));
+
+      CORBA::Long get_participant_id ()
+        ACE_THROW_SPEC ((CORBA::SystemException));
 
       /**
       *  Associate the servant with the object reference.
@@ -384,6 +391,10 @@ namespace OpenDDS
       /// This participant id given by DCPSInfo repository.
       RepoId                                dp_id_;
 
+      /// Whether this DomainParticipant is attached to a federated
+      /// repository.
+      bool                                  federated_;
+
       /// Collection of publishers.
       PublisherSet   publishers_;
       /// Collection of subscribers.
@@ -401,9 +412,6 @@ namespace OpenDDS
       /// The object reference activated from this servant.
       ::DDS::DomainParticipant_var participant_objref_;
 
-      /// Object reference to the DCPSInfo.
-      DCPSInfo_var                 repository_;
-
       /// The built in topic subscriber.
       ::DDS::Subscriber_var        bit_subscriber_;
 
@@ -415,6 +423,9 @@ namespace OpenDDS
       ::DDS::Topic_var       bit_pub_topic_;
       /// The topic for built in topic subscription.
       ::DDS::Topic_var       bit_sub_topic_;
+
+      /// Listener to initiate failover with.
+      FailoverListener*      failoverListener_;
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
       /// The datareader for built in topic participant.

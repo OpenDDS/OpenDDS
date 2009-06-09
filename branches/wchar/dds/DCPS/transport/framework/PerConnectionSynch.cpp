@@ -3,6 +3,7 @@
 // $Id$
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "PerConnectionSynch.h"
+#include "dds/DCPS/debug.h"
 
 
 #if !defined (__ACE_INLINE__)
@@ -12,14 +13,14 @@
 
 OpenDDS::DCPS::PerConnectionSynch::~PerConnectionSynch()
 {
-  DBG_ENTRY_LVL("PerConnectionSynch","~PerConnectionSynch",5);
+  DBG_ENTRY_LVL("PerConnectionSynch","~PerConnectionSynch",6);
 }
 
 
 void
 OpenDDS::DCPS::PerConnectionSynch::work_available()
 {
-  DBG_ENTRY_LVL("PerConnectionSynch","work_available",5);
+  DBG_ENTRY_LVL("PerConnectionSynch","work_available",6);
   GuardType guard(this->lock_);
   this->work_available_ = 1;
   this->condition_.signal();
@@ -29,18 +30,33 @@ OpenDDS::DCPS::PerConnectionSynch::work_available()
 int
 OpenDDS::DCPS::PerConnectionSynch::open(void*)
 {
-  DBG_ENTRY_LVL("PerConnectionSynch","open",5);
+  DBG_ENTRY_LVL("PerConnectionSynch","open",6);
   // Activate this object to start a new thread that will call
   // our svc() method, and then our close() method.
   this->shutdown_ = 0;
-  return this->activate(THR_NEW_LWP | THR_JOINABLE, 1);
+
+  long flags;
+  flags  = THR_NEW_LWP | THR_JOINABLE ;//|THR_SCOPE_PROCESS | THR_SCOPE_THREAD;
+  if( this->scheduler_ >= 0) {
+    flags |= this->scheduler_;
+  }
+  if( DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) PerConnectionSynch::open(): ")
+      ACE_TEXT("activating thread with flags 0x%08.8x ")
+      ACE_TEXT("and priority %d.\n"),
+      flags,
+      this->dds_priority_
+    ));
+  }
+  return this->activate( flags, 1, 0, this->dds_priority_);
 }
 
 
 int
 OpenDDS::DCPS::PerConnectionSynch::svc()
 {
-  DBG_ENTRY_LVL("PerConnectionSynch","svc",5);
+  DBG_ENTRY_LVL("PerConnectionSynch","svc",6);
 
   ThreadSynchWorker::WorkOutcome work_outcome =
                                ThreadSynchWorker::WORK_OUTCOME_NO_MORE_TO_DO;
@@ -135,7 +151,7 @@ OpenDDS::DCPS::PerConnectionSynch::svc()
 int
 OpenDDS::DCPS::PerConnectionSynch::close(u_long)
 {
-  DBG_ENTRY_LVL("PerConnectionSynch","close",5);
+  DBG_ENTRY_LVL("PerConnectionSynch","close",6);
   return 0;
 }
 
@@ -143,7 +159,7 @@ OpenDDS::DCPS::PerConnectionSynch::close(u_long)
 int
 OpenDDS::DCPS::PerConnectionSynch::register_worker_i()
 {
-  DBG_ENTRY_LVL("PerConnectionSynch","register_worker_i",5);
+  DBG_ENTRY_LVL("PerConnectionSynch","register_worker_i",6);
   return this->open(0);
 }
 
@@ -151,7 +167,7 @@ OpenDDS::DCPS::PerConnectionSynch::register_worker_i()
 void
 OpenDDS::DCPS::PerConnectionSynch::unregister_worker_i()
 {
-  DBG_ENTRY_LVL("PerConnectionSynch","unregister_worker_i",5);
+  DBG_ENTRY_LVL("PerConnectionSynch","unregister_worker_i",6);
   // It is at this point that we need to stop the thread that
   // was activated when our open() method was called.
   {

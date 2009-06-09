@@ -17,22 +17,25 @@
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "Service_Participant.h"
+#include "GuidUtils.h"
 #include "dds/DCPS/DomainParticipantImpl.h"
+
+#include <sstream>
 
 namespace OpenDDS {
   namespace DCPS {
 
-    OpenDDS_Dcps_Export extern const char* BUILT_IN_PARTICIPANT_TOPIC;
-    OpenDDS_Dcps_Export extern const char* BUILT_IN_PARTICIPANT_TOPIC_TYPE;
+    OpenDDS_Dcps_Export extern const char* const BUILT_IN_PARTICIPANT_TOPIC;
+    OpenDDS_Dcps_Export extern const char* const BUILT_IN_PARTICIPANT_TOPIC_TYPE;
 
-    OpenDDS_Dcps_Export extern const char* BUILT_IN_TOPIC_TOPIC;
-    OpenDDS_Dcps_Export extern const char* BUILT_IN_TOPIC_TOPIC_TYPE;
+    OpenDDS_Dcps_Export extern const char* const BUILT_IN_TOPIC_TOPIC;
+    OpenDDS_Dcps_Export extern const char* const BUILT_IN_TOPIC_TOPIC_TYPE;
 
-    OpenDDS_Dcps_Export extern const char* BUILT_IN_SUBSCRIPTION_TOPIC;
-    OpenDDS_Dcps_Export extern const char* BUILT_IN_SUBSCRIPTION_TOPIC_TYPE;
+    OpenDDS_Dcps_Export extern const char* const BUILT_IN_SUBSCRIPTION_TOPIC;
+    OpenDDS_Dcps_Export extern const char* const BUILT_IN_SUBSCRIPTION_TOPIC_TYPE;
 
-    OpenDDS_Dcps_Export extern const char* BUILT_IN_PUBLICATION_TOPIC;
-    OpenDDS_Dcps_Export extern const char* BUILT_IN_PUBLICATION_TOPIC_TYPE;
+    OpenDDS_Dcps_Export extern const char* const BUILT_IN_PUBLICATION_TOPIC;
+    OpenDDS_Dcps_Export extern const char* const BUILT_IN_PUBLICATION_TOPIC_TYPE;
 
     enum BuiltInTopicTransportTypeId
     {
@@ -46,6 +49,20 @@ namespace OpenDDS {
 
     class DomainParticipantImpl;
 
+    /**
+     * Functor for ordering BuiltinKey_t.
+     *
+     * Use this like this:
+     *   std::map< ::DDS::BuiltinTopicKey_t, int, OpenDDS::DCPS::BuiltinTopicKeyLess> MapType;
+     */
+    class BuiltinTopicKeyLess {
+      public:
+        bool operator()(
+               const ::DDS::BuiltinTopicKey_t& lhs,
+               const ::DDS::BuiltinTopicKey_t& rhs
+             );
+    };
+
     // changed from member function template to class template
     // to avoid VC++ v6 build problem.
     /*
@@ -56,48 +73,47 @@ namespace OpenDDS {
     class BIT_Helper_1
     {
       public:
-        ::DDS::ReturnCode_t instance_handle_to_repo_id (
-            DomainParticipantImpl*   dp,
-            const char*              bit_name,
-            const ::DDS::InstanceHandle_t& handle,
-            RepoId&                  repoid)
-        {
-          // The index in BuiltinTopicKey_t[3] for entity templatized in this function.
-          // If the data is read from the participant BIT datareader then the key position
-          // is 1; otherwise it's 2.
-          int key_pos = 2;
+       ::DDS::ReturnCode_t instance_handle_to_repo_key (
+           DomainParticipantImpl*         dp,
+           const char*                    bit_name,
+           const ::DDS::InstanceHandle_t& handle,
+           CORBA::Long&                   repoKey)
+       {
+         // The index in BuiltinTopicKey_t[3] for entity templatized in this function.
+         // If the data is read from the participant BIT datareader then the key position
+         // is 1; otherwise it's 2.
+         int key_pos = 2;
 
-          if (ACE_OS::strcmp (bit_name, BUILT_IN_PARTICIPANT_TOPIC) == 0)
-            {
-              key_pos = 1;
-            }
+         if (ACE_OS::strcmp (bit_name, BUILT_IN_PARTICIPANT_TOPIC) == 0)
+           {
+             key_pos = 1;
+           }
 
-          BIT_DataSeq data;
-          ::DDS::ReturnCode_t ret
-            = instance_handle_to_bit_data (dp, bit_name, handle, data);
+         BIT_DataSeq data;
+         ::DDS::ReturnCode_t ret
+           = instance_handle_to_bit_data (dp, bit_name, handle, data);
 
-          if (ret != ::DDS::RETCODE_OK)
-            {
-              ACE_ERROR_RETURN((LM_ERROR,
-                                ACE_TEXT("(%P|%t) BIT_Helper::instance_handle_to_repo_id, ")
-                                ACE_TEXT("failed to find builtin topic data for instance ")
-                                ACE_TEXT("handle %d error %d\n"), handle, ret),
-                                ret);
-            }
+         if (ret != ::DDS::RETCODE_OK)
+           {
+             ACE_ERROR_RETURN((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: BIT_Helper::instance_handle_to_repo_key: ")
+                 ACE_TEXT("failed to find builtin topic data for instance %d, ")
+                 ACE_TEXT("error %d.\n"),
+                 handle,
+                 ret
+             ), ret);
+           }
 
-
-          repoid = data[0].key[key_pos];
-
-          if (repoid == 0)
-            {
-              ACE_ERROR_RETURN ((LM_ERROR,
-                                 ACE_TEXT("(%P|%t) ERROR: BIT_Helper::instance_handle_to_repo_id, ")
-                                 ACE_TEXT(" got invalid repo id. \n")),
-                                 ::DDS::RETCODE_ERROR);
-            }
-          return ::DDS::RETCODE_OK;
-        }
-
+         repoKey = data[0].key[key_pos];
+         if (repoKey == 0)
+           {
+             ACE_ERROR_RETURN((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: BIT_Helper::instance_handle_to_repo_key: ")
+                 ACE_TEXT(" got invalid repo key. \n")
+             ), ::DDS::RETCODE_ERROR);
+           }
+         return ::DDS::RETCODE_OK;
+       }
 
         ::DDS::ReturnCode_t instance_handle_to_bit_data (
             DomainParticipantImpl*   dp,
@@ -213,7 +229,7 @@ namespace OpenDDS {
           if (CORBA::is_nil (reader.in ()))
             {
               ACE_ERROR_RETURN ((LM_DEBUG,
-                   "ERROR: repo_ids_to_instance_handles() %s not found.\n",
+                   "ERROR: repo_ids_to_instance_handles() %C not found.\n",
                    bit_name),
                    ::DDS::RETCODE_ERROR);
             }
@@ -222,7 +238,7 @@ namespace OpenDDS {
           if (CORBA::is_nil (bit_reader.in ()))
             {
               ACE_ERROR_RETURN ((LM_DEBUG,
-                   "ERROR: repo_ids_to_instance_handles() %s narrow failed.\n",
+                   "ERROR: repo_ids_to_instance_handles() %C narrow failed.\n",
                    bit_name),
                    ::DDS::RETCODE_ERROR);
             }
@@ -242,6 +258,8 @@ namespace OpenDDS {
           // when the add_association is called before the builtin topic datareader got
           // the published data.
 
+          CORBA::ULong repoid_len = repoids.length ();
+          handles.length (repoid_len);
           while (1)
             {
               ret = bit_reader->read (data,
@@ -260,24 +278,47 @@ namespace OpenDDS {
                                     ret);
                 }
 
-              CORBA::ULong repoid_len = repoids.length ();
               CORBA::ULong data_len = data.length ();
-              handles.length (repoid_len);
+
+              if (DCPS_debug_level >= 10) {
+                ACE_DEBUG((LM_DEBUG,
+                  ACE_TEXT("(%P|%t) BIT_Helper::repo_ids_to_instance_handles, ")
+                  ACE_TEXT("processing %d received samples.\n"),
+                  data_len
+                ));
+              }
 
               CORBA::ULong count = 0;
 
-              for (CORBA::ULong i = 0; i < repoid_len; i++)
+              /// @TODO: FIXME This fails on fragmented sample sets.
+              for (CORBA::ULong i = 0; i < repoid_len; ++i)
                 {
-                  for (CORBA::ULong j = 0; j < data_len; j++)
+                  ::OpenDDS::DCPS::GuidConverter converter( const_cast<GUID_t*>( &repoids[i]));
+                  if (DCPS_debug_level >= 10) {
+                    ACE_DEBUG((LM_DEBUG,
+                      ACE_TEXT("(%P|%t) BIT_Helper::repo_ids_to_instance_handles: ")
+                      ACE_TEXT("repoId %C\n"),
+                      (const char*)converter
+                    ));
+                  }
+                  for (CORBA::ULong j = 0; j < data_len; ++j)
                     {
-                      if (DCPS_debug_level >= 10)
-                        ACE_DEBUG((LM_DEBUG,"%s BIT has [%d, %d, %d]\n",
-                          bit_name, data[j].key[0], data[j].key[1],
-                          data[j].key[2] ));
-                      if (data[j].key[key_pos] == repoids[i])
+                      if (DCPS_debug_level >= 10) {
+                        ACE_DEBUG((LM_DEBUG,
+			  ACE_TEXT("(%P|%t) BIT_Helper::repo_ids_to_instance_handles: ")
+                          ACE_TEXT("%C sample[ %d], key == [%d, 0x%x, 0x%x], handle == %d\n"),
+		          bit_name,
+                          j,
+		          data[j].key[0],
+		          data[j].key[1],
+		          data[j].key[2],
+                          infos[j].instance_handle
+                        ));
+                      }
+                      if( data[j].key[key_pos] == (CORBA::Long)((long) converter))
                         {
                           handles[i] = infos[j].instance_handle;
-                          count ++;
+                          ++count;
                           break;
                         }
                     }
@@ -317,6 +358,22 @@ namespace OpenDDS {
         }
 
     };
+
+    inline
+    bool
+    BuiltinTopicKeyLess::operator()(
+      const ::DDS::BuiltinTopicKey_t& lhs,
+      const ::DDS::BuiltinTopicKey_t& rhs
+    ) {
+      // N.B.  This assumes that the MS index is 2 and the LS index is 0.
+      return (lhs[2] < rhs[2])? true:
+             (lhs[2] > rhs[2])? false:
+             (lhs[1] < rhs[1])? true:
+             (lhs[1] > rhs[1])? false:
+             (lhs[0] < rhs[0])? true:
+                                false;
+
+    }
 
   } // End of namespace DCPS
 } // End of namespace OpenDDS

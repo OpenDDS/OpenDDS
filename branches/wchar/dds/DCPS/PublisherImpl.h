@@ -1,8 +1,9 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DDS_DCPS_PUBLISHER_IMPL_H
-#define TAO_DDS_DCPS_PUBLISHER_IMPL_H
+
+#ifndef OPENDDS_DCPS_PUBLISHER_IMPL_H
+#define OPENDDS_DCPS_PUBLISHER_IMPL_H
 
 #include "dds/DdsDcpsPublicationS.h"
 #include "dds/DdsDcpsDataWriterRemoteC.h"
@@ -11,6 +12,7 @@
 #include "DataSampleList.h"
 #include "dds/DCPS/transport/framework/TransportInterface.h"
 #include "ace/Synch.h"
+#include "ace/Reverse_Lock_T.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -18,7 +20,6 @@
 
 #include <map>
 #include <list>
-#include <vector>
 
 
 namespace OpenDDS
@@ -31,24 +32,27 @@ namespace OpenDDS
     /// Information about a DataWriter
     struct OpenDDS_Dcps_Export PublisherDataWriterInfo {
       /// The remote datawriter object reference.
-      ::OpenDDS::DCPS::DataWriterRemote_ptr  remote_writer_objref_ ;
+      ::OpenDDS::DCPS::DataWriterRemote_ptr  remote_writer_objref_;
       /// The local datawriter object reference.
-      ::DDS::DataWriter_ptr        local_writer_objref_ ;
+      ::DDS::DataWriter_ptr        local_writer_objref_;
       /// The datawriter servant.
       DataWriterImpl*              local_writer_impl_;
       /// The topic id from repository.
-      RepoId			   topic_id_;
+      RepoId                       topic_id_;
       /// The datawriter/publication id from repository.
-      PublicationId                publication_id_ ;
+      PublicationId                publication_id_;
       /// The group id of the datawriter. - NOT USED IN FIRST IMPL
-      CoherencyGroup               group_id_ ;
-    } ;
+      CoherencyGroup               group_id_;
+    };
 
     typedef std::multimap<ACE_CString, PublisherDataWriterInfo*>
-        DataWriterMap ;
+        DataWriterMap;
 
-    typedef std::map<PublicationId, PublisherDataWriterInfo*>
-        PublicationMap ;
+    typedef std::map<PublicationId, PublisherDataWriterInfo*, GUID_tKeyLessThan>
+        PublicationMap;
+
+    // DataWriter id to qos map.
+    typedef std::map<RepoId, ::DDS::DataWriterQos, GUID_tKeyLessThan> DwIdToQosMap;
 
 
     /**
@@ -75,8 +79,7 @@ namespace OpenDDS
       ///Constructor
       PublisherImpl (const ::DDS::PublisherQos & qos,
                      ::DDS::PublisherListener_ptr a_listener,
-                     DomainParticipantImpl*       participant,
-                     ::DDS::DomainParticipant_ptr participant_objref);
+                     DomainParticipantImpl*       participant);
 
       ///Destructor
       virtual ~PublisherImpl (void);
@@ -198,12 +201,6 @@ namespace OpenDDS
         CORBA::SystemException
       ));
 
-    virtual ::DDS::StatusKindMask get_status_changes (
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
-
     ACE_INLINE
     ACE_Recursive_Thread_Mutex&      get_pi_lock ()
     {
@@ -246,13 +243,6 @@ namespace OpenDDS
         const RepoId&       writer);
 
     /**
-    * Cache the publisher's object reference.
-    */
-    void set_object_reference (
-        const ::DDS::Publisher_ptr& pub
-      );
-
-    /**
     * This is called by datawriter to notify the publisher to
     * collect the available data from the datawriter for
     * sending.
@@ -288,37 +278,36 @@ namespace OpenDDS
       /// repository id.
       PublicationMap                publication_map_;
       /// Next coherency group ID to use.  -  NOT USED IN FIRST IMPL
-      CoherencyGroup                group_id_ ;
+      CoherencyGroup                group_id_;
       /// Ordered list of active coherency groups. -  NOT USED IN FIRST IMPL
       std::list<CoherencyGroup>     active_coherency_;
-      /// Reference to the DCPSInfo repository for this Publisher.
-      DCPSInfo_var                  repository_;
+      /// Domain in which we are contained.
+      ::DDS::DomainId_t             domain_id_;
       /// The DomainParticipant servant that owns this Publisher.
       DomainParticipantImpl*        participant_;
-      /// The object reference of the DomainParticipant that owns this
-      /// Publisher.
-      ::DDS::DomainParticipant_var  participant_objref_;
       /// The suspend depth count.
       CORBA::Short                  suspend_depth_count_;
       /// Unique sequence number used when the scope_access = GROUP.
       /// -  NOT USED IN FIRST IMPL - not supporting GROUP scope
       SequenceNumber                sequence_number_;
         /// Start of current aggregation period. - NOT USED IN FIRST IMPL
-      ACE_Time_Value                aggregation_period_start_ ;
-      /// The publisher object reference.
-      ::DDS::Publisher_var          publisher_objref_;
+      ACE_Time_Value                aggregation_period_start_;
 
+      typedef ACE_Recursive_Thread_Mutex  lock_type;
+      typedef ACE_Reverse_Lock<lock_type> reverse_lock_type;
       /// The recursive lock to protect datawriter map and suspend count.
       /// It also projects the TransportInterface (it must be held when
       /// calling any TransportInterface method).
-      mutable ACE_Recursive_Thread_Mutex    pi_lock_;
+      mutable lock_type                   pi_lock_;
+      reverse_lock_type                   reverse_pi_lock_;
 
       /// The catched available data while suspending.
-      DataSampleList                available_data_list_ ;
+      DataSampleList                available_data_list_;
+
 
     };
 
   } // namespace  ::DDS
 } // namespace OpenDDS
 
-#endif /* TAO_DDS_DCPS_PUBLISHER_IMPL_H  */
+#endif /* OPENDDS_DCPS_PUBLISHER_IMPL_H  */

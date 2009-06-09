@@ -5,13 +5,15 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 
-PerlACE::add_lib_path('../FooType5');
+PerlDDS::add_lib_path('../FooType5');
 
 # single reader with single instances test
 
@@ -46,12 +48,14 @@ if ($ARGV[$arg_idx] eq 'nokey') {
 if ($ARGV[$arg_idx] eq 'udp') {
   $use_udp = 1;
   $arg_idx = $arg_idx + 1;
+  $write_interval_ms = 50;
 }
 
 if ($ARGV[$arg_idx] eq 'mcast') {
   $use_mcast = 1;
   $pub_addr = "224.0.0.1:29803";
   $arg_idx = $arg_idx + 1;
+  $write_interval_ms = 50;
 }
 
 if ($ARGV[$arg_idx] eq 'reliable_multicast') {
@@ -104,13 +108,12 @@ else {
   exit 1;
 }
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+$dcpsrepo_ior = "repo.ior";
 
-$subscriber_completed = PerlACE::LocalFile ("subscriber_finished.txt");
-$subscriber_ready = PerlACE::LocalFile ("subscriber_ready.txt");
-$publisher_completed = PerlACE::LocalFile ("publisher_finished.txt");
-$publisher_ready = PerlACE::LocalFile ("publisher_ready.txt");
+$subscriber_completed = "subscriber_finished.txt";
+$subscriber_ready = "subscriber_ready.txt";
+$publisher_completed = "publisher_finished.txt";
+$publisher_ready = "publisher_ready.txt";
 
 unlink $dcpsrepo_ior;
 unlink $subscriber_completed;
@@ -121,9 +124,8 @@ unlink $publisher_ready;
 $use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
 $tcp_svc_config = $use_svc_config ? " -ORBSvcConf ../../tcp.conf " : '';
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                  "$tcp_svc_config -o $dcpsrepo_ior"
-                                  . " -d $domains_file");
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                    "$tcp_svc_config -o $dcpsrepo_ior ");
 print $DCPSREPO->CommandLine(), "\n";
 
 $bit_off_conf = "-DCPSBit 0";
@@ -152,9 +154,6 @@ $sub_parameters = "$svc_config -u $use_udp -c $use_mcast -s $sub_addr -p $pub_ad
               . " -k $no_key -y $read_interval_ms -f $mixed_trans"
               . " -a $use_reliable_multicast";
 
-$Subscriber = new PerlACE::Process ("subscriber", $sub_parameters);
-print $Subscriber->CommandLine(), "\n";
-
 $pub_parameters = "$svc_config -u $use_udp -c $use_mcast -p $pub_addr -w $num_writers "
               . " -m $num_instances_per_writer -i $num_samples_per_instance "
 	      . " -n $max_samples_per_instance -z $sequence_length"
@@ -162,8 +161,11 @@ $pub_parameters = "$svc_config -u $use_udp -c $use_mcast -p $pub_addr -w $num_wr
               . " -f $mixed_trans"
               . " -a $use_reliable_multicast";
 
+$Subscriber = PerlDDS::create_process ("subscriber", $sub_parameters);
+print $Subscriber->CommandLine(), "\n";
+  
+$Publisher = PerlDDS::create_process ("publisher", $pub_parameters);
 
-$Publisher = new PerlACE::Process ("publisher", $pub_parameters);
 print $Publisher->CommandLine(), "\n";
 
 

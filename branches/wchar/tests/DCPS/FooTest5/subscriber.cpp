@@ -22,19 +22,36 @@
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/TopicDescriptionImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
-#include "tests/DCPS/FooType5/FooTypeSupportImpl.h"
-#include "tests/DCPS/FooType5/FooNoKeyTypeSupportImpl.h"
+#include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
+#include "dds/DCPS/BuiltInTopicUtils.h"
+#include "dds/DCPS/SubscriberImpl.h"
+#include "dds/DdsDcpsSubscriptionC.h"
+
 #include "ace/Arg_Shifter.h"
+#include "ace/Default_Constants.h"
 
 #include "common.h"
+#include <sstream>
 
 
 /// parse the command line arguments
 int parse_args (int argc, ACE_TCHAR *argv[])
 {
+//Create the multicast_group_address_str using default multicast address.
+#ifdef ACE_HAS_IPV6
+  multicast_group_address_str = ACE_TEXT(ACE_DEFAULT_MULTICASTV6_ADDR);
+#else
+  multicast_group_address_str = ACE_TEXT(ACE_DEFAULT_MULTICAST_ADDR);
+#endif
+  multicast_group_address_str += ACE_TEXT(":");
+  std::basic_stringstream<ACE_TCHAR> out;
+  out << ACE_DEFAULT_MULTICAST_PORT;
+  multicast_group_address_str += out.str().c_str();
+
+
   u_long mask =  ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS) ;
   ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS) ;
   ACE_Arg_Shifter arg_shifter (argc, argv);
@@ -60,6 +77,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     //  -o directory of synch files used to coordinate publisher and subscriber
     //                              defaults to current directory.
     //  -v                          verbose transport debug
+    //  -b test_bit                 defaults to 0 - not testing BIT
 
     const ACE_TCHAR *currentArg = 0;
 
@@ -172,6 +190,15 @@ int parse_args (int argc, ACE_TCHAR *argv[])
       TURN_ON_VERBOSE_DEBUG;
       arg_shifter.consume_arg();
     }
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-b"))) != 0)
+    {
+      test_bit = ACE_OS::atoi (currentArg);
+      if (test_bit == 1)
+      {
+        ACE_DEBUG((LM_DEBUG, "Subscriber testing BIT transport.\n"));
+      }
+      arg_shifter.consume_arg();
+    }
     else
     {
       arg_shifter.ignore_arg ();
@@ -214,7 +241,7 @@ create_subscriber (::DDS::DomainParticipant_ptr participant,
 
       // Attach the subscriber to the transport.
       OpenDDS::DCPS::SubscriberImpl* sub_impl
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl> (sub.in ());
+        = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*> (sub.in ());
 
       if (0 == sub_impl)
         {
@@ -462,16 +489,36 @@ int main (int argc, ACE_TCHAR *argv[])
       //dr_qos.history.depth = history_depth  ;
 
       // activate the listener
-      DataReaderListenerImpl* listener_servant = new DataReaderListenerImpl();
-
-      ::DDS::DataReaderListener_var listener
-        = ::OpenDDS::DCPS::servant_to_reference(listener_servant);
+      ::DDS::DataReaderListener_var listener (new DataReaderListenerImpl);
 
       if (CORBA::is_nil (listener.in ()))
         {
           ACE_ERROR ((LM_ERROR, ACE_TEXT ("(%P|%t) listener is nil.")));
           throw TestException ();
         }
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
+      // Test that the BIT objects can be obtained on the tcp transport
+      if (test_bit != 0)
+        {
+          ::DDS::Subscriber_var bit_subscriber = participant->get_builtin_subscriber () ;
+          if (CORBA::is_nil (bit_subscriber.in ()))
+            ACE_ERROR((LM_ERROR, ACE_TEXT("Error: Failed to get BIT subscriber\n")));
+          else
+            {
+              ::DDS::DataReader_var bit_dr = bit_subscriber->lookup_datareader (OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC);
+              if(CORBA::is_nil (bit_dr.in ()))
+                  ACE_ERROR((LM_ERROR, ACE_TEXT("Error: Failed to lookup BIT Topic Data Reader\n")));
+              else
+                {
+                  ::DDS::TopicBuiltinTopicDataDataReader_var bit_topic_dr
+                      = ::DDS::TopicBuiltinTopicDataDataReader::_narrow (bit_dr.in ());
+                  if (CORBA::is_nil (bit_topic_dr.in ()))
+                      ACE_ERROR((LM_ERROR, ACE_TEXT("Error: Failed to narrow BIT Topic Data Reader\n")));
+                }
+            }
+        }
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 
       ::DDS::DataReader_var * drs = new ::DDS::DataReader_var[num_datareaders];
 

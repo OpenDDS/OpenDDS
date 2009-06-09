@@ -6,12 +6,14 @@
 
 #include "SimpleTcpConfiguration.h"
 #include "SimpleTcpConfiguration_rch.h"
-//borland #include "SimpleTcpDataLink.h"
+#ifdef __BORLANDC__
+#  include "SimpleTcpDataLink.h"
+#endif
 #include "SimpleTcpDataLink_rch.h"
 #include "SimpleTcpConnection_rch.h"
-//borland #include "SimpleTcpSendStrategy.h"
+#include "SimpleTcpSendStrategy.h"
 #include "SimpleTcpSendStrategy_rch.h"
-//borland #include "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
+#include "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
 #include "SimpleTcpReconnectTask.h"
 #include "dds/DCPS/transport/framework/TransportReceiveStrategy_rch.h"
 #include "dds/DCPS/RcObject_T.h"
@@ -48,9 +50,10 @@ namespace OpenDDS
         /// Attempt an active connection establishment to the remote address.
         /// The local address is sent to the remote (passive) side to
         /// identify ourselves to the remote side.
-        int active_establishment(const ACE_INET_Addr& remote_address,
-                                 const ACE_INET_Addr& local_address,
-                                 SimpleTcpConfiguration_rch tcp_config);
+        int active_connect(const ACE_INET_Addr& remote_address,
+                           const ACE_INET_Addr& local_address,
+                           CORBA::Long          priority,
+                           SimpleTcpConfiguration_rch tcp_config);
 
         /// This will be called by the DataLink (that "owns" us) when
         /// the SimpleTcpTransport has been told to shutdown(), or when
@@ -113,7 +116,20 @@ namespace OpenDDS
 
         void shutdown ();
 
+        /// Access TRANSPORT_PRIORITY.value policy value if set.
+        CORBA::Long& transport_priority();
+        CORBA::Long  transport_priority() const;
+
       private:
+
+        /// Attempt an active connection establishment to the remote address.
+        /// The local address is sent to the remote (passive) side to
+        /// identify ourselves to the remote side.
+        /// Note this method is not thread protected. The caller need acquire
+        /// the reconnect_lock_ before calling this function.
+        int active_establishment(const ACE_INET_Addr& remote_address,
+                                 const ACE_INET_Addr& local_address,
+                                 SimpleTcpConfiguration_rch tcp_config);
 
         int active_reconnect_i ();
         int passive_reconnect_i ();
@@ -171,6 +187,9 @@ namespace OpenDDS
 
         /// Last time the connection is re-established.
         ACE_Time_Value last_reconnect_attempted_;
+
+        /// TRANSPORT_PRIORITY.value policy value.
+        CORBA::Long transport_priority_;
 
         /// shutdown flag
         bool shutdown_;

@@ -11,21 +11,11 @@
 
 
 
-ACE_INLINE void
-OpenDDS::DCPS::SimpleTcpConnection::disconnect()
-{
-  DBG_ENTRY_LVL("SimpleTcpConnection","disconnect",5);
-  this->peer().close();
-  this->connected_ = false;
-}
-
-
-
 
 ACE_INLINE void
 OpenDDS::DCPS::SimpleTcpConnection::remove_receive_strategy()
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","remove_receive_strategy",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","remove_receive_strategy",6);
 
   this->receive_strategy_ = 0;
 }
@@ -34,7 +24,7 @@ OpenDDS::DCPS::SimpleTcpConnection::remove_receive_strategy()
 ACE_INLINE void
 OpenDDS::DCPS::SimpleTcpConnection::remove_send_strategy()
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","remove_send_strategy",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","remove_send_strategy",6);
 
   this->send_strategy_ = 0;
 }
@@ -68,3 +58,18 @@ OpenDDS::DCPS::SimpleTcpConnection::get_remote_address ()
 {
   return this->remote_address_;
 }
+
+ACE_INLINE
+CORBA::Long&
+OpenDDS::DCPS::SimpleTcpConnection::transport_priority()
+{
+  return this->transport_priority_;
+}
+
+ACE_INLINE
+CORBA::Long
+OpenDDS::DCPS::SimpleTcpConnection::transport_priority() const
+{
+  return this->transport_priority_;
+}
+

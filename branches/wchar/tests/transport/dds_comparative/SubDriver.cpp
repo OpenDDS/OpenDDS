@@ -108,6 +108,7 @@ SubDriver::init()
     = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
 
   tcp_config->local_address_ = this->local_address_;
+  tcp_config->local_address_str_ = this->sub_addr_str_;
 
   if (transport_impl->configure(config.in()) != 0)
     {
@@ -231,11 +232,14 @@ SubDriver::parse_arg_p(const ACE_TCHAR* arg, bool& flag)
   ACE_TString pub_id_str(arg_str.c_str(), pos);
   ACE_TString pub_addr_str(arg_str.c_str() + pos + 1);
 
-  OpenDDS::DCPS::RepoId pub_id = ACE_OS::atoi(pub_id_str.c_str());
+  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 1
+  converter.kind()   = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
+  converter.key()[2] = ACE_OS::atoi( pub_id_str.c_str());
+  OpenDDS::DCPS::RepoId pub_id = converter;
 
   ACE_INET_Addr pub_addr(pub_addr_str.c_str());
 
-  this->subscriber_.add_remote_publisher(pub_id,pub_addr);
+  this->subscriber_.add_remote_publisher(pub_id,pub_addr, pub_addr_str);
   
   flag = true;
 }
@@ -284,11 +288,14 @@ SubDriver::parse_arg_s(const ACE_TCHAR* arg, bool& flag)
 
   // Parse the sub_id from left of ':' char, and remainder to right of ':'.
   ACE_TString sub_id_str(arg_str.c_str() ,pos);
-  ACE_TString sub_addr_str(arg_str.c_str() + pos + 1);
+  this->sub_addr_str_ = arg_str.c_str() + pos + 1;
 
-  OpenDDS::DCPS::RepoId sub_id = ACE_OS::atoi(sub_id_str.c_str());
+  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 2
+  converter.kind()   = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
+  converter.key()[2] = ACE_OS::atoi( sub_id_str.c_str());
+  OpenDDS::DCPS::RepoId sub_id = converter;
 
-  this->local_address_ = ACE_INET_Addr(sub_addr_str.c_str());
+  this->local_address_ = ACE_INET_Addr(this->sub_addr_str_.c_str());
 
   this->subscriber_.set_local_subscriber(sub_id);
 

@@ -5,14 +5,16 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 
-PerlACE::add_lib_path('../FooType4');
-PerlACE::add_lib_path('../common');
+PerlDDS::add_lib_path('../FooType4');
+PerlDDS::add_lib_path('../common');
 
 # single reader with single instances test
 $multiple_instance=0;
@@ -53,8 +55,7 @@ else {
   exit 1;
 }
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+$dcpsrepo_ior = "repo.ior";
 
 $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : " -ORBSvcConf ../../tcp.conf ";
@@ -62,14 +63,16 @@ $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
 unlink $dcpsrepo_ior;
 unlink $pub_id_file;
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "$svc_config -o $dcpsrepo_ior"
-                             . " -d $domains_file");
-
 # test multiple cases
 $parameters = "$svc_config -r $num_readers -t $use_take"
               . " -m $multiple_instance -i $num_samples_per_reader " ;
-$FooTest4 = new PerlACE::Process ("FooTest4", $parameters);
+
+
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                    "$svc_config -o $dcpsrepo_ior ");
+
+$FooTest4 = PerlDDS::create_process ("FooTest4", $parameters);
+
 print $FooTest4->CommandLine(), "\n";
 
 

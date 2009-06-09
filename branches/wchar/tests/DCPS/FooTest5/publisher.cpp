@@ -22,8 +22,7 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/PublisherImpl.h"
-#include "tests/DCPS/FooType5/FooTypeSupportImpl.h"
-#include "tests/DCPS/FooType5/FooNoKeyTypeSupportImpl.h"
+#include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
@@ -201,7 +200,7 @@ create_publisher (::DDS::DomainParticipant_ptr participant,
 
       // Attach the publisher to the transport.
       OpenDDS::DCPS::PublisherImpl* pub_impl
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub.in());
+        = dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub.in());
 
       if (0 == pub_impl)
         {
@@ -510,6 +509,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         {
           ACE_OS::fprintf (writers_completed, "%d\n", timeout_writes);
         }
+      ACE_OS::fclose(writers_completed);
 
       // Wait for the subscriber to finish.
       FILE* readers_completed = 0;
@@ -520,7 +520,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           readers_completed = ACE_OS::fopen (sub_finished_filename.c_str (), ACE_LIB_TEXT("r"));
         } while (0 == readers_completed);
 
-      ACE_OS::fclose(writers_completed);
       ACE_OS::fclose(readers_completed);
 
       {  // Extra scope for VC6

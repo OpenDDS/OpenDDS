@@ -12,6 +12,6 @@ OpenDDS::DCPS::TransportSendElement::TransportSendElement
     element_(sample),
     allocator_(allocator)
 {
-  DBG_ENTRY_LVL("TransportSendElement","TransportSendElement",5);
+  DBG_ENTRY_LVL("TransportSendElement","TransportSendElement",6);
 }
 

@@ -8,6 +8,7 @@
 
 #include "dds/DCPS/transport/framework/TransportConfiguration.h"
 #include "ace/INET_Addr.h"
+#include <string>
 
 
 namespace OpenDDS
@@ -28,6 +29,7 @@ namespace OpenDDS
         /// Describes the local endpoint to be used to accept
         /// passive connections.
         ACE_INET_Addr local_address_;
+        ACE_TString   local_address_str_;
 
         bool enable_nagle_algorithm_;
 

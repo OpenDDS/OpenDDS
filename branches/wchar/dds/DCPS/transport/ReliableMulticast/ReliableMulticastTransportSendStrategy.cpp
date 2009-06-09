@@ -80,6 +80,19 @@ OpenDDS::DCPS::ReliableMulticastTransportSendStrategy::get_handle()
   return ACE_INVALID_HANDLE;
 }
 
+ACE_SOCK&
+OpenDDS::DCPS::ReliableMulticastTransportSendStrategy::socket()
+{
+  static ACE_SOCK_IO nilSocket;
+
+  if( this->sender_.get()) {
+    return this->sender_->socket();
+
+  } else {
+    return nilSocket;
+  }
+}
+
 ssize_t
 OpenDDS::DCPS::ReliableMulticastTransportSendStrategy::send_bytes_i(const iovec iov[], int n)
 {

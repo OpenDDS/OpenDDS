@@ -12,14 +12,14 @@
 
 OpenDDS::DCPS::TransportImplFactory::~TransportImplFactory()
 {
-  DBG_ENTRY_LVL("TransportImplFactory","~TransportImplFactory",5);
+  DBG_ENTRY_LVL("TransportImplFactory","~TransportImplFactory",6);
 }
 
 
 int
 OpenDDS::DCPS::TransportImplFactory::requires_reactor() const
 {
-  DBG_ENTRY_LVL("TransportImplFactory","requires_reactor",5);
+  DBG_ENTRY_LVL("TransportImplFactory","requires_reactor",6);
   // Return "false" (aka 0).
   return 0;
 }

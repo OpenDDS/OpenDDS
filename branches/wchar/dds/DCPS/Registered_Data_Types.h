@@ -58,6 +58,8 @@ namespace OpenDDS
                                          ACE_CString type_name,
                                          OpenDDS::DCPS::TypeSupport_ptr the_type);
 
+      ::DDS::ReturnCode_t unregister_participant (::DDS::DomainParticipant_ptr domain_participant);
+
       /**
        * Find a data type by its type name.
        * @note This class retains Ownership of the memory returned

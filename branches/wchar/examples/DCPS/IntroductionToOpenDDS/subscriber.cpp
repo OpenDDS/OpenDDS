@@ -6,9 +6,8 @@
 //
 // *******************************************************************
 
-#include "QuoteTypeSupportImpl.h"
+#include "StockQuoterTypeSupportImpl.h"
 #include "QuoteDataReaderListenerImpl.h"
-#include "ExchangeEventTypeSupportImpl.h"
 #include "ExchangeEventDataReaderListenerImpl.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
@@ -70,7 +69,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
     // Attach the subscriber to the TCP transport.
     // (almost identical to the publisher)
     OpenDDS::DCPS::SubscriberImpl* sub_impl =
-      OpenDDS::DCPS::reference_to_servant< OpenDDS::DCPS::SubscriberImpl >(sub.in ());
+      dynamic_cast< OpenDDS::DCPS::SubscriberImpl* >(sub.in ());
     if (0 == sub_impl) {
       cerr << "Failed to obtain subscriber servant" << endl;
       ACE_OS::exit(1);
@@ -152,21 +151,16 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
 
     // Create DataReaders and DataReaderListeners for the
     // Quote and ExchangeEvent
-
-    QuoteDataReaderListenerImpl quote_listener_servant;
-
-    DDS::DataReaderListener_var quote_listener =
-      OpenDDS::DCPS::servant_to_reference( &quote_listener_servant );
+    DDS::DataReaderListener_var quote_listener (new QuoteDataReaderListenerImpl);
 
     if (CORBA::is_nil (quote_listener.in ())) {
       cerr << "Quote listener is nil." << endl;
       ACE_OS::exit(1);
     }
 
-    ExchangeEventDataReaderListenerImpl exchange_evt_listener_servant;
-
-    DDS::DataReaderListener_var exchange_evt_listener =
-      OpenDDS::DCPS::servant_to_reference( &exchange_evt_listener_servant );
+    DDS::DataReaderListener_var exchange_evt_listener (new ExchangeEventDataReaderListenerImpl);
+    ExchangeEventDataReaderListenerImpl* listener_servant =
+      dynamic_cast<ExchangeEventDataReaderListenerImpl*>(exchange_evt_listener.in());
 
     if (CORBA::is_nil (exchange_evt_listener.in ())) {
       cerr << "ExchangeEvent listener is nil." << endl;
@@ -192,7 +186,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
 
     // Wait for events from the Publisher; shut down when "close" received
     cout << "Subscriber: waiting for events" << endl;
-    while ( ! exchange_evt_listener_servant.is_exchange_closed_received() ) {
+    while ( ! listener_servant->is_exchange_closed_received() ) {
       ACE_OS::sleep(1);
     }
 

@@ -10,6 +10,8 @@
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "ace/Message_Block.h"
 
+#include <functional>
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -22,7 +24,6 @@ namespace OpenDDS
     typedef ACE_UINT16 CoherencyGroup ;
     typedef RepoId PublicationId;
    
-    const ::DDS::InstanceHandle_t HANDLE_NIL = 0;
     const ::CORBA::ULong DEFAULT_STATUS_KIND_MASK = 0xFFFF;
 
     /// Lolipop sequencing (never wrap to negative).
@@ -32,6 +33,14 @@ namespace OpenDDS
       /// Default constructor starts negative.
       SequenceNumber() { value_ = SHRT_MIN ; }
 
+      /// Construct with a value.
+      SequenceNumber( ACE_INT16 value) : value_( value) { }
+
+      // N.B: Default copy constructor is sufficient.
+
+      /// Allow assignments.
+      SequenceNumber& operator=( const SequenceNumber& rhs) { value_ = rhs.value_; return *this; }
+
       /// Pre-increment.
       SequenceNumber operator++() {
         this->increment() ;
@@ -40,17 +49,32 @@ namespace OpenDDS
 
       /// Post-increment.
       SequenceNumber operator++(int) {
-        SequenceNumber value = *this ;
-        this->increment() ;
+        SequenceNumber value (*this);
+        ++*this;
         return value ;
       }
 
-      bool operator==( const SequenceNumber& rvalue) { return value_ == rvalue.value_ ; }
-      bool operator!=( const SequenceNumber& rvalue) { return value_ != rvalue.value_ ; }
-      bool operator<(  const SequenceNumber& rvalue) { return value_  < rvalue.value_ ; }
-      bool operator>(  const SequenceNumber& rvalue) { return value_  > rvalue.value_ ; }
-      bool operator>=( const SequenceNumber& rvalue) { return value_ >= rvalue.value_ ; }
-      bool operator<=( const SequenceNumber& rvalue) { return value_ <= rvalue.value_ ; }
+      /// Convert to integer type.
+      operator ACE_INT16() { return this->value_; }
+
+      /// This is the magic of the lollipop.
+      /// N.B. This comparison is only good until the distance reaches
+      ///      half of the lollipop size (SHRT_MAX/2).
+      bool operator<(  const SequenceNumber& rvalue) const {
+             return (value_ < 0)?              (value_ < rvalue.value_):
+                    (value_ == rvalue.value_)? false:
+                    (value_ <  rvalue.value_)? (((rvalue.value_ - value_) < (SHRT_MAX/2))?
+                                                true: false):
+                                               (((value_ - rvalue.value_) < (SHRT_MAX/2))?
+                                                false: true);
+           }
+
+      bool operator==( const SequenceNumber& rvalue) const { return value_ == rvalue.value_ ; }
+      bool operator!=( const SequenceNumber& rvalue) const { return value_ != rvalue.value_ ; }
+      bool operator>=( const SequenceNumber& rvalue) const { return !(*this  < rvalue);  }
+      bool operator<=( const SequenceNumber& rvalue) const { return !(rvalue < *this); }
+      bool operator>(  const SequenceNumber& rvalue) const { return  (rvalue < *this)
+                                                                  && (*this != rvalue);  }
 
       ACE_INT16 value_ ;
 
@@ -68,8 +92,8 @@ namespace OpenDDS
     typedef Cached_Allocator_With_Overflow<ACE_Data_Block, ACE_Null_Mutex>  
       DataBlockAllocator;
     
-    #define DUP true
-    #define NO_DUP false
+#define DUP true
+#define NO_DUP false
 
 
     /// This struct holds both object reference and the corresponding servant.
@@ -110,6 +134,17 @@ namespace OpenDDS
 
       T_impl* svt_;
       T_var   obj_;
+    };
+
+    /// Use a Foo_var in a std::set or std::map with this comparison function,
+    /// for example std::set<Foo_var, VarLess<Foo> >
+    template <class T, class V = typename T::_var_type>
+    struct VarLess : public std::binary_function<V, V, bool>
+    {
+      bool operator() (const V& x, const V& y) const
+      {
+        return x.in() < y.in();
+      }
     };
 
   } // namespace OpenDDS

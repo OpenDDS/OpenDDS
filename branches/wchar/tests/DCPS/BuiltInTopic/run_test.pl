@@ -5,11 +5,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
-PerlACE::add_lib_path('../FooType4');
+PerlDDS::add_lib_path('../FooType4');
 
 $ignore_kind=0;
 
@@ -34,28 +36,42 @@ else {
   exit 1;
 }
 
-$iorfile = PerlACE::LocalFile ("repo.ior");
+$iorfile = "repo.ior";
 unlink $iorfile;
 $status = 0;
 $client_orb = "";
 
+my $repoDebug;
+my $appDebug;
+# $repoDebug = 10;
+# $appDebug  = 10;
+
+my $repoOpts = "";
+$repoOpts  = "-DCPSDebugLevel $repoDebug "               if $repoDebug;
+$repoOpts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
+
+my $appOpts = "";
+$appOpts  = "-DCPSDebugLevel $appDebug "                if $appDebug;
+$appOpts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
+
 $dynamic_tcp = new PerlACE::ConfigList->check_config ('STATIC')
     ? '' : '-ORBSvcConf ../../tcp.conf';
 
-$REPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                              "-o $iorfile -d domain_ids $dynamic_tcp");
-#                              . " -ORBDebugLevel 1");
-$CL = new PerlACE::Process ("bit", "-DCPSInfoRepo file://$iorfile " .
-                            "$dynamic_tcp -i $ignore_kind");
+$REPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                "$repoOpts -o $iorfile $dynamic_tcp ");
+$CL = PerlDDS::create_process ("bit", "-DCPSInfoRepo file://$iorfile " .
+                              "$dynamic_tcp -i $ignore_kind $appOpts ");
 
+print $REPO->CommandLine() . "\n";
 $REPO->Spawn ();
 
-if (PerlACE::waitforfile_timed ($iorfile, 5) == -1) {
+if (PerlACE::waitforfile_timed ($iorfile, 30) == -1) {
     print STDERR "ERROR: cannot find file <$iorfile>\n";
     $REPO->Kill (); $REPO->TimedWait (1);
     exit 1;
 }
 
+print $CL->CommandLine() . "\n";
 $result = $CL->SpawnWaitKill (60);
 
 if ($result != 0) {

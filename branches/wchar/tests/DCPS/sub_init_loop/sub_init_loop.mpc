@@ -1,40 +1,26 @@
 // $Id$
 
 project(*Publisher) : dcpsexe_with_tcp {
-
-  exename   = publisher
+  exename = publisher
 
   TypeSupport_Files {
-    Messenger.idl >> MessageTypeSupport.idl MessageTypeSupportImpl.h MessageTypeSupportImpl.cpp
-  }
-
-  IDL_Files {
     Messenger.idl
-    MessageTypeSupport.idl
   }
 
   Source_Files {
     publisher.cpp
     Writer.cpp
-    MessageTypeSupportImpl.cpp
   }
 }
 
 project(*Subscriber) : dcpsexe_with_tcp {
-
-  exename   = subscriber
+  exename = subscriber
 
   TypeSupport_Files {
-    Messenger.idl >> MessageTypeSupport.idl MessageTypeSupportImpl.h MessageTypeSupportImpl.cpp
-  }
-
-  IDL_Files {
     Messenger.idl
-    MessageTypeSupport.idl
   }
 
   Source_Files {
     subscriber.cpp
-    MessageTypeSupportImpl.cpp
   }
 }

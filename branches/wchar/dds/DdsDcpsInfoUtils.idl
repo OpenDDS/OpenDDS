@@ -3,6 +3,8 @@
 #ifndef TAO_DDS_DCPS_INFO_UTILS_IDL
 #define TAO_DDS_DCPS_INFO_UTILS_IDL
 #include "dds/DdsDcpsInfrastructure.idl"
+#include "dds/DdsDcpsGuid.idl"
+#include "tao/OctetSeq.pidl"
 
 module OpenDDS
 {
@@ -10,10 +12,16 @@ module OpenDDS
   {
     // These are unique across a domain
     // They are also the InstanceHandle_t in Sample_Info for built-in Topics
-    typedef long RepoId;
+    typedef GUID_t RepoId;
+
+    // Information returned from call to add_domain_participant()
+    struct AddDomainStatus {
+      RepoId  id;
+      boolean federated;
+    };
 
     typedef long TransportInterfaceId;
-    typedef sequence<octet> TransportInterfaceBLOB;
+    typedef CORBA::OctetSeq TransportInterfaceBLOB;
 
     struct TransportInterfaceInfo {
       /// The transport type (.e.g SimpleTCP or SimpleUDP)
@@ -21,6 +29,10 @@ module OpenDDS
       /// Informationn about the transport instance that is opaque to all but
       /// code specific to that transport implementation.
       TransportInterfaceBLOB data;
+
+      /// This encodes the TRANSPORT_PRIORITY DataWriter Qos policy value
+      /// for publications.  The value is set to 0 for subscriptions.
+      long publication_transport_priority;
     };
 
     // Status returned by a topic operation
@@ -30,7 +42,8 @@ module OpenDDS
       FOUND,
       NOT_FOUND,
       REMOVED,
-      CONFLICTING_TYPENAME
+      CONFLICTING_TYPENAME,
+      INTERNAL_ERROR
     };
 
     // thrown when operation receives an

@@ -69,6 +69,9 @@ namespace OpenDDS
             ACE_Reactor_Mask mask
             );
 
+          /// Access the underlying socket.
+          ACE_SOCK& socket();
+
         protected:
           typedef std::queue<
             std::pair<std::string, ACE_INET_Addr>

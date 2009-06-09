@@ -8,7 +8,7 @@
 ACE_INLINE
 OpenDDS::DCPS::SimpleUdpSocket::SimpleUdpSocket()
 {
-  DBG_ENTRY_LVL("SimpleUdpSocket","SimpleUdpSocket",5);
+  DBG_ENTRY_LVL("SimpleUdpSocket","SimpleUdpSocket",6);
 }
 
 
@@ -16,8 +16,16 @@ ACE_INLINE
 ACE_HANDLE
 OpenDDS::DCPS::SimpleUdpSocket::get_handle() const
 {
-  DBG_ENTRY_LVL("SimpleUdpSocket","get_handle",5);
+  DBG_ENTRY_LVL("SimpleUdpSocket","get_handle",6);
   return this->socket_.get_handle();
+}
+
+ACE_INLINE
+ACE_SOCK&
+OpenDDS::DCPS::SimpleUdpSocket::socket()
+{
+  DBG_ENTRY_LVL("SimpleUdpSocket","socket",6);
+  return this->socket_;
 }
 
 
@@ -26,7 +34,7 @@ OpenDDS::DCPS::SimpleUdpSocket::open_socket(ACE_INET_Addr& local_address,
                                         const ACE_INET_Addr& multicast_group_address,
                                         bool receiver)
 {
-  DBG_ENTRY_LVL("SimpleUdpSocket","open_socket",5);
+  DBG_ENTRY_LVL("SimpleUdpSocket","open_socket",6);
 
   ACE_UNUSED_ARG (multicast_group_address);
   ACE_UNUSED_ARG (receiver);
@@ -67,7 +75,7 @@ OpenDDS::DCPS::SimpleUdpSocket::open_socket(ACE_INET_Addr& local_address,
 ACE_INLINE void
 OpenDDS::DCPS::SimpleUdpSocket::close_socket()
 {
-  DBG_ENTRY_LVL("SimpleUdpSocket","close_socket",5);
+  DBG_ENTRY_LVL("SimpleUdpSocket","close_socket",6);
 
   // Make sure that no other thread is send()'ing to the socket_ right now.
   GuardType guard(this->lock_);
@@ -82,7 +90,7 @@ OpenDDS::DCPS::SimpleUdpSocket::send_bytes(const iovec iov[],
                                        int   n,
                                        const ACE_INET_Addr& remote_address)
 {
-  DBG_ENTRY_LVL("SimpleUdpSocket","send_bytes",5);
+  DBG_ENTRY_LVL("SimpleUdpSocket","send_bytes",6);
 
   // Protect the socket from multiple threads attempting to send at once.
   GuardType guard(this->lock_);
@@ -96,7 +104,7 @@ OpenDDS::DCPS::SimpleUdpSocket::receive_bytes(iovec iov[],
                                           int   n,
                                           ACE_INET_Addr& remote_address)
 {
-  DBG_ENTRY_LVL("SimpleUdpSocket","receive_bytes",5);
+  DBG_ENTRY_LVL("SimpleUdpSocket","receive_bytes",6);
 
   return this->socket_.recv(iov, n, remote_address);
 }

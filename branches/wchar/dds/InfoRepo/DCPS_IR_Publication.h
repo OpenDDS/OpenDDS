@@ -10,6 +10,8 @@
 #ifndef DCPS_IR_PUBLICATION_H
 #define DCPS_IR_PUBLICATION_H
 
+#include  "inforepo_export.h"
+#include /**/ "UpdateDataTypes.h"
 #include /**/ "dds/DdsDcpsInfrastructureC.h"
 #include /**/ "dds/DdsDcpsPublicationC.h"
 #include /**/ "dds/DdsDcpsInfoC.h"
@@ -36,7 +38,7 @@ typedef ACE_Unbounded_Set<DCPS_IR_Subscription*> DCPS_IR_Subscription_Set;
  *
  *
  */
-class DCPS_IR_Publication
+class OpenDDS_InfoRepoLib_Export DCPS_IR_Publication
 {
 public:
   DCPS_IR_Publication (OpenDDS::DCPS::RepoId id,
@@ -62,13 +64,16 @@ public:
   /// sendNotify indicates whether to tell the datawriter about
   ///  removing the subscription
   /// The notify_lost parameter is passed to the remove_associations()
+  /// The notify_both_side parameter indicates if it needs call sub to remove
+  /// association as well.
   /// See the comments of remove_associations() in DdsDcpsDataWriterRemote.idl
   /// or DdsDcpsDataReaderRemote.idl.
   /// This method can mark the participant dead
   /// Returns 0 if successful
   int remove_associated_subscription (DCPS_IR_Subscription* sub,
                                       CORBA::Boolean sendNotify,
-                                      CORBA::Boolean notify_lost);
+                                      CORBA::Boolean notify_lost,
+                                      bool notify_both_side = false);
 
   /// Removes all the associated subscriptions
   /// This method can mark the participant dead
@@ -106,6 +111,18 @@ public:
   /// Publication retains ownership
   ::DDS::PublisherQos* get_publisher_qos ();
 
+  /// Update the DataWriter or Publisher qos and also publish the qos changes
+  /// to datawriter BIT.
+  bool set_qos (const ::DDS::DataWriterQos & qos,
+                const ::DDS::PublisherQos & publisherQos,
+                Update::SpecificQos& specificQos);
+
+  /// Update DataWriterQos only.
+  void set_qos( const ::DDS::DataWriterQos& qos);
+
+  /// Update PublisherQos only.
+  void set_qos( const ::DDS::PublisherQos& qos);
+
   /// get the transport ID of the transport implementation type.
   OpenDDS::DCPS::TransportInterfaceId   get_transport_id () const;
 
@@ -129,7 +146,32 @@ public:
   CORBA::Boolean is_bit ();
   void set_bit_status (CORBA::Boolean isBIT);
 
+  // Expose the datawriter.
+  OpenDDS::DCPS::DataWriterRemote_ptr writer();
+
+  // Verify the existing associations. This may result removal of
+  // associations. The existing associations have to be removed before
+  // adding new association and may need some delay. Otherwise, if  
+  // two DataReaders uses same Datalink and add an association happens 
+  // before remove an association then the new association will fail to 
+  // connect.
+  void reevaluate_existing_associations ();
+
+  // Re-evaluate the association between this publication and the provided
+  // subscription. If they are already associated and not compatible then
+  // they will be dis-associated. If they are not already associated then
+  // the new association will be added.
+  void reevaluate_association (DCPS_IR_Subscription* subscription);
+
 private:
+
+  /// Check compatibility between provided Publisher QoS and the QoS of
+  /// this publication associated DataReaders's subscribers.
+  bool compatibleQosChange (const ::DDS::PublisherQos & qos);
+  /// Check compatibility between provided DataWriter QoS and the QoS of
+  /// this publication associated DataReaders.
+  bool compatibleQosChange (const ::DDS::DataWriterQos & qos);
+
   OpenDDS::DCPS::RepoId id_;
   DCPS_IR_Participant* participant_;
   DCPS_IR_Topic* topic_;

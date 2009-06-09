@@ -10,6 +10,7 @@
 #ifndef DCPS_IR_TOPIC_DESCRIPTION_H
 #define DCPS_IR_TOPIC_DESCRIPTION_H
 
+#include  "inforepo_export.h"
 #include /**/ "ace/Unbounded_Set.h"
 #include /**/ "ace/SString.h"
 #include /**/ "tao/corbafwd.h"
@@ -36,7 +37,7 @@ typedef ACE_Unbounded_Set<DCPS_IR_Topic*> DCPS_IR_Topic_Set;
  * @brief Representative of a Topic Description
  *
  */
-class DCPS_IR_Topic_Description
+class OpenDDS_InfoRepoLib_Export DCPS_IR_Topic_Description
 {
 public:
   DCPS_IR_Topic_Description (
@@ -87,6 +88,14 @@ public:
   /// Associate the publication and subscription
   void associate (DCPS_IR_Publication* publication,
                   DCPS_IR_Subscription* subscription);
+
+  /// Re-evaluate the association between the provided publication and
+  /// the subscriptions it maintains.
+  void reevaluate_associations (DCPS_IR_Publication* publication);
+
+  /// Re-evaluate the association between the provided subscription and
+  /// the publications in all its maintained topics.  
+  void reevaluate_associations (DCPS_IR_Subscription* subscription);
 
   const char* get_name () const ;
   const char* get_dataTypeName () const;

@@ -16,9 +16,9 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/PublisherImpl.h"
-#include "tests/DCPS/MultiTopicTypes/Foo1TypeSupportImpl.h"
-#include "tests/DCPS/MultiTopicTypes/Foo2TypeSupportImpl.h"
-#include "tests/DCPS/MultiTopicTypes/Foo3TypeSupportImpl.h"
+#include "tests/DCPS/MultiTopicTypes/Foo1DefTypeSupportImpl.h"
+#include "tests/DCPS/MultiTopicTypes/Foo2DefTypeSupportImpl.h"
+#include "tests/DCPS/MultiTopicTypes/Foo3DefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 #include "ace/Arg_Shifter.h"
@@ -27,7 +27,8 @@
 #include "common.h"
 
 OpenDDS::DCPS::TransportImpl_rch writer_transport_impl;
-static const ACE_TCHAR * writer_address_str = ACE_TEXT("");
+static const ACE_TCHAR * writer_address_str = ACE_TEXT("localhost:0");
+
 static int writer_address_given = 0;
 
 static int topics = 0 ;
@@ -59,6 +60,7 @@ static int init_writer_tranport ()
 
       ACE_INET_Addr writer_address (writer_address_str);
       writer_udp_config->local_address_ = writer_address;
+      writer_udp_config->local_address_str_ = writer_address_str;
 
       if (writer_transport_impl->configure(writer_config.in()) != 0)
         {
@@ -85,6 +87,7 @@ static int init_writer_tranport ()
         {
           ACE_INET_Addr writer_address (writer_address_str);
           writer_tcp_config->local_address_ = writer_address;
+          writer_tcp_config->local_address_str_ = writer_address_str;
         }
         // else use default address - OS assigned.
 
@@ -219,26 +222,17 @@ int main (int argc, ACE_TCHAR *argv[])
 
       if (topics & TOPIC_T1)
         {
-          ::T1::Foo1TypeSupportImpl *fts_servant =
-              new ::T1::Foo1TypeSupportImpl();
-
-          fts1 = OpenDDS::DCPS::servant_to_reference (fts_servant);
+          fts1 = new ::T1::Foo1TypeSupportImpl;
         }
 
       if (topics & TOPIC_T2)
         {
-          ::T2::Foo2TypeSupportImpl *fts_servant =
-              new ::T2::Foo2TypeSupportImpl();
-
-          fts2 = OpenDDS::DCPS::servant_to_reference (fts_servant);
+          fts2 = new ::T2::Foo2TypeSupportImpl();
         }
 
       if (topics & TOPIC_T3)
         {
-          ::T3::Foo3TypeSupportImpl *fts_servant =
-              new ::T3::Foo3TypeSupportImpl();
-
-          fts3 = OpenDDS::DCPS::servant_to_reference (fts_servant);
+          fts3 = new ::T3::Foo3TypeSupportImpl();
         }
 
       ::DDS::DomainParticipant_var dp =
@@ -354,7 +348,7 @@ int main (int argc, ACE_TCHAR *argv[])
 
       // Attach the publisher to the transport.
       OpenDDS::DCPS::PublisherImpl* pub_impl
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub.in ());
+        = dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub.in ());
 
       if (0 == pub_impl)
       {

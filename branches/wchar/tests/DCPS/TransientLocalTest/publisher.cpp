@@ -9,8 +9,9 @@
  */
 // ============================================================================
 
-#include "MessageTypeSupportImpl.h"
+#include "MessengerTypeSupportImpl.h"
 #include "Writer.h"
+#include "DataWriterListenerImpl.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
@@ -77,7 +78,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
 
       // Attach the publisher to the transport.
       OpenDDS::DCPS::PublisherImpl* pub_impl =
-        OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub.in());
+        dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub.in());
       if (0 == pub_impl) {
         cerr << "Failed to obtain publisher servant" << endl;
         exit(1);
@@ -113,10 +114,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       dw_qos.resource_limits.max_samples_per_instance = 1000;
       dw_qos.history.kind  = ::DDS::KEEP_ALL_HISTORY_QOS;
 
+      ::DDS::DataWriterListener_var dwl (new DataWriterListenerImpl);
+
       DDS::DataWriter_var dw =
         pub->create_datawriter(topic.in (),
                                dw_qos,
-                               DDS::DataWriterListener::_nil());
+                               dwl.in());
       if (CORBA::is_nil (dw.in ())) {
         cerr << "create_datawriter failed." << endl;
         exit(1);
