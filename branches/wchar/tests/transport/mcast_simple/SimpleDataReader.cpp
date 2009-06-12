@@ -3,13 +3,14 @@
 // $Id$
 #include "SimpleDataReader.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
+#include "dds/DCPS/GuidBuilder.h"
 #include "ace/Log_Msg.h"
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 
 SimpleDataReader::SimpleDataReader()
-  : sub_id_( OpenDDS::DCPS::GUID_UNKNOWN),
+  : sub_id_(OpenDDS::DCPS::GuidBuilder::create ()),
     received_test_message_(0)
 {
   DBG_ENTRY("SimpleDataReader","SimpleDataReader");

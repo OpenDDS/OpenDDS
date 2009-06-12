@@ -272,17 +272,24 @@ namespace OpenDDS
     }
 
     ACE_INLINE
-    int&
+    long&
     Service_Participant::scheduler()
     {
       return this->scheduler_;
     }
 
     ACE_INLINE
-    int
+    long 
     Service_Participant::scheduler() const
     {
       return this->scheduler_;
+    }
+
+    ACE_INLINE
+    ACE_Time_Value
+    Service_Participant::pending_timeout() const
+    {
+      return this->pending_timeout_;
     }
 
     ACE_INLINE

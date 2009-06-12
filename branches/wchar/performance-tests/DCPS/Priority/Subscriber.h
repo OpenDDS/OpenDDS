@@ -9,7 +9,15 @@
 #include <map>
 #include <iosfwd>
 
-namespace Test {
+namespace Test
+{
+  class Subscriber;
+}
+
+std::ostream& operator<<(std::ostream& str, const Test::Subscriber& value);
+
+namespace Test
+{
 
 class Options;
 class DataReaderListener;
@@ -40,8 +48,11 @@ class Subscriber {
     /// Priority of  writers.
     const std::map< long, long>& priorities() const;
 
+    /// Format and dump raw data to a stream.
+    std::ostream& rawData( std::ostream& str) const;
+
     /// Stream out statistics values.
-    friend std::ostream& operator<<( std::ostream& str, const Subscriber& value);
+    friend std::ostream& ::operator<<(std::ostream& str, const Subscriber& value);
 
   private:
     /// Test options.
@@ -64,6 +75,9 @@ class Subscriber {
 
     /// Reader listener.
     DataReaderListener* listener_;
+
+    /// Reader listener lifetime management.
+    OpenDDS::DCPS::LocalObject_var safe_listener_;
 
     /// Blocking object for test synchronization.
     DDS::WaitSet_var waiter_;

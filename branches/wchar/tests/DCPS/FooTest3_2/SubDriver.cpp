@@ -8,6 +8,7 @@
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/AssociationData.h"
+#include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "SimpleSubscriber.h"
 #include "tests/DCPS/common/TestSupport.h"
@@ -365,10 +366,13 @@ SubDriver::parse_sub_arg(const ACE_TString& arg)
   ACE_TString sub_id_str(arg.c_str(), pos);
   this->sub_addr_str_ = arg.c_str() + pos + 1;
 
-  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 1
-  converter.kind()   = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
-  converter.key()[2] = ACE_OS::atoi(sub_id_str.c_str());
-  this->sub_id_ = converter;
+  // RepoIds are conventionally created and managed by the DCPSInfoRepo. Those
+  // generated here are for the sole purpose of verifying internal behavior.
+  OpenDDS::DCPS::RepoIdBuilder builder(sub_id_);
+
+  builder.participantId(1);
+  builder.entityKey(ACE_OS::atoi(sub_id_str.c_str()));
+  builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
 
   // Use the remainder as the "stringified" ACE_INET_Addr.
   this->sub_addr_ = ACE_INET_Addr(this->sub_addr_str_.c_str());

@@ -79,6 +79,8 @@ module DDS {
 
     Publisher get_publisher();
 
+    ReturnCode_t wait_for_acknowledgments(in Duration_t max_wait);
+
     // Access the status
     LivelinessLostStatus
       get_liveliness_lost_status();

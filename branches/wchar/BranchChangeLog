@@ -1,12 +1,21 @@
+Fri Jun 12 18:55:57 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * many files
+
+          Merged in changes from the trunk between r2013 and r2213.  Fixed
+          compile problems with uses_wchar=1 and started addressing the runtime
+          issues, this involved some general cleanup of bad code in DDS core
+          and tests.
+
 Tue Jun  9 20:48:07 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * many files
 
-	  Merged in changes from trunk between the branching-off point and
-	  r2013.  Fixed compile problems with uses_wchar=1 and a few runtime
-	  issues.  There are still runtime failures in a number of tests, but
-	  those are being deferred until the next round of merges.
-	
+          Merged in changes from trunk between the branching-off point and
+          r2013.  Fixed compile problems with uses_wchar=1 and a few runtime
+          issues.  There are still runtime failures in a number of tests, but
+          those are being deferred until the next round of merges.
+
 Thu Jan 29 00:09:21 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * examples/DCPS/DistributedContent/DistributedContent.mpc:
@@ -240,3 +249,9 @@ Wed Oct 10 14:27:11 UTC 2007  Adam Mitz  <mitza@ociweb.com>
           Changes for ACE_USES_WCHAR=1 builds.  All interaction with ACE and
           the OS is done in terms of TCHAR, including argv parsing.  Conversion
           back to char is done when going to CORBA, including ORB_init().
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

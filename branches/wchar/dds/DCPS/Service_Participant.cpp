@@ -5,6 +5,7 @@
 #include "Service_Participant.h"
 #include "BuiltInTopicUtils.h"
 #include "DataDurabilityCache.h"
+#include "RepoIdConverter.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
@@ -90,7 +91,8 @@ namespace OpenDDS
       priority_max_( 0),
       transient_data_cache_ (),
       persistent_data_cache_ (),
-      persistent_data_dir_ (DEFAULT_PERSISTENT_DATA_DIR)
+      persistent_data_dir_ (DEFAULT_PERSISTENT_DATA_DIR),
+      pending_timeout_(0)
     {
       initialize();
     }
@@ -427,12 +429,16 @@ namespace OpenDDS
             }
           else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSBitTransportPort"))) != 0)
             {
+              /// No need to guard this insertion as we are still single
+              /// threaded here.
               this->bitTransportPortMap_[ DEFAULT_REPO] = ACE_OS::atoi (currentArg);
               arg_shifter.consume_arg ();
               got_bit_transport_port = true;
             }
           else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSBitTransportIPAddress"))) != 0)
             {
+              /// No need to guard this insertion as we are still single
+              /// threaded here.
               this->bitTransportIpMap_[ DEFAULT_REPO] = currentArg;
               arg_shifter.consume_arg ();
               got_bit_transport_ip = true;
@@ -458,6 +464,11 @@ namespace OpenDDS
             {
               this->persistent_data_dir_ = ACE_TEXT_ALWAYS_CHAR(currentArg);
               arg_shifter.consume_arg ();
+            }
+          else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSPendingTimeout"))) != 0)
+            {
+              this->pending_timeout_ = ACE_OS::atoi(currentArg);
+              arg_shifter.consume_arg();
             }
           else
             {
@@ -735,7 +746,10 @@ namespace OpenDDS
       }
 
       // Any previously held reference at this key will be released, right?
-      this->repoMap_[ key] = DCPSInfo::_duplicate( repo);
+      {
+        ACE_GUARD( ACE_Recursive_Thread_Mutex, guard, this->maps_lock_);
+        this->repoMap_[ key] = DCPSInfo::_duplicate( repo);
+      }
 
       // Force a call to attach_participant() for all domains bound to
       // this repository.
@@ -747,12 +761,15 @@ namespace OpenDDS
     {
       // Search the mappings for any domains mapped to this repository.
       std::vector< ::DDS::DomainId_t> domainList;
-      for( DomainRepoMap::const_iterator current = this->domainRepoMap_.begin();
-           current != this->domainRepoMap_.end();
-           ++current
-         ) {
-        if( current->second == oldKey) {
-          domainList.push_back( current->first);
+      {
+        ACE_GUARD( ACE_Recursive_Thread_Mutex, guard, this->maps_lock_);
+        for( DomainRepoMap::const_iterator current = this->domainRepoMap_.begin();
+             current != this->domainRepoMap_.end();
+             ++current
+           ) {
+          if( current->second == oldKey) {
+            domainList.push_back( current->first);
+          }
         }
       }
 
@@ -767,71 +784,80 @@ namespace OpenDDS
     void
     Service_Participant::set_repo_domain( const ::DDS::DomainId_t domain, const RepoKey key)
     {
-      DomainRepoMap::const_iterator where = this->domainRepoMap_.find( domain);
-      if( (where == this->domainRepoMap_.end()) || (where->second != key)) {
-        // Only assign entries into the map when they change the
-        // contents.
-        this->domainRepoMap_[ domain] = key;
-        if( DCPS_debug_level > 0) {
-          ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("(%P|%t) Service_Participant::set_repo_domain: ")
-            ACE_TEXT("Domain[ %d] = Repo[ %d].\n"),
-            domain, key
-          ));
+      std::vector< std::pair< DCPSInfo_var, RepoId> > repoList;
+      {
+        ACE_GUARD( ACE_Recursive_Thread_Mutex, guard, this->maps_lock_);
+        DomainRepoMap::const_iterator where = this->domainRepoMap_.find( domain);
+        if( (where == this->domainRepoMap_.end()) || (where->second != key)) {
+          // Only assign entries into the map when they change the
+          // contents.
+          this->domainRepoMap_[ domain] = key;
+          if( DCPS_debug_level > 0) {
+            ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) Service_Participant::set_repo_domain: ")
+              ACE_TEXT("Domain[ %d] = Repo[ %d].\n"),
+              domain, key
+            ));
+          }
         }
-      }
 
-      //
-      // Make sure that we mark each DomainParticipant for this domain
-      // using this repository as attached to this repository.
-      //
-      // @TODO: Move this note into user documentation.
-      // N.B. Calling set_repo() or set_repo_ior() will result in this
-      //      code executing again with the new repository.  It is best
-      //      to call those routines first when making changes.
-      //
+        //
+        // Make sure that we mark each DomainParticipant for this domain
+        // using this repository as attached to this repository.
+        //
+        // @TODO: Move this note into user documentation.
+        // N.B. Calling set_repo() or set_repo_ior() will result in this
+        //      code executing again with the new repository.  It is best
+        //      to call those routines first when making changes.
+        //
 
-      // No servant means no participant.  No worries.
-      if( 0 != this->dp_factory_servant_) {
-        // Map of domains to sets of participants.
-        const DomainParticipantFactoryImpl::DPMap& participants
-          = this->dp_factory_servant_->participants();
+        // No servant means no participant.  No worries.
+        if( 0 != this->dp_factory_servant_) {
+          // Map of domains to sets of participants.
+          const DomainParticipantFactoryImpl::DPMap& participants
+            = this->dp_factory_servant_->participants();
 
-        // Extract the set of participants for the current domain.
-        DomainParticipantFactoryImpl::DPMap::const_iterator
-          which  = participants.find( domain);
-        if( which != participants.end()) {
-          // Extract the repository to attach this domain to.
-          RepoMap::const_iterator location = this->repoMap_.find( key);
-          if( location != this->repoMap_.end()) {
-            for( DomainParticipantFactoryImpl::DPSet::const_iterator
-                 current  = which->second.begin();
-                 current != which->second.end();
-                 ++current
-               ) {
-              try {
-                // Attach each DomainParticipant in this domain to this
-                // repository.
-                RepoId id = current->svt_->get_id();
-                location->second->attach_participant( domain, id);
-                if( DCPS_debug_level > 0) {
-                  ::OpenDDS::DCPS::GuidConverter converter( id);
-                  ACE_DEBUG((LM_DEBUG,
-                    ACE_TEXT("(%P|%t) Service_Participant::set_repo_domain: ")
-                    ACE_TEXT("participant %C attached to Repo[ %d].\n"),
-                    (const char*) converter,
-                    key
-                  ));
+          // Extract the set of participants for the current domain.
+          DomainParticipantFactoryImpl::DPMap::const_iterator
+            which  = participants.find( domain);
+          if( which != participants.end()) {
+            // Extract the repository to attach this domain to.
+            RepoMap::const_iterator location = this->repoMap_.find( key);
+            if( location != this->repoMap_.end()) {
+              for( DomainParticipantFactoryImpl::DPSet::const_iterator
+                   current  = which->second.begin();
+                   current != which->second.end();
+                   ++current
+                 ) {
+                try {
+                  // Attach each DomainParticipant in this domain to this
+                  // repository.
+                  RepoId id = current->svt_->get_id();
+                  repoList.push_back(std::make_pair(location->second, id));
+                  if( DCPS_debug_level > 0) {
+                    RepoIdConverter converter(id);
+                    ACE_DEBUG((LM_DEBUG,
+                      ACE_TEXT("(%P|%t) Service_Participant::set_repo_domain: ")
+                      ACE_TEXT("participant %C attached to Repo[ %d].\n"),
+                      std::string(converter).c_str(),
+                      key
+                    ));
+                  }
+                } catch (const CORBA::Exception& ex) {
+                  ex._tao_print_exception (
+                    "ERROR: Service_Participant::set_repo_domain: failed to attach repository - "
+                  );
+                  return;
                 }
-              } catch (const CORBA::Exception& ex) {
-                ex._tao_print_exception (
-                  "ERROR: Service_Participant::set_repo_domain: failed to attach repository - "
-                );
-                return;
               }
             }
           }
         }
+      } // End of GUARD scope.
+
+      // Make all of the remote calls after releasing the lock.
+      for( unsigned int index = 0; index < repoList.size(); ++index) {
+        repoList[ index].first->attach_participant( domain, repoList[ index].second);
       }
     }
 
@@ -1016,38 +1042,44 @@ namespace OpenDDS
     void
     Service_Participant::bit_transport_port (int port, RepoKey repo)
     {
+       ACE_GUARD( ACE_Recursive_Thread_Mutex, guard, this->maps_lock_);
        this->bitTransportPortMap_[ repo] = port;
        got_bit_transport_port = true;
     }
 
     int
-    Service_Participant::init_bit_transport_impl ( RepoKey repo)
+    Service_Participant::init_bit_transport_impl ( ::DDS::DomainId_t domain)
     {
 #if !defined (DDS_HAS_MINIMUM_BIT)
+      RepoKey repo = DEFAULT_REPO;
+      DomainRepoMap::const_iterator where = this->domainRepoMap_.find( domain);
+      if( where != this->domainRepoMap_.end()) {
+        repo = where->second;
+      }
+
       // Assign BIT transport key values starting from BIT_ALL_TRAFFIC as a base.
-      // Allow for the DEFAULT_REPO value of -1 here as well.
-      OpenDDS::DCPS::TransportIdType transportKey = BIT_ALL_TRAFFIC + 1 + repo;
+      OpenDDS::DCPS::TransportIdType transportKey = BIT_ALL_TRAFFIC + domain;
 
       if( false == TheTransportFactory->obtain( transportKey).is_nil()) {
         // The transport for this repo has already been created/configured.
         if( DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("(%P|%t) Repo[ %d].transport already loaded.\n"),
-            repo
+            ACE_TEXT("(%P|%t) Domain[ %d].transport already loaded.\n"),
+            domain
           ));
         }
         return 0;
       }
 
-      this->bitTransportMap_[ repo]
+      this->bitTransportMap_[ domain]
         = TheTransportFactory->create_transport_impl (transportKey, 
                                                       ACE_TEXT("SimpleTcp"), 
                                                       DONT_AUTO_CONFIG);
 
       if( DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) Repo[ %d].transport == %x local_address=%s:%d \n"),
-          repo, this->bitTransportMap_[ repo].in(), bitTransportIpMap_[ repo].c_str(), 
+          ACE_TEXT("(%P|%t) Domain[ %d].transport == %x local_address=%s:%d \n"),
+          domain, this->bitTransportMap_[ domain].in(), bitTransportIpMap_[ repo].c_str(), 
           bitTransportPortMap_[ repo]));
       }
 
@@ -1077,12 +1109,12 @@ namespace OpenDDS
       tcp_config->local_address_str_ += ACE_TEXT(":");
       tcp_config->local_address_str_ += ACE_TEXT_CHAR_TO_TCHAR(out.str().c_str());
 
-      if( this->bitTransportMap_[ repo]->configure(config.in()) != 0)
+      if( this->bitTransportMap_[ domain]->configure(config.in()) != 0)
         {
           ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::init_bit_transport_impl: ")
-            ACE_TEXT("Failed to configure transport for repo %d.\n"),
-            repo
+            ACE_TEXT("Failed to configure transport for domain %d.\n"),
+            domain
           ));
           return -1;
         }
@@ -1091,7 +1123,7 @@ namespace OpenDDS
           return 0;
         }
 #else
-      ACE_UNUSED_ARG(repo);
+      ACE_UNUSED_ARG(domain);
       return -1;
 #endif // DDS_HAS_MINIMUM_BIT
     }
@@ -1099,22 +1131,18 @@ namespace OpenDDS
     TransportImpl_rch
     Service_Participant::bit_transport_impl(::DDS::DomainId_t domain)
     {
-      RepoKey repo = DEFAULT_REPO;
-      DomainRepoMap::const_iterator where = this->domainRepoMap_.find( domain);
-      if( where != this->domainRepoMap_.end()) {
-        repo = where->second;
-      }
-      if( this->bitTransportMap_[ repo].is_nil ()) {
+      ACE_GUARD_RETURN( ACE_Recursive_Thread_Mutex, guard, this->maps_lock_, TransportImpl_rch());
+      if( this->bitTransportMap_[ domain].is_nil ()) {
         if( DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) Initializing BIT transport for domain %d\n"),
             domain
           ));
         }
-        init_bit_transport_impl( repo);
+        init_bit_transport_impl( domain);
       }
 
-      return this->bitTransportMap_[ repo];
+      return this->bitTransportMap_[ domain];
     }
 
     int

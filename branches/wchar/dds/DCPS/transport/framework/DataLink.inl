@@ -55,8 +55,6 @@ OpenDDS::DCPS::DataLink::send_start_i()
 }
 
 
-//MJM: Here is where inlining will become critical.  This can be
-//MJM: compiled completely away (if its not virtual, of course).
 ACE_INLINE void
 OpenDDS::DCPS::DataLink::send(TransportQueueElement* element)
 {

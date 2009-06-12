@@ -31,6 +31,7 @@ import javax.jms.TopicSubscriber;
 
 import DDS.DomainParticipant;
 
+import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.persistence.DurableSubscriptionStore;
 
 /**
@@ -38,6 +39,7 @@ import org.opendds.jms.persistence.DurableSubscriptionStore;
  * @version $Revision$
  */
 public class SessionImpl implements Session {
+    private Logger logger;
     private int acknowledgeMode;
     private boolean transacted;
     private MessageListener messageListener;
@@ -57,6 +59,7 @@ public class SessionImpl implements Session {
 
     public SessionImpl(ConnectionImpl owningConnection, boolean transacted, int acknowledgeMode) {
         this.owningConnection = owningConnection;
+        this.logger = owningConnection.getLogger();
         this.transacted = transacted;
         this.acknowledgeMode = acknowledgeMode;
 
@@ -102,8 +105,12 @@ public class SessionImpl implements Session {
                                           boolean noLocal) throws JMSException {
         checkClosed();
         validateDestination(destination);
+
         MessageConsumer messageConsumer = new MessageConsumerImpl(this, destination, messageSelector, noLocal);
+        logger.debug("Created %s", messageConsumer);
+
         createdConsumers.add(messageConsumer);
+
         return messageConsumer;
     }
 
@@ -115,8 +122,12 @@ public class SessionImpl implements Session {
 
     public MessageProducer createProducer(Destination destination) throws JMSException {
         checkClosed();
+
         MessageProducer messageProducer = new MessageProducerImpl(this, destination);
+        logger.debug("Created %s", messageProducer);
+
         createdProducers.add(messageProducer);
+
         return messageProducer;
     }
 
@@ -132,9 +143,13 @@ public class SessionImpl implements Session {
                                                    boolean noLocal) throws JMSException {
         checkClosed();
         validateDestination(topic);
+
         DurableMessageConsumerImpl messageConsumer = new DurableMessageConsumerImpl(this, name, topic, messageSelector, noLocal);
+        logger.debug("Created %s", messageConsumer);
+
         owningConnection.registerDurableSubscription(name, messageConsumer);
         createdConsumers.add(messageConsumer);
+
         return messageConsumer;
     }
 
@@ -147,6 +162,9 @@ public class SessionImpl implements Session {
         if (owningConnection.getDurableSubscriptionByname(name) != null) {
             throw new IllegalStateException("The durable topic " + name + " has an active subscriber in client " + clientID);
         }
+
+        logger.debug("Unsubscribing %s", name);
+
         owningConnection.removeDurableSubscription(name);
         DurableSubscriptionStore store = owningConnection.getPersistenceManager().getDurableSubscriptionStore();
         store.unsubscribe(new DurableSubscription(owningConnection.getClientID(), name));
@@ -247,10 +265,20 @@ public class SessionImpl implements Session {
 
     public void close() throws JMSException {
         if (closed) return;
-        for (MessageProducer producer: createdProducers) producer.close();
-        for (MessageConsumer consumer: createdConsumers) consumer.close();
+
+        logger.debug("Closing %s", this);
+
+        for (MessageProducer producer: createdProducers) {
+            producer.close();
+        }
+
+        for (MessageConsumer consumer: createdConsumers) {
+            consumer.close();
+        }
+
         executor.shutdown();
-        this.closed = true;
+
+        closed = true;
     }
 
     public void checkClosed() {

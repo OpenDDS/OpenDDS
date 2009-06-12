@@ -8,6 +8,7 @@
 #include "DataWriterImpl.h"
 #include "Service_Participant.h"
 #include "Qos_Helper.h"
+#include "RepoIdConverter.h"
 #include "Marked_Default_Qos.h"
 #include "TopicImpl.h"
 #include "dds/DdsDcpsTypeSupportExtS.h"
@@ -37,10 +38,12 @@ const CoherencyGroup DEFAULT_GROUP_ID = 0;
 //      cannot be false.
 
 // Implementation skeleton constructor
-PublisherImpl::PublisherImpl (const ::DDS::PublisherQos &   qos,
+PublisherImpl::PublisherImpl (DDS::InstanceHandle_t handle,
+                              const ::DDS::PublisherQos &   qos,
                               ::DDS::PublisherListener_ptr a_listener,
                               DomainParticipantImpl*       participant)
-  : qos_(qos),
+  : handle_(handle),
+    qos_(qos),
     default_datawriter_qos_(TheServiceParticipant->initial_DataWriterQos ()),
     listener_mask_(DEFAULT_STATUS_KIND_MASK),
     listener_ (::DDS::PublisherListener::_duplicate(a_listener)),
@@ -75,6 +78,27 @@ PublisherImpl::~PublisherImpl (void)
       ACE_TEXT("PublisherImpl::~PublisherImpl, ")
       ACE_TEXT("some datawriters still exist.\n")));
     }
+}
+
+DDS::InstanceHandle_t
+PublisherImpl::get_instance_handle()
+  ACE_THROW_SPEC ((CORBA::SystemException))
+{
+  return handle_;
+}
+
+bool
+PublisherImpl::contains_writer(DDS::InstanceHandle_t a_handle)
+{
+  InstanceHandleHelper helper(a_handle);
+
+  for (DataWriterMap::iterator it(datawriter_map_.begin());
+       it != datawriter_map_.end(); ++it)
+  {
+    if (helper.matches(it->second->local_writer_objref_))
+      return true;
+  } 
+  return false;
 }
 
 ::DDS::DataWriter_ptr
@@ -203,13 +227,13 @@ PublisherImpl::create_datawriter (
                dw_servant) == -1)
     {
       RepoId id = dw_servant->get_publication_id();
-      ::OpenDDS::DCPS::GuidConverter converter( id);
+      RepoIdConverter converter(id);
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("PublisherImpl::create_datawriter: ")
         ACE_TEXT("failed to register datawriter %C with ")
         ACE_TEXT("TransportImpl.\n"),
-        (const char*) converter
+        std::string(converter).c_str()
       ));
       return ::DDS::DataWriter::_nil ();
     }
@@ -236,12 +260,12 @@ PublisherImpl::delete_datawriter (::DDS::DataWriter_ptr a_datawriter)
     if (dw_publisher.in()!= this)
     {
       RepoId id = dw_servant->get_publication_id();
-      ::OpenDDS::DCPS::GuidConverter converter( id);
+      RepoIdConverter converter(id);
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) PublisherImpl::delete_datareader: ")
         ACE_TEXT("the data writer %C doesn't ")
         ACE_TEXT("belong to this subscriber \n"),
-        (const char*) converter
+        std::string(converter).c_str()
       ));
       return ::DDS::RETCODE_PRECONDITION_NOT_MET;
     }
@@ -260,12 +284,12 @@ PublisherImpl::delete_datawriter (::DDS::DataWriter_ptr a_datawriter)
     PublicationMap::iterator it = publication_map_.find (publication_id);
 
     if( it == publication_map_.end ()) {
-      ::OpenDDS::DCPS::GuidConverter converter( publication_id);
+      RepoIdConverter converter(publication_id);
       ACE_ERROR_RETURN ((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("PublisherImpl::delete_datawriter, ")
         ACE_TEXT("datawriter %C not found.\n"),
-        (const char*) converter
+        std::string(converter).c_str()
       ),::DDS::RETCODE_ERROR);
     }
     local_writer = it->second->local_writer_impl_;
@@ -306,10 +330,13 @@ PublisherImpl::delete_datawriter (::DDS::DataWriter_ptr a_datawriter)
     ACE_GUARD_RETURN (reverse_lock_type, reverse_monitor, this->reverse_pi_lock_, 
                       ::DDS::RETCODE_ERROR);
 
+    // Wait for pending samples to drain prior to removing associations
+    // and unregistering the publication.
+    dw_servant->wait_pending();
+
     // Call remove association before unregistering the datawriter
     // with the transport, otherwise some callbacks resulted from
     // remove_association may lost.
-
     dw_servant->remove_all_associations();
 
 
@@ -326,13 +353,13 @@ PublisherImpl::delete_datawriter (::DDS::DataWriter_ptr a_datawriter)
     // Unregister the DataWriterImpl object with the TransportImpl.
     else if (impl->unregister_publication (publication_id) == -1)
     {
-      ::OpenDDS::DCPS::GuidConverter converter( publication_id);
+      RepoIdConverter converter(publication_id);
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("PublisherImpl::delete_datawriter: ")
         ACE_TEXT("failed to unregister datawriter %C ")
         ACE_TEXT("with TransportImpl.\n"),
-        (const char*) converter
+        std::string(converter).c_str()
       ));
       return ::DDS::RETCODE_ERROR;
     }
@@ -459,16 +486,14 @@ PublisherImpl::delete_contained_entities ()
           delete_datawriter (cur->second->local_writer_objref_);
       if (ret != ::DDS::RETCODE_OK)
         {
-          ::OpenDDS::DCPS::GuidConverter converter(
-            const_cast< ::OpenDDS::DCPS::RepoId*>( &pub_id)
-          );
+          RepoIdConverter converter(pub_id);
           ACE_ERROR_RETURN((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: ")
             ACE_TEXT("PublisherImpl::")
             ACE_TEXT("delete_contained_entities: ")
             ACE_TEXT("failed to delete ")
             ACE_TEXT("datawriter %C.\n"),
-            (const char*) converter
+            std::string(converter).c_str()
           ),ret);
         }
     }
@@ -517,13 +542,13 @@ PublisherImpl::set_qos (const ::DDS::PublisherQos & qos)
                 idToQosMap.insert(DwIdToQosMap::value_type(id, qos));
               if (pair.second == false)
               {
-                ::OpenDDS::DCPS::GuidConverter converter( id);
+                RepoIdConverter converter( id);
                 ACE_ERROR_RETURN((LM_ERROR,
                   ACE_TEXT("(%P|%t) ")
                   ACE_TEXT("PublisherImpl::set_qos: ")
                   ACE_TEXT("insert id %d to DwIdToQosMap ")
                   ACE_TEXT("failed.\n"),
-                  (const char*) converter
+                  std::string(converter).c_str()
                 ),::DDS::RETCODE_ERROR);
               }
             }
@@ -593,7 +618,7 @@ PublisherImpl::set_listener (::DDS::PublisherListener_ptr a_listener,
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
   listener_mask_ = mask;
-  //note: OK to duplicate  and reference_to_servant a nil object ref
+  //note: OK to duplicate  a nil object ref
   listener_ = ::DDS::PublisherListener::_duplicate(a_listener);
   fast_listener_ = listener_.in ();
   return ::DDS::RETCODE_OK;
@@ -787,17 +812,17 @@ void PublisherImpl::add_associations (const ReaderAssociationSeq & readers,
     }
 
   if( DCPS_debug_level > 4) {
-    ::OpenDDS::DCPS::GUID_t pubId = writer->get_publication_id();
-    ::OpenDDS::DCPS::GuidConverter converter( pubId);
+    RepoIdConverter converter(writer->get_publication_id());
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) PublisherImpl::add_associations(): ")
       ACE_TEXT("adding %d subscriptions to publication %C with priority %d.\n"),
       length,
-      (const char*) converter,
+      std::string(converter).c_str(),
       writer_qos.transport_priority.value
     ));
   }
   this->add_subscriptions (writer->get_publication_id (),
+                           writer,
                            writer_qos.transport_priority.value,
                            length,
                            associations);
@@ -909,12 +934,12 @@ PublisherImpl::writer_enabled(
 
     if (pair.second == false)
       {
-        ::OpenDDS::DCPS::GuidConverter converter( info->publication_id_);
+        RepoIdConverter converter(info->publication_id_);
         ACE_ERROR_RETURN((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: ")
           ACE_TEXT("PublisherImpl::writer_enabled: ")
           ACE_TEXT("insert publication %C failed.\n"),
-          (const char*) converter
+          std::string(converter).c_str()
         ),::DDS::RETCODE_ERROR);
       }
 

@@ -3,6 +3,7 @@
 // $Id$
 #include "SimpleDataReader.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
+#include "dds/DCPS/GuidBuilder.h"
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
 #include "ace/OS_NS_sys_time.h"
@@ -11,7 +12,7 @@
 
 
 SimpleDataReader::SimpleDataReader()
-  : sub_id_( OpenDDS::DCPS::GUID_UNKNOWN),
+  : sub_id_ (OpenDDS::DCPS::GuidBuilder::create ()),
     num_messages_expected_(0),
     num_messages_received_(0)
 {

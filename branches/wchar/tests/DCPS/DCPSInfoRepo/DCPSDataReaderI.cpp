@@ -2,11 +2,9 @@
 //
 // $Id$
 
+#include "dds/DCPS/RepoIdConverter.h"
 
 #include "DCPSDataReaderI.h"
-
-#include "dds/DCPS/GuidUtils.h"
-#include <sstream>
 
 // Implementation skeleton constructor
 TAO_DDS_DCPSDataReader_i::TAO_DDS_DCPSDataReader_i (void)
@@ -28,31 +26,23 @@ void TAO_DDS_DCPSDataReader_i::add_associations (
   {
     CORBA::ULong length = writers.length();
 
-    std::stringstream buffer;
-    long key = OpenDDS::DCPS::GuidConverter(
-                 const_cast< OpenDDS::DCPS::RepoId*>( &yourId)
-               );
-    buffer << yourId << "(" << std::hex << key << ")";
+    OpenDDS::DCPS::RepoIdConverter converter(yourId);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("\nTAO_DDS_DCPSDataReader_i::add_associations () :\n")
-      ACE_TEXT("\tReader %s Adding association to %d writers:\n"),
-      buffer.str().c_str(),
+      ACE_TEXT("\tReader %C Adding association to %d writers:\n"),
+      std::string(converter).c_str(),
       length
     ));
 
     for (CORBA::ULong cnt = 0; cnt < length; ++cnt)
       {
-        std::stringstream writerBuffer;
-        key = OpenDDS::DCPS::GuidConverter(
-                const_cast< OpenDDS::DCPS::RepoId*>( &writers[ cnt].writerId)
-              );
-        writerBuffer << writers[ cnt].writerId << "(" << std::hex << key << ")";
+        OpenDDS::DCPS::RepoIdConverter converter(writers[cnt].writerId);
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("\tAssociation - %d\n")
-          ACE_TEXT("\t writer id - %s\n")
+          ACE_TEXT("\t writer id - %C\n")
           ACE_TEXT("\t transport_id - %d\n\n"),
           cnt,
-          writerBuffer.str().c_str(),
+          std::string(converter).c_str(),
           writers[ cnt].writerTransInfo.transport_id
         ));
       }
@@ -79,16 +69,12 @@ void TAO_DDS_DCPSDataReader_i::remove_associations (
 
     for (CORBA::ULong cnt = 0; cnt < length; ++cnt)
       {
-        std::stringstream buffer;
-        long key = OpenDDS::DCPS::GuidConverter(
-                     const_cast< OpenDDS::DCPS::RepoId*>( &writers[ cnt])
-                   );
-        buffer << writers[ cnt] << "(" << std::hex << key << ")";
+        OpenDDS::DCPS::RepoIdConverter converter(writers[cnt]);
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("\tAssociation - %d\n")
-          ACE_TEXT("\t writer_id - %s\n"),
+          ACE_TEXT("\t writer_id - %C\n"),
           cnt,
-          buffer.str().c_str()
+          std::string(converter).c_str()
         ));
       }
 

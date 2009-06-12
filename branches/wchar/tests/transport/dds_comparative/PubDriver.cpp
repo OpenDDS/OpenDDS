@@ -4,6 +4,7 @@
 
 #include "PubDriver.h"
 #include "TestException.h"
+#include "dds/DCPS/RepoIdBuilder.h"
 // Add the TransportImpl.h before TransportImpl_rch.h is included to  
 // resolve the build problem that the class is not defined when 
 // RcHandle<T> template is instantiated.
@@ -263,17 +264,20 @@ PubDriver::parse_arg_p(const ACE_TCHAR* arg, bool& flag)
 
   // Parse the pub_id from left of ':' char, and remainder to right of ':'.
   ACE_TString pub_id_str(arg_str.c_str(), pos);
-  this->pub_addr_str_ = arg_str.c_str() + pos + 1;
 
-  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 1
-  converter.kind()   = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
-  converter.key()[2] = ACE_OS::atoi( pub_id_str.c_str());
-  OpenDDS::DCPS::RepoId pub_id = converter;
+  // RepoIds are conventionally created and managed by the DCPSInfoRepo. Those
+  // generated here are for the sole purpose of verifying internal behavior.
+  OpenDDS::DCPS::RepoIdBuilder builder;
 
-  this->local_address_ = ACE_INET_Addr(this->pub_addr_str_.c_str());
-
-  this->publisher_.set_local_publisher(pub_id);
+  builder.participantId(1);
+  builder.entityKey(ACE_OS::atoi(pub_id_str.c_str()));
+  builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
   
+  OpenDDS::DCPS::RepoId repoId(builder);
+  publisher_.set_local_publisher(repoId);
+
+  local_address_ = ACE_INET_Addr(this->pub_addr_str_.c_str());
+
   flag = true;
 }
 
@@ -316,14 +320,19 @@ PubDriver::parse_arg_s(const ACE_TCHAR* arg, bool& flag)
   ACE_TString sub_id_str(arg_str.c_str(), pos);
   ACE_TString sub_addr_str(arg_str.c_str() + pos + 1);
 
-  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 2
-  converter.kind()   = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
-  converter.key()[2] = ACE_OS::atoi( sub_id_str.c_str());
-  OpenDDS::DCPS::RepoId sub_id = converter;
+  // RepoIds are conventionally created and managed by the DCPSInfoRepo. Those
+  // generated here are for the sole purpose of verifying internal behavior.
+  OpenDDS::DCPS::RepoIdBuilder builder;
+
+  builder.participantId(1);
+  builder.entityKey(ACE_OS::atoi(sub_id_str.c_str()));
+  builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
+  
+  OpenDDS::DCPS::RepoId repoId(builder);
 
   ACE_INET_Addr sub_addr(sub_addr_str.c_str());
 
-  this->publisher_.add_remote_subscriber(sub_id,sub_addr, sub_addr_str);
+  publisher_.add_remote_subscriber(repoId, sub_addr, sub_addr_str);
 
   flag = true;
 }

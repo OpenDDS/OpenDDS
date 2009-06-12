@@ -1,9 +1,9 @@
 // -*- C++ -*-
 // $Id$
 
+#include "Publisher.h"
 #include "Test.h"
 #include "Options.h"
-#include "Publisher.h"
 #include "dds/DCPS/Service_Participant.h"
 
 #include <sstream>
@@ -41,7 +41,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ));
     return 1;
 
-  } catch( Test::Exception e)  {
+  } catch (const Test::Exception& e)  {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) publisher_main() - ")
       ACE_TEXT("Test exception caught during processing: %s.\n"),

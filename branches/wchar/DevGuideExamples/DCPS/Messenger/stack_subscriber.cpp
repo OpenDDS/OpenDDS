@@ -10,7 +10,7 @@
 // ============================================================================
 
 
-#include "StackDataReaderListener.h"
+#include "DataReaderListener.h"
 #include "MessengerTypeSupportImpl.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
@@ -157,18 +157,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
       // activate the listener
-      StackDataReaderListenerImpl listener_servant;
-      DDS::DataReaderListener_var listener (&listener_servant);
-
-      if (CORBA::is_nil (listener.in ())) {
-        cerr << "listener is nil." << endl;
-        exit(1);
-      }
+      DataReaderListenerImpl listener_servant;
 
       // Create the Datareaders
       DDS::DataReader_var dr = sub->create_datareader(topic.in (),
                                                       DATAREADER_QOS_DEFAULT,
-                                                      listener.in ());
+                                                      &listener_servant);
       if (CORBA::is_nil (dr.in ())) {
         cerr << "create_datareader failed." << endl;
         exit(1);

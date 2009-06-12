@@ -84,6 +84,12 @@ OpenDDS::DCPS::SimpleTcpReceiveStrategy::deliver_sample
       transport->demarshal_acks (sample.sample_,
                                  sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER);
     }
+  else if (sample.header_.message_id_ == SAMPLE_ACK)
+    {
+      VDBG((LM_DEBUG, "(%P|%t) DBG:  received SAMPLE_ACK \n"));
+
+      this->link_->ack_received(sample);
+    }
   else
     this->link_->data_received(sample);
 }
@@ -108,7 +114,7 @@ OpenDDS::DCPS::SimpleTcpReceiveStrategy::start_i()
     buffer << *this->link_.in();
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) SimpleTcpReceiveStrategy::start_i() - ")
-      ACE_TEXT("link:\n%sconnected to %C:%d ")
+      ACE_TEXT("link:\n%C connected to %C:%d ")
       ACE_TEXT("registering with reactor to receive.\n"),
       buffer.str().c_str(),
       this->connection_->get_remote_address().get_host_name(),

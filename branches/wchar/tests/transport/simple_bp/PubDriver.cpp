@@ -8,14 +8,17 @@
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/AssociationData.h"
+#include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "SimplePublisher.h"
 #include <ace/Arg_Shifter.h>
 
 
 PubDriver::PubDriver()
-  : num_msgs_(10000),
-    msg_size_(128)
+: pub_id_ (OpenDDS::DCPS::GuidBuilder::create ()),
+  sub_id_ (OpenDDS::DCPS::GuidBuilder::create ()),
+  num_msgs_(10000),
+  msg_size_(128)
 {
 }
 
@@ -33,6 +36,8 @@ PubDriver::run(int& argc, ACE_TCHAR* argv[])
                                         "TAO_DDS_DCPS");
 
   TheServiceParticipant->set_ORB (orb.in());
+  DDS::DomainParticipantFactory_var dpf;
+  dpf = TheParticipantFactoryWithArgs(argc, argv);
 
   parse_args(argc, argv);
   init();
@@ -277,10 +282,14 @@ PubDriver::parse_pub_arg(const ACE_TString& arg)
   // Parse the pub_id from left of ':' char, and remainder to right of ':'.
   ACE_TString pub_id_str(arg.c_str(), pos);
   this->pub_addr_str_ = arg.c_str() + pos + 1;
-  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 1
-  converter.kind()   = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
-  converter.key()[2] = ACE_OS::atoi( pub_id_str.c_str());
-  this->pub_id_ = converter;
+  // RepoIds are conventionally created and managed by the DCPSInfoRepo. Those
+  // generated here are for the sole purpose of verifying internal behavior.
+  OpenDDS::DCPS::RepoIdBuilder builder(pub_id_);
+
+  builder.participantId(1);
+  builder.entityKey(ACE_OS::atoi(pub_id_str.c_str()));
+  builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
+  
   this->pub_addr_ = ACE_INET_Addr(this->pub_addr_str_.c_str());
 
   return 0;
@@ -319,11 +328,14 @@ PubDriver::parse_sub_arg(const ACE_TString& arg)
   // Parse the sub_id from left of ':' char, and remainder to right of ':'.
   ACE_TString sub_id_str(arg.c_str(), pos);
   this->sub_addr_str_ = arg.c_str() + pos + 1;
+  
+  // RepoIds are conventionally created and managed by the DCPSInfoRepo. Those
+  // generated here are for the sole purpose of verifying internal behavior.
+  OpenDDS::DCPS::RepoIdBuilder builder(sub_id_);
 
-  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 2
-  converter.kind()   = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
-  converter.key()[2] = ACE_OS::atoi( sub_id_str.c_str());
-  this->sub_id_ = converter;
+  builder.participantId(1);
+  builder.entityKey(ACE_OS::atoi(sub_id_str.c_str()));
+  builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
 
   // Find the (only) ':' char in the remainder, and make sure it is in
   // a legal spot.

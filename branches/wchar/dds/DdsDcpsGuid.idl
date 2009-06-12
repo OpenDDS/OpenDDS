@@ -23,6 +23,7 @@ module OpenDDS
     };
 
     const octet ENTITYKIND_BUILTIN_UNKNOWN      = 0xc0;
+    const octet ENTITYKIND_BUILTIN_PARTICIPANT  = 0xc1;
     const octet ENTITYKIND_USER_UNKNOWN         = 0x00;
     const octet ENTITYKIND_USER_WRITER_WITH_KEY = 0x02;
     const octet ENTITYKIND_USER_WRITER_NO_KEY   = 0x03;
@@ -30,6 +31,9 @@ module OpenDDS
     const octet ENTITYKIND_USER_READER_WITH_KEY = 0x07;
 
     // Vendor specific Kinds have the following bit pattern: 01xx_xxxx
+    const octet ENTITYKIND_OPENDDS_SUBSCRIBER   = 0x41;
+    const octet ENTITYKIND_OPENDDS_PUBLISHER    = 0x42;
+
     const octet ENTITYKIND_OPENDDS_TOPIC        = 0x45;
 
 // Specifying the GUID type as a DCPS data type with a complex key forces

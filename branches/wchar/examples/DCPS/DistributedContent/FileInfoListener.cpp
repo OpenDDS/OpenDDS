@@ -32,10 +32,6 @@ void FileInfoListener::on_data_available (::DDS::DataReader_ptr reader)
     DistributedContent::FileDiff diff;
     DDS::SampleInfo si ;
     DDS::ReturnCode_t status = fileinfo_dr->take_next_sample(diff, si) ;
-    // Alternate code to read directlty via the servant
-    //FileInfoDataReaderImpl* dr_servant =
-    //  reference_to_servant< FileInfoDataReaderImpl> (fileinfo_dr.in ());
-    //DDS::ReturnCode_t status = dr_servant->take_next_sample(diff, si) ;
 
     if (status == DDS::RETCODE_OK) {
 

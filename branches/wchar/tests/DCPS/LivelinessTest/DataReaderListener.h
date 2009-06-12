@@ -126,7 +126,7 @@ public:
 
   bool verify_last_liveliness_status ()
   {
-    return last_status_.active_count == 0 && last_status_.inactive_count == 0;
+    return last_status_.alive_count == 0 && last_status_.not_alive_count == 0;
   }
 
 private:

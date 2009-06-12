@@ -3,6 +3,9 @@
 // $Id$
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
+#include "dds/DCPS/RepoIdConverter.h"
+
 #include "TransportInterface.h"
 
 #if !defined (__ACE_INLINE__)
@@ -44,8 +47,6 @@ OpenDDS::DCPS::TransportInterface::attach_transport(TransportImpl* impl)
     // a data member (this->swap_bytes_) so that we don't have to ask
     // the impl for it anymore.
     this->swap_bytes_ = impl->swap_bytes();
-    //MJM: Of course the OO way would be to have a mutator and do it thus:
-    //MJM:   this->swap_bytes( impl->swap_bytes());
 
     // Ask the impl for the connection_info() value, and cache the answer in
     // a data member (this->connection_info_) so that we don't have to ask
@@ -110,7 +111,6 @@ OpenDDS::DCPS::TransportInterface::detach_transport()
 
     this->remote_map_.release_all_reservations();
     this->local_map_.release_all_reservations();
-    //MJM: Althgough these are not currently implemented, right?
   }
 
   // Tell the (detached) TransportImpl object that it should detach
@@ -140,7 +140,8 @@ OpenDDS::DCPS::TransportInterface::add_associations
                           const char*               remote_id_str,
                           size_t                    num_remote_associations,
                           const AssociationData*    remote_associations,
-                          TransportReceiveListener* receive_listener)
+                          TransportReceiveListener* receive_listener,
+                          TransportSendListener*    send_listener)
 {
   DBG_ENTRY_LVL("TransportInterface","add_associations",6);
 
@@ -177,13 +178,13 @@ OpenDDS::DCPS::TransportInterface::add_associations
                 remote_associations[i].remote_data_.data.length(),
                 ebuffer, sizeof(ebuffer)
               ) ;
-              ::OpenDDS::DCPS::GuidConverter localConverter( local_id);
-              ::OpenDDS::DCPS::GuidConverter remoteConverter( remote_id);
+              RepoIdConverter local_converter(local_id);
+              RepoIdConverter remote_converter(remote_id);
               ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) TransportInterface::add_associations: ")
                 ACE_TEXT("publication %C to subscription %C.\n%s\n"),
-                (const char*) localConverter,
-                (const char*) remoteConverter,
+                std::string(local_converter).c_str(),
+                std::string(remote_converter).c_str(),
                 ebuffer
               ));
             }
@@ -191,6 +192,7 @@ OpenDDS::DCPS::TransportInterface::add_associations
             link = this->impl_->reserve_datalink(remote_associations[i].remote_data_,
                                                  remote_id,
                                                  local_id,
+                                                 send_listener,
                                                  priority);
           }
         else
@@ -202,13 +204,13 @@ OpenDDS::DCPS::TransportInterface::add_associations
                 remote_associations[i].remote_data_.data.length(),
                 ebuffer, sizeof(ebuffer)
               ) ;
-              ::OpenDDS::DCPS::GuidConverter localConverter( local_id);
-              ::OpenDDS::DCPS::GuidConverter remoteConverter( remote_id);
+              RepoIdConverter local_converter(local_id);
+              RepoIdConverter remote_converter(remote_id);
               ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) TransportInterface::add_associations: ")
                 ACE_TEXT("subscription %C to publication %C.\n%s\n"),
-                (const char*) localConverter,
-                (const char*) remoteConverter,
+                std::string(local_converter).c_str(),
+                std::string(remote_converter).c_str(),
                 ebuffer
               ));
             }
@@ -225,50 +227,20 @@ OpenDDS::DCPS::TransportInterface::add_associations
         if (link.is_nil())
           {
             // reserve_datalink failure
-            ::OpenDDS::DCPS::GuidConverter localConverter( local_id);
-            ::OpenDDS::DCPS::GuidConverter remoteConverter( remote_id);
+            RepoIdConverter local_converter(local_id);
+            RepoIdConverter remote_converter(remote_id);
             ACE_ERROR_RETURN((LM_ERROR,
               ACE_TEXT("(%P|%t) ERROR: Failed to reserve a DataLink with the ")
               ACE_TEXT("TransportImpl for association from local ")
               ACE_TEXT("[%C %C] to remote [%C %C].\n"),
               local_id_str,
-              (const char*) localConverter,
+              std::string(local_converter).c_str(),
               remote_id_str,
-              (const char*) remoteConverter
+              std::string(remote_converter).c_str()
             ),-1);
           }
 
         // At this point, the DataLink knows about our association.
-
-        //MJM: vvv CONNECTION ESTABLISHMENT CHANGES vvv
-
-        //MJM: The logic from here to the end of the loop needs to be broken out
-        //MJM: and moved to another method.  That method should collect up all
-        //MJM: of the new connections.  When they _all_ have been established,
-        //MJM: then this routine can move forward.  In the meantime, after this
-        //MJM: method has made all of the reserve_datalink() calls, it should
-        //MJM: then wait on a condition that indicates that _all_ of the
-        //MJM: datalinks are available.
-
-        //MJM: It is then the responsibility of the datalinks to not report
-        //MJM: their successful connection until both sides have checked in.
-        //MJM: This means adding some additional traffic during connection
-        //MJM: establishment.  See the datalink details for more info.
-
-        //MJM: Hmm...
-        //MJM: 1) make another method to do the rest of the registration
-        //MJM:    code here.
-        //MJM: 2) Make that method aware of how many datalinks need to
-        //MJM:    be established.
-        //MJM: 3) After that many links have been established, signal the
-        //MJM:    condition.
-        //MJM: 4) Have this method wait() on the signal() after all the
-        //MJM:    reserve_datalinks() calls have been made.
-
-        //MJM: What remains is to add a ready protocol to the connection
-        //MJM: establishment.
-
-        //MJM: ^^^ CONNECTION ESTABLISHMENT CHANGES ^^^
 
         // Now we need to update the local_map_ to associate the local_id
         // with the new DataLink.  We do this by inserting the DataLink into
@@ -283,7 +255,6 @@ OpenDDS::DCPS::TransportInterface::add_associations
             // Now that we know the local_set contains the new DataLink,
             // we need to get the new DataLink into a remote_set within
             // our remote_map_.
-
             if (this->remote_map_.insert_link(remote_id, link.in()) != -1)
               {
                 // Ok.  We are done handling the current association.
@@ -294,28 +265,27 @@ OpenDDS::DCPS::TransportInterface::add_associations
             else
               {
                 // The remote_set->insert_link() failed.
-                ::OpenDDS::DCPS::GuidConverter converter( remote_id);
+                RepoIdConverter converter(remote_id);
                 ACE_ERROR((LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: Failed to insert DataLink into remote_map_ ")
                   ACE_TEXT("(DataLinkSetMap) for remote [%C %C].\n"),
                   remote_id_str,
-                  (const char*) converter
+                  std::string(converter).c_str()
                 ));
               }
 
             // "Undo" logic due to error would go here.
             //   * We would need to undo the local_set->insert_link() operation.
-            //MJM: Make it so.
           }
         else
           {
             // The local_set->insert_link() failed.
-            ::OpenDDS::DCPS::GuidConverter converter( local_id);
+            RepoIdConverter converter(local_id);
             ACE_ERROR((LM_ERROR,
               ACE_TEXT("(%P|%t) ERROR: Failed to insert DataLink into ")
               ACE_TEXT("local_map_ for local [%C %C].\n"),
               local_id_str,
-              (const char*) converter
+              std::string(converter).c_str()
             ));
           }
 
@@ -323,10 +293,6 @@ OpenDDS::DCPS::TransportInterface::add_associations
         //   * We would need to undo the impl->reserve_datalink() operation.
         //   * We also would need to iterate over the remote_assocations that
         //     have worked thus far, and nuke them.
-        //MJM: Right.
-        //MJM: We will need to make sure that we do _not_ leave the transport in
-        //MJM: a funky state after a failure to associate.  This will probably
-        //MJM: be a fairly common occurance in some environments.
 
         // Only failure conditions will cause the logic to get here.
         return -1;

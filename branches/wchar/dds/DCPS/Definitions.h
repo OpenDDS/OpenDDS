@@ -23,26 +23,26 @@ namespace OpenDDS
   {
     typedef ACE_UINT16 CoherencyGroup ;
     typedef RepoId PublicationId;
-   
+
     const ::CORBA::ULong DEFAULT_STATUS_KIND_MASK = 0xFFFF;
 
     /// Lolipop sequencing (never wrap to negative).
     /// This helps distinguish new and old sequence numbers. (?)
     struct OpenDDS_Dcps_Export SequenceNumber 
     {
-      /// Default constructor starts negative.
-      SequenceNumber() { value_ = SHRT_MIN ; }
-
-      /// Construct with a value.
-      SequenceNumber( ACE_INT16 value) : value_( value) { }
+      /// Construct with a value, default to negative starting point.
+      SequenceNumber( ACE_INT16 value = SHRT_MIN) : value_( value) { }
 
       // N.B: Default copy constructor is sufficient.
 
       /// Allow assignments.
-      SequenceNumber& operator=( const SequenceNumber& rhs) { value_ = rhs.value_; return *this; }
+      SequenceNumber& operator=( const SequenceNumber& rhs) {
+        value_ = rhs.value_;
+        return *this; 
+      }
 
       /// Pre-increment.
-      SequenceNumber operator++() {
+      SequenceNumber& operator++() {
         this->increment() ;
         return *this ;
       }
@@ -58,17 +58,21 @@ namespace OpenDDS
       operator ACE_INT16() { return this->value_; }
 
       /// This is the magic of the lollipop.
-      /// N.B. This comparison is only good until the distance reaches
-      ///      half of the lollipop size (SHRT_MAX/2).
+      /// N.B. This comparison assumes that the shortest distance between
+      ///      the values being compared is the positive counting
+      ///      sequence between them.  This means that MAX-2 is less
+      ///      than 2 since they are separated by only four counts from
+      ///      MAX-2 to 2.  But that 2 is less than MAX/2 since the
+      ///      shortest distance is from 2 to MAX/2.
       bool operator<(  const SequenceNumber& rvalue) const {
-             return (value_ < 0)?              (value_ < rvalue.value_):
-                    (value_ == rvalue.value_)? false:
-                    (value_ <  rvalue.value_)? (((rvalue.value_ - value_) < (SHRT_MAX/2))?
-                                                true: false):
-                                               (((value_ - rvalue.value_) < (SHRT_MAX/2))?
-                                                false: true);
+             ACE_INT16 distance = rvalue.value_ - value_;
+             return (distance == 0)? false:                    // Equal is not less than.
+                    (value_ < 0)?    (value_ < rvalue.value_): // Stem of lollipop.
+                    (distance <  0)? (SHRT_MAX/2 < -distance): // Closest distance dominates.
+                                     (distance < (SHRT_MAX/2));
            }
 
+      /// Derive a full suite of logical operations.
       bool operator==( const SequenceNumber& rvalue) const { return value_ == rvalue.value_ ; }
       bool operator!=( const SequenceNumber& rvalue) const { return value_ != rvalue.value_ ; }
       bool operator>=( const SequenceNumber& rvalue) const { return !(*this  < rvalue);  }

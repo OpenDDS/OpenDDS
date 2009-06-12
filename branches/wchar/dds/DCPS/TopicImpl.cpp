@@ -4,6 +4,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "TopicImpl.h"
 #include "Qos_Helper.h"
+#include "RepoIdConverter.h"
 #include "Definitions.h"
 #include "Service_Participant.h"
 #include "DomainParticipantImpl.h"
@@ -133,7 +134,7 @@ namespace OpenDDS
       ))
     {
       listener_mask_ = mask;
-      //note: OK to duplicate  and reference_to_servant a nil object ref
+      //note: OK to duplicate  a nil object ref
       listener_ = ::DDS::TopicListener::_duplicate(a_listener);
       fast_listener_ = listener_.in ();
       return ::DDS::RETCODE_OK;
@@ -184,6 +185,13 @@ namespace OpenDDS
       return id_;
     }
 
+    DDS::InstanceHandle_t
+    TopicImpl::get_instance_handle()
+      ACE_THROW_SPEC ((CORBA::SystemException))
+    {
+      RepoIdConverter converter(id_);
+      return DDS::InstanceHandle_t(converter);
+    }
 
   } // namespace DCPS
 } // namespace OpenDDS

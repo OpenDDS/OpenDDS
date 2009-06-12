@@ -5,6 +5,7 @@
 #include "DomainParticipantFactoryImpl.h"
 #include "DomainParticipantImpl.h"
 #include "dds/DdsDcpsInfoC.h"
+#include "RepoIdConverter.h"
 #include "Service_Participant.h"
 #include "Qos_Helper.h"
 #include "Util.h"
@@ -204,12 +205,12 @@ namespace OpenDDS
       if (the_servant->is_clean () == 0)
         {
           RepoId id = the_servant->get_id();
-          ::OpenDDS::DCPS::GuidConverter converter( id);
+          RepoIdConverter converter(id);
           ACE_ERROR_RETURN((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: ")
             ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
             ACE_TEXT("the participant %C is not empty.\n"),
-            (const char*) converter
+            std::string(converter).c_str()
           ),::DDS::RETCODE_PRECONDITION_NOT_MET);
         }
 
@@ -219,14 +220,14 @@ namespace OpenDDS
       DPSet* entry;
       if (find(participants_, domain_id, entry) == -1)
         {
-          ::OpenDDS::DCPS::GuidConverter converter( dp_id);
+          RepoIdConverter converter(dp_id);
           ACE_ERROR_RETURN((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: ")
             ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
             ACE_TEXT("%p domain_id=%d dp_id=%C.\n"),
             ACE_TEXT("find"),
             domain_id,
-            (const char*) converter
+            std::string(converter).c_str()
           ),::DDS::RETCODE_ERROR);
         }
       else

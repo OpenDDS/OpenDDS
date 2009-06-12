@@ -1,0 +1,441 @@
+eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
+    & eval 'exec perl -S $0 $argv:q'
+    if 0;
+
+# $Id$
+# -*- perl -*-
+
+# Locate the project - *before* we use it to locate Perl modules
+use FindBin;
+my $projectRoot;
+BEGIN { $projectRoot = "$FindBin::Bin/.."; }
+
+# Locate the Perl modules
+use lib "$projectRoot/bin";
+use DDS_Run_Test;
+
+########################################
+#
+# Locate the link libraries
+# PerlDDS::add_lib_path( "$projectRoot/lib");
+#  NOTE: add_lib_path() does not appear to export the path to the
+#        subprocess sufficiently for use by our subprocesses.
+use Env qw( @LD_LIBRARY_PATH @LIB_PATH @SHLIB_PATH @PATH);
+unshift @LD_LIBRARY_PATH, "$projectRoot/lib";
+unshift @LIB_PATH,        "$projectRoot/lib";
+unshift @SHLIB_PATH,      "$projectRoot/lib";
+
+# I find this a particularly heinous setting.
+if( $^O eq 'MSWin32') { unshift @PATH, "$projectRoot/lib"; }
+#
+########################################
+
+use Getopt::Long qw( :config bundling) ;
+use Pod::Usage ;
+
+my $status = 0;
+my $failed = 0;
+
+#
+# Basic options.
+#
+my $debug;
+my $man;
+my $help;
+my $verbose;
+my $orbVerbose;
+my $dFile;
+my $rawData;
+my $rawSize = 4 * 1024;
+my $transportDebug;
+my $repoDebug;
+my $noaction;
+
+#
+# Specific options.
+#
+my $duration;
+my $startRepo;
+my $startTest;
+my $repoHost;
+my $iniFile  = $projectRoot . "/etc/transport.ini";
+my $scenarios;
+
+########################################################################
+#
+# Process the command line.
+#
+#   -v -V -? -d -T -R -x -f -r -h -s -i -S -P -t
+#
+GetOptions( "verbose!"            => \$verbose,
+            "v"                   => \$verbose,
+            "ORBVerboseLogging|V" => \$orbVerbose,
+            "help|?"              => \$help,
+            "man"                 => \$man,
+            "debug|d=i"           => \$debug,
+            "tdebug|T=i"          => \$transportDebug,
+            "rdebug|R=i"          => \$repoDebug,
+            "noaction|x"          => \$noaction,
+            "dfile|f=s"           => \$dFile,
+            "rawdatafile|r=s"     => \$rawData,
+            "repohost|h=s"        => \$repoHost,
+            "inifile|i=s"         => \$iniFile,
+            "scenario|s=s"        => \$scenarios,
+            "startrepo|S"         => \$startRepo,
+            "starttest|P"         => \$startTest,
+            "duration|t=i"        => \$duration,
+
+) or pod2usage( 0) ;
+pod2usage( 1)             if $help or ($startTest and not $scenarios);
+pod2usage( -verbose => 2) if $man;
+#
+########################################################################
+
+# Extract the individual scenarios.
+my @scenario = split( ',', $scenarios);
+
+# Verbosity.
+print "Commands will be printed only and not executed.\n"
+                                          if $verbose and $noaction;
+print "Repository will be started\n"      if $verbose and $startRepo;
+print "Test process will be started\n"    if $verbose and $startTest;
+print "Test will execute for at least $duration seconds before terminating\n"
+                                          if $verbose and $duration;
+print "Test will execute continuously and not terminate\n"
+                                          if $verbose and not $duration;
+print "ProjectRoot==$projectRoot\n"       if $verbose;
+print "RepoHost==$repoHost\n"             if $verbose;
+print scalar(@scenario) . " scenarios==" . join(', ', @scenario) . "\n"
+                                          if $verbose;
+print "RawDataFile==$rawData\n"           if $verbose and $rawData;
+
+print "Debug==$debug\n"                   if $verbose and $debug;
+print "RepoDebug==$repoDebug\n"           if $verbose and $repoDebug;
+print "TransportDebug==$transportDebug\n" if $verbose and $transportDebug;
+print "DebugFile==$dFile\n"               if $verbose and $dFile;
+print "VerboseLogging==$orbVerbose\n"     if $verbose and $orbVerbose;
+
+# Kill processes after specified duration plus a one minute grace period
+# if they do not terminate independently.
+my $killDelay = 60;
+$killDelay += $duration if $duration;
+
+# Files.
+my $repo_ior  = PerlACE::LocalFile("repo.ior");
+my $debugFile;
+   $debugFile = PerlACE::LocalFile( $dFile) if $dFile;
+my $confFile  = $projectRoot . "/etc/svc.conf";
+
+# Clean out leftovers.
+unlink $repo_ior;
+unlink $debugFile if $debugFile;
+
+my $common_opts = new PerlACE::ConfigList->check_config ('STATIC') ? ''
+    : "-ORBSvcConf $confFile";
+$common_opts .= $verboseDebug if $verboseDebug;
+$common_opts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
+
+# Process variables.
+my $REPO;
+my @TEST;
+
+# Establish process arguments.
+
+my $appDebug;
+$appDebug  = $debug if $debug;
+
+my $verboseDebug;
+$verboseDebug = "-ORBVerboseLogging 1 " if $orbVerbose;
+
+my $repoOpts = "$common_opts ";
+$repoOpts .= "-ORBListenEndpoints $repoHost " if $repoHost;
+$repoOpts .= "-DCPSDebugLevel $repoDebug " if $repoDebug;
+$repoOpts .= "-ORBLogFile $debugFile " if ($repoDebug or $transportDebug) and $debugFile;
+
+my $index = 0;
+my $testOpts = "$common_opts ";
+$testOpts .= "-v " if $verbose;
+$testOpts .= "-DCPSConfigFile $iniFile " if $iniFile;
+$testOpts .= "-DCPSDebugLevel $appDebug " if $appDebug;
+$testOpts .= "-ORBLogFile $debugFile " if ($appDebug or $transportDebug) and $debugFile;
+$testOpts .= "-DCPSInfoRepo corbaloc:iiop:$repoHost/DCPSInfoRepo ";
+$testOpts .= "-d $duration " if $duration;
+$testOpts .= "-t newest -s $rawSize -r $rawData " if $rawData;
+
+# Define the processes.
+
+my $repoArgs = "$repoOpts -o $repo_ior ";
+if( PerlACE::is_vxworks_test()) {
+  $REPO = new PerlACE::ProcessVX( "$FindBin::Bin/DCPSInfoRepo", $repoArgs);
+} else {
+  $REPO = new PerlACE::Process( "$FindBin::Bin/DCPSInfoRepo", $repoArgs);
+}
+
+for my $index ( 1 .. scalar(@scenario)) {
+  my $testArgs = "$testOpts "
+               . "-f $scenario[ $index - 1] ";
+  if( PerlACE::is_vxworks_test()) {
+    $TEST[ $index - 1] = new PerlACE::ProcessVX( "$FindBin::Bin/testprocess", $testArgs);
+  } else {
+    $TEST[ $index - 1] = new PerlACE::Process( "$FindBin::Bin/testprocess", $testArgs);
+  }
+}
+
+if( $noaction) {
+  # Be verbose.
+  print $REPO->CommandLine() . "\n" if $verbose and $startRepo;
+  foreach my $test (@TEST) {
+    print $test->CommandLine() . "\n" if $verbose and $startTest;
+  }
+  exit;
+}
+
+if( $startRepo) {
+  # Fire up the repository
+  print "\nREPO\n";
+  print $REPO->CommandLine() . "\n";
+  $REPO->Spawn();
+}
+
+if( $startTest) {
+  # Fire up the test processes.
+  for my $index ( 1 .. scalar(@scenario)) {
+    print "\nTEST $index\n";
+    print $TEST[ $index - 1]->CommandLine() . "\n";
+    $TEST[ $index - 1]->Spawn();
+  }
+
+  # block forever if no duration was specified.
+  sleep if not $duration;
+
+  # Wait for the testprocess to terminate nicely.
+
+  for my $index ( 1 .. scalar(@scenario)) {
+    $status = $TEST[ $index - 1]->WaitKill( $killDelay);
+    if( $status != 0) {
+      print STDERR "ERROR: Test $index returned $status\n";
+      ++$failed;
+    }
+    $killDelay = 5;
+  }
+}
+
+# Terminate the repository.
+
+if( $startRepo) {
+  # block forever if no duration was specified and we haven't already
+  # been released from this obligation.
+  sleep if not $duration and not $startTest;
+
+  print "\nStopping repository\n";
+  $status = $REPO->TerminateWaitKill( $killDelay);
+  if( $status != 0) {
+    print STDERR "ERROR: Repository returned $status\n";
+    ++$failed;
+  }
+  unlink $repo_ior;
+}
+
+# Report results.
+
+if( $failed == 0) {
+  print "test PASSED.\n";
+
+} else {
+  print STDERR "test FAILED.\n";
+}
+
+exit $failed;
+
+=head1 NAME
+
+run_test - Execute the test process for a distributed test.
+
+=head1 SYNOPSIS
+
+./run_test [options]
+
+Options:
+
+  -? | --help            brief help message
+
+  --man                  full documentation
+
+  -x | --noaction        do not execute any processing
+
+  -v | --verbose         be chatty while executing
+
+  -V | --ORBVerboseLogging=NUMBER
+                         set the corresponding ORB option
+
+  -d NUMBER | --debug=NUMBER
+                         set the DCPS debugging level
+
+  -T NUMBER | --tdebug=NUMBER
+                         set the DCPSTransportDebug debugging level
+
+  -R NUMBER | --rdebug=NUMBER
+                         set the DCPS debugging level for the repository
+
+  -f FILE | --dfile=FILE set the filename for debug output
+
+  -h FQDN | --repohost FQDN
+                         fully qualified domain name (and port) for
+                         connecting to repository
+
+  -i FILE | --inifile FILE
+                         file for configuring the OpenDDS service
+
+  -s FILELIST | --scenario FILELIST
+                         list of files defining the test scenario(s) to execute
+
+  -r FILE | --rawdatafile FILE
+                         file to write collected data to at end of test
+
+  -t NUMBER | --duration=NUMBER
+                         limit the duration of test execution
+
+  -S | --startrepo       start a repository
+
+  -P | --starttest       start a testprocess
+
+=head1 OPTIONS
+
+=over 8
+
+=item B<-?> | B<--help>
+
+Print a brief help message and exits.
+
+=item B<--man>
+
+Prints the manual page and exits.
+
+=item B<-x> | B<--noaction>
+
+Print the commands that would be executed with the current set of command
+line options and exit without performing any processing.
+
+=item B<-v> | B<--verbose>
+
+Print additional information while executing.
+
+=item B<-V> | B<--ORBVerboseLogging=NUMBER>
+
+Sets the -ORBVerboseLogging option to NUMBER.
+
+The default value is 0.
+
+The value is set to 1 if the single letter form isused (-V).
+
+=item B<-d NUMBER> | B<--debug=NUMBER>
+
+Sets the -DCPSDebugLevel option value.
+
+The default value is 0.
+
+=item B<-T NUMBER> | B<--tdebug=NUMBER>
+
+Sets the -DCPSTransportDebugLevel option value.
+
+The default value is 0.
+
+=item B<-R NUMBER> | B<--rdebug=NUMBER>
+
+Sets the -DCPSDebugLevel option value for the repository process.
+
+The default value is 0.
+
+=item B<-T NUMBER> | B<--tdebug=NUMBER>
+
+Sets the -DCPSTransportDebugLevel option value.
+
+The default value is 0.
+
+=item B<-t NUMBER> | B<--duration=NUMBER>
+
+Limits the execution time of the test.  If not specified, then any test
+or repository process that is started will execute until the script is
+interrupted.
+
+The default value is unspecified.
+
+=item B<-S> | B<--startrepo>
+
+Causes a repository process to be started.
+
+The default value is to not start a repository process.
+
+=item B<-P> | B<--starttest>
+
+Causes a test process to be started.
+
+The default value is to not start a test process.
+
+=item B<-f FILE> | B<--dfile=FILE>
+
+Sets the -ORBLogFile option value.
+
+The default value is 0.
+
+=item B<-h FQDN> | B<--repohost=FQDN>
+
+This is the fully qualified domain name and port where the OpenDDS
+repository may be found.
+
+The default value is 'localhost:2112'.
+
+=item B<-i FILE> | B<--inifile=FILE>
+
+OpenDDS configuration filename.  This defines the configuration
+information for the OpenDDS service itself.
+
+The default is to use the file located in the 'etc' directory relative
+from the project root (the parent directory of the directory where the
+command was executed from) with filename 'transport.ini'.
+
+=item B<-s FILELIST> | B<--scenario=FILELIST>
+
+Test scenario definition filenames.  This defines the scenarios to execute
+for the test.  This names an 'ini' style file that contains information
+about all publications and subscriptions to execute for this test
+execution.  This can be one or more filenames, separated by commas.  One
+test process will be started (if requested) to process each named
+scenario configuration file.
+
+There is no default value, and the test will not execute if not
+specified.
+
+=item B<-r FILE> | B<--rawdatafile=FILE>
+
+Raw data output filename.  This file is where any raw latency data
+collected during the test will be written.
+
+There is no default value, so no data will be reported by default.
+
+=back
+
+=head1 DESCRIPTION
+
+TBD
+
+=head1 EXAMPLES
+
+=over 8
+
+=item B<./run_test -vx -s s1.ini>
+
+=item B<./run_test -d 10 -T 4 -s test.ini -f test.log -h localhost:2038>
+
+=item B<./run_test -x -t mcast -s scenario1.ini>
+
+=item B<./run_test -vd10T4V -s test.ini -h machine.domain.com:2112>
+
+=back
+
+=cut
+
+__END__
+
+# vim: filetype=perl
+

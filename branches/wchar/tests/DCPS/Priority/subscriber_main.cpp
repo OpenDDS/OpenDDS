@@ -54,7 +54,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_TEXT("CORBA exception caught during processing.\n")
     ));
 
-  } catch( Test::Exception e)  {
+  } catch (const Test::Exception& e)  {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) subscriber_main() - ")
       ACE_TEXT("Test exception caught during processing: %s.\n"),

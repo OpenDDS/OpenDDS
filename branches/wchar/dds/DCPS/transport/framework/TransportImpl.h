@@ -233,6 +233,7 @@ namespace OpenDDS
                       (const TransportInterfaceInfo& remote_subscriber_info,
                        RepoId                        subscriber_id,
                        RepoId                        publisher_id,
+                       TransportSendListener*        send_listener,
                        CORBA::Long                   priority);
 
         /// Called by our friend, the TransportInterface, to reserve
@@ -244,10 +245,7 @@ namespace OpenDDS
                        RepoId                        subscriber_id,
                        TransportReceiveListener*     receive_listener,
                        CORBA::Long                   priority);
-//MJM: You might be able to collapse these two methods by just providing
-//MJM: a default NULL recieve listener (as the last arg) as long as this
-//MJM: collapsing propogates down to the datalink as well.  The method
-//MJM: implementations are remarkably similar.
+
 protected:
         typedef ACE_SYNCH_MUTEX                ReservationLockType;
         typedef ACE_Guard<ReservationLockType> ReservationGuardType;

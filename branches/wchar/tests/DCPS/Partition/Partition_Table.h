@@ -62,20 +62,24 @@ namespace Test
         0
       };
 
+    /// Partition Six (equivalent to One)
+    char const * Six[] = { 0 };
+
     PartitionConfig const PartitionConfigs[] =
       {
-        PartitionConfig (One,   1),
+        PartitionConfig (One,   2),
         PartitionConfig (Two,   0),
         PartitionConfig (Three, 2),
         PartitionConfig (Four,  1),
-        PartitionConfig (Five,  0)
+        PartitionConfig (Five,  0),
+        PartitionConfig (Six,   2)
       };
   }
 
   namespace Requested
   {
     /// Partition One
-    char const * const * const One = 0;
+    char const * One[] = { 0 };
 
     /// Partition Two
     char const * Two[] =
@@ -99,12 +103,28 @@ namespace Test
         0
       };
 
+    /// Partition Five (equivalent to One)
+    char const * Five[] =
+      {
+        "",
+        0
+      };
+
+    /// Partition Six
+    char const * Six[] =
+      {
+        "*",
+        0
+      };
+
     PartitionConfig const PartitionConfigs[] =
       {
-        PartitionConfig (One,   1),
+        PartitionConfig (One,   2),
         PartitionConfig (Two,   2),
         PartitionConfig (Three, 1),
-        PartitionConfig (Four,  0)
+        PartitionConfig (Four,  0),
+        PartitionConfig (Five,  2),
+        PartitionConfig (Six,   4)
       };
   }
 }

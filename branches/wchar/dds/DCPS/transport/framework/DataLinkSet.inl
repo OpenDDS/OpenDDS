@@ -5,6 +5,7 @@
 #include "EntryExit.h"
 #include "DataLink.h"
 #include "TransportSendElement.h"
+#include "SendResponseListener.h"
 #include "dds/DCPS/Util.h"
 
 ACE_INLINE void
@@ -74,6 +75,37 @@ OpenDDS::DCPS::DataLinkSet::send_control(RepoId                 pub_id,
     }
 
   return SEND_CONTROL_OK;
+}
+
+ACE_INLINE void
+OpenDDS::DCPS::DataLinkSet::send_response(
+  RepoId pub_id,
+  ACE_Message_Block* response
+)
+{
+  DBG_ENTRY_LVL("DataLinkSet","send_response",6);
+  TransportSendControlElement* send_element = 0;
+
+  SendResponseListener listener;
+
+  GuardType guard(this->lock_);
+  ACE_NEW_MALLOC( send_element,
+    (TransportSendControlElement*)send_control_element_allocator_.malloc(),
+    TransportSendControlElement( map_.size(),
+    pub_id,
+    &listener,
+    response,
+    &send_control_element_allocator_
+  ));
+
+  for (MapType::iterator itr = map_.begin();
+    itr != map_.end();
+    ++itr)
+    {
+      itr->second->send_start();
+      itr->second->send(send_element);
+      itr->second->send_stop();
+    }
 }
 
 

@@ -2,6 +2,7 @@
 #include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
+#include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/TopicImpl.h"
 #include "dds/DCPS/DomainParticipantImpl.h"
@@ -338,16 +339,22 @@ void run_next_sample_test (ssize_t size)
 
   OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (OpenDDS::DCPS::TransportSendElement));
 
-  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 1
-  converter.kind()             = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
-  converter.key()[2]           = 0;
+  // RepoIds are conventionally created and managed by the DCPSInfoRepo. Those
+  // generated here are for the sole purpose of verifying internal behavior.
+  OpenDDS::DCPS::RepoIdBuilder builder;
+
+  builder.participantId(1);
+  builder.entityKey(0);
+  builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
+  
+  OpenDDS::DCPS::RepoId repoId(builder);
 
   { // make VC6 buid - avoid error C2374: 'i' : redefinition; multiple initialization
   for (ssize_t i = 0; i < size; i ++)
   {
-    converter.key()[2] = i;
+    repoId.entityId.entityKey[2] = i;
     DataSampleListElement* sample
-      = new DataSampleListElement( converter, 0, 0, &trans_allocator);
+      = new DataSampleListElement(repoId, 0, 0, &trans_allocator);
     if (i == pub_id_middle)
     {
       middle = sample;
@@ -393,8 +400,8 @@ void run_next_sample_test (ssize_t size)
       ACE_TEXT("(list.dequeue_head_next_sample (sample) == true)")
       ACE_TEXT("\n")
     ));
-    converter.key()[2] = i;
-    TEST_CHECK (sample->publication_id_ == converter);
+    repoId.entityId.entityKey[2] = i;
+    TEST_CHECK (sample->publication_id_ == repoId);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) run_next_sample_test: ")
       ACE_TEXT("(sample->publication_id_ == converter)")
@@ -424,25 +431,31 @@ void run_next_send_sample_test (ssize_t size)
   DataSampleListElement* middle = 0;
 
   OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (OpenDDS::DCPS::TransportSendElement));
+  
+  // RepoIds are conventionally created and managed by the DCPSInfoRepo. Those
+  // generated here are for the sole purpose of verifying internal behavior.
+  OpenDDS::DCPS::RepoIdBuilder builder;
 
-  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 1
-  converter.kind()             = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
-  converter.key()[2]           = 0;
+  builder.participantId(1);
+  builder.entityKey(0);
+  builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
+ 
+  OpenDDS::DCPS::RepoId repoId(builder);
 
   for (ssize_t i = 0; i < pub_id_middle; i ++)
   {
-    converter.key()[2] = i;
+    repoId.entityId.entityKey[2] = i;
     DataSampleListElement* sample
-      = new DataSampleListElement( converter, 0, 0, &trans_allocator);
+      = new DataSampleListElement(repoId, 0, 0, &trans_allocator);
     list.enqueue_tail_next_send_sample (sample);
   }
 
   { // make VC6 buid - avoid error C2374: 'i' : redefinition; multiple initialization
   for (ssize_t i = pub_id_middle; i < size; i ++)
   {
-    converter.key()[2] = i;
+    repoId.entityId.entityKey[2] = i;
     DataSampleListElement* sample
-      = new DataSampleListElement( converter, 0, 0, &trans_allocator);
+      = new DataSampleListElement(repoId, 0, 0, &trans_allocator);
     if (i == pub_id_middle)
     {
       middle = sample;
@@ -495,8 +508,8 @@ void run_next_send_sample_test (ssize_t size)
       ACE_TEXT("(list.dequeue_head_next_send_sample (sample) == true)")
       ACE_TEXT("\n")
     ));
-    converter.key()[2] = i;
-    TEST_CHECK (sample->publication_id_ == converter);
+    repoId.entityId.entityKey[2] = i;
+    TEST_CHECK (sample->publication_id_ == repoId);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) run_next_send_sample_test: ")
       ACE_TEXT("(sample->publication_id_ == converter)")
@@ -525,15 +538,21 @@ void run_next_instance_sample_test (ssize_t size)
 
   OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (OpenDDS::DCPS::TransportSendElement));
 
-  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 1
-  converter.kind()             = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
-  converter.key()[2]           = 0;
+  // RepoIds are conventionally created and managed by the DCPSInfoRepo. Those
+  // generated here are for the sole purpose of verifying internal behavior.
+  OpenDDS::DCPS::RepoIdBuilder builder;
+
+  builder.participantId(1);
+  builder.entityKey(0);
+  builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
+  
+  OpenDDS::DCPS::RepoId repoId(builder);
 
   for (ssize_t i = 0; i < size; i ++)
   {
-    converter.key()[2] = i;
+    repoId.entityId.entityKey[2] = i;
     DataSampleListElement* sample
-      = new DataSampleListElement( converter, 0, 0, &trans_allocator);
+      = new DataSampleListElement(repoId, 0, 0, &trans_allocator);
     if (i == pub_id_middle)
     {
       middle = sample;
@@ -584,8 +603,8 @@ void run_next_instance_sample_test (ssize_t size)
       ACE_TEXT("(list.dequeue_head_next_instance_sample (sample) == true)")
       ACE_TEXT("\n")
     ));
-    converter.key()[2] = i;
-    TEST_CHECK (sample->publication_id_ == converter);
+    repoId.entityId.entityKey[2] = i;
+    TEST_CHECK (sample->publication_id_ == repoId);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) run_next_instance_sample_test: ")
       ACE_TEXT("(sample->publication_id_ == converter)")

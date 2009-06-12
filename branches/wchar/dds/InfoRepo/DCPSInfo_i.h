@@ -21,7 +21,7 @@
 #include /**/ "DCPS_IR_Publication.h"
 #include /**/ "DCPS_IR_Subscription.h"
 #include /**/ "DCPS_IR_Domain.h"
-#include "GuidGenerator.h"
+#include "RepoIdGenerator.h"
 #include "UpdateManager.h"
 
 #include /**/ "dds/DdsDcpsInfoS.h"
@@ -309,7 +309,7 @@ public:
   virtual void ignore_domain_participant (
       ::DDS::DomainId_t domainId,
       const OpenDDS::DCPS::RepoId& myParticipantId,
-      CORBA::Long ignoreKey
+      const OpenDDS::DCPS::RepoId& ignoreId
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -325,7 +325,7 @@ public:
   virtual void ignore_topic (
       ::DDS::DomainId_t domainId,
       const OpenDDS::DCPS::RepoId& myParticipantId,
-      CORBA::Long ignoreKey
+      const OpenDDS::DCPS::RepoId& ignoreId
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -337,7 +337,7 @@ public:
   virtual void ignore_subscription (
       ::DDS::DomainId_t domainId,
       const OpenDDS::DCPS::RepoId& myParticipantId,
-      CORBA::Long ignoreKey
+      const OpenDDS::DCPS::RepoId& ignoreId
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -349,7 +349,7 @@ public:
   virtual void ignore_publication (
       ::DDS::DomainId_t domainId,
       const OpenDDS::DCPS::RepoId& myParticipantId,
-      CORBA::Long ignoreKey
+      const OpenDDS::DCPS::RepoId& ignoreId
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -505,8 +505,8 @@ private:
   DCPS_IR_Domain_Map domains_;
   CORBA::ORB_var orb_;
 
-  long          federation_;
-  GuidGenerator participantIdGenerator_;
+  long            federation_;
+  RepoIdGenerator participantIdGenerator_;
 
   Update::Manager* um_;
   bool reincarnate_;

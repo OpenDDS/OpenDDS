@@ -25,6 +25,7 @@
 #include "ace/Reverse_Lock_T.h"
 
 #include <vector>
+#include <list>
 #include <map>
 #include <memory>
 
@@ -73,9 +74,35 @@ namespace OpenDDS
         /// update liveliness when remove_association is called.
         void removed ();
 
+        /// Update the last observed sequence number from this publication.
+        void last_sequence( SequenceNumber sequence);
+
+        /// Access the most recently observed sequence number from this publication.
+        SequenceNumber last_sequence() const;
+
+        /// Remove ack requests prior to the given sequence.
+        /// NOTE: This removes *all* ack requests for this publication
+        ///       satisfied by this sequence.
+        void clear_acks( SequenceNumber sequence);
+
+        /// Determine if a SAMPLE_ACK message should be sent to this
+        /// publication.
+        bool should_ack( ACE_Time_Value now);
+
+        /// Set the time after which we no longer need to generate a
+        /// SAMPLE_ACK for this sequence value.
+        void ack_deadline( SequenceNumber sequence, ACE_Time_Value when);
+
       private:
         /// Timestamp of last write/dispose/assert_liveliness from this DataWriter
         ACE_Time_Value last_liveliness_activity_time_;
+
+        /// Last observed data sample sequence number from this writer.
+        SequenceNumber last_sequence_;
+
+        /// Times after which we no longer need to respond to a REQUEST_ACK message.
+        typedef std::list< std::pair< SequenceNumber, ACE_Time_Value> > DeadlineList;
+        DeadlineList ack_deadlines_;
 
         /// State of the writer.
         WriterState state_;
@@ -88,10 +115,13 @@ namespace OpenDDS
       };
 
     /// Elements stored for managing statistical data.
-    class WriterStats {
+    class OpenDDS_Dcps_Export WriterStats {
       public:
         /// Default constructor.
-        WriterStats();
+        WriterStats(
+          int amount = 0,
+          DataCollector< double>::OnFull type = DataCollector< double>::KeepOldest
+        );
 
         /// Add a datum to the latency statistics.
         void add_stat( const ACE_Time_Value& delay);
@@ -101,6 +131,9 @@ namespace OpenDDS
 
         /// Reset the latency statistics for this writer.
         void reset_stats();
+
+        /// Dump any raw data.
+        std::ostream& raw_data( std::ostream& str) const;
 
       private:
         /// Latency statistics for the DataWriter to this DataReader.
@@ -133,12 +166,17 @@ namespace OpenDDS
         ::DDS::InstanceHandle_t,
         SubscriptionInstance*> SubscriptionInstanceMapType;
 
+      /// Type of collection of statistics for writers to this reader.
+      typedef std::map< PublicationId, WriterStats, GUID_tKeyLessThan> StatsMapType;
+
       //Constructor
       DataReaderImpl (void);
 
       //Destructor
       virtual ~DataReaderImpl (void);
 
+      virtual DDS::InstanceHandle_t get_instance_handle()
+        ACE_THROW_SPEC ((CORBA::SystemException));
 
       virtual void add_associations (
           ::OpenDDS::DCPS::RepoId yourId,
@@ -387,6 +425,20 @@ namespace OpenDDS
           ::CORBA::SystemException
         ));
 
+      /// @name Raw Latency Statistics Interfaces
+      /// @{
+
+      /// Expose the statistics container.
+      const StatsMapType& raw_latency_statistics() const;
+
+      /// Configure the size of the raw data collection buffer.
+      unsigned int& raw_latency_buffer_size();
+
+      /// Configure the type of the raw data collection buffer.
+      DataCollector< double>::OnFull& raw_latency_buffer_type();
+
+      /// @}
+
       /// update liveliness info for this writer.
       void writer_activity(PublicationId writer_id);
 
@@ -516,6 +568,12 @@ namespace OpenDDS
       ::DDS::InstanceHandle_t         next_handle_;
 
     private:
+      /// Send a SAMPLE_ACK message in response to a REQUEST_ACK message.
+      bool send_sample_ack(
+             const RepoId& publication,
+             ACE_INT16 sequence,
+             ::DDS::Time_t when
+           );
 
       /// Data has arrived into the cache, unblock waiting ReadConditions
       void notify_read_conditions ();
@@ -618,14 +676,18 @@ namespace OpenDDS
       /// Flag indicating status of statistics gathering.
       bool statistics_enabled_;
 
-      typedef std::map< PublicationId, WriterInfo,  GUID_tKeyLessThan> WriterMapType;
-      typedef std::map< PublicationId, WriterStats, GUID_tKeyLessThan> StatsMapType;
-
       /// publications writing to this reader.
+      typedef std::map< PublicationId, WriterInfo,  GUID_tKeyLessThan> WriterMapType;
       WriterMapType writers_;
 
       /// Statistics for this reader, collected for each writer.
       StatsMapType statistics_;
+
+      /// Bound (or initial reservation) of raw latency buffer.
+      unsigned int raw_latency_buffer_size_;
+
+      /// Type of raw latency data buffer.
+      DataCollector< double>::OnFull raw_latency_buffer_type_;
 
       typedef
         std::set< ::DDS::ReadCondition_var, VarLess< ::DDS::ReadCondition > >

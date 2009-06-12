@@ -9,6 +9,7 @@
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
+#include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
@@ -19,9 +20,6 @@
 
 #include "FederatorTypeSupportC.h"
 #include "FederatorTypeSupportImpl.h"
-
-#include <sstream>
-#include <string>
 
 #if !defined (__ACE_INLINE__)
 # include "FederatorManagerImpl.inl"
@@ -424,14 +422,11 @@ ManagerImpl::initialize()
         ACE_TEXT("unable to extract typed OwnerUpdate writer.\n")
       ));
     } else {
-      ::OpenDDS::DCPS::RepoId id = servant->get_publication_id();
-      std::stringstream buffer;
-      long key = ::OpenDDS::DCPS::GuidConverter( id);
-      buffer << id << "(" << std::hex << key << ")";
+      OpenDDS::DCPS::RepoIdConverter converter(servant->get_publication_id());
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
         ACE_TEXT("created federation OwnerUpdate writer %C for repository %d\n"),
-        buffer.str().c_str(),
+        std::string(converter).c_str(),
         this->id()
       ));
     }
@@ -461,14 +456,11 @@ ManagerImpl::initialize()
       ));
 
     } else {
-      ::OpenDDS::DCPS::RepoId id = servant->get_subscription_id();
-      std::stringstream buffer;
-      long key = ::OpenDDS::DCPS::GuidConverter( id);
-      buffer << id << "(" << std::hex << key << ")";
+      OpenDDS::DCPS::RepoIdConverter converter(servant->get_subscription_id());
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
         ACE_TEXT("created federation OwnerUpdate reader %C for repository %d\n"),
-        buffer.str().c_str(),
+        std::string(converter).c_str(),
         this->id()
       ));
     }
@@ -513,14 +505,11 @@ ManagerImpl::initialize()
       ));
 
     } else {
-      ::OpenDDS::DCPS::RepoId id = servant->get_publication_id();
-      std::stringstream buffer;
-      long key = ::OpenDDS::DCPS::GuidConverter( id);
-      buffer << id << "(" << std::hex << key << ")";
+      OpenDDS::DCPS::RepoIdConverter converter(servant->get_publication_id());
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
         ACE_TEXT("created federation TopicUpdate writer %C for repository %d\n"),
-        buffer.str().c_str(),
+        std::string(converter).c_str(),
         this->id()
       ));
     }
@@ -550,14 +539,11 @@ ManagerImpl::initialize()
       ));
 
     } else {
-      ::OpenDDS::DCPS::RepoId id = servant->get_subscription_id();
-      std::stringstream buffer;
-      long key = ::OpenDDS::DCPS::GuidConverter( id);
-      buffer << id << "(" << std::hex << key << ")";
+      OpenDDS::DCPS::RepoIdConverter converter(servant->get_subscription_id());
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
         ACE_TEXT("created federation TopicUpdate reader %C for repository %d\n"),
-        buffer.str().c_str(),
+        std::string(converter).c_str(),
         this->id()
       ));
     }
@@ -602,14 +588,11 @@ ManagerImpl::initialize()
       ));
 
     } else {
-      ::OpenDDS::DCPS::RepoId id = servant->get_publication_id();
-      std::stringstream buffer;
-      long key = ::OpenDDS::DCPS::GuidConverter( id);
-      buffer << id << "(" << std::hex << key << ")";
+      OpenDDS::DCPS::RepoIdConverter converter(servant->get_publication_id());
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
         ACE_TEXT("created federation ParticipantUpdate writer %C for repository %d\n"),
-        buffer.str().c_str(),
+        std::string(converter).c_str(),
         this->id()
       ));
     }
@@ -639,14 +622,11 @@ ManagerImpl::initialize()
       ));
 
     } else {
-      ::OpenDDS::DCPS::RepoId id = servant->get_subscription_id();
-      std::stringstream buffer;
-      long key = ::OpenDDS::DCPS::GuidConverter( id);
-      buffer << id << "(" << std::hex << key << ")";
+      OpenDDS::DCPS::RepoIdConverter converter(servant->get_subscription_id());
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
         ACE_TEXT("created federation ParticipantUpdate reader %C for repository %d\n"),
-        buffer.str().c_str(),
+        std::string(converter).c_str(),
         this->id()
       ));
     }
@@ -691,14 +671,11 @@ ManagerImpl::initialize()
       ));
 
     } else {
-      ::OpenDDS::DCPS::RepoId id = servant->get_publication_id();
-      std::stringstream buffer;
-      long key = ::OpenDDS::DCPS::GuidConverter( id);
-      buffer << id << "(" << std::hex << key << ")";
+      OpenDDS::DCPS::RepoIdConverter converter(servant->get_publication_id());
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
         ACE_TEXT("created federation PublicationUpdate writer %C for repository %d\n"),
-        buffer.str().c_str(),
+        std::string(converter).c_str(),
         this->id()
       ));
     }
@@ -728,14 +705,11 @@ ManagerImpl::initialize()
       ));
 
     } else {
-      ::OpenDDS::DCPS::RepoId id = servant->get_subscription_id();
-      std::stringstream buffer;
-      long key = ::OpenDDS::DCPS::GuidConverter( id);
-      buffer << id << "(" << std::hex << key << ")";
+      OpenDDS::DCPS::RepoIdConverter converter(servant->get_subscription_id());
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
         ACE_TEXT("created federation PublicationUpdate reader %C for repository %d\n"),
-        buffer.str().c_str(),
+        std::string(converter).c_str(),
         this->id()
       ));
     }
@@ -780,14 +754,11 @@ ManagerImpl::initialize()
       ));
 
     } else {
-      ::OpenDDS::DCPS::RepoId id = servant->get_publication_id();
-      std::stringstream buffer;
-      long key = ::OpenDDS::DCPS::GuidConverter( id);
-      buffer << id << "(" << std::hex << key << ")";
+      OpenDDS::DCPS::RepoIdConverter converter(servant->get_publication_id());
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
         ACE_TEXT("created federation SubscriptionUpdate writer %C for repository %d\n"),
-        buffer.str().c_str(),
+        std::string(converter).c_str(),
         this->id()
       ));
     }
@@ -817,14 +788,11 @@ ManagerImpl::initialize()
       ));
 
     } else {
-      ::OpenDDS::DCPS::RepoId id = servant->get_subscription_id();
-      std::stringstream buffer;
-      long key = ::OpenDDS::DCPS::GuidConverter( id);
-      buffer << id << "(" << std::hex << key << ")";
+      OpenDDS::DCPS::RepoIdConverter converter(servant->get_subscription_id());
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
         ACE_TEXT("created federation SubscriptionUpdate reader %C for repository %d\n"),
-        buffer.str().c_str(),
+        std::string(converter).c_str(),
         this->id()
       ));
     }

@@ -2,9 +2,12 @@ Version 1.3 of OpenDDS.
 
 New to this version are the following changes:
 
-- Extended the implementation of the DataReader SUBSCRIPTION_MATCH_STATUS
-  and DataWriter PUBLICATION_MATCH_STATUS to include decrementing the
-  total_count when associations are removed.
+- Implemented the Communication Status entity structures and behaviors to
+  conform with the version 1.2 specification (formal/07-01-01).  This
+  includes member name changes and additions to LivelinessChangedStatus;
+  modifying and extending the SampleRejectedStatusKind enumeration; and,
+  adding new members to the PublicationMatchStatus and
+  SubscriptionMatchStatus structures.
 
 - Implemented the TRANSPORT_PRIORITY Quality of service policy using the
   policy value to set thread priorities and DiffServ codepoint values.
@@ -31,6 +34,9 @@ New to this version are the following changes:
 
 - The PARTITION QoS policy now accepts character class wildcards using [].
 
+- Corrected a bug in the PARTITION QoS implementation where the default
+  QoS would not match against the '*' wildcard.
+
 - The DURABILITY QoS implementation was corrected so that readers requesting
   the VOLATLIE kind will not receive historic samples from writers.  Since
   there were some use-cases for the old behavior, it is available through an
@@ -47,6 +53,17 @@ New to this version are the following changes:
 
 - The $DDS_ROOT/bin/federation utility has been renamed to opendds_ir_ctl
   and now supports shutting down a remote non-federated DCPSInfoRepo process.
+
+- Deleting a DataWriter from a Publisher now blocks until pending samples have
+  been delivered by the underlying transport.  By default, the DataWriter will
+  block indefinitely.  To change the default blocking behavior, you may
+  specify a number of seconds to block with the -DCPSPendingTimeout option.
+
+- Instance handles are now compliant with version 1.2 of the DDS
+  specification.  Additionally, the contains_entity and get_instance_handle
+  operations have been implemented.
+
+- Implemented DataWriter::wait_for_acknowledgments() from formal/07-01-01.
 
 =========================================================================
 

@@ -6,6 +6,7 @@
 
 #include "EntityImpl.h"
 #include "Definitions.h"
+#include "InstanceHandle.h"
 #include "TopicImpl.h"
 #include "dds/DdsDcpsPublicationC.h"
 #include "dds/DdsDcpsSubscriptionExtC.h"
@@ -34,9 +35,9 @@ namespace OpenDDS
 {
   namespace DCPS
   {
+    class FailoverListener;
     class PublisherImpl;
     class SubscriberImpl;
-    class FailoverListener;
 
     /**
     * @class DomainParticipantImpl
@@ -101,6 +102,8 @@ namespace OpenDDS
       ///Destructor
       virtual ~DomainParticipantImpl (void);
 
+    virtual DDS::InstanceHandle_t get_instance_handle()
+      ACE_THROW_SPEC ((CORBA::SystemException));
 
     virtual ::DDS::Publisher_ptr create_publisher (
       const ::DDS::PublisherQos & qos,
@@ -175,6 +178,9 @@ namespace OpenDDS
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
+
+    virtual CORBA::Boolean contains_entity(DDS::InstanceHandle_t a_handle)
+      ACE_THROW_SPEC ((CORBA::SystemException));
 
     virtual ::DDS::ReturnCode_t set_qos (
         const ::DDS::DomainParticipantQos & qos
@@ -336,9 +342,6 @@ namespace OpenDDS
     private:
 
       /** The implementation of create_topic.
-      *   The TopicMap owns the reference bumped by narrow in the
-      *   servant_to_reference and the returned topic is a duplicate
-      *   topic in the TopicMap.
       */
       ::DDS::Topic_ptr create_topic_i (
           const RepoId topic_id,
@@ -426,6 +429,11 @@ namespace OpenDDS
 
       /// Listener to initiate failover with.
       FailoverListener*      failoverListener_;
+
+      /// Instance handle generators for non-repo backed entities
+      /// (i.e. subscribers and publishers).
+      InstanceHandleGenerator subscriber_handles_;
+      InstanceHandleGenerator publisher_handles_;
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
       /// The datareader for built in topic participant.

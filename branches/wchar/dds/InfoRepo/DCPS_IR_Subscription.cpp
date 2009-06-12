@@ -7,10 +7,9 @@
 #include /**/ "DCPS_IR_Topic_Description.h"
 #include /**/ "DCPS_IR_Domain.h"
 #include /**/ "DCPS_Utils.h"
+#include /**/ "dds/DCPS/RepoIdConverter.h"
 #include /**/ "dds/DCPS/Qos_Helper.h"
 #include /**/ "tao/debug.h"
-
-#include <sstream>
 
 DCPS_IR_Subscription::DCPS_IR_Subscription (OpenDDS::DCPS::RepoId id,
                                             DCPS_IR_Participant* participant,
@@ -67,21 +66,13 @@ int DCPS_IR_Subscription::add_associated_publication (DCPS_IR_Publication* pub)
               {
                 if (::OpenDDS::DCPS::DCPS_debug_level > 0)
                  {
-                    std::stringstream buffer;
-                    long handle;
-                    handle = ::OpenDDS::DCPS::GuidConverter( this->id_);
-                    buffer << this->id_ << "(" << std::hex << handle << ")";
-
-                    std::stringstream publicationBuffer;
-                    OpenDDS::DCPS::RepoId pubId = pub->get_id();
-                    handle = ::OpenDDS::DCPS::GuidConverter( pubId);
-                    publicationBuffer << pubId << "(" << std::hex << handle << ")";
-
+                    OpenDDS::DCPS::RepoIdConverter sub_converter(id_);
+                    OpenDDS::DCPS::RepoIdConverter pub_converter(pub->get_id());
                     ACE_DEBUG((LM_DEBUG,
                       ACE_TEXT("(%P|%t) DCPS_IR_Subscription::add_associated_publication:")
                       ACE_TEXT(" subscription %C adding publication %C.\n"),
-                      buffer.str().c_str(),
-                      publicationBuffer.str().c_str()
+                      std::string(sub_converter).c_str(),
+                      std::string(pub_converter).c_str()
                     ));
                  }
                 reader_->add_associations(id_, associationSeq);
@@ -108,42 +99,26 @@ int DCPS_IR_Subscription::add_associated_publication (DCPS_IR_Publication* pub)
 
     case 1:
       {
-        std::stringstream buffer;
-        long handle;
-        handle = ::OpenDDS::DCPS::GuidConverter( this->id_);
-        buffer << this->id_ << "(" << std::hex << handle << ")";
-
-        std::stringstream publicationBuffer;
-        OpenDDS::DCPS::RepoId pubId = pub->get_id();
-        handle = ::OpenDDS::DCPS::GuidConverter( pubId);
-        publicationBuffer << pubId << "(" << std::hex << handle << ")";
-
+        OpenDDS::DCPS::RepoIdConverter sub_converter(id_);
+        OpenDDS::DCPS::RepoIdConverter pub_converter(pub->get_id());
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Subscription::add_associated_publication: ")
           ACE_TEXT("subscription %C attempted to re-add publication %C\n"),
-          buffer.str().c_str(),
-          publicationBuffer.str().c_str()
+          std::string(sub_converter).c_str(),
+          std::string(pub_converter).c_str()
         ));
       }
       break;
 
     case -1:
       {
-        std::stringstream buffer;
-        long handle;
-        handle = ::OpenDDS::DCPS::GuidConverter( this->id_);
-        buffer << this->id_ << "(" << std::hex << handle << ")";
-
-        std::stringstream publicationBuffer;
-        OpenDDS::DCPS::RepoId pubId = pub->get_id();
-        handle = ::OpenDDS::DCPS::GuidConverter( pubId);
-        publicationBuffer << pubId << "(" << std::hex << handle << ")";
-
+        OpenDDS::DCPS::RepoIdConverter sub_converter(id_);
+        OpenDDS::DCPS::RepoIdConverter pub_converter(pub->get_id());
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Subscription::add_associated_publication: ")
           ACE_TEXT("subscription %C failed to add publication %C\n"),
-          buffer.str().c_str(),
-          publicationBuffer.str().c_str()
+          std::string(sub_converter).c_str(),
+          std::string(pub_converter).c_str()
         ));
       }
     };
@@ -201,42 +176,26 @@ int DCPS_IR_Subscription::remove_associated_publication (DCPS_IR_Publication* pu
     {
       if (::OpenDDS::DCPS::DCPS_debug_level > 0)
         {
-          std::stringstream buffer;
-          long handle;
-          handle = ::OpenDDS::DCPS::GuidConverter( this->id_);
-          buffer << this->id_ << "(" << std::hex << handle << ")";
-
-          std::stringstream publicationBuffer;
-          OpenDDS::DCPS::RepoId pubId = pub->get_id();
-          handle = ::OpenDDS::DCPS::GuidConverter( pubId);
-          publicationBuffer << pubId << "(" << std::hex << handle << ")";
-
+          OpenDDS::DCPS::RepoIdConverter sub_converter(id_);
+          OpenDDS::DCPS::RepoIdConverter pub_converter(pub->get_id());
           ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) DCPS_IR_Subscription::remove_associated_publication: ")
             ACE_TEXT("subscription %C removed publication %C at %x.\n"),
-            buffer.str().c_str(),
-            publicationBuffer.str().c_str(),
+            std::string(sub_converter).c_str(),
+            std::string(pub_converter).c_str(),
             pub
           ));
         }
     }
   else
     {
-      std::stringstream buffer;
-      long handle;
-      handle = ::OpenDDS::DCPS::GuidConverter( this->id_);
-      buffer << this->id_ << "(" << std::hex << handle << ")";
-
-      std::stringstream publicationBuffer;
-      OpenDDS::DCPS::RepoId pubId = pub->get_id();
-      handle = ::OpenDDS::DCPS::GuidConverter( pubId);
-      publicationBuffer << pubId << "(" << std::hex << handle << ")";
-
+      OpenDDS::DCPS::RepoIdConverter sub_converter(id_);
+      OpenDDS::DCPS::RepoIdConverter pub_converter(pub->get_id());
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Subscription::remove_associated_publication: ")
         ACE_TEXT("subscription %C failed to remove publication %C at %x.\n"),
-        buffer.str().c_str(),
-        publicationBuffer.str().c_str(),
+        std::string(sub_converter).c_str(),
+        std::string(pub_converter).c_str(),
         pub
       ));
     } // if (0 == status)
@@ -302,35 +261,17 @@ void DCPS_IR_Subscription::disassociate_participant (OpenDDS::DCPS::RepoId id)
           ++iter;
           if (::OpenDDS::DCPS::DCPS_debug_level > 0)
             {
-              std::stringstream buffer;
-              long handle;
-              handle = ::OpenDDS::DCPS::GuidConverter( this->id_);
-              buffer << this->id_ << "(" << std::hex << handle << ")";
-
-              std::stringstream publicationBuffer;
-              OpenDDS::DCPS::RepoId pubId = pub->get_id();
-              handle = ::OpenDDS::DCPS::GuidConverter( pubId);
-              publicationBuffer << pubId << "(" << std::hex << handle << ")";
-
-              std::stringstream participantBuffer;
-              handle = ::OpenDDS::DCPS::GuidConverter( id);
-              participantBuffer << id << "(" << std::hex << handle << ")";
-
-              std::stringstream publicationParticipantBuffer;
-              OpenDDS::DCPS::RepoId publicationParticipantId
-                = pub->get_participant_id();
-              handle
-                = ::OpenDDS::DCPS::GuidConverter( publicationParticipantId);
-              publicationParticipantBuffer
-                << publicationParticipantId << "(" << std::hex << handle << ")";
-
+              OpenDDS::DCPS::RepoIdConverter sub_converter(id_);
+              OpenDDS::DCPS::RepoIdConverter pub_converter(pub->get_id());
+              OpenDDS::DCPS::RepoIdConverter sub_part_converter(id);
+              OpenDDS::DCPS::RepoIdConverter pub_part_converter(pub->get_participant_id());
               ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) DCPS_IR_Subscription::disassociate_participant: ")
                 ACE_TEXT("subscription %C testing if publication %C particpant %C == %C.\n"),
-                buffer.str().c_str(),
-                publicationBuffer.str().c_str(),
-                publicationParticipantBuffer.str().c_str(),
-                participantBuffer.str().c_str()
+                std::string(sub_converter).c_str(),
+                std::string(pub_converter).c_str(),
+                std::string(sub_part_converter).c_str(),
+                std::string(pub_part_converter).c_str()
               ));
             }
           if (id == pub->get_participant_id() )
@@ -391,35 +332,17 @@ void DCPS_IR_Subscription::disassociate_topic (OpenDDS::DCPS::RepoId id)
           ++iter;
           if (::OpenDDS::DCPS::DCPS_debug_level > 0)
             {
-              std::stringstream buffer;
-              long handle;
-              handle = ::OpenDDS::DCPS::GuidConverter( this->id_);
-              buffer << this->id_ << "(" << std::hex << handle << ")";
-
-              std::stringstream publicationBuffer;
-              OpenDDS::DCPS::RepoId pubId = pub->get_id();
-              handle = ::OpenDDS::DCPS::GuidConverter( pubId);
-              publicationBuffer << pubId << "(" << std::hex << handle << ")";
-
-              std::stringstream topicBuffer;
-              handle = ::OpenDDS::DCPS::GuidConverter( id);
-              topicBuffer << id << "(" << std::hex << handle << ")";
-
-              std::stringstream publicationTopicBuffer;
-              OpenDDS::DCPS::RepoId publicationTopicId
-                = pub->get_topic_id();
-              handle
-                = ::OpenDDS::DCPS::GuidConverter( publicationTopicId);
-              publicationTopicBuffer
-                << publicationTopicId << "(" << std::hex << handle << ")";
-
+              OpenDDS::DCPS::RepoIdConverter sub_converter(id_);
+              OpenDDS::DCPS::RepoIdConverter pub_converter(pub->get_id());
+              OpenDDS::DCPS::RepoIdConverter sub_topic_converter(id);
+              OpenDDS::DCPS::RepoIdConverter pub_topic_converter(pub->get_topic_id());
               ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) DCPS_IR_Subscription::disassociate_topic: ")
                 ACE_TEXT("subscription %C testing if publication %C topic %C == %C.\n"),
-                buffer.str().c_str(),
-                publicationBuffer.str().c_str(),
-                publicationTopicBuffer.str().c_str(),
-                topicBuffer.str().c_str()
+                std::string(sub_converter).c_str(),
+                std::string(pub_converter).c_str(),
+                std::string(sub_topic_converter).c_str(),
+                std::string(pub_topic_converter).c_str()
               ));
             }
           if (id == pub->get_topic_id() )
@@ -480,26 +403,15 @@ void DCPS_IR_Subscription::disassociate_publication (OpenDDS::DCPS::RepoId id)
           ++iter;
           if (::OpenDDS::DCPS::DCPS_debug_level > 0)
             {
-              std::stringstream buffer;
-              long handle;
-              handle = ::OpenDDS::DCPS::GuidConverter( this->id_);
-              buffer << this->id_ << "(" << std::hex << handle << ")";
-
-              std::stringstream publicationBuffer;
-              OpenDDS::DCPS::RepoId pubId = pub->get_id();
-              handle = ::OpenDDS::DCPS::GuidConverter( pubId);
-              publicationBuffer << pubId << "(" << std::hex << handle << ")";
-
-              std::stringstream idBuffer;
-              handle = ::OpenDDS::DCPS::GuidConverter( id);
-              idBuffer << id << "(" << std::hex << handle << ")";
-
+              OpenDDS::DCPS::RepoIdConverter sub_converter(id_);
+              OpenDDS::DCPS::RepoIdConverter pub_converter(pub->get_id());
+              OpenDDS::DCPS::RepoIdConverter sub_pub_converter(id);
               ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) DCPS_IR_Subscription::disassociate_publication: ")
                 ACE_TEXT("subscription %C testing if publication %C == %C.\n"),
-                buffer.str().c_str(),
-                publicationBuffer.str().c_str(),
-                idBuffer.str().c_str()
+                std::string(sub_converter).c_str(),
+                std::string(pub_converter).c_str(),
+                std::string(sub_pub_converter).c_str()
               ));
             }
           if (id == pub->get_id() )

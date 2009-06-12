@@ -202,7 +202,7 @@ DDS::ReturnCode_t
                     ::DDS::RETCODE_ERROR);
 
   ::DDS::InstanceHandle_t const registered_handle =
-      this->get_instance_handle(instance_data);
+      this->find_instance_handle(instance_data);
 
   if (registered_handle == ::DDS::HANDLE_NIL)
   {
@@ -319,7 +319,7 @@ DDS::ReturnCode_t
 
   if(instance_handle == ::DDS::HANDLE_NIL)
   {
-    instance_handle = this->get_instance_handle(instance_data);
+    instance_handle = this->find_instance_handle(instance_data);
     if (instance_handle == ::DDS::HANDLE_NIL)
     {
       ACE_ERROR_RETURN ((LM_ERROR,
@@ -561,7 +561,7 @@ ACE_Message_Block*
 }
 
 ::DDS::InstanceHandle_t
- <%TYPE%>DataWriterImpl::get_instance_handle(
+ <%TYPE%>DataWriterImpl::find_instance_handle(
                 const ::<%SCOPE%><%TYPE%>& instance_data)
 {
   InstanceMap::const_iterator const it = instance_map_.find(instance_data);
@@ -1075,6 +1075,7 @@ DDS::ReturnCode_t
              ::OpenDDS::DCPS::DDS_OPERATION_READ);
 
   OpenDDS::DCPS::SubscriptionInstance* inst = get_handle_instance(a_handle);
+  if (inst == 0) return DDS::RETCODE_BAD_PARAMETER;
 
   if ((inst->instance_state_.view_state() & view_states) &&
       (inst->instance_state_.instance_state() & instance_states))
@@ -1422,7 +1423,7 @@ void
   )
 {
   using ::OpenDDS::DCPS::ReceivedDataElement;
-
+    
   if (0 == item->dec_ref())
   {
     if (item->registered_data_ != 0)
@@ -1495,7 +1496,7 @@ DDS::ReturnCode_t
 
 
 ::DDS::InstanceHandle_t
- <%TYPE%>DataReaderImpl::get_instance_handle(
+ <%TYPE%>DataReaderImpl::find_instance_handle(
                 const ::<%SCOPE%><%TYPE%>& instance_data)
 {
   InstanceMap::const_iterator const it = instance_map_.find(instance_data);
@@ -1638,7 +1639,7 @@ void
         set_status_changed_flag (::DDS::SAMPLE_REJECTED_STATUS, true);
 
         sample_rejected_status_.last_reason =
-          ::DDS::REJECTED_BY_INSTANCE_LIMIT;
+          ::DDS::REJECTED_BY_SAMPLES_PER_INSTANCE_LIMIT;
         ++sample_rejected_status_.total_count;
         ++sample_rejected_status_.total_count_change;
         sample_rejected_status_.last_instance_handle = handle;
@@ -1709,7 +1710,6 @@ void
     instance_ptr->last_sequence_ = header.sequence_;
 
     instance_ptr->rcvd_sample_.add(ptr);
-    ptr->inc_ref();
 
     if (instance_ptr->rcvd_sample_.size_ > get_depth())
     {

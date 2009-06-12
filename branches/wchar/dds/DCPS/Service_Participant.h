@@ -17,6 +17,7 @@
 
 #include "ace/Task.h"
 #include "ace/Configuration.h"
+#include "ace/Time_Value.h"
 
 #include <map>
 #include <memory>
@@ -251,9 +252,12 @@ namespace OpenDDS
 
       /// Accessors for scheduling policy value.
       //@{
-      int& scheduler();
-      int  scheduler() const;
+      long& scheduler();
+      long  scheduler() const;
       //@}
+
+      /// Accessor for pending data timeout.
+      ACE_Time_Value pending_timeout() const;
 
       /// Accessors for priority extremums for the current scheduler.
       //@{
@@ -300,7 +304,7 @@ namespace OpenDDS
         }
 
       ///Create the TransportImpl for all builtin topics.
-      int init_bit_transport_impl (RepoKey repo = DEFAULT_REPO);
+      int init_bit_transport_impl (::DDS::DomainId_t domain = ANY_DOMAIN);
 
       /// Get the data durability cache corresponding to the given
       /// DurabilityQosPolicy and sample list depth.
@@ -444,8 +448,8 @@ namespace OpenDDS
       typedef std::map< RepoKey, int> RepoTransportPortMap;
       RepoTransportPortMap bitTransportPortMap_;
 
-      /// The mapping from repository key to transport implementations.
-      typedef std::map< RepoKey, TransportImpl_rch> RepoTransportMap;
+      /// The mapping from DomainId to transport implementations.
+      typedef std::map< ::DDS::DomainId_t, TransportImpl_rch> RepoTransportMap;
       RepoTransportMap bitTransportMap_;
 
       bool bit_enabled_;
@@ -475,7 +479,7 @@ namespace OpenDDS
       ACE_TString schedulerString_;
 
       /// Scheduling policy value used for setting thread priorities.
-      int scheduler_;
+      long scheduler_;
 
       /// Minimum priority value for the current scheduling policy.
       int priority_min_;
@@ -491,6 +495,13 @@ namespace OpenDDS
 
       /// The @c PERSISTENT data durability directory.
       ACE_CString persistent_data_dir_;
+
+      /// Number of seconds to wait on pending samples to be sent
+      /// or dropped.
+      ACE_Time_Value pending_timeout_;
+
+      /// Guard access to the internal maps.
+      ACE_Recursive_Thread_Mutex maps_lock_;
     };
 
 #   define TheServiceParticipant OpenDDS::DCPS::Service_Participant::instance()

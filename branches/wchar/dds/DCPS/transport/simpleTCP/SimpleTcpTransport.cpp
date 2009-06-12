@@ -530,7 +530,7 @@ OpenDDS::DCPS::SimpleTcpTransport::make_active_connection
     buffer << *link;
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) SimpleTcpTransport::make_active connection() - ")
-      ACE_TEXT("established with %C:%d and priority %d.\n%s"),
+      ACE_TEXT("established with %C:%d and priority %d.\n%C"),
       remote_address.get_host_name(),
       remote_address.get_port_number(),
       link->transport_priority(),
@@ -565,7 +565,7 @@ OpenDDS::DCPS::SimpleTcpTransport::make_passive_connection
     buffer << *link;
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) SimpleTcpTransport::make_passive connection() - ")
-      ACE_TEXT("established with %C:%d and priority %d.\n%s"),
+      ACE_TEXT("established with %C:%d and priority %d.\n%C"),
       remote_address.get_host_name(),
       remote_address.get_port_number(),
       link->transport_priority(),

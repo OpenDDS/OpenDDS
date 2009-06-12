@@ -39,7 +39,7 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
 
   while( DDS::RETCODE_OK == dr->take_next_sample( data, info)) {
     if( info.valid_data) {
-      ++count;
+      ++this->count_;
       if( this->verbose_) {
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderListener::on_data_available() - ")
@@ -56,8 +56,6 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
       ));
     }
   }
-
-  this->count_ += count;
 }
 
 void

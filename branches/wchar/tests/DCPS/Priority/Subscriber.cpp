@@ -78,7 +78,7 @@ Subscriber::Subscriber( const Options& options)
     buffer << this->options_.transportType();
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Subscriber::Subscriber() - ")
-      ACE_TEXT("failed to create %s transport.\n"),
+      ACE_TEXT("failed to create %C transport.\n"),
       buffer.str().c_str()
     ));
     throw BadTransportException();
@@ -88,13 +88,14 @@ Subscriber::Subscriber( const Options& options)
     buffer << this->options_.transportType();
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
-      ACE_TEXT("created %s transport.\n"),
+      ACE_TEXT("created %C transport.\n"),
       buffer.str().c_str()
     ));
   }
 
   // Create the listener.
   this->listener_ = new DataReaderListener( this->options_.verbose());
+  this->safe_listener_ = this->listener_;
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
@@ -108,7 +109,7 @@ Subscriber::Subscriber( const Options& options)
    != testData->register_type( this->participant_.in(), 0)) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Subscriber::Subscriber() - ")
-      ACE_TEXT("unable to install type %s support.\n"),
+      ACE_TEXT("unable to install type %C support.\n"),
       testData->get_type_name()
     ));
     throw BadTypeSupportException ();
@@ -116,7 +117,7 @@ Subscriber::Subscriber( const Options& options)
   } else if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
-      ACE_TEXT("created type %s support.\n"),
+      ACE_TEXT("created type %C support.\n"),
       testData->get_type_name()
     ));
   }
@@ -131,7 +132,7 @@ Subscriber::Subscriber( const Options& options)
   if( CORBA::is_nil( this->topic_.in())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Subscriber::Subscriber() - ")
-      ACE_TEXT("failed to create topic %s.\n"),
+      ACE_TEXT("failed to create topic %C.\n"),
       this->options_.topicName().c_str()
     ));
     throw BadTopicException();
@@ -139,7 +140,7 @@ Subscriber::Subscriber( const Options& options)
   } else if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
-      ACE_TEXT("created topic %s.\n"),
+      ACE_TEXT("created topic %C.\n"),
       this->options_.topicName().c_str()
     ));
   }
@@ -244,7 +245,7 @@ Subscriber::Subscriber( const Options& options)
 
   // Grab, enable and attach the status condition for test synchronization.
   this->status_ = this->reader_->get_statuscondition();
-  this->status_->set_enabled_statuses( DDS::LIVELINESS_CHANGED_STATUS);
+  this->status_->set_enabled_statuses( DDS::SUBSCRIPTION_MATCH_STATUS);
   this->waiter_->attach_condition( this->status_.in());
 
   if( this->options_.verbose()) {
@@ -265,17 +266,16 @@ Subscriber::count() const
 void
 Subscriber::run()
 {
-  DDS::Duration_t   timeout = { PUBLICATION_WAIT_TIME, 0};
+  DDS::Duration_t   timeout = { DDS::DURATION_INFINITY_SEC, DDS::DURATION_INFINITY_NSEC};
   DDS::ConditionSeq conditions;
-  DDS::LivelinessChangedStatus changes = { 0, 0, 0, 0};
+  DDS::SubscriptionMatchStatus matches = { 0, 0, 0, 0, 0};
+  if( this->options_.verbose()) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) Subscriber::run() - ")
+      ACE_TEXT("waiting for publications to attach.\n")
+    ));
+  }
   do {
-    if( this->options_.verbose()) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Subscriber::run() - ")
-        ACE_TEXT("waiting for publication to %s.\n"),
-        (changes.active_count==0? "attach": "detach")
-      ));
-    }
     if( DDS::RETCODE_OK != this->waiter_->wait( conditions, timeout)) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Subscriber::run() - ")
@@ -283,9 +283,17 @@ Subscriber::run()
       ));
       throw BadSyncException();
     }
-    changes = this->reader_->get_liveliness_changed_status();
+    matches = this->reader_->get_subscription_match_status();
 
-  } while( changes.active_count_change != -1);
+    if( this->options_.verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Subscriber::run() - ")
+        ACE_TEXT("%d publications attached.\n"),
+        matches.current_count
+      ));
+    }
+
+  } while( matches.current_count > 0);
 
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,

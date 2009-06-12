@@ -334,7 +334,7 @@ namespace
       case AST_Expression::EV_double:     o << ev->u.dval; break;
       case AST_Expression::EV_char:     o << '\'' << ev->u.cval << '\''; break;
       case AST_Expression::EV_wchar:      o << ev->u.wcval; break;
-      case AST_Expression::EV_octet:      o << ev->u.oval; break;
+      case AST_Expression::EV_octet: o << static_cast<int> (ev->u.oval); break;
       case AST_Expression::EV_bool:
                         o << boolalpha << static_cast<bool> (ev->u.bval); break;
       case AST_Expression::EV_string:

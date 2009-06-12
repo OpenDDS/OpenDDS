@@ -192,7 +192,7 @@ int ignore ()
       std::stringstream ignoreBuffer;
       ignoreBuffer << ignore_id;
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) IGNORE_PARTICIPANT,  participant %s ignore participant %s .\n"),
+                 ACE_TEXT("(%P|%t) IGNORE_PARTICIPANT,  participant %C ignore participant %C .\n"),
                  participantBuffer.str().c_str(), ignoreBuffer.str().c_str()));
 
       ::DDS::InstanceHandleSeq handles;
@@ -205,12 +205,7 @@ int ignore ()
                     ::DDS::ParticipantBuiltinTopicDataSeq,
                     ::OpenDDS::DCPS::ReaderIdSeq > hh;
 
-      ::DDS::ReturnCode_t ret
-        = hh.repo_ids_to_instance_handles(participant_servant,
-          ::OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
-          ignore_ids,
-          handles);
-
+      DDS::ReturnCode_t ret = hh.repo_ids_to_instance_handles(ignore_ids, handles);
       if (ret != ::DDS::RETCODE_OK)
       {
         ACE_ERROR ((LM_ERROR,
@@ -221,7 +216,7 @@ int ignore ()
       }
 
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) IGNORE_PARTICIPANT,  ignored participant %s has handle %d.\n"),
+        ACE_TEXT("(%P|%t) IGNORE_PARTICIPANT,  ignored participant %C has handle 0x%x.\n"),
         ignoreBuffer.str().c_str(),
         handles[0]
       ));
@@ -232,7 +227,7 @@ int ignore ()
       {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT("(%P|%t) IGNORE_PARTICIPANT, ")
-                    ACE_TEXT(" participant %s ignore participant %s returned error %d\n"),
+                    ACE_TEXT(" participant %C ignore participant %C returned error %d\n"),
                     participantBuffer.str().c_str(), ignoreBuffer.str().c_str(), ret));
         return -1;
       }
@@ -249,7 +244,7 @@ int ignore ()
       std::stringstream ignoreBuffer;
       ignoreBuffer << ignore_id;
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) IGNORE_TOPIC, participant %s ignore topic %s .\n"),
+                 ACE_TEXT("(%P|%t) IGNORE_TOPIC, participant %C ignore topic %C .\n"),
                  participantBuffer.str().c_str(), ignoreBuffer.str().c_str()));
 
       ::DDS::InstanceHandleSeq handles;
@@ -262,12 +257,7 @@ int ignore ()
                     ::DDS::TopicBuiltinTopicDataSeq,
                     ::OpenDDS::DCPS::ReaderIdSeq > hh;
 
-      ::DDS::ReturnCode_t ret
-        = hh.repo_ids_to_instance_handles(participant_servant,
-          ::OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC,
-          ignore_ids,
-          handles);
-
+      DDS::ReturnCode_t ret = hh.repo_ids_to_instance_handles(ignore_ids, handles);
       if (ret != ::DDS::RETCODE_OK)
       {
         ACE_ERROR ((LM_ERROR,
@@ -278,7 +268,7 @@ int ignore ()
       }
 
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) IGNORE_TOPIC,  ignored topic %s has handle %d.\n"),
+        ACE_TEXT("(%P|%t) IGNORE_TOPIC,  ignored topic %C has handle 0x%x.\n"),
         ignoreBuffer.str().c_str(),
         handles[0]
       ));
@@ -289,7 +279,7 @@ int ignore ()
       {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT("(%P|%t) IGNORE_TOPIC, ")
-                    ACE_TEXT(" ignore_topic %d return error %d\n"),
+                    ACE_TEXT(" ignore_topic 0x%x return error %d\n"),
                     handles[0], ret));
         return -1;
       }
@@ -305,7 +295,7 @@ int ignore ()
       std::stringstream ignoreBuffer;
       ignoreBuffer << ignore_id;
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) IGNORE_PUBLICATION, participant %s ignore publication %s .\n"),
+                 ACE_TEXT("(%P|%t) IGNORE_PUBLICATION, participant %C ignore publication %C .\n"),
                  participantBuffer.str().c_str(), ignoreBuffer.str().c_str()));
 
       ::DDS::InstanceHandleSeq handles;
@@ -319,12 +309,7 @@ int ignore ()
                     ::DDS::PublicationBuiltinTopicDataSeq,
                     ::OpenDDS::DCPS::ReaderIdSeq > hh;
 
-      ::DDS::ReturnCode_t ret
-        = hh.repo_ids_to_instance_handles(participant_servant,
-          ::OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC,
-          ignore_ids,
-          handles);
-
+      DDS::ReturnCode_t ret = hh.repo_ids_to_instance_handles(ignore_ids, handles);
       if (ret != ::DDS::RETCODE_OK)
       {
         ACE_ERROR ((LM_ERROR,
@@ -335,7 +320,7 @@ int ignore ()
       }
 
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) IGNORE_PUBLICATION,  ignored topic %s has handle %d.\n"),
+        ACE_TEXT("(%P|%t) IGNORE_PUBLICATION,  ignored topic %C has handle 0x%x.\n"),
         ignoreBuffer.str().c_str(),
         handles[0]
       ));
@@ -346,7 +331,7 @@ int ignore ()
       {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT("(%P|%t) IGNORE_PUBLICATION, ")
-                    ACE_TEXT(" ignore_publication %d return error %d\n"),
+                    ACE_TEXT(" ignore_publication 0x%x return error %d\n"),
                     handles[0], ret));
         return -1;
       }
@@ -362,7 +347,7 @@ int ignore ()
       std::stringstream ignoreBuffer;
       ignoreBuffer << ignore_id;
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) IGNORE_SUBSCRIPTION, participant %s ignore subscription %s .\n"),
+                 ACE_TEXT("(%P|%t) IGNORE_SUBSCRIPTION, participant %C ignore subscription %C .\n"),
                  participantBuffer.str().c_str(), ignoreBuffer.str().c_str()));
 
       ::DDS::InstanceHandleSeq handles;
@@ -375,12 +360,7 @@ int ignore ()
                     ::DDS::SubscriptionBuiltinTopicDataSeq,
                     ::OpenDDS::DCPS::ReaderIdSeq > hh;
 
-      ::DDS::ReturnCode_t ret
-        = hh.repo_ids_to_instance_handles(participant_servant,
-          ::OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC,
-          ignore_ids,
-          handles);
-
+      DDS::ReturnCode_t ret = hh.repo_ids_to_instance_handles(ignore_ids, handles);
       if (ret != ::DDS::RETCODE_OK)
       {
         ACE_ERROR ((LM_ERROR,
@@ -391,7 +371,7 @@ int ignore ()
       }
 
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) IGNORE_SUBSCRIPTION,  ignored topic %s has handle %d.\n"),
+        ACE_TEXT("(%P|%t) IGNORE_SUBSCRIPTION,  ignored topic %C has handle 0x%x.\n"),
         ignoreBuffer.str().c_str(),
         handles[0]
       ));
@@ -402,7 +382,7 @@ int ignore ()
       {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT("(%P|%t) IGNORE_SUBSCRIPTION, ")
-                    ACE_TEXT(" ignore_subscription %d returned error %d\n"),
+                    ACE_TEXT(" ignore_subscription 0x%x returned error %d\n"),
                     handles[0], ret));
         return -1;
       }
@@ -501,7 +481,7 @@ int read (int expect_success)
         if (!expect_success)
         {
           ACE_ERROR_RETURN ((LM_ERROR,
-                             ACE_TEXT("(%P|%t) ERROR: received a message but did not expect too!\n"))
+                             ACE_TEXT("(%P|%t) ERROR: received an unexpected sample!\n"))
                              , -1);
 
         }

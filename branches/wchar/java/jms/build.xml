@@ -130,8 +130,7 @@
 
         <jar destfile="${build.dir}/${project.filename}.jar"
              compress="${jar.compress}"
-             index="${jar.index}"
-             update="true">
+             index="${jar.index}">
             <fileset dir="${build.dir}/classes"/>
             <fileset dir="${build.dir}">
                 <include name="version.properties"/>
@@ -201,8 +200,7 @@
 
         <jar destfile="${build.dir}/${project.filename}.rar"
              compress="${rar.compress}"
-             index="${rar.index}"
-             update="true">
+             index="${rar.index}">
             <fileset dir="${build.dir}">
                 <include name="${project.filename}.jar"/>
             </fileset>

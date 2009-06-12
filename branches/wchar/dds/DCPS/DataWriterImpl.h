@@ -76,6 +76,9 @@ namespace OpenDDS
       ///Destructor
       virtual ~DataWriterImpl (void);
 
+      virtual DDS::InstanceHandle_t get_instance_handle()
+        ACE_THROW_SPEC ((CORBA::SystemException));
+
       virtual ::DDS::ReturnCode_t set_qos (const ::DDS::DataWriterQos & qos)
         ACE_THROW_SPEC ((CORBA::SystemException));
 
@@ -92,6 +95,10 @@ namespace OpenDDS
 
       virtual ::DDS::Topic_ptr get_topic ()
         ACE_THROW_SPEC ((CORBA::SystemException));
+
+      virtual ::DDS::ReturnCode_t wait_for_acknowledgments (
+          const ::DDS::Duration_t & max_wait)
+        ACE_THROW_SPEC ((::CORBA::SystemException));
 
       virtual ::DDS::Publisher_ptr get_publisher ()
         ACE_THROW_SPEC ((CORBA::SystemException));
@@ -233,6 +240,9 @@ namespace OpenDDS
        */
       void control_delivered (ACE_Message_Block* sample);
 
+      /// Deliver a requested SAMPLE_ACK message to this writer.
+      virtual void deliver_ack( const DataSampleHeader& header, DataSample* data);
+
       /**
        * Accessor of the associated topic name.
        */
@@ -357,6 +367,9 @@ namespace OpenDDS
 
       // Reset time interval for each instance.
       void reschedule_deadline ();
+
+      /// Wait for pending samples to drain.
+      void wait_pending();
 
     protected:
 
@@ -508,6 +521,15 @@ namespace OpenDDS
 
       /// Flag indicates that the init() is called.
       bool                       initialized_;
+
+      /// Lock used for wait_for_acks() processing.
+      ACE_SYNCH_MUTEX wfaLock_;
+
+      /// Used to block in wait_for_acks().
+      ACE_Condition< ACE_SYNCH_MUTEX> wfaCondition_;
+
+      typedef std::map<RepoId, SequenceNumber, GUID_tKeyLessThan> RepoIdToSequenceMap;
+      RepoIdToSequenceMap idToSequence_;
 
       IdSet                  pending_readers_;
    };

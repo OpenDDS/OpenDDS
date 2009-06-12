@@ -40,8 +40,7 @@ parse_args (int argc, ACE_TCHAR *argv[])
   return 0;
 }
 
-int
-main (int argc, ACE_TCHAR *argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   try
     {
