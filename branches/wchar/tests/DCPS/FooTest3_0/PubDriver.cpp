@@ -451,9 +451,9 @@ PubDriver::run()
   if (fp == 0)
   {
     ACE_ERROR ((LM_ERROR,
-                ACE_LIB_TEXT("Unable to open %s for writing:(%u) %p\n"),
+                ACE_TEXT("Unable to open %s for writing:(%u) %p\n"),
                 pub_id_fname_.c_str (),
-                ACE_LIB_TEXT("PubDriver::run")));
+                ACE_TEXT("PubDriver::run")));
     return;
   }
 
@@ -464,7 +464,7 @@ PubDriver::run()
   // Write the publication id to a file.
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT("(%P|%t) PubDriver::run, ")
-              ACE_TEXT(" Write to %s: pub_id=%s. \n"),
+              ACE_TEXT(" Write to %s: pub_id=%C. \n"),
               pub_id_fname_.c_str (),
               buffer.str().c_str()));
 
@@ -1234,7 +1234,7 @@ void PubDriver::attach_to_transport ()
 
     ACE_ERROR((LM_ERROR,
                 "(%P|%t) Failed to attach to the transport. "
-                "AttachStatus == %s\n", status_str.c_str()));
+                "AttachStatus == %C\n", status_str.c_str()));
     throw TestException();
   }
 }

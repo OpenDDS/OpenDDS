@@ -1,3 +1,33 @@
+Fri Jun 12 22:04:44 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/NetworkAddress.h:
+
+          Added #include for ACE_TString.
+
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/publisher.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/Aggregator.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * tests/DCPS/DcpsIntegration/infrastructure.cpp:
+        * tests/DCPS/DcpsIntegration/topic.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/MultiDPTest/publisher.cpp:
+        * tests/DCPS/MultiDPTest/subscriber.cpp:
+        * tests/DCPS/MultiTopicTest/publisher.cpp:
+        * tests/DCPS/Partition/Publisher.cpp:
+        * tests/DCPS/Partition/Subscriber.cpp:
+        * tests/DCPS/Priority/publisher_main.cpp:
+        * tests/DCPS/UnitTests/LivelinessCompatibility.cpp:
+
+          The name of the main() function is ACE_TMAIN.
+          ACE_LIB_TEXT is deprecated in favor of ACE_TEXT.
+          Fixed a %s -> %C in ACE logging.
+
 Fri Jun 12 21:59:57 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/FileSystemStorage.cpp:

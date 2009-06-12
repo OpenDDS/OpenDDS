@@ -8,6 +8,7 @@
 #include "tao/Basic_Types.h"
 #include "ace/INET_Addr.h"
 #include "ace/CDR_Stream.h"
+#include "ace/SString.h"
 #include <vector>
 
 
@@ -17,10 +18,11 @@ namespace OpenDDS
   namespace DCPS
   {
 
-    struct HostnameInfo {
-             int         index_;
-	     ACE_TString hostname_;
-	     };
+    struct HostnameInfo
+    {
+      int index_;
+      ACE_TString hostname_;
+    };
 
     typedef std::vector <HostnameInfo> HostnameInfoVector;
 
