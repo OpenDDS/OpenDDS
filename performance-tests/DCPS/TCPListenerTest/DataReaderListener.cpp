@@ -19,15 +19,6 @@ int read (::DDS::DataReader_ptr reader, bool use_zero_copy_reads)
   R_var var_dr
     = R::_narrow(reader);
 
-  // Note: in v 0.12 and before the zero-copy read enabled interface
-  //       was only available via the servant but with the change
-  //       to local interfaces the local object reference can be used.
-  // Note: in v 0.12 and before interfaces were remote (although collocated) 
-  //       and using the servant directly rather than the DataReader reference
-  //       had performance benefits but with the change to local
-  //       interfaces this is no longer needed.
-  //Rimpl* dr_servant = OpenDDS::DCPS::reference_to_servant<Rimpl> (var_dr.in ());
-
   if (subscriber_delay_msec)
     {
       ACE_Time_Value delay ( subscriber_delay_msec / 1000,

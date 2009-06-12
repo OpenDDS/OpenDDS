@@ -165,3 +165,10 @@ tests/DCPS/FileSystemStorage/run_test.pl: !DCPS_MIN
 tests/DCPS/Priority/run_test.pl: !DCPS_MIN
 tests/DCPS/LatencyBudget/run_test.pl: !DCPS_MIN
 tests/DCPS/LatencyBudget/run_test.pl late: !DCPS_MIN
+tests/DCPS/WaitForAck/run_test.pl: !DCPS_MIN
+tests/DCPS/Thrasher/run_test.pl default: !DCPS_MIN
+tests/DCPS/Thrasher/run_test.pl low: !DCPS_MIN
+tests/DCPS/Thrasher/run_test.pl medium: !DCPS_MIN
+tests/DCPS/Thrasher/run_test.pl high: !DCPS_MIN
+tests/DCPS/Thrasher/run_test.pl aggressive: !DCPS_MIN
+tests/DCPS/Thrasher/run_test.pl single: !DCPS_MIN

@@ -11,7 +11,7 @@ project(perf*idl): dcps {
 
 project(perf*Publisher) : dcpsexe_with_unreliable_dgram, dcps_reliable_multicast, dcps_tcp {
   exename = publisher
-  after  += DDS*idl
+  after  += perf*idl
 
   TypeSupport_Files {
     Test.idl
@@ -28,7 +28,7 @@ project(perf*Publisher) : dcpsexe_with_unreliable_dgram, dcps_reliable_multicast
 
 project(perf*Subscriber) : dcpsexe_with_unreliable_dgram, dcps_reliable_multicast, dcps_tcp {
   exename = subscriber
-  after  += DDS*idl
+  after  += perf*idl
 
   TypeSupport_Files {
     Test.idl
@@ -39,6 +39,7 @@ project(perf*Subscriber) : dcpsexe_with_unreliable_dgram, dcps_reliable_multicas
     Options.cpp
     DataReaderListener.cpp
     PublicationProfile.cpp
+    Commas.cpp
     subscriber_main.cpp
   }
 }

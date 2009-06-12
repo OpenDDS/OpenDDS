@@ -1,12 +1,14 @@
 // -*- C++ -*-
 // $Id$
 
+#include "Subscriber.h"
 #include "Test.h"
 #include "Options.h"
-#include "Subscriber.h"
+#include "Commas.h"
 #include "dds/DCPS/Service_Participant.h"
 
 #include <iomanip>
+#include <fstream>
 #include <sstream>
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
@@ -60,41 +62,23 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         bytes = where->second;
       }
 
-      // Formatting magic.
-      int triples[ 20];
-      int index = 0;
-
       // Form the message for this writer.
       buffer << "   writer[ 0x" << std::hex << current->first << "] == "
-             << std::dec;
+             << Commas( current->second) << " samples / "
+             << Commas( bytes) << " bytes recieved at priority "
+             << std::dec << priority << "." << std::endl;
 
-      for( long value = current->second; value != 0; value /= 1000)
-        triples[ index++] = value % 1000;
-
-      for( char fillchar = ' '; index > 0;) {
-        buffer << std::setfill( fillchar) << std::setw( 3) << triples[ --index];
-        fillchar = '0';
-        if( index != 0) buffer << ",";
-        else            buffer << " ";
-      }
-
-      buffer << "samples / ";
-
-      for( long value = bytes; value != 0; value /= 1000) triples[ index++] = value % 1000;
-
-      for( char fillchar = ' '; index > 0;) {
-        buffer << std::setfill( fillchar) << std::setw( 3) << triples[ --index];
-        fillchar = '0';
-        if( index != 0) buffer << ",";
-        else            buffer << " ";
-      }
-
-      buffer << "bytes recieved at priority " << std::dec << priority
-             << "." << std::endl;
     }
     buffer << "Total messages received: " << std::dec << subscriber.total_messages() << std::endl;
     buffer << "Valid messages received: " << std::dec << subscriber.valid_messages() << std::endl;
     buffer << subscriber << std::endl;
+
+    // Put any raw data out if indicated.
+    if( !options.rawOutputFilename().empty()) {
+      std::ofstream rawOutput( options.rawOutputFilename().c_str());
+      subscriber.rawData( rawOutput);
+    }
+
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) subscriber_main() - ")
       ACE_TEXT("test over:\n%s"),
@@ -110,7 +94,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ACE_TEXT("CORBA exception caught during processing.\n")
     ));
 
-  } catch( Test::Exception e)  {
+  } catch (const Test::Exception& e)  {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) subscriber_main() - ")
       ACE_TEXT("Test exception caught during processing: %s.\n"),

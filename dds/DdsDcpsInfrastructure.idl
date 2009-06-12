@@ -116,8 +116,10 @@ module DDS {
 		};
 
     enum SampleRejectedStatusKind {
-		REJECTED_BY_INSTANCE_LIMIT,
-		REJECTED_BY_TOPIC_LIMIT
+                NOT_REJECTED,
+		REJECTED_BY_INSTANCES_LIMIT,
+		REJECTED_BY_SAMPLES_LIMIT,
+		REJECTED_BY_SAMPLES_PER_INSTANCE_LIMIT
 		};
 
     struct SampleRejectedStatus {
@@ -133,10 +135,11 @@ module DDS {
 		};
 
     struct LivelinessChangedStatus {
-		long active_count;
-		long inactive_count;
-		long active_count_change;
-		long inactive_count_change;
+		long alive_count;
+		long not_alive_count;
+		long alive_count_change;
+		long not_alive_count_change;
+		InstanceHandle_t last_publication_handle;
 		};
 
     struct OfferedDeadlineMissedStatus {
@@ -175,12 +178,16 @@ module DDS {
     struct PublicationMatchStatus {
 		long total_count;
 		long total_count_change;
+		long current_count;
+		long current_count_change;
 		InstanceHandle_t last_subscription_handle;
 		};
 
     struct SubscriptionMatchStatus {
 		long total_count;
 		long total_count_change;
+		long current_count;
+		long current_count_change;
 		InstanceHandle_t last_publication_handle;
 		};
 
@@ -639,6 +646,8 @@ module DDS {
     StatusCondition get_statuscondition();
 
     StatusKindMask get_status_changes();
+
+    InstanceHandle_t get_instance_handle();
 		};
 
 

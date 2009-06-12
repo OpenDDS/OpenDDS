@@ -9,6 +9,7 @@
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/RepoIdBuilder.h"
 #include "SimpleSubscriber.h"
 #include "tests/DCPS/common/TestSupport.h"
 #include <ace/Arg_Shifter.h>
@@ -346,7 +347,7 @@ SubDriver::run()
 	    {
               std::stringstream buffer( charBuffer);
               buffer >> pub_id;
-	      ids.push_back ( OpenDDS::DCPS::GuidConverter( pub_id));
+	      ids.push_back(pub_id);
 
               std::stringstream idbuffer;
               idbuffer << pub_id;
@@ -521,10 +522,13 @@ SubDriver::parse_sub_arg(const ACE_TString& arg)
   ACE_TString sub_id_str(arg.c_str(), pos);
   ACE_TString sub_addr_str(arg.c_str() + pos + 1);
 
-  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 1
-  converter.kind()   = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
-  converter.key()[2] = ACE_OS::atoi(sub_id_str.c_str());
-  this->sub_id_ = converter;
+  // RepoIds are conventionally created and managed by the DCPSInfoRepo. Those
+  // generated here are for the sole purpose of verifying internal behavior.
+  OpenDDS::DCPS::RepoIdBuilder builder(sub_id_);
+
+  builder.participantId(1);
+  builder.entityKey(ACE_OS::atoi(sub_id_str.c_str()));
+  builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
 
   this->sub_addr_ = sub_addr_str.c_str();
 

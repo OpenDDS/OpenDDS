@@ -47,7 +47,7 @@ namespace OpenDDS
         int           work_available_;
         int           shutdown_;
         long          dds_priority_;
-        int           scheduler_;
+        long          scheduler_;
     };
 
   } /* namespace DCPS */

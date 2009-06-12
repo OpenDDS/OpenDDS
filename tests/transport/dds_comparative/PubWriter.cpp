@@ -5,10 +5,11 @@
 #include "PubWriter.h"
 #include "Pub.h"
 #include "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/GuidBuilder.h"
 
 
 PubWriter::PubWriter()
-  : pub_id_( OpenDDS::DCPS::GUID_UNKNOWN),
+  : pub_id_(OpenDDS::DCPS::GuidBuilder::create ()),
     data_size_(0),
     num_to_send_(0),
     condition_(this->lock_),

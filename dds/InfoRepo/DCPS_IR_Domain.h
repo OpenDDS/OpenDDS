@@ -15,10 +15,10 @@
 #include /**/ "dds/DdsDcpsInfrastructureC.h"
 #include /**/ "dds/DdsDcpsInfoS.h"
 
-#include "GuidGenerator.h"
+#include "RepoIdGenerator.h"
 
 #include /**/ "dds/DdsDcpsDomainC.h"
-#include /**/ "dds/DdsDcpsGuidC.h"
+#include /**/ "dds/DdsDcpsInfoUtilsC.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include /**/ "dds/DdsDcpsInfrastructureTypeSupportC.h"
@@ -51,7 +51,6 @@ class DCPS_IR_Topic;
 class DCPS_IR_Subscription;
 class DCPS_IR_Publication;
 
-
 /**
  * @class DCPS_IR_Domain
  *
@@ -64,7 +63,7 @@ class DCPS_IR_Publication;
 class OpenDDS_InfoRepoLib_Export DCPS_IR_Domain
 {
 public:
-  DCPS_IR_Domain(::DDS::DomainId_t id, GuidGenerator& generator);
+  DCPS_IR_Domain(DDS::DomainId_t id, RepoIdGenerator& generator);
 
   ~DCPS_IR_Domain();
 
@@ -130,12 +129,6 @@ public:
   // Ensure no conflicts with sequence values from persistent storage.
   void last_participant_key( long key);
 
-  // Lookup RepoId values for specific entity types by their key.
-  OpenDDS::DCPS::RepoId participant(  const CORBA::Long key);
-  OpenDDS::DCPS::RepoId topic(        const CORBA::Long key);
-  OpenDDS::DCPS::RepoId subscription( const CORBA::Long key);
-  OpenDDS::DCPS::RepoId publication(  const CORBA::Long key);
-
   /// Initialize the Built-In Topic structures
   /// This needs to be called before the run begins
   /// Returns 0 (zero) if successful
@@ -198,7 +191,7 @@ private:
 
   // Participant GUID Id generator.  The remaining Entities have their
   // values generated within the containing Participant.
-  GuidGenerator& participantIdGenerator_;
+  RepoIdGenerator& participantIdGenerator_;
 
   /// all the participants
   DCPS_IR_Participant_Map participants_;
@@ -239,24 +232,6 @@ private:
   ::DDS::Topic_var                                   bitPublicationTopic_;
   ::DDS::PublicationBuiltinTopicDataDataWriter_var   bitPublicationDataWriter_;
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
-
-  // Constructs for managing Instance handle and Id mappings.
-
-  /// Map from InstanceHandle values to GUID values.
-  typedef std::map< CORBA::Long, OpenDDS::DCPS::RepoId> KeyToIdMap;
-
-  /// Participant Keys and Ids.
-  KeyToIdMap participantKeyToIdMap_;
-
-  /// Topic Keys and Ids.
-  KeyToIdMap topicKeyToIdMap_;
-
-  /// Subscription Keys and Ids.
-  KeyToIdMap subscriptionKeyToIdMap_;
-
-  /// Publication Keys and Ids.
-  KeyToIdMap publicationKeyToIdMap_;
-
 };
 
 #endif /* DCPS_IR_DOMAIN_H */

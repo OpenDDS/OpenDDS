@@ -61,8 +61,8 @@ void DataReaderListenerImpl::on_liveliness_changed (
     ACE_UNUSED_ARG(reader);
     ACE_UNUSED_ARG(status);
     // if we have gone from active to inactive, then we missed a deadline
-    if((status.active_count_change < 0) &&
-       (status.inactive_count_change > 0))
+    if((status.alive_count_change < 0) &&
+       (status.not_alive_count_change > 0))
     {
       ++deadline_missed_;
     }
@@ -72,10 +72,10 @@ void DataReaderListenerImpl::on_liveliness_changed (
       ACE_TEXT("active=%d, inactive=%d, ")
       ACE_TEXT("activeDelta=%d, inactiveDelta=%d ")
       ACE_TEXT("deadline_missed=%d\n"),
-      status.active_count,
-      status.inactive_count,
-      status.active_count_change,
-      status.inactive_count_change,
+      status.alive_count,
+      status.not_alive_count,
+      status.alive_count_change,
+      status.not_alive_count_change,
       deadline_missed_
     ));
   }

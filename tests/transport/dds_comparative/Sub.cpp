@@ -4,11 +4,12 @@
 #include "Sub.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
+#include "dds/DCPS/GuidBuilder.h"
 #include "TestException.h"
 
 
 Sub::Sub()
-  : sub_id_( OpenDDS::DCPS::GUID_UNKNOWN)
+  : sub_id_(OpenDDS::DCPS::GuidBuilder::create ())
 {
 }
 

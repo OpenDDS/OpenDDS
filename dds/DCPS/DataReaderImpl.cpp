@@ -10,7 +10,9 @@
 #include "DomainParticipantImpl.h"
 #include "Service_Participant.h"
 #include "Qos_Helper.h"
+#include "RepoIdConverter.h"
 #include "TopicImpl.h"
+#include "Serializer.h"
 #include "SubscriberImpl.h"
 #include "Transient_Kludge.h"
 #include "Util.h"
@@ -66,15 +68,19 @@ DataReaderImpl::DataReaderImpl (void) :
   is_bit_ (false),
   initialized_ (false),
   always_get_history_ (false),
-  statistics_enabled_( false)
+  statistics_enabled_( false),
+  raw_latency_buffer_size_( 0),
+  raw_latency_buffer_type_( DataCollector< double>::KeepOldest)
 {
   CORBA::ORB_var orb = TheServiceParticipant->get_ORB ();
   reactor_ = orb->orb_core()->reactor();
 
-  liveliness_changed_status_.active_count = 0;
-  liveliness_changed_status_.inactive_count = 0;
-  liveliness_changed_status_.active_count_change = 0;
-  liveliness_changed_status_.inactive_count_change = 0;
+  liveliness_changed_status_.alive_count = 0;
+  liveliness_changed_status_.not_alive_count = 0;
+  liveliness_changed_status_.alive_count_change = 0;
+  liveliness_changed_status_.not_alive_count_change = 0;
+  liveliness_changed_status_.last_publication_handle =
+    ::DDS::HANDLE_NIL;
 
   requested_deadline_missed_status_.total_count = 0;
   requested_deadline_missed_status_.total_count_change = 0;
@@ -88,6 +94,8 @@ DataReaderImpl::DataReaderImpl (void) :
 
   subscription_match_status_.total_count = 0;
   subscription_match_status_.total_count_change = 0;
+  subscription_match_status_.current_count = 0;
+  subscription_match_status_.current_count_change = 0;
   subscription_match_status_.last_publication_handle =
     ::DDS::HANDLE_NIL;
 
@@ -96,8 +104,7 @@ DataReaderImpl::DataReaderImpl (void) :
 
   sample_rejected_status_.total_count = 0;
   sample_rejected_status_.total_count_change = 0;
-  sample_rejected_status_.last_reason =
-    ::DDS::REJECTED_BY_INSTANCE_LIMIT;
+  sample_rejected_status_.last_reason = ::DDS::NOT_REJECTED;
   sample_rejected_status_.last_instance_handle = ::DDS::HANDLE_NIL;
 
   this->budget_exceeded_status_.total_count = 0;
@@ -115,17 +122,6 @@ DataReaderImpl::~DataReaderImpl (void)
     {
       delete rd_allocator_;
     }
-
-  CORBA::Long count = this->total_samples();
-  if( count > 0) {
-    ::OpenDDS::DCPS::GuidConverter converter( this->subscription_id_);
-    ACE_DEBUG((LM_WARNING,
-      ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::~DataReaderImpl() - ")
-      ACE_TEXT("reader %C terminating with %d samples unread.\n"),
-      (const char*) converter,
-      count
-    ));
-  }
 }
 
 // this method is called when delete_datawriter is called.
@@ -206,29 +202,39 @@ void DataReaderImpl::init (
   initialized_ = true;
 }
 
+DDS::InstanceHandle_t
+DataReaderImpl::get_instance_handle()
+  ACE_THROW_SPEC ((CORBA::SystemException))
+{
+  RepoIdConverter converter(subscription_id_);
+  return DDS::InstanceHandle_t(converter);
+}
 
 void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
                                        const OpenDDS::DCPS::WriterAssociationSeq & writers)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
-  DBG_ENTRY_LVL("DataReaderImpl","add_associations",6);
-
+  //
+  // The following block is for diagnostic purposes only.
+  //
   if (DCPS_debug_level >= 1)
   {
-    ::OpenDDS::DCPS::GuidConverter readerConverter( yourId);
-    ::OpenDDS::DCPS::GuidConverter writerConverter(
-      const_cast< ::OpenDDS::DCPS::RepoId*>( &writers[ 0].writerId)
-    );
+    RepoIdConverter reader_converter(yourId);
+    RepoIdConverter writer_converter(writers[0].writerId);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::add_associations - ")
       ACE_TEXT("bit %d local %C remote %C num remotes %d \n"),
       is_bit_,
-      (const char*) readerConverter,
-      (const char*) writerConverter,
+      std::string(reader_converter).c_str(),
+      std::string(writer_converter).c_str(),
       writers.length()
     ));
   }
 
+  //
+  // This block prevents adding associations to deleted readers.
+  // Presumably this is a "good thing(tm)".
+  //
   if (entity_deleted_ == true)
   {
     if (DCPS_debug_level >= 1)
@@ -238,16 +244,28 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
     return;
   }
 
+  //
+  // We are being called back from the repository before we are done
+  // processing after our call to the repository that caused this call
+  // (from the repository) to be made.
+  //
   if (GUID_UNKNOWN == subscription_id_)
   {
     // add_associations was invoked before DCSPInfoRepo::add_subscription() returned.
     subscription_id_ = yourId;
   }
 
+  //
+  // We do the following while holding the publication_handle_lock_.
+  //
   {
     ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->publication_handle_lock_);
 
-    // keep track of writers associate with this reader
+    //
+    // For each writer in the list of writers to associate with, we
+    // create a WriterInfo and a WriterStats object and store them in
+    // our internal maps.
+    //
     CORBA::ULong wr_len = writers.length ();
     for (CORBA::ULong i = 0; i < wr_len; i++)
     {
@@ -260,42 +278,90 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
         )
       );
       this->statistics_.insert(
-        StatsMapType::value_type( writer_id, WriterStats())
+        StatsMapType::value_type(
+          writer_id,
+          WriterStats(
+            this->raw_latency_buffer_size_,
+            this->raw_latency_buffer_type_
+          )
+        )
       );
       if( DCPS_debug_level > 4) {
-        ::OpenDDS::DCPS::GuidConverter converter( writer_id);
+        RepoIdConverter converter(writer_id);
         ACE_DEBUG((LM_DEBUG,
           "(%P|%t) DataReaderImpl::add_associations: "
           "inserted writer %C.\n",
-          (const char*) converter
+          std::string(converter).c_str()
         ));
       }
     }
 
-    // add associations to the transport before using
-    // Built-In Topic support and telling the listener.
-    // This call appears to be idempotent.
+    //
+    // Propagate the add_associations processing down into the Transport
+    // layer here.  This will establish the transport support and reserve
+    // usage of an existing connection or initiate creation of a new
+    // connection if no suitable connection is available.
+    //
     this->subscriber_servant_->add_associations(writers, this, qos_);
 
+    // Check if any publications have already sent a REQUEST_ACK message.
+    wr_len = writers.length ();
+    for( unsigned int index = 0; index < wr_len; ++index) {
+      WriterMapType::iterator where
+        = this->writers_.find( writers[ index].writerId);
+      if( where != this->writers_.end()) {
+        ACE_Time_Value now = ACE_OS::gettimeofday();
+
+        ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
+        if( where->second.should_ack( now)) {
+          SequenceNumber sequence = where->second.last_sequence();
+          ::DDS::Time_t timenow = time_value_to_time(now);
+          bool result = this->send_sample_ack(
+                          writers[ index].writerId,
+                          sequence.value_,
+                          timenow
+                        );
+          if( result) {
+            where->second.clear_acks( sequence);
+          }
+        }
+      }
+    }
+
+    //
+    // LIVELINESS policy timers are managed here.
+    //
     if (liveliness_lease_duration_  != ACE_Time_Value::zero)
     {
       // this call will start the timer if it is not already set
       ACE_Time_Value now = ACE_OS::gettimeofday ();
       if (DCPS_debug_level >= 5) {
-        ::OpenDDS::DCPS::GuidConverter converter( this->subscription_id_);
+        RepoIdConverter converter(subscription_id_);
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderImpl::add_associations: ")
           ACE_TEXT("starting/resetting liveliness timer for reader %C\n"),
-          (const char*) converter
+          std::string(converter).c_str()
         ));
       }
       this->handle_timeout (now, this);
     }
     // else - no timer needed when LIVELINESS.lease_duration is INFINITE
-  }
 
+  }
+  //
+  // We no longer hold the publication_handle_lock_.
+  //
+
+  //
+  // We only do the following processing for readers that are *not*
+  // readers of Builtin Topics.
+  //
   if (! is_bit_)
     {
+      //
+      // We derive a list of writer Id values corresponding to the writer
+      // argument list.
+      //
       WriterIdSeq wr_ids;
       CORBA::ULong wr_len = writers.length ();
       wr_ids.length (wr_len);
@@ -305,10 +371,18 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
         wr_ids[i] = writers[i].writerId;
       }
 
+      //
+      // Here we convert the list of writer Id values to local handle
+      // values.
+      //
       ::DDS::InstanceHandleSeq handles;
       if (this->bit_lookup_instance_handles (wr_ids, handles) == false)
         return;
 
+      //
+      // We acquire the publication_handle_lock_ for the remainder of our
+      // processing.
+      //
       ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->publication_handle_lock_);
       wr_len = handles.length ();
 
@@ -318,11 +392,11 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
           RepoIdToHandleMap::value_type( wr_ids[ index], handles[ index])
         );
         if( DCPS_debug_level > 4) {
-          ::OpenDDS::DCPS::GuidConverter converter( wr_ids[ index]);
+          RepoIdConverter converter(wr_ids[index]);
           ACE_DEBUG((LM_WARNING,
             ACE_TEXT("(%P|%t) DataReaderImpl::add_associations: ")
             ACE_TEXT("id_to_handle_map_[ %C] = 0x%x.\n"),
-            (const char*) converter,
+            std::string(converter).c_str(),
             handles[index]
           ));
         }
@@ -330,12 +404,15 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
 
       // We need to adjust these after the insertions have all completed
       // since insertions are not guaranteed to increase the number of
-      // matched publications.
+      // currently matched publications.
       int matchedPublications = this->id_to_handle_map_.size();
-      this->subscription_match_status_.total_count_change
-        = matchedPublications - this->subscription_match_status_.total_count;
-      this->subscription_match_status_.total_count
-        = matchedPublications;
+      this->subscription_match_status_.current_count_change
+        = matchedPublications - this->subscription_match_status_.current_count;
+      this->subscription_match_status_.current_count = matchedPublications;
+
+      ++this->subscription_match_status_.total_count;
+      ++this->subscription_match_status_.total_count_change;
+
       this->subscription_match_status_.last_publication_handle
         = handles[ wr_len - 1];
 
@@ -354,6 +431,7 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
 
         // Client will look at it so next time it looks the change should be 0
         this->subscription_match_status_.total_count_change = 0;
+        this->subscription_match_status_.current_count_change = 0;
       }
       notify_status_condition();
     }
@@ -372,16 +450,14 @@ void DataReaderImpl::remove_associations (
 
   if (DCPS_debug_level >= 1)
   {
-    ::OpenDDS::DCPS::GuidConverter readerConverter( this->subscription_id_);
-    ::OpenDDS::DCPS::GuidConverter writerConverter(
-      const_cast< ::OpenDDS::DCPS::RepoId*>( &writers[ 0])
-    );
+    RepoIdConverter reader_converter(subscription_id_);
+    RepoIdConverter writer_converter(writers[0]);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations: ")
       ACE_TEXT("bit %d local %C remote %C num remotes %d \n"),
       is_bit_,
-      (const char*) readerConverter,
-      (const char*) writerConverter,
+      std::string(reader_converter).c_str(),
+      std::string(writer_converter).c_str(),
       writers.length ()
     ));
   }
@@ -414,11 +490,11 @@ void DataReaderImpl::remove_associations (
     {
       if (DCPS_debug_level >= 1)
       {
-        ::OpenDDS::DCPS::GuidConverter converter( writer_id);
+        RepoIdConverter converter(writer_id);
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations: ")
           ACE_TEXT("the writer local %C was already removed.\n"),
-          (const char*) converter
+          std::string(converter).c_str()
         ));
       }
     }
@@ -440,18 +516,21 @@ void DataReaderImpl::remove_associations (
 
   if (! is_bit_)
   {
-    // The writer should be in the id_to_handle map at this time so
-    // log with error.
+    // The writer should be in the id_to_handle map at this time.  Note
+    // it if it not there.
     if (this->cache_lookup_instance_handles (updated_writers, handles) == false)
     {
-      ACE_ERROR ((LM_ERROR, "(%P|%t) DataReaderImpl::remove_associations: "
-        "cache_lookup_instance_handles failed.\n"));
-      return;
+      if( DCPS_debug_level > 4) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations: ")
+          ACE_TEXT("cache_lookup_instance_handles failed.\n")
+        ));
+      }
     }
 
     for (CORBA::ULong i = 0; i < wr_len; ++i)
     {
-      id_to_handle_map_.erase(writers[i]);
+      id_to_handle_map_.erase( updated_writers[i]);
     }
   }
 
@@ -461,12 +540,16 @@ void DataReaderImpl::remove_associations (
   if( !this->is_bit_) {
     // Derive the change in the number of publications writing to this reader.
     int matchedPublications = this->id_to_handle_map_.size();
-    this->subscription_match_status_.total_count_change
-      = matchedPublications - this->subscription_match_status_.total_count;
+    this->subscription_match_status_.current_count_change
+      = matchedPublications - this->subscription_match_status_.current_count;
 
     // Only process status if the number of publications has changed.
-    if( this->subscription_match_status_.total_count_change != 0) {
-      this->subscription_match_status_.total_count = matchedPublications;
+    if( this->subscription_match_status_.current_count_change != 0) {
+      this->subscription_match_status_.current_count = matchedPublications;
+
+      /// Section 7.1.4.1: total_count will not decrement.
+
+      /// @TODO: Reconcile this with the verbiage in section 7.1.4.1
       this->subscription_match_status_.last_publication_handle
         = handles[ wr_len - 1];
 
@@ -482,6 +565,7 @@ void DataReaderImpl::remove_associations (
 
         // Client will look at it so next time it looks the change should be 0
         this->subscription_match_status_.total_count_change = 0;
+        this->subscription_match_status_.current_count_change = 0;
       }
       notify_status_condition();
     }
@@ -740,7 +824,7 @@ void DataReaderImpl::get_qos (
                    ))
 {
   listener_mask_ = mask;
-  //note: OK to duplicate  and reference_to_servant a nil object ref
+  //note: OK to duplicate  a nil object ref
   listener_ = ::DDS::DataReaderListener::_duplicate(a_listener);
   fast_listener_ = listener_.in ();
   return ::DDS::RETCODE_OK;
@@ -801,8 +885,8 @@ void DataReaderImpl::get_qos (
   ::DDS::LivelinessChangedStatus status =
       liveliness_changed_status_;
 
-  liveliness_changed_status_.active_count_change = 0;
-  liveliness_changed_status_.inactive_count_change = 0;
+  liveliness_changed_status_.alive_count_change = 0;
+  liveliness_changed_status_.not_alive_count_change = 0;
 
   return status;
 }
@@ -859,6 +943,7 @@ DataReaderImpl::get_subscription_match_status ()
   set_status_changed_flag (::DDS::SUBSCRIPTION_MATCH_STATUS, false);
   ::DDS::SubscriptionMatchStatus status = subscription_match_status_;
   subscription_match_status_.total_count_change = 0;
+  subscription_match_status_.current_count_change = 0;
 
   return status ;
 }
@@ -1053,17 +1138,17 @@ DataReaderImpl::writer_activity(PublicationId writer_id)
       ACE_Time_Value when = ACE_OS::gettimeofday ();
       iter->second.received_activity (when);
 
-  } else if( DCPS_debug_level > 0) {
+  } else if( DCPS_debug_level > 4) {
     // This may not be an error since it could happen that the sample
     // is delivered to the datareader after the write is dis-associated
     // with this datareader.
-    ::OpenDDS::DCPS::GuidConverter readerConverter( this->subscription_id_);
-    ::OpenDDS::DCPS::GuidConverter writerConverter( writer_id);
+    RepoIdConverter reader_converter(subscription_id_);
+    RepoIdConverter writer_converter(writer_id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::writer_activity: ")
       ACE_TEXT("reader %C is not associated with writer %C.\n"),
-      (const char*) readerConverter,
-      (const char*) writerConverter
+      std::string(reader_converter).c_str(),
+      std::string(writer_converter).c_str()
     ));
   }
 }
@@ -1080,11 +1165,11 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   if( DCPS_debug_level > 9) {
     std::stringstream buffer;
     buffer << sample.header_ << std::ends;
-    ::OpenDDS::DCPS::GuidConverter converter( this->subscription_id_);
+    RepoIdConverter converter(subscription_id_);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::data_received: ")
       ACE_TEXT("%C received sample: %C.\n"),
-      (const char*) converter,
+      std::string(converter).c_str(),
       buffer.str().c_str()
     ));
   }
@@ -1121,6 +1206,36 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         bool is_new_instance = false;
         this->dds_demarshal(sample, instance, is_new_instance);
 
+        WriterMapType::iterator where
+          = this->writers_.find( header.publication_id_);
+        if( where != this->writers_.end()) {
+          where->second.last_sequence( SequenceNumber(header.sequence_));
+
+          ACE_Time_Value now = ACE_OS::gettimeofday();
+          if( where->second.should_ack( now)) {
+            ::DDS::Time_t timenow = time_value_to_time(now);
+            bool result = this->send_sample_ack(
+                            header.publication_id_,
+                            header.sequence_,
+                            timenow
+                          );
+            if( result) {
+              where->second.clear_acks( SequenceNumber(header.sequence_));
+            }
+          }
+
+        } else {
+          RepoIdConverter subscriptionBuffer( this->subscription_id_);
+          RepoIdConverter publicationBuffer(  header.publication_id_);
+          ACE_DEBUG((LM_WARNING,
+            ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::data_received() - ")
+            ACE_TEXT("subscription %C failed to find ")
+            ACE_TEXT("publication data for %C.\n"),
+            std::string( subscriptionBuffer).c_str(),
+            std::string( publicationBuffer).c_str()
+          ));
+        }
+
         if (this->watchdog_.get ())
         {
           instance->last_sample_tv_ = instance->cur_sample_tv_;
@@ -1137,6 +1252,66 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         }
 
         this->notify_read_conditions();
+      }
+      break;
+
+    case REQUEST_ACK:
+      {
+        this->writer_activity( sample.header_.publication_id_);
+
+        SequenceNumber ack;
+        ::DDS::Duration_t delay;
+        ::TAO::DCPS::Serializer serializer(
+          sample.sample_,
+          sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER
+        );
+        serializer >> ack.value_;
+        serializer >> delay;
+
+        if( DCPS_debug_level > 9) {
+          RepoIdConverter debugConverter( sample.header_.publication_id_);
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) DataReaderImpl::data_received() - ")
+            ACE_TEXT("publication %C received REQUEST_ACK for sequence 0x%x ")
+            ACE_TEXT("valid for the next %d seconds.\n"),
+            std::string( debugConverter).c_str(),
+            ACE_UINT16(ack.value_),
+            delay.sec
+          ));
+        }
+
+        WriterMapType::iterator where
+          = this->writers_.find( sample.header_.publication_id_);
+        if( where != this->writers_.end()) {
+          ACE_Time_Value now      = ACE_OS::gettimeofday();
+          ACE_Time_Value deadline = now + duration_to_time_value( delay);
+
+          where->second.ack_deadline( ack, deadline);
+
+          if( where->second.should_ack( now)) {
+            ::DDS::Time_t timenow = time_value_to_time(now);
+            bool result = this->send_sample_ack(
+                            sample.header_.publication_id_,
+                            ack.value_,
+                            timenow
+                          );
+            if( result) {
+              where->second.clear_acks( ack);
+            }
+          }
+
+        } else {
+          RepoIdConverter subscriptionBuffer( this->subscription_id_);
+          RepoIdConverter publicationBuffer(  sample.header_.publication_id_);
+          ACE_DEBUG((LM_WARNING,
+            ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::data_received() - ")
+            ACE_TEXT("subscription %C failed to find ")
+            ACE_TEXT("publication data for %C.\n"),
+            std::string( subscriptionBuffer).c_str(),
+            std::string( publicationBuffer).c_str()
+          ));
+        }
+
       }
       break;
 
@@ -1182,11 +1357,68 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
     default:
       ACE_ERROR((LM_ERROR,
-                 "(%P|%t) %T ERRRO: DataReaderImpl::data_received"
+                 "(%P|%t) ERROR: DataReaderImpl::data_received"
                  "unexpected message_id = %d\n",
                  sample.header_.message_id_));
       break;
     }
+}
+
+bool
+DataReaderImpl::send_sample_ack(
+  const RepoId& publication,
+  ACE_INT16 sequence,
+  ::DDS::Time_t when
+)
+{
+  size_t dataSize = sizeof( sequence);
+  dataSize += _dcps_find_size( publication);
+
+  ACE_Message_Block* data;
+  ACE_NEW_RETURN( data, ACE_Message_Block( dataSize), false);
+
+  bool doSwap    = this->subscriber_servant_->swap_bytes();
+  bool byteOrder = (doSwap? !TAO_ENCAP_BYTE_ORDER: TAO_ENCAP_BYTE_ORDER);
+
+  ::TAO::DCPS::Serializer serializer( data, doSwap);
+  serializer << publication;
+  serializer << sequence;
+
+  DataSampleHeader outbound_header;
+  outbound_header.message_id_               = SAMPLE_ACK;
+  outbound_header.byte_order_               = byteOrder,
+  outbound_header.message_length_           = data->total_length ();
+  outbound_header.sequence_                 = 0;
+  outbound_header.source_timestamp_sec_     = when.sec;
+  outbound_header.source_timestamp_nanosec_ = when.nanosec;
+  outbound_header.coherency_group_          = 0;
+  outbound_header.publication_id_           = this->subscription_id_;
+
+  ACE_Message_Block* sample_ack;
+  ACE_NEW_RETURN(
+    sample_ack,
+    ACE_Message_Block(
+      outbound_header.max_marshaled_size(),
+      ACE_Message_Block::MB_DATA,
+      data // cont
+    ), false
+  );
+  sample_ack << outbound_header;
+
+  if( DCPS_debug_level > 0) {
+    RepoIdConverter subscriptionBuffer( this->subscription_id_);
+    RepoIdConverter publicationBuffer(  publication);
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) DataReaderImpl::send_sample_ack() - ")
+      ACE_TEXT("%C sending SAMPLE_ACK message with sequence 0x%x ")
+      ACE_TEXT("to publication %C.\n"),
+      std::string( subscriptionBuffer).c_str(),
+      ACE_UINT16(sequence),
+      std::string( publicationBuffer).c_str()
+    ));
+  }
+
+  return this->subscriber_servant_->send_response( publication, sample_ack);
 }
 
 void DataReaderImpl::notify_read_conditions()
@@ -1390,11 +1622,11 @@ DataReaderImpl::handle_timeout (const ACE_Time_Value &tv,
     {
 
       if (DCPS_debug_level >= 5) {
-        ::OpenDDS::DCPS::GuidConverter converter( this->subscription_id_);
+        RepoIdConverter converter(subscription_id_);
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderImpl::handle_timeout: ")
           ACE_TEXT(" canceling timer for reader %C.\n"),
-          (const char*) converter
+          std::string(converter).c_str()
         ));
       }
 
@@ -1437,11 +1669,11 @@ DataReaderImpl::handle_timeout (const ACE_Time_Value &tv,
   }
 
   if (DCPS_debug_level >= 5) {
-    ::OpenDDS::DCPS::GuidConverter converter( this->subscription_id_);
+    RepoIdConverter converter(subscription_id_);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::handle_timeout: ")
       ACE_TEXT("reader %C has %d live writers; from_reactor=%d\n"),
-      (const char*) converter,
+      std::string(converter).c_str(),
       alive_writers,
       arg == this ? 0 : 1
     ));
@@ -1518,17 +1750,16 @@ OpenDDS::DCPS::WriterInfo::WriterInfo (DataReaderImpl* reader,
     writer_id_(writer_id)
 {
   if (DCPS_debug_level >= 5) {
-    ::OpenDDS::DCPS::GuidConverter writerConverter( writer_id);
-    ::OpenDDS::DCPS::GuidConverter readerConverter( reader->subscription_id_);
+    RepoIdConverter writer_converter(writer_id);
+    RepoIdConverter reader_converter(reader->subscription_id_);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) WriterInfo::WriterInfo: ")
       ACE_TEXT("writer %C added to reader %C.\n"),
-      (const char*) writerConverter,
-      (const char*) readerConverter
+      std::string(writer_converter).c_str(),
+      std::string(reader_converter).c_str()
     ));
   }
 }
-
 
 ACE_Time_Value
 OpenDDS::DCPS::WriterInfo::check_activity (const ACE_Time_Value& now)
@@ -1557,7 +1788,113 @@ void OpenDDS::DCPS::WriterInfo::removed ()
   reader_->writer_removed (writer_id_, this->state_);
 }
 
-OpenDDS::DCPS::WriterStats::WriterStats()
+SequenceNumber
+OpenDDS::DCPS::WriterInfo::last_sequence() const
+{
+  // sample_lock_ is held by the caller.
+  
+  return this->last_sequence_;
+}
+
+void
+OpenDDS::DCPS::WriterInfo::last_sequence(
+  SequenceNumber sequence
+)
+{
+  // sample_lock_ is held by the caller.
+
+  if( this->last_sequence_ < sequence) {
+    this->last_sequence_ = sequence;
+  }
+}
+
+void
+OpenDDS::DCPS::WriterInfo::clear_acks(
+  SequenceNumber sequence
+)
+{
+  // sample_lock_ is held by the caller.
+
+  DeadlineList::iterator current
+    = this->ack_deadlines_.begin();
+  while( current != this->ack_deadlines_.end()) {
+    if( current->first <= sequence) {
+      current = this->ack_deadlines_.erase( current);
+
+    } else {
+      break;
+    }
+  }
+}
+
+bool
+OpenDDS::DCPS::WriterInfo::should_ack(
+  ACE_Time_Value now
+)
+{
+  // sample_lock_ is held by the caller.
+
+  if( this->ack_deadlines_.size() == 0) {
+    return false;
+  }
+
+  DeadlineList::iterator current
+    = this->ack_deadlines_.begin();
+  while( current != this->ack_deadlines_.end()) {
+    if( current->second < now) {
+      // Remove any expired response deadlines.
+      current = this->ack_deadlines_.erase( current);
+
+    } else {
+      // NOTE: This assumes no out of order reception.
+      if( current->first <= this->last_sequence_) {
+        return true;
+      }
+      ++current;
+    }
+  }
+  return false;
+}
+
+void
+OpenDDS::DCPS::WriterInfo::ack_deadline( SequenceNumber sequence, ACE_Time_Value when)
+{
+  // sample_lock_ is held by the caller.
+
+  if( this->ack_deadlines_.size() == 0) {
+    this->ack_deadlines_.push_back( std::make_pair( sequence, when));
+    return;
+  }
+
+  for( DeadlineList::iterator current
+         = this->ack_deadlines_.begin();
+       current != this->ack_deadlines_.end();
+       ++current) {
+    // Insertion sort.
+    if( sequence < current->first) {
+      this->ack_deadlines_.insert(
+        current,
+        std::make_pair( sequence, when)
+      );
+      return;
+
+    } else if( sequence == current->first) {
+      // Only update the deadline to be *later* than any existing one.
+      if( current->second < when) {
+        current->second = when;
+      }
+      return;
+
+    } else {
+      break;
+    }
+  }
+}
+
+OpenDDS::DCPS::WriterStats::WriterStats(
+  int amount,
+  DataCollector< double>::OnFull type
+) : stats_( amount, type)
 {
 }
 
@@ -1587,33 +1924,40 @@ void OpenDDS::DCPS::WriterStats::reset_stats()
   this->stats_.reset();
 }
 
+std::ostream& OpenDDS::DCPS::WriterStats::raw_data( std::ostream& str) const
+{
+  str << std::dec << this->stats_.size()
+      << " samples out of " << this->stats_.n() << std::endl;
+  return str << this->stats_;
+}
+
 void
 DataReaderImpl::writer_removed (PublicationId   writer_id,
              WriterInfo::WriterState& state)
 {
   if (DCPS_debug_level >= 5) {
-    ::OpenDDS::DCPS::GuidConverter readerConverter( this->subscription_id_);
-    ::OpenDDS::DCPS::GuidConverter writerConverter( writer_id);
+    RepoIdConverter reader_converter(subscription_id_);
+    RepoIdConverter writer_converter(writer_id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::writer_removed: ")
       ACE_TEXT("reader %C from writer %C.\n"),
-      (const char*) readerConverter,
-      (const char*) writerConverter
+      std::string(reader_converter).c_str(),
+      std::string(writer_converter).c_str()
     ));
   }
 
   bool liveliness_changed = false;
   if (state == WriterInfo::ALIVE)
   {
-    -- liveliness_changed_status_.active_count;
-    -- liveliness_changed_status_.active_count_change;
+    -- liveliness_changed_status_.alive_count;
+    -- liveliness_changed_status_.alive_count_change;
     liveliness_changed = true;
   }
 
   if (state == WriterInfo::DEAD)
   {
-    -- liveliness_changed_status_.inactive_count;
-    -- liveliness_changed_status_.inactive_count_change;
+    -- liveliness_changed_status_.not_alive_count;
+    -- liveliness_changed_status_.not_alive_count_change;
     liveliness_changed = true;
   }
 
@@ -1631,13 +1975,13 @@ DataReaderImpl::writer_became_alive (PublicationId writer_id,
   if (DCPS_debug_level >= 5) {
     std::stringstream buffer;
     buffer << state;
-    ::OpenDDS::DCPS::GuidConverter readerConverter( this->subscription_id_);
-    ::OpenDDS::DCPS::GuidConverter writerConverter( writer_id);
+    RepoIdConverter reader_converter(subscription_id_);
+    RepoIdConverter writer_converter(writer_id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::writer_became_alive: ")
       ACE_TEXT("reader %C from writer %C state %C.\n"),
-      (const char*) readerConverter,
-      (const char*) writerConverter,
+      std::string(reader_converter).c_str(),
+      std::string(writer_converter).c_str(),
       buffer.str().c_str()
     ));
   }
@@ -1649,34 +1993,34 @@ DataReaderImpl::writer_became_alive (PublicationId writer_id,
   bool liveliness_changed = false;
   if (state != WriterInfo::ALIVE)
   {
-    liveliness_changed_status_.active_count++;
-    liveliness_changed_status_.active_count_change++;
+    liveliness_changed_status_.alive_count++;
+    liveliness_changed_status_.alive_count_change++;
     liveliness_changed = true;
   }
 
   if (state == WriterInfo::DEAD)
   {
-    liveliness_changed_status_.inactive_count--;
-    liveliness_changed_status_.inactive_count_change--;
+    liveliness_changed_status_.not_alive_count--;
+    liveliness_changed_status_.not_alive_count_change--;
     liveliness_changed = true;
   }
 
   set_status_changed_flag(::DDS::LIVELINESS_CHANGED_STATUS, true);
 
-  if (liveliness_changed_status_.active_count < 0)
+  if (liveliness_changed_status_.alive_count < 0)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::writer_became_alive: ")
-                  ACE_TEXT(" invalid liveliness_changed_status active count - %d.\n"),
-      liveliness_changed_status_.active_count));
+                  ACE_TEXT(" invalid liveliness_changed_status alive count - %d.\n"),
+      liveliness_changed_status_.alive_count));
       return;
     }
-  if (liveliness_changed_status_.inactive_count < 0)
+  if (liveliness_changed_status_.not_alive_count < 0)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::writer_became_alive: ")
-                  ACE_TEXT(" invalid liveliness_changed_status inactive count - %d .\n"),
-      liveliness_changed_status_.inactive_count));
+                  ACE_TEXT(" invalid liveliness_changed_status not alive count - %d .\n"),
+      liveliness_changed_status_.not_alive_count));
       return;
     }
 
@@ -1703,13 +2047,13 @@ DataReaderImpl::writer_became_dead (PublicationId   writer_id,
   if (DCPS_debug_level >= 5) {
     std::stringstream buffer;
     buffer << state;
-    ::OpenDDS::DCPS::GuidConverter readerConverter( this->subscription_id_);
-    ::OpenDDS::DCPS::GuidConverter writerConverter( writer_id);
+    RepoIdConverter reader_converter(subscription_id_);
+    RepoIdConverter writer_converter(writer_id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::writer_became_dead: ")
       ACE_TEXT("reader %C from writer%C state %C.\n"),
-      (const char*) readerConverter,
-      (const char*) writerConverter,
+      std::string(reader_converter).c_str(),
+      std::string(writer_converter).c_str(),
       buffer.str().c_str()
     ));
   }
@@ -1719,37 +2063,37 @@ DataReaderImpl::writer_became_dead (PublicationId   writer_id,
 
   if (state == OpenDDS::DCPS::WriterInfo::NOT_SET)
   {
-    liveliness_changed_status_.inactive_count++;
-    liveliness_changed_status_.inactive_count_change++;
+    liveliness_changed_status_.not_alive_count++;
+    liveliness_changed_status_.not_alive_count_change++;
     liveliness_changed = true;
   }
 
   if (state == WriterInfo::ALIVE)
   {
-    liveliness_changed_status_.active_count--;
-    liveliness_changed_status_.active_count_change--;
-    liveliness_changed_status_.inactive_count++;
-    liveliness_changed_status_.inactive_count_change++;
+    liveliness_changed_status_.alive_count--;
+    liveliness_changed_status_.alive_count_change--;
+    liveliness_changed_status_.not_alive_count++;
+    liveliness_changed_status_.not_alive_count_change++;
     liveliness_changed = true;
   }
 
   //update the state to DEAD.
   state = WriterInfo::DEAD;
 
-  if (liveliness_changed_status_.active_count < 0)
+  if (liveliness_changed_status_.alive_count < 0)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::writer_became_dead: ")
-                  ACE_TEXT(" invalid liveliness_changed_status active count - %d.\n"),
-      liveliness_changed_status_.active_count));
+                  ACE_TEXT(" invalid liveliness_changed_status alive count - %d.\n"),
+      liveliness_changed_status_.alive_count));
       return;
     }
-  if (liveliness_changed_status_.inactive_count < 0)
+  if (liveliness_changed_status_.not_alive_count < 0)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::writer_became_dead: ")
-                  ACE_TEXT(" invalid liveliness_changed_status inactive count - %d.\n"),
-      liveliness_changed_status_.inactive_count));
+                  ACE_TEXT(" invalid liveliness_changed_status not alive count - %d.\n"),
+      liveliness_changed_status_.not_alive_count));
       return;
     }
 
@@ -1762,7 +2106,7 @@ DataReaderImpl::writer_became_dead (PublicationId   writer_id,
       SubscriptionInstance *ptr = iter->second;
 
       ptr->instance_state_.writer_became_dead (
-        writer_id, liveliness_changed_status_.active_count, when);
+        writer_id, liveliness_changed_status_.alive_count, when);
 
       iter = next;
     }
@@ -1867,15 +2211,13 @@ void DataReaderImpl::process_latency( const ReceivedDataSample& sample)
     ///     association has been torn down).  We may want to promote this
     ///     to a warning if other conditions causing this symptom are
     ///     discovered.
-    ::OpenDDS::DCPS::GuidConverter readerConverter( this->subscription_id_);
-    ::OpenDDS::DCPS::GuidConverter writerConverter(
-      const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.header_.publication_id_)
-    );
+    RepoIdConverter reader_converter(subscription_id_);
+    RepoIdConverter writer_converter(sample.header_.publication_id_);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::process_latency() - ")
       ACE_TEXT("reader %C is not associated with writer %C (late sample?).\n"),
-      (const char*) readerConverter,
-      (const char*) writerConverter
+      std::string(reader_converter).c_str(),
+      std::string(writer_converter).c_str()
     ));
   }
 }
@@ -2109,11 +2451,7 @@ DataReaderImpl::bit_lookup_instance_handles (const WriterIdSeq& ids,
     const char* separator = "";
     std::stringstream buffer;
     for( unsigned long i = 0; i < size; ++i) {
-      long handle;
-      handle = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &ids[i])
-               );
-      buffer << separator << ids[i] << "(" << std::hex << handle << ")";
+      buffer << separator << RepoIdConverter(ids[i]);
       separator = ", ";
     }
     ACE_DEBUG((LM_DEBUG,
@@ -2131,12 +2469,7 @@ DataReaderImpl::bit_lookup_instance_handles (const WriterIdSeq& ids,
       ::DDS::PublicationBuiltinTopicDataSeq,
       WriterIdSeq > hh;
 
-    ::DDS::ReturnCode_t ret
-      = hh.repo_ids_to_instance_handles(participant_servant_,
-      BUILT_IN_PUBLICATION_TOPIC,
-      ids,
-      hdls);
-
+    DDS::ReturnCode_t ret = hh.repo_ids_to_instance_handles(ids, hdls);
     if (ret != ::DDS::RETCODE_OK)
     {
       ACE_ERROR ((LM_ERROR,
@@ -2154,13 +2487,11 @@ DataReaderImpl::bit_lookup_instance_handles (const WriterIdSeq& ids,
       ));
       for (CORBA::ULong i = 0; i < num_wrts; ++i)
       {
-        ::OpenDDS::DCPS::GuidConverter converter(
-          const_cast< ::OpenDDS::DCPS::RepoId*>( &ids[ i])
-        );
+        RepoIdConverter converter(ids[i]);
         ACE_DEBUG((LM_WARNING,
           ACE_TEXT("(%P|%t) DataReaderImpl::bit_lookup_instance_handles: ")
           ACE_TEXT("writer %C has handle 0x%x.\n"),
-          (const char*) converter,
+          std::string(converter).c_str(),
           hdls[i]
         ));
       }
@@ -2173,17 +2504,13 @@ DataReaderImpl::bit_lookup_instance_handles (const WriterIdSeq& ids,
     hdls.length (num_wrts);
     for (CORBA::ULong i = 0; i < num_wrts; i++)
     {
-      hdls[i] = ::OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &ids[i])
-               );
+      RepoIdConverter converter(ids[i]);
+      hdls[i] = DDS::InstanceHandle_t(converter);
       if( DCPS_debug_level > 4) {
-        ::OpenDDS::DCPS::GuidConverter converter(
-          const_cast< ::OpenDDS::DCPS::RepoId*>( &ids[ i])
-        );
         ACE_DEBUG((LM_WARNING,
           ACE_TEXT("(%P|%t) DataReaderImpl::bit_lookup_instance_handles: ")
           ACE_TEXT("using hash as handle for writer %C.\n"),
-          (const char*) converter
+          std::string(converter).c_str()
         ));
       }
     }
@@ -2204,13 +2531,11 @@ DataReaderImpl::cache_lookup_instance_handles (const WriterIdSeq& ids,
     RepoIdToHandleMap::iterator iter = id_to_handle_map_.find(ids[i]);
     if (iter == id_to_handle_map_.end())
     {
-      ::OpenDDS::DCPS::GuidConverter converter(
-        const_cast< ::OpenDDS::DCPS::RepoId*>( &ids[ i])
-      );
+      RepoIdConverter converter(ids[i]);
       ACE_DEBUG((LM_WARNING,
         ACE_TEXT("(%P|%t) DataReaderImpl::cache_lookup_instance_handles: ")
         ACE_TEXT("could not find instance handle for writer %C.\n"),
-        (const char*) converter
+        std::string(converter).c_str()
       ));
       hdls[i] = -1;
       ret = false;
@@ -2219,13 +2544,11 @@ DataReaderImpl::cache_lookup_instance_handles (const WriterIdSeq& ids,
     {
       hdls[i] = iter->second;
       if( DCPS_debug_level > 7) {
-        ::OpenDDS::DCPS::GuidConverter converter(
-          const_cast< ::OpenDDS::DCPS::RepoId*>( &ids[ i])
-        );
+        RepoIdConverter converter(ids[i]);
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderImpl::cache_lookup_instance_handles: ")
           ACE_TEXT("instance handle for writer %C == 0x%x.\n"),
-          (const char*) converter,
+          std::string(converter).c_str(),
           hdls[i]
         ));
       }
@@ -2311,7 +2634,7 @@ DataReaderImpl::num_zero_copies()
       for (OpenDDS::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_;
             item != 0; item = item->next_data_sample_)
         {
-            loans += item->zero_copy_cnt_;
+            loans += item->zero_copy_cnt_.value();
         }
     }
 
@@ -2328,21 +2651,19 @@ void DataReaderImpl::notify_liveliness_change()
     listener->on_liveliness_changed (dr_local_objref_.in (),
       liveliness_changed_status_);
 
-    liveliness_changed_status_.active_count_change = 0;
-    liveliness_changed_status_.inactive_count_change = 0;
+    liveliness_changed_status_.alive_count_change = 0;
+    liveliness_changed_status_.not_alive_count_change = 0;
   }
   notify_status_condition ();
   if( DCPS_debug_level > 9) {
     std::stringstream buffer;
-    long key = GuidConverter( this->subscription_id_);
-    buffer << "subscription " << this->subscription_id_ << "(" << key << ")";
+    buffer << "subscription " << RepoIdConverter(subscription_id_);
     buffer << ", listener at: 0x" << std::hex << this->fast_listener_;
     for( WriterMapType::iterator current = this->writers_.begin();
          current != this->writers_.end();
          ++current) {
       RepoId id = current->first;
-      key = GuidConverter( id);
-      buffer << std::endl << "\tNOTIFY: writer[ " << id << "(" << key << ")] == ";
+      buffer << std::endl << "\tNOTIFY: writer[ " << RepoIdConverter(id) << "] == ";
       buffer << current->second.get_state();
     }
     buffer << std::endl;

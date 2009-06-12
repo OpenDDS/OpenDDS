@@ -15,12 +15,15 @@ import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.ManagedConnectionFactory;
 
 import org.opendds.jms.common.ExceptionHelper;
+import org.opendds.jms.common.util.Logger;
 
 /**
  * @author  Steven Stallion
  * @version $Revision$
  */
 public class ConnectionFactoryImpl implements ConnectionFactory, Serializable {
+    private static Logger logger = Logger.getLogger(ConnectionFactoryImpl.class);
+
     private ManagedConnectionFactory mcf;
     private ConnectionManager cxManager;
     private ConnectionRequestInfo cxRequestInfo;
@@ -55,7 +58,10 @@ public class ConnectionFactoryImpl implements ConnectionFactory, Serializable {
         }
 
         try {
-            return (Connection) cxManager.allocateConnection(mcf, cxRequestInfo);
+            Connection conn = (Connection) cxManager.allocateConnection(mcf, cxRequestInfo);
+            logger.debug("Created %s", conn);
+
+            return conn;
 
         } catch (ResourceException e) {
             throw ExceptionHelper.wrap(e);

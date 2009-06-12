@@ -5,6 +5,7 @@
 #include "DomainParticipantImpl.h"
 #include "Service_Participant.h"
 #include "Qos_Helper.h"
+#include "RepoIdConverter.h"
 #include "PublisherImpl.h"
 #include "SubscriberImpl.h"
 #include "Marked_Default_Qos.h"
@@ -12,6 +13,8 @@
 #include "Transient_Kludge.h"
 #include "FailoverListener.h"
 #include "Util.h"
+
+#include "dds/DdsDcpsGuidC.h"
 
 #include <sstream>
 
@@ -63,7 +66,9 @@ namespace OpenDDS
         domain_id_(domain_id),
         dp_id_(dp_id),
         federated_( federated),
-        failoverListener_( 0)
+        failoverListener_( 0),
+        subscriber_handles_(ENTITYKIND_OPENDDS_SUBSCRIBER),
+        publisher_handles_(ENTITYKIND_OPENDDS_PUBLISHER)
     {
       DDS::ReturnCode_t ret;
       ret = this->set_listener(a_listener, DEFAULT_STATUS_KIND_MASK);
@@ -117,7 +122,8 @@ namespace OpenDDS
 
       PublisherImpl* pub = 0;
       ACE_NEW_RETURN(pub,
-                     PublisherImpl(pub_qos,
+                     PublisherImpl(publisher_handles_.next(),
+                                   pub_qos,
                                    a_listener,
                                    this),
                      ::DDS::Publisher::_nil());
@@ -243,7 +249,8 @@ namespace OpenDDS
 
       SubscriberImpl* sub = 0 ;
       ACE_NEW_RETURN(sub,
-                     SubscriberImpl(sub_qos,
+                     SubscriberImpl(subscriber_handles_.next(),
+                                    sub_qos,
                                     a_listener,
                                     this),
                      ::DDS::Subscriber::_nil());
@@ -901,6 +908,65 @@ namespace OpenDDS
       return ret;
     }
 
+    CORBA::Boolean
+    DomainParticipantImpl::contains_entity(DDS::InstanceHandle_t a_handle)
+      ACE_THROW_SPEC ((CORBA::SystemException))
+    {
+      InstanceHandleHelper helper(a_handle);
+
+      /// Check top-level containers for Topic, Subscriber,
+      /// and Publisher instances.
+      if (helper.is_topic())
+      {
+        for (TopicMap::iterator it(topics_.begin());
+             it != topics_.end(); ++it)
+        {
+          if (helper.matches(it->second.pair_.svt_))
+            return true;
+        }
+      }
+      else if (helper.is_subscriber())
+      {
+        for (SubscriberSet::iterator it(subscribers_.begin());
+             it != subscribers_.end(); ++it)
+        {
+          if (helper.matches(it->svt_))
+            return true;
+        }
+      }
+      else if (helper.is_publisher())
+      {
+        for (PublisherSet::iterator it(publishers_.begin());
+             it != publishers_.end(); ++it)
+        {
+          if (helper.matches(it->svt_))
+            return true;
+        }
+      }
+
+      /// Recurse into SubscriberImpl and PublisherImpl for
+      /// DataReader and DataWriter instances respectively.
+      else if (helper.is_datareader())
+      {
+        for (SubscriberSet::iterator it(subscribers_.begin());
+             it != subscribers_.end(); ++it)
+        {
+          if (it->svt_->contains_reader(a_handle))
+            return true;
+        }
+      }
+      else if (helper.is_datawriter())
+      {
+        for (PublisherSet::iterator it(publishers_.begin());
+             it != publishers_.end(); ++it)
+        {
+          if (it->svt_->contains_writer(a_handle))
+            return true;
+        }
+      }
+
+      return false;
+    }
 
     ::DDS::ReturnCode_t
     DomainParticipantImpl::set_qos (
@@ -990,7 +1056,7 @@ namespace OpenDDS
       ))
     {
       listener_mask_ = mask;
-      //note: OK to duplicate  and reference_to_servant a nil object ref
+      //note: OK to duplicate  a nil object ref
       listener_ = ::DDS::DomainParticipantListener::_duplicate(a_listener);
       fast_listener_ = listener_.in ();
       return ::DDS::RETCODE_OK;
@@ -1025,14 +1091,13 @@ namespace OpenDDS
                             ::DDS::RETCODE_NOT_ENABLED);
         }
 
-      CORBA::Long ignoreKey = 0;
+      RepoId ignoreId = RepoIdBuilder::create();
 
       BIT_Helper_1 < ::DDS::ParticipantBuiltinTopicDataDataReader,
                ::DDS::ParticipantBuiltinTopicDataDataReader_var,
                ::DDS::ParticipantBuiltinTopicDataSeq > hh;
       ::DDS::ReturnCode_t ret
-        = hh.instance_handle_to_repo_key(this, BUILT_IN_PARTICIPANT_TOPIC, handle, ignoreKey);
-
+        = hh.instance_handle_to_repo_key(this, BUILT_IN_PARTICIPANT_TOPIC, handle, ignoreId);
 
       if (ret != ::DDS::RETCODE_OK)
         {
@@ -1042,25 +1107,24 @@ namespace OpenDDS
       try
         {
           if( DCPS_debug_level >= 4) {
-            ::OpenDDS::DCPS::GuidConverter converter( this->dp_id_);
+            RepoIdConverter converter(dp_id_);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("%P|%t) DomainParticipantImpl::ignore_participant: ")
-              ACE_TEXT("%C ignoring handle==%d, key==%x.\n"),
-              (const char*) converter,
-              handle,
-              ignoreKey
+              ACE_TEXT("%C ignoring handle %x.\n"),
+              std::string(converter).c_str(),
+              handle
             ));
           }
           DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
           repo->ignore_domain_participant(domain_id_,
                                           dp_id_,
-                                          ignoreKey);
+                                          ignoreId);
           if( DCPS_debug_level >= 4) {
-            ::OpenDDS::DCPS::GuidConverter converter( this->dp_id_);
+            RepoIdConverter converter(dp_id_);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_participant: ")
               ACE_TEXT("%C repo call returned.\n"),
-              (const char*) converter
+              std::string(converter).c_str()
             ));
           }
         }
@@ -1104,13 +1168,13 @@ namespace OpenDDS
                             ::DDS::RETCODE_NOT_ENABLED);
         }
 
-      CORBA::Long ignoreKey = 0;
+      RepoId ignoreId = RepoIdBuilder::create();
 
       BIT_Helper_1 < ::DDS::TopicBuiltinTopicDataDataReader,
                ::DDS::TopicBuiltinTopicDataDataReader_var,
                ::DDS::TopicBuiltinTopicDataSeq > hh;
       ::DDS::ReturnCode_t ret =
-                  hh.instance_handle_to_repo_key(this, BUILT_IN_TOPIC_TOPIC, handle, ignoreKey);
+                  hh.instance_handle_to_repo_key(this, BUILT_IN_TOPIC_TOPIC, handle, ignoreId);
 
       if (ret != ::DDS::RETCODE_OK)
         {
@@ -1120,19 +1184,18 @@ namespace OpenDDS
       try
         {
           if( DCPS_debug_level >= 4) {
-            ::OpenDDS::DCPS::GuidConverter converter( this->dp_id_);
+            RepoIdConverter converter(dp_id_);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("%P|%t) DomainParticipantImpl::ignore_topic: ")
-              ACE_TEXT("%C ignoring handle==%d, key==%x.\n"),
-              (const char*) converter,
-              handle,
-              ignoreKey
+              ACE_TEXT("%C ignoring handle %x.\n"),
+              std::string(converter).c_str(),
+              handle
             ));
           }
           DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
           repo->ignore_topic(domain_id_,
                              dp_id_,
-                             ignoreKey);
+                             ignoreId);
         }
       catch (const CORBA::SystemException& sysex)
         {
@@ -1174,13 +1237,13 @@ namespace OpenDDS
                             ::DDS::RETCODE_NOT_ENABLED);
         }
 
-      CORBA::Long ignoreKey = 0;
+      RepoId ignoreId = RepoIdBuilder::create();
 
       BIT_Helper_1 < ::DDS::PublicationBuiltinTopicDataDataReader,
                ::DDS::PublicationBuiltinTopicDataDataReader_var,
                ::DDS::PublicationBuiltinTopicDataSeq > hh;
       ::DDS::ReturnCode_t ret =
-                  hh.instance_handle_to_repo_key(this, BUILT_IN_PUBLICATION_TOPIC, handle, ignoreKey);
+                  hh.instance_handle_to_repo_key(this, BUILT_IN_PUBLICATION_TOPIC, handle, ignoreId);
 
       if (ret != ::DDS::RETCODE_OK)
         {
@@ -1190,19 +1253,18 @@ namespace OpenDDS
       try
         {
           if( DCPS_debug_level >= 4) {
-            ::OpenDDS::DCPS::GuidConverter converter( this->dp_id_);
+            RepoIdConverter converter(dp_id_);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("%P|%t) DomainParticipantImpl::ignore_publication: ")
-              ACE_TEXT("%C ignoring handle==%d, key==%x.\n"),
-              (const char*) converter,
-              handle,
-              ignoreKey
+              ACE_TEXT("%C ignoring handle %x.\n"),
+              std::string(converter).c_str(),
+              handle
             ));
           }
           DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
           repo->ignore_publication(domain_id_,
                                    dp_id_,
-                                   ignoreKey);
+                                   ignoreId);
         }
       catch (const CORBA::SystemException& sysex)
         {
@@ -1244,13 +1306,13 @@ namespace OpenDDS
                             ::DDS::RETCODE_NOT_ENABLED);
         }
 
-      CORBA::Long ignoreKey = 0;
+      RepoId ignoreId = RepoIdBuilder::create();
 
       BIT_Helper_1 < ::DDS::SubscriptionBuiltinTopicDataDataReader,
                ::DDS::SubscriptionBuiltinTopicDataDataReader_var,
                ::DDS::SubscriptionBuiltinTopicDataSeq > hh;
       ::DDS::ReturnCode_t ret =
-                  hh.instance_handle_to_repo_key(this, BUILT_IN_SUBSCRIPTION_TOPIC, handle, ignoreKey);
+                  hh.instance_handle_to_repo_key(this, BUILT_IN_SUBSCRIPTION_TOPIC, handle, ignoreId);
 
       if (ret != ::DDS::RETCODE_OK)
         {
@@ -1260,19 +1322,18 @@ namespace OpenDDS
       try
         {
           if( DCPS_debug_level >= 4) {
-            ::OpenDDS::DCPS::GuidConverter converter( this->dp_id_);
+            RepoIdConverter converter(dp_id_);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("%P|%t) DomainParticipantImpl::ignore_subscription: ")
-              ACE_TEXT("%C ignoring handle==%d, key==%x.\n"),
-              (const char*) converter,
-              handle,
-              ignoreKey
+              ACE_TEXT("%C ignoring handle %d.\n"),
+              std::string(converter).c_str(),
+              handle
             ));
           }
           DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
           repo->ignore_subscription(domain_id_,
                                     dp_id_,
-                                    ignoreKey);
+                                    ignoreId);
         }
       catch (const CORBA::SystemException& sysex)
         {
@@ -1476,20 +1537,28 @@ namespace OpenDDS
       return dp_id_;
     }
 
+    DDS::InstanceHandle_t
+    DomainParticipantImpl::get_instance_handle()
+      ACE_THROW_SPEC ((CORBA::SystemException))
+    {
+      RepoIdConverter converter(dp_id_);
+      return DDS::InstanceHandle_t(converter);
+    }
+
     CORBA::Long
     DomainParticipantImpl::get_federation_id()
       ACE_THROW_SPEC ((CORBA::SystemException))
     {
-      GuidConverter gc(dp_id_);
-      return gc.federationId();
+      RepoIdConverter converter(dp_id_);
+      return converter.federationId();
     }
 
     CORBA::Long
     DomainParticipantImpl::get_participant_id()
       ACE_THROW_SPEC ((CORBA::SystemException))
     {
-      GuidConverter gc(dp_id_);
-      return gc.participantId();
+      RepoIdConverter converter(dp_id_);
+      return converter.participantId();
     }
 
     ::DDS::Topic_ptr

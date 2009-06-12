@@ -5,6 +5,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "DataSampleHeader.h"
 #include "Serializer.h"
+#include "RepoIdConverter.h"
 
 #include <iostream>
 
@@ -77,14 +78,9 @@ OpenDDS::DCPS::DataSampleHeader::init (ACE_Message_Block* buffer)
   if( reader.good_bit() != true) return ;
   this->marshaled_size_ += sizeof( this->coherency_group_) ;
 
-  // Publication ID is complex structure of bytes, but of known size -
-  // just slurp the whole structure.
-  this->publication_id_ = GUID_UNKNOWN;
-  reader.read_octet_array(
-    reinterpret_cast<ACE_CDR::Octet*>( &this->publication_id_),
-    sizeof(this->publication_id_)
-  );
-  this->marshaled_size_ += sizeof( this->publication_id_) ;
+  reader >> this->publication_id_;
+  if( reader.good_bit() != true) return ;
+  this->marshaled_size_ += _dcps_find_size( this->publication_id_) ;
 
 }
 
@@ -141,15 +137,12 @@ operator<< (ACE_Message_Block*& buffer, OpenDDS::DCPS::DataSampleHeader& value)
 
   writer << value.coherency_group_ ;
 
-  writer.write_octet_array(
-    reinterpret_cast<ACE_CDR::Octet*>( &value.publication_id_),
-    sizeof(value.publication_id_)
-  );
+  writer << value.publication_id_;
 
   return writer.good_bit() ;
 }
 
-/// Message Id enumarion insertion onto an ostream.
+/// Message Id enumeration insertion onto an ostream.
 std::ostream& operator<<( std::ostream& str, const OpenDDS::DCPS::MessageId value)
 {
   switch( value) {
@@ -160,6 +153,8 @@ std::ostream& operator<<( std::ostream& str, const OpenDDS::DCPS::MessageId valu
     case OpenDDS::DCPS::DISPOSE_INSTANCE:      return str << "DISPOSE_INSTANCE";
     case OpenDDS::DCPS::GRACEFUL_DISCONNECT:   return str << "GRACEFUL_DISCONNECT";
     case OpenDDS::DCPS::FULLY_ASSOCIATED:      return str << "FULLY_ASSOCIATED";
+    case OpenDDS::DCPS::REQUEST_ACK:           return str << "REQUEST_ACK";
+    case OpenDDS::DCPS::SAMPLE_ACK:            return str << "SAMPLE_ACK";
     default:                                   return str << "UNSPECIFIED(" << int(value) << ")";
   }
 }
@@ -186,11 +181,7 @@ std::ostream& operator<<( std::ostream& str, const OpenDDS::DCPS::DataSampleHead
   str << "(" << std::dec << value.lifespan_duration_sec_ << "/";
   str << std::dec << value.lifespan_duration_nanosec_ << "), ";
   str << std::dec << value.coherency_group_ << ", ";
-
-  long key = OpenDDS::DCPS::GuidConverter(
-               const_cast< OpenDDS::DCPS::GUID_t*>( &value.publication_id_)
-             );
-  str << value.publication_id_ << "(" << std::hex << key << ")";
+  str << OpenDDS::DCPS::RepoIdConverter(value.publication_id_);
 
   str << "]";
   return str;

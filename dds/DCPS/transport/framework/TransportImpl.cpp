@@ -8,6 +8,7 @@
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/PublisherImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
+#include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/Util.h"
 #include "tao/debug.h"
 #include <sstream>
@@ -111,6 +112,7 @@ OpenDDS::DCPS::TransportImpl::reserve_datalink
                       (const TransportInterfaceInfo& remote_subscriber_info,
                        RepoId                        subscriber_id,
                        RepoId                        publisher_id,
+                       TransportSendListener*        send_listener,
                        CORBA::Long                   priority)
 {
   DBG_ENTRY_LVL("TransportImpl","reserve_datalink",6);
@@ -128,19 +130,23 @@ OpenDDS::DCPS::TransportImpl::reserve_datalink
 
   if (link.is_nil())
     {
-      ::OpenDDS::DCPS::GuidConverter writerConverter( publisher_id);
-      ::OpenDDS::DCPS::GuidConverter readerConverter( subscriber_id);
+      OpenDDS::DCPS::RepoIdConverter pub_converter(publisher_id);
+      OpenDDS::DCPS::RepoIdConverter sub_converter(subscriber_id);
       ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: TransportImpl::reserve_datalink: ")
         ACE_TEXT("subclass was unable to find ")
         ACE_TEXT("or create a DataLink for local publisher_id %C ")
         ACE_TEXT("to remote subscriber_id %C.\n"),
-        (const char*) writerConverter,
-        (const char*) readerConverter
+        std::string(pub_converter).c_str(),
+        std::string(sub_converter).c_str()
       ),0);
     }
 
-  link->make_reservation(subscriber_id,publisher_id);
+  link->make_reservation(
+    subscriber_id,
+    publisher_id,
+    send_listener
+  );
 
   return link._retn();
 }
@@ -171,15 +177,15 @@ OpenDDS::DCPS::TransportImpl::reserve_datalink
 
   if (link.is_nil())
     {
-      ::OpenDDS::DCPS::GuidConverter writerConverter( publisher_id);
-      ::OpenDDS::DCPS::GuidConverter readerConverter( subscriber_id);
+      OpenDDS::DCPS::RepoIdConverter pub_converter(publisher_id);
+      OpenDDS::DCPS::RepoIdConverter sub_converter(subscriber_id);
       ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: TransportImpl::reserve_datalink: ")
         ACE_TEXT("subclass was unable to find ")
         ACE_TEXT("or create a DataLink for local publisher_id %C ")
         ACE_TEXT("to remote subscriber_id %C.\n"),
-        (const char*) writerConverter,
-        (const char*) readerConverter
+        std::string(pub_converter).c_str(),
+        std::string(sub_converter).c_str()
       ),0);
     }
 
@@ -258,11 +264,11 @@ OpenDDS::DCPS::TransportImpl::register_publication (OpenDDS::DCPS::RepoId pub_id
 
   if (::OpenDDS::DCPS::Transport_debug_level > 8)
     {
-      ::OpenDDS::DCPS::GuidConverter converter( pub_id);
+      OpenDDS::DCPS::RepoIdConverter converter(pub_id);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) transport %x added publication %C.\n"),
         this,
-        (const char*) converter
+        std::string(converter).c_str()
       ));
     }
 
@@ -287,11 +293,11 @@ OpenDDS::DCPS::TransportImpl::unregister_publication (OpenDDS::DCPS::RepoId pub_
 
   if (::OpenDDS::DCPS::Transport_debug_level > 8)
     {
-      ::OpenDDS::DCPS::GuidConverter converter( pub_id);
+      OpenDDS::DCPS::RepoIdConverter converter( pub_id);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) transport %x released publication %C.\n"),
         this,
-        (const char*) converter
+        std::string(converter).c_str()
       ));
     }
 
@@ -309,11 +315,11 @@ OpenDDS::DCPS::TransportImpl::find_publication (OpenDDS::DCPS::RepoId pub_id, bo
     {
       if (::OpenDDS::DCPS::Transport_debug_level > 8)
         {
-          ::OpenDDS::DCPS::GuidConverter converter( pub_id);
+          OpenDDS::DCPS::RepoIdConverter converter( pub_id);
           ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t)TransportImpl::find_publication: ")
             ACE_TEXT("publication %C not found\n"),
-            (const char*) converter
+            std::string(converter).c_str()
           ));
         }
       return 0;
@@ -343,12 +349,12 @@ OpenDDS::DCPS::TransportImpl::register_subscription (OpenDDS::DCPS::RepoId sub_i
 
   if (::OpenDDS::DCPS::Transport_debug_level > 8)
     {
-      ::OpenDDS::DCPS::GuidConverter converter( sub_id);
+      OpenDDS::DCPS::RepoIdConverter converter(sub_id);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) TransportImpl::register_subscription: ")
         ACE_TEXT("transport %x added subscription %C.\n"),
         this,
-        (const char*) converter
+        std::string(converter).c_str()
       ));
     }
 
@@ -370,22 +376,22 @@ OpenDDS::DCPS::TransportImpl::unregister_subscription (OpenDDS::DCPS::RepoId sub
     dr_map_.erase(iter);
 
   } else {
-    ::OpenDDS::DCPS::GuidConverter converter( sub_id);
+    OpenDDS::DCPS::RepoIdConverter converter(sub_id);
     ACE_ERROR((LM_WARNING,
       ACE_TEXT("(%P|%t) WARNING: TransportImpl::unregister_subscription: ")
       ACE_TEXT("subscription %C not found to unregister.\n"),
-      (const char*) converter
+      std::string(converter).c_str()
     ));
   }
 
   if (::OpenDDS::DCPS::Transport_debug_level > 8)
     {
-      ::OpenDDS::DCPS::GuidConverter converter( sub_id);
+      OpenDDS::DCPS::RepoIdConverter converter(sub_id);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) TransportImpl::unregister_subscription: ")
         ACE_TEXT("transport %x released subscription %C.\n"),
         this,
-        (const char*) converter
+        std::string(converter).c_str()
       ));
     }
 
@@ -405,11 +411,11 @@ OpenDDS::DCPS::TransportImpl::find_subscription (OpenDDS::DCPS::RepoId sub_id, b
     {
       if (::OpenDDS::DCPS::Transport_debug_level > 8)
         {
-          ::OpenDDS::DCPS::GuidConverter converter( sub_id);
+          OpenDDS::DCPS::RepoIdConverter converter( sub_id);
           ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) TransportImpl::find_subscription: ")
             ACE_TEXT("subscription %C not found.\n"),
-            (const char*) converter
+            std::string(converter).c_str()
           ));
         }
       return 0;
@@ -447,11 +453,11 @@ OpenDDS::DCPS::TransportImpl::add_pending_association (RepoId  pub_id,
    
     if (bind(pending_association_sub_map_, pub_id, infos) == -1)
     {
-      ::OpenDDS::DCPS::GuidConverter converter( pub_id);
+      OpenDDS::DCPS::RepoIdConverter converter(pub_id);
       ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: TransportImpl::add_pending_association: ")
         ACE_TEXT("failed to add pending associations for pub %C\n"),
-        (const char*) converter
+        std::string(converter).c_str()
       ),-1);
     }
   }

@@ -8,6 +8,8 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/PublisherImpl.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
+#include "dds/DCPS/RepoIdBuilder.h"
+#include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Transient_Kludge.h"
@@ -233,6 +235,8 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
                             PARTICIPANT_QOS_DEFAULT,
                             ::DDS::DomainParticipantListener::_nil());
   TEST_CHECK (! CORBA::is_nil (participant_.in ()));
+  // NOTE: A participant may not contain itself
+  TEST_CHECK (!participant_->contains_entity(participant_->get_instance_handle()));
 
   if (::DDS::RETCODE_OK != fts->register_type(participant_.in (), MY_TYPE))
     {
@@ -258,11 +262,16 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
                                        TOPIC_QOS_DEFAULT,
                                        ::DDS::TopicListener::_nil());
   TEST_CHECK (! CORBA::is_nil (topic_.in ()));
+  TEST_CHECK (participant_->contains_entity(topic_->get_instance_handle()));
 
   publisher_ =
     participant_->create_publisher(PUBLISHER_QOS_DEFAULT,
                                    ::DDS::PublisherListener::_nil());
   TEST_CHECK (! CORBA::is_nil (publisher_.in ()));
+
+  std::cout << std::hex << "0x" << publisher_->get_instance_handle() << std::endl;
+
+  TEST_CHECK (participant_->contains_entity(publisher_->get_instance_handle()));
 
   publisher_servant_
     = dynamic_cast<OpenDDS::DCPS::PublisherImpl*>
@@ -307,6 +316,7 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
                                     DATAWRITER_QOS_USE_TOPIC_QOS,
                                     ::DDS::DataWriterListener::_nil());
   TEST_CHECK (! CORBA::is_nil (datawriter_.in ()));
+  TEST_CHECK (participant_->contains_entity(datawriter_->get_instance_handle()));
 
   ::DDS::DataWriterQos dw_qos_use_topic_qos;
   datawriter_->get_qos (dw_qos_use_topic_qos);
@@ -319,6 +329,8 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
 
   // Delete the datawriter.
   publisher_->delete_datawriter (datawriter_.in ());
+  
+  TEST_CHECK (! participant_->contains_entity(datawriter_->get_instance_handle()));
 
   // Create datawriter to test DATAWRITER_QOS_DEFAULT/get_publisher
   // get_qos/set_qos/get_default_datawriter_qos.
@@ -327,6 +339,7 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
                                     DATAWRITER_QOS_DEFAULT,
                                     ::DDS::DataWriterListener::_nil());
   TEST_CHECK (! CORBA::is_nil (datawriter_.in ()));
+  TEST_CHECK (participant_->contains_entity(datawriter_->get_instance_handle()));
 
   ::DDS::Topic_var topic_got
     = datawriter_->get_topic ();
@@ -364,6 +377,8 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
 
   // Delete the datawriter.
   publisher_->delete_datawriter (datawriter_.in ());
+  
+  TEST_CHECK (! participant_->contains_entity(datawriter_->get_instance_handle()));
 
   // Create datawriter to test register/unregister/dispose and etc.
   ::DDS::DataWriterQos dw_qos;
@@ -382,6 +397,7 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
                                     dw_qos,
                                     ::DDS::DataWriterListener::_nil());
   TEST_CHECK (! CORBA::is_nil (datawriter_.in ()));
+  TEST_CHECK (participant_->contains_entity(datawriter_->get_instance_handle()));
 
   datawriter_servant_
     = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*> (datawriter_.in ());
@@ -716,6 +732,8 @@ PubDriver::resume_test ()
 void
 PubDriver::listener_test ()
 {
+  OpenDDS::DCPS::RepoIdConverter converter(sub_id_);
+
   // Create DomainParticipantListener, PublisherListener and
   // DataWriterListener.
   ::DDS::DomainParticipantListener_var dpl(new DomainParticipantListenerImpl);
@@ -849,7 +867,7 @@ PubDriver::listener_test ()
 
   TEST_CHECK (ret == ::DDS::RETCODE_OK
               && subscription_handles.length () == 1
-              && subscription_handles[0] == OpenDDS::DCPS::GuidConverter(this->sub_id_));
+              && subscription_handles[0] == DDS::InstanceHandle_t(converter));
 
   // Test get_publication_match_status.
 
@@ -867,7 +885,7 @@ PubDriver::listener_test ()
   // The listener is set after add_association, so the total_count_change
   // should be 1 since the datawriter is associated with one datareader.
   TEST_CHECK (match_status.total_count_change == 1);
-  TEST_CHECK (match_status.last_subscription_handle == OpenDDS::DCPS::GuidConverter(this->sub_id_));
+  TEST_CHECK (match_status.last_subscription_handle == DDS::InstanceHandle_t(converter));
 
   // Call register_test to send a few messages to remote subscriber.
   register_test ();
@@ -1099,10 +1117,13 @@ PubDriver::parse_sub_arg(const ACE_TString& arg)
   ACE_TString sub_id_str(arg.c_str(), pos);
   ACE_TString sub_addr_str(arg.c_str() + pos + 1);
 
-  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 1
-  converter.kind()   = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
-  converter.key()[2] = ACE_OS::atoi(sub_id_str.c_str());
-  this->sub_id_ = converter;
+  // RepoIds are conventionally created and managed by the DCPSInfoRepo. Those
+  // generated here are for the sole purpose of verifying internal behavior.
+  OpenDDS::DCPS::RepoIdBuilder builder(sub_id_);
+
+  builder.participantId(1);
+  builder.entityKey(ACE_OS::atoi(sub_id_str.c_str()));
+  builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
 
   // Use the remainder as the "stringified" ACE_INET_Addr.
   this->sub_addr_ = sub_addr_str.c_str();

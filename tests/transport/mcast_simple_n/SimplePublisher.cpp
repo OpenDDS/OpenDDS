@@ -75,6 +75,7 @@ SimplePublisher::init(OpenDDS::DCPS::TransportIdType               transport_id,
   // Add the association between the local pub_id and the remote sub_id
   // to the transport via the TransportInterface.
   int result = this->add_subscriptions (pub_id,
+                                        0,
                                         0,   /* priority */
                                         num_subscriptions,
                                         subscriptions);

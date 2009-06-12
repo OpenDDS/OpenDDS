@@ -53,6 +53,9 @@ namespace OpenDDS
           CORBA::SystemException
         ));
 
+      virtual DDS::InstanceHandle_t get_instance_handle()
+        ACE_THROW_SPEC ((CORBA::SystemException)) = 0;
+
       virtual void set_deleted (bool state);
 
       virtual bool get_deleted ();
@@ -80,7 +83,7 @@ namespace OpenDDS
       DDS::StatusKindMask status_changes_;
       DDS::StatusCondition_var status_condition_;
 
-      ACE_Thread_Mutex    lock_;  
+      ACE_Thread_Mutex lock_;  
     };
 
   } // namespace DCPS

@@ -16,7 +16,8 @@ namespace OpenDDS
   {
 
     struct DataSampleListElement;
-
+    struct DataSampleHeader;
+    typedef ACE_Message_Block DataSample;
 
     class OpenDDS_Dcps_Export TransportSendListener
     {
@@ -30,6 +31,12 @@ namespace OpenDDS
         virtual void control_delivered(ACE_Message_Block* sample);
         virtual void control_dropped(ACE_Message_Block* sample, bool dropped_by_transport);
 
+        /// Handle reception of SAMPLE_ACK message.
+        virtual void deliver_ack(
+                       const DataSampleHeader& /* header */,
+                       DataSample* /* data */
+                     )
+                     {}
 
       protected:
 

@@ -46,6 +46,8 @@ namespace OpenDDS
       //Destructor
       virtual ~TopicImpl (void);
 
+    virtual DDS::InstanceHandle_t get_instance_handle()
+      ACE_THROW_SPEC ((CORBA::SystemException));
 
     virtual ::DDS::ReturnCode_t set_qos (
         const ::DDS::TopicQos & qos

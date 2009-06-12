@@ -20,6 +20,8 @@
 #include "ace/Synch.h"
 #include "ace/Event_Handler.h"
 
+#include <map>
+
 #include <iosfwd> // For operator<<() diagnostic formatter.
 
 class ACE_SOCK;
@@ -43,6 +45,7 @@ namespace OpenDDS
   {
 
     class  TransportReceiveListener;
+    class  TransportSendListener;
     class  TransportQueueElement;
     class  DataLinkSetMap;
     class  ReceivedDataSample;
@@ -87,7 +90,11 @@ namespace OpenDDS
 
       // ciju: Called by TransportImpl
         /// This is for a remote subscriber_id and local publisher_id
-        int make_reservation(RepoId subscriber_id, RepoId publisher_id);
+        int make_reservation(
+              RepoId subscriber_id,
+              RepoId publisher_id,
+              TransportSendListener* send_listener
+            );
 
       // ciju: Called by TransportImpl
         /// This is for a remote publisher_id and a local subscriber_id.
@@ -120,8 +127,6 @@ namespace OpenDDS
         void send_start();
         void send(TransportQueueElement* element);
         void send_stop();
-//MJM: We may want to change these to be enable/disable instead of start/stop.
-//MJM: No real reason, but the semantics may be easier to understand?
 
       // ciju: Called by LinkSet with locks held
         /// This method is essentially an "undo_send()" method.  It's goal
@@ -142,6 +147,9 @@ namespace OpenDDS
         /// the appropriate TransportReceiveListener objects to be told
         /// that data_received().
         int data_received(ReceivedDataSample& sample);
+
+        /// SAMPLE_ACK message received on this link.
+        void ack_received( ReceivedDataSample& sample);
 
         /// Obtain a unique identifier for this DataLink object.
         DataLinkIdType id() const;
@@ -289,6 +297,10 @@ namespace OpenDDS
 
         /// Convenience function for diagnostic information.
         friend std::ostream& ::operator<<(std::ostream& str, const DataLink& value);
+
+        /// Map publication Id value to TransportSendListener.
+        typedef std::map< RepoId, TransportSendListener*, GUID_tKeyLessThan> IdToSendListenerMap;
+        IdToSendListenerMap send_listeners_;
 
         /// Map associating each publisher_id with a set of
         /// TransportReceiveListener objects (each with an associated

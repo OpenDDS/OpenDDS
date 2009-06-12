@@ -4,11 +4,12 @@
 #include "Pub.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
+#include "dds/DCPS/GuidBuilder.h"
 #include "TestException.h"
 
 
 Pub::Pub()
-  : pub_id_( OpenDDS::DCPS::GUID_UNKNOWN)
+  : pub_id_(OpenDDS::DCPS::GuidBuilder::create ())
 {
 }
 
@@ -155,7 +156,7 @@ Pub::init_add_subscriptions()
       this->subs_[i].as_association(subs[i]);
     }
 
-  int result = this->add_subscriptions(this->pub_id_, 0, num_subs, subs);
+  int result = this->add_subscriptions(this->pub_id_, 0, 0, num_subs, subs);
 
   delete [] subs;
 

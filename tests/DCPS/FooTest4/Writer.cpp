@@ -6,6 +6,7 @@
 #include "Writer.h"
 #include "../common/TestException.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
+#include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Serializer.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportC.h"
@@ -68,11 +69,14 @@ Writer::start ()
       sample.header_.message_length_ = sizeof(foo) ;
       sample.header_.message_id_ = ::OpenDDS::DCPS::SAMPLE_DATA ;
       sample.header_.sequence_ = seq.value_ ;
+  
+      // RepoIds are conventionally created and managed by the DCPSInfoRepo. Those
+      // generated here are for the sole purpose of verifying internal behavior.
+      OpenDDS::DCPS::RepoIdBuilder builder(sample.header_.publication_id_);
 
-      OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation 0, Participant 1.
-      converter.kind()   = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
-      converter.key()[2] = 1;
-      sample.header_.publication_id_ = converter ;
+      builder.participantId(1);
+      builder.entityKey(1);
+      builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
 
       sample.header_.source_timestamp_sec_ =
 		  static_cast<ACE_INT32> (now.sec ());

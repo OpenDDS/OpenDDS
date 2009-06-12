@@ -33,10 +33,16 @@ public class ResourceAdapterImpl implements ResourceAdapter {
     public synchronized void stop() {}
 
     public void endpointActivation(MessageEndpointFactory endpointFactory,
-                                   ActivationSpec activationSpec) {}
+                                   ActivationSpec activationSpec) {
+
+        throw new UnsupportedOperationException();
+    }
 
     public void endpointDeactivation(MessageEndpointFactory endpointFactory,
-                                     ActivationSpec activationSpec) {}
+                                     ActivationSpec activationSpec) {
+
+        throw new UnsupportedOperationException();
+    }
 
     public XAResource[] getXAResources(ActivationSpec[] activationSpecs) {
         return null; // transactions not supported

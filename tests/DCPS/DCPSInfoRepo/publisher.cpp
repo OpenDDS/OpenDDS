@@ -1,6 +1,6 @@
-#include  "dds/DdsDcpsInfoC.h"
-#include  "dds/DCPS/GuidUtils.h"
-#include  "DCPSDataWriterI.h"
+#include "dds/DdsDcpsInfoC.h"
+#include "dds/DCPS/RepoIdBuilder.h"
+#include "DCPSDataWriterI.h"
 
 #include "ace/Arg_Shifter.h"
 #include "ace/Argv_Type_Converter.h"
@@ -55,8 +55,7 @@ parse_args (int argc, ACE_TCHAR *argv[])
 }
 
 
-int
-main (int argc, ACE_TCHAR *argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   if (parse_args (argc, argv) != 0)
     return 1;
@@ -173,15 +172,24 @@ main (int argc, ACE_TCHAR *argv[])
         {
           ACE_DEBUG((LM_INFO,
                      ACE_TEXT("Ignoring all entities with 1 and 2\n") ));
-          info->ignore_domain_participant(domainId, dpId, 1);
-          info->ignore_topic(domainId, dpId, 1);
-          info->ignore_publication(domainId, dpId, 1);
-          info->ignore_subscription(domainId, dpId, 1);
+          
+          OpenDDS::DCPS::RepoIdBuilder builder;
+          
+          builder.entityKey(1);
+          OpenDDS::DCPS::RepoId repoId_1(builder);
+          
+          info->ignore_domain_participant(domainId, dpId, repoId_1);
+          info->ignore_topic(domainId, dpId, repoId_1);
+          info->ignore_publication(domainId, dpId, repoId_1);
+          info->ignore_subscription(domainId, dpId, repoId_1);
 
-          info->ignore_domain_participant(domainId, dpId, 2);
-          info->ignore_topic(domainId, dpId, 2);
-          info->ignore_publication(domainId, dpId, 2);
-          info->ignore_subscription(domainId, dpId, 2);
+          builder.entityKey(2);
+          OpenDDS::DCPS::RepoId repoId_2(builder);
+
+          info->ignore_domain_participant(domainId, dpId, repoId_2);
+          info->ignore_topic(domainId, dpId, repoId_2);
+          info->ignore_publication(domainId, dpId, repoId_2);
+          info->ignore_subscription(domainId, dpId, repoId_2);
         }
 
 
@@ -257,10 +265,16 @@ main (int argc, ACE_TCHAR *argv[])
         {
           ACE_DEBUG((LM_INFO,
                      ACE_TEXT("Ignoring all entities with 3\n") ));
-          info->ignore_domain_participant(domainId, dpId, 3);
-          info->ignore_topic(domainId, dpId, 3);
-          info->ignore_publication(domainId, dpId, 3);
-          info->ignore_subscription(domainId, dpId, 3);
+          
+          OpenDDS::DCPS::RepoIdBuilder builder;
+
+          builder.entityKey(3);
+          OpenDDS::DCPS::RepoId repoId_3(builder);
+
+          info->ignore_domain_participant(domainId, dpId, repoId_3);
+          info->ignore_topic(domainId, dpId, repoId_3);
+          info->ignore_publication(domainId, dpId, repoId_3);
+          info->ignore_subscription(domainId, dpId, repoId_3);
 
           run_time = ACE_Time_Value(15,0);
           orb->run(run_time);

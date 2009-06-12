@@ -15,7 +15,7 @@
 #include /**/ "dds/DdsDcpsInfrastructureC.h"
 #include /**/ "dds/DdsDcpsInfoS.h"
 
-#include "GuidGenerator.h"
+#include "RepoIdGenerator.h"
 
 #include /**/ "ace/Map_Manager.h"
 
@@ -208,9 +208,9 @@ private:
   ACE_SYNCH_MUTEX ownerLock_;
 
   // Entity GUID Id generators.
-  GuidGenerator topicIdGenerator_;
-  GuidGenerator publicationIdGenerator_;
-  GuidGenerator subscriptionIdGenerator_;
+  RepoIdGenerator topicIdGenerator_;
+  RepoIdGenerator publicationIdGenerator_;
+  RepoIdGenerator subscriptionIdGenerator_;
 
   DCPS_IR_Subscription_Map subscriptions_;
   DCPS_IR_Publication_Map publications_;

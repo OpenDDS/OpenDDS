@@ -42,7 +42,7 @@ int main(int argc, ACE_TCHAR* argv[])
     ));
     return 1;
 
-  } catch( Test::Exception e)  {
+  } catch (const Test::Exception& e)  {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) publisher_main() - ")
       ACE_TEXT("Test exception caught during processing: %s.\n"),

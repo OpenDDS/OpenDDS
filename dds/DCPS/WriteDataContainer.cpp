@@ -10,6 +10,7 @@
 #include "PublicationInstance.h"
 #include "Util.h"
 #include "Qos_Helper.h"
+#include "RepoIdConverter.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/transport/framework/TransportDebug.h"
 #include "tao/debug.h"
@@ -87,6 +88,7 @@ WriteDataContainer::WriteDataContainer(
     max_blocking_time_ (max_blocking_time),
     waiting_on_release_ (false),
     condition_ (lock_),
+    empty_condition_(lock_),
     n_chunks_ (n_chunks),
     sample_list_element_allocator_(2 * n_chunks_),
     transport_send_element_allocator_(2 * n_chunks_,
@@ -211,13 +213,13 @@ WriteDataContainer::reenqueue_all(OpenDDS::DCPS::ReaderIdSeq const & rds,
                            rds,
                            lifespan);
     if( DCPS_debug_level > 9) {
-      ::OpenDDS::DCPS::GuidConverter converter( this->publication_id_);
+      RepoIdConverter converter(publication_id_);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) WriteDataContainer::reenqueue_all: ")
         ACE_TEXT("domain %d topic %C publication %C copying HISTORY to resend.\n"),
         this->domain_id_,
         this->topic_name_,
-        (const char*) converter
+        std::string(converter).c_str()
       ));
     }
   }
@@ -488,6 +490,15 @@ WriteDataContainer::get_sent_data()
 }
 
 
+bool
+WriteDataContainer::pending_data()
+{
+  return this->released_data_.size_ != 0
+      || this->sending_data_.size_ != 0
+      || this->unsent_data_.size_ != 0;
+}
+
+
 void
 WriteDataContainer::data_delivered (DataSampleListElement* sample)
 {
@@ -513,83 +524,89 @@ WriteDataContainer::data_delivered (DataSampleListElement* sample)
   if (released_data_.dequeue_next_send_sample (sample))
   {
     release_buffer (sample);
-    return;
-  }
-  //
-  // Search the sending_data_ list first.
-  //
-  else if (sending_data_.dequeue_next_send_sample (sample))
-  {
-    // in sending_data_ list
-  }
-  //
-  else
-  {
-    // The sample is neither in the sending_data_ nor the
-    // released_data_.
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("WriteDataContainer::data_delivered, ")
-               ACE_TEXT("The delivered sample is not in sending_data_ and ")
-               ACE_TEXT("released_data_ list.\n")));
-  }
-  //remove fix this one
-  PublicationInstance* instance = sample->handle_;
-
-  if (instance->waiting_list_.head_ != 0)
-  {
-    // Remove the delivered sample from the instance sample list
-    // and release.
-    if (instance->samples_.dequeue_next_instance_sample(sample) == false)
-    {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("WriteDataContainer::data_delivered, ")
-                 ACE_TEXT("dequeue_next_instance_sample from instance ")
-                 ACE_TEXT("list failed\n")));
-    }
-    release_buffer (sample);
-
-    // Mark the first waiting sample will be next to add to instance
-    // list.
-    instance->waiting_list_.head_->space_available_ = true;
-    // Remove this waiting sample from waiting list.
-    DataSampleListElement* stale = 0;
-    if (instance->waiting_list_.dequeue_head_next_instance_sample (stale) == false)
-    {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("WriteDataContainer::data_delivered, ")
-                 ACE_TEXT("dequeue_head_next_instance_sample from waiting ")
-                 ACE_TEXT("list failed\n")));
-    }
-
-    if (waiting_on_release_)
-    {
-      waiting_on_release_ = false;
-      // Broadcast the blocked enqueue threads.
-      condition_.broadcast();
-    }
   }
   else
   {
-    if( DCPS_debug_level > 9) {
-      ::OpenDDS::DCPS::GuidConverter converter( this->publication_id_);
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered: ")
-        ACE_TEXT("domain %d topic %C publication %C pushed to HISTORY.\n"),
-        this->domain_id_,
-        this->topic_name_,
-        (const char*) converter
-      ));
+    //
+    // Search the sending_data_ list first.
+    //
+    if (sending_data_.dequeue_next_send_sample (sample))
+    {
+      // in sending_data_ list
     }
+    //
+    else
+    {
+      // The sample is neither in the sending_data_ nor the
+      // released_data_.
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("WriteDataContainer::data_delivered, ")
+                 ACE_TEXT("The delivered sample is not in sending_data_ and ")
+                 ACE_TEXT("released_data_ list.\n")));
+    }
+    //remove fix this one
+    PublicationInstance* instance = sample->handle_;
 
-    // INSERT INTO DURABILITY CACHE HERE
-    ::OpenDDS::DCPS::DataSampleHeader::update_flag (sample->sample_,
-      HISTORIC_SAMPLE_FLAG);
-    
-    sent_data_.enqueue_tail_next_send_sample (sample);
+    if (instance->waiting_list_.head_ != 0)
+    {
+      // Remove the delivered sample from the instance sample list
+      // and release.
+      if (instance->samples_.dequeue_next_instance_sample(sample) == false)
+      {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: ")
+                   ACE_TEXT("WriteDataContainer::data_delivered, ")
+                   ACE_TEXT("dequeue_next_instance_sample from instance ")
+                   ACE_TEXT("list failed\n")));
+      }
+      release_buffer (sample);
+
+      // Mark the first waiting sample will be next to add to instance
+      // list.
+      instance->waiting_list_.head_->space_available_ = true;
+      // Remove this waiting sample from waiting list.
+      DataSampleListElement* stale = 0;
+      if (instance->waiting_list_.dequeue_head_next_instance_sample (stale) == false)
+      {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: ")
+                   ACE_TEXT("WriteDataContainer::data_delivered, ")
+                   ACE_TEXT("dequeue_head_next_instance_sample from waiting ")
+                   ACE_TEXT("list failed\n")));
+      }
+
+      if (waiting_on_release_)
+      {
+        waiting_on_release_ = false;
+        // Broadcast the blocked enqueue threads.
+        condition_.broadcast();
+      }
+    }
+    else
+    {
+      if( DCPS_debug_level > 9) {
+        RepoIdConverter converter(publication_id_);
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered: ")
+          ACE_TEXT("domain %d topic %C publication %C pushed to HISTORY.\n"),
+          this->domain_id_,
+          this->topic_name_,
+          std::string(converter).c_str()
+        ));
+      }
+
+      // INSERT INTO DURABILITY CACHE HERE
+      ::OpenDDS::DCPS::DataSampleHeader::update_flag (sample->sample_,
+        HISTORIC_SAMPLE_FLAG);
+      
+      sent_data_.enqueue_tail_next_send_sample (sample);
+    }
   }
+
+  // Signal if there is no pending data.
+  if (!pending_data())
+    empty_condition_.broadcast();
 }
 
 
@@ -650,6 +667,14 @@ WriteDataContainer::data_dropped (DataSampleListElement* sample,
                ACE_TEXT("The dropped sample is not in released_data_ ")
                ACE_TEXT("list.\n")));
   }
+
+  // Signal if there is no pending data.
+  ACE_GUARD(ACE_Recursive_Thread_Mutex,
+    guard,
+    this->lock_);
+
+  if (!pending_data())
+    empty_condition_.broadcast();
 }
 
 
@@ -720,13 +745,13 @@ WriteDataContainer::remove_oldest_sample (
     release_buffer(stale);
     released = true;
     if( DCPS_debug_level > 9) {
-      ::OpenDDS::DCPS::GuidConverter converter( this->publication_id_);
+      RepoIdConverter converter(publication_id_);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) WriteDataContainer::remove_oldest_sample: ")
         ACE_TEXT("domain %d topic %C publication %C sample removed from HISTORY.\n"),
         this->domain_id_,
         this->topic_name_,
-        (const char*) converter
+        std::string(converter).c_str()
       ));
     }
   }
@@ -1144,6 +1169,20 @@ void WriteDataContainer::reschedule_deadline ()
           "%p\n", "reset_timer_interval"));
       }
     }
+  }
+}
+
+void
+WriteDataContainer::wait_pending()
+{
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
+
+  const ACE_Time_Value pending_timeout =
+    TheServiceParticipant->pending_timeout();
+
+  while (pending_data())
+  {
+    empty_condition_.wait(&pending_timeout);
   }
 }
 

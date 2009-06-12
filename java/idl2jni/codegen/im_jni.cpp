@@ -552,7 +552,7 @@ bool idl_mapping_jni::gen_jarray_copies (UTL_ScopedName *name,
   const string &jniArrayType, const string &taoTypeName, bool sequence,
   const string &length, bool elementIsObjref /* = false */)
 {
-  commonSetup c (name, jniArrayType.c_str (), false, false, sequence);
+  commonSetup c (name, jniArrayType.c_str (), false, false);
   string preLoop, postLoopCxx, postLoopJava, preNewArray, newArrayExtra,
     loopCxx, loopJava, actualJniType = jniType,
     resizeCxx = sequence ? "  target.length (len);\n" : "";

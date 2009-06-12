@@ -38,13 +38,13 @@ class Publisher {
     DDS::Publisher_var publisher_;
 
     /// Writer.
-    DDS::DataWriter_var writer_;
+    DDS::DataWriter_var writer_[2];
 
     /// Blocking object for test synchronization.
     DDS::WaitSet_var waiter_;
 
     /// Blocking condition for test synchronization.
-    DDS::StatusCondition_var status_;
+    DDS::StatusCondition_var status_[2];
 };
 
 } // End of namespace Test

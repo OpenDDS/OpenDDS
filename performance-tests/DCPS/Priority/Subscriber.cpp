@@ -11,7 +11,9 @@
 
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
+#include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
+#include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpConfiguration.h"
@@ -95,6 +97,7 @@ Subscriber::Subscriber( const Options& options)
 
   // Create the listener.
   this->listener_ = new DataReaderListener( this->options_.verbose());
+  this->safe_listener_ = this->listener_;
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
@@ -172,6 +175,20 @@ Subscriber::Subscriber( const Options& options)
       ACE_TEXT("failed to narrow subscriber servant.\n")
     ));
     throw BadServantException();
+  }
+
+  // Configure the raw data gathering.
+  servant->raw_latency_buffer_size() = this->options_.raw_buffer_size();
+  servant->raw_latency_buffer_type() = this->options_.raw_buffer_type();
+  if( this->options_.verbose()) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
+      ACE_TEXT("configured to capture %d latency measurements of type %d ")
+      ACE_TEXT("per writer to file %s.\n"),
+      this->options_.raw_buffer_size(),
+      this->options_.raw_buffer_type(),
+      this->options_.rawOutputFilename().c_str()
+    ));
   }
 
   if( ::OpenDDS::DCPS::ATTACH_OK
@@ -306,13 +323,13 @@ Subscriber::run()
 {
   DDS::Duration_t   timeout = { DDS::DURATION_INFINITY_SEC, DDS::DURATION_INFINITY_NSEC};
   DDS::ConditionSeq conditions;
-  DDS::SubscriptionMatchStatus matches = { 0, 0, 0};
+  DDS::SubscriptionMatchStatus matches = { 0, 0, 0, 0, 0};
   do {
     if( this->options_.verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Subscriber::run() - ")
         ACE_TEXT("%d publications attached.\n"),
-        matches.total_count
+        matches.current_count
       ));
     }
     if( DDS::RETCODE_OK != this->waiter_->wait( conditions, timeout)) {
@@ -324,7 +341,7 @@ Subscriber::run()
     }
     matches = this->reader_->get_subscription_match_status();
 
-  } while( matches.total_count > 0);
+  } while( matches.current_count > 0);
 
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
@@ -334,15 +351,17 @@ Subscriber::run()
   }
 }
 
+}
+
 std::ostream&
-operator<<( std::ostream& str, const Subscriber& value)
+operator<<( std::ostream& str, const Test::Subscriber& value)
 {
   ::OpenDDS::DCPS::LatencyStatisticsSeq statistics;
   value.reader_->get_latency_stats( statistics);
   str << " --- statistical summary ---" << std::endl;
   for( unsigned long index = 0; index < statistics.length(); ++index) {
-    ::OpenDDS::DCPS::GuidConverter converter( statistics[ index].publication);
-    str << "  Writer[ " << (const char*)converter << "]" << std::endl;
+    OpenDDS::DCPS::RepoIdConverter converter(statistics[ index].publication);
+    str << "  Writer[ " << converter << "]" << std::endl;
     str << "     samples: " << statistics[ index].n << std::endl;
     str << "        mean: " << statistics[ index].mean << std::endl;
     str << "     minimum: " << statistics[ index].minimum << std::endl;
@@ -350,6 +369,36 @@ operator<<( std::ostream& str, const Subscriber& value)
     str << "    variance: " << statistics[ index].variance << std::endl;
   }
 
+  return str;
+}
+
+namespace Test
+{
+
+std::ostream&
+Subscriber::rawData( std::ostream& str) const
+{
+  // Configure the raw data gathering and extract the raw latency data
+  // container.
+  OpenDDS::DCPS::DataReaderImpl* readerImpl
+    = dynamic_cast< OpenDDS::DCPS::DataReaderImpl*>( this->reader_.in());
+  if( readerImpl == 0) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: Subscriber::Subscriber() - ")
+      ACE_TEXT("failed to derive reader implementation.\n")
+    ));
+    throw BadReaderException();
+  }
+
+  int index = 0;
+  for( OpenDDS::DCPS::DataReaderImpl::StatsMapType::const_iterator current
+         = readerImpl->raw_latency_statistics().begin();
+       current != readerImpl->raw_latency_statistics().end();
+       ++current, ++index) {
+    OpenDDS::DCPS::RepoIdConverter converter(current->first);
+    str << std::endl << "  Writer[ " << converter << "]" << std::endl;
+    current->second.raw_data( str);
+  }
   return str;
 }
 

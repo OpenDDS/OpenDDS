@@ -8,6 +8,7 @@
 #include "DataReaderRemoteImpl.h"
 #include "DomainParticipantImpl.h"
 #include "Qos_Helper.h"
+#include "RepoIdConverter.h"
 #include "TopicImpl.h"
 #include "DataReaderImpl.h"
 #include "Service_Participant.h"
@@ -40,17 +41,21 @@ namespace OpenDDS
 #endif
 
 // Implementation skeleton constructor
-SubscriberImpl::SubscriberImpl (const ::DDS::SubscriberQos & qos,
+SubscriberImpl::SubscriberImpl (DDS::InstanceHandle_t handle,
+                                const ::DDS::SubscriberQos & qos,
 				::DDS::SubscriberListener_ptr a_listener,
 				DomainParticipantImpl*       participant)
-  : qos_(qos),
+  : handle_(handle),
+    qos_(qos),
     default_datareader_qos_(
 			    TheServiceParticipant->initial_DataReaderQos()),
 
     listener_mask_(DEFAULT_STATUS_KIND_MASK),
     fast_listener_ (0),
     participant_(participant),
-    domain_id_( participant->get_domain_id())
+    domain_id_( participant->get_domain_id()),
+    raw_latency_buffer_size_( 0),
+    raw_latency_buffer_type_( DataCollector< double>::KeepOldest)
 {
   //Note: OK to duplicate a nil.
   listener_ = ::DDS::SubscriberListener::_duplicate(a_listener);
@@ -78,6 +83,26 @@ SubscriberImpl::~SubscriberImpl (void)
     }
 }
 
+DDS::InstanceHandle_t
+SubscriberImpl::get_instance_handle()
+  ACE_THROW_SPEC ((CORBA::SystemException))
+{
+  return handle_;
+}
+
+bool
+SubscriberImpl::contains_reader(DDS::InstanceHandle_t a_handle)
+{
+  InstanceHandleHelper helper(a_handle);
+
+  for (DataReaderSet::iterator it(datareader_set_.begin());
+       it != datareader_set_.end(); ++it)
+  {
+    if (helper.matches(*it))
+      return true;
+  } 
+  return false;
+}
 
 ::DDS::DataReader_ptr
 SubscriberImpl::create_datareader (
@@ -187,6 +212,12 @@ SubscriberImpl::create_opendds_datareader (
   ::OpenDDS::DCPS::DataReaderRemote_var dr_remote_obj = 
       servant_to_remote_reference(reader_remote_impl);
 
+  // Propagate the latency buffer data collection configuration.
+  // @TODO: Determine whether we want to exclude the Builtin Topic
+  //        readers from data gathering.
+  dr_servant->raw_latency_buffer_size() = this->raw_latency_buffer_size_;
+  dr_servant->raw_latency_buffer_type() = this->raw_latency_buffer_type_;
+
   dr_servant->init (topic_servant,
 		    dr_qos,
             ext_qos,
@@ -226,12 +257,12 @@ SubscriberImpl::create_opendds_datareader (
 					dr_servant) == -1)
     {
       RepoId id = dr_servant->get_subscription_id();
-      ::OpenDDS::DCPS::GuidConverter converter( id);
+      RepoIdConverter converter(id);
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("SubscriberImpl::create_datareader: ")
         ACE_TEXT("failed to register datareader %C with TransportImpl.\n"),
-        (const char*) converter
+        std::string(converter).c_str()
       ));
       return ::DDS::DataReader::_nil ();
     }
@@ -265,11 +296,11 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
     if (dr_subscriber.in() != this)
     {
         RepoId id = dr_servant->get_subscription_id();
-        ::OpenDDS::DCPS::GuidConverter converter( id);
+        RepoIdConverter converter(id);
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) SubscriberImpl::delete_datareader: ")
           ACE_TEXT("data reader %C doesn't belong to this subscriber.\n"),
-          (const char*) converter
+          std::string(converter).c_str()
         ));
         return ::DDS::RETCODE_PRECONDITION_NOT_MET;
     }
@@ -306,13 +337,13 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
     {
       CORBA::String_var topic_name = dr_servant->get_topic_name();
       RepoId id = dr_servant->get_subscription_id ();
-      ::OpenDDS::DCPS::GuidConverter converter( id);
+      RepoIdConverter converter(id);
       ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("SubscriberImpl::delete_datareader: ")
         ACE_TEXT("datareader(topic_name=%C) %C not found.\n"),
         topic_name.in(),
-        (const char*) converter
+        std::string(converter).c_str()
       ),::DDS::RETCODE_ERROR);
     }
 
@@ -364,12 +395,12 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
   // Unregister the DataReader object with the TransportImpl.
   else if (impl->unregister_subscription (subscription_id) == -1)
     {
-      ::OpenDDS::DCPS::GuidConverter converter( subscription_id);
+      RepoIdConverter converter(subscription_id);
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("SubscriberImpl::delete_datareader: ")
         ACE_TEXT("failed to unregister datareader %C with TransportImpl.\n"),
-        (const char*) converter
+        std::string(converter).c_str()
       ));
       return ::DDS::RETCODE_ERROR;
     }
@@ -599,11 +630,11 @@ SubscriberImpl::set_qos (
                 = idToQosMap.insert(DrIdToQosMap::value_type(id, qos));
               if (pair.second == false)
               {
-                ::OpenDDS::DCPS::GuidConverter converter( id);
+                RepoIdConverter converter(id);
                 ACE_ERROR_RETURN((LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::set_qos: ")
                   ACE_TEXT("insert %C to DrIdToQosMap failed.\n"), 
-                  (const char*) converter
+                  std::string(converter).c_str()
                 ),::DDS::RETCODE_ERROR);
               }
             }
@@ -683,7 +714,7 @@ SubscriberImpl::set_listener (
 		   ))
 {
   listener_mask_ = mask;
-  //note: OK to duplicate  and reference_to_servant a nil object ref
+  //note: OK to duplicate  a nil object ref
   listener_ = ::DDS::SubscriberListener::_duplicate(a_listener);
   fast_listener_ = listener_.in ();
   return ::DDS::RETCODE_OK;
@@ -1025,6 +1056,19 @@ SubscriberImpl::listener_for (::DDS::StatusKind kind)
       return fast_listener_;
     }
 }
+
+unsigned int&
+SubscriberImpl::raw_latency_buffer_size()
+{
+  return this->raw_latency_buffer_size_;
+}
+
+DataCollector< double>::OnFull&
+SubscriberImpl::raw_latency_buffer_type()
+{
+  return this->raw_latency_buffer_type_;
+}
+ 
 
 } // namespace DCPS
 } // namespace OpenDDS
