@@ -1177,12 +1177,20 @@ WriteDataContainer::wait_pending()
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
-  const ACE_Time_Value pending_timeout =
+  ACE_Time_Value pending_timeout =
     TheServiceParticipant->pending_timeout();
+
+  ACE_Time_Value* pTimeout = 0;
+
+  if (pending_timeout == ACE_Time_Value::zero)
+  {
+    pTimeout = &pending_timeout;
+    pending_timeout += ACE_OS::gettimeofday();
+  }
 
   while (pending_data())
   {
-    empty_condition_.wait(&pending_timeout);
+    empty_condition_.wait(pTimeout);
   }
 }
 
