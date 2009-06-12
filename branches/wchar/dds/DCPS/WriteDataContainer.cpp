@@ -441,6 +441,15 @@ WriteDataContainer::get_unsent_data()
   // Clear the unsent data list.
   //
   this->unsent_data_.reset ();
+
+  // Signal if there is no pending data.
+  ACE_GUARD(ACE_Recursive_Thread_Mutex,
+    guard,
+    this->lock_);
+
+  if (!pending_data())
+    empty_condition_.broadcast();
+
   //
   // Return the moved list.
   //
@@ -772,6 +781,16 @@ WriteDataContainer::remove_oldest_sample (
       ACE_TEXT("WriteDataContainer::remove_oldest_sample, ")
       ACE_TEXT("The oldest sample is not in any internal list.\n")),
       ::DDS::RETCODE_ERROR);
+  }
+
+  // Signal if there is no pending data.
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex,
+      guard,
+      this->lock_);
+
+    if (!pending_data())
+      empty_condition_.broadcast();
   }
 
   if (result == false)
