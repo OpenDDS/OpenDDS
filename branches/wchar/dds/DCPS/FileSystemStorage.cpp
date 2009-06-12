@@ -62,7 +62,14 @@ namespace
 
 
   // support long paths (> 260 chars in absolute path) on Win32
-#ifdef ACE_WIN32
+  /* Windows Mobile / Windows CE (WinCE) porting notes:
+   *   These platforms have no concept of "current directory"
+   *   and the Win32-specific \\?\ syntax may or may not work.
+   *   This file has been set up to compile under WinCE but we
+   *   don't expect that persistent storage to work well at runtime
+   *   so PERSISTENT_DURABILITY_QOS may not actually work.
+   */
+#if defined ACE_WIN32 && !defined ACE_HAS_WINCE
 
   void fwd_slash_to_back_slash(ACE_WString& str)
   {
@@ -272,7 +279,12 @@ DDS_Dirent::DDS_Dirent(const ACE_TCHAR* path)
 int DDS_Dirent::open(const ACE_TCHAR* path)
 {
   close();
-  ACE_WString wpath = to_win32_long_path(path);
+  ACE_WString wpath = 
+#ifdef ACE_HAS_WINCE
+    path;
+#else
+    to_win32_long_path(path);
+#endif
 
   // taken from ACE_OS::opendir_emulation() and translated to wchar
 

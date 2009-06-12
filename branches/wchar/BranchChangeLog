@@ -1,3 +1,11 @@
+Fri Jun 12 21:59:57 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/FileSystemStorage.cpp:
+
+          Ported to WinCE.  It compiles but there will almost certainly
+          be runtime problems due to the limited file system on this
+          platform.  This has implications for PERSISTENT_DURABILITY_QOS.
+
 Fri Jun 12 21:36:18 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/WriteDataContainer.cpp:
