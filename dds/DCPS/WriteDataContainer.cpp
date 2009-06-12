@@ -443,9 +443,14 @@ WriteDataContainer::get_unsent_data()
   this->unsent_data_.reset ();
 
   // Signal if there is no pending data.
-  ACE_GUARD(ACE_Recursive_Thread_Mutex,
+  //
+  // N.B. If a mutex cannot be obtained it is possible for this
+  //      method to return successfully without broadcasting the
+  //      condition.
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
     guard,
-    this->lock_);
+    this->lock_,
+    list);
 
   if (!pending_data())
     empty_condition_.broadcast();
@@ -785,9 +790,10 @@ WriteDataContainer::remove_oldest_sample (
 
   // Signal if there is no pending data.
   {
-    ACE_GUARD(ACE_Recursive_Thread_Mutex,
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
       guard,
-      this->lock_);
+      this->lock_,
+      ::DDS::RETCODE_ERROR);
 
     if (!pending_data())
       empty_condition_.broadcast();
