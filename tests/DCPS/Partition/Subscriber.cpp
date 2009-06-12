@@ -34,7 +34,7 @@ using std::endl;
 
 OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
 
-int main (int argc, ACE_TCHAR* argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   try
     {

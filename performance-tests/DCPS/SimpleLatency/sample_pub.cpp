@@ -69,7 +69,7 @@ const OpenDDS::DCPS::TransportIdType TCP_IMPL_ID = 20;
 CORBA::Long size = 4;
 long total_samples = 500;
 
-int main(int argc, ACE_TCHAR *argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
        // Calling TheParticipantFactoryWithArgs before user application parse command
        // line.

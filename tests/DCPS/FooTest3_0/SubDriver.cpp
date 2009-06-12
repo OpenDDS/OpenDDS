@@ -353,7 +353,7 @@ SubDriver::run()
               idbuffer << pub_id;
 	      ACE_DEBUG ((LM_DEBUG,
 			  ACE_TEXT("(%P|%t) SubDriver::run, ")
-			  ACE_TEXT(" Got from %s: pub_id=%s.\n"),
+			  ACE_TEXT(" Got from %s: pub_id=%C.\n"),
 			  pub_id_fname_.c_str (),
 			  idbuffer.str().c_str()));
 	    }

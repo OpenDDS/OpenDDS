@@ -317,7 +317,7 @@ create_subscriber (::DDS::DomainParticipant_ptr participant,
 }
 
 
-int main (int argc, ACE_TCHAR *argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
 
   ::DDS::DomainParticipantFactory_var dpf;
