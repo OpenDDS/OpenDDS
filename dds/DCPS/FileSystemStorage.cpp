@@ -10,7 +10,6 @@
 
 #include "ace/Version.h"
 #if ACE_MAJOR_VERSION == 5 && ACE_MINOR_VERSION < 5
-typedef dirent ACE_DIRENT;
 typedef ssize_t String_Index_t;
 #else
 typedef size_t String_Index_t;
@@ -221,7 +220,7 @@ namespace
     DDS_Dirent dir(dirname.c_str());
     {
       CwdGuard cg(dirname);
-      for (ACE_DIRENT* ent = dir.read(); ent; ent = dir.read())
+      for (DDS_DIRENT* ent = dir.read(); ent; ent = dir.read())
         {
           if (ent->d_name[0] == ACE_TEXT('.')) continue; // skip '.' and '..'
           if (is_dir(ent->d_name))
@@ -279,7 +278,7 @@ DDS_Dirent::DDS_Dirent(const ACE_TCHAR* path)
 int DDS_Dirent::open(const ACE_TCHAR* path)
 {
   close();
-  ACE_WString wpath = 
+  ACE_WString wpath =
 #ifdef ACE_HAS_WINCE
     path;
 #else
@@ -330,7 +329,7 @@ int DDS_Dirent::open(const ACE_TCHAR* path)
 }
 
 
-ACE_DIRENT* DDS_Dirent::read()
+DDS_DIRENT* DDS_Dirent::read()
 {
   if (!dirp_) return 0;
 
@@ -363,7 +362,7 @@ ACE_DIRENT* DDS_Dirent::read()
 
   if (dirp_->current_handle_ != INVALID_HANDLE_VALUE)
     {
-      dirp_->dirent_ = (ACE_DIRENT *) ACE_OS::malloc(sizeof(ACE_DIRENT));
+      dirp_->dirent_ = (DDS_DIRENT *) ACE_OS::malloc(sizeof(DDS_DIRENT));
 
       if (dirp_->dirent_ != 0)
         {
@@ -372,7 +371,7 @@ ACE_DIRENT* DDS_Dirent::read()
                             * sizeof (ACE_TCHAR));
           ACE_OS::strcpy(dirp_->dirent_->d_name,
                          ACE_TEXT_WCHAR_TO_TCHAR(dirp_->fdata_.cFileName));
-          dirp_->dirent_->d_reclen = sizeof (ACE_DIRENT);
+          dirp_->dirent_->d_reclen = sizeof (DDS_DIRENT);
         }
 
       return dirp_->dirent_;
@@ -406,9 +405,63 @@ DDS_Dirent::~DDS_Dirent()
   close();
 }
 
+#elif defined ACE_USES_WCHAR // non-Win32 uses-WChar
+
+struct DDS_DIR
+{
+  ACE_DIR* real_dir_;
+  DDS_DIRENT ent_;
+
+  DDS_DIR() : real_dir_(), ent_() {}
+};
+
+
+DDS_Dirent::DDS_Dirent(const ACE_TCHAR* path)
+  : dirp_(new DDS_DIR)
+{
+  if (path) open(path);
+}
+
+
+int DDS_Dirent::open(const ACE_TCHAR* path)
+{
+  close();
+  return (dirp_->real_dir_ = ACE_OS::opendir(path)) == 0 ? -1 : 0;
+}
+
+
+DDS_DIRENT* DDS_Dirent::read()
+{
+  if (!dirp_->real_dir_) return 0;
+  dirp_->ent_.real_dirent_ = ACE_OS::readdir(dirp_->real_dir_);
+  if (!dirp_->ent_.real_dirent_) return 0;
+  ACE_OS::free(dirp_->ent_.d_name);
+  dirp_->ent_.d_name =
+    ACE_OS::strdup(ACE_TEXT_CHAR_TO_TCHAR(dirp_->ent_.real_dirent_->d_name));
+  return &dirp_->ent_;
+}
+
+
+void DDS_Dirent::close()
+{
+  if (dirp_->real_dir_)
+    {
+      ACE_OS::closedir(dirp_->real_dir_);
+      ACE_OS::free(dirp_->ent_.d_name);
+    }
+  dirp_->real_dir_ = 0;
+}
+
+
+DDS_Dirent::~DDS_Dirent()
+{
+  close();
+  delete dirp_;
+}
+
 #endif // ACE_WIN32
 
-  
+
 // File
 
 
@@ -761,7 +814,7 @@ void Directory::scan_dir(const ACE_TString& relative, DDS_Dirent& dir,
 {
   ACE_TString path = physical_dirname_ + relative;
   add_slash(path);
-  while (ACE_DIRENT* ent = dir.read())
+  while (DDS_DIRENT* ent = dir.read())
     {
       if (ent->d_name[0] == ACE_TEXT('.')) continue; // skip '.' and '..'
       ACE_TString file = path + ent->d_name;
