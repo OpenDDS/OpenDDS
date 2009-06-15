@@ -161,8 +161,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       ACE_stat stats;
       while (ACE_OS::stat (sub_ready_filename, &stats) == -1)
         {
-          ACE_Time_Value small(0,250000);
-          ACE_OS::sleep (small);
+          ACE_Time_Value small_time(0,250000);
+          ACE_OS::sleep (small_time);
         }
 
       writer.start ();

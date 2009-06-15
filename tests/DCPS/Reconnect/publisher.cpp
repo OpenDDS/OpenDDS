@@ -232,8 +232,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
     // Wait for the subscriber to be ready.
     FILE* readers_ready = 0;
     do {
-      ACE_Time_Value small(0,250000);
-      ACE_OS::sleep (small);
+      ACE_Time_Value small_time(0,250000);
+      ACE_OS::sleep (small_time);
       readers_ready = ACE_OS::fopen (sub_ready_filename, ACE_TEXT ("r"));
     } while (0 == readers_ready);
     ACE_OS::fclose(readers_ready);
@@ -242,8 +242,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
     ACE_OS::sleep(3);
     writer->start ();
     while ( !writer->is_finished()) {
-      ACE_Time_Value small(0,250000);
-      ACE_OS::sleep (small);
+      ACE_Time_Value small_time(0,250000);
+      ACE_OS::sleep (small_time);
     }
 
     // Indicate that the publisher is done
@@ -259,8 +259,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
     // Wait for the subscriber to finish.
     FILE* readers_completed = 0;
     do {
-      ACE_Time_Value small(0,250000);
-      ACE_OS::sleep (small);
+      ACE_Time_Value small_time(0,250000);
+      ACE_OS::sleep (small_time);
       readers_completed = ACE_OS::fopen (sub_finished_filename, ACE_TEXT ("r"));
     } while (0 == readers_completed);
     ACE_OS::fclose(readers_completed);

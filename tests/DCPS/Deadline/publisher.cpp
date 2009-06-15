@@ -27,6 +27,7 @@
 #include "ace/Get_Opt.h"
 
 #include <memory>
+#include <assert.h>
 
 using namespace Messenger;
 

@@ -127,8 +127,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       ACE_stat stats;
       while (ACE_OS::stat (pub_ready_filename, &stats) == -1)
         {
-          ACE_Time_Value small(0,250000);
-          ACE_OS::sleep (small);
+          ACE_Time_Value small_time(0,250000);
+          ACE_OS::sleep (small_time);
         }
 
       for (int count = 1; count <= sub_reinit_itr; count++)
@@ -203,16 +203,16 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
               if (handles.length() > 0) {
                 break;
               }
-              ACE_Time_Value small (0,250000);
-              ACE_OS::sleep (small);
+              ACE_Time_Value small_time (0,250000);
+              ACE_OS::sleep (small_time);
             }
 
           // Add sleep to let the fully_associted message arrive datawriter 
           // before remove_associations is called upon delete_datareader, 
           // otherwise the datawriter will encounter bit lookup timeout upon 
           // fully associated.
-          ACE_Time_Value small (0,250000);
-	        ACE_OS::sleep (small);
+          ACE_Time_Value small_time (0,250000);
+	        ACE_OS::sleep (small_time);
 
           if (verbose) {
             ACE_DEBUG ((LM_DEBUG, "(%P|%t) *** Destroying Subscriber\n"));

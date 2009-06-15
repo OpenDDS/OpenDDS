@@ -7,6 +7,7 @@
 
 #include <dds/DCPS/Service_Participant.h>
 #include <ace/streams.h>
+#include <ace/OS_NS_time.h>
 
 #include <time.h>
 #include <math.h>
@@ -194,9 +195,9 @@ void AckDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr)
     {
 
 
-      time_t clock = time (NULL);
+      time_t clock = ACE_OS::time (NULL);
       std::cout << "# MY Pub Sub measurements (in us) \n";
-      std::cout << "# Executed at:" <<  ctime(&clock);
+      std::cout << "# Executed at:" << ACE_OS::ctime(&clock);
       std::cout << "#       Roundtrip time [us]\n";
       std::cout << "Count     mean      min      max   std_dev\n";
       std::cout << " "

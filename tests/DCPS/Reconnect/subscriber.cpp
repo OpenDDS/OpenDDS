@@ -236,8 +236,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     // Wait for the publisher to be ready
     FILE* writers_ready = 0;
     do {
-      ACE_Time_Value small(0,250000);
-      ACE_OS::sleep (small);
+      ACE_Time_Value small_time(0,250000);
+      ACE_OS::sleep (small_time);
       writers_ready = ACE_OS::fopen (pub_ready_filename, ACE_TEXT ("r"));
     } while (0 == writers_ready);
     ACE_OS::fclose(writers_ready);

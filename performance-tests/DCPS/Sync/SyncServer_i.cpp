@@ -73,7 +73,7 @@ SyncServer_i::~SyncServer_i (void)
 
   this->wait ();
 
-  unlink (ior_file_.c_str());
+  ACE_OS::unlink (ior_file_.c_str());
 }
 
 void
@@ -276,8 +276,8 @@ SyncServer_i::wait_session (void)
         break;
       }
 
-      ACE_Time_Value small(0,250000);
-      ACE_OS::sleep (small);
+      ACE_Time_Value small_time(0,250000);
+      ACE_OS::sleep (small_time);
     }
 
   return true;
