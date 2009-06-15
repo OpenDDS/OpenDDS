@@ -1815,7 +1815,7 @@ OpenDDS::DCPS::TransportSendStrategy::non_blocking_send (const iovec iov[], int 
           // by looking at the iovec
           for (int ii = 0; ii < n; ii++)
             {
-              ACE_DEBUG((LM_DEBUG, "(%P|%t)send_bytes: iov[%d].iov_len = %d .iob_base =%X\n",
+              ACE_DEBUG((LM_DEBUG, "(%P|%t)send_bytes: iov[%d].iov_len = %d .iov_base =%X\n",
                 ii, iov[ii].iov_len, iov[ii].iov_base ));
             }
         }
