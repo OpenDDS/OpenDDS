@@ -178,12 +178,12 @@ PerformanceTest::started ()
 
 void PerformanceTest::show_stats()
 {
-  time_t clock = time (NULL);
+  time_t clock = ACE_OS::time (NULL);
   std::cout << "\n# Transport performance measurements (in us) \n";
   std::cout << "Test Name: " << test_name_  << std::endl;
   std::cout << "Test Start Location: " << start_location_ << std::endl;
   std::cout << "Test Stop  Location: " << stop_location_  << std::endl;
-  std::cout << "# Executed at:" <<  ctime(&clock);
+  std::cout << "# Executed at:" <<  ACE_OS::ctime(&clock);
   std::cout << "# Transport framework traversal time [us]\n";
   std::cout << "Count     mean      min      max   std_dev\n";
   std::cout << " "

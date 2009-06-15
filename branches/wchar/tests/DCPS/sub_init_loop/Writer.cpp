@@ -85,8 +85,8 @@ Writer::svc ()
           if (handles.length() > 0) {
             break;
           }
-          ACE_Time_Value small (0,250000);
-          ACE_OS::sleep (small);
+          ACE_Time_Value small_time (0,250000);
+          ACE_OS::sleep (small_time);
         }
 
       // Begin write cycle.

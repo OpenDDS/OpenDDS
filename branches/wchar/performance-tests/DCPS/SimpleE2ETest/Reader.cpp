@@ -310,7 +310,7 @@ Reader::wait_for_data (::DDS::Subscriber_ptr sub,
                        int timeout_sec)
 {
   const int factor = 1000;
-  ACE_Time_Value small(0,1000000/factor);
+  ACE_Time_Value small_time(0,1000000/factor);
   int timeout_loops = timeout_sec * factor;
   ACE_Time_Value next_log = ACE_OS::gettimeofday () + ACE_Time_Value(5,0);
 
@@ -325,7 +325,7 @@ Reader::wait_for_data (::DDS::Subscriber_ptr sub,
       if (discard->length () > 0)
         return 1;
 
-      ACE_OS::sleep (small);
+      ACE_OS::sleep (small_time);
       if (ACE_OS::gettimeofday () >= next_log)
         {
           ACE_DEBUG((LM_DEBUG,"%T Still waiting for data\n"));

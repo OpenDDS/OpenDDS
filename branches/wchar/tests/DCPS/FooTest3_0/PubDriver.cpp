@@ -479,8 +479,8 @@ PubDriver::run()
   FILE* readers_ready = 0;
   do
     {
-      ACE_Time_Value small(0,250000);
-      ACE_OS::sleep (small);
+      ACE_Time_Value small_time(0,250000);
+      ACE_OS::sleep (small_time);
       readers_ready = ACE_OS::fopen (sub_ready_filename_.c_str (), ACE_LIB_TEXT("r"));
     } while (0 == readers_ready);
 

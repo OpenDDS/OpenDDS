@@ -2,6 +2,10 @@
 //
 // $Id$
 
+// This include needs to appear near the top so ACE gets a chance
+// to figure out the correct time_t typedef.
+#include "ace/OS_NS_time.h"
+
 #include "common.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/DataSampleList.h"

@@ -287,8 +287,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       FILE* readers_ready = 0;
       do
         {
-          ACE_Time_Value small(0,250000);
-          ACE_OS::sleep (small);
+          ACE_Time_Value small_time(0,250000);
+          ACE_OS::sleep (small_time);
           readers_ready = ACE_OS::fopen (sub_ready_filename.c_str (), ACE_LIB_TEXT("r"));
         } while (0 == readers_ready);
 
@@ -339,8 +339,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       FILE* readers_completed = 0;
       do
         {
-          ACE_Time_Value small(0,250000);
-          ACE_OS::sleep (small);
+          ACE_Time_Value small_time(0,250000);
+          ACE_OS::sleep (small_time);
           readers_completed = ACE_OS::fopen (sub_finished_filename.c_str (), ACE_LIB_TEXT("r"));
         } while (0 == readers_completed);
 

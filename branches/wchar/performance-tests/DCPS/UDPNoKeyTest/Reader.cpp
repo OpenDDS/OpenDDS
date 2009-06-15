@@ -321,7 +321,7 @@ Reader::wait_for_data (::DDS::Subscriber_ptr sub,
                        int timeout_sec)
 {
   const int factor = 1000;
-  ACE_Time_Value small(0,1000000/factor);
+  ACE_Time_Value small_time(0,1000000/factor);
   int timeout_loops = timeout_sec * factor;
 
   ::DDS::DataReaderSeq_var discard = new ::DDS::DataReaderSeq(10);
@@ -335,7 +335,7 @@ Reader::wait_for_data (::DDS::Subscriber_ptr sub,
       if (discard->length () > 0)
         return 1;
 
-      ACE_OS::sleep (small);
+      ACE_OS::sleep (small_time);
     }
   return 0;
 }

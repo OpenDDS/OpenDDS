@@ -1,6 +1,11 @@
 // -*- C++ -*-
 //
 // $Id$
+
+// This include needs to appear near the top so ACE gets a chance
+// to figure out the correct time_t typedef.
+#include "ace/OS_NS_time.h"
+
 #include "Test.h"
 #include "Publication.h"
 #include "EntityProfiles.h"

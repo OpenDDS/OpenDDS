@@ -22,6 +22,8 @@
 #include "ace/Get_Opt.h"
 #include "ace/Sched_Params.h"
 
+#include <cstdio>
+
 using namespace DDS;
 using namespace CORBA;
 using namespace DDSPerfTest;
@@ -74,7 +76,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
        bool useZeroCopyRead = false;
        DomainId_t myDomain = 411;
 
-       setbuf (stdout, NULL);
+#ifndef _WIN32_WCE
+       std::setbuf (stdout, NULL);
+#endif
 
        ACE_Get_Opt get_opts (argc, argv, ACE_LIB_TEXT("ut"));
 

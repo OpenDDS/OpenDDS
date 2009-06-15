@@ -23,7 +23,7 @@
 #include "ace/Get_Opt.h"
 #include "ace/Sched_Params.h"
 
-#include <sys/types.h>
+#include <cstdio>
 
 using namespace std;
 using namespace DDS;
@@ -80,7 +80,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
        bool useZeroCopyRead = false;
        DomainId_t myDomain = 411;
 
-       setbuf( stdout, NULL );		/* no buffering for standard-out */
+#ifndef _WIN32_WCE
+       std::setbuf( stdout, NULL );		/* no buffering for standard-out */
+#endif
 
        ACE_Get_Opt get_opts (argc, argv, ACE_LIB_TEXT("c:ut"));
        int ich;

@@ -99,7 +99,7 @@ Reader::read (const SampleInfoMap& si_map,
 
   const int factor = 20;
   const int timeout_sec = 10 ;
-  ACE_Time_Value small(0,1000000/factor);
+  ACE_Time_Value small_time(0,1000000/factor);
   int timeout_loops = timeout_sec * factor;
 
   try
@@ -118,7 +118,7 @@ Reader::read (const SampleInfoMap& si_map,
         found = true ;
         break ;
       }
-      ACE_OS::sleep (small);
+      ACE_OS::sleep (small_time);
     }
 
     if (!found)

@@ -192,9 +192,9 @@ TcpPublisher::send_bytes(unsigned num_bytes, const char* bytes)
 void
 TcpPublisher::dump_stats ()
 {
-  time_t clock = time (NULL);
+  time_t clock = ACE_OS::time (NULL);
   std::cout << "# MY Pub Sub measurements (in us) \n";
-  std::cout << "# Executed at:" <<  ctime(&clock);
+  std::cout << "# Executed at:" << ACE_OS::ctime(&clock);
   std::cout << "#       Roundtrip time [us]\n";
   std::cout << "Count     mean      min      max   std_dev\n";
   std::cout << " "
