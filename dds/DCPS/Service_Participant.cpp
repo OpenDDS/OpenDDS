@@ -690,7 +690,7 @@ namespace OpenDDS
     void
     Service_Participant::set_repo_ior( const wchar_t* ior, const RepoKey key)
     {
-      set_repo_ior(ACE_Wide_To_Ascii(ior).char_rep());
+      set_repo_ior(ACE_Wide_To_Ascii(ior).char_rep(), key);
     }
 
     void
