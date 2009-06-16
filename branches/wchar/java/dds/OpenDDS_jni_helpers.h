@@ -6,6 +6,7 @@
 
 #include "ace/Basic_Types.h"
 #include "ace/INET_Addr.h"
+#include "ace/SString.h"
 #include <string>
 
 namespace jvmSig
@@ -158,13 +159,13 @@ struct DoubleField : SimpleField<C, double, jvmSig::DOUBLE, jdouble,
 };
 
 template <typename C>
-struct InetAddrField : Field<C, std::string, jvmSig::STRING>
+struct InetAddrField : Field<C, ACE_TString, jvmSig::STRING>
 {
-  typedef typename Field<C, std::string, jvmSig::STRING>::memptr_t memptr_t;
+  typedef typename Field<C, ACE_TString, jvmSig::STRING>::memptr_t memptr_t;
   typedef ACE_INET_Addr C::*inetaddr_t;
   inetaddr_t addr_;
   InetAddrField (const char *j, memptr_t string_field, inetaddr_t addr_field)
-    : Field<C, std::string, jvmSig::STRING> (j, string_field)
+    : Field<C, ACE_TString, jvmSig::STRING> (j, string_field)
     , addr_ (addr_field) {}
 
   void toCxx (JNIEnv *jni, jclass clazz, jobject obj, C &cxx)
@@ -172,14 +173,15 @@ struct InetAddrField : Field<C, std::string, jvmSig::STRING>
     jfieldID fid = this->getFid (jni, clazz);
     jobject src = jni->GetObjectField (obj, fid);
     JStringMgr jsm (jni, static_cast<jstring> (src));
-    cxx.*(this->member_ptr_) = jsm.c_str ();
+    cxx.*(this->member_ptr_) = jsm.tc_str ();
     (cxx.*addr_).set (jsm.c_str ());
   }
 
   void toJava (JNIEnv *jni, jclass clazz, const C &cxx, jobject obj)
   {
     jfieldID fid = this->getFid (jni, clazz);
-    jstring str = jni->NewStringUTF ((cxx.*(this->member_ptr_)).c_str ());
+    jstring str = jni->NewStringUTF (ACE_TEXT_ALWAYS_CHAR (
+                    (cxx.*(this->member_ptr_)).c_str ()));
     jni->SetObjectField (obj, fid, str);
     jni->DeleteLocalRef (str);
   }

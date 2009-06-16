@@ -268,6 +268,11 @@ public:
     return c_str_;
   }
 
+  const ACE_TCHAR* tc_str() const
+  {
+    return ACE_TEXT_CHAR_TO_TCHAR(c_str_);
+  }
+
 private:
   JNIEnv* jni_;
   jstring jstring_;

@@ -234,6 +234,16 @@ namespace OpenDDS
         }
     }
 
+#ifdef ACE_USES_WCHAR
+    ::DDS::DomainParticipantFactory_ptr
+    Service_Participant::get_domain_participant_factory (int &argc,
+                                                         char *argv[])
+    {
+      ACE_Argv_Type_Converter converter (argc, argv);
+      return get_domain_participant_factory(converter.get_argc(),
+                                            converter.get_TCHAR_argv());
+    }
+#endif
 
     ::DDS::DomainParticipantFactory_ptr
     Service_Participant::get_domain_participant_factory (int &argc,
@@ -252,14 +262,11 @@ namespace OpenDDS
                 {
                   if (CORBA::is_nil (orb_.in ()))
                     {
-                      ACE_Argv_Type_Converter converter (argc, argv);
-
                       //TBD: allow user to specify the ORB id
 
                       // Use a unique ORB for the ::DDS Service
                       // to avoid conflicts with other CORBA code
-                      orb_ = CORBA::ORB_init (converter.get_argc(),
-                                              converter.get_ASCII_argv(),
+                      orb_ = CORBA::ORB_init (argc, argv,
                                               "TAO_DDS_DCPS");
                     }
 

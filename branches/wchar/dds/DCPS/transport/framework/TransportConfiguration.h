@@ -93,7 +93,7 @@ namespace OpenDDS
         /// send without backpressure.
         bool thread_per_connection_;
 
-        /// Delay in milliseconds that the datalink should be released after all 
+        /// Delay in milliseconds that the datalink should be released after all
         /// associations are removed. The default value is 10 seconds.
         long datalink_release_delay_;
 
@@ -103,6 +103,7 @@ namespace OpenDDS
         /// Default ctor.
         TransportConfiguration();
 
+        static ACE_TString id_to_section_name(const TransportIdType& id);
 
       private:
 

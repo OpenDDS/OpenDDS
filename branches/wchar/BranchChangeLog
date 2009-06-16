@@ -1,3 +1,33 @@
+Tue Jun 16 19:31:24 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Added a char*[] version of TheParticipantFactoryWithArgs for wchar
+          builds.  The ORB can now be initialized with wchar_t*[], no need to
+          convert (this is an extension to the OMG CORBA spec).
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.cpp:
+        * dds/DCPS/transport/framework/TransportConfiguration.h:
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastConfiguration.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpConfiguration.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConfiguration.cpp:
+
+          Removed duplicated and fragile code that used sprintf to form
+          configuration section names.  Replaced one helper method that uses
+          C++ iostreams to avoid the %ls (Linux wchar_t) vs. %s (Win32 wchar_t)
+          problem.
+
+        * java/dds/OpenDDS_jni_helpers.h:
+        * java/idl2jni/codegen/be_extern.h:
+        * java/idl2jni/codegen/be_global.cpp:
+        * java/idl2jni/codegen/be_init.cpp:
+        * java/idl2jni/runtime/idl2jni_runtime.h:
+
+          Made the Java support code compatible with ACE_USES_WCHAR.
+
 Mon Jun 15 21:15:00 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
