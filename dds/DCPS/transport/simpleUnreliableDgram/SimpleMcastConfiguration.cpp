@@ -31,14 +31,13 @@ OpenDDS::DCPS::SimpleMcastConfiguration::load (const TransportIdType& id,
   // what to do.
   this->TransportConfiguration::load (id, cf);
 
-  ACE_TCHAR section [50];
-  ACE_OS::sprintf (section, ACE_TEXT("%s%d")
-                   , TRANSPORT_SECTION_NAME_PREFIX, id);
+  ACE_TString sect_name = id_to_section_name(id);
   const ACE_Configuration_Section_Key &root = cf.root_section ();
   ACE_Configuration_Section_Key trans_sect;
-  if (cf.open_section (root, section, 0, trans_sect) != 0)
+  if (cf.open_section (root, sect_name.c_str(), 0, trans_sect) != 0)
     ACE_ERROR_RETURN ((LM_ERROR,
-                       ACE_TEXT ("Failed to open section: section %s\n"), section),
+                       ACE_TEXT ("Failed to open section: %s\n"),
+                       sect_name.c_str()),
                        -1);
 
   ACE_TString local_address;

@@ -76,7 +76,7 @@ trademarks or registered trademarks of Sun Microsystems, Inc.
 
 extern BE_GlobalData *be_global;
 
-extern int BE_init (int &, char*[]);
+extern int BE_init (int &, ACE_TCHAR *[]);
 extern void BE_post_init (BE_PI_CONST char *[], long);
 extern void BE_version (void);
 extern void BE_produce (void);

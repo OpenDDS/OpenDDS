@@ -112,6 +112,11 @@ namespace OpenDDS
           ACE_TCHAR *argv[] = 0
         );
 
+#ifdef ACE_USES_WCHAR
+      ::DDS::DomainParticipantFactory_ptr
+        get_domain_participant_factory (int &argc, char *argv[]);
+#endif
+
       /**
        * Stop being a participant in the service.
        *
