@@ -38,7 +38,7 @@ SimpleDataReader::data_received(const OpenDDS::DCPS::ReceivedDataSample& sample)
   DBG_ENTRY("SimpleDataReader","data_received");
 
   ACE_DEBUG((LM_DEBUG, "(%P|%t) Data has been received:\n"));
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) Message: [%s]\n", sample.sample_->rd_ptr()));
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) Message: [%C]\n", sample.sample_->rd_ptr()));
   this->received_test_message_ = 1;
 }
 

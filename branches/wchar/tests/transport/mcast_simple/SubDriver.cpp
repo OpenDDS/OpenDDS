@@ -13,7 +13,6 @@
 #include "SimpleSubscriber.h"
 #include <ace/Arg_Shifter.h>
 #include <ace/OS.h>
-#include <ace/Argv_Type_Converter.h>
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
@@ -40,9 +39,8 @@ SubDriver::run(int& argc, ACE_TCHAR* argv[])
   // Need call the ORB_init to dynamically load the SimpleMcast library via
   // service configurator.
   // initialize the orb
-  ACE_Argv_Type_Converter conv(argc, argv);
-  CORBA::ORB_var orb = CORBA::ORB_init (conv.get_argc(),
-                                        conv.get_ASCII_argv(),
+  CORBA::ORB_var orb = CORBA::ORB_init (argc,
+                                        argv,
                                         "TAO_DDS_DCPS");
   TheServiceParticipant->set_ORB (orb.in());
   DDS::DomainParticipantFactory_var dpf;

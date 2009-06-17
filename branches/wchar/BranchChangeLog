@@ -1,3 +1,35 @@
+Wed Jun 17 18:19:28 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/transport/dds_comparative/Pub.cpp:
+        * tests/transport/dds_comparative/Sub.cpp:
+        * tests/transport/mcast_simple/PubDriver.cpp:
+        * tests/transport/mcast_simple/SimpleDataReader.cpp:
+        * tests/transport/mcast_simple/SubDriver.cpp:
+        * tests/transport/mcast_simple_n/PubDriver.cpp:
+        * tests/transport/mcast_simple_n/SimpleDataReader.cpp:
+        * tests/transport/mcast_simple_n/SubDriver.cpp:
+        * tests/transport/simple/SimpleDataReader.cpp:
+        * tests/transport/simple/pub_main.cpp:
+        * tests/transport/simple/sub_main.cpp:
+        * tests/transport/simple_bp/SimpleDataReader.cpp:
+        * tests/transport/simple_bp/pub_main.cpp:
+        * tests/transport/simple_bp/sub_main.cpp:
+        * tests/transport/simple_bp_rm/SimpleDataReader.cpp:
+        * tests/transport/simple_bp_rm/pub_main.cpp:
+        * tests/transport/simple_bp_rm/sub_main.cpp:
+        * tests/transport/simple_n/SimpleDataReader.cpp:
+        * tests/transport/simple_n/pub_main.cpp:
+        * tests/transport/simple_n/sub_main.cpp:
+        * tests/transport/udp_simple/PubDriver.cpp:
+        * tests/transport/udp_simple/SimpleDataReader.cpp:
+        * tests/transport/udp_simple/SubDriver.cpp:
+        * tests/transport/udp_simple_n/PubDriver.cpp:
+        * tests/transport/udp_simple_n/SimpleDataReader.cpp:
+        * tests/transport/udp_simple_n/SubDriver.cpp:
+
+          Removed ACE_Argv_Type_Converter because ORB_init now accepts either
+          narrow or wide characters in argv.  Fixed some %s that should be %C.
+
 Tue Jun 16 19:31:24 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:

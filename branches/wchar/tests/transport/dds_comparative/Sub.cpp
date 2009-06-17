@@ -108,16 +108,16 @@ Sub::init_attach_transport(unsigned impl_id)
       switch (status)
         {
           case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-            ACE_ERROR((LM_ERROR,"(%P|%t) %s ATTACH_BAD_TRANSPORT\n",emsg));
+            ACE_ERROR((LM_ERROR,"(%P|%t) %C ATTACH_BAD_TRANSPORT\n",emsg));
             throw TestException();
           case OpenDDS::DCPS::ATTACH_ERROR:
-            ACE_ERROR((LM_ERROR,"(%P|%t) %s ATTACH_ERROR\n",emsg));
+            ACE_ERROR((LM_ERROR,"(%P|%t) %C ATTACH_ERROR\n",emsg));
             throw TestException();
           case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-            ACE_ERROR((LM_ERROR,"(%P|%t) %s ATTACH_INCOMPATIBLE_QOS\n",emsg));
+            ACE_ERROR((LM_ERROR,"(%P|%t) %C ATTACH_INCOMPATIBLE_QOS\n",emsg));
             throw TestException();
           default:
-            ACE_ERROR((LM_ERROR,"(%P|%t) %s <!UNKNOWN!>\n",emsg));
+            ACE_ERROR((LM_ERROR,"(%P|%t) %C <!UNKNOWN!>\n",emsg));
             throw TestException();
         }
     }
