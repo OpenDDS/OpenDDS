@@ -189,7 +189,7 @@ OpenDDS::DCPS::DummyTcpConnection::open(void* arg)
 
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-    "DummyTcpConnection::open %X %s:%d->%s:%d reconnect_state = %d\n", this,
+    "DummyTcpConnection::open %X %C:%d->%C:%d reconnect_state = %d\n", this,
     this->remote_address_.get_host_addr (), this->remote_address_.get_port_number (),
     this->local_address_.get_host_addr (), this->local_address_.get_port_number (),
     this->reconnect_state_));
@@ -478,7 +478,7 @@ OpenDDS::DCPS::DummyTcpConnection::active_reconnect_i ()
   int ret = -1;
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-    "active_reconnect_i(%s:%d->%s:%d) reconnect_state = %d\n",
+    "active_reconnect_i(%C:%d->%C:%d) reconnect_state = %d\n",
     this->remote_address_.get_host_addr (), this->remote_address_.get_port_number (),
     this->local_address_.get_host_addr (), this->local_address_.get_port_number (),
     this->reconnect_state_));
@@ -535,13 +535,13 @@ OpenDDS::DCPS::DummyTcpConnection::active_reconnect_i ()
         {
           if (this->tcp_config_->conn_retry_attempts_ > 0)
             {
-              ACE_DEBUG ((LM_DEBUG, "(%P|%t) we tried and failed to re-establish connection to %s:%d.\n",
+              ACE_DEBUG ((LM_DEBUG, "(%P|%t) we tried and failed to re-establish connection to %C:%d.\n",
                           this->remote_address_.get_host_addr (),
                           this->remote_address_.get_port_number ()));
             }
           else
             {
-              ACE_DEBUG ((LM_DEBUG, "(%P|%t) we did not try to re-establish connection to %s:%d.\n",
+              ACE_DEBUG ((LM_DEBUG, "(%P|%t) we did not try to re-establish connection to %C:%d.\n",
                           this->remote_address_.get_host_addr (),
                           this->remote_address_.get_port_number ()));
             }
@@ -552,7 +552,7 @@ OpenDDS::DCPS::DummyTcpConnection::active_reconnect_i ()
         }
       else
         {
-          ACE_DEBUG ((LM_DEBUG, "(%P|%t)re-established connection to %s:%d.\n",
+          ACE_DEBUG ((LM_DEBUG, "(%P|%t)re-established connection to %C:%d.\n",
             this->remote_address_.get_host_addr (),
             this->remote_address_.get_port_number ()));
           this->reconnect_state_ = RECONNECTED_STATE;
@@ -686,7 +686,7 @@ OpenDDS::DCPS::DummyTcpConnection::transfer (DummyTcpConnection* connection)
   connection->old_con_ = this;
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-        "transfer(%s:%d->%s:%d) passive reconnected. new con %X   "
+        "transfer(%C:%d->%C:%d) passive reconnected. new con %X   "
         " old con %X \n",
         this->remote_address_.get_host_addr (), this->remote_address_.get_port_number (),
         this->local_address_.get_host_addr (), this->local_address_.get_port_number (),

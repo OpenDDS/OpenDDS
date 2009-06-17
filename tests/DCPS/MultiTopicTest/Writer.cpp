@@ -66,7 +66,7 @@ Writer::svc ()
 
     ::DDS::Topic_var topic = writer_->get_topic() ;
 
-    ACE_DEBUG((LM_DEBUG,"(%P|%t) %s: Writer::svc begins.\n",
+    ACE_DEBUG((LM_DEBUG,"(%P|%t) %C: Writer::svc begins.\n",
               topic->get_name()));
 
     if (!ACE_OS::strcmp(topic->get_name(), MY_TOPIC1))

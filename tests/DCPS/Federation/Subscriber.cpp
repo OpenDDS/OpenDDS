@@ -23,7 +23,7 @@ Subscriber::Subscriber( int argc, ACE_TCHAR** argv, char** envp)
 
   if( OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) COMMANDLINE: Verbose == %s\n")
+      ACE_TEXT("(%P|%t) COMMANDLINE: Verbose == %C\n")
       ACE_TEXT("(%P|%t) COMMANDLINE: Samples == %d\n"),
       (this->config_.verbose()? "true": "false"),
       this->config_.samples()
@@ -124,7 +124,7 @@ Subscriber::Subscriber( int argc, ACE_TCHAR** argv, char** envp)
 
   if( OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Installing type %s support into domain %d.\n"),
+      ACE_TEXT("(%P|%t) INFO: Installing type %C support into domain %d.\n"),
       this->config_.typeName().c_str(),
       this->config_.domain()
     ));
@@ -136,7 +136,7 @@ Subscriber::Subscriber( int argc, ACE_TCHAR** argv, char** envp)
                           )
     ) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Unable to install type %s support for domain %d.\n"),
+      ACE_TEXT("(%P|%t) ERROR: Unable to install type %C support for domain %d.\n"),
       this->config_.typeName().c_str(),
       this->config_.domain()
     ));
@@ -155,7 +155,7 @@ Subscriber::Subscriber( int argc, ACE_TCHAR** argv, char** envp)
                  );
   if( CORBA::is_nil( this->topic_.in()) ) {
     ACE_ERROR ((LM_ERROR,
-      ACE_TEXT ("(%P|%t) ERROR: Failed to create topic %s for subscriber.\n"),
+      ACE_TEXT ("(%P|%t) ERROR: Failed to create topic %C for subscriber.\n"),
       this->config_.topicName().c_str()
     ));
     throw BadTopicException ();

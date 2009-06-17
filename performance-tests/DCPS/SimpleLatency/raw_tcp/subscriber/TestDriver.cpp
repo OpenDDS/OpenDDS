@@ -268,14 +268,14 @@ TestDriver::parse_address(const std::string& spec)
 
   if ((pos = spec.find(':')) == std::string::npos) {
     ACE_ERROR((LM_ERROR,
-               "(%P|%t) Bad address (%s) - missing ':' char.\n",
+               "(%P|%t) Bad address (%C) - missing ':' char.\n",
                spec.c_str()));
     throw TestException();
   }
 
   if (pos == 0) {
     ACE_ERROR((LM_ERROR,
-               "(%P|%t) Bad address (%s) - "
+               "(%P|%t) Bad address (%C) - "
                "':' char can't be first char.\n",
                spec.c_str()));
     throw TestException();
@@ -283,7 +283,7 @@ TestDriver::parse_address(const std::string& spec)
 
   if (pos == (spec.length() - 1)) {
     ACE_ERROR((LM_ERROR,
-               "(%P|%t) Bad address (%s) - "
+               "(%P|%t) Bad address (%C) - "
                "':' char can't be last char.\n",
                spec.c_str()));
     throw TestException();

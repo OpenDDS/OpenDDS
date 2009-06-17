@@ -396,7 +396,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   else if (0 != strcmp(ss_foo.theString.in (), my_foo.theString.in ()))
     {
       ACE_ERROR((LM_ERROR, 
-        ACE_TEXT("Failed to serialize theString \"%s\" => \"%s\"\n"),
+        ACE_TEXT("Failed to serialize theString \"%C\" => \"%C\"\n"),
         my_foo.theString.in (), ss_foo.theString.in ()));
       failed = true;
     }

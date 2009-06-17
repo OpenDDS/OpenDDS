@@ -52,7 +52,7 @@ Writer::open( void*)
   if( result != 0) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Writer::open() - ")
-      ACE_TEXT("failed to activate the %s publication thread.\n"),
+      ACE_TEXT("failed to activate the %C publication thread.\n"),
       this->profile_.name().c_str()
     ));
   }
@@ -89,7 +89,7 @@ Writer::svc ()
 {
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) Writer::svc() - ")
-    ACE_TEXT("processing publication %s.\n"),
+    ACE_TEXT("processing publication %C.\n"),
     this->profile_.name().c_str()
   ));
 
@@ -115,7 +115,7 @@ Writer::svc ()
     if( this->verbose_ && BE_REALLY_VERBOSE) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Writer::svc() - ")
-        ACE_TEXT("publication %s wrote sample %d at priority %d, ")
+        ACE_TEXT("publication %C wrote sample %d at priority %d, ")
         ACE_TEXT("waiting %d microseconds to send next one.\n"),
         this->profile_.name().c_str(),
         count,
@@ -131,7 +131,7 @@ Writer::svc ()
   if( this->verbose_) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Writer::svc() - ")
-      ACE_TEXT("publication %s honoring termination request, ")
+      ACE_TEXT("publication %C honoring termination request, ")
       ACE_TEXT("stopping thread.\n"),
       this->profile_.name().c_str()
     ));

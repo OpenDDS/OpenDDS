@@ -8,29 +8,9 @@
 #include "tests/DCPS/FooType5/FooDefTypeSupportC.h"
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 
-// Only for Microsoft VC6
-#if defined (_MSC_VER) && (_MSC_VER >= 1200) && (_MSC_VER < 1300)
-
-// Added unused arguments with default value to work around with vc6
-// bug on template function instantiation.
-template <class DT, class DT_seq, class DR, class DR_ptr, class DR_var, class DR_impl>
-int read (::DDS::DataReader_ptr reader,
-          DT* dt = 0, DR* dr = 0, DR_ptr dr_ptr = 0, DR_var* dr_var = 0, DR_impl* dr_impl = 0)
-{
-  ACE_UNUSED_ARG (dt);
-  ACE_UNUSED_ARG (dr);
-  ACE_UNUSED_ARG (dr_ptr);
-  ACE_UNUSED_ARG (dr_var);
-  ACE_UNUSED_ARG (dr_impl);
-
-#else
-
 template <class DT, class DT_seq, class DR, class DR_ptr, class DR_var, class DR_impl>
 int read (::DDS::DataReader_ptr reader)
 {
-
-#endif
-
   try
   {
     DR_var foo_dr
@@ -71,10 +51,10 @@ int read (::DDS::DataReader_ptr reader)
     if (status == ::DDS::RETCODE_OK)
     {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t)reader %X %s foo.x = %f foo.y = %f, foo.data_source = %d \n"),
+        ACE_TEXT("(%P|%t)reader %X %C foo.x = %f foo.y = %f, foo.data_source = %d \n"),
         reader, action, foo.x, foo.y, foo.data_source));
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) %s SampleInfo.sample_rank = %d \n"),
+        ACE_TEXT("(%P|%t) %C SampleInfo.sample_rank = %d \n"),
         action, si.sample_rank));
 
       if (results.add (foo) == -1)

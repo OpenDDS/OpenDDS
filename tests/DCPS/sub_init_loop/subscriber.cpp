@@ -248,7 +248,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     }
   catch (CORBA::Exception& e) {
     ACE_ERROR_RETURN ((LM_ERROR,
-                       "(%P|%t) Exception caught in main (): %s (%s).\n"
+                       "(%P|%t) Exception caught in main (): %C (%C).\n"
                        ,  e._name (), e._rep_id ())
                       , -1);
   }

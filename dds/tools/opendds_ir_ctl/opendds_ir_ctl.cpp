@@ -208,7 +208,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
       if( options.verbose()) {
         ACE_DEBUG(( LM_INFO,
           ACE_TEXT("(%P|%t) INFO: opendds_ir_ctl: ")
-          ACE_TEXT("attempting to resolve and connect to repository at: %s.\n"),
+          ACE_TEXT("attempting to resolve and connect to repository at: %C.\n"),
           iorString.c_str()
         ));
       }
@@ -218,7 +218,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
       ir = OpenDDS::DCPS::DCPSInfo::_narrow( obj.in() );
       if( CORBA::is_nil( ir.in())) {
         ACE_ERROR(( LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: opendds_ir_ctl: could not narrow %s.\n"),
+          ACE_TEXT("(%P|%t) ERROR: opendds_ir_ctl: could not narrow %C.\n"),
           iorString.c_str()
         ));
         return -4;
@@ -233,7 +233,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
       if( options.verbose()) {
         ACE_DEBUG(( LM_INFO,
           ACE_TEXT("(%P|%t) INFO: opendds_ir_ctl: ")
-          ACE_TEXT("attempting to resolve and connect to repository at: %s.\n"),
+          ACE_TEXT("attempting to resolve and connect to repository at: %C.\n"),
           iorString.c_str()
         ));
       }
@@ -243,7 +243,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
       target = OpenDDS::Federator::Manager::_narrow( obj.in() );
       if( CORBA::is_nil( target.in())) {
         ACE_ERROR(( LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: opendds_ir_ctl: could not narrow %s.\n"),
+          ACE_TEXT("(%P|%t) ERROR: opendds_ir_ctl: could not narrow %C.\n"),
           iorString.c_str()
         ));
         return -5;
@@ -258,7 +258,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
         if( options.verbose()) {
           ACE_DEBUG(( LM_INFO,
             ACE_TEXT("(%P|%t) INFO: opendds_ir_ctl: ")
-            ACE_TEXT("attempting to resolve and connect to repository at: %s.\n"),
+            ACE_TEXT("attempting to resolve and connect to repository at: %C.\n"),
             iorString.c_str()
           ));
         }
@@ -268,7 +268,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
         peer = OpenDDS::Federator::Manager::_narrow( obj.in() );
         if( CORBA::is_nil( peer.in())) {
           ACE_ERROR(( LM_ERROR,
-            ACE_TEXT("(%P|%t) ERROR: opendds_ir_ctl: could not narrow %s.\n"),
+            ACE_TEXT("(%P|%t) ERROR: opendds_ir_ctl: could not narrow %C.\n"),
             iorString.c_str()
           ));
           return -6;
@@ -335,7 +335,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
   } catch (const std::exception& ex) {
     ACE_ERROR ((LM_ERROR,
-                ACE_TEXT("(%P|%t) ABORT: opendds_ir_ctl: %s exception caught in main().\n"), ex.what()));
+                ACE_TEXT("(%P|%t) ABORT: opendds_ir_ctl: %C exception caught in main().\n"), ex.what()));
     status = -2;
 
   } catch(...) {

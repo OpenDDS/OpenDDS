@@ -35,7 +35,7 @@ ApplicationLevel::receive_diff(const DistributedContent::FileDiff& diff)
   ACE_TString diff_file_name = directory_;
 
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%s received new diff (%d) -> (%d) for file \"%s\" id %d size %d bytes from %s\n"),
+    ACE_TEXT("%s received new diff (%d) -> (%d) for file \"%C\" id %d size %d bytes from %C\n"),
     nodename_.c_str(),
     diff.previous_version,
     diff.new_version,

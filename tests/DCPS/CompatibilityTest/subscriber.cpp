@@ -276,7 +276,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (drl_servant->subscription_matched() != compatible)
       {
         ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("(%P|%t) Expected subscription_matched to be %s, but it wasn't.")
+                    ACE_TEXT("(%P|%t) Expected subscription_matched to be %C, but it wasn't.")
                     ACE_TEXT("durability_kind=%s,liveliness_kind=%s,liveliness_duration=%s,")
                     ACE_TEXT("reliability_kind=%s\n"),
                     (compatible) ? "true" : "false",

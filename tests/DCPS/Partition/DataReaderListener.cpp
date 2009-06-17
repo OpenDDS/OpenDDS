@@ -178,7 +178,7 @@ Test::DataReaderListener::display_partitions (
       char const * s = partition.name[i];
 
       ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT (" %u\t\t%s\n"),
+                  ACE_TEXT (" %u\t\t%C\n"),
                   i,
                   *s == 0 ? "\"\"" : s));
     }

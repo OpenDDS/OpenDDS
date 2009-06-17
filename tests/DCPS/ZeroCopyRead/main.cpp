@@ -336,7 +336,7 @@ void check_read_status(DDS::ReturnCode_t status,
           if (data.length() != expected)
           {
               ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) %s ERROR: expected %d samples but got %d\n"),
+                  ACE_TEXT("(%P|%t) %C ERROR: expected %d samples but got %d\n"),
                   where, expected, data.length() ));
               test_failed = 1;
               throw TestException();
@@ -346,7 +346,7 @@ void check_read_status(DDS::ReturnCode_t status,
       else if (status == ::DDS::RETCODE_NO_DATA)
       {
         ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("(%P|%t) %s ERROR: reader received NO_DATA!\n"),
+          ACE_TEXT("(%P|%t) %C ERROR: reader received NO_DATA!\n"),
           where));
         test_failed = 1;
         throw TestException();
@@ -354,7 +354,7 @@ void check_read_status(DDS::ReturnCode_t status,
       else if (status == ::DDS::RETCODE_PRECONDITION_NOT_MET)
       {
         ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("(%P|%t) %s ERROR: reader received PRECONDITION_NOT_MET!\n"),
+          ACE_TEXT("(%P|%t) %C ERROR: reader received PRECONDITION_NOT_MET!\n"),
           where));
         test_failed = 1;
         throw TestException();
@@ -362,7 +362,7 @@ void check_read_status(DDS::ReturnCode_t status,
       else
       {
         ACE_ERROR((LM_ERROR,
-            ACE_TEXT("(%P|%t) %s ERROR: unexpected status %d!\n"),
+            ACE_TEXT("(%P|%t) %C ERROR: unexpected status %d!\n"),
             where, status ));
         test_failed = 1;
         throw TestException();
@@ -382,7 +382,7 @@ void check_return_loan_status(DDS::ReturnCode_t status,
           if (data.length() != expected_len)
           {
               ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) %s ERROR: expected %d len but got %d\n"),
+                  ACE_TEXT("(%P|%t) %C ERROR: expected %d len but got %d\n"),
                   where, expected_len, data.length() ));
               test_failed = 1;
               throw TestException();
@@ -390,7 +390,7 @@ void check_return_loan_status(DDS::ReturnCode_t status,
           if (data.maximum() != expected_max)
           {
               ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) %s ERROR: expected %d maximum but got %d\n"),
+                  ACE_TEXT("(%P|%t) %C ERROR: expected %d maximum but got %d\n"),
                   where, expected_max, data.maximum() ));
               test_failed = 1;
               throw TestException();
@@ -400,7 +400,7 @@ void check_return_loan_status(DDS::ReturnCode_t status,
       else if (status == ::DDS::RETCODE_NO_DATA)
       {
         ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("(%P|%t) %s ERROR: reader received NO_DATA!\n"),
+          ACE_TEXT("(%P|%t) %C ERROR: reader received NO_DATA!\n"),
           where));
         test_failed = 1;
         throw TestException();
@@ -408,7 +408,7 @@ void check_return_loan_status(DDS::ReturnCode_t status,
       else if (status == ::DDS::RETCODE_PRECONDITION_NOT_MET)
       {
         ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("(%P|%t) %s ERROR: reader received PRECONDITION_NOT_MET!\n"),
+          ACE_TEXT("(%P|%t) %C ERROR: reader received PRECONDITION_NOT_MET!\n"),
           where));
         test_failed = 1;
         throw TestException();
@@ -416,7 +416,7 @@ void check_return_loan_status(DDS::ReturnCode_t status,
       else
       {
         ACE_ERROR((LM_ERROR,
-            ACE_TEXT("(%P|%t) %s ERROR: unexpected status %d!\n"),
+            ACE_TEXT("(%P|%t) %C ERROR: unexpected status %d!\n"),
             where, status ));
         test_failed = 1;
         throw TestException();
@@ -882,7 +882,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
         }
 
-        //ACE_DEBUG((LM_DEBUG,"%s != %s\n", data1[0].text.in(), data2[0].text.in() ));
+        //ACE_DEBUG((LM_DEBUG,"%C != %C\n", data1[0].text.in(), data2[0].text.in() ));
 
         if (0 == strcmp(data1[0].text.in(), data2[0].text.in()))
         {
@@ -1357,8 +1357,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         if (status != ::DDS::RETCODE_NO_DATA)
         {
             ACE_ERROR ((LM_ERROR,
-            ACE_TEXT("(%P|%t) %s ERROR: expected NO_DATA status from take!\n"), 
-            "t6"));
+              ACE_TEXT("(%P|%t) %t6 ERROR: expected NO_DATA status from take!\n")));
             test_failed = 1;
 
         }

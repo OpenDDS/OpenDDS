@@ -43,7 +43,7 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
       if( this->verbose_) {
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderListener::on_data_available() - ")
-          ACE_TEXT("received valid sample(%d): %03d: %s\n"),
+          ACE_TEXT("received valid sample(%d): %03d: %C\n"),
           count,
           data.key,
           (const char*)data.value

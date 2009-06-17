@@ -28,7 +28,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   } catch (const std::exception& ex) {
     ACE_ERROR ((LM_ERROR,
-                ACE_TEXT("%T (%P|%t) ABORT: %s exception caught in main().\n"), ex.what()));
+                ACE_TEXT("%T (%P|%t) ABORT: %C exception caught in main().\n"), ex.what()));
     status = -2;
 
   } catch(...) {
