@@ -42,7 +42,7 @@ void
 SimpleDataReader::data_received(const OpenDDS::DCPS::ReceivedDataSample& sample)
 {
   VDBG((LM_DEBUG, "(%P|%t) Data has been received:\n"));
-  VDBG((LM_DEBUG, "(%P|%t) Message: \"%s\"\n", sample.sample_->rd_ptr()));
+  VDBG((LM_DEBUG, "(%P|%t) Message: \"%C\"\n", sample.sample_->rd_ptr()));
 
   ++this->num_messages_received_;
 

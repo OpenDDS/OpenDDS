@@ -43,7 +43,7 @@ SimpleDataReader::data_received(const OpenDDS::DCPS::ReceivedDataSample& sample)
   ACE_UNUSED_ARG(sample);
 
   ACE_DEBUG((LM_DEBUG, "(%P|%t) Data has been received:\n"));
-//  ACE_DEBUG((LM_DEBUG, "(%P|%t) Message: \"%s\"\n", sample.sample_->rd_ptr()));
+//  ACE_DEBUG((LM_DEBUG, "(%P|%t) Message: \"%C\"\n", sample.sample_->rd_ptr()));
 
   if (0 == num_messages_received_)
     {
