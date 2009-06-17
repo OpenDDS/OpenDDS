@@ -25,7 +25,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       buffer << options.transportType();
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) publisher_main() - ")
-        ACE_TEXT("started with transport %s(%d), id %d.\n"),
+        ACE_TEXT("started with transport %C(%d), id %d.\n"),
         buffer.str().c_str(),
         options.transportKey(),
         options.publisherId()
@@ -45,7 +45,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   } catch (const Test::Exception& e)  {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) publisher_main() - ")
-      ACE_TEXT("Test exception caught during processing: %s.\n"),
+      ACE_TEXT("Test exception caught during processing: %C.\n"),
       e.what()
     ));
     return 1;

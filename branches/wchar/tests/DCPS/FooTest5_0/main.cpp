@@ -593,12 +593,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (status == ::DDS::RETCODE_OK)
       {
         ACE_DEBUG((LM_DEBUG,
-            "%s foo.x = %f foo.y = %f, foo.key = %d\n",
-            "read", sample.x, sample.y, sample.key));
+            "read foo.x = %f foo.y = %f, foo.key = %d\n",
+            sample.x, sample.y, sample.key));
 
         ACE_DEBUG((LM_DEBUG,
-            "%s SampleInfo.sample_rank = %d\n",
-            "read", info.sample_rank));
+            "read SampleInfo.sample_rank = %d\n",
+            info.sample_rank));
         if (foo.x != sample.x)
           {
             ACE_ERROR((LM_ERROR,

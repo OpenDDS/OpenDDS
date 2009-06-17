@@ -88,7 +88,7 @@ SyncServer_i::register_me (::Sync::Role role, ::Sync::Client_ptr callback,
   }
   catch (const CORBA::Exception& ex)
     {
-      ACE_ERROR ((LM_ERROR, "SyncServer> Callback connection establishment failed: %s\n"
+      ACE_ERROR ((LM_ERROR, "SyncServer> Callback connection establishment failed: %C\n"
                   , ex._info().c_str()));
       // should we continue. For now yes, else SynchServer will may become unresponsive.
     }
@@ -153,7 +153,7 @@ SyncServer_i::unregister (::Sync::Id id)
       orb_->shutdown (0);
     }
     catch (CORBA::Exception& ex) {
-      ACE_ERROR ((LM_ERROR, "SyncServer> ORB shutdown failure: %s.\n"
+      ACE_ERROR ((LM_ERROR, "SyncServer> ORB shutdown failure: %C.\n"
                   , ex._info().c_str()));
     }
   }
@@ -219,7 +219,7 @@ SyncServer_i::notify (void)
       iter->second.callback->proceed ();
     }
     catch (CORBA::Exception& ex) {
-      ACE_ERROR ((LM_ERROR, "SyncServer> Publisher notification failed: %s\n"
+      ACE_ERROR ((LM_ERROR, "SyncServer> Publisher notification failed: %C\n"
                   , ex._info().c_str()));
     }
   }
@@ -231,7 +231,7 @@ SyncServer_i::notify (void)
       iter->second.callback->proceed ();
     }
     catch (CORBA::Exception& ex) {
-      ACE_ERROR ((LM_ERROR, "SyncServer> Subscriber notification failed: %s\n"
+      ACE_ERROR ((LM_ERROR, "SyncServer> Subscriber notification failed: %C\n"
                   , ex._info().c_str()));
     }
   }
@@ -260,7 +260,7 @@ SyncServer_i::svc (void)
       shutdown_ = true;
     }
   catch ( CORBA::Exception& ex) {
-    ACE_ERROR ((LM_ERROR, "SyncServer> Unexpected exception: %s"
+    ACE_ERROR ((LM_ERROR, "SyncServer> Unexpected exception: %C"
                 ,  ex._info().c_str()));
     return -1;
   }

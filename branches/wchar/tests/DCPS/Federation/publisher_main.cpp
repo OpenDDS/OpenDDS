@@ -32,7 +32,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   } catch (const std::exception& ex) {
     ACE_ERROR ((LM_ERROR,
       ACE_TEXT("(%P|%t) FATAL: Publisher - ")
-      ACE_TEXT("%s exception caught in main().\n"),
+      ACE_TEXT("%C exception caught in main().\n"),
       ex.what()
     ));
     status = -2;

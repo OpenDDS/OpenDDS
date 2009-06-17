@@ -82,13 +82,13 @@ TestConfig::TestConfig( int argc, ACE_TCHAR** argv, char** envp)
 #if 0
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) INFO: Configured with: verbose       = %b\n")
-    ACE_TEXT("                                          type          = %s\n")
+    ACE_TEXT("                                          type          = %C\n")
     ACE_TEXT("                                          address       = %s\n")
-    ACE_TEXT("                                          repository    = %s\n")
-    ACE_TEXT("                                          reader topic  = %s\n")
-    ACE_TEXT("                                          writer topic  = %s\n")
-    ACE_TEXT("                                          reader domain = %s\n")
-    ACE_TEXT("                                          writer domain = %s\n"),
+    ACE_TEXT("                                          repository    = %C\n")
+    ACE_TEXT("                                          reader topic  = %C\n")
+    ACE_TEXT("                                          writer topic  = %C\n")
+    ACE_TEXT("                                          reader domain = %d\n")
+    ACE_TEXT("                                          writer domain = %d\n"),
     this->verbose_, this->typeName_,
     this->transportAddressName_, this->infoRepoIor_,
     this->readerTopicName_, this->writerTopicName_,

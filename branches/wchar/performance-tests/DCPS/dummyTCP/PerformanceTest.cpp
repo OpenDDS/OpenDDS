@@ -68,7 +68,7 @@ PerformanceTest::find_or_create_testobj(const string& test_name,
   else
   {
     if(debug)
-      ACE_DEBUG((LM_DEBUG,"(%P|%t), %s, Creating a new PerformanceTest object\n", test_name.c_str()));
+      ACE_DEBUG((LM_DEBUG,"(%P|%t), %C, Creating a new PerformanceTest object\n", test_name.c_str()));
     pt = new PerformanceTest(test_name,start_loc);
     pmap_.insert(make_pair(test_name,pt));
   }

@@ -1,3 +1,57 @@
+Wed Jun 17 20:44:46 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/tools/opendds_ir_ctl/opendds_ir_ctl.cpp:
+        * examples/DCPS/DistributedContent/ApplicationLevel.cpp:
+        * performance-tests/DCPS/Priority/DataReaderListener.cpp:
+        * performance-tests/DCPS/Priority/Publisher.cpp:
+        * performance-tests/DCPS/Priority/Subscriber.cpp:
+        * performance-tests/DCPS/Priority/Writer.cpp:
+        * performance-tests/DCPS/Priority/publisher_main.cpp:
+        * performance-tests/DCPS/Priority/subscriber_main.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TestDriver.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/TestDriver.cpp:
+        * performance-tests/DCPS/Sync/SyncServer_i.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher/TestDriver.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/TcpSubscriber.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConnection.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.cpp:
+        * performance-tests/DCPS/dummyTCP/PerformanceTest.cpp:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/CompatibilityTest/publisher.cpp:
+        * tests/DCPS/CompatibilityTest/subscriber.cpp:
+        * tests/DCPS/Compiler/idl_test1_main/main.cpp:
+        * tests/DCPS/Compiler/idl_test3_main/main.cpp:
+        * tests/DCPS/Federation/Publisher.cpp:
+        * tests/DCPS/Federation/Subscriber.cpp:
+        * tests/DCPS/Federation/publisher_main.cpp:
+        * tests/DCPS/Federation/subscriber_main.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/SubDriver.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/SubDriver.cpp:
+        * tests/DCPS/FooTest5/DataReaderListener.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/LivelinessTest/DataReaderListener.cpp:
+        * tests/DCPS/MultiRepoTest/TestConfig.cpp:
+        * tests/DCPS/MultiRepoTest/TestMonitor.cpp:
+        * tests/DCPS/MultiRepoTest/TestSystem.cpp:
+        * tests/DCPS/MultiRepoTest/monitor.cpp:
+        * tests/DCPS/MultiRepoTest/system.cpp:
+        * tests/DCPS/MultiTopicTest/Writer.cpp:
+        * tests/DCPS/Partition/DataReaderListener.cpp:
+        * tests/DCPS/Partition/DataWriterListener.cpp:
+        * tests/DCPS/Priority/DataReaderListener.cpp:
+        * tests/DCPS/Priority/publisher_main.cpp:
+        * tests/DCPS/Priority/subscriber_main.cpp:
+        * tests/DCPS/SimpleFooTest/main.cpp:
+        * tests/DCPS/ViewState/main.cpp:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+        * tests/DCPS/sub_init_loop/Writer.cpp:
+        * tests/DCPS/sub_init_loop/subscriber.cpp:
+
+          Fixed some instances of %s that should be %C (in ACE_DEBUG, etc.).
+
 Wed Jun 17 18:19:28 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * tests/transport/dds_comparative/Pub.cpp:

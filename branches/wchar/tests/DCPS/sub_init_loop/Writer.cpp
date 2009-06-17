@@ -125,7 +125,7 @@ Writer::svc ()
         } // while (true)
     }
   catch (CORBA::Exception& e) {
-    ACE_ERROR_RETURN ((LM_ERROR, "Exception caught in svc: %s (%s).\n"
+    ACE_ERROR_RETURN ((LM_ERROR, "Exception caught in svc: %C (%C).\n"
                        ,  e._name (), e._rep_id ())
                       , -1);
   }

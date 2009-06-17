@@ -393,9 +393,9 @@ PubDriver::run()
   if (fp == 0)
   {
     ACE_ERROR ((LM_ERROR,
-                ACE_LIB_TEXT("Unable to open %s for writing:(%u) %p\n"),
+                ACE_TEXT("Unable to open %s for writing:(%u) %p\n"),
                 pub_id_fname_.c_str (),
-                ACE_LIB_TEXT("PubDriver::run")));
+                ACE_TEXT("PubDriver::run")));
     return;
   }
 

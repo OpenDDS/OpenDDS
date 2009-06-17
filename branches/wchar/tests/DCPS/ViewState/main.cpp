@@ -162,7 +162,7 @@ void check_read_status(DDS::ReturnCode_t status,
           if (data.length() != expected)
           {
               ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) %s ERROR: expected %d samples but got %d\n"),
+                  ACE_TEXT("(%P|%t) %C ERROR: expected %d samples but got %d\n"),
                   where, expected, data.length() ));
               test_failed = 1;
               throw TestException();
@@ -172,7 +172,7 @@ void check_read_status(DDS::ReturnCode_t status,
       else if (status == ::DDS::RETCODE_NO_DATA)
       {
         ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("(%P|%t) %s ERROR: reader received NO_DATA!\n"),
+          ACE_TEXT("(%P|%t) %C ERROR: reader received NO_DATA!\n"),
           where));
         test_failed = 1;
         throw TestException();
@@ -180,7 +180,7 @@ void check_read_status(DDS::ReturnCode_t status,
       else if (status == ::DDS::RETCODE_PRECONDITION_NOT_MET)
       {
         ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("(%P|%t) %s ERROR: reader received PRECONDITION_NOT_MET!\n"),
+          ACE_TEXT("(%P|%t) %C ERROR: reader received PRECONDITION_NOT_MET!\n"),
           where));
         test_failed = 1;
         throw TestException();
@@ -188,7 +188,7 @@ void check_read_status(DDS::ReturnCode_t status,
       else
       {
         ACE_ERROR((LM_ERROR,
-            ACE_TEXT("(%P|%t) %s ERROR: unexpected status %d!\n"),
+            ACE_TEXT("(%P|%t) %C ERROR: unexpected status %d!\n"),
             where, status ));
         test_failed = 1;
         throw TestException();
