@@ -183,9 +183,8 @@ Reader::start ()
   if (activate (THR_NEW_LWP | THR_JOINABLE, 1) == -1)
   {
     ACE_ERROR ((LM_ERROR,
-                ACE_TEXT("(%P|%t) Reader::start, ")
-                ACE_TEXT ("%p."),
-                "activate"));
+                ACE_TEXT("(%P|%t) Reader::start, %p.\n"),
+                ACE_TEXT("activate")));
     throw TestException ();
   }
 }

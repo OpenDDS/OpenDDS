@@ -49,7 +49,7 @@ OpenDDS::DCPS::SimpleMcastTransport::configure_socket(TransportConfiguration* co
                         "(%P|%t) ERROR: failed to open multicast socket %C:%d: %p\n",
                         mcast_config->multicast_group_address_.get_host_addr (),
                         mcast_config->multicast_group_address_.get_port_number (),
-                        "open"),
+                        ACE_TEXT("open")),
                        -1);
     }
 

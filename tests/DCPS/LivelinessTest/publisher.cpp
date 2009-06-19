@@ -139,7 +139,7 @@ public:
     {
       ACE_ERROR ((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: PauseReactor, ")
-                 ACE_TEXT(" %p. \n"), "schedule_timer"));
+                 ACE_TEXT(" %p. \n"), ACE_TEXT("schedule_timer")));
     }
   }
 

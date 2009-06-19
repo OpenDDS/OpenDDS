@@ -227,8 +227,8 @@ OpenDDS::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
   if (this->con_checker_->open ())
     {
       ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: connection checker failed to open : %p\n",
-                        "open"),
+                        ACE_TEXT("(%P|%t) ERROR: connection checker failed to open : %p\n"),
+                        ACE_TEXT("open")),
 		       -1);
     }
 
@@ -244,10 +244,10 @@ OpenDDS::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
       SimpleTcpConfiguration_rch cfg = this->tcp_config_._retn();
 
       ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: Acceptor failed to open %C:%d: %p\n",
+                        ACE_TEXT("(%P|%t) ERROR: Acceptor failed to open %C:%d: %p\n"),
                         cfg->local_address_.get_host_addr (),
                         cfg->local_address_.get_port_number (),
-                        "open"),
+                        ACE_TEXT("open")),
                        -1);
     }
 

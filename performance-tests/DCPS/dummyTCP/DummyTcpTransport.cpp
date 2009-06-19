@@ -236,7 +236,7 @@ OpenDDS::DCPS::DummyTcpTransport::configure_i(TransportConfiguration* config)
     {
       ACE_ERROR_RETURN((LM_ERROR,
                         "(%P|%t) ERROR: connection checker failed to open : %p\n",
-                        "open"),
+                        ACE_TEXT("open")),
 		       -1);
     }
 
@@ -255,7 +255,7 @@ OpenDDS::DCPS::DummyTcpTransport::configure_i(TransportConfiguration* config)
                         "(%P|%t) ERROR: Acceptor failed to open %C:%d: %p\n",
                         cfg->local_address_.get_host_addr (),
                         cfg->local_address_.get_port_number (),
-                        "open"),
+                        ACE_TEXT("open")),
                        -1);
     }
 

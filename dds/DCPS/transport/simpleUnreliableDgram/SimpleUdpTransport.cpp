@@ -48,7 +48,7 @@ OpenDDS::DCPS::SimpleUdpTransport::configure_socket(TransportConfiguration* conf
                         "(%P|%t) ERROR: failed to open udp socket %C:%d: %p\n",
                         address.get_host_addr (),
                         address.get_port_number (),
-                        "open"),
+                        ACE_TEXT("open")),
                        -1);
     }
  

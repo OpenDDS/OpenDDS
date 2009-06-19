@@ -177,7 +177,7 @@ TestDriver::run_i()
   if (acceptor.open(sub_addr_) == -1) {
     ACE_ERROR((LM_ERROR,
                "%p\n",
-               "open"));
+               ACE_TEXT("open")));
     throw TestException();
   }
 
@@ -186,7 +186,7 @@ TestDriver::run_i()
   if (acceptor.accept(peer) == -1) {
     ACE_ERROR((LM_ERROR,
                "%p\n",
-               "accept"));
+               ACE_TEXT("accept")));
     throw TestException();
   }
 

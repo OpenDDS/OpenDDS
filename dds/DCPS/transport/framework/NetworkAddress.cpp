@@ -78,7 +78,8 @@ ACE_TString get_fully_qualified_hostname ()
     if (result != 0 || addr_count < 1)
     {
       ACE_ERROR ((LM_ERROR,
-                  "(%P|%t)!!! ERROR: Unable to probe network. %p\n"));
+        ACE_TEXT ("(%P|%t)!!! ERROR: Unable to probe network. %p\n"),
+        ACE_TEXT ("ACE::get_ip_interfaces")));
     }
     else
     {

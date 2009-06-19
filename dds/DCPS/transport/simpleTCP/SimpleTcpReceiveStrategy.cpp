@@ -130,7 +130,7 @@ OpenDDS::DCPS::SimpleTcpReceiveStrategy::start_i()
       this->connection_->_remove_ref();
       ACE_ERROR_RETURN((LM_ERROR,
                         "(%P|%t) ERROR: SimpleTcpReceiveStrategy::start_i SimpleTcpConnection can't register with "
-                        "reactor %X %p\n", this->connection_.in(), "register_handler"),
+                        "reactor %X %p\n", this->connection_.in(), ACE_TEXT("register_handler")),
                        -1);
     }
 

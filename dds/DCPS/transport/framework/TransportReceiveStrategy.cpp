@@ -304,8 +304,8 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
     || bytes_remaining < 0)
     {
       VDBG_LVL((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Unrecoverable problem ")
-                      ACE_TEXT("with data link detected: %p.\n"),
-                "receive_bytes"), 1);
+                          ACE_TEXT("with data link detected: %p.\n"),
+                          ACE_TEXT("receive_bytes")), 1);
 
       // The relink() will handle the connection to the ReconnectTask to do
       // the reconnect so this reactor thread will not be block.

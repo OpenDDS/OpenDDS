@@ -1809,7 +1809,7 @@ OpenDDS::DCPS::TransportSendStrategy::non_blocking_send (const iovec iov[], int 
       else
         {
           VDBG_LVL((LM_ERROR, "(%P|%t) TransportSendStrategy::send_bytes: ERROR: %p iovec count: %d\n",
-		    "sendv", n),1);
+		    ACE_TEXT("sendv"), n),1);
 
           // try to get the application to core when "Bad Address" is returned
           // by looking at the iovec
