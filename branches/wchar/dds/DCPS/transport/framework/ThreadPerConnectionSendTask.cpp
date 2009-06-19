@@ -55,7 +55,9 @@ int OpenDDS::DCPS::ThreadPerConnectionSendTask::add_request(SendStrategyOpType o
   req.release ();
       }
     else
-      ACE_ERROR((LM_ERROR, "(%P|%t)ERROR: ThreadPerConnectionSendTask::add %p\n", "put"));
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t)ERROR: ThreadPerConnectionSendTask::add %p\n"),
+        ACE_TEXT("put")));
   }
 
   return result;
@@ -142,7 +144,7 @@ int OpenDDS::DCPS::ThreadPerConnectionSendTask::svc()
         //send requests without interval. We just need ignore the dequeue
         //failure.
         //ACE_ERROR ((LM_ERROR, "(%P|%t)ERROR: ThreadPerConnectionSendTask::svc  %p\n",
-        //  "dequeue_head"));
+        //  ACE_TEXT("dequeue_head")));
         continue;
       }
     }

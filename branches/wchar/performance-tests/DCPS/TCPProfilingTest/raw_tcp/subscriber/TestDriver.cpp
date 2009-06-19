@@ -186,7 +186,7 @@ TestDriver::run_i()
   if (acceptor.open(addr_, reactor) == -1) {
     ACE_ERROR((LM_ERROR,
                "%p\n",
-               "open"));
+               ACE_TEXT("open")));
     throw TestException();
   }
 

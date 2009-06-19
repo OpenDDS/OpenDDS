@@ -202,10 +202,10 @@ Publisher::run (void)
       for (size_t count = 0; count < topic_count_; count++)
         {
           topic_[count] =
-            participant_[count%participant_count_]->create_topic ("Movie Discussion List",
-                                                                  type_name.in (),
-                                                                  topic_qos,
-                                                                  DDS::TopicListener::_nil());
+            participant_[count % participant_count_]->create_topic ("Movie Discussion List",
+                                                                    type_name.in (),
+                                                                    topic_qos,
+                                                                    DDS::TopicListener::_nil());
           if (CORBA::is_nil (topic_[count].in ())) {
             cerr << "create_topic failed." << endl;
             return false;

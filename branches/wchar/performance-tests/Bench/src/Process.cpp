@@ -477,7 +477,7 @@ Process::run()
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Process::run() - ")
         ACE_TEXT("unblocked main thread: %p.\n"),
-        "wait"
+        ACE_TEXT("wait")
       ));
     }
 
@@ -496,7 +496,7 @@ Process::run()
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) Process::run() - ")
           ACE_TEXT("unblocked main thread: %p.\n"),
-          "wait"
+          ACE_TEXT("wait")
         ));
       }
     }

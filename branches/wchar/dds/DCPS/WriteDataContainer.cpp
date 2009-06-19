@@ -1189,8 +1189,8 @@ void WriteDataContainer::reschedule_deadline ()
     {
       if (this->watchdog_->reset_timer_interval (iter->second->deadline_timer_id_) == -1)
       {
-        ACE_ERROR ((LM_ERROR, "(%P|%t) WriteDataContainer::reschedule_deadline "
-          "%p\n", "reset_timer_interval"));
+        ACE_ERROR ((LM_ERROR, ACE_TEXT ("(%P|%t) WriteDataContainer::reschedule_deadline %p\n")
+          ACE_TEXT ("reset_timer_interval")));
       }
     }
   }

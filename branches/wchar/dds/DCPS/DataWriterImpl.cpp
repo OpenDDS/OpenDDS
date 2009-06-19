@@ -1176,8 +1176,8 @@ DataWriterImpl::enable ()
                                  liveliness_check_interval_) == -1)
     {
       ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable: ")
-                  ACE_TEXT(" %p. \n"), "schedule_timer"));
+                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable: %p.\n"),
+                  ACE_TEXT("schedule_timer")));
     }
     else
     {
@@ -1784,9 +1784,8 @@ DataWriterImpl::handle_timeout (const ACE_Time_Value &tv,
     {
       ACE_ERROR_RETURN ((LM_ERROR,
                          ACE_TEXT("(%P|%t) ERROR: ")
-                         ACE_TEXT("DataWriterImpl::handle_timeout: ")
-                         ACE_TEXT(" %p. \n"),
-                         "cancel_timer"),
+                         ACE_TEXT("DataWriterImpl::handle_timeout: %p.\n"),
+                         ACE_TEXT("cancel_timer")),
                         -1);
     }
 
@@ -1799,9 +1798,8 @@ DataWriterImpl::handle_timeout (const ACE_Time_Value &tv,
     {
       ACE_ERROR_RETURN ((LM_ERROR,
                          ACE_TEXT("(%P|%t) ERROR: ")
-                         ACE_TEXT("DataWriterImpl::handle_timeout: ")
-                         ACE_TEXT(" %p. \n"),
-                         "schedule_timer"),
+                         ACE_TEXT("DataWriterImpl::handle_timeout: %p.\n"),
+                         ACE_TEXT("schedule_timer")),
                         -1);
     }
   }

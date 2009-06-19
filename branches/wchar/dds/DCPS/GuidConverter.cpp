@@ -86,6 +86,15 @@ GuidConverter::operator std::string() const
   return os.str();
 }
 
+GuidConverter::operator std::wstring() const
+{
+  std::wostringstream os;
+
+  os << guid_ << "(" << std::hex << checksum() << ")";
+  
+  return os.str();
+}
+
 } // namespace
 } // namespace
 
@@ -93,4 +102,10 @@ std::ostream&
 operator<<(std::ostream& os, const OpenDDS::DCPS::GuidConverter& rhs)
 {
   return os << std::string(rhs);
+}
+
+std::wostream&
+operator<<(std::wostream& os, const OpenDDS::DCPS::GuidConverter& rhs)
+{
+  return os << std::wstring(rhs);
 }

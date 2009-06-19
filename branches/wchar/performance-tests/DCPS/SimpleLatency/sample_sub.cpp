@@ -46,7 +46,7 @@ void set_rt()
 
   if (-1 == ACE_OS::sched_params(params))
   {
-    ACE_DEBUG ((LM_DEBUG, "WARNING: %p\n"));
+    ACE_DEBUG ((LM_DEBUG, "WARNING: %p\n", ACE_TEXT("sched_params")));
   }
 
 #if (defined (MCL_CURRENT) && defined(MCL_FUTURE))

@@ -1639,7 +1639,7 @@ DataReaderImpl::handle_timeout (const ACE_Time_Value &tv,
         // so it is not a failure.
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::handle_timeout: ")
-          ACE_TEXT(" %p. \n"), "cancel_timer" ));
+          ACE_TEXT(" %p. \n"), ACE_TEXT("cancel_timer")));
       }
       liveliness_timer_id_ = -1;
     }
@@ -1694,7 +1694,7 @@ DataReaderImpl::handle_timeout (const ACE_Time_Value &tv,
     {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::handle_timeout: ")
-        ACE_TEXT(" %p. \n"), "schedule_timer" ));
+        ACE_TEXT(" %p. \n"), ACE_TEXT("schedule_timer")));
     }
   }
   else {
@@ -2698,8 +2698,8 @@ void DataReaderImpl::reschedule_deadline ()
       {
         if (this->watchdog_->reset_timer_interval (iter->second->deadline_timer_id_) == -1)
         {
-          ACE_ERROR ((LM_ERROR, "(%P|%t)DataReaderImpl::reschedule_deadline "
-            "%p\n", "reset_timer_interval"));
+          ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t)DataReaderImpl::reschedule_deadline %p\n"),
+                      ACE_TEXT("reset_timer_interval")));
         }
       }
     }
