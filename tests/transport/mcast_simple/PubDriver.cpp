@@ -40,7 +40,7 @@ PubDriver::run(int& argc, ACE_TCHAR* argv[])
   // initialize the orb
   CORBA::ORB_var orb = CORBA::ORB_init (argc,
                                         argv,
-                                        "TAO_DDS_DCPS");
+                                        OpenDDS::DCPS::DEFAULT_ORB_NAME);
 
   TheServiceParticipant->set_ORB (orb.in());
   DDS::DomainParticipantFactory_var dpf;

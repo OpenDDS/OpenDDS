@@ -636,7 +636,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           // Client creates the orb.
           orb = CORBA::ORB_init (conv.get_argc (),
                                  conv.get_ASCII_argv (),
-                                 "TAO_DDS_DCPS");
+                                 OpenDDS::DCPS::DEFAULT_ORB_NAME);
 
           TheServiceParticipant->set_ORB(orb.in());
 

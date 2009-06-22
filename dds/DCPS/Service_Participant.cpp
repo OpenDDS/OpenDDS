@@ -266,8 +266,7 @@ namespace OpenDDS
 
                       // Use a unique ORB for the ::DDS Service
                       // to avoid conflicts with other CORBA code
-                      orb_ = CORBA::ORB_init (argc, argv,
-                                              "TAO_DDS_DCPS");
+                      orb_ = CORBA::ORB_init (argc, argv, DEFAULT_ORB_NAME);
                     }
 
                   if (parse_args (argc, argv) != 0)
@@ -1119,7 +1118,7 @@ namespace OpenDDS
       if( this->bitTransportMap_[ domain]->configure(config.in()) != 0)
         {
           ACE_ERROR((LM_ERROR,
-            ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::init_bit_transport_impl: ")
+            ACE_TEXT("(%P|%t) ERROR: Service_Participant::init_bit_transport_impl: ")
             ACE_TEXT("Failed to configure transport for domain %d.\n"),
             domain
           ));

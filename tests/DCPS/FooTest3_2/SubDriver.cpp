@@ -157,7 +157,7 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
   ACE_Argv_Type_Converter conv (argc, argv);
   orb_ = CORBA::ORB_init (conv.get_argc (),
                           conv.get_ASCII_argv (),
-                          "TAO_DDS_DCPS");
+                          OpenDDS::DCPS::DEFAULT_ORB_NAME);
 
   TheServiceParticipant->set_ORB (orb_.in());
 
