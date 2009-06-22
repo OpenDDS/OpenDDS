@@ -445,80 +445,80 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
   CORBA::ULong rds_len = 0;
   ::DDS::InstanceHandleSeq handles;
 
+  // Ensure the same acquisition order as in wait_for_acknowledgments().
+  ACE_GUARD (ACE_SYNCH_MUTEX, wfaGuard, this->wfaLock_);
+  ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
+
+  //Remove the readers from fully associated reader list. 
+  //If the supplied reader is not in the cached reader list then it is 
+  //already removed. We just need remove the readers in the list that have
+  //not been removed.
+
+  CORBA::ULong len = readers.length();
+  for (CORBA::ULong i = 0; i < len; ++i)
   {
-    // Ensure the same acquisition order as in wait_for_acknowledgments().
-    ACE_GUARD (ACE_SYNCH_MUTEX, wfaGuard, this->wfaLock_);
-    ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
+    //Remove the readers from fully associated reader list. If it's not
+    //in there, the fully_associated() is not called yet and remove it
+    //from pending list.
 
-    //Remove the readers from fully associated reader list. 
-    //If the supplied reader is not in the cached reader list then it is 
-    //already removed. We just need remove the readers in the list that have
-    //not been removed.
-
-    CORBA::ULong len = readers.length();
-    for (CORBA::ULong i = 0; i < len; ++i)
+    if (OpenDDS::DCPS::remove (readers_, readers[i]) == 0)
     {
-      //Remove the readers from fully associated reader list. If it's not
-      //in there, the fully_associated() is not called yet and remove it
-      //from pending list.
+      ++ fully_associated_len;
+      fully_associated_readers.length (fully_associated_len);
+      fully_associated_readers [fully_associated_len - 1] = readers[i]; 
 
-      if (OpenDDS::DCPS::remove (readers_, readers[i]) == 0)
-      {
-        ++ fully_associated_len;
-        fully_associated_readers.length (fully_associated_len);
-        fully_associated_readers [fully_associated_len - 1] = readers[i]; 
+      // Remove this reader from the ACK sequence map if its there.
+      // This is where we need to be holding the wfaLock_ obtained
+      // above.
+      RepoIdToSequenceMap::iterator where
+        = this->idToSequence_.find( readers[i]);
+      if( where != this->idToSequence_.end()) {
+        this->idToSequence_.erase( where);
 
-        // Remove this reader from the ACK sequence map if its there.
-        // This is where we need to be holding the wfaLock_ obtained
-        // above.
-        RepoIdToSequenceMap::iterator where
-          = this->idToSequence_.find( readers[i]);
-        if( where != this->idToSequence_.end()) {
-          this->idToSequence_.erase( where);
-
-          // It is possible that this subscription was causing the wait
-          // to continue, so give the opportunity to find out.
-          this->wfaCondition_.broadcast();
-        }
-
-        ++ rds_len;
-        rds.length (rds_len);
-        rds [rds_len - 1] = readers[i];         
+        // It is possible that this subscription was causing the wait
+        // to continue, so give the opportunity to find out.
+        this->wfaCondition_.broadcast();
       }
-      else if (OpenDDS::DCPS::remove (pending_readers_, readers[i]) == 0)
-      {
-        ++ rds_len;
-        rds.length (rds_len);
-        rds [rds_len - 1] = readers[i]; 
 
-        RepoIdConverter converter(readers[i]);
-        ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) DataWriterImpl::remove_associations: ")
-          ACE_TEXT("removing reader %C before fully_associated() call.\n"),
-          std::string(converter).c_str()
-        ));
-      }
-      //else reader is already removed which indicates remove_association()
-      //is called multiple times.
+      ++ rds_len;
+      rds.length (rds_len);
+      rds [rds_len - 1] = readers[i];         
     }
-  
-    if (fully_associated_len > 0 && ! is_bit_)
+    else if (OpenDDS::DCPS::remove (pending_readers_, readers[i]) == 0)
     {
-      // The reader should be in the id_to_handle map at this time so
-      // log with error.
-      if (this->cache_lookup_instance_handles (fully_associated_readers, handles) == false)
-      {
-        ACE_ERROR ((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::remove_associations: "
-          "cache_lookup_instance_handles failed, notify %d \n", notify_lost));
-        return;
-      }
+      ++ rds_len;
+      rds.length (rds_len);
+      rds [rds_len - 1] = readers[i]; 
 
-      for (CORBA::ULong i = 0; i < fully_associated_len; ++i)
-      {
-        id_to_handle_map_.erase(fully_associated_readers[i]);
-      }
+      RepoIdConverter converter(readers[i]);
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) DataWriterImpl::remove_associations: ")
+        ACE_TEXT("removing reader %C before fully_associated() call.\n"),
+        std::string(converter).c_str()
+      ));
+    }
+    //else reader is already removed which indicates remove_association()
+    //is called multiple times.
+  }
+
+  if (fully_associated_len > 0 && ! is_bit_)
+  {
+    // The reader should be in the id_to_handle map at this time so
+    // log with error.
+    if (this->cache_lookup_instance_handles (fully_associated_readers, handles) == false)
+    {
+      ACE_ERROR ((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::remove_associations: "
+        "cache_lookup_instance_handles failed, notify %d \n", notify_lost));
+      return;
+    }
+
+    for (CORBA::ULong i = 0; i < fully_associated_len; ++i)
+    {
+      id_to_handle_map_.erase(fully_associated_readers[i]);
     }
   }
+
+  wfaGuard.release();
 
   if (rds_len > 0)
   {
@@ -529,8 +529,6 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
   // Mirror the PUBLICATION_MATCH_STATUS processing from
   // fully_associated() here.
   if( !this->is_bit_) {
-    // Re-acquire the lock.
-    ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
     // Derive the change in the number of subscriptions reading this writer.
     int matchedSubscriptions = this->id_to_handle_map_.size();
