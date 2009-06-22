@@ -1,3 +1,15 @@
+Mon Jun 22 18:45:04 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Only acquire lock once in remove_associations instead of releasing
+          and re-acquiring.  A race condition was observed where the state was
+          inconsistent afer re-acquiring.
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Added a check for a Win32-specific errno value.
+
 Fri Jun 19 22:14:25 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:

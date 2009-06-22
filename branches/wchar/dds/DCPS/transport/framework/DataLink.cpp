@@ -1177,11 +1177,15 @@ OpenDDS::DCPS::DataLink::set_dscp_codepoint( int cp, ACE_SOCK& socket)
                 sizeof(cp)
              );
 
-  if( (result == -1) && (errno != ENOTSUP)) {
+  if( (result == -1) && (errno != ENOTSUP)
+#ifdef WSAEINVAL
+    && (errno != WSAEINVAL)
+#endif
+    ) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataLink::set_dscp_codepoint() - ")
       ACE_TEXT("failed to set the %C codepoint to %d: %m, ")
-      ACE_TEXT("try running as supersuser.\n"),
+      ACE_TEXT("try running as superuser.\n"),
       which,
       cp
     ));
