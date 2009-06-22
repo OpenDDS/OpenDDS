@@ -36,6 +36,8 @@ namespace OpenDDS
   {
     class DataDurabilityCache;
 
+    const char DEFAULT_ORB_NAME[] = "OpenDDS_DCPS";
+
     /**
      * @class Service_Participant
      *
