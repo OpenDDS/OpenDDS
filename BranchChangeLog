@@ -1,3 +1,10 @@
+Tue Jun 23 19:17:40 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportDefs.h:
+
+          The allocator's template argument should be a char
+          array, not ACE_TCHAR -- it's just a chunk of bytes.
+
 Tue Jun 23 16:23:36 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLinkSetMap.cpp:

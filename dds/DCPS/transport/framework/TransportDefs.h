@@ -201,7 +201,7 @@ namespace OpenDDS
                                               TransportDataBlockAllocator ;
 
     typedef Cached_Allocator_With_Overflow<
-              ACE_TCHAR[RECEIVE_DATA_BUFFER_SIZE],
+              char[RECEIVE_DATA_BUFFER_SIZE],
               RECEIVE_SYNCH>                  TransportDataAllocator ;
 
 
