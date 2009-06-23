@@ -141,8 +141,8 @@ OpenDDS::DCPS::DataLinkSetMap::release_reservations
       {
         RepoIdConverter remote_converter(remote_ids[i]);
         RepoIdConverter local_converter(local_id);
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: DataLinkSetMap::release_reservations: ")
+        VDBG((LM_WARNING,
+          ACE_TEXT("(%P|%t) DataLinkSetMap::release_reservations: ")
           ACE_TEXT("failed to find remote_id %C ")
           ACE_TEXT("in map for local_id %C. Skipping this remote_id.\n"),
           std::string(remote_converter).c_str(),
