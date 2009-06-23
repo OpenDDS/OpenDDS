@@ -1,3 +1,10 @@
+Tue Jun 23 15:20:56 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/NetworkAddress.cpp:
+
+          If DDS discovers the local system's hostname as "localhost"
+          then fall back on using the dotted-decimal address.
+
 Mon Jun 22 22:21:44 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:
