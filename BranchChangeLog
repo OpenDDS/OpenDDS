@@ -1,3 +1,16 @@
+Tue Jun 23 16:23:36 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkSetMap.cpp:
+
+          Demoted an ERROR to a warning after checking with Mike Martinez.
+          This is an expected case where datalink establishment / teardown
+          is happening quickly, and the code is there to handle it.
+
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+
+          Fix some more stray %s's that should be %C's.
+
 Tue Jun 23 15:20:56 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/NetworkAddress.cpp:

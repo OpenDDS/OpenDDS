@@ -411,7 +411,7 @@ PubDriver::run()
     // Write the publication id to a file.
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT("(%P|%t) PubDriver::run, ")
-                ACE_TEXT(" Write to %s: pub_id=%s.\n"),
+                ACE_TEXT(" Write to %s: pub_id=%C.\n"),
                 pub_id_fname_.c_str (),
                 buffer.str().c_str()));
 
