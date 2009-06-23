@@ -101,10 +101,14 @@ ACE_TString get_fully_qualified_hostname ()
           {
             VDBG_LVL ((LM_DEBUG, "(%P|%t) ip interface %C:%d maps to hostname %C\n",
               addr_array[i].get_host_addr(), addr_array[i].get_port_number (), hostname), 2);
+            if (ACE_OS::strncmp (hostname, "localhost", 9) == 0)
+            {
+              addr_array[i].get_host_addr (hostname, MAXHOSTNAMELEN);
+            }
             OpenDDS::DCPS::HostnameInfo info;
-	    info.index_ = i;
-	    info.hostname_ = ACE_TEXT_CHAR_TO_TCHAR(hostname);
-	    nonFQDN.push_back (info);
+            info.index_ = i;
+            info.hostname_ = ACE_TEXT_CHAR_TO_TCHAR (hostname);
+            nonFQDN.push_back (info);
           }
         }
       }
