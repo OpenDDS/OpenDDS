@@ -43,7 +43,7 @@ OpenDDS::DCPS::TransportSendControlElement::release_element(bool dropped_by_tran
 
   if (allocator_)
     {
-      allocator_->free (this);
+      ACE_DES_FREE( this, allocator_->free, TransportSendControlElement);
     }
 }
 

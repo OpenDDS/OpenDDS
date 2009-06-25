@@ -77,7 +77,6 @@ void
 OpenDDS::DCPS::SimpleTcpConnection::disconnect()
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","disconnect",6);
-  this->peer().close();
   this->connected_ = false;
   if (! this->receive_strategy_.is_nil ())
   {
@@ -87,6 +86,7 @@ OpenDDS::DCPS::SimpleTcpConnection::disconnect()
     rs->get_reactor()->remove_handler (this,       
        ACE_Event_Handler::READ_MASK | ACE_Event_Handler::DONT_CALL);
   }
+  this->peer().close();
 }
 
 

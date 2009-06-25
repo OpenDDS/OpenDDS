@@ -118,6 +118,7 @@ OpenDDS::DCPS::TransportSendStrategy::~TransportSendStrategy()
   if( this->pkt_chain_ != 0) {
     size_t size = this->pkt_chain_->total_length();
     if( size > 0) {
+      this->pkt_chain_->release();
       ACE_DEBUG((LM_WARNING,
         ACE_TEXT("(%P|%t) WARNING: TransportSendStrategy::~TransportSendStrategy() - ")
         ACE_TEXT("terminating with %d unsent bytes.\n"),

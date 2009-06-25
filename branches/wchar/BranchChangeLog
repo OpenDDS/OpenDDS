@@ -1,3 +1,24 @@
+Thu Jun 25 20:37:02 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RakeResults_T.cpp:
+
+          Removed unreachable code that caused warnings on some compilers.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Release the ACE Message Block if there is still data in the dtor.
+          
+        * dds/DCPS/transport/framework/TransportSendControlElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendElement.cpp:
+
+          Use ACE_DES_FREE to call destructors on objects allocated by
+          custom allocators and placement new-ed.  Thanks to Mike for the fix.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+
+          Move the close() of the socket to after it's been removed from
+          the reactor.
+
 Tue Jun 23 19:17:40 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportDefs.h:
