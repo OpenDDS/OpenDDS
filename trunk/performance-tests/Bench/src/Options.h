@@ -108,7 +108,7 @@ class Options  {
     typedef std::map< std::string, SubscriptionProfile*> SubscriptionProfileMap;
 
     /// Default constructor.
-    Options( int argc, char** argv, char** envp = 0);
+    Options( int argc, ACE_TCHAR** argv, char** envp = 0);
 
     /// Virtual destructor.
     virtual ~Options();
@@ -167,7 +167,7 @@ class Options  {
 
   private:
     /// Configure scenario information from a file.
-    void configureScenarios( const char* filename);
+    void configureScenarios( const ACE_TCHAR* filename);
 
     /// Extract the DDS Entity information for the scenario.
     void configureEntities( ACE_Configuration_Heap& heap);
@@ -176,28 +176,28 @@ class Options  {
     void loadParticipant(
            ACE_Configuration_Heap& heap,
            ACE_Configuration_Section_Key& key,
-           std::string name
+           std::basic_string<ACE_TCHAR> name
          );
 
     /// Load specification for a Topic.
     void loadTopic(
            ACE_Configuration_Heap& heap,
            ACE_Configuration_Section_Key& key,
-           std::string name
+           std::basic_string<ACE_TCHAR> name
          );
 
     /// Load specification for a Publication.
     void loadPublication(
            ACE_Configuration_Heap& heap,
            ACE_Configuration_Section_Key& key,
-           std::string name
+           std::basic_string<ACE_TCHAR> name
          );
 
     /// Load specification for a Subscription.
     void loadSubscription(
            ACE_Configuration_Heap& heap,
            ACE_Configuration_Section_Key& key,
-           std::string name
+           std::basic_string<ACE_TCHAR> name
          );
 
     /// Test verbosity.

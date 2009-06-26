@@ -252,7 +252,7 @@ PersistenceUpdater::init (int argc, ACE_TCHAR *argv[])
 
   if (um_ == 0) {
     ACE_ERROR ((LM_ERROR, ACE_TEXT("PersistenceUpdater initialization failed. ")
-                "No UpdateManagerSvc discovered.\n"));
+                ACE_TEXT("No UpdateManager discovered.\n")));
     return -1;
   }
 
@@ -795,7 +795,7 @@ PersistenceUpdater::update( const IdPath& id, const ::DDS::DomainParticipantQos&
     OpenDDS::DCPS::RepoIdConverter converter(id.id);
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) PersistenceUpdater::update: ")
-      ACE_TEXT("participant %s not found\n"),
+      ACE_TEXT("participant %C not found\n"),
       std::string(converter).c_str()
     ));
   }
@@ -818,7 +818,7 @@ PersistenceUpdater::update( const IdPath& id, const ::DDS::TopicQos& qos)
     OpenDDS::DCPS::RepoIdConverter converter(id.id);
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) PersistenceUpdater::update: ")
-      ACE_TEXT("topic %s not found\n"),
+      ACE_TEXT("topic %C not found\n"),
       std::string(converter).c_str()
     ));
   }
@@ -841,7 +841,7 @@ PersistenceUpdater::update( const IdPath& id, const ::DDS::DataWriterQos& qos)
     OpenDDS::DCPS::RepoIdConverter converter(id.id);
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) PersistenceUpdater::update(writerQos): ")
-      ACE_TEXT("publication %s not found\n"),
+      ACE_TEXT("publication %C not found\n"),
       std::string(converter).c_str()
     ));
   }
@@ -864,7 +864,7 @@ PersistenceUpdater::update( const IdPath& id, const ::DDS::PublisherQos& qos)
     OpenDDS::DCPS::RepoIdConverter converter(id.id);
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) PersistenceUpdater::update(publisherQos): ")
-      ACE_TEXT("publication %s not found\n"),
+      ACE_TEXT("publication %C not found\n"),
       std::string(converter).c_str()
     ));
   }
@@ -887,7 +887,7 @@ PersistenceUpdater::update( const IdPath& id, const ::DDS::DataReaderQos& qos)
     OpenDDS::DCPS::RepoIdConverter converter(id.id);
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) PersistenceUpdater::update(readerQos): ")
-      ACE_TEXT("subscription %s not found\n"),
+      ACE_TEXT("subscription %C not found\n"),
       std::string(converter).c_str()
     ));
   }
@@ -910,7 +910,7 @@ PersistenceUpdater::update( const IdPath& id, const ::DDS::SubscriberQos& qos)
     OpenDDS::DCPS::RepoIdConverter converter(id.id);
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) PersistenceUpdater::update(subscriberQos): ")
-      ACE_TEXT("subscription %s not found\n"),
+      ACE_TEXT("subscription %C not found\n"),
       std::string(converter).c_str()
     ));
   }
@@ -950,7 +950,7 @@ PersistenceUpdater::destroy( const IdPath& id, ItemType type, ActorType)
         OpenDDS::DCPS::RepoIdConverter converter(id.id);
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P | %t) PersistenceUpdater::destroy: ")
-          ACE_TEXT("unknown entity - %s.\n"),
+          ACE_TEXT("unknown entity - %C.\n"),
           std::string(converter).c_str()
         ));
       }

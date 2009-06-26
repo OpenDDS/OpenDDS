@@ -92,7 +92,7 @@ class Options {
     enum Command { JOIN, KILL, LEAVE, SHUTDOWN };
 
     /// Construct with command line arguments only.
-    Options( int argc, char** argv);
+    Options( int argc, ACE_TCHAR** argv);
 
     /// Virtual destructor.
     virtual ~Options() { }
@@ -129,16 +129,16 @@ class Options {
     int federationDomain_;
 };
 
-Options::Options( int argc, char** argv)
+Options::Options( int argc, ACE_TCHAR** argv)
  : verbose_( false)
  , federationDomain_( OpenDDS::Federator::DEFAULT_FEDERATIONDOMAIN)
 {
   ACE_Arg_Shifter arg_shifter( argc, argv);
 
   while (arg_shifter.is_anything_left()) {
-    const char *arg = arg_shifter.get_current();
+    const ACE_TCHAR *arg = arg_shifter.get_current();
 
-    if (*arg == '-') {
+    if (*arg == ACE_TEXT('-')) {
       switch (*++arg) {
         case 'h':
           usage_and_exit( -8);
@@ -154,10 +154,10 @@ Options::Options( int argc, char** argv)
   if( --argc) {
     // First argument is the command.
     switch( **++argv) {
-      case 'j': case 'J': this->command_ = JOIN;     break;
-      case 'k': case 'K': this->command_ = KILL;     break;
-      case 'l': case 'L': this->command_ = LEAVE;    break;
-      case 's': case 'S': this->command_ = SHUTDOWN; break;
+      case ACE_TEXT('j'): case ACE_TEXT('J'): this->command_ = JOIN;     break;
+      case ACE_TEXT('k'): case ACE_TEXT('K'): this->command_ = KILL;     break;
+      case ACE_TEXT('l'): case ACE_TEXT('L'): this->command_ = LEAVE;    break;
+      case ACE_TEXT('s'): case ACE_TEXT('S'): this->command_ = SHUTDOWN; break;
 
       // Unknown command.
       default: 
@@ -166,12 +166,12 @@ Options::Options( int argc, char** argv)
     }
 
     // Next argument is the target for all commands.
-    if( --argc) this->target_ = *++argv;
+    if( --argc) this->target_ = ACE_TEXT_ALWAYS_CHAR(*++argv);
     else        usage_and_exit( -9);
 
     if( this->command_ == JOIN) {
       // Its the join command, next argument is the peer.
-      if( --argc) this->peer_ = *++argv;
+      if( --argc) this->peer_ = ACE_TEXT_ALWAYS_CHAR(*++argv);
       else        usage_and_exit( -10);
 
       // Optional federation domain value.
@@ -185,8 +185,7 @@ Options::Options( int argc, char** argv)
 
 } // End of anonymous namespace.
 
-int
-main( int argc, char** argv)
+int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 {
   int status = 0;
   try {
@@ -209,7 +208,7 @@ main( int argc, char** argv)
       if( options.verbose()) {
         ACE_DEBUG(( LM_INFO,
           ACE_TEXT("(%P|%t) INFO: opendds_ir_ctl: ")
-          ACE_TEXT("attempting to resolve and connect to repository at: %s.\n"),
+          ACE_TEXT("attempting to resolve and connect to repository at: %C.\n"),
           iorString.c_str()
         ));
       }
@@ -219,7 +218,7 @@ main( int argc, char** argv)
       ir = OpenDDS::DCPS::DCPSInfo::_narrow( obj.in() );
       if( CORBA::is_nil( ir.in())) {
         ACE_ERROR(( LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: opendds_ir_ctl: could not narrow %s.\n"),
+          ACE_TEXT("(%P|%t) ERROR: opendds_ir_ctl: could not narrow %C.\n"),
           iorString.c_str()
         ));
         return -4;
@@ -234,7 +233,7 @@ main( int argc, char** argv)
       if( options.verbose()) {
         ACE_DEBUG(( LM_INFO,
           ACE_TEXT("(%P|%t) INFO: opendds_ir_ctl: ")
-          ACE_TEXT("attempting to resolve and connect to repository at: %s.\n"),
+          ACE_TEXT("attempting to resolve and connect to repository at: %C.\n"),
           iorString.c_str()
         ));
       }
@@ -244,7 +243,7 @@ main( int argc, char** argv)
       target = OpenDDS::Federator::Manager::_narrow( obj.in() );
       if( CORBA::is_nil( target.in())) {
         ACE_ERROR(( LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: opendds_ir_ctl: could not narrow %s.\n"),
+          ACE_TEXT("(%P|%t) ERROR: opendds_ir_ctl: could not narrow %C.\n"),
           iorString.c_str()
         ));
         return -5;
@@ -259,7 +258,7 @@ main( int argc, char** argv)
         if( options.verbose()) {
           ACE_DEBUG(( LM_INFO,
             ACE_TEXT("(%P|%t) INFO: opendds_ir_ctl: ")
-            ACE_TEXT("attempting to resolve and connect to repository at: %s.\n"),
+            ACE_TEXT("attempting to resolve and connect to repository at: %C.\n"),
             iorString.c_str()
           ));
         }
@@ -269,7 +268,7 @@ main( int argc, char** argv)
         peer = OpenDDS::Federator::Manager::_narrow( obj.in() );
         if( CORBA::is_nil( peer.in())) {
           ACE_ERROR(( LM_ERROR,
-            ACE_TEXT("(%P|%t) ERROR: opendds_ir_ctl: could not narrow %s.\n"),
+            ACE_TEXT("(%P|%t) ERROR: opendds_ir_ctl: could not narrow %C.\n"),
             iorString.c_str()
           ));
           return -6;
@@ -336,7 +335,7 @@ main( int argc, char** argv)
 
   } catch (const std::exception& ex) {
     ACE_ERROR ((LM_ERROR,
-                ACE_TEXT("(%P|%t) ABORT: opendds_ir_ctl: %s exception caught in main().\n"), ex.what()));
+                ACE_TEXT("(%P|%t) ABORT: opendds_ir_ctl: %C exception caught in main().\n"), ex.what()));
     status = -2;
 
   } catch(...) {

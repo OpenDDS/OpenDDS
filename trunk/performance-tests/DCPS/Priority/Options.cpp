@@ -42,25 +42,25 @@ namespace { // anonymous namespace for file scope.
 //                      = OpenDDS::DCPS::DataCollector< double>::KeepOldest;
 
   // Command line argument definitions.
-  const char* TRANSPORT_TYPE_ARGUMENT    = "-t";
-  const char* VERBOSE_ARGUMENT           = "-v";
-  const char* DURATION_ARGUMENT          = "-c";
-  const char* SCENARIO_ARGUMENT          = "-f";
-  const char* ID_ARGUMENT                = "-i";
-  const char* RAW_DATA_FILENAME_ARGUMENT = "-r";
+  const ACE_TCHAR* TRANSPORT_TYPE_ARGUMENT = ACE_TEXT("-t");
+  const ACE_TCHAR* VERBOSE_ARGUMENT        = ACE_TEXT("-v");
+  const ACE_TCHAR* DURATION_ARGUMENT       = ACE_TEXT("-c");
+  const ACE_TCHAR* SCENARIO_ARGUMENT       = ACE_TEXT("-f");
+  const ACE_TCHAR* ID_ARGUMENT             = ACE_TEXT("-i");
+  const ACE_TCHAR* RAW_DATA_FILENAME_ARGUMENT = ACE_TEXT("-r");
 
   // Scenario configuration file section names.
-  const char* PUBLICATION_SECTION_NAME = "publication";
+  const ACE_TCHAR* PUBLICATION_SECTION_NAME = ACE_TEXT("publication");
 
   // Scenario configuration file Key values.
-  const char* TRANSPORT_KEY_NAME = "Transport";
-  const char* DURATION_KEY_NAME  = "TestDuration";
-  const char* PRIORITY_KEY_NAME  = "Priority";
-  const char* MAX_KEY_NAME       = "MessageMax";
-  const char* MIN_KEY_NAME       = "MessageMin";
-  const char* SIZE_KEY_NAME      = "MessageSize";
-  const char* DEVIATION_KEY_NAME = "MessageDeviation";
-  const char* RATE_KEY_NAME      = "MessageRate";
+  const ACE_TCHAR* TRANSPORT_KEY_NAME = ACE_TEXT("Transport");
+  const ACE_TCHAR* DURATION_KEY_NAME  = ACE_TEXT("TestDuration");
+  const ACE_TCHAR* PRIORITY_KEY_NAME  = ACE_TEXT("Priority");
+  const ACE_TCHAR* MAX_KEY_NAME       = ACE_TEXT("MessageMax");
+  const ACE_TCHAR* MIN_KEY_NAME       = ACE_TEXT("MessageMin");
+  const ACE_TCHAR* SIZE_KEY_NAME      = ACE_TEXT("MessageSize");
+  const ACE_TCHAR* DEVIATION_KEY_NAME = ACE_TEXT("MessageDeviation");
+  const ACE_TCHAR* RATE_KEY_NAME      = ACE_TEXT("MessageRate");
 
   // Scenario configuration default values.
   enum { DEFAULT_PRIORITY  =    0};
@@ -72,15 +72,15 @@ namespace { // anonymous namespace for file scope.
 
   // Map command line arguments to transport types and keys.
   const struct TransportTypeArgMappings {
-    std::string optionName;
+    ACE_TString optionName;
     std::pair< Test::Options::TransportType, unsigned int>
                 transportInfo;
 
   } transportTypeArgMappings[] = {
-    { "tcp", std::make_pair( Test::Options::TCP, 1U) }, // [transport_impl_1]
-    { "udp", std::make_pair( Test::Options::UDP, 2U) }, // [transport_impl_2]
-    { "mc",  std::make_pair( Test::Options::MC,  3U) }, // [transport_impl_3]
-    { "rmc", std::make_pair( Test::Options::RMC, 4U) }  // [transport_impl_4]
+    { ACE_TEXT("tcp"), std::make_pair( Test::Options::TCP, 1U) }, // [transport_impl_1]
+    { ACE_TEXT("udp"), std::make_pair( Test::Options::UDP, 2U) }, // [transport_impl_2]
+    { ACE_TEXT("mc"),  std::make_pair( Test::Options::MC,  3U) }, // [transport_impl_3]
+    { ACE_TEXT("rmc"), std::make_pair( Test::Options::RMC, 4U) }  // [transport_impl_4]
   };
 
 } // end of anonymous namespace.
@@ -95,7 +95,7 @@ Options::~Options()
   this->publicationProfiles_.clear();
 }
 
-Options::Options( int argc, char** argv, char** /* envp */)
+Options::Options(int argc, ACE_TCHAR** argv, char** /* envp */)
  : verbose_(           false),
    domain_(            DEFAULT_TEST_DOMAIN),
    id_(                DEFAULT_ID),
@@ -116,7 +116,7 @@ Options::Options( int argc, char** argv, char** /* envp */)
         parser.get_current()
       ));
     }
-    const char* currentArg = 0;
+    const ACE_TCHAR* currentArg = 0;
     if( 0 != (currentArg = parser.get_the_parameter( TRANSPORT_TYPE_ARGUMENT))) {
       this->transportType_ = NONE;
       for( unsigned int index = 0;
@@ -154,7 +154,7 @@ Options::Options( int argc, char** argv, char** /* envp */)
       parser.consume_arg();
 
     } else if( 0 != (currentArg = parser.get_the_parameter( RAW_DATA_FILENAME_ARGUMENT))) {
-      this->rawOutputFilename_ = currentArg;
+      this->rawOutputFilename_ = ACE_TEXT_ALWAYS_CHAR(currentArg);
       parser.consume_arg();
 
     } else if( 0 <= (parser.cur_arg_strncasecmp( VERBOSE_ARGUMENT))) {
@@ -173,7 +173,7 @@ Options::Options( int argc, char** argv, char** /* envp */)
 }
 
 void
-Options::configureScenarios( const char* filename)
+Options::configureScenarios(const ACE_TCHAR* filename)
 {
   if( this->verbose()) {
     ACE_DEBUG((LM_DEBUG,
@@ -329,7 +329,7 @@ Options::configureScenarios( const char* filename)
     // Store the profile for the current publication.
     this->publicationProfiles_.push_back(
       new PublicationProfile(
-            sectionName.c_str(),
+            ACE_TEXT_ALWAYS_CHAR(sectionName.c_str()),
             priority,
             rate,
             size,

@@ -29,7 +29,7 @@ namespace { // anonymous namespace for file scope.
   const char* DEFAULT_TEST_TOPICNAME = "TestTopic";
 
   // Command line argument definitions.
-  const char* VERBOSE_ARGUMENT = "-v";
+  const ACE_TCHAR* VERBOSE_ARGUMENT = ACE_TEXT("-v");
 
 } // end of anonymous namespace.
 
@@ -39,7 +39,7 @@ Options::~Options()
 {
 }
 
-Options::Options( int argc, char** argv, char** /* envp */)
+Options::Options( int argc, ACE_TCHAR** argv, char** /* envp */)
  : valid_(        true),
    verbose_(      false),
    domain_(       DEFAULT_TEST_DOMAIN),

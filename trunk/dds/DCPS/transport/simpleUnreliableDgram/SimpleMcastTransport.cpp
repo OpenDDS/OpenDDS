@@ -46,10 +46,10 @@ OpenDDS::DCPS::SimpleMcastTransport::configure_socket(TransportConfiguration* co
                           mcast_config->receiver_) != 0)
     {
       ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: failed to open multicast socket %s:%d: %p\n",
+                        "(%P|%t) ERROR: failed to open multicast socket %C:%d: %p\n",
                         mcast_config->multicast_group_address_.get_host_addr (),
                         mcast_config->multicast_group_address_.get_port_number (),
-                        "open"),
+                        ACE_TEXT("open")),
                        -1);
     }
 
@@ -61,12 +61,12 @@ OpenDDS::DCPS::SimpleMcastTransport::configure_socket(TransportConfiguration* co
   // qualified hostname and actual listening port number.
   if (mcast_config->local_address_.is_any ())
     {
-      const std::string& hostname = get_fully_qualified_hostname ();
+      ACE_TString hostname = get_fully_qualified_hostname ();
 
       mcast_config->local_address_.set (port, hostname.c_str());
       mcast_config->local_address_str_ = hostname;
-      mcast_config->local_address_str_ += ":";
-      mcast_config->local_address_str_ += out.str ();
+      mcast_config->local_address_str_ += ACE_TEXT(":");
+      mcast_config->local_address_str_ += ACE_TEXT_CHAR_TO_TCHAR(out.str().c_str());
     }
 
   // Now we got the actual listening port. Update the port nnmber in the configuration
@@ -77,9 +77,9 @@ OpenDDS::DCPS::SimpleMcastTransport::configure_socket(TransportConfiguration* co
 
       if (! mcast_config->local_address_str_.empty ())
       {
-        std::string::size_type pos = mcast_config->local_address_str_.find_first_of (':');
-        std::string str = mcast_config->local_address_str_.substr (0, pos + 1);
-        str += out.str ();
+        ACE_TString::size_type pos = mcast_config->local_address_str_.find (ACE_TEXT(':'));
+        ACE_TString str = mcast_config->local_address_str_.substr (0, pos + 1);
+        str += ACE_TEXT_CHAR_TO_TCHAR(out.str().c_str());
         mcast_config->local_address_str_ = str;
       }
     }

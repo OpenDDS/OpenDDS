@@ -23,7 +23,7 @@ TestConfig::~TestConfig()
 {
 }
 
-TestConfig::TestConfig( int argc, char** argv, char** envp)
+TestConfig::TestConfig( int argc, ACE_TCHAR** argv, char** envp)
  : verbose_( TC_DEFAULT_VERBOSE),
    samples_( TC_DEFAULT_SAMPLES),
    typeName_( TC_DEFAULT_TYPE)
@@ -35,44 +35,44 @@ TestConfig::TestConfig( int argc, char** argv, char** envp)
 
   ACE_Arg_Shifter parser( argc, argv);
   while( parser.is_anything_left()) {
-    const char* currentArg = 0;
-    if( 0 != (currentArg = parser.get_the_parameter("-Address"))) {
+    const ACE_TCHAR* currentArg = 0;
+    if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-Address")))) {
       this->transportAddressName_ = currentArg;
       parser.consume_arg();
 
-    } else if( 0 != (currentArg = parser.get_the_parameter("-TypeName"))) {
-      this->typeName_ = currentArg;
+    } else if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-TypeName")))) {
+      this->typeName_ = ACE_TEXT_ALWAYS_CHAR(currentArg);
       parser.consume_arg();
 
-    } else if( 0 != (currentArg = parser.get_the_parameter("-WriterDomain"))) {
+    } else if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-WriterDomain")))) {
       long domain = ACE_OS::atoi( currentArg);
       this->publisherDomain_.push_back( domain);
       this->domainRepoMap_[ domain] = this->infoRepoIor_.size() - 1;
       parser.consume_arg();
 
-    } else if( 0 != (currentArg = parser.get_the_parameter("-ReaderDomain"))) {
+    } else if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-ReaderDomain")))) {
       long domain = ACE_OS::atoi( currentArg);
       this->subscriberDomain_.push_back( domain);
       this->domainRepoMap_[ domain] = this->infoRepoIor_.size() - 1;
       parser.consume_arg();
 
-    } else if( 0 != (currentArg = parser.get_the_parameter("-WriterTopic"))) {
-      this->writerTopicName_.push_back( currentArg);
+    } else if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-WriterTopic")))) {
+      this->writerTopicName_.push_back(ACE_TEXT_ALWAYS_CHAR(currentArg));
       parser.consume_arg();
 
-    } else if( 0 != (currentArg = parser.get_the_parameter("-ReaderTopic"))) {
-      this->readerTopicName_.push_back( currentArg);
+    } else if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-ReaderTopic")))) {
+      this->readerTopicName_.push_back(ACE_TEXT_ALWAYS_CHAR(currentArg));
       parser.consume_arg();
 
-    } else if( 0 != (currentArg = parser.get_the_parameter("-InfoRepo"))) {
-      this->infoRepoIor_.push_back( currentArg);
+    } else if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-InfoRepo")))) {
+      this->infoRepoIor_.push_back(ACE_TEXT_ALWAYS_CHAR(currentArg));
       parser.consume_arg();
 
-    } else if( 0 != (currentArg = parser.get_the_parameter("-Samples"))) {
+    } else if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-Samples")))) {
       this->samples_ = ACE_OS::atoi( currentArg);
       parser.consume_arg();
 
-    } else if( 0 != (currentArg = parser.get_the_parameter("-v"))) {
+    } else if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-v")))) {
       this->verbose_ = true;
 
     } else {
@@ -82,13 +82,13 @@ TestConfig::TestConfig( int argc, char** argv, char** envp)
 #if 0
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) INFO: Configured with: verbose       = %b\n")
-    ACE_TEXT("                                          type          = %s\n")
+    ACE_TEXT("                                          type          = %C\n")
     ACE_TEXT("                                          address       = %s\n")
-    ACE_TEXT("                                          repository    = %s\n")
-    ACE_TEXT("                                          reader topic  = %s\n")
-    ACE_TEXT("                                          writer topic  = %s\n")
-    ACE_TEXT("                                          reader domain = %s\n")
-    ACE_TEXT("                                          writer domain = %s\n"),
+    ACE_TEXT("                                          repository    = %C\n")
+    ACE_TEXT("                                          reader topic  = %C\n")
+    ACE_TEXT("                                          writer topic  = %C\n")
+    ACE_TEXT("                                          reader domain = %d\n")
+    ACE_TEXT("                                          writer domain = %d\n"),
     this->verbose_, this->typeName_,
     this->transportAddressName_, this->infoRepoIor_,
     this->readerTopicName_, this->writerTopicName_,
@@ -155,13 +155,13 @@ TestConfig::infoRepoIor( int index) const
   }
 }
 
-std::string&
+ACE_TString&
 TestConfig::transportAddressName()
 {
   return this->transportAddressName_;
 }
 
-std::string
+ACE_TString
 TestConfig::transportAddressName() const
 {
   return this->transportAddressName_;

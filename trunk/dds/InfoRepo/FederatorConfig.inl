@@ -17,14 +17,14 @@ OpenDDS::Federator::Config::argc() const
 }
 
 ACE_INLINE
-char**&
+ACE_TCHAR**&
 OpenDDS::Federator::Config::argv()
 {
   return this->argv_;
 }
 
 ACE_INLINE
-char**
+ACE_TCHAR**
 OpenDDS::Federator::Config::argv() const
 {
   return this->argv_;
@@ -73,28 +73,28 @@ OpenDDS::Federator::Config::federationPort() const
 }
 
 ACE_INLINE
-std::string&
+OpenDDS::Federator::tstring&
 OpenDDS::Federator::Config::configFile()
 {
   return this->configFile_;
 }
 
 ACE_INLINE
-std::string
+OpenDDS::Federator::tstring
 OpenDDS::Federator::Config::configFile() const
 {
   return this->configFile_;
 }
 
 ACE_INLINE
-std::string&
+OpenDDS::Federator::tstring&
 OpenDDS::Federator::Config::federateIor()
 {
   return this->federateIor_;
 }
 
 ACE_INLINE
-std::string
+OpenDDS::Federator::tstring
 OpenDDS::Federator::Config::federateIor() const
 {
   return this->federateIor_;

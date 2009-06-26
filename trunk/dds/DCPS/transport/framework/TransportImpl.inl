@@ -67,7 +67,7 @@ OpenDDS::DCPS::TransportImpl::configure(TransportConfiguration* config)
   if (this->dl_clean_task_.open ()) {
     ACE_ERROR_RETURN ((LM_ERROR,
            "(%P|%t) ERROR: DL Cleanup task failed to open : %p\n",
-           "open"), -1);
+           ACE_TEXT("open")), -1);
   }
 
   // Success.

@@ -44,21 +44,21 @@ SimplePublisher::init(OpenDDS::DCPS::TransportIdType               transport_id,
   if (status != OpenDDS::DCPS::ATTACH_OK)
     {
       // We failed to attach to the transport for some reason.
-      std::string status_str;
+      ACE_TString status_str;
 
       switch (status)
         {
           case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-            status_str = "ATTACH_BAD_TRANSPORT";
+            status_str = ACE_TEXT("ATTACH_BAD_TRANSPORT");
             break;
           case OpenDDS::DCPS::ATTACH_ERROR:
-            status_str = "ATTACH_ERROR";
+            status_str = ACE_TEXT("ATTACH_ERROR");
             break;
           case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-            status_str = "ATTACH_INCOMPATIBLE_QOS";
+            status_str = ACE_TEXT("ATTACH_INCOMPATIBLE_QOS");
             break;
           default:
-            status_str = "Unknown Status";
+            status_str = ACE_TEXT("Unknown Status");
             break;
         }
 

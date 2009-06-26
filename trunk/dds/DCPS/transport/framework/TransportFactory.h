@@ -16,7 +16,6 @@
 #include "ace/Configuration.h"
 
 #include <map>
-#include <string>
 
 namespace OpenDDS
 {

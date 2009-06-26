@@ -40,12 +40,12 @@ int expected_lost_sub_notification = 0;
 int actual_lost_sub_notification = 0;
 int end_with_publisher = 0;
 int verify_lost_sub_notification = 1;
-std::string local_address;
+ACE_TString local_address;
 
 /// parse the command line arguments
-int parse_args (int argc, char *argv[])
+int parse_args (int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, "vn:a:r:i:l:e:c:x:");
+  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT ("vn:a:r:i:l:e:c:x:"));
   int c;
 
   while ((c = get_opts ()) != -1)
@@ -100,7 +100,7 @@ int parse_args (int argc, char *argv[])
 }
 
 
-int main (int argc, char *argv[])
+int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
   try {
     DDS::DomainParticipantFactory_var dpf;
@@ -145,16 +145,16 @@ int main (int argc, char *argv[])
     // Initialize the transport
     OpenDDS::DCPS::TransportImpl_rch tcp_impl =
       TheTransportFactory->create_transport_impl (TCP_IMPL_ID,
-                                                  "SimpleTcp",
+                                                  ACE_TEXT ("SimpleTcp"),
                                                   OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
     OpenDDS::DCPS::TransportConfiguration_rch reader_config
-      = TheTransportFactory->create_configuration (TCP_IMPL_ID, "SimpleTcp");
+      = TheTransportFactory->create_configuration (TCP_IMPL_ID, ACE_TEXT ("SimpleTcp"));
 
     OpenDDS::DCPS::SimpleTcpConfiguration* reader_tcp_config
       = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
 
-    reader_tcp_config->local_address_ = ACE_INET_Addr (local_address.c_str());
+    reader_tcp_config->local_address_ = ACE_INET_Addr (local_address.c_str ());
     reader_tcp_config->local_address_str_ = local_address;
     // This is needed to get the connection deletion callback.
     reader_tcp_config->datalink_release_delay_ = 0;
@@ -226,7 +226,7 @@ int main (int argc, char *argv[])
     }
 
     // Indicate that the subscriber is ready
-    FILE* readers_ready = ACE_OS::fopen (sub_ready_filename, "w");
+    FILE* readers_ready = ACE_OS::fopen (sub_ready_filename, ACE_TEXT ("w"));
     if (readers_ready == 0) {
       cerr << "ERROR Unable to create subscriber ready file." << endl;
       exit(1);
@@ -236,9 +236,9 @@ int main (int argc, char *argv[])
     // Wait for the publisher to be ready
     FILE* writers_ready = 0;
     do {
-      ACE_Time_Value small(0,250000);
-      ACE_OS::sleep (small);
-      writers_ready = ACE_OS::fopen (pub_ready_filename, "r");
+      ACE_Time_Value small_time(0,250000);
+      ACE_OS::sleep (small_time);
+      writers_ready = ACE_OS::fopen (pub_ready_filename, ACE_TEXT ("r"));
     } while (0 == writers_ready);
     ACE_OS::fclose(writers_ready);
 
@@ -253,7 +253,7 @@ int main (int argc, char *argv[])
       // can re-calculate the number of expected messages. Otherwise,
       // the blocking timeout test will never exit from this loop.
       if (writers_completed == 0) {
-        writers_completed = ACE_OS::fopen (pub_finished_filename, "r");
+        writers_completed = ACE_OS::fopen (pub_finished_filename, ACE_TEXT ("r"));
         if (writers_completed != 0) {
           if (end_with_publisher)
           {
@@ -282,7 +282,7 @@ int main (int argc, char *argv[])
     }
 
     // Indicate that the subscriber is done
-    FILE* readers_completed = ACE_OS::fopen (sub_finished_filename, "w");
+    FILE* readers_completed = ACE_OS::fopen (sub_finished_filename, ACE_TEXT ("w"));
     if (readers_completed == 0) {
       cerr << "ERROR Unable to create subscriber completed file." << endl;
       exit(1);

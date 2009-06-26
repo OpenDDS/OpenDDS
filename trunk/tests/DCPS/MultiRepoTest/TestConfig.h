@@ -1,6 +1,9 @@
 #ifndef TESTCONFIG_H
 #define TESTCONFIG_H
 
+#include "ace/ace_wchar.h"
+#include "ace/SString.h"
+
 #include <vector>
 #include <map>
 #include <string>
@@ -51,7 +54,7 @@ class TestConfig {
      * (incremented by 1).  Any domain definitions are then mapped to the
      * currently active repository key.
      */
-    TestConfig( int argc, char** argv, char** envp);
+    TestConfig( int argc, ACE_TCHAR** argv, char** envp);
 
     /// Virtual destructor.
     virtual ~TestConfig();
@@ -69,8 +72,8 @@ class TestConfig {
     std::string  typeName() const;
 
     /// Transport address string.
-    std::string& transportAddressName();
-    std::string  transportAddressName() const;
+    ACE_TString& transportAddressName();
+    ACE_TString  transportAddressName() const;
 
     /// InfoRepo IOR.
     std::string& infoRepoIor( int index = 0);
@@ -122,7 +125,7 @@ class TestConfig {
     std::string typeName_;
 
     /// Transport address string.
-    std::string transportAddressName_;
+    ACE_TString transportAddressName_;
 
     /// InfoRepo IOR.
     StringVector infoRepoIor_;

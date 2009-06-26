@@ -35,7 +35,7 @@ class Pub : public OpenDDS::DCPS::TransportInterface
     /// Add a remote subscriber
     void add_remote_subscriber(OpenDDS::DCPS::RepoId    sub_id,
                                const ACE_INET_Addr& sub_addr,
-                               const std::string&   sub_addr_str);
+                               const ACE_TString&   sub_addr_str);
 
     /// Initialize the publisher.  This causes this publisher to attach itself
     /// to the appropriate TransportImpl object, followed by a call to
@@ -83,11 +83,11 @@ class Pub : public OpenDDS::DCPS::TransportInterface
     {
       OpenDDS::DCPS::RepoId sub_id_;
       ACE_INET_Addr     sub_addr_;
-      std::string       sub_addr_str_;
+      ACE_TString       sub_addr_str_;
 
       SubInfo(OpenDDS::DCPS::RepoId sub_id, 
               const ACE_INET_Addr& sub_addr,
-              const std::string & sub_addr_str)
+              const ACE_TString& sub_addr_str)
         : sub_id_(sub_id), sub_addr_(sub_addr), sub_addr_str_(sub_addr_str)
         {}
 

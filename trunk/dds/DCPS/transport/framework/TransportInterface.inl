@@ -91,7 +91,7 @@ OpenDDS::DCPS::TransportInterface::send_response(
     ACE_DEBUG((LM_WARNING,
       ACE_TEXT("(%P|%t) WARNING: TransportInterface::send_response() - ")
       ACE_TEXT("unable to find link to send SAMPLE_ACK message on to ")
-      ACE_TEXT("reach publication %s.\n"),
+      ACE_TEXT("reach publication %C.\n"),
       std::string( converter).c_str()
     ));
     this->remote_map_.dump();
@@ -240,7 +240,7 @@ OpenDDS::DCPS::TransportInterface::send(const DataSampleList& samples)
             OpenDDS::DCPS::RepoIdConverter converter(cur->publication_id_);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) TransportInterface::send: ")
-              ACE_TEXT("no links for publication %s, ")
+              ACE_TEXT("no links for publication %C, ")
               ACE_TEXT("not sending %d samples.\n"),
               std::string(converter).c_str(),
               samples.size_

@@ -10,8 +10,7 @@
 #include <fstream>
 #include <sstream>
 
-int
-main( int argc, char *argv[])
+int ACE_TMAIN( int argc, ACE_TCHAR *argv[])
 {
   int result = -1;
 
@@ -47,10 +46,10 @@ main( int argc, char *argv[])
       ACE_TEXT("CORBA exception caught during processing.\n")
     ));
 
-  } catch( Test::Exception e)  {
+  } catch (const Test::Exception& e)  {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) subscriber_main() - ")
-      ACE_TEXT("Test exception caught during processing: %s.\n"),
+      ACE_TEXT("Test exception caught during processing: %C.\n"),
       e.what()
     ));
 

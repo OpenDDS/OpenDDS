@@ -20,9 +20,9 @@
 const long  TEST_DOMAIN   = 411;
 const char* TEST_TOPIC    = "McastListenerPerfTest";
 const char* TEST_TYPE     = "McastListenerPerfTestType";
-const char * reader_address_str = "default";
-const char * writer_address_str = "default";
-const char * multicast_group_address_str = "default";
+const ACE_TCHAR* reader_address_str = ACE_TEXT("default");
+const ACE_TCHAR* writer_address_str = ACE_TEXT("default");
+const ACE_TCHAR* multicast_group_address_str = ACE_TEXT("default");
 
 const ACE_Time_Value max_blocking_time(::DDS::DURATION_INFINITY_SEC);
 
@@ -56,20 +56,20 @@ int init_reader_tranport ()
   int status = 0;
 
   reader_transport_impl =
-      TheTransportFactory->create_transport_impl (SUB_TRAFFIC, "SimpleMcast", OpenDDS::DCPS::DONT_AUTO_CONFIG);
+      TheTransportFactory->create_transport_impl (SUB_TRAFFIC, ACE_TEXT("SimpleMcast"), OpenDDS::DCPS::DONT_AUTO_CONFIG);
   OpenDDS::DCPS::TransportConfiguration_rch reader_config 
-    = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleMcast");
+    = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("SimpleMcast"));
 
   OpenDDS::DCPS::SimpleMcastConfiguration* reader_mcast_config 
     = static_cast <OpenDDS::DCPS::SimpleMcastConfiguration*> (reader_config.in ());
 
-  if (0 != ACE_OS::strcmp("default", reader_address_str) )
+  if (0 != ACE_OS::strcmp(ACE_TEXT("default"), reader_address_str) )
     {
       ACE_INET_Addr reader_address (reader_address_str);
       //reader_mcast_config->local_address_ = reader_address;
     }
 
-  if (0 != ACE_OS::strcmp("default", multicast_group_address_str) )
+  if (0 != ACE_OS::strcmp(ACE_TEXT("default"), multicast_group_address_str) )
     {
       ACE_INET_Addr multicast_group_address (multicast_group_address_str);
       reader_mcast_config->multicast_group_address_ = multicast_group_address;
@@ -96,22 +96,22 @@ int init_writer_tranport ()
 
   writer_transport_impl =
       TheTransportFactory->create_transport_impl(PUB_TRAFFIC, 
-                                                 "SimpleMcast",
+                                                 ACE_TEXT("SimpleMcast"),
                                                  OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   OpenDDS::DCPS::TransportConfiguration_rch writer_config 
-    = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleMcast");
+    = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("SimpleMcast"));
 
   OpenDDS::DCPS::SimpleMcastConfiguration* writer_mcast_config 
     = static_cast <OpenDDS::DCPS::SimpleMcastConfiguration*> (writer_config.in ());
 
-  if (0 != ACE_OS::strcmp("default", writer_address_str) )
+  if (0 != ACE_OS::strcmp(ACE_TEXT("default"), writer_address_str) )
     {
       ACE_INET_Addr writer_address (writer_address_str);
       //writer_mcast_config->local_address_ = writer_address;
     }
 
-  if (0 != ACE_OS::strcmp("default", multicast_group_address_str) )
+  if (0 != ACE_OS::strcmp(ACE_TEXT("default"), multicast_group_address_str) )
     {
       ACE_INET_Addr multicast_group_address (multicast_group_address_str);
       writer_mcast_config->multicast_group_address_ = multicast_group_address;

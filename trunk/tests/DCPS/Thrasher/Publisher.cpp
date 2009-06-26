@@ -30,12 +30,12 @@ namespace
     {
       const ACE_TCHAR* arg;
 
-      if ((arg = shifter.get_the_parameter("-s")))
+      if ((arg = shifter.get_the_parameter(ACE_TEXT("-s"))))
       {
         samples_per_thread = ACE_OS::atoi(arg);
         shifter.consume_arg();
       }
-      else if ((arg = shifter.get_the_parameter("-t")))
+      else if ((arg = shifter.get_the_parameter(ACE_TEXT("-t"))))
       {
         num_threads = ACE_OS::atoi(arg);
         shifter.consume_arg();

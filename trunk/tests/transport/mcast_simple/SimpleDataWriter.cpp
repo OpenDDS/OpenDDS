@@ -49,12 +49,12 @@ SimpleDataWriter::run(SimplePublisher* publisher)
   // We just send one message.
 
   // This is what goes in the "Data Block".
-  ACE_TString data = "Hello World!";
+  ACE_CString data = "Hello World!";
 
   // Now we can create the DataSampleHeader struct and set its fields.
   OpenDDS::DCPS::DataSampleHeader header;
 
-  // The +1 makes the null terminator ('/0') get placed into the block.
+  // The +1 makes the null terminator ('\0') get placed into the block.
   header.message_length_ = data.length() + 1;
   header.message_id_ = 1;
   header.sequence_ = 0;

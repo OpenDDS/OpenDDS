@@ -15,19 +15,21 @@
 
 namespace OpenDDS { namespace Federator {
 
+typedef std::basic_string<ACE_TCHAR> tstring;
+
 class OpenDDS_Federator_Export Config  {
   public:
     /// Command line option specifying the configuration file.
-    static const std::string FEDERATOR_CONFIG_OPTION;
+    static const tstring FEDERATOR_CONFIG_OPTION;
 
     /// Command line option specifying the federation Id value.
-    static const std::string FEDERATOR_ID_OPTION;
+    static const tstring FEDERATOR_ID_OPTION;
 
     /// Command line option specifying a repository to federate with.
-    static const std::string FEDERATE_WITH_OPTION;
+    static const tstring FEDERATE_WITH_OPTION;
 
     /// Default constructor.
-    Config( int argc, char** argv);
+    Config( int argc, ACE_TCHAR** argv);
 
     /// Virtual destructor.
     virtual ~Config();
@@ -37,8 +39,8 @@ class OpenDDS_Federator_Export Config  {
     int  argc() const;
 
     /// Access the enhanced argc.
-    char**& argv();
-    char**  argv() const;
+    ACE_TCHAR**& argv();
+    ACE_TCHAR**  argv() const;
 
     /// Federation Id value.
     RepoKey& federationId();
@@ -53,12 +55,12 @@ class OpenDDS_Federator_Export Config  {
     short  federationPort() const;
 
     /// Initial federation IOR value.
-    std::string& federateIor();
-    std::string  federateIor() const;
+    tstring& federateIor();
+    tstring  federateIor() const;
 
     /// Configuration filename.
-    std::string& configFile();
-    std::string  configFile() const;
+    tstring& configFile();
+    tstring  configFile() const;
 
   private:
     /// Process a configuration file
@@ -68,13 +70,13 @@ class OpenDDS_Federator_Export Config  {
     int argc_;
 
     /// Enhanced argv.
-    char** argv_;
+    ACE_TCHAR** argv_;
 
     /// Configuration filename, if any.
-    std::string configFile_;
+    tstring configFile_;
 
     /// Initial federation IOR, if any.
-    std::string federateIor_;
+    tstring federateIor_;
 
     /// Configured Federation Id value.
     RepoKey federationId_;

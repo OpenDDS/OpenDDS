@@ -17,8 +17,7 @@
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
 #endif
 
-int
-main( int argc, char** argv)
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   OpenDDS::DCPS::set_DCPS_debug_level( 0);
   int status = 0;
@@ -33,7 +32,7 @@ main( int argc, char** argv)
   } catch (const std::exception& ex) {
     ACE_ERROR ((LM_ERROR,
       ACE_TEXT("%T (%P|%t) FATAL: Subscriber - ")
-      ACE_TEXT("%s exception caught in main().\n"),
+      ACE_TEXT("%C exception caught in main().\n"),
       ex.what()
     ));
     status = -2;

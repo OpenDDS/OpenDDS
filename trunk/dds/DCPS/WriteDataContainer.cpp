@@ -216,7 +216,7 @@ WriteDataContainer::reenqueue_all(OpenDDS::DCPS::ReaderIdSeq const & rds,
       RepoIdConverter converter(publication_id_);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) WriteDataContainer::reenqueue_all: ")
-        ACE_TEXT("domain %d topic %s publication %s copying HISTORY to resend.\n"),
+        ACE_TEXT("domain %d topic %C publication %C copying HISTORY to resend.\n"),
         this->domain_id_,
         this->topic_name_,
         std::string(converter).c_str()
@@ -441,6 +441,20 @@ WriteDataContainer::get_unsent_data()
   // Clear the unsent data list.
   //
   this->unsent_data_.reset ();
+
+  // Signal if there is no pending data.
+  //
+  // N.B. If a mutex cannot be obtained it is possible for this
+  //      method to return successfully without broadcasting the
+  //      condition.
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+    guard,
+    this->lock_,
+    list);
+
+  if (!pending_data())
+    empty_condition_.broadcast();
+
   //
   // Return the moved list.
   //
@@ -493,8 +507,7 @@ WriteDataContainer::get_sent_data()
 bool
 WriteDataContainer::pending_data()
 {
-  return this->released_data_.size_ != 0
-      || this->sending_data_.size_ != 0
+  return this->sending_data_.size_ != 0
       || this->unsent_data_.size_ != 0;
 }
 
@@ -589,7 +602,7 @@ WriteDataContainer::data_delivered (DataSampleListElement* sample)
         RepoIdConverter converter(publication_id_);
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered: ")
-          ACE_TEXT("domain %d topic %s publication %s pushed to HISTORY.\n"),
+          ACE_TEXT("domain %d topic %C publication %C pushed to HISTORY.\n"),
           this->domain_id_,
           this->topic_name_,
           std::string(converter).c_str()
@@ -748,7 +761,7 @@ WriteDataContainer::remove_oldest_sample (
       RepoIdConverter converter(publication_id_);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) WriteDataContainer::remove_oldest_sample: ")
-        ACE_TEXT("domain %d topic %s publication %s sample removed from HISTORY.\n"),
+        ACE_TEXT("domain %d topic %C publication %C sample removed from HISTORY.\n"),
         this->domain_id_,
         this->topic_name_,
         std::string(converter).c_str()
@@ -772,6 +785,17 @@ WriteDataContainer::remove_oldest_sample (
       ACE_TEXT("WriteDataContainer::remove_oldest_sample, ")
       ACE_TEXT("The oldest sample is not in any internal list.\n")),
       ::DDS::RETCODE_ERROR);
+  }
+
+  // Signal if there is no pending data.
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+      guard,
+      this->lock_,
+      ::DDS::RETCODE_ERROR);
+
+    if (!pending_data())
+      empty_condition_.broadcast();
   }
 
   if (result == false)
@@ -960,8 +984,8 @@ WriteDataContainer::unregister_all (DataWriterImpl* writer)
 
       if (old_head == 0)
         {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: WriteDataContainer::unregister_all,"
-            "NULL element at head of sending_data_, size %d head %X tail %X \n"),
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: WriteDataContainer::unregister_all,")
+            ACE_TEXT("NULL element at head of sending_data_, size %d head %X tail %X \n"), 
             sending_data_.size_,  sending_data_.head_,  sending_data_.tail_));
           break;
         }
@@ -1146,7 +1170,7 @@ WriteDataContainer::persist_data ()
                   ACE_TEXT("(%P|%t) ERROR: ")
                   ACE_TEXT("WriteDataContainer::persist_data, ")
                   ACE_TEXT("failed to make data durable for ")
-                  ACE_TEXT("(domain, topic, type) = (%d, %s, %s)\n"),
+                  ACE_TEXT("(domain, topic, type) = (%d, %C, %C)\n"),
                   this->domain_id_,
                   this->topic_name_,
                   this->type_name_));
@@ -1165,8 +1189,8 @@ void WriteDataContainer::reschedule_deadline ()
     {
       if (this->watchdog_->reset_timer_interval (iter->second->deadline_timer_id_) == -1)
       {
-        ACE_ERROR ((LM_ERROR, "(%P|%t) WriteDataContainer::reschedule_deadline "
-          "%p\n", "reset_timer_interval"));
+        ACE_ERROR ((LM_ERROR, ACE_TEXT ("(%P|%t) WriteDataContainer::reschedule_deadline %p\n")
+          ACE_TEXT ("reset_timer_interval")));
       }
     }
   }
@@ -1177,12 +1201,20 @@ WriteDataContainer::wait_pending()
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
-  const ACE_Time_Value pending_timeout =
+  ACE_Time_Value pending_timeout =
     TheServiceParticipant->pending_timeout();
+
+  ACE_Time_Value* pTimeout = 0;
+
+  if (pending_timeout == ACE_Time_Value::zero)
+  {
+    pTimeout = &pending_timeout;
+    pending_timeout += ACE_OS::gettimeofday();
+  }
 
   while (pending_data())
   {
-    empty_condition_.wait(&pending_timeout);
+    empty_condition_.wait(pTimeout);
   }
 }
 

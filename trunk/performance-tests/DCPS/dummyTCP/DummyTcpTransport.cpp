@@ -82,7 +82,7 @@ OpenDDS::DCPS::DummyTcpTransport::find_or_create_datalink
 	    if (con->reconnect (on_new_association) == -1)
 	      {
 		ACE_ERROR_RETURN ((LM_ERROR,
-				   "(%P|%t) ERROR: Unable to reconnect to remote %s:%d.\n",
+				   "(%P|%t) ERROR: Unable to reconnect to remote %C:%d.\n",
 				   remote_address.get_host_addr (),
 				   remote_address.get_port_number ()),
 				  0);
@@ -236,7 +236,7 @@ OpenDDS::DCPS::DummyTcpTransport::configure_i(TransportConfiguration* config)
     {
       ACE_ERROR_RETURN((LM_ERROR,
                         "(%P|%t) ERROR: connection checker failed to open : %p\n",
-                        "open"),
+                        ACE_TEXT("open")),
 		       -1);
     }
 
@@ -252,10 +252,10 @@ OpenDDS::DCPS::DummyTcpTransport::configure_i(TransportConfiguration* config)
       DummyTcpConfiguration_rch cfg = this->tcp_config_._retn();
 
       ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: Acceptor failed to open %s:%d: %p\n",
+                        "(%P|%t) ERROR: Acceptor failed to open %C:%d: %p\n",
                         cfg->local_address_.get_host_addr (),
                         cfg->local_address_.get_port_number (),
-                        "open"),
+                        ACE_TEXT("open")),
                        -1);
     }
 
@@ -365,7 +365,7 @@ OpenDDS::DCPS::DummyTcpTransport::connection_info_i
 (TransportInterfaceInfo& local_info) const
 {
   DBG_ENTRY_LVL("DummyTcpTransport","connection_info_i",5);
-  VDBG_LVL ((LM_DEBUG, "(%P|%t)DummyTcpTransport::connection_info_i %s:%d\n",
+  VDBG_LVL ((LM_DEBUG, "(%P|%t)DummyTcpTransport::connection_info_i %C:%d\n",
              this->tcp_config_->local_address_.get_host_addr (),
              this->tcp_config_->local_address_.get_port_number ()), 2);
 

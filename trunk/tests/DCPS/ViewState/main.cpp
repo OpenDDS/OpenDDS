@@ -66,11 +66,11 @@ int init_tranport ()
 
       reader_transport_impl
         = TheTransportFactory->create_transport_impl (SUB_TRAFFIC,
-                                                      "SimpleTcp",
+                                                      ACE_TEXT("SimpleTcp"),
                                                       OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
       OpenDDS::DCPS::TransportConfiguration_rch reader_config
-        = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleTcp");
+        = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("SimpleTcp"));
 
       if (reader_transport_impl->configure(reader_config.in()) != 0)
         {
@@ -82,10 +82,10 @@ int init_tranport ()
 
       writer_transport_impl
         = TheTransportFactory->create_transport_impl (PUB_TRAFFIC,
-                                                      "SimpleTcp",
+                                                      ACE_TEXT("SimpleTcp"),
                                                       OpenDDS::DCPS::DONT_AUTO_CONFIG);
       OpenDDS::DCPS::TransportConfiguration_rch writer_config
-        = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleTcp");
+        = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("SimpleTcp"));
 
       if (writer_transport_impl->configure(writer_config.in()) != 0)
         {
@@ -103,7 +103,7 @@ int wait_for_data (::DDS::Subscriber_ptr sub,
                    int timeout_sec)
 {
   const int factor = 10;
-  ACE_Time_Value small(0,1000000/factor);
+  ACE_Time_Value small_time(0,1000000/factor);
   int timeout_loops = timeout_sec * factor;
 
   ::DDS::DataReaderSeq_var discard = new ::DDS::DataReaderSeq(10);
@@ -117,13 +117,13 @@ int wait_for_data (::DDS::Subscriber_ptr sub,
       if (discard->length () > 0)
         return 1;
 
-      ACE_OS::sleep (small);
+      ACE_OS::sleep (small_time);
     }
   return 0;
 }
 
 /// parse the command line arguments
-int parse_args (int argc, char *argv[])
+int parse_args (int argc, ACE_TCHAR *argv[])
 {
 
   u_long mask =  ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS) ;
@@ -137,7 +137,7 @@ int parse_args (int argc, char *argv[])
     //  -d history.depth            defaults to 1
     //  -z                          verbose transport debug
 
-    if (arg_shifter.cur_arg_strncasecmp("-z") == 0)
+    if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-z")) == 0)
     {
       TURN_ON_VERBOSE_DEBUG;
       arg_shifter.consume_arg();
@@ -162,7 +162,7 @@ void check_read_status(DDS::ReturnCode_t status,
           if (data.length() != expected)
           {
               ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) %s ERROR: expected %d samples but got %d\n"),
+                  ACE_TEXT("(%P|%t) %C ERROR: expected %d samples but got %d\n"),
                   where, expected, data.length() ));
               test_failed = 1;
               throw TestException();
@@ -172,7 +172,7 @@ void check_read_status(DDS::ReturnCode_t status,
       else if (status == ::DDS::RETCODE_NO_DATA)
       {
         ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("(%P|%t) %s ERROR: reader received NO_DATA!\n"),
+          ACE_TEXT("(%P|%t) %C ERROR: reader received NO_DATA!\n"),
           where));
         test_failed = 1;
         throw TestException();
@@ -180,7 +180,7 @@ void check_read_status(DDS::ReturnCode_t status,
       else if (status == ::DDS::RETCODE_PRECONDITION_NOT_MET)
       {
         ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("(%P|%t) %s ERROR: reader received PRECONDITION_NOT_MET!\n"),
+          ACE_TEXT("(%P|%t) %C ERROR: reader received PRECONDITION_NOT_MET!\n"),
           where));
         test_failed = 1;
         throw TestException();
@@ -188,7 +188,7 @@ void check_read_status(DDS::ReturnCode_t status,
       else
       {
         ACE_ERROR((LM_ERROR,
-            ACE_TEXT("(%P|%t) %s ERROR: unexpected status %d!\n"),
+            ACE_TEXT("(%P|%t) %C ERROR: unexpected status %d!\n"),
             where, status ));
         test_failed = 1;
         throw TestException();
@@ -196,7 +196,7 @@ void check_read_status(DDS::ReturnCode_t status,
 }
 
 
-int main (int argc, char *argv[])
+int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
 
 
@@ -640,8 +640,8 @@ int main (int argc, char *argv[])
             || data4[3].count != foo3.count)
           {
             ACE_ERROR ((LM_ERROR,
-              ACE_TEXT("(%P|%t) ERROR: read samples from most recent generation"
-              " failed to provide same data.\n") ));
+              ACE_TEXT("(%P|%t) ERROR: read samples from most recent generation")
+              ACE_TEXT(" failed to provide same data.\n") ));
             test_failed = 1;
           }
 
@@ -674,8 +674,8 @@ int main (int argc, char *argv[])
             || data5[3].count != foo3.count)
           {
             ACE_ERROR ((LM_ERROR,
-              ACE_TEXT("(%P|%t) ERROR: read after read most recent generation samples "
-              "failed to provide same data.\n") ));
+              ACE_TEXT("(%P|%t) ERROR: read after read most recent generation samples ")
+              ACE_TEXT("failed to provide same data.\n") ));
             test_failed = 1;
           }    
 

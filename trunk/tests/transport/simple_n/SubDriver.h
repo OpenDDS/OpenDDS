@@ -14,7 +14,7 @@ class SubDriver
     SubDriver();
     virtual ~SubDriver();
 
-    void run(int& argc, char* argv[]);
+    void run(int& argc, ACE_TCHAR* argv[]);
 
 
   private:
@@ -29,23 +29,23 @@ class SubDriver
       ALL_TRAFFIC
     };
 
-    void parse_args(int& argc, char* argv[]);
+    void parse_args(int& argc, ACE_TCHAR* argv[]);
     void init();
     void run();
 
-    int parse_pub_arg(const std::string& arg);
-    int parse_sub_arg(const std::string& arg);
+    int parse_pub_arg(const ACE_TString& arg);
+    int parse_sub_arg(const ACE_TString& arg);
 
 
     SimpleSubscriber subscriber_;
 
     OpenDDS::DCPS::RepoId pub_id_;
     ACE_INET_Addr     pub_addr_;
-    std::string       pub_addr_str_;
+    ACE_TString       pub_addr_str_;
 
     OpenDDS::DCPS::RepoId sub_id_;
     ACE_INET_Addr     sub_addr_;
-    std::string       sub_addr_str_;
+    ACE_TString       sub_addr_str_;
 
     unsigned num_msgs_;
 };

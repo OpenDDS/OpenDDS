@@ -51,7 +51,7 @@ public:
    * @return true if the DDS system was intialized correctly,
    *         false otherwise.
    */
-  bool init_DDS(int& argc, char *argv[]);
+  bool init_DDS(int& argc, ACE_TCHAR *argv[]);
   /**
    * Shutdown the DDS System
    */

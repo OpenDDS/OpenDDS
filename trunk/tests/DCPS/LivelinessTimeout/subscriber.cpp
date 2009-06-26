@@ -35,11 +35,11 @@ static int init_reader_tranport (OpenDDS::DCPS::TransportImpl_rch& reader_transp
 
   reader_transport_impl =
       TheTransportFactory->create_transport_impl (SUB_TRAFFIC,
-                                                  "SimpleTcp",
+                                                  ACE_TEXT("SimpleTcp"),
                                                   OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   OpenDDS::DCPS::TransportConfiguration_rch reader_config
-    = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleTcp");
+    = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("SimpleTcp"));
 
   if (reader_transport_impl->configure(reader_config.in()) != 0)
     {
@@ -54,7 +54,7 @@ static int init_reader_tranport (OpenDDS::DCPS::TransportImpl_rch& reader_transp
 
 
 /// parse the command line arguments
-int parse_args (int argc, char *argv[])
+int parse_args (int argc, ACE_TCHAR *argv[])
 {
   u_long mask =  ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS) ;
   ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS) ;
@@ -68,24 +68,24 @@ int parse_args (int argc, char *argv[])
     //  -x test duration in sec     defaults to 40
     //  -z                          verbose transport debug
 
-    const char *currentArg = 0;
+    const ACE_TCHAR *currentArg = 0;
 
-    if ((currentArg = arg_shifter.get_the_parameter("-l")) != 0)
+    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-l"))) != 0)
     {
       LEASE_DURATION_SEC = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-t")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-t"))) != 0)
     {
       threshold_liveliness_lost = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-x")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-x"))) != 0)
     {
       test_duration = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if (arg_shifter.cur_arg_strncasecmp("-z") == 0)
+    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-z")) == 0)
     {
       TURN_ON_VERBOSE_DEBUG;
       arg_shifter.consume_arg();
@@ -100,7 +100,7 @@ int parse_args (int argc, char *argv[])
 }
 
 
-int main (int argc, char *argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
 
   int status = 0;
@@ -198,16 +198,16 @@ int main (int argc, char *argv[])
           switch (attach_status)
             {
               case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-                status_str = "ATTACH_BAD_TRANSPORT";
+                status_str = ACE_TEXT("ATTACH_BAD_TRANSPORT");
                 break;
               case OpenDDS::DCPS::ATTACH_ERROR:
-                status_str = "ATTACH_ERROR";
+                status_str = ACE_TEXT("ATTACH_ERROR");
                 break;
               case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-                status_str = "ATTACH_INCOMPATIBLE_QOS";
+                status_str = ACE_TEXT("ATTACH_INCOMPATIBLE_QOS");
                 break;
               default:
-                status_str = "Unknown Status";
+                status_str = ACE_TEXT("Unknown Status");
                 break;
             }
 

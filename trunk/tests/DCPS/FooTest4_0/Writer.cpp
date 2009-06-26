@@ -14,7 +14,7 @@
 #include "dds/DCPS/PublisherImpl.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
-static const char * writer_address_str = "localhost:29876";
+static const ACE_TCHAR* writer_address_str = ACE_TEXT("localhost:29876");
 
 Writer::Writer(::DDS::DomainParticipant_ptr dp,
                ::DDS::Topic_ptr topic,
@@ -334,11 +334,11 @@ int Writer::init_transport ()
 
   writer_transport_impl
     = TheTransportFactory->create_transport_impl (PUB_TRAFFIC,
-                                                  "SimpleTcp",
+                                                  ACE_TEXT("SimpleTcp"),
                                                   OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   OpenDDS::DCPS::TransportConfiguration_rch writer_config
-    = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleTcp");
+    = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("SimpleTcp"));
 
   OpenDDS::DCPS::SimpleTcpConfiguration* writer_tcp_config
     = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (writer_config.in ());

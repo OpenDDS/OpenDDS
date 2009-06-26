@@ -14,8 +14,7 @@
 #include "tao/Exception.h"
 #include "dds/DCPS/debug.h"
 
-int
-main( int argc, char** argv)
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   OpenDDS::DCPS::set_DCPS_debug_level( 0);
   int status = 0;
@@ -29,7 +28,7 @@ main( int argc, char** argv)
 
   } catch (const std::exception& ex) {
     ACE_ERROR ((LM_ERROR,
-                ACE_TEXT("%T (%P|%t) ABORT: %s exception caught in main().\n"), ex.what()));
+                ACE_TEXT("%T (%P|%t) ABORT: %C exception caught in main().\n"), ex.what()));
     status = -2;
 
   } catch(...) {

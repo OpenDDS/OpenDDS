@@ -115,7 +115,7 @@ class Options  {
     typedef std::vector< PublicationProfile*> ProfileContainer;
 
     /// Default constructor.
-    Options( int argc, char** argv, char** envp = 0);
+    Options(int argc, ACE_TCHAR** argv, char** envp = 0);
 
     /// Virtual destructor.
     virtual ~Options();
@@ -161,7 +161,7 @@ class Options  {
 
   private:
     /// Configure scenario information from a file.
-    void configureScenarios( const char* filename);
+    void configureScenarios(const ACE_TCHAR* filename);
 
     /// Test verbosity.
     bool verbose_;

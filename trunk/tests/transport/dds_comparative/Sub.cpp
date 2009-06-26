@@ -44,7 +44,7 @@ Sub::set_local_subscriber(OpenDDS::DCPS::RepoId sub_id)
 void
 Sub::add_remote_publisher(OpenDDS::DCPS::RepoId    pub_id,
                           const ACE_INET_Addr& pub_addr,
-                          const std::string&   pub_addr_str)
+                          const ACE_TString&   pub_addr_str)
 {
   this->pubs_.push_back(PubInfo(pub_id,pub_addr,pub_addr_str));
 }
@@ -108,16 +108,16 @@ Sub::init_attach_transport(unsigned impl_id)
       switch (status)
         {
           case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-            ACE_ERROR((LM_ERROR,"(%P|%t) %s ATTACH_BAD_TRANSPORT\n",emsg));
+            ACE_ERROR((LM_ERROR,"(%P|%t) %C ATTACH_BAD_TRANSPORT\n",emsg));
             throw TestException();
           case OpenDDS::DCPS::ATTACH_ERROR:
-            ACE_ERROR((LM_ERROR,"(%P|%t) %s ATTACH_ERROR\n",emsg));
+            ACE_ERROR((LM_ERROR,"(%P|%t) %C ATTACH_ERROR\n",emsg));
             throw TestException();
           case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-            ACE_ERROR((LM_ERROR,"(%P|%t) %s ATTACH_INCOMPATIBLE_QOS\n",emsg));
+            ACE_ERROR((LM_ERROR,"(%P|%t) %C ATTACH_INCOMPATIBLE_QOS\n",emsg));
             throw TestException();
           default:
-            ACE_ERROR((LM_ERROR,"(%P|%t) %s <!UNKNOWN!>\n",emsg));
+            ACE_ERROR((LM_ERROR,"(%P|%t) %C <!UNKNOWN!>\n",emsg));
             throw TestException();
         }
     }

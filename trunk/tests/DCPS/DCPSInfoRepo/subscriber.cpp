@@ -3,25 +3,25 @@
 #include  "dds/DCPS/Service_Participant.h"
 
 #include "ace/Arg_Shifter.h"
+#include "ace/Argv_Type_Converter.h"
 
-
-const char *ior = "file://dcps_ir.ior";
+const ACE_TCHAR *ior = ACE_TEXT("file://dcps_ir.ior");
 
 int
-parse_args (int argc, char *argv[])
+parse_args (int argc, ACE_TCHAR *argv[])
 {
   ACE_Arg_Shifter arg_shifter (argc, argv);
 
   while (arg_shifter.is_anything_left ())
   {
-    const char *currentArg = 0;
+    const ACE_TCHAR *currentArg = 0;
 
-    if ((currentArg = arg_shifter.get_the_parameter("-k")) != 0)
+    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-k"))) != 0)
     {
       ior = currentArg;
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-?")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-?"))) != 0)
     {
       ACE_ERROR_RETURN ((LM_ERROR,
                           "usage:  %s "
@@ -40,13 +40,15 @@ parse_args (int argc, char *argv[])
   return 0;
 }
 
-int
-main (int argc, char *argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   try
     {
+      ACE_Argv_Type_Converter converter (argc, argv);
+
       CORBA::ORB_var orb =
-        CORBA::ORB_init (argc, argv, "");
+        CORBA::ORB_init (converter.get_argc(),
+        converter.get_ASCII_argv(), "");
 
       if (parse_args (argc, argv) != 0)
         return 1;
@@ -63,7 +65,7 @@ main (int argc, char *argv[])
       mgr->activate();
 
       CORBA::Object_var tmp =
-        orb->string_to_object (ior);
+        orb->string_to_object (ACE_TEXT_ALWAYS_CHAR(ior));
 
       OpenDDS::DCPS::DCPSInfo_var info =
         OpenDDS::DCPS::DCPSInfo::_narrow (tmp.in ());

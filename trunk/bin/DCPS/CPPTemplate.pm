@@ -217,13 +217,12 @@ DDS::ReturnCode_t
   else if (handle != ::DDS::HANDLE_NIL && handle != registered_handle)
   {
     ACE_ERROR_RETURN ((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ")
-                       ACE_TEXT("<%TYPE%>DataWriterImpl::unregister, ")
-                       ACE_TEXT("The given handle=%X is different from ")
-                       ACE_TEXT("registered handle=%X.\n"),
-                       handle,
-                       registered_handle),
-                      ::DDS::RETCODE_ERROR);
+                        ACE_TEXT("(%P|%t) ")
+                        ACE_TEXT("<%TYPE%>DataWriterImpl::unregister, ")
+                        ACE_TEXT("The given handle=%X is different from ")
+                        ACE_TEXT("registered handle=%X.\n"),
+                        handle, registered_handle),
+                        ::DDS::RETCODE_ERROR);
   }
 
   // DataWriterImpl::unregister will call back to inform the
@@ -1855,7 +1854,7 @@ DDS::ReturnCode_t
   if (received_data.length() != info_seq.length())
   {
     ACE_DEBUG((LM_DEBUG,
-               "<%TYPE%>DataReaderImpl::%s "
+               "<%TYPE%>DataReaderImpl::%C "
                "PRECONDITION_NOT_MET sample and info input "
                "sequences do not match.\n",
                method_name ));
@@ -1866,7 +1865,7 @@ DDS::ReturnCode_t
   if ((received_data.maximum() > 0) && (received_data.release() == false))
   {
     ACE_DEBUG((LM_DEBUG,
-               "<%TYPE%>DataReaderImpl::%s "
+               "<%TYPE%>DataReaderImpl::%C "
                "PRECONDITION_NOT_MET mismatch of "
                "maximum %d and owns %d\n",
                method_name,
@@ -1897,7 +1896,7 @@ DDS::ReturnCode_t
     {
       //SPEC ref v1.2 7.1.2.5.3.8 #5c
       ACE_DEBUG((LM_DEBUG,
-                 "<%TYPE%>DataReaderImpl::%s "
+                 "<%TYPE%>DataReaderImpl::%C "
                  "PRECONDITION_NOT_MET max_samples %d > maximum %d\n",
                  method_name,
                  max_samples,

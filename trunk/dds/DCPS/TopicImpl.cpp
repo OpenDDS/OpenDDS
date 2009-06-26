@@ -79,8 +79,7 @@ namespace OpenDDS
                     if (status == 0)
                     {
                       ACE_ERROR_RETURN ((LM_ERROR,
-                        ACE_TEXT("(%P|%t) "
-                        "TopicImpl::set_qos, ")
+                        ACE_TEXT("(%P|%t) TopicImpl::set_qos, ")
                         ACE_TEXT("failed on compatiblity check. \n")),
                         ::DDS::RETCODE_ERROR);
                     }

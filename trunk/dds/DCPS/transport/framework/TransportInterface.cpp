@@ -182,7 +182,7 @@ OpenDDS::DCPS::TransportInterface::add_associations
               RepoIdConverter remote_converter(remote_id);
               ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) TransportInterface::add_associations: ")
-                ACE_TEXT("publication %s to subscription %s.\n%s\n"),
+                ACE_TEXT("publication %C to subscription %C.\n%s\n"),
                 std::string(local_converter).c_str(),
                 std::string(remote_converter).c_str(),
                 ebuffer
@@ -208,7 +208,7 @@ OpenDDS::DCPS::TransportInterface::add_associations
               RepoIdConverter remote_converter(remote_id);
               ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) TransportInterface::add_associations: ")
-                ACE_TEXT("subscription %s to publication %s.\n%s\n"),
+                ACE_TEXT("subscription %C to publication %C.\n%s\n"),
                 std::string(local_converter).c_str(),
                 std::string(remote_converter).c_str(),
                 ebuffer
@@ -232,7 +232,7 @@ OpenDDS::DCPS::TransportInterface::add_associations
             ACE_ERROR_RETURN((LM_ERROR,
               ACE_TEXT("(%P|%t) ERROR: Failed to reserve a DataLink with the ")
               ACE_TEXT("TransportImpl for association from local ")
-              ACE_TEXT("[%s %s] to remote [%s %s].\n"),
+              ACE_TEXT("[%C %C] to remote [%C %C].\n"),
               local_id_str,
               std::string(local_converter).c_str(),
               remote_id_str,
@@ -268,7 +268,7 @@ OpenDDS::DCPS::TransportInterface::add_associations
                 RepoIdConverter converter(remote_id);
                 ACE_ERROR((LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: Failed to insert DataLink into remote_map_ ")
-                  ACE_TEXT("(DataLinkSetMap) for remote [%s %s].\n"),
+                  ACE_TEXT("(DataLinkSetMap) for remote [%C %C].\n"),
                   remote_id_str,
                   std::string(converter).c_str()
                 ));
@@ -283,7 +283,7 @@ OpenDDS::DCPS::TransportInterface::add_associations
             RepoIdConverter converter(local_id);
             ACE_ERROR((LM_ERROR,
               ACE_TEXT("(%P|%t) ERROR: Failed to insert DataLink into ")
-              ACE_TEXT("local_map_ for local [%s %s].\n"),
+              ACE_TEXT("local_map_ for local [%C %C].\n"),
               local_id_str,
               std::string(converter).c_str()
             ));

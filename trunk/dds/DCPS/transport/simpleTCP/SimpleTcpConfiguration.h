@@ -8,7 +8,6 @@
 
 #include "dds/DCPS/transport/framework/TransportConfiguration.h"
 #include "ace/INET_Addr.h"
-#include <string>
 
 
 namespace OpenDDS
@@ -34,7 +33,7 @@ namespace OpenDDS
         /// This string is either from configuration file or default
         /// to hostname:port. The hostname is fully qualified hostname
         /// and the port is randomly picked by os.
-        std::string local_address_str_;
+        ACE_TString local_address_str_;
 
         bool enable_nagle_algorithm_;
 

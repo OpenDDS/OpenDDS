@@ -65,7 +65,7 @@ parse_args (int argc, ACE_TCHAR *argv[])
   return 0;
 }
 
-int main (int argc, ACE_TCHAR *argv[]) {
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
   try
     {
       DDS::DomainParticipantFactory_var dpf =
@@ -154,8 +154,8 @@ int main (int argc, ACE_TCHAR *argv[]) {
 
       writer->start ();
       while ( !writer->is_finished()) {
-        ACE_Time_Value small(0,250000);
-        ACE_OS::sleep (small);
+        ACE_Time_Value small_time(0,250000);
+        ACE_OS::sleep (small_time);
       }
 
       // Cleanup

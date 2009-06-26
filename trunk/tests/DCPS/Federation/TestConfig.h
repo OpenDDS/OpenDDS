@@ -1,6 +1,7 @@
 #ifndef TESTCONFIG_H
 #define TESTCONFIG_H
 
+#include "ace/ace_wchar.h"
 #include <string>
 
 class TestConfig {
@@ -15,7 +16,7 @@ class TestConfig {
      *   -v                     - verbose operation
      *   -Samples <number>      - number of samples to emit into the subsystems
      */
-    TestConfig( int argc, char** argv, char** envp);
+    TestConfig( int argc, ACE_TCHAR** argv, char** envp);
 
     /// Virtual destructor.
     virtual ~TestConfig();

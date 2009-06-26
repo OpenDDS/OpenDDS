@@ -5,7 +5,7 @@
 #include "tao/CDR.h"
 
 // this test tests the -Gdcps generated code for type XyZ::Foo from idl_test1_lib.
-int main (int argc, char *argv[])
+int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
   int failed = false;
   bool dump_buffer = false;
@@ -276,8 +276,8 @@ int main (int argc, char *argv[])
     }
 
 
-  char ebuffer[512] ; ebuffer[0] = '\0' ;
-  char obuffer[512] ; obuffer[0] = '\0' ;
+  ACE_TCHAR ebuffer[512] ; ebuffer[0] = ACE_TEXT('\0') ;
+  ACE_TCHAR obuffer[512] ; obuffer[0] = ACE_TEXT('\0') ;
 
   // test serializing
 
@@ -396,7 +396,7 @@ int main (int argc, char *argv[])
   else if (0 != strcmp(ss_foo.theString.in (), my_foo.theString.in ()))
     {
       ACE_ERROR((LM_ERROR, 
-        ACE_TEXT("Failed to serialize theString \"%s\" => \"%s\"\n"),
+        ACE_TEXT("Failed to serialize theString \"%C\" => \"%C\"\n"),
         my_foo.theString.in (), ss_foo.theString.in ()));
       failed = true;
     }

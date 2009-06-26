@@ -228,7 +228,7 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
       }
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderListener::on_data_available() - ")
-        ACE_TEXT("statistics for %d writers at sample %d:\n%s"),
+        ACE_TEXT("statistics for %d writers at sample %d:\n%C"),
         statistics.length(),
         this->totalMessages_,
         buffer.str().c_str()

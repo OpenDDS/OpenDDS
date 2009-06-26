@@ -31,21 +31,20 @@ OpenDDS::DCPS::SimpleMcastConfiguration::load (const TransportIdType& id,
   // what to do.
   this->TransportConfiguration::load (id, cf);
 
-  ACE_TCHAR section [50];
-  ACE_OS::sprintf (section, ACE_TEXT("%s%d")
-                   , ACE_TEXT_ALWAYS_CHAR(TRANSPORT_SECTION_NAME_PREFIX), id);
+  ACE_TString sect_name = id_to_section_name(id);
   const ACE_Configuration_Section_Key &root = cf.root_section ();
   ACE_Configuration_Section_Key trans_sect;
-  if (cf.open_section (root, section, 0, trans_sect) != 0)
+  if (cf.open_section (root, sect_name.c_str(), 0, trans_sect) != 0)
     ACE_ERROR_RETURN ((LM_ERROR,
-                       ACE_TEXT ("Failed to open section: section %s\n"), section),
+                       ACE_TEXT ("Failed to open section: %s\n"),
+                       sect_name.c_str()),
                        -1);
 
   ACE_TString local_address;
   GET_CONFIG_STRING_VALUE (cf, trans_sect, ACE_TEXT("local_address"), local_address);
   if (local_address != ACE_TEXT(""))
   {
-    this->local_address_str_ = local_address.c_str ();
+    this->local_address_str_ = local_address;
     this->local_address_.set (local_address_str_.c_str ());
   }
 
@@ -53,7 +52,7 @@ OpenDDS::DCPS::SimpleMcastConfiguration::load (const TransportIdType& id,
   GET_CONFIG_STRING_VALUE (cf, trans_sect, ACE_TEXT("multicast_group_address"), multicast_group_address);
   if (multicast_group_address != ACE_TEXT(""))
   {
-    this->multicast_group_address_str_ = multicast_group_address.c_str();
+    this->multicast_group_address_str_ = multicast_group_address;
     this->multicast_group_address_.set (multicast_group_address_str_.c_str ());
   }
 

@@ -7,6 +7,8 @@
 #include "ThreadSynchStrategy.h"
 #include "EntryExit.h"
 
+#include <sstream>
+
 #if !defined (__ACE_INLINE__)
 # include "TransportConfiguration.inl"
 #endif /* ! __ACE_INLINE__ */
@@ -18,19 +20,27 @@ OpenDDS::DCPS::TransportConfiguration::~TransportConfiguration()
   delete this->send_thread_strategy_;
 }
 
+
+ACE_TString
+OpenDDS::DCPS::TransportConfiguration::id_to_section_name(const TransportIdType& id)
+{
+  std::basic_ostringstream<ACE_TCHAR> oss;
+  oss << TRANSPORT_SECTION_NAME_PREFIX << id;
+  return oss.str().c_str();
+}
+
+
 int
 OpenDDS::DCPS::TransportConfiguration::load (const TransportIdType& id
                                              , ACE_Configuration_Heap& cf)
 {
-  ACE_TCHAR section [50];
-  ACE_OS::sprintf (section, ACE_TEXT("%s%u")
-                   , ACE_TEXT_ALWAYS_CHAR(TRANSPORT_SECTION_NAME_PREFIX), id);
+  ACE_TString sect_name = id_to_section_name(id);
   const ACE_Configuration_Section_Key &root = cf.root_section ();
   ACE_Configuration_Section_Key sect;
-  if (cf.open_section (root, section, 0, sect) != 0)
+  if (cf.open_section (root, sect_name.c_str(), 0, sect) != 0)
     ACE_ERROR_RETURN ((LM_ERROR,
-                       ACE_TEXT ("Failed to open section: %s\n"), section),
-                       -1);
+                       ACE_TEXT ("Failed to open section: %s\n"),
+                       sect_name.c_str()), -1);
   GET_CONFIG_VALUE (cf, sect, ACE_TEXT("swap_bytes"), this->swap_bytes_, bool)
   GET_CONFIG_VALUE (cf, sect, ACE_TEXT("queue_messages_per_pool"), this->queue_messages_per_pool_, size_t)
   GET_CONFIG_VALUE (cf, sect, ACE_TEXT("queue_initial_pools"), this->queue_initial_pools_, size_t)

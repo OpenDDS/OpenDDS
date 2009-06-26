@@ -31,7 +31,8 @@ using namespace Messenger;
 
 OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
 
-int main (int argc, char *argv[]) {
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+{
   try
     {
       DDS::DomainParticipantFactory_var dpf =
@@ -140,8 +141,8 @@ int main (int argc, char *argv[]) {
         writer->start ();
         while ( !writer->is_finished())
         {
-          ACE_Time_Value small(30,0);
-          ACE_OS::sleep (small);
+          ACE_Time_Value small_time(30,0);
+          ACE_OS::sleep (small_time);
         }
 
         // Cleanup

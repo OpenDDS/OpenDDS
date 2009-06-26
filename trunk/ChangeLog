@@ -1,3 +1,11 @@
+Fri Jun 26 22:28:11 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        Merged the wchar branch back to trunk.  That branch is now read-only.
+        This brings OpenDDS into compliance with ACE uses_wchar=1 builds.  The
+        implications of this are described in the file docs/design/wchar.txt
+        along with coding guidelines to keep it working.
+        The ChangeLog for this branch can be found at history/ChangeLog-wchar.
+
 Thu Apr 16 17:52:24 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * examples/DCPS/DistributedContent/AbstractionLayer.cpp:

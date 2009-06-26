@@ -38,8 +38,7 @@ char synch_fname[] = "monitor1_done";
 OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
 int num_messages = 10;
 
-int
-parse_args (int argc, char *argv[])
+int parse_args (int argc, ACE_TCHAR *argv[])
 {
   ACE_Get_Opt get_opts (argc, argv, "n:");
   int c;
@@ -65,7 +64,7 @@ parse_args (int argc, char *argv[])
   return 0;
 }
 
-int main (int argc, char *argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   ACE_DEBUG ((LM_DEBUG, "(%P|%t) subscriber main\n"));
   try
@@ -216,7 +215,7 @@ int main (int argc, char *argv[])
           ACE_LIB_TEXT("(%P|%t)waiting monitor1 done ...\n")));
         ACE_OS::sleep (1);
         ++i;
-	      fp = ACE_OS::fopen (synch_fname, ACE_LIB_TEXT("r"));
+        fp = ACE_OS::fopen (synch_fname, ACE_LIB_TEXT("r"));
       }
       if (fp != 0)
         ACE_OS::fclose (fp);

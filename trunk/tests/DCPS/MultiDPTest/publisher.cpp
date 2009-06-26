@@ -32,10 +32,10 @@ OpenDDS::DCPS::TransportImpl_rch writer_impl;
 ::DDS::DataWriter_var datawriter[2];
 Writer* writers[2];
 int writer_address_given = 0;
-ACE_TString writer_address_str = "localhost:0";
+ACE_TString writer_address_str = ACE_TEXT("localhost:0");
 
 /// parse the command line arguments
-int parse_args (int argc, char *argv[])
+int parse_args (int argc, ACE_TCHAR *argv[])
 {
   u_long mask =  ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS) ;
   ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS) ;
@@ -51,25 +51,25 @@ int parse_args (int argc, char *argv[])
     //  -z length of float sequence in data type   defaults to 10
     //  -v                          verbose transport debug
 
-    const char *currentArg = 0;
+    const ACE_TCHAR *currentArg = 0;
 
-    if ((currentArg = arg_shifter.get_the_parameter("-m")) != 0)
+    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-m"))) != 0)
     {
       num_instances_per_writer = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-i")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-i"))) != 0)
     {
       num_samples_per_instance = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-p")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-p"))) != 0)
     {
       writer_address_str = currentArg;
       writer_address_given = 1;
       arg_shifter.consume_arg ();
     }
-   else if (arg_shifter.cur_arg_strncasecmp("-v") == 0)
+   else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-v")) == 0)
     {
       TURN_ON_VERBOSE_DEBUG;
       arg_shifter.consume_arg();
@@ -135,11 +135,11 @@ void init ()
 
   writer_impl
     = TheTransportFactory->create_transport_impl (PUB_TRAFFIC_TCP,
-                                                  "SimpleTcp",
+                                                  ACE_TEXT("SimpleTcp"),
                                                   OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   OpenDDS::DCPS::TransportConfiguration_rch writer_config
-    = TheTransportFactory->create_configuration (PUB_TRAFFIC_TCP, "SimpleTcp");
+    = TheTransportFactory->create_configuration (PUB_TRAFFIC_TCP, ACE_TEXT("SimpleTcp"));
 
   OpenDDS::DCPS::SimpleTcpConfiguration* writer_tcp_config
     = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
@@ -194,16 +194,16 @@ void init ()
       switch (attach_status)
         {
           case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-            status_str = "ATTACH_BAD_TRANSPORT";
+            status_str = ACE_TEXT("ATTACH_BAD_TRANSPORT");
             break;
           case OpenDDS::DCPS::ATTACH_ERROR:
-            status_str = "ATTACH_ERROR";
+            status_str = ACE_TEXT("ATTACH_ERROR");
             break;
           case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-            status_str = "ATTACH_INCOMPATIBLE_QOS";
+            status_str = ACE_TEXT("ATTACH_INCOMPATIBLE_QOS");
             break;
           default:
-            status_str = "Unknown Status";
+            status_str = ACE_TEXT("Unknown Status");
             break;
         }
 
@@ -259,7 +259,7 @@ void shutdown ()
 }
 
 
-int main (int argc, char *argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   int status = 0;
 
@@ -287,8 +287,8 @@ int main (int argc, char *argv[])
       FILE* readers_ready = 0;
       do
         {
-          ACE_Time_Value small(0,250000);
-          ACE_OS::sleep (small);
+          ACE_Time_Value small_time(0,250000);
+          ACE_OS::sleep (small_time);
           readers_ready = ACE_OS::fopen (sub_ready_filename.c_str (), ACE_LIB_TEXT("r"));
         } while (0 == readers_ready);
 
@@ -339,8 +339,8 @@ int main (int argc, char *argv[])
       FILE* readers_completed = 0;
       do
         {
-          ACE_Time_Value small(0,250000);
-          ACE_OS::sleep (small);
+          ACE_Time_Value small_time(0,250000);
+          ACE_OS::sleep (small_time);
           readers_completed = ACE_OS::fopen (sub_finished_filename.c_str (), ACE_LIB_TEXT("r"));
         } while (0 == readers_completed);
 

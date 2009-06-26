@@ -23,14 +23,14 @@ const char* TEST_TYPE_NAME     = "foo-type";
 
 
 int
-parse_args (int argc, char *argv[])
+parse_args (int argc, ACE_TCHAR *argv[])
 {
 
   ACE_Arg_Shifter arg_shifter (argc, argv);
 
   while (arg_shifter.is_anything_left ())
     {
-      if (arg_shifter.cur_arg_strncasecmp("-?") == 0)
+      if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-?")) == 0)
         {
           ACE_ERROR_RETURN ((LM_ERROR,
                             "usage:  %s "
@@ -51,8 +51,7 @@ parse_args (int argc, char *argv[])
 
 
 
-int
-main (int argc, char *argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   if (parse_args (argc, argv) != 0)
     {

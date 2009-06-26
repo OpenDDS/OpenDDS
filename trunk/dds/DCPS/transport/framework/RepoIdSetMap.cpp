@@ -32,7 +32,7 @@ OpenDDS::DCPS::RepoIdSetMap::insert(RepoId key, RepoId value)
       ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: RepoIdSetMap::insert: ")
         ACE_TEXT("failed to find_or_create RepoIdSet ")
-        ACE_TEXT("for RepoId %s.\n"),
+        ACE_TEXT("for RepoId %C.\n"),
         std::string(converter).c_str()
       ),-1);
     }
@@ -45,8 +45,8 @@ OpenDDS::DCPS::RepoIdSetMap::insert(RepoId key, RepoId value)
       RepoIdConverter key_converter(key);
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: RepoIdSetMap::insert: ")
-        ACE_TEXT("failed to insert RepoId %s ")
-        ACE_TEXT("into RepoIdSet for RepoId %s.\n"),
+        ACE_TEXT("failed to insert RepoId %C ")
+        ACE_TEXT("into RepoIdSet for RepoId %C.\n"),
         std::string(value_converter).c_str(),
         std::string(key_converter).c_str()
       ));
@@ -70,7 +70,7 @@ OpenDDS::DCPS::RepoIdSetMap::insert(RepoId key, RepoId value)
           ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: RepoIdSetMap::insert: ")
             ACE_TEXT("failed to unbind (undo create) an empty ")
-            ACE_TEXT("RepoIdSet for RepoId %s.\n"),
+            ACE_TEXT("RepoIdSet for RepoId %C.\n"),
             std::string(converter).c_str()
           ));
         }
@@ -96,7 +96,7 @@ OpenDDS::DCPS::RepoIdSetMap::remove(RepoId key,RepoId value)
       RepoIdConverter converter(key);
       ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: RepoIdSetMap::remove: ")
-        ACE_TEXT("unable to locate RepoIdSet for key %s.\n"),
+        ACE_TEXT("unable to locate RepoIdSet for key %C.\n"),
         std::string(converter).c_str()
       ),-1);
     }
@@ -111,8 +111,8 @@ OpenDDS::DCPS::RepoIdSetMap::remove(RepoId key,RepoId value)
       RepoIdConverter value_converter(value);
       ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: RepoIdSetMap::remove: ")
-        ACE_TEXT("RepoIdSet for key %s does not contain ")
-        ACE_TEXT("value %s.\n"),
+        ACE_TEXT("RepoIdSet for key %C does not contain ")
+        ACE_TEXT("value %C.\n"),
         std::string(key_converter).c_str(),
         std::string(value_converter).c_str()
       ),-1);
@@ -135,7 +135,7 @@ OpenDDS::DCPS::RepoIdSetMap::remove_set(RepoId key)
         RepoIdConverter converter(key);
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) RepeIdSetMap::remove_set: ")
-          ACE_TEXT("RepoId %s not found in map.\n"),
+          ACE_TEXT("RepoId %C not found in map.\n"),
           std::string(converter).c_str()
         ));
       }
@@ -158,7 +158,7 @@ OpenDDS::DCPS::RepoIdSetMap::release_publisher(RepoId subscriber_id,
       RepoIdConverter converter(subscriber_id);
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: RepoIdSetMap::release_publisher: ")
-        ACE_TEXT("subscriber_id %s not found in map.\n"),
+        ACE_TEXT("subscriber_id %C not found in map.\n"),
         std::string(converter).c_str()
       ));
       // Return 1 to indicate that the subscriber_id is no longer associated
@@ -183,7 +183,7 @@ OpenDDS::DCPS::RepoIdSetMap::release_publisher(RepoId subscriber_id,
           ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: RepoIdSetMap::release_publisher: ")
             ACE_TEXT("failed to remove an empty ")
-            ACE_TEXT("ReceiveListenerSet for publisher_id %s.\n"),
+            ACE_TEXT("ReceiveListenerSet for publisher_id %C.\n"),
             std::string(converter).c_str()
           ));
         }
@@ -339,7 +339,7 @@ OpenDDS::DCPS::RepoIdSetMap::dump ()
       std::stringstream buffer;
       buffer << "key  " << itr->first << " - value " << it->first; 
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t)   %s \n"),
+        ACE_TEXT("(%P|%t)   %C \n"),
         buffer.str().c_str()));
     }
   }

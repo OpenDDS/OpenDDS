@@ -205,7 +205,7 @@ DataWriterImpl::add_associations ( ::OpenDDS::DCPS::RepoId yourId,
     RepoIdConverter reader_converter(readers[0].readerId);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataWriterImpl::add_associations - ")
-      ACE_TEXT("bit %d local %s remote %s num remotes %d \n"),
+      ACE_TEXT("bit %d local %C remote %C num remotes %d \n"),
       is_bit_,
       std::string(writer_converter).c_str(),
       std::string(reader_converter).c_str(),
@@ -239,7 +239,7 @@ DataWriterImpl::add_associations ( ::OpenDDS::DCPS::RepoId yourId,
         RepoIdConverter converter(readers[i].readerId);
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::add_associations: ")
-          ACE_TEXT("failed to mark %s as pending.\n"),
+          ACE_TEXT("failed to mark %C as pending.\n"),
           std::string(converter).c_str()
         ));
 
@@ -247,7 +247,7 @@ DataWriterImpl::add_associations ( ::OpenDDS::DCPS::RepoId yourId,
         RepoIdConverter converter(readers[i].readerId);
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataWriterImpl::add_associations: ")
-          ACE_TEXT("marked %s as pending.\n"),
+          ACE_TEXT("marked %C as pending.\n"),
           std::string(converter).c_str()
         ));
       }
@@ -280,7 +280,7 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
     RepoIdConverter reader_converter(remote_associations[0].remote_id_);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataWriterImpl::fully_associated - ")
-      ACE_TEXT("bit %d local %s remote %s num remotes %d \n"),
+      ACE_TEXT("bit %d local %C remote %C num remotes %d \n"),
       is_bit_,
       std::string(writer_converter).c_str(),
       std::string(reader_converter).c_str(),
@@ -305,7 +305,7 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
         RepoIdConverter converter(remote_associations[i].remote_id_);
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataWriterImpl::fully_associated: ")
-          ACE_TEXT("reader %s is not in pending list ")
+          ACE_TEXT("reader %C is not in pending list ")
           ACE_TEXT("because remove_association is already called.\n"),
           std::string(converter).c_str()
         ));
@@ -323,7 +323,7 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
         RepoIdConverter converter(remote_associations[i].remote_id_);
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::fully_associated: ")
-          ACE_TEXT("insert %s from pending failed.\n"),
+          ACE_TEXT("insert %C from pending failed.\n"),
           std::string(converter).c_str()
         ));
       }
@@ -359,7 +359,7 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
           RepoIdConverter converter(rd_ids[i]);
           ACE_DEBUG((LM_WARNING,
             ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::fully_associated: ")
-            ACE_TEXT("id_to_handle_map_%s = 0x%x failed.\n"),
+            ACE_TEXT("id_to_handle_map_%C = 0x%x failed.\n"),
             std::string(converter).c_str(),
             handles[i]
           ));
@@ -369,7 +369,7 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
           RepoIdConverter converter(rd_ids[i]);
           ACE_DEBUG((LM_WARNING,
             ACE_TEXT("(%P|%t) DataWriterImpl::fully_associated: ")
-            ACE_TEXT("id_to_handle_map_%s = 0x%x.\n"),
+            ACE_TEXT("id_to_handle_map_%C = 0x%x.\n"),
             std::string(converter).c_str(),
             handles[i]
           ));
@@ -431,7 +431,7 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
     RepoIdConverter reader_converter(readers[0]);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataWriterImpl::remove_associations: ")
-      ACE_TEXT("bit %d local %s remote %s num remotes %d\n"),
+      ACE_TEXT("bit %d local %C remote %C num remotes %d\n"),
       is_bit_,
       std::string(writer_converter).c_str(),
       std::string(reader_converter).c_str(),
@@ -445,80 +445,80 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
   CORBA::ULong rds_len = 0;
   ::DDS::InstanceHandleSeq handles;
 
+  // Ensure the same acquisition order as in wait_for_acknowledgments().
+  ACE_GUARD (ACE_SYNCH_MUTEX, wfaGuard, this->wfaLock_);
+  ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
+
+  //Remove the readers from fully associated reader list. 
+  //If the supplied reader is not in the cached reader list then it is 
+  //already removed. We just need remove the readers in the list that have
+  //not been removed.
+
+  CORBA::ULong len = readers.length();
+  for (CORBA::ULong i = 0; i < len; ++i)
   {
-    // Ensure the same acquisition order as in wait_for_acknowledgments().
-    ACE_GUARD (ACE_SYNCH_MUTEX, wfaGuard, this->wfaLock_);
-    ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
+    //Remove the readers from fully associated reader list. If it's not
+    //in there, the fully_associated() is not called yet and remove it
+    //from pending list.
 
-    //Remove the readers from fully associated reader list. 
-    //If the supplied reader is not in the cached reader list then it is 
-    //already removed. We just need remove the readers in the list that have
-    //not been removed.
-
-    CORBA::ULong len = readers.length();
-    for (CORBA::ULong i = 0; i < len; ++i)
+    if (OpenDDS::DCPS::remove (readers_, readers[i]) == 0)
     {
-      //Remove the readers from fully associated reader list. If it's not
-      //in there, the fully_associated() is not called yet and remove it
-      //from pending list.
+      ++ fully_associated_len;
+      fully_associated_readers.length (fully_associated_len);
+      fully_associated_readers [fully_associated_len - 1] = readers[i]; 
 
-      if (OpenDDS::DCPS::remove (readers_, readers[i]) == 0)
-      {
-        ++ fully_associated_len;
-        fully_associated_readers.length (fully_associated_len);
-        fully_associated_readers [fully_associated_len - 1] = readers[i]; 
+      // Remove this reader from the ACK sequence map if its there.
+      // This is where we need to be holding the wfaLock_ obtained
+      // above.
+      RepoIdToSequenceMap::iterator where
+        = this->idToSequence_.find( readers[i]);
+      if( where != this->idToSequence_.end()) {
+        this->idToSequence_.erase( where);
 
-        // Remove this reader from the ACK sequence map if its there.
-        // This is where we need to be holding the wfaLock_ obtained
-        // above.
-        RepoIdToSequenceMap::iterator where
-          = this->idToSequence_.find( readers[i]);
-        if( where != this->idToSequence_.end()) {
-          this->idToSequence_.erase( where);
-
-          // It is possible that this subscription was causing the wait
-          // to continue, so give the opportunity to find out.
-          this->wfaCondition_.broadcast();
-        }
-
-        ++ rds_len;
-        rds.length (rds_len);
-        rds [rds_len - 1] = readers[i];         
+        // It is possible that this subscription was causing the wait
+        // to continue, so give the opportunity to find out.
+        this->wfaCondition_.broadcast();
       }
-      else if (OpenDDS::DCPS::remove (pending_readers_, readers[i]) == 0)
-      {
-        ++ rds_len;
-        rds.length (rds_len);
-        rds [rds_len - 1] = readers[i]; 
 
-        RepoIdConverter converter(readers[i]);
-        ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) DataWriterImpl::remove_associations: ")
-          ACE_TEXT("removing reader %s before fully_associated() call.\n"),
-          std::string(converter).c_str()
-        ));
-      }
-      //else reader is already removed which indicates remove_association()
-      //is called multiple times.
+      ++ rds_len;
+      rds.length (rds_len);
+      rds [rds_len - 1] = readers[i];         
     }
-  
-    if (fully_associated_len > 0 && ! is_bit_)
+    else if (OpenDDS::DCPS::remove (pending_readers_, readers[i]) == 0)
     {
-      // The reader should be in the id_to_handle map at this time so
-      // log with error.
-      if (this->cache_lookup_instance_handles (fully_associated_readers, handles) == false)
-      {
-        ACE_ERROR ((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::remove_associations: "
-          "cache_lookup_instance_handles failed, notify %d \n", notify_lost));
-        return;
-      }
+      ++ rds_len;
+      rds.length (rds_len);
+      rds [rds_len - 1] = readers[i]; 
 
-      for (CORBA::ULong i = 0; i < fully_associated_len; ++i)
-      {
-        id_to_handle_map_.erase(fully_associated_readers[i]);
-      }
+      RepoIdConverter converter(readers[i]);
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) DataWriterImpl::remove_associations: ")
+        ACE_TEXT("removing reader %C before fully_associated() call.\n"),
+        std::string(converter).c_str()
+      ));
+    }
+    //else reader is already removed which indicates remove_association()
+    //is called multiple times.
+  }
+
+  if (fully_associated_len > 0 && ! is_bit_)
+  {
+    // The reader should be in the id_to_handle map at this time so
+    // log with error.
+    if (this->cache_lookup_instance_handles (fully_associated_readers, handles) == false)
+    {
+      ACE_ERROR ((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::remove_associations: "
+        "cache_lookup_instance_handles failed, notify %d \n", notify_lost));
+      return;
+    }
+
+    for (CORBA::ULong i = 0; i < fully_associated_len; ++i)
+    {
+      id_to_handle_map_.erase(fully_associated_readers[i]);
     }
   }
+
+  wfaGuard.release();
 
   if (rds_len > 0)
   {
@@ -529,8 +529,6 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
   // Mirror the PUBLICATION_MATCH_STATUS processing from
   // fully_associated() here.
   if( !this->is_bit_) {
-    // Re-acquire the lock.
-    ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
     // Derive the change in the number of subscriptions reading this writer.
     int matchedSubscriptions = this->id_to_handle_map_.size();
@@ -677,8 +675,7 @@ DataWriterImpl::set_qos (const ::DDS::DataWriterQos & qos)
           if (status == 0)
           {
             ACE_ERROR_RETURN ((LM_ERROR,
-              ACE_TEXT("(%P|%t) "
-              "DataWriterImpl::set_qos, ")
+              ACE_TEXT("(%P|%t) DataWriterImpl::set_qos, ")
               ACE_TEXT("qos is not compatible. \n")),
               ::DDS::RETCODE_ERROR);
           }
@@ -792,7 +789,7 @@ ACE_THROW_SPEC ((::CORBA::SystemException))
       RepoIdConverter converter( this->publication_id_);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_acknowledgments() - ")
-        ACE_TEXT("%s not blocking due to no associated subscriptions.\n"),
+        ACE_TEXT("%C not blocking due to no associated subscriptions.\n"),
         std::string(converter).c_str()
       ));
     }
@@ -823,7 +820,7 @@ ACE_THROW_SPEC ((::CORBA::SystemException))
     RepoIdConverter converter( this->publication_id_);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_acknowledgments() - ")
-      ACE_TEXT("%s sending REQUEST_ACK message for sequence 0x%x ")
+      ACE_TEXT("%C sending REQUEST_ACK message for sequence 0x%x ")
       ACE_TEXT("to %d subscriptions.\n"),
       std::string(converter).c_str(),
       ACE_UINT16(target.value_),
@@ -889,7 +886,7 @@ ACE_THROW_SPEC ((::CORBA::SystemException))
         RepoIdConverter converter( this->publication_id_);
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_acknowledgments() - ")
-          ACE_TEXT("%s unblocking for sequence 0x%x.\n"),
+          ACE_TEXT("%C unblocking for sequence 0x%x.\n"),
           std::string(converter).c_str(),
           ACE_UINT16(target.value_)
         ));
@@ -902,7 +899,7 @@ ACE_THROW_SPEC ((::CORBA::SystemException))
   RepoIdConverter converter( this->publication_id_);
   ACE_DEBUG((LM_WARNING,
     ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::wait_for_acknowledgments() - ")
-    ACE_TEXT("%s timed out waiting for sequence 0x%x to be acknowledged ")
+    ACE_TEXT("%C timed out waiting for sequence 0x%x to be acknowledged ")
     ACE_TEXT("from %d subscriptions.\n"),
     std::string(converter).c_str(),
     ACE_UINT16(target.value_),
@@ -1177,8 +1174,8 @@ DataWriterImpl::enable ()
                                  liveliness_check_interval_) == -1)
     {
       ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable: ")
-                  ACE_TEXT(" %p. \n"), "schedule_timer"));
+                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable: %p.\n"),
+                  ACE_TEXT("schedule_timer")));
     }
     else
     {
@@ -1635,8 +1632,8 @@ DataWriterImpl::data_delivered (DataSampleListElement* sample)
     RepoIdConverter writer_converter(publication_id_);
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::data_delivered: ")
-      ACE_TEXT(" The publication id %s from delivered element ")
-      ACE_TEXT("does not match the datawriter's id %s\n"),
+      ACE_TEXT(" The publication id %C from delivered element ")
+      ACE_TEXT("does not match the datawriter's id %C\n"),
       std::string(sample_converter).c_str(),
       std::string(writer_converter).c_str()
     ));
@@ -1675,8 +1672,8 @@ DataWriterImpl::deliver_ack(
     RepoIdConverter debugConverter2( header.publication_id_);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataWriterImpl::deliver_ack() - ")
-      ACE_TEXT("publication %s received update for ")
-      ACE_TEXT("sample %x from subscription %s.\n"),
+      ACE_TEXT("publication %C received update for ")
+      ACE_TEXT("sample %x from subscription %C.\n"),
       std::string( debugConverter).c_str(),
       ACE_UINT16(ack.value_),
       std::string( debugConverter2).c_str()
@@ -1772,7 +1769,7 @@ DataWriterImpl::handle_timeout (const ACE_Time_Value &tv,
       RepoIdConverter converter(publication_id_);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataWriterImpl::handle_timeout: ")
-        ACE_TEXT("%s sending LIVELINESS message.\n"),
+        ACE_TEXT("%C sending LIVELINESS message.\n"),
         std::string(converter).c_str()
       ));
     }
@@ -1785,9 +1782,8 @@ DataWriterImpl::handle_timeout (const ACE_Time_Value &tv,
     {
       ACE_ERROR_RETURN ((LM_ERROR,
                          ACE_TEXT("(%P|%t) ERROR: ")
-                         ACE_TEXT("DataWriterImpl::handle_timeout: ")
-                         ACE_TEXT(" %p. \n"),
-                         "cancel_timer"),
+                         ACE_TEXT("DataWriterImpl::handle_timeout: %p.\n"),
+                         ACE_TEXT("cancel_timer")),
                         -1);
     }
 
@@ -1800,9 +1796,8 @@ DataWriterImpl::handle_timeout (const ACE_Time_Value &tv,
     {
       ACE_ERROR_RETURN ((LM_ERROR,
                          ACE_TEXT("(%P|%t) ERROR: ")
-                         ACE_TEXT("DataWriterImpl::handle_timeout: ")
-                         ACE_TEXT(" %p. \n"),
-                         "schedule_timer"),
+                         ACE_TEXT("DataWriterImpl::handle_timeout: %p.\n"),
+                         ACE_TEXT("schedule_timer")),
                         -1);
     }
   }
@@ -2010,7 +2005,7 @@ DataWriterImpl::bit_lookup_instance_handles (const ReaderIdSeq& ids,
     }
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataWriterImpl::bit_lookup_instance_handles: ")
-      ACE_TEXT("searching for handles for reader Ids: %s.\n"),
+      ACE_TEXT("searching for handles for reader Ids: %C.\n"),
       buffer.str().c_str()
     ));
   }
@@ -2040,7 +2035,7 @@ DataWriterImpl::bit_lookup_instance_handles (const ReaderIdSeq& ids,
         RepoIdConverter converter(ids[i]);
         ACE_DEBUG((LM_WARNING,
           ACE_TEXT("(%P|%t) DataWriterImpl::bit_lookup_instance_handles: ")
-          ACE_TEXT("reader %s has handle 0x%x.\n"),
+          ACE_TEXT("reader %C has handle 0x%x.\n"),
           std::string(converter).c_str(),
           hdls[i]
         ));
@@ -2059,7 +2054,7 @@ DataWriterImpl::bit_lookup_instance_handles (const ReaderIdSeq& ids,
       if( DCPS_debug_level > 4) {
         ACE_DEBUG((LM_WARNING,
           ACE_TEXT("(%P|%t) DataWriterImpl::bit_lookup_instance_handles: ")
-          ACE_TEXT("using hash as handle for reader %s.\n"),
+          ACE_TEXT("using hash as handle for reader %C.\n"),
           std::string(converter).c_str()
         ));
       }
@@ -2085,7 +2080,7 @@ DataWriterImpl::cache_lookup_instance_handles (const ReaderIdSeq& ids,
       RepoIdConverter converter(ids[i]);
       ACE_DEBUG((LM_WARNING,
         ACE_TEXT("(%P|%t) DataWriterImpl::cache_lookup_instance_handles: ")
-        ACE_TEXT("could not find instance handle for writer %s.\n"),
+        ACE_TEXT("could not find instance handle for writer %C.\n"),
         std::string(converter).c_str()
       ));
       hdls[i] = -1;
@@ -2098,7 +2093,7 @@ DataWriterImpl::cache_lookup_instance_handles (const ReaderIdSeq& ids,
         RepoIdConverter converter(ids[i]);
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataWriterImpl::cache_lookup_instance_handles: ")
-          ACE_TEXT("instance handle for writer %s == 0x%x.\n"),
+          ACE_TEXT("instance handle for writer %C == 0x%x.\n"),
           std::string(converter).c_str(),
           hdls[i]
         ));

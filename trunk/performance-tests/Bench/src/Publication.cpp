@@ -1,6 +1,11 @@
 // -*- C++ -*-
 //
 // $Id$
+
+// This include needs to appear near the top so ACE gets a chance
+// to figure out the correct time_t typedef.
+#include "ace/OS_NS_time.h"
+
 #include "Test.h"
 #include "Publication.h"
 #include "EntityProfiles.h"
@@ -47,7 +52,7 @@ Publication::open( void*)
   if( result != 0) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Writer::open() - ")
-      ACE_TEXT("failed to activate the %s publication thread.\n"),
+      ACE_TEXT("failed to activate the %C publication thread.\n"),
       this->name_.c_str()
     ));
   }
@@ -88,7 +93,7 @@ Publication::get_statuscondition()
   if( !this->enabled_) {
     if( this->verbose_) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Publication::get_statuscondition() - publication %s: ")
+        ACE_TEXT("(%P|%t) Publication::get_statuscondition() - publication %C: ")
         ACE_TEXT("not enabled, declining to process.\n"),
         this->name_.c_str()
       ));
@@ -108,7 +113,7 @@ Publication::get_listener()
   if( !this->enabled_) {
     if( this->verbose_) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Publication::get_listener() - publication %s: ")
+        ACE_TEXT("(%P|%t) Publication::get_listener() - publication %C: ")
         ACE_TEXT("not enabled, declining to process.\n"),
         this->name_.c_str()
       ));
@@ -131,7 +136,7 @@ Publication::set_listener(
   if( !this->enabled_) {
     if( this->verbose_) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Publication::set_listener() - publication %s: ")
+        ACE_TEXT("(%P|%t) Publication::set_listener() - publication %C: ")
         ACE_TEXT("not enabled, declining to process.\n"),
         this->name_.c_str()
       ));
@@ -154,7 +159,7 @@ Publication::write( const Test::Data& sample)
       ++this->messages_;
       if( this->verbose_ && BE_REALLY_VERBOSE) {
         ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) Publication::write() - publication %s: ")
+          ACE_TEXT("(%P|%t) Publication::write() - publication %C: ")
           ACE_TEXT("forwarded sample %d at priority %d.\n"),
           this->name_.c_str(),
           this->messages_,
@@ -164,7 +169,7 @@ Publication::write( const Test::Data& sample)
 
     } else {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) Publication::write() - publication %s: ")
+        ACE_TEXT("(%P|%t) Publication::write() - publication %C: ")
         ACE_TEXT("failed to forward sample: pid: %d, seq: %d, priority: %d.\n"),
           this->name_.c_str(),
           sample.pid,
@@ -184,7 +189,7 @@ Publication::enable(
   if( this->enabled_) {
     if( this->verbose_) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Publication::enable() - publication %s: ")
+        ACE_TEXT("(%P|%t) Publication::enable() - publication %C: ")
         ACE_TEXT("already enabled, declining to process.\n"),
         this->name_.c_str()
       ));
@@ -199,7 +204,7 @@ Publication::enable(
                                    );
   if( CORBA::is_nil( publisher.in())) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) Publication::enable() - publication %s: ")
+      ACE_TEXT("(%P|%t) Publication::enable() - publication %C: ")
       ACE_TEXT("failed to create publisher.\n"),
         this->name_.c_str()
     ));
@@ -214,7 +219,7 @@ Publication::enable(
       );
   if( transport.is_nil()) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) Publication::enable() - publication %s: ")
+      ACE_TEXT("(%P|%t) Publication::enable() - publication %C: ")
       ACE_TEXT("failed to create transport with index %d.\n"),
       this->name_.c_str(),
       this->profile_->transport
@@ -223,7 +228,7 @@ Publication::enable(
 
   } else if( this->verbose_) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Publication::enable() - publication %s: ")
+      ACE_TEXT("(%P|%t) Publication::enable() - publication %C: ")
       ACE_TEXT("created transport with index %d.\n"),
       this->name_.c_str(),
       this->profile_->transport
@@ -233,7 +238,7 @@ Publication::enable(
   // Attach the transport
   if( ::OpenDDS::DCPS::ATTACH_OK != transport->attach( publisher)) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) Publication::enable() - publication %s: ")
+      ACE_TEXT("(%P|%t) Publication::enable() - publication %C: ")
       ACE_TEXT("failed to attach transport with index %d to publisher.\n"),
       this->name_.c_str(),
       this->profile_->transport
@@ -242,7 +247,7 @@ Publication::enable(
 
   } else if( this->verbose_) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Publication::enable() - publication %s: ")
+      ACE_TEXT("(%P|%t) Publication::enable() - publication %C: ")
       ACE_TEXT("attached transport with index %d to publisher.\n"),
       this->name_.c_str(),
       this->profile_->transport
@@ -269,7 +274,7 @@ Publication::enable(
       );
   if( CORBA::is_nil( writer.in())) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) Publication::enable() - publication %s: ")
+      ACE_TEXT("(%P|%t) Publication::enable() - publication %C: ")
       ACE_TEXT("failed to create writer.\n"),
       this->name_.c_str()
     ));
@@ -277,7 +282,7 @@ Publication::enable(
 
   } else if( this->verbose_) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Publication::enable() - publication %s: ")
+      ACE_TEXT("(%P|%t) Publication::enable() - publication %C: ")
       ACE_TEXT("created writer.\n"),
       this->name_.c_str()
     ));
@@ -286,7 +291,7 @@ Publication::enable(
   this->writer_ = Test::DataDataWriter::_narrow( writer.in());
   if( CORBA::is_nil( this->writer_.in())) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) Publication::enable() - publication %s: ")
+      ACE_TEXT("(%P|%t) Publication::enable() - publication %C: ")
       ACE_TEXT("failed to narrow writer for Test::Data type.\n"),
       this->name_.c_str()
     ));
@@ -294,7 +299,7 @@ Publication::enable(
 
   } else if( this->verbose_) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Publication::enable() - publication %s: ")
+      ACE_TEXT("(%P|%t) Publication::enable() - publication %C: ")
       ACE_TEXT("narrowed writer for Test::Data type.\n"),
       this->name_.c_str()
     ));
@@ -310,7 +315,7 @@ Publication::svc ()
   if( !this->enabled_) {
     if( this->verbose_) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Publication::svc() - publication %s: ")
+        ACE_TEXT("(%P|%t) Publication::svc() - publication %C: ")
         ACE_TEXT("not enabled, declining to process.\n"),
         this->name_.c_str()
       ));
@@ -319,7 +324,7 @@ Publication::svc ()
 
   } else if( this->verbose_) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Publication::svc() - publication %s: ")
+      ACE_TEXT("(%P|%t) Publication::svc() - publication %C: ")
       ACE_TEXT("processing starts on thread.\n"),
       this->name_.c_str()
     ));
@@ -361,7 +366,7 @@ Publication::svc ()
 
     if( this->verbose_ && BE_REALLY_VERBOSE) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Publication::svc() - publication %s: ")
+        ACE_TEXT("(%P|%t) Publication::svc() - publication %C: ")
         ACE_TEXT("wrote sample %d at priority %d, ")
         ACE_TEXT("waiting %d microseconds to send next one.\n"),
         this->name_.c_str(),
@@ -381,7 +386,7 @@ Publication::svc ()
 
   if( this->verbose_) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Publication::svc() - publication %s: ")
+      ACE_TEXT("(%P|%t) Publication::svc() - publication %C: ")
       ACE_TEXT("honoring termination request, stopping thread.\n"),
       this->name_.c_str()
     ));

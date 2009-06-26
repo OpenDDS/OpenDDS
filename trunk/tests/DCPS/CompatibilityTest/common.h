@@ -51,13 +51,13 @@ extern ::DDS::DurabilityQosPolicyKind durability_kind;
 extern ::DDS::LivelinessQosPolicyKind liveliness_kind;
 extern bool compatible;
 
-extern std::string LEASE_DURATION_STR;
+extern ACE_TString LEASE_DURATION_STR;
 extern std::string test_duration_str;
-extern std::string reliability_kind_str;
-extern std::string durability_kind_str;
-extern std::string liveliness_kind_str;
+extern ACE_TString reliability_kind_str;
+extern ACE_TString durability_kind_str;
+extern ACE_TString liveliness_kind_str;
 
-::DDS::DurabilityQosPolicyKind get_durability_kind(const std::string& argument);
-::DDS::LivelinessQosPolicyKind get_liveliness_kind(const std::string& argument);
-::DDS::ReliabilityQosPolicyKind get_reliability_kind(const std::string& argument);
-DDS::Duration_t get_lease_duration(const std::string& argument);
+::DDS::DurabilityQosPolicyKind get_durability_kind(const ACE_TString& argument);
+::DDS::LivelinessQosPolicyKind get_liveliness_kind(const ACE_TString& argument);
+::DDS::ReliabilityQosPolicyKind get_reliability_kind(const ACE_TString& argument);
+DDS::Duration_t get_lease_duration(const ACE_TString& argument);

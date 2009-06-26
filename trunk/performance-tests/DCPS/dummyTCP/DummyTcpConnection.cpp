@@ -46,8 +46,8 @@ OpenDDS::DCPS::DummyTcpConnection::DummyTcpConnection()
   if (this->reconnect_task_.open ())
     {
       ACE_ERROR ((LM_ERROR,
-                  "(%P|%t) ERROR: Reconnect task failed to open : %p\n",
-                  "open"));
+                  ACE_TEXT ("(%P|%t) ERROR: Reconnect task failed to open : %p\n"),
+                  ACE_TEXT ("open")));
     }
 }
 
@@ -158,9 +158,11 @@ OpenDDS::DCPS::DummyTcpConnection::open(void* arg)
                           sizeof(network_order_address)) == -1)
     {
       ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: Unable to receive the remote_address "
-                        "from the remote (active) side of the connection."
-                        " %p\n", "recv_n"),
+         ACE_TEXT("(%P|%t) ERROR: SimpleTcpConnection::open() - ")
+         ACE_TEXT("unable to receive the length of address string ")
+         ACE_TEXT("from the remote (active) side of the connection. ")
+         ACE_TEXT("%p\n"),
+         ACE_TEXT("recv_n")),
                        -1);
     }
 
@@ -189,7 +191,7 @@ OpenDDS::DCPS::DummyTcpConnection::open(void* arg)
 
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-    "DummyTcpConnection::open %X %s:%d->%s:%d reconnect_state = %d\n", this,
+    "DummyTcpConnection::open %X %C:%d->%C:%d reconnect_state = %d\n", this,
     this->remote_address_.get_host_addr (), this->remote_address_.get_port_number (),
     this->local_address_.get_host_addr (), this->local_address_.get_port_number (),
     this->reconnect_state_));
@@ -329,7 +331,8 @@ OpenDDS::DCPS::DummyTcpConnection::active_establishment
   if (connector.connect(this->peer(), remote_address) != 0)
     {
       ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: Failed to connect. %p\n", "connect"),
+                        ACE_TEXT ("(%P|%t) ERROR: Failed to connect. %p\n"),
+                        ACE_TEXT ("connect")),
                        -1);
     }
   else
@@ -449,8 +452,8 @@ OpenDDS::DCPS::DummyTcpConnection::passive_reconnect_i ()
         {
           this->_remove_ref ();
           ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) ERROR: DummyTcpConnection::passive_reconnect_i, ")
-                            ACE_TEXT(" %p. \n"), "schedule_timer" ),
+            ACE_TEXT("(%P|%t) ERROR: SimpleTcpConnection::passive_reconnect_i")
+            ACE_TEXT(", %p.\n"), ACE_TEXT("schedule_timer")),
                             -1);
         }
     }
@@ -478,7 +481,7 @@ OpenDDS::DCPS::DummyTcpConnection::active_reconnect_i ()
   int ret = -1;
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-    "active_reconnect_i(%s:%d->%s:%d) reconnect_state = %d\n",
+    "active_reconnect_i(%C:%d->%C:%d) reconnect_state = %d\n",
     this->remote_address_.get_host_addr (), this->remote_address_.get_port_number (),
     this->local_address_.get_host_addr (), this->local_address_.get_port_number (),
     this->reconnect_state_));
@@ -535,13 +538,13 @@ OpenDDS::DCPS::DummyTcpConnection::active_reconnect_i ()
         {
           if (this->tcp_config_->conn_retry_attempts_ > 0)
             {
-              ACE_DEBUG ((LM_DEBUG, "(%P|%t) we tried and failed to re-establish connection to %s:%d.\n",
+              ACE_DEBUG ((LM_DEBUG, "(%P|%t) we tried and failed to re-establish connection to %C:%d.\n",
                           this->remote_address_.get_host_addr (),
                           this->remote_address_.get_port_number ()));
             }
           else
             {
-              ACE_DEBUG ((LM_DEBUG, "(%P|%t) we did not try to re-establish connection to %s:%d.\n",
+              ACE_DEBUG ((LM_DEBUG, "(%P|%t) we did not try to re-establish connection to %C:%d.\n",
                           this->remote_address_.get_host_addr (),
                           this->remote_address_.get_port_number ()));
             }
@@ -552,7 +555,7 @@ OpenDDS::DCPS::DummyTcpConnection::active_reconnect_i ()
         }
       else
         {
-          ACE_DEBUG ((LM_DEBUG, "(%P|%t)re-established connection to %s:%d.\n",
+          ACE_DEBUG ((LM_DEBUG, "(%P|%t)re-established connection to %C:%d.\n",
             this->remote_address_.get_host_addr (),
             this->remote_address_.get_port_number ()));
           this->reconnect_state_ = RECONNECTED_STATE;
@@ -646,8 +649,8 @@ OpenDDS::DCPS::DummyTcpConnection::transfer (DummyTcpConnection* connection)
       if (rs->get_reactor()->cancel_timer(this) == -1)
       {
         ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: DummyTcpConnection::transfer, ")
-          ACE_TEXT(" %p. \n"), "cancel_timer" ));
+          ACE_TEXT("(%P|%t) ERROR: SimpleTcpConnection::transfer, ")
+          ACE_TEXT(" %p. \n"), ACE_TEXT("cancel_timer")));
       }
       this->_remove_ref ();
       notify_reconnect = true;
@@ -686,7 +689,7 @@ OpenDDS::DCPS::DummyTcpConnection::transfer (DummyTcpConnection* connection)
   connection->old_con_ = this;
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-        "transfer(%s:%d->%s:%d) passive reconnected. new con %X   "
+        "transfer(%C:%d->%C:%d) passive reconnected. new con %X   "
         " old con %X \n",
         this->remote_address_.get_host_addr (), this->remote_address_.get_port_number (),
         this->local_address_.get_host_addr (), this->local_address_.get_port_number (),

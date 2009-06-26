@@ -136,9 +136,8 @@ TcpSubscriber::handle_input(ACE_HANDLE)
     // The publisher has disconnected - check if this was unexpected.
     if (!(TcpSubscriber::stats_->is_num_packets(packet_count_))) {
       ACE_ERROR((LM_ERROR,
-                 "(%P|%t) %s Publisher disconnected prematurely when "
+                 "(%P|%t) TcpSubscriber::handle_input Publisher disconnected prematurely when "
                  "packet_count is %d.\n",
-                 "TcpSubscriber::handle_input",
                  packet_count_));
     }
 
@@ -151,8 +150,7 @@ TcpSubscriber::handle_input(ACE_HANDLE)
   else if (result < 0) {
     // Something bad happened
     ACE_ERROR_RETURN ((LM_ERROR,
-                       "(%P|%t) %s bad read\n",
-                       "TcpSubscriber::handle_input"),
+                       "(%P|%t) TcpSubscriber::handle_input bad read\n"),
                       -1);
   }
 

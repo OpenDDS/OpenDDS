@@ -190,7 +190,7 @@ SubscriberImpl::create_opendds_datareader (
       ACE_ERROR ((LM_ERROR,
 		  ACE_TEXT("(%P|%t) ERROR: ")
 		  ACE_TEXT("SubscriberImpl::create_datareader, ")
-		  ACE_TEXT("typesupport(topic_name=%s) is nil.\n"),
+		  ACE_TEXT("typesupport(topic_name=%C) is nil.\n"),
 		  name.in ()));
       return ::DDS::DataReader::_nil ();
     }
@@ -261,7 +261,7 @@ SubscriberImpl::create_opendds_datareader (
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("SubscriberImpl::create_datareader: ")
-        ACE_TEXT("failed to register datareader %s with TransportImpl.\n"),
+        ACE_TEXT("failed to register datareader %C with TransportImpl.\n"),
         std::string(converter).c_str()
       ));
       return ::DDS::DataReader::_nil ();
@@ -299,7 +299,7 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
         RepoIdConverter converter(id);
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) SubscriberImpl::delete_datareader: ")
-          ACE_TEXT("data reader %s doesn't belong to this subscriber.\n"),
+          ACE_TEXT("data reader %C doesn't belong to this subscriber.\n"),
           std::string(converter).c_str()
         ));
         return ::DDS::RETCODE_PRECONDITION_NOT_MET;
@@ -341,7 +341,7 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
       ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("SubscriberImpl::delete_datareader: ")
-        ACE_TEXT("datareader(topic_name=%s) %s not found.\n"),
+        ACE_TEXT("datareader(topic_name=%C) %C not found.\n"),
         topic_name.in(),
         std::string(converter).c_str()
       ),::DDS::RETCODE_ERROR);
@@ -399,7 +399,7 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("SubscriberImpl::delete_datareader: ")
-        ACE_TEXT("failed to unregister datareader %s with TransportImpl.\n"),
+        ACE_TEXT("failed to unregister datareader %C with TransportImpl.\n"),
         std::string(converter).c_str()
       ));
       return ::DDS::RETCODE_ERROR;
@@ -513,7 +513,7 @@ SubscriberImpl::lookup_datareader (
           ACE_DEBUG ((LM_DEBUG,
 		      ACE_TEXT("(%P|%t) ")
 		      ACE_TEXT("SubscriberImpl::lookup_datareader, ")
-		      ACE_TEXT("The datareader(topic_name=%s) is not found\n"),
+		      ACE_TEXT("The datareader(topic_name=%C) is not found\n"),
 		      topic_name));
         }
       return ::DDS::DataReader::_nil ();
@@ -633,7 +633,7 @@ SubscriberImpl::set_qos (
                 RepoIdConverter converter(id);
                 ACE_ERROR_RETURN((LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::set_qos: ")
-                  ACE_TEXT("insert %s to DrIdToQosMap failed.\n"), 
+                  ACE_TEXT("insert %C to DrIdToQosMap failed.\n"), 
                   std::string(converter).c_str()
                 ),::DDS::RETCODE_ERROR);
               }
@@ -656,8 +656,7 @@ SubscriberImpl::set_qos (
               if (status == 0)
               {
                 ACE_ERROR_RETURN ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) "
-                  "SubscriberImpl::set_qos, ")
+                  ACE_TEXT("(%P|%t) SubscriberImpl::set_qos, ")
                   ACE_TEXT("failed on compatiblity check. \n")),
                   ::DDS::RETCODE_ERROR);
               }
@@ -1021,7 +1020,7 @@ SubscriberImpl::reader_enabled(
     ACE_DEBUG ((LM_DEBUG,
 		ACE_TEXT("(%P|%t) ")
 		ACE_TEXT("SubscriberImpl::reader_enabled, ")
-		ACE_TEXT("datareader(topic_name=%s) enabled\n"),
+		ACE_TEXT("datareader(topic_name=%C) enabled\n"),
 		topic_name));
 
   DataReaderMap::iterator it
@@ -1032,7 +1031,7 @@ SubscriberImpl::reader_enabled(
     {
       ACE_ERROR ((LM_ERROR,
 		  ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::reader_enabled, ")
-		  ACE_TEXT("insert datareader(topic_name=%s) failed. \n"),
+		  ACE_TEXT("insert datareader(topic_name=%C) failed. \n"),
 		  topic_name));
       return;
     }

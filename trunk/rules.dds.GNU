@@ -27,6 +27,7 @@ endif
 # Set defaults for gnumake macros corresponding to MPC features used by DDS
 # This is needed for features used in requires/avoids statements in .mpc files
 built_in_topics ?= 1
+tao_orbsvcs ?= 1
 
 # Turn on symbol versioning. The scheme that we follow is to allow
 # applications dependent on libraries, with same version numbers (major,

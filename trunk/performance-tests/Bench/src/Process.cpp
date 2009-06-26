@@ -72,7 +72,7 @@ Process::Process( const Options& options)
     if( CORBA::is_nil( this->participants_[ current->first].in())) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
-        ACE_TEXT("failed to create participant %s.\n"),
+        ACE_TEXT("failed to create participant %C.\n"),
         current->first.c_str()
       ));
       throw BadParticipantException();
@@ -80,7 +80,7 @@ Process::Process( const Options& options)
     } else if( this->options_.verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Process::Process() - ")
-        ACE_TEXT("created participant %s in domain %d.\n"),
+        ACE_TEXT("created participant %C in domain %d.\n"),
         current->first.c_str(),
         current->second->domainId
       ));
@@ -94,7 +94,7 @@ Process::Process( const Options& options)
      != testData->register_type( this->participants_[ current->first].in(), 0)) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
-        ACE_TEXT("unable to install type %s support into participant %s.\n"),
+        ACE_TEXT("unable to install type %C support into participant %C.\n"),
         testData->get_type_name(),
         current->first.c_str()
       ));
@@ -103,7 +103,7 @@ Process::Process( const Options& options)
     } else if( this->options_.verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Process::Process() - ")
-        ACE_TEXT("created type %s support in participant %s.\n"),
+        ACE_TEXT("created type %C support in participant %C.\n"),
         testData->get_type_name(),
         current->first.c_str()
       ));
@@ -126,7 +126,7 @@ Process::Process( const Options& options)
     if( participantLocation == this->participants_.end()) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
-        ACE_TEXT("failed to obtain participant %s for topic %s.\n"),
+        ACE_TEXT("failed to obtain participant %C for topic %C.\n"),
         current->second->participant.c_str(),
         current->first.c_str()
       ));
@@ -145,7 +145,7 @@ Process::Process( const Options& options)
     if( CORBA::is_nil( this->topics_[ current->first].in())) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
-        ACE_TEXT("failed to create topic %s in participant %s.\n"),
+        ACE_TEXT("failed to create topic %C in participant %C.\n"),
         current->first.c_str(),
         current->second->participant.c_str()
       ));
@@ -154,7 +154,7 @@ Process::Process( const Options& options)
     } else if( this->options_.verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Process::Process() - ")
-        ACE_TEXT("created topic %s in participant %s.\n"),
+        ACE_TEXT("created topic %C in participant %C.\n"),
         current->first.c_str(),
         current->second->participant.c_str()
       ));
@@ -172,7 +172,7 @@ Process::Process( const Options& options)
     if( topicLocation == this->topics_.end()) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
-        ACE_TEXT("failed to obtain topic %s for subscription %s.\n"),
+        ACE_TEXT("failed to obtain topic %C for subscription %C.\n"),
         current->second->topic.c_str(),
         current->first.c_str()
       ));
@@ -186,7 +186,7 @@ Process::Process( const Options& options)
     if( where == this->options_.topicProfileMap().end()) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
-        ACE_TEXT("failed to find topic profile %s for subscription %s.\n"),
+        ACE_TEXT("failed to find topic profile %C for subscription %C.\n"),
         current->second->topic.c_str(),
         current->first.c_str()
       ));
@@ -197,7 +197,7 @@ Process::Process( const Options& options)
     if( participantLocation == this->participants_.end()) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
-        ACE_TEXT("failed to obtain participant %s for subscription %s.\n"),
+        ACE_TEXT("failed to obtain participant %C for subscription %C.\n"),
         where->second->participant.c_str(),
         current->first.c_str()
       ));
@@ -229,7 +229,7 @@ Process::Process( const Options& options)
     if( this->subscriptions_[ current->first] == 0) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
-        ACE_TEXT("failed to create subscription %s in participant %s.\n"),
+        ACE_TEXT("failed to create subscription %C in participant %C.\n"),
         current->first.c_str(),
         where->second->participant.c_str()
       ));
@@ -238,7 +238,7 @@ Process::Process( const Options& options)
     } else if( this->options_.verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Process::Process() - ")
-        ACE_TEXT("created subscription %s in participant %s.\n"),
+        ACE_TEXT("created subscription %C in participant %C.\n"),
         current->first.c_str(),
         where->second->participant.c_str()
       ));
@@ -257,7 +257,7 @@ Process::Process( const Options& options)
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Process::Process() - ")
         ACE_TEXT("extracted StatusCondition for ")
-        ACE_TEXT("subscription %s in participant %s.\n"),
+        ACE_TEXT("subscription %C in participant %C.\n"),
         current->first.c_str(),
         where->second->participant.c_str()
       ));
@@ -279,7 +279,7 @@ Process::Process( const Options& options)
     if( topicLocation == this->topics_.end()) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
-        ACE_TEXT("failed to obtain topic %s for publication %s.\n"),
+        ACE_TEXT("failed to obtain topic %C for publication %C.\n"),
         current->second->topic.c_str(),
         current->first.c_str()
       ));
@@ -293,7 +293,7 @@ Process::Process( const Options& options)
     if( where == this->options_.topicProfileMap().end()) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
-        ACE_TEXT("failed to find topic profile %s for publication %s.\n"),
+        ACE_TEXT("failed to find topic profile %C for publication %C.\n"),
         current->second->topic.c_str(),
         current->first.c_str()
       ));
@@ -304,7 +304,7 @@ Process::Process( const Options& options)
     if( participantLocation == this->participants_.end()) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
-        ACE_TEXT("failed to obtain participant %s for publication %s.\n"),
+        ACE_TEXT("failed to obtain participant %C for publication %C.\n"),
         where->second->participant.c_str(),
         current->first.c_str()
       ));
@@ -322,7 +322,7 @@ Process::Process( const Options& options)
     if( this->publications_[ current->first] == 0) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
-        ACE_TEXT("failed to create publication %s in participant %s.\n"),
+        ACE_TEXT("failed to create publication %C in participant %C.\n"),
         current->first.c_str(),
         where->second->participant.c_str()
       ));
@@ -331,7 +331,7 @@ Process::Process( const Options& options)
     } else if( this->options_.verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Process::Process() - ")
-        ACE_TEXT("created publication %s in participant %s.\n"),
+        ACE_TEXT("created publication %C in participant %C.\n"),
         current->first.c_str(),
         where->second->participant.c_str()
       ));
@@ -350,7 +350,7 @@ Process::Process( const Options& options)
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Process::Process() - ")
         ACE_TEXT("extracted StatusCondition for ")
-        ACE_TEXT("publication %s in participant %s.\n"),
+        ACE_TEXT("publication %C in participant %C.\n"),
         current->first.c_str(),
         where->second->participant.c_str()
       ));
@@ -363,8 +363,8 @@ Process::Process( const Options& options)
       if( subscription == 0) {
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
-          ACE_TEXT("failed to obtain subscription %s ")
-          ACE_TEXT("to forward for publication %s.\n"),
+          ACE_TEXT("failed to obtain subscription %C ")
+          ACE_TEXT("to forward for publication %C.\n"),
           current->second->source.c_str(),
           current->first.c_str()
         ));
@@ -477,7 +477,7 @@ Process::run()
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Process::run() - ")
         ACE_TEXT("unblocked main thread: %p.\n"),
-        "wait"
+        ACE_TEXT("wait")
       ));
     }
 
@@ -496,7 +496,7 @@ Process::run()
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) Process::run() - ")
           ACE_TEXT("unblocked main thread: %p.\n"),
-          "wait"
+          ACE_TEXT("wait")
         ));
       }
     }
@@ -527,7 +527,7 @@ Process::run()
     current->second->wait();
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Process::run() - ")
-      ACE_TEXT("publication %s stopping after sending %d messages.\n"),
+      ACE_TEXT("publication %C stopping after sending %d messages.\n"),
       current->first.c_str(),
       current->second->messages()
     ));
@@ -612,7 +612,7 @@ Process::run()
         } else {
           ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: Process::run() - ")
-            ACE_TEXT("output file not active for subscription: %s.\n"),
+            ACE_TEXT("output file not active for subscription: %C.\n"),
             current->first.c_str()
           ));
 
@@ -620,7 +620,7 @@ Process::run()
       } else {
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: Process::run() - ")
-          ACE_TEXT("output file not found for subscription: %s.\n"),
+          ACE_TEXT("output file not found for subscription: %C.\n"),
           current->first.c_str()
         ));
       }
@@ -645,7 +645,7 @@ Process::run()
         } else {
           ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: Process::run() - ")
-            ACE_TEXT("output file not active for subscription: %s.\n"),
+            ACE_TEXT("output file not active for subscription: %C.\n"),
             current->first.c_str()
           ));
 
@@ -653,7 +653,7 @@ Process::run()
       } else {
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: Process::run() - ")
-          ACE_TEXT("output file not found for subscription: %s.\n"),
+          ACE_TEXT("output file not found for subscription: %C.\n"),
           current->first.c_str()
         ));
       }

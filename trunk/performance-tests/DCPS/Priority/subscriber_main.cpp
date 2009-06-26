@@ -11,8 +11,7 @@
 #include <fstream>
 #include <sstream>
 
-int
-main( int argc, char *argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   int result = -1;
 
@@ -31,7 +30,7 @@ main( int argc, char *argv[])
       buffer << options.transportType();
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) subscriber_main() - ")
-        ACE_TEXT("started with transport %s(%d).\n"),
+        ACE_TEXT("started with transport %C(%d).\n"),
         buffer.str().c_str(),
         options.transportKey()
       ));
@@ -82,7 +81,7 @@ main( int argc, char *argv[])
 
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) subscriber_main() - ")
-      ACE_TEXT("test over:\n%s"),
+      ACE_TEXT("test over:\n%C"),
       buffer.str().c_str()
     ));
 
@@ -95,10 +94,10 @@ main( int argc, char *argv[])
       ACE_TEXT("CORBA exception caught during processing.\n")
     ));
 
-  } catch( Test::Exception e)  {
+  } catch (const Test::Exception& e)  {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) subscriber_main() - ")
-      ACE_TEXT("Test exception caught during processing: %s.\n"),
+      ACE_TEXT("Test exception caught during processing: %C.\n"),
       e.what()
     ));
 

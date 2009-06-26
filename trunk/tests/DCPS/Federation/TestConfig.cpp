@@ -21,7 +21,7 @@ TestConfig::~TestConfig()
 {
 }
 
-TestConfig::TestConfig( int argc, char** argv, char** /* envp */)
+TestConfig::TestConfig( int argc, ACE_TCHAR** argv, char** /* envp */)
  : verbose_(   TC_DEFAULT_VERBOSE),
    samples_(   TC_DEFAULT_SAMPLES),
    domain_(    DEFAULT_DOMAIN),
@@ -30,12 +30,12 @@ TestConfig::TestConfig( int argc, char** argv, char** /* envp */)
 {
   ACE_Arg_Shifter parser( argc, argv);
   while( parser.is_anything_left()) {
-    const char* currentArg = 0;
-    if( 0 != (currentArg = parser.get_the_parameter("-Samples"))) {
+    const ACE_TCHAR* currentArg = 0;
+    if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-Samples")))) {
       this->samples_ = ACE_OS::atoi( currentArg);
       parser.consume_arg();
 
-    } else if( 0 != (currentArg = parser.get_the_parameter("-v"))) {
+    } else if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-v")))) {
       this->verbose_ = true;
 
     } else {

@@ -13,7 +13,7 @@
 /**
  * @brief Construct a test system from the command line.
  */
-Subscriber::Subscriber( int argc, char** argv, char** envp)
+Subscriber::Subscriber( int argc, ACE_TCHAR** argv, char** envp)
  : config_( argc, argv, envp),
    sync_( 0)
 {
@@ -23,7 +23,7 @@ Subscriber::Subscriber( int argc, char** argv, char** envp)
 
   if( OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) COMMANDLINE: Verbose == %s\n")
+      ACE_TEXT("(%P|%t) COMMANDLINE: Verbose == %C\n")
       ACE_TEXT("(%P|%t) COMMANDLINE: Samples == %d\n"),
       (this->config_.verbose()? "true": "false"),
       this->config_.samples()
@@ -68,14 +68,14 @@ Subscriber::Subscriber( int argc, char** argv, char** envp)
   this->transport_
     = TheTransportFactory->create_transport_impl(
         0,
-        "SimpleTcp",
+        ACE_TEXT("SimpleTcp"),
         OpenDDS::DCPS::DONT_AUTO_CONFIG
       );
 
   OpenDDS::DCPS::TransportConfiguration_rch transport_config
     = TheTransportFactory->create_configuration(
         0,
-        ACE_TString("SimpleTcp")
+        ACE_TEXT("SimpleTcp")
       );
 
 #if 0
@@ -124,7 +124,7 @@ Subscriber::Subscriber( int argc, char** argv, char** envp)
 
   if( OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Installing type %s support into domain %d.\n"),
+      ACE_TEXT("(%P|%t) INFO: Installing type %C support into domain %d.\n"),
       this->config_.typeName().c_str(),
       this->config_.domain()
     ));
@@ -136,7 +136,7 @@ Subscriber::Subscriber( int argc, char** argv, char** envp)
                           )
     ) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Unable to install type %s support for domain %d.\n"),
+      ACE_TEXT("(%P|%t) ERROR: Unable to install type %C support for domain %d.\n"),
       this->config_.typeName().c_str(),
       this->config_.domain()
     ));
@@ -155,7 +155,7 @@ Subscriber::Subscriber( int argc, char** argv, char** envp)
                  );
   if( CORBA::is_nil( this->topic_.in()) ) {
     ACE_ERROR ((LM_ERROR,
-      ACE_TEXT ("(%P|%t) ERROR: Failed to create topic %s for subscriber.\n"),
+      ACE_TEXT ("(%P|%t) ERROR: Failed to create topic %C for subscriber.\n"),
       this->config_.topicName().c_str()
     ));
     throw BadTopicException ();
@@ -195,16 +195,16 @@ Subscriber::Subscriber( int argc, char** argv, char** envp)
 
     switch (attach_status) {
       case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-        status_str = "ATTACH_BAD_TRANSPORT";
+        status_str = ACE_TEXT("ATTACH_BAD_TRANSPORT");
         break;
       case OpenDDS::DCPS::ATTACH_ERROR:
-        status_str = "ATTACH_ERROR";
+        status_str = ACE_TEXT("ATTACH_ERROR");
         break;
       case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-        status_str = "ATTACH_INCOMPATIBLE_QOS";
+        status_str = ACE_TEXT("ATTACH_INCOMPATIBLE_QOS");
         break;
       default:
-        status_str = "Unknown Status";
+        status_str = ACE_TEXT("Unknown Status");
         break;
     }
     ACE_ERROR ((LM_ERROR,

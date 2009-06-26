@@ -25,7 +25,7 @@ InfoRepoMulticastResponder::~InfoRepoMulticastResponder ()
     (this->mcast_dgram_.leave (this->mcast_addr_) == -1)
     )
     {
-      ACE_ERROR ((LM_ERROR, "%p\n", "~InfoRepoMulticastResponder()"));
+      ACE_ERROR ((LM_ERROR, "%p\n", ACE_TEXT("~InfoRepoMulticastResponder()")));
     }
 }
 
@@ -48,7 +48,7 @@ InfoRepoMulticastResponder::init (
   }
 
   if (this->mcast_addr_.set (port, mcast_addr) == -1)
-    ACE_ERROR_RETURN ((LM_ERROR, "InfoRepoMulticastResponder::init() %p\n", "set"), -1);
+    ACE_ERROR_RETURN ((LM_ERROR, "InfoRepoMulticastResponder::init() %p\n", ACE_TEXT("set")), -1);
   return common_init (orb);
 }
 
@@ -95,7 +95,7 @@ InfoRepoMulticastResponder::init (
   if (this->mcast_addr_.set (actual_mcast_addr.in ()) == -1)
     ACE_ERROR_RETURN ((LM_ERROR,
                        "%p\n",
-                       "set"),
+                       ACE_TEXT("set")),
                       -1);
 
   return common_init (orb);
@@ -111,13 +111,13 @@ InfoRepoMulticastResponder::common_init (
   if (this->response_addr_.set ((u_short) 0) == -1)
     ACE_ERROR_RETURN ((LM_ERROR,
     "InfoRepoMulticastResponder::common_init() %p\n",
-                       "set"),
+                       ACE_TEXT("set")),
                       -1);
   else if (this->response_.open (this->response_addr_) == -1)
     {
       ACE_ERROR_RETURN ((LM_ERROR,
                          "%p\n",
-                         "set"),
+                         ACE_TEXT("set")),
                         -1);
     }
 
@@ -127,14 +127,15 @@ InfoRepoMulticastResponder::common_init (
       if (this->mcast_dgram_.join (this->mcast_addr_,
                                    1,
                                    ACE_TEXT_CHAR_TO_TCHAR(this->mcast_nic_.c_str())) == -1)
-      ACE_ERROR_RETURN ((LM_ERROR, "InfoRepoMulticastResponder::common_init() %p\n", "subscribe"),-1);
+      ACE_ERROR_RETURN ((LM_ERROR, "InfoRepoMulticastResponder::common_init() %p\n",
+                         ACE_TEXT("subscribe")), -1);
     }
   else
     {
       if (this->mcast_dgram_.join (this->mcast_addr_) == -1)
         ACE_ERROR_RETURN ((LM_ERROR,
-      "InfoRepoMulticastResponder::common_init() %p\n",
-                           "subscribe"),
+                           "InfoRepoMulticastResponder::common_init() %p\n",
+                           ACE_TEXT("subscribe")),
                           -1);
     }
   this->initialized_ = true;
@@ -206,7 +207,7 @@ InfoRepoMulticastResponder::handle_input (ACE_HANDLE)
       remote_addr.addr_to_string (addr, sizeof(addr));
       ACE_DEBUG ((LM_DEBUG,
                   "(%P|%t) Received multicast from %s.\n"
-                  "Service Name received : %s\n"
+                  "Service Name received : %C\n"
                   "Port received : %u\n",
                   addr,
                   object_key,
@@ -326,8 +327,8 @@ InfoRepoMulticastResponder::handle_input (ACE_HANDLE)
 
   if (TAO_debug_level > 0)
     ACE_DEBUG ((LM_DEBUG,
-    "(%P|%t) InfoRepoMulticastResponder::handle_input() ior: <%s>\n"
-                "sent to %s:%u.\n"
+    "(%P|%t) InfoRepoMulticastResponder::handle_input() ior: <%C>\n"
+                "sent to %C:%u.\n"
                 "result from send = %d\n",
                 ior.c_str (),
                 peer_addr.get_host_name (),

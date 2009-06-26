@@ -209,7 +209,7 @@ namespace OpenDDS
           ACE_ERROR_RETURN((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: ")
             ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
-            ACE_TEXT("the participant %s is not empty.\n"),
+            ACE_TEXT("the participant %C is not empty.\n"),
             std::string(converter).c_str()
           ),::DDS::RETCODE_PRECONDITION_NOT_MET);
         }
@@ -227,7 +227,7 @@ namespace OpenDDS
             ACE_TEXT("%p domain_id=%d dp_id=%s.\n"),
             ACE_TEXT("find"),
             domain_id,
-            std::string(converter).c_str()
+            std::basic_string<ACE_TCHAR>(converter).c_str()
           ),::DDS::RETCODE_ERROR);
         }
       else

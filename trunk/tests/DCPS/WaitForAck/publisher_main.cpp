@@ -8,8 +8,7 @@
 
 #include <sstream>
 
-int
-main( int argc, char *argv[])
+int ACE_TMAIN( int argc, ACE_TCHAR *argv[])
 {
   int result = 1;
   try {
@@ -43,10 +42,10 @@ main( int argc, char *argv[])
     ));
     return 2;
 
-  } catch( Test::Exception e)  {
+  } catch(const Test::Exception& e)  {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) publisher_main() - ")
-      ACE_TEXT("Test exception caught during processing: %s.\n"),
+      ACE_TEXT("Test exception caught during processing: %C.\n"),
       e.what()
     ));
     return 3;

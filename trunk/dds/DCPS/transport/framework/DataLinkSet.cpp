@@ -168,7 +168,7 @@ OpenDDS::DCPS::DataLinkSet::find_link(const RepoId remoteId,
               RepoIdConverter converter(localId);
               ACE_ERROR((LM_ERROR,
                 ACE_TEXT("(%P|%t) DataLinkSet::find_link: ")
-                ACE_TEXT("cannot remove link for localId %s pub_side is %s.\n"),
+                ACE_TEXT("cannot remove link for localId %C pub_side is %C.\n"),
                 std::string(converter).c_str(),
                 (pub_side? "true": "false")
               ));
