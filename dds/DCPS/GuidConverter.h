@@ -84,6 +84,7 @@ public:
 
   /// Convert to diagnostic string.
   operator std::string() const;
+  operator std::wstring() const;
 
 protected:
   const GUID_t guid_;
@@ -94,5 +95,8 @@ protected:
 
 OpenDDS_Dcps_Export std::ostream&
 operator<<(std::ostream& os, const OpenDDS::DCPS::GuidConverter& rhs);
+
+OpenDDS_Dcps_Export std::wostream&
+operator<<(std::wostream& os, const OpenDDS::DCPS::GuidConverter& rhs);
 
 #endif /* DCPS_GUIDCONVERTER_H */

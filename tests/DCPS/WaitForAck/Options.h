@@ -24,7 +24,7 @@ namespace Test {
 class Options  {
   public:
     /// Default constructor.
-    Options( int argc, char** argv, char** envp = 0);
+    Options( int argc, ACE_TCHAR** argv, char** envp = 0);
 
     /// Virtual destructor.
     virtual ~Options();

@@ -41,9 +41,8 @@ Writer::start ()
   if (activate (THR_NEW_LWP | THR_JOINABLE, num_thread_to_write_) == -1)
   {
     ACE_ERROR ((LM_ERROR,
-                ACE_TEXT("(%P|%t) Writer::start, ")
-                ACE_TEXT ("%p."),
-                "activate"));
+                ACE_TEXT("(%P|%t) Writer::start, %p.\n"),
+                ACE_TEXT("activate")));
     throw TestException ();
   }
 }
@@ -66,7 +65,7 @@ Writer::svc ()
 
     ::DDS::Topic_var topic = writer_->get_topic() ;
 
-    ACE_DEBUG((LM_DEBUG,"(%P|%t) %s: Writer::svc begins.\n",
+    ACE_DEBUG((LM_DEBUG,"(%P|%t) %C: Writer::svc begins.\n",
               topic->get_name()));
 
     if (!ACE_OS::strcmp(topic->get_name(), MY_TOPIC1))

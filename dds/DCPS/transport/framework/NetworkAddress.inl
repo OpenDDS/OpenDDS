@@ -18,7 +18,7 @@ OpenDDS::DCPS::NetworkAddress::~NetworkAddress()
 }
 
 ACE_INLINE
-OpenDDS::DCPS::NetworkAddress::NetworkAddress(const std::string& addr)
+OpenDDS::DCPS::NetworkAddress::NetworkAddress(const ACE_TString& addr)
 : reserved_ (0)
 {
   DBG_ENTRY_LVL("NetworkAddress","NetworkAddress",6);

@@ -49,7 +49,7 @@ SimpleDataWriter::run(SimplePublisher* publisher)
   // We just send one message.
 
   // This is what goes in the "Data Block".
-  ACE_TString data = "Hello World!";
+  ACE_CString data = "Hello World!";
 
   // Now we can create the DataSampleHeader struct and set its fields.
   OpenDDS::DCPS::DataSampleHeader header;

@@ -15,7 +15,7 @@
 /**
  * @brief Construct a test system from the command line.
  */
-TestSystem::TestSystem( int argc, char** argv, char** envp)
+TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
  : config_( argc, argv, envp)
 {
   // Grab a local reference to the factory to ensure that we perform the
@@ -124,14 +124,14 @@ TestSystem::TestSystem( int argc, char** argv, char** envp)
     this->transport_
       = TheTransportFactory->create_transport_impl(
           TestConfig::SubscriberTransport,
-          "SimpleTcp",
+          ACE_TEXT("SimpleTcp"),
           OpenDDS::DCPS::DONT_AUTO_CONFIG
         );
 
     OpenDDS::DCPS::TransportConfiguration_rch reader_config
       = TheTransportFactory->create_configuration(
           TestConfig::SubscriberTransport,
-          ACE_TString("SimpleTcp")
+          ACE_TEXT("SimpleTcp")
         );
 
     OpenDDS::DCPS::SimpleTcpConfiguration* reader_tcp_config
@@ -176,7 +176,7 @@ TestSystem::TestSystem( int argc, char** argv, char** envp)
   //
 
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%T (%P|%t) INFO: creating subscription type support for type %s.\n"),
+    ACE_TEXT("%T (%P|%t) INFO: creating subscription type support for type %C.\n"),
     this->config_.typeName().c_str()
   ));
   ::Xyz::FooNoKeyTypeSupportImpl* subscriber_data = new ::Xyz::FooNoKeyTypeSupportImpl();
@@ -191,7 +191,7 @@ TestSystem::TestSystem( int argc, char** argv, char** envp)
   }
 
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%T (%P|%t) INFO: creating publication type support for type %s.\n"),
+    ACE_TEXT("%T (%P|%t) INFO: creating publication type support for type %C.\n"),
     this->config_.typeName().c_str()
   ));
   ::Xyz::FooNoKeyTypeSupportImpl* publisher_data = new ::Xyz::FooNoKeyTypeSupportImpl();
@@ -210,7 +210,7 @@ TestSystem::TestSystem( int argc, char** argv, char** envp)
   //
 
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%T (%P|%t) INFO: creating subscription topic: %s.\n"),
+    ACE_TEXT("%T (%P|%t) INFO: creating subscription topic: %C.\n"),
     this->config_.readerTopicName().c_str()
   ));
   this->readerTopic_
@@ -228,7 +228,7 @@ TestSystem::TestSystem( int argc, char** argv, char** envp)
     }
 
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%T (%P|%t) INFO: creating publication topic: %s.\n"),
+    ACE_TEXT("%T (%P|%t) INFO: creating publication topic: %C.\n"),
     this->config_.writerTopicName().c_str()
   ));
   this->writerTopic_
@@ -284,16 +284,16 @@ TestSystem::TestSystem( int argc, char** argv, char** envp)
       switch (attach_status)
         {
           case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-            status_str = "ATTACH_BAD_TRANSPORT";
+            status_str = ACE_TEXT("ATTACH_BAD_TRANSPORT");
             break;
           case OpenDDS::DCPS::ATTACH_ERROR:
-            status_str = "ATTACH_ERROR";
+            status_str = ACE_TEXT("ATTACH_ERROR");
             break;
           case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-            status_str = "ATTACH_INCOMPATIBLE_QOS";
+            status_str = ACE_TEXT("ATTACH_INCOMPATIBLE_QOS");
             break;
           default:
-            status_str = "Unknown Status";
+            status_str = ACE_TEXT("Unknown Status");
             break;
         }
 
@@ -341,16 +341,16 @@ TestSystem::TestSystem( int argc, char** argv, char** envp)
       switch (attach_status)
         {
           case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-            status_str = "ATTACH_BAD_TRANSPORT";
+            status_str = ACE_TEXT("ATTACH_BAD_TRANSPORT");
             break;
           case OpenDDS::DCPS::ATTACH_ERROR:
-            status_str = "ATTACH_ERROR";
+            status_str = ACE_TEXT("ATTACH_ERROR");
             break;
           case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-            status_str = "ATTACH_INCOMPATIBLE_QOS";
+            status_str = ACE_TEXT("ATTACH_INCOMPATIBLE_QOS");
             break;
           default:
-            status_str = "Unknown Status";
+            status_str = ACE_TEXT("Unknown Status");
             break;
         }
 
@@ -414,7 +414,7 @@ TestSystem::TestSystem( int argc, char** argv, char** envp)
       );
 
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%T (%P|%t) INFO: creating data reader for topic: %s, type: %s.\n"),
+    ACE_TEXT("%T (%P|%t) INFO: creating data reader for topic: %C, type: %C.\n"),
     description->get_name(), description->get_type_name()
   ));
   this->dataReader_ = this->subscriber_->create_datareader(

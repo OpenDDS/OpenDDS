@@ -36,7 +36,7 @@ int max_samples_per_instance = ::DDS::LENGTH_UNLIMITED;
 int history_depth = 1;
 
 /// parse the command line arguments
-int parse_args (int argc, char *argv[])
+int parse_args (int argc, ACE_TCHAR *argv[])
 {
   ACE_Arg_Shifter arg_shifter (argc, argv);
 
@@ -51,39 +51,39 @@ int parse_args (int argc, char *argv[])
     //  -n max_samples_per_instance defaults to INFINITE
     //  -d history.depth           defaults to 1
 
-    const char *currentArg = 0;
+    const ACE_TCHAR *currentArg = 0;
 
-    if ((currentArg = arg_shifter.get_the_parameter("-t")) != 0)
+    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-t"))) != 0)
     {
       num_threads_to_write = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-b")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-b"))) != 0)
     {
       block_on_write = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-m")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-m"))) != 0)
     {
       multiple_instances = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-i")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-i"))) != 0)
     {
       num_writes_per_thread = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-w")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-w"))) != 0)
     {
       num_datawriters = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-n")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-n"))) != 0)
     {
       max_samples_per_instance = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-d")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-d"))) != 0)
     {
       history_depth = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
@@ -98,7 +98,7 @@ int parse_args (int argc, char *argv[])
 }
 
 
-int main (int argc, char *argv[])
+int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
   try
     {

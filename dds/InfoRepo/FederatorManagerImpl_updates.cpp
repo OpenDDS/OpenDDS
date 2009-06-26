@@ -54,7 +54,7 @@ ManagerImpl::create( const Update::UTopic& topic)
     OpenDDS::DCPS::RepoIdConverter topic_converter(sample.id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::create( TopicUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s/ topic %s ]\n"),
+      ACE_TEXT("repo %d - [ domain %d/ participant %C/ topic %C ]\n"),
       this->id(),
       sample.domain,
       std::string(part_converter).c_str(),
@@ -86,7 +86,7 @@ ManagerImpl::create( const Update::UParticipant& participant)
     OpenDDS::DCPS::RepoIdConverter converter(sample.id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::create( ParticipantUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s ]\n"),
+      ACE_TEXT("repo %d - [ domain %d/ participant %C ]\n"),
       this->id(),
       sample.domain,
       std::string(converter).c_str()
@@ -123,7 +123,7 @@ ManagerImpl::create( const Update::URActor& reader)
     OpenDDS::DCPS::RepoIdConverter sub_converter(sample.id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::create( SubscriptionUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
+      ACE_TEXT("repo %d - [ domain %d/ participant %C/ subscription %C ]\n"),
       this->id(),
       sample.domain,
       std::string(part_converter).c_str(),
@@ -163,7 +163,7 @@ ManagerImpl::create( const Update::UWActor& writer)
     OpenDDS::DCPS::RepoIdConverter pub_converter(sample.id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::create( PublicationUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
+      ACE_TEXT("repo %d - [ domain %d/ participant %C/ publication %C ]\n"),
       this->id(),
       sample.domain,
       std::string(part_converter).c_str(),
@@ -194,7 +194,7 @@ ManagerImpl::create( const Update::OwnershipData& data)
     OpenDDS::DCPS::RepoIdConverter converter(sample.participant);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::create( OwnerUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s/ sender %d/ owner %d ]\n"),
+      ACE_TEXT("repo %d - [ domain %d/ participant %C/ sender %d/ owner %d ]\n"),
       this->id(),
       sample.domain,
       std::string(converter).c_str(),
@@ -242,7 +242,7 @@ ManagerImpl::destroy(
           OpenDDS::DCPS::RepoIdConverter topic_converter(sample.id);
           ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) Federator::ManagerImpl::destroy( TopicUpdate): ")
-            ACE_TEXT("repo %d - [ domain %d/ participant %s/ topic %s ]\n"),
+            ACE_TEXT("repo %d - [ domain %d/ participant %C/ topic %C ]\n"),
             this->id(),
             sample.domain,
             std::string(part_converter).c_str(),
@@ -272,7 +272,7 @@ ManagerImpl::destroy(
           OpenDDS::DCPS::RepoIdConverter converter(sample.id);
           ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) Federator::ManagerImpl::destroy( ParticipantUpdate): ")
-            ACE_TEXT("repo %d - [ domain %d/ participant %s ]\n"),
+            ACE_TEXT("repo %d - [ domain %d/ participant %C ]\n"),
             this->id(),
             sample.domain,
             std::string(converter).c_str()
@@ -306,7 +306,7 @@ ManagerImpl::destroy(
               OpenDDS::DCPS::RepoIdConverter pub_converter(sample.id);
               ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) Federator::ManagerImpl::destroy( PublicationUpdate): ")
-                ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
+                ACE_TEXT("repo %d - [ domain %d/ participant %C/ publication %C ]\n"),
                 this->id(),
                 sample.domain,
                 std::string(part_converter).c_str(),
@@ -338,7 +338,7 @@ ManagerImpl::destroy(
               OpenDDS::DCPS::RepoIdConverter sub_converter(sample.id);
               ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) Federator::ManagerImpl::destroy( SubscriptionUpdate): ")
-                ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
+                ACE_TEXT("repo %d - [ domain %d/ participant %C/ subscription %C ]\n"),
                 this->id(),
                 sample.domain,
                 std::string(part_converter).c_str(),
@@ -374,7 +374,7 @@ ManagerImpl::update( const Update::IdPath& id, const ::DDS::DomainParticipantQos
     OpenDDS::DCPS::RepoIdConverter converter(sample.id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::update( ParticipantUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s ]\n"),
+      ACE_TEXT("repo %d - [ domain %d/ participant %C ]\n"),
       this->id(),
       sample.domain,
       std::string(converter).c_str()
@@ -406,7 +406,7 @@ ManagerImpl::update( const Update::IdPath& id, const ::DDS::TopicQos& qos)
     OpenDDS::DCPS::RepoIdConverter topic_converter(sample.id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::update( TopicUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s/ topic %s ]\n"),
+      ACE_TEXT("repo %d - [ domain %d/ participant %C/ topic %C ]\n"),
       this->id(),
       sample.domain,
       std::string(part_converter).c_str(),
@@ -439,7 +439,7 @@ ManagerImpl::update( const Update::IdPath& id, const ::DDS::DataWriterQos& qos)
     OpenDDS::DCPS::RepoIdConverter pub_converter(sample.id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::update( WriterUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
+      ACE_TEXT("repo %d - [ domain %d/ participant %C/ publication %C ]\n"),
       this->id(),
       sample.domain,
       std::string(part_converter).c_str(),
@@ -472,7 +472,7 @@ ManagerImpl::update( const Update::IdPath& id, const ::DDS::PublisherQos& qos)
     OpenDDS::DCPS::RepoIdConverter pub_converter(sample.id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::update( PublisherUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
+      ACE_TEXT("repo %d - [ domain %d/ participant %C/ publication %C ]\n"),
       this->id(),
       sample.domain,
       std::string(part_converter).c_str(),
@@ -505,7 +505,7 @@ ManagerImpl::update( const Update::IdPath& id, const ::DDS::DataReaderQos& qos)
     OpenDDS::DCPS::RepoIdConverter sub_converter(sample.id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::update( ReaderUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
+      ACE_TEXT("repo %d - [ domain %d/ participant %C/ subscription %C ]\n"),
       this->id(),
       sample.domain,
       std::string(part_converter).c_str(),
@@ -538,7 +538,7 @@ ManagerImpl::update( const Update::IdPath& id, const ::DDS::SubscriberQos& qos)
     OpenDDS::DCPS::RepoIdConverter sub_converter(sample.id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::update( SubscriberUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
+      ACE_TEXT("repo %d - [ domain %d/ participant %C/ subscription %C ]\n"),
       this->id(),
       sample.domain,
       std::string(part_converter).c_str(),
@@ -562,7 +562,7 @@ ManagerImpl::processCreate( const OwnerUpdate* sample, const ::DDS::SampleInfo* 
     OpenDDS::DCPS::RepoIdConverter converter(sample->participant);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processCreate( OwnerUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s/ sender %d/ owner %d ]\n"),
+      ACE_TEXT("repo %d - [ domain %d/ participant %C/ sender %d/ owner %d ]\n"),
       this->id(),
       sample->domain,
       std::string(converter).c_str(),
@@ -602,7 +602,7 @@ ManagerImpl::processCreate( const PublicationUpdate* sample, const ::DDS::Sample
     OpenDDS::DCPS::RepoIdConverter pub_converter(sample->id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processCreate( PublicationUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
+      ACE_TEXT("repo %d - [ domain %d/ participant %C/ publication %C ]\n"),
       this->id(),
       sample->domain,
       std::string(part_converter).c_str(),
@@ -650,7 +650,7 @@ ManagerImpl::processCreate( const SubscriptionUpdate* sample, const ::DDS::Sampl
     OpenDDS::DCPS::RepoIdConverter sub_converter(sample->id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processCreate( SubscriptionUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
+      ACE_TEXT("repo %d - [ domain %d/ participant %C/ subscription %C ]\n"),
       this->id(),
       sample->domain,
       std::string(part_converter).c_str(),
@@ -696,7 +696,7 @@ ManagerImpl::processCreate( const ParticipantUpdate* sample, const ::DDS::Sample
     OpenDDS::DCPS::RepoIdConverter converter(sample->id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processCreate( ParticipantUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s/ owner %d ]\n"),
+      ACE_TEXT("repo %d - [ domain %d/ participant %C/ owner %d ]\n"),
       this->id(),
       sample->domain,
       std::string(converter).c_str(),
@@ -726,7 +726,7 @@ ManagerImpl::processCreate( const TopicUpdate* sample, const ::DDS::SampleInfo* 
     OpenDDS::DCPS::RepoIdConverter topic_converter(sample->id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processCreate( TopicUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s/ topic %s ]\n"),
+      ACE_TEXT("repo %d - [ domain %d/ participant %C/ topic %C ]\n"),
       this->id(),
       sample->domain,
       std::string(part_converter).c_str(),
@@ -769,7 +769,7 @@ ManagerImpl::processDeferred()
     std::list< OwnerUpdate>::iterator current = this->deferredOwnerships_.begin();
     while (current != this->deferredOwnerships_.end())
     {
-      if( true == this->info_->changeOwnership( current->domain,
+      if (this->info_->changeOwnership(current->domain,
         current->participant,
         current->sender,
         current->owner)) {
@@ -777,7 +777,7 @@ ManagerImpl::processDeferred()
             OpenDDS::DCPS::RepoIdConverter converter(current->participant);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDeferred( OwnerUpdate): ")
-              ACE_TEXT("repo %d - [ domain %d/ participant %s/ sender %d/ owner %d ]\n"),
+              ACE_TEXT("repo %d - [ domain %d/ participant %C/ sender %d/ owner %d ]\n"),
               this->id(),
               current->domain,
               std::string(converter).c_str(),
@@ -809,7 +809,7 @@ ManagerImpl::processDeferred()
             OpenDDS::DCPS::RepoIdConverter topic_converter(current->id);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDeferred( TopicUpdate): ")
-              ACE_TEXT("repo %d - [ domain %d/ participant %s/ topic %s ]\n"),
+              ACE_TEXT("repo %d - [ domain %d/ participant %C/ topic %C ]\n"),
               this->id(),
               current->domain,
               std::string(part_converter).c_str(),
@@ -849,7 +849,7 @@ ManagerImpl::processDeferred()
             OpenDDS::DCPS::RepoIdConverter pub_converter(current->id);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDeferred( PublicationUpdate): ")
-              ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
+              ACE_TEXT("repo %d - [ domain %d/ participant %C/ publication %C ]\n"),
               this->id(),
               current->domain,
               std::string(part_converter).c_str(),
@@ -888,7 +888,7 @@ ManagerImpl::processDeferred()
             OpenDDS::DCPS::RepoIdConverter sub_converter(current->id);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDeferred( SubscriptionUpdate): ")
-              ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
+              ACE_TEXT("repo %d - [ domain %d/ participant %C/ subscription %C ]\n"),
               this->id(),
               current->domain,
               std::string(part_converter).c_str(),
@@ -913,7 +913,7 @@ ManagerImpl::processUpdateQos1( const OwnerUpdate* sample, const ::DDS::SampleIn
     OpenDDS::DCPS::RepoIdConverter converter(sample->participant);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateQos1( OwnerUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s/ sender %d/ owner %d ]\n"),
+      ACE_TEXT("repo %d - [ domain %d/ participant %C/ sender %d/ owner %d ]\n"),
       this->id(),
       sample->domain,
       std::string(converter).c_str(),
@@ -948,7 +948,7 @@ ManagerImpl::processUpdateQos1( const PublicationUpdate* sample, const ::DDS::Sa
     OpenDDS::DCPS::RepoIdConverter pub_converter(sample->id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateQos1( PublicationUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
+      ACE_TEXT("repo %d - [ domain %d/ participant %C/ publication %C ]\n"),
       this->id(),
       sample->domain,
       std::string(part_converter).c_str(),
@@ -972,7 +972,7 @@ ManagerImpl::processUpdateQos2( const PublicationUpdate* sample, const ::DDS::Sa
     OpenDDS::DCPS::RepoIdConverter pub_converter(sample->id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateQos2( PublicationUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
+      ACE_TEXT("repo %d - [ domain %d/ participant %C/ publication %C ]\n"),
       this->id(),
       sample->domain,
       std::string(part_converter).c_str(),
@@ -996,7 +996,7 @@ ManagerImpl::processUpdateQos1( const SubscriptionUpdate* sample, const ::DDS::S
     OpenDDS::DCPS::RepoIdConverter sub_converter(sample->id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateQos1( SubscriptionUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
+      ACE_TEXT("repo %d - [ domain %d/ participant %C/ subscription %C ]\n"),
       this->id(),
       sample->domain,
       std::string(part_converter).c_str(),
@@ -1020,7 +1020,7 @@ ManagerImpl::processUpdateQos2( const SubscriptionUpdate* sample, const ::DDS::S
     OpenDDS::DCPS::RepoIdConverter sub_converter(sample->id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateQos2( SubscriptionUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
+      ACE_TEXT("repo %d - [ domain %d/ participant %C/ subscription %C ]\n"),
       this->id(),
       sample->domain,
       std::string(part_converter).c_str(),
@@ -1043,7 +1043,7 @@ ManagerImpl::processUpdateQos1( const ParticipantUpdate* sample, const ::DDS::Sa
     OpenDDS::DCPS::RepoIdConverter converter(sample->id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateQos1( ParticipantUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s ]\n"),
+      ACE_TEXT("repo %d - [ domain %d/ participant %C ]\n"),
       this->id(),
       sample->domain,
       std::string(converter).c_str()
@@ -1065,7 +1065,7 @@ ManagerImpl::processUpdateQos1( const TopicUpdate* sample, const ::DDS::SampleIn
     OpenDDS::DCPS::RepoIdConverter topic_converter(sample->id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateQos1( TopicUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s/ topic %s ]\n"),
+      ACE_TEXT("repo %d - [ domain %d/ participant %C/ topic %C ]\n"),
       this->id(),
       sample->domain,
       std::string(part_converter).c_str(),
@@ -1088,7 +1088,7 @@ ManagerImpl::processDelete( const OwnerUpdate* sample, const ::DDS::SampleInfo* 
     OpenDDS::DCPS::RepoIdConverter converter(sample->participant);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDelete( OwnerUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s/ sender %d/ owner %d ]\n"),
+      ACE_TEXT("repo %d - [ domain %d/ participant %C/ sender %d/ owner %d ]\n"),
       this->id(),
       sample->domain,
       std::string(converter).c_str(),
@@ -1123,7 +1123,7 @@ ManagerImpl::processDelete( const PublicationUpdate* sample, const ::DDS::Sample
     OpenDDS::DCPS::RepoIdConverter pub_converter(sample->id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDelete( PublicationUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
+      ACE_TEXT("repo %d - [ domain %d/ participant %C/ publication %C ]\n"),
       this->id(),
       sample->domain,
       std::string(part_converter).c_str(),
@@ -1157,7 +1157,7 @@ ManagerImpl::processDelete( const SubscriptionUpdate* sample, const ::DDS::Sampl
     OpenDDS::DCPS::RepoIdConverter sub_converter(sample->id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDelete( SubscriptionUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
+      ACE_TEXT("repo %d - [ domain %d/ participant %C/ subscription %C ]\n"),
       this->id(),
       sample->domain,
       std::string(part_converter).c_str(),
@@ -1189,7 +1189,7 @@ ManagerImpl::processDelete( const ParticipantUpdate* sample, const ::DDS::Sample
     OpenDDS::DCPS::RepoIdConverter converter(sample->id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDelete( ParticipantUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s ]\n"),
+      ACE_TEXT("repo %d - [ domain %d/ participant %C ]\n"),
       this->id(),
       sample->domain,
       std::string(converter).c_str()
@@ -1210,7 +1210,7 @@ ManagerImpl::processDelete( const TopicUpdate* sample, const ::DDS::SampleInfo* 
     OpenDDS::DCPS::RepoIdConverter topic_converter(sample->id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDelete( TopicUpdate): ")
-      ACE_TEXT("repo %d - [ domain %d/ participant %s/ topic %s ]\n"),
+      ACE_TEXT("repo %d - [ domain %d/ participant %C/ topic %C ]\n"),
       this->id(),
       sample->domain,
       std::string(part_converter).c_str(),

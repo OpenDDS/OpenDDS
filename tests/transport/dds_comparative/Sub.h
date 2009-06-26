@@ -32,7 +32,7 @@ class Sub : public OpenDDS::DCPS::TransportInterface
     /// Add a remote publisher
     void add_remote_publisher(OpenDDS::DCPS::RepoId    pub_id,
                               const ACE_INET_Addr& pub_addr,
-                              const std::string&   pub_addr_str);
+                              const ACE_TString&   pub_addr_str);
 
     void init(unsigned impl_id);
     void wait();
@@ -52,11 +52,11 @@ class Sub : public OpenDDS::DCPS::TransportInterface
     {
       OpenDDS::DCPS::RepoId pub_id_;
       ACE_INET_Addr     pub_addr_;
-      std::string       pub_addr_str_;
+      ACE_TString       pub_addr_str_;
 
       PubInfo(OpenDDS::DCPS::RepoId pub_id, 
               const ACE_INET_Addr& pub_addr,
-              const std::string&   pub_addr_str)
+              const ACE_TString&   pub_addr_str)
         : pub_id_(pub_id), pub_addr_(pub_addr), pub_addr_str_(pub_addr_str)
         {}
 

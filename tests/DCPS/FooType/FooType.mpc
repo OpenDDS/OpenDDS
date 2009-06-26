@@ -7,5 +7,6 @@ project(DcpsFooType) : dcps {
   TypeSupport_Files {
     FooType.idl
   }
+
 }
 

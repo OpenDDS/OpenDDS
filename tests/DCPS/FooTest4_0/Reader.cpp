@@ -15,7 +15,7 @@
 #include "tests/DCPS/FooType4/FooDefTypeSupportC.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
-static const char * reader_address_str = "localhost:16789";
+static const ACE_TCHAR* reader_address_str = ACE_TEXT("localhost:16789");
 
 Reader::Reader(::DDS::DomainParticipant_ptr dp,
                int history_depth,
@@ -99,7 +99,7 @@ Reader::read (const SampleInfoMap& si_map,
 
   const int factor = 20;
   const int timeout_sec = 10 ;
-  ACE_Time_Value small(0,1000000/factor);
+  ACE_Time_Value small_time(0,1000000/factor);
   int timeout_loops = timeout_sec * factor;
 
   try
@@ -118,7 +118,7 @@ Reader::read (const SampleInfoMap& si_map,
         found = true ;
         break ;
       }
-      ACE_OS::sleep (small);
+      ACE_OS::sleep (small_time);
     }
 
     if (!found)
@@ -217,10 +217,10 @@ int Reader::init_transport ()
   int status = 0;
 
   reader_transport_impl
-    = TheTransportFactory->create_transport_impl (SUB_TRAFFIC, "SimpleTcp", OpenDDS::DCPS::DONT_AUTO_CONFIG);
+    = TheTransportFactory->create_transport_impl (SUB_TRAFFIC, ACE_TEXT("SimpleTcp"), OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   OpenDDS::DCPS::TransportConfiguration_rch reader_config
-    = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleTcp");
+    = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("SimpleTcp"));
 
   OpenDDS::DCPS::SimpleTcpConfiguration* reader_tcp_config
     = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (reader_config.in ());

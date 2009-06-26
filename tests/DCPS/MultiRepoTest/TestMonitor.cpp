@@ -29,7 +29,7 @@ namespace { // Anonymous namespace for file scope.
 /**
  * @brief Construct a test system from the command line.
  */
-TestMonitor::TestMonitor( int argc, char** argv, char** envp)
+TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
  : config_( argc, argv, envp)
 {
 /// DDS_RUN_DEBUG_LEVEL = 5;
@@ -58,9 +58,9 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
 
   if( signed(OpenDDS::DCPS::DCPS_debug_level) >= 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) COMMANDLINE:              Verbose == %s\n")
+      ACE_TEXT("%T (%P|%t) COMMANDLINE:              Verbose == %C\n")
       ACE_TEXT("%T (%P|%t) COMMANDLINE:              Samples == %d\n")
-      ACE_TEXT("%T (%P|%t) COMMANDLINE:                 Type == %s\n")
+      ACE_TEXT("%T (%P|%t) COMMANDLINE:                 Type == %C\n")
       ACE_TEXT("%T (%P|%t) COMMANDLINE:    Transport Address == %s\n"),
       (this->config_.verbose()? "true": "false"),
       this->config_.samples(),
@@ -69,19 +69,19 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
     ));
     for( int index = 0; index < this->config_.infoRepoIorSize(); ++index) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("%T (%P|%t) COMMANDLINE:     InforRepoIOR[ %d] == %s\n"),
+        ACE_TEXT("%T (%P|%t) COMMANDLINE:     InforRepoIOR[ %d] == %C\n"),
         index, this->config_.infoRepoIor( index).c_str()
       ));
     }
     for( int index = 0; index < this->config_.readerTopicNameSize(); ++index) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("%T (%P|%t) COMMANDLINE:  readerTopicName[ %d] == %s\n"),
+        ACE_TEXT("%T (%P|%t) COMMANDLINE:  readerTopicName[ %d] == %C\n"),
         index, this->config_.readerTopicName( index).c_str()
       ));
     }
     for( int index = 0; index < this->config_.writerTopicNameSize(); ++index) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("%T (%P|%t) COMMANDLINE:  writerTopicName[ %d] == %s\n"),
+        ACE_TEXT("%T (%P|%t) COMMANDLINE:  writerTopicName[ %d] == %C\n"),
         index, this->config_.writerTopicName( index).c_str()
       ));
     }
@@ -252,14 +252,14 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
     this->transport_[ *current]
       = TheTransportFactory->create_transport_impl(
           transportKey,
-          "SimpleTcp",
+          ACE_TEXT("SimpleTcp"),
           OpenDDS::DCPS::DONT_AUTO_CONFIG
         );
 
     OpenDDS::DCPS::TransportConfiguration_rch reader_config
       = TheTransportFactory->create_configuration(
           transportKey,
-          ACE_TString("SimpleTcp")
+          ACE_TEXT("SimpleTcp")
         );
 
 //  OpenDDS::DCPS::SimpleTcpConfiguration* reader_tcp_config
@@ -317,7 +317,7 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
        current != this->participants_.end();
        ++current) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) INFO: Installing type %s support into domain %d.\n"),
+      ACE_TEXT("%T (%P|%t) INFO: Installing type %C support into domain %d.\n"),
       this->config_.typeName().c_str(),
       current->first
     ));
@@ -329,7 +329,7 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
                               )
         ) {
         ACE_ERROR((LM_ERROR,
-          ACE_TEXT("%T (%P|%t) ERROR: Unable to install type %s support for domain %d.\n"),
+          ACE_TEXT("%T (%P|%t) ERROR: Unable to install type %C support for domain %d.\n"),
           this->config_.typeName().c_str(),
           current->first
         ));
@@ -344,7 +344,7 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
 
   for( int index = 0; index < this->config_.readerTopicNameSize(); ++index) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) INFO: creating subscription[ %d] topic: %s.\n"),
+      ACE_TEXT("%T (%P|%t) INFO: creating subscription[ %d] topic: %C.\n"),
       index,
       this->config_.readerTopicName( index).c_str()
     ));
@@ -358,7 +358,7 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
     if( CORBA::is_nil( this->readerTopic_[ index].in()) )
       {
         ACE_ERROR ((LM_ERROR,
-          ACE_TEXT ("%T (%P|%t) ERROR: Failed to create topic %s for subscriber[ %d].\n"),
+          ACE_TEXT ("%T (%P|%t) ERROR: Failed to create topic %C for subscriber[ %d].\n"),
           this->config_.readerTopicName( index).c_str(),
           index
         ));
@@ -372,7 +372,7 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
 
   for( int index = 0; index < this->config_.writerTopicNameSize(); ++index) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) INFO: creating publication[ %d] topic: %s.\n"),
+      ACE_TEXT("%T (%P|%t) INFO: creating publication[ %d] topic: %C.\n"),
       index,
       this->config_.writerTopicName( index).c_str()
     ));
@@ -386,7 +386,7 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
     if( CORBA::is_nil( this->writerTopic_[ index].in()) )
       {
         ACE_ERROR ((LM_ERROR,
-          ACE_TEXT ("%T (%P|%t) ERROR: Failed to create topic %s for publisher[ %d].\n"),
+          ACE_TEXT ("%T (%P|%t) ERROR: Failed to create topic %C for publisher[ %d].\n"),
           this->config_.writerTopicName( index).c_str(),
           index
         ));
@@ -451,16 +451,16 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
         switch (attach_status)
           {
             case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-              status_str = "ATTACH_BAD_TRANSPORT";
+              status_str = ACE_TEXT("ATTACH_BAD_TRANSPORT");
               break;
             case OpenDDS::DCPS::ATTACH_ERROR:
-              status_str = "ATTACH_ERROR";
+              status_str = ACE_TEXT("ATTACH_ERROR");
               break;
             case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-              status_str = "ATTACH_INCOMPATIBLE_QOS";
+              status_str = ACE_TEXT("ATTACH_INCOMPATIBLE_QOS");
               break;
             default:
-              status_str = "Unknown Status";
+              status_str = ACE_TEXT("Unknown Status");
               break;
           }
 
@@ -529,16 +529,16 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
         switch (attach_status)
           {
             case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-              status_str = "ATTACH_BAD_TRANSPORT";
+              status_str = ACE_TEXT("ATTACH_BAD_TRANSPORT");
               break;
             case OpenDDS::DCPS::ATTACH_ERROR:
-              status_str = "ATTACH_ERROR";
+              status_str = ACE_TEXT("ATTACH_ERROR");
               break;
             case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-              status_str = "ATTACH_INCOMPATIBLE_QOS";
+              status_str = ACE_TEXT("ATTACH_INCOMPATIBLE_QOS");
               break;
             default:
-              status_str = "Unknown Status";
+              status_str = ACE_TEXT("Unknown Status");
               break;
           }
 

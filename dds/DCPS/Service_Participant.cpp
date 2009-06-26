@@ -51,8 +51,7 @@ namespace OpenDDS
 
     static const ACE_TCHAR DEFAULT_REPO_IOR[] = ACE_TEXT("file://repo.ior");
 
-    static const ACE_CString DEFAULT_PERSISTENT_DATA_DIR =
-      ACE_TEXT_ALWAYS_CHAR("OpenDDS-durable-data-dir");
+    static const ACE_CString DEFAULT_PERSISTENT_DATA_DIR = "OpenDDS-durable-data-dir";
 
     static const ACE_TCHAR COMMON_SECTION_NAME[] = ACE_TEXT("common");
     static const ACE_TCHAR DOMAIN_SECTION_NAME[] = ACE_TEXT("domain");
@@ -235,6 +234,16 @@ namespace OpenDDS
         }
     }
 
+#ifdef ACE_USES_WCHAR
+    ::DDS::DomainParticipantFactory_ptr
+    Service_Participant::get_domain_participant_factory (int &argc,
+                                                         char *argv[])
+    {
+      ACE_Argv_Type_Converter converter (argc, argv);
+      return get_domain_participant_factory(converter.get_argc(),
+                                            converter.get_TCHAR_argv());
+    }
+#endif
 
     ::DDS::DomainParticipantFactory_ptr
     Service_Participant::get_domain_participant_factory (int &argc,
@@ -253,15 +262,11 @@ namespace OpenDDS
                 {
                   if (CORBA::is_nil (orb_.in ()))
                     {
-                      ACE_Argv_Type_Converter converter (argc, argv);
-
                       //TBD: allow user to specify the ORB id
 
                       // Use a unique ORB for the ::DDS Service
                       // to avoid conflicts with other CORBA code
-                      orb_ = CORBA::ORB_init (argc,
-                                              converter.get_ASCII_argv(),
-                                              "TAO_DDS_DCPS");
+                      orb_ = CORBA::ORB_init (argc, argv, DEFAULT_ORB_NAME);
                     }
 
                   if (parse_args (argc, argv) != 0)
@@ -274,8 +279,8 @@ namespace OpenDDS
                   if (config_fname == ACE_TEXT(""))
                     {
                       ACE_DEBUG ((LM_INFO,
-                        ACE_TEXT ("(%P|%t)INFO: not using file configuration - no configuration "
-                        "file specified.\n")));
+                        ACE_TEXT ("(%P|%t)INFO: not using file configuration - no configuration ")
+                        ACE_TEXT ("file specified.\n")));
                     }
                   else
                     {
@@ -286,10 +291,9 @@ namespace OpenDDS
                       if (!in)
                         {
                           ACE_DEBUG ((LM_INFO,
-                                      ACE_TEXT("(%P|%t)INFO: not using file configuration - "
-                                               "can not open \"%s\" for reading. %p\n"),
-                                      config_fname.c_str(),
-                                      ACE_TEXT("fopen")));
+                                      ACE_TEXT("(%P|%t)INFO: not using file configuration - ")
+                                      ACE_TEXT ("can not open \"%s\" for reading. %p\n"),
+                                      config_fname.c_str(), ACE_TEXT("fopen")));
                         }
                       else
                         {
@@ -628,15 +632,15 @@ namespace OpenDDS
         int ace_scheduler = ACE_SCHED_OTHER;
         this->scheduler_  = THR_SCHED_DEFAULT;
 
-        if( this->schedulerString_ == "SCHED_RR") {
+        if( this->schedulerString_ == ACE_TEXT("SCHED_RR")) {
           this->scheduler_ = THR_SCHED_RR;
           ace_scheduler    = ACE_SCHED_RR;
 
-        } else if( this->schedulerString_ == "SCHED_FIFO") {
+        } else if( this->schedulerString_ == ACE_TEXT("SCHED_FIFO")) {
           this->scheduler_ = THR_SCHED_FIFO;
           ace_scheduler    = ACE_SCHED_FIFO;
 
-        } else if( this->schedulerString_ == "SCHED_OTHER") {
+        } else if( this->schedulerString_ == ACE_TEXT("SCHED_OTHER")) {
           this->scheduler_ = THR_SCHED_DEFAULT;
           ace_scheduler    = ACE_SCHED_OTHER;
 
@@ -690,11 +694,17 @@ namespace OpenDDS
     }
 
     void
-    Service_Participant::set_repo_ior( const ACE_TCHAR* ior, const RepoKey key)
+    Service_Participant::set_repo_ior( const wchar_t* ior, const RepoKey key)
+    {
+      set_repo_ior(ACE_Wide_To_Ascii(ior).char_rep(), key);
+    }
+
+    void
+    Service_Participant::set_repo_ior( const char* ior, const RepoKey key)
     {
       if( DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) Service_Participant::set_repo_ior: Repo[ %d] == %s\n"),
+          ACE_TEXT("(%P|%t) Service_Participant::set_repo_ior: Repo[ %d] == %C\n"),
           key, ior
         ));
       }
@@ -707,14 +717,13 @@ namespace OpenDDS
       DCPSInfo_var repo;
 
       try {
-        CORBA::Object_var obj
-          = orb_->string_to_object(ACE_TEXT_ALWAYS_CHAR (ior));
+        CORBA::Object_var obj = orb_->string_to_object(ior);
 
         repo = DCPSInfo::_narrow( obj.in());
         if( CORBA::is_nil( repo.in())) {
           ACE_ERROR((LM_ERROR,
             ACE_TEXT ("(%P|%t) ERROR: Service_Participant::set_repo_ior: ")
-            ACE_TEXT ("unable to narrow DCPSInfo (%s) for key %d. \n"),
+            ACE_TEXT ("unable to narrow DCPSInfo (%C) for key %d. \n"),
             ior,
             key
           ));
@@ -835,7 +844,7 @@ namespace OpenDDS
                     RepoIdConverter converter(id);
                     ACE_DEBUG((LM_DEBUG,
                       ACE_TEXT("(%P|%t) Service_Participant::set_repo_domain: ")
-                      ACE_TEXT("participant %s attached to Repo[ %d].\n"),
+                      ACE_TEXT("participant %C attached to Repo[ %d].\n"),
                       std::string(converter).c_str(),
                       key
                     ));
@@ -1102,14 +1111,14 @@ namespace OpenDDS
       std::stringstream out;
       out << this->bitTransportPortMap_[ repo];
 
-      tcp_config->local_address_str_ = this->bitTransportIpMap_[ repo].c_str();
-      tcp_config->local_address_str_ += ":";
-      tcp_config->local_address_str_ += out.str ();
+      tcp_config->local_address_str_ = this->bitTransportIpMap_[ repo];
+      tcp_config->local_address_str_ += ACE_TEXT(":");
+      tcp_config->local_address_str_ += ACE_TEXT_CHAR_TO_TCHAR(out.str().c_str());
 
       if( this->bitTransportMap_[ domain]->configure(config.in()) != 0)
         {
           ACE_ERROR((LM_ERROR,
-            ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::init_bit_transport_impl: ")
+            ACE_TEXT("(%P|%t) ERROR: Service_Participant::init_bit_transport_impl: ")
             ACE_TEXT("Failed to configure transport for domain %d.\n"),
             domain
           ));
@@ -1200,8 +1209,8 @@ namespace OpenDDS
       int status = 0;
       if ((status = this->cf_.open ()) != 0)
         ACE_ERROR_RETURN ((LM_ERROR,
-                           ACE_TEXT ("(%P|%t)Service_Participant::load_configuration "
-                                     "open() returned %d\n"),
+                           ACE_TEXT ("(%P|%t)Service_Participant::load_configuration ")
+                           ACE_TEXT ("open() returned %d\n"),
                            status),
                            -1);
 
@@ -1210,8 +1219,8 @@ namespace OpenDDS
 
       if (status != 0) {
         ACE_ERROR_RETURN ((LM_ERROR,
-                           ACE_TEXT ("(%P|%t)Service_Participant::load_configuration "
-                           "import_config () returned %d\n"),
+                           ACE_TEXT ("(%P|%t)Service_Participant::load_configuration ")
+                           ACE_TEXT ("import_config () returned %d\n"),
                            status),
                            -1);
       }
@@ -1219,8 +1228,8 @@ namespace OpenDDS
       status = this->load_common_configuration ();
       if (status != 0) {
         ACE_ERROR_RETURN ((LM_ERROR,
-                           ACE_TEXT ("(%P|%t)Service_Participant::load_configuration "
-                           "load_common_configuration () returned %d\n"),
+                           ACE_TEXT ("(%P|%t)Service_Participant::load_configuration ")
+                           ACE_TEXT ("load_common_configuration () returned %d\n"),
                            status),
                            -1);
       }
@@ -1228,24 +1237,24 @@ namespace OpenDDS
       status = this->load_domain_configuration ();
       if (status != 0) {
         ACE_ERROR_RETURN ((LM_ERROR,
-                           ACE_TEXT ("(%P|%t) Service_Participant::load_configuration "
-                           "load_domain_configuration () returned %d\n"),
+                           ACE_TEXT ("(%P|%t) Service_Participant::load_configuration ")
+                           ACE_TEXT ("load_domain_configuration () returned %d\n"),
                            status),
                            -1);
       }
       status = this->load_repo_configuration ();
       if (status != 0) {
         ACE_ERROR_RETURN ((LM_ERROR,
-                           ACE_TEXT ("(%P|%t) Service_Participant::load_configuration "
-                           "load_repo_configuration () returned %d\n"),
+                           ACE_TEXT ("(%P|%t) Service_Participant::load_configuration ")
+                           ACE_TEXT ("load_repo_configuration () returned %d\n"),
                            status),
                            -1);
       }
       status = TheTransportFactory->load_transport_configuration (this->cf_);
       if (status != 0) {
         ACE_ERROR_RETURN ((LM_ERROR,
-                           ACE_TEXT ("(%P|%t)Service_Participant::load_configuration "
-                           "load_transport_configuration () returned %d\n"),
+                           ACE_TEXT ("(%P|%t)Service_Participant::load_configuration ")
+                           ACE_TEXT ("load_transport_configuration () returned %d\n"),
                            status),
                            -1);
       }
@@ -1264,8 +1273,8 @@ namespace OpenDDS
               // This is not an error if the configuration file does not have
               // a common section. The code default configuration will be used.
               ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("(%P|%t)Service_Participant::load_common_configuration "
-                          "failed to open section %s\n"),
+                ACE_TEXT ("(%P|%t)Service_Participant::load_common_configuration ")
+                ACE_TEXT ("failed to open section %s\n"),
                           COMMON_SECTION_NAME));
             }
           return 0;

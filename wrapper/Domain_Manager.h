@@ -51,7 +51,7 @@ class DDSWrapper_Export Domain_Manager
   /// @param argv commandline arguments used for initialization
   /// @param domain_id in which domain participant should be registered
   Domain_Manager (int & argc, 
-		  char *argv[],
+		  ACE_TCHAR *argv[],
 		  DDS::DomainId_t domain_id);
 
   /// ctor
@@ -60,7 +60,7 @@ class DDSWrapper_Export Domain_Manager
   /// @param domain_id in which domain participant should be registered
   /// @param qos for the domain participant
   Domain_Manager (int & argc, 
-		  char *argv[],
+		  ACE_TCHAR *argv[],
 		  DDS::DomainId_t domain_id,
 		  const DDS::DomainParticipantQos & qos);
 

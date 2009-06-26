@@ -19,7 +19,7 @@ class SubDriver
     SubDriver();
     virtual ~SubDriver();
 
-    void run(int& argc, char* argv[]);
+    void run(int& argc, ACE_TCHAR* argv[]);
 
 
   private:
@@ -34,23 +34,23 @@ class SubDriver
       ALL_TRAFFIC
     };
 
-    void parse_args(int& argc, char* argv[]);
-    void init(int& argc, char* argv[]);
+    void parse_args(int& argc, ACE_TCHAR* argv[]);
+    void init(int& argc, ACE_TCHAR* argv[]);
     void run();
 
-    int parse_pub_arg(const std::string& arg);
-    int parse_sub_arg(const std::string& arg);
+    int parse_pub_arg(const ACE_TString& arg);
+    int parse_sub_arg(const ACE_TString& arg);
 
     CORBA::ORB_var orb_;
 
     SimpleSubscriber  subscriber_;
 
-    ACE_CString       pub_id_fname_;
+    ACE_TString       pub_id_fname_;
     ACE_INET_Addr     pub_addr_;
-    std::string       pub_addr_str_;
+    ACE_TString       pub_addr_str_;
 
     OpenDDS::DCPS::RepoId sub_id_;
-    ACE_CString       sub_addr_;
+    ACE_TString       sub_addr_;
 
     int               num_writes_;
 
@@ -60,7 +60,7 @@ class SubDriver
     int               add_new_subscription_;
     int               shutdown_delay_secs_;
 
-    std::string       sub_ready_filename_;
+    ACE_TString       sub_ready_filename_;
 };
 
 #endif

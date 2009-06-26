@@ -36,7 +36,7 @@ namespace OpenDDS
       private:
   
         ACE_INET_Addr local_address_;
-        std::string   multicast_group_address_str_;
+        ACE_TString   multicast_group_address_str_;
         ACE_INET_Addr multicast_group_address_;
         bool receiver_;
     };

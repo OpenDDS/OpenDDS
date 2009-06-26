@@ -27,7 +27,7 @@
 class TestMonitor {
   public:
     /// Construct from command line.
-    TestMonitor( int argc, char** argv, char** envp);
+    TestMonitor( int argc, ACE_TCHAR** argv, char** envp);
 
     /// Virtual destructor.
     virtual ~TestMonitor();

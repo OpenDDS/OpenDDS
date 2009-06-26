@@ -70,7 +70,7 @@ int DCPS_IR_Subscription::add_associated_publication (DCPS_IR_Publication* pub)
                     OpenDDS::DCPS::RepoIdConverter pub_converter(pub->get_id());
                     ACE_DEBUG((LM_DEBUG,
                       ACE_TEXT("(%P|%t) DCPS_IR_Subscription::add_associated_publication:")
-                      ACE_TEXT(" subscription %s adding publication %s.\n"),
+                      ACE_TEXT(" subscription %C adding publication %C.\n"),
                       std::string(sub_converter).c_str(),
                       std::string(pub_converter).c_str()
                     ));
@@ -103,7 +103,7 @@ int DCPS_IR_Subscription::add_associated_publication (DCPS_IR_Publication* pub)
         OpenDDS::DCPS::RepoIdConverter pub_converter(pub->get_id());
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Subscription::add_associated_publication: ")
-          ACE_TEXT("subscription %s attempted to re-add publication %s\n"),
+          ACE_TEXT("subscription %C attempted to re-add publication %C\n"),
           std::string(sub_converter).c_str(),
           std::string(pub_converter).c_str()
         ));
@@ -116,7 +116,7 @@ int DCPS_IR_Subscription::add_associated_publication (DCPS_IR_Publication* pub)
         OpenDDS::DCPS::RepoIdConverter pub_converter(pub->get_id());
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Subscription::add_associated_publication: ")
-          ACE_TEXT("subscription %s failed to add publication %s\n"),
+          ACE_TEXT("subscription %C failed to add publication %C\n"),
           std::string(sub_converter).c_str(),
           std::string(pub_converter).c_str()
         ));
@@ -180,7 +180,7 @@ int DCPS_IR_Subscription::remove_associated_publication (DCPS_IR_Publication* pu
           OpenDDS::DCPS::RepoIdConverter pub_converter(pub->get_id());
           ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) DCPS_IR_Subscription::remove_associated_publication: ")
-            ACE_TEXT("subscription %s removed publication %s at %x.\n"),
+            ACE_TEXT("subscription %C removed publication %C at %x.\n"),
             std::string(sub_converter).c_str(),
             std::string(pub_converter).c_str(),
             pub
@@ -193,7 +193,7 @@ int DCPS_IR_Subscription::remove_associated_publication (DCPS_IR_Publication* pu
       OpenDDS::DCPS::RepoIdConverter pub_converter(pub->get_id());
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Subscription::remove_associated_publication: ")
-        ACE_TEXT("subscription %s failed to remove publication %s at %x.\n"),
+        ACE_TEXT("subscription %C failed to remove publication %C at %x.\n"),
         std::string(sub_converter).c_str(),
         std::string(pub_converter).c_str(),
         pub
@@ -267,7 +267,7 @@ void DCPS_IR_Subscription::disassociate_participant (OpenDDS::DCPS::RepoId id)
               OpenDDS::DCPS::RepoIdConverter pub_part_converter(pub->get_participant_id());
               ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) DCPS_IR_Subscription::disassociate_participant: ")
-                ACE_TEXT("subscription %s testing if publication %s particpant %s == %s.\n"),
+                ACE_TEXT("subscription %C testing if publication %C particpant %C == %C.\n"),
                 std::string(sub_converter).c_str(),
                 std::string(pub_converter).c_str(),
                 std::string(sub_part_converter).c_str(),
@@ -338,7 +338,7 @@ void DCPS_IR_Subscription::disassociate_topic (OpenDDS::DCPS::RepoId id)
               OpenDDS::DCPS::RepoIdConverter pub_topic_converter(pub->get_topic_id());
               ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) DCPS_IR_Subscription::disassociate_topic: ")
-                ACE_TEXT("subscription %s testing if publication %s topic %s == %s.\n"),
+                ACE_TEXT("subscription %C testing if publication %C topic %C == %C.\n"),
                 std::string(sub_converter).c_str(),
                 std::string(pub_converter).c_str(),
                 std::string(sub_topic_converter).c_str(),
@@ -408,7 +408,7 @@ void DCPS_IR_Subscription::disassociate_publication (OpenDDS::DCPS::RepoId id)
               OpenDDS::DCPS::RepoIdConverter sub_pub_converter(id);
               ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) DCPS_IR_Subscription::disassociate_publication: ")
-                ACE_TEXT("subscription %s testing if publication %s == %s.\n"),
+                ACE_TEXT("subscription %C testing if publication %C == %C.\n"),
                 std::string(sub_converter).c_str(),
                 std::string(pub_converter).c_str(),
                 std::string(sub_pub_converter).c_str()

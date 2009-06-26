@@ -122,17 +122,6 @@ DataReaderImpl::~DataReaderImpl (void)
     {
       delete rd_allocator_;
     }
-
-  CORBA::Long count = this->total_samples();
-  if( count > 0) {
-    RepoIdConverter converter(subscription_id_);
-    ACE_DEBUG((LM_WARNING,
-      ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::~DataReaderImpl() - ")
-      ACE_TEXT("reader %s terminating with %d samples unread.\n"),
-      std::string(converter).c_str(),
-      count
-    ));
-  }
 }
 
 // this method is called when delete_datawriter is called.
@@ -234,7 +223,7 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
     RepoIdConverter writer_converter(writers[0].writerId);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::add_associations - ")
-      ACE_TEXT("bit %d local %s remote %s num remotes %d \n"),
+      ACE_TEXT("bit %d local %C remote %C num remotes %d \n"),
       is_bit_,
       std::string(reader_converter).c_str(),
       std::string(writer_converter).c_str(),
@@ -301,7 +290,7 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
         RepoIdConverter converter(writer_id);
         ACE_DEBUG((LM_DEBUG,
           "(%P|%t) DataReaderImpl::add_associations: "
-          "inserted writer %s.\n",
+          "inserted writer %C.\n",
           std::string(converter).c_str()
         ));
       }
@@ -350,7 +339,7 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
         RepoIdConverter converter(subscription_id_);
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderImpl::add_associations: ")
-          ACE_TEXT("starting/resetting liveliness timer for reader %s\n"),
+          ACE_TEXT("starting/resetting liveliness timer for reader %C\n"),
           std::string(converter).c_str()
         ));
       }
@@ -406,7 +395,7 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
           RepoIdConverter converter(wr_ids[index]);
           ACE_DEBUG((LM_WARNING,
             ACE_TEXT("(%P|%t) DataReaderImpl::add_associations: ")
-            ACE_TEXT("id_to_handle_map_[ %s] = 0x%x.\n"),
+            ACE_TEXT("id_to_handle_map_[ %C] = 0x%x.\n"),
             std::string(converter).c_str(),
             handles[index]
           ));
@@ -465,7 +454,7 @@ void DataReaderImpl::remove_associations (
     RepoIdConverter writer_converter(writers[0]);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations: ")
-      ACE_TEXT("bit %d local %s remote %s num remotes %d \n"),
+      ACE_TEXT("bit %d local %C remote %C num remotes %d \n"),
       is_bit_,
       std::string(reader_converter).c_str(),
       std::string(writer_converter).c_str(),
@@ -504,7 +493,7 @@ void DataReaderImpl::remove_associations (
         RepoIdConverter converter(writer_id);
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations: ")
-          ACE_TEXT("the writer local %s was already removed.\n"),
+          ACE_TEXT("the writer local %C was already removed.\n"),
           std::string(converter).c_str()
         ));
       }
@@ -1157,7 +1146,7 @@ DataReaderImpl::writer_activity(PublicationId writer_id)
     RepoIdConverter writer_converter(writer_id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::writer_activity: ")
-      ACE_TEXT("reader %s is not associated with writer %s.\n"),
+      ACE_TEXT("reader %C is not associated with writer %C.\n"),
       std::string(reader_converter).c_str(),
       std::string(writer_converter).c_str()
     ));
@@ -1179,7 +1168,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     RepoIdConverter converter(subscription_id_);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::data_received: ")
-      ACE_TEXT("%s received sample: %s.\n"),
+      ACE_TEXT("%C received sample: %C.\n"),
       std::string(converter).c_str(),
       buffer.str().c_str()
     ));
@@ -1240,8 +1229,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
           RepoIdConverter publicationBuffer(  header.publication_id_);
           ACE_DEBUG((LM_WARNING,
             ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::data_received() - ")
-            ACE_TEXT("subscription %s failed to find ")
-            ACE_TEXT("publication data for %s.\n"),
+            ACE_TEXT("subscription %C failed to find ")
+            ACE_TEXT("publication data for %C.\n"),
             std::string( subscriptionBuffer).c_str(),
             std::string( publicationBuffer).c_str()
           ));
@@ -1283,7 +1272,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
           RepoIdConverter debugConverter( sample.header_.publication_id_);
           ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) DataReaderImpl::data_received() - ")
-            ACE_TEXT("publication %s received REQUEST_ACK for sequence 0x%x ")
+            ACE_TEXT("publication %C received REQUEST_ACK for sequence 0x%x ")
             ACE_TEXT("valid for the next %d seconds.\n"),
             std::string( debugConverter).c_str(),
             ACE_UINT16(ack.value_),
@@ -1316,8 +1305,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
           RepoIdConverter publicationBuffer(  sample.header_.publication_id_);
           ACE_DEBUG((LM_WARNING,
             ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::data_received() - ")
-            ACE_TEXT("subscription %s failed to find ")
-            ACE_TEXT("publication data for %s.\n"),
+            ACE_TEXT("subscription %C failed to find ")
+            ACE_TEXT("publication data for %C.\n"),
             std::string( subscriptionBuffer).c_str(),
             std::string( publicationBuffer).c_str()
           ));
@@ -1421,8 +1410,8 @@ DataReaderImpl::send_sample_ack(
     RepoIdConverter publicationBuffer(  publication);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::send_sample_ack() - ")
-      ACE_TEXT("%s sending SAMPLE_ACK message with sequence 0x%x ")
-      ACE_TEXT("to publication %s.\n"),
+      ACE_TEXT("%C sending SAMPLE_ACK message with sequence 0x%x ")
+      ACE_TEXT("to publication %C.\n"),
       std::string( subscriptionBuffer).c_str(),
       ACE_UINT16(sequence),
       std::string( publicationBuffer).c_str()
@@ -1636,7 +1625,7 @@ DataReaderImpl::handle_timeout (const ACE_Time_Value &tv,
         RepoIdConverter converter(subscription_id_);
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderImpl::handle_timeout: ")
-          ACE_TEXT(" canceling timer for reader %s.\n"),
+          ACE_TEXT(" canceling timer for reader %C.\n"),
           std::string(converter).c_str()
         ));
       }
@@ -1650,7 +1639,7 @@ DataReaderImpl::handle_timeout (const ACE_Time_Value &tv,
         // so it is not a failure.
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::handle_timeout: ")
-          ACE_TEXT(" %p. \n"), "cancel_timer" ));
+          ACE_TEXT(" %p. \n"), ACE_TEXT("cancel_timer")));
       }
       liveliness_timer_id_ = -1;
     }
@@ -1683,7 +1672,7 @@ DataReaderImpl::handle_timeout (const ACE_Time_Value &tv,
     RepoIdConverter converter(subscription_id_);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::handle_timeout: ")
-      ACE_TEXT("reader %s has %d live writers; from_reactor=%d\n"),
+      ACE_TEXT("reader %C has %d live writers; from_reactor=%d\n"),
       std::string(converter).c_str(),
       alive_writers,
       arg == this ? 0 : 1
@@ -1705,7 +1694,7 @@ DataReaderImpl::handle_timeout (const ACE_Time_Value &tv,
     {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::handle_timeout: ")
-        ACE_TEXT(" %p. \n"), "schedule_timer" ));
+        ACE_TEXT(" %p. \n"), ACE_TEXT("schedule_timer")));
     }
   }
   else {
@@ -1765,7 +1754,7 @@ OpenDDS::DCPS::WriterInfo::WriterInfo (DataReaderImpl* reader,
     RepoIdConverter reader_converter(reader->subscription_id_);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) WriterInfo::WriterInfo: ")
-      ACE_TEXT("writer %s added to reader %s.\n"),
+      ACE_TEXT("writer %C added to reader %C.\n"),
       std::string(writer_converter).c_str(),
       std::string(reader_converter).c_str()
     ));
@@ -1951,7 +1940,7 @@ DataReaderImpl::writer_removed (PublicationId   writer_id,
     RepoIdConverter writer_converter(writer_id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::writer_removed: ")
-      ACE_TEXT("reader %s from writer %s.\n"),
+      ACE_TEXT("reader %C from writer %C.\n"),
       std::string(reader_converter).c_str(),
       std::string(writer_converter).c_str()
     ));
@@ -1990,7 +1979,7 @@ DataReaderImpl::writer_became_alive (PublicationId writer_id,
     RepoIdConverter writer_converter(writer_id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::writer_became_alive: ")
-      ACE_TEXT("reader %s from writer %s state %s.\n"),
+      ACE_TEXT("reader %C from writer %C state %C.\n"),
       std::string(reader_converter).c_str(),
       std::string(writer_converter).c_str(),
       buffer.str().c_str()
@@ -2062,7 +2051,7 @@ DataReaderImpl::writer_became_dead (PublicationId   writer_id,
     RepoIdConverter writer_converter(writer_id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::writer_became_dead: ")
-      ACE_TEXT("reader %s from writer%s state %s.\n"),
+      ACE_TEXT("reader %C from writer%C state %C.\n"),
       std::string(reader_converter).c_str(),
       std::string(writer_converter).c_str(),
       buffer.str().c_str()
@@ -2226,7 +2215,7 @@ void DataReaderImpl::process_latency( const ReceivedDataSample& sample)
     RepoIdConverter writer_converter(sample.header_.publication_id_);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::process_latency() - ")
-      ACE_TEXT("reader %s is not associated with writer %s (late sample?).\n"),
+      ACE_TEXT("reader %C is not associated with writer %C (late sample?).\n"),
       std::string(reader_converter).c_str(),
       std::string(writer_converter).c_str()
     ));
@@ -2467,7 +2456,7 @@ DataReaderImpl::bit_lookup_instance_handles (const WriterIdSeq& ids,
     }
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::bit_lookup_instance_handles: ")
-      ACE_TEXT("searching for handles for writer Ids: %s.\n"),
+      ACE_TEXT("searching for handles for writer Ids: %C.\n"),
       buffer.str().c_str()
     ));
   }
@@ -2501,7 +2490,7 @@ DataReaderImpl::bit_lookup_instance_handles (const WriterIdSeq& ids,
         RepoIdConverter converter(ids[i]);
         ACE_DEBUG((LM_WARNING,
           ACE_TEXT("(%P|%t) DataReaderImpl::bit_lookup_instance_handles: ")
-          ACE_TEXT("writer %s has handle 0x%x.\n"),
+          ACE_TEXT("writer %C has handle 0x%x.\n"),
           std::string(converter).c_str(),
           hdls[i]
         ));
@@ -2520,7 +2509,7 @@ DataReaderImpl::bit_lookup_instance_handles (const WriterIdSeq& ids,
       if( DCPS_debug_level > 4) {
         ACE_DEBUG((LM_WARNING,
           ACE_TEXT("(%P|%t) DataReaderImpl::bit_lookup_instance_handles: ")
-          ACE_TEXT("using hash as handle for writer %s.\n"),
+          ACE_TEXT("using hash as handle for writer %C.\n"),
           std::string(converter).c_str()
         ));
       }
@@ -2545,7 +2534,7 @@ DataReaderImpl::cache_lookup_instance_handles (const WriterIdSeq& ids,
       RepoIdConverter converter(ids[i]);
       ACE_DEBUG((LM_WARNING,
         ACE_TEXT("(%P|%t) DataReaderImpl::cache_lookup_instance_handles: ")
-        ACE_TEXT("could not find instance handle for writer %s.\n"),
+        ACE_TEXT("could not find instance handle for writer %C.\n"),
         std::string(converter).c_str()
       ));
       hdls[i] = -1;
@@ -2558,7 +2547,7 @@ DataReaderImpl::cache_lookup_instance_handles (const WriterIdSeq& ids,
         RepoIdConverter converter(ids[i]);
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderImpl::cache_lookup_instance_handles: ")
-          ACE_TEXT("instance handle for writer %s == 0x%x.\n"),
+          ACE_TEXT("instance handle for writer %C == 0x%x.\n"),
           std::string(converter).c_str(),
           hdls[i]
         ));
@@ -2681,7 +2670,7 @@ void DataReaderImpl::notify_liveliness_change()
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::notify_liveliness_change: ")
       ACE_TEXT("listener at 0x%x, mask 0x%x.\n")
-      ACE_TEXT("\tNOTIFY: %s\n"),
+      ACE_TEXT("\tNOTIFY: %C\n"),
       listener,
       listener_mask_,
       buffer.str().c_str()
@@ -2709,8 +2698,8 @@ void DataReaderImpl::reschedule_deadline ()
       {
         if (this->watchdog_->reset_timer_interval (iter->second->deadline_timer_id_) == -1)
         {
-          ACE_ERROR ((LM_ERROR, "(%P|%t)DataReaderImpl::reschedule_deadline "
-            "%p\n", "reset_timer_interval"));
+          ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t)DataReaderImpl::reschedule_deadline %p\n"),
+                      ACE_TEXT("reset_timer_interval")));
         }
       }
     }

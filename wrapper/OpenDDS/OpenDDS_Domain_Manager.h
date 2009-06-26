@@ -32,7 +32,7 @@ class OpenDDS_Domain_Manager : public Domain_Manager_Impl
   /// implementation from the command line and set up a domain participant 
   /// with this.
   OpenDDS_Domain_Manager (int & argc, 
-			  char *argv[],
+			  ACE_TCHAR *argv[],
 			  DDS::DomainId_t domain_id);
 
   /// ctor
@@ -40,7 +40,7 @@ class OpenDDS_Domain_Manager : public Domain_Manager_Impl
   /// implementation from the command line and set up a domain participant 
   /// with this. It also allows to pass specific DomainParticipant QoS parameters
   OpenDDS_Domain_Manager (int & argc, 
-			  char *argv[],
+			  ACE_TCHAR *argv[],
 			  DDS::DomainId_t domain_id,
 			  const DDS::DomainParticipantQos & qos);
 
@@ -81,7 +81,7 @@ class OpenDDS_Domain_Manager : public Domain_Manager_Impl
   ///       default_tcp   for tcp/ip 
   ///       default_udp   for default udp
   ///       default_mcast_sub for multicast with sub id
-  bool parse_args (int & argc, char * argv[]);
+  bool parse_args (int & argc, ACE_TCHAR * argv[]);
 
  private:
   /// reference to the internally used domain participant

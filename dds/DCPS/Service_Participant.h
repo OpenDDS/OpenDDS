@@ -36,6 +36,8 @@ namespace OpenDDS
   {
     class DataDurabilityCache;
 
+    const char DEFAULT_ORB_NAME[] = "OpenDDS_DCPS";
+
     /**
      * @class Service_Participant
      *
@@ -111,6 +113,11 @@ namespace OpenDDS
           int &argc = zero_argc,
           ACE_TCHAR *argv[] = 0
         );
+
+#ifdef ACE_USES_WCHAR
+      ::DDS::DomainParticipantFactory_ptr
+        get_domain_participant_factory (int &argc, char *argv[]);
+#endif
 
       /**
        * Stop being a participant in the service.
@@ -203,8 +210,12 @@ namespace OpenDDS
       int liveliness_factor () const;
 
       /// Load DCPSInfoRepo IORs.
-      void set_repo_ior (const ACE_TCHAR* ior,
+      // CORBA strings are narrow so ior is const char* not ACE_TCHAR
+      void set_repo_ior (const char* ior,
                          const RepoKey key = DEFAULT_REPO);
+
+      /// Convenience overload for wchar_t
+      void set_repo_ior (const wchar_t* ior, const RepoKey key = DEFAULT_REPO);
 
       /// Load DCPSInfoRepo reference directly.
       void set_repo (DCPSInfo_ptr repo, const RepoKey key = DEFAULT_REPO);

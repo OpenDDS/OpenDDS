@@ -165,7 +165,7 @@ PublisherImpl::create_datawriter (
       ACE_ERROR ((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("PublisherImpl::create_datawriter, ")
-      ACE_TEXT("typesupport(topic_name=%s) is nil.\n"),
+      ACE_TEXT("typesupport(topic_name=%C) is nil.\n"),
       name.in ()));
       return ::DDS::DataWriter::_nil ();
     }
@@ -231,7 +231,7 @@ PublisherImpl::create_datawriter (
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("PublisherImpl::create_datawriter: ")
-        ACE_TEXT("failed to register datawriter %s with ")
+        ACE_TEXT("failed to register datawriter %C with ")
         ACE_TEXT("TransportImpl.\n"),
         std::string(converter).c_str()
       ));
@@ -263,7 +263,7 @@ PublisherImpl::delete_datawriter (::DDS::DataWriter_ptr a_datawriter)
       RepoIdConverter converter(id);
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) PublisherImpl::delete_datareader: ")
-        ACE_TEXT("the data writer %s doesn't ")
+        ACE_TEXT("the data writer %C doesn't ")
         ACE_TEXT("belong to this subscriber \n"),
         std::string(converter).c_str()
       ));
@@ -288,7 +288,7 @@ PublisherImpl::delete_datawriter (::DDS::DataWriter_ptr a_datawriter)
       ACE_ERROR_RETURN ((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("PublisherImpl::delete_datawriter, ")
-        ACE_TEXT("datawriter %s not found.\n"),
+        ACE_TEXT("datawriter %C not found.\n"),
         std::string(converter).c_str()
       ),::DDS::RETCODE_ERROR);
     }
@@ -357,7 +357,7 @@ PublisherImpl::delete_datawriter (::DDS::DataWriter_ptr a_datawriter)
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("PublisherImpl::delete_datawriter: ")
-        ACE_TEXT("failed to unregister datawriter %s ")
+        ACE_TEXT("failed to unregister datawriter %C ")
         ACE_TEXT("with TransportImpl.\n"),
         std::string(converter).c_str()
       ));
@@ -440,7 +440,7 @@ PublisherImpl::lookup_datawriter (const char * topic_name)
           ACE_DEBUG ((LM_DEBUG,
                       ACE_TEXT("(%P|%t) ")
                       ACE_TEXT("PublisherImpl::lookup_datawriter, ")
-                      ACE_TEXT("The datawriter(topic_name=%s) is not found\n"),
+                      ACE_TEXT("The datawriter(topic_name=%C) is not found\n"),
                       topic_name));
         }
       return ::DDS::DataWriter::_nil ();
@@ -492,7 +492,7 @@ PublisherImpl::delete_contained_entities ()
             ACE_TEXT("PublisherImpl::")
             ACE_TEXT("delete_contained_entities: ")
             ACE_TEXT("failed to delete ")
-            ACE_TEXT("datawriter %s.\n"),
+            ACE_TEXT("datawriter %C.\n"),
             std::string(converter).c_str()
           ),ret);
         }
@@ -571,8 +571,7 @@ PublisherImpl::set_qos (const ::DDS::PublisherQos & qos)
               if (status == 0)
               {
                 ACE_ERROR_RETURN ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) "
-                  "PublisherImpl::set_qos, ")
+                  ACE_TEXT("(%P|%t) PublisherImpl::set_qos, ")
                   ACE_TEXT("failed on compatiblity check. \n")),
                   ::DDS::RETCODE_ERROR);
               }
@@ -816,7 +815,7 @@ void PublisherImpl::add_associations (const ReaderAssociationSeq & readers,
     RepoIdConverter converter(writer->get_publication_id());
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) PublisherImpl::add_associations(): ")
-      ACE_TEXT("adding %d subscriptions to publication %s with priority %d.\n"),
+      ACE_TEXT("adding %d subscriptions to publication %C with priority %d.\n"),
       length,
       std::string(converter).c_str(),
       writer_qos.transport_priority.value
@@ -923,7 +922,7 @@ PublisherImpl::writer_enabled(
         ACE_ERROR_RETURN ((LM_ERROR,
                            ACE_TEXT("(%P|%t) ERROR: ")
                            ACE_TEXT("PublisherImpl::writer_enabled, ")
-                           ACE_TEXT("insert datawriter(topic_name=%s) ")
+                           ACE_TEXT("insert datawriter(topic_name=%C) ")
                            ACE_TEXT("failed.\n"),
                            topic_name),
                           ::DDS::RETCODE_ERROR);
@@ -939,7 +938,7 @@ PublisherImpl::writer_enabled(
         ACE_ERROR_RETURN((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: ")
           ACE_TEXT("PublisherImpl::writer_enabled: ")
-          ACE_TEXT("insert publication %s failed.\n"),
+          ACE_TEXT("insert publication %C failed.\n"),
           std::string(converter).c_str()
         ),::DDS::RETCODE_ERROR);
       }

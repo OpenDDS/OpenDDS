@@ -30,7 +30,7 @@
 #endif
 
 OpenDDS_Domain_Manager::OpenDDS_Domain_Manager (int & argc, 
-				char* argv[], 
+				ACE_TCHAR* argv[], 
 				DDS::DomainId_t domain_id)
   : dp_ (DDS::DomainParticipant::_nil ()),
     transport_impl_id_ (1),
@@ -64,7 +64,7 @@ OpenDDS_Domain_Manager::OpenDDS_Domain_Manager (int & argc,
 }
 
 OpenDDS_Domain_Manager::OpenDDS_Domain_Manager (int & argc, 
-				char* argv[], 
+				ACE_TCHAR* argv[], 
 				DDS::DomainId_t domain_id,
 				const DDS::DomainParticipantQos & qos)
   : dp_ (DDS::DomainParticipant::_nil ()),
@@ -168,18 +168,18 @@ OpenDDS_Domain_Manager::publication_manager (const Domain_Manager_Ptr & ref,
 }
 
 bool
-OpenDDS_Domain_Manager::parse_args (int & argc, char * argv [])
+OpenDDS_Domain_Manager::parse_args (int & argc, ACE_TCHAR * argv [])
 {
   ACE_Arg_Shifter arg_shifter (argc, argv);
 
-  const char *current = 0;
+  const ACE_TCHAR *current = 0;
   
   // Ignore the command - argv[0].
   arg_shifter.ignore_arg ();
   
   while (arg_shifter.is_anything_left ()) 
     {
-      if ((current = arg_shifter.get_the_parameter ("-t")) != 0) 
+      if ((current = arg_shifter.get_the_parameter (ACE_TEXT("-t"))) != 0) 
         {
 	    if (ACE_OS::strcmp (current, ACE_TEXT("udp")) == 0)
 	      {

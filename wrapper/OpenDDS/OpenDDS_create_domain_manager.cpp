@@ -15,7 +15,7 @@
 /// factory method for creating an OpenDDS domain manager
 /// this is used within the Domain_Manager class
 Domain_Manager_Impl * create_domain_manager (int & argc,
-					     char * argv[],
+					     ACE_TCHAR * argv[],
 					     DDS::DomainId_t domain_id)
 {
   return new OpenDDS_Domain_Manager (argc,
@@ -26,7 +26,7 @@ Domain_Manager_Impl * create_domain_manager (int & argc,
 /// factory method for creating an OpenDDS domain manager
 /// this is used within the Domain_Manager class
 Domain_Manager_Impl * create_domain_manager (int & argc,
-					     char * argv[],
+					     ACE_TCHAR * argv[],
 					     DDS::DomainId_t domain_id,
 					     const DDS::DomainParticipantQos & qos)
 {

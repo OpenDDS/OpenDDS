@@ -50,9 +50,9 @@ char* CUR_GROUP_DATA = GROUP_DATA;
 unsigned int dps_with_user_data = 2;
 
 int
-parse_args (int argc, char *argv[])
+parse_args (int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, "l:d:t:s:p:u");
+  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("l:d:t:s:p:u"));
   int c;
 
   while ((c = get_opts ()) != -1)
@@ -101,7 +101,7 @@ parse_args (int argc, char *argv[])
 }
 
 
-int main (int argc, char *argv[])
+int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
   try
     {
@@ -258,20 +258,20 @@ int main (int argc, char *argv[])
         if (ACE_OS::strcmp (topicdata[i].name.in (), topic_name) != 0)
         {
           ACE_ERROR_RETURN ((LM_ERROR,
-            "(%P|%t) monitor:  got topic name \"%s\", expected topic name \"%s\"\n", 
+            "(%P|%t) monitor:  got topic name \"%C\", expected topic name \"%C\"\n", 
             topicdata[i].name.in (), topic_name),
             1);
         }
         if (ACE_OS::strcmp (topicdata[i].type_name.in (), topic_type_name) != 0)
         {
           ACE_ERROR_RETURN ((LM_ERROR,
-            "(%P|%t) monitor:  got topic type name \"%s\", expected topic type name \"%s\"\n", 
+            "(%P|%t) monitor:  got topic type name \"%C\", expected topic type name \"%C\"\n", 
             topicdata[i].type_name.in (), topic_type_name),
             1);
         }
 
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: Topic: key = %d, %x, %x, name = %s, "
-          "type_name=%s \n",
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: Topic: key = %d, %x, %x, name = %C, "
+          "type_name=%C \n",
           topicdata[i].key[0], topicdata[i].key[1], topicdata[i].key[2],
           topicdata[i].name.in (), topicdata[i].type_name.in ()));
 
@@ -329,14 +329,14 @@ int main (int argc, char *argv[])
         if (ACE_OS::strcmp (pubdata[i].topic_name.in (), topic_name) != 0)
         {
           ACE_ERROR_RETURN ((LM_ERROR,
-            "(%P|%t) monitor:  got datawriter topic name \"%s\", expected topic name \"%s\"\n", 
+            "(%P|%t) monitor:  got datawriter topic name \"%C\", expected topic name \"%C\"\n", 
             pubdata[i].topic_name.in (), topic_name),
             1);
         }
         if (ACE_OS::strcmp (pubdata[i].type_name.in (), topic_type_name) != 0)
         {
           ACE_ERROR_RETURN ((LM_ERROR,
-            "(%P|%t) monitor:  got datawriter topic type name \"%s\", expected topic type name \"%s\"\n", 
+            "(%P|%t) monitor:  got datawriter topic type name \"%C\", expected topic type name \"%C\"\n", 
             pubdata[i].type_name.in (), topic_type_name),
             1);
         }
@@ -344,9 +344,9 @@ int main (int argc, char *argv[])
         ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DataWriter: key = %d, %x, %x. \n",
             pubdata[i].key[0], pubdata[i].key[1], pubdata[i].key[2]));
 
-        //ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DW user data %s \n", pubdata[i].user_data.value.get_buffer()));
-        //ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DW topic data %s \n", pubdata[i].topic_data.value.get_buffer()));
-        //ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DW group data %s \n", pubdata[i].group_data.value.get_buffer()));
+        //ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DW user data %C \n", pubdata[i].user_data.value.get_buffer()));
+        //ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DW topic data %C \n", pubdata[i].topic_data.value.get_buffer()));
+        //ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DW group data %C \n", pubdata[i].group_data.value.get_buffer()));
 
         CORBA::ULong user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_DW_USER_DATA));
         CORBA::ULong topic_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_TOPIC_DATA));
@@ -409,14 +409,14 @@ int main (int argc, char *argv[])
         if (ACE_OS::strcmp (subdata[i].topic_name.in (), topic_name) != 0)
         {
           ACE_ERROR_RETURN ((LM_ERROR,
-            "(%P|%t) monitor:  got datareader topic name \"%s\", expected topic name \"%s\"\n", 
+            "(%P|%t) monitor:  got datareader topic name \"%C\", expected topic name \"%C\"\n", 
             subdata[i].topic_name.in (), topic_name),
             1);
         }
         if (ACE_OS::strcmp (subdata[i].type_name.in (), topic_type_name) != 0)
         {
           ACE_ERROR_RETURN ((LM_ERROR,
-            "(%P|%t) monitor:  got datareader topic type name \"%s\", expected topic type name \"%s\"\n", 
+            "(%P|%t) monitor:  got datareader topic type name \"%C\", expected topic type name \"%C\"\n", 
             subdata[i].type_name.in (), topic_type_name),
             1);
         }
@@ -424,9 +424,9 @@ int main (int argc, char *argv[])
         ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DataReader: key = %d, %x, %x \n",
           subdata[i].key[0], subdata[i].key[1], subdata[i].key[2]));
       
-        //ACE_DEBUG((LM_DEBUG, "(%P|%t)DR user data %s \n", subdata[i].user_data.value.get_buffer()));
-        //ACE_DEBUG((LM_DEBUG, "(%P|%t)DR topic data %s \n", subdata[i].topic_data.value.get_buffer()));
-        //ACE_DEBUG((LM_DEBUG, "(%P|%t)DR group data %s \n", subdata[i].group_data.value.get_buffer()));
+        //ACE_DEBUG((LM_DEBUG, "(%P|%t)DR user data %C \n", subdata[i].user_data.value.get_buffer()));
+        //ACE_DEBUG((LM_DEBUG, "(%P|%t)DR topic data %C \n", subdata[i].topic_data.value.get_buffer()));
+        //ACE_DEBUG((LM_DEBUG, "(%P|%t)DR group data %C \n", subdata[i].group_data.value.get_buffer()));
 
         CORBA::ULong user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_DR_USER_DATA));
         CORBA::ULong topic_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_TOPIC_DATA));

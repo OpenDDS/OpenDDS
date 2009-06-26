@@ -180,14 +180,14 @@ ManagerImpl::initialize()
   ::OpenDDS::DCPS::TransportImpl_rch transport
     = TheTransportFactory->create_transport_impl(
         this->config_.federationDomain(),
-        ACE_TString("SimpleTcp"),
+        ACE_TEXT("SimpleTcp"),
         ::OpenDDS::DCPS::DONT_AUTO_CONFIG
       );
 
   ::OpenDDS::DCPS::TransportConfiguration_rch transportConfig
     = TheTransportFactory->create_configuration(
         this->config_.federationDomain(),
-        ACE_TString("SimpleTcp")
+        ACE_TEXT("SimpleTcp")
       );
 
   if( transport->configure( transportConfig.in()) != 0) {
@@ -206,14 +206,14 @@ ManagerImpl::initialize()
   ::OpenDDS::DCPS::TransportImpl_rch subscriptionTransport
     = TheTransportFactory->create_transport_impl(
         1 + this->config_.federationDomain(),
-        ACE_TString("SimpleTcp"),
+        ACE_TEXT("SimpleTcp"),
         ::OpenDDS::DCPS::DONT_AUTO_CONFIG
       );
 
   ::OpenDDS::DCPS::TransportConfiguration_rch subscriptionTransportConfig
     = TheTransportFactory->create_configuration(
         1 + this->config_.federationDomain(),
-        ACE_TString("SimpleTcp")
+        ACE_TEXT("SimpleTcp")
       );
 
   if( subscriptionTransport->configure( subscriptionTransportConfig.in()) != 0) {
@@ -425,7 +425,7 @@ ManagerImpl::initialize()
       OpenDDS::DCPS::RepoIdConverter converter(servant->get_publication_id());
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
-        ACE_TEXT("created federation OwnerUpdate writer %s for repository %d\n"),
+        ACE_TEXT("created federation OwnerUpdate writer %C for repository %d\n"),
         std::string(converter).c_str(),
         this->id()
       ));
@@ -459,7 +459,7 @@ ManagerImpl::initialize()
       OpenDDS::DCPS::RepoIdConverter converter(servant->get_subscription_id());
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
-        ACE_TEXT("created federation OwnerUpdate reader %s for repository %d\n"),
+        ACE_TEXT("created federation OwnerUpdate reader %C for repository %d\n"),
         std::string(converter).c_str(),
         this->id()
       ));
@@ -508,7 +508,7 @@ ManagerImpl::initialize()
       OpenDDS::DCPS::RepoIdConverter converter(servant->get_publication_id());
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
-        ACE_TEXT("created federation TopicUpdate writer %s for repository %d\n"),
+        ACE_TEXT("created federation TopicUpdate writer %C for repository %d\n"),
         std::string(converter).c_str(),
         this->id()
       ));
@@ -542,7 +542,7 @@ ManagerImpl::initialize()
       OpenDDS::DCPS::RepoIdConverter converter(servant->get_subscription_id());
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
-        ACE_TEXT("created federation TopicUpdate reader %s for repository %d\n"),
+        ACE_TEXT("created federation TopicUpdate reader %C for repository %d\n"),
         std::string(converter).c_str(),
         this->id()
       ));
@@ -591,7 +591,7 @@ ManagerImpl::initialize()
       OpenDDS::DCPS::RepoIdConverter converter(servant->get_publication_id());
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
-        ACE_TEXT("created federation ParticipantUpdate writer %s for repository %d\n"),
+        ACE_TEXT("created federation ParticipantUpdate writer %C for repository %d\n"),
         std::string(converter).c_str(),
         this->id()
       ));
@@ -625,7 +625,7 @@ ManagerImpl::initialize()
       OpenDDS::DCPS::RepoIdConverter converter(servant->get_subscription_id());
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
-        ACE_TEXT("created federation ParticipantUpdate reader %s for repository %d\n"),
+        ACE_TEXT("created federation ParticipantUpdate reader %C for repository %d\n"),
         std::string(converter).c_str(),
         this->id()
       ));
@@ -674,7 +674,7 @@ ManagerImpl::initialize()
       OpenDDS::DCPS::RepoIdConverter converter(servant->get_publication_id());
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
-        ACE_TEXT("created federation PublicationUpdate writer %s for repository %d\n"),
+        ACE_TEXT("created federation PublicationUpdate writer %C for repository %d\n"),
         std::string(converter).c_str(),
         this->id()
       ));
@@ -708,7 +708,7 @@ ManagerImpl::initialize()
       OpenDDS::DCPS::RepoIdConverter converter(servant->get_subscription_id());
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
-        ACE_TEXT("created federation PublicationUpdate reader %s for repository %d\n"),
+        ACE_TEXT("created federation PublicationUpdate reader %C for repository %d\n"),
         std::string(converter).c_str(),
         this->id()
       ));
@@ -757,7 +757,7 @@ ManagerImpl::initialize()
       OpenDDS::DCPS::RepoIdConverter converter(servant->get_publication_id());
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
-        ACE_TEXT("created federation SubscriptionUpdate writer %s for repository %d\n"),
+        ACE_TEXT("created federation SubscriptionUpdate writer %C for repository %d\n"),
         std::string(converter).c_str(),
         this->id()
       ));
@@ -791,7 +791,7 @@ ManagerImpl::initialize()
       OpenDDS::DCPS::RepoIdConverter converter(servant->get_subscription_id());
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
-        ACE_TEXT("created federation SubscriptionUpdate reader %s for repository %d\n"),
+        ACE_TEXT("created federation SubscriptionUpdate reader %C for repository %d\n"),
         std::string(converter).c_str(),
         this->id()
       ));
@@ -1012,7 +1012,7 @@ ACE_THROW_SPEC (( ::CORBA::SystemException, Incomplete))
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) ManagerImpl::discover_federation( %s)\n"),
+      ACE_TEXT("(%P|%t) ManagerImpl::discover_federation( %C)\n"),
       ior
     ));
   }
@@ -1108,7 +1108,7 @@ ManagerImpl::join_federation(
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) FederatorManagerImpl::join_federation() - ")
           ACE_TEXT("id %d obtained reference to id %d:\n")
-          ACE_TEXT("\t%s\n"),
+          ACE_TEXT("\t%C\n"),
           this->id(),
           remote,
           remoteRepoIor.in()

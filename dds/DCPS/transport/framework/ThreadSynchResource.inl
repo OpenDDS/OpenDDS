@@ -29,7 +29,7 @@ OpenDDS::DCPS::ThreadSynchResource::wait_to_unclog()
         {
           ACE_ERROR((LM_ERROR,
                     "(%P|%t) ERROR: ACE::handle_write_ready return -1 while waiting "
-                    " to unclog. %p \n", "handle_write_ready"));
+                    " to unclog. %p \n", ACE_TEXT("handle_write_ready")));
         }
       return -1;
     }

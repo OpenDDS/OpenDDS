@@ -34,12 +34,12 @@ class Publisher
 public:
   typedef std::string InitError;
 
-  Publisher (int argc, char *argv[]) throw (InitError);
+  Publisher (int argc, ACE_TCHAR *argv[]) throw (InitError);
 
   bool run ();
 
 private:
-  bool parse_args (int argc, char *argv[]);
+  bool parse_args (int argc, ACE_TCHAR *argv[]);
 
   size_t topic_count_;
   size_t participant_count_;
@@ -64,9 +64,9 @@ private:
 };
 
 bool
-Publisher::parse_args (int argc, char *argv[])
+Publisher::parse_args (int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, "t:n:p:c:s:i:");
+  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("t:n:p:c:s:i:"));
   int c;
   std::string usage = " -t <topic count>\n"
     " -n <participant count>\n -p <publisher count>\n"
@@ -87,7 +87,7 @@ Publisher::parse_args (int argc, char *argv[])
         writer_count_ = ACE_OS::atoi (get_opts.opt_arg ());
         break;
       case 'c':
-        control_file_ = get_opts.opt_arg ();
+        control_file_ = ACE_TEXT_ALWAYS_CHAR (get_opts.opt_arg ());
         break;
       case 's':
         subscriber_count_ = ACE_OS::atoi (get_opts.opt_arg ());
@@ -96,7 +96,7 @@ Publisher::parse_args (int argc, char *argv[])
         transport_impl_id_ = ACE_OS::atoi (get_opts.opt_arg ());
         break;
       case 'y':
-        sync_server_ = get_opts.opt_arg ();
+        sync_server_ = ACE_TEXT_ALWAYS_CHAR (get_opts.opt_arg ());
         break;
       case '?':
       default:
@@ -111,7 +111,7 @@ Publisher::parse_args (int argc, char *argv[])
   return true;
 }
 
-Publisher::Publisher (int argc, char *argv[]) throw (Publisher::InitError)
+Publisher::Publisher (int argc, ACE_TCHAR *argv[]) throw (Publisher::InitError)
   : topic_count_ (1), participant_count_ (1), writer_count_ (1)
   , control_file_ ("barrier_file"), subscriber_count_(1)
   , transport_impl_id_ (1)
@@ -202,10 +202,10 @@ Publisher::run (void)
       for (size_t count = 0; count < topic_count_; count++)
         {
           topic_[count] =
-            participant_[count%participant_count_]->create_topic ("Movie Discussion List",
-                                                                  type_name.in (),
-                                                                  topic_qos,
-                                                                  DDS::TopicListener::_nil());
+            participant_[count % participant_count_]->create_topic ("Movie Discussion List",
+                                                                    type_name.in (),
+                                                                    topic_qos,
+                                                                    DDS::TopicListener::_nil());
           if (CORBA::is_nil (topic_[count].in ())) {
             cerr << "create_topic failed." << endl;
             return false;
@@ -226,14 +226,14 @@ Publisher::run (void)
         this->transports_[ count]
           = TheTransportFactory->create_transport_impl(
               this->transport_impl_id_ + count,
-              ACE_TString("SimpleTcp"),
+              ACE_TEXT("SimpleTcp"),
               ::OpenDDS::DCPS::DONT_AUTO_CONFIG
             );
 
         OpenDDS::DCPS::TransportConfiguration_rch config
           = TheTransportFactory->create_configuration(
               this->transport_impl_id_ + count,
-              ACE_TString("SimpleTcp")
+              ACE_TEXT("SimpleTcp")
             );
 
         if( this->transports_[ count]->configure( config.in()) != 0) {

@@ -39,73 +39,73 @@ namespace { // anonymous namespace for file scope.
                       = OpenDDS::DCPS::DataCollector< double>::KeepNewest;
 
   // Command line argument definitions.
-  const char* VERBOSE_ARGUMENT             = "-v";
-  const char* DURATION_ARGUMENT            = "-d";
-  const char* SCENARIO_ARGUMENT            = "-f";
-  const char* RAW_DATA_BUFFERSIZE_ARGUMENT = "-s";
-  const char* RAW_DATA_BUFFERTYPE_ARGUMENT = "-t";
-  const char* RAW_DATA_FILENAME_ARGUMENT   = "-r";
+  const ACE_TCHAR* VERBOSE_ARGUMENT             = ACE_TEXT("-v");
+  const ACE_TCHAR* DURATION_ARGUMENT            = ACE_TEXT("-d");
+  const ACE_TCHAR* SCENARIO_ARGUMENT            = ACE_TEXT("-f");
+  const ACE_TCHAR* RAW_DATA_BUFFERSIZE_ARGUMENT = ACE_TEXT("-s");
+  const ACE_TCHAR* RAW_DATA_BUFFERTYPE_ARGUMENT = ACE_TEXT("-t");
+  const ACE_TCHAR* RAW_DATA_FILENAME_ARGUMENT   = ACE_TEXT("-r");
 
   // BUFFERTYPE argument values.
-  const char* UNBOUNDED_BUFFERTYPE  = "unbounded";
-  const char* KEEPNEWEST_BUFFERTYPE = "newest";
-  const char* KEEPOLDEST_BUFFERTYPE = "oldest";
+  const ACE_TCHAR* UNBOUNDED_BUFFERTYPE  = ACE_TEXT("unbounded");
+  const ACE_TCHAR* KEEPNEWEST_BUFFERTYPE = ACE_TEXT("newest");
+  const ACE_TCHAR* KEEPOLDEST_BUFFERTYPE = ACE_TEXT("oldest");
 
   // Scenario configuration file section names.
-  const char* PARTICIPANT_SECTIONNAME  = "participant";
-  const char* TOPIC_SECTIONNAME        = "topic";
-  const char* PUBLICATION_SECTIONNAME  = "publication";
-  const char* SUBSCRIPTION_SECTIONNAME = "subscription";
+  const ACE_TCHAR* PARTICIPANT_SECTIONNAME  = ACE_TEXT("participant");
+  const ACE_TCHAR* TOPIC_SECTIONNAME        = ACE_TEXT("topic");
+  const ACE_TCHAR* PUBLICATION_SECTIONNAME  = ACE_TEXT("publication");
+  const ACE_TCHAR* SUBSCRIPTION_SECTIONNAME = ACE_TEXT("subscription");
 
   // Scenario configuration file Key values.
-  const char* DURATION_KEY_NAME                           = "TestDuration";
-  const char* DOMAINID_KEYNAME                            = "DomainId";
-  const char* USERDATA_KEYNAME                            = "UserData";
-  const char* ENTITYFACTORY_KEYNAME                       = "EntityFactory";
-  const char* TOPICDATA_KEYNAME                           = "TopicData";
-  const char* DURABILITY_KEYNAME                          = "Durability";
-  const char* DURABILITYSERVICEDURATION_KEYNAME           = "DurabilityServiceDuration";
-  const char* DURABILITYSERVICEHISTORYKIND_KEYNAME        = "DurabilityServiceHistoryKind";
-  const char* DURABILITYSERVICEHISTORYDEPTH_KEYNAME       = "DurabilityServiceHistoryDepth";
-  const char* DURABILITYSERVICESAMPLES_KEYNAME            = "DurabilityServiceSamples";
-  const char* DURABILITYSERVICEINSTANCES_KEYNAME          = "DurabilityServiceInstances";
-  const char* DURABILITYSERVICESAMPLESPERINSTANCE_KEYNAME = "DurabilityServiceSamplesPerInstance";
-  const char* DEADLINE_KEYNAME                            = "Deadline";
-  const char* LATENCYBUDGET_KEYNAME                       = "LatencyBudget";
-  const char* LIVELINESSKIND_KEYNAME                      = "LivelinessKind";
-  const char* LIVELINESSDURATION_KEYNAME                  = "LivelinessDuration";
-  const char* RELIABILITYKIND_KEYNAME                     = "ReliabilityKind";
-  const char* RELIABILITYMAXBLOCKING_KEYNAME              = "ReliabilityMaxBlocking";
-  const char* DESTINATIONORDER_KEYNAME                    = "DestinationOrder";
-  const char* HISTORYKIND_KEYNAME                         = "HistoryKind";
-  const char* HISTORYDEPTH_KEYNAME                        = "HistoryDepth";
-  const char* RESOURCEMAXSAMPLES_KEYNAME                  = "ResourceMaxSamples";
-  const char* RESOURCEMAXINSTANCES_KEYNAME                = "ResourceMaxInstances";
-  const char* RESOURCEMAXSAMPLESPERINSTANCE_KEYNAME       = "ResourceMaxSamplesPerInstance";
-  const char* TRANSPORTPRIORITY_KEYNAME                   = "TransportPriority";
-  const char* LIFESPANDURATION_KEYNAME                    = "LifespanDuration";
-  const char* OWNERSHIPKIND_KEYNAME                       = "OwnershipKind";
-  const char* OWNERSHIPSTRENGTH_KEYNAME                   = "OwnershipStrength";
-  const char* PRESENTATION_KEYNAME                        = "Presentation";
-  const char* PRESENTATIONCOHERENT_KEYNAME                = "PresentationCoherent";
-  const char* PRESENTATIONORDERED_KEYNAME                 = "PresentationOrdered";
-  const char* GROUPDATA_KEYNAME                           = "GroupData";
-  const char* PARTITION_KEYNAME                           = "Partition";
-  const char* TIMEBASEDFILTER_KEYNAME                     = "TimeBasedFilter";
-  const char* WRITERDATALIFECYCLE_KEYNAME                 = "WriterDataLifecycle";
-  const char* READERDATALIFECYCLE_KEYNAME                 = "ReaderDataLifecycle";
-  const char* PARTICIPANT_KEYNAME                         = "Participant";
-  const char* TOPIC_KEYNAME                               = "Topic";
-  const char* TRANSPORTINDEX_KEYNAME                      = "TransportIndex";
-  const char* MESSAGESOURCE_KEYNAME                       = "MessageSource";
-  const char* MESSAGERATE_KEYNAME                         = "MessageRate";
-  const char* MESSAGESIZE_KEYNAME                         = "MessageSize";
-  const char* MESSAGEMAX_KEYNAME                          = "MessageMax";
-  const char* MESSAGEMIN_KEYNAME                          = "MessageMin";
-  const char* MESSAGEDEVIATION_KEYNAME                    = "MessageDeviation";
-  const char* DATACOLLECTIONFILE_KEYNAME                  = "DataCollectionFile";
-  const char* DATACOLLECTIONBOUND_KEYNAME                 = "DataCollectionBound";
-  const char* DATACOLLECTIONRETENTION_KEYNAME             = "DataCollectionRetention";
+  const ACE_TCHAR* DURATION_KEY_NAME                           = ACE_TEXT("TestDuration");
+  const ACE_TCHAR* DOMAINID_KEYNAME                            = ACE_TEXT("DomainId");
+  const ACE_TCHAR* USERDATA_KEYNAME                            = ACE_TEXT("UserData");
+  const ACE_TCHAR* ENTITYFACTORY_KEYNAME                       = ACE_TEXT("EntityFactory");
+  const ACE_TCHAR* TOPICDATA_KEYNAME                           = ACE_TEXT("TopicData");
+  const ACE_TCHAR* DURABILITY_KEYNAME                          = ACE_TEXT("Durability");
+  const ACE_TCHAR* DURABILITYSERVICEDURATION_KEYNAME           = ACE_TEXT("DurabilityServiceDuration");
+  const ACE_TCHAR* DURABILITYSERVICEHISTORYKIND_KEYNAME        = ACE_TEXT("DurabilityServiceHistoryKind");
+  const ACE_TCHAR* DURABILITYSERVICEHISTORYDEPTH_KEYNAME       = ACE_TEXT("DurabilityServiceHistoryDepth");
+  const ACE_TCHAR* DURABILITYSERVICESAMPLES_KEYNAME            = ACE_TEXT("DurabilityServiceSamples");
+  const ACE_TCHAR* DURABILITYSERVICEINSTANCES_KEYNAME          = ACE_TEXT("DurabilityServiceInstances");
+  const ACE_TCHAR* DURABILITYSERVICESAMPLESPERINSTANCE_KEYNAME = ACE_TEXT("DurabilityServiceSamplesPerInstance");
+  const ACE_TCHAR* DEADLINE_KEYNAME                            = ACE_TEXT("Deadline");
+  const ACE_TCHAR* LATENCYBUDGET_KEYNAME                       = ACE_TEXT("LatencyBudget");
+  const ACE_TCHAR* LIVELINESSKIND_KEYNAME                      = ACE_TEXT("LivelinessKind");
+  const ACE_TCHAR* LIVELINESSDURATION_KEYNAME                  = ACE_TEXT("LivelinessDuration");
+  const ACE_TCHAR* RELIABILITYKIND_KEYNAME                     = ACE_TEXT("ReliabilityKind");
+  const ACE_TCHAR* RELIABILITYMAXBLOCKING_KEYNAME              = ACE_TEXT("ReliabilityMaxBlocking");
+  const ACE_TCHAR* DESTINATIONORDER_KEYNAME                    = ACE_TEXT("DestinationOrder");
+  const ACE_TCHAR* HISTORYKIND_KEYNAME                         = ACE_TEXT("HistoryKind");
+  const ACE_TCHAR* HISTORYDEPTH_KEYNAME                        = ACE_TEXT("HistoryDepth");
+  const ACE_TCHAR* RESOURCEMAXSAMPLES_KEYNAME                  = ACE_TEXT("ResourceMaxSamples");
+  const ACE_TCHAR* RESOURCEMAXINSTANCES_KEYNAME                = ACE_TEXT("ResourceMaxInstances");
+  const ACE_TCHAR* RESOURCEMAXSAMPLESPERINSTANCE_KEYNAME       = ACE_TEXT("ResourceMaxSamplesPerInstance");
+  const ACE_TCHAR* TRANSPORTPRIORITY_KEYNAME                   = ACE_TEXT("TransportPriority");
+  const ACE_TCHAR* LIFESPANDURATION_KEYNAME                    = ACE_TEXT("LifespanDuration");
+  const ACE_TCHAR* OWNERSHIPKIND_KEYNAME                       = ACE_TEXT("OwnershipKind");
+  const ACE_TCHAR* OWNERSHIPSTRENGTH_KEYNAME                   = ACE_TEXT("OwnershipStrength");
+  const ACE_TCHAR* PRESENTATION_KEYNAME                        = ACE_TEXT("Presentation");
+  const ACE_TCHAR* PRESENTATIONCOHERENT_KEYNAME                = ACE_TEXT("PresentationCoherent");
+  const ACE_TCHAR* PRESENTATIONORDERED_KEYNAME                 = ACE_TEXT("PresentationOrdered");
+  const ACE_TCHAR* GROUPDATA_KEYNAME                           = ACE_TEXT("GroupData");
+  const ACE_TCHAR* PARTITION_KEYNAME                           = ACE_TEXT("Partition");
+  const ACE_TCHAR* TIMEBASEDFILTER_KEYNAME                     = ACE_TEXT("TimeBasedFilter");
+  const ACE_TCHAR* WRITERDATALIFECYCLE_KEYNAME                 = ACE_TEXT("WriterDataLifecycle");
+  const ACE_TCHAR* READERDATALIFECYCLE_KEYNAME                 = ACE_TEXT("ReaderDataLifecycle");
+  const ACE_TCHAR* PARTICIPANT_KEYNAME                         = ACE_TEXT("Participant");
+  const ACE_TCHAR* TOPIC_KEYNAME                               = ACE_TEXT("Topic");
+  const ACE_TCHAR* TRANSPORTINDEX_KEYNAME                      = ACE_TEXT("TransportIndex");
+  const ACE_TCHAR* MESSAGESOURCE_KEYNAME                       = ACE_TEXT("MessageSource");
+  const ACE_TCHAR* MESSAGERATE_KEYNAME                         = ACE_TEXT("MessageRate");
+  const ACE_TCHAR* MESSAGESIZE_KEYNAME                         = ACE_TEXT("MessageSize");
+  const ACE_TCHAR* MESSAGEMAX_KEYNAME                          = ACE_TEXT("MessageMax");
+  const ACE_TCHAR* MESSAGEMIN_KEYNAME                          = ACE_TEXT("MessageMin");
+  const ACE_TCHAR* MESSAGEDEVIATION_KEYNAME                    = ACE_TEXT("MessageDeviation");
+  const ACE_TCHAR* DATACOLLECTIONFILE_KEYNAME                  = ACE_TEXT("DataCollectionFile");
+  const ACE_TCHAR* DATACOLLECTIONBOUND_KEYNAME                 = ACE_TEXT("DataCollectionBound");
+  const ACE_TCHAR* DATACOLLECTIONRETENTION_KEYNAME             = ACE_TEXT("DataCollectionRetention");
 
 } // end of anonymous namespace.
 
@@ -146,7 +146,7 @@ Options::~Options()
   this->subscriptionProfileMap_.clear();
 }
 
-Options::Options( int argc, char** argv, char** /* envp */)
+Options::Options( int argc, ACE_TCHAR** argv, char** /* envp */)
  : verbose_(           false),
    configured_(        true),
    duration_(          DEFAULT_TEST_DURATION),
@@ -163,7 +163,7 @@ Options::Options( int argc, char** argv, char** /* envp */)
         parser.get_current()
       ));
     }
-    const char* currentArg = 0;
+    const ACE_TCHAR* currentArg = 0;
     if( 0 != (currentArg = parser.get_the_parameter( DURATION_ARGUMENT))) {
       this->duration_ = ACE_OS::atoi( currentArg);
       parser.consume_arg();
@@ -177,7 +177,7 @@ Options::Options( int argc, char** argv, char** /* envp */)
       parser.consume_arg();
 
     } else if( 0 != (currentArg = parser.get_the_parameter( RAW_DATA_BUFFERTYPE_ARGUMENT))) {
-      std::string bufferType = currentArg;
+      std::basic_string<ACE_TCHAR> bufferType = currentArg;
       if( bufferType == UNBOUNDED_BUFFERTYPE) {
         this->rawBufferType_ = ::OpenDDS::DCPS::DataCollector<double>::Unbounded;
 
@@ -200,7 +200,7 @@ Options::Options( int argc, char** argv, char** /* envp */)
       parser.consume_arg();
 
     } else if( 0 != (currentArg = parser.get_the_parameter( RAW_DATA_FILENAME_ARGUMENT))) {
-      this->rawOutputFilename_ = currentArg;
+      this->rawOutputFilename_ = ACE_TEXT_ALWAYS_CHAR(currentArg);
       if( this->verbose()) {
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) Options::Options() - ")
@@ -227,7 +227,7 @@ Options::Options( int argc, char** argv, char** /* envp */)
 }
 
 void
-Options::configureScenarios( const char* filename)
+Options::configureScenarios( const ACE_TCHAR* filename)
 {
   if( this->verbose()) {
     ACE_DEBUG((LM_DEBUG,
@@ -445,7 +445,7 @@ void
 Options::loadParticipant(
   ACE_Configuration_Heap& heap,
   ACE_Configuration_Section_Key& sectionKey,
-  std::string sectionName
+  std::basic_string<ACE_TCHAR> sectionName
 )
 {
   /**
@@ -520,14 +520,14 @@ Options::loadParticipant(
   }
 
   // Store the profile for the current participant.
-  this->participantProfileMap_[ sectionName] = profile;
+  this->participantProfileMap_[ACE_TEXT_ALWAYS_CHAR(sectionName.c_str())] = profile;
 }
 
 void
 Options::loadTopic(
   ACE_Configuration_Heap& heap,
   ACE_Configuration_Section_Key& sectionKey,
-  std::string sectionName
+  std::basic_string<ACE_TCHAR> sectionName
 )
 {
   /**
@@ -603,16 +603,16 @@ Options::loadTopic(
         valueString.c_str()
       ));
     }
-    if( valueString == "VOLATILE") {
+    if( valueString == ACE_TEXT("VOLATILE")) {
       profile->qos.durability.kind = ::DDS::VOLATILE_DURABILITY_QOS;
 
-    } else if( valueString == "LOCAL") {
+    } else if( valueString == ACE_TEXT("LOCAL")) {
       profile->qos.durability.kind = ::DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
 
-    } else if( valueString == "TRANSIENT") {
+    } else if( valueString == ACE_TEXT("TRANSIENT")) {
       profile->qos.durability.kind = ::DDS::TRANSIENT_DURABILITY_QOS;
 
-    } else if( valueString == "PERSISTENT") {
+    } else if( valueString == ACE_TEXT("PERSISTENT")) {
       profile->qos.durability.kind = ::DDS::PERSISTENT_DURABILITY_QOS;
 
     } else {
@@ -657,10 +657,10 @@ Options::loadTopic(
         valueString.c_str()
       ));
     }
-    if( valueString == "ALL") {
+    if( valueString == ACE_TEXT("ALL")) {
       profile->qos.durability_service.history_kind = ::DDS::KEEP_ALL_HISTORY_QOS;
 
-    } else if( valueString == "LAST") {
+    } else if( valueString == ACE_TEXT("LAST")) {
       profile->qos.durability_service.history_kind = ::DDS::KEEP_LAST_HISTORY_QOS;
 
     } else {
@@ -786,13 +786,13 @@ Options::loadTopic(
         valueString.c_str()
       ));
     }
-    if( valueString == "AUTOMATIC") {
+    if( valueString == ACE_TEXT("AUTOMATIC")) {
       profile->qos.liveliness.kind = ::DDS::AUTOMATIC_LIVELINESS_QOS;
 
-    } else if( valueString == "PARTICIPANT") {
+    } else if( valueString == ACE_TEXT("PARTICIPANT")) {
       profile->qos.liveliness.kind = ::DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
 
-    } else if( valueString == "TOPIC") {
+    } else if( valueString == ACE_TEXT("TOPIC")) {
       profile->qos.liveliness.kind = ::DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS;
 
     } else {
@@ -836,10 +836,10 @@ Options::loadTopic(
         valueString.c_str()
       ));
     }
-    if( valueString == "BEST_EFFORT") {
+    if( valueString == ACE_TEXT("BEST_EFFORT")) {
       profile->qos.reliability.kind = ::DDS::BEST_EFFORT_RELIABILITY_QOS;
 
-    } else if( valueString == "RELIABLE") {
+    } else if( valueString == ACE_TEXT("RELIABLE")) {
       profile->qos.reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
 
     } else {
@@ -883,10 +883,10 @@ Options::loadTopic(
         valueString.c_str()
       ));
     }
-    if( valueString == "SOURCE") {
+    if( valueString == ACE_TEXT("SOURCE")) {
       profile->qos.destination_order.kind = ::DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS;
 
-    } else if( valueString == "RECEPTION") {
+    } else if( valueString == ACE_TEXT("RECEPTION")) {
       profile->qos.destination_order.kind = ::DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS;
 
     } else {
@@ -913,10 +913,10 @@ Options::loadTopic(
         valueString.c_str()
       ));
     }
-    if( valueString == "ALL") {
+    if( valueString == ACE_TEXT("ALL")) {
       profile->qos.history.kind = ::DDS::KEEP_ALL_HISTORY_QOS;
 
-    } else if( valueString == "LAST") {
+    } else if( valueString == ACE_TEXT("LAST")) {
       profile->qos.history.kind = ::DDS::KEEP_LAST_HISTORY_QOS;
 
     } else {
@@ -1040,10 +1040,10 @@ Options::loadTopic(
         valueString.c_str()
       ));
     }
-    if( valueString == "SHARED") {
+    if( valueString == ACE_TEXT("SHARED")) {
       profile->qos.ownership.kind = ::DDS::SHARED_OWNERSHIP_QOS;
 
-    } else if( valueString == "EXCLUSIVE") {
+    } else if( valueString == ACE_TEXT("EXCLUSIVE")) {
       profile->qos.ownership.kind = ::DDS::EXCLUSIVE_OWNERSHIP_QOS;
 
     } else {
@@ -1061,7 +1061,7 @@ Options::loadTopic(
   valueString.clear();
   heap.get_string_value( sectionKey, PARTICIPANT_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    profile->participant = valueString.c_str();
+    profile->participant = ACE_TEXT_ALWAYS_CHAR(valueString.c_str());
     if( this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Options::loadTopic() - ")
@@ -1074,14 +1074,14 @@ Options::loadTopic(
   }
 
   // Store the profile for the current participant.
-  this->topicProfileMap_[ sectionName] = profile;
+  this->topicProfileMap_[ACE_TEXT_ALWAYS_CHAR(sectionName.c_str())] = profile;
 }
 
 void
 Options::loadPublication(
   ACE_Configuration_Heap& heap,
   ACE_Configuration_Section_Key& sectionKey,
-  std::string sectionName
+  std::basic_string<ACE_TCHAR> sectionName
 )
 {
   /**
@@ -1153,13 +1153,13 @@ Options::loadPublication(
         valueString.c_str()
       ));
     }
-    if( valueString == "INSTANCE") {
+    if( valueString == ACE_TEXT("INSTANCE")) {
       profile->publisherQos.presentation.access_scope = ::DDS::INSTANCE_PRESENTATION_QOS;
 
-    } else if( valueString == "TOPIC") {
+    } else if( valueString == ACE_TEXT("TOPIC")) {
       profile->publisherQos.presentation.access_scope = ::DDS::TOPIC_PRESENTATION_QOS;
 
-    } else if( valueString == "GROUP") {
+    } else if( valueString == ACE_TEXT("GROUP")) {
       profile->publisherQos.presentation.access_scope = ::DDS::GROUP_PRESENTATION_QOS;
 
     } else {
@@ -1210,7 +1210,7 @@ Options::loadPublication(
   heap.get_string_value( sectionKey, PARTITION_KEYNAME, valueString);
   if (valueString.length() > 0) {
     profile->publisherQos.partition.name.length( 1);
-    profile->publisherQos.partition.name[0] = ACE_OS::strdup( valueString.c_str());
+    profile->publisherQos.partition.name[0] = ACE_TEXT_ALWAYS_CHAR(valueString.c_str());
     if( this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Options::loadPublication() - ")
@@ -1274,19 +1274,19 @@ Options::loadPublication(
         valueString.c_str()
       ));
     }
-    if( valueString == "VOLATILE") {
+    if( valueString == ACE_TEXT("VOLATILE")) {
       profile->writerQos.durability.kind = ::DDS::VOLATILE_DURABILITY_QOS;
       profile->writerQosMask |= SetDurabilityQos;
 
-    } else if( valueString == "LOCAL") {
+    } else if( valueString == ACE_TEXT("LOCAL")) {
       profile->writerQos.durability.kind = ::DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
       profile->writerQosMask |= SetDurabilityQos;
 
-    } else if( valueString == "TRANSIENT") {
+    } else if( valueString == ACE_TEXT("TRANSIENT")) {
       profile->writerQos.durability.kind = ::DDS::TRANSIENT_DURABILITY_QOS;
       profile->writerQosMask |= SetDurabilityQos;
 
-    } else if( valueString == "PERSISTENT") {
+    } else if( valueString == ACE_TEXT("PERSISTENT")) {
       profile->writerQos.durability.kind = ::DDS::PERSISTENT_DURABILITY_QOS;
       profile->writerQosMask |= SetDurabilityQos;
 
@@ -1333,11 +1333,11 @@ Options::loadPublication(
         valueString.c_str()
       ));
     }
-    if( valueString == "ALL") {
+    if( valueString == ACE_TEXT("ALL")) {
       profile->writerQos.durability_service.history_kind = ::DDS::KEEP_ALL_HISTORY_QOS;
       profile->writerQosMask |= SetDurabilityServiceHistoryKindQos;
 
-    } else if( valueString == "LAST") {
+    } else if( valueString == ACE_TEXT("LAST")) {
       profile->writerQos.durability_service.history_kind = ::DDS::KEEP_LAST_HISTORY_QOS;
       profile->writerQosMask |= SetDurabilityServiceHistoryKindQos;
 
@@ -1470,15 +1470,15 @@ Options::loadPublication(
         valueString.c_str()
       ));
     }
-    if( valueString == "AUTOMATIC") {
+    if( valueString == ACE_TEXT("AUTOMATIC")) {
       profile->writerQos.liveliness.kind = ::DDS::AUTOMATIC_LIVELINESS_QOS;
       profile->writerQosMask |= SetLivelinessKindQos;
 
-    } else if( valueString == "PARTICIPANT") {
+    } else if( valueString == ACE_TEXT("PARTICIPANT")) {
       profile->writerQos.liveliness.kind = ::DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
       profile->writerQosMask |= SetLivelinessKindQos;
 
-    } else if( valueString == "TOPIC") {
+    } else if( valueString == ACE_TEXT("TOPIC")) {
       profile->writerQos.liveliness.kind = ::DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS;
       profile->writerQosMask |= SetLivelinessKindQos;
 
@@ -1524,11 +1524,11 @@ Options::loadPublication(
         valueString.c_str()
       ));
     }
-    if( valueString == "BEST_EFFORT") {
+    if( valueString == ACE_TEXT("BEST_EFFORT")) {
       profile->writerQos.reliability.kind = ::DDS::BEST_EFFORT_RELIABILITY_QOS;
       profile->writerQosMask |= SetReliabilityKindQos;
 
-    } else if( valueString == "RELIABLE") {
+    } else if( valueString == ACE_TEXT("RELIABLE")) {
       profile->writerQos.reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
       profile->writerQosMask |= SetReliabilityKindQos;
 
@@ -1574,11 +1574,11 @@ Options::loadPublication(
         valueString.c_str()
       ));
     }
-    if( valueString == "SOURCE") {
+    if( valueString == ACE_TEXT("SOURCE")) {
       profile->writerQos.destination_order.kind = ::DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS;
       profile->writerQosMask |= SetDestinationOrderQos;
 
-    } else if( valueString == "RECEPTION") {
+    } else if( valueString == ACE_TEXT("RECEPTION")) {
       profile->writerQos.destination_order.kind = ::DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS;
       profile->writerQosMask |= SetDestinationOrderQos;
 
@@ -1606,11 +1606,11 @@ Options::loadPublication(
         valueString.c_str()
       ));
     }
-    if( valueString == "ALL") {
+    if( valueString == ACE_TEXT("ALL")) {
       profile->writerQos.history.kind = ::DDS::KEEP_ALL_HISTORY_QOS;
       profile->writerQosMask |= SetHistoryKindQos;
 
-    } else if( valueString == "LAST") {
+    } else if( valueString == ACE_TEXT("LAST")) {
       profile->writerQos.history.kind = ::DDS::KEEP_LAST_HISTORY_QOS;
       profile->writerQosMask |= SetHistoryKindQos;
 
@@ -1766,11 +1766,11 @@ Options::loadPublication(
         valueString.c_str()
       ));
     }
-    if( valueString == "SHARED") {
+    if( valueString == ACE_TEXT("SHARED")) {
       profile->writerQos.ownership.kind = ::DDS::SHARED_OWNERSHIP_QOS;
       profile->writerQosMask |= SetOwnershipKindQos;
 
-    } else if( valueString == "EXCLUSIVE") {
+    } else if( valueString == ACE_TEXT("EXCLUSIVE")) {
       profile->writerQos.ownership.kind = ::DDS::EXCLUSIVE_OWNERSHIP_QOS;
       profile->writerQosMask |= SetOwnershipKindQos;
 
@@ -1824,7 +1824,7 @@ Options::loadPublication(
   valueString.clear();
   heap.get_string_value( sectionKey, TOPIC_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    profile->topic = valueString.c_str();
+    profile->topic = ACE_TEXT_ALWAYS_CHAR(valueString.c_str());
     if( this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Options::loadPublication() - ")
@@ -1856,7 +1856,7 @@ Options::loadPublication(
   valueString.clear();
   heap.get_string_value( sectionKey, MESSAGESOURCE_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    profile->source = valueString.c_str();
+    profile->source = ACE_TEXT_ALWAYS_CHAR(valueString.c_str());
     if( this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Options::loadPublication() - ")
@@ -1949,14 +1949,14 @@ Options::loadPublication(
   }
 
   // Store the profile for the current participant.
-  this->publicationProfileMap_[ sectionName] = profile;
+  this->publicationProfileMap_[ACE_TEXT_ALWAYS_CHAR(sectionName.c_str())] = profile;
 }
 
 void
 Options::loadSubscription(
   ACE_Configuration_Heap& heap,
   ACE_Configuration_Section_Key& sectionKey,
-  std::string sectionName
+  std::basic_string<ACE_TCHAR> sectionName
 )
 {
   /**
@@ -2016,13 +2016,13 @@ Options::loadSubscription(
         valueString.c_str()
       ));
     }
-    if( valueString == "INSTANCE") {
+    if( valueString == ACE_TEXT("INSTANCE")) {
       profile->subscriberQos.presentation.access_scope = ::DDS::INSTANCE_PRESENTATION_QOS;
 
-    } else if( valueString == "TOPIC") {
+    } else if( valueString == ACE_TEXT("TOPIC")) {
       profile->subscriberQos.presentation.access_scope = ::DDS::TOPIC_PRESENTATION_QOS;
 
-    } else if( valueString == "GROUP") {
+    } else if( valueString == ACE_TEXT("GROUP")) {
       profile->subscriberQos.presentation.access_scope = ::DDS::GROUP_PRESENTATION_QOS;
 
     } else {
@@ -2073,7 +2073,7 @@ Options::loadSubscription(
   heap.get_string_value( sectionKey, PARTITION_KEYNAME, valueString);
   if (valueString.length() > 0) {
     profile->subscriberQos.partition.name.length( 1);
-    profile->subscriberQos.partition.name[0] = ACE_OS::strdup( valueString.c_str());
+    profile->subscriberQos.partition.name[0] = ACE_TEXT_ALWAYS_CHAR(valueString.c_str());
     if( this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
@@ -2137,19 +2137,19 @@ Options::loadSubscription(
         valueString.c_str()
       ));
     }
-    if( valueString == "VOLATILE") {
+    if( valueString == ACE_TEXT("VOLATILE")) {
       profile->readerQos.durability.kind = ::DDS::VOLATILE_DURABILITY_QOS;
       profile->readerQosMask |= SetDurabilityQos;
 
-    } else if( valueString == "LOCAL") {
+    } else if( valueString == ACE_TEXT("LOCAL")) {
       profile->readerQos.durability.kind = ::DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
       profile->readerQosMask |= SetDurabilityQos;
 
-    } else if( valueString == "TRANSIENT") {
+    } else if( valueString == ACE_TEXT("TRANSIENT")) {
       profile->readerQos.durability.kind = ::DDS::TRANSIENT_DURABILITY_QOS;
       profile->readerQosMask |= SetDurabilityQos;
 
-    } else if( valueString == "PERSISTENT") {
+    } else if( valueString == ACE_TEXT("PERSISTENT")) {
       profile->readerQos.durability.kind = ::DDS::PERSISTENT_DURABILITY_QOS;
       profile->readerQosMask |= SetDurabilityQos;
 
@@ -2213,15 +2213,15 @@ Options::loadSubscription(
         valueString.c_str()
       ));
     }
-    if( valueString == "AUTOMATIC") {
+    if( valueString == ACE_TEXT("AUTOMATIC")) {
       profile->readerQos.liveliness.kind = ::DDS::AUTOMATIC_LIVELINESS_QOS;
       profile->readerQosMask |= SetLivelinessKindQos;
 
-    } else if( valueString == "PARTICIPANT") {
+    } else if( valueString == ACE_TEXT("PARTICIPANT")) {
       profile->readerQos.liveliness.kind = ::DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
       profile->readerQosMask |= SetLivelinessKindQos;
 
-    } else if( valueString == "TOPIC") {
+    } else if( valueString == ACE_TEXT("TOPIC")) {
       profile->readerQos.liveliness.kind = ::DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS;
       profile->readerQosMask |= SetLivelinessKindQos;
 
@@ -2267,11 +2267,11 @@ Options::loadSubscription(
         valueString.c_str()
       ));
     }
-    if( valueString == "BEST_EFFORT") {
+    if( valueString == ACE_TEXT("BEST_EFFORT")) {
       profile->readerQos.reliability.kind = ::DDS::BEST_EFFORT_RELIABILITY_QOS;
       profile->readerQosMask |= SetReliabilityKindQos;
 
-    } else if( valueString == "RELIABLE") {
+    } else if( valueString == ACE_TEXT("RELIABLE")) {
       profile->readerQos.reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
       profile->readerQosMask |= SetReliabilityKindQos;
 
@@ -2317,11 +2317,11 @@ Options::loadSubscription(
         valueString.c_str()
       ));
     }
-    if( valueString == "SOURCE") {
+    if( valueString == ACE_TEXT("SOURCE")) {
       profile->readerQos.destination_order.kind = ::DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS;
       profile->readerQosMask |= SetDestinationOrderQos;
 
-    } else if( valueString == "RECEPTION") {
+    } else if( valueString == ACE_TEXT("RECEPTION")) {
       profile->readerQos.destination_order.kind = ::DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS;
       profile->readerQosMask |= SetDestinationOrderQos;
 
@@ -2349,11 +2349,11 @@ Options::loadSubscription(
         valueString.c_str()
       ));
     }
-    if( valueString == "ALL") {
+    if( valueString == ACE_TEXT("ALL")) {
       profile->readerQos.history.kind = ::DDS::KEEP_ALL_HISTORY_QOS;
       profile->readerQosMask |= SetHistoryKindQos;
 
-    } else if( valueString == "LAST") {
+    } else if( valueString == ACE_TEXT("LAST")) {
       profile->readerQos.history.kind = ::DDS::KEEP_LAST_HISTORY_QOS;
       profile->readerQosMask |= SetHistoryKindQos;
 
@@ -2501,7 +2501,7 @@ Options::loadSubscription(
   valueString.clear();
   heap.get_string_value( sectionKey, TOPIC_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    profile->topic = valueString.c_str();
+    profile->topic = ACE_TEXT_ALWAYS_CHAR(valueString.c_str());
     if( this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
@@ -2533,7 +2533,7 @@ Options::loadSubscription(
   valueString.clear();
   heap.get_string_value( sectionKey, DATACOLLECTIONFILE_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    profile->datafile = valueString.c_str();
+    profile->datafile = ACE_TEXT_ALWAYS_CHAR(valueString.c_str());
     if( this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
@@ -2574,13 +2574,13 @@ Options::loadSubscription(
         valueString.c_str()
       ));
     }
-    if( valueString == "ALL") {
+    if( valueString == ACE_TEXT("ALL")) {
       profile->retention = ::OpenDDS::DCPS::DataCollector<double>::Unbounded;
 
-    } else if( valueString == "OLDEST") {
+    } else if( valueString == ACE_TEXT("OLDEST")) {
       profile->retention = ::OpenDDS::DCPS::DataCollector<double>::KeepOldest;
 
-    } else if( valueString == "NEWEST") {
+    } else if( valueString == ACE_TEXT("NEWEST")) {
       profile->retention = ::OpenDDS::DCPS::DataCollector<double>::KeepNewest;
 
     } else {
@@ -2595,7 +2595,7 @@ Options::loadSubscription(
   }
 
   // Store the profile for the current participant.
-  this->subscriptionProfileMap_[ sectionName] = profile;
+  this->subscriptionProfileMap_[ACE_TEXT_ALWAYS_CHAR(sectionName.c_str())] = profile;
 }
 
 } // End of namespace Test

@@ -19,8 +19,8 @@
 const long  TEST_DOMAIN   = 911;
 const char* TEST_TOPIC    = "foo";
 const char* TEST_TOPIC_TYPE     = "foo";
-const char * reader_address_str = "localhost:0";
-const char * writer_address_str = "localhost:0";
+const ACE_TCHAR* reader_address_str = ACE_TEXT("localhost:0");
+const ACE_TCHAR* writer_address_str = ACE_TEXT("localhost:0");
 int default_key = 101010;
 int num_writes = 1;
 
@@ -49,10 +49,10 @@ OpenDDS::DCPS::TransportImpl_rch writer_transport_impl;
 int init_transport ()
 {
   reader_transport_impl
-    = TheTransportFactory->create_transport_impl (SUB_TRAFFIC, "SimpleTcp", OpenDDS::DCPS::DONT_AUTO_CONFIG);
+    = TheTransportFactory->create_transport_impl (SUB_TRAFFIC, ACE_TEXT("SimpleTcp"), OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   OpenDDS::DCPS::TransportConfiguration_rch reader_config
-    = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleTcp");
+    = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("SimpleTcp"));
 
   OpenDDS::DCPS::SimpleTcpConfiguration* reader_tcp_config
     = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
@@ -70,10 +70,10 @@ int init_transport ()
   }
 
   writer_transport_impl
-    = TheTransportFactory->create_transport_impl (PUB_TRAFFIC, "SimpleTcp", OpenDDS::DCPS::DONT_AUTO_CONFIG);
+    = TheTransportFactory->create_transport_impl (PUB_TRAFFIC, ACE_TEXT("SimpleTcp"), OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   OpenDDS::DCPS::TransportConfiguration_rch writer_config
-    = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleTcp");
+    = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("SimpleTcp"));
 
   OpenDDS::DCPS::SimpleTcpConfiguration* writer_tcp_config
     = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
@@ -128,7 +128,7 @@ int attach_publisher_transport ()
       ACE_ERROR_RETURN ((LM_ERROR,
                         ACE_TEXT("(%P|%t) Failed to attach publisher with the transport. ")
                         ACE_TEXT("AttachStatus == %s\n"),
-                        status_str.c_str()),
+                        ACE_TEXT_CHAR_TO_TCHAR (status_str.c_str())),
                         -1);
     }
 
@@ -164,7 +164,7 @@ int attach_subscriber_transport ()
       ACE_ERROR_RETURN ((LM_ERROR,
                         ACE_TEXT("(%P|%t) Failed to attach subscriber with the transport. ")
                         ACE_TEXT("AttachStatus == %s\n"),
-                        status_str.c_str()),
+                        ACE_TEXT_CHAR_TO_TCHAR (status_str.c_str())),
                         -1);
     }
 
@@ -192,7 +192,7 @@ int ignore ()
       std::stringstream ignoreBuffer;
       ignoreBuffer << ignore_id;
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) IGNORE_PARTICIPANT,  participant %s ignore participant %s .\n"),
+                 ACE_TEXT("(%P|%t) IGNORE_PARTICIPANT,  participant %C ignore participant %C .\n"),
                  participantBuffer.str().c_str(), ignoreBuffer.str().c_str()));
 
       ::DDS::InstanceHandleSeq handles;
@@ -216,7 +216,7 @@ int ignore ()
       }
 
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) IGNORE_PARTICIPANT,  ignored participant %s has handle 0x%x.\n"),
+        ACE_TEXT("(%P|%t) IGNORE_PARTICIPANT,  ignored participant %C has handle 0x%x.\n"),
         ignoreBuffer.str().c_str(),
         handles[0]
       ));
@@ -227,7 +227,7 @@ int ignore ()
       {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT("(%P|%t) IGNORE_PARTICIPANT, ")
-                    ACE_TEXT(" participant %s ignore participant %s returned error %d\n"),
+                    ACE_TEXT(" participant %C ignore participant %C returned error %d\n"),
                     participantBuffer.str().c_str(), ignoreBuffer.str().c_str(), ret));
         return -1;
       }
@@ -244,7 +244,7 @@ int ignore ()
       std::stringstream ignoreBuffer;
       ignoreBuffer << ignore_id;
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) IGNORE_TOPIC, participant %s ignore topic %s .\n"),
+                 ACE_TEXT("(%P|%t) IGNORE_TOPIC, participant %C ignore topic %C .\n"),
                  participantBuffer.str().c_str(), ignoreBuffer.str().c_str()));
 
       ::DDS::InstanceHandleSeq handles;
@@ -268,7 +268,7 @@ int ignore ()
       }
 
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) IGNORE_TOPIC,  ignored topic %s has handle 0x%x.\n"),
+        ACE_TEXT("(%P|%t) IGNORE_TOPIC,  ignored topic %C has handle 0x%x.\n"),
         ignoreBuffer.str().c_str(),
         handles[0]
       ));
@@ -295,7 +295,7 @@ int ignore ()
       std::stringstream ignoreBuffer;
       ignoreBuffer << ignore_id;
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) IGNORE_PUBLICATION, participant %s ignore publication %s .\n"),
+                 ACE_TEXT("(%P|%t) IGNORE_PUBLICATION, participant %C ignore publication %C .\n"),
                  participantBuffer.str().c_str(), ignoreBuffer.str().c_str()));
 
       ::DDS::InstanceHandleSeq handles;
@@ -320,7 +320,7 @@ int ignore ()
       }
 
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) IGNORE_PUBLICATION,  ignored topic %s has handle 0x%x.\n"),
+        ACE_TEXT("(%P|%t) IGNORE_PUBLICATION,  ignored topic %C has handle 0x%x.\n"),
         ignoreBuffer.str().c_str(),
         handles[0]
       ));
@@ -347,7 +347,7 @@ int ignore ()
       std::stringstream ignoreBuffer;
       ignoreBuffer << ignore_id;
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) IGNORE_SUBSCRIPTION, participant %s ignore subscription %s .\n"),
+                 ACE_TEXT("(%P|%t) IGNORE_SUBSCRIPTION, participant %C ignore subscription %C .\n"),
                  participantBuffer.str().c_str(), ignoreBuffer.str().c_str()));
 
       ::DDS::InstanceHandleSeq handles;
@@ -371,7 +371,7 @@ int ignore ()
       }
 
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) IGNORE_SUBSCRIPTION,  ignored topic %s has handle 0x%x.\n"),
+        ACE_TEXT("(%P|%t) IGNORE_SUBSCRIPTION,  ignored topic %C has handle 0x%x.\n"),
         ignoreBuffer.str().c_str(),
         handles[0]
       ));

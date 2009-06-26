@@ -33,7 +33,7 @@ OpenDDS::DCPS::ReceiveListenerSet::exist (const RepoId& local_id,
     OpenDDS::DCPS::RepoIdConverter converter(local_id);
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ReceiveListenerSet::exist: ")
-      ACE_TEXT("could not find local %s.\n"),
+      ACE_TEXT("could not find local %C.\n"),
       std::string(converter).c_str()
     ));
 
@@ -45,7 +45,7 @@ OpenDDS::DCPS::ReceiveListenerSet::exist (const RepoId& local_id,
     OpenDDS::DCPS::RepoIdConverter converter(local_id);
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ReceiveListenerSet::exist: ")
-      ACE_TEXT("listener for local %s is nil.\n"),
+      ACE_TEXT("listener for local %C is nil.\n"),
       std::string(converter).c_str()
     ));
 

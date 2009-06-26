@@ -118,6 +118,7 @@ OpenDDS::DCPS::TransportSendStrategy::~TransportSendStrategy()
   if( this->pkt_chain_ != 0) {
     size_t size = this->pkt_chain_->total_length();
     if( size > 0) {
+      this->pkt_chain_->release();
       ACE_DEBUG((LM_WARNING,
         ACE_TEXT("(%P|%t) WARNING: TransportSendStrategy::~TransportSendStrategy() - ")
         ACE_TEXT("terminating with %d unsent bytes.\n"),
@@ -166,7 +167,7 @@ OpenDDS::DCPS::TransportSendStrategy::perform_work()
   { // scope for the guard(this->lock_);
     GuardType guard(this->lock_);
 
-    VDBG_LVL((LM_DEBUG, "(%P|%t) DBG: perform_work mode: %s\n", mode_as_str (this->mode_)), 5);
+    VDBG_LVL((LM_DEBUG, "(%P|%t) DBG: perform_work mode: %C\n", mode_as_str (this->mode_)), 5);
 
     if (this->mode_ == MODE_TERMINATED)
       {
@@ -196,7 +197,7 @@ OpenDDS::DCPS::TransportSendStrategy::perform_work()
     if (this->mode_ != MODE_QUEUE && this->mode_ != MODE_SUSPEND)
       {
         VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
-                  "Entered perform_work() and mode_ is %s - just return "
+                  "Entered perform_work() and mode_ is %C - just return "
                   "WORK_OUTCOME_NO_MORE_TO_DO.\n", mode_as_str (this->mode_)), 5);
         return WORK_OUTCOME_NO_MORE_TO_DO;
       }
@@ -960,7 +961,7 @@ OpenDDS::DCPS::TransportSendStrategy::send(TransportQueueElement* element, bool 
 	if (this->mode_ == MODE_QUEUE || this->mode_ == MODE_SUSPEND)
 	  {
 	    VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
-		      "this->mode_ == %s, so queue elem and leave.\n", mode_as_str (this->mode_)), 5);
+		      "this->mode_ == %C, so queue elem and leave.\n", mode_as_str (this->mode_)), 5);
 
 	    this->queue_->put(element);
 	    if (this->mode_ != MODE_SUSPEND)
@@ -1223,7 +1224,7 @@ OpenDDS::DCPS::TransportSendStrategy::send_stop()
     if (this->mode_ == MODE_QUEUE || this->mode_ == MODE_SUSPEND)
       {
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-	      "But since we are in %s, we don't have to do "
+	      "But since we are in %C, we don't have to do "
 	      "anything more in this important send_stop().\n",
 	      mode_as_str(this->mode_)));
         // We don't do anything if we are in MODE_QUEUE.  Just leave.
@@ -1809,13 +1810,13 @@ OpenDDS::DCPS::TransportSendStrategy::non_blocking_send (const iovec iov[], int 
       else
         {
           VDBG_LVL((LM_ERROR, "(%P|%t) TransportSendStrategy::send_bytes: ERROR: %p iovec count: %d\n",
-		    "sendv", n),1);
+		    ACE_TEXT("sendv"), n),1);
 
           // try to get the application to core when "Bad Address" is returned
           // by looking at the iovec
           for (int ii = 0; ii < n; ii++)
             {
-              ACE_DEBUG((LM_DEBUG, "(%P|%t)send_bytes: iov[%d].iov_len = %d .iob_base =%X\n",
+              ACE_DEBUG((LM_DEBUG, "(%P|%t)send_bytes: iov[%d].iov_len = %d .iov_base =%X\n",
                 ii, iov[ii].iov_len, iov[ii].iov_base ));
             }
         }

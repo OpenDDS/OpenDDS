@@ -21,20 +21,20 @@ int try_marshaling(const FOO &in_foo, FOO &out_foo,
   size_t cs = _dcps_find_size(in_foo);
 
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%s: _tao_is_bounded_size(foo) => %d\n"), 
+    ACE_TEXT("%C: _tao_is_bounded_size(foo) => %d\n"), 
     name, bounded));
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%s: _max_marshaled_size(my_foo) => %d\n"), 
+    ACE_TEXT("%C: _max_marshaled_size(my_foo) => %d\n"), 
     name, ms));
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%s: _dcps_find_size(my_foo) => %d\n"), 
+    ACE_TEXT("%C: _dcps_find_size(my_foo) => %d\n"), 
     name, cs));
 
   // NOTE:_max_marshaled_size is not always > for unbounded.
   if (bounded && ms < cs)
     {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("%s: _dcps_max_marshaled_size(foo) %d < _dcps_find_size(foo) %d\n"),
+        ACE_TEXT("%C: _dcps_max_marshaled_size(foo) %d < _dcps_find_size(foo) %d\n"),
         name, ms, cs));
       failed = true;
       return false;
@@ -43,7 +43,7 @@ int try_marshaling(const FOO &in_foo, FOO &out_foo,
   if (expected_cs != DONT_CHECK_CS && cs != expected_cs)
     {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("%s: _dcps_find_size(foo) got %d but expected %d\n"),
+        ACE_TEXT("%C: _dcps_find_size(foo) got %d but expected %d\n"),
         name, cs, expected_cs ));
       failed = true;
       return false;
@@ -52,7 +52,7 @@ int try_marshaling(const FOO &in_foo, FOO &out_foo,
   if (expected_ms != DONT_CHECK_MS && ms != expected_ms)
     {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("%s: _dcps_max_marshaled_size(foo) got %d but expected %d\n"),
+        ACE_TEXT("%C: _dcps_max_marshaled_size(foo) got %d but expected %d\n"),
         name, ms, expected_ms ));
       failed = true;
       return false;
@@ -66,13 +66,13 @@ int try_marshaling(const FOO &in_foo, FOO &out_foo,
   if (false == (cdr << in_foo))
     {
       ACE_ERROR((LM_ERROR, 
-        ACE_TEXT("%s: TAO_OutputCDR << failed\n"), name));
+        ACE_TEXT("%C: TAO_OutputCDR << failed\n"), name));
       failed = true;
     }
 
 
-  char ebuffer[51200] ; ebuffer[0] = '\0' ;
-  char obuffer[51200] ; obuffer[0] = '\0' ;
+  ACE_TCHAR ebuffer[51200] ; ebuffer[0] = ACE_TEXT('\0') ;
+  ACE_TCHAR obuffer[51200] ; obuffer[0] = ACE_TEXT('\0') ;
 
   TAO::DCPS::Serializer ss(mb);
 
@@ -81,14 +81,14 @@ int try_marshaling(const FOO &in_foo, FOO &out_foo,
       ACE::format_hexdump( mb->rd_ptr(), mb->length(), ebuffer, 
         sizeof(ebuffer)) ;
       ACE_DEBUG((LM_DEBUG, 
-        ACE_TEXT("%s: BEFORE WRITING, LENGTH: %d, BUFFER:\n%s\n"), 
+        ACE_TEXT("%C: BEFORE WRITING, LENGTH: %d, BUFFER:\n%s\n"), 
         name, mb->length(), ebuffer));
     }
 
   if (false == ss << in_foo)
     {
       ACE_ERROR((LM_ERROR, 
-        ACE_TEXT("%s: Serializing failed\n"), name));
+        ACE_TEXT("%C: Serializing failed\n"), name));
       failed = true;
       return false;
     }
@@ -98,7 +98,7 @@ int try_marshaling(const FOO &in_foo, FOO &out_foo,
       ACE::format_hexdump( mb->rd_ptr(), mb->length(), ebuffer, 
         sizeof(ebuffer)) ;
       ACE_DEBUG((LM_DEBUG, 
-        ACE_TEXT("%s: AFTER WRITING, LENGTH: %d, BUFFER:\n%s\n"), 
+        ACE_TEXT("%C: AFTER WRITING, LENGTH: %d, BUFFER:\n%s\n"), 
         name, mb->length(), ebuffer));
     }
 
@@ -111,7 +111,7 @@ int try_marshaling(const FOO &in_foo, FOO &out_foo,
   if (false == ss >> out_foo)
     {
       ACE_ERROR((LM_ERROR, 
-        ACE_TEXT("%s: Deserializing failed\n"), name));
+        ACE_TEXT("%C: Deserializing failed\n"), name));
       failed = true;
       mb->release(); // don't leak memory!
       return false;
@@ -120,12 +120,12 @@ int try_marshaling(const FOO &in_foo, FOO &out_foo,
   mb->release(); // don't leak memory!
 
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%s: try_marshaling PASSED\n"), name));
+    ACE_TEXT("%C: try_marshaling PASSED\n"), name));
   return true;
 }
 
 // this test tests the -Gdcps generated code for type XyZ::Foo from foo_test1_lib.
-int main (int argc, char *argv[])
+int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
  
   if (argc > 1) dump_buffer = true;
@@ -653,7 +653,7 @@ int main (int argc, char *argv[])
       else if (0 != strcmp(ss_foo.theString.in (), my_foo.theString.in ()))
         {
           ACE_ERROR((LM_ERROR, 
-            ACE_TEXT("Failed to serialize theString \"%s\" => \"%s\"\n"),
+            ACE_TEXT("Failed to serialize theString \"%C\" => \"%C\"\n"),
             my_foo.theString.in (), ss_foo.theString.in ()));
           failed = true;
         }

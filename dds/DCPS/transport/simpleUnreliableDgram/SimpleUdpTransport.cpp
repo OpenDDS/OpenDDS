@@ -45,10 +45,10 @@ OpenDDS::DCPS::SimpleUdpTransport::configure_socket(TransportConfiguration* conf
     {
 
       ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: failed to open udp socket %s:%d: %p\n",
+                        "(%P|%t) ERROR: failed to open udp socket %C:%d: %p\n",
                         address.get_host_addr (),
                         address.get_port_number (),
-                        "open"),
+                        ACE_TEXT("open")),
                        -1);
     }
  
@@ -60,12 +60,12 @@ OpenDDS::DCPS::SimpleUdpTransport::configure_socket(TransportConfiguration* conf
   // qualified hostname and actual listening port number.
   if (udp_config->local_address_.is_any ())
     {
-      const std::string& hostname = get_fully_qualified_hostname ();
+      ACE_TString hostname = get_fully_qualified_hostname ();
 
       udp_config->local_address_.set (port, hostname.c_str());
       udp_config->local_address_str_ = hostname;
-      udp_config->local_address_str_ += ":";
-      udp_config->local_address_str_ += out.str ();
+      udp_config->local_address_str_ += ACE_TEXT(":");
+      udp_config->local_address_str_ += ACE_TEXT_CHAR_TO_TCHAR(out.str().c_str());
     }
 
   // Now we got the actual listening port. Update the port nnmber in the configuration
@@ -76,9 +76,9 @@ OpenDDS::DCPS::SimpleUdpTransport::configure_socket(TransportConfiguration* conf
 
       if (! udp_config->local_address_str_.empty ())
       {
-        std::string::size_type pos = udp_config->local_address_str_.find_first_of (':');
-        std::string str = udp_config->local_address_str_.substr (0, pos + 1);
-        str += out.str ();
+        ACE_TString::size_type pos = udp_config->local_address_str_.find (ACE_TEXT(':'));
+        ACE_TString str = udp_config->local_address_str_.substr (0, pos + 1);
+        str += ACE_TEXT_CHAR_TO_TCHAR(out.str().c_str());
         udp_config->local_address_str_ = str;
       }
     }

@@ -34,7 +34,7 @@ TimeBase::TimeT get_timestamp() {
   return retval;
 }
 
-int main (int argc, char *argv[]) {
+int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
 
   DDS::DomainParticipantFactory_var dpf = DDS::DomainParticipantFactory::_nil();
   DDS::DomainParticipant_var participant = DDS::DomainParticipant::_nil();

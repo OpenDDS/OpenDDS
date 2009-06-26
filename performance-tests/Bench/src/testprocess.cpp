@@ -9,8 +9,7 @@
 
 #include <iostream>
 
-int
-main( int argc, char *argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   try {
     // Initialize DDS.
@@ -43,10 +42,10 @@ main( int argc, char *argv[])
     ));
     return 1;
 
-  } catch( Test::Exception e)  {
+  } catch( const Test::Exception& e)  {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) testprocess() - ")
-      ACE_TEXT("Test exception caught during processing: %s.\n"),
+      ACE_TEXT("Test exception caught during processing: %C.\n"),
       e.what()
     ));
     return 1;

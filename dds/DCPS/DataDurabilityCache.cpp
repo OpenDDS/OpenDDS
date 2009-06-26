@@ -679,7 +679,7 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
                     ACE_TEXT ("OpenDDS (%P|%t) Scheduling durable data ")
                     ACE_TEXT ("cleanup for\n")
                     ACE_TEXT ("OpenDDS (%P|%t) (domain_id, topic, type) ")
-                    ACE_TEXT ("== (%d, %s, %s,)\n"),
+                    ACE_TEXT ("== (%d, %C, %C)\n"),
                     domain_id,
                     topic_name,
                     type_name));

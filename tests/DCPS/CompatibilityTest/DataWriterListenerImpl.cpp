@@ -38,8 +38,8 @@ void DataWriterListenerImpl::on_offered_incompatible_qos (
   ACE_UNUSED_ARG(status) ;
 
   ACE_ERROR ((LM_DEBUG,
-         ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_offered_incompatible_qos "
-         "This should appear when the test is designed to be incompatible.\n")));
+         ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_offered_incompatible_qos ")
+         ACE_TEXT("This should appear when the test is designed to be incompatible.\n")));
 }
 
 void DataWriterListenerImpl::on_liveliness_lost (

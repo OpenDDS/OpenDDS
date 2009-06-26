@@ -39,7 +39,7 @@ Subscription::get_statuscondition()
   if( !this->enabled_) {
     if( this->verbose_) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Subscription::get_statuscondition() - subscription %s: ")
+        ACE_TEXT("(%P|%t) Subscription::get_statuscondition() - subscription %C: ")
         ACE_TEXT("not enabled, declining to process.\n"),
         this->name_.c_str()
       ));
@@ -57,7 +57,7 @@ Subscription::set_destination( Publication* publication)
   if( !this->enabled_) {
     if( this->verbose_) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Subscription::set_destination() - subscription %s: ")
+        ACE_TEXT("(%P|%t) Subscription::set_destination() - subscription %C: ")
         ACE_TEXT("not enabled, declining to process.\n"),
         this->name_.c_str()
       ));
@@ -78,7 +78,7 @@ Subscription::enable(
   if( this->enabled_) {
     if( this->verbose_) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Subscription::enable() - subscription %s: ")
+        ACE_TEXT("(%P|%t) Subscription::enable() - subscription %C: ")
         ACE_TEXT("already enabled, declining to process.\n"),
         this->name_.c_str()
       ));
@@ -93,7 +93,7 @@ Subscription::enable(
                                      );
   if( CORBA::is_nil( subscriber.in())) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) Subscription::enable() - subscription %s: ")
+      ACE_TEXT("(%P|%t) Subscription::enable() - subscription %C: ")
       ACE_TEXT("failed to create subscriber.\n"),
         this->name_.c_str()
     ));
@@ -107,7 +107,7 @@ Subscription::enable(
       = dynamic_cast< ::OpenDDS::DCPS::SubscriberImpl*>( subscriber.in());
     if( 0 == servant) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Subscription::enable() - subscription %s: ")
+        ACE_TEXT("(%P|%t) ERROR: Subscription::enable() - subscription %C: ")
         ACE_TEXT("failed to narrow subscriber servant.\n"),
         this->name_.c_str()
       ));
@@ -121,9 +121,9 @@ Subscription::enable(
     servant->raw_latency_buffer_type() = this->profile_->retention;
     if( this->verbose_) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Subscription::enable() - subscription %s: ")
+        ACE_TEXT("(%P|%t) Subscription::enable() - subscription %C: ")
         ACE_TEXT("configured to capture %d latency measurements of type %d ")
-        ACE_TEXT("per writer to file %s.\n"),
+        ACE_TEXT("per writer to file %C.\n"),
         this->name_.c_str(),
         this->profile_->bound,
         this->profile_->retention,
@@ -140,7 +140,7 @@ Subscription::enable(
       );
   if( transport.is_nil()) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) Subscription::enable() - subscription %s: ")
+      ACE_TEXT("(%P|%t) Subscription::enable() - subscription %C: ")
       ACE_TEXT("failed to create transport with index %d.\n"),
       this->name_.c_str(),
       this->profile_->transport
@@ -149,7 +149,7 @@ Subscription::enable(
 
   } else if( this->verbose_) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Subscription::enable() - subscription %s: ")
+      ACE_TEXT("(%P|%t) Subscription::enable() - subscription %C: ")
       ACE_TEXT("created transport with index %d.\n"),
       this->name_.c_str(),
       this->profile_->transport
@@ -159,7 +159,7 @@ Subscription::enable(
   // Attach the transport
   if( ::OpenDDS::DCPS::ATTACH_OK != transport->attach( subscriber)) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) Subscription::enable() - subscription %s: ")
+      ACE_TEXT("(%P|%t) Subscription::enable() - subscription %C: ")
       ACE_TEXT("failed to attach transport with index %d to subscriber.\n"),
       this->name_.c_str(),
       this->profile_->transport
@@ -168,7 +168,7 @@ Subscription::enable(
 
   } else if( this->verbose_) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Subscription::enable() - subscription %s: ")
+      ACE_TEXT("(%P|%t) Subscription::enable() - subscription %C: ")
       ACE_TEXT("attached transport with index %d to subscriber.\n"),
       this->name_.c_str(),
       this->profile_->transport
@@ -194,7 +194,7 @@ Subscription::enable(
                                );
   if( CORBA::is_nil( reader.in())) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) Subscription::enable() - subscription %s: ")
+      ACE_TEXT("(%P|%t) Subscription::enable() - subscription %C: ")
       ACE_TEXT("failed to create reader.\n"),
       this->name_.c_str()
     ));
@@ -202,7 +202,7 @@ Subscription::enable(
 
   } else if( this->verbose_) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Subscription::enable() - subscription %s: ")
+      ACE_TEXT("(%P|%t) Subscription::enable() - subscription %C: ")
       ACE_TEXT("created reader.\n"),
       this->name_.c_str()
     ));
@@ -211,7 +211,7 @@ Subscription::enable(
   this->reader_ = ::OpenDDS::DCPS::DataReaderEx::_narrow( reader.in());
   if( CORBA::is_nil( this->reader_.in())) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Subscription::enable() - subscription %s: ")
+      ACE_TEXT("(%P|%t) ERROR: Subscription::enable() - subscription %C: ")
       ACE_TEXT("failed to narrow reader to extract statistics.\n"),
       this->name_.c_str()
     ));
@@ -238,7 +238,7 @@ Subscription::enable(
   this->safe_listener_ = this->listener_;
   if( this->verbose_) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Subscription::enable() - subscription %s: ")
+      ACE_TEXT("(%P|%t) Subscription::enable() - subscription %C: ")
       ACE_TEXT("created reader listener.\n"),
       this->name_.c_str()
     ));
@@ -305,7 +305,7 @@ Subscription::rawData( std::ostream& str) const
     = dynamic_cast< OpenDDS::DCPS::DataReaderImpl*>( this->reader_.in());
   if( readerImpl == 0) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Subscription::enable() - subscription %s: ")
+      ACE_TEXT("(%P|%t) ERROR: Subscription::enable() - subscription %C: ")
       ACE_TEXT("failed to derive reader implementation.\n"),
       this->name_.c_str()
     ));

@@ -40,12 +40,12 @@ int expected_lost_pub_notification = 0;
 int actual_lost_pub_notification = 0;
 int expected_deleted_connections = 1;
 int num_deleted_connections = 0;
-std::string local_address;
+ACE_TString local_address;
 
 /// parse the command line arguments
-int parse_args (int argc, char *argv[])
+int parse_args (int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, "va:n:i:l:d:x:");
+  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT ("va:n:i:l:d:x:"));
   int c;
 
   while ((c = get_opts ()) != -1)
@@ -92,7 +92,7 @@ int parse_args (int argc, char *argv[])
 }
 
 
-int main (int argc, char *argv[]) {
+int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
   try {
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
@@ -134,16 +134,16 @@ int main (int argc, char *argv[]) {
     // Initialize the transport
     OpenDDS::DCPS::TransportImpl_rch tcp_impl =
         TheTransportFactory->create_transport_impl (TCP_IMPL_ID,
-                                                    "SimpleTcp",
+                                                    ACE_TEXT ("SimpleTcp"),
                                                     OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
     OpenDDS::DCPS::TransportConfiguration_rch writer_config
-      = TheTransportFactory->create_configuration (TCP_IMPL_ID, "SimpleTcp");
+      = TheTransportFactory->create_configuration (TCP_IMPL_ID, ACE_TEXT ("SimpleTcp"));
 
     OpenDDS::DCPS::SimpleTcpConfiguration* writer_tcp_config
       = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
 
-    writer_tcp_config->local_address_ = ACE_INET_Addr (local_address.c_str());
+    writer_tcp_config->local_address_ = ACE_INET_Addr (local_address.c_str ());
     writer_tcp_config->local_address_str_ = local_address;
     // This is needed for bp_timeout test.
     writer_tcp_config->max_output_pause_period_ = 2000;
@@ -222,7 +222,7 @@ int main (int argc, char *argv[]) {
     Writer* writer = new Writer(dw.in());
 
     // Indicate that the publisher is ready
-    FILE* writers_ready = ACE_OS::fopen (pub_ready_filename, "w");
+    FILE* writers_ready = ACE_OS::fopen (pub_ready_filename, ACE_TEXT ("w"));
     if (writers_ready == 0) {
       cerr << "ERROR Unable to create publisher ready file" << endl;
       exit(1);
@@ -232,9 +232,9 @@ int main (int argc, char *argv[]) {
     // Wait for the subscriber to be ready.
     FILE* readers_ready = 0;
     do {
-      ACE_Time_Value small(0,250000);
-      ACE_OS::sleep (small);
-      readers_ready = ACE_OS::fopen (sub_ready_filename, "r");
+      ACE_Time_Value small_time(0,250000);
+      ACE_OS::sleep (small_time);
+      readers_ready = ACE_OS::fopen (sub_ready_filename, ACE_TEXT ("r"));
     } while (0 == readers_ready);
     ACE_OS::fclose(readers_ready);
 
@@ -242,12 +242,12 @@ int main (int argc, char *argv[]) {
     ACE_OS::sleep(3);
     writer->start ();
     while ( !writer->is_finished()) {
-      ACE_Time_Value small(0,250000);
-      ACE_OS::sleep (small);
+      ACE_Time_Value small_time(0,250000);
+      ACE_OS::sleep (small_time);
     }
 
     // Indicate that the publisher is done
-    FILE* writers_completed = ACE_OS::fopen (pub_finished_filename, "w");
+    FILE* writers_completed = ACE_OS::fopen (pub_finished_filename, ACE_TEXT ("w"));
     if (writers_completed == 0) {
       cerr << "ERROR Unable to i publisher completed file" << endl;
     } else {
@@ -259,9 +259,9 @@ int main (int argc, char *argv[]) {
     // Wait for the subscriber to finish.
     FILE* readers_completed = 0;
     do {
-      ACE_Time_Value small(0,250000);
-      ACE_OS::sleep (small);
-      readers_completed = ACE_OS::fopen (sub_finished_filename, "r");
+      ACE_Time_Value small_time(0,250000);
+      ACE_OS::sleep (small_time);
+      readers_completed = ACE_OS::fopen (sub_finished_filename, ACE_TEXT ("r"));
     } while (0 == readers_completed);
     ACE_OS::fclose(readers_completed);
 

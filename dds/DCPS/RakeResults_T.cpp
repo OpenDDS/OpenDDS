@@ -217,8 +217,6 @@ bool RakeResults<SampleSeq>::copy_to_user()
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
     }
 #endif
-
-  return true;
 }
 
     } // namespace DCPS

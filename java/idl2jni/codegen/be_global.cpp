@@ -298,8 +298,8 @@ BE_GlobalData::usage (void) const
 {
   ACE_DEBUG ((
       LM_DEBUG,
-      ACE_TEXT (" -SS\t\t\tSuppress generation of server-side (skeleton) "
-                "files\n")
+      ACE_TEXT (" -SS\t\t\tSuppress generation of server-side (skeleton) ")
+      ACE_TEXT ("files\n")
       ));
 }
 

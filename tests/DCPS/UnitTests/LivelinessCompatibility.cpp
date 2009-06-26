@@ -21,7 +21,7 @@ lease_greater_than (::DDS::LivelinessQosPolicy const & qos1,
 }
 
 
-int main (int , char *[])
+int ACE_TMAIN(int , ACE_TCHAR *[])
 {
   int status = 0;
 

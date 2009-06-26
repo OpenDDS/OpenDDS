@@ -160,7 +160,7 @@ OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::assert_topic (
       OpenDDS::DCPS::RepoIdConverter converter(topicId);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) TAO_DDS_DCPSInfo_i::assert_topic: ")
-        ACE_TEXT("pushing creation of topic %s in domain %d.\n"),
+        ACE_TEXT("pushing creation of topic %C in domain %d.\n"),
         std::string(converter).c_str(),
         domainId
       ));
@@ -201,7 +201,7 @@ TAO_DDS_DCPSInfo_i::add_topic (const OpenDDS::DCPS::RepoId& topicId,
       OpenDDS::DCPS::RepoIdConverter converter(participantId);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i:add_topic: ")
-        ACE_TEXT("invalid participant %s.\n"),
+        ACE_TEXT("invalid participant %C.\n"),
         std::string(converter).c_str()
       ));
     }
@@ -311,7 +311,7 @@ OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::remove_topic (
       OpenDDS::DCPS::RepoIdConverter converter(topicId);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) TAO_DDS_DCPSInfo_i::remove_topic: ")
-        ACE_TEXT("pushing deletion of topic %s in domain %d.\n"),
+        ACE_TEXT("pushing deletion of topic %C in domain %d.\n"),
         std::string(converter).c_str(),
         domainId
       ));
@@ -440,7 +440,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication (
       OpenDDS::DCPS::RepoIdConverter converter(pubId);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) (RepoId)TAO_DDS_DCPSInfo_i::add_publication: ")
-        ACE_TEXT("pushing creation of publication %s in domain %d.\n"),
+        ACE_TEXT("pushing creation of publication %C in domain %d.\n"),
         std::string(converter).c_str(),
         domainId
       ));
@@ -485,7 +485,7 @@ TAO_DDS_DCPSInfo_i::add_publication (::DDS::DomainId_t domainId,
       OpenDDS::DCPS::RepoIdConverter converter(pubId);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i:add_publication: ")
-        ACE_TEXT("invalid participant %s in domain %d.\n"),
+        ACE_TEXT("invalid participant %C in domain %d.\n"),
         std::string(converter).c_str(),
         domainId
       ));
@@ -498,7 +498,7 @@ TAO_DDS_DCPSInfo_i::add_publication (::DDS::DomainId_t domainId,
     OpenDDS::DCPS::RepoIdConverter converter(topicId);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i:add_publication: ")
-      ACE_TEXT("invalid topic %s in domain %d.\n"),
+      ACE_TEXT("invalid topic %C in domain %d.\n"),
       std::string(converter).c_str(),
       domainId
     ));
@@ -529,7 +529,7 @@ TAO_DDS_DCPSInfo_i::add_publication (::DDS::DomainId_t domainId,
         OpenDDS::DCPS::RepoIdConverter converter(pubId);
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::add_publication: ")
-          ACE_TEXT("failed to add publication to participant %s.\n"),
+          ACE_TEXT("failed to add publication to participant %C.\n"),
           std::string(converter).c_str()
         ));
       }
@@ -549,7 +549,7 @@ TAO_DDS_DCPSInfo_i::add_publication (::DDS::DomainId_t domainId,
         OpenDDS::DCPS::RepoIdConverter converter(pubId);
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::add_publication: ")
-          ACE_TEXT("failed to add publication to participant %s topic list.\n"),
+          ACE_TEXT("failed to add publication to participant %C topic list.\n"),
           std::string(converter).c_str()
         ));
 
@@ -629,7 +629,7 @@ void TAO_DDS_DCPSInfo_i::remove_publication (
       OpenDDS::DCPS::RepoIdConverter converter(publicationId);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) TAO_DDS_DCPSInfo_i::remove_publication: ")
-        ACE_TEXT("pushing deletion of publication %s in domain %d.\n"),
+        ACE_TEXT("pushing deletion of publication %C in domain %d.\n"),
         std::string(converter).c_str(),
         domainId
       ));
@@ -698,8 +698,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription (
     }
   else if (topic->add_subscription_reference(subPtr) != 0)
     {
-      ACE_ERROR ((LM_ERROR, ACE_TEXT("Failed to add subscription to ")
-                  "topic list.\n"));
+      ACE_ERROR ((LM_ERROR, ACE_TEXT("Failed to add subscription to topic list.\n")));
       // No associations were made so remove and fail.
       partPtr->remove_subscription(subId);
       subId = OpenDDS::DCPS::GUID_UNKNOWN;
@@ -720,7 +719,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription (
       OpenDDS::DCPS::RepoIdConverter converter(subId);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) (RepoId)TAO_DDS_DCPSInfo_i::add_subscription: ")
-        ACE_TEXT("pushing creation of subscription %s in domain %d.\n"),
+        ACE_TEXT("pushing creation of subscription %C in domain %d.\n"),
         std::string(converter).c_str(),
         domainId
       ));
@@ -768,7 +767,7 @@ TAO_DDS_DCPSInfo_i::add_subscription (
       OpenDDS::DCPS::RepoIdConverter converter(participantId);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i:add_subscription: ")
-        ACE_TEXT("invalid participant %s in domain %d.\n"),
+        ACE_TEXT("invalid participant %C in domain %d.\n"),
         std::string(converter).c_str(),
         domainId
       ));
@@ -782,7 +781,7 @@ TAO_DDS_DCPSInfo_i::add_subscription (
       OpenDDS::DCPS::RepoIdConverter converter(topicId);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i:add_subscription: ")
-        ACE_TEXT("invalid topic %s in domain %d.\n"),
+        ACE_TEXT("invalid topic %C in domain %d.\n"),
         std::string(converter).c_str(),
         domainId
       ));
@@ -812,7 +811,7 @@ TAO_DDS_DCPSInfo_i::add_subscription (
         OpenDDS::DCPS::RepoIdConverter converter(subId);
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::add_subscription: ")
-          ACE_TEXT("failed to add subscription to participant %s.\n"),
+          ACE_TEXT("failed to add subscription to participant %C.\n"),
           std::string(converter).c_str()
         ));
       }
@@ -832,7 +831,7 @@ TAO_DDS_DCPSInfo_i::add_subscription (
         OpenDDS::DCPS::RepoIdConverter converter(subId);
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::add_subscription: ")
-          ACE_TEXT("failed to add subscription to participant %s topic list.\n"),
+          ACE_TEXT("failed to add subscription to participant %C topic list.\n"),
           std::string(converter).c_str()
         ));
 
@@ -910,7 +909,7 @@ void TAO_DDS_DCPSInfo_i::remove_subscription (
       OpenDDS::DCPS::RepoIdConverter converter(subscriptionId);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) TAO_DDS_DCPSInfo_i::remove_subscription: ")
-        ACE_TEXT("pushing deletion of subscription %s in domain %d.\n"),
+        ACE_TEXT("pushing deletion of subscription %C in domain %d.\n"),
         std::string(converter).c_str(),
         domainId
       ));
@@ -964,7 +963,7 @@ OpenDDS::DCPS::AddDomainStatus TAO_DDS_DCPSInfo_i::add_domain_participant (
       OpenDDS::DCPS::RepoIdConverter converter(participantId);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) (RepoId)TAO_DDS_DCPSInfo_i::add_domain_participant: ")
-        ACE_TEXT("participant %s in domain %d is BIT publisher for this domain.\n"),
+        ACE_TEXT("participant %C in domain %d is BIT publisher for this domain.\n"),
         std::string(converter).c_str(),
         domain
       ));
@@ -995,7 +994,7 @@ OpenDDS::DCPS::AddDomainStatus TAO_DDS_DCPSInfo_i::add_domain_participant (
       OpenDDS::DCPS::RepoIdConverter converter(participantId);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) (RepoId)TAO_DDS_DCPSInfo_i::add_domain_participant: ")
-        ACE_TEXT("pushing creation of participant %s in domain %d.\n"),
+        ACE_TEXT("pushing creation of participant %C in domain %d.\n"),
         std::string(converter).c_str(),
         domain
       ));
@@ -1006,7 +1005,7 @@ OpenDDS::DCPS::AddDomainStatus TAO_DDS_DCPSInfo_i::add_domain_participant (
     OpenDDS::DCPS::RepoIdConverter converter(participantId);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) (RepoId)TAO_DDS_DCPSInfo_i::add_domain_participant: ")
-      ACE_TEXT("domain %d loaded participant %s at 0x%x.\n"),
+      ACE_TEXT("domain %d loaded participant %C at 0x%x.\n"),
       domain,
       std::string(converter).c_str(),
       participant
@@ -1046,7 +1045,7 @@ TAO_DDS_DCPSInfo_i::add_domain_participant (::DDS::DomainId_t domainId
     if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) (bool)TAO_DDS_DCPSInfo_i::add_domain_participant: ")
-        ACE_TEXT("participant id %s already exists.\n"),
+        ACE_TEXT("participant id %C already exists.\n"),
         std::string(converter).c_str()
       ));
     }
@@ -1065,7 +1064,7 @@ TAO_DDS_DCPSInfo_i::add_domain_participant (::DDS::DomainId_t domainId
       {
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: (bool)TAO_DDS_DCPSInfo_i::add_domain_participant: ")
-          ACE_TEXT("failed to load participant %s in domain %d.\n"),
+          ACE_TEXT("failed to load participant %C in domain %d.\n"),
           std::string(converter).c_str(),
           domainId
         ));
@@ -1077,7 +1076,7 @@ TAO_DDS_DCPSInfo_i::add_domain_participant (::DDS::DomainId_t domainId
       if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) WARNING: (bool)TAO_DDS_DCPSInfo_i::add_domain_participant: ")
-          ACE_TEXT("attempt to load duplicate participant %s in domain %d.\n"),
+          ACE_TEXT("attempt to load duplicate participant %C in domain %d.\n"),
           std::string(converter).c_str(),
           domainId
         ));
@@ -1106,7 +1105,7 @@ TAO_DDS_DCPSInfo_i::add_domain_participant (::DDS::DomainId_t domainId
   if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) (bool)TAO_DDS_DCPSInfo_i::add_domain_participant: ")
-      ACE_TEXT("loaded participant %s at 0x%x in domain %d.\n"),
+      ACE_TEXT("loaded participant %C at 0x%x in domain %d.\n"),
       std::string(converter).c_str(),
       participant,
       domainId
@@ -1169,7 +1168,7 @@ TAO_DDS_DCPSInfo_i::remove_by_owner(
       OpenDDS::DCPS::RepoIdConverter converter(candidates[index]);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) (bool)TAO_DDS_DCPSInfo_i::remove_by_owner: ")
-        ACE_TEXT("%d subscriptions to remove from participant %s.\n"),
+        ACE_TEXT("%d subscriptions to remove from participant %C.\n"),
         keylist.size(),
         std::string(converter).c_str()
       ));
@@ -1194,7 +1193,7 @@ TAO_DDS_DCPSInfo_i::remove_by_owner(
       OpenDDS::DCPS::RepoIdConverter converter(candidates[index]);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) (bool)TAO_DDS_DCPSInfo_i::remove_by_owner: ")
-        ACE_TEXT("%d publications to remove from participant %s.\n"),
+        ACE_TEXT("%d publications to remove from participant %C.\n"),
         keylist.size(),
         std::string(converter).c_str()
       ));
@@ -1219,7 +1218,7 @@ TAO_DDS_DCPSInfo_i::remove_by_owner(
       OpenDDS::DCPS::RepoIdConverter converter(candidates[index]);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) (bool)TAO_DDS_DCPSInfo_i::remove_by_owner: ")
-        ACE_TEXT("%d topics to remove from participant %s.\n"),
+        ACE_TEXT("%d topics to remove from participant %C.\n"),
         keylist.size(),
         std::string(converter).c_str()
       ));
@@ -1262,7 +1261,7 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant (
     OpenDDS::DCPS::RepoIdConverter converter(participantId);
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: (bool)TAO_DDS_DCPSInfo_i::remove_domain_participant: ")
-      ACE_TEXT("failed to locate participant %s in domain %d.\n"),
+      ACE_TEXT("failed to locate participant %C in domain %d.\n"),
       std::string(converter).c_str(),
       domainId
     ));
@@ -1295,7 +1294,7 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant (
       OpenDDS::DCPS::RepoIdConverter converter(participantId);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) TAO_DDS_DCPSInfo_i::remove_domain_participant: ")
-        ACE_TEXT("pushing deletion of participant %s in domain %d.\n"),
+        ACE_TEXT("pushing deletion of participant %C in domain %d.\n"),
         std::string(converter).c_str(),
         domainId
       ));
@@ -1492,7 +1491,7 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_publication_qos (
       OpenDDS::DCPS::RepoIdConverter converter(dwId);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) TAO_DDS_DCPSInfo_i::update_publication_qos: ")
-        ACE_TEXT("pushing update of publication %s in domain %d.\n"),
+        ACE_TEXT("pushing update of publication %C in domain %d.\n"),
         std::string(converter).c_str(),
         domainId
       ));
@@ -1622,7 +1621,7 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_subscription_qos (
       OpenDDS::DCPS::RepoIdConverter converter(drId);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) TAO_DDS_DCPSInfo_i::update_subscription_qos: ")
-        ACE_TEXT("pushing update of subscription %s in domain %d.\n"),
+        ACE_TEXT("pushing update of subscription %C in domain %d.\n"),
         std::string(converter).c_str(),
         domainId
       ));
@@ -1739,7 +1738,7 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_topic_qos (
       OpenDDS::DCPS::RepoIdConverter converter(topicId);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) TAO_DDS_DCPSInfo_i::update_topic_qos: ")
-        ACE_TEXT("pushing update of topic %s in domain %d.\n"),
+        ACE_TEXT("pushing update of topic %C in domain %d.\n"),
         std::string(converter).c_str(),
         domainId
       ));
@@ -1787,7 +1786,7 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_domain_participant_qos (
       OpenDDS::DCPS::RepoIdConverter converter(participantId);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) TAO_DDS_DCPSInfo_i::update_domain_participant_qos: ")
-        ACE_TEXT("pushing update of participant %s in domain %d.\n"),
+        ACE_TEXT("pushing update of participant %C in domain %d.\n"),
         std::string(converter).c_str(),
         domainId
       ));
@@ -1861,7 +1860,7 @@ TAO_DDS_DCPSInfo_i::domain( ::DDS::DomainId_t domain)
 
 
 int TAO_DDS_DCPSInfo_i::init_transport (int listen_address_given,
-                                        const char* listen_str)
+                                        const ACE_TCHAR* listen_str)
 {
   int status = 0;
   try
@@ -1927,7 +1926,7 @@ TAO_DDS_DCPSInfo_i::receive_image (const Update::UImage& image)
         OpenDDS::DCPS::RepoIdConverter converter(part->participantId);
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::receive_image: ")
-          ACE_TEXT("failed to add participant %s to domain %d.\n"),
+          ACE_TEXT("failed to add participant %C to domain %d.\n"),
           std::string(converter).c_str(),
           part->domainId
         ));
@@ -1937,7 +1936,7 @@ TAO_DDS_DCPSInfo_i::receive_image (const Update::UImage& image)
         OpenDDS::DCPS::RepoIdConverter converter(part->participantId);
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) TAO_DDS_DCPSInfo_i::receive_image: ")
-          ACE_TEXT("added participant %s to domain %d.\n"),
+          ACE_TEXT("added participant %C to domain %d.\n"),
           std::string(converter).c_str(),
           part->domainId
         ));
@@ -1956,7 +1955,7 @@ TAO_DDS_DCPSInfo_i::receive_image (const Update::UImage& image)
         OpenDDS::DCPS::RepoIdConverter part_converter(topic->participantId);
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::receive_image: ")
-          ACE_TEXT("failed to add topic %s to participant %s.\n"),
+          ACE_TEXT("failed to add topic %C to participant %C.\n"),
           std::string(topic_converter).c_str(),
           std::string(part_converter).c_str()
         ));
@@ -1967,7 +1966,7 @@ TAO_DDS_DCPSInfo_i::receive_image (const Update::UImage& image)
         OpenDDS::DCPS::RepoIdConverter part_converter(topic->participantId);
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) TAO_DDS_DCPSInfo_i::receive_image: ")
-          ACE_TEXT("added topic %s to participant %s.\n"),
+          ACE_TEXT("added topic %C to participant %C.\n"),
           std::string(topic_converter).c_str(),
           std::string(part_converter).c_str()
         ));
@@ -1988,7 +1987,7 @@ TAO_DDS_DCPSInfo_i::receive_image (const Update::UImage& image)
         OpenDDS::DCPS::RepoIdConverter part_converter(sub->participantId);
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::receive_image: ")
-          ACE_TEXT("failed to add subscription %s to participant %s.\n"),
+          ACE_TEXT("failed to add subscription %C to participant %C.\n"),
           std::string(sub_converter).c_str(),
           std::string(part_converter).c_str()
         ));
@@ -1999,7 +1998,7 @@ TAO_DDS_DCPSInfo_i::receive_image (const Update::UImage& image)
         OpenDDS::DCPS::RepoIdConverter part_converter(sub->participantId);
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) TAO_DDS_DCPSInfo_i::receive_image: ")
-          ACE_TEXT("added subscription %s to participant %s.\n"),
+          ACE_TEXT("added subscription %C to participant %C.\n"),
           std::string(sub_converter).c_str(),
           std::string(part_converter).c_str()
         ));
@@ -2020,7 +2019,7 @@ TAO_DDS_DCPSInfo_i::receive_image (const Update::UImage& image)
         OpenDDS::DCPS::RepoIdConverter part_converter(pub->participantId);
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::receive_image: ")
-          ACE_TEXT("failed to add publication %s to participant %s.\n"),
+          ACE_TEXT("failed to add publication %C to participant %C.\n"),
           std::string(pub_converter).c_str(),
           std::string(part_converter).c_str()
         ));
@@ -2031,7 +2030,7 @@ TAO_DDS_DCPSInfo_i::receive_image (const Update::UImage& image)
         OpenDDS::DCPS::RepoIdConverter part_converter(pub->participantId);
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) TAO_DDS_DCPSInfo_i::receive_image: ")
-          ACE_TEXT("added publication %s to participant %s.\n"),
+          ACE_TEXT("added publication %C to participant %C.\n"),
           std::string(pub_converter).c_str(),
           std::string(part_converter).c_str()
         ));
@@ -2066,7 +2065,7 @@ TAO_DDS_DCPSInfo_i::init_persistence (void)
     }
   else {
     ACE_ERROR_RETURN ((LM_ERROR, ACE_TEXT("TAO_DDS_DCPSInfo_i> Failed to discover ")
-                       "UpdateManagerSvc.\n"), false);
+                       ACE_TEXT ("UpdateManagerSvc.\n")), false);
   }
 
   return true;

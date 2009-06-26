@@ -31,8 +31,8 @@
 const long  MY_DOMAIN   = 411;
 const char* MY_TOPIC    = "foo";
 const char* MY_TYPE     = "foo";
-std::string reader_address_str = "localhost:0";
-std::string writer_address_str = "localhost:0";
+ACE_TString reader_address_str = ACE_TEXT("localhost:0");
+ACE_TString writer_address_str = ACE_TEXT("localhost:0");
 int reader_address_given = 0;
 int writer_address_given = 0;
 
@@ -72,11 +72,11 @@ int init_tranport ()
     {
       reader_transport_impl
         = TheTransportFactory->create_transport_impl (SUB_TRAFFIC,
-                                                      "SimpleUdp",
+                                                      ACE_TEXT("SimpleUdp"),
                                                       OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
       OpenDDS::DCPS::TransportConfiguration_rch reader_config
-        = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleUdp");
+        = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("SimpleUdp"));
 
       OpenDDS::DCPS::SimpleUdpConfiguration* reader_udp_config
         = static_cast <OpenDDS::DCPS::SimpleUdpConfiguration*> (reader_config.in ());
@@ -106,11 +106,11 @@ int init_tranport ()
     {
       reader_transport_impl
         = TheTransportFactory->create_transport_impl (SUB_TRAFFIC,
-                                                      "SimpleTcp",
+                                                      ACE_TEXT("SimpleTcp"),
                                                       OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
       OpenDDS::DCPS::TransportConfiguration_rch reader_config
-        = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleTcp");
+        = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("SimpleTcp"));
 
       OpenDDS::DCPS::SimpleTcpConfiguration* reader_tcp_config
         = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
@@ -136,11 +136,11 @@ int init_tranport ()
     {
       writer_transport_impl
          = TheTransportFactory->create_transport_impl (PUB_TRAFFIC,
-                                                       "SimpleUdp",
+                                                       ACE_TEXT("SimpleUdp"),
                                                        OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
       OpenDDS::DCPS::TransportConfiguration_rch writer_config
-        = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleUdp");
+        = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("SimpleUdp"));
 
       OpenDDS::DCPS::SimpleUdpConfiguration* writer_udp_config
         = static_cast <OpenDDS::DCPS::SimpleUdpConfiguration*> (writer_config.in ());
@@ -169,10 +169,10 @@ int init_tranport ()
     {
       writer_transport_impl
         = TheTransportFactory->create_transport_impl (PUB_TRAFFIC,
-                                                      "SimpleTcp",
+                                                      ACE_TEXT("SimpleTcp"),
                                                       OpenDDS::DCPS::DONT_AUTO_CONFIG);
       OpenDDS::DCPS::TransportConfiguration_rch writer_config
-        = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleTcp");
+        = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("SimpleTcp"));
 
       OpenDDS::DCPS::SimpleTcpConfiguration* writer_tcp_config
         = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
@@ -202,7 +202,7 @@ int wait_for_data (::DDS::Subscriber_ptr sub,
                    int timeout_sec)
 {
   const int factor = 10;
-  ACE_Time_Value small(0,1000000/factor);
+  ACE_Time_Value small_time(0,1000000/factor);
   int timeout_loops = timeout_sec * factor;
 
   ::DDS::DataReaderSeq_var discard = new ::DDS::DataReaderSeq(10);
@@ -216,18 +216,18 @@ int wait_for_data (::DDS::Subscriber_ptr sub,
       if (discard->length () > 0)
         return 1;
 
-      ACE_OS::sleep (small);
+      ACE_OS::sleep (small_time);
     }
   return 0;
 }
 
 /// parse the command line arguments
-int parse_args (int argc, char *argv[])
+int parse_args (int argc, ACE_TCHAR *argv[])
 {
   reader_address_str = ACE_LOCALHOST;
-  reader_address_str += ":16701";
+  reader_address_str += ACE_TEXT(":16701");
   writer_address_str = ACE_LOCALHOST;
-  writer_address_str += ":29803";
+  writer_address_str += ACE_TEXT(":29803");
 
   u_long mask =  ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS) ;
   ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS) ;
@@ -247,57 +247,57 @@ int parse_args (int argc, char *argv[])
     //  -us                         Subscriber using UDP transport
     //  -up                         Publisher using UDP transport
 
-    const char *currentArg = 0;
+    const ACE_TCHAR *currentArg = 0;
 
-    if ((currentArg = arg_shifter.get_the_parameter("-t")) != 0)
+    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-t"))) != 0)
     {
       use_take = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-m")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-m"))) != 0)
     {
       multiple_instances = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-n")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-n"))) != 0)
     {
       max_samples_per_instance = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-d")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-d"))) != 0)
     {
       history_depth = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-s")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-s"))) != 0)
     {
       reader_address_str = currentArg;
       reader_address_given = 1;
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-p")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-p"))) != 0)
     {
       writer_address_str = currentArg;
       writer_address_given = 1;
       arg_shifter.consume_arg ();
     }
-    else if (arg_shifter.cur_arg_strncasecmp("-z") == 0)
+    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-z")) == 0)
     {
       TURN_ON_VERBOSE_DEBUG;
       arg_shifter.consume_arg();
     }
-    else if (arg_shifter.cur_arg_strncasecmp("-b") == 0)
+    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-b")) == 0)
     {
       support_client_side_BIT = true;
       arg_shifter.consume_arg();
     }
-    else if (arg_shifter.cur_arg_strncasecmp("-us") == 0)
+    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-us")) == 0)
     {
       ACE_DEBUG((LM_DEBUG, "Subscriber Using UDP transport.\n"));
       sub_using_udp = 1;
       arg_shifter.consume_arg();
     }
-    else if (arg_shifter.cur_arg_strncasecmp("-up") == 0)
+    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-up")) == 0)
     {
       ACE_DEBUG((LM_DEBUG, "Publisher Using UDP transport.\n"));
       pub_using_udp = 1;
@@ -313,7 +313,7 @@ int parse_args (int argc, char *argv[])
 }
 
 
-int main (int argc, char *argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
 
   int test_failed = 0;
@@ -593,12 +593,12 @@ int main (int argc, char *argv[])
       if (status == ::DDS::RETCODE_OK)
       {
         ACE_DEBUG((LM_DEBUG,
-            "%s foo.x = %f foo.y = %f, foo.key = %d\n",
-            "read", sample.x, sample.y, sample.key));
+            "read foo.x = %f foo.y = %f, foo.key = %d\n",
+            sample.x, sample.y, sample.key));
 
         ACE_DEBUG((LM_DEBUG,
-            "%s SampleInfo.sample_rank = %d\n",
-            "read", info.sample_rank));
+            "read SampleInfo.sample_rank = %d\n",
+            info.sample_rank));
         if (foo.x != sample.x)
           {
             ACE_ERROR((LM_ERROR,

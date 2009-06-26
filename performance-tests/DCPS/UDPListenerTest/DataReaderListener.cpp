@@ -181,21 +181,21 @@ void DataReaderListenerImpl::on_sample_rejected(
   ))
   {
     ACE_UNUSED_ARG(reader) ;
-    ACE_TString str = "";
+    ACE_TString str = ACE_TEXT("");
 
     if (::DDS::REJECTED_BY_SAMPLES_PER_INSTANCE_LIMIT == status.last_reason)
     {
-      str += " Samples Per Instance Limit";
+      str += ACE_TEXT(" Samples Per Instance Limit");
     }
 
     if (::DDS::REJECTED_BY_INSTANCES_LIMIT == status.last_reason)
     {
-      str += " Instances Limit";
+      str += ACE_TEXT(" Instances Limit");
     }
 
     if (::DDS::REJECTED_BY_SAMPLES_LIMIT == status.last_reason)
     {
-      str += " Samples Limit";
+      str += ACE_TEXT(" Samples Limit");
     }
 
     ACE_DEBUG((LM_DEBUG,

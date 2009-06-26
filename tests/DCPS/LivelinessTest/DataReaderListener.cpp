@@ -23,7 +23,7 @@ DataReaderListenerImpl::DataReaderListenerImpl (void) :
 
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::DataReaderListenerImpl\n")
-      " use_take=%d num_ops_per_thread=%d\n",
+      ACE_TEXT(" use_take=%d num_ops_per_thread=%d\n"),
       use_take, num_ops_per_thread
       ));
     ACE_UNUSED_ARG(max_samples_per_instance);
@@ -123,8 +123,8 @@ void DataReaderListenerImpl::on_liveliness_changed (
   
     last_status_ = status;
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) DataReaderListenerImpl::on_liveliness_changed %d\n"
-      "alive_count %d not_alive_count %d alive_count_change %d not_alive_count_change %d\n"),
+      "%T (%P|%t) DataReaderListenerImpl::on_liveliness_changed %d\n"
+      "alive_count %d not_alive_count %d alive_count_change %d not_alive_count_change %d\n",
                liveliness_changed_count_, status.alive_count, status.not_alive_count,
                status.alive_count_change, status.not_alive_count_change));
   }
@@ -204,7 +204,7 @@ void DataReaderListenerImpl::on_subscription_match (
         for (CORBA::ULong i = 0 ; i < si.length() ; i++)
         {
           ACE_DEBUG((LM_DEBUG,
-              "%T %s foo[%d]: x = %f y = %f, key = %d\n",
+              "%T %C foo[%d]: x = %f y = %f, key = %d\n",
               use_take ? "took": "read", i, foo[i].x, foo[i].y, foo[i].key));
           PrintSampleInfo(si[i]) ;
           last_si_ = si[i] ;

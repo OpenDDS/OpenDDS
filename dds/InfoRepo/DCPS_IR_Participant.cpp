@@ -57,7 +57,7 @@ DCPS_IR_Participant::~DCPS_IR_Participant()
       OpenDDS::DCPS::RepoIdConverter sub_converter(current->first);
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::~DCPS_IR_Participant: ")
-        ACE_TEXT("domain %d participant %s removing subscription %s.\n"),
+        ACE_TEXT("domain %d participant %C removing subscription %C.\n"),
         this->domain_->get_id(),
         std::string(part_converter).c_str(),
         std::string(sub_converter).c_str()
@@ -73,7 +73,7 @@ DCPS_IR_Participant::~DCPS_IR_Participant()
       OpenDDS::DCPS::RepoIdConverter pub_converter(current->first);
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::~DCPS_IR_Participant: ")
-        ACE_TEXT("domain %d participant %s removing publication %s.\n"),
+        ACE_TEXT("domain %d participant %C removing publication %C.\n"),
         this->domain_->get_id(),
         std::string(part_converter).c_str(),
         std::string(pub_converter).c_str()
@@ -89,7 +89,7 @@ DCPS_IR_Participant::~DCPS_IR_Participant()
       OpenDDS::DCPS::RepoIdConverter topic_converter(current->first);
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::~DCPS_IR_Participant: ")
-        ACE_TEXT("domain %d participant %s retained topic %s.\n"),
+        ACE_TEXT("domain %d participant %C retained topic %C.\n"),
         this->domain_->get_id(),
         std::string(part_converter).c_str(),
         std::string(topic_converter).c_str()
@@ -130,7 +130,7 @@ DCPS_IR_Participant::takeOwnership()
       OpenDDS::DCPS::RepoIdConverter converter(id_);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DCPS_IR_Participant::take_ownership: ")
-        ACE_TEXT("pushing ownership %s in domain %d.\n"),
+        ACE_TEXT("pushing ownership %C in domain %d.\n"),
         std::string(converter).c_str(),
         this->domain_->get_id()
       ));
@@ -202,7 +202,7 @@ int DCPS_IR_Participant::add_publication (DCPS_IR_Publication* pub)
       OpenDDS::DCPS::RepoIdConverter pub_converter(pubId);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DCPS_IR_Participant::add_publication: ")
-        ACE_TEXT("participant %s successfully added publication %s at 0x%x.\n"),
+        ACE_TEXT("participant %C successfully added publication %C at 0x%x.\n"),
         std::string(part_converter).c_str(),
         std::string(pub_converter).c_str(),
         pub
@@ -216,7 +216,7 @@ int DCPS_IR_Participant::add_publication (DCPS_IR_Publication* pub)
       OpenDDS::DCPS::RepoIdConverter pub_converter(pubId);
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) WARNING: DCPS_IR_Participant::add_publication: ")
-        ACE_TEXT("participant %s attempted to add existing publication %s.\n"),
+        ACE_TEXT("participant %C attempted to add existing publication %C.\n"),
         std::string(part_converter).c_str(),
         std::string(pub_converter).c_str()
       ));
@@ -237,7 +237,7 @@ int DCPS_IR_Participant::find_publication_reference (OpenDDS::DCPS::RepoId pubId
       OpenDDS::DCPS::RepoIdConverter pub_converter(pubId);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DCPS_IR_Participant::find_publication_reference: ")
-        ACE_TEXT("participant %s found publication %s at 0x%x.\n"),
+        ACE_TEXT("participant %C found publication %C at 0x%x.\n"),
         std::string(part_converter).c_str(),
         std::string(pub_converter).c_str(),
         pub
@@ -250,7 +250,7 @@ int DCPS_IR_Participant::find_publication_reference (OpenDDS::DCPS::RepoId pubId
     OpenDDS::DCPS::RepoIdConverter pub_converter(pubId);
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::find_publication_reference: ")
-      ACE_TEXT("participant %s could not find publication %s.\n"),
+      ACE_TEXT("participant %C could not find publication %C.\n"),
       std::string(part_converter).c_str(),
       std::string(pub_converter).c_str()
     ));
@@ -273,7 +273,7 @@ int DCPS_IR_Participant::remove_publication (OpenDDS::DCPS::RepoId pubId)
       OpenDDS::DCPS::RepoIdConverter pub_converter(pubId);
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::remove_publication: ")
-        ACE_TEXT("participant %s unable to remove associations from publication %s\n"),
+        ACE_TEXT("participant %C unable to remove associations from publication %C\n"),
         std::string(part_converter).c_str(),
         std::string(pub_converter).c_str()
       ));
@@ -290,7 +290,7 @@ int DCPS_IR_Participant::remove_publication (OpenDDS::DCPS::RepoId pubId)
       OpenDDS::DCPS::RepoIdConverter pub_converter(pubId);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DCPS_IR_Participant::remove_publication: ")
-        ACE_TEXT("participant %s removed publication %s.\n"),
+        ACE_TEXT("participant %C removed publication %C.\n"),
         std::string(part_converter).c_str(),
         std::string(pub_converter).c_str()
       ));
@@ -302,7 +302,7 @@ int DCPS_IR_Participant::remove_publication (OpenDDS::DCPS::RepoId pubId)
     OpenDDS::DCPS::RepoIdConverter pub_converter(pubId);
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::remove_publication: ")
-      ACE_TEXT("participant %s unable to remove publication %s.\n"),
+      ACE_TEXT("participant %C unable to remove publication %C.\n"),
       std::string(part_converter).c_str(),
       std::string(pub_converter).c_str()
     ));
@@ -325,7 +325,7 @@ int DCPS_IR_Participant::add_subscription (DCPS_IR_Subscription* sub)
       OpenDDS::DCPS::RepoIdConverter sub_converter(subId);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DCPS_IR_Participant::add_subscription: ")
-        ACE_TEXT("participant %s successfully added subscription %s at 0x%x.\n"),
+        ACE_TEXT("participant %C successfully added subscription %C at 0x%x.\n"),
         std::string(part_converter).c_str(),
         std::string(sub_converter).c_str(),
         sub
@@ -339,7 +339,7 @@ int DCPS_IR_Participant::add_subscription (DCPS_IR_Subscription* sub)
       OpenDDS::DCPS::RepoIdConverter sub_converter(subId);
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) WARNING: DCPS_IR_Participant::add_subscription: ")
-        ACE_TEXT("participant %s attempted to add existing subscription %s.\n"),
+        ACE_TEXT("participant %C attempted to add existing subscription %C.\n"),
         std::string(part_converter).c_str(),
         std::string(sub_converter).c_str()
       ));
@@ -360,7 +360,7 @@ int DCPS_IR_Participant::add_subscription (DCPS_IR_Subscription* sub)
       OpenDDS::DCPS::RepoIdConverter sub_converter(subId);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DCPS_IR_Participant::find_subscription_reference: ")
-        ACE_TEXT("participant %s found subscription %s at 0x%x.\n"),
+        ACE_TEXT("participant %C found subscription %C at 0x%x.\n"),
         std::string(part_converter).c_str(),
         std::string(sub_converter).c_str(),
         sub
@@ -373,7 +373,7 @@ int DCPS_IR_Participant::add_subscription (DCPS_IR_Subscription* sub)
     OpenDDS::DCPS::RepoIdConverter sub_converter(subId);
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::find_subscription_reference: ")
-      ACE_TEXT("participant %s could not find subscription %s.\n"),
+      ACE_TEXT("participant %C could not find subscription %C.\n"),
       std::string(part_converter).c_str(),
       std::string(sub_converter).c_str()
     ));
@@ -395,7 +395,7 @@ int DCPS_IR_Participant::remove_subscription (OpenDDS::DCPS::RepoId subId)
       OpenDDS::DCPS::RepoIdConverter sub_converter(subId);
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::remove_subscription: ")
-        ACE_TEXT("participant %s unable to remove associations from subscription %s\n"),
+        ACE_TEXT("participant %C unable to remove associations from subscription %C\n"),
         std::string(part_converter).c_str(),
         std::string(sub_converter).c_str()
       ));
@@ -412,7 +412,7 @@ int DCPS_IR_Participant::remove_subscription (OpenDDS::DCPS::RepoId subId)
       OpenDDS::DCPS::RepoIdConverter sub_converter(subId);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DCPS_IR_Participant::remove_subscription: ")
-        ACE_TEXT("participant %s removed subscription %s.\n"),
+        ACE_TEXT("participant %C removed subscription %C.\n"),
         std::string(part_converter).c_str(),
         std::string(sub_converter).c_str()
       ));
@@ -424,7 +424,7 @@ int DCPS_IR_Participant::remove_subscription (OpenDDS::DCPS::RepoId subId)
     OpenDDS::DCPS::RepoIdConverter sub_converter(subId);
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::remove_subscription: ")
-      ACE_TEXT("participant %s unable to remove subscription %s.\n"),
+      ACE_TEXT("participant %C unable to remove subscription %C.\n"),
       std::string(part_converter).c_str(),
       std::string(sub_converter).c_str()
     ));
@@ -446,7 +446,7 @@ int DCPS_IR_Participant::add_topic_reference (DCPS_IR_Topic* topic)
       OpenDDS::DCPS::RepoIdConverter topic_converter(topicId);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DCPS_IR_Participant::add_topic_reference: ")
-        ACE_TEXT("participant %s successfully added topic %s at 0x%x.\n"),
+        ACE_TEXT("participant %C successfully added topic %C at 0x%x.\n"),
         std::string(part_converter).c_str(),
         std::string(topic_converter).c_str(),
         topic
@@ -460,7 +460,7 @@ int DCPS_IR_Participant::add_topic_reference (DCPS_IR_Topic* topic)
       OpenDDS::DCPS::RepoIdConverter topic_converter(topicId);
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) WARNING: DCPS_IR_Participant::add_topic_reference: ")
-        ACE_TEXT("participant %s attempted to add existing topic %s.\n"),
+        ACE_TEXT("participant %C attempted to add existing topic %C.\n"),
         std::string(part_converter).c_str(),
         std::string(topic_converter).c_str()
       ));
@@ -482,7 +482,7 @@ int DCPS_IR_Participant::remove_topic_reference (OpenDDS::DCPS::RepoId topicId,
       OpenDDS::DCPS::RepoIdConverter topic_converter(topicId);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DCPS_IR_Participant::remove_topic_reference: ")
-        ACE_TEXT("participant %s removed topic %s at 0x%x.\n"),
+        ACE_TEXT("participant %C removed topic %C at 0x%x.\n"),
         std::string(part_converter).c_str(),
         std::string(topic_converter).c_str(),
         topic
@@ -496,7 +496,7 @@ int DCPS_IR_Participant::remove_topic_reference (OpenDDS::DCPS::RepoId topicId,
       OpenDDS::DCPS::RepoIdConverter topic_converter(topicId);
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) WARNING: DCPS_IR_Participant::remove_topic_reference: ")
-        ACE_TEXT("participant %s unable to find topic %s for removal.\n"),
+        ACE_TEXT("participant %C unable to find topic %C for removal.\n"),
         std::string(part_converter).c_str(),
         std::string(topic_converter).c_str()
       ));
@@ -517,7 +517,7 @@ int DCPS_IR_Participant::find_topic_reference (OpenDDS::DCPS::RepoId topicId,
       OpenDDS::DCPS::RepoIdConverter topic_converter(topicId);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DCPS_IR_Participant::find_topic_reference: ")
-        ACE_TEXT("participant %s found topic %s at %x.\n"),
+        ACE_TEXT("participant %C found topic %C at %x.\n"),
         std::string(part_converter).c_str(),
         std::string(topic_converter).c_str(),
         topic
@@ -530,7 +530,7 @@ int DCPS_IR_Participant::find_topic_reference (OpenDDS::DCPS::RepoId topicId,
     OpenDDS::DCPS::RepoIdConverter topic_converter(topicId);
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::find_topic_reference: ")
-      ACE_TEXT("participant %s unable to find topic %s.\n"),
+      ACE_TEXT("participant %C unable to find topic %C.\n"),
       std::string(part_converter).c_str(),
       std::string(topic_converter).c_str()
     ));
@@ -594,7 +594,7 @@ void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
           OpenDDS::DCPS::RepoIdConverter converter(id);
           ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) DCPS_IR_Participant::remove_all_dependents: ")
-            ACE_TEXT("pushing deletion of topic %s in domain %d.\n"),
+            ACE_TEXT("pushing deletion of topic %C in domain %d.\n"),
             std::string(converter).c_str(),
             this->domain_->get_id()
           ));
@@ -617,7 +617,7 @@ void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
           OpenDDS::DCPS::RepoIdConverter topic_converter(id);
           ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) DCPS_IR_Participant::remove_all_dependents: ")
-            ACE_TEXT("domain %d participant %s removed topic %s.\n"),
+            ACE_TEXT("domain %d participant %C removed topic %C.\n"),
             this->domain_->get_id(),
             std::string(part_converter).c_str(),
             std::string(topic_converter).c_str()
@@ -653,7 +653,7 @@ void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
         OpenDDS::DCPS::RepoIdConverter converter(id);
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DCPS_IR_Participant::remove_all_dependents: ")
-          ACE_TEXT("pushing deletion of publication %s in domain %d.\n"),
+          ACE_TEXT("pushing deletion of publication %C in domain %d.\n"),
           std::string(converter).c_str(),
           this->domain_->get_id()
         ));
@@ -683,7 +683,7 @@ void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
         OpenDDS::DCPS::RepoIdConverter converter(id);
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DCPS_IR_Participant::remove_all_dependents: ")
-          ACE_TEXT("pushing deletion of subscription %s in domain %d.\n"),
+          ACE_TEXT("pushing deletion of subscription %C in domain %d.\n"),
           std::string(converter).c_str(),
           this->domain_->get_id()
         ));
@@ -730,7 +730,7 @@ void DCPS_IR_Participant::ignore_participant (OpenDDS::DCPS::RepoId id)
       OpenDDS::DCPS::RepoIdConverter ignore_converter(id);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DCPS_IR_Participant::ignore_participant: ")
-        ACE_TEXT("participant %s now ignoring participant %s.\n"),
+        ACE_TEXT("participant %C now ignoring participant %C.\n"),
         std::string(part_converter).c_str(),
         std::string(ignore_converter).c_str()
       ));
@@ -764,7 +764,7 @@ void DCPS_IR_Participant::ignore_topic (OpenDDS::DCPS::RepoId id)
       OpenDDS::DCPS::RepoIdConverter ignore_converter(id);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DCPS_IR_Participant::ignore_topic: ")
-        ACE_TEXT("participant %s now ignoring topic %s.\n"),
+        ACE_TEXT("participant %C now ignoring topic %C.\n"),
         std::string(part_converter).c_str(),
         std::string(ignore_converter).c_str()
       ));
@@ -798,7 +798,7 @@ void DCPS_IR_Participant::ignore_publication (OpenDDS::DCPS::RepoId id)
       OpenDDS::DCPS::RepoIdConverter ignore_converter(id);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DCPS_IR_Participant::ignore_publication: ")
-        ACE_TEXT("participant %s now ignoring publication %s.\n"),
+        ACE_TEXT("participant %C now ignoring publication %C.\n"),
         std::string(part_converter).c_str(),
         std::string(ignore_converter).c_str()
       ));
@@ -824,7 +824,7 @@ void DCPS_IR_Participant::ignore_subscription (OpenDDS::DCPS::RepoId id)
       OpenDDS::DCPS::RepoIdConverter ignore_converter(id);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DCPS_IR_Participant::ignore_subscription: ")
-        ACE_TEXT("participant %s now ignoring subscription %s.\n"),
+        ACE_TEXT("participant %C now ignoring subscription %C.\n"),
         std::string(part_converter).c_str(),
         std::string(ignore_converter).c_str()
       ));

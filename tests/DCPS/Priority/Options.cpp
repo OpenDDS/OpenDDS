@@ -32,15 +32,15 @@ namespace { // anonymous namespace for file scope.
 
   // Map command line arguments to transport types and keys.
   const struct TransportTypeArgMappings {
-    std::string optionName;
+    std::basic_string<ACE_TCHAR> optionName;
     std::pair< Test::Options::TransportType, unsigned int>
                 transportInfo;
 
   } transportTypeArgMappings[] = {
-    { "tcp", std::make_pair( Test::Options::TCP, 1U) }, // [transport_impl_1]
-    { "udp", std::make_pair( Test::Options::UDP, 2U) }, // [transport_impl_2]
-    { "mc",  std::make_pair( Test::Options::MC,  3U) }, // [transport_impl_3]
-    { "rmc", std::make_pair( Test::Options::RMC, 4U) }  // [transport_impl_4]
+    { ACE_TEXT("tcp"), std::make_pair( Test::Options::TCP, 1U) }, // [transport_impl_1]
+    { ACE_TEXT("udp"), std::make_pair( Test::Options::UDP, 2U) }, // [transport_impl_2]
+    { ACE_TEXT("mc"),  std::make_pair( Test::Options::MC,  3U) }, // [transport_impl_3]
+    { ACE_TEXT("rmc"), std::make_pair( Test::Options::RMC, 4U) }  // [transport_impl_4]
   };
 
 } // end of anonymous namespace.
@@ -48,17 +48,17 @@ namespace { // anonymous namespace for file scope.
 namespace Test {
 
 // Command line argument definitions.
-const char* Options::TRANSPORT_TYPE_ARGUMENT = "-t";
-const char* Options::PUBLISHER_ID_ARGUMENT   = "-i";
-const char* Options::VERBOSE_ARGUMENT        = "-v";
-const char* Options::PRIORITY_ARGUMENT       = "-p";
-const char* Options::COUNT_ARGUMENT          = "-c";
+const ACE_TCHAR* Options::TRANSPORT_TYPE_ARGUMENT = ACE_TEXT("-t");
+const ACE_TCHAR* Options::PUBLISHER_ID_ARGUMENT   = ACE_TEXT("-i");
+const ACE_TCHAR* Options::VERBOSE_ARGUMENT        = ACE_TEXT("-v");
+const ACE_TCHAR* Options::PRIORITY_ARGUMENT       = ACE_TEXT("-p");
+const ACE_TCHAR* Options::COUNT_ARGUMENT          = ACE_TEXT("-c");
 
 Options::~Options()
 {
 }
 
-Options::Options( int argc, char** argv, char** /* envp */)
+Options::Options( int argc, ACE_TCHAR** argv, char** /* envp */)
  : verbose_(       false),
    domain_(        DEFAULT_TEST_DOMAIN),
    priority_(      DEFAULT_TEST_PRIORITY),
@@ -70,7 +70,7 @@ Options::Options( int argc, char** argv, char** /* envp */)
 {
   ACE_Arg_Shifter parser( argc, argv);
   while( parser.is_anything_left()) {
-    const char* currentArg = 0;
+    const ACE_TCHAR* currentArg = 0;
     if( 0 != (currentArg = parser.get_the_parameter( TRANSPORT_TYPE_ARGUMENT))) {
       this->transportType_ = NONE;
       for( unsigned int index = 0;

@@ -38,18 +38,18 @@
 
 
 /// parse the command line arguments
-int parse_args (int argc, char *argv[])
+int parse_args (int argc, ACE_TCHAR *argv[])
 {
 //Create the multicast_group_address_str using default multicast address.
 #ifdef ACE_HAS_IPV6
-  multicast_group_address_str = ACE_DEFAULT_MULTICASTV6_ADDR;
+  multicast_group_address_str = ACE_TEXT(ACE_DEFAULT_MULTICASTV6_ADDR);
 #else
-  multicast_group_address_str = ACE_DEFAULT_MULTICAST_ADDR;
+  multicast_group_address_str = ACE_TEXT(ACE_DEFAULT_MULTICAST_ADDR);
 #endif
-  multicast_group_address_str += ":";
-  std::stringstream out;
+  multicast_group_address_str += ACE_TEXT(":");
+  std::basic_stringstream<ACE_TCHAR> out;
   out << ACE_DEFAULT_MULTICAST_PORT;
-  multicast_group_address_str += out.str ();
+  multicast_group_address_str += out.str().c_str();
 
 
   u_long mask =  ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS) ;
@@ -79,41 +79,41 @@ int parse_args (int argc, char *argv[])
     //  -v                          verbose transport debug
     //  -b test_bit                 defaults to 0 - not testing BIT
 
-    const char *currentArg = 0;
+    const ACE_TCHAR *currentArg = 0;
 
-    if ((currentArg = arg_shifter.get_the_parameter("-t")) != 0)
+    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-t"))) != 0)
     {
       use_take = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-r")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-r"))) != 0)
     {
       num_datareaders = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-n")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-n"))) != 0)
     {
       max_samples_per_instance = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-d")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-d"))) != 0)
     {
       history_depth = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-s")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-s"))) != 0)
     {
       reader_address_str = currentArg;
       reader_address_given = 1;
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-p")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-p"))) != 0)
     {
       multicast_group_address_str = currentArg;
       multicast_group_address_given = 1;
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-u")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-u"))) != 0)
     {
       using_udp = ACE_OS::atoi (currentArg);
       if (using_udp == 1)
@@ -122,7 +122,7 @@ int parse_args (int argc, char *argv[])
       }
       arg_shifter.consume_arg();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-c")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-c"))) != 0)
     {
       using_mcast = ACE_OS::atoi (currentArg);
       if (using_mcast == 1)
@@ -131,7 +131,7 @@ int parse_args (int argc, char *argv[])
       }
       arg_shifter.consume_arg();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-a")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-a"))) != 0)
     {
       using_reliable_multicast = ACE_OS::atoi (currentArg);
       if (using_reliable_multicast == 1)
@@ -140,42 +140,42 @@ int parse_args (int argc, char *argv[])
       }
       arg_shifter.consume_arg();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-m")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-m"))) != 0)
     {
       num_instances_per_writer = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-i")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-i"))) != 0)
     {
       num_samples_per_instance = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-w")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-w"))) != 0)
     {
       num_datawriters = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-z")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-z"))) != 0)
     {
       sequence_length = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-k")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-k"))) != 0)
     {
       no_key = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-y")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-y"))) != 0)
     {
       op_interval_ms = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-f")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-f"))) != 0)
     {
       mixed_trans = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-o")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-o"))) != 0)
     {
       synch_file_dir = currentArg;
       pub_ready_filename = synch_file_dir + pub_ready_filename;
@@ -185,12 +185,12 @@ int parse_args (int argc, char *argv[])
 
       arg_shifter.consume_arg ();
     }
-    else if (arg_shifter.cur_arg_strncasecmp("-v") == 0)
+    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-v")) == 0)
     {
       TURN_ON_VERBOSE_DEBUG;
       arg_shifter.consume_arg();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-b")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-b"))) != 0)
     {
       test_bit = ACE_OS::atoi (currentArg);
       if (test_bit == 1)
@@ -281,16 +281,16 @@ create_subscriber (::DDS::DomainParticipant_ptr participant,
           switch (attach_status)
             {
               case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-                status_str = "ATTACH_BAD_TRANSPORT";
+                status_str = ACE_TEXT("ATTACH_BAD_TRANSPORT");
                 break;
               case OpenDDS::DCPS::ATTACH_ERROR:
-                status_str = "ATTACH_ERROR";
+                status_str = ACE_TEXT("ATTACH_ERROR");
                 break;
               case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-                status_str = "ATTACH_INCOMPATIBLE_QOS";
+                status_str = ACE_TEXT("ATTACH_INCOMPATIBLE_QOS");
                 break;
               default:
-                status_str = "Unknown Status";
+                status_str = ACE_TEXT("Unknown Status");
                 break;
             }
 
@@ -317,7 +317,7 @@ create_subscriber (::DDS::DomainParticipant_ptr participant,
 }
 
 
-int main (int argc, char *argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
 
   ::DDS::DomainParticipantFactory_var dpf;
@@ -563,8 +563,8 @@ int main (int argc, char *argv[])
       FILE* writers_ready = 0;
       do
         {
-          ACE_Time_Value small(0,250000);
-          ACE_OS::sleep (small);
+          ACE_Time_Value small_time(0,250000);
+          ACE_OS::sleep (small_time);
           writers_ready = ACE_OS::fopen (pub_ready_filename.c_str (), ACE_LIB_TEXT("r"));
         } while (0 == writers_ready);
 
@@ -613,8 +613,8 @@ int main (int argc, char *argv[])
       // Wait for the publisher to finish
       while (writers_completed == 0)
         {
-          ACE_Time_Value small(0,250000);
-          ACE_OS::sleep (small);
+          ACE_Time_Value small_time(0,250000);
+          ACE_OS::sleep (small_time);
           writers_completed = ACE_OS::fopen (pub_finished_filename.c_str (), ACE_LIB_TEXT("r"));
         }
 

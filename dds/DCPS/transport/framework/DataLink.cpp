@@ -111,8 +111,8 @@ OpenDDS::DCPS::DataLink::make_reservation(
     RepoIdConverter remote(subscriber_id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataLink::make_reservation() - ")
-      ACE_TEXT("creating association local: publisher %s ")
-      ACE_TEXT("<--> with remote subscriber %s.\n"),
+      ACE_TEXT("creating association local: publisher %C ")
+      ACE_TEXT("<--> with remote subscriber %C.\n"),
       std::string(local).c_str(),
       std::string(remote).c_str()
     ));
@@ -169,8 +169,8 @@ OpenDDS::DCPS::DataLink::make_reservation(
           RepoIdConverter pub_converter(publisher_id);
           ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
-            ACE_TEXT("failed to insert remote subscriber %s ")
-            ACE_TEXT("to local publisher %s reservation into sub_map_.\n"),
+            ACE_TEXT("failed to insert remote subscriber %C ")
+            ACE_TEXT("to local publisher %C reservation into sub_map_.\n"),
             std::string(sub_converter).c_str(),
             std::string(pub_converter).c_str()
           ));
@@ -182,8 +182,8 @@ OpenDDS::DCPS::DataLink::make_reservation(
           RepoIdConverter sub_converter(subscriber_id);
           ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
-            ACE_TEXT("failed to remove (undo) local publisher %s ")
-            ACE_TEXT("to remote subscriber %s reservation from pub_map_.\n"),
+            ACE_TEXT("failed to remove (undo) local publisher %C ")
+            ACE_TEXT("to remote subscriber %C reservation from pub_map_.\n"),
             std::string(pub_converter).c_str(),
             std::string(sub_converter).c_str()
           ));
@@ -195,8 +195,8 @@ OpenDDS::DCPS::DataLink::make_reservation(
       RepoIdConverter sub_converter(subscriber_id);
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
-        ACE_TEXT("failed to insert local publisher %s to remote ")
-        ACE_TEXT("subscriber %s reservation into pub_map_.\n"),
+        ACE_TEXT("failed to insert local publisher %C to remote ")
+        ACE_TEXT("subscriber %C reservation into pub_map_.\n"),
         std::string(pub_converter).c_str(),
         std::string(sub_converter).c_str()
       ));
@@ -223,8 +223,8 @@ OpenDDS::DCPS::DataLink::make_reservation
     RepoIdConverter remote(publisher_id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataLink::make_reservation() - ")
-      ACE_TEXT("creating association local subscriber: %s ")
-      ACE_TEXT("<--> with remote publisher %s.\n"),
+      ACE_TEXT("creating association local subscriber: %C ")
+      ACE_TEXT("<--> with remote publisher %C.\n"),
       std::string(local).c_str(),
       std::string(remote).c_str()
     ));
@@ -281,8 +281,8 @@ OpenDDS::DCPS::DataLink::make_reservation
           RepoIdConverter sub_converter(subscriber_id);
           ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
-            ACE_TEXT("Failed to insert remote publisher %s to local ")
-            ACE_TEXT("subscriber %s reservation into pub_map_.\n"),
+            ACE_TEXT("Failed to insert remote publisher %C to local ")
+            ACE_TEXT("subscriber %C reservation into pub_map_.\n"),
             std::string(pub_converter).c_str(),
             std::string(sub_converter).c_str()
           ));
@@ -294,8 +294,8 @@ OpenDDS::DCPS::DataLink::make_reservation
           RepoIdConverter pub_converter(publisher_id);
           ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservations: ")
-            ACE_TEXT("failed to remove (undo) local subscriber %s to remote ")
-            ACE_TEXT("publisher %s reservation from sub_map_.\n"),
+            ACE_TEXT("failed to remove (undo) local subscriber %C to remote ")
+            ACE_TEXT("publisher %C reservation from sub_map_.\n"),
             std::string(sub_converter).c_str(),
             std::string(pub_converter).c_str()
           ));
@@ -307,8 +307,8 @@ OpenDDS::DCPS::DataLink::make_reservation
       RepoIdConverter pub_converter(publisher_id);
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservations: ")
-        ACE_TEXT("failed to insert local subscriber %s to remote ")
-        ACE_TEXT("publisher %s reservation into sub_map_.\n"),
+        ACE_TEXT("failed to insert local subscriber %C to remote ")
+        ACE_TEXT("publisher %C reservation into sub_map_.\n"),
         std::string(sub_converter).c_str(),
         std::string(pub_converter).c_str()
       ));
@@ -337,8 +337,8 @@ OpenDDS::DCPS::DataLink::release_reservations(RepoId          remote_id,
     RepoIdConverter remote(remote_id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataLink::release_reservations() - ")
-      ACE_TEXT("releasing association local: %s ")
-      ACE_TEXT("<--> with remote %s.\n"),
+      ACE_TEXT("releasing association local: %C ")
+      ACE_TEXT("<--> with remote %C.\n"),
       std::string(local).c_str(),
       std::string(remote).c_str()
     ));
@@ -370,7 +370,7 @@ OpenDDS::DCPS::DataLink::release_reservations(RepoId          remote_id,
           RepoIdConverter converter(remote_id);
           ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: DataLink::release_reservations: ")
-            ACE_TEXT("unable to locate remote %s in pub_map_ or sub_map_.\n"),
+            ACE_TEXT("unable to locate remote %C in pub_map_ or sub_map_.\n"),
             std::string(converter).c_str()
           ));
         }
@@ -472,7 +472,7 @@ OpenDDS::DCPS::DataLink::data_received(ReceivedDataSample& sample)
     RepoIdConverter converter(publisher_id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataLink::data_received: ")
-      ACE_TEXT(" publisher %s received sample: %s.\n"),
+      ACE_TEXT(" publisher %C received sample: %C.\n"),
       std::string(converter).c_str(),
       buffer.str().c_str()
     ));
@@ -490,7 +490,7 @@ OpenDDS::DCPS::DataLink::data_received(ReceivedDataSample& sample)
         RepoIdConverter converter(publisher_id);
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataLink::data_received: ")
-          ACE_TEXT(" discarding sample from publisher %s due to no listeners.\n"),
+          ACE_TEXT(" discarding sample from publisher %C due to no listeners.\n"),
           std::string(converter).c_str()
         ));
       }
@@ -523,7 +523,7 @@ OpenDDS::DCPS::DataLink::ack_received( ReceivedDataSample& sample)
       RepoIdConverter converter( publication);
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) DataLink::ack_received: ")
-        ACE_TEXT("listener for publication %s not found.\n"),
+        ACE_TEXT("listener for publication %C not found.\n"),
         std::string(converter).c_str()
       ));
       return;
@@ -575,7 +575,7 @@ OpenDDS::DCPS::DataLink::release_remote_subscriber
     RepoIdConverter converter(publisher_id);
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: DataLink::release_remote_subscriber: ")
-      ACE_TEXT(" failed to remove pub %s from PubSet.\n"),
+      ACE_TEXT(" failed to remove pub %C from PubSet.\n"),
       std::string(converter).c_str()
     ));
   }
@@ -614,7 +614,7 @@ OpenDDS::DCPS::DataLink::release_remote_publisher
     RepoIdConverter converter(subscriber_id);
     ACE_ERROR ((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: DataLink::release_remote_publisher: ")
-      ACE_TEXT(" failed to remove sub %s from ListenerSet.\n"),
+      ACE_TEXT(" failed to remove sub %C from ListenerSet.\n"),
       std::string(converter).c_str()
     ));
   }
@@ -690,7 +690,7 @@ OpenDDS::DCPS::DataLink::notify (enum ConnectionNotice notice)
   DBG_ENTRY_LVL("DataLink","notify",6);
 
   VDBG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) DataLink::notify: this(%X) notify %s\n"),
+    ACE_TEXT("(%P|%t) DataLink::notify: this(%X) notify %C\n"),
     this,
     connection_notice_as_str(notice)
   ));
@@ -714,7 +714,7 @@ OpenDDS::DCPS::DataLink::notify (enum ConnectionNotice notice)
                 RepoIdConverter converter(itr->first);
                 ACE_DEBUG((LM_DEBUG,
                   ACE_TEXT("(%P|%t) DataLink::notify: ")
-                  ACE_TEXT("notify pub %s %s.\n"),
+                  ACE_TEXT("notify pub %C %C.\n"),
                   std::string(converter).c_str(),
                   connection_notice_as_str(notice)
                 ));
@@ -750,7 +750,7 @@ OpenDDS::DCPS::DataLink::notify (enum ConnectionNotice notice)
                 RepoIdConverter converter(itr->first);
                 ACE_DEBUG((LM_DEBUG,
                   ACE_TEXT("(%P|%t) DataLink::notify: ")
-                  ACE_TEXT("not notify pub %s %s \n"),
+                  ACE_TEXT("not notify pub %C %C \n"),
                   std::string(converter).c_str(),
                   connection_notice_as_str(notice)
                 ));
@@ -781,7 +781,7 @@ OpenDDS::DCPS::DataLink::notify (enum ConnectionNotice notice)
                 RepoIdConverter converter(itr->first);
                 ACE_DEBUG((LM_DEBUG,
                   ACE_TEXT("(%P|%t) DataLink::notify: ")
-                  ACE_TEXT("notify sub %s %s.\n"),
+                  ACE_TEXT("notify sub %C %C.\n"),
                   std::string(converter).c_str(),
                   connection_notice_as_str(notice)
                 ));
@@ -826,7 +826,7 @@ OpenDDS::DCPS::DataLink::notify (enum ConnectionNotice notice)
                 RepoIdConverter converter(itr->first);
                 ACE_DEBUG((LM_DEBUG,
                   ACE_TEXT("(%P|%t)DataLink::notify: ")
-                  ACE_TEXT("not notify sub %s subscription lost.\n"),
+                  ACE_TEXT("not notify sub %C subscription lost.\n"),
                   std::string(converter).c_str()
                 ));
               }
@@ -856,7 +856,7 @@ OpenDDS::DCPS::DataLink::notify_connection_deleted ()
               RepoIdConverter converter(itr->first);
               ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t)DataLink:: notify_connection_deleted: ")
-                ACE_TEXT("notify pub %s connection deleted.\n"),
+                ACE_TEXT("notify pub %C connection deleted.\n"),
                 std::string(converter).c_str()
               ));
             }
@@ -879,7 +879,7 @@ OpenDDS::DCPS::DataLink::notify_connection_deleted ()
               RepoIdConverter converter(itr2->first);
               ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) DataLink::notify_connection_deleted: ")
-                ACE_TEXT("notify sub %s connection deleted.\n"),
+                ACE_TEXT("notify sub %C connection deleted.\n"),
                 std::string(converter).c_str()
               ));
             }
@@ -1177,11 +1177,15 @@ OpenDDS::DCPS::DataLink::set_dscp_codepoint( int cp, ACE_SOCK& socket)
                 sizeof(cp)
              );
 
-  if( (result == -1) && (errno != ENOTSUP)) {
+  if( (result == -1) && (errno != ENOTSUP)
+#ifdef WSAEINVAL
+    && (errno != WSAEINVAL)
+#endif
+    ) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataLink::set_dscp_codepoint() - ")
-      ACE_TEXT("failed to set the %s codepoint to %d: %m, ")
-      ACE_TEXT("try running as supersuser.\n"),
+      ACE_TEXT("failed to set the %C codepoint to %d: %m, ")
+      ACE_TEXT("try running as superuser.\n"),
       which,
       cp
     ));
@@ -1189,7 +1193,7 @@ OpenDDS::DCPS::DataLink::set_dscp_codepoint( int cp, ACE_SOCK& socket)
   } else if( DCPS_debug_level > 4) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataLink::set_dscp_codepoint() - ")
-        ACE_TEXT("set %s codepoint to %d.\n"),
+        ACE_TEXT("set %C codepoint to %d.\n"),
         which,
         cp
       ));

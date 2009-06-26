@@ -27,7 +27,7 @@ TimeBase::TimeT get_timestamp() {
   return retval;
 }
 
-int main (int argc, char *argv[]) {
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
 
   try {
     // create a domain manager, containing DomainParticipant configuration

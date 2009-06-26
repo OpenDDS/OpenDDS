@@ -270,16 +270,16 @@ InfoRepo::init ()
 
   // Initialize the DomainParticipantFactory
   ::DDS::DomainParticipantFactory_var dpf
-      = TheParticipantFactoryWithArgs(this->federatorConfig_.argc(),
-                                      this->federatorConfig_.argv());
+      = TheParticipantFactoryWithArgs(cvt.get_argc(),
+                                      cvt.get_TCHAR_argv());
 
   // We need parse the command line options for DCPSInfoRepo after parsing DCPS specific
   // command line options.
 
   // Check the non-ORB arguments.
   this->parse_args(
-    this->federatorConfig_.argc(),
-    this->federatorConfig_.argv()
+    cvt.get_argc(),
+    cvt.get_TCHAR_argv()
   );
 
   // Activate the POA manager before initialize built-in-topics
@@ -288,7 +288,8 @@ InfoRepo::init ()
 
   if (use_bits_)
     {
-      if (0 != info_servant->init_transport(listen_address_given_, listen_address_str_.c_str()))
+      if (0 != info_servant->init_transport(listen_address_given_,
+          listen_address_str_.c_str()))
         {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPSInfoRepo::init: ")
                      ACE_TEXT("Unable to initialize transport.\n")));

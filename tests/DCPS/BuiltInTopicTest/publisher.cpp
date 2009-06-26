@@ -36,8 +36,7 @@ char synch_fname[] = "monitor1_done";
 OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
 int num_messages = 10;
 
-int
-parse_args (int argc, char *argv[])
+int parse_args (int argc, ACE_TCHAR *argv[])
 {
   ACE_Get_Opt get_opts (argc, argv, "n:");
   int c;
@@ -63,7 +62,7 @@ parse_args (int argc, char *argv[])
   return 0;
 }
 
-int main (int argc, char *argv[]) {
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
   try
     {
       ACE_DEBUG ((LM_DEBUG, "(%P|%t) publisher main\n"));
@@ -245,8 +244,8 @@ int main (int argc, char *argv[]) {
 
       writer->start ();
       while ( !writer->is_finished()) {
-        ACE_Time_Value small(0,250000);
-        ACE_OS::sleep (small);
+        ACE_Time_Value small_time(0,250000);
+        ACE_OS::sleep (small_time);
       }
 
       // Cleanup

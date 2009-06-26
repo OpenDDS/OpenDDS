@@ -29,9 +29,9 @@ using namespace Messenger;
 OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
 
 int
-parse_args (int argc, char *argv[])
+parse_args (int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, "t:");
+  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("t:"));
   int c;
 
   while ((c = get_opts ()) != -1)
@@ -39,30 +39,30 @@ parse_args (int argc, char *argv[])
     switch (c)
     {
     case 't':
-      if (ACE_OS::strcmp (get_opts.opt_arg (), "udp") == 0) {
+      if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("udp")) == 0) {
         transport_impl_id = 2;
       }
-      else if (ACE_OS::strcmp (get_opts.opt_arg (), "mcast") == 0) {
+      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("mcast")) == 0) {
         transport_impl_id = 3;
       }
       // test with DEFAULT_SIMPLE_TCP_ID.
-      else if (ACE_OS::strcmp (get_opts.opt_arg (), "default_tcp") == 0) {
+      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_tcp")) == 0) {
         transport_impl_id = OpenDDS::DCPS::DEFAULT_SIMPLE_TCP_ID;
       }
       // test with DEFAULT_SIMPLE_UDP_ID.
-      else if (ACE_OS::strcmp (get_opts.opt_arg (), "default_udp") == 0) {
+      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_udp")) == 0) {
         transport_impl_id = OpenDDS::DCPS::DEFAULT_SIMPLE_UDP_ID;
       }
-      else if (ACE_OS::strcmp (get_opts.opt_arg (), "default_mcast_pub") == 0) {
+      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_mcast_pub")) == 0) {
         transport_impl_id = OpenDDS::DCPS::DEFAULT_SIMPLE_MCAST_PUB_ID;
       }
       break;
     case '?':
     default:
       ACE_ERROR_RETURN ((LM_ERROR,
-        "usage:  %s "
-        "-t <tcp/udp/default> "
-        "\n",
+        ACE_TEXT("usage:  %s ")
+        ACE_TEXT("-t <tcp/udp/default> ")
+        ACE_TEXT("\n"),
         argv [0]),
         -1);
     }
@@ -71,7 +71,7 @@ parse_args (int argc, char *argv[])
   return 0;
 }
 
-int main (int argc, char *argv[]) {
+int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
   try
     {
       DDS::DomainParticipantFactory_var dpf =
@@ -168,8 +168,8 @@ int main (int argc, char *argv[]) {
 
       writer->start ();
       while ( !writer->is_finished()) {
-        ACE_Time_Value small(0,250000);
-        ACE_OS::sleep (small);
+        ACE_Time_Value small_time(0,250000);
+        ACE_OS::sleep (small_time);
       }
 
       // Cleanup

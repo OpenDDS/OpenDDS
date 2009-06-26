@@ -114,7 +114,7 @@ OpenDDS::DCPS::SimpleTcpReceiveStrategy::start_i()
     buffer << *this->link_.in();
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) SimpleTcpReceiveStrategy::start_i() - ")
-      ACE_TEXT("link:\n%sconnected to %s:%d ")
+      ACE_TEXT("link:\n%C connected to %C:%d ")
       ACE_TEXT("registering with reactor to receive.\n"),
       buffer.str().c_str(),
       this->connection_->get_remote_address().get_host_name(),
@@ -130,7 +130,7 @@ OpenDDS::DCPS::SimpleTcpReceiveStrategy::start_i()
       this->connection_->_remove_ref();
       ACE_ERROR_RETURN((LM_ERROR,
                         "(%P|%t) ERROR: SimpleTcpReceiveStrategy::start_i SimpleTcpConnection can't register with "
-                        "reactor %X %p\n", this->connection_.in(), "register_handler"),
+                        "reactor %X %p\n", this->connection_.in(), ACE_TEXT("register_handler")),
                        -1);
     }
 

@@ -71,7 +71,7 @@ Subscriber::Subscriber( const Options& options)
    != testData->register_type( this->participant_.in(), 0)) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Subscriber::Subscriber() - ")
-      ACE_TEXT("unable to install type %s support.\n"),
+      ACE_TEXT("unable to install type %C support.\n"),
       testData->get_type_name()
     ));
     throw BadTypeSupportException ();
@@ -79,7 +79,7 @@ Subscriber::Subscriber( const Options& options)
   } else if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
-      ACE_TEXT("created type %s support.\n"),
+      ACE_TEXT("created type %C support.\n"),
       testData->get_type_name()
     ));
   }
@@ -94,7 +94,7 @@ Subscriber::Subscriber( const Options& options)
   if( CORBA::is_nil( topic.in())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Subscriber::Subscriber() - ")
-      ACE_TEXT("failed to create topic %s.\n"),
+      ACE_TEXT("failed to create topic %C.\n"),
       this->options_.topicName().c_str()
     ));
     throw BadTopicException();
@@ -102,7 +102,7 @@ Subscriber::Subscriber( const Options& options)
   } else if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
-      ACE_TEXT("created topic %s.\n"),
+      ACE_TEXT("created topic %C.\n"),
       this->options_.topicName().c_str()
     ));
   }

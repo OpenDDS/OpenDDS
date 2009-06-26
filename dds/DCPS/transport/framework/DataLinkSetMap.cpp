@@ -34,7 +34,7 @@ OpenDDS::DCPS::DataLinkSetMap::dump()
     RepoIdConverter converter( current->first);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataLinkSetMap::dump() - ")
-      ACE_TEXT("contains link for %s.\n"),
+      ACE_TEXT("contains link for %C.\n"),
       std::string( converter).c_str()
     ));
   }
@@ -141,10 +141,10 @@ OpenDDS::DCPS::DataLinkSetMap::release_reservations
       {
         RepoIdConverter remote_converter(remote_ids[i]);
         RepoIdConverter local_converter(local_id);
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: DataLinkSetMap::release_reservations: ")
-          ACE_TEXT("failed to find remote_id %s ")
-          ACE_TEXT("in map for local_id %s. Skipping this remote_id.\n"),
+        VDBG((LM_WARNING,
+          ACE_TEXT("(%P|%t) DataLinkSetMap::release_reservations: ")
+          ACE_TEXT("failed to find remote_id %C ")
+          ACE_TEXT("in map for local_id %C. Skipping this remote_id.\n"),
           std::string(remote_converter).c_str(),
           std::string(local_converter).c_str()
         ));
@@ -161,7 +161,7 @@ OpenDDS::DCPS::DataLinkSetMap::release_reservations
           RepoIdConverter converter(remote_ids[i]);
           VDBG((LM_DEBUG,
             ACE_TEXT("(%P|%t) WARNING: DataLinkSetMap::release_reservations: ")
-            ACE_TEXT("failed to unbind remote_id %s ")
+            ACE_TEXT("failed to unbind remote_id %C ")
             ACE_TEXT("from map. Skipping this remote_id.\n"),
             std::string(converter).c_str()
           ));
@@ -229,7 +229,7 @@ OpenDDS::DCPS::DataLinkSetMap::remove_released
         RepoIdConverter converter(local_id);
         VDBG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataLinkSetMap::remove_released: ")
-          ACE_TEXT("released local_id %s is not associated with ")
+          ACE_TEXT("released local_id %C is not associated with ")
           ACE_TEXT("any DataLinkSet in map. Skipping local_id.\n"),
           std::string(converter).c_str()
         ));
@@ -258,7 +258,7 @@ OpenDDS::DCPS::DataLinkSetMap::remove_released
             RepoIdConverter converter(local_id);
             VDBG((LM_DEBUG,
               ACE_TEXT("(%P|%t) DataLinkSetMap:remove_released: ")
-              ACE_TEXT("failed to unbind released local_id %s ")
+              ACE_TEXT("failed to unbind released local_id %C ")
               ACE_TEXT("from the map.\n"),
               std::string(converter).c_str()
             ));

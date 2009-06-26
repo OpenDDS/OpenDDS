@@ -34,13 +34,13 @@ SubDriver::~SubDriver()
 
 
 void
-SubDriver::run(int& argc, char* argv[])
+SubDriver::run(int& argc, ACE_TCHAR* argv[])
 {
   DBG_ENTRY_LVL("SubDriver","run",6);
 
   CORBA::ORB_var orb = CORBA::ORB_init (argc,
                                         argv,
-                                        "TAO_DDS_DCPS");
+                                        OpenDDS::DCPS::DEFAULT_ORB_NAME);
 
   TheServiceParticipant->set_ORB (orb.in());
   DDS::DomainParticipantFactory_var dpf;
@@ -53,7 +53,7 @@ SubDriver::run(int& argc, char* argv[])
 
 
 void
-SubDriver::parse_args(int& argc, char* argv[])
+SubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
 {
   DBG_ENTRY("SubDriver","parse_args");
 
@@ -67,12 +67,12 @@ SubDriver::parse_args(int& argc, char* argv[])
   bool got_p = false;
   bool got_s = false;
 
-  const char* current_arg = 0;
+  const ACE_TCHAR* current_arg = 0;
 
   while (arg_shifter.is_anything_left())
   {
     // The '-p' option
-    if ((current_arg = arg_shifter.get_the_parameter("-p"))) {
+    if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-p")))) {
       if (got_p) {
         ACE_ERROR((LM_ERROR,
                    "(%P|%t) Only one -p allowed on command-line.\n"));
@@ -91,7 +91,7 @@ SubDriver::parse_args(int& argc, char* argv[])
       got_p = true;
     }
     // A '-s' option
-    else if ((current_arg = arg_shifter.get_the_parameter("-s"))) {
+    else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-s")))) {
       if (got_s) {
         ACE_ERROR((LM_ERROR,
                    "(%P|%t) Only one -s allowed on command-line.\n"));
@@ -110,7 +110,7 @@ SubDriver::parse_args(int& argc, char* argv[])
       got_s = true;
     }
     // The '-?' option
-    else if (arg_shifter.cur_arg_strncasecmp("-?") == 0) {
+    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-?")) == 0) {
       ACE_DEBUG((LM_DEBUG,
                  "usage: %s "
                  "-p pub_id:pub_host:pub_port -s sub_id:sub_host:sub_port\n",
@@ -162,7 +162,7 @@ SubDriver::init()
   // a reference to the cached TransportImpl will be returned.
   OpenDDS::DCPS::TransportImpl_rch transport_impl 
     = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, 
-                                                  "SimpleTcp",
+                                                  ACE_TEXT("SimpleTcp"),
                                                   OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -176,7 +176,7 @@ SubDriver::init()
   // PubDriver.cpp (in the PubDriver::init() method) that describes the
   // other configuration options available.
   OpenDDS::DCPS::TransportConfiguration_rch config 
-    = TheTransportFactory->create_configuration (ALL_TRAFFIC, "SimpleTcp");
+    = TheTransportFactory->create_configuration (ALL_TRAFFIC, ACE_TEXT("SimpleTcp"));
 
   OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config 
     = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
@@ -234,7 +234,7 @@ SubDriver::run()
              "Initialize our SimpleSubscriber object.\n"));
 
   // Write a file so that test script knows we're ready
-  FILE * file = ACE_OS::fopen ("subready.txt", "w");
+  FILE * file = ACE_OS::fopen ("subready.txt", ACE_TEXT("w"));
   ACE_OS::fprintf (file, "Ready\n");
   ACE_OS::fclose (file);
 
@@ -271,14 +271,14 @@ SubDriver::run()
 
 
 int
-SubDriver::parse_pub_arg(const std::string& arg)
+SubDriver::parse_pub_arg(const ACE_TString& arg)
 {
   DBG_ENTRY("SubDriver","parse_pub_arg");
 
-  std::string::size_type pos;
+  ACE_TString::size_type pos;
 
   // Find the first ':' character, and make sure it is in a legal spot.
-  if ((pos = arg.find_first_of(':')) == std::string::npos) {
+  if ((pos = arg.find(ACE_TEXT(':'))) == ACE_TString::npos) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) Bad -p command-line value (%s). Missing ':' char.\n",
                arg.c_str()));
@@ -302,8 +302,8 @@ SubDriver::parse_pub_arg(const std::string& arg)
   }
 
   // Parse the pub_id from left of ':' char, and remainder to right of ':'.
-  std::string pub_id_str(arg,0,pos);
-  this->pub_addr_str_ = std::string (arg,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
+  ACE_TString pub_id_str(arg.c_str(), pos);
+  this->pub_addr_str_ = arg.c_str() + pos + 1;
 
   // RepoIds are conventionally created and managed by the DCPSInfoRepo. Those
   // generated here are for the sole purpose of verifying internal behavior.
@@ -315,7 +315,7 @@ SubDriver::parse_pub_arg(const std::string& arg)
 
   // Find the (only) ':' char in the remainder, and make sure it is in
   // a legal spot.
-  if ((pos = this->pub_addr_str_.find_first_of(':')) == std::string::npos) {
+  if ((pos = this->pub_addr_str_.find(ACE_TEXT(':'))) == ACE_TString::npos) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) Bad -p command-line value (%s). "
                "Missing second ':' char.\n",
@@ -347,14 +347,14 @@ SubDriver::parse_pub_arg(const std::string& arg)
 
 
 int
-SubDriver::parse_sub_arg(const std::string& arg)
+SubDriver::parse_sub_arg(const ACE_TString& arg)
 {
   DBG_ENTRY("SubDriver","parse_sub_arg");
 
-  std::string::size_type pos;
+  ACE_TString::size_type pos;
 
   // Find the first ':' character, and make sure it is in a legal spot.
-  if ((pos = arg.find_first_of(':')) == std::string::npos) {
+  if ((pos = arg.find(ACE_TEXT(':'))) == ACE_TString::npos) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) Bad -p command-line value (%s). Missing ':' char.\n",
                arg.c_str()));
@@ -378,8 +378,8 @@ SubDriver::parse_sub_arg(const std::string& arg)
   }
 
   // Parse the sub_id from left of ':' char, and remainder to right of ':'.
-  std::string sub_id_str(arg,0,pos);
-  this->sub_addr_str_ = std::string (arg,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
+  ACE_TString sub_id_str(arg.c_str(), pos);
+  this->sub_addr_str_ = arg.c_str() + pos + 1;
   
   // RepoIds are conventionally created and managed by the DCPSInfoRepo. Those
   // generated here are for the sole purpose of verifying internal behavior.

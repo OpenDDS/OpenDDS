@@ -7,7 +7,6 @@
 #include "SimpleUnreliableDgram_export.h"
 #include "SimpleUnreliableDgramConfiguration.h"
 #include "ace/INET_Addr.h"
-#include <string>
 
 
 namespace OpenDDS
@@ -32,7 +31,7 @@ namespace OpenDDS
         /// The address string used to provide to DCPSInfoRepo.
         /// This string is either from configuration file or default
         /// to ACE_DEFAULT_MULTICAST_PORT:ACE_DEFAULT_MULTICAST_ADDR
-        std::string   multicast_group_address_str_;
+        ACE_TString  multicast_group_address_str_;
 
         /// Are we a receiver?
         bool receiver_;

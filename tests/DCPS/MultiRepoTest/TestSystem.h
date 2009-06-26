@@ -25,7 +25,7 @@
 class TestSystem {
   public:
     /// Construct from command line.
-    TestSystem( int argc, char** argv, char** envp);
+    TestSystem( int argc, ACE_TCHAR** argv, char** envp);
 
     /// Virtual destructor.
     virtual ~TestSystem();

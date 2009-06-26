@@ -14,7 +14,7 @@ class DataReaderListenerImpl;
 class Subscriber {
   public:
     /// Construct from command line.
-    Subscriber( int argc, char** argv, char** envp);
+    Subscriber( int argc, ACE_TCHAR** argv, char** envp);
 
     /// Virtual destructor.
     virtual ~Subscriber();

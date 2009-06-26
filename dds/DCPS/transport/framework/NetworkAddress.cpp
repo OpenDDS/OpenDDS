@@ -18,7 +18,7 @@ operator<< (ACE_OutputCDR& outCdr, OpenDDS::DCPS::NetworkAddress& value)
   outCdr << ACE_OutputCDR::from_boolean (ACE_CDR_BYTE_ORDER);
 
   outCdr << ACE_OutputCDR::from_octet (value.reserved_);
-  outCdr << value.addr_.c_str();
+  outCdr << ACE_TEXT_ALWAYS_CHAR (value.addr_.c_str());
 
   return outCdr.good_bit ();
 }
@@ -41,17 +41,21 @@ operator>> (ACE_InputCDR& inCdr, OpenDDS::DCPS::NetworkAddress& value)
   if (inCdr >> buf == 0)
     return 0;
 
-  value.addr_ = buf;
+  value.addr_ = ACE_TEXT_CHAR_TO_TCHAR (buf);
 
   delete[] buf;
 
   return inCdr.good_bit ();
 }
 
-
-const std::string& get_fully_qualified_hostname ()
+namespace OpenDDS
 {
-  static std::string fullname;
+namespace DCPS
+{
+
+ACE_TString get_fully_qualified_hostname ()
+{
+  static ACE_TString fullname;
 
   if (fullname.empty ())
   {
@@ -74,7 +78,8 @@ const std::string& get_fully_qualified_hostname ()
     if (result != 0 || addr_count < 1)
     {
       ACE_ERROR ((LM_ERROR,
-                  "(%P|%t)!!! ERROR: Unable to probe network. %p\n"));
+        ACE_TEXT ("(%P|%t)!!! ERROR: Unable to probe network. %p\n"),
+        ACE_TEXT ("ACE::get_ip_interfaces")));
     }
     else
     {
@@ -87,19 +92,23 @@ const std::string& get_fully_qualified_hostname ()
         {
           if (addr_array[i].is_loopback() == false && ACE_OS::strchr (hostname, '.') != 0)
           {
-            VDBG_LVL ((LM_DEBUG, "(%P|%t) found fqdn %s from %s:%d\n",
+            VDBG_LVL ((LM_DEBUG, "(%P|%t) found fqdn %C from %C:%d\n",
               hostname, addr_array[i].get_host_addr(), addr_array[i].get_port_number()), 2);
-            fullname = hostname;
+            fullname = ACE_TEXT_CHAR_TO_TCHAR(hostname);
             return fullname;
           }
           else
           {
-            VDBG_LVL ((LM_DEBUG, "(%P|%t) ip interface %s:%d maps to hostname %s \n",
+            VDBG_LVL ((LM_DEBUG, "(%P|%t) ip interface %C:%d maps to hostname %C\n",
               addr_array[i].get_host_addr(), addr_array[i].get_port_number (), hostname), 2);
+            if (ACE_OS::strncmp (hostname, "localhost", 9) == 0)
+            {
+              addr_array[i].get_host_addr (hostname, MAXHOSTNAMELEN);
+            }
             OpenDDS::DCPS::HostnameInfo info;
-	    info.index_ = i;
-	    info.hostname_ = hostname;
-	    nonFQDN.push_back (info);
+            info.index_ = i;
+            info.hostname_ = ACE_TEXT_CHAR_TO_TCHAR (hostname);
+            nonFQDN.push_back (info);
           }
         }
       }
@@ -134,4 +143,8 @@ const std::string& get_fully_qualified_hostname ()
   }
 
   return fullname;
+}
+
+
+}
 }

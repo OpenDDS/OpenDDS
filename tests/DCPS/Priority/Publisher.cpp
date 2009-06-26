@@ -78,7 +78,7 @@ Publisher::Publisher( const Options& options)
     buffer << this->options_.transportType();
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Publisher::Publisher() - ")
-      ACE_TEXT("failed to create %s transport.\n"),
+      ACE_TEXT("failed to create %C transport.\n"),
       buffer.str().c_str()
     ));
     throw BadTransportException();
@@ -88,7 +88,7 @@ Publisher::Publisher( const Options& options)
     buffer << this->options_.transportType();
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
-      ACE_TEXT("created %s transport.\n"),
+      ACE_TEXT("created %C transport.\n"),
       buffer.str().c_str()
     ));
   }
@@ -99,7 +99,7 @@ Publisher::Publisher( const Options& options)
    != testData->register_type( this->participant_.in(), 0)) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Publisher::Publisher() - ")
-      ACE_TEXT("unable to install type %s support.\n"),
+      ACE_TEXT("unable to install type %C support.\n"),
       testData->get_type_name()
     ));
     throw BadTypeSupportException ();
@@ -107,7 +107,7 @@ Publisher::Publisher( const Options& options)
   } else if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
-      ACE_TEXT("created type %s support.\n"),
+      ACE_TEXT("created type %C support.\n"),
       testData->get_type_name()
     ));
   }
@@ -122,7 +122,7 @@ Publisher::Publisher( const Options& options)
   if( CORBA::is_nil( this->topic_.in())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Publisher::Publisher() - ")
-      ACE_TEXT("failed to create topic %s.\n"),
+      ACE_TEXT("failed to create topic %C.\n"),
       this->options_.topicName().c_str()
     ));
     throw BadTopicException();
@@ -130,7 +130,7 @@ Publisher::Publisher( const Options& options)
   } else if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
-      ACE_TEXT("created topic %s.\n"),
+      ACE_TEXT("created topic %C.\n"),
       this->options_.topicName().c_str()
     ));
   }

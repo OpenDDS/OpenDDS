@@ -16,7 +16,7 @@ class DataWriterListenerImpl;
 class Publisher {
   public:
     /// Construct from command line.
-    Publisher( int argc, char** argv, char** envp);
+    Publisher( int argc, ACE_TCHAR** argv, char** envp);
 
     /// Virtual destructor.
     virtual ~Publisher();

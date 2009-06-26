@@ -16,7 +16,7 @@ OpenDDS::DCPS::DummyTcpConfiguration::DummyTcpConfiguration()
 {
   DBG_ENTRY_LVL("DummyTcpConfiguration","DummyTcpConfiguration",5);
 
-  transport_type_ = "DummyTcp";
+  transport_type_ = ACE_TEXT("DummyTcp");
 
   if (local_address_.set (static_cast<unsigned short> (0),
                 static_cast<ACE_UINT32> (INADDR_ANY),

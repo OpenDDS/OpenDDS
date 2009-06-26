@@ -119,9 +119,8 @@ Writer::start ()
   if (activate (THR_NEW_LWP | THR_JOINABLE, num_instances_per_writer) == -1)
   {
     ACE_ERROR ((LM_ERROR,
-                ACE_TEXT("(%P|%t) Writer::start, ")
-                ACE_TEXT ("%p."),
-                "activate"));
+                ACE_TEXT("(%P|%t) Writer::start, %p.\n"),
+                ACE_TEXT("activate")));
     throw TestException ();
   }
 }

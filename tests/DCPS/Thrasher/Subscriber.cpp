@@ -35,7 +35,7 @@ namespace
     {
       const ACE_TCHAR* arg;
 
-      if ((arg = shifter.get_the_parameter("-n")))
+      if ((arg = shifter.get_the_parameter(ACE_TEXT("-n"))))
       {
         expected_samples = ACE_OS::atoi(arg);
         shifter.consume_arg();

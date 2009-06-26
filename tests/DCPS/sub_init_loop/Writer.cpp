@@ -85,8 +85,8 @@ Writer::svc ()
           if (handles.length() > 0) {
             break;
           }
-          ACE_Time_Value small (0,250000);
-          ACE_OS::sleep (small);
+          ACE_Time_Value small_time (0,250000);
+          ACE_OS::sleep (small_time);
         }
 
       // Begin write cycle.
@@ -125,7 +125,7 @@ Writer::svc ()
         } // while (true)
     }
   catch (CORBA::Exception& e) {
-    ACE_ERROR_RETURN ((LM_ERROR, "Exception caught in svc: %s (%s).\n"
+    ACE_ERROR_RETURN ((LM_ERROR, "Exception caught in svc: %C (%C).\n"
                        ,  e._name (), e._rep_id ())
                       , -1);
   }

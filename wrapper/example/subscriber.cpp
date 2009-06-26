@@ -23,7 +23,7 @@ DDS::DomainId_t QUOTER_DOMAIN_ID = 1066;
 const char* QUOTER_QUOTE_TOPIC = "Stock Quotes";
 const char* QUOTER_EXCHANGE_EVENT_TOPIC = "Stock Exchange Events";
 
-int main (int argc, char *argv[]) {
+int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
 
   try
     {

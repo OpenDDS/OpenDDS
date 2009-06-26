@@ -38,7 +38,7 @@ namespace { // Anonymous namespace for file scope
       ArgCopier( OpenDDS::Federator::Config* config);
 
       /// The Functor function operator.
-      void operator()( char* arg);
+      void operator()( ACE_TCHAR* arg);
 
     private:
       /// The configuration object.
@@ -55,7 +55,7 @@ namespace { // Anonymous namespace for file scope
   }
 
   void
-  ArgCopier::operator()( char* arg)
+  ArgCopier::operator()( ACE_TCHAR* arg)
   {
     // Search for command line arguments to process rather than copy.
     if( ::OpenDDS::Federator::Config::FEDERATOR_CONFIG_OPTION == arg) {
@@ -103,17 +103,16 @@ namespace { // Anonymous namespace for file scope
 
 namespace OpenDDS { namespace Federator {
 
-const std::string
-Config::FEDERATOR_CONFIG_OPTION( "-FederatorConfig");
+const tstring
+Config::FEDERATOR_CONFIG_OPTION(ACE_TEXT("-FederatorConfig"));
 
-const std::string
-Config::FEDERATOR_ID_OPTION( "-FederationId");
+const tstring
+Config::FEDERATOR_ID_OPTION(ACE_TEXT("-FederationId"));
 
-const
-std::string
-Config::FEDERATE_WITH_OPTION( "-FederateWith");
+const tstring
+Config::FEDERATE_WITH_OPTION(ACE_TEXT("-FederateWith"));
 
-Config::Config( int argc, char** argv)
+Config::Config( int argc, ACE_TCHAR** argv)
  : argc_( 0),
    federationId_( NIL_REPOSITORY),
    federationDomain_( DEFAULT_FEDERATIONDOMAIN),
@@ -126,7 +125,7 @@ Config::Config( int argc, char** argv)
   }
 
   // Setup the internal storage.
-  this->argv_ = new char*[ argc];
+  this->argv_ = new ACE_TCHAR*[ argc];
 
   // Process the federation arguments.  Copy the uninteresting arguments verbatim.
   ArgCopier argCopier( this);
@@ -174,7 +173,7 @@ Config::processFile()
 
   // Import the file into our shiny new spot.
   ACE_Ini_ImpExp import( heap);
-  if( 0 != import.import_config( this->configFile_.c_str())) {
+  if( 0 != import.import_config(this->configFile_.c_str())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Federator::Config::process - ")
       ACE_TEXT("unable to import configuration file.\n")

@@ -76,7 +76,7 @@ OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink
   network_order_address.to_addr (remote_address);
 
   VDBG_LVL ((LM_DEBUG, "(%P|%t)SimpleTcpTransport::find_or_create_datalink remote addr str "
-    "\"%s\" remote_address \"%s:%d\"\n",
+    "\"%s\" remote_address \"%C:%d\"\n",
     network_order_address.addr_.c_str (),
     remote_address.get_host_name(),
     remote_address.get_port_number ()), 2);
@@ -98,7 +98,7 @@ OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink
 	    if (con->reconnect (on_new_association) == -1)
 	      {
 		ACE_ERROR_RETURN ((LM_ERROR,
-				   "(%P|%t) ERROR: Unable to reconnect to remote %s:%d.\n",
+				   "(%P|%t) ERROR: Unable to reconnect to remote %C:%d.\n",
 				   remote_address.get_host_addr (),
 				   remote_address.get_port_number ()),
 				  0);
@@ -227,8 +227,8 @@ OpenDDS::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
   if (this->con_checker_->open ())
     {
       ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: connection checker failed to open : %p\n",
-                        "open"),
+                        ACE_TEXT("(%P|%t) ERROR: connection checker failed to open : %p\n"),
+                        ACE_TEXT("open")),
 		       -1);
     }
 
@@ -244,10 +244,10 @@ OpenDDS::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
       SimpleTcpConfiguration_rch cfg = this->tcp_config_._retn();
 
       ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: Acceptor failed to open %s:%d: %p\n",
+                        ACE_TEXT("(%P|%t) ERROR: Acceptor failed to open %C:%d: %p\n"),
                         cfg->local_address_.get_host_addr (),
                         cfg->local_address_.get_port_number (),
-                        "open"),
+                        ACE_TEXT("open")),
                        -1);
     }
 
@@ -262,7 +262,7 @@ OpenDDS::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
 		  ACE_TEXT ("cannot get local addr\n")));
     }
 
-  VDBG_LVL ((LM_DEBUG, "(%P|%t)SimpleTcpTransport::configure_i listening on %s:%d\n",
+  VDBG_LVL ((LM_DEBUG, "(%P|%t)SimpleTcpTransport::configure_i listening on %C:%d\n",
       address.get_host_name(), address.get_port_number()), 2);
 
   unsigned short port = address.get_port_number ();
@@ -273,12 +273,12 @@ OpenDDS::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
   // qualified hostname and actual listening port number.
   if (tcp_config_->local_address_.is_any ())
     {
-      const std::string& hostname = get_fully_qualified_hostname ();
+      ACE_TString hostname = get_fully_qualified_hostname ();
 
       this->tcp_config_->local_address_.set (port, hostname.c_str());
       this->tcp_config_->local_address_str_ = hostname;
-      this->tcp_config_->local_address_str_ += ":";
-      this->tcp_config_->local_address_str_ += out.str ();
+      this->tcp_config_->local_address_str_ += ACE_TEXT(":");
+      this->tcp_config_->local_address_str_ += ACE_TEXT_CHAR_TO_TCHAR(out.str().c_str());
     }
 
   // Now we got the actual listening port. Update the port nnmber in the configuration
@@ -289,9 +289,9 @@ OpenDDS::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
 
       if (! this->tcp_config_->local_address_str_.empty ())
       {
-        std::string::size_type pos = this->tcp_config_->local_address_str_.find_first_of (':');
-        std::string str = this->tcp_config_->local_address_str_.substr (0, pos + 1);
-        str += out.str ();
+        ACE_TString::size_type pos = this->tcp_config_->local_address_str_.find (ACE_TEXT(':'));
+        ACE_TString str = this->tcp_config_->local_address_str_.substr (0, pos + 1);
+        str += ACE_TEXT_CHAR_TO_TCHAR(out.str().c_str());
         this->tcp_config_->local_address_str_ = str;
       }
     }
@@ -436,7 +436,7 @@ OpenDDS::DCPS::SimpleTcpTransport::release_datalink_i(DataLink* link)
     buffer << *link;
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) SimpleTcpTransport::release_datalink_i() - ")
-      ACE_TEXT("link with priority %d released.\n%s"),
+      ACE_TEXT("link with priority %d released.\n%C"),
       link->transport_priority(),
       buffer.str().c_str()
     ));
@@ -469,7 +469,7 @@ OpenDDS::DCPS::SimpleTcpTransport::passive_connection
   if( DCPS_debug_level > 9) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) SimpleTcpTransport::passive connection() - ")
-      ACE_TEXT("established with %s:%d.\n"),
+      ACE_TEXT("established with %C:%d.\n"),
       remote_address.get_host_name(),
       remote_address.get_port_number()
     ));
@@ -487,7 +487,7 @@ OpenDDS::DCPS::SimpleTcpTransport::passive_connection
     if( where != this->connections_.end()) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: SimpleTcpTransport::passive_connection() - ")
-        ACE_TEXT("connection with %s:%d at priority %d already exists, ")
+        ACE_TEXT("connection with %C:%d at priority %d already exists, ")
         ACE_TEXT("overwriting previously established connection.\n"),
         remote_address.get_host_name(),
         remote_address.get_port_number(),
@@ -530,7 +530,7 @@ OpenDDS::DCPS::SimpleTcpTransport::make_active_connection
     buffer << *link;
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) SimpleTcpTransport::make_active connection() - ")
-      ACE_TEXT("established with %s:%d and priority %d.\n%s"),
+      ACE_TEXT("established with %C:%d and priority %d.\n%C"),
       remote_address.get_host_name(),
       remote_address.get_port_number(),
       link->transport_priority(),
@@ -565,7 +565,7 @@ OpenDDS::DCPS::SimpleTcpTransport::make_passive_connection
     buffer << *link;
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) SimpleTcpTransport::make_passive connection() - ")
-      ACE_TEXT("established with %s:%d and priority %d.\n%s"),
+      ACE_TEXT("established with %C:%d and priority %d.\n%C"),
       remote_address.get_host_name(),
       remote_address.get_port_number(),
       link->transport_priority(),

@@ -23,7 +23,7 @@
 #include "ace/Get_Opt.h"
 #include "ace/Sched_Params.h"
 
-#include <sys/types.h>
+#include <cstdio>
 
 using namespace std;
 using namespace DDS;
@@ -69,7 +69,7 @@ const OpenDDS::DCPS::TransportIdType TCP_IMPL_ID = 20;
 CORBA::Long size = 4;
 long total_samples = 500;
 
-int main(int argc, char *argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
        // Calling TheParticipantFactoryWithArgs before user application parse command
        // line.
@@ -80,7 +80,9 @@ int main(int argc, char *argv[])
        bool useZeroCopyRead = false;
        DomainId_t myDomain = 411;
 
-       setbuf( stdout, NULL );		/* no buffering for standard-out */
+#ifndef _WIN32_WCE
+       std::setbuf( stdout, NULL );		/* no buffering for standard-out */
+#endif
 
        ACE_Get_Opt get_opts (argc, argv, ACE_LIB_TEXT("c:ut"));
        int ich;
@@ -88,7 +90,7 @@ int main(int argc, char *argv[])
         switch (ich) {
 
           case 'c': /* c specifes number of samples */
-            total_samples = atoi(get_opts.opt_arg ());
+            total_samples = ACE_OS::atoi(get_opts.opt_arg ());
 
             if(total_samples < 0) {
               fprintf(stderr, "splice_pub: ERROR - bad sample number\n");
@@ -133,21 +135,21 @@ int main(int argc, char *argv[])
        /* Initialize the transports for publisher*/
        OpenDDS::DCPS::TransportImpl_rch pub_tcp_impl;
        if (useTCP) {
-         pub_tcp_impl = TheTransportFactory->create_transport_impl (TCP_IMPL_ID,
-                                                     "SimpleTcp",
+         pub_tcp_impl = TheTransportFactory->create_transport_impl (TCP_IMPL_ID, 
+                                                     ACE_TEXT("SimpleTcp"), 
                                                      ::OpenDDS::DCPS::AUTO_CONFIG);
         } else {
-         pub_tcp_impl = TheTransportFactory->create_transport_impl (UDP_IMPL_ID,
-                                                     "SimpleUdp",
+         pub_tcp_impl = TheTransportFactory->create_transport_impl (UDP_IMPL_ID, 
+                                                     ACE_TEXT("SimpleUdp"), 
                                                      OpenDDS::DCPS::DONT_AUTO_CONFIG);
          OpenDDS::DCPS::TransportConfiguration_rch config
-           = TheTransportFactory->create_configuration (UDP_IMPL_ID, "SimpleUdp");
+           = TheTransportFactory->create_configuration (UDP_IMPL_ID, ACE_TEXT("SimpleUdp"));
 
          OpenDDS::DCPS::SimpleUdpConfiguration* udp_config
            = static_cast <OpenDDS::DCPS::SimpleUdpConfiguration*> (config.in ());
 
-         std::string addrStr(ACE_LOCALHOST);
-         addrStr += ":12345";
+         ACE_TString addrStr(ACE_LOCALHOST);
+         addrStr += ACE_TEXT(":12345");
          udp_config->local_address_.set(addrStr.c_str());
          pub_tcp_impl->configure (config.in ());
        }
@@ -186,23 +188,23 @@ int main(int argc, char *argv[])
        /* Initialize the transport for subscriber */
        OpenDDS::DCPS::TransportImpl_rch sub_tcp_impl;
        if (useTCP) {
-         sub_tcp_impl
-           = TheTransportFactory->create_transport_impl (TCP_IMPL_ID+1,
-                                                         "SimpleTcp",
+         sub_tcp_impl 
+           = TheTransportFactory->create_transport_impl (TCP_IMPL_ID+1, 
+                                                         ACE_TEXT("SimpleTcp"), 
                                                          ::OpenDDS::DCPS::AUTO_CONFIG);
        } else {
-         sub_tcp_impl
-           = TheTransportFactory->create_transport_impl(UDP_IMPL_ID+1,
-                                                        "SimpleUdp",
+         sub_tcp_impl 
+           = TheTransportFactory->create_transport_impl(UDP_IMPL_ID+1, 
+                                                        ACE_TEXT("SimpleUdp"), 
                                                         OpenDDS::DCPS::DONT_AUTO_CONFIG);
          OpenDDS::DCPS::TransportConfiguration_rch config
-           = TheTransportFactory->create_configuration (UDP_IMPL_ID+1, "SimpleUdp");
+           = TheTransportFactory->create_configuration (UDP_IMPL_ID+1, ACE_TEXT("SimpleUdp"));
 
          OpenDDS::DCPS::SimpleUdpConfiguration* udp_config
            = static_cast <OpenDDS::DCPS::SimpleUdpConfiguration*> (config.in ());
 
-         std::string addrStr(ACE_LOCALHOST);
-         addrStr += ":12356";
+         ACE_TString addrStr(ACE_LOCALHOST);
+         addrStr += ACE_TEXT(":12356");
 
          udp_config->local_address_.set(addrStr.c_str ());
          sub_tcp_impl->configure(config.in());

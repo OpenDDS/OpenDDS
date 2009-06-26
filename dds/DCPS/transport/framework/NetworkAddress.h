@@ -8,7 +8,7 @@
 #include "tao/Basic_Types.h"
 #include "ace/INET_Addr.h"
 #include "ace/CDR_Stream.h"
-#include <string>
+#include "ace/SString.h"
 #include <vector>
 
 
@@ -18,10 +18,11 @@ namespace OpenDDS
   namespace DCPS
   {
 
-    struct HostnameInfo {
-             int         index_;
-	     std::string hostname_;
-	     };
+    struct HostnameInfo
+    {
+      int index_;
+      ACE_TString hostname_;
+    };
 
     typedef std::vector <HostnameInfo> HostnameInfoVector;
 
@@ -41,7 +42,7 @@ namespace OpenDDS
       ~NetworkAddress();
 
       /// Ctor using address string.
-      NetworkAddress(const std::string& addr);
+      explicit NetworkAddress(const ACE_TString& addr);
 
       void dump ();
 
@@ -54,16 +55,21 @@ namespace OpenDDS
       CORBA::Octet reserved_;
 
       /// The address in string format. e.g. ip:port, hostname:port
-      std::string addr_;
+      ACE_TString addr_;
     };
+
+    /// Helper function to get the fully qualified hostname.
+    /// It attempts to discover the FQDN by the network interface addresses, however 
+    /// the result is impacted by the network configuration, so it returns name in the
+    /// order whoever is found first - FQDN, short hostname, name resolved from loopback
+    /// address. In the case using short hostname or name resolved from loopback, a 
+    /// warning is logged. If there is no any name discovered from network interfaces,
+    /// an error is logged.
+    extern OpenDDS_Dcps_Export
+    ACE_TString get_fully_qualified_hostname ();
+
   }
-
 }
-
-#if defined (__ACE_INLINE__)
-# include "NetworkAddress.inl"
-#endif  /* __ACE_INLINE__ */
-
 
 /// Marshal into a buffer.
 extern OpenDDS_Dcps_Export
@@ -75,14 +81,8 @@ extern OpenDDS_Dcps_Export
 ACE_CDR::Boolean
 operator>> (ACE_InputCDR& inCdr, OpenDDS::DCPS::NetworkAddress& value);
 
-/// Helper function to get the fully qualified hostname.
-/// It attempts to discover the FQDN by the network interface addresses, however 
-/// the result is impacted by the network configuration, so it returns name in the
-/// order whoever is found first - FQDN, short hostname, name resolved from loopback
-/// address. In the case using short hostname or name resolved from loopback, a 
-/// warning is logged. If there is no any name discovered from network interfaces,
-/// an error is logged.
-extern OpenDDS_Dcps_Export
-const std::string& get_fully_qualified_hostname ();
+#if defined (__ACE_INLINE__)
+# include "NetworkAddress.inl"
+#endif  /* __ACE_INLINE__ */
 
 #endif /* OPENDDS_DCPS_NETWORKADDRESS_H */

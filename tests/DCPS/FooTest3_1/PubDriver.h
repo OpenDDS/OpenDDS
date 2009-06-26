@@ -22,7 +22,7 @@ class PubDriver
     PubDriver();
     virtual ~PubDriver();
 
-    void run(int& argc, char* argv[]);
+    void run(int& argc, ACE_TCHAR* argv[]);
 
     virtual void shutdown (
       )
@@ -43,14 +43,14 @@ class PubDriver
       ALL_TRAFFIC
     };
 
-    void parse_args(int& argc, char* argv[]);
-    void init(int& argc, char* argv[]);
+    void parse_args(int& argc, ACE_TCHAR* argv[]);
+    void init(int& argc, ACE_TCHAR* argv[]);
     void run();
     void end();
     void attach_to_transport ();
 
-    int parse_pub_arg(const std::string& arg);
-    int parse_sub_arg(const std::string& arg);
+    int parse_pub_arg(const ACE_TString& arg);
+    int parse_sub_arg(const ACE_TString& arg);
 
     ::DDS::DomainParticipant_var participant_;
     ::DDS::Topic_var             topic_;
@@ -58,13 +58,13 @@ class PubDriver
     ::DDS::DataWriter_var *      datawriters_;
     Writer**                     writers_;
 
-    ACE_CString       pub_id_fname_;
+    ACE_TString       pub_id_fname_;
     ACE_INET_Addr     pub_addr_;
-    std::string       pub_addr_str_;
+    ACE_TString       pub_addr_str_;
 
     OpenDDS::DCPS::RepoId sub_id_;
     ACE_INET_Addr     sub_addr_;
-    std::string       sub_addr_str_;
+    ACE_TString       sub_addr_str_;
 
     int               block_on_write_;
     int               num_threads_to_write_;
@@ -79,7 +79,7 @@ class PubDriver
     ACE_CString       pub_driver_ior_;
     bool              shutdown_;
 
-    std::string       sub_ready_filename_;
+    ACE_TString       sub_ready_filename_;
 };
 
 #endif

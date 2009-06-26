@@ -36,9 +36,9 @@ bool verbose = false;
 int write_delay_ms = 1000;
 
 /// parse the command line arguments
-int parse_args (int argc, char *argv[])
+int parse_args (int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, "vi:");
+  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("vi:"));
   int c;
 
   while ((c = get_opts ()) != -1)
@@ -65,7 +65,7 @@ int parse_args (int argc, char *argv[])
 }
 
 
-int main (int argc, char *argv[])
+int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
   try
     {
@@ -118,32 +118,15 @@ int main (int argc, char *argv[])
         exit(1);
       }
 
-    // Attach the publisher to the transport.
-    OpenDDS::DCPS::PublisherImpl* pub_impl =
-      dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub.in ());
-    if (0 == pub_impl) {
-      cerr << "Failed to obtain publisher servant" << endl;
-      exit(1);
-    }
-
-    OpenDDS::DCPS::AttachStatus status = pub_impl->attach_transport(tcp_impl.in());
-    if (status != OpenDDS::DCPS::ATTACH_OK) {
-      std::string status_str;
-      switch (status) {
-        case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-          status_str = "ATTACH_BAD_TRANSPORT";
-          break;
-        case OpenDDS::DCPS::ATTACH_ERROR:
-          status_str = "ATTACH_ERROR";
-          break;
-        case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-          status_str = "ATTACH_INCOMPATIBLE_QOS";
-          break;
-        default:
-          status_str = "Unknown Status";
-          break;
+      // Attach the publisher to the transport.
+      OpenDDS::DCPS::PublisherImpl* pub_impl =
+        dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub.in ());
+      if (0 == pub_impl) {
+        cerr << "Failed to obtain publisher servant" << endl;
+        exit(1);
       }
-    }
+
+      pub_impl->attach_transport(tcp_impl.in());
 
       // Create the datawriter
       DDS::DataWriterQos dw_qos;
@@ -166,7 +149,7 @@ int main (int argc, char *argv[])
       Writer writer (dw.in(), sub_finished_filename, verbose);
 
       // Indicate that the publisher is ready
-      FILE* writers_ready = ACE_OS::fopen (pub_ready_filename, "w");
+      FILE* writers_ready = ACE_OS::fopen (pub_ready_filename, ACE_TEXT("w"));
       if (writers_ready == 0) {
         cerr << "ERROR Unable to create publisher ready file" << endl;
         exit(1);
@@ -178,8 +161,8 @@ int main (int argc, char *argv[])
       ACE_stat stats;
       while (ACE_OS::stat (sub_ready_filename, &stats) == -1)
         {
-          ACE_Time_Value small(0,250000);
-          ACE_OS::sleep (small);
+          ACE_Time_Value small_time(0,250000);
+          ACE_OS::sleep (small_time);
         }
 
       writer.start ();

@@ -41,8 +41,8 @@ void DataWriterListenerImpl::on_offered_incompatible_qos (
   test_failed_ = true;
 
   ACE_ERROR ((LM_ERROR,
-         ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_offered_incompatible_qos "
-         "All QOS should be compatible for this test\n")));
+         "(%P|%t) DataWriterListenerImpl::on_offered_incompatible_qos "
+         "All QOS should be compatible for this test\n"));
 }
 
 void DataWriterListenerImpl::on_liveliness_lost (

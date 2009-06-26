@@ -8,7 +8,7 @@
 
 
 int
-main(int argc, char* argv[])
+ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
   // Need call the ORB_init to dynamically load the transport libs.
   CORBA::ORB_var orb = CORBA::ORB_init (argc,
