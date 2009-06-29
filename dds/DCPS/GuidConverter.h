@@ -84,7 +84,9 @@ public:
 
   /// Convert to diagnostic string.
   operator std::string() const;
+#ifdef ACE_HAS_WCHAR
   operator std::wstring() const;
+#endif
 
 protected:
   const GUID_t guid_;
@@ -96,7 +98,10 @@ protected:
 OpenDDS_Dcps_Export std::ostream&
 operator<<(std::ostream& os, const OpenDDS::DCPS::GuidConverter& rhs);
 
+#ifdef ACE_HAS_WCHAR
 OpenDDS_Dcps_Export std::wostream&
 operator<<(std::wostream& os, const OpenDDS::DCPS::GuidConverter& rhs);
+#endif
+
 
 #endif /* DCPS_GUIDCONVERTER_H */
