@@ -1,3 +1,15 @@
+Mon Jun 29 21:36:37 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/GuidConverter.h:
+        * dds/DCPS/GuidConverter.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Fixes for platforms without ACE_HAS_WCHAR.  Current support platforms
+          with this problem are GCC 3.3.2 on Solaris/x86 and GCC 3.3.5 on QNX.
+          The C++ standard library that comes with these compilers is lacking
+          std::wstring, std::wostream, etc.
+
 Mon Jun 29 20:38:49 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * docs/INSTALL:
