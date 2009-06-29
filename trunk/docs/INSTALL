@@ -54,6 +54,7 @@ BUILDING OpenDDS
   5 Test
 
     $DDS_ROOT/bin/auto_run_tests.pl
+        If you built static libraries, add "-Config STATIC" to this command.
 
 * Note:
 

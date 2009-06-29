@@ -259,7 +259,7 @@ SubDriver::parse_pub_arg(const ACE_TString& arg)
   size_t pos;
 
   // Find the first ':' character, and make sure it is in a legal spot.
-  if ((pos = arg.find(ACE_TEXT(':'))) == ACE_TString::npos) {
+  if ((pos = std::find(arg.c_str(), arg.c_str() + arg.length(), ACE_TEXT(':')) - arg.c_str()) == arg.length()) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) Bad -p command-line value (%s). Missing ':' char.\n",
                arg.c_str()));
@@ -285,7 +285,7 @@ SubDriver::parse_pub_arg(const ACE_TString& arg)
   // Parse the pub_id from left of ':' char, and remainder to right of ':'.
   ACE_TString pub_id_str(arg.c_str(), pos);
   this->pub_addr_str_ = arg.c_str() + pos + 1;
-  
+
   // RepoIds are conventionally created and managed by the DCPSInfoRepo. Those
   // generated here are for the sole purpose of verifying internal behavior.
   OpenDDS::DCPS::RepoIdBuilder builder(pub_id_);
@@ -296,7 +296,7 @@ SubDriver::parse_pub_arg(const ACE_TString& arg)
 
   // Find the (only) ':' char in the remainder, and make sure it is in
   // a legal spot.
-  if ((pos = this->pub_addr_str_.find(ACE_TEXT(':'))) == ACE_TString::npos) {
+  if ((pos = std::find(pub_addr_str_.c_str(), pub_addr_str_.c_str() + pub_addr_str_.length(), ACE_TEXT(':')) - pub_addr_str_.c_str()) == pub_addr_str_.length()) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) Bad -p command-line value (%s). "
                "Missing second ':' char.\n",
@@ -333,7 +333,7 @@ SubDriver::parse_sub_arg(const ACE_TString& arg)
   size_t pos;
 
   // Find the first ':' character, and make sure it is in a legal spot.
-  if ((pos = arg.find(ACE_TEXT(':'))) == ACE_TString::npos) {
+  if ((pos = std::find(arg.c_str(), arg.c_str() + arg.length(), ACE_TEXT(':')) - arg.c_str()) == arg.length()) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) Bad -p command-line value (%s). Missing ':' char.\n",
                arg.c_str()));
