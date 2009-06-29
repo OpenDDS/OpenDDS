@@ -74,9 +74,9 @@ OpenDDS::DCPS::SimpleUdpTransport::configure_socket(TransportConfiguration* conf
     {
       udp_config->local_address_.set_port_number (port);
 
-      if (! udp_config->local_address_str_.empty ())
+      if (udp_config->local_address_str_.length () > 0)
       {
-        ACE_TString::size_type pos = udp_config->local_address_str_.find (ACE_TEXT(':'));
+        size_t pos = udp_config->local_address_str_.find (ACE_TEXT(':'));
         ACE_TString str = udp_config->local_address_str_.substr (0, pos + 1);
         str += ACE_TEXT_CHAR_TO_TCHAR(out.str().c_str());
         udp_config->local_address_str_ = str;

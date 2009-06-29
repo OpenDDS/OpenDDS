@@ -75,9 +75,9 @@ OpenDDS::DCPS::SimpleMcastTransport::configure_socket(TransportConfiguration* co
     {
       mcast_config->local_address_.set_port_number (port);
 
-      if (! mcast_config->local_address_str_.empty ())
+      if (mcast_config->local_address_str_.length () > 0)
       {
-        ACE_TString::size_type pos = mcast_config->local_address_str_.find (ACE_TEXT(':'));
+        size_t pos = mcast_config->local_address_str_.find (ACE_TEXT(':'));
         ACE_TString str = mcast_config->local_address_str_.substr (0, pos + 1);
         str += ACE_TEXT_CHAR_TO_TCHAR(out.str().c_str());
         mcast_config->local_address_str_ = str;

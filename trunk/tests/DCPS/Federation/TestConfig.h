@@ -1,6 +1,7 @@
 #ifndef TESTCONFIG_H
 #define TESTCONFIG_H
 
+#include "ace/config-lite.h"
 #include "ace/ace_wchar.h"
 #include <string>
 

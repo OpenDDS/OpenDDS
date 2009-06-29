@@ -57,7 +57,7 @@ ACE_TString get_fully_qualified_hostname ()
 {
   static ACE_TString fullname;
 
-  if (fullname.empty ())
+  if (fullname.length () == 0)
   {
     size_t addr_count;
     ACE_INET_Addr *addr_array;

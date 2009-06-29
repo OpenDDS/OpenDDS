@@ -296,7 +296,7 @@ SubDriver::run()
 int
 SubDriver::parse_pub_arg(const ACE_TString& arg)
 {
-  ACE_TString::size_type pos;
+  size_t pos;
 
   // Find the first ':' character, and make sure it is in a legal spot.
   if ((pos = arg.find(ACE_TEXT(':'))) == ACE_TString::npos) {
@@ -335,7 +335,7 @@ SubDriver::parse_pub_arg(const ACE_TString& arg)
 int
 SubDriver::parse_sub_arg(const ACE_TString& arg)
 {
-  ACE_TString::size_type pos;
+  size_t pos;
 
   // Find the first ':' character, and make sure it is in a legal spot.
   if ((pos = arg.find(ACE_TEXT(':'))) == ACE_TString::npos) {
