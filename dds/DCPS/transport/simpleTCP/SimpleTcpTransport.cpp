@@ -287,9 +287,9 @@ OpenDDS::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
     {
       this->tcp_config_->local_address_.set_port_number (port);
 
-      if (! this->tcp_config_->local_address_str_.empty ())
+      if (this->tcp_config_->local_address_str_.length () > 0)
       {
-        ACE_TString::size_type pos = this->tcp_config_->local_address_str_.find (ACE_TEXT(':'));
+        size_t pos = this->tcp_config_->local_address_str_.find (ACE_TEXT(':'));
         ACE_TString str = this->tcp_config_->local_address_str_.substr (0, pos + 1);
         str += ACE_TEXT_CHAR_TO_TCHAR(out.str().c_str());
         this->tcp_config_->local_address_str_ = str;

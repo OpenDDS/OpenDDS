@@ -10,6 +10,7 @@
 
 #include "ace/Version.h"
 #if ACE_MAJOR_VERSION == 5 && ACE_MINOR_VERSION < 5
+typedef dirent ACE_DIRENT;
 typedef ssize_t String_Index_t;
 #else
 typedef size_t String_Index_t;

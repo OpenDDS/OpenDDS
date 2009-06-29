@@ -1,3 +1,40 @@
+Mon Jun 29 17:46:14 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/FileSystemStorage.cpp:
+        * dds/DCPS/transport/framework/NetworkAddress.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastTransport.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpTransport.cpp:
+        * tests/DCPS/CompatibilityTest/common.cpp:
+        * tests/DCPS/Federation/TestConfig.h:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/SubDriver.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/SubDriver.cpp:
+        * tests/DCPS/MultiRepoTest/TestConfig.h:
+        * tests/transport/dds_comparative/PubDriver.cpp:
+        * tests/transport/dds_comparative/SubDriver.cpp:
+        * tests/transport/mcast_simple/PubDriver.cpp:
+        * tests/transport/mcast_simple/SubDriver.cpp:
+        * tests/transport/mcast_simple_n/PubDriver.cpp:
+        * tests/transport/mcast_simple_n/SubDriver.cpp:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SubDriver.cpp:
+        * tests/transport/simple_bp/PubDriver.cpp:
+        * tests/transport/simple_bp/SubDriver.cpp:
+        * tests/transport/simple_bp_rm/PubDriver.cpp:
+        * tests/transport/simple_bp_rm/SubDriver.cpp:
+        * tests/transport/simple_n/PubDriver.cpp:
+        * tests/transport/simple_n/SubDriver.cpp:
+        * tests/transport/udp_simple/PubDriver.cpp:
+        * tests/transport/udp_simple/SubDriver.cpp:
+        * tests/transport/udp_simple_n/PubDriver.cpp:
+        * tests/transport/udp_simple_n/SubDriver.cpp:
+
+          TAO 1.4a and 1.5a compatibility after the merge.
+
 Fri Jun 26 22:28:11 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         Merged the wchar branch back to trunk.  That branch is now read-only.

@@ -11,6 +11,7 @@
 
 
 #include "dds/DdsDcpsInfrastructureC.h"
+#include "ace/SString.h"
 #include <stdexcept>
 #include <string>
 
