@@ -232,7 +232,7 @@ PubDriver::parse_pub_arg(const ACE_TString& arg)
   size_t pos;
 
   // Find the first ':' character, and make sure it is in a legal spot.
-  if ((pos = arg.find(ACE_TEXT(':'))) == ACE_TString::npos) {
+  if ((pos = std::find(arg.c_str(), arg.c_str() + arg.length(), ACE_TEXT(':')) - arg.c_str()) == arg.length()) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) Bad -p command-line value (%s). Missing ':' char.\n",
                arg.c_str()));
@@ -279,7 +279,7 @@ PubDriver::parse_sub_arg(const ACE_TString& arg)
   size_t pos;
 
   // Find the first ':' character, and make sure it is in a legal spot.
-  if ((pos = arg.find(ACE_TEXT(':'))) == ACE_TString::npos) {
+  if ((pos = std::find(arg.c_str(), arg.c_str() + arg.length(), ACE_TEXT(':')) - arg.c_str()) == arg.length()) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) Bad -p command-line value (%s). Missing ':' char.\n",
                arg.c_str()));
@@ -316,7 +316,7 @@ PubDriver::parse_sub_arg(const ACE_TString& arg)
 
   // Find the (only) ':' char in the remainder, and make sure it is in
   // a legal spot.
-  if ((pos = this->sub_addr_str_.find(ACE_TEXT(':'))) == ACE_TString::npos) {
+  if ((pos = std::find(sub_addr_str_.c_str(), sub_addr_str_.c_str() + sub_addr_str_.length(), ACE_TEXT(':')) - sub_addr_str_.c_str()) == sub_addr_str_.length()) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) Bad -p command-line value (%s). "
                "Missing second ':' char.\n",

@@ -202,7 +202,7 @@ SubDriver::parse_arg_p(const ACE_TCHAR* arg, bool& flag)
   size_t pos;
 
   // Find the first ':' character, and make sure it is in a legal spot.
-  if ((pos = arg_str.find(ACE_TEXT(':'))) == ACE_TString::npos)
+  if ((pos = std::find(arg_str.c_str(), arg_str.c_str() + arg_str.length(), ACE_TEXT(':')) - arg_str.c_str()) == arg_str.length())
     {
       ACE_ERROR((LM_ERROR,
                  "(%P|%t) Bad -p value (%s). "
@@ -265,7 +265,7 @@ SubDriver::parse_arg_s(const ACE_TCHAR* arg, bool& flag)
   size_t pos;
 
   // Find the first ':' character, and make sure it is in a legal spot.
-  if ((pos = arg_str.find(ACE_TEXT(':'))) == ACE_TString::npos)
+  if ((pos = std::find(arg_str.c_str(), arg_str.c_str() + arg_str.length(), ACE_TEXT(':')) - arg_str.c_str()) == arg_str.length())
     {
       ACE_ERROR((LM_ERROR,
                  "(%P|%t) Bad -s value (%s). "
