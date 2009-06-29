@@ -16,7 +16,7 @@ SyncClient_i::SyncClient_i (const std::string& sync_server
         {
           // create new ORB
           int argc = 2;
-          char* argv[] = {"-ORBDebuglevel", "0"};
+          char* argv[] = {(char*) "-ORBDebuglevel", (char*) "0"};
           orb_ = CORBA::ORB_init (argc, argv, "SyncClient");
           if (CORBA::is_nil (orb_.in())) {
             throw InitError ("SyncClient_i::ctr> Orb init failed.");
