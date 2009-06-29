@@ -1,3 +1,9 @@
+Mon Jun 29 17:53:54 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/DCPS/Sync/SyncClient_i.cpp:
+
+          Fix a warning from GCC 4.3.
+
 Mon Jun 29 17:46:14 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/FileSystemStorage.cpp:
