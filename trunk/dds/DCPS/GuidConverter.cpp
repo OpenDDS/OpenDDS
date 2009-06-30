@@ -86,7 +86,7 @@ GuidConverter::operator std::string() const
   return os.str();
 }
 
-#ifdef ACE_HAS_WCHAR
+#ifdef DDS_HAS_WCHAR
 GuidConverter::operator std::wstring() const
 {
   std::wostringstream os;
@@ -106,7 +106,7 @@ operator<<(std::ostream& os, const OpenDDS::DCPS::GuidConverter& rhs)
   return os << std::string(rhs);
 }
 
-#ifdef ACE_HAS_WCHAR
+#ifdef DDS_HAS_WCHAR
 std::wostream&
 operator<<(std::wostream& os, const OpenDDS::DCPS::GuidConverter& rhs)
 {

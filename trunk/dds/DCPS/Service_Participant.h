@@ -12,6 +12,7 @@
 #include "DomainParticipantFactoryImpl.h"
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
+#include "dds/DCPS/Definitions.h"
 
 #include "tao/PortableServer/PortableServer.h"
 
@@ -214,7 +215,7 @@ namespace OpenDDS
       void set_repo_ior (const char* ior,
                          const RepoKey key = DEFAULT_REPO);
 
-#ifdef ACE_HAS_WCHAR
+#ifdef DDS_HAS_WCHAR
       /// Convenience overload for wchar_t
       void set_repo_ior (const wchar_t* ior, const RepoKey key = DEFAULT_REPO);
 #endif
