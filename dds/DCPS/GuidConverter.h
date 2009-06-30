@@ -15,6 +15,7 @@
 #include "GuidUtils.h"
 
 #include "dcps_export.h"
+#include "dds/DCPS/Definitions.h"
 
 namespace OpenDDS
 {
@@ -84,7 +85,7 @@ public:
 
   /// Convert to diagnostic string.
   operator std::string() const;
-#ifdef ACE_HAS_WCHAR
+#ifdef DDS_HAS_WCHAR
   operator std::wstring() const;
 #endif
 
@@ -98,7 +99,7 @@ protected:
 OpenDDS_Dcps_Export std::ostream&
 operator<<(std::ostream& os, const OpenDDS::DCPS::GuidConverter& rhs);
 
-#ifdef ACE_HAS_WCHAR
+#ifdef DDS_HAS_WCHAR
 OpenDDS_Dcps_Export std::wostream&
 operator<<(std::wostream& os, const OpenDDS::DCPS::GuidConverter& rhs);
 #endif

@@ -1,3 +1,15 @@
+Tue Jun 30 17:45:01 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/GuidConverter.h:
+        * dds/DCPS/GuidConverter.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Fixed for Solaris/x86 with GCC 3.3.2; now using DDS_HAS_WCHAR because
+          this platform does indded have ACE_HAS_WCHAR even though its C++ std
+          library is incomplete.
+
 Mon Jun 29 21:36:37 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/GuidConverter.h:

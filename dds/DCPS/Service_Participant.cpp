@@ -693,7 +693,7 @@ namespace OpenDDS
       }
     }
 
-#ifdef ACE_HAS_WCHAR
+#ifdef DDS_HAS_WCHAR
     void
     Service_Participant::set_repo_ior( const wchar_t* ior, const RepoKey key)
     {
