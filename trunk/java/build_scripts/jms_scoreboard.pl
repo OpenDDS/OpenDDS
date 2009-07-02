@@ -33,6 +33,12 @@ if (!chdir $opt_d) {
     exit $!;
 }
 
+# This seems to only impact ant on Windows, it's confused by -Dfoo=bar when 
+# bar also contains an =
+if ($^O eq 'MSWin32') {
+    map s/-D([\w.]+)=(\S+)=(\S+)/-D$1=\\"$2=$3\\"/, @ARGV;
+}
+ 
 my $overall_status = 0;
 
 for my $tgt (@targets) {
@@ -53,7 +59,7 @@ for my $tgt (@targets) {
         $PROC = new PerlACE::Process("$ANT_HOME/bin/ant",
                                      "@ARGV $extra $tgt->[1]");
       }
-      $status = $PROC->SpawnWaitKill(300);
+      $status = $PROC->SpawnWaitKill(600);
     }
     else {
       $status = system("\"$ANT_HOME/bin/ant\" @ARGV $extra $tgt->[1]");
