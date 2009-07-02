@@ -1,3 +1,10 @@
+Thu Jul  2 20:49:29 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * java/build_scripts/jms_scoreboard.pl:
+
+          Extended the timeout and added a workaround for ant on Windows not
+          handling -Dfoo=bar=1 correctly.
+
 Tue Jun 30 17:45:01 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Definitions.h:
