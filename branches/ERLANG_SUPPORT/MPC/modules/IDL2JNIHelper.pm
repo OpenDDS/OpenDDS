@@ -16,9 +16,9 @@ use strict;
 use FileHandle;
 
 use CommandHelper;
-use IDLHelper qw(%types);
+use IDLBase qw(%types);
 
-our @ISA = qw(IDLHelper);
+our @ISA = qw(IDLBase);
 
 # ************************************************************
 # Data Section
