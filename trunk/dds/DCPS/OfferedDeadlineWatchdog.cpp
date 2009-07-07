@@ -66,7 +66,7 @@ OpenDDS::DCPS::OfferedDeadlineWatchdog::execute(void const * act, bool timer_cal
       ACE_Time_Value diff = ACE_OS::gettimeofday () - instance->cur_sample_tv_;
       missed = diff >= this->interval_;
     }
-    else // upon writing sample.
+    else if (instance->last_sample_tv_ != ACE_Time_Value::zero) // upon writing sample.
     {
       ACE_Time_Value diff = instance->cur_sample_tv_ - instance->last_sample_tv_;
       missed = diff > this->interval_;
