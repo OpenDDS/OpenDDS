@@ -1,9 +1,22 @@
+Tue Jul  7 23:49:46 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+
+          Fixed a bug in the execute() that should not calculate
+          the period between two samples if it's called upon first 
+          sample receiving.
+                    
+        * tests/DCPS/Deadline/publisher.cpp:
+
+          Adjusted the expected missed deadline calls as the changes
+          were made.
+          
 Tue Jul  7 16:07:12 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * MPC/modules/IDL2JNIHelper.pm:
         * MPC/modules/IDLBase.pm:
 
-	  Merged MPC IDL refactoring from ERLANG_SUPPORT branch (r2243).
+          Merged MPC IDL refactoring from ERLANG_SUPPORT branch (r2243).
 
 Thu Jul  2 20:49:29 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
