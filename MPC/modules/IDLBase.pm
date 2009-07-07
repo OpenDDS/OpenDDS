@@ -1,4 +1,4 @@
-package IDLHelper;
+package IDLBase;
 
 # ************************************************************
 # Description   : Assist in determining the output from idl2jni.

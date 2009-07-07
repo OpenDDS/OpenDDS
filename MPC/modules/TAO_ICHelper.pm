@@ -7,9 +7,9 @@ package TAO_ICHelper;
 use strict;
 
 use FileHandle;
-use IDLHelper;
+use IDLBase;
 
-our @ISA = qw(IDLHelper);
+our @ISA = qw(IDLBase);
 
 sub get_component_name {
   return 'Erlang_Files';
