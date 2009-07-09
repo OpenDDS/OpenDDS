@@ -13,6 +13,43 @@
 #include "DataSampleHeader.inl"
 #endif /* __ACE_INLINE__ */
 
+
+bool OpenDDS::DCPS::DataSampleHeader::partial(ACE_Message_Block& mb)
+{
+  static const unsigned int LIFESPAN_MASK = 0x08, LIFESPAN_LENGTH = 8;
+  const size_t full_header = DataSampleHeader().max_marshaled_size();
+
+  size_t len = mb.total_length();
+  if (len < 2) return true;
+
+  struct Restore_Rd_Ptr
+  {
+    explicit Restore_Rd_Ptr(ACE_Message_Block& mb)
+      : mb_(mb), rd_ptr_(mb.rd_ptr()) {}
+
+    ~Restore_Rd_Ptr()
+    {
+      mb_.rd_ptr(rd_ptr_);
+    }
+
+    ACE_Message_Block& mb_;
+    char* rd_ptr_;
+  } restorer(mb);
+
+  TAO::DCPS::Serializer reader(&mb);
+
+  char id;
+  reader >> id;
+  if (!reader.good_bit()) return true;
+
+  ACE_CDR::Octet flags;
+  reader >> ACE_InputCDR::to_octet(flags);
+  if (!reader.good_bit()) return true;
+
+  if (flags & LIFESPAN_MASK) return len < full_header;
+  else return len < full_header - LIFESPAN_LENGTH;
+}
+
 void
 OpenDDS::DCPS::DataSampleHeader::init (ACE_Message_Block* buffer)
 {

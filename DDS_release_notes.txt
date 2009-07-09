@@ -65,6 +65,9 @@ New to this version are the following changes:
 
 - Implemented DataWriter::wait_for_acknowledgments() from formal/07-01-01.
 
+- Added support for Windows Mobile 6 (WinCE) Standard SDK, and ACE_USES_WCHAR
+  builds in general.  See docs/design/wchar.txt.
+
 =========================================================================
 
 Version 1.2 of OpenDDS.

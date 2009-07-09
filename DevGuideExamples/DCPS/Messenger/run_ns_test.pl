@@ -84,7 +84,7 @@ if (! -s $nsadd.$exec_extn) {
 $NSADD = PerlDDS::create_process($nsadd,
                               "$arg_ns_ref --name InfoRepo --ior file://$dcpsrepo_ior");
 $NSADD->IgnoreExeSubDir(1);
-$NSADD->SpawnWaitKill(5);
+$NSADD->SpawnWaitKill(30);
 
 unlink $dcpsrepo_ior;
 

@@ -51,9 +51,6 @@ namespace OpenDDS { namespace DCPS {
         // Construct with values.
         PriorityKey( CORBA::Long priority, ACE_INET_Addr address);
 
-        // Virtual destructor to allow extensions.
-        virtual ~PriorityKey();
-
         // Ordering for STL containers.
         bool operator<(  const PriorityKey& rhs) const;
 

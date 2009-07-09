@@ -545,10 +545,7 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
                        "== %u.\n",
                        this->receive_buffers_[ this->buffer_index_]->wr_ptr()));
 
-            // TODO: We should use the marshaled_size() instead of max_marshaled_size()
-            //       for this checking.
-            if( this->receive_buffers_[ this->buffer_index_]->total_length()
-                < this->receive_sample_.header_.max_marshaled_size())
+            if (DataSampleHeader::partial(*this->receive_buffers_[this->buffer_index_]))
               {
                 //
                 // Not enough room in the buffer for the entire Sample

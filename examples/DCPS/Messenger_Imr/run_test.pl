@@ -62,7 +62,7 @@ sub RunImRUtil {
     my $cmd = shift;
     $imr_util->Arguments("$imr_init_ref $cmd");
     print ">>> " . $imr_util->CommandLine() . "\n";
-    return $imr_util->SpawnWaitKill(5);
+    return $imr_util->SpawnWaitKill(30);
 }
 
 sub SpawnWait {

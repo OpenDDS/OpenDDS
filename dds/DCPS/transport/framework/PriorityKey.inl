@@ -15,11 +15,6 @@ OpenDDS::DCPS::PriorityKey::PriorityKey( CORBA::Long priority, ACE_INET_Addr add
 }
 
 ACE_INLINE
-OpenDDS::DCPS::PriorityKey::~PriorityKey()
-{
-}
-
-ACE_INLINE
 bool
 OpenDDS::DCPS::PriorityKey::operator<(  const PriorityKey& rhs) const
 {
