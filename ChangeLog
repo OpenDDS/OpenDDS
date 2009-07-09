@@ -1,9 +1,18 @@
+Thu Jul  9 05:30:38 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * DDS_release_notes.txt:
+        * dds/tools/opendds_repo_ctl:
+        * java/jms/compat/build.xml:
+        * performance-tests/Bench/tools/mkpkg:
+
+          Renamed opendds_ir_ctl tool to opendds_repo_ctl.
+
 Thu Jul  9 05:16:03 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * MPC/modules/IDL2JNIHelper.pm:
         * MPC/modules/IDLBase.pm:
 
-	  Corrections to the IDL refactoring for Java/idl2jni.
+          Corrections to the IDL refactoring for Java/idl2jni.
 
 Tue Jul  7 23:49:46 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
