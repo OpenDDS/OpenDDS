@@ -218,7 +218,7 @@ if ($kill_subscriber == 0)
     }
 }
 
-$PublisherResult = $Publisher->WaitKill (30);
+$PublisherResult = $Publisher->WaitKill (60);
 if ($kill_subscriber != 0 && $PublisherResult == 0) {
     # writing out to STDOUT as these tests redirect STDERR to a log file.
     # The nightly script parses STDERR to detect test failures.
