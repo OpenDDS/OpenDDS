@@ -1,16 +1,23 @@
+Thu Jul  9 05:16:03 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * MPC/modules/IDL2JNIHelper.pm:
+        * MPC/modules/IDLBase.pm:
+
+	  Corrections to the IDL refactoring for Java/idl2jni.
+
 Tue Jul  7 23:49:46 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/OfferedDeadlineWatchdog.cpp:
 
           Fixed a bug in the execute() that should not calculate
-          the period between two samples if it's called upon first 
+          the period between two samples if it's called upon first
           sample receiving.
-                    
+
         * tests/DCPS/Deadline/publisher.cpp:
 
           Adjusted the expected missed deadline calls as the changes
           were made.
-          
+
 Tue Jul  7 16:07:12 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * MPC/modules/IDL2JNIHelper.pm:

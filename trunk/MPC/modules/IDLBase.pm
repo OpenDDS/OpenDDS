@@ -15,25 +15,23 @@ package IDLBase;
 use strict;
 
 use CommandHelper;
-use Exporter qw(import);
 use FileHandle;
 
 our @ISA = qw(CommandHelper);
-our @EXPORT_OK = qw(%types);
 
 # ************************************************************
 # Data Section
 # ************************************************************
 
-our %types  = ('const'           => 0x01,
-               'enum'            => 0x07,
-               'native'          => 0x06,
-               'struct'          => 0x07,
-               'union'           => 0x07,
-               'interface'       => 0x1f,
-               'local interface' => 0x2f,
-               'typedef'         => 0x06,
-               'simple typedef'  => 0x04,
+my %types  = ('const'           => 0x01,
+              'enum'            => 0x07,
+              'native'          => 0x06,
+              'struct'          => 0x07,
+              'union'           => 0x07,
+              'interface'       => 0x1f,
+              'local interface' => 0x2f,
+              'typedef'         => 0x06,
+              'simple typedef'  => 0x04,
               );
 
 my %idl_keywords = ('abstract' => 1,
@@ -136,6 +134,11 @@ sub get_typesupport_info {
   return $self->{'strs'}->{$tsfile}->[1];
 }
 
+sub get_type_bits {
+  my($self, $type) = @_;
+  return %types->{$type};
+}
+
 
 # ************************************************************
 # Public Interface Section
@@ -153,8 +156,8 @@ sub get_output {
   ## Get the file names based on the type and name of each entry
   my @tmp;
   foreach my $ent (@$data) {
-    my($type, @scope) = @$ent;
-    push @tmp, $self->get_filenames($flags, $type, @scope);
+    my($type, $scope) = @$ent;
+    push @tmp, $self->get_filenames($flags, $type, $scope);
   }
   @filenames = grep(!$seen{$_}++, @tmp); # remove duplicates
 
@@ -204,7 +207,7 @@ sub get_scope {
     push @scope, $$entry[1];
   }
 
-  return @scope;
+  return \@scope;
 }
 
 sub cached_parse {
@@ -351,9 +354,9 @@ sub parse {
                      if ($simple && $single eq 'typedef' && $str !~ /^\s*\[/);
 
               ## Get the scope and put the entry in the data array
-              my @scope = $self->get_scope(\@state);
-              push @scope, $name;
-              push(@data, [$single, @scope]);
+              my $scope = $self->get_scope(\@state);
+              push @$scope, $name;
+              push(@data, [$single, $scope]);
 
               ## Reset this so that we don't continue adding entries
               $single = undef;
@@ -412,9 +415,10 @@ sub parse {
             $local = undef;
           }
 
-          my @scope = $self->get_scope(\@state);
-          ## TODO Verify scope is created correctly! ##
-          splice(@$entry, 1, 0, @scope);
+          ## Save the scope in the entry array
+          my $scope = $self->get_scope(\@state);
+          push @$scope, $$entry[1];
+          splice(@$entry, 1, 0, $scope);
 
           ## Save the entry in the data array
           push(@data, $entry);
