@@ -1,3 +1,11 @@
+Thu Jul  9 17:47:10 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+
+          Made monitor 2 wait for monitor 1 finish to avoid fixed time delay
+          (15 seconds) may not be enough for monitor 1 get bit data before 
+          monitor 2 start.
+          
 Thu Jul  9 05:30:38 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * DDS_release_notes.txt:
