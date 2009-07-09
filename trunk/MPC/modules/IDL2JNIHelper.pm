@@ -40,7 +40,7 @@ sub get_component_name {
 }
 
 sub get_outputexts {
-  return ['\.java'];
+  return ['\\.java'];
 }
 
 sub get_filenames {

@@ -48,7 +48,7 @@ namespace OpenDDS
         ACE_CDR::Octet packet_id_[6];
        
         /// The size of the message following this header, not including the
-        /// 8 bytes used by this TransportHeader.
+        /// 11 bytes used by this TransportHeader.
         ACE_UINT32 length_;
 
         /// Similar to IDL compiler generated methods.

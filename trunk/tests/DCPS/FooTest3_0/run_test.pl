@@ -12,7 +12,7 @@ use lib "$ACE_ROOT/bin";
 use DDS_Run_Test;
 
 # Set the library path for the client to be able to load
-# the FooTyoe* library.
+# the FooType* library.
 PerlDDS::add_lib_path('../FooType3');
 
 $status = 0;

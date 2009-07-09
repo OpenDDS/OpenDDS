@@ -1,11 +1,46 @@
+Thu Jul  9 18:21:55 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Noted Windows Mobile and ACE_USES_WCHAR support.
+
+        * MPC/modules/IDL2JNIHelper.pm:
+
+          Fixed Perl syntax error.
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+
+          The DataSampleHeader is now variable-length so we need a way for the
+          transport to know if it has enough bytes queued up to make a header.
+          This should fix the intermittent LivelinessTest failure, and in
+          general will make sure that the DCPS layer gets control messages
+          (0 bytes of sample data) right away.
+
+        * dds/DCPS/transport/framework/PriorityKey.h:
+        * dds/DCPS/transport/framework/PriorityKey.inl:
+
+          Removed the virtual destructor, this is a value type.
+
+        * DevGuideExamples/DCPS/Messenger/run_ns_test.pl:
+        * examples/DCPS/Messenger_Imr/run_test.pl:
+
+          Increase timeouts for running TAO utilities (nsadd, tao_imr).
+
+        * tests/DCPS/FooTest3_0/run_test.pl:
+
+          Typo.
+
 Thu Jul  9 17:47:10 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/BuiltInTopicTest/monitor.cpp:
 
           Made monitor 2 wait for monitor 1 finish to avoid fixed time delay
-          (15 seconds) may not be enough for monitor 1 get bit data before 
+          (15 seconds) may not be enough for monitor 1 get bit data before
           monitor 2 start.
-          
+
 Thu Jul  9 05:30:38 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * DDS_release_notes.txt:
@@ -251,7 +286,7 @@ Wed Apr  8 15:42:27 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/transport/framework/SendResponseListener.cpp:
 
-          Inlclude precompiled headers.
+          Include precompiled headers.
 
 Wed Apr  8 01:30:15 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
@@ -1981,7 +2016,7 @@ Thu Jan 29 05:35:56 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * java/jms/build.properties:
         * java/jms/build.xml:
 
-          Removed source compatibility flags; cases unpredictable behavior
+          Removed source compatibility flags; causes unpredictable behavior
           when used with JDK 1.6 compilers (reported against 1.6.0_11).
 
 Wed Jan 28 23:05:39 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
@@ -3266,7 +3301,7 @@ Fri Dec  5 23:23:24 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         This changeset includes many improvements to the core OpenDDS
         libraries as well as the incorporation of a JMS Provider based on
-        OpenDDS (located at $DDS_ROOT/java/jms).  Subsequent committs to the
+        OpenDDS (located at $DDS_ROOT/java/jms).  Subsequent commits to the
         release notes will detail all of the user-visible changes to OpenDDS.
 
 Wed Dec  3 18:19:34 UTC 2008  Paul Calabrese  <calabrese_p@ociweb.com>
