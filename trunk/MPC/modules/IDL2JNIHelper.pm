@@ -36,11 +36,11 @@ my $ext    = '.java';
 # ************************************************************
 
 sub get_component_name {
-  return "Java_Files";
+  return 'Java_Files';
 }
 
 sub get_outputexts {
-  return ["\\.java"];
+  return ['\.java'];
 }
 
 sub get_filenames {
