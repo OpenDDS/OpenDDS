@@ -48,6 +48,7 @@ char* CUR_TOPIC_DATA = TOPIC_DATA;
 char* CUR_GROUP_DATA = GROUP_DATA;
 
 unsigned int dps_with_user_data = 2;
+char synch_fname[] = "monitor1_done";
 
 int
 parse_args (int argc, ACE_TCHAR *argv[])
@@ -114,6 +115,24 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       if (parse_args (argc, argv) == -1) {
         return -1;
+      }
+
+      if (CUR_PART_USER_DATA == UPDATED_PART_USER_DATA)
+      {
+        // wait for Monitor 1 done
+        FILE* fp = ACE_OS::fopen (synch_fname, ACE_LIB_TEXT("r"));
+        int i = 0;
+        while (fp == 0 &&  i < 15)
+        {
+          ACE_DEBUG ((LM_DEBUG,
+            ACE_LIB_TEXT("(%P|%t)waiting monitor1 done ...\n")));
+          ACE_OS::sleep (1);
+          ++ i;
+          fp = ACE_OS::fopen (synch_fname, ACE_LIB_TEXT("r"));
+        }
+
+        if (fp != 0)
+          ACE_OS::fclose (fp);
       }
 
       participant = dpf->create_participant(411,
@@ -463,7 +482,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       if (CUR_PART_USER_DATA == PART_USER_DATA)
       {
         // Create synch file.
-        FILE* fp = ACE_OS::fopen ("monitor1_done", ACE_LIB_TEXT("w"));
+        FILE* fp = ACE_OS::fopen (synch_fname, ACE_LIB_TEXT("w"));
         if (fp != 0)
         {
           ACE_DEBUG ((LM_DEBUG, ACE_LIB_TEXT("(%P|%t)monitor1 is done\n")));
