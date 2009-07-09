@@ -19,7 +19,7 @@ void
 usage_and_exit( int value = 0)
 {
   std::cout << std::endl
-    << "USAGE: opendds_ir_ctl [opts] <cmd> <args> ..." << std::endl
+    << "USAGE: opendds_repo_ctl [opts] <cmd> <args> ..." << std::endl
     << std::endl
     << " The command line is a simplistic command/arguments format.  The first" << std::endl
     << " argument will *always* be the command and following arguments are" << std::endl
@@ -207,7 +207,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
       iorString += OpenDDS::Federator::REPOSITORY_IORTABLE_KEY;
       if( options.verbose()) {
         ACE_DEBUG(( LM_INFO,
-          ACE_TEXT("(%P|%t) INFO: opendds_ir_ctl: ")
+          ACE_TEXT("(%P|%t) INFO: opendds_repo_ctl: ")
           ACE_TEXT("attempting to resolve and connect to repository at: %C.\n"),
           iorString.c_str()
         ));
@@ -218,7 +218,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
       ir = OpenDDS::DCPS::DCPSInfo::_narrow( obj.in() );
       if( CORBA::is_nil( ir.in())) {
         ACE_ERROR(( LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: opendds_ir_ctl: could not narrow %C.\n"),
+          ACE_TEXT("(%P|%t) ERROR: opendds_repo_ctl: could not narrow %C.\n"),
           iorString.c_str()
         ));
         return -4;
@@ -232,7 +232,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
       iorString += OpenDDS::Federator::FEDERATOR_IORTABLE_KEY;
       if( options.verbose()) {
         ACE_DEBUG(( LM_INFO,
-          ACE_TEXT("(%P|%t) INFO: opendds_ir_ctl: ")
+          ACE_TEXT("(%P|%t) INFO: opendds_repo_ctl: ")
           ACE_TEXT("attempting to resolve and connect to repository at: %C.\n"),
           iorString.c_str()
         ));
@@ -243,7 +243,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
       target = OpenDDS::Federator::Manager::_narrow( obj.in() );
       if( CORBA::is_nil( target.in())) {
         ACE_ERROR(( LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: opendds_ir_ctl: could not narrow %C.\n"),
+          ACE_TEXT("(%P|%t) ERROR: opendds_repo_ctl: could not narrow %C.\n"),
           iorString.c_str()
         ));
         return -5;
@@ -257,7 +257,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
         iorString += OpenDDS::Federator::FEDERATOR_IORTABLE_KEY;
         if( options.verbose()) {
           ACE_DEBUG(( LM_INFO,
-            ACE_TEXT("(%P|%t) INFO: opendds_ir_ctl: ")
+            ACE_TEXT("(%P|%t) INFO: opendds_repo_ctl: ")
             ACE_TEXT("attempting to resolve and connect to repository at: %C.\n"),
             iorString.c_str()
           ));
@@ -268,7 +268,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
         peer = OpenDDS::Federator::Manager::_narrow( obj.in() );
         if( CORBA::is_nil( peer.in())) {
           ACE_ERROR(( LM_ERROR,
-            ACE_TEXT("(%P|%t) ERROR: opendds_ir_ctl: could not narrow %C.\n"),
+            ACE_TEXT("(%P|%t) ERROR: opendds_repo_ctl: could not narrow %C.\n"),
             iorString.c_str()
           ));
           return -6;
@@ -281,7 +281,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
         {
           if( options.verbose()) {
             ACE_DEBUG(( LM_INFO,
-              ACE_TEXT("(%P|%t) INFO: opendds_ir_ctl: federating.\n")
+              ACE_TEXT("(%P|%t) INFO: opendds_repo_ctl: federating.\n")
             ));
           }
           target->join_federation( peer.in(), options.federationDomain());
@@ -292,7 +292,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
         {
           if( options.verbose()) {
             ACE_DEBUG(( LM_INFO,
-              ACE_TEXT("(%P|%t) INFO: opendds_ir_ctl: leaving and shutting down.\n")
+              ACE_TEXT("(%P|%t) INFO: opendds_repo_ctl: leaving and shutting down.\n")
             ));
           }
           target->leave_and_shutdown();
@@ -303,7 +303,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
         {
           if( options.verbose()) {
             ACE_DEBUG(( LM_INFO,
-              ACE_TEXT("(%P|%t) INFO: opendds_ir_ctl: shutting down.\n")
+              ACE_TEXT("(%P|%t) INFO: opendds_repo_ctl: shutting down.\n")
             ));
           }
           target->shutdown();
@@ -314,7 +314,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
         {
           if( options.verbose()) {
             ACE_DEBUG(( LM_INFO,
-              ACE_TEXT("(%P|%t) INFO: opendds_ir_ctl: shutting down.\n")
+              ACE_TEXT("(%P|%t) INFO: opendds_repo_ctl: shutting down.\n")
             ));
           }
           ir->shutdown();
@@ -323,24 +323,24 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
       default:
         ACE_ERROR(( LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: opendds_ir_ctl: unknown command requested.\n ")
+          ACE_TEXT("(%P|%t) ERROR: opendds_repo_ctl: unknown command requested.\n ")
         ));
         usage_and_exit( -7);
         break;
     }
 
   } catch (const CORBA::Exception& ex) {
-    ex._tao_print_exception ("(%P|%t) ABORT: opendds_ir_ctl: CORBA problem detected.\n");
+    ex._tao_print_exception ("(%P|%t) ABORT: opendds_repo_ctl: CORBA problem detected.\n");
     status = -1;
 
   } catch (const std::exception& ex) {
     ACE_ERROR ((LM_ERROR,
-                ACE_TEXT("(%P|%t) ABORT: opendds_ir_ctl: %C exception caught in main().\n"), ex.what()));
+                ACE_TEXT("(%P|%t) ABORT: opendds_repo_ctl: %C exception caught in main().\n"), ex.what()));
     status = -2;
 
   } catch(...) {
     ACE_ERROR ((LM_ERROR,
-                ACE_TEXT("(%P|%t) ABORT: opendds_ir_ctl: unspecified exception caught in main() - panic.\n")));
+                ACE_TEXT("(%P|%t) ABORT: opendds_repo_ctl: unspecified exception caught in main() - panic.\n")));
     status = -3;
 
   }
