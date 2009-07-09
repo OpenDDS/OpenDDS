@@ -1199,8 +1199,6 @@ void WriteDataContainer::reschedule_deadline ()
 void
 WriteDataContainer::wait_pending()
 {
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
-
   ACE_Time_Value pending_timeout =
     TheServiceParticipant->pending_timeout();
 
@@ -1212,8 +1210,16 @@ WriteDataContainer::wait_pending()
     pending_timeout += ACE_OS::gettimeofday();
   }
 
-  while (pending_data())
+  bool do_wait = true;
+
+  while (do_wait)
   {
+    {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
+      do_wait = pending_data();
+    }
+    if (!do_wait)
+      break;
     empty_condition_.wait(pTimeout);
   }
 }

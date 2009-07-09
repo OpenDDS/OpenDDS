@@ -1,3 +1,17 @@
+Thu Jul  9 22:17:52 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Fixed a deadlock situation while datawriter deletion thread
+          holds the data container lock and wait for pending data clear
+          out and the other thread calls data_delivered on data container
+          which acquire the lock as well.
+          
+        * tests/DCPS/Reconnect/run_test.pl:
+        
+          Extended publisher process timeout in case there are more data
+          need be clear during shutdown for the bp_timeout test case.
+
 Thu Jul  9 21:56:37 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/FooTest3_1/run_test.pl:
