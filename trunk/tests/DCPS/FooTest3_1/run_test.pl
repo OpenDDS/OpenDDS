@@ -61,7 +61,7 @@ elsif ($ARGV[0] eq 'bp_remove') {
   $write_dalay_msec=0;
   $check_data_dropped=1;
   $receive_dalay_msec=100;
-  $publisher_running_sec=120;
+  $publisher_running_sec=150;
 }
 elsif ($ARGV[0] eq 'b') {
   # test of blocking write
@@ -71,7 +71,7 @@ elsif ($ARGV[0] eq 'b') {
   $num_writes_per_thread=1000;
   $write_dalay_msec=0;
   $receive_dalay_msec=100;
-  $publisher_running_sec=120;
+  $publisher_running_sec=150;
   $subscriber_running_sec=120;
 }
 elsif ($ARGV[0] eq '') {

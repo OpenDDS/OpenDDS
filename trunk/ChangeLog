@@ -1,3 +1,10 @@
+Thu Jul  9 21:56:37 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/FooTest3_1/run_test.pl:
+        * tests/DCPS/FooTest3_2/run_test.pl:
+
+          Extend the timeouts for the sake of the slow QNX machine.
+
 Thu Jul  9 18:21:55 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * DDS_release_notes.txt:
