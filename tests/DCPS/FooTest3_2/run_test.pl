@@ -12,7 +12,7 @@ use lib "$ACE_ROOT/bin";
 use DDS_Run_Test;
 
 # Set the library path for the client to be able to load
-# the FooTyoe* library.
+# the FooType* library.
 PerlDDS::add_lib_path('../FooType3Unbounded');
 
 $status=0;
@@ -30,7 +30,7 @@ $blocking_write=0;
 $write_dalay_msec=0;
 $receive_dalay_msec=0;
 $check_data_dropped=0;
-$publisher_running_sec=20;
+$publisher_running_sec=30;
 $subscriber_running_sec=20;
 $repo_bit_conf = "-NOBITS";
 $app_bit_conf = "-DCPSBit 0";
@@ -61,7 +61,7 @@ elsif ($ARGV[0] eq 'bp_remove') {
   $write_dalay_msec=0;
   $check_data_dropped=1;
   $receive_dalay_msec=100;
-  $publisher_running_sec=120;
+  $publisher_running_sec=150;
   $subscriber_running_sec=120;
 }
 elsif ($ARGV[0] eq 'b') {
@@ -72,7 +72,7 @@ elsif ($ARGV[0] eq 'b') {
   $num_writes_per_thread=1000;
   $write_dalay_msec=0;
   $receive_dalay_msec=100;
-  $publisher_running_sec=120;
+  $publisher_running_sec=150;
   $subscriber_running_sec=120;
 }
 elsif ($ARGV[0] eq '') {
