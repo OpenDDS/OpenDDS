@@ -16,7 +16,7 @@ use strict;
 use FileHandle;
 
 use CommandHelper;
-use IDLBase qw(%types);
+use IDLBase;
 
 our @ISA = qw(IDLBase);
 
@@ -45,32 +45,42 @@ sub get_outputexts {
 
 sub get_filenames {
   my $self = shift;
-  my($flags, $type, @scope) = @_;
+  my($flags, $type, $scope, $name) = @_;
 
-  my $bits = $types{$type};
+  my $bits = $self->get_type_bits($type);
   my @filenames;
 
   ## Get the file names based on the type of data structure
-  push(@filenames, basename(@scope) . $ext)           if ($bits & 0x01);
-  push(@filenames, basename(@scope) . $holder. $ext)  if ($bits & 0x02);
-  push(@filenames, basename(@scope) . $helper. $ext)  if ($bits & 0x04);
-  push(@filenames, basename(@scope) . $ops . $ext)    if ($bits & 0x08);
-  push(@filenames, privname(@scope) . $stub . $ext)   if ($bits & 0x10);
+  push(@filenames, basename($scope) . $ext)           if ($bits & 0x01);
+  push(@filenames, basename($scope) . $holder. $ext)  if ($bits & 0x02);
+  push(@filenames, basename($scope) . $helper. $ext)  if ($bits & 0x04);
+  push(@filenames, basename($scope) . $ops . $ext)    if ($bits & 0x08);
+  push(@filenames, privname($scope) . $stub . $ext)   if ($bits & 0x10);
   if ($bits & 0x20) {
     foreach my $local_suffix (@local) {
-      push(@filenames, privname(@scope) . $local_suffix . $ext);
+      push(@filenames, privname($scope) . $local_suffix . $ext);
     }
   }
+
   return @filenames;
 }
 
 sub basename {
-  return join '/', @_;
+  my($scope) = @_;
+  return join '/', @$scope;
 }
 
 sub privname {
-  my(@scope, $name) = @_;
-  return join '/', (@scope, '_' . $name);
+  my($scope) = @_;
+
+  ## Create a temporary for modification
+  my @tmp = @$scope;
+
+  ## Prefix last element with underscore
+  my $name = pop @tmp;
+  push @tmp, '_' . $name;
+
+  return basename(\@tmp);
 }
 
 1;
