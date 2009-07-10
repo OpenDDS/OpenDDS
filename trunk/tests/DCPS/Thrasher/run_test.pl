@@ -29,27 +29,27 @@ my $norun;
 my $arg = shift;
 if ($arg eq 'low') {
   $pub_opts .= "-t 8 -s 128";
-  $sub_opts .= "-n 1024";
+  $sub_opts .= "-t 8 -n 1024";
 
 } elsif ($arg eq 'medium') {
   $pub_opts .= "-t 16 -s 64";
-  $sub_opts .= "-n 1024";
+  $sub_opts .= "-t 16 -n 1024";
 
 } elsif ($arg eq 'high') {
   $pub_opts .= "-t 32 -s 32";
-  $sub_opts .= "-n 1024";
+  $sub_opts .= "-t 32 -n 1024";
 
 } elsif ($arg eq 'aggressive') {
   $pub_opts .= "-t 64 -s 16";
-  $sub_opts .= "-n 1024";
+  $sub_opts .= "-t 64 -n 1024";
 
 } elsif ($arg eq 'single') {
   $pub_opts .= "-t 1 -s 1";
-  $sub_opts .= "-n 1";
+  $sub_opts .= "-t 1 -n 1";
 
 } else { # default (i.e. lazy)
   $pub_opts .= "-t 1 -s 1024";
-  $sub_opts .= "-n 1024";
+  $sub_opts .= "-t 1 -n 1024";
 }
 
 $status = 0;
