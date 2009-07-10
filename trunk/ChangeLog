@@ -1,3 +1,10 @@
+Fri Jul 10 21:14:42 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Use the byte order from the sample header, not the setting
+          from the publisher's configuration.
+
 Fri Jul 10 20:47:35 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:
