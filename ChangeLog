@@ -1,3 +1,11 @@
+Fri Jul 10 19:28:49 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tests/DCPS/Priority/Publisher.cpp:
+
+          Added calls to wait_for_acknowledgements() after sending all
+          data in order to allow the subscriber to receive the data
+          before tearing down the connection.
+
 Fri Jul 10 17:25:31 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataSampleHeader.cpp:
