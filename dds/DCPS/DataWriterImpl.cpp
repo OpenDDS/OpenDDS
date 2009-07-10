@@ -1663,7 +1663,7 @@ DataWriterImpl::deliver_ack(
 
   ::TAO::DCPS::Serializer serializer(
     data,
-    this->get_publisher_servant()->swap_bytes()
+    header.byte_order_ != TAO_ENCAP_BYTE_ORDER
   );
   serializer >> ack.value_;
 
