@@ -2,13 +2,9 @@
  * $Id$
  */
 
-#include "DcpsInfo_pch.h"
-
-#include <iostream>
-
-#include "tao/ORB_Core.h"
-
 #include "DCPSInfoRepoServ.h"
+#include "tao/ORB_Core.h"
+#include <iostream>
 
 int
 ACE_TMAIN (int argc, ACE_TCHAR *argv[])
