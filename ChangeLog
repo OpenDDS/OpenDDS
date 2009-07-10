@@ -1,3 +1,11 @@
+Fri Jul 10 22:09:52 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Thrasher/Subscriber.cpp:
+        * tests/DCPS/Thrasher/run_test.pl:
+
+          Subscriber now knows how many writers to expect and won't shut down
+          until that many writers have been seen in SubscriptionMatchStatus.
+
 Fri Jul 10 21:14:42 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:

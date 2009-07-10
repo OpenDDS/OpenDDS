@@ -25,6 +25,7 @@ namespace
 {
   std::size_t expected_samples = 1024;
   std::size_t received_samples = 0;
+  int n_publishers = 1;
 
   void
   parse_args(int& argc, ACE_TCHAR** argv)
@@ -38,6 +39,11 @@ namespace
       if ((arg = shifter.get_the_parameter(ACE_TEXT("-n"))))
       {
         expected_samples = ACE_OS::atoi(arg);
+        shifter.consume_arg();
+      }
+      else if ((arg = shifter.get_the_parameter(ACE_TEXT("-t"))))
+      {
+        n_publishers = ACE_OS::atoi(arg);
         shifter.consume_arg();
       }
       else
@@ -166,8 +172,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
       matches = reader->get_subscription_match_status();
     }
-    while (matches.current_count > 0);
-
+    while (matches.current_count > 0 || matches.total_count < n_publishers);
     ws->detach_condition(cond);
 
     // Clean-up!
