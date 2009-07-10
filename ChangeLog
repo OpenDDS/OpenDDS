@@ -1,3 +1,12 @@
+Fri Jul 10 17:25:31 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.cpp:
+
+          Changed the pre-parsing of the header to not user the Serializer,
+          it's too hard to reset the rd_ptrs if we need to go to the
+          continuation block.  Now just manually read the first two bytes and
+          leave the rd_ptrs where they are.
+
 Thu Jul  9 22:17:52 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/WriteDataContainer.cpp:
@@ -6,9 +15,9 @@ Thu Jul  9 22:17:52 UTC 2009  Yan Dai  <dai_y@ociweb.com>
           holds the data container lock and wait for pending data clear
           out and the other thread calls data_delivered on data container
           which acquire the lock as well.
-          
+
         * tests/DCPS/Reconnect/run_test.pl:
-        
+
           Extended publisher process timeout in case there are more data
           need be clear during shutdown for the bp_timeout test case.
 
