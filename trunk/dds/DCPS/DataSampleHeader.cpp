@@ -22,31 +22,24 @@ bool OpenDDS::DCPS::DataSampleHeader::partial(ACE_Message_Block& mb)
   size_t len = mb.total_length();
   if (len < 2) return true;
 
-  struct Restore_Rd_Ptr
-  {
-    explicit Restore_Rd_Ptr(ACE_Message_Block& mb)
-      : mb_(mb), rd_ptr_(mb.rd_ptr()) {}
+  char buffer[2];
 
-    ~Restore_Rd_Ptr()
+  switch (mb.length())
     {
-      mb_.rd_ptr(rd_ptr_);
+    case 0:
+      if (!mb.cont()) return true;
+      memcpy(buffer, mb.cont()->rd_ptr(), 2);
+      break;
+    case 1:
+      if (!mb.cont()) return true;
+      buffer[0] = *mb.rd_ptr();
+      buffer[1] = *mb.cont()->rd_ptr();
+      break;
+    default:
+      memcpy(buffer, mb.rd_ptr(), 2);
     }
 
-    ACE_Message_Block& mb_;
-    char* rd_ptr_;
-  } restorer(mb);
-
-  TAO::DCPS::Serializer reader(&mb);
-
-  char id;
-  reader >> id;
-  if (!reader.good_bit()) return true;
-
-  ACE_CDR::Octet flags;
-  reader >> ACE_InputCDR::to_octet(flags);
-  if (!reader.good_bit()) return true;
-
-  if (flags & LIFESPAN_MASK) return len < full_header;
+  if (buffer[1] & LIFESPAN_MASK) return len < full_header;
   else return len < full_header - LIFESPAN_LENGTH;
 }
 
