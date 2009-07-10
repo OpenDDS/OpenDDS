@@ -364,6 +364,13 @@ Publisher::run()
       2 * this->options_.count()
     ));
   }
+
+  // Make sure that the data has arriven.
+  ::DDS::Duration_t shutdownDelay = { 15, 0}; // Wait up to a total of 15
+                                              // seconds to finish the test.
+  ::DDS::ReturnCode_t discard;
+  discard = writer0->wait_for_acknowledgments( shutdownDelay);
+  discard = writer1->wait_for_acknowledgments( shutdownDelay);
 }
 
 } // End of namespace Test
