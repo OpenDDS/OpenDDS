@@ -1214,11 +1214,8 @@ WriteDataContainer::wait_pending()
 
   while (do_wait)
   {
-    {
-      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
-      do_wait = pending_data();
-    }
-    if (!do_wait)
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
+    if (!pending_data())
       break;
     empty_condition_.wait(pTimeout);
   }

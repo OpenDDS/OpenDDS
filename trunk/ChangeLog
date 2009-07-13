@@ -1,3 +1,10 @@
+Mon Jul 13 20:41:41 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Made empty_condition_ wait after holding the lock. This fixed 
+          the deadlock during shutdown shown in a windows build.
+          
 Fri Jul 10 22:09:52 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/Thrasher/Subscriber.cpp:
