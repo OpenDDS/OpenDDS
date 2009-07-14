@@ -261,41 +261,47 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
   {
     ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->publication_handle_lock_);
 
+    CORBA::ULong wr_len;
+
     //
     // For each writer in the list of writers to associate with, we
     // create a WriterInfo and a WriterStats object and store them in
     // our internal maps.
     //
-    CORBA::ULong wr_len = writers.length ();
-    for (CORBA::ULong i = 0; i < wr_len; i++)
     {
-      PublicationId writer_id = writers[i].writerId;
-      this->writers_.insert(
-        // This insertion is idempotent.
-        WriterMapType::value_type(
-          writer_id,
-          WriterInfo( this, writer_id)
-        )
-      );
-      this->statistics_.insert(
-        StatsMapType::value_type(
-          writer_id,
-          WriterStats(
-            this->raw_latency_buffer_size_,
-            this->raw_latency_buffer_type_
-          )
-        )
-      );
-      if( DCPS_debug_level > 4) {
-        RepoIdConverter converter(writer_id);
-        ACE_DEBUG((LM_DEBUG,
-          "(%P|%t) DataReaderImpl::add_associations: "
-          "inserted writer %C.\n",
-          std::string(converter).c_str()
-        ));
+      ACE_WRITE_GUARD (ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
+
+      wr_len = writers.length ();
+      for (CORBA::ULong i = 0; i < wr_len; i++)
+      {
+	PublicationId writer_id = writers[i].writerId;
+	this->writers_.insert(
+	  // This insertion is idempotent.
+	  WriterMapType::value_type(
+	    writer_id,
+	    WriterInfo( this, writer_id)
+	  )
+	);
+	this->statistics_.insert(
+	  StatsMapType::value_type(
+	    writer_id,
+	    WriterStats(
+	      this->raw_latency_buffer_size_,
+	      this->raw_latency_buffer_type_
+	    )
+	  )
+	);
+	if( DCPS_debug_level > 4) {
+	  RepoIdConverter converter(writer_id);
+	  ACE_DEBUG((LM_DEBUG,
+	    "(%P|%t) DataReaderImpl::add_associations: "
+	    "inserted writer %C.\n",
+	    std::string(converter).c_str()
+	  ));
+	}
       }
     }
-
+      
     //
     // Propagate the add_associations processing down into the Transport
     // layer here.  This will establish the transport support and reserve
@@ -305,26 +311,30 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
     this->subscriber_servant_->add_associations(writers, this, qos_);
 
     // Check if any publications have already sent a REQUEST_ACK message.
-    wr_len = writers.length ();
-    for( unsigned int index = 0; index < wr_len; ++index) {
-      WriterMapType::iterator where
-        = this->writers_.find( writers[ index].writerId);
-      if( where != this->writers_.end()) {
-        ACE_Time_Value now = ACE_OS::gettimeofday();
+    {
+      ACE_READ_GUARD (ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
 
-        ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
-        if( where->second.should_ack( now)) {
-          SequenceNumber sequence = where->second.last_sequence();
-          ::DDS::Time_t timenow = time_value_to_time(now);
-          bool result = this->send_sample_ack(
-                          writers[ index].writerId,
-                          sequence.value_,
-                          timenow
-                        );
-          if( result) {
-            where->second.clear_acks( sequence);
-          }
-        }
+      wr_len = writers.length ();
+      for( unsigned int index = 0; index < wr_len; ++index) {
+	WriterMapType::iterator where
+	  = this->writers_.find( writers[ index].writerId);
+	if( where != this->writers_.end()) {
+	  ACE_Time_Value now = ACE_OS::gettimeofday();
+
+	  ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
+	  if( where->second.should_ack( now)) {
+	    SequenceNumber sequence = where->second.last_sequence();
+	    ::DDS::Time_t timenow = time_value_to_time(now);
+	    bool result = this->send_sample_ack(
+			    writers[ index].writerId,
+			    sequence.value_,
+			    timenow
+			  );
+	    if( result) {
+	      where->second.clear_acks( sequence);
+	    }
+	  }
+	}
       }
     }
 
@@ -471,38 +481,44 @@ void DataReaderImpl::remove_associations (
   // requested to be removed.
   WriterIdSeq updated_writers;
 
+  CORBA::ULong wr_len;
+
   //Remove the writers from writer list. If the supplied writer
   //is not in the cached writers list then it is already removed.
   //We just need remove the writers in the list that have not been
   //removed.
-  CORBA::ULong wr_len = writers.length ();
-  for (CORBA::ULong i = 0; i < wr_len; i++)
   {
-    PublicationId writer_id = writers[i];
+    ACE_WRITE_GUARD (ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
 
-    WriterMapType::iterator it = this->writers_.find (writer_id);
-    if (it != this->writers_.end())
+    wr_len = writers.length ();
+    for (CORBA::ULong i = 0; i < wr_len; i++)
     {
-      it->second.removed ();
-    }
+      PublicationId writer_id = writers[i];
 
-    if (this->writers_.erase(writer_id) == 0)
-    {
-      if (DCPS_debug_level >= 1)
+      WriterMapType::iterator it = this->writers_.find (writer_id);
+      if (it != this->writers_.end())
       {
-        RepoIdConverter converter(writer_id);
-        ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations: ")
-          ACE_TEXT("the writer local %C was already removed.\n"),
-          std::string(converter).c_str()
-        ));
+	it->second.removed ();
       }
-    }
-    else
-    {
-      CORBA::Long len = updated_writers.length ();
-      updated_writers.length (len + 1);
-      updated_writers[len] = writer_id;
+
+      if (this->writers_.erase(writer_id) == 0)
+      {
+	if (DCPS_debug_level >= 1)
+	{
+	  RepoIdConverter converter(writer_id);
+	  ACE_DEBUG((LM_DEBUG,
+	    ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations: ")
+	    ACE_TEXT("the writer local %C was already removed.\n"),
+	    std::string(converter).c_str()
+	  ));
+	}
+      }
+      else
+      {
+	CORBA::Long len = updated_writers.length ();
+	updated_writers.length (len + 1);
+	updated_writers[len] = writer_id;
+      }
     }
   }
 
@@ -591,15 +607,20 @@ void DataReaderImpl::remove_all_associations ()
 
   int size = writers_.size();
   writers.length(size);
-  WriterMapType::iterator curr_writer = writers_.begin();
-  WriterMapType::iterator end_writer = writers_.end();
+  
+  {
+    ACE_WRITE_GUARD (ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
 
-  int i = 0;
-  while (curr_writer != end_writer)
-    {
-      writers[i++] = curr_writer->first;
-      ++curr_writer;
-    }
+    WriterMapType::iterator curr_writer = writers_.begin();
+    WriterMapType::iterator end_writer = writers_.end();
+
+    int i = 0;
+    while (curr_writer != end_writer)
+      {
+	writers[i++] = curr_writer->first;
+	++curr_writer;
+      }
+  }
 
   try
     {
@@ -1132,6 +1153,7 @@ void
 DataReaderImpl::writer_activity(PublicationId writer_id)
 {
   // caller should have the sample_lock_ !!!
+  ACE_READ_GUARD (ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
 
   WriterMapType::iterator iter = writers_.find(writer_id);
   if( iter != writers_.end()) {
@@ -1206,35 +1228,39 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         bool is_new_instance = false;
         this->dds_demarshal(sample, instance, is_new_instance);
 
-        WriterMapType::iterator where
-          = this->writers_.find( header.publication_id_);
-        if( where != this->writers_.end()) {
-          where->second.last_sequence( SequenceNumber(header.sequence_));
+	{
+	  ACE_READ_GUARD (ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
 
-          ACE_Time_Value now = ACE_OS::gettimeofday();
-          if( where->second.should_ack( now)) {
-            ::DDS::Time_t timenow = time_value_to_time(now);
-            bool result = this->send_sample_ack(
-                            header.publication_id_,
-                            header.sequence_,
-                            timenow
-                          );
-            if( result) {
-              where->second.clear_acks( SequenceNumber(header.sequence_));
-            }
-          }
+	  WriterMapType::iterator where
+	    = this->writers_.find( header.publication_id_);
+	  if( where != this->writers_.end()) {
+	    where->second.last_sequence( SequenceNumber(header.sequence_));
 
-        } else {
-          RepoIdConverter subscriptionBuffer( this->subscription_id_);
-          RepoIdConverter publicationBuffer(  header.publication_id_);
-          ACE_DEBUG((LM_WARNING,
-            ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::data_received() - ")
-            ACE_TEXT("subscription %C failed to find ")
-            ACE_TEXT("publication data for %C.\n"),
-            std::string( subscriptionBuffer).c_str(),
-            std::string( publicationBuffer).c_str()
-          ));
-        }
+	    ACE_Time_Value now = ACE_OS::gettimeofday();
+	    if( where->second.should_ack( now)) {
+	      ::DDS::Time_t timenow = time_value_to_time(now);
+	      bool result = this->send_sample_ack(
+			      header.publication_id_,
+			      header.sequence_,
+			      timenow
+			    );
+	      if( result) {
+		where->second.clear_acks( SequenceNumber(header.sequence_));
+	      }
+	    }
+
+	  } else {
+	    RepoIdConverter subscriptionBuffer( this->subscription_id_);
+	    RepoIdConverter publicationBuffer(  header.publication_id_);
+	    ACE_DEBUG((LM_WARNING,
+	      ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::data_received() - ")
+	      ACE_TEXT("subscription %C failed to find ")
+	      ACE_TEXT("publication data for %C.\n"),
+	      std::string( subscriptionBuffer).c_str(),
+	      std::string( publicationBuffer).c_str()
+	    ));
+	  }
+	}
 
         if (this->watchdog_.get ())
         {
@@ -1280,37 +1306,41 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
           ));
         }
 
-        WriterMapType::iterator where
-          = this->writers_.find( sample.header_.publication_id_);
-        if( where != this->writers_.end()) {
-          ACE_Time_Value now      = ACE_OS::gettimeofday();
-          ACE_Time_Value deadline = now + duration_to_time_value( delay);
+	{
+	  ACE_READ_GUARD (ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
 
-          where->second.ack_deadline( ack, deadline);
+	  WriterMapType::iterator where
+	    = this->writers_.find( sample.header_.publication_id_);
+	  if( where != this->writers_.end()) {
+	    ACE_Time_Value now      = ACE_OS::gettimeofday();
+	    ACE_Time_Value deadline = now + duration_to_time_value( delay);
 
-          if( where->second.should_ack( now)) {
-            ::DDS::Time_t timenow = time_value_to_time(now);
-            bool result = this->send_sample_ack(
-                            sample.header_.publication_id_,
-                            ack.value_,
-                            timenow
-                          );
-            if( result) {
-              where->second.clear_acks( ack);
-            }
-          }
+	    where->second.ack_deadline( ack, deadline);
 
-        } else {
-          RepoIdConverter subscriptionBuffer( this->subscription_id_);
-          RepoIdConverter publicationBuffer(  sample.header_.publication_id_);
-          ACE_DEBUG((LM_WARNING,
-            ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::data_received() - ")
-            ACE_TEXT("subscription %C failed to find ")
-            ACE_TEXT("publication data for %C.\n"),
-            std::string( subscriptionBuffer).c_str(),
-            std::string( publicationBuffer).c_str()
-          ));
-        }
+	    if( where->second.should_ack( now)) {
+	      ::DDS::Time_t timenow = time_value_to_time(now);
+	      bool result = this->send_sample_ack(
+			      sample.header_.publication_id_,
+			      ack.value_,
+			      timenow
+			    );
+	      if( result) {
+		where->second.clear_acks( ack);
+	      }
+	    }
+
+	  } else {
+	    RepoIdConverter subscriptionBuffer( this->subscription_id_);
+	    RepoIdConverter publicationBuffer(  sample.header_.publication_id_);
+	    ACE_DEBUG((LM_WARNING,
+	      ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::data_received() - ")
+	      ACE_TEXT("subscription %C failed to find ")
+	      ACE_TEXT("publication data for %C.\n"),
+	      std::string( subscriptionBuffer).c_str(),
+	      std::string( publicationBuffer).c_str()
+	    ));
+	  }
+	}
 
       }
       break;
@@ -1650,20 +1680,27 @@ DataReaderImpl::handle_timeout (const ACE_Time_Value &tv,
   int alive_writers = 0;
 
   // Iterate over each writer to this reader
-  for (WriterMapType::iterator iter = writers_.begin();
-    iter != writers_.end();
-    ++iter)
   {
-    // deal with possibly not being alive or
-    // tell when it will not be alive next (if no activity)
-    next_absolute = iter->second.check_activity(tv);
+    ACE_READ_GUARD_RETURN (ACE_RW_Thread_Mutex,
+			   read_guard,
+			   this->writers_lock_,
+			   0);
 
-    if (next_absolute != ACE_Time_Value::max_time)
+    for (WriterMapType::iterator iter = writers_.begin();
+      iter != writers_.end();
+      ++iter)
     {
-      alive_writers++;
-      if (next_absolute < smallest)
+      // deal with possibly not being alive or
+      // tell when it will not be alive next (if no activity)
+      next_absolute = iter->second.check_activity(tv);
+
+      if (next_absolute != ACE_Time_Value::max_time)
       {
-        smallest = next_absolute;
+	alive_writers++;
+	if (next_absolute < smallest)
+	{
+	  smallest = next_absolute;
+	}
       }
     }
   }
@@ -2656,6 +2693,8 @@ void DataReaderImpl::notify_liveliness_change()
   }
   notify_status_condition ();
   if( DCPS_debug_level > 9) {
+    ACE_READ_GUARD (ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
+
     std::stringstream buffer;
     buffer << "subscription " << RepoIdConverter(subscription_id_);
     buffer << ", listener at: 0x" << std::hex << this->fast_listener_;

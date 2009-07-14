@@ -680,6 +680,9 @@ namespace OpenDDS
       typedef std::map< PublicationId, WriterInfo,  GUID_tKeyLessThan> WriterMapType;
       WriterMapType writers_;
 
+      /// RW lock for reading/writing publications.
+      ACE_RW_Thread_Mutex writers_lock_;
+
       /// Statistics for this reader, collected for each writer.
       StatsMapType statistics_;
 
