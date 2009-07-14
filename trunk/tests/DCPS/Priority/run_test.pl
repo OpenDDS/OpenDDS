@@ -73,7 +73,7 @@ print "VerboseLogging==$orbVerbose\n"     if $verbose and $orbVerbose;
 my $repo_ior  = PerlACE::LocalFile("repo.ior");
 my $debugFile;
    $debugFile = PerlACE::LocalFile( $dFile) if $dFile;
-my $confFile  = PerlACE::LocalFile( "svc.conf");
+my $confFile  = PerlACE::LocalFile( "services.conf");
 my $iniFile   = PerlACE::LocalFile( "transport.ini");
 
 # Clean out leftovers.
