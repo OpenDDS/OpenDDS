@@ -187,6 +187,7 @@ Lock acquisition ordering:
   repository calls datareaderremote->add_associations()
 
     DataReaderImpl::publication_handle_lock_
+    DataReaderImpl::writer_lock_
     ConditionImpl::lock_
     WaitSet::lock_
 
@@ -404,7 +405,11 @@ NOTES:
 repository calls datareaderremote->add_associations()
   DataReaderRemoteImpl::add_associations()
     DataReaderImpl::add_associations()
-*     ACQUIRES/RELEASES DataReaderImpl::publication_handle_lock_
+*     ACQUIRE DataReaderImpl::publication_handle_lock_
+*LW   ACQUIRE/RELEASE DataReaderImpl::writers_lock_
+*LR   ACQUIRE/RELEASE DataReaderImpl::writers_lock_
+      RELEASE DataReaderImpl::publication_handle_lock_
+
       SubscriberImpl::add_assocations()
         TransportInterface::add_publications()
           TransportInterface::add_associations()
@@ -579,6 +584,7 @@ NOTES:
       DataReaderImpl::remove_associations()
 *L      ACQUIRE DataReaderImpl::publication_handle_lock_
         NOTE 25
+*W	ACQUIRE/RELEASE DataReaderImpl::writers_lock_
 *       RELEASE DataReaderImpl::publication_handle_lock_
 
 NOTES:

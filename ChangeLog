@@ -1,10 +1,20 @@
+Tue Jul 14 19:41:07 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * docs/design/lockmap.txt:
+
+	  Added RW mutex to protect writers map in DataReaderImpl instances.
+	  This fixes a SEGV occasionally seen in Windows CE builds (presumably
+	  others as well).
+
 Tue Jul 14 16:10:17 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * tests/DCPS/Priority/run_test.pl:
         * tests/DCPS/Priority/services.conf:
 
-	  Renamed svc.conf to avoid picking it up by default.  This was
-	  an issue for executing with static builds.
+          Renamed svc.conf to avoid picking it up by default.  This was
+          an issue for executing with static builds.
 
         * tests/DCPS/Priority/svc.conf:
 
