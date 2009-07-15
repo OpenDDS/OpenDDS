@@ -36,7 +36,7 @@ my $ext    = '.java';
 # ************************************************************
 
 sub get_component_name {
-  return 'Java_Files';
+  return 'java_files';
 }
 
 sub get_outputexts {
@@ -61,8 +61,7 @@ sub get_filenames {
       push(@filenames, privname($scope) . $local_suffix . $ext);
     }
   }
-
-  return @filenames;
+  return \@filenames;
 }
 
 sub basename {
