@@ -1,9 +1,21 @@
+Wed Jul 15 22:20:10 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+
+	  Added configurable setting of scheduler quantum values.  This
+	  is required for SunOS systems which require a non-zero value.
+
+        * tests/DCPS/Priority/transport.ini:
+
+	  Add new scheduler_slice key for use on SunOs systems.
+
 Wed Jul 15 19:55:53 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * MPC/modules/IDL2JNIHelper.pm:
         * MPC/modules/IDLBase.pm:
 
-	  Fixed MPC dependency issue in java/tests/complex_idl. 
+          Fixed MPC dependency issue in java/tests/complex_idl.
 
 Tue Jul 14 19:41:07 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
