@@ -86,6 +86,7 @@ namespace OpenDDS
       federation_initial_backoff_seconds_( DEFAULT_FEDERATION_INITIAL_BACKOFF_SECONDS),
       federation_backoff_multiplier_( DEFAULT_FEDERATION_BACKOFF_MULTIPLIER),
       federation_liveliness_( DEFAULT_FEDERATION_LIVELINESS),
+      schedulerQuantum_( 0),
       scheduler_( -1),
       priority_min_( 0),
       priority_max_( 0),
@@ -653,12 +654,18 @@ namespace OpenDDS
         }
 
         //
+        // Only useful for RR and FIFO schedulers.
+        //
+        ACE_Time_Value quantum( 0, this->schedulerQuantum_);
+
+        //
         // Attempt to set the scheduling policy.
         //
         ACE_Sched_Params params(
                            ace_scheduler,
                            ACE_Sched_Params::priority_min( ace_scheduler),
-                           ACE_SCOPE_PROCESS
+                           ACE_SCOPE_PROCESS,
+                           quantum
                          );
         if( ACE_OS::sched_params( params) != 0) {
           if( ACE_OS::last_error() == EPERM) {
@@ -1377,6 +1384,7 @@ namespace OpenDDS
           // Establish the scheduler if specified.
           //
           GET_CONFIG_STRING_VALUE (this->cf_, sect, ACE_TEXT("scheduler"), this->schedulerString_)
+          GET_CONFIG_VALUE (this->cf_, sect, ACE_TEXT("scheduler_slice"), this->schedulerQuantum_, int)
         }
 
       return 0;
