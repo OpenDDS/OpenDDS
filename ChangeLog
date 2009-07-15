@@ -1,11 +1,18 @@
+Wed Jul 15 23:07:22 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+	  Changed scheduler scope to ACE_SCOPE_THREAD; this should fix
+	  the ENOTSUP issue on platforms which use pthread_setschedparam.
+
 Wed Jul 15 22:48:37 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * tests/DCPS/Priority/run_test.pl:
         * tests/DCPS/Priority/transport.ini:
         * tests/DCPS/Priority/transport_solaris.ini:
 
-	  Updated Priority test to set scheduler quantum on SunOS
-	  platforms.
+          Updated Priority test to set scheduler quantum on SunOS
+          platforms.
 
 Wed Jul 15 22:20:10 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
