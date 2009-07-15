@@ -664,7 +664,7 @@ namespace OpenDDS
         ACE_Sched_Params params(
                            ace_scheduler,
                            ACE_Sched_Params::priority_min( ace_scheduler),
-                           ACE_SCOPE_PROCESS,
+                           ACE_SCOPE_THREAD,
                            quantum
                          );
         if( ACE_OS::sched_params( params) != 0) {
