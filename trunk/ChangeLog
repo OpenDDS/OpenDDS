@@ -1,14 +1,23 @@
+Wed Jul 15 22:48:37 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/Priority/run_test.pl:
+        * tests/DCPS/Priority/transport.ini:
+        * tests/DCPS/Priority/transport_solaris.ini:
+
+	  Updated Priority test to set scheduler quantum on SunOS
+	  platforms.
+
 Wed Jul 15 22:20:10 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:
         * dds/DCPS/Service_Participant.cpp:
 
-	  Added configurable setting of scheduler quantum values.  This
-	  is required for SunOS systems which require a non-zero value.
+          Added configurable setting of scheduler quantum values.  This
+          is required for SunOS systems which require a non-zero value.
 
         * tests/DCPS/Priority/transport.ini:
 
-	  Add new scheduler_slice key for use on SunOs systems.
+          Add new scheduler_slice key for use on SunOS systems.
 
 Wed Jul 15 19:55:53 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 

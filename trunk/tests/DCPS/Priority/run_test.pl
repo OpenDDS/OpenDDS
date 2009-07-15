@@ -8,6 +8,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 use Env qw( DDS_ROOT ACE_ROOT);
 use lib "$DDS_ROOT/bin";
 use lib "$ACE_ROOT/bin";
+use English;
 use PerlACE::Run_Test;
 
 use Getopt::Long qw( :config bundling) ;
@@ -74,7 +75,13 @@ my $repo_ior  = PerlACE::LocalFile("repo.ior");
 my $debugFile;
    $debugFile = PerlACE::LocalFile( $dFile) if $dFile;
 my $confFile  = PerlACE::LocalFile( "services.conf");
-my $iniFile   = PerlACE::LocalFile( "transport.ini");
+
+my $iniFile;
+if ("solaris" eq $OSNAME) {
+  $iniFile   = PerlACE::LocalFile( "transport_$OSNAME.ini");
+} else {
+  $iniFile   = PerlACE::LocalFile( "transport.ini");
+}
 
 # Clean out leftovers.
 unlink $repo_ior;
