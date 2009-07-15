@@ -1,12 +1,19 @@
+Wed Jul 15 19:55:53 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * MPC/modules/IDL2JNIHelper.pm:
+        * MPC/modules/IDLBase.pm:
+
+	  Fixed MPC dependency issue in java/tests/complex_idl. 
+
 Tue Jul 14 19:41:07 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
         * dds/DCPS/DataReaderImpl.cpp:
         * docs/design/lockmap.txt:
 
-	  Added RW mutex to protect writers map in DataReaderImpl instances.
-	  This fixes a SEGV occasionally seen in Windows CE builds (presumably
-	  others as well).
+          Added RW mutex to protect writers map in DataReaderImpl instances.
+          This fixes a SEGV occasionally seen in Windows XP builds (presumably
+          others as well).
 
 Tue Jul 14 16:10:17 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 

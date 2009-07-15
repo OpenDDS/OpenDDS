@@ -157,7 +157,7 @@ sub get_output {
   my @tmp;
   foreach my $ent (@$data) {
     my($type, $scope) = @$ent;
-    push @tmp, $self->get_filenames($flags, $type, $scope);
+    push @tmp, @{$self->get_filenames($flags, $type, $scope)};
   }
   @filenames = grep(!$seen{$_}++, @tmp); # remove duplicates
 
@@ -168,7 +168,7 @@ sub get_output {
 sub get_filenames {
   ## This method is called with the base directory and filename and
   ## expects an array of filenames to be tied to the source file.
-  return ();
+  return [];
 }
 
 sub get_tied {
