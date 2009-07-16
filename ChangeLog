@@ -1,9 +1,15 @@
+Thu Jul 16 18:59:22 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+	  Removed uneccessary read lock on writers_map_
+
 Wed Jul 15 23:07:22 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
 
-	  Changed scheduler scope to ACE_SCOPE_THREAD; this should fix
-	  the ENOTSUP issue on platforms which use pthread_setschedparam.
+          Changed scheduler scope to ACE_SCOPE_THREAD; this should fix
+          the ENOTSUP issue on platforms which use pthread_setschedparam.
 
 Wed Jul 15 22:48:37 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
