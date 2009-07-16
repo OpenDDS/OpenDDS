@@ -2681,6 +2681,9 @@ DataReaderImpl::num_zero_copies()
 
 void DataReaderImpl::notify_liveliness_change()
 {
+  // N.B. writers_lock_ should already be acquired when
+  //      this method is called.
+
   ::DDS::DataReaderListener* listener
     = listener_for (::DDS::LIVELINESS_CHANGED_STATUS);
   if (listener != 0)
@@ -2693,8 +2696,6 @@ void DataReaderImpl::notify_liveliness_change()
   }
   notify_status_condition ();
   if( DCPS_debug_level > 9) {
-    ACE_READ_GUARD (ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
-
     std::stringstream buffer;
     buffer << "subscription " << RepoIdConverter(subscription_id_);
     buffer << ", listener at: 0x" << std::hex << this->fast_listener_;
