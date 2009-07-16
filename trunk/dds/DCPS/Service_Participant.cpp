@@ -1384,7 +1384,10 @@ namespace OpenDDS
           // Establish the scheduler if specified.
           //
           GET_CONFIG_STRING_VALUE (this->cf_, sect, ACE_TEXT("scheduler"), this->schedulerString_)
+#if ACE_MAJOR_VERSION == 5 && ACE_MINOR_VERSION >= 5
+	  // scheduler_slice is only supported on ACE 5.5+
           GET_CONFIG_VALUE (this->cf_, sect, ACE_TEXT("scheduler_slice"), this->schedulerQuantum_, int)
+#endif
         }
 
       return 0;

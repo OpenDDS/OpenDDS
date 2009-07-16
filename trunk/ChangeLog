@@ -1,8 +1,15 @@
+Thu Jul 16 19:42:46 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+	  scheduler_slice is now conditionally supported for ACE 5.5+
+	  platforms.
+
 Thu Jul 16 19:32:28 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * bin/dcps_tests.lst:
 
-	  Dropped aggressive Thrasher tests from scoreboard.
+          Dropped aggressive Thrasher tests from scoreboard.
 
 Thu Jul 16 18:59:22 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
