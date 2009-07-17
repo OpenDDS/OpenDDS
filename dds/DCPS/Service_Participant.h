@@ -488,8 +488,8 @@ namespace OpenDDS
       /// Scheduling policy value from configuration file.
       ACE_TString schedulerString_;
 
-      /// Scheduler time slice in microseconds from configuration file.
-      int schedulerQuantum_;
+      /// Scheduler time slice from configuration file.
+      ACE_Time_Value schedulerQuantum_;
 
       /// Scheduling policy value used for setting thread priorities.
       long scheduler_;
