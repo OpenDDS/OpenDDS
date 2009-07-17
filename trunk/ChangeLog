@@ -1,9 +1,15 @@
+Fri Jul 17 17:26:48 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/native/build.xml:
+
+	  Simplified creating Debug/Release builds on Windows platforms.
+
 Thu Jul 16 21:03:27 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
 
-	  Adjusted protection in remove_all_associations; fixes failing
-	  JMS tests.
+          Adjusted protection in remove_all_associations; fixes failing
+          JMS tests.
 
 Thu Jul 16 19:42:46 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 

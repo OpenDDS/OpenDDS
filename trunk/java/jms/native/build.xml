@@ -82,13 +82,13 @@
     <condition property="vcbuild.config" value="Debug">
         <and>
             <os family="windows"/>
-            <istrue value="${compile.debug}"/>
+            <istrue value="${native.debug}"/>
         </and>
     </condition>
     <condition property="vcbuild.config" value="Release">
         <and>
             <os family="windows"/>
-            <isfalse value="${compile.debug}"/>
+            <isfalse value="${native.debug}"/>
         </and>
     </condition>
 
@@ -106,7 +106,7 @@
         </and>
     </condition>
     <condition property="make.compile.arguments"
-               value="/build ${vcbuild.config} ${makefile}">
+               value="${makefile} /build ${vcbuild.config}">
         <os family="windows"/>
     </condition>
 
