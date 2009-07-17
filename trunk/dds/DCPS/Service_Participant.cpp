@@ -86,14 +86,14 @@ namespace OpenDDS
       federation_initial_backoff_seconds_( DEFAULT_FEDERATION_INITIAL_BACKOFF_SECONDS),
       federation_backoff_multiplier_( DEFAULT_FEDERATION_BACKOFF_MULTIPLIER),
       federation_liveliness_( DEFAULT_FEDERATION_LIVELINESS),
-      schedulerQuantum_( 0),
+      schedulerQuantum_(ACE_Time_Value::zero),
       scheduler_( -1),
       priority_min_( 0),
       priority_max_( 0),
       transient_data_cache_ (),
       persistent_data_cache_ (),
       persistent_data_dir_ (DEFAULT_PERSISTENT_DATA_DIR),
-      pending_timeout_(0)
+      pending_timeout_(ACE_Time_Value::zero)
     {
       initialize();
     }
@@ -654,18 +654,13 @@ namespace OpenDDS
         }
 
         //
-        // Only useful for RR and FIFO schedulers.
-        //
-        ACE_Time_Value quantum( 0, this->schedulerQuantum_);
-
-        //
         // Attempt to set the scheduling policy.
         //
         ACE_Sched_Params params(
                            ace_scheduler,
                            ACE_Sched_Params::priority_min( ace_scheduler),
                            ACE_SCOPE_THREAD,
-                           quantum
+                           this->schedulerQuantum_
                          );
         if( ACE_OS::sched_params( params) != 0) {
           if( ACE_OS::last_error() == EPERM) {
@@ -1385,8 +1380,12 @@ namespace OpenDDS
           //
           GET_CONFIG_STRING_VALUE (this->cf_, sect, ACE_TEXT("scheduler"), this->schedulerString_)
 #if ACE_MAJOR_VERSION == 5 && ACE_MINOR_VERSION >= 5
-	  // scheduler_slice is only supported on ACE 5.5+
-          GET_CONFIG_VALUE (this->cf_, sect, ACE_TEXT("scheduler_slice"), this->schedulerQuantum_, int)
+	  suseconds_t usec(0); 
+	  
+	  GET_CONFIG_VALUE (this->cf_, sect, ACE_TEXT("scheduler_slice"), usec, suseconds_t)
+
+	  if (usec > 0)
+	    this->schedulerQuantum_.usec(usec);
 #endif
         }
 
