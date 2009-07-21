@@ -71,7 +71,11 @@ OpenDDS::DCPS::TransportSendStrategy::TransportSendStrategy
   DirectPriorityMapper mapper( priority);
   this->synch_ = config->send_thread_strategy()->create_synch_object(
     synch_resource,
+#ifdef ACE_WIN32
+    ACE_DEFAULT_THREAD_PRIORITY,
+#else
     mapper.thread_priority(),
+#endif
     TheServiceParticipant->scheduler()
   );
 

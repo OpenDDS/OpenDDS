@@ -656,6 +656,11 @@ namespace OpenDDS
         //
         // Attempt to set the scheduling policy.
         //
+#ifdef ACE_WIN32
+        ACE_DEBUG((LM_WARNING,
+                   ACE_TEXT("(%P|%t) WARNING: Service_Participant::initializeScheduling() - ")
+                   ACE_TEXT("scheduling is not implemented on Win32.\n")));
+#else
         ACE_Sched_Params params(
                            ace_scheduler,
                            ACE_Sched_Params::priority_min( ace_scheduler),
@@ -668,7 +673,6 @@ namespace OpenDDS
               ACE_TEXT("(%P|%t) WARNING: Service_Participant::initializeScheduling() - ")
               ACE_TEXT("user is not superuser, requested scheduler not set.\n")
             ));
-
           } else {
             ACE_ERROR((LM_ERROR,
               ACE_TEXT("(%P|%t) ERROR: Service_Participant::initializeScheduling() - ")
@@ -690,8 +694,9 @@ namespace OpenDDS
         //
         // Setup some scheduler specific information for later use.
         //
-        this->priority_min_ = ACE_Sched_Params::priority_min( ace_scheduler, ACE_SCOPE_PROCESS);
-        this->priority_max_ = ACE_Sched_Params::priority_max( ace_scheduler, ACE_SCOPE_PROCESS);
+        this->priority_min_ = ACE_Sched_Params::priority_min( ace_scheduler, ACE_SCOPE_THREAD);
+        this->priority_max_ = ACE_Sched_Params::priority_max( ace_scheduler, ACE_SCOPE_THREAD);
+#endif // ACE_WIN32
       }
     }
 
