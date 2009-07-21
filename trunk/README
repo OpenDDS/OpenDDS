@@ -82,9 +82,10 @@ OpenDDS requires TAO for both IDL compilation as well as interaction
 with the DCPSInfoRepo. At a minimum, you must be at one of the following
 versions (or later) in order to properly compile OpenDDS:
 
-*** TAO 1.4a patch 23
-*** TAO 1.5a patch 9
-*** TAO 1.6.6
+*** TAO 1.4a patch 24
+*** TAO 1.5a patch 14
+*** TAO 1.6a patch 1
+*** TAO 1.7.1 (DOC Group)
 
 Note that the 1.xa releases are from OCI and can be obtained from
 http://www.theaceorb.com/. The DOC Group releases can be obtained from
@@ -113,16 +114,24 @@ use of ActiveState Perl.
 
 This release of OpenDDS has been tested under the following platforms:
 
-** Windows XP and Server 2003
+Linux family:
 ** RedHat EL 5, x86_64
-** RedHat (7.2, 9), x86
+** RedHat 7.2 and EL 4.2, x86
 ** Fedora Core 3, x86_64
 ** Fedora Core 6, x86
 ** CentOS 5, x86_64
-** Ubuntu 7.10 (Gutsy Gibbon), x86
-** Ubuntu 8.04 ("Hardy Heron"), x86
-** SunOS 5.9 (x86) and 5.10 (sparc)
+** Ubuntu 8.10, x86
+
+Windows family:
+** Windows XP
+** Windows Server 2003
+** Windows Mobile 6 (ARM)
+
+Others:
+** SunOS 5.9 (Solaris 9) (x86) and 5.10 (sparc)
 ** QNX Neutrino 6.3.2 (x86)
+** Macintosh OS X 10.5 "Leopard" (x86)
+
 
 ======================================================================
 * Compilers
@@ -131,16 +140,18 @@ This release of OpenDDS has been tested using the following compilers:
 
 ** Microsoft Visual C++ 7.1 (Visual Studio .NET 2003)
 ** Microsoft Visual C++ 8 with SP1 (Visual Studio 2005)
-** gcc 3.2.2 with Red Hat modifications
+** Microsoft Visual C++ 9 with SP1 (Visual Studio 2008)
 ** gcc 3.3.2
-** gcc 3.4.4 with Red Hat modifications
+** gcc 3.4.4 (Red Hat 3.4.4-2)
+** 4.0.1 (Apple Inc. build 5465)
 ** gcc 4.1.1
-** gcc 4.1.1 with Red Hat modifications
-** gcc 4.1.2 with Red Hat modifications
-** gcc 4.1.2 with Ubuntu modifications
-** gcc 4.2.3 with Ubuntu modifications
+** gcc 4.1.1 (Red Hat 4.1.1-30) (Red Hat 4.1.1-52)
+** gcc 4.1.2 (Red Hat 4.1.2-14)
+** gcc 4.3.2
+** gcc 4.3.2 (Ubuntu 4.3.2-1ubuntu11)
 ** QNX gcc 3.3.5
-** Sun C++ 5.8 Patch 121017-08 2006/12/06
+** Sun C++ 5.9 SunOS_sparc Patch 124863-01 2007/07/25
+** Sun C++ 5.9 SunOS_i386 Patch 124864-07 2008/08/22
 
 * Building and Installing
 
@@ -181,9 +192,11 @@ with the following qualifications.
 --- supported entities ----
 DomainParticipantFactory, DomainParticipant, Topic, TopicDescription,
 Publisher DataWriter,DataReader, Subscriber, all Listeners.
-  - Does not support any Conditions, WaitSet, ContentFilteredTopic or
+  - Does not support ContentFilteredTopic or
     MultiTopic (or the methods on the supported topics related to
     these classes).
+  - Conditions and WaitSet are now supported except QueryCondition is only
+    partially supported (ORDER BY is supported but WHERE is not).
 
 -- listener calls supported ---
   --- publisher side --
@@ -387,6 +400,7 @@ of samples.
 ) We have implemented to formal/04-12-02 (v 1.0 of the DDS spec)
   but version 1.2 has come out since with various improvements and
   clarifications that may not be implemented.
+  ** Parts of the v1.2 spec have now been implemented.
 
 ----------------------------------------------------------------------
 ) The DEADLINE QoS policy related
@@ -408,6 +422,9 @@ of samples.
 
 ======================================================================
 * Test Failures
+
+tests/DCPS/Thrasher/run_test.pl high
+  
 
 Note: A list of tests that are run in the nightly automated build/test
       can be found in $DDS_ROOT/bin/dcps_tests.lst

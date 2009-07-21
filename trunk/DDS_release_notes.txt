@@ -1,5 +1,11 @@
 Version 1.3 of OpenDDS.
 
+* This will be the final release of OpenDDS that will build with the current
+  patch level of TAO 1.4a.  This release is compatible with (the current patch
+  levels of) TAO 1.4a, 1.5a, and 1.6a, as well as the current DOC Group
+  beta/micro release.  Future releases will be compatible with TAO 1.5a, 1.6a
+  and the DOC group -- see the README file for details on TAO versions.
+
 New to this version are the following changes:
 
 - Implemented the Communication Status entity structures and behaviors to
@@ -13,7 +19,8 @@ New to this version are the following changes:
   policy value to set thread priorities and DiffServ codepoint values.
   The current implementation does not honor the Changeable behavior of
   the policy.  Only the intially established policy value is honored for
-  any given DataWriter Entity.
+  any given DataWriter Entity.  Thread priorities are not currently set
+  on Win32 systems.
 
 - Implemented the LATENCY_BUDGET Quality of service policy as a
   monitoring feature with an extended listener callback for exceeded
