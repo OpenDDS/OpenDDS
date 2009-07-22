@@ -6,9 +6,9 @@ BUILDING OpenDDS
 
 * Supported platform:
 
-  We have built OpenDDS on Win32 using Visual Studio .NET 2003 (VC 7.1)
+  We have built OpenDDS on Windows using Visual Studio .NET 2003 (VC 7.1)
   and Visual Studio 2005 (VC 8), as well as gcc 3.3 on Solaris/x86, and gcc 3.4
-  and 4.x on Linux. (See $DDS_ROOT/README for a more complete description)
+  and 4.x on Linux.  (See $DDS_ROOT/README for a more complete description)
 
 * Compiling:
 
@@ -18,9 +18,10 @@ BUILDING OpenDDS
 
   1 Build ACE and TAO.
 
-    See the instructions in ACE_wrappers/ACE-INSTALL.html and
-    ACE_wrappers/TAO/TAO-INSTALL.html or the relevant sections
-    in OCI's TAO Developer's Guide.
+    See the instructions in
+    http://theaceorb.com/faq/index.html#HowToBuildACEandTAOonWindows
+    or http://theaceorb.com/faq/index.html#HowToBuildACEandTAOonLinux,
+    or the relevant sections in OCI's TAO Developer's Guide.
 
     If you are using TAO 1.4a, see $DDS_ROOT/14a_README for more information.
 
@@ -53,14 +54,19 @@ BUILDING OpenDDS
 
   5 Test
 
+    Optionally, you can run the entire OpenDDS regression test suite with one
+    Perl command.
     $DDS_ROOT/bin/auto_run_tests.pl
         If you built static libraries, add "-Config STATIC" to this command.
+        On Windows if you build Release mode add "-ExeSubDir Release".
+        On Windows if you build static libraries add "-ExeSubDir Static_Debug"
+        or "-ExeSubDir Static_Release".
 
 * Note:
 
- These instructions assume you have obtained OpenDDS as a released version from
- the website.  If you have obtained OpenDDS from subversion, you will need to
- generate makefiles or Visual Studio project files first.
+ The instructions above assume you have obtained OpenDDS as a released version
+ from the website.  If you have obtained OpenDDS from subversion, you will need
+ to generate makefiles or Visual Studio project files first.
  Make sure your environment variables are set, including MPC_ROOT.
 
      On Linux or Solaris:
