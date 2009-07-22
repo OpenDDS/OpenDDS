@@ -2,9 +2,8 @@
 //
 // $Id$
 
-#include "dds/DCPS/RepoIdConverter.h"
-
 #include "DCPSDataReaderI.h"
+#include "dds/DCPS/RepoIdConverter.h"
 
 // Implementation skeleton constructor
 TAO_DDS_DCPSDataReader_i::TAO_DDS_DCPSDataReader_i (void)

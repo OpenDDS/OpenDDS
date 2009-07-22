@@ -4,8 +4,8 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include "dds/DCPS/transport/framework/TransportImpl_rch.h"
 #include "dds/DCPS/DomainParticipantImpl.h"
+#include "dds/DCPS/transport/framework/TransportImpl_rch.h"
 #include "dds/DCPS/TopicImpl.h"
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/DataReaderImpl.h"

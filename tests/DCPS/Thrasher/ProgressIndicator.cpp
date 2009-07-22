@@ -1,10 +1,9 @@
 /*
  * $Id$
  */
+#include <ace/Log_Msg.h>
 
 #include <iostream>
-
-#include <ace/Log_Msg.h>
 
 #include "ProgressIndicator.h"
 

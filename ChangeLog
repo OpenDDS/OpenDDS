@@ -1,22 +1,38 @@
+Wed Jul 22 22:16:34 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/BuiltInTopic/common.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.cpp:
+        * tests/DCPS/Priority/publisher_main.cpp:
+        * tests/DCPS/Priority/subscriber_main.cpp:
+        * tests/DCPS/Thrasher/DataReaderListenerImpl.h:
+        * tests/DCPS/Thrasher/ProgressIndicator.cpp:
+
+          Changed the order of some includes to be compatible with
+          Windows Mobile 6 release mode build.
+
+        * tests/DCPS/Thrasher/Thrasher.mpc:
+
+          Renamed the projects to something more specific.
+
 Wed Jul 22 21:28:10 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * DDS_release_notes.txt:
 
-	  Updated release notes with changes to DataWriter::unregister
-	  and DataWriter::dispose.
+          Updated release notes with changes to DataWriter::unregister
+          and DataWriter::dispose.
 
         * dds/DCPS/InstanceState.h:
         * dds/DCPS/InstanceState.inl:
         * dds/DCPS/InstanceState.cpp:
 
-	  Changes to allow instances to be removed once all samples have
-	  been removed.
+          Changes to allow instances to be removed once all samples have
+          been removed.
 
         * java/jms/src/org/opendds/jms/ConsumerMessageFactory.java:
         * java/jms/src/org/opendds/jms/MessageProducerImpl.java:
 
-	  JMS will now issue an unregister after writing each Message; this
-	  prevents a resource leak in DataReaderImpl.
+          JMS will now issue an unregister after writing each Message; this
+          prevents a resource leak in DataReaderImpl.
 
         * tests/DCPS/Instance:
         * tests/DCPS/Instance/Instance.mpc:
@@ -24,8 +40,8 @@ Wed Jul 22 21:28:10 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * tests/DCPS/Instance/run_test.pl:
         * tests/DCPS/Instance/tcp.conf:
 
-	  Added an additional test which verifies that instances are now
-	  disposed properly.
+          Added an additional test which verifies that instances are now
+          disposed properly.
 
 Wed Jul 22 21:07:52 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
