@@ -93,7 +93,7 @@ http://download.dre.vanderbilt.edu/.
 
 ** GNU Make
 
-GNU Make 3.8 was used for automating the compiling and linking of OpenDDS
+GNU Make 3.80 was used for automating the compiling and linking of OpenDDS
 on Unix and Linux systems.
 
 ** Perl
