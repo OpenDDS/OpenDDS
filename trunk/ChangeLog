@@ -136,6 +136,12 @@ Fri Jul 10 20:47:35 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
           Re-ordered the headers and removed an unneeded one.
 
+        * DevGuideExamples/DCPS/Messenger/pub.ini:
+        * DevGuideExamples/DCPS/Messenger/sub.ini:
+
+          Commented-out the local_address line to let DDS
+          discover the local endpoints.
+
 Fri Jul 10 19:28:49 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * tests/DCPS/Priority/Publisher.cpp:
