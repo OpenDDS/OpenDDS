@@ -82,7 +82,7 @@ OpenDDS requires TAO for both IDL compilation as well as interaction
 with the DCPSInfoRepo. At a minimum, you must be at one of the following
 versions (or later) in order to properly compile OpenDDS:
 
-*** TAO 1.4a patch 24
+*** TAO 1.4a patch 24 (this is the final release of OpenDDS to support 1.4a)
 *** TAO 1.5a patch 14
 *** TAO 1.6a patch 1
 *** TAO 1.7.1 (DOC Group)
@@ -424,7 +424,9 @@ of samples.
 * Test Failures
 
 tests/DCPS/Thrasher/run_test.pl high
-  
+  This test can fail if there are insufficient system resouces.  The test
+  creates 32 application threads that each have their own DomainParticipant,
+  Publisher, and DataWriter.
 
 Note: A list of tests that are run in the nightly automated build/test
       can be found in $DDS_ROOT/bin/dcps_tests.lst
