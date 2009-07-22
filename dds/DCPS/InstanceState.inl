@@ -168,6 +168,9 @@ OpenDDS::DCPS::InstanceState::empty( bool value)
   // here.
   //
   this->empty_ = value ;
+
+  if (this->release_pending_)
+  {
+    release_if_empty();
+  }
 }
-
-

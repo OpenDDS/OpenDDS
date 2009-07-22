@@ -22,6 +22,7 @@ OpenDDS::DCPS::InstanceState::InstanceState (DataReaderImpl* reader,
    , no_writers_generation_count_( 0)
    , no_writers_( false)
    , empty_( true)
+   , release_pending_(false)
    , reader_( reader)
    , handle_(handle)
 {
@@ -91,8 +92,11 @@ OpenDDS::DCPS::InstanceState::release_if_empty()
   if( this->empty_ && this->no_writers_)
   {
     this->reader_->release_instance (this->handle_);
+    this->release_pending_ = false;
+  }
+  else
+  {
+    this->release_pending_ = true;
   }
 }
-
-
 

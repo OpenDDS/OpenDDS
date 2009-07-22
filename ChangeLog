@@ -1,3 +1,32 @@
+Wed Jul 22 21:28:10 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+	  Updated release notes with changes to DataWriter::unregister
+	  and DataWriter::dispose.
+
+        * dds/DCPS/InstanceState.h:
+        * dds/DCPS/InstanceState.inl:
+        * dds/DCPS/InstanceState.cpp:
+
+	  Changes to allow instances to be removed once all samples have
+	  been removed.
+
+        * java/jms/src/org/opendds/jms/ConsumerMessageFactory.java:
+        * java/jms/src/org/opendds/jms/MessageProducerImpl.java:
+
+	  JMS will now issue an unregister after writing each Message; this
+	  prevents a resource leak in DataReaderImpl.
+
+        * tests/DCPS/Instance:
+        * tests/DCPS/Instance/Instance.mpc:
+        * tests/DCPS/Instance/main.cpp:
+        * tests/DCPS/Instance/run_test.pl:
+        * tests/DCPS/Instance/tcp.conf:
+
+	  Added an additional test which verifies that instances are now
+	  disposed properly.
+
 Wed Jul 22 21:07:52 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * README:
