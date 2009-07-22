@@ -75,6 +75,10 @@ New to this version are the following changes:
 - Added support for Windows Mobile 6 (WinCE) Standard SDK, and ACE_USES_WCHAR
   builds in general.  See docs/design/wchar.txt.
 
+- Updated support for DataWriter::unregister and DataWriter::dispose to
+  properly release resources after all samples in a marked instance are
+  removed.
+
 =========================================================================
 
 Version 1.2 of OpenDDS.

@@ -21,7 +21,6 @@ public class ConsumerMessageFactory {
      * @param messagePayload The DDS MessagePayload sample
      * @param handle The DDS instance handle of the DDS MessagePayload sample
      * @param sessionImpl The JMS SessionImpl
-     * @return
      */
     public static AbstractMessageImpl buildMessageFromPayload(MessagePayload messagePayload, int handle, SessionImpl sessionImpl) {
         final MessageBodyKind bodyKind = messagePayload.theBody.discriminator();
