@@ -1,3 +1,10 @@
+Wed Jul 22 18:19:42 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Changed an error message to correctly identify the local
+          and remote sides of a failed connection.
+
 Tue Jul 21 22:02:24 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * DDS_release_notes.txt:

@@ -182,10 +182,10 @@ OpenDDS::DCPS::TransportImpl::reserve_datalink
       ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: TransportImpl::reserve_datalink: ")
         ACE_TEXT("subclass was unable to find ")
-        ACE_TEXT("or create a DataLink for local publisher_id %C ")
-        ACE_TEXT("to remote subscriber_id %C.\n"),
-        std::string(pub_converter).c_str(),
-        std::string(sub_converter).c_str()
+        ACE_TEXT("or create a DataLink for local subscriber_id %C ")
+        ACE_TEXT("to remote publisher_id %C.\n"),
+        std::string(sub_converter).c_str(),
+        std::string(pub_converter).c_str()
       ),0);
     }
 
