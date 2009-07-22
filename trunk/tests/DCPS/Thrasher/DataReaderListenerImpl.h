@@ -5,11 +5,11 @@
 #ifndef DCPS_THRASHER_DATAREADERLISTENERIMPL_H
 #define DCPS_THRASHER_DATAREADERLISTENERIMPL_H
 
-#include <cstdlib>
-
 #include <dds/DdsDcpsSubscriptionS.h>
 
 #include "ProgressIndicator.h"
+
+#include <cstdlib>
 
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>

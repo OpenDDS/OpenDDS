@@ -1,8 +1,8 @@
 // -*- C++ -*-
 // $Id$
 
-#include "Test.h"
 #include "Options.h"
+#include "Test.h"
 #include "Publisher.h"
 #include "dds/DCPS/Service_Participant.h"
 
