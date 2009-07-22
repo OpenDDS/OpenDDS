@@ -10,7 +10,7 @@ module Sync
   {
     // Different entities register with the Data Sink.
     void register_me (in Role rol, in Client callback
-		      , out Id ide);
+                      , out Id ide);
 
     void unregister (in Id ide);
 

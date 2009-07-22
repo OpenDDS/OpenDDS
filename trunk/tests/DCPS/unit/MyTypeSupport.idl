@@ -8,8 +8,8 @@
 
 local interface MyTypeSupport : OpenDDS::DCPS::TypeSupport {
     DDS::ReturnCode_t register_type(
-		in DDS::DomainParticipant participant,
-		in string type_name);
+                in DDS::DomainParticipant participant,
+                in string type_name);
 };
 
 

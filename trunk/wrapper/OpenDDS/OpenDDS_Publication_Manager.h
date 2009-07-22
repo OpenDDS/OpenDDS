@@ -27,8 +27,8 @@ class OpenDDS_Publication_Manager : public Publication_Manager_Impl
  public:
   /// ctor with transport impl registration
   OpenDDS_Publication_Manager (const Domain_Manager & dm,
-			       OpenDDS::DCPS::TransportIdType transport_id,
-			       const DDS::PublisherQos & qos);
+                               OpenDDS::DCPS::TransportIdType transport_id,
+                               const DDS::PublisherQos & qos);
 
   /// dtor
   virtual ~OpenDDS_Publication_Manager ();

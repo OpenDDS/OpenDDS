@@ -68,11 +68,11 @@ module OpenDDS
   
 
     struct IncompatibleQosStatus {
-		  long total_count;
-		  long count_since_last_send;
+                  long total_count;
+                  long count_since_last_send;
       DDS::QosPolicyId_t last_policy_id;
       DDS::QosPolicyCountSeq policies;
-		};
+                };
 
 
   }; // module DDS

@@ -212,7 +212,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           // otherwise the datawriter will encounter bit lookup timeout upon 
           // fully associated.
           ACE_Time_Value small_time (0,250000);
-	        ACE_OS::sleep (small_time);
+                ACE_OS::sleep (small_time);
 
           if (verbose) {
             ACE_DEBUG ((LM_DEBUG, "(%P|%t) *** Destroying Subscriber\n"));

@@ -25,7 +25,7 @@ class Subscription_Manager_Impl;
 /// this defines a reference counted pointer for a subscription manager
 /// implementation
 typedef class ACE_Refcounted_Auto_Ptr <Subscription_Manager_Impl, 
-				       ACE_Null_Mutex> Subscription_Manager_Ptr;
+                                       ACE_Null_Mutex> Subscription_Manager_Ptr;
 
 /**
  * @class Subscription_Manager_Impl

@@ -115,7 +115,7 @@ Writer::svc ()
     }
   } catch (CORBA::Exception& e) {
     cerr << "Exception caught in svc:" << endl
-	 << e << endl;
+         << e << endl;
   }
 
   while (1)

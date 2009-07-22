@@ -1,3 +1,9 @@
+Wed Jul 22 19:01:23 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * Many files
+
+          Removed tabs from all source files (C++, Perl, Java, IDL).
+
 Wed Jul 22 18:19:42 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportImpl.cpp:

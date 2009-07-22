@@ -42,13 +42,13 @@ if ($useImr == 1) {
     $RepoOpts = $RepoOpts . " -ORBuseimr 1 $imr_init_ref";
 }
 my $AGGREGATOR = PerlDDS::create_process ("Aggregator", "-a file://$dcpsrepo_ior "
-				    . "-b file://$dcpsrepo_ior2 -c $dcpsrepo_iogr");
+                                    . "-b file://$dcpsrepo_ior2 -c $dcpsrepo_iogr");
 
 my $ImRPort = PerlACE::random_port();
 my $ImR = PerlDDS::create_process ($implrepo_server, "-o $implrepo_ior $OBJ_REF_STYLE "
-				. "-orbendpoint iiop://:$ImRPort");
+                                . "-orbendpoint iiop://:$ImRPort");
 my $Act = PerlDDS::create_process ($imr_activator, "-o $activator_ior $imr_init_ref "
-				. "$OBJ_REF_STYLE -orbendpoint iiop://:$activator_port");
+                                . "$OBJ_REF_STYLE -orbendpoint iiop://:$activator_port");
 my $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo", $RepoOpts);
 my $DCPSREPO2 = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo", $RepoOpts2);
 my $imr_util = PerlDDS::create_process ("$tao_imr");
@@ -116,14 +116,14 @@ CleanupOutput();
 
 if ($useImr == 1) {
     if (SpawnWait($ImR, $implrepo_ior, 30) != 0) {
-	$ImR->Kill();
-	exit 1;
+        $ImR->Kill();
+        exit 1;
     }
 
     if (SpawnWait($Act, $activator_ior, 30) != 0) {
-	$ImR->Kill();
-	$Act->Kill();
-	exit 1;
+        $ImR->Kill();
+        $Act->Kill();
+        exit 1;
     }
 }
 

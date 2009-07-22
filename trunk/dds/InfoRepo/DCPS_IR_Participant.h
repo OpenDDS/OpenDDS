@@ -60,7 +60,7 @@ public:
                        OpenDDS::DCPS::RepoId id,
                        DCPS_IR_Domain* domain,
                        ::DDS::DomainParticipantQos qos,
-		       Update::Manager* um);
+                       Update::Manager* um);
 
   virtual ~DCPS_IR_Participant();
 

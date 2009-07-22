@@ -50,7 +50,7 @@ parse_args (int argc, ACE_TCHAR *argv[])
     default:
       ACE_ERROR_RETURN ((LM_ERROR,
         "usage:  %s "
-	"-u -d \n"
+        "-u -d \n"
         "-u for unregister notification test \n"
         "-d for dispose notification test \n",
         argv [0]),

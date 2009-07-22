@@ -145,14 +145,14 @@ elsif ($use_reliable_multicast == 1) {
 # test multiple cases
 $sub_parameters = "$svc_config -u $use_udp -c $use_mcast -s $sub_addr -p $pub_addr -r $num_readers -t $use_take"
               . " -m $num_instances_per_writer -i $num_samples_per_instance"
-	      . " -w $num_writers -z $sequence_length"
+              . " -w $num_writers -z $sequence_length"
               . " -k $no_key -y $read_interval_ms -f $mixed_trans"
               . " -a $use_reliable_multicast -b 1";
 
 $pub_parameters = "$svc_config -u $use_udp -c $use_mcast -p $pub_addr -w $num_writers "
               . " -m $num_instances_per_writer -i $num_samples_per_instance "
-	      . " -n $max_samples_per_instance -z $sequence_length"
-	      . " -k $no_key -y $write_interval_ms -b $writer_blocking_ms"
+              . " -n $max_samples_per_instance -z $sequence_length"
+              . " -k $no_key -y $write_interval_ms -b $writer_blocking_ms"
               . " -f $mixed_trans"
               . " -a $use_reliable_multicast";
 

@@ -16,7 +16,7 @@ class Sync_Export SyncServer_i : public virtual POA_Sync::Server, public ACE_Tas
   typedef std::string InitError;
 
   SyncServer_i (size_t pub_count, size_t sub_count
-		, CORBA::ORB_ptr orb, bool write_ior=true) throw (InitError);
+                , CORBA::ORB_ptr orb, bool write_ior=true) throw (InitError);
   virtual ~SyncServer_i (void);
 
   // synchrously wait for session completion.
@@ -27,14 +27,14 @@ class Sync_Export SyncServer_i : public virtual POA_Sync::Server, public ACE_Tas
   virtual int svc (void);
 
   virtual void register_me (::Sync::Role rol, ::Sync::Client_ptr callback,
-			    ::Sync::Id_out ide)
+                            ::Sync::Id_out ide)
     throw (CORBA::SystemException);
 
   virtual void unregister (::Sync::Id ide)
     throw (CORBA::SystemException);
 
   virtual void way_point_reached (::Sync::Id ide,
-				  ::Sync::WayPoint way_point)
+                                  ::Sync::WayPoint way_point)
     throw (CORBA::SystemException);
 
  private:
@@ -46,9 +46,9 @@ class Sync_Export SyncServer_i : public virtual POA_Sync::Server, public ACE_Tas
     ::Sync::WayPoint way_point;
 
     Cl (::Sync::Id i, ::Sync::Client_var c
-	, ::Sync::Role r, ::Sync::WayPoint w)
+        , ::Sync::Role r, ::Sync::WayPoint w)
       : id (i), callback (c)
-	 , role (r), way_point (w)
+         , role (r), way_point (w)
     { };
   } ClientInfo;
 

@@ -43,7 +43,7 @@ elsif ($ARGV[0] eq 'default_tcp') {
 }
 elsif ($ARGV[0] eq 'default_udp') {
     $opts .= ($use_svc_config ? " -ORBSvcConf udp.conf " : '')
-	. " -t default_udp";
+        . " -t default_udp";
     $pub_opts = "$opts";
     $sub_opts = "$opts";
 }
@@ -82,7 +82,7 @@ $dcpsrepo_ior = "repo.ior";
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-				  "-ORBDebugLevel 10 -ORBLogFile DCPSInfoRepo.log $repo_bit_opt -o $dcpsrepo_ior ");
+                                  "-ORBDebugLevel 10 -ORBLogFile DCPSInfoRepo.log $repo_bit_opt -o $dcpsrepo_ior ");
 
 if($stack_based == 0) {
   #create

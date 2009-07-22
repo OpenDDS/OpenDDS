@@ -139,8 +139,8 @@ namespace OpenDDS
       /// This method is a no-op and just returns 0 since the free list
       /// only works with fixed sized entities.
       virtual void *calloc (size_t /* n_elem */,
-			    size_t /* elem_size */,
-			    char /* initial_value */ = '\0')
+                            size_t /* elem_size */,
+                            char /* initial_value */ = '\0')
       {
         ACE_NOTSUP_RETURN (0);
       }

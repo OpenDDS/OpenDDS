@@ -93,7 +93,7 @@ Writer::svc ()
       if (unregister_notify_test && i == num_messages/2)
       {
         message_dw->unregister(message, handle);
-	handle = message_dw->_cxx_register (message);
+        handle = message_dw->_cxx_register (message);
       }
  
       message.count++;
@@ -106,7 +106,7 @@ Writer::svc ()
     
   } catch (CORBA::Exception& e) {
     cerr << "Exception caught in svc:" << endl
-	 << e << endl;
+         << e << endl;
   }
 
   while (1)

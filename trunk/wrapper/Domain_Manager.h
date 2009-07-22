@@ -51,8 +51,8 @@ class DDSWrapper_Export Domain_Manager
   /// @param argv commandline arguments used for initialization
   /// @param domain_id in which domain participant should be registered
   Domain_Manager (int & argc, 
-		  ACE_TCHAR *argv[],
-		  DDS::DomainId_t domain_id);
+                  ACE_TCHAR *argv[],
+                  DDS::DomainId_t domain_id);
 
   /// ctor
   /// @param argc number of command line arguments
@@ -60,9 +60,9 @@ class DDSWrapper_Export Domain_Manager
   /// @param domain_id in which domain participant should be registered
   /// @param qos for the domain participant
   Domain_Manager (int & argc, 
-		  ACE_TCHAR *argv[],
-		  DDS::DomainId_t domain_id,
-		  const DDS::DomainParticipantQos & qos);
+                  ACE_TCHAR *argv[],
+                  DDS::DomainId_t domain_id,
+                  const DDS::DomainParticipantQos & qos);
 
   /// ctor that takes ownership of the passed in impl pointer
   Domain_Manager (Domain_Manager_Ptr impl);
@@ -84,14 +84,14 @@ class DDSWrapper_Export Domain_Manager
 
   /// factory method for subscription managers
   Subscription_Manager subscription_manager (const DDS::SubscriberQos & qos
-					       = SUBSCRIBER_QOS_DEFAULT);
+                                               = SUBSCRIBER_QOS_DEFAULT);
 
   /// returns a subscription manager for built-in topics
   Subscription_Manager builtin_topic_subscriber ();
 
   /// getter method for publication managers
   Publication_Manager publication_manager (const DDS::PublisherQos & qos
-					     = PUBLISHER_QOS_DEFAULT);
+                                             = PUBLISHER_QOS_DEFAULT);
 
   /// getter method for the internal domain participant
   /// the memory is managed by the Domain_Manager

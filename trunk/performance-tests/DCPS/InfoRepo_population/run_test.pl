@@ -56,12 +56,12 @@ $repo_bit_opt = "$opts -NOBITS";
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-				  "$repo_bit_opt -o $dcpsrepo_ior ");
+                                  "$repo_bit_opt -o $dcpsrepo_ior ");
 $Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
 $Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
 $Publisher2 = PerlDDS::create_process ("publisher", " $pub_opts"." -i2");
 $SyncServer = PerlDDS::create_process ("syncServer"
-				    , "$syncopts -p2 -s1");
+                                    , "$syncopts -p2 -s1");
 
 print $DCPSREPO->CommandLine() . "\n";
 $DCPSREPO->Spawn ();

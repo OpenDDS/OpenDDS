@@ -52,7 +52,7 @@ public:
   /// 'associate' switch toggles association attempt.
   /// Returns 0 if added, 1 if already exists, -1 other failure
   int add_subscription_reference (DCPS_IR_Subscription* subscription
-				  , bool associate = true);
+                                  , bool associate = true);
 
   /// Removes the subscription from the list of subscriptions
   /// Returns 0 if successful

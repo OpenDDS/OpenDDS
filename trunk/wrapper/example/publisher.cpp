@@ -32,13 +32,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
   try {
     // create a domain manager, containing DomainParticipant configuration
     Domain_Manager domain_manager (argc,
-				   argv,
-				   QUOTER_DOMAIN_ID);
+                                   argv,
+                                   QUOTER_DOMAIN_ID);
 
     // create a topic manager, related to the quote topic
     Topic_Manager quoter_topic_manager (
       new Topic_Manager_T <StockQuoter::QuoteTypeSupport,
-	                   StockQuoter::QuoteTypeSupportImpl> (
+                           StockQuoter::QuoteTypeSupportImpl> (
         QUOTER_QUOTE_TOPIC));
 
     // create a topic manager, related to the exchange topic

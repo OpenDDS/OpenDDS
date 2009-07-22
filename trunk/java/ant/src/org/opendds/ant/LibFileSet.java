@@ -50,9 +50,9 @@ public class LibFileSet extends FileSet {
                 } else if (Os.isFamily(Os.FAMILY_WINDOWS)) {
                     sbuf.append("dll");
 
-		} else { // Os.FAMILY_UNIX
+                } else { // Os.FAMILY_UNIX
                     sbuf.append("so");
-		}
+                }
 
                 entry.setName(sbuf.toString());
             }

@@ -82,17 +82,17 @@ OpenDDS_Publication_Manager::register_transport (OpenDDS::DCPS::TransportIdType 
       std::string status_str;
       switch (status) {
       case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-	status_str = "ATTACH_BAD_TRANSPORT";
-	break;
+        status_str = "ATTACH_BAD_TRANSPORT";
+        break;
       case OpenDDS::DCPS::ATTACH_ERROR:
-	status_str = "ATTACH_ERROR";
-	break;
+        status_str = "ATTACH_ERROR";
+        break;
       case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-	status_str = "ATTACH_INCOMPATIBLE_QOS";
-	break;
+        status_str = "ATTACH_INCOMPATIBLE_QOS";
+        break;
       default:
-	status_str = "Unknown Status";
-	break;
+        status_str = "Unknown Status";
+        break;
       }
 
       std::string error_msg (
@@ -105,8 +105,8 @@ OpenDDS_Publication_Manager::register_transport (OpenDDS::DCPS::TransportIdType 
 
 DDS::DataWriter_ptr
 OpenDDS_Publication_Manager::access_topic (const Topic_Manager & topic,
-					   const DDS::DataWriterQos & qos,
-					   const Publication_Manager_Ptr & ref)
+                                           const DDS::DataWriterQos & qos,
+                                           const Publication_Manager_Ptr & ref)
 {
   // Create a modifiable copy of the Topic_Manager
   Topic_Manager tm (topic);

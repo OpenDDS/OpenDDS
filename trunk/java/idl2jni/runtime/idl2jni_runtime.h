@@ -310,7 +310,7 @@ public:
     void *jni;
     if (jvm_->AttachCurrentThread (&jni, 0) != 0)
       {
-	throw std::exception ();
+        throw std::exception ();
       }
     jni_ = reinterpret_cast<JNIEnv *> (jni);
     if (cl != 0) setContextClassLoader (jni_, cl);

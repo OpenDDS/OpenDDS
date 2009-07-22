@@ -85,7 +85,7 @@ namespace OpenDDS
       // from being created.
 
       return
-	TAO_Singleton<Data_Types_Register, TAO_SYNCH_MUTEX>::instance ();
+        TAO_Singleton<Data_Types_Register, TAO_SYNCH_MUTEX>::instance ();
     }
 
 

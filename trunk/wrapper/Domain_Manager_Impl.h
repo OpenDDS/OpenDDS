@@ -24,7 +24,7 @@ class Domain_Manager_Impl;
 /// this defines a reference counted pointer for a domain manager
 /// implementation
 typedef class ACE_Refcounted_Auto_Ptr <Domain_Manager_Impl, 
-				       ACE_Null_Mutex> Domain_Manager_Ptr;
+                                       ACE_Null_Mutex> Domain_Manager_Ptr;
 
 /**
  * @class Domain_Manager_Impl

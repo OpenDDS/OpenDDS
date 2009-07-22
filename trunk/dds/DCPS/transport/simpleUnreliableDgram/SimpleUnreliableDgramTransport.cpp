@@ -102,7 +102,7 @@ OpenDDS::DCPS::SimpleUnreliableDgramTransport::find_or_create_datalink
             new SimpleUnreliableDgramSynchResource(
               this->socket_.in(),
               this,
-	      this->config_->max_output_pause_period_
+              this->config_->max_output_pause_period_
             ),
             priority
           );

@@ -73,45 +73,45 @@ class EntryExit
 {
  public:
   EntryExit (const char* className, const char* methodName, const void* addr
-	     , unsigned recurse_level = 0)
+             , unsigned recurse_level = 0)
     : recurse_level_ (recurse_level)
     , addr_ (addr)
     , addr_set_ (true)
     {
       // No processing unless debugging turned on.
       if (::OpenDDS::DCPS::Transport_debug_level > 0)
-	{
-	  class_[25] = method_[25] = 0;
+        {
+          class_[25] = method_[25] = 0;
 
-	  ACE_OS::strncpy (this->class_, className, 25);
-	  ACE_OS::strncpy (this->method_, methodName, 25);
+          ACE_OS::strncpy (this->class_, className, 25);
+          ACE_OS::strncpy (this->method_, methodName, 25);
 
-	  if (this->recurse_level_ == 0) {
-	    ACE_DEBUG ((LM_DEBUG, "(%P|%t) DBG: ENTRY: [%s::%s() ::%@]\n"
-			, this->class_, this->method_, this->addr_));
-	  }
-	  else {
-	    ACE_DEBUG ((LM_DEBUG, "(%P|%t) DBG: ENTRY: [%s::%s() ::%@ :%d]\n"
-			, this->class_, this->method_, this->addr_
-			, this->recurse_level_));
-	  }
-	}
+          if (this->recurse_level_ == 0) {
+            ACE_DEBUG ((LM_DEBUG, "(%P|%t) DBG: ENTRY: [%s::%s() ::%@]\n"
+                        , this->class_, this->method_, this->addr_));
+          }
+          else {
+            ACE_DEBUG ((LM_DEBUG, "(%P|%t) DBG: ENTRY: [%s::%s() ::%@ :%d]\n"
+                        , this->class_, this->method_, this->addr_
+                        , this->recurse_level_));
+          }
+        }
     };
 
   ~EntryExit()
     {
       if (::OpenDDS::DCPS::Transport_debug_level > 0)
-	{
-	  if (this->recurse_level_ == 0) {
-	    ACE_DEBUG ((LM_DEBUG, "(%P|%t) DBG: EXIT : [%s::%s() ::%@]\n"
-			, this->class_, this->method_, this->addr_));
-	  }
-	  else {
-	    ACE_DEBUG ((LM_DEBUG, "(%P|%t) DBG: EXIT : [%s::%s() ::%@:%d]\n"
-			, this->class_, this->method_, this->addr_
-			, this->recurse_level_));
-	  }
-	}
+        {
+          if (this->recurse_level_ == 0) {
+            ACE_DEBUG ((LM_DEBUG, "(%P|%t) DBG: EXIT : [%s::%s() ::%@]\n"
+                        , this->class_, this->method_, this->addr_));
+          }
+          else {
+            ACE_DEBUG ((LM_DEBUG, "(%P|%t) DBG: EXIT : [%s::%s() ::%@:%d]\n"
+                        , this->class_, this->method_, this->addr_
+                        , this->recurse_level_));
+          }
+        }
     };
 
  private:

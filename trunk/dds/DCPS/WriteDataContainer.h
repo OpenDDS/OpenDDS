@@ -162,7 +162,7 @@ namespace OpenDDS
        */
       ::DDS::ReturnCode_t
       register_instance (::DDS::InstanceHandle_t&  instance_handle,
-			 DataSample*&              registered_sample);
+                         DataSample*&              registered_sample);
 
       /**
        * Remove the provided instance from the instances_ list.
@@ -264,7 +264,7 @@ namespace OpenDDS
        * remove_sample().
        */
       void data_dropped (DataSampleListElement* element,
-			 bool dropped_by_transport);
+                         bool dropped_by_transport);
 
       /**
        * Allocate a DataSampleListElement object and check the space

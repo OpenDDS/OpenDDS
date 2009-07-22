@@ -83,9 +83,9 @@ sub run_compatibility_tests {
 }
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-							 "$repo_bit_conf "
+                                                         "$repo_bit_conf "
 #                           . "-ORBDebugLevel 1 "
-						   . "-o $dcpsrepo_ior ");
+                                                   . "-o $dcpsrepo_ior ");
 print $DCPSREPO->CommandLine() . "\n";
 $DCPSREPO->Spawn ();
 print "Repository PID: " . $DCPSREPO->{PROCESS} . "\n" if $DCPSREPO->{PROCESS};

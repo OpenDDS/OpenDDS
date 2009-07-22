@@ -261,32 +261,32 @@ public:
 
     while (!shutdown_)
       {
-	delay = -1;
+        delay = -1;
 
-	{ // guard scope
-	  GuardType guard (lock_);
+        { // guard scope
+          GuardType guard (lock_);
 
-	  if (this->delay_ >= 0)
-	    {
-	      // make local copy of protected data.
-	      pub_driver = this->pub_driver_;
-	      sub_id = this->sub_id_;
-	      sub_addr = this->sub_addr_;
-	      delay = this->delay_;
+          if (this->delay_ >= 0)
+            {
+              // make local copy of protected data.
+              pub_driver = this->pub_driver_;
+              sub_id = this->sub_id_;
+              sub_addr = this->sub_addr_;
+              delay = this->delay_;
 
-	      // reset delay
-	      this->delay_ = -1;
-	    }
-	}
+              // reset delay
+              this->delay_ = -1;
+            }
+        }
 
-	if (delay >= 0)
-	  {
-	    ACE_OS::sleep (delay);
-	    pub_driver->add_new_subscription (sub_id, sub_addr.c_str ());
-	    continue;
-	  }
+        if (delay >= 0)
+          {
+            ACE_OS::sleep (delay);
+            pub_driver->add_new_subscription (sub_id, sub_addr.c_str ());
+            continue;
+          }
 
-	ACE_OS::sleep (1);
+        ACE_OS::sleep (1);
       }
 
     return 0;
@@ -333,33 +333,33 @@ SubDriver::run()
   while (1)
     {
       FILE* fp
-	= ACE_OS::fopen (pub_id_fname_.c_str (), ACE_LIB_TEXT("r"));
+        = ACE_OS::fopen (pub_id_fname_.c_str (), ACE_LIB_TEXT("r"));
       if (fp == 0)
-	{
-	  ACE_OS::sleep (1);
-	}
+        {
+          ACE_OS::sleep (1);
+        }
       else
-	{
+        {
           // this could be made cleaner by losing the old C-style I/O.
-	  ::OpenDDS::DCPS::PublicationId pub_id = OpenDDS::DCPS::GUID_UNKNOWN;
+          ::OpenDDS::DCPS::PublicationId pub_id = OpenDDS::DCPS::GUID_UNKNOWN;
           char charBuffer[64];
-	  while (fscanf (fp, "%s\n", &charBuffer[0]) != EOF)
-	    {
+          while (fscanf (fp, "%s\n", &charBuffer[0]) != EOF)
+            {
               std::stringstream buffer( charBuffer);
               buffer >> pub_id;
-	      ids.push_back(pub_id);
+              ids.push_back(pub_id);
 
               std::stringstream idbuffer;
               idbuffer << pub_id;
-	      ACE_DEBUG ((LM_DEBUG,
-			  ACE_TEXT("(%P|%t) SubDriver::run, ")
-			  ACE_TEXT(" Got from %s: pub_id=%C.\n"),
-			  pub_id_fname_.c_str (),
-			  idbuffer.str().c_str()));
-	    }
-	  ACE_OS::fclose (fp);
-	  break;
-	}
+              ACE_DEBUG ((LM_DEBUG,
+                          ACE_TEXT("(%P|%t) SubDriver::run, ")
+                          ACE_TEXT(" Got from %s: pub_id=%C.\n"),
+                          pub_id_fname_.c_str (),
+                          idbuffer.str().c_str()));
+            }
+          ACE_OS::fclose (fp);
+          break;
+        }
     }
 
   CORBA::Object_var object =
