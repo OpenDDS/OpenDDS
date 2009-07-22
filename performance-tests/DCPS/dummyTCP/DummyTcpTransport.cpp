@@ -75,20 +75,20 @@ OpenDDS::DCPS::DummyTcpTransport::find_or_create_datalink
 
     if (this->links_.find(remote_address,link) == 0)
       {
-	DummyTcpConnection_rch con = link->get_connection ();
-	if (con->is_connector () && ! con->is_connected ())
-	  {
-	    bool on_new_association = true;
-	    if (con->reconnect (on_new_association) == -1)
-	      {
-		ACE_ERROR_RETURN ((LM_ERROR,
-				   "(%P|%t) ERROR: Unable to reconnect to remote %C:%d.\n",
-				   remote_address.get_host_addr (),
-				   remote_address.get_port_number ()),
-				  0);
-	      }
-	  }
-	// This means we may or may not find a suitable (and already connected) DataLink.
+        DummyTcpConnection_rch con = link->get_connection ();
+        if (con->is_connector () && ! con->is_connected ())
+          {
+            bool on_new_association = true;
+            if (con->reconnect (on_new_association) == -1)
+              {
+                ACE_ERROR_RETURN ((LM_ERROR,
+                                   "(%P|%t) ERROR: Unable to reconnect to remote %C:%d.\n",
+                                   remote_address.get_host_addr (),
+                                   remote_address.get_port_number ()),
+                                  0);
+              }
+          }
+        // This means we may or may not find a suitable (and already connected) DataLink.
   // Thus we need more checks.
   else
   {
@@ -98,9 +98,9 @@ OpenDDS::DCPS::DummyTcpTransport::find_or_create_datalink
     }
 
   }
-	VDBG_LVL ((LM_DEBUG, "(%P|%t)  Found existing connection,"
-		   " No need for passive connection establishment.\n"), 5);
-	return link._retn();
+        VDBG_LVL ((LM_DEBUG, "(%P|%t)  Found existing connection,"
+                   " No need for passive connection establishment.\n"), 5);
+        return link._retn();
       }
   }
 
@@ -117,11 +117,11 @@ OpenDDS::DCPS::DummyTcpTransport::find_or_create_datalink
     // Attempt to bind the DummyTcpDataLink to our links_ map.
     if (this->links_.bind(remote_address,link) != 0)
       {
-	// We failed to bind the new DataLink into our links_ map.
-	// On error, we return a NULL pointer.
-	ACE_ERROR_RETURN((LM_ERROR,
-			  "(%P|%t) ERROR: Unable to bind new DummyTcpDataLink to "
-			  "DummyTcpTransport in links_ map.\n"), 0);
+        // We failed to bind the new DataLink into our links_ map.
+        // On error, we return a NULL pointer.
+        ACE_ERROR_RETURN((LM_ERROR,
+                          "(%P|%t) ERROR: Unable to bind new DummyTcpDataLink to "
+                          "DummyTcpTransport in links_ map.\n"), 0);
       }
   }
 
@@ -216,14 +216,14 @@ OpenDDS::DCPS::DummyTcpTransport::configure_i(TransportConfiguration* config)
     {
       ACE_INET_Addr new_addr;
       int result = new_addr.set (
-				 tcp_config->local_address_.get_port_number (),
-				 tcp_config->local_address_.get_host_name ());
+                                 tcp_config->local_address_.get_port_number (),
+                                 tcp_config->local_address_.get_host_name ());
 
       if (result != 0)
         ACE_ERROR_RETURN((LM_ERROR,
-			  "(%P|%t) ERROR: DummyTcpTransport::configure_i"
-			  " could not get host name!!\n"),
-			 -1);
+                          "(%P|%t) ERROR: DummyTcpTransport::configure_i"
+                          " could not get host name!!\n"),
+                         -1);
 
       const char *tmp = 0; // just to help debugging
       tmp = new_addr.get_host_addr ();
@@ -237,14 +237,14 @@ OpenDDS::DCPS::DummyTcpTransport::configure_i(TransportConfiguration* config)
       ACE_ERROR_RETURN((LM_ERROR,
                         "(%P|%t) ERROR: connection checker failed to open : %p\n",
                         ACE_TEXT("open")),
-		       -1);
+                       -1);
     }
 
   // Open our acceptor object so that we can accept passive connections
   // on our this->tcp_config_->local_address_.
 
   if (this->acceptor_->open(this->tcp_config_->local_address_,
-			    this->reactor_task_->get_reactor()) != 0)
+                            this->reactor_task_->get_reactor()) != 0)
     {
       // Remember to drop our reference to the tcp_config_ object since
       // we are about to return -1 here, which means we are supposed to
@@ -264,9 +264,9 @@ OpenDDS::DCPS::DummyTcpTransport::configure_i(TransportConfiguration* config)
   if (this->acceptor_->acceptor ().get_local_addr (address) != 0)
     {
       ACE_ERROR ((LM_ERROR,
-		  ACE_TEXT ("(%P|%t) ERROR: DummyTcpTransport::configure_i ")
-		  ACE_TEXT ("- %p"),
-		  ACE_TEXT ("cannot get local addr\n")));
+                  ACE_TEXT ("(%P|%t) ERROR: DummyTcpTransport::configure_i ")
+                  ACE_TEXT ("- %p"),
+                  ACE_TEXT ("cannot get local addr\n")));
     }
 
   unsigned short port = address.get_port_number ();
@@ -441,17 +441,17 @@ OpenDDS::DCPS::DummyTcpTransport::passive_connection
     GuardType guard(this->connections_lock_);
 
     VDBG_LVL ((LM_DEBUG, "(%P|%t) # of bef connections: %d\n"
-	       , this->connections_.current_size()), 5);
+               , this->connections_.current_size()), 5);
 
     if (this->connections_.bind(remote_address,connection_obj) != 0)
       {
         ACE_ERROR((LM_ERROR,
-		   "(%P|%t) ERROR: Unable to bind DummyTcpConnection object "
-		   "to the connections_ map.\n"));
+                   "(%P|%t) ERROR: Unable to bind DummyTcpConnection object "
+                   "to the connections_ map.\n"));
       }
 
     VDBG_LVL ((LM_DEBUG, "(%P|%t) # of aftr connections: %d\n"
-	       , this->connections_.current_size()), 5);
+               , this->connections_.current_size()), 5);
 
     // Regardless of the outcome of the bind operation, let's tell any threads
     // that are wait()'ing on the connections_updated_ condition to check
@@ -502,13 +502,13 @@ OpenDDS::DCPS::DummyTcpTransport::make_passive_connection
   if (this->tcp_config_->passive_connect_duration_ != 0)
     {
       abs_timeout.set (this->tcp_config_->passive_connect_duration_/1000,
-		       this->tcp_config_->passive_connect_duration_%1000 * 1000);
+                       this->tcp_config_->passive_connect_duration_%1000 * 1000);
       abs_timeout += ACE_OS::gettimeofday ();
     }
 
   VDBG_LVL ((LM_DEBUG, "(%P|%t) DBG:   "
-	     "Passive connect timeout: %d milliseconds (0 == forever).\n",
-	     this->tcp_config_->passive_connect_duration_), 5);
+             "Passive connect timeout: %d milliseconds (0 == forever).\n",
+             this->tcp_config_->passive_connect_duration_), 5);
 
   // Look in our connections_ map to see if the passive connection
   // has already been established for the remote_address.  If so, we
@@ -517,28 +517,28 @@ OpenDDS::DCPS::DummyTcpTransport::make_passive_connection
     GuardType guard(this->connections_lock_);
     while (true)
       {
-	if ((abs_timeout != ACE_Time_Value::zero)
-	    && (abs_timeout <= ACE_OS::gettimeofday ()))
-	  {
-	    // This doesn't necessarily represent an error.
-	    // It could just be a delay on teh remote side. More a QOS issue.
-	    VDBG_LVL ((LM_ERROR, "(%P|%t) ERROR: Passive connection timedout.\n"), 5);
-	    return -1;
-	  }
+        if ((abs_timeout != ACE_Time_Value::zero)
+            && (abs_timeout <= ACE_OS::gettimeofday ()))
+          {
+            // This doesn't necessarily represent an error.
+            // It could just be a delay on teh remote side. More a QOS issue.
+            VDBG_LVL ((LM_ERROR, "(%P|%t) ERROR: Passive connection timedout.\n"), 5);
+            return -1;
+          }
 
-	// check if theres already a connection waiting
-	if (this->connections_.unbind(remote_address,connection) == 0) {
-	  // break out and continue with connection establishment
-	  break;
-	}
+        // check if theres already a connection waiting
+        if (this->connections_.unbind(remote_address,connection) == 0) {
+          // break out and continue with connection establishment
+          break;
+        }
 
-	// Now lets wait for an update
-	if (abs_timeout == ACE_Time_Value::zero) {
-	  this->connections_updated_.wait (0);
-	}
-	else {
-	  this->connections_updated_.wait (&abs_timeout);
-	}
+        // Now lets wait for an update
+        if (abs_timeout == ACE_Time_Value::zero) {
+          this->connections_updated_.wait (0);
+        }
+        else {
+          this->connections_updated_.wait (&abs_timeout);
+        }
       }
   }
 
@@ -559,17 +559,17 @@ OpenDDS::DCPS::DummyTcpTransport::connect_datalink
 
   TransportSendStrategy_rch send_strategy =
     new DummyTcpSendStrategy(link,
-			      this->tcp_config_.in(),
-			      connection,
-			      new DummyTcpSynchResource(connection,
-							 this->tcp_config_->max_output_pause_period_),
+                              this->tcp_config_.in(),
+                              connection,
+                              new DummyTcpSynchResource(connection,
+                                                         this->tcp_config_->max_output_pause_period_),
             this->reactor_task_.in(),
             link->priority());
 
   TransportReceiveStrategy_rch receive_strategy =
     new DummyTcpReceiveStrategy(link,
-				 connection,
-				 this->reactor_task_.in());
+                                 connection,
+                                 this->reactor_task_.in());
 
   if (link->connect(connection,
                     send_strategy.in(),

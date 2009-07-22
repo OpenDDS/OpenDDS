@@ -268,7 +268,7 @@ sub parse {
   my $ts_pragma;
   ($str, $ts_str, $ts_pragma) = $self->preprocess($file, $includes,
                                                   $macros, $mparams)
-						            if (!defined $str);
+                                                            if (!defined $str);
 
   ## Keep track of const's and typedef's with these variables
   my $single;

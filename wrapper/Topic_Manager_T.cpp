@@ -92,17 +92,17 @@ Topic_Manager_T <TYPE_SUPPORT, TS_IMPL>::create_topic (Domain_Manager & dm)
       CORBA::String_var type_name = type_->get_type_name ();
 
       topic_ = 
-	dm.participant ()->create_topic (name_.c_str (),
-					 type_name.in (),
-					 TOPIC_QOS_DEFAULT,
-					 ::DDS::TopicListener::_nil ());
+        dm.participant ()->create_topic (name_.c_str (),
+                                         type_name.in (),
+                                         TOPIC_QOS_DEFAULT,
+                                         ::DDS::TopicListener::_nil ());
     }
   else
     {
       DDS::Duration_t timeout = {1, 0};
 
       topic_ = dm.participant ()->find_topic (name_.c_str (),
-						timeout);
+                                                timeout);
     }
 
   // check if topic creation was successful
@@ -129,18 +129,18 @@ Topic_Manager_T <TYPE_SUPPORT, TS_IMPL>::delete_topic (Domain_Manager & dm)
 template <typename TYPE_SUPPORT, typename TS_IMPL>
 DDS::DataReader_ptr 
 Topic_Manager_T <TYPE_SUPPORT, TS_IMPL>::datareader (const Subscription_Manager & sm,
-						     const DDS::DataReaderQos & qos)
+                                                     const DDS::DataReaderQos & qos)
 {
   // check if subscriber exists
   if (CORBA::is_nil (sm.subscriber ()))
     throw Manager_Exception (
-	"Could not create datareader due to invalid subscriber reference");
+        "Could not create datareader due to invalid subscriber reference");
 
   // use subscriber to create a datareader for the topic
   DDS::DataReader_var dr = 
     sm.subscriber ()->create_datareader (topic_.in (),
-					 qos,
-					 listener_.in ()); 
+                                         qos,
+                                         listener_.in ()); 
 
   return dr._retn ();
 }
@@ -148,7 +148,7 @@ Topic_Manager_T <TYPE_SUPPORT, TS_IMPL>::datareader (const Subscription_Manager 
 template <typename TYPE_SUPPORT, typename TS_IMPL>
 DDS::DataWriter_ptr 
 Topic_Manager_T <TYPE_SUPPORT, TS_IMPL>::datawriter (const Publication_Manager & pm,
-						     const DDS::DataWriterQos & qos)
+                                                     const DDS::DataWriterQos & qos)
 {
   // check if subscriber exists
   if (CORBA::is_nil (pm.publisher ()))
@@ -158,8 +158,8 @@ Topic_Manager_T <TYPE_SUPPORT, TS_IMPL>::datawriter (const Publication_Manager &
   // use publisher to create a datawriter for the topic
   DDS::DataWriter_var dw = 
     pm.publisher ()->create_datawriter (topic_.in (),
-					qos,
-					DDS::DataWriterListener::_nil ()); 
+                                        qos,
+                                        DDS::DataWriterListener::_nil ()); 
 
   return dw._retn ();
 }

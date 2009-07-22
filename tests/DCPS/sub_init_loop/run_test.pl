@@ -29,7 +29,7 @@ unlink $testoutputfilename;
 if ($#ARGV >= 0)
 {
     if ($ARGV[0] == "verbose") {
-	$common_opts = $common_opts." -v";
+        $common_opts = $common_opts." -v";
     }
 }
 $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''

@@ -302,11 +302,11 @@ namespace OpenDDS
 
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator== (const ::DDS::Duration_t& t1,
-		 const ::DDS::Duration_t& t2);
+                 const ::DDS::Duration_t& t2);
 
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator!= (const ::DDS::Duration_t& t1,
-		 const ::DDS::Duration_t& t2);
+                 const ::DDS::Duration_t& t2);
 
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator< (const ::DDS::Duration_t& t1,

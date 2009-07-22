@@ -31,7 +31,7 @@ $common_args = "-DCPSInfoRepo corbaloc:iiop:localhost:$port1/DCPSInfoRepo"
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-				  "$repo_bit_opt -o $dcpsrepo_ior "
+                                  "$repo_bit_opt -o $dcpsrepo_ior "
                                 . "-ORBEndpoint iiop://localhost:$port1");
 $Subscriber = PerlDDS::create_process ("subscriber",
                                     "-DCPSConfigFile sub.ini $common_args");

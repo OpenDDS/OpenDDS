@@ -53,7 +53,7 @@ parse_args (int argc, ACE_TCHAR *argv[])
         "usage:  %s "
         "-d -u"
         "\n"
-	"-d for dispose notification test and -u for unregister notification test \n",
+        "-d for dispose notification test and -u for unregister notification test \n",
         argv [0]),
         -1);
     }

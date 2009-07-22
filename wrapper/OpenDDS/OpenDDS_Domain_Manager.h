@@ -32,17 +32,17 @@ class OpenDDS_Domain_Manager : public Domain_Manager_Impl
   /// implementation from the command line and set up a domain participant 
   /// with this.
   OpenDDS_Domain_Manager (int & argc, 
-			  ACE_TCHAR *argv[],
-			  DDS::DomainId_t domain_id);
+                          ACE_TCHAR *argv[],
+                          DDS::DomainId_t domain_id);
 
   /// ctor
   /// will read dcps configuration and information about the used transport 
   /// implementation from the command line and set up a domain participant 
   /// with this. It also allows to pass specific DomainParticipant QoS parameters
   OpenDDS_Domain_Manager (int & argc, 
-			  ACE_TCHAR *argv[],
-			  DDS::DomainId_t domain_id,
-			  const DDS::DomainParticipantQos & qos);
+                          ACE_TCHAR *argv[],
+                          DDS::DomainId_t domain_id,
+                          const DDS::DomainParticipantQos & qos);
 
   /// destructor
   virtual ~OpenDDS_Domain_Manager ();

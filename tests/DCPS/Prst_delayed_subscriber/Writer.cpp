@@ -114,7 +114,7 @@ Writer::svc ()
     }
   catch (CORBA::Exception& e) {
     cerr << "Exception caught in svc:" << endl
-	 << e << endl;
+         << e << endl;
   }
 
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::svc finished.\n")));

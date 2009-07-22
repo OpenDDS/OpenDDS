@@ -218,7 +218,7 @@ my(%options) = ("help"    => \$usage,
                 "debug"   => \$debug,
                 "verbose" => \$verbose,
                 "only=s"  => \$only,
-				"winDebug"  => \$winDebug,
+                                "winDebug"  => \$winDebug,
                );
 my(%desc)    = ("loop"  => "Run the tests in a loop until a failure is " .
                            "seen",
@@ -231,7 +231,7 @@ my(%desc)    = ("loop"  => "Run the tests in a loop until a failure is " .
                 "debug" => "Pass the --debug option all tests",
                 "verbose" => "Pass the --verbose option all tests",
                 "only"  => "Only run this specific test",
-				"winDebug" => "Pass the --winDebug option all tests",
+                                "winDebug" => "Pass the --winDebug option all tests",
                );
 ProcessOptions($0, \%options, \%desc);
 
@@ -293,7 +293,7 @@ do {
         ## Run the perl script and redirect the output
         chdir($dname);
         if (open($fh, "$^X $bname " . ($debug ? "--debug " : "") .
-		                              ($winDebug ? "--winDebug " : "") .         
+                                              ($winDebug ? "--winDebug " : "") .         
                                       ($verbose ? "--verbose " : "") . "2>&1 |")) {
           my($logFile) = $nodir . ".txt";
           $logFile =~ s/\//_/g;
@@ -337,12 +337,12 @@ do {
       if (terminalSupportsSpecial()) {
         print "\x1b[1mFailed\x1b[m\n";
         $failedTests[$i]= $nodir."\n";
-		$i++;
+                $i++;
       }
       else {
         $failedTests[$i]= $nodir."\n";
-		print "** Failed **\n";
-		$i++;
+                print "** Failed **\n";
+                $i++;
       }
       $totalfailed++;
       ++$testInfo{$script}->[2];
@@ -356,7 +356,7 @@ do {
           print "Tests that failed are:\n";
           print " @failedTests";
         }
-		
+                
   if ($loop) {
     print "Finished $loopCount sequence" . (($loopCount != 1) ? "s" : "") . 
           " of tests\n";

@@ -35,7 +35,7 @@ namespace OpenDDS
             OpenDDS::DCPS::ReliableMulticast::detail::Packet
             > PacketVector;
 
-	  SenderLogic(size_t sender_history_size);
+          SenderLogic(size_t sender_history_size);
 
           void receive(
             const OpenDDS::DCPS::ReliableMulticast::detail::Packet& p,

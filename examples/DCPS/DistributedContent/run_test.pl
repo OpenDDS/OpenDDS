@@ -52,7 +52,7 @@ sub SpawnWait {
     $process->Spawn();
     my $ret = PerlACE::waitforfile_timed($file, $timeout);
     if ($ret == -1) {
-	print STDERR "ERROR: Cannot find file <$file>\n";
+        print STDERR "ERROR: Cannot find file <$file>\n";
     }
     return $ret;
 }

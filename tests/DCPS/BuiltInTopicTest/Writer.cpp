@@ -92,7 +92,7 @@ Writer::svc ()
     }
   } catch (CORBA::Exception& e) {
     cerr << "Writer: Exception caught in svc:" << endl
-	 << e << endl;
+         << e << endl;
   }
 
   // wait for datareader finish.

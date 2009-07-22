@@ -164,8 +164,8 @@ if ($num_subscribers == 2)
     $result = $subscriber2->WaitKill(60);
 
     if ($result != 0) {
-	print STDERR "ERROR: $subscriber2 returned $result  \n";
-	$status = 1;
+        print STDERR "ERROR: $subscriber2 returned $result  \n";
+        $status = 1;
     }
 }
 

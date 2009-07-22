@@ -103,7 +103,7 @@ Writer::svc ()
     PerformanceTest::report_stats("Publisher Side Transport Performance Test");
   } catch (CORBA::Exception& e) {
     cerr << "Exception caught in svc:" << endl
-	 << e << endl;
+         << e << endl;
   }
 
   while (1)

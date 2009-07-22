@@ -29,16 +29,16 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
     {
       // create a domain manager, containing DomainParticipant configuration
       Domain_Manager domain_manager (argc,
-				     argv,
-				     QUOTER_DOMAIN_ID);
+                                     argv,
+                                     QUOTER_DOMAIN_ID);
 
       // Create DataReaders and DataReaderListeners for the
       // Quote and ExchangeEvent
       DDS::DataReaderListener_var quote_listener (new QuoteDataReaderListenerImpl);
   
       if (CORBA::is_nil (quote_listener.in ())) {
-	cerr << "Quote listener is nil." << endl;
-	ACE_OS::exit(1);
+        cerr << "Quote listener is nil." << endl;
+        ACE_OS::exit(1);
       }
 
       // create a topic manager, related to the quote topic
@@ -49,11 +49,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
 
       DDS::DataReaderListener_var exchange_evt_listener (new ExchangeEventDataReaderListenerImpl);
       ExchangeEventDataReaderListenerImpl* listener_servant =
-	dynamic_cast<ExchangeEventDataReaderListenerImpl*>(exchange_evt_listener.in());
+        dynamic_cast<ExchangeEventDataReaderListenerImpl*>(exchange_evt_listener.in());
       
       if (CORBA::is_nil (exchange_evt_listener.in ())) {
-	cerr << "ExchangeEvent listener is nil." << endl;
-	ACE_OS::exit(1);
+        cerr << "ExchangeEvent listener is nil." << endl;
+        ACE_OS::exit(1);
       }
 
       // create a topic manager, related to the exchange topic
@@ -64,7 +64,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
 
       // get a subscription manager
       Subscription_Manager subscription_manager =
-	domain_manager.subscription_manager ();
+        domain_manager.subscription_manager ();
 
       // create topic and data reader for the topic
       subscription_manager.access_topic (quoter_topic_manager);
@@ -75,7 +75,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       // Wait for events from the Publisher; shut down when "close" received
       cout << "Subscriber: waiting for events" << endl;
       while ( ! listener_servant->is_exchange_closed_received() ) {
-	ACE_OS::sleep(1);
+        ACE_OS::sleep(1);
       }
 
       cout << "Received CLOSED event from publisher; exiting..." << endl;
@@ -85,7 +85,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       ACE_OS::exit(1);
     } catch (CORBA::Exception& e) {
       cerr << "Exception caught in main.cpp:" << endl
-	   << e << endl;
+           << e << endl;
       ACE_OS::exit(1);
     }
 

@@ -59,7 +59,7 @@ OpenDDS_Subscription_Manager::init (const DDS::SubscriberQos & qos)
   // create the subscriber using default QoS.
   sub_ = 
     dm_.participant ()->create_subscriber (qos,
-					   DDS::SubscriberListener::_nil ());
+                                           DDS::SubscriberListener::_nil ());
   
   // check for successful creation
   if (CORBA::is_nil (sub_.in ()))
@@ -91,17 +91,17 @@ OpenDDS_Subscription_Manager::register_transport (
       std::string status_str;
       switch (status) {
       case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-	status_str = "ATTACH_BAD_TRANSPORT";
-	break;
+        status_str = "ATTACH_BAD_TRANSPORT";
+        break;
       case OpenDDS::DCPS::ATTACH_ERROR:
-	status_str = "ATTACH_ERROR";
-	break;
+        status_str = "ATTACH_ERROR";
+        break;
       case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-	status_str = "ATTACH_INCOMPATIBLE_QOS";
-	break;
+        status_str = "ATTACH_INCOMPATIBLE_QOS";
+        break;
       default:
-	status_str = "Unknown Status";
-	break;
+        status_str = "Unknown Status";
+        break;
       }
 
       std::string error_msg (

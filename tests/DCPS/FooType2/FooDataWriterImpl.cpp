@@ -313,7 +313,7 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
 //       to the WriteDataContainer.
 ACE_Message_Block*
  FooDataWriterImpl::marshal(
-		const Foo& instance_data,
+                const Foo& instance_data,
                 int  for_write)
 {
   ACE_Message_Block* mb;
@@ -358,9 +358,9 @@ ACE_Message_Block*
 ::DDS::ReturnCode_t
  FooDataWriterImpl::get_or_create_instance_handle(
                 DDS::InstanceHandle_t& handle,
-		Foo instance_data,
-		int& is_new,
-		ACE_Message_Block*& marshalled, // only if is_new==1
+                Foo instance_data,
+                int& is_new,
+                ACE_Message_Block*& marshalled, // only if is_new==1
                 const ::DDS::Time_t & source_timestamp)
 {
   handle = ::OpenDDS::DCPS::HANDLE_NIL;
@@ -404,7 +404,7 @@ ACE_Message_Block*
 
 ::DDS::InstanceHandle_t
  FooDataWriterImpl::get_instance_handle(
-		Foo instance_data)
+                Foo instance_data)
 {
   FooMap::const_iterator it = instance_map_.find(instance_data);
 

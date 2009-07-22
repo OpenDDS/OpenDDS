@@ -7,6 +7,6 @@ module SyncExt
   interface Collector : Sync::Server
   {
     void publish (in Role rol, in long instances
-		  , in long msecs);
+                  , in long msecs);
   };
 };

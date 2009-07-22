@@ -74,7 +74,7 @@ sub SpawnWait {
     $process->Spawn();
     my $ret = PerlACE::waitforfile_timed($file, $timeout);
     if ($ret == -1) {
-	print STDERR "ERROR: Cannot find file <$file>\n";
+        print STDERR "ERROR: Cannot find file <$file>\n";
     }
     return $ret;
 }
@@ -83,14 +83,14 @@ CleanupOutput();
 
 if ($useImr == 1) {
     if (SpawnWait($ImR, $implrepo_ior, 30) != 0) {
-	$ImR->Kill();
-	exit 1;
+        $ImR->Kill();
+        exit 1;
     }
 
     if (SpawnWait($Act, $activator_ior, 30) != 0) {
-	$ImR->Kill();
-	$Act->Kill();
-	exit 1;
+        $ImR->Kill();
+        $Act->Kill();
+        exit 1;
     }
 }
 

@@ -28,34 +28,34 @@ my $repo_bit_opt = $opts;
 
 if ($ARGV[0] eq 'udp') {
     $opts .= ($use_svc_config ?
-		  " -ORBSvcConf $file_prefix/udp.conf " : '')
-	. "-t udp";
+                  " -ORBSvcConf $file_prefix/udp.conf " : '')
+        . "-t udp";
     $pub_config_file = "$file_prefix/pub_udp.ini";
     $sub_config_file = "$file_prefix/sub_udp.ini";
 }
 elsif ($ARGV[0] eq 'mcast') {
     $opts .= ($use_svc_config ?
-		  " -ORBSvcConf $file_prefix/mcast.conf " : '')
-	. "-t mcast";
+                  " -ORBSvcConf $file_prefix/mcast.conf " : '')
+        . "-t mcast";
     $pub_config_file = "$file_prefix/pub_mcast.ini";
     $sub_config_file = "$file_prefix/sub_mcast.ini";
 }
 elsif ($ARGV[0] eq 'reliable_mcast') {
     $opts .= ($use_svc_config ?
-	      " -ORBSvcConf $file_prefix/reliable_mcast.conf " : '')
+              " -ORBSvcConf $file_prefix/reliable_mcast.conf " : '')
         . "-t reliable_mcast";
     $pub_config_file = "$file_prefix/pub_reliable_mcast.ini";
     $sub_config_file = "$file_prefix/sub_reliable_mcast.ini";
 }
 elsif ($ARGV[0] eq 'default_mcast') {
     $opts .= ($use_svc_config ?
-		  " -ORBSvcConf $file_prefix/mcast.conf " : '');
+                  " -ORBSvcConf $file_prefix/mcast.conf " : '');
     $pub_opts = "-t default_mcast_pub";
     $sub_opts = "-t default_mcast_sub";
 }
 
 $CS = new CrossSyncDDS (1, PerlACE::random_port(), PerlACE::random_port()
-			, $pub_config_file, $sub_config_file);
+                        , $pub_config_file, $sub_config_file);
 if (!$CS) {
     print "Crossplatform test pre-reqs not met. Skipping...\n";
     exit 0;
@@ -102,9 +102,9 @@ if ($role == CrossSync::SERVER) {
     print $DCPSREPO->CommandLine(). "\n";
     $DCPSREPO->Spawn ();
     if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
-	print STDERR "ERROR: waiting for DCPSInfo IOR file\n";
-	$DCPSREPO->Kill ();
-	exit 1;
+        print STDERR "ERROR: waiting for DCPSInfo IOR file\n";
+        $DCPSREPO->Kill ();
+        exit 1;
     }
     unlink $dcpsrepo_ior;
 
@@ -112,23 +112,23 @@ if ($role == CrossSync::SERVER) {
     $Publisher->Spawn ();
 
     if ($CS->ready () == -1) {
-	print STDERR "ERROR: subscriber failed to initialize.\n";
-	$status = 1;
-	$DCPSREPO->Kill ();
-	$Publisher->Kill ();
-	exit 1;
+        print STDERR "ERROR: subscriber failed to initialize.\n";
+        $status = 1;
+        $DCPSREPO->Kill ();
+        $Publisher->Kill ();
+        exit 1;
     }
 
     $PublisherResult = $Publisher->WaitKill (300);
     if ($PublisherResult != 0) {
-	print STDERR "ERROR: publisher returned $PublisherResult \n";
-	$status = 1;
+        print STDERR "ERROR: publisher returned $PublisherResult \n";
+        $status = 1;
     }
 
     $ir = $DCPSREPO->TerminateWaitKill(5);
     if ($ir != 0) {
-	print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-	$status = 1;
+        print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
+        $status = 1;
     }
 } else {
     print $Subscriber->CommandLine(). "\n";
@@ -136,8 +136,8 @@ if ($role == CrossSync::SERVER) {
 
     $SubscriberResult = $Subscriber->WaitKill (15);
     if ($SubscriberResult != 0) {
-	print STDERR "ERROR: subscriber returned $SubscriberResult \n";
-	$status = 1;
+        print STDERR "ERROR: subscriber returned $SubscriberResult \n";
+        $status = 1;
     }
 }
 

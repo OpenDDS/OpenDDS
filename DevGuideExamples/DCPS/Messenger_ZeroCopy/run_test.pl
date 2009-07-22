@@ -56,7 +56,7 @@ $app_bit_conf = "-DCPSBit 0";
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-				  "$repo_bit_conf -o $dcpsrepo_ior ");
+                                  "$repo_bit_conf -o $dcpsrepo_ior ");
 $Subscriber = PerlDDS::create_process ("subscriber", "$app_bit_conf $sub_opts");
 $Publisher = PerlDDS::create_process ("publisher", "$app_bit_conf $pub_opts");
 

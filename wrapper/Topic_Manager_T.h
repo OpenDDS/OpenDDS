@@ -30,9 +30,9 @@ class Topic_Manager_T : public Topic_Manager_Impl
   /// @param listener is used to create a datareader with the datareader 
   ///                 method.
   Topic_Manager_T (const std::string& name,
-		   DDS::DataReaderListener_ptr listener = 
+                   DDS::DataReaderListener_ptr listener = 
                      DDS::DataReaderListener::_nil (),		     
-		   bool create_new_topic = true);
+                   bool create_new_topic = true);
 
   /// dtor
   virtual ~Topic_Manager_T ();
@@ -49,12 +49,12 @@ class Topic_Manager_T : public Topic_Manager_Impl
   /// this method returns a new datareader created by a subscriber
   /// memory management has to be done by the caller
   virtual DDS::DataReader_ptr datareader (const Subscription_Manager & sm,
-					  const DDS::DataReaderQos & qos);
+                                          const DDS::DataReaderQos & qos);
 
   /// this method returns a new datawriter created by a publisher
   /// memory management has to be done by the caller
   virtual DDS::DataWriter_ptr datawriter (const Publication_Manager & pm,
-					  const DDS::DataWriterQos & qos);
+                                          const DDS::DataWriterQos & qos);
 
  private:
   /// copy ctor is private to prevent copies

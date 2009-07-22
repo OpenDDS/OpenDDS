@@ -67,8 +67,8 @@ void write (long id,
       {
         ACE_ERROR((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: ")
-			  ACE_TEXT("write failed for msg_num %d\n"),
-			   i ));
+                          ACE_TEXT("write failed for msg_num %d\n"),
+                           i ));
       }
   }
   }

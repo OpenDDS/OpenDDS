@@ -34,7 +34,7 @@ DataReaderRemoteImpl::~DataReaderRemoteImpl (void)
 
 
 void DataReaderRemoteImpl::add_associations (const ::OpenDDS::DCPS::RepoId& yourId,
-				       const OpenDDS::DCPS::WriterAssociationSeq & writers)
+                                       const OpenDDS::DCPS::WriterAssociationSeq & writers)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
   parent_->add_associations( yourId, writers);
@@ -42,12 +42,12 @@ void DataReaderRemoteImpl::add_associations (const ::OpenDDS::DCPS::RepoId& your
 
 
 void DataReaderRemoteImpl::remove_associations (
-					  const OpenDDS::DCPS::WriterIdSeq & writers,
-					  ::CORBA::Boolean notify_lost
-					  )
+                                          const OpenDDS::DCPS::WriterIdSeq & writers,
+                                          ::CORBA::Boolean notify_lost
+                                          )
   ACE_THROW_SPEC ((
-		   CORBA::SystemException
-		   ))
+                   CORBA::SystemException
+                   ))
 {
   parent_->remove_associations ( writers, notify_lost);
 }
@@ -55,11 +55,11 @@ void DataReaderRemoteImpl::remove_associations (
 
 
 void DataReaderRemoteImpl::update_incompatible_qos (
-					      const OpenDDS::DCPS::IncompatibleQosStatus & status
-					      )
+                                              const OpenDDS::DCPS::IncompatibleQosStatus & status
+                                              )
   ACE_THROW_SPEC ((
-		   CORBA::SystemException
-		   ))
+                   CORBA::SystemException
+                   ))
 {
     parent_->update_incompatible_qos (status);
 }

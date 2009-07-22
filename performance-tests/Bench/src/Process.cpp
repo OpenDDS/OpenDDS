@@ -466,9 +466,9 @@ Process::run()
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Process::run() - ")
         ACE_TEXT("blocking main thread for %d seconds, ")
-	ACE_TEXT("from %d until %d.\n"),
+        ACE_TEXT("from %d until %d.\n"),
         this->options_.duration(),
-	now.sec(),
+        now.sec(),
         when.sec()
       ));
     }

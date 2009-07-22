@@ -24,7 +24,7 @@ class Publication_Manager_Impl;
 /// this defines a reference counted pointer for a publication manager
 /// implementation
 typedef class ACE_Refcounted_Auto_Ptr <Publication_Manager_Impl, 
-				       ACE_Null_Mutex> Publication_Manager_Ptr;
+                                       ACE_Null_Mutex> Publication_Manager_Ptr;
 
 /**
  * @class Publication_Manager_Impl

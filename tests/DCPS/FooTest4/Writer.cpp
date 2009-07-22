@@ -79,7 +79,7 @@ Writer::start ()
       builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
 
       sample.header_.source_timestamp_sec_ =
-		  static_cast<ACE_INT32> (now.sec ());
+                  static_cast<ACE_INT32> (now.sec ());
       sample.header_.source_timestamp_nanosec_ = now.usec() * 1000 ;
 
       sample.sample_ =  new ACE_Message_Block(sizeof(foo)) ;

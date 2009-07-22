@@ -20,9 +20,9 @@ SimpleSubscriber::~SimpleSubscriber()
 
 void
 SimpleSubscriber::init(OpenDDS::DCPS::TransportIdType          transport_id,
-		       OpenDDS::DCPS::RepoId                   sub_id,
-		       ssize_t                             num_publications,
-		       const OpenDDS::DCPS::AssociationData*   publications)
+                       OpenDDS::DCPS::RepoId                   sub_id,
+                       ssize_t                             num_publications,
+                       const OpenDDS::DCPS::AssociationData*   publications)
 {
   this->sub_id_ = sub_id;
   this->num_publications_ = num_publications;
@@ -51,18 +51,18 @@ SimpleSubscriber::init(OpenDDS::DCPS::TransportIdType          transport_id,
 
       switch (status)
         {
-	      case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-	        status_str = ACE_TEXT("ATTACH_BAD_TRANSPORT");
-	        break;
-	      case OpenDDS::DCPS::ATTACH_ERROR:
-	        status_str = ACE_TEXT("ATTACH_ERROR");
-	        break;
-	      case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-	        status_str = ACE_TEXT("ATTACH_INCOMPATIBLE_QOS");
-	        break;
-	      default:
-	        status_str = ACE_TEXT("Unknown Status");
-	        break;
+              case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
+                status_str = ACE_TEXT("ATTACH_BAD_TRANSPORT");
+                break;
+              case OpenDDS::DCPS::ATTACH_ERROR:
+                status_str = ACE_TEXT("ATTACH_ERROR");
+                break;
+              case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
+                status_str = ACE_TEXT("ATTACH_INCOMPATIBLE_QOS");
+                break;
+              default:
+                status_str = ACE_TEXT("Unknown Status");
+                break;
         }
 
       ACE_ERROR((LM_ERROR,
@@ -83,10 +83,10 @@ SimpleSubscriber::associate ()
   // Add the association between the local sub_id and the remote pub_id
   // to the transport via the TransportInterface.
   int result = this->add_publications (this->sub_id_,
-				       &this->reader_,
-				       0,   /* priority */
-				       this->num_publications_,
-				       this->publications_);
+                                       &this->reader_,
+                                       0,   /* priority */
+                                       this->num_publications_,
+                                       this->publications_);
 
   if (result != 0)
     {

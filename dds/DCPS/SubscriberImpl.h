@@ -233,7 +233,7 @@ namespace OpenDDS
 
     void reader_enabled(DataReaderRemote_ptr     remote_reader,
                         ::DDS::DataReader_ptr    local_reader,
-			DataReaderImpl*          local_reader_impl,
+                        DataReaderImpl*          local_reader_impl,
                         const char *topic_name,
                         RepoId topic_id
       )

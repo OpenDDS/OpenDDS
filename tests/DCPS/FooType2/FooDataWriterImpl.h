@@ -138,7 +138,7 @@ class FooType_Export FooDataWriterImpl : public virtual POA_FooDataWriter,
     ));
 
   ACE_Message_Block* marshal(
-		const Foo& instance_data,
+                const Foo& instance_data,
                 int  for_write = 1);
 
   ::DDS::ReturnCode_t get_or_create_instance_handle(
@@ -149,7 +149,7 @@ class FooType_Export FooDataWriterImpl : public virtual POA_FooDataWriter,
       const ::DDS::Time_t & source_timestamp);
 
   ::DDS::InstanceHandle_t get_instance_handle(
-		Foo instance_data);
+                Foo instance_data);
 
   virtual void init (
         ::DDS::Topic_ptr                       a_topic,

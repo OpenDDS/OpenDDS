@@ -203,10 +203,10 @@ PubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
       arg_shifter.consume_arg ();
     }
     else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-f"))) != 0)
-	  {
-	    sub_ready_filename_ = current_arg;
-	    arg_shifter.consume_arg ();
-	  }
+          {
+            sub_ready_filename_ = current_arg;
+            arg_shifter.consume_arg ();
+          }
     // The '-?' option
     else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-?")) == 0) {
       ACE_DEBUG((LM_DEBUG,

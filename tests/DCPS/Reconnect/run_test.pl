@@ -213,8 +213,8 @@ if ($kill_subscriber == 0)
 {
     $SubscriberResult = $Subscriber->WaitKill (300);
     if ($SubscriberResult != 0) {
-	print STDERR "ERROR: subscriber returned $SubscriberResult \n";
-	$status = 1;
+        print STDERR "ERROR: subscriber returned $SubscriberResult \n";
+        $status = 1;
     }
 }
 

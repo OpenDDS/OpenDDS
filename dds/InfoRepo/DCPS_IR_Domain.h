@@ -93,10 +93,10 @@ public:
                                    DCPS_IR_Participant* participantPtr);
 
   OpenDDS::DCPS::TopicStatus force_add_topic(const OpenDDS::DCPS::RepoId& topicId,
-					 const char* topicName,
-					 const char* dataTypeName,
-					 const ::DDS::TopicQos & qos,
-					 DCPS_IR_Participant* participantPtr);
+                                         const char* topicName,
+                                         const char* dataTypeName,
+                                         const ::DDS::TopicQos & qos,
+                                         DCPS_IR_Participant* participantPtr);
 
   /// Find the topic with the topic name
   /// Does NOT take ownership of any initial memory pointed to by topic
@@ -155,10 +155,10 @@ public:
 
 private:
   OpenDDS::DCPS::TopicStatus add_topic_i (OpenDDS::DCPS::RepoId& topicId,
-				      const char * topicName,
-				      const char * dataTypeName,
-				      const ::DDS::TopicQos & qos,
-				      DCPS_IR_Participant* participantPtr);
+                                      const char * topicName,
+                                      const char * dataTypeName,
+                                      const ::DDS::TopicQos & qos,
+                                      DCPS_IR_Participant* participantPtr);
 
   /// Takes ownership of the memory pointed to by desc if successful
   /// returns 0 if successful,

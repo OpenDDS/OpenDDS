@@ -21,7 +21,7 @@ Subscription_Manager::null () const
 
 ACE_INLINE void
 Subscription_Manager::access_topic (const Topic_Manager & topic,
-				    const DDS::DataReaderQos & qos)
+                                    const DDS::DataReaderQos & qos)
 {
   manager_impl_->access_topic (topic, qos, manager_impl_);
 }

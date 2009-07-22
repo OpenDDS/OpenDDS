@@ -23,7 +23,7 @@ class Sync_Export SyncClient_i : public POA_Sync::Client, public ACE_Task_Base
   enum Role {Pub, Sub};
 
   SyncClient_i (const std::string& sync_server, CORBA::ORB_ptr orb
-		, Role role)
+                , Role role)
     throw (InitError);
   virtual ~SyncClient_i (void);
 

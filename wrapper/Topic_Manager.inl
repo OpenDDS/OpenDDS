@@ -39,14 +39,14 @@ Topic_Manager::delete_topic (Domain_Manager & dm)
 
 ACE_INLINE DDS::DataReader_ptr
 Topic_Manager::datareader (const Subscription_Manager & sm,
-			   const DDS::DataReaderQos & qos)
+                           const DDS::DataReaderQos & qos)
 {
   return manager_impl_->datareader (sm, qos);
 }
 
 ACE_INLINE DDS::DataWriter_ptr 
 Topic_Manager::datawriter (const Publication_Manager & pm,
-			   const DDS::DataWriterQos & qos)
+                           const DDS::DataWriterQos & qos)
 {
   return manager_impl_->datawriter (pm, qos);
 }

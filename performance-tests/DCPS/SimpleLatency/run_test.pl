@@ -20,7 +20,7 @@ $app_bit_conf = "-ORBSvcConf ../../tcp.conf -DCPSBit 0";
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-				  "$repo_bit_conf -o $dcpsrepo_ior ");
+                                  "$repo_bit_conf -o $dcpsrepo_ior ");
 
 $Subscriber = PerlDDS::create_process ("dds_sub", "$app_bit_conf");
 
