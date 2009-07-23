@@ -12,7 +12,7 @@ and as the basis of the OpenDDS DCPS Information Repository (DCPSInfoRepo).
 The primary development of OpenDDS was done by the ACE/TAO development
 team at Object Computing, Incorporated (http://www.ociweb.com) in
 St. Louis and Phoenix. It is released under the same generous license
-terms as ACE, TAO and MPC.
+terms as ACE, TAO and MPC.  See the LICENSE file for details.
 
 This directory structure contains OpenDDS 1.3.
 
@@ -161,163 +161,8 @@ For building and installation instructions see docs/INSTALL.
 ======================================================================
 * OpenDDS Compliance with the DDS Specification
 
-OpenDDS supports the following capabilities defined in the DDS
-Specification:
-
-An implementation of the "Minimum Profile" (as defined in the spec)
-with the following qualifications.
-
---- supported QoS ----
-   Note: all other QoS can only have the default values
-         (as defined in the spec).
-  - DEADLINE
-  - DURABILITY
-  - DURABILITY_SERVICE
-  - LIFESPAN
-  - LIVELINESS.lease_duration = <any period of time>;
-  - RELIABILITY.kind = RELIABLE
-    RELIABILITY.kind = BEST_EFFORT
-  - HISTORY.kind = KEEP_LAST
-    HISTORY.depth = <any value>
-    HISTORY.kind = KEEP_ALL
-  - PARTITION
-  - RELIABILITY.max_blocking_time = <any period of time>
-  - RESOURCE_LIMITS.max_samples_per_instance
-  - RESOURCE_LIMITS.max_samples
-  - RESOURCE_LIMITS.max_instances
-  - USER_DATA 
-  - TOPIC_DATA 
-  - GROUP_DATA
-
---- supported entities ----
-DomainParticipantFactory, DomainParticipant, Topic, TopicDescription,
-Publisher DataWriter,DataReader, Subscriber, all Listeners.
-  - Does not support ContentFilteredTopic or
-    MultiTopic (or the methods on the supported topics related to
-    these classes).
-  - Conditions and WaitSet are now supported except QueryCondition is only
-    partially supported (ORDER BY is supported but WHERE is not).
-
--- listener calls supported ---
-  --- publisher side --
-  - on_offered_deadline_missed
-  - on_offered_incompatible_qos
-  - on_publication_match
-  --- subscriber side
-  - on_requested_deadline_missed
-  - on_requested_incompatible_qos
-  - on_sample_rejected
-  - on_liveliness_changed
-  - on_data_available
-  - on_subscription_match
-  - on_sample_lost
-  - on_data_on_readers
-
-  Other call are not supported because they are related to QoS that
-  is not supported.
-
---- data type definition  --
-Can define a structure in IDL that will be used as a DDS data type.
-The structure may include basic scalar types, strings, sequences,
-arrays, enumeration and unions.
-It may not contain interfaces or value types.
-
-Zero or more keys can be specified for a data type.
-
----- supported transports ---
-- SimpleTCP
-  A TCP based transport.
-- SimpleUDP
-  A UDP based transport (unreliable delivery).
-- SimpleMcast
-  A UDP multicast transport (unreliable delivery).
-- ReliableMulticast
-  A reliable UDP multicast transport
-
-The TAO implementation provides a transport framework that makes it
-easy to add a new transport.
-
-
-** Additional information on the supported QoS
-
-   - LIVELINESS.lease_duration = <any period of time>;
-      // set the liveliness heartbeat interval.
-      // note: LIVELINESS.kind must be AUTOMATIC
-
-  - RELIABILITY.kind = RELIABLE
-    This Qos should be associated with a SimpleTCP transport.
-    The SimpleTCP transport is currently the only transport supporting
-    RELIABILITY.kind = RELIABLE.
-
-  - RELIABILITY.kind = BEST_EFFORT
-    The SimpleUDP transport supports this Qos.
-
-The following two sets of QoS that define the sample queuing behavior
-of samples.
-
-  - HISTORY.kind = KEEP_LAST
-    HISTORY.depth = <any value>
-    When HISTORY.kind=KEEP_LAST up to HISTORY.depth samples will be
-    held by a DataWriter and DataReader.
-    If there are HISTORY.depth samples not sent by the publisher's
-    transport then the oldest sample will be "lost" when the write
-    call is made.  If the transport receives a sample and there are
-    HISTORY.depth NOT_READ samples then the oldest sample will be
-    "lost".  See Listener & Status section.
-
-  - HISTORY.kind = KEEP_ALL
-    RESOURCE_LIMITS.max_samples_per_instance
-    RELIABILITY.max_blocking_time = <any period of time>
-
-    When HISTORY.kind = KEEP_ALL a write call will block up to the
-    RELIABILITY.max_blocking_time because
-    RESOURCE_LIMITS.max_samples_per_instance are already waiting to be
-    sent.  The write call will return OK if the sample was queued (to
-    be sent) within the timeout period or TIMEOUT if the sample was
-    not queued (because the backpressure had not let up).
-    HISTORY.kind = KEEP_ALL does not make sense when use with the
-    SimpleUDP transport because the SimpleUDP transport does not
-    confirm that the sample was received by the subscriber and hence
-    will never block.
-
-    If the transport receives a sample and there are
-    RESOURCE_LIMITS.max_samples_per_instance
-    NOT_READ samples the newly received sample will be "rejected".
-
-  - RESOURCE_LIMITS.max_samples
-    This QoS determines the maximum number of samples allowed for a
-    given DataWriter or DataReader. In the OpenDDS implementation it
-    also determines the number of pre-allocated memory chunks for
-    sample data.  If the value is UNLIMITED (the default) then the
-    Service_Participant::n_chunks() value will be used in place of
-    RESOURCE_LIMITS.max_samples to determine the number of
-    pre-allocated sample chunks.  n_chunks() defaults to 20 but can be
-    set by the client code.
-
-    Note: unbounded data types do not use the pre-allocated memory for
-    samples but they do use pre-allocated data structures related to
-    samples) so unbounded data types will be less efficient than
-    bounded types.  Any type containing a sequence/string without
-    bounds or containing a union (even if it contains all bounded
-    fields) is an unbounded type.
-
-    // unbounded  (by any of the fields)
-    typedef sequence<float> FloatSeq;
-    struct unbounded {
-      string name;
-      A_Union data;
-      FloatSeq values;
-    };
-
-    // bounded
-    struct bounded {
-      string<10> name;
-      sequence<float,3> values;
-    };
-
-  - RESOURCE_LIMITS.max_instances
-    Can be set to any value but is not used by the TAO implementation.
-
+See opendds.org and the OpenDDS Developer's Guide at
+http://download.ociweb.com/OpenDDS/OpenDDS-latest.pdf.
 
 ======================================================================
 * Known Limitations
@@ -415,10 +260,6 @@ of samples.
 ----------------------------------------------------------------------
 ) LIFESPAN support on the publisher side only expires data when using
   a DURABILITY kind other than VOLATILE.
-
-----------------------------------------------------------------------
-) Pattern matching capabilities for the PARTITION QoS policy is
-  currently limited to wildcards containing '*' and/or '?'.
 
 ======================================================================
 * Test Failures
