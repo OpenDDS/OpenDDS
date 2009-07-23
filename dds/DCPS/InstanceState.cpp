@@ -59,7 +59,6 @@ OpenDDS::DCPS::InstanceState::unregister_was_received(const PublicationId& write
       this->instance_state_ = DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE ;
      // spec says if "no samples in the DataReader" then the
      //      instance is removed.
-
       this->release_if_empty ();
     }
 }
@@ -78,7 +77,6 @@ OpenDDS::DCPS::InstanceState::writer_became_dead (
       this->instance_state_ = DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE ;
      // spec says if "no samples in the DataReader" then the
      //      instance is removed.
-
       this->release_if_empty ();
     }
 }
