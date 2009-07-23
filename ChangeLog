@@ -80,7 +80,9 @@ Tue Jul 21 22:02:24 UTC 2009  Adam Mitz  <mitza@ociweb.com>
         * dds/DCPS/Service_Participant.cpp:
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
 
-          Thread priorities are no longer set on Win32 systems.
+          Thread priorities are no longer set on Windows systems.  Future work
+          in this area may provide a mapping of priority numbers suitable for
+          Windows's requirements.
 
 Fri Jul 17 21:46:45 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 

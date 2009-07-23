@@ -20,12 +20,12 @@ New to this version are the following changes:
   The current implementation does not honor the Changeable behavior of
   the policy.  Only the intially established policy value is honored for
   any given DataWriter Entity.  Thread priorities are not currently set
-  on Win32 systems.
+  on Windows systems.
 
 - Implemented the LATENCY_BUDGET Quality of service policy as a
   monitoring feature with an extended listener callback for exceeded
   budget values.  Statistics for latency are made available via an
-  OpenDDS specific extended API as well.
+  OpenDDS-specific extended API as well.
 
 - Implemented the ReadCondition interface and associated operations
   on the DataReader (such as read_w_condition).
@@ -75,7 +75,7 @@ New to this version are the following changes:
 - Added support for Windows Mobile 6 (WinCE) Standard SDK, and ACE_USES_WCHAR
   builds in general.  See docs/design/wchar.txt.
 
-- Updated support for DataWriter::unregister and DataWriter::dispose to
+- Updated support for DataWriter::unregister() and DataWriter::dispose() to
   properly release resources after all samples in a marked instance are
   removed.
 
