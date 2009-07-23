@@ -27,7 +27,6 @@ OpenDDS::DCPS::InstanceState::InstanceState (DataReaderImpl* reader,
 {
   ::DDS::DataReaderQos qos ;
   this->reader_->get_qos(qos) ;
-
 }
 
 // cannot ACE_INLINE because of #include loop
