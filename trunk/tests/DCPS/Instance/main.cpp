@@ -254,7 +254,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: unable to take next instance!\n")), 2);
 
-    /// Verify instance has been removed (size should be 0)
+    /// Verify instance has been removed
     if (test.has_instance(handle))
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
