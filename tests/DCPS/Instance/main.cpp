@@ -37,14 +37,8 @@ public:
   bool
   has_instance(DDS::InstanceHandle_t handle)
   {
-    OpenDDS::DCPS::SubscriptionInstance* si =
-      this->impl_->get_handle_instance(handle);
-    if (si == 0)
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l: has_instance()")
-                        ACE_TEXT(" ERROR: unable to find instance!\n")), true);
-
-    return si->rcvd_sample_.size_ != 0;
+    return this->impl_->instances_.find(handle)
+      != this->impl_->instances_.end();
   }
 
   bool
@@ -243,7 +237,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     //
     DDS_TEST test(reader_i);
     if (!test) return 1;
-
+    
     Foo foo;
     DDS::InstanceHandle_t handle;
 
@@ -252,7 +246,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     writer_i->write(foo, handle);
     writer_i->unregister(foo, handle);
 
-    ACE_OS::sleep(5); // wait for sample to arrive
+    ACE_OS::sleep(10); // wait for samples to arrive
 
     /// Take sample (this should cause the instance to be removed)
     if (!test.take_next_sample())
