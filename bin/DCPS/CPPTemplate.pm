@@ -620,7 +620,7 @@ void
       ::DDS::InstanceHandle_t handle = it->second;
       OpenDDS::DCPS::SubscriptionInstance* ptr = get_handle_instance(handle);
 
-      while (ptr->rcvd_sample_.size_)
+      while (ptr && ptr->rcvd_sample_.size_)
         {
           OpenDDS::DCPS::ReceivedDataElement * const head_ptr =
             ptr->rcvd_sample_.head_;
