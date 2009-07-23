@@ -62,7 +62,6 @@ OpenDDS::DCPS::InstanceState::unregister_was_received(const PublicationId& write
     }
 }
 
-
 void 
 OpenDDS::DCPS::InstanceState::writer_became_dead (
   const PublicationId&  writer_id,
@@ -79,7 +78,6 @@ OpenDDS::DCPS::InstanceState::writer_became_dead (
       this->release_if_empty ();
     }
 }
-
 
 void
 OpenDDS::DCPS::InstanceState::release_if_empty()
