@@ -131,12 +131,6 @@ namespace OpenDDS
       size_t no_writers_generation_count_;
 
       /**
-       * Keep track of the existence of a live writer since we need to
-       * discern this difference while in the DISPOSED state.
-       */
-      bool no_writers_;
-
-      /**
        * Keep track of whether the DataReader is empty or not.
        */
       bool empty_;
