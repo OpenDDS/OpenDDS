@@ -20,6 +20,7 @@ OpenDDS::DCPS::InstanceState::InstanceState (DataReaderImpl* reader,
    , view_state_( 0)
    , disposed_generation_count_( 0)
    , no_writers_generation_count_( 0)
+   , no_writers_( false)
    , empty_( true)
    , release_pending_(false)
    , reader_( reader)
@@ -72,6 +73,7 @@ OpenDDS::DCPS::InstanceState::writer_became_dead (
 
   if(writers_.empty () && this->instance_state_ & DDS::ALIVE_INSTANCE_STATE)
     {
+      this->no_writers_ = true;
       this->instance_state_ = DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE ;
      // spec says if "no samples in the DataReader" then the
      //      instance is removed.
@@ -82,7 +84,7 @@ OpenDDS::DCPS::InstanceState::writer_became_dead (
 void
 OpenDDS::DCPS::InstanceState::release_if_empty()
 {
-  if( this->empty_ && this->writers_.empty())
+  if( this->empty_ && this->no_writers_)
   {
     this->reader_->release_instance (this->handle_);
     this->release_pending_ = false;
