@@ -1,3 +1,78 @@
+Mon Jul 27 23:20:44 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+	  Updated release notes with instance operation changes.
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        * bin/DCPS/IDLTemplate.pm:
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DdsDcpsPublication.idl:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+
+	  Updated instance operations to comply with formal/07-01-01.
+
+        * DevGuideExamples/DCPS/Messenger/Writer.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/Writer.cpp:
+        * examples/DCPS/IntroductionToOpenDDS/publisher.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/Writer.cpp:
+        * examples/DCPS/Messenger_Imr/Writer.cpp:
+        * performance-tests/DCPS/InfoRepo_population/Writer.cpp:
+        * performance-tests/DCPS/McastListenerTest/Writer.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/Writer.cpp:
+        * performance-tests/DCPS/SimpleLatency/PubListener.cpp:
+        * performance-tests/DCPS/SimpleLatency/SubListener.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/TCPListenerTest/Writer.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/Writer.cpp:
+        * performance-tests/DCPS/TransportLatency/Writer.cpp:
+        * performance-tests/DCPS/UDPListenerTest/Writer.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/Writer.cpp:
+        * tests/DCPS/BuiltInTopic/common.cpp:
+        * tests/DCPS/BuiltInTopicTest/Writer.cpp:
+        * tests/DCPS/CompatibilityTest/Writer.cpp:
+        * tests/DCPS/CorbaSeq/Writer.cpp:
+        * tests/DCPS/Deadline/Writer.cpp:
+        * tests/DCPS/FooTest2/main.cpp:
+        * tests/DCPS/FooTest3/Writer.cpp:
+        * tests/DCPS/FooTest3NoKey/Writer.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/Writer.cpp:
+        * tests/DCPS/FooTest3_2/Writer.cpp:
+        * tests/DCPS/FooTest4_0/Writer.cpp:
+        * tests/DCPS/FooTest5/Writer.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/FooType2/FooDataWriterImpl.h:
+        * tests/DCPS/FooType2/FooDataWriterImpl.cpp:
+        * tests/DCPS/Instance/main.cpp:
+        * tests/DCPS/LatencyBudget/Writer.cpp:
+        * tests/DCPS/Lifespan/Writer.cpp:
+        * tests/DCPS/LivelinessTest/Writer.cpp:
+        * tests/DCPS/LivelinessTimeout/Writer.cpp:
+        * tests/DCPS/MultiDPTest/Writer.cpp:
+        * tests/DCPS/MultiTopicTest/Writer.cpp:
+        * tests/DCPS/NotifyTest/Writer.cpp:
+        * tests/DCPS/Partition/Publisher.cpp:
+        * tests/DCPS/PersistentDurability/Writer.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/Writer.cpp:
+        * tests/DCPS/Reconnect/Writer.cpp:
+        * tests/DCPS/SetQosDeadline/Writer.cpp:
+        * tests/DCPS/SetQosPartition/Writer.cpp:
+        * tests/DCPS/StringKey/Writer.cpp:
+        * tests/DCPS/Thrasher/ParticipantTask.cpp:
+        * tests/DCPS/TransientDurability/Writer.cpp:
+        * tests/DCPS/TransientLocalTest/Writer.cpp:
+        * tests/DCPS/ViewState/main.cpp:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+        * tests/DCPS/sub_init_loop/Writer.cpp:
+        * wrapper/example/publisher.cpp:
+
+	  Updated examples, tests, and DevGuideExamples to make use
+	  of refactored instance operations.
+
 Mon Jul 27 19:28:40 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * DDS_release_notes.txt:
@@ -8,8 +83,8 @@ Mon Jul 27 19:28:40 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * dds/DCPS/InstanceState.cpp:
         * tests/DCPS/Instance/main.cpp:
 
-	  Re-applied instance changes (r2279, r2286) to trunk with
-	  additional changes to correct invalid container modifications.
+          Re-applied instance changes (r2279, r2286) to trunk with
+          additional changes to correct invalid container modifications.
 
 Mon Jul 27 19:26:05 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 

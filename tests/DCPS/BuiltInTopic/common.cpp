@@ -420,7 +420,7 @@ int write ()
     TEST_CHECK (! CORBA::is_nil (foo_dw.in ()));
 
     ::DDS::InstanceHandle_t handle
-        = foo_dw->_cxx_register (foo);
+        = foo_dw->register_instance(foo);
 
     for (int i = 0; i< num_writes; i ++)
     {

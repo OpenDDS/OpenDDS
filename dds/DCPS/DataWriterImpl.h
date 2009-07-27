@@ -168,17 +168,20 @@ namespace OpenDDS
        * the transport to broadcast the registered instance.
        */
       ::DDS::ReturnCode_t
-      register_instance (::DDS::InstanceHandle_t& handle,
-                         DataSample* data,
-                         const ::DDS::Time_t & source_timestamp)
+      register_instance_i(
+          ::DDS::InstanceHandle_t& handle,
+          DataSample* data,
+          const ::DDS::Time_t & source_timestamp)
         ACE_THROW_SPEC ((CORBA::SystemException));
 
       /**
        * Delegate to the WriteDataContainer to unregister and tell
        * the transport to broadcast the unregistered instance.
        */
-      ::DDS::ReturnCode_t unregister (::DDS::InstanceHandle_t handle,
-                                      const ::DDS::Time_t & source_timestamp)
+      ::DDS::ReturnCode_t
+      unregister_instance_i(
+	  ::DDS::InstanceHandle_t handle,
+          const ::DDS::Time_t & source_timestamp)
         ACE_THROW_SPEC ((CORBA::SystemException));
 
       /**

@@ -87,7 +87,7 @@ Writer::svc ()
               ACE_TEXT("%T (%P|%t) Writer::svc starting to write.\n")));
 
         ::DDS::InstanceHandle_t handle
-            = foo_dw->_cxx_register (foo);
+            = foo_dw->register_instance(foo);
 
         for (int i = 0; i< num_writes_per_thread_; i ++)
           {
@@ -116,7 +116,7 @@ Writer::svc ()
               ACE_TEXT("%T (%P|%t) Writer::svc starting to write.\n")));
 
         ::DDS::InstanceHandle_t handle
-            = foo_dw->_cxx_register (foo);
+            = foo_dw->register_instance(foo);
 
         char buff[512] ;
         for (int i = 0; i< num_writes_per_thread_; i ++)
@@ -147,7 +147,7 @@ Writer::svc ()
               ACE_TEXT("%T (%P|%t) Writer::svc starting to write.\n")));
 
         ::DDS::InstanceHandle_t handle
-            = foo_dw->_cxx_register (foo);
+            = foo_dw->register_instance(foo);
 
         char buff[512] ;
         for (int i = 0; i< num_writes_per_thread_; i ++)

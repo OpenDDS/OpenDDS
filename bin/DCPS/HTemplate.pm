@@ -104,25 +104,25 @@ public:
   //Destructor
   virtual ~<%TYPE%>DataWriterImpl (void);
 
-  virtual DDS::InstanceHandle_t _cxx_register (
-      const ::<%SCOPE%><%TYPE%> & instance_data)
+  virtual DDS::InstanceHandle_t register_instance (
+      const ::<%SCOPE%><%TYPE%> & instance)
     ACE_THROW_SPEC ((CORBA::SystemException));
 
-  virtual DDS::InstanceHandle_t register_w_timestamp (
-      const ::<%SCOPE%><%TYPE%> & instance_data,
+  virtual DDS::InstanceHandle_t register_instance_w_timestamp (
+      const ::<%SCOPE%><%TYPE%> & instance,
       ::DDS::InstanceHandle_t handle,
-      const ::DDS::Time_t & source_timestamp)
+      const ::DDS::Time_t & timestamp)
     ACE_THROW_SPEC ((CORBA::SystemException));
 
-  virtual DDS::ReturnCode_t unregister (
-      const ::<%SCOPE%><%TYPE%> & instance_data,
+  virtual DDS::ReturnCode_t unregister_instance (
+      const ::<%SCOPE%><%TYPE%> & instance,
       ::DDS::InstanceHandle_t handle)
     ACE_THROW_SPEC ((CORBA::SystemException));
 
-  virtual DDS::ReturnCode_t unregister_w_timestamp (
-      const ::<%SCOPE%><%TYPE%> & instance_data,
+  virtual DDS::ReturnCode_t unregister_instance_w_timestamp (
+      const ::<%SCOPE%><%TYPE%> & instance,
       ::DDS::InstanceHandle_t handle,
-      const ::DDS::Time_t & source_timestamp)
+      const ::DDS::Time_t & timestamp)
     ACE_THROW_SPEC ((CORBA::SystemException));
 
   //WARNING: If the handle is non-nil and the instance is not registered

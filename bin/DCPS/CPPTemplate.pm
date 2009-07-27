@@ -133,22 +133,22 @@ char *
 }
 
 DDS::InstanceHandle_t
-<%TYPE%>DataWriterImpl::_cxx_register (
-    const ::<%SCOPE%><%TYPE%> & instance_data)
+<%TYPE%>DataWriterImpl::register_instance (
+    const ::<%SCOPE%><%TYPE%> & instance)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
-  ::DDS::Time_t const source_timestamp =
+  ::DDS::Time_t const timestamp =
     ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
-  return register_w_timestamp (instance_data,
-                               ::DDS::HANDLE_NIL,
-                               source_timestamp);
+  return register_instance_w_timestamp (instance,
+                                        ::DDS::HANDLE_NIL,
+                                        timestamp);
 }
 
 DDS::InstanceHandle_t
-<%TYPE%>DataWriterImpl::register_w_timestamp (
-    const ::<%SCOPE%><%TYPE%> & instance_data,
+<%TYPE%>DataWriterImpl::register_instance_w_timestamp (
+    const ::<%SCOPE%><%TYPE%> & instance,
     ::DDS::InstanceHandle_t /* handle */,
-    const ::DDS::Time_t & source_timestamp)
+    const ::DDS::Time_t & timestamp)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ::DDS::InstanceHandle_t registered_handle;
@@ -160,13 +160,14 @@ DDS::InstanceHandle_t
 
   ::DDS::ReturnCode_t const ret
     = this->get_or_create_instance_handle(registered_handle,
-                                          instance_data,
-                                          source_timestamp);
+                                          instance,
+                                          timestamp);
   if (ret != ::DDS::RETCODE_OK)
   {
     ACE_ERROR ((LM_ERROR,
                 ACE_TEXT("(%P|%t) ")
-                ACE_TEXT("<%TYPE%>DataWriterImpl::register_w_timestamp, ")
+                ACE_TEXT("<%TYPE%>DataWriterImpl::")
+                ACE_TEXT("register_instance_w_timestamp, ")
                 ACE_TEXT("register failed error=%d.\n"),
                 ret));
   }
@@ -176,24 +177,24 @@ DDS::InstanceHandle_t
 
 
 DDS::ReturnCode_t
-<%TYPE%>DataWriterImpl::unregister (
-    const ::<%SCOPE%><%TYPE%> & instance_data,
+<%TYPE%>DataWriterImpl::unregister_instance (
+    const ::<%SCOPE%><%TYPE%> & instance,
     ::DDS::InstanceHandle_t handle)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
-  ::DDS::Time_t const source_timestamp =
+  ::DDS::Time_t const timestamp =
     ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
 
-  return unregister_w_timestamp (instance_data,
-                                 handle,
-                                 source_timestamp);
+  return unregister_instance_w_timestamp (instance,
+                                          handle,
+                                          timestamp);
 }
 
 DDS::ReturnCode_t
-<%TYPE%>DataWriterImpl::unregister_w_timestamp (
-    const ::<%SCOPE%><%TYPE%> & instance_data,
+<%TYPE%>DataWriterImpl::unregister_instance_w_timestamp (
+    const ::<%SCOPE%><%TYPE%> & instance,
     ::DDS::InstanceHandle_t handle,
-    const ::DDS::Time_t & source_timestamp)
+    const ::DDS::Time_t & timestamp)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
@@ -202,7 +203,7 @@ DDS::ReturnCode_t
                     ::DDS::RETCODE_ERROR);
 
   ::DDS::InstanceHandle_t const registered_handle =
-      this->find_instance_handle(instance_data);
+      this->find_instance_handle(instance);
 
   if (registered_handle == ::DDS::HANDLE_NIL)
   {
@@ -210,7 +211,8 @@ DDS::ReturnCode_t
     // already unregistered.
     ACE_ERROR_RETURN ((LM_ERROR,
                         ACE_TEXT("(%P|%t) ")
-                        ACE_TEXT("<%TYPE%>DataWriterImpl::unregister, ")
+                        ACE_TEXT("<%TYPE%>DataWriterImpl::")
+                        ACE_TEXT("unregister_instance_w_timestamp, ")
                         ACE_TEXT("The instance is not registered.\n")),
                         ::DDS::RETCODE_ERROR);
   }
@@ -218,18 +220,19 @@ DDS::ReturnCode_t
   {
     ACE_ERROR_RETURN ((LM_ERROR,
                         ACE_TEXT("(%P|%t) ")
-                        ACE_TEXT("<%TYPE%>DataWriterImpl::unregister, ")
+                        ACE_TEXT("<%TYPE%>DataWriterImpl::")
+                        ACE_TEXT("unregister_w_timestamp, ")
                         ACE_TEXT("The given handle=%X is different from ")
                         ACE_TEXT("registered handle=%X.\n"),
                         handle, registered_handle),
                         ::DDS::RETCODE_ERROR);
   }
 
-  // DataWriterImpl::unregister will call back to inform the
+  // DataWriterImpl::unregister_instance_i will call back to inform the
   // <%TYPE%>DataWriter.
   // That the instance handle is removed from there and hence
   // <%TYPE%>DataWriter can remove the instance here.
-  return OpenDDS::DCPS::DataWriterImpl::unregister(handle, source_timestamp);
+  return OpenDDS::DCPS::DataWriterImpl::unregister_instance_i(handle, timestamp);
 }
 
 DDS::ReturnCode_t
@@ -530,7 +533,7 @@ ACE_Message_Block*
       this->dds_marshal(instance_data, 0); //NOT_FOR_WRITE
 
     // tell DataWriterLocal and Publisher about the instance.
-    ::DDS::ReturnCode_t ret = register_instance(handle, marshalled, source_timestamp);
+    ::DDS::ReturnCode_t ret = register_instance_i(handle, marshalled, source_timestamp);
     // note: the WriteDataContainer/PublicationInstance maintains ownership
     // of the marshalled sample.
 

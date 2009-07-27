@@ -46,7 +46,7 @@ Writer::run_test (int pass)
               pass));
 
     ::DDS::InstanceHandle_t handle
-        = foo_dw->_cxx_register (foo);
+        = foo_dw->register_instance(foo);
 
     for (int i = 0; i< num_writes_per_thread_; i ++)
     {

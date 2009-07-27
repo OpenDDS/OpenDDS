@@ -551,7 +551,7 @@ PubDriver::register_test ()
   foo1.writer_id = -1;
 
   ::DDS::InstanceHandle_t handle1
-    = foo_datawriter_->_cxx_register (foo1);
+    = foo_datawriter_->register_instance(foo1);
 
   ::Xyz::Foo foo2;
   foo2.a_long_value = 101010;
@@ -560,7 +560,7 @@ PubDriver::register_test ()
   foo2.writer_id = 99;
 
   ::DDS::InstanceHandle_t handle2
-    = foo_datawriter_->_cxx_register (foo2);
+    = foo_datawriter_->register_instance(foo2);
 
   TEST_CHECK (handle1 == handle2);
 
@@ -601,7 +601,7 @@ PubDriver::dispose_test ()
   foo1.writer_id = -1;
 
   ::DDS::InstanceHandle_t handle
-    = foo_datawriter_->_cxx_register (foo1);
+    = foo_datawriter_->register_instance(foo1);
 
   ::Xyz::Foo foo2;
   foo2.a_long_value = 101010;
@@ -643,7 +643,7 @@ PubDriver::unregister_test ()
   foo1.writer_id = -1;
 
   ::DDS::InstanceHandle_t handle
-    = foo_datawriter_->_cxx_register (foo1);
+    = foo_datawriter_->register_instance(foo1);
 
   ::Xyz::Foo foo2;
   foo2.a_long_value = 101010;
@@ -656,8 +656,7 @@ PubDriver::unregister_test ()
 
   TEST_CHECK (ret == ::DDS::RETCODE_OK);
 
-  ret = foo_datawriter_->unregister (foo1,
-                                     handle);
+  ret = foo_datawriter_->unregister_instance(foo1, handle);
 
   TEST_CHECK (ret == ::DDS::RETCODE_OK);
 
@@ -700,7 +699,7 @@ PubDriver::resume_test ()
   foo1.writer_id = -1;
 
   ::DDS::InstanceHandle_t handle
-    = foo_datawriter_->_cxx_register (foo1);
+    = foo_datawriter_->register_instance(foo1);
 
   ::Xyz::Foo foo2;
   foo2.a_long_value = 101010;
@@ -949,7 +948,7 @@ PubDriver::allocator_test ()
   foo1.writer_id = -1;
 
   ::DDS::InstanceHandle_t handle
-    = foo_datawriter_->_cxx_register (foo1);
+    = foo_datawriter_->register_instance(foo1);
 
   ::Xyz::Foo foo2;
   foo2.a_long_value = 101010;
@@ -1018,7 +1017,7 @@ PubDriver::liveliness_test ()
   foo.writer_id = 0;
 
   ::DDS::InstanceHandle_t handle
-    = foo_datawriter_->_cxx_register (foo);
+    = foo_datawriter_->register_instance(foo);
 
   foo.handle_value = handle;
 

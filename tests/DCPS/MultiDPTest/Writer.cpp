@@ -50,7 +50,7 @@ template<class DT, class DW, class DW_var>
               ACE_TEXT("%T (%P|%t) Writer::svc starting to write.\n")));
 
     ::DDS::InstanceHandle_t handle
-        = foo_dw->_cxx_register (foo);
+        = foo_dw->register_instance(foo);
 
     for (int i = 0; i< num_samples_per_instance; i ++)
     {

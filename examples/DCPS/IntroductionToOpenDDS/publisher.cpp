@@ -186,15 +186,15 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
     // Register the Exchange Event and the two Quoted securities (SPY and MDY)
     StockQuoter::ExchangeEvent ex_evt;
     ex_evt.exchange = STOCK_EXCHANGE_NAME;
-    DDS::InstanceHandle_t exchange_handle = exchange_evt_dw->_cxx_register(ex_evt);
+    DDS::InstanceHandle_t exchange_handle = exchange_evt_dw->register_instance(ex_evt);
 
     StockQuoter::Quote spy;
     spy.ticker = CORBA::string_dup("SPY");
-    DDS::InstanceHandle_t spy_handle = quote_dw->_cxx_register(spy);
+    DDS::InstanceHandle_t spy_handle = quote_dw->register_instance(spy);
 
     StockQuoter::Quote mdy;
     mdy.ticker = CORBA::string_dup("MDY");
-    DDS::InstanceHandle_t mdy_handle = quote_dw->_cxx_register(mdy);
+    DDS::InstanceHandle_t mdy_handle = quote_dw->register_instance(mdy);
 
     // Publish...
 

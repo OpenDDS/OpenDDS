@@ -128,7 +128,7 @@ void AckDataReaderListenerImpl::init(DDS::DataReader_ptr dr,
   this->dw_servant_ =
     dynamic_cast<PubMessageDataWriterImpl*>(pubmessage_dw.in());
   DDSPerfTest::PubMessage msg;
-  this->handle_ = this->dw_servant_->_cxx_register (msg);
+  this->handle_ = this->dw_servant_->register_instance(msg);
 }
 
 

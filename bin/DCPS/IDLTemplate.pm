@@ -53,26 +53,26 @@ local interface <%TYPE%>TypeSupport : OpenDDS::DCPS::TypeSupport {
 
 /** DataWriter interface for <%TYPE%> data type.
  *
- * See the DDS specification, OMG formal/04-12-02, for a description of
- * this interface.
+ * See the DDS specifications, OMG formal/04-12-02 and formal/07-01-01,
+ * for a description of this interface.
  */
 local interface <%TYPE%>DataWriter : DDS::DataWriter {
-    DDS::InstanceHandle_t register(
-                in <%SCOPE%><%TYPE%> instance_data);
+    DDS::InstanceHandle_t register_instance(
+                in <%SCOPE%><%TYPE%> instance);
 
-    DDS::InstanceHandle_t register_w_timestamp(
-                in <%SCOPE%><%TYPE%> instance_data,
+    DDS::InstanceHandle_t register_instance_w_timestamp(
+                in <%SCOPE%><%TYPE%> instance,
                 in DDS::InstanceHandle_t handle,
-                in DDS::Time_t source_timestamp);
+                in DDS::Time_t timestamp);
 
-    DDS::ReturnCode_t unregister(
-                in <%SCOPE%><%TYPE%> instance_data,
+    DDS::ReturnCode_t unregister_instance(
+                in <%SCOPE%><%TYPE%> instance,
                 in DDS::InstanceHandle_t handle);
 
-    DDS::ReturnCode_t unregister_w_timestamp(
-                in <%SCOPE%><%TYPE%> instance_data,
+    DDS::ReturnCode_t unregister_instance_w_timestamp(
+                in <%SCOPE%><%TYPE%> instance,
                 in DDS::InstanceHandle_t handle,
-                in DDS::Time_t source_timestamp);
+                in DDS::Time_t timestamp);
 
     //WARNING: If the handle is non-nil and the instance is not registered
     //         then this operation may cause an access violation.

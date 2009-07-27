@@ -428,7 +428,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
           // register the data so we can use the handle.
           ::DDS::InstanceHandle_t handle
-            = fast_dw->_cxx_register (foo1);
+            = fast_dw->register_instance(foo1);
 
           // write first sample
           fast_dw->write(foo1, handle);

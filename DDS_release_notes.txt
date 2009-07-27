@@ -6,6 +6,13 @@ New to this version are the following changes:
   properly release resources after all samples in a marked instance are
   removed.
 
+- The following operations in FooDataWriter have been renamed to reflect
+  changes in formal/07-01-01:
+    * register()/_cxx_register()  => register_instance()
+    * register_w_timestamp()      => register_instance_w_timestamp()
+    * unregister()                => unregister_instance()
+    * unregister_w_timestamp()    => unregister_instance_w_timestamp()
+
 =========================================================================
 
 Version 1.3 of OpenDDS.

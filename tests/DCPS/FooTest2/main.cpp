@@ -78,7 +78,7 @@ public:
       foo.y = (float) 987.654;
 
       ::DDS::InstanceHandle_t handle
-        = foo_dw->_cxx_register (foo);
+        = foo_dw->register_instance(foo);
 
       Foo key_holder;
       ::DDS::ReturnCode_t ret

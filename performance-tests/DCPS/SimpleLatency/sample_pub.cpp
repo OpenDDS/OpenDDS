@@ -252,7 +252,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
        pubmessage_data.seqnum = 1;
 
        DDS::InstanceHandle_t handle =
-         pubmessage_writer->_cxx_register (pubmessage_data);
+         pubmessage_writer->register_instance(pubmessage_data);
 
        pubmessage_writer->write (pubmessage_data,
                                  handle);
