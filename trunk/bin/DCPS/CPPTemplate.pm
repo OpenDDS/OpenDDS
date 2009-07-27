@@ -612,24 +612,28 @@ void
 
 <%TYPE%>DataReaderImpl::~<%TYPE%>DataReaderImpl ()
 {
-  InstanceMap::iterator const the_end = instance_map_.end ();
-  for (InstanceMap::iterator it = instance_map_.begin ();
-       it != the_end;
-       ++it)
+  for (InstanceMap::iterator it = instance_map_.begin();
+       it != instance_map_.end(); ++it)
+  {
+    OpenDDS::DCPS::SubscriptionInstance* ptr =
+      get_handle_instance(it->second);
+
+    if (ptr == 0) continue;
+
+    // Cancel pending state changes; this avoids potential
+    // conflicts when releasing shared resources.
+    ptr->instance_state_.cancel_pending();
+
+    while (ptr->rcvd_sample_.size_ > 0)
     {
-      ::DDS::InstanceHandle_t handle = it->second;
-      OpenDDS::DCPS::SubscriptionInstance* ptr = get_handle_instance(handle);
-
-      while (ptr && ptr->rcvd_sample_.size_)
-        {
-          OpenDDS::DCPS::ReceivedDataElement * const head_ptr =
-            ptr->rcvd_sample_.head_;
-          ptr->rcvd_sample_.remove(head_ptr);
-          dec_ref_data_element(head_ptr);
-        }
-
-      delete ptr;
+      OpenDDS::DCPS::ReceivedDataElement * const head_ptr =
+	ptr->rcvd_sample_.head_;
+      ptr->rcvd_sample_.remove(head_ptr);
+      dec_ref_data_element(head_ptr);
     }
+
+    delete ptr;
+  }
 
   delete data_allocator_;
   //X SHH release the data samples in the instance_map_.

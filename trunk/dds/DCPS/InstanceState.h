@@ -75,7 +75,10 @@ namespace OpenDDS
 
       /// DataReader has become empty.
       void empty(bool value);
-      
+
+      /// Cancel pending state changes.
+      void cancel_pending();
+
       /// Remove the instance if it's instance has no samples
       /// and no writers.
       void release_if_empty();
@@ -131,15 +134,14 @@ namespace OpenDDS
       size_t no_writers_generation_count_;
 
       /**
-       * Keep track of the existence of a live writer since we need to
-       * discern this difference while in the DISPOSED state.
-       */
-      bool no_writers_;
-
-      /**
        * Keep track of whether the DataReader is empty or not.
        */
       bool empty_;
+
+      /**
+       * Keep track of whether the instance is waiting to be released.
+       */
+      bool release_pending_;
 
       /**
        * Reference to our containing reader.  This is used to call back

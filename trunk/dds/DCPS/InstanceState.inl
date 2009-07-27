@@ -137,8 +137,6 @@ OpenDDS::DCPS::InstanceState::data_was_received(const PublicationId& writer_id)
       default: break ;
     }
     this->instance_state_ = DDS::ALIVE_INSTANCE_STATE ;
-
-    this->no_writers_ = false;
 }
 
 ACE_INLINE
@@ -155,7 +153,6 @@ OpenDDS::DCPS::InstanceState::lively(const PublicationId& writer_id)
     {
       this->no_writers_generation_count_++ ;
       this->instance_state_ = DDS::ALIVE_INSTANCE_STATE ;
-      this->no_writers_ = false;
     }
 }
 
@@ -167,7 +164,9 @@ OpenDDS::DCPS::InstanceState::empty( bool value)
   // Manage the instance state due to the DataReader becoming empty
   // here.
   //
-  this->empty_ = value ;
+  if ((this->empty_ = value) && this->release_pending_)
+  {
+    release_if_empty();
+  }
 }
-
 
