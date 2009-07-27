@@ -1,3 +1,12 @@
+Version 1.4 of OpenDDS.
+
+New to this version are the following changes:
+
+- First release note here
+
+
+=========================================================================
+
 Version 1.3 of OpenDDS.
 
 * This will be the final release of OpenDDS that will build with the current
