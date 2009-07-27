@@ -1,0 +1,14 @@
+project : dcps {
+  after         += MultiTopicTypes
+  libout         = .
+  idlflags      += -Wb,export_macro=FooLib_Export -Wb,export_include=foolib_export.h
+  dynamicflags   = FOOLIB_BUILD_DLL
+  dcps_ts_flags += --export=FooLib_Export
+
+  TypeSupport_Files {
+    Foo1Def.idl
+    Foo2Def.idl
+    Foo3Def.idl
+  }
+}
+

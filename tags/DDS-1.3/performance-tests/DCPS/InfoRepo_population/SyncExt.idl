@@ -1,0 +1,12 @@
+#include "Sync.idl"
+
+module SyncExt
+{
+  enum Role {Topic, Participant, Publisher, Subscriber};
+
+  interface Collector : Sync::Server
+  {
+    void publish (in Role rol, in long instances
+                  , in long msecs);
+  };
+};
