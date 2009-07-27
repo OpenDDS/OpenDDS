@@ -41,7 +41,6 @@ Writer::end ()
   wait ();
 }
 
-
 int
 Writer::svc ()
 {
