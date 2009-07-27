@@ -161,7 +161,7 @@ ParticipantTask::svc()
     for (std::size_t i = 0; i < samples_per_thread_; ++i)
     {
       Foo foo;
-      DDS::InstanceHandle_t handle = writer_i->_cxx_register(foo);
+      DDS::InstanceHandle_t handle = writer_i->register_instance(foo);
 
       if (writer_i->write(foo, handle) != DDS::RETCODE_OK)
         ACE_ERROR_RETURN((LM_ERROR,

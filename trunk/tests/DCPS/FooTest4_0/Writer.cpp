@@ -105,7 +105,7 @@ void Writer::write (char message_id, const ::Xyz::Foo &foo)
 
     case ::OpenDDS::DCPS::INSTANCE_REGISTRATION:
       ACE_OS::printf ("registering foo.key = %d\n", foo.key) ;
-      handle = fast_dw_->_cxx_register (foo);
+      handle = fast_dw_->register_instance(foo);
       break;
 
     case ::OpenDDS::DCPS::DISPOSE_INSTANCE:

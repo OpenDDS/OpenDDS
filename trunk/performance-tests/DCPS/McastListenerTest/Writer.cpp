@@ -49,7 +49,7 @@ void write (long id,
             ACE_TEXT("%T (%P|%t) Writer::svc starting to write.\n")));
 
   ::DDS::InstanceHandle_t handle
-      = pt_dw->_cxx_register (data);
+      = pt_dw->register_instance(data);
 
   {  // Extra scope for VC6
   for (int i = 0; i < num_messages; i ++)

@@ -70,7 +70,7 @@ Writer::svc ()
 
     Messenger::Message message;
     message.subject_id = 99;
-    ::DDS::InstanceHandle_t handle = message_dw->_cxx_register (message);
+    ::DDS::InstanceHandle_t handle = message_dw->register_instance(message);
 
     ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("%T (%P|%t) Writer::svc starting to write.\n")));

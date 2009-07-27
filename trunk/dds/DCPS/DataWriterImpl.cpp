@@ -1232,17 +1232,17 @@ DataWriterImpl::enable ()
 
  
 ::DDS::ReturnCode_t
-DataWriterImpl::register_instance(::DDS::InstanceHandle_t& handle,
-                                  DataSample* data,
-                                  const ::DDS::Time_t & source_timestamp)
+DataWriterImpl::register_instance_i(::DDS::InstanceHandle_t& handle,
+                                    DataSample* data,
+                                    const ::DDS::Time_t & source_timestamp)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
-  DBG_ENTRY_LVL("DataWriterImpl","register_instance",6);
+  DBG_ENTRY_LVL("DataWriterImpl","register_instance_i",6);
   if (enabled_ == false)
   {
     ACE_ERROR_RETURN ((LM_ERROR,
                        ACE_TEXT("(%P|%t) ERROR: ")
-                       ACE_TEXT("DataWriterImpl::register_instance: ")
+                       ACE_TEXT("DataWriterImpl::register_instance_i: ")
                        ACE_TEXT(" Entity is not enabled. \n")),
                       ::DDS::RETCODE_NOT_ENABLED);
   }
@@ -1252,7 +1252,7 @@ DataWriterImpl::register_instance(::DDS::InstanceHandle_t& handle,
   if (ret != ::DDS::RETCODE_OK)
   {
     ACE_ERROR_RETURN ((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::register_instance: ")
+                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::register_instance_i: ")
                        ACE_TEXT("register instance with container failed.\n")),
                       ret);
   }
@@ -1276,7 +1276,7 @@ DataWriterImpl::register_instance(::DDS::InstanceHandle_t& handle,
   {
     ACE_ERROR_RETURN ((LM_ERROR,
                        ACE_TEXT("(%P|%t) ERROR: ")
-                       ACE_TEXT("DataWriterImpl::register_instance: ")
+                       ACE_TEXT("DataWriterImpl::register_instance_i: ")
                        ACE_TEXT("send_control failed.\n")),
                       ::DDS::RETCODE_ERROR);
   }
@@ -1286,15 +1286,15 @@ DataWriterImpl::register_instance(::DDS::InstanceHandle_t& handle,
 
 
 ::DDS::ReturnCode_t
-DataWriterImpl::unregister ( ::DDS::InstanceHandle_t handle,
-                             const ::DDS::Time_t & source_timestamp)
+DataWriterImpl::unregister_instance_i (::DDS::InstanceHandle_t handle,
+                                       const ::DDS::Time_t & source_timestamp)
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
-  DBG_ENTRY_LVL("DataWriterImpl","unregister",6);
+  DBG_ENTRY_LVL("DataWriterImpl","unregister_instance_i",6);
   if (enabled_ == false)
   {
     ACE_ERROR_RETURN ((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::unregister: ")
+                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::unregister_instance_i: ")
                        ACE_TEXT(" Entity is not enabled.\n")),
                       ::DDS::RETCODE_NOT_ENABLED);
   }
@@ -1311,7 +1311,7 @@ DataWriterImpl::unregister ( ::DDS::InstanceHandle_t handle,
     {
       ACE_ERROR_RETURN ((LM_ERROR,
                          ACE_TEXT("(%P|%t) ERROR: ")
-                         ACE_TEXT("DataWriterImpl::unregister: ")
+                         ACE_TEXT("DataWriterImpl::unregister_instance_i: ")
                          ACE_TEXT(" unregister with container failed. \n")),
                         ret);
     }
@@ -1333,7 +1333,7 @@ DataWriterImpl::unregister ( ::DDS::InstanceHandle_t handle,
   if (status == SEND_CONTROL_ERROR)
   {
     ACE_ERROR_RETURN ((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::unregister: ")
+                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::unregister_instance_i: ")
                        ACE_TEXT(" send_control failed. \n")),
                       ::DDS::RETCODE_ERROR);
   }

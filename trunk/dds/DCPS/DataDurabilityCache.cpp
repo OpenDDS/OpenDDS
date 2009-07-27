@@ -788,9 +788,9 @@ OpenDDS::DCPS::DataDurabilityCache::get_data (
    *       OpenDDS supports that value?
    */
   ::DDS::ReturnCode_t ret =
-      data_writer->register_instance (handle,
-                                      registration_sample.get (),
-                                      registration_timestamp);
+      data_writer->register_instance_i(handle,
+                                       registration_sample.get(),
+                                       registration_timestamp);
 
   if (ret != ::DDS::RETCODE_OK)
     return false;

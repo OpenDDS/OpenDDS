@@ -231,9 +231,9 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     //
     // ASSERTION
     //
-    // dispose/unregister should cause an instance to be removed
-    // after the last sample in the instance has been removed
-    // from the ReceivedDataElementList.
+    // unregister_instance should cause an instance to be removed
+    // after the last sample in the instance has been taken
+    // from the ReceivedDataElementList:
     //
     DDS_TEST test(reader_i);
     if (!test) return 1;
@@ -241,14 +241,13 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     Foo foo;
     DDS::InstanceHandle_t handle;
 
-    handle = writer_i->_cxx_register(foo);
+    handle = writer_i->register_instance(foo);
 
     writer_i->write(foo, handle);
-    writer_i->unregister(foo, handle);
+    writer_i->unregister_instance(foo, handle);
 
     ACE_OS::sleep(5); // wait for samples to arrive
 
-    /// Take sample (this should cause the instance to be removed)
     if (!test.take_next_sample())
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")

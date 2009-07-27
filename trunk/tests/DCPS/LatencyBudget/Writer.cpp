@@ -78,7 +78,7 @@ Writer::svc ()
 
     Messenger::Message message;
     message.subject_id = 99;
-    ::DDS::InstanceHandle_t handle = message_dw->_cxx_register (message);
+    ::DDS::InstanceHandle_t handle = message_dw->register_instance(message);
 
     message.from       = CORBA::string_dup("Comic Book Guy");
     message.subject    = CORBA::string_dup("Review");

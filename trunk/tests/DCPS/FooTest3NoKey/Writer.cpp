@@ -35,7 +35,7 @@ Writer::start ()
   foo_dw_ = ::Xyz::FooDataWriter::_narrow(writer_.in ());
   TEST_CHECK (! CORBA::is_nil (foo_dw_.in ()));
 
-  handle_ = foo_dw_->_cxx_register (registered_foo_);
+  handle_ = foo_dw_->register_instance(registered_foo_);
 
   if (activate (THR_NEW_LWP | THR_JOINABLE, num_thread_to_write_) == -1)
   {
@@ -75,7 +75,7 @@ Writer::svc ()
     for (int i = 0; i< num_writes_per_thread_; i ++)
     {
       ::DDS::InstanceHandle_t handle
-        = foo_dw_->_cxx_register (foo);
+        = foo_dw_->register_instance(foo);
 
       // Any registration with different a_long_value should always
       // return the same handle.

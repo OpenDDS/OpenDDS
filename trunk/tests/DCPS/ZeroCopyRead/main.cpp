@@ -675,7 +675,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
 
       writer_instance_handle
-          = fast_dw->_cxx_register (foo);
+          = fast_dw->register_instance(foo);
 
       fast_dw->write(foo,
                      writer_instance_handle);

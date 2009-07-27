@@ -571,7 +571,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       foo.y = -1;
 
       handle
-          = fast_dw->_cxx_register (foo);
+          = fast_dw->register_instance(foo);
 
       foo.x = 7;
 

@@ -26,7 +26,7 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
 }
 
 
-::DDS::InstanceHandle_t FooDataWriterImpl::_cxx_register (
+::DDS::InstanceHandle_t FooDataWriterImpl::register_instance(
     const Foo & instance_data
     )
     ACE_THROW_SPEC ((

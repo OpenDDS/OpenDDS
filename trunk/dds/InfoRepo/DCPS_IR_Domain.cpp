@@ -1095,7 +1095,7 @@ void DCPS_IR_Domain::publish_participant_bit (DCPS_IR_Participant* participant)
             data.user_data = participantQos->user_data;
 
             ::DDS::InstanceHandle_t handle
-              = bitParticipantDataWriter_->_cxx_register (data);
+              = bitParticipantDataWriter_->register_instance(data);
 
             participant->set_handle(handle);
 
@@ -1173,7 +1173,7 @@ void DCPS_IR_Domain::publish_topic_bit (DCPS_IR_Topic* topic)
             data.topic_data = topicQos->topic_data;
 
             ::DDS::InstanceHandle_t handle
-              = bitTopicDataWriter_->_cxx_register (data);
+              = bitTopicDataWriter_->register_instance(data);
 
             topic->set_handle(handle);
 
@@ -1253,7 +1253,7 @@ void DCPS_IR_Domain::publish_subscription_bit (DCPS_IR_Subscription* subscriptio
             data.group_data = publisherQos->group_data;
             
             ::DDS::InstanceHandle_t handle
-              = bitSubscriptionDataWriter_->_cxx_register (data);
+              = bitSubscriptionDataWriter_->register_instance(data);
 
             subscription->set_handle(handle);
 
@@ -1333,7 +1333,7 @@ void DCPS_IR_Domain::publish_publication_bit (DCPS_IR_Publication* publication)
             data.group_data = publisherQos->group_data;
             
             ::DDS::InstanceHandle_t handle
-              = bitPublicationDataWriter_->_cxx_register (data);
+              = bitPublicationDataWriter_->register_instance(data);
 
             publication->set_handle(handle);
 

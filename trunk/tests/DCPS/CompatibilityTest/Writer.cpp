@@ -45,7 +45,7 @@ Writer::run_test (const ACE_Time_Value& duration)
                 pass));
 
       ::DDS::InstanceHandle_t handle
-          = foo_dw->_cxx_register (foo);
+          = foo_dw->register_instance(foo);
 
       foo.x = 5.0;
       foo.y = (float)(pass) ;

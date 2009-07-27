@@ -173,7 +173,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         the_data.the_data = CORBA::string_dup ("Data Wuz Here!");
 
         ::DDS::InstanceHandle_t const handle =
-            writer->_cxx_register (the_data);
+            writer->register_instance(the_data);
 
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("%T (%P|%t) PUB starting to write.\n")));

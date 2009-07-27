@@ -101,7 +101,7 @@ Writer::svc ()
     for (int i = 0; i< num_writes_per_thread_; i ++)
     {
       ::DDS::InstanceHandle_t handle
-        = foo_dw->_cxx_register (foo);
+        = foo_dw->register_instance(foo);
 
       foo.handle_value = handle;
 

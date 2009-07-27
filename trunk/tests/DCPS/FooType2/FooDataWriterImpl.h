@@ -62,7 +62,7 @@ class FooType_Export FooDataWriterImpl : public virtual POA_FooDataWriter,
   virtual ~FooDataWriterImpl (void);
 
 
-  virtual ::DDS::InstanceHandle_t _cxx_register (
+  virtual ::DDS::InstanceHandle_t register_instance (
       const Foo & instance_data
     )
     ACE_THROW_SPEC ((
