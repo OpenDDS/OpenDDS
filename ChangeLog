@@ -1,3 +1,14 @@
+Mon Jul 27 19:17:48 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/modules/IDLBase.pm:
+
+          Resolved a Perl warning.
+
+        * DDS_release_notes.txt:
+        * README:
+
+          Updated with placeholders for the 1.4 release.
+
 Mon Jul 27 14:21:37 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * OpenDDS version 1.3 released.

@@ -136,7 +136,7 @@ sub get_typesupport_info {
 
 sub get_type_bits {
   my($self, $type) = @_;
-  return %types->{$type};
+  return $types{$type};
 }
 
 
