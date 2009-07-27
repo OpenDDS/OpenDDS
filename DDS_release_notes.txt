@@ -2,8 +2,9 @@ Version 1.4 of OpenDDS.
 
 New to this version are the following changes:
 
-- First release note here
-
+- Updated support for DataWriter::unregister and DataWriter::dispose to
+  properly release resources after all samples in a marked instance are
+  removed.
 
 =========================================================================
 

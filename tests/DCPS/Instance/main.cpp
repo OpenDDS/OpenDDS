@@ -246,7 +246,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     writer_i->write(foo, handle);
     writer_i->unregister(foo, handle);
 
-    ACE_OS::sleep(10); // wait for samples to arrive
+    ACE_OS::sleep(5); // wait for samples to arrive
 
     /// Take sample (this should cause the instance to be removed)
     if (!test.take_next_sample())
