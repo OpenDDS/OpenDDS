@@ -1,9 +1,17 @@
+Tue Jul 28 20:07:03 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps.mpb:
+        * dds/DdsDcps.mpc:
+        * rules.dds.GNU:
+
+          Refactored the way DDS interacts with gnuace.
+
 Tue Jul 28 18:59:34 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/src/org/opendds/jms/MessageProducerImpl.java:
 
-	  Updated JMS producer to dispose of instances after sending
-	  messages.
+          Updated JMS producer to dispose of instances after sending
+          messages.
 
 Tue Jul 28 18:43:30 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
