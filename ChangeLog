@@ -1,3 +1,10 @@
+Tue Jul 28 17:50:42 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+
+	  Fixed an incorrect ordering of callbacks for dispose/unregister;
+	  this was causing non-valid data samples to be dropped.
+
 Tue Jul 28 14:17:05 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * 14a_README:
