@@ -10,7 +10,7 @@ Tue Jul 28 18:43:30 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * java/tests/messenger/publisher/TestPublisher.java:
         * java/tests/multirepo/MultiRepoWorker.java:
 
-          Updated missing java tests to make use of refactored instance
+          Updated missed java tests to make use of refactored instance
           operations.
 
 Tue Jul 28 17:50:42 UTC 2009  Steven Stallion  <stallions@ociweb.com>
