@@ -1,8 +1,14 @@
+Tue Jul 28 14:17:05 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * 14a_README:
+
+          Removed this file.  TAO 1.4a is no longer supported.
+
 Mon Jul 27 23:20:44 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * DDS_release_notes.txt:
 
-	  Updated release notes with instance operation changes.
+          Updated release notes with instance operation changes.
 
         * bin/DCPS/CPPTemplate.pm:
         * bin/DCPS/HTemplate.pm:
@@ -13,7 +19,7 @@ Mon Jul 27 23:20:44 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * dds/DdsDcpsPublication.idl:
         * dds/InfoRepo/DCPS_IR_Domain.cpp:
 
-	  Updated instance operations to comply with formal/07-01-01.
+          Updated instance operations to comply with formal/07-01-01.
 
         * DevGuideExamples/DCPS/Messenger/Writer.cpp:
         * DevGuideExamples/DCPS/Messenger_ZeroCopy/Writer.cpp:
@@ -70,8 +76,8 @@ Mon Jul 27 23:20:44 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * tests/DCPS/sub_init_loop/Writer.cpp:
         * wrapper/example/publisher.cpp:
 
-	  Updated examples, tests, and DevGuideExamples to make use
-	  of refactored instance operations.
+          Updated examples, tests, and DevGuideExamples to make use
+          of refactored instance operations.
 
 Mon Jul 27 19:28:40 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
