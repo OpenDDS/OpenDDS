@@ -13,4 +13,8 @@ project: taolib, portableserver, dcps_ts_defaults, built_in_topic_support, dds_s
 
   // DDS is not compatible with an exceptions=0 build
   requires    += exceptions
+
+  verbatim(gnuace, extension, 1) {
+    include $(DDS_ROOT)/rules.dds.GNU
+  }
 }
