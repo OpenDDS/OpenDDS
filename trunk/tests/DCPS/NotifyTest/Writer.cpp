@@ -91,6 +91,7 @@ Writer::svc ()
       }
       if (unregister_notify_test && i == num_messages/2)
       {
+	ACE_OS::sleep(5); // wait for samples to arrive
         message_dw->unregister_instance(message, handle);
         handle = message_dw->register_instance(message);
       }
@@ -100,6 +101,7 @@ Writer::svc ()
 
     if (dispose_notify_test)
     {
+      ACE_OS::sleep(5); // wait for samples to arrive
       message_dw->dispose (message, handle);
     }
     

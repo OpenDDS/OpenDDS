@@ -92,18 +92,6 @@ Mon Jul 27 19:28:40 UTC 2009  Steven Stallion  <stallions@ociweb.com>
           Re-applied instance changes (r2279, r2286) to trunk with
           additional changes to correct invalid container modifications.
 
-Mon Jul 27 19:26:05 UTC 2009  Steven Stallion  <stallions@ociweb.com>
-
-        * bin/DCPS/CPPTemplate.pm:
-
-        * bin/dcps_tests.lst:
-
-        * dds/DCPS/InstanceState.h:
-        * dds/DCPS/InstanceState.inl:
-        * dds/DCPS/InstanceState.cpp:
-
-        * tests/DCPS/Instance/main.cpp:
-
 Mon Jul 27 19:17:48 UTC 2009  Adam Mitz  <mitza@ociweb.com>
 
         * MPC/modules/IDLBase.pm:
