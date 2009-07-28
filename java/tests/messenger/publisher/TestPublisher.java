@@ -77,7 +77,7 @@ public class TestPublisher {
         MessageDataWriter mdw = MessageDataWriterHelper.narrow(dw);
         Message msg = new Message();
         msg.subject_id = 99;
-        int handle = mdw.register(msg);
+        int handle = mdw.register_instance(msg);
         msg.from = "OpenDDS-Java";
         msg.subject = "Review";
         msg.text = "Worst. Movie. Ever.";
