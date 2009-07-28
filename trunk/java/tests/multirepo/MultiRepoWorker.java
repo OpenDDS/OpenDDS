@@ -107,7 +107,7 @@ public class MultiRepoWorker {
                     Message message = new Message();
                     message.text = text;
 
-                    int handle = writer.register(message);
+                    int handle = writer.register_instance(message);
                     if (writer.write(message, handle) != RETCODE_OK.value) {
                         throw new IllegalStateException("Unable to write message!");
                     }
