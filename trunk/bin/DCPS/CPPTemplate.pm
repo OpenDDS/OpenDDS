@@ -1693,19 +1693,6 @@ void
                            OpenDDS::DCPS::ReceivedDataElement(instance_data),
                            ::DDS::RETCODE_ERROR);
 
-    if (is_dispose_msg)
-    {
-      instance_ptr->instance_state_.dispose_was_received(header.publication_id_) ;
-    }
-    else if (is_unregister_msg)
-    {
-      instance_ptr->instance_state_.unregister_was_received(header.publication_id_) ;
-    }
-    else
-    {
-      instance_ptr->instance_state_.data_was_received(header.publication_id_) ;
-    }
-
     ptr->source_timestamp_.sec = header.source_timestamp_sec_;
     ptr->source_timestamp_.nanosec = header.source_timestamp_nanosec_;
     ptr->disposed_generation_count_ =
@@ -1747,6 +1734,19 @@ void
       }
 
       dec_ref_data_element(head_ptr);
+    }
+
+    if (is_dispose_msg)
+    {
+      instance_ptr->instance_state_.dispose_was_received(header.publication_id_) ;
+    }
+    else if (is_unregister_msg)
+    {
+      instance_ptr->instance_state_.unregister_was_received(header.publication_id_) ;
+    }
+    else
+    {
+      instance_ptr->instance_state_.data_was_received(header.publication_id_) ;
     }
 
     OpenDDS::DCPS::SubscriberImpl* sub = get_subscriber_servant ();
