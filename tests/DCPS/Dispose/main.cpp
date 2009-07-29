@@ -42,12 +42,15 @@ public:
   }
 
   bool
-  take_next_sample()
+  take_samples(int max_samples)
   {
-    Foo foo;
-    DDS::SampleInfo si;
+    FooSeq foo;
+    DDS::SampleInfoSeq si;
 
-    return reader_->take_next_sample(foo, si) == DDS::RETCODE_OK;
+    return reader_->take(foo, si, max_samples,
+	                 DDS::ANY_SAMPLE_STATE,
+			 DDS::ANY_VIEW_STATE,
+			 DDS::ANY_INSTANCE_STATE) == DDS::RETCODE_OK;
   }
 
   bool operator!()
@@ -246,10 +249,10 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     ACE_OS::sleep(5); // wait for samples to arrive
 
-    if (!test.take_next_sample())
+    if (!test.take_samples(2)) /* 1 valid + 1 non-valid (dispose) */
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
-                          ACE_TEXT(" ERROR: unable to take next instance!\n")), 2);
+                          ACE_TEXT(" ERROR: unable to take samples!\n")), 2);
 
     /// Verify instance has been deleted
     if (test.has_instance(handle))
