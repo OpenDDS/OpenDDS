@@ -162,7 +162,7 @@
                 <property name="cargo.jvmargs" value="-ea ${server.jvmargs}"/> <!-- enable assertions -->
 
                 <!-- Deployables -->
-                <deployable type="rar" file="${jms.basedir}/build/opendds-jms-1.2.1.rar"/>
+                <deployable type="rar" file="${jms.basedir}/build/opendds-jms-1.3.rar"/>
                 <deployable type="ear" file="${build.dir}/${ant.project.name}.ear"/>
             </configuration>
         </cargo>

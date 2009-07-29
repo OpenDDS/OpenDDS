@@ -1,3 +1,11 @@
+Wed Jul 29 22:31:19 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/compat/build.xml:
+        * java/jms/example/jbossesb/helloworld/src/opendds-ds.xml:
+        * java/jms/example/jbossesb/helloworld2/src/opendds-ds.xml:
+
+	  Updated OpenDDS release version to 1.3.
+
 Wed Jul 29 22:07:58 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * bin/dcps_tests.lst:
