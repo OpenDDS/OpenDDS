@@ -229,11 +229,9 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     ws->detach_condition(cond);
 
     //
-    // ASSERTION
-    //
-    // unregister_instance should cause an instance to be removed
-    // after the last sample in the instance has been taken
-    // from the ReceivedDataElementList:
+    // FooDataWriter::dispose should cause an instance to be
+    // deleted after the last sample in the instance has been
+    // taken from the ReceivedDataElementList:
     //
     DDS_TEST test(reader_i);
     if (!test) return 1;
@@ -244,7 +242,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     handle = writer_i->register_instance(foo);
 
     writer_i->write(foo, handle);
-    writer_i->unregister_instance(foo, handle);
+    writer_i->dispose(foo, handle);
 
     ACE_OS::sleep(5); // wait for samples to arrive
 
@@ -253,7 +251,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: unable to take next instance!\n")), 2);
 
-    /// Verify instance has been removed
+    /// Verify instance has been deleted
     if (test.has_instance(handle))
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
