@@ -42,9 +42,10 @@ OpenDDS::DCPS::InstanceState::dispose_was_received(const PublicationId& writer_i
   if( this->instance_state_ & DDS::ALIVE_INSTANCE_STATE)
     {
       this->instance_state_ = DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE ;
-      //spec says: if "no samples in the DataReader && no "live" writers"
-      //      then destroy the instance.
-      this->release_if_empty ();
+      // N.B. dispose instance transitions are always followed by a
+      // non-valid sample being queued to the ReceivedDataElementList;
+      // marking the release as pending prevents this sample from being lost.
+      this->release_pending_ = true;
     }
 }
 
@@ -56,9 +57,10 @@ OpenDDS::DCPS::InstanceState::unregister_was_received(const PublicationId& write
   if(writers_.empty () && this->instance_state_ & DDS::ALIVE_INSTANCE_STATE)
     {
       this->instance_state_ = DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE ;
-     // spec says if "no samples in the DataReader" then the
-     //      instance is removed.
-      this->release_if_empty ();
+      // N.B. unregister instance transitions are always followed by a
+      // non-valid sample being queued to the ReceivedDataElementList;
+      // marking the release as pending prevents this sample from being lost.
+      this->release_pending_ = true;
     }
 }
 
