@@ -93,6 +93,8 @@ namespace OpenDDS
         CORBA::SystemException
       ))
     {
+      ACE_UNUSED_ARG (mask);
+
       ::DDS::PublisherQos pub_qos;
 
       if (qos == PUBLISHER_QOS_DEFAULT)
