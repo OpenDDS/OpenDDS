@@ -52,7 +52,8 @@ OpenDDS_Publication_Manager::init (const DDS::PublisherQos & qos)
   // create the subscriber using default QoS.
   pub_ = 
     dm_.participant ()->create_publisher (qos,
-                                          DDS::PublisherListener::_nil ());
+                                          DDS::PublisherListener::_nil (),
+                                          OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
   // check for successful creation
   if (CORBA::is_nil (pub_.in ()))
