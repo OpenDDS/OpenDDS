@@ -122,6 +122,8 @@ namespace OpenDDS
 
       static bool consistent (const ::DDS::SubscriberQos       & qos);
 
+      static bool consistent (const ::DDS::DomainParticipantFactoryQos & qos);
+
       static bool valid (const ::DDS::UserDataQosPolicy& qos);
 
       static bool valid (const ::DDS::TopicDataQosPolicy & qos);
@@ -177,6 +179,8 @@ namespace OpenDDS
       static bool valid (const ::DDS::DataReaderQos& qos);
 
       static bool valid (const ::DDS::SubscriberQos& qos);
+
+      static bool valid (const ::DDS::DomainParticipantFactoryQos& qos);
 
       static bool changeable (const ::DDS::UserDataQosPolicy& qos1,
                               const ::DDS::UserDataQosPolicy& qos2);
@@ -261,7 +265,6 @@ namespace OpenDDS
 
       static bool changeable (const ::DDS::SubscriberQos       & qos1,
                               const ::DDS::SubscriberQos       & qos2);
-
     };
 
     // Convenience function to avoid introducing preprocessor
@@ -435,6 +438,11 @@ bool operator == (const ::DDS::DataReaderQos& qos1,
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator == (const ::DDS::SubscriberQos& qos1,
                   const ::DDS::SubscriberQos& qos2);
+
+EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
+bool operator == (const ::DDS::DomainParticipantFactoryQos& qos1,
+                  const ::DDS::DomainParticipantFactoryQos& qos2);
+
 
 #if defined(__ACE_INLINE__)
 #include "Qos_Helper.inl"

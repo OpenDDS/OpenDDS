@@ -1,3 +1,41 @@
+Thu Jul 30 23:24:42 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantFactoryImpl.h:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:          
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/EntityImpl.h:
+        * dds/DCPS/EntityImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.cpp:
+
+          - Fixed a bug in last commit that did not pass listener mask parameter 
+            to PublisherImpl constructor.
+          - Implemented DomainParticipantFactoryImpl set_qos and get_qos.
+          - Made DomainParticipant auto enabled if DomainParticipantFactoryQos
+            autoenable_created_entities is 1.
+          - Updated DomainParticipant, Publisher, Subscriber, DataWriter, 
+            DataReader enable() method according to spec:
+             "Calling enable on an Entity whose factory is not enabled will fail
+              and return PRECONDITION_NOT_MET."
+          - Removed code checking enabled_ flag for lookup_* methods. According
+            to spec, the lookup can be invoked when an Entity has not yet been 
+            enabled.
+
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        
+          Added unit tests for DomainParticipantFactory set_qos and get_qos
+          and entity enable(). 
+
 Thu Jul 30 18:30:40 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/DomainParticipantFactoryImpl.cpp:

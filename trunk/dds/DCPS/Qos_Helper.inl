@@ -389,6 +389,13 @@ bool operator == (const ::DDS::SubscriberQos& qos1,
     && qos1.entity_factory == qos2.entity_factory;
 }
 
+ACE_INLINE
+bool operator == (const ::DDS::DomainParticipantFactoryQos& qos1,
+                  const ::DDS::DomainParticipantFactoryQos& qos2)
+{
+  return qos1.entity_factory == qos2.entity_factory;
+}
+
 // ------------------------------------------------------------------
 
 namespace OpenDDS
@@ -609,6 +616,13 @@ namespace OpenDDS
       return true;
     }
 
+    ACE_INLINE
+    bool
+    Qos_Helper::consistent (const ::DDS::DomainParticipantFactoryQos & /* qos */)
+    {
+      return true;
+    }
+
     // Note: Since in the first implmenation of DSS in TAO
     //       a limited number of QoS values are allowed to be
     //       modified, the validity tests are simplified to mostly
@@ -795,10 +809,9 @@ namespace OpenDDS
     }
 
     ACE_INLINE
-    bool Qos_Helper::valid (const ::DDS::EntityFactoryQosPolicy& qos)
+    bool Qos_Helper::valid (const ::DDS::EntityFactoryQosPolicy& /*qos*/)
     {
-      return
-        qos == TheServiceParticipant->initial_EntityFactoryQosPolicy();
+      return true;
     }
 
     ACE_INLINE
@@ -900,6 +913,12 @@ namespace OpenDDS
         && valid(qos.entity_factory);
     }
 
+    ACE_INLINE
+    bool Qos_Helper::valid (const ::DDS::DomainParticipantFactoryQos& qos)
+    {
+      return valid (qos.entity_factory);
+    }
+    
     ACE_INLINE
     bool Qos_Helper::changeable (const ::DDS::UserDataQosPolicy& /* qos1 */,
                                  const ::DDS::UserDataQosPolicy& /* qos2 */)

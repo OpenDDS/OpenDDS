@@ -12,6 +12,7 @@
 #include "Registered_Data_Types.h"
 #include "Transient_Kludge.h"
 #include "FailoverListener.h"
+#include "DomainParticipantFactoryImpl.h"
 #include "Util.h"
 
 #include "dds/DdsDcpsGuidC.h"
@@ -54,13 +55,15 @@ namespace OpenDDS
     //      cannot be false.
 
     // Implementation skeleton constructor
-    DomainParticipantImpl::DomainParticipantImpl (const ::DDS::DomainId_t&             domain_id,
+    DomainParticipantImpl::DomainParticipantImpl (DomainParticipantFactoryImpl *       factory,
+                                                  const ::DDS::DomainId_t&             domain_id,
                                                   const RepoId&                        dp_id,
                                                   const ::DDS::DomainParticipantQos &  qos,
                                                   ::DDS::DomainParticipantListener_ptr a_listener,
                                                   const ::DDS::StatusMask &            mask,
                                                   bool                                 federated)
-      : default_topic_qos_(TheServiceParticipant->initial_TopicQos()),
+      : factory_ (factory),
+        default_topic_qos_(TheServiceParticipant->initial_TopicQos()),
         default_publisher_qos_(TheServiceParticipant->initial_PublisherQos()),
         default_subscriber_qos_(TheServiceParticipant->initial_SubscriberQos()),
         qos_(qos),
@@ -129,6 +132,7 @@ namespace OpenDDS
                      PublisherImpl(publisher_handles_.next(),
                                    pub_qos,
                                    a_listener,
+                                   mask,
                                    this),
                      ::DDS::Publisher::_nil());
 
@@ -761,14 +765,6 @@ namespace OpenDDS
         CORBA::SystemException
       ))
     {
-      if (enabled_ == false)
-        {
-          ACE_ERROR ((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::lookup_topicdescription, ")
-                      ACE_TEXT(" Entity is not enabled. \n")));
-          return ::DDS::TopicDescription::_nil ();
-        }
-
       ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                         tao_mon,
                         this->topics_protector_,
@@ -1520,9 +1516,21 @@ namespace OpenDDS
         CORBA::SystemException
       ))
     {
-      //TDB - check if factory is enables and then enable all entities
-      // (don't need to do it for now because
-      //  entity_factory.autoenable_created_entities is always = 1)
+      //According spec: 
+      // Calling enable on an Entity whose factory is not enabled will fail 
+      // and return PRECONDITION_NOT_MET.
+      ::DDS::DomainParticipantFactoryQos qos;
+      if (this->factory_->get_qos (qos) != ::DDS::RETCODE_OK)
+      {
+        ACE_ERROR ((LM_ERROR, ACE_TEXT ("%P|%t)DomainParticipantImpl::enable failed to")
+          ACE_TEXT (" get factory qos\n")));
+        return ::DDS::RETCODE_ERROR;
+      }
+
+      if (qos.entity_factory.autoenable_created_entities == 0)
+      {
+        return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+      }
 
       ::DDS::ReturnCode_t ret = this->set_enabled ();
 

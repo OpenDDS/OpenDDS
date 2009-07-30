@@ -80,6 +80,7 @@ namespace OpenDDS
       PublisherImpl (DDS::InstanceHandle_t handle,
                      const ::DDS::PublisherQos & qos,
                      ::DDS::PublisherListener_ptr a_listener,
+                     const ::DDS::StatusMask & mask,
                      DomainParticipantImpl*       participant);
 
       ///Destructor

@@ -174,6 +174,13 @@ namespace OpenDDS
     }
 
     ACE_INLINE
+    ::DDS::DomainParticipantFactoryQos
+    Service_Participant::initial_DomainParticipantFactoryQos () const
+    {
+      return initial_DomainParticipantFactoryQos_;
+    }
+
+    ACE_INLINE
     ::DDS::DomainParticipantQos            
     Service_Participant::initial_DomainParticipantQos () const
     {
