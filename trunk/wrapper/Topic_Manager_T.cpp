@@ -95,7 +95,8 @@ Topic_Manager_T <TYPE_SUPPORT, TS_IMPL>::create_topic (Domain_Manager & dm)
         dm.participant ()->create_topic (name_.c_str (),
                                          type_name.in (),
                                          TOPIC_QOS_DEFAULT,
-                                         ::DDS::TopicListener::_nil ());
+                                         ::DDS::TopicListener::_nil (),
+                                         OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
     }
   else
     {
@@ -140,7 +141,8 @@ Topic_Manager_T <TYPE_SUPPORT, TS_IMPL>::datareader (const Subscription_Manager 
   DDS::DataReader_var dr = 
     sm.subscriber ()->create_datareader (topic_.in (),
                                          qos,
-                                         listener_.in ()); 
+                                         listener_.in (),
+                                         OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK); 
 
   return dr._retn ();
 }
@@ -159,7 +161,8 @@ Topic_Manager_T <TYPE_SUPPORT, TS_IMPL>::datawriter (const Publication_Manager &
   DDS::DataWriter_var dw = 
     pm.publisher ()->create_datawriter (topic_.in (),
                                         qos,
-                                        DDS::DataWriterListener::_nil ()); 
+                                        DDS::DataWriterListener::_nil (),
+                                        OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK); 
 
   return dw._retn ();
 }
