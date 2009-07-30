@@ -82,12 +82,12 @@ namespace OpenDDS
       virtual ::DDS::ReturnCode_t set_qos (const ::DDS::DataWriterQos & qos)
         ACE_THROW_SPEC ((CORBA::SystemException));
 
-      virtual void get_qos (::DDS::DataWriterQos & qos)
+      virtual ::DDS::ReturnCode_t get_qos (::DDS::DataWriterQos & qos)
         ACE_THROW_SPEC ((CORBA::SystemException));
 
       virtual ::DDS::ReturnCode_t set_listener (
           ::DDS::DataWriterListener_ptr a_listener,
-          ::DDS::StatusKindMask mask)
+          ::DDS::StatusMask mask)
         ACE_THROW_SPEC ((CORBA::SystemException));
 
       virtual ::DDS::DataWriterListener_ptr get_listener ()
@@ -103,19 +103,23 @@ namespace OpenDDS
       virtual ::DDS::Publisher_ptr get_publisher ()
         ACE_THROW_SPEC ((CORBA::SystemException));
 
-      virtual ::DDS::LivelinessLostStatus get_liveliness_lost_status ()
+      virtual ::DDS::ReturnCode_t get_liveliness_lost_status (
+          ::DDS::LivelinessLostStatus & status)
         ACE_THROW_SPEC ((CORBA::SystemException));
 
-      virtual ::DDS::OfferedDeadlineMissedStatus get_offered_deadline_missed_status ()
+      virtual ::DDS::ReturnCode_t get_offered_deadline_missed_status (
+        ::DDS::OfferedDeadlineMissedStatus & status)
         ACE_THROW_SPEC ((CORBA::SystemException));
 
-      virtual ::DDS::OfferedIncompatibleQosStatus * get_offered_incompatible_qos_status ()
+      virtual ::DDS::ReturnCode_t get_offered_incompatible_qos_status (
+        ::DDS::OfferedIncompatibleQosStatus & status)
         ACE_THROW_SPEC ((CORBA::SystemException));
 
-      virtual ::DDS::PublicationMatchStatus get_publication_match_status ()
+      virtual ::DDS::ReturnCode_t get_publication_matched_status (
+        ::DDS::PublicationMatchedStatus & status)
         ACE_THROW_SPEC ((CORBA::SystemException));
 
-      virtual void assert_liveliness ()
+      virtual ::DDS::ReturnCode_t assert_liveliness ()
         ACE_THROW_SPEC ((CORBA::SystemException));
 
       virtual ::DDS::ReturnCode_t get_matched_subscriptions (
@@ -157,6 +161,7 @@ namespace OpenDDS
           TopicImpl*                             topic_servant,
           const ::DDS::DataWriterQos &           qos,
           ::DDS::DataWriterListener_ptr          a_listener,
+          const ::DDS::StatusMask &              mask,
           OpenDDS::DCPS::DomainParticipantImpl*  participant_servant,
           OpenDDS::DCPS::PublisherImpl*          publisher_servant,
           ::DDS::DataWriter_ptr                  dw_local,
@@ -441,7 +446,7 @@ namespace OpenDDS
       ::DDS::DataWriterQos            qos_;
       /// The StatusKind bit mask indicates which status condition change
       /// can be notified by the listener of this entity.
-      ::DDS::StatusKindMask           listener_mask_;
+      ::DDS::StatusMask           listener_mask_;
       /// Used to notify the entity for relevant events.
       ::DDS::DataWriterListener_var   listener_;
       /// The datawriter listener servant.
@@ -480,7 +485,7 @@ namespace OpenDDS
       ::DDS::LivelinessLostStatus         liveliness_lost_status_ ;
       ::DDS::OfferedDeadlineMissedStatus  offered_deadline_missed_status_ ;
       ::DDS::OfferedIncompatibleQosStatus offered_incompatible_qos_status_ ;
-      ::DDS::PublicationMatchStatus       publication_match_status_ ;
+      ::DDS::PublicationMatchedStatus       publication_match_status_ ;
 
       /**
        * @todo The publication_lost_status_ and

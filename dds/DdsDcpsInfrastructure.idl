@@ -37,10 +37,15 @@ module DDS {
 // sequence template.
 #pragma DCPS_SUPPORT_ZERO_COPY_READ
 
-    typedef DOMAINID_TYPE_NATIVE DomainId_t;
-    typedef HANDLE_TYPE_NATIVE InstanceHandle_t;
-    typedef BUILTIN_TOPIC_KEY_TYPE_NATIVE BuiltinTopicKey_t[3];
+    typedef DOMAINID_TYPE_NATIVE  DomainId_t;
+    typedef HANDLE_TYPE_NATIVE    InstanceHandle_t;
+
+    struct BuiltinTopicKey_t {
+        BUILTIN_TOPIC_KEY_TYPE_NATIVE value[3];
+    };
+
     typedef sequence<InstanceHandle_t> InstanceHandleSeq;
+
     typedef long ReturnCode_t;
     typedef long QosPolicyId_t;
     typedef sequence<string> StringSeq;
@@ -58,20 +63,22 @@ module DDS {
     // ----------------------------------------------------------------------
     // Pre-defined values
     // ----------------------------------------------------------------------
-
     const InstanceHandle_t HANDLE_NIL = HANDLE_NIL_NATIVE;
+
     const long LENGTH_UNLIMITED = -1;
-    const long DURATION_INFINITY_SEC = 0x7ffffff;
-    const unsigned long DURATION_INFINITY_NSEC = 0x7ffffff;
+    
+    const long            DURATION_INFINITE_SEC   = 0x7fffffff;
+    const unsigned long   DURATION_INFINITE_NSEC  = 0x7fffffff;
+
     const long DURATION_ZERO_SEC = 0;
     const unsigned long DURATION_ZERO_NSEC = 0;
-    const long TIMESTAMP_INVALID_SEC = -1;
-    const unsigned long TIMESTAMP_INVALID_NSEC = 0xffffffff;
+
+    const long            TIME_INVALID_SEC        = -1;
+    const unsigned long   TIME_INVALID_NSEC       = 0xffffffff;
 
     // ----------------------------------------------------------------------
     // Return codes
     // ----------------------------------------------------------------------
-
     const ReturnCode_t RETCODE_OK = 0;
     const ReturnCode_t RETCODE_ERROR = 1;
     const ReturnCode_t RETCODE_UNSUPPORTED = 2;
@@ -84,26 +91,28 @@ module DDS {
     const ReturnCode_t RETCODE_ALREADY_DELETED = 9;
     const ReturnCode_t RETCODE_TIMEOUT = 10;
     const ReturnCode_t RETCODE_NO_DATA = 11;
+    const ReturnCode_t RETCODE_ILLEGAL_OPERATION     = 12;
 
     // ----------------------------------------------------------------------
     // Status to support listeners and conditions
     // ----------------------------------------------------------------------
 
     typedef unsigned long StatusKind;
-    typedef unsigned long StatusKindMask; // bit-mask StatusKind
-    const StatusKind INCONSISTENT_TOPIC_STATUS = 0x0001 << 0;
-    const StatusKind OFFERED_DEADLINE_MISSED_STATUS = 0x0001 << 1;
-    const StatusKind REQUESTED_DEADLINE_MISSED_STATUS = 0x0001 << 2;
-    const StatusKind OFFERED_INCOMPATIBLE_QOS_STATUS = 0x0001 << 5;
-    const StatusKind REQUESTED_INCOMPATIBLE_QOS_STATUS = 0x0001 << 6;
-    const StatusKind SAMPLE_LOST_STATUS = 0x0001 << 7;
-    const StatusKind SAMPLE_REJECTED_STATUS = 0x0001 << 8;
-    const StatusKind DATA_ON_READERS_STATUS = 0x0001 << 9;
-    const StatusKind DATA_AVAILABLE_STATUS = 0x0001 << 10;
-    const StatusKind LIVELINESS_LOST_STATUS = 0x0001 << 11;
-    const StatusKind LIVELINESS_CHANGED_STATUS = 0x0001 << 12;
-    const StatusKind PUBLICATION_MATCH_STATUS = 0x0001 << 13;
-    const StatusKind SUBSCRIPTION_MATCH_STATUS = 0x0001 << 14;
+    typedef unsigned long StatusMask; // bit-mask StatusKind
+
+    const StatusKind INCONSISTENT_TOPIC_STATUS            = 0x0001 << 0;
+    const StatusKind OFFERED_DEADLINE_MISSED_STATUS       = 0x0001 << 1;
+    const StatusKind REQUESTED_DEADLINE_MISSED_STATUS     = 0x0001 << 2;
+    const StatusKind OFFERED_INCOMPATIBLE_QOS_STATUS      = 0x0001 << 5;
+    const StatusKind REQUESTED_INCOMPATIBLE_QOS_STATUS    = 0x0001 << 6;
+    const StatusKind SAMPLE_LOST_STATUS                   = 0x0001 << 7;
+    const StatusKind SAMPLE_REJECTED_STATUS               = 0x0001 << 8;
+    const StatusKind DATA_ON_READERS_STATUS               = 0x0001 << 9;
+    const StatusKind DATA_AVAILABLE_STATUS                = 0x0001 << 10;
+    const StatusKind LIVELINESS_LOST_STATUS               = 0x0001 << 11;
+    const StatusKind LIVELINESS_CHANGED_STATUS            = 0x0001 << 12;
+    const StatusKind PUBLICATION_MATCHED_STATUS           = 0x0001 << 13;
+    const StatusKind SUBSCRIPTION_MATCHED_STATUS          = 0x0001 << 14;
 
     struct InconsistentTopicStatus {
                 long total_count;
@@ -175,7 +184,8 @@ module DDS {
                 QosPolicyCountSeq policies;
                 };
 
-    struct PublicationMatchStatus {
+
+    struct PublicationMatchedStatus {
                 long total_count;
                 long total_count_change;
                 long current_count;
@@ -183,7 +193,8 @@ module DDS {
                 InstanceHandle_t last_subscription_handle;
                 };
 
-    struct SubscriptionMatchStatus {
+
+    struct SubscriptionMatchedStatus {
                 long total_count;
                 long total_count_change;
                 long current_count;
@@ -206,7 +217,7 @@ module DDS {
     //interface Subscriber;
     //interface Publisher;
 
-    //typedef sequence<Topic> TopicSeq;
+    //typedef sequence<Topic> TopicSeq; 
     //typedef sequence<DataReader> DataReaderSeq;
 
     local interface Listener {};
@@ -250,15 +261,15 @@ module DDS {
 
 
     local interface StatusCondition : Condition {
-        StatusKindMask get_enabled_statuses();
+        StatusMask get_enabled_statuses();
         ReturnCode_t set_enabled_statuses(
-            in StatusKindMask mask);
+            in StatusMask mask);
         Entity get_entity();
     };
 
     // Sample states to support reads
     typedef unsigned long SampleStateKind;
-    typedef sequence <SampleStateKind> SampleStateSeq;
+
     const SampleStateKind READ_SAMPLE_STATE = 0x0001 << 0;
     const SampleStateKind NOT_READ_SAMPLE_STATE = 0x0001 << 1;
 
@@ -268,7 +279,6 @@ module DDS {
 
     // View states to support reads
     typedef unsigned long ViewStateKind;
-    typedef sequence<ViewStateKind> ViewStateSeq;
     const ViewStateKind NEW_VIEW_STATE = 0x0001 << 0;
     const ViewStateKind NOT_NEW_VIEW_STATE = 0x0001 << 1;
 
@@ -278,15 +288,14 @@ module DDS {
 
     // Instance states to support reads
     typedef unsigned long InstanceStateKind;
-    typedef sequence<InstanceStateKind> InstanceStateSeq;
     const InstanceStateKind ALIVE_INSTANCE_STATE = 0x0001 << 0;
-    const InstanceStateKind NOT_ALIVE_DISPOSED_INSTANCE_STATE= 0x0001 << 1;
+    const InstanceStateKind NOT_ALIVE_DISPOSED_INSTANCE_STATE   = 0x0001 << 1;
     const InstanceStateKind NOT_ALIVE_NO_WRITERS_INSTANCE_STATE = 0x0001 << 2;
 
     // This is a bit-mask InstanceStateKind
     typedef unsigned long InstanceStateMask;
-    const InstanceStateMask ANY_INSTANCE_STATE = 0xffff;
-    const InstanceStateMask NOT_ALIVE_INSTANCE_STATE= 0x006;
+    const InstanceStateMask ANY_INSTANCE_STATE                  = 0xffff;
+    const InstanceStateMask NOT_ALIVE_INSTANCE_STATE            = 0x006;
 
 
     // ----------------------------------------------------------------------
@@ -310,11 +319,11 @@ module DDS {
     const string WRITERDATALIFECYCLE_QOS_POLICY_NAME = "WriterDataLifecycle";
     const string READERDATALIFECYCLE_QOS_POLICY_NAME = "ReaderDataLifecycle";
     const string TOPICDATA_QOS_POLICY_NAME           = "TopicData";
-    const string GROUPDATA_QOS_POLICY_NAME           = "GroupData";
-    const string TRANSPORTPRIORITY_QOS_POLICY_NAME   = "TransportPriority";
+    const string GROUPDATA_QOS_POLICY_NAME           = "TransportPriority";
     const string LIFESPAN_QOS_POLICY_NAME            = "Lifespan";
     const string DURABILITYSERVICE_POLICY_NAME       = "DurabilityService";
 
+    const QosPolicyId_t INVALID_QOS_POLICY_ID              = 0;
     const QosPolicyId_t USERDATA_QOS_POLICY_ID            = 1;
     const QosPolicyId_t DURABILITY_QOS_POLICY_ID          = 2;
     const QosPolicyId_t PRESENTATION_QOS_POLICY_ID        = 3;
@@ -338,17 +347,16 @@ module DDS {
     const QosPolicyId_t LIFESPAN_QOS_POLICY_ID            = 21;
     const QosPolicyId_t DURABILITYSERVICE_QOS_POLICY_ID   = 22;
 
-    typedef sequence<octet> OctetSeq;
     struct UserDataQosPolicy {
-                OctetSeq value;
+                sequence<octet> value;
                 };
 
     struct TopicDataQosPolicy {
-                OctetSeq value;
+                sequence<octet> value;
                 };
 
     struct GroupDataQosPolicy {
-                OctetSeq value;
+                sequence<octet> value;
                 };
 
     struct TransportPriorityQosPolicy {
@@ -368,7 +376,6 @@ module DDS {
 
     struct DurabilityQosPolicy {
                 DurabilityQosPolicyKind kind;
-                Duration_t service_cleanup_delay;
                 };
 
     enum PresentationQosPolicyAccessScopeKind {
@@ -468,6 +475,7 @@ module DDS {
 
     struct ReaderDataLifecycleQosPolicy {
                 Duration_t autopurge_nowriter_samples_delay;
+                Duration_t autopurge_disposed_samples_delay;
                 };
 
     struct DurabilityServiceQosPolicy {
@@ -477,6 +485,10 @@ module DDS {
         long                    max_samples;
         long                    max_instances;
         long                    max_samples_per_instance;
+    };
+
+    struct DomainParticipantFactoryQos {
+        EntityFactoryQosPolicy entity_factory;
     };
 
     struct DomainParticipantQos {
@@ -513,6 +525,7 @@ module DDS {
                 TransportPriorityQosPolicy transport_priority;
                 LifespanQosPolicy lifespan;
                 UserDataQosPolicy user_data;
+                OwnershipQosPolicy ownership;
                 OwnershipStrengthQosPolicy ownership_strength;
                 WriterDataLifecycleQosPolicy writer_data_lifecycle;
                 };
@@ -534,6 +547,7 @@ module DDS {
                 HistoryQosPolicy history;
                 ResourceLimitsQosPolicy resource_limits;
                 UserDataQosPolicy user_data;
+                OwnershipQosPolicy ownership;
                 TimeBasedFilterQosPolicy time_based_filter;
                 ReaderDataLifecycleQosPolicy reader_data_lifecycle;
                 };
@@ -550,9 +564,9 @@ module DDS {
 
 // These pragmas are OpenDDS-specific.
 #pragma DCPS_DATA_TYPE "DDS::ParticipantBuiltinTopicData"
-#pragma DCPS_DATA_KEY  "DDS::ParticipantBuiltinTopicData key[0]"
-#pragma DCPS_DATA_KEY  "DDS::ParticipantBuiltinTopicData key[1]"
-#pragma DCPS_DATA_KEY  "DDS::ParticipantBuiltinTopicData key[2]"
+#pragma DCPS_DATA_KEY  "DDS::ParticipantBuiltinTopicData key.value[0]"
+#pragma DCPS_DATA_KEY  "DDS::ParticipantBuiltinTopicData key.value[1]"
+#pragma DCPS_DATA_KEY  "DDS::ParticipantBuiltinTopicData key.value[2]"
     struct ParticipantBuiltinTopicData {
       BuiltinTopicKey_t key;
       UserDataQosPolicy user_data;
@@ -560,9 +574,9 @@ module DDS {
 
 // These pragmas are OpenDDS-specific.
 #pragma DCPS_DATA_TYPE "DDS::TopicBuiltinTopicData"
-#pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key[0]"
-#pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key[1]"
-#pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key[2]"
+#pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key.value[0]"
+#pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key.value[1]"
+#pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key.value[2]"
     struct TopicBuiltinTopicData {
                 BuiltinTopicKey_t key;
                 string name;
@@ -584,9 +598,9 @@ module DDS {
 
 // These pragmas are OpenDDS-specific.
 #pragma DCPS_DATA_TYPE "DDS::PublicationBuiltinTopicData"
-#pragma DCPS_DATA_KEY  "DDS::PublicationBuiltinTopicData key[0]"
-#pragma DCPS_DATA_KEY  "DDS::PublicationBuiltinTopicData key[1]"
-#pragma DCPS_DATA_KEY  "DDS::PublicationBuiltinTopicData key[2]"
+#pragma DCPS_DATA_KEY  "DDS::PublicationBuiltinTopicData key.value[0]"
+#pragma DCPS_DATA_KEY  "DDS::PublicationBuiltinTopicData key.value[1]"
+#pragma DCPS_DATA_KEY  "DDS::PublicationBuiltinTopicData key.value[2]"
     struct PublicationBuiltinTopicData {
                 BuiltinTopicKey_t key;
                 BuiltinTopicKey_t participant_key;
@@ -600,7 +614,9 @@ module DDS {
                 ReliabilityQosPolicy reliability;
                 LifespanQosPolicy lifespan;
                 UserDataQosPolicy user_data;
+                OwnershipQosPolicy ownership;
                 OwnershipStrengthQosPolicy ownership_strength;
+                DestinationOrderQosPolicy destination_order;
                 PresentationQosPolicy presentation;
                 PartitionQosPolicy partition;
                 TopicDataQosPolicy topic_data;
@@ -609,9 +625,9 @@ module DDS {
 
 // These pragmas are OpenDDS-specific.
 #pragma DCPS_DATA_TYPE "DDS::SubscriptionBuiltinTopicData"
-#pragma DCPS_DATA_KEY  "DDS::SubscriptionBuiltinTopicData key[0]"
-#pragma DCPS_DATA_KEY  "DDS::SubscriptionBuiltinTopicData key[1]"
-#pragma DCPS_DATA_KEY  "DDS::SubscriptionBuiltinTopicData key[2]"
+#pragma DCPS_DATA_KEY  "DDS::SubscriptionBuiltinTopicData key.value[0]"
+#pragma DCPS_DATA_KEY  "DDS::SubscriptionBuiltinTopicData key.value[1]"
+#pragma DCPS_DATA_KEY  "DDS::SubscriptionBuiltinTopicData key.value[2]"
     struct SubscriptionBuiltinTopicData {
                 BuiltinTopicKey_t key;
                 BuiltinTopicKey_t participant_key;
@@ -622,6 +638,7 @@ module DDS {
                 LatencyBudgetQosPolicy latency_budget;
                 LivelinessQosPolicy liveliness;
                 ReliabilityQosPolicy reliability;
+                OwnershipQosPolicy ownership;
                 DestinationOrderQosPolicy destination_order;
                 UserDataQosPolicy user_data;
                 TimeBasedFilterQosPolicy time_based_filter;
@@ -635,20 +652,23 @@ module DDS {
 
     // ----------------------------------------------------------------------
     local interface Entity {
-                // ReturnCode_t set_qos(in EntityQos qos);
-                // void get_qos(inout EntityQos qos);
-                // ReturnCode_t set_listener(in Listener l,
-                //                           in StatusKindMask mask);
-                // Listener get_listener();
+    //  ReturnCode_t set_qos(
+    //      in EntityQos qos);
+    //  ReturnCode_t get_qos(
+    //      inout EntityQos qos);
+    //  ReturnCode_t set_listener(
+    //      in Listener l, 
+    //      in StatusMask mask);
+    //  Listener get_listener();
 
-                ReturnCode_t enable();
+      ReturnCode_t enable();
 
-    StatusCondition get_statuscondition();
+      StatusCondition get_statuscondition();
 
-    StatusKindMask get_status_changes();
+      StatusMask get_status_changes();
 
-    InstanceHandle_t get_instance_handle();
-                };
+      InstanceHandle_t get_instance_handle();
+    };
 
 
     struct SampleInfo {
@@ -657,13 +677,13 @@ module DDS {
                 InstanceStateKind instance_state;
                 Time_t source_timestamp;
                 InstanceHandle_t instance_handle;
+                InstanceHandle_t publication_handle;
                 long disposed_generation_count;
                 long no_writers_generation_count;
                 long sample_rank;
                 long generation_rank;
                 long absolute_generation_rank;
-    InstanceHandle_t publication_handle;
-    boolean valid_data;
+                boolean valid_data;
                 };
 
     native SampleInfoSeq; // support zero-copy read

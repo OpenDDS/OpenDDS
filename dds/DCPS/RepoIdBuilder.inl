@@ -21,9 +21,9 @@ RepoIdBuilder::participantId(long participantId)
 ACE_INLINE void
 RepoIdBuilder::from_BuiltinTopicKey(DDS::BuiltinTopicKey_t key)
 {
-  federationId(key[0]);
-  participantId(key[1]);
-  entityId(key[2]);
+  federationId(key.value[0]);
+  participantId(key.value[1]);
+  entityId(key.value[2]);
 }
 
 } // namespace

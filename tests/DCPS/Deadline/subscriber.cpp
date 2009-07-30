@@ -60,7 +60,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       participant =
         dpf->create_participant(411,
                                 PARTICIPANT_QOS_DEFAULT,
-                                DDS::DomainParticipantListener::_nil());
+                                DDS::DomainParticipantListener::_nil(),
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (participant.in ())) {
         cerr << "create_participant failed." << endl;
         return 1 ;
@@ -84,7 +85,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         participant->create_topic("Movie Discussion List",
                                   type_name.in (),
                                   topic_qos,
-                                  DDS::TopicListener::_nil());
+                                  DDS::TopicListener::_nil(),
+                                  ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (topic.in ())) {
         cerr << "Failed to create_topic." << endl;
         exit(1);
@@ -100,7 +102,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // transport.
       DDS::Subscriber_var sub =
         participant->create_subscriber (SUBSCRIBER_QOS_DEFAULT,
-                                        DDS::SubscriberListener::_nil());
+                                        DDS::SubscriberListener::_nil(),
+                                        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (sub.in ())) {
         cerr << "Failed to create_subscriber." << endl;
         exit(1);
@@ -156,7 +159,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         DDS::DataReader_var tmp_dr =
           sub->create_datareader (topic.in (),
                                   bogus_qos,
-                                  DDS::DataReaderListener::_nil ());
+                                  DDS::DataReaderListener::_nil (),
+                                  ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
         if (CORBA::is_nil (tmp_dr.in ()))
         {
@@ -168,11 +172,15 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         ACE_OS::sleep (2);
 
         // Check if the incompatible deadline was correctly flagged.
-        DDS::RequestedIncompatibleQosStatus_var incompatible_status =
-          tmp_dr->get_requested_incompatible_qos_status ();
+        DDS::RequestedIncompatibleQosStatus incompatible_status;
+        if (tmp_dr->get_requested_incompatible_qos_status (incompatible_status) != ::DDS::RETCODE_OK)
+        {
+          cerr << "ERROR: Failed to get requested incompatible qos status" << endl;
+          exit (1);
+        }
 
         DDS::QosPolicyCountSeq const & policies =
-          incompatible_status->policies;
+          incompatible_status.policies;
 
         bool incompatible_deadline = false;
         CORBA::ULong const len = policies.length ();
@@ -218,14 +226,16 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       DDS::DataReader_var dr1 =
         sub->create_datareader (topic.in (),
                                 dr_qos,
-                                listener.in ());
+                                listener.in (),
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
       // Second data reader will not have a listener to test proper
       // handling of a nil listener in the deadline handling code.
       DDS::DataReader_var dr2 =
         sub->create_datareader (topic.in (),
                                 dr_qos,
-                                DDS::DataReaderListener::_nil ());
+                                DDS::DataReaderListener::_nil (),
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
       if (CORBA::is_nil (dr1.in ()) || CORBA::is_nil (dr2.in ()))
       {
@@ -262,12 +272,21 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // Synchronize with publisher. Wait until both associate with DataWriter.
       while (attempts < max_attempts)
       {
-        ::DDS::SubscriptionMatchStatus status1 = dr1->get_subscription_match_status ();
-        ::DDS::SubscriptionMatchStatus status2 = dr2->get_subscription_match_status ();
-        if (status1.total_count == 1 && status2.total_count == 1)
-          break;
-        ++ attempts;
-        ACE_OS::sleep (1);
+        ::DDS::SubscriptionMatchedStatus status1;
+        ::DDS::SubscriptionMatchedStatus status2;
+        if (dr1->get_subscription_matched_status (status1) == ::DDS::RETCODE_OK
+          && dr2->get_subscription_matched_status (status2) == ::DDS::RETCODE_OK)
+        {
+          if (status1.total_count == 1 && status2.total_count == 1)
+            break;
+          ++ attempts;
+          ACE_OS::sleep (1);
+        }
+        else 
+        {
+          cerr << "ERROR: Failed to get subscription matched status" << endl;
+          exit (1);
+        }
       }
 
       if (attempts >= max_attempts)
@@ -280,11 +299,19 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // Wait for deadline periods to expire. 
       ACE_OS::sleep (SLEEP_DURATION);
 
-      DDS::RequestedDeadlineMissedStatus deadline_status1 =
-        dr1->get_requested_deadline_missed_status();
+      DDS::RequestedDeadlineMissedStatus deadline_status1;
+      if (dr1->get_requested_deadline_missed_status(deadline_status1) != ::DDS::RETCODE_OK)
+      {
+        cerr << "ERROR: Failed to get requested deadline missed status" << endl;
+        exit (1);
+      }
 
-      DDS::RequestedDeadlineMissedStatus deadline_status2 =
-        dr2->get_requested_deadline_missed_status();
+      DDS::RequestedDeadlineMissedStatus deadline_status2;
+      if (dr2->get_requested_deadline_missed_status(deadline_status2) != ::DDS::RETCODE_OK)
+      {
+        cerr << "ERROR: Failed to get requested deadline missed status" << endl;
+        exit (1);
+      }
 
       Messenger::Message message;
       message.subject_id = 99;
@@ -347,8 +374,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // writing/receiving period.
       ACE_OS::sleep (SLEEP_DURATION + no_miss_period);
 
-      deadline_status1 = dr1->get_requested_deadline_missed_status();
-      deadline_status2 = dr2->get_requested_deadline_missed_status();
+      if ((dr1->get_requested_deadline_missed_status(deadline_status1) != ::DDS::RETCODE_OK)
+        || (dr2->get_requested_deadline_missed_status(deadline_status2) != ::DDS::RETCODE_OK))
+      {
+        cerr << "ERROR: failed to get requested deadline missed status" << endl;
+        exit (1);
+      }
 
       if (deadline_status1.last_instance_handle != dr1_hd1 
         && deadline_status1.last_instance_handle != dr1_hd2)

@@ -43,7 +43,8 @@ ParticipantTask::svc()
     DDS::DomainParticipant_var participant =
       TheParticipantFactory->create_participant(42,
                                                 PARTICIPANT_QOS_DEFAULT,
-                                                DDS::DomainParticipantListener::_nil());
+                                                DDS::DomainParticipantListener::_nil(),
+                                                ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
     if (CORBA::is_nil(participant.in()))
       ACE_ERROR_RETURN((LM_ERROR,
@@ -53,7 +54,8 @@ ParticipantTask::svc()
     // Create Publisher
     DDS::Publisher_var publisher =
       participant->create_publisher(PUBLISHER_QOS_DEFAULT,
-                                    DDS::PublisherListener::_nil());
+                                    DDS::PublisherListener::_nil(),
+                                    ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
    
     if (CORBA::is_nil(publisher.in()))
       ACE_ERROR_RETURN((LM_ERROR,
@@ -97,7 +99,8 @@ ParticipantTask::svc()
       participant->create_topic("FooTopic",
                                 ts->get_type_name(),
                                 TOPIC_QOS_DEFAULT,
-                                DDS::TopicListener::_nil());
+                                DDS::TopicListener::_nil(),
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
     if (CORBA::is_nil(topic.in()))
       ACE_ERROR_RETURN((LM_ERROR,
@@ -113,7 +116,8 @@ ParticipantTask::svc()
     DDS::DataWriter_var writer =
       publisher->create_datawriter(topic.in(),
                                    writer_qos,
-                                   DDS::DataWriterListener::_nil());
+                                   DDS::DataWriterListener::_nil(),
+                                   ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
     
     if (CORBA::is_nil(writer.in()))
       ACE_ERROR_RETURN((LM_ERROR,
@@ -128,16 +132,16 @@ ParticipantTask::svc()
 
     // Block until Subscriber is available
     DDS::StatusCondition_var cond = writer->get_statuscondition();
-    cond->set_enabled_statuses(DDS::PUBLICATION_MATCH_STATUS);
+    cond->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
 
     DDS::WaitSet_var ws = new DDS::WaitSet;
     ws->attach_condition(cond);
 
     DDS::Duration_t timeout =
-      { DDS::DURATION_INFINITY_SEC, DDS::DURATION_INFINITY_NSEC };
+      { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
 
     DDS::ConditionSeq conditions; 
-    DDS::PublicationMatchStatus matches = {0, 0, 0, 0, 0};
+    DDS::PublicationMatchedStatus matches = {0, 0, 0, 0, 0};
     do
     {
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK)
@@ -145,7 +149,12 @@ ParticipantTask::svc()
                           ACE_TEXT("%N:%l: svc()")
                           ACE_TEXT(" wait failed!\n")), 1);
 
-      matches = writer->get_publication_match_status();
+      if (writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK)
+      {
+        ACE_ERROR ((LM_ERROR,
+          "ERROR: failed to get publication matched status\n"));
+        ACE_OS::exit (1);
+      }
     }
     while (matches.current_count < 1);
 

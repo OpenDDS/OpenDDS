@@ -43,7 +43,7 @@ const long  MY_DOMAIN   = 411;
 const char* MY_TOPIC    = "foo";
 const char* MY_TYPE     = "foo";
 
-const ACE_Time_Value max_blocking_time(::DDS::DURATION_INFINITY_SEC);
+const ACE_Time_Value max_blocking_time(::DDS::DURATION_INFINITE_SEC);
 
 int max_samples_per_instance = ::DDS::LENGTH_UNLIMITED;
 int history_depth = 10 ;
@@ -110,7 +110,7 @@ int wait_for_data (::DDS::Subscriber_ptr sub,
   while (timeout_loops-- > 0)
     {
       sub->get_datareaders (
-                    discard.out (),
+                    discard.inout (),
                     ::DDS::NOT_READ_SAMPLE_STATE,
                     ::DDS::ANY_VIEW_STATE,
                     ::DDS::ANY_INSTANCE_STATE );
@@ -222,7 +222,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,
                                 PARTICIPANT_QOS_DEFAULT,
-                                ::DDS::DomainParticipantListener::_nil());
+                                ::DDS::DomainParticipantListener::_nil(),
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       //xxx obj rc = 3
       if (CORBA::is_nil (dp.in ()))
       {
@@ -254,7 +255,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         dp->create_topic (MY_TOPIC,
                           MY_TYPE,
                           topic_qos,
-                          ::DDS::TopicListener::_nil());
+                          ::DDS::TopicListener::_nil(),
+                          ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (topic.in ()))
       {
         return 1 ;
@@ -274,7 +276,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // Create the subscriber
       ::DDS::Subscriber_var sub =
         dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
-                             ::DDS::SubscriberListener::_nil());
+                             ::DDS::SubscriberListener::_nil(),
+                             ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (sub.in ()))
       {
         ACE_ERROR_RETURN ((LM_ERROR,
@@ -285,7 +288,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // Create the publisher
       ::DDS::Publisher_var pub =
         dp->create_publisher(PUBLISHER_QOS_DEFAULT,
-                             ::DDS::PublisherListener::_nil());
+                             ::DDS::PublisherListener::_nil(),
+                             ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (pub.in ()))
       {
         ACE_ERROR_RETURN ((LM_ERROR,
@@ -340,7 +344,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       ::DDS::DataWriter_var dw = pub->create_datawriter(topic.in (),
                                         dw_qos,
-                                        ::DDS::DataWriterListener::_nil());
+                                        ::DDS::DataWriterListener::_nil(),
+                                        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
       if (CORBA::is_nil (dw.in ()))
       {
@@ -361,7 +366,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       ::DDS::DataReader_var dr
         = sub->create_datareader(description.in (),
                                  dr_qos,
-                                 ::DDS::DataReaderListener::_nil());
+                                 ::DDS::DataReaderListener::_nil(),
+                                 ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
       if (CORBA::is_nil (dr.in ()))
         {

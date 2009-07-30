@@ -54,9 +54,9 @@ void DataWriterListenerImpl::on_liveliness_lost (
   ACE_UNUSED_ARG(status) ;
 }
   
-void DataWriterListenerImpl::on_publication_match (
+void DataWriterListenerImpl::on_publication_matched (
       ::DDS::DataWriter_ptr writer,
-      const ::DDS::PublicationMatchStatus & status
+      const ::DDS::PublicationMatchedStatus & status
     )
     ACE_THROW_SPEC ((
       ::CORBA::SystemException
@@ -68,7 +68,7 @@ void DataWriterListenerImpl::on_publication_match (
   publication_matched_ = true;
 
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_publication_match \n")));
+    ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_publication_matched \n")));
 }
 
 void DataWriterListenerImpl::on_publication_disconnected (

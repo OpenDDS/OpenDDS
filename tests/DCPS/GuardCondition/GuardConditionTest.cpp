@@ -58,7 +58,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   ret = gc->set_trigger_value(true);
   if (ret != RETCODE_OK) return ret;
   ConditionSeq active;
-  Duration_t infinite = {DURATION_INFINITY_SEC, DURATION_INFINITY_NSEC};
+  Duration_t infinite = {DURATION_INFINITE_SEC, DURATION_INFINITE_NSEC};
   ret = ws->wait(active, infinite);
   if (ret != RETCODE_OK) return ret;
   if (active.length() != 1 || active[0] != gc) return 1;

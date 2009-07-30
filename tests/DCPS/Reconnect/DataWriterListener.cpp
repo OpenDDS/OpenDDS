@@ -60,16 +60,16 @@ void DataWriterListenerImpl::on_liveliness_lost (
 }
 
 
-void DataWriterListenerImpl::on_publication_match (
+void DataWriterListenerImpl::on_publication_matched (
   ::DDS::DataWriter_ptr,
-  const ::DDS::PublicationMatchStatus &
+  const ::DDS::PublicationMatchedStatus &
   )
   ACE_THROW_SPEC ((
   ::CORBA::SystemException
   ))
 {
   ACE_DEBUG ((LM_DEBUG ,
-    "(%P|%t)DataWriterListenerImpl::on_publication_match\n"));
+    "(%P|%t)DataWriterListenerImpl::on_publication_matched\n"));
 }
 
 

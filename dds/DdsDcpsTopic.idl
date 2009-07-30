@@ -23,18 +23,17 @@ module DDS {
                 };
 
     local interface Topic : Entity, TopicDescription {
-      ReturnCode_t set_qos(
-        in TopicQos qos);
-
-      void get_qos(inout TopicQos qos);
-
-      ReturnCode_t set_listener(
-        in TopicListener a_listener, 
-        in StatusKindMask mask);
-
-      TopicListener get_listener();
-      // Access the status
-      InconsistentTopicStatus get_inconsistent_topic_status();
+        ReturnCode_t set_qos(
+            in TopicQos qos);
+        ReturnCode_t get_qos( 
+            inout TopicQos qos);
+        ReturnCode_t set_listener(
+            in TopicListener a_listener, 
+            in StatusMask mask);
+        TopicListener get_listener();
+        // Access the status
+        ReturnCode_t get_inconsistent_topic_status(
+            inout InconsistentTopicStatus a_status);
     };
 
     local interface TypeSupport {
@@ -43,7 +42,7 @@ module DDS {
                  //                in string type_name);
                  //        
                   
-                 string get_type_name ();
+                 //        string get_type_name ();
                 };
 };
 

@@ -40,7 +40,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       DDS::DomainParticipant_var participant =
         dpf->create_participant(411,
                                 PARTICIPANT_QOS_DEFAULT,
-                                DDS::DomainParticipantListener::_nil());
+                                DDS::DomainParticipantListener::_nil(),
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (participant.in ())) {
         cerr << "create_participant failed." << endl;
         return 1;
@@ -62,7 +63,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         participant->create_topic ("Movie Discussion List",
                                    type_name.in (),
                                    topic_qos,
-                                   DDS::TopicListener::_nil());
+                                   DDS::TopicListener::_nil(),
+                                   ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (topic.in ())) {
         cerr << "create_topic failed." << endl;
         exit(1);
@@ -75,7 +77,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       DDS::Publisher_var pub =
         participant->create_publisher (PUBLISHER_QOS_DEFAULT,
-        DDS::PublisherListener::_nil());
+        DDS::PublisherListener::_nil(),
+        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (pub.in ()))
       {
         cerr << "create_publisher failed." << endl;
@@ -129,7 +132,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       DDS::DataWriter_var dw =
         pub->create_datawriter (topic.in (),
                                 dw_qos,
-                                dwl.in());
+                                dwl.in(),
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (dw.in ())) {
         cerr << "create_datawriter failed." << endl;
         exit(1);

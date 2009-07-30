@@ -41,6 +41,7 @@ namespace OpenDDS
                  OpenDDS::DCPS::TypeSupport_ptr type_support,
                  const ::DDS::TopicQos &        qos,
                  ::DDS::TopicListener_ptr       a_listener,
+                 const ::DDS::StatusMask &      mask,
                  ::DDS::DomainParticipant_ptr   participant);
 
       //Destructor
@@ -56,7 +57,7 @@ namespace OpenDDS
         CORBA::SystemException
       ));
 
-    virtual void get_qos (
+    virtual ::DDS::ReturnCode_t get_qos (
         ::DDS::TopicQos & qos
       )
       ACE_THROW_SPEC ((
@@ -65,7 +66,7 @@ namespace OpenDDS
 
     virtual ::DDS::ReturnCode_t set_listener (
         ::DDS::TopicListener_ptr a_listener,
-        ::DDS::StatusKindMask mask
+        ::DDS::StatusMask mask
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -77,7 +78,8 @@ namespace OpenDDS
         CORBA::SystemException
       ));
 
-    virtual ::DDS::InconsistentTopicStatus get_inconsistent_topic_status (
+    virtual ::DDS::ReturnCode_t get_inconsistent_topic_status (
+        ::DDS::InconsistentTopicStatus & a_status
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -107,7 +109,7 @@ namespace OpenDDS
 
       /// The mask for which kind of events the listener
       ///  will be notified about.
-      ::DDS::StatusKindMask          listener_mask_;
+      ::DDS::StatusMask          listener_mask_;
       /// The topic listener
       ::DDS::TopicListener_var       listener_;
       /// The topic listener servant.

@@ -74,9 +74,9 @@ void DataWriterListenerImpl::on_liveliness_lost (
     ));
   }
 
-void DataWriterListenerImpl::on_publication_match (
+void DataWriterListenerImpl::on_publication_matched (
     ::DDS::DataWriter_ptr writer,
-    const ::DDS::PublicationMatchStatus & status
+    const ::DDS::PublicationMatchedStatus & status
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -86,7 +86,7 @@ void DataWriterListenerImpl::on_publication_match (
     ACE_UNUSED_ARG(status) ;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) DataWriterListenerImpl::on_publication_match Repo[ %d] \n"),
+      ACE_TEXT("%T (%P|%t) DataWriterListenerImpl::on_publication_matched Repo[ %d] \n"),
       this->repo_
     ));
   }

@@ -43,7 +43,8 @@ Publisher::Publisher( int argc, ACE_TCHAR** argv, char** envp)
   this->participant_ = factory->create_participant(
                          this->config_.domain(),
                          PARTICIPANT_QOS_DEFAULT,
-                         ::DDS::DomainParticipantListener::_nil()
+                         ::DDS::DomainParticipantListener::_nil(),
+                         ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
                        );
   if( CORBA::is_nil( this->participant_.in())) {
     ACE_ERROR ((LM_ERROR,
@@ -130,7 +131,8 @@ Publisher::Publisher( int argc, ACE_TCHAR** argv, char** envp)
                    this->config_.topicName().c_str(),
                    this->config_.typeName().c_str(),
                    TOPIC_QOS_DEFAULT,
-                   ::DDS::TopicListener::_nil()
+                   ::DDS::TopicListener::_nil(),
+                   ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
                  );
   if( CORBA::is_nil( this->topic_.in()) ) {
     ACE_ERROR ((LM_ERROR,
@@ -146,7 +148,8 @@ Publisher::Publisher( int argc, ACE_TCHAR** argv, char** envp)
 
   this->publisher_ = this->participant_->create_publisher(
                        PUBLISHER_QOS_DEFAULT,
-                       ::DDS::PublisherListener::_nil()
+                       ::DDS::PublisherListener::_nil(),
+                       ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
                      );
   if( CORBA::is_nil (this->publisher_.in ())) {
     ACE_ERROR ((LM_ERROR, ACE_TEXT ("(%P|%t) ERROR: Failed to create_publisher.\n")));
@@ -232,7 +235,8 @@ Publisher::Publisher( int argc, ACE_TCHAR** argv, char** envp)
     = this->publisher_->create_datawriter(
         this->topic_.in(),
         writerQos,
-        this->listener_.in()
+        this->listener_.in(),
+        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
       );
   if( CORBA::is_nil( this->dataWriter_.in()) ) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: create datawriter failed.\n")));

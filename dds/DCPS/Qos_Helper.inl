@@ -37,8 +37,8 @@ operator< (::DDS::Duration_t const & t1,
   //       infinite nanosec value to be somewhere in the middle.
   ::DDS::Duration_t const DDS_DURATION_INFINITY =
     {
-      ::DDS::DURATION_INFINITY_SEC,
-      ::DDS::DURATION_INFINITY_NSEC
+      ::DDS::DURATION_INFINITE_SEC,
+      ::DDS::DURATION_INFINITE_NSEC
     };
 
   // We assume that either both the DDS::Duration_t::sec and
@@ -127,8 +127,7 @@ operator== (const ::DDS::DurabilityQosPolicy& qos1,
             const ::DDS::DurabilityQosPolicy& qos2)
 {
   return
-    qos1.kind == qos2.kind
-    && qos1.service_cleanup_delay == qos2.service_cleanup_delay;
+    qos1.kind == qos2.kind;
 }
 
 ACE_INLINE
@@ -289,7 +288,9 @@ bool operator == (const ::DDS::ReaderDataLifecycleQosPolicy& qos1,
                   const ::DDS::ReaderDataLifecycleQosPolicy& qos2)
 {
   return
-    qos1.autopurge_nowriter_samples_delay == qos2.autopurge_nowriter_samples_delay;
+    (qos1.autopurge_nowriter_samples_delay == qos2.autopurge_nowriter_samples_delay)
+    && (qos1.autopurge_disposed_samples_delay == qos2.autopurge_disposed_samples_delay);
+
 }
 
 
@@ -467,8 +468,8 @@ namespace OpenDDS
     {
       ::DDS::Duration_t const DDS_DURATION_INFINITY =
         {
-          ::DDS::DURATION_INFINITY_SEC,
-          ::DDS::DURATION_INFINITY_NSEC
+          ::DDS::DURATION_INFINITE_SEC,
+          ::DDS::DURATION_INFINITE_NSEC
         };
 
       // Only accept infinite or positive finite durations.  (Zero
@@ -659,8 +660,7 @@ namespace OpenDDS
         (qos.kind == ::DDS::VOLATILE_DURABILITY_QOS
          || qos.kind == ::DDS::TRANSIENT_LOCAL_DURABILITY_QOS
          || qos.kind == ::DDS::TRANSIENT_DURABILITY_QOS
-         || qos.kind == ::DDS::PERSISTENT_DURABILITY_QOS)
-        && non_negative_duration (qos.service_cleanup_delay);
+         || qos.kind == ::DDS::PERSISTENT_DURABILITY_QOS);
     }
 
     ACE_INLINE

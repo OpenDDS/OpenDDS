@@ -136,6 +136,7 @@ DataWriterImpl::init (
     TopicImpl *                            topic_servant,
     const ::DDS::DataWriterQos &           qos,
     ::DDS::DataWriterListener_ptr          a_listener,
+    const ::DDS::StatusMask &              mask,
     OpenDDS::DCPS::DomainParticipantImpl * participant_servant,
     OpenDDS::DCPS::PublisherImpl *         publisher_servant,
     ::DDS::DataWriter_ptr                  dw_local,
@@ -161,11 +162,13 @@ DataWriterImpl::init (
   qos_ = qos;
   //Note: OK to _duplicate(nil).
   listener_ = ::DDS::DataWriterListener::_duplicate(a_listener);
-
+  
   if (! CORBA::is_nil (listener_.in()))
     {
       fast_listener_ = listener_.in();
     }
+
+  listener_mask_ = mask;
 
   // Only store the participant pointer, since it is our "grand"
   // parent, we will exist as long as it does.
@@ -377,15 +380,15 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
         publication_match_status_.last_subscription_handle = handles[i];
       }
 
-      set_status_changed_flag (::DDS::PUBLICATION_MATCH_STATUS, true);
+      set_status_changed_flag (::DDS::PUBLICATION_MATCHED_STATUS, true);
     }
 
     ::DDS::DataWriterListener* listener =
-        listener_for (::DDS::PUBLICATION_MATCH_STATUS);
+        listener_for (::DDS::PUBLICATION_MATCHED_STATUS);
 
     if (listener != 0)
     {
-      listener->on_publication_match (dw_local_objref_.in (),
+      listener->on_publication_matched (dw_local_objref_.in (),
         publication_match_status_);
 
       // TBD - why does the spec say to change this but not
@@ -526,7 +529,7 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
       this->publication_id_);
   }
 
-  // Mirror the PUBLICATION_MATCH_STATUS processing from
+  // Mirror the PUBLICATION_MATCHED_STATUS processing from
   // fully_associated() here.
   if( !this->is_bit_) {
 
@@ -545,12 +548,12 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
       this->publication_match_status_.last_subscription_handle
         = handles[ rds_len - 1];
 
-      set_status_changed_flag (::DDS::PUBLICATION_MATCH_STATUS, true);
+      set_status_changed_flag (::DDS::PUBLICATION_MATCHED_STATUS, true);
 
       ::DDS::DataWriterListener* listener
-        = this->listener_for( ::DDS::SUBSCRIPTION_MATCH_STATUS);
+        = this->listener_for( ::DDS::SUBSCRIPTION_MATCHED_STATUS);
       if( listener != 0) {
-        listener->on_publication_match(
+        listener->on_publication_matched(
           this->dw_local_objref_.in(),
           this->publication_match_status_
         );
@@ -704,8 +707,8 @@ DataWriterImpl::set_qos (const ::DDS::DataWriterQos & qos)
       if (qos_.deadline.period.sec != qos.deadline.period.sec
         || qos_.deadline.period.nanosec != qos.deadline.period.nanosec)
       {
-        if (qos_.deadline.period.sec == ::DDS::DURATION_INFINITY_SEC
-          && qos_.deadline.period.nanosec == ::DDS::DURATION_INFINITY_NSEC)
+        if (qos_.deadline.period.sec == ::DDS::DURATION_INFINITE_SEC
+          && qos_.deadline.period.nanosec == ::DDS::DURATION_INFINITE_NSEC)
         {
           ACE_auto_ptr_reset (this->watchdog_,
             new OfferedDeadlineWatchdog (
@@ -717,8 +720,8 @@ DataWriterImpl::set_qos (const ::DDS::DataWriterQos & qos)
             this->offered_deadline_missed_status_,
             this->last_deadline_missed_total_count_));
         }
-        else if (qos.deadline.period.sec == ::DDS::DURATION_INFINITY_SEC
-                 && qos.deadline.period.nanosec == ::DDS::DURATION_INFINITY_NSEC)
+        else if (qos.deadline.period.sec == ::DDS::DURATION_INFINITE_SEC
+                 && qos.deadline.period.nanosec == ::DDS::DURATION_INFINITE_NSEC)
         {
           this->watchdog_->cancel_all ();
           this->watchdog_.reset ();
@@ -747,16 +750,17 @@ DataWriterImpl::set_qos (const ::DDS::DataWriterQos & qos)
   }
 }
 
-void
+::DDS::ReturnCode_t
 DataWriterImpl::get_qos (::DDS::DataWriterQos & qos)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
   qos = qos_;
+  return ::DDS::RETCODE_OK;
 }
 
 ::DDS::ReturnCode_t
 DataWriterImpl::set_listener ( ::DDS::DataWriterListener_ptr a_listener,
-                               ::DDS::StatusKindMask mask)
+                               ::DDS::StatusMask mask)
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   listener_mask_ = mask;
@@ -915,28 +919,30 @@ DataWriterImpl::get_publisher ()
   return ::DDS::Publisher::_duplicate (publisher_servant_);
 }
 
-::DDS::LivelinessLostStatus
-DataWriterImpl::get_liveliness_lost_status ()
+::DDS::ReturnCode_t 
+DataWriterImpl::get_liveliness_lost_status (
+  ::DDS::LivelinessLostStatus & status)
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
                     this->lock_,
-                    ::DDS::LivelinessLostStatus ());
+                    ::DDS::RETCODE_ERROR);
   set_status_changed_flag (::DDS::LIVELINESS_LOST_STATUS, false);
-  ::DDS::LivelinessLostStatus status = liveliness_lost_status_;
+  status = liveliness_lost_status_;
   liveliness_lost_status_.total_count_change = 0;
-  return status;
+  return ::DDS::RETCODE_OK;
 }
 
-::DDS::OfferedDeadlineMissedStatus
-DataWriterImpl::get_offered_deadline_missed_status ()
+::DDS::ReturnCode_t 
+DataWriterImpl::get_offered_deadline_missed_status (
+  ::DDS::OfferedDeadlineMissedStatus & status)
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
                     this->lock_,
-                    ::DDS::OfferedDeadlineMissedStatus ());
+                    ::DDS::RETCODE_ERROR);
 
   set_status_changed_flag (::DDS::OFFERED_DEADLINE_MISSED_STATUS, false);
 
@@ -948,46 +954,45 @@ DataWriterImpl::get_offered_deadline_missed_status ()
   this->last_deadline_missed_total_count_ =
     this->offered_deadline_missed_status_.total_count;
 
-  ::DDS::OfferedDeadlineMissedStatus const status =
-      offered_deadline_missed_status_;
+  status = offered_deadline_missed_status_;
 
   this->offered_deadline_missed_status_.total_count_change = 0;
 
-  return status;
+  return ::DDS::RETCODE_OK;
 }
 
-::DDS::OfferedIncompatibleQosStatus *
-DataWriterImpl::get_offered_incompatible_qos_status ( )
+::DDS::ReturnCode_t
+DataWriterImpl::get_offered_incompatible_qos_status (
+  ::DDS::OfferedIncompatibleQosStatus & status)
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
                     this->lock_,
-                    0);
+                    ::DDS::RETCODE_ERROR);
   set_status_changed_flag (::DDS::OFFERED_INCOMPATIBLE_QOS_STATUS, false);
-  ::DDS::OfferedIncompatibleQosStatus* status =
-      new ::DDS::OfferedIncompatibleQosStatus;
-  *status = offered_incompatible_qos_status_;
+  status = offered_incompatible_qos_status_;
   offered_incompatible_qos_status_.total_count_change = 0;
-  return status;
+  return ::DDS::RETCODE_OK;
 }
 
-::DDS::PublicationMatchStatus
-DataWriterImpl::get_publication_match_status ()
+::DDS::ReturnCode_t
+DataWriterImpl::get_publication_matched_status (
+  ::DDS::PublicationMatchedStatus & status)
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
                     this->lock_,
-                    ::DDS::PublicationMatchStatus ());
-  set_status_changed_flag (::DDS::PUBLICATION_MATCH_STATUS, false);
-  ::DDS::PublicationMatchStatus status = publication_match_status_;
+                    ::DDS::RETCODE_ERROR);
+  set_status_changed_flag (::DDS::PUBLICATION_MATCHED_STATUS, false);
+  status = publication_match_status_;
   publication_match_status_.total_count_change = 0;
   publication_match_status_.current_count_change = 0;
-  return status;
+  return ::DDS::RETCODE_OK;
 }
 
-void
+::DDS::ReturnCode_t 
 DataWriterImpl::assert_liveliness ()
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
@@ -1000,6 +1005,9 @@ DataWriterImpl::assert_liveliness ()
 
   // ACE_Time_Value now = ACE_OS::gettimeofday ();
   // send_liveliness (now);
+
+  //tbd: Why commented ?
+  return ::DDS::RETCODE_OK;
 }
 
 ::DDS::ReturnCode_t
@@ -1160,8 +1168,8 @@ DataWriterImpl::enable ()
                n_chunks_));
   }
 
-  if (qos_.liveliness.lease_duration.sec != ::DDS::DURATION_INFINITY_SEC
-      || qos_.liveliness.lease_duration.nanosec != ::DDS::DURATION_INFINITY_NSEC)
+  if (qos_.liveliness.lease_duration.sec != ::DDS::DURATION_INFINITE_SEC
+      || qos_.liveliness.lease_duration.nanosec != ::DDS::DURATION_INFINITE_NSEC)
   {
     liveliness_check_interval_ =
       duration_to_time_value (qos_.liveliness.lease_duration);
@@ -1187,8 +1195,8 @@ DataWriterImpl::enable ()
   // Setup the offered deadline watchdog if the configured deadline
   // period is not the default (infinite).
   ::DDS::Duration_t const deadline_period = this->qos_.deadline.period;
-  if (deadline_period.sec != ::DDS::DURATION_INFINITY_SEC
-      || deadline_period.nanosec != ::DDS::DURATION_INFINITY_NSEC)
+  if (deadline_period.sec != ::DDS::DURATION_INFINITE_SEC
+      || deadline_period.nanosec != ::DDS::DURATION_INFINITE_NSEC)
   {
     ACE_auto_ptr_reset (this->watchdog_,
                         new OfferedDeadlineWatchdog (
@@ -1589,8 +1597,8 @@ DataWriterImpl::create_sample_data_message ( DataSample* data,
   header_data.source_timestamp_sec_ = source_timestamp.sec;
   header_data.source_timestamp_nanosec_ = source_timestamp.nanosec;
 
-  if (qos_.lifespan.duration.sec != ::DDS::DURATION_INFINITY_SEC
-    || qos_.lifespan.duration.nanosec != ::DDS::DURATION_INFINITY_NSEC)
+  if (qos_.lifespan.duration.sec != ::DDS::DURATION_INFINITE_SEC
+    || qos_.lifespan.duration.nanosec != ::DDS::DURATION_INFINITE_NSEC)
   {
     header_data.lifespan_duration_ = true;
     header_data.lifespan_duration_sec_ = qos_.lifespan.duration.sec;

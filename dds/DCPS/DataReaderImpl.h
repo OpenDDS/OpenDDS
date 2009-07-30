@@ -247,6 +247,7 @@ namespace OpenDDS
         const ::DDS::DataReaderQos &  qos,
         const DataReaderQosExt &      ext_qos,
         ::DDS::DataReaderListener_ptr a_listener,
+        const ::DDS::StatusMask &     mask,
         DomainParticipantImpl*        participant,
         SubscriberImpl*               subscriber,
         ::DDS::DataReader_ptr         dr_objref,
@@ -298,7 +299,7 @@ namespace OpenDDS
           CORBA::SystemException
         ));
 
-      virtual void get_qos (
+      virtual ::DDS::ReturnCode_t get_qos (
           ::DDS::DataReaderQos & qos
         )
         ACE_THROW_SPEC ((
@@ -307,7 +308,7 @@ namespace OpenDDS
 
       virtual ::DDS::ReturnCode_t set_listener (
           ::DDS::DataReaderListener_ptr a_listener,
-          ::DDS::StatusKindMask mask
+          ::DDS::StatusMask mask
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
@@ -331,37 +332,43 @@ namespace OpenDDS
           CORBA::SystemException
         ));
 
-      virtual ::DDS::SampleRejectedStatus get_sample_rejected_status (
+      virtual ::DDS::ReturnCode_t get_sample_rejected_status (
+          ::DDS::SampleRejectedStatus & status
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
         ));
 
-      virtual ::DDS::LivelinessChangedStatus get_liveliness_changed_status (
+      virtual ::DDS::ReturnCode_t get_liveliness_changed_status (
+          ::DDS::LivelinessChangedStatus & status
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
         ));
 
-      virtual ::DDS::RequestedDeadlineMissedStatus get_requested_deadline_missed_status (
+      virtual ::DDS::ReturnCode_t get_requested_deadline_missed_status (
+          ::DDS::RequestedDeadlineMissedStatus & status
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
         ));
 
-      virtual ::DDS::RequestedIncompatibleQosStatus * get_requested_incompatible_qos_status (
+      virtual ::DDS::ReturnCode_t get_requested_incompatible_qos_status (
+          ::DDS::RequestedIncompatibleQosStatus & status
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
         ));
 
-      virtual ::DDS::SubscriptionMatchStatus get_subscription_match_status (
+      virtual ::DDS::ReturnCode_t get_subscription_matched_status (
+          ::DDS::SubscriptionMatchedStatus & status
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
         ));
 
-      virtual ::DDS::SampleLostStatus get_sample_lost_status (
+      virtual ::DDS::ReturnCode_t get_sample_lost_status (
+          ::DDS::SampleLostStatus & status
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
@@ -604,7 +611,7 @@ namespace OpenDDS
 
       TopicImpl*                      topic_servant_;
       ::DDS::TopicDescription_var     topic_desc_;
-      ::DDS::StatusKindMask           listener_mask_;
+      ::DDS::StatusMask           listener_mask_;
       ::DDS::DataReaderListener_var   listener_;
       ::DDS::DataReaderListener*  fast_listener_;
       DomainParticipantImpl*          participant_servant_;
@@ -627,7 +634,7 @@ namespace OpenDDS
       ::DDS::LivelinessChangedStatus        liveliness_changed_status_;
       ::DDS::RequestedDeadlineMissedStatus  requested_deadline_missed_status_;
       ::DDS::RequestedIncompatibleQosStatus requested_incompatible_qos_status_;
-      ::DDS::SubscriptionMatchStatus        subscription_match_status_;
+      ::DDS::SubscriptionMatchedStatus        subscription_match_status_;
 
       // OpenDDS extended status.  This is only available via listener.
       BudgetExceededStatus                  budget_exceeded_status_;
@@ -651,7 +658,7 @@ namespace OpenDDS
 
       /// The time interval for checking liveliness.
       /// TBD: Should this be initialized with
-      ///      ::DDS::DURATION_INFINITY_SEC and ::DDS::DURATION_INFINITY_NSEC
+      ///      ::DDS::DURATION_INFINITE_SEC and ::DDS::DURATION_INFINITE_NSEC
       ///      instead of ACE_Time_Value::zero to be consistent with default
       ///      duration qos ? Or should we simply use the ACE_Time_Value::zero
       ///      to indicate the INFINITY duration ?

@@ -41,7 +41,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       participant =
         dpf->create_participant(411,
                                 PARTICIPANT_QOS_DEFAULT,
-                                DDS::DomainParticipantListener::_nil());
+                                DDS::DomainParticipantListener::_nil(),
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (participant.in ())) {
         cerr << "create_participant failed." << endl;
         return 1 ;
@@ -65,7 +66,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         participant->create_topic("Movie Discussion List",
                                   type_name.in (),
                                   topic_qos,
-                                  DDS::TopicListener::_nil());
+                                  DDS::TopicListener::_nil(),
+                                  ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (topic.in ())) {
         cerr << "Failed to create_topic." << endl;
         exit(1);
@@ -81,7 +83,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // transport.
       DDS::Subscriber_var sub =
         participant->create_subscriber (SUBSCRIBER_QOS_DEFAULT,
-                                        DDS::SubscriberListener::_nil());
+                                        DDS::SubscriberListener::_nil(),
+                                        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (sub.in ())) {
         cerr << "Failed to create_subscriber." << endl;
         exit(1);
@@ -146,7 +149,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       DDS::DataReader_var dr1 =
         sub->create_datareader (topic.in (),
                                 dr_qos,
-                                listener1.in ());
+                                listener1.in (),
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
       // Set up a 3 second recurring deadline.
       dr_qos.deadline.period.sec     = 3;
@@ -157,7 +161,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       DDS::DataReader_var dr2 =
         sub->create_datareader (topic.in (),
                                 dr_qos,
-                                listener2.in ());
+                                listener2.in (),
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
       if (CORBA::is_nil (dr1.in ()) || CORBA::is_nil (dr2.in ()))
       {

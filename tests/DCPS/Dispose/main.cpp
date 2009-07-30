@@ -74,7 +74,8 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     DDS::DomainParticipant_var participant =
       TheParticipantFactory->create_participant(42,
                                                 PARTICIPANT_QOS_DEFAULT,
-                                                DDS::DomainParticipantListener::_nil());
+                                                DDS::DomainParticipantListener::_nil(),
+                                                ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
     if (CORBA::is_nil(participant.in()))
       ACE_ERROR_RETURN((LM_ERROR,
@@ -84,7 +85,8 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     // Create Subscriber
     DDS::Subscriber_var subscriber =
       participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
-                                     DDS::SubscriberListener::_nil());
+                                     DDS::SubscriberListener::_nil(),
+                                     ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
     if (CORBA::is_nil(subscriber.in()))
       ACE_ERROR_RETURN((LM_ERROR,
@@ -94,7 +96,8 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     // Create Publisher
     DDS::Publisher_var publisher =
       participant->create_publisher(PUBLISHER_QOS_DEFAULT,
-                                    DDS::PublisherListener::_nil());
+                                    DDS::PublisherListener::_nil(),
+                                    ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
    
     if (CORBA::is_nil(publisher.in()))
       ACE_ERROR_RETURN((LM_ERROR,
@@ -165,7 +168,8 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       participant->create_topic("FooTopic",
                                 ts->get_type_name(),
                                 TOPIC_QOS_DEFAULT,
-                                DDS::TopicListener::_nil());
+                                DDS::TopicListener::_nil(),
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
     if (CORBA::is_nil(topic.in()))
       ACE_ERROR_RETURN((LM_ERROR,
@@ -176,7 +180,8 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     DDS::DataReader_var reader =
       subscriber->create_datareader(topic.in(),
                                     DATAREADER_QOS_DEFAULT,
-                                    DDS::DataReaderListener::_nil());
+                                    DDS::DataReaderListener::_nil(),
+                                    ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
     if (CORBA::is_nil(reader.in()))
       ACE_ERROR_RETURN((LM_ERROR,
@@ -193,7 +198,8 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     DDS::DataWriter_var writer =
       publisher->create_datawriter(topic.in(),
                                    DATAWRITER_QOS_DEFAULT,
-                                   DDS::DataWriterListener::_nil());
+                                   DDS::DataWriterListener::_nil(),
+                                   ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
     
     if (CORBA::is_nil(writer.in()))
       ACE_ERROR_RETURN((LM_ERROR,
@@ -208,16 +214,16 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     // Block until Subscriber is associated
     DDS::StatusCondition_var cond = writer->get_statuscondition();
-    cond->set_enabled_statuses(DDS::PUBLICATION_MATCH_STATUS);
+    cond->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
 
     DDS::WaitSet_var ws = new DDS::WaitSet;
     ws->attach_condition(cond);
 
     DDS::Duration_t timeout =
-      { DDS::DURATION_INFINITY_SEC, DDS::DURATION_INFINITY_NSEC };
+      { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
 
     DDS::ConditionSeq conditions; 
-    DDS::PublicationMatchStatus matches = { 0, 0, 0, 0, 0 };
+    DDS::PublicationMatchedStatus matches = { 0, 0, 0, 0, 0 };
     do
     {
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK)
@@ -225,7 +231,13 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: wait failed!\n")), 1);
 
-      matches = writer->get_publication_match_status();
+      if (writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK)
+      {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("%N:%l: main()")
+                          ACE_TEXT(" ERROR: failed to get publication matched status!\n")),
+                          2);
+      }
     }
     while (matches.current_count < 1);
 

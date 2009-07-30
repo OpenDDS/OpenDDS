@@ -33,7 +33,7 @@
 #define  TOPIC_T2  2
 #define  TOPIC_T3  4
 
-static const ACE_Time_Value max_blocking_time(::DDS::DURATION_INFINITY_SEC);
+static const ACE_Time_Value max_blocking_time(::DDS::DURATION_INFINITE_SEC);
 
 static const int LEASE_DURATION_SEC = 5 ; // seconds
 

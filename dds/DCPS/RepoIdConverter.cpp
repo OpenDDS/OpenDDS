@@ -39,9 +39,9 @@ RepoIdConverter::participantId() const
 void
 RepoIdConverter::get_BuiltinTopicKey(DDS::BuiltinTopicKey_t& key) const
 {
-  key[0] = federationId();
-  key[1] = participantId();
-  key[2] = entityId();
+  key.value[0] = federationId();
+  key.value[1] = participantId();
+  key.value[2] = entityId();
 }
 
 RepoIdConverter::operator DDS::InstanceHandle_t() const

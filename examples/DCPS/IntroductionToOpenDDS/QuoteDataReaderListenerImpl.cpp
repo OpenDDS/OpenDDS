@@ -88,12 +88,12 @@ void QuoteDataReaderListenerImpl::on_liveliness_changed (
   cerr << "QuoteDataReaderListenerImpl::on_liveliness_changed" << endl;
 }
 
-void QuoteDataReaderListenerImpl::on_subscription_match (
+void QuoteDataReaderListenerImpl::on_subscription_matched (
     DDS::DataReader_ptr,
-    const DDS::SubscriptionMatchStatus &)
+    const DDS::SubscriptionMatchedStatus &)
   throw (CORBA::SystemException)
 {
-  cerr << "QuoteDataReaderListenerImpl::on_subscription_match" << endl;
+  cerr << "QuoteDataReaderListenerImpl::on_subscription_matched" << endl;
 }
 
 void QuoteDataReaderListenerImpl::on_sample_rejected(

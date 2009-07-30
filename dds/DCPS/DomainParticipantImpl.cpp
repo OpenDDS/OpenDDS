@@ -58,6 +58,7 @@ namespace OpenDDS
                                                   const RepoId&                        dp_id,
                                                   const ::DDS::DomainParticipantQos &  qos,
                                                   ::DDS::DomainParticipantListener_ptr a_listener,
+                                                  const ::DDS::StatusMask &            mask,
                                                   bool                                 federated)
       : default_topic_qos_(TheServiceParticipant->initial_TopicQos()),
         default_publisher_qos_(TheServiceParticipant->initial_PublisherQos()),
@@ -71,7 +72,7 @@ namespace OpenDDS
         publisher_handles_(ENTITYKIND_OPENDDS_PUBLISHER)
     {
       DDS::ReturnCode_t ret;
-      ret = this->set_listener(a_listener, DEFAULT_STATUS_KIND_MASK);
+      ret = this->set_listener(a_listener, mask);
     }
 
 
@@ -85,7 +86,8 @@ namespace OpenDDS
     ::DDS::Publisher_ptr
     DomainParticipantImpl::create_publisher (
         const ::DDS::PublisherQos & qos,
-        ::DDS::PublisherListener_ptr a_listener
+        ::DDS::PublisherListener_ptr a_listener,
+        ::DDS::StatusMask mask
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -213,7 +215,8 @@ namespace OpenDDS
     ::DDS::Subscriber_ptr
     DomainParticipantImpl::create_subscriber (
         const ::DDS::SubscriberQos & qos,
-        ::DDS::SubscriberListener_ptr a_listener
+        ::DDS::SubscriberListener_ptr a_listener,
+        ::DDS::StatusMask mask
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -252,6 +255,7 @@ namespace OpenDDS
                      SubscriberImpl(subscriber_handles_.next(),
                                     sub_qos,
                                     a_listener,
+                                    mask,
                                     this),
                      ::DDS::Subscriber::_nil());
 
@@ -370,7 +374,8 @@ namespace OpenDDS
         const char * topic_name,
         const char * type_name,
         const ::DDS::TopicQos & qos,
-        ::DDS::TopicListener_ptr a_listener
+        ::DDS::TopicListener_ptr a_listener,
+        ::DDS::StatusMask mask
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -482,7 +487,8 @@ namespace OpenDDS
                                                               topic_name,
                                                               type_name,
                                                               topic_qos,
-                                                              a_listener);
+                                                              a_listener,
+                                                              mask);
                   return new_topic;
                 }
               else
@@ -694,7 +700,9 @@ namespace OpenDDS
                                                           topic_name,
                                                           type_name,
                                                           qos,
-                                                          ::DDS::TopicListener::_nil ());
+                                                          ::DDS::TopicListener::_nil (),
+                                                          ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+                                                          );
                 return new_topic;
               }
               else
@@ -1034,7 +1042,7 @@ namespace OpenDDS
     }
 
 
-    void
+    ::DDS::ReturnCode_t
     DomainParticipantImpl::get_qos (
         ::DDS::DomainParticipantQos & qos
       )
@@ -1043,13 +1051,14 @@ namespace OpenDDS
       ))
     {
       qos = qos_;
+      return ::DDS::RETCODE_OK;
     }
 
 
     ::DDS::ReturnCode_t
     DomainParticipantImpl::set_listener (
         ::DDS::DomainParticipantListener_ptr a_listener,
-        ::DDS::StatusKindMask mask
+        ::DDS::StatusMask mask
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -1369,7 +1378,7 @@ namespace OpenDDS
     }
 
 
-    void
+    ::DDS::ReturnCode_t
     DomainParticipantImpl::assert_liveliness (
       )
       ACE_THROW_SPEC ((
@@ -1383,6 +1392,9 @@ namespace OpenDDS
       // This will do nothing in current implementation since we only
       // support the AUTOMATIC liveliness qos for datawriter.
       // Add implementation here.
+
+      //tbd: not implemented so return error if it's called.
+      return ::DDS::RETCODE_ERROR;
     }
 
 
@@ -1406,7 +1418,7 @@ namespace OpenDDS
     }
 
 
-    void
+    ::DDS::ReturnCode_t
     DomainParticipantImpl::get_default_publisher_qos (
         ::DDS::PublisherQos & qos
       )
@@ -1415,6 +1427,7 @@ namespace OpenDDS
       ))
     {
       qos = default_publisher_qos_;
+      return ::DDS::RETCODE_OK;
     }
 
 
@@ -1438,7 +1451,7 @@ namespace OpenDDS
     }
 
 
-    void
+    ::DDS::ReturnCode_t
     DomainParticipantImpl::get_default_subscriber_qos (
         ::DDS::SubscriberQos & qos
       )
@@ -1447,6 +1460,7 @@ namespace OpenDDS
       ))
     {
       qos = default_subscriber_qos_;
+      return ::DDS::RETCODE_OK;
     }
 
 
@@ -1470,7 +1484,7 @@ namespace OpenDDS
     }
 
 
-    void
+    ::DDS::ReturnCode_t
     DomainParticipantImpl::get_default_topic_qos (
         ::DDS::TopicQos & qos
       )
@@ -1479,6 +1493,7 @@ namespace OpenDDS
       ))
     {
       qos = default_topic_qos_;
+      return ::DDS::RETCODE_OK;
     }
     
     ::DDS::ReturnCode_t
@@ -1567,7 +1582,8 @@ namespace OpenDDS
         const char * topic_name,
         const char * type_name,
         const ::DDS::TopicQos & qos,
-        ::DDS::TopicListener_ptr a_listener
+        ::DDS::TopicListener_ptr a_listener,
+        const ::DDS::StatusMask & mask
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -1602,6 +1618,7 @@ namespace OpenDDS
                                 type_support,
                                 qos,
                                 a_listener,
+                                mask,
                                 participant_objref_.in ()),
                       ::DDS::Topic::_nil());
 
@@ -1738,7 +1755,8 @@ namespace OpenDDS
         bit_part_topic_ = this->create_topic (::OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
                                                ::OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE,
                                                topic_qos,
-                                               ::DDS::TopicListener::_nil());
+                                               ::DDS::TopicListener::_nil(),
+                                               ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
         if (CORBA::is_nil (bit_part_topic_.in ()))
           {
             ACE_ERROR_RETURN ((LM_ERROR,
@@ -1776,7 +1794,8 @@ namespace OpenDDS
         bit_topic_topic_ = this->create_topic (::OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC,
                                                ::OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE,
                                                topic_qos,
-                                               ::DDS::TopicListener::_nil());
+                                               ::DDS::TopicListener::_nil(),
+                                               ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
         if (CORBA::is_nil (bit_topic_topic_.in ()))
           {
             ACE_ERROR_RETURN ((LM_ERROR,
@@ -1814,7 +1833,8 @@ namespace OpenDDS
           this->create_topic (::OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC,
                               ::OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE,
                               topic_qos,
-                              ::DDS::TopicListener::_nil());
+                              ::DDS::TopicListener::_nil(),
+                              ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
         if (CORBA::is_nil (bit_sub_topic_.in ()))
           {
             ACE_ERROR_RETURN ((LM_ERROR,
@@ -1852,7 +1872,8 @@ namespace OpenDDS
           this->create_topic (::OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC,
                               ::OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC_TYPE,
                               topic_qos,
-                              ::DDS::TopicListener::_nil());
+                              ::DDS::TopicListener::_nil(),
+                              ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
         if (CORBA::is_nil (bit_pub_topic_.in ()))
           {
             ACE_ERROR_RETURN ((LM_ERROR,
@@ -1886,7 +1907,8 @@ namespace OpenDDS
 
           bit_subscriber_
             = this->create_subscriber (sub_qos,
-                                       ::DDS::SubscriberListener::_nil ());
+                                       ::DDS::SubscriberListener::_nil (),
+                                       ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
         }
       catch (const CORBA::Exception& ex)
         {
@@ -1917,10 +1939,12 @@ namespace OpenDDS
             participantReaderQos.liveliness.lease_duration.sec
               = TheServiceParticipant->federation_liveliness();
           }
+
           ::DDS::DataReader_var dr
             = bit_subscriber_->create_datareader (bit_part_topic_desc.in (),
                                                   participantReaderQos,
-                                                  ::DDS::DataReaderListener::_nil ());
+                                                  ::DDS::DataReaderListener::_nil (),
+                                                  ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
           bit_part_dr_
             = ::DDS::ParticipantBuiltinTopicDataDataReader::_narrow (dr.in ());
@@ -1943,7 +1967,8 @@ namespace OpenDDS
 
           dr = bit_subscriber_->create_datareader (bit_topic_topic_desc.in (),
                                                    dr_qos,
-                                                   ::DDS::DataReaderListener::_nil ());
+                                                   ::DDS::DataReaderListener::_nil (),
+                                                   ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
           bit_topic_dr_
             = ::DDS::TopicBuiltinTopicDataDataReader::_narrow (dr.in ());
@@ -1953,7 +1978,8 @@ namespace OpenDDS
 
           dr = bit_subscriber_->create_datareader (bit_pub_topic_desc.in (),
                                                    dr_qos,
-                                                   ::DDS::DataReaderListener::_nil ());
+                                                   ::DDS::DataReaderListener::_nil (),
+                                                   ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
           bit_pub_dr_
             = ::DDS::PublicationBuiltinTopicDataDataReader::_narrow (dr.in ());
@@ -1963,7 +1989,8 @@ namespace OpenDDS
 
           dr = bit_subscriber_->create_datareader (bit_sub_topic_desc.in (),
                                                    dr_qos,
-                                                   ::DDS::DataReaderListener::_nil ());
+                                                   ::DDS::DataReaderListener::_nil (),
+                                                   ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
           bit_sub_dr_
             = ::DDS::SubscriptionBuiltinTopicDataDataReader::_narrow (dr.in ());

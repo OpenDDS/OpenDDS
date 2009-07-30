@@ -26,7 +26,7 @@ const char* TEST_TYPE     = (const char* ) "PerfTestType";
 const ACE_TCHAR* reader_address_str = ACE_TEXT("default");
 const ACE_TCHAR* writer_address_str = ACE_TEXT("default");
 
-const ACE_Time_Value max_blocking_time(::DDS::DURATION_INFINITY_SEC);
+const ACE_Time_Value max_blocking_time(::DDS::DURATION_INFINITE_SEC);
 
 int NUM_SAMPLES = 128;
 int DATA_SIZE = 128;

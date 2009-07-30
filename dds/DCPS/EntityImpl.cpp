@@ -49,7 +49,7 @@ namespace OpenDDS
         return ::DDS::StatusCondition::_duplicate(status_condition_);
       }
 
-    ::DDS::StatusKindMask
+    ::DDS::StatusMask
     EntityImpl::get_status_changes (
       )
       ACE_THROW_SPEC ((

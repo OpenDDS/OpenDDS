@@ -85,7 +85,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       participant =
         dpFactory->create_participant(TEST_DOMAIN_NUMBER,
                                       PARTICIPANT_QOS_DEFAULT,
-                                      dpListener.in());
+                                      dpListener.in(),
+                                      ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if ( CORBA::is_nil (participant.in ()) )
         {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -160,7 +161,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ::DDS::Topic_var testTopic = participant->create_topic("foo-name",
                                                              TEST_TYPE_NAME,
                                                              TOPIC_QOS_DEFAULT,
-                                                             ::DDS::TopicListener::_nil());
+                                                             ::DDS::TopicListener::_nil(),
+                                                             ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if ( CORBA::is_nil (testTopic.in ()) )
         {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -231,7 +233,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ::DDS::Topic_var topic = participant->create_topic("foo-name",
                                                          TEST_TYPE_NAME,
                                                          TOPIC_QOS_DEFAULT,
-                                                         ::DDS::TopicListener::_nil());
+                                                         ::DDS::TopicListener::_nil(),
+                                                         ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if ( CORBA::is_nil (topic.in ()) )
         {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -240,8 +243,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         }
 
 
-      ::DDS::InconsistentTopicStatus inconsistentStatus =
-          topic->get_inconsistent_topic_status();
+      ::DDS::InconsistentTopicStatus inconsistentStatus;
+      if (topic->get_inconsistent_topic_status(inconsistentStatus) != ::DDS::RETCODE_OK)
+      {
+        ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("(%P|%t) Failed to get inconsistent topic status!\n")),
+                            6);
+      }
 
       ACE_UNUSED_ARG (inconsistentStatus);
 
@@ -283,7 +291,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                             7);
         }
 
-      ::DDS::StatusKindMask mask = ::DDS::PUBLICATION_MATCH_STATUS | ::DDS::SUBSCRIPTION_MATCH_STATUS;
+      ::DDS::StatusMask mask = ::DDS::PUBLICATION_MATCHED_STATUS | ::DDS::SUBSCRIPTION_MATCHED_STATUS;
       topic->set_listener(topicListener.in(), mask);
 
       ::DDS::TopicListener_var addedListener = topic->get_listener ();

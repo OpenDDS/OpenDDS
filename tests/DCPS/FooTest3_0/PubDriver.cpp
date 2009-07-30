@@ -233,7 +233,8 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
   participant_ =
     dpf->create_participant(MY_DOMAIN,
                             PARTICIPANT_QOS_DEFAULT,
-                            ::DDS::DomainParticipantListener::_nil());
+                            ::DDS::DomainParticipantListener::_nil(),
+                            ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
   TEST_CHECK (! CORBA::is_nil (participant_.in ()));
   // NOTE: A participant may not contain itself
   TEST_CHECK (!participant_->contains_entity(participant_->get_instance_handle()));
@@ -260,13 +261,15 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
   topic_ = participant_->create_topic (MY_TOPIC,
                                        MY_TYPE,
                                        TOPIC_QOS_DEFAULT,
-                                       ::DDS::TopicListener::_nil());
+                                       ::DDS::TopicListener::_nil(),
+                                       ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
   TEST_CHECK (! CORBA::is_nil (topic_.in ()));
   TEST_CHECK (participant_->contains_entity(topic_->get_instance_handle()));
 
   publisher_ =
     participant_->create_publisher(PUBLISHER_QOS_DEFAULT,
-                                   ::DDS::PublisherListener::_nil());
+                                   ::DDS::PublisherListener::_nil(),
+                                   ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
   TEST_CHECK (! CORBA::is_nil (publisher_.in ()));
 
   std::cout << std::hex << "0x" << publisher_->get_instance_handle() << std::endl;
@@ -314,7 +317,8 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
   datawriter_
     = publisher_->create_datawriter(topic_.in (),
                                     DATAWRITER_QOS_USE_TOPIC_QOS,
-                                    ::DDS::DataWriterListener::_nil());
+                                    ::DDS::DataWriterListener::_nil(),
+                                    ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
   TEST_CHECK (! CORBA::is_nil (datawriter_.in ()));
   TEST_CHECK (participant_->contains_entity(datawriter_->get_instance_handle()));
 
@@ -337,7 +341,8 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
   datawriter_
     = publisher_->create_datawriter(topic_.in (),
                                     DATAWRITER_QOS_DEFAULT,
-                                    ::DDS::DataWriterListener::_nil());
+                                    ::DDS::DataWriterListener::_nil(),
+                                    ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
   TEST_CHECK (! CORBA::is_nil (datawriter_.in ()));
   TEST_CHECK (participant_->contains_entity(datawriter_->get_instance_handle()));
 
@@ -395,7 +400,8 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
   datawriter_
     = publisher_->create_datawriter(topic_.in (),
                                     dw_qos,
-                                    ::DDS::DataWriterListener::_nil());
+                                    ::DDS::DataWriterListener::_nil(),
+                                    ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
   TEST_CHECK (! CORBA::is_nil (datawriter_.in ()));
   TEST_CHECK (participant_->contains_entity(datawriter_->get_instance_handle()));
 
@@ -811,19 +817,19 @@ PubDriver::listener_test ()
   TEST_CHECK (offered_incompatible_qos_called_on_pub == 0);
   TEST_CHECK (offered_incompatible_qos_called_on_dw  == 0);
 
-  ::DDS::OfferedIncompatibleQosStatus_var incomp_status_got
-    = foo_datawriter_->get_offered_incompatible_qos_status ();
+  ::DDS::OfferedIncompatibleQosStatus incomp_status_got;
+  TEST_CHECK (foo_datawriter_->get_offered_incompatible_qos_status (incomp_status_got) == ::DDS::RETCODE_OK);
 
-  TEST_CHECK (incomp_status_got.in ().total_count == incomp_status.total_count);
+  TEST_CHECK (incomp_status_got.total_count == incomp_status.total_count);
   // TBD: This should be reconfirmed when the DataWriterImpl::update_incompatible_qos is
   //      updated.
-  TEST_CHECK (incomp_status_got.in ().total_count_change == 0);
-  TEST_CHECK (incomp_status_got.in ().last_policy_id == incomp_status.last_policy_id);
-  TEST_CHECK (incomp_status_got.in ().policies.length () == incomp_status.policies.length ());
+  TEST_CHECK (incomp_status_got.total_count_change == 0);
+  TEST_CHECK (incomp_status_got.last_policy_id == incomp_status.last_policy_id);
+  TEST_CHECK (incomp_status_got.policies.length () == incomp_status.policies.length ());
   for (CORBA::ULong i = 0; i < 2; i ++)
   {
-    TEST_CHECK (incomp_status_got.in ().policies[i].policy_id == incomp_status.policies[i].policy_id);
-    TEST_CHECK (incomp_status_got.in ().policies[i].count == incomp_status.policies[i].count);
+    TEST_CHECK (incomp_status_got.policies[i].policy_id == incomp_status.policies[i].policy_id);
+    TEST_CHECK (incomp_status_got.policies[i].count == incomp_status.policies[i].count);
   }
 
   publisher_->set_listener (pl.in (),
@@ -850,13 +856,13 @@ PubDriver::listener_test ()
   TEST_CHECK (offered_incompatible_qos_called_on_pub == 1);
   TEST_CHECK (offered_incompatible_qos_called_on_dw == 1);
 
-  ::DDS::StatusKindMask changed_status
+  ::DDS::StatusMask changed_status
     = foo_datawriter_->get_status_changes ();
 
-  // Both OFFERED_INCOMPATIBLE_QOS_STATUS and PUBLICATION_MATCH_STATUS status
+  // Both OFFERED_INCOMPATIBLE_QOS_STATUS and PUBLICATION_MATCHED_STATUS status
   // are changed.
   TEST_CHECK ((changed_status & ::DDS::OFFERED_INCOMPATIBLE_QOS_STATUS) != 0);
-  TEST_CHECK ((changed_status & ::DDS::PUBLICATION_MATCH_STATUS) != 0);
+  TEST_CHECK ((changed_status & ::DDS::PUBLICATION_MATCHED_STATUS) != 0);
 
   // Test get_matched_subscriptions.
 
@@ -868,17 +874,18 @@ PubDriver::listener_test ()
               && subscription_handles.length () == 1
               && subscription_handles[0] == DDS::InstanceHandle_t(converter));
 
-  // Test get_publication_match_status.
+  // Test get_publication_matched_status.
 
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) PubDriver::listener_test: ")
-    ACE_TEXT("get_publication_match_status.\n")
+    ACE_TEXT("get_publication_matched_status.\n")
   ));
 
-  // The PUBLICATION_MATCH_STATUS status is updated when add_association.
+  // The PUBLICATION_MATCHED_STATUS status is updated when add_association.
   // One subscription is added already.
-  ::DDS::PublicationMatchStatus match_status
-    = foo_datawriter_->get_publication_match_status ();
+  ::DDS::PublicationMatchedStatus match_status;
+
+  TEST_CHECK (foo_datawriter_->get_publication_matched_status (match_status) == ::DDS::RETCODE_OK);
 
   TEST_CHECK (match_status.total_count == 1);
   // The listener is set after add_association, so the total_count_change
@@ -914,10 +921,10 @@ PubDriver::listener_test ()
 
   // The OfferedDeadlineMissedStatus and OfferedDeadlineMissedStatus are not
   // supported currently. The status got should be the same as initial status.
-  ::DDS::OfferedDeadlineMissedStatus deadline_status
-    = foo_datawriter_->get_offered_deadline_missed_status ();
-  ::DDS::LivelinessLostStatus liveliness_status
-    = foo_datawriter_->get_liveliness_lost_status ();
+  ::DDS::OfferedDeadlineMissedStatus deadline_status;
+  TEST_CHECK (foo_datawriter_->get_offered_deadline_missed_status (deadline_status) == ::DDS::RETCODE_OK);
+  ::DDS::LivelinessLostStatus liveliness_status;
+  TEST_CHECK (foo_datawriter_->get_liveliness_lost_status (liveliness_status) == ::DDS::RETCODE_OK);
 
   ::DDS::OfferedDeadlineMissedStatus initial_deadline_status;
   initial_deadline_status.total_count = 0;

@@ -276,7 +276,8 @@ PubDriver::init(int& argc, ACE_TCHAR *argv[])
   participant_ =
     dpf->create_participant(MY_DOMAIN,
                             PARTICIPANT_QOS_DEFAULT,
-                            ::DDS::DomainParticipantListener::_nil());
+                            ::DDS::DomainParticipantListener::_nil(),
+                            ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
   TEST_CHECK (! CORBA::is_nil (participant_.in ()));
 
   if (::DDS::RETCODE_OK != fts->register_type(participant_.in (), MY_TYPE))
@@ -304,13 +305,15 @@ PubDriver::init(int& argc, ACE_TCHAR *argv[])
   topic_ = participant_->create_topic (MY_TOPIC,
                                        MY_TYPE,
                                        topic_qos,
-                                       ::DDS::TopicListener::_nil());
+                                       ::DDS::TopicListener::_nil(),
+                                       ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
   TEST_CHECK (! CORBA::is_nil (topic_.in ()));
 
 
   publisher_ =
     participant_->create_publisher(PUBLISHER_QOS_DEFAULT,
-                          ::DDS::PublisherListener::_nil());
+                          ::DDS::PublisherListener::_nil(),
+                          ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
   TEST_CHECK (! CORBA::is_nil (publisher_.in ()));
 
   attach_to_transport ();
@@ -336,7 +339,8 @@ PubDriver::init(int& argc, ACE_TCHAR *argv[])
     datawriters_[i]
     = publisher_->create_datawriter(topic_.in (),
                                     datawriter_qos,
-                                    ::DDS::DataWriterListener::_nil());
+                                    ::DDS::DataWriterListener::_nil(),
+                                    ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
     TEST_CHECK (! CORBA::is_nil (datawriters_[i].in ()));
   }
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Publisher created %d datawriters.\n"), num_datawriters_));

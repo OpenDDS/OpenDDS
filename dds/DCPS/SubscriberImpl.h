@@ -65,6 +65,7 @@ namespace OpenDDS
       SubscriberImpl (DDS::InstanceHandle_t handle,
                       const ::DDS::SubscriberQos & qos,
                       ::DDS::SubscriberListener_ptr a_listener,
+                      const ::DDS::StatusMask & mask,
                       DomainParticipantImpl*       participant);
 
       //Destructor
@@ -78,7 +79,8 @@ namespace OpenDDS
       virtual ::DDS::DataReader_ptr create_datareader (
         ::DDS::TopicDescription_ptr a_topic_desc,
         const ::DDS::DataReaderQos & qos,
-        ::DDS::DataReaderListener_ptr a_listener
+        ::DDS::DataReaderListener_ptr a_listener,
+        ::DDS::StatusMask mask
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -88,7 +90,8 @@ namespace OpenDDS
         ::DDS::TopicDescription_ptr a_topic_desc,
         const ::DDS::DataReaderQos & qos,
         const DataReaderQosExt & ext_qos,
-        ::DDS::DataReaderListener_ptr a_listener
+        ::DDS::DataReaderListener_ptr a_listener,
+        ::DDS::StatusMask mask
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -115,7 +118,7 @@ namespace OpenDDS
       ));
 
     virtual ::DDS::ReturnCode_t get_datareaders (
-        ::DDS::DataReaderSeq_out readers,
+        ::DDS::DataReaderSeq & readers,
         ::DDS::SampleStateMask sample_states,
         ::DDS::ViewStateMask view_states,
         ::DDS::InstanceStateMask instance_states
@@ -124,7 +127,7 @@ namespace OpenDDS
         CORBA::SystemException
       ));
 
-    virtual void notify_datareaders (
+    virtual ::DDS::ReturnCode_t notify_datareaders (
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -137,7 +140,7 @@ namespace OpenDDS
         CORBA::SystemException
       ));
 
-    virtual void get_qos (
+    virtual ::DDS::ReturnCode_t get_qos (
         ::DDS::SubscriberQos & qos
       )
       ACE_THROW_SPEC ((
@@ -146,7 +149,7 @@ namespace OpenDDS
 
     virtual ::DDS::ReturnCode_t set_listener (
         ::DDS::SubscriberListener_ptr a_listener,
-        ::DDS::StatusKindMask mask
+        ::DDS::StatusMask mask
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -183,7 +186,7 @@ namespace OpenDDS
         CORBA::SystemException
       ));
 
-    virtual void get_default_datareader_qos (
+    virtual ::DDS::ReturnCode_t get_default_datareader_qos (
         ::DDS::DataReaderQos & qos
       )
       ACE_THROW_SPEC ((
@@ -262,7 +265,7 @@ namespace OpenDDS
       ::DDS::SubscriberQos          qos_;
       ::DDS::DataReaderQos          default_datareader_qos_;
 
-      DDS::StatusKindMask           listener_mask_;
+      DDS::StatusMask           listener_mask_;
       ::DDS::SubscriberListener_var  listener_;
       ::DDS::SubscriberListener* fast_listener_;
 

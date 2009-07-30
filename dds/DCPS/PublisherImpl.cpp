@@ -105,7 +105,8 @@ PublisherImpl::contains_writer(DDS::InstanceHandle_t a_handle)
 PublisherImpl::create_datawriter (
     ::DDS::Topic_ptr a_topic,
     const ::DDS::DataWriterQos & qos,
-    ::DDS::DataWriterListener_ptr a_listener)
+    ::DDS::DataWriterListener_ptr a_listener,
+    ::DDS::StatusMask mask)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
   if (CORBA::is_nil (a_topic))
@@ -192,6 +193,7 @@ PublisherImpl::create_datawriter (
                     topic_servant,
                     dw_qos,
                     a_listener,
+                    mask,
                     participant_,
                     this,
                     dw_obj.in (),
@@ -605,16 +607,17 @@ PublisherImpl::set_qos (const ::DDS::PublisherQos & qos)
     }
 }
 
-void
+::DDS::ReturnCode_t 
 PublisherImpl::get_qos (::DDS::PublisherQos & qos)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
   qos = qos_;
+  return ::DDS::RETCODE_OK;
 }
 
 ::DDS::ReturnCode_t
 PublisherImpl::set_listener (::DDS::PublisherListener_ptr a_listener,
-                             ::DDS::StatusKindMask mask)
+                             ::DDS::StatusMask mask)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
   listener_mask_ = mask;
@@ -702,6 +705,18 @@ PublisherImpl::end_coherent_changes ()
   return ::DDS::RETCODE_UNSUPPORTED;
 }
 
+
+::DDS::ReturnCode_t 
+PublisherImpl::wait_for_acknowledgments (
+  const ::DDS::Duration_t & max_wait
+  )
+  ACE_THROW_SPEC ((::CORBA::SystemException))
+{
+  //tbd
+  return ::DDS::RETCODE_OK;
+}
+
+
 ::DDS::DomainParticipant_ptr
 PublisherImpl::get_participant ()
   ACE_THROW_SPEC ((CORBA::SystemException))
@@ -724,11 +739,12 @@ PublisherImpl::set_default_datawriter_qos (const ::DDS::DataWriterQos & qos)
     }
 }
 
-void
+::DDS::ReturnCode_t
 PublisherImpl::get_default_datawriter_qos (::DDS::DataWriterQos & qos)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
   qos = default_datawriter_qos_;
+  return ::DDS::RETCODE_OK;
 }
 
 ::DDS::ReturnCode_t

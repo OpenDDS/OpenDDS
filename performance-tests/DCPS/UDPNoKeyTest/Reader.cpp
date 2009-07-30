@@ -50,10 +50,22 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
   int num_reads = 0;
   int zero_reads = 0;
   DDS::ReturnCode_t status;
-  ::DDS::SampleRejectedStatus rejected =
-         dr_servant->get_sample_rejected_status ();
-  ::DDS::SampleLostStatus lost =
-         dr_servant->get_sample_lost_status ();
+  ::DDS::SampleRejectedStatus rejected;
+  if (dr_servant->get_sample_rejected_status (rejected) != ::DDS::RETCODE_OK)
+  {
+    ACE_ERROR_RETURN((LM_ERROR,
+      "ERROR: failed to get sample rejected status\n"),
+      -2);
+  }
+
+  ::DDS::SampleLostStatus lost;
+  if (dr_servant->get_sample_lost_status (lost) != ::DDS::RETCODE_OK)
+  {
+    ACE_ERROR_RETURN((LM_ERROR,
+      "ERROR: failed to get sample lost status\n"),
+      -2);
+  }
+
 
   bool end_messages = false;
 
@@ -119,13 +131,27 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
 
 
           //ACE_DEBUG((LM_DEBUG,"got RETCODE_NO_DATA\n"));
-          rejected = dr_servant->get_sample_rejected_status ();
+          ::DDS::ReturnCode_t ret = dr_servant->get_sample_rejected_status (rejected);
+          if (ret != ::DDS::RETCODE_OK)
+          {
+            ACE_ERROR_RETURN ((LM_ERROR, 
+              ACE_TEXT ("(%P|%t)ERROR: Failed get sample rejected status \n")),
+              ret);
+          }
+
           if (rejected.total_count_change > 0)
             {
               //ACE_DEBUG((LM_DEBUG,"rejected %d samples\n", rejected.total_count_change));
               stats->samples_received(rejected.total_count_change);
             }
-          lost = dr_servant->get_sample_lost_status ();
+
+          ret = dr_servant->get_sample_lost_status (lost);
+          if (ret != ::DDS::RETCODE_OK)
+          {
+            ACE_ERROR_RETURN ((LM_ERROR, 
+              ACE_TEXT ("(%P|%t)ERROR: Failed to get sample lost status \n")),
+              ret);
+          }
           if (lost.total_count_change > 0)
             {
               //ACE_DEBUG((LM_DEBUG,"lost %d samples\n", lost.total_count_change));
@@ -327,7 +353,7 @@ Reader::wait_for_data (::DDS::Subscriber_ptr sub,
   while (timeout_loops-- > 0)
     {
       sub->get_datareaders (
-                    discard.out (),
+                    discard.inout (),
                     ::DDS::NOT_READ_SAMPLE_STATE,
                     ::DDS::ANY_VIEW_STATE,
                     ::DDS::ANY_INSTANCE_STATE );

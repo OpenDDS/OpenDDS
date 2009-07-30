@@ -54,9 +54,9 @@ void DataWriterListenerImpl::on_liveliness_lost (
     // Add your implementation here
   }
 
-void DataWriterListenerImpl::on_publication_match (
+void DataWriterListenerImpl::on_publication_matched (
     ::DDS::DataWriter_ptr writer,
-    const ::DDS::PublicationMatchStatus & status
+    const ::DDS::PublicationMatchedStatus & status
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException

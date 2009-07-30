@@ -143,9 +143,9 @@ void DataReaderListenerImpl::on_liveliness_changed (
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_liveliness_changed\n")));
   }
 
-void DataReaderListenerImpl::on_subscription_match (
+void DataReaderListenerImpl::on_subscription_matched (
     ::DDS::DataReader_ptr reader,
-    const ::DDS::SubscriptionMatchStatus & status
+    const ::DDS::SubscriptionMatchedStatus & status
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -155,7 +155,7 @@ void DataReaderListenerImpl::on_subscription_match (
     ACE_UNUSED_ARG(status) ;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_match \n")));
+      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_matched \n")));
   }
 
   void DataReaderListenerImpl::on_sample_rejected(

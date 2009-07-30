@@ -38,7 +38,8 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       DDS::DomainParticipant_var participant =
         dpf->create_participant (411,
                                  PARTICIPANT_QOS_DEFAULT,
-                                 DDS::DomainParticipantListener::_nil());
+                                 DDS::DomainParticipantListener::_nil(),
+                                 ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (participant.in ()))
       {
         cerr << "create_participant failed." << endl;
@@ -61,7 +62,8 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
         participant->create_topic ("Movie Discussion List",
                                    type_name.in (),
                                    topic_qos,
-                                   DDS::TopicListener::_nil());
+                                   DDS::TopicListener::_nil(),
+                                   ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (topic.in ()))
       {
         cerr << "create_topic failed." << endl;
@@ -75,7 +77,8 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
 
       DDS::Publisher_var pub =
         participant->create_publisher (PUBLISHER_QOS_DEFAULT,
-                                       DDS::PublisherListener::_nil());
+                                       DDS::PublisherListener::_nil(),
+                                       ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (pub.in ()))
       {
         cerr << "create_publisher failed." << endl;
@@ -136,7 +139,8 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
         DDS::DataWriter_var dw_tmp =
           pub->create_datawriter (topic.in (),
                                   dw_qos,
-                                  ::DDS::DataWriterListener::_nil ());
+                                  ::DDS::DataWriterListener::_nil (),
+                                  ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
         if (CORBA::is_nil (dw_tmp.in ()))
         {
           cerr << "create_datawriter failed." << endl;
@@ -173,7 +177,8 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       // should be transferred to this DataWriter.  Once publication
       // match occurs, the data should be sent to the subscriber.
       DDS::DataWriter_var dw =
-        pub->create_datawriter (topic.in (), dw_qos, dwl.in ());
+        pub->create_datawriter (topic.in (), dw_qos, dwl.in (),
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
       int const max_attempts = 50;
       int attempts; 
@@ -226,12 +231,14 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
           participant->create_topic ("Dummy Topic",
                                      type_name.in (),
                                      topic_qos,
-                                     DDS::TopicListener::_nil());
+                                     DDS::TopicListener::_nil(),
+                                     ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
         DDS::DataWriter_var dummy_dw =
           pub->create_datawriter (dummy_topic.in (),
                                   dw_qos,
-                                  ::DDS::DataWriterListener::_nil ());
+                                  ::DDS::DataWriterListener::_nil (),
+                                  ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
         if (CORBA::is_nil (dummy_dw.in ()))
         {
           cerr << "create_datawriter for dummy topic failed." << endl;

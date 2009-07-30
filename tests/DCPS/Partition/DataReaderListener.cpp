@@ -81,9 +81,9 @@ Test::DataReaderListener::on_liveliness_changed (
 }
 
 void
-Test::DataReaderListener::on_subscription_match (
+Test::DataReaderListener::on_subscription_matched (
     DDS::DataReader_ptr reader,
-    const DDS::SubscriptionMatchStatus& status)
+    const DDS::SubscriptionMatchedStatus& status)
   throw (CORBA::SystemException)
 {
   if( status.total_count_change > 0) {
@@ -92,7 +92,7 @@ Test::DataReaderListener::on_subscription_match (
 
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("(%P|%t) ")
-             ACE_TEXT("DataReaderListener::on_subscription_match\n")));
+             ACE_TEXT("DataReaderListener::on_subscription_matched\n")));
 
   this->display_partitions (reader);
 }

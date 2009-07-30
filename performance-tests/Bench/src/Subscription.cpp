@@ -89,7 +89,8 @@ Subscription::enable(
   // Create the subscriber.
   ::DDS::Subscriber_var subscriber = participant->create_subscriber(
                                        this->profile_->subscriberQos,
-                                       ::DDS::SubscriberListener::_nil()
+                                       ::DDS::SubscriberListener::_nil(),
+                                       ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
                                      );
   if( CORBA::is_nil( subscriber.in())) {
     ACE_ERROR((LM_ERROR,
@@ -190,7 +191,8 @@ Subscription::enable(
   DDS::DataReader_var reader = subscriber->create_datareader(
                                  topic,
                                  readerQos,
-                                 ::DDS::DataReaderListener::_nil()
+                                 ::DDS::DataReaderListener::_nil(),
+                                 ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
                                );
   if( CORBA::is_nil( reader.in())) {
     ACE_ERROR((LM_ERROR,

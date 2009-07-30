@@ -50,7 +50,8 @@ Publisher::Publisher( const Options& options)
     = TheParticipantFactory->create_participant(
         this->options_.domain(),
         PARTICIPANT_QOS_DEFAULT,
-        DDS::DomainParticipantListener::_nil()
+        DDS::DomainParticipantListener::_nil(),
+        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
       );
   if( CORBA::is_nil( this->participant_.in())) {
     ACE_ERROR((LM_ERROR,
@@ -117,7 +118,8 @@ Publisher::Publisher( const Options& options)
                    this->options_.topicName().c_str(),
                    testData->get_type_name(),
                    TOPIC_QOS_DEFAULT,
-                   ::DDS::TopicListener::_nil()
+                   ::DDS::TopicListener::_nil(),
+                   ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
                  );
   if( CORBA::is_nil( this->topic_.in())) {
     ACE_ERROR((LM_ERROR,
@@ -138,7 +140,8 @@ Publisher::Publisher( const Options& options)
   // Create the publisher.
   this->publisher_ = this->participant_->create_publisher(
                        PUBLISHER_QOS_DEFAULT,
-                       ::DDS::PublisherListener::_nil()
+                       ::DDS::PublisherListener::_nil(),
+                       ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
                      );
   if( CORBA::is_nil( this->publisher_.in())) {
     ACE_ERROR((LM_ERROR,
@@ -213,7 +216,8 @@ Publisher::Publisher( const Options& options)
   this->writer_[0] = this->publisher_->create_datawriter(
                     this->topic_.in(),
                     writerQos,
-                    DDS::DataWriterListener::_nil()
+                    DDS::DataWriterListener::_nil(),
+                    ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
                   );
   if( CORBA::is_nil( this->writer_[0].in())) {
     ACE_ERROR((LM_ERROR,
@@ -231,7 +235,7 @@ Publisher::Publisher( const Options& options)
 
   // Grab, enable and attach the status condition for test synchronization.
   this->status_[0] = this->writer_[0]->get_statuscondition();
-  this->status_[0]->set_enabled_statuses( DDS::PUBLICATION_MATCH_STATUS);
+  this->status_[0]->set_enabled_statuses( DDS::PUBLICATION_MATCHED_STATUS);
   this->waiter_->attach_condition( this->status_[0].in());
 
   if( this->options_.verbose()) {
@@ -248,7 +252,8 @@ Publisher::Publisher( const Options& options)
   this->writer_[1] = this->publisher_->create_datawriter(
                     this->topic_.in(),
                     writerQos,
-                    DDS::DataWriterListener::_nil()
+                    DDS::DataWriterListener::_nil(),
+                    ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
                   );
   if( CORBA::is_nil( this->writer_[1].in())) {
     ACE_ERROR((LM_ERROR,
@@ -266,7 +271,7 @@ Publisher::Publisher( const Options& options)
 
   // Grab, enable and attach the status condition for test synchronization.
   this->status_[1] = this->writer_[1]->get_statuscondition();
-  this->status_[1]->set_enabled_statuses( DDS::PUBLICATION_MATCH_STATUS);
+  this->status_[1]->set_enabled_statuses( DDS::PUBLICATION_MATCHED_STATUS);
   this->waiter_->attach_condition( this->status_[1].in());
 
   if( this->options_.verbose()) {
@@ -281,9 +286,9 @@ Publisher::Publisher( const Options& options)
 void
 Publisher::run()
 {
-  DDS::Duration_t   timeout = { DDS::DURATION_INFINITY_SEC, DDS::DURATION_INFINITY_NSEC};
+  DDS::Duration_t   timeout = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC};
   DDS::ConditionSeq conditions;
-  DDS::PublicationMatchStatus matches = { 0, 0, 0, 0, 0};
+  DDS::PublicationMatchedStatus matches = { 0, 0, 0, 0, 0};
   unsigned int cummulative_count = 0;
   do {
     if( this->options_.verbose()) {
@@ -306,9 +311,14 @@ Publisher::run()
 
       DDS::DataWriter_var writer = DDS::DataWriter::_narrow( condition->get_entity());
       if( !CORBA::is_nil( writer.in())) {
-        DDS::StatusKindMask changes = writer->get_status_changes();
-        if( changes & DDS::PUBLICATION_MATCH_STATUS) {
-          matches = writer->get_publication_match_status();
+        DDS::StatusMask changes = writer->get_status_changes();
+        if( changes & DDS::PUBLICATION_MATCHED_STATUS) {
+          if (writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK)
+          {
+            ACE_ERROR ((LM_ERROR,
+              "ERROR: failed to get publication matched status\n"));
+            ACE_OS::exit (1);
+          }
           cummulative_count += matches.current_count_change;
         }
       }

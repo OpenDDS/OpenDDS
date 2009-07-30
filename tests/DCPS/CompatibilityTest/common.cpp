@@ -85,8 +85,8 @@ DDS::Duration_t get_lease_duration(const ACE_TString& argument)
   DDS::Duration_t lease;
   if(argument == ACE_TEXT("infinite"))
   {
-    lease.sec = ::DDS::DURATION_INFINITY_SEC;
-    lease.nanosec = ::DDS::DURATION_INFINITY_NSEC;
+    lease.sec = ::DDS::DURATION_INFINITE_SEC;
+    lease.nanosec = ::DDS::DURATION_INFINITE_NSEC;
   }
   else
   {

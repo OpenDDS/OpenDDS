@@ -2485,14 +2485,19 @@ Options::loadSubscription(
     profile->readerQos.reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec = 0;
     profile->readerQos.reader_data_lifecycle.autopurge_nowriter_samples_delay.sec
       = ACE_OS::atoi( valueString.c_str());
+    //tbd: what's right value for autopurge_disposed_samples_delay?
+    profile->readerQos.reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec = 0;
+    profile->readerQos.reader_data_lifecycle.autopurge_disposed_samples_delay.sec
+      = 0; 
     profile->readerQosMask |= SetReaderDataLifecycleQos;
     if( this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
-        ACE_TEXT("  [subscription/%s] %s == %d.\n"),
+        ACE_TEXT("  [subscription/%s] %s == %d %d.\n"),
         sectionName.c_str(),
         READERDATALIFECYCLE_KEYNAME,
-        profile->readerQos.reader_data_lifecycle.autopurge_nowriter_samples_delay.sec
+        profile->readerQos.reader_data_lifecycle.autopurge_nowriter_samples_delay.sec,
+        profile->readerQos.reader_data_lifecycle.autopurge_disposed_samples_delay.sec
       ));
     }
   }

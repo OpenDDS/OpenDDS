@@ -70,7 +70,8 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     DDS::DomainParticipant_var participant =
       dpf->create_participant(42,
                               PARTICIPANT_QOS_DEFAULT,
-                              DDS::DomainParticipantListener::_nil());
+                              DDS::DomainParticipantListener::_nil(),
+                              ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
     if (CORBA::is_nil(participant.in()))
       ACE_ERROR_RETURN((LM_ERROR,
@@ -80,7 +81,8 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     // Create Subscriber
     DDS::Subscriber_var subscriber =
       participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
-                                     DDS::SubscriberListener::_nil());
+                                     DDS::SubscriberListener::_nil(),
+                                     ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
     if (CORBA::is_nil(subscriber.in()))
       ACE_ERROR_RETURN((LM_ERROR,
@@ -121,7 +123,8 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       participant->create_topic("FooTopic",
                                 ts->get_type_name(),
                                 TOPIC_QOS_DEFAULT,
-                                DDS::TopicListener::_nil());
+                                DDS::TopicListener::_nil(),
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
     if (CORBA::is_nil(topic.in()))
       ACE_ERROR_RETURN((LM_ERROR,
@@ -144,7 +147,8 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     DDS::DataReader_var reader =
       subscriber->create_datareader(topic.in(),
                                     reader_qos,
-                                    listener.in());
+                                    listener.in(),
+                                    ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
     if (CORBA::is_nil(reader.in()))
       ACE_ERROR_RETURN((LM_ERROR,
@@ -153,16 +157,16 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     // Block until Publisher completes
     DDS::StatusCondition_var cond = reader->get_statuscondition();
-    cond->set_enabled_statuses(DDS::SUBSCRIPTION_MATCH_STATUS);
+    cond->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
 
     DDS::WaitSet_var ws = new DDS::WaitSet;
     ws->attach_condition(cond);
     
     DDS::Duration_t timeout =
-      { DDS::DURATION_INFINITY_SEC, DDS::DURATION_INFINITY_NSEC };
+      { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
 
     DDS::ConditionSeq conditions; 
-    DDS::SubscriptionMatchStatus matches = {0, 0, 0, 0, 0};
+    DDS::SubscriptionMatchedStatus matches = {0, 0, 0, 0, 0};
     do
     {
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK)
@@ -170,7 +174,12 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" wait failed!\n")), 8);
 
-      matches = reader->get_subscription_match_status();
+      if (reader->get_subscription_matched_status(matches) != ::DDS::RETCODE_OK)
+      {
+        ACE_ERROR ((LM_ERROR,
+          "ERROR: failed to get subscription matched status\n"));
+        return 1;
+      }
     }
     while (matches.current_count > 0 || matches.total_count < n_publishers);
     ws->detach_condition(cond);

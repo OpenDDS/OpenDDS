@@ -167,6 +167,7 @@ public:
         OpenDDS::DCPS::TopicImpl*              topic_servant,
         const ::DDS::DataWriterQos &           qos,
         ::DDS::DataWriterListener_ptr          a_listener,
+        const ::DDS::StatusMask &              mask,
         OpenDDS::DCPS::DomainParticipantImpl*  participant_servant,
         OpenDDS::DCPS::PublisherImpl*          publisher_servant,
         ::DDS::DataWriter_ptr                  dw_objref,

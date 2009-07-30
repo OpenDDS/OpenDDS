@@ -24,9 +24,9 @@ module DDS {
       in DataWriter writer,
       in LivelinessLostStatus status);
 
-    void on_publication_match(
+    void on_publication_matched(
       in DataWriter writer,
-      in PublicationMatchStatus status);
+      in PublicationMatchedStatus status);
     };
 
     local interface PublisherListener : DataWriterListener {
@@ -63,15 +63,17 @@ module DDS {
     // ReturnCode_t get_key_value(
     //		inout Data key_holder,
     //		in InstanceHandle_t handle);
+    // InstanceHandle_t lookup_instance(
+    //      in Data instance_data);
 
     ReturnCode_t set_qos(
       in DataWriterQos qos);
 
-    void get_qos(inout DataWriterQos qos);
+    ReturnCode_t get_qos(inout DataWriterQos qos);
 
     ReturnCode_t set_listener(
       in DataWriterListener a_listener,
-      in StatusKindMask mask);
+      in StatusMask mask);
 
     DataWriterListener get_listener();
 
@@ -82,19 +84,16 @@ module DDS {
     ReturnCode_t wait_for_acknowledgments(in Duration_t max_wait);
 
     // Access the status
-    LivelinessLostStatus
-      get_liveliness_lost_status();
+    ReturnCode_t get_liveliness_lost_status(
+        inout LivelinessLostStatus status);
+    ReturnCode_t get_offered_deadline_missed_status(
+        inout OfferedDeadlineMissedStatus status);
+    ReturnCode_t get_offered_incompatible_qos_status(
+        inout OfferedIncompatibleQosStatus status);
+    ReturnCode_t get_publication_matched_status(
+        inout PublicationMatchedStatus status);
 
-    OfferedDeadlineMissedStatus
-      get_offered_deadline_missed_status();
-
-    OfferedIncompatibleQosStatus
-      get_offered_incompatible_qos_status();
-
-    PublicationMatchStatus
-      get_publication_match_status();
-
-    void assert_liveliness();
+    ReturnCode_t assert_liveliness();
 
     ReturnCode_t get_matched_subscriptions(
       inout InstanceHandleSeq subscription_handles);
@@ -112,7 +111,8 @@ module DDS {
     DataWriter create_datawriter(
       in Topic a_topic,
       in DataWriterQos qos,
-      in DataWriterListener a_listener);
+      in DataWriterListener a_listener,
+      in StatusMask mask);
 
     ReturnCode_t delete_datawriter(
       in DataWriter a_datawriter);
@@ -125,12 +125,12 @@ module DDS {
     ReturnCode_t set_qos(
       in PublisherQos qos);
 
-    void get_qos(
+    ReturnCode_t get_qos(
       inout PublisherQos qos);
 
     ReturnCode_t set_listener(
       in PublisherListener a_listener,
-      in StatusKindMask mask);
+      in StatusMask mask);
 
     PublisherListener get_listener();
 
@@ -141,13 +141,16 @@ module DDS {
     ReturnCode_t begin_coherent_changes();
 
     ReturnCode_t end_coherent_changes();
+        
+    ReturnCode_t wait_for_acknowledgments(
+        in Duration_t max_wait);
 
     DomainParticipant get_participant();
 
     ReturnCode_t set_default_datawriter_qos(
       in DataWriterQos qos);
 
-    void get_default_datawriter_qos(
+    ReturnCode_t get_default_datawriter_qos(
       inout DataWriterQos qos);
 
     ReturnCode_t copy_from_topic_qos(
