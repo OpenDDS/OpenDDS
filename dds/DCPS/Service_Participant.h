@@ -165,6 +165,7 @@ namespace OpenDDS
       ::DDS::WriterDataLifecycleQosPolicy initial_WriterDataLifecycleQosPolicy () const;
       ::DDS::ReaderDataLifecycleQosPolicy initial_ReaderDataLifecycleQosPolicy () const;
 
+      ::DDS::DomainParticipantFactoryQos  initial_DomainParticipantFactoryQos () const;
       ::DDS::DomainParticipantQos         initial_DomainParticipantQos () const;
       ::DDS::TopicQos                     initial_TopicQos () const;
       ::DDS::DataWriterQos                initial_DataWriterQos () const;
@@ -432,6 +433,7 @@ namespace OpenDDS
       ::DDS::PublisherQos                 initial_PublisherQos_;
       ::DDS::DataReaderQos                initial_DataReaderQos_;
       ::DDS::SubscriberQos                initial_SubscriberQos_;
+      ::DDS::DomainParticipantFactoryQos  initial_DomainParticipantFactoryQos_;
 
       ::DDS::LivelinessLostStatus         initial_liveliness_lost_status_ ;
       ::DDS::OfferedDeadlineMissedStatus  initial_offered_deadline_missed_status_ ;

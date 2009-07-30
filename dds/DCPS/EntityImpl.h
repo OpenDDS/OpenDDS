@@ -35,11 +35,8 @@ namespace OpenDDS
       ///Destructor
       virtual ~EntityImpl ();
 
-      virtual ::DDS::ReturnCode_t set_enabled (
-        )
-        ACE_THROW_SPEC ((
-          CORBA::SystemException
-        ));
+      virtual ::DDS::ReturnCode_t set_enabled ();
+      bool get_enabled () const;
 
       virtual ::DDS::StatusCondition_ptr get_statuscondition (
         )

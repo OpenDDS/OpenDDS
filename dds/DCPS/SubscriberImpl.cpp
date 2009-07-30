@@ -493,15 +493,6 @@ SubscriberImpl::lookup_datareader (
                    CORBA::SystemException
                    ))
 {
-  if (enabled_ == false)
-    {
-      //tbd: should throw NotEnabled exception ?
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::lookup_datareader, ")
-                  ACE_TEXT(" Entity is not enabled. \n")));
-      return ::DDS::DataReader::_nil ();
-    }
-
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
                     this->si_lock_,
@@ -859,14 +850,13 @@ SubscriberImpl::enable (
                    CORBA::SystemException
                    ))
 {
-  //TDB - check if factory is enables and then enable all entities
-  // (don't need to do it for now because
-  //  entity_factory.autoenable_created_entities is always = 1)
-
-  //if (factory not enabled)
-  //{
-  //  return ::DDS::RETCODE_PRECONDITION_NOT_MET;
-  //}
+  //According spec: 
+  // Calling enable on an Entity whose factory is not enabled will fail 
+  // and return PRECONDITION_NOT_MET.
+  if (this->participant_->get_enabled () == false)
+  {
+    return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
 
   this->set_enabled ();
   return ::DDS::RETCODE_OK;

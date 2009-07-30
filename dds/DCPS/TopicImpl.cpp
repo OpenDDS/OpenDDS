@@ -172,9 +172,15 @@ namespace OpenDDS
         CORBA::SystemException
       ))
     {
-      //TDB - check if factory is enables and then enable all entities
-      // (don't need to do it for now because
-      //  entity_factory.autoenable_created_entities is always = 1)
+      //According spec: 
+      // Calling enable on an Entity whose factory is not enabled will fail 
+      // and return PRECONDITION_NOT_MET.
+      DomainParticipantImpl* part = dynamic_cast<DomainParticipantImpl*> (this->participant_);
+      if (part->get_enabled () == false)
+      {
+        return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+      }
+
       return this->set_enabled ();
     }
 

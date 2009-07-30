@@ -1082,14 +1082,13 @@ DataWriterImpl::get_matched_subscription_data (
 DataWriterImpl::enable ()
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
-  //TDB - check if factory is enabled and then enable all entities
-  // (don't need to do it for now because
-  //  entity_factory.autoenable_created_entities is always = 1)
-
-  //if (factory Entity is not enabled.)
-  //{
-  //  return ::DDS::RETCODE_PRECONDITION_NOT_MET;
-  //}
+  //According spec: 
+  // Calling enable on an Entity whose factory is not enabled will fail 
+  // and return PRECONDITION_NOT_MET.
+  if (this->publisher_servant_->get_enabled () == false)
+  {
+    return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
 
   // Note: do configuration based on QoS in enable() because
   //       before enable is called the QoS can be changed -- even

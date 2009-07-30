@@ -38,6 +38,7 @@ namespace OpenDDS
     class FailoverListener;
     class PublisherImpl;
     class SubscriberImpl;
+    class DomainParticipantFactoryImpl;
 
     /**
     * @class DomainParticipantImpl
@@ -93,7 +94,8 @@ namespace OpenDDS
       typedef std::map<std::string, RefCounted_Topic> TopicMap;
 
       ///Constructor
-      DomainParticipantImpl (const ::DDS::DomainId_t&             domain_id,
+      DomainParticipantImpl (DomainParticipantFactoryImpl *       factory,
+                             const ::DDS::DomainId_t&             domain_id,
                              const RepoId&                        dp_id,
                              const ::DDS::DomainParticipantQos &  qos,
                              ::DDS::DomainParticipantListener_ptr a_listener,
@@ -378,6 +380,7 @@ namespace OpenDDS
       /// Attach the subscriber with the transport.
       ::DDS::ReturnCode_t attach_bit_transport ();
 
+      DomainParticipantFactoryImpl* factory_;
       /// The default topic qos.
       ::DDS::TopicQos        default_topic_qos_;
       /// The default publisher qos.

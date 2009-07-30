@@ -1077,6 +1077,14 @@ DataReaderImpl::get_matched_publication_data (
 DataReaderImpl::enable ()
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
+  //According spec: 
+  // Calling enable on an Entity whose factory is not enabled will fail 
+  // and return PRECONDITION_NOT_MET.
+  if (this->subscriber_servant_->get_enabled () == false)
+  {
+    return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+
   if (qos_.history.kind == ::DDS::KEEP_ALL_HISTORY_QOS)
     {
       // The spec says qos_.history.depth is "has no effect"

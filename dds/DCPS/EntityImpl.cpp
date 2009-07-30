@@ -28,16 +28,19 @@ namespace OpenDDS
     ::DDS::ReturnCode_t
     EntityImpl::set_enabled (
       )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ))
+    {
+      if (enabled_ == false)
       {
-        if (enabled_ == false)
-          {
-            enabled_ = true;
-          }
-        return ::DDS::RETCODE_OK;
+        enabled_ = true;
       }
+      return ::DDS::RETCODE_OK;
+    }
+
+    bool 
+    EntityImpl::get_enabled () const
+    {
+      return this->enabled_.value ();
+    }
 
     ::DDS::StatusCondition_ptr
     EntityImpl::get_statuscondition(

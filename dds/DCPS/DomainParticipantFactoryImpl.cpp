@@ -17,7 +17,8 @@ namespace OpenDDS
   {
     // Implementation skeleton constructor
     DomainParticipantFactoryImpl::DomainParticipantFactoryImpl (void)
-    : default_participant_qos_ (TheServiceParticipant->initial_DomainParticipantQos ())
+    : qos_ (TheServiceParticipant->initial_DomainParticipantFactoryQos ()),
+      default_participant_qos_ (TheServiceParticipant->initial_DomainParticipantQos ())
     {
     }
 
@@ -103,7 +104,7 @@ namespace OpenDDS
       DomainParticipantImpl* dp;
 
       ACE_NEW_RETURN (dp,
-                      DomainParticipantImpl(domainId, dp_id, qos, a_listener, mask, federated),
+                      DomainParticipantImpl(this, domainId, dp_id, qos, a_listener, mask, federated),
                       ::DDS::DomainParticipant::_nil ());
 
       ::DDS::DomainParticipant_ptr dp_obj(dp);
@@ -123,9 +124,10 @@ namespace OpenDDS
       // needed for the built in topics during enable.
       dp->set_object_reference (dp_obj); //xxx no change
 
-      // There is no qos policy in the DomainParticipantFactory, the DomainParticipant
-      // defaults to enabled.
-      dp->enable ();
+      if (qos_.entity_factory.autoenable_created_entities == 1)
+      {
+        dp->enable ();
+      }
 
       ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                         tao_mon,
@@ -423,9 +425,15 @@ namespace OpenDDS
         ::CORBA::SystemException
       )) 
     {
-      //tbd:
-      ACE_UNUSED_ARG (qos);
-      return ::DDS::RETCODE_OK;
+      if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos))
+      {
+        qos_ = qos;
+        return ::DDS::RETCODE_OK;
+      }
+      else
+      {
+        return ::DDS::RETCODE_INCONSISTENT_POLICY;
+      }
     }
 
     ::DDS::ReturnCode_t 
@@ -436,8 +444,7 @@ namespace OpenDDS
         ::CORBA::SystemException
       )) 
     {
-      //tbd:
-      ACE_UNUSED_ARG (qos);
+      qos = this->qos_;
       return ::DDS::RETCODE_OK;
     }
 

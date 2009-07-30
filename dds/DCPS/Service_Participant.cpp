@@ -559,6 +559,7 @@ namespace OpenDDS
 
       initial_DomainParticipantQos_.user_data = initial_UserDataQosPolicy_;
       initial_DomainParticipantQos_.entity_factory = initial_EntityFactoryQosPolicy_;
+      initial_DomainParticipantFactoryQos_.entity_factory = initial_EntityFactoryQosPolicy_;
 
       initial_TopicQos_.topic_data = initial_TopicDataQosPolicy_;
       initial_TopicQos_.durability = initial_DurabilityQosPolicy_;

@@ -41,11 +41,12 @@ const CoherencyGroup DEFAULT_GROUP_ID = 0;
 PublisherImpl::PublisherImpl (DDS::InstanceHandle_t handle,
                               const ::DDS::PublisherQos &   qos,
                               ::DDS::PublisherListener_ptr a_listener,
+                              const ::DDS::StatusMask & mask,
                               DomainParticipantImpl*       participant)
   : handle_(handle),
     qos_(qos),
     default_datawriter_qos_(TheServiceParticipant->initial_DataWriterQos ()),
-    listener_mask_(DEFAULT_STATUS_KIND_MASK),
+    listener_mask_(mask),
     listener_ (::DDS::PublisherListener::_duplicate(a_listener)),
     fast_listener_ (0),
     group_id_ (DEFAULT_GROUP_ID),
@@ -419,14 +420,6 @@ PublisherImpl::delete_datawriter (::DDS::DataWriter_ptr a_datawriter)
 PublisherImpl::lookup_datawriter (const char * topic_name)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
-  if (enabled_ == false)
-    {
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: PublisherImpl::lookup_datawriter, ")
-                  ACE_TEXT(" Entity is not enabled. \n")));
-      return ::DDS::DataWriter::_nil ();
-    }
-
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
                     this->pi_lock_,
@@ -782,14 +775,13 @@ PublisherImpl::copy_from_topic_qos (::DDS::DataWriterQos & a_datawriter_qos,
 PublisherImpl::enable ()
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
-  //TDB - check if factory is enables and then enable all entities
-  // (don't need to do it for now because
-  //  entity_factory.autoenable_created_entities is always = 1)
-
-  //if (factory not enabled)
-  //{
-  //  return ::DDS::RETCODE_PRECONDITION_NOT_MET;
-  //}
+  //According spec: 
+  // Calling enable on an Entity whose factory is not enabled will fail 
+  // and return PRECONDITION_NOT_MET.
+  if (this->participant_->get_enabled () == false)
+  {
+    return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
 
   this->set_enabled ();
   return ::DDS::RETCODE_OK;
