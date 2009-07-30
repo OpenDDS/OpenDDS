@@ -713,6 +713,7 @@ PublisherImpl::wait_for_acknowledgments (
   ACE_THROW_SPEC ((::CORBA::SystemException))
 {
   //tbd
+  ACE_UNUSED_ARG (max_wait);
   return ::DDS::RETCODE_OK;
 }
 

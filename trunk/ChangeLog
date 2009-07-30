@@ -1,9 +1,18 @@
+Thu Jul 30 18:30:40 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+
+	  Fixed warnings for unused arguments.
+
 Thu Jul 30 14:01:01 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * wrapper/OpenDDS/OpenDDS_Publication_Manager.cpp:
         * wrapper/OpenDDS/OpenDDS_Subscription_Manager.cpp:
         * wrapper/Topic_Manager_T.cpp:
-	    Added new StatusMask argument to create_*() calls.
+
+          Added new StatusMask argument to create_*() calls.
 
 Thu Jul 30 02:08:33 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 

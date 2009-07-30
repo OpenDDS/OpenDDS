@@ -424,6 +424,7 @@ namespace OpenDDS
       )) 
     {
       //tbd:
+      ACE_UNUSED_ARG (qos);
       return ::DDS::RETCODE_OK;
     }
 
@@ -436,6 +437,7 @@ namespace OpenDDS
       )) 
     {
       //tbd:
+      ACE_UNUSED_ARG (qos);
       return ::DDS::RETCODE_OK;
     }
 
