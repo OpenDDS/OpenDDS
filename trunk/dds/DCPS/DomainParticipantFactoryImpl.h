@@ -58,7 +58,8 @@ namespace OpenDDS
     virtual ::DDS::DomainParticipant_ptr create_participant (
         ::DDS::DomainId_t domainId,
         const ::DDS::DomainParticipantQos & qos,
-        ::DDS::DomainParticipantListener_ptr a_listener
+        ::DDS::DomainParticipantListener_ptr a_listener,
+        ::DDS::StatusMask mask
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -85,7 +86,7 @@ namespace OpenDDS
         CORBA::SystemException
       ));
 
-    virtual void get_default_participant_qos (
+    virtual ::DDS::ReturnCode_t get_default_participant_qos (
         ::DDS::DomainParticipantQos & qos
       )
       ACE_THROW_SPEC ((
@@ -97,6 +98,20 @@ namespace OpenDDS
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
+
+    virtual ::DDS::ReturnCode_t set_qos (
+        const ::DDS::DomainParticipantFactoryQos & qos
+      )
+      ACE_THROW_SPEC ((
+        ::CORBA::SystemException
+      ));
+
+    virtual ::DDS::ReturnCode_t get_qos (
+        ::DDS::DomainParticipantFactoryQos & qos
+      )
+      ACE_THROW_SPEC ((
+        ::CORBA::SystemException
+      )); 
 
     /** This method is not defined in the IDL and is defined for
     *  internal use.

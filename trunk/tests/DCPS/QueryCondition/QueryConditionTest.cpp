@@ -22,13 +22,17 @@ int run_test(int argc, ACE_TCHAR *argv[])
   WaitSet_var ws = new WaitSet;
   DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
   DomainParticipant_var dp =
-    dpf->create_participant(23, PARTICIPANT_QOS_DEFAULT, 0);
+    dpf->create_participant(23, PARTICIPANT_QOS_DEFAULT, 0,
+                            ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
   MessageTypeSupport_var ts = new MessageTypeSupportImpl;
-  ts->register_type(dp, ts->get_type_name());
+  // leave type name not speficied would register it with _interface_repository_id
+  ts->register_type(dp, ""); 
   Topic_var topic = dp->create_topic("MyTopic", ts->get_type_name(),
-                                     TOPIC_QOS_DEFAULT, 0);
+                                     TOPIC_QOS_DEFAULT, 0,
+                                     ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
-  Publisher_var pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0);
+  Publisher_var pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
+                                           ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
   TransportImpl_rch pub_tport =
     TheTransportFactory->create_transport_impl(1, AUTO_CONFIG);
   PublisherImpl* pub_impl = dynamic_cast<PublisherImpl*> (pub.in());
@@ -36,9 +40,11 @@ int run_test(int argc, ACE_TCHAR *argv[])
   DataWriterQos dw_qos;
   pub->get_default_datawriter_qos(dw_qos);
   dw_qos.history.kind = KEEP_ALL_HISTORY_QOS;
-  DataWriter_var dw = pub->create_datawriter(topic, dw_qos, 0);
+  DataWriter_var dw = pub->create_datawriter(topic, dw_qos, 0,
+                                             ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
-  Subscriber_var sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0);
+  Subscriber_var sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
+                                             ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
   TransportImpl_rch sub_tport =
     TheTransportFactory->create_transport_impl(2, AUTO_CONFIG);
   SubscriberImpl* sub_impl = dynamic_cast<SubscriberImpl*> (sub.in());
@@ -46,12 +52,13 @@ int run_test(int argc, ACE_TCHAR *argv[])
   DataReaderQos dr_qos;
   sub->get_default_datareader_qos(dr_qos);
   dr_qos.history.kind = KEEP_ALL_HISTORY_QOS;
-  DataReader_var dr = sub->create_datareader(topic, dr_qos, 0);
+  DataReader_var dr = sub->create_datareader(topic, dr_qos, 0,
+                                             ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
   StatusCondition_var dw_sc = dw->get_statuscondition();
-  dw_sc->set_enabled_statuses(PUBLICATION_MATCH_STATUS);
+  dw_sc->set_enabled_statuses(PUBLICATION_MATCHED_STATUS);
   ws->attach_condition(dw_sc);
-  Duration_t infinite = {DURATION_INFINITY_SEC, DURATION_INFINITY_NSEC};
+  Duration_t infinite = {DURATION_INFINITE_SEC, DURATION_INFINITE_NSEC};
   ConditionSeq active;
   ws->wait(active, infinite);
   ws->detach_condition(dw_sc);

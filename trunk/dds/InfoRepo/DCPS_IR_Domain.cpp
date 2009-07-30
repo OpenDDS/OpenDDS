@@ -534,7 +534,8 @@ int DCPS_IR_Domain::init_built_in_topics( bool federated)
       bitParticipant_ =
         bitParticipantFactory_->create_participant(id_,
                                                    PARTICIPANT_QOS_DEFAULT,
-                                                   bitParticipantListener_.in());
+                                                   bitParticipantListener_.in(),
+                                                   ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (bitParticipant_.in ()))
         {
           ACE_ERROR_RETURN ((LM_ERROR,
@@ -603,7 +604,8 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
         bitParticipant_->create_topic (::OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
                                        ::OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE,
                                        topic_qos,
-                                       ::DDS::TopicListener::_nil());
+                                       ::DDS::TopicListener::_nil(),
+                                       ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (bitParticipantTopic_.in ()))
         {
           ACE_ERROR_RETURN ((LM_ERROR,
@@ -631,7 +633,8 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
         bitParticipant_->create_topic (::OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC,
                                        ::OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE,
                                        topic_qos,
-                                       ::DDS::TopicListener::_nil());
+                                       ::DDS::TopicListener::_nil(),
+                                       ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (bitTopicTopic_.in ()))
         {
           ACE_ERROR_RETURN ((LM_ERROR,
@@ -659,7 +662,8 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
         bitParticipant_->create_topic (::OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC,
                                        ::OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE,
                                        topic_qos,
-                                       ::DDS::TopicListener::_nil());
+                                       ::DDS::TopicListener::_nil(),
+                                       ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (bitSubscriptionTopic_.in ()))
         {
           ACE_ERROR_RETURN ((LM_ERROR,
@@ -687,7 +691,8 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
         bitParticipant_->create_topic (::OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC,
                                        ::OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC_TYPE,
                                        topic_qos,
-                                       ::DDS::TopicListener::_nil());
+                                       ::DDS::TopicListener::_nil(),
+                                       ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (bitPublicationTopic_.in ()))
         {
           ACE_ERROR_RETURN ((LM_ERROR,
@@ -741,7 +746,8 @@ int DCPS_IR_Domain::init_built_in_topics_datawriters( bool federated)
       datawriter =
         bitPublisher_->create_datawriter(bitParticipantTopic_.in (),
                                          participantWriterQos,
-                                         ::DDS::DataWriterListener::_nil());
+                                         ::DDS::DataWriterListener::_nil(),
+                                         ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
       bitParticipantDataWriter_ =
         ::DDS::ParticipantBuiltinTopicDataDataWriter::_narrow(datawriter.in ());
@@ -762,7 +768,8 @@ int DCPS_IR_Domain::init_built_in_topics_datawriters( bool federated)
       datawriter =
         bitPublisher_->create_datawriter(bitTopicTopic_.in (),
                                           dw_qos,
-                                          ::DDS::DataWriterListener::_nil());
+                                          ::DDS::DataWriterListener::_nil(),
+                                          ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
       bitTopicDataWriter_ =
         ::DDS::TopicBuiltinTopicDataDataWriter::_narrow(datawriter.in ());
@@ -779,7 +786,8 @@ int DCPS_IR_Domain::init_built_in_topics_datawriters( bool federated)
       datawriter =
         bitPublisher_->create_datawriter(bitSubscriptionTopic_.in (),
                                           dw_qos,
-                                          ::DDS::DataWriterListener::_nil());
+                                          ::DDS::DataWriterListener::_nil(),
+                                          ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
       bitSubscriptionDataWriter_ =
         ::DDS::SubscriptionBuiltinTopicDataDataWriter::_narrow(
@@ -797,7 +805,8 @@ int DCPS_IR_Domain::init_built_in_topics_datawriters( bool federated)
       datawriter =
         bitPublisher_->create_datawriter(bitPublicationTopic_.in (),
                                          dw_qos,
-                                         ::DDS::DataWriterListener::_nil());
+                                         ::DDS::DataWriterListener::_nil(),
+                                         ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
       bitPublicationDataWriter_ =
         ::DDS::PublicationBuiltinTopicDataDataWriter::_narrow(datawriter.in ());
@@ -834,7 +843,8 @@ int DCPS_IR_Domain::init_built_in_topics_transport ()
       // Create the Publisher
       bitPublisher_ =
         bitParticipant_->create_publisher(PUBLISHER_QOS_DEFAULT,
-                                          ::DDS::PublisherListener::_nil());
+                                          ::DDS::PublisherListener::_nil(),
+                                          ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (bitPublisher_.in ()))
         {
           ACE_ERROR_RETURN ((LM_ERROR,
@@ -1103,7 +1113,7 @@ void DCPS_IR_Domain::publish_participant_bit (DCPS_IR_Participant* participant)
             {
               ACE_DEBUG ((LM_DEBUG, 
                 "(%P|%t) DCPS_IR_Domain::publish_participant_bit: [ %d, 0x%x, 0x%x], handle %d.\n", 
-                data.key[0], data.key[1], data.key[2], handle));
+                data.key.value[0], data.key.value[1], data.key.value[2], handle));
             }
 
             bitParticipantDataWriter_->write(data,
@@ -1181,7 +1191,7 @@ void DCPS_IR_Domain::publish_topic_bit (DCPS_IR_Topic* topic)
             {
               ACE_DEBUG ((LM_DEBUG, 
                 "(%P|%t) DCPS_IR_Domain::publish_topic_bit: [ %d, 0x%x, 0x%x], handle %d.\n", 
-                data.key[0], data.key[1], data.key[2], handle));
+                data.key.value[0], data.key.value[1], data.key.value[2], handle));
             }
 
             bitTopicDataWriter_->write(data,
@@ -1261,7 +1271,7 @@ void DCPS_IR_Domain::publish_subscription_bit (DCPS_IR_Subscription* subscriptio
             {
               ACE_DEBUG ((LM_DEBUG, 
                 "(%P|%t) DCPS_IR_Domain::publish_subscription_bit: [ %d, 0x%x, 0x%x], handle %d.\n", 
-                data.key[0], data.key[1], data.key[2], handle));
+                data.key.value[0], data.key.value[1], data.key.value[2], handle));
             }
 
             bitSubscriptionDataWriter_->write(data,
@@ -1326,7 +1336,9 @@ void DCPS_IR_Domain::publish_publication_bit (DCPS_IR_Publication* publication)
             data.liveliness = writerQos->liveliness;
             data.reliability = writerQos->reliability;
             data.user_data = writerQos->user_data;
+            data.ownership = writerQos->ownership;
             data.ownership_strength = writerQos->ownership_strength;
+            data.destination_order = writerQos->destination_order;
             data.presentation = publisherQos->presentation;
             data.partition = publisherQos->partition;
             data.topic_data = topicQos->topic_data;
@@ -1341,7 +1353,7 @@ void DCPS_IR_Domain::publish_publication_bit (DCPS_IR_Publication* publication)
             {
               ACE_DEBUG ((LM_DEBUG, 
                 "(%P|%t) DCPS_IR_Domain::publish_publication_bit: [ %d, 0x%x, 0x%x], handle %d.\n", 
-                data.key[0], data.key[1], data.key[2], handle));
+                data.key.value[0], data.key.value[1], data.key.value[2], handle));
             }
 
             bitPublicationDataWriter_->write(data,

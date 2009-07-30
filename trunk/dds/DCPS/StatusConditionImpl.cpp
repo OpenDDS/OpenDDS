@@ -19,7 +19,7 @@ CORBA::Boolean StatusConditionImpl::get_trigger_value()
   return (parent_->get_status_changes() & mask_) > 0;
 }
 
-DDS::StatusKindMask StatusConditionImpl::get_enabled_statuses()
+DDS::StatusMask StatusConditionImpl::get_enabled_statuses()
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, lock_, 0);
@@ -27,7 +27,7 @@ DDS::StatusKindMask StatusConditionImpl::get_enabled_statuses()
 }
 
 DDS::ReturnCode_t
-StatusConditionImpl::set_enabled_statuses(DDS::StatusKindMask mask)
+StatusConditionImpl::set_enabled_statuses(DDS::StatusMask mask)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, lock_,

@@ -83,9 +83,9 @@ virtual void on_liveliness_lost (
     CORBA::SystemException
   ));
 
-virtual void on_publication_match (
+virtual void on_publication_matched (
     ::DDS::DataWriter_ptr writer,
-    const ::DDS::PublicationMatchStatus & status
+    const ::DDS::PublicationMatchedStatus & status
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -130,9 +130,9 @@ virtual void on_data_available (
     CORBA::SystemException
   ));
 
-virtual void on_subscription_match (
+virtual void on_subscription_matched (
     ::DDS::DataReader_ptr reader,
-    const ::DDS::SubscriptionMatchStatus & status
+    const ::DDS::SubscriptionMatchedStatus & status
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException

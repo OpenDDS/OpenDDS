@@ -38,7 +38,8 @@ AbstractionLayer::init_DDS(int& argc, ACE_TCHAR *argv[])
   // Create participant
   dp_ = dpf_->create_participant (DOMAINID,
                                   PARTICIPANT_QOS_DEFAULT,
-                                  DDS::DomainParticipantListener::_nil ());
+                                  DDS::DomainParticipantListener::_nil (),
+                                  ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
   if (CORBA::is_nil (dp_.in ()) ) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("ERROR - Create participant failed.\n") ));
@@ -57,7 +58,8 @@ AbstractionLayer::init_DDS(int& argc, ACE_TCHAR *argv[])
 
   // Create publisher
   pub_ = dp_->create_publisher (PUBLISHER_QOS_DEFAULT,
-                                DDS::PublisherListener::_nil ());
+                                DDS::PublisherListener::_nil (),
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
   if (CORBA::is_nil (pub_.in ()) ) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("ERROR - Create publisher failed.\n") ));
@@ -79,7 +81,8 @@ AbstractionLayer::init_DDS(int& argc, ACE_TCHAR *argv[])
    topic_ = dp_->create_topic ("fileinfo_topic", // topic name
                                "DistributedContent::FileDiff", // topic type
                                TOPIC_QOS_DEFAULT,
-                               DDS::TopicListener::_nil ());
+                               DDS::TopicListener::_nil (),
+                               ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
   if (CORBA::is_nil (topic_.in ()) ) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("ERROR - Create topic failed.\n") ));
@@ -89,7 +92,8 @@ AbstractionLayer::init_DDS(int& argc, ACE_TCHAR *argv[])
 
   // Create the subscriber
   sub_ = dp_->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
-                                DDS::SubscriberListener::_nil());
+                                DDS::SubscriberListener::_nil(),
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
   if (CORBA::is_nil (sub_.in ()) ) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("ERROR - Create subscriber failed.\n") ));
@@ -110,7 +114,8 @@ AbstractionLayer::init_DDS(int& argc, ACE_TCHAR *argv[])
   // Create the datareader
   dr_ = sub_->create_datareader (topic_.in (),
                                  DATAREADER_QOS_DEFAULT,
-                                 listener_.in ());
+                                 listener_.in (),
+                                 ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
   if (CORBA::is_nil (dr_.in ()) ) {
     ACE_ERROR((LM_ERROR, "ERROR - Create data reader failed.\n"));
     return false;
@@ -176,7 +181,8 @@ AbstractionLayer::init_DDS(int& argc, ACE_TCHAR *argv[])
   // Create the datawriter
   dw_ = pub_->create_datawriter (topic_.in (),
                                  DATAWRITER_QOS_DEFAULT,
-                                 DDS::DataWriterListener::_nil ());
+                                 DDS::DataWriterListener::_nil (),
+                                 ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
   if (CORBA::is_nil (dw_.in ()) ) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("ERROR - Create data writer failed.\n") ));

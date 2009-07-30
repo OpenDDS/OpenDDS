@@ -92,7 +92,8 @@ int init (int argc, ACE_TCHAR *argv[])
       participant
         = participant_factory->create_participant(TEST_DOMAIN,
                                                   PARTICIPANT_QOS_DEFAULT,
-                                                  ::DDS::DomainParticipantListener::_nil ());
+                                                  ::DDS::DomainParticipantListener::_nil (),
+                                                  ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       
       //SHH create a separate particpant for the subscriber and publisher
 
@@ -116,14 +117,16 @@ int init (int argc, ACE_TCHAR *argv[])
       topic = participant->create_topic (TEST_TOPIC,
                                          TEST_TOPIC_TYPE,
                                          TOPIC_QOS_DEFAULT,
-                                         ::DDS::TopicListener::_nil ());
+                                         ::DDS::TopicListener::_nil (),
+                                         ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
       topic_servant
         = dynamic_cast<OpenDDS::DCPS::TopicImpl*> (topic.in ());
 
       subscriber
         = participant->create_subscriber (SUBSCRIBER_QOS_DEFAULT,
-                                         ::DDS::SubscriberListener::_nil ());
+                                         ::DDS::SubscriberListener::_nil (),
+                                         ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
       subscriber_servant
         = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(subscriber.in ());
@@ -142,7 +145,8 @@ int init (int argc, ACE_TCHAR *argv[])
 
       publisher
         = participant->create_publisher (PUBLISHER_QOS_DEFAULT,
-                                         ::DDS::PublisherListener::_nil ());
+                                         ::DDS::PublisherListener::_nil (),
+                                         ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
       publisher_servant
         = dynamic_cast<OpenDDS::DCPS::PublisherImpl*>(publisher.in ());
@@ -165,7 +169,8 @@ int init (int argc, ACE_TCHAR *argv[])
       datareader
         = subscriber->create_datareader (topicdescription.in (),
                                          DATAREADER_QOS_DEFAULT,
-                                         ::DDS::DataReaderListener::_nil ());
+                                         ::DDS::DataReaderListener::_nil (),
+                                         ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
       datareader_servant
         = dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(datareader.in ());
@@ -173,7 +178,8 @@ int init (int argc, ACE_TCHAR *argv[])
       datawriter
         = publisher->create_datawriter (topic.in (),
                                         DATAWRITER_QOS_DEFAULT,
-                                        ::DDS::DataWriterListener::_nil ());
+                                        ::DDS::DataWriterListener::_nil (),
+                                        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
       datawriter_servant
         = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(datawriter.in ());
@@ -239,9 +245,9 @@ void test_bit_participant ()
       DDS::BuiltinTopicKey_t key;
       converter.get_BuiltinTopicKey(key);
 
-      TEST_CHECK (part_data[0].key[0] == key[0]);
-      TEST_CHECK (part_data[0].key[1] == key[1]);
-      TEST_CHECK (part_data[0].key[2] == key[2]);
+      TEST_CHECK (part_data[0].key.value[0] == key.value[0]);
+      TEST_CHECK (part_data[0].key.value[1] == key.value[1]);
+      TEST_CHECK (part_data[0].key.value[2] == key.value[2]);
     }
   catch (...)
     {
@@ -289,9 +295,9 @@ void test_bit_topic ()
       DDS::BuiltinTopicKey_t key;
       converter.get_BuiltinTopicKey(key);
 
-      TEST_CHECK (topic_data[0].key[0] == key[0]);
-      TEST_CHECK (topic_data[0].key[1] == key[1]);
-      TEST_CHECK (topic_data[0].key[2] == key[2]);
+      TEST_CHECK (topic_data[0].key.value[0] == key.value[0]);
+      TEST_CHECK (topic_data[0].key.value[1] == key.value[1]);
+      TEST_CHECK (topic_data[0].key.value[2] == key.value[2]);
 
       topic_servant->get_qos (topic_qos);
 
@@ -360,9 +366,9 @@ void test_bit_publication ()
       DDS::BuiltinTopicKey_t pub_key;
       pub_converter.get_BuiltinTopicKey(pub_key);
 
-      TEST_CHECK (the_pub_data.key[0] == pub_key[0]);
-      TEST_CHECK (the_pub_data.key[1] == pub_key[1]);
-      TEST_CHECK (the_pub_data.key[2] == pub_key[2]);
+      TEST_CHECK (the_pub_data.key.value[0] == pub_key.value[0]);
+      TEST_CHECK (the_pub_data.key.value[1] == pub_key.value[1]);
+      TEST_CHECK (the_pub_data.key.value[2] == pub_key.value[2]);
 
       // BuiltinTopicKey_t is initialized from its corresponding RepoId.
       // This test verifies that the conversion was done correctly.
@@ -371,9 +377,9 @@ void test_bit_publication ()
       DDS::BuiltinTopicKey_t part_key;
       part_converter.get_BuiltinTopicKey(part_key);
 
-      TEST_CHECK (the_pub_data.participant_key[0] == part_key[0]);
-      TEST_CHECK (the_pub_data.participant_key[1] == part_key[1]);
-      TEST_CHECK (the_pub_data.participant_key[2] == part_key[2]);
+      TEST_CHECK (the_pub_data.participant_key.value[0] == part_key.value[0]);
+      TEST_CHECK (the_pub_data.participant_key.value[1] == part_key.value[1]);
+      TEST_CHECK (the_pub_data.participant_key.value[2] == part_key.value[2]);
 
       TEST_CHECK (ACE_OS::strcmp (the_pub_data.topic_name.in (), TEST_TOPIC) == 0);
       TEST_CHECK (ACE_OS::strcmp (the_pub_data.type_name.in (), TEST_TOPIC_TYPE) == 0);
@@ -441,9 +447,9 @@ void test_bit_subscription ()
       DDS::BuiltinTopicKey_t sub_key;
       sub_converter.get_BuiltinTopicKey(sub_key);
 
-      TEST_CHECK (the_sub_data.key[0] == sub_key[0]);
-      TEST_CHECK (the_sub_data.key[1] == sub_key[1]);
-      TEST_CHECK (the_sub_data.key[2] == sub_key[2]);
+      TEST_CHECK (the_sub_data.key.value[0] == sub_key.value[0]);
+      TEST_CHECK (the_sub_data.key.value[1] == sub_key.value[1]);
+      TEST_CHECK (the_sub_data.key.value[2] == sub_key.value[2]);
 
       // BuiltinTopicKey_t is initialized from its corresponding RepoId.
       // This test verifies that the conversion was done correctly.
@@ -452,9 +458,9 @@ void test_bit_subscription ()
       DDS::BuiltinTopicKey_t part_key;
       part_converter.get_BuiltinTopicKey(part_key);
 
-      TEST_CHECK (the_sub_data.participant_key[0] == part_key[0]);
-      TEST_CHECK (the_sub_data.participant_key[1] == part_key[1]);
-      TEST_CHECK (the_sub_data.participant_key[2] == part_key[2]);
+      TEST_CHECK (the_sub_data.participant_key.value[0] == part_key.value[0]);
+      TEST_CHECK (the_sub_data.participant_key.value[1] == part_key.value[1]);
+      TEST_CHECK (the_sub_data.participant_key.value[2] == part_key.value[2]);
 
       TEST_CHECK (ACE_OS::strcmp (the_sub_data.topic_name.in (), TEST_TOPIC) == 0);
       TEST_CHECK (ACE_OS::strcmp (the_sub_data.type_name.in (), TEST_TOPIC_TYPE) == 0);

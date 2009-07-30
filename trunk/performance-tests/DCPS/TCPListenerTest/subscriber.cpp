@@ -142,7 +142,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(TEST_DOMAIN,
                                 PARTICIPANT_QOS_DEFAULT,
-                                ::DDS::DomainParticipantListener::_nil());
+                                ::DDS::DomainParticipantListener::_nil(),
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (dp.in ()))
       {
         ACE_ERROR ((LM_ERROR,
@@ -226,7 +227,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         dp->create_topic (TEST_TOPIC,
                           TEST_TYPE,
                           topic_qos,
-                          ::DDS::TopicListener::_nil());
+                          ::DDS::TopicListener::_nil(),
+                          ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (topic.in ()))
       {
         return 1 ;
@@ -245,7 +247,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // Create the subscriber
       ::DDS::Subscriber_var sub =
         dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
-                             ::DDS::SubscriberListener::_nil());
+                             ::DDS::SubscriberListener::_nil(),
+                             ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (sub.in() ))
       {
         ACE_ERROR_RETURN ((LM_ERROR,
@@ -331,7 +334,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       ::DDS::DataReader_var  the_dr
                = sub->create_datareader(description.in() ,
                                         dr_qos,
-                                        dr_listener.in());
+                                        dr_listener.in(),
+                                        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
       if (CORBA::is_nil (the_dr.in() ))
       {

@@ -436,7 +436,7 @@ namespace OpenDDS
       ::DDS::LivelinessLostStatus         initial_liveliness_lost_status_ ;
       ::DDS::OfferedDeadlineMissedStatus  initial_offered_deadline_missed_status_ ;
       ::DDS::OfferedIncompatibleQosStatus initial_offered_incompatible_qos_status_ ;
-      ::DDS::PublicationMatchStatus       initial_publication_match_status_ ;
+      ::DDS::PublicationMatchedStatus       initial_publication_match_status_ ;
 
       /// The configurable value of the number chunks that the
       /// @c DataWriter's cached allocator can allocate.

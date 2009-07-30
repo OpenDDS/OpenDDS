@@ -30,10 +30,10 @@ namespace OpenDDS
       CORBA::Boolean get_trigger_value()
         ACE_THROW_SPEC ((CORBA::SystemException));
 
-      DDS::StatusKindMask get_enabled_statuses()
+      DDS::StatusMask get_enabled_statuses()
         ACE_THROW_SPEC ((CORBA::SystemException));
     
-      DDS::ReturnCode_t set_enabled_statuses(DDS::StatusKindMask mask)
+      DDS::ReturnCode_t set_enabled_statuses(DDS::StatusMask mask)
         ACE_THROW_SPEC ((CORBA::SystemException));
     
       DDS::Entity_ptr get_entity()
@@ -43,7 +43,7 @@ namespace OpenDDS
       //deliberately not a _var, don't hold a reference to the parent since
       //it is guaranteed to outlive us and we don't want a cyclical reference
       EntityImpl* parent_;
-      DDS::StatusKindMask mask_;
+      DDS::StatusMask mask_;
     };
   }
 }

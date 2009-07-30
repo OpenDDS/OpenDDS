@@ -56,9 +56,9 @@ Test::DataWriterListener::on_liveliness_lost (
 }
   
 void
-Test::DataWriterListener::on_publication_match (
+Test::DataWriterListener::on_publication_matched (
     ::DDS::DataWriter_ptr writer,
-    ::DDS::PublicationMatchStatus const& status)
+    ::DDS::PublicationMatchedStatus const& status)
   ACE_THROW_SPEC ((::CORBA::SystemException))
 {
   if( status.total_count_change > 0) {
@@ -67,7 +67,7 @@ Test::DataWriterListener::on_publication_match (
 
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("(%P|%t) ")
-             ACE_TEXT("DataWriterListener::on_publication_match\n")));
+             ACE_TEXT("DataWriterListener::on_publication_matched\n")));
 
   this->display_partitions (writer);
 }

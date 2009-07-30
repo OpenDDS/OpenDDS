@@ -31,8 +31,8 @@ namespace OpenDDS
     resend_data_expired (DataSampleListElement const & element,
                          ::DDS::LifespanQosPolicy const & lifespan)
     {
-      if (lifespan.duration.sec != ::DDS::DURATION_INFINITY_SEC
-          || lifespan.duration.nanosec != ::DDS::DURATION_INFINITY_NSEC)
+      if (lifespan.duration.sec != ::DDS::DURATION_INFINITE_SEC
+          || lifespan.duration.nanosec != ::DDS::DURATION_INFINITE_NSEC)
       {
         // Finite lifespan.  Check if data has expired.
 

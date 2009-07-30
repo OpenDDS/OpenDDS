@@ -88,7 +88,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,
                                 PARTICIPANT_QOS_DEFAULT,
-                                ::DDS::DomainParticipantListener::_nil());
+                                ::DDS::DomainParticipantListener::_nil(),
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (dp.in ()))
       {
         ACE_ERROR ((LM_ERROR,
@@ -116,7 +117,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         dp->create_topic (MY_TOPIC,
                           MY_TYPE,
                           topic_qos,
-                          ::DDS::TopicListener::_nil());
+                          ::DDS::TopicListener::_nil(),
+                          ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (topic.in ()))
       {
         return 1 ;

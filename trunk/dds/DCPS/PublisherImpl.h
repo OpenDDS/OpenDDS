@@ -93,7 +93,8 @@ namespace OpenDDS
     virtual ::DDS::DataWriter_ptr create_datawriter (
         ::DDS::Topic_ptr a_topic,
         const ::DDS::DataWriterQos & qos,
-        ::DDS::DataWriterListener_ptr a_listener
+        ::DDS::DataWriterListener_ptr a_listener,
+        ::DDS::StatusMask mask
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -126,7 +127,7 @@ namespace OpenDDS
         CORBA::SystemException
       ));
 
-    virtual void get_qos (
+    virtual ::DDS::ReturnCode_t get_qos (
         ::DDS::PublisherQos & qos
       )
       ACE_THROW_SPEC ((
@@ -135,7 +136,7 @@ namespace OpenDDS
 
     virtual ::DDS::ReturnCode_t set_listener (
         ::DDS::PublisherListener_ptr a_listener,
-        ::DDS::StatusKindMask mask
+        ::DDS::StatusMask mask
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -171,6 +172,13 @@ namespace OpenDDS
         CORBA::SystemException
       ));
 
+    virtual ::DDS::ReturnCode_t wait_for_acknowledgments (
+        const ::DDS::Duration_t & max_wait
+      )
+      ACE_THROW_SPEC ((
+        ::CORBA::SystemException
+      ));
+
     virtual ::DDS::DomainParticipant_ptr get_participant (
       )
       ACE_THROW_SPEC ((
@@ -184,7 +192,7 @@ namespace OpenDDS
         CORBA::SystemException
       ));
 
-    virtual void get_default_datawriter_qos (
+    virtual ::DDS::ReturnCode_t get_default_datawriter_qos (
         ::DDS::DataWriterQos & qos
       )
       ACE_THROW_SPEC ((
@@ -273,7 +281,7 @@ namespace OpenDDS
 
       /// The StatusKind bit mask indicates which status condition change
       /// can be notified by the listener of this entity.
-      ::DDS::StatusKindMask         listener_mask_;
+      ::DDS::StatusMask         listener_mask_;
       /// Used to notify the entity for relevant events.
       ::DDS::PublisherListener_var  listener_;
       /// The publisher listener servant.

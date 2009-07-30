@@ -47,7 +47,7 @@ namespace OpenDDS
           CORBA::SystemException
         ));
 
-      virtual ::DDS::StatusKindMask get_status_changes (
+      virtual ::DDS::StatusMask get_status_changes (
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
@@ -80,7 +80,7 @@ namespace OpenDDS
       /// status changes and it is reset to FALSE each time the application
       /// accesses the plain communication status via the proper
       /// get_<plain communication status> operation on the Entity.
-      DDS::StatusKindMask status_changes_;
+      DDS::StatusMask status_changes_;
       DDS::StatusCondition_var status_condition_;
 
       ACE_Thread_Mutex lock_;  

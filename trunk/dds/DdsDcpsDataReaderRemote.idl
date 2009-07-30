@@ -26,7 +26,7 @@ module OpenDDS {
     // It is split out so the DDS::DataReader interface can be local.
     interface DataReaderRemote  { //x : ::DDS::DataReader {
 
-      // will tell transport and call on_subscription_match() 
+      // will tell transport and call on_subscription_matched() 
       oneway void add_associations(
         in OpenDDS::DCPS::RepoId yourId,
         in WriterAssociationSeq writers

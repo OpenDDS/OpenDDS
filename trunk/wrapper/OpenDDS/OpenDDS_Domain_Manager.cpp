@@ -47,7 +47,8 @@ OpenDDS_Domain_Manager::OpenDDS_Domain_Manager (int & argc,
   // create the participant named 'participant'.
   dp_ = dpf->create_participant (domain_id,
                                  PARTICIPANT_QOS_DEFAULT,
-                                 DDS::DomainParticipantListener::_nil ());
+                                 DDS::DomainParticipantListener::_nil (),
+                                 ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
   // check for successful creation
   if (CORBA::is_nil (dp_.in ()))
@@ -82,7 +83,8 @@ OpenDDS_Domain_Manager::OpenDDS_Domain_Manager (int & argc,
   // create the participant named 'participant'.
   dp_ = dpf->create_participant (domain_id,
                                  qos,
-                                 DDS::DomainParticipantListener::_nil ());
+                                 DDS::DomainParticipantListener::_nil (),
+                                 ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
   // check for successful creation
   if (CORBA::is_nil (dp_.in ()))

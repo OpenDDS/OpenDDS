@@ -81,14 +81,14 @@ throw (CORBA::SystemException)
 }
 
 void
-FailoverListener::on_subscription_match(
+FailoverListener::on_subscription_matched(
     ::DDS::DataReader_ptr /* reader */,
-    const ::DDS::SubscriptionMatchStatus & /* status */)
+    const ::DDS::SubscriptionMatchedStatus & /* status */)
 throw (CORBA::SystemException)
 {
   if( OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) FailoverListener::on_subscription_match\n")));
+               ACE_TEXT("(%P|%t) FailoverListener::on_subscription_matched\n")));
   }
 }
 

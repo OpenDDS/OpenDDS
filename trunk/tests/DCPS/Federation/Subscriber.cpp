@@ -42,7 +42,8 @@ Subscriber::Subscriber( int argc, ACE_TCHAR** argv, char** envp)
   this->participant_ = factory->create_participant(
                          this->config_.domain(),
                          PARTICIPANT_QOS_DEFAULT,
-                         ::DDS::DomainParticipantListener::_nil()
+                         ::DDS::DomainParticipantListener::_nil(),
+                         ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
                        );
   if( CORBA::is_nil (this->participant_.in())) {
     ACE_ERROR ((LM_ERROR,
@@ -151,7 +152,8 @@ Subscriber::Subscriber( int argc, ACE_TCHAR** argv, char** envp)
                    this->config_.topicName().c_str(),
                    this->config_.typeName().c_str(),
                    TOPIC_QOS_DEFAULT,
-                   ::DDS::TopicListener::_nil()
+                   ::DDS::TopicListener::_nil(),
+                   ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
                  );
   if( CORBA::is_nil( this->topic_.in()) ) {
     ACE_ERROR ((LM_ERROR,
@@ -167,7 +169,8 @@ Subscriber::Subscriber( int argc, ACE_TCHAR** argv, char** envp)
 
   this->subscriber_ = this->participant_->create_subscriber(
                         SUBSCRIBER_QOS_DEFAULT,
-                        ::DDS::SubscriberListener::_nil()
+                        ::DDS::SubscriberListener::_nil(),
+                        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
                       );
   if( CORBA::is_nil (this->subscriber_.in ())) {
     ACE_ERROR ((LM_ERROR, ACE_TEXT ("(%P|%t) ERROR: Failed to create_subscriber.\n")));
@@ -231,7 +234,8 @@ Subscriber::Subscriber( int argc, ACE_TCHAR** argv, char** envp)
     = this->subscriber_->create_datareader(
         description.in(),
         DATAREADER_QOS_DEFAULT,
-        this->listener_.in ()
+        this->listener_.in (),
+        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
       );
   if( CORBA::is_nil( this->dataReader_.in())) {
     ACE_ERROR((LM_ERROR,

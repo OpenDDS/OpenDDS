@@ -35,7 +35,8 @@ module OpenDDS
         in DDS::TopicDescription a_topic,
         in DDS::DataReaderQos qos,
         in DataReaderQosExt ext_qos,
-        in DDS::DataReaderListener a_listener);
+        in DDS::DataReaderListener a_listener,
+        in DDS::StatusMask mask);
     };
 
     struct SubscriptionLostStatus {

@@ -44,13 +44,14 @@ namespace OpenDDS
 SubscriberImpl::SubscriberImpl (DDS::InstanceHandle_t handle,
                                 const ::DDS::SubscriberQos & qos,
                                 ::DDS::SubscriberListener_ptr a_listener,
+                                const ::DDS::StatusMask & mask,
                                 DomainParticipantImpl*       participant)
   : handle_(handle),
     qos_(qos),
     default_datareader_qos_(
                             TheServiceParticipant->initial_DataReaderQos()),
 
-    listener_mask_(DEFAULT_STATUS_KIND_MASK),
+    listener_mask_(mask),
     fast_listener_ (0),
     participant_(participant),
     domain_id_( participant->get_domain_id()),
@@ -108,7 +109,8 @@ SubscriberImpl::contains_reader(DDS::InstanceHandle_t a_handle)
 SubscriberImpl::create_datareader (
                                    ::DDS::TopicDescription_ptr a_topic_desc,
                                    const ::DDS::DataReaderQos & qos,
-                                   ::DDS::DataReaderListener_ptr a_listener
+                                   ::DDS::DataReaderListener_ptr a_listener,
+                                   ::DDS::StatusMask mask
                                    )
   ACE_THROW_SPEC ((
                    CORBA::SystemException
@@ -116,7 +118,7 @@ SubscriberImpl::create_datareader (
 {
   DataReaderQosExt ext_qos;
   get_default_datareader_qos_ext(ext_qos);
-  return create_opendds_datareader(a_topic_desc, qos, ext_qos, a_listener);
+  return create_opendds_datareader(a_topic_desc, qos, ext_qos, a_listener, mask);
 }
 
 
@@ -124,8 +126,9 @@ SubscriberImpl::create_datareader (
 SubscriberImpl::create_opendds_datareader (
                                    ::DDS::TopicDescription_ptr a_topic_desc,
                                    const ::DDS::DataReaderQos & qos,
-                   const DataReaderQosExt & ext_qos,
-                                   ::DDS::DataReaderListener_ptr a_listener
+                                   const DataReaderQosExt & ext_qos,
+                                   ::DDS::DataReaderListener_ptr a_listener,
+                                   ::DDS::StatusMask mask
                                    )
   ACE_THROW_SPEC ((
                    CORBA::SystemException
@@ -220,8 +223,9 @@ SubscriberImpl::create_opendds_datareader (
 
   dr_servant->init (topic_servant,
                     dr_qos,
-            ext_qos,
+                    ext_qos,
                     a_listener,
+                    mask,
                     participant_,
                     this,
                     dr_obj.in (),
@@ -527,7 +531,7 @@ SubscriberImpl::lookup_datareader (
 
 ::DDS::ReturnCode_t
 SubscriberImpl::get_datareaders (
-                                 ::DDS::DataReaderSeq_out readers,
+                                 ::DDS::DataReaderSeq & readers,
                                  ::DDS::SampleStateMask sample_states,
                                  ::DDS::ViewStateMask view_states,
                                  ::DDS::InstanceStateMask instance_states
@@ -542,7 +546,7 @@ SubscriberImpl::get_datareaders (
                     ::DDS::RETCODE_ERROR);
 
   int count(0) ;
-  readers = new ::DDS::DataReaderSeq(datareader_set_.size()) ;
+  readers.length (count);
   for (DataReaderSet::const_iterator pos = datareader_set_.begin() ;
        pos != datareader_set_.end() ; ++pos)
     {
@@ -550,8 +554,8 @@ SubscriberImpl::get_datareaders (
           (*pos)->have_view_states(view_states) &&
           (*pos)->have_instance_states(instance_states))
         {
-          readers->length(count + 1) ;
-          (*readers)[count++] = (*pos)->get_dr_obj_ref() ;
+          readers.length(count + 1) ;
+          readers[count++] = (*pos)->get_dr_obj_ref() ;
         }
     }
 
@@ -559,16 +563,17 @@ SubscriberImpl::get_datareaders (
 }
 
 
-void
+::DDS::ReturnCode_t
 SubscriberImpl::notify_datareaders (
                                     )
   ACE_THROW_SPEC ((
                    CORBA::SystemException
                    ))
 {
-  ACE_GUARD (ACE_Recursive_Thread_Mutex,
-             guard,
-             this->si_lock_);
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                    guard,
+                    this->si_lock_,
+                    ::DDS::RETCODE_ERROR);
 
   DataReaderMap::iterator it;
 
@@ -586,6 +591,8 @@ SubscriberImpl::notify_datareaders (
             ::DDS::DATA_AVAILABLE_STATUS, false);
         }
     }
+
+  return ::DDS::RETCODE_OK ;
 }
 
 
@@ -692,7 +699,7 @@ SubscriberImpl::set_qos (
 }
 
 
-void
+::DDS::ReturnCode_t
 SubscriberImpl::get_qos (
                          ::DDS::SubscriberQos & qos
                          )
@@ -701,13 +708,14 @@ SubscriberImpl::get_qos (
                    ))
 {
   qos = qos_;
+  return ::DDS::RETCODE_OK;
 }
 
 
 ::DDS::ReturnCode_t
 SubscriberImpl::set_listener (
                               ::DDS::SubscriberListener_ptr a_listener,
-                              ::DDS::StatusKindMask mask
+                              ::DDS::StatusMask mask
                               )
   ACE_THROW_SPEC ((
                    CORBA::SystemException
@@ -787,7 +795,7 @@ SubscriberImpl::set_default_datareader_qos (
 }
 
 
-void
+::DDS::ReturnCode_t
 SubscriberImpl::get_default_datareader_qos (
                                             ::DDS::DataReaderQos & qos
                                             )
@@ -796,6 +804,7 @@ SubscriberImpl::get_default_datareader_qos (
                    ))
 {
   qos = default_datareader_qos_;
+  return ::DDS::RETCODE_OK;
 }
 
 

@@ -238,7 +238,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,
                                 PARTICIPANT_QOS_DEFAULT,
-                                ::DDS::DomainParticipantListener::_nil());
+                                ::DDS::DomainParticipantListener::_nil(),
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (dp.in ()))
       {
         ACE_ERROR ((LM_ERROR,
@@ -293,7 +294,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           topic1 = dp->create_topic (MY_TOPIC1,
                                      MY_TYPE1,
                                      topic_qos,
-                                     ::DDS::TopicListener::_nil());
+                                     ::DDS::TopicListener::_nil(),
+                                     ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
           if (CORBA::is_nil (topic1.in ()))
             {
@@ -306,7 +308,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           topic2 = dp->create_topic (MY_TOPIC2,
                                      MY_TYPE2,
                                      topic_qos,
-                                     ::DDS::TopicListener::_nil());
+                                     ::DDS::TopicListener::_nil(),
+                                     ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
           if (CORBA::is_nil (topic2.in ()))
             {
@@ -319,7 +322,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           topic3 = dp->create_topic (MY_TOPIC3,
                                      MY_TYPE3,
                                      topic_qos,
-                                     ::DDS::TopicListener::_nil());
+                                     ::DDS::TopicListener::_nil(),
+                                     ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
           if (CORBA::is_nil (topic3.in ()))
             {
@@ -330,7 +334,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       // Create the publisher
       ::DDS::Publisher_var pub =
         dp->create_publisher(PUBLISHER_QOS_DEFAULT,
-                             ::DDS::PublisherListener::_nil());
+                             ::DDS::PublisherListener::_nil(),
+                             ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (pub.in ()))
       {
         ACE_ERROR_RETURN ((LM_ERROR,
@@ -407,7 +412,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         {
           dw1 = pub->create_datawriter(topic1.in (),
                                       dw_qos,
-                                      ::DDS::DataWriterListener::_nil());
+                                      ::DDS::DataWriterListener::_nil(),
+                                      ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
           if (CORBA::is_nil (dw1.in ()))
             {
@@ -421,7 +427,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         {
           dw2 = pub->create_datawriter(topic2.in (),
                                       dw_qos,
-                                      ::DDS::DataWriterListener::_nil());
+                                      ::DDS::DataWriterListener::_nil(),
+                                      ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
           if (CORBA::is_nil (dw2.in ()))
             {
@@ -435,7 +442,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         {
           dw3 = pub->create_datawriter(topic3.in (),
                                       dw_qos,
-                                      ::DDS::DataWriterListener::_nil());
+                                      ::DDS::DataWriterListener::_nil(),
+                                      ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
           if (CORBA::is_nil (dw3.in ()))
             {

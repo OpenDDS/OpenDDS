@@ -67,7 +67,8 @@ Process::Process( const Options& options)
       = TheParticipantFactory->create_participant(
           current->second->domainId,
           current->second->qos,
-          DDS::DomainParticipantListener::_nil()
+          DDS::DomainParticipantListener::_nil(),
+          ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
         );
     if( CORBA::is_nil( this->participants_[ current->first].in())) {
       ACE_ERROR((LM_ERROR,
@@ -140,7 +141,8 @@ Process::Process( const Options& options)
           current->first.c_str(),
           this->dataTypeName_.c_str(),
           current->second->qos,
-          DDS::TopicListener::_nil()
+          DDS::TopicListener::_nil(),
+          ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
         );
     if( CORBA::is_nil( this->topics_[ current->first].in())) {
       ACE_ERROR((LM_ERROR,
@@ -250,7 +252,7 @@ Process::Process( const Options& options)
     // Extract the subscription status condition.
     DDS::StatusCondition_var status
       = this->subscriptions_[ current->first]->get_statuscondition();
-    status->set_enabled_statuses( DDS::SUBSCRIPTION_MATCH_STATUS);
+    status->set_enabled_statuses( DDS::SUBSCRIPTION_MATCHED_STATUS);
     this->subscriptionWaiter_->attach_condition( status.in());
 
     if( this->options_.verbose()) {
@@ -343,7 +345,7 @@ Process::Process( const Options& options)
     // Extract the publication status condition.
     DDS::StatusCondition_var status
       = this->publications_[ current->first]->get_statuscondition();
-    status->set_enabled_statuses( DDS::PUBLICATION_MATCH_STATUS);
+    status->set_enabled_statuses( DDS::PUBLICATION_MATCHED_STATUS);
     this->publicationWaiter_->attach_condition( status.in());
 
     if( this->options_.verbose()) {
@@ -400,9 +402,9 @@ Process::unblock()
 void
 Process::run()
 {
-  DDS::Duration_t   timeout = { DDS::DURATION_INFINITY_SEC, DDS::DURATION_INFINITY_NSEC};
+  DDS::Duration_t   timeout = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC};
   DDS::ConditionSeq conditions;
-  DDS::PublicationMatchStatus publicationMatches = { 0, 0, 0, 0, 0};
+  DDS::PublicationMatchedStatus publicationMatches = { 0, 0, 0, 0, 0};
   unsigned int cummulative_count = 0;
   do {
     if( this->options_.verbose()) {
@@ -426,9 +428,14 @@ Process::run()
 
       DDS::DataWriter_var writer = DDS::DataWriter::_narrow( condition->get_entity());
       if( !CORBA::is_nil( writer.in())) {
-        DDS::StatusKindMask changes = writer->get_status_changes();
-        if( changes & DDS::PUBLICATION_MATCH_STATUS) {
-          publicationMatches = writer->get_publication_match_status();
+        DDS::StatusMask changes = writer->get_status_changes();
+        if( changes & DDS::PUBLICATION_MATCHED_STATUS) {
+          if (writer->get_publication_matched_status(publicationMatches) != ::DDS::RETCODE_OK)
+          {
+            ACE_ERROR ((LM_ERROR,
+              "ERROR: failed to get publication matched status\n"));
+            ACE_OS::exit (1);
+          }
           cummulative_count += publicationMatches.current_count_change;
         }
       }
@@ -548,7 +555,7 @@ Process::run()
   // become unassociated before we shut down entirely.
   //
 
-  DDS::SubscriptionMatchStatus subscriptionMatches = { 0, 0, 0, 0, 0};
+  DDS::SubscriptionMatchedStatus subscriptionMatches = { 0, 0, 0, 0, 0};
   unsigned int current_count;
   do {
     if( DDS::RETCODE_OK != this->subscriptionWaiter_->wait( conditions, timeout)) {
@@ -575,8 +582,14 @@ Process::run()
           // Again, we do not actually care what the event or change was,
           // we just take this opportunity to determine the current status
           // of associations.
-          subscriptionMatches = reader->get_subscription_match_status();
-          current_count += subscriptionMatches.current_count;
+          if (reader->get_subscription_matched_status(subscriptionMatches) != ::DDS::RETCODE_OK)
+          {
+            ACE_ERROR((LM_ERROR,
+              ACE_TEXT("(%P|%t) Process::run() - ")
+              ACE_TEXT("failed to get subscription matches status.\n")));
+          }
+          else
+            current_count += subscriptionMatches.current_count;
         }
       }
     }

@@ -29,19 +29,19 @@ int ACE_TMAIN(int , ACE_TCHAR *[])
   // (except when dr is also infinite, covered next)
   {
     ::DDS::LivelinessQosPolicy dw_liveliness;
-    dw_liveliness.lease_duration.sec = ::DDS::DURATION_INFINITY_SEC;
-    dw_liveliness.lease_duration.nanosec = ::DDS::DURATION_INFINITY_NSEC;
+    dw_liveliness.lease_duration.sec = ::DDS::DURATION_INFINITE_SEC;
+    dw_liveliness.lease_duration.nanosec = ::DDS::DURATION_INFINITE_NSEC;
 
     ::DDS::LivelinessQosPolicy dr_liveliness;
-    dr_liveliness.lease_duration.sec = ::DDS::DURATION_INFINITY_SEC;
-    dr_liveliness.lease_duration.nanosec = ::DDS::DURATION_INFINITY_NSEC + 1;
+    dr_liveliness.lease_duration.sec = ::DDS::DURATION_INFINITE_SEC;
+    dr_liveliness.lease_duration.nanosec = ::DDS::DURATION_INFINITE_NSEC + 1;
 
     // verify that the datawriter liveliness is greater, since it is infinite
     TEST_CHECK(lease_greater_than(dw_liveliness, dr_liveliness))
     TEST_CHECK(!lease_greater_than(dr_liveliness, dw_liveliness))
 
-    dr_liveliness.lease_duration.sec = ::DDS::DURATION_INFINITY_NSEC;
-    dr_liveliness.lease_duration.nanosec = ::DDS::DURATION_INFINITY_NSEC - 1;
+    dr_liveliness.lease_duration.sec = ::DDS::DURATION_INFINITE_NSEC;
+    dr_liveliness.lease_duration.nanosec = ::DDS::DURATION_INFINITE_NSEC - 1;
 
     // verify that the datawriter liveliness is greater, since it is infinite
     TEST_CHECK(lease_greater_than(dw_liveliness, dr_liveliness));
@@ -58,26 +58,26 @@ int ACE_TMAIN(int , ACE_TCHAR *[])
   // verify that if dr is infinite, that dw is never greater
   {
     ::DDS::LivelinessQosPolicy dw_liveliness;
-    dw_liveliness.lease_duration.sec = ::DDS::DURATION_INFINITY_SEC;
-    dw_liveliness.lease_duration.nanosec = ::DDS::DURATION_INFINITY_NSEC;
+    dw_liveliness.lease_duration.sec = ::DDS::DURATION_INFINITE_SEC;
+    dw_liveliness.lease_duration.nanosec = ::DDS::DURATION_INFINITE_NSEC;
 
     ::DDS::LivelinessQosPolicy dr_liveliness;
-    dr_liveliness.lease_duration.sec = ::DDS::DURATION_INFINITY_SEC;
-    dr_liveliness.lease_duration.nanosec = ::DDS::DURATION_INFINITY_NSEC;
+    dr_liveliness.lease_duration.sec = ::DDS::DURATION_INFINITE_SEC;
+    dr_liveliness.lease_duration.nanosec = ::DDS::DURATION_INFINITE_NSEC;
 
     // verify that the datawriter liveliness isn't greater, since they are equal
     TEST_CHECK(!lease_greater_than(dw_liveliness, dr_liveliness));
     TEST_CHECK(!lease_greater_than(dr_liveliness, dw_liveliness));
 
-    dw_liveliness.lease_duration.sec = ::DDS::DURATION_INFINITY_SEC;
-    dw_liveliness.lease_duration.nanosec = ::DDS::DURATION_INFINITY_NSEC + 1;
+    dw_liveliness.lease_duration.sec = ::DDS::DURATION_INFINITE_SEC;
+    dw_liveliness.lease_duration.nanosec = ::DDS::DURATION_INFINITE_NSEC + 1;
 
     // verify that the datawriter liveliness isn't greater, since dr is infinite
     TEST_CHECK(!lease_greater_than(dw_liveliness, dr_liveliness));
     TEST_CHECK(lease_greater_than(dr_liveliness, dw_liveliness));
 
-    dw_liveliness.lease_duration.sec = ::DDS::DURATION_INFINITY_SEC;
-    dw_liveliness.lease_duration.nanosec = ::DDS::DURATION_INFINITY_NSEC - 1;
+    dw_liveliness.lease_duration.sec = ::DDS::DURATION_INFINITE_SEC;
+    dw_liveliness.lease_duration.nanosec = ::DDS::DURATION_INFINITE_NSEC - 1;
 
     // verify that the datawriter liveliness isn't greater, since dr is infinite
     TEST_CHECK(!lease_greater_than(dw_liveliness, dr_liveliness));

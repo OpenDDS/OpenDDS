@@ -78,9 +78,9 @@ void DomainParticipantListenerImpl::on_liveliness_lost (
     // Add your implementation here
   }
 
-void DomainParticipantListenerImpl::on_publication_match (
+void DomainParticipantListenerImpl::on_publication_matched (
     ::DDS::DataWriter_ptr writer,
-    const ::DDS::PublicationMatchStatus & status
+    const ::DDS::PublicationMatchedStatus & status
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -154,9 +154,9 @@ void DomainParticipantListenerImpl::on_data_available (
     // Add your implementation here
   }
 
-void DomainParticipantListenerImpl::on_subscription_match (
+void DomainParticipantListenerImpl::on_subscription_matched (
     ::DDS::DataReader_ptr reader,
-    const ::DDS::SubscriptionMatchStatus & status
+    const ::DDS::SubscriptionMatchedStatus & status
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException

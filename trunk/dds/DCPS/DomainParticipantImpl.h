@@ -97,6 +97,7 @@ namespace OpenDDS
                              const RepoId&                        dp_id,
                              const ::DDS::DomainParticipantQos &  qos,
                              ::DDS::DomainParticipantListener_ptr a_listener,
+                             const ::DDS::StatusMask &            mask,
                              bool                                 federated = false);
 
       ///Destructor
@@ -107,7 +108,8 @@ namespace OpenDDS
 
     virtual ::DDS::Publisher_ptr create_publisher (
       const ::DDS::PublisherQos & qos,
-        ::DDS::PublisherListener_ptr a_listener
+        ::DDS::PublisherListener_ptr a_listener,
+        ::DDS::StatusMask mask
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -122,7 +124,8 @@ namespace OpenDDS
 
     virtual ::DDS::Subscriber_ptr create_subscriber (
         const ::DDS::SubscriberQos & qos,
-        ::DDS::SubscriberListener_ptr a_listener
+        ::DDS::SubscriberListener_ptr a_listener,
+        ::DDS::StatusMask mask
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -145,7 +148,8 @@ namespace OpenDDS
         const char * topic_name,
         const char * type_name,
         const ::DDS::TopicQos & qos,
-        ::DDS::TopicListener_ptr a_listener
+        ::DDS::TopicListener_ptr a_listener,
+        ::DDS::StatusMask mask
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -189,7 +193,7 @@ namespace OpenDDS
         CORBA::SystemException
       ));
 
-    virtual void get_qos (
+    virtual ::DDS::ReturnCode_t get_qos (
         ::DDS::DomainParticipantQos & qos
       )
       ACE_THROW_SPEC ((
@@ -198,7 +202,7 @@ namespace OpenDDS
 
     virtual ::DDS::ReturnCode_t set_listener (
         ::DDS::DomainParticipantListener_ptr a_listener,
-        ::DDS::StatusKindMask mask
+        ::DDS::StatusMask mask
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -244,7 +248,7 @@ namespace OpenDDS
         CORBA::SystemException
       ));
 
-    virtual void assert_liveliness (
+    virtual ::DDS::ReturnCode_t assert_liveliness (
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -257,7 +261,7 @@ namespace OpenDDS
         CORBA::SystemException
       ));
 
-    virtual void get_default_publisher_qos (
+    virtual ::DDS::ReturnCode_t get_default_publisher_qos (
         ::DDS::PublisherQos & qos
       )
       ACE_THROW_SPEC ((
@@ -271,7 +275,7 @@ namespace OpenDDS
         CORBA::SystemException
       ));
 
-    virtual void get_default_subscriber_qos (
+    virtual ::DDS::ReturnCode_t get_default_subscriber_qos (
         ::DDS::SubscriberQos & qos
       )
       ACE_THROW_SPEC ((
@@ -285,7 +289,7 @@ namespace OpenDDS
         CORBA::SystemException
       ));
 
-    virtual void get_default_topic_qos (
+    virtual ::DDS::ReturnCode_t get_default_topic_qos (
         ::DDS::TopicQos & qos
       )
       ACE_THROW_SPEC ((
@@ -348,7 +352,8 @@ namespace OpenDDS
           const char * topic_name,
           const char * type_name,
           const ::DDS::TopicQos & qos,
-          ::DDS::TopicListener_ptr a_listener
+          ::DDS::TopicListener_ptr a_listener,
+          const ::DDS::StatusMask & mask
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
@@ -388,7 +393,7 @@ namespace OpenDDS
       ::DDS::DomainParticipantListener* fast_listener_;
       /// The StatusKind bit mask indicates which status condition change
       /// can be notified by the listener of this entity.
-      ::DDS::StatusKindMask                 listener_mask_;
+      ::DDS::StatusMask                 listener_mask_;
       /// The id of the domain that creates this participant.
       ::DDS::DomainId_t                     domain_id_;
       /// This participant id given by DCPSInfo repository.

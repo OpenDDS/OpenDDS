@@ -78,12 +78,12 @@ void DataReaderListenerImpl::on_liveliness_changed (
   cerr << "DataReaderListenerImpl::on_liveliness_changed" << endl;
 }
 
-void DataReaderListenerImpl::on_subscription_match (
+void DataReaderListenerImpl::on_subscription_matched (
     DDS::DataReader_ptr,
-    const DDS::SubscriptionMatchStatus &)
+    const DDS::SubscriptionMatchedStatus &)
   throw (CORBA::SystemException)
 {
-  cerr << "DataReaderListenerImpl::on_subscription_match" << endl;
+  cerr << "DataReaderListenerImpl::on_subscription_matched" << endl;
 }
 
 void DataReaderListenerImpl::on_sample_rejected(

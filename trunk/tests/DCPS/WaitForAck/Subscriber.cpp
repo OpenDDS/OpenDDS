@@ -48,7 +48,8 @@ Subscriber::Subscriber( const Options& options)
     = TheParticipantFactory->create_participant(
         this->options_.domain(),
         PARTICIPANT_QOS_DEFAULT,
-        DDS::DomainParticipantListener::_nil()
+        DDS::DomainParticipantListener::_nil(),
+        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
       );
   if( CORBA::is_nil( this->participant_.in())) {
     ACE_ERROR((LM_ERROR,
@@ -89,7 +90,8 @@ Subscriber::Subscriber( const Options& options)
                            this->options_.topicName().c_str(),
                            testData->get_type_name(),
                            TOPIC_QOS_DEFAULT,
-                           ::DDS::TopicListener::_nil()
+                           ::DDS::TopicListener::_nil(),
+                           ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
                          );
   if( CORBA::is_nil( topic.in())) {
     ACE_ERROR((LM_ERROR,
@@ -111,7 +113,8 @@ Subscriber::Subscriber( const Options& options)
   DDS::Subscriber_var subscriber
     = this->participant_->create_subscriber(
         SUBSCRIBER_QOS_DEFAULT,
-        ::DDS::SubscriberListener::_nil()
+        ::DDS::SubscriberListener::_nil(),
+        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
       );
   if( CORBA::is_nil( subscriber.in())) {
     ACE_ERROR((LM_ERROR,
@@ -174,7 +177,8 @@ Subscriber::Subscriber( const Options& options)
       = subscriber->create_datareader(
           topic.in(),
           readerQos,
-          DDS::DataReaderListener::_nil()
+          DDS::DataReaderListener::_nil(),
+          ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
         );
     if( CORBA::is_nil( reader.in())) {
       ACE_ERROR((LM_ERROR,
@@ -201,7 +205,7 @@ Subscriber::Subscriber( const Options& options)
 
     // Grab, enable and attach the status condition for test synchronization.
     this->status_ = this->reader_[ index]->get_statuscondition();
-    this->status_->set_enabled_statuses( DDS::SUBSCRIPTION_MATCH_STATUS);
+    this->status_->set_enabled_statuses( DDS::SUBSCRIPTION_MATCHED_STATUS);
     this->waiter_->attach_condition( this->status_.in());
 
     if( this->options_.verbose()) {
@@ -216,9 +220,9 @@ Subscriber::Subscriber( const Options& options)
 void
 Subscriber::run()
 {
-  DDS::Duration_t   timeout = { DDS::DURATION_INFINITY_SEC, DDS::DURATION_INFINITY_NSEC};
+  DDS::Duration_t   timeout = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC};
   DDS::ConditionSeq conditions;
-  DDS::SubscriptionMatchStatus matches = { 0, 0, 0, 0, 0};
+  DDS::SubscriptionMatchedStatus matches = { 0, 0, 0, 0, 0};
   int current_count = 0;
   do {
     if( this->options_.verbose()) {
@@ -235,10 +239,22 @@ Subscriber::run()
       ));
       throw BadSyncException();
     }
-    matches = this->reader_[ 0]->get_subscription_match_status();
+    if (this->reader_[ 0]->get_subscription_matched_status(matches) != ::DDS::RETCODE_OK)
+    {
+      ACE_ERROR ((LM_ERROR,
+        ACE_TEXT ("ERROR: failed to get subscription matched status\n")));
+      ACE_OS::exit (1);
+    }
+
     current_count = matches.current_count;
 
-    matches = this->reader_[ 1]->get_subscription_match_status();
+    if (this->reader_[ 1]->get_subscription_matched_status(matches) != ::DDS::RETCODE_OK)
+    {
+      ACE_ERROR ((LM_ERROR,
+        ACE_TEXT("ERROR: failed to get subscription matched status\n")));
+      ACE_OS::exit (1);
+    }
+
     current_count += matches.current_count;
 
   } while( current_count > 0);

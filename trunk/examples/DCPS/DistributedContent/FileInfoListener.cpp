@@ -96,9 +96,9 @@ void FileInfoListener::on_liveliness_changed (
 }
 
 
-void FileInfoListener::on_subscription_match (
+void FileInfoListener::on_subscription_matched (
                             ::DDS::DataReader_ptr,
-                            const ::DDS::SubscriptionMatchStatus &)
+                            const ::DDS::SubscriptionMatchedStatus &)
     ACE_THROW_SPEC ((::CORBA::SystemException))
 {
 }

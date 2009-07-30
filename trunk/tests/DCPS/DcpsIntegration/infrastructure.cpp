@@ -154,7 +154,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       testParticipant =
         dpFactory->create_participant(TEST_DOMAIN_NUMBER,
                                       dPQosChangedEntityFactory,
-                                      dpListener.in());
+                                      dpListener.in(),
+                                      ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if ( ! CORBA::is_nil (testParticipant.in ()) )
         {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -182,7 +183,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       testParticipant =
         dpFactory->create_participant(TEST_DOMAIN_NUMBER,
                                       PARTICIPANT_QOS_DEFAULT,
-                                      dpListener.in());
+                                      dpListener.in(),
+                                      ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if ( CORBA::is_nil (testParticipant.in ()) )
         {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -267,7 +269,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       participant =
         dpFactory->create_participant(TEST_DOMAIN_NUMBER,
                                       PARTICIPANT_QOS_DEFAULT,
-                                      dpListener.in());
+                                      dpListener.in(),
+                                      ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if ( CORBA::is_nil (participant.in ()) )
         {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -321,7 +324,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       ::DDS::ReturnCode_t setListenerReturnCode =
         participant->set_listener(dpListener.in(),
-                                  ::DDS::INCONSISTENT_TOPIC_STATUS | ::DDS::SUBSCRIPTION_MATCH_STATUS);
+                                  ::DDS::INCONSISTENT_TOPIC_STATUS | ::DDS::SUBSCRIPTION_MATCHED_STATUS);
       if (::DDS::RETCODE_OK != setListenerReturnCode)
         {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -414,7 +417,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       ::DDS::Publisher_var publisher = ::DDS::Publisher::_nil();
       publisher = participant->create_publisher (pubInitialQos,
-                                                 ::DDS::PublisherListener::_nil());
+                                                 ::DDS::PublisherListener::_nil(),
+                                                 ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (publisher.in ()) )
         {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -481,7 +485,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       ::DDS::Subscriber_var subscriber = ::DDS::Subscriber::_nil();
       subscriber = participant->create_subscriber (subInitialQos,
-                                                 ::DDS::SubscriberListener::_nil());
+                                                 ::DDS::SubscriberListener::_nil(),
+                                                 ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (subscriber.in ()) )
         {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -509,7 +514,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
 
       publisher = participant->create_publisher (pubInitialQos,
-                                                 ::DDS::PublisherListener::_nil());
+                                                 ::DDS::PublisherListener::_nil(),
+                                                 ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (publisher.in ()) )
         {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -521,7 +527,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 31 passed.\n")));
         }
       subscriber = participant->create_subscriber (subInitialQos,
-                                                 ::DDS::SubscriberListener::_nil());
+                                                 ::DDS::SubscriberListener::_nil(),
+                                                 ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (subscriber.in ()) )
         {
           ACE_ERROR_RETURN((LM_ERROR,

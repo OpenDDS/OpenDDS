@@ -24,7 +24,8 @@ Reader::Reader(::DDS::DomainParticipant_ptr dp,
     dp_(::DDS::DomainParticipant::_duplicate (dp))
 {
   sub_ = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
-                             ::DDS::SubscriberListener::_nil());
+                             ::DDS::SubscriberListener::_nil(),
+                             ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
   if (CORBA::is_nil (sub_.in ()))
   {
     ACE_ERROR ((LM_ERROR,
@@ -77,7 +78,8 @@ Reader::Reader(::DDS::DomainParticipant_ptr dp,
   ::DDS::DataReader_var dr = sub_->create_datareader(description.in (),
                                 dr_qos,
 //                                ::DDS::DataReaderListener::_nil()
-                                drl.in ());
+                                drl.in (),
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
   if (CORBA::is_nil (dr.in ()))
   {
@@ -109,7 +111,7 @@ Reader::read (const SampleInfoMap& si_map,
     while (timeout_loops-- > 0) // Danger! fix later
     {
       sub_->get_datareaders (
-                    readers.out (),
+                    readers.inout (),
                     ss,
                     vs,
                     is );

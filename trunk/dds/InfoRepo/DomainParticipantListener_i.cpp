@@ -71,9 +71,9 @@ void OPENDDS_DCPS_DomainParticipantListener_i::on_liveliness_lost (
     // Add your implementation here
   }
 
-void OPENDDS_DCPS_DomainParticipantListener_i::on_publication_match (
+void OPENDDS_DCPS_DomainParticipantListener_i::on_publication_matched (
     ::DDS::DataWriter_ptr ,
-    const ::DDS::PublicationMatchStatus &
+    const ::DDS::PublicationMatchedStatus &
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -136,9 +136,9 @@ void OPENDDS_DCPS_DomainParticipantListener_i::on_data_available (
     // Add your implementation here
   }
 
-void OPENDDS_DCPS_DomainParticipantListener_i::on_subscription_match (
+void OPENDDS_DCPS_DomainParticipantListener_i::on_subscription_matched (
     ::DDS::DataReader_ptr ,
-    const ::DDS::SubscriptionMatchStatus &
+    const ::DDS::SubscriptionMatchedStatus &
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException

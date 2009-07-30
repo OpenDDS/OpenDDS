@@ -152,7 +152,7 @@ namespace OpenDDS {
               for (CORBA::ULong i = 0; i < the_data.length(); ++i)
               {
                 if (the_info[i].instance_handle == handle ||
-                    the_data[i].key[2] == handle)
+                    the_data[i].key.value[2] == handle)
                 {
                   data.length(1);
                   data[0] = the_data[i];
@@ -216,11 +216,11 @@ namespace OpenDDS {
       const ::DDS::BuiltinTopicKey_t& rhs
     ) {
       // N.B.  This assumes that the MS index is 2 and the LS index is 0.
-      return (lhs[2] < rhs[2])? true:
-             (lhs[2] > rhs[2])? false:
-             (lhs[1] < rhs[1])? true:
-             (lhs[1] > rhs[1])? false:
-             (lhs[0] < rhs[0])? true:
+      return (lhs.value[2] < rhs.value[2])? true:
+             (lhs.value[2] > rhs.value[2])? false:
+             (lhs.value[1] < rhs.value[1])? true:
+             (lhs.value[1] > rhs.value[1])? false:
+             (lhs.value[0] < rhs.value[0])? true:
                                 false;
 
     }

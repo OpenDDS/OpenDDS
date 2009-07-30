@@ -87,7 +87,8 @@ ManagerImpl::initialize()
     = TheParticipantFactory->create_participant(
         this->config_.federationDomain(),
         PARTICIPANT_QOS_DEFAULT,
-        ::DDS::DomainParticipantListener::_nil()
+        ::DDS::DomainParticipantListener::_nil(),
+        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
       );
   if( CORBA::is_nil( this->federationParticipant_.in())) {
     ACE_ERROR((LM_ERROR,
@@ -232,7 +233,8 @@ ManagerImpl::initialize()
   ::DDS::Subscriber_var subscriber
     = this->federationParticipant_->create_subscriber(
         SUBSCRIBER_QOS_DEFAULT,
-        ::DDS::SubscriberListener::_nil()
+        ::DDS::SubscriberListener::_nil(),
+        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
       );
   if( CORBA::is_nil( subscriber.in())) {
     ACE_ERROR((LM_ERROR,
@@ -292,7 +294,8 @@ ManagerImpl::initialize()
   ::DDS::Publisher_var publisher
     = this->federationParticipant_->create_publisher(
         PUBLISHER_QOS_DEFAULT,
-        ::DDS::PublisherListener::_nil()
+        ::DDS::PublisherListener::_nil(),
+        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
       );
   if( CORBA::is_nil( publisher.in())) {
     ACE_ERROR((LM_ERROR,
@@ -387,13 +390,15 @@ ManagerImpl::initialize()
             OWNERUPDATETOPICNAME,
             OWNERUPDATETYPENAME,
             TOPIC_QOS_DEFAULT,
-            ::DDS::TopicListener::_nil()
+            ::DDS::TopicListener::_nil(),
+            ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
           );
 
   dataWriter = publisher->create_datawriter(
                  topic.in(),
                  writerQos,
-                 ::DDS::DataWriterListener::_nil()
+                 ::DDS::DataWriterListener::_nil(),
+                 ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
                );
   if( CORBA::is_nil( dataWriter.in())) {
     ACE_ERROR((LM_ERROR,
@@ -436,7 +441,8 @@ ManagerImpl::initialize()
   dataReader  = subscriber->create_datareader(
                   description.in(),
                   readerQos,
-                  &this->ownerListener_
+                  &this->ownerListener_,
+                  ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
                 );
   if( CORBA::is_nil( dataReader.in())) {
     ACE_ERROR((LM_ERROR,
@@ -470,12 +476,14 @@ ManagerImpl::initialize()
             TOPICUPDATETOPICNAME,
             TOPICUPDATETYPENAME,
             TOPIC_QOS_DEFAULT,
-            ::DDS::TopicListener::_nil()
+            ::DDS::TopicListener::_nil(),
+            ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
           );
   dataWriter = publisher->create_datawriter(
                  topic.in(),
                  writerQos,
-                 ::DDS::DataWriterListener::_nil()
+                 ::DDS::DataWriterListener::_nil(),
+                 ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
                );
   if( CORBA::is_nil( dataWriter.in())) {
     ACE_ERROR((LM_ERROR,
@@ -519,7 +527,8 @@ ManagerImpl::initialize()
   dataReader  = subscriber->create_datareader(
                   description.in(),
                   readerQos,
-                  &this->topicListener_
+                  &this->topicListener_,
+                  ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
                 );
   if( CORBA::is_nil( dataReader.in())) {
     ACE_ERROR((LM_ERROR,
@@ -553,12 +562,14 @@ ManagerImpl::initialize()
             PARTICIPANTUPDATETOPICNAME,
             PARTICIPANTUPDATETYPENAME,
             TOPIC_QOS_DEFAULT,
-            ::DDS::TopicListener::_nil()
+            ::DDS::TopicListener::_nil(),
+            ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
           );
   dataWriter = publisher->create_datawriter(
                  topic.in(),
                  writerQos,
-                 ::DDS::DataWriterListener::_nil()
+                 ::DDS::DataWriterListener::_nil(),
+                 ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
                );
   if( CORBA::is_nil( dataWriter.in())) {
     ACE_ERROR((LM_ERROR,
@@ -602,7 +613,8 @@ ManagerImpl::initialize()
   dataReader  = subscriber->create_datareader(
                   description.in(),
                   readerQos,
-                  &this->participantListener_
+                  &this->participantListener_,
+                  ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
                 );
   if( CORBA::is_nil( dataReader.in())) {
     ACE_ERROR((LM_ERROR,
@@ -636,12 +648,14 @@ ManagerImpl::initialize()
             PUBLICATIONUPDATETOPICNAME,
             PUBLICATIONUPDATETYPENAME,
             TOPIC_QOS_DEFAULT,
-            ::DDS::TopicListener::_nil()
+            ::DDS::TopicListener::_nil(),
+            ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
           );
   dataWriter = publisher->create_datawriter(
                  topic.in(),
                  writerQos,
-                 ::DDS::DataWriterListener::_nil()
+                 ::DDS::DataWriterListener::_nil(),
+                 ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
                );
   if( CORBA::is_nil( dataWriter.in())) {
     ACE_ERROR((LM_ERROR,
@@ -685,7 +699,8 @@ ManagerImpl::initialize()
   dataReader  = subscriber->create_datareader(
                   description.in(),
                   readerQos,
-                  &this->publicationListener_
+                  &this->publicationListener_,
+                  ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
                 );
   if( CORBA::is_nil( dataReader.in())) {
     ACE_ERROR((LM_ERROR,
@@ -719,12 +734,14 @@ ManagerImpl::initialize()
             SUBSCRIPTIONUPDATETOPICNAME,
             SUBSCRIPTIONUPDATETYPENAME,
             TOPIC_QOS_DEFAULT,
-            ::DDS::TopicListener::_nil()
+            ::DDS::TopicListener::_nil(),
+            ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
           );
   dataWriter = publisher->create_datawriter(
                  topic.in(),
                  writerQos,
-                 ::DDS::DataWriterListener::_nil()
+                 ::DDS::DataWriterListener::_nil(),
+                 ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
                );
   if( CORBA::is_nil( dataWriter.in())) {
     ACE_ERROR((LM_ERROR,
@@ -768,7 +785,8 @@ ManagerImpl::initialize()
   dataReader  = subscriber->create_datareader(
                   description.in(),
                   readerQos,
-                  &this->subscriptionListener_
+                  &this->subscriptionListener_,
+                  ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
                 );
   if( CORBA::is_nil( dataReader.in())) {
     ACE_ERROR((LM_ERROR,

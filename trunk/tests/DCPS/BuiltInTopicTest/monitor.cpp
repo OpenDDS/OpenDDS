@@ -137,7 +137,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       participant = dpf->create_participant(411,
                                             PARTICIPANT_QOS_DEFAULT,
-                                            DDS::DomainParticipantListener::_nil());
+                                            DDS::DomainParticipantListener::_nil(),
+                                            ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       if (CORBA::is_nil (participant.in ())) {
         ACE_ERROR((LM_ERROR, "(%P|%t) monitor: create_participant failed.\n"));
         return 1 ;
@@ -222,7 +223,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       for (CORBA::ULong i = 0; i < len; ++i)
       {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: Participant: key = %d, %x, %x \n",
-          partdata[i].key[0], partdata[i].key[1], partdata[i].key[2]));
+          partdata[i].key.value[0], partdata[i].key.value[1], partdata[i].key.value[2]));
 
         CORBA::ULong cur_len = partdata[i].user_data.value.length ();
         
@@ -291,7 +292,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
         ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: Topic: key = %d, %x, %x, name = %C, "
           "type_name=%C \n",
-          topicdata[i].key[0], topicdata[i].key[1], topicdata[i].key[2],
+          topicdata[i].key.value[0], topicdata[i].key.value[1], topicdata[i].key.value[2],
           topicdata[i].name.in (), topicdata[i].type_name.in ()));
 
         CORBA::ULong topic_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_TOPIC_DATA));
@@ -361,7 +362,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         }
 
         ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DataWriter: key = %d, %x, %x. \n",
-            pubdata[i].key[0], pubdata[i].key[1], pubdata[i].key[2]));
+            pubdata[i].key.value[0], pubdata[i].key.value[1], pubdata[i].key.value[2]));
 
         //ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DW user data %C \n", pubdata[i].user_data.value.get_buffer()));
         //ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DW topic data %C \n", pubdata[i].topic_data.value.get_buffer()));
@@ -441,7 +442,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         }
   
         ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DataReader: key = %d, %x, %x \n",
-          subdata[i].key[0], subdata[i].key[1], subdata[i].key[2]));
+          subdata[i].key.value[0], subdata[i].key.value[1], subdata[i].key.value[2]));
       
         //ACE_DEBUG((LM_DEBUG, "(%P|%t)DR user data %C \n", subdata[i].user_data.value.get_buffer()));
         //ACE_DEBUG((LM_DEBUG, "(%P|%t)DR topic data %C \n", subdata[i].topic_data.value.get_buffer()));

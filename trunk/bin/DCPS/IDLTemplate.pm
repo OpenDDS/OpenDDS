@@ -49,6 +49,8 @@ local interface <%TYPE%>TypeSupport : OpenDDS::DCPS::TypeSupport {
     DDS::ReturnCode_t register_type(
                 in DDS::DomainParticipant participant,
                 in string type_name);
+                
+    string get_type_name ();            
 };
 
 /** DataWriter interface for <%TYPE%> data type.

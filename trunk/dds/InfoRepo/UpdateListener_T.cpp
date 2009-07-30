@@ -140,14 +140,14 @@ UpdateListener< DataType, ReaderType>::on_liveliness_changed(
 
 template< class DataType, class ReaderType>
 void
-UpdateListener< DataType, ReaderType>::on_subscription_match(
+UpdateListener< DataType, ReaderType>::on_subscription_matched(
     ::DDS::DataReader_ptr /* reader */,
-    const ::DDS::SubscriptionMatchStatus & /* status */)
+    const ::DDS::SubscriptionMatchedStatus & /* status */)
   ACE_THROW_SPEC((CORBA::SystemException))
 {
   if( OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) UpdateListener::on_subscription_match\n")));
+               ACE_TEXT("(%P|%t) UpdateListener::on_subscription_matched\n")));
   }
 }
 

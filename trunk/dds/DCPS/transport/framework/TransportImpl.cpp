@@ -442,7 +442,7 @@ OpenDDS::DCPS::TransportImpl::add_pending_association (RepoId  pub_id,
   info.association_data_ = remote_associations;
 
   // Cache the Association data so it can be used for the callback
-  // to notify datawriter on_publication_match.
+  // to notify datawriter on_publication_matched.
 
   PendingAssociationsMap::iterator iter = pending_association_sub_map_.find(pub_id);
   if (iter != pending_association_sub_map_.end())

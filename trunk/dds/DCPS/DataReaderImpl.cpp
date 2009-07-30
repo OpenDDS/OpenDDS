@@ -152,6 +152,7 @@ void DataReaderImpl::init (
                            const ::DDS::DataReaderQos &  qos,
                            const DataReaderQosExt &      ext_qos,
                            ::DDS::DataReaderListener_ptr a_listener,
+                           const ::DDS::StatusMask &     mask,
                            DomainParticipantImpl*        participant,
                            SubscriberImpl*               subscriber,
                            ::DDS::DataReader_ptr         dr_objref,
@@ -184,6 +185,8 @@ void DataReaderImpl::init (
     {
       fast_listener_ = listener_.in ();
     }
+
+  listener_mask_ = mask;
 
   // Only store the participant pointer, since it is our "grand"
   // parent, we will exist as long as it does
@@ -426,12 +429,12 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
       this->subscription_match_status_.last_publication_handle
         = handles[ wr_len - 1];
 
-      set_status_changed_flag (::DDS::SUBSCRIPTION_MATCH_STATUS, true);
+      set_status_changed_flag (::DDS::SUBSCRIPTION_MATCHED_STATUS, true);
 
       ::DDS::DataReaderListener* listener
-        = listener_for (::DDS::SUBSCRIPTION_MATCH_STATUS);
+        = listener_for (::DDS::SUBSCRIPTION_MATCHED_STATUS);
       if( listener != 0) {
-        listener->on_subscription_match(
+        listener->on_subscription_matched(
           dr_local_objref_.in (),
           this->subscription_match_status_
         );
@@ -569,12 +572,12 @@ void DataReaderImpl::remove_associations (
       this->subscription_match_status_.last_publication_handle
         = handles[ wr_len - 1];
 
-      set_status_changed_flag (::DDS::SUBSCRIPTION_MATCH_STATUS, true);
+      set_status_changed_flag (::DDS::SUBSCRIPTION_MATCHED_STATUS, true);
 
       ::DDS::DataReaderListener* listener
-        = listener_for (::DDS::SUBSCRIPTION_MATCH_STATUS);
+        = listener_for (::DDS::SUBSCRIPTION_MATCHED_STATUS);
       if( listener != 0) {
-        listener->on_subscription_match(
+        listener->on_subscription_matched(
           dr_local_objref_.in (),
           this->subscription_match_status_
         );
@@ -791,8 +794,8 @@ bool DataReaderImpl::has_readcondition(::DDS::ReadCondition_ptr a_condition)
     if (qos_.deadline.period.sec != qos.deadline.period.sec
       || qos_.deadline.period.nanosec != qos.deadline.period.nanosec)
     {
-      if (qos_.deadline.period.sec == ::DDS::DURATION_INFINITY_SEC
-        && qos_.deadline.period.nanosec == ::DDS::DURATION_INFINITY_NSEC)
+      if (qos_.deadline.period.sec == ::DDS::DURATION_INFINITE_SEC
+        && qos_.deadline.period.nanosec == ::DDS::DURATION_INFINITE_NSEC)
       {
         ACE_auto_ptr_reset (this->watchdog_,
           new RequestedDeadlineWatchdog (
@@ -804,8 +807,8 @@ bool DataReaderImpl::has_readcondition(::DDS::ReadCondition_ptr a_condition)
           this->requested_deadline_missed_status_,
           this->last_deadline_missed_total_count_));
       }
-      else if (qos.deadline.period.sec == ::DDS::DURATION_INFINITY_SEC
-        && qos.deadline.period.nanosec == ::DDS::DURATION_INFINITY_NSEC)
+      else if (qos.deadline.period.sec == ::DDS::DURATION_INFINITE_SEC
+        && qos.deadline.period.nanosec == ::DDS::DURATION_INFINITE_NSEC)
       {
         this->watchdog_->cancel_all ();
         this->watchdog_.reset ();
@@ -827,19 +830,21 @@ bool DataReaderImpl::has_readcondition(::DDS::ReadCondition_ptr a_condition)
   }
 }
 
-void DataReaderImpl::get_qos (
-                              ::DDS::DataReaderQos & qos
-                              )
+::DDS::ReturnCode_t 
+DataReaderImpl::get_qos (
+                        ::DDS::DataReaderQos & qos
+                        )
   ACE_THROW_SPEC ((
                    CORBA::SystemException
                    ))
 {
   qos = qos_;
+  return ::DDS::RETCODE_OK;
 }
 
 ::DDS::ReturnCode_t DataReaderImpl::set_listener (
                                                   ::DDS::DataReaderListener_ptr a_listener,
-                                                  ::DDS::StatusKindMask mask
+                                                  ::DDS::StatusMask mask
                                                   )
   ACE_THROW_SPEC ((
                    CORBA::SystemException
@@ -880,8 +885,9 @@ void DataReaderImpl::get_qos (
   return ::DDS::Subscriber::_duplicate (subscriber_servant_);
 }
 
-::DDS::SampleRejectedStatus DataReaderImpl::get_sample_rejected_status (
-                                                                        )
+::DDS::ReturnCode_t
+DataReaderImpl::get_sample_rejected_status (
+  ::DDS::SampleRejectedStatus & status)
   ACE_THROW_SPEC ((
                    CORBA::SystemException
                    ))
@@ -889,13 +895,14 @@ void DataReaderImpl::get_qos (
   ACE_Guard<ACE_Recursive_Thread_Mutex> justMe (this->sample_lock_);
 
   set_status_changed_flag (::DDS::SAMPLE_REJECTED_STATUS, false);
-  ::DDS::SampleRejectedStatus status = sample_rejected_status_;
+  status = sample_rejected_status_;
   sample_rejected_status_.total_count_change = 0;
-  return status;
+  return ::DDS::RETCODE_OK;
 }
 
-::DDS::LivelinessChangedStatus DataReaderImpl::get_liveliness_changed_status (
-                                                                              )
+::DDS::ReturnCode_t
+DataReaderImpl::get_liveliness_changed_status (
+  ::DDS::LivelinessChangedStatus & status)
   ACE_THROW_SPEC ((
                    CORBA::SystemException
                    ))
@@ -904,17 +911,18 @@ void DataReaderImpl::get_qos (
 
   set_status_changed_flag(::DDS::LIVELINESS_CHANGED_STATUS,
                           false);
-  ::DDS::LivelinessChangedStatus status =
-      liveliness_changed_status_;
+  status = liveliness_changed_status_;
 
   liveliness_changed_status_.alive_count_change = 0;
   liveliness_changed_status_.not_alive_count_change = 0;
 
-  return status;
+  return ::DDS::RETCODE_OK;
 }
 
-::DDS::RequestedDeadlineMissedStatus
-DataReaderImpl::get_requested_deadline_missed_status ()
+
+::DDS::ReturnCode_t
+DataReaderImpl::get_requested_deadline_missed_status (
+  ::DDS::RequestedDeadlineMissedStatus & status)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ACE_Guard<ACE_Recursive_Thread_Mutex> justMe (this->sample_lock_);
@@ -933,14 +941,14 @@ DataReaderImpl::get_requested_deadline_missed_status ()
   this->last_deadline_missed_total_count_ =
     this->requested_deadline_missed_status_.total_count;
 
-  ::DDS::RequestedDeadlineMissedStatus const status =
-      requested_deadline_missed_status_;
+  status = requested_deadline_missed_status_;
 
-  return status;
+  return ::DDS::RETCODE_OK;
 }
 
-::DDS::RequestedIncompatibleQosStatus *
-DataReaderImpl::get_requested_incompatible_qos_status ()
+::DDS::ReturnCode_t
+DataReaderImpl::get_requested_incompatible_qos_status (
+  ::DDS::RequestedIncompatibleQosStatus & status)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ACE_Guard<ACE_Recursive_Thread_Mutex> justMe (
@@ -948,38 +956,39 @@ DataReaderImpl::get_requested_incompatible_qos_status ()
 
   set_status_changed_flag(::DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS,
                           false);
-  ::DDS::RequestedIncompatibleQosStatus* status
-      = new ::DDS::RequestedIncompatibleQosStatus;
-  *status = requested_incompatible_qos_status_;
+  status = requested_incompatible_qos_status_;
   requested_incompatible_qos_status_.total_count_change = 0;
-  return status;
+
+  return ::DDS::RETCODE_OK;
 }
 
-::DDS::SubscriptionMatchStatus
-DataReaderImpl::get_subscription_match_status ()
+::DDS::ReturnCode_t
+DataReaderImpl::get_subscription_matched_status (
+  ::DDS::SubscriptionMatchedStatus & status)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ACE_Guard<ACE_Recursive_Thread_Mutex> justMe (
     this->publication_handle_lock_);
 
-  set_status_changed_flag (::DDS::SUBSCRIPTION_MATCH_STATUS, false);
-  ::DDS::SubscriptionMatchStatus status = subscription_match_status_;
+  set_status_changed_flag (::DDS::SUBSCRIPTION_MATCHED_STATUS, false);
+  status = subscription_match_status_;
   subscription_match_status_.total_count_change = 0;
   subscription_match_status_.current_count_change = 0;
 
-  return status ;
+  return ::DDS::RETCODE_OK;
 }
 
-::DDS::SampleLostStatus
-DataReaderImpl::get_sample_lost_status ()
+::DDS::ReturnCode_t
+DataReaderImpl::get_sample_lost_status (
+  ::DDS::SampleLostStatus & status)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ACE_Guard<ACE_Recursive_Thread_Mutex> justMe (this->sample_lock_);
 
   set_status_changed_flag (::DDS::SAMPLE_LOST_STATUS, false);
-  ::DDS::SampleLostStatus status = sample_lost_status_;
+  status = sample_lost_status_;
   sample_lost_status_.total_count_change = 0;
-  return status;
+  return ::DDS::RETCODE_OK;
 }
 
 ::DDS::ReturnCode_t
@@ -1108,9 +1117,9 @@ DataReaderImpl::enable ()
                rd_allocator_, n_chunks_));
 
   if ((qos_.liveliness.lease_duration.sec !=
-       ::DDS::DURATION_INFINITY_SEC) ||
+       ::DDS::DURATION_INFINITE_SEC) ||
       (qos_.liveliness.lease_duration.nanosec !=
-       ::DDS::DURATION_INFINITY_NSEC))
+       ::DDS::DURATION_INFINITE_NSEC))
     {
       liveliness_lease_duration_ =
         duration_to_time_value (qos_.liveliness.lease_duration);
@@ -1121,8 +1130,8 @@ DataReaderImpl::enable ()
   // period is not the default (infinite).
   ::DDS::Duration_t const deadline_period = this->qos_.deadline.period;
   if (this->watchdog_.get () == 0
-    && (deadline_period.sec != ::DDS::DURATION_INFINITY_SEC
-    || deadline_period.nanosec != ::DDS::DURATION_INFINITY_NSEC))
+    && (deadline_period.sec != ::DDS::DURATION_INFINITE_SEC
+    || deadline_period.nanosec != ::DDS::DURATION_INFINITE_NSEC))
   {
     ACE_auto_ptr_reset (this->watchdog_,
       new RequestedDeadlineWatchdog (

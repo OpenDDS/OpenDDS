@@ -188,6 +188,10 @@ SubscriptionProfile::copyToReaderQos( ::DDS::DataReaderQos& qos)
       = this->readerQos.reader_data_lifecycle.autopurge_nowriter_samples_delay.sec;
     qos.reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec
       = this->readerQos.reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec;
+    qos.reader_data_lifecycle.autopurge_disposed_samples_delay.sec
+      = this->readerQos.reader_data_lifecycle.autopurge_disposed_samples_delay.sec;
+    qos.reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec
+      = this->readerQos.reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec;
   }
 }
 

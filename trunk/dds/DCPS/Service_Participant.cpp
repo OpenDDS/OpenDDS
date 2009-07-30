@@ -495,12 +495,10 @@ namespace OpenDDS
       //       hmm - I guess that would be OK since the user
       //       is overriding them.)
       initial_TransportPriorityQosPolicy_.value = 0;
-      initial_LifespanQosPolicy_.duration.sec = ::DDS::DURATION_INFINITY_SEC;
-      initial_LifespanQosPolicy_.duration.nanosec = ::DDS::DURATION_INFINITY_NSEC;
+      initial_LifespanQosPolicy_.duration.sec = ::DDS::DURATION_INFINITE_SEC;
+      initial_LifespanQosPolicy_.duration.nanosec = ::DDS::DURATION_INFINITE_NSEC;
 
       initial_DurabilityQosPolicy_.kind = ::DDS::VOLATILE_DURABILITY_QOS;
-      initial_DurabilityQosPolicy_.service_cleanup_delay.sec = ::DDS::DURATION_ZERO_SEC;
-      initial_DurabilityQosPolicy_.service_cleanup_delay.nanosec = ::DDS::DURATION_ZERO_NSEC;
 
       initial_DurabilityServiceQosPolicy_.service_cleanup_delay.sec =
         ::DDS::DURATION_ZERO_SEC;
@@ -520,8 +518,8 @@ namespace OpenDDS
       initial_PresentationQosPolicy_.coherent_access = 0;
       initial_PresentationQosPolicy_.ordered_access = 0;
 
-      initial_DeadlineQosPolicy_.period.sec = ::DDS::DURATION_INFINITY_SEC;
-      initial_DeadlineQosPolicy_.period.nanosec = ::DDS::DURATION_INFINITY_NSEC;
+      initial_DeadlineQosPolicy_.period.sec = ::DDS::DURATION_INFINITE_SEC;
+      initial_DeadlineQosPolicy_.period.nanosec = ::DDS::DURATION_INFINITE_NSEC;
 
       initial_LatencyBudgetQosPolicy_.duration.sec = ::DDS::DURATION_ZERO_SEC;
       initial_LatencyBudgetQosPolicy_.duration.nanosec = ::DDS::DURATION_ZERO_NSEC;
@@ -530,16 +528,16 @@ namespace OpenDDS
       initial_OwnershipStrengthQosPolicy_.value = 0;
 
       initial_LivelinessQosPolicy_.kind = ::DDS::AUTOMATIC_LIVELINESS_QOS;
-      initial_LivelinessQosPolicy_.lease_duration.sec = ::DDS::DURATION_INFINITY_SEC;
-      initial_LivelinessQosPolicy_.lease_duration.nanosec = ::DDS::DURATION_INFINITY_NSEC;
+      initial_LivelinessQosPolicy_.lease_duration.sec = ::DDS::DURATION_INFINITE_SEC;
+      initial_LivelinessQosPolicy_.lease_duration.nanosec = ::DDS::DURATION_INFINITE_NSEC;
 
       initial_TimeBasedFilterQosPolicy_.minimum_separation.sec = ::DDS::DURATION_ZERO_SEC;
       initial_TimeBasedFilterQosPolicy_.minimum_separation.nanosec = ::DDS::DURATION_ZERO_NSEC;
 
       initial_ReliabilityQosPolicy_.kind = ::DDS::BEST_EFFORT_RELIABILITY_QOS;
       // The spec does not provide the default max_blocking_time.
-      initial_ReliabilityQosPolicy_.max_blocking_time.sec = ::DDS::DURATION_INFINITY_SEC;
-      initial_ReliabilityQosPolicy_.max_blocking_time.nanosec = ::DDS::DURATION_INFINITY_NSEC;
+      initial_ReliabilityQosPolicy_.max_blocking_time.sec = ::DDS::DURATION_INFINITE_SEC;
+      initial_ReliabilityQosPolicy_.max_blocking_time.nanosec = ::DDS::DURATION_INFINITE_NSEC;
 
       initial_DestinationOrderQosPolicy_.kind = ::DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS;
 
@@ -556,6 +554,8 @@ namespace OpenDDS
 
       initial_ReaderDataLifecycleQosPolicy_.autopurge_nowriter_samples_delay.sec = ::DDS::DURATION_ZERO_SEC;
       initial_ReaderDataLifecycleQosPolicy_.autopurge_nowriter_samples_delay.nanosec = ::DDS::DURATION_ZERO_NSEC;
+      initial_ReaderDataLifecycleQosPolicy_.autopurge_disposed_samples_delay.sec = ::DDS::DURATION_ZERO_SEC;
+      initial_ReaderDataLifecycleQosPolicy_.autopurge_disposed_samples_delay.nanosec = ::DDS::DURATION_ZERO_NSEC;
 
       initial_DomainParticipantQos_.user_data = initial_UserDataQosPolicy_;
       initial_DomainParticipantQos_.entity_factory = initial_EntityFactoryQosPolicy_;

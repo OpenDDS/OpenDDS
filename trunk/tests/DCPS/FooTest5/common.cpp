@@ -31,7 +31,7 @@ int reader_address_given = 0;
 int multicast_group_address_given = 0;
 int writer_address_given = 0;
 
-const ACE_Time_Value max_blocking_time(::DDS::DURATION_INFINITY_SEC);
+const ACE_Time_Value max_blocking_time(::DDS::DURATION_INFINITE_SEC);
 
 int use_take = 0;
 int num_samples_per_instance = 1;

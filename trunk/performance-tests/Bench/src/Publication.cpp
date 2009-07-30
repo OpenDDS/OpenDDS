@@ -130,7 +130,7 @@ Publication::get_listener()
 ::DDS::ReturnCode_t
 Publication::set_listener(
   ::DDS::DataWriterListener_ptr a_listener,
-  ::DDS::StatusKindMask mask
+  ::DDS::StatusMask mask
 )
 {
   if( !this->enabled_) {
@@ -200,7 +200,8 @@ Publication::enable(
   // Create the publisher.
   ::DDS::Publisher_var publisher = participant->create_publisher(
                                      this->profile_->publisherQos,
-                                     ::DDS::PublisherListener::_nil()
+                                     ::DDS::PublisherListener::_nil(),
+                                     ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
                                    );
   if( CORBA::is_nil( publisher.in())) {
     ACE_ERROR((LM_ERROR,
@@ -270,7 +271,8 @@ Publication::enable(
     = publisher->create_datawriter(
         topic,
         writerQos,
-        ::DDS::DataWriterListener::_nil()
+        ::DDS::DataWriterListener::_nil(),
+        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
       );
   if( CORBA::is_nil( writer.in())) {
     ACE_ERROR((LM_ERROR,

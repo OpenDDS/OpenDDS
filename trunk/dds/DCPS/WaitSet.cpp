@@ -110,8 +110,8 @@ ReturnCode_t WaitSet::wait(ConditionSeq& active_conditions,
     return DDS::RETCODE_BAD_PARAMETER;
   ACE_Time_Value deadline;
   ACE_Time_Value* p_deadline = 0;
-  if (timeout.sec != DURATION_INFINITY_SEC ||
-      timeout.nanosec != DURATION_INFINITY_NSEC)
+  if (timeout.sec != DURATION_INFINITE_SEC ||
+      timeout.nanosec != DURATION_INFINITE_NSEC)
     {
       deadline = ACE_OS::gettimeofday()
         + OpenDDS::DCPS::duration_to_time_value(timeout);

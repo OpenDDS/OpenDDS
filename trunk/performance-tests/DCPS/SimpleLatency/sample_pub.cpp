@@ -121,7 +121,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
        DDS::DomainParticipant_var dp =
               dpf->create_participant (myDomain,
                                        PARTICIPANT_QOS_DEFAULT,
-                                       DDS::DomainParticipantListener::_nil ());
+                                       DDS::DomainParticipantListener::_nil (),
+                                       ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
        if (CORBA::is_nil (dp.in ()) ) {
          cout << argv[0] << "SAMPLE_PUB: ERROR - Create participant failed." << endl;
          exit (1);
@@ -130,7 +131,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
        /* Create publisher */
        DDS::Publisher_var p =
          dp->create_publisher (PUBLISHER_QOS_DEFAULT,
-                               DDS::PublisherListener::_nil ());
+                               DDS::PublisherListener::_nil (),
+                               ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
        /* Initialize the transports for publisher*/
        OpenDDS::DCPS::TransportImpl_rch pub_tcp_impl;
@@ -169,12 +171,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
        DDS::Topic_var pubmessage_topic = dp->create_topic ("pubmessage_topic", // topic name
                                                            "DDSPerfTest::PubMessage", // topic type
                                                            TOPIC_QOS_DEFAULT,
-                                                           DDS::TopicListener::_nil ());
+                                                           DDS::TopicListener::_nil (),
+                                                           ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
        /* Create PubMessage datawriter */
        DDS::DataWriter_var dw = p->create_datawriter (pubmessage_topic.in (),
                                                       DATAWRITER_QOS_DEFAULT,
-                                                      DDS::DataWriterListener::_nil ());
+                                                      DDS::DataWriterListener::_nil (),
+                                                      ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
        PubMessageDataWriter_var pubmessage_writer =
          PubMessageDataWriter::_narrow (dw.in());
 
@@ -182,7 +186,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
        /* Create the subscriber */
        DDS::Subscriber_var s =
          dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
-                                        DDS::SubscriberListener::_nil());
+                               DDS::SubscriberListener::_nil(),
+                               ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
 
        /* Initialize the transport for subscriber */
@@ -224,7 +229,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
        DDS::Topic_var ackmessage_topic = dp->create_topic ("ackmessage_topic", // topic name
                                                            "DDSPerfTest::AckMessage", // topic type
                                                            TOPIC_QOS_DEFAULT,
-                                                           DDS::TopicListener::_nil ());
+                                                           DDS::TopicListener::_nil (),
+                                                           ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
 
 
@@ -237,7 +243,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
        /* Create AckMessage datareader */
        DDS::DataReader_var dr = s->create_datareader (ackmessage_topic.in (),
                                                       DATAREADER_QOS_DEFAULT,
-                                                      listener.in ());
+                                                      listener.in (),
+                                                      ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
        listener_servant->init(dr.in(), dw.in(), useZeroCopyRead);
 

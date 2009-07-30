@@ -138,7 +138,8 @@ int run_domain_test ()
   ::DDS::DomainParticipant_var new_dp
     = dpf->create_participant(MY_DOMAIN,
                               PARTICIPANT_QOS_DEFAULT,
-                              ::DDS::DomainParticipantListener::_nil ());
+                              ::DDS::DomainParticipantListener::_nil (),
+                              ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
   TEST_CHECK (! CORBA::is_nil (new_dp.in ()));
   ACE_DEBUG((LM_DEBUG,
@@ -188,7 +189,8 @@ int run_domain_test ()
     = new_dp->create_topic(MY_TOPIC,
                            MY_TYPE,
                            TOPIC_QOS_DEFAULT,
-                           ::DDS::TopicListener::_nil ());
+                           ::DDS::TopicListener::_nil (),
+                           ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
   OpenDDS::DCPS::TopicImpl* new_topic_servant
     = dynamic_cast<OpenDDS::DCPS::TopicImpl*>(new_topic.in ());

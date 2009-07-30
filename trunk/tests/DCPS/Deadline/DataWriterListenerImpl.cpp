@@ -46,9 +46,9 @@ DataWriterListenerImpl::on_liveliness_lost (
 }
   
 void
-DataWriterListenerImpl::on_publication_match (
+DataWriterListenerImpl::on_publication_matched (
     ::DDS::DataWriter_ptr /* writer */,
-    ::DDS::PublicationMatchStatus const & /* status */)
+    ::DDS::PublicationMatchedStatus const & /* status */)
     ACE_THROW_SPEC ((::CORBA::SystemException))
 {
 }

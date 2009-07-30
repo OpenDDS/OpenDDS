@@ -21,15 +21,14 @@ namespace OpenDDS
                           OpenDDS::DCPS::TypeSupport_ptr type_support,
                           const ::DDS::TopicQos &        qos,
                           ::DDS::TopicListener_ptr       a_listener,
+                          const ::DDS::StatusMask &      mask,
                           ::DDS::DomainParticipant_ptr   participant)
       : TopicDescriptionImpl(topic_name,
                              type_name,
                              type_support,
                              participant),
         qos_(qos),
-        // must default because create_topic does not take a mask
-        // like set_listener does. - ?discrepency in the DDS spec.
-        listener_mask_(DEFAULT_STATUS_KIND_MASK),
+        listener_mask_(mask),
         listener_(::DDS::TopicListener::_duplicate(a_listener)),
         fast_listener_ (0),
         id_(topic_id),
@@ -112,7 +111,7 @@ namespace OpenDDS
     }
 
 
-    void
+    ::DDS::ReturnCode_t
     TopicImpl::get_qos (
         ::DDS::TopicQos & qos
       )
@@ -121,13 +120,14 @@ namespace OpenDDS
       ))
     {
       qos = qos_;
+      return ::DDS::RETCODE_OK;
     }
 
 
     ::DDS::ReturnCode_t
     TopicImpl::set_listener (
         ::DDS::TopicListener_ptr a_listener,
-        ::DDS::StatusKindMask mask
+        ::DDS::StatusMask mask
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -152,16 +152,16 @@ namespace OpenDDS
     }
 
 
-    ::DDS::InconsistentTopicStatus
+    ::DDS::ReturnCode_t 
     TopicImpl::get_inconsistent_topic_status (
+        ::DDS::InconsistentTopicStatus & a_status
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ))
     {
-      ::DDS::InconsistentTopicStatus status;
-      status = inconsistent_topic_status_;
-      return status;
+      a_status = inconsistent_topic_status_;
+      return ::DDS::RETCODE_OK;
     }
 
 

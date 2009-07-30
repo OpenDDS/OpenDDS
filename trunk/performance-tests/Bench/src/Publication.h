@@ -55,7 +55,7 @@ class Publication : public ACE_Task_Base {
     ::DDS::DataWriterListener_ptr get_listener();
     ::DDS::ReturnCode_t set_listener(
                           ::DDS::DataWriterListener_ptr a_listener,
-                          ::DDS::StatusKindMask mask
+                          ::DDS::StatusMask mask
                         );
     /// @}
 

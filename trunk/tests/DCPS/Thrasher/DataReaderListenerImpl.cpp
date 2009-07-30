@@ -64,9 +64,9 @@ DataReaderListenerImpl::on_liveliness_changed(
 {}
 
 void
-DataReaderListenerImpl::on_subscription_match(
+DataReaderListenerImpl::on_subscription_matched(
     DDS::DataReader_ptr,
-    const DDS::SubscriptionMatchStatus&)
+    const DDS::SubscriptionMatchedStatus&)
   throw (CORBA::SystemException)
 {}
 

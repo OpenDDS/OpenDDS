@@ -254,9 +254,9 @@ void AckDataReaderListenerImpl::on_liveliness_changed (
 {
 }
 
-void AckDataReaderListenerImpl::on_subscription_match (
+void AckDataReaderListenerImpl::on_subscription_matched (
     DDS::DataReader_ptr,
-    const DDS::SubscriptionMatchStatus &)
+    const DDS::SubscriptionMatchedStatus &)
   throw (CORBA::SystemException)
 {
 }

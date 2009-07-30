@@ -30,7 +30,8 @@ namespace OpenDDS
     DomainParticipantFactoryImpl::create_participant (
         ::DDS::DomainId_t domainId,
         const ::DDS::DomainParticipantQos & qos,
-        ::DDS::DomainParticipantListener_ptr a_listener
+        ::DDS::DomainParticipantListener_ptr a_listener,
+        ::DDS::StatusMask mask
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -102,7 +103,7 @@ namespace OpenDDS
       DomainParticipantImpl* dp;
 
       ACE_NEW_RETURN (dp,
-                      DomainParticipantImpl(domainId, dp_id, qos, a_listener, federated),
+                      DomainParticipantImpl(domainId, dp_id, qos, a_listener, mask, federated),
                       ::DDS::DomainParticipant::_nil ());
 
       ::DDS::DomainParticipant_ptr dp_obj(dp);
@@ -353,7 +354,8 @@ namespace OpenDDS
         }
     }
 
-    void DomainParticipantFactoryImpl::get_default_participant_qos (
+    ::DDS::ReturnCode_t
+    DomainParticipantFactoryImpl::get_default_participant_qos (
         ::DDS::DomainParticipantQos & qos
       )
       ACE_THROW_SPEC ((
@@ -361,6 +363,7 @@ namespace OpenDDS
       ))
     {
       qos = default_participant_qos_;
+      return ::DDS::RETCODE_OK;
     }
 
     ::DDS::ReturnCode_t
@@ -409,6 +412,31 @@ namespace OpenDDS
       ))
     {
       return TheParticipantFactory;
+    }
+
+
+    ::DDS::ReturnCode_t 
+    DomainParticipantFactoryImpl::set_qos (
+        const ::DDS::DomainParticipantFactoryQos & qos
+      )
+      ACE_THROW_SPEC ((
+        ::CORBA::SystemException
+      )) 
+    {
+      //tbd:
+      return ::DDS::RETCODE_OK;
+    }
+
+    ::DDS::ReturnCode_t 
+    DomainParticipantFactoryImpl::get_qos (
+        ::DDS::DomainParticipantFactoryQos & qos
+      )
+      ACE_THROW_SPEC ((
+        ::CORBA::SystemException
+      )) 
+    {
+      //tbd:
+      return ::DDS::RETCODE_OK;
     }
 
     const DomainParticipantFactoryImpl::DPMap&

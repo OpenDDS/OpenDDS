@@ -173,9 +173,9 @@ void ForwardingListenerImpl::on_liveliness_changed (
     ));
   }
 
-void ForwardingListenerImpl::on_subscription_match (
+void ForwardingListenerImpl::on_subscription_matched (
     ::DDS::DataReader_ptr reader,
-    const ::DDS::SubscriptionMatchStatus & status
+    const ::DDS::SubscriptionMatchedStatus & status
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -185,7 +185,7 @@ void ForwardingListenerImpl::on_subscription_match (
     ACE_UNUSED_ARG(status) ;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) ForwardingListenerImpl::on_subscription_match Repo[ %d] \n"),
+      ACE_TEXT("%T (%P|%t) ForwardingListenerImpl::on_subscription_matched Repo[ %d] \n"),
       this->repo_
     ));
   }
