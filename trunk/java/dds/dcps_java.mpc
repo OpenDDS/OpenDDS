@@ -2,7 +2,6 @@ project: dcps, idl2jni, optional_jni_check, dcps_java_optional {
 
   sharedname    = OpenDDS_DCPS_Java
   after        += tao_java
-  libs         += tao_java
   libout        = $(DDS_ROOT)/lib
   idl2jniflags += -SS -I$(DDS_ROOT) -I$(TAO_ROOT) -I.. \
                   -Wb,stub_export_include=dcps_java_export.h \

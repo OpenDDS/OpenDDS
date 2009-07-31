@@ -1,10 +1,19 @@
+Fri Jul 31 15:40:15 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DdsDcpsInfrastructure.idl:
+        * java/dds/dcps_java.mpc:
+
+	  Reverted UserDataQosPolicy, GroupDataQosPolicy, and
+	  TopicQosPolicy definitions to old values; use of CORBA::OctetSeq
+	  caused issues when used from DdsDcpsInfrastructure.idl.
+
 Fri Jul 31 02:40:42 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DdsDcpsInfrastructure.idl:
         * java/dds/dcps_java.mpc:
 
-	  Fixes to java support; anonymous structs/arrays are not
-	  supported by idl2jni.
+          Fixes to java support; anonymous structs/arrays are not
+          supported by idl2jni.
 
 Thu Jul 30 23:24:42 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
