@@ -17,7 +17,7 @@ public class TestPublisher {
             return;
         }
         DomainParticipant dp = dpf.create_participant(411,
-            PARTICIPANT_QOS_DEFAULT.get(), null);
+            PARTICIPANT_QOS_DEFAULT.get(), null, 0);
         if (dp == null) {
             System.err.println("ERROR: Domain Participant creation failed");
             return;
@@ -31,13 +31,13 @@ public class TestPublisher {
 
         Topic top = dp.create_topic("Movie Discussion List",
                                     servant.get_type_name(),
-                                    TOPIC_QOS_DEFAULT.get(), null);
+                                    TOPIC_QOS_DEFAULT.get(), null, 0);
         if (top == null) {
             System.err.println("ERROR: Topic creation failed");
             return;
         }
 
-        Publisher pub = dp.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null);
+        Publisher pub = dp.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null, 0);
         if (pub == null) {
             System.err.println("ERROR: Publisher creation failed");
             return;
@@ -60,7 +60,8 @@ public class TestPublisher {
 
         DataWriter dw = pub.create_datawriter(top,
                                               DATAWRITER_QOS_DEFAULT.get(),
-                                              null);
+                                              null,
+					      0);
         if (dw == null) {
             System.err.println("ERROR: DataWriter creation failed");
             return;

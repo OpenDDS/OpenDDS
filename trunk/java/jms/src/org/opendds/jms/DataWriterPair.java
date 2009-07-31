@@ -60,7 +60,7 @@ public class DataWriterPair {
         dataWriterQosPolicy.setQos(holder.value);
 
         holder.value.durability.kind = DurabilityQosPolicyKind.PERSISTENT_DURABILITY_QOS;
-        final DataWriter dataWriter = publisher.create_datawriter(ddsTopic, holder.value, null);
+        final DataWriter dataWriter = publisher.create_datawriter(ddsTopic, holder.value, null, 0);
         MessagePayloadDataWriter persistentDW = MessagePayloadDataWriterHelper.narrow(dataWriter);
         logger.debug("Created %s -> %s", persistentDW, dataWriterQosPolicy);
 
@@ -71,7 +71,7 @@ public class DataWriterPair {
         dataWriterQosPolicy.setQos(holder.value);
 
         holder.value.durability.kind = DurabilityQosPolicyKind.VOLATILE_DURABILITY_QOS;
-        final DataWriter dataWriter2 = publisher.create_datawriter(ddsTopic, holder.value, null);
+        final DataWriter dataWriter2 = publisher.create_datawriter(ddsTopic, holder.value, null, 0);
         MessagePayloadDataWriter volatileDW = MessagePayloadDataWriterHelper.narrow(dataWriter2);
         logger.debug("Created %s -> %s", volatileDW, dataWriterQosPolicy);
 

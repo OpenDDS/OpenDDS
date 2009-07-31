@@ -63,7 +63,7 @@ public class BuiltinTopicsTest {
         dpf = TheParticipantFactory.WithArgs(new StringSeqHolder(args));
         
         participant =
-            dpf.create_participant(DOMAIN_ID, PARTICIPANT_QOS_DEFAULT.get(), null);
+            dpf.create_participant(DOMAIN_ID, PARTICIPANT_QOS_DEFAULT.get(), null, 0);
         
         builtinSubscriber = participant.get_builtin_subscriber();
         
@@ -73,7 +73,7 @@ public class BuiltinTopicsTest {
         }
 
         topic = participant.create_topic("BuiltinTopics::Topic", typeSupport.get_type_name(),
-                                         TOPIC_QOS_DEFAULT.get(), null);
+                                         TOPIC_QOS_DEFAULT.get(), null, 0);
     }
     
     protected static void testParticipantBIT() throws Exception {
@@ -129,14 +129,14 @@ public class BuiltinTopicsTest {
         //      is functioning (no Subscriptions exist).
         
         Subscriber subscriber = 
-            participant.create_subscriber(SUBSCRIBER_QOS_DEFAULT.get(), null);
+            participant.create_subscriber(SUBSCRIBER_QOS_DEFAULT.get(), null, 0);
         
         TransportImpl transport = 
             TheTransportFactory.create_transport_impl(1, TheTransportFactory.AUTO_CONFIG);
         
         transport.attach_to_subscriber(subscriber);
         
-        subscriber.create_datareader(topic, DATAREADER_QOS_DEFAULT.get(), null);
+        subscriber.create_datareader(topic, DATAREADER_QOS_DEFAULT.get(), null, 0);
         
         Thread.sleep(2500); // Wait for repo to settle
         
@@ -165,14 +165,14 @@ public class BuiltinTopicsTest {
         //      is functioning (no Subscriptions exist).
         
         Publisher publisher = 
-            participant.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null);
+            participant.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null, 0);
         
         TransportImpl transport = 
             TheTransportFactory.create_transport_impl(2, TheTransportFactory.AUTO_CONFIG);
         
         transport.attach_to_publisher(publisher);
         
-        publisher.create_datawriter(topic, DATAWRITER_QOS_DEFAULT.get(), null);
+        publisher.create_datawriter(topic, DATAWRITER_QOS_DEFAULT.get(), null, 0);
         
         Thread.sleep(2500); // Wait for repo to settle
         

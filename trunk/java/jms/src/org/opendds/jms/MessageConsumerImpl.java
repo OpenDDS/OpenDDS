@@ -19,8 +19,8 @@ import DDS.ANY_INSTANCE_STATE;
 import DDS.ANY_SAMPLE_STATE;
 import DDS.ANY_VIEW_STATE;
 import DDS.DATA_AVAILABLE_STATUS;
-import DDS.DURATION_INFINITY_NSEC;
-import DDS.DURATION_INFINITY_SEC;
+import DDS.DURATION_INFINITE_NSEC;
+import DDS.DURATION_INFINITE_SEC;
 import DDS.DataReader;
 import DDS.DataReaderQosHolder;
 import DDS.Duration_t;
@@ -117,7 +117,7 @@ public class MessageConsumerImpl implements MessageConsumer {
 
         dataReaderQosPolicy.setQos(holder.value);
 
-        DataReader reader = subscriber.create_datareader(ddsTopic, holder.value, null);
+        DataReader reader = subscriber.create_datareader(ddsTopic, holder.value, null, 0);
         logger.debug("Created %s -> %s", reader, dataReaderQosPolicy);
 
         return MessagePayloadDataReaderHelper.narrow(reader);
@@ -152,7 +152,7 @@ public class MessageConsumerImpl implements MessageConsumer {
 
     public Message receive() throws JMSException {
         checkClosed();
-        Duration_t duration = new Duration_t(DURATION_INFINITY_SEC.value, DURATION_INFINITY_NSEC.value);
+        Duration_t duration = new Duration_t(DURATION_INFINITE_SEC.value, DURATION_INFINITE_NSEC.value);
         return doRecoverOrReceive(duration);
     }
 
@@ -161,8 +161,8 @@ public class MessageConsumerImpl implements MessageConsumer {
         Duration_t duration = new Duration_t();
         if (timeout < 0) throw new IllegalArgumentException("The timeout specified is negative: " + timeout);
         if (timeout == 0) {
-            duration.sec = DURATION_INFINITY_SEC.value;
-            duration.nanosec = DURATION_INFINITY_NSEC.value;
+            duration.sec = DURATION_INFINITE_SEC.value;
+            duration.nanosec = DURATION_INFINITE_NSEC.value;
         } else {
             duration.sec = (int) timeout / 1000;
             duration.nanosec = ((int) (timeout % 1000)) * 1000;

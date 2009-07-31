@@ -788,10 +788,10 @@ public class AbstractMessageImplTest {
         DomainParticipantFactory dpFactory = TheParticipantFactory.WithArgs(new StringSeqHolder(fakeArgs));
         assertNotNull(dpFactory);
 
-        DomainParticipant participant = dpFactory.create_participant(1, PARTICIPANT_QOS_DEFAULT.get(), null);
+        DomainParticipant participant = dpFactory.create_participant(1, PARTICIPANT_QOS_DEFAULT.get(), null, 0);
         assertNotNull(participant);
 
-        Subscriber subscriber = participant.create_subscriber(SUBSCRIBER_QOS_DEFAULT.get(), null);
+        Subscriber subscriber = participant.create_subscriber(SUBSCRIBER_QOS_DEFAULT.get(), null, 0);
         assertNotNull(subscriber);
 
         TransportImpl transport = TheTransportFactory.create_transport_impl(1, TheTransportFactory.AUTO_CONFIG);
@@ -804,7 +804,7 @@ public class AbstractMessageImplTest {
         assertNotNull(typeSupport);
 
         typeSupport.register_type(participant, "OpenDDS::JMS::MessagePayload");
-        final Topic topic = participant.create_topic("OpenDDS::JMS::MessagePayload", typeSupport.get_type_name(), TOPIC_QOS_DEFAULT.get(), null);
+        final Topic topic = participant.create_topic("OpenDDS::JMS::MessagePayload", typeSupport.get_type_name(), TOPIC_QOS_DEFAULT.get(), null, 0);
         assertNotNull(topic);
 
         Destination destination = new TopicImpl("Topic 1") {
@@ -813,7 +813,7 @@ public class AbstractMessageImplTest {
             }
         };
 
-        Publisher publisher = participant.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null);
+        Publisher publisher = participant.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null, 0);
         assertNotNull(publisher);
 
         TransportImpl transport2 = TheTransportFactory.create_transport_impl(2, TheTransportFactory.AUTO_CONFIG);

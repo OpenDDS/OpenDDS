@@ -13,8 +13,8 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageProducer;
 
-import DDS.DURATION_INFINITY_NSEC;
-import DDS.DURATION_INFINITY_SEC;
+import DDS.DURATION_INFINITE_NSEC;
+import DDS.DURATION_INFINITE_SEC;
 import DDS.DataWriterQosHolder;
 import DDS.HANDLE_NIL;
 import OpenDDS.JMS.MessagePayload;
@@ -209,8 +209,8 @@ public class MessageProducerImpl implements MessageProducer {
         DataWriterQosHolder holder = new DataWriterQosHolder(QosPolicies.newDataWriterQos());
         dataWriter.get_qos(holder);
         if (timeToLive == 0L) {
-            holder.value.lifespan.duration.sec = DURATION_INFINITY_SEC.value;
-            holder.value.lifespan.duration.nanosec = DURATION_INFINITY_NSEC.value;
+            holder.value.lifespan.duration.sec = DURATION_INFINITE_SEC.value;
+            holder.value.lifespan.duration.nanosec = DURATION_INFINITE_NSEC.value;
         } else {
             holder.value.lifespan.duration.sec = (int) timeToLive / 1000;
             holder.value.lifespan.duration.nanosec = ((int) (timeToLive % 1000)) * 1000000;
