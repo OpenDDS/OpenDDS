@@ -30,7 +30,6 @@
 // dealing with base template exports
 #include "tao/StringSeq.pidl"
 #include "tao/LongSeq.pidl"
-#include "tao/OctetSeq.pidl"
 
 module DDS {
 
@@ -351,16 +350,18 @@ module DDS {
     const QosPolicyId_t LIFESPAN_QOS_POLICY_ID            = 21;
     const QosPolicyId_t DURABILITYSERVICE_QOS_POLICY_ID   = 22;
 
+    typedef sequence<octet> OctetSeq;
+
     struct UserDataQosPolicy {
-                CORBA::OctetSeq value;
+                OctetSeq value;
                 };
 
     struct TopicDataQosPolicy {
-                CORBA::OctetSeq value;
+                OctetSeq value;
                 };
 
     struct GroupDataQosPolicy {
-                CORBA::OctetSeq value;
+                OctetSeq value;
                 };
 
     struct TransportPriorityQosPolicy {
