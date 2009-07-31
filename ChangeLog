@@ -1,3 +1,41 @@
+Fri Jul 31 19:39:52 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          - Moved subscription/publication registering with transport to
+            writer_enabled() and reader_enabled(). If the reader/writer
+            is not enabled, the repo id is invalid so it can not be used
+            to register with transport.
+          - Made reader_enabled() return status.
+
+        * tests/DCPS/BuiltInTopic/main.cpp:
+
+          Reverted to previous version to not add test cases for
+          DomainParticipantFactory set_qos and get_qos and entity enable().
+
+        * tests/DCPS/DPFactoryQos/DPFactoryQos.mpc:
+        * tests/DCPS/DPFactoryQos/DataReaderListener.h:
+        * tests/DCPS/DPFactoryQos/DataReaderListener.cpp:
+        * tests/DCPS/DPFactoryQos/Messenger.idl:
+        * tests/DCPS/DPFactoryQos/Writer.h:
+        * tests/DCPS/DPFactoryQos/Writer.cpp:
+        * tests/DCPS/DPFactoryQos/pub.ini:
+        * tests/DCPS/DPFactoryQos/publisher.cpp:
+        * tests/DCPS/DPFactoryQos/run_test.pl:
+        * tests/DCPS/DPFactoryQos/sub.ini:
+        * tests/DCPS/DPFactoryQos/subscriber.cpp:
+        * tests/DCPS/DPFactoryQos/tcp.conf:
+
+          Added new test for DomainParticipantFactory set_qos and
+          get_qos and entity enable() functions.
+
+        * bin/dcps_tests.lst:
+
+          Added DPFactoryQos test.
+
 Fri Jul 31 18:23:32 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/src/org/opendds/jms/ConsumerDataReaderListener.java:
@@ -18,8 +56,8 @@ Fri Jul 31 18:23:32 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * java/tests/multirepo/MultiRepoBase.java:
         * java/tests/multirepo/MultiRepoWorker.java:
 
-	  Refactored Java language support to accommdoate changes introduced
-	  in r2314.
+          Refactored Java language support to accommdoate changes introduced
+          in r2314.
 
 Fri Jul 31 15:40:15 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
