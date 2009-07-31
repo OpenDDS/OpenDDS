@@ -30,6 +30,7 @@
 // dealing with base template exports
 #include "tao/StringSeq.pidl"
 #include "tao/LongSeq.pidl"
+#include "tao/OctetSeq.pidl"
 
 module DDS {
 
@@ -40,14 +41,17 @@ module DDS {
     typedef DOMAINID_TYPE_NATIVE  DomainId_t;
     typedef HANDLE_TYPE_NATIVE    InstanceHandle_t;
 
+    typedef BUILTIN_TOPIC_KEY_TYPE_NATIVE BuiltinTopicKeyValue[3];
+
     struct BuiltinTopicKey_t {
-        BUILTIN_TOPIC_KEY_TYPE_NATIVE value[3];
-    };
+                BuiltinTopicKeyValue value;
+                };
 
     typedef sequence<InstanceHandle_t> InstanceHandleSeq;
 
     typedef long ReturnCode_t;
     typedef long QosPolicyId_t;
+
     typedef sequence<string> StringSeq;
 
     struct Duration_t {
@@ -348,15 +352,15 @@ module DDS {
     const QosPolicyId_t DURABILITYSERVICE_QOS_POLICY_ID   = 22;
 
     struct UserDataQosPolicy {
-                sequence<octet> value;
+                CORBA::OctetSeq value;
                 };
 
     struct TopicDataQosPolicy {
-                sequence<octet> value;
+                CORBA::OctetSeq value;
                 };
 
     struct GroupDataQosPolicy {
-                sequence<octet> value;
+                CORBA::OctetSeq value;
                 };
 
     struct TransportPriorityQosPolicy {
