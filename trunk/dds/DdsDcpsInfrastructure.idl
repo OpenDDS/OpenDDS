@@ -707,6 +707,10 @@ module OpenDDS
   // potential conflicts with new OMG defined QosPolicyId_t values.
   const ::DDS::QosPolicyId_t TRANSPORTTYPE_QOS_POLICY_ID = 0x7fffffff;
 
+  module DCPS
+  {
+    const DDS::StatusMask DEFAULT_STATUS_MASK = 0xffff;
+  };
 };
 
 #endif  /* OPENDDS_DCPS_INFRASTRUCTURE_IDL */

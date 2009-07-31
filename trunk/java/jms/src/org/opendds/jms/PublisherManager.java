@@ -12,6 +12,7 @@ import javax.resource.ResourceException;
 import DDS.DomainParticipant;
 import DDS.Publisher;
 import DDS.PublisherQosHolder;
+import OpenDDS.DCPS.DEFAULT_STATUS_MASK;
 import OpenDDS.DCPS.transport.AttachStatus;
 import OpenDDS.DCPS.transport.TransportImpl;
 
@@ -59,7 +60,7 @@ public class PublisherManager {
             // specifier on created MessageConsumer instances:
             holder.value.partition = PartitionHelper.match(connection.getConnectionId());
 
-            Publisher publisher = participant.create_publisher(holder.value, null, 0);
+            Publisher publisher = participant.create_publisher(holder.value, null, DEFAULT_STATUS_MASK.value);
             if (publisher == null) {
                 throw new JMSException("Unable to create Publisher; please check logs");
             }

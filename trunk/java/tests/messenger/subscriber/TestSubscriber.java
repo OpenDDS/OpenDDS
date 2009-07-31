@@ -17,7 +17,7 @@ public class TestSubscriber {
             return;
         }
         DomainParticipant dp = dpf.create_participant(411,
-            PARTICIPANT_QOS_DEFAULT.get(), null, 0);
+            PARTICIPANT_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
         if (dp == null) {
             System.err.println("ERROR: Domain Participant creation failed");
             return;
@@ -30,14 +30,16 @@ public class TestSubscriber {
         }
         Topic top = dp.create_topic("Movie Discussion List",
                                     servant.get_type_name(),
-                                    TOPIC_QOS_DEFAULT.get(), null, 0);
+                                    TOPIC_QOS_DEFAULT.get(),
+                                    null,
+                                    DEFAULT_STATUS_MASK.value);
         if (top == null) {
             System.err.println("ERROR: Topic creation failed");
             return;
         }
 
         Subscriber sub = dp.create_subscriber(SUBSCRIBER_QOS_DEFAULT.get(),
-                                              null, 0);
+                                              null, DEFAULT_STATUS_MASK.value);
         if (sub == null) {
             System.err.println("ERROR: Subscriber creation failed");
             return;
@@ -62,7 +64,7 @@ public class TestSubscriber {
         DataReader dr = sub.create_datareader(top,
                                               DATAREADER_QOS_DEFAULT.get(),
                                               listener,
-					      0);
+					      DEFAULT_STATUS_MASK.value);
         if (dr == null) {
             System.err.println("ERROR: DataReader creation failed");
             return;

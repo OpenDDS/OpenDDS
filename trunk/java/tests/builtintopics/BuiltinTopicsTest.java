@@ -37,6 +37,7 @@ import DDS.TopicBuiltinTopicDataDataReader;
 import DDS.TopicBuiltinTopicDataDataReaderHelper;
 import DDS.TopicBuiltinTopicDataSeqHolder;
 import OpenDDS.DCPS.BuiltinTopicUtils;
+import OpenDDS.DCPS.DEFAULT_STATUS_MASK;
 import OpenDDS.DCPS.TheParticipantFactory;
 import OpenDDS.DCPS.TheServiceParticipant;
 import OpenDDS.DCPS.transport.TheTransportFactory;
@@ -63,7 +64,7 @@ public class BuiltinTopicsTest {
         dpf = TheParticipantFactory.WithArgs(new StringSeqHolder(args));
         
         participant =
-            dpf.create_participant(DOMAIN_ID, PARTICIPANT_QOS_DEFAULT.get(), null, 0);
+            dpf.create_participant(DOMAIN_ID, PARTICIPANT_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
         
         builtinSubscriber = participant.get_builtin_subscriber();
         

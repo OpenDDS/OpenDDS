@@ -40,7 +40,7 @@ public class ComplexIDLTest extends QuoteSupport {
         dpf = TheParticipantFactory.WithArgs(new StringSeqHolder(args));
         assert (dpf != null);
         
-        participant = dpf.create_participant(DOMAIN_ID, PARTICIPANT_QOS_DEFAULT.get(), null, 0);
+        participant = dpf.create_participant(DOMAIN_ID, PARTICIPANT_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
         assert (participant != null);
         
         DataTypeSupport typeSupport = new DataTypeSupportImpl();
@@ -49,10 +49,10 @@ public class ComplexIDLTest extends QuoteSupport {
         assert (result != RETCODE_ERROR.value);
 
         topic = participant.create_topic("Complex::Topic", typeSupport.get_type_name(),
-                                         TOPIC_QOS_DEFAULT.get(), null, 0);
+                                         TOPIC_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
         assert (topic != null);
 
-        publisher = participant.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null, 0);
+        publisher = participant.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
         assert (publisher != null);
         
         AttachStatus status;
@@ -64,7 +64,7 @@ public class ComplexIDLTest extends QuoteSupport {
         status = transport1.attach_to_publisher(publisher);
         assert (status.value() != AttachStatus._ATTACH_ERROR);
         
-        subscriber = participant.create_subscriber(SUBSCRIBER_QOS_DEFAULT.get(), null, 0);
+        subscriber = participant.create_subscriber(SUBSCRIBER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
         assert (subscriber != null);
         
         TransportImpl transport2 =
@@ -129,7 +129,7 @@ public class ComplexIDLTest extends QuoteSupport {
                         t.printStackTrace();
                     }
                 };
-            }, 0
+            }, DEFAULT_STATUS_MASK.value 
         );
 
         lock.lock();
@@ -195,7 +195,7 @@ public class ComplexIDLTest extends QuoteSupport {
                             t.printStackTrace();
                         }
                     }
-                }, 0
+                }, DEFAULT_STATUS_MASK.value
             );
         
             // Wait for DataReader

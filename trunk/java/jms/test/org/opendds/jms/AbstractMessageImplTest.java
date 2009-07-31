@@ -40,6 +40,7 @@ import DDS.SUBSCRIBER_QOS_DEFAULT;
 import DDS.Subscriber;
 import DDS.TOPIC_QOS_DEFAULT;
 import DDS.Topic;
+import OpenDDS.DCPS.DEFAULT_STATUS_MASK;
 import OpenDDS.DCPS.TheParticipantFactory;
 import OpenDDS.DCPS.transport.AttachStatus;
 import OpenDDS.DCPS.transport.TheTransportFactory;
@@ -788,10 +789,10 @@ public class AbstractMessageImplTest {
         DomainParticipantFactory dpFactory = TheParticipantFactory.WithArgs(new StringSeqHolder(fakeArgs));
         assertNotNull(dpFactory);
 
-        DomainParticipant participant = dpFactory.create_participant(1, PARTICIPANT_QOS_DEFAULT.get(), null, 0);
+        DomainParticipant participant = dpFactory.create_participant(1, PARTICIPANT_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
         assertNotNull(participant);
 
-        Subscriber subscriber = participant.create_subscriber(SUBSCRIBER_QOS_DEFAULT.get(), null, 0);
+        Subscriber subscriber = participant.create_subscriber(SUBSCRIBER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
         assertNotNull(subscriber);
 
         TransportImpl transport = TheTransportFactory.create_transport_impl(1, TheTransportFactory.AUTO_CONFIG);
@@ -804,7 +805,7 @@ public class AbstractMessageImplTest {
         assertNotNull(typeSupport);
 
         typeSupport.register_type(participant, "OpenDDS::JMS::MessagePayload");
-        final Topic topic = participant.create_topic("OpenDDS::JMS::MessagePayload", typeSupport.get_type_name(), TOPIC_QOS_DEFAULT.get(), null, 0);
+        final Topic topic = participant.create_topic("OpenDDS::JMS::MessagePayload", typeSupport.get_type_name(), TOPIC_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
         assertNotNull(topic);
 
         Destination destination = new TopicImpl("Topic 1") {
@@ -813,7 +814,7 @@ public class AbstractMessageImplTest {
             }
         };
 
-        Publisher publisher = participant.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null, 0);
+        Publisher publisher = participant.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
         assertNotNull(publisher);
 
         TransportImpl transport2 = TheTransportFactory.create_transport_impl(2, TheTransportFactory.AUTO_CONFIG);
