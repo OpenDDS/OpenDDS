@@ -215,31 +215,6 @@ PublisherImpl::create_datawriter (
         }
     }
 
-  OpenDDS::DCPS::TransportImpl_rch impl = this->get_transport_impl();
-  if (impl.is_nil ())
-    {
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: ")
-                  ACE_TEXT("PublisherImpl::create_datawriter, ")
-                  ACE_TEXT("the publisher has not been attached to ")
-                  ACE_TEXT("the TransportImpl.\n")));
-      return ::DDS::DataWriter::_nil ();
-    }
-  // Register the DataWriterImpl object with the TransportImpl.
-  else if (impl->register_publication (dw_servant->get_publication_id(),
-               dw_servant) == -1)
-    {
-      RepoId id = dw_servant->get_publication_id();
-      RepoIdConverter converter(id);
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("PublisherImpl::create_datawriter: ")
-        ACE_TEXT("failed to register datawriter %C with ")
-        ACE_TEXT("TransportImpl.\n"),
-        std::string(converter).c_str()
-      ));
-      return ::DDS::DataWriter::_nil ();
-    }
   return ::DDS::DataWriter::_duplicate (dw_obj.in ());
 }
 
@@ -903,6 +878,31 @@ PublisherImpl::writer_enabled(
       }
 
       info->local_writer_impl_->set_publication_id (info->publication_id_);
+
+      OpenDDS::DCPS::TransportImpl_rch impl = this->get_transport_impl();
+      if (impl.is_nil ())
+        {
+          ACE_ERROR ((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("PublisherImpl::writer_enabled, ")
+                      ACE_TEXT("the publisher has not been attached to ")
+                      ACE_TEXT("the TransportImpl.\n")));
+          return ::DDS::RETCODE_ERROR;
+        }
+      // Register the DataWriterImpl object with the TransportImpl.
+      else if (impl->register_publication (info->publication_id_,
+                  info->local_writer_impl_) == -1)
+        {
+          RepoIdConverter converter(info->publication_id_);
+          ACE_ERROR((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR: ")
+            ACE_TEXT("PublisherImpl::writer_enabled: ")
+            ACE_TEXT("failed to register datawriter %C with ")
+            ACE_TEXT("TransportImpl.\n"),
+            std::string(converter).c_str()
+          ));
+          return ::DDS::RETCODE_ERROR;
+        }
     }
   catch (const CORBA::SystemException& sysex)
     {

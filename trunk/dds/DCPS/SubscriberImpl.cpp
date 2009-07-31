@@ -247,30 +247,6 @@ SubscriberImpl::create_opendds_datareader (
         }
     }
 
-  OpenDDS::DCPS::TransportImpl_rch impl = this->get_transport_impl();
-  if (impl.is_nil ())
-    {
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: ")
-                  ACE_TEXT("SubscriberImpl::create_datareader, ")
-                  ACE_TEXT("the subscriber has not been attached to the TransportImpl.\n")));
-      return ::DDS::DataReader::_nil ();
-    }
-  // Register the DataReader object with the TransportImpl.
-  else if (impl->register_subscription (dr_servant->get_subscription_id(),
-                                        dr_servant) == -1)
-    {
-      RepoId id = dr_servant->get_subscription_id();
-      RepoIdConverter converter(id);
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("SubscriberImpl::create_datareader: ")
-        ACE_TEXT("failed to register datareader %C with TransportImpl.\n"),
-        std::string(converter).c_str()
-      ));
-      return ::DDS::DataReader::_nil ();
-    }
-
   // add created data reader to this' data reader container -
   // done in enable_reader
   return ::DDS::DataReader::_duplicate(dr_obj.in ());
@@ -954,7 +930,7 @@ SubscriberImpl::remove_associations(
 }
 
 
-void
+::DDS::ReturnCode_t
 SubscriberImpl::reader_enabled(
                    DataReaderRemote_ptr     remote_reader,
                    ::DDS::DataReader_ptr    local_reader,
@@ -996,23 +972,46 @@ SubscriberImpl::reader_enabled(
         ACE_ERROR ((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::reader_enabled, ")
           ACE_TEXT("add_subscription returned invalid id. \n")));
-        return;
+        return ::DDS::RETCODE_ERROR;
       }
       info->local_reader_impl_->set_subscription_id (info->subscription_id_);
+
+      OpenDDS::DCPS::TransportImpl_rch impl = this->get_transport_impl();
+      if (impl.is_nil ())
+        {
+          ACE_ERROR ((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("SubscriberImpl::create_datareader, ")
+                      ACE_TEXT("the subscriber has not been attached to the TransportImpl.\n")));
+          return ::DDS::RETCODE_ERROR;
+        }
+      // Register the DataReader object with the TransportImpl.
+      else if (impl->register_subscription (info->subscription_id_,
+                                            info->local_reader_impl_) == -1)
+        {
+          RepoIdConverter converter(info->subscription_id_);
+          ACE_ERROR((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR: ")
+            ACE_TEXT("SubscriberImpl::create_datareader: ")
+            ACE_TEXT("failed to register datareader %C with TransportImpl.\n"),
+            std::string(converter).c_str()
+          ));
+          return ::DDS::RETCODE_ERROR;
+        }
     }
   catch (const CORBA::SystemException& sysex)
     {
       sysex._tao_print_exception (
         "ERROR: System Exception"
         " in SubscriberImpl::reader_enabled");
-      return;
+      return ::DDS::RETCODE_ERROR;
     }
   catch (const CORBA::UserException& userex)
     {
       userex._tao_print_exception (
         "ERROR: User Exception"
         " in SubscriberImpl::reader_enabled");
-      return;
+      return ::DDS::RETCODE_ERROR;
     }
 
   if (DCPS_debug_level >= 4)
@@ -1032,12 +1031,14 @@ SubscriberImpl::reader_enabled(
                   ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::reader_enabled, ")
                   ACE_TEXT("insert datareader(topic_name=%C) failed. \n"),
                   topic_name));
-      return;
+      return ::DDS::RETCODE_ERROR;
     }
 
   // Increase the ref count when the servant is referenced
   // by the datareader map.
   info->local_reader_impl_->_add_ref ();
+
+  return ::DDS::RETCODE_OK;
 }
 
 ::DDS::SubscriberListener*

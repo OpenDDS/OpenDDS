@@ -1156,14 +1156,12 @@ DataReaderImpl::enable ()
 
   CORBA::String_var name = topic_servant_->get_name ();
 
-  subscriber_servant_->reader_enabled(
+  return subscriber_servant_->reader_enabled(
                       dr_remote_objref_.in (),
                       dr_local_objref_.in (),
                       this,
-                                      name.in(),
-                                      topic_servant_->get_id());
-
-  return ::DDS::RETCODE_OK;
+                      name.in(),
+                      topic_servant_->get_id());
 }
 
 

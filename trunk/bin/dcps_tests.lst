@@ -172,3 +172,4 @@ tests/DCPS/Thrasher/run_test.pl default: !DCPS_MIN
 tests/DCPS/Thrasher/run_test.pl low: !DCPS_MIN
 tests/DCPS/Thrasher/run_test.pl medium: !DCPS_MIN
 tests/DCPS/Thrasher/run_test.pl high: !DCPS_MIN
+tests/DCPS/DPFactoryQos/run_test.pl: !DCPS_MIN

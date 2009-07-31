@@ -81,14 +81,6 @@ int init (int argc, ACE_TCHAR *argv[])
     {
       participant_factory = TheParticipantFactoryWithArgs(argc, argv);
 
-      // Default DomainParticipantFactory qos is to auto enable.
-      ::DDS::DomainParticipantFactoryQos fqos;
-      TEST_CHECK (participant_factory->get_qos (fqos) == ::DDS::RETCODE_OK);
-      TEST_CHECK (fqos.entity_factory.autoenable_created_entities == 1);
-      // Now disable DomainParticipantFactory autoenable
-      fqos.entity_factory.autoenable_created_entities = 0;
-      TEST_CHECK (participant_factory->set_qos (fqos) == ::DDS::RETCODE_OK);
-
       // Initialize the transport
       if (0 != init_transport() )
       {
@@ -103,9 +95,6 @@ int init (int argc, ACE_TCHAR *argv[])
                                                   ::DDS::DomainParticipantListener::_nil (),
                                                   ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
       
-      // The enable() failed because factory disabled autoenable.
-      TEST_CHECK (participant->enable () == ::DDS::RETCODE_PRECONDITION_NOT_MET);
-
       //SHH create a separate particpant for the subscriber and publisher
 
       // Wait a while to give the transport thread time
@@ -130,9 +119,6 @@ int init (int argc, ACE_TCHAR *argv[])
                                          TOPIC_QOS_DEFAULT,
                                          ::DDS::TopicListener::_nil (),
                                          ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
-     
-      // The enable() failed because factory disabled autoenable.
-      TEST_CHECK (topic->enable () == ::DDS::RETCODE_PRECONDITION_NOT_MET);
 
       topic_servant
         = dynamic_cast<OpenDDS::DCPS::TopicImpl*> (topic.in ());
@@ -141,9 +127,6 @@ int init (int argc, ACE_TCHAR *argv[])
         = participant->create_subscriber (SUBSCRIBER_QOS_DEFAULT,
                                          ::DDS::SubscriberListener::_nil (),
                                          ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
-
-      // The enable() failed because factory disabled autoenable.
-      TEST_CHECK (subscriber->enable () == ::DDS::RETCODE_PRECONDITION_NOT_MET);
 
       subscriber_servant
         = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(subscriber.in ());
@@ -164,9 +147,6 @@ int init (int argc, ACE_TCHAR *argv[])
         = participant->create_publisher (PUBLISHER_QOS_DEFAULT,
                                          ::DDS::PublisherListener::_nil (),
                                          ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
-
-      // The enable() failed because factory disabled autoenable.
-      TEST_CHECK (publisher->enable () == ::DDS::RETCODE_PRECONDITION_NOT_MET);
 
       publisher_servant
         = dynamic_cast<OpenDDS::DCPS::PublisherImpl*>(publisher.in ());
@@ -192,9 +172,6 @@ int init (int argc, ACE_TCHAR *argv[])
                                          ::DDS::DataReaderListener::_nil (),
                                          ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
-      // The enable() failed because factory disabled autoenable.
-      TEST_CHECK (datareader->enable () == ::DDS::RETCODE_PRECONDITION_NOT_MET);
-
       datareader_servant
         = dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(datareader.in ());
 
@@ -204,25 +181,12 @@ int init (int argc, ACE_TCHAR *argv[])
                                         ::DDS::DataWriterListener::_nil (),
                                         ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
 
-      // The enable() failed because factory disabled autoenable.
-      TEST_CHECK (datawriter->enable () == ::DDS::RETCODE_PRECONDITION_NOT_MET);
-
       datawriter_servant
         = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(datawriter.in ());
-
-      // Now reset the DomainParticipantFactory to autoenable
-      fqos.entity_factory.autoenable_created_entities = 1;
-      TEST_CHECK (participant_factory->set_qos (fqos) == ::DDS::RETCODE_OK);
-      // Enable every entity from factory to it's entities and it should succeed.
-      TEST_CHECK (participant->enable () == ::DDS::RETCODE_OK);
-      TEST_CHECK (publisher->enable () == ::DDS::RETCODE_OK);
-      TEST_CHECK (subscriber->enable () == ::DDS::RETCODE_OK);
-      TEST_CHECK (datawriter->enable () == ::DDS::RETCODE_OK);
-      TEST_CHECK (datareader->enable () == ::DDS::RETCODE_OK);
   }
   catch (...)
     {
-      ACE_ERROR_RETURN ((LM_ERROR,+
+      ACE_ERROR_RETURN ((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Exception caught in init ()\n")),
         1);
     }

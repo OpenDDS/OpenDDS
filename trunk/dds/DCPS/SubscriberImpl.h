@@ -234,11 +234,12 @@ namespace OpenDDS
     // called by DataReaderImpl::data_received
     void data_received(DataReaderImpl *reader);
 
-    void reader_enabled(DataReaderRemote_ptr     remote_reader,
-                        ::DDS::DataReader_ptr    local_reader,
-                        DataReaderImpl*          local_reader_impl,
-                        const char *topic_name,
-                        RepoId topic_id
+    ::DDS::ReturnCode_t reader_enabled(
+          DataReaderRemote_ptr     remote_reader,
+          ::DDS::DataReader_ptr    local_reader,
+          DataReaderImpl*          local_reader_impl,
+          const char *topic_name,
+          RepoId topic_id
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
