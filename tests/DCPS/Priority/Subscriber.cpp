@@ -288,8 +288,7 @@ Subscriber::run()
       throw BadSyncException();
     }
 
-    DDS::SubscriptionMatchedStatus matched = { 0, 0, 0, 0, 0};
-    if (this->reader_->get_subscription_matched_status (matched) != ::DDS::RETCODE_OK)
+    if (this->reader_->get_subscription_matched_status (matches) != ::DDS::RETCODE_OK)
     {
       ACE_ERROR ((LM_ERROR,
         "ERROR: failed to get subscription matched status\n"));
