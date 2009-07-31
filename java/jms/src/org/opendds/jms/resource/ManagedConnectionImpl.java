@@ -24,6 +24,7 @@ import DDS.DomainParticipant;
 import DDS.DomainParticipantFactory;
 import DDS.DomainParticipantQosHolder;
 import DDS.RETCODE_OK;
+import OpenDDS.DCPS.DEFAULT_STATUS_MASK;
 import OpenDDS.DCPS.DomainParticipantExt;
 import OpenDDS.DCPS.DomainParticipantExtHelper;
 import OpenDDS.DCPS.TheParticipantFactory;
@@ -82,7 +83,10 @@ public class ManagedConnectionImpl implements ManagedConnection {
         ParticipantQosPolicy policy = cxRequestInfo.getParticipantQosPolicy();
         policy.setQos(holder.value);
 
-        participant = dpf.create_participant(cxRequestInfo.getDomainID(), holder.value, null, 0);
+        participant = dpf.create_participant(cxRequestInfo.getDomainID(),
+                                             holder.value,
+                                             null,
+                                             DEFAULT_STATUS_MASK.value);
         if (participant == null) {
             throw new ResourceException("Unable to create DomainParticipant; please check logs");
         }

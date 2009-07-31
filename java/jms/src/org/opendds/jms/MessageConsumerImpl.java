@@ -38,6 +38,7 @@ import DDS.SampleInfoSeqHolder;
 import DDS.Subscriber;
 import DDS.Topic;
 import DDS.WaitSet;
+import OpenDDS.DCPS.DEFAULT_STATUS_MASK;
 import OpenDDS.JMS.MessagePayload;
 import OpenDDS.JMS.MessagePayloadDataReader;
 import OpenDDS.JMS.MessagePayloadDataReaderHelper;
@@ -117,7 +118,7 @@ public class MessageConsumerImpl implements MessageConsumer {
 
         dataReaderQosPolicy.setQos(holder.value);
 
-        DataReader reader = subscriber.create_datareader(ddsTopic, holder.value, null, 0);
+        DataReader reader = subscriber.create_datareader(ddsTopic, holder.value, null, DEFAULT_STATUS_MASK.value);
         logger.debug("Created %s -> %s", reader, dataReaderQosPolicy);
 
         return MessagePayloadDataReaderHelper.narrow(reader);

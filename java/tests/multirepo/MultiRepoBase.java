@@ -9,6 +9,7 @@ import org.omg.CORBA.StringSeqHolder;
 import DDS.DomainParticipant;
 import DDS.DomainParticipantFactory;
 import DDS.PARTICIPANT_QOS_DEFAULT;
+import OpenDDS.DCPS.DEFAULT_STATUS_MASK;
 import OpenDDS.DCPS.TheParticipantFactory;
 import OpenDDS.DCPS.TheServiceParticipant;
 import OpenDDS.DCPS.transport.TheTransportFactory;
@@ -39,7 +40,7 @@ public class MultiRepoBase {
     }
     
     private static DomainParticipant createParticipant(int domainId) {
-        return participants.push(dpf.create_participant(domainId, PARTICIPANT_QOS_DEFAULT.get(), null, 0));
+        return participants.push(dpf.create_participant(domainId, PARTICIPANT_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value));
     }
     
     protected static MultiRepoWorker createWorker(int domainId) {

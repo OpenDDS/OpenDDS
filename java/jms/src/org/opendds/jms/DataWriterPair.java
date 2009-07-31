@@ -18,6 +18,7 @@ import DDS.DurabilityQosPolicyKind;
 import DDS.Duration_t;
 import DDS.Publisher;
 import DDS.Topic;
+import OpenDDS.DCPS.DEFAULT_STATUS_MASK;
 import OpenDDS.JMS.MessagePayloadDataWriter;
 import OpenDDS.JMS.MessagePayloadDataWriterHelper;
 
@@ -60,7 +61,7 @@ public class DataWriterPair {
         dataWriterQosPolicy.setQos(holder.value);
 
         holder.value.durability.kind = DurabilityQosPolicyKind.PERSISTENT_DURABILITY_QOS;
-        final DataWriter dataWriter = publisher.create_datawriter(ddsTopic, holder.value, null, 0);
+        final DataWriter dataWriter = publisher.create_datawriter(ddsTopic, holder.value, null, DEFAULT_STATUS_MASK.value);
         MessagePayloadDataWriter persistentDW = MessagePayloadDataWriterHelper.narrow(dataWriter);
         logger.debug("Created %s -> %s", persistentDW, dataWriterQosPolicy);
 
@@ -71,7 +72,7 @@ public class DataWriterPair {
         dataWriterQosPolicy.setQos(holder.value);
 
         holder.value.durability.kind = DurabilityQosPolicyKind.VOLATILE_DURABILITY_QOS;
-        final DataWriter dataWriter2 = publisher.create_datawriter(ddsTopic, holder.value, null, 0);
+        final DataWriter dataWriter2 = publisher.create_datawriter(ddsTopic, holder.value, null, DEFAULT_STATUS_MASK.value);
         MessagePayloadDataWriter volatileDW = MessagePayloadDataWriterHelper.narrow(dataWriter2);
         logger.debug("Created %s -> %s", volatileDW, dataWriterQosPolicy);
 

@@ -28,6 +28,7 @@ import DDS.TOPIC_QOS_DEFAULT;
 import DDS.Topic;
 import DDS._DataReaderListenerLocalBase;
 import DDS._DataWriterListenerLocalBase;
+import OpenDDS.DCPS.DEFAULT_STATUS_MASK;
 import OpenDDS.DCPS.transport.AttachStatus;
 import OpenDDS.DCPS.transport.TheTransportFactory;
 import OpenDDS.DCPS.transport.TransportImpl;
@@ -66,7 +67,7 @@ public class MultiRepoWorker {
         }
 
         topic = participant.create_topic("MultiRepo::Topic", typeSupport.get_type_name(),
-                                         TOPIC_QOS_DEFAULT.get(), null, 0);
+                                         TOPIC_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
 
         transport = TheTransportFactory.create_transport_impl(++transportId, TheTransportFactory.AUTO_CONFIG);
 
@@ -80,7 +81,7 @@ public class MultiRepoWorker {
 
     public void write(final String text) {
         Publisher publisher =
-            participant.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null, 0);
+            participant.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
         
         assert (publisher != null);
 
@@ -114,13 +115,13 @@ public class MultiRepoWorker {
 
                     System.out.printf("[%s] wrote %s\n", participant, message);
                 }
-            }, 0
+            }, DEFAULT_STATUS_MASK.value
         );
     }
     
     public void read() {
         Subscriber subscriber =
-            participant.create_subscriber(SUBSCRIBER_QOS_DEFAULT.get(), null, 0);
+            participant.create_subscriber(SUBSCRIBER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
         
         assert (subscriber != null);
         
@@ -159,7 +160,7 @@ public class MultiRepoWorker {
 
                     System.out.printf("[%s] read: \"%s\"\n", participant, mh.value.text);
                 }
-            }, 0
+            }, DEFAULT_STATUS_MASK.value
         );
     }
 

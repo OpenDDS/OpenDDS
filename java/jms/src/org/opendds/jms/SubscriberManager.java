@@ -12,6 +12,7 @@ import javax.resource.ResourceException;
 import DDS.DomainParticipant;
 import DDS.Subscriber;
 import DDS.SubscriberQosHolder;
+import OpenDDS.DCPS.DEFAULT_STATUS_MASK;
 import OpenDDS.DCPS.transport.AttachStatus;
 import OpenDDS.DCPS.transport.TransportImpl;
 
@@ -64,7 +65,7 @@ public class SubscriberManager {
                 holder.value.partition = PartitionHelper.matchAll();
             }
 
-            Subscriber subscriber = participant.create_subscriber(holder.value, null, 0);
+            Subscriber subscriber = participant.create_subscriber(holder.value, null, DEFAULT_STATUS_MASK.value);
             if (subscriber == null) {
                 throw new JMSException("Unable to create Subscriber; please check logs");
             }
