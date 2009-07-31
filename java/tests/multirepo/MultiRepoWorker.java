@@ -12,7 +12,7 @@ import DDS.LivelinessLostStatus;
 import DDS.OfferedDeadlineMissedStatus;
 import DDS.OfferedIncompatibleQosStatus;
 import DDS.PUBLISHER_QOS_DEFAULT;
-import DDS.PublicationMatchStatus;
+import DDS.PublicationMatchedStatus;
 import DDS.Publisher;
 import DDS.RETCODE_OK;
 import DDS.RequestedDeadlineMissedStatus;
@@ -23,7 +23,7 @@ import DDS.SampleInfoHolder;
 import DDS.SampleLostStatus;
 import DDS.SampleRejectedStatus;
 import DDS.Subscriber;
-import DDS.SubscriptionMatchStatus;
+import DDS.SubscriptionMatchedStatus;
 import DDS.TOPIC_QOS_DEFAULT;
 import DDS.Topic;
 import DDS._DataReaderListenerLocalBase;
@@ -66,7 +66,7 @@ public class MultiRepoWorker {
         }
 
         topic = participant.create_topic("MultiRepo::Topic", typeSupport.get_type_name(),
-                                         TOPIC_QOS_DEFAULT.get(), null);
+                                         TOPIC_QOS_DEFAULT.get(), null, 0);
 
         transport = TheTransportFactory.create_transport_impl(++transportId, TheTransportFactory.AUTO_CONFIG);
 
@@ -80,7 +80,7 @@ public class MultiRepoWorker {
 
     public void write(final String text) {
         Publisher publisher =
-            participant.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null);
+            participant.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null, 0);
         
         assert (publisher != null);
 
@@ -97,7 +97,7 @@ public class MultiRepoWorker {
 
                 public void on_offered_incompatible_qos(DataWriter dw, OfferedIncompatibleQosStatus status) {}
 
-                public void on_publication_match(DataWriter dw, PublicationMatchStatus status) {
+                public void on_publication_matched(DataWriter dw, PublicationMatchedStatus status) {
                     if (status.total_count < 1) {
                         throw new IllegalArgumentException("Unable to match publication!");
                     }
@@ -114,13 +114,13 @@ public class MultiRepoWorker {
 
                     System.out.printf("[%s] wrote %s\n", participant, message);
                 }
-            }
+            }, 0
         );
     }
     
     public void read() {
         Subscriber subscriber =
-            participant.create_subscriber(SUBSCRIBER_QOS_DEFAULT.get(), null);
+            participant.create_subscriber(SUBSCRIBER_QOS_DEFAULT.get(), null, 0);
         
         assert (subscriber != null);
         
@@ -142,7 +142,7 @@ public class MultiRepoWorker {
 
                 public void on_sample_rejected(DataReader dr, SampleRejectedStatus status) {}
 
-                public void on_subscription_match(DataReader dr, SubscriptionMatchStatus status) {}
+                public void on_subscription_matched(DataReader dr, SubscriptionMatchedStatus status) {}
 
                 public void on_data_available(DataReader dr) {
                     MessageDataReader reader = MessageDataReaderHelper.narrow(dr);
@@ -159,7 +159,7 @@ public class MultiRepoWorker {
 
                     System.out.printf("[%s] read: \"%s\"\n", participant, mh.value.text);
                 }
-            }
+            }, 0
         );
     }
 

@@ -40,7 +40,7 @@ public class ComplexIDLTest extends QuoteSupport {
         dpf = TheParticipantFactory.WithArgs(new StringSeqHolder(args));
         assert (dpf != null);
         
-        participant = dpf.create_participant(DOMAIN_ID, PARTICIPANT_QOS_DEFAULT.get(), null);
+        participant = dpf.create_participant(DOMAIN_ID, PARTICIPANT_QOS_DEFAULT.get(), null, 0);
         assert (participant != null);
         
         DataTypeSupport typeSupport = new DataTypeSupportImpl();
@@ -49,10 +49,10 @@ public class ComplexIDLTest extends QuoteSupport {
         assert (result != RETCODE_ERROR.value);
 
         topic = participant.create_topic("Complex::Topic", typeSupport.get_type_name(),
-                                         TOPIC_QOS_DEFAULT.get(), null);
+                                         TOPIC_QOS_DEFAULT.get(), null, 0);
         assert (topic != null);
 
-        publisher = participant.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null);
+        publisher = participant.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null, 0);
         assert (publisher != null);
         
         AttachStatus status;
@@ -64,7 +64,7 @@ public class ComplexIDLTest extends QuoteSupport {
         status = transport1.attach_to_publisher(publisher);
         assert (status.value() != AttachStatus._ATTACH_ERROR);
         
-        subscriber = participant.create_subscriber(SUBSCRIBER_QOS_DEFAULT.get(), null);
+        subscriber = participant.create_subscriber(SUBSCRIBER_QOS_DEFAULT.get(), null, 0);
         assert (subscriber != null);
         
         TransportImpl transport2 =
@@ -91,7 +91,7 @@ public class ComplexIDLTest extends QuoteSupport {
 
                 public void on_offered_incompatible_qos(DataWriter dw, OfferedIncompatibleQosStatus status) {}
 
-                public void on_publication_match(DataWriter dw, PublicationMatchStatus status) {
+                public void on_publication_matched(DataWriter dw, PublicationMatchedStatus status) {
                     try {
                         if (status.current_count == 0) return;
                         // Don't run the rest of this method if the callback is
@@ -129,7 +129,7 @@ public class ComplexIDLTest extends QuoteSupport {
                         t.printStackTrace();
                     }
                 };
-            }
+            }, 0
         );
 
         lock.lock();
@@ -146,7 +146,7 @@ public class ComplexIDLTest extends QuoteSupport {
 
                     public void on_sample_rejected(DataReader dr, SampleRejectedStatus status) {}
 
-                    public void on_subscription_match(DataReader dr, SubscriptionMatchStatus status) {}
+                    public void on_subscription_matched(DataReader dr, SubscriptionMatchedStatus status) {}
 
                     public void on_data_available(DataReader dr) {
                         try {
@@ -195,7 +195,7 @@ public class ComplexIDLTest extends QuoteSupport {
                             t.printStackTrace();
                         }
                     }
-                }
+                }, 0
             );
         
             // Wait for DataReader

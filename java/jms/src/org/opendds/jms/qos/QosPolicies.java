@@ -56,6 +56,7 @@ public class QosPolicies {
         qos.history = newHistoryQosPolicy();
         qos.latency_budget = newLatencyBudgetQosPolicy();
         qos.liveliness = newLivelinessQosPolicy();
+        qos.ownership = newOwnershipQosPolicy();
         qos.reader_data_lifecycle = newReaderDataLifecycleQosPolicy();
         qos.reliability = newReliabilityQosPolicy();
         qos.resource_limits = newResourceLimitsQosPolicy();
@@ -76,6 +77,7 @@ public class QosPolicies {
         qos.latency_budget = newLatencyBudgetQosPolicy();
         qos.lifespan = newLifespanQosPolicy();
         qos.liveliness = newLivelinessQosPolicy();
+        qos.ownership = newOwnershipQosPolicy();
         qos.ownership_strength = newOwnershipStrengthQosPolicy();
         qos.reliability = newReliabilityQosPolicy();
         qos.resource_limits = newResourceLimitsQosPolicy();
@@ -106,7 +108,6 @@ public class QosPolicies {
         DurabilityQosPolicy policy = new DurabilityQosPolicy();
 
         policy.kind = DurabilityQosPolicyKind.VOLATILE_DURABILITY_QOS;
-        policy.service_cleanup_delay = new Duration_t();
 
         return policy;
     }
@@ -216,6 +217,7 @@ public class QosPolicies {
     public static ReaderDataLifecycleQosPolicy newReaderDataLifecycleQosPolicy() {
         ReaderDataLifecycleQosPolicy policy = new ReaderDataLifecycleQosPolicy();
 
+        policy.autopurge_disposed_samples_delay = new Duration_t();
         policy.autopurge_nowriter_samples_delay = new Duration_t();
 
         return policy;

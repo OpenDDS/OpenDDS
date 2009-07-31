@@ -78,8 +78,8 @@ public class DataReaderListenerImpl extends DDS._DataReaderListenerLocalBase {
         System.err.println("DataReaderListenerImpl.on_liveliness_changed");
     }
 
-    public void on_subscription_match(DDS.DataReader reader, DDS.SubscriptionMatchStatus status) {
-        System.err.println("DataReaderListenerImpl.on_subscription_match");
+    public void on_subscription_matched(DDS.DataReader reader, DDS.SubscriptionMatchedStatus status) {
+        System.err.println("DataReaderListenerImpl.on_subscription_matched");
     }
 
     public void on_sample_lost(DDS.DataReader reader, DDS.SampleLostStatus status) {

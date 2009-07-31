@@ -74,7 +74,7 @@ public class TopicImpl implements Serializable, Topic {
 
         topicQosPolicy.setQos(holder.value);
 
-        DDS.Topic topic = participant.create_topic(topicName, connection.getTypeName(), holder.value, null);
+        DDS.Topic topic = participant.create_topic(topicName, connection.getTypeName(), holder.value, null, 0);
         if (topic == null) {
             throw new JMSException("Unable to create Topic; please check logs");
         }

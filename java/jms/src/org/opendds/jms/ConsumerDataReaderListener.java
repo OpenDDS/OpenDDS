@@ -20,7 +20,7 @@ import DDS.SampleInfo;
 import DDS.SampleInfoSeqHolder;
 import DDS.SampleLostStatus;
 import DDS.SampleRejectedStatus;
-import DDS.SubscriptionMatchStatus;
+import DDS.SubscriptionMatchedStatus;
 import DDS._DataReaderListenerLocalBase;
 import OpenDDS.JMS.MessagePayload;
 import OpenDDS.JMS.MessagePayloadDataReader;
@@ -90,7 +90,7 @@ public class ConsumerDataReaderListener extends _DataReaderListenerLocalBase {
         return rc == RETCODE_OK.value;
     }
 
-    public void on_subscription_match(DataReader dataReader, SubscriptionMatchStatus subscriptionMatchStatus) {
+    public void on_subscription_matched(DataReader dataReader, SubscriptionMatchedStatus subscriptionMatchStatus) {
         // No-op
     }
 

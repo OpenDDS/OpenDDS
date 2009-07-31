@@ -82,7 +82,7 @@ public class ManagedConnectionImpl implements ManagedConnection {
         ParticipantQosPolicy policy = cxRequestInfo.getParticipantQosPolicy();
         policy.setQos(holder.value);
 
-        participant = dpf.create_participant(cxRequestInfo.getDomainID(), holder.value, null);
+        participant = dpf.create_participant(cxRequestInfo.getDomainID(), holder.value, null, 0);
         if (participant == null) {
             throw new ResourceException("Unable to create DomainParticipant; please check logs");
         }

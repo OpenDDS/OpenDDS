@@ -64,12 +64,15 @@ public class SubscriberManager {
                 holder.value.partition = PartitionHelper.matchAll();
             }
 
-            Subscriber subscriber = participant.create_subscriber(holder.value, null);
+            Subscriber subscriber = participant.create_subscriber(holder.value, null, 0);
             if (subscriber == null) {
                 throw new JMSException("Unable to create Subscriber; please check logs");
             }
-            logger.debug("Created %s -> %s", subscriber, policy);
-            logger.debug("%s using PARTITION %s", subscriber, Arrays.deepToString(holder.value.partition.name));
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Created %s -> %s", subscriber, policy);
+                logger.debug("%s using PARTITION %s", subscriber, Arrays.deepToString(holder.value.partition.name));
+            }
 
             TransportImpl transport = transportManager.getTransport();
             if (transport.attach_to_subscriber(subscriber) != AttachStatus.ATTACH_OK) {

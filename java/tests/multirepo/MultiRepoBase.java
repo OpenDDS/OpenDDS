@@ -39,7 +39,7 @@ public class MultiRepoBase {
     }
     
     private static DomainParticipant createParticipant(int domainId) {
-        return participants.push(dpf.create_participant(domainId, PARTICIPANT_QOS_DEFAULT.get(), null));
+        return participants.push(dpf.create_participant(domainId, PARTICIPANT_QOS_DEFAULT.get(), null, 0));
     }
     
     protected static MultiRepoWorker createWorker(int domainId) {

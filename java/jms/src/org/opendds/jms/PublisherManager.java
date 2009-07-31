@@ -59,7 +59,7 @@ public class PublisherManager {
             // specifier on created MessageConsumer instances:
             holder.value.partition = PartitionHelper.match(connection.getConnectionId());
 
-            Publisher publisher = participant.create_publisher(holder.value, null);
+            Publisher publisher = participant.create_publisher(holder.value, null, 0);
             if (publisher == null) {
                 throw new JMSException("Unable to create Publisher; please check logs");
             }
