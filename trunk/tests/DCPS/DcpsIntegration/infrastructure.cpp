@@ -155,7 +155,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         dpFactory->create_participant(TEST_DOMAIN_NUMBER,
                                       dPQosChangedEntityFactory,
                                       dpListener.in(),
-                                      ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if ( ! CORBA::is_nil (testParticipant.in ()) )
         {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -184,7 +184,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         dpFactory->create_participant(TEST_DOMAIN_NUMBER,
                                       PARTICIPANT_QOS_DEFAULT,
                                       dpListener.in(),
-                                      ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if ( CORBA::is_nil (testParticipant.in ()) )
         {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -270,7 +270,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         dpFactory->create_participant(TEST_DOMAIN_NUMBER,
                                       PARTICIPANT_QOS_DEFAULT,
                                       dpListener.in(),
-                                      ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if ( CORBA::is_nil (participant.in ()) )
         {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -418,7 +418,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ::DDS::Publisher_var publisher = ::DDS::Publisher::_nil();
       publisher = participant->create_publisher (pubInitialQos,
                                                  ::DDS::PublisherListener::_nil(),
-                                                 ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (publisher.in ()) )
         {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -486,7 +486,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ::DDS::Subscriber_var subscriber = ::DDS::Subscriber::_nil();
       subscriber = participant->create_subscriber (subInitialQos,
                                                  ::DDS::SubscriberListener::_nil(),
-                                                 ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (subscriber.in ()) )
         {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -515,7 +515,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       publisher = participant->create_publisher (pubInitialQos,
                                                  ::DDS::PublisherListener::_nil(),
-                                                 ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (publisher.in ()) )
         {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -528,7 +528,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         }
       subscriber = participant->create_subscriber (subInitialQos,
                                                  ::DDS::SubscriberListener::_nil(),
-                                                 ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (subscriber.in ()) )
         {
           ACE_ERROR_RETURN((LM_ERROR,

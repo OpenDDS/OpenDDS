@@ -138,7 +138,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       participant = dpf->create_participant(411,
                                             PARTICIPANT_QOS_DEFAULT,
                                             DDS::DomainParticipantListener::_nil(),
-                                            ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                            ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (participant.in ())) {
         ACE_ERROR((LM_ERROR, "(%P|%t) monitor: create_participant failed.\n"));
         return 1 ;

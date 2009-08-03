@@ -71,7 +71,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       dpf->create_participant(42,
                               PARTICIPANT_QOS_DEFAULT,
                               DDS::DomainParticipantListener::_nil(),
-                              ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                              ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (CORBA::is_nil(participant.in()))
       ACE_ERROR_RETURN((LM_ERROR,
@@ -82,7 +82,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     DDS::Subscriber_var subscriber =
       participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
                                      DDS::SubscriberListener::_nil(),
-                                     ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (CORBA::is_nil(subscriber.in()))
       ACE_ERROR_RETURN((LM_ERROR,
@@ -124,7 +124,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
                                 ts->get_type_name(),
                                 TOPIC_QOS_DEFAULT,
                                 DDS::TopicListener::_nil(),
-                                ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (CORBA::is_nil(topic.in()))
       ACE_ERROR_RETURN((LM_ERROR,
@@ -148,7 +148,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       subscriber->create_datareader(topic.in(),
                                     reader_qos,
                                     listener.in(),
-                                    ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (CORBA::is_nil(reader.in()))
       ACE_ERROR_RETURN((LM_ERROR,

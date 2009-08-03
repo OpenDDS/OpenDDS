@@ -68,7 +68,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
       this->config_.subscriberDomain(),
       PARTICIPANT_QOS_DEFAULT,
       ::DDS::DomainParticipantListener::_nil(),
-      ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
     );
   if (CORBA::is_nil (this->subscriberParticipant_.in ()))
     {
@@ -99,7 +99,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
         this->config_.publisherDomain(),
         PARTICIPANT_QOS_DEFAULT,
         ::DDS::DomainParticipantListener::_nil(),
-        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
       );
     if (CORBA::is_nil (this->publisherParticipant_.in ()))
       {
@@ -221,7 +221,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
         this->config_.typeName().c_str(),
         TOPIC_QOS_DEFAULT,
         ::DDS::TopicListener::_nil(),
-        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
       );
   if( CORBA::is_nil( this->readerTopic_.in()) )
     {
@@ -240,7 +240,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
         this->config_.typeName().c_str(),
         TOPIC_QOS_DEFAULT,
         ::DDS::TopicListener::_nil(),
-        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
       );
   if( CORBA::is_nil( this->readerTopic_.in()) )
     {
@@ -257,7 +257,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
   this->subscriber_ = this->subscriberParticipant_->create_subscriber(
                         SUBSCRIBER_QOS_DEFAULT,
                         ::DDS::SubscriberListener::_nil(),
-                        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (CORBA::is_nil (this->subscriber_.in ()))
     {
       ACE_ERROR ((LM_ERROR,
@@ -317,7 +317,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
   this->publisher_ = this->publisherParticipant_->create_publisher(
                        PUBLISHER_QOS_DEFAULT,
                        ::DDS::PublisherListener::_nil(),
-                       ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                       ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (CORBA::is_nil (this->publisher_.in ()))
     {
       ACE_ERROR ((LM_ERROR,
@@ -393,7 +393,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
                         this->writerTopic_.in(),
                         writerQos,
                         listener.in(),
-                        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+                        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
                       );
   if( CORBA::is_nil( this->dataWriter_.in()) )
     {
@@ -428,7 +428,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
                         description.in(),
                         DATAREADER_QOS_DEFAULT,
                         this->listener_.in (),
-                        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+                        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
                       );
   if( CORBA::is_nil( this->dataReader_.in()) )
     {

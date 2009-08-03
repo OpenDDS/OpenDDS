@@ -245,7 +245,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         dpf->create_participant(MY_DOMAIN,
                                 PARTICIPANT_QOS_DEFAULT,
                                 ::DDS::DomainParticipantListener::_nil(),
-                                ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       if (CORBA::is_nil (dp.in ()))
       {
@@ -302,7 +302,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                                      MY_TYPE1,
                                      topic_qos,
                                      ::DDS::TopicListener::_nil(),
-                                     ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
           if (CORBA::is_nil (topic1.in ()))
             {
@@ -316,7 +316,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                                      MY_TYPE2,
                                      topic_qos,
                                      ::DDS::TopicListener::_nil(),
-                                     ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
           if (CORBA::is_nil (topic2.in ()))
             {
@@ -330,7 +330,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                                      MY_TYPE3,
                                      topic_qos,
                                      ::DDS::TopicListener::_nil(),
-                                     ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
           if (CORBA::is_nil (topic3.in ()))
             {
@@ -379,7 +379,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       ::DDS::Subscriber_var sub =
         dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
                              ::DDS::SubscriberListener::_nil(),
-                             ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (sub.in ()))
       {
         ACE_ERROR_RETURN ((LM_ERROR,
@@ -462,7 +462,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           dr1 = sub->create_datareader(description1.in (),
                                   dr_qos,
                                   drl1.in (),
-                                  ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                  ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
         }
 
       if (topics & TOPIC_T2)
@@ -470,7 +470,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           dr2 = sub->create_datareader(description2.in (),
                                   dr_qos,
                                   drl2.in (),
-                                  ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                  ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
         }
 
       if (topics & TOPIC_T3)
@@ -478,7 +478,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           dr3 = sub->create_datareader(description3.in (),
                                   dr_qos,
                                   drl3.in (),
-                                  ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                  ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
         }
 /*
       // Indicate that the subscriber is ready

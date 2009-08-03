@@ -234,7 +234,7 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
     dpf->create_participant(MY_DOMAIN,
                             PARTICIPANT_QOS_DEFAULT,
                             ::DDS::DomainParticipantListener::_nil(),
-                            ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                            ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   TEST_CHECK (! CORBA::is_nil (participant_.in ()));
   // NOTE: A participant may not contain itself
   TEST_CHECK (!participant_->contains_entity(participant_->get_instance_handle()));
@@ -262,14 +262,14 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
                                        MY_TYPE,
                                        TOPIC_QOS_DEFAULT,
                                        ::DDS::TopicListener::_nil(),
-                                       ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                       ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   TEST_CHECK (! CORBA::is_nil (topic_.in ()));
   TEST_CHECK (participant_->contains_entity(topic_->get_instance_handle()));
 
   publisher_ =
     participant_->create_publisher(PUBLISHER_QOS_DEFAULT,
                                    ::DDS::PublisherListener::_nil(),
-                                   ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                   ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   TEST_CHECK (! CORBA::is_nil (publisher_.in ()));
 
   std::cout << std::hex << "0x" << publisher_->get_instance_handle() << std::endl;
@@ -318,7 +318,7 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
     = publisher_->create_datawriter(topic_.in (),
                                     DATAWRITER_QOS_USE_TOPIC_QOS,
                                     ::DDS::DataWriterListener::_nil(),
-                                    ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   TEST_CHECK (! CORBA::is_nil (datawriter_.in ()));
   TEST_CHECK (participant_->contains_entity(datawriter_->get_instance_handle()));
 
@@ -342,7 +342,7 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
     = publisher_->create_datawriter(topic_.in (),
                                     DATAWRITER_QOS_DEFAULT,
                                     ::DDS::DataWriterListener::_nil(),
-                                    ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   TEST_CHECK (! CORBA::is_nil (datawriter_.in ()));
   TEST_CHECK (participant_->contains_entity(datawriter_->get_instance_handle()));
 
@@ -401,7 +401,7 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
     = publisher_->create_datawriter(topic_.in (),
                                     dw_qos,
                                     ::DDS::DataWriterListener::_nil(),
-                                    ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   TEST_CHECK (! CORBA::is_nil (datawriter_.in ()));
   TEST_CHECK (participant_->contains_entity(datawriter_->get_instance_handle()));
 
@@ -758,7 +758,7 @@ PubDriver::listener_test ()
 
   TEST_CHECK (CORBA::is_nil (dpl_got.in ()));
 
-  participant_->set_listener (dpl.in (), DEFAULT_STATUS_KIND_MASK);
+  participant_->set_listener (dpl.in (), DEFAULT_STATUS_MASK);
 
   dpl_got = participant_->get_listener ();
 

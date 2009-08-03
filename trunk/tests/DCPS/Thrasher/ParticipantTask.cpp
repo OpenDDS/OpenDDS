@@ -44,7 +44,7 @@ ParticipantTask::svc()
       TheParticipantFactory->create_participant(42,
                                                 PARTICIPANT_QOS_DEFAULT,
                                                 DDS::DomainParticipantListener::_nil(),
-                                                ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (CORBA::is_nil(participant.in()))
       ACE_ERROR_RETURN((LM_ERROR,
@@ -55,7 +55,7 @@ ParticipantTask::svc()
     DDS::Publisher_var publisher =
       participant->create_publisher(PUBLISHER_QOS_DEFAULT,
                                     DDS::PublisherListener::_nil(),
-                                    ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
    
     if (CORBA::is_nil(publisher.in()))
       ACE_ERROR_RETURN((LM_ERROR,
@@ -100,7 +100,7 @@ ParticipantTask::svc()
                                 ts->get_type_name(),
                                 TOPIC_QOS_DEFAULT,
                                 DDS::TopicListener::_nil(),
-                                ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (CORBA::is_nil(topic.in()))
       ACE_ERROR_RETURN((LM_ERROR,
@@ -117,7 +117,7 @@ ParticipantTask::svc()
       publisher->create_datawriter(topic.in(),
                                    writer_qos,
                                    DDS::DataWriterListener::_nil(),
-                                   ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                   ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     
     if (CORBA::is_nil(writer.in()))
       ACE_ERROR_RETURN((LM_ERROR,

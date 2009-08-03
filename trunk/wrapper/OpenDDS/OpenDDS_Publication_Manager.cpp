@@ -53,7 +53,7 @@ OpenDDS_Publication_Manager::init (const DDS::PublisherQos & qos)
   pub_ = 
     dm_.participant ()->create_publisher (qos,
                                           DDS::PublisherListener::_nil (),
-                                          OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                          OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
   // check for successful creation
   if (CORBA::is_nil (pub_.in ()))

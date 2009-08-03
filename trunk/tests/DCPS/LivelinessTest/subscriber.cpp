@@ -206,7 +206,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         dpf->create_participant(MY_DOMAIN,
                                 PARTICIPANT_QOS_DEFAULT,
                                 ::DDS::DomainParticipantListener::_nil(),
-                                ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (dp.in ()))
       {
         ACE_ERROR ((LM_ERROR,
@@ -235,7 +235,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           MY_TYPE,
                           topic_qos,
                           ::DDS::TopicListener::_nil(),
-                          ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                          ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (topic.in ()))
       {
         return 1 ;
@@ -256,7 +256,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ::DDS::Subscriber_var sub =
         dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
                              ::DDS::SubscriberListener::_nil(),
-                             ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (sub.in ()))
       {
         ACE_ERROR_RETURN ((LM_ERROR,
@@ -335,7 +335,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       dr = sub->create_datareader(description.in (),
                                   dr_qos,
                                   drl.in (),
-                                  ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                  ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       // Indicate that the subscriber is ready
       FILE* readers_ready = ACE_OS::fopen (sub_ready_filename.c_str (), ACE_LIB_TEXT("w"));

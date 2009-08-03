@@ -25,7 +25,7 @@ Reader::Reader(::DDS::DomainParticipant_ptr dp,
 {
   sub_ = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
                              ::DDS::SubscriberListener::_nil(),
-                             ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (CORBA::is_nil (sub_.in ()))
   {
     ACE_ERROR ((LM_ERROR,
@@ -79,7 +79,7 @@ Reader::Reader(::DDS::DomainParticipant_ptr dp,
                                 dr_qos,
 //                                ::DDS::DataReaderListener::_nil()
                                 drl.in (),
-                                ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
   if (CORBA::is_nil (dr.in ()))
   {

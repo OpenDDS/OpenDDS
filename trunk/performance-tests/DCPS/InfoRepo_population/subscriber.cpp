@@ -191,7 +191,7 @@ Subscriber::run (void)
             dpf_->create_participant (domain_id,
                                       PARTICIPANT_QOS_DEFAULT,
                                       DDS::DomainParticipantListener::_nil(),
-                                      ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
           if (CORBA::is_nil (participant_[count].in ())) {
             cerr << "create_participant failed." << endl;
             return false;
@@ -225,7 +225,7 @@ Subscriber::run (void)
                                                     type_name.in (),
                                                     topic_qos,
                                                     DDS::TopicListener::_nil(),
-                                                    ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
           if (CORBA::is_nil (topic_[count].in ())) {
             cerr << "create_topic failed." << endl;
             return false;
@@ -274,7 +274,7 @@ Subscriber::run (void)
           subs_[count] =
             participant_[count]->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
                                                    DDS::SubscriberListener::_nil(),
-                                                   ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                                   ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
           if (CORBA::is_nil (subs_[count].in ())) {
             cerr << "Failed to create_subscriber." << endl;
             return false;
@@ -325,7 +325,7 @@ Subscriber::run (void)
             = subs_[count]->create_datareader(topic_[count].in (),
                                      dr_qos,
                                      DDS::DataReaderListener::_nil(),
-                                     ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
           if (CORBA::is_nil (dr_[count].in ())) {
             cerr << "create_datareader failed." << endl;
             return false;

@@ -48,7 +48,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       QUOTER_DOMAIN_ID,
       PARTICIPANT_QOS_DEFAULT,
       DDS::DomainParticipantListener::_nil(),
-      ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (CORBA::is_nil (participant.in ())) {
       cerr << "create_participant failed." << endl;
@@ -60,7 +60,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
     DDS::Publisher_var pub =
       participant->create_publisher(PUBLISHER_QOS_DEFAULT,
                                     DDS::PublisherListener::_nil(),
-                                    ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (CORBA::is_nil (pub.in ())) {
       cerr << "create_publisher failed." << endl;
       ACE_OS::exit(1);
@@ -132,7 +132,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
                                  QUOTER_QUOTE_TYPE,
                                  default_topic_qos,
                                  DDS::TopicListener::_nil(),
-                                 ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (CORBA::is_nil (quote_topic.in ())) {
       cerr << "create_topic for " << QUOTER_QUOTE_TOPIC << " failed." << endl;
       ACE_OS::exit(1);
@@ -144,7 +144,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
                                  QUOTER_EXCHANGE_EVENT_TYPE,
                                  default_topic_qos,
                                  DDS::TopicListener::_nil(),
-                                 ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (CORBA::is_nil (exchange_evt_topic.in ())) {
       cerr << "create_topic for " << QUOTER_EXCHANGE_EVENT_TOPIC << " failed." << endl;
       ACE_OS::exit(1);
@@ -160,7 +160,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       pub->create_datawriter(quote_topic.in (),
                              dw_default_qos,
                              DDS::DataWriterListener::_nil(),
-                             ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (CORBA::is_nil (quote_base_dw.in ())) {
       cerr << "create_datawriter for " << QUOTER_QUOTE_TOPIC << " failed." << endl;
       ACE_OS::exit(1);
@@ -177,7 +177,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       pub->create_datawriter(exchange_evt_topic.in (),
                              dw_default_qos,
                              DDS::DataWriterListener::_nil(),
-                             ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (CORBA::is_nil (exchange_evt_base_dw.in ())) {
       cerr << "create_datawriter for " << QUOTER_EXCHANGE_EVENT_TOPIC << " failed." << endl;
       ACE_OS::exit(1);

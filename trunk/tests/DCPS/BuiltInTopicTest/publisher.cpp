@@ -89,7 +89,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
         dpf->create_participant(411,
                                 partQos,
                                 DDS::DomainParticipantListener::_nil(),
-                                ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (participant.in ())) {
         cerr << "publisher: create_participant failed." << endl;
         return 1;
@@ -117,7 +117,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
                                    type_name.in (),
                                    topic_qos,
                                    DDS::TopicListener::_nil(),
-                                   ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                   ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (topic.in ())) {
         cerr << "publisher: create_topic failed." << endl;
         exit(1);
@@ -138,7 +138,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
       DDS::Publisher_var pub =
         participant->create_publisher(pub_qos,
         DDS::PublisherListener::_nil(),
-        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (pub.in ())) {
         cerr << "publisher: create_publisher failed." << endl;
         exit(1);
@@ -193,7 +193,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
         pub->create_datawriter(topic.in (),
                                dw_qos,
                                DDS::DataWriterListener::_nil(),
-                               ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                               ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (dw.in ())) {
         cerr << "publisher: create_datawriter failed." << endl;
         exit(1);

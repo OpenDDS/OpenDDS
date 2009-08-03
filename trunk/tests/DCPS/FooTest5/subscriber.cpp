@@ -232,7 +232,7 @@ create_subscriber (::DDS::DomainParticipant_ptr participant,
     {
       sub = participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
                              ::DDS::SubscriberListener::_nil(),
-                             ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (sub.in ()))
         {
           ACE_ERROR ((LM_ERROR,
@@ -342,7 +342,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         dpf->create_participant(MY_DOMAIN,
                                 PARTICIPANT_QOS_DEFAULT,
                                 ::DDS::DomainParticipantListener::_nil(),
-                                ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (participant.in ()))
         {
           ACE_ERROR ((LM_ERROR,
@@ -398,7 +398,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                     MY_TYPE,
                                     topic_qos,
                                     ::DDS::TopicListener::_nil(),
-                                    ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (topic.in ()))
         {
           ACE_ERROR ((LM_ERROR,
@@ -424,7 +424,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                               MY_TYPE_FOR_UDP,
                                               topic_qos,
                                               ::DDS::TopicListener::_nil(),
-                                              ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                              ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
           if (CORBA::is_nil (topic1.in ()))
             {
               ACE_ERROR ((LM_ERROR,
@@ -546,7 +546,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           drs[i] = the_sub->create_datareader(the_description.in (),
                                               dr_qos,
                                               listener.in (),
-                                              ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                              ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
           if (CORBA::is_nil (drs[i].in ()))
             {

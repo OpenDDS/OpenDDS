@@ -88,7 +88,7 @@ ManagerImpl::initialize()
         this->config_.federationDomain(),
         PARTICIPANT_QOS_DEFAULT,
         ::DDS::DomainParticipantListener::_nil(),
-        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
       );
   if( CORBA::is_nil( this->federationParticipant_.in())) {
     ACE_ERROR((LM_ERROR,
@@ -234,7 +234,7 @@ ManagerImpl::initialize()
     = this->federationParticipant_->create_subscriber(
         SUBSCRIBER_QOS_DEFAULT,
         ::DDS::SubscriberListener::_nil(),
-        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
       );
   if( CORBA::is_nil( subscriber.in())) {
     ACE_ERROR((LM_ERROR,
@@ -295,7 +295,7 @@ ManagerImpl::initialize()
     = this->federationParticipant_->create_publisher(
         PUBLISHER_QOS_DEFAULT,
         ::DDS::PublisherListener::_nil(),
-        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
       );
   if( CORBA::is_nil( publisher.in())) {
     ACE_ERROR((LM_ERROR,
@@ -391,14 +391,14 @@ ManagerImpl::initialize()
             OWNERUPDATETYPENAME,
             TOPIC_QOS_DEFAULT,
             ::DDS::TopicListener::_nil(),
-            ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+            ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
           );
 
   dataWriter = publisher->create_datawriter(
                  topic.in(),
                  writerQos,
                  ::DDS::DataWriterListener::_nil(),
-                 ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
                );
   if( CORBA::is_nil( dataWriter.in())) {
     ACE_ERROR((LM_ERROR,
@@ -442,7 +442,7 @@ ManagerImpl::initialize()
                   description.in(),
                   readerQos,
                   &this->ownerListener_,
-                  ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+                  ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
                 );
   if( CORBA::is_nil( dataReader.in())) {
     ACE_ERROR((LM_ERROR,
@@ -477,13 +477,13 @@ ManagerImpl::initialize()
             TOPICUPDATETYPENAME,
             TOPIC_QOS_DEFAULT,
             ::DDS::TopicListener::_nil(),
-            ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+            ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
           );
   dataWriter = publisher->create_datawriter(
                  topic.in(),
                  writerQos,
                  ::DDS::DataWriterListener::_nil(),
-                 ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
                );
   if( CORBA::is_nil( dataWriter.in())) {
     ACE_ERROR((LM_ERROR,
@@ -528,7 +528,7 @@ ManagerImpl::initialize()
                   description.in(),
                   readerQos,
                   &this->topicListener_,
-                  ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+                  ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
                 );
   if( CORBA::is_nil( dataReader.in())) {
     ACE_ERROR((LM_ERROR,
@@ -563,13 +563,13 @@ ManagerImpl::initialize()
             PARTICIPANTUPDATETYPENAME,
             TOPIC_QOS_DEFAULT,
             ::DDS::TopicListener::_nil(),
-            ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+            ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
           );
   dataWriter = publisher->create_datawriter(
                  topic.in(),
                  writerQos,
                  ::DDS::DataWriterListener::_nil(),
-                 ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
                );
   if( CORBA::is_nil( dataWriter.in())) {
     ACE_ERROR((LM_ERROR,
@@ -614,7 +614,7 @@ ManagerImpl::initialize()
                   description.in(),
                   readerQos,
                   &this->participantListener_,
-                  ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+                  ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
                 );
   if( CORBA::is_nil( dataReader.in())) {
     ACE_ERROR((LM_ERROR,
@@ -649,13 +649,13 @@ ManagerImpl::initialize()
             PUBLICATIONUPDATETYPENAME,
             TOPIC_QOS_DEFAULT,
             ::DDS::TopicListener::_nil(),
-            ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+            ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
           );
   dataWriter = publisher->create_datawriter(
                  topic.in(),
                  writerQos,
                  ::DDS::DataWriterListener::_nil(),
-                 ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
                );
   if( CORBA::is_nil( dataWriter.in())) {
     ACE_ERROR((LM_ERROR,
@@ -700,7 +700,7 @@ ManagerImpl::initialize()
                   description.in(),
                   readerQos,
                   &this->publicationListener_,
-                  ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+                  ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
                 );
   if( CORBA::is_nil( dataReader.in())) {
     ACE_ERROR((LM_ERROR,
@@ -735,13 +735,13 @@ ManagerImpl::initialize()
             SUBSCRIPTIONUPDATETYPENAME,
             TOPIC_QOS_DEFAULT,
             ::DDS::TopicListener::_nil(),
-            ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+            ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
           );
   dataWriter = publisher->create_datawriter(
                  topic.in(),
                  writerQos,
                  ::DDS::DataWriterListener::_nil(),
-                 ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
                );
   if( CORBA::is_nil( dataWriter.in())) {
     ACE_ERROR((LM_ERROR,
@@ -786,7 +786,7 @@ ManagerImpl::initialize()
                   description.in(),
                   readerQos,
                   &this->subscriptionListener_,
-                  ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+                  ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
                 );
   if( CORBA::is_nil( dataReader.in())) {
     ACE_ERROR((LM_ERROR,

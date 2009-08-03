@@ -86,7 +86,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         dpFactory->create_participant(TEST_DOMAIN_NUMBER,
                                       PARTICIPANT_QOS_DEFAULT,
                                       dpListener.in(),
-                                      ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if ( CORBA::is_nil (participant.in ()) )
         {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -162,7 +162,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                                              TEST_TYPE_NAME,
                                                              TOPIC_QOS_DEFAULT,
                                                              ::DDS::TopicListener::_nil(),
-                                                             ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if ( CORBA::is_nil (testTopic.in ()) )
         {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -234,7 +234,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                                          TEST_TYPE_NAME,
                                                          TOPIC_QOS_DEFAULT,
                                                          ::DDS::TopicListener::_nil(),
-                                                         ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                                         ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if ( CORBA::is_nil (topic.in ()) )
         {
           ACE_ERROR_RETURN((LM_ERROR,
