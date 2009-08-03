@@ -25,7 +25,7 @@ Writer::Writer(::DDS::DomainParticipant_ptr dp,
   // Create the publisher
   pub_ = dp->create_publisher(PUBLISHER_QOS_DEFAULT,
                               ::DDS::PublisherListener::_nil(),
-                              ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                              ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (CORBA::is_nil (pub_.in ()))
   {
     ACE_ERROR ((LM_ERROR,
@@ -68,7 +68,7 @@ Writer::Writer(::DDS::DomainParticipant_ptr dp,
   dw_ = pub_->create_datawriter(topic,
                                 dw_qos,
                                 ::DDS::DataWriterListener::_nil(),
-                                ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
   if (CORBA::is_nil (dw_.in ()))
   {

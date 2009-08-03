@@ -60,7 +60,7 @@ OpenDDS_Subscription_Manager::init (const DDS::SubscriberQos & qos)
   sub_ = 
     dm_.participant ()->create_subscriber (qos,
                                            DDS::SubscriberListener::_nil (),
-                                           OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                           OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   
   // check for successful creation
   if (CORBA::is_nil (sub_.in ()))

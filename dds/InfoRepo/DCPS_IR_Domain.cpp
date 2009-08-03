@@ -535,7 +535,7 @@ int DCPS_IR_Domain::init_built_in_topics( bool federated)
         bitParticipantFactory_->create_participant(id_,
                                                    PARTICIPANT_QOS_DEFAULT,
                                                    bitParticipantListener_.in(),
-                                                   ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                                   ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (bitParticipant_.in ()))
         {
           ACE_ERROR_RETURN ((LM_ERROR,
@@ -605,7 +605,7 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
                                        ::OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE,
                                        topic_qos,
                                        ::DDS::TopicListener::_nil(),
-                                       ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                       ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (bitParticipantTopic_.in ()))
         {
           ACE_ERROR_RETURN ((LM_ERROR,
@@ -634,7 +634,7 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
                                        ::OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE,
                                        topic_qos,
                                        ::DDS::TopicListener::_nil(),
-                                       ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                       ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (bitTopicTopic_.in ()))
         {
           ACE_ERROR_RETURN ((LM_ERROR,
@@ -663,7 +663,7 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
                                        ::OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE,
                                        topic_qos,
                                        ::DDS::TopicListener::_nil(),
-                                       ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                       ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (bitSubscriptionTopic_.in ()))
         {
           ACE_ERROR_RETURN ((LM_ERROR,
@@ -692,7 +692,7 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
                                        ::OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC_TYPE,
                                        topic_qos,
                                        ::DDS::TopicListener::_nil(),
-                                       ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                       ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (bitPublicationTopic_.in ()))
         {
           ACE_ERROR_RETURN ((LM_ERROR,
@@ -747,7 +747,7 @@ int DCPS_IR_Domain::init_built_in_topics_datawriters( bool federated)
         bitPublisher_->create_datawriter(bitParticipantTopic_.in (),
                                          participantWriterQos,
                                          ::DDS::DataWriterListener::_nil(),
-                                         ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                         ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       bitParticipantDataWriter_ =
         ::DDS::ParticipantBuiltinTopicDataDataWriter::_narrow(datawriter.in ());
@@ -769,7 +769,7 @@ int DCPS_IR_Domain::init_built_in_topics_datawriters( bool federated)
         bitPublisher_->create_datawriter(bitTopicTopic_.in (),
                                           dw_qos,
                                           ::DDS::DataWriterListener::_nil(),
-                                          ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                          ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       bitTopicDataWriter_ =
         ::DDS::TopicBuiltinTopicDataDataWriter::_narrow(datawriter.in ());
@@ -787,7 +787,7 @@ int DCPS_IR_Domain::init_built_in_topics_datawriters( bool federated)
         bitPublisher_->create_datawriter(bitSubscriptionTopic_.in (),
                                           dw_qos,
                                           ::DDS::DataWriterListener::_nil(),
-                                          ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                          ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       bitSubscriptionDataWriter_ =
         ::DDS::SubscriptionBuiltinTopicDataDataWriter::_narrow(
@@ -806,7 +806,7 @@ int DCPS_IR_Domain::init_built_in_topics_datawriters( bool federated)
         bitPublisher_->create_datawriter(bitPublicationTopic_.in (),
                                          dw_qos,
                                          ::DDS::DataWriterListener::_nil(),
-                                         ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                         ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       bitPublicationDataWriter_ =
         ::DDS::PublicationBuiltinTopicDataDataWriter::_narrow(datawriter.in ());
@@ -844,7 +844,7 @@ int DCPS_IR_Domain::init_built_in_topics_transport ()
       bitPublisher_ =
         bitParticipant_->create_publisher(PUBLISHER_QOS_DEFAULT,
                                           ::DDS::PublisherListener::_nil(),
-                                          ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                          ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (bitPublisher_.in ()))
         {
           ACE_ERROR_RETURN ((LM_ERROR,

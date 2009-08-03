@@ -201,7 +201,7 @@ Publication::enable(
   ::DDS::Publisher_var publisher = participant->create_publisher(
                                      this->profile_->publisherQos,
                                      ::DDS::PublisherListener::_nil(),
-                                     ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+                                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
                                    );
   if( CORBA::is_nil( publisher.in())) {
     ACE_ERROR((LM_ERROR,
@@ -272,7 +272,7 @@ Publication::enable(
         topic,
         writerQos,
         ::DDS::DataWriterListener::_nil(),
-        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
       );
   if( CORBA::is_nil( writer.in())) {
     ACE_ERROR((LM_ERROR,

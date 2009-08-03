@@ -45,7 +45,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       QUOTER_DOMAIN_ID,
       PARTICIPANT_QOS_DEFAULT,
       DDS::DomainParticipantListener::_nil(),
-      ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (CORBA::is_nil (participant.in ())) {
       cerr << "create_participant failed." << endl;
       ACE_OS::exit(1);
@@ -56,7 +56,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
     DDS::Subscriber_var sub =
       participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
                                      DDS::SubscriberListener::_nil(),
-                                     ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (CORBA::is_nil (sub.in ())) {
       cerr << "create_subscriber failed." << endl;
       ACE_OS::exit(1);
@@ -134,7 +134,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
                                  QUOTER_QUOTE_TYPE,
                                  default_topic_qos,
                                  DDS::TopicListener::_nil(),
-                                 ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (CORBA::is_nil (quote_topic.in ())) {
       cerr << "create_topic for " << QUOTER_QUOTE_TOPIC << " failed." << endl;
       ACE_OS::exit(1);
@@ -147,7 +147,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
                                  QUOTER_EXCHANGE_EVENT_TYPE,
                                  default_topic_qos,
                                  DDS::TopicListener::_nil(),
-                                 ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (CORBA::is_nil (exchange_evt_topic.in ())) {
       cerr << "create_topic for " << QUOTER_EXCHANGE_EVENT_TOPIC << " failed." << endl;
       ACE_OS::exit(1);
@@ -182,13 +182,13 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       sub->create_datareader(quote_topic.in (),
                              dr_default_qos,
                              quote_listener.in (),
-                             ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     DDS::DataReader_var exchange_evt_dr = 
       sub->create_datareader(exchange_evt_topic.in (),
                              dr_default_qos,
                              exchange_evt_listener.in (),
-                             ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     // Wait for events from the Publisher; shut down when "close" received
     cout << "Subscriber: waiting for events" << endl;

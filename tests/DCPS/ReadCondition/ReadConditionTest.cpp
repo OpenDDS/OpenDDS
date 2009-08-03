@@ -32,30 +32,30 @@ int run_test(int argc, ACE_TCHAR *argv[])
   WaitSet_var ws = new WaitSet;
   DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
   DomainParticipant_var dp = dpf->create_participant(23,
-    PARTICIPANT_QOS_DEFAULT, 0, ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+    PARTICIPANT_QOS_DEFAULT, 0, ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   MessageTypeSupport_var ts = new MessageTypeSupportImpl;
   // leave type name not speficied would register it with _interface_repository_id
   ts->register_type(dp, "");
   Topic_var topic = dp->create_topic("MyTopic", ts->get_type_name(),
-    TOPIC_QOS_DEFAULT, 0, ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+    TOPIC_QOS_DEFAULT, 0, ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
   Publisher_var pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
-                                           ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                           ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   TransportImpl_rch pub_tport =
     TheTransportFactory->create_transport_impl(1, AUTO_CONFIG);
   PublisherImpl* pub_impl = dynamic_cast<PublisherImpl*> (pub.in());
   pub_impl->attach_transport(pub_tport.in());
   DataWriter_var dw = pub->create_datawriter(topic, DATAWRITER_QOS_DEFAULT, 0,
-                                             ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
   Subscriber_var sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
-                                             ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   TransportImpl_rch sub_tport =
     TheTransportFactory->create_transport_impl(2, AUTO_CONFIG);
   SubscriberImpl* sub_impl = dynamic_cast<SubscriberImpl*> (sub.in());
   sub_impl->attach_transport(sub_tport.in());
   DataReader_var dr = sub->create_datareader(topic, DATAREADER_QOS_DEFAULT, 0,
-                                             ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
   StatusCondition_var dw_sc = dw->get_statuscondition();
   dw_sc->set_enabled_statuses(PUBLICATION_MATCHED_STATUS);

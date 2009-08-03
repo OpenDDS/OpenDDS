@@ -43,26 +43,26 @@ int run_test(int argc, ACE_TCHAR *argv[])
   WaitSet_var ws = new WaitSet;
   DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
   DomainParticipant_var dp = dpf->create_participant(23,
-    PARTICIPANT_QOS_DEFAULT, 0, ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+    PARTICIPANT_QOS_DEFAULT, 0, ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   Messenger::MessageTypeSupport_var ts = new Messenger::MessageTypeSupportImpl;
   ts->register_type(dp, ts->get_type_name());
   Topic_var topic = dp->create_topic("MyTopic", ts->get_type_name(),
-    TOPIC_QOS_DEFAULT, 0, ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+    TOPIC_QOS_DEFAULT, 0, ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
   Publisher_var pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
-                                           ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                           ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   TransportImpl_rch pub_tport =
     TheTransportFactory->create_transport_impl(1, AUTO_CONFIG);
   PublisherImpl* pub_impl = dynamic_cast<PublisherImpl*> (pub.in());
   pub_impl->attach_transport(pub_tport.in());
   DataWriter_var dw = pub->create_datawriter(topic, DATAWRITER_QOS_DEFAULT, 0,
-                                             ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   StatusCondition_var cond = dw->get_statuscondition();
   cond->set_enabled_statuses(OFFERED_INCOMPATIBLE_QOS_STATUS);
   ws->attach_condition(cond);
 
   Subscriber_var sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
-                                             ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   TransportImpl_rch sub_tport =
     TheTransportFactory->create_transport_impl(2, AUTO_CONFIG);
   SubscriberImpl* sub_impl = dynamic_cast<SubscriberImpl*> (sub.in());
@@ -73,7 +73,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
   Waiter w(ws);
   w.activate();
   DataReader_var dr = sub->create_datareader(topic, dr_qos, 0,
-                                             ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   w.wait();
   bool passed = (w.result() == RETCODE_OK);
   ws->detach_condition(cond);

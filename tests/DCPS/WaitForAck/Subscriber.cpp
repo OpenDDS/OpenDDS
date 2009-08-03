@@ -49,7 +49,7 @@ Subscriber::Subscriber( const Options& options)
         this->options_.domain(),
         PARTICIPANT_QOS_DEFAULT,
         DDS::DomainParticipantListener::_nil(),
-        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
       );
   if( CORBA::is_nil( this->participant_.in())) {
     ACE_ERROR((LM_ERROR,
@@ -91,7 +91,7 @@ Subscriber::Subscriber( const Options& options)
                            testData->get_type_name(),
                            TOPIC_QOS_DEFAULT,
                            ::DDS::TopicListener::_nil(),
-                           ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+                           ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
                          );
   if( CORBA::is_nil( topic.in())) {
     ACE_ERROR((LM_ERROR,
@@ -114,7 +114,7 @@ Subscriber::Subscriber( const Options& options)
     = this->participant_->create_subscriber(
         SUBSCRIBER_QOS_DEFAULT,
         ::DDS::SubscriberListener::_nil(),
-        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
       );
   if( CORBA::is_nil( subscriber.in())) {
     ACE_ERROR((LM_ERROR,
@@ -178,7 +178,7 @@ Subscriber::Subscriber( const Options& options)
           topic.in(),
           readerQos,
           DDS::DataReaderListener::_nil(),
-          ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+          ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
         );
     if( CORBA::is_nil( reader.in())) {
       ACE_ERROR((LM_ERROR,

@@ -51,7 +51,7 @@ Publisher::Publisher( const Options& options)
         this->options_.domain(),
         PARTICIPANT_QOS_DEFAULT,
         DDS::DomainParticipantListener::_nil(),
-        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
       );
   if( CORBA::is_nil( this->participant_.in())) {
     ACE_ERROR((LM_ERROR,
@@ -119,7 +119,7 @@ Publisher::Publisher( const Options& options)
                    testData->get_type_name(),
                    TOPIC_QOS_DEFAULT,
                    ::DDS::TopicListener::_nil(),
-                   ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+                   ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
                  );
   if( CORBA::is_nil( this->topic_.in())) {
     ACE_ERROR((LM_ERROR,
@@ -141,7 +141,7 @@ Publisher::Publisher( const Options& options)
   this->publisher_ = this->participant_->create_publisher(
                        PUBLISHER_QOS_DEFAULT,
                        ::DDS::PublisherListener::_nil(),
-                       ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+                       ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
                      );
   if( CORBA::is_nil( this->publisher_.in())) {
     ACE_ERROR((LM_ERROR,
@@ -217,7 +217,7 @@ Publisher::Publisher( const Options& options)
                     this->topic_.in(),
                     writerQos,
                     DDS::DataWriterListener::_nil(),
-                    ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
                   );
   if( CORBA::is_nil( this->writer_[0].in())) {
     ACE_ERROR((LM_ERROR,
@@ -253,7 +253,7 @@ Publisher::Publisher( const Options& options)
                     this->topic_.in(),
                     writerQos,
                     DDS::DataWriterListener::_nil(),
-                    ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
                   );
   if( CORBA::is_nil( this->writer_[1].in())) {
     ACE_ERROR((LM_ERROR,

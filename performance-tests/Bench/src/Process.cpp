@@ -68,7 +68,7 @@ Process::Process( const Options& options)
           current->second->domainId,
           current->second->qos,
           DDS::DomainParticipantListener::_nil(),
-          ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+          ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
         );
     if( CORBA::is_nil( this->participants_[ current->first].in())) {
       ACE_ERROR((LM_ERROR,
@@ -142,7 +142,7 @@ Process::Process( const Options& options)
           this->dataTypeName_.c_str(),
           current->second->qos,
           DDS::TopicListener::_nil(),
-          ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+          ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
         );
     if( CORBA::is_nil( this->topics_[ current->first].in())) {
       ACE_ERROR((LM_ERROR,

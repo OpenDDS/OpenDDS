@@ -52,7 +52,7 @@ DataWriterImpl::DataWriterImpl (void)
     topic_id_ ( GUID_UNKNOWN ),
     topic_servant_ (0),
     qos_ (TheServiceParticipant->initial_DataWriterQos ()),
-    listener_mask_(DEFAULT_STATUS_KIND_MASK),
+    listener_mask_(DEFAULT_STATUS_MASK),
     fast_listener_ (0),
     participant_servant_ (0),
     domain_id_ (0),

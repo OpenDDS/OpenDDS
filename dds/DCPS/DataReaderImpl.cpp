@@ -53,7 +53,7 @@ DataReaderImpl::DataReaderImpl (void) :
   next_handle_(0),
   topic_servant_ (0),
   topic_desc_(0),
-  listener_mask_(DEFAULT_STATUS_KIND_MASK),
+  listener_mask_(DEFAULT_STATUS_MASK),
   fast_listener_ (0),
   participant_servant_ (0),
   domain_id_ (0),

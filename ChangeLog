@@ -1,9 +1,143 @@
+Mon Aug  3 19:18:22 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+        
+        * dds/DCPS/Definitions.h:
+
+	  Dropped OpenDDS::DCPS::DEFAULT_STATE_KIND_MASK in favor of
+	  new IDL constant (OpenDDS::DCPS::DEFAULT_STATE_MASK).
+
+        * DevGuideExamples/DCPS/Messenger/publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/stack_subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger/subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/subscriber.cpp:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * examples/DCPS/DistributedContent/AbstractionLayer.cpp:
+        * examples/DCPS/IntroductionToOpenDDS/publisher.cpp:
+        * examples/DCPS/IntroductionToOpenDDS/subscriber.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/publisher.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/subscriber.cpp:
+        * examples/DCPS/Messenger_Imr/publisher.cpp:
+        * examples/DCPS/Messenger_Imr/subscriber.cpp:
+        * performance-tests/Bench/src/Process.cpp:
+        * performance-tests/Bench/src/Publication.cpp:
+        * performance-tests/Bench/src/Subscription.cpp:
+        * performance-tests/DCPS/InfoRepo_population/publisher.cpp:
+        * performance-tests/DCPS/InfoRepo_population/subscriber.cpp:
+        * performance-tests/DCPS/McastListenerTest/publisher.cpp:
+        * performance-tests/DCPS/McastListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/Priority/Publisher.cpp:
+        * performance-tests/DCPS/Priority/Subscriber.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/publisher.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/subscriber.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/publisher.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/subscriber.cpp:
+        * performance-tests/DCPS/TransportLatency/publisher.cpp:
+        * performance-tests/DCPS/TransportLatency/subscriber.cpp:
+        * performance-tests/DCPS/UDPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/UDPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/publisher.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/subscriber.cpp:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+        * tests/DCPS/CompatibilityTest/publisher.cpp:
+        * tests/DCPS/CompatibilityTest/subscriber.cpp:
+        * tests/DCPS/CorbaSeq/publisher.cpp:
+        * tests/DCPS/CorbaSeq/subscriber.cpp:
+        * tests/DCPS/DPFactoryQos/publisher.cpp:
+        * tests/DCPS/DPFactoryQos/subscriber.cpp:
+        * tests/DCPS/DcpsIntegration/infrastructure.cpp:
+        * tests/DCPS/DcpsIntegration/topic.cpp:
+        * tests/DCPS/Deadline/publisher.cpp:
+        * tests/DCPS/Deadline/subscriber.cpp:
+        * tests/DCPS/Dispose/main.cpp:
+        * tests/DCPS/Federation/Publisher.cpp:
+        * tests/DCPS/Federation/Subscriber.cpp:
+        * tests/DCPS/FooTest2/main.cpp:
+        * tests/DCPS/FooTest3/main.cpp:
+        * tests/DCPS/FooTest3NoKey/main.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest4/main.cpp:
+        * tests/DCPS/FooTest4_0/Reader.cpp:
+        * tests/DCPS/FooTest4_0/Writer.cpp:
+        * tests/DCPS/FooTest4_0/main.cpp:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/LatencyBudget/publisher.cpp:
+        * tests/DCPS/LatencyBudget/subscriber.cpp:
+        * tests/DCPS/Lifespan/publisher.cpp:
+        * tests/DCPS/Lifespan/subscriber.cpp:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/LivelinessTimeout/publisher.cpp:
+        * tests/DCPS/LivelinessTimeout/subscriber.cpp:
+        * tests/DCPS/MultiDPTest/publisher.cpp:
+        * tests/DCPS/MultiDPTest/subscriber.cpp:
+        * tests/DCPS/MultiRepoTest/TestMonitor.cpp:
+        * tests/DCPS/MultiRepoTest/TestSystem.cpp:
+        * tests/DCPS/MultiTopicTest/publisher.cpp:
+        * tests/DCPS/MultiTopicTest/subscriber.cpp:
+        * tests/DCPS/NotifyTest/publisher.cpp:
+        * tests/DCPS/NotifyTest/subscriber.cpp:
+        * tests/DCPS/Partition/Publisher.cpp:
+        * tests/DCPS/Partition/Subscriber.cpp:
+        * tests/DCPS/PersistentDurability/publisher.cpp:
+        * tests/DCPS/PersistentDurability/subscriber.cpp:
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Priority/Subscriber.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/publisher.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/subscriber.cpp:
+        * tests/DCPS/QueryCondition/QueryConditionTest.cpp:
+        * tests/DCPS/ReadCondition/ReadConditionTest.cpp:
+        * tests/DCPS/Reconnect/publisher.cpp:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+        * tests/DCPS/SetQosDeadline/publisher.cpp:
+        * tests/DCPS/SetQosDeadline/subscriber.cpp:
+        * tests/DCPS/SetQosPartition/publisher.cpp:
+        * tests/DCPS/SetQosPartition/subscriber.cpp:
+        * tests/DCPS/SimpleFooTest/main.cpp:
+        * tests/DCPS/StatusCondition/StatusConditionTest.cpp:
+        * tests/DCPS/StringKey/publisher.cpp:
+        * tests/DCPS/StringKey/subscriber.cpp:
+        * tests/DCPS/Thrasher/ParticipantTask.cpp:
+        * tests/DCPS/Thrasher/Subscriber.cpp:
+        * tests/DCPS/TransientDurability/publisher.cpp:
+        * tests/DCPS/TransientDurability/subscriber.cpp:
+        * tests/DCPS/TransientLocalTest/publisher.cpp:
+        * tests/DCPS/TransientLocalTest/subscriber.cpp:
+        * tests/DCPS/ViewState/main.cpp:
+        * tests/DCPS/WaitForAck/Publisher.cpp:
+        * tests/DCPS/WaitForAck/Subscriber.cpp:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+        * tests/DCPS/sub_init_loop/publisher.cpp:
+        * tests/DCPS/sub_init_loop/subscriber.cpp:
+        * tests/DCPS/unit/Main.cpp:
+        * wrapper/OpenDDS/OpenDDS_Domain_Manager.cpp:
+        * wrapper/OpenDDS/OpenDDS_Publication_Manager.cpp:
+        * wrapper/OpenDDS/OpenDDS_Subscription_Manager.cpp:
+        * wrapper/Topic_Manager_T.cpp:
+
+	  Refactored C++ code to make use of new DEFAULT_STATE_MASK
+	  constant.
+
 Fri Jul 31 22:17:13 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DdsDcpsInfrastructure.idl:
 
-	  Promoted OpenDDS::DCPS::DEFAULT_STATE_MASK to IDL from
-	  Definitions.h (cxx refactoring forthcoming).
+          Promoted OpenDDS::DCPS::DEFAULT_STATE_MASK to IDL from
+          Definitions.h (cxx refactoring forthcoming).
 
         * java/jms/src/org/opendds/jms/DataWriterPair.java:
         * java/jms/src/org/opendds/jms/MessageConsumerImpl.java:
@@ -19,7 +153,7 @@ Fri Jul 31 22:17:13 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * java/tests/multirepo/MultiRepoBase.java:
         * java/tests/multirepo/MultiRepoWorker.java:
 
-	  Updated Java bindings to support DEFAULT_STATE_MASK.
+          Updated Java bindings to support DEFAULT_STATE_MASK.
 
 Fri Jul 31 21:46:28 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 

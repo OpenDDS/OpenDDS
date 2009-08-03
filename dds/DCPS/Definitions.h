@@ -30,8 +30,6 @@ namespace OpenDDS
     typedef ACE_UINT16 CoherencyGroup ;
     typedef RepoId PublicationId;
 
-    const ::CORBA::ULong DEFAULT_STATUS_KIND_MASK = 0xFFFF;
-
     /// Lolipop sequencing (never wrap to negative).
     /// This helps distinguish new and old sequence numbers. (?)
     struct OpenDDS_Dcps_Export SequenceNumber 

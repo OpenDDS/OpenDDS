@@ -59,7 +59,7 @@ Publisher::Publisher( const Options& options)
         this->options_.domain(),
         PARTICIPANT_QOS_DEFAULT,
         DDS::DomainParticipantListener::_nil(),
-        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
       );
   if( CORBA::is_nil( this->participant_.in())) {
     ACE_ERROR((LM_ERROR,
@@ -101,7 +101,7 @@ Publisher::Publisher( const Options& options)
                            testData->get_type_name(),
                            TOPIC_QOS_DEFAULT,
                            ::DDS::TopicListener::_nil(),
-                           ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+                           ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
                          );
   if( CORBA::is_nil( topic.in())) {
     ACE_ERROR((LM_ERROR,
@@ -123,7 +123,7 @@ Publisher::Publisher( const Options& options)
   DDS::Publisher_var publisher = this->participant_->create_publisher(
                                    PUBLISHER_QOS_DEFAULT,
                                    ::DDS::PublisherListener::_nil(),
-                                   ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+                                   ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
                                  );
   if( CORBA::is_nil( publisher.in())) {
     ACE_ERROR((LM_ERROR,
@@ -200,7 +200,7 @@ Publisher::Publisher( const Options& options)
           topic.in(),
           writerQos,
           DDS::DataWriterListener::_nil(),
-          ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
+          ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
         );
     if( CORBA::is_nil( writer.in())) {
       ACE_ERROR((LM_ERROR,

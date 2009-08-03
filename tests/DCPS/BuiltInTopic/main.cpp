@@ -93,7 +93,7 @@ int init (int argc, ACE_TCHAR *argv[])
         = participant_factory->create_participant(TEST_DOMAIN,
                                                   PARTICIPANT_QOS_DEFAULT,
                                                   ::DDS::DomainParticipantListener::_nil (),
-                                                  ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                                  ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       
       //SHH create a separate particpant for the subscriber and publisher
 
@@ -118,7 +118,7 @@ int init (int argc, ACE_TCHAR *argv[])
                                          TEST_TOPIC_TYPE,
                                          TOPIC_QOS_DEFAULT,
                                          ::DDS::TopicListener::_nil (),
-                                         ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                         ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       topic_servant
         = dynamic_cast<OpenDDS::DCPS::TopicImpl*> (topic.in ());
@@ -126,7 +126,7 @@ int init (int argc, ACE_TCHAR *argv[])
       subscriber
         = participant->create_subscriber (SUBSCRIBER_QOS_DEFAULT,
                                          ::DDS::SubscriberListener::_nil (),
-                                         ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                         ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       subscriber_servant
         = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(subscriber.in ());
@@ -146,7 +146,7 @@ int init (int argc, ACE_TCHAR *argv[])
       publisher
         = participant->create_publisher (PUBLISHER_QOS_DEFAULT,
                                          ::DDS::PublisherListener::_nil (),
-                                         ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                         ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       publisher_servant
         = dynamic_cast<OpenDDS::DCPS::PublisherImpl*>(publisher.in ());
@@ -170,7 +170,7 @@ int init (int argc, ACE_TCHAR *argv[])
         = subscriber->create_datareader (topicdescription.in (),
                                          DATAREADER_QOS_DEFAULT,
                                          ::DDS::DataReaderListener::_nil (),
-                                         ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                         ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       datareader_servant
         = dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(datareader.in ());
@@ -179,7 +179,7 @@ int init (int argc, ACE_TCHAR *argv[])
         = publisher->create_datawriter (topic.in (),
                                         DATAWRITER_QOS_DEFAULT,
                                         ::DDS::DataWriterListener::_nil (),
-                                        ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       datawriter_servant
         = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(datawriter.in ());

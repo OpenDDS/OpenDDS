@@ -175,7 +175,7 @@ Publisher::run (void)
             dpf_->create_participant (domain_id,
                                       PARTICIPANT_QOS_DEFAULT,
                                       DDS::DomainParticipantListener::_nil(),
-                                      ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
           if (CORBA::is_nil (participant_[count].in ())) {
             cerr << "create_participant failed." << endl;
             return false;
@@ -207,7 +207,7 @@ Publisher::run (void)
                                                                     type_name.in (),
                                                                     topic_qos,
                                                                     DDS::TopicListener::_nil(),
-                                                                    ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                                                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
           if (CORBA::is_nil (topic_[count].in ())) {
             cerr << "create_topic failed." << endl;
             return false;
@@ -256,7 +256,7 @@ Publisher::run (void)
           pub_[count] =
             participant_[count]->create_publisher(PUBLISHER_QOS_DEFAULT,
                                                   DDS::PublisherListener::_nil(),
-                                                  ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                                  ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
           if (CORBA::is_nil (pub_[count].in ())) {
             cerr << "create_publisher failed." << endl;
@@ -308,7 +308,7 @@ Publisher::run (void)
             pub_[count]->create_datawriter(topic_[count].in (),
                                    dw_qos,
                                    DDS::DataWriterListener::_nil(),
-                                   ::OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK);
+                                   ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
           if (CORBA::is_nil (dw_[count].in ())) {
             cerr << "create_datawriter failed." << endl;
             return false;
