@@ -257,14 +257,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       Messenger::MessageDataReader_var message_dr1 =
         Messenger::MessageDataReader::_narrow(dr1.in());
 
-      Messenger::MessageDataReaderImpl* dr1_svt = 
-        dynamic_cast<Messenger::MessageDataReaderImpl*>(message_dr1.in());
-
       Messenger::MessageDataReader_var message_dr2 =
         Messenger::MessageDataReader::_narrow(dr2.in());
-
-      Messenger::MessageDataReaderImpl* dr2_svt = 
-        dynamic_cast<Messenger::MessageDataReaderImpl*>(message_dr2.in());
 
       int max_attempts = 10;
       int attempts = 0;

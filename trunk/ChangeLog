@@ -1,3 +1,9 @@
+Tue Aug  4 17:10:00 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/Deadline/subscriber.cpp:
+
+          Fixed unused variable warnings.
+          
 Tue Aug  4 02:46:26 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
