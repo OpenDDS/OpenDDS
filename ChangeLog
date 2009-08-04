@@ -1,3 +1,10 @@
+Tue Aug  4 18:02:22 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/DPFactoryQos/DataReaderListener.cpp:
+        * tests/DCPS/DPFactoryQos/Writer.cpp:
+        
+          Added DataWriter and DataReader lookup_instance() test cases.
+
 Tue Aug  4 17:16:55 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * DDS_release_notes.txt:
