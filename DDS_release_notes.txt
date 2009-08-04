@@ -13,6 +13,10 @@ New to this version are the following changes:
     * unregister()                => unregister_instance()
     * unregister_w_timestamp()    => unregister_instance_w_timestamp()
 
+- Fixed an issue in QueryCondition where applying filters on non-valid
+  data samples caused a SEGV; these samples are now implicitly filtered
+  out.
+
 =========================================================================
 
 Version 1.3 of OpenDDS.

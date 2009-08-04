@@ -14,7 +14,6 @@ import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 import javax.jms.Session;
 
-import DDS.ALIVE_INSTANCE_STATE;
 import DDS.ANY_INSTANCE_STATE;
 import DDS.ANY_SAMPLE_STATE;
 import DDS.ANY_VIEW_STATE;
@@ -25,8 +24,6 @@ import DDS.DataReader;
 import DDS.DataReaderQosHolder;
 import DDS.Duration_t;
 import DDS.GuardCondition;
-import DDS.NEW_VIEW_STATE;
-import DDS.NOT_NEW_VIEW_STATE;
 import DDS.NOT_READ_SAMPLE_STATE;
 import DDS.READ_SAMPLE_STATE;
 import DDS.RETCODE_OK;
@@ -118,7 +115,7 @@ public class MessageConsumerImpl implements MessageConsumer {
 
         dataReaderQosPolicy.setQos(holder.value);
 
-        DataReader reader = subscriber.create_datareader(ddsTopic, holder.value, null, DEFAULT_STATUS_MASK.value);
+        DataReader reader = subscriber.create_datareader(ddsTopic, holder.value, null, 0);
         logger.debug("Created %s -> %s", reader, dataReaderQosPolicy);
 
         return MessagePayloadDataReaderHelper.narrow(reader);
@@ -201,7 +198,7 @@ public class MessageConsumerImpl implements MessageConsumer {
 
     private Message doReceive(Duration_t duration) throws JMSException {
         ReadCondition readCondition = messagePayloadDataReader.create_querycondition(NOT_READ_SAMPLE_STATE.value,
-            NEW_VIEW_STATE.value, ALIVE_INSTANCE_STATE.value, "ORDER BY theHeader.TwentyMinusJMSPriority", new String[]{});
+            ANY_VIEW_STATE.value, ANY_INSTANCE_STATE.value, "ORDER BY theHeader.TwentyMinusJMSPriority", new String[]{});
         int rc = waitSet.attach_condition(readCondition);
         if (rc != RETCODE_OK.value) {
             throw new JMSException("Cannot attach readCondition to OpenDDS WaitSet.");
@@ -296,7 +293,7 @@ public class MessageConsumerImpl implements MessageConsumer {
             final int handle = pair.getInstanceHandle();
             MessagePayloadSeqHolder payloads = new MessagePayloadSeqHolder(new MessagePayload[0]);
             SampleInfoSeqHolder infos = new SampleInfoSeqHolder(new SampleInfo[0]);
-            int rc = reader.read_instance(payloads, infos, 1, handle, READ_SAMPLE_STATE.value, NOT_NEW_VIEW_STATE.value, ALIVE_INSTANCE_STATE.value);
+            int rc = reader.read_instance(payloads, infos, 1, handle, READ_SAMPLE_STATE.value, ANY_VIEW_STATE.value, ANY_INSTANCE_STATE.value);
             if (rc != RETCODE_OK.value) continue;
 
             MessagePayload messagePayload = payloads.value[0];
@@ -315,7 +312,7 @@ public class MessageConsumerImpl implements MessageConsumer {
             final int handle = pair.getInstanceHandle();
             MessagePayloadSeqHolder payloads = new MessagePayloadSeqHolder(new MessagePayload[0]);
             SampleInfoSeqHolder infos = new SampleInfoSeqHolder(new SampleInfo[0]);
-            int rc = reader.read_instance(payloads, infos, 1, handle, READ_SAMPLE_STATE.value, NOT_NEW_VIEW_STATE.value, ALIVE_INSTANCE_STATE.value);
+            int rc = reader.read_instance(payloads, infos, 1, handle, READ_SAMPLE_STATE.value, ANY_VIEW_STATE.value, ANY_INSTANCE_STATE.value);
             if (rc != RETCODE_OK.value) continue;
             MessagePayload messagePayload = payloads.value[0];
             SampleInfo sampleInfo = infos.value[0];

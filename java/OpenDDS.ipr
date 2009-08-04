@@ -359,9 +359,9 @@
       <option name="SERVER_MODE" value="false" />
       <option name="SHMEM_ADDRESS" value="javadebug" />
       <option name="HOST" value="localhost" />
-      <option name="PORT" value="5005" />
+      <option name="PORT" value="8787" />
       <RunnerSettings RunnerId="Debug">
-        <option name="DEBUG_PORT" value="5005" />
+        <option name="DEBUG_PORT" value="8787" />
         <option name="TRANSPORT" value="0" />
         <option name="LOCAL" value="false" />
       </RunnerSettings>

@@ -56,8 +56,14 @@ namespace OpenDDS
 
     private:
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-      bool where_filter(typename SampleSeq::value_type*) const
-      { return true; } //FUTURE: implement
+      bool where_filter(typename SampleSeq::value_type* sample) const
+      {
+        // Never accept non-valid samples	
+        if (sample == 0) return false;
+
+	//FUTURE: implement
+	return true;
+      }
 #endif
 
       template <class FwdIter>

@@ -1,9 +1,21 @@
+Tue Aug  4 17:16:55 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+	  Updated release notes regarding changes in QueryCondition.
+
+        * dds/DCPS/RakeResults_T.h:
+        * java/jms/src/org/opendds/jms/MessageConsumerImpl.java:
+        * java/jms/src/org/opendds/jms/MessageProducerImpl.java:
+
+	  Fixed issues preventing JMS tests from running correctly.
+
 Tue Aug  4 17:10:00 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/Deadline/subscriber.cpp:
 
           Fixed unused variable warnings.
-          
+
 Tue Aug  4 02:46:26 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
