@@ -174,15 +174,13 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       // Enable every entity from factory to it's entities and it should succeed.
       if (participant->enable () != ::DDS::RETCODE_OK 
         || topic->enable () != ::DDS::RETCODE_OK
-        || pub->enable () != ::DDS::RETCODE_OK
-        || dw->enable () != ::DDS::RETCODE_OK)
+        || pub->enable () != ::DDS::RETCODE_OK)
       {
-        cerr << "Failed to enable entities." << endl;
+        cerr << "Failed to enable factory." << endl;
         return 1;
       }
-      
-      Writer* writer = new Writer(dw.in());
 
+      Writer* writer = new Writer(dw.in());
       writer->start ();
       writer->wait ();
       delete writer;
