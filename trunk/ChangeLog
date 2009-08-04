@@ -1,9 +1,55 @@
+Tue Aug  4 02:46:26 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        * bin/DCPS/IDLTemplate.pm:
+
+          Added lookup_instance() to DataWriter and DataReader
+          idl and implementations according to spec and removed
+          find_instance_handle() which is similar to the
+          lookup_instance() function.
+
+        * dds/DCPS/EntityImpl.h:
+        * dds/DCPS/EntityImpl.cpp:
+
+          Added is_enabled() to access enabled_ flag.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.cpp:
+
+          Code updates according to spec:
+          - Calling enable on an already enabled Entity returns OK
+            and has no effect.
+          - Calling enable on an Entity whose factory is not enabled
+            will fail and return PRECONDITION_NOT_MET.
+          - Non-changeable qos can be changed prior to calling
+            the enable operation on the Entity.
+          - Removed enabled_ flag checking in factory delete_*
+            operations based on entity enable description that the
+            factory operations are allowed when entity is not enabled.
+
+        * tests/DCPS/DcpsIntegration/infrastructure.cpp:
+
+          Updated test as the entity factory autoenable qos are supported
+          now and is changeable.
+
+        * tests/DCPS/Deadline/subscriber.cpp:
+
+          Replaced find_instance_handle() call with lookup_instance().
+
 Mon Aug  3 19:18:22 UTC 2009  Steven Stallion  <stallions@ociweb.com>
-        
+
         * dds/DCPS/Definitions.h:
 
-	  Dropped OpenDDS::DCPS::DEFAULT_STATE_KIND_MASK in favor of
-	  new IDL constant (OpenDDS::DCPS::DEFAULT_STATE_MASK).
+          Dropped OpenDDS::DCPS::DEFAULT_STATE_KIND_MASK in favor of
+          new IDL constant (OpenDDS::DCPS::DEFAULT_STATE_MASK).
 
         * DevGuideExamples/DCPS/Messenger/publisher.cpp:
         * DevGuideExamples/DCPS/Messenger/stack_subscriber.cpp:
@@ -129,8 +175,8 @@ Mon Aug  3 19:18:22 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * wrapper/OpenDDS/OpenDDS_Subscription_Manager.cpp:
         * wrapper/Topic_Manager_T.cpp:
 
-	  Refactored C++ code to make use of new DEFAULT_STATE_MASK
-	  constant.
+          Refactored C++ code to make use of new DEFAULT_STATE_MASK
+          constant.
 
 Fri Jul 31 22:17:13 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 

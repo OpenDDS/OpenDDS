@@ -58,49 +58,45 @@ namespace OpenDDS
           if (qos_ == qos)
             return ::DDS::RETCODE_OK;
 
-          if (enabled_.value())
-            {
-              if (! Qos_Helper::changeable (qos_, qos))
-                {
-                  return ::DDS::RETCODE_IMMUTABLE_POLICY;
-                }
-              else 
-                {
-                  qos_ = qos;
-                  DomainParticipantImpl* part = dynamic_cast<DomainParticipantImpl*> (this->participant_);
-
-                  try
-                  {
-                    DCPSInfo_var repo = TheServiceParticipant->get_repository(part->get_domain_id());
-                    CORBA::Boolean status 
-                      = repo->update_topic_qos(this->id_, part->get_domain_id(), part->get_id(), qos_);
-
-                    if (status == 0)
-                    {
-                      ACE_ERROR_RETURN ((LM_ERROR,
-                        ACE_TEXT("(%P|%t) TopicImpl::set_qos, ")
-                        ACE_TEXT("failed on compatiblity check. \n")),
-                        ::DDS::RETCODE_ERROR);
-                    }
-                  }
-                  catch (const CORBA::SystemException& sysex)
-                  {
-                    sysex._tao_print_exception (
-                      "ERROR: System Exception"
-                      " in TopicImpl::set_qos");
-                    return ::DDS::RETCODE_ERROR;
-                  }
-                  catch (const CORBA::UserException& userex)
-                  {
-                    userex._tao_print_exception (
-                      "ERROR:  Exception"
-                      " in TopicImpl::set_qos");
-                    return ::DDS::RETCODE_ERROR;
-                  }
-                }
-            }
+          // for the not changeable qos, it can be changed before enable
+          if (! Qos_Helper::changeable (qos_, qos) && enabled_ == true)
+          {
+            return ::DDS::RETCODE_IMMUTABLE_POLICY;
+          }
           else 
+          {
             qos_ = qos;
+            DomainParticipantImpl* part = dynamic_cast<DomainParticipantImpl*> (this->participant_);
+
+            try
+            {
+              DCPSInfo_var repo = TheServiceParticipant->get_repository(part->get_domain_id());
+              CORBA::Boolean status 
+                = repo->update_topic_qos(this->id_, part->get_domain_id(), part->get_id(), qos_);
+
+              if (status == 0)
+              {
+                ACE_ERROR_RETURN ((LM_ERROR,
+                  ACE_TEXT("(%P|%t) TopicImpl::set_qos, ")
+                  ACE_TEXT("failed on compatiblity check. \n")),
+                  ::DDS::RETCODE_ERROR);
+              }
+            }
+            catch (const CORBA::SystemException& sysex)
+            {
+              sysex._tao_print_exception (
+                "ERROR: System Exception"
+                " in TopicImpl::set_qos");
+              return ::DDS::RETCODE_ERROR;
+            }
+            catch (const CORBA::UserException& userex)
+            {
+              userex._tao_print_exception (
+                "ERROR:  Exception"
+                " in TopicImpl::set_qos");
+              return ::DDS::RETCODE_ERROR;
+            }
+          }
 
           return ::DDS::RETCODE_OK;
         }
@@ -173,10 +169,18 @@ namespace OpenDDS
       ))
     {
       //According spec: 
-      // Calling enable on an Entity whose factory is not enabled will fail 
+      // - Calling enable on an already enabled Entity returns OK and has no 
+      // effect.
+      // - Calling enable on an Entity whose factory is not enabled will fail 
       // and return PRECONDITION_NOT_MET.
+
+      if (this->is_enabled ())
+      {
+        return ::DDS::RETCODE_OK;
+      }
+
       DomainParticipantImpl* part = dynamic_cast<DomainParticipantImpl*> (this->participant_);
-      if (part->get_enabled () == false)
+      if (part->is_enabled () == false)
       {
         return ::DDS::RETCODE_PRECONDITION_NOT_MET;
       }

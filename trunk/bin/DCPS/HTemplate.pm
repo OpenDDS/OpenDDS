@@ -158,6 +158,10 @@ public:
       ::DDS::InstanceHandle_t handle)
     ACE_THROW_SPEC ((CORBA::SystemException));
 
+  virtual ::DDS::InstanceHandle_t lookup_instance (
+      const ::<%SCOPE%><%TYPE%> & instance_data)
+    ACE_THROW_SPEC ((CORBA::SystemException));
+
   /**
    * Initialize the DataWriter object.
    * Called as part of create_datawriter.
@@ -218,12 +222,6 @@ private:
     DDS::InstanceHandle_t& handle,
     const ::<%SCOPE%><%TYPE%>& instance_data,
     const ::DDS::Time_t & source_timestamp);
-
-  /**
-   * Get the InstanceHandle for the given data.
-   */
-  ::DDS::InstanceHandle_t find_instance_handle(
-    const ::<%SCOPE%><%TYPE%>& instance_data);
 
    InstanceMap  instance_map_;
    size_t       marshaled_size_;
@@ -377,8 +375,9 @@ public:
       ::DDS::InstanceHandle_t handle)
     ACE_THROW_SPEC ((CORBA::SystemException));
 
-  ::DDS::InstanceHandle_t find_instance_handle(
-      const ::<%SCOPE%><%TYPE%>& instance_data);
+  virtual ::DDS::InstanceHandle_t lookup_instance (
+      const ::<%SCOPE%><%TYPE%> & instance_data)
+    ACE_THROW_SPEC ((CORBA::SystemException));
 
   virtual DDS::ReturnCode_t auto_return_loan(void* seq);
 

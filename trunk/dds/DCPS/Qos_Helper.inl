@@ -1199,5 +1199,11 @@ namespace OpenDDS
         && changeable(qos1.entity_factory, qos2.entity_factory);
     }
 
+    ACE_INLINE
+    bool Qos_Helper::changeable (const ::DDS::DomainParticipantFactoryQos& qos1,
+                                 const ::DDS::DomainParticipantFactoryQos& qos2)
+    {
+      return changeable(qos1.entity_factory, qos2.entity_factory);
+    }
   } // namespace ::DDS
 } // namespace OpenDDS

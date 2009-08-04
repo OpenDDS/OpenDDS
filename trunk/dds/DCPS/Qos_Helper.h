@@ -265,6 +265,9 @@ namespace OpenDDS
 
       static bool changeable (const ::DDS::SubscriberQos       & qos1,
                               const ::DDS::SubscriberQos       & qos2);
+
+      static bool changeable (const ::DDS::DomainParticipantFactoryQos& qos1,
+                              const ::DDS::DomainParticipantFactoryQos& qos2);
     };
 
     // Convenience function to avoid introducing preprocessor

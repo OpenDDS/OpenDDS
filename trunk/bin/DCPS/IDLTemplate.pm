@@ -103,6 +103,9 @@ local interface <%TYPE%>DataWriter : DDS::DataWriter {
     DDS::ReturnCode_t get_key_value(
                 inout <%SCOPE%><%TYPE%> key_holder,
                 in DDS::InstanceHandle_t handle);
+
+    DDS::InstanceHandle_t lookup_instance(
+                in <%SCOPE%><%TYPE%> instance_data);
 };
 
 /** DataReader interface for <%TYPE%> data type.
@@ -204,6 +207,9 @@ local interface <%TYPE%>DataReader : OpenDDS::DCPS::DataReaderEx {
     DDS::ReturnCode_t get_key_value(
                 inout <%SCOPE%><%TYPE%> key_holder,
                 in DDS::InstanceHandle_t handle);
+                
+    DDS::InstanceHandle_t lookup_instance(
+                in <%SCOPE%><%TYPE%> instance_data);
 };
 
 <%MODULEEND%>

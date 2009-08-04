@@ -37,7 +37,7 @@ namespace OpenDDS
     }
 
     bool 
-    EntityImpl::get_enabled () const
+    EntityImpl::is_enabled () const
     {
       return this->enabled_.value ();
     }

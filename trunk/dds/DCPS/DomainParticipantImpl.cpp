@@ -174,14 +174,6 @@ namespace OpenDDS
         CORBA::SystemException
       ))
     {
-      if (enabled_ == false)
-        {
-          ACE_ERROR_RETURN ((LM_ERROR,
-                            ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_publisher, ")
-                            ACE_TEXT(" Entity is not enabled. \n")),
-                            ::DDS::RETCODE_NOT_ENABLED);
-        }
-
       // The servant's ref count should be 2 at this point,
       // one referenced by poa, one referenced by the subscriber
       // set.
@@ -301,14 +293,6 @@ namespace OpenDDS
         CORBA::SystemException
       ))
     {
-      if (enabled_ == false)
-        {
-          ACE_ERROR_RETURN ((LM_ERROR,
-                            ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_subscriber, ")
-                            ACE_TEXT(" Entity is not enabled. \n")),
-                            ::DDS::RETCODE_NOT_ENABLED);
-        }
-
       // The servant's ref count should be 2 at this point,
       // one referenced by poa, one referenced by the subscriber
       // set.
@@ -364,15 +348,7 @@ namespace OpenDDS
         CORBA::SystemException
       ))
     {
-      if (enabled_ == false)
-        {
-          ACE_ERROR ((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::get_builtin_subscriber, ")
-                      ACE_TEXT(" Entity is not enabled. \n")));
-          return ::DDS::Subscriber::_nil ();
-        }
-
-        return ::DDS::Subscriber::_duplicate (bit_subscriber_.in ());
+      return ::DDS::Subscriber::_duplicate (bit_subscriber_.in ());
     }
 
     ::DDS::Topic_ptr
@@ -545,14 +521,6 @@ namespace OpenDDS
 
       try
       {
-        if (enabled_ == false)
-          {
-            ACE_ERROR_RETURN ((LM_ERROR,
-                              ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
-                              ACE_TEXT(" Entity is not enabled. \n")),
-                              ::DDS::RETCODE_NOT_ENABLED);
-          }
-
         // The servant's ref count should be greater than 2 at this point,
         // one referenced by poa, one referenced by the topic map and
         // others referenced by the datareader/datawriter.
@@ -660,7 +628,7 @@ namespace OpenDDS
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ))
-    {
+    {      
       try
         {
           ACE_Time_Value timeout_tv
@@ -789,14 +757,6 @@ namespace OpenDDS
         CORBA::SystemException
       ))
     {
-      if (enabled_ == false)
-        {
-          ACE_ERROR_RETURN ((LM_ERROR,
-                            ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_contained_entities, ")
-                            ACE_TEXT(" Entity is not enabled. \n")),
-                            ::DDS::RETCODE_NOT_ENABLED);
-        }
-
       // mark that the entity is being deleted
       set_deleted (true);
 
@@ -987,50 +947,46 @@ namespace OpenDDS
         if (qos_ == qos)
           return ::DDS::RETCODE_OK;
 
-        if (enabled_.value())
+        // for the not changeable qos, it can be changed before enable
+        if (! Qos_Helper::changeable (qos_, qos) && enabled_ == true)
         {
-          if (! Qos_Helper::changeable (qos_, qos))
-          {
-            return ::DDS::RETCODE_IMMUTABLE_POLICY;
-          }
-          else
-          {
-            qos_ = qos;
-
-            try
-            {
-              DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
-              CORBA::Boolean status
-                = repo->update_domain_participant_qos(domain_id_,
-                                                      dp_id_,
-                                                      qos_);
-              if (status == 0)
-              {
-                ACE_ERROR_RETURN ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) DomainParticipantImpl::set_qos, ")
-                  ACE_TEXT("failed on compatiblity check. \n")),
-                  ::DDS::RETCODE_ERROR);
-              }
-            }
-            catch (const CORBA::SystemException& sysex)
-            {
-              sysex._tao_print_exception (
-                "ERROR: System Exception"
-                " in DomainParticipantImpl::set_qos");
-              return ::DDS::RETCODE_ERROR;
-            }
-            catch (const CORBA::UserException& userex)
-            {
-              userex._tao_print_exception (
-                "ERROR:  Exception"
-                " in DomainParticipantImpl::set_qos");
-              return ::DDS::RETCODE_ERROR;
-            }
-          }
+          return ::DDS::RETCODE_IMMUTABLE_POLICY;
         }
         else
+        {
           qos_ = qos;
 
+          try
+          {
+            DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
+            CORBA::Boolean status
+              = repo->update_domain_participant_qos(domain_id_,
+                                                    dp_id_,
+                                                    qos_);
+            if (status == 0)
+            {
+              ACE_ERROR_RETURN ((LM_ERROR,
+                ACE_TEXT("(%P|%t) DomainParticipantImpl::set_qos, ")
+                ACE_TEXT("failed on compatiblity check. \n")),
+                ::DDS::RETCODE_ERROR);
+            }
+          }
+          catch (const CORBA::SystemException& sysex)
+          {
+            sysex._tao_print_exception (
+              "ERROR: System Exception"
+              " in DomainParticipantImpl::set_qos");
+            return ::DDS::RETCODE_ERROR;
+          }
+          catch (const CORBA::UserException& userex)
+          {
+            userex._tao_print_exception (
+              "ERROR:  Exception"
+              " in DomainParticipantImpl::set_qos");
+            return ::DDS::RETCODE_ERROR;
+          }
+        }
+    
         return ::DDS::RETCODE_OK;
       }
       else
@@ -1517,8 +1473,16 @@ namespace OpenDDS
       ))
     {
       //According spec: 
-      // Calling enable on an Entity whose factory is not enabled will fail 
+      // - Calling enable on an already enabled Entity returns OK and has no 
+      // effect.
+      // - Calling enable on an Entity whose factory is not enabled will fail 
       // and return PRECONDITION_NOT_MET.
+
+      if (this->is_enabled ())
+      {
+        return ::DDS::RETCODE_OK;
+      }
+
       ::DDS::DomainParticipantFactoryQos qos;
       if (this->factory_->get_qos (qos) != ::DDS::RETCODE_OK)
       {

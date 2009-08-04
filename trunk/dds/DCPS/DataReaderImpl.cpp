@@ -754,39 +754,36 @@ bool DataReaderImpl::has_readcondition(::DDS::ReadCondition_ptr a_condition)
     if (qos_ == qos)
       return ::DDS::RETCODE_OK;
 
-    if (enabled_.value())
+    if (! Qos_Helper::changeable (qos_, qos) && enabled_ == true)
     {
-      if (! Qos_Helper::changeable (qos_, qos))
+      return ::DDS::RETCODE_IMMUTABLE_POLICY;
+    }
+    else
+    {
+      try
       {
-        return ::DDS::RETCODE_IMMUTABLE_POLICY;
+        DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
+        ::DDS::SubscriberQos subscriberQos;
+        this->subscriber_servant_->get_qos(subscriberQos);
+        repo->update_subscription_qos(this->participant_servant_->get_domain_id(),
+                                      this->participant_servant_->get_id(),
+                                      this->subscription_id_,
+                                      qos,
+                                      subscriberQos);
       }
-      else
+      catch (const CORBA::SystemException& sysex)
       {
-        try
-        {
-          DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
-          ::DDS::SubscriberQos subscriberQos;
-          this->subscriber_servant_->get_qos(subscriberQos);
-          repo->update_subscription_qos(this->participant_servant_->get_domain_id(),
-                                        this->participant_servant_->get_id(),
-                                        this->subscription_id_,
-                                        qos,
-                                        subscriberQos);
-        }
-        catch (const CORBA::SystemException& sysex)
-        {
-          sysex._tao_print_exception (
-            "ERROR: System Exception"
-            " in DataReaderImpl::set_qos");
-          return ::DDS::RETCODE_ERROR;
-        }
-        catch (const CORBA::UserException& userex)
-        {
-          userex._tao_print_exception (
-            "ERROR:  Exception"
-            " in DataReaderImpl::set_qos");
-          return ::DDS::RETCODE_ERROR;
-        }
+        sysex._tao_print_exception (
+          "ERROR: System Exception"
+          " in DataReaderImpl::set_qos");
+        return ::DDS::RETCODE_ERROR;
+      }
+      catch (const CORBA::UserException& userex)
+      {
+        userex._tao_print_exception (
+          "ERROR:  Exception"
+          " in DataReaderImpl::set_qos");
+        return ::DDS::RETCODE_ERROR;
       }
     }
 
@@ -1078,9 +1075,17 @@ DataReaderImpl::enable ()
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
   //According spec: 
-  // Calling enable on an Entity whose factory is not enabled will fail 
+  // - Calling enable on an already enabled Entity returns OK and has no 
+  // effect.
+  // - Calling enable on an Entity whose factory is not enabled will fail 
   // and return PRECONDITION_NOT_MET.
-  if (this->subscriber_servant_->get_enabled () == false)
+  
+  if (this->is_enabled ())
+  {
+    return ::DDS::RETCODE_OK;
+  }
+
+  if (this->subscriber_servant_->is_enabled () == false)
   {
     return ::DDS::RETCODE_PRECONDITION_NOT_MET;
   }
