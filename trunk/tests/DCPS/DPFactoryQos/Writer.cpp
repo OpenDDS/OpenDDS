@@ -48,7 +48,14 @@ Writer::svc ()
 
     while (1)
     {
-      writer_->get_matched_subscriptions(handles);
+      ::DDS::ReturnCode_t ret = writer_->get_matched_subscriptions(handles);
+
+      if (ret == ::DDS::RETCODE_NOT_ENABLED)
+      {
+        writer_->enable ();
+        continue;
+      }  
+
       if (handles.length() > 0)
         break;
       else

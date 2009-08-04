@@ -13,6 +13,7 @@ use DDS_Run_Test;
 
 $status = 0;
 $use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
+$pub_log = "pub.log";
 
 $opts = $use_svc_config ? "-ORBSvcConf tcp.conf" : '';
 $repo_bit_opt = $opts;
@@ -22,11 +23,13 @@ $sub_conf = "-DCPSConfigFile sub.ini";
 $dcpsrepo_ior = "repo.ior";
 
 unlink $dcpsrepo_ior;
+unlink $pub_log;
+
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                   "$repo_bit_opt -o $dcpsrepo_ior ");
 $Subscriber = PerlDDS::create_process ("subscriber", " $opts $sub_conf");
-$Publisher = PerlDDS::create_process ("publisher", " $opts $pub_conf");
+$Publisher = PerlDDS::create_process ("publisher", " $opts $pub_conf -ORBLogFile $pub_log");
 
 print $DCPSREPO->CommandLine() . "\n";
 $DCPSREPO->Spawn ();

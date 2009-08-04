@@ -151,12 +151,12 @@ DDS::InstanceHandle_t
     const ::DDS::Time_t & timestamp)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
-  ::DDS::InstanceHandle_t registered_handle;
+  ::DDS::InstanceHandle_t registered_handle = ::DDS::HANDLE_NIL;
 
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
                     get_lock (),
-                    ::DDS::RETCODE_ERROR);
+                    registered_handle);
 
   ::DDS::ReturnCode_t const ret
     = this->get_or_create_instance_handle(registered_handle,
@@ -565,6 +565,7 @@ ACE_Message_Block*
     if (ret != ::DDS::RETCODE_OK)
     {
       marshalled->release ();
+      handle = ::DDS::HANDLE_NIL;
       return ret;
     }
 
@@ -575,6 +576,7 @@ ACE_Message_Block*
 
       if (pair.second == false)
       {
+        handle = ::DDS::HANDLE_NIL;
         ACE_ERROR_RETURN ((LM_ERROR,
                            ACE_TEXT("(%P|%t) ")
                            ACE_TEXT("<%TYPE%>DataWriterImpl::")

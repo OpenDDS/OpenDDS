@@ -188,10 +188,30 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // Enable every entity from factory to it's entities and it should succeed.
       if (participant->enable () != ::DDS::RETCODE_OK 
         || topic->enable () != ::DDS::RETCODE_OK
-        || sub->enable () != ::DDS::RETCODE_OK
-        || dr->enable () != ::DDS::RETCODE_OK)
+        || sub->enable () != ::DDS::RETCODE_OK)
       {
-        cerr << "Failed to enable entities." << endl;
+        cerr << "Failed to enable factory." << endl;
+        return 1;
+      }
+
+      // The datareader is not enabled so it will not able to
+      // communicate with datawriter.
+      int i = 0;
+      while (i < 5 && listener_servant.num_reads() == 0)
+      {
+        ACE_OS::sleep (1);
+        ++i;
+      }
+
+      if (listener_servant.num_reads() > 0)
+      {
+        cerr << "Should not receive any samples since datareader is not enabled." << endl;
+        return 1;
+      }
+
+      if (dr->enable () != ::DDS::RETCODE_OK)
+      {
+        cerr << "Failed to enable DataReader." << endl;
         return 1;
       }
 
