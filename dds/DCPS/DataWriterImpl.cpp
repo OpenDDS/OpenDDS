@@ -653,51 +653,48 @@ DataWriterImpl::set_qos (const ::DDS::DataWriterQos & qos)
 {
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos))
   {
-    if (enabled_.value())
+    if (qos_ == qos)
+      return ::DDS::RETCODE_OK;
+
+    if (! Qos_Helper::changeable (qos_, qos) && enabled_ == true)
     {
-      if (qos_ == qos)
-        return ::DDS::RETCODE_OK;
-
-      if (! Qos_Helper::changeable (qos_, qos))
+      return ::DDS::RETCODE_IMMUTABLE_POLICY;
+    }
+    else
+    {
+      try
       {
-        return ::DDS::RETCODE_IMMUTABLE_POLICY;
+        DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
+        ::DDS::PublisherQos publisherQos;
+        this->publisher_servant_->get_qos(publisherQos);
+        CORBA::Boolean status
+          = repo->update_publication_qos(this->participant_servant_->get_domain_id(),
+                                      this->participant_servant_->get_id(),
+                                      this->publication_id_,
+                                      qos,
+                                      publisherQos);
+        if (status == 0)
+        {
+          ACE_ERROR_RETURN ((LM_ERROR,
+            ACE_TEXT("(%P|%t) DataWriterImpl::set_qos, ")
+            ACE_TEXT("qos is not compatible. \n")),
+            ::DDS::RETCODE_ERROR);
+        }
+
       }
-      else
+      catch (const CORBA::SystemException& sysex)
       {
-        try
-        {
-          DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
-          ::DDS::PublisherQos publisherQos;
-          this->publisher_servant_->get_qos(publisherQos);
-          CORBA::Boolean status
-            = repo->update_publication_qos(this->participant_servant_->get_domain_id(),
-                                        this->participant_servant_->get_id(),
-                                        this->publication_id_,
-                                        qos,
-                                        publisherQos);
-          if (status == 0)
-          {
-            ACE_ERROR_RETURN ((LM_ERROR,
-              ACE_TEXT("(%P|%t) DataWriterImpl::set_qos, ")
-              ACE_TEXT("qos is not compatible. \n")),
-              ::DDS::RETCODE_ERROR);
-          }
-
-        }
-        catch (const CORBA::SystemException& sysex)
-        {
-          sysex._tao_print_exception (
-            "ERROR: System Exception"
-            " in DataWriterImpl::set_qos");
-          return ::DDS::RETCODE_ERROR;
-        }
-        catch (const CORBA::UserException& userex)
-        {
-          userex._tao_print_exception (
-            "ERROR:  Exception"
-            " in DataWriterImpl::set_qos");
-          return ::DDS::RETCODE_ERROR;
-        }
+        sysex._tao_print_exception (
+          "ERROR: System Exception"
+          " in DataWriterImpl::set_qos");
+        return ::DDS::RETCODE_ERROR;
+      }
+      catch (const CORBA::UserException& userex)
+      {
+        userex._tao_print_exception (
+          "ERROR:  Exception"
+          " in DataWriterImpl::set_qos");
+        return ::DDS::RETCODE_ERROR;
       }
     }
 
@@ -1083,9 +1080,17 @@ DataWriterImpl::enable ()
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   //According spec: 
-  // Calling enable on an Entity whose factory is not enabled will fail 
+  // - Calling enable on an already enabled Entity returns OK and has no 
+  // effect.
+  // - Calling enable on an Entity whose factory is not enabled will fail 
   // and return PRECONDITION_NOT_MET.
-  if (this->publisher_servant_->get_enabled () == false)
+  
+  if (this->is_enabled ())
+  {
+    return ::DDS::RETCODE_OK;
+  }
+
+  if (this->publisher_servant_->is_enabled () == false)
   {
     return ::DDS::RETCODE_PRECONDITION_NOT_MET;
   }

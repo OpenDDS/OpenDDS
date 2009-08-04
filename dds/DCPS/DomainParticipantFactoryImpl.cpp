@@ -427,7 +427,9 @@ namespace OpenDDS
     {
       if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos))
       {
-        qos_ = qos;
+        if (! (qos_ == qos) && Qos_Helper::changeable (qos_, qos))
+          qos_ = qos;
+        
         return ::DDS::RETCODE_OK;
       }
       else

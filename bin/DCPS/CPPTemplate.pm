@@ -197,13 +197,8 @@ DDS::ReturnCode_t
     const ::DDS::Time_t & timestamp)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
-  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-                    guard,
-                    get_lock (),
-                    ::DDS::RETCODE_ERROR);
-
   ::DDS::InstanceHandle_t const registered_handle =
-      this->find_instance_handle(instance);
+      this->lookup_instance(instance);
 
   if (registered_handle == ::DDS::HANDLE_NIL)
   {
@@ -227,6 +222,11 @@ DDS::ReturnCode_t
                         handle, registered_handle),
                         ::DDS::RETCODE_ERROR);
   }
+  
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                    guard,
+                    get_lock (),
+                    ::DDS::RETCODE_ERROR);
 
   // DataWriterImpl::unregister_instance_i will call back to inform the
   // <%TYPE%>DataWriter.
@@ -315,14 +315,9 @@ DDS::ReturnCode_t
     const ::DDS::Time_t & source_timestamp)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
-  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-                    guard,
-                    get_lock (),
-                    ::DDS::RETCODE_ERROR);
-
   if(instance_handle == ::DDS::HANDLE_NIL)
   {
-    instance_handle = this->find_instance_handle(instance_data);
+    instance_handle = this->lookup_instance(instance_data);
     if (instance_handle == ::DDS::HANDLE_NIL)
     {
       ACE_ERROR_RETURN ((LM_ERROR,
@@ -332,6 +327,11 @@ DDS::ReturnCode_t
                         ::DDS::RETCODE_ERROR);
     }
   }
+
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                    guard,
+                    get_lock (),
+                    ::DDS::RETCODE_ERROR);
 
   return OpenDDS::DCPS::DataWriterImpl::dispose(instance_handle,
                                                 source_timestamp);
@@ -362,6 +362,29 @@ DDS::ReturnCode_t
 
   return ::DDS::RETCODE_ERROR;
 }
+
+
+::DDS::InstanceHandle_t 
+<%TYPE%>DataWriterImpl::lookup_instance (
+    const ::<%SCOPE%><%TYPE%> & instance_data)
+  ACE_THROW_SPEC ((CORBA::SystemException))
+{
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                    guard,
+                    get_lock (),
+                    ::DDS::RETCODE_ERROR);
+
+  InstanceMap::const_iterator const it = instance_map_.find(instance_data);
+
+  if (it == instance_map_.end())
+  {
+    return ::DDS::HANDLE_NIL;
+  }
+  else
+  {
+    return it->second;
+  }
+}  
 
 
 void
@@ -563,22 +586,6 @@ ACE_Message_Block*
   } // end of if (needs_registration)
 
   return ::DDS::RETCODE_OK;
-}
-
-::DDS::InstanceHandle_t
- <%TYPE%>DataWriterImpl::find_instance_handle(
-                const ::<%SCOPE%><%TYPE%>& instance_data)
-{
-  InstanceMap::const_iterator const it = instance_map_.find(instance_data);
-
-  if (it == instance_map_.end())
-  {
-    return ::DDS::HANDLE_NIL;
-  }
-  else
-  {
-    return it->second;
-  }
 }
 
 
@@ -1504,9 +1511,10 @@ DDS::ReturnCode_t
 }
 
 
-::DDS::InstanceHandle_t
- <%TYPE%>DataReaderImpl::find_instance_handle(
-                const ::<%SCOPE%><%TYPE%>& instance_data)
+::DDS::InstanceHandle_t 
+<%TYPE%>DataReaderImpl::lookup_instance (
+    const ::<%SCOPE%><%TYPE%> & instance_data)
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   InstanceMap::const_iterator const it = instance_map_.find(instance_data);
 
@@ -1518,7 +1526,7 @@ DDS::ReturnCode_t
   {
     return it->second;
   }
-}
+}  
 
 
 void

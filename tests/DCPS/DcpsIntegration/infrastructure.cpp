@@ -122,31 +122,31 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       ::DDS::ReturnCode_t setFactoryReturnCode =
         dpFactory->set_default_participant_qos(dPQosChangedEntityFactory);
-      if (::DDS::RETCODE_INCONSISTENT_POLICY != setFactoryReturnCode)
+      if (::DDS::RETCODE_OK != setFactoryReturnCode)
         {
           ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) Was able to set invalid default Participant QOS!\n")),
+                            ACE_TEXT("(%P|%t) Failed to set default Participant QOS!\n")),
                             3);
         }
-        else
-        {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 5 passed.\n")));
-        }
+      else
+      {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 5 passed.\n")));
+      }
 
       ::DDS::DomainParticipantQos dPQosNewDefault;
       dpFactory->get_default_participant_qos (dPQosNewDefault);
 
       if (dPQosNewDefault.entity_factory.autoenable_created_entities
         != dPQosInitialDefault.entity_factory.autoenable_created_entities)
-        {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) Incorrect default Participant QOS was returned in the get!\n")),
-                            3);
-        }
-        else
-        {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 6 passed.\n")));
-        }
+      {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 6 passed.\n")));
+      }
+      else
+      {
+        ACE_ERROR_RETURN((LM_ERROR,
+          ACE_TEXT("(%P|%t) Incorrect default Participant QOS was returned in the get!\n")),
+          3);
+      }
 
       ::DDS::DomainParticipant_var testParticipant;
 
@@ -156,29 +156,46 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                       dPQosChangedEntityFactory,
                                       dpListener.in(),
                                       ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-      if ( ! CORBA::is_nil (testParticipant.in ()) )
-        {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) Invalid QOS returned a DomainParticipant!\n")),
-                            4);
-        }
-        else
-        {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 7 passed.\n")));
-        }
+      if ( CORBA::is_nil (testParticipant.in ()) )
+      {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) Failed to create DomainParticipant!\n")),
+                          4);
+      }
+      else
+      {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 7 passed.\n")));
+      }
 
       ::DDS::ReturnCode_t deleteParticipantReturnCode =
       dpFactory->delete_participant(testParticipant.in ());
-      if (::DDS::RETCODE_BAD_PARAMETER != deleteParticipantReturnCode)
+      
+      if (::DDS::RETCODE_OK != deleteParticipantReturnCode)
         {
           ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) Invalid Participant was deleted!\n")),
+                            ACE_TEXT("(%P|%t) The delete_participant returned %d!\n"), 
+                            deleteParticipantReturnCode),
                             4);
         }
-        else
+      else
         {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 8 passed.\n")));
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 8-1 passed.\n")));
         }
+
+      testParticipant = ::DDS::DomainParticipant::_nil ();
+      deleteParticipantReturnCode =
+        dpFactory->delete_participant(testParticipant.in ());
+
+      if (::DDS::RETCODE_BAD_PARAMETER != deleteParticipantReturnCode)
+      {
+        ACE_ERROR_RETURN((LM_ERROR,
+          ACE_TEXT("(%P|%t) Invalid Participant was deleted!\n")),
+          4);
+      }
+      else
+      {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 8-2 passed.\n")));
+      }
 
       testParticipant =
         dpFactory->create_participant(TEST_DOMAIN_NUMBER,
@@ -243,7 +260,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                             ACE_TEXT("(%P|%t) Nil DomainParticipantFactory returned on second call!\n")),
                             6);
         }
-        else
+      else
         {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 13 passed.\n")));
         }
@@ -254,7 +271,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                             ACE_TEXT("(%P|%t) DomainParticipantFactory instances don't match!\n")),
                             6);
         }
-        else
+      else
         {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 14 passed.\n")));
         }
@@ -284,8 +301,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       ::DDS::DomainParticipantQos participantInitialQOS;
       participant->get_qos(participantInitialQOS);
+      // PARTICIPANT_QOS_DEFAULT was got from DomainParticipantFactory which has changed its
+      // default participant qos from initial default.
       if (participantInitialQOS.entity_factory.autoenable_created_entities
-        != dPQosInitialDefault.entity_factory.autoenable_created_entities)
+        == dPQosInitialDefault.entity_factory.autoenable_created_entities)
         {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) Participant has incorrect QOS!\n")),
@@ -298,10 +317,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       ::DDS::ReturnCode_t setQosReturnCode =
         participant->set_qos(dPQosChangedEntityFactory);
-      if (::DDS::RETCODE_INCONSISTENT_POLICY != setQosReturnCode)
+      if (::DDS::RETCODE_OK != setQosReturnCode)
         {
           ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) Was able to set invalid Participant QOS!\n")),
+                            ACE_TEXT("(%P|%t) Was not able to set Participant QOS!\n")),
                             7);
         }
         else

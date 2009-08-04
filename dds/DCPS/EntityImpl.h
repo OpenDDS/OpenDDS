@@ -36,7 +36,7 @@ namespace OpenDDS
       virtual ~EntityImpl ();
 
       virtual ::DDS::ReturnCode_t set_enabled ();
-      bool get_enabled () const;
+      bool is_enabled () const;
 
       virtual ::DDS::StatusCondition_ptr get_statuscondition (
         )

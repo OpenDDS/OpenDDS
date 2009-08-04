@@ -222,14 +222,6 @@ PublisherImpl::create_datawriter (
 PublisherImpl::delete_datawriter (::DDS::DataWriter_ptr a_datawriter)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
-  if (enabled_ == false)
-    {
-      ACE_ERROR_RETURN ((LM_ERROR,
-       ACE_TEXT("(%P|%t) ERROR: PublisherImpl::delete_datawriter, ")
-       ACE_TEXT(" Entity is not enabled. \n")),
-      ::DDS::RETCODE_NOT_ENABLED);
-    }
-
   DataWriterImpl* dw_servant =
     dynamic_cast <DataWriterImpl*> (a_datawriter);
 
@@ -425,14 +417,6 @@ PublisherImpl::lookup_datawriter (const char * topic_name)
 PublisherImpl::delete_contained_entities ()
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
-  if (enabled_ == false)
-    {
-      ACE_ERROR_RETURN ((LM_ERROR,
-       ACE_TEXT("(%P|%t) ERROR: PublisherImpl::delete_contained_entities, ")
-       ACE_TEXT(" Entity is not enabled. \n")),
-      ::DDS::RETCODE_NOT_ENABLED);
-    }
-
   // mark that the entity is being deleted
   set_deleted (true);
 
@@ -483,89 +467,85 @@ PublisherImpl::set_qos (const ::DDS::PublisherQos & qos)
       if (qos_ == qos)
         return ::DDS::RETCODE_OK;
 
-      if (enabled_ == true)
+      // for the not changeable qos, it can be changed before enable
+      if (! Qos_Helper::changeable (qos_, qos) && enabled_ == true)
       {
-        if (! Qos_Helper::changeable (qos_, qos))
-        {
-          return ::DDS::RETCODE_IMMUTABLE_POLICY;
-        }
-        else
-        {
-          qos_ = qos;
-
-          DwIdToQosMap idToQosMap;
-          {
-            ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-              guard,
-              this->pi_lock_,
-              ::DDS::RETCODE_ERROR);
-
-            for (PublicationMap::iterator iter = publication_map_.begin();
-              iter != publication_map_.end();
-              ++iter)
-            {
-              ::DDS::DataWriterQos qos;
-              iter->second->local_writer_impl_->get_qos(qos);
-              RepoId id =
-                iter->second->local_writer_impl_->get_publication_id();
-              std::pair<DwIdToQosMap::iterator, bool> pair =
-                idToQosMap.insert(DwIdToQosMap::value_type(id, qos));
-              if (pair.second == false)
-              {
-                RepoIdConverter converter( id);
-                ACE_ERROR_RETURN((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ")
-                  ACE_TEXT("PublisherImpl::set_qos: ")
-                  ACE_TEXT("insert id %d to DwIdToQosMap ")
-                  ACE_TEXT("failed.\n"),
-                  std::string(converter).c_str()
-                ),::DDS::RETCODE_ERROR);
-              }
-            }
-          }
-
-          DwIdToQosMap::iterator iter = idToQosMap.begin ();
-          while (iter != idToQosMap.end())
-          {
-            try
-            {
-              DCPSInfo_var repo = TheServiceParticipant->get_repository( this->domain_id_);
-              CORBA::Boolean status
-                = repo->update_publication_qos (
-                      participant_->get_domain_id(),
-                      participant_->get_id (),
-                      iter->first,
-                      iter->second,
-                      this->qos_);
-
-              if (status == 0)
-              {
-                ACE_ERROR_RETURN ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) PublisherImpl::set_qos, ")
-                  ACE_TEXT("failed on compatiblity check. \n")),
-                  ::DDS::RETCODE_ERROR);
-              }
-            }
-            catch (const CORBA::SystemException& sysex)
-            {
-              sysex._tao_print_exception (
-                "ERROR: System Exception"
-                " in PublisherImpl::set_qos");
-              return ::DDS::RETCODE_ERROR;
-            }
-            catch (const CORBA::UserException& userex)
-            {
-              userex._tao_print_exception (
-                "ERROR:  Exception"
-                " in PublisherImpl::set_qos");
-              return ::DDS::RETCODE_ERROR;
-            }
-            ++iter;
-          }
-        }
+        return ::DDS::RETCODE_IMMUTABLE_POLICY;
       }
       else
+      {
         qos_ = qos;
+
+        DwIdToQosMap idToQosMap;
+        {
+          ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+            guard,
+            this->pi_lock_,
+            ::DDS::RETCODE_ERROR);
+
+          for (PublicationMap::iterator iter = publication_map_.begin();
+            iter != publication_map_.end();
+            ++iter)
+          {
+            ::DDS::DataWriterQos qos;
+            iter->second->local_writer_impl_->get_qos(qos);
+            RepoId id =
+              iter->second->local_writer_impl_->get_publication_id();
+            std::pair<DwIdToQosMap::iterator, bool> pair =
+              idToQosMap.insert(DwIdToQosMap::value_type(id, qos));
+            if (pair.second == false)
+            {
+              RepoIdConverter converter( id);
+              ACE_ERROR_RETURN((LM_ERROR,
+                ACE_TEXT("(%P|%t) ")
+                ACE_TEXT("PublisherImpl::set_qos: ")
+                ACE_TEXT("insert id %d to DwIdToQosMap ")
+                ACE_TEXT("failed.\n"),
+                std::string(converter).c_str()
+              ),::DDS::RETCODE_ERROR);
+            }
+          }
+        }
+
+        DwIdToQosMap::iterator iter = idToQosMap.begin ();
+        while (iter != idToQosMap.end())
+        {
+          try
+          {
+            DCPSInfo_var repo = TheServiceParticipant->get_repository( this->domain_id_);
+            CORBA::Boolean status
+              = repo->update_publication_qos (
+                    participant_->get_domain_id(),
+                    participant_->get_id (),
+                    iter->first,
+                    iter->second,
+                    this->qos_);
+
+            if (status == 0)
+            {
+              ACE_ERROR_RETURN ((LM_ERROR,
+                ACE_TEXT("(%P|%t) PublisherImpl::set_qos, ")
+                ACE_TEXT("failed on compatiblity check. \n")),
+                ::DDS::RETCODE_ERROR);
+            }
+          }
+          catch (const CORBA::SystemException& sysex)
+          {
+            sysex._tao_print_exception (
+              "ERROR: System Exception"
+              " in PublisherImpl::set_qos");
+            return ::DDS::RETCODE_ERROR;
+          }
+          catch (const CORBA::UserException& userex)
+          {
+            userex._tao_print_exception (
+              "ERROR:  Exception"
+              " in PublisherImpl::set_qos");
+            return ::DDS::RETCODE_ERROR;
+          }
+          ++iter;
+        }
+      }
 
       return ::DDS::RETCODE_OK;
     }
@@ -661,6 +641,14 @@ PublisherImpl::resume_publications ()
  PublisherImpl::begin_coherent_changes ()
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
+  if (enabled_ == false)
+  {
+    ACE_ERROR_RETURN ((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: PublisherImpl::delete_contained_entities, ")
+      ACE_TEXT(" Entity is not enabled. \n")),
+      ::DDS::RETCODE_NOT_ENABLED);
+  }
+
   //NOT REQUIRED FOR FIRST IMPLEMENTATION
   return ::DDS::RETCODE_UNSUPPORTED;
 }
@@ -669,6 +657,14 @@ PublisherImpl::resume_publications ()
 PublisherImpl::end_coherent_changes ()
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
+  if (enabled_ == false)
+  {
+    ACE_ERROR_RETURN ((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: PublisherImpl::delete_contained_entities, ")
+      ACE_TEXT(" Entity is not enabled. \n")),
+      ::DDS::RETCODE_NOT_ENABLED);
+  }
+
   //NOT REQUIRED FOR FIRST IMPLEMENTATION
   return ::DDS::RETCODE_UNSUPPORTED;
 }
@@ -680,6 +676,14 @@ PublisherImpl::wait_for_acknowledgments (
   )
   ACE_THROW_SPEC ((::CORBA::SystemException))
 {
+  if (enabled_ == false)
+  {
+    ACE_ERROR_RETURN ((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: PublisherImpl::delete_contained_entities, ")
+      ACE_TEXT(" Entity is not enabled. \n")),
+      ::DDS::RETCODE_NOT_ENABLED);
+  }
+
   //tbd
   ACE_UNUSED_ARG (max_wait);
   return ::DDS::RETCODE_OK;
@@ -751,9 +755,17 @@ PublisherImpl::enable ()
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
   //According spec: 
-  // Calling enable on an Entity whose factory is not enabled will fail 
+  // - Calling enable on an already enabled Entity returns OK and has no 
+  // effect.
+  // - Calling enable on an Entity whose factory is not enabled will fail 
   // and return PRECONDITION_NOT_MET.
-  if (this->participant_->get_enabled () == false)
+  
+  if (this->is_enabled ())
+  {
+    return ::DDS::RETCODE_OK;
+  }
+
+  if (this->participant_->is_enabled () == false)
   {
     return ::DDS::RETCODE_PRECONDITION_NOT_MET;
   }

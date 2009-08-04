@@ -259,15 +259,6 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
 {
   DBG_ENTRY_LVL("SubscriberImpl","delete_datareader",6);
 
-  ACE_TRACE(ACE_TEXT("SubscriberImpl::delete_datareader"));
-  if (enabled_ == false)
-    {
-      ACE_ERROR_RETURN ((LM_ERROR,
-                         ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::delete_datareader, ")
-                         ACE_TEXT(" Entity is not enabled. \n")),
-                        ::DDS::RETCODE_NOT_ENABLED);
-    }
-
   DataReaderImpl* dr_servant
     = dynamic_cast<DataReaderImpl*> (a_datareader);
 
@@ -409,16 +400,6 @@ SubscriberImpl::delete_contained_entities (
                    CORBA::SystemException
                    ))
 {
-  ACE_TRACE(ACE_TEXT("SubscriberImpl::delete_contained_entities")) ;
-
-  if (enabled_ == false)
-    {
-      ACE_ERROR_RETURN ((LM_ERROR,
-                         ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::delete_contained_entities, ")
-                         ACE_TEXT(" Entity is not enabled. \n")),
-                        ::DDS::RETCODE_NOT_ENABLED);
-    }
-
   // mark that the entity is being deleted
   set_deleted (true);
 
@@ -576,87 +557,83 @@ SubscriberImpl::set_qos (
       if (qos_ == qos)
         return ::DDS::RETCODE_OK;
 
-      if (enabled_ == true)
+      // for the not changeable qos, it can be changed before enable
+      if (! Qos_Helper::changeable (qos_, qos) && enabled_ == true)
       {
-        if (! Qos_Helper::changeable (qos_, qos))
-        {
-          return ::DDS::RETCODE_IMMUTABLE_POLICY;
-        }
-        else
-        {
-          qos_ = qos;
-
-          DrIdToQosMap idToQosMap;
-          {
-            ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-              guard,
-              this->si_lock_,
-              ::DDS::RETCODE_ERROR);
-            DataReaderMap::const_iterator endIter = datareader_map_.end(); 
-            for (DataReaderMap::const_iterator iter = datareader_map_.begin() ;
-              iter != endIter ; ++iter)
-            {
-              DataReaderImpl* reader = iter->second->local_reader_impl_; 
-              ::DDS::DataReaderQos qos;
-              reader->get_qos(qos); 
-              RepoId id = reader->get_subscription_id();
-              std::pair<DrIdToQosMap::iterator, bool> pair
-                = idToQosMap.insert(DrIdToQosMap::value_type(id, qos));
-              if (pair.second == false)
-              {
-                RepoIdConverter converter(id);
-                ACE_ERROR_RETURN((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::set_qos: ")
-                  ACE_TEXT("insert %C to DrIdToQosMap failed.\n"), 
-                  std::string(converter).c_str()
-                ),::DDS::RETCODE_ERROR);
-              }
-            }
-          }
-
-          DrIdToQosMap::iterator iter = idToQosMap.begin ();
-          while (iter != idToQosMap.end())
-          {
-            try
-            {
-              DCPSInfo_var repo = TheServiceParticipant->get_repository( this->domain_id_);
-              CORBA::Boolean status 
-                = repo->update_subscription_qos( this->domain_id_,
-                                                          participant_->get_id (), 
-                                                          iter->first,
-                                                          iter->second,
-                                                          this->qos_);
-
-              if (status == 0)
-              {
-                ACE_ERROR_RETURN ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) SubscriberImpl::set_qos, ")
-                  ACE_TEXT("failed on compatiblity check. \n")),
-                  ::DDS::RETCODE_ERROR);
-              }
-            }
-            catch (const CORBA::SystemException& sysex)
-            {
-              sysex._tao_print_exception (
-                "ERROR: System Exception"
-                " in SubscriberImpl::set_qos");
-              return ::DDS::RETCODE_ERROR;
-            }
-            catch (const CORBA::UserException& userex)
-            {
-              userex._tao_print_exception (
-                "ERROR:  Exception"
-                " in SubscriberImpl::set_qos");
-              return ::DDS::RETCODE_ERROR;
-            }
-
-            ++iter;
-          } 
-        }
+        return ::DDS::RETCODE_IMMUTABLE_POLICY;
       }
       else
+      {
         qos_ = qos;
-        
+
+        DrIdToQosMap idToQosMap;
+        {
+          ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+            guard,
+            this->si_lock_,
+            ::DDS::RETCODE_ERROR);
+          DataReaderMap::const_iterator endIter = datareader_map_.end(); 
+          for (DataReaderMap::const_iterator iter = datareader_map_.begin() ;
+            iter != endIter ; ++iter)
+          {
+            DataReaderImpl* reader = iter->second->local_reader_impl_; 
+            ::DDS::DataReaderQos qos;
+            reader->get_qos(qos); 
+            RepoId id = reader->get_subscription_id();
+            std::pair<DrIdToQosMap::iterator, bool> pair
+              = idToQosMap.insert(DrIdToQosMap::value_type(id, qos));
+            if (pair.second == false)
+            {
+              RepoIdConverter converter(id);
+              ACE_ERROR_RETURN((LM_ERROR,
+                ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::set_qos: ")
+                ACE_TEXT("insert %C to DrIdToQosMap failed.\n"), 
+                std::string(converter).c_str()
+              ),::DDS::RETCODE_ERROR);
+            }
+          }
+        }
+
+        DrIdToQosMap::iterator iter = idToQosMap.begin ();
+        while (iter != idToQosMap.end())
+        {
+          try
+          {
+            DCPSInfo_var repo = TheServiceParticipant->get_repository( this->domain_id_);
+            CORBA::Boolean status 
+              = repo->update_subscription_qos( this->domain_id_,
+                                                        participant_->get_id (), 
+                                                        iter->first,
+                                                        iter->second,
+                                                        this->qos_);
+
+            if (status == 0)
+            {
+              ACE_ERROR_RETURN ((LM_ERROR,
+                ACE_TEXT("(%P|%t) SubscriberImpl::set_qos, ")
+                ACE_TEXT("failed on compatiblity check. \n")),
+                ::DDS::RETCODE_ERROR);
+            }
+          }
+          catch (const CORBA::SystemException& sysex)
+          {
+            sysex._tao_print_exception (
+              "ERROR: System Exception"
+              " in SubscriberImpl::set_qos");
+            return ::DDS::RETCODE_ERROR;
+          }
+          catch (const CORBA::UserException& userex)
+          {
+            userex._tao_print_exception (
+              "ERROR:  Exception"
+              " in SubscriberImpl::set_qos");
+            return ::DDS::RETCODE_ERROR;
+          }
+
+          ++iter;
+        } 
+      }
+
       return ::DDS::RETCODE_OK;
     }
   else
@@ -827,9 +804,17 @@ SubscriberImpl::enable (
                    ))
 {
   //According spec: 
-  // Calling enable on an Entity whose factory is not enabled will fail 
+  // - Calling enable on an already enabled Entity returns OK and has no 
+  // effect.
+  // - Calling enable on an Entity whose factory is not enabled will fail 
   // and return PRECONDITION_NOT_MET.
-  if (this->participant_->get_enabled () == false)
+  
+  if (this->is_enabled ())
+  {
+    return ::DDS::RETCODE_OK;
+  }
+
+  if (this->participant_->is_enabled () == false)
   {
     return ::DDS::RETCODE_PRECONDITION_NOT_MET;
   }
