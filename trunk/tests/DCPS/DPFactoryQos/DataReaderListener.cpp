@@ -27,6 +27,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
   try {
     ::Messenger::MessageDataReader_var message_dr =
         ::Messenger::MessageDataReader::_narrow(reader);
+
     if (CORBA::is_nil (message_dr.in ())) {
       cerr << "read: _narrow failed." << endl;
       exit(1);
@@ -35,6 +36,13 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     Messenger::Message message;
     DDS::SampleInfo si ;
     DDS::ReturnCode_t status = message_dr->take_next_sample(message, si) ;
+
+    ::DDS::InstanceHandle_t lookup_handle = message_dr->lookup_instance (message);
+    if (lookup_handle == ::DDS::HANDLE_NIL || lookup_handle != si.instance_handle)
+    {
+      cerr << "ERROR: lookup_instance test failed." << endl;
+      exit(1);
+    }
 
     if (status == DDS::RETCODE_OK) {
 
