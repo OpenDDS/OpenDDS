@@ -223,10 +223,10 @@ public class MessageProducerImpl implements MessageProducer {
         final MessagePayload payload = messageImpl.getPayload();
         dataWriter.write(payload, HANDLE_NIL.value);
 
-        // N.B. We must dispose the instance for immediately;
+        // N.B. We must unregister the instance immediately;
         // this prevents a resource leak in OpenDDS proper when
         // volatile keys are used to identify instances.
-        dataWriter.dispose(payload, HANDLE_NIL.value);
+        dataWriter.unregister_instance(payload, HANDLE_NIL.value);
     }
 
     public void close() throws JMSException {
