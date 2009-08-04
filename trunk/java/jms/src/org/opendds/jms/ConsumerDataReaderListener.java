@@ -6,11 +6,11 @@ package org.opendds.jms;
 
 import javax.jms.JMSException;
 
-import DDS.ALIVE_INSTANCE_STATE;
+import DDS.ANY_INSTANCE_STATE;
+import DDS.ANY_VIEW_STATE;
 import DDS.DataReader;
 import DDS.LENGTH_UNLIMITED;
 import DDS.LivelinessChangedStatus;
-import DDS.NEW_VIEW_STATE;
 import DDS.NOT_READ_SAMPLE_STATE;
 import DDS.RETCODE_OK;
 import DDS.ReadCondition;
@@ -84,7 +84,7 @@ public class ConsumerDataReaderListener extends _DataReaderListenerLocalBase {
 
     private static boolean readOneSample(MessagePayloadDataReader reader, MessagePayloadSeqHolder payloads, SampleInfoSeqHolder infos) {
         ReadCondition readCondition = reader.create_querycondition(NOT_READ_SAMPLE_STATE.value,
-            NEW_VIEW_STATE.value, ALIVE_INSTANCE_STATE.value, "ORDER BY theHeader.TwentyMinusJMSPriority", new String[] {});
+            ANY_VIEW_STATE.value, ANY_INSTANCE_STATE.value, "ORDER BY theHeader.TwentyMinusJMSPriority", new String[] {});
         int rc = reader.read_w_condition(payloads, infos, LENGTH_UNLIMITED.value, readCondition);
         reader.delete_readcondition(readCondition);
         return rc == RETCODE_OK.value;
