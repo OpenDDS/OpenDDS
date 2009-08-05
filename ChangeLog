@@ -1,19 +1,41 @@
+Wed Aug  5 17:15:08 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+
+	  Implemented Publisher::wait_for_acknowledgments.
+
+        * bin/dcps_tests.lst:
+
+	  Added WaitForAck publisher test to nightly builds.
+
+        * tests/DCPS/WaitForAck/Options.h:
+        * tests/DCPS/WaitForAck/Options.inl:
+        * tests/DCPS/WaitForAck/Options.cpp:
+        * tests/DCPS/WaitForAck/Publisher.h:
+        * tests/DCPS/WaitForAck/Publisher.cpp:
+        * tests/DCPS/WaitForAck/run_test.pl:
+
+	  Updated WaitForAck test to cover publisher implementation.
+
 Tue Aug  4 22:10:49 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
-     
+
           - Fixed a bug in register_instance() that ACE_GUARD_RETURN
             return nil handle instead of RETCODE_ERROR.
           - Reset the instance handle to nil as return of register_instance()
             if there are any errors encountered during registering.
-          
+
         * tests/DCPS/DPFactoryQos/Writer.cpp:
         * tests/DCPS/DPFactoryQos/publisher.cpp:
         * tests/DCPS/DPFactoryQos/run_test.pl:
         * tests/DCPS/DPFactoryQos/subscriber.cpp:
 
-          Modified datawriter and datareader enable test case. They can 
-          not associate before enabled and are able to associate after 
+          Modified datawriter and datareader enable test case. They can
+          not associate before enabled and are able to associate after
           enable.
 
 Tue Aug  4 18:02:22 UTC 2009  Yan Dai  <dai_y@ociweb.com>

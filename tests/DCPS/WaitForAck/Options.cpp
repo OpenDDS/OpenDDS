@@ -30,6 +30,7 @@ namespace { // anonymous namespace for file scope.
 
   // Command line argument definitions.
   const ACE_TCHAR* VERBOSE_ARGUMENT = ACE_TEXT("-v");
+  const ACE_TCHAR* PUBLISHER_ARGUMENT = ACE_TEXT("-p");
 
 } // end of anonymous namespace.
 
@@ -42,6 +43,7 @@ Options::~Options()
 Options::Options( int argc, ACE_TCHAR** argv, char** /* envp */)
  : valid_(        true),
    verbose_(      false),
+   publisher_(	  false),
    domain_(       DEFAULT_TEST_DOMAIN),
    topicName_(    DEFAULT_TEST_TOPICNAME),
    publications_( DEFAULT_PUBLICATIONS),
@@ -60,6 +62,10 @@ Options::Options( int argc, ACE_TCHAR** argv, char** /* envp */)
       this->verbose_ = true;
       parser.consume_arg();
 
+    } else if (0 <= (parser.cur_arg_strncasecmp(PUBLISHER_ARGUMENT))) {
+      this->publisher_ = true;
+      parser.consume_arg(); 
+      
     } else {
       if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
         ACE_DEBUG((LM_WARNING,

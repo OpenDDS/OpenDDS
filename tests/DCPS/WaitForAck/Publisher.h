@@ -39,6 +39,9 @@ class Publisher {
     /// DomainParticipant.
     DDS::DomainParticipant_var participant_;
 
+    /// Publisher.
+    DDS::Publisher_var publisher_;
+
     /// Publications.
     PublicationVector publications_;
 

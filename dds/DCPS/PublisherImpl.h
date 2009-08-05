@@ -9,6 +9,7 @@
 #include "dds/DdsDcpsDataWriterRemoteC.h"
 #include "dds/DdsDcpsInfoC.h"
 #include "EntityImpl.h"
+#include "DataWriterImpl.h"
 #include "DataSampleList.h"
 #include "dds/DCPS/transport/framework/TransportInterface.h"
 #include "ace/Synch.h"
@@ -48,12 +49,14 @@ namespace OpenDDS
     typedef std::multimap<ACE_CString, PublisherDataWriterInfo*>
         DataWriterMap;
 
+    typedef std::map<DataWriterImpl*, DataWriterImpl::AckToken>
+        DataWriterAckMap;
+
     typedef std::map<PublicationId, PublisherDataWriterInfo*, GUID_tKeyLessThan>
         PublicationMap;
 
     // DataWriter id to qos map.
     typedef std::map<RepoId, ::DDS::DataWriterQos, GUID_tKeyLessThan> DwIdToQosMap;
-
 
     /**
     * @class PublisherImpl

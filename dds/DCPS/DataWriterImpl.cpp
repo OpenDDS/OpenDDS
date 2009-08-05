@@ -6,7 +6,6 @@
 #include "DomainParticipantImpl.h"
 #include "PublisherImpl.h"
 #include "Service_Participant.h"
-#include "Qos_Helper.h"
 #include "RepoIdConverter.h"
 #include "TopicImpl.h"
 #include "PublicationInstance.h"
@@ -781,27 +780,26 @@ DataWriterImpl::get_topic ()
   return ::DDS::Topic::_duplicate (topic_objref_.in ());
 }
 
-::DDS::ReturnCode_t
-DataWriterImpl::wait_for_acknowledgments (const ::DDS::Duration_t & max_wait)
-ACE_THROW_SPEC ((::CORBA::SystemException))
+bool
+DataWriterImpl::should_ack() const
 {
-  if( this->readers_.size() == 0) {
-    if( DCPS_debug_level > 0) {
-      RepoIdConverter converter( this->publication_id_);
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_acknowledgments() - ")
-        ACE_TEXT("%C not blocking due to no associated subscriptions.\n"),
-        std::string(converter).c_str()
-      ));
-    }
-    return ::DDS::RETCODE_OK;
-  }
+  // N.B. It may be worthwhile to investigate a more efficient
+  // heuristic for determining if a writer should send SAMPLE_ACK
+  // control samples. Perhaps based on a sequence number delta?
+  return this->readers_.size() != 0;
+}
 
-  ACE_Time_Value when = ACE_OS::gettimeofday();
-  SequenceNumber target = this->sequence_number_;
+DataWriterImpl::AckToken
+DataWriterImpl::create_ack_token(DDS::Duration_t max_wait) const
+{
+  return AckToken(max_wait, this->sequence_number_);
+}
 
-  size_t dataSize = sizeof( target.value_); // Assume no padding.
-  dataSize += _dcps_find_size( max_wait);
+DDS::ReturnCode_t
+DataWriterImpl::send_ack_requests(const DataWriterImpl::AckToken& token)
+{
+  size_t dataSize = sizeof(token.sequence_.value_); // Assume no padding.
+  dataSize += _dcps_find_size(token.max_wait_);
 
   ACE_Message_Block* data;
   ACE_NEW_RETURN(
@@ -814,8 +812,8 @@ ACE_THROW_SPEC ((::CORBA::SystemException))
     data,
     this->get_publisher_servant()->swap_bytes()
   );
-  serializer << target.value_;
-  serializer << max_wait;
+  serializer << token.sequence_.value_;
+  serializer << token.max_wait_;
 
   if( DCPS_debug_level > 0) {
     RepoIdConverter converter( this->publication_id_);
@@ -824,14 +822,13 @@ ACE_THROW_SPEC ((::CORBA::SystemException))
       ACE_TEXT("%C sending REQUEST_ACK message for sequence 0x%x ")
       ACE_TEXT("to %d subscriptions.\n"),
       std::string(converter).c_str(),
-      ACE_UINT16(target.value_),
+      ACE_UINT16(token.sequence_.value_),
       this->readers_.size()
     ));
   }
 
-  ::DDS::Time_t now = time_value_to_time(when);
   ACE_Message_Block* ack_request =
-    this->create_control_message(REQUEST_ACK, data, now);
+    this->create_control_message(REQUEST_ACK, data, token.timestamp());
 
   SendControlStatus status;
   { // This reaches all associated subscriptions.
@@ -849,8 +846,13 @@ ACE_THROW_SPEC ((::CORBA::SystemException))
     ));
     return ::DDS::RETCODE_ERROR;
   }
+  return DDS::RETCODE_OK;
+}
 
-  when += duration_to_time_value(max_wait);
+DDS::ReturnCode_t
+DataWriterImpl::wait_for_ack_responses(const DataWriterImpl::AckToken& token)
+{
+  ACE_Time_Value deadline(token.deadline());
 
   // Protect the wait-fer-acks blocking.
   ACE_GUARD_RETURN(
@@ -877,7 +879,7 @@ ACE_THROW_SPEC ((::CORBA::SystemException))
            current != this->readers_.end();
            ++current
          ) {
-        if( this->idToSequence_[ *current] < target) {
+        if( this->idToSequence_[ *current] < token.sequence_) {
           done = false;
         }
       }
@@ -889,13 +891,13 @@ ACE_THROW_SPEC ((::CORBA::SystemException))
           ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_acknowledgments() - ")
           ACE_TEXT("%C unblocking for sequence 0x%x.\n"),
           std::string(converter).c_str(),
-          ACE_UINT16(target.value_)
+          ACE_UINT16(token.sequence_.value_)
         ));
       }
       return ::DDS::RETCODE_OK;
     }
 
-  } while( 0 == this->wfaCondition_.wait( &when));
+  } while( 0 == this->wfaCondition_.wait(&deadline));
 
   RepoIdConverter converter( this->publication_id_);
   ACE_DEBUG((LM_WARNING,
@@ -903,10 +905,36 @@ ACE_THROW_SPEC ((::CORBA::SystemException))
     ACE_TEXT("%C timed out waiting for sequence 0x%x to be acknowledged ")
     ACE_TEXT("from %d subscriptions.\n"),
     std::string(converter).c_str(),
-    ACE_UINT16(target.value_),
+    ACE_UINT16(token.sequence_.value_),
     this->readers_.size()
   ));
   return ::DDS::RETCODE_TIMEOUT;
+}
+
+DDS::ReturnCode_t
+DataWriterImpl::wait_for_acknowledgments(const DDS::Duration_t& max_wait)
+  ACE_THROW_SPEC ((::CORBA::SystemException))
+{
+  if(!should_ack()) {
+    if( DCPS_debug_level > 0) {
+      RepoIdConverter converter( this->publication_id_);
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_acknowledgments() - ")
+        ACE_TEXT("%C not blocking due to no associated subscriptions.\n"),
+        std::string(converter).c_str()
+      ));
+    }
+    return ::DDS::RETCODE_OK;
+  }
+
+  AckToken token(create_ack_token(max_wait));
+
+  DDS::ReturnCode_t error;
+ 
+  if ((error = send_ack_requests(token)) != DDS::RETCODE_OK) return error;
+  if ((error = wait_for_ack_responses(token)) != DDS::RETCODE_OK) return error;
+
+  return DDS::RETCODE_OK;
 }
 
 ::DDS::Publisher_ptr

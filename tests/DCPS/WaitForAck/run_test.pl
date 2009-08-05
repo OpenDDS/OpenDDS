@@ -23,6 +23,7 @@ my $debug;
 my $man;
 my $help;
 my $verbose;
+my $publisher;
 my $orbVerbose;
 my $dFile;
 my $transportDebug;
@@ -42,6 +43,7 @@ my $priority      = "1";
 #
 GetOptions( "verbose!"            => \$verbose,
             "v"                   => \$verbose,
+	    "publisher|p"	  => \$publisher,
             "ORBVerboseLogging|V" => \$orbVerbose,
             "help|?"              => \$help,
             "man"                 => \$man,
@@ -130,6 +132,7 @@ if( PerlACE::is_vxworks_test()) {
 }
 
 my $pubArgs = "$appOpts ";
+$pubArgs .= "-p " if $publisher;
 $pubArgs .= "-DCPSInfoRepo file://$repo_ior ";
 if( PerlACE::is_vxworks_test()) {
   $PUB = new PerlACE::ProcessVX( "publisher", $pubArgs);

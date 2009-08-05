@@ -23,6 +23,20 @@ Test::Options::verbose() const
 }
 
 ACE_INLINE
+bool&
+Test::Options::publisher()
+{
+  return this->publisher_;
+}
+
+ACE_INLINE
+bool
+Test::Options::publisher() const
+{
+  return this->publisher_;
+}
+
+ACE_INLINE
 unsigned long&
 Test::Options::domain()
 {
