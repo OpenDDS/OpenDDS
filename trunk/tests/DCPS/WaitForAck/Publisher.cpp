@@ -120,12 +120,12 @@ Publisher::Publisher( const Options& options)
   }
 
   // Create the publisher.
-  DDS::Publisher_var publisher = this->participant_->create_publisher(
-                                   PUBLISHER_QOS_DEFAULT,
-                                   ::DDS::PublisherListener::_nil(),
-                                   ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
-                                 );
-  if( CORBA::is_nil( publisher.in())) {
+  this->publisher_ = this->participant_->create_publisher(
+      PUBLISHER_QOS_DEFAULT,
+      ::DDS::PublisherListener::_nil(),
+      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
+  );
+  if( CORBA::is_nil(this->publisher_.in())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Publisher::Publisher() - ")
       ACE_TEXT("failed to create publisher.\n")
@@ -161,7 +161,7 @@ Publisher::Publisher( const Options& options)
 
   // Attach the transport to the publisher.
   if( ::OpenDDS::DCPS::ATTACH_OK
-   != transport->attach( publisher.in())) {
+   != transport->attach(this->publisher_.in())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Publisher::Publisher() - ")
       ACE_TEXT("failed to attach publisher to transport.\n")
@@ -177,7 +177,7 @@ Publisher::Publisher( const Options& options)
 
   // Writer Qos policy values.
   ::DDS::DataWriterQos writerQos;
-  publisher->get_default_datawriter_qos( writerQos);
+  this->publisher_->get_default_datawriter_qos( writerQos);
 
   writerQos.durability.kind                          = ::DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
   writerQos.history.kind                             = ::DDS::KEEP_ALL_HISTORY_QOS;
@@ -196,7 +196,7 @@ Publisher::Publisher( const Options& options)
   for( int index = 0; index < this->options_.publications(); ++index) {
     // Create the writer.
     DDS::DataWriter_var writer
-      = publisher->create_datawriter(
+      = this->publisher_->create_datawriter(
           topic.in(),
           writerQos,
           DDS::DataWriterListener::_nil(),
@@ -305,18 +305,34 @@ Publisher::run()
   ACE_OS::sleep( 2);
 
   ::DDS::Duration_t delay = { 5, 0 }; // Wait for up to 5 seconds.
-  for( unsigned int index = 0; index < this->publications_.size(); ++index) {
-    // First wait on this writer.
-    ::DDS::ReturnCode_t result
-      = this->publications_[ index]->wait_for_acks( delay);
-    if( result != ::DDS::RETCODE_OK) {
+  if (this->options_.publisher())
+  {
+    DDS::ReturnCode_t error =
+      this->publisher_->wait_for_acknowledgments(delay);
+    if (error != DDS::RETCODE_OK)
+    {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) ERROR Publisher::run() - ")
-        ACE_TEXT("publication %d wait failed with code: %d.\n"),
-        index,
-        result
-      ));
+	ACE_TEXT("(%P|%t) ERROR Publisher::run() - ")
+	ACE_TEXT("publisher wait failed with code: %d.\n"),
+	error));
       ++this->status_;
+    }
+  }
+  else
+  {
+    for( unsigned int index = 0; index < this->publications_.size(); ++index) {
+      // First wait on this writer.
+      ::DDS::ReturnCode_t result
+	= this->publications_[ index]->wait_for_acks( delay);
+      if( result != ::DDS::RETCODE_OK) {
+	ACE_DEBUG((LM_DEBUG,
+	  ACE_TEXT("(%P|%t) ERROR Publisher::run() - ")
+	  ACE_TEXT("publication %d wait failed with code: %d.\n"),
+	  index,
+	  result
+	));
+	++this->status_;
+      }
     }
   }
 

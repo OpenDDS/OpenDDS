@@ -670,23 +670,82 @@ PublisherImpl::end_coherent_changes ()
 }
 
 
-::DDS::ReturnCode_t 
-PublisherImpl::wait_for_acknowledgments (
-  const ::DDS::Duration_t & max_wait
-  )
+DDS::ReturnCode_t 
+PublisherImpl::wait_for_acknowledgments(
+    const ::DDS::Duration_t& max_wait)
   ACE_THROW_SPEC ((::CORBA::SystemException))
 {
   if (enabled_ == false)
   {
     ACE_ERROR_RETURN ((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: PublisherImpl::delete_contained_entities, ")
-      ACE_TEXT(" Entity is not enabled. \n")),
-      ::DDS::RETCODE_NOT_ENABLED);
+      ACE_TEXT("(%P|%t) ERROR: PublisherImpl::wait_for_acknowledgments, ")
+      ACE_TEXT("Entity is not enabled.\n")),
+      DDS::RETCODE_NOT_ENABLED);
   }
 
-  //tbd
-  ACE_UNUSED_ARG (max_wait);
-  return ::DDS::RETCODE_OK;
+  DataWriterAckMap ack_writers;
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+		     guard,
+		     this->pi_lock_,
+		     DDS::RETCODE_ERROR);
+
+    // Collect writers to request acks
+    for (DataWriterMap::iterator it(this->datawriter_map_.begin());
+	 it != this->datawriter_map_.end(); ++it)
+    {
+      DataWriterImpl* writer = it->second->local_writer_impl_;
+      if (writer->should_ack())
+      {
+	DataWriterImpl::AckToken token = writer->create_ack_token(max_wait);
+
+	std::pair<DataWriterAckMap::iterator, bool> pair =
+	  ack_writers.insert(DataWriterAckMap::value_type(writer, token));
+	if (!pair.second)
+	{
+	  ACE_ERROR_RETURN((LM_ERROR,
+	    ACE_TEXT("(%P|%t) ERROR: PublisherImpl::wait_for_acknowledgments, ")
+	    ACE_TEXT("Unable to insert AckToken into DataWriterAckMap!\n")),
+	    DDS::RETCODE_ERROR);
+	}
+      }
+    }
+  }
+
+  if (ack_writers.empty())
+  { 
+    if(DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+	ACE_TEXT("(%P|%t) PublisherImpl::wait_for_acknowledgments() - ")
+	ACE_TEXT("not blocking due to no writers requiring acks.\n")
+      ));
+    }
+    return DDS::RETCODE_OK;
+  }
+
+  // Send ack requests to all associated readers
+  for (DataWriterAckMap::iterator it(ack_writers.begin());
+       it != ack_writers.end(); ++it)
+  {
+    it->first->send_ack_requests(it->second);
+  }
+
+  // Wait for ack responses from all associated readers
+  for (DataWriterAckMap::iterator it(ack_writers.begin());
+       it != ack_writers.end(); ++it)
+  {
+    DataWriterImpl::AckToken token = it->second;
+    if (token.deadline() <= ACE_OS::gettimeofday())
+    {
+      ACE_ERROR_RETURN((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: PublisherImpl::wait_for_acknowledgments, ")
+        ACE_TEXT("Timed out waiting for acknowledgments!\n")),
+        DDS::RETCODE_TIMEOUT);
+    }
+    it->first->wait_for_ack_responses(token);
+  }
+  
+  return DDS::RETCODE_OK;
 }
 
 

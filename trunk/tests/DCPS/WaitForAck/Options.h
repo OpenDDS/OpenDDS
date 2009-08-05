@@ -37,6 +37,11 @@ class Options  {
     public:    bool  verbose() const;
     ///}
 
+    ///{ @name Test publisher.
+    protected: bool& publisher();
+    public:    bool  publisher() const;
+    ///}
+
     ///{ @name Test domain.
     protected: unsigned long& domain();
     public:    unsigned long  domain() const;
@@ -63,6 +68,9 @@ class Options  {
 
     /// Test verbosity.
     bool verbose_;
+
+    /// Test Publisher implementation.
+    bool publisher_;
 
     /// Test domain.
     unsigned long domain_;

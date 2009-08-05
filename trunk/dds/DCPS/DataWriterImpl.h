@@ -17,6 +17,7 @@
 #include "DataSampleHeader.h"
 #include "TopicImpl.h"
 #include "AssociationData.h"
+#include "Qos_Helper.h"
 
 #include "ace/Event_Handler.h"
 
@@ -69,6 +70,31 @@ namespace OpenDDS
       // public virtual OpenDDS::DCPS::DataWriterLocal
     {
     public:
+      struct AckToken
+      {
+        ACE_Time_Value tstamp_;
+        DDS::Duration_t max_wait_;
+        SequenceNumber sequence_;
+
+        AckToken(const DDS::Duration_t& max_wait,
+                 const SequenceNumber& sequence)
+          : tstamp_(ACE_OS::gettimeofday()),
+            max_wait_(max_wait),
+            sequence_(sequence)
+	{}
+
+	~AckToken() {}
+
+	ACE_Time_Value deadline() const
+	{ 
+	  return this->tstamp_ + duration_to_time_value(this->max_wait_);
+	}
+
+	DDS::Time_t timestamp() const
+	{
+	  return time_value_to_time(this->tstamp_);
+	}
+      };
 
       ///Constructor
       DataWriterImpl (void);
@@ -247,6 +273,18 @@ namespace OpenDDS
        * message is delivered.
        */
       void control_delivered (ACE_Message_Block* sample);
+
+      /// Does this writer have samples to be acknowledged?
+      bool should_ack() const;
+      
+      /// Create an AckToken for ack operations.
+      AckToken create_ack_token(DDS::Duration_t max_wait) const;
+
+      /// Send SAMPLE_ACK messages to associated readers.
+      DDS::ReturnCode_t send_ack_requests(const AckToken& token);
+
+      /// Wait for SAMPLE_ACK responses from associated readers.
+      DDS::ReturnCode_t wait_for_ack_responses(const AckToken& token);
 
       /// Deliver a requested SAMPLE_ACK message to this writer.
       virtual void deliver_ack( const DataSampleHeader& header, DataSample* data);
