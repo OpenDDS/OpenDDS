@@ -1,3 +1,11 @@
+Thu Aug  6 20:32:51 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * docs/design/presentation.txt:
+
+	  Added discussion about implementing the minimum profile portion
+	  of the PRESENTATION Qos policy.  Included all relevant
+	  specification sections and verbiage.
+
 Wed Aug  5 17:15:08 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.h:
@@ -5,11 +13,11 @@ Wed Aug  5 17:15:08 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * dds/DCPS/PublisherImpl.h:
         * dds/DCPS/PublisherImpl.cpp:
 
-	  Implemented Publisher::wait_for_acknowledgments.
+          Implemented Publisher::wait_for_acknowledgments.
 
         * bin/dcps_tests.lst:
 
-	  Added WaitForAck publisher test to nightly builds.
+          Added WaitForAck publisher test to nightly builds.
 
         * tests/DCPS/WaitForAck/Options.h:
         * tests/DCPS/WaitForAck/Options.inl:
@@ -18,7 +26,7 @@ Wed Aug  5 17:15:08 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * tests/DCPS/WaitForAck/Publisher.cpp:
         * tests/DCPS/WaitForAck/run_test.pl:
 
-	  Updated WaitForAck test to cover publisher implementation.
+          Updated WaitForAck test to cover publisher implementation.
 
 Tue Aug  4 22:10:49 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
