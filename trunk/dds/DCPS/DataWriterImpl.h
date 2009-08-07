@@ -20,6 +20,7 @@
 #include "Qos_Helper.h"
 
 #include "ace/Event_Handler.h"
+#include "ace/OS_NS_sys_time.h"
 
 #include <map>
 #include <memory>
@@ -86,7 +87,7 @@ namespace OpenDDS
 	~AckToken() {}
 
 	ACE_Time_Value deadline() const
-	{ 
+	{
 	  return this->tstamp_ + duration_to_time_value(this->max_wait_);
 	}
 
@@ -276,7 +277,7 @@ namespace OpenDDS
 
       /// Does this writer have samples to be acknowledged?
       bool should_ack() const;
-      
+
       /// Create an AckToken for ack operations.
       AckToken create_ack_token(DDS::Duration_t max_wait) const;
 
@@ -462,7 +463,7 @@ namespace OpenDDS
       /// via the bit datareader.
       bool bit_lookup_instance_handles (const ReaderIdSeq& ids,
                                          ::DDS::InstanceHandleSeq & hdls);
- 
+
       /// Lookup the cache to get the instance handle by the
       /// subscription repo ids.
       bool cache_lookup_instance_handles (const ReaderIdSeq& ids,

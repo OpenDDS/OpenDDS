@@ -1,3 +1,9 @@
+Fri Aug  7 22:20:45 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+
+          Added missing include for ACE_OS::gettimeofday.
+
 Fri Aug  7 16:03:10 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
 
@@ -20,7 +26,7 @@ Fri Aug  7 16:03:10 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * tests/DCPS/DestinationOrder/tcp.conf:
 
           Added new test for DESTINATION_ORDER implementation.
-        
+
         * bin/dcps_tests.lst:
 
           Added nightly tests for SOURCE_TIMESTAMP and RECEPTION_TIMESTAMP
