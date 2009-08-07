@@ -1516,7 +1516,7 @@ bool DataReaderImpl::have_sample_states(
     {
       SubscriptionInstance *ptr = iter->second;
 
-      for (ReceivedDataElement *item = ptr->rcvd_sample_.head_;
+      for (ReceivedDataElement *item = ptr->rcvd_samples_.head_;
            item != 0; item = item->next_data_sample_)
         {
           if (item->sample_state_ & sample_states)
@@ -1580,11 +1580,11 @@ bool DataReaderImpl::contains_sample(::DDS::SampleStateMask sample_states,
           //if the sample state mask is "don't care" we can skip the inner loop
           //(as long as there's at least one sample)
           if ((sample_states & ::DDS::ANY_SAMPLE_STATE)
-            == ::DDS::ANY_SAMPLE_STATE && inst.rcvd_sample_.head_)
+            == ::DDS::ANY_SAMPLE_STATE && inst.rcvd_samples_.head_)
             {
               return true;
             }
-          for (ReceivedDataElement* item = inst.rcvd_sample_.head_; item != 0;
+          for (ReceivedDataElement* item = inst.rcvd_samples_.head_; item != 0;
             item = item->next_data_sample_)
             {
               if (item->sample_state_ & sample_states)
@@ -1652,7 +1652,7 @@ CORBA::Long DataReaderImpl::total_samples() const
     {
       SubscriptionInstance *ptr = iter->second;
 
-      count += ptr->rcvd_sample_.size_;
+      count += ptr->rcvd_samples_.size_;
     }
 
   return count;
@@ -1778,7 +1778,7 @@ DataReaderImpl::release_instance (::DDS::InstanceHandle_t handle)
     return;
   }
 
-  if (instance->rcvd_sample_.size_ == 0)
+  if (instance->rcvd_samples_.size_ == 0)
   {
     this->instances_.erase (handle);
     this->release_instance_i (handle);
@@ -2689,7 +2689,7 @@ DataReaderImpl::num_zero_copies()
     {
       SubscriptionInstance *ptr = iter->second;
 
-      for (OpenDDS::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_;
+      for (OpenDDS::DCPS::ReceivedDataElement *item = ptr->rcvd_samples_.head_;
             item != 0; item = item->next_data_sample_)
         {
             loans += item->zero_copy_cnt_.value();

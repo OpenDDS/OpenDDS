@@ -146,7 +146,7 @@ bool RakeResults<SampleSeq>::copy_into(FwdIter iter, FwdIter end,
       InstanceData& id = result.first->second;
       if (result.second) // first time we've seen this Instance
         {
-          ReceivedDataElement& mrs = *inst.rcvd_sample_.tail_;
+          ReceivedDataElement& mrs = *inst.rcvd_samples_.tail_;
           id.MRS_disposed_gc_ = mrs.disposed_generation_count_;
           id.MRS_nowriters_gc_ = mrs.no_writers_generation_count_;
         }
@@ -166,7 +166,7 @@ bool RakeResults<SampleSeq>::copy_into(FwdIter iter, FwdIter end,
       // 4. Take
       if (oper_ == DDS_OPERATION_TAKE)
         {
-          inst.rcvd_sample_.remove(rde);
+          inst.rcvd_samples_.remove(rde);
           inst.instance_state_.data_reader()->dec_ref_data_element(rde);
         }
     }

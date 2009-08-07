@@ -80,6 +80,51 @@ operator>= (::DDS::Duration_t const & t1,
   return t2 <= t1;
 }
 
+ACE_INLINE bool
+operator!(const DDS::Time_t& t)
+{
+  return t.sec == DDS::TIME_INVALID_SEC
+      || t.nanosec == DDS::TIME_INVALID_NSEC;
+}
+
+ACE_INLINE bool
+operator==(const DDS::Time_t& t1, const DDS::Time_t& t2)
+{
+  return !(t1 < t2) && !(t2 < t1);
+}
+
+ACE_INLINE bool
+operator!=(const DDS::Time_t& t1, const DDS::Time_t& t2)
+{
+  return !(t1 == t2);
+}
+
+ACE_INLINE bool
+operator<(const DDS::Time_t& t1, const DDS::Time_t& t2)
+{
+  if (!t1 || !t2) return false;
+  return t1.sec < t2.sec
+      || t1.sec == t2.sec && t1.nanosec < t2.nanosec;
+}
+
+ACE_INLINE bool
+operator<=(const DDS::Time_t& t1, const DDS::Time_t& t2)
+{
+  return !(t2 < t1);
+}
+
+ACE_INLINE bool
+operator>(const DDS::Time_t& t1, const DDS::Time_t& t2)
+{
+  return t2 < t1;
+}
+
+ACE_INLINE bool
+operator>=(const DDS::Time_t& t1, const DDS::Time_t& t2)
+{
+  return t2 <= t1;
+}
+
 
 ACE_INLINE
 bool operator == (const ::DDS::UserDataQosPolicy& qos1,
@@ -754,10 +799,9 @@ namespace OpenDDS
     ACE_INLINE
     bool Qos_Helper::valid (const ::DDS::DestinationOrderQosPolicy& qos)
     {
-      return
-        qos == TheServiceParticipant->initial_DestinationOrderQosPolicy();
+      return qos.kind == DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS
+          || qos.kind == DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS;
     }
-
 
     ACE_INLINE
     bool

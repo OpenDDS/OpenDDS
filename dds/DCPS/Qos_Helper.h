@@ -331,6 +331,27 @@ bool operator>= (const ::DDS::Duration_t& t1,
                  const ::DDS::Duration_t& t2);
 
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
+bool operator!(const DDS::Time_t& t);
+
+EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
+bool operator==(const DDS::Time_t& t1, const DDS::Time_t& t2);
+
+EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
+bool operator!=(const DDS::Time_t& t1, const DDS::Time_t& t2);
+
+EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
+bool operator<(const DDS::Time_t& t1, const DDS::Time_t& t2);
+
+EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
+bool operator<=(const DDS::Time_t& t1, const DDS::Time_t& t2);
+
+EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
+bool operator>(const DDS::Time_t& t1, const DDS::Time_t& t2);
+
+EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
+bool operator>=(const DDS::Time_t& t1, const DDS::Time_t& t2);
+
+EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator == (const ::DDS::UserDataQosPolicy& qos1,
                   const ::DDS::UserDataQosPolicy& qos2);
 
