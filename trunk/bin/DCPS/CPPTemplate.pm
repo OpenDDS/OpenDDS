@@ -638,11 +638,11 @@ void
     // conflicts when releasing shared resources.
     ptr->instance_state_.cancel_pending();
 
-    while (ptr->rcvd_sample_.size_ > 0)
+    while (ptr->rcvd_samples_.size_ > 0)
     {
       OpenDDS::DCPS::ReceivedDataElement * const head_ptr =
-	ptr->rcvd_sample_.head_;
-      ptr->rcvd_sample_.remove(head_ptr);
+        ptr->rcvd_samples_.head_;
+      ptr->rcvd_samples_.remove(head_ptr);
       dec_ref_data_element(head_ptr);
     }
 
@@ -715,7 +715,7 @@ DDS::ReturnCode_t
         (inst->instance_state_.instance_state() & instance_states))
     {
       size_t i(0);
-      for (OpenDDS::DCPS::ReceivedDataElement *item = inst->rcvd_sample_.head_;
+      for (OpenDDS::DCPS::ReceivedDataElement *item = inst->rcvd_samples_.head_;
            item != 0; item = item->next_data_sample_)
       {
         if (item->sample_state_ & sample_states)
@@ -795,7 +795,7 @@ DDS::ReturnCode_t
         (inst->instance_state_.instance_state() & instance_states))
     {
       size_t i(0);
-      for (OpenDDS::DCPS::ReceivedDataElement *item = inst->rcvd_sample_.head_;
+      for (OpenDDS::DCPS::ReceivedDataElement *item = inst->rcvd_samples_.head_;
            item != 0; item = item->next_data_sample_)
       {
         if (item->sample_state_ & sample_states)
@@ -909,7 +909,7 @@ DDS::ReturnCode_t
     if ((ptr->instance_state_.view_state() & ::DDS::ANY_VIEW_STATE) &&
         (ptr->instance_state_.instance_state() & ::DDS::ANY_INSTANCE_STATE))
     {
-      for (OpenDDS::DCPS::ReceivedDataElement* item = ptr->rcvd_sample_.head_;
+      for (OpenDDS::DCPS::ReceivedDataElement* item = ptr->rcvd_samples_.head_;
            item != 0;
            item = item->next_data_sample_)
       {
@@ -942,7 +942,7 @@ DDS::ReturnCode_t
 
       // Get the sample_ranks, generation_ranks, and
       // absolute_generation_ranks for this info_seq
-      this->sample_info(sample_info, ptr->rcvd_sample_.tail_);
+      this->sample_info(sample_info, ptr->rcvd_samples_.tail_);
 
       break;
     }
@@ -982,7 +982,7 @@ DDS::ReturnCode_t
 
       OpenDDS::DCPS::ReceivedDataElement *next;
       tail = 0;
-      OpenDDS::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_;
+      OpenDDS::DCPS::ReceivedDataElement *item = ptr->rcvd_samples_.head_;
       while (item)
       {
         if (item->sample_state_ & ::DDS::NOT_READ_SAMPLE_STATE)
@@ -998,16 +998,16 @@ DDS::ReturnCode_t
 
           if (!mrg) mrg = ptr->instance_state_.most_recent_generation(item);
 
-          if (item == ptr->rcvd_sample_.tail_)
+          if (item == ptr->rcvd_samples_.tail_)
           {
-            tail = ptr->rcvd_sample_.tail_;
+            tail = ptr->rcvd_samples_.tail_;
             item = item->next_data_sample_;
           }
           else
           {
             next = item->next_data_sample_;
 
-            ptr->rcvd_sample_.remove(item);
+            ptr->rcvd_samples_.remove(item);
             dec_ref_data_element(item);
 
             item = next;
@@ -1034,12 +1034,12 @@ DDS::ReturnCode_t
       {
         this->sample_info(sample_info, tail);
 
-        ptr->rcvd_sample_.remove(tail);
+        ptr->rcvd_samples_.remove(tail);
         dec_ref_data_element(tail);
       }
       else
       {
-        this->sample_info(sample_info, ptr->rcvd_sample_.tail_);
+        this->sample_info(sample_info, ptr->rcvd_samples_.tail_);
       }
 
       break;
@@ -1099,7 +1099,7 @@ DDS::ReturnCode_t
       (inst->instance_state_.instance_state() & instance_states))
   {
     size_t i(0);
-    for (OpenDDS::DCPS::ReceivedDataElement* item = inst->rcvd_sample_.head_;
+    for (OpenDDS::DCPS::ReceivedDataElement* item = inst->rcvd_samples_.head_;
          item; item = item->next_data_sample_)
     {
       if (item->sample_state_ & sample_states)
@@ -1174,7 +1174,7 @@ DDS::ReturnCode_t
       (inst->instance_state_.instance_state() & instance_states))
   {
     size_t i(0);
-    for (OpenDDS::DCPS::ReceivedDataElement* item = inst->rcvd_sample_.head_;
+    for (OpenDDS::DCPS::ReceivedDataElement* item = inst->rcvd_samples_.head_;
          item; item = item->next_data_sample_)
     {
       if (item->sample_state_ & sample_states)
@@ -1593,7 +1593,7 @@ void
     OpenDDS::DCPS::SubscriptionInstance* instance = 0;
     handle = get_next_handle();
     ACE_NEW_RETURN (instance,
-                    OpenDDS::DCPS::SubscriptionInstance(this, handle),
+                    OpenDDS::DCPS::SubscriptionInstance(this, this->qos_, handle),
                     ::DDS::RETCODE_ERROR);
 
     instance->instance_handle_ = handle;
@@ -1637,7 +1637,7 @@ void
     //       and RESOURCE_LIMITS.max_instances.
     if ((this->qos_.resource_limits.max_samples_per_instance !=
           ::DDS::LENGTH_UNLIMITED) &&
-       (instance_ptr->rcvd_sample_.size_ >=
+       (instance_ptr->rcvd_samples_.size_ >=
         this->qos_.resource_limits.max_samples_per_instance))
     {
 
@@ -1645,7 +1645,7 @@ void
         // It just simply removes the oldest sample no matter what the 
         // view state is.
         if  (! is_dispose_msg  && ! is_unregister_msg
-          && instance_ptr->rcvd_sample_.head_->sample_state_
+          && instance_ptr->rcvd_samples_.head_->sample_state_
           == ::DDS::NOT_READ_SAMPLE_STATE)
         {
         // for now the implemented QoS means that if the head sample
@@ -1683,8 +1683,8 @@ void
        {
          // Discard the oldest previously-read sample
          OpenDDS::DCPS::ReceivedDataElement *item =
-           instance_ptr->rcvd_sample_.head_;
-         instance_ptr->rcvd_sample_.remove(item);
+           instance_ptr->rcvd_samples_.head_;
+         instance_ptr->rcvd_samples_.remove(item);
          dec_ref_data_element(item);
       }
     }
@@ -1728,14 +1728,14 @@ void
     ptr->sequence_ = header.sequence_;
     instance_ptr->last_sequence_ = header.sequence_;
 
-    instance_ptr->rcvd_sample_.add(ptr);
+    instance_ptr->rcvd_strategy_->add(ptr);
 
-    if (instance_ptr->rcvd_sample_.size_ > get_depth())
+    if (instance_ptr->rcvd_samples_.size_ > get_depth())
     {
       OpenDDS::DCPS::ReceivedDataElement* head_ptr =
-        instance_ptr->rcvd_sample_.head_;
+        instance_ptr->rcvd_samples_.head_;
 
-      instance_ptr->rcvd_sample_.remove(head_ptr);
+      instance_ptr->rcvd_samples_.remove(head_ptr);
 
       if (head_ptr->sample_state_ == ::DDS::NOT_READ_SAMPLE_STATE)
       {

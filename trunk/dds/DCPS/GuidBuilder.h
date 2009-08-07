@@ -51,4 +51,4 @@ private:
 # include "GuidBuilder.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif /* DCPS_REPOIDBUILDER_H */
+#endif /* DCPS_GUIDBUILDER_H */
