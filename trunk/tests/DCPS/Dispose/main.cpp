@@ -17,10 +17,10 @@
 
 #include "FooTypeTypeSupportImpl.h"
 
-#ifdef ACE_AS_STATIC_LIBS                                                   
-# include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>                         
+#ifdef ACE_AS_STATIC_LIBS
+# include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
 #endif
-  
+
 class DDS_TEST
 {
 public:
@@ -42,12 +42,14 @@ public:
   }
 
   bool
-  take_samples(int max_samples)
+  take_all_samples()
   {
     FooSeq foo;
     DDS::SampleInfoSeq si;
 
-    return reader_->take(foo, si, max_samples,
+    return reader_->take(foo,
+                         si,
+                         DDS::LENGTH_UNLIMITED,
 	                 DDS::ANY_SAMPLE_STATE,
 			 DDS::ANY_VIEW_STATE,
 			 DDS::ANY_INSTANCE_STATE) == DDS::RETCODE_OK;
@@ -75,7 +77,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       TheParticipantFactory->create_participant(42,
                                                 PARTICIPANT_QOS_DEFAULT,
                                                 DDS::DomainParticipantListener::_nil(),
-                                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (CORBA::is_nil(participant.in()))
       ACE_ERROR_RETURN((LM_ERROR,
@@ -86,7 +88,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     DDS::Subscriber_var subscriber =
       participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
                                      DDS::SubscriberListener::_nil(),
-                                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (CORBA::is_nil(subscriber.in()))
       ACE_ERROR_RETURN((LM_ERROR,
@@ -97,8 +99,8 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     DDS::Publisher_var publisher =
       participant->create_publisher(PUBLISHER_QOS_DEFAULT,
                                     DDS::PublisherListener::_nil(),
-                                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-   
+                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
     if (CORBA::is_nil(publisher.in()))
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
@@ -117,7 +119,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     OpenDDS::DCPS::SubscriberImpl* subscriber_i =
       dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(subscriber.in());
-    
+
     if (subscriber_i == 0)
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
@@ -125,7 +127,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     OpenDDS::DCPS::AttachStatus sub_status =
       subscriber_i->attach_transport(sub_transport.in());
-    
+
     if (sub_status != OpenDDS::DCPS::ATTACH_OK)
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
@@ -142,7 +144,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     OpenDDS::DCPS::PublisherImpl* publisher_i =
       dynamic_cast<OpenDDS::DCPS::PublisherImpl*>(publisher.in());
-    
+
     if (publisher_i == 0)
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
@@ -150,12 +152,12 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     OpenDDS::DCPS::AttachStatus pub_status =
       publisher_i->attach_transport(pub_transport.in());
-    
+
     if (pub_status != OpenDDS::DCPS::ATTACH_OK)
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
                         ACE_TEXT(" ERROR: attach_transport failed!\n")), 1);
-    
+
     // Register Type (FooType)
     FooTypeSupport_var ts = new FooTypeSupportImpl;
     if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK)
@@ -169,7 +171,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
                                 ts->get_type_name(),
                                 TOPIC_QOS_DEFAULT,
                                 DDS::TopicListener::_nil(),
-                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (CORBA::is_nil(topic.in()))
       ACE_ERROR_RETURN((LM_ERROR,
@@ -177,35 +179,44 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
                         ACE_TEXT(" ERROR: create_topic failed!\n")), 1);
 
     // Create DataReader
+    DDS::DataReaderQos qos;
+
+    if (subscriber->get_default_datareader_qos(qos) != DDS::RETCODE_OK)
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("%N:%l main()")
+                        ACE_TEXT(" ERROR: create_datareader failed!\n")), -1);
+
+    qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+
     DDS::DataReader_var reader =
       subscriber->create_datareader(topic.in(),
-                                    DATAREADER_QOS_DEFAULT,
+                                    qos,
                                     DDS::DataReaderListener::_nil(),
-                                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (CORBA::is_nil(reader.in()))
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
                         ACE_TEXT(" ERROR: create_datareader failed!\n")), 7);
-    
+
     FooDataReader_var reader_i = FooDataReader::_narrow(reader);
     if (CORBA::is_nil(reader_i))
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
                         ACE_TEXT(" ERROR: _narrow failed!\n")), 1);
-      
+
     // Create DataWriter
     DDS::DataWriter_var writer =
       publisher->create_datawriter(topic.in(),
                                    DATAWRITER_QOS_DEFAULT,
                                    DDS::DataWriterListener::_nil(),
-                                   ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    
+                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
     if (CORBA::is_nil(writer.in()))
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
                         ACE_TEXT(" ERROR: create_datawriter failed!\n")), 1);
-    
+
     FooDataWriter_var writer_i = FooDataWriter::_narrow(writer);
     if (CORBA::is_nil(writer_i))
       ACE_ERROR_RETURN((LM_ERROR,
@@ -222,7 +233,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     DDS::Duration_t timeout =
       { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
 
-    DDS::ConditionSeq conditions; 
+    DDS::ConditionSeq conditions;
     DDS::PublicationMatchedStatus matches = { 0, 0, 0, 0, 0 };
     do
     {
@@ -250,7 +261,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     //
     DDS_TEST test(reader_i);
     if (!test) return 1;
-    
+
     Foo foo;
     DDS::InstanceHandle_t handle;
 
@@ -261,24 +272,23 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     ACE_OS::sleep(5); // wait for samples to arrive
 
-    if (!test.take_samples(2)) /* 1 valid + 1 non-valid (dispose) */
+    if (!test.take_all_samples())
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: unable to take samples!\n")), 2);
-
     /// Verify instance has been deleted
     if (test.has_instance(handle))
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: instance not removed!\n")), 3);
 
-    // Clean-up!    
+    // Clean-up!
     TheTransportFactory->release();
     TheServiceParticipant->shutdown();
   }
   catch (const CORBA::Exception& e)
   {
-    e._tao_print_exception("caught in main()"); 
+    e._tao_print_exception("caught in main()");
     return -1;
   }
 
