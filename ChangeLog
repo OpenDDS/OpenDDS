@@ -1,3 +1,12 @@
+Mon Aug 10 23:50:19 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/RakeResults_T.h:
+        * dds/DCPS/RakeResults_T.cpp:
+        * tests/DCPS/Dispose/main.cpp:
+
+          Fixed bug causing non-valid samples to be filtered out
+          unconditionally.
+
 Mon Aug 10 22:41:13 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
@@ -25,7 +34,6 @@ Fri Aug  7 22:20:45 UTC 2009  Steven Stallion  <stallions@ociweb.com>
           Added missing include for ACE_OS::gettimeofday.
 
 Fri Aug  7 16:03:10 UTC 2009  Steven Stallion  <stallions@ociweb.com>
-
 
         * bin/DCPS/CPPTemplate.pm:
         * dds/DCPS/DataReaderImpl.cpp:

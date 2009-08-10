@@ -84,17 +84,20 @@ bool RakeResults<SampleSeq>::insert_sample(ReceivedDataElement* sample,
                     (sample->registered_data_))) return false;
 #endif
 
-  RakeData rd = {sample, instance, index_in_instance};
-
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   if (do_sort_)
     {
+      // N.B. Until a better heuristic is found, non-valid
+      // samples are omitted when sorting.
+      if (sample->registered_data_ == 0) return false;
+      RakeData rd = {sample, instance, index_in_instance};
       sorted_.insert(rd);
     }
   else
     {
 #endif
       if (unsorted_.size() == max_samples_) return false;
+      RakeData rd = {sample, instance, index_in_instance};
       unsorted_.push_back(rd);
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
     }
