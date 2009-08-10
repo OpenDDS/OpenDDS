@@ -93,9 +93,6 @@ namespace OpenDDS
         /// SAMPLE_ACK for this sequence value.
         void ack_deadline( SequenceNumber sequence, ACE_Time_Value when);
 
-        /// Accessor for writer_id_.
-        PublicationId writer_id () const;
-
       private:
         /// Timestamp of last write/dispose/assert_liveliness from this DataWriter
         ACE_Time_Value last_liveliness_activity_time_;

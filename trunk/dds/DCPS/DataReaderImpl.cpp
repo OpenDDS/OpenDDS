@@ -1174,33 +1174,25 @@ void
 DataReaderImpl::writer_activity(PublicationId writer_id)
 {
   // caller should have the sample_lock_ !!!
-  WriterInfo info;
-  {
-    ACE_READ_GUARD (ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
+  ACE_READ_GUARD (ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
 
-    WriterMapType::iterator iter = writers_.find(writer_id);
-    if( iter != writers_.end()) {
-      info = iter->second; 
+  WriterMapType::iterator iter = writers_.find(writer_id);
+  if( iter != writers_.end()) {
+      ACE_Time_Value when = ACE_OS::gettimeofday ();
+      iter->second.received_activity (when);
 
-    } else if( DCPS_debug_level > 4) {
-      // This may not be an error since it could happen that the sample
-      // is delivered to the datareader after the write is dis-associated
-      // with this datareader.
-      RepoIdConverter reader_converter(subscription_id_);
-      RepoIdConverter writer_converter(writer_id);
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) DataReaderImpl::writer_activity: ")
-        ACE_TEXT("reader %C is not associated with writer %C.\n"),
-        std::string(reader_converter).c_str(),
-        std::string(writer_converter).c_str()
-        ));
-    }
-  }
-  
-  if (! (info.writer_id() == GUID_UNKNOWN))
-  {
-    ACE_Time_Value when = ACE_OS::gettimeofday ();
-    info.received_activity (when);
+  } else if( DCPS_debug_level > 4) {
+    // This may not be an error since it could happen that the sample
+    // is delivered to the datareader after the write is dis-associated
+    // with this datareader.
+    RepoIdConverter reader_converter(subscription_id_);
+    RepoIdConverter writer_converter(writer_id);
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) DataReaderImpl::writer_activity: ")
+      ACE_TEXT("reader %C is not associated with writer %C.\n"),
+      std::string(reader_converter).c_str(),
+      std::string(writer_converter).c_str()
+    ));
   }
 }
 
@@ -1808,7 +1800,6 @@ OpenDDS::DCPS::WriterInfo::WriterInfo ()
 {
 }
 
-
 OpenDDS::DCPS::WriterInfo::WriterInfo (DataReaderImpl* reader,
                                    PublicationId   writer_id)
   : last_liveliness_activity_time_(ACE_OS::gettimeofday()),
@@ -1957,14 +1948,6 @@ OpenDDS::DCPS::WriterInfo::ack_deadline( SequenceNumber sequence, ACE_Time_Value
     }
   }
 }
-
-
-OpenDDS::DCPS::PublicationId 
-OpenDDS::DCPS::WriterInfo::writer_id () const
-{
-  return writer_id_;
-}
-
 
 OpenDDS::DCPS::WriterStats::WriterStats(
   int amount,
