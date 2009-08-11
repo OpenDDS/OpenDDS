@@ -98,7 +98,7 @@ PublisherImpl::contains_writer(DDS::InstanceHandle_t a_handle)
   {
     if (helper.matches(it->second->local_writer_objref_))
       return true;
-  } 
+  }
   return false;
 }
 
@@ -241,6 +241,9 @@ PublisherImpl::delete_datawriter (::DDS::DataWriter_ptr a_datawriter)
     }
   }
 
+  // Unregister all registered instances prior to deletion.
+  dw_servant->unregister_instances();
+
   CORBA::String_var topic_name = dw_servant->get_topic_name ();
   DataWriterImpl* local_writer = 0;
   RepoId publication_id  = GUID_UNKNOWN;
@@ -293,11 +296,11 @@ PublisherImpl::delete_datawriter (::DDS::DataWriter_ptr a_datawriter)
     publication_map_.erase (publication_id);
 
 
-    // Release pi_lock_ before making call to transport layer to avoid 
-    // some deadlock situations that threads acquire locks(PublisherImpl 
+    // Release pi_lock_ before making call to transport layer to avoid
+    // some deadlock situations that threads acquire locks(PublisherImpl
     // pi_lock_, TransportInterface reservation_lock and TransportImpl
     // lock_) in reverse order.
-    ACE_GUARD_RETURN (reverse_lock_type, reverse_monitor, this->reverse_pi_lock_, 
+    ACE_GUARD_RETURN (reverse_lock_type, reverse_monitor, this->reverse_pi_lock_,
                       ::DDS::RETCODE_ERROR);
 
     // Wait for pending samples to drain prior to removing associations
@@ -555,7 +558,7 @@ PublisherImpl::set_qos (const ::DDS::PublisherQos & qos)
     }
 }
 
-::DDS::ReturnCode_t 
+::DDS::ReturnCode_t
 PublisherImpl::get_qos (::DDS::PublisherQos & qos)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
@@ -670,7 +673,7 @@ PublisherImpl::end_coherent_changes ()
 }
 
 
-DDS::ReturnCode_t 
+DDS::ReturnCode_t
 PublisherImpl::wait_for_acknowledgments(
     const ::DDS::Duration_t& max_wait)
   ACE_THROW_SPEC ((::CORBA::SystemException))
@@ -713,7 +716,7 @@ PublisherImpl::wait_for_acknowledgments(
   }
 
   if (ack_writers.empty())
-  { 
+  {
     if(DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
 	ACE_TEXT("(%P|%t) PublisherImpl::wait_for_acknowledgments() - ")
@@ -744,7 +747,7 @@ PublisherImpl::wait_for_acknowledgments(
     }
     it->first->wait_for_ack_responses(token);
   }
-  
+
   return DDS::RETCODE_OK;
 }
 
@@ -813,12 +816,12 @@ PublisherImpl::copy_from_topic_qos (::DDS::DataWriterQos & a_datawriter_qos,
 PublisherImpl::enable ()
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
-  //According spec: 
-  // - Calling enable on an already enabled Entity returns OK and has no 
+  //According spec:
+  // - Calling enable on an already enabled Entity returns OK and has no
   // effect.
-  // - Calling enable on an Entity whose factory is not enabled will fail 
+  // - Calling enable on an Entity whose factory is not enabled will fail
   // and return PRECONDITION_NOT_MET.
-  
+
   if (this->is_enabled ())
   {
     return ::DDS::RETCODE_OK;
@@ -939,7 +942,7 @@ PublisherImpl::writer_enabled(
           qos,
           trans_conf_info ,   // Obtained during setup.
           this->qos_);
-      
+
       if (info->publication_id_ == GUID_UNKNOWN)
       {
         ACE_ERROR ((LM_ERROR,
@@ -1096,7 +1099,7 @@ PublisherImpl::assert_liveliness_by_participant ()
   for (DataWriterMap::iterator it(datawriter_map_.begin());
     it != datawriter_map_.end(); ++it)
   {
-    ::DDS::ReturnCode_t dw_ret 
+    ::DDS::ReturnCode_t dw_ret
       = it->second->local_writer_impl_->assert_liveliness_by_participant ();
     if (dw_ret != ::DDS::RETCODE_OK)
     {

@@ -161,7 +161,7 @@ DataWriterImpl::init (
   qos_ = qos;
   //Note: OK to _duplicate(nil).
   listener_ = ::DDS::DataWriterListener::_duplicate(a_listener);
-  
+
   if (! CORBA::is_nil (listener_.in()))
     {
       fast_listener_ = listener_.in();
@@ -231,7 +231,7 @@ DataWriterImpl::add_associations ( ::OpenDDS::DCPS::RepoId yourId,
 
   {
     ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
-    // Add to pending_readers_ 
+    // Add to pending_readers_
 
     CORBA::ULong len = readers.length();
 
@@ -300,7 +300,7 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
     for (CORBA::ULong i = 0; i < num_remote_associations; ++i)
     {
       // If the reader is not in pending association list, which indicates it's already
-      // removed by remove_association. In other words, the remove_association()  
+      // removed by remove_association. In other words, the remove_association()
       // is called before fully_associated() call.
       if (OpenDDS::DCPS::remove (pending_readers_, remote_associations[i].remote_id_) == -1)
       {
@@ -313,13 +313,13 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
         ));
         continue;
       }
-      
+
       // The reader is in the pending reader, now add it to fully associated reader
       // list.
       ++len;
       rd_ids.length (len);
       rd_ids[len - 1] = remote_associations[i].remote_id_;
-      
+
       if (OpenDDS::DCPS::insert (readers_, remote_associations[i].remote_id_) == -1)
       {
         RepoIdConverter converter(remote_associations[i].remote_id_);
@@ -451,8 +451,8 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
   ACE_GUARD (ACE_SYNCH_MUTEX, wfaGuard, this->wfaLock_);
   ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
-  //Remove the readers from fully associated reader list. 
-  //If the supplied reader is not in the cached reader list then it is 
+  //Remove the readers from fully associated reader list.
+  //If the supplied reader is not in the cached reader list then it is
   //already removed. We just need remove the readers in the list that have
   //not been removed.
 
@@ -467,7 +467,7 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
     {
       ++ fully_associated_len;
       fully_associated_readers.length (fully_associated_len);
-      fully_associated_readers [fully_associated_len - 1] = readers[i]; 
+      fully_associated_readers [fully_associated_len - 1] = readers[i];
 
       // Remove this reader from the ACK sequence map if its there.
       // This is where we need to be holding the wfaLock_ obtained
@@ -484,13 +484,13 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
 
       ++ rds_len;
       rds.length (rds_len);
-      rds [rds_len - 1] = readers[i];         
+      rds [rds_len - 1] = readers[i];
     }
     else if (OpenDDS::DCPS::remove (pending_readers_, readers[i]) == 0)
     {
       ++ rds_len;
       rds.length (rds_len);
-      rds [rds_len - 1] = readers[i]; 
+      rds [rds_len - 1] = readers[i];
 
       RepoIdConverter converter(readers[i]);
       ACE_DEBUG((LM_DEBUG,
@@ -722,7 +722,7 @@ DataWriterImpl::set_qos (const ::DDS::DataWriterQos & qos)
           this->watchdog_->cancel_all ();
           this->watchdog_.reset ();
         }
-        else 
+        else
         {
           this->watchdog_->reset_interval (
             duration_to_time_value (qos.deadline.period));
@@ -930,7 +930,7 @@ DataWriterImpl::wait_for_acknowledgments(const DDS::Duration_t& max_wait)
   AckToken token(create_ack_token(max_wait));
 
   DDS::ReturnCode_t error;
- 
+
   if ((error = send_ack_requests(token)) != DDS::RETCODE_OK) return error;
   if ((error = wait_for_ack_responses(token)) != DDS::RETCODE_OK) return error;
 
@@ -944,7 +944,7 @@ DataWriterImpl::get_publisher ()
   return ::DDS::Publisher::_duplicate (publisher_servant_);
 }
 
-::DDS::ReturnCode_t 
+::DDS::ReturnCode_t
 DataWriterImpl::get_liveliness_lost_status (
   ::DDS::LivelinessLostStatus & status)
   ACE_THROW_SPEC (( CORBA::SystemException ))
@@ -959,7 +959,7 @@ DataWriterImpl::get_liveliness_lost_status (
   return ::DDS::RETCODE_OK;
 }
 
-::DDS::ReturnCode_t 
+::DDS::ReturnCode_t
 DataWriterImpl::get_offered_deadline_missed_status (
   ::DDS::OfferedDeadlineMissedStatus & status)
   ACE_THROW_SPEC (( CORBA::SystemException ))
@@ -1017,7 +1017,7 @@ DataWriterImpl::get_publication_matched_status (
   return ::DDS::RETCODE_OK;
 }
 
-::DDS::ReturnCode_t 
+::DDS::ReturnCode_t
 DataWriterImpl::assert_liveliness ()
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
@@ -1036,7 +1036,7 @@ DataWriterImpl::assert_liveliness ()
     || now - last_liveliness_activity_time_ >= liveliness_check_interval_)
   {
     //Not recent enough then send liveliness message.
-    if (DCPS_debug_level > 9) { 
+    if (DCPS_debug_level > 9) {
       RepoIdConverter converter(publication_id_);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataWriterImpl::assert_liveliness: ")
@@ -1051,7 +1051,7 @@ DataWriterImpl::assert_liveliness ()
   return ::DDS::RETCODE_OK;
 }
 
-::DDS::ReturnCode_t 
+::DDS::ReturnCode_t
 DataWriterImpl::assert_liveliness_by_participant ()
 {
   // This operation is called by participant.
@@ -1137,12 +1137,12 @@ DataWriterImpl::get_matched_subscription_data (
 DataWriterImpl::enable ()
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
-  //According spec: 
-  // - Calling enable on an already enabled Entity returns OK and has no 
+  //According spec:
+  // - Calling enable on an already enabled Entity returns OK and has no
   // effect.
-  // - Calling enable on an Entity whose factory is not enabled will fail 
+  // - Calling enable on an Entity whose factory is not enabled will fail
   // and return PRECONDITION_NOT_MET.
-  
+
   if (this->is_enabled ())
   {
     return ::DDS::RETCODE_OK;
@@ -1230,7 +1230,7 @@ DataWriterImpl::enable ()
                n_chunks_));
   }
 
-  if (qos_.liveliness.kind == ::DDS::AUTOMATIC_LIVELINESS_QOS  
+  if (qos_.liveliness.kind == ::DDS::AUTOMATIC_LIVELINESS_QOS
     && (qos_.liveliness.lease_duration.sec != ::DDS::DURATION_INFINITE_SEC
       && qos_.liveliness.lease_duration.nanosec != ::DDS::DURATION_INFINITE_NSEC))
   {
@@ -1301,7 +1301,7 @@ DataWriterImpl::enable ()
   return writer_enabled_result;
 }
 
- 
+
 ::DDS::ReturnCode_t
 DataWriterImpl::register_instance_i(::DDS::InstanceHandle_t& handle,
                                     DataSample* data,
@@ -1409,7 +1409,30 @@ DataWriterImpl::unregister_instance_i (::DDS::InstanceHandle_t handle,
                       ::DDS::RETCODE_ERROR);
   }
 
+  if (this->qos_.writer_data_lifecycle.autodispose_unregistered_instances)
+  {
+    this->dispose(handle, source_timestamp);
+  }
+
   return ret;
+}
+
+void
+DataWriterImpl::unregister_instances()
+{
+  DDS::Time_t source_timestamp =
+    time_value_to_time(ACE_OS::gettimeofday());
+
+  PublicationInstanceMapType::iterator it =
+    this->data_container_->instances_.begin();
+
+  while(it != this->data_container_->instances_.end())
+  {
+    DDS::InstanceHandle_t handle = it->first;
+    ++it; // avoid mangling the iterator
+
+    this->unregister_instance_i(handle, source_timestamp);
+  }
 }
 
 ::DDS::ReturnCode_t
@@ -2193,7 +2216,7 @@ DataWriterImpl::persist_data ()
   return this->data_container_->persist_data ();
 }
 
-void 
+void
 DataWriterImpl::reschedule_deadline ()
 {
   if (this->watchdog_.get() != 0)
