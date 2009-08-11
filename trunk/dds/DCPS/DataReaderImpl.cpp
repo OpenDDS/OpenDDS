@@ -118,6 +118,13 @@ DataReaderImpl::~DataReaderImpl (void)
 {
   DBG_ENTRY_LVL ("DataReaderImpl","~DataReaderImpl",6);
 
+  for (WriterMapType::iterator iter = writers_.begin();
+    iter != writers_.end();
+    ++iter)
+  {
+    delete iter->second;
+  }
+
   if (initialized_)
     {
       delete rd_allocator_;
@@ -282,7 +289,7 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
           // This insertion is idempotent.
           WriterMapType::value_type(
             writer_id,
-            WriterInfo( this, writer_id)
+            new WriterInfo( this, writer_id)
           )
         );
         this->statistics_.insert(
@@ -325,8 +332,8 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
           ACE_Time_Value now = ACE_OS::gettimeofday();
 
           ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
-          if( where->second.should_ack( now)) {
-            SequenceNumber sequence = where->second.last_sequence();
+          if( where->second->should_ack( now)) {
+            SequenceNumber sequence = where->second->last_sequence();
             ::DDS::Time_t timenow = time_value_to_time(now);
             bool result = this->send_sample_ack(
                             writers[ index].writerId,
@@ -334,7 +341,7 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
                             timenow
                           );
             if( result) {
-              where->second.clear_acks( sequence);
+              where->second->clear_acks( sequence);
             }
           }
         }
@@ -501,8 +508,10 @@ void DataReaderImpl::remove_associations (
       WriterMapType::iterator it = this->writers_.find (writer_id);
       if (it != this->writers_.end())
       {
-        it->second.removed ();
+        it->second->removed ();
       }
+
+      delete it->second;
 
       if (this->writers_.erase(writer_id) == 0)
       {
@@ -1174,25 +1183,38 @@ void
 DataReaderImpl::writer_activity(PublicationId writer_id)
 {
   // caller should have the sample_lock_ !!!
-  ACE_READ_GUARD (ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
+  
+  WriterInfo* writer = 0;
 
-  WriterMapType::iterator iter = writers_.find(writer_id);
-  if( iter != writers_.end()) {
-      ACE_Time_Value when = ACE_OS::gettimeofday ();
-      iter->second.received_activity (when);
+  // The received_activity() has to be called outside the writers_lock_
+  // because it probably acquire writers_lock_ read lock recursively
+  // (in handle_timeout). This could cause deadlock when there are writers
+  // waiting.
+  {
+    ACE_READ_GUARD (ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
 
-  } else if( DCPS_debug_level > 4) {
-    // This may not be an error since it could happen that the sample
-    // is delivered to the datareader after the write is dis-associated
-    // with this datareader.
-    RepoIdConverter reader_converter(subscription_id_);
-    RepoIdConverter writer_converter(writer_id);
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DataReaderImpl::writer_activity: ")
-      ACE_TEXT("reader %C is not associated with writer %C.\n"),
-      std::string(reader_converter).c_str(),
-      std::string(writer_converter).c_str()
-    ));
+    WriterMapType::iterator iter = writers_.find(writer_id);
+    if( iter != writers_.end()) {
+      writer = iter->second; 
+
+    } else if( DCPS_debug_level > 4) {
+      // This may not be an error since it could happen that the sample
+      // is delivered to the datareader after the write is dis-associated
+      // with this datareader.
+      RepoIdConverter reader_converter(subscription_id_);
+      RepoIdConverter writer_converter(writer_id);
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) DataReaderImpl::writer_activity: ")
+        ACE_TEXT("reader %C is not associated with writer %C.\n"),
+        std::string(reader_converter).c_str(),
+        std::string(writer_converter).c_str()
+        ));
+    }
+  }
+  if (writer != 0)
+  {
+    ACE_Time_Value when = ACE_OS::gettimeofday ();
+    writer->received_activity (when);
   }
 }
 
@@ -1255,10 +1277,10 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
           WriterMapType::iterator where
             = this->writers_.find( header.publication_id_);
           if( where != this->writers_.end()) {
-            where->second.last_sequence( SequenceNumber(header.sequence_));
+            where->second->last_sequence( SequenceNumber(header.sequence_));
 
             ACE_Time_Value now = ACE_OS::gettimeofday();
-            if( where->second.should_ack( now)) {
+            if( where->second->should_ack( now)) {
               ::DDS::Time_t timenow = time_value_to_time(now);
               bool result = this->send_sample_ack(
                               header.publication_id_,
@@ -1266,7 +1288,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
                               timenow
                             );
               if( result) {
-                where->second.clear_acks( SequenceNumber(header.sequence_));
+                where->second->clear_acks( SequenceNumber(header.sequence_));
               }
             }
 
@@ -1336,9 +1358,9 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
             ACE_Time_Value now      = ACE_OS::gettimeofday();
             ACE_Time_Value deadline = now + duration_to_time_value( delay);
 
-            where->second.ack_deadline( ack, deadline);
+            where->second->ack_deadline( ack, deadline);
 
-            if( where->second.should_ack( now)) {
+            if( where->second->should_ack( now)) {
               ::DDS::Time_t timenow = time_value_to_time(now);
               bool result = this->send_sample_ack(
                               sample.header_.publication_id_,
@@ -1346,7 +1368,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
                               timenow
                             );
               if( result) {
-                where->second.clear_acks( ack);
+                where->second->clear_acks( ack);
               }
             }
 
@@ -1713,7 +1735,7 @@ DataReaderImpl::handle_timeout (const ACE_Time_Value &tv,
     {
       // deal with possibly not being alive or
       // tell when it will not be alive next (if no activity)
-      next_absolute = iter->second.check_activity(tv);
+      next_absolute = iter->second->check_activity(tv);
 
       if (next_absolute != ACE_Time_Value::max_time)
       {
@@ -2725,7 +2747,7 @@ void DataReaderImpl::notify_liveliness_change()
          ++current) {
       RepoId id = current->first;
       buffer << std::endl << "\tNOTIFY: writer[ " << RepoIdConverter(id) << "] == ";
-      buffer << current->second.get_state();
+      buffer << current->second->get_state();
     }
     buffer << std::endl;
     ACE_DEBUG((LM_DEBUG,
