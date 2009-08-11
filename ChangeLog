@@ -1,3 +1,9 @@
+Tue Aug 11 15:30:42 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/DestinationOrder/main.cpp:
+
+          Dropped unused local (caused scoreboard warnings).
+
 Tue Aug 11 04:42:34 UTC 2009  Yan Dai  <dai_y@yahoo.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
@@ -10,17 +16,17 @@ Tue Aug 11 04:42:34 UTC 2009  Yan Dai  <dai_y@yahoo.com>
 
           Added support of MANUAL_BY_PARTICIPANT_LIVELINESS_QOS
           and MANUAL_BY_TOPIC_LIVELINESS_QOS.
-          
-          - Disabled automatic liveliness assertion for new 
+
+          - Disabled automatic liveliness assertion for new
             supported liveliness kind.
           - Implemented assert_liveliness() for DomainParticipantImpl
-            and DataWriterImpl. 
+            and DataWriterImpl.
           - Made DataWriterImpl::send_liveliness return status
             code.
           - Fixed the bugs in DataReader and DataWriter that non-zero
             lease duration should be calculated when nanosec is not
             infite as well.
-          
+
         * tests/DCPS/ManualAssertLiveliness/DataReaderListener.h:
         * tests/DCPS/ManualAssertLiveliness/DataReaderListener.cpp:
         * tests/DCPS/ManualAssertLiveliness/ManualAssertLiveliness.mpc:
@@ -35,7 +41,7 @@ Tue Aug 11 04:42:34 UTC 2009  Yan Dai  <dai_y@yahoo.com>
         * tests/DCPS/ManualAssertLiveliness/tcp.conf:
 
           Added new test for manual liveliness qos.
-          
+
 Mon Aug 10 23:50:19 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/RakeResults_T.h:

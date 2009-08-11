@@ -40,8 +40,6 @@ parse_args(int& argc, ACE_TCHAR** argv)
 
   while (shifter.is_anything_left())
   {
-    const ACE_TCHAR* arg;
-
     if (shifter.cur_arg_strncasecmp("source") == 0)
     {
       ACE_DEBUG((LM_DEBUG,
