@@ -275,6 +275,8 @@ namespace OpenDDS
     */
     ::DDS::PublisherListener* listener_for (::DDS::StatusKind kind);
 
+    ::DDS::ReturnCode_t assert_liveliness_by_participant ();
+
     private:
       DDS::InstanceHandle_t         handle_;
 

@@ -1,3 +1,41 @@
+Tue Aug 11 04:42:34 UTC 2009  Yan Dai  <dai_y@yahoo.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Qos_Helper.inl:
+
+          Added support of MANUAL_BY_PARTICIPANT_LIVELINESS_QOS
+          and MANUAL_BY_TOPIC_LIVELINESS_QOS.
+          
+          - Disabled automatic liveliness assertion for new 
+            supported liveliness kind.
+          - Implemented assert_liveliness() for DomainParticipantImpl
+            and DataWriterImpl. 
+          - Made DataWriterImpl::send_liveliness return status
+            code.
+          - Fixed the bugs in DataReader and DataWriter that non-zero
+            lease duration should be calculated when nanosec is not
+            infite as well.
+          
+        * tests/DCPS/ManualAssertLiveliness/DataReaderListener.h:
+        * tests/DCPS/ManualAssertLiveliness/DataReaderListener.cpp:
+        * tests/DCPS/ManualAssertLiveliness/ManualAssertLiveliness.mpc:
+        * tests/DCPS/ManualAssertLiveliness/Messenger.idl:
+        * tests/DCPS/ManualAssertLiveliness/Writer.h:
+        * tests/DCPS/ManualAssertLiveliness/Writer.cpp:
+        * tests/DCPS/ManualAssertLiveliness/pub.ini:
+        * tests/DCPS/ManualAssertLiveliness/publisher.cpp:
+        * tests/DCPS/ManualAssertLiveliness/run_test.pl:
+        * tests/DCPS/ManualAssertLiveliness/sub.ini:
+        * tests/DCPS/ManualAssertLiveliness/subscriber.cpp:
+        * tests/DCPS/ManualAssertLiveliness/tcp.conf:
+
+          Added new test for manual liveliness qos.
+          
 Mon Aug 10 23:50:19 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/RakeResults_T.h:

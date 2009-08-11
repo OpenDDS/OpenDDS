@@ -1347,8 +1347,18 @@ namespace OpenDDS
       // support the AUTOMATIC liveliness qos for datawriter.
       // Add implementation here.
 
-      //tbd: not implemented so return error if it's called.
-      return ::DDS::RETCODE_ERROR;
+      ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                        tao_mon,
+                        this->publishers_protector_,
+                        ::DDS::RETCODE_ERROR);
+
+      for (PublisherSet::iterator it(publishers_.begin());
+            it != publishers_.end(); ++it)
+      {
+        it->svt_->assert_liveliness_by_participant ();
+      }
+
+      return ::DDS::RETCODE_OK;
     }
 
 

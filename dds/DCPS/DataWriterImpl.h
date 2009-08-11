@@ -149,6 +149,8 @@ namespace OpenDDS
       virtual ::DDS::ReturnCode_t assert_liveliness ()
         ACE_THROW_SPEC ((CORBA::SystemException));
 
+      virtual ::DDS::ReturnCode_t assert_liveliness_by_participant ();
+
       virtual ::DDS::ReturnCode_t get_matched_subscriptions (
           ::DDS::InstanceHandleSeq & subscription_handles)
         ACE_THROW_SPEC ((CORBA::SystemException));
@@ -457,7 +459,7 @@ namespace OpenDDS
                               const ::DDS::Time_t& source_timestamp);
 
       /// Send the liveliness message.
-      void send_liveliness (const ACE_Time_Value& now);
+      bool send_liveliness (const ACE_Time_Value& now);
 
       /// Lookup the instance handles by the subscription repo ids
       /// via the bit datareader.

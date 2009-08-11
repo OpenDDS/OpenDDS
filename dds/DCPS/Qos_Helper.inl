@@ -763,9 +763,9 @@ namespace OpenDDS
     bool Qos_Helper::valid (const ::DDS::LivelinessQosPolicy& qos)
     {
       return
-        // Only valid for qos.kind == ::DDS::AUTOMATIC_LIVELINESS_QOS
-        // for first implementation.
-        qos.kind == ::DDS::AUTOMATIC_LIVELINESS_QOS
+        (qos.kind == ::DDS::AUTOMATIC_LIVELINESS_QOS
+        || qos.kind == ::DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS
+        || qos.kind == ::DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS)
 
         && valid_duration (qos.lease_duration);
     }
