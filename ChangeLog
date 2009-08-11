@@ -1,3 +1,17 @@
+Tue Aug 11 17:29:31 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Fixed the deadlock situation that the deliver sample thread
+          (reactor thread) recursively acquires writers_lock_ read
+          lock while there is a waiting writer from add_associations
+          thread(orb thread) that acquires write lock. This was achieved
+          by allocating WriterInfo on heap and writers_ map maintains
+          the WriterInfo pointer so the received_activity() can be moved
+          out of the writers_lock_ scope in writer_activity() and the 
+          WriterInfo internal state can be updated on single copy.
+
 Tue Aug 11 15:30:42 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * tests/DCPS/DestinationOrder/main.cpp:

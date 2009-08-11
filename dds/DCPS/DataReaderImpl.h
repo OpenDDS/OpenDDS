@@ -684,7 +684,7 @@ namespace OpenDDS
       bool statistics_enabled_;
 
       /// publications writing to this reader.
-      typedef std::map< PublicationId, WriterInfo,  GUID_tKeyLessThan> WriterMapType;
+      typedef std::map< PublicationId, WriterInfo*,  GUID_tKeyLessThan> WriterMapType;
       WriterMapType writers_;
 
       /// RW lock for reading/writing publications.
