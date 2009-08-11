@@ -219,6 +219,12 @@ namespace OpenDDS
         ACE_THROW_SPEC ((CORBA::SystemException));
 
       /**
+       * Unregister all registered instances and tell the transport
+       * to broadcast the unregistered instances.
+       */
+      void unregister_instances();
+
+      /**
        * Delegate to the WriteDataContainer to queue the instance
        * sample and finally tell the transport to send the sample.
        */

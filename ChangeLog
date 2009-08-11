@@ -1,3 +1,13 @@
+Tue Aug 11 22:26:53 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+
+          - Added support for WRITER_DATA_LIFECYCLE
+          - PublisherImpl::delete_datawriter causes a DataWriter to 
+            properly unregister all registered instances prior to deletion.
+
 Tue Aug 11 17:29:31 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
@@ -9,7 +19,7 @@ Tue Aug 11 17:29:31 UTC 2009  Yan Dai  <dai_y@ociweb.com>
           thread(orb thread) that acquires write lock. This was achieved
           by allocating WriterInfo on heap and writers_ map maintains
           the WriterInfo pointer so the received_activity() can be moved
-          out of the writers_lock_ scope in writer_activity() and the 
+          out of the writers_lock_ scope in writer_activity() and the
           WriterInfo internal state can be updated on single copy.
 
 Tue Aug 11 15:30:42 UTC 2009  Steven Stallion  <stallions@ociweb.com>
