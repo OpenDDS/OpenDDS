@@ -1025,15 +1025,45 @@ DataWriterImpl::assert_liveliness ()
   // is either MANUAL_BY_PARTICIPANT or MANUAL_BY_TOPIC.
   // Otherwise, it has no effect.
 
-  // This will do nothing in current implementation since we only
-  // support the AUTOMATIC liveliness qos for datawriter.
+  if (this->qos_.liveliness.kind == ::DDS::AUTOMATIC_LIVELINESS_QOS)
+  {
+    return ::DDS::RETCODE_OK;
+  }
 
-  // ACE_Time_Value now = ACE_OS::gettimeofday ();
-  // send_liveliness (now);
+  ACE_Time_Value now = ACE_OS::gettimeofday ();
 
-  //tbd: Why commented ?
+  if (last_liveliness_activity_time_ == ACE_Time_Value::zero
+    || now - last_liveliness_activity_time_ >= liveliness_check_interval_)
+  {
+    //Not recent enough then send liveliness message.
+    if (DCPS_debug_level > 9) { 
+      RepoIdConverter converter(publication_id_);
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) DataWriterImpl::assert_liveliness: ")
+        ACE_TEXT("%C sending LIVELINESS message.\n"),
+        std::string(converter).c_str()
+      ));
+    }
+    if (this->send_liveliness(now) == false)
+      return ::DDS::RETCODE_ERROR;
+  }
+
   return ::DDS::RETCODE_OK;
 }
+
+::DDS::ReturnCode_t 
+DataWriterImpl::assert_liveliness_by_participant ()
+{
+  // This operation is called by participant.
+
+  if (this->qos_.liveliness.kind != ::DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS)
+  {
+    return ::DDS::RETCODE_OK;
+  }
+
+  return this->assert_liveliness ();
+}
+
 
 ::DDS::ReturnCode_t
 DataWriterImpl::get_matched_subscriptions (
@@ -1200,8 +1230,9 @@ DataWriterImpl::enable ()
                n_chunks_));
   }
 
-  if (qos_.liveliness.lease_duration.sec != ::DDS::DURATION_INFINITE_SEC
-      || qos_.liveliness.lease_duration.nanosec != ::DDS::DURATION_INFINITE_NSEC)
+  if (qos_.liveliness.kind == ::DDS::AUTOMATIC_LIVELINESS_QOS  
+    && (qos_.liveliness.lease_duration.sec != ::DDS::DURATION_INFINITE_SEC
+      && qos_.liveliness.lease_duration.nanosec != ::DDS::DURATION_INFINITE_NSEC))
   {
     liveliness_check_interval_ =
       duration_to_time_value (qos_.liveliness.lease_duration);
@@ -1436,9 +1467,19 @@ DataWriterImpl::write (DataSample* data,
                       ret);
   }
 
-  last_liveliness_activity_time_ = ACE_OS::gettimeofday ();
+  ret = this->publisher_servant_->data_available(this);
+  if (ret != ::DDS::RETCODE_OK)
+  {
+    ACE_ERROR_RETURN ((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("DataWriterImpl::write: ")
+      ACE_TEXT("data_available failed.\n")),
+      ret);
+  }
+  else
+    last_liveliness_activity_time_ = ACE_OS::gettimeofday ();
 
-  return this->publisher_servant_->data_available(this);
+  return ::DDS::RETCODE_OK;
 }
 
 ::DDS::ReturnCode_t
@@ -1855,7 +1896,7 @@ DataWriterImpl::handle_close (ACE_HANDLE,
 }
 
 
-void
+bool
 DataWriterImpl::send_liveliness (const ACE_Time_Value& now)
 {
   ::DDS::Time_t t = time_value_to_time (now);
@@ -1864,7 +1905,7 @@ DataWriterImpl::send_liveliness (const ACE_Time_Value& now)
 
   SendControlStatus status;
   {
-    ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publisher_servant_->get_pi_lock());
+    ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, justMe, publisher_servant_->get_pi_lock(), false);
 
     status = this->publisher_servant_->send_control(publication_id_,
                                                     this,
@@ -1873,13 +1914,15 @@ DataWriterImpl::send_liveliness (const ACE_Time_Value& now)
 
   if (status == SEND_CONTROL_ERROR)
   {
-    ACE_ERROR ((LM_ERROR,
+    ACE_ERROR_RETURN ((LM_ERROR,
                 ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::send_liveliness: ")
-                ACE_TEXT(" send_control failed. \n")));
+                ACE_TEXT(" send_control failed. \n")),
+                false);
   }
   else
   {
     last_liveliness_activity_time_ = now;
+    return true;
   }
 }
 

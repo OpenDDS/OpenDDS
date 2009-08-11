@@ -1130,7 +1130,7 @@ DataReaderImpl::enable ()
                rd_allocator_, n_chunks_));
 
   if ((qos_.liveliness.lease_duration.sec !=
-       ::DDS::DURATION_INFINITE_SEC) ||
+       ::DDS::DURATION_INFINITE_SEC) &&
       (qos_.liveliness.lease_duration.nanosec !=
        ::DDS::DURATION_INFINITE_NSEC))
     {
