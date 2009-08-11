@@ -1418,11 +1418,8 @@ DataWriterImpl::unregister_instance_i (::DDS::InstanceHandle_t handle,
 }
 
 void
-DataWriterImpl::unregister_instances()
+DataWriterImpl::unregister_instances(const DDS::Time_t& source_timestamp)
 {
-  DDS::Time_t source_timestamp =
-    time_value_to_time(ACE_OS::gettimeofday());
-
   PublicationInstanceMapType::iterator it =
     this->data_container_->instances_.begin();
 

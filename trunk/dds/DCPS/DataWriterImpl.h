@@ -222,7 +222,7 @@ namespace OpenDDS
        * Unregister all registered instances and tell the transport
        * to broadcast the unregistered instances.
        */
-      void unregister_instances();
+      void unregister_instances(const DDS::Time_t& source_timestamp);
 
       /**
        * Delegate to the WriteDataContainer to queue the instance
