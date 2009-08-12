@@ -22,8 +22,8 @@ $pub_opts = "$opts $pub_conf ";
 $sub_opts = "$opts $sub_conf ";
 
 if ($ARGV[0] eq 'lost') {
-    $pub_opts = "$opts $pub_conf -l -t 10 ";
-    $sub_opts = "$opts $sub_conf -l -n 4 -c 12";
+    $pub_opts = "$opts $pub_conf -l -n 4 -t 10 ";
+    $sub_opts = "$opts $sub_conf -l -n 4 -c 16";
 }
 elsif ($ARGV[0] ne '') {
     print STDERR "ERROR: invalid test case\n";
