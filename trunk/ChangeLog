@@ -1,3 +1,32 @@
+Wed Aug 12 16:31:41 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+
+          Fixed a bug in handle_input() that did not completely process
+          the received data during handle_input. It returned from
+          handle_input whenever there is a message with no data (e.g.
+          liveliness message) even there are more data in receiving
+          buffer. Since 'amount' is the min value of length of sample
+          data not read and the length of left data in receiving buffer,
+          when there is a message with no data (e.g.liveliness), the
+          amount is always 0 so it returns from handle_input. The fix
+          would be return when no sample data left and also no data
+          in receiving buffer.
+
+          This problem was observed in ManualAssertLiveliness test.
+
+        * tests/DCPS/ManualAssertLiveliness/run_test.pl:
+
+          Updated number of liveliness changed callbacks.
+
+        * tests/DCPS/ManualAssertLiveliness/README:
+
+          Added description.
+
+        * bin/dcps_tests.lst:
+
+          Added ManualAssertLiveliness tests.
+
 Tue Aug 11 22:26:53 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.h:

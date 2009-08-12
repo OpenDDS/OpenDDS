@@ -676,7 +676,7 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
                    this->receive_buffers_[ this->buffer_index_]->wr_ptr()));
      //
         // Determine the amount of data for the next block in the chain.
-        //
+        // 
         size_t amount
                  = ace_min<size_t>(
                      this->receive_sample_remaining_,
@@ -805,8 +805,9 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
             this->receive_sample_.sample_ = 0 ;
           }
 
-        if( amount == 0) {
+        if( amount == 0 && this->receive_buffers_[ this->buffer_index_]->length() == 0) {
           // Relinquish control if there is no more data to process.
+          VDBG((LM_DEBUG,"(%P|%t) DBG:   We are done - no more data.\n"));
           return 0;
         }
 
