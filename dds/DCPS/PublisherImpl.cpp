@@ -241,9 +241,11 @@ PublisherImpl::delete_datawriter (::DDS::DataWriter_ptr a_datawriter)
     }
   }
 
+#if 0
   // Unregister all registered instances prior to deletion.
   DDS::Time_t source_timestamp = time_value_to_time(ACE_OS::gettimeofday());
   dw_servant->unregister_instances(source_timestamp);
+#endif
 
   CORBA::String_var topic_name = dw_servant->get_topic_name ();
   DataWriterImpl* local_writer = 0;
