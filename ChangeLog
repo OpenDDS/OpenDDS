@@ -1,3 +1,9 @@
+Thu Aug 13 22:58:29 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+          Added missing implementation for MyDataReaderImpl::release_data.
+
 Thu Aug 13 22:43:00 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/README:
