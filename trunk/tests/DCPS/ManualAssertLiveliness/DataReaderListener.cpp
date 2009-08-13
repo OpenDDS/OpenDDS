@@ -101,6 +101,7 @@ void DataReaderListenerImpl::on_liveliness_changed (
   cerr << "  not_alive_count = " << status.not_alive_count << endl;
   cerr << "  alive_count_change = " << status.alive_count_change << endl;
   cerr << "  not_alive_count_change = " << status.not_alive_count_change << endl;
+  cerr << "  last_publication_handle = " << status.last_publication_handle << endl;
 }
 
 void DataReaderListenerImpl::on_subscription_matched (

@@ -11,6 +11,7 @@
 
 #include "MessengerTypeSupportImpl.h"
 #include "Writer.h"
+#include "DataWriterListenerImpl.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
@@ -30,11 +31,12 @@ int LEASE_DURATION_SEC = 2;
 int assert_liveliness_period = LEASE_DURATION_SEC;
 int num_messages = 10;
 bool liveliness_lost_test = false;
+int num_liveliness_lost_callbacks = 2;
 
 int
 parse_args (int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("t:n:l"));
+  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("t:n:lc:"));
   int c;
 
   while ((c = get_opts ()) != -1)
@@ -49,6 +51,9 @@ parse_args (int argc, ACE_TCHAR *argv[])
       break;
     case 'l':
       liveliness_lost_test = true;
+      break;
+    case 'c':
+      num_liveliness_lost_callbacks = ACE_OS::atoi (get_opts.opt_arg());
       break;
     case '?':
     default:
@@ -145,6 +150,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
         exit(1);
       }
 
+      DataWriterListenerImpl * dwl_servant = new DataWriterListenerImpl;
+      ::DDS::DataWriterListener_var dwl (dwl_servant);
+
       // Create the datawriters
       ::DDS::DataWriterQos dw_qos;
       pub->get_default_datawriter_qos (dw_qos);
@@ -157,7 +165,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       DDS::DataWriter_var dw1 =
         pub->create_datawriter(topic.in (),
                                dw_qos,
-                               DDS::DataWriterListener::_nil(),
+                               dwl.in(),
                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (dw1.in ())) {
         cerr << "create_datawriter failed." << endl;
@@ -167,7 +175,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       DDS::DataWriter_var dw2 =
         pub->create_datawriter(topic.in (),
                                dw_qos,
-                               DDS::DataWriterListener::_nil(),
+                               dwl.in(),
                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (dw2.in ())) {
         cerr << "create_datawriter failed." << endl;
@@ -179,7 +187,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       DDS::DataWriter_var dw3 =
         pub->create_datawriter(topic.in (),
                                dw_qos,
-                               DDS::DataWriterListener::_nil(),
+                               dwl.in(),
                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (dw2.in ())) {
         cerr << "create_datawriter failed." << endl;
@@ -189,7 +197,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       DDS::DataWriter_var dw4 =
         pub->create_datawriter(topic.in (),
                                dw_qos,
-                               DDS::DataWriterListener::_nil(),
+                               dwl.in(),
                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (dw2.in ())) {
         cerr << "create_datawriter failed." << endl;
@@ -216,6 +224,14 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       delete writer3;
       delete writer4;
 
+      if (liveliness_lost_test
+        && dwl_servant->num_liveliness_lost_callbacks () != num_liveliness_lost_callbacks)
+      {
+        cerr << "ERROR: did not receive expected liveliness lost callbacks. " 
+          << dwl_servant->num_liveliness_lost_callbacks () << "/" << 
+          num_liveliness_lost_callbacks << endl; 
+      }
+      
       participant->delete_contained_entities();
       dpf->delete_participant(participant.in ());
       TheTransportFactory->release();
@@ -223,7 +239,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
   }
   catch (CORBA::Exception& e)
     {
-       cerr << "PUB: Exception caught in main.cpp:" << endl
+      cerr << "PUB: Exception caught in main.cpp:" << endl
          << e << endl;
       exit(1);
     }

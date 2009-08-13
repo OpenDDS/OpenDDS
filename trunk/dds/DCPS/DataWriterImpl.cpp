@@ -59,6 +59,7 @@ DataWriterImpl::DataWriterImpl (void)
     publication_id_ ( GUID_UNKNOWN ),
     sequence_number_ (),
     data_container_ (0),
+    liveliness_lost_ (false),
     mb_allocator_(0),
     db_allocator_(0),
     header_allocator_(0),
@@ -1230,9 +1231,8 @@ DataWriterImpl::enable ()
                n_chunks_));
   }
 
-  if (qos_.liveliness.kind == ::DDS::AUTOMATIC_LIVELINESS_QOS
-    && (qos_.liveliness.lease_duration.sec != ::DDS::DURATION_INFINITE_SEC
-      && qos_.liveliness.lease_duration.nanosec != ::DDS::DURATION_INFINITE_NSEC))
+  if (qos_.liveliness.lease_duration.sec != ::DDS::DURATION_INFINITE_SEC
+      && qos_.liveliness.lease_duration.nanosec != ::DDS::DURATION_INFINITE_NSEC)
   {
     liveliness_check_interval_ =
       duration_to_time_value (qos_.liveliness.lease_duration);
@@ -1861,20 +1861,29 @@ int
 DataWriterImpl::handle_timeout (const ACE_Time_Value &tv,
                                 const void * /* arg */)
 {
+  bool liveliness_lost = false;
+
   ACE_Time_Value elapsed = tv - last_liveliness_activity_time_;
 
   if (elapsed >= liveliness_check_interval_)
   {
-    //Not recent enough then send liveliness message.
-    if (DCPS_debug_level > 9) {
-      RepoIdConverter converter(publication_id_);
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) DataWriterImpl::handle_timeout: ")
-        ACE_TEXT("%C sending LIVELINESS message.\n"),
-        std::string(converter).c_str()
-      ));
+    if (this->qos_.liveliness.kind == ::DDS::AUTOMATIC_LIVELINESS_QOS)
+    {
+      //Not recent enough then send liveliness message.
+      if (DCPS_debug_level > 9) {
+        RepoIdConverter converter(publication_id_);
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DataWriterImpl::handle_timeout: ")
+          ACE_TEXT("%C sending LIVELINESS message.\n"),
+          std::string(converter).c_str()
+          ));
+      }
+    
+      if (this->send_liveliness(tv) == false)
+        liveliness_lost = true;
     }
-    this->send_liveliness(tv);
+    else
+      liveliness_lost = true;
   }
   else
   {
@@ -1903,6 +1912,22 @@ DataWriterImpl::handle_timeout (const ACE_Time_Value &tv,
     }
   }
 
+  if (! this->liveliness_lost_ && liveliness_lost)
+  {
+    ++ this->liveliness_lost_status_.total_count;
+    ++ this->liveliness_lost_status_.total_count_change;
+
+    ::DDS::DataWriterListener* listener =
+      listener_for (::DDS::LIVELINESS_LOST_STATUS);
+
+    if (listener != 0)
+    {
+      listener->on_liveliness_lost (this->dw_local_objref_.in (),
+                                    this->liveliness_lost_status_);
+    }
+  }
+
+  this->liveliness_lost_ = liveliness_lost;
   return 0;
 }
 

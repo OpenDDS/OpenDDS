@@ -50,6 +50,9 @@ namespace OpenDDS
 
     /// Keeps track of a DataWriter's liveliness for a DataReader.
     class OpenDDS_Dcps_Export WriterInfo {
+
+      friend class DataReaderImpl;
+
       public:
         enum WriterState { NOT_SET, ALIVE, DEAD };
 
@@ -112,6 +115,9 @@ namespace OpenDDS
 
         /// DCPSInfoRepo ID of the DataWriter
         PublicationId writer_id_;
+
+        /// The publication handle
+        ::DDS::InstanceHandle_t handle_;
       };
 
     /// Elements stored for managing statistical data.
@@ -218,21 +224,18 @@ namespace OpenDDS
     /// tell instances when a DataWriter transitions to being alive
     /// The writer state is inout parameter, it has to be set ALIVE before
     /// handle_timeout is called since some subroutine use the state.
-    void writer_became_alive (PublicationId         writer_id,
-                              const ACE_Time_Value& when,
-                              WriterInfo::WriterState& state);
+    void writer_became_alive (WriterInfo& info,
+                              const ACE_Time_Value& when);
 
     /// tell instances when a DataWriter transitions to DEAD
     /// The writer state is inout parameter, the state is set to DEAD
     /// when it returns.
-    void writer_became_dead (PublicationId         writer_id,
-                             const ACE_Time_Value& when,
-                             WriterInfo::WriterState& state);
+    void writer_became_dead (WriterInfo& info,
+                             const ACE_Time_Value& when);
 
     /// tell instance when a DataWriter is removed.
     /// The liveliness status need update.
-    void writer_removed (PublicationId   writer_id,
-                         WriterInfo::WriterState& state);
+    void writer_removed (WriterInfo& info);
 
     virtual int handle_close (ACE_HANDLE,
                               ACE_Reactor_Mask);

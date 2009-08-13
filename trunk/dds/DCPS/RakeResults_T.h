@@ -58,7 +58,8 @@ namespace OpenDDS
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
       bool where_filter(typename SampleSeq::value_type* sample) const
       {
-	return true; //FUTURE: implement
+        ACE_UNUSED_ARG (sample);
+	      return true; //FUTURE: implement
       }
 #endif
 

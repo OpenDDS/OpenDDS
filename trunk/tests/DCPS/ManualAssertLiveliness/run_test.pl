@@ -22,7 +22,7 @@ $pub_opts = "$opts $pub_conf ";
 $sub_opts = "$opts $sub_conf ";
 
 if ($ARGV[0] eq 'lost') {
-    $pub_opts = "$opts $pub_conf -l -n 4 -t 10 ";
+    $pub_opts = "$opts $pub_conf -l -n 4 -t 10 -c 8";
     $sub_opts = "$opts $sub_conf -l -n 4 -c 16";
 }
 elsif ($ARGV[0] ne '') {

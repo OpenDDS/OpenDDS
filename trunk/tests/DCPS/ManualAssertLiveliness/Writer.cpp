@@ -121,8 +121,8 @@ Manual_By_Participant_Writer_1::svc ()
 
 Manual_By_Participant_Writer_2::Manual_By_Participant_Writer_2(::DDS::DomainParticipant_ptr part, 
                ::DDS::DataWriter_ptr writer) 
-    : participant_ (::DDS::DomainParticipant::_duplicate (part)),
-      Writer_Base(writer)
+    : Writer_Base(writer),
+      participant_ (::DDS::DomainParticipant::_duplicate (part))
 {
 }
 
