@@ -1,3 +1,12 @@
+Thu Aug 13 22:43:00 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/README:
+        * java/jms/src/org/opendds/jms/qos/ParticipantQosPolicy.java:
+        * java/jms/src/org/opendds/jms/qos/PublisherQosPolicy.java:
+        * java/jms/src/org/opendds/jms/qos/SubscriberQosPolicy.java:
+
+          Enabled support for ENTITY_FACTORY QoS.
+
 Thu Aug 13 22:17:02 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
@@ -10,7 +19,7 @@ Thu Aug 13 22:17:02 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * dds/DCPS/Qos_Helper.inl:
         * dds/DCPS/SubscriptionInstance.h:
 
-          Added support for READER_DATA_LIFECYCLE.  
+          Added support for READER_DATA_LIFECYCLE.
 
 Thu Aug 13 19:01:44 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 

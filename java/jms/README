@@ -147,7 +147,7 @@ The following JMX MBeans are provided:
       Username
         The attributes defined above correspond to standard configuration
         options as defined in the Hibernate documentation.
-        
+
 
 The following JCA config properties are supported for ConnectionFactories:
 
@@ -199,7 +199,6 @@ For example:
 The following QoS policies are reserved for internal use by the OpenDDS
 JMS Provider and may not be used by JMS client code:
   - DURABILITY
-  - ENTITY_FACTORY
   - LIFESPAN
   - PARTITION
 
