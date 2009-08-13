@@ -1,26 +1,39 @@
+Thu Aug 13 17:09:18 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/FooTest3_0/SimpleDataReader.cpp:
+        
+          Added message_id_ debug info.
+          
+        * tests/DCPS/FooTest3_0/run_test.pl:
+
+          Added one more expected message as the writer_data_lifecycle
+          qos was supported now. The default 
+          autodispose_unregistered_instances is 1 which add dispose 
+          message upon unregister_instance() call.
+          
 Thu Aug 13 04:41:21 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
         * dds/DCPS/DataReaderImpl.inl:
         * dds/DCPS/DataReaderImpl.cpp:
-        
-          Made last_publication_handle in liveliness_changed_status 
-          updated when count is changed. The handle is added to 
-          WriterInfo and the methods(e.g. writer_become_active, 
-          writer_become_dead, etc) that changes the status are 
+
+          Made last_publication_handle in liveliness_changed_status
+          updated when count is changed. The handle is added to
+          WriterInfo and the methods(e.g. writer_become_active,
+          writer_become_dead, etc) that changes the status are
           passed with WriterInfo so it can access the handle.
-          
+
         * dds/DCPS/DataWriterImpl.h:
         * dds/DCPS/DataWriterImpl.cpp:
-        
-          Supported liveliness lost callback. The liveliness timer 
+
+          Supported liveliness lost callback. The liveliness timer
           for AUTOMATIC_LIVELINESS_QOS is also used for liveliness
-          lost status update. 
-          
+          lost status update.
+
         * dds/DCPS/RakeResults_T.h:
-          
+
           Fixed a warning.
-           
+
         * tests/DCPS/ManualAssertLiveliness/DataReaderListener.cpp:
         * tests/DCPS/ManualAssertLiveliness/DataWriterListenerImpl.h:
         * tests/DCPS/ManualAssertLiveliness/DataWriterListenerImpl.cpp:
