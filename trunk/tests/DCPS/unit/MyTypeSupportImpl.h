@@ -81,9 +81,10 @@ public:
   {
     return ::DDS::RETCODE_ERROR;
   }
-  
+
+  virtual void release_data(OpenDDS::DCPS::SubscriptionInstance*) {}
   virtual void release_instance_i(DDS::InstanceHandle_t) {}
-  virtual void dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample&, 
+  virtual void dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample&,
                              OpenDDS::DCPS::SubscriptionInstance *&,
                              bool &) {}
   virtual void dec_ref_data_element(OpenDDS::DCPS::ReceivedDataElement *) {}
