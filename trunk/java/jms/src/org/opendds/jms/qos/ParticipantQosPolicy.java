@@ -44,10 +44,10 @@ public class ParticipantQosPolicy implements QosPolicy<DomainParticipantQos> {
             qos.user_data.value = property.asBytes();
         }
 
-        // ENTITY_FACTORY QosPolicy (reserved)
+        // ENTITY_FACTORY QosPolicy
         property = helper.find("ENTITY_FACTORY.autoenable_created_entities");
         if (property.exists()) {
-            logger.warn("ENTITY_FACTORY QosPolicy is reserved for internal use!");
+            qos.entity_factory.autoenable_created_entities = property.asBoolean();
         }
     }
 
