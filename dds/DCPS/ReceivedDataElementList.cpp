@@ -20,7 +20,7 @@ OpenDDS::DCPS::ReceivedDataElementList::~ReceivedDataElementList()
   // The memory pointed to by instance_state_ is owned by
   // another object.
 }
-   
+
 bool
 OpenDDS::DCPS::ReceivedDataElementList::remove(ReceivedDataElement *data_sample)
 {
@@ -76,8 +76,7 @@ OpenDDS::DCPS::ReceivedDataElementList::remove(ReceivedDataElement *data_sample)
       // let the instance know it is empty
       instance_state_->empty(true);
     }
-          
+
   return true ;
 }
-
 
