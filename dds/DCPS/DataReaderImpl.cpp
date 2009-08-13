@@ -265,13 +265,14 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
     subscription_id_ = yourId;
   }
 
+  CORBA::ULong wr_len = writers.length ();
+  WriterInfo ** infos = new WriterInfo*[wr_len];
+
   //
   // We do the following while holding the publication_handle_lock_.
   //
   {
     ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->publication_handle_lock_);
-
-    CORBA::ULong wr_len;
 
     //
     // For each writer in the list of writers to associate with, we
@@ -281,15 +282,15 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
     {
       ACE_WRITE_GUARD (ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
 
-      wr_len = writers.length ();
       for (CORBA::ULong i = 0; i < wr_len; i++)
       {
         PublicationId writer_id = writers[i].writerId;
+        infos[i] = new WriterInfo( this, writer_id);
         this->writers_.insert(
           // This insertion is idempotent.
           WriterMapType::value_type(
             writer_id,
-            new WriterInfo( this, writer_id)
+            infos[i]
           )
         );
         this->statistics_.insert(
@@ -324,7 +325,6 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
     {
       ACE_READ_GUARD (ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
 
-      wr_len = writers.length ();
       for( unsigned int index = 0; index < wr_len; ++index) {
         WriterMapType::iterator where
           = this->writers_.find( writers[ index].writerId);
@@ -383,7 +383,6 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
       // argument list.
       //
       WriterIdSeq wr_ids;
-      CORBA::ULong wr_len = writers.length ();
       wr_ids.length (wr_len);
 
       for (CORBA::ULong i = 0; i < wr_len; ++i)
@@ -396,65 +395,76 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
       // values.
       //
       ::DDS::InstanceHandleSeq handles;
-      if (this->bit_lookup_instance_handles (wr_ids, handles) == false)
+      if (this->bit_lookup_instance_handles (wr_ids, handles) == false
+        || handles.length () != wr_len)
         return;
 
       //
       // We acquire the publication_handle_lock_ for the remainder of our
       // processing.
       //
-      ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->publication_handle_lock_);
-      wr_len = handles.length ();
+      {
+        ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->publication_handle_lock_);
 
-      for( unsigned int index = 0; index < wr_len; ++index) {
-        // This insertion is idempotent.
-        this->id_to_handle_map_.insert(
-          RepoIdToHandleMap::value_type( wr_ids[ index], handles[ index])
-        );
-        if( DCPS_debug_level > 4) {
-          RepoIdConverter converter(wr_ids[index]);
-          ACE_DEBUG((LM_WARNING,
-            ACE_TEXT("(%P|%t) DataReaderImpl::add_associations: ")
-            ACE_TEXT("id_to_handle_map_[ %C] = 0x%x.\n"),
-            std::string(converter).c_str(),
-            handles[index]
-          ));
+        for( unsigned int index = 0; index < wr_len; ++index) {
+          // This insertion is idempotent.
+          this->id_to_handle_map_.insert(
+            RepoIdToHandleMap::value_type( wr_ids[ index], handles[ index])
+          );
+          if( DCPS_debug_level > 4) {
+            RepoIdConverter converter(wr_ids[index]);
+            ACE_DEBUG((LM_WARNING,
+              ACE_TEXT("(%P|%t) DataReaderImpl::add_associations: ")
+              ACE_TEXT("id_to_handle_map_[ %C] = 0x%x.\n"),
+              std::string(converter).c_str(),
+              handles[index]
+            ));
+          }
+        }
+
+        // We need to adjust these after the insertions have all completed
+        // since insertions are not guaranteed to increase the number of
+        // currently matched publications.
+        int matchedPublications = this->id_to_handle_map_.size();
+        this->subscription_match_status_.current_count_change
+          = matchedPublications - this->subscription_match_status_.current_count;
+        this->subscription_match_status_.current_count = matchedPublications;
+
+        ++this->subscription_match_status_.total_count;
+        ++this->subscription_match_status_.total_count_change;
+
+        this->subscription_match_status_.last_publication_handle
+          = handles[ wr_len - 1];
+
+        set_status_changed_flag (::DDS::SUBSCRIPTION_MATCHED_STATUS, true);
+
+        ::DDS::DataReaderListener* listener
+          = listener_for (::DDS::SUBSCRIPTION_MATCHED_STATUS);
+        if( listener != 0) {
+          listener->on_subscription_matched(
+            dr_local_objref_.in (),
+            this->subscription_match_status_
+          );
+
+          // TBD - why does the spec say to change this but not change
+          //       the ChangeFlagStatus after a listener call?
+
+          // Client will look at it so next time it looks the change should be 0
+          this->subscription_match_status_.total_count_change = 0;
+          this->subscription_match_status_.current_count_change = 0;
+        }
+        notify_status_condition();
+      }
+
+      {
+        ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
+        for( unsigned int index = 0; index < wr_len; ++index) {
+          infos[index]->handle_ = handles[index];
         }
       }
-
-      // We need to adjust these after the insertions have all completed
-      // since insertions are not guaranteed to increase the number of
-      // currently matched publications.
-      int matchedPublications = this->id_to_handle_map_.size();
-      this->subscription_match_status_.current_count_change
-        = matchedPublications - this->subscription_match_status_.current_count;
-      this->subscription_match_status_.current_count = matchedPublications;
-
-      ++this->subscription_match_status_.total_count;
-      ++this->subscription_match_status_.total_count_change;
-
-      this->subscription_match_status_.last_publication_handle
-        = handles[ wr_len - 1];
-
-      set_status_changed_flag (::DDS::SUBSCRIPTION_MATCHED_STATUS, true);
-
-      ::DDS::DataReaderListener* listener
-        = listener_for (::DDS::SUBSCRIPTION_MATCHED_STATUS);
-      if( listener != 0) {
-        listener->on_subscription_matched(
-          dr_local_objref_.in (),
-          this->subscription_match_status_
-        );
-
-        // TBD - why does the spec say to change this but not change
-        //       the ChangeFlagStatus after a listener call?
-
-        // Client will look at it so next time it looks the change should be 0
-        this->subscription_match_status_.total_count_change = 0;
-        this->subscription_match_status_.current_count_change = 0;
-      }
-      notify_status_condition();
     }
+
+    delete []infos;
 }
 
 
@@ -1818,7 +1828,8 @@ OpenDDS::DCPS::WriterInfo::WriterInfo ()
   : last_liveliness_activity_time_(ACE_OS::gettimeofday()),
     state_(NOT_SET),
     reader_(0),
-    writer_id_( GUID_UNKNOWN )
+    writer_id_( GUID_UNKNOWN ),
+    handle_ (::DDS::HANDLE_NIL)
 {
 }
 
@@ -1855,7 +1866,7 @@ OpenDDS::DCPS::WriterInfo::check_activity (const ACE_Time_Value& now)
     if (expires_at <= now)
     {
       // let all instances know this write is not alive.
-      reader_->writer_became_dead(writer_id_, now, state_);
+      reader_->writer_became_dead(*this, now);
       expires_at = ACE_Time_Value::max_time;
     }
   }
@@ -1865,7 +1876,7 @@ OpenDDS::DCPS::WriterInfo::check_activity (const ACE_Time_Value& now)
 
 void OpenDDS::DCPS::WriterInfo::removed ()
 {
-  reader_->writer_removed (writer_id_, this->state_);
+  reader_->writer_removed (*this);
 }
 
 SequenceNumber
@@ -1971,6 +1982,7 @@ OpenDDS::DCPS::WriterInfo::ack_deadline( SequenceNumber sequence, ACE_Time_Value
   }
 }
 
+
 OpenDDS::DCPS::WriterStats::WriterStats(
   int amount,
   DataCollector< double>::OnFull type
@@ -2012,12 +2024,11 @@ std::ostream& OpenDDS::DCPS::WriterStats::raw_data( std::ostream& str) const
 }
 
 void
-DataReaderImpl::writer_removed (PublicationId   writer_id,
-             WriterInfo::WriterState& state)
+DataReaderImpl::writer_removed (WriterInfo& info)
 {
   if (DCPS_debug_level >= 5) {
     RepoIdConverter reader_converter(subscription_id_);
-    RepoIdConverter writer_converter(writer_id);
+    RepoIdConverter writer_converter(info.writer_id_);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::writer_removed: ")
       ACE_TEXT("reader %C from writer %C.\n"),
@@ -2027,20 +2038,21 @@ DataReaderImpl::writer_removed (PublicationId   writer_id,
   }
 
   bool liveliness_changed = false;
-  if (state == WriterInfo::ALIVE)
+  if (info.state_ == WriterInfo::ALIVE)
   {
     -- liveliness_changed_status_.alive_count;
     -- liveliness_changed_status_.alive_count_change;
     liveliness_changed = true;
   }
 
-  if (state == WriterInfo::DEAD)
+  if (info.state_ == WriterInfo::DEAD)
   {
     -- liveliness_changed_status_.not_alive_count;
     -- liveliness_changed_status_.not_alive_count_change;
     liveliness_changed = true;
   }
 
+  liveliness_changed_status_.last_publication_handle = info.handle_;
   if( liveliness_changed) {
     set_status_changed_flag(::DDS::LIVELINESS_CHANGED_STATUS, true);
     this->notify_liveliness_change ();
@@ -2048,15 +2060,14 @@ DataReaderImpl::writer_removed (PublicationId   writer_id,
 }
 
 void
-DataReaderImpl::writer_became_alive (PublicationId writer_id,
-                                     const ACE_Time_Value& /* when */,
-                                     WriterInfo::WriterState& state)
+DataReaderImpl::writer_became_alive (WriterInfo& info,
+                                     const ACE_Time_Value& /* when */)
 {
   if (DCPS_debug_level >= 5) {
     std::stringstream buffer;
-    buffer << state;
+    buffer << info.state_;
     RepoIdConverter reader_converter(subscription_id_);
-    RepoIdConverter writer_converter(writer_id);
+    RepoIdConverter writer_converter(info.writer_id_);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::writer_became_alive: ")
       ACE_TEXT("reader %C from writer %C state %C.\n"),
@@ -2071,19 +2082,21 @@ DataReaderImpl::writer_became_alive (PublicationId writer_id,
   // NOTE: each instance will change to ALIVE_STATE when they receive a sample
 
   bool liveliness_changed = false;
-  if (state != WriterInfo::ALIVE)
+  if (info.state_ != WriterInfo::ALIVE)
   {
     liveliness_changed_status_.alive_count++;
     liveliness_changed_status_.alive_count_change++;
     liveliness_changed = true;
   }
 
-  if (state == WriterInfo::DEAD)
+  if (info.state_ == WriterInfo::DEAD)
   {
     liveliness_changed_status_.not_alive_count--;
     liveliness_changed_status_.not_alive_count_change--;
     liveliness_changed = true;
   }
+
+  liveliness_changed_status_.last_publication_handle = info.handle_;
 
   set_status_changed_flag(::DDS::LIVELINESS_CHANGED_STATUS, true);
 
@@ -2106,7 +2119,7 @@ DataReaderImpl::writer_became_alive (PublicationId writer_id,
 
   // Change the state to ALIVE since handle_timeout may call writer_became_dead
   // which need the current state info.
-  state = WriterInfo::ALIVE;
+  info.state_ = WriterInfo::ALIVE;
 
   // Call listener only when there are liveliness status changes.
   if (liveliness_changed)
@@ -2120,15 +2133,14 @@ DataReaderImpl::writer_became_alive (PublicationId writer_id,
 }
 
 void
-DataReaderImpl::writer_became_dead (PublicationId   writer_id,
-                                    const ACE_Time_Value& when,
-            WriterInfo::WriterState& state)
+DataReaderImpl::writer_became_dead (WriterInfo & info,
+                                    const ACE_Time_Value& when)
 {
   if (DCPS_debug_level >= 5) {
     std::stringstream buffer;
-    buffer << state;
+    buffer << info.state_;
     RepoIdConverter reader_converter(subscription_id_);
-    RepoIdConverter writer_converter(writer_id);
+    RepoIdConverter writer_converter(info.writer_id_);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::writer_became_dead: ")
       ACE_TEXT("reader %C from writer%C state %C.\n"),
@@ -2141,14 +2153,14 @@ DataReaderImpl::writer_became_dead (PublicationId   writer_id,
   // caller should already have the samples_lock_ !!!
   bool liveliness_changed = false;
 
-  if (state == OpenDDS::DCPS::WriterInfo::NOT_SET)
+  if (info.state_ == OpenDDS::DCPS::WriterInfo::NOT_SET)
   {
     liveliness_changed_status_.not_alive_count++;
     liveliness_changed_status_.not_alive_count_change++;
     liveliness_changed = true;
   }
 
-  if (state == WriterInfo::ALIVE)
+  if (info.state_ == WriterInfo::ALIVE)
   {
     liveliness_changed_status_.alive_count--;
     liveliness_changed_status_.alive_count_change--;
@@ -2157,8 +2169,10 @@ DataReaderImpl::writer_became_dead (PublicationId   writer_id,
     liveliness_changed = true;
   }
 
+  liveliness_changed_status_.last_publication_handle = info.handle_;
+
   //update the state to DEAD.
-  state = WriterInfo::DEAD;
+  info.state_ = WriterInfo::DEAD;
 
   if (liveliness_changed_status_.alive_count < 0)
     {
@@ -2186,7 +2200,7 @@ DataReaderImpl::writer_became_dead (PublicationId   writer_id,
       SubscriptionInstance *ptr = iter->second;
 
       ptr->instance_state_.writer_became_dead (
-        writer_id, liveliness_changed_status_.alive_count, when);
+        info.writer_id_, liveliness_changed_status_.alive_count, when);
 
       iter = next;
     }

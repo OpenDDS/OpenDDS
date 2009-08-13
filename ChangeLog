@@ -1,8 +1,41 @@
+Thu Aug 13 04:41:21 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.inl:
+        * dds/DCPS/DataReaderImpl.cpp:
+        
+          Made last_publication_handle in liveliness_changed_status 
+          updated when count is changed. The handle is added to 
+          WriterInfo and the methods(e.g. writer_become_active, 
+          writer_become_dead, etc) that changes the status are 
+          passed with WriterInfo so it can access the handle.
+          
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        
+          Supported liveliness lost callback. The liveliness timer 
+          for AUTOMATIC_LIVELINESS_QOS is also used for liveliness
+          lost status update. 
+          
+        * dds/DCPS/RakeResults_T.h:
+          
+          Fixed a warning.
+           
+        * tests/DCPS/ManualAssertLiveliness/DataReaderListener.cpp:
+        * tests/DCPS/ManualAssertLiveliness/DataWriterListenerImpl.h:
+        * tests/DCPS/ManualAssertLiveliness/DataWriterListenerImpl.cpp:
+        * tests/DCPS/ManualAssertLiveliness/ManualAssertLiveliness.mpc:
+        * tests/DCPS/ManualAssertLiveliness/Writer.cpp:
+        * tests/DCPS/ManualAssertLiveliness/publisher.cpp:
+        * tests/DCPS/ManualAssertLiveliness/run_test.pl:
+
+          Added DataWriter liveliness lost callback test case.
+
 Wed Aug 12 19:11:05 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/PublisherImpl.cpp:
 
-	  Temporarily remove a change to allow isolated debugging.
+          Temporarily remove a change to allow isolated debugging.
 
 Wed Aug 12 16:31:41 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 

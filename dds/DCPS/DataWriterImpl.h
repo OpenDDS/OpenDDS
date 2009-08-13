@@ -534,6 +534,10 @@ namespace OpenDDS
       ::DDS::OfferedIncompatibleQosStatus offered_incompatible_qos_status_ ;
       ::DDS::PublicationMatchedStatus       publication_match_status_ ;
 
+      /// True if the writer failed to actively signal its liveliness within
+      /// its offered liveliness period.
+      bool liveliness_lost_;
+
       /**
        * @todo The publication_lost_status_ and
        *       publication_reconnecting_status_ are left here for
