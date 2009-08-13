@@ -38,13 +38,16 @@ SimpleDataReader::data_received(const OpenDDS::DCPS::ReceivedDataSample& sample)
   {
     this->received_test_message_ ++;
 
-    ::TAO::DCPS::Serializer serializer (sample.sample_);
-    ::Xyz::Foo foo;
-    serializer >> foo;
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) Message: message_id_=%d a_long_value=%d handle_value=%d "
-      "sample_sequence=%d writer_id=%d\n", 
-      header.message_id_, foo.a_long_value, foo.handle_value,
-      foo.sample_sequence, foo.writer_id));
+    if (header.message_id_ == OpenDDS::DCPS::SAMPLE_DATA)
+    {
+      ::TAO::DCPS::Serializer serializer (sample.sample_);
+      ::Xyz::Foo foo;
+      serializer >> foo;
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Message: message_id_=%d a_long_value=%d handle_value=%d "
+        "sample_sequence=%d writer_id=%d\n",
+        header.message_id_, foo.a_long_value, foo.handle_value,
+        foo.sample_sequence, foo.writer_id));
+    }
   }
   else
   {

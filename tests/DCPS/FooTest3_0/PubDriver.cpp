@@ -161,7 +161,7 @@ PubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
     {
       pub_driver_ior_ = ACE_TEXT_ALWAYS_CHAR(current_arg);
       arg_shifter.consume_arg ();
-    }    
+    }
     else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-f"))) != 0)
     {
       sub_ready_filename_ = current_arg;
@@ -333,7 +333,7 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
 
   // Delete the datawriter.
   publisher_->delete_datawriter (datawriter_.in ());
-  
+
   TEST_CHECK (! participant_->contains_entity(datawriter_->get_instance_handle()));
 
   // Create datawriter to test DATAWRITER_QOS_DEFAULT/get_publisher
@@ -382,13 +382,14 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
 
   // Delete the datawriter.
   publisher_->delete_datawriter (datawriter_.in ());
-  
+
   TEST_CHECK (! participant_->contains_entity(datawriter_->get_instance_handle()));
 
   // Create datawriter to test register/unregister/dispose and etc.
   ::DDS::DataWriterQos dw_qos;
   publisher_->get_default_datawriter_qos (dw_qos);
 
+  dw_qos.writer_data_lifecycle.autodispose_unregistered_instances = false;
   dw_qos.history.depth = history_depth_;
 
   if (test_to_run_ == LIVELINESS_TEST)

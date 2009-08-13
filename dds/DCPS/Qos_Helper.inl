@@ -861,8 +861,7 @@ namespace OpenDDS
     ACE_INLINE
     bool Qos_Helper::valid (const ::DDS::WriterDataLifecycleQosPolicy& qos)
     {
-      return
-        qos == TheServiceParticipant->initial_WriterDataLifecycleQosPolicy();
+      return true;
     }
 
 
@@ -962,7 +961,7 @@ namespace OpenDDS
     {
       return valid (qos.entity_factory);
     }
-    
+
     ACE_INLINE
     bool Qos_Helper::changeable (const ::DDS::UserDataQosPolicy& /* qos1 */,
                                  const ::DDS::UserDataQosPolicy& /* qos2 */)
