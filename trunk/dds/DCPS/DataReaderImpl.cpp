@@ -312,7 +312,7 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
         }
       }
     }
-      
+
     //
     // Propagate the add_associations processing down into the Transport
     // layer here.  This will establish the transport support and reserve
@@ -627,10 +627,10 @@ void DataReaderImpl::remove_all_associations ()
   int size;
 
   ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->publication_handle_lock_);
-  
+
   {
     ACE_READ_GUARD (ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
-  
+
     size = writers_.size();
     writers.length(size);
 
@@ -846,7 +846,7 @@ bool DataReaderImpl::has_readcondition(::DDS::ReadCondition_ptr a_condition)
   }
 }
 
-::DDS::ReturnCode_t 
+::DDS::ReturnCode_t
 DataReaderImpl::get_qos (
                         ::DDS::DataReaderQos & qos
                         )
@@ -1093,12 +1093,12 @@ DataReaderImpl::get_matched_publication_data (
 DataReaderImpl::enable ()
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
-  //According spec: 
-  // - Calling enable on an already enabled Entity returns OK and has no 
+  //According spec:
+  // - Calling enable on an already enabled Entity returns OK and has no
   // effect.
-  // - Calling enable on an Entity whose factory is not enabled will fail 
+  // - Calling enable on an Entity whose factory is not enabled will fail
   // and return PRECONDITION_NOT_MET.
-  
+
   if (this->is_enabled ())
   {
     return ::DDS::RETCODE_OK;
@@ -1193,7 +1193,7 @@ void
 DataReaderImpl::writer_activity(PublicationId writer_id)
 {
   // caller should have the sample_lock_ !!!
-  
+
   WriterInfo* writer = 0;
 
   // The received_activity() has to be called outside the writers_lock_
@@ -1205,7 +1205,7 @@ DataReaderImpl::writer_activity(PublicationId writer_id)
 
     WriterMapType::iterator iter = writers_.find(writer_id);
     if( iter != writers_.end()) {
-      writer = iter->second; 
+      writer = iter->second;
 
     } else if( DCPS_debug_level > 4) {
       // This may not be an error since it could happen that the sample
@@ -1318,7 +1318,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         if (this->watchdog_.get ())
         {
           instance->last_sample_tv_ = instance->cur_sample_tv_;
-          instance->cur_sample_tv_ = ACE_OS::gettimeofday (); 
+          instance->cur_sample_tv_ = ACE_OS::gettimeofday ();
 
           if (is_new_instance)
           {
@@ -1599,7 +1599,7 @@ bool DataReaderImpl::have_instance_states(
 /// Fold-in the three separate loops of have_sample_states(),
 /// have_view_states(), and have_instance_states().  Takes the sample_lock_.
 bool DataReaderImpl::contains_sample(::DDS::SampleStateMask sample_states,
-  ::DDS::ViewStateMask view_states, ::DDS::InstanceStateMask instance_states) 
+  ::DDS::ViewStateMask view_states, ::DDS::InstanceStateMask instance_states)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, false);
   for (SubscriptionInstanceMapType::iterator iter = instances_.begin(),
@@ -1810,17 +1810,10 @@ DataReaderImpl::release_instance (::DDS::InstanceHandle_t handle)
     return;
   }
 
-  if (instance->rcvd_samples_.size_ == 0)
-  {
-    this->instances_.erase (handle);
-    this->release_instance_i (handle);
-  }
-  else
-  {
-    ACE_ERROR ((LM_ERROR, "(%P|%t) DataReaderImpl::release_instance "
-      "Can not release the instance (handle=0x%x) since it still has samples.\n",
-      handle));
-  }
+  this->release_data(instance);
+
+  this->instances_.erase(handle);
+  this->release_instance_i(handle);
 }
 
 
@@ -1883,7 +1876,7 @@ SequenceNumber
 OpenDDS::DCPS::WriterInfo::last_sequence() const
 {
   // sample_lock_ is held by the caller.
-  
+
   return this->last_sequence_;
 }
 
@@ -2666,7 +2659,7 @@ DataReaderImpl::data_expired (DataSampleHeader const & header) const
                  ACE_TEXT("Discarded historic data.\n")));
     }
 
-    return true;  // Data expired. 
+    return true;  // Data expired.
   }
 
   // The LIFESPAN_DURATION_FLAG is set when sample data is sent
@@ -2782,7 +2775,6 @@ void DataReaderImpl::post_read_or_take()
     ::DDS::DATA_ON_READERS_STATUS, false);
 }
 
-
 void DataReaderImpl::reschedule_deadline ()
 {
   if (this->watchdog_.get() != 0)
@@ -2801,6 +2793,12 @@ void DataReaderImpl::reschedule_deadline ()
       }
     }
   }
+}
+
+ACE_Reactor*
+DataReaderImpl::get_reactor()
+{
+  return this->reactor_;
 }
 
 } // namespace DCPS

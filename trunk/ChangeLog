@@ -1,3 +1,17 @@
+Thu Aug 13 22:17:02 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/InstanceState.h:
+        * dds/DCPS/InstanceState.inl:
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/SubscriptionInstance.h:
+
+          Added support for READER_DATA_LIFECYCLE.  
+
 Thu Aug 13 19:01:44 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/PublisherImpl.cpp:

@@ -7,11 +7,6 @@
 
 
 ACE_INLINE
-OpenDDS::DCPS::InstanceState::~InstanceState ()
-{
-}
-
-ACE_INLINE
 OpenDDS::DCPS::DataReaderImpl*
 OpenDDS::DCPS::InstanceState::data_reader() const
 {
@@ -22,9 +17,9 @@ ACE_INLINE
 void
 OpenDDS::DCPS::InstanceState::accessed()
 {
-//
-// Manage the view state due to data access here.
-//
+  //
+  // Manage the view state due to data access here.
+  //
   if (this->view_state_ & DDS::ANY_VIEW_STATE)
     {
       this->view_state_ = DDS::NOT_NEW_VIEW_STATE ;
@@ -58,7 +53,7 @@ void OpenDDS::DCPS::InstanceState::sample_info(::DDS::SampleInfo& si,
  */
   si.sample_rank = 0 ;
 
-  // these aren't the real value, they're being saved 
+  // these aren't the real value, they're being saved
   // for a later calculation. the actual value is
   // calculated in DataReaderImpl::sample_info using
   // these values.
@@ -105,7 +100,6 @@ OpenDDS::DCPS::InstanceState::data_was_received(const PublicationId& writer_id)
   // this state value.  Then manage the data sample only transistions
   // here.  Let the lively() method manage the other transitions.
   //
-
   writers_.insert (writer_id);
 
   switch( this->view_state_)
@@ -143,12 +137,12 @@ ACE_INLINE
 void
 OpenDDS::DCPS::InstanceState::lively(const PublicationId& writer_id)
 {
-  writers_.insert (writer_id);
-
   //
   // Manage transisitions in the instance state that do not require a
   // data sample, but merely the notion of liveliness.
   //
+  writers_.insert (writer_id);
+
   if( this->instance_state_ == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE)
     {
       this->no_writers_generation_count_++ ;

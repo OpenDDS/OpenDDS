@@ -859,17 +859,16 @@ namespace OpenDDS
     }
 
     ACE_INLINE
-    bool Qos_Helper::valid (const ::DDS::WriterDataLifecycleQosPolicy& qos)
+    bool Qos_Helper::valid (const ::DDS::WriterDataLifecycleQosPolicy&)
     {
       return true;
     }
 
 
     ACE_INLINE
-    bool Qos_Helper::valid (const ::DDS::ReaderDataLifecycleQosPolicy& qos)
+    bool Qos_Helper::valid (const ::DDS::ReaderDataLifecycleQosPolicy&)
     {
-      return
-        qos == TheServiceParticipant->initial_ReaderDataLifecycleQosPolicy();
+      return true;
     }
 
 

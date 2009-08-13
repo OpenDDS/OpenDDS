@@ -638,15 +638,7 @@ void
     // conflicts when releasing shared resources.
     ptr->instance_state_.cancel_pending();
 
-    while (ptr->rcvd_samples_.size_ > 0)
-    {
-      OpenDDS::DCPS::ReceivedDataElement * const head_ptr =
-        ptr->rcvd_samples_.head_;
-      ptr->rcvd_samples_.remove(head_ptr);
-      dec_ref_data_element(head_ptr);
-    }
-
-    delete ptr;
+    this->release_data(ptr);
   }
 
   delete data_allocator_;
@@ -1593,7 +1585,10 @@ void
     OpenDDS::DCPS::SubscriptionInstance* instance = 0;
     handle = get_next_handle();
     ACE_NEW_RETURN (instance,
-                    OpenDDS::DCPS::SubscriptionInstance(this, this->qos_, handle),
+                    OpenDDS::DCPS::SubscriptionInstance(this,
+                                                        this->qos_,
+                                                        this->sample_lock_,
+                                                        handle),
                     ::DDS::RETCODE_ERROR);
 
     instance->instance_handle_ = handle;
@@ -1935,6 +1930,30 @@ DDS::ReturnCode_t
   //---- end of preconditions common to read and take -----
 
   return ::DDS::RETCODE_OK;
+}
+
+void
+<%TYPE%>DataReaderImpl::release_data(
+    OpenDDS::DCPS::SubscriptionInstance* instance)
+{
+  if (instance->rcvd_samples_.size_ > 0)
+  {
+    ACE_DEBUG((LM_WARNING,
+               ACE_TEXT("(%P|%t) WARNING:")
+               ACE_TEXT(" <%TYPE%>DataReaderImpl::release_data:")
+               ACE_TEXT(" releasing %d samples from instance 0x%x!\n"),
+               instance->rcvd_samples_.size_,
+               instance->instance_handle_));
+
+    while (instance->rcvd_samples_.size_ > 0)
+    {
+      OpenDDS::DCPS::ReceivedDataElement* head = instance->rcvd_samples_.head_;
+      instance->rcvd_samples_.remove(head);
+      dec_ref_data_element(head);
+    }
+  }
+
+  delete instance;
 }
 
 void

@@ -15,9 +15,9 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-namespace OpenDDS 
+namespace OpenDDS
 {
-  namespace DCPS 
+  namespace DCPS
   {
     class InstanceState ;
 
@@ -37,7 +37,7 @@ namespace OpenDDS
       {
       }
 
-      long dec_ref() 
+      long dec_ref()
       {
           return --this->ref_count_;
       }
@@ -70,7 +70,7 @@ namespace OpenDDS
       /// at the time the sample was received
       size_t no_writers_generation_count_ ;
 
-      /// This is needed to know if delete DataReader should fail with 
+      /// This is needed to know if delete DataReader should fail with
       /// PRECONDITION_NOT_MET because there are outstanding loans.
       ACE_Atomic_Op<ACE_Thread_Mutex, long> zero_copy_cnt_;
 
@@ -94,7 +94,7 @@ namespace OpenDDS
       ReceivedDataElementList(InstanceState *instance_state = 0) ;
 
       ~ReceivedDataElementList() ;
-      
+
       // adds a data sample to the end of the list
       void add(ReceivedDataElement *data_sample) ;
 

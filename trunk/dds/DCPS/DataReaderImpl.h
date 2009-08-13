@@ -522,6 +522,8 @@ namespace OpenDDS
       // Reset time interval for each instance.
       void reschedule_deadline ();
 
+      ACE_Reactor* get_reactor();
+
     protected:
 
       SubscriberImpl* get_subscriber_servant ();
@@ -554,6 +556,8 @@ namespace OpenDDS
       * to ensure that the handle is unique for the container.
       */
       ::DDS::InstanceHandle_t get_next_handle ();
+
+      virtual void release_data(SubscriptionInstance* instance) = 0;
 
       virtual void release_instance_i (::DDS::InstanceHandle_t handle) = 0;
 
@@ -594,7 +598,7 @@ namespace OpenDDS
       /// via the bit datareader.
       bool bit_lookup_instance_handles (const WriterIdSeq& ids,
                                          ::DDS::InstanceHandleSeq & hdls);
- 
+
       /// Lookup the cache to get the instance handle by the
       /// publication repo ids.
       bool cache_lookup_instance_handles (const WriterIdSeq& ids,

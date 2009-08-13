@@ -399,8 +399,9 @@ public:
 
     //virtual OpenDDS::DCPS::DataReaderRemote_ptr get_datareaderremote_obj_ref ();
 
+    virtual void release_data(OpenDDS::DCPS::SubscriptionInstance* instance);
+    
     virtual void release_instance_i (::DDS::InstanceHandle_t handle);
-
 
   private:
 

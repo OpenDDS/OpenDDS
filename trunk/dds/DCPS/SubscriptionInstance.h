@@ -18,9 +18,9 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 
-namespace OpenDDS 
+namespace OpenDDS
 {
-  namespace DCPS 
+  namespace DCPS
   {
     class DataReaderImpl;
 
@@ -28,15 +28,16 @@ namespace OpenDDS
      * @class SubscriptionInstance
      *
      * @brief Struct that has information about an instance and the instance
-     *        sample list. 
+     *        sample list.
      */
       class SubscriptionInstance
       {
       public:
         SubscriptionInstance(DataReaderImpl *reader,
                              const DDS::DataReaderQos& qos,
-                             DDS::InstanceHandle_t handle) :
-            instance_state_(reader, handle),
+                             ACE_Recursive_Thread_Mutex& lock,
+                             DDS::InstanceHandle_t handle)
+          : instance_state_(reader, lock, handle),
             last_sequence_(0),
             rcvd_samples_(&instance_state_),
             rcvd_strategy_(0),
@@ -91,7 +92,7 @@ namespace OpenDDS
 
         ACE_Time_Value   cur_sample_tv_;
 
-        long             deadline_timer_id_; 
+        long             deadline_timer_id_;
       } ;
   }
 }

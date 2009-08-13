@@ -16,9 +16,9 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-namespace OpenDDS 
+namespace OpenDDS
 {
-  namespace DCPS 
+  namespace DCPS
   {
     class DataReaderImpl;
     class ReceivedDataElement;
@@ -34,13 +34,15 @@ namespace OpenDDS
      * Accessors are provided to query the current value of each of
      * these states.
      */
-    class OpenDDS_Dcps_Export InstanceState
+    class OpenDDS_Dcps_Export InstanceState : public ACE_Event_Handler
     {
     public:
       /// Constructor.
-      InstanceState(DataReaderImpl* reader, DDS::InstanceHandle_t handle);
+      InstanceState(DataReaderImpl* reader,
+                    ACE_Recursive_Thread_Mutex& lock,
+                    DDS::InstanceHandle_t handle);
 
-      /// Destructor 
+      /// Destructor
       virtual ~InstanceState();
 
       /// Populate the SampleInfo structure
@@ -58,7 +60,7 @@ namespace OpenDDS
 
       /// Access no writers generation count
       size_t no_writers_generation_count() const;
-      
+
       /// DISPOSE message received for this instance.
       void dispose_was_received(const PublicationId& writer_id);
 
@@ -76,12 +78,21 @@ namespace OpenDDS
       /// DataReader has become empty.
       void empty(bool value);
 
+      /// Schedule a pending release of resources.
+      void schedule_pending();
+
       /// Cancel pending state changes.
       void cancel_pending();
+
+      /// Schedule an immediate release of resources.
+      void schedule_release();
 
       /// Remove the instance if it's instance has no samples
       /// and no writers.
       void release_if_empty();
+
+      /// Remove the instance immediately.
+      void release();
 
       /// tell this instance when a DataWriter transitions to NOT_ALIVE
       void writer_became_dead(const PublicationId& writer_id,
@@ -92,8 +103,11 @@ namespace OpenDDS
 
       DataReaderImpl* data_reader() const;
 
-    private:
+      virtual int handle_timeout(const ACE_Time_Value& current_time,
+                                 const void* arg);
 
+    private:
+      ACE_Recursive_Thread_Mutex& lock_;
 
       /**
        * Current instance state.
@@ -125,11 +139,11 @@ namespace OpenDDS
        */
       DDS::ViewStateKind view_state_;
 
-      /// Number of times the instance state changes  
+      /// Number of times the instance state changes
       /// from NOT_ALIVE_DISPOSED to ALIVE.
       size_t disposed_generation_count_;
 
-      /// Number of times the instance state changes 
+      /// Number of times the instance state changes
       /// from NOT_ALIVE_NO_WRITERS to ALIVE.
       size_t no_writers_generation_count_;
 
@@ -142,6 +156,12 @@ namespace OpenDDS
        * Keep track of whether the instance is waiting to be released.
        */
       bool release_pending_;
+
+
+      /**
+       * Keep track of a scheduled release timer.
+       */
+      long release_timer_id_;
 
       /**
        * Reference to our containing reader.  This is used to call back
