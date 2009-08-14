@@ -81,11 +81,11 @@ namespace OpenDDS
       /// Schedule a pending release of resources.
       void schedule_pending();
 
-      /// Cancel pending state changes.
-      void cancel_pending();
-
       /// Schedule an immediate release of resources.
       void schedule_release();
+
+      /// Cancel a scheduled or pending release of resources.
+      void cancel_release();
 
       /// Remove the instance if it's instance has no samples
       /// and no writers.

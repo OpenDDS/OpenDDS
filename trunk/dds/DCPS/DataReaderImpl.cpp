@@ -1810,7 +1810,7 @@ DataReaderImpl::release_instance (::DDS::InstanceHandle_t handle)
     return;
   }
 
-  this->release_data(instance);
+  this->purge_data(instance);
 
   this->instances_.erase(handle);
   this->release_instance_i(handle);

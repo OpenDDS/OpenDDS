@@ -1,3 +1,27 @@
+Fri Aug 14 22:54:02 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/InstanceState.h:
+        * dds/DCPS/InstanceState.inl:
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/ReceivedDataElementList.cpp:
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+          Bugfixes to READER_DATA_LIFECYCLE support.
+        
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Commented out unregister on delete; causes stack corruption on
+          associated readers when data is received (requires further
+          research).
+        
+        * dds/DCPS/Service_Participant.cpp:
+
+          Updated QoS defaults; stripped trailing spaces.
+
 Thu Aug 13 22:58:29 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * tests/DCPS/unit/MyTypeSupportImpl.h:

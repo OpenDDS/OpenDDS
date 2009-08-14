@@ -207,7 +207,7 @@ namespace OpenDDS
                 this->wait ();
               }
             // Don't delete the participants - require the client code
-            // to delete participants 
+            // to delete participants
 #if 0
             //TBD return error code from this call
             // -- non-empty entity will make this call return failure
@@ -515,8 +515,8 @@ namespace OpenDDS
         ::DDS::LENGTH_UNLIMITED;
 
       initial_PresentationQosPolicy_.access_scope = ::DDS::INSTANCE_PRESENTATION_QOS;
-      initial_PresentationQosPolicy_.coherent_access = 0;
-      initial_PresentationQosPolicy_.ordered_access = 0;
+      initial_PresentationQosPolicy_.coherent_access = false;
+      initial_PresentationQosPolicy_.ordered_access = false;
 
       initial_DeadlineQosPolicy_.period.sec = ::DDS::DURATION_INFINITE_SEC;
       initial_DeadlineQosPolicy_.period.nanosec = ::DDS::DURATION_INFINITE_NSEC;
@@ -548,14 +548,14 @@ namespace OpenDDS
       initial_ResourceLimitsQosPolicy_.max_instances = ::DDS::LENGTH_UNLIMITED;
       initial_ResourceLimitsQosPolicy_.max_samples_per_instance = ::DDS::LENGTH_UNLIMITED;
 
-      initial_EntityFactoryQosPolicy_.autoenable_created_entities = 1;
+      initial_EntityFactoryQosPolicy_.autoenable_created_entities = true;
 
-      initial_WriterDataLifecycleQosPolicy_.autodispose_unregistered_instances = 1;
+      initial_WriterDataLifecycleQosPolicy_.autodispose_unregistered_instances = true;
 
-      initial_ReaderDataLifecycleQosPolicy_.autopurge_nowriter_samples_delay.sec = ::DDS::DURATION_ZERO_SEC;
-      initial_ReaderDataLifecycleQosPolicy_.autopurge_nowriter_samples_delay.nanosec = ::DDS::DURATION_ZERO_NSEC;
-      initial_ReaderDataLifecycleQosPolicy_.autopurge_disposed_samples_delay.sec = ::DDS::DURATION_ZERO_SEC;
-      initial_ReaderDataLifecycleQosPolicy_.autopurge_disposed_samples_delay.nanosec = ::DDS::DURATION_ZERO_NSEC;
+      initial_ReaderDataLifecycleQosPolicy_.autopurge_nowriter_samples_delay.sec = ::DDS::DURATION_INFINITE_SEC;
+      initial_ReaderDataLifecycleQosPolicy_.autopurge_nowriter_samples_delay.nanosec = ::DDS::DURATION_INFINITE_NSEC;
+      initial_ReaderDataLifecycleQosPolicy_.autopurge_disposed_samples_delay.sec = ::DDS::DURATION_INFINITE_SEC;
+      initial_ReaderDataLifecycleQosPolicy_.autopurge_disposed_samples_delay.nanosec = ::DDS::DURATION_INFINITE_NSEC;
 
       initial_DomainParticipantQos_.user_data = initial_UserDataQosPolicy_;
       initial_DomainParticipantQos_.entity_factory = initial_EntityFactoryQosPolicy_;
@@ -1088,14 +1088,14 @@ namespace OpenDDS
       }
 
       this->bitTransportMap_[ domain]
-        = TheTransportFactory->create_transport_impl (transportKey, 
-                                                      ACE_TEXT("SimpleTcp"), 
+        = TheTransportFactory->create_transport_impl (transportKey,
+                                                      ACE_TEXT("SimpleTcp"),
                                                       DONT_AUTO_CONFIG);
 
       if( DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) Domain[ %d].transport == %x local_address=%s:%d \n"),
-          domain, this->bitTransportMap_[ domain].in(), bitTransportIpMap_[ repo].c_str(), 
+          domain, this->bitTransportMap_[ domain].in(), bitTransportIpMap_[ repo].c_str(),
           bitTransportPortMap_[ repo]));
       }
 
@@ -1386,8 +1386,8 @@ namespace OpenDDS
           //
           GET_CONFIG_STRING_VALUE (this->cf_, sect, ACE_TEXT("scheduler"), this->schedulerString_)
 #if ACE_MAJOR_VERSION == 5 && ACE_MINOR_VERSION >= 5
-          suseconds_t usec(0); 
-          
+          suseconds_t usec(0);
+
           GET_CONFIG_VALUE (this->cf_, sect, ACE_TEXT("scheduler_slice"), usec, suseconds_t)
 
           if (usec > 0)
@@ -1640,7 +1640,7 @@ namespace OpenDDS
 
         cache = this->persistent_data_cache_.get ();
       }
-     
+
       return cache;
     }
 

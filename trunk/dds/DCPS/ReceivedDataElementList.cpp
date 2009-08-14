@@ -49,10 +49,17 @@ OpenDDS::DCPS::ReceivedDataElementList::remove(ReceivedDataElement *data_sample)
 
   if (data_sample == head_)
   {
-    head_ = data_sample->next_data_sample_ ;
-    if (head_)
+    if (head_ == tail_)
     {
-      head_->previous_data_sample_ = 0 ;
+      head_ = tail_ = 0;
+    }
+    else
+    {
+      head_ = data_sample->next_data_sample_ ;
+      if (head_)
+      {
+        head_->previous_data_sample_ = 0 ;
+      }
     }
   }
   else if (data_sample == tail_)

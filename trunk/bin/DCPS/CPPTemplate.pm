@@ -631,14 +631,7 @@ void
   {
     OpenDDS::DCPS::SubscriptionInstance* ptr =
       get_handle_instance(it->second);
-
-    if (ptr == 0) continue;
-
-    // Cancel pending state changes; this avoids potential
-    // conflicts when releasing shared resources.
-    ptr->instance_state_.cancel_pending();
-
-    this->release_data(ptr);
+    this->purge_data(ptr);
   }
 
   delete data_allocator_;
@@ -1933,24 +1926,16 @@ DDS::ReturnCode_t
 }
 
 void
-<%TYPE%>DataReaderImpl::release_data(
+<%TYPE%>DataReaderImpl::purge_data(
     OpenDDS::DCPS::SubscriptionInstance* instance)
 {
-  if (instance->rcvd_samples_.size_ > 0)
-  {
-    ACE_DEBUG((LM_WARNING,
-               ACE_TEXT("(%P|%t) WARNING:")
-               ACE_TEXT(" <%TYPE%>DataReaderImpl::release_data:")
-               ACE_TEXT(" releasing %d samples from instance 0x%x!\n"),
-               instance->rcvd_samples_.size_,
-               instance->instance_handle_));
+  instance->instance_state_.cancel_release();
 
-    while (instance->rcvd_samples_.size_ > 0)
-    {
-      OpenDDS::DCPS::ReceivedDataElement* head = instance->rcvd_samples_.head_;
-      instance->rcvd_samples_.remove(head);
-      dec_ref_data_element(head);
-    }
+  while (instance->rcvd_samples_.size_ > 0)
+  {
+    OpenDDS::DCPS::ReceivedDataElement* head =
+      instance->rcvd_samples_.remove_head();
+    dec_ref_data_element(head);
   }
 
   delete instance;
@@ -1967,7 +1952,6 @@ void
     if (it->second == handle)
     {
       instance_map_.erase (it);
-      return;
     }
   }
 }
