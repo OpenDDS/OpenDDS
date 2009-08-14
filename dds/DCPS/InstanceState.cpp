@@ -32,11 +32,7 @@ OpenDDS::DCPS::InstanceState::InstanceState(DataReaderImpl* reader,
 
 OpenDDS::DCPS::InstanceState::~InstanceState()
 {
-  if (this->release_timer_id_ != -1)
-  {
-    this->reader_->get_reactor()->
-      cancel_timer(this->release_timer_id_);
-  }
+  cancel_release();
 }
 
 // cannot ACE_INLINE because of #include loop
@@ -45,15 +41,18 @@ int
 OpenDDS::DCPS::InstanceState::handle_timeout(const ACE_Time_Value& current_time,
                                              const void*)
 {
-  this->release_timer_id_ = -1;
 
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
                    this->lock_,
                    0);
 
-  // autopurge delay has timed out; forcefully
-  // remove all resources used by the instance.
+  ACE_DEBUG((LM_WARNING,
+             ACE_TEXT("(%P|%t) WARNING:")
+             ACE_TEXT(" InstanceState::handle_timeout:")
+             ACE_TEXT(" autopurging samples with instance handle 0x%x!\n"),
+             this->handle_));
+
   this->release();
 
   return 0;
@@ -108,12 +107,6 @@ OpenDDS::DCPS::InstanceState::schedule_pending()
 }
 
 void
-OpenDDS::DCPS::InstanceState::cancel_pending()
-{
-  this->release_pending_ = false;
-}
-
-void
 OpenDDS::DCPS::InstanceState::schedule_release()
 {
     DDS::DataReaderQos qos;
@@ -141,15 +134,10 @@ OpenDDS::DCPS::InstanceState::schedule_release()
     if (delay.sec != DDS::DURATION_INFINITE_SEC &&
         delay.nanosec != DDS::DURATION_INFINITE_NSEC)
     {
+      cancel_release();
+
       ACE_Reactor* reactor = this->reader_->get_reactor();
-
-      if (this->release_timer_id_ != -1)
-      {
-        reactor->cancel_timer(this->release_timer_id_);
-      }
-
-      this->release_timer_id_ =
-        reactor->schedule_timer(this, 0, duration_to_time_value(delay));
+      reactor->schedule_timer(this, 0, duration_to_time_value(delay));
 
       if (this->release_timer_id_ == -1)
       {
@@ -169,6 +157,20 @@ OpenDDS::DCPS::InstanceState::schedule_release()
 }
 
 void
+OpenDDS::DCPS::InstanceState::cancel_release()
+{
+  this->release_pending_ = false;
+
+  if (this->release_timer_id_ != -1)
+  {
+    ACE_Reactor* reactor = this->reader_->get_reactor();
+    reactor->cancel_timer(this->release_timer_id_);
+
+    this->release_timer_id_ = -1;
+  }
+}
+
+void
 OpenDDS::DCPS::InstanceState::release_if_empty()
 {
   if( this->empty_ && this->writers_.empty())
@@ -184,7 +186,6 @@ OpenDDS::DCPS::InstanceState::release_if_empty()
 void
 OpenDDS::DCPS::InstanceState::release()
 {
-  cancel_pending(); // must cancel prior to release!
   this->reader_->release_instance(this->handle_);
 }
 

@@ -557,7 +557,7 @@ namespace OpenDDS
       */
       ::DDS::InstanceHandle_t get_next_handle ();
 
-      virtual void release_data(SubscriptionInstance* instance) = 0;
+      virtual void purge_data(SubscriptionInstance* instance) = 0;
 
       virtual void release_instance_i (::DDS::InstanceHandle_t handle) = 0;
 

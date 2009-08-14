@@ -95,6 +95,8 @@ ACE_INLINE
 void
 OpenDDS::DCPS::InstanceState::data_was_received(const PublicationId& writer_id)
 {
+  cancel_release();
+
   //
   // Update the view state here, since only sample data received affects
   // this state value.  Then manage the data sample only transistions
@@ -145,6 +147,8 @@ OpenDDS::DCPS::InstanceState::lively(const PublicationId& writer_id)
 
   if( this->instance_state_ == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE)
     {
+      cancel_release(); // cancel unregister
+
       this->no_writers_generation_count_++ ;
       this->instance_state_ = DDS::ALIVE_INSTANCE_STATE ;
     }
