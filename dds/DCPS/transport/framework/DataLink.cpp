@@ -440,13 +440,23 @@ OpenDDS::DCPS::DataLink::release_reservations(RepoId          remote_id,
       CORBA::ORB_var orb = TheServiceParticipant->get_ORB ();
       ACE_Reactor* reactor = orb->orb_core ()->reactor ();
 
+      this->impl_->release_datalink(this, true);
       reactor->schedule_timer (this, 0, this->datalink_release_delay_);
     }
     else 
     {
-      this->handle_timeout (ACE_OS::gettimeofday (), 0);
+      this->impl_->release_datalink(this, false);
+      this->handle_timeout (ACE_OS::gettimeofday (), (const void *)0);
     }
   }
+}
+
+bool
+OpenDDS::DCPS::DataLink::cancel_release ()
+{
+  CORBA::ORB_var orb = TheServiceParticipant->get_ORB ();
+  ACE_Reactor* reactor = orb->orb_core ()->reactor ();
+  return reactor->cancel_timer (this) > 0;
 }
 
 
@@ -652,12 +662,9 @@ OpenDDS::DCPS::DataLink::transport_shutdown()
 {
   DBG_ENTRY_LVL("DataLink","transport_shutdown",6);
 
-  CORBA::ORB_var orb = TheServiceParticipant->get_ORB ();
-
-  ACE_Reactor* reactor = orb->orb_core ()->reactor ();
-  if (reactor->cancel_timer (this, 0) > 0)
+  if (this->cancel_release ())
   {
-    this->handle_timeout (ACE_OS::gettimeofday(), (const void *)1);
+    this->handle_timeout (ACE_OS::gettimeofday(), (const void *)0);
   }
 
   {
@@ -1085,12 +1092,11 @@ int
 OpenDDS::DCPS::DataLink::handle_timeout (const ACE_Time_Value &/*tv*/,
                                         const void * arg)
 {
+  ACE_UNUSED_ARG (arg);
+
   if ((this->pub_map_.size() + this->sub_map_.size()) == 0)
   {
     this->pre_stop_i ();
-
-    if (arg == 0)
-      this->impl_->release_datalink(this);
 
     // The TransportImpl ptr should be cleaned in the dstr.
     // This link will be used as a callback after the actual

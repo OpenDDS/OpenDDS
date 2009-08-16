@@ -70,7 +70,8 @@ namespace OpenDDS
         virtual void notify_lost_on_backpressure_timeout ();
 
         /// Called by the DataLink to release itself.
-        virtual void release_datalink_i(DataLink* link);
+        virtual void release_datalink_i(DataLink* link,
+                                        bool release_pending);
 
       protected:
 

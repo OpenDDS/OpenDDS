@@ -1945,14 +1945,17 @@ void
 <%TYPE%>DataReaderImpl::release_instance_i (::DDS::InstanceHandle_t handle)
 {
   InstanceMap::iterator const the_end = instance_map_.end ();
-  for (InstanceMap::iterator it = instance_map_.begin ();
-       it != the_end;
-       ++it)
+  InstanceMap::iterator it = instance_map_.begin ();
+  while (it != the_end)
   {
     if (it->second == handle)
     {
-      instance_map_.erase (it);
+      InstanceMap::iterator curIt = it;
+      ++ it;
+      instance_map_.erase (curIt);
     }
+    else
+      ++ it;
   }
 }
 

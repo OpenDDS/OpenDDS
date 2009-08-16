@@ -48,7 +48,8 @@ namespace OpenDDS
 
       virtual int connection_info_i(TransportInterfaceInfo& local_info) const;
 
-      virtual void release_datalink_i(OpenDDS::DCPS::DataLink* link);
+      virtual void release_datalink_i(OpenDDS::DCPS::DataLink* link, 
+                                      bool release_pending);
 
       virtual bool acked(RepoId, RepoId);
       virtual void remove_ack (RepoId pub_id, RepoId sub_id);

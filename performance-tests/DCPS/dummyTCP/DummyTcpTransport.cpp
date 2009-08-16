@@ -383,9 +383,12 @@ OpenDDS::DCPS::DummyTcpTransport::connection_info_i
 
 
 void
-OpenDDS::DCPS::DummyTcpTransport::release_datalink_i(DataLink* link)
+OpenDDS::DCPS::DummyTcpTransport::release_datalink_i(DataLink* link,
+                                                     bool release_pending)
 {
   DBG_ENTRY_LVL("DummyTcpTransport","release_datalink_i",5);
+
+  ACE_UNUSED_ARG (release_pending);
 
   DummyTcpDataLink* tcp_link = ACE_static_cast(DummyTcpDataLink*,link);
 

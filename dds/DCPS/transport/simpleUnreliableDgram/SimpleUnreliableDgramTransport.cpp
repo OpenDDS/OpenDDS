@@ -228,10 +228,11 @@ OpenDDS::DCPS::SimpleUnreliableDgramTransport::shutdown_i()
 
 
 void
-OpenDDS::DCPS::SimpleUnreliableDgramTransport::release_datalink_i(DataLink* link)
+OpenDDS::DCPS::SimpleUnreliableDgramTransport::release_datalink_i(DataLink* link,
+                                                                  bool release_pending)
 {
   DBG_ENTRY_LVL("SimpleUnreliableDgramTransport","release_datalink_i",6);
-
+  ACE_UNUSED_ARG (release_pending);
   SimpleUnreliableDgramDataLink* dgram_link = ACE_static_cast(SimpleUnreliableDgramDataLink*,link);
 
   if (dgram_link == 0)

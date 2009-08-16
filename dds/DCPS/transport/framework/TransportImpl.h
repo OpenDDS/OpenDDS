@@ -179,7 +179,7 @@ namespace OpenDDS
         /// Called by our release_datalink() method in order to give the
         /// concrete TransportImpl subclass a chance to do something when
         /// the release_datalink "event" occurs.
-        virtual void release_datalink_i(DataLink* link) = 0;
+        virtual void release_datalink_i(DataLink* link, bool release_pending) = 0;
 
         /// Accessor to obtain a "copy" of the reference to the reactor task.
         /// Caller is responsible for the "copy" of the reference that is
@@ -216,7 +216,9 @@ namespace OpenDDS
         /// TransportInterface is known to have acquired our reservation_lock_,
         /// so there won't be any reserve_datalink() calls being made from
         /// any other threads while we perform this release.
-        void release_datalink(DataLink* link);
+        /// Since there are some delay of the datalink release, the release_pending 
+        /// flag means whether the release happen right away or after some delay.
+        void release_datalink(DataLink* link, bool release_pending);
 
         /// Called by our friend, the TransportInterface, to attach
         /// itself to this TransportImpl object.
