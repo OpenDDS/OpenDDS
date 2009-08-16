@@ -1,3 +1,9 @@
+Sun Aug 16 06:36:51 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/InstanceState.cpp:
+
+          Dropped unused argument.
+
 Fri Aug 14 22:54:02 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
@@ -11,13 +17,13 @@ Fri Aug 14 22:54:02 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * tests/DCPS/unit/MyTypeSupportImpl.h:
 
           Bugfixes to READER_DATA_LIFECYCLE support.
-        
+
         * dds/DCPS/PublisherImpl.cpp:
 
           Commented out unregister on delete; causes stack corruption on
           associated readers when data is received (requires further
           research).
-        
+
         * dds/DCPS/Service_Participant.cpp:
 
           Updated QoS defaults; stripped trailing spaces.

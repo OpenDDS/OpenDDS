@@ -38,10 +38,9 @@ OpenDDS::DCPS::InstanceState::~InstanceState()
 // cannot ACE_INLINE because of #include loop
 
 int
-OpenDDS::DCPS::InstanceState::handle_timeout(const ACE_Time_Value& current_time,
-                                             const void*)
+OpenDDS::DCPS::InstanceState::handle_timeout(const ACE_Time_Value& /* current_time */,
+                                             const void* /* arg */)
 {
-
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
                    this->lock_,
