@@ -1,3 +1,40 @@
+Sun Aug 16 19:17:56 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+
+          Fixed a problem in transport that possibly creates multiple links 
+          to same remote. The problem occurs when new association comes while
+          the previous link is declared to be released but is in pending release.
+          The fix is to keep track the pending released datalinks and reuse the 
+          datalink if the datalink release is still pending when a new association
+          comes.
+          
+          This problem is observered in thrash high test with following errors 
+          on publisher.
+                   
+          "ERROR: SimpleTcpTransport::passive_connection() - connection with 
+          oci1176.ociweb.com:39384 at priority 0 already exists, overwriting 
+          previously established connection."
+           
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.h:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.cpp:
+
+          Updated for the release_datalink_i() signature changes.
+          
+        * bin/DCPS/CPPTemplate.pm:
+        
+          Fixed a bug that use an invalid iterator after erasing to continue 
+          iterating.
+
 Sun Aug 16 06:36:51 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/InstanceState.cpp:

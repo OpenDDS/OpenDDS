@@ -218,6 +218,8 @@ namespace OpenDDS
         CORBA::Long& transport_priority();
         CORBA::Long  transport_priority() const;
 
+        bool cancel_release ();
+
        protected:
 
         /// This is how the subclass "announces" to this DataLink base class

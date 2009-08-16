@@ -157,8 +157,11 @@ OpenDDS::DCPS::ReliableMulticastTransportImpl::connection_info_i(TransportInterf
 }
 
 void
-OpenDDS::DCPS::ReliableMulticastTransportImpl::release_datalink_i(DataLink* link)
+OpenDDS::DCPS::ReliableMulticastTransportImpl::release_datalink_i(
+  DataLink* link, bool release_pending)
 {
+  ACE_UNUSED_ARG (release_pending);
+
   OpenDDS::DCPS::ReliableMulticastDataLink* data_link =
     dynamic_cast<OpenDDS::DCPS::ReliableMulticastDataLink*>(link);
 

@@ -116,12 +116,12 @@ OpenDDS::DCPS::TransportImpl::set_reactor(TransportReactorTask* task)
 /// object, the DataLink has lost all of its associations, and is not needed
 /// any longer.
 ACE_INLINE void
-OpenDDS::DCPS::TransportImpl::release_datalink(DataLink* link)
+OpenDDS::DCPS::TransportImpl::release_datalink(DataLink* link, bool release_pending)
 {
   DBG_ENTRY_LVL("TransportImpl","release_datalink",6);
 
   // Delegate to our subclass.
-  this->release_datalink_i(link);
+  this->release_datalink_i(link, release_pending);
 }
 
 
@@ -208,3 +208,5 @@ OpenDDS::DCPS::TransportImpl::pre_shutdown_i ()
 {
   //noop
 }
+
+

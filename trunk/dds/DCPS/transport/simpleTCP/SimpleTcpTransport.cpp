@@ -89,7 +89,8 @@ OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink
     // First, we have to try to find an existing (connected) DataLink
     // that suits the caller's needs.
 
-    if (this->links_.find( PriorityKey( priority, remote_address), link) == 0)
+    PriorityKey key( priority, remote_address);
+    if (this->links_.find( key, link) == 0)
       {
         SimpleTcpConnection_rch con = link->get_connection ();
         if (con->is_connector () && ! con->is_connected ())
@@ -105,19 +106,40 @@ OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink
               }
           }
         // This means we may or may not find a suitable (and already connected) DataLink.
-  // Thus we need more checks.
-  else
-  {
-    if(!con->is_connector () && !con->is_connected ())
-    {
-      // The passive connecting side will wait for the connection establishment.
-    }
+          // Thus we need more checks.
+        else
+        {
+          if(!con->is_connector () && !con->is_connected ())
+          {
+            // The passive connecting side will wait for the connection establishment.
+          }
 
-  }
+        }
         VDBG_LVL ((LM_DEBUG, "(%P|%t)  Found existing connection,"
                    " No need for passive connection establishment.\n"), 5);
         return link._retn();
       }
+    else if (this->pending_release_links_.find( key, link) == 0)
+    {
+      if (link->cancel_release ())
+      {
+        if (this->pending_release_links_.unbind( key, link) == 0 && this->links_.bind( key, link) == 0)
+        {
+          VDBG_LVL ((LM_DEBUG, "(%P|%t) Move link prio=%d addr=%C:%d to links_\n", 
+            link->transport_priority(), link->remote_address().get_host_name (),
+            link->remote_address().get_port_number()), 5);
+          return link._retn(); 
+        }
+        else 
+        {
+          // This should not happen.
+          ACE_ERROR ((LM_ERROR, "(%P|%t) Failed to move link prio=%d addr=%C:%d to links_\n", 
+            link->transport_priority(), link->remote_address().get_host_name (),
+            link->remote_address().get_port_number()));        
+        }
+      }
+    }
+    // else not exist in pending release so create new link 
   }
 
   // The "find" part of the find_or_create_datalink has been attempted, and
@@ -356,9 +378,16 @@ OpenDDS::DCPS::SimpleTcpTransport::shutdown_i()
       {
         entry->int_id_->transport_shutdown();
       }
-
     this->links_.unbind_all();
-  }
+
+    for (AddrLinkMap::ITERATOR itr(this->pending_release_links_);
+      itr.next(entry);
+      itr.advance())
+      {
+        entry->int_id_->transport_shutdown();
+      }
+    this->pending_release_links_.unbind_all();
+ }
 
   // Drop our reference to the SimpleTcpConfiguration object.
   this->tcp_config_ = 0;
@@ -400,7 +429,8 @@ OpenDDS::DCPS::SimpleTcpTransport::connection_info_i
 
 
 void
-OpenDDS::DCPS::SimpleTcpTransport::release_datalink_i(DataLink* link)
+OpenDDS::DCPS::SimpleTcpTransport::release_datalink_i(DataLink* link,
+                                                      bool release_pending)
 {
   DBG_ENTRY_LVL("SimpleTcpTransport","release_datalink_i",6);
 
@@ -424,11 +454,21 @@ OpenDDS::DCPS::SimpleTcpTransport::release_datalink_i(DataLink* link)
                 tcp_link->transport_priority(),
                 tcp_link->remote_address()
               );
+
   if (this->links_.unbind( key, released_link) != 0)
     {
       ACE_ERROR((LM_ERROR,
                  "(%P|%t) ERROR: Unable to locate DataLink in order to "
                  "release and it.\n"));
+    }
+  else if (release_pending)
+    {
+      if (this->pending_release_links_.bind( key, released_link) != 0)
+      {
+        ACE_ERROR((LM_ERROR,
+          "(%P|%t) ERROR: Unable to bind released SimpleTcpDataLink to "
+          "pending_release_links_ map.\n"));
+      }    
     }
 
   if( DCPS_debug_level > 9) {
@@ -706,3 +746,7 @@ OpenDDS::DCPS::SimpleTcpTransport::fresh_link( SimpleTcpConnection_rch connectio
 
   return 0;
 }
+
+
+
+

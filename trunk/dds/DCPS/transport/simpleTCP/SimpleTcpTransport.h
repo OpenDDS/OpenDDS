@@ -65,7 +65,8 @@ namespace OpenDDS
                                  (TransportInterfaceInfo& local_info) const;
 
         /// Called by the DataLink to release itself.
-        virtual void release_datalink_i(DataLink* link);
+        virtual void release_datalink_i(DataLink* link,
+                                        bool release_pending);
 
       private:
 
@@ -135,6 +136,7 @@ namespace OpenDDS
 
         /// This is the map of connected DataLinks.
         AddrLinkMap links_;
+        AddrLinkMap pending_release_links_;
 
         /// This lock is used to protect the links_ data member.
         LockType links_lock_;
