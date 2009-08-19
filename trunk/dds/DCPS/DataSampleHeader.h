@@ -114,7 +114,7 @@ namespace OpenDDS
                            ACE_Message_Block* buffer);
 
       static bool test_flag(DataSampleHeaderFlag flag,
-                            long value);
+                            char value);
 
       /// Does the data in this mb constitute a partial Sample Header?
       static bool partial (ACE_Message_Block& mb);
