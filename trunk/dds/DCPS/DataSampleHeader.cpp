@@ -65,14 +65,14 @@ OpenDDS::DCPS::DataSampleHeader::init (ACE_Message_Block* buffer)
   if( reader.good_bit() != true) return ;
   this->marshaled_size_ += sizeof( byte) ;
 
-  this->byte_order_         = check_flag(BYTE_ORDER_FLAG, byte);
-  this->coherent_change_    = check_flag(COHERENT_CHANGE_FLAG, byte);
-  this->historic_sample_    = check_flag(HISTORIC_SAMPLE_FLAG, byte);
-  this->lifespan_duration_  = check_flag(LIFESPAN_DURATION_FLAG, byte);
-  this->reserved_1          = check_flag(RESERVED_1_FLAG, byte);
-  this->reserved_2          = check_flag(RESERVED_2_FLAG, byte);
-  this->reserved_3          = check_flag(RESERVED_3_FLAG, byte);
-  this->reserved_4          = check_flag(RESERVED_4_FLAG, byte);
+  this->byte_order_         = test_flag(BYTE_ORDER_FLAG, byte);
+  this->coherent_change_    = test_flag(COHERENT_CHANGE_FLAG, byte);
+  this->historic_sample_    = test_flag(HISTORIC_SAMPLE_FLAG, byte);
+  this->lifespan_duration_  = test_flag(LIFESPAN_DURATION_FLAG, byte);
+  this->reserved_1          = test_flag(RESERVED_1_FLAG, byte);
+  this->reserved_2          = test_flag(RESERVED_2_FLAG, byte);
+  this->reserved_3          = test_flag(RESERVED_3_FLAG, byte);
+  this->reserved_4          = test_flag(RESERVED_4_FLAG, byte);
 
   // Set swap_bytes flag to the Serializer if data sample from
   // the publisher is in different byte order.
