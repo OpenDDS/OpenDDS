@@ -28,8 +28,8 @@ namespace OpenDDS
 
 
     /**
-     * This class provides the methods that the DSPS components use to call
-     * into the Transport layer. This is the main mechanism by which the
+     * This class provides the methods that the DSPS components use to call 
+     * into the Transport layer. This is the main mechanism by which the 
      * application sends data to subscriptions and manages associations between
      * publications and subscriptions in the service.
      */
@@ -46,7 +46,7 @@ namespace OpenDDS
         int swap_bytes() const;
 
         /// These methods are made public for the need of datawriter,
-        /// but they are just for internal use.
+        /// but they are just for internal use. 
 
         /// Send the control message to remote subscribers through the
         /// appropriate DataLink(s).
@@ -86,12 +86,6 @@ namespace OpenDDS
         /// of TransportInterface) in order to attach this TransportInterface
         /// to the supplied TransportImpl object.
         AttachStatus attach_transport(TransportImpl* impl);
-
-        /// This method can be called by our subclass to detach this
-        /// TransportInterface from the TransportImpl to which it is
-        /// currently attached.  This is the opposite of the
-        /// "attach_transport()" method.
-        void detach_transport();
 
         /// Return the TransportImpl object reference.
         TransportImpl_rch get_transport_impl ();
@@ -136,6 +130,12 @@ namespace OpenDDS
         /// will be used to send the sample.  This ultimately gets it
         /// to all remote subscribers interested in the local publisher_id.
         void send(const DataSampleList& samples);
+
+        /// This method can be called by our subclass to detach this
+        /// TransportInterface from the TransportImpl to which it is
+        /// currently attached.  This is the opposite of the
+        /// "attach_transport()" method.
+        void detach_transport();
 
         /// Method to be implemented by subclass so that it may be
         /// informed of a transport_detached() "event".  The subclass
@@ -185,12 +185,12 @@ namespace OpenDDS
         TransportImpl_rch impl_;
 
         /// Note: Not protected by any lock.
-        /// The (cached) connection information (blob) obtained
+        /// The (cached) connection information (blob) obtained  
         /// from the TransportImpl during attach_transport().
         TransportInterfaceInfo connection_info_;
 
         /// Note: Not protected by any lock.
-        /// The (cached) swap bytes configuration value obtained
+        /// The (cached) swap bytes configuration value obtained  
         /// from the TransportImpl during attach_transport().
         int swap_bytes_;
 

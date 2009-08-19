@@ -55,6 +55,13 @@ namespace OpenDDS
         /// framework.
         void release();
 
+        /// This will shutdown just one TransportImpl object.
+        ///
+        /// Client Application can call this method to tear down just one
+        /// TransportImpl object.  Note that this is effectively an
+        /// "uncreate()" method.
+        void release(TransportIdType impl_id);
+
         /// This function is called as the concrete transport library is loaded. The concrete transport
         /// library creates a concrete transport generator and register with TransportFactory singleton.
         /// Special Note: Caller is "giving away" the generator to

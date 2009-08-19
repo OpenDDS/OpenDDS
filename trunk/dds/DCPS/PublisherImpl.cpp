@@ -242,12 +242,10 @@ PublisherImpl::delete_datawriter (::DDS::DataWriter_ptr a_datawriter)
   }
 
   // Unregister all registered instances prior to deletion.
+#if 0
   DDS::Time_t source_timestamp = time_value_to_time(ACE_OS::gettimeofday());
   dw_servant->unregister_instances(source_timestamp);
-
-  // Wait for pending samples to drain prior to removing associations
-  // and unregistering the publication.
-  dw_servant->wait_pending();
+#endif
 
   CORBA::String_var topic_name = dw_servant->get_topic_name ();
   DataWriterImpl* local_writer = 0;
@@ -307,6 +305,10 @@ PublisherImpl::delete_datawriter (::DDS::DataWriter_ptr a_datawriter)
     // lock_) in reverse order.
     ACE_GUARD_RETURN (reverse_lock_type, reverse_monitor, this->reverse_pi_lock_,
                       ::DDS::RETCODE_ERROR);
+
+    // Wait for pending samples to drain prior to removing associations
+    // and unregistering the publication.
+    dw_servant->wait_pending();
 
     // Call remove association before unregistering the datawriter
     // with the transport, otherwise some callbacks resulted from
