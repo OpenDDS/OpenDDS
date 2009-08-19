@@ -29,6 +29,8 @@
 OpenDDS::DCPS::TransportImpl_rch reader_transport_impl;
 OpenDDS::DCPS::TransportImpl_rch writer_transport_impl;
 
+ACE_Atomic_Op<ACE_Thread_Mutex, OpenDDS::DCPS::TransportIdType> transportIds(0);
+
 int max_samples_per_instance = 10 ;
 int history_depth = 10 ;
 
@@ -214,9 +216,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       si_map['A'].absolute_generation_rank = 2;
 
       si_map['B'].sample_state = ::DDS::READ_SAMPLE_STATE ;
-      // The samples of the same instance returned by 
+      // The samples of the same instance returned by
       // a single read() should have same view state
-      // so samples 'B','C','D' should have same view 
+      // so samples 'B','C','D' should have same view
       // state as 'A'.
       si_map['B'].view_state = ::DDS::NEW_VIEW_STATE ;
       si_map['B'].instance_state = ::DDS::ALIVE_INSTANCE_STATE ;
@@ -235,18 +237,18 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       // one addition dispose "sample" after.
       si.sample_rank = 1 + 1;
-      // disposed_generation_count = 1 when receiving "C" 
+      // disposed_generation_count = 1 when receiving "C"
       // while disposed_generation_count = 0 when receiving "A" and "B"
-      // so 
-      //   S.disposed_generation_count = 1 
+      // so
+      //   S.disposed_generation_count = 1
       //   MRSIC.disposed_generation_count = 2
       //   MRSIC.no_writers_generation_count = S.no_writers_generation_count = 0
-      //   
+      //
       //
       //   si.generation_rank =
       //    (MRSIC.disposed_generation_count + MRSIC.no_writers_generation_count)
       //     - (S.disposed_generation_count + S.no_writers_generation_count)
-      si.generation_rank = 1 ; 
+      si.generation_rank = 1 ;
       si.absolute_generation_rank = 1 ;
       si_map['C'] = si ;
 
@@ -351,10 +353,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       si_map['c'].absolute_generation_rank = 1 ;
 
       si.sample_state = ::DDS::NOT_READ_SAMPLE_STATE ;
-      // The samples of the same instance returned by 
+      // The samples of the same instance returned by
       // a single read() should have same view state
-      // so sample 'd' should have same view state as 
-      // sample 'c'.      
+      // so sample 'd' should have same view state as
+      // sample 'c'.
       si.view_state = ::DDS::NEW_VIEW_STATE ;
       si.instance_state = ::DDS::ALIVE_INSTANCE_STATE ;
       si.disposed_generation_count = 0 ;

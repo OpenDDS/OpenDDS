@@ -15,7 +15,7 @@
 #include "tests/DCPS/FooType4/FooDefTypeSupportC.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
-static const ACE_TCHAR* reader_address_str = ACE_TEXT("localhost:16789");
+extern ACE_Atomic_Op<ACE_Thread_Mutex, OpenDDS::DCPS::TransportIdType> transportIds;
 
 Reader::Reader(::DDS::DomainParticipant_ptr dp,
                int history_depth,
@@ -171,7 +171,7 @@ Reader::read (const SampleInfoMap& si_map,
             ACE_OS::printf ("got SampleInfo[%d] dispose sample\n", i);
             continue;
           }
- 
+
           ACE_OS::printf ("foo[%d] - %c : x = %f y = %f, key = %d\n",
             i, foo[i].c, foo[i].x, foo[i].y, foo[i].key);
           PrintSampleInfo(si[i]) ;
@@ -218,18 +218,13 @@ int Reader::init_transport ()
 {
   int status = 0;
 
-  reader_transport_impl
-    = TheTransportFactory->create_transport_impl (SUB_TRAFFIC, ACE_TEXT("SimpleTcp"), OpenDDS::DCPS::DONT_AUTO_CONFIG);
+  OpenDDS::DCPS::TransportIdType transportId = ++transportIds;
 
   OpenDDS::DCPS::TransportConfiguration_rch reader_config
-    = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("SimpleTcp"));
+    = TheTransportFactory->get_or_create_configuration (transportId, ACE_TEXT("SimpleTcp"));
 
-  OpenDDS::DCPS::SimpleTcpConfiguration* reader_tcp_config
-    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
-
-  ACE_INET_Addr reader_address (reader_address_str);
-  reader_tcp_config->local_address_ = reader_address;
-  reader_tcp_config->local_address_str_ = reader_address_str;
+  reader_transport_impl
+    = TheTransportFactory->create_transport_impl(transportId, 0);
 
   if (reader_transport_impl->configure(reader_config.in()) != 0)
     {
@@ -247,10 +242,4 @@ Reader::~Reader()
 {
   sub_->delete_contained_entities() ;
   dp_->delete_subscriber(sub_.in ());
-
-  //We have to wait a while to avoid the remove_association from DCPSInfo
-  //called after the transport is release.
-  ACE_OS::sleep (2);
-
-  TheTransportFactory->release(SUB_TRAFFIC) ;
 }

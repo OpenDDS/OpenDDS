@@ -1539,7 +1539,7 @@ void
   store_instance_data(data, sample.header_, instance, just_registered);
 }
 
-::DDS::ReturnCode_t
+void
 <%TYPE%>DataReaderImpl::store_instance_data(
     ::<%SCOPE%><%TYPE%> *instance_data,
     const OpenDDS::DCPS::DataSampleHeader& header,
@@ -1563,13 +1563,7 @@ void
                   data_allocator_->free,
                   <%TYPE%> );
     instance_data = 0;
-
-    ACE_ERROR_RETURN ((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ")
-                       ACE_TEXT("<%TYPE%>DataReaderImpl::")
-                       ACE_TEXT("store_instance_data, ")
-                       ACE_TEXT("can not dispose or unregister a not registered instance. \n")),
-                      ::DDS::RETCODE_ERROR);
+    return;
   }
 
   if (it == instance_map_.end())
@@ -1577,24 +1571,23 @@ void
     just_registered = true;
     OpenDDS::DCPS::SubscriptionInstance* instance = 0;
     handle = get_next_handle();
-    ACE_NEW_RETURN (instance,
-                    OpenDDS::DCPS::SubscriptionInstance(this,
-                                                        this->qos_,
-                                                        this->sample_lock_,
-                                                        handle),
-                    ::DDS::RETCODE_ERROR);
+    ACE_NEW (instance,
+             OpenDDS::DCPS::SubscriptionInstance(this,
+                                                 this->qos_,
+                                                 this->sample_lock_,
+                                                 handle));
 
     instance->instance_handle_ = handle;
     int ret = bind(instances_, handle, instance);
 
     if (ret != 0)
     {
-      ACE_ERROR_RETURN ((LM_ERROR,
-                         ACE_TEXT("(%P|%t) ")
-                         ACE_TEXT("<%TYPE%>DataReaderImpl::")
-                         ACE_TEXT("store_instance_data, ")
-                         ACE_TEXT("insert handle failed. \n")),
-                        ::DDS::RETCODE_ERROR);
+      ACE_ERROR ((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ")
+                  ACE_TEXT("<%TYPE%>DataReaderImpl::")
+                  ACE_TEXT("store_instance_data, ")
+                  ACE_TEXT("insert handle failed. \n")));
+      return;
     }
 
     std::pair<InstanceMap::iterator, bool> bpair
@@ -1602,12 +1595,12 @@ void
                                handle));
     if (bpair.second == false)
     {
-      ACE_ERROR_RETURN ((LM_ERROR,
-                         ACE_TEXT("(%P|%t) ")
-                         ACE_TEXT("<%TYPE%>DataReaderImpl::")
-                         ACE_TEXT("store_instance_data, ")
-                         ACE_TEXT("insert ::<%SCOPE%><%TYPE%> failed. \n")),
-                        ::DDS::RETCODE_ERROR);
+      ACE_ERROR ((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ")
+                  ACE_TEXT("<%TYPE%>DataReaderImpl::")
+                  ACE_TEXT("store_instance_data, ")
+                  ACE_TEXT("insert ::<%SCOPE%><%TYPE%> failed. \n")));
+      return;
     }
   }
   else
@@ -1653,8 +1646,8 @@ void
 
         if (listener != 0)
         {
-          ACE_GUARD_RETURN (Reverse_Lock_t, unlock_guard, reverse_sample_lock_,
-                            ::DDS::RETCODE_ERROR);
+          ACE_GUARD (Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+          
           ::DDS::DataReader_var dr = get_dr_obj_ref();
           listener->on_sample_rejected(dr.in (),
                                        sample_rejected_status_);
@@ -1665,7 +1658,7 @@ void
                       data_allocator_->free,
                       <%TYPE%> );
 
-        return ::DDS::RETCODE_OK; //OK?
+        return;
        }
        else
        {
@@ -1686,12 +1679,11 @@ void
     }
 
     OpenDDS::DCPS::ReceivedDataElement *ptr;
-    ACE_NEW_MALLOC_RETURN (ptr,
-                           static_cast<OpenDDS::DCPS::ReceivedDataElement *> (
-                             rd_allocator_->malloc (
-                               sizeof (OpenDDS::DCPS::ReceivedDataElement))),
-                           OpenDDS::DCPS::ReceivedDataElement(instance_data),
-                           ::DDS::RETCODE_ERROR);
+    ACE_NEW_MALLOC (ptr,
+                    static_cast<OpenDDS::DCPS::ReceivedDataElement *> (
+                        rd_allocator_->malloc (
+                            sizeof (OpenDDS::DCPS::ReceivedDataElement))),
+                    OpenDDS::DCPS::ReceivedDataElement(instance_data));
 
     if (is_dispose_msg)
     {
@@ -1737,8 +1729,8 @@ void
 
         if (listener)
         {
-          ACE_GUARD_RETURN (Reverse_Lock_t, unlock_guard, reverse_sample_lock_,
-                            ::DDS::RETCODE_ERROR);
+          ACE_GUARD (Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+
           ::DDS::DataReader_var dr = get_dr_obj_ref();
           listener->on_sample_lost(dr.in (), sample_lost_status_);
         }
@@ -1758,8 +1750,8 @@ void
         sub->listener_for(::DDS::DATA_ON_READERS_STATUS);
     if (sub_listener != 0)
     {
-      ACE_GUARD_RETURN (Reverse_Lock_t, unlock_guard, reverse_sample_lock_,
-                        ::DDS::RETCODE_ERROR);
+      ACE_GUARD (Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+      
       sub_listener->on_data_on_readers(get_subscriber()) ;
       sub->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
     }
@@ -1772,8 +1764,8 @@ void
 
       if (listener != 0)
       {
-        ACE_GUARD_RETURN (Reverse_Lock_t, unlock_guard, reverse_sample_lock_,
-                          ::DDS::RETCODE_ERROR);
+        ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+        
         ::DDS::DataReader_var dr = get_dr_obj_ref();
         listener->on_data_available(dr.in ());
         set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
@@ -1793,8 +1785,6 @@ void
                   data_allocator_->free,
                   <%TYPE%> );
   }
-
-  return ::DDS::RETCODE_OK;
 }
 
 void

@@ -469,7 +469,7 @@ public:
       ::DDS::QueryCondition_ptr a_condition
       );
 
-  ::DDS::ReturnCode_t store_instance_data(
+    void store_instance_data(
          ::<%SCOPE%><%TYPE%> *instance_data,
          const OpenDDS::DCPS::DataSampleHeader& header,
          OpenDDS::DCPS::SubscriptionInstance*& instance_ptr,
