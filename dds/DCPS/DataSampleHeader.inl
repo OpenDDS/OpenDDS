@@ -161,8 +161,8 @@ OpenDDS::DCPS::DataSampleHeader::set_flag(DataSampleHeaderFlag flag,
 
 ACE_INLINE
 bool
-OpenDDS::DCPS::DataSampleHeader::check_flag(DataSampleHeaderFlag flag,
-                                            long value)
+OpenDDS::DCPS::DataSampleHeader::test_flag(DataSampleHeaderFlag flag,
+                                           long value)
 {
   return mask_flag(flag) & value;
 }

@@ -113,8 +113,8 @@ namespace OpenDDS
       static void set_flag(DataSampleHeaderFlag flag,
                            ACE_Message_Block* buffer);
 
-      static bool check_flag(DataSampleHeaderFlag flag,
-                             long value);
+      static bool test_flag(DataSampleHeaderFlag flag,
+                            long value);
 
       /// Does the data in this mb constitute a partial Sample Header?
       static bool partial (ACE_Message_Block& mb);
