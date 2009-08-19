@@ -14,7 +14,7 @@
 #include "dds/DCPS/PublisherImpl.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
-static const ACE_TCHAR* writer_address_str = ACE_TEXT("localhost:29876");
+extern ACE_Atomic_Op<ACE_Thread_Mutex, OpenDDS::DCPS::TransportIdType> transportIds;
 
 Writer::Writer(::DDS::DomainParticipant_ptr dp,
                ::DDS::Topic_ptr topic,
@@ -86,7 +86,7 @@ Writer::Writer(::DDS::DomainParticipant_ptr dp,
     throw TestException() ;
   }
 
-  fast_dw_ = 
+  fast_dw_ =
     dynamic_cast< ::Xyz::FooDataWriterImpl*> (foo_dw.in ());
 
 }
@@ -334,20 +334,13 @@ int Writer::init_transport ()
 {
   int status = 0;
 
-  writer_transport_impl
-    = TheTransportFactory->create_transport_impl (PUB_TRAFFIC,
-                                                  ACE_TEXT("SimpleTcp"),
-                                                  OpenDDS::DCPS::DONT_AUTO_CONFIG);
+  OpenDDS::DCPS::TransportIdType transportId = ++transportIds;
 
   OpenDDS::DCPS::TransportConfiguration_rch writer_config
-    = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("SimpleTcp"));
+    = TheTransportFactory->get_or_create_configuration (transportId, ACE_TEXT("SimpleTcp"));
 
-  OpenDDS::DCPS::SimpleTcpConfiguration* writer_tcp_config
-    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
-
-  ACE_INET_Addr writer_address (writer_address_str);
-  writer_tcp_config->local_address_ = writer_address;
-  writer_tcp_config->local_address_str_ = writer_address_str;
+  writer_transport_impl
+    = TheTransportFactory->create_transport_impl(transportId, 0);
 
   if (writer_transport_impl->configure(writer_config.in()) != 0)
     {
@@ -363,14 +356,8 @@ int Writer::init_transport ()
 Writer::~Writer()
 {
   pub_->delete_datawriter(dw_.in ());
+
   // Clean up publisher objects
   // pub_->delete_contained_entities() ;
-
   dp_->delete_publisher(pub_.in ());
-
-  //We have to wait a while to avoid the remove_association from DCPSInfo
-  //called after the transport is release.
-  ACE_OS::sleep (2);
-
-  TheTransportFactory->release(PUB_TRAFFIC) ;
 }

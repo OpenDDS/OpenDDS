@@ -1,3 +1,40 @@
+Tue Aug 18 23:56:02 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+
+          Changed store_instance_data return type to void; unregister
+          and dispose on a non-registered instance no longer emits a 
+          warning.
+
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Re-enabled autodispose for scoreboard testing.
+
+        * dds/DCPS/transport/framework/TransportFactory.h:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+       
+          Removed single argument variant of release; no code uses
+          this method and its use can cause dangerous consequences
+          (i.e. reactor task referencing invalid data).
+        
+        * dds/DCPS/transport/framework/TransportInterface.h:
+
+          Promoted detach_transport to public scope to match
+          attach_transport.
+
+        * tests/DCPS/FooTest4_0/Reader.cpp:
+        * tests/DCPS/FooTest4_0/Writer.cpp:
+        * tests/DCPS/FooTest4_0/main.cpp:
+
+          Updated test to better configure transports; dropped use
+          of single argument version of TransportFactory::release.
+
+        * tests/DCPS/Thrasher/DataReaderListenerImpl.cpp:
+
+          Updated test to only track valid data samples (fixes
+          spurious scoreboard errors).
+
 Sun Aug 16 19:17:56 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.h:
@@ -7,20 +44,20 @@ Sun Aug 16 19:17:56 UTC 2009  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
 
-          Fixed a problem in transport that possibly creates multiple links 
+          Fixed a problem in transport that possibly creates multiple links
           to same remote. The problem occurs when new association comes while
           the previous link is declared to be released but is in pending release.
-          The fix is to keep track the pending released datalinks and reuse the 
+          The fix is to keep track the pending released datalinks and reuse the
           datalink if the datalink release is still pending when a new association
           comes.
-          
-          This problem is observered in thrash high test with following errors 
+
+          This problem is observered in thrash high test with following errors
           on publisher.
-                   
-          "ERROR: SimpleTcpTransport::passive_connection() - connection with 
-          oci1176.ociweb.com:39384 at priority 0 already exists, overwriting 
+
+          "ERROR: SimpleTcpTransport::passive_connection() - connection with
+          oci1176.ociweb.com:39384 at priority 0 already exists, overwriting
           previously established connection."
-           
+
         * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.h:
         * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.cpp:
         * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.h:
@@ -29,10 +66,10 @@ Sun Aug 16 19:17:56 UTC 2009  Yan Dai  <dai_y@ociweb.com>
         * performance-tests/DCPS/dummyTCP/DummyTcpTransport.cpp:
 
           Updated for the release_datalink_i() signature changes.
-          
+
         * bin/DCPS/CPPTemplate.pm:
-        
-          Fixed a bug that use an invalid iterator after erasing to continue 
+
+          Fixed a bug that use an invalid iterator after erasing to continue
           iterating.
 
 Sun Aug 16 06:36:51 UTC 2009  Steven Stallion  <stallions@ociweb.com>

@@ -27,7 +27,7 @@ DataReaderListenerImpl::on_data_available(
                ACE_TEXT(" _narrow failed!\n")));
     return;
   }
-  
+
   // The following is intentionally inefficient to simulate
   // backpressure with multiple writers; we should be especially
   // dull and take only one sample at a time.
@@ -37,8 +37,11 @@ DataReaderListenerImpl::on_data_available(
 
   while (reader_i->take_next_sample(foo, si) == DDS::RETCODE_OK)
   {
-    ++received_samples_;
-    ++progress_;
+    if (si.valid_data)
+    {
+      ++received_samples_;
+      ++progress_;
+    }
   }
 }
 
