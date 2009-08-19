@@ -50,8 +50,8 @@ OpenDDS::DCPS::DataSampleHeader::init (ACE_Message_Block* buffer)
 
   TAO::DCPS::Serializer reader( buffer )  ;
   // TODO: Now it's ok to serialize the message_id before flag byte
-  // since the message_id_ is defined as char. If the message_id_ 
-  // is changed to be defined as a type with multiple bytes then 
+  // since the message_id_ is defined as char. If the message_id_
+  // is changed to be defined as a type with multiple bytes then
   // we need define it after the flag byte or serialize flag byte before
   // serializing the message_id_. I think the former approach is simpler
   // than the latter approach.
@@ -65,14 +65,14 @@ OpenDDS::DCPS::DataSampleHeader::init (ACE_Message_Block* buffer)
   if( reader.good_bit() != true) return ;
   this->marshaled_size_ += sizeof( byte) ;
 
-  this->byte_order_         = ((byte & 0x01) != 0) ;
-  this->last_sample_        = ((byte & 0x02) != 0) ;
-  this->historic_sample_    = ((byte & 0x04) != 0) ;
-  this->lifespan_duration_  = ((byte & 0x08) != 0) ;
-  this->reserved_1          = ((byte & 0x10) != 0) ;
-  this->reserved_2          = ((byte & 0x20) != 0) ;
-  this->reserved_3          = ((byte & 0x40) != 0) ;
-  this->reserved_4          = ((byte & 0x80) != 0) ;
+  this->byte_order_         = check_flag(BYTE_ORDER_FLAG, byte);
+  this->coherent_change_    = check_flag(COHERENT_CHANGE_FLAG, byte);
+  this->historic_sample_    = check_flag(HISTORIC_SAMPLE_FLAG, byte);
+  this->lifespan_duration_  = check_flag(LIFESPAN_DURATION_FLAG, byte);
+  this->reserved_1          = check_flag(RESERVED_1_FLAG, byte);
+  this->reserved_2          = check_flag(RESERVED_2_FLAG, byte);
+  this->reserved_3          = check_flag(RESERVED_3_FLAG, byte);
+  this->reserved_4          = check_flag(RESERVED_4_FLAG, byte);
 
   // Set swap_bytes flag to the Serializer if data sample from
   // the publisher is in different byte order.
@@ -98,30 +98,25 @@ OpenDDS::DCPS::DataSampleHeader::init (ACE_Message_Block* buffer)
     reader >> this->lifespan_duration_sec_;
     if (!reader.good_bit()) return;
     this->marshaled_size_ += sizeof (this->lifespan_duration_sec_);
-    
+
     reader >> this->lifespan_duration_nanosec_;
     if (!reader.good_bit()) return;
     this->marshaled_size_ += sizeof (this->lifespan_duration_nanosec_);
   }
 
-  reader >> this->coherency_group_ ;
-  if( reader.good_bit() != true) return ;
-  this->marshaled_size_ += sizeof( this->coherency_group_) ;
-
   reader >> this->publication_id_;
   if( reader.good_bit() != true) return ;
   this->marshaled_size_ += _dcps_find_size( this->publication_id_) ;
-
 }
 
-/// The update_flag method is a hack which updates the sample
+/// The clear_flag and set_flag methods are a hack to update the
 /// header flags after a sample has been serialized without
-/// deserializing the message. This method will break if the
-/// current Serializer behavior changes.
+/// deserializing the entire message. This method will break if
+/// the current Serializer behavior changes.
 
 void
-OpenDDS::DCPS::DataSampleHeader::update_flag (ACE_Message_Block* buffer,
-  DataSampleHeaderFlag flag)
+OpenDDS::DCPS::DataSampleHeader::clear_flag(DataSampleHeaderFlag flag,
+                                            ACE_Message_Block* buffer)
 {
   char *base = buffer->base();
 
@@ -129,12 +124,32 @@ OpenDDS::DCPS::DataSampleHeader::update_flag (ACE_Message_Block* buffer,
   // verify sufficient length exists:
   if (buffer->end() - base < 2) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: DataSampleHeader::update_flag: ")
+      ACE_TEXT("(%P|%t) ERROR: DataSampleHeader::clear_flag: ")
       ACE_TEXT("ACE_Message_Block too short (missing flags octet).\n")));
+    return;
   }
 
   // Twiddle flag bit.
-  *(base + 1) |= (1 << flag);
+  *(base + 1) ^= mask_flag(flag);
+}
+
+void
+OpenDDS::DCPS::DataSampleHeader::set_flag(DataSampleHeaderFlag flag,
+                                          ACE_Message_Block* buffer)
+{
+  char *base = buffer->base();
+
+  // The flags octet will always be the second byte;
+  // verify sufficient length exists:
+  if (buffer->end() - base < 2) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: DataSampleHeader::set_flag: ")
+      ACE_TEXT("ACE_Message_Block too short (missing flags octet).\n")));
+    return;
+  }
+
+  // Twiddle flag bit.
+  *(base + 1) |= mask_flag(flag);
 }
 
 ACE_CDR::Boolean
@@ -145,14 +160,14 @@ operator<< (ACE_Message_Block*& buffer, OpenDDS::DCPS::DataSampleHeader& value)
   writer << value.message_id_ ;
 
   // Write the flags as a single byte.
-  ACE_CDR::Octet flags = (value.byte_order_         << 0)
-                       | (value.last_sample_        << 1)
-                       | (value.historic_sample_    << 2)
-                       | (value.lifespan_duration_  << 3)
-                       | (value.reserved_1          << 4)
-                       | (value.reserved_2          << 5)
-                       | (value.reserved_3          << 6)
-                       | (value.reserved_4          << 7)
+  ACE_CDR::Octet flags = (value.byte_order_         << OpenDDS::DCPS::BYTE_ORDER_FLAG)
+                       | (value.coherent_change_    << OpenDDS::DCPS::COHERENT_CHANGE_FLAG)
+                       | (value.historic_sample_    << OpenDDS::DCPS::HISTORIC_SAMPLE_FLAG)
+                       | (value.lifespan_duration_  << OpenDDS::DCPS::LIFESPAN_DURATION_FLAG)
+                       | (value.reserved_1          << OpenDDS::DCPS::RESERVED_1_FLAG)
+                       | (value.reserved_2          << OpenDDS::DCPS::RESERVED_2_FLAG)
+                       | (value.reserved_3          << OpenDDS::DCPS::RESERVED_3_FLAG)
+                       | (value.reserved_4          << OpenDDS::DCPS::RESERVED_4_FLAG)
                        ;
   writer << ACE_OutputCDR::from_octet (flags);
   writer << value.message_length_ ;
@@ -164,8 +179,6 @@ operator<< (ACE_Message_Block*& buffer, OpenDDS::DCPS::DataSampleHeader& value)
     writer << value.lifespan_duration_sec_;
     writer << value.lifespan_duration_nanosec_;
   }
-
-  writer << value.coherency_group_ ;
 
   writer << value.publication_id_;
 
@@ -185,6 +198,7 @@ std::ostream& operator<<( std::ostream& str, const OpenDDS::DCPS::MessageId valu
     case OpenDDS::DCPS::FULLY_ASSOCIATED:      return str << "FULLY_ASSOCIATED";
     case OpenDDS::DCPS::REQUEST_ACK:           return str << "REQUEST_ACK";
     case OpenDDS::DCPS::SAMPLE_ACK:            return str << "SAMPLE_ACK";
+    case OpenDDS::DCPS::END_COHERENT_CHANGE:   return str << "END_COHERENT_CHANGE";
     default:                                   return str << "UNSPECIFIED(" << int(value) << ")";
   }
 }
@@ -196,13 +210,13 @@ std::ostream& operator<<( std::ostream& str, const OpenDDS::DCPS::DataSampleHead
   str << "[";
 
   str << OpenDDS::DCPS::MessageId( value.message_id_) << ", ";
-  if( value.last_sample_ == 1) {
-    str << "last sample, ";
-  }
   if( value.byte_order_ == 1) {
     str << "network order, ";
   } else {
     str << "little endian, ";
+  }
+  if( value.coherent_change_ == 1) {
+    str << "coherent change, ";
   }
   str << std::dec << value.message_length_ << ", ";
   str << "0x" << std::hex << value.sequence_ << ", ";
@@ -210,7 +224,6 @@ std::ostream& operator<<( std::ostream& str, const OpenDDS::DCPS::DataSampleHead
   str << std::dec << value.source_timestamp_nanosec_ << "), ";
   str << "(" << std::dec << value.lifespan_duration_sec_ << "/";
   str << std::dec << value.lifespan_duration_nanosec_ << "), ";
-  str << std::dec << value.coherency_group_ << ", ";
   str << OpenDDS::DCPS::RepoIdConverter(value.publication_id_);
 
   str << "]";

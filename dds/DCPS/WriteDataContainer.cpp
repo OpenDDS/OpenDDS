@@ -168,7 +168,7 @@ WriteDataContainer::enqueue(
   if (this->watchdog_.get ())
   {
     instance->last_sample_tv_ = instance->cur_sample_tv_;
-    instance->cur_sample_tv_ = ACE_OS::gettimeofday (); 
+    instance->cur_sample_tv_ = ACE_OS::gettimeofday ();
     this->watchdog_->execute ((void const *)instance, false);
   }
 
@@ -609,10 +609,7 @@ WriteDataContainer::data_delivered (DataSampleListElement* sample)
         ));
       }
 
-      // INSERT INTO DURABILITY CACHE HERE
-      ::OpenDDS::DCPS::DataSampleHeader::update_flag (sample->sample_,
-        HISTORIC_SAMPLE_FLAG);
-      
+      DataSampleHeader::set_flag(HISTORIC_SAMPLE_FLAG, sample->sample_);
       sent_data_.enqueue_tail_next_send_sample (sample);
     }
   }
@@ -985,7 +982,7 @@ WriteDataContainer::unregister_all (DataWriterImpl* writer)
       if (old_head == 0)
         {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: WriteDataContainer::unregister_all,")
-            ACE_TEXT("NULL element at head of sending_data_, size %d head %X tail %X \n"), 
+            ACE_TEXT("NULL element at head of sending_data_, size %d head %X tail %X \n"),
             sending_data_.size_,  sending_data_.head_,  sending_data_.tail_));
           break;
         }

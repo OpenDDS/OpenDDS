@@ -1470,11 +1470,11 @@ DataReaderImpl::send_sample_ack(
   DataSampleHeader outbound_header;
   outbound_header.message_id_               = SAMPLE_ACK;
   outbound_header.byte_order_               = byteOrder,
+  outbound_header.coherent_change_          = 0;
   outbound_header.message_length_           = data->total_length ();
   outbound_header.sequence_                 = 0;
   outbound_header.source_timestamp_sec_     = when.sec;
   outbound_header.source_timestamp_nanosec_ = when.nanosec;
-  outbound_header.coherency_group_          = 0;
   outbound_header.publication_id_           = this->subscription_id_;
 
   ACE_Message_Block* sample_ack;

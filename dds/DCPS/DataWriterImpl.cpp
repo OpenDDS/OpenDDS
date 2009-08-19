@@ -1623,16 +1623,15 @@ DataWriterImpl::create_control_message (enum MessageId message_id,
 {
   DataSampleHeader header_data;
   header_data.message_id_ = message_id;
-  //header_data.last_sample_
   header_data.byte_order_ =
     this->publisher_servant_->swap_bytes()
     ? !TAO_ENCAP_BYTE_ORDER
     : TAO_ENCAP_BYTE_ORDER;
+  header_data.coherent_change_ = 0;
   header_data.message_length_ = data->total_length ();
   header_data.sequence_ = 0;
   header_data.source_timestamp_sec_ = source_timestamp.sec;
   header_data.source_timestamp_nanosec_ = source_timestamp.nanosec;
-  header_data.coherency_group_ = 0;
   header_data.publication_id_ = publication_id_;
 
   ACE_Message_Block* message;
@@ -1679,11 +1678,11 @@ DataWriterImpl::create_sample_data_message ( DataSample* data,
 
   DataSampleHeader header_data;
   header_data.message_id_ = SAMPLE_DATA;
-  //header_data.last_sample_
   header_data.byte_order_ =
     this->publisher_servant_->swap_bytes()
     ? !TAO_ENCAP_BYTE_ORDER
     : TAO_ENCAP_BYTE_ORDER;
+  header_data.coherent_change_ = 0; // TODO
   header_data.message_length_ = data->total_length ();
   ++this->sequence_number_;
   header_data.sequence_ = this->sequence_number_.value_;
@@ -1698,7 +1697,6 @@ DataWriterImpl::create_sample_data_message ( DataSample* data,
     header_data.lifespan_duration_nanosec_ = qos_.lifespan.duration.nanosec;
   }
 
-  header_data.coherency_group_ = 0;
   header_data.publication_id_ = publication_id_;
 
   size_t max_marshaled_size = header_data.max_marshaled_size ();
@@ -1878,7 +1876,7 @@ DataWriterImpl::handle_timeout (const ACE_Time_Value &tv,
           std::string(converter).c_str()
           ));
       }
-    
+
       if (this->send_liveliness(tv) == false)
         liveliness_lost = true;
     }

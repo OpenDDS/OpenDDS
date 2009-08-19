@@ -1,3 +1,18 @@
+Wed Aug 19 23:10:11 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Initial changes to support non-default PRESENTATION QoS policies:
+          - Updated DataSampleHeader to support coherent groups
+          - Fixed byte ordering assignment issues (referenced wrong flag)
+          - Updated flag operations; refactored update_flag method to
+            inlined clear_flag and set_flag methods.
+
 Wed Aug 19 16:24:55 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/PublisherImpl.cpp:
