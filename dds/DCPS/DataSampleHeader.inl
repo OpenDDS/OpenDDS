@@ -109,7 +109,7 @@ OpenDDS::DCPS::DataSampleHeader::max_marshaled_size()
 
 ACE_INLINE
 long
-mask_flag(DataSampleHeaderFlag flag)
+OpenDDS::DCPS::DataSampleHeader::mask_flag(DataSampleHeaderFlag flag)
 {
   return 1 << flag;
 }
@@ -161,7 +161,8 @@ OpenDDS::DCPS::DataSampleHeader::set_flag(DataSampleHeaderFlag flag,
 
 ACE_INLINE
 bool
-check_flag(DataSampleHeaderFlag flag, long value)
+OpenDDS::DCPS::DataSampleHeader::check_flag(DataSampleHeaderFlag flag,
+                                            long value)
 {
   return mask_flag(flag) & value;
 }

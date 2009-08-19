@@ -109,49 +109,6 @@ OpenDDS::DCPS::DataSampleHeader::init (ACE_Message_Block* buffer)
   this->marshaled_size_ += _dcps_find_size( this->publication_id_) ;
 }
 
-/// The clear_flag and set_flag methods are a hack to update the
-/// header flags after a sample has been serialized without
-/// deserializing the entire message. This method will break if
-/// the current Serializer behavior changes.
-
-void
-OpenDDS::DCPS::DataSampleHeader::clear_flag(DataSampleHeaderFlag flag,
-                                            ACE_Message_Block* buffer)
-{
-  char *base = buffer->base();
-
-  // The flags octet will always be the second byte;
-  // verify sufficient length exists:
-  if (buffer->end() - base < 2) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: DataSampleHeader::clear_flag: ")
-      ACE_TEXT("ACE_Message_Block too short (missing flags octet).\n")));
-    return;
-  }
-
-  // Twiddle flag bit.
-  *(base + 1) ^= mask_flag(flag);
-}
-
-void
-OpenDDS::DCPS::DataSampleHeader::set_flag(DataSampleHeaderFlag flag,
-                                          ACE_Message_Block* buffer)
-{
-  char *base = buffer->base();
-
-  // The flags octet will always be the second byte;
-  // verify sufficient length exists:
-  if (buffer->end() - base < 2) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: DataSampleHeader::set_flag: ")
-      ACE_TEXT("ACE_Message_Block too short (missing flags octet).\n")));
-    return;
-  }
-
-  // Twiddle flag bit.
-  *(base + 1) |= mask_flag(flag);
-}
-
 ACE_CDR::Boolean
 operator<< (ACE_Message_Block*& buffer, OpenDDS::DCPS::DataSampleHeader& value)
 {
