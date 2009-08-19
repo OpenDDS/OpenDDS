@@ -5,15 +5,15 @@
 //TODO: we should really use the ACE_CDR_BYTE_ORDER instead of
 //      TAO_ENCAP_BYTE_ORDER, but since the ACE_CDR_BYTE_ORDER
 //      is currently defined under the ACE_HAS_WCHAR guard which
-//      is different from DOC's version (I'm not sure why) and 
+//      is different from DOC's version (I'm not sure why) and
 //      the TAO_ENCAP_BYTE_ORDER is currently consistent with
-//      the ACE_CDR_BYTE_ORDER, it's ok to use 
+//      the ACE_CDR_BYTE_ORDER, it's ok to use
 //      TAO_ENCAP_BYTE_ORDER for now.
 ACE_INLINE
 OpenDDS::DCPS::DataSampleHeader::DataSampleHeader ()
   : message_id_( 0)
-  , last_sample_( 0)
   , byte_order_(TAO_ENCAP_BYTE_ORDER)
+  , coherent_change_( 0)
   , historic_sample_( 0)
   , lifespan_duration_( 0)
   , reserved_1( 0)
@@ -24,7 +24,6 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader ()
   , sequence_( 0)
   , source_timestamp_sec_( 0)
   , source_timestamp_nanosec_( 0)
-  , coherency_group_( 0)
   , publication_id_( GUID_UNKNOWN )
   , marshaled_size_( 0)
 {
@@ -33,8 +32,8 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader ()
 ACE_INLINE
 OpenDDS::DCPS::DataSampleHeader::DataSampleHeader (ACE_Message_Block* buffer)
   : message_id_( 0)
-  , last_sample_( 0)
   , byte_order_( TAO_ENCAP_BYTE_ORDER)
+  , coherent_change_( 0)
   , historic_sample_( 0)
   , lifespan_duration_( 0)
   , reserved_1( 0)
@@ -45,7 +44,6 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader (ACE_Message_Block* buffer)
   , sequence_( 0)
   , source_timestamp_sec_( 0)
   , source_timestamp_nanosec_( 0)
-  , coherency_group_( 0)
   , publication_id_( GUID_UNKNOWN )
 {
   this->init( buffer) ;
@@ -54,8 +52,8 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader (ACE_Message_Block* buffer)
 ACE_INLINE
 OpenDDS::DCPS::DataSampleHeader::DataSampleHeader (ACE_Message_Block& buffer)
   : message_id_( 0)
-  , last_sample_( 0)
   , byte_order_( TAO_ENCAP_BYTE_ORDER)
+  , coherent_change_( 0)
   , historic_sample_( 0)
   , lifespan_duration_( 0)
   , reserved_1( 0)
@@ -66,7 +64,6 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader (ACE_Message_Block& buffer)
   , sequence_( 0)
   , source_timestamp_sec_( 0)
   , source_timestamp_nanosec_( 0)
-  , coherency_group_( 0)
   , publication_id_( GUID_UNKNOWN )
 {
   this->init( &buffer) ;
@@ -107,7 +104,64 @@ OpenDDS::DCPS::DataSampleHeader::max_marshaled_size()
        + sizeof( this->source_timestamp_nanosec_)
        + sizeof( this->lifespan_duration_sec_)
        + sizeof( this->lifespan_duration_nanosec_)
-       + sizeof( this->coherency_group_)
        + sizeof( this->publication_id_) ;
 }
 
+ACE_INLINE
+long
+mask_flag(DataSampleHeaderFlag flag)
+{
+  return 1 << flag;
+}
+
+/// The clear_flag and set_flag methods are a hack to update the
+/// header flags after a sample has been serialized without
+/// deserializing the entire message. This method will break if
+/// the current Serializer behavior changes.
+
+ACE_INLINE
+void
+OpenDDS::DCPS::DataSampleHeader::clear_flag(DataSampleHeaderFlag flag,
+                                            ACE_Message_Block* buffer)
+{
+  char *base = buffer->base();
+
+  // The flags octet will always be the second byte;
+  // verify sufficient length exists:
+  if (buffer->end() - base < 2) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: DataSampleHeader::clear_flag: ")
+      ACE_TEXT("ACE_Message_Block too short (missing flags octet).\n")));
+    return;
+  }
+
+  // Twiddle flag bit.
+  *(base + 1) ^= mask_flag(flag);
+}
+
+ACE_INLINE
+void
+OpenDDS::DCPS::DataSampleHeader::set_flag(DataSampleHeaderFlag flag,
+                                          ACE_Message_Block* buffer)
+{
+  char *base = buffer->base();
+
+  // The flags octet will always be the second byte;
+  // verify sufficient length exists:
+  if (buffer->end() - base < 2) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: DataSampleHeader::set_flag: ")
+      ACE_TEXT("ACE_Message_Block too short (missing flags octet).\n")));
+    return;
+  }
+
+  // Twiddle flag bit.
+  *(base + 1) |= mask_flag(flag);
+}
+
+ACE_INLINE
+bool
+check_flag(DataSampleHeaderFlag flag, long value)
+{
+  return mask_flag(flag) & value;
+}

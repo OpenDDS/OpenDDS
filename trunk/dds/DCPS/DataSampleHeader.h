@@ -21,7 +21,7 @@ namespace OpenDDS
     /// One byte message id (< 256)
     enum MessageId
     {
-      SAMPLE_DATA,             
+      SAMPLE_DATA,
       DATAWRITER_LIVELINESS,
       INSTANCE_REGISTRATION,
       UNREGISTER_INSTANCE,
@@ -29,12 +29,13 @@ namespace OpenDDS
       GRACEFUL_DISCONNECT,
       FULLY_ASSOCIATED,
       REQUEST_ACK,
-      SAMPLE_ACK
+      SAMPLE_ACK,
+      END_COHERENT_CHANGE
     };
 
     enum DataSampleHeaderFlag {
-      LAST_SAMPLE_FLAG,
       BYTE_ORDER_FLAG,
+      COHERENT_CHANGE_FLAG,
       HISTORIC_SAMPLE_FLAG,
       LIFESPAN_DURATION_FLAG,
       RESERVED_1_FLAG,
@@ -50,13 +51,13 @@ namespace OpenDDS
       /// The enum MessageId.
       char message_id_;
 
-      /// The flag indicates the last sample of a group of 
-      /// coherent changes.
-      bool last_sample_ : 1;
-
       /// 0 -  Message encoded using little-endian byte order.
       /// 1 -  Message encoded using network byte order.
       bool byte_order_  : 1;
+
+      /// The flag indicates the sample belongs to a coherent
+      /// change (i.e. PRESENTATION coherent_access == true).
+      bool coherent_change_ : 1;
 
       /// This flag indicates a sample has been resent from a
       /// non-VOLATILE DataWriter.
@@ -74,23 +75,23 @@ namespace OpenDDS
 
       //The size of the message including the entire header.
       ACE_UINT32 message_length_;
-      
-      /// The sequence number is obtained from the Publisher 
-      /// associated with the DataWriter based on the PRESENTATION 
-      /// requirement for the sequence value (access_scope == GROUP). 
+
+      /// The sequence number is obtained from the Publisher
+      /// associated with the DataWriter based on the PRESENTATION
+      /// requirement for the sequence value (access_scope == GROUP).
       ACE_INT16   sequence_;
 
       /// The SOURCE_TIMESTAMP field is generated from the DataWriter
-      /// or supplied by the application at the time of the write.  
-      /// This value is derived from the local hosts system clock, 
-      /// which is assumed to be synchronized with the clocks on other 
-      /// hosts within the domain.  This field is required for 
+      /// or supplied by the application at the time of the write.
+      /// This value is derived from the local hosts system clock,
+      /// which is assumed to be synchronized with the clocks on other
+      /// hosts within the domain.  This field is required for
       /// DESTINATION_ORDER and LIFESPAN policy behaviors of subscriptions.
-      /// It is also required to be present for all data in the 
+      /// It is also required to be present for all data in the
       /// SampleInfo structure supplied along with each data sample.
       ACE_INT32 source_timestamp_sec_;
       ACE_UINT32 source_timestamp_nanosec_; // Corresponding IDL is unsigned.
-      
+
       /// The LIFESPAN duration field is generated from the DataWriter
       /// or supplied by the application at the time of the write. This
       /// field is used to determine if a given sample is considered
@@ -99,19 +100,21 @@ namespace OpenDDS
       /// lifespan_duration_ flag.
       ACE_INT32 lifespan_duration_sec_;
       ACE_UINT32 lifespan_duration_nanosec_;  // Corresponding IDL is unsigned.
-      
-      /// The COHERENCY_GROUP field is obtained from the Publisher as well, 
-      /// in order to support the same scope as the SEQUENCE field.  
-      /// The special value of 0 indicates that the sample is not 
-      /// participating in a coherency group.
-      ACE_UINT16  coherency_group_;
 
-      /// Identify the DataWriter that produced the sample data being 
+      /// Identify the DataWriter that produced the sample data being
       /// sent.
       PublicationId  publication_id_;
-      
-      static void update_flag (ACE_Message_Block* buffer,
-                               DataSampleHeaderFlag flag) ;
+
+      static long mask_flag(DataSampleHeaderFlag flag);
+
+      static void clear_flag(DataSampleHeaderFlag flag,
+                             ACE_Message_Block* buffer);
+
+      static void set_flag(DataSampleHeaderFlag flag,
+                           ACE_Message_Block* buffer);
+
+      static bool check_flag(DataSampleHeaderFlag flag,
+                             long value);
 
       /// Does the data in this mb constitute a partial Sample Header?
       static bool partial (ACE_Message_Block& mb);
@@ -142,7 +145,7 @@ namespace OpenDDS
     };
 
     /// Used to allocator the DataSampleHeader object.
-    typedef Cached_Allocator_With_Overflow<DataSampleHeader, ACE_Null_Mutex>  
+    typedef Cached_Allocator_With_Overflow<DataSampleHeader, ACE_Null_Mutex>
       DataSampleHeaderAllocator;
 
 #if defined(__ACE_INLINE__)
