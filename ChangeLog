@@ -1,10 +1,23 @@
+Wed Aug 19 16:24:55 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Disabled unregister on delete in delete_datawriter; this issue
+          needs to be investigated further when there is more time.
+
+        * dds/DCPS/transport/framework/TransportFactory.h:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.h:
+
+          Reverted transport interface changes.
+
 Tue Aug 18 23:56:02 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
         * bin/DCPS/HTemplate.pm:
 
           Changed store_instance_data return type to void; unregister
-          and dispose on a non-registered instance no longer emits a 
+          and dispose on a non-registered instance no longer emits a
           warning.
 
         * dds/DCPS/PublisherImpl.cpp:
@@ -13,11 +26,11 @@ Tue Aug 18 23:56:02 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportFactory.h:
         * dds/DCPS/transport/framework/TransportFactory.cpp:
-       
+
           Removed single argument variant of release; no code uses
           this method and its use can cause dangerous consequences
           (i.e. reactor task referencing invalid data).
-        
+
         * dds/DCPS/transport/framework/TransportInterface.h:
 
           Promoted detach_transport to public scope to match
