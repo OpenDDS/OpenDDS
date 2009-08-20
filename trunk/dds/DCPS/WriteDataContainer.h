@@ -38,7 +38,7 @@ namespace OpenDDS
      *
      * This container is instantiated per DataWriter. It maintains
      * list of PublicationInstance objects which is internally
-     * referenced by the instance handle. 
+     * referenced by the instance handle.
      *
      * This container contains threaded lists of all data written to a
      * given DataWriter. The real data sample is represented by the
@@ -66,7 +66,7 @@ namespace OpenDDS
      * the DataSampleElements for the data sample duplicates of the
      * sending and sent list and are pushed to the released list after
      * giving to the transport.
-     * 
+     *
      *
      *
      * @note: 1) The PublicationInstance object is not removed from
@@ -106,6 +106,8 @@ namespace OpenDDS
        * No default constructor, must be initialized.
        */
       WriteDataContainer(
+        /// The writer which owns this container.
+        DataWriterImpl* writer,
         /// Depth of the instance sample queue.
         CORBA::Long    depth,
         /// Should the write wait for available space?
@@ -176,7 +178,6 @@ namespace OpenDDS
       ::DDS::ReturnCode_t unregister (
           ::DDS::InstanceHandle_t handle,
           DataSample*& registered_sample,
-          DataWriterImpl*         writer,
           bool                    dup_registered_sample = true
         );
 
@@ -213,7 +214,7 @@ namespace OpenDDS
       DataSampleList get_unsent_data() ;
 
       /**
-       * Obtain a list of data for resending. This is only used when 
+       * Obtain a list of data for resending. This is only used when
        * TRANSIENT_LOCAL_DURABILITY_QOS is used. The data on the list
        * returned is moved from the resend list to the released list
        * as part of this call.
@@ -280,8 +281,7 @@ namespace OpenDDS
        */
       ::DDS::ReturnCode_t obtain_buffer (
         DataSampleListElement*& element,
-        ::DDS::InstanceHandle_t handle,
-        DataWriterImpl*         writer);
+        ::DDS::InstanceHandle_t handle);
 
       /**
        * Release the memory previously allocated.
@@ -294,7 +294,7 @@ namespace OpenDDS
       /**
        * Unregister all instances managed by this data containers.
        */
-      void unregister_all (DataWriterImpl* writer);
+      void unregister_all ();
 
       /**
        * @todo remove/document this!
@@ -326,8 +326,8 @@ namespace OpenDDS
       WriteDataContainer & operator= (WriteDataContainer const &);
       // --------------------------
 
-      void copy_and_append (DataSampleList& list, 
-                            DataSampleList const & appended, 
+      void copy_and_append (DataSampleList& list,
+                            DataSampleList const & appended,
                             OpenDDS::DCPS::ReaderIdSeq const & rds,
                             ::DDS::LifespanQosPolicy const & lifespan);
 
@@ -376,7 +376,7 @@ namespace OpenDDS
       /// TRANSIENT_LOCAL_DURABILITY_QOS policy. It duplicates the
       /// samples in sent and sending list. These
       /// DataSampleListElement will be appended to released_data_
-      /// list after passing to the transport. 
+      /// list after passing to the transport.
       DataSampleList   resend_data_ ;
 
       /// The individual instance queue threads in the data.
@@ -384,6 +384,9 @@ namespace OpenDDS
 
       /// The publication Id from repo.
       PublicationId    publication_id_ ;
+
+      /// The writer that owns this container.
+      DataWriterImpl*  writer_;
 
       /// The maximum size of an instance sample list which are to
       /// be maintained in the container.

@@ -30,7 +30,7 @@ namespace OpenDDS
       FULLY_ASSOCIATED,
       REQUEST_ACK,
       SAMPLE_ACK,
-      END_COHERENT_CHANGE
+      END_COHERENT_CHANGES
     };
 
     enum DataSampleHeaderFlag {
@@ -56,7 +56,7 @@ namespace OpenDDS
       bool byte_order_  : 1;
 
       /// The flag indicates the sample belongs to a coherent
-      /// change (i.e. PRESENTATION coherent_access == true).
+      /// change set (i.e. PRESENTATION coherent_access == true).
       bool coherent_change_ : 1;
 
       /// This flag indicates a sample has been resent from a
@@ -114,7 +114,7 @@ namespace OpenDDS
                            ACE_Message_Block* buffer);
 
       static bool test_flag(DataSampleHeaderFlag flag,
-                            char value);
+                            ACE_Message_Block* buffer);
 
       /// Does the data in this mb constitute a partial Sample Header?
       static bool partial (ACE_Message_Block& mb);

@@ -31,12 +31,6 @@ namespace OpenDDS
   }}
 #endif
 
-const CoherencyGroup DEFAULT_GROUP_ID = 0;
-
-//TBD - add check for enabled in most methods.
-//      currently this is not needed because auto_enable_created_entities
-//      cannot be false.
-
 // Implementation skeleton constructor
 PublisherImpl::PublisherImpl (DDS::InstanceHandle_t handle,
                               const ::DDS::PublisherQos &   qos,
@@ -49,7 +43,7 @@ PublisherImpl::PublisherImpl (DDS::InstanceHandle_t handle,
     listener_mask_(mask),
     listener_ (::DDS::PublisherListener::_duplicate(a_listener)),
     fast_listener_ (0),
-    group_id_ (DEFAULT_GROUP_ID),
+    change_depth_(0),
     domain_id_( participant->get_domain_id()),
     participant_ (participant),
     suspend_depth_count_ (0),
@@ -643,38 +637,117 @@ PublisherImpl::resume_publications ()
   return ::DDS::RETCODE_OK;
 }
 
-::DDS::ReturnCode_t
- PublisherImpl::begin_coherent_changes ()
+DDS::ReturnCode_t
+PublisherImpl::begin_coherent_changes()
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
   if (enabled_ == false)
   {
-    ACE_ERROR_RETURN ((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: PublisherImpl::delete_contained_entities, ")
-      ACE_TEXT(" Entity is not enabled. \n")),
-      ::DDS::RETCODE_NOT_ENABLED);
+    ACE_ERROR_RETURN((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: PublisherImpl::begin_coherent_changes:")
+      ACE_TEXT(" Publisher is not enabled!\n")),
+      DDS::RETCODE_NOT_ENABLED);
   }
 
-  //NOT REQUIRED FOR FIRST IMPLEMENTATION
-  return ::DDS::RETCODE_UNSUPPORTED;
+  if (!qos_.presentation.coherent_access)
+  {
+    ACE_ERROR_RETURN((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: PublisherImpl::begin_coherent_changes:")
+      ACE_TEXT(" QoS policy does not support coherent access!\n")),
+      DDS::RETCODE_ERROR);
+  }
+
+  if (qos_.presentation.access_scope == DDS::GROUP_PRESENTATION_QOS)
+  {
+    // GROUP access scope is not yet supported.
+    return DDS::RETCODE_UNSUPPORTED;
+  }
+
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                    guard,
+                    this->pi_lock_,
+                    DDS::RETCODE_ERROR);
+
+  ++this->change_depth_;
+
+  if (qos_.presentation.access_scope == DDS::INSTANCE_PRESENTATION_QOS)
+  {
+    // INSTANCE access scope essentially behaves
+    // as a no-op. (see: 7.1.3.6)
+    return DDS::RETCODE_OK;
+  }
+
+  // We should only notify publications on the first
+  // and last change to the current change set:
+  if (this->change_depth_ == 1)
+  {
+    for (PublicationMap::iterator it = this->publication_map_.begin();
+         it != this->publication_map_.end(); ++it)
+    {
+      it->second->local_writer_impl_->
+        begin_coherent_changes();
+    }
+  }
+
+  return DDS::RETCODE_OK;
 }
 
-::DDS::ReturnCode_t
-PublisherImpl::end_coherent_changes ()
+DDS::ReturnCode_t
+PublisherImpl::end_coherent_changes()
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
   if (enabled_ == false)
   {
-    ACE_ERROR_RETURN ((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: PublisherImpl::delete_contained_entities, ")
-      ACE_TEXT(" Entity is not enabled. \n")),
-      ::DDS::RETCODE_NOT_ENABLED);
+    ACE_ERROR_RETURN((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: PublisherImpl::end_coherent_changes:")
+      ACE_TEXT(" Publisher is not enabled!\n")),
+      DDS::RETCODE_NOT_ENABLED);
   }
 
-  //NOT REQUIRED FOR FIRST IMPLEMENTATION
-  return ::DDS::RETCODE_UNSUPPORTED;
-}
+  if (!qos_.presentation.coherent_access)
+  {
+    ACE_ERROR_RETURN((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: PublisherImpl::end_coherent_changes:")
+      ACE_TEXT(" QoS policy does not support coherent access!\n")),
+      DDS::RETCODE_ERROR);
+  }
 
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                    guard,
+                    this->pi_lock_,
+                    DDS::RETCODE_ERROR);
+
+  if (this->change_depth_ == 0)
+  {
+    ACE_ERROR_RETURN((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: PublisherImpl::end_coherent_changes:")
+      ACE_TEXT(" No matching call to begin_coherent_changes!\n")),
+      DDS::RETCODE_PRECONDITION_NOT_MET);
+  }
+
+  --this->change_depth_;
+
+  if (qos_.presentation.access_scope == DDS::INSTANCE_PRESENTATION_QOS)
+  {
+    // INSTANCE access scope essentially behaves
+    // as a no-op. (see: 7.1.3.6)
+    return DDS::RETCODE_OK;
+  }
+
+  // We should only notify publications on the first
+  // and last change to the current change set:
+  if (this->change_depth_ == 0)
+  {
+    for (PublicationMap::iterator it = this->publication_map_.begin();
+         it != this->publication_map_.end(); ++it)
+    {
+      it->second->local_writer_impl_->
+        end_coherent_changes();
+    }
+  }
+
+  return DDS::RETCODE_OK;
+}
 
 DDS::ReturnCode_t
 PublisherImpl::wait_for_acknowledgments(

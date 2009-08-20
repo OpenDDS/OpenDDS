@@ -1,9 +1,26 @@
+Thu Aug 20 23:57:23 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.inl:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Implemented write side of non-default PRESENTATION QoS policies.
+
 Thu Aug 20 16:59:49 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportFactory.cpp:
 
           Removed obsolete comments for release with specific transport method.
-          
+
 Thu Aug 20 15:10:48 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * tests/DCPS/LivelinessTest/subscriber.cpp:
