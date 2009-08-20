@@ -555,10 +555,6 @@ OpenDDS::DCPS::TransportFactory::release()
 }
 
 
-// Note that we don't stop or drop our reference to the reactor_task_,
-// if one should exist, and the TransportImpl being release was the only
-// one that required the reactor.  The other release() method above does
-// deal with the reactor.
 void
 OpenDDS::DCPS::TransportFactory::release(TransportIdType impl_id)
 {
