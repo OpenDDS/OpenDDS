@@ -414,13 +414,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           ACE_TEXT("test failed second condition.\n")
         ));
 
-      } else if( drl_servant->no_writers_generation_count() != (use_take==1 ? 0 : num_unlively_periods) ) {
+      } else if( drl_servant->no_writers_generation_count() != num_unlively_periods) {
         status = 1;
         // Yet another error condition.
 
-        // if use take then the instance had "no samples" when it got NO_WRITERS and
-        // hence the instance state terminated and then started again so
-        // no_writers_generation_count should = 0.
+        // Using take will remove the instance and instance state will be
+        // reset for any subsequent samples sent.  Since there are no
+        // more samples sent, the information available from the listener
+        // retains that from the last read sample rather than the reset
+        // value for an (as yet unreceived) next sample.
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: subscriber - ")
           ACE_TEXT("test failed third condition.\n")
