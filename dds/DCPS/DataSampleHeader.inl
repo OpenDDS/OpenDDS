@@ -162,7 +162,18 @@ OpenDDS::DCPS::DataSampleHeader::set_flag(DataSampleHeaderFlag flag,
 ACE_INLINE
 bool
 OpenDDS::DCPS::DataSampleHeader::test_flag(DataSampleHeaderFlag flag,
-                                           char value)
+                                           ACE_Message_Block* buffer)
 {
-  return mask_flag(flag) & value;
+  char *base = buffer->base();
+
+  // The flags octet will always be the second byte;
+  // verify sufficient length exists:
+  if (buffer->end() - base < 2) {
+    ACE_ERROR_RETURN((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: DataSampleHeader::set_flag: ")
+      ACE_TEXT("ACE_Message_Block too short (missing flags octet).\n")), false);
+  }
+
+  // Test flag bit.
+  return *(base + 1) & mask_flag(flag);
 }

@@ -18,7 +18,7 @@ namespace OpenDDS
     const CORBA::ULong MAX_READERS_PER_ELEM = 5;
     typedef Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex>
                                               TransportSendElementAllocator;
-    
+
     const int MAX_READERS_TO_RESEND = 5;
 
     class TransportSendListener;
@@ -42,8 +42,8 @@ namespace OpenDDS
     *       the DataWriter (within PRESENTATION.access_scope==TOPIC).
     *       This thread will be used to hold the element in one of four
     *       different lists in the WriteDataContainer: the unsent_data_
-    *       list, the sending_data_ list, the sent_data_ list, or the 
-    *       released_data_ list at different times during its lifetime.  
+    *       list, the sending_data_ list, the sent_data_ list, or the
+    *       released_data_ list at different times during its lifetime.
     *       This has a double link to allow removal of elements from internal
     *       locations in the list.
     *
@@ -82,7 +82,7 @@ namespace OpenDDS
     *       are all presumably from a cache (for the most part) anyway, so
     *       it should be fairly quick.
     */
-    struct OpenDDS_Dcps_Export DataSampleListElement 
+    struct OpenDDS_Dcps_Export DataSampleListElement
     {
       DataSampleListElement (PublicationId           publication_id,
                              TransportSendListener*  send_listner,
@@ -105,16 +105,12 @@ namespace OpenDDS
       CORBA::ULong           num_subs_;
       OpenDDS::DCPS::RepoId      subscription_ids_[OpenDDS::DCPS::MAX_READERS_PER_ELEM];
 
-      /// Group Id used downstream.
-      /// This is not used in the first implementation (INSTANCE level)
-      CoherencyGroup         group_id_ ;
-
       /// Timestamp for the sample when it was first written.
       ::DDS::Time_t source_timestamp_;
 
       /// Used to make removal from the
       /// container _much_ more efficient.
-      
+
       /// Thread of all data within a DataWriter.
       DataSampleListElement* previous_sample_ ;
       DataSampleListElement* next_sample_ ;
@@ -131,15 +127,15 @@ namespace OpenDDS
       /// TransportInterface to send().
       TransportSendListener* send_listener_;
 
-      /// The flag indicates space availability for this waiting DataSample. 
+      /// The flag indicates space availability for this waiting DataSample.
       bool space_available_;
 
-      /// The pointer to the object that contains the instance information 
+      /// The pointer to the object that contains the instance information
       /// and data sample list.
       /// The client holds this as an InstanceHandle_t.
       PublicationInstance*   handle_;
 
-      /// Allocator for the TransportSendElement. 
+      /// Allocator for the TransportSendElement.
       TransportSendElementAllocator* transport_send_element_allocator_;
     };
 
@@ -179,7 +175,7 @@ namespace OpenDDS
       DataSampleListIterator  operator--(int);
       reference operator*();
       pointer operator->();
-      
+
     private:
 
       DataSampleListElement* head_;
@@ -205,17 +201,17 @@ namespace OpenDDS
 
       /// Default constructor clears the list.
       DataSampleList();
-      
+
       /// Reset to initial state.
       void reset ();
 
       /// This function assumes the list is the sending_data, sent_data,
-      /// unsent_data or released_data which is linked by the 
+      /// unsent_data or released_data which is linked by the
       /// next_sample/previous_sample.
       void enqueue_tail_next_sample (DataSampleListElement* sample);
 
       /// This function assumes the list is the sending_data, sent_data,
-      /// unsent_data or released_data which is linked by the 
+      /// unsent_data or released_data which is linked by the
       /// next_sample/previous_sample.
       bool dequeue_head_next_sample (DataSampleListElement*& stale);
 
@@ -235,22 +231,22 @@ namespace OpenDDS
       /// linked by the next_instance_sample_.
       bool dequeue_head_next_instance_sample (DataSampleListElement*& stale);
 
-      /// This function assumes that the list is a list that linked using 
-      /// next_sample/previous_sample but the stale element's position is 
+      /// This function assumes that the list is a list that linked using
+      /// next_sample/previous_sample but the stale element's position is
       /// unknown.
       bool dequeue_next_sample (DataSampleListElement* stale);
 
-      /// This function assumes that the list is a list that linked using 
-      /// next_instance_sample but the stale element's position is 
+      /// This function assumes that the list is a list that linked using
+      /// next_instance_sample but the stale element's position is
       /// unknown.
       bool dequeue_next_instance_sample (DataSampleListElement* stale);
 
-      /// This function assumes that the list is a list that linked using 
-      /// next_send_sample but the stale element's position is 
+      /// This function assumes that the list is a list that linked using
+      /// next_send_sample but the stale element's position is
       /// unknown.
       bool dequeue_next_send_sample (DataSampleListElement* stale);
 
-      /// This function assumes the appended list is a list linked with 
+      /// This function assumes the appended list is a list linked with
       /// previous/next_sample_ and might be linked with next_send_sample_.
       /// If it's not linked with the next_send_sample_ then this function
       /// will make it linked before appending.
@@ -276,7 +272,7 @@ namespace OpenDDS
     };
 
     /// Used to allocator the DataSampleListElement object.
-    typedef Cached_Allocator_With_Overflow<DataSampleListElement, ACE_Null_Mutex>  
+    typedef Cached_Allocator_With_Overflow<DataSampleListElement, ACE_Null_Mutex>
       DataSampleListElementAllocator;
 
   }  /* namespace DCPS */

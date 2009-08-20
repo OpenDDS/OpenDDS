@@ -73,6 +73,7 @@ namespace OpenDDS
 #endif
 
 WriteDataContainer::WriteDataContainer(
+  DataWriterImpl* writer,
   CORBA::Long    depth,
   bool           should_block ,
   ACE_Time_Value max_blocking_time,
@@ -83,7 +84,8 @@ WriteDataContainer::WriteDataContainer(
   DataDurabilityCache* durability_cache,
   ::DDS::DurabilityServiceQosPolicy const & durability_service,
   std::auto_ptr<OfferedDeadlineWatchdog>& watchdog)
-  : depth_ (depth),
+  : writer_(writer),
+    depth_ (depth),
     should_block_ (should_block),
     max_blocking_time_ (max_blocking_time),
     waiting_on_release_ (false),
@@ -300,7 +302,6 @@ WriteDataContainer::register_instance(
 WriteDataContainer::unregister(
   ::DDS::InstanceHandle_t instance_handle,
   DataSample*&            registered_sample,
-  DataWriterImpl*         writer,
   bool                    dup_registered_sample)
 {
   PublicationInstance* instance = 0;
@@ -327,7 +328,7 @@ WriteDataContainer::unregister(
   }
 
   // Unregister the instance with typed DataWriter.
-  writer->unregistered (instance_handle);
+  this->writer_->unregistered (instance_handle);
 
   if (this->watchdog_.get ())
     this->watchdog_->cancel_timer (instance);
@@ -609,6 +610,15 @@ WriteDataContainer::data_delivered (DataSampleListElement* sample)
         ));
       }
 
+      // N.B. Clear COHERENT_CHANGE_FLAG if writer is no longer
+      // writing coherent changes. This ensures data delivered
+      // after DataWriter::end_coherent_changes has returned
+      // has its flag properly cleared prior to persistence.
+      if (!this->writer_->coherent_changes_pending())
+      {
+        DataSampleHeader::clear_flag(COHERENT_CHANGE_FLAG, sample->sample_);
+      }
+
       DataSampleHeader::set_flag(HISTORIC_SAMPLE_FLAG, sample->sample_);
       sent_data_.enqueue_tail_next_send_sample (sample);
     }
@@ -810,8 +820,7 @@ WriteDataContainer::remove_oldest_sample (
 
 ::DDS::ReturnCode_t
 WriteDataContainer::obtain_buffer (DataSampleListElement*& element,
-                                   ::DDS::InstanceHandle_t handle,
-                                   DataWriterImpl*         writer)
+                                   ::DDS::InstanceHandle_t handle)
 {
   PublicationInstance* instance = get_handle_instance (handle);
 
@@ -821,7 +830,7 @@ WriteDataContainer::obtain_buffer (DataSampleListElement*& element,
       sample_list_element_allocator_.malloc (
         sizeof (DataSampleListElement) ) ),
     DataSampleListElement (publication_id_,
-                           writer,
+                           this->writer_,
                            instance,
                            &transport_send_element_allocator_),
     ::DDS::RETCODE_ERROR);
@@ -930,7 +939,7 @@ WriteDataContainer::obtain_buffer (DataSampleListElement*& element,
       // then we need force the Transport to drop the oldest sample.
       // The transport will call data_dropped to remove the oldest
       // sample from the released_data_ list.
-      writer->remove_sample (stale);
+      this->writer_->remove_sample (stale);
     }
   }
 
@@ -958,7 +967,7 @@ WriteDataContainer::release_buffer (DataSampleListElement* element)
 }
 
 void
-WriteDataContainer::unregister_all (DataWriterImpl* writer)
+WriteDataContainer::unregister_all ()
 {
   DBG_ENTRY_LVL("WriteDataContainer","unregister_all",6);
 
@@ -966,7 +975,7 @@ WriteDataContainer::unregister_all (DataWriterImpl* writer)
 
   // Tell transport remove all control messages currently
   // transport is processing.
-  (void) writer->remove_all_control_msgs ();
+  (void) this->writer_->remove_all_control_msgs ();
 
   {
     //The internal list needs protection since this call may result from the
@@ -989,7 +998,7 @@ WriteDataContainer::unregister_all (DataWriterImpl* writer)
 
       // Tell transport remove all samples currently
       // transport is processing.
-      writer->remove_sample (old_head);
+      this->writer_->remove_sample (old_head);
 
       if (old_head == sending_data_.head_) {
         /*
@@ -1035,7 +1044,7 @@ WriteDataContainer::unregister_all (DataWriterImpl* writer)
     }
 
     // Mark the instance unregistered.
-    ret = unregister (it->first, registered_sample, writer, false);
+    ret = unregister (it->first, registered_sample, false);
     if (ret != ::DDS::RETCODE_OK)
     {
       ACE_ERROR ((LM_ERROR,

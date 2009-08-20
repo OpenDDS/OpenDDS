@@ -297,10 +297,8 @@ namespace OpenDDS
       /// This map is used to support datawriter lookup by datawriter
       /// repository id.
       PublicationMap                publication_map_;
-      /// Next coherency group ID to use.  -  NOT USED IN FIRST IMPL
-      CoherencyGroup                group_id_;
-      /// Ordered list of active coherency groups. -  NOT USED IN FIRST IMPL
-      std::list<CoherencyGroup>     active_coherency_;
+      /// The number of times begin_coherent_changes as been called.
+      std::size_t                   change_depth_;
       /// Domain in which we are contained.
       ::DDS::DomainId_t             domain_id_;
       /// The DomainParticipant servant that owns this Publisher.
@@ -323,8 +321,6 @@ namespace OpenDDS
 
       /// The catched available data while suspending.
       DataSampleList                available_data_list_;
-
-
     };
 
   } // namespace  ::DDS

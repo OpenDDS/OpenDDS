@@ -58,6 +58,8 @@ DataWriterImpl::DataWriterImpl (void)
     publisher_servant_(0),
     publication_id_ ( GUID_UNKNOWN ),
     sequence_number_ (),
+    coherent_(false),
+    coherent_samples_(0),
     data_container_ (0),
     liveliness_lost_ (false),
     mb_allocator_(0),
@@ -1194,7 +1196,8 @@ DataWriterImpl::enable ()
 
   //Note: the QoS used to set n_chunks_ is Changable=No so
   // it is OK that we cannot change the size of our allocators.
-  data_container_ = new WriteDataContainer (depth,
+  data_container_ = new WriteDataContainer (this,
+                                            depth,
                                             should_block,
                                             max_blocking_time,
                                             n_chunks_,
@@ -1375,8 +1378,7 @@ DataWriterImpl::unregister_instance_i (::DDS::InstanceHandle_t handle,
 
   ::DDS::ReturnCode_t ret =
       this->data_container_->unregister(handle,
-                                        unregistered_sample_data,
-                                        this);
+                                        unregistered_sample_data);
 
   if (ret != ::DDS::RETCODE_OK)
     {
@@ -1449,8 +1451,7 @@ DataWriterImpl::write (DataSample* data,
 
   DataSampleListElement* element;
   ::DDS::ReturnCode_t ret = this->data_container_->obtain_buffer(element,
-                                                                 handle,
-                                                                 this);
+                                                                 handle);
 
   if (ret != ::DDS::RETCODE_OK)
   {
@@ -1498,6 +1499,11 @@ DataWriterImpl::write (DataSample* data,
   }
   else
     last_liveliness_activity_time_ = ACE_OS::gettimeofday ();
+
+  if (this->coherent_)
+  {
+    ++this->coherent_samples_;
+  }
 
   return ::DDS::RETCODE_OK;
 }
@@ -1587,7 +1593,7 @@ DataWriterImpl::unregister_all ()
     (void) reactor_->cancel_timer (this, 0);
     cancel_timer_ = false;
   }
-  data_container_->unregister_all (this);
+  data_container_->unregister_all ();
 }
 
 void
@@ -1682,7 +1688,7 @@ DataWriterImpl::create_sample_data_message ( DataSample* data,
     this->publisher_servant_->swap_bytes()
     ? !TAO_ENCAP_BYTE_ORDER
     : TAO_ENCAP_BYTE_ORDER;
-  header_data.coherent_change_ = 0; // TODO
+  header_data.coherent_change_ = this->coherent_;
   header_data.message_length_ = data->total_length ();
   ++this->sequence_number_;
   header_data.sequence_ = this->sequence_number_.value_;
@@ -1790,6 +1796,75 @@ DataWriterImpl::deliver_ack(
       ));
     }
     this->wfaCondition_.broadcast();
+  }
+}
+
+bool
+DataWriterImpl::coherent_changes_pending()
+{
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                   guard,
+                   get_lock(),
+                   false);
+
+  return this->coherent_;
+}
+
+void
+DataWriterImpl::begin_coherent_changes()
+{
+  ACE_GUARD(ACE_Recursive_Thread_Mutex,
+            guard,
+            get_lock());
+
+  this->coherent_ = true;
+}
+
+void
+DataWriterImpl::end_coherent_changes()
+{
+  // PublisherImpl::pi_lock_ should be held.
+  ACE_GUARD(ACE_Recursive_Thread_Mutex,
+            guard,
+            get_lock());
+
+  ACE_Message_Block* data;
+  size_t size = sizeof(this->coherent_samples_);
+
+  ACE_NEW(data, ACE_Message_Block(size));
+
+  TAO::DCPS::Serializer serializer(
+      data, this->get_publisher_servant()->swap_bytes());
+
+  serializer << this->coherent_samples_;
+
+  DDS::Time_t source_timestamp =
+    time_value_to_time(ACE_OS::gettimeofday());
+
+  ACE_Message_Block* control =
+    create_control_message(END_COHERENT_CHANGES, data, source_timestamp);
+
+  SendControlStatus status =
+    this->publisher_servant_->send_control(this->publication_id_, this, control);
+  if (status == SEND_CONTROL_ERROR)
+  {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::end_coherent_changes:")
+      ACE_TEXT(" unable to send END_COHERENT_CHANGES control message!\n")));
+  }
+
+  this->coherent_ = false;
+  this->coherent_samples_ = 0;
+
+  // N.B. Clear COHERENT_CHANGE_FLAG on sent data since writer
+  // is no longer writing coherent changes. This ensures data
+  // is properly persisted when the writer is shutdown.
+  DataSampleList sent_data = this->data_container_->get_sent_data();
+  for (DataSampleList::iterator it = sent_data.begin();
+       it != sent_data.end(); ++it)
+  {
+    ACE_Message_Block* sample = it->sample_;
+    DataSampleHeader::clear_flag(COHERENT_CHANGE_FLAG, sample);
   }
 }
 

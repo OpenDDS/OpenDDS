@@ -13,9 +13,8 @@ namespace OpenDDS
       PublicationInstance*    handle,
       TransportSendElementAllocator* allocator)
       : sample_ (0),
-        publication_id_ (publication_id), 
+        publication_id_ (publication_id),
         num_subs_ (0),
-        group_id_ (0),
         previous_sample_ (0),
         next_sample_ (0),
         next_instance_sample_ (0),
@@ -36,7 +35,6 @@ namespace OpenDDS
       : sample_ (elem.sample_->duplicate ())
       , publication_id_ (elem.publication_id_)
       , num_subs_ (elem.num_subs_)
-      , group_id_ (elem.group_id_)
       , previous_sample_ (elem.previous_sample_)
       , next_sample_ (elem.next_sample_)
       , next_instance_sample_ (elem.next_instance_sample_)
@@ -72,11 +70,10 @@ namespace OpenDDS
     {
       sample_ = rhs.sample_->duplicate ();
       publication_id_ = rhs.publication_id_;
-      num_subs_ = rhs.num_subs_; 
+      num_subs_ = rhs.num_subs_;
       std::copy (rhs.subscription_ids_,
                  rhs.subscription_ids_ + num_subs_,
                  subscription_ids_);
-      group_id_ = rhs.group_id_;
       source_timestamp_.sec = rhs.source_timestamp_.sec;
       source_timestamp_.nanosec = rhs.source_timestamp_.nanosec;
       previous_sample_ = rhs.previous_sample_;
@@ -94,13 +91,13 @@ namespace OpenDDS
 
 
     // --------------------------------------------
- 
+
     ACE_INLINE
-    DataSampleList::DataSampleList() 
-      : head_( 0), 
-        tail_( 0), 
-        size_( 0) 
-    { 
+    DataSampleList::DataSampleList()
+      : head_( 0),
+        tail_( 0),
+        size_( 0)
+    {
     }
 
     ACE_INLINE
@@ -116,20 +113,20 @@ namespace OpenDDS
     {
       //sample->previous_sample_ = 0;
       //sample->next_sample_ = 0;
-      
+
       ++size_ ;
-      if( head_ == 0) 
+      if( head_ == 0)
         {
           // First sample in the list.
           head_ = tail_ = sample ;
-        } 
-      else 
+        }
+      else
         {
           // Add to existing list.
           tail_->next_sample_ = sample ;
           sample->previous_sample_ = tail_;
           tail_ = sample;
-        }    
+        }
     }
 
     ACE_INLINE
@@ -154,7 +151,7 @@ namespace OpenDDS
             {
               tail_ = 0;
             }
-          else 
+          else
             {
               head_->previous_sample_ = 0;
             }
@@ -174,12 +171,12 @@ namespace OpenDDS
       //sample->next_send_sample_ = 0;
 
       ++ size_ ;
-      if(head_ == 0) 
+      if(head_ == 0)
         {
           // First sample in list.
           head_ = tail_ = sample ;
-        } 
-      else 
+        }
+      else
         {
           // Add to existing list.
           //sample->previous_sample_ = tail_;
@@ -216,11 +213,11 @@ namespace OpenDDS
             {
               head_->previous_send_sample_ = 0;
             }
-          //else 
+          //else
           //  {
           //    head_->previous_sample_ = 0;
           //  }
-          
+
           stale->next_send_sample_ = 0 ;
           stale->previous_send_sample_ = 0 ;
 
@@ -235,12 +232,12 @@ namespace OpenDDS
       sample->next_instance_sample_ = 0;
 
       ++ size_ ;
-      if(head_ == 0) 
+      if(head_ == 0)
         {
           // First sample on queue.
           head_ = tail_ = sample ;
-        } 
-      else 
+        }
+      else
         {
           // Another sample on an existing queue.
           tail_->next_instance_sample_ = sample ;
@@ -258,11 +255,11 @@ namespace OpenDDS
       stale = head_;
 
       if (head_ == 0)
-        { 
+        {
           // try to dequeue empty instance list.
           return false;
         }
-      else 
+      else
         {
           --size_ ;
           head_ = head_->next_instance_sample_ ;

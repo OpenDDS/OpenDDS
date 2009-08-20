@@ -298,6 +298,15 @@ namespace OpenDDS
       /// Deliver a requested SAMPLE_ACK message to this writer.
       virtual void deliver_ack( const DataSampleHeader& header, DataSample* data);
 
+      /// Are coherent changes pending?
+      bool coherent_changes_pending();
+
+      /// Starts a coherent change set; should only be called once.
+      void begin_coherent_changes();
+
+      /// Ends a coherent change set; should only be called once.
+      void end_coherent_changes();
+
       /**
        * Accessor of the associated topic name.
        */
@@ -514,6 +523,12 @@ namespace OpenDDS
       /// The sequence number unique in DataWriter scope.
       /// Not used in first implementation.
       SequenceNumber                  sequence_number_;
+      /// Flag indicating DataWriter current belongs to
+      /// a coherent change set.
+      bool                            coherent_;
+      /// The number of samples belonging to the current
+      /// coherent change set.
+      std::size_t                     coherent_samples_;
       /// The sample data container.
       WriteDataContainer*             data_container_;
       /// The lock to protect the activate subscriptions

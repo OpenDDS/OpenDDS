@@ -65,14 +65,14 @@ OpenDDS::DCPS::DataSampleHeader::init (ACE_Message_Block* buffer)
   if( reader.good_bit() != true) return ;
   this->marshaled_size_ += sizeof( byte) ;
 
-  this->byte_order_         = test_flag(BYTE_ORDER_FLAG, byte);
-  this->coherent_change_    = test_flag(COHERENT_CHANGE_FLAG, byte);
-  this->historic_sample_    = test_flag(HISTORIC_SAMPLE_FLAG, byte);
-  this->lifespan_duration_  = test_flag(LIFESPAN_DURATION_FLAG, byte);
-  this->reserved_1          = test_flag(RESERVED_1_FLAG, byte);
-  this->reserved_2          = test_flag(RESERVED_2_FLAG, byte);
-  this->reserved_3          = test_flag(RESERVED_3_FLAG, byte);
-  this->reserved_4          = test_flag(RESERVED_4_FLAG, byte);
+  this->byte_order_         = byte & mask_flag(BYTE_ORDER_FLAG);
+  this->coherent_change_    = byte & mask_flag(COHERENT_CHANGE_FLAG);
+  this->historic_sample_    = byte & mask_flag(HISTORIC_SAMPLE_FLAG);
+  this->lifespan_duration_  = byte & mask_flag(LIFESPAN_DURATION_FLAG);
+  this->reserved_1          = byte & mask_flag(RESERVED_1_FLAG);
+  this->reserved_2          = byte & mask_flag(RESERVED_2_FLAG);
+  this->reserved_3          = byte & mask_flag(RESERVED_3_FLAG);
+  this->reserved_4          = byte & mask_flag(RESERVED_4_FLAG);
 
   // Set swap_bytes flag to the Serializer if data sample from
   // the publisher is in different byte order.
@@ -155,7 +155,7 @@ std::ostream& operator<<( std::ostream& str, const OpenDDS::DCPS::MessageId valu
     case OpenDDS::DCPS::FULLY_ASSOCIATED:      return str << "FULLY_ASSOCIATED";
     case OpenDDS::DCPS::REQUEST_ACK:           return str << "REQUEST_ACK";
     case OpenDDS::DCPS::SAMPLE_ACK:            return str << "SAMPLE_ACK";
-    case OpenDDS::DCPS::END_COHERENT_CHANGE:   return str << "END_COHERENT_CHANGE";
+    case OpenDDS::DCPS::END_COHERENT_CHANGES:  return str << "END_COHERENT_CHANGES";
     default:                                   return str << "UNSPECIFIED(" << int(value) << ")";
   }
 }
