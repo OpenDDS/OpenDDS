@@ -1,9 +1,15 @@
+Thu Aug 20 16:59:49 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+
+          Removed obsolete comments for release with specific transport method.
+          
 Thu Aug 20 15:10:48 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * tests/DCPS/LivelinessTest/subscriber.cpp:
 
-	  Changed final test condition check to reflect new (correct)
-	  instance state behavior.
+          Changed final test condition check to reflect new (correct)
+          instance state behavior.
 
 Wed Aug 19 23:10:11 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
