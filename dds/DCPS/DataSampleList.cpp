@@ -47,16 +47,16 @@ namespace OpenDDS
         {
           // Adjust list size.
           -- size_ ;
-          
+
           //
           // Remove from the previous element.
           //
-          if( stale->previous_sample_ != 0) 
+          if( stale->previous_sample_ != 0)
             {
               // Remove from inside of the list.
               stale->previous_sample_->next_sample_ = stale->next_sample_ ;
-            } 
-          else 
+            }
+          else
             {
               // Remove from the head of the list.
               head_ = stale->next_sample_ ;
@@ -69,12 +69,12 @@ namespace OpenDDS
           //
           // Remove from the next element.
           //
-          if( stale->next_sample_ != 0) 
+          if( stale->next_sample_ != 0)
             {
               // Remove the inside of the list.
               stale->next_sample_->previous_sample_ = stale->previous_sample_ ;
-            } 
-          else 
+            }
+          else
             {
               // Remove from the tail of the list.
               tail_ = stale->previous_sample_ ;
@@ -110,7 +110,7 @@ namespace OpenDDS
         {
           if (item == stale)
             {
-              found = true;  
+              found = true;
               previous->next_instance_sample_ = stale->next_instance_sample_;
               -- size_ ;
 
@@ -120,7 +120,7 @@ namespace OpenDDS
             }
           previous = item;
         }
-      
+
       return found;
     }
 
@@ -151,7 +151,7 @@ namespace OpenDDS
               break;
             }
         }
-      
+
       if (found)
         {
           // Adjust size.
@@ -166,12 +166,12 @@ namespace OpenDDS
           //
           // Remove from the next element.
           //
-          if( stale->next_send_sample_ != 0) 
+          if( stale->next_send_sample_ != 0)
             {
               // Remove from the inside of the list.
               stale->next_send_sample_->previous_send_sample_ = stale->previous_send_sample_ ;
-            } 
-          else 
+            }
+          else
             {
               stale->previous_send_sample_->next_send_sample_ = 0;
               // Remove from the tail of the list.
@@ -183,12 +183,12 @@ namespace OpenDDS
           ////
           //// Remove from the next element.
           ////
-          //if( stale->next_sample_ != 0) 
+          //if( stale->next_sample_ != 0)
           //  {
           //    // Remove from the inside of the list.
           //    stale->next_sample_->previous_sample_ = stale->previous_sample_ ;
-          //  } 
-          //else 
+          //  }
+          //else
           //  {
           //    // Remove from the tail of the list.
           //    tail_ = stale->previous_sample_ ;
@@ -220,10 +220,10 @@ namespace OpenDDS
           tail_ = list.tail_;
           size_ = list.size_;
         }
-       else 
+       else
         {
-          tail_->next_send_sample_ 
-            //= tail_->next_sample_ 
+          tail_->next_send_sample_
+            //= tail_->next_sample_
             = list.head_;
           list.head_->previous_send_sample_ = tail_;
           //list.head_->previous_sample_ = tail_;
@@ -267,24 +267,6 @@ namespace OpenDDS
       this->current_ = rhs.current_;
 
       return *this;
-    }
-
-    bool
-    DataSampleListIterator::operator==(DataSampleListIterator& rhs) const
-    {
-      return
-        this->head_ == rhs.head_
-        && this->tail_ == rhs.tail_
-        && this->current_ == rhs.current_;
-    }
-
-    bool
-    DataSampleListIterator::operator!=(DataSampleListIterator& rhs) const
-    {
-      return
-        this->head_ != rhs.head_
-        || this->tail_ != rhs.tail_
-        || this->current_ != rhs.current_;
     }
 
     DataSampleListIterator&
