@@ -1855,17 +1855,6 @@ DataWriterImpl::end_coherent_changes()
 
   this->coherent_ = false;
   this->coherent_samples_ = 0;
-
-  // N.B. Clear COHERENT_CHANGE_FLAG on sent data since writer
-  // is no longer writing coherent changes. This ensures data
-  // is properly persisted when the writer is shutdown.
-  DataSampleList sent_data = this->data_container_->get_sent_data();
-  for (DataSampleList::iterator it = sent_data.begin();
-       it != sent_data.end(); ++it)
-  {
-    ACE_Message_Block* sample = it->sample_;
-    DataSampleHeader::clear_flag(COHERENT_CHANGE_FLAG, sample);
-  }
 }
 
 PublisherImpl*

@@ -610,15 +610,6 @@ WriteDataContainer::data_delivered (DataSampleListElement* sample)
         ));
       }
 
-      // N.B. Clear COHERENT_CHANGE_FLAG if writer is no longer
-      // writing coherent changes. This ensures data delivered
-      // after DataWriter::end_coherent_changes has returned
-      // has its flag properly cleared prior to persistence.
-      if (!this->writer_->coherent_changes_pending())
-      {
-        DataSampleHeader::clear_flag(COHERENT_CHANGE_FLAG, sample->sample_);
-      }
-
       DataSampleHeader::set_flag(HISTORIC_SAMPLE_FLAG, sample->sample_);
       sent_data_.enqueue_tail_next_send_sample (sample);
     }

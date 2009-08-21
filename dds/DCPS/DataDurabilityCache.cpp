@@ -518,8 +518,8 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
     // samples with the coherent_sample_ flag set). The spec
     // does not provide any guidance in this case, therefore
     // we opt for the simplest solution and assume that there
-    // are no outstanding change sets when calculating the
-    // number of samples to drop.
+    // are no change sets when calculating the number of
+    // samples to drop.
 
     // Drop "old" samples.  Only keep the "depth" most recent
     // samples, i.e. those found at the tail end of the
@@ -639,13 +639,17 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
     {
       DataSampleListElement& elem = *i;
 
-      // N.B. Do not persist samples with outstanding coherent
-      // changes. To verify, we check the DataSampleHeader for
-      // the coherent_change_ flag. The DataSampleHeader will
+      // N.B. Do not persist samples with coherent changes.
+      // To verify, we check the DataSampleHeader for the
+      // coherent_change_ flag. The DataSampleHeader will
       // always be the first message block in the chain.
+      //
+      // It should be noted that persisting coherent changes
+      // is a non-trivial task, and should be handled when
+      // finializing persistence profile conformance.
       if (DataSampleHeader::test_flag(COHERENT_CHANGE_FLAG, elem.sample_))
       {
-        continue; // skip sample
+        continue; // skip coherent sample
       }
 
       sample_data_type sample (elem, allocator);
