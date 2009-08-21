@@ -13,7 +13,7 @@ Thu Aug 20 23:57:23 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * dds/DCPS/WriteDataContainer.h:
         * dds/DCPS/WriteDataContainer.cpp:
 
-          Implemented write side of non-default PRESENTATION QoS policies.
+          Added support for non-default PRESENTATION QoS policies (write).
 
 Thu Aug 20 16:59:49 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
