@@ -40,7 +40,7 @@ parse_args(int& argc, ACE_TCHAR** argv)
 
   while (shifter.is_anything_left())
   {
-    if (shifter.cur_arg_strncasecmp("source") == 0)
+    if (shifter.cur_arg_strncasecmp(ACE_TEXT("source")) == 0)
     {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("%N:%l parse_args()")
