@@ -1,3 +1,13 @@
+Fri Aug 21 18:39:30 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Updated persistent behavior. We no longer persist any samples that
+          belonged to a coherent change group; instead, a new follow-on task
+          to persistence profile conformance will be added.
+
 Fri Aug 21 16:42:33 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/DataSampleList.h:
