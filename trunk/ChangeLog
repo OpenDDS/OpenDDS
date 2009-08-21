@@ -1,3 +1,12 @@
+Fri Aug 21 16:42:33 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.cpp:
+
+          Implicitly inlined == and != operators and applied missing
+          const qualifier; this fixes build failures on hosts using
+          GCC.
+
 Fri Aug 21 00:19:02 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * tests/DCPS/DestinationOrder/main.cpp:

@@ -167,14 +167,26 @@ namespace OpenDDS
       DataSampleListIterator(DataSampleListIterator const & rhs);
 
       DataSampleListIterator& operator=(DataSampleListIterator const & rhs);
-      bool operator==(DataSampleListIterator& rhs) const;
-      bool operator!=(DataSampleListIterator& rhs) const;
       DataSampleListIterator& operator++();
       DataSampleListIterator  operator++(int);
       DataSampleListIterator& operator--();
       DataSampleListIterator  operator--(int);
       reference operator*();
       pointer operator->();
+
+      bool
+      operator==(const DataSampleListIterator& rhs) const
+      {
+        return this->head_ == rhs.head_
+            && this->tail_ == rhs.tail_
+            && this->current_ == rhs.current_;
+      }
+
+      bool
+      operator!=(const DataSampleListIterator& rhs) const
+      {
+        return !(*this == rhs);
+      }
 
     private:
 
