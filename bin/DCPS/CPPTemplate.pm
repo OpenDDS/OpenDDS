@@ -703,7 +703,7 @@ DDS::ReturnCode_t
       for (OpenDDS::DCPS::ReceivedDataElement *item = inst->rcvd_samples_.head_;
            item != 0; item = item->next_data_sample_)
       {
-        if (item->sample_state_ & sample_states)
+        if (item->sample_state_ & sample_states && !item->coherent_change_)
         {
           results.insert_sample(item, inst, ++i);
         }
@@ -783,7 +783,7 @@ DDS::ReturnCode_t
       for (OpenDDS::DCPS::ReceivedDataElement *item = inst->rcvd_samples_.head_;
            item != 0; item = item->next_data_sample_)
       {
-        if (item->sample_state_ & sample_states)
+        if (item->sample_state_ & sample_states && !item->coherent_change_)
         {
           results.insert_sample(item, inst, ++i);
         }
@@ -1087,7 +1087,7 @@ DDS::ReturnCode_t
     for (OpenDDS::DCPS::ReceivedDataElement* item = inst->rcvd_samples_.head_;
          item; item = item->next_data_sample_)
     {
-      if (item->sample_state_ & sample_states)
+      if (item->sample_state_ & sample_states && !item->coherent_change_)
       {
         results.insert_sample(item, inst, ++i);
       }
@@ -1162,7 +1162,7 @@ DDS::ReturnCode_t
     for (OpenDDS::DCPS::ReceivedDataElement* item = inst->rcvd_samples_.head_;
          item; item = item->next_data_sample_)
     {
-      if (item->sample_state_ & sample_states)
+      if (item->sample_state_ & sample_states && !item->coherent_change_)
       {
         results.insert_sample(item, inst, ++i);
       }
