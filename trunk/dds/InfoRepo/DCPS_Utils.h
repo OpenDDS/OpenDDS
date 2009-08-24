@@ -42,7 +42,9 @@ compatibleQOS (const ::DDS::DataWriterQos * writerQos,
 
 bool
 compatibleQOS (const ::DDS::PublisherQos * pubQos,
-               const ::DDS::SubscriberQos * subQos);
+               const ::DDS::SubscriberQos * subQos,
+               OpenDDS::DCPS::IncompatibleQosStatus* writerStatus,
+               OpenDDS::DCPS::IncompatibleQosStatus* readerStatus);
 
 // Should check the compatibility of the entity QoS ?
 // The changeable QoS that is supported currently and should be compatible is

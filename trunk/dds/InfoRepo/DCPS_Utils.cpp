@@ -166,6 +166,10 @@ compatibleQOS (DCPS_IR_Publication  * publication,
   ::DDS::SubscriberQos const * const subQos =
       subscription->get_subscriber_qos ();
 
+  // Verify compatibility of PublisherQos and SubscriberQos
+  compatible = compatible && compatibleQOS (pubQos, subQos,
+                                            writerStatus, readerStatus);
+
   // Verify publisher and subscriber are in a matching partition.
   //
   // According to the DDS spec:
@@ -182,10 +186,31 @@ compatibleQOS (DCPS_IR_Publication  * publication,
 
 
 bool
-compatibleQOS (const ::DDS::PublisherQos * /*pubQos*/,
-               const ::DDS::SubscriberQos * /*subQos*/)
+compatibleQOS (const ::DDS::PublisherQos*  pubQos,
+               const ::DDS::SubscriberQos* subQos,
+               OpenDDS::DCPS::IncompatibleQosStatus* writerStatus,
+               OpenDDS::DCPS::IncompatibleQosStatus* readerStatus)
 {
-  return true;
+  bool compatible = true;
+
+  // PARTITION, GROUP_DATA, and ENTITY_FACTORY are RxO==no.
+
+  // Check the PRESENTATION_QOS_POLICY_ID
+  if (   (pubQos->presentation.access_scope < subQos->presentation.access_scope)
+     || (  (pubQos->presentation.coherent_access == false)
+         &&(subQos->presentation.coherent_access == true))
+     || (  (pubQos->presentation.ordered_access  == false)
+         &&(subQos->presentation.ordered_access  == true)))
+  {
+    compatible = false;
+
+    increment_incompatibility_count(writerStatus,
+                                    ::DDS::PRESENTATION_QOS_POLICY_ID);
+    increment_incompatibility_count(readerStatus,
+                                    ::DDS::PRESENTATION_QOS_POLICY_ID);
+  }
+
+  return compatible;
 }
 
 bool

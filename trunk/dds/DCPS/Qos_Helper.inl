@@ -644,12 +644,8 @@ namespace OpenDDS
     bool
     Qos_Helper::consistent (const ::DDS::DataReaderQos       & qos)
     {
-      //TBD: These should be check when both the DEADLINE and
-      //     TIME_BASED_FILTER QoS policies are supported.
-
-
       return
-        // consistent (qos.deadline, qos.time_based_filter) &&
+        consistent (qos.deadline, qos.time_based_filter) &&
         consistent (qos.resource_limits, qos.history);
     }
 
@@ -726,7 +722,9 @@ namespace OpenDDS
     bool Qos_Helper::valid (const ::DDS::PresentationQosPolicy& qos)
     {
       return
-        qos == TheServiceParticipant->initial_PresentationQosPolicy();
+        (   qos.access_scope == ::DDS::INSTANCE_PRESENTATION_QOS
+         || qos.access_scope == ::DDS::TOPIC_PRESENTATION_QOS
+         || qos.access_scope == ::DDS::GROUP_PRESENTATION_QOS);
     }
 
 
