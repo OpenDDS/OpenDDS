@@ -101,7 +101,7 @@ SubscriberImpl::contains_reader(DDS::InstanceHandle_t a_handle)
   {
     if (helper.matches(*it))
       return true;
-  } 
+  }
   return false;
 }
 
@@ -212,7 +212,7 @@ SubscriberImpl::create_opendds_datareader (
   PortableServer::ServantBase_var reader_remote(reader_remote_impl);
 
   //this is the client reference to the DataReaderRemoteImpl
-  ::OpenDDS::DCPS::DataReaderRemote_var dr_remote_obj = 
+  ::OpenDDS::DCPS::DataReaderRemote_var dr_remote_obj =
       servant_to_remote_reference(reader_remote_impl);
 
   // Propagate the latency buffer data collection configuration.
@@ -282,7 +282,7 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
     {
       return ::DDS::RETCODE_PRECONDITION_NOT_MET;
     }
-  
+
   SubscriberDataReaderInfo* dr_info = 0;
 
   {
@@ -319,7 +319,7 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
     }
 
     dr_info = it->second;
-      
+
     datareader_map_.erase(it) ;
 
     datareader_set_.erase(dr_servant) ;
@@ -350,7 +350,7 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
     }
 
   // Call remove association before unregistering the datareader from the transport,
-  // otherwise some callbacks resulted from remove_association may lost. 
+  // otherwise some callbacks resulted from remove_association may lost.
 
   dr_servant->remove_all_associations();
 
@@ -418,8 +418,8 @@ SubscriberImpl::delete_contained_entities (
     {
        drs.push_back (it->second->local_reader_objref_);
     }
-  }   
-    
+  }
+
   size_t num_rds = drs.size ();
 
   for (size_t i = 0; i < num_rds; ++i)
@@ -572,13 +572,13 @@ SubscriberImpl::set_qos (
             guard,
             this->si_lock_,
             ::DDS::RETCODE_ERROR);
-          DataReaderMap::const_iterator endIter = datareader_map_.end(); 
+          DataReaderMap::const_iterator endIter = datareader_map_.end();
           for (DataReaderMap::const_iterator iter = datareader_map_.begin() ;
             iter != endIter ; ++iter)
           {
-            DataReaderImpl* reader = iter->second->local_reader_impl_; 
+            DataReaderImpl* reader = iter->second->local_reader_impl_;
             ::DDS::DataReaderQos qos;
-            reader->get_qos(qos); 
+            reader->get_qos(qos);
             RepoId id = reader->get_subscription_id();
             std::pair<DrIdToQosMap::iterator, bool> pair
               = idToQosMap.insert(DrIdToQosMap::value_type(id, qos));
@@ -587,7 +587,7 @@ SubscriberImpl::set_qos (
               RepoIdConverter converter(id);
               ACE_ERROR_RETURN((LM_ERROR,
                 ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::set_qos: ")
-                ACE_TEXT("insert %C to DrIdToQosMap failed.\n"), 
+                ACE_TEXT("insert %C to DrIdToQosMap failed.\n"),
                 std::string(converter).c_str()
               ),::DDS::RETCODE_ERROR);
             }
@@ -600,9 +600,9 @@ SubscriberImpl::set_qos (
           try
           {
             DCPSInfo_var repo = TheServiceParticipant->get_repository( this->domain_id_);
-            CORBA::Boolean status 
+            CORBA::Boolean status
               = repo->update_subscription_qos( this->domain_id_,
-                                                        participant_->get_id (), 
+                                                        participant_->get_id (),
                                                         iter->first,
                                                         iter->second,
                                                         this->qos_);
@@ -631,7 +631,7 @@ SubscriberImpl::set_qos (
           }
 
           ++iter;
-        } 
+        }
       }
 
       return ::DDS::RETCODE_OK;
@@ -803,12 +803,12 @@ SubscriberImpl::enable (
                    CORBA::SystemException
                    ))
 {
-  //According spec: 
-  // - Calling enable on an already enabled Entity returns OK and has no 
+  //According spec:
+  // - Calling enable on an already enabled Entity returns OK and has no
   // effect.
-  // - Calling enable on an Entity whose factory is not enabled will fail 
+  // - Calling enable on an Entity whose factory is not enabled will fail
   // and return PRECONDITION_NOT_MET.
-  
+
   if (this->is_enabled ())
   {
     return ::DDS::RETCODE_OK;
@@ -1053,7 +1053,7 @@ SubscriberImpl::raw_latency_buffer_type()
 {
   return this->raw_latency_buffer_type_;
 }
- 
+
 
 } // namespace DCPS
 } // namespace OpenDDS

@@ -1286,7 +1286,14 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
           WriterMapType::iterator where
             = this->writers_.find( header.publication_id_);
+
           if( where != this->writers_.end()) {
+            if (header.coherent_change_)
+            {
+              // Received coherent change
+              ++where->second->coherent_samples_;
+            }
+
             where->second->last_sequence( SequenceNumber(header.sequence_));
 
             ACE_Time_Value now = ACE_OS::gettimeofday();
@@ -1395,6 +1402,73 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
           }
         }
 
+      }
+      break;
+
+    case END_COHERENT_CHANGES:
+      {
+        std::size_t coherent_samples;
+
+        this->writer_activity(sample.header_.publication_id_);
+
+        TAO::DCPS::Serializer serializer(
+            sample.sample_, sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER);
+
+        serializer >> coherent_samples;
+
+        ACE_READ_GUARD (ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
+        {
+          WriterMapType::iterator it =
+            this->writers_.find(sample.header_.publication_id_);
+
+          if (it == this->writers_.end())
+          {
+            RepoIdConverter sub_id(this->subscription_id_);
+            RepoIdConverter pub_id(sample.header_.publication_id_);
+            ACE_DEBUG((LM_WARNING,
+              ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::data_received()")
+              ACE_TEXT(" subscription %C failed to find ")
+              ACE_TEXT(" publication data for %C!\n"),
+              std::string(sub_id).c_str(),
+              std::string(pub_id).c_str()));
+            return;
+          }
+
+          // Verify we have received all coherent samples
+          // within the active change set. The following
+          // assumes no out-of-order delivery!
+          if (it->second->coherent_samples_ != coherent_samples)
+          {
+            RepoIdConverter sub_id(this->subscription_id_);
+            RepoIdConverter pub_id(sample.header_.publication_id_);
+            ACE_ERROR((LM_ERROR,
+              ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::data_received()")
+              ACE_TEXT(" subscription %C failed to receive ")
+              ACE_TEXT(" all coherent changes from publication %C!\n"),
+              std::string(sub_id).c_str(),
+              std::string(pub_id).c_str()));
+
+            for (SubscriptionInstanceMapType::iterator it = this->instances_.begin();
+                 it != this->instances_.end(); ++it)
+            {
+              it->second->rcvd_strategy_->reject_coherent();
+            }
+
+            // Clear active change set count
+            it->second->coherent_samples_ = 0;
+            return;
+          }
+
+          for (SubscriptionInstanceMapType::iterator it = this->instances_.begin();
+               it != this->instances_.end(); ++it)
+          {
+            it->second->rcvd_strategy_->accept_coherent();
+          }
+
+          // Clear active change set count
+          it->second->coherent_samples_ = 0;
+        }
+        this->notify_read_conditions();
       }
       break;
 
@@ -1609,17 +1683,11 @@ bool DataReaderImpl::contains_sample(::DDS::SampleStateMask sample_states,
       if ((inst.instance_state_.view_state() & view_states) &&
         (inst.instance_state_.instance_state() & instance_states))
         {
-          //if the sample state mask is "don't care" we can skip the inner loop
-          //(as long as there's at least one sample)
-          if ((sample_states & ::DDS::ANY_SAMPLE_STATE)
-            == ::DDS::ANY_SAMPLE_STATE && inst.rcvd_samples_.head_)
-            {
-              return true;
-            }
           for (ReceivedDataElement* item = inst.rcvd_samples_.head_; item != 0;
             item = item->next_data_sample_)
             {
-              if (item->sample_state_ & sample_states)
+              if (item->sample_state_ & sample_states
+                  && !item->coherent_change_)
                 {
                   return true;
                 }
@@ -1822,7 +1890,8 @@ OpenDDS::DCPS::WriterInfo::WriterInfo ()
     state_(NOT_SET),
     reader_(0),
     writer_id_( GUID_UNKNOWN ),
-    handle_ (::DDS::HANDLE_NIL)
+    handle_ (::DDS::HANDLE_NIL),
+    coherent_samples_(0)
 {
 }
 
@@ -1831,7 +1900,8 @@ OpenDDS::DCPS::WriterInfo::WriterInfo (DataReaderImpl* reader,
   : last_liveliness_activity_time_(ACE_OS::gettimeofday()),
     state_(NOT_SET),
     reader_(reader),
-    writer_id_(writer_id)
+    writer_id_(writer_id),
+    coherent_samples_(0)
 {
   if (DCPS_debug_level >= 5) {
     RepoIdConverter writer_converter(writer_id);

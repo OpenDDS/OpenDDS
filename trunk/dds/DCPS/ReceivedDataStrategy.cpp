@@ -8,6 +8,40 @@
 #include "ReceivedDataElementList.h"
 #include "ReceivedDataStrategy.h"
 
+namespace
+{
+class CoherentFilter
+  : public OpenDDS::DCPS::ReceivedDataFilter
+{
+public:
+  CoherentFilter() {}
+  ~CoherentFilter() {}
+
+  bool
+  operator()(OpenDDS::DCPS::ReceivedDataElement* data_sample)
+  {
+    return data_sample->coherent_change_;
+  }
+};
+
+class AcceptCoherent
+  : public OpenDDS::DCPS::ReceivedDataOperation
+{
+public:
+  AcceptCoherent() {}
+  ~AcceptCoherent() {}
+
+  void
+  operator()(OpenDDS::DCPS::ReceivedDataElement* data_sample)
+  {
+    // Clear coherent_change_ flag; this makes
+    // the data available for read/take operations.
+    data_sample->coherent_change_ = false;
+  }
+};
+
+} // namespace
+
 namespace OpenDDS
 {
 namespace DCPS
@@ -20,6 +54,24 @@ ReceivedDataStrategy::ReceivedDataStrategy(
 ReceivedDataStrategy::~ReceivedDataStrategy()
 {}
 
+void
+ReceivedDataStrategy::add(ReceivedDataElement* data_sample)
+{
+  this->rcvd_samples_.add(data_sample);
+}
+
+void
+ReceivedDataStrategy::accept_coherent()
+{
+  this->rcvd_samples_.apply_all(CoherentFilter(), AcceptCoherent());
+}
+
+void
+ReceivedDataStrategy::reject_coherent()
+{
+  this->rcvd_samples_.remove(CoherentFilter(), true);
+}
+
 
 ReceptionDataStrategy::ReceptionDataStrategy(
     ReceivedDataElementList& rcvd_samples)
@@ -28,12 +80,6 @@ ReceptionDataStrategy::ReceptionDataStrategy(
 
 ReceptionDataStrategy::~ReceptionDataStrategy()
 {}
-
-void
-ReceptionDataStrategy::add(ReceivedDataElement* data_sample)
-{
-  this->rcvd_samples_.add(data_sample);
-}
 
 
 SourceDataStrategy::SourceDataStrategy(

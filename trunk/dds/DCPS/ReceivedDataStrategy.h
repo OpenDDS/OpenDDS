@@ -19,7 +19,11 @@ public:
 
   virtual ~ReceivedDataStrategy();
 
-  virtual void add(ReceivedDataElement* data_sample) = 0;
+  virtual void add(ReceivedDataElement* data_sample);
+
+  virtual void accept_coherent();
+
+  virtual void reject_coherent();
 
 protected:
   ReceivedDataElementList& rcvd_samples_;
@@ -32,8 +36,6 @@ public:
   explicit ReceptionDataStrategy(ReceivedDataElementList& rcvd_samples);
 
   ~ReceptionDataStrategy();
-
-  virtual void add(ReceivedDataElement* data_sample);
 };
 
 class OpenDDS_Dcps_Export SourceDataStrategy

@@ -19,7 +19,7 @@ namespace OpenDDS
 {
   namespace DCPS
   {
-    class InstanceState ;
+    class InstanceState;
 
     class OpenDDS_Dcps_Export ReceivedDataElement
     {
@@ -27,6 +27,7 @@ namespace OpenDDS
       ReceivedDataElement(void *received_data) :
             registered_data_(received_data),
             sample_state_(::DDS::NOT_READ_SAMPLE_STATE),
+            coherent_change_(false),
             disposed_generation_count_(0),
             no_writers_generation_count_(0),
             zero_copy_cnt_(0),
@@ -62,6 +63,12 @@ namespace OpenDDS
       ///Source time stamp for this data sample
       ::DDS::Time_t source_timestamp_;
 
+      /// Reception time stamp for this data sample
+      DDS::Time_t destination_timestamp_;
+
+      /// Sample belongs to an active coherent change set
+      bool coherent_change_;
+
       /// The data sample's instance's disposed_generation_count_
       /// at the time the sample was received
       size_t disposed_generation_count_ ;
@@ -86,7 +93,35 @@ namespace OpenDDS
     private:
       ACE_Atomic_Op<ACE_Thread_Mutex, long> ref_count_;
 
-    } ; // class ReceivedDataElement
+    }; // class ReceivedDataElement
+
+    class OpenDDS_Dcps_Export ReceivedDataFilter
+    {
+    public:
+      ReceivedDataFilter()
+      {}
+
+      virtual ~ReceivedDataFilter()
+      {}
+
+      virtual bool operator()(ReceivedDataElement* data_sample)
+      {
+        return false;
+      }
+    };
+
+    class OpenDDS_Dcps_Export ReceivedDataOperation
+    {
+    public:
+      ReceivedDataOperation()
+      {}
+
+      virtual ~ReceivedDataOperation()
+      {}
+
+      virtual void operator()(ReceivedDataElement* data_sample)
+      {}
+    };
 
     class OpenDDS_Dcps_Export ReceivedDataElementList
     {
@@ -95,10 +130,14 @@ namespace OpenDDS
 
       ~ReceivedDataElementList() ;
 
+      void apply_all(ReceivedDataFilter& match, ReceivedDataOperation& func);
+
       // adds a data sample to the end of the list
       void add(ReceivedDataElement *data_sample) ;
 
       bool remove(ReceivedDataElement *data_sample) ;
+
+      bool remove(ReceivedDataFilter& match, bool eval_all);
 
       ReceivedDataElement *remove_head() ;
       ReceivedDataElement *remove_tail() ;
