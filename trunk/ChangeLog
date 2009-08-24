@@ -1,10 +1,17 @@
+Mon Aug 24 22:06:00 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+
+          Added additional checks to ensure FooDataReaderImpl does not
+          read/take coherent change samples.
+
 Mon Aug 24 21:43:38 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
         * dds/DCPS/ReceivedDataElementList.h:
         * dds/DCPS/ReceivedDataStrategy.cpp:
 
-	  Updates to remove some compiler errors using gcc.
+          Updates to remove some compiler errors using gcc.
 
 Mon Aug 24 20:44:02 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
