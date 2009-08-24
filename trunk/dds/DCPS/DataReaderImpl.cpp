@@ -1448,10 +1448,10 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
               std::string(sub_id).c_str(),
               std::string(pub_id).c_str()));
 
-            for (SubscriptionInstanceMapType::iterator it = this->instances_.begin();
-                 it != this->instances_.end(); ++it)
+            for (SubscriptionInstanceMapType::iterator current = this->instances_.begin();
+                 current != this->instances_.end(); ++current)
             {
-              it->second->rcvd_strategy_->reject_coherent();
+              current->second->rcvd_strategy_->reject_coherent();
             }
 
             // Clear active change set count

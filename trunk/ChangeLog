@@ -1,3 +1,11 @@
+Mon Aug 24 21:43:38 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/ReceivedDataElementList.h:
+        * dds/DCPS/ReceivedDataStrategy.cpp:
+
+	  Updates to remove some compiler errors using gcc.
+
 Mon Aug 24 20:44:02 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
@@ -8,7 +16,7 @@ Mon Aug 24 20:44:02 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * dds/DCPS/ReceivedDataStrategy.h:
         * dds/DCPS/ReceivedDataStrategy.cpp:
         * dds/DCPS/SubscriberImpl.cpp:
-          
+
           Added support for non-default PRESENTATION QoS policies (read).
 
 Mon Aug 24 15:55:16 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>

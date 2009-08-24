@@ -63,13 +63,16 @@ ReceivedDataStrategy::add(ReceivedDataElement* data_sample)
 void
 ReceivedDataStrategy::accept_coherent()
 {
-  this->rcvd_samples_.apply_all(CoherentFilter(), AcceptCoherent());
+  CoherentFilter    filter = CoherentFilter();
+  AcceptCoherent operation = AcceptCoherent();
+  this->rcvd_samples_.apply_all( filter, operation);
 }
 
 void
 ReceivedDataStrategy::reject_coherent()
 {
-  this->rcvd_samples_.remove(CoherentFilter(), true);
+  CoherentFilter filter = CoherentFilter();
+  this->rcvd_samples_.remove( filter, true);
 }
 
 

@@ -104,7 +104,7 @@ namespace OpenDDS
       virtual ~ReceivedDataFilter()
       {}
 
-      virtual bool operator()(ReceivedDataElement* data_sample)
+      virtual bool operator()(ReceivedDataElement* /* data_sample */)
       {
         return false;
       }
@@ -119,7 +119,7 @@ namespace OpenDDS
       virtual ~ReceivedDataOperation()
       {}
 
-      virtual void operator()(ReceivedDataElement* data_sample)
+      virtual void operator()(ReceivedDataElement* /* data_sample */)
       {}
     };
 
