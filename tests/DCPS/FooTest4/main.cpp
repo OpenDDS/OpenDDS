@@ -242,11 +242,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
       ::DDS::SubscriberQos new_sub_qos = sub_qos_got;
-      // This qos is not supported, so it's invalid qos.
       new_sub_qos.presentation.access_scope = ::DDS::GROUP_PRESENTATION_QOS;
 
+      // PRESENTATION policies are not changeable.
       ret = sub->set_qos (new_sub_qos);
-      if (ret != ::DDS::RETCODE_INCONSISTENT_POLICY)
+      if (ret != ::DDS::RETCODE_IMMUTABLE_POLICY)
       {
         ACE_ERROR ((LM_ERROR,
                    ACE_TEXT("(%P|%t) Subscriber set_qos failed.\n")));

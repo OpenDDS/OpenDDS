@@ -720,12 +720,21 @@ bool DCPS_IR_Publication::compatibleQosChange (const ::DDS::PublisherQos & qos)
   DCPS_IR_Subscription_Set::ITERATOR iter = associations_.begin();
   DCPS_IR_Subscription_Set::ITERATOR end = associations_.end();
 
+  OpenDDS::DCPS::IncompatibleQosStatus writerStatus;
+  writerStatus.total_count = 0;
+  writerStatus.count_since_last_send = 0;
+
+  OpenDDS::DCPS::IncompatibleQosStatus readerStatus;
+  readerStatus.total_count = 0;
+  readerStatus.count_since_last_send = 0;
+
   while (iter != end)
   {
     sub = *iter;
     ++iter;
 
-    if (! ::compatibleQOS(&qos, sub->get_subscriber_qos()))
+    if (! ::compatibleQOS(&qos, sub->get_subscriber_qos(),
+                          &writerStatus, &readerStatus))
       return false;
   }
 

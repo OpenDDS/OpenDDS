@@ -407,10 +407,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       ::DDS::ReturnCode_t pubChangeQosReturnCode =
       participant->set_default_publisher_qos(pubQosChangedEntityFactory);
-      if (::DDS::RETCODE_INCONSISTENT_POLICY != pubChangeQosReturnCode)
+      if (::DDS::RETCODE_OK != pubChangeQosReturnCode)
         {
           ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) Was able to set invalid default Publisher QOS!\n")),
+                            ACE_TEXT("(%P|%t) Was unable to set valid default Publisher QOS!\n")),
                             8);
         }
         else
@@ -422,7 +422,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       participant->get_default_publisher_qos (pubQosNewDefault);
 
       if (pubInitialQos.entity_factory.autoenable_created_entities
-        != pubQosNewDefault.entity_factory.autoenable_created_entities)
+        == pubQosNewDefault.entity_factory.autoenable_created_entities)
         {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) Incorrect default Publisher QOS was returned in the get!\n")),
@@ -475,10 +475,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       ::DDS::ReturnCode_t subChangeQosReturnCode =
       participant->set_default_subscriber_qos(subQosChangedEntityFactory);
-      if (::DDS::RETCODE_INCONSISTENT_POLICY != subChangeQosReturnCode)
+      if (::DDS::RETCODE_OK != subChangeQosReturnCode)
         {
           ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) Was able to set invalid default Subscriber QOS!\n")),
+                            ACE_TEXT("(%P|%t) Was unable to set valid default Subscriber QOS!\n")),
                             9);
         }
         else
@@ -490,7 +490,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       participant->get_default_subscriber_qos (subQosNewDefault);
 
       if (subInitialQos.entity_factory.autoenable_created_entities
-        != subQosNewDefault.entity_factory.autoenable_created_entities)
+        == subQosNewDefault.entity_factory.autoenable_created_entities)
         {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) Incorrect default Subscriber QOS was returned in the get!\n")),

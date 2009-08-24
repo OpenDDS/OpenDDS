@@ -289,14 +289,25 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
   participant_->get_default_publisher_qos (default_pub_qos);
   TEST_CHECK (pub_qos_got == default_pub_qos);
 
-  ::DDS::PublisherQos new_pub_qos = pub_qos_got;
-  // This qos is not supported, so it's invalid qos.
-  new_pub_qos.presentation.access_scope = ::DDS::GROUP_PRESENTATION_QOS;
+  ::DDS::PublisherQos instance_pub_qos = pub_qos_got;
+  ::DDS::PublisherQos topic_pub_qos    = pub_qos_got;
+  ::DDS::PublisherQos group_pub_qos    = pub_qos_got;
+  instance_pub_qos.presentation.access_scope = ::DDS::INSTANCE_PRESENTATION_QOS;
+  topic_pub_qos.presentation.access_scope    = ::DDS::TOPIC_PRESENTATION_QOS;
+  group_pub_qos.presentation.access_scope    = ::DDS::GROUP_PRESENTATION_QOS;
 
-  TEST_CHECK (! (new_pub_qos == default_pub_qos));
+  TEST_CHECK ((instance_pub_qos == default_pub_qos));
+  TEST_CHECK (  !(topic_pub_qos == default_pub_qos));
+  TEST_CHECK (  !(group_pub_qos == default_pub_qos));
 
-  ret = publisher_->set_qos (new_pub_qos);
-  TEST_CHECK (ret == ::DDS::RETCODE_INCONSISTENT_POLICY);
+  ret = publisher_->set_qos (topic_pub_qos);
+  TEST_CHECK (ret == ::DDS::RETCODE_IMMUTABLE_POLICY);
+
+  ret = publisher_->set_qos (group_pub_qos);
+  TEST_CHECK (ret == ::DDS::RETCODE_IMMUTABLE_POLICY);
+
+  ret = publisher_->set_qos (instance_pub_qos);
+  TEST_CHECK (ret == ::DDS::RETCODE_OK);
 
   ::DDS::DomainParticipant_var participant
     = publisher_->get_participant ();
