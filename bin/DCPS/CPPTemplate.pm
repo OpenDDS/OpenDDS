@@ -977,7 +977,6 @@ DDS::ReturnCode_t
             item = item->next_data_sample_;
             continue;
         }
-
         if (item->sample_state_ & ::DDS::NOT_READ_SAMPLE_STATE)
         {
           if (item->registered_data_ != 0)
