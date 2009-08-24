@@ -898,6 +898,8 @@ DDS::ReturnCode_t
            item != 0;
            item = item->next_data_sample_)
       {
+        if (item->coherent_change_) continue;
+
         if (item->sample_state_ & ::DDS::NOT_READ_SAMPLE_STATE)
         {
           if (item->registered_data_ != 0)
@@ -970,6 +972,12 @@ DDS::ReturnCode_t
       OpenDDS::DCPS::ReceivedDataElement *item = ptr->rcvd_samples_.head_;
       while (item)
       {
+        if (item->coherent_change_)
+        {
+            item = item->next_data_sample_;
+            continue;
+        }
+
         if (item->sample_state_ & ::DDS::NOT_READ_SAMPLE_STATE)
         {
           if (item->registered_data_ != 0)
