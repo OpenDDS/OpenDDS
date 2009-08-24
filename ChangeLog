@@ -1,30 +1,43 @@
+Mon Aug 24 20:44:02 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/ReceivedDataElementList.h:
+        * dds/DCPS/ReceivedDataElementList.cpp:
+        * dds/DCPS/ReceivedDataStrategy.h:
+        * dds/DCPS/ReceivedDataStrategy.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+          
+          Added support for non-default PRESENTATION QoS policies (read).
+
 Mon Aug 24 15:55:16 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/Qos_Helper.inl:
-	  Enabled DEADLINE/TIME_BASED_FILTER consistency checking.
-	  Changed valid PRESENTATION policies to check for valid
-	  access_scope members.
+          Enabled DEADLINE/TIME_BASED_FILTER consistency checking.
+          Changed valid PRESENTATION policies to check for valid
+          access_scope members.
 
         * dds/InfoRepo/DCPS_IR_Publication.cpp:
         * dds/InfoRepo/DCPS_IR_Subscription.cpp:
         * dds/InfoRepo/DCPS_Utils.h:
 
-	  compatibleQos( PublisherQos, SubscriberQos)
-	    - modified added reader and writer status to signature.
+          compatibleQos( PublisherQos, SubscriberQos)
+            - modified added reader and writer status to signature.
 
         * dds/InfoRepo/DCPS_Utils.cpp:
 
-	  compatibleQos( DCPS_IR_Publication, DCPS_IR_Subscription)
-	    - added call to qos compatibilty checking method.
-	  compatibleQos( PublisherQos, SubscriberQos, ...)
-	    - implemented compatibility checking.
+          compatibleQos( DCPS_IR_Publication, DCPS_IR_Subscription)
+            - added call to qos compatibilty checking method.
+          compatibleQos( PublisherQos, SubscriberQos, ...)
+            - implemented compatibility checking.
 
         * tests/DCPS/DcpsIntegration/infrastructure.cpp:
         * tests/DCPS/FooTest3_0/PubDriver.cpp:
         * tests/DCPS/FooTest4/main.cpp:
 
-	  Modified tests to accommodate new compatibility and validity
-	  implementations.
+          Modified tests to accommodate new compatibility and validity
+          implementations.
 
 Fri Aug 21 18:39:30 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 

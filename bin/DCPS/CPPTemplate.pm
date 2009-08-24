@@ -1700,6 +1700,12 @@ void
 
     ptr->source_timestamp_.sec = header.source_timestamp_sec_;
     ptr->source_timestamp_.nanosec = header.source_timestamp_nanosec_;
+
+    ptr->destination_timestamp_ =
+      OpenDDS::DCPS::time_value_to_time(ACE_OS::gettimeofday());
+
+    ptr->coherent_change_ = header.coherent_change_;
+
     ptr->disposed_generation_count_ =
         instance_ptr->instance_state_.disposed_generation_count();
     ptr->no_writers_generation_count_ =

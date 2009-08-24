@@ -116,8 +116,11 @@ namespace OpenDDS
         /// DCPSInfoRepo ID of the DataWriter
         PublicationId writer_id_;
 
-        /// The publication handle
+        /// The publication entity instance handle.
         ::DDS::InstanceHandle_t handle_;
+
+        /// Number of received coherent changes in active change set.
+        ACE_Atomic_Op<ACE_Thread_Mutex, std::size_t> coherent_samples_;
       };
 
     /// Elements stored for managing statistical data.
