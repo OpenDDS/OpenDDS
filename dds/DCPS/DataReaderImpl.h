@@ -474,7 +474,8 @@ namespace OpenDDS
 
       virtual void dds_demarshal(const ReceivedDataSample& sample,
                                  SubscriptionInstance*& instance,
-                                 bool & is_new_instance)= 0;
+                                 bool & is_new_instance,
+                                 bool & filtered)= 0;
       virtual void dispose(const ReceivedDataSample& sample,
                            SubscriptionInstance*& instance);
       virtual void unregister(const ReceivedDataSample& sample,
@@ -568,6 +569,16 @@ namespace OpenDDS
 
       mutable SubscriptionInstanceMapType           instances_;
 
+      /// Check if the received data sample or instance should
+      /// be filtered.
+      /**
+       * @note Filtering will only occur if the application
+       *       configured a finite duration in the Topic's LIFESPAN
+       *       QoS policy or DataReader's TIME_BASED_FILTER QoS policy.
+       */
+      bool filter_sample(const DataSampleHeader& header) const;
+      bool filter_instance(const SubscriptionInstance* instance) const;
+
       ReceivedDataAllocator          *rd_allocator_;
       ::DDS::DataReaderQos            qos_;
 
@@ -606,14 +617,6 @@ namespace OpenDDS
       /// publication repo ids.
       bool cache_lookup_instance_handles (const WriterIdSeq& ids,
                                          ::DDS::InstanceHandleSeq & hdls);
-
-      /// Check if the received data sample expired.
-      /**
-       * @note Expiration will only occur if the application
-       *       configured a finite duration in the Topic's LIFESPAN
-       *       QoS policy.
-       */
-      bool data_expired (DataSampleHeader const & header) const;
 
       friend class WriterInfo;
 

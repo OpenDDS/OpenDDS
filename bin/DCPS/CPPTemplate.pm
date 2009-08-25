@@ -1579,7 +1579,8 @@ void
 <%TYPE%>DataReaderImpl::dds_demarshal(
   const OpenDDS::DCPS::ReceivedDataSample& sample,
   OpenDDS::DCPS::SubscriptionInstance*& instance,
-  bool & just_registered)
+  bool & just_registered,
+  bool & filtered)
 {
   ::<%SCOPE%><%TYPE%> *data /* = new ::<%SCOPE%><%TYPE%>(instance_data) */ ;
 
@@ -1595,7 +1596,7 @@ void
 
   ser >> *data;
 
-  store_instance_data(data, sample.header_, instance, just_registered);
+  store_instance_data(data, sample.header_, instance, just_registered, filtered);
 }
 
 void
@@ -1603,7 +1604,8 @@ void
     ::<%SCOPE%><%TYPE%> *instance_data,
     const OpenDDS::DCPS::DataSampleHeader& header,
     OpenDDS::DCPS::SubscriptionInstance*& instance_ptr,
-    bool & just_registered)
+    bool & just_registered,
+    bool & filtered)
 {
   bool is_dispose_msg = header.message_id_ == OpenDDS::DCPS::DISPOSE_INSTANCE;
   bool is_unregister_msg = header.message_id_ == OpenDDS::DCPS::UNREGISTER_INSTANCE;
@@ -1669,8 +1671,18 @@ void
 
   if (header.message_id_ != OpenDDS::DCPS::INSTANCE_REGISTRATION)
   {
-    instance_ptr =
-      get_handle_instance(handle);
+    // Check instance based QoS policy filters
+    // (i.e. OWNERSHIP, TIME_BASED_FILTER)
+    if (header.message_id_ == OpenDDS::DCPS::SAMPLE_DATA &&
+        (filtered = filter_instance(instance_ptr)))
+    {
+      ACE_DES_FREE (instance_data,
+                    data_allocator_->free,
+                    <%TYPE%> );
+      return;
+    }
+
+    instance_ptr = get_handle_instance(handle);
 
     // TBD - we also need to reject for > RESOURCE_LIMITS.max_samples
     //       and RESOURCE_LIMITS.max_instances.
@@ -1870,7 +1882,8 @@ void
   // The demarshal push this "sample" to received sample list so the user 
   // can be notified the dispose event.
   bool just_registered = false;
-  this->dds_demarshal (sample, instance, just_registered);
+  bool filtered = false;
+  this->dds_demarshal (sample, instance, just_registered, filtered);
 }
 
 void
@@ -1884,7 +1897,8 @@ void
   // The demarshal push this "sample" to received sample list so the user 
   // can be notified the unregister event.
   bool just_registered = false;
-  this->dds_demarshal (sample, instance, just_registered);
+  bool filtered = false;
+  this->dds_demarshal (sample, instance, just_registered, filtered);
 }
 
 DDS::ReturnCode_t

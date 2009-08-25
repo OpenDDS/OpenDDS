@@ -389,7 +389,8 @@ public:
 
     virtual void dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample& sample,
                                OpenDDS::DCPS::SubscriptionInstance*& instance,
-                               bool & just_registered);
+                               bool & just_registered,
+                               bool & filtered);
 
     virtual void dispose(const OpenDDS::DCPS::ReceivedDataSample& sample,
                          OpenDDS::DCPS::SubscriptionInstance*& instance);
@@ -473,7 +474,8 @@ public:
          ::<%SCOPE%><%TYPE%> *instance_data,
          const OpenDDS::DCPS::DataSampleHeader& header,
          OpenDDS::DCPS::SubscriptionInstance*& instance_ptr,
-         bool & just_registered
+         bool & just_registered,
+         bool & filtered
          );
 
     /// common input read* & take* input processing and precondition checks

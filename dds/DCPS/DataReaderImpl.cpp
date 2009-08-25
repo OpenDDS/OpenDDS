@@ -1259,12 +1259,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         this->writer_activity(header.publication_id_);
 
         // Verify data has not exceeded its lifespan.
-        if (this->data_expired (header))
-        {
-          // Data expired.  Do not demarshal the data.  Simply allow
-          // the caller to deallocate the data buffer.
-          break;
-        }
+        if (this->filter_sample(header)) break;
 
         // This adds the reader to the set/list of readers with data.
         this->subscriber_servant_->data_received(this);
@@ -1279,7 +1274,13 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
         SubscriptionInstance* instance = 0;
         bool is_new_instance = false;
-        this->dds_demarshal(sample, instance, is_new_instance);
+        bool filtered = false;
+        dds_demarshal(sample, instance, is_new_instance, filtered);
+
+        instance->last_sample_tv_ = instance->cur_sample_tv_;
+        instance->cur_sample_tv_ = ACE_OS::gettimeofday ();
+
+        if (filtered) break; // sample filtered from instance
 
         {
           ACE_READ_GUARD (ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
@@ -1324,9 +1325,6 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
         if (this->watchdog_.get ())
         {
-          instance->last_sample_tv_ = instance->cur_sample_tv_;
-          instance->cur_sample_tv_ = ACE_OS::gettimeofday ();
-
           if (is_new_instance)
           {
             this->watchdog_->schedule_timer (instance);
@@ -1459,10 +1457,10 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
             return;
           }
 
-          for (SubscriptionInstanceMapType::iterator it = this->instances_.begin();
-               it != this->instances_.end(); ++it)
+          for (SubscriptionInstanceMapType::iterator current = this->instances_.begin();
+               current != this->instances_.end(); ++current)
           {
-            it->second->rcvd_strategy_->accept_coherent();
+            current->second->rcvd_strategy_->accept_coherent();
           }
 
           // Clear active change set count
@@ -2716,8 +2714,10 @@ DataReaderImpl::cache_lookup_instance_handles (const WriterIdSeq& ids,
 }
 
 bool
-DataReaderImpl::data_expired (DataSampleHeader const & header) const
+DataReaderImpl::filter_sample(const DataSampleHeader& header) const
 {
+  ACE_Time_Value now(ACE_OS::gettimeofday());
+
   // Expire historic data if QoS indicates VOLATILE.
   if (!always_get_history_ && header.historic_sample_
     && qos_.durability.kind == ::DDS::VOLATILE_DURABILITY_QOS)
@@ -2729,7 +2729,7 @@ DataReaderImpl::data_expired (DataSampleHeader const & header) const
                  ACE_TEXT("Discarded historic data.\n")));
     }
 
-    return true;  // Data expired.
+    return true;  // Data filtered.
   }
 
   // The LIFESPAN_DURATION_FLAG is set when sample data is sent
@@ -2746,7 +2746,6 @@ DataReaderImpl::data_expired (DataSampleHeader const & header) const
 
     // We assume that the publisher host's clock and subcriber host's
     // clock are synchronized (allowed by the spec).
-    ACE_Time_Value const now (ACE_OS::gettimeofday ());
     ACE_Time_Value const expiration_time (
       OpenDDS::DCPS::time_to_time_value (tmp));
     if (now >= expiration_time)
@@ -2761,7 +2760,31 @@ DataReaderImpl::data_expired (DataSampleHeader const & header) const
                    diff.usec ()));
       }
 
-      return true;  // Data expired.
+      return true;  // Data filtered.
+    }
+  }
+
+  return false;
+}
+
+bool
+DataReaderImpl::filter_instance(const SubscriptionInstance* instance) const
+{
+  ACE_Time_Value now(ACE_OS::gettimeofday());
+
+  // TIME_BASED_FILTER processing; expire data samples
+  // if minimum separation is not met for instance.
+  const DDS::Duration_t zero =
+    { DDS::DURATION_ZERO_SEC, DDS::DURATION_ZERO_NSEC };
+
+  if (this->qos_.time_based_filter.minimum_separation > zero)
+  {
+    DDS::Duration_t separation =
+      time_value_to_duration(now - instance->last_sample_tv_);
+
+    if (separation < this->qos_.time_based_filter.minimum_separation)
+    {
+      return true;  // Data filtered.
     }
   }
 
