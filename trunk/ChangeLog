@@ -1,26 +1,39 @@
+Tue Aug 25 23:14:53 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/Qos_Helper.inl:
+
+          Added support for TIME_BASED_FILTER.
+          - Refactored data filtering. data_expired has been renamed
+            to filter_sample and a new filter_instance method has been
+            added.
+
 Tue Aug 25 21:38:02 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
 
           - According to spec 1.2, Samples that contain no data do not
             count towards the limits imposed by the RESOURCE_LIMITS QoS policy
-            so the oldest sample is not removed to impose the resource limit 
+            so the oldest sample is not removed to impose the resource limit
             requirement when unregister/dispose message arrives.
-          - This fixed access violation when trying to add dispose sample 
-            to instance after instance is released during removing last 
+          - This fixed access violation when trying to add dispose sample
+            to instance after instance is released during removing last
             sample.
-          - Made DataReader ignore the unregister/dispose message when it does 
-            not cause state change. This resolved the issue of duplicate 
+          - Made DataReader ignore the unregister/dispose message when it does
+            not cause state change. This resolved the issue of duplicate
             notifications for unregister or dispose event.
 
         * dds/DCPS/InstanceState.inl:
         * dds/DCPS/InstanceState.h:
-        
-          Made dispose_was_received, unregister_was_received  return a bool value 
-          to indicate whether it causes instance state change. If it does, the 
-          unregister or dispose notification sample is added and the listener 
-          on_data_avaiable is called. 
-          
+
+          Made dispose_was_received, unregister_was_received  return a bool value
+          to indicate whether it causes instance state change. If it does, the
+          unregister or dispose notification sample is added and the listener
+          on_data_avaiable is called.
+
         * dds/DCPS/DataWriterImpl.cpp:
 
           Moved dispose() call before unregister operation in
@@ -40,7 +53,7 @@ Tue Aug 25 21:38:02 UTC 2009  Yan Dai  <dai_y@ociweb.com>
           Passed the DataReaderImpl reference to constructor. This solved
           problem that access reader servant via instance crashes after taking
           last sample which probably causes instance release.
-        
+
         * tests/DCPS/MultiRepoTest/ForwardingListener.cpp:
 
           Added unregister/dispose notification sample checking and not forward
@@ -50,11 +63,11 @@ Tue Aug 25 21:38:02 UTC 2009  Yan Dai  <dai_y@ociweb.com>
         * tests/DCPS/NotifyTest/DataReaderListener.cpp:
         * tests/DCPS/NotifyTest/subscriber.cpp:
 
-          - Made the test just count dispose/unregister notification before 
+          - Made the test just count dispose/unregister notification before
             delete_datawriter() call as now the delete_datawriter() will send
             dispose and unregister message to reader.
           - Changed expected unregister event notification to 0 since dispose
-            arrives before unregister notification and taking dispose sample 
+            arrives before unregister notification and taking dispose sample
             cause instance dispose so unregister message is ignored.
 
         * tests/DCPS/Priority/DataReaderListener.cpp:
