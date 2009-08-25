@@ -685,8 +685,21 @@ DDS::ReturnCode_t
                     this->sample_lock_,
                     ::DDS::RETCODE_ERROR);
 
+  ::DDS::SubscriberQos qos;
+
+  ::OpenDDS::DCPS::SubscriberImpl* sub = get_subscriber_servant(); 
+  if (sub->get_qos(qos) != ::DDS::RETCODE_OK)
+  {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t)")
+                      ACE_TEXT(" <%TYPE%>DataReaderImpl::read_i:")
+                      ACE_TEXT(" unable to obtain Subscriber QoS!\n")),
+                      DDS::RETCODE_ERROR);
+  }
+
   ::OpenDDS::DCPS::RakeResults< ::<%MODULE%><%TYPE%>Seq >
-     results(received_data, info_seq, max_samples, a_condition,
+     results(received_data, info_seq, max_samples,
+             qos.presentation.ordered_access, a_condition,
              ::OpenDDS::DCPS::DDS_OPERATION_READ);
 
   for (InstanceMap::iterator it = instance_map_.begin(),
@@ -765,8 +778,21 @@ DDS::ReturnCode_t
                     this->sample_lock_,
                     ::DDS::RETCODE_ERROR);
 
+  ::DDS::SubscriberQos qos;
+
+  ::OpenDDS::DCPS::SubscriberImpl* sub = get_subscriber_servant(); 
+  if (sub->get_qos(qos) != ::DDS::RETCODE_OK)
+  {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t)")
+                      ACE_TEXT(" <%TYPE%>DataReaderImpl::take_i:")
+                      ACE_TEXT(" unable to obtain Subscriber QoS!\n")),
+                      DDS::RETCODE_ERROR);
+  }
+
   ::OpenDDS::DCPS::RakeResults< ::<%MODULE%><%TYPE%>Seq >
-     results(received_data, info_seq, max_samples, a_condition,
+     results(received_data, info_seq, max_samples,
+             qos.presentation.ordered_access, a_condition,
              ::OpenDDS::DCPS::DDS_OPERATION_TAKE);
 
   for (InstanceMap::iterator it = instance_map_.begin(),
@@ -1079,9 +1105,22 @@ DDS::ReturnCode_t
     ::DDS::QueryCondition_ptr a_condition)
 {
   ::<%MODULE%><%TYPE%>Seq::PrivateMemberAccess received_data_p(received_data);
+  
+  ::DDS::SubscriberQos qos;
+
+  ::OpenDDS::DCPS::SubscriberImpl* sub = get_subscriber_servant(); 
+  if (sub->get_qos(qos) != ::DDS::RETCODE_OK)
+  {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t)")
+                      ACE_TEXT(" <%TYPE%>DataReaderImpl::read_instance_i:")
+                      ACE_TEXT(" unable to obtain Subscriber QoS!\n")),
+                      DDS::RETCODE_ERROR);
+  }
 
   ::OpenDDS::DCPS::RakeResults< ::<%MODULE%><%TYPE%>Seq >
-     results(received_data, info_seq, max_samples, a_condition,
+     results(received_data, info_seq, max_samples,
+             qos.presentation.ordered_access, a_condition,
              ::OpenDDS::DCPS::DDS_OPERATION_READ);
 
   OpenDDS::DCPS::SubscriptionInstance* inst = get_handle_instance(a_handle);
@@ -1155,9 +1194,22 @@ DDS::ReturnCode_t
     ::DDS::QueryCondition_ptr a_condition)
 {
   ::<%MODULE%><%TYPE%>Seq::PrivateMemberAccess received_data_p(received_data);
+  
+  ::DDS::SubscriberQos qos;
+
+  ::OpenDDS::DCPS::SubscriberImpl* sub = get_subscriber_servant(); 
+  if (sub->get_qos(qos) != ::DDS::RETCODE_OK)
+  {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t)")
+                      ACE_TEXT(" <%TYPE%>DataReaderImpl::take_instance_i:")
+                      ACE_TEXT(" unable to obtain Subscriber QoS!\n")),
+                      DDS::RETCODE_ERROR);
+  }
 
   ::OpenDDS::DCPS::RakeResults< ::<%MODULE%><%TYPE%>Seq >
-     results(received_data, info_seq, max_samples, a_condition,
+     results(received_data, info_seq, max_samples,
+             qos.presentation.ordered_access, a_condition,
              ::OpenDDS::DCPS::DDS_OPERATION_TAKE);
 
   OpenDDS::DCPS::SubscriptionInstance* inst = get_handle_instance(a_handle);

@@ -30,11 +30,13 @@ template <class SampleSeq>
 RakeResults<SampleSeq>::RakeResults(SampleSeq& received_data,
                                     ::DDS::SampleInfoSeq& info_seq,
                                     ::CORBA::Long max_samples,
+                                    bool ordered_access,
                                     ::DDS::QueryCondition_ptr cond,
                                     Operation_t oper)
   : received_data_(received_data)
   , info_seq_(info_seq)
   , max_samples_(max_samples)
+  , ordered_access_(ordered_access)
   , cond_(cond)
   , oper_(oper)
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
@@ -96,9 +98,17 @@ bool RakeResults<SampleSeq>::insert_sample(ReceivedDataElement* sample,
   else
     {
 #endif
-      if (unsorted_.size() == max_samples_) return false;
-      RakeData rd = {sample, instance, index_in_instance};
-      unsorted_.push_back(rd);
+      if (this->ordered_access_)
+      {
+        RakeData rd = {sample, instance, index_in_instance};
+        this->ordered_.insert(rd);
+      }
+      else
+      {
+        if (unsorted_.size() == max_samples_) return false;
+        RakeData rd = {sample, instance, index_in_instance};
+        unsorted_.push_back(rd);
+      }
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
     }
 #endif
@@ -213,10 +223,25 @@ bool RakeResults<SampleSeq>::copy_to_user()
   else
     {
 #endif
-      size_t len = unsorted_.size(); //can't be larger than max_samples_
-      received_data_p.internal_set_length(len);
-      info_seq_.length(len);
-      return copy_into(unsorted_.begin(), unsorted_.end(), received_data_p);
+      if (this->ordered_access_)
+      {
+        size_t len = std::min(this->ordered_.size(),
+                              static_cast<size_t>(this->max_samples_));
+
+        received_data_p.internal_set_length(len);
+        this->info_seq_.length(len);
+
+        return copy_into(this->ordered_.begin(),
+                         this->ordered_.end(),
+                         received_data_p);
+      }
+      else
+      {
+        size_t len = unsorted_.size(); //can't be larger than max_samples_
+        received_data_p.internal_set_length(len);
+        info_seq_.length(len);
+        return copy_into(unsorted_.begin(), unsorted_.end(), received_data_p);
+      }
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
     }
 #endif

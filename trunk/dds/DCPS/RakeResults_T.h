@@ -43,8 +43,8 @@ namespace OpenDDS
     {
     public:
       RakeResults(SampleSeq& received_data, ::DDS::SampleInfoSeq& info_seq,
-                  ::CORBA::Long max_samples, ::DDS::QueryCondition_ptr cond,
-                  Operation_t oper);
+                  ::CORBA::Long max_samples, bool ordered_access,
+                  ::DDS::QueryCondition_ptr cond, Operation_t oper);
 
       /// Returns false if the sample will definitely not be part of the
       /// resulting dataset, however if this returns true it still may be
@@ -98,8 +98,25 @@ namespace OpenDDS
 
       bool do_sort_;
       typedef std::multiset<RakeData, QueryConditionCmp> SortedSet;
+
+      // Contains data for QueryCondition
       SortedSet sorted_;
 #endif
+      class OrderedAccessCmp
+      {
+      public:
+        bool operator()(const RakeData& lhs, const RakeData& rhs) const
+        {
+          return lhs.rde_->source_timestamp_ < rhs.rde_->source_timestamp_;
+        }
+      };
+
+      bool ordered_access_;
+
+      // Contains data for PRESENTATION.ordered_access
+      std::set<RakeData, OrderedAccessCmp> ordered_;
+
+      // Contains data for all other use cases
       std::vector<RakeData> unsorted_;
 
       // data strucutres used by copy_into()
