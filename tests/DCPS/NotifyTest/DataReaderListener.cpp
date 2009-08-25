@@ -13,7 +13,8 @@ using namespace Messenger;
 DataReaderListenerImpl::DataReaderListenerImpl()
   : num_reads_(0),
     num_received_dispose_(0),
-    num_received_unregister_(0)
+    num_received_unregister_(0),
+    shutdown_ (false)
 {
 }
 
@@ -25,7 +26,9 @@ DataReaderListenerImpl::~DataReaderListenerImpl ()
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
   throw (CORBA::SystemException)
 {
-  num_reads_ ++;
+  if (! shutdown_) 
+    num_reads_ ++;
+
   try {
     ::Messenger::MessageDataReader_var message_dr =
         ::Messenger::MessageDataReader::_narrow(reader);
@@ -54,12 +57,14 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
       {
         cout << "instance is disposed" << endl;
-        ++ num_received_dispose_;
+        if (! shutdown_) 
+          ++ num_received_dispose_;
       }
       else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE)
       {
         cout << "instance is unregistered" << endl;
-        ++ num_received_unregister_;
+        if (! shutdown_) 
+          ++ num_received_unregister_;
       }
       else
       {

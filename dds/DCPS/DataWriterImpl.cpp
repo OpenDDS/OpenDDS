@@ -1374,6 +1374,13 @@ DataWriterImpl::unregister_instance_i (::DDS::InstanceHandle_t handle,
   }
 
 
+  // According to spec 1.2, autodispose_unregistered_instances true causes
+  // dispose on the instance prior to calling unregister operation.
+  if (this->qos_.writer_data_lifecycle.autodispose_unregistered_instances)
+  {
+    this->dispose(handle, source_timestamp);
+  }
+
   DataSample* unregistered_sample_data;
 
   ::DDS::ReturnCode_t ret =
@@ -1409,11 +1416,6 @@ DataWriterImpl::unregister_instance_i (::DDS::InstanceHandle_t handle,
                        ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::unregister_instance_i: ")
                        ACE_TEXT(" send_control failed. \n")),
                       ::DDS::RETCODE_ERROR);
-  }
-
-  if (this->qos_.writer_data_lifecycle.autodispose_unregistered_instances)
-  {
-    this->dispose(handle, source_timestamp);
   }
 
   return ret;

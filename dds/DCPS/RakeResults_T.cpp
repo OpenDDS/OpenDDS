@@ -27,13 +27,15 @@ inline void trim(std::string& str)
 #endif
 
 template <class SampleSeq>
-RakeResults<SampleSeq>::RakeResults(SampleSeq& received_data,
+RakeResults<SampleSeq>::RakeResults(DataReaderImpl* reader, 
+                                    SampleSeq& received_data,
                                     ::DDS::SampleInfoSeq& info_seq,
                                     ::CORBA::Long max_samples,
                                     bool ordered_access,
                                     ::DDS::QueryCondition_ptr cond,
                                     Operation_t oper)
-  : received_data_(received_data)
+  : reader_ (reader)
+  , received_data_(received_data)
   , info_seq_(info_seq)
   , max_samples_(max_samples)
   , ordered_access_(ordered_access)
@@ -180,7 +182,7 @@ bool RakeResults<SampleSeq>::copy_into(FwdIter iter, FwdIter end,
       if (oper_ == DDS_OPERATION_TAKE)
         {
           inst.rcvd_samples_.remove(rde);
-          inst.instance_state_.data_reader()->dec_ref_data_element(rde);
+          this->reader_->dec_ref_data_element(rde);
         }
     }
 

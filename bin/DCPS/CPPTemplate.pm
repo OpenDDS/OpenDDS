@@ -698,7 +698,7 @@ DDS::ReturnCode_t
   }
 
   ::OpenDDS::DCPS::RakeResults< ::<%MODULE%><%TYPE%>Seq >
-     results(received_data, info_seq, max_samples,
+     results(this, received_data, info_seq, max_samples,
              qos.presentation.ordered_access, a_condition,
              ::OpenDDS::DCPS::DDS_OPERATION_READ);
 
@@ -791,7 +791,7 @@ DDS::ReturnCode_t
   }
 
   ::OpenDDS::DCPS::RakeResults< ::<%MODULE%><%TYPE%>Seq >
-     results(received_data, info_seq, max_samples,
+     results(this, received_data, info_seq, max_samples,
              qos.presentation.ordered_access, a_condition,
              ::OpenDDS::DCPS::DDS_OPERATION_TAKE);
 
@@ -1119,7 +1119,7 @@ DDS::ReturnCode_t
   }
 
   ::OpenDDS::DCPS::RakeResults< ::<%MODULE%><%TYPE%>Seq >
-     results(received_data, info_seq, max_samples,
+     results(this, received_data, info_seq, max_samples,
              qos.presentation.ordered_access, a_condition,
              ::OpenDDS::DCPS::DDS_OPERATION_READ);
 
@@ -1208,7 +1208,7 @@ DDS::ReturnCode_t
   }
 
   ::OpenDDS::DCPS::RakeResults< ::<%MODULE%><%TYPE%>Seq >
-     results(received_data, info_seq, max_samples,
+     results(this, received_data, info_seq, max_samples,
              qos.presentation.ordered_access, a_condition,
              ::OpenDDS::DCPS::DDS_OPERATION_TAKE);
 
@@ -1608,7 +1608,6 @@ void
   bool is_dispose_msg = header.message_id_ == OpenDDS::DCPS::DISPOSE_INSTANCE;
   bool is_unregister_msg = header.message_id_ == OpenDDS::DCPS::UNREGISTER_INSTANCE;
 
-
   DDS::InstanceHandle_t handle(::DDS::HANDLE_NIL);
 
   //!!! caller should already have the sample_lock_
@@ -1681,9 +1680,11 @@ void
         this->qos_.resource_limits.max_samples_per_instance))
     {
 
-        // If it's dispose control message, we do not want to reject it.
-        // It just simply removes the oldest sample no matter what the 
-        // view state is.
+        // According to spec 1.2, Samples that contain no data do not 
+        // count towards the limits imposed by the RESOURCE_LIMITS QoS policy
+        // so do not remove the oldest sample when unregister/dispose
+        // message arrives.
+        
         if  (! is_dispose_msg  && ! is_unregister_msg
           && instance_ptr->rcvd_samples_.head_->sample_state_
           == ::DDS::NOT_READ_SAMPLE_STATE)
@@ -1719,7 +1720,7 @@ void
 
         return;
        }
-       else
+       else if (! is_dispose_msg  && ! is_unregister_msg)
        {
          // Discard the oldest previously-read sample
          OpenDDS::DCPS::ReceivedDataElement *item =
@@ -1737,26 +1738,32 @@ void
       instance_data = 0;
     }
 
-    OpenDDS::DCPS::ReceivedDataElement *ptr;
-    ACE_NEW_MALLOC (ptr,
-                    static_cast<OpenDDS::DCPS::ReceivedDataElement *> (
-                        rd_allocator_->malloc (
-                            sizeof (OpenDDS::DCPS::ReceivedDataElement))),
-                    OpenDDS::DCPS::ReceivedDataElement(instance_data));
-
+    bool event_notify = true;
     if (is_dispose_msg)
     {
-      instance_ptr->instance_state_.dispose_was_received(header.publication_id_) ;
+      event_notify = instance_ptr->instance_state_.dispose_was_received(header.publication_id_) ;
     }
     else if (is_unregister_msg)
     {
-      instance_ptr->instance_state_.unregister_was_received(header.publication_id_) ;
+      event_notify = instance_ptr->instance_state_.unregister_was_received(header.publication_id_) ;
     }
     else
     {
       instance_ptr->instance_state_.data_was_received(header.publication_id_) ;
     }
 
+    if (! event_notify)
+    {       
+       return;
+    }
+    
+    OpenDDS::DCPS::ReceivedDataElement *ptr;
+    ACE_NEW_MALLOC (ptr,
+                    static_cast<OpenDDS::DCPS::ReceivedDataElement *> (
+                        rd_allocator_->malloc (
+                            sizeof (OpenDDS::DCPS::ReceivedDataElement))),
+                    OpenDDS::DCPS::ReceivedDataElement(instance_data));
+    
     ptr->source_timestamp_.sec = header.source_timestamp_sec_;
     ptr->source_timestamp_.nanosec = header.source_timestamp_nanosec_;
 

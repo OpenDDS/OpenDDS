@@ -72,12 +72,18 @@ public:
     return num_received_unregister_;
   }
 
+  void stop () {
+    shutdown_ = true;
+  }
+
+
 private:
 
   DDS::DataReader_var reader_;
   long                  num_reads_;
   long                  num_received_dispose_;
   long                  num_received_unregister_;
+  bool                  shutdown_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */

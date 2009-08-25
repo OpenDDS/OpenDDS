@@ -50,16 +50,32 @@ int read (::DDS::DataReader_ptr reader)
 
     if (status == ::DDS::RETCODE_OK)
     {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t)reader %X %C foo.x = %f foo.y = %f, foo.data_source = %d \n"),
-        reader, action, foo.x, foo.y, foo.data_source));
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) %C SampleInfo.sample_rank = %d \n"),
-        action, si.sample_rank));
-
-      if (results.add (foo) == -1)
+      if (si.valid_data == 1)
       {
-        return -1;
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t)reader %X %C foo.x = %f foo.y = %f, foo.data_source = %d \n"),
+          reader, action, foo.x, foo.y, foo.data_source));
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) %C SampleInfo.sample_rank = %d \n"),
+          action, si.sample_rank));
+
+        if (results.add (foo) == -1)
+        {
+          return -1;
+        }
+      }
+      else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
+      {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)instance is disposed\n")));
+      }
+      else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE)
+      {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)instance is unregistered\n")));
+      }
+      else
+      {
+        ACE_ERROR ((LM_ERROR, "(%P|%t)DataReaderListenerImpl::on_data_available:"
+          " received unknown instance state %d\n", si.instance_state));
       }
     }
     else if (status == ::DDS::RETCODE_NO_DATA)

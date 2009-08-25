@@ -62,7 +62,18 @@ namespace OpenDDS
       size_t no_writers_generation_count() const;
 
       /// DISPOSE message received for this instance.
-      void dispose_was_received(const PublicationId& writer_id);
+      /// Return flag indicates whether the instance state was changed.
+      /// This flag is used by concreate DataReader to determine whether 
+      /// it should notify listener. If state is not changed, the dispose 
+      /// message is ignored.
+      bool dispose_was_received(const PublicationId& writer_id);
+      
+      /// UNREGISTER message received for this instance.
+      /// Return flag indicates whether the instance state was changed.
+      /// This flag is used by concreate DataReader to determine whether 
+      /// it should notify listener. If state is not changed, the unregister 
+      /// message is ignored.
+      bool unregister_was_received(const PublicationId& writer_id);
 
       /// Data sample received for this instance.
       void data_was_received(const PublicationId& writer_id);
@@ -98,8 +109,6 @@ namespace OpenDDS
       void writer_became_dead(const PublicationId& writer_id,
                               int num_alive_writers,
                               const ACE_Time_Value& when);
-
-      void unregister_was_received(const PublicationId& writer_id);
 
       DataReaderImpl* data_reader() const;
 
