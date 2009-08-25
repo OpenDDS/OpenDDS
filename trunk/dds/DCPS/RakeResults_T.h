@@ -42,7 +42,8 @@ namespace OpenDDS
     class RakeResults
     {
     public:
-      RakeResults(SampleSeq& received_data, ::DDS::SampleInfoSeq& info_seq,
+      RakeResults(DataReaderImpl* reader,
+                  SampleSeq& received_data, ::DDS::SampleInfoSeq& info_seq,
                   ::CORBA::Long max_samples, bool ordered_access,
                   ::DDS::QueryCondition_ptr cond, Operation_t oper);
 
@@ -69,6 +70,7 @@ namespace OpenDDS
       RakeResults(const RakeResults&); // no copy construction
       RakeResults& operator=(const RakeResults&); // no assignment
 
+      DataReaderImpl* reader_;
       SampleSeq& received_data_;
       ::DDS::SampleInfoSeq& info_seq_;
       ::CORBA::ULong max_samples_;

@@ -235,11 +235,21 @@ PublisherImpl::delete_datawriter (::DDS::DataWriter_ptr a_datawriter)
     }
   }
 
+  // Trigger data to be persisted, i.e. made durable, if so
+  // configured. This needs be called before unregister_instances
+  // because unregister_instances may cause instance dispose.
+  if (!dw_servant->persist_data()
+      && DCPS_debug_level >= 2)
+  {
+    ACE_ERROR ((LM_ERROR,
+                ACE_TEXT("(%P|%t) ERROR: ")
+                ACE_TEXT("PublisherImpl::delete_datawriter, ")
+                ACE_TEXT("failed to make data durable.\n")));
+  }
+
   // Unregister all registered instances prior to deletion.
-#if 0
   DDS::Time_t source_timestamp = time_value_to_time(ACE_OS::gettimeofday());
   dw_servant->unregister_instances(source_timestamp);
-#endif
 
   CORBA::String_var topic_name = dw_servant->get_topic_name ();
   DataWriterImpl* local_writer = 0;
@@ -337,17 +347,6 @@ PublisherImpl::delete_datawriter (::DDS::DataWriter_ptr a_datawriter)
     delete dw_info;
 
     dw_servant->cleanup ();
-  }
-
-  // Trigger data to be persisted, i.e. made durable, if so
-  // configured.
-  if (!local_writer->persist_data()
-      && DCPS_debug_level >= 2)
-  {
-    ACE_ERROR ((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: ")
-                ACE_TEXT("PublisherImpl::delete_datawriter, ")
-                ACE_TEXT("failed to make data durable.\n")));
   }
 
   // not just unregister but remove any pending writes/sends.

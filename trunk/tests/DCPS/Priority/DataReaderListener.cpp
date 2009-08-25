@@ -49,12 +49,24 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
           (const char*)data.value
         ));
       }
-    } else {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: DataReaderListener::on_data_available() - ")
-        ACE_TEXT("received an INVALID sample.\n")
-      ));
+    } 
+    else if (info.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
+    {
+      ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DataReaderListener::on_data_available() - ")
+          ACE_TEXT("received dispose\n")));
     }
+    else if (info.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE)
+    {
+      ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DataReaderListener::on_data_available() - ")
+          ACE_TEXT("received unregister\n")));
+    }
+    else
+      ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: DataReaderListener::on_data_available() - ")
+      ACE_TEXT("received an INVALID sample.\n")
+      ));
   }
 }
 

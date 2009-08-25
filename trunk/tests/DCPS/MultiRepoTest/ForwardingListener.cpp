@@ -25,7 +25,7 @@ int read (::DDS::DataReader_ptr reader, ::DDS::DataWriter_ptr writer,
 #else
 
 template <class DT, class DT_seq, class DR, class DR_ptr, class DR_var, class DR_impl>
-int read (::DDS::DataReader_ptr reader, DT& foo)
+int read (::DDS::DataReader_ptr reader, DT& foo, bool& valid_data)
 {
 
 #endif
@@ -52,9 +52,26 @@ int read (::DDS::DataReader_ptr reader, DT& foo)
 
     if (status == ::DDS::RETCODE_OK)
     {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("%T (%P|%t) ForwardingListenerImpl::read %X foo.x = %f foo.y = %f, foo.data_source = %d \n"),
-        reader, foo.x, foo.y, foo.data_source));
+      valid_data = si.valid_data;
+      if (si.valid_data == 1)
+      {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("%T (%P|%t) ForwardingListenerImpl::read %X foo.x = %f foo.y = %f, foo.data_source = %d\n"),
+          reader, foo.x, foo.y, foo.data_source));
+      }
+      else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
+      {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)instance is disposed\n")));
+      }
+      else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE)
+      {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)instance is unregistered\n")));
+      }
+      else
+      {
+        ACE_ERROR ((LM_ERROR, "(%P|%t)ForwardingListenerImpl::read:"
+          " received unknown instance state %d\n", si.instance_state));
+      }
     }
     else if (status == ::DDS::RETCODE_NO_DATA)
     {
@@ -220,12 +237,13 @@ void ForwardingListenerImpl::on_subscription_matched (
     //num_reads ++;
 
     ::Xyz::FooNoKey foo;
+    bool valid_data = false;
     int ret = read <Xyz::FooNoKey,
         ::Xyz::FooNoKeySeq,
         ::Xyz::FooNoKeyDataReader,
         ::Xyz::FooNoKeyDataReader_ptr,
         ::Xyz::FooNoKeyDataReader_var,
-        ::Xyz::FooNoKeyDataReaderImpl> (reader, foo);
+        ::Xyz::FooNoKeyDataReaderImpl> (reader, foo, valid_data);
 
     if (ret != 0)
     {
@@ -240,13 +258,13 @@ void ForwardingListenerImpl::on_subscription_matched (
         this->repo_
       ));
       // The bit bucket is done processing when the answer is received.
-      if( foo.data_source == 42) {
+      if(valid_data && foo.data_source == 42) {
         ACE_GUARD (ACE_SYNCH_MUTEX, g, this->lock_);
         this->complete_ = true;
         this->condition_.signal();
       }
 
-    } else if( foo.data_source == 30) {
+    } else if(valid_data && foo.data_source == 30) {
       // Signal that we are done once we receive a disconnect message.
       // We use the data_source member as a command value.
       ACE_DEBUG((LM_DEBUG,
@@ -270,7 +288,8 @@ void ForwardingListenerImpl::on_subscription_matched (
           this->repo_
         ));
 
-      } else {
+      } else if (valid_data)
+      {
         // Modify the data as it passes, just to prove it has been here.
         foo.x += 1.0;
         foo.y += 2.0;

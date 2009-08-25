@@ -57,7 +57,8 @@ OpenDDS::DCPS::InstanceState::handle_timeout(const ACE_Time_Value& /* current_ti
   return 0;
 }
 
-void
+
+bool
 OpenDDS::DCPS::InstanceState::dispose_was_received(const PublicationId& writer_id)
 {
   writers_.erase (writer_id);
@@ -69,10 +70,12 @@ OpenDDS::DCPS::InstanceState::dispose_was_received(const PublicationId& writer_i
   {
     this->instance_state_ = DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE;
     schedule_release();
+    return true;
   }
+  return false;
 }
 
-void
+bool
 OpenDDS::DCPS::InstanceState::unregister_was_received(const PublicationId& writer_id)
 {
   writers_.erase (writer_id);
@@ -81,7 +84,9 @@ OpenDDS::DCPS::InstanceState::unregister_was_received(const PublicationId& write
   {
     this->instance_state_ = DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE;
     schedule_release();
+    return true;
   }
+  return false;
 }
 
 void
