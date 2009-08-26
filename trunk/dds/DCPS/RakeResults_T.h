@@ -21,7 +21,6 @@ namespace OpenDDS
 {
   namespace DCPS
   {
-
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
     //TODO: this can be removed once code-generation is done
     template <class Sample>
@@ -30,7 +29,6 @@ namespace OpenDDS
     {
       return 0;
     }
-
 #endif
 
     enum Operation_t { DDS_OPERATION_READ, DDS_OPERATION_TAKE };
@@ -77,50 +75,36 @@ namespace OpenDDS
       SampleSeq& received_data_;
       ::DDS::SampleInfoSeq& info_seq_;
       ::CORBA::ULong max_samples_;
-      ::DDS::PresentationQosPolicy presentation_;
       ::DDS::QueryCondition_ptr cond_;
       Operation_t oper_;
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-
-      class QueryConditionCmp
+      class SortedSetCmp
       {
       public:
         bool operator()(const RakeData& lhs, const RakeData& rhs) const
         {
           if (!cmp_.in())
             {
-              return lhs.rde_->registered_data_ < rhs.rde_->registered_data_;
+              // The following assumes that if no comparator is set
+              // then PRESENTATION ordered access applies (TOPIC).
+              return lhs.rde_->source_timestamp_ < rhs.rde_->source_timestamp_;
             }
+
           return cmp_->compare(lhs.rde_->registered_data_,
                                rhs.rde_->registered_data_);
         }
 
-        explicit QueryConditionCmp(ComparatorBase::Ptr cmp = 0) : cmp_(cmp) {}
+        explicit SortedSetCmp(ComparatorBase::Ptr cmp = 0) : cmp_(cmp) {}
 
       private:
         ComparatorBase::Ptr cmp_;
       };
 
       bool do_sort_;
-      typedef std::multiset<RakeData, QueryConditionCmp> SortedSet;
+      typedef std::multiset<RakeData, SortedSetCmp> SortedSet;
 
-      // Contains data for QueryCondition
+      // Contains data for QueryCondition/Ordered access
       SortedSet sorted_;
-#endif
-      class OrderedAccessCmp
-      {
-      public:
-        bool operator()(const RakeData& lhs, const RakeData& rhs) const
-        {
-          return lhs.rde_->source_timestamp_ < rhs.rde_->source_timestamp_;
-        }
-      };
-
-      bool ordered_access_;
-
-      // Contains data for PRESENTATION.ordered_access
-      std::set<RakeData, OrderedAccessCmp> ordered_;
 
       // Contains data for all other use cases
       std::vector<RakeData> unsorted_;

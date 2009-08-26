@@ -38,12 +38,9 @@ RakeResults<SampleSeq>::RakeResults(DataReaderImpl* reader,
   , received_data_(received_data)
   , info_seq_(info_seq)
   , max_samples_(max_samples)
-  , presentation_(presentation)
   , cond_(cond)
   , oper_(oper)
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   , do_sort_(false)
-#endif
 {
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   if (cond_)
@@ -69,12 +66,20 @@ RakeResults<SampleSeq>::RakeResults(DataReaderImpl* reader,
               //FUTURE: handle ASC / DESC as an extension to the DDS spec?
               cmp = create_qc_comparator(sample, fieldspec.c_str(), cmp);
             }
-          QueryConditionCmp comparator(cmp);
+          SortedSetCmp comparator(cmp);
           SortedSet actual_sort(comparator);
           sorted_.swap(actual_sort);
         }
     }
-#endif // excluding the content subscription profile
+  else
+    {
+#endif
+      // PRESENTATION ordered access (TOPIC)
+      this->do_sort_ = presentation.ordered_access == true &&
+        presentation.access_scope == DDS::TOPIC_PRESENTATION_QOS;
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+    }
+#endif
 }
 
 
@@ -86,35 +91,22 @@ bool RakeResults<SampleSeq>::insert_sample(ReceivedDataElement* sample,
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   if (!where_filter(static_cast<typename SampleSeq::value_type*>
                     (sample->registered_data_))) return false;
+#endif
 
   if (do_sort_)
     {
       // N.B. Until a better heuristic is found, non-valid
-      // samples are omitted when sorting.
-      if (sample->registered_data_ == 0) return false;
+      // samples are elided when sorting by QueryCondition.
+      if (cond_ && sample->registered_data_ == 0) return false;
       RakeData rd = {sample, instance, index_in_instance};
       sorted_.insert(rd);
     }
   else
     {
-#endif
-      // Currently, we only support ordered access for
-      // the TOPIC access scope.
-      if (this->presentation_.access_scope == DDS::TOPIC_PRESENTATION_QOS &&
-          this->presentation_.ordered_access)
-      {
-        RakeData rd = {sample, instance, index_in_instance};
-        this->ordered_.insert(rd);
-      }
-      else
-      {
-        if (unsorted_.size() == max_samples_) return false;
-        RakeData rd = {sample, instance, index_in_instance};
-        unsorted_.push_back(rd);
-      }
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+      if (unsorted_.size() == max_samples_) return false;
+      RakeData rd = {sample, instance, index_in_instance};
+      unsorted_.push_back(rd);
     }
-#endif
 
   return true;
 }
@@ -215,7 +207,7 @@ template <class SampleSeq>
 bool RakeResults<SampleSeq>::copy_to_user()
 {
   typename SampleSeq::PrivateMemberAccess received_data_p(received_data_);
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+
   if (do_sort_)
     {
       size_t len = std::min(sorted_.size(), static_cast<size_t>(max_samples_));
@@ -225,32 +217,11 @@ bool RakeResults<SampleSeq>::copy_to_user()
     }
   else
     {
-#endif
-      // Currently, we only support ordered access for
-      // the TOPIC access scope.
-      if (this->presentation_.access_scope == DDS::TOPIC_PRESENTATION_QOS &&
-          this->presentation_.ordered_access)
-      {
-        size_t len = std::min(this->ordered_.size(),
-                              static_cast<size_t>(this->max_samples_));
-
-        received_data_p.internal_set_length(len);
-        this->info_seq_.length(len);
-
-        return copy_into(this->ordered_.begin(),
-                         this->ordered_.end(),
-                         received_data_p);
-      }
-      else
-      {
-        size_t len = unsorted_.size(); //can't be larger than max_samples_
-        received_data_p.internal_set_length(len);
-        info_seq_.length(len);
-        return copy_into(unsorted_.begin(), unsorted_.end(), received_data_p);
-      }
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+      size_t len = unsorted_.size(); //can't be larger than max_samples_
+      received_data_p.internal_set_length(len);
+      info_seq_.length(len);
+      return copy_into(unsorted_.begin(), unsorted_.end(), received_data_p);
     }
-#endif
 }
 
     } // namespace DCPS
