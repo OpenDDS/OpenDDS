@@ -97,7 +97,7 @@ bool RakeResults<SampleSeq>::insert_sample(ReceivedDataElement* sample,
     {
       // N.B. Until a better heuristic is found, non-valid
       // samples are elided when sorting by QueryCondition.
-      if (cond_ && sample->registered_data_ == 0) return false;
+      if (cond_ && !sample->registered_data_) return false;
       RakeData rd = {sample, instance, index_in_instance};
       sorted_.insert(rd);
     }
