@@ -1,3 +1,14 @@
+Wed Aug 26 18:09:52 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/RakeResults_T.cpp:
+
+          Fixed various GCC warnings.
+
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+          Fixed compiler failure resulting from bad test harness.
+
 Wed Aug 26 00:02:48 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/DcpsIntegration/infrastructure.cpp:

@@ -27,7 +27,7 @@ inline void trim(std::string& str)
 #endif
 
 template <class SampleSeq>
-RakeResults<SampleSeq>::RakeResults(DataReaderImpl* reader, 
+RakeResults<SampleSeq>::RakeResults(DataReaderImpl* reader,
                                     SampleSeq& received_data,
                                     ::DDS::SampleInfoSeq& info_seq,
                                     ::CORBA::Long max_samples,
@@ -38,12 +38,14 @@ RakeResults<SampleSeq>::RakeResults(DataReaderImpl* reader,
   , received_data_(received_data)
   , info_seq_(info_seq)
   , max_samples_(max_samples)
-  , ordered_access_(ordered_access)
   , cond_(cond)
   , oper_(oper)
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   , do_sort_(false)
+#endif
+  , ordered_access_(ordered_access)
 {
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   if (cond_)
     {
       CORBA::String_var query_var = cond_->get_query_expression();
@@ -72,10 +74,8 @@ RakeResults<SampleSeq>::RakeResults(DataReaderImpl* reader,
           sorted_.swap(actual_sort);
         }
     }
+#endif // excluding the content subscription profile
 }
-#else // excluding the content subscription profile
-{}
-#endif
 
 
 template <class SampleSeq>

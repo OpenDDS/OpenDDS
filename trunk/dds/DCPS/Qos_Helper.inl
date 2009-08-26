@@ -770,7 +770,7 @@ namespace OpenDDS
 
 
     ACE_INLINE
-    bool Qos_Helper::valid (const ::DDS::TimeBasedFilterQosPolicy& qos)
+    bool Qos_Helper::valid (const ::DDS::TimeBasedFilterQosPolicy& /*qos*/)
     {
       return true;
     }
