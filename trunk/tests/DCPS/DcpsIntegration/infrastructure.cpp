@@ -347,7 +347,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (::DDS::RETCODE_OK != setListenerReturnCode)
         {
           ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) Was unable to set valid Participant listener!\n")),
+                            ACE_TEXT("(%P|%t) Was unable to set valid Participant listener %d!\n"), setListenerReturnCode),
                             7);
         }
         else
@@ -401,6 +401,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
 
       ::DDS::PublisherQos pubQosChangedEntityFactory;
+      participant->get_default_publisher_qos(pubQosChangedEntityFactory);
+
       pubQosChangedEntityFactory.entity_factory.autoenable_created_entities =
         ! pubInitialQos.entity_factory.autoenable_created_entities;
 
@@ -410,7 +412,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (::DDS::RETCODE_OK != pubChangeQosReturnCode)
         {
           ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) Was unable to set valid default Publisher QOS!\n")),
+                            ACE_TEXT("(%P|%t) Was unable to set valid default Publisher QOS %d!\n"), pubChangeQosReturnCode),
                             8);
         }
         else
@@ -469,6 +471,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
 
       ::DDS::SubscriberQos subQosChangedEntityFactory;
+      participant->get_default_subscriber_qos(subQosChangedEntityFactory);
+
       subQosChangedEntityFactory.entity_factory.autoenable_created_entities =
         ! subInitialQos.entity_factory.autoenable_created_entities;
 

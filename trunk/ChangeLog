@@ -1,3 +1,10 @@
+Wed Aug 26 00:02:48 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/DcpsIntegration/infrastructure.cpp:
+
+          Fixed inconsistent qos issue from set_default_publisher_qos()
+          and set_default_subscriber_qos() calls.
+
 Tue Aug 25 23:14:53 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
