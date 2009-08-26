@@ -699,7 +699,7 @@ DDS::ReturnCode_t
 
   ::OpenDDS::DCPS::RakeResults< ::<%MODULE%><%TYPE%>Seq >
      results(this, received_data, info_seq, max_samples,
-             qos.presentation.ordered_access, a_condition,
+             qos.presentation, a_condition,
              ::OpenDDS::DCPS::DDS_OPERATION_READ);
 
   for (InstanceMap::iterator it = instance_map_.begin(),
@@ -792,7 +792,7 @@ DDS::ReturnCode_t
 
   ::OpenDDS::DCPS::RakeResults< ::<%MODULE%><%TYPE%>Seq >
      results(this, received_data, info_seq, max_samples,
-             qos.presentation.ordered_access, a_condition,
+             qos.presentation, a_condition,
              ::OpenDDS::DCPS::DDS_OPERATION_TAKE);
 
   for (InstanceMap::iterator it = instance_map_.begin(),
@@ -1120,7 +1120,7 @@ DDS::ReturnCode_t
 
   ::OpenDDS::DCPS::RakeResults< ::<%MODULE%><%TYPE%>Seq >
      results(this, received_data, info_seq, max_samples,
-             qos.presentation.ordered_access, a_condition,
+             qos.presentation, a_condition,
              ::OpenDDS::DCPS::DDS_OPERATION_READ);
 
   OpenDDS::DCPS::SubscriptionInstance* inst = get_handle_instance(a_handle);
@@ -1209,7 +1209,7 @@ DDS::ReturnCode_t
 
   ::OpenDDS::DCPS::RakeResults< ::<%MODULE%><%TYPE%>Seq >
      results(this, received_data, info_seq, max_samples,
-             qos.presentation.ordered_access, a_condition,
+             qos.presentation, a_condition,
              ::OpenDDS::DCPS::DDS_OPERATION_TAKE);
 
   OpenDDS::DCPS::SubscriptionInstance* inst = get_handle_instance(a_handle);

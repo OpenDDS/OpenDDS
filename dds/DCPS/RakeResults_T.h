@@ -43,9 +43,12 @@ namespace OpenDDS
     {
     public:
       RakeResults(DataReaderImpl* reader,
-                  SampleSeq& received_data, ::DDS::SampleInfoSeq& info_seq,
-                  ::CORBA::Long max_samples, bool ordered_access,
-                  ::DDS::QueryCondition_ptr cond, Operation_t oper);
+                  SampleSeq& received_data,
+                  ::DDS::SampleInfoSeq& info_seq,
+                  ::CORBA::Long max_samples,
+                  ::DDS::PresentationQosPolicy presentation,
+                  ::DDS::QueryCondition_ptr cond,
+                  Operation_t oper);
 
       /// Returns false if the sample will definitely not be part of the
       /// resulting dataset, however if this returns true it still may be
@@ -74,6 +77,7 @@ namespace OpenDDS
       SampleSeq& received_data_;
       ::DDS::SampleInfoSeq& info_seq_;
       ::CORBA::ULong max_samples_;
+      ::DDS::PresentationQosPolicy presentation_;
       ::DDS::QueryCondition_ptr cond_;
       Operation_t oper_;
 

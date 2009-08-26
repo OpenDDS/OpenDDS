@@ -31,19 +31,19 @@ RakeResults<SampleSeq>::RakeResults(DataReaderImpl* reader,
                                     SampleSeq& received_data,
                                     ::DDS::SampleInfoSeq& info_seq,
                                     ::CORBA::Long max_samples,
-                                    bool ordered_access,
+                                    ::DDS::PresentationQosPolicy presentation,
                                     ::DDS::QueryCondition_ptr cond,
                                     Operation_t oper)
   : reader_ (reader)
   , received_data_(received_data)
   , info_seq_(info_seq)
   , max_samples_(max_samples)
+  , presentation_(presentation)
   , cond_(cond)
   , oper_(oper)
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   , do_sort_(false)
 #endif
-  , ordered_access_(ordered_access)
 {
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   if (cond_)
@@ -86,9 +86,7 @@ bool RakeResults<SampleSeq>::insert_sample(ReceivedDataElement* sample,
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   if (!where_filter(static_cast<typename SampleSeq::value_type*>
                     (sample->registered_data_))) return false;
-#endif
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   if (do_sort_)
     {
       // N.B. Until a better heuristic is found, non-valid
@@ -100,7 +98,10 @@ bool RakeResults<SampleSeq>::insert_sample(ReceivedDataElement* sample,
   else
     {
 #endif
-      if (this->ordered_access_)
+      // Currently, we only support ordered access for
+      // the TOPIC access scope.
+      if (this->presentation_.access_scope == DDS::TOPIC_PRESENTATION_QOS &&
+          this->presentation_.ordered_access)
       {
         RakeData rd = {sample, instance, index_in_instance};
         this->ordered_.insert(rd);
@@ -225,7 +226,10 @@ bool RakeResults<SampleSeq>::copy_to_user()
   else
     {
 #endif
-      if (this->ordered_access_)
+      // Currently, we only support ordered access for
+      // the TOPIC access scope.
+      if (this->presentation_.access_scope == DDS::TOPIC_PRESENTATION_QOS &&
+          this->presentation_.ordered_access)
       {
         size_t len = std::min(this->ordered_.size(),
                               static_cast<size_t>(this->max_samples_));
@@ -252,8 +256,5 @@ bool RakeResults<SampleSeq>::copy_to_user()
     } // namespace DCPS
 } // namespace OpenDDS
 
-
 #endif /* RAKERESULTS_H  */
-
-
 

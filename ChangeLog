@@ -1,3 +1,12 @@
+Wed Aug 26 21:16:21 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/RakeResults_T.h:
+        * dds/DCPS/RakeResults_T.cpp:
+
+          Updates to RakeResults to better handle PRESENTATION
+          access_scope.
+
 Wed Aug 26 18:09:52 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/Qos_Helper.inl:
