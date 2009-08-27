@@ -1,3 +1,22 @@
+Thu Aug 27 22:31:11 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+
+          Fixed minor bug in TIME_BASED_FILTER implementation; instance_ptr
+          assignment should occur prior to filter_instance call.
+
+        * bin/dcps_tests.lst:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+        * tests/DCPS/TimeBasedFilter:
+        * tests/DCPS/TimeBasedFilter/TimeBasedFilter.mpc:
+        * tests/DCPS/TimeBasedFilter/main.cpp:
+        * tests/DCPS/TimeBasedFilter/run_test.pl:
+        * tests/DCPS/TimeBasedFilter/tcp.conf:
+
+          Added new test for TIME_BASED_FILTER QoS policies.
+
 Thu Aug 27 19:02:33 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/Qos_Helper.inl:

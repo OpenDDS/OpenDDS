@@ -1277,10 +1277,10 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         bool filtered = false;
         dds_demarshal(sample, instance, is_new_instance, filtered);
 
+        if (filtered) break; // sample filtered from instance
+
         instance->last_sample_tv_ = instance->cur_sample_tv_;
         instance->cur_sample_tv_ = ACE_OS::gettimeofday ();
-
-        if (filtered) break; // sample filtered from instance
 
         {
           ACE_READ_GUARD (ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);

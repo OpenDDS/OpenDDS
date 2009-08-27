@@ -6,6 +6,12 @@
 #include "Service_Participant.h"
 #include "ace/OS_NS_string.h" // for strcmp() in partition operator==()
 
+namespace
+{
+const ACE_INT32 NSECS_IN_SEC = 1000000000;
+
+} // namespace
+
 // These operators are used in some inline functions below.  Some
 // compilers require the inline definition to appear before its use.
 ACE_INLINE
@@ -123,6 +129,20 @@ ACE_INLINE bool
 operator>=(const DDS::Time_t& t1, const DDS::Time_t& t2)
 {
   return t2 <= t1;
+}
+
+ACE_INLINE DDS::Time_t
+operator-(const DDS::Time_t& t1, const DDS::Time_t& t2)
+{
+  DDS::Time_t t =
+    { t1.sec - t2.sec, t1.nanosec - t2.nanosec };
+
+  if (t.nanosec > NSECS_IN_SEC)
+  {
+    t.sec += t.nanosec / NSECS_IN_SEC;
+    t.nanosec -= t.nanosec % NSECS_IN_SEC;
+  }
+  return t;
 }
 
 
@@ -477,6 +497,13 @@ namespace OpenDDS
       t.sec = truncate_cast<CORBA::Long> (tv.sec ());
       t.nanosec = tv.usec () * 1000;
       return t;
+    }
+
+    ACE_INLINE
+    DDS::Duration_t time_to_duration (const DDS::Time_t& t)
+    {
+      DDS::Duration_t d = { t.sec, t.nanosec };
+      return d;
     }
 
     ACE_INLINE
