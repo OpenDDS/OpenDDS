@@ -1,3 +1,10 @@
+Thu Aug 27 19:02:33 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.inl:
+
+          Fixed annoying GCC 4.3.x warning; apparently GCC doesn't expect
+          anyone to have a proper grasp of order of operations.
+
 Thu Aug 27 17:56:19 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
