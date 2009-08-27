@@ -528,7 +528,7 @@ namespace OpenDDS
       bool                            coherent_;
       /// The number of samples belonging to the current
       /// coherent change set.
-      std::size_t                     coherent_samples_;
+      ACE_UINT32                      coherent_samples_;
       /// The sample data container.
       WriteDataContainer*             data_container_;
       /// The lock to protect the activate subscriptions

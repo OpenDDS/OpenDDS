@@ -120,7 +120,7 @@ namespace OpenDDS
         ::DDS::InstanceHandle_t handle_;
 
         /// Number of received coherent changes in active change set.
-        ACE_Atomic_Op<ACE_Thread_Mutex, std::size_t> coherent_samples_;
+        ACE_Atomic_Op<ACE_Thread_Mutex, ACE_UINT32> coherent_samples_;
       };
 
     /// Elements stored for managing statistical data.

@@ -1405,7 +1405,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
     case END_COHERENT_CHANGES:
       {
-        std::size_t coherent_samples;
+        ACE_UINT32 coherent_samples;
 
         this->writer_activity(sample.header_.publication_id_);
 
