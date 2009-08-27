@@ -104,7 +104,7 @@ operator<(const DDS::Time_t& t1, const DDS::Time_t& t2)
 {
   if (!t1 || !t2) return false;
   return t1.sec < t2.sec
-      || t1.sec == t2.sec && t1.nanosec < t2.nanosec;
+      || (t1.sec == t2.sec && t1.nanosec < t2.nanosec);
 }
 
 ACE_INLINE bool
