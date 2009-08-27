@@ -1671,6 +1671,8 @@ void
 
   if (header.message_id_ != OpenDDS::DCPS::INSTANCE_REGISTRATION)
   {
+    instance_ptr = get_handle_instance(handle);
+
     // Check instance based QoS policy filters
     // (i.e. OWNERSHIP, TIME_BASED_FILTER)
     if (header.message_id_ == OpenDDS::DCPS::SAMPLE_DATA &&
@@ -1681,8 +1683,6 @@ void
                     <%TYPE%> );
       return;
     }
-
-    instance_ptr = get_handle_instance(handle);
 
     // TBD - we also need to reject for > RESOURCE_LIMITS.max_samples
     //       and RESOURCE_LIMITS.max_instances.

@@ -46,6 +46,9 @@ namespace OpenDDS
     ::DDS::Duration_t time_value_to_duration (const ACE_Time_Value& tv);
 
     EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
+    DDS::Duration_t time_to_duration (const DDS::Time_t& t);
+
+    EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
     CORBA::Long get_instance_sample_list_depth (
       ::DDS::HistoryQosPolicyKind history,
       long                        history_depth,
@@ -350,6 +353,9 @@ bool operator>(const DDS::Time_t& t1, const DDS::Time_t& t2);
 
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator>=(const DDS::Time_t& t1, const DDS::Time_t& t2);
+
+EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
+DDS::Time_t operator-(const DDS::Time_t& t1, const DDS::Time_t& t2);
 
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator == (const ::DDS::UserDataQosPolicy& qos1,
