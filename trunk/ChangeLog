@@ -1,3 +1,14 @@
+Fri Aug 28 19:30:37 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/SubscriptionInstance.h:
+        * tests/DCPS/TimeBasedFilter/main.cpp:
+
+          Final round of updates to TIME_BASED_FILTER implementation and
+          testing.
+
 Fri Aug 28 16:56:02 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/Qos_Helper.inl:

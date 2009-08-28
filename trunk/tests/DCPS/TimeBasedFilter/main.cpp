@@ -29,10 +29,10 @@ namespace
 {
 static OpenDDS::DCPS::TransportIdType transportId = 0;
 
-static DDS::Duration_t minimum_separation =
-  { DDS::DURATION_ZERO_SEC, DDS::DURATION_ZERO_NSEC };
+static DDS::Duration_t minimum_separation = { 5, 0 };
 
-static const int WRITE_CYCLES = 60;
+static const int EXPECTED_SAMPLES = 2;
+static const int SAMPLES_PER_CYCLE = 5;
 
 void
 parse_args(int& argc, ACE_TCHAR** argv)
@@ -61,6 +61,13 @@ int
 ACE_TMAIN(int argc, ACE_TCHAR** argv)
 {
   parse_args(argc, argv);
+
+  if (minimum_separation.sec < 1)
+  {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("%N:%l main()")
+                      ACE_TEXT(" ERROR: minimum_separation must be non-zero!\n")), -1);
+  }
 
   try
   {
@@ -281,37 +288,34 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     //
     // Verify TIME_BASED_FILTER is properly filtering samples.
     // We write a number of samples over a finite period of
-    // time, and then verify that every sample ready meets or
-    // exceeds the minimum separation duration.
+    // time, and then verify we receive the expected number
+    // of samples.
     //
+    std::size_t seen = 0;
+
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("%N:%l main()")
-               ACE_TEXT(" INFO: Testing %d second(s) minimum separation.\n"),
+               ACE_TEXT(" INFO: Testing %d second minimum separation...\n"),
                minimum_separation));
 
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("%N:%l main()")
-               ACE_TEXT(" INFO: Writing data for ~%d second(s)...\n"),
-               WRITE_CYCLES));
-    for (int i = 0; i < WRITE_CYCLES; ++i)
+    // We expect to receive up to one sample per
+    // cycle (all others should be filtered).
+    for (int i = 0; i < EXPECTED_SAMPLES; ++i)
     {
-      Foo foo = { 0, 0, 0, 0 }; // samples must be in the same instance!
-
-      if (writer_i->write(foo, DDS::HANDLE_NIL) != DDS::RETCODE_OK)
+      for (int j = 0; j < SAMPLES_PER_CYCLE; ++j)
       {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("%N:%l main()")
-                            ACE_TEXT(" ERROR: Unable to write sample!\n")), -1);
+        Foo foo = { 0, float(i), float(j), 0 }; // same instance required!
+        if (writer_i->write(foo, DDS::HANDLE_NIL) != DDS::RETCODE_OK)
+        {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("%N:%l main()")
+                              ACE_TEXT(" ERROR: Unable to write sample!\n")), -1);
+        }
       }
-      ACE_OS::sleep(1);
+
+      // Wait for at least two minimum_separation cycles
+      ACE_OS::sleep(2 * minimum_separation.sec);
     }
-
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("%N:%l main()")
-               ACE_TEXT(" INFO: Reading data...")));
-
-    DDS::Time_t last_timestamp = { 0, 0 };
-    std::size_t samples = 0;
 
     for (;;)
     {
@@ -321,28 +325,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       DDS::ReturnCode_t error = reader_i->take_next_sample(foo, info);
       if (error == DDS::RETCODE_OK && info.valid_data)
       {
-        samples++;
-
-        // Ignore first sample to establish baseline
-        if (samples > 1)
-        {
-          DDS::Duration_t separation =
-            OpenDDS::DCPS::time_to_duration(info.source_timestamp - last_timestamp);
-
-          if (separation < minimum_separation)
-          {
-            ACE_DEBUG((LM_DEBUG,
-                       ACE_TEXT(" %d sample(s) received.\n"),
-                       samples));
-
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("%N:%l main()")
-                              ACE_TEXT(" ERROR: Minimum separation exceeded:")
-                              ACE_TEXT(" %d second(s) %d nanosec(s)!\n"),
-                              separation.sec, separation.nanosec), -1);
-          }
-        }
-        last_timestamp = info.source_timestamp;
+        seen++;
       }
       else if (error == DDS::RETCODE_NO_DATA)
       {
@@ -356,9 +339,13 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       }
     }
 
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT(" %d sample(s) received.\n"),
-               samples));
+    if (seen != EXPECTED_SAMPLES)
+    {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("%N:%l main()")
+                        ACE_TEXT(" ERROR: received %d sample(s), expected %d!\n"),
+                        seen, EXPECTED_SAMPLES), -1);
+    }
 
     // Clean-up!
     TheTransportFactory->release();

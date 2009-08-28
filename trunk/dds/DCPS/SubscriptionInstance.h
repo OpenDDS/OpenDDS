@@ -93,6 +93,8 @@ namespace OpenDDS
         ACE_Time_Value   cur_sample_tv_;
 
         long             deadline_timer_id_;
+
+        ACE_Time_Value   last_accepted_;
       } ;
   }
 }
