@@ -576,8 +576,8 @@ namespace OpenDDS
        *       configured a finite duration in the Topic's LIFESPAN
        *       QoS policy or DataReader's TIME_BASED_FILTER QoS policy.
        */
-      bool filter_sample(const DataSampleHeader& header) const;
-      bool filter_instance(const SubscriptionInstance* instance) const;
+      bool filter_sample(const DataSampleHeader& header);
+      bool filter_instance(SubscriptionInstance* instance);
 
       ReceivedDataAllocator          *rd_allocator_;
       ::DDS::DataReaderQos            qos_;

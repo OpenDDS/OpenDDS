@@ -1279,9 +1279,6 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
         if (filtered) break; // sample filtered from instance
 
-        instance->last_sample_tv_ = instance->cur_sample_tv_;
-        instance->cur_sample_tv_ = ACE_OS::gettimeofday ();
-
         {
           ACE_READ_GUARD (ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
 
@@ -1325,6 +1322,9 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
         if (this->watchdog_.get ())
         {
+          instance->last_sample_tv_ = instance->cur_sample_tv_;
+          instance->cur_sample_tv_ = ACE_OS::gettimeofday ();
+
           if (is_new_instance)
           {
             this->watchdog_->schedule_timer (instance);
@@ -2714,7 +2714,7 @@ DataReaderImpl::cache_lookup_instance_handles (const WriterIdSeq& ids,
 }
 
 bool
-DataReaderImpl::filter_sample(const DataSampleHeader& header) const
+DataReaderImpl::filter_sample(const DataSampleHeader& header)
 {
   ACE_Time_Value now(ACE_OS::gettimeofday());
 
@@ -2768,7 +2768,7 @@ DataReaderImpl::filter_sample(const DataSampleHeader& header) const
 }
 
 bool
-DataReaderImpl::filter_instance(const SubscriptionInstance* instance) const
+DataReaderImpl::filter_instance(SubscriptionInstance* instance)
 {
   ACE_Time_Value now(ACE_OS::gettimeofday());
 
@@ -2780,13 +2780,15 @@ DataReaderImpl::filter_instance(const SubscriptionInstance* instance) const
   if (this->qos_.time_based_filter.minimum_separation > zero)
   {
     DDS::Duration_t separation =
-      time_value_to_duration(now - instance->last_sample_tv_);
+      time_value_to_duration(now - instance->last_accepted_);
 
     if (separation < this->qos_.time_based_filter.minimum_separation)
     {
       return true;  // Data filtered.
     }
   }
+
+  instance->last_accepted_ = now;
 
   return false;
 }
