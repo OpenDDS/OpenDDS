@@ -29,46 +29,13 @@ namespace
 {
 static OpenDDS::DCPS::TransportIdType transportId = 0;
 
-static DDS::Duration_t minimum_separation = { 5, 0 };
-
-static const int EXPECTED_SAMPLES = 2;
-static const int SAMPLES_PER_CYCLE = 5;
-
-void
-parse_args(int& argc, ACE_TCHAR** argv)
-{
-  ACE_Arg_Shifter shifter(argc, argv);
-
-  while (shifter.is_anything_left())
-  {
-    const ACE_TCHAR* arg;
-
-    if ((arg = shifter.get_the_parameter(ACE_TEXT("-ms"))) != 0)
-    {
-      minimum_separation.sec = ACE_OS::atoi(arg);
-      shifter.consume_arg();
-    }
-    else
-    {
-      shifter.ignore_arg();
-    }
-  }
-}
+static const std::size_t SAMPLES_PER_TEST = 100;
 
 } // namespace
 
 int
 ACE_TMAIN(int argc, ACE_TCHAR** argv)
 {
-  parse_args(argc, argv);
-
-  if (minimum_separation.sec < 1)
-  {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("%N:%l main()")
-                      ACE_TEXT(" ERROR: minimum_separation must be non-zero!\n")), -1);
-  }
-
   try
   {
     TheParticipantFactoryWithArgs(argc, argv);
@@ -88,8 +55,21 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     }
 
     // Create Subscriber
+    DDS::SubscriberQos subscriber_qos;
+    if (participant->get_default_subscriber_qos(subscriber_qos) != DDS::RETCODE_OK)
+    {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("%N:%l main()")
+                        ACE_TEXT(" ERROR: get_qos failed!\n")), -1);
+    }
+
+    // TODO Currently only TOPIC access_scope is supported.
+    subscriber_qos.presentation.access_scope = DDS::TOPIC_PRESENTATION_QOS;
+    subscriber_qos.presentation.coherent_access = true;
+    subscriber_qos.presentation.ordered_access = true;
+
     DDS::Subscriber_var subscriber =
-      participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
+      participant->create_subscriber(subscriber_qos,
                                      DDS::SubscriberListener::_nil(),
                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
@@ -101,8 +81,21 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     }
 
     // Create Publisher
+    DDS::PublisherQos publisher_qos;
+    if (participant->get_default_publisher_qos(publisher_qos) != DDS::RETCODE_OK)
+    {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("%N:%l main()")
+                        ACE_TEXT(" ERROR: get_qos failed!\n")), -1);
+    }
+
+    // TODO Currently only TOPIC access_scope is supported.
+    publisher_qos.presentation.access_scope = DDS::TOPIC_PRESENTATION_QOS;
+    publisher_qos.presentation.coherent_access = true;
+    publisher_qos.presentation.ordered_access = true;
+
     DDS::Publisher_var publisher =
-      participant->create_publisher(PUBLISHER_QOS_DEFAULT,
+      participant->create_publisher(publisher_qos,
                                     DDS::PublisherListener::_nil(),
                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
@@ -123,18 +116,8 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     OpenDDS::DCPS::TransportImpl_rch sub_transport =
       TheTransportFactory->create_transport_impl(transportId);
 
-    OpenDDS::DCPS::SubscriberImpl* subscriber_i =
-      dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(subscriber.in());
-
-    if (subscriber_i == 0)
-    {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: dynamic_cast failed!\n")), -1);
-    }
-
     OpenDDS::DCPS::AttachStatus sub_status =
-      subscriber_i->attach_transport(sub_transport.in());
+      sub_transport->attach(subscriber.in());
 
     if (sub_status != OpenDDS::DCPS::ATTACH_OK)
     {
@@ -153,18 +136,8 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     OpenDDS::DCPS::TransportImpl_rch pub_transport =
       TheTransportFactory->create_transport_impl(transportId);
 
-    OpenDDS::DCPS::PublisherImpl* publisher_i =
-      dynamic_cast<OpenDDS::DCPS::PublisherImpl*>(publisher.in());
-
-    if (publisher_i == 0)
-    {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: dynamic_cast failed!\n")), -1);
-    }
-
     OpenDDS::DCPS::AttachStatus pub_status =
-      publisher_i->attach_transport(pub_transport.in());
+      pub_transport->attach(publisher.in());
 
     if (pub_status != OpenDDS::DCPS::ATTACH_OK)
     {
@@ -198,21 +171,20 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     }
 
     // Create DataReader
-    DDS::DataReaderQos qos;
+    DDS::DataReaderQos reader_qos;
 
-    if (subscriber->get_default_datareader_qos(qos) != DDS::RETCODE_OK)
+    if (subscriber->get_default_datareader_qos(reader_qos) != DDS::RETCODE_OK)
     {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_datareader failed!\n")), -1);
+                        ACE_TEXT(" ERROR: get_default_datareader_qos failed!\n")), -1);
     }
 
-    qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
-    qos.time_based_filter.minimum_separation = minimum_separation;
+    reader_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
 
     DDS::DataReader_var reader =
       subscriber->create_datareader(topic.in(),
-                                    qos,
+                                    reader_qos,
                                     DDS::DataReaderListener::_nil(),
                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
@@ -286,25 +258,18 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     ws->detach_condition(cond);
 
     //
-    // Verify TIME_BASED_FILTER is properly filtering samples.
-    // We write a number of samples over a finite period of
-    // time, and then verify we receive the expected number
-    // of samples.
+    // Test coherent_access and ordered_access facets of
+    // the PRESENTATION QoS policy.
     //
-    std::size_t seen = 0;
-
-    ACE_DEBUG((LM_DEBUG,
+    ACE_DEBUG((LM_ERROR,
                ACE_TEXT("%N:%l main()")
-               ACE_TEXT(" INFO: Testing %d second minimum separation...\n"),
-               minimum_separation));
-
-    // We expect to receive up to one sample per
-    // cycle (all others should be filtered).
-    for (int i = 0; i < EXPECTED_SAMPLES; ++i)
+               ACE_TEXT(" INFO: Testing coherent_access...\n")));
     {
-      for (int j = 0; j < SAMPLES_PER_CYCLE; ++j)
+      publisher->begin_coherent_changes();
+
+      for (int i = 0; i < SAMPLES_PER_TEST; ++i)
       {
-        Foo foo = { 0, 0, 0, 0 }; // same instance required!
+        Foo foo;
         if (writer_i->write(foo, DDS::HANDLE_NIL) != DDS::RETCODE_OK)
         {
             ACE_ERROR_RETURN((LM_ERROR,
@@ -312,39 +277,113 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
                               ACE_TEXT(" ERROR: Unable to write sample!\n")), -1);
         }
       }
+      ACE_OS::sleep(5); // wait for samples to arrive
 
-      // Wait for at least two minimum_separation cycles
-      ACE_OS::sleep(2 * minimum_separation.sec);
+      // Verify that no samples are yet available
+      {
+        FooSeq foo;
+        DDS::SampleInfoSeq info;
+
+        DDS::ReturnCode_t error;
+        if ((error = reader_i->take(foo,
+                                    info,
+                                    DDS::LENGTH_UNLIMITED,
+                                    DDS::ANY_SAMPLE_STATE,
+                                    DDS::ANY_VIEW_STATE,
+                                    DDS::ANY_INSTANCE_STATE)) != DDS::RETCODE_NO_DATA)
+        {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("%N:%l main()")
+                            ACE_TEXT(" ERROR: Unexpected samples read!\n")), -1);
+        }
+      }
+
+      publisher->end_coherent_changes();
+      ACE_OS::sleep(5); // wait for samples to arrive
+
+      //Verify coherent samples are now available
+      {
+        FooSeq foo;
+        DDS::SampleInfoSeq info;
+
+        DDS::ReturnCode_t error;
+        if ((error = reader_i->take(foo,
+                                    info,
+                                    DDS::LENGTH_UNLIMITED,
+                                    DDS::ANY_SAMPLE_STATE,
+                                    DDS::ANY_VIEW_STATE,
+                                    DDS::ANY_INSTANCE_STATE)) != DDS::RETCODE_OK)
+        {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("%N:%l main()")
+                            ACE_TEXT(" ERROR: Unexpected number of samples taken!\n")), -1);
+        }
+
+        if (foo.length() != SAMPLES_PER_TEST)
+        {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("%N:%l main()")
+                            ACE_TEXT(" ERROR: Unexpected number of samples taken!\n")), -1);
+        }
+      }
     }
 
-    for (;;)
+    ACE_DEBUG((LM_ERROR,
+               ACE_TEXT("%N:%l main()")
+               ACE_TEXT(" INFO: Testing ordered_access...\n")));
     {
-      Foo foo;
-      DDS::SampleInfo info;
+      for (int i = 0; i < SAMPLES_PER_TEST / 2; ++i)
+      {
+        // Write first instance
+        Foo foo1 = { 0, 0, 0, 0 };
+        if (writer_i->write(foo1, DDS::HANDLE_NIL) != DDS::RETCODE_OK)
+        {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("%N:%l main()")
+                              ACE_TEXT(" ERROR: Unable to write sample!\n")), -1);
+        }
 
-      DDS::ReturnCode_t error = reader_i->take_next_sample(foo, info);
-      if (error == DDS::RETCODE_OK && info.valid_data)
-      {
-        seen++;
+        // Write second instance
+        Foo foo2 = { 42, 0, 0, 0 };
+        if (writer_i->write(foo2, DDS::HANDLE_NIL) != DDS::RETCODE_OK)
+        {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("%N:%l main()")
+                              ACE_TEXT(" ERROR: Unable to write sample!\n")), -1);
+        }
       }
-      else if (error == DDS::RETCODE_NO_DATA)
-      {
-        break; // done!
-      }
-      else
-      {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: Unable to take sample!\n")), -1);
-      }
-    }
+      ACE_OS::sleep(5); // wait for samples to arrive
 
-    if (seen != EXPECTED_SAMPLES)
-    {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: received %d sample(s), expected %d!\n"),
-                        seen, EXPECTED_SAMPLES), -1);
+      // Verify samples are sorted in source order
+      {
+        FooSeq foo;
+        DDS::SampleInfoSeq info;
+
+        DDS::ReturnCode_t error;
+        if ((error = reader_i->take(foo,
+                                    info,
+                                    DDS::LENGTH_UNLIMITED,
+                                    DDS::ANY_SAMPLE_STATE,
+                                    DDS::ANY_VIEW_STATE,
+                                    DDS::ANY_INSTANCE_STATE)) != DDS::RETCODE_OK)
+        {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("%N:%l main()")
+                            ACE_TEXT(" ERROR: Unable to take samples!\n")), -1);
+        }
+
+        DDS::Time_t last_timestamp = { 0, 0 };
+        for (CORBA::ULong i = 0; i < info.length(); ++i)
+        {
+          if (info[i].source_timestamp < last_timestamp)
+          {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("%N:%l main()")
+                              ACE_TEXT(" ERROR: Samples taken out of order!\n")), -1);
+          }
+          last_timestamp = info[i].source_timestamp;
+        }
+      }
     }
 
     // Clean-up!

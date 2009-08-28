@@ -1,3 +1,14 @@
+Fri Aug 28 21:55:12 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/Presentation:
+        * tests/DCPS/Presentation/Presentation.mpc:
+        * tests/DCPS/Presentation/main.cpp:
+        * tests/DCPS/Presentation/run_test.pl:
+        * tests/DCPS/Presentation/tcp.conf:
+
+          Added new tests for PRESENTATION QoS policy implementation.
+
 Fri Aug 28 19:30:37 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * bin/dcps_tests.lst:
