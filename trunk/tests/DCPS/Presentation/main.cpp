@@ -2,9 +2,7 @@
  * $Id$
  */
 
-#include <ace/Arg_Shifter.h>
 #include <ace/Log_Msg.h>
-#include <ace/OS_NS_stdlib.h>
 
 #include <tao/Basic_Types.h>
 
