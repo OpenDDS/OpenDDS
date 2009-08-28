@@ -283,6 +283,9 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
                           ACE_TEXT(" ERROR: instance not removed!\n")), 3);
 
     // Clean-up!
+    participant->delete_contained_entities();
+    TheParticipantFactory->delete_participant(participant);
+
     TheTransportFactory->release();
     TheServiceParticipant->shutdown();
   }

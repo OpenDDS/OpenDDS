@@ -2,7 +2,6 @@
  * $Id$
  */
 
-#include <ace/Arg_Shifter.h>
 #include <ace/Log_Msg.h>
 
 #include <tao/Basic_Types.h>
@@ -28,40 +27,15 @@ namespace
 {
 static OpenDDS::DCPS::TransportIdType transportId = 0;
 
-static const CORBA::Octet FIRST_SAMPLE = 0xbe;
-static const CORBA::Octet SECOND_SAMPLE = 0xef;
+static const std::size_t SAMPLES_PER_TEST = 100;
 
-static bool use_source_timestamp = false;
-
-void
-parse_args(int& argc, ACE_TCHAR** argv)
-{
-  ACE_Arg_Shifter shifter(argc, argv);
-
-  while (shifter.is_anything_left())
-  {
-    if (shifter.cur_arg_strncasecmp(ACE_TEXT("source")) == 0)
-    {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("%N:%l parse_args()")
-                 ACE_TEXT(" INFO: using SOURCE_TIMESTAMP\n")));
-      use_source_timestamp = true;
-      shifter.consume_arg();
-    }
-    else
-    {
-      shifter.ignore_arg();
-    }
-  }
-}
+static const DDS::Duration_t autopurge_delay = { 5, 0 };
 
 } // namespace
 
 int
 ACE_TMAIN(int argc, ACE_TCHAR** argv)
 {
-  parse_args(argc, argv);
-
   try
   {
     TheParticipantFactoryWithArgs(argc, argv);
@@ -116,18 +90,8 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     OpenDDS::DCPS::TransportImpl_rch sub_transport =
       TheTransportFactory->create_transport_impl(transportId);
 
-    OpenDDS::DCPS::SubscriberImpl* subscriber_i =
-      dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(subscriber.in());
-
-    if (subscriber_i == 0)
-    {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: dynamic_cast failed!\n")), -1);
-    }
-
     OpenDDS::DCPS::AttachStatus sub_status =
-      subscriber_i->attach_transport(sub_transport.in());
+      sub_transport->attach(subscriber.in());
 
     if (sub_status != OpenDDS::DCPS::ATTACH_OK)
     {
@@ -146,18 +110,8 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     OpenDDS::DCPS::TransportImpl_rch pub_transport =
       TheTransportFactory->create_transport_impl(transportId);
 
-    OpenDDS::DCPS::PublisherImpl* publisher_i =
-      dynamic_cast<OpenDDS::DCPS::PublisherImpl*>(publisher.in());
-
-    if (publisher_i == 0)
-    {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: dynamic_cast failed!\n")), -1);
-    }
-
     OpenDDS::DCPS::AttachStatus pub_status =
-      publisher_i->attach_transport(pub_transport.in());
+      pub_transport->attach(publisher.in());
 
     if (pub_status != OpenDDS::DCPS::ATTACH_OK)
     {
@@ -191,25 +145,22 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     }
 
     // Create DataReader
-    DDS::DataReaderQos qos;
+    DDS::DataReaderQos reader_qos;
 
-    if (subscriber->get_default_datareader_qos(qos) != DDS::RETCODE_OK)
+    if (subscriber->get_default_datareader_qos(reader_qos) != DDS::RETCODE_OK)
     {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_datareader failed!\n")), -1);
+                        ACE_TEXT(" ERROR: get_default_datareader_qos failed!\n")), -1);
     }
 
-    qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
-    if (use_source_timestamp)
-    {
-      qos.destination_order.kind =
-        DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS;
-    }
+    reader_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+    reader_qos.reader_data_lifecycle.autopurge_nowriter_samples_delay = autopurge_delay;
+    reader_qos.reader_data_lifecycle.autopurge_disposed_samples_delay = autopurge_delay;
 
     DDS::DataReader_var reader =
       subscriber->create_datareader(topic.in(),
-                                    qos,
+                                    reader_qos,
                                     DDS::DataReaderListener::_nil(),
                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
@@ -275,7 +226,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: failed to get publication match status!\n")), -1);
+                          ACE_TEXT(" ERROR: Failed to get publication match status!\n")), -1);
       }
     }
     while (matches.current_count < 1);
@@ -283,57 +234,91 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     ws->detach_condition(cond);
 
     //
-    // FooDataReader take/read operations should return
-    // samples within the same instance ordered by either
-    // source or reception timestamp.
+    // Test autopurge_nowriter_samples_delay and
+    // autopurge_disposed_samples_delay facets of
+    // the READER_DATA_LIFECYCLE QoS policy.
     //
-    DDS::Time_t t1 = { 10, 0 };
-    DDS::Time_t t2 = {  0, 0 };
-
-    Foo f1 = { 0, 0, 0, FIRST_SAMPLE  /* o77 */ };
-    Foo f2 = { 0, 0, 0, SECOND_SAMPLE /* o77 */ };
-
-    DDS::InstanceHandle_t instance =
-      writer_i->register_instance(f1);
-
-    if (writer_i->write_w_timestamp(f1, instance, t1) != DDS::RETCODE_OK)
+    ACE_DEBUG((LM_ERROR,
+               ACE_TEXT("%N:%l main()")
+               ACE_TEXT(" INFO: Testing autopurge_disposed_samples_delay...\n")));
     {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: unable to write sample!\n")), -1);
+      Foo foo = { 42, 0, 0, 0 };
+
+      DDS::InstanceHandle_t handle = writer_i->register_instance(foo);
+
+      for (int i = 0; i < SAMPLES_PER_TEST; ++i)
+      {
+        if (writer_i->write(foo, DDS::HANDLE_NIL) != DDS::RETCODE_OK)
+        {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("%N:%l main()")
+                              ACE_TEXT(" ERROR: Unable to write sample!\n")), -1);
+        }
+      }
+      ACE_OS::sleep(5); // wait for samples to arrive
+
+      writer_i->dispose(foo, handle);
+
+      ACE_OS::sleep(10); // wait for dispose and autopurge
+
+      // Verify that no samples are available
+      {
+        FooSeq foo;
+        DDS::SampleInfoSeq info;
+
+        DDS::ReturnCode_t error;
+        if ((error = reader_i->take(foo,
+                                    info,
+                                    DDS::LENGTH_UNLIMITED,
+                                    DDS::ANY_SAMPLE_STATE,
+                                    DDS::ANY_VIEW_STATE,
+                                    DDS::ANY_INSTANCE_STATE)) != DDS::RETCODE_NO_DATA)
+        {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("%N:%l main()")
+                            ACE_TEXT(" ERROR: Unexpected samples taken!\n")), -1);
+        }
+      }
     }
-    if (writer_i->write_w_timestamp(f2, instance, t2) != DDS::RETCODE_OK)
+
+    ACE_DEBUG((LM_ERROR,
+               ACE_TEXT("%N:%l main()")
+               ACE_TEXT(" INFO: Testing autopurge_nowriter_samples_delay...\n")));
     {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: unable to write sample!\n")), -1);
-    }
+      for (int i = 0; i < SAMPLES_PER_TEST; ++i)
+      {
+        Foo foo;
+        if (writer_i->write(foo, DDS::HANDLE_NIL) != DDS::RETCODE_OK)
+        {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("%N:%l main()")
+                              ACE_TEXT(" ERROR: Unable to write sample!\n")), -1);
+        }
+      }
+      ACE_OS::sleep(5); // wait for samples to arrive
 
-    ACE_OS::sleep(5); // wait for samples to arrive
+      publisher->delete_datawriter(writer);
 
-    FooSeq foo;
-    DDS::SampleInfoSeq info;
+      ACE_OS::sleep(10); // wait for disassociation and autopurge
 
-    if (reader_i->take_instance(foo,
-                                info,
-                                1,
-                                instance,
-                                DDS::ANY_SAMPLE_STATE,
-                                DDS::ANY_VIEW_STATE,
-                                DDS::ANY_INSTANCE_STATE) != DDS::RETCODE_OK)
-    {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: unable to take next sample!\n")), -1);
-    }
+      // Verify that no samples are available
+      {
+        FooSeq foo;
+        DDS::SampleInfoSeq info;
 
-    // Verify first sample is ordered correctly
-    if (use_source_timestamp && foo[0].o77 != SECOND_SAMPLE
-     || !use_source_timestamp && foo[0].o77 != FIRST_SAMPLE)
-    {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: DESTINATION_ORDER is incorrect!\n")), 1);
+        DDS::ReturnCode_t error;
+        if ((error = reader_i->take(foo,
+                                    info,
+                                    DDS::LENGTH_UNLIMITED,
+                                    DDS::ANY_SAMPLE_STATE,
+                                    DDS::ANY_VIEW_STATE,
+                                    DDS::ANY_INSTANCE_STATE)) != DDS::RETCODE_NO_DATA)
+        {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("%N:%l main()")
+                            ACE_TEXT(" ERROR: Unexpected samples taken!\n")), -1);
+        }
+      }
     }
 
     // Clean-up!
@@ -345,7 +330,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
   }
   catch (const CORBA::Exception& e)
   {
-    e._tao_print_exception("caught in main()");
+    e._tao_print_exception("Caught in main()");
     return -1;
   }
 
