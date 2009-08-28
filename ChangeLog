@@ -1,3 +1,10 @@
+Fri Aug 28 16:56:02 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.inl:
+        * tests/DCPS/TimeBasedFilter/main.cpp:
+
+          Fixes to GCC warnings.
+
 Thu Aug 27 22:31:11 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:

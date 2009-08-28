@@ -4,6 +4,7 @@
 
 #include <ace/Arg_Shifter.h>
 #include <ace/Log_Msg.h>
+#include <ace/OS_NS_stdlib.h>
 
 #include <tao/Basic_Types.h>
 
@@ -44,7 +45,7 @@ parse_args(int& argc, ACE_TCHAR** argv)
 
     if ((arg = shifter.get_the_parameter(ACE_TEXT("-ms"))) != 0)
     {
-      minimum_separation.sec = ACE_OS::atol(arg);
+      minimum_separation.sec = ACE_OS::atoi(arg);
       shifter.consume_arg();
     }
     else
@@ -309,7 +310,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
                ACE_TEXT("%N:%l main()")
                ACE_TEXT(" INFO: Reading data...")));
 
-    DDS::Time_t last_timestamp;
+    DDS::Time_t last_timestamp = { 0, 0 };
     std::size_t samples = 0;
 
     for (;;)

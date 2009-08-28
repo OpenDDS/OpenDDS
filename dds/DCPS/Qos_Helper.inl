@@ -8,7 +8,7 @@
 
 namespace
 {
-const ACE_INT32 NSECS_IN_SEC = 1000000000;
+const ACE_UINT32 NSECS_IN_SEC = 1000000000;
 
 } // namespace
 
