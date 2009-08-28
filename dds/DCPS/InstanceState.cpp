@@ -141,7 +141,9 @@ OpenDDS::DCPS::InstanceState::schedule_release()
       cancel_release();
 
       ACE_Reactor* reactor = this->reader_->get_reactor();
-      reactor->schedule_timer(this, 0, duration_to_time_value(delay));
+
+      this->release_timer_id_ =
+        reactor->schedule_timer(this, 0, duration_to_time_value(delay));
 
       if (this->release_timer_id_ == -1)
       {

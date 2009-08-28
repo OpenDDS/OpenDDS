@@ -385,6 +385,9 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     }
 
     // Clean-up!
+    participant->delete_contained_entities();
+    TheParticipantFactory->delete_participant(participant);
+
     TheTransportFactory->release();
     TheServiceParticipant->shutdown();
   }
