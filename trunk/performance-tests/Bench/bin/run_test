@@ -206,12 +206,16 @@ if( $startTest) {
   }
 
   # block forever if no duration was specified.
-  sleep if not $duration;
+  WaitForUserInput() if not $duration;
 
   # Wait for the testprocess to terminate nicely.
 
   for my $index ( 1 .. scalar(@scenario)) {
-    $status = $TEST[ $index - 1]->WaitKill( $killDelay);
+    if ($duration) {
+      $status = $TEST[ $index - 1]->WaitKill( $killDelay);
+    } else {
+      $status = $TEST[ $index - 1]->TerminateWaitKill( $killDelay);
+    }
     if( $status != 0) {
       print STDERR "ERROR: Test $index returned $status\n";
       ++$failed;
@@ -225,7 +229,7 @@ if( $startTest) {
 if( $startRepo) {
   # block forever if no duration was specified and we haven't already
   # been released from this obligation.
-  sleep if not $duration and not $startTest;
+  WaitForUserInput() if not $duration and not $startTest;
 
   print "\nStopping repository\n";
   $status = $REPO->TerminateWaitKill( $killDelay);
@@ -246,6 +250,12 @@ if( $failed == 0) {
 }
 
 exit $failed;
+
+
+sub WaitForUserInput {
+  print "\n\nNo Duration specified.  Hit Enter to end the processes and finish the test.\n\n";
+  my $userinput = <STDIN>;
+}
 
 =head1 NAME
 

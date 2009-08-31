@@ -84,6 +84,9 @@ class Publication : public ACE_Task_Base {
     /// The writer for the publication.
     Test::DataDataWriter_var writer_;
 
+    /// The publisher for the publication.
+    ::DDS::Publisher_var publisher_;
+
     /// Lock for synchronizing access to the methods.
     ACE_SYNCH_MUTEX lock_;
 };
