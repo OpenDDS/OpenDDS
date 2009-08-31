@@ -1,3 +1,15 @@
+Mon Aug 31 20:45:26 UTC 2009  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/Bench/src/Publication.cpp:
+        * performance-tests/Bench/src/Publication.h:
+
+          Remove the publications from the system after they finish
+          publishing.
+
+        * performance-tests/Bench/bin/run_test:
+
+          Added ability to hit Enter to shutdown tests with no duration specified.
+
 Fri Aug 28 23:15:06 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/InstanceState.cpp:

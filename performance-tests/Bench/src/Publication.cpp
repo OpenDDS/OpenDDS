@@ -34,7 +34,8 @@ Publication::Publication(
     verbose_( verbose),
     done_( false),
     enabled_( false),
-    messages_( 0)
+    messages_( 0),
+    publisher_(::DDS::Publisher::_nil())
 {
 }
 
@@ -43,6 +44,10 @@ Publication::~Publication()
   // Terminate cleanly.
   this->stop();
   this->wait();
+
+  if( !CORBA::is_nil( publisher_.in())) {
+      publisher_->delete_datawriter(writer_.in());
+  }
 }
 
 int
@@ -198,12 +203,12 @@ Publication::enable(
   }
 
   // Create the publisher.
-  ::DDS::Publisher_var publisher = participant->create_publisher(
+  publisher_ = participant->create_publisher(
                                      this->profile_->publisherQos,
                                      ::DDS::PublisherListener::_nil(),
                                      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
                                    );
-  if( CORBA::is_nil( publisher.in())) {
+  if( CORBA::is_nil( publisher_.in())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) Publication::enable() - publication %C: ")
       ACE_TEXT("failed to create publisher.\n"),
@@ -237,7 +242,7 @@ Publication::enable(
   }
 
   // Attach the transport
-  if( ::OpenDDS::DCPS::ATTACH_OK != transport->attach( publisher)) {
+  if( ::OpenDDS::DCPS::ATTACH_OK != transport->attach( publisher_)) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) Publication::enable() - publication %C: ")
       ACE_TEXT("failed to attach transport with index %d to publisher.\n"),
@@ -260,15 +265,15 @@ Publication::enable(
   topic->get_qos( topicQos);
 
   ::DDS::DataWriterQos writerQos;
-  publisher->get_default_datawriter_qos( writerQos);
+  publisher_->get_default_datawriter_qos( writerQos);
 
-  publisher->copy_from_topic_qos( writerQos, topicQos);
+  publisher_->copy_from_topic_qos( writerQos, topicQos);
 
   this->profile_->copyToWriterQos( writerQos);
 
   // Create the writer.
   DDS::DataWriter_var writer
-    = publisher->create_datawriter(
+    = publisher_->create_datawriter(
         topic,
         writerQos,
         ::DDS::DataWriterListener::_nil(),
