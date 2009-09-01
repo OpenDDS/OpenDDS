@@ -328,8 +328,8 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     }
 
     // Verify first sample is ordered correctly
-    if (use_source_timestamp && foo[0].o77 != SECOND_SAMPLE
-     || !use_source_timestamp && foo[0].o77 != FIRST_SAMPLE)
+    if ((use_source_timestamp && foo[0].o77 != SECOND_SAMPLE) ||
+        (!use_source_timestamp && foo[0].o77 != FIRST_SAMPLE))
     {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l main()")

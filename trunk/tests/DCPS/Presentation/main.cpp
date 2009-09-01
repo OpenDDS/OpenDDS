@@ -27,7 +27,7 @@ namespace
 {
 static OpenDDS::DCPS::TransportIdType transportId = 0;
 
-static const std::size_t SAMPLES_PER_TEST = 100;
+static const size_t SAMPLES_PER_TEST = 100;
 
 } // namespace
 
@@ -265,7 +265,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     {
       publisher->begin_coherent_changes();
 
-      for (int i = 0; i < SAMPLES_PER_TEST; ++i)
+      for (size_t i = 0; i < SAMPLES_PER_TEST; ++i)
       {
         Foo foo;
         if (writer_i->write(foo, DDS::HANDLE_NIL) != DDS::RETCODE_OK)
@@ -330,7 +330,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
                ACE_TEXT("%N:%l main()")
                ACE_TEXT(" INFO: Testing ordered_access...\n")));
     {
-      for (int i = 0; i < SAMPLES_PER_TEST / 2; ++i)
+      for (size_t i = 0; i < SAMPLES_PER_TEST / 2; ++i)
       {
         // Write first instance
         Foo foo1 = { 0, 0, 0, 0 };

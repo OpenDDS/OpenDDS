@@ -27,7 +27,7 @@ namespace
 {
 static OpenDDS::DCPS::TransportIdType transportId = 0;
 
-static const std::size_t SAMPLES_PER_TEST = 100;
+static const size_t SAMPLES_PER_TEST = 100;
 
 static const DDS::Duration_t autopurge_delay = { 5, 0 };
 
@@ -246,7 +246,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
       DDS::InstanceHandle_t handle = writer_i->register_instance(foo);
 
-      for (int i = 0; i < SAMPLES_PER_TEST; ++i)
+      for (size_t i = 0; i < SAMPLES_PER_TEST; ++i)
       {
         if (writer_i->write(foo, DDS::HANDLE_NIL) != DDS::RETCODE_OK)
         {
@@ -285,7 +285,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
                ACE_TEXT("%N:%l main()")
                ACE_TEXT(" INFO: Testing autopurge_nowriter_samples_delay...\n")));
     {
-      for (int i = 0; i < SAMPLES_PER_TEST; ++i)
+      for (size_t i = 0; i < SAMPLES_PER_TEST; ++i)
       {
         Foo foo;
         if (writer_i->write(foo, DDS::HANDLE_NIL) != DDS::RETCODE_OK)
