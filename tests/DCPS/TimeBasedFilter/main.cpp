@@ -31,8 +31,8 @@ static OpenDDS::DCPS::TransportIdType transportId = 0;
 
 static DDS::Duration_t minimum_separation = { 5, 0 };
 
-static const int EXPECTED_SAMPLES = 2;
-static const int SAMPLES_PER_CYCLE = 5;
+static const size_t EXPECTED_SAMPLES = 2;
+static const size_t SAMPLES_PER_CYCLE = 5;
 
 void
 parse_args(int& argc, ACE_TCHAR** argv)
@@ -291,7 +291,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     // time, and then verify we receive the expected number
     // of samples.
     //
-    std::size_t seen = 0;
+    size_t seen = 0;
 
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("%N:%l main()")
@@ -300,9 +300,9 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     // We expect to receive up to one sample per
     // cycle (all others should be filtered).
-    for (int i = 0; i < EXPECTED_SAMPLES; ++i)
+    for (size_t i = 0; i < EXPECTED_SAMPLES; ++i)
     {
-      for (int j = 0; j < SAMPLES_PER_CYCLE; ++j)
+      for (size_t j = 0; j < SAMPLES_PER_CYCLE; ++j)
       {
         Foo foo = { 0, 0, 0, 0 }; // same instance required!
         if (writer_i->write(foo, DDS::HANDLE_NIL) != DDS::RETCODE_OK)
