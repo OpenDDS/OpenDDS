@@ -5,7 +5,7 @@ Tue Sep  1 20:35:29 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * tests/DCPS/ReaderDataLifecycle/main.cpp:
         * tests/DCPS/TimeBasedFilter/main.cpp:
 
-          Fixes to various GCC warnings.
+          Fixed various GCC warnings.
 
 Mon Aug 31 20:45:26 UTC 2009  Trevor Fields  <fields_t@ociweb.com>
 
