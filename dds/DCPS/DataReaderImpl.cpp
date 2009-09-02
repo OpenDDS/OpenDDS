@@ -11,6 +11,7 @@
 #include "Service_Participant.h"
 #include "Qos_Helper.h"
 #include "RepoIdConverter.h"
+#include "RepoIdBuilder.h"
 #include "TopicImpl.h"
 #include "Serializer.h"
 #include "SubscriberImpl.h"
@@ -216,8 +217,7 @@ DDS::InstanceHandle_t
 DataReaderImpl::get_instance_handle()
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
-  RepoIdConverter converter(subscription_id_);
-  return DDS::InstanceHandle_t(converter);
+  return this->participant_servant_->get_handle( subscription_id_);
 }
 
 void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
@@ -395,7 +395,7 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
       // values.
       //
       ::DDS::InstanceHandleSeq handles;
-      if (this->bit_lookup_instance_handles (wr_ids, handles) == false
+      if (this->lookup_instance_handles (wr_ids, handles) == false
         || handles.length () != wr_len)
         return;
 
@@ -556,12 +556,12 @@ void DataReaderImpl::remove_associations (
   {
     // The writer should be in the id_to_handle map at this time.  Note
     // it if it not there.
-    if (this->cache_lookup_instance_handles (updated_writers, handles) == false)
+    if (this->lookup_instance_handles (updated_writers, handles) == false)
     {
       if( DCPS_debug_level > 4) {
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations: ")
-          ACE_TEXT("cache_lookup_instance_handles failed.\n")
+          ACE_TEXT("lookup_instance_handles failed.\n")
         ));
       }
     }
@@ -2390,7 +2390,7 @@ void DataReaderImpl::notify_latency( PublicationId writer)
     writerIds[ 0] = writer;
 
     ::DDS::InstanceHandleSeq handles;
-    this->cache_lookup_instance_handles( writerIds, handles);
+    this->lookup_instance_handles( writerIds, handles);
 
     if( handles.length() >= 1) {
       this->budget_exceeded_status_.last_instance_handle = handles[ 0];
@@ -2471,9 +2471,17 @@ DataReaderImpl::get_handle_instance (::DDS::InstanceHandle_t handle)
 
 
 ::DDS::InstanceHandle_t
-DataReaderImpl::get_next_handle ()
+DataReaderImpl::get_next_handle ( const DDS::BuiltinTopicKey_t& key)
 {
-  return ++next_handle_;
+  if( this->is_bit()) {
+    OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::GUID_UNKNOWN;
+    OpenDDS::DCPS::RepoIdBuilder builder( id);
+    builder.from_BuiltinTopicKey( key);
+    return this->participant_servant_->get_handle( id);
+
+  } else {
+    return this->participant_servant_->get_handle();
+  }
 }
 
 
@@ -2493,7 +2501,7 @@ DataReaderImpl::notify_subscription_disconnected (const WriterIdSeq& pubids)
 
         // Since this callback may come after remove_association which removes
         // the writer from id_to_handle map, we can ignore this error.
-        this->cache_lookup_instance_handles (pubids, status.publication_handles);
+        this->lookup_instance_handles (pubids, status.publication_handles);
         the_listener->on_subscription_disconnected (this->dr_local_objref_.in (),
         status);
       }
@@ -2518,10 +2526,10 @@ DataReaderImpl::notify_subscription_reconnected (const WriterIdSeq& pubids)
 
       // If it's reconnected then the reader should be in id_to_handle map otherwise
       // log with an error.
-      if (this->cache_lookup_instance_handles (pubids, status.publication_handles) == false)
+      if (this->lookup_instance_handles (pubids, status.publication_handles) == false)
       {
         ACE_ERROR ((LM_ERROR, "(%P|%t) DataReaderImpl::notify_subscription_reconnected: "
-          "cache_lookup_instance_handles failed.\n"));
+          "lookup_instance_handles failed.\n"));
       }
       the_listener->on_subscription_reconnected (this->dr_local_objref_.in (),
         status);
@@ -2576,7 +2584,7 @@ DataReaderImpl::notify_subscription_lost (const WriterIdSeq& pubids)
 
       // Since this callback may come after remove_association which removes
       // the writer from id_to_handle map, we can ignore this error.
-      this->cache_lookup_instance_handles (pubids, status.publication_handles);
+      this->lookup_instance_handles (pubids, status.publication_handles);
       the_listener->on_subscription_lost (this->dr_local_objref_.in (),
         status);
     }
@@ -2598,8 +2606,8 @@ DataReaderImpl::notify_connection_deleted ()
 }
 
 bool
-DataReaderImpl::bit_lookup_instance_handles (const WriterIdSeq& ids,
-                                               ::DDS::InstanceHandleSeq & hdls)
+DataReaderImpl::lookup_instance_handles (const WriterIdSeq& ids,
+                                         ::DDS::InstanceHandleSeq & hdls)
 {
   if( DCPS_debug_level > 9) {
     CORBA::ULong const size = ids.length ();
@@ -2610,107 +2618,20 @@ DataReaderImpl::bit_lookup_instance_handles (const WriterIdSeq& ids,
       separator = ", ";
     }
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DataReaderImpl::bit_lookup_instance_handles: ")
+      ACE_TEXT("(%P|%t) DataReaderImpl::lookup_instance_handles: ")
       ACE_TEXT("searching for handles for writer Ids: %C.\n"),
       buffer.str().c_str()
     ));
   }
 
-  if (TheServiceParticipant->get_BIT () == true && ! TheTransientKludge->is_enabled ())
+  CORBA::ULong const num_wrts = ids.length ();
+  hdls.length (num_wrts);
+  for (CORBA::ULong i = 0; i < num_wrts; ++i)
   {
-#if !defined (DDS_HAS_MINIMUM_BIT)
-    BIT_Helper_2 < ::DDS::PublicationBuiltinTopicDataDataReader,
-      ::DDS::PublicationBuiltinTopicDataDataReader_var,
-      ::DDS::PublicationBuiltinTopicDataSeq,
-      WriterIdSeq > hh;
-
-    DDS::ReturnCode_t ret = hh.repo_ids_to_instance_handles(ids, hdls);
-    if (ret != ::DDS::RETCODE_OK)
-    {
-      ACE_ERROR ((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::bit_lookup_instance_handles: ")
-        ACE_TEXT("failed.\n")
-      ));
-      return false;
-
-    } else if( DCPS_debug_level > 4) {
-      CORBA::ULong const num_wrts = ids.length ();
-      ACE_DEBUG((LM_WARNING,
-        ACE_TEXT("(%P|%t) DataReaderImpl::bit_lookup_instance_handles: ")
-        ACE_TEXT("%d writer handles processed.\n"),
-        num_wrts
-      ));
-      for (CORBA::ULong i = 0; i < num_wrts; ++i)
-      {
-        RepoIdConverter converter(ids[i]);
-        ACE_DEBUG((LM_WARNING,
-          ACE_TEXT("(%P|%t) DataReaderImpl::bit_lookup_instance_handles: ")
-          ACE_TEXT("writer %C has handle 0x%x.\n"),
-          std::string(converter).c_str(),
-          hdls[i]
-        ));
-      }
-    }
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
-  }
-  else
-  {
-    CORBA::ULong num_wrts = ids.length ();
-    hdls.length (num_wrts);
-    for (CORBA::ULong i = 0; i < num_wrts; i++)
-    {
-      RepoIdConverter converter(ids[i]);
-      hdls[i] = DDS::InstanceHandle_t(converter);
-      if( DCPS_debug_level > 4) {
-        ACE_DEBUG((LM_WARNING,
-          ACE_TEXT("(%P|%t) DataReaderImpl::bit_lookup_instance_handles: ")
-          ACE_TEXT("using hash as handle for writer %C.\n"),
-          std::string(converter).c_str()
-        ));
-      }
-    }
+    hdls[i] = this->participant_servant_->get_handle( ids[i]);
   }
 
   return true;
-}
-
-bool
-DataReaderImpl::cache_lookup_instance_handles (const WriterIdSeq& ids,
-                                              ::DDS::InstanceHandleSeq & hdls)
-{
-  bool ret = true;
-  CORBA::ULong num_ids = ids.length ();
-  for (CORBA::ULong i = 0; i < num_ids; ++i)
-  {
-    hdls.length (i + 1);
-    RepoIdToHandleMap::iterator iter = id_to_handle_map_.find(ids[i]);
-    if (iter == id_to_handle_map_.end())
-    {
-      RepoIdConverter converter(ids[i]);
-      ACE_DEBUG((LM_WARNING,
-        ACE_TEXT("(%P|%t) DataReaderImpl::cache_lookup_instance_handles: ")
-        ACE_TEXT("could not find instance handle for writer %C.\n"),
-        std::string(converter).c_str()
-      ));
-      hdls[i] = -1;
-      ret = false;
-    }
-    else
-    {
-      hdls[i] = iter->second;
-      if( DCPS_debug_level > 7) {
-        RepoIdConverter converter(ids[i]);
-        ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) DataReaderImpl::cache_lookup_instance_handles: ")
-          ACE_TEXT("instance handle for writer %C == 0x%x.\n"),
-          std::string(converter).c_str(),
-          hdls[i]
-        ));
-      }
-    }
-  }
-
-  return ret;
 }
 
 bool

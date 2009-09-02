@@ -70,9 +70,7 @@ namespace OpenDDS
         domain_id_(domain_id),
         dp_id_(dp_id),
         federated_( federated),
-        failoverListener_( 0),
-        subscriber_handles_(ENTITYKIND_OPENDDS_SUBSCRIBER),
-        publisher_handles_(ENTITYKIND_OPENDDS_PUBLISHER)
+        failoverListener_( 0)
     {
       DDS::ReturnCode_t ret;
       ret = this->set_listener(a_listener, mask);
@@ -129,7 +127,7 @@ namespace OpenDDS
 
       PublisherImpl* pub = 0;
       ACE_NEW_RETURN(pub,
-                     PublisherImpl(publisher_handles_.next(),
+                     PublisherImpl(participant_handles_.next(),
                                    pub_qos,
                                    a_listener,
                                    mask,
@@ -250,7 +248,7 @@ namespace OpenDDS
 
       SubscriberImpl* sub = 0 ;
       ACE_NEW_RETURN(sub,
-                     SubscriberImpl(subscriber_handles_.next(),
+                     SubscriberImpl(participant_handles_.next(),
                                     sub_qos,
                                     a_listener,
                                     mask,
@@ -878,57 +876,64 @@ namespace OpenDDS
     DomainParticipantImpl::contains_entity(DDS::InstanceHandle_t a_handle)
       ACE_THROW_SPEC ((CORBA::SystemException))
     {
-      InstanceHandleHelper helper(a_handle);
-
       /// Check top-level containers for Topic, Subscriber,
       /// and Publisher instances.
-      if (helper.is_topic())
       {
+        ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                          guard,
+                          this->topics_protector_,
+                          false);
+
         for (TopicMap::iterator it(topics_.begin());
              it != topics_.end(); ++it)
         {
-          if (helper.matches(it->second.pair_.svt_))
+          if (a_handle == it->second.pair_.svt_->get_instance_handle())
             return true;
         }
       }
-      else if (helper.is_subscriber())
+
       {
+        ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                          guard,
+                          this->subscribers_protector_,
+                          false);
+
         for (SubscriberSet::iterator it(subscribers_.begin());
              it != subscribers_.end(); ++it)
         {
-          if (helper.matches(it->svt_))
+          if (a_handle == it->svt_->get_instance_handle())
             return true;
         }
       }
-      else if (helper.is_publisher())
+
       {
+        ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                          guard,
+                          this->publishers_protector_,
+                          false);
+
         for (PublisherSet::iterator it(publishers_.begin());
              it != publishers_.end(); ++it)
         {
-          if (helper.matches(it->svt_))
+          if (a_handle == it->svt_->get_instance_handle())
             return true;
         }
       }
 
       /// Recurse into SubscriberImpl and PublisherImpl for
       /// DataReader and DataWriter instances respectively.
-      else if (helper.is_datareader())
+      for (SubscriberSet::iterator it(subscribers_.begin());
+           it != subscribers_.end(); ++it)
       {
-        for (SubscriberSet::iterator it(subscribers_.begin());
-             it != subscribers_.end(); ++it)
-        {
-          if (it->svt_->contains_reader(a_handle))
-            return true;
-        }
+        if (it->svt_->contains_reader(a_handle))
+          return true;
       }
-      else if (helper.is_datawriter())
+
+      for (PublisherSet::iterator it(publishers_.begin());
+           it != publishers_.end(); ++it)
       {
-        for (PublisherSet::iterator it(publishers_.begin());
-             it != publishers_.end(); ++it)
-        {
-          if (it->svt_->contains_writer(a_handle))
-            return true;
-        }
+        if (it->svt_->contains_writer(a_handle))
+          return true;
       }
 
       return false;
@@ -1540,8 +1545,7 @@ namespace OpenDDS
     DomainParticipantImpl::get_instance_handle()
       ACE_THROW_SPEC ((CORBA::SystemException))
     {
-      RepoIdConverter converter(dp_id_);
-      return DDS::InstanceHandle_t(converter);
+      return this->get_handle( this->dp_id_);
     }
 
     CORBA::Long
@@ -1558,6 +1562,25 @@ namespace OpenDDS
     {
       RepoIdConverter converter(dp_id_);
       return converter.participantId();
+    }
+
+    DDS::InstanceHandle_t
+    DomainParticipantImpl::get_handle( const RepoId& id)
+    {
+      if( id == GUID_UNKNOWN) {
+        return this->participant_handles_.next();
+      }
+
+      ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                        guard,
+                        this->handle_protector_,
+                        HANDLE_UNKNOWN);
+
+      HandleMap::const_iterator location = this->handles_.find( id);
+      if( location == this->handles_.end()) {
+        this->handles_[ id] = this->participant_handles_.next();
+      }
+      return this->handles_[ id];
     }
 
     ::DDS::Topic_ptr
@@ -1603,7 +1626,7 @@ namespace OpenDDS
                                 qos,
                                 a_listener,
                                 mask,
-                                participant_objref_.in ()),
+                                this),
                       ::DDS::Topic::_nil());
 
       if ((enabled_ == true) && (qos_.entity_factory.autoenable_created_entities == 1))

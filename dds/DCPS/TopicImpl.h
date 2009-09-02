@@ -42,7 +42,7 @@ namespace OpenDDS
                  const ::DDS::TopicQos &        qos,
                  ::DDS::TopicListener_ptr       a_listener,
                  const ::DDS::StatusMask &      mask,
-                 ::DDS::DomainParticipant_ptr   participant);
+                 DomainParticipantImpl*         participant);
 
       //Destructor
       virtual ~TopicImpl (void);

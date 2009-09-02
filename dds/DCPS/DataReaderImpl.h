@@ -556,10 +556,8 @@ namespace OpenDDS
 
       /**
       * Get an instance handle for a new instance.
-      * This method should be called under the protection of a lock
-      * to ensure that the handle is unique for the container.
       */
-      ::DDS::InstanceHandle_t get_next_handle ();
+      ::DDS::InstanceHandle_t get_next_handle ( const DDS::BuiltinTopicKey_t& key);
 
       virtual void purge_data(SubscriptionInstance* instance) = 0;
 
@@ -609,14 +607,8 @@ namespace OpenDDS
       void notify_subscription_lost (const ::DDS::InstanceHandleSeq& handles);
 
       /// Lookup the instance handles by the publication repo ids
-      /// via the bit datareader.
-      bool bit_lookup_instance_handles (const WriterIdSeq& ids,
-                                         ::DDS::InstanceHandleSeq & hdls);
-
-      /// Lookup the cache to get the instance handle by the
-      /// publication repo ids.
-      bool cache_lookup_instance_handles (const WriterIdSeq& ids,
-                                         ::DDS::InstanceHandleSeq & hdls);
+      bool lookup_instance_handles (const WriterIdSeq& ids,
+                                    ::DDS::InstanceHandleSeq & hdls);
 
       friend class WriterInfo;
 

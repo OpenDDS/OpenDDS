@@ -94,12 +94,15 @@ SubscriberImpl::get_instance_handle()
 bool
 SubscriberImpl::contains_reader(DDS::InstanceHandle_t a_handle)
 {
-  InstanceHandleHelper helper(a_handle);
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+    guard,
+    this->si_lock_,
+    false);
 
   for (DataReaderSet::iterator it(datareader_set_.begin());
        it != datareader_set_.end(); ++it)
   {
-    if (helper.matches(*it))
+    if (a_handle == (*it)->get_instance_handle())
       return true;
   }
   return false;

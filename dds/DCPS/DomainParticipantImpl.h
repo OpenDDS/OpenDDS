@@ -92,6 +92,7 @@ namespace OpenDDS
       };
 
       typedef std::map<std::string, RefCounted_Topic> TopicMap;
+      typedef std::map< RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan> HandleMap;
 
       ///Constructor
       DomainParticipantImpl (DomainParticipantFactoryImpl *       factory,
@@ -327,6 +328,11 @@ namespace OpenDDS
         ACE_THROW_SPEC ((CORBA::SystemException));
 
       /**
+       * Obtain a local handle representing a GUID.
+       */
+      DDS::InstanceHandle_t get_handle( const RepoId& id = GUID_UNKNOWN);
+
+      /**
       *  Associate the servant with the object reference.
       *  This is required to pass to the topic servant.
       */
@@ -412,6 +418,8 @@ namespace OpenDDS
       SubscriberSet  subscribers_;
       /// Collection of topics.
       TopicMap       topics_;
+      /// Collection of handles.
+      HandleMap       handles_;
 
       /// Protect the publisher collection.
       ACE_Recursive_Thread_Mutex   publishers_protector_;
@@ -419,6 +427,8 @@ namespace OpenDDS
       ACE_Recursive_Thread_Mutex   subscribers_protector_;
       /// Protect the topic collection.
       ACE_Recursive_Thread_Mutex   topics_protector_;
+      /// Protect the handle collection.
+      ACE_Recursive_Thread_Mutex   handle_protector_;
 
       /// The object reference activated from this servant.
       ::DDS::DomainParticipant_var participant_objref_;
@@ -440,8 +450,7 @@ namespace OpenDDS
 
       /// Instance handle generators for non-repo backed entities
       /// (i.e. subscribers and publishers).
-      InstanceHandleGenerator subscriber_handles_;
-      InstanceHandleGenerator publisher_handles_;
+      InstanceHandleGenerator participant_handles_;
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
       /// The datareader for built in topic participant.
