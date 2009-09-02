@@ -64,6 +64,9 @@ namespace OpenDDS {
              );
     };
 
+    template< typename TopicType>
+    ::DDS::BuiltinTopicKey_t keyFromSample( TopicType* sample);
+
     // changed from member function template to class template
     // to avoid VC++ v6 build problem.
     /*
@@ -223,6 +226,55 @@ namespace OpenDDS {
              (lhs.value[0] < rhs.value[0])? true:
                                 false;
 
+    }
+
+    template<>
+    inline
+    ::DDS::BuiltinTopicKey_t
+    keyFromSample< ::DDS::ParticipantBuiltinTopicData>(
+      ::DDS::ParticipantBuiltinTopicData* sample
+    )
+    {
+      return sample->key;
+    }
+
+    template<>
+    inline
+    ::DDS::BuiltinTopicKey_t
+    keyFromSample< ::DDS::TopicBuiltinTopicData>(
+      ::DDS::TopicBuiltinTopicData* sample
+    )
+    {
+      return sample->key;
+    }
+
+    template<>
+    inline
+    ::DDS::BuiltinTopicKey_t
+    keyFromSample< ::DDS::SubscriptionBuiltinTopicData>(
+      ::DDS::SubscriptionBuiltinTopicData* sample
+    )
+    {
+      return sample->key;
+    }
+
+    template<>
+    inline
+    ::DDS::BuiltinTopicKey_t
+    keyFromSample< ::DDS::PublicationBuiltinTopicData>(
+      ::DDS::PublicationBuiltinTopicData* sample
+    )
+    {
+      return sample->key;
+    }
+
+    template< typename TopicType>
+    inline
+    ::DDS::BuiltinTopicKey_t keyFromSample( TopicType*)
+    {
+      ::DDS::BuiltinTopicKey_t value;
+      value.value[0] = value.value[1] = value.value[2] = 0;
+      return value;
     }
 
   } // End of namespace DCPS

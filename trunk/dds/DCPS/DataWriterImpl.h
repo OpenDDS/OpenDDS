@@ -477,14 +477,8 @@ namespace OpenDDS
       bool send_liveliness (const ACE_Time_Value& now);
 
       /// Lookup the instance handles by the subscription repo ids
-      /// via the bit datareader.
-      bool bit_lookup_instance_handles (const ReaderIdSeq& ids,
-                                         ::DDS::InstanceHandleSeq & hdls);
-
-      /// Lookup the cache to get the instance handle by the
-      /// subscription repo ids.
-      bool cache_lookup_instance_handles (const ReaderIdSeq& ids,
-                                         ::DDS::InstanceHandleSeq & hdls);
+      bool lookup_instance_handles (const ReaderIdSeq& ids,
+                                    ::DDS::InstanceHandleSeq & hdls);
 
       friend class ::DDS_TEST; // allows tests to get at dw_remote_objref_
 

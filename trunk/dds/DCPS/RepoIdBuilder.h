@@ -28,7 +28,7 @@ public:
 
   void participantId(long participantId);
 
-  void from_BuiltinTopicKey(DDS::BuiltinTopicKey_t key);
+  void from_BuiltinTopicKey( const DDS::BuiltinTopicKey_t& key);
 };
 
 } // namespace

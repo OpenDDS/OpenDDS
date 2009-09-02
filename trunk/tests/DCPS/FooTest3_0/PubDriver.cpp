@@ -12,6 +12,7 @@
 #include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/DomainParticipantImpl.h"
 #include "dds/DCPS/Transient_Kludge.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "DomainParticipantListener.h"
@@ -882,9 +883,14 @@ PubDriver::listener_test ()
   ::DDS::ReturnCode_t ret
     = foo_datawriter_->get_matched_subscriptions (subscription_handles);
 
+  OpenDDS::DCPS::DomainParticipantImpl* impl
+    = dynamic_cast< OpenDDS::DCPS::DomainParticipantImpl*>( participant_.ptr());
+  DDS::InstanceHandle_t sub_handle = impl->get_handle( sub_id_);
+
   TEST_CHECK (ret == ::DDS::RETCODE_OK
               && subscription_handles.length () == 1
-              && subscription_handles[0] == DDS::InstanceHandle_t(converter));
+              && impl
+              && subscription_handles[0] == sub_handle);
 
   // Test get_publication_matched_status.
 
@@ -903,7 +909,7 @@ PubDriver::listener_test ()
   // The listener is set after add_association, so the total_count_change
   // should be 1 since the datawriter is associated with one datareader.
   TEST_CHECK (match_status.total_count_change == 1);
-  TEST_CHECK (match_status.last_subscription_handle == DDS::InstanceHandle_t(converter));
+  TEST_CHECK (match_status.last_subscription_handle == sub_handle);
 
   // Call register_test to send a few messages to remote subscriber.
   register_test ();

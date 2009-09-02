@@ -16,6 +16,8 @@ namespace OpenDDS
 {
   namespace DCPS
   {
+    class DomainParticipantImpl;
+
     /**
     * @class TopicDescriptionImpl
     *
@@ -31,10 +33,10 @@ namespace OpenDDS
     public:
 
       //Constructor
-      TopicDescriptionImpl (const char*                    topic_name,
-                            const char*                    type_name,
-                            OpenDDS::DCPS::TypeSupport_ptr type_support,
-                            ::DDS::DomainParticipant_ptr   participant);
+      TopicDescriptionImpl (const char*            topic_name,
+                            const char*            type_name,
+                            TypeSupport_ptr        type_support,
+                            DomainParticipantImpl* participant);
 
       //Destructor
       virtual ~TopicDescriptionImpl (void);
@@ -71,7 +73,7 @@ namespace OpenDDS
       ACE_CString                    type_name_;
 
       /// The participant that creates this topic.
-      ::DDS::DomainParticipant_ptr   participant_;
+      DomainParticipantImpl*         participant_;
 
       /// The type_support for this topic.
       OpenDDS::DCPS::TypeSupport_ptr type_support_;

@@ -313,6 +313,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     FooSeq foo;
     DDS::SampleInfoSeq info;
+    instance = reader_i->lookup_instance( f1);
 
     if (reader_i->take_instance(foo,
                                 info,

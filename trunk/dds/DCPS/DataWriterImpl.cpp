@@ -193,8 +193,7 @@ DDS::InstanceHandle_t
 DataWriterImpl::get_instance_handle()
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
-  RepoIdConverter converter(publication_id_);
-  return DDS::InstanceHandle_t(converter);
+  return this->participant_servant_->get_handle( publication_id_);
 }
 
 void
@@ -343,7 +342,7 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
     ::DDS::InstanceHandleSeq handles;
     // Create the list of readers repo id.
 
-    if (this->bit_lookup_instance_handles (rd_ids, handles) == false)
+    if (this->lookup_instance_handles (rd_ids, handles) == false)
       return;
 
     {
@@ -510,10 +509,10 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
   {
     // The reader should be in the id_to_handle map at this time so
     // log with error.
-    if (this->cache_lookup_instance_handles (fully_associated_readers, handles) == false)
+    if (this->lookup_instance_handles (fully_associated_readers, handles) == false)
     {
       ACE_ERROR ((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::remove_associations: "
-        "cache_lookup_instance_handles failed, notify %d \n", notify_lost));
+        "lookup_instance_handles failed, notify %d \n", notify_lost));
       return;
     }
 
@@ -2067,8 +2066,8 @@ DataWriterImpl::notify_publication_disconnected (const ReaderIdSeq& subids)
       // Since this callback may come after remove_association which
       // removes the reader from id_to_handle map, we can ignore this
       // error.
-      this->cache_lookup_instance_handles (subids,
-                                           status.subscription_handles);
+      this->lookup_instance_handles (subids,
+                                     status.subscription_handles);
       the_listener->on_publication_disconnected (this->dw_local_objref_.in (),
                                                  status);
     }
@@ -2096,8 +2095,8 @@ DataWriterImpl::notify_publication_reconnected (const ReaderIdSeq& subids)
 
       // If it's reconnected then the reader should be in id_to_handle
       // map otherwise log with an error.
-      if (this->cache_lookup_instance_handles (subids,
-                                               status.subscription_handles) == false)
+      if (this->lookup_instance_handles (subids,
+                                         status.subscription_handles) == false)
       {
         ACE_ERROR ((LM_ERROR,
                     "(%P|%t)ERROR: DataWriterImpl::"
@@ -2130,8 +2129,8 @@ DataWriterImpl::notify_publication_lost (const ReaderIdSeq& subids)
 
       // Since this callback may come after remove_association which removes
       // the reader from id_to_handle map, we can ignore this error.
-      this->cache_lookup_instance_handles (subids,
-                                           status.subscription_handles);
+      this->lookup_instance_handles (subids,
+                                     status.subscription_handles);
       the_listener->on_publication_lost (this->dw_local_objref_.in (),
       status);
     }
@@ -2184,8 +2183,8 @@ DataWriterImpl::notify_connection_deleted ()
 }
 
 bool
-DataWriterImpl::bit_lookup_instance_handles (const ReaderIdSeq& ids,
-                                             ::DDS::InstanceHandleSeq & hdls)
+DataWriterImpl::lookup_instance_handles (const ReaderIdSeq& ids,
+                                         ::DDS::InstanceHandleSeq & hdls)
 {
   if( DCPS_debug_level > 9) {
     CORBA::ULong const size = ids.length ();
@@ -2196,105 +2195,22 @@ DataWriterImpl::bit_lookup_instance_handles (const ReaderIdSeq& ids,
       separator = ", ";
     }
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DataWriterImpl::bit_lookup_instance_handles: ")
+      ACE_TEXT("(%P|%t) DataWriterImpl::lookup_instance_handles: ")
       ACE_TEXT("searching for handles for reader Ids: %C.\n"),
       buffer.str().c_str()
     ));
   }
 
-  if (TheServiceParticipant->get_BIT () == true
-      && ! TheTransientKludge->is_enabled ())
+  CORBA::ULong const num_rds = ids.length ();
+  hdls.length (num_rds);
+  for (CORBA::ULong i = 0; i < num_rds; ++i)
   {
-#if !defined (DDS_HAS_MINIMUM_BIT)
-    BIT_Helper_2 < ::DDS::SubscriptionBuiltinTopicDataDataReader,
-                   ::DDS::SubscriptionBuiltinTopicDataDataReader_var,
-                   ::DDS::SubscriptionBuiltinTopicDataSeq,
-                   ReaderIdSeq > hh;
-
-    DDS::ReturnCode_t ret = hh.repo_ids_to_instance_handles(ids, hdls);
-    if (ret != ::DDS::RETCODE_OK)
-    {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::")
-        ACE_TEXT("bit_lookup_instance_handles: failed.\n")
-      ));
-      return false;
-
-    } else if( DCPS_debug_level > 4) {
-      CORBA::ULong const num_rds = ids.length ();
-      for (CORBA::ULong i = 0; i < num_rds; ++i)
-      {
-        RepoIdConverter converter(ids[i]);
-        ACE_DEBUG((LM_WARNING,
-          ACE_TEXT("(%P|%t) DataWriterImpl::bit_lookup_instance_handles: ")
-          ACE_TEXT("reader %C has handle 0x%x.\n"),
-          std::string(converter).c_str(),
-          hdls[i]
-        ));
-      }
-    }
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
-  }
-  else
-  {
-    CORBA::ULong const num_rds = ids.length ();
-    hdls.length (num_rds);
-    for (CORBA::ULong i = 0; i < num_rds; ++i)
-    {
-      RepoIdConverter converter(ids[i]);
-      hdls[i] = DDS::InstanceHandle_t(converter);
-      if( DCPS_debug_level > 4) {
-        ACE_DEBUG((LM_WARNING,
-          ACE_TEXT("(%P|%t) DataWriterImpl::bit_lookup_instance_handles: ")
-          ACE_TEXT("using hash as handle for reader %C.\n"),
-          std::string(converter).c_str()
-        ));
-      }
-    }
+    hdls[i] = this->participant_servant_->get_handle( ids[i]);
   }
 
   return true;
 }
 
-
-bool
-DataWriterImpl::cache_lookup_instance_handles (const ReaderIdSeq& ids,
-                                               ::DDS::InstanceHandleSeq & hdls)
-{
-  bool ret = true;
-  CORBA::ULong const num_ids = ids.length ();
-  for (CORBA::ULong i = 0; i < num_ids; ++i)
-  {
-    hdls.length (i + 1);
-    RepoIdToHandleMap::iterator iter = id_to_handle_map_.find(ids[i]);
-    if (iter == id_to_handle_map_.end())
-    {
-      RepoIdConverter converter(ids[i]);
-      ACE_DEBUG((LM_WARNING,
-        ACE_TEXT("(%P|%t) DataWriterImpl::cache_lookup_instance_handles: ")
-        ACE_TEXT("could not find instance handle for writer %C.\n"),
-        std::string(converter).c_str()
-      ));
-      hdls[i] = -1;
-      ret = false;
-    }
-    else
-    {
-      hdls[i] = iter->second;
-      if( DCPS_debug_level > 4) {
-        RepoIdConverter converter(ids[i]);
-        ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) DataWriterImpl::cache_lookup_instance_handles: ")
-          ACE_TEXT("instance handle for writer %C == 0x%x.\n"),
-          std::string(converter).c_str(),
-          hdls[i]
-        ));
-      }
-    }
-  }
-
-  return ret;
-}
 
 bool
 DataWriterImpl::persist_data ()

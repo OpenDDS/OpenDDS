@@ -85,12 +85,16 @@ PublisherImpl::get_instance_handle()
 bool
 PublisherImpl::contains_writer(DDS::InstanceHandle_t a_handle)
 {
-  InstanceHandleHelper helper(a_handle);
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+        guard,
+        this->pi_lock_,
+        ::DDS::RETCODE_ERROR);
 
   for (DataWriterMap::iterator it(datawriter_map_.begin());
        it != datawriter_map_.end(); ++it)
   {
-    if (helper.matches(it->second->local_writer_objref_))
+    if(a_handle
+       == it->second->local_writer_objref_->get_instance_handle())
       return true;
   }
   return false;

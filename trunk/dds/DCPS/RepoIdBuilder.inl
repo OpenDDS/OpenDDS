@@ -19,7 +19,7 @@ RepoIdBuilder::participantId(long participantId)
 }
 
 ACE_INLINE void
-RepoIdBuilder::from_BuiltinTopicKey(DDS::BuiltinTopicKey_t key)
+RepoIdBuilder::from_BuiltinTopicKey( const DDS::BuiltinTopicKey_t& key)
 {
   federationId(key.value[0]);
   participantId(key.value[1]);

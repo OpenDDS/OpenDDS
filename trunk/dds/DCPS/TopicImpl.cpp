@@ -22,7 +22,7 @@ namespace OpenDDS
                           const ::DDS::TopicQos &        qos,
                           ::DDS::TopicListener_ptr       a_listener,
                           const ::DDS::StatusMask &      mask,
-                          ::DDS::DomainParticipant_ptr   participant)
+                          DomainParticipantImpl*         participant)
       : TopicDescriptionImpl(topic_name,
                              type_name,
                              type_support,
@@ -199,8 +199,7 @@ namespace OpenDDS
     TopicImpl::get_instance_handle()
       ACE_THROW_SPEC ((CORBA::SystemException))
     {
-      RepoIdConverter converter(id_);
-      return DDS::InstanceHandle_t(converter);
+      return this->participant_->get_handle( this->id_);
     }
 
   } // namespace DCPS

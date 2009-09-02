@@ -12,10 +12,10 @@ namespace OpenDDS
   namespace DCPS
   {
     // Implementation skeleton constructor
-    TopicDescriptionImpl::TopicDescriptionImpl (const char*                    topic_name,
-                                                const char*                    type_name,
-                                                OpenDDS::DCPS::TypeSupport_ptr     type_support,
-                                                ::DDS::DomainParticipant_ptr   participant)
+    TopicDescriptionImpl::TopicDescriptionImpl (const char*            topic_name,
+                                                const char*            type_name,
+                                                TypeSupport_ptr        type_support,
+                                                DomainParticipantImpl* participant)
       : topic_name_(topic_name),
         type_name_(type_name),
         participant_(participant),

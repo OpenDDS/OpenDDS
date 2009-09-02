@@ -37,6 +37,7 @@ sub header {
 #include "dds/DCPS/ReceivedDataElementList.h"
 #include "dds/DCPS/RakeResults_T.h"
 #include "dds/DCPS/transport/framework/TransportInterface.h"
+#include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/Util.h"
 #include "<%IDLBASE%>TypeSupportImpl.h"
 
@@ -1630,7 +1631,8 @@ void
   {
     just_registered = true;
     OpenDDS::DCPS::SubscriptionInstance* instance = 0;
-    handle = get_next_handle();
+    DDS::BuiltinTopicKey_t key = OpenDDS::DCPS::keyFromSample( instance_data);
+    handle = get_next_handle( key);
     ACE_NEW (instance,
              OpenDDS::DCPS::SubscriptionInstance(this,
                                                  this->qos_,
