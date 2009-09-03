@@ -1480,6 +1480,176 @@ namespace OpenDDS
       return ::DDS::RETCODE_OK;
     }
 
+
+    ::DDS::ReturnCode_t 
+		DomainParticipantImpl::get_discovered_participants (
+        ::DDS::InstanceHandleSeq & participant_handles
+      )
+      ACE_THROW_SPEC ((
+        ::CORBA::SystemException
+      ))
+	  {
+      ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+        guard,
+        this->handle_protector_,
+        ::DDS::RETCODE_ERROR);
+
+      HandleMap::const_iterator itEnd = this->handles_.end ();
+      for (HandleMap::const_iterator iter = this->handles_.begin();
+        iter != itEnd; ++iter)
+      {
+        GuidConverter converter (iter->first);
+        if (converter.entityKind() == KIND_PARTICIPANT)
+        {
+          CORBA::ULong len = participant_handles.length ();
+          participant_handles.length (len + 1);
+          participant_handles[len] = iter->second;
+        }
+      }
+
+		  return ::DDS::RETCODE_OK;
+	  }
+    
+    ::DDS::ReturnCode_t 
+		DomainParticipantImpl::get_discovered_participant_data (
+        ::DDS::ParticipantBuiltinTopicData & participant_data,
+        ::DDS::InstanceHandle_t participant_handle
+      )
+      ACE_THROW_SPEC ((
+        ::CORBA::SystemException
+      ))
+	  {
+      {
+        ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+          guard,
+          this->handle_protector_,
+          ::DDS::RETCODE_ERROR);
+
+        bool found = false;
+        HandleMap::const_iterator itEnd = this->handles_.end ();
+        for (HandleMap::const_iterator iter = this->handles_.begin();
+          iter != itEnd; ++iter)
+        {
+          GuidConverter converter (iter->first);
+          if (participant_handle == iter->second
+            && converter.entityKind() == KIND_PARTICIPANT)
+          {
+            found = true;
+            break;
+          }
+        }
+
+        if (!found)
+          return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+      }
+
+      ::DDS::SampleInfoSeq info;
+      ::DDS::ParticipantBuiltinTopicDataSeq data;
+      ::DDS::ReturnCode_t ret 
+        = this->bit_part_dr_->read_instance(data,
+                                            info,
+                                            1,
+                                            participant_handle,
+                                            ::DDS::ANY_SAMPLE_STATE,
+                                            ::DDS::ANY_VIEW_STATE,
+                                            ::DDS::ANY_INSTANCE_STATE);
+      if (ret == ::DDS::RETCODE_OK)
+      {
+        if (info[0].valid_data)
+          participant_data = data[0];
+        else
+          return ::DDS::RETCODE_NO_DATA;
+      }
+
+      return ret;        
+    }
+    
+
+    ::DDS::ReturnCode_t 
+		DomainParticipantImpl::get_discovered_topics (
+        ::DDS::InstanceHandleSeq & topic_handles
+      )
+      ACE_THROW_SPEC ((
+        ::CORBA::SystemException
+      ))
+    {
+      ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+        guard,
+        this->handle_protector_,
+        ::DDS::RETCODE_ERROR);
+
+      HandleMap::const_iterator itEnd = this->handles_.end ();
+      for (HandleMap::const_iterator iter = this->handles_.begin();
+        iter != itEnd; ++iter)
+      {
+        GuidConverter converter (iter->first);
+        if (converter.entityKind() == KIND_TOPIC)
+        {
+          CORBA::ULong len = topic_handles.length ();
+          topic_handles.length (len + 1);
+          topic_handles[len] = iter->second;
+        }
+      }
+
+      return ::DDS::RETCODE_OK;
+    }
+
+
+    ::DDS::ReturnCode_t 
+		DomainParticipantImpl::get_discovered_topic_data (
+        ::DDS::TopicBuiltinTopicData & topic_data,
+        ::DDS::InstanceHandle_t topic_handle
+      )
+      ACE_THROW_SPEC ((
+        ::CORBA::SystemException
+      ))
+    {
+      {
+        ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+          guard,
+          this->handle_protector_,
+          ::DDS::RETCODE_ERROR);
+
+        bool found = false;
+        HandleMap::const_iterator itEnd = this->handles_.end ();
+        for (HandleMap::const_iterator iter = this->handles_.begin();
+          iter != itEnd; ++iter)
+        {
+          GuidConverter converter (iter->first);
+          if (topic_handle == iter->second
+            && converter.entityKind() == KIND_TOPIC)
+          {
+            found = true;
+            break;
+          }
+        }
+
+        if (!found)
+          return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+      }
+
+      ::DDS::SampleInfoSeq info;
+      ::DDS::TopicBuiltinTopicDataSeq data;
+      ::DDS::ReturnCode_t ret 
+        = this->bit_topic_dr_->read_instance(data,
+                                    info,
+                                    1,
+                                    topic_handle,
+                                    ::DDS::ANY_SAMPLE_STATE,
+                                    ::DDS::ANY_VIEW_STATE,
+                                    ::DDS::ANY_INSTANCE_STATE);
+      if (ret == ::DDS::RETCODE_OK)
+      {
+        if (info[0].valid_data)
+          topic_data = data[0];
+        else
+          return ::DDS::RETCODE_NO_DATA;
+      }
+
+      return ret;     
+    }
+
+
     ::DDS::ReturnCode_t
     DomainParticipantImpl::enable (
       )

@@ -3,6 +3,7 @@
 // $Id$
 
 #include "ReceivedDataElementList.h"
+#include "DomainParticipantImpl.h"
 #include "ace/OS_NS_sys_time.h"
 
 
@@ -47,6 +48,7 @@ void OpenDDS::DCPS::InstanceState::sample_info(::DDS::SampleInfo& si,
   si.no_writers_generation_count = no_writers_generation_count_ ;
   si.source_timestamp = de->source_timestamp_ ;
   si.instance_handle = handle_ ;
+  si.publication_handle = this->reader_->participant_servant_->get_handle (de->pub_);
   si.valid_data = de->registered_data_ != 0;
 /*
  * These are actually calculated later...

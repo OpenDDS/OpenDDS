@@ -90,6 +90,7 @@ private:
 
   DDS::DataReader_var reader_;
   long                  num_reads_;
+  ::DDS::InstanceHandle_t publication_handle_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */
