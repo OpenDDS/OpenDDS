@@ -590,9 +590,6 @@ namespace OpenDDS
       typedef ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> Reverse_Lock_t;
       Reverse_Lock_t reverse_sample_lock_;
 
-      /// The instance handle for the next new instance.
-      ::DDS::InstanceHandle_t         next_handle_;
-
     private:
       /// Send a SAMPLE_ACK message in response to a REQUEST_ACK message.
       bool send_sample_ack(

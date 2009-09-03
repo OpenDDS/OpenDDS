@@ -1,77 +1,191 @@
-Last updated: 3/30/2009
-Steven Stallion
 
-The DDS 1.2 specification (formal/07-01-01) adds additional operations which
-affect the scope and use of instance handles.  Instance handles are now
-made available via the Entity::get_instance_handle operation.  It is also
-possible for a given DomainParticipant to assert whether or not it contains
-a given entity through the use of contains_entity operation.  Currently,
-instance handles are either derived from an associated RepoId assigned by the
-DCPSInfoRepo or generated as a sequence.  Due to the increased scope and wider
-use presented in the updated specification, a new generation scheme is
-required.
+Instance handles:
 
-Instance handles will now be divided into two categories:
-- Entity instance handles
-- Data instance handles
+  "You can think of them as essentially local identifiers for objects
+  that live within the global data space."
 
-Entity instance handles are assigned to both local and remote entities
-by the DomainParticipantImpl.  At the time an entity instance handle is
-created, a corresonding RepoId must be available and associated for remote
-entities.  These RepoIds are used when calling the DCPSInfoRepo for the
-various ignore_* operations.
+This is a good working definition and covers all of the cases which
+need to be handled by the opaque handle values.  The global data space
+in this case consists of the entire reachable DDS service; both local
+and remote service entities.
 
-When a new entity instance handle is created for a remote entity, the
-DomainParticipantImpl should verify that the given RepoId has not already
-been associated.  If it has, the previously assigned instance handle should
-be used.  If it has not, a new instance handle should be generated and
-associated with the given RepoId in a map managed by the DomainParticipantImpl.
+The following methods and data structures use the InstanceHandle_t
+opaque value:
 
-Per the specification, the contains_entity operation may recurse through a 
-DomainParticipant's Subscriber and Publisher.
+  DDS::Entity
+    Returns handle value:
+      InstanceHandle_t = get_instance_handle()
 
-Entity instance handles should have their state periodically purged when
-entities are either deleted or disassociated.  
+  DDS::DomainParticipant
+    Returns handle value:
+      get_discovered_participants( inout: InstanceHandle_t)
+      get_discovered_topics( inout: InstanceHandle_t)
 
-Data instance handles are scoped to the associated DataReaderImpl or
-DataWriterImpl which created it.  These instance handles are not intended 
-to be mixed with entity instance handles.  The sole exception to this rule is
-when a Builtin Topic is used to lookup an entity which is then passed to one
-of the ignore_* operations on the DomainParticipant (see below).
+    Requires handle value:
+      ignore_participant( InstanceHandle_t)
+      ignore_topic( InstanceHandle_t)
+      ignore_publication( InstanceHandle_t)
+      ignore_subscription(
+      InstanceHandle_t)
+      get_discovered_participant_data( ..., InstanceHandle_t)
+      get_discovered_topic_data( ..., InstanceHandle_t)
+      contains_entity( InstanceHandle_t)
 
-Unlike entity instance handles, data instance handles do not maintain any
-additional state which need purging.
+  DDS::DataWriter
+    Returns handle value:
+      InstanceHandle_t = register_instance(...)
+      InstanceHandle_t = register_instance_w_timestamp(...)
+      InstanceHandle_t = lookup_instance(...)
+      get_matched_subscriptions( inout: InstanceHandle_t)
 
-The InstanceHandle_t type is currently a typedef to a CORBA long in
-DdsDcpsInfrastructure.idl.  The lower 4 bits of the overall 32-bit value
-contains a kind field (InstanceHandleKind) that indicates the kind of handle.
-The upper 28 bits are a sequence which allows for up to 268,435,456 instance
-handles be assigned per kind.
+    Requires handle value:
+      unregister_instance( ..., InstanceHandle_t)
+      unregister_instance_w_timestamp( ..., InstanceHandle_t, ...)
+      get_key_value( ..., InstanceHandle_t)
+      write( ..., InstanceHandle_t)
+      write_w_timestamp( ..., InstanceHandle_t, ...)
+      dispose( ..., InstanceHandle_t)
+      dispose_w_timestamp( ..., InstanceHandle_t, ...)
+      get_matched_subscription_data( ..., InstanceHandle_t)
 
-InstanceHandle_t:
-31..............24..............16..............8.......4.......0
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                         sequence(28)                  |kind(4)|
-+---------------+---------------+---------------+---------------+
-      (MSB)                                           (LSB)
+  DDS::DataReader
+    Returns handle value:
+      InstanceHandle_t = lookup_instance(...)
+      get_matched_publications( inout: InstanceHandle_t)
 
-The InstanceHandleKind field allows the DomainParticipantImpl to perform
-additional error checking in the various ignore_* operations.  If a data
-instance handle is passed to an ignore operation, it is assumed that it 
-corresponds to an entity referenced by a Builtin Topic.  The RepoId will
-then be generated from the BuiltinTopicKey_t for that instance and used.
+    Requires handle value:
+      read_instance( ..., InstanceHandle_t, ...)
+      take_instance( ..., InstanceHandle_t, ...)
+      read_next_instance( ..., InstanceHandle_t, ...)
+      take_next_instance( ..., InstanceHandle_t, ...)
+      read_next_instance_w_condition( ..., InstanceHandle_t, ...)
+      take_next_instance_w_condition( ..., InstanceHandle_t, ...)
+      get_key_value( ..., InstanceHandle_t)
+      get_matched_publication_data( ..., InstanceHandle_t)
 
-InstanceHandleKind Enumeration:
-0x0 KIND_UNKNOWN
-0x1 KIND_PARTICIPANT
-0x2 KIND_TOPIC
-0x3 KIND_SUBSCRIBER
-0x4 KIND_PUBLISHER
-0x5 KIND_DATAREADER
-0x6 KIND_DATAWRITER
-0xF KIND_DATA
+  DDS::SampleInfo
+    instance_handle publication_handle
 
-The DCPSInfoRepo must have all references to InstanceHandle_t removed.  As the
-scope and responsibility for generating these values has now shifted to
-DomainParticipantImpl, it is no longer neccessary (or correct) for the
-DCPSInfoRepo to be aware of an assigned instance handle.
+  DDS::LivelinessChangedStatus
+    last_publication_handle
+
+  DDS::OfferedDeadlineMissedStatus
+    last_instance_handle
+
+  DDS::RequestedDeadlineMissedStatus
+    last_instance_handle
+
+  DDS::SampleRejectedStatus
+    last_instance_handle
+
+  DDS::PublicationMatchedStatus
+    last_subscription_handle
+
+  DDS::SubscriptionMatchedStatus
+    last_publication_handle
+
+For the DataWriter and DataReader, InstanceHandle_t values
+represent a specific key value for that writer or reader.  For the
+Entity::get_instance_handle() and DomainParticipant::contains_entity()
+methods, the InstanceHandle_t value represents a local Entity within
+the scope of the DomainParticipant.
+
+NOTE: Even though there is no inheritance from Entity shown for DataReader
+      and DataWriter in the specification, the IDL included there for
+      the PSM clearly shows this relationship, so these are considered
+      Entities.
+
+For the SampleInfo and various Status variable fields, the
+InstanceHandle_t values represent either a DataReader key value
+(instance_handle, last_instance_handle) or an Entity within the entire
+reachable DDS service (publication_handle, last_publication_handle,
+last_subscription_handle).
+
+The DDS specification, formal/07-01-01 version 1.2, clearly links the
+two different uses of these handles:
+
+  7.1.2.2.1.31 contains_entity
+  ...
+  The instance handle for an Entity may be obtained from built-in
+  topic data, from various statuses, or from the Entity operation
+  get_instance_handle.
+
+This means that an application should be able to read a Builtin Topic
+sample, determine its SampleInfo::instance_handle, and use that in a
+call to any of the API methods that require an instance handle.  If that
+handle is not suitable for that call, the method implementation should
+reject its use by returning the RETCODE_BAD_PARAMETER status code.
+
+Synthesizing the above information we see that the scope of any individual
+InstanceHandle_t value is within at least a single DomainParticipant
+and that values obtained via get_instance_handle() or from SampleInfo
+or reader or writer methods need to be consistent and match where they
+refer to the same Entity or data key value.
+
+The handle values for a unique data key value used to identify instances
+in readers and writers are usable only in the reader or writer from which
+the handle was obtained.  For example, if a writer is used to register a
+sample with a key value and returns an instance handle representing that
+instance, that handle is only valid within the scope of that writer.
+To access the same unique data key value from a reader, or any other
+writer, a lookup_instance() call can be made to find the handle value
+valid within that reader or writer.
+
+OpenDDS generates all InstanceHandle_t values within the scope of a
+containing DomainParticipant Entity.  Each contained Entity and unique
+data key value instance in each writer and reader will have a unique
+value within the participant.
+
+Values representing Entities obtained from the data sample key values,
+a DataWriter or DataReader lookup_instance() call, from a DataReader
+SampleInfo value, or from a Communication Status variable field value,
+must correspond to the Entity get_instance_handle() value obtained from
+the corresponding Entity where it is available in the same scope (that is,
+the Entity referred to is contained within the same DomainParticipant).
+
+The specification suggests, but does not require, that the type of the
+opaque handle values be a CORBA::Long.  OpenDDS follows this suggestion.
+
+A consequence of maintaining the handle values as unique within a
+participant is that the total number of Entities plus data instances in
+all readers and writers may not exceed the maximum allowed value of the
+handle type.  For OpenDDS this is a 32 bit value.  Note that this
+includes all values generated, even if they are no longer actively
+participating in the operation of the middleware (disposed instances,
+destroyed Entities).  OpenDDS does not currently implement a value reuse
+mechanism once the handle value type saturates.
+
+The following methods are part of the instance handle management
+implementation of OpenDDS:
+
+  InstanceHandleGenerator
+    - Class provides the Sequence implementation used to generate
+      unique handle values.
+
+  DomainParticipant::participant_handles_
+    - Object of InstanceHandleGenerator used as the generating Sequence
+      for handles.
+
+  DomainParticipant::handles_,handles_protector_
+    - Mapping of GUID_t values to instance handles and lock for guarding
+      access to the container.
+
+  InstanceHandle_t = DomainParticipant::get_handle( GUID_t)
+    - If the GUID_t value represents and Entity, an index is searched for
+      that Entity and any existing handle value returned.  Otherwise a
+      unique new handle value is generated.  The new value is stored in
+      the index if it represents and Entity.
+
+  InstanceHandle_t = DataWriterImpl::get_next_instance()
+    - Obtains a handle value for unique data key value instances as they
+      are created.
+
+  InstanceHandle_t = DataReaderImpl::get_next_handle( BuiltinTopicKey_t)
+    - If the reader is for a BuiltinTopic Topic, then a handle is
+      obtained representing the Entity described in the sample with the
+      given key value.  Otherwise a unique new handle value is generated.
+
+  BuiltinTopicKey_t = keyFromSample<T>( T* sample)
+    - Template function to extract BuiltinTopicKey_t values from
+      BuiltinTopic data samples.
+

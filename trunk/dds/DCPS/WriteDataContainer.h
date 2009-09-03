@@ -346,13 +346,6 @@ namespace OpenDDS
         DataSampleList& instance_list,
         bool& released);
 
-      /**
-       * Get an instance handle for a new instance.
-       * This method should be called under the protection of a lock
-       * to ensure that the handle is unique for the container.
-       */
-      ::DDS::InstanceHandle_t get_next_handle ();
-
     private:
 
       /// List of data that has not been sent yet.
@@ -438,9 +431,6 @@ namespace OpenDDS
 
       /// The flag indicates the datawriter will be destroyed.
       bool  shutdown_;
-
-      /// The instance handle for the next new instance.
-      ::DDS::InstanceHandle_t next_handle_;
 
       /// Domain ID.
       ::DDS::DomainId_t const domain_id_;

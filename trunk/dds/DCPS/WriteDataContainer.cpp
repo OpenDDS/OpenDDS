@@ -96,7 +96,6 @@ WriteDataContainer::WriteDataContainer(
     transport_send_element_allocator_(2 * n_chunks_,
                                       sizeof (OpenDDS::DCPS::TransportSendElement)),
     shutdown_ (false),
-    next_handle_(1),
     domain_id_ (domain_id),
     topic_name_  (topic_name),
     type_name_ (type_name),
@@ -247,7 +246,7 @@ WriteDataContainer::register_instance(
 
     ACE_auto_ptr_reset (safe_instance, instance);
 
-    instance_handle = get_next_handle();
+    instance_handle = this->writer_->get_next_handle();
 
     int const insert_attempt = bind(instances_, instance_handle, instance);
 
@@ -1075,16 +1074,6 @@ WriteDataContainer::get_handle_instance (::DDS::InstanceHandle_t handle)
   }
 
   return instance;
-}
-
-::DDS::InstanceHandle_t
-WriteDataContainer::get_next_handle ()
-{
-  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-                    guard,
-                    this->lock_,
-                    0);
-  return next_handle_++;
 }
 
 

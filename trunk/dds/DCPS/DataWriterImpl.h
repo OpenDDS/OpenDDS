@@ -435,6 +435,11 @@ namespace OpenDDS
       /// Wait for pending samples to drain.
       void wait_pending();
 
+      /**
+       * Get an instance handle for a new instance.
+       */
+      DDS::InstanceHandle_t get_next_handle ();
+
     protected:
 
       /**
