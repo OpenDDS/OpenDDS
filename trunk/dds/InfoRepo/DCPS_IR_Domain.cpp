@@ -1254,6 +1254,7 @@ void DCPS_IR_Domain::publish_subscription_bit (DCPS_IR_Subscription* subscriptio
             data.latency_budget = readerQos->latency_budget;
             data.liveliness = readerQos->liveliness;
             data.reliability = readerQos->reliability;
+            data.ownership = readerQos->ownership;
             data.destination_order = readerQos->destination_order;
             data.user_data = readerQos->user_data;
             data.time_based_filter = readerQos->time_based_filter;
@@ -1335,6 +1336,7 @@ void DCPS_IR_Domain::publish_publication_bit (DCPS_IR_Publication* publication)
             data.latency_budget = writerQos->latency_budget;
             data.liveliness = writerQos->liveliness;
             data.reliability = writerQos->reliability;
+            data.lifespan = writerQos->lifespan;
             data.user_data = writerQos->user_data;
             data.ownership = writerQos->ownership;
             data.ownership_strength = writerQos->ownership_strength;

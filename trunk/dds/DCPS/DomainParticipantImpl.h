@@ -306,6 +306,37 @@ namespace OpenDDS
         ::CORBA::SystemException
       ));
 
+    virtual ::DDS::ReturnCode_t get_discovered_participants (
+        ::DDS::InstanceHandleSeq & participant_handles
+      )
+      ACE_THROW_SPEC ((
+        ::CORBA::SystemException
+      ));
+    
+    virtual ::DDS::ReturnCode_t get_discovered_participant_data (
+        ::DDS::ParticipantBuiltinTopicData & participant_data,
+        ::DDS::InstanceHandle_t participant_handle
+      )
+      ACE_THROW_SPEC ((
+        ::CORBA::SystemException
+      ));
+    
+    virtual ::DDS::ReturnCode_t get_discovered_topics (
+        ::DDS::InstanceHandleSeq & topic_handles
+      )
+      ACE_THROW_SPEC ((
+        ::CORBA::SystemException
+      ));
+        
+    virtual ::DDS::ReturnCode_t get_discovered_topic_data (
+        ::DDS::TopicBuiltinTopicData & topic_data,
+        ::DDS::InstanceHandle_t topic_handle
+      )
+      ACE_THROW_SPEC ((
+        ::CORBA::SystemException
+      ));
+    
+
     virtual ::DDS::ReturnCode_t enable (
       )
       ACE_THROW_SPEC ((

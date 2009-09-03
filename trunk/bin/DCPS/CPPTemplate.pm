@@ -1776,7 +1776,8 @@ void
                     static_cast<OpenDDS::DCPS::ReceivedDataElement *> (
                         rd_allocator_->malloc (
                             sizeof (OpenDDS::DCPS::ReceivedDataElement))),
-                    OpenDDS::DCPS::ReceivedDataElement(instance_data));
+                    OpenDDS::DCPS::ReceivedDataElement(header.publication_id_,
+                                                       instance_data));
     
     ptr->source_timestamp_.sec = header.source_timestamp_sec_;
     ptr->source_timestamp_.nanosec = header.source_timestamp_nanosec_;

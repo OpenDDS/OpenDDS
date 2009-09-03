@@ -9,6 +9,7 @@
 #include "ace/Thread_Mutex.h"
 
 #include "dcps_export.h"
+#include "Definitions.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -24,7 +25,8 @@ namespace OpenDDS
     class OpenDDS_Dcps_Export ReceivedDataElement
     {
     public:
-      ReceivedDataElement(void *received_data) :
+      ReceivedDataElement(PublicationId pub, void *received_data) :
+            pub_ (pub),
             registered_data_(received_data),
             sample_state_(::DDS::NOT_READ_SAMPLE_STATE),
             coherent_change_(false),
@@ -89,6 +91,8 @@ namespace OpenDDS
 
       /// the next data sample in the ReceivedDataElementList
       ReceivedDataElement *next_data_sample_ ;
+
+      PublicationId pub_;
 
     private:
       ACE_Atomic_Op<ACE_Thread_Mutex, long> ref_count_;

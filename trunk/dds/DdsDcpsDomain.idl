@@ -92,6 +92,20 @@ module DDS
     ReturnCode_t get_default_topic_qos(inout TopicQos qos);
 
     ReturnCode_t get_current_time( inout Time_t current_time);
+
+	  ReturnCode_t get_discovered_participants(
+		  inout InstanceHandleSeq participant_handles);
+
+	  ReturnCode_t get_discovered_participant_data(
+		  inout ParticipantBuiltinTopicData participant_data,
+		  in InstanceHandle_t participant_handle);
+
+	  ReturnCode_t get_discovered_topics(
+		  inout InstanceHandleSeq topic_handles);
+
+	  ReturnCode_t get_discovered_topic_data(
+		  inout TopicBuiltinTopicData topic_data,
+		  in InstanceHandle_t topic_handle);
   };
 
   local interface DomainParticipantFactory

@@ -10,7 +10,8 @@
 
 // Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl()
-  : num_reads_(0)
+  : num_reads_(0),
+    publication_handle_ (::DDS::HANDLE_NIL)
 {
 }
 
@@ -36,13 +37,32 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     DDS::ReturnCode_t status = message_dr->take_next_sample(message, si) ;
 
     if (status == DDS::RETCODE_OK) {
-      cout << "DataReaderListener:" << endl
-           << "   Message: subject    = " << message.subject.in() << endl
-           << "            subject_id = " << message.subject_id   << endl
-           << "            from       = " << message.from.in()    << endl
-           << "            count      = " << message.count        << endl
-           << "            text       = " << message.text.in()    << endl;
-      cout << "   SampleInfo.sample_rank = " << si.sample_rank << endl;
+
+      if (si.valid_data)
+      {
+        if (si.publication_handle == ::DDS::HANDLE_NIL 
+          || si.publication_handle != this->publication_handle_)
+        {
+          cerr << "DataReaderListener: ERROR: publication_handle validate failed." << endl;
+          exit(1);
+        }
+
+        cout << "DataReaderListener:" << endl
+            << "   Message: subject    = " << message.subject.in() << endl
+            << "            subject_id = " << message.subject_id   << endl
+            << "            from       = " << message.from.in()    << endl
+            << "            count      = " << message.count        << endl
+            << "            text       = " << message.text.in()    << endl;
+        cout << "   SampleInfo.sample_rank = " << si.sample_rank << endl;
+      }
+      else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
+      {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)instance is disposed\n")));
+      }
+      else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE)
+      {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)instance is unregistered\n")));
+      }
     } else if (status == DDS::RETCODE_NO_DATA) {
       cerr << "DataReaderListener: ERROR: reader received DDS::RETCODE_NO_DATA!" << endl;
     } else {
@@ -80,10 +100,12 @@ void DataReaderListenerImpl::on_liveliness_changed (
 
 void DataReaderListenerImpl::on_subscription_matched (
     DDS::DataReader_ptr,
-    const DDS::SubscriptionMatchedStatus &)
+    const DDS::SubscriptionMatchedStatus & status)
   throw (CORBA::SystemException)
 {
-  cerr << "DataReaderListenerImpl::on_subscription_matched" << endl;
+  this->publication_handle_ = status.last_publication_handle;
+  cerr << "DataReaderListenerImpl::on_subscription_matched handle=" 
+    << publication_handle_ << endl;
 }
 
 void DataReaderListenerImpl::on_sample_rejected(

@@ -611,9 +611,10 @@ namespace OpenDDS
                                     ::DDS::InstanceHandleSeq & hdls);
 
       friend class WriterInfo;
+      friend class InstanceState;
 
       friend class ::DDS_TEST; //allows tests to get at dr_remote_objref_
-
+     
       TopicImpl*                      topic_servant_;
       ::DDS::TopicDescription_var     topic_desc_;
       ::DDS::StatusMask           listener_mask_;

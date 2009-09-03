@@ -143,9 +143,13 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         ACE_ERROR((LM_ERROR, "(%P|%t) monitor: create_participant failed.\n"));
         return 1 ;
       }
+
+      OpenDDS::DCPS::DomainParticipantImpl* part_svt 
+        = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in ());
+
       // give time for BIT datareader/datawriter fully association.
       ACE_OS::sleep (2);
-
+      
       if (delay_before_read_sec > 0) {
         ACE_DEBUG((LM_DEBUG,"(%P|%t) monitor: SLEEPING BEFORE READING!\n"));
         ACE_OS::sleep (delay_before_read_sec);
@@ -192,9 +196,46 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         return 1;
       }
 
+      {
+        ::DDS::InstanceHandleSeq handles;
+        if (participant->get_discovered_participants (handles) != ::DDS::RETCODE_OK
+          || handles.length () == 0)
+        {      
+          ACE_ERROR((LM_ERROR, "(%P|%t) monitor: get_discovered_participant test failed.\n"));
+          return 1;
+        }
+      
+        CORBA::ULong len = handles.length ();
+        if (len != num_parts)
+        {
+          ACE_ERROR_RETURN ((LM_ERROR,
+            "(%P|%t) monitor:  get_discovered_participant expected %d got %d.\n", 
+            num_parts, len),
+            1);
+        }
+
+        for (CORBA::ULong i = 0; i < len; ++ i)
+        {
+          ::DDS::ParticipantBuiltinTopicData data;
+          participant->get_discovered_participant_data(data, handles[i]);
+
+          OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::GUID_UNKNOWN;
+          OpenDDS::DCPS::RepoIdBuilder builder( id);
+          builder.from_BuiltinTopicKey( data.key);
+
+          if (part_svt->get_handle (id) != handles[i])
+          {
+            ACE_ERROR((LM_ERROR, "(%P|%t) monitor: get_discovered_participant_data test failed.\n"));
+            return 1;
+          }
+        }
+
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: discover participants test PASSED.\n"));
+      }
+
       ::DDS::SampleInfoSeq partinfos(10);
       ::DDS::ParticipantBuiltinTopicDataSeq partdata(10);
-      DDS::ReturnCode_t ret = part_reader->read (partdata, 
+      ::DDS::ReturnCode_t ret = part_reader->read (partdata, 
                                                  partinfos, 
                                                  10, 
                                                  ::DDS::ANY_SAMPLE_STATE,
@@ -217,7 +258,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           1);
       }
 
-
+      
       CORBA::ULong cur_dps_with_user_data = 0;
       CORBA::ULong user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_PART_USER_DATA));
       for (CORBA::ULong i = 0; i < len; ++i)
@@ -245,6 +286,43 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN ((LM_ERROR,
           "(%P|%t) monitor:  DomainParticipant changeable qos test FAILED.\n"),
           1);
+      }
+
+      {
+        ::DDS::InstanceHandleSeq handles;
+        if (participant->get_discovered_topics (handles) != ::DDS::RETCODE_OK
+          || handles.length () == 0)
+        {      
+          ACE_ERROR((LM_ERROR, "(%P|%t) monitor: get_discovered_topics test failed.\n"));
+          return 1;
+        }
+
+        CORBA::ULong len = handles.length ();
+        if (len != num_topics)
+        {
+          ACE_ERROR_RETURN ((LM_ERROR,
+            "(%P|%t) monitor:  get_discovered_topics expected %d got %d.\n", 
+            num_topics, len),
+            1);
+        }
+
+        for (CORBA::ULong i = 0; i < len; ++ i)
+        {
+          ::DDS::TopicBuiltinTopicData data;
+          participant->get_discovered_topic_data(data, handles[i]);
+
+          OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::GUID_UNKNOWN;
+          OpenDDS::DCPS::RepoIdBuilder builder( id);
+          builder.from_BuiltinTopicKey( data.key);
+
+          if (part_svt->get_handle (id) != handles[i])
+          {
+            ACE_ERROR((LM_ERROR, "(%P|%t) monitor: get_discovered_topic_data test failed.\n"));
+            return 1;
+          }
+        }
+         
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: discover topics test PASSED.\n"));
       }
 
       ::DDS::SampleInfoSeq topicinfos(10);
