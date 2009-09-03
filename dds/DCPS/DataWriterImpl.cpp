@@ -196,6 +196,12 @@ DataWriterImpl::get_instance_handle()
   return this->participant_servant_->get_handle( publication_id_);
 }
 
+DDS::InstanceHandle_t
+DataWriterImpl::get_next_handle ()
+{
+  return this->participant_servant_->get_handle();
+}
+
 void
 DataWriterImpl::add_associations ( ::OpenDDS::DCPS::RepoId yourId,
                                    const ReaderAssociationSeq & readers )

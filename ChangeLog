@@ -1,3 +1,32 @@
+Thu Sep  3 16:39:21 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+	  Removed obsolete next_handle_ member.
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+	  get_next_handle()
+	    - new method to obtain an instance handle.
+
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+	  register_instance()
+	    - replaced call to local get_next_handle() with call to
+	      writer get_next_handle().
+
+	  Removed obsolete next_handle_ member.
+
+	  get_next_handle()
+	    - obsolete / removed
+
+        * docs/design/instance_handles.txt:
+
+	  Description of current InstanceHandle_t implementation.
+
 Thu Sep  3 16:22:45 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DdsDcpsDomain.idl:
@@ -5,23 +34,23 @@ Thu Sep  3 16:22:45 UTC 2009  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/DomainParticipantImpl.cpp:
 
           Supported following methods.
-          
-			get_discovered_participants
-			get_discovered_participant_data
-			get_discovered_topics
-			get_discovered_topic_data implementations
-	          
+
+                        get_discovered_participants
+                        get_discovered_participant_data
+                        get_discovered_topics
+                        get_discovered_topic_data implementations
+
         * bin/DCPS/CPPTemplate.pm:
         * dds/DCPS/DataReaderImpl.h:
         * dds/DCPS/InstanceState.inl:
         * dds/DCPS/ReceivedDataElementList.h:
 
           Supported publication_handle setup in SampleInfo
- 
+
         * dds/InfoRepo/DCPS_IR_Domain.cpp:
-        
+
           Added missing qos setup in built-in-topic data.
-          
+
         * tests/DCPS/BuiltInTopicTest/DataReaderListener.h:
         * tests/DCPS/BuiltInTopicTest/DataReaderListener.cpp:
         * tests/DCPS/BuiltInTopicTest/monitor.cpp:
@@ -29,140 +58,140 @@ Thu Sep  3 16:22:45 UTC 2009  Yan Dai  <dai_y@ociweb.com>
           Added get_discovered_participants and get_discovered_topics test cases
           and verify SampleInfo publication_handle is set and consistent with
           on_subscription_matched returned handle.
-          
+
 Wed Sep  2 20:30:43 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
 
-	  Attempt to extract the BuiltinTopicKey_t value from Builtin
-	  Topic samples and pass it into DataReaderImpl::get_next_handle().
+          Attempt to extract the BuiltinTopicKey_t value from Builtin
+          Topic samples and pass it into DataReaderImpl::get_next_handle().
 
         * dds/DCPS/BuiltInTopicUtils.h:
 
-	  keyFromSample<T>( T* sample)
-	    - new template function to extract BuiltinTopicKey_t values
-	      from samples, with specializations for the actual Builtin
-	      Topic data types.  Other data types return an empty key.
+          keyFromSample<T>( T* sample)
+            - new template function to extract BuiltinTopicKey_t values
+              from samples, with specializations for the actual Builtin
+              Topic data types.  Other data types return an empty key.
 
         * dds/DCPS/DataReaderImpl.h:
         * dds/DCPS/DataReaderImpl.cpp:
 
-	  get_instance_handle()
-	    - lookup the instance handle in the DomainParticipant handle
-	      mapping from RepoId values.
+          get_instance_handle()
+            - lookup the instance handle in the DomainParticipant handle
+              mapping from RepoId values.
 
-	  get_next_handle( const DDS::BuiltinTopicKey_t& key)
-	    - added 'key' parameter to be used in generating handle
-	      values for Builtin Topic data readers.  Implemented
-	      obtaining handle values from the DomainParticipant handle
-	      sequence.
+          get_next_handle( const DDS::BuiltinTopicKey_t& key)
+            - added 'key' parameter to be used in generating handle
+              values for Builtin Topic data readers.  Implemented
+              obtaining handle values from the DomainParticipant handle
+              sequence.
 
-	  lookup_instance_handles()
-	    - implement RepoId to handle lookup using the
-	      DomainParticipant mapping cache.
+          lookup_instance_handles()
+            - implement RepoId to handle lookup using the
+              DomainParticipant mapping cache.
 
-	  bit_lookup_instance_handles()
-	  cache_lookup_instance_handles()
-	    - obsolete / removed / replaced with calls to new
-	      lookup_instance_handles() method.
+          bit_lookup_instance_handles()
+          cache_lookup_instance_handles()
+            - obsolete / removed / replaced with calls to new
+              lookup_instance_handles() method.
 
         * dds/DCPS/DataWriterImpl.h:
         * dds/DCPS/DataWriterImpl.cpp:
 
-	  get_instance_handle()
-	    - lookup the instance handle in the DomainParticipant handle
-	      mapping from RepoId values.
+          get_instance_handle()
+            - lookup the instance handle in the DomainParticipant handle
+              mapping from RepoId values.
 
-	  lookup_instance_handles()
-	    - implement RepoId to handle lookup using the
-	      DomainParticipant mapping cache.
+          lookup_instance_handles()
+            - implement RepoId to handle lookup using the
+              DomainParticipant mapping cache.
 
-	  bit_lookup_instance_handles()
-	  cache_lookup_instance_handles()
-	    - obsolete / removed / replaced with calls to new
-	      lookup_instance_handles() method.
+          bit_lookup_instance_handles()
+          cache_lookup_instance_handles()
+            - obsolete / removed / replaced with calls to new
+              lookup_instance_handles() method.
 
         * dds/DCPS/DomainParticipantImpl.h:
         * dds/DCPS/DomainParticipantImpl.cpp:
 
-	  Added new HandleMap type and handles_ map member.  New
-	  handle_protector_ mutex is used for a guard in the pattern of
-	  other containers in this class.
+          Added new HandleMap type and handles_ map member.  New
+          handle_protector_ mutex is used for a guard in the pattern of
+          other containers in this class.
 
-	  Replaced subscriber_handles_ and publisher_handles_ handle
-	  sequences with the single participant_handles_ sequence that is
-	  used to generate all handle values within the DomainParticipant
-	  and contained Entities.
+          Replaced subscriber_handles_ and publisher_handles_ handle
+          sequences with the single participant_handles_ sequence that is
+          used to generate all handle values within the DomainParticipant
+          and contained Entities.
 
-	  get_instance_handle()
-	    - lookup the instance handle in the mapping from RepoId
-	      values.
+          get_instance_handle()
+            - lookup the instance handle in the mapping from RepoId
+              values.
 
-	  contains_entity()
-	    - modified to use direct comparisons.  Added guards to
-	      protect container accesses.
+          contains_entity()
+            - modified to use direct comparisons.  Added guards to
+              protect container accesses.
 
-	  get_handle()
-	    - new method to obtain a new handle value or an existing
-	      handle value for a given RepoId value.
+          get_handle()
+            - new method to obtain a new handle value or an existing
+              handle value for a given RepoId value.
 
         * dds/DCPS/InstanceHandle.h:
         * dds/DCPS/InstanceHandle.cpp:
 
-	  InstanceHandleGenerator
-	    - retained as a handle Sequence for generating all handle
-	      values within the scope of a DomainParticipant.  The actual
-	      values were simplified to be a monotonically increasing
-	      numerical sequence with no embedded meta-information about
-	      type.
+          InstanceHandleGenerator
+            - retained as a handle Sequence for generating all handle
+              values within the scope of a DomainParticipant.  The actual
+              values were simplified to be a monotonically increasing
+              numerical sequence with no embedded meta-information about
+              type.
 
-	  InstanceHandleHelper
-	    - removed
+          InstanceHandleHelper
+            - removed
 
         * dds/DCPS/PublisherImpl.h:
         * dds/DCPS/PublisherImpl.cpp:
 
-	  contains_writer()
-	    - modified to use direct handle comparisons.  Protect
-	      container access using the pi_lock_ member.
+          contains_writer()
+            - modified to use direct handle comparisons.  Protect
+              container access using the pi_lock_ member.
 
         * dds/DCPS/RepoIdBuilder.h:
         * dds/DCPS/RepoIdBuilder.inl:
 
-	  from_BuiltinTopicKey()
-	    - changed argument type to const reference.
+          from_BuiltinTopicKey()
+            - changed argument type to const reference.
 
         * dds/DCPS/SubscriberImpl.cpp:
 
-	  contains_reader()
-	    - modified to use direct handle comparisons.  Protect
-	      container access using the si_lock_ member.
+          contains_reader()
+            - modified to use direct handle comparisons.  Protect
+              container access using the si_lock_ member.
 
         * dds/DCPS/TopicDescriptionImpl.h:
         * dds/DCPS/TopicDescriptionImpl.cpp:
 
-	  Construct and store a DomainParticipantImpl pointer instead of
-	  the more generic DDS::DomainParticipant_ptr.
+          Construct and store a DomainParticipantImpl pointer instead of
+          the more generic DDS::DomainParticipant_ptr.
 
         * dds/DCPS/TopicImpl.h:
         * dds/DCPS/TopicImpl.cpp:
 
-	  Pass DomainParticipantImpl pointer to base class constructor
-	  instead of the more generic DDS::DomainParticipant_ptr.
+          Pass DomainParticipantImpl pointer to base class constructor
+          instead of the more generic DDS::DomainParticipant_ptr.
 
-	  get_instance_handle()
-	    - lookup the instance handle in the DomainParticipant handle
-	      mapping from RepoId values.
+          get_instance_handle()
+            - lookup the instance handle in the DomainParticipant handle
+              mapping from RepoId values.
 
         * tests/DCPS/DestinationOrder/main.cpp:
 
-	  Extract the actual reader instance value before taking the
-	  instance data.
+          Extract the actual reader instance value before taking the
+          instance data.
 
         * tests/DCPS/FooTest3_0/PubDriver.cpp:
 
-	  Change handle value extraction to match new handle extraction
-	  idiom.
+          Change handle value extraction to match new handle extraction
+          idiom.
 
 Tue Sep  1 20:35:29 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
