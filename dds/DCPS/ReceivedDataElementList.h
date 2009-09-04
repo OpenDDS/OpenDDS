@@ -55,6 +55,8 @@ namespace OpenDDS
           return this->ref_count_.value();
       }
 
+      PublicationId pub_;
+
       /// Data sample received
       void *registered_data_;  // ugly, but works....
 
@@ -91,8 +93,6 @@ namespace OpenDDS
 
       /// the next data sample in the ReceivedDataElementList
       ReceivedDataElement *next_data_sample_ ;
-
-      PublicationId pub_;
 
     private:
       ACE_Atomic_Op<ACE_Thread_Mutex, long> ref_count_;
