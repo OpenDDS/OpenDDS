@@ -93,6 +93,8 @@ module DDS
 
     ReturnCode_t get_current_time( inout Time_t current_time);
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
+
 	  ReturnCode_t get_discovered_participants(
 		  inout InstanceHandleSeq participant_handles);
 
@@ -106,6 +108,9 @@ module DDS
 	  ReturnCode_t get_discovered_topic_data(
 		  inout TopicBuiltinTopicData topic_data,
 		  in InstanceHandle_t topic_handle);
+
+#endif
+
   };
 
   local interface DomainParticipantFactory

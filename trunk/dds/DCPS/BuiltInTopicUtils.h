@@ -67,6 +67,8 @@ namespace OpenDDS {
     template< typename TopicType>
     ::DDS::BuiltinTopicKey_t keyFromSample( TopicType* sample);
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
+
     // changed from member function template to class template
     // to avoid VC++ v6 build problem.
     /*
@@ -212,6 +214,8 @@ namespace OpenDDS {
         }
     };
 
+#endif
+
     inline
     bool
     BuiltinTopicKeyLess::operator()(
@@ -227,6 +231,9 @@ namespace OpenDDS {
                                 false;
 
     }
+
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
 
     template<>
     inline
@@ -267,6 +274,8 @@ namespace OpenDDS {
     {
       return sample->key;
     }
+
+#endif
 
     template< typename TopicType>
     inline

@@ -113,12 +113,6 @@ class ACE_Data_Block ;
 }
 
 
-// The factory section name prefix.
-static const ACE_TCHAR FACTORY_SECTION_NAME_PREFIX[]
-= ACE_TEXT("transport_factory_");
-// The factory section name prefix is "transport_factory_" so the length is 18.
-static const size_t FACTORY_SECTION_NAME_PREFIX_LEN =
-ACE_OS::strlen (FACTORY_SECTION_NAME_PREFIX);
 // The transport section name prefix.
 static const ACE_TCHAR  TRANSPORT_SECTION_NAME_PREFIX[]
 = ACE_TEXT("transport_impl_");
