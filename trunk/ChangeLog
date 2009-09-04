@@ -1,31 +1,39 @@
+Fri Sep  4 16:49:04 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/InstanceState.inl:
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/ReceivedDataElementList.h:
+
+          Fixed a few compilation errors and warnings on linux.
+          
 Thu Sep  3 16:39:21 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
         * dds/DCPS/DataReaderImpl.cpp:
 
-	  Removed obsolete next_handle_ member.
+          Removed obsolete next_handle_ member.
 
         * dds/DCPS/DataWriterImpl.h:
         * dds/DCPS/DataWriterImpl.cpp:
 
-	  get_next_handle()
-	    - new method to obtain an instance handle.
+          get_next_handle()
+            - new method to obtain an instance handle.
 
         * dds/DCPS/WriteDataContainer.h:
         * dds/DCPS/WriteDataContainer.cpp:
 
-	  register_instance()
-	    - replaced call to local get_next_handle() with call to
-	      writer get_next_handle().
+          register_instance()
+            - replaced call to local get_next_handle() with call to
+              writer get_next_handle().
 
-	  Removed obsolete next_handle_ member.
+          Removed obsolete next_handle_ member.
 
-	  get_next_handle()
-	    - obsolete / removed
+          get_next_handle()
+            - obsolete / removed
 
         * docs/design/instance_handles.txt:
 
-	  Description of current InstanceHandle_t implementation.
+          Description of current InstanceHandle_t implementation.
 
 Thu Sep  3 16:22:45 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
