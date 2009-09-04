@@ -1,3 +1,15 @@
+Fri Sep  4 18:59:47 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tools:
+        * tools/setenv.csh:
+        * tools/setenv.sh:
+
+          Added boilerplate environment scripts for new users.
+
+        * tools/style:
+
+          Added new scripts for applying project style changes.
+
 Fri Sep  4 18:00:20 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/BuiltInTopicUtils.h:
@@ -10,7 +22,7 @@ Fri Sep  4 18:00:20 UTC 2009  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/transport/framework/TransportDefs.h:
 
           Removed unused variable to fix warnings.
-          
+
 Fri Sep  4 16:49:04 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/InstanceState.inl:
