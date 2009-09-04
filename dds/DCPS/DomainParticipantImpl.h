@@ -13,6 +13,7 @@
 #include "dds/DdsDcpsTopicC.h"
 #include "dds/DdsDcpsDomainExtS.h"
 #include "dds/DdsDcpsInfoC.h"
+#include "dds/DCPS/GuidUtils.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "dds/DdsDcpsInfrastructureTypeSupportC.h"
@@ -306,6 +307,8 @@ namespace OpenDDS
         ::CORBA::SystemException
       ));
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
+
     virtual ::DDS::ReturnCode_t get_discovered_participants (
         ::DDS::InstanceHandleSeq & participant_handles
       )
@@ -336,6 +339,7 @@ namespace OpenDDS
         ::CORBA::SystemException
       ));
     
+#endif
 
     virtual ::DDS::ReturnCode_t enable (
       )
@@ -361,7 +365,7 @@ namespace OpenDDS
       /**
        * Obtain a local handle representing a GUID.
        */
-      DDS::InstanceHandle_t get_handle( const RepoId& id = GUID_UNKNOWN);
+      ::DDS::InstanceHandle_t get_handle( const RepoId& id = GUID_UNKNOWN);
 
       /**
       *  Associate the servant with the object reference.

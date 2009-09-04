@@ -1481,6 +1481,8 @@ namespace OpenDDS
     }
 
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
+
     ::DDS::ReturnCode_t 
 		DomainParticipantImpl::get_discovered_participants (
         ::DDS::InstanceHandleSeq & participant_handles
@@ -1649,6 +1651,7 @@ namespace OpenDDS
       return ret;     
     }
 
+#endif
 
     ::DDS::ReturnCode_t
     DomainParticipantImpl::enable (
@@ -1734,7 +1737,7 @@ namespace OpenDDS
       return converter.participantId();
     }
 
-    DDS::InstanceHandle_t
+    ::DDS::InstanceHandle_t
     DomainParticipantImpl::get_handle( const RepoId& id)
     {
       if( id == GUID_UNKNOWN) {

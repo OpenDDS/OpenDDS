@@ -1,3 +1,16 @@
+Fri Sep  4 18:00:20 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/BuiltInTopicUtils.h:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DdsDcpsDomain.idl:
+
+          Fixed compilation failure on DDS_HAS_MINIMUM_BIT builds.
+
+        * dds/DCPS/transport/framework/TransportDefs.h:
+
+          Removed unused variable to fix warnings.
+          
 Fri Sep  4 16:49:04 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/InstanceState.inl:
@@ -5,7 +18,7 @@ Fri Sep  4 16:49:04 UTC 2009  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/ReceivedDataElementList.h:
 
           Fixed a few compilation errors and warnings on linux.
-          
+
 Thu Sep  3 16:39:21 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
