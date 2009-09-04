@@ -2,6 +2,11 @@
 # $Id$
 #
 
+:begin
+
 # Collapse lines which only contain closing parens.
 $!N
-/\n *)\{1,\};$/s/\n *//
+s/\n *\()\{1,\};\)$/\1/
+t begin
+P
+D
