@@ -3,7 +3,8 @@
 #
 
 # Collapse multi-line ACE_THROW_SPEC clauses.
-/ACE_THROW_SPEC(($/{
-  $!N;$!N
-  s/\n *//g
+# NOTE: Trailing rparens are caught by another rule.
+/ACE_THROW_SPEC *(($/{
+  $!N
+  s/\n *//
 }

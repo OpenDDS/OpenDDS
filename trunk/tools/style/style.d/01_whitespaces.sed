@@ -14,3 +14,6 @@ s/\(!\) \{1,\}/\1/g
 # Adjust initializer list alignment by astyle(1).
 s/^ \{2,4\}\( \{2\}:\)/\1/
 s/^ \{2,4\}\( \{2\},\)/\1/
+
+# Strip leading spaces from template specifiers.
+s/< \{1,\}\([^<]\)/<\1/g
