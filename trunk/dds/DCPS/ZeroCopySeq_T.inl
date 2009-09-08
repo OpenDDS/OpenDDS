@@ -14,10 +14,10 @@ namespace TAO
     {
 
 
-//DDS_Vector implementation
+//ZeroCopyVector implementation
 
 template <class Sample_T, size_t DEF_MAX> ACE_INLINE
-ZeroCopyDataSeq<Sample_T, DEF_MAX>::DDS_Vector::DDS_Vector(
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::ZeroCopyVector::ZeroCopyVector(
   const size_t init_size,
   ACE_Allocator* alloc)
   : ACE_Vector<OpenDDS::DCPS::ReceivedDataElement*, DEF_MAX> (init_size, alloc)
@@ -27,7 +27,7 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::DDS_Vector::DDS_Vector(
 
 template <class Sample_T, size_t DEF_MAX> ACE_INLINE
 void
-ZeroCopyDataSeq<Sample_T, DEF_MAX>::DDS_Vector::swap(DDS_Vector& rhs)
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::ZeroCopyVector::swap(ZeroCopyVector& rhs)
 {
   //Later versions of ACE do have a working ACE_Vector<T,MAX>::swap so we must
   //delegate up to ACE_Array<T> to get consistent swap behavior.

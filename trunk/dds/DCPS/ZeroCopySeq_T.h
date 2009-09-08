@@ -136,13 +136,13 @@ namespace TAO
       /** In some versions of ACE, ACE_Vector doesn't have a working swap()
         * function, so we have to provide our own.
         */
-      class DDS_Vector
+      class ZeroCopyVector
         : public ACE_Vector<OpenDDS::DCPS::ReceivedDataElement*, DEF_MAX>
       {
       public:
-        DDS_Vector(const size_t init_size = DEF_MAX, ACE_Allocator* alloc = 0);
+        ZeroCopyVector(const size_t init_size = DEF_MAX, ACE_Allocator* alloc = 0);
 
-        void swap(DDS_Vector&);
+        void swap(ZeroCopyVector&);
 
         typedef ACE_Vector<OpenDDS::DCPS::ReceivedDataElement*, DEF_MAX> BASE;
         using BASE::allocator_;
@@ -181,7 +181,7 @@ namespace TAO
       OpenDDS::DCPS::FirstTimeFastAllocator<OpenDDS::DCPS::ReceivedDataElement*, DEF_MAX>
         default_allocator_;
 
-      typedef DDS_Vector Ptr_Seq_Type;
+      typedef ZeroCopyVector Ptr_Seq_Type;
 
       /// array of pointers if the sequence is supporting zero-copy reads
       Ptr_Seq_Type ptrs_;
