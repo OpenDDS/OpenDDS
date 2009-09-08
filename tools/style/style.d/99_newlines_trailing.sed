@@ -7,5 +7,5 @@
 # Strip trailing newlines.
 /^\n*$/{
   $d; N
-  bbegin
+  b begin
 }
