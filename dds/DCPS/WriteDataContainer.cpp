@@ -64,14 +64,6 @@ namespace OpenDDS
       return false;
     }
 
-
-#if 0
-    // Emacs trick to align code with first column
-    // This will cause emacs to emit bogus alignment message
-    // For now just disregard them.
-  }}
-#endif
-
 WriteDataContainer::WriteDataContainer(
   DataWriterImpl* writer,
   CORBA::Long    depth,

@@ -39,14 +39,6 @@ namespace OpenDDS
   namespace DCPS
   {
 
-#if 0
-    // Emacs trick to align code with first column
-    // This will cause emacs to emit bogus alignment message
-    // For now just disregard them.
-  }}
-#endif
-
-
 DataReaderImpl::DataReaderImpl (void) :
   rd_allocator_(0),
   qos_ (TheServiceParticipant->initial_DataReaderQos ()),

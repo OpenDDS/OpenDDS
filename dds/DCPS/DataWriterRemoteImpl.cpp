@@ -15,12 +15,6 @@ namespace OpenDDS
     //TBD - add check for enabled in most methods.
     //      currently this is not needed because auto_enable_created_entities
     //      cannot be false.
-#if 0
-    // Emacs trick to align code with first column
-    // This will cause emacs to emit bogus alignment message
-    // For now just disregard them.
-  }}
-#endif
 
 DataWriterRemoteImpl::DataWriterRemoteImpl (DataWriterImpl* parent)
   : parent_ (parent)

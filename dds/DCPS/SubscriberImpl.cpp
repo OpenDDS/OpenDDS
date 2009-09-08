@@ -33,13 +33,6 @@ namespace OpenDDS
   namespace DCPS
   {
 
-#if 0
-    // Emacs trick to align code with first column
-    // This will cause emacs to emit bogus alignment message
-    // For now just disregard them.
-  }}
-#endif
-
 // Implementation skeleton constructor
 SubscriberImpl::SubscriberImpl (DDS::InstanceHandle_t handle,
                                 const ::DDS::SubscriberQos & qos,

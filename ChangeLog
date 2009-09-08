@@ -1,3 +1,15 @@
+Tue Sep  8 18:45:26 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderRemoteImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterRemoteImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Dropped Emacs alignment hacks.
+
 Tue Sep  8 17:05:47 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * tools/style/style.d/01_whitespaces.sed:
