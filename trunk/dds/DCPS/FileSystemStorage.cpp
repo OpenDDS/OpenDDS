@@ -926,8 +926,8 @@ ACE_TString b32h_encode(const ACE_TCHAR* decoded)
 
 ACE_TString b32h_decode(const ACE_TCHAR* encoded)
 {
-  static const size_t dec[] = // #before first '=' -> #output
-    {0, 0, 1, 0, 2, 3, 0, 4};
+  // #before first '=' -> #output
+  static const size_t dec[] = {0, 0, 1, 0, 2, 3, 0, 4};
   ACE_TString decoded;
   for (; *encoded; encoded += 8)
     {
