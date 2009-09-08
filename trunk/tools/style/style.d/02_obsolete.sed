@@ -3,7 +3,7 @@
 #
 
 # Remove #if 0 blocks:
-/#if 0/,/#endif/d
+/#if 0$/,/^#endif/D
 
 # Strip leading global specifiers on known namespaces.
 s/^::\(ACE\)/\1/
@@ -23,7 +23,7 @@ s/\( \{1,\}\)::\(OpenDDS\)/\1\2/g
 
 # Replace obsolete uses of void for empty parameter lists.
 # NOTE: This may break C-style casts.
-s/(void)/()/
+s/\([^ ]\)(void)/\1()/
 
 # Strip trailing spaces from known macros.
 s/\(ACE_THROW_SPEC\) \{1,\}/\1/g
