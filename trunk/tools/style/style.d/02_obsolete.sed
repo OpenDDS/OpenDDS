@@ -2,9 +2,6 @@
 # $Id$
 #
 
-# Remove #if 0 blocks:
-/#if 0$/,/^#endif/D
-
 # Strip leading global specifiers on known namespaces.
 s/^::\(ACE\)/\1/
 s/\( \{1,\}\)::\(ACE\)/\1\2/g
