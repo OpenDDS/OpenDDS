@@ -12,14 +12,6 @@ namespace OpenDDS
   namespace DCPS
   {
 
-#if 0
-    // Emacs trick to align code with first column
-    // This will cause emacs to emit bogus alignment message
-    // For now just disregard them.
-  }}
-#endif
-
-
 DataReaderRemoteImpl::DataReaderRemoteImpl (DataReaderImpl* parent) :
   parent_(parent)
 {
