@@ -1,8 +1,8 @@
-OpenDDS is an open-source C++ implementation of the
-Object Management Group's specification "Data Distribution
-Service for Real-time Systems".  Although OpenDDS is itself developed in
-C++, Java and JMS bindings are provided so that Java applications can use
-OpenDDS -- see java/README and java/jms/README for details.
+OpenDDS is an open-source C++ implementation of the Object Management Group's
+specification "Data Distribution Service for Real-time Systems".  Although
+OpenDDS is itself developed in C++, Java and JMS bindings are provided so
+that Java applications can use OpenDDS -- see java/README and java/jms/README
+for details.
 
 OpenDDS is built on the ACE (http://www.theaceorb.com/product/aboutace.html)
 abstraction layer to provide platform portability.  OpenDDS also leverages
@@ -262,6 +262,11 @@ http://download.ociweb.com/OpenDDS/OpenDDS-latest.pdf
   samples belonging to an outstanding coherent change group.  The coherent
   samples are not persisted, however their presence may prematurely evict
   valid data samples from being persisted due to resource limits.
+
+  Coherent change groups are not maintained when their constituent data
+  is persisted.  That is, when a non-volatile DataWriter comes online,
+  samples previously sent as a part of a change group will no longer be
+  sent as a part of a new change group.
 
 
 ======================================================================
