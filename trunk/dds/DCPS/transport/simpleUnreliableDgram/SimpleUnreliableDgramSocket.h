@@ -1,6 +1,12 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef OPENDDS_DCPS_SIMPLEUNRELIABLEDGRAMSOCKET_H
 #define OPENDDS_DCPS_SIMPLEUNRELIABLEDGRAMSOCKET_H
 
@@ -15,69 +21,63 @@
 #include "ace/SOCK_Dgram.h"
 #include "ace/Event_Handler.h"
 
+namespace OpenDDS {
+namespace DCPS {
 
-namespace OpenDDS
-{
+class SimpleUnreliableDgram_Export SimpleUnreliableDgramSocket : public RcObject<ACE_SYNCH_MUTEX>,
+      public ACE_Event_Handler {
+public:
 
-  namespace DCPS
-  {
+  SimpleUnreliableDgramSocket();
+  virtual ~SimpleUnreliableDgramSocket();
 
-    class SimpleUnreliableDgram_Export SimpleUnreliableDgramSocket : public RcObject<ACE_SYNCH_MUTEX>, 
-                            public ACE_Event_Handler
-    {
-      public:
+  virtual ACE_HANDLE get_handle() const = 0;
 
-        SimpleUnreliableDgramSocket();
-        virtual ~SimpleUnreliableDgramSocket();
+  /// Access the underlying socket.
+  virtual ACE_SOCK& socket() = 0;
 
-        virtual ACE_HANDLE get_handle() const = 0;
+  virtual int handle_input(ACE_HANDLE);
+  virtual int handle_close(ACE_HANDLE, ACE_Reactor_Mask);
 
-        /// Access the underlying socket.
-        virtual ACE_SOCK& socket() = 0;
+  int set_receive_strategy(TransportReceiveStrategy* strategy,
+                           TransportReactorTask*     reactor_task);
+  void remove_receive_strategy();
 
-        virtual int handle_input(ACE_HANDLE);
-        virtual int handle_close(ACE_HANDLE, ACE_Reactor_Mask);
+  virtual int open_socket(ACE_INET_Addr& local_address,
+                          const ACE_INET_Addr& multicast_group_address = ACE_INET_Addr(),
+                          bool receiver = false) = 0;
 
-        int set_receive_strategy(TransportReceiveStrategy* strategy,
-                                 TransportReactorTask*     reactor_task);
-        void remove_receive_strategy();
+  virtual void close_socket() = 0;
 
-        virtual int open_socket (ACE_INET_Addr& local_address,
-                 const ACE_INET_Addr& multicast_group_address = ACE_INET_Addr(),
-                 bool receiver = false) = 0;
+  virtual ssize_t send_bytes(const iovec iov[],
+                             int   n,
+                             const ACE_INET_Addr& remote_address) = 0;
 
-        virtual void close_socket() = 0;
+  virtual ssize_t receive_bytes(iovec iov[],
+                                int   n,
+                                ACE_INET_Addr& remote_address) = 0;
 
-        virtual ssize_t send_bytes(const iovec iov[],
-                           int   n,
-                           const ACE_INET_Addr& remote_address) = 0;
+protected:
 
-        virtual ssize_t receive_bytes(iovec iov[],
-                              int   n,
-                              ACE_INET_Addr& remote_address) = 0;
+  typedef ACE_SYNCH_MUTEX     LockType;
+  typedef ACE_Guard<LockType> GuardType;
 
-      protected:
-        
-        typedef ACE_SYNCH_MUTEX     LockType;
-        typedef ACE_Guard<LockType> GuardType;
+  /// Lock used to protect against sending to the socket_ from
+  /// multiple DataLinks.
+  LockType lock_;
 
-        /// Lock used to protect against sending to the socket_ from
-        /// multiple DataLinks.
-        LockType lock_;
+  /// The reactor task
+  TransportReactorTask_rch task_;
 
-        /// The reactor task
-        TransportReactorTask_rch task_;
+  /// The single TransportReceiveStrategy object for this socket.
+  TransportReceiveStrategy_rch receive_strategy_;
 
-        /// The single TransportReceiveStrategy object for this socket.
-        TransportReceiveStrategy_rch receive_strategy_;
+  /// The local address.
+  ACE_INET_Addr local_address_;
+};
 
-        /// The local address.
-        ACE_INET_Addr local_address_;
-    };
-
-  }
-
-}
+} // namespace DCPS
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "SimpleUnreliableDgramSocket.inl"

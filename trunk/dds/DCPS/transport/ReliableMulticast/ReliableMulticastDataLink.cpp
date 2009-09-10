@@ -1,6 +1,11 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #include "ReliableMulticast_pch.h"
 #include "ReliableMulticastDataLink.h"
@@ -19,8 +24,7 @@ OpenDDS::DCPS::ReliableMulticastDataLink::ReliableMulticastDataLink(
   ReliableMulticastTransportConfiguration& configuration,
   const ACE_INET_Addr& multicast_group_address,
   OpenDDS::DCPS::ReliableMulticastTransportImpl& transport_impl,
-  CORBA::Long priority
-  )
+  CORBA::Long priority)
   : OpenDDS::DCPS::DataLink(&transport_impl, priority)
   , local_address_(configuration.local_address_)
   , multicast_group_address_(multicast_group_address)
@@ -38,23 +42,20 @@ OpenDDS::DCPS::ReliableMulticastDataLink::ReliableMulticastDataLink(
 bool
 OpenDDS::DCPS::ReliableMulticastDataLink::connect(bool is_publisher)
 {
-  if (is_publisher)
-  {
+  if (is_publisher) {
     send_strategy_.configure(
       reactor_task_->get_reactor(),
       local_address_,
       multicast_group_address_,
-      sender_history_size_
-      );
-  }
-  else
-  {
+      sender_history_size_);
+
+  } else {
     receive_strategy_.configure(
       reactor_task_->get_reactor(),
       multicast_group_address_,
-      receiver_buffer_size_
-      );
+      receiver_buffer_size_);
   }
+
   start(&send_strategy_, &receive_strategy_);
   running_ = true;
   return true;
@@ -63,8 +64,7 @@ OpenDDS::DCPS::ReliableMulticastDataLink::connect(bool is_publisher)
 void
 OpenDDS::DCPS::ReliableMulticastDataLink::stop_i()
 {
-  if (running_)
-  {
+  if (running_) {
     send_strategy_.teardown();
     receive_strategy_.teardown();
     reactor_task_ = 0;

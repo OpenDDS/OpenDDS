@@ -1,6 +1,12 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef OPENDDS_DCPS_TRANSPORTGDCONTROLELEMENT_H
 #define OPENDDS_DCPS_TRANSPORTGDCONTROLELEMENT_H
 
@@ -11,42 +17,35 @@
 
 class ACE_Message_Block ;
 
-namespace OpenDDS
-{
+namespace OpenDDS {
+namespace DCPS {
 
-  namespace DCPS
-  {
+class OpenDDS_Dcps_Export TransportControlElement : public TransportQueueElement {
+public:
 
-    class OpenDDS_Dcps_Export TransportControlElement : public TransportQueueElement
-    {
-      public:
+  TransportControlElement(ACE_Message_Block* msg_block);
 
-        TransportControlElement(ACE_Message_Block* msg_block);
+  virtual ~TransportControlElement();
 
-        virtual ~TransportControlElement();
+protected:
 
-      protected:
+  virtual bool requires_exclusive_packet() const;
 
-        virtual bool requires_exclusive_packet() const;
+  virtual RepoId publication_id() const;
 
-        virtual RepoId publication_id() const;
+  virtual const ACE_Message_Block* msg() const;
 
-        virtual const ACE_Message_Block* msg() const;
+  virtual void release_element(bool dropped_by_transport);
 
+  virtual void data_delivered();
 
-        virtual void release_element(bool dropped_by_transport);
+private:
 
-        virtual void data_delivered();
+  /// The control message.
+  ACE_Message_Block* msg_;
+};
 
-
-      private:
-
-        /// The control message.
-        ACE_Message_Block* msg_;
-    };
-
-  }
-}
-
+} // namespace DCPS
+} // namespace OpenDDS
 
 #endif  /* OPENDDS_DCPS_TRANSPORTGDCONTROLELEMENT_H */

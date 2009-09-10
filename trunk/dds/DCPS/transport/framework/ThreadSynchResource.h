@@ -1,38 +1,39 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef OPENDDS_DCPS_THREADSYNCHRESOURCE_H
 #define OPENDDS_DCPS_THREADSYNCHRESOURCE_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "ace/Time_Value.h"
 
+namespace OpenDDS {
+namespace DCPS {
 
-namespace OpenDDS
-{
-  namespace DCPS
-  {
+class OpenDDS_Dcps_Export ThreadSynchResource {
+public:
 
-    class OpenDDS_Dcps_Export ThreadSynchResource
-    {
-      public:
+  virtual ~ThreadSynchResource();
 
-        virtual ~ThreadSynchResource();
+  virtual int wait_to_unclog();
 
-        virtual int wait_to_unclog();
+protected:
 
-     
-      protected:
+  virtual void notify_lost_on_backpressure_timeout() = 0;
 
-        virtual void notify_lost_on_backpressure_timeout () = 0;
+  ThreadSynchResource(ACE_HANDLE handle);
+  ACE_HANDLE handle_;
+  ACE_Time_Value* timeout_;
+};
 
-        ThreadSynchResource(ACE_HANDLE handle);
-        ACE_HANDLE handle_;
-        ACE_Time_Value* timeout_;
-    };
-
-  } /* namespace DCPS */
-} /* namespace OpenDDS */
+} // namespace DCPS
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "ThreadSynchResource.inl"

@@ -1,5 +1,12 @@
-// -*- C++ -*-
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef TAO_DDS_FEDERATOR_IDL
 #define TAO_DDS_FEDERATOR_IDL
 
@@ -260,4 +267,3 @@ module OpenDDS { module Federator {
 }; }; // End of OpenDDS::Federator
 
 #endif /* TAO_DDS_FEDERATOR_IDL */
-

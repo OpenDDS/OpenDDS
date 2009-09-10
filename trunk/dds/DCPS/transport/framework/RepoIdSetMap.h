@@ -1,6 +1,12 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef OPENDDS_DCPS_REPOIDSETMAP_H
 #define OPENDDS_DCPS_REPOIDSETMAP_H
 
@@ -13,65 +19,61 @@
 #include "ace/Synch.h"
 #include <map>
 
-namespace OpenDDS
-{
+namespace OpenDDS {
+namespace DCPS {
 
-  namespace DCPS
-  {
-    class RepoIdSetMap;
+class RepoIdSetMap;
 
-    class OpenDDS_Dcps_Export RepoIdSetMap
-    {
-      public:
+class OpenDDS_Dcps_Export RepoIdSetMap {
+public:
 
-        typedef std::map<RepoId, RepoIdSet_rch, GUID_tKeyLessThan> MapType;
+  typedef std::map<RepoId, RepoIdSet_rch, GUID_tKeyLessThan> MapType;
 
-        RepoIdSetMap();
-        virtual ~RepoIdSetMap();
+  RepoIdSetMap();
+  virtual ~RepoIdSetMap();
 
-        int        insert(RepoId key, RepoId value);
-        RepoIdSet* find(RepoId key);
+  int        insert(RepoId key, RepoId value);
+  RepoIdSet* find(RepoId key);
 
-        int        remove(RepoId key, RepoId value);
-        RepoIdSet* remove_set(RepoId key);
+  int        remove(RepoId key, RepoId value);
+  RepoIdSet* remove_set(RepoId key);
 
-        int release_publisher(RepoId subscriber_id, RepoId publisher_id);
+  int release_publisher(RepoId subscriber_id, RepoId publisher_id);
 
-        size_t size() const;
+  size_t size() const;
 
-        /// Give access to the underlying map for iteration purposes.
-        MapType& map();
-        const MapType& map() const;
+  /// Give access to the underlying map for iteration purposes.
+  MapType& map();
+  const MapType& map() const;
 
-        /// The size of the serialized map.
-        size_t marshaled_size ();
-        
-        /// Serialize this map. The data in the stream: 
-        /// size of this map, list of key(repoid)-value(RepoIdSet).
-        ACE_Message_Block* marshal (bool byte_order);
+  /// The size of the serialized map.
+  size_t marshaled_size();
 
-        /// Demarshal the serialized data of a RepoIdSetMap. 
-        int demarshal (ACE_Message_Block* acks, bool byte_order);
-        
-        /// List the key of this map.
-        void get_keys (RepoIdSet& keys);
+  /// Serialize this map. The data in the stream:
+  /// size of this map, list of key(repoid)-value(RepoIdSet).
+  ACE_Message_Block* marshal(bool byte_order);
 
-        void operator= (const RepoIdSetMap &);
+  /// Demarshal the serialized data of a RepoIdSetMap.
+  int demarshal(ACE_Message_Block* acks, bool byte_order);
 
-        void clear ();
+  /// List the key of this map.
+  void get_keys(RepoIdSet& keys);
 
-        void dump ();
+  void operator= (const RepoIdSetMap &);
 
-    private:
+  void clear();
 
-        RepoIdSet* find_or_create(RepoId key);
+  void dump();
 
-        MapType  map_;
-    };
+private:
 
-  }  /* namespace DCPS */
+  RepoIdSet* find_or_create(RepoId key);
 
-}  /* namespace OpenDDS */
+  MapType  map_;
+};
+
+} // namespace DCPS
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "RepoIdSetMap.inl"

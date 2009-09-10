@@ -1,10 +1,14 @@
-// -*- C++ -*-
 /*
  * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
 
-#ifndef _DCPSINFOREPOSERV_H
-#define _DCPSINFOREPOSERV_H
+#ifndef DCPSINFOREPOSERV_H
+#define DCPSINFOREPOSERV_H
 
 #include <orbsvcs/Shutdown_Utilities.h>
 
@@ -20,34 +24,33 @@
 #include "FederatorManagerImpl.h"
 #include "ShutdownInterface.h"
 
-class OpenDDS_DCPSInfoRepoServ_Export InfoRepo :
-    public ShutdownInterface, public ACE_Event_Handler {
+class OpenDDS_DCPSInfoRepoServ_Export InfoRepo
+  : public ShutdownInterface, public ACE_Event_Handler {
 public:
-  struct InitError
-  {
-    InitError (const char* msg)
-      : msg_(msg) {};
+  struct InitError {
+    InitError(const char* msg)
+        : msg_(msg) {};
     std::string msg_;
   };
 
-  InfoRepo (int argc, ACE_TCHAR *argv[]);
-  ~InfoRepo (void);
-  void run (void);
+  InfoRepo(int argc, ACE_TCHAR *argv[]);
+  ~InfoRepo();
+  void run();
 
   /// ShutdownInterface used to schedule a shutdown.
-  virtual void shutdown (void);
+  virtual void shutdown();
 
   /// shutdown() and wait for it to complete: cannot be called from the reactor
   /// thread.
-  void sync_shutdown (void);
+  void sync_shutdown();
 
   /// Handler for the reactor to dispatch finalization activity to.
-  virtual int handle_exception( ACE_HANDLE fd = ACE_INVALID_HANDLE);
+  virtual int handle_exception(ACE_HANDLE fd = ACE_INVALID_HANDLE);
 
 private:
-  void init ();
-  void usage (const ACE_TCHAR * cmd);
-  void parse_args (int argc, ACE_TCHAR *argv[]);
+  void init();
+  void usage(const ACE_TCHAR * cmd);
+  void parse_args(int argc, ACE_TCHAR *argv[]);
 
   /// Actual finalization of service resources.
   void finalize();
@@ -77,14 +80,13 @@ private:
 };
 
 class OpenDDS_DCPSInfoRepoServ_Export InfoRepo_Shutdown :
-    public Shutdown_Functor
-{
+      public Shutdown_Functor {
 public:
   InfoRepo_Shutdown(InfoRepo& ir);
 
-  void operator() (int which_signal);
+  void operator()(int which_signal);
 private:
   InfoRepo& ir_;
 };
 
-#endif  /* _DCPSINFOREPOSERV_H */
+#endif  /* DCPSINFOREPOSERV_H */

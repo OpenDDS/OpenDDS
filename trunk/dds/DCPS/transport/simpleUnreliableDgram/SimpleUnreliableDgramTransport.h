@@ -1,6 +1,12 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef OPENDDS_DCPS_SIMPLEUNRELIABLEDGRAMTRANSPORT_H
 #define OPENDDS_DCPS_SIMPLEUNRELIABLEDGRAMTRANSPORT_H
 
@@ -20,104 +26,97 @@
 #include "ace/Hash_Map_Manager.h"
 #include "ace/Synch.h"
 
+namespace OpenDDS {
+namespace DCPS {
 
-namespace OpenDDS
-{
+class SimpleUnreliableDgramReceiveStrategy;
+class ReceivedDataSample;
 
-  namespace DCPS
-  {
+/**
+ * This class provides specific implementation for unreliable transports - UDP and
+ * unreliable multicast.
+ *
+ * Notes about object ownership:
+ * 1) Own datalink objects and socket object.
+ * 2) Reference to TransportReactorTask object, configuration object
+ *    and TransportReceiveStrategy object.
+ */
+class SimpleUnreliableDgram_Export SimpleUnreliableDgramTransport : public TransportImpl {
+public:
 
-    class SimpleUnreliableDgramReceiveStrategy;
-    class ReceivedDataSample;
+  SimpleUnreliableDgramTransport();
+  virtual ~SimpleUnreliableDgramTransport();
 
-    /**
-     * This class provides specific implementation for unreliable transports - UDP and 
-     * unreliable multicast.
-     *
-     * Notes about object ownership:
-     * 1) Own datalink objects and socket object.
-     * 2) Reference to TransportReactorTask object, configuration object 
-     *    and TransportReceiveStrategy object.
-     */
-    class SimpleUnreliableDgram_Export SimpleUnreliableDgramTransport : public TransportImpl
-    {
-      public:
+protected:
 
-        SimpleUnreliableDgramTransport();
-        virtual ~SimpleUnreliableDgramTransport();
+  friend class SimpleUnreliableDgramSynchResource;
 
-      protected:
+  virtual DataLink* find_or_create_datalink
+  (const TransportInterfaceInfo& remote_info,
+   int                           connect_as_publisher,
+   CORBA::Long                   priority);
 
-        friend class SimpleUnreliableDgramSynchResource;
+  virtual int configure_i(TransportConfiguration* config);
 
-        virtual DataLink* find_or_create_datalink
-                          (const TransportInterfaceInfo& remote_info,
-                           int                           connect_as_publisher,
-                           CORBA::Long                   priority);
+  virtual int configure_socket(TransportConfiguration* config) = 0;
 
-        virtual int configure_i(TransportConfiguration* config);
- 
-        virtual int configure_socket(TransportConfiguration* config) = 0;
-  
-        virtual void shutdown_i();
+  virtual void shutdown_i();
 
-        virtual int connection_info_i
-                                 (TransportInterfaceInfo& local_info) const = 0;
+  virtual int connection_info_i
+  (TransportInterfaceInfo& local_info) const = 0;
 
-        virtual bool acked (RepoId, RepoId);
-        virtual void remove_ack (RepoId pub_id, RepoId sub_id);
+  virtual bool acked(RepoId, RepoId);
+  virtual void remove_ack(RepoId pub_id, RepoId sub_id);
 
-        virtual void notify_lost_on_backpressure_timeout ();
+  virtual void notify_lost_on_backpressure_timeout();
 
-        /// Called by the DataLink to release itself.
-        virtual void release_datalink_i(DataLink* link,
-                                        bool release_pending);
+  /// Called by the DataLink to release itself.
+  virtual void release_datalink_i(DataLink* link,
+                                  bool release_pending);
 
-      protected:
+protected:
 
-        /// Our friend needs to call our deliver_sample() method.
-        friend class SimpleUnreliableDgramReceiveStrategy;
+  /// Our friend needs to call our deliver_sample() method.
+  friend class SimpleUnreliableDgramReceiveStrategy;
 
-        virtual void deliver_sample(ReceivedDataSample&  sample,
-                            const ACE_INET_Addr& remote_address,
-                            CORBA::Long          priority);
+  virtual void deliver_sample(ReceivedDataSample&  sample,
+                              const ACE_INET_Addr& remote_address,
+                              CORBA::Long          priority);
 
-        /// Map Type: (key) ACE_INET_Addr to (value) SimpleMcastDataLink_rch
-        typedef ACE_Hash_Map_Manager_Ex
-                               <PriorityKey,
-                                SimpleUnreliableDgramDataLink_rch,
-                                ACE_Hash<PriorityKey>,
-                                ACE_Equal_To<PriorityKey>,
-                                ACE_Null_Mutex>              AddrLinkMap;
+  /// Map Type: (key) ACE_INET_Addr to (value) SimpleMcastDataLink_rch
+  typedef ACE_Hash_Map_Manager_Ex
+  <PriorityKey,
+  SimpleUnreliableDgramDataLink_rch,
+  ACE_Hash<PriorityKey>,
+  ACE_Equal_To<PriorityKey>,
+  ACE_Null_Mutex>              AddrLinkMap;
 
-        typedef ACE_SYNCH_MUTEX         LockType;
-        typedef ACE_Guard<LockType>     GuardType;
-        typedef ACE_Condition<LockType> ConditionType;
+  typedef ACE_SYNCH_MUTEX         LockType;
+  typedef ACE_Guard<LockType>     GuardType;
+  typedef ACE_Condition<LockType> ConditionType;
 
-        /// This is the map of connected DataLinks.
-        AddrLinkMap links_;
+  /// This is the map of connected DataLinks.
+  AddrLinkMap links_;
 
-        /// This lock is used to protect the links_ data member.
-        LockType links_lock_;
+  /// This lock is used to protect the links_ data member.
+  LockType links_lock_;
 
-        /// We need the reactor to tell our socket to handle_input().
-        TransportReactorTask_rch reactor_task_;
+  /// We need the reactor to tell our socket to handle_input().
+  TransportReactorTask_rch reactor_task_;
 
-        /// The TransportReceiveStrategy object for this TransportImpl.
-        TransportReceiveStrategy_rch receive_strategy_;
+  /// The TransportReceiveStrategy object for this TransportImpl.
+  TransportReceiveStrategy_rch receive_strategy_;
 
-        SimpleUnreliableDgramSocket_rch  socket_;
+  SimpleUnreliableDgramSocket_rch  socket_;
 
-        SimpleUnreliableDgramConfiguration_rch config_;
-    };
+  SimpleUnreliableDgramConfiguration_rch config_;
+};
 
-  } /* namespace DCPS */
-
-} /* namespace OpenDDS */
+} // namespace DCPS
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "SimpleUnreliableDgramTransport.inl"
 #endif /* __ACE_INLINE__ */
-
 
 #endif  /* OPENDDS_DCPS_SIMPLEUNRELIABLEDGRAMTRANSPORT_H */

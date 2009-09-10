@@ -1,6 +1,11 @@
-// -*- IDL -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 /**
  *   This file was used to generate the code in FloatSeqC.*
@@ -31,4 +36,4 @@ module CORBA
   typedef sequence<float> FloatSeq;
 };
 
-#endif  /* OPENDDS_CORBA_FLOAT_SEQ_IDL */
+#endif /* OPENDDS_CORBA_FLOAT_SEQ_IDL */

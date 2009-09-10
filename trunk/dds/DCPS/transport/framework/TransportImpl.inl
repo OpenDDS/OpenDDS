@@ -1,6 +1,11 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #include "TransportInterface.h"
 #include "TransportConfiguration.h"
@@ -29,21 +34,20 @@ OpenDDS::DCPS::TransportImpl::configure(TransportConfiguration* config)
 
   GuardType guard(this->lock_);
 
-  if (config == 0)
-    {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: invalid configuration.\n"),
-                        -1);
-    }
+  if (config == 0) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      "(%P|%t) ERROR: invalid configuration.\n"),
+                     -1);
+  }
 
-  if (!this->config_.is_nil())
-    {
-      // We are rejecting this configuration attempt since this
-      // TransportImpl object has already been configured.
-      ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: TransportImpl already configured.\n"),
-                       -1);
-    }
+  if (!this->config_.is_nil()) {
+    // We are rejecting this configuration attempt since this
+    // TransportImpl object has already been configured.
+    ACE_ERROR_RETURN((LM_ERROR,
+                      "(%P|%t) ERROR: TransportImpl already configured.\n"),
+                     -1);
+  }
+
 //MJM: So we disallow dynamic reconfiguration?  So if we want a
 //MJM: different configuration, we should kill this one and create and
 //MJM: configure a new one...
@@ -52,8 +56,8 @@ OpenDDS::DCPS::TransportImpl::configure(TransportConfiguration* config)
   if (this->configure_i(config) == -1) {
     // The subclass rejected the configuration attempt.
     ACE_ERROR_RETURN((LM_ERROR,
-          "(%P|%t) ERROR: TransportImpl configuration failed.\n"),
-         -1);
+                      "(%P|%t) ERROR: TransportImpl configuration failed.\n"),
+                     -1);
   }
 
   // Our subclass accepted the configuration attempt.
@@ -64,16 +68,15 @@ OpenDDS::DCPS::TransportImpl::configure(TransportConfiguration* config)
   // Open the DL Cleanup task
   // We depend upon the existing config logic to ensure the
   // DL Cleanup task is opened only once
-  if (this->dl_clean_task_.open ()) {
-    ACE_ERROR_RETURN ((LM_ERROR,
-           "(%P|%t) ERROR: DL Cleanup task failed to open : %p\n",
-           ACE_TEXT("open")), -1);
+  if (this->dl_clean_task_.open()) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      "(%P|%t) ERROR: DL Cleanup task failed to open : %p\n",
+                      ACE_TEXT("open")), -1);
   }
 
   // Success.
   return 0;
 }
-
 
 /// NOTE: Should only be called if this->lock_ has already been acquired.
 //MJM: I am not convinced that this needs to be guarded by the caller.
@@ -88,7 +91,6 @@ OpenDDS::DCPS::TransportImpl::reactor_task()
   return task._retn();
 }
 
-
 ACE_INLINE int
 OpenDDS::DCPS::TransportImpl::set_reactor(TransportReactorTask* task)
 {
@@ -96,12 +98,11 @@ OpenDDS::DCPS::TransportImpl::set_reactor(TransportReactorTask* task)
 
   GuardType guard(this->lock_);
 
-  if (!this->reactor_task_.is_nil())
-    {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: TransportImpl already has a reactor.\n"),
-                       -1);
-    }
+  if (!this->reactor_task_.is_nil()) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      "(%P|%t) ERROR: TransportImpl already has a reactor.\n"),
+                     -1);
+  }
 
   // Keep a copy for ourselves.
   task->_add_ref();
@@ -109,7 +110,6 @@ OpenDDS::DCPS::TransportImpl::set_reactor(TransportReactorTask* task)
 
   return 0;
 }
-
 
 /// The DataLink itself calls this when it has determined that, due
 /// to some remove_associations() call being handled by a TransportInterface
@@ -123,7 +123,6 @@ OpenDDS::DCPS::TransportImpl::release_datalink(DataLink* link, bool release_pend
   // Delegate to our subclass.
   this->release_datalink_i(link, release_pending);
 }
-
 
 /// This is called by a TransportInterface object when it is handling
 /// its own request to detach_transport(), and this TransportImpl object
@@ -141,14 +140,12 @@ OpenDDS::DCPS::TransportImpl::detach_interface(TransportInterface* transport_int
   unbind(interfaces_, transport_interface);
 }
 
-
 ACE_INLINE OpenDDS::DCPS::TransportImpl::ReservationLockType&
 OpenDDS::DCPS::TransportImpl::reservation_lock()
 {
   DBG_ENTRY_LVL("TransportImpl","reservation_lock",6);
   return this->reservation_lock_;
 }
-
 
 ACE_INLINE const OpenDDS::DCPS::TransportImpl::ReservationLockType&
 OpenDDS::DCPS::TransportImpl::reservation_lock() const
@@ -157,30 +154,27 @@ OpenDDS::DCPS::TransportImpl::reservation_lock() const
   return this->reservation_lock_;
 }
 
-
 /// Note that this will return -1 if the TransportImpl has not been
 /// configure()'d yet.
 ACE_INLINE int
 OpenDDS::DCPS::TransportImpl::connection_info
-                                   (TransportInterfaceInfo& local_info) const
+(TransportInterfaceInfo& local_info) const
 {
   DBG_ENTRY_LVL("TransportImpl","connection_info",6);
 
   GuardType guard(this->lock_);
 
-  if (this->config_.is_nil())
-    {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: TransportImpl cannot populate "
-                        "connection_info - TransportImpl has not "
-                        "been configure()'d.\n"),
-                       -1);
-    }
+  if (this->config_.is_nil()) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      "(%P|%t) ERROR: TransportImpl cannot populate "
+                      "connection_info - TransportImpl has not "
+                      "been configure()'d.\n"),
+                     -1);
+  }
 
   // Delegate to our subclass.
   return this->connection_info_i(local_info);
 }
-
 
 /// Note that this will return -1 if the TransportImpl has not been
 /// configure()'d yet.
@@ -191,22 +185,18 @@ OpenDDS::DCPS::TransportImpl::swap_bytes() const
 
   GuardType guard(this->lock_);
 
-  if (this->config_.is_nil())
-    {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: TransportImpl cannot return swap_bytes "
-                        "value - TransportImpl has not been configure()'d.\n"),
-                       -1);
-    }
+  if (this->config_.is_nil()) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      "(%P|%t) ERROR: TransportImpl cannot return swap_bytes "
+                      "value - TransportImpl has not been configure()'d.\n"),
+                     -1);
+  }
 
   return this->config_->swap_bytes_;
 }
 
-
 ACE_INLINE void
-OpenDDS::DCPS::TransportImpl::pre_shutdown_i ()
+OpenDDS::DCPS::TransportImpl::pre_shutdown_i()
 {
   //noop
 }
-
-

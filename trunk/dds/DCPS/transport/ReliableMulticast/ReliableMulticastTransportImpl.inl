@@ -1,6 +1,11 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #include "ReliableMulticastDataLink.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
@@ -22,8 +27,8 @@ OpenDDS::DCPS::ReliableMulticastTransportImpl::acked(RepoId, RepoId)
   return true;
 }
 
-ACE_INLINE void 
-OpenDDS::DCPS::ReliableMulticastTransportImpl::remove_ack (RepoId /*pub_id*/, RepoId /*sub_id*/)
+ACE_INLINE void
+OpenDDS::DCPS::ReliableMulticastTransportImpl::remove_ack(RepoId /*pub_id*/, RepoId /*sub_id*/)
 {
   //noop
 }

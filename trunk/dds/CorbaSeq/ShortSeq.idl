@@ -1,6 +1,11 @@
-// -*- IDL -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 // ================================================================
 /**
@@ -29,4 +34,4 @@ module CORBA
   typedef sequence<short> ShortSeq;
 };
 
-#endif  /* OPENDDS_CORBA_SHORT_SEQ_IDL */
+#endif /* OPENDDS_CORBA_SHORT_SEQ_IDL */

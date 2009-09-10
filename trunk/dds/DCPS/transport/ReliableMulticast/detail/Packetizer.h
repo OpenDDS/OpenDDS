@@ -1,5 +1,11 @@
-// -*- C++ -*-
-//
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #ifndef OPENDDS_DCPS_PACKETIZER_H
 #define OPENDDS_DCPS_PACKETIZER_H
@@ -15,42 +21,29 @@
 #include "ace/SOCK_IO.h"
 #include <vector>
 
-namespace OpenDDS
-{
+namespace OpenDDS {
+namespace DCPS {
+namespace ReliableMulticast {
+namespace detail {
 
-  namespace DCPS
-  {
+struct Packet;
 
-    namespace ReliableMulticast
-    {
+class ReliableMulticast_Export Packetizer {
+public:
+  enum {
+    MAX_PAYLOAD_SIZE = 1024
+  };
 
-      namespace detail
-      {
+  void packetize(
+    const iovec iov[],
+    int size,
+    std::vector<Packet>& packets);
+};
 
-        struct Packet;
-
-        class ReliableMulticast_Export Packetizer
-        {
-        public:
-          enum
-          {
-            MAX_PAYLOAD_SIZE = 1024
-          };
-
-          void packetize(
-            const iovec iov[],
-            int size,
-            std::vector<Packet>& packets
-            );
-        };
-
-      } /* namespace detail */
-
-    } /* namespace ReliableMulticast */
-
-  } /* namespace DCPS */
-
-} /* namespace OpenDDS */
+} // namespace detail
+} // namespace ReliableMulticast
+} // namespace DCPS
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "Packetizer.inl"

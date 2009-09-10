@@ -1,5 +1,10 @@
 /*
  * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
 
 #ifndef DCPS_REPOIDBUILDER_H
@@ -12,12 +17,10 @@
 
 #include "dcps_export.h"
 
-namespace OpenDDS
-{
-namespace DCPS
-{
-class OpenDDS_Dcps_Export RepoIdBuilder : public GuidBuilder
-{
+namespace OpenDDS {
+namespace DCPS {
+
+class OpenDDS_Dcps_Export RepoIdBuilder : public GuidBuilder {
 public:
   RepoIdBuilder();
   explicit RepoIdBuilder(RepoId& repoId);
@@ -28,11 +31,11 @@ public:
 
   void participantId(long participantId);
 
-  void from_BuiltinTopicKey( const DDS::BuiltinTopicKey_t& key);
+  void from_BuiltinTopicKey(const DDS::BuiltinTopicKey_t& key);
 };
 
-} // namespace
-} // namespace
+} // namespace DCPS
+} // namespace OpenDDS
 
 #ifdef __ACE_INLINE__
 # include "RepoIdBuilder.inl"

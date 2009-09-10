@@ -10,18 +10,18 @@ fi
 
 TOOLS_HOME=$DDS_ROOT/tools
 
-# Files to process; if no arguments are passed, then
-# all source files will be processed.
-if [ $# != 0 ]; then
-  FILES="$@"
-else
-  echo "WARNING: Processing ALL files in $DDS_ROOT!"
-  FILES=`find $DDS_ROOT -type f \
-        -name '*.h' -o -name '*.cpp' -o -name '*.inl'`
+if [ $# = 0 ]; then
+  echo "Usage: $0 file..."
+  exit 1
 fi
 
-for FILE in $FILES; do
+for FILE in "$@"; do
   echo "Processing $FILE"
+
+  if [ ! -f "$FILE" ]; then
+    echo "$FILE: No such file"
+    exit 1
+  fi
 
   cp $FILE $FILE.orig
   cat $TOOLS_HOME/copyright/COPYRIGHT $FILE.orig > $FILE

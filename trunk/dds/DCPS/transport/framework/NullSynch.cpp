@@ -1,10 +1,15 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "NullSynch.h"
 #include "ThreadSynchResource.h"
-
 
 #if !defined (__ACE_INLINE__)
 #include "NullSynch.inl"
@@ -14,7 +19,6 @@ OpenDDS::DCPS::NullSynch::~NullSynch()
 {
   DBG_ENTRY_LVL("NullSynch","~NullSynch",6);
 }
-
 
 void
 OpenDDS::DCPS::NullSynch::work_available()

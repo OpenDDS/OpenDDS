@@ -1,6 +1,12 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef OPENDDS_DCPS_POOLSYNCHSTRATEGY_H
 #define OPENDDS_DCPS_POOLSYNCHSTRATEGY_H
 
@@ -10,44 +16,38 @@
 #include "ace/Synch.h"
 #include "ace/Condition_T.h"
 
+namespace OpenDDS {
+namespace DCPS {
 
-namespace OpenDDS
-{
-  namespace DCPS
-  {
+class OpenDDS_Dcps_Export PoolSynchStrategy : public ACE_Task_Base,
+      public ThreadSynchStrategy {
+public:
 
-    class OpenDDS_Dcps_Export PoolSynchStrategy : public ACE_Task_Base,
-                              public ThreadSynchStrategy
-    {
-      public:
+  PoolSynchStrategy();
+  virtual ~PoolSynchStrategy();
 
-        PoolSynchStrategy();
-        virtual ~PoolSynchStrategy();
+  virtual ThreadSynch* create_synch_object(
+    ThreadSynchResource* synch_resource,
+    long                 priority,
+    int                  scheduler);
 
-        virtual ThreadSynch* create_synch_object(
-                               ThreadSynchResource* synch_resource,
-                               long                 priority,
-                               int                  scheduler
-                             );
+  virtual int open(void*);
+  virtual int svc();
+  virtual int close(u_long);
 
-        virtual int open(void*);
-        virtual int svc();
-        virtual int close(u_long);
+private:
 
+  typedef ACE_SYNCH_MUTEX         LockType;
+  typedef ACE_Guard<LockType>     GuardType;
+  typedef ACE_Condition<LockType> ConditionType;
 
-      private:
+  LockType      lock_;
+  ConditionType condition_;
+  int           shutdown_;
+};
 
-        typedef ACE_SYNCH_MUTEX         LockType;
-        typedef ACE_Guard<LockType>     GuardType;
-        typedef ACE_Condition<LockType> ConditionType;
-
-        LockType      lock_;
-        ConditionType condition_;
-        int           shutdown_;
-    };
-
-  } /* namespace DCPS */
-} /* namespace OpenDDS */
+} // namespace DCPS
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "PoolSynchStrategy.inl"

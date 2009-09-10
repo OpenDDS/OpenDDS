@@ -1,6 +1,12 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef OPENDDS_DCPS_TRANSPORT_GENERATOR_H
 #define OPENDDS_DCPS_TRANSPORT_GENERATOR_H
 
@@ -11,47 +17,42 @@
 
 #include "ace/Synch.h"
 
-namespace OpenDDS
-{
+namespace OpenDDS {
+namespace DCPS {
 
-  namespace DCPS
-  {
+/**
+ * @class TransportGenerator
+ *
+ * @brief Base class for concrete transports to provide new objects.
+ *
+ * Each transport implementation will need to define a concrete
+ * subclass of the TransportGenerator class.  The base
+ * class (TransportGenerator) contains the pure virtual functions to
+ * provide new objects. The concrete transport implements these methods
+ * to provide the new concrete transport object.
+ *
+ * The TransportGenerator object is registered with the Transport6supplied to the
+ * TransportImpl::configure() method.
+ */
+class OpenDDS_Dcps_Export TransportGenerator : public RcObject<ACE_SYNCH_MUTEX> {
+public:
 
-    /**
-     * @class TransportGenerator
-     *
-     * @brief Base class for concrete transports to provide new objects.
-     *
-     * Each transport implementation will need to define a concrete
-     * subclass of the TransportGenerator class.  The base
-     * class (TransportGenerator) contains the pure virtual functions to 
-     * provide new objects. The concrete transport implements these methods
-     * to provide the new concrete transport object.
-     *
-     * The TransportGenerator object is registered with the Transport6supplied to the 
-     * TransportImpl::configure() method.
-     */
-    class OpenDDS_Dcps_Export TransportGenerator : public RcObject<ACE_SYNCH_MUTEX>
-    {
-      public:
+  /// Dtor
+  virtual ~TransportGenerator();
 
-        /// Dtor
-        virtual ~TransportGenerator();
+  virtual TransportImplFactory* new_factory() = 0;
 
-        virtual TransportImplFactory* new_factory() = 0;
+  virtual TransportConfiguration* new_configuration(const TransportIdType id) = 0;
 
-        virtual TransportConfiguration* new_configuration(const TransportIdType id) = 0;
-        
-        virtual void default_transport_ids (TransportIdList & ids) = 0;
+  virtual void default_transport_ids(TransportIdList & ids) = 0;
 
-      protected:
+protected:
 
-        /// Default ctor.
-        TransportGenerator();
-    };
+  /// Default ctor.
+  TransportGenerator();
+};
 
-  }
-
-}
+} // namespace DCPS
+} // namespace OpenDDS
 
 #endif

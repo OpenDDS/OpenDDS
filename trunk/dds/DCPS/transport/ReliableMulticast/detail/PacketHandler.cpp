@@ -1,6 +1,11 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #include "ReliableMulticast_pch.h"
 #include "PacketHandler.h"
@@ -17,29 +22,25 @@ typedef OpenDDS::DCPS::ReliableMulticast::detail::PacketSerializer PacketSeriali
 void
 OpenDDS::DCPS::ReliableMulticast::detail::PacketHandler::send_packet_to(
   const Packet& packet,
-  const ACE_INET_Addr& dest
-  )
+  const ACE_INET_Addr& dest)
 {
   size_t buffer_size = 0;
   PacketSerializer packetSerializer;
   ACE_Auto_Basic_Array_Ptr<char> serialized(
-    packetSerializer.getBuffer(packet, buffer_size)
-    );
+    packetSerializer.getBuffer(packet, buffer_size));
   char* begin = packetSerializer.serializeFromTo(packet, serialized.get(), buffer_size);
 
   OpenDDS::DCPS::ReliableMulticast::detail::EventHandler::send(
     begin,
     buffer_size - (begin - serialized.get()),
-    dest
-    );
+    dest);
 }
 
 void
 OpenDDS::DCPS::ReliableMulticast::detail::PacketHandler::receive(
   const char* buffer,
   size_t size,
-  const ACE_INET_Addr& peer
-  )
+  const ACE_INET_Addr& peer)
 {
   PacketSerializer packetSerializer;
   Packet packet;

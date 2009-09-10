@@ -1,5 +1,3 @@
-
-// -*- C++ -*-
 // $Id$
 // Definition for Win32 Export directives.
 // This file is generated automatically by generate_export_file.pl OpenDDS_Federator
@@ -15,7 +13,7 @@
 
 #if !defined (OPENDDS_FEDERATOR_HAS_DLL)
 #  define OPENDDS_FEDERATOR_HAS_DLL 1
-#endif /* ! OPENDDS_FEDERATOR_HAS_DLL */
+#endif /* !OPENDDS_FEDERATOR_HAS_DLL */
 
 #if defined (OPENDDS_FEDERATOR_HAS_DLL) && (OPENDDS_FEDERATOR_HAS_DLL == 1)
 #  if defined (OPENDDS_FEDERATOR_BUILD_DLL)

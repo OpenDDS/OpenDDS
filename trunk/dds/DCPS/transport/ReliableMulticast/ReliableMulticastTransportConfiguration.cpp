@@ -1,6 +1,11 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #include "ReliableMulticast_pch.h"
 #include "ReliableMulticastTransportConfiguration.h"
@@ -12,42 +17,40 @@
 int
 OpenDDS::DCPS::ReliableMulticastTransportConfiguration::load(
   const TransportIdType& id,
-  ACE_Configuration_Heap& config
-  )
+  ACE_Configuration_Heap& config)
 {
-  if (id == DEFAULT_RELIABLE_MULTICAST_PUB_ID || id == DEFAULT_RELIABLE_MULTICAST_SUB_ID)
-  {
+  if (id == DEFAULT_RELIABLE_MULTICAST_PUB_ID || id == DEFAULT_RELIABLE_MULTICAST_SUB_ID) {
     ACE_ERROR_RETURN(
       (LM_ERROR, ACE_TEXT("(%P|%t) ERROR: You can not configure the default reliable multicast transport (id=%u).\n"), id),
-      -1
-      );
+      -1);
   }
 
   int result = TransportConfiguration::load(id, config);
-  if (result == 0)
-  {
+
+  if (result == 0) {
     ACE_TString sect_name = id_to_section_name(id);
-    const ACE_Configuration_Section_Key &root = config.root_section ();
+    const ACE_Configuration_Section_Key &root = config.root_section();
     ACE_Configuration_Section_Key trans_sect;
-    if (config.open_section (root, sect_name.c_str(), 0, trans_sect) != 0) {
-      ACE_ERROR_RETURN ((LM_ERROR,
-                         ACE_TEXT ("Failed to open section: %s\n"),
-                         sect_name.c_str()), -1);
+
+    if (config.open_section(root, sect_name.c_str(), 0, trans_sect) != 0) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("Failed to open section: %s\n"),
+                        sect_name.c_str()), -1);
     }
 
     ACE_TString str;
     GET_CONFIG_STRING_VALUE(config, trans_sect, ACE_TEXT("local_address"), str);
-    if (str != ACE_TEXT(""))
-    {
+
+    if (str != ACE_TEXT("")) {
       this->local_address_str_ = str;
-      this->local_address_.set (str.c_str ());
+      this->local_address_.set(str.c_str());
     }
 
     GET_CONFIG_STRING_VALUE(config, trans_sect, ACE_TEXT("multicast_group_address"), str);
-    if (str != ACE_TEXT(""))
-    {
+
+    if (str != ACE_TEXT("")) {
       this->multicast_group_address_str_ = str;
-      this->multicast_group_address_.set (multicast_group_address_str_.c_str ());
+      this->multicast_group_address_.set(multicast_group_address_str_.c_str());
     }
 
     GET_CONFIG_VALUE(config, trans_sect, ACE_TEXT("receiver"), receiver_, bool);
@@ -56,6 +59,7 @@ OpenDDS::DCPS::ReliableMulticastTransportConfiguration::load(
 
     GET_CONFIG_VALUE(config, trans_sect, ACE_TEXT("receiver_buffer_size"), receiver_buffer_size_, size_t);
   }
+
   return result;
 }
 

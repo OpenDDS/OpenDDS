@@ -1,9 +1,14 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef OPENDDS_DCPS_TRANSPORTREACTORTASK_H
 #define OPENDDS_DCPS_TRANSPORTREACTORTASK_H
-
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject_T.h"
@@ -12,48 +17,41 @@
 
 class ACE_Reactor;
 
+namespace OpenDDS {
+namespace DCPS {
 
-namespace OpenDDS
-{
+class OpenDDS_Dcps_Export TransportReactorTask : public virtual ACE_Task_Base,
+      public virtual RcObject<ACE_SYNCH_MUTEX> {
+public:
 
-  namespace DCPS
-  {
+  TransportReactorTask();
+  virtual ~TransportReactorTask();
 
-    class OpenDDS_Dcps_Export TransportReactorTask : public virtual ACE_Task_Base,
-                                 public virtual RcObject<ACE_SYNCH_MUTEX>
-    {
-      public:
+  virtual int open(void*);
+  virtual int svc();
+  virtual int close(u_long flags = 0);
 
-        TransportReactorTask();
-        virtual ~TransportReactorTask();
+  void stop();
 
-        virtual int open(void*);
-        virtual int svc();
-        virtual int close(u_long flags = 0);
+  ACE_Reactor* get_reactor();
+  const ACE_Reactor* get_reactor() const;
 
-        void stop();
+private:
 
-        ACE_Reactor* get_reactor();
-        const ACE_Reactor* get_reactor() const;
+  typedef ACE_SYNCH_MUTEX         LockType;
+  typedef ACE_Guard<LockType>     GuardType;
+  typedef ACE_Condition<LockType> ConditionType;
 
+  enum State { STATE_NOT_RUNNING, STATE_OPENING, STATE_RUNNING };
 
-      private:
+  LockType      lock_;
+  State         state_;
+  ConditionType condition_;
+  ACE_Reactor*  reactor_;
+};
 
-        typedef ACE_SYNCH_MUTEX         LockType;
-        typedef ACE_Guard<LockType>     GuardType;
-        typedef ACE_Condition<LockType> ConditionType;
-
-        enum State { STATE_NOT_RUNNING, STATE_OPENING, STATE_RUNNING };
-
-        LockType      lock_;
-        State         state_;
-        ConditionType condition_;
-        ACE_Reactor*  reactor_;
-    };
-
-  }
-
-}
+} // namespace DCPS
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "TransportReactorTask.inl"

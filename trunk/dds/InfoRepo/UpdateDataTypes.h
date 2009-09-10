@@ -1,13 +1,14 @@
-// -*- C++ -*-
-/**
- * @file      UpdateDataTypes.h
- *
+/*
  * $Id$
  *
- * @author Ciju John <johnc@ociweb.com>
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
-#ifndef _UPDATE_DATA_TYPES
-#define _UPDATE_DATA_TYPES
+
+#ifndef UPDATE_DATA_TYPES
+#define UPDATE_DATA_TYPES
 
 #include "dds/DdsDcpsInfoUtilsC.h"
 
@@ -19,14 +20,14 @@ namespace Update {
 enum ItemType  { Topic, Participant, Actor };
 enum ActorType { DataReader, DataWriter };
 enum SpecificQos {
-       NoQos,
-       ParticipantQos,
-       TopicQos,
-       DataWriterQos,
-       PublisherQos,
-       DataReaderQos,
-       SubscriberQos
-     };
+  NoQos,
+  ParticipantQos,
+  TopicQos,
+  DataWriterQos,
+  PublisherQos,
+  DataReaderQos,
+  SubscriberQos
+};
 
 typedef long                            DomainIdType;
 typedef OpenDDS::DCPS::RepoId           IdType; // Federation scope identifier type.
@@ -39,11 +40,10 @@ struct IdPath {
   IdType       participant;
   IdType       id;
 
-  IdPath( DomainIdType d, IdType p, IdType i)
-   : domain( d),
-     participant( p),
-     id( i)
-  { }
+  IdPath(DomainIdType d, IdType p, IdType i)
+  : domain(d),
+      participant(p),
+      id(i) { }
 };
 
 struct OwnershipData {
@@ -51,11 +51,10 @@ struct OwnershipData {
   IdType       participant;
   long         owner;
 
-  OwnershipData( DomainIdType d, IdType p, long o)
-   : domain( d),
-     participant( p),
-     owner( o)
-  { }
+  OwnershipData(DomainIdType d, IdType p, long o)
+  : domain(d),
+      participant(p),
+      owner(o) { }
 };
 
 template <typename Q, typename S>
@@ -73,17 +72,15 @@ struct TopicStrt {
     IdType       pa,
     const char*  na,
     const char*  da,
-    Q            tQos
-  ) : domainId( dom),
-      topicId( to),
-      participantId( pa),
-      name( na),
-      dataType( da),
-      topicQos( tQos)
-  { };
+    Q            tQos) : domainId(dom),
+      topicId(to),
+      participantId(pa),
+      name(na),
+      dataType(da),
+      topicQos(tQos) { };
 };
-typedef struct TopicStrt< ::DDS::TopicQos&, std::string> UTopic;
-typedef struct TopicStrt< QosSeq, std::string>           DTopic;
+typedef struct TopicStrt<DDS::TopicQos&, std::string> UTopic;
+typedef struct TopicStrt<QosSeq, std::string>         DTopic;
 
 template <typename Q>
 struct ParticipantStrt {
@@ -96,15 +93,13 @@ struct ParticipantStrt {
     DomainIdType dom,
     long         own,
     IdType       part,
-    Q            pQos
-  ) : domainId( dom),
-      owner( own),
-      participantId( part),
-      participantQos( pQos)
-  { };
+    Q            pQos) : domainId(dom),
+      owner(own),
+      participantId(part),
+      participantQos(pQos) { };
 };
-typedef struct ParticipantStrt< ::DDS::DomainParticipantQos&> UParticipant;
-typedef struct ParticipantStrt< QosSeq>                       DParticipant;
+typedef struct ParticipantStrt<DDS::DomainParticipantQos&> UParticipant;
+typedef struct ParticipantStrt<QosSeq>                     DParticipant;
 
 template <typename PSQ, typename RWQ, typename C, typename T>
 struct ActorStrt {
@@ -127,29 +122,28 @@ struct ActorStrt {
     const char*  call,
     PSQ          pub,
     RWQ          drdw,
-    T            trans
-  ) : domainId( dom),
-      actorId( act),
-      topicId( top),
-      participantId( part),
-      type( typ),
-      callback( call),
-      pubsubQos( pub),
-      drdwQos( drdw),
-      transportInterfaceInfo( trans)
-  { };
+    T            trans)
+    : domainId(dom),
+      actorId(act),
+      topicId(top),
+      participantId(part),
+      type(typ),
+      callback(call),
+      pubsubQos(pub),
+      drdwQos(drdw),
+      transportInterfaceInfo(trans) { };
 };
 typedef struct ActorStrt<
-  ::DDS::SubscriberQos& ,
-  ::DDS::DataReaderQos&,
-  std::string,
-  ::OpenDDS::DCPS::TransportInterfaceInfo&> URActor;
+      DDS::SubscriberQos& ,
+      DDS::DataReaderQos&,
+      std::string,
+      OpenDDS::DCPS::TransportInterfaceInfo&> URActor;
 typedef struct ActorStrt<
-  ::DDS::PublisherQos& ,
-  ::DDS::DataWriterQos& ,
-  std::string,
-  ::OpenDDS::DCPS::TransportInterfaceInfo&> UWActor;
-typedef struct ActorStrt< QosSeq, QosSeq, std::string, BinSeq> DActor;
+      DDS::PublisherQos& ,
+      DDS::DataWriterQos& ,
+      std::string,
+      OpenDDS::DCPS::TransportInterfaceInfo&> UWActor;
+typedef struct ActorStrt<QosSeq, QosSeq, std::string, BinSeq> DActor;
 
 template <typename T, typename P, typename A, typename W>
 struct ImageData {
@@ -164,10 +158,9 @@ struct ImageData {
   ReaderSeq      actors;
   WriterSeq      wActors;
 };
-typedef struct ImageData< UTopic*, UParticipant*, URActor*, UWActor*> UImage;
-typedef struct ImageData< DTopic,  DParticipant,  DActor,   DActor>   DImage;
+typedef struct ImageData<UTopic*, UParticipant*, URActor*, UWActor*> UImage;
+typedef struct ImageData<DTopic,  DParticipant,  DActor,   DActor>   DImage;
 
-} // End of namespace Update
+} // namespace Update
 
-#endif // _UPDATE_DATA_TYPES
-
+#endif /* UPDATE_DATA_TYPES */

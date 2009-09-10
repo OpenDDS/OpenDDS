@@ -1,5 +1,3 @@
-
-// -*- C++ -*-
 // $Id$
 // Definition for Win32 Export directives.
 // This file is generated automatically by generate_export_file.pl ReliableMulticast
@@ -15,7 +13,7 @@
 
 #if !defined (RELIABLEMULTICAST_HAS_DLL)
 #  define RELIABLEMULTICAST_HAS_DLL 1
-#endif /* ! RELIABLEMULTICAST_HAS_DLL */
+#endif /* !RELIABLEMULTICAST_HAS_DLL */
 
 #if defined (RELIABLEMULTICAST_HAS_DLL) && (RELIABLEMULTICAST_HAS_DLL == 1)
 #  if defined (RELIABLEMULTICAST_BUILD_DLL)

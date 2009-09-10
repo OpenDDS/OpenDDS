@@ -1,12 +1,16 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef TAO_DDS_DCPS_TRANSIENT_KLUDGE_H
 #define TAO_DDS_DCPS_TRANSIENT_KLUDGE_H
 
-
 #include "dcps_export.h"
-
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -16,52 +20,48 @@
 # pragma warning( disable : 4231 )
 #endif
 
-namespace OpenDDS
-{
-  namespace DCPS
-  {
-    /**
-    * @class TransientKludge
-    *
-    * @brief Simply turn on and off the transient kludge enable flag.
-    *
-    * This class provides the methods to set/get transient kludge
-    * enable flag.
-    * Only the DCPSInfo repository should set/enable the kludge!!!
-    */
-    class OpenDDS_Dcps_Export Transient_Kludge
-    {
-    public:
+namespace OpenDDS {
+namespace DCPS {
 
-      Transient_Kludge ();
-      ~Transient_Kludge ();
+/**
+* @class TransientKludge
+*
+* @brief Simply turn on and off the transient kludge enable flag.
+*
+* This class provides the methods to set/get transient kludge
+* enable flag.
+* Only the DCPSInfo repository should set/enable the kludge!!!
+*/
+class OpenDDS_Dcps_Export Transient_Kludge {
+public:
 
-      /// Return a singleton instance of this class.
-      static Transient_Kludge* instance (void);
+  Transient_Kludge();
+  ~Transient_Kludge();
 
-      /// Turn on enabled_ flag.
-      void enable ();
+  /// Return a singleton instance of this class.
+  static Transient_Kludge* instance();
 
-      /// Turn off enabled_ flag.
-      void disable ();
+  /// Turn on enabled_ flag.
+  void enable();
 
-      /// Accessor of enable flag.
-      bool is_enabled ();
+  /// Turn off enabled_ flag.
+  void disable();
 
-    private:
-      /// The flag.
-      bool  enabled_;
-    };
+  /// Accessor of enable flag.
+  bool is_enabled();
 
+private:
+  /// The flag.
+  bool  enabled_;
+};
 
-    #define TheTransientKludge ::OpenDDS::DCPS::Transient_Kludge::instance()
+#define TheTransientKludge OpenDDS::DCPS::Transient_Kludge::instance()
 
-  } // namespace DCPS
+} // namespace DCPS
 } // namespace OpenDDS
 
 #if defined(__ACE_INLINE__)
 #include "Transient_Kludge.inl"
 #endif /* __ACE_INLINE__ */
-
 
 #endif /* TAO_DDS_DCPS_TRANSIENT_KLUDGE_H */

@@ -1,6 +1,11 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #include "ReliableMulticast_pch.h"
 #include "SenderLogic.h"
@@ -12,30 +17,24 @@
 void
 OpenDDS::DCPS::ReliableMulticast::detail::SenderLogic::receive(
   const OpenDDS::DCPS::ReliableMulticast::detail::Packet& p,
-  PacketVector& redelivered
-  ) const
+  PacketVector& redelivered) const
 {
   redelivered.clear();
-  if (p.type_ == OpenDDS::DCPS::ReliableMulticast::detail::Packet::NACK)
-  {
+
+  if (p.type_ == OpenDDS::DCPS::ReliableMulticast::detail::Packet::NACK) {
     for (
       OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type id = p.nack_begin_;
       id != p.nack_end_;
-      ++id
-      )
-    {
+      ++id) {
       BufferType::const_iterator iter = buffer_.find(id);
 
-      if (iter != buffer_.end())
-      {
+      if (iter != buffer_.end()) {
         redelivered.push_back(iter->second);
-      }
-      else
-      {
+
+      } else {
         redelivered.push_back(OpenDDS::DCPS::ReliableMulticast::detail::Packet(
-          id,
-          OpenDDS::DCPS::ReliableMulticast::detail::Packet::DATA_NOT_AVAILABLE
-          ));
+                                id,
+                                OpenDDS::DCPS::ReliableMulticast::detail::Packet::DATA_NOT_AVAILABLE));
       }
     }
   }
@@ -44,42 +43,37 @@ OpenDDS::DCPS::ReliableMulticast::detail::SenderLogic::receive(
 void
 OpenDDS::DCPS::ReliableMulticast::detail::SenderLogic::send(
   const OpenDDS::DCPS::ReliableMulticast::detail::Packet& p,
-  PacketVector& delivered
-  )
+  PacketVector& delivered)
 {
   delivered.clear();
+
   if (
     p.type_ == OpenDDS::DCPS::ReliableMulticast::detail::Packet::DATA_INTERMEDIATE ||
-    p.type_ == OpenDDS::DCPS::ReliableMulticast::detail::Packet::DATA_END_OF_MESSAGE
-    )
-  {
+    p.type_ == OpenDDS::DCPS::ReliableMulticast::detail::Packet::DATA_END_OF_MESSAGE) {
     buffer_packet(p, delivered);
   }
 }
 
 void
 OpenDDS::DCPS::ReliableMulticast::detail::SenderLogic::make_heartbeat(
-  OpenDDS::DCPS::ReliableMulticast::detail::Packet& p
-  )
+  OpenDDS::DCPS::ReliableMulticast::detail::Packet& p)
 {
   p = OpenDDS::DCPS::ReliableMulticast::detail::Packet(
-    current_id_ - 1,
-    OpenDDS::DCPS::ReliableMulticast::detail::Packet::HEARTBEAT
-    );
+        current_id_ - 1,
+        OpenDDS::DCPS::ReliableMulticast::detail::Packet::HEARTBEAT);
 }
 
 void
 OpenDDS::DCPS::ReliableMulticast::detail::SenderLogic::buffer_packet(
   const OpenDDS::DCPS::ReliableMulticast::detail::Packet& p,
-  PacketVector& delivered
-  )
+  PacketVector& delivered)
 {
   OpenDDS::DCPS::ReliableMulticast::detail::Packet tmp(p);
 
-  if (buffersize() == sender_history_size_)
-  {
+  if (buffersize() == sender_history_size_) {
     buffer_.erase(current_id_ - sender_history_size_);
   }
+
   tmp.id_ = current_id_;
   ++current_id_;
   buffer_.insert(std::make_pair(tmp.id_, tmp));
@@ -88,8 +82,7 @@ OpenDDS::DCPS::ReliableMulticast::detail::SenderLogic::buffer_packet(
 
 bool
 OpenDDS::DCPS::ReliableMulticast::detail::SenderLogic::is_buffered(
-  const OpenDDS::DCPS::ReliableMulticast::detail::Packet& p
-  ) const
+  const OpenDDS::DCPS::ReliableMulticast::detail::Packet& p) const
 {
   return buffer_.find(p.id_) != buffer_.end();
 }

@@ -1,13 +1,11 @@
-// -*- C++ -*-
-// ============================================================================
-/**
- *  @file   GuidUtils.h
+/*
+ * $Id$
  *
- *  $Id$
+ * Copyright 2009 Object Computing, Inc.
  *
- *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
-// ============================================================================
 
 #ifndef GUIDUTILS_H
 #define GUIDUTILS_H
@@ -20,11 +18,9 @@
 
 #include "dcps_export.h"
 
+namespace OpenDDS {
+namespace DCPS {
 
-namespace OpenDDS
-{
-namespace DCPS
-{
 /// Vendor Id value specified for OCI is used for OpenDDS.
 const GuidVendorId_t VENDORID_OCI = { 0x00, 0x03 };
 
@@ -57,12 +53,12 @@ enum EntityKind {     // EntityId_t.entityKind value(s)
   KIND_TOPIC          // 0x3f & 0x05
 };
 
-} // namespace
-} // namespace
+} // namespace DCPS
+} // namespace OpenDDS
 
 // Check for equality using the generated logical functor.
 inline OpenDDS_Dcps_Export bool
-operator==( const OpenDDS::DCPS::GUID_t& lhs, const OpenDDS::DCPS::GUID_t& rhs)
+operator==(const OpenDDS::DCPS::GUID_t& lhs, const OpenDDS::DCPS::GUID_t& rhs)
 {
   GUID_tKeyLessThan lessThan;
   return !lessThan(lhs, rhs) && !lessThan(rhs, lhs);
@@ -77,4 +73,3 @@ OpenDDS_Dcps_Export std::istream&
 operator>>(std::istream& is, OpenDDS::DCPS::GUID_t& rhs);
 
 #endif /* GUIDUTILS_H */
-

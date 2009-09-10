@@ -1,5 +1,11 @@
-// -*- C++ -*-
-//
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #ifndef OPENDDS_DCPS_RELIABLEMULTICASTFACTORY_H
 #define OPENDDS_DCPS_RELIABLEMULTICASTFACTORY_H
@@ -10,28 +16,23 @@
 #include "ReliableMulticast_Export.h"
 #include "dds/DCPS/transport/framework/TransportImplFactory.h"
 
-namespace OpenDDS
-{
+namespace OpenDDS {
+namespace DCPS {
 
-  namespace DCPS
-  {
+class ReliableMulticast_Export ReliableMulticastTransportImplFactory
+  : public TransportImplFactory {
+public:
+  ReliableMulticastTransportImplFactory();
+  virtual ~ReliableMulticastTransportImplFactory();
 
-    class ReliableMulticast_Export ReliableMulticastTransportImplFactory
-      : public TransportImplFactory
-    {
-    public:
-      ReliableMulticastTransportImplFactory();
-      virtual ~ReliableMulticastTransportImplFactory();
+  virtual int requires_reactor() const;
 
-      virtual int requires_reactor() const;
+protected:
+  virtual TransportImpl* create();
+};
 
-    protected:
-      virtual TransportImpl* create();
-    };
-
-  } /* namespace DCPS */
-
-} /* namespace OpenDDS */
+} // namespace DCPS
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "ReliableMulticastTransportImplFactory.inl"

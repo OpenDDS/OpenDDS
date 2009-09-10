@@ -1,6 +1,11 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #include "EntryExit.h"
 
@@ -12,8 +17,6 @@ OpenDDS::DCPS::BuildChainVisitor::BuildChainVisitor()
   DBG_ENTRY_LVL("BuildChainVisitor","BuildChainVisitor",6);
 }
 
-
-
 ACE_INLINE
 ACE_Message_Block*
 OpenDDS::DCPS::BuildChainVisitor::chain()
@@ -24,4 +27,3 @@ OpenDDS::DCPS::BuildChainVisitor::chain()
   this->head_ = this->tail_ = 0;
   return head;
 }
-

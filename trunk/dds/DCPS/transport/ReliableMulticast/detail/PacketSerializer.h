@@ -1,4 +1,11 @@
-// -*- C++ -*-
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 //
 
 #ifndef OPENDDS_DCPS_PACKETSERIALIZER_H
@@ -14,52 +21,38 @@
 #include "dds/DCPS/transport/ReliableMulticast/ReliableMulticast_Export.h"
 #include <cstring>
 
-namespace OpenDDS
-{
+namespace OpenDDS {
+namespace DCPS {
+namespace ReliableMulticast {
+namespace detail {
 
-  namespace DCPS
-  {
+struct Packet;
 
-    namespace ReliableMulticast
-    {
+class ReliableMulticast_Export PacketSerializer {
+public:
+  /// Create a buffer appropriately-sized for the input Packet and
+  /// return it.  This buffer is owned by the caller!
+  char* getBuffer(
+    const Packet& packet,
+    size_t& size) const;
 
-      namespace detail
-      {
+  /// Returns a pointer to the first byte in the buffer that is
+  /// used - this is due to alignment in ACE_OutputCDR.
+  char* serializeFromTo(
+    const Packet& packet,
+    char* buffer,
+    size_t size) const;
 
-        struct Packet;
+  void serializeFromTo(
+    const char* buffer,
+    size_t size,
+    Packet& packet) const;
+};
 
-        class ReliableMulticast_Export PacketSerializer
-        {
-        public:
-          /// Create a buffer appropriately-sized for the input Packet and
-          /// return it.  This buffer is owned by the caller!
-          char* getBuffer(
-            const Packet& packet,
-            size_t& size
-            ) const;
-
-          /// Returns a pointer to the first byte in the buffer that is
-          /// used - this is due to alignment in ACE_OutputCDR.
-          char* serializeFromTo(
-            const Packet& packet,
-            char* buffer,
-            size_t size
-            ) const;
-
-          void serializeFromTo(
-            const char* buffer,
-            size_t size,
-            Packet& packet
-            ) const;
-        };
-
-      } /* namespace detail */
-
-    } /* namespace ReliableMulticast */
-
-  } /* namespace DCPS */
-
-} /* namespace OpenDDS */
+} // namespace detail
+} // namespace ReliableMulticast
+} // namespace DCPS
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "PacketSerializer.inl"

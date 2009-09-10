@@ -1,6 +1,11 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "ace/Event_Handler.h"
@@ -14,7 +19,7 @@
 
 #if !defined (__ACE_INLINE__)
 # include "InstanceState.inl"
-#endif /* ! __ACE_INLINE__ */
+#endif /* !__ACE_INLINE__ */
 
 OpenDDS::DCPS::InstanceState::InstanceState(DataReaderImpl* reader,
                                             ACE_Recursive_Thread_Mutex& lock,
@@ -36,10 +41,8 @@ OpenDDS::DCPS::InstanceState::~InstanceState()
   cancel_release();
 }
 
-
-
-void OpenDDS::DCPS::InstanceState::sample_info(::DDS::SampleInfo& si,
-                                const ReceivedDataElement* de)
+void OpenDDS::DCPS::InstanceState::sample_info(DDS::SampleInfo& si,
+                                               const ReceivedDataElement* de)
 {
   si.sample_state = de->sample_state_ ;
   si.view_state = view_state_ ;
@@ -48,11 +51,11 @@ void OpenDDS::DCPS::InstanceState::sample_info(::DDS::SampleInfo& si,
   si.no_writers_generation_count = no_writers_generation_count_ ;
   si.source_timestamp = de->source_timestamp_ ;
   si.instance_handle = handle_ ;
-  si.publication_handle = this->reader_->participant_servant_->get_handle (de->pub_);
+  si.publication_handle = this->reader_->participant_servant_->get_handle(de->pub_);
   si.valid_data = de->registered_data_ != 0;
-/*
- * These are actually calculated later...
- */
+  /*
+   * These are actually calculated later...
+   */
   si.sample_rank = 0 ;
 
   // these aren't the real value, they're being saved
@@ -62,9 +65,8 @@ void OpenDDS::DCPS::InstanceState::sample_info(::DDS::SampleInfo& si,
   si.generation_rank = de->disposed_generation_count_ +
                        de->no_writers_generation_count_ ;
   si.absolute_generation_rank = de->disposed_generation_count_ +
-                       de->no_writers_generation_count_ ;
+                                de->no_writers_generation_count_ ;
 }
-
 
 // cannot ACE_INLINE because of #include loop
 
@@ -88,48 +90,46 @@ OpenDDS::DCPS::InstanceState::handle_timeout(const ACE_Time_Value& /* current_ti
   return 0;
 }
 
-
 bool
 OpenDDS::DCPS::InstanceState::dispose_was_received(const PublicationId& writer_id)
 {
-  writers_.erase (writer_id);
+  writers_.erase(writer_id);
 
   //
   // Manage the instance state on disposal here.
   //
-  if( this->instance_state_ & DDS::ALIVE_INSTANCE_STATE)
-  {
+  if (this->instance_state_ & DDS::ALIVE_INSTANCE_STATE) {
     this->instance_state_ = DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE;
     schedule_release();
     return true;
   }
+
   return false;
 }
 
 bool
 OpenDDS::DCPS::InstanceState::unregister_was_received(const PublicationId& writer_id)
 {
-  writers_.erase (writer_id);
+  writers_.erase(writer_id);
 
-  if(writers_.empty () && this->instance_state_ & DDS::ALIVE_INSTANCE_STATE)
-  {
+  if (writers_.empty() && this->instance_state_ & DDS::ALIVE_INSTANCE_STATE) {
     this->instance_state_ = DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE;
     schedule_release();
     return true;
   }
+
   return false;
 }
 
 void
-OpenDDS::DCPS::InstanceState::writer_became_dead (
+OpenDDS::DCPS::InstanceState::writer_became_dead(
   const PublicationId&  writer_id,
   int                   /*num_alive_writers*/,
   const ACE_Time_Value& /* when */)
 {
-  writers_.erase (writer_id);
+  writers_.erase(writer_id);
 
-  if(writers_.empty () && this->instance_state_ & DDS::ALIVE_INSTANCE_STATE)
-  {
+  if (writers_.empty() && this->instance_state_ & DDS::ALIVE_INSTANCE_STATE) {
     this->instance_state_ = DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE;
     schedule_release();
   }
@@ -144,53 +144,50 @@ OpenDDS::DCPS::InstanceState::schedule_pending()
 void
 OpenDDS::DCPS::InstanceState::schedule_release()
 {
-    DDS::DataReaderQos qos;
-    this->reader_->get_qos(qos);
+  DDS::DataReaderQos qos;
+  this->reader_->get_qos(qos);
 
-    DDS::Duration_t delay;
-    switch (this->instance_state_)
-    {
-    case DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE:
-      delay = qos.reader_data_lifecycle.autopurge_nowriter_samples_delay;
-      break;
+  DDS::Duration_t delay;
 
-    case DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE:
-      delay = qos.reader_data_lifecycle.autopurge_disposed_samples_delay;
-      break;
+  switch (this->instance_state_) {
+  case DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE:
+    delay = qos.reader_data_lifecycle.autopurge_nowriter_samples_delay;
+    break;
 
-    default:
+  case DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE:
+    delay = qos.reader_data_lifecycle.autopurge_disposed_samples_delay;
+    break;
+
+  default:
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: InstanceState::schedule_release:")
+               ACE_TEXT(" Unsupported instance state: %d!\n"),
+               this->instance_state_));
+    return;
+  }
+
+  if (delay.sec != DDS::DURATION_INFINITE_SEC &&
+      delay.nanosec != DDS::DURATION_INFINITE_NSEC) {
+    cancel_release();
+
+    ACE_Reactor* reactor = this->reader_->get_reactor();
+
+    this->release_timer_id_ =
+      reactor->schedule_timer(this, 0, duration_to_time_value(delay));
+
+    if (this->release_timer_id_ == -1) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: InstanceState::schedule_release:")
-                 ACE_TEXT(" Unsupported instance state: %d!\n"),
-                 this->instance_state_));
-      return;
+                 ACE_TEXT(" Unable to schedule timer!\n")));
     }
 
-    if (delay.sec != DDS::DURATION_INFINITE_SEC &&
-        delay.nanosec != DDS::DURATION_INFINITE_NSEC)
-    {
-      cancel_release();
-
-      ACE_Reactor* reactor = this->reader_->get_reactor();
-
-      this->release_timer_id_ =
-        reactor->schedule_timer(this, 0, duration_to_time_value(delay));
-
-      if (this->release_timer_id_ == -1)
-      {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: InstanceState::schedule_release:")
-                   ACE_TEXT(" Unable to schedule timer!\n")));
-      }
-    }
-    else
-    {
-      // N.B. instance transitions are always followed by a non-valid
-      // sample being queued to the ReceivedDataElementList; marking
-      // the release as pending prevents this sample from being lost
-      // if all samples have been already removed from the instance.
-      schedule_pending();
-    }
+  } else {
+    // N.B. instance transitions are always followed by a non-valid
+    // sample being queued to the ReceivedDataElementList; marking
+    // the release as pending prevents this sample from being lost
+    // if all samples have been already removed from the instance.
+    schedule_pending();
+  }
 }
 
 void
@@ -198,8 +195,7 @@ OpenDDS::DCPS::InstanceState::cancel_release()
 {
   this->release_pending_ = false;
 
-  if (this->release_timer_id_ != -1)
-  {
+  if (this->release_timer_id_ != -1) {
     ACE_Reactor* reactor = this->reader_->get_reactor();
     reactor->cancel_timer(this->release_timer_id_);
 
@@ -210,12 +206,10 @@ OpenDDS::DCPS::InstanceState::cancel_release()
 void
 OpenDDS::DCPS::InstanceState::release_if_empty()
 {
-  if( this->empty_ && this->writers_.empty())
-  {
+  if (this->empty_ && this->writers_.empty()) {
     release();
-  }
-  else
-  {
+
+  } else {
     schedule_pending();
   }
 }
@@ -225,4 +219,3 @@ OpenDDS::DCPS::InstanceState::release()
 {
   this->reader_->release_instance(this->handle_);
 }
-

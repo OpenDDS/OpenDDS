@@ -1,52 +1,51 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef OPENDDS_DCPS_REMOVEALLVISITOR_H
 #define OPENDDS_DCPS_REMOVEALLVISITOR_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "BasicQueueVisitor_T.h"
 
+namespace OpenDDS {
+namespace DCPS {
 
-namespace OpenDDS
-{
+class TransportQueueElement;
 
-  namespace DCPS
-  {
+class OpenDDS_Dcps_Export RemoveAllVisitor : public BasicQueueVisitor<TransportQueueElement> {
+public:
 
-    class TransportQueueElement;
+  RemoveAllVisitor();
 
-    class OpenDDS_Dcps_Export RemoveAllVisitor : public BasicQueueVisitor<TransportQueueElement>
-    {
-      public:
+  virtual ~RemoveAllVisitor();
 
-        RemoveAllVisitor();
+  /// The BasicQueue<T>::accept_remove_visitor() method will call
+  /// this visit_element_remove() method for each element in the queue.
+  virtual int visit_element_remove(TransportQueueElement* element,
+                                   int&                   remove);
 
-        virtual ~RemoveAllVisitor();
+  /// Accessor for the status.  Called after this visitor object has
+  /// been passed to BasicQueue<T>::accept_remove_visitor().
+  int status() const;
 
-        /// The BasicQueue<T>::accept_remove_visitor() method will call
-        /// this visit_element_remove() method for each element in the queue.
-        virtual int visit_element_remove(TransportQueueElement* element,
-                                         int&                   remove);
+  int removed_bytes() const;
 
-        /// Accessor for the status.  Called after this visitor object has
-        /// been passed to BasicQueue<T>::accept_remove_visitor().
-        int status() const;
+private:
 
-        int removed_bytes() const;
+  /// Holds the status of our visit.
+  int status_;
 
+  int removed_bytes_;
+};
 
-      private:
-
-        /// Holds the status of our visit.
-        int status_;
-
-        int removed_bytes_;
-    };
-
-  }
-
-}
+} // namespace DCPS
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "RemoveAllVisitor.inl"

@@ -1,6 +1,12 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef OPENDDS_DCPS_STATS_T_H
 #define OPENDDS_DCPS_STATS_T_H
 
@@ -10,79 +16,78 @@
 
 #include "DataCollector_T.h"
 
-namespace OpenDDS { namespace DCPS {
+namespace OpenDDS {
+namespace DCPS {
 
 /**
- * @class Stats< DataType>
+ * @class Stats<DataType>
  *
  * @brief Accumulates average, n, variance, minimum, and maximum statistics
  */
-template< typename DataType>
-class Stats : public DataCollector< DataType> {
-  public:
-    /// Default constructor.
-    Stats(
-      unsigned int amount = 0,
-      typename DataCollector< DataType>::OnFull type
-        = DataCollector< DataType>::KeepOldest
-    );
+template<typename DataType>
+class Stats : public DataCollector<DataType> {
+public:
+  /// Default constructor.
+  Stats(
+    unsigned int amount = 0,
+    typename DataCollector<DataType>::OnFull type
+    = DataCollector<DataType>::KeepOldest);
 
-    /// Default bitwise copy is sufficient.
+  /// Default bitwise copy is sufficient.
 
-    /// Assignment operator
-    Stats& operator=( const Stats& rhs);
+  /// Assignment operator
+  Stats& operator=(const Stats& rhs);
 
-    /// Reset statistics to nil.
-    void reset();
+  /// Reset statistics to nil.
+  void reset();
 
-    /**
-     * Accumulate a new value.
-     * @param value the new value to be accumulated.
-     */
-    void add( DataType value);
+  /**
+   * Accumulate a new value.
+   * @param value the new value to be accumulated.
+   */
+  void add(DataType value);
 
-    /// Calculate the average value.
-    long double mean() const;
+  /// Calculate the average value.
+  long double mean() const;
 
-    /// Calculate the variance value.
-    long double var() const;
+  /// Calculate the variance value.
+  long double var() const;
 
-    /// Access the minimum value.
-    DataType minimum() const;
+  /// Access the minimum value.
+  DataType minimum() const;
 
-    /// Access the maximum value.
-    DataType maximum() const;
+  /// Access the maximum value.
+  DataType maximum() const;
 
-    /// Access the number of values accumulated.
-    unsigned long n() const;
+  /// Access the number of values accumulated.
+  unsigned long n() const;
 
-  private:
-    // Direct statistics.
-    unsigned long n_;
-    DataType      minimum_;
-    DataType      maximum_;
+private:
+  // Direct statistics.
+  unsigned long n_;
+  DataType      minimum_;
+  DataType      maximum_;
 
-    // Internal variables have the largest range and highest precision possible.
-    long double an_ ;
-    long double bn_ ;
-    long double cn_ ;
-    long double variance_ ;
+  // Internal variables have the largest range and highest precision possible.
+  long double an_ ;
+  long double bn_ ;
+  long double cn_ ;
+  long double variance_ ;
 };
 
-template< typename DataType>
+template<typename DataType>
 inline
 Stats<DataType>::Stats(
   unsigned int amount,
-  typename DataCollector< DataType>::OnFull type
-) : DataCollector< DataType>( amount, type)
+  typename DataCollector<DataType>::OnFull type) : DataCollector<DataType>(amount, type)
 {
   this->reset();
 }
 
-template< typename DataType>
+template<typename DataType>
 inline
 Stats<DataType>&
-Stats<DataType>::operator=( const Stats& rhs)
+Stats<DataType>::operator=(const Stats& rhs)
 {
   this->n_        = rhs.n_;
   this->minimum_  = rhs.minimum_;
@@ -94,7 +99,7 @@ Stats<DataType>::operator=( const Stats& rhs)
   return *this;
 }
 
-template< typename DataType>
+template<typename DataType>
 inline
 void
 Stats<DataType>::reset()
@@ -108,13 +113,13 @@ Stats<DataType>::reset()
   this->variance_ = 0.0;
 }
 
-template< typename DataType>
+template<typename DataType>
 inline
 void
-Stats<DataType>::add( DataType value)
+Stats<DataType>::add(DataType value)
 {
   // Save the raw value if configured to.
-  this->collect( value);
+  this->collect(value);
 
   // Slide rule style calculations.
   long double term;
@@ -130,7 +135,7 @@ Stats<DataType>::add( DataType value)
   this->variance_ /= (this->n_ + 1);
   this->variance_ *=  this->n_;
 
-  term = static_cast< long double>( value);
+  term = static_cast<long double>(value);
   this->variance_ +=  this->an_;
   this->variance_ -=  this->bn_ * term;
   this->variance_ +=  this->cn_ * term * term;
@@ -145,7 +150,7 @@ Stats<DataType>::add( DataType value)
   this->an_ /= (this->n_ + 2);
   this->an_ *= (this->n_ + 1);
 
-  // term = static_cast< long double>( value);
+  // term = static_cast<long double>( value);
   term *= term;
   term /= (this->n_ + 2);
   term /= (this->n_ + 2);
@@ -159,7 +164,7 @@ Stats<DataType>::add( DataType value)
   this->bn_ /= (this->n_ + 2);
   this->bn_ *= (this->n_ + 1);
 
-  term = static_cast< long double>( value * 2);
+  term = static_cast<long double>(value * 2);
   term /= (this->n_ + 2);
   term /= (this->n_ + 2);
   this->bn_ += term;
@@ -171,23 +176,23 @@ Stats<DataType>::add( DataType value)
   this->cn_ /= (this->n_ + 2);
   this->cn_ /= (this->n_ + 2);
 
-  if( (this->n_ == 0) || (value < this->minimum_)) {
+  if ((this->n_ == 0) || (value < this->minimum_)) {
     this->minimum_ = value;
   }
 
-  if( (this->n_ == 0) || (value > this->maximum_)) {
+  if ((this->n_ == 0) || (value > this->maximum_)) {
     this->maximum_ = value;
   }
 
   this->n_ += 1; // Must follow internal variable updates.
 }
 
-template< typename DataType>
+template<typename DataType>
 inline
 long double
 Stats<DataType>::mean() const
 {
-  if( this->n_ == 0) {
+  if (this->n_ == 0) {
     /// @TODO: return qNaN with no data.
     return 0.0;
   }
@@ -206,7 +211,7 @@ Stats<DataType>::mean() const
   return average ;
 }
 
-template< typename DataType>
+template<typename DataType>
 inline
 long double
 Stats<DataType>::var() const
@@ -214,7 +219,7 @@ Stats<DataType>::var() const
   return this->variance_ ;
 }
 
-template< typename DataType>
+template<typename DataType>
 inline
 DataType
 Stats<DataType>::minimum() const
@@ -223,7 +228,7 @@ Stats<DataType>::minimum() const
   return (this->n_ == 0)? 0: this->minimum_;
 }
 
-template< typename DataType>
+template<typename DataType>
 inline
 DataType
 Stats<DataType>::maximum() const
@@ -232,7 +237,7 @@ Stats<DataType>::maximum() const
   return (this->n_ == 0)? 0: this->maximum_;
 }
 
-template< typename DataType>
+template<typename DataType>
 inline
 unsigned long
 Stats<DataType>::n() const
@@ -240,7 +245,7 @@ Stats<DataType>::n() const
   return this->n_;
 }
 
-}} // End of namespace OpenDDS::DCPS
+} // namespace DCPS
+} // namespace OpenDDS
 
 #endif // OPENDDS_DCPS_STATS_T_H
-

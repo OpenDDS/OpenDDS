@@ -1,6 +1,11 @@
-// -*- IDL -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 /**
  *   This file was used to generate the code in WCharSeqC.*
@@ -28,4 +33,4 @@ module CORBA
   typedef sequence<wchar> WCharSeq;
 };
 
-#endif  /* OPENDDS_CORBA_WCHAR_SEQ_IDL */
+#endif /* OPENDDS_CORBA_WCHAR_SEQ_IDL */

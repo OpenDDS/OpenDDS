@@ -1,6 +1,12 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef OPENDDS_DCPS_NETWORKADDRESS_H
 #define OPENDDS_DCPS_NETWORKADDRESS_H
 
@@ -11,65 +17,59 @@
 #include "ace/SString.h"
 #include <vector>
 
+namespace OpenDDS {
+namespace DCPS {
 
-namespace OpenDDS
-{
+struct HostnameInfo {
+  int index_;
+  ACE_TString hostname_;
+};
 
-  namespace DCPS
-  {
+typedef std::vector <HostnameInfo> HostnameInfoVector;
 
-    struct HostnameInfo
-    {
-      int index_;
-      ACE_TString hostname_;
-    };
+/**
+ * @struct NetworkAddress
+ *
+ * @brief Defines a wrapper around address info which is used for advertise.
+ *
+ *
+ * This is used to send/receive an address information through transport.
+ */
+struct OpenDDS_Dcps_Export NetworkAddress {
+  /// Default Ctor
+  NetworkAddress();
 
-    typedef std::vector <HostnameInfo> HostnameInfoVector;
+  ~NetworkAddress();
 
-    /**
-     * @struct NetworkAddress
-     *
-     * @brief Defines a wrapper around address info which is used for advertise.
-     *       
-     *
-     * This is used to send/receive an address information through transport.
-     */
-    struct OpenDDS_Dcps_Export NetworkAddress
-    {
-      /// Default Ctor
-      NetworkAddress();
+  /// Ctor using address string.
+  explicit NetworkAddress(const ACE_TString& addr);
 
-      ~NetworkAddress();
+  void dump();
 
-      /// Ctor using address string.
-      explicit NetworkAddress(const ACE_TString& addr);
+  /// Accessor to populate the provided ACE_INET_Addr object from the
+  /// address string received through transport.
+  void to_addr(ACE_INET_Addr& addr) const;
 
-      void dump ();
+  /// Reserve byte for some feature supports in the future.
+  /// e.g. version support.
+  CORBA::Octet reserved_;
 
-      /// Accessor to populate the provided ACE_INET_Addr object from the
-      /// address string received through transport.
-      void to_addr(ACE_INET_Addr& addr) const;
+  /// The address in string format. e.g. ip:port, hostname:port
+  ACE_TString addr_;
+};
 
-      /// Reserve byte for some feature supports in the future. 
-      /// e.g. version support.
-      CORBA::Octet reserved_;
+/// Helper function to get the fully qualified hostname.
+/// It attempts to discover the FQDN by the network interface addresses, however
+/// the result is impacted by the network configuration, so it returns name in the
+/// order whoever is found first - FQDN, short hostname, name resolved from loopback
+/// address. In the case using short hostname or name resolved from loopback, a
+/// warning is logged. If there is no any name discovered from network interfaces,
+/// an error is logged.
+extern OpenDDS_Dcps_Export
+ACE_TString get_fully_qualified_hostname();
 
-      /// The address in string format. e.g. ip:port, hostname:port
-      ACE_TString addr_;
-    };
-
-    /// Helper function to get the fully qualified hostname.
-    /// It attempts to discover the FQDN by the network interface addresses, however 
-    /// the result is impacted by the network configuration, so it returns name in the
-    /// order whoever is found first - FQDN, short hostname, name resolved from loopback
-    /// address. In the case using short hostname or name resolved from loopback, a 
-    /// warning is logged. If there is no any name discovered from network interfaces,
-    /// an error is logged.
-    extern OpenDDS_Dcps_Export
-    ACE_TString get_fully_qualified_hostname ();
-
-  }
-}
+} // namespace DCPS
+} // namespace OpenDDS
 
 /// Marshal into a buffer.
 extern OpenDDS_Dcps_Export

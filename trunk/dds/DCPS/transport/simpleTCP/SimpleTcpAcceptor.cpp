@@ -1,19 +1,24 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #include "SimpleTcp_pch.h"
 #include "SimpleTcpAcceptor.h"
 #include "SimpleTcpTransport.h"
 #include "SimpleTcpSendStrategy.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
-
 // This can not be inlined since it needs to have the internals of the
 // SimpleTcpTransport available in order to call add_ref(), and that
 // gets a bit circular in the dependencies.  Oh well.
 OpenDDS::DCPS::SimpleTcpAcceptor::SimpleTcpAcceptor
-                                         (SimpleTcpTransport* transport_impl)
-: transport_(transport_impl, false)
+(SimpleTcpTransport* transport_impl)
+  : transport_(transport_impl, false)
 {
   DBG_ENTRY_LVL("SimpleTcpAcceptor","SimpleTcpAcceptor",6);
 }
@@ -29,7 +34,6 @@ OpenDDS::DCPS::SimpleTcpAcceptor::get_configuration()
   return this->transport_->get_configuration();
 }
 
-
 OpenDDS::DCPS::SimpleTcpTransport*
 OpenDDS::DCPS::SimpleTcpAcceptor::transport()
 {
@@ -40,7 +44,6 @@ OpenDDS::DCPS::SimpleTcpAcceptor::transport()
   return tmp._retn();
 }
 
-
 void
 OpenDDS::DCPS::SimpleTcpAcceptor::transport_shutdown()
 {
@@ -49,4 +52,3 @@ OpenDDS::DCPS::SimpleTcpAcceptor::transport_shutdown()
   // Drop the reference to the SimpleTcpTransport object.
   this->transport_ = 0;
 }
-

@@ -1,6 +1,12 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef OPENDDS_DCPS_SIMPLETCPRECEIVESTRATEGY_H
 #define OPENDDS_DCPS_SIMPLETCPRECEIVESTRATEGY_H
 
@@ -10,54 +16,48 @@
 #include "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
 
+namespace OpenDDS {
+namespace DCPS {
 
-namespace OpenDDS
-{
+class SimpleTcpReceiveStrategy : public TransportReceiveStrategy {
+public:
 
-  namespace DCPS
-  {
+  SimpleTcpReceiveStrategy(SimpleTcpDataLink*    link,
+                           SimpleTcpConnection*  connection,
+                           TransportReactorTask* task);
+  virtual ~SimpleTcpReceiveStrategy();
 
-    class SimpleTcpReceiveStrategy : public TransportReceiveStrategy
-    {
-      public:
+  int reset(SimpleTcpConnection* connection);
 
-        SimpleTcpReceiveStrategy(SimpleTcpDataLink*    link,
-                                 SimpleTcpConnection*  connection,
-                                 TransportReactorTask* task);
-        virtual ~SimpleTcpReceiveStrategy();
+  ACE_Reactor* get_reactor();
 
-        int reset(SimpleTcpConnection* connection);
+  bool gracefully_disconnected();
 
-        ACE_Reactor* get_reactor();
+protected:
 
-        bool gracefully_disconnected ();
+  virtual ssize_t receive_bytes(iovec iov[],
+                                int   n,
+                                ACE_INET_Addr& remote_address);
 
-      protected:
+  virtual void deliver_sample(ReceivedDataSample& sample,
+                              const ACE_INET_Addr& remote_address);
 
-        virtual ssize_t receive_bytes(iovec iov[],
-                                      int   n,
-                                      ACE_INET_Addr& remote_address);
+  virtual int start_i();
+  virtual void stop_i();
 
-        virtual void deliver_sample(ReceivedDataSample& sample,
-                                    const ACE_INET_Addr& remote_address);
+  // Delegate to the connection object to re-establishment
+  // the connection.
+  virtual void relink(bool do_suspend = true);
 
-        virtual int start_i();
-        virtual void stop_i();
+private:
 
-        // Delegate to the connection object to re-establishment
-        // the connection.
-        virtual void relink (bool do_suspend = true);
+  SimpleTcpDataLink_rch    link_;
+  SimpleTcpConnection_rch  connection_;
+  TransportReactorTask_rch reactor_task_;
+};
 
-      private:
-
-        SimpleTcpDataLink_rch    link_;
-        SimpleTcpConnection_rch  connection_;
-        TransportReactorTask_rch reactor_task_;
-    };
-
-  }  /* namespace DCPS */
-
-}  /* namespace OpenDDS */
+} // namespace DCPS
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "SimpleTcpReceiveStrategy.inl"

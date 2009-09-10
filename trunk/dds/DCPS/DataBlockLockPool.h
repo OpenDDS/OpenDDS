@@ -1,13 +1,11 @@
-// -*- C++ -*-
-// ============================================================================
-/**
- *  @file   DataBlockLockPool.h
+/*
+ * $Id$
  *
- *  $Id$
+ * Copyright 2009 Object Computing, Inc.
  *
- *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
-// ============================================================================
 
 #ifndef DATABLOCKLOCKPOOL_H
 #define DATABLOCKLOCKPOOL_H
@@ -20,7 +18,7 @@
 /**
  * @class DataBlockLockPool
  *
- * @brief Holds and distributes locks to be used for locking 
+ * @brief Holds and distributes locks to be used for locking
  * ACE_Data_Blocks.  Currently it does not require returning the
  * locks.
  *
@@ -28,16 +26,15 @@
  *
  * @NOTE: This class is NOT thread safe.
  */
-class OpenDDS_Dcps_Export DataBlockLockPool
-{
+class OpenDDS_Dcps_Export DataBlockLockPool {
 public:
   typedef ACE_Lock_Adapter<ACE_Thread_Mutex> DataBlockLock;
 
   DataBlockLockPool(size_t size);
   virtual ~DataBlockLockPool();
 
-  DataBlockLock * get_lock ();
-  void return_lock (DataBlockLock * lock);
+  DataBlockLock * get_lock();
+  void return_lock(DataBlockLock * lock);
 
 private:
   typedef ACE_Array<DataBlockLock> Pool;

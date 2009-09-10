@@ -1,5 +1,10 @@
 /*
  * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
 
 #ifndef DCPS_REPOIDCONVERTER_H
@@ -14,10 +19,9 @@
 
 #include "dcps_export.h"
 
-namespace OpenDDS
-{
-namespace DCPS
-{
+namespace OpenDDS {
+namespace DCPS {
+
 /**
  * @class RepoIdConverter
  *
@@ -59,13 +63,12 @@ namespace DCPS
  *  14  GUID_t.entityId.entityKey[ 2] == entity id[2] (LS byte)
  *  15  GUID_t.entityId.entityKind    == entity kind
  */
-class OpenDDS_Dcps_Export RepoIdConverter : public GuidConverter
-{
+class OpenDDS_Dcps_Export RepoIdConverter : public GuidConverter {
 public:
   RepoIdConverter(const RepoId& repoId);
 
   ~RepoIdConverter();
-  
+
   long federationId() const;
 
   long participantId() const;
@@ -75,7 +78,7 @@ public:
   operator DDS::InstanceHandle_t() const;
 };
 
-} // namespace
-} // namespace
+} // namespace DCPS
+} // namespace OpenDDS
 
 #endif /* DCPS_REPOIDCONVERTER_H */

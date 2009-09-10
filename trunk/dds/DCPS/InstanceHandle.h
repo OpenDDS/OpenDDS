@@ -1,5 +1,10 @@
 /*
  * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
 
 #ifndef DCPS_INSTANCEHANDLE_H
@@ -12,14 +17,12 @@
 
 #include "dcps_export.h"
 
-namespace OpenDDS
-{
-namespace DCPS
-{
+namespace OpenDDS {
+namespace DCPS {
+
 const DDS::InstanceHandle_t HANDLE_UNKNOWN(0);
 
-class OpenDDS_Dcps_Export InstanceHandleGenerator
-{
+class OpenDDS_Dcps_Export InstanceHandleGenerator {
 public:
   explicit InstanceHandleGenerator(long begin = HANDLE_UNKNOWN);
 
@@ -31,7 +34,7 @@ private:
   ACE_Atomic_Op<ACE_Thread_Mutex, long> sequence_;
 };
 
-} // namespace
-} // namespace
+} // namespace DCPS
+} // namespace OpenDDS
 
 #endif /* DCPS_INSTANCEHANDLE_H */

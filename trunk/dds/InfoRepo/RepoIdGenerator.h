@@ -1,5 +1,10 @@
 /*
  * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
 
 #ifndef REPOIDGENERATOR_H
@@ -83,8 +88,7 @@
  * Where the VendorId value used for OpenDDS is the one for
  * Object Computing, Inc. == 0x03.
  */
-class OpenDDS_InfoRepoLib_Export RepoIdGenerator
-{
+class OpenDDS_InfoRepoLib_Export RepoIdGenerator {
 public:
   static const unsigned KeyBits;
 
@@ -105,8 +109,7 @@ public:
   RepoIdGenerator(
     long federation,
     long participant = 0,
-    OpenDDS::DCPS::EntityKind kind = OpenDDS::DCPS::KIND_PARTICIPANT
-  );
+    OpenDDS::DCPS::EntityKind kind = OpenDDS::DCPS::KIND_PARTICIPANT);
 
   /// Virtual destructor.
   virtual ~RepoIdGenerator();
@@ -122,7 +125,7 @@ public:
    * If the supplied @c key value is larger than the actual last
    * generated key value, the new key value replaces the old one.
    */
-  void last( long key);
+  void last(long key);
 
 private:
   /// Type of Entity to generate GUID values for.
@@ -139,4 +142,3 @@ private:
 };
 
 #endif /* REPOIDGENERATOR_H  */
-
