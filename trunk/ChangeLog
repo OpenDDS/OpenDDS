@@ -1,11 +1,17 @@
+Thu Sep 10 16:37:36 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/style/style.d/02_obsolete.sed:
+
+          Updated filters to accept certain globally specified symbols.
+
 Thu Sep 10 05:49:39 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/Serializer.inl:
         * dds/DCPS/Serializer.cpp:
 
-          Fixed a bug that incorrectly serialize and de-serialize 
+          Fixed a bug that incorrectly serialize and de-serialize
           wstring.
-          
+
         * tests/DCPS/Serializer_wstring/DataReaderListener.h:
         * tests/DCPS/Serializer_wstring/DataReaderListener.cpp:
         * tests/DCPS/Serializer_wstring/Messenger.idl:
@@ -24,7 +30,7 @@ Thu Sep 10 05:49:39 UTC 2009  Yan Dai  <dai_y@ociweb.com>
         * bin/dcps_tests.lst:
 
           Added Serializer_wstring test.
-          
+
 Thu Sep 10 01:16:24 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/

@@ -2,6 +2,15 @@
 # $Id$
 #
 
+:begin
+
+# Skip required globally specified symbols.
+# NOTE: There shouldn't be very many!
+/::DDS_TEST/{
+  P;D
+  b begin
+}
+
 # Strip leading global specifiers on known namespaces.
 s/^::\(ACE\)/\1/
 s/\([ (,;]\{1,\}\)::\(ACE\)/\1\2/g
