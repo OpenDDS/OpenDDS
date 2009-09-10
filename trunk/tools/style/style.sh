@@ -31,7 +31,7 @@ for FILE in "$@"; do
 
   # Apply individual sed(1) scripts:
   for SCRIPT in $SCRIPTS; do
-    cp "$FILE" "$FILE.orig"
+    cp "$FILE" "$FILE.orig" # create working copy
     sed -f "$SCRIPT" "$FILE.orig" > "$FILE"
   done
 done
