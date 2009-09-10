@@ -1,21 +1,93 @@
-Version 1.4 of OpenDDS.
+Version 2.0 of OpenDDS.
 
 New to this version are the following changes:
 
-- Updated support for DataWriter::unregister and DataWriter::dispose to
-  properly release resources after all samples in a marked instance are
-  removed.
+- Updated support for DataWriter::unregister() and DataWriter::dispose()
+  to properly release resources after all samples in a marked instance
+  are removed.
 
-- The following operations in FooDataWriter have been renamed to reflect
-  changes in formal/07-01-01:
-    * register()/_cxx_register()  => register_instance()
-    * register_w_timestamp()      => register_instance_w_timestamp()
-    * unregister()                => unregister_instance()
-    * unregister_w_timestamp()    => unregister_instance_w_timestamp()
+- Implemented Publisher::wait_for_acknowledgments() as defined in
+  formal/07-01-01.
 
 - Fixed an issue in QueryCondition where applying filters on non-valid
   data samples caused a SEGV; these samples are now implicitly filtered
   out.
+
+- Implemented PRESENTATION QoS policy as defined in formal/07-01-01.
+  Currently, only INSTANCE and TOPIC access scopes are supported. Ordered
+  access is supported effectively for the TOPIC access scope only.
+
+- Implemented MANUAL_BY_TOPIC and MANUAL_BY_PARTICIPANT LIVELINESS QoS
+  policy kinds.
+
+- Implemented BY_SOURCE_TIMESTAMP DESTINATION_ORDER QoS policy kind.
+  Samples may now be ordered based on reception or source times on a per
+  instance basis.
+
+- Implemented ENTITY_FACTORY auto_enable support in formal/07-01-01.
+  Entities may now be enabled manually by setting this value to false.
+
+- Implemented WRITER_DATA_LIFECYCLE as defined in formal/07-01-01.
+  Instances will now be properly unregistered/disposed when a DataWriter
+  is deleted.
+
+- Implemented READER_DATA_LIFECYCLE as defined in formal/07-01-01.
+
+- Implemented TIME_BASED_FILTER as defined in formal/07-01-01.
+
+- create_*() functions now take a StatusMask argument.  A new constant
+  named OpenDDS::DCPS::DEFAULT_STATUS_MASK has been introduced as a 
+  convenience to indicate interest in all status changes.
+
+- Implemented the following new methods on DomainParticipant as defined
+  in formal/07-01-01:
+    * get_discovered_participants()
+    * get_discovered_participant_data()
+    * get_discovered_topics()
+    * get_discovered_topic_data()
+
+- Constant name changes:
+    * PUBLICATION_MATCH_STATUS  => PUBLICATION_MATCHED_STATUS
+    * DURATION_INFINITY_SEC     => DURATION_INFINITE_SEC
+    * DURATION_INFINITY_NSEC    => DURATION_INFINITE_NSEC
+    * TIMESTAMP_INVALID_SEC     => TIME_INVALID_SEC
+    * TIMESTAMP_INVALID_NSEC    => TIME_INVALID_NSEC
+  
+- Removed constants: 
+    * TRANSPORTPRIORITY_QOS_POLICY_NAME
+
+- Type name changes:
+    * StatusKindMask            => StatusMask
+    * SubscriptionMatchStatus   => SubscriptionMatchedStatus
+    * PublicationMatchStatus    => PublicationMatchedStatus
+  
+- Removed types:
+    * SampleStateSeq
+    * ViewStateSeq
+    * OctetSeq
+
+- Other type changes:
+    * BuiltinTopicKey_t is now a struct containing an array rather
+      than a bare array type.  This allows passing a BuiltinTopicKey_t
+      by reference.
+    * Ownership is now indicated in DataReaderQos and DataWriterQos as
+      well as PublicationBuiltinTopicData and SubscriptionBuiltinTopicData.
+    * Removed sevice_cleanup_delay from DurabilityQosPolicy.
+
+- Method name changes:
+    * register()/_cxx_register()  => register_instance()
+    * register_w_timestamp()      => register_instance_w_timestamp()
+    * unregister()                => unregister_instance()
+    * unregister_w_timestamp()    => unregister_instance_w_timestamp()
+    * on_subscription_match()     => on_subscription_matched()
+    * on_publication_match()      => on_publication_matched()
+
+- Other method changes:
+    * set_qos(), get_qos(), get_*_status() and assert_liveliness() now
+      return error codes as specified in formal/07-01-01.
+    * Subscriber::get_datareaders() reader parameter has changed from out
+      to inout.
+
 
 =========================================================================
 
