@@ -261,12 +261,12 @@ http://download.ociweb.com/OpenDDS/OpenDDS-latest.pdf
 ) There is unspecified behavior when a non-volatile DataWriter persists
   samples belonging to an outstanding coherent change group.  The coherent
   samples are not persisted, however their presence may prematurely evict
-  valid data samples from being persisted due to resource limits.
+  valid data samples from the durability cache due to resource limits.
 
   Coherent change groups are not maintained when their constituent data
-  is persisted.  That is, when a non-volatile DataWriter comes online,
-  samples previously sent as a part of a change group will no longer be
-  sent as a part of a new change group.
+  is persisted.  When a non-volatile DataWriter comes online, samples
+  previously sent as a part of a change group will no longer maintain
+  their atomicity.
 
 
 ======================================================================
