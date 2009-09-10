@@ -202,7 +202,7 @@ TAO::DCPS::Serializer::read_string(ACE_CDR::WChar*& dest)
   //       done here before the allocation even though it will be
   //       checked during the actual read as well.
   //
-  if (length <= this->current_->total_length()) {
+  if (length * sizeof (ACE_CDR::WChar) <= this->current_->total_length()) {
     //
     // Allocate the destination.
     //

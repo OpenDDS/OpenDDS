@@ -556,7 +556,7 @@ operator<< (TAO::DCPS::Serializer& s, const ACE_CDR::WChar* x)
     // Included the null termination in the serialized data.
     ACE_CDR::ULong stringlen = static_cast<ACE_CDR::ULong>(ACE_OS::strlen(x));
     s << stringlen;
-    s.buffer_write(reinterpret_cast<const char*>(x), stringlen, false);
+    s.buffer_write(reinterpret_cast<const char*>(x), stringlen * sizeof (ACE_CDR::WChar), false);
 
   } else {
     s << 0;
