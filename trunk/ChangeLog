@@ -1,3 +1,30 @@
+Thu Sep 10 05:49:39 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/Serializer.inl:
+        * dds/DCPS/Serializer.cpp:
+
+          Fixed a bug that incorrectly serialize and de-serialize 
+          wstring.
+          
+        * tests/DCPS/Serializer_wstring/DataReaderListener.h:
+        * tests/DCPS/Serializer_wstring/DataReaderListener.cpp:
+        * tests/DCPS/Serializer_wstring/Messenger.idl:
+        * tests/DCPS/Serializer_wstring/README:
+        * tests/DCPS/Serializer_wstring/Serializer_wstring.mpc:
+        * tests/DCPS/Serializer_wstring/Writer.h:
+        * tests/DCPS/Serializer_wstring/Writer.cpp:
+        * tests/DCPS/Serializer_wstring/pub.ini:
+        * tests/DCPS/Serializer_wstring/publisher.cpp:
+        * tests/DCPS/Serializer_wstring/run_test.pl:
+        * tests/DCPS/Serializer_wstring/sub.ini:
+        * tests/DCPS/Serializer_wstring/subscriber.cpp:
+
+          Added a test for the bug fix.
+
+        * bin/dcps_tests.lst:
+
+          Added Serializer_wstring test.
+          
 Thu Sep 10 01:16:24 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/
