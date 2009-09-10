@@ -1,3 +1,17 @@
+Thu Sep 10 17:12:18 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tests/DCPS/Serializer_wstring/DataReaderListener.cpp:
+
+	  Corrected a compiler warning with const_cast<>.
+
+	  verify_message()
+	    - added additional diagnostics.  Added additional check to
+	      avoid core dump with missing data.
+
+        * tests/DCPS/Serializer_wstring/Writer.cpp:
+
+	  Corrected a compiler warning with const_cast<>.
+
 Thu Sep 10 16:37:36 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * tools/style/style.d/02_obsolete.sed:
