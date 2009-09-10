@@ -1,6 +1,11 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #include "ReliableMulticast_pch.h"
 #include "ReliableMulticastTransportSendStrategy.h"
@@ -19,14 +24,12 @@ OpenDDS::DCPS::ReliableMulticastTransportSendStrategy::configure(
   ACE_Reactor* reactor,
   const ACE_INET_Addr& local_address,
   const ACE_INET_Addr& multicast_group_address,
-  size_t sender_history_size
-  )
+  size_t sender_history_size)
 {
   sender_.reset(new ReactivePacketSender(
-    local_address,
-    multicast_group_address,
-    sender_history_size
-    ));
+                  local_address,
+                  multicast_group_address,
+                  sender_history_size));
   sender_->reactor(reactor);
   sender_->open();
 }
@@ -34,8 +37,7 @@ OpenDDS::DCPS::ReliableMulticastTransportSendStrategy::configure(
 void
 OpenDDS::DCPS::ReliableMulticastTransportSendStrategy::teardown()
 {
-  if (sender_.get() != 0)
-  {
+  if (sender_.get() != 0) {
     sender_->close();
     sender_.reset();
   }
@@ -53,8 +55,8 @@ OpenDDS::DCPS::ReliableMulticastTransportSendStrategy::send_bytes(const iovec io
   ACE_UNUSED_ARG(bp);
 
   ssize_t sent = 0;
-  for (int idx = 0; idx < n; ++idx)
-  {
+
+  for (int idx = 0; idx < n; ++idx) {
     sent += iov[idx].iov_len;
   }
 
@@ -62,12 +64,11 @@ OpenDDS::DCPS::ReliableMulticastTransportSendStrategy::send_bytes(const iovec io
   std::vector<Packet> packets;
 
   packetizer.packetize(iov, n, packets);
+
   for (
     std::vector<Packet>::const_iterator packet = packets.begin();
     packet != packets.end();
-    ++packet
-    )
-  {
+    ++packet) {
     sender_->send_packet(*packet);
   }
 
@@ -85,7 +86,7 @@ OpenDDS::DCPS::ReliableMulticastTransportSendStrategy::socket()
 {
   static ACE_SOCK_IO nilSocket;
 
-  if( this->sender_.get()) {
+  if (this->sender_.get()) {
     return this->sender_->socket();
 
   } else {

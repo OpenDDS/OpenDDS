@@ -1,6 +1,11 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #include "EntryExit.h"
 
@@ -12,7 +17,6 @@ OpenDDS::DCPS::RemoveAllVisitor::RemoveAllVisitor()
   DBG_ENTRY_LVL("RemoveAllVisitor","RemoveAllVisitor",6);
 }
 
-
 ACE_INLINE int
 OpenDDS::DCPS::RemoveAllVisitor::status() const
 {
@@ -20,11 +24,9 @@ OpenDDS::DCPS::RemoveAllVisitor::status() const
   return this->status_;
 }
 
-
 ACE_INLINE int
 OpenDDS::DCPS::RemoveAllVisitor::removed_bytes() const
 {
   DBG_ENTRY_LVL("RemoveAllVisitor","removed_bytes",6);
   return this->removed_bytes_;
 }
-

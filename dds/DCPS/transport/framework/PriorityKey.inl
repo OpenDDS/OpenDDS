@@ -1,22 +1,27 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 ACE_INLINE
 OpenDDS::DCPS::PriorityKey::PriorityKey()
- : priority_( 0)
+  : priority_(0)
 {
 }
 
 ACE_INLINE
-OpenDDS::DCPS::PriorityKey::PriorityKey( CORBA::Long priority, ACE_INET_Addr address)
- : priority_( priority), address_( address)
+OpenDDS::DCPS::PriorityKey::PriorityKey(CORBA::Long priority, ACE_INET_Addr address)
+  : priority_(priority), address_(address)
 {
 }
 
 ACE_INLINE
 bool
-OpenDDS::DCPS::PriorityKey::operator<(  const PriorityKey& rhs) const
+OpenDDS::DCPS::PriorityKey::operator<(const PriorityKey& rhs) const
 {
   return (this->address_ < rhs.address_)? true:
          (rhs.address_ < this->address_)? false:
@@ -25,10 +30,10 @@ OpenDDS::DCPS::PriorityKey::operator<(  const PriorityKey& rhs) const
 
 ACE_INLINE
 bool
-OpenDDS::DCPS::PriorityKey::operator==( const PriorityKey& rhs) const
+OpenDDS::DCPS::PriorityKey::operator==(const PriorityKey& rhs) const
 {
   return (this->priority_ == rhs.priority_)
-      && (this->address_ == rhs.address_);
+         && (this->address_ == rhs.address_);
 }
 
 ACE_INLINE
@@ -65,4 +70,3 @@ OpenDDS::DCPS::PriorityKey::address() const
 {
   return this->address_;
 }
-

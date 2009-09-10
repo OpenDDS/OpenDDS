@@ -1,43 +1,34 @@
-// -*- C++ -*-
-
-
-//=============================================================================
-/**
- *  @file    DefaultValues.h
+/*
+ * $Id$
  *
- *  $Id$
+ * Copyright 2009 Object Computing, Inc.
  *
- *  Defines a class that listens to a multicast address for client requests
- *  for ior of a bootstrappable service.
- *
- *
- *  @author   Sergio Flores-Gaitan
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
-//=============================================================================
-
 
 #ifndef DEFAULTVALUES_H
 #define DEFAULTVALUES_H
+
 #include /**/ "ace/pre.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-namespace OpenDDS { namespace Federator {
+namespace OpenDDS {
+namespace Federator {
+namespace Defaults {
 
-  namespace Defaults
-  {
+enum {
+  DiscoveryRequestPort = 10022,
+  DiscoveryReplyPort = 10023
+};
 
-    enum
-    {
-      DiscoveryRequestPort = 10022,
-      DiscoveryReplyPort = 10023
-    };
-
-  }
-
-} }
+} // namespace Defaults
+} // namespace Federator
+} // namespace OpenDDS
 
 #include /**/ "ace/post.h"
+
 #endif /* DEFAULTVALUES_H */

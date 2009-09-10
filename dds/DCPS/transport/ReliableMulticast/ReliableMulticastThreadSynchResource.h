@@ -1,5 +1,11 @@
-// -*- C++ -*-
-//
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #ifndef OPENDDS_DCPS_RELIABLEMULTICASTTHREADSYNCHRESOURCE_H
 #define OPENDDS_DCPS_RELIABLEMULTICASTTHREADSYNCHRESOURCE_H
@@ -14,24 +20,21 @@
 #include "ReliableMulticast_Export.h"
 #include "dds/DCPS/transport/framework/ThreadSynchResource.h"
 
-namespace OpenDDS
-{
+namespace OpenDDS {
 
-  namespace DCPS
-  {
+namespace DCPS {
 
-    class ReliableMulticast_Export ReliableMulticastThreadSynchResource
-      : public ThreadSynchResource
-    {
-    public:
-      ReliableMulticastThreadSynchResource();
-      virtual ~ReliableMulticastThreadSynchResource();
+class ReliableMulticast_Export ReliableMulticastThreadSynchResource
+  : public ThreadSynchResource {
+public:
+  ReliableMulticastThreadSynchResource();
+  virtual ~ReliableMulticastThreadSynchResource();
 
-    protected:
-      virtual void notify_lost_on_backpressure_timeout();
-    };
+protected:
+  virtual void notify_lost_on_backpressure_timeout();
+};
 
-  } /* namespace DCPS */
+} /* namespace DCPS */
 
 } /* namespace OpenDDS */
 

@@ -1,6 +1,12 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef OPENDDS_DCPS_SIMPLETCPSENDSTRATEGY_H
 #define OPENDDS_DCPS_SIMPLETCPSENDSTRATEGY_H
 
@@ -10,56 +16,49 @@
 #include "dds/DCPS/transport/framework/TransportSendStrategy.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
 
+namespace OpenDDS {
+namespace DCPS {
 
-namespace OpenDDS
-{
+class SimpleTcpConfiguration;
+class SimpleTcpSynchResource;
 
-  namespace DCPS
-  {
+class SimpleTcpSendStrategy : public TransportSendStrategy {
+public:
 
-    class SimpleTcpConfiguration;
-    class SimpleTcpSynchResource;
+  SimpleTcpSendStrategy(SimpleTcpDataLink*      link,
+                        SimpleTcpConfiguration* config,
+                        SimpleTcpConnection*    connection,
+                        SimpleTcpSynchResource* synch_resource,
+                        TransportReactorTask*   task,
+                        CORBA::Long             priority);
+  virtual ~SimpleTcpSendStrategy();
 
+  /// This is called by the datalink object to associate with the "new" connection object.
+  /// The "old" connection object is unregistered with the reactor and the "new" connection
+  /// object is registered for sending. The implementation of this method is borrowed from
+  /// the ReceiveStrategy.
+  int reset(SimpleTcpConnection* connection);
 
-    class SimpleTcpSendStrategy : public TransportSendStrategy
-    {
-      public:
+protected:
 
-        SimpleTcpSendStrategy(SimpleTcpDataLink*      link,
-                              SimpleTcpConfiguration* config,
-                              SimpleTcpConnection*    connection,
-                              SimpleTcpSynchResource* synch_resource,
-                              TransportReactorTask*   task,
-                              CORBA::Long             priority);
-        virtual ~SimpleTcpSendStrategy();
+  virtual ssize_t send_bytes(const iovec iov[], int n, int& bp);
+  virtual ACE_HANDLE get_handle();
+  virtual ssize_t send_bytes_i(const iovec iov[], int n);
 
-        /// This is called by the datalink object to associate with the "new" connection object.
-        /// The "old" connection object is unregistered with the reactor and the "new" connection
-        /// object is registered for sending. The implementation of this method is borrowed from
-        /// the ReceiveStrategy.
-        int reset(SimpleTcpConnection* connection);
+  /// Delegate to the connection object to re-establish
+  /// the connection.
+  virtual void relink(bool do_suspend = true);
 
-      protected:
+  virtual void stop_i();
 
-        virtual ssize_t send_bytes(const iovec iov[], int n, int& bp);
-        virtual ACE_HANDLE get_handle ();
-        virtual ssize_t send_bytes_i (const iovec iov[], int n);
+private:
 
-        /// Delegate to the connection object to re-establish
-        /// the connection.
-        virtual void relink (bool do_suspend = true);
+  SimpleTcpConnection_rch connection_;
+  SimpleTcpDataLink_rch   link_;
+  TransportReactorTask_rch reactor_task_;
+};
 
-        virtual void stop_i();
-
-      private:
-
-        SimpleTcpConnection_rch connection_;
-        SimpleTcpDataLink_rch   link_;
-        TransportReactorTask_rch reactor_task_;
-    };
-
-  }  /* namespace DCPS */
-
-}  /* namespace OpenDDS */
+} // namespace DCPS
+} // namespace OpenDDS
 
 #endif  /* OPENDDS_DCPS_SIMPLETCPSENDSTRATEGY_H */

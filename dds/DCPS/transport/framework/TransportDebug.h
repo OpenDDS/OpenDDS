@@ -1,6 +1,12 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef TAO_DDS_TRANSPORT_DEBUG_H
 #define TAO_DDS_TRANSPORT_DEBUG_H
 
@@ -19,30 +25,27 @@
 #endif
 
 // backwards compatibility macros
-#define DDS_RUN_DEBUG_LEVEL ::OpenDDS::DCPS::Transport_debug_level
+#define DDS_RUN_DEBUG_LEVEL OpenDDS::DCPS::Transport_debug_level
 #define TURN_ON_VERBOSE_DEBUG DDS_RUN_DEBUG_LEVEL = DDS_BLD_DEBUG_LEVEL;
 #define TURN_OFF_VERBOSE_DEBUG DDS_RUN_DEBUG_LEVEL = 0;
-
 
 /*
   This is the only debug macro you should be using.
   LEVEL = [0-5], 0 being lowest
 */
 #define VDBG_LVL(DBG_ARGS, LEVEL) \
-  if (LEVEL < ::OpenDDS::DCPS::Transport_debug_level) ACE_DEBUG(DBG_ARGS);
+  if (LEVEL < OpenDDS::DCPS::Transport_debug_level) ACE_DEBUG(DBG_ARGS);
 #define VDBG(DBG_ARGS) \
   VDBG_LVL(DBG_ARGS, 5)
 
+namespace OpenDDS {
+namespace DCPS {
 
-namespace OpenDDS
-{
-  namespace DCPS
-  {
-    /// Transport Logging verbosity level.
-    // This needs to be initialized somewhere.
-    extern OpenDDS_Dcps_Export unsigned int Transport_debug_level;
+/// Transport Logging verbosity level.
+// This needs to be initialized somewhere.
+extern OpenDDS_Dcps_Export unsigned int Transport_debug_level;
 
-  } // namespace OpenDDS
+} // namespace OpenDDS
 } // namespace DCPS
 
 #endif /* TAO_DDS_TRANSPORT_DEBUG_H */

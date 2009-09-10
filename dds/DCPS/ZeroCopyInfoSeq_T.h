@@ -1,13 +1,11 @@
-// -*- C++ -*-
-// ============================================================================
-/**
- *  @file   ZeroCopyInfoSeq_T.h
+/*
+ * $Id$
  *
- *  $Id$
+ * Copyright 2009 Object Computing, Inc.
  *
- *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
-// ============================================================================
 
 #ifndef ZEROCOPYINFOSEQ_H
 #define ZEROCOPYINFOSEQ_H
@@ -35,30 +33,27 @@
 #endif
 
 //This must stay in namespace "TAO" until the tao_idl compiler is changed
-namespace TAO
-{
-  namespace DCPS
-  {
+namespace TAO {
+namespace DCPS {
 
-    template <class InfoType, size_t DEF_MAX = DCPS_ZERO_COPY_SEQ_DEFAULT_SIZE>
-    class ZeroCopyInfoSeq : public TAO_BASE_SEQUENCE <InfoType>
-    {
-    public:
+template <class InfoType, size_t DEF_MAX = DCPS_ZERO_COPY_SEQ_DEFAULT_SIZE>
+class ZeroCopyInfoSeq : public TAO_BASE_SEQUENCE <InfoType> {
+public:
 
-      ZeroCopyInfoSeq();
+  ZeroCopyInfoSeq();
 
-      //This ctor serves as the CORBA "max" ctor as well as providing
-      //symmetry with the ZeroCopyDataSeq class template.
-      explicit ZeroCopyInfoSeq(CORBA::ULong maximum,
-        CORBA::ULong init_size = DEF_MAX, ACE_Allocator* = 0);
+  //This ctor serves as the CORBA "max" ctor as well as providing
+  //symmetry with the ZeroCopyDataSeq class template.
+  explicit ZeroCopyInfoSeq(CORBA::ULong maximum,
+                           CORBA::ULong init_size = DEF_MAX, ACE_Allocator* = 0);
 
-      ZeroCopyInfoSeq(CORBA::ULong maximum, CORBA::ULong length,
-        InfoType* buffer, CORBA::Boolean release = false);
+  ZeroCopyInfoSeq(CORBA::ULong maximum, CORBA::ULong length,
+                  InfoType* buffer, CORBA::Boolean release = false);
 
-    };
+};
 
-  } // namespace  ::DDS
-} // namespace OpenDDS
+} // namespace DCPS
+} // namespace TAO
 
 #if defined (__ACE_INLINE__)
 #include "dds/DCPS/ZeroCopyInfoSeq_T.inl"

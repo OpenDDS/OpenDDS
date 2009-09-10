@@ -1,6 +1,11 @@
-/// -*- C++ -*-
-///
-/// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 //TODO: we should really use the ACE_CDR_BYTE_ORDER instead of
 //      TAO_ENCAP_BYTE_ORDER, but since the ACE_CDR_BYTE_ORDER
@@ -10,70 +15,70 @@
 //      the ACE_CDR_BYTE_ORDER, it's ok to use
 //      TAO_ENCAP_BYTE_ORDER for now.
 ACE_INLINE
-OpenDDS::DCPS::DataSampleHeader::DataSampleHeader ()
-  : message_id_( 0)
+OpenDDS::DCPS::DataSampleHeader::DataSampleHeader()
+  : message_id_(0)
   , byte_order_(TAO_ENCAP_BYTE_ORDER)
-  , coherent_change_( 0)
-  , historic_sample_( 0)
-  , lifespan_duration_( 0)
-  , reserved_1( 0)
-  , reserved_2( 0)
-  , reserved_3( 0)
-  , reserved_4( 0)
-  , message_length_( 0)
-  , sequence_( 0)
-  , source_timestamp_sec_( 0)
-  , source_timestamp_nanosec_( 0)
-  , publication_id_( GUID_UNKNOWN )
-  , marshaled_size_( 0)
+  , coherent_change_(0)
+  , historic_sample_(0)
+  , lifespan_duration_(0)
+  , reserved_1(0)
+  , reserved_2(0)
+  , reserved_3(0)
+  , reserved_4(0)
+  , message_length_(0)
+  , sequence_(0)
+  , source_timestamp_sec_(0)
+  , source_timestamp_nanosec_(0)
+  , publication_id_(GUID_UNKNOWN)
+  , marshaled_size_(0)
 {
 }
 
 ACE_INLINE
-OpenDDS::DCPS::DataSampleHeader::DataSampleHeader (ACE_Message_Block* buffer)
-  : message_id_( 0)
-  , byte_order_( TAO_ENCAP_BYTE_ORDER)
-  , coherent_change_( 0)
-  , historic_sample_( 0)
-  , lifespan_duration_( 0)
-  , reserved_1( 0)
-  , reserved_2( 0)
-  , reserved_3( 0)
-  , reserved_4( 0)
-  , message_length_( 0)
-  , sequence_( 0)
-  , source_timestamp_sec_( 0)
-  , source_timestamp_nanosec_( 0)
-  , publication_id_( GUID_UNKNOWN )
+OpenDDS::DCPS::DataSampleHeader::DataSampleHeader(ACE_Message_Block* buffer)
+  : message_id_(0)
+  , byte_order_(TAO_ENCAP_BYTE_ORDER)
+  , coherent_change_(0)
+  , historic_sample_(0)
+  , lifespan_duration_(0)
+  , reserved_1(0)
+  , reserved_2(0)
+  , reserved_3(0)
+  , reserved_4(0)
+  , message_length_(0)
+  , sequence_(0)
+  , source_timestamp_sec_(0)
+  , source_timestamp_nanosec_(0)
+  , publication_id_(GUID_UNKNOWN)
 {
-  this->init( buffer) ;
+  this->init(buffer) ;
 }
 
 ACE_INLINE
-OpenDDS::DCPS::DataSampleHeader::DataSampleHeader (ACE_Message_Block& buffer)
-  : message_id_( 0)
-  , byte_order_( TAO_ENCAP_BYTE_ORDER)
-  , coherent_change_( 0)
-  , historic_sample_( 0)
-  , lifespan_duration_( 0)
-  , reserved_1( 0)
-  , reserved_2( 0)
-  , reserved_3( 0)
-  , reserved_4( 0)
-  , message_length_( 0)
-  , sequence_( 0)
-  , source_timestamp_sec_( 0)
-  , source_timestamp_nanosec_( 0)
-  , publication_id_( GUID_UNKNOWN )
+OpenDDS::DCPS::DataSampleHeader::DataSampleHeader(ACE_Message_Block& buffer)
+  : message_id_(0)
+  , byte_order_(TAO_ENCAP_BYTE_ORDER)
+  , coherent_change_(0)
+  , historic_sample_(0)
+  , lifespan_duration_(0)
+  , reserved_1(0)
+  , reserved_2(0)
+  , reserved_3(0)
+  , reserved_4(0)
+  , message_length_(0)
+  , sequence_(0)
+  , source_timestamp_sec_(0)
+  , source_timestamp_nanosec_(0)
+  , publication_id_(GUID_UNKNOWN)
 {
-  this->init( &buffer) ;
+  this->init(&buffer) ;
 }
 
 ACE_INLINE
 OpenDDS::DCPS::DataSampleHeader&
 OpenDDS::DCPS::DataSampleHeader::operator= (ACE_Message_Block* buffer)
 {
-  this->init( buffer) ;
+  this->init(buffer) ;
   return *this ;
 }
 
@@ -81,7 +86,7 @@ ACE_INLINE
 OpenDDS::DCPS::DataSampleHeader&
 OpenDDS::DCPS::DataSampleHeader::operator= (ACE_Message_Block& buffer)
 {
-  this->init( &buffer) ;
+  this->init(&buffer) ;
   return *this ;
 }
 
@@ -96,15 +101,15 @@ ACE_INLINE
 size_t
 OpenDDS::DCPS::DataSampleHeader::max_marshaled_size()
 {
-  return sizeof( this->message_id_)
-       + sizeof(char) // Flags are a single byte.
-       + sizeof( this->message_length_)
-       + sizeof( this->sequence_)
-       + sizeof( this->source_timestamp_sec_)
-       + sizeof( this->source_timestamp_nanosec_)
-       + sizeof( this->lifespan_duration_sec_)
-       + sizeof( this->lifespan_duration_nanosec_)
-       + sizeof( this->publication_id_) ;
+  return sizeof(this->message_id_)
+         + sizeof(char) // Flags are a single byte.
+         + sizeof(this->message_length_)
+         + sizeof(this->sequence_)
+         + sizeof(this->source_timestamp_sec_)
+         + sizeof(this->source_timestamp_nanosec_)
+         + sizeof(this->lifespan_duration_sec_)
+         + sizeof(this->lifespan_duration_nanosec_)
+         + sizeof(this->publication_id_) ;
 }
 
 ACE_INLINE
@@ -130,8 +135,8 @@ OpenDDS::DCPS::DataSampleHeader::clear_flag(DataSampleHeaderFlag flag,
   // verify sufficient length exists:
   if (buffer->end() - base < 2) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: DataSampleHeader::clear_flag: ")
-      ACE_TEXT("ACE_Message_Block too short (missing flags octet).\n")));
+               ACE_TEXT("(%P|%t) ERROR: DataSampleHeader::clear_flag: ")
+               ACE_TEXT("ACE_Message_Block too short (missing flags octet).\n")));
     return;
   }
 
@@ -150,8 +155,8 @@ OpenDDS::DCPS::DataSampleHeader::set_flag(DataSampleHeaderFlag flag,
   // verify sufficient length exists:
   if (buffer->end() - base < 2) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: DataSampleHeader::set_flag: ")
-      ACE_TEXT("ACE_Message_Block too short (missing flags octet).\n")));
+               ACE_TEXT("(%P|%t) ERROR: DataSampleHeader::set_flag: ")
+               ACE_TEXT("ACE_Message_Block too short (missing flags octet).\n")));
     return;
   }
 
@@ -170,8 +175,8 @@ OpenDDS::DCPS::DataSampleHeader::test_flag(DataSampleHeaderFlag flag,
   // verify sufficient length exists:
   if (buffer->end() - base < 2) {
     ACE_ERROR_RETURN((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: DataSampleHeader::set_flag: ")
-      ACE_TEXT("ACE_Message_Block too short (missing flags octet).\n")), false);
+                      ACE_TEXT("(%P|%t) ERROR: DataSampleHeader::set_flag: ")
+                      ACE_TEXT("ACE_Message_Block too short (missing flags octet).\n")), false);
   }
 
   // Test flag bit.

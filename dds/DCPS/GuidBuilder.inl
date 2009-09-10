@@ -1,11 +1,15 @@
 /*
  * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
 
-namespace OpenDDS
-{
-namespace DCPS
-{
+namespace OpenDDS {
+namespace DCPS {
+
 ACE_INLINE void
 GuidBuilder::entityId(long entityId)
 {
@@ -15,9 +19,9 @@ GuidBuilder::entityId(long entityId)
 
 ACE_INLINE
 GuidBuilder::operator GUID_t()
-{ 
+{
   return guid_;
 }
 
-} // namespace
-} // namespace
+} // namespace DCPS
+} // namespace OpenDDS

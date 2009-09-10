@@ -1,5 +1,10 @@
 /*
  * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
@@ -10,13 +15,12 @@
 # include "GuidBuilder.inl"
 #endif /* __ACE_INLINE__ */
 
-namespace
-{
+namespace {
+
 inline void
 fill_guid(CORBA::Octet* begin, long value, std::size_t len)
 {
-  for (std::size_t i = 0; i < len; ++i)
-  {
+  for (std::size_t i = 0; i < len; ++i) {
     unsigned shift = (len - i - 1) << 3;
     begin[i] = static_cast<CORBA::Octet>(0xff & (value >> shift));
   }
@@ -24,10 +28,9 @@ fill_guid(CORBA::Octet* begin, long value, std::size_t len)
 
 } // namespace
 
-namespace OpenDDS
-{
-namespace DCPS
-{
+namespace OpenDDS {
+namespace DCPS {
+
 GuidBuilder::GuidBuilder()
   : guid_cxx_(create()),
     guid_(guid_cxx_)
@@ -103,8 +106,7 @@ GuidBuilder::entityKind(CORBA::Octet entityKind)
 void
 GuidBuilder::entityKind(EntityKind kind)
 {
-  switch (kind)
-  {
+  switch (kind) {
   case KIND_WRITER:
     guid_.entityId.entityKind =
       ENTITYKIND_USER_WRITER_WITH_KEY;
@@ -126,5 +128,5 @@ GuidBuilder::entityKind(EntityKind kind)
   }
 }
 
-} // namespace
-} // namespace
+} // namespace DCPS
+} // namespace OpenDDS

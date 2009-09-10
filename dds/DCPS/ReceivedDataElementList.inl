@@ -1,10 +1,14 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #include "ReceivedDataElementList.h"
 #include "InstanceState.h"
-
 
 ACE_INLINE
 void
@@ -19,33 +23,28 @@ OpenDDS::DCPS::ReceivedDataElementList::add(ReceivedDataElement *data_sample)
   data_sample->next_data_sample_ = 0;
 
   ++size_ ;
-  if (!head_)
-  {
+
+  if (!head_) {
     // First sample in the list.
     head_ = tail_ = data_sample ;
-  }
-  else
-  {
+
+  } else {
     // Add to existing list.
     tail_->next_data_sample_ = data_sample ;
     data_sample->previous_data_sample_ = tail_;
     tail_ = data_sample;
   }
 
-  if (instance_state_)
-    {
-      instance_state_->empty(false);
-    }
+  if (instance_state_) {
+    instance_state_->empty(false);
+  }
 }
-
-
 
 ACE_INLINE
 OpenDDS::DCPS::ReceivedDataElement *
 OpenDDS::DCPS::ReceivedDataElementList::remove_head()
 {
-  if (!size_)
-  {
+  if (!size_) {
     return 0 ;
   }
 
@@ -56,14 +55,11 @@ OpenDDS::DCPS::ReceivedDataElementList::remove_head()
   return ptr ;
 }
 
-
-
 ACE_INLINE
 OpenDDS::DCPS::ReceivedDataElement *
 OpenDDS::DCPS::ReceivedDataElementList::remove_tail()
 {
-  if (!size_)
-  {
+  if (!size_) {
     return 0 ;
   }
 

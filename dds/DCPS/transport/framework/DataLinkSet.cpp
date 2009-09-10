@@ -1,6 +1,12 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "DataLinkSet.h"
 #include "DataLinkSet_rch.h"
@@ -29,19 +35,16 @@ OpenDDS::DCPS::DataLinkSet::DataLinkSet()
 {
   DBG_ENTRY_LVL("DataLinkSet","DataLinkSet",6);
 
-  if (::OpenDDS::DCPS::Transport_debug_level >= 2)
-    {
-      ACE_DEBUG ((LM_DEBUG, "(%P|%t) DataLinkSet send_control_element_allocator %x with %d chunks\n",
-      &send_control_element_allocator_, NUM_SEND_CONTROL_ELEMENT_CHUNKS));
-    }
+  if (OpenDDS::DCPS::Transport_debug_level >= 2) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataLinkSet send_control_element_allocator %x with %d chunks\n",
+               &send_control_element_allocator_, NUM_SEND_CONTROL_ELEMENT_CHUNKS));
+  }
 }
-
 
 OpenDDS::DCPS::DataLinkSet::~DataLinkSet()
 {
   DBG_ENTRY_LVL("DataLinkSet","~DataLinkSet",6);
 }
-
 
 int
 OpenDDS::DCPS::DataLinkSet::insert_link(DataLink* link)
@@ -54,7 +57,6 @@ OpenDDS::DCPS::DataLinkSet::insert_link(DataLink* link)
 
   return bind(map_, mylink->id(), mylink);
 }
-
 
 // Perform "set subtraction" logic.  Subtract the released_set from
 // *this* set.  When complete, return the (new) size of the set.
@@ -69,27 +71,23 @@ OpenDDS::DCPS::DataLinkSet::remove_links(DataLinkSet* released_set)
   // Attempt to unbind each of the DataLinks in the released_set's
   // internal map from *this* object's internal map.
   for (DataLinkSet::MapType::iterator itr = released_set->map_.begin();
-      itr != released_set->map_.end();
-      ++itr)
-    {
+       itr != released_set->map_.end();
+       ++itr) {
 
-      DataLinkIdType link_id = itr->first;
+    DataLinkIdType link_id = itr->first;
 
-      if (unbind(map_, link_id) != 0)
-        {
-          // Just report to the log that we tried.
-          VDBG((LM_DEBUG,
+    if (unbind(map_, link_id) != 0) {
+      // Just report to the log that we tried.
+      VDBG((LM_DEBUG,
             ACE_TEXT("(%P|%t) DataLinkSet::remove_links: ")
             ACE_TEXT("link_id %d not found in map.\n"),
-            link_id
-          ));
-        }
+            link_id));
     }
+  }
 
   // Return the current size of our map following all attempts to unbind().
   return map_.size();
 }
-
 
 //void
 //OpenDDS::DCPS::DataLinkSet::release_reservations(RepoId          remote_id,
@@ -112,40 +110,35 @@ OpenDDS::DCPS::DataLinkSet::remove_links(DataLinkSet* released_set)
 //  }
 //}
 
-
 OpenDDS::DCPS::DataLinkSet*
-OpenDDS::DCPS::DataLinkSet::select_links (const RepoId* remoteIds,
-                                      const CORBA::ULong num_targets)
+OpenDDS::DCPS::DataLinkSet::select_links(const RepoId* remoteIds,
+                                         const CORBA::ULong num_targets)
 {
   DBG_ENTRY_LVL("DataLinkSet","select_links",6);
 
-  DataLinkSet_rch selected_links = new DataLinkSet ();
+  DataLinkSet_rch selected_links = new DataLinkSet();
 
   GuardType guard(this->lock_);
 
   for (MapType::iterator itr = map_.begin();
-    itr != map_.end();
-    ++itr)
-  {
-    for (CORBA::ULong i = 0; i < num_targets; ++i)
-    {
-      if (itr->second->is_target (remoteIds[i]))
-      {
-        bind (selected_links->map_,
-          itr->second->id(), itr->second);
+       itr != map_.end();
+       ++itr) {
+    for (CORBA::ULong i = 0; i < num_targets; ++i) {
+      if (itr->second->is_target(remoteIds[i])) {
+        bind(selected_links->map_,
+             itr->second->id(), itr->second);
         break;
       }
     }
   }
 
-  return selected_links._retn ();
+  return selected_links._retn();
 }
-
 
 OpenDDS::DCPS::DataLink*
 OpenDDS::DCPS::DataLinkSet::find_link(const RepoId remoteId,
-                                     const RepoId localId,
-                                     const bool   pub_side)
+                                      const RepoId localId,
+                                      const bool   pub_side)
 {
   DBG_ENTRY_LVL("DataLinkSet","find_link",6);
 
@@ -153,38 +146,34 @@ OpenDDS::DCPS::DataLinkSet::find_link(const RepoId remoteId,
     GuardType guard(this->lock_);
 
     for (MapType::iterator itr = map_.begin();
-      itr != map_.end();
-      ++itr)
-    {
-       bool last = true;
-       if (itr->second->exist (remoteId, localId, pub_side, last))
-        {
-          DataLink_rch link = itr->second;
+         itr != map_.end();
+         ++itr) {
+      bool last = true;
 
-          if (last)
-          {
-            if (unbind(map_, itr->first) != 0)
-            {
-              RepoIdConverter converter(localId);
-              ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) DataLinkSet::find_link: ")
-                ACE_TEXT("cannot remove link for localId %C pub_side is %C.\n"),
-                std::string(converter).c_str(),
-                (pub_side? "true": "false")
-              ));
-            }
+      if (itr->second->exist(remoteId, localId, pub_side, last)) {
+        DataLink_rch link = itr->second;
+
+        if (last) {
+          if (unbind(map_, itr->first) != 0) {
+            RepoIdConverter converter(localId);
+            ACE_ERROR((LM_ERROR,
+                       ACE_TEXT("(%P|%t) DataLinkSet::find_link: ")
+                       ACE_TEXT("cannot remove link for localId %C pub_side is %C.\n"),
+                       std::string(converter).c_str(),
+                       (pub_side? "true": "false")));
           }
-          return link._retn ();
         }
+
+        return link._retn();
+      }
     }
   }
 
   return 0;
 }
 
-
 bool
-OpenDDS::DCPS::DataLinkSet::empty ()
+OpenDDS::DCPS::DataLinkSet::empty()
 {
   GuardType guard(this->lock_);
 

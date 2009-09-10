@@ -1,6 +1,12 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef OPENDDS_DCPS_SIMPLEMCASTFACTORY_H
 #define OPENDDS_DCPS_SIMPLEMCASTFACTORY_H
 
@@ -9,31 +15,24 @@
 
 class SimpleMcastTransport;
 
+namespace OpenDDS {
+namespace DCPS {
 
-namespace OpenDDS
-{
+class SimpleUnreliableDgram_Export SimpleMcastFactory : public TransportImplFactory {
+public:
 
-  namespace DCPS
-  {
+  SimpleMcastFactory();
+  virtual ~SimpleMcastFactory();
 
-    class SimpleUnreliableDgram_Export SimpleMcastFactory : public TransportImplFactory
-    {
-      public:
+  virtual int requires_reactor() const;
 
-        SimpleMcastFactory();
-        virtual ~SimpleMcastFactory();
+protected:
 
-        virtual int requires_reactor() const;
+  virtual TransportImpl* create();
+};
 
-
-      protected:
-
-        virtual TransportImpl* create();
-    };
-
-  }  /* namespace DCPS */
-
-}  /* namespace OpenDDS */
+} // namespace DCPS
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "SimpleMcastFactory.inl"

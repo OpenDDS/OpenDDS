@@ -1,5 +1,11 @@
-// -*- C++ -*-
-//
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #ifndef OPENDDS_DCPS_REACTIVEPACKETRECEIVER_H
 #define OPENDDS_DCPS_REACTIVEPACKETRECEIVER_H
@@ -19,65 +25,51 @@
 #include "ace/Null_Mutex.h"
 #include <map>
 
-namespace OpenDDS
-{
+namespace OpenDDS {
+namespace DCPS {
+namespace ReliableMulticast {
+namespace detail {
 
-  namespace DCPS
-  {
+class PacketReceiverCallback;
 
-    namespace ReliableMulticast
-    {
+class ReliableMulticast_Export ReactivePacketReceiver
+  : public PacketHandler {
+public:
+  ReactivePacketReceiver(
+    const ACE_INET_Addr& multicast_group_address,
+    PacketReceiverCallback& callback,
+    size_t receiver_buffer_size);
 
-      namespace detail
-      {
+  virtual ~ReactivePacketReceiver();
 
-        class PacketReceiverCallback;
+  bool open();
 
-        class ReliableMulticast_Export ReactivePacketReceiver
-          : public PacketHandler
-        {
-        public:
-          ReactivePacketReceiver(
-            const ACE_INET_Addr& multicast_group_address,
-            PacketReceiverCallback& callback,
-            size_t receiver_buffer_size
-            );
+  virtual void close();
 
-          virtual ~ReactivePacketReceiver();
+  virtual void receive_packet_from(
+    const Packet& packet,
+    const ACE_INET_Addr& peer);
 
-          bool open();
+  int handle_timeout(
+    const ACE_Time_Value& current_time,
+    const void* = 0);
 
-          virtual void close();
+private:
+  typedef ACE_Strong_Bound_Ptr<ReceiverLogic, ACE_Null_Mutex> ReceiverLogicPtr;
 
-          virtual void receive_packet_from(
-            const Packet& packet,
-            const ACE_INET_Addr& peer
-            );
+  PacketReceiverCallback& callback_;
+  ACE_INET_Addr multicast_group_address_;
+  size_t receiver_buffer_size_;
+  ACE_Thread_Mutex nack_mutex_;
+  std::map<ACE_INET_Addr, ReceiverLogicPtr> receiver_logics_;
+  typedef std::map<ACE_INET_Addr, std::vector<Packet> > PeerToPacketVectorMap;
+  PeerToPacketVectorMap nacks_;
+};
 
-          int handle_timeout(
-            const ACE_Time_Value& current_time,
-            const void* = 0
-            );
-
-        private:
-          typedef ACE_Strong_Bound_Ptr<ReceiverLogic, ACE_Null_Mutex> ReceiverLogicPtr;
-
-          PacketReceiverCallback& callback_;
-          ACE_INET_Addr multicast_group_address_;
-          size_t receiver_buffer_size_;
-          ACE_Thread_Mutex nack_mutex_;
-          std::map<ACE_INET_Addr, ReceiverLogicPtr> receiver_logics_;
-          typedef std::map<ACE_INET_Addr, std::vector<Packet> > PeerToPacketVectorMap;
-          PeerToPacketVectorMap nacks_;
-        };
-
-      } /* namespace detail */
-
-    } /* namespace ReliableMulticast */
-
-  } /* namespace DCPS */
-
-} /* namespace OpenDDS */
+} // namespace detail
+} // namespace ReliableMulticast
+} // namespace DCPS
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "ReactivePacketReceiver.inl"

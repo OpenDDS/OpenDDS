@@ -1,6 +1,12 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef OPENDDS_DCPS_THREADPERCONNECTIONSENDER_H
 #define OPENDDS_DCPS_THREADPERCONNECTIONSENDER_H
 
@@ -15,104 +21,98 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+namespace OpenDDS {
+namespace DCPS {
 
-namespace OpenDDS
-{
+class DataLink;
+class TransportQueueElement;
+struct DataSampleListElement;
 
-  namespace DCPS
-  {
-    class DataLink;
-    class TransportQueueElement;
-    struct DataSampleListElement;
+enum SendStrategyOpType {
+  SEND_START,
+  SEND,
+  SEND_STOP,
+  REMOVE_SAMPLE,
+  REMOVE_ALL_CONTROL_SAMPLES
+};
 
-    enum SendStrategyOpType
-    {
-      SEND_START,
-      SEND,
-      SEND_STOP,
-      REMOVE_SAMPLE,
-      REMOVE_ALL_CONTROL_SAMPLES
-    };
+struct SendRequest {
+  SendStrategyOpType op_;
+  TransportQueueElement* element_;
+};
 
-    struct SendRequest
-    {
-      SendStrategyOpType op_;
-      TransportQueueElement* element_;
-    };
+/**
+ * @class ThreadPerConnectionSendTask
+ *
+ * @brief Execute the requests of sending a sample or control message.
+ *
+ *  This task implements the request execute method which handles each step
+ *  of sending a sample or control message.
+ */
+class OpenDDS_Dcps_Export ThreadPerConnectionSendTask : public ACE_Task_Base {
+public:
 
-    /**
-     * @class ThreadPerConnectionSendTask
-     *
-     * @brief Execute the requests of sending a sample or control message.
-     *
-     *  This task implements the request execute method which handles each step
-     *  of sending a sample or control message.
-     */
-    class OpenDDS_Dcps_Export ThreadPerConnectionSendTask : public ACE_Task_Base
-    {
-    public:
+  /// Constructor.
+  ThreadPerConnectionSendTask(DataLink* link);
 
-      /// Constructor.
-      ThreadPerConnectionSendTask(DataLink* link);
+  /// Virtual Destructor.
+  virtual ~ThreadPerConnectionSendTask();
 
-      /// Virtual Destructor.
-      virtual ~ThreadPerConnectionSendTask();
+  /// Put the request to the request queue.
+  /// Returns 0 if successful, -1 otherwise (it has been "rejected" or this
+  /// task is shutdown).
+  int add_request(SendStrategyOpType op, TransportQueueElement* element = 0);
 
-      /// Put the request to the request queue.
-      /// Returns 0 if successful, -1 otherwise (it has been "rejected" or this
-      /// task is shutdown).
-      int add_request(SendStrategyOpType op, TransportQueueElement* element = 0);
+  /// Activate the worker threads
+  virtual int open(void* = 0);
 
-      /// Activate the worker threads
-      virtual int open(void* = 0);
+  /// The "mainline" executed by the worker thread.
+  virtual int svc();
 
-      /// The "mainline" executed by the worker thread.
-      virtual int svc();
+  /// Called when the thread exits.
+  virtual int close(u_long flag = 0);
 
-      /// Called when the thread exits.
-      virtual int close(u_long flag = 0);
+  /// Remove sample from the thread per connection queue.
+  int remove_sample(const DataSampleListElement* sample);
 
-      /// Remove sample from the thread per connection queue.
-      int remove_sample (const DataSampleListElement* sample);
+private:
 
-    private:
+  /// Handle the request.
+  virtual void execute(SendRequest& req);
 
-      /// Handle the request.
-      virtual void execute (SendRequest& req);
+  typedef ACE_SYNCH_MUTEX         LockType;
+  typedef ACE_Guard<LockType>     GuardType;
+  typedef ACE_Condition<LockType> ConditionType;
 
+  typedef BasicQueue<SendRequest> QueueType;
 
-      typedef ACE_SYNCH_MUTEX         LockType;
-      typedef ACE_Guard<LockType>     GuardType;
-      typedef ACE_Condition<LockType> ConditionType;
+  /// Lock to protect the "state" (all of the data members) of this object.
+  LockType lock_;
 
-      typedef BasicQueue<SendRequest> QueueType;
+  /// The request queue.
+  QueueType queue_;
 
-      /// Lock to protect the "state" (all of the data members) of this object.
-      LockType lock_;
+  /// Condition used to signal the worker threads that they may be able to
+  /// find a request in the queue_ that needs to be executed.
+  /// This condition will be signal()'ed each time a request is
+  /// added to the queue_, and also when this task is shutdown.
+  ConditionType work_available_;
 
-      /// The request queue.
-      QueueType queue_;
+  /// Flag used to initiate a shutdown request to all worker threads.
+  bool shutdown_initiated_;
 
-      /// Condition used to signal the worker threads that they may be able to
-      /// find a request in the queue_ that needs to be executed.
-      /// This condition will be signal()'ed each time a request is
-      /// added to the queue_, and also when this task is shutdown.
-      ConditionType work_available_;
+  /// Flag used to avoid multiple open() calls.
+  bool opened_;
 
-      /// Flag used to initiate a shutdown request to all worker threads.
-      bool shutdown_initiated_;
+  /// The id of the thread created by this task.
+  ACE_thread_t thr_id_;
 
-      /// Flag used to avoid multiple open() calls.
-      bool opened_;
+  /// The datalink to send the samples or control messages.
+  DataLink* link_;
+};
 
-      /// The id of the thread created by this task.
-      ACE_thread_t thr_id_;
-
-      /// The datalink to send the samples or control messages.
-      DataLink* link_;
-    };
-  }
-}
+} // namespace DCPS
+} // namespace OpenDDS
 
 #include /**/ "ace/post.h"
 

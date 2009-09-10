@@ -1,6 +1,11 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #include "ReliableMulticast_pch.h"
 #include "ReactivePacketSender.h"
@@ -13,21 +18,20 @@
 typedef OpenDDS::DCPS::ReliableMulticast::detail::PacketHandler PacketHandler;
 typedef OpenDDS::DCPS::ReliableMulticast::detail::Packet Packet;
 
-namespace
+namespace {
+
+void logError(
+  const char* errMsg)
 {
-  void logError(
-    const char* errMsg
-    )
-  {
-    ACE_ERROR((LM_ERROR, errMsg));
-  }
+  ACE_ERROR((LM_ERROR, errMsg));
 }
+
+} // namespace
 
 OpenDDS::DCPS::ReliableMulticast::detail::ReactivePacketSender::ReactivePacketSender(
   const ACE_INET_Addr& local_address,
   const ACE_INET_Addr& multicast_group_address,
-  size_t sender_history_size
-  )
+  size_t sender_history_size)
   : sender_logic_(sender_history_size)
   , local_address_(local_address)
   , multicast_group_address_(multicast_group_address)
@@ -35,64 +39,58 @@ OpenDDS::DCPS::ReliableMulticast::detail::ReactivePacketSender::ReactivePacketSe
 }
 
 bool
-OpenDDS::DCPS::ReliableMulticast::detail::ReactivePacketSender::open(
-  )
+OpenDDS::DCPS::ReliableMulticast::detail::ReactivePacketSender::open()
 {
   if (socket_.ACE_SOCK_Dgram::open(
-    local_address_
-    ) == -1)
-  {
+        local_address_) == -1) {
     logError("ReactivePacketSender: failure to open\n");
     return false;
   }
 
-
   ACE_INET_Addr address;
-  if (this->socket_.get_local_addr (address) != 0)
-  {
-    ACE_ERROR_RETURN ((LM_ERROR,
-      ACE_TEXT ("(%P|%t) ERROR: ReliableMulticast::open_socket ")
-      ACE_TEXT ("- %p"),
-      ACE_TEXT ("cannot get local addr\n")),
-      false);
+
+  if (this->socket_.get_local_addr(address) != 0) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ReliableMulticast::open_socket ")
+                      ACE_TEXT("- %p"),
+                      ACE_TEXT("cannot get local addr\n")),
+                     false);
   }
-  this->local_address_.set_port_number (address.get_port_number ());
+
+  this->local_address_.set_port_number(address.get_port_number());
 
   if (reactor()->register_handler(
-    this,
-    ACE_Event_Handler::READ_MASK
-    ) == -1)
-  {
+        this,
+        ACE_Event_Handler::READ_MASK) == -1) {
     logError("ReactivePacketSender: failure to register_handler\n");
     return false;
   }
+
   if (reactor()->schedule_timer(
-    this,
-    0,
-    ACE_Time_Value(1),
-    ACE_Time_Value(1)
-    ) == -1)
-  {
+        this,
+        0,
+        ACE_Time_Value(1),
+        ACE_Time_Value(1)) == -1) {
     logError("ReactivePacketSender: failure to schedule_timer\n");
   }
+
   return true;
 }
 
 void
 OpenDDS::DCPS::ReliableMulticast::detail::ReactivePacketSender::close()
 {
-  if (reactor()->cancel_timer(this) == -1)
-  {
+  if (reactor()->cancel_timer(this) == -1) {
     logError("ReactivePacketSender: failure to cancel_timer\n");
   }
+
   OpenDDS::DCPS::ReliableMulticast::detail::EventHandler::close();
   reactor(0);
 }
 
 void
 OpenDDS::DCPS::ReliableMulticast::detail::ReactivePacketSender::send_packet(
-  const Packet& p
-  )
+  const Packet& p)
 {
   std::vector<Packet> to_deliver;
 
@@ -106,8 +104,7 @@ OpenDDS::DCPS::ReliableMulticast::detail::ReactivePacketSender::send_packet(
 void
 OpenDDS::DCPS::ReliableMulticast::detail::ReactivePacketSender::receive_packet_from(
   const Packet& packet,
-  const ACE_INET_Addr& peer
-  )
+  const ACE_INET_Addr& peer)
 {
   std::vector<Packet> to_redeliver;
   ACE_UNUSED_ARG(peer);
@@ -122,8 +119,7 @@ OpenDDS::DCPS::ReliableMulticast::detail::ReactivePacketSender::receive_packet_f
 int
 OpenDDS::DCPS::ReliableMulticast::detail::ReactivePacketSender::handle_timeout(
   const ACE_Time_Value& current_time,
-  const void*
-  )
+  const void*)
 {
   ACE_UNUSED_ARG(current_time);
 

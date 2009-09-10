@@ -1,6 +1,12 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef OPENDDS_DCPS_SIMPLETCPRECONNECTTASK_H
 #define OPENDDS_DCPS_SIMPLETCPRECONNECTTASK_H
 
@@ -12,50 +18,45 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+namespace OpenDDS {
+namespace DCPS {
 
-namespace OpenDDS
-{
+class SimpleTcpConnection;
 
-  namespace DCPS
-  {
-    class SimpleTcpConnection;
+enum ReconnectOpType {
+  DO_RECONNECT
+};
 
-    enum ReconnectOpType
-      {
-        DO_RECONNECT
-      };
+/**
+ * @class SimpleTcpReconnectTask
+ *
+ * @brief Active Object managing a queue of reconnecting request.
+ *
+ *  This task handles request to reconnect to the remotes to avoid the
+ *  the caller threads (thread to send or reactor thread) block on reconnecting.
+ *  This reconnect task has lifetime as SimpleTcpConnection object. One reconnect
+ *  task just dedicates to a single connection.
+ */
+class SimpleTcpReconnectTask : public QueueTaskBase <ReconnectOpType> {
+public:
 
+  /// Constructor.
+  SimpleTcpReconnectTask(SimpleTcpConnection* con);
 
-    /**
-     * @class SimpleTcpReconnectTask
-     *
-     * @brief Active Object managing a queue of reconnecting request.
-     *
-     *  This task handles request to reconnect to the remotes to avoid the
-     *  the caller threads (thread to send or reactor thread) block on reconnecting.
-     *  This reconnect task has lifetime as SimpleTcpConnection object. One reconnect 
-     *  task just dedicates to a single connection.
-     */
-    class SimpleTcpReconnectTask : public QueueTaskBase <ReconnectOpType>
-    {
-    public:
-   
-      /// Constructor.
-      SimpleTcpReconnectTask(SimpleTcpConnection* con);
+  /// Virtual Destructor.
+  virtual ~SimpleTcpReconnectTask();
 
-      /// Virtual Destructor.
-      virtual ~SimpleTcpReconnectTask();
+  /// Handle reconnect requests.
+  virtual void execute(ReconnectOpType& op);
 
-      /// Handle reconnect requests.
-      virtual void execute (ReconnectOpType& op);
+private:
 
-    private:
+  /// The connection that needs be re-established.
+  SimpleTcpConnection* connection_;
+};
 
-      /// The connection that needs be re-established.
-      SimpleTcpConnection* connection_;
-    };
-  }
-}
+} // namespace DCPS
+} // namespace OpenDDS
 
 #include /**/ "ace/post.h"
 

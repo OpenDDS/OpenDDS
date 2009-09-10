@@ -1,6 +1,11 @@
-// -*- IDL -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 /**
  *   This file was used to generate the code in CharSeqC.*
@@ -30,4 +35,4 @@ module CORBA
   typedef sequence<char> CharSeq;
 };
 
-#endif  /* OPENDDS_CORBA_CHAR_SEQ_IDL */
+#endif /* OPENDDS_CORBA_CHAR_SEQ_IDL */

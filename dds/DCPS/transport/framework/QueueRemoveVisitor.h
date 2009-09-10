@@ -1,6 +1,12 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef OPENDDS_DCPS_QUEUEREMOVEVISITOR_H
 #define OPENDDS_DCPS_QUEUEREMOVEVISITOR_H
 
@@ -10,60 +16,53 @@
 #include "TransportDefs.h"
 #include "ace/Message_Block.h"
 
+namespace OpenDDS {
+namespace DCPS {
 
-namespace OpenDDS
-{
+class TransportQueueElement;
 
-  namespace DCPS
-  {
+class OpenDDS_Dcps_Export QueueRemoveVisitor : public BasicQueueVisitor<TransportQueueElement> {
+public:
 
-    class TransportQueueElement;
+  /// In order to construct a QueueRemoveVisitor, it must be
+  /// provided with the DataSampleListElement* (used as an
+  /// identifier) that should be removed from the BasicQueue<T>
+  /// (the one this visitor will visit when it is passed-in
+  /// to a BasicQueue<T>::accept_remove_visitor() invocation).
+  QueueRemoveVisitor(const ACE_Message_Block* sample);
 
-    class OpenDDS_Dcps_Export QueueRemoveVisitor : public BasicQueueVisitor<TransportQueueElement>
-    {
-      public:
+  /// Used to remove all control samples with the specified pub_id.
+  QueueRemoveVisitor(RepoId pub_id);
 
-        /// In order to construct a QueueRemoveVisitor, it must be
-        /// provided with the DataSampleListElement* (used as an
-        /// identifier) that should be removed from the BasicQueue<T>
-        /// (the one this visitor will visit when it is passed-in
-        /// to a BasicQueue<T>::accept_remove_visitor() invocation).
-        QueueRemoveVisitor(const ACE_Message_Block* sample);
+  virtual ~QueueRemoveVisitor();
 
-        /// Used to remove all control samples with the specified pub_id.
-        QueueRemoveVisitor(RepoId pub_id);
+  /// The BasicQueue<T>::accept_remove_visitor() method will call
+  /// this visit_element_remove() method for each element in the queue.
+  virtual int visit_element_remove(TransportQueueElement* element,
+                                   int&                   remove);
 
-        virtual ~QueueRemoveVisitor();
+  /// Accessor for the status.  Called after this visitor object has
+  /// been passed to BasicQueue<T>::accept_remove_visitor().
+  int status() const;
 
-        /// The BasicQueue<T>::accept_remove_visitor() method will call
-        /// this visit_element_remove() method for each element in the queue.
-        virtual int visit_element_remove(TransportQueueElement* element,
-                                  int&                   remove);
+  int removed_bytes() const;
 
-        /// Accessor for the status.  Called after this visitor object has
-        /// been passed to BasicQueue<T>::accept_remove_visitor().
-        int status() const;
+private:
 
-        int removed_bytes() const;
+  /// The sample that needs to be removed.
+  const ACE_Message_Block* sample_;
 
+  /// The publisher_id of the control samples to be removed.
+  RepoId pub_id_;
 
-      private:
+  /// Holds the status of our visit.
+  int status_;
 
-        /// The sample that needs to be removed.
-        const ACE_Message_Block* sample_;
+  int removed_bytes_;
+};
 
-        /// The publisher_id of the control samples to be removed.
-        RepoId pub_id_;
-
-        /// Holds the status of our visit.
-        int status_;
-
-        int removed_bytes_;
-    };
-
-  }
-
-}
+} // namespace DCPS
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "QueueRemoveVisitor.inl"

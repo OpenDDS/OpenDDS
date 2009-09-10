@@ -1,6 +1,11 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #ifndef OPENDDS_DCPS_SIMPLEUNRELIABLEDGRAM_H
 #define OPENDDS_DCPS_SIMPLEUNRELIABLEDGRAM_H
@@ -11,23 +16,18 @@
 #include "ace/Service_Object.h"
 #include "ace/Service_Config.h"
 
-
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-
-class SimpleUnreliableDgram_Export OPENDDS_DCPS_SimpleUnreliableDgram_Initializer
-{
+class SimpleUnreliableDgram_Export OPENDDS_DCPS_SimpleUnreliableDgram_Initializer {
 public:
   // Constructor.
-  OPENDDS_DCPS_SimpleUnreliableDgram_Initializer (void);
+  OPENDDS_DCPS_SimpleUnreliableDgram_Initializer();
 };
 
 static OPENDDS_DCPS_SimpleUnreliableDgram_Initializer OPENDDS_DCPS_SimpleUnreliableDgram_initializer;
 
-
 #include /**/ "ace/post.h"
 
 #endif /* OPENDDS_DCPS_SIMPLEUNRELIABLEDGRAM_H */
-

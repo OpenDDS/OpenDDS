@@ -1,24 +1,27 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "TransportControlElement.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
-
 OpenDDS::DCPS::TransportControlElement::TransportControlElement(ACE_Message_Block* msg_block)
-: TransportQueueElement(1),
-  msg_ (msg_block)
+  : TransportQueueElement(1),
+    msg_(msg_block)
 {
   DBG_ENTRY_LVL("TransportControlElement","TransportControlElement",6);
 }
-
 
 OpenDDS::DCPS::TransportControlElement::~TransportControlElement()
 {
   DBG_ENTRY_LVL("TransportControlElement","~TransportControlElement",6);
 }
-
 
 bool
 OpenDDS::DCPS::TransportControlElement::requires_exclusive_packet() const
@@ -27,14 +30,13 @@ OpenDDS::DCPS::TransportControlElement::requires_exclusive_packet() const
   return true;
 }
 
-
 void
 OpenDDS::DCPS::TransportControlElement::release_element(bool dropped_by_transport)
 {
-  ACE_UNUSED_ARG (dropped_by_transport);
+  ACE_UNUSED_ARG(dropped_by_transport);
 
   if (msg_) {
-    msg_->release ();
+    msg_->release();
   }
 
   // This element is guaranteed to be heap-based. The DCPS layer passes
@@ -42,20 +44,17 @@ OpenDDS::DCPS::TransportControlElement::release_element(bool dropped_by_transpor
   delete this;
 }
 
-
 void
 OpenDDS::DCPS::TransportControlElement::data_delivered()
 {
   DBG_ENTRY_LVL("TransportSendControlElement","data_delivered",6);
 }
 
-
 OpenDDS::DCPS::RepoId
 OpenDDS::DCPS::TransportControlElement::publication_id() const
 {
   return GUID_UNKNOWN;
 }
-
 
 const ACE_Message_Block*
 OpenDDS::DCPS::TransportControlElement::msg() const

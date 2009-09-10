@@ -1,6 +1,11 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
@@ -11,7 +16,6 @@
 #if !defined (__ACE_INLINE__)
 #include "TransportInterface.inl"
 #endif /* __ACE_INLINE__ */
-
 
 OpenDDS::DCPS::TransportInterface::~TransportInterface()
 {
@@ -25,7 +29,6 @@ OpenDDS::DCPS::TransportInterface::transport_detached_i()
   // Subclass should override if interested in the "transport detached event".
 }
 
-
 /// The client application calls this to attach this TransportInterface
 /// object to the supplied TransportImpl object.
 OpenDDS::DCPS::AttachStatus
@@ -36,12 +39,11 @@ OpenDDS::DCPS::TransportInterface::attach_transport(TransportImpl* impl)
   { // guard scope
     GuardType guard(this->lock_);
 
-    if (!this->impl_.is_nil())
-      {
-  // This TransportInterface object is currently attached to
-  // a TransportImpl.
-  return ATTACH_BAD_TRANSPORT;
-      }
+    if (!this->impl_.is_nil()) {
+      // This TransportInterface object is currently attached to
+      // a TransportImpl.
+      return ATTACH_BAD_TRANSPORT;
+    }
 
     // Ask the impl for the swap_bytes() value, and cache the answer in
     // a data member (this->swap_bytes_) so that we don't have to ask
@@ -54,11 +56,10 @@ OpenDDS::DCPS::TransportInterface::attach_transport(TransportImpl* impl)
     impl->connection_info(this->connection_info_);
 
     // Attempt to attach ourselves to the TransportImpl object now.
-    if (impl->attach_interface(this) == ATTACH_BAD_TRANSPORT)
-      {
-  // The TransportImpl didn't accept our attachment for some reason.
-  return ATTACH_BAD_TRANSPORT;
-      }
+    if (impl->attach_interface(this) == ATTACH_BAD_TRANSPORT) {
+      // The TransportImpl didn't accept our attachment for some reason.
+      return ATTACH_BAD_TRANSPORT;
+    }
 
     // Now the TransportImpl object knows about us.  Let's remember the
     // TransportImpl object by saving a "copy" of the reference to our
@@ -69,7 +70,6 @@ OpenDDS::DCPS::TransportInterface::attach_transport(TransportImpl* impl)
 
   return ATTACH_OK;
 }
-
 
 /// This is called by the client application or a subclass of
 /// TransportInterface when it has decided to detach this TransportInterface
@@ -94,11 +94,10 @@ OpenDDS::DCPS::TransportInterface::detach_transport()
   {
     GuardType guard(this->lock_);
 
-    if (this->impl_.is_nil())
-      {
-        // We are already detached from the transport.
-        return;
-      }
+    if (this->impl_.is_nil()) {
+      // We are already detached from the transport.
+      return;
+    }
 
     // Give away our "copy" of the TransportImpl reference to a local
     // (smart pointer) variable.
@@ -121,7 +120,6 @@ OpenDDS::DCPS::TransportInterface::detach_transport()
   impl->detach_interface(this);
 }
 
-
 // NOTES for add_associations() method:
 //
 //   Things are majorly foo-barred if we are getting errors in this method.
@@ -134,23 +132,22 @@ OpenDDS::DCPS::TransportInterface::detach_transport()
 /// and add_subscriptions().
 int
 OpenDDS::DCPS::TransportInterface::add_associations
-                         (RepoId                    local_id,
-                          CORBA::Long               priority,
-                          const char*               local_id_str,
-                          const char*               remote_id_str,
-                          size_t                    num_remote_associations,
-                          const AssociationData*    remote_associations,
-                          TransportReceiveListener* receive_listener,
-                          TransportSendListener*    send_listener)
+(RepoId                    local_id,
+ CORBA::Long               priority,
+ const char*               local_id_str,
+ const char*               remote_id_str,
+ size_t                    num_remote_associations,
+ const AssociationData*    remote_associations,
+ TransportReceiveListener* receive_listener,
+ TransportSendListener*    send_listener)
 {
   DBG_ENTRY_LVL("TransportInterface","add_associations",6);
 
-  if (this->impl_.is_nil())
-    {
-      // There is no TransportImpl object - the transport must have
-      // been detached.  Return the failure code.
-      return -1;
-    }
+  if (this->impl_.is_nil()) {
+    // There is no TransportImpl object - the transport must have
+    // been detached.  Return the failure code.
+    return -1;
+  }
 
   {
     // We need to acquire the reservation lock from the TransportImpl object.
@@ -159,164 +156,149 @@ OpenDDS::DCPS::TransportInterface::add_associations
     // add or remove reservations at the same time as us.
     TransportImpl::ReservationGuardType guard(this->impl_->reservation_lock());
 
-    for (size_t i = 0; i < num_remote_associations; ++i)
-      {
-        RepoId remote_id = remote_associations[i].remote_id_;
+    for (size_t i = 0; i < num_remote_associations; ++i) {
+      RepoId remote_id = remote_associations[i].remote_id_;
 
-        DataLink_rch link;
+      DataLink_rch link;
 
-        // There are two ways to reserve the DataLink -- as a local publisher,
-        // or as a local subscriber.  If the receive_listener argument is
-        // a NULL pointer (0), then use the local publisher version.  Otherwise,
-        // use the local subscriber version.
-        if (receive_listener == 0)
-          {
-            if( DCPS_debug_level > 0) {
-              ACE_TCHAR ebuffer[4096] ;
-              ACE::format_hexdump(
-                (const char*)&remote_associations[i].remote_data_.data[0],
-                remote_associations[i].remote_data_.data.length(),
-                ebuffer, sizeof(ebuffer)
-              ) ;
-              RepoIdConverter local_converter(local_id);
-              RepoIdConverter remote_converter(remote_id);
-              ACE_DEBUG((LM_DEBUG,
-                ACE_TEXT("(%P|%t) TransportInterface::add_associations: ")
-                ACE_TEXT("publication %C to subscription %C.\n%s\n"),
-                std::string(local_converter).c_str(),
-                std::string(remote_converter).c_str(),
-                ebuffer
-              ));
-            }
-            // Local publisher, remote subscriber.
-            link = this->impl_->reserve_datalink(remote_associations[i].remote_data_,
-                                                 remote_id,
-                                                 local_id,
-                                                 send_listener,
-                                                 priority);
-          }
-        else
-          {
-            if( DCPS_debug_level > 0) {
-              ACE_TCHAR ebuffer[4096] ;
-              ACE::format_hexdump(
-                (const char*)&remote_associations[i].remote_data_.data[0],
-                remote_associations[i].remote_data_.data.length(),
-                ebuffer, sizeof(ebuffer)
-              ) ;
-              RepoIdConverter local_converter(local_id);
-              RepoIdConverter remote_converter(remote_id);
-              ACE_DEBUG((LM_DEBUG,
-                ACE_TEXT("(%P|%t) TransportInterface::add_associations: ")
-                ACE_TEXT("subscription %C to publication %C.\n%s\n"),
-                std::string(local_converter).c_str(),
-                std::string(remote_converter).c_str(),
-                ebuffer
-              ));
-            }
-            // Local subscriber, remote publisher.
-            link = this->impl_->reserve_datalink(
-                     remote_associations[i].remote_data_,
-                     remote_id,
-                     local_id,
-                     receive_listener,
-                     remote_associations[i].remote_data_.publication_transport_priority
-                   );
-          }
+      // There are two ways to reserve the DataLink -- as a local publisher,
+      // or as a local subscriber.  If the receive_listener argument is
+      // a NULL pointer (0), then use the local publisher version.  Otherwise,
+      // use the local subscriber version.
+      if (receive_listener == 0) {
+        if (DCPS_debug_level > 0) {
+          ACE_TCHAR ebuffer[4096] ;
+          ACE::format_hexdump(
+            (const char*)&remote_associations[i].remote_data_.data[0],
+            remote_associations[i].remote_data_.data.length(),
+            ebuffer, sizeof(ebuffer)) ;
+          RepoIdConverter local_converter(local_id);
+          RepoIdConverter remote_converter(remote_id);
+          ACE_DEBUG((LM_DEBUG,
+                     ACE_TEXT("(%P|%t) TransportInterface::add_associations: ")
+                     ACE_TEXT("publication %C to subscription %C.\n%s\n"),
+                     std::string(local_converter).c_str(),
+                     std::string(remote_converter).c_str(),
+                     ebuffer));
+        }
 
-        if (link.is_nil())
-          {
-            // reserve_datalink failure
-            RepoIdConverter local_converter(local_id);
-            RepoIdConverter remote_converter(remote_id);
-            ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) ERROR: Failed to reserve a DataLink with the ")
-              ACE_TEXT("TransportImpl for association from local ")
-              ACE_TEXT("[%C %C] to remote [%C %C].\n"),
-              local_id_str,
-              std::string(local_converter).c_str(),
-              remote_id_str,
-              std::string(remote_converter).c_str()
-            ),-1);
-          }
+        // Local publisher, remote subscriber.
+        link = this->impl_->reserve_datalink(remote_associations[i].remote_data_,
+                                             remote_id,
+                                             local_id,
+                                             send_listener,
+                                             priority);
 
-        // At this point, the DataLink knows about our association.
+      } else {
+        if (DCPS_debug_level > 0) {
+          ACE_TCHAR ebuffer[4096] ;
+          ACE::format_hexdump(
+            (const char*)&remote_associations[i].remote_data_.data[0],
+            remote_associations[i].remote_data_.data.length(),
+            ebuffer, sizeof(ebuffer)) ;
+          RepoIdConverter local_converter(local_id);
+          RepoIdConverter remote_converter(remote_id);
+          ACE_DEBUG((LM_DEBUG,
+                     ACE_TEXT("(%P|%t) TransportInterface::add_associations: ")
+                     ACE_TEXT("subscription %C to publication %C.\n%s\n"),
+                     std::string(local_converter).c_str(),
+                     std::string(remote_converter).c_str(),
+                     ebuffer));
+        }
 
-        // Now we need to update the local_map_ to associate the local_id
-        // with the new DataLink.  We do this by inserting the DataLink into
-        // the local_set that we found (or created) earlier.
+        // Local subscriber, remote publisher.
+        link = this->impl_->reserve_datalink(
+                 remote_associations[i].remote_data_,
+                 remote_id,
+                 local_id,
+                 receive_listener,
+                 remote_associations[i].remote_data_.publication_transport_priority);
+      }
 
-        // We consider a result of 1 or 0 to indicate success here.  A result
-        // of 0 means that the insert_link() succeeded, and a result of 1 means
-        // that the local_id already has an existing reservation with the
-        // DataLink.  This is expected to happen.
-        if (this->local_map_.insert_link(local_id, link.in()) != -1)
-          {
-            // Now that we know the local_set contains the new DataLink,
-            // we need to get the new DataLink into a remote_set within
-            // our remote_map_.
-            if (this->remote_map_.insert_link(remote_id, link.in()) != -1)
-              {
-                // Ok.  We are done handling the current association.
-                // This means we can continue the loop and go on to
-                // the next association.
-                continue;
-              }
-            else
-              {
-                // The remote_set->insert_link() failed.
-                RepoIdConverter converter(remote_id);
-                ACE_ERROR((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: Failed to insert DataLink into remote_map_ ")
-                  ACE_TEXT("(DataLinkSetMap) for remote [%C %C].\n"),
-                  remote_id_str,
-                  std::string(converter).c_str()
-                ));
-              }
+      if (link.is_nil()) {
+        // reserve_datalink failure
+        RepoIdConverter local_converter(local_id);
+        RepoIdConverter remote_converter(remote_id);
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: Failed to reserve a DataLink with the ")
+                          ACE_TEXT("TransportImpl for association from local ")
+                          ACE_TEXT("[%C %C] to remote [%C %C].\n"),
+                          local_id_str,
+                          std::string(local_converter).c_str(),
+                          remote_id_str,
+                          std::string(remote_converter).c_str()),-1);
+      }
 
-            // "Undo" logic due to error would go here.
-            //   * We would need to undo the local_set->insert_link() operation.
-          }
-        else
-          {
-            // The local_set->insert_link() failed.
-            RepoIdConverter converter(local_id);
-            ACE_ERROR((LM_ERROR,
-              ACE_TEXT("(%P|%t) ERROR: Failed to insert DataLink into ")
-              ACE_TEXT("local_map_ for local [%C %C].\n"),
-              local_id_str,
-              std::string(converter).c_str()
-            ));
-          }
+      // At this point, the DataLink knows about our association.
+
+      // Now we need to update the local_map_ to associate the local_id
+      // with the new DataLink.  We do this by inserting the DataLink into
+      // the local_set that we found (or created) earlier.
+
+      // We consider a result of 1 or 0 to indicate success here.  A result
+      // of 0 means that the insert_link() succeeded, and a result of 1 means
+      // that the local_id already has an existing reservation with the
+      // DataLink.  This is expected to happen.
+      if (this->local_map_.insert_link(local_id, link.in()) != -1) {
+        // Now that we know the local_set contains the new DataLink,
+        // we need to get the new DataLink into a remote_set within
+        // our remote_map_.
+        if (this->remote_map_.insert_link(remote_id, link.in()) != -1) {
+          // Ok.  We are done handling the current association.
+          // This means we can continue the loop and go on to
+          // the next association.
+          continue;
+
+        } else {
+          // The remote_set->insert_link() failed.
+          RepoIdConverter converter(remote_id);
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("(%P|%t) ERROR: Failed to insert DataLink into remote_map_ ")
+                     ACE_TEXT("(DataLinkSetMap) for remote [%C %C].\n"),
+                     remote_id_str,
+                     std::string(converter).c_str()));
+        }
 
         // "Undo" logic due to error would go here.
-        //   * We would need to undo the impl->reserve_datalink() operation.
-        //   * We also would need to iterate over the remote_assocations that
-        //     have worked thus far, and nuke them.
+        //   * We would need to undo the local_set->insert_link() operation.
 
-        // Only failure conditions will cause the logic to get here.
-        return -1;
-      } // for scope
-
-    if (ACE_OS::strcmp (local_id_str, "publisher_id") == 0)
-      {
-        if (this->impl_->add_pending_association (local_id,
-                                                  num_remote_associations,
-                                                  remote_associations) != 0)
-          return -1;
+      } else {
+        // The local_set->insert_link() failed.
+        RepoIdConverter converter(local_id);
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: Failed to insert DataLink into ")
+                   ACE_TEXT("local_map_ for local [%C %C].\n"),
+                   local_id_str,
+                   std::string(converter).c_str()));
       }
+
+      // "Undo" logic due to error would go here.
+      //   * We would need to undo the impl->reserve_datalink() operation.
+      //   * We also would need to iterate over the remote_assocations that
+      //     have worked thus far, and nuke them.
+
+      // Only failure conditions will cause the logic to get here.
+      return -1;
+    } // for scope
+
+    if (ACE_OS::strcmp(local_id_str, "publisher_id") == 0) {
+      if (this->impl_->add_pending_association(local_id,
+                                               num_remote_associations,
+                                               remote_associations) != 0)
+        return -1;
+    }
+
     // We completed everything without a problem.
   } // guard scope
 
   return 0;
 }
 
-
 void
 OpenDDS::DCPS::TransportInterface::remove_associations(ssize_t       size,
-                                                   const RepoId* remote_ids,
-                                                   const RepoId  local_id,
-                                                   const bool pub_side)
+                                                       const RepoId* remote_ids,
+                                                       const RepoId  local_id,
+                                                       const bool pub_side)
 {
   DBG_ENTRY_LVL("TransportInterface","remove_associations",6);
 
@@ -338,7 +320,6 @@ OpenDDS::DCPS::TransportInterface::remove_associations(ssize_t       size,
   }
 }
 
-
 /// This is called by the attached TransportImpl object when it wants
 /// to detach itself from this TransportInterface.  This is called
 /// as a result of the TransportImpl being shutdown().
@@ -349,12 +330,11 @@ OpenDDS::DCPS::TransportInterface::transport_detached()
   {
     GuardType guard(this->lock_);
 
-    if (this->impl_.is_nil())
-      {
-        // This TransportInterface is not currently attached to any
-        // TransportImpl, so we can leave right now.
-        return;
-      }
+    if (this->impl_.is_nil()) {
+      // This TransportInterface is not currently attached to any
+      // TransportImpl, so we can leave right now.
+      return;
+    }
 
     // Drop our reference to the TransportImpl.
     this->impl_ = 0;

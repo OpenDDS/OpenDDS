@@ -1,5 +1,12 @@
-// -*- C++ -*-
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef TAO_DDS_DCPSINFO_IDL
 #define TAO_DDS_DCPSINFO_IDL
 
@@ -218,4 +225,4 @@ module OpenDDS {
   }; // module DDS
 }; // module OpenDDS
 
-#endif // TAO_DDS_DCPSINFO_IDL
+#endif /* TAO_DDS_DCPSINFO_IDL */

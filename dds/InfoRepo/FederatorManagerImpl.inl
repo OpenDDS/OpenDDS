@@ -1,6 +1,11 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 ACE_INLINE
 OpenDDS::Federator::RepoKey&
@@ -32,9 +37,9 @@ OpenDDS::Federator::ManagerImpl::info() const
 
 ACE_INLINE
 void
-OpenDDS::Federator::ManagerImpl::localRepo( ::OpenDDS::DCPS::DCPSInfo_ptr repo)
+OpenDDS::Federator::ManagerImpl::localRepo(::OpenDDS::DCPS::DCPSInfo_ptr repo)
 {
-  this->localRepo_ = ::OpenDDS::DCPS::DCPSInfo::_duplicate( repo);
+  this->localRepo_ = OpenDDS::DCPS::DCPSInfo::_duplicate(repo);
 }
 
 ACE_INLINE
@@ -46,8 +51,7 @@ OpenDDS::Federator::ManagerImpl::orb()
 
 ACE_INLINE
 void
-OpenDDS::Federator::ManagerImpl::orb( CORBA::ORB_ptr value)
+OpenDDS::Federator::ManagerImpl::orb(CORBA::ORB_ptr value)
 {
-  this->orb_ = CORBA::ORB::_duplicate (value);
+  this->orb_ = CORBA::ORB::_duplicate(value);
 }
-

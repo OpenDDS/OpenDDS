@@ -1,4 +1,12 @@
-// -*- C++ -*-
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef OPENDDS_DCPS_CONDITIONIMPL_H
 #define OPENDDS_DCPS_CONDITIONIMPL_H
 
@@ -14,27 +22,26 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-namespace OpenDDS
-{
-  namespace DCPS
-  {
-    class ConditionImpl
-      : public virtual OpenDDS::DCPS::LocalObject<DDS::Condition>
-    {
-    public:
-      DDS::ReturnCode_t attach_to_ws(DDS::WaitSet_ptr ws);
-      DDS::ReturnCode_t detach_from_ws(DDS::WaitSet_ptr ws);
-      void signal_all();
+namespace OpenDDS {
+namespace DCPS {
 
-    protected:
-      ConditionImpl() {}
-      virtual ~ConditionImpl() {}
+class ConditionImpl
+  : public virtual OpenDDS::DCPS::LocalObject<DDS::Condition> {
+public:
+  DDS::ReturnCode_t attach_to_ws(DDS::WaitSet_ptr ws);
+  DDS::ReturnCode_t detach_from_ws(DDS::WaitSet_ptr ws);
+  void signal_all();
 
-      typedef std::set<DDS::WaitSet_var, VarLess<DDS::WaitSet> > WaitSetSet;
-      WaitSetSet waitsets_;
-      ACE_Recursive_Thread_Mutex lock_;
-    };
-  }
-}
+protected:
+  ConditionImpl() {}
+  virtual ~ConditionImpl() {}
+
+  typedef std::set<DDS::WaitSet_var, VarLess<DDS::WaitSet> > WaitSetSet;
+  WaitSetSet waitsets_;
+  ACE_Recursive_Thread_Mutex lock_;
+};
+
+} // namespace DCPS
+} // namespace OpenDDS
 
 #endif

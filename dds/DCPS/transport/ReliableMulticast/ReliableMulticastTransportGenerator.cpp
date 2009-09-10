@@ -1,6 +1,11 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #include "ReliableMulticast_pch.h"
 #include "ReliableMulticastTransportGenerator.h"
@@ -24,7 +29,7 @@ OpenDDS::DCPS::ReliableMulticastTransportGenerator::new_factory()
 OpenDDS::DCPS::TransportConfiguration*
 OpenDDS::DCPS::ReliableMulticastTransportGenerator::new_configuration(const TransportIdType id)
 {
-  ACE_UNUSED_ARG (id);
+  ACE_UNUSED_ARG(id);
 
   ReliableMulticastTransportConfiguration* trans_config = 0;
   ACE_NEW_RETURN(trans_config,

@@ -1,6 +1,12 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef UPDATELISTENER_T_H
 #define UPDATELISTENER_T_H
 
@@ -11,92 +17,72 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-namespace OpenDDS { namespace Federator {
+namespace OpenDDS {
+namespace Federator {
 
-/// @class UpdateListener< DataType, ReaderType>
-template< class DataType, class ReaderType>
+/// @class UpdateListener<DataType, ReaderType>
+template<class DataType, class ReaderType>
 class UpdateListener
-  : public virtual ::OpenDDS::DCPS::LocalObject< ::DDS::DataReaderListener>
-{
-  public:
-    /// Default constructor
-    UpdateListener( UpdateProcessor< DataType>& processor);
+  : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
+public:
+  /// Default constructor
+  UpdateListener(UpdateProcessor<DataType>& processor);
 
-    /// Virtual destructor
-    virtual ~UpdateListener();
+  /// Virtual destructor
+  virtual ~UpdateListener();
 
-    virtual void on_requested_deadline_missed (
-      ::DDS::DataReader_ptr reader,
-      const ::DDS::RequestedDeadlineMissedStatus & status
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+  virtual void on_requested_deadline_missed(
+    DDS::DataReader_ptr reader,
+    const DDS::RequestedDeadlineMissedStatus & status)
+  ACE_THROW_SPEC((CORBA::SystemException));
 
-   virtual void on_requested_incompatible_qos (
-      ::DDS::DataReader_ptr reader,
-      const ::DDS::RequestedIncompatibleQosStatus & status
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+  virtual void on_requested_incompatible_qos(
+    DDS::DataReader_ptr reader,
+    const DDS::RequestedIncompatibleQosStatus & status)
+  ACE_THROW_SPEC((CORBA::SystemException));
 
-    virtual void on_liveliness_changed (
-      ::DDS::DataReader_ptr reader,
-      const ::DDS::LivelinessChangedStatus & status
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+  virtual void on_liveliness_changed(
+    DDS::DataReader_ptr reader,
+    const DDS::LivelinessChangedStatus & status)
+  ACE_THROW_SPEC((CORBA::SystemException));
 
-    virtual void on_subscription_matched (
-      ::DDS::DataReader_ptr reader,
-      const ::DDS::SubscriptionMatchedStatus & status
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+  virtual void on_subscription_matched(
+    DDS::DataReader_ptr reader,
+    const DDS::SubscriptionMatchedStatus & status)
+  ACE_THROW_SPEC((CORBA::SystemException));
 
-    virtual void on_sample_rejected(
-      ::DDS::DataReader_ptr reader,
-      const DDS::SampleRejectedStatus& status
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+  virtual void on_sample_rejected(
+    DDS::DataReader_ptr reader,
+    const DDS::SampleRejectedStatus& status)
+  ACE_THROW_SPEC((CORBA::SystemException));
 
-    virtual void on_data_available(
-      ::DDS::DataReader_ptr reader
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+  virtual void on_data_available(
+    DDS::DataReader_ptr reader)
+  ACE_THROW_SPEC((CORBA::SystemException));
 
-    virtual void on_sample_lost(
-      ::DDS::DataReader_ptr reader,
-      const DDS::SampleLostStatus& status
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+  virtual void on_sample_lost(
+    DDS::DataReader_ptr reader,
+    const DDS::SampleLostStatus& status)
+  ACE_THROW_SPEC((CORBA::SystemException));
 
-    /// Access our Federation Id value.
-    RepoKey& federationId();
-    RepoKey  federationId() const;
+  /// Access our Federation Id value.
+  RepoKey& federationId();
+  RepoKey  federationId() const;
 
-    void stop ();
-    void join ();
+  void stop();
+  void join();
 
-  private:
-    /// Our Federation Id value.
-    RepoKey federationId_;
+private:
+  /// Our Federation Id value.
+  RepoKey federationId_;
 
-    /// Manager object to delegate sample processing to.
-    UpdateReceiver< DataType> receiver_;
+  /// Manager object to delegate sample processing to.
+  UpdateReceiver<DataType> receiver_;
 
 };
 
-}} // End of namespace OpenDDS::Federator
+} // namespace Federator
+} // namespace OpenDDS
 
 #if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
 #include "UpdateListener_T.cpp"
@@ -108,4 +94,3 @@ class UpdateListener
 #endif /* ACE_TEMPLATES_REQUIRE_PRAGMA */
 
 #endif /* UPDATELISTENER_T_H  */
-

@@ -1,3 +1,12 @@
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef DDSDCPS_PCH_H
 #define DDSDCPS_PCH_H
 
@@ -10,5 +19,6 @@
 #include "tao/ORB_Core.h"
 #include "tao/PortableServer/PortableServer.h"
 
-#endif
-#endif
+#endif  /* USING_PCH */
+
+#endif  /* DDSDCPS_PCH_H */

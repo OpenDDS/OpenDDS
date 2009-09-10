@@ -1,5 +1,11 @@
-// -*- C++ -*-
-//
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #ifndef OPENDDS_DCPS_PACKETRECEIVERCALLBACK_H
 #define OPENDDS_DCPS_PACKETRECEIVERCALLBACK_H
@@ -15,38 +21,26 @@
 #include "Packet.h"
 #include <vector>
 
-namespace OpenDDS
-{
+namespace OpenDDS {
+namespace DCPS {
+namespace ReliableMulticast {
+namespace detail {
 
-  namespace DCPS
-  {
+/// Specifies an interface only!
+class ReliableMulticast_Export PacketReceiverCallback {
+public:
+  virtual ~PacketReceiverCallback() {}
 
-    namespace ReliableMulticast
-    {
+  virtual void received_packets(
+    const std::vector<Packet>& packets) = 0;
 
-      namespace detail
-      {
+  virtual void reliability_compromised() = 0;
+};
 
-        /// Specifies an interface only!
-        class ReliableMulticast_Export PacketReceiverCallback
-        {
-        public:
-          virtual ~PacketReceiverCallback() {}
-
-          virtual void received_packets(
-            const std::vector<Packet>& packets
-            ) = 0;
-
-          virtual void reliability_compromised() = 0;
-        };
-
-      } /* namespace detail */
-
-    } /* namespace ReliableMulticast */
-
-  } /* namespace DCPS */
-
-} /* namespace OpenDDS */
+} // namespace detail
+} // namespace ReliableMulticast
+} // namespace DCPS
+} // namespace OpenDDS
 
 #include /**/ "ace/post.h"
 

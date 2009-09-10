@@ -1,5 +1,11 @@
-// -*- C++ -*-
-//
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #ifndef OPENDDS_DCPS_REACTIVEPACKETSENDER_H
 #define OPENDDS_DCPS_REACTIVEPACKETSENDER_H
@@ -16,59 +22,45 @@
 #include "PacketHandler.h"
 #include "SenderLogic.h"
 
-namespace OpenDDS
-{
+namespace OpenDDS {
+namespace DCPS {
+namespace ReliableMulticast {
+namespace detail {
 
-  namespace DCPS
-  {
+class ReliableMulticast_Export ReactivePacketSender
+  : public PacketHandler {
+public:
+  ReactivePacketSender(
+    const ACE_INET_Addr& local_address,
+    const ACE_INET_Addr& multicast_group_address,
+    size_t sender_history_size);
+  virtual ~ReactivePacketSender();
 
-    namespace ReliableMulticast
-    {
+  bool open();
 
-      namespace detail
-      {
+  virtual void close();
 
-        class ReliableMulticast_Export ReactivePacketSender
-          : public PacketHandler
-        {
-        public:
-          ReactivePacketSender(
-            const ACE_INET_Addr& local_address,
-            const ACE_INET_Addr& multicast_group_address,
-            size_t sender_history_size
-            );
-          virtual ~ReactivePacketSender();
+  void send_packet(const Packet& p);
 
-          bool open();
+  virtual void receive_packet_from(
+    const Packet& packet,
+    const ACE_INET_Addr& peer);
 
-          virtual void close();
+  int handle_timeout(
+    const ACE_Time_Value& current_time,
+    const void* = 0);
 
-          void send_packet(const Packet& p);
+private:
+  ACE_Thread_Mutex heartbeat_mutex_;
+  SenderLogic sender_logic_;
+  ACE_INET_Addr local_address_;
+  ACE_INET_Addr multicast_group_address_;
+};
 
-          virtual void receive_packet_from(
-            const Packet& packet,
-            const ACE_INET_Addr& peer
-            );
-
-          int handle_timeout(
-            const ACE_Time_Value& current_time,
-            const void* = 0
-            );
-
-        private:
-          ACE_Thread_Mutex heartbeat_mutex_;
-          SenderLogic sender_logic_;
-          ACE_INET_Addr local_address_;
-          ACE_INET_Addr multicast_group_address_;
-        };
-
-      } /* namespace detail */
-
-    } /* namespace ReliableMulticast */
-
-  } /* namespace DCPS */
-
-} /* namespace OpenDDS */
+} // namespace detail
+} // namespace ReliableMulticast
+} // namespace DCPS
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "ReactivePacketSender.inl"

@@ -1,6 +1,12 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef OPENDDS_DCPS_BUILDCHAINVISTOR_H
 #define OPENDDS_DCPS_BUILDCHAINVISTOR_H
 
@@ -9,44 +15,34 @@
 
 class ACE_Message_Block;
 
+namespace OpenDDS {
+namespace DCPS {
 
-namespace OpenDDS
-{
+class TransportQueueElement;
 
-  namespace DCPS
-  {
+class OpenDDS_Dcps_Export BuildChainVisitor : public BasicQueueVisitor<TransportQueueElement> {
+public:
 
-    class TransportQueueElement;
+  BuildChainVisitor();
+  virtual ~BuildChainVisitor();
 
+  virtual int visit_element(TransportQueueElement* element);
 
-    class OpenDDS_Dcps_Export BuildChainVisitor : public BasicQueueVisitor<TransportQueueElement>
-    {
-      public:
+  /// Accessor to extract the chain, leaving the head_ and tail_
+  /// set to 0 as a result.
+  ACE_Message_Block* chain();
 
-        BuildChainVisitor();
-        virtual ~BuildChainVisitor();
+private:
 
-        virtual int visit_element(TransportQueueElement* element);
+  ACE_Message_Block* head_;
+  ACE_Message_Block* tail_;
+};
 
-        /// Accessor to extract the chain, leaving the head_ and tail_
-        /// set to 0 as a result.
-        ACE_Message_Block* chain();
-
-
-      private:
-
-        ACE_Message_Block* head_;
-        ACE_Message_Block* tail_;
-    };
-
-  }
-
-}
-
+} // namespace DCPS
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "BuildChainVisitor.inl"
 #endif /* __ACE_INLINE__ */
-
 
 #endif  /* OPENDDS_DCPS_BUILDCHAINVISTOR_H */

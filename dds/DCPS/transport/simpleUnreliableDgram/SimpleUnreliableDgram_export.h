@@ -1,5 +1,3 @@
-
-// -*- C++ -*-
 // $Id$
 // Definition for Win32 Export directives.
 // This file is generated automatically by generate_export_file.pl -s SimpleUnreliableDgram
@@ -15,7 +13,7 @@
 
 #if !defined (SIMPLEUNRELIABLEDGRAM_HAS_DLL)
 #  define SIMPLEUNRELIABLEDGRAM_HAS_DLL 1
-#endif /* ! SIMPLEUNRELIABLEDGRAM_HAS_DLL */
+#endif /* !SIMPLEUNRELIABLEDGRAM_HAS_DLL */
 
 #if defined (SIMPLEUNRELIABLEDGRAM_HAS_DLL) && (SIMPLEUNRELIABLEDGRAM_HAS_DLL == 1)
 #  if defined (SIMPLEUNRELIABLEDGRAM_BUILD_DLL)

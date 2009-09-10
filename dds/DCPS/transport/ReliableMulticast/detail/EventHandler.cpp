@@ -1,6 +1,11 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #include "ReliableMulticast_pch.h"
 #include "EventHandler.h"
@@ -13,12 +18,10 @@
 void
 OpenDDS::DCPS::ReliableMulticast::detail::EventHandler::close()
 {
-  if (socket_.get_handle() != ACE_INVALID_HANDLE)
-  {
+  if (socket_.get_handle() != ACE_INVALID_HANDLE) {
     reactor()->remove_handler(
       this,
-      ACE_Event_Handler::ALL_EVENTS_MASK | ACE_Event_Handler::DONT_CALL
-      );
+      ACE_Event_Handler::ALL_EVENTS_MASK | ACE_Event_Handler::DONT_CALL);
     socket_.close();
   }
 }
@@ -27,8 +30,7 @@ void
 OpenDDS::DCPS::ReliableMulticast::detail::EventHandler::send(
   char* buffer,
   size_t size,
-  const ACE_INET_Addr& dest
-  )
+  const ACE_INET_Addr& dest)
 {
   bool reregister =  false;
   {
@@ -37,13 +39,11 @@ OpenDDS::DCPS::ReliableMulticast::detail::EventHandler::send(
 
     output_queue_.push(std::make_pair(std::string(buffer, size), dest));
   }
-  if (reregister)
-  {
+
+  if (reregister) {
     if (reactor()->register_handler(
-      this,
-      ACE_Event_Handler::WRITE_MASK
-      ) == -1)
-    {
+          this,
+          ACE_Event_Handler::WRITE_MASK) == -1) {
       throw std::runtime_error("failure to register_handler");
     }
   }
@@ -63,8 +63,7 @@ OpenDDS::DCPS::ReliableMulticast::detail::EventHandler::socket()
 
 int
 OpenDDS::DCPS::ReliableMulticast::detail::EventHandler::handle_input(
-  ACE_HANDLE fd
-  )
+  ACE_HANDLE fd)
 {
   ACE_UNUSED_ARG(fd);
 
@@ -72,50 +71,46 @@ OpenDDS::DCPS::ReliableMulticast::detail::EventHandler::handle_input(
   ACE_INET_Addr peer;
 
   ssize_t bytes_read = socket_.recv(
-    static_cast<void*>(buffer), sizeof(buffer), peer
-    );
-  if (bytes_read > 0)
-  {
+                         static_cast<void*>(buffer), sizeof(buffer), peer);
+
+  if (bytes_read > 0) {
     ACE_Guard<ACE_Thread_Mutex> lock(input_mutex_);
     receive(buffer, bytes_read, peer);
   }
+
   return 0;
 }
 
 int
 OpenDDS::DCPS::ReliableMulticast::detail::EventHandler::handle_output(
-  ACE_HANDLE fd
-  )
+  ACE_HANDLE fd)
 {
   ACE_UNUSED_ARG(fd);
 
   ACE_Guard<ACE_Thread_Mutex> lock(output_mutex_);
-  if (!output_queue_.empty())
-  {
+
+  if (!output_queue_.empty()) {
     Queue::value_type& item = output_queue_.front();
     ssize_t bytes_sent = socket_.ACE_SOCK_Dgram::send(
-      static_cast<const void*>(item.first.data()),
-      item.first.size(),
-      item.second
-      );
+                           static_cast<const void*>(item.first.data()),
+                           item.first.size(),
+                           item.second);
 
-    if (size_t(bytes_sent) == item.first.size())
-    {
+    if (size_t(bytes_sent) == item.first.size()) {
       output_queue_.pop();
-    }
-    else if (bytes_sent > 0)
-    {
+
+    } else if (bytes_sent > 0) {
       item.first = item.first.substr(bytes_sent);
     }
   }
+
   return output_queue_.empty() ? -1 : 0;
 }
 
 int
 OpenDDS::DCPS::ReliableMulticast::detail::EventHandler::handle_close(
   ACE_HANDLE fd,
-  ACE_Reactor_Mask mask
-  )
+  ACE_Reactor_Mask mask)
 {
   ACE_UNUSED_ARG(fd);
   ACE_UNUSED_ARG(mask);

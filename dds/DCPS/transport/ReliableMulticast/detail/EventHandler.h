@@ -1,5 +1,11 @@
-// -*- C++ -*-
-//
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #ifndef OPENDDS_DCPS_EVENTHANDLER_H
 #define OPENDDS_DCPS_EVENTHANDLER_H
@@ -22,74 +28,58 @@
 #include <string>
 #include <utility>
 
-namespace OpenDDS
-{
+namespace OpenDDS {
+namespace DCPS {
+namespace ReliableMulticast {
+namespace detail {
 
-  namespace DCPS
-  {
+class ReliableMulticast_Export EventHandler
+  : public ACE_Event_Handler {
+public:
+  virtual ~EventHandler();
 
-    namespace ReliableMulticast
-    {
+  virtual void close();
 
-      namespace detail
-      {
+  virtual void send(
+    char* buffer,
+    size_t size,
+    const ACE_INET_Addr& dest);
 
-        class ReliableMulticast_Export EventHandler
-          : public ACE_Event_Handler
-        {
-        public:
-          virtual ~EventHandler();
+  virtual void receive(
+    const char* buffer,
+    size_t size,
+    const ACE_INET_Addr& peer) = 0;
 
-          virtual void close();
+  virtual ACE_HANDLE get_handle() const;
 
-          virtual void send(
-            char* buffer,
-            size_t size,
-            const ACE_INET_Addr& dest
-            );
+  virtual int handle_input(
+    ACE_HANDLE fd = ACE_INVALID_HANDLE);
 
-          virtual void receive(
-            const char* buffer,
-            size_t size,
-            const ACE_INET_Addr& peer
-            ) = 0;
+  virtual int handle_output(
+    ACE_HANDLE fd = ACE_INVALID_HANDLE);
 
-          virtual ACE_HANDLE get_handle() const;
+  virtual int handle_close(
+    ACE_HANDLE fd,
+    ACE_Reactor_Mask mask);
 
-          virtual int handle_input(
-            ACE_HANDLE fd = ACE_INVALID_HANDLE
-            );
+  /// Access the underlying socket.
+  ACE_SOCK& socket();
 
-          virtual int handle_output(
-            ACE_HANDLE fd = ACE_INVALID_HANDLE
-            );
+protected:
+  typedef std::queue<
+  std::pair<std::string, ACE_INET_Addr>
+  > Queue;
 
-          virtual int handle_close(
-            ACE_HANDLE fd,
-            ACE_Reactor_Mask mask
-            );
+  ACE_SOCK_Dgram_Mcast socket_;
+  ACE_Thread_Mutex input_mutex_;
+  ACE_Thread_Mutex output_mutex_;
+  Queue output_queue_;
+};
 
-          /// Access the underlying socket.
-          ACE_SOCK& socket();
-
-        protected:
-          typedef std::queue<
-            std::pair<std::string, ACE_INET_Addr>
-            > Queue;
-
-          ACE_SOCK_Dgram_Mcast socket_;
-          ACE_Thread_Mutex input_mutex_;
-          ACE_Thread_Mutex output_mutex_;
-          Queue output_queue_;
-        };
-
-      } /* namespace detail */
-
-    } /* namespace ReliableMulticast */
-
-  } /* namespace DCPS */
-
-} /* namespace OpenDDS */
+} // namespace detail
+} // namespace ReliableMulticast
+} // namespace DCPS
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "EventHandler.inl"

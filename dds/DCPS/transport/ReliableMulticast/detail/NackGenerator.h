@@ -1,5 +1,11 @@
-// -*- C++ -*-
-//
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #ifndef OPENDDS_DCPS_NACKGENERATOR_H
 #define OPENDDS_DCPS_NACKGENERATOR_H
@@ -17,60 +23,44 @@
 #include <vector>
 #include <iterator>
 
-namespace OpenDDS
-{
+namespace OpenDDS {
+namespace DCPS {
+namespace ReliableMulticast {
+namespace detail {
 
-  namespace DCPS
-  {
+class ReliableMulticast_Export NackGenerator {
+public:
+  typedef std::set<
+  OpenDDS::DCPS::ReliableMulticast::detail::Packet
+  > PacketSet;
 
-    namespace ReliableMulticast
-    {
+  bool cancel(
+    OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type id);
 
-      namespace detail
-      {
+  void cancel_all();
 
-        class ReliableMulticast_Export NackGenerator
-        {
-        public:
-          typedef std::set<
-            OpenDDS::DCPS::ReliableMulticast::detail::Packet
-            > PacketSet;
+  void nack_range(
+    OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type begin,
+    OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type end);
 
-          bool cancel(
-            OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type id
-            );
+  void get_nacks(
+    std::vector<OpenDDS::DCPS::ReliableMulticast::detail::Packet>& nacks);
 
-          void cancel_all();
+private:
+  PacketSet::iterator find_nack_containing(
+    const OpenDDS::DCPS::ReliableMulticast::detail::Packet& packet);
 
-          void nack_range(
-            OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type begin,
-            OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type end
-            );
+  PacketSet::iterator join_nacks(
+    PacketSet::iterator first,
+    PacketSet::iterator second);
 
-          void get_nacks(
-            std::vector<OpenDDS::DCPS::ReliableMulticast::detail::Packet>& nacks
-            );
+  PacketSet nacks_;
+};
 
-        private:
-          PacketSet::iterator find_nack_containing(
-            const OpenDDS::DCPS::ReliableMulticast::detail::Packet& packet
-            );
-
-          PacketSet::iterator join_nacks(
-            PacketSet::iterator first,
-            PacketSet::iterator second
-            );
-
-          PacketSet nacks_;
-        };
-
-      } /* namespace detail */
-
-    } /* namespace ReliableMulticast */
-
-  } /* namespace DCPS */
-
-} /* namespace OpenDDS */
+} // namespace detail
+} // namespace ReliableMulticast
+} // namespace DCPS
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "NackGenerator.inl"

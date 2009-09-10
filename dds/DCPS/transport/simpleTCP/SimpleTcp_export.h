@@ -1,5 +1,3 @@
-
-// -*- C++ -*-
 // $Id$
 // Definition for Win32 Export directives.
 // This file is generated automatically by generate_export_file.pl -s SimpleTcp
@@ -15,7 +13,7 @@
 
 #if !defined (SIMPLETCP_HAS_DLL)
 #  define SIMPLETCP_HAS_DLL 1
-#endif /* ! SIMPLETCP_HAS_DLL */
+#endif /* !SIMPLETCP_HAS_DLL */
 
 #if defined (SIMPLETCP_HAS_DLL) && (SIMPLETCP_HAS_DLL == 1)
 #  if defined (SIMPLETCP_BUILD_DLL)

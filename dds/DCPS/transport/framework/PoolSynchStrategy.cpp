@@ -1,28 +1,30 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "PoolSynchStrategy.h"
 #include "PoolSynch.h"
 
-
 #if !defined (__ACE_INLINE__)
 #include "PoolSynchStrategy.inl"
 #endif /* __ACE_INLINE__ */
-
 
 OpenDDS::DCPS::PoolSynchStrategy::~PoolSynchStrategy()
 {
   DBG_ENTRY_LVL("PoolSynchStrategy","~PoolSynchStrategy",6);
 }
 
-
 OpenDDS::DCPS::ThreadSynch*
 OpenDDS::DCPS::PoolSynchStrategy::create_synch_object(
   ThreadSynchResource* synch_resource,
   long                 /* priority */,
-  int                  /* scheduler */
-)
+  int                  /* scheduler */)
 {
   DBG_ENTRY_LVL("PoolSynchStrategy","create_synch_object",6);
   PoolSynch* synch_object = new PoolSynch(this,synch_resource);
@@ -36,7 +38,6 @@ OpenDDS::DCPS::PoolSynchStrategy::create_synch_object(
   return synch_object;
 }
 
-
 int
 OpenDDS::DCPS::PoolSynchStrategy::open(void*)
 {
@@ -45,7 +46,6 @@ OpenDDS::DCPS::PoolSynchStrategy::open(void*)
   return 0;
 }
 
-
 int
 OpenDDS::DCPS::PoolSynchStrategy::svc()
 {
@@ -53,7 +53,6 @@ OpenDDS::DCPS::PoolSynchStrategy::svc()
   // TBD
   return 0;
 }
-
 
 int
 OpenDDS::DCPS::PoolSynchStrategy::close(u_long)

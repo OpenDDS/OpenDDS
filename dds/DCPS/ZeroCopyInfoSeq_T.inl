@@ -1,28 +1,22 @@
-// -*- C++ -*-
-// ============================================================================
-/**
- *  @file   ZeroCopyInfoSeq_T.inl
+/*
+ * $Id$
  *
- *  $Id$
+ * Copyright 2009 Object Computing, Inc.
  *
- *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
-// ============================================================================
 
 #include "ZeroCopyInfoSeq_T.h"
 
-namespace TAO
-{
-    namespace DCPS
-    {
-
+namespace TAO {
+namespace DCPS {
 
 template <class InfoType, size_t DEF_MAX> ACE_INLINE
 ZeroCopyInfoSeq<InfoType, DEF_MAX>::ZeroCopyInfoSeq()
   : TAO_BASE_SEQUENCE <InfoType> ()
 {
 }
-
 
 template <class InfoType, size_t DEF_MAX> ACE_INLINE
 ZeroCopyInfoSeq<InfoType, DEF_MAX>::ZeroCopyInfoSeq(
@@ -32,7 +26,6 @@ ZeroCopyInfoSeq<InfoType, DEF_MAX>::ZeroCopyInfoSeq(
   : TAO_BASE_SEQUENCE <InfoType> (maximum ? maximum : init_size)
 {
 }
-
 
 template <class InfoType, size_t DEF_MAX> ACE_INLINE
 ZeroCopyInfoSeq<InfoType, DEF_MAX>::ZeroCopyInfoSeq(
@@ -44,6 +37,5 @@ ZeroCopyInfoSeq<InfoType, DEF_MAX>::ZeroCopyInfoSeq(
 {
 }
 
-
-    } // namespace  ::DDS
-} // namespace OpenDDS
+} // namespace DCPS
+} // namespace TAO

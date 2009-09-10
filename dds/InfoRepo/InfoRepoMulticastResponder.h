@@ -1,23 +1,15 @@
-// -*- C++ -*-
-
-
-//=============================================================================
-/**
- *  @file    InfoRepoMulticastResponder.h
+/*
+ * $Id$
  *
- *  $Id$
+ * Copyright 2009 Object Computing, Inc.
  *
- *  Defines a class that listens to a multicast address for client requests
- *  for ior of a bootstrappable service.
- *
- *
- *  @author   Sergio Flores-Gaitan
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
-//=============================================================================
-
 
 #ifndef INFOREPOMULTICASTRESPONDER_H
 #define INFOREPOMULTICASTRESPONDER_H
+
 #include /**/ "ace/pre.h"
 
 #include "federator_export.h"
@@ -32,7 +24,8 @@
 #include "ace/Reactor.h"
 #include "ace/SString.h"
 
-namespace OpenDDS { namespace Federator {
+namespace OpenDDS {
+namespace Federator {
 
 /**
  * @class InfoRepoMulticastResponder
@@ -44,44 +37,40 @@ namespace OpenDDS { namespace Federator {
  * registered with a reactor and should be initialized with the
  * ior of the  service to be multicasted.
  */
-class OpenDDS_Federator_Export InfoRepoMulticastResponder : public ACE_Event_Handler
-{
+class OpenDDS_Federator_Export InfoRepoMulticastResponder : public ACE_Event_Handler {
 public:
   /// Constructor.
-  InfoRepoMulticastResponder ();
+  InfoRepoMulticastResponder();
 
   /// Destructor.
-  virtual ~InfoRepoMulticastResponder ();
+  virtual ~InfoRepoMulticastResponder();
 
   /// Initialization method.
-  int init (
+  int init(
     CORBA::ORB_ptr orb,
     u_short port,
-    const char *mcast_addr
-    );
+    const char *mcast_addr);
 
   /// Initialization method. Takes in "address:port" string as a
   /// parameter.
-  int init (
+  int init(
     CORBA::ORB_ptr orb,
-    const char *mcast_addr
-    );
+    const char *mcast_addr);
 
   /// Callback when input is received on the handle.
-  virtual int handle_input (ACE_HANDLE n);
+  virtual int handle_input(ACE_HANDLE n);
 
   /// Callback when a timeout has occurred.
-  virtual int handle_timeout (const ACE_Time_Value &tv,
-                              const void *arg);
+  virtual int handle_timeout(const ACE_Time_Value &tv,
+                             const void *arg);
 
   /// Returns the internal handle used to receive multicast.
-  virtual ACE_HANDLE get_handle () const;
+  virtual ACE_HANDLE get_handle() const;
 
 private:
   /// Factor common functionality from the two init functions.
-  int common_init (
-    CORBA::ORB_ptr orb
-    );
+  int common_init(
+    CORBA::ORB_ptr orb);
 
   /// Are we initialized?
   bool initialized_;
@@ -104,7 +93,9 @@ private:
   ACE_CString mcast_nic_;
 };
 
-} }
+} // namespace Federator
+} // namespace OpenDDS
 
 #include /**/ "ace/post.h"
+
 #endif /* INFOREPOMULTICASTRESPONDER_H */

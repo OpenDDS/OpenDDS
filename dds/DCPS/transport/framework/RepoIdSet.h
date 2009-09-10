@@ -1,6 +1,12 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef OPENDDS_DCPS_REPOIDSET_H
 #define OPENDDS_DCPS_REPOIDSET_H
 
@@ -14,47 +20,42 @@
 
 #include <map>
 
-namespace OpenDDS
-{
+namespace OpenDDS {
+namespace DCPS {
 
-  namespace DCPS
-  {
+class OpenDDS_Dcps_Export RepoIdSet : public RcObject<ACE_SYNCH_MUTEX> {
+public:
 
-    class OpenDDS_Dcps_Export RepoIdSet : public RcObject<ACE_SYNCH_MUTEX>
-    {
-      public:
+  typedef std::map<RepoId, RepoId, GUID_tKeyLessThan> MapType;
 
-        typedef std::map<RepoId, RepoId, GUID_tKeyLessThan> MapType;
+  RepoIdSet();
+  virtual ~RepoIdSet();
 
-        RepoIdSet();
-        virtual ~RepoIdSet();
+  int insert_id(RepoId key, RepoId value);
+  int remove_id(RepoId id);
 
-        int insert_id(RepoId key, RepoId value);
-        int remove_id(RepoId id);
+  size_t size() const;
 
-        size_t size() const;
+  /// Give access to the underlying map for iteration purposes.
+  MapType& map();
+  const MapType& map() const;
 
-        /// Give access to the underlying map for iteration purposes.
-        MapType& map();
-        const MapType& map() const;
+  /// Serialize the map. The data order in the serialized
+  /// stream: size of map, list of keys in the map.
+  void serialize(TAO::DCPS::Serializer & serializer);
 
-        /// Serialize the map. The data order in the serialized 
-        /// stream: size of map, list of keys in the map.
-        void serialize(TAO::DCPS::Serializer & serializer);
+  bool exist(const RepoId& remote_id,
+             bool& last);
 
-        bool exist (const RepoId& remote_id, 
-                    bool& last);
+  void clear();
 
-        void clear ();
+private:
 
-      private:
+  MapType  map_;
+};
 
-        MapType  map_;
-    };
-
-  }  /* namespace DCPS */
-
-}  /* namespace OpenDDS */
+} // namespace DCPS
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "RepoIdSet.inl"

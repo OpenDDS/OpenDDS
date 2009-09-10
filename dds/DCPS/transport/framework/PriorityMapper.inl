@@ -1,10 +1,15 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 ACE_INLINE
-OpenDDS::DCPS::PriorityMapper::PriorityMapper( CORBA::Long priority)
- : priority_( priority)
+OpenDDS::DCPS::PriorityMapper::PriorityMapper(CORBA::Long priority)
+  : priority_(priority)
 {
 }
 
@@ -21,4 +26,3 @@ OpenDDS::DCPS::PriorityMapper::priority() const
 {
   return this->priority_;
 }
-

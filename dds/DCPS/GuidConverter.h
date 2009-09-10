@@ -1,5 +1,10 @@
 /*
  * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
 
 #ifndef DCPS_GUIDCONVERTER_H
@@ -17,10 +22,9 @@
 #include "dcps_export.h"
 #include "dds/DCPS/Definitions.h"
 
-namespace OpenDDS
-{
-namespace DCPS
-{
+namespace OpenDDS {
+namespace DCPS {
+
 /**
  * @class GuidConverter
  *
@@ -59,8 +63,7 @@ namespace DCPS
  *  14  GUID_t.entityId.entityKey[ 2] == entity id[2] (LS byte)
  *  15  GUID_t.entityId.entityKind    == entity kind
  */
-class OpenDDS_Dcps_Export GuidConverter
-{
+class OpenDDS_Dcps_Export GuidConverter {
 public:
   /// Construct from a GUID_t.
   GuidConverter(const GUID_t& guid);
@@ -103,6 +106,5 @@ operator<<(std::ostream& os, const OpenDDS::DCPS::GuidConverter& rhs);
 OpenDDS_Dcps_Export std::wostream&
 operator<<(std::wostream& os, const OpenDDS::DCPS::GuidConverter& rhs);
 #endif
-
 
 #endif /* DCPS_GUIDCONVERTER_H */

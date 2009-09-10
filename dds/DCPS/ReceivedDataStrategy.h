@@ -1,22 +1,24 @@
 /*
  * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
 
 #ifndef DCPS_RECEIVEDDATASTRATEGY_H
 #define DCPS_RECEIVEDDATASTRATEGY_H
 
-namespace OpenDDS
-{
-namespace DCPS
-{
+namespace OpenDDS {
+namespace DCPS {
+
 class ReceivedDataElementList;
 class ReceivedDataElement;
 
-class OpenDDS_Dcps_Export ReceivedDataStrategy
-{
+class OpenDDS_Dcps_Export ReceivedDataStrategy {
 public:
   explicit ReceivedDataStrategy(ReceivedDataElementList& rcvd_samples);
-
   virtual ~ReceivedDataStrategy();
 
   virtual void add(ReceivedDataElement* data_sample);
@@ -30,8 +32,7 @@ protected:
 };
 
 class OpenDDS_Dcps_Export ReceptionDataStrategy
-  : public ReceivedDataStrategy
-{
+  : public ReceivedDataStrategy {
 public:
   explicit ReceptionDataStrategy(ReceivedDataElementList& rcvd_samples);
 
@@ -39,8 +40,7 @@ public:
 };
 
 class OpenDDS_Dcps_Export SourceDataStrategy
-  : public ReceivedDataStrategy
-{
+  : public ReceivedDataStrategy {
 public:
   explicit SourceDataStrategy(ReceivedDataElementList& rcvd_samples);
 
@@ -49,7 +49,7 @@ public:
   virtual void add(ReceivedDataElement* data_sample);
 };
 
-} // namespace
-} // namespace
+} // namespace DCPS
+} // namespace OpenDDS
 
 #endif /* DCPS_RECEIVEDDATASTRATEGY_H */

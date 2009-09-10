@@ -1,5 +1,11 @@
-// -*- C++ -*-
-//
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #ifndef OPENDDS_DCPS_RELIABLEMULTICASTLOADER_H
 #define OPENDDS_DCPS_RELIABLEMULTICASTLOADER_H
@@ -17,8 +23,7 @@
 #include "ace/Service_Config.h"
 
 class ReliableMulticast_Export OPENDDS_DCPS_ReliableMulticastLoader
-  : public ACE_Service_Object
-{
+  : public ACE_Service_Object {
 public:
   OPENDDS_DCPS_ReliableMulticastLoader();
   virtual ~OPENDDS_DCPS_ReliableMulticastLoader();
@@ -30,8 +35,8 @@ public:
 #include "ReliableMulticastLoader.inl"
 #endif /* __ACE_INLINE__ */
 
-ACE_STATIC_SVC_DECLARE_EXPORT (ReliableMulticast, OPENDDS_DCPS_ReliableMulticastLoader)
-ACE_FACTORY_DECLARE (ReliableMulticast, OPENDDS_DCPS_ReliableMulticastLoader)
+ACE_STATIC_SVC_DECLARE_EXPORT(ReliableMulticast, OPENDDS_DCPS_ReliableMulticastLoader)
+ACE_FACTORY_DECLARE(ReliableMulticast, OPENDDS_DCPS_ReliableMulticastLoader)
 
 #include /**/ "ace/post.h"
 

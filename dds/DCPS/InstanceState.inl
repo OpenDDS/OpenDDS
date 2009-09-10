@@ -1,6 +1,11 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #include "ReceivedDataElementList.h"
 #include "ace/OS_NS_sys_time.h"
@@ -19,22 +24,18 @@ OpenDDS::DCPS::InstanceState::accessed()
   //
   // Manage the view state due to data access here.
   //
-  if (this->view_state_ & DDS::ANY_VIEW_STATE)
-    {
-      this->view_state_ = DDS::NOT_NEW_VIEW_STATE ;
-    }
+  if (this->view_state_ & DDS::ANY_VIEW_STATE) {
+    this->view_state_ = DDS::NOT_NEW_VIEW_STATE ;
+  }
 }
-
 
 ACE_INLINE
 bool
-OpenDDS::DCPS::InstanceState::most_recent_generation (ReceivedDataElement* item) const
+OpenDDS::DCPS::InstanceState::most_recent_generation(ReceivedDataElement* item) const
 {
   return item->disposed_generation_count_ == disposed_generation_count_
-    && item->no_writers_generation_count_ == no_writers_generation_count_;
+         && item->no_writers_generation_count_ == no_writers_generation_count_;
 }
-
-
 
 ACE_INLINE
 DDS::InstanceStateKind
@@ -62,7 +63,6 @@ size_t OpenDDS::DCPS::InstanceState::no_writers_generation_count() const
   return no_writers_generation_count_ ;
 }
 
-
 ACE_INLINE
 void
 OpenDDS::DCPS::InstanceState::data_was_received(const PublicationId& writer_id)
@@ -74,37 +74,39 @@ OpenDDS::DCPS::InstanceState::data_was_received(const PublicationId& writer_id)
   // this state value.  Then manage the data sample only transistions
   // here.  Let the lively() method manage the other transitions.
   //
-  writers_.insert (writer_id);
+  writers_.insert(writer_id);
 
-  switch( this->view_state_)
-    {
-      case DDS::NEW_VIEW_STATE: break ; // No action.
+  switch (this->view_state_) {
+  case DDS::NEW_VIEW_STATE:
+    break ; // No action.
 
-      case DDS::NOT_NEW_VIEW_STATE:
-        if( this->instance_state_ & DDS::NOT_ALIVE_INSTANCE_STATE)
-          {
-            this->view_state_ = DDS::NEW_VIEW_STATE ;
-          }
-        break ;
+  case DDS::NOT_NEW_VIEW_STATE:
 
-      default:
-        this->view_state_ = DDS::NEW_VIEW_STATE ;
-        break ;
+    if (this->instance_state_ & DDS::NOT_ALIVE_INSTANCE_STATE) {
+      this->view_state_ = DDS::NEW_VIEW_STATE ;
     }
 
-  switch( this->instance_state_)
-    {
-      case DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE:
-        this->disposed_generation_count_++ ;
-        break ;
+    break ;
 
-      case DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE:
-        this->no_writers_generation_count_++ ;
-        break ;
+  default:
+    this->view_state_ = DDS::NEW_VIEW_STATE ;
+    break ;
+  }
 
-      default: break ;
-    }
-    this->instance_state_ = DDS::ALIVE_INSTANCE_STATE ;
+  switch (this->instance_state_) {
+  case DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE:
+    this->disposed_generation_count_++ ;
+    break ;
+
+  case DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE:
+    this->no_writers_generation_count_++ ;
+    break ;
+
+  default:
+    break ;
+  }
+
+  this->instance_state_ = DDS::ALIVE_INSTANCE_STATE ;
 }
 
 ACE_INLINE
@@ -115,28 +117,25 @@ OpenDDS::DCPS::InstanceState::lively(const PublicationId& writer_id)
   // Manage transisitions in the instance state that do not require a
   // data sample, but merely the notion of liveliness.
   //
-  writers_.insert (writer_id);
+  writers_.insert(writer_id);
 
-  if( this->instance_state_ == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE)
-    {
-      cancel_release(); // cancel unregister
+  if (this->instance_state_ == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
+    cancel_release(); // cancel unregister
 
-      this->no_writers_generation_count_++ ;
-      this->instance_state_ = DDS::ALIVE_INSTANCE_STATE ;
-    }
+    this->no_writers_generation_count_++ ;
+    this->instance_state_ = DDS::ALIVE_INSTANCE_STATE ;
+  }
 }
 
 ACE_INLINE
 void
-OpenDDS::DCPS::InstanceState::empty( bool value)
+OpenDDS::DCPS::InstanceState::empty(bool value)
 {
   //
   // Manage the instance state due to the DataReader becoming empty
   // here.
   //
-  if ((this->empty_ = value) && this->release_pending_)
-  {
+  if ((this->empty_ = value) && this->release_pending_) {
     release_if_empty();
   }
 }
-

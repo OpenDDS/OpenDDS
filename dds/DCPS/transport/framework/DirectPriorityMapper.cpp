@@ -1,6 +1,11 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #include "DCPS/DdsDcps_pch.h"
 #include "DCPS/debug.h"
@@ -27,17 +32,17 @@ OpenDDS::DCPS::DirectPriorityMapper::codepoint() const
   // We know that the DiffServ codepoints range from a low number to a
   // high number, with the high number being a higher priority - which
   // is the ordering that the TRANSPORT_PRIORIY value has.
-  short value = std::min( dscp_max, std::max( dscp_min, this->priority()));
+  short value = std::min(dscp_max, std::max(dscp_min, this->priority()));
 
-  if( OpenDDS::DCPS::DCPS_debug_level > 4) {
+  if (OpenDDS::DCPS::DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DirectPriorityMapper:codepoint() - ")
-      ACE_TEXT("mapped TRANSPORT_PRIORITY value %d ")
-      ACE_TEXT("to codepoint %d.\n"),
-      this->priority(),
-      value
-    ));
+               ACE_TEXT("(%P|%t) DirectPriorityMapper:codepoint() - ")
+               ACE_TEXT("mapped TRANSPORT_PRIORITY value %d ")
+               ACE_TEXT("to codepoint %d.\n"),
+               this->priority(),
+               value));
   }
+
   return value;
 }
 
@@ -51,23 +56,22 @@ OpenDDS::DCPS::DirectPriorityMapper::thread_priority() const
 
   short value = thread_min + direction * this->priority();
 
-  if( this->priority() < 0) {
+  if (this->priority() < 0) {
     value = thread_min;
   }
 
-  if( this->priority() > range) {
+  if (this->priority() > range) {
     value = thread_max;
   }
 
-  if( OpenDDS::DCPS::DCPS_debug_level > 4) {
+  if (OpenDDS::DCPS::DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DirectPriorityMapper:thread_priority() - ")
-      ACE_TEXT("mapped TRANSPORT_PRIORITY value %d ")
-      ACE_TEXT("to thread priority %d.\n"),
-      this->priority(),
-      value
-    ));
+               ACE_TEXT("(%P|%t) DirectPriorityMapper:thread_priority() - ")
+               ACE_TEXT("mapped TRANSPORT_PRIORITY value %d ")
+               ACE_TEXT("to thread priority %d.\n"),
+               this->priority(),
+               value));
   }
+
   return value;
 }
-

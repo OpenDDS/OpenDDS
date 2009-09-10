@@ -1,5 +1,11 @@
-// -*- C++ -*-
-//
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #ifndef OPENDDS_DCPS_RECEIVERLOGIC_H
 #define OPENDDS_DCPS_RECEIVERLOGIC_H
@@ -18,103 +24,80 @@
 #include <stdexcept>
 #include <vector>
 
-namespace OpenDDS
-{
+namespace OpenDDS {
+namespace DCPS {
+namespace ReliableMulticast {
+namespace detail {
 
-  namespace DCPS
-  {
+class ReliableMulticast_Export ReceiverLogic {
+public:
+  enum ReliabilityMode {
+    HARD_RELIABILITY,
+    SOFT_RELIABILITY
+  };
 
-    namespace ReliableMulticast
-    {
+  typedef std::vector<
+  OpenDDS::DCPS::ReliableMulticast::detail::Packet
+  > PacketVector;
 
-      namespace detail
-      {
+  ReceiverLogic(
+    size_t receiver_buffer_size,
+    const ReliabilityMode& reliability = HARD_RELIABILITY);
 
-        class ReliableMulticast_Export ReceiverLogic
-        {
-        public:
-          enum ReliabilityMode
-          {
-            HARD_RELIABILITY,
-            SOFT_RELIABILITY
-          };
+  void receive(
+    const OpenDDS::DCPS::ReliableMulticast::detail::Packet& p,
+    PacketVector& nacks,
+    PacketVector& delivered);
 
-          typedef std::vector<
-            OpenDDS::DCPS::ReliableMulticast::detail::Packet
-            > PacketVector;
+private:
+  bool in_range(
+    const OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type& id,
+    int minadd,
+    int maxadd);
 
-          ReceiverLogic(
-            size_t receiver_buffer_size,
-            const ReliabilityMode& reliability = HARD_RELIABILITY
-            );
+  bool get_and_remove_buffered_packet(
+    const OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type& id,
+    OpenDDS::DCPS::ReliableMulticast::detail::Packet& p);
 
-          void receive(
-            const OpenDDS::DCPS::ReliableMulticast::detail::Packet& p,
-            PacketVector& nacks,
-            PacketVector& delivered
-            );
+  void deliver(
+    PacketVector& delivered,
+    const OpenDDS::DCPS::ReliableMulticast::detail::Packet& p);
 
-        private:
-          bool in_range(
-            const OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type& id,
-            int minadd,
-            int maxadd
-            );
+  void buffer_packet(
+    const OpenDDS::DCPS::ReliableMulticast::detail::Packet& p,
+    PacketVector& delivered);
 
-          bool get_and_remove_buffered_packet(
-            const OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type& id,
-            OpenDDS::DCPS::ReliableMulticast::detail::Packet& p
-            );
+  bool is_buffered(
+    const OpenDDS::DCPS::ReliableMulticast::detail::Packet& p) const;
 
-          void deliver(
-            PacketVector& delivered,
-            const OpenDDS::DCPS::ReliableMulticast::detail::Packet& p
-            );
+  OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type find_previous_received(
+    const OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type& id) const;
 
-          void buffer_packet(
-            const OpenDDS::DCPS::ReliableMulticast::detail::Packet& p,
-            PacketVector& delivered
-            );
+  size_t buffersize() const;
 
-          bool is_buffered(
-            const OpenDDS::DCPS::ReliableMulticast::detail::Packet& p
-            ) const;
+  OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type find_beginning_of_consecutive_range(
+    const OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type& end) const;
 
-          OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type find_previous_received(
-            const OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type& id
-            ) const;
+  void handle_unreliable_operation(
+    PacketVector& delivered);
 
-          size_t buffersize(
-            ) const;
+  typedef std::map<
+  OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type,
+  OpenDDS::DCPS::ReliableMulticast::detail::Packet
+  > BufferType;
 
-          OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type find_beginning_of_consecutive_range(
-            const OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type& end
-            ) const;
+  size_t receiver_buffer_size_;
+  ReliabilityMode reliability_;
+  bool seen_last_delivered_;
+  OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type last_delivered_id_;
+  OpenDDS::DCPS::ReliableMulticast::detail::NackGenerator nacker_;
+  BufferType buffer_;
+};
 
-          void handle_unreliable_operation(
-            PacketVector& delivered
-            );
-
-          typedef std::map<
-            OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type,
-            OpenDDS::DCPS::ReliableMulticast::detail::Packet
-            > BufferType;
-
-          size_t receiver_buffer_size_;
-          ReliabilityMode reliability_;
-          bool seen_last_delivered_;
-          OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type last_delivered_id_;
-          OpenDDS::DCPS::ReliableMulticast::detail::NackGenerator nacker_;
-          BufferType buffer_;
-        };
-
-      } /* namespace detail */
-
-    } /* namespace ReliableMulticast */
-
-  } /* namespace DCPS */
-
-} /* namespace OpenDDS */
+} // namespace detail
+} // namespace ReliableMulticast
+} // namespace DCPS
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "ReceiverLogic.inl"

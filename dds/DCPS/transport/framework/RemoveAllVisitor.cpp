@@ -1,23 +1,25 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "RemoveAllVisitor.h"
 #include "TransportQueueElement.h"
 #include "dds/DCPS/DataSampleList.h"
 
-
 #if !defined (__ACE_INLINE__)
 #include "RemoveAllVisitor.inl"
 #endif /* __ACE_INLINE__ */
-
 
 OpenDDS::DCPS::RemoveAllVisitor::~RemoveAllVisitor()
 {
   DBG_ENTRY_LVL("RemoveAllVisitor","~RemoveAllVisitor",6);
 }
-
 
 int
 OpenDDS::DCPS::RemoveAllVisitor::visit_element_remove(TransportQueueElement* element,
@@ -45,5 +47,3 @@ OpenDDS::DCPS::RemoveAllVisitor::visit_element_remove(TransportQueueElement* ele
   // Continue visitation.
   return 1;
 }
-
-

@@ -1,15 +1,14 @@
-// -*- C++ -*-
-/**
- * @file      UpdateManager.h
- *
- * library   UpdateManager
- *
+/*
  * $Id$
  *
- * @author Ciju John <johnc@ociweb.com>
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
-#ifndef _UPDATE_MANAGER_
-#define _UPDATE_MANAGER_
+
+#ifndef UPDATE_MANAGER_H
+#define UPDATE_MANAGER_H
 
 #include "inforepo_export.h"
 #include "UpdateDataTypes.h"
@@ -30,26 +29,25 @@ class TAO_DDS_DCPSInfo_i;
 
 namespace Update {
 
-class OpenDDS_InfoRepoLib_Export Manager : public ACE_Service_Object
-{
- public:
-  Manager (void);
+class OpenDDS_InfoRepoLib_Export Manager : public ACE_Service_Object {
+public:
+  Manager();
 
-  virtual ~Manager (void);
+  virtual ~Manager();
 
   /// Shared object initializer
-  virtual int init (int argc, ACE_TCHAR *argv[]);
+  virtual int init(int argc, ACE_TCHAR *argv[]);
 
   /// Shared object finalizer
-  virtual int fini (void);
+  virtual int fini();
 
   // mechanism for InfoRepo object to be registered.
-  void add (TAO_DDS_DCPSInfo_i* info);
-  void add (Updater* updater);
+  void add(TAO_DDS_DCPSInfo_i* info);
+  void add(Updater* updater);
 
   // Mechanism to unregister Updaters/InfoRepo
-  void remove ();
-  void remove (const Updater* updater);
+  void remove();
+  void remove(const Updater* updater);
 
   /// Force a clean shutdown.
   // void shutdown (void);
@@ -57,28 +55,28 @@ class OpenDDS_InfoRepoLib_Export Manager : public ACE_Service_Object
   /// Upstream request for a fresh image
   /// Currently handled synchronously via 'pushImage'
   /// TBD: Replace with an asynchronous model.
-  void requestImage (void);
+  void requestImage();
 
   /// Downstream request to push image
-  void pushImage (const DImage& image);
+  void pushImage(const DImage& image);
 
   // Propagate creation of entities.
-  template< class UType>
-  void create( const UType& info);
+  template<class UType>
+  void create(const UType& info);
 
   // Propagate QoS updates.
-  template< class QosType>
-  void update( const IdPath& id, const QosType& qos);
+  template<class QosType>
+  void update(const IdPath& id, const QosType& qos);
 
   // Propagate destruction of entities.
-  void destroy( const IdPath& id, ItemType type, ActorType actor = DataWriter);
+  void destroy(const IdPath& id, ItemType type, ActorType actor = DataWriter);
 
   // Downstream request to push persisted data
-  void add (const DTopic& topic);
-  void add (const DParticipant& participant);
-  void add (const DActor& actor);
+  void add(const DTopic& topic);
+  void add(const DParticipant& participant);
+  void add(const DActor& actor);
 
- private:
+private:
   typedef std::set <Updater*> Updaters;
 
   // required to break an include dependency loop
@@ -101,28 +99,27 @@ class OpenDDS_InfoRepoLib_Export Manager : public ACE_Service_Object
 
 typedef Update::Manager UpdateManagerSvc;
 
-ACE_STATIC_SVC_DECLARE (UpdateManagerSvc)
+ACE_STATIC_SVC_DECLARE(UpdateManagerSvc)
 
-ACE_FACTORY_DECLARE (ACE_Local_Service, UpdateManagerSvc)
+ACE_FACTORY_DECLARE(ACE_Local_Service, UpdateManagerSvc)
 
-class OpenDDS_InfoRepoLib_Export UpdateManagerSvc_Loader
-{
+class OpenDDS_InfoRepoLib_Export UpdateManagerSvc_Loader {
 public:
-  static int init (void);
+  static int init();
 };
 
 #if defined(ACE_HAS_BROKEN_STATIC_CONSTRUCTORS)
 
-typedef int (*UpdateManagerSvc_Loader) (void);
+typedef int (*UpdateManagerSvc_Loader)();
 
 static UpdateManagerSvc_Loader ldr =
-&UpdateManagerSvc_Loader::init;
+  &UpdateManagerSvc_Loader::init;
 
 #else
 
 static int ldr =
-UpdateManagerSvc_Loader::init ();
+  UpdateManagerSvc_Loader::init();
 
 #endif /* ACE_HAS_BROKEN_STATIC_CONSTRUCTORS */
 
-#endif // _UPDATE_MANAGER_
+#endif /* UPDATE_MANAGER_H */

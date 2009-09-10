@@ -1,4 +1,12 @@
-// -*- C++ -*-
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef OPENDDS_DCPS_WAITSET_H
 #define OPENDDS_DCPS_WAITSET_H
 
@@ -17,82 +25,83 @@
 
 #include <set>
 
-namespace OpenDDS
-{
-  namespace DCPS
-  {
-    class ConditionImpl;
-  }
-}
+namespace OpenDDS {
+namespace DCPS {
 
-namespace DDS
-{
-  class WaitSet;
-  typedef WaitSet* WaitSet_ptr;
+class ConditionImpl;
 
-  typedef TAO_Objref_Var_T<WaitSet> WaitSet_var;
+} // namespace DCPS
+} // namespace OpenDDS
 
-  class OpenDDS_Dcps_Export WaitSet
-    : public virtual OpenDDS::DCPS::LocalObject<WaitSetInterf>
-  {
-  public:
-    typedef WaitSet_ptr _ptr_type;
-    typedef WaitSet_var _var_type;
+namespace DDS {
 
-    WaitSet()
-      : lock_(), cond_(lock_)
-    {}
+class WaitSet;
+typedef WaitSet* WaitSet_ptr;
 
-    virtual ~WaitSet() {}
+typedef TAO_Objref_Var_T<WaitSet> WaitSet_var;
 
-    ReturnCode_t wait(ConditionSeq& active_conditions,
-        const Duration_t& timeout)
-      ACE_THROW_SPEC ((CORBA::SystemException));
+class OpenDDS_Dcps_Export WaitSet
+  : public virtual OpenDDS::DCPS::LocalObject<WaitSetInterf> {
+public:
+  typedef WaitSet_ptr _ptr_type;
+  typedef WaitSet_var _var_type;
 
-    ReturnCode_t attach_condition(Condition_ptr cond)
-      ACE_THROW_SPEC ((CORBA::SystemException));
+  WaitSet()
+    : lock_(),
+      cond_(lock_)
+  {}
 
-    ReturnCode_t detach_condition(Condition_ptr cond)
-      ACE_THROW_SPEC ((CORBA::SystemException));
+  virtual ~WaitSet() {}
 
-    ReturnCode_t get_conditions (ConditionSeq& attached_conditions)
-      ACE_THROW_SPEC ((CORBA::SystemException));
+  ReturnCode_t wait(ConditionSeq& active_conditions,
+                    const Duration_t& timeout)
+  ACE_THROW_SPEC((CORBA::SystemException));
 
-    /// Convenience method for detaching multiple conditions,
-    /// for example when shutting down.
-    ReturnCode_t detach_conditions (const ConditionSeq& conditions)
-      ACE_THROW_SPEC ((CORBA::SystemException));
+  ReturnCode_t attach_condition(Condition_ptr cond)
+  ACE_THROW_SPEC((CORBA::SystemException));
 
-    static WaitSet_ptr _duplicate(WaitSet_ptr obj);
+  ReturnCode_t detach_condition(Condition_ptr cond)
+  ACE_THROW_SPEC((CORBA::SystemException));
 
-    typedef std::set<Condition_var,
-      OpenDDS::DCPS::VarLess<Condition> > ConditionSet;
+  ReturnCode_t get_conditions(ConditionSeq& attached_conditions)
+  ACE_THROW_SPEC((CORBA::SystemException));
 
-  private:
-    ReturnCode_t detach_i(const Condition_ptr cond);
-    void signal(Condition_ptr cond);
-    friend class OpenDDS::DCPS::ConditionImpl;
+  /// Convenience method for detaching multiple conditions,
+  /// for example when shutting down.
+  ReturnCode_t detach_conditions(const ConditionSeq& conditions)
+  ACE_THROW_SPEC((CORBA::SystemException));
 
-    ACE_Recursive_Thread_Mutex lock_;
-    ACE_Condition_Recursive_Thread_Mutex cond_;
-    ACE_Atomic_Op<ACE_Thread_Mutex, long> waiting_;
+  static WaitSet_ptr _duplicate(WaitSet_ptr obj);
 
-    ConditionSet attached_conditions_;
-    ConditionSet signaled_conditions_;
-  };
-}
+  typedef std::set<Condition_var,
+  OpenDDS::DCPS::VarLess<Condition> > ConditionSet;
 
-namespace TAO
-{
-  template<>
-  struct OpenDDS_Dcps_Export Objref_Traits<DDS::WaitSet>
-  {
-    static DDS::WaitSet_ptr duplicate(DDS::WaitSet_ptr p);
-    static void release(DDS::WaitSet_ptr p);
-    static DDS::WaitSet_ptr nil();
-    static CORBA::Boolean marshal(const DDS::WaitSet_ptr p,
-      TAO_OutputCDR & cdr);
-  };
-}
+private:
+  ReturnCode_t detach_i(const Condition_ptr cond);
+  void signal(Condition_ptr cond);
+  friend class OpenDDS::DCPS::ConditionImpl;
+
+  ACE_Recursive_Thread_Mutex lock_;
+  ACE_Condition_Recursive_Thread_Mutex cond_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, long> waiting_;
+
+  ConditionSet attached_conditions_;
+  ConditionSet signaled_conditions_;
+};
+
+} // namespace DDS
+
+namespace TAO {
+
+template<>
+struct OpenDDS_Dcps_Export Objref_Traits<DDS::WaitSet> {
+  static DDS::WaitSet_ptr duplicate(DDS::WaitSet_ptr p);
+  static void release(DDS::WaitSet_ptr p);
+  static DDS::WaitSet_ptr nil();
+  static CORBA::Boolean marshal(const DDS::WaitSet_ptr p,
+                                TAO_OutputCDR & cdr);
+};
+
+} // namespace TAO
 
 #endif

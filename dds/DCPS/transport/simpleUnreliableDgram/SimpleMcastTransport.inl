@@ -1,6 +1,11 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #include "SimpleMcastSocket.h"
 #include "SimpleUnreliableDgramDataLink_rch.h"
@@ -14,12 +19,11 @@ OpenDDS::DCPS::SimpleMcastTransport::SimpleMcastTransport()
   this->socket_ = new SimpleMcastSocket();
 }
 
-
 ACE_INLINE void
 OpenDDS::DCPS::SimpleMcastTransport::deliver_sample
-                                     (ReceivedDataSample&  sample,
-                                      const ACE_INET_Addr& remote_address,
-                                      CORBA::Long          priority)
+(ReceivedDataSample&  sample,
+ const ACE_INET_Addr& remote_address,
+ CORBA::Long          priority)
 {
   DBG_ENTRY_LVL("SimpleMcastTransport","deliver_sample",6);
 
@@ -32,16 +36,15 @@ OpenDDS::DCPS::SimpleMcastTransport::deliver_sample
 
     // Override the remote_address passed in - we are always going to be
     // receiving on our multicast address!
-    PriorityKey key( priority, this->multicast_group_address_);
-    if (this->links_.find( key, link) != 0)
-      {
-        ACE_ERROR((LM_ERROR,
-                   "(%P|%t) ERROR: Unable to deliver received sample to DataLink.  "
-                   "No DataLink found for remote_address.\n"));
-        return;
-      }
+    PriorityKey key(priority, this->multicast_group_address_);
+
+    if (this->links_.find(key, link) != 0) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: Unable to deliver received sample to DataLink.  "
+                 "No DataLink found for remote_address.\n"));
+      return;
+    }
   }
 
   link->data_received(sample);
 }
-

@@ -1,5 +1,11 @@
-// -*- C++ -*-
-//
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #ifndef OPENDDS_DCPS_RELIABLEMULTICASTTRANSPORTSENDSTRATEGY_H
 #define OPENDDS_DCPS_RELIABLEMULTICASTTRANSPORTSENDSTRATEGY_H
@@ -17,70 +23,59 @@
 
 class ACE_SOCK;
 
-namespace OpenDDS
-{
+namespace OpenDDS {
+namespace DCPS {
 
-  namespace DCPS
-  {
+namespace ReliableMulticast {
+namespace detail {
 
-    namespace ReliableMulticast
-    {
+class ReactivePacketSender;
 
-      namespace detail
-      {
+} // namespace detail
+} // namespace ReliableMulticast
 
-        class ReactivePacketSender;
+class ReliableMulticastTransportConfiguration;
+class ReliableMulticastThreadSynchResource;
 
-      } /* namespace detail */
+class ReliableMulticast_Export ReliableMulticastTransportSendStrategy
+  : public TransportSendStrategy {
+public:
+  // We do not own synch_resource!
+  ReliableMulticastTransportSendStrategy(
+    OpenDDS::DCPS::ReliableMulticastTransportConfiguration& configuration,
+    OpenDDS::DCPS::ReliableMulticastThreadSynchResource* synch_resource,
+    CORBA::Long priority);
+  virtual ~ReliableMulticastTransportSendStrategy();
 
-    } /* namespace ReliableMulticast */
+  void configure(
+    ACE_Reactor* reactor,
+    const ACE_INET_Addr& local_address,
+    const ACE_INET_Addr& multicast_group_address,
+    size_t sender_history_size);
 
-    class ReliableMulticastTransportConfiguration;
-    class ReliableMulticastThreadSynchResource;
+  void teardown();
 
-    class ReliableMulticast_Export ReliableMulticastTransportSendStrategy
-      : public TransportSendStrategy
-    {
-    public:
-      // We do not own synch_resource!
-      ReliableMulticastTransportSendStrategy(
-        OpenDDS::DCPS::ReliableMulticastTransportConfiguration& configuration,
-        OpenDDS::DCPS::ReliableMulticastThreadSynchResource* synch_resource,
-        CORBA::Long priority
-        );
-      virtual ~ReliableMulticastTransportSendStrategy();
+  /// Access the underlying socket.
+  /// N.B. This is valid only after being configure()ed.  If called
+  ///      prior, then a reference to an empty static ACE_SOCK_IO
+  ///      object will be returned.
+  ACE_SOCK& socket();
 
-      void configure(
-        ACE_Reactor* reactor,
-        const ACE_INET_Addr& local_address,
-        const ACE_INET_Addr& multicast_group_address,
-        size_t sender_history_size
-        );
+protected:
+  virtual void stop_i();
 
-      void teardown();
+  virtual ssize_t send_bytes(const iovec iov[], int n, int& bp);
 
-      /// Access the underlying socket.
-      /// N.B. This is valid only after being configure()ed.  If called
-      ///      prior, then a reference to an empty static ACE_SOCK_IO
-      ///      object will be returned.
-      ACE_SOCK& socket();
+  virtual ACE_HANDLE get_handle();
 
-    protected:
-      virtual void stop_i();
+  virtual ssize_t send_bytes_i(const iovec iov[], int n);
 
-      virtual ssize_t send_bytes(const iovec iov[], int n, int& bp);
+private:
+  ACE_Auto_Ptr<OpenDDS::DCPS::ReliableMulticast::detail::ReactivePacketSender> sender_;
+};
 
-      virtual ACE_HANDLE get_handle();
-
-      virtual ssize_t send_bytes_i(const iovec iov[], int n);
-
-    private:
-      ACE_Auto_Ptr<OpenDDS::DCPS::ReliableMulticast::detail::ReactivePacketSender> sender_;
-    };
-
-  } /* namespace DCPS */
-
-} /* namespace OpenDDS */
+} // namespace DCPS
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "ReliableMulticastTransportSendStrategy.inl"

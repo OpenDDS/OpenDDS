@@ -1,6 +1,12 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef OPENDDS_DCPS_SIMPLEUNRELIABLEDGRAMSENDSTRATEGY_H
 #define OPENDDS_DCPS_SIMPLEUNRELIABLEDGRAMSENDSTRATEGY_H
 
@@ -9,48 +15,41 @@
 #include "dds/DCPS/transport/framework/TransportSendStrategy.h"
 #include "ace/INET_Addr.h"
 
+namespace OpenDDS {
+namespace DCPS {
 
-namespace OpenDDS
-{
+class TransportConfiguration;
+class SimpleUnreliableDgramSynchResource;
 
-  namespace DCPS
-  {
+class SimpleUnreliableDgram_Export SimpleUnreliableDgramSendStrategy : public TransportSendStrategy {
+public:
 
-    class TransportConfiguration;
-    class SimpleUnreliableDgramSynchResource;
+  SimpleUnreliableDgramSendStrategy(TransportConfiguration* config,
+                                    const ACE_INET_Addr&    remote_address,
+                                    SimpleUnreliableDgramSocket*        socket,
+                                    SimpleUnreliableDgramSynchResource* resource,
+                                    CORBA::Long                         priority);
+  virtual ~SimpleUnreliableDgramSendStrategy();
 
-    class SimpleUnreliableDgram_Export SimpleUnreliableDgramSendStrategy : public TransportSendStrategy
-    {
-      public:
+protected:
 
-        SimpleUnreliableDgramSendStrategy(TransportConfiguration* config,
-                              const ACE_INET_Addr&    remote_address,
-                              SimpleUnreliableDgramSocket*        socket,
-                              SimpleUnreliableDgramSynchResource* resource,
-                              CORBA::Long                         priority);
-        virtual ~SimpleUnreliableDgramSendStrategy();
+  virtual void stop_i();
 
-      protected:
+  virtual ssize_t send_bytes(const iovec iov[], int n, int& bp);
+  virtual ACE_HANDLE get_handle();
+  virtual ssize_t send_bytes_i(const iovec iov[], int n);
 
-        virtual void stop_i();
+private:
 
-        virtual ssize_t send_bytes(const iovec iov[], int n, int& bp);
-        virtual ACE_HANDLE get_handle ();
-        virtual ssize_t send_bytes_i (const iovec iov[], int n);
+  /// The remote address
+  ACE_INET_Addr remote_address_;
 
+  /// The socket
+  SimpleUnreliableDgramSocket_rch socket_;
+};
 
-      private:
-
-        /// The remote address
-        ACE_INET_Addr remote_address_;
-
-        /// The socket
-        SimpleUnreliableDgramSocket_rch socket_;
-    };
-
-  }  /* namespace DCPS */
-
-}  /* namespace OpenDDS */
+} // namespace DCPS
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "SimpleUnreliableDgramSendStrategy.inl"

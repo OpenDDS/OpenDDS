@@ -1,9 +1,15 @@
+Thu Sep 10 01:16:24 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/
+
+          Applied new style and copyrights to all source.
+
 Tue Sep  8 19:05:55 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/FileSystemStorage.cpp:
 
           Fixed issue with astyle conversion; // comments after assignment
-          causes astyle to spuriously join the next line.
+          causes astyle to incorrectly join the next line.
 
 Tue Sep  8 18:45:26 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
@@ -1113,8 +1119,8 @@ Mon Aug  3 19:18:22 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/Definitions.h:
 
-          Dropped OpenDDS::DCPS::DEFAULT_STATE_KIND_MASK in favor of
-          new IDL constant (OpenDDS::DCPS::DEFAULT_STATE_MASK).
+          Dropped OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK in favor of
+          new IDL constant (OpenDDS::DCPS::DEFAULT_STATUS_MASK).
 
         * DevGuideExamples/DCPS/Messenger/publisher.cpp:
         * DevGuideExamples/DCPS/Messenger/stack_subscriber.cpp:
@@ -1240,14 +1246,14 @@ Mon Aug  3 19:18:22 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * wrapper/OpenDDS/OpenDDS_Subscription_Manager.cpp:
         * wrapper/Topic_Manager_T.cpp:
 
-          Refactored C++ code to make use of new DEFAULT_STATE_MASK
+          Refactored C++ code to make use of new DEFAULT_STATUS_MASK
           constant.
 
 Fri Jul 31 22:17:13 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DdsDcpsInfrastructure.idl:
 
-          Promoted OpenDDS::DCPS::DEFAULT_STATE_MASK to IDL from
+          Promoted OpenDDS::DCPS::DEFAULT_STATUS_MASK to IDL from
           Definitions.h (cxx refactoring forthcoming).
 
         * java/jms/src/org/opendds/jms/DataWriterPair.java:
@@ -1264,7 +1270,7 @@ Fri Jul 31 22:17:13 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * java/tests/multirepo/MultiRepoBase.java:
         * java/tests/multirepo/MultiRepoWorker.java:
 
-          Updated Java bindings to support DEFAULT_STATE_MASK.
+          Updated Java bindings to support DEFAULT_STATUS_MASK.
 
 Fri Jul 31 21:46:28 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 

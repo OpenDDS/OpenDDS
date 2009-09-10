@@ -1,5 +1,11 @@
-// -*- C++ -*-
-//
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #ifndef OPENDDS_DCPS_RELIABLEMULTICAST_INITIALIZER_H
 #define OPENDDS_DCPS_RELIABLEMULTICAST_INITIALIZER_H
@@ -15,8 +21,7 @@
 #include "ace/Service_Object.h"
 #include "ace/Service_Config.h"
 
-class ReliableMulticast_Export OPENDDS_DCPS_ReliableMulticast_Initializer
-{
+class ReliableMulticast_Export OPENDDS_DCPS_ReliableMulticast_Initializer {
 public:
   OPENDDS_DCPS_ReliableMulticast_Initializer();
 };

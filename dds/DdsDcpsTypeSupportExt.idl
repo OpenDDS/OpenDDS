@@ -1,3 +1,12 @@
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef OPENDDS_DCPS_TYPE_SUPPORT_IDL
 #define OPENDDS_DCPS_TYPE_SUPPORT_IDL
 
@@ -34,6 +43,5 @@ module OpenDDS {
     };
   };
 };
-
 
 #endif /* OPENDDS_DCPS_TYPE_SUPPORT_IDL */

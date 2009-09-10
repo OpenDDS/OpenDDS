@@ -1,5 +1,10 @@
 /*
  * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
@@ -13,8 +18,8 @@
 
 #include "GuidBuilder.h"
 
-namespace
-{
+namespace {
+
 inline std::ostream&
 sep(std::ostream& os)
 {
@@ -33,21 +38,23 @@ std::ostream&
 operator<<(std::ostream& os, const OpenDDS::DCPS::GUID_t& rhs)
 {
   std::size_t len;
-  
-  len = sizeof (rhs.guidPrefix) / sizeof (CORBA::Octet);
-  for (std::size_t i = 0; i < len; ++i)
-  {
+
+  len = sizeof(rhs.guidPrefix) / sizeof(CORBA::Octet);
+
+  for (std::size_t i = 0; i < len; ++i) {
     os << setopts << unsigned(rhs.guidPrefix[i]);
+
     if ((i + 1) % 4 == 0) os << sep;
   }
 
-  len = sizeof (rhs.entityId.entityKey) / sizeof (CORBA::Octet);
-  for (std::size_t i = 0; i < len; ++i)
-  {
+  len = sizeof(rhs.entityId.entityKey) / sizeof(CORBA::Octet);
+
+  for (std::size_t i = 0; i < len; ++i) {
     os << setopts << unsigned(rhs.entityId.entityKey[i]);
   }
+
   os << setopts << unsigned(rhs.entityId.entityKind);
-  
+
   return os;
 }
 
@@ -56,7 +63,7 @@ operator>>(std::istream& is, OpenDDS::DCPS::GUID_t& rhs)
 {
   long word;
   char discard;
-  
+
   OpenDDS::DCPS::GuidBuilder builder(rhs);
 
   is >> std::hex >> word;
@@ -73,6 +80,6 @@ operator>>(std::istream& is, OpenDDS::DCPS::GUID_t& rhs)
 
   is >> std::hex >> word;
   builder.entityId(word);
-  
+
   return is;
 }

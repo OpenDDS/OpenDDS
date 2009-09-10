@@ -1,12 +1,12 @@
-// ============================================================================
-/**
- *  @file   DCPS_IR_Publication.h
+/*
+ * $Id$
  *
- *  $Id$
+ * Copyright 2009 Object Computing, Inc.
  *
- *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
-// ============================================================================
+
 #ifndef DCPS_IR_PUBLICATION_H
 #define DCPS_IR_PUBLICATION_H
 
@@ -30,7 +30,6 @@ class DCPS_IR_Topic_Description;
 class DCPS_IR_Subscription;
 typedef ACE_Unbounded_Set<DCPS_IR_Subscription*> DCPS_IR_Subscription_Set;
 
-
 /**
  * @class DCPS_IR_Publication
  *
@@ -38,25 +37,24 @@ typedef ACE_Unbounded_Set<DCPS_IR_Subscription*> DCPS_IR_Subscription_Set;
  *
  *
  */
-class OpenDDS_InfoRepoLib_Export DCPS_IR_Publication
-{
+class OpenDDS_InfoRepoLib_Export DCPS_IR_Publication {
 public:
-  DCPS_IR_Publication (OpenDDS::DCPS::RepoId id,
-                       DCPS_IR_Participant* participant,
-                       DCPS_IR_Topic* topic,
-                       OpenDDS::DCPS::DataWriterRemote_ptr writer,
-                       ::DDS::DataWriterQos qos,
-                       OpenDDS::DCPS::TransportInterfaceInfo info,
-                       ::DDS::PublisherQos publisherQos);
+  DCPS_IR_Publication(OpenDDS::DCPS::RepoId id,
+                      DCPS_IR_Participant* participant,
+                      DCPS_IR_Topic* topic,
+                      OpenDDS::DCPS::DataWriterRemote_ptr writer,
+                      DDS::DataWriterQos qos,
+                      OpenDDS::DCPS::TransportInterfaceInfo info,
+                      DDS::PublisherQos publisherQos);
 
-  ~DCPS_IR_Publication ();
+  ~DCPS_IR_Publication();
 
   /// Associate with the subscription
   /// Adds the subscription to the list of associated
   ///  subscriptions and notifies datawriter if successfully added
   /// This method can mark the participant dead
   /// Returns 0 if added, 1 if already exists, -1 other failure
-  int add_associated_subscription (DCPS_IR_Subscription* sub);
+  int add_associated_subscription(DCPS_IR_Subscription* sub);
 
   /// Remove the associated subscription
   /// Removes the subscription from the list of associated
@@ -70,10 +68,10 @@ public:
   /// or DdsDcpsDataReaderRemote.idl.
   /// This method can mark the participant dead
   /// Returns 0 if successful
-  int remove_associated_subscription (DCPS_IR_Subscription* sub,
-                                      CORBA::Boolean sendNotify,
-                                      CORBA::Boolean notify_lost,
-                                      bool notify_both_side = false);
+  int remove_associated_subscription(DCPS_IR_Subscription* sub,
+                                     CORBA::Boolean sendNotify,
+                                     CORBA::Boolean notify_lost,
+                                     bool notify_both_side = false);
 
   /// Removes all the associated subscriptions
   /// This method can mark the participant dead
@@ -81,108 +79,108 @@ public:
   /// when the InfoRepo detects this publication is lost because of the failure
   /// of invocation on this publication.
   /// Returns 0 if successful
-  int remove_associations (CORBA::Boolean notify_lost);
+  int remove_associations(CORBA::Boolean notify_lost);
 
   /// Remove any subscriptions whose participant has the id
-  void disassociate_participant (OpenDDS::DCPS::RepoId id);
+  void disassociate_participant(OpenDDS::DCPS::RepoId id);
 
   /// Remove any subscriptions whose topic has the id
-  void disassociate_topic (OpenDDS::DCPS::RepoId id);
+  void disassociate_topic(OpenDDS::DCPS::RepoId id);
 
   /// Remove any subscriptions with the id
-  void disassociate_subscription (OpenDDS::DCPS::RepoId id);
+  void disassociate_subscription(OpenDDS::DCPS::RepoId id);
 
   /// Notify the writer of incompatible qos status
   ///  and reset the status' count_since_last_send to 0
-  void update_incompatible_qos ();
+  void update_incompatible_qos();
 
   /// Check that none of the ids given are ones that
   ///  this publication should ignore.
   /// returns 1 if one of these ids is an ignored id
-  CORBA::Boolean is_subscription_ignored (OpenDDS::DCPS::RepoId partId,
-                                          OpenDDS::DCPS::RepoId topicId,
-                                          OpenDDS::DCPS::RepoId subId);
+  CORBA::Boolean is_subscription_ignored(OpenDDS::DCPS::RepoId partId,
+                                         OpenDDS::DCPS::RepoId topicId,
+                                         OpenDDS::DCPS::RepoId subId);
 
   /// Return pointer to the DataWriter qos
   /// Publication retains ownership
-  ::DDS::DataWriterQos* get_datawriter_qos ();
+  DDS::DataWriterQos* get_datawriter_qos();
 
   /// Return pointer to the Publisher qos
   /// Publication retains ownership
-  ::DDS::PublisherQos* get_publisher_qos ();
+  DDS::PublisherQos* get_publisher_qos();
 
   /// Update the DataWriter or Publisher qos and also publish the qos changes
   /// to datawriter BIT.
-  bool set_qos (const ::DDS::DataWriterQos & qos,
-                const ::DDS::PublisherQos & publisherQos,
-                Update::SpecificQos& specificQos);
+  bool set_qos(const DDS::DataWriterQos & qos,
+               const DDS::PublisherQos & publisherQos,
+               Update::SpecificQos& specificQos);
 
   /// Update DataWriterQos only.
-  void set_qos( const ::DDS::DataWriterQos& qos);
+  void set_qos(const DDS::DataWriterQos& qos);
 
   /// Update PublisherQos only.
-  void set_qos( const ::DDS::PublisherQos& qos);
+  void set_qos(const DDS::PublisherQos& qos);
 
   /// get the transport ID of the transport implementation type.
-  OpenDDS::DCPS::TransportInterfaceId   get_transport_id () const;
+  OpenDDS::DCPS::TransportInterfaceId   get_transport_id() const;
 
   /// Returns a copy of the TransportInterfaceInfo object
-  OpenDDS::DCPS::TransportInterfaceInfo get_transportInterfaceInfo () const;
+  OpenDDS::DCPS::TransportInterfaceInfo get_transportInterfaceInfo() const;
 
   /// Return pointer to the incompatible qos status
   /// Publication retains ownership
-  OpenDDS::DCPS::IncompatibleQosStatus* get_incompatibleQosStatus (); 
+  OpenDDS::DCPS::IncompatibleQosStatus* get_incompatibleQosStatus();
 
-  OpenDDS::DCPS::RepoId get_id ();
-  OpenDDS::DCPS::RepoId get_topic_id ();
-  OpenDDS::DCPS::RepoId get_participant_id ();
+  OpenDDS::DCPS::RepoId get_id();
+  OpenDDS::DCPS::RepoId get_topic_id();
+  OpenDDS::DCPS::RepoId get_participant_id();
 
-  DCPS_IR_Topic* get_topic ();
+  DCPS_IR_Topic* get_topic();
   DCPS_IR_Topic_Description* get_topic_description();
 
-  ::DDS::InstanceHandle_t get_handle();
-  void set_handle(::DDS::InstanceHandle_t handle);
+  DDS::InstanceHandle_t get_handle();
+  void set_handle(DDS::InstanceHandle_t handle);
 
-  CORBA::Boolean is_bit ();
-  void set_bit_status (CORBA::Boolean isBIT);
+  CORBA::Boolean is_bit();
+  void set_bit_status(CORBA::Boolean isBIT);
 
   // Expose the datawriter.
   OpenDDS::DCPS::DataWriterRemote_ptr writer();
 
   // Verify the existing associations. This may result removal of
   // associations. The existing associations have to be removed before
-  // adding new association and may need some delay. Otherwise, if  
-  // two DataReaders uses same Datalink and add an association happens 
-  // before remove an association then the new association will fail to 
+  // adding new association and may need some delay. Otherwise, if
+  // two DataReaders uses same Datalink and add an association happens
+  // before remove an association then the new association will fail to
   // connect.
-  void reevaluate_existing_associations ();
+  void reevaluate_existing_associations();
 
   // Re-evaluate the association between this publication and the provided
   // subscription. If they are already associated and not compatible then
   // they will be dis-associated. If they are not already associated then
   // the new association will be added.
-  void reevaluate_association (DCPS_IR_Subscription* subscription);
+  void reevaluate_association(DCPS_IR_Subscription* subscription);
 
 private:
 
   /// Check compatibility between provided Publisher QoS and the QoS of
   /// this publication associated DataReaders's subscribers.
-  bool compatibleQosChange (const ::DDS::PublisherQos & qos);
+  bool compatibleQosChange(const DDS::PublisherQos & qos);
   /// Check compatibility between provided DataWriter QoS and the QoS of
   /// this publication associated DataReaders.
-  bool compatibleQosChange (const ::DDS::DataWriterQos & qos);
+  bool compatibleQosChange(const DDS::DataWriterQos & qos);
 
   OpenDDS::DCPS::RepoId id_;
   DCPS_IR_Participant* participant_;
   DCPS_IR_Topic* topic_;
-  ::DDS::InstanceHandle_t handle_;
+  DDS::InstanceHandle_t handle_;
   CORBA::Boolean isBIT_;
 
   /// the corresponding DataWriterRemote object
   OpenDDS::DCPS::DataWriterRemote_var writer_;
-  ::DDS::DataWriterQos qos_;
+  DDS::DataWriterQos qos_;
   OpenDDS::DCPS::TransportInterfaceInfo info_;
-  ::DDS::PublisherQos publisherQos_;
+  DDS::PublisherQos publisherQos_;
 
   DCPS_IR_Subscription_Set associations_;
 

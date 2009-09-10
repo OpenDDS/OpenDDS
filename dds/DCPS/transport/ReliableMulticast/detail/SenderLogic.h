@@ -1,5 +1,11 @@
-// -*- C++ -*-
-//
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #ifndef OPENDDS_DCPS_SENDERLOGIC_H
 #define OPENDDS_DCPS_SENDERLOGIC_H
@@ -16,69 +22,53 @@
 #include <vector>
 #include <map>
 
-namespace OpenDDS
-{
+namespace OpenDDS {
+namespace DCPS {
+namespace ReliableMulticast {
+namespace detail {
 
-  namespace DCPS
-  {
+class ReliableMulticast_Export SenderLogic {
+public:
+  typedef std::vector<
+  OpenDDS::DCPS::ReliableMulticast::detail::Packet
+  > PacketVector;
 
-    namespace ReliableMulticast
-    {
+  SenderLogic(size_t sender_history_size);
 
-      namespace detail
-      {
+  void receive(
+    const OpenDDS::DCPS::ReliableMulticast::detail::Packet& p,
+    PacketVector& redelivered) const;
 
-        class ReliableMulticast_Export SenderLogic
-        {
-        public:
-          typedef std::vector<
-            OpenDDS::DCPS::ReliableMulticast::detail::Packet
-            > PacketVector;
+  void send(
+    const OpenDDS::DCPS::ReliableMulticast::detail::Packet& p,
+    PacketVector& delivered);
 
-          SenderLogic(size_t sender_history_size);
+  void make_heartbeat(OpenDDS::DCPS::ReliableMulticast::detail::Packet& p);
 
-          void receive(
-            const OpenDDS::DCPS::ReliableMulticast::detail::Packet& p,
-            PacketVector& redelivered
-            ) const;
+private:
+  void buffer_packet(
+    const OpenDDS::DCPS::ReliableMulticast::detail::Packet& p,
+    PacketVector& delivered);
 
-          void send(
-            const OpenDDS::DCPS::ReliableMulticast::detail::Packet& p,
-            PacketVector& delivered
-            );
+  bool is_buffered(
+    const OpenDDS::DCPS::ReliableMulticast::detail::Packet& p) const;
 
-          void make_heartbeat(OpenDDS::DCPS::ReliableMulticast::detail::Packet& p);
+  size_t buffersize() const;
 
-        private:
-          void buffer_packet(
-            const OpenDDS::DCPS::ReliableMulticast::detail::Packet& p,
-            PacketVector& delivered
-            );
+  typedef std::map<
+  OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type,
+  OpenDDS::DCPS::ReliableMulticast::detail::Packet
+  > BufferType;
 
-          bool is_buffered(
-            const OpenDDS::DCPS::ReliableMulticast::detail::Packet& p
-            ) const;
+  size_t sender_history_size_;
+  OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type current_id_;
+  BufferType buffer_;
+};
 
-          size_t buffersize(
-            ) const;
-
-          typedef std::map<
-            OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type,
-            OpenDDS::DCPS::ReliableMulticast::detail::Packet
-            > BufferType;
-
-          size_t sender_history_size_;
-          OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type current_id_;
-          BufferType buffer_;
-        };
-
-      } /* namespace detail */
-
-    } /* namespace ReliableMulticast */
-
-  } /* namespace DCPS */
-
-} /* namespace OpenDDS */
+} // namespace detail
+} // namespace ReliableMulticast
+} // namespace DCPS
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "SenderLogic.inl"

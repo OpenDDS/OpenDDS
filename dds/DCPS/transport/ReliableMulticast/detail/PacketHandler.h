@@ -1,5 +1,11 @@
-// -*- C++ -*-
-//
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #ifndef OPENDDS_DCPS_PACKETHANDLER_H
 #define OPENDDS_DCPS_PACKETHANDLER_H
@@ -16,61 +22,43 @@
 #include "Packet.h"
 #include <cstring>
 
-namespace OpenDDS
-{
+namespace OpenDDS {
+namespace DCPS {
+namespace ReliableMulticast {
+namespace detail {
 
-  namespace DCPS
-  {
+class ReliableMulticast_Export PacketHandler
+  : public OpenDDS::DCPS::ReliableMulticast::detail::EventHandler {
+public:
+  template <typename Container> void send_many(
+    const Container& container,
+    const ACE_INET_Addr& dest) {
+    for (
+      typename Container::const_iterator iter = container.begin();
+      iter != container.end();
+      ++iter) {
+      send_packet_to(*iter, dest);
+    }
+  }
 
-    namespace ReliableMulticast
-    {
+  virtual void send_packet_to(
+    const OpenDDS::DCPS::ReliableMulticast::detail::Packet& packet,
+    const ACE_INET_Addr& dest);
 
-      namespace detail
-      {
+  virtual void receive(
+    const char* buffer,
+    size_t size,
+    const ACE_INET_Addr& peer);
 
-        class ReliableMulticast_Export PacketHandler
-          : public OpenDDS::DCPS::ReliableMulticast::detail::EventHandler
-        {
-        public:
-          template <typename Container> void send_many(
-            const Container& container,
-            const ACE_INET_Addr& dest
-            )
-          {
-            for (
-              typename Container::const_iterator iter = container.begin();
-              iter != container.end();
-              ++iter
-              )
-            {
-              send_packet_to(*iter, dest);
-            }
-          }
+  virtual void receive_packet_from(
+    const OpenDDS::DCPS::ReliableMulticast::detail::Packet& packet,
+    const ACE_INET_Addr& peer) = 0;
+};
 
-          virtual void send_packet_to(
-            const OpenDDS::DCPS::ReliableMulticast::detail::Packet& packet,
-            const ACE_INET_Addr& dest
-            );
-
-          virtual void receive(
-            const char* buffer,
-            size_t size,
-            const ACE_INET_Addr& peer
-            );
-
-          virtual void receive_packet_from(
-            const OpenDDS::DCPS::ReliableMulticast::detail::Packet& packet,
-            const ACE_INET_Addr& peer
-            ) = 0;
-        };
-
-      } /* namespace detail */
-
-    } /* namespace ReliableMulticast */
-
-  } /* namespace DCPS */
-
-} /* namespace OpenDDS */
+} // namespace detail
+} // namespace ReliableMulticast
+} // namespace DCPS
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "PacketHandler.inl"

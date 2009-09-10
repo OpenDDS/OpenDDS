@@ -1,6 +1,12 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef OPENDDS_DCPS_SIMPLETCPFACTORY_H
 #define OPENDDS_DCPS_SIMPLETCPFACTORY_H
 
@@ -10,31 +16,24 @@
 
 class SimpleTcpTransport;
 
+namespace OpenDDS {
+namespace DCPS {
 
-namespace OpenDDS
-{
+class SimpleTcp_Export SimpleTcpFactory : public TransportImplFactory {
+public:
 
-  namespace DCPS
-  {
+  SimpleTcpFactory();
+  virtual ~SimpleTcpFactory();
 
-    class SimpleTcp_Export SimpleTcpFactory : public TransportImplFactory
-    {
-      public:
+  virtual int requires_reactor() const;
 
-        SimpleTcpFactory();
-        virtual ~SimpleTcpFactory();
+protected:
 
-        virtual int requires_reactor() const;
+  virtual TransportImpl* create();
+};
 
-
-      protected:
-
-        virtual TransportImpl* create();
-    };
-
-  }  /* namespace DCPS */
-
-}  /* namespace OpenDDS */
+} // namespace DCPS
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "SimpleTcpFactory.inl"

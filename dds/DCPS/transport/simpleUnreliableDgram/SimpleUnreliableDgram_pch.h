@@ -1,3 +1,12 @@
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef SIMPLEUNRELIABLEDGRAM_PCH_H
 #define SIMPLEUNRELIABLEDGRAM_PCH_H
 

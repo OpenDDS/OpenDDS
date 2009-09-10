@@ -1,6 +1,12 @@
-/// -*- C++ -*-
-///
-/// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef DATA_COLLECTOR_H
 #define DATA_COLLECTOR_H
 
@@ -15,10 +21,11 @@
 #include <iosfwd>
 #include <vector>
 
-namespace OpenDDS { namespace DCPS {
+namespace OpenDDS {
+namespace DCPS {
 
 /**
- * @class DataCollector< DatumType>
+ * @class DataCollector<DatumType>
  *
  * @brief Collect data in a buffer.
  *
@@ -26,79 +33,79 @@ namespace OpenDDS { namespace DCPS {
  * extendable to allow data to be collected as a feature of a more
  * complex class.
  */
-template< typename DatumType>
+template<typename DatumType>
 class DataCollector {
-  public:
-    /// Selectors for behavior when buffer fills.
-    enum OnFull { KeepOldest, KeepNewest, Unbounded};
+public:
+  /// Selectors for behavior when buffer fills.
+  enum OnFull { KeepOldest, KeepNewest, Unbounded};
 
-    /**
-     * Construct with optional buffer size and full behavior.
-     *
-     * @param bound  - amount of data to store or reserve as buffer.
-     * @param onFull - behavior of collector when bound is reached.
-     *
-     * OnFull == KeepOldest: The buffer is limited to the amount of data
-     *                       specified by the bouund parameter and only
-     *                       the data collected first is retained.
-     * OnFull == KeepNewest: The buffer is limited to the amount of data
-     *                       specified by the bouund parameter and only
-     *                       the most recently collected data is
-     *                       retained.
-     * OnFull == Unbounded:  The buffer contains all collected data and
-     *                       the bound parameter is used as an initial
-     *                       reservation amount.
-     *
-     * Collection is either bounded or unbounded.  In the case of a
-     * bounded collection, either the first data collected or the most
-     * recent data collected is retained.  When an unbounded collection
-     * is specified, then the bound parameter is used as a capacity hint
-     * and that amount of data is reserved initially.
-     */
-    DataCollector( unsigned int bound = 0, OnFull onFull = KeepOldest);
+  /**
+   * Construct with optional buffer size and full behavior.
+   *
+   * @param bound  - amount of data to store or reserve as buffer.
+   * @param onFull - behavior of collector when bound is reached.
+   *
+   * OnFull == KeepOldest: The buffer is limited to the amount of data
+   *                       specified by the bouund parameter and only
+   *                       the data collected first is retained.
+   * OnFull == KeepNewest: The buffer is limited to the amount of data
+   *                       specified by the bouund parameter and only
+   *                       the most recently collected data is
+   *                       retained.
+   * OnFull == Unbounded:  The buffer contains all collected data and
+   *                       the bound parameter is used as an initial
+   *                       reservation amount.
+   *
+   * Collection is either bounded or unbounded.  In the case of a
+   * bounded collection, either the first data collected or the most
+   * recent data collected is retained.  When an unbounded collection
+   * is specified, then the bound parameter is used as a capacity hint
+   * and that amount of data is reserved initially.
+   */
+  DataCollector(unsigned int bound = 0, OnFull onFull = KeepOldest);
 
-    /// Allow the class to be extended.
-    virtual ~DataCollector();
+  /// Allow the class to be extended.
+  virtual ~DataCollector();
 
-    /// Implement data collection.
-    void collect( const DatumType& datum);
+  /// Implement data collection.
+  void collect(const DatumType& datum);
 
-    /// Amount of data actually stored.
-    unsigned int size() const;
+  /// Amount of data actually stored.
+  unsigned int size() const;
 
-    /// Convenience operator for collecting data by inserting it into the
-    /// collector.
-    DataCollector< DatumType>& operator<<( DatumType datum);
+  /// Convenience operator for collecting data by inserting it into the
+  /// collector.
+  DataCollector<DatumType>& operator<<(DatumType datum);
 
-    /// Implement insertion of collected data onto an ostream.
-    std::ostream& insert( std::ostream& str) const;
+  /// Implement insertion of collected data onto an ostream.
+  std::ostream& insert(std::ostream& str) const;
 
-  private:
-    /// The collected data goes here.
-    std::vector< DatumType> buffer_;
+private:
+  /// The collected data goes here.
+  std::vector<DatumType> buffer_;
 
-    /// Where to write the next datum collected.
-    unsigned int writeAt_;
+  /// Where to write the next datum collected.
+  unsigned int writeAt_;
 
-    /// Total or initial capacity of buffer.
-    unsigned int bound_;
+  /// Total or initial capacity of buffer.
+  unsigned int bound_;
 
-    /// Flag indicating that we have collected as much or more data than
-    /// we can store.
-    bool full_;
+  /// Flag indicating that we have collected as much or more data than
+  /// we can store.
+  bool full_;
 
-    /// Selector for behavior when buffer fills.
-    OnFull onFull_;
+  /// Selector for behavior when buffer fills.
+  OnFull onFull_;
 };
 
-}} // End namespace OpenDDS::DCPS
+} // namespace DCPS
+} // namespace OpenDDS
 
 /// Insert collected data onto an ostream.
-template< typename DatumType>
+template<typename DatumType>
 std::ostream& operator<<(
   std::ostream& str,
-  const OpenDDS::DCPS::DataCollector< DatumType>& value
-);
+  const OpenDDS::DCPS::DataCollector<DatumType>& value);
 
 #if defined (__ACE_INLINE__)
 #include "DataCollector_T.inl"
@@ -115,4 +122,3 @@ std::ostream& operator<<(
 #include /**/ "ace/post.h"
 
 #endif /* DATA_COLLECTOR_H */
-

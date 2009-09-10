@@ -1,16 +1,11 @@
-// -*- C++ -*-
-
-//=============================================================================
-/**
- *  @file   WatchdogTimer.h
+/*
+ * $Id$
  *
- *  $Id$
+ * Copyright 2009 Object Computing, Inc.
  *
- *  Underlying watchdog timer.
- *
- *  @author Ossama Othman <othmano@ociweb.com>
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
-//=============================================================================
 
 #ifndef OPENDDS_WATCHDOG_TIMER_H
 #define OPENDDS_WATCHDOG_TIMER_H
@@ -21,56 +16,53 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-
 class ACE_Time_Value;
 
-namespace OpenDDS
-{
-  namespace DCPS
-  {
-    class Watchdog;
+namespace OpenDDS {
+namespace DCPS {
 
-    /**
-     * @class WatchdogTimer
-     *
-     * @brief Event handler responsible for calling watchdog when
-     *        timer expires.
-     *
-     * This event handler is triggered when its corresponding timer
-     * interval expires.  It calls back on the watchdog object
-     * associated with it.
-     */
-    class WatchdogTimer
-      : public ACE_Event_Handler
-    {
-    public:
+class Watchdog;
 
-      /// Constructor.
-      WatchdogTimer (Watchdog * dog);
+/**
+ * @class WatchdogTimer
+ *
+ * @brief Event handler responsible for calling watchdog when
+ *        timer expires.
+ *
+ * This event handler is triggered when its corresponding timer
+ * interval expires.  It calls back on the watchdog object
+ * associated with it.
+ */
+class WatchdogTimer
+  : public ACE_Event_Handler {
+public:
 
-      /// Destructor.
-      virtual ~WatchdogTimer ();
+  /// Constructor.
+  WatchdogTimer(Watchdog * dog);
 
-    protected:
+  /// Destructor.
+  virtual ~WatchdogTimer();
 
-      /// Template method called when deadline period has expired.
-      /**
-       * This @c ACE_Event_Handler template method is called when the
-       * deadline period has expired.  The appropriate listener or
-       * condition method will be called.
-       */
-      virtual int handle_timeout (ACE_Time_Value const & current_time,
-                                  void const * act);
+protected:
 
-    private:
+  /// Template method called when deadline period has expired.
+  /**
+   * This @c ACE_Event_Handler template method is called when the
+   * deadline period has expired.  The appropriate listener or
+   * condition method will be called.
+   */
+  virtual int handle_timeout(ACE_Time_Value const & current_time,
+                             void const * act);
 
-      /// Pointer to @c Watchdog object which will be called when the
-      /// corresponding timer expires.
-      Watchdog * const watchdog_;
+private:
 
-    };
+  /// Pointer to @c Watchdog object which will be called when the
+  /// corresponding timer expires.
+  Watchdog * const watchdog_;
 
-  } // DCPS
-} // OpenDDS
+};
+
+} // namespace DCPS
+} // namespace OpenDDS
 
 #endif  /* OPENDDS_WATCHDOG_TIMER_H */

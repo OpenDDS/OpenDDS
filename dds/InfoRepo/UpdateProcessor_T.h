@@ -1,6 +1,12 @@
-// -*- C++ -*-
-//
-// $Id$
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef UPDATEPROCESSOR_T_H
 #define UPDATEPROCESSOR_T_H
 
@@ -8,70 +14,70 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+namespace DDS {
 
-namespace DDS { struct SampleInfo; }
+struct SampleInfo;
 
-namespace OpenDDS { namespace Federator {
+} // namespace DDS
 
-  /**
-   * @class UpdateProcessor
-   *
-   * @brief Interface for managing update publications.
-   *
-   * This class provides interfaces to manage update data received from
-   * federated repositories.
-   */
-  template< class DataType>
-  class  UpdateProcessor {
-    public:
-      /// Default constructor.
-      UpdateProcessor();
+namespace OpenDDS {
+namespace Federator {
 
-      /// Virtual destructor
-      virtual ~UpdateProcessor(void);
+/**
+ * @class UpdateProcessor
+ *
+ * @brief Interface for managing update publications.
+ *
+ * This class provides interfaces to manage update data received from
+ * federated repositories.
+ */
+template<class DataType>
+class  UpdateProcessor {
+public:
+  /// Default constructor.
+  UpdateProcessor();
 
-      //
-      // Abstract interface to be implemented per application.
-      //
+  /// Virtual destructor
+  virtual ~UpdateProcessor();
 
-      /// Entities are created.
-      virtual void processCreate(
-        const DataType*          sample,
-        const ::DDS::SampleInfo* info
-      ) = 0;
+  //
+  // Abstract interface to be implemented per application.
+  //
 
-      /// Entity Qos values are modified.
-      virtual void processUpdateQos1(
-        const DataType*          sample,
-        const ::DDS::SampleInfo* info
-      ) = 0;
+  /// Entities are created.
+  virtual void processCreate(
+    const DataType*          sample,
+    const DDS::SampleInfo* info) = 0;
 
-      /// Entity additional Qos values are modified.
-      /// A default null implementation is provided.
-      virtual void processUpdateQos2(
-        const DataType*          sample,
-        const ::DDS::SampleInfo* info
-      );
+  /// Entity Qos values are modified.
+  virtual void processUpdateQos1(
+    const DataType*          sample,
+    const DDS::SampleInfo* info) = 0;
 
-      /// Entities are destroyed.
-      virtual void processDelete(
-        const DataType*          sample,
-        const ::DDS::SampleInfo* info
-      ) = 0;
+  /// Entity additional Qos values are modified.
+  /// A default null implementation is provided.
+  virtual void processUpdateQos2(
+    const DataType*          sample,
+    const DDS::SampleInfo* info);
 
-      //
-      // Concrete implementation of common processing.
-      //
+  /// Entities are destroyed.
+  virtual void processDelete(
+    const DataType*          sample,
+    const DDS::SampleInfo* info) = 0;
 
-      /// Update publication information with sample data.
-      void processSample(
-        const DataType*          sample,
-        const ::DDS::SampleInfo* info
-      );
+  //
+  // Concrete implementation of common processing.
+  //
 
-  };
+  /// Update publication information with sample data.
+  void processSample(
+    const DataType*          sample,
+    const DDS::SampleInfo* info);
 
-}} // End namespace OpenDDS::Federator
+};
+
+} // namespace Federator
+} // namespace OpenDDS
 
 #if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
 #include "UpdateProcessor_T.cpp"
@@ -83,4 +89,3 @@ namespace OpenDDS { namespace Federator {
 #endif /* ACE_TEMPLATES_REQUIRE_PRAGMA */
 
 #endif  /* UPDATEPROCESSOR_T_H */
-
