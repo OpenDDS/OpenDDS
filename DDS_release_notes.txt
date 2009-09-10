@@ -1,5 +1,10 @@
 Version 2.0 of OpenDDS.
 
+* This is the first release of OpenDDS that conforms to the minimum
+  compliance profile as documented in formal/07-01-01 (version 1.2).
+  Near-complete support for the persistence profile and initial support
+  for the content-subscription profile is also provided in this release.
+
 New to this version are the following changes:
 
 - Updated support for DataWriter::unregister() and DataWriter::dispose()
