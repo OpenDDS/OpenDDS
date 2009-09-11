@@ -1,3 +1,31 @@
+Fri Sep 11 18:30:53 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Fixed a bug in listener_for() that should check if listener
+          is nil before return. This bug would prevent to traverse up
+          to find listener if current listener is nil and the status
+          is enabled.
+          
+        * dds/DdsDcpsInfrastructure.idl:
+
+          Added NO_STATUS_MASK and ALL_STATUS_MASK constants and made
+          default listen to all.
+          
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+
+          Added test case for listen_for() bug fix.
+          
+        * tests/DCPS/Serializer_wstring/DataReaderListener.cpp:
+        * tests/DCPS/Serializer_wstring/Writer.cpp:
+
+          Used old C-style cast to avoid wchar* cast compilation errors
+          on some platforms.
+          
 Fri Sep 11 17:10:13 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * DDS_release_notes.txt:

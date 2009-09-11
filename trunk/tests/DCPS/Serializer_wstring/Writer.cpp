@@ -12,12 +12,12 @@ using namespace Messenger;
 const int num_instances_per_writer = 1;
 const int num_messages = 10;
 
-CORBA::Char* charseq = const_cast<CORBA::Char*>("I'm char seq");
-CORBA::WChar* wcharseq = const_cast<CORBA::WChar*>(L"I'm wchar seq");
+CORBA::Char* charseq = (CORBA::Char*)("I'm char seq");
+CORBA::WChar* wcharseq = (CORBA::WChar*)(L"I'm wchar seq");
 const CORBA::Char* strseq = "I'm string seq";
-const CORBA::WChar* wstrseq = L"I'm wstring seq";
+const CORBA::WChar* wstrseq = (const CORBA::WChar*)(L"I'm wstring seq");
 const CORBA::Char* str = "I'm string";
-const CORBA::WChar* wstr = L"I'm wstring";
+const CORBA::WChar* wstr = (const CORBA::WChar*)(L"I'm wstring");
 
 Writer::Writer(::DDS::DataWriter_ptr writer)
 : writer_ (::DDS::DataWriter::_duplicate (writer)),

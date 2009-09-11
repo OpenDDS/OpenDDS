@@ -1831,7 +1831,7 @@ DataWriterImpl::listener_for(::DDS::StatusKind kind)
   // per 2.1.4.3.1 Listener Access to Plain Communication Status
   // use this entities factory if listener is mask not enabled
   // for this kind.
-  if ((listener_mask_ & kind) == 0) {
+  if (fast_listener_ == 0 || (listener_mask_ & kind) == 0) {
     return publisher_servant_->listener_for(kind);
 
   } else {
