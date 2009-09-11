@@ -25,8 +25,7 @@ template <typename T>
 class OpenDDS_Dcps_Export RcObject {
 public:
 
-  virtual ~RcObject() {
-  }
+  virtual ~RcObject() {}
 
   virtual void _add_ref() {
     ++this->ref_count_;

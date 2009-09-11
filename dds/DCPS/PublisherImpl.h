@@ -38,7 +38,7 @@ struct OpenDDS_Dcps_Export PublisherDataWriterInfo {
   /// The remote datawriter object reference.
   OpenDDS::DCPS::DataWriterRemote_ptr  remote_writer_objref_;
   /// The local datawriter object reference.
-  DDS::DataWriter_ptr        local_writer_objref_;
+  DDS::DataWriter_ptr          local_writer_objref_;
   /// The datawriter servant.
   DataWriterImpl*              local_writer_impl_;
   /// The topic id from repository.

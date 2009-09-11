@@ -73,7 +73,7 @@ struct OpenDDS_Dcps_Export PublicationInstance {
   ACE_Time_Value   cur_sample_tv_;
 
   long             deadline_timer_id_;
-} ;
+};
 
 } // namespace DCPS
 } // namespace OpenDDS

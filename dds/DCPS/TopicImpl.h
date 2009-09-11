@@ -86,10 +86,12 @@ public:
   CORBA::Long entity_refs() const {
     return entity_refs_;
   };
-  void add_entity_ref()           {
+
+  void add_entity_ref() {
     entity_refs_++;
   };
-  void remove_entity_ref()        {
+
+  void remove_entity_ref() {
     entity_refs_--;
   };
 

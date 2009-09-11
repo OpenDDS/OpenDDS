@@ -1,3 +1,25 @@
+Fri Sep 11 16:15:08 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/BuiltInTopicUtils.h:
+        * dds/DCPS/Cached_Allocator_With_Overflow_T.h:
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/DomainParticipantFactoryImpl.h:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DurabilityArray.h:
+        * dds/DCPS/GuardCondition.h:
+        * dds/DCPS/PublicationInstance.h:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/RcHandle_T.h:
+        * dds/DCPS/RcObject_T.h:
+        * dds/DCPS/ReceivedDataElementList.h:
+        * dds/DCPS/Stats_T.h:
+        * dds/DCPS/TopicImpl.h:
+
+          Minor formatting updates.
+
 Thu Sep 10 22:45:43 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * DDS_release_notes.txt:

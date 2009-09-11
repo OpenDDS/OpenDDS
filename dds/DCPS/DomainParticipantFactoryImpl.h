@@ -103,7 +103,7 @@ public:
 
 private:
 
-  DDS::DomainParticipantFactoryQos   qos_;
+  DDS::DomainParticipantFactoryQos qos_;
 
   /// The default qos value of DomainParticipant.
   DDS::DomainParticipantQos   default_participant_qos_;

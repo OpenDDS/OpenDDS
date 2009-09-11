@@ -87,10 +87,10 @@ typedef ACE_Message_Block DataSample ;
 *       it should be fairly quick.
 */
 struct OpenDDS_Dcps_Export DataSampleListElement {
-  DataSampleListElement(PublicationId           publication_id,
-                        TransportSendListener*  send_listner,
-                        PublicationInstance*    handle,
-                        TransportSendElementAllocator* allocator);
+  DataSampleListElement(PublicationId                   publication_id,
+                        TransportSendListener*          send_listner,
+                        PublicationInstance*            handle,
+                        TransportSendElementAllocator*  allocator);
 
   DataSampleListElement(const DataSampleListElement& elem);
 
@@ -106,7 +106,7 @@ struct OpenDDS_Dcps_Export DataSampleListElement {
   /// Publication Id used downstream.
   PublicationId          publication_id_ ;
   CORBA::ULong           num_subs_;
-  OpenDDS::DCPS::RepoId      subscription_ids_[OpenDDS::DCPS::MAX_READERS_PER_ELEM];
+  OpenDDS::DCPS::RepoId  subscription_ids_[OpenDDS::DCPS::MAX_READERS_PER_ELEM];
 
   /// Timestamp for the sample when it was first written.
   DDS::Time_t source_timestamp_;
@@ -153,8 +153,7 @@ struct OpenDDS_Dcps_Export DataSampleListElement {
  * @c over the "send samples" in a @c DataSampleList.
  */
 class OpenDDS_Dcps_Export DataSampleListIterator
-  : public std::iterator<std::bidirectional_iterator_tag,
-      DataSampleListElement> {
+  : public std::iterator<std::bidirectional_iterator_tag, DataSampleListElement> {
 public:
 
   /// Default constructor.

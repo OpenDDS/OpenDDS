@@ -38,7 +38,7 @@ typedef RepoId PublicationId;
 /// This helps distinguish new and old sequence numbers. (?)
 struct OpenDDS_Dcps_Export SequenceNumber {
   /// Construct with a value, default to negative starting point.
-  SequenceNumber(ACE_INT16 value = SHRT_MIN) : value_(value) { }
+  SequenceNumber(ACE_INT16 value = SHRT_MIN) : value_(value) {}
 
   // N.B: Default copy constructor is sufficient.
 
@@ -119,32 +119,33 @@ DataBlockAllocator;
 #define NO_DUP false
 
 /// This struct holds both object reference and the corresponding servant.
-template < typename T_impl, typename T, typename T_ptr, typename T_var >
+template <typename T_impl, typename T, typename T_ptr, typename T_var>
 struct Objref_Servant_Pair {
   Objref_Servant_Pair()
-  : svt_(0) {
-  };
+    : svt_(0)
+  {}
 
   Objref_Servant_Pair(T_impl* svt, T_ptr obj, bool dup)
-  : svt_(svt) {
+    : svt_(svt)
+  {
     if (dup) {
       obj_ = T::_duplicate(obj);
 
     } else {
       obj_ = obj;
     }
-  };
+  }
 
-  ~Objref_Servant_Pair() {
-  };
+  ~Objref_Servant_Pair()
+  {}
 
-  bool operator== (const Objref_Servant_Pair & pair) const {
+  bool operator==(const Objref_Servant_Pair & pair) const {
     return pair.svt_ == this->svt_;
-  };
+  }
 
   bool operator<(const Objref_Servant_Pair & pair) const {
     return this->svt_ < pair.svt_;
-  };
+  }
 
   T_impl* svt_;
   T_var   obj_;
