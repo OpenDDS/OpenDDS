@@ -1345,15 +1345,13 @@ Service_Participant::load_common_configuration()
     // Establish the scheduler if specified.
     //
     GET_CONFIG_STRING_VALUE(this->cf_, sect, ACE_TEXT("scheduler"), this->schedulerString_)
-#if ACE_MAJOR_VERSION == 5 && ACE_MINOR_VERSION >= 5
+
     suseconds_t usec(0);
 
     GET_CONFIG_VALUE(this->cf_, sect, ACE_TEXT("scheduler_slice"), usec, suseconds_t)
 
     if (usec > 0)
       this->schedulerQuantum_.usec(usec);
-
-#endif
   }
 
   return 0;

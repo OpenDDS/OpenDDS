@@ -438,7 +438,7 @@ idl2jni_visitor::visit_component (AST_Component *node)
   return -1;
 }
 
-int 
+int
 idl2jni_visitor::visit_component_fwd (AST_ComponentFwd *node)
 {
   if (node->imported () && !be_global->do_included_files ())
@@ -451,7 +451,7 @@ idl2jni_visitor::visit_component_fwd (AST_ComponentFwd *node)
   return -1;
 }
 
-int 
+int
 idl2jni_visitor::visit_eventtype (AST_EventType *node)
 {
   if (node->imported () && !be_global->do_included_files ())
@@ -464,7 +464,7 @@ idl2jni_visitor::visit_eventtype (AST_EventType *node)
   return -1;
 }
 
-int 
+int
 idl2jni_visitor::visit_eventtype_fwd (AST_EventTypeFwd *node)
 {
   if (node->imported () && !be_global->do_included_files ())
@@ -490,7 +490,7 @@ idl2jni_visitor::visit_home (AST_Home *node)
   return -1;
 }
 
-int 
+int
 idl2jni_visitor::visit_factory (AST_Factory *)
 {
   cout << "ERROR: factories not currently supported" << endl;
@@ -557,9 +557,7 @@ int idl2jni_visitor::visit_decl (AST_Decl *)
   return 0;
 }
 
-#if ACE_MAJOR_VERSION == 5 && ACE_MINOR_VERSION >= 5
 int idl2jni_visitor::visit_valuebox (AST_ValueBox *)
 {
   return 0;
 }
-#endif

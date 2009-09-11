@@ -6,7 +6,6 @@
 
 #include "ace/OS_NS_sys_stat.h"
 #include "ace/OS_NS_string.h"
-#include "ace/Version.h"
 
 #include <iostream>
 #include <sstream>
@@ -118,7 +117,7 @@ namespace
       }
 
     ostringstream oss;
-    if (jn.pkg_.size () > 0) 
+    if (jn.pkg_.size () > 0)
       oss <<
         "package " << pkgdecl << ";\n";
     oss <<
@@ -144,7 +143,7 @@ namespace
   {
     JavaName jn_help (jn, "Helper");
 
-    string body = 
+    string body =
       "  // Any and TypeCode operations not currently implemented\n"
       "  public static String id() { return \"" + string (repoid) + "\"; }\n";
 
@@ -570,7 +569,7 @@ bool idl_mapping_java::gen_interf (UTL_ScopedName *name, bool local,
     {
       extends += type (inherits[i]);
       extends_ops += type (inherits[i]) + "Operations";
-      if (i != inherits.size () - 1) 
+      if (i != inherits.size () - 1)
         {
           extends += ", ";
           extends_ops += ", ";
@@ -653,7 +652,7 @@ bool idl_mapping_java::gen_interf (UTL_ScopedName *name, bool local,
       string lb =
         "  private String[] _type_ids = {" + allRepoIds + "};\n\n"
         "  public String[] _ids() { return (String[])_type_ids.clone(); }\n";
-      ok = java_class_gen (jn_lb, JABSTRACT_CLASS, lb.c_str (), 
+      ok = java_class_gen (jn_lb, JABSTRACT_CLASS, lb.c_str (),
         "org.omg.CORBA.LocalObject", jn.clazz_.c_str ());
     }
 
@@ -697,10 +696,9 @@ namespace
       case AST_Expression::EV_bool:
         os << boolalpha << static_cast<bool> (dv.u.bool_val); break;
       case AST_Expression::EV_enum:       os << dv.u.enum_val; break;
-#if (ACE_MAJOR_VERSION > 5) || (ACE_MAJOR_VERSION == 5 && ACE_MINOR_VERSION > 5)
       case AST_Expression::EV_longlong:   os << dv.u.longlong_val; break;
       case AST_Expression::EV_ulonglong:  os << dv.u.ulonglong_val; break;
-#endif
+
       default:
         cerr << "ERROR: Bad discriminant type (shouldn't happen here)\n";
       }

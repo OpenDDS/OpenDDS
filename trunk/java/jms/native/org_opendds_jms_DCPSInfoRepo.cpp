@@ -16,10 +16,6 @@
 
 #include "org_opendds_jms_DCPSInfoRepo.h"
 
-#if ACE_MAJOR_VERSION == 5 && ACE_MINOR_VERSION < 5
-# define ACE_PRE_5_5
-#endif
-
 namespace
 {
 struct InitGuard
@@ -33,7 +29,7 @@ struct InitGuard
   {
     ACE::fini();
   }
-  
+
 } init_guard;
 
 jfieldID
@@ -77,11 +73,7 @@ delete_argv(JNIEnv*, ACE_TCHAR** argv, jsize len)
   // Skip first element; argv[0] is a string literal.
   for (int i = 1; i < len; ++i)
   {
-#ifdef ACE_PRE_5_5
-    ACE::String_Conversion::free(argv[i]);
-#else
     ACE_OS::free(argv[i]);
-#endif
   }
   delete[] argv;
 }
@@ -109,12 +101,7 @@ to_argv(JNIEnv* env, jobjectArray args, jsize len)
     }
 
     const char* cs = env->GetStringUTFChars(arg, 0);
-
-#ifdef ACE_PRE_5_5
-    argv[i] = ACE_TEXT_TO_TCHAR_OUT(cs);
-#else
     argv[i] = ACE_OS::strdup(ACE_TEXT_CHAR_TO_TCHAR (cs));
-#endif
 
     env->ReleaseStringUTFChars(arg, cs);
   }

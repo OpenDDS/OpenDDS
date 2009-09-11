@@ -16,15 +16,6 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#if defined (ACE_MAJOR_VERSION)                                 \
-  && (ACE_MAJOR_VERSION > 5                                     \
-      || (ACE_MAJOR_VERSION == 5 && ACE_MINOR_VERSION > 5)      \
-      || (ACE_MAJOR_VERSION == 5                                \
-          && ACE_MINOR_VERSION == 5                             \
-          && ACE_BETA_VERSION > 3))
-# include "ace/Truncate.h"
-#endif  /* ACE >= 5.5.4 */
-
 // Define a macro since we should NOT declare methods as extern and
 // then define them as inline
 #if defined(__ACE_INLINE__)
@@ -275,38 +266,6 @@ public:
   static bool changeable(const DDS::DomainParticipantFactoryQos& qos1,
                          const DDS::DomainParticipantFactoryQos& qos2);
 };
-
-// Convenience function to avoid introducing preprocessor
-// conditionals in more than one place.
-template<typename TO, typename FROM>
-inline TO truncate_cast(FROM val)
-{
-#if defined (ACE_MAJOR_VERSION)
-# if (ACE_MAJOR_VERSION > 5                                     \
-      || (ACE_MAJOR_VERSION == 5 && ACE_MINOR_VERSION > 5)      \
-      || (ACE_MAJOR_VERSION == 5                                \
-          && ACE_MINOR_VERSION == 5                             \
-          && ACE_BETA_VERSION > 6))
-  // ACE_Utils::truncate_cast<> is only supported in ACE 5.5.7 or
-  // better.
-  return ACE_Utils::truncate_cast<TO> (val);
-# elif (ACE_MAJOR_VERSION == 5     \
-        && ACE_MINOR_VERSION == 5  \
-        && ACE_BETA_VERSION > 3)
-  // ACE_Utils::Truncate<> is only supported between ACE 5.5.4 and
-  // 5.5.6.
-  return ACE_Utils::Truncate<TO> (val);
-# else
-  // We're SoL.  Ideally, ACE_Utils::truncate_cast<> should be
-  // backported to both TAO 1.4a and TAO 1.5a to avoid the need
-  // for this convenience function altogether.
-  return static_cast<TO>(val);
-# endif
-#else
-  // We're SoL.  See above.
-  return static_cast<TO>(val);
-#endif
-}
 
 } // namespace DCPS
 } // namespace OpenDDS

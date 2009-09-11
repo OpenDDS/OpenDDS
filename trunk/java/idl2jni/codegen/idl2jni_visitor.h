@@ -94,10 +94,8 @@ public:
 
   virtual int visit_native (AST_Native *node);
 
-#if ACE_MAJOR_VERSION == 5 && ACE_MINOR_VERSION >= 5
   virtual int visit_valuebox (AST_ValueBox *node);
-#endif
-  
+
 protected:
   AST_Decl *scope_;
   CORBA::Boolean in_reopened_;

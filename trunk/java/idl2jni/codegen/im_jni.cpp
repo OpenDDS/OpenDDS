@@ -190,7 +190,7 @@ namespace
         if (seq == "DDS/SampleInfoSeq") return NATIVE_INFO_SEQUENCE;
         return NATIVE_DATA_SEQUENCE;
       }
-    return NATIVE_UNKNOWN; 
+    return NATIVE_UNKNOWN;
   }
 }
 
@@ -1118,7 +1118,7 @@ namespace
     params.push_back(idl_mapping_jni::jvmSignature (attr->field_type ()));
 
     string fnName = jni_function_name (javaStub, attrname, &params);
-    
+
     if (local)
       {
         string attrname_cxx = isCxxKeyword (attrname) ? (string ("_cxx_")
