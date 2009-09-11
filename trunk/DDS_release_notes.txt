@@ -19,8 +19,7 @@ New to this version are the following changes:
   out.
 
 - Implemented PRESENTATION QoS policy as defined in formal/07-01-01.
-  Currently, only INSTANCE and TOPIC access scopes are supported. Ordered
-  access is supported effectively for the TOPIC access scope only.
+  Currently, GROUP access is not supported.
 
 - Implemented MANUAL_BY_TOPIC and MANUAL_BY_PARTICIPANT LIVELINESS QoS
   policy kinds.
