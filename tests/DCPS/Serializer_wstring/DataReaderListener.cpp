@@ -9,12 +9,12 @@
 
 using namespace Messenger;
 
-CORBA::Char* charseq = const_cast<CORBA::Char*>("I'm char seq");
-CORBA::WChar* wcharseq = const_cast<CORBA::WChar*>(L"I'm wchar seq");
+const CORBA::Char* charseq = "I'm char seq";
+const CORBA::WChar* wcharseq = (const CORBA::WChar*)(L"I'm wchar seq");
 const CORBA::Char* strseq = "I'm string seq";
-const CORBA::WChar* wstrseq = L"I'm wstring seq";
+const CORBA::WChar* wstrseq = (const CORBA::WChar*)(L"I'm wstring seq");
 const CORBA::Char* str = "I'm string";
-const CORBA::WChar* wstr = L"I'm wstring";
+const CORBA::WChar* wstr = (const CORBA::WChar*)(L"I'm wstring");
 
 const int num_expected_messages = 10;
 

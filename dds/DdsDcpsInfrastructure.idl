@@ -713,7 +713,9 @@ module OpenDDS
 
   module DCPS
   {
-    const DDS::StatusMask DEFAULT_STATUS_MASK = 0xffffffff;
+    const DDS::StatusMask ALL_STATUS_MASK = 0xffffffff;
+    const DDS::StatusMask NO_STATUS_MASK  = 0x00000000;
+    const DDS::StatusMask DEFAULT_STATUS_MASK = ALL_STATUS_MASK;
   };
 };
 

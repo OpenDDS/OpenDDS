@@ -1641,7 +1641,7 @@ DomainParticipantImpl::set_object_reference(const DDS::DomainParticipant_ptr& dp
 DDS::DomainParticipantListener*
 DomainParticipantImpl::listener_for(DDS::StatusKind kind)
 {
-  if ((listener_mask_ & kind) == 0) {
+  if (fast_listener_ == 0 || (listener_mask_ & kind) == 0) {
     return 0;
 
   } else {
