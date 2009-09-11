@@ -51,12 +51,21 @@
     </target>
 
     <target name="esb" depends="init">
+        <copy todir="${build.dir}">
+            <fileset dir="${src.dir}/opendds-ds.xml"/>
+            <filterset>
+                <filter token="VERSION" value="${opendds.version}"/>
+            </filterset>
+        </copy>
+
         <jar jarfile="${build.dir}/${ant.project.name}.esb"
              compress="${jar.compress}"
              index="${jar.index}">
             <fileset dir="${src.dir}">
-                <include name="opendds-ds.xml"/>
                 <include name="META-INF/*"/>
+            </fileset>
+            <fileset dir="${build.dir}">
+                <include name="opendds-ds.xml"/>
             </fileset>
         </jar>
     </target>
