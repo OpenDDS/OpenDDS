@@ -1,5 +1,10 @@
 /*
  * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
 
 package org.opendds.jms.management.annotation;
@@ -12,7 +17,7 @@ import java.lang.annotation.Target;
 
 /**
  * Indicates an MBean operation.
- * 
+ *
  * @author  Steven Stallion
  * @version $Revision$
  *

@@ -1,3 +1,12 @@
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 package OpenDDS.DCPS;
 
 public final class TheParticipantFactory {
@@ -27,5 +36,4 @@ public final class TheParticipantFactory {
       System.loadLibrary("OpenDDS_DCPS_Javad");
     else System.loadLibrary("OpenDDS_DCPS_Java");
   }
-
 }

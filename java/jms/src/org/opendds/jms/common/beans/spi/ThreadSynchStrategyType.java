@@ -1,5 +1,10 @@
 /*
  * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
 
 package org.opendds.jms.common.beans.spi;
@@ -24,7 +29,7 @@ public class ThreadSynchStrategyType implements Type<ThreadSynchStrategy> {
 
     public ThreadSynchStrategy valueOf(Object o) {
         assert o != null;
-        
+
         if (o instanceof Number) {
             return ThreadSynchStrategy.values()[((Number) o).intValue()];
 

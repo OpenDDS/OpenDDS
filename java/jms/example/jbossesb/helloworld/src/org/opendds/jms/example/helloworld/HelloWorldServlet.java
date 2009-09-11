@@ -1,5 +1,10 @@
 /*
  * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
 
 package org.opendds.jms.example.helloworld;
@@ -33,11 +38,11 @@ public class HelloWorldServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         int numberOfSamples = Integer.parseInt(request.getParameter("numberOfSamples"));
         long delay = Long.parseLong(request.getParameter("delay"));
-        
+
         try {
             Message message = MessageFactory.getInstance().getMessage();
             message.getBody().add("Hello World!");
-           
+
             ServiceInvoker invoker =
                 new ServiceInvoker("OpenDDS", "HelloWorld");
 

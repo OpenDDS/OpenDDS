@@ -1,5 +1,10 @@
 /*
  * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
 
 package org.opendds.jms.persistence;
@@ -80,7 +85,7 @@ public class DurableSubscriptionStore implements Serializable {
 
     public void unsubscribe(DurableSubscription subscription) throws JMSException {
         assert subscription != null;
-        
+
         Session session = sessionFactory.openSession();
         Transaction transaction = null;
         try {

@@ -1,3 +1,12 @@
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 package org.opendds.jms;
 
 import javax.jms.JMSException;
@@ -8,7 +17,8 @@ import javax.jms.TopicSubscriber;
 import org.opendds.jms.persistence.DurableSubscriptionStore;
 
 /**
- * @author Weiqi Gao
+ * @author  Weiqi Gao
+ * @version $Revision$
  */
 public class DurableMessageConsumerImpl extends MessageConsumerImpl implements TopicSubscriber {
     private boolean noLocal;

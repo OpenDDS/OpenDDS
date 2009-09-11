@@ -1,3 +1,12 @@
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 package OpenDDS.DCPS.transport;
 
 import java.io.Serializable;
@@ -34,5 +43,4 @@ public class AttachStatus implements Serializable {
       throws java.io.ObjectStreamException {
     return from_int(value());
   }
-
 }

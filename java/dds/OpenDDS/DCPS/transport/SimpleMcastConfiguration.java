@@ -1,3 +1,12 @@
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 package OpenDDS.DCPS.transport;
 
 public class SimpleMcastConfiguration
@@ -32,5 +41,4 @@ public class SimpleMcastConfiguration
     private boolean receiver;
     public boolean isReceiver() { return receiver; }
     public void setReceiver(boolean r) { receiver = r; }
-
 }

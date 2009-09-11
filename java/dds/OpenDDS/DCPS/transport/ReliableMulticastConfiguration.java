@@ -1,3 +1,12 @@
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 package OpenDDS.DCPS.transport;
 
 public class ReliableMulticastConfiguration extends TransportConfiguration {
@@ -32,5 +41,4 @@ public class ReliableMulticastConfiguration extends TransportConfiguration {
     private int receiverBufferSize;
     public int getReceiverBufferSize() { return receiverBufferSize; }
     public void setReceiverBufferSize(int rbs) { receiverBufferSize = rbs; }
-
 }

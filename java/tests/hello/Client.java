@@ -1,4 +1,11 @@
-// in order to clarify where all the classes live, we're not using "import" here
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 public class Client {
 
@@ -9,7 +16,7 @@ public class Client {
 
     if (orb == null) {
       System.err.println("ERROR: Failed to init ORB");
-      System.exit(-1);    
+      System.exit(-1);
     }
 
     if (args_holder.value.length < 2 || !"-k".equals(args_holder.value[0])) {
@@ -31,5 +38,4 @@ public class Client {
     hello.shutdown();
     orb.destroy();
   }
-
 }
