@@ -1,5 +1,10 @@
 /*
  * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
 
 import DDS.*;
@@ -27,24 +32,24 @@ import Complex.*;
  */
 public class ComplexIDLTest extends QuoteSupport {
     private static final int DOMAIN_ID = 42;
-    
+
     private static DomainParticipantFactory dpf;
     private static DomainParticipant participant;
 
     private static Topic topic;
-    
+
     private static Publisher publisher;
     private static Subscriber subscriber;
-    
+
     protected static void setUp(String[] args) {
         dpf = TheParticipantFactory.WithArgs(new StringSeqHolder(args));
         assert (dpf != null);
-        
+
         participant = dpf.create_participant(DOMAIN_ID, PARTICIPANT_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
         assert (participant != null);
-        
+
         DataTypeSupport typeSupport = new DataTypeSupportImpl();
-        
+
         int result = typeSupport.register_type(participant, "Complex::Data");
         assert (result != RETCODE_ERROR.value);
 
@@ -54,35 +59,35 @@ public class ComplexIDLTest extends QuoteSupport {
 
         publisher = participant.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
         assert (publisher != null);
-        
+
         AttachStatus status;
-        
-        TransportImpl transport1 = 
+
+        TransportImpl transport1 =
             TheTransportFactory.create_transport_impl(1, TheTransportFactory.AUTO_CONFIG);
         assert (transport1 != null);
-        
+
         status = transport1.attach_to_publisher(publisher);
         assert (status.value() != AttachStatus._ATTACH_ERROR);
-        
+
         subscriber = participant.create_subscriber(SUBSCRIBER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
         assert (subscriber != null);
-        
+
         TransportImpl transport2 =
             TheTransportFactory.create_transport_impl(2, TheTransportFactory.AUTO_CONFIG);
         assert (transport2 != null);
-        
+
         status = transport2.attach_to_subscriber(subscriber);
         assert (status.value() != AttachStatus._ATTACH_ERROR);
     }
-    
+
     protected static void testQuotes() throws Exception {
         System.out.println("And now for something completely different...");
-        
+
         final AtomicInteger count = new AtomicInteger();
-        
+
         final Lock lock = new ReentrantLock();
         final Condition finished = lock.newCondition();
-        
+
         publisher.create_datawriter(topic, DATAWRITER_QOS_DEFAULT.get(),
             new DDS._DataWriterListenerLocalBase() {
                 public void on_liveliness_lost(DataWriter dw, LivelinessLostStatus status) {}
@@ -102,34 +107,34 @@ public class ComplexIDLTest extends QuoteSupport {
                         //NOTE: Since we are testing a complex type which contains a
                         //      union, both variants (DATA_IDL, DATA_STREAM) must be
                         //      tested on the same set of data:
-                        
+
                         List<Data> dataItems = new ArrayList<Data>();
-                        
+
                         for (Quote quote : quotes) {
                             // DATA_IDL
                             dataItems.add(createData(quote));
 
                             // DATA_STREAM
                             ByteArrayOutputStream out = new ByteArrayOutputStream();
-                            
+
                             ObjectOutputStream os = new ObjectOutputStream(out);
                             os.writeObject(quote.line); // Quote is not Serializable
-                            
+
                             dataItems.add(createData(out.toByteArray()));
                         }
-                        
+
                         count.set(dataItems.size());
-                        
+
                         for (Data data : dataItems) {
                             int result = writer.write(data, HANDLE_NIL.value);
                             assert (result != RETCODE_ERROR.value);
                         }
-                        
+
                     } catch (Throwable t) {
                         t.printStackTrace();
                     }
                 };
-            }, DEFAULT_STATUS_MASK.value 
+            }, DEFAULT_STATUS_MASK.value
         );
 
         lock.lock();
@@ -177,7 +182,7 @@ public class ComplexIDLTest extends QuoteSupport {
 
                                     ObjectInputStream os = new ObjectInputStream(in);
                                     Object obj = os.readObject();
-                                    
+
                                     assert (obj instanceof String);
                             }
 
@@ -190,21 +195,21 @@ public class ComplexIDLTest extends QuoteSupport {
                                     lock.unlock();
                                 }
                             }
-                            
+
                         } catch (Throwable t) {
                             t.printStackTrace();
                         }
                     }
                 }, DEFAULT_STATUS_MASK.value
             );
-        
+
             // Wait for DataReader
             finished.await();
-            
+
         } finally {
             lock.unlock();
         }
-        
+
         System.out.println("(Those responsible have been sacked.)");
     }
 
@@ -212,7 +217,7 @@ public class ComplexIDLTest extends QuoteSupport {
         setUp(args);
         try {
             testQuotes();
-            
+
         } finally {
             tearDown();
         }
@@ -221,35 +226,35 @@ public class ComplexIDLTest extends QuoteSupport {
     protected static void tearDown() {
         participant.delete_contained_entities();
         dpf.delete_participant(participant);
-        
+
         TheTransportFactory.release();
         TheServiceParticipant.shutdown();
     }
-    
+
     //
 
     private static Data createData(byte[] bytes) {
         Data data = new Data();
         data.payload = new DataUnion();
-        
+
         data.payload.stream(bytes);
-        
+
         return data;
     }
-    
+
     private static Data createData(Quote quote) {
         Data data = new Data();
         data.payload = new DataUnion();
-                    
+
         data.payload.idl_quote(quote);
 
         return data;
     }
-    
+
     private static Data createDefaultData() {
         Quote quote = new Quote();
         quote.cast_member = new CastMember();
-        
+
         return createData(quote);
     }
 }

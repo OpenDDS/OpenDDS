@@ -1,3 +1,12 @@
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 package OpenDDS.DCPS.transport;
 
 public abstract class SimpleUnreliableDgramConfiguration
@@ -17,7 +26,6 @@ public abstract class SimpleUnreliableDgramConfiguration
     private int maxOutputPausePeriod;
     public int getMaxOutputPausePeriod() { return maxOutputPausePeriod; }
     public void setMaxOutputPausePeriod(int mopp) {
-        maxOutputPausePeriod = mopp; 
+        maxOutputPausePeriod = mopp;
     }
-
 }

@@ -1,3 +1,12 @@
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 package OpenDDS.DCPS.transport;
 
 public final class TransportImpl {
@@ -19,5 +28,4 @@ public final class TransportImpl {
     public native AttachStatus attach_to_publisher(DDS.Publisher pub);
 
     public native AttachStatus attach_to_subscriber(DDS.Subscriber sub);
-
 }

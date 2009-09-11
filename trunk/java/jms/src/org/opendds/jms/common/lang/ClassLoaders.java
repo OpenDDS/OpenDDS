@@ -1,5 +1,10 @@
 /*
  * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
 
 package org.opendds.jms.common.lang;
@@ -44,7 +49,7 @@ public class ClassLoaders {
     public static InputStream getResourceAsStream(String name, ClassLoader cl) {
         assert name != null;
         assert cl != null;
-        
+
         return verifyResource(name, cl.getResourceAsStream(name));
     }
 

@@ -1,3 +1,12 @@
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 import DDS.*;
 import OpenDDS.DCPS.*;
 import OpenDDS.DCPS.transport.*;
@@ -78,5 +87,4 @@ public class TestSubscriber {
         TheTransportFactory.release();
         TheServiceParticipant.shutdown();
     }
-
 }

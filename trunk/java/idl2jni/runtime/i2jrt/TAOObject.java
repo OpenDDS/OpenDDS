@@ -1,3 +1,12 @@
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 package i2jrt;
 import org.omg.CORBA.*;
 
@@ -37,7 +46,7 @@ public class TAOObject implements org.omg.CORBA.Object {
       NVList arg_list, NamedValue result) {
     throw new NO_IMPLEMENT();
   }
-  
+
   public Request _create_request(Context ctx, String operation,
       NVList arg_list, NamedValue result, ExceptionList exclist,
       ContextList ctxlist) {

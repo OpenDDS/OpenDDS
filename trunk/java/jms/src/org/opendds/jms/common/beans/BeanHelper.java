@@ -1,5 +1,10 @@
 /*
  * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
 
 package org.opendds.jms.common.beans;
@@ -156,7 +161,7 @@ public class BeanHelper {
 
     public void setProperties(Object instance, Properties properties) {
         assert properties != null;
-        
+
         Enumeration en = properties.propertyNames();
         while (en.hasMoreElements()) {
             String name = (String) en.nextElement();

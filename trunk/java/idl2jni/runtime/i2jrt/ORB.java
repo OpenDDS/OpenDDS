@@ -1,3 +1,12 @@
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 package i2jrt;
 import org.omg.CORBA.StringSeqHolder;
 
@@ -35,9 +44,9 @@ public class ORB {
   static {
     String libName = "idl2jni_runtime";
     String propVal = System.getProperty("opendds.native.debug");
-    if (propVal != null && ("1".equalsIgnoreCase(propVal) || 
-        "y".equalsIgnoreCase(propVal) || "yes".equalsIgnoreCase(propVal) 
-        || "t".equalsIgnoreCase(propVal) || 
+    if (propVal != null && ("1".equalsIgnoreCase(propVal) ||
+        "y".equalsIgnoreCase(propVal) || "yes".equalsIgnoreCase(propVal)
+        || "t".equalsIgnoreCase(propVal) ||
         "true".equalsIgnoreCase(propVal))) libName = libName + "d";
     System.loadLibrary(libName);
   }

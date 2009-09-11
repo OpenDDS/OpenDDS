@@ -1,5 +1,10 @@
 /*
  * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
 
 package org.opendds.jms.common.beans.spi;
@@ -22,7 +27,7 @@ public class ByteType implements Type<Byte> {
 
     public Byte valueOf(Object o) {
         assert o != null;
-        
+
         if (o instanceof Boolean) {
             return ((Boolean) o) ? (byte) 1 : 0;
 

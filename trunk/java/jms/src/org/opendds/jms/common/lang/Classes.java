@@ -1,5 +1,10 @@
 /*
  * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
 
 package org.opendds.jms.common.lang;
@@ -29,7 +34,7 @@ public class Classes {
 
     public static Class[] getTypes(Object[] parameters) {
         assert parameters != null;
-        
+
         List<Class> types = new ArrayList<Class>();
 
         for (Object parameter : parameters) {

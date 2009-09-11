@@ -1,3 +1,12 @@
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 package OpenDDS.DCPS.transport;
 
 public class SimpleTcpConfiguration extends TransportConfiguration {
@@ -42,7 +51,7 @@ public class SimpleTcpConfiguration extends TransportConfiguration {
     private int maxOutputPausePeriod;
     public int getMaxOutputPausePeriod() { return maxOutputPausePeriod; }
     public void setMaxOutputPausePeriod(int mopp) {
-        maxOutputPausePeriod = mopp; 
+        maxOutputPausePeriod = mopp;
     }
 
     private int passiveReconnectDuration;
@@ -58,5 +67,4 @@ public class SimpleTcpConfiguration extends TransportConfiguration {
     public void setPassiveConnectDuration(int pcd) {
         passiveConnectDuration = pcd;
     }
-
 }

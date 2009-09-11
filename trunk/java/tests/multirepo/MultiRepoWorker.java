@@ -1,5 +1,10 @@
 /*
  * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
 
 import DDS.DATAREADER_QOS_DEFAULT;
@@ -50,12 +55,12 @@ public class MultiRepoWorker {
     private static volatile int transportId;
 
     private DomainParticipant participant;
-    
+
     private Topic topic;
     private TransportImpl transport;
 
     private boolean read;
-    
+
     public MultiRepoWorker(DomainParticipant participant) {
         assert (participant != null);
 
@@ -82,7 +87,7 @@ public class MultiRepoWorker {
     public void write(final String text) {
         Publisher publisher =
             participant.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
-        
+
         assert (publisher != null);
 
         AttachStatus status = transport.attach_to_publisher(publisher);
@@ -118,13 +123,13 @@ public class MultiRepoWorker {
             }, DEFAULT_STATUS_MASK.value
         );
     }
-    
+
     public void read() {
         Subscriber subscriber =
             participant.create_subscriber(SUBSCRIBER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
-        
+
         assert (subscriber != null);
-        
+
         AttachStatus status = transport.attach_to_subscriber(subscriber);
         if (status.value() != AttachStatus._ATTACH_OK) {
             throw new IllegalStateException("Unable to attach subscriber to transport!");
@@ -152,7 +157,7 @@ public class MultiRepoWorker {
 
                     SampleInfo si = new SampleInfo();
                     si.source_timestamp = new DDS.Time_t();
-                    
+
                     SampleInfoHolder sih = new SampleInfoHolder(si);
                     reader.take_next_sample(mh, sih);
 
