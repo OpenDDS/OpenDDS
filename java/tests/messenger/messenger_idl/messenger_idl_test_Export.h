@@ -1,4 +1,3 @@
-// -*- C++ -*-
 // $Id$
 // Definition for Win32 Export directives.
 // This file is generated automatically by generate_export_file.pl messenger_idl_test
@@ -14,7 +13,7 @@
 
 #if !defined (MESSENGER_IDL_TEST_HAS_DLL)
 #  define MESSENGER_IDL_TEST_HAS_DLL 1
-#endif /* ! MESSENGER_IDL_TEST_HAS_DLL */
+#endif /* !MESSENGER_IDL_TEST_HAS_DLL */
 
 #if defined (MESSENGER_IDL_TEST_HAS_DLL) && (MESSENGER_IDL_TEST_HAS_DLL == 1)
 #  if defined (MESSENGER_IDL_TEST_BUILD_DLL)

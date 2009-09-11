@@ -1,5 +1,11 @@
-// -*- C++ -*-
-
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 // This file is here to avoid the use of VPATH.  Since the TAO_IDL
 // counterparts are built with a different BE_GlobalData definition, the

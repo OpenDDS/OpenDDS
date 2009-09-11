@@ -1,5 +1,3 @@
-// This may look like C, but it's really -*- C++ -*-
-
 /*
 
 COPYRIGHT
@@ -67,7 +65,6 @@ trademarks or registered trademarks of Sun Microsystems, Inc.
 #ifndef IDL2JNI_BE_EXTERN_H
 #define IDL2JNI_BE_EXTERN_H
 
-
 #include "be_global.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -76,11 +73,11 @@ trademarks or registered trademarks of Sun Microsystems, Inc.
 
 extern BE_GlobalData *be_global;
 
-extern int BE_init (int &, ACE_TCHAR *[]);
-extern void BE_post_init (char *[], long);
-extern void BE_version (void);
-extern void BE_produce (void);
-extern void BE_abort (void);
-extern void BE_cleanup (void);
+extern int BE_init(int &, ACE_TCHAR *[]);
+extern void BE_post_init(char *[], long);
+extern void BE_version();
+extern void BE_produce();
+extern void BE_abort();
+extern void BE_cleanup();
 
 #endif /* IDL2JNI_BE_EXTERN_H */

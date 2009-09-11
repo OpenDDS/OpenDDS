@@ -1,4 +1,3 @@
-// -*- C++ -*-
 // $Id$
 // Definition for Win32 Export directives.
 // This file is generated automatically by generate_export_file.pl dcps_java
@@ -14,7 +13,7 @@
 
 #if !defined (DCPS_JAVA_HAS_DLL)
 #  define DCPS_JAVA_HAS_DLL 1
-#endif /* ! DCPS_JAVA_HAS_DLL */
+#endif /* !DCPS_JAVA_HAS_DLL */
 
 #if defined (DCPS_JAVA_HAS_DLL) && (DCPS_JAVA_HAS_DLL == 1)
 #  if defined (DCPS_JAVA_BUILD_DLL)

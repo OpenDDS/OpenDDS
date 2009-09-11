@@ -1,4 +1,3 @@
-// -*- C++ -*-
 // $Id$
 // Definition for Win32 Export directives.
 // This file is generated automatically by generate_export_file.pl opendds_jms_native
@@ -14,7 +13,7 @@
 
 #if !defined (OPENDDS_JMS_NATIVE_HAS_DLL)
 #  define OPENDDS_JMS_NATIVE_HAS_DLL 1
-#endif /* ! OPENDDS_JMS_NATIVE_HAS_DLL */
+#endif /* !OPENDDS_JMS_NATIVE_HAS_DLL */
 
 #if defined (OPENDDS_JMS_NATIVE_HAS_DLL) && (OPENDDS_JMS_NATIVE_HAS_DLL == 1)
 #  if defined (OPENDDS_JMS_NATIVE_BUILD_DLL)
