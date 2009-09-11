@@ -327,11 +327,7 @@ namespace {
 
 void loadLibIfNeeded(const ACE_TCHAR *svcname, const ACE_TCHAR *svcconf)
 {
-#if TAO_MAJOR_VERSION == 1 && TAO_MINOR_VERSION < 5
-  ACE_Service_Repository *asg = ACE_Service_Repository::instance();
-#else
   ACE_Service_Gestalt *asg = ACE_Service_Config::current();
-#endif
 
   if (asg->find(svcname) == -1 /*not found*/) {
     ACE_Service_Config::process_directive(svcconf);

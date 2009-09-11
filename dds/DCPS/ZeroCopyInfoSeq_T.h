@@ -23,21 +23,14 @@
 // any non-listener entity implementations.
 #include "dds/DCPS/LocalObject.h"
 
-#include <tao/Version.h>
-#if TAO_MAJOR_VERSION == 1 && TAO_MINOR_VERSION == 4
-#  include <tao/Sequence_T.h>
-#  define TAO_BASE_SEQUENCE TAO_Unbounded_Sequence
-#else
-#  include <tao/Unbounded_Value_Sequence_T.h>
-#  define TAO_BASE_SEQUENCE TAO::unbounded_value_sequence
-#endif
+#include <tao/Unbounded_Value_Sequence_T.h>
 
 //This must stay in namespace "TAO" until the tao_idl compiler is changed
 namespace TAO {
 namespace DCPS {
 
 template <class InfoType, size_t DEF_MAX = DCPS_ZERO_COPY_SEQ_DEFAULT_SIZE>
-class ZeroCopyInfoSeq : public TAO_BASE_SEQUENCE <InfoType> {
+class ZeroCopyInfoSeq : public TAO::unbounded_value_sequence<InfoType> {
 public:
 
   ZeroCopyInfoSeq();

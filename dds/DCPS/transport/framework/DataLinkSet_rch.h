@@ -11,7 +11,6 @@
 #define OPENDDS_DCPS_DATALINKSET_RCH_H
 
 #include "dds/DCPS/RcHandle_T.h"
-#include "ace/Version.h"
 
 namespace OpenDDS {
 namespace DCPS {

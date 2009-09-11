@@ -31,13 +31,7 @@
 #include <orbsvcs/Shutdown_Utilities.h>
 
 #ifdef ACE_AS_STATIC_LIBS
-#include <tao/Version.h>
-#if TAO_MAJOR_VERSION == 1 && TAO_MINOR_VERSION == 4
-// no ImR_Client, and we are already including it statically since we are
-// statically linking to TAO_PortableServer
-#else
 #include "tao/ImR_Client/ImR_Client.h"
-#endif
 #endif
 
 #include "ace/Get_Opt.h"

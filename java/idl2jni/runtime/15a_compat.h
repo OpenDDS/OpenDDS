@@ -12,8 +12,8 @@
 
 #include "tao/Version.h"
 
-#if TAO_MAJOR_VERSION == 1 && (TAO_MINOR_VERSION < 5 || \
-  (TAO_MINOR_VERSION == 5 && TAO_BETA_VERSION <= 6) )
+#if (TAO_MAJOR_VERSION == 1 && \
+ TAO_MINOR_VERSION == 5 && TAO_BETA_VERSION <= 6)
 #  define IDL2JNI_NO_INC_SCSET_H
 #  define IDL2JNI_CONST_SEQ_ELEM charstr_sequence_element
 #else
