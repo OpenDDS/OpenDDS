@@ -22,18 +22,20 @@ class RcHandle {
 public:
 
   RcHandle()
-  : ptr_(0) {
-  }
+    : ptr_(0)
+  {}
 
   RcHandle(T *p, bool take_ownership = true)
-  : ptr_(p) {
+    : ptr_(p)
+  {
     if (!take_ownership) {
       this->bump_up();
     }
   }
 
   RcHandle(const RcHandle &b)
-  : ptr_(b.ptr_) {
+    : ptr_(b.ptr_)
+  {
     this->bump_up();
   }
 

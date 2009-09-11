@@ -66,9 +66,7 @@ public:
     ACE_NEW(this->pool_,
             char[n_chunks * chunk_size]);
 
-    for (size_t c = 0;
-         c < n_chunks;
-         c++) {
+    for (size_t c = 0; c < n_chunks; c++) {
       void* placement = this->pool_ + c * chunk_size;
       this->free_list_.add(new(placement) ACE_Cached_Mem_Pool_Node<T>);
     }

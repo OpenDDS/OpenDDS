@@ -28,10 +28,9 @@ template<typename DataType>
 class Stats : public DataCollector<DataType> {
 public:
   /// Default constructor.
-  Stats(
-    unsigned int amount = 0,
-    typename DataCollector<DataType>::OnFull type
-    = DataCollector<DataType>::KeepOldest);
+  Stats(unsigned int amount = 0,
+        typename DataCollector<DataType>::OnFull type =
+          DataCollector<DataType>::KeepOldest);
 
   /// Default bitwise copy is sufficient.
 

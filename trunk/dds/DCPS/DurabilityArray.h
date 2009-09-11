@@ -41,15 +41,13 @@ public:
   DurabilityArray(size_t size,
                   ACE_Allocator * allocator)
     : ACE_Array_Base<T> (size, allocator)
-  {
-  }
+  {}
 
   DurabilityArray(size_t size,
                   T const & default_value,
                   ACE_Allocator * allocator)
     : ACE_Array_Base<T> (size, default_value, allocator)
-  {
-  }
+  {}
 
   DurabilityArray(DurabilityArray<T> const & rhs)
     : ACE_Array_Base<T> (rhs.size(), rhs.allocator_)
@@ -59,8 +57,7 @@ public:
   }
 
   ~DurabilityArray()
-  {
-  }
+  {}
 
   void operator= (DurabilityArray<T> const & rhs)
   {

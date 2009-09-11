@@ -118,15 +118,15 @@ public:
 
   static bool consistent(const DDS::DomainParticipantQos& qos);
 
-  static bool consistent(const DDS::TopicQos            & qos);
+  static bool consistent(const DDS::TopicQos& qos);
 
-  static bool consistent(const DDS::DataWriterQos       & qos);
+  static bool consistent(const DDS::DataWriterQos& qos);
 
-  static bool consistent(const DDS::PublisherQos        & qos);
+  static bool consistent(const DDS::PublisherQos& qos);
 
-  static bool consistent(const DDS::DataReaderQos       & qos);
+  static bool consistent(const DDS::DataReaderQos& qos);
 
-  static bool consistent(const DDS::SubscriberQos       & qos);
+  static bool consistent(const DDS::SubscriberQos& qos);
 
   static bool consistent(const DDS::DomainParticipantFactoryQos & qos);
 
@@ -257,20 +257,20 @@ public:
   static bool changeable(const DDS::DomainParticipantQos& qos1,
                          const DDS::DomainParticipantQos& qos2);
 
-  static bool changeable(const DDS::TopicQos            & qos1,
-                         const DDS::TopicQos            & qos2);
+  static bool changeable(const DDS::TopicQos& qos1,
+                         const DDS::TopicQos& qos2);
 
-  static bool changeable(const DDS::DataWriterQos       & qos1,
-                         const DDS::DataWriterQos       & qos2);
+  static bool changeable(const DDS::DataWriterQos& qos1,
+                         const DDS::DataWriterQos& qos2);
 
-  static bool changeable(const DDS::PublisherQos        & qos1,
-                         const DDS::PublisherQos        & qos2);
+  static bool changeable(const DDS::PublisherQos& qos1,
+                         const DDS::PublisherQos& qos2);
 
-  static bool changeable(const DDS::DataReaderQos       & qos1,
-                         const DDS::DataReaderQos       & qos2);
+  static bool changeable(const DDS::DataReaderQos& qos1,
+                         const DDS::DataReaderQos& qos2);
 
-  static bool changeable(const DDS::SubscriberQos       & qos1,
-                         const DDS::SubscriberQos       & qos2);
+  static bool changeable(const DDS::SubscriberQos& qos1,
+                         const DDS::SubscriberQos& qos2);
 
   static bool changeable(const DDS::DomainParticipantFactoryQos& qos1,
                          const DDS::DomainParticipantFactoryQos& qos2);

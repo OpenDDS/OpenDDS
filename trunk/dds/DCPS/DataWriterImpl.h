@@ -185,15 +185,15 @@ public:
    * Initialize the data members.
    */
   virtual void init(
-    DDS::Topic_ptr                       topic,
-    TopicImpl*                             topic_servant,
-    const DDS::DataWriterQos &           qos,
-    DDS::DataWriterListener_ptr          a_listener,
-    const DDS::StatusMask &              mask,
-    OpenDDS::DCPS::DomainParticipantImpl*  participant_servant,
-    OpenDDS::DCPS::PublisherImpl*          publisher_servant,
-    DDS::DataWriter_ptr                  dw_local,
-    OpenDDS::DCPS::DataWriterRemote_ptr    dw_remote)
+    DDS::Topic_ptr                        topic,
+    TopicImpl*                            topic_servant,
+    const DDS::DataWriterQos &            qos,
+    DDS::DataWriterListener_ptr           a_listener,
+    const DDS::StatusMask &               mask,
+    OpenDDS::DCPS::DomainParticipantImpl* participant_servant,
+    OpenDDS::DCPS::PublisherImpl*         publisher_servant,
+    DDS::DataWriter_ptr                   dw_local,
+    OpenDDS::DCPS::DataWriterRemote_ptr   dw_remote)
   ACE_THROW_SPEC((CORBA::SystemException));
 
   /**
@@ -359,7 +359,7 @@ public:
   // ciju: Seems this is no longer being used.
   // Was wrong. Still required.
   ACE_INLINE
-  ACE_Recursive_Thread_Mutex&      get_lock() {
+  ACE_Recursive_Thread_Mutex& get_lock() {
     return data_container_->lock_;
   }
 

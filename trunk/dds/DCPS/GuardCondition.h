@@ -29,7 +29,9 @@ class OpenDDS_Dcps_Export GuardCondition
   , public virtual OpenDDS::DCPS::ConditionImpl {
 public:
   GuardCondition()
-  : trigger_value_(false) {}
+    : trigger_value_(false)
+  {}
+
   virtual ~GuardCondition() {}
 
   CORBA::Boolean get_trigger_value()

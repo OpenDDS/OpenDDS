@@ -39,8 +39,8 @@ public:
       sequence_(0),
       previous_data_sample_(0),
       next_data_sample_(0),
-      ref_count_(1) {
-  }
+      ref_count_(1)
+  {}
 
   long dec_ref() {
     return --this->ref_count_;
@@ -85,7 +85,7 @@ public:
   ACE_Atomic_Op<ACE_Thread_Mutex, long> zero_copy_cnt_;
 
   /// The data sample's sequence number
-  ACE_INT16   sequence_ ;
+  ACE_INT16 sequence_ ;
 
   /// the previous data sample in the ReceivedDataElementList
   ReceivedDataElement *previous_data_sample_ ;
@@ -141,7 +141,7 @@ public:
   ReceivedDataElement* tail_ ;
 
   /// Number of elements in the list.
-  ssize_t                size_ ;
+  ssize_t              size_ ;
 
 private:
   InstanceState *instance_state_ ;

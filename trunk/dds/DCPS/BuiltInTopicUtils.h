@@ -76,11 +76,12 @@ public:
   DDS::ReturnCode_t instance_handle_to_repo_key(
     DomainParticipantImpl*         dp,
     const char*                    bit_name,
-    const DDS::InstanceHandle_t& handle,
-    OpenDDS::DCPS::RepoId&       repoId) {
+    const DDS::InstanceHandle_t&   handle,
+    OpenDDS::DCPS::RepoId&         repoId)
+  {
     BIT_DataSeq data;
     DDS::ReturnCode_t ret
-    = instance_handle_to_bit_data(dp, bit_name, handle, data);
+      = instance_handle_to_bit_data(dp, bit_name, handle, data);
 
     if (ret != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -98,21 +99,21 @@ public:
   }
 
   DDS::ReturnCode_t instance_handle_to_bit_data(
-    DomainParticipantImpl*   dp,
-    const char*              bit_name,
+    DomainParticipantImpl*       dp,
+    const char*                  bit_name,
     const DDS::InstanceHandle_t& handle,
-    BIT_DataSeq&                   data) {
-    DDS::Subscriber_var bit_subscriber
-    = dp->get_builtin_subscriber() ;
+    BIT_DataSeq&                 data)
+  {
+    DDS::Subscriber_var bit_subscriber = dp->get_builtin_subscriber() ;
 
-    DDS::DataReader_var reader
-    = bit_subscriber->lookup_datareader(bit_name) ;
+    DDS::DataReader_var reader =
+      bit_subscriber->lookup_datareader(bit_name) ;
 
     BIT_Reader_var bit_reader = BIT_Reader::_narrow(reader.in());
 
-    ACE_Time_Value due = ACE_OS::gettimeofday()
-                         + ACE_Time_Value(TheServiceParticipant->bit_lookup_duration_msec() / 1000,
-                                          (TheServiceParticipant->bit_lookup_duration_msec() % 1000)*1000);
+    ACE_Time_Value due = ACE_OS::gettimeofday() +
+      ACE_Time_Value(TheServiceParticipant->bit_lookup_duration_msec() / 1000,
+                     (TheServiceParticipant->bit_lookup_duration_msec() % 1000)*1000);
 
     DDS::ReturnCode_t ret = DDS::RETCODE_OK;
 
@@ -184,7 +185,8 @@ class BIT_Helper_2 {
 public:
   DDS::ReturnCode_t repo_ids_to_instance_handles(
     const IdSeq&                    repoids,
-    DDS::InstanceHandleSeq&       handles) {
+    DDS::InstanceHandleSeq&         handles)
+  {
     CORBA::ULong repoids_len = repoids.length();
     handles.length(repoids_len);
 

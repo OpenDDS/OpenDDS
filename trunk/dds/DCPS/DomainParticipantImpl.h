@@ -59,32 +59,29 @@ class DomainParticipantFactoryImpl;
 */
 class OpenDDS_Dcps_Export DomainParticipantImpl
   : public virtual OpenDDS::DCPS::LocalObject<DomainParticipantExt>,
-      public virtual OpenDDS::DCPS::EntityImpl {
+    public virtual OpenDDS::DCPS::EntityImpl {
 public:
+  typedef Objref_Servant_Pair <SubscriberImpl, DDS::Subscriber,
+          DDS::Subscriber_ptr, DDS::Subscriber_var> Subscriber_Pair;
 
-  typedef Objref_Servant_Pair <SubscriberImpl,
-  DDS::Subscriber,
-  DDS::Subscriber_ptr,
-  DDS::Subscriber_var > Subscriber_Pair;
-  typedef Objref_Servant_Pair <PublisherImpl,
-  DDS::Publisher,
-  DDS::Publisher_ptr,
-  DDS::Publisher_var > Publisher_Pair;
-  typedef Objref_Servant_Pair <TopicImpl,
-  DDS::Topic,
-  DDS::Topic_ptr,
-  DDS::Topic_var > Topic_Pair;
+  typedef Objref_Servant_Pair <PublisherImpl, DDS::Publisher,
+          DDS::Publisher_ptr, DDS::Publisher_var> Publisher_Pair;
+
+  typedef Objref_Servant_Pair <TopicImpl, DDS::Topic,
+          DDS::Topic_ptr, DDS::Topic_var> Topic_Pair;
 
   typedef std::set<Subscriber_Pair> SubscriberSet;
   typedef std::set<Publisher_Pair> PublisherSet;
 
   struct RefCounted_Topic {
     RefCounted_Topic()
-        : client_refs_(0) {};
+      : client_refs_(0)
+    {}
 
     RefCounted_Topic(const Topic_Pair & pair)
-        : pair_(pair),
-        client_refs_(1) {};
+      : pair_(pair),
+        client_refs_(1)
+    {}
 
     /// The topic object reference.
     Topic_Pair     pair_;
@@ -97,11 +94,11 @@ public:
 
   ///Constructor
   DomainParticipantImpl(DomainParticipantFactoryImpl *       factory,
-                        const DDS::DomainId_t&             domain_id,
+                        const DDS::DomainId_t&               domain_id,
                         const RepoId&                        dp_id,
-                        const DDS::DomainParticipantQos &  qos,
-                        DDS::DomainParticipantListener_ptr a_listener,
-                        const DDS::StatusMask &            mask,
+                        const DDS::DomainParticipantQos &    qos,
+                        DDS::DomainParticipantListener_ptr   a_listener,
+                        const DDS::StatusMask &              mask,
                         bool                                 federated = false);
 
   ///Destructor
@@ -380,7 +377,7 @@ private:
   DDS::Topic_var       bit_sub_topic_;
 
   /// Listener to initiate failover with.
-  FailoverListener*      failoverListener_;
+  FailoverListener*    failoverListener_;
 
   /// Instance handle generators for non-repo backed entities
   /// (i.e. subscribers and publishers).
