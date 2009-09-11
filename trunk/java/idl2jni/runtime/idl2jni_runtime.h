@@ -99,17 +99,6 @@ void copyToJava(JNIEnv *jni, jobject &target,
   copyToJava(jni, target, var);
 }
 
-#if TAO_MAJOR_VERSION == 1 && TAO_MINOR_VERSION < 5
-template <typename T>
-void copyToCxx(JNIEnv *jni,
-               TAO_Object_Manager<T, typename T::_var_type> target, jobject source)
-{
-  typename T::_var_type var;
-  copyToCxx(jni, var, source);
-  target = var;
-}
-#endif
-
 idl2jni_runtime_Export
 jobject currentThread(JNIEnv *);
 

@@ -9,7 +9,6 @@
 
 #include "global_extern.h"
 #include "be_extern.h"
-#include "tao/Version.h"
 
 void
 BE_version()

@@ -15,7 +15,6 @@
 #include "dds/DCPS/RcObject_T.h"
 
 #include "ace/Synch_Traits.h"
-#include "ace/Version.h"
 #include "ace/SString.h"
 #include "ace/os_include/os_dirent.h"
 
