@@ -1,4 +1,3 @@
-// -*- C++ -*-
 // $Id$
 // Definition for Win32 Export directives.
 // This file is generated automatically by generate_export_file.pl complex_idl_test
@@ -14,7 +13,7 @@
 
 #if !defined (COMPLEX_IDL_TEST_HAS_DLL)
 #  define COMPLEX_IDL_TEST_HAS_DLL 1
-#endif /* ! COMPLEX_IDL_TEST_HAS_DLL */
+#endif /* !COMPLEX_IDL_TEST_HAS_DLL */
 
 #if defined (COMPLEX_IDL_TEST_HAS_DLL) && (COMPLEX_IDL_TEST_HAS_DLL == 1)
 #  if defined (COMPLEX_IDL_TEST_BUILD_DLL)

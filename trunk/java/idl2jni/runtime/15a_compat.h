@@ -1,4 +1,11 @@
-/* -*- C++ -*- */
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #ifndef IDL2JNI_RT_15A_COMPAT_H
 #define IDL2JNI_RT_15A_COMPAT_H

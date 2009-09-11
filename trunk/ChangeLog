@@ -1,3 +1,45 @@
+Fri Sep 11 22:07:43 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/dds/DDS_QoS_jni.cpp:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * java/dds/OpenDDS_jni_helpers.h:
+        * java/dds/dcps_java_export.h:
+        * java/idl2jni/codegen/be_extern.h:
+        * java/idl2jni/codegen/be_global.h:
+        * java/idl2jni/codegen/be_global.cpp:
+        * java/idl2jni/codegen/be_init.cpp:
+        * java/idl2jni/codegen/be_produce.cpp:
+        * java/idl2jni/codegen/drv_args.cpp:
+        * java/idl2jni/codegen/drv_preproc.cpp:
+        * java/idl2jni/codegen/idl2jni.cpp:
+        * java/idl2jni/codegen/idl2jni_visitor.h:
+        * java/idl2jni/codegen/idl2jni_visitor.cpp:
+        * java/idl2jni/codegen/idl_mapping.h:
+        * java/idl2jni/codegen/idl_mapping.cpp:
+        * java/idl2jni/codegen/im_java.cpp:
+        * java/idl2jni/codegen/im_jni.cpp:
+        * java/idl2jni/runtime/15a_compat.h:
+        * java/idl2jni/runtime/i2jrt_ORB.cpp:
+        * java/idl2jni/runtime/i2jrt_TAOObject.cpp:
+        * java/idl2jni/runtime/idl2jni_BaseJavaPeer.h:
+        * java/idl2jni/runtime/idl2jni_jni.h:
+        * java/idl2jni/runtime/idl2jni_runtime.h:
+        * java/idl2jni/runtime/idl2jni_runtime.cpp:
+        * java/idl2jni/runtime/idl2jni_runtime_Export.h:
+        * java/idl2jni/tests/simple/simple.idl:
+        * java/jms/native/Message.idl:
+        * java/jms/native/opendds_jms_native_Export.h:
+        * java/jms/native/org_opendds_jms_DCPSInfoRepo.cpp:
+        * java/tao/tao_java_export.h:
+        * java/tests/complex_idl/Complex.idl:
+        * java/tests/complex_idl/complex_idl_test_Export.h:
+        * java/tests/messenger/messenger_idl/Messenger.idl:
+        * java/tests/messenger/messenger_idl/messenger_idl_test_Export.h:
+        * java/tests/multirepo/MultiRepo.idl:
+        * java/tests/multirepo/multirepo_test_Export.h:
+
+          Reformatted native Java with updated style.
+
 Fri Sep 11 20:21:12 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/compat/build.xml:

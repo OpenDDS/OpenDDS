@@ -1,4 +1,3 @@
-// -*- C++ -*-
 // $Id$
 // Definition for Win32 Export directives.
 // This file is generated automatically by generate_export_file.pl multirepo_test
@@ -14,7 +13,7 @@
 
 #if !defined (MULTIREPO_TEST_HAS_DLL)
 #  define MULTIREPO_TEST_HAS_DLL 1
-#endif /* ! MULTIREPO_TEST_HAS_DLL */
+#endif /* !MULTIREPO_TEST_HAS_DLL */
 
 #if defined (MULTIREPO_TEST_HAS_DLL) && (MULTIREPO_TEST_HAS_DLL == 1)
 #  if defined (MULTIREPO_TEST_BUILD_DLL)

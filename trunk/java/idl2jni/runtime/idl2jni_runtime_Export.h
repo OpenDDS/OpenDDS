@@ -1,5 +1,3 @@
-
-// -*- C++ -*-
 // $Id$
 // Definition for Win32 Export directives.
 // This file is generated automatically by generate_export_file.pl idl2jni_runtime
@@ -15,7 +13,7 @@
 
 #if !defined (IDL2JNI_RUNTIME_HAS_DLL)
 #  define IDL2JNI_RUNTIME_HAS_DLL 1
-#endif /* ! IDL2JNI_RUNTIME_HAS_DLL */
+#endif /* !IDL2JNI_RUNTIME_HAS_DLL */
 
 #if defined (IDL2JNI_RUNTIME_HAS_DLL) && (IDL2JNI_RUNTIME_HAS_DLL == 1)
 #  if defined (IDL2JNI_RUNTIME_BUILD_DLL)

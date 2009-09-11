@@ -1,4 +1,3 @@
-// -*- C++ -*-
 // $Id$
 // Definition for Win32 Export directives.
 // This file is generated automatically by generate_export_file.pl tao_java
@@ -14,7 +13,7 @@
 
 #if !defined (TAO_JAVA_HAS_DLL)
 #  define TAO_JAVA_HAS_DLL 1
-#endif /* ! TAO_JAVA_HAS_DLL */
+#endif /* !TAO_JAVA_HAS_DLL */
 
 #if defined (TAO_JAVA_HAS_DLL) && (TAO_JAVA_HAS_DLL == 1)
 #  if defined (TAO_JAVA_BUILD_DLL)
