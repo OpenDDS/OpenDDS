@@ -17,14 +17,12 @@ BE_version (void)
 int
 BE_init (int &, ACE_TCHAR *[])
 {
-#if ACE_MAJOR_VERSION == 5 && ACE_MINOR_VERSION >= 5
   ACE_NEW_RETURN (be_global, BE_GlobalData, -1);
-#endif
   return 0;
 }
 
 void
-BE_post_init (BE_PI_CONST char *[], long)
+BE_post_init (char *[], long)
 {
 }
 

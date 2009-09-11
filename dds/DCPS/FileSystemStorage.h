@@ -63,23 +63,15 @@ namespace FileSystemStorage {
 // For Win32 long path name support, used internally and not exported
 #if defined ACE_WIN32 || defined ACE_USES_WCHAR
 
-#  if ACE_MAJOR_VERSION == 5 && ACE_MINOR_VERSION < 5
-#    ifdef ACE_USES_WCHAR
-#      define DDS_DIRENT wdirent
-#    else
-#      define DDS_DIRENT dirent
-#    endif // wchar
-#  else // ACE 5.5 and up gives us the ACE_DIRENT macro
-#    ifdef ACE_WIN32
+# ifdef ACE_WIN32
 typedef ACE_DIRENT DDS_DIRENT;
-#    else // !ACE_WIN32
+# else // !ACE_WIN32
 struct DDS_DIRENT {
   ACE_DIRENT* real_dirent_;
   ACE_TCHAR* d_name;
   DDS_DIRENT() : real_dirent_(), d_name() {}
 };
-#    endif // ACE_WIN32
-#  endif // ACE 5.4
+# endif // ACE_WIN32
 
 struct DDS_DIR;
 class DDS_Dirent {

@@ -19,11 +19,11 @@ BE_GlobalData *be_global = 0;
 
 BE_GlobalData::BE_GlobalData (void)
   : filename_ (0),
-    do_server_side_ (I_TRUE)
+    do_server_side_ (true)
 {
   // At this point, the FE has been initialized.  We can
   // now instruct it that we want to preserve c++ keywords.
-  idl_global->preserve_cpp_keywords (I_TRUE);
+  idl_global->preserve_cpp_keywords (true);
 }
 
 BE_GlobalData::~BE_GlobalData (void)
@@ -97,20 +97,20 @@ BE_GlobalData::filename (const char *fname)
   this->filename_ = fname;
 }
 
-idl_bool
+bool
 BE_GlobalData::do_included_files (void) const
 {
   return false; //we never process included files
 }
 
-idl_bool
+bool
 BE_GlobalData::do_server_side (void) const
 {
   return this->do_server_side_;
 }
 
 void
-BE_GlobalData::do_server_side (idl_bool val)
+BE_GlobalData::do_server_side (bool val)
 {
   this->do_server_side_ = val;
 }
@@ -309,7 +309,7 @@ BE_GlobalData::generator_init (void)
   AST_Generator *gen = 0;
   ACE_NEW_RETURN (gen,
                   AST_Generator,
-                  0);             
+                  0);
   return gen;
 }
 

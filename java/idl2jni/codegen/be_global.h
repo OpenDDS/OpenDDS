@@ -5,7 +5,6 @@
 #define IDL2JNI_BE_GLOBAL_H
 
 
-#include "14a_compat.h"
 #include "ace/SString.h"
 
 #include <string>
@@ -44,10 +43,10 @@ public:
   const char *filename (void) const;
   void filename (const char *fname);
 
-  idl_bool do_included_files (void) const;
+  bool do_included_files (void) const;
 
-  idl_bool do_server_side (void) const;
-  void do_server_side (idl_bool val);
+  bool do_server_side (void) const;
+  void do_server_side (bool val);
 
   ACE_CString spawn_options (void);
   // Command line passed to ACE_Process::spawn. Different
@@ -55,16 +54,16 @@ public:
 
   void parse_args (long &i, char **av);
   // Parse args that affect the backend.
-  
+
   void prep_be_arg (char *s);
   // Special BE arg call factored out of DRV_args.
-  
+
   void arg_post_proc (void);
   // Checks made after parsing args.
-  
+
   void usage (void) const;
   // Display usage of BE-specific options.
-  
+
   AST_Generator *generator_init (void);
   // Create an AST node generator.
 
@@ -72,7 +71,7 @@ public:
   void close_streams ();
 
   std::ostringstream stub_header_, stub_impl_, skel_header_, skel_impl_;
-  ACE_CString stub_header_name_, stub_impl_name_, skel_header_name_, 
+  ACE_CString stub_header_name_, stub_impl_name_, skel_header_name_,
     skel_impl_name_;
 
   ///print message to all open streams
@@ -110,7 +109,7 @@ private:
   const char *filename_;
   // Name of the IDL file we are processing.
 
-  idl_bool do_server_side_;
+  bool do_server_side_;
 
   ACE_CString stub_export_macro_, stub_export_include_,
     skel_export_macro_, skel_export_include_, native_lib_name_;
