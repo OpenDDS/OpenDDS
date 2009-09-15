@@ -87,6 +87,7 @@ struct PublicationProfile {
   DDS::PublisherQos  publisherQos;
   DDS::DataWriterQos writerQos;
   unsigned int       writerQosMask;
+  unsigned int       associations;
 
   void copyToWriterQos( ::DDS::DataWriterQos& qos);
 };

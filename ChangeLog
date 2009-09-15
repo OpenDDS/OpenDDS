@@ -1,3 +1,14 @@
+Tue Sep 15 17:53:38 UTC 2009  Trevor Fields  <fields_t@ociweb.com>
+
+       * performance-tests/Bench/src/TestProcess.mpc:
+       * performance-tests/Bench/src/Process.cpp:
+       * performance-tests/Bench/src/Process.h:
+       * performance-tests/Bench/src/EntityProfiles.h:
+       * performance-tests/Bench/src/Options.cpp:
+
+         Added ability to specify the number of associations a pupblicationi
+         will receive.
+
 Fri Sep 11 23:04:58 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * java/
