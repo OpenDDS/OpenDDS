@@ -52,6 +52,7 @@ Process::~Process()
 Process::Process( const Options& options)
  : options_( options),
    publicationWaiter_( new DDS::WaitSet),
+   publicationsAssociations_(0),
    subscriptionWaiter_( new DDS::WaitSet),
    guardCondition_( new DDS::GuardCondition),
    condition_( this->lock_),
@@ -275,7 +276,7 @@ Process::Process( const Options& options)
        current != this->options_.publicationProfileMap().end();
        ++current
      ) {
-    // Grab the topic for which this subscription will be created.
+    // Grab the topic for which this publication will be created.
     TopicMap::iterator topicLocation
       = this->topics_.find( current->second->topic);
     if( topicLocation == this->topics_.end()) {
@@ -289,7 +290,7 @@ Process::Process( const Options& options)
     }
     DDS::Topic_var topic = topicLocation->second;
 
-    // Grab the participant in which this subscription will be installed.
+    // Grab the participant in which this publication will be installed.
     Options::TopicProfileMap::const_iterator where
       = this->options_.topicProfileMap().find( current->second->topic);
     if( where == this->options_.topicProfileMap().end()) {
@@ -374,6 +375,9 @@ Process::Process( const Options& options)
       }
       subscription->set_destination( this->publications_[ current->first]);
     }
+
+    // Add the publications expected associations
+    publicationsAssociations_ += current->second->associations;
   }
 
   // Go ahead and get the output files opened and ready for use.
@@ -412,7 +416,7 @@ Process::run()
         ACE_TEXT("(%P|%t) Process::run() - ")
         ACE_TEXT("%d of %d subscriptions attached to publications, waiting for more.\n"),
         cummulative_count,
-        this->publications_.size()
+        publicationsAssociations_
       ));
     }
     if( DDS::RETCODE_OK != this->publicationWaiter_->wait( conditions, timeout)) {
@@ -443,7 +447,7 @@ Process::run()
 
   // @NOTE: This currently makes the simplifying assumption that there
   // is a single subscription for each publication.
-  } while( cummulative_count < this->publications_.size());
+  } while( cummulative_count < publicationsAssociations_);
 
   // Kluge to bias the race between BuiltinTopic samples and application
   // samples towards the BuiltinTopics during association establishment.

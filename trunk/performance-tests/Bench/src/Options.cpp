@@ -106,6 +106,7 @@ namespace { // anonymous namespace for file scope.
   const ACE_TCHAR* DATACOLLECTIONFILE_KEYNAME                  = ACE_TEXT("DataCollectionFile");
   const ACE_TCHAR* DATACOLLECTIONBOUND_KEYNAME                 = ACE_TEXT("DataCollectionBound");
   const ACE_TCHAR* DATACOLLECTIONRETENTION_KEYNAME             = ACE_TEXT("DataCollectionRetention");
+  const ACE_TCHAR* ASSOCIATIONS_KEYNAME                        = ACE_TEXT("Associations");
 
 } // end of anonymous namespace.
 
@@ -1128,6 +1129,7 @@ Options::loadPublication(
    *   MessageMax       = <number> # upper bound for size
    *   MessageMin       = <number> # lower bound for size
    *   MessageDeviation = <number> # standard deviation for size
+   *   Associations     = <number> # subscriptions that will connect
    */
 
   // Note that this requires that the Service Participant already be
@@ -1138,6 +1140,7 @@ Options::loadPublication(
   profile->publisherQos  = TheServiceParticipant->initial_PublisherQos();
   profile->writerQos     = TheServiceParticipant->initial_DataWriterQos();
   profile->writerQosMask = 0;
+  profile->associations = 1;
   ACE_TString valueString;
 
   // Presentation                        = <string> # One of INSTANCE, TOPIC, GROUP
@@ -1944,6 +1947,22 @@ Options::loadPublication(
         sectionName.c_str(),
         MESSAGEDEVIATION_KEYNAME,
         profile->size.deviation()
+      ));
+    }
+  }
+
+  // Associations = <number> # number of subscriptions that will connect
+  valueString.clear();
+  heap.get_string_value( sectionKey, ASSOCIATIONS_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->associations = ACE_OS::atoi( valueString.c_str());
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        ASSOCIATIONS_KEYNAME,
+        profile->associations
       ));
     }
   }

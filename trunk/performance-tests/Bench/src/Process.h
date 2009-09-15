@@ -1,4 +1,3 @@
-// -*- C++ -*-
 // $Id$
 #ifndef PROCESS_H
 #define PROCESS_H
@@ -41,19 +40,19 @@ class Process {
 
   private:
     /// Participant container.
-    typedef std::map< std::string, DDS::DomainParticipant_var> ParticipantMap;
+    typedef std::map<std::string, DDS::DomainParticipant_var> ParticipantMap;
 
     /// Topic container.
-    typedef std::map< std::string, DDS::Topic_var> TopicMap;
+    typedef std::map<std::string, DDS::Topic_var> TopicMap;
 
     /// Output file container.
-    typedef std::map< std::string, std::ofstream*> OutputFileMap;
+    typedef std::map<std::string, std::ofstream*> OutputFileMap;
 
     /// Publication container.
-    typedef std::map< std::string, Publication*> PublicationMap;
+    typedef std::map<std::string, Publication*> PublicationMap;
 
     /// Subscription container.
-    typedef std::map< std::string, Subscription*> SubscriptionMap;
+    typedef std::map<std::string, Subscription*> SubscriptionMap;
 
     /// Test options.
     const Options& options_;
@@ -75,6 +74,9 @@ class Process {
 
     /// Blocking object for publication synchronization.
     DDS::WaitSet_var publicationWaiter_;
+
+    /// Number of associations that the publications will make
+    unsigned int publicationsAssociations_;
 
     /// Subscriptions.
     SubscriptionMap subscriptions_;
@@ -105,4 +107,3 @@ std::ostream& operator<<( std::ostream& str, const Test::Process& value)
 }
 
 #endif /* PROCESS_H */
-

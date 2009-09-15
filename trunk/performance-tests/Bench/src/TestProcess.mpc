@@ -17,6 +17,10 @@ project(BenchProcess) : dcpsexe_with_unreliable_dgram, dcps_reliable_multicast, 
     Test.idl
   }
 
+  Header_Files {
+    Shutdown.h
+  }
+
   Source_Files {
     Exponential.cpp
     Gaussian.cpp
