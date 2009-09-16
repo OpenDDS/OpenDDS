@@ -1,3 +1,13 @@
+Wed Sep 16 17:49:34 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Updated nightly Messenger and Messenger_ZeroCopy tests.
+
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy:
+
+          Messenger_ZeroCopy redux.
+
 Wed Sep 16 05:05:23 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
