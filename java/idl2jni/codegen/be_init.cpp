@@ -7,6 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include "tao/Version.h"
+
 #include "global_extern.h"
 #include "be_extern.h"
 
