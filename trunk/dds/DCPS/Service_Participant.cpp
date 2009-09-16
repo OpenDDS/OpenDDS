@@ -554,6 +554,7 @@ Service_Participant::initialize()
   initial_DataWriterQos_.transport_priority = initial_TransportPriorityQosPolicy_;
   initial_DataWriterQos_.lifespan = initial_LifespanQosPolicy_;
   initial_DataWriterQos_.user_data = initial_UserDataQosPolicy_;
+  initial_DataWriterQos_.ownership = initial_OwnershipQosPolicy_;
   initial_DataWriterQos_.ownership_strength = initial_OwnershipStrengthQosPolicy_;
   initial_DataWriterQos_.writer_data_lifecycle = initial_WriterDataLifecycleQosPolicy_;
 
@@ -572,6 +573,7 @@ Service_Participant::initialize()
   initial_DataReaderQos_.resource_limits = initial_ResourceLimitsQosPolicy_;
   initial_DataReaderQos_.user_data = initial_UserDataQosPolicy_;
   initial_DataReaderQos_.time_based_filter = initial_TimeBasedFilterQosPolicy_;
+  initial_DataReaderQos_.ownership = initial_OwnershipQosPolicy_;
   initial_DataReaderQos_.reader_data_lifecycle = initial_ReaderDataLifecycleQosPolicy_;
 
   initial_SubscriberQos_.presentation = initial_PresentationQosPolicy_;

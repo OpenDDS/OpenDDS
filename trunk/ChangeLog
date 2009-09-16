@@ -1,3 +1,14 @@
+Wed Sep 16 05:05:23 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Added missing initialization code for OWNERSHIP on DataReader and
+          DataWriter entities.
+
+        * java/idl2jni/codegen/be_init.cpp:
+
+          Added missing tao/Version.h include.
+
 Wed Sep 16 04:57:34 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/DataReaderListener.h:
