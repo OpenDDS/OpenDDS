@@ -1,3 +1,23 @@
+Wed Sep 16 04:57:34 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/DataReaderListener.h:
+        * DevGuideExamples/DCPS/Messenger/DataReaderListener.cpp:
+        * DevGuideExamples/DCPS/Messenger/Messenger.idl:
+        * DevGuideExamples/DCPS/Messenger/Writer.h:
+        * DevGuideExamples/DCPS/Messenger/Writer.cpp:
+        * DevGuideExamples/DCPS/Messenger/publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/stack_subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger/subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/DataReaderListener.h:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/DataReaderListener.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/Messenger.idl:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/Writer.h:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/Writer.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/subscriber.cpp:
+
+          DevGuideExamples updates.
+
 Tue Sep 15 17:53:38 UTC 2009  Trevor Fields  <fields_t@ociweb.com>
 
        * performance-tests/Bench/src/TestProcess.mpc:
