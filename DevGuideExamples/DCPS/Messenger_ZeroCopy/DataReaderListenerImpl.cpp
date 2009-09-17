@@ -57,29 +57,36 @@ DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     ACE_OS::exit(-1);
   }
 
-  Messenger::Message message;
-  DDS::SampleInfo info;
+  Messenger::MessageSeq messages;
+  DDS::SampleInfoSeq info;
 
-  DDS::ReturnCode_t error = reader_i->take_next_sample(message, info);
+  DDS::ReturnCode_t error = reader_i->take(messages,
+                                           info,
+                                           DDS::LENGTH_UNLIMITED,
+                                           DDS::ANY_SAMPLE_STATE,
+                                           DDS::ANY_VIEW_STATE,
+                                           DDS::ANY_INSTANCE_STATE);
 
   if (error == DDS::RETCODE_OK) {
-    std::cout << "SampleInfo.sample_rank = " << info.sample_rank << std::endl;
-    std::cout << "SampleInfo.instance_state = " << info.instance_state << std::endl;
+    std::cout << "SampleInfo.sample_rank = " << info[0].sample_rank << std::endl;
+    std::cout << "SampleInfo.instance_state = " << info[0].instance_state << std::endl;
 
-    if (info.valid_data) {
-      std::cout << "Message: subject    = " << message.subject.in() << std::endl
-                << "         subject_id = " << message.subject_id   << std::endl
-                << "         from       = " << message.from.in()    << std::endl
-                << "         count      = " << message.count        << std::endl
-                << "         text       = " << message.text.in()    << std::endl;
+    if (info[0].valid_data) {
+      std::cout << "Message: subject    = " << messages[0].subject.in() << std::endl
+                << "         subject_id = " << messages[0].subject_id   << std::endl
+                << "         from       = " << messages[0].from.in()    << std::endl
+                << "         count      = " << messages[0].count        << std::endl
+                << "         text       = " << messages[0].text.in()    << std::endl;
 
     }
 
   } else {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("%N:%l on_data_available()")
-               ACE_TEXT(" ERROR: take_next_sample failed!\n")));
+               ACE_TEXT(" ERROR: take failed!\n")));
   }
+
+  reader_i->return_loan(messages, info);
 }
 
 void

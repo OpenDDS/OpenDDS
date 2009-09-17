@@ -1,6 +1,7 @@
 Thu Sep 17 20:30:34 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy:
 
           DevGuideExamples updates.
 
