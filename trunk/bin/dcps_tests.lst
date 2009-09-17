@@ -129,32 +129,6 @@ performance-tests/DCPS/TCPListenerTest/run_test-4p1s.pl: !DCPS_MIN
 # Not running UDPListenerTest due to the machine dependent peformance of UDP.
 
 DevGuideExamples/DCPS/Messenger/run_test.pl: !DCPS_MIN
-DevGuideExamples/DCPS/Messenger/run_test.pl default_tcp: !DCPS_MIN
-DevGuideExamples/DCPS/Messenger/run_test.pl udp: !DCPS_MIN
-DevGuideExamples/DCPS/Messenger/run_test.pl default_udp: !DCPS_MIN
-DevGuideExamples/DCPS/Messenger/run_test.pl mcast: !DCPS_MIN
-DevGuideExamples/DCPS/Messenger/run_test.pl default_mcast: !DCPS_MIN
-DevGuideExamples/DCPS/Messenger/run_test.pl reliable_mcast: !DCPS_MIN
-DevGuideExamples/DCPS/Messenger/run_test.pl default_reliable_mcast: !DCPS_MIN
-DevGuideExamples/DCPS/Messenger/run_test.pl nobits: !DCPS_MIN
-DevGuideExamples/DCPS/Messenger/run_test.pl stack: !DCPS_MIN
-DevGuideExamples/DCPS/Messenger/run_corbaloc_test.pl: !DCPS_MIN
-DevGuideExamples/DCPS/Messenger/run_ns_test.pl: !DCPS_MIN !DDS_NO_ORBSVCS
-DevGuideExamples/DCPS/Messenger/run_test.pl ipv6: IPV6 !DCPS_MIN
-
-DevGuideExamples/DCPS/Messenger_ZeroCopy/run_test.pl: !DCPS_MIN
-DevGuideExamples/DCPS/Messenger_ZeroCopy/run_test.pl default_tcp: !DCPS_MIN
-DevGuideExamples/DCPS/Messenger_ZeroCopy/run_test.pl udp: !DCPS_MIN
-DevGuideExamples/DCPS/Messenger_ZeroCopy/run_test.pl default_udp: !DCPS_MIN
-DevGuideExamples/DCPS/Messenger_ZeroCopy/run_test.pl mcast: !DCPS_MIN
-DevGuideExamples/DCPS/Messenger_ZeroCopy/run_test.pl default_mcast: !DCPS_MIN
-DevGuideExamples/DCPS/Messenger_ZeroCopy/run_test.pl reliable_mcast: !DCPS_MIN
-DevGuideExamples/DCPS/Messenger_ZeroCopy/run_test.pl default_reliable_mcast: !DCPS_MIN
-DevGuideExamples/DCPS/Messenger_ZeroCopy/run_test.pl nobits: !DCPS_MIN
-DevGuideExamples/DCPS/Messenger_ZeroCopy/run_test.pl stack: !DCPS_MIN
-DevGuideExamples/DCPS/Messenger_ZeroCopy/run_corbaloc_test.pl: !DCPS_MIN
-DevGuideExamples/DCPS/Messenger_ZeroCopy/run_ns_test.pl: !DCPS_MIN !DDS_NO_ORBSVCS
-DevGuideExamples/DCPS/Messenger_ZeroCopy/run_test.pl ipv6: IPV6 !DCPS_MIN
 
 examples/DCPS/Messenger_Imr/run_test.pl: !DCPS_MIN !MIN_CORBA !CORBA_E_COMPACT !CORBA_E_MICRO !DDS_NO_ORBSVCS
 
