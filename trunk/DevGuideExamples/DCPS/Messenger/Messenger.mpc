@@ -1,56 +1,38 @@
+//
+// $Id$
+//
 
-project(DDS*idl): dcps {
-  // This project ensures the common components get built first.
-
+project(*idl): dcps {
   TypeSupport_Files {
     Messenger.idl
   }
-
+  
   custom_only = 1
 }
 
-
-project(DDS*Publisher) : dcpsexe_with_tcp, dcps_unreliable_dgram, dcps_reliable_multicast {
-
+project(*publisher) : dcpsexe_with_tcp {
   exename   = publisher
-  after    += DDS*idl
-
+  after    += *idl
+  
   TypeSupport_Files {
     Messenger.idl
   }
 
   Source_Files {
-    publisher.cpp
-    Writer.cpp
+    Publisher.cpp
   }
 }
 
-project(DDS*Subscriber) : dcpsexe_with_tcp, dcps_unreliable_dgram, dcps_reliable_multicast {
-
+project(*subscriber) : dcpsexe_with_tcp {
   exename   = subscriber
-  after    += DDS*idl
+  after    += *idl
 
   TypeSupport_Files {
     Messenger.idl
   }
 
   Source_Files {
-    subscriber.cpp
-    DataReaderListener.cpp
-  }
-}
-
-project(DDS*StackSubscriber) : dcpsexe_with_tcp, dcps_unreliable_dgram, dcps_reliable_multicast {
-
-  exename   = stack_subscriber
-  after    += DDS*idl
-
-  TypeSupport_Files {
-    Messenger.idl
-  }
-
-  Source_Files {
-    stack_subscriber.cpp
-    DataReaderListener.cpp
+    DataReaderListenerImpl.cpp
+    Subscriber.cpp
   }
 }
