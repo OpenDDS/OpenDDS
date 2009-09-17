@@ -1675,15 +1675,19 @@ void
   {
     instance_ptr = get_handle_instance(handle);
 
-    // Check instance based QoS policy filters
-    // (i.e. OWNERSHIP, TIME_BASED_FILTER)
-    if (header.message_id_ == OpenDDS::DCPS::SAMPLE_DATA &&
-        (filtered = filter_instance(instance_ptr)))
+    if (header.message_id_ == OpenDDS::DCPS::SAMPLE_DATA)
     {
-      ACE_DES_FREE (instance_data,
-                    data_allocator_->free,
-                    <%TYPE%> );
-      return;
+      // Check instance based QoS policy filters
+      // (i.e. OWNERSHIP, TIME_BASED_FILTER)
+      filtered = filter_instance(instance_ptr);
+
+      if (filtered)
+      {
+        ACE_DES_FREE (instance_data,
+                      data_allocator_->free,
+                      <%TYPE%> );
+        return;
+      }
     }
 
     // TBD - we also need to reject for > RESOURCE_LIMITS.max_samples
