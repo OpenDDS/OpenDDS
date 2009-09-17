@@ -1,9 +1,16 @@
+Thu Sep 17 22:42:22 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+
+          Fixed warning on VC9 builds. Apparently Windows does not think parens
+          provide sufficient security when assigning within conditionals.
+
 Thu Sep 17 22:20:54 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * tests/DCPS/Serializer_wstring/publisher.cpp:
         * tests/DCPS/Serializer_wstring/subscriber.cpp:
 
-          Fixes for Win CE builds.
+          Fixes for WinCE builds.
 
 Thu Sep 17 20:30:34 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
