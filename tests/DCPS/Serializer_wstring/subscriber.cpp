@@ -27,7 +27,7 @@ using namespace Messenger;
 
 const OpenDDS::DCPS::TransportIdType TCP_IMPL_ID = 1;
 
-int main (int argc, char *argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   try {
     DDS::DomainParticipantFactory_var dpf;
@@ -70,7 +70,7 @@ int main (int argc, char *argv[])
     // Initialize the transport
     OpenDDS::DCPS::TransportImpl_rch tcp_impl =
       TheTransportFactory->create_transport_impl (TCP_IMPL_ID, ::OpenDDS::DCPS::AUTO_CONFIG);
-    
+
     // Create the subscriber and attach to the corresponding
     // transport.
     DDS::Subscriber_var sub =
@@ -124,7 +124,7 @@ int main (int argc, char *argv[])
     // Create the Datareaders
     DDS::DataReaderQos dr_qos;
     sub->get_default_datareader_qos (dr_qos);
-    DDS::DataReader_var dr 
+    DDS::DataReader_var dr
       = sub->create_datareader(topic.in (),
                                dr_qos,
                                listener.in (),

@@ -1,3 +1,10 @@
+Thu Sep 17 22:20:54 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/Serializer_wstring/publisher.cpp:
+        * tests/DCPS/Serializer_wstring/subscriber.cpp:
+
+          Fixes for Win CE builds.
+
 Thu Sep 17 20:30:34 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger:
