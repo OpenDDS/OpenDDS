@@ -1,3 +1,13 @@
+Thu Sep 17 19:55:16 UTC 2009  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/Bench/doc/tests:
+
+          Updated config path info for running test.
+
+        * performance-tests/Bench/tools/mkpkg:
+
+          Changed to use version of ACE TAO besides 1.5a.
+
 Thu Sep 17 15:48:30 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * java/idl2jni/codegen/im_java.cpp:
