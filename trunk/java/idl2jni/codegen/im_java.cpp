@@ -15,6 +15,7 @@
 
 #include "ace/OS_NS_sys_stat.h"
 #include "ace/OS_NS_string.h"
+#include "ace/Version.h"
 
 #include <iostream>
 #include <sstream>
@@ -772,13 +773,14 @@ void writeUnionDefaultValue(ostream &os, AST_Expression::ExprType udisc_type,
   case AST_Expression::EV_enum:
     os << dv.u.enum_val;
     break;
+#if (ACE_MAJOR_VERSION == 5 && ACE_MINOR_VERSION < 6)
   case AST_Expression::EV_longlong:
     os << dv.u.longlong_val;
     break;
   case AST_Expression::EV_ulonglong:
     os << dv.u.ulonglong_val;
     break;
-
+#endif
   default:
     cerr << "ERROR: Bad discriminant type (shouldn't happen here)\n";
   }
