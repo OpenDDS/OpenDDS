@@ -119,14 +119,14 @@ A simple example to execute scenario1 is:
 
    host1> cd testing
    host1> sudo bin/run_test -v -P -t 60 -h host1.localdomain \
-          -i etc/transport.ini -s s1-p1.ini
+          -i etc/transport.ini -s tests/s1-p1.ini
 
    ...and on host2...
 
    host2> tar xf scenario1.tar.bz2
    host2> cd testing
    host2> sudo bin/run_test -v -P -h host1.localdomain \
-          -i etc/transport.ini -s s1-p2.ini
+          -i etc/transport.ini -s tests/s1-p2.ini
 
 A more complex example executing scenario3 on 3 hosts is:
 

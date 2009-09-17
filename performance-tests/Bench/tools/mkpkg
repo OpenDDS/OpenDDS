@@ -27,19 +27,23 @@ cp $DDS_ROOT/lib/libSimpleUnreliableDgram.so.* $PKG/lib/
 (cd $PKG/lib; ln -s libSimpleUnreliableDgram.so.* libSimpleUnreliableDgram.so)
 
 # Statically linked
-cp $ACE_ROOT/lib/libACE.so.5.5a*                $PKG/lib/
-cp $ACE_ROOT/lib/libTAO_AnyTypeCode.so.1.5a*    $PKG/lib/
-cp $ACE_ROOT/lib/libTAO_ImR_Client.so.1.5a*     $PKG/lib/
-cp $ACE_ROOT/lib/libTAO_IORTable.so.1.5a*       $PKG/lib/
-cp $ACE_ROOT/lib/libTAO_PortableServer.so.1.5a* $PKG/lib/
-cp $ACE_ROOT/lib/libTAO.so.1.5a*                $PKG/lib/
-cp $ACE_ROOT/lib/libTAO_Svc_Utils.so.1.5a*      $PKG/lib/
+cp $ACE_ROOT/lib/libACE.so.*                $PKG/lib/
+cp $ACE_ROOT/lib/libTAO_AnyTypeCode.so.*    $PKG/lib/
+cp $ACE_ROOT/lib/libTAO_ImR_Client.so.*     $PKG/lib/
+cp $ACE_ROOT/lib/libTAO_IORTable.so.*       $PKG/lib/
+cp $ACE_ROOT/lib/libTAO_PortableServer.so.* $PKG/lib/
+cp $ACE_ROOT/lib/libTAO.so.*                $PKG/lib/
+cp $ACE_ROOT/lib/libTAO_Svc_Utils.so.*      $PKG/lib/
+cp $ACE_ROOT/lib/libTAO_CodecFactory.so.*   $PKG/lib/
+cp $ACE_ROOT/lib/libTAO_AnyTypeCode.so.*    $PKG/lib/
+cp $ACE_ROOT/lib/libTAO_Codeset.so.*        $PKG/lib/
+cp $ACE_ROOT/lib/libTAO_PI.so.*             $PKG/lib/
 
-# Dynamically linked
-cp $ACE_ROOT/lib/libTAO_Codeset.so            $PKG/lib/
-cp $ACE_ROOT/lib/libTAO_PI.so                 $PKG/lib/
-cp $ACE_ROOT/lib/libTAO_CodecFactory.so.1.5a* $PKG/lib/
-cp $ACE_ROOT/lib/libTAO_AnyTypeCode.so.1.5a*  $PKG/lib/
+# For dynamic linking
+(cd $PKG/lib; ln -s libTAO_CodecFactory.so.*     libTAO_CodecFactory.so)
+(cd $PKG/lib; ln -s libTAO_AnyTypeCode.so.*      libTAO_AnyTypeCode.so)
+(cd $PKG/lib; ln -s libTAO_Codeset.so.*          libTAO_Codeset.so)
+(cd $PKG/lib; ln -s libTAO_PI.so.*               libTAO_PI.so)
 
 mkdir -p $PKG/bin/PerlDDS
 mkdir -p $PKG/bin/PerlACE
