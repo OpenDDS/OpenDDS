@@ -124,8 +124,8 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     writer->start ();
     while ( !writer->is_finished()) {
-      ACE_Time_Value small(0,250000);
-      ACE_OS::sleep (small);
+      ACE_Time_Value delay(0, 250000);
+      ACE_OS::sleep(delay);
     }
 
     // Cleanup
