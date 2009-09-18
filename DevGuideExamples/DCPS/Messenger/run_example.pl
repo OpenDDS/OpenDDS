@@ -17,8 +17,8 @@ $use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
 $opts = $use_svc_config ? "-ORBSvcConf tcp.conf" : '';
 $repo_bit_opt = $opts;
 
-$pub_opts = "$opts -ORBDebugLevel 10 -ORBLogFile publisher.log -DCPSConfigFile publisher.ini -DCPSDebugLevel 10";
-$sub_opts = "$opts -DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile subscriber.log -DCPSConfigFile subscriber.ini -DCPSDebugLevel 10";
+$pub_opts = "$opts -ORBDebugLevel 10 -ORBLogFile publisher.log -DCPSDebugLevel 10";
+$sub_opts = "$opts -DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile subscriber.log -DCPSDebugLevel 10";
 
 $dcpsrepo_ior = "repo.ior";
 
@@ -63,11 +63,5 @@ if ($ir != 0) {
 }
 
 unlink $dcpsrepo_ior;
-
-if ($status == 0) {
-  print "test PASSED.\n";
-} else {
-  print STDERR "test FAILED.\n";
-}
 
 exit $status;
