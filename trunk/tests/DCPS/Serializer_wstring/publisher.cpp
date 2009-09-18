@@ -16,6 +16,7 @@
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #include <dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h>
+#include <ace/OS_main.h>
 #include <ace/streams.h>
 
 #ifdef ACE_AS_STATIC_LIBS
@@ -26,7 +27,9 @@ using namespace Messenger;
 
 const OpenDDS::DCPS::TransportIdType TCP_IMPL_ID = 1;
 
-int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
+int
+ACE_TMAIN(int argc, ACE_TCHAR* argv[])
+{
   try {
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
