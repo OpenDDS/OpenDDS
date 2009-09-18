@@ -1,3 +1,13 @@
+Fri Sep 18 16:20:54 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/DataReaderListenerImpl.h:
+        * DevGuideExamples/DCPS/Messenger/DataReaderListenerImpl.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/DataReaderListenerImpl.h:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/DataReaderListenerImpl.cpp:
+        * java/idl2jni/codegen/im_java.cpp:
+
+          Various scoreboard fixes.
+
 Thu Sep 17 22:42:22 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:

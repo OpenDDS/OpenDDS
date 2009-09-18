@@ -773,7 +773,7 @@ void writeUnionDefaultValue(ostream &os, AST_Expression::ExprType udisc_type,
   case AST_Expression::EV_enum:
     os << dv.u.enum_val;
     break;
-#if (ACE_MAJOR_VERSION == 5 && ACE_MINOR_VERSION < 6)
+#if !(ACE_MAJOR_VERSION == 5 && ACE_MINOR_VERSION < 6)
   case AST_Expression::EV_longlong:
     os << dv.u.longlong_val;
     break;
