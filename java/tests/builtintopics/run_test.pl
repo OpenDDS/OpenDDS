@@ -20,7 +20,7 @@ foreach my $i (@ARGV) {
     } 
 }
 
-my $opts = "-ORBSvcConf $DDS_ROOT/DevGuideExamples/DCPS/Messenger/tcp.conf";
+my $opts = "-ORBSvcConf $DDS_ROOT/tests/DCPS/Messenger/tcp.conf";
 my $debug_opt = ($debug eq '0') ? ''
     : "-ORBDebugLevel $debug -DCPSDebugLevel $debug";
 

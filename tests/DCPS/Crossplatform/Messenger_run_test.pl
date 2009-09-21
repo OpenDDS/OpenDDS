@@ -18,7 +18,7 @@ $| = 1;
 my $status = 0;
 my $use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
 
-my $file_prefix = "$ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger";
+my $file_prefix = "$ENV{DDS_ROOT}/tests/DCPS/Messenger";
 my $pub_config_file = "$file_prefix/pub.ini";
 my $sub_config_file = "$file_prefix/sub.ini";
 my $opts = $use_svc_config ? "-ORBSvcConf $file_prefix/tcp.conf" : '';
@@ -86,10 +86,10 @@ my $common_args = "-DCPSInfoRepo corbaloc:iiop:$repo_host:$port1/DCPSInfoRepo"
 unlink $dcpsrepo_ior;
 
 $Subscriber = PerlDDS::create_process
-      ("$ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/subscriber",
+      ("$ENV{DDS_ROOT}/tests/DCPS/Messenger/subscriber",
        "-DCPSConfigFile $sub_config_file $common_args $sub_opts");
 $Publisher = PerlDDS::create_process
-      ("$ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/publisher",
+      ("$ENV{DDS_ROOT}/tests/DCPS/Messenger/publisher",
        "-DCPSConfigFile $pub_config_file $common_args $pub_opts");
 
 if ($role == CrossSync::SERVER) {

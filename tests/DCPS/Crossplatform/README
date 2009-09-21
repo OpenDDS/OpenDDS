@@ -12,5 +12,5 @@ The cross platform testing schedule is maintained in test_list.txt.
  Any two nightly builds defined as part of a single group need to set
  the environment variable CROSS_GRP to the value defined here.
 
-Messenger_run_test.pl: Based upon the $DDS_ROOT/DevGuide/DCPS
+Messenger_run_test.pl: Based upon the $DDS_ROOT/tests/DCPS
  /Messenger/run_corbaloc_test.pl test.
