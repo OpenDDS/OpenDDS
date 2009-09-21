@@ -7,10 +7,13 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "MessengerTypeSupportImpl.h"
+#include <ace/Log_Msg.h>
 
-#include <dds/DCPS/Service_Participant.h>
+#include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDcpsPublicationC.h>
+
 #include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/WaitSet.h>
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
 
@@ -18,10 +21,7 @@
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
 #endif
 
-#include <dds/DdsDcpsInfrastructureC.h>
-#include <dds/DdsDcpsPublicationC.h>
-
-#include <ace/Log_Msg.h>
+#include "MessengerTypeSupportImpl.h"
 
 static DDS::Duration_t timeout = { 30, 0 };
 

@@ -1,3 +1,10 @@
+Mon Sep 21 22:38:35 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/Messenger:
+
+          Introduced new Messenger test under tests to take on
+          responsibilities of old DevGuideExample tests.
+
 Mon Sep 21 22:01:47 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/src/Options.cpp:
@@ -8,13 +15,6 @@ Mon Sep 21 22:01:47 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 	  Trevor's updates to the framework - fixed problem with
 	  transport creation; allow operation without publications or
 	  subscriptions (both are no longer required).
-
-Mon Sep 21 17:24:37 UTC 2009  Steven Stallion  <stallions@ociweb.com>
-
-        * DevGuideExamples/DCPS/Messenger/Publisher.cpp:
-        * DevGuideExamples/DCPS/Messenger/Subscriber.cpp:
-
-          Updated include order (fixes issues on WinCE builds)
 
 Fri Sep 18 19:29:46 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
