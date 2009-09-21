@@ -217,32 +217,44 @@ Publication::enable(
     throw BadPublisherException();
   }
 
-  // Create the transport
+  // Try to obtain the transport first
   OpenDDS::DCPS::TransportImpl_rch transport
-    = TheTransportFactory->create_transport_impl(
+    = TheTransportFactory->obtain(
+        this->profile_->transport
+      );
+  if( transport.is_nil()) {
+    // Create the transport
+    transport = TheTransportFactory->create_transport_impl(
         this->profile_->transport,
         ::OpenDDS::DCPS::AUTO_CONFIG
       );
-  if( transport.is_nil()) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) Publication::enable() - publication %C: ")
-      ACE_TEXT("failed to create transport with index %d.\n"),
-      this->name_.c_str(),
-      this->profile_->transport
-    ));
-    throw BadTransportException();
-
+    if( transport.is_nil()) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) Publication::enable() - publication %C: ")
+        ACE_TEXT("failed to create transport with index %d.\n"),
+        this->name_.c_str(),
+        this->profile_->transport
+      ));
+      throw BadTransportException();
+    } else if( this->verbose_) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Publication::enable() - publication %C: ")
+        ACE_TEXT("created transport with index %d.\n"),
+        this->name_.c_str(),
+        this->profile_->transport
+      ));
+    }
   } else if( this->verbose_) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Publication::enable() - publication %C: ")
-      ACE_TEXT("created transport with index %d.\n"),
+      ACE_TEXT("obtained transport with index %d.\n"),
       this->name_.c_str(),
       this->profile_->transport
     ));
   }
 
   // Attach the transport
-  if( ::OpenDDS::DCPS::ATTACH_OK != transport->attach( publisher_)) {
+  if( ::OpenDDS::DCPS::ATTACH_OK != transport->attach( publisher_.in())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) Publication::enable() - publication %C: ")
       ACE_TEXT("failed to attach transport with index %d to publisher.\n"),

@@ -392,13 +392,6 @@ Options::configureEntities( ACE_Configuration_Heap& heap)
       }
     }
 
-  } else {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Options::configureEntities() - ")
-      ACE_TEXT("failed to find any publication definitions in ")
-      ACE_TEXT("scenario definition file.\n")
-    ));
-    this->configured_ = false;
   }
 
   // Find all of the [subscription] sections.
@@ -431,13 +424,6 @@ Options::configureEntities( ACE_Configuration_Heap& heap)
       }
     }
 
-  } else {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Options::configureEntities() - ")
-      ACE_TEXT("failed to find any subscription definitions in ")
-      ACE_TEXT("scenario definition file.\n")
-    ));
-    this->configured_ = false;
   }
 
 }
