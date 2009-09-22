@@ -7,7 +7,7 @@ feature (built_in_topics): dcps_ts_defaults, idl2jni {
     idl2jniflags += -SS -I$(TAO_ROOT) -I$(DDS_ROOT) -I$(DDS_ROOT)/dds \
                     -Wb,stub_export_include=dcps_java_export.h \
                     -Wb,stub_export_macro=dcps_java_Export
-    $(DDS_ROOT)/dds/DdsDcpsInfrastructureTypeSupport.idl << DdsDcpsTypeSupportExtJC.h
+    $(DDS_ROOT)/dds/DdsDcpsInfrastructureTypeSupport.idl << DdsDcpsInfrastructureTypeSupportJC.h
   }
 
   Define_Custom(TypeSupportJavaOnly) {
@@ -26,7 +26,7 @@ feature (built_in_topics): dcps_ts_defaults, idl2jni {
   }
 
   Java_Files {
-    DDS/ParticipantBuiltinTopicDataTypeSupportImpl.java << DDS/ParticipantBuiltinTopicDataTypeSupport.java
+    DDS/ParticipantBuiltinTopicDataTypeSupportImpl.java
     DDS/TopicBuiltinTopicDataTypeSupportImpl.java
     DDS/PublicationBuiltinTopicDataTypeSupportImpl.java
     DDS/SubscriptionBuiltinTopicDataTypeSupportImpl.java
