@@ -43,8 +43,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     if (CORBA::is_nil(participant.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_participant() failed!\n")), -1);
+                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT(" create_participant failed!\n")), -1);
     }
 
     // Register Type (Messenger::Message)
@@ -53,8 +53,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: register_type() failed!\n")), -1);
+                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT(" register_type failed!\n")), -1);
     }
 
     // Create Topic (Movie Discussion List)
@@ -67,8 +67,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     if (CORBA::is_nil(topic.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_topic() failed!\n")), -1);
+                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT(" create_topic failed!\n")), -1);
     }
 
     // Create Subscriber
@@ -79,8 +79,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     if (CORBA::is_nil(subscriber.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_subscriber() failed!\n")), -1);
+                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT(" create_subscriber failed!\n")), -1);
     }
 
     // Initialize and attach Transport
@@ -92,8 +92,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     if (status != OpenDDS::DCPS::ATTACH_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: attach() failed!\n")), -1);
+                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT(" attach failed!\n")), -1);
     }
 
     // Create DataReader
@@ -107,8 +107,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     if (CORBA::is_nil(reader.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_datareader() failed!\n")), -1);
+                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT(" create_datareader failed!\n")), -1);
     }
 
     Messenger::MessageDataReader_var reader_i =
@@ -116,8 +116,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     if (CORBA::is_nil(reader_i.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: _narrow failed!\n")),
+                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT(" _narrow failed!\n")),
                        -1);
     }
 
@@ -134,14 +134,14 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     do {
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: wait() failed!\n")), -1);
+                          ACE_TEXT("ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wait failed!\n")), -1);
       }
 
       if (reader->get_subscription_matched_status(matches) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: get_subscription_matched_status() failed!\n")), -1);
+                          ACE_TEXT("ERROR: %N:%l: main() -")
+                          ACE_TEXT(" get_subscription_matched_status failed!\n")), -1);
       }
     } while (matches.current_count > 0);
 

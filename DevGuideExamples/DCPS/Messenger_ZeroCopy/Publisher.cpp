@@ -41,8 +41,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     if (CORBA::is_nil(participant.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_participant failed!\n")),
+                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT(" create_participant failed!\n")),
                        -1);
     }
 
@@ -52,8 +52,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: register_type failed!\n")),
+                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT(" register_type failed!\n")),
                        -1);
     }
 
@@ -67,8 +67,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     if (CORBA::is_nil(topic.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_topic failed!\n")),
+                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT(" create_topic failed!\n")),
                        -1);
     }
 
@@ -80,8 +80,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     if (CORBA::is_nil(publisher.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_publisher failed!\n")),
+                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT(" create_publisher failed!\n")),
                        -1);
     }
 
@@ -92,8 +92,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     if (transport_impl->attach(publisher.in()) != OpenDDS::DCPS::ATTACH_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: attach failed!\n")),
+                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT(" attach failed!\n")),
                        -1);
     }
 
@@ -106,8 +106,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     if (CORBA::is_nil(writer.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_datawriter failed!\n")),
+                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT(" create_datawriter failed!\n")),
                        -1);
     }
 
@@ -116,8 +116,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     if (CORBA::is_nil(writer_i.in())) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: _narrow failed!\n")),
+                          ACE_TEXT("ERROR: %N:%l: main() -")
+                          ACE_TEXT(" _narrow failed!\n")),
                          -1);
     }
 
@@ -134,15 +134,15 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     do {
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: wait failed!\n")),
+                          ACE_TEXT("ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wait failed!\n")),
                          -1);
       }
 
       if (writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: get_publication_matched_status failed!\n")),
+                          ACE_TEXT("ERROR: %N:%l: main() -")
+                          ACE_TEXT(" get_publication_matched_status failed!\n")),
                          -1);
       }
 
@@ -164,16 +164,16 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       if (error != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("%N:%l main()")
-                   ACE_TEXT(" ERROR: write returned %d!\n"), error));
+                   ACE_TEXT("ERROR: %N:%l: main() -")
+                   ACE_TEXT(" write returned %d!\n"), error));
       }
     }
 
     // Wait for samples to be acknowledged
     if (writer_i->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: wait_for_acknowledgments failed!\n")),
+                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT(" wait_for_acknowledgments failed!\n")),
                        -1);
     }
 
