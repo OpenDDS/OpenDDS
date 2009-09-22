@@ -1,3 +1,9 @@
+Tue Sep 22 22:34:07 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/dds/dcps_java_optional.mpb:
+
+          Fixes to MPC dependencies on Windows hosts.
+
 Tue Sep 22 21:51:15 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/DataReaderListenerImpl.cpp:
