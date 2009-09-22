@@ -7,8 +7,6 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include <iostream>
-
 #include <ace/Log_Msg.h>
 #include <ace/OS_NS_stdlib.h>
 
@@ -18,6 +16,8 @@
 #include "DataReaderListener.h"
 #include "MessengerTypeSupportC.h"
 #include "MessengerTypeSupportImpl.h"
+
+#include <iostream>
 
 DataReaderListenerImpl::DataReaderListenerImpl()
   : num_reads_(0)

@@ -7,8 +7,6 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include <iostream>
-
 #include <ace/Log_Msg.h>
 #include <ace/OS_NS_stdlib.h>
 
@@ -16,34 +14,36 @@
 #include "MessengerTypeSupportC.h"
 #include "MessengerTypeSupportImpl.h"
 
+#include <iostream>
+
 void
 DataReaderListenerImpl::on_requested_deadline_missed(
-  DDS::DataReader_ptr /* reader */,
-  const DDS::RequestedDeadlineMissedStatus& /* status */)
+  DDS::DataReader_ptr /*reader*/,
+  const DDS::RequestedDeadlineMissedStatus& /*status*/)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
 }
 
 void
 DataReaderListenerImpl::on_requested_incompatible_qos(
-  DDS::DataReader_ptr /* reader */,
-  const DDS::RequestedIncompatibleQosStatus& /* status */)
+  DDS::DataReader_ptr /*reader*/,
+  const DDS::RequestedIncompatibleQosStatus& /*status*/)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
 }
 
 void
 DataReaderListenerImpl::on_sample_rejected(
-  DDS::DataReader_ptr /* reader */,
-  const DDS::SampleRejectedStatus& /* status */)
+  DDS::DataReader_ptr /*reader*/,
+  const DDS::SampleRejectedStatus& /*status*/)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
 }
 
 void
 DataReaderListenerImpl::on_liveliness_changed(
-  DDS::DataReader_ptr /* reader */,
-  const DDS::LivelinessChangedStatus& /* status */)
+  DDS::DataReader_ptr /*reader*/,
+  const DDS::LivelinessChangedStatus& /*status*/)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
 }
@@ -57,8 +57,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
   if (CORBA::is_nil(reader_i.in())) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("%N:%l on_data_available()")
-               ACE_TEXT(" ERROR: _narrow failed!\n")));
+               ACE_TEXT("ERROR: %N:%l: on_data_available() -")
+               ACE_TEXT(" _narrow failed!\n")));
     ACE_OS::exit(-1);
   }
 
@@ -87,8 +87,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
   } else {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("%N:%l on_data_available()")
-               ACE_TEXT(" ERROR: take failed!\n")));
+               ACE_TEXT("ERROR: %N:%l: on_data_available() -")
+               ACE_TEXT(" take failed!\n")));
   }
 
   reader_i->return_loan(messages, info);
@@ -96,16 +96,16 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 void
 DataReaderListenerImpl::on_subscription_matched(
-  DDS::DataReader_ptr /* reader */,
-  const DDS::SubscriptionMatchedStatus& /* status */)
+  DDS::DataReader_ptr /*reader*/,
+  const DDS::SubscriptionMatchedStatus& /*status*/)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
 }
 
 void
 DataReaderListenerImpl::on_sample_lost(
-  DDS::DataReader_ptr /* reader */,
-  const DDS::SampleLostStatus& /* status */)
+  DDS::DataReader_ptr /*reader*/,
+  const DDS::SampleLostStatus& /*status*/)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
 }
