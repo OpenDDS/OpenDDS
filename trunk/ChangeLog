@@ -1,6 +1,7 @@
 Tue Sep 22 22:54:55 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * bin/dcps_tests.lst:
+        * bin/cross_tests.lst:
 
           Dropped default_ Messenger tests; these have not been verified
           to be correct.
