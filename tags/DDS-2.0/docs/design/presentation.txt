@@ -1,0 +1,492 @@
+
+Thu Aug  6 09:54:52 CDT 2009
+
+========================================================================
+*** DDS Compliance Profiles (from 2):
+
+Minimum Profile:
+
+1) access_scope==INSTANCE; coherent_access==false; ordered_access==false
+2) access_scope==INSTANCE; coherent_access==true
+3) access_scope==INSTANCE; ordered_access==true
+4) access_scope==TOPIC;    coherent_access==false; ordered_access==false
+5) access_scope==TOPIC;    coherent_access==true
+6) access_scope==TOPIC;    ordered_access==true
+
+Object Model Profile (DCPS support only):
+
+7) access_scope==GROUP;    coherent_access==false; ordered_access==false
+8) access_scope==GROUP;    coherent_access==true
+9) access_scope==GROUP;    ordered_access==true
+
+----------------------------------------
+
+No change to current DCPS behavior: (1), (2), (3), (4)
+
+Required to meet Minimum Profile: (5), (6)
+
+Required to meet Object Model Profile (DCPS support only): (7), (8), (9)
+
+========================================================================
+*** General implementation changes.
+
+DomainParticipant::create_publisher()
+DomainParticipant::create_subscriber()
+Publisher::set_qos()
+Subscriber::set_qos()
+  - handle access_scope==GROUP.  Do we want to reject this value or allow
+    it and return the correct error for the methods when it would affect
+    behavior?
+
+Subscriber::begin_access()
+  - track how many times this is called; return OK.  This is probably a
+    new Atomic int member.
+
+Subscriber::end_access()
+  - match begin_access() calls; return PRECONDITION_NOT_MET if no match;
+    otherwise return OK.
+
+CompatibleQOS( PublisherQos, SubscriberQos) (dds/InfoRepo/DCPS_Utils.cpp)
+  - implement compatibility check for PRESENTATION policies.
+
+CompatibleQOS( Pub*, Sub*) (dds/InfoRepo/DCPS_Utils.cpp)
+  - add call to Qos compatibility checking implemented above.
+
+========================================================================
+*** 5) access_scope==TOPIC;    coherent_access==true
+
+Publisher::begin_coherent_changes()
+  - track how many times this is called. This is probably a new Atomic
+    int member.
+  - Set the 'coherent' flag on all samples sent by all DataWriters
+    contained by this Publisher.
+
+Publisher::end_coherent_changes()
+  - match begin_coherent_changes() calls.  Only act when there are no
+    more begin calls to match.  Return PRECONDITION_NOT_MET if there is
+    not begin call to match.
+  - Send an END_COHERENT_SET control message from all DataWrites contained
+    by this Publisher.
+  - Clear the 'coherent' flag on all samples sent by all DataWriters
+    contained by this Publisher.
+
+DataReader::rake()
+  - Add 'incoherent' flag to ReceivedDataElement structure, cleared by
+    default.
+  - Set 'incoherent' flag on all received samples that have the
+    'coherent' flag set when recieved.
+  - Ignore all samples that have the 'incoherent' flag set when forming
+    the output list of samples.
+
+DataReader::data_received()
+  - Process END_COHERENT_SET control messages by clearing all of the
+    'incoherent' flags for samples of all instances received from the
+    same publication (DataWriter).
+    
+    NOTE: If the publication information is not available for each sample
+          (which it should be since that is set in the SampleInfo),
+          then we will need to add this information to the stored data
+          about the sample.
+
+========================================================================
+*** 6) access_scope==TOPIC;    ordered_access==true
+
+DataReader::rake()
+  - interleave output list from different instances according to
+    DESTINATION_ORDER sort order.  I *think* this might be similar to the
+    "ORDER BY" implementation that is already present.
+
+    NOTE: The ordering is only required for samples from the same DataWriter.
+
+========================================================================
+*** From the Publication Module section (7.1.2.4):
+
+7.1.2.4.1.10 Publisher::begin_coherent_changes
+
+This operation requests that the application will begin a ‘coherent
+set’ of modifications using DataWriter objects attached to the
+Publisher. The ‘coherent set’ will be completed by a matching call
+to end_coherent_changes.
+
+A ‘coherent set’ is a set of modifications that must be propagated
+in such a way that they are interpreted at the receivers’ side as a
+consistent set of modifications; that is, the receiver will only be able
+to access the data after all the modifications in the set are available
+at the receiver end[12].
+
+A connectivity change may occur in the middle of a set of coherent
+changes; for example, the set of partitions used by the Publisher or one
+of its Subscribers may change, a late-joining DataReader may appear on
+the network, or a communication failure may occur. In the event that such
+a change prevents an entity from receiving the entire set of coherent
+changes, that entity must behave as if it had received none of the set.
+
+These calls can be nested. In that case, the coherent set terminates
+only with the last call to end_coherent_ changes.
+
+The support for ‘coherent changes’ enables a publishing application to
+change the value of several data-instances that could belong to the same
+or different topics and have those changes be seen ‘atomically’ by the
+readers. This is useful in cases where the values are inter-related. For
+example, if there are two data-instances representing the ‘altitude’
+and ‘velocity vector’ of the same aircraft and both are changed,
+it may be useful to communicate those values in a way the reader can
+see both together; otherwise, it may e.g., erroneously interpret that
+the aircraft is on a collision course.
+
+Footnotes:
+  12. This does not imply that the middleware has to encapsulate all the
+      modifications in a single message; it only implies that the
+      receiving applications will behave as if this was the case.
+
+7.1.2.4.1.11 Publisher::end_coherent_changes
+
+This operation terminates the ‘coherent set’ initiated by the
+matching call to begin_coherent_ changes. If there is no matching
+call to begin_coherent_ changes, the operation will return the error
+PRECONDITION_NOT_MET.
+
+Possible error codes returned in addition to the standard ones:
+PRECONDITION_NOT_MET.
+
+========================================================================
+*** From the Subscription Module section (7.1.2.5):
+
+7.1.2.5.2.8 Subscriber::begin_access
+
+This operation indicates that the application is about to access the
+data samples in any of the DataReader objects attached to the Subscriber.
+
+The application is required to use this operation only if PRESENTATION
+QosPolicy of the Subscriber to which the DataReader belongs has the
+access_scope set to ‘GROUP.’
+
+In the aforementioned case, the operation begin_access must be called
+prior to calling any of the sample-accessing operations, namely:
+get_datareaders on the Subscriber and read, take, read_w_condition,
+take_w_condition on any DataReader. Otherwise the sample-accessing
+operations will return the error PRECONDITION_NOT_MET. Once the
+application has finished accessing the data samples it must call
+end_access.
+
+It is not required for the application to call begin_access/end_access if
+the PRESENTATION QosPolicy has the access_scope set to something other
+than ‘GROUP.’ Calling begin_access/end_access in this case is not
+considered an error and has no effect.
+
+The calls to begin_access/end_access may be nested. In that case, the
+application must call end_access as many times as it called begin_access.
+
+Possible error codes returned in addition to the standard ones:
+PRECONDITION_NOT_MET.
+
+7.1.2.5.2.9 Subscriber::end_access
+
+Indicates that the application has finished accessing the data samples
+in DataReader objects managed by the Subscriber.
+
+This operation must be used to ‘close’ a corresponding begin_access.
+
+After calling end_access the application should no longer access any
+of the Data or SampleInfo elements returned from the sample-accessing
+operations. This call must close a previous call to begin_access otherwise
+the operation will return the error PRECONDITION_NOT_MET.
+
+Possible error codes returned in addition to the standard ones:
+PRECONDITION_NOT_MET.
+
+7.1.2.5.2.10 Subscriber::get_datareaders
+
+This operation allows the application to access the DataReader objects
+that contain samples with the specified sample_states, view_states,
+and instance_states.
+
+If the PRESENTATION QosPolicy of the Subscriber to which the DataReader
+belongs has the access_scope set to ‘GROUP.’ This operation should
+only be invoked inside a begin_access/end_access block. Otherwise it
+will return the error PRECONDITION_NOT_MET.
+
+Depending on the setting of the PRESENTATION QoS policy (see Section
+7.1.3.6, “PRESENTATION,” on page 110), the returned collection of
+DataReader objects may be a ‘set’ containing each DataReader at most
+once in no specified order, or a ‘list’ containing each DataReader
+one or more times in a specific order.
+
+     1. If PRESENTATION access_scope is INSTANCE or TOPIC, the returned
+        collection is a ‘set.’
+
+     2. If PRESENTATION access_scope is GROUP and ordered_access is set
+        to TRUE, then the returned collection is a ‘list.’
+
+This difference is due to the fact that, in the second situation it is
+required to access samples belonging to different DataReader objects in
+a particular order. In this case, the application should process each
+DataReader in the same order it appears in the ‘list’ and read or
+take exactly one sample from each DataReader. The patterns that an
+application should use to access data is fully described in Section
+7.1.2.5.1, “Access to the data,” on page 62.
+
+========================================================================
+*** From the DataReader::read() description (7.1.2.5.3.8):
+
+This operation accesses a collection of Data values from the
+DataReader. The size of the returned collection will be limited to the
+specified max_samples. The properties of the data_values collection
+and the setting of the PRESENTATION QoS policy (see Section 7.1.3.6,
+“PRESENTATION,” on page 110) may impose further limits on the size
+of the returned ‘list.’
+
+     1. If PRESENTATION access_scope is INSTANCE, then the returned
+        collection is a ‘list’ where samples belonging to the same
+        data-instance are consecutive.
+
+     2. If PRESENTATION access_scope is TOPIC and ordered_access is
+        set to FALSE, then the returned collection is a ‘list’ where
+        samples belonging to the same data-instance are consecutive.
+
+     3. If PRESENTATION access_scope is TOPIC and ordered_access is set
+        to TRUE, then the returned collection is a ‘list’ were samples
+        belonging to the same instance may or may not be consecutive. This
+        is because to preserve order it may be necessary to mix samples
+        from different instances.
+
+     4. If PRESENTATION access_scope is GROUP and ordered_access is
+        set to FALSE, then the returned collection is a ‘list’ where
+        samples belonging to the same data instance are consecutive.
+
+     5. If PRESENTATION access_scope is GROUP and ordered_access is
+        set to TRUE, then the returned collection contains at most one
+        sample. The difference in this case is due to the fact that it is
+        required that the application is able to read samples belonging
+        to different DataReader objects in a specific order.
+
+In any case, the relative order between the samples of one instance is
+consistent with the DESTINATION_ORDER QosPolicy:
+
+    • If DESTINATION_ORDER is BY_RECEPTION_TIMESTAMP, samples belonging
+      to the same instances will appear in the relative order in which
+      they were received (FIFO, earlier samples ahead of the later
+      samples).
+
+    • If DESTINATION_ORDER is BY_SOURCE_TIMESTAMP, samples belonging
+      to the same instances will appear in the relative order implied
+      by the source_timestamp (FIFO, smaller values of source_timestamp
+      ahead of the larger values).
+
+========================================================================
+*** From the DataReader::take() description (7.1.2.5.3.9):
+
+This operation accesses a collection of data-samples from the DataReader
+and a corresponding collection of SampleInfo structures. The operation
+will return either a ‘list’ of samples or else a single sample. This
+is controlled by the PRESENTATION QosPolicy using the same logic as for
+the read operation (see Section 7.1.2.5.3.8).
+
+========================================================================
+*** From the Data Access Patterns description (7.1.2.5.1.9):
+
+To access data coherently, or in order, the PRESENTATION QoS (explained in
+Section 7.1.3.6, “PRESENTATION,” on page 110) must be set properly
+and the application must conform to the access pattern described
+below. Otherwise, the application will still access the data but will
+not necessarily see all coherent changes together, nor will it see the
+changes in the proper order.
+
+There is a general pattern that will provide both ordered and coherent
+access across multiple DataReaders. This pattern will work for any
+settings of the PRESENTATION QoS. Simpler patterns may also work for
+specific settings of the QoS as described below.
+
+1. General pattern to access samples as a coherent set and/or in order
+   across DataReader entities. This case applies when PRESENTATION QoS
+   specifies “access_scope=GROUP.”
+
+     • Upon notification to the SubscriberListener or following
+       the similar StatusCondition[18] enabled, the application uses
+       begin_access on the Subscriber to indicate it will be accessing
+       data through the Subscriber.
+
+     • Then it calls get get_datareaders on the Subscriber to get the
+       list of DataReader objects where data samples are available.
+
+     • Following this it calls read or take on each DataReader in
+       the same order returned to access all the relevant changes in
+       the DataReader.
+
+     • Once it has called read or take on all the readers, it calls
+       end_access.
+
+Note that if the PRESENTATION QoS policy specifies ordered_access=TRUE,
+then the list of DataReaders may return the same reader several times. In
+this manner the correct sample order can be maintained among samples in
+different DataReader objects.
+
+2. Specialized pattern if no order or coherence needs to be maintained
+   across DataReader entities.This case applies if PRESENTATION QoS
+   policy specifies access_scope something other than GROUP.
+
+     • In this case, it is not required for the application to call
+       begin_access and end_access. However, doing so is not an error
+       and it will have no effect.
+
+     • The application accesses the data by calling read or take[19]
+       on each DataReader in any order it wishes.
+
+     • The application can still call get_datareaders to determine
+       which readers have data to be read, but it does not need to read
+       all of them, nor read them in a particular order. Furthermore,
+       the return of get_datareaders will be logically a “set” in
+       the sense that the same reader will not appear twice, and the
+       order of the readers returned is not specified.
+
+3. Specialized pattern if the application accesses the data within the
+   SubscriberListener. This case applies regardless of the PRESENTATION
+   QoS policy when the application accesses the data inside the
+   listener’s implementation of the on_data_on_readers operation.
+
+     • Similar to the previous case (2 above), it is not required for
+       the application to call begin_access and end_access, but doing
+       so has no effect.
+
+     • The application can access data by calling read or take[20] on
+       each DataReader in any order it wishes.
+
+     • The application can also delegate the accessing of the data
+       to the DataReaderListener objects installed on each DataReader
+       by calling notify_datareaders.
+
+     • Similar to the previous case (2 above), the application can
+       still call get_datareaders to determine which readers have data to
+       be read, but it does not need to read all of them, nor read them
+       in a particular order. Furthermore, the return of get_datareaders
+       will be logically a ‘set.’
+
+Footnotes:
+  18. For instance, on Subscriber with mask referring to DATA_ON_READERS.
+  19. Or the variants read_w_condition and take_w_condition.
+  20. Or the variants read_w_condition and take_w_condition.
+
+========================================================================
+*** From the QoS Policy Table (7.1.3):
+
+PRESENTATION (Publisher, Subscriber), RxO, not changeable
+   An “access_scope”: INSTANCE, TOPIC, GROUP
+   And two booleans: “coherent_access” “ordered_access”
+
+Specifies how the samples representing changes to data instances are
+presented to the subscribing application. This policy affects the
+application’s ability to specify and receive coherent changes and to
+see the relative order of changes. access_scope determines the largest
+scope spanning the entities for which the order and coherency of changes
+can be preserved. The two booleans control whether coherent access and
+ordered access are supported within the scope access_scope.
+
+access_scope==INSTANCE   (this is the default access_scope)
+  Scope spans only a single instance.  Indicates that changes to one
+  instance need not be coherent nor ordered with respect to changes to
+  any other instance. In other words, order and coherent changes apply
+  to each instance separately.
+
+access_scope==TOPIC
+  Scope spans to all instances within the same DataWriter (or Data
+  Reader), but not across instances in different DataWriter (or Data
+  Reader).
+
+access_scope==GROUP [optional - Object Model Profile]
+  Scope spans to all instances belonging to DataWriter (or DataReader)
+  entities within the same Publisher (or Subscriber).
+
+coherent_access   (the default setting of coherent_access is FALSE)
+  Specifies support coherent access.  That is, the ability to group a
+  set of changes as a unit on the publishing end such that they are
+  received as a unit at the subscribing end.
+
+ordered_access   (the default setting of ordered_access is FALSE)
+  Specifies support for ordered access to the samples received at the
+  subscription end. That is, the ability of the subscriber to see changes
+  in the same order as they occurred on the publishing end.
+
+========================================================================
+*** From the QoS Policy description (7.1.3.6):
+
+This QoS policy controls the extent to which changes to data-instances
+can be made dependent on each other and also the kind of dependencies
+that can be propagated and maintained by the Service.
+
+The setting of coherent_access controls whether the Service will preserve
+the groupings of changes made by the publishing application by means of
+the operations begin_coherent_change and end_coherent_change.
+
+The setting of ordered_access controls whether the Service will preserve
+the order of changes.
+
+The granularity is controlled by the setting of the access_scope.
+
+If coherent_access is set, then the access_scope controls the maximum
+extent of coherent changes. The behavior is as follows:
+
+     • If access_scope is set to INSTANCE, the use of
+       begin_coherent_change and end_coherent_change has no effect on how
+       the subscriber can access the data because with the scope limited
+       to each instance, changes to separate instances are considered
+       independent and thus cannot be grouped by a coherent change.
+
+     • If access_scope is set to TOPIC, then coherent changes
+       (indicated by their enclosure within calls to begin_coherent_change
+       and end_coherent_change) will be made available as such to
+       each remote DataReader independently. That is, changes made to
+       instances within each individual DataWriter will be available
+       as coherent with respect to other changes to instances in that
+       same DataWriter, but will not be grouped with changes made to
+       instances belonging to a different DataWriter.
+
+     • If access_scope is set to GROUP, then coherent changes made to
+       instances through a DataWriter attached to a common Publisher
+       are made available as a unit to remote subscribers.
+
+If ordered_access is set, then the access_scope controls the maximum
+extent for which order will be preserved by the Service.
+
+     • If access_scope is set to INSTANCE (the lowest level), then
+       changes to each instance are considered unordered relative
+       to changes to any other instance. That means that changes
+       (creations, deletions, modifications) made to two instances are
+       not necessarily seen in the order they occur. This is the case
+       even if it is the same application thread making the changes
+       using the same DataWriter.
+
+     • If access_scope is set to TOPIC, changes (creations, deletions,
+       modifications) made by a single DataWriter are made available to
+       subscribers in the same order they occur. Changes made to instances
+       through different DataWriter entities are not necessarily seen
+       in the order they occur. This is the case, even if the changes
+       are made by a single application thread using DataWriter objects
+       attached to the same Publisher.
+
+     • Finally, if access_scope is set to GROUP, changes made to
+       instances via DataWriter entities attached to the same Publisher
+       object are made available to subscribers on the same order
+       they occur.
+
+Note that this QoS policy controls the scope at which related changes are
+made available to the subscriber. This means the subscriber can access
+the changes in a coherent manner and in the proper order; however,
+it does not necessarily imply that the Subscriber will indeed access
+the changes in the correct order. For that to occur, the application at
+the subscriber end must use the proper logic in reading the DataReader
+objects, as described in “Access to the data.”
+
+The value offered is considered compatible with the value requested if
+and only if the following conditions are met:
+
+    1. The inequality “offered access_scope >= requested access_scope”
+       evaluates to ‘TRUE.’ For the purposes of this inequality,
+       the values of PRESENTATION access_scope are considered ordered
+       such that INSTANCE < TOPIC < GROUP.
+
+    2. Requested coherent_access is FALSE, or else both offered and
+       requested coherent_access are TRUE.
+
+    3. Requested ordered_access is FALSE, or else both offered and
+       requested ordered _access are TRUE.
+

@@ -1,0 +1,43 @@
+// -*- MPC -*-
+//
+// $Id$
+
+project(*Publisher): dcpsexe_with_tcp {
+  exename = FooTest3NoKey_publisher
+  after    += DcpsFooType3NoKey
+  libs     +=  DcpsFooType3NoKey
+  libpaths += ../FooType3NoKey
+
+  IDL_Files {
+    Test.idl
+  }
+
+  Source_Files {
+    pub_main.cpp
+    PubDriver.cpp
+    InstanceDataMap.cpp
+    Writer.cpp
+    TestS.cpp
+    TestC.cpp
+    test_helper.cpp
+  }
+}
+
+project(*Subscriber): dcpsexe_with_tcp {
+  exename = FooTest3NoKey_subscriber
+  after    += DcpsFooType3NoKey
+  libs     += DcpsFooType3NoKey
+  libpaths += ../FooType3NoKey
+
+  IDL_Files {
+    Test.idl
+  }
+
+  Source_Files {
+    sub_main.cpp
+    SubDriver.cpp
+    SimpleDataReader.cpp
+    SimpleSubscriber.cpp
+    TestC.cpp
+  }
+}

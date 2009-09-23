@@ -1,0 +1,610 @@
+
+remote calls examined:
+  DCPSInfo::attach_participant
+  DCPSInfo::assert_topic 
+  DCPSInfo::find_topic 
+  DCPSInfo::remove_topic 
+  DCPSInfo::enable_topic 
+  DCPSInfo::add_publication 
+  DCPSInfo::remove_publication 
+  DCPSInfo::add_subscription 
+  DCPSInfo::remove_subscription 
+  DCPSInfo::add_domain_participant 
+  DCPSInfo::remove_domain_participant 
+  DCPSInfo::ignore_domain_participant 
+  DCPSInfo::ignore_topic 
+  DCPSInfo::ignore_subscription 
+  DCPSInfo::ignore_publication 
+  DCPSInfo::update_domain_participant_qos 
+  DCPSInfo::update_topic_qos 
+  DCPSInfo::update_publication_qos 
+  DCPSInfo::update_subscription_qos 
+  DCPSInfo::shutdown
+
+paths examined:
+  application calls publisher->create_datawriter()
+  repository  calls datawriterremote->add_associations()
+  acceptor    calls datalink->passive_connection()
+  repository  calls datareaderremote->add_associations()
+  application calls subscriber->create_datareader()
+
+  application calls publisher->delete_datawriter()
+  repository  calls datawriterremote->remove_associations()
+  application calls subscriber->delete_datareader()
+  repository  calls datareaderremote->remove_associations()
+  application calls participant->delete_contained_entities()
+
+========================================================================
+
+Remote Calls:
+
+  --------------------------------------
+  attach_participant
+    NO LOCKS HELD DURING THIS CALL
+
+  --------------------------------------
+  assert_topic 
+    NO LOCKS HELD DURING THIS CALL
+
+  --------------------------------------
+  find_topic 
+    NO LOCKS HELD DURING THIS CALL
+
+  --------------------------------------
+  remove_topic 
+    LOCKS HELD DURING REMOTE CALL:
+      DomainParticipantImpl::topics_protector_
+
+  --------------------------------------
+  enable_topic 
+    OBSOLETE -- remove this method
+
+  --------------------------------------
+  add_publication 
+    NO LOCKS HELD DURING THIS CALL
+
+  --------------------------------------
+  remove_publication 
+    NO LOCKS HELD DURING THIS CALL
+
+  --------------------------------------
+  add_subscription 
+    NO LOCKS HELD DURING THIS CALL
+
+  --------------------------------------
+  remove_subscription 
+    NO LOCKS HELD DURING THIS CALL
+
+  --------------------------------------
+  add_domain_participant 
+    NO LOCKS HELD DURING THIS CALL
+
+  --------------------------------------
+  remove_domain_participant 
+    NO LOCKS HELD DURING THIS CALL
+
+  --------------------------------------
+  ignore_domain_participant 
+    NO LOCKS HELD DURING THIS CALL
+
+  --------------------------------------
+  ignore_topic 
+    NO LOCKS HELD DURING THIS CALL
+
+  --------------------------------------
+  ignore_subscription 
+    NO LOCKS HELD DURING THIS CALL
+
+  --------------------------------------
+  ignore_publication 
+    NO LOCKS HELD DURING THIS CALL
+
+  --------------------------------------
+  update_domain_participant_qos 
+    NO LOCKS HELD DURING THIS CALL
+
+  --------------------------------------
+  update_topic_qos 
+    NO LOCKS HELD DURING THIS CALL
+
+  --------------------------------------
+  update_publication_qos 
+    NO LOCKS HELD DURING THIS CALL
+
+  --------------------------------------
+  update_subscription_qos 
+    NO LOCKS HELD DURING THIS CALL
+
+  --------------------------------------
+  shutdown
+    NO LOCKS HELD DURING THIS CALL
+
+========================================================================
+Lock acquisition ordering:
+
+  --------------------------------------
+  application calls publisher->create_datawriter()
+
+    PublisherImpl::pi_lock_
+
+    TransportImpl::lock_
+    DataWriterImpl::lock_
+
+    TransportImpl::lock_
+    SubscriberImpl::si_lock_
+
+    TransportImpl::lock_
+    FooDataReaderImpl::sample_lock_
+
+    TransportImpl::lock_
+    ConditionImpl::lock_
+
+    TransportImpl::lock_
+    WaitSet::lock_
+
+    TransportImpl::lock_
+    WriteDataContainer::lock_
+    PublisherImpl::pi_lock_
+    WriteDataContainer::lock_ // RECURSION
+
+    TransportImpl::lock_
+    WriteDataContainer::lock_
+    PublisherImpl::pi_lock_
+    DataLinkSet::lock_
+    DataLink::strategy_lock_
+    TransportSendStrategy::lock_
+
+========================================================================
+  repository calls datawriterremote->add_associations()
+
+    DataWriterImpl::lock_
+
+    TransportImpl::reservation_lock_
+    SimpleTcpTransport::links_lock_
+    SimpleTcpConnection::reconnect_lock_
+
+    TransportImpl::reservation_lock_
+    SimpleTcpConnection::reconnect_lock_
+
+    TransportImpl::reservation_lock_
+    DataLink::strategy_lock_
+
+    TransportImpl::reservation_lock_
+    TransportImpl::lock_
+
+    TransportImpl::reservation_lock_
+    TransportImpl::pub_map_lock_
+
+    TransportImpl::reservation_lock_
+    TransportImpl::sub_map_lock_
+
+========================================================================
+  acceptor calls datalink->passive_connection()
+
+    SimpleTcpTransport::connections_lock_
+
+========================================================================
+  repository calls datareaderremote->add_associations()
+
+    DataReaderImpl::publication_handle_lock_
+    DataReaderImpl::writer_lock_
+    ConditionImpl::lock_
+    WaitSet::lock_
+
+    SubscriberImpl::si_lock_
+
+    FooDataReaderImpl::sample_lock_
+
+    TransportImpl::reservation_lock_
+    SimpleTcpTransport::links_lock_
+    SimpleTcpConnection::reconnect_lock_
+
+    TransportImpl::reservation_lock_
+    SimpleTcpTransport::connections_lock_
+
+    TransportImpl::reservation_lock_ --- BLOCKS WHILE HOLDING THIS LOCK!!!
+
+    TransportImpl::reservation_lock_
+    DataLink::strategy_lock_
+
+    TransportImpl::reservation_lock_
+    TransportSendStrategy::lock_
+
+========================================================================
+  application calls subscriber->create_datareader()
+
+    TransportImpl::lock_
+
+========================================================================
+  application calls publisher->delete_datawriter()
+
+    PublisherImpl::pi_lock_
+
+    DataWriterImpl::lock_
+
+    ConditionImpl::lock_
+
+    WaitSet::lock_
+
+    TransportImpl::lock_
+
+    WriteDataContainer::lock_
+
+========================================================================
+  repository  calls datawriterremote->remove_associations()
+
+    DataWriterImpl::lock_
+
+    ConditionImpl::lock_
+
+    WaitSet::lock_
+
+
+========================================================================
+Details:
+========================================================================
+
+========================================================================
+application calls publisher->create_datawriter()
+  PublisherImpl::create_datawriter()
+    DataWriterImpl::enable()
+      PublisherImpl::writer_enabled()
+        DCPSInfo::add_publication() // REMOTE CALL
+*       ACQUIRE/RELEASE PublisherImpl::pi_lock_
+    TransportImpl::register_publication()
+*L    ACQUIRE TransportImpl::lock_
+        TransportImpl::check_fully_association( pub_id)
+          TransportImpl::check_fully_association( pub_id, AssociationInfoList)
+            DataWriterImpl::fully_associated()
+*L            ACQUIRE/RELEASE DataWriterImpl::lock_
+              DataWriterImpl::bit_lookup_instance_handles()
+                BIT_Helper_2::repo_ids_to_instance_handles()
+                  DomainParticipantImpl::get_builtin_subscriber()
+                  SubscriberImpl::lookup_datareader()
+*L                  ACQUIRE/RELEASE SubscriberImpl::si_lock_
+                  DataReaderImpl::read()
+                    DataReaderImpl::read_i()
+*L                    ACQUIRE/RELEASE FooDataReaderImpl::sample_lock_
+*L            ACQUIRE/RELEASE DataWriterImpl::lock_
+              DataWriterListener::on_publication_match() --- NOTE(6)
+              DataWriterImpl::notify_status_condition()
+                ConditionImpl::signal_all()
+*L                ACQUIRE/RELEASE ConditionImpl::lock_
+                  WaitSet::signal()
+*LL                 ACQUIRE WaitSet::lock_
+                    unblock threads waiting on WaitSet::condition_
+*L                  RELEASE WaitSet::lock_
+
+              // DURABILITY resend processing
+              WriteDataContainer::reenqueue_all()
+*LL           ACQUIRE WriteDataContainer::lock_ --- NOTE(1)
+              PublisherImpl::data_available()
+*LLL            ACQUIRE PublisherImpl::pi_lock_
+       >        DataWriterImpl::get_resend_data()
+       >        DataSampleList::enqueue_tail_next_send_sample()
+       >------- or
+       >        TransportInterface::send()
+       >  >       TransportSendListener::data_delivered() --- NOTE(7)
+       >  >         WriteDataContainer::data_delivered()
+*LLL   >  >         ACQUIRE/RELEASE WriteDataContainer::lock_ --- NOTE(2)
+       >  >------ or
+       >  >       DataLinkSet::send_start()
+*LLLL  >  >         ACQUIRE DataLinkSet::lock_ --- x 2 NOTE(3)
+       >  >           DataLink::send_start()
+       >  >  >          ThreadPerConnectionSendTask::add_request() --- NOTE(4)
+       >  >  >--------- or
+       >  >  >          DataLink::send_start_i()
+*LLLL  >  >  >          ACQUIRE/RELEASE DataLink::strategy_lock_
+       >  >  >            TransportSendStrategy::send_start()
+*LLL   >  >         RELEASE DataLinkSet::lock_ --- x 2 NOTE(3)
+       >  >       DataLinkSet::send()
+*LLLL  >  >         ACQUIRE DataLinkSet::lock_
+       >  >           DataLink::send()
+       >  >  >          ThreadPerConnectionSendTask::add_request()
+       >  >  >--------- or
+       >  >  >          DataLink::send_i()
+*LLLL  >  >  >          ACQUIRE/RELEASE DataLink::strategy_lock_
+       >  >  >            TransportSendStrategy::send()
+*LLLLL >  >  >              ACQUIRE TransportSendStrategy::lock_
+       >  >  >                NOTE(5)
+*LLLL  >  >  >              RELEASE TransportSendStrategy::lock_
+*LLL   >  >         RELEASE DataLinkSet::lock_
+*LL             RELEASE PublisherImpl::pi_lock_
+*L            RELEASE WriteDataContainer::lock_
+
+*     RELEASE TransportImpl::lock_
+
+NOTES:
+  1) The WriteDataContainer lock is acquired here from within the
+     DataWriterImpl and not the call to the DataWriterContainer itself.
+     Presumably this is to allow this lock to be held while the list of
+     data to resend is passed through the transport layers.
+  2) This is a recursive call to acquire/release this lock in this
+     scenario.  Since the possibility of other threads calling into this
+     method *without* already holding the lock must be allowed for, there
+     may not be a simple mechanism to avoid this.  Unless we decouple
+     processing even more and hand off to another thread before we reach
+     this spot.  Like maybe having the reenqueue_all() processing on its
+     own thread.
+  3) There are two distinct DataLinkSet objects for which the lock_
+     object in each is acquired and released in tandem.
+  4) There is probably as much time spent on condition checking and
+     enqeueing here as there would be just making the calls.  There are
+     some locks used during the processing that could as well be
+     replaced with AtomicOps.
+  5) Send processing occurs at this point.  Revisit if necessary.
+  6) Here we could call back to application code while holding the
+     TransportImpl::lock_
+  7) In this case there is no associated link on which to send the
+     historical data, so the data is released by calling data_delivered.
+
+========================================================================
+repository calls datawriterremote->add_associations()
+  DataWriterRemoteImpl::add_associations()
+    DataWriterImpl::add_associations()
+*     ACQUIRE/RELEASE DataWriterImpl::lock_
+      PublisherImpl::add_assocations()
+        TransportInterface::add_subscriptions()
+          TransportInterface::add_associations()
+*L          ACQUIRE TransportImpl::reservation_lock_
+            TransportImpl::reserve_datalink()
+              SimpleTcpTransport::find_or_create_datalink() --- NOTE(9)
+*LL             ACQUIRE SimpleTcpTransport::links_lock_
+                  SimpleTcpConnection::reconnect() --- NOTE(12)
+*LL                 ACQUIRE/RELEASE SimpleTcpConnection::reconnect_lock_
+*L              RELEASE SimpleTcpTransport::links_lock_
+                SimpleTcpDataLink::SimpleTcpDataLink()
+*L              ACQUIRE/RELEASE SimpleTcpTransport::links_lock_
+                SimpleTcpTransport::make_active_connection() -- NOTE(12)
+*L                ACQUIRE/RELEASE SimpleTcpConnection::reconnect_lock_
+                  SimpleTcpTransport::connect_datalink()
+                    SimpleTcpDataLink::connect()
+                      DataLink::start()
+*L                      ACQUIRE/RELEASE DataLink::strategy_lock_
+*L              ACQUIRE/RELEASE SimpleTcpTransport::links_lock_
+              DataLink::make_reservation()
+*LL             ACQUIRE DataLink::strategy_lock_
+                TransportSendStrategy::link_released()
+                  ACQUIRE/RELEASE TransportSendStrategy::lock_ -- NOTE(10)
+*L              RELEASE DataLink::strategy_lock_
+*L              ACQUIRE/RELEASE DataLink::pub_map_lock_
+*L              ACQUIRE/RELEASE DataLink::sub_map_lock_ -- NOTE(11)
+            TransportImpl::add_pending_association()
+*LL           ACQUIRE TransportImpl::lock_
+              TransportImpl::check_fully_association( pub_id) --- NOTE(8)
+*L            RELEASE TransportImpl::lock_
+*           RELEASE TransportImpl::reservation_lock_
+
+NOTES:
+  8) This then is the same sequence as above.  These will not conflict
+     since one and only one thread will be allowed to hold the
+     TransportImpl::lock_ at the same time.
+  9) This is implemented by the specific type of transport instantiated
+     for this Transport.  Here I assume SimpleTcp.
+ 10) At least this use of the send_strategy_lock_ with the
+     TransportSendStrategy::lock_ is redundant.  Only one of these is
+     required.
+ 11) It may be worth investigating whether both of these locks are
+     necessary or if a single lock could protect both containers.
+ 12) This is a simplification of the connect/reconnect call stack, but I
+     believe that it accurately represents the lock usage.
+
+========================================================================
+acceptor calls datalink->passive_connection() --- NOTE(13)
+  SimplTcpTransport::passive_connection()
+*L  ACQUIRE SimpleTcpTransport::connections_lock_
+    unblock threads waiting on SimpleTcpTransport::connections_updated_ --- NOTE(14)
+*   RELEASE SimpleTcpTransport::connections_lock_
+
+NOTES:
+ 13) This is specific to the SimpleTcp transport implementation.
+ 14) This unblocks any pending subscriber side add_associations calls in
+     the SimpleTcpTransport::make_passive_connection() method.
+
+========================================================================
+repository calls datareaderremote->add_associations()
+  DataReaderRemoteImpl::add_associations()
+    DataReaderImpl::add_associations()
+*     ACQUIRE DataReaderImpl::publication_handle_lock_
+*LW   ACQUIRE/RELEASE DataReaderImpl::writers_lock_
+*LR   ACQUIRE/RELEASE DataReaderImpl::writers_lock_
+      RELEASE DataReaderImpl::publication_handle_lock_
+
+      SubscriberImpl::add_assocations()
+        TransportInterface::add_publications()
+          TransportInterface::add_associations()
+*L          ACQUIRE TransportImpl::reservation_lock_
+            TransportImpl::reserve_datalink()
+              SimpleTcpTransport::find_or_create_datalink() --- NOTE(9)
+*LL             ACQUIRE SimpleTcpTransport::links_lock_
+                  SimpleTcpConnection::reconnect() --- NOTE(12)
+*LL                 ACQUIRE/RELEASE SimpleTcpConnection::reconnect_lock_
+*L              RELEASE SimpleTcpTransport::links_lock_
+                SimpleTcpDataLink::SimpleTcpDataLink()
+*L              ACQUIRE/RELEASE SimpleTcpTransport::links_lock_
+                SimpleTcpTransport::make_passive_connection() -- NOTE(12)
+*LL               ACQUIRE SimpleTcpTransport::connections_lock_
+!!!!!!!!!!        WAIT on SimpleTcpTransport::connections_updated_ -- NOTE(16)
+*L                RELEASE SimpleTcpTransport::connections_lock_
+                  SimpleTcpTransport::connect_datalink()
+                    SimpleTcpDataLink::connect()
+                      DataLink::start()
+*L                      ACQUIRE/RELEASE DataLink::strategy_lock_
+*L              ACQUIRE/RELEASE SimpleTcpTransport::links_lock_
+              DataLink::make_reservation()
+*LL             ACQUIRE DataLink::strategy_lock_
+                TransportSendStrategy::link_released()
+                  ACQUIRE/RELEASE TransportSendStrategy::lock_ -- NOTE(10)
+*L              RELEASE DataLink::strategy_lock_
+                ACQUIRE/RELEASE DataLink::pub_map_lock_
+                ACQUIRE/RELEASE DataLink::sub_map_lock_ -- NOTE(11)
+              SimpleTcpDataLink::fully_associated()
+                DataLink::send_i() -- NOTE(17)
+*L              ACQUIRE/RELEASE DataLink::strategy_lock_
+                  TransportSendStrategy::send()
+*LL               ACQUIRE TransportSendStrategy::lock_
+                    NOTE(5)
+*L                RELEASE TransportSendStrategy::lock_
+*           RELEASE TransportImpl::reservation_lock_
+      DataReaderImpl::bit_lookup_instance_handles()
+        BIT_Helper_2::repo_ids_to_instance_handles()
+          DomainParticipantImpl::get_builtin_subscriber()
+          SubscriberImpl::lookup_datareader()
+*           ACQUIRE/RELEASE SubscriberImpl::si_lock_
+          DataReaderImpl::read()
+            DataReaderImpl::read_i()
+*             ACQUIRE/RELEASE FooDataReaderImpl::sample_lock_
+*L    ACQUIRE DataReaderImpl::publication_handle_lock_
+      DataReaderListener::on_subscription_match() --- NOTE(15)
+      DataReaderImpl::notify_status_condition()
+        ConditionImpl::signal_all()
+*L        ACQUIRE/RELEASE ConditionImpl::lock_
+          WaitSet::signal()
+*LL         ACQUIRE WaitSet::lock_
+            unblock threads waiting on WaitSet::condition_
+*L          RELEASE WaitSet::lock_
+*     RELEASE DataReaderImpl::publication_handle_lock_
+
+NOTES:
+ 15) Here we could call back to application code while holding the
+     DataReaderImpl::publication_handle_lock_
+ 16) This is conditional on a passive connection not already having been
+     accepted for this datalink.  It also releases the inner,
+     SimpleTcpTransport::connections_lock_, during the waiting period, but
+     *retains* the outter, TransportImpl::reservation_lock_ during the
+     waiting period.
+ 17) This is the FULLY_ASSOCIATED message from the subscription to the
+     publication.
+
+========================================================================
+application calls subscriber->create_datareader()
+  SubscriberImpl::create_datareader()
+  SubscriberImpl::create_opendds_datareader()
+    DataReaderImpl::enable() -- NOTE(19)
+      SubscriberImpl::reader_enabled() -- NOTE(18)
+        DCPSInfo::add_subscription() // REMOTE CALL
+    TransportImpl::register_subscription()
+*     ACQUIRE/RELEASE TransportImpl::lock_
+
+NOTES:
+ 18) Interestingly, the lock protecting the subscribers reader map is
+     not acquired during insertion.  This is likely to be a latent fault
+     and should be corrected.
+ 19) On slightly further investigation, there are no locks anywhere in the
+     DataReaderImpl that are protecting the internal storage either.
+     There are at least 2 std::map<> and 1 std::set<> containers that
+     should be so protected.
+
+========================================================================
+application calls publisher->delete_datawriter()
+  PublisherImpl::delete_datawriter()
+*L    ACQUIRE PublisherImpl::pi_lock_
+*     ACQUIRE PublisherImpl::reverse_pi_lock_ --- NOTE(20)
+      DataWriterImpl::remove_all_associations()
+*       ACQUIRE/RELEASE DataWriterImpl::lock_
+        DataWriterImpl::remove_associations()
+*         ACQUIRE/RELEASE DataWriterImpl::lock_
+          PublisherImpl::remove_associations()
+            TransportInterface::remove_associations()
+*L            ACQUIRE TransportImpl::reservation_lock_
+                DataLinkSetMap::release_reservations()
+*L                ACQUIRE/RELEASE DataLinkSetMap::map_lock_
+                  DataLink::release_reservations()
+*L                  ACQUIRE/RELEASE DataLink::pub_map_lock_
+*L                  ACQUIRE/RELEASE DataLink::sub_map_lock_
+                DataLinkSetMap::remove_released()
+*L                ACQUIRE/RELEASE DataLinkSetMap::map_lock_
+                  DataLinkSet::remove_links()
+*LL                 ACQUIRE DataLinkSet::lock_
+*LLL                ACQUIRE DataLinkSet::lock_ --- NOTE(24)
+*LL                 RELEASE DataLinkSet::lock_
+*L                  RELEASE DataLinkSet::lock_
+*             RELEASE TransportImpl::reservation_lock_
+*         ACQUIRE/RELEASE DataWriterImpl::lock_
+          DataWriterListener::on_publication_match() --- NOTE(15)
+          DataWriterImpl::notify_status_condition()
+            ConditionImpl::signal_all()
+*             ACQUIRE/RELEASE ConditionImpl::lock_
+              WaitSet::signal()
+*L              ACQUIRE WaitSet::lock_
+                unblock threads waiting on WaitSet::condition_
+*               RELEASE WaitSet::lock_
+      TransportImpl::unregister_publication()
+*       ACQUIRE/RELEASE TransportImpl::lock_
+      DataWriterImpl::cleanup()
+*L    RELEASE PublisherImpl::reverse_pi_lock_
+*     RELEASE PublisherImpl::pi_lock_
+      DataWriterImpl::persist_data()
+        NOTE(21)
+      DataWriterImpl::unregister_all()
+        WriteDataContainer::unregister_all() --- NOTE(22)
+*L        ACQUIRE WriteDataContainer::lock_
+          DataWriterImpl::data_delivered()
+            WriteDataContainer::data_delivered()
+*L            ACQUIRE/RELEASE WriteDataContainer::lock_ -- NOTE(23)
+*         RELEASE WriteDataContainer::lock_
+          WriteDataContainer::dispose()
+*           ACQUIRE/RELEASE WriteDataContainer::lock_
+      DCPSInfo::remove_publication() // REMOTE CALL
+
+NOTES:
+ 20) This is actually an idiom to release the pi_lock_ for a time.  This
+     is not scoped, so this essentially releases the lock.  We need to
+     determine whether to scope this shorter (reacquire the pi_lock_) or
+     to just end the scope of holding the pi_lock_ at this point.
+ 21) Persistence processing occurs at this point.  Revisit if necessary.
+ 22) This removes elements from the instances_ container while *NOT*
+     holding any locks.
+ 23) This is an additional scenario for recursion similar to that in
+     NOTE(2).
+ 24) This is the lock from a different object than the first one.  These
+     pairs of locks are always from two different sets.
+
+========================================================================
+  repository  calls datawriterremote->remove_associations()
+    DataWriterImpl::remove_associations()
+*     ACQUIRE/RELEASE DataWriterImpl::lock_
+      PublisherImpl::remove_associations()
+*     ACQUIRE/RELEASE DataWriterImpl::lock_
+      DataWriterListener::on_publication_match() --- NOTE(15)
+      DataWriterImpl::notify_status_condition()
+        ConditionImpl::signal_all()
+*         ACQUIRE/RELEASE ConditionImpl::lock_
+          WaitSet::signal()
+*L          ACQUIRE WaitSet::lock_
+            unblock threads waiting on WaitSet::condition_
+*           RELEASE WaitSet::lock_
+
+========================================================================
+  application calls subscriber->delete_datareader()
+
+========================================================================
+  repository  calls datareaderremote->remove_associations()
+    DataReaderRemoteImpl::remove_associations()
+      DataReaderImpl::remove_associations()
+*L      ACQUIRE DataReaderImpl::publication_handle_lock_
+        NOTE 25
+*W	ACQUIRE/RELEASE DataReaderImpl::writers_lock_
+*       RELEASE DataReaderImpl::publication_handle_lock_
+
+NOTES:
+ 25) This is not complete.
+
+========================================================================
+  DomainParticipant::delete_contained_entities()
+    ACQUIRE/RELEASE DomainParticipantImpl::publishers_protector_
+      NOTE 25
+    ACQUIRE DomainParticipantImpl::subscribers_protector_
+    SubscriberImpl::delete_contained_entities()
+      ACQUIRE/RELEASE SubscriberImpl::si_lock_
+      SubscriberImpl::delete_datareader()
+        ACQUIRE/RELEASE SubscriberImpl::si_lock_
+        DCPSInfo::remove_subscription() # REMOTE CALL - waiting for response.
+        NOTE 25
+    RELEASE DomainParticipantImpl::subscribers_protector_
+    ACQUIRE/RELEASE DomainParticipantImpl::topics_protector_
+      NOTE 25
+
+
+========================================================================
+========================================================================
