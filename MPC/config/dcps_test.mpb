@@ -1,0 +1,10 @@
+//
+// $Id$
+//
+
+project: dcpsexe {
+  libs        += TestFramework
+  after       += TestFramework
+
+  includes    += $(DDS_ROOT)/tests/DCPS/TestFramework
+}
