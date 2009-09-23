@@ -570,7 +570,7 @@ TestSubscriber<Reader>::wait_for_publishers(size_t count,
 
   if (matches.current_count != 0) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("ERROR: %N:%l: wait_for_subscribers() -")
+               ACE_TEXT("ERROR: %N:%l: wait_for_publishers() -")
                ACE_TEXT(" timed out!\n")));
     ACE_OS::exit(-1);
   }
