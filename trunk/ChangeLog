@@ -1,3 +1,16 @@
+Wed Sep 23 23:09:24 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * MPC/config/dcps_test.mpb:
+        * MPC/config/dcps_test_tcp.mpb:
+        * tests/DCPS/TestFramework:
+        * tests/DCPS/TestFramework/Test.idl:
+        * tests/DCPS/TestFramework/TestFramework.h:
+        * tests/DCPS/TestFramework/TestFramework.cpp:
+        * tests/DCPS/TestFramework/TestFramework.mpc:
+        * tests/DCPS/TestFramework/TestFramework_Export.h:
+
+          Initial commit of DCPS TestFramework harness.
+
 Wed Sep 23 21:36:29 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * LICENSE:
