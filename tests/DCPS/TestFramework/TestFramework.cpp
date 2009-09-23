@@ -204,8 +204,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
 OpenDDS::DCPS::TransportIdType
 TestBase::next_transport_id()
 {
-  static ACE_Atomic_Op<ACE_SYNCH_MUTEX, long> transport_ids;
-  return ++transport_ids;
+  static ACE_Atomic_Op<ACE_SYNCH_MUTEX, long> transport_ids(1);
+  return transport_ids++;
 }
 
 template<typename Writer>
