@@ -138,8 +138,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
 {
   const char* name = DEFAULT_TOPIC;
 
-  Test::MessageTypeSupport_var ts =
-    new Test::MessageTypeSupportImpl();
+  TestMessageTypeSupport_var ts =
+    new TestMessageTypeSupportImpl();
 
   if (ts->register_type(this->participant_.in(), "") != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR,

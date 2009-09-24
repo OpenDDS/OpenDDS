@@ -7,12 +7,10 @@
  * See: http://www.opendds.org/license.html
  */
 
-#pragma DCPS_DATA_TYPE "Test::Message"
-#pragma DCPS_DATA_KEY "Test::Message key"
+#pragma DCPS_DATA_TYPE "TestMessage"
+#pragma DCPS_DATA_KEY "TestMessage key"
 
-module Test {
-  struct Message {
-    long key;
-    string data;
-  };
+struct TestMessage {
+  long key;
+  string message;
 };
