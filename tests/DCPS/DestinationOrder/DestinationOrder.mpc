@@ -2,16 +2,10 @@
 // $Id$
 //
 
-project: dcpsexe_with_tcp {
-  exename   = test
-  
-  after    += DcpsFooType
-  libs     += DcpsFooType
-  
-  includes += ../FooType
-  libpaths += ../FooType
+project : dcps_test_tcp {
+  exename = test
 
   Source_Files {
-    main.cpp
+    TestCase.cpp
   }
 }

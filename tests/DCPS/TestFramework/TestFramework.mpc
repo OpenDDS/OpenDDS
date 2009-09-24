@@ -13,7 +13,7 @@ project: dcps {
   dynamicflags  += TESTFRAMEWORK_BUILD_DLL
 
   TypeSupport_Files {
-    Test.idl
+    TestFramework.idl
   }
 
   Source_Files {

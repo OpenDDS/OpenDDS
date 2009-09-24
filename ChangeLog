@@ -1,3 +1,15 @@
+Thu Sep 24 21:33:28 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/DestinationOrder/DestinationOrder.mpc:
+        * tests/DCPS/DestinationOrder/TestCase.h:
+        * tests/DCPS/DestinationOrder/TestCase.cpp:
+        * tests/DCPS/TestFramework/TestFramework.h:
+        * tests/DCPS/TestFramework/TestFramework.idl:
+        * tests/DCPS/TestFramework/TestFramework.cpp:
+        * tests/DCPS/TestFramework/TestFramework.mpc:
+
+          TestFramework updates; converted DestinationOrder test.
+
 Wed Sep 23 23:09:24 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * MPC/config/dcps_test.mpb:

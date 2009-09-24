@@ -23,9 +23,9 @@
 
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
 
-#include "TestC.h"
-#include "TestTypeSupportC.h"
-#include "TestTypeSupportImpl.h"
+#include "TestFrameworkC.h"
+#include "TestFrameworkTypeSupportC.h"
+#include "TestFrameworkTypeSupportImpl.h"
 
 #include "TestFramework_Export.h"
 
