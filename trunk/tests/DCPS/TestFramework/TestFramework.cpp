@@ -278,7 +278,7 @@ TestPublisher<Writer>::wait_for_subscribers(size_t count,
 
     } while (matches.current_count < count);
 
-    ws->detach_condition(cond);
+    ws->detach_condition(condition);
 
     if (matches.current_count != count) {
       ACE_ERROR((LM_ERROR,
@@ -566,7 +566,7 @@ TestSubscriber<Reader>::wait_for_publishers(size_t count,
 
   } while (matches.current_count > 0 || matches.total_count < count);
 
-  ws->detach_condition(cond);
+  ws->detach_condition(condition);
 
   if (matches.current_count != 0) {
     ACE_ERROR((LM_ERROR,
