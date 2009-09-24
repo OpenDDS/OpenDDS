@@ -148,7 +148,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
     ACE_OS::exit(-1);
   }
 
-  const char* type_name = ts->get_type_name();
+  CORBA::String_var s = ts->get_type_name();
+  const char* type_name = s.in();
 
   DDS::TopicQos qos;
   if (this->participant_->get_default_topic_qos(qos) != DDS::RETCODE_OK) {
