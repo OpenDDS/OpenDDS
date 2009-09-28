@@ -18,5 +18,6 @@ project: dcps {
 
   Source_Files {
     TestFramework.cpp
+    TestFramework_T.cpp
   }
 }
