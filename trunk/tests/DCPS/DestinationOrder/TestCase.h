@@ -10,7 +10,7 @@
 #ifndef DCPS_TEST_DESTINATIONORDER_H
 #define DCPS_TEST_DESTINATIONORDER_H
 
-#include "TestFramework.h"
+#include "TestFramework_T.h"
 
 class TestCase : public virtual TestPair<TestMessageDataReader,
                                          TestMessageDataWriter> {
