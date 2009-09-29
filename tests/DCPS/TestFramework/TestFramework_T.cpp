@@ -56,7 +56,7 @@ TestPublisher<Writer>::wait_for_acknowledgments(DDS::Duration_t timeout)
 
 template<typename Writer>
 void
-TestPublisher<Writer>::wait_for_subscribers(size_t count,
+TestPublisher<Writer>::wait_for_subscribers(CORBA::Long count,
                                             DDS::Duration_t timeout)
 {
     DDS::StatusCondition_var condition = this->writer_->get_statuscondition();
@@ -344,7 +344,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 template<typename Reader>
 void
-TestSubscriber<Reader>::wait_for_publishers(size_t count,
+TestSubscriber<Reader>::wait_for_publishers(CORBA::Long count,
                                             DDS::Duration_t timeout)
 {
   DDS::StatusCondition_var condition = this->reader_->get_statuscondition();

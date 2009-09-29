@@ -13,7 +13,7 @@
 #include "TestFramework.h"
 
 template<typename Writer>
-class TestFramework_Export TestPublisher : public virtual TestBase {
+class TestPublisher : public virtual TestBase {
 public:
   typedef typename Writer::_ptr_type Writer_ptr;
   typedef typename Writer::_var_type Writer_var;
@@ -35,7 +35,7 @@ public:
     DDS::Duration_t timeout = DEFAULT_TIMEOUT);
 
   void wait_for_subscribers(
-    size_t count = 1,
+    CORBA::Long count = 1,
     DDS::Duration_t timeout = DEFAULT_TIMEOUT);
 
 protected:
@@ -59,7 +59,7 @@ protected:
 };
 
 template<typename Reader>
-class TestFramework_Export TestSubscriber : public virtual TestBase {
+class TestSubscriber : public virtual TestBase {
 public:
   typedef typename Reader::_ptr_type Reader_ptr;
   typedef typename Reader::_var_type Reader_var;
@@ -78,7 +78,7 @@ public:
     DDS::StatusMask& status);
 
   void wait_for_publishers(
-    size_t count = 1,
+    CORBA::Long count = 1,
     DDS::Duration_t timeout = DEFAULT_TIMEOUT);
 
 protected:
@@ -102,8 +102,8 @@ protected:
 };
 
 template<typename Reader, typename Writer>
-class TestFramework_Export TestPair : public virtual TestSubscriber<Reader>,
-                                      public virtual TestPublisher<Writer> {
+class TestPair : public virtual TestSubscriber<Reader>,
+                 public virtual TestPublisher<Writer> {
 public:
   TestPair();
   virtual ~TestPair();
