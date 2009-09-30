@@ -7,7 +7,7 @@ feature (built_in_topics): dcps_ts_defaults, idl2jni {
     idl2jniflags += -SS -I$(TAO_ROOT) -I$(DDS_ROOT) -I$(DDS_ROOT)/dds \
                     -Wb,stub_export_include=dcps_java_export.h \
                     -Wb,stub_export_macro=dcps_java_Export
-    $(DDS_ROOT)/dds/DdsDcpsInfrastructureTypeSupport.idl << DdsDcpsInfrastructureTypeSupportJC.h
+    $(DDS_ROOT)/dds/DdsDcpsInfrastructureTypeSupport.idl << DdsDcpsTypeSupportExtJC.h
   }
 
   Define_Custom(TypeSupportJavaOnly) {
@@ -22,7 +22,7 @@ feature (built_in_topics): dcps_ts_defaults, idl2jni {
 
   TypeSupportJavaOnly_Files {
     dcps_ts_java_flags += --extension_args=cpp_file=BitsJC.cpp
-    $(DDS_ROOT)/dds/DdsDcpsInfrastructure.idl >> BitsJC.cpp DDS/ParticipantBuiltinTopicDataTypeSupportImpl.java DDS/TopicBuiltinTopicDataTypeSupportImpl.java DDS/PublicationBuiltinTopicDataTypeSupportImpl.java DDS/SubscriptionBuiltinTopicDataTypeSupportImpl.java
+    $(DDS_ROOT)/dds/DdsDcpsInfrastructure.idl >> DDS/ParticipantBuiltinTopicDataTypeSupportImpl.java DDS/TopicBuiltinTopicDataTypeSupportImpl.java DDS/PublicationBuiltinTopicDataTypeSupportImpl.java DDS/SubscriptionBuiltinTopicDataTypeSupportImpl.java
   }
 
   Java_Files {
