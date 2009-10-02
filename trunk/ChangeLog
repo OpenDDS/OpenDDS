@@ -1,3 +1,11 @@
+Fri Oct  2 19:19:54 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/idl2jni/codegen/idl2jni_visitor.h:
+        * java/idl2jni/codegen/idl2jni_visitor.cpp:
+
+          Added additional virtual functions added by recent commit to
+          DOC trunk.
+
 Wed Sep 30 05:03:35 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * java/dds/dcps_java_optional.mpb:
