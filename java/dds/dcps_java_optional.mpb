@@ -11,7 +11,7 @@ feature (built_in_topics): dcps_ts_defaults, idl2jni {
   }
 
   Define_Custom(TypeSupportJavaOnly) {
-    automatic_in  = 0
+    automatic_in  = 1
     automatic_out = 1
     command       = perl $(DDS_ROOT)/bin/dcps_ts.pl --extensions_only --extension=$(DDS_ROOT)/java/build_scripts/JavaTypeSupportImpl
     dependent     = $(DDS_ROOT)/bin/dcps_ts.pl \
@@ -35,7 +35,5 @@ feature (built_in_topics): dcps_ts_defaults, idl2jni {
 }
 
 feature (!built_in_topics): idl2jni {
-
   idl2jniflags += -DDDS_HAS_MINIMUM_BIT
-
 }
