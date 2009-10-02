@@ -1,3 +1,10 @@
+Fri Oct  2 21:00:44 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/dds/dcps_java_optional.mpb:
+          
+          Attempted for for MPC dependency issues for Java bindings on
+          Windows platforms.
+
 Fri Oct  2 19:32:24 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/src/META-INF/ra.xml:
