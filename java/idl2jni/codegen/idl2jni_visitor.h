@@ -103,6 +103,32 @@ public:
 
   virtual int visit_valuebox(AST_ValueBox *node);
 
+  virtual int visit_template_interface(AST_Template_Interface *node);
+
+  virtual int visit_porttype(AST_PortType *node);
+
+  virtual int visit_provides(AST_Provides *node);
+
+  virtual int visit_uses(AST_Uses *node);
+
+  virtual int visit_publishes(AST_Publishes *node);
+
+  virtual int visit_emits(AST_Emits *node);
+
+  virtual int visit_consumes(AST_Consumes *node);
+
+  virtual int visit_extended_port(AST_Extended_Port *node);
+
+  virtual int visit_mirror_port(AST_Mirror_Port *node);
+
+  virtual int visit_connector(AST_Connector *node);
+
+  virtual int visit_instantiated_connector(AST_Instantiated_Connector *node);
+
+  virtual int visit_tmpl_port(AST_Tmpl_Port *node);
+
+  virtual int visit_tmpl_mirror_port(AST_Tmpl_Mirror_Port *node);
+
 protected:
   AST_Decl *scope_;
   CORBA::Boolean in_reopened_;
