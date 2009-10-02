@@ -21,17 +21,13 @@
             OpenDDS (Licensed Product) is protected by copyright, and is
             distributed under the following terms.
 
-            OpenDDS is an open source implementation of the Object Management
-            Group (OMG) Data Distribution Service (DDS), developed and copyrighted
-            by Object Computing Incorporated (OCI).  OpenDDS is designed to extend
-            "The ACE ORB" (TAO) by providing an optional specialized OMG service,
-            known as the Data Distribution Service. The OMG DDS specification is
-            intended to be suitable for systems whose requirements include
-            real-time, high volume, robustness, failure tolerant data
-            distribution, and employing a publish and subscribe model. OpenDDS is
-            another CORBA service continuing in the tradition of TAO as a fully
-            featured implementation of CORBA with an active community of users
-            committed to its evolution.
+            OpenDDS is an open source implementation of the Object Management Group
+            (OMG) Data Distribution Service (DDS), developed and copyrighted by
+            Object Computing Incorporated (OCI). OpenDDS is both a multi-language
+            and multi-platform implementation. The OMG DDS specification is intended
+            to be suitable for systems whose requirements include real-time, high
+            volume, robustness, failure tolerant data distribution utilizing a
+            publish and subscribe model.
 
             Since OpenDDS is open source and free of licensing fees, you are free
             to use, modify, and distribute the source code, as long as you include
