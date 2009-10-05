@@ -1,3 +1,9 @@
+Mon Oct  5 22:34:17 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/dds/dcps_java_optional.mpb:
+
+          More adjustments for Windows builds.
+
 Mon Oct  5 15:44:59 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * java/idl2jni/codegen/idl2jni_visitor.h:
