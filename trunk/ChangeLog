@@ -1,7 +1,16 @@
+Mon Oct  5 15:44:59 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/idl2jni/codegen/idl2jni_visitor.h:
+
+          Added forward decls to fix compilation issues on older releases
+          of TAO. Due to DOC release practices, there is no way to
+          conditionally compile changes in the ast_visitor interface.
+          Don't complain; this is as good as it gets.
+
 Fri Oct  2 21:00:44 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * java/dds/dcps_java_optional.mpb:
-          
+
           Attempted for for MPC dependency issues for Java bindings on
           Windows platforms.
 
