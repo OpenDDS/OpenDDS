@@ -22,6 +22,59 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+// NOTE: Forward decls are reproduced here to avoid
+// compilation issues on older releases of TAO.
+class AST_Decl;
+class UTL_Scope;
+class AST_Type;
+class AST_PredefinedType;
+class AST_Module;
+class AST_Interface;
+class AST_InterfaceFwd;
+class AST_Template_Interface;
+class AST_ValueBox;
+class AST_ValueType;
+class AST_ValueTypeFwd;
+class AST_Component;
+class AST_ComponentFwd;
+class AST_PortType;
+class AST_Provides;
+class AST_Uses;
+class AST_Publishes;
+class AST_Emits;
+class AST_Consumes;
+class AST_Extended_Port;
+class AST_Mirror_Port;
+class AST_Tmpl_Port;
+class AST_Tmpl_Mirror_Port;
+class AST_Connector;
+class AST_Instantiated_Connector;
+class AST_EventType;
+class AST_EventTypeFwd;
+class AST_Home;
+class AST_Factory;
+class AST_Structure;
+class AST_StructureFwd;
+class AST_Exception;
+class AST_Expression;
+class AST_Enum;
+class AST_Operation;
+class AST_Field;
+class AST_Argument;
+class AST_Attribute;
+class AST_Union;
+class AST_UnionFwd;
+class AST_UnionBranch;
+class AST_UnionLabel;
+class AST_Constant;
+class AST_EnumVal;
+class AST_Array;
+class AST_Sequence;
+class AST_String;
+class AST_Typedef;
+class AST_Root;
+class AST_Native;
+
 class idl2jni_visitor : public ast_visitor {
 
 public:
