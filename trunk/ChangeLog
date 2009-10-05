@@ -32,7 +32,7 @@ Wed Sep 30 05:03:35 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * java/dds/dcps_java_optional.mpb:
 
-          Attempted for for MPC dependency issues for Java bindings.
+          Attempted fix for for MPC dependency issues for Java bindings.
 
 Tue Sep 29 16:39:52 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
