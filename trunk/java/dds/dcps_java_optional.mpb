@@ -16,8 +16,7 @@ feature (built_in_topics): dcps_ts_defaults, idl2jni {
     command       = perl $(DDS_ROOT)/bin/dcps_ts.pl --extensions_only --extension=$(DDS_ROOT)/java/build_scripts/JavaTypeSupportImpl
     dependent     = $(DDS_ROOT)/bin/dcps_ts.pl \
                     $(DDS_ROOT)/java/build_scripts/JavaTypeSupportImpl.pm
-    generic_outputext     = .java
-    output_follows_input  = 0
+    inputext      = .idl
     keyword dcps_ts_java_flags = commandflags
   }
 
@@ -27,14 +26,16 @@ feature (built_in_topics): dcps_ts_defaults, idl2jni {
   }
 
   Java_Files {
-    DDS/ParticipantBuiltinTopicDataTypeSupportImpl.java << classes/DDS/_ParticipantBuiltinTopicDataTypeSupportTAOPeer.class
-    DDS/TopicBuiltinTopicDataTypeSupportImpl.java << classes/DDS/_TopicBuiltinTopicDataTypeSupportTAOPeer.class
-    DDS/PublicationBuiltinTopicDataTypeSupportImpl.java << classes/DDS/_PublicationBuiltinTopicDataTypeSupportTAOPeer.class
-    DDS/SubscriptionBuiltinTopicDataTypeSupportImpl.java << classes/DDS/_SubscriptionBuiltinTopicDataTypeSupportTAOPeer.class
+    DDS/ParticipantBuiltinTopicDataTypeSupportImpl.java << DDS/ParticipantBuiltinTopicDataTypeSupport.java
+    DDS/TopicBuiltinTopicDataTypeSupportImpl.java
+    DDS/PublicationBuiltinTopicDataTypeSupportImpl.java
+    DDS/SubscriptionBuiltinTopicDataTypeSupportImpl.java
     OpenDDS/DCPS/BuiltinTopicUtils.java
   }
 }
 
 feature (!built_in_topics): idl2jni {
+
   idl2jniflags += -DDDS_HAS_MINIMUM_BIT
+
 }
