@@ -2495,7 +2495,7 @@ DataReaderImpl::filter_sample(const DataSampleHeader& header)
       && qos_.durability.kind == DDS::VOLATILE_DURABILITY_QOS) {
     if (DCPS_debug_level >= 8) {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) DataReaderImpl::data_expired: ")
+                 ACE_TEXT("(%P|%t) DataReaderImpl::filter_sample: ")
                  ACE_TEXT("Discarded historic data.\n")));
     }
 
