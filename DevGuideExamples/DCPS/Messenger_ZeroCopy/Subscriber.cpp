@@ -23,7 +23,6 @@
 #include "DataReaderListenerImpl.h"
 #include "MessengerTypeSupportImpl.h"
 
-static DDS::Duration_t timeout = { 30, 0 }; // 30 seconds
 
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
@@ -57,9 +56,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     // Create Topic (Movie Discussion List)
+    CORBA::String_var type_name = ts->get_type_name();
     DDS::Topic_var topic =
       participant->create_topic("Movie Discussion List",
-                                ts->get_type_name(),
+                                type_name.in(),
                                 TOPIC_QOS_DEFAULT,
                                 DDS::TopicListener::_nil(),
                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -96,12 +96,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     // Create DataReader
-    DataReaderListenerImpl listener;
+    DDS::DataReaderListener_var listener(new DataReaderListenerImpl);
 
     DDS::DataReader_var reader =
       subscriber->create_datareader(topic.in(),
                              DATAREADER_QOS_DEFAULT,
-                             &listener,
+                             listener.in(),
                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (CORBA::is_nil(reader.in())) {
@@ -129,6 +129,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     DDS::ConditionSeq conditions;
     DDS::SubscriptionMatchedStatus matches = { 0, 0, 0, 0, 0 };
+    DDS::Duration_t timeout = { 30, 0 }; // 30 seconds
 
     do {
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {

@@ -1,3 +1,17 @@
+Wed Oct  7 16:07:02 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/Subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/Subscriber.cpp:
+
+          Updates to the Developer's Guide examples to make them
+          more consistent with the OpenDDS 2.0 DevGuide.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Clean up an ACE_DEBUG message.
+
 Mon Oct  5 22:34:17 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * java/dds/dcps_java_optional.mpb:

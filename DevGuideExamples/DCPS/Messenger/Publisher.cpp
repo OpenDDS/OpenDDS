@@ -23,7 +23,6 @@
 
 #include "MessengerTypeSupportImpl.h"
 
-static DDS::Duration_t timeout = { 30, 0 };
 
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
@@ -59,9 +58,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     // Create Topic (Movie Discussion List)
+    CORBA::String_var type_name = ts->get_type_name();
     DDS::Topic_var topic =
       participant->create_topic("Movie Discussion List",
-                                ts->get_type_name(),
+                                type_name.in(),
                                 TOPIC_QOS_DEFAULT,
                                 DDS::TopicListener::_nil(),
                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -112,10 +112,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                        -1);
     }
 
-    Messenger::MessageDataWriter_var writer_i =
+    Messenger::MessageDataWriter_var message_writer =
       Messenger::MessageDataWriter::_narrow(writer.in());
 
-    if (CORBA::is_nil(writer_i.in())) {
+    if (CORBA::is_nil(message_writer.in())) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("ERROR: %N:%l: main() -")
                           ACE_TEXT(" _narrow failed!\n")),
@@ -131,6 +131,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     DDS::ConditionSeq conditions;
     DDS::PublicationMatchedStatus matches = { 0, 0, 0, 0, 0 };
+    DDS::Duration_t timeout = { 30, 0 };
 
     do {
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
@@ -161,7 +162,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     message.count      = 0;
 
     for (int i = 0; i < 10; i++) {
-      DDS::ReturnCode_t error = writer_i->write(message, DDS::HANDLE_NIL);
+      DDS::ReturnCode_t error = message_writer->write(message, DDS::HANDLE_NIL);
 
       if (error != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR,
@@ -171,7 +172,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     // Wait for samples to be acknowledged
-    if (writer_i->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK) {
+    if (message_writer->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" wait_for_acknowledgments failed!\n")),
