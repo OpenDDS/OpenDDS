@@ -1,3 +1,10 @@
+Fri Oct  9 20:49:09 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Fixed default ReliablityQos policy; default is now RELIABLE
+          (reported by Scott Harris).
+
 Wed Oct  7 16:07:02 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/Publisher.cpp:
