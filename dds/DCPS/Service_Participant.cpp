@@ -548,6 +548,7 @@ Service_Participant::initialize()
   initial_DataWriterQos_.latency_budget = initial_LatencyBudgetQosPolicy_;
   initial_DataWriterQos_.liveliness = initial_LivelinessQosPolicy_;
   initial_DataWriterQos_.reliability = initial_ReliabilityQosPolicy_;
+  initial_DataWriterQos_.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
   initial_DataWriterQos_.destination_order = initial_DestinationOrderQosPolicy_;
   initial_DataWriterQos_.history = initial_HistoryQosPolicy_;
   initial_DataWriterQos_.resource_limits = initial_ResourceLimitsQosPolicy_;
@@ -557,7 +558,6 @@ Service_Participant::initialize()
   initial_DataWriterQos_.ownership = initial_OwnershipQosPolicy_;
   initial_DataWriterQos_.ownership_strength = initial_OwnershipStrengthQosPolicy_;
   initial_DataWriterQos_.writer_data_lifecycle = initial_WriterDataLifecycleQosPolicy_;
-  initial_DataWriterQos_.writer_data_lifecycle.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
   initial_PublisherQos_.presentation = initial_PresentationQosPolicy_;
   initial_PublisherQos_.partition = initial_PartitionQosPolicy_;
