@@ -319,7 +319,7 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
   publisher_->get_default_datawriter_qos (default_dw_qos);
 
   ::DDS::DataWriterQos new_default_dw_qos = default_dw_qos;
-  new_default_dw_qos.reliability.kind  = ::DDS::RELIABLE_RELIABILITY_QOS;
+  new_default_dw_qos.reliability.kind  = ::DDS::BEST_EFFORT_RELIABILITY_QOS;
 
   TEST_CHECK (! (new_default_dw_qos == default_dw_qos));
   TEST_CHECK (publisher_->set_default_datawriter_qos (new_default_dw_qos)
