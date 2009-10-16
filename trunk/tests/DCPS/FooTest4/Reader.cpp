@@ -213,9 +213,9 @@ Reader::start1 ()
                   ::DDS::NOT_READ_SAMPLE_STATE,
                   ::DDS::ANY_VIEW_STATE,
                   ::DDS::ANY_INSTANCE_STATE) ;
-            handle = si[0].instance_handle ;
             if (status == ::DDS::RETCODE_OK)
             {
+              handle = si[0].instance_handle ;
               ACE_OS::printf ("%s foo.x = %f foo.y = %f, foo.key = %d\n",
                       action, foo[0].x, foo[0].y, foo[0].key);
 
@@ -292,9 +292,9 @@ Reader::start1 ()
                   ::DDS::NOT_READ_SAMPLE_STATE,
                   ::DDS::ANY_VIEW_STATE,
                   ::DDS::ANY_INSTANCE_STATE) ;
-            handle = si[0].instance_handle ;
             if (status == ::DDS::RETCODE_OK)
             {
+              handle = si[0].instance_handle ; 
               ACE_OS::printf ("%s foo.x = %f foo.y = %f, foo.key = %d\n",
                       action, foo[0].x, foo[0].y, foo[0].key);
 
