@@ -1,3 +1,10 @@
+Fri Oct 16 18:35:38 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/FooTest4/Reader.cpp:
+
+          Fixed access violation on zero length SampleInfoSeq 
+          returned from read_next_instance or take_next_instance.
+
 Tue Oct 13 22:45:56 GMT 2009  Scott Harris  <harris_s@ociweb.com>
 
         * tests/DCPS/FooTest3_0/PubDriver.cpp
