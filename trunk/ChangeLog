@@ -1,4 +1,4 @@
-Tuesday, October 20, 2009  1:36:51 PM GMT  Scott Harris  <harris_s@ociweb.com>
+Tue Oct 20 01:36:51 UTC 2009  Scott Harris  <harris_s@ociweb.com>
 
         * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher/TestDriver.h
 
@@ -11,7 +11,7 @@ Fri Oct 16 18:35:38 UTC 2009  Yan Dai  <dai_y@ociweb.com>
           Fixed access violation on zero length SampleInfoSeq 
           returned from read_next_instance or take_next_instance.
 
-Tue Oct 13 22:45:56 GMT 2009  Scott Harris  <harris_s@ociweb.com>
+Tue Oct 13 22:45:56 UTC 2009  Scott Harris  <harris_s@ociweb.com>
 
         * tests/DCPS/FooTest3_0/PubDriver.cpp
 
@@ -16466,7 +16466,7 @@ Wed Apr 25 22:38:56 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
                         Resolve gcc build errors and warnings.
 
-        Wed Apr 18 18:50:41 GMT 2007  Scott Harris <harris_s@ociweb.com>
+        Wed Apr 18 18:50:41 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
                         * bin/DCPS/CPPTemplate.pm:
                         * bin/DCPS/HTemplate.pm:
@@ -19581,7 +19581,7 @@ Wed Nov 15 14:07:44 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
           Added missing includes to fix compilation errors on windows.
 
-Wed Nov 15 15:47:31 GMT 2006  Rich Seibel<seibel_r@ociweb.com>
+Wed Nov 15 15:47:31 UTC 2006  Rich Seibel<seibel_r@ociweb.com>
 
         * tests/DCPS/FooTest3/Writer.cpp:
         * tests/DCPS/FooTest3NoKey/Writer.cpp:
@@ -19594,7 +19594,7 @@ Wed Nov 15 15:47:31 GMT 2006  Rich Seibel<seibel_r@ociweb.com>
           Green Hills compiler to C-style, since the
           Visual Studio compiler didn't like it.
 
-Tue Nov 14 15:36:59 GMT 2006  Rich Seibel<seibel_r@ociweb.com>
+Tue Nov 14 15:36:59 UTC 2006  Rich Seibel<seibel_r@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
           Rearranged includes to correct a dependency which tripped
