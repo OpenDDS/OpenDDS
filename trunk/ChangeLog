@@ -1,3 +1,9 @@
+Tuesday, October 20, 2009  1:36:51 PM GMT  Scott Harris  <harris_s@ociweb.com>
+
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher/TestDriver.h
+
+          Fix build against SunCC with STLport.
+
 Fri Oct 16 18:35:38 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/FooTest4/Reader.cpp:

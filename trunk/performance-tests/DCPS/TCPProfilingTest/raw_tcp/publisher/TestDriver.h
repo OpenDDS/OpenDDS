@@ -4,6 +4,7 @@
 #include "TestData.h"
 #include <ace/INET_Addr.h>
 #include <list>
+#include <string>
 
 class TcpPublisher;
 
