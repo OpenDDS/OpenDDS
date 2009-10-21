@@ -587,6 +587,8 @@ int idl2jni_visitor::visit_valuebox(AST_ValueBox *)
   return 0;
 }
 
+#if (TAO_MAJOR_VERSION > 2 || (TAO_MAJOR_VERSION == 1 && \
+ (TAO_MINOR_VERSION > 7 || (TAO_MINOR_VERSION == 7 && TAO_BETA_VERSION > 3))))
 int idl2jni_visitor::visit_template_interface(AST_Template_Interface *)
 {
   return 0;
@@ -651,3 +653,4 @@ int idl2jni_visitor::visit_tmpl_mirror_port(AST_Tmpl_Mirror_Port *)
 {
   return 0;
 }
+#endif
