@@ -14,7 +14,7 @@ team at Object Computing, Incorporated (http://www.ociweb.com) in
 St. Louis and Phoenix.  It is released under the same generous license
 terms as ACE, TAO and MPC.  See the LICENSE file for details.
 
-This directory structure contains OpenDDS 2.1.
+This directory structure contains OpenDDS 2.0.1.
 
 
 ======================================================================
@@ -81,9 +81,9 @@ OpenDDS requires TAO for both IDL compilation as well as interaction
 with the DCPSInfoRepo.  At a minimum, you must be at one of the following
 versions (or later) in order to properly compile OpenDDS:
 
-*** TAO 1.5a patch 15
-*** TAO 1.6a patch 2
-*** TAO 1.7.3 (DOC Group)
+*** TAO 1.5a patch 16
+*** TAO 1.6a patch 3
+*** TAO 1.7.4 (DOC Group)
 
 Note that the 1.xa releases are from OCI and can be obtained from
 http://www.theaceorb.com/.  The DOC Group releases can be obtained from
