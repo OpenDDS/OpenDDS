@@ -1,0 +1,6 @@
+//
+// $Id$
+//
+
+project : dcps_test, dcps_tcp {
+}

@@ -1,0 +1,24 @@
+# $Id$
+
+The TRANSIENT kind of the DURABILITY QoS policy configures the
+publisher within a given domain to retain unsent data beyond the
+lifetime of its DataWriters so that subsequently created DataWriters
+within that publisher will have the opportunity to send the unsent
+data.  The "durable" unsent data will not outlive the publisher.
+
+This test verifies properly functioning TRANSIENT DURABILITY support
+in OpenDDS by performing the following actions:
+
+1. Write data for a specific domain/topic/type through a DataWriter
+   that has not been associated with a DataReader.  (No pub/sub match
+   yet).
+2. Allow that DataWriter to go out of scope.
+3. Create a new DataWriter for the same domain/topic/type.  New data
+   will not be written to this DataWriter.  Cached "durable" data
+   should instead be retrieved from the underlying data durability
+   cache.
+4. A subscription to this domain/topic/type will then occur, after
+   which the data that was in the durability cache will be sent to the
+   DataReader.
+5. To test "service_cleanup_delay", a new DataWriter for a dummy topic
+   will be created with the appropriate QoS settings.

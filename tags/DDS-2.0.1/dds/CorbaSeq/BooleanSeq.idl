@@ -1,0 +1,24 @@
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+/**
+ *   This file is used to generate the code in BooleanSeqC.*
+ */
+
+#ifndef OPENDDS_CORBA_BOOLEAN_SEQ_IDL
+#define OPENDDS_CORBA_BOOLEAN_SEQ_IDL
+
+#pragma prefix "omg.org"
+
+module CORBA
+{
+  typedef sequence<boolean> BooleanSeq;
+};
+
+#endif /* OPENDDS_CORBA_BOOLEAN_SEQ_IDL */

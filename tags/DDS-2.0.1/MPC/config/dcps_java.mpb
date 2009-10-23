@@ -1,0 +1,17 @@
+project: dcps, idl2jni, dcps_java_bits {
+
+  after        += dcps_java
+  libs         += OpenDDS_DCPS_Java tao_java
+  includes     += $(DDS_ROOT)/java $(DDS_ROOT)/dds
+  macros       += NOMINMAX         //don't #define min and max in Win32 headers
+
+  idl2jniflags += -SS -I$(DDS_ROOT) -I$(TAO_ROOT)
+
+  javacflags   += -classpath $(DDS_ROOT)/lib/OpenDDS_DCPS.jar
+
+  Modify_Custom(TypeSupport) {
+    commandflags += --extension=$(DDS_ROOT)/java/build_scripts/JavaTypeSupportImpl
+    dependent    += $(DDS_ROOT)/java/build_scripts/JavaTypeSupportImpl.pm
+  }
+
+}

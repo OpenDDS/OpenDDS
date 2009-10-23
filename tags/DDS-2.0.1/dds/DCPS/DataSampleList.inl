@@ -1,0 +1,283 @@
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#include <algorithm>
+
+namespace OpenDDS {
+namespace DCPS {
+
+ACE_INLINE
+DataSampleListElement::DataSampleListElement(
+  PublicationId           publication_id,
+  TransportSendListener*  send_listner,
+  PublicationInstance*    handle,
+  TransportSendElementAllocator* allocator)
+  : sample_(0),
+    publication_id_(publication_id),
+    num_subs_(0),
+    previous_sample_(0),
+    next_sample_(0),
+    next_instance_sample_(0),
+    next_send_sample_(0),
+    previous_send_sample_(0),
+    send_listener_(send_listner),
+    space_available_(false),
+    handle_(handle),
+    transport_send_element_allocator_(allocator)
+{
+  source_timestamp_.sec = 0;
+  source_timestamp_.nanosec = 0;
+}
+
+ACE_INLINE
+DataSampleListElement::DataSampleListElement(
+  const DataSampleListElement& elem)
+  : sample_(elem.sample_->duplicate())
+  , publication_id_(elem.publication_id_)
+  , num_subs_(elem.num_subs_)
+  , previous_sample_(elem.previous_sample_)
+  , next_sample_(elem.next_sample_)
+  , next_instance_sample_(elem.next_instance_sample_)
+  , next_send_sample_(elem.next_send_sample_)
+  , previous_send_sample_(elem.previous_send_sample_)
+  , send_listener_(elem.send_listener_)
+  , space_available_(elem.space_available_)
+  , handle_(elem.handle_)
+  , transport_send_element_allocator_(
+      elem.transport_send_element_allocator_)
+{
+  std::copy(elem.subscription_ids_,
+            elem.subscription_ids_ + num_subs_,
+            subscription_ids_);
+
+  source_timestamp_.sec = elem.source_timestamp_.sec;
+  source_timestamp_.nanosec = elem.source_timestamp_.nanosec;
+}
+
+ACE_INLINE
+DataSampleListElement::~DataSampleListElement()
+{
+  if (sample_) {
+    sample_->release();
+  }
+}
+
+ACE_INLINE
+DataSampleListElement &
+DataSampleListElement::operator= (DataSampleListElement const & rhs)
+{
+  sample_ = rhs.sample_->duplicate();
+  publication_id_ = rhs.publication_id_;
+  num_subs_ = rhs.num_subs_;
+  std::copy(rhs.subscription_ids_,
+            rhs.subscription_ids_ + num_subs_,
+            subscription_ids_);
+  source_timestamp_.sec = rhs.source_timestamp_.sec;
+  source_timestamp_.nanosec = rhs.source_timestamp_.nanosec;
+  previous_sample_ = rhs.previous_sample_;
+  next_sample_ = rhs.next_sample_;
+  next_instance_sample_ = rhs.next_instance_sample_;
+  next_send_sample_ = rhs.next_send_sample_;
+  previous_send_sample_ = rhs.previous_send_sample_;
+  send_listener_ = rhs.send_listener_;
+  space_available_ = rhs.space_available_;
+  handle_ = rhs.handle_;
+  transport_send_element_allocator_ = rhs.transport_send_element_allocator_;
+
+  return *this;
+}
+
+// --------------------------------------------
+
+ACE_INLINE
+DataSampleList::DataSampleList()
+  : head_(0),
+    tail_(0),
+    size_(0)
+{
+}
+
+ACE_INLINE
+void DataSampleList::reset()
+{
+  head_ = tail_ = 0;
+  size_ = 0;
+}
+
+ACE_INLINE
+void
+DataSampleList::enqueue_tail_next_sample(DataSampleListElement* sample)
+{
+  //sample->previous_sample_ = 0;
+  //sample->next_sample_ = 0;
+
+  ++size_ ;
+
+  if (head_ == 0) {
+    // First sample in the list.
+    head_ = tail_ = sample ;
+
+  } else {
+    // Add to existing list.
+    tail_->next_sample_ = sample ;
+    sample->previous_sample_ = tail_;
+    tail_ = sample;
+  }
+}
+
+ACE_INLINE
+bool
+DataSampleList::dequeue_head_next_sample(DataSampleListElement*& stale)
+{
+  //
+  // Remove the oldest sample from the list.
+  //
+  stale = head_;
+
+  if (head_ == 0) {
+    return false;
+
+  } else {
+    --size_ ;
+    head_ = head_->next_sample_;
+
+    if (head_ == 0) {
+      tail_ = 0;
+
+    } else {
+      head_->previous_sample_ = 0;
+    }
+
+    stale->next_sample_ = 0;
+    stale->previous_sample_ = 0;
+    return true;
+  }
+}
+
+ACE_INLINE
+void
+DataSampleList::enqueue_tail_next_send_sample(DataSampleListElement* sample)
+{
+  //sample->previous_sample_ = 0;
+  //sample->next_sample_ = 0;
+  //sample->next_send_sample_ = 0;
+
+  ++ size_ ;
+
+  if (head_ == 0) {
+    // First sample in list.
+    head_ = tail_ = sample ;
+
+  } else {
+    // Add to existing list.
+    //sample->previous_sample_ = tail_;
+    //tail_->next_sample_ = sample;
+    sample->previous_send_sample_ = tail_;
+    tail_->next_send_sample_ = sample ;
+    tail_ = sample ;
+  }
+}
+
+ACE_INLINE
+bool
+DataSampleList::dequeue_head_next_send_sample(DataSampleListElement*& stale)
+{
+  //
+  // Remove the oldest sample from the instance list.
+  //
+  stale = head_;
+
+  if (head_ == 0) {
+    return false;
+
+  } else {
+    --size_ ;
+
+    head_ = head_->next_send_sample_ ;
+
+    if (head_ == 0) {
+      tail_ = 0;
+
+    } else {
+      head_->previous_send_sample_ = 0;
+    }
+
+    //else
+    //  {
+    //    head_->previous_sample_ = 0;
+    //  }
+
+    stale->next_send_sample_ = 0 ;
+    stale->previous_send_sample_ = 0 ;
+
+    return true;
+  }
+}
+
+ACE_INLINE
+void
+DataSampleList::enqueue_tail_next_instance_sample(DataSampleListElement* sample)
+{
+  sample->next_instance_sample_ = 0;
+
+  ++ size_ ;
+
+  if (head_ == 0) {
+    // First sample on queue.
+    head_ = tail_ = sample ;
+
+  } else {
+    // Another sample on an existing queue.
+    tail_->next_instance_sample_ = sample ;
+    tail_ = sample ;
+  }
+}
+
+ACE_INLINE
+bool
+DataSampleList::dequeue_head_next_instance_sample(DataSampleListElement*& stale)
+{
+  //
+  // Remove the oldest sample from the instance list.
+  //
+  stale = head_;
+
+  if (head_ == 0) {
+    // try to dequeue empty instance list.
+    return false;
+
+  } else {
+    --size_ ;
+    head_ = head_->next_instance_sample_ ;
+
+    if (head_ == 0) {
+      tail_ = 0;
+    }
+
+    stale->next_instance_sample_ = 0;
+    return true;
+  }
+}
+
+ACE_INLINE
+DataSampleList::iterator
+DataSampleList::begin()
+{
+  return iterator(this->head_, this->tail_, this->head_);
+}
+
+ACE_INLINE
+DataSampleList::iterator
+DataSampleList::end()
+{
+  return iterator(this->head_, this->tail_, 0);
+}
+
+} // namespace DCPS
+} // namespace OpenDDS

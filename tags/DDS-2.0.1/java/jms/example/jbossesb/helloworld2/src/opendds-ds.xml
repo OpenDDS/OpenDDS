@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Id$
+-->
+<!DOCTYPE connection-factories PUBLIC "-//JBoss//DTD JBOSS JCA Config 1.5//EN"
+    "http://www.jboss.org/j2ee/dtd/jboss-ds_1_5.dtd">
+
+<connection-factories>
+    <mbean code="org.opendds.jms.management.ParticipantFactoryService"
+           name="OpenDDS:service=DomainParticipantFactory">
+        <attribute name="DCPSInfoRepo">iiop://localhost:6666/DCPSInfoRepo</attribute>
+        <attribute name="DCPSPersistentDataDir">${jboss.server.data.dir}/opendds</attribute>
+        <attribute name="ORBListenEndpoints">iiop://:6667</attribute>
+        <attribute name="TransportType">SimpleTcp</attribute>
+        <depends>jboss.jca:service=RARDeployment,name='opendds-jms-@VERSION@.rar'</depends>
+    </mbean>
+
+    <!--
+        Destination configuration
+    -->
+    <mbean code="org.opendds.jms.management.Destination"
+           name="OpenDDS:destination=Topic,type=Topic">
+        <attribute name="JndiName">DDS/Topic</attribute>
+    </mbean>
+
+    <!--
+        ConnectionFactory configuration
+    -->
+    <no-tx-connection-factory>
+        <jndi-name>DDS/ConnectionFactory</jndi-name>
+        <use-java-context>false</use-java-context>
+        <rar-name>opendds-jms-@VERSION@.rar</rar-name>
+        <connection-definition>javax.jms.ConnectionFactory</connection-definition>
+        <config-property name="DomainID" type="java.lang.Integer">1</config-property>
+        <config-property name="TransportType" type="java.lang.String">SimpleTcp</config-property>
+        <min-pool-size>5</min-pool-size>
+        <max-pool-size>20</max-pool-size>
+        <depends>OpenDDS:service=DomainParticipantFactory</depends>
+    </no-tx-connection-factory>
+</connection-factories>

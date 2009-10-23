@@ -1,0 +1,10 @@
+project(DcpsSimpleFooTest): dcpsexe {
+  exename   = SimpleFooTest
+  libs     +=  DcpsFooType
+  libpaths +=  ../FooType
+  after    += DcpsFooType
+
+  Source_Files {
+    main.cpp
+  }
+}

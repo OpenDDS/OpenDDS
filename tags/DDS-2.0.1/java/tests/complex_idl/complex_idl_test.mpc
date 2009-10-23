@@ -1,0 +1,24 @@
+// $Id$
+project: dcps_tcp, dcps_java {
+
+    sharedname      = complex_idl_test
+
+    idlflags        += -Wb,stub_export_include=complex_idl_test_Export.h \
+                       -Wb,stub_export_macro=complex_idl_test_Export
+    dcps_ts_flags   += --export=complex_idl_test_Export
+    idl2jniflags    += -Wb,stub_export_include=complex_idl_test_Export.h \
+                       -Wb,stub_export_macro=complex_idl_test_Export
+
+    dynamicflags    += COMPLEX_IDL_TEST_BUILD_DLL
+
+    // Older versions of Visual Studio will create the intermediate directories
+    // in all-lowercase, so we have to create them first to get the correct case.
+    specific(vc71, vc8) {
+        prebuild    += <%mkdir%> Complex 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
+        prebuild    += <%mkdir%> classes<%slash%>Complex 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
+    }
+
+    TypeSupport_Files {
+        Complex.idl
+    }
+}
