@@ -1,3 +1,12 @@
+Version 2.1 of OpenDDS.
+
+New to this version are the following changes:
+
+- First change...
+
+
+=========================================================================
+
 Version 2.0.1 of OpenDDS.
 
 * This is a bugfix release to account for issues introduced by the 2.0
