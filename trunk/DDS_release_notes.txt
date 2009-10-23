@@ -1,8 +1,16 @@
-Version 2.1 of OpenDDS.
+Version 2.0.1 of OpenDDS.
+
+* This is a bugfix release to account for issues introduced by the 2.0
+  integration process.  No new features have been added in this release.
 
 New to this version are the following changes:
 
-- First change...
+- Bugfixes for STLport support using Sun CC compilers.
+
+- Corrected default ReliablityQoS policy for DataWriter entities.
+
+- Bugfixes to Java language bindings including TAO_IDL interface changes
+  introduced in DOC TAO 1.7.4 and incorrectly generated project files.
 
 
 =========================================================================
