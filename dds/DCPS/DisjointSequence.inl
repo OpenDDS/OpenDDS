@@ -28,8 +28,8 @@ DisjointSequence::disjoint()
   return this->low_ != this->high_;
 }
 
-ACE_INLINE SequenceNumber
-DisjointSequence::value()
+ACE_INLINE
+DisjointSequence::operator SequenceNumber()
 {
   // Always return low water mark; this value
   // represents the maximum contiguous value.
