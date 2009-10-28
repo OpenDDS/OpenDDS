@@ -27,11 +27,12 @@ public:
   SequenceNumber low();
   SequenceNumber high();
 
-  SequenceNumber value();
   bool disjoint();
 
   bool update(SequenceNumber value);
   void skip(SequenceNumber value);
+
+  operator SequenceNumber();
 
 private:
   SequenceNumber low_;
