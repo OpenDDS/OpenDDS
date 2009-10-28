@@ -1,3 +1,14 @@
+Wed Oct 28 22:57:37 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Initial implementation of disjoint sequence tracking for
+          forthcoming updates to wait_for_acknowledgements and
+          coherent_access.
+
 Fri Oct 23 22:40:22 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * DDS_release_notes.txt:
