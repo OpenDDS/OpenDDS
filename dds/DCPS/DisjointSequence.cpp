@@ -40,14 +40,13 @@ DisjointSequence::update(SequenceNumber value)
     // set to eliminate additional contiguities.
     this->low_ = value;
     normalize();
-
     return true;
   }
 
   if (value > this->high_) {
     // Swap new high water mark with previous value;
     // this intentionally falls through to insert
-    // the previous alue to the set.
+    // the previous value to the set.
     std::swap(value, this->high_);
   }
 
