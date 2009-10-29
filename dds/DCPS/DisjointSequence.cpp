@@ -39,7 +39,6 @@ void
 DisjointSequence::update(SequenceNumber value)
 {
   if (value <= low()) return;
-
   insert(value);
   normalize();
 }
