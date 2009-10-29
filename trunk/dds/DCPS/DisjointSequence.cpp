@@ -54,13 +54,13 @@ DisjointSequence::skip(SequenceNumber value)
 void
 DisjointSequence::normalize()
 {
+  // Remove contiguities from the beginning of the
+  // set; set should minimally contain one value.
   values_type::iterator first = this->values_.begin();
   while (first != this->values_.end()) {
     values_type::iterator second(first);
     second++;
 
-    // Remove contiguities from the beginning of the
-    // set; set should minimally contain one value.
     if (second != this->values_.end() && *second == *first + 1) {
       this->values_.erase(first);
       first = second;
