@@ -10,37 +10,34 @@
 #ifndef DCPS_DISJOINTSEQUENCE_H
 #define DCPS_DISJOINTSEQUENCE_H
 
-#include <set>
-
 #include "Definitions.h"
-
 #include "dcps_export.h"
+
+#include <set>
 
 namespace OpenDDS {
 namespace DCPS {
 
 class OpenDDS_Dcps_Export DisjointSequence {
 public:
-  DisjointSequence();
+  explicit DisjointSequence(SequenceNumber value = SequenceNumber());
   ~DisjointSequence();
 
-  SequenceNumber low();
-  SequenceNumber high();
+  SequenceNumber low() const;
+  SequenceNumber high() const;
 
-  bool disjoint();
+  bool disjoint() const;
 
-  bool update(SequenceNumber value);
+  void update(SequenceNumber value);
   void skip(SequenceNumber value);
 
-  operator SequenceNumber();
+  operator SequenceNumber() const;
 
 private:
-  SequenceNumber low_;
-  SequenceNumber high_;
-
   typedef std::set<SequenceNumber> values_type;
   values_type values_;
 
+  void insert(SequenceNumber value);
   void normalize();
 };
 

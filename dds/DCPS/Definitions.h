@@ -163,7 +163,7 @@ struct VarLess : public std::binary_function<V, V, bool> {
 } // namespace OpenDDS
 } // namespace DCPS
 
-OpenDDS::DCPS::SequenceNumber
+inline OpenDDS_Dcps_Export OpenDDS::DCPS::SequenceNumber
 operator+(const OpenDDS::DCPS::SequenceNumber& lhs, int rhs)
 {
   // The lollipop must be protected; ensure new value
@@ -171,7 +171,7 @@ operator+(const OpenDDS::DCPS::SequenceNumber& lhs, int rhs)
   return OpenDDS::DCPS::SequenceNumber((lhs.value_ + rhs) % 0x7fff);
 }
 
-OpenDDS::DCPS::SequenceNumber
+inline OpenDDS_Dcps_Export OpenDDS::DCPS::SequenceNumber
 operator+(int lhs, const OpenDDS::DCPS::SequenceNumber& rhs)
 {
   return rhs + lhs;

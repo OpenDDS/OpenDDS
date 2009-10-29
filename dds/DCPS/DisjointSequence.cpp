@@ -8,7 +8,6 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
-
 #include "DisjointSequence.h"
 
 #ifndef __ACE_INLINE__
@@ -16,62 +15,56 @@
 #endif /* __ACE_INLINE__ */
 
 #include <algorithm>
+#include <cassert>
 
 namespace OpenDDS {
 namespace DCPS {
 
-DisjointSequence::DisjointSequence()
+DisjointSequence::DisjointSequence(SequenceNumber value)
 {
+  insert(value);
 }
 
 DisjointSequence::~DisjointSequence()
 {
 }
 
-bool
+void
+DisjointSequence::insert(SequenceNumber value) {
+  std::pair<values_type::iterator, bool> pair = this->values_.insert(value);
+  assert(pair.second);
+}
+
+void
 DisjointSequence::update(SequenceNumber value)
 {
-  if (value <= this->low_ || value == this->high_) {
-    return false; // value already seen; ignore
+  if (value <= low()) {
+    return; // value seen
   }
-
-  if (value == this->low_ + 1) {
-    // Update value of low water mark; normalize
-    // set to eliminate additional contiguities.
-    this->low_ = value;
-    normalize();
-    return true;
-  }
-
-  if (value > this->high_) {
-    // Swap new high water mark with previous value;
-    // this intentionally falls through to insert
-    // the previous value to the set.
-    std::swap(value, this->high_);
-  }
-
-  std::pair<values_type::iterator, bool> pair = this->values_.insert(value);
-  return pair.second;
+  insert(value);
+  normalize();
 }
 
 void
 DisjointSequence::skip(SequenceNumber value)
 {
-  this->low_ = this->high_ = value;
   this->values_.clear();
+  insert(value);
 }
 
 void
 DisjointSequence::normalize()
 {
-  // Remove all contiguities from the beginning of
-  // the set; update the low water mark if needed.
-  for (values_type::iterator it = this->values_.begin();
-       it != this->values_.end(); ++it) {
-    SequenceNumber value = *it;
-    if (value = this->low_ + 1) {
-      this->low_ = value;
-      this->values_.erase(it);
+  values_type::iterator first = this->values_.begin();
+  while (first != this->values_.end()) {
+    values_type::iterator second(first);
+    second++;
+
+    // Remove contiguities from the beginning of the
+    // set; set should minimally contain one value.
+    if (second != this->values_.end() && *second == *first + 1) {
+      this->values_.erase(first);
+      first = second;
     }
   }
 }
