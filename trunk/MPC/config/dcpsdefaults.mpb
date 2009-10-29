@@ -1,0 +1,6 @@
+//
+// $Id$
+//
+
+project: taolib, portableserver, taoidldefaults, coverage_optional, assert {
+}
