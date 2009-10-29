@@ -1,3 +1,13 @@
+Thu Oct 29 22:13:55 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Updated disjoint sequence to be inclusive; added missing
+          inline on global operators.
+
 Wed Oct 28 22:57:37 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/Definitions.h:

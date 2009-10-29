@@ -7,33 +7,37 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include <cassert>
+
 namespace OpenDDS {
 namespace DCPS {
 
 ACE_INLINE SequenceNumber
-DisjointSequence::low()
+DisjointSequence::low() const
 {
-  return this->low_;
+  assert(!this->values_.empty());
+  return *(this->values_.begin());
 }
 
 ACE_INLINE SequenceNumber
-DisjointSequence::high()
+DisjointSequence::high() const
 {
-  return this->high_;
+  assert(!this->values_.empty());
+  return *(this->values_.rbegin());
 }
 
 ACE_INLINE bool
-DisjointSequence::disjoint()
+DisjointSequence::disjoint() const
 {
-  return this->low_ != this->high_;
+  return this->values_.size() > 1;
 }
 
 ACE_INLINE
-DisjointSequence::operator SequenceNumber()
+DisjointSequence::operator SequenceNumber() const
 {
   // Always return low water mark; this value
-  // represents the maximum contiguous value.
-  return this->low_;
+  // represents the max contiguous value seen.
+  return low();
 }
 
 } // namespace DCPS
