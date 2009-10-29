@@ -168,7 +168,7 @@ operator+(const OpenDDS::DCPS::SequenceNumber& lhs, int rhs)
 {
   // The lollipop must be protected; ensure new value
   // does not break the cellophane! (see increment)
-  return OpenDDS::DCPS::SequenceNumber((lhs.value_ + rhs) & 0x7fff);
+  return OpenDDS::DCPS::SequenceNumber((lhs.value_ + rhs) % 0x7fff);
 }
 
 OpenDDS::DCPS::SequenceNumber
