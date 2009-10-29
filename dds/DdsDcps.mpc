@@ -1,4 +1,4 @@
-project: taolib, portableserver, core, dcps_bits, coverage_optional, built_in_topic_support {
+project: dcpsdefaults, core, dcps_bits, built_in_topic_support {
   requires    += exceptions
   sharedname   = OpenDDS_Dcps
   dynamicflags = OPENDDS_DCPS_BUILD_DLL
