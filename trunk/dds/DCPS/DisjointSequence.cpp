@@ -14,8 +14,6 @@
 # include "DisjointSequence.inl"
 #endif /* __ACE_INLINE__ */
 
-#include <algorithm>
-
 namespace OpenDDS {
 namespace DCPS {
 
