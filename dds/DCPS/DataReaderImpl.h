@@ -20,6 +20,7 @@
 #include "Definitions.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "dds/DCPS/transport/framework/TransportReceiveListener.h"
+#include "DisjointSequence.h"
 #include "SubscriptionInstance.h"
 #include "InstanceState.h"
 #include "Cached_Allocator_With_Overflow_T.h"
@@ -82,12 +83,6 @@ public:
   /// update liveliness when remove_association is called.
   void removed();
 
-  /// Update the last observed sequence number from this publication.
-  void last_sequence(SequenceNumber sequence);
-
-  /// Access the most recently observed sequence number from this publication.
-  SequenceNumber last_sequence() const;
-
   /// Remove ack requests prior to the given sequence.
   /// NOTE: This removes *all* ack requests for this publication
   ///       satisfied by this sequence.
@@ -101,16 +96,23 @@ public:
   /// SAMPLE_ACK for this sequence value.
   void ack_deadline(SequenceNumber sequence, ACE_Time_Value when);
 
+  /// Update the last observed sequence number.
+  void ack_sequence(SequenceNumber value);
+
+  /// Return the most recently observed contiguous sequence number.
+  SequenceNumber ack_sequence() const;
+
 private:
   /// Timestamp of last write/dispose/assert_liveliness from this DataWriter
   ACE_Time_Value last_liveliness_activity_time_;
 
-  /// Last observed data sample sequence number from this writer.
-  SequenceNumber last_sequence_;
-
   /// Times after which we no longer need to respond to a REQUEST_ACK message.
   typedef std::list<std::pair<SequenceNumber, ACE_Time_Value> > DeadlineList;
   DeadlineList ack_deadlines_;
+
+  DisjointSequence ack_sequence_;
+
+  bool seen_data_;
 
   /// State of the writer.
   WriterState state_;
@@ -367,7 +369,7 @@ public:
   /// @}
 
   /// update liveliness info for this writer.
-  void writer_activity(PublicationId writer_id);
+  void writer_activity(const DataSampleHeader& header, bool is_data = false);
 
   /// process a message that has been received - could be control or a data sample.
   virtual void data_received(const ReceivedDataSample& sample);

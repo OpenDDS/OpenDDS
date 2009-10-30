@@ -312,7 +312,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
           ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
 
           if (where->second->should_ack(now)) {
-            SequenceNumber sequence = where->second->last_sequence();
+            SequenceNumber sequence = where->second->ack_sequence();
             DDS::Time_t timenow = time_value_to_time(now);
             bool result = this->send_sample_ack(
                             writers[ index].writerId,
@@ -1107,7 +1107,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 }
 
 void
-DataReaderImpl::writer_activity(PublicationId writer_id)
+DataReaderImpl::writer_activity(const DataSampleHeader& header, bool is_data)
 {
   // caller should have the sample_lock_ !!!
 
@@ -1120,7 +1120,7 @@ DataReaderImpl::writer_activity(PublicationId writer_id)
   {
     ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
 
-    WriterMapType::iterator iter = writers_.find(writer_id);
+    WriterMapType::iterator iter = writers_.find(header.publication_id_);
 
     if (iter != writers_.end()) {
       writer = iter->second;
@@ -1130,7 +1130,7 @@ DataReaderImpl::writer_activity(PublicationId writer_id)
       // is delivered to the datareader after the write is dis-associated
       // with this datareader.
       RepoIdConverter reader_converter(subscription_id_);
-      RepoIdConverter writer_converter(writer_id);
+      RepoIdConverter writer_converter(header.publication_id_);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataReaderImpl::writer_activity: ")
                  ACE_TEXT("reader %C is not associated with writer %C.\n"),
@@ -1140,6 +1140,14 @@ DataReaderImpl::writer_activity(PublicationId writer_id)
   }
 
   if (writer != 0) {
+    // In order to properly track out of order delivery,
+    // a baseline must be established based on the first
+    // data sample received.
+    if (!writer->seen_data_ && is_data) {
+      writer->seen_data_ = true;
+      writer->ack_sequence_.skip(header.sequence_);
+    }
+
     ACE_Time_Value when = ACE_OS::gettimeofday();
     writer->received_activity(when);
   }
@@ -1170,7 +1178,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   case INSTANCE_REGISTRATION: {
     DataSampleHeader const & header = sample.header_;
 
-    this->writer_activity(header.publication_id_);
+    this->writer_activity(header, true);
 
     // Verify data has not exceeded its lifespan.
     if (this->filter_sample(header)) break;
@@ -1205,7 +1213,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
           ++where->second->coherent_samples_;
         }
 
-        where->second->last_sequence(SequenceNumber(header.sequence_));
+        where->second->ack_sequence(header.sequence_);
 
         ACE_Time_Value now = ACE_OS::gettimeofday();
 
@@ -1250,7 +1258,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   break;
 
   case REQUEST_ACK: {
-    this->writer_activity(sample.header_.publication_id_);
+    this->writer_activity(sample.header_);
 
     SequenceNumber ack;
     DDS::Duration_t delay;
@@ -1313,7 +1321,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   case END_COHERENT_CHANGES: {
     ACE_UINT32 coherent_samples;
 
-    this->writer_activity(sample.header_.publication_id_);
+    this->writer_activity(sample.header_);
 
     TAO::DCPS::Serializer serializer(
       sample.sample_, sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER);
@@ -1373,7 +1381,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   break;
 
   case DATAWRITER_LIVELINESS: {
-    this->writer_activity(sample.header_.publication_id_);
+    this->writer_activity(sample.header_);
 
     // tell all instances they got a liveliness message
     for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
@@ -1388,7 +1396,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   break;
 
   case DISPOSE_INSTANCE: {
-    this->writer_activity(sample.header_.publication_id_);
+    this->writer_activity(sample.header_);
     SubscriptionInstance* instance = 0;
     this->dispose(sample, instance);
 
@@ -1399,7 +1407,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   break;
 
   case UNREGISTER_INSTANCE: {
-    this->writer_activity(sample.header_.publication_id_);
+    this->writer_activity(sample.header_);
     SubscriptionInstance* instance = 0;
     this->unregister(sample, instance);
 
@@ -1766,6 +1774,7 @@ DataReaderImpl::release_instance(DDS::InstanceHandle_t handle)
 
 OpenDDS::DCPS::WriterInfo::WriterInfo()
   : last_liveliness_activity_time_(ACE_OS::gettimeofday()),
+    seen_data_(false),
     state_(NOT_SET),
     reader_(0),
     writer_id_(GUID_UNKNOWN),
@@ -1819,25 +1828,6 @@ void OpenDDS::DCPS::WriterInfo::removed()
   reader_->writer_removed(*this);
 }
 
-SequenceNumber
-OpenDDS::DCPS::WriterInfo::last_sequence() const
-{
-  // sample_lock_ is held by the caller.
-
-  return this->last_sequence_;
-}
-
-void
-OpenDDS::DCPS::WriterInfo::last_sequence(
-  SequenceNumber sequence)
-{
-  // sample_lock_ is held by the caller.
-
-  if (this->last_sequence_ < sequence) {
-    this->last_sequence_ = sequence;
-  }
-}
-
 void
 OpenDDS::DCPS::WriterInfo::clear_acks(
   SequenceNumber sequence)
@@ -1876,8 +1866,7 @@ OpenDDS::DCPS::WriterInfo::should_ack(
       current = this->ack_deadlines_.erase(current);
 
     } else {
-      // NOTE: This assumes no out of order reception.
-      if (current->first <= this->last_sequence_) {
+      if (current->first <= this->ack_sequence_) {
         return true;
       }
 
@@ -1921,6 +1910,20 @@ OpenDDS::DCPS::WriterInfo::ack_deadline(SequenceNumber sequence, ACE_Time_Value 
       break;
     }
   }
+}
+
+void
+OpenDDS::DCPS::WriterInfo::ack_sequence(SequenceNumber value)
+{
+  // sample_lock_ is held by the caller.
+  this->ack_sequence_.update(value);
+}
+
+SequenceNumber
+OpenDDS::DCPS::WriterInfo::ack_sequence() const
+{
+  // sample_lock_ is held by the caller.
+  return this->ack_sequence_;
 }
 
 OpenDDS::DCPS::WriterStats::WriterStats(
@@ -2104,6 +2107,7 @@ DataReaderImpl::writer_became_dead(WriterInfo & info,
 
   //update the state to DEAD.
   info.state_ = WriterInfo::DEAD;
+  info.seen_data_ = false;
 
   if (liveliness_changed_status_.alive_count < 0) {
     ACE_ERROR((LM_ERROR,
