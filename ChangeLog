@@ -1,3 +1,12 @@
+Fri Oct 30 16:17:19 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Removed uneccessary assertions obviated by refactoring to an
+          inclusive model.
+
 Fri Oct 30 15:44:05 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/DisjointSequence.h:

@@ -38,7 +38,6 @@ private:
   typedef std::set<SequenceNumber> values_type;
   values_type values_;
 
-  void insert(SequenceNumber value);
   void normalize();
 };
 

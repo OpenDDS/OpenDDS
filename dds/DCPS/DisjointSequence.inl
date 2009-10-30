@@ -7,22 +7,18 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include <cassert>
-
 namespace OpenDDS {
 namespace DCPS {
 
 ACE_INLINE SequenceNumber
 DisjointSequence::low() const
 {
-  assert(!this->values_.empty());
   return *(this->values_.begin());
 }
 
 ACE_INLINE SequenceNumber
 DisjointSequence::high() const
 {
-  assert(!this->values_.empty());
   return *(this->values_.rbegin());
 }
 
