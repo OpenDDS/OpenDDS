@@ -1146,6 +1146,10 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header, bool is_data)
     if (!writer->seen_data_ && is_data) {
       writer->seen_data_ = true;
       writer->ack_sequence_.skip(header.sequence_);
+
+    } else {
+      // Acknowledge all other control and data samples.
+      writer->ack_sequence(sample.header.sequence_);
     }
 
     ACE_Time_Value when = ACE_OS::gettimeofday();
@@ -1212,8 +1216,6 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
           // Received coherent change
           ++where->second->coherent_samples_;
         }
-
-        where->second->ack_sequence(header.sequence_);
 
         ACE_Time_Value now = ACE_OS::gettimeofday();
 
