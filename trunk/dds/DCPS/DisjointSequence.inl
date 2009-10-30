@@ -26,10 +26,16 @@ DisjointSequence::high() const
   return *(this->values_.rbegin());
 }
 
+ACE_INLINE size_t
+DisjointSequence::depth() const
+{
+  return this->values_.size();
+}
+
 ACE_INLINE bool
 DisjointSequence::disjoint() const
 {
-  return this->values_.size() > 1;
+  return depth() > 1;
 }
 
 ACE_INLINE

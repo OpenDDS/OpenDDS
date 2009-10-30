@@ -1,3 +1,11 @@
+Fri Oct 30 15:44:05 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+
+          Added depth member function to expose total number of disjoint
+          values within the set.
+
 Thu Oct 29 23:23:15 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/DisjointSequence.cpp:
