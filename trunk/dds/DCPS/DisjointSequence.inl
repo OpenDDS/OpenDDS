@@ -25,13 +25,13 @@ DisjointSequence::high() const
 ACE_INLINE size_t
 DisjointSequence::depth() const
 {
-  return this->values_.size();
+  return high() - low();
 }
 
 ACE_INLINE bool
 DisjointSequence::disjoint() const
 {
-  return depth() > 1;
+  return this->values_.size() > 1;
 }
 
 ACE_INLINE
