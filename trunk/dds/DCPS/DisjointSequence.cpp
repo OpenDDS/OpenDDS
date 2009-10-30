@@ -15,14 +15,14 @@
 #endif /* __ACE_INLINE__ */
 
 #include <algorithm>
-#include <cassert>
 
 namespace OpenDDS {
 namespace DCPS {
 
 DisjointSequence::DisjointSequence(SequenceNumber value)
 {
-  insert(value);
+  // Set should minimally contain one value.
+  this->values_.insert(value);
 }
 
 DisjointSequence::~DisjointSequence()
@@ -30,16 +30,10 @@ DisjointSequence::~DisjointSequence()
 }
 
 void
-DisjointSequence::insert(SequenceNumber value) {
-  std::pair<values_type::iterator, bool> pair = this->values_.insert(value);
-  assert(pair.second);
-}
-
-void
 DisjointSequence::update(SequenceNumber value)
 {
   if (value <= low()) return;
-  insert(value);
+  this->values_.insert(value);
   normalize();
 }
 
@@ -47,7 +41,7 @@ void
 DisjointSequence::skip(SequenceNumber value)
 {
   this->values_.clear();
-  insert(value);
+  this->values_.insert(value);
 }
 
 void
@@ -60,10 +54,11 @@ DisjointSequence::normalize()
     values_type::iterator second(first);
     second++;
 
-    if (second != this->values_.end() && *second == *first + 1) {
-      this->values_.erase(first);
-      first = second;
-    }
+    if (second == this->values_.end() ||
+        *second != *first + 1) break; // short-circuit
+
+    this->values_.erase(first);
+    first = second;
   }
 }
 
