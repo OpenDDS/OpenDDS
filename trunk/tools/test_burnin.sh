@@ -8,8 +8,7 @@ if [ $# -lt 1 ]; then
   exit 1
 fi
 
-PASS=1
 while [ $? -eq 0 ]; do
+  PASS=`expr ${PASS:=0} + 1`
   echo "TEST PASS: $PASS" && $@
-  PASS=`expr $PASS + 1`
 done
