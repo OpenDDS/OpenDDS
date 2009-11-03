@@ -1,3 +1,15 @@
+//
+// $Id$
+//
+
+project(*DisjointSequence): dcpsexe {
+  exename   = *
+
+  Source_Files {
+    DisjointSequence.cpp
+  }
+}
+
 project(*LivelinessCompatibility): dcpsexe {
   exename   = *
 
@@ -5,3 +17,4 @@ project(*LivelinessCompatibility): dcpsexe {
     LivelinessCompatibility.cpp
   }
 }
+
