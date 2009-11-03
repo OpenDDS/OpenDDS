@@ -25,7 +25,7 @@ DisjointSequence::high() const
 ACE_INLINE size_t
 DisjointSequence::depth() const
 {
-  return high() - low() + 1;
+  return high() - low();
 }
 
 ACE_INLINE bool
