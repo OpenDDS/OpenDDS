@@ -369,7 +369,7 @@ public:
   /// @}
 
   /// update liveliness info for this writer.
-  void writer_activity(const DataSampleHeader& header, bool is_data = false);
+  void writer_activity(const DataSampleHeader& header);
 
   /// process a message that has been received - could be control or a data sample.
   virtual void data_received(const ReceivedDataSample& sample);

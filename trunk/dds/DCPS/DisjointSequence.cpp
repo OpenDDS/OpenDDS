@@ -19,7 +19,6 @@ namespace DCPS {
 
 DisjointSequence::DisjointSequence(SequenceNumber value)
 {
-  // Set should minimally contain one value.
   this->values_.insert(value);
 }
 
