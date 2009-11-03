@@ -1,3 +1,9 @@
+Tue Nov  3 21:42:58 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+
+          Replaced bad ACE_TMAIN definition.
+
 Tue Nov  3 21:39:22 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
