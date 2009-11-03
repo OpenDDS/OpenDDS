@@ -31,14 +31,17 @@
 namespace OpenDDS {
 namespace DCPS {
 
-typedef ACE_UINT16 CoherencyGroup ;
+typedef ACE_UINT16 CoherencyGroup;
 typedef RepoId PublicationId;
 
 /// Lolipop sequencing (never wrap to negative).
 /// This helps distinguish new and old sequence numbers. (?)
 struct OpenDDS_Dcps_Export SequenceNumber {
   /// Construct with a value, default to negative starting point.
-  SequenceNumber(ACE_INT16 value = SHRT_MIN) : value_(value) {}
+  SequenceNumber(int value = SHRT_MIN) {
+    if (value > SHRT_MAX) this->value_ = ACE_INT16(value % SHRT_MAX);
+    else                  this->value_ = ACE_INT16(value);
+  }
 
   // N.B: Default copy constructor is sufficient.
 
@@ -105,7 +108,6 @@ struct OpenDDS_Dcps_Export SequenceNumber {
   void increment() {
     /// Lolipop sequencing (never wrap to negative).
     if (this->value_ == 0x7fff) this->value_ = 0x0 ;
-
     else                        this->value_++ ;
   }
 } ;
@@ -166,9 +168,7 @@ struct VarLess : public std::binary_function<V, V, bool> {
 inline OpenDDS_Dcps_Export OpenDDS::DCPS::SequenceNumber
 operator+(const OpenDDS::DCPS::SequenceNumber& lhs, int rhs)
 {
-  // The lollipop must be protected; ensure new value
-  // does not break the cellophane! (see increment)
-  return OpenDDS::DCPS::SequenceNumber((lhs.value_ + rhs) % 0x7fff);
+  return OpenDDS::DCPS::SequenceNumber(lhs.value_ + rhs);
 }
 
 inline OpenDDS_Dcps_Export OpenDDS::DCPS::SequenceNumber

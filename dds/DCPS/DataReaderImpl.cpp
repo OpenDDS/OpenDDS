@@ -1107,7 +1107,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 }
 
 void
-DataReaderImpl::writer_activity(const DataSampleHeader& header, bool is_data)
+DataReaderImpl::writer_activity(const DataSampleHeader& header)
 {
   // caller should have the sample_lock_ !!!
 
@@ -1140,16 +1140,24 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header, bool is_data)
   }
 
   if (writer != 0) {
-    // In order to properly track out of order delivery,
-    // a baseline must be established based on the first
-    // data sample received.
-    if (!writer->seen_data_ && is_data) {
-      writer->seen_data_ = true;
-      writer->ack_sequence_.skip(header.sequence_);
-    }
-
     ACE_Time_Value when = ACE_OS::gettimeofday();
     writer->received_activity(when);
+
+    if (header.message_id_ == SAMPLE_DATA) {
+      if (writer->seen_data_) {
+        // Data samples should be acknowledged prior to any
+        // reader-side filtering to ensure discontiguities
+        // are not unintentionally introduced.
+        writer->ack_sequence(header.sequence_);
+
+      } else {
+        // In order to properly track out of order delivery,
+        // a baseline must be established based on the first
+        // data sample received.
+        writer->seen_data_ = true;
+        writer->ack_sequence_.skip(header.sequence_);
+      }
+    }
   }
 }
 
@@ -1178,7 +1186,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   case INSTANCE_REGISTRATION: {
     DataSampleHeader const & header = sample.header_;
 
-    this->writer_activity(header, true);
+    this->writer_activity(header);
 
     // Verify data has not exceeded its lifespan.
     if (this->filter_sample(header)) break;
@@ -1213,10 +1221,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
           ++where->second->coherent_samples_;
         }
 
-        where->second->ack_sequence(header.sequence_);
-
         ACE_Time_Value now = ACE_OS::gettimeofday();
-
         if (where->second->should_ack(now)) {
           DDS::Time_t timenow = time_value_to_time(now);
           bool result = this->send_sample_ack(
