@@ -106,12 +106,14 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     sequence.update(5);
 
     TEST_CHECK(sequence.low() == SequenceNumber(0));
+    TEST_CHECK(sequence.high() == SequenceNumber(5));
     TEST_CHECK(sequence.disjoint());
     TEST_CHECK(sequence.depth() == 5);
 
     sequence.update(1);
 
     TEST_CHECK(sequence.low() == SequenceNumber(5));
+    TEST_CHECK(sequence.high() == SequenceNumber(5));
     TEST_CHECK(!sequence.disjoint());
     TEST_CHECK(sequence.depth() == 0);
   }
