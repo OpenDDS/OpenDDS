@@ -28,8 +28,8 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     // ASSERT low and high water marks are the same:
     TEST_CHECK(sequence.low() == sequence.high());
 
-    // ASSERT depth is 0:
-    TEST_CHECK(sequence.depth() == 0);
+    // ASSERT depth is 1:
+    TEST_CHECK(sequence.depth() == 1);
 
     // ASSERT sequence is not disjointed:
     TEST_CHECK(!sequence.disjoint());
@@ -46,8 +46,8 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     // ASSERT low and high water marks are the same:
     TEST_CHECK(sequence.low() == sequence.high());
 
-    // ASSERT depth is 0:
-    TEST_CHECK(sequence.depth() == 0);
+    // ASSERT depth is 1:
+    TEST_CHECK(sequence.depth() == 1);
 
     // ASSERT sequence is not disjointed:
     TEST_CHECK(!sequence.disjoint());
@@ -68,8 +68,8 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     // ASSERT low and high water marks are the same:
     TEST_CHECK(sequence.low() == sequence.high());
 
-    // ASSERT depth is 0:
-    TEST_CHECK(sequence.depth() == 0);
+    // ASSERT depth is 1:
+    TEST_CHECK(sequence.depth() == 1);
 
     // ASSERT sequence is not disjointed:
     TEST_CHECK(!sequence.disjoint());
@@ -86,7 +86,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     TEST_CHECK(sequence.low() == SequenceNumber(1));
     TEST_CHECK(!sequence.disjoint());
-    TEST_CHECK(sequence.depth() == 0);
+    TEST_CHECK(sequence.depth() == 1);
 
     // ASSERT update of value > low + 1 creates discontiguity:
     sequence = DisjointSequence(0);
@@ -95,7 +95,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(sequence.low() == SequenceNumber(0));
     TEST_CHECK(sequence.high() == SequenceNumber(5));
     TEST_CHECK(sequence.disjoint());
-    TEST_CHECK(sequence.depth() == 5);
+    TEST_CHECK(sequence.depth() == 6);
 
     // ASSERT update of low + 1 updates the low water mark and
     //        normalizes any new contiguities:
@@ -108,14 +108,33 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(sequence.low() == SequenceNumber(0));
     TEST_CHECK(sequence.high() == SequenceNumber(5));
     TEST_CHECK(sequence.disjoint());
-    TEST_CHECK(sequence.depth() == 5);
+    TEST_CHECK(sequence.depth() == 6);
 
     sequence.update(1);
 
     TEST_CHECK(sequence.low() == SequenceNumber(5));
     TEST_CHECK(sequence.high() == SequenceNumber(5));
     TEST_CHECK(!sequence.disjoint());
-    TEST_CHECK(sequence.depth() == 0);
+    TEST_CHECK(sequence.depth() == 1);
+
+    // ASSERT update of low + 1 updates the low water mark
+    //        and preserves existing discontiguities:
+    sequence = DisjointSequence(0);
+    sequence.update(2);
+    sequence.update(4); // discontiguity
+    sequence.update(5);
+
+    TEST_CHECK(sequence.low() == SequenceNumber(0));
+    TEST_CHECK(sequence.high() == SequenceNumber(5));
+    TEST_CHECK(sequence.disjoint());
+    TEST_CHECK(sequence.depth() == 6);
+
+    sequence.update(1);
+
+    TEST_CHECK(sequence.low() == SequenceNumber(2));
+    TEST_CHECK(sequence.high() == SequenceNumber(5));
+    TEST_CHECK(sequence.disjoint());
+    TEST_CHECK(sequence.depth() == 4);
   }
 
   return 0;
