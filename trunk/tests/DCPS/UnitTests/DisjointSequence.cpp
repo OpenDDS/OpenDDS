@@ -15,7 +15,7 @@
 using namespace OpenDDS::DCPS;
 
 int
-ACE_TMAIN(int argc, ACE_TCHAR* argv[])
+ACE_TMAIN()
 {
   // Construction (default)
   {
