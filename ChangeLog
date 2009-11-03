@@ -1,3 +1,9 @@
+Tue Nov  3 15:19:23 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+
+          Dropped unused arguments in ACE_TMAIN.
+
 Tue Nov  3 00:00:33 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * tests/DCPS/UnitTests/DisjointSequence.cpp:
