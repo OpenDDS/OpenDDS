@@ -1,3 +1,11 @@
+Fri Nov  6 19:09:35 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.cpp:
+
+          Fixed compiler warnings introduced by last commit.
+
 Fri Nov  6 00:47:50 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/AssociationData.h:

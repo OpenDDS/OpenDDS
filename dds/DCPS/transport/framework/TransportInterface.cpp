@@ -153,7 +153,7 @@ OpenDDS::DCPS::TransportInterface::add_associations(
     // add or remove reservations at the same time as us.
     TransportImpl::ReservationGuardType guard(this->impl_->reservation_lock());
 
-    for (size_t i = 0; i < info.num_associations_; ++i) {
+    for (ssize_t i = 0; i < info.num_associations_; ++i) {
       RepoId remote_id = info.association_data_[i].remote_id_;
 
       DataLink_rch link;
