@@ -878,12 +878,17 @@ void PublisherImpl::add_associations(const ReaderAssociationSeq & readers,
     return;
   }
 
-  size_t length = readers.length();
-  AssociationData* associations = new AssociationData[length];
+  AssociationInfo info;
+  info.num_associations_ = readers.length();
 
-  for (size_t i = 0; i < length; ++i) {
-    associations[i].remote_id_ = readers[i].readerId;
-    associations[i].remote_data_ = readers[i].readerTransInfo;
+  // TransportInterface does not take ownership of the associations.
+  // The associations will be deleted when transport inform
+  // datawriter fully associated (in DataWriterImpl::fully_associated()).
+  info.association_data_ = new AssociationData[info.num_associations_];
+
+  for (size_t i = 0; i < info.num_associations_; ++i) {
+    info.association_data_[i].remote_id_ = readers[i].readerId;
+    info.association_data_[i].remote_data_ = readers[i].readerTransInfo;
   }
 
   if (DCPS_debug_level > 4) {
@@ -891,19 +896,15 @@ void PublisherImpl::add_associations(const ReaderAssociationSeq & readers,
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) PublisherImpl::add_associations(): ")
                ACE_TEXT("adding %d subscriptions to publication %C with priority %d.\n"),
-               length,
+               info.num_associations_,
                std::string(converter).c_str(),
                writer_qos.transport_priority.value));
   }
 
   this->add_subscriptions(writer->get_publication_id(),
-                          writer,
+                          info,
                           writer_qos.transport_priority.value,
-                          length,
-                          associations);
-  // TransportInterface does not take ownership of the associations.
-  // The associations will be deleted when transport inform
-  // datawriter fully associated (in DataWriterImpl::fully_associated()).
+                          writer);
 }
 
 void

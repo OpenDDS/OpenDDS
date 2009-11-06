@@ -51,12 +51,15 @@ OpenDDS::DCPS::DummyTcpTransport::~DummyTcpTransport()
 /// due to an add_subscriptions() call on a TransportInterface object.
 /// This means true (1).  It *is* connecting as a publisher.
 OpenDDS::DCPS::DataLink*
-OpenDDS::DCPS::DummyTcpTransport::find_or_create_datalink
-(const TransportInterfaceInfo& remote_info,
- int                           connect_as_publisher,
- CORBA::Long                   /* priority */)
+OpenDDS::DCPS::DummyTcpTransport::find_or_create_datalink(
+  RepoId                  /*local_id*/,
+  const AssociationData*  remote_association,
+  CORBA::Long             /*priority*/,
+  bool                    active)
 {
   DBG_ENTRY_LVL("DummyTcpTransport","find_or_create_datalink",5);
+
+  const TransportInterfaceInfo& remote_info = remote_association->remote_data_;
 
   // Get the remote address from the "blob" in the remote_info struct.
   NetworkAddress* network_order_address =
@@ -130,7 +133,7 @@ OpenDDS::DCPS::DummyTcpTransport::find_or_create_datalink
 
   // Active or passive connection establishment is based upon the value
   // on the connect_as_publisher argument.
-  if (connect_as_publisher == 1)
+  if (active)
     {
       result = this->make_active_connection(remote_address, link.in());
 

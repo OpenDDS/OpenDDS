@@ -138,11 +138,14 @@ Sub::init_add_publications()
       this->pubs_[i].as_association(pubs[i]);
     }
 
+  OpenDDS::DCPS::AssociationInfo info;
+  info.num_associations_ = num_pubs;
+  info.association_data_ = pubs;
+
   int result = this->add_publications(this->sub_id_,
-                                      &(this->reader_),
+                                      info,
                                       0,
-                                      num_pubs,
-                                      pubs);
+                                      &this->reader_);
 
   delete [] pubs;
 

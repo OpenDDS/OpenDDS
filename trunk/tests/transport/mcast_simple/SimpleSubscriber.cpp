@@ -95,13 +95,17 @@ SimpleSubscriber::init(OpenDDS::DCPS::TransportIdType          transport_id,
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Add the publications.\n"));
 
+  OpenDDS::DCPS::AssociationInfo info;
+  info.num_associations_ = num_publications;
+  info.association_data_ =
+    const_cast<OpenDDS::DCPS::AssociationData*>(publications);
+
   // Add the association between the local sub_id and the remote pub_id
   // to the transport via the TransportInterface.
   int result = this->add_publications(sub_id,
-                                      &this->reader_,
-                                      0,   /* priority */
-                                      num_publications,
-                                      publications);
+                                      info,
+                                      0,  // priority
+                                      &this->reader_);
 
   if (result != 0)
     {

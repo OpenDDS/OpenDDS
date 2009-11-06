@@ -46,20 +46,21 @@ OpenDDS::DCPS::SimpleTcpTransport::~SimpleTcpTransport()
 /// reserve_datalink() on the TransportImpl, and the TransportImpl calls
 /// find_or_create_datalink() on us (a concrete subclass of TransportImpl).
 ///
-/// The connect_as_publisher will be set to 0 if this method was called
+/// The active argument will be set to false if this method was called
 /// due to an add_publications() call on a TransportInterface object.
-/// This means false (0).  It is *not* connecting as a publisher.
 ///
-/// The connect_as_publisher will be set to 1 if this method was called
+/// The active argument will be set to true if this method was called
 /// due to an add_subscriptions() call on a TransportInterface object.
-/// This means true (1).  It *is* connecting as a publisher.
 OpenDDS::DCPS::DataLink*
-OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink
-(const TransportInterfaceInfo& remote_info,
- int                           connect_as_publisher,
- CORBA::Long                   priority)
+OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink(
+  RepoId                  /*local_id*/,
+  const AssociationData*  remote_association,
+  CORBA::Long             priority,
+  bool                    active)
 {
   DBG_ENTRY_LVL("SimpleTcpTransport","find_or_create_datalink",6);
+
+  const TransportInterfaceInfo& remote_info = remote_association->remote_data_;
 
   // Get the remote address from the "blob" in the remote_info struct.
   NetworkAddress network_order_address;
@@ -164,7 +165,7 @@ OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink
 
   // Active or passive connection establishment is based upon the value
   // on the connect_as_publisher argument.
-  if (connect_as_publisher == 1) {
+  if (active) {
     result = this->make_active_connection(remote_address, link.in());
 
     if (result != 0) {

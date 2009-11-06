@@ -29,15 +29,15 @@ OpenDDS::DCPS::SimpleUnreliableDgramTransport::~SimpleUnreliableDgramTransport()
 }
 
 OpenDDS::DCPS::DataLink*
-OpenDDS::DCPS::SimpleUnreliableDgramTransport::find_or_create_datalink
-(const TransportInterfaceInfo& remote_info,
- int                           connect_as_publisher,
- int                           priority)
+OpenDDS::DCPS::SimpleUnreliableDgramTransport::find_or_create_datalink(
+  RepoId                  /*local_id*/,
+  const AssociationData*  remote_association,
+  CORBA::Long             priority,
+  bool                    /*active*/)
 {
   DBG_ENTRY_LVL("SimpleUnreliableDgramTransport","find_or_create_datalink",6);
 
-  // For MCAST, we don't care why we are connecting.
-  ACE_UNUSED_ARG(connect_as_publisher);
+  const TransportInterfaceInfo& remote_info = remote_association->remote_data_;
 
   // Get the remote address from the "blob" in the remote_info struct.
   NetworkAddress network_order_address;

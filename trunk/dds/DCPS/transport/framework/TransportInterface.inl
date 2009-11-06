@@ -154,41 +154,35 @@ OpenDDS::DCPS::TransportInterface::remove_all_control_msgs(RepoId pub_id)
 }
 
 ACE_INLINE int
-OpenDDS::DCPS::TransportInterface::add_subscriptions
-(RepoId                 publisher_id,
- TransportSendListener* send_listener,
- CORBA::Long            priority,
- ssize_t                size,
- const AssociationData* subscriptions)
+OpenDDS::DCPS::TransportInterface::add_subscriptions(
+  RepoId                  local_id,
+  const AssociationInfo&  info,
+  CORBA::Long             priority,
+  TransportSendListener*  send_listener)
 {
   DBG_ENTRY_LVL("TransportInterface","add_subscriptions",6);
   // Delegate to generic add_associations operation
-  return this->add_associations(publisher_id,
+  return this->add_associations(local_id,
+                                info,
                                 priority,
-                                "publisher_id",
-                                "subscriber_id",
-                                size,
-                                subscriptions,
-                                0, send_listener);
+                                0,
+                                send_listener);
 }
 
 ACE_INLINE int
-OpenDDS::DCPS::TransportInterface::add_publications
-(RepoId                    subscriber_id,
- TransportReceiveListener* receive_listener,
- CORBA::Long               priority,
- ssize_t                   size,
- const AssociationData*    publications)
+OpenDDS::DCPS::TransportInterface::add_publications(
+  RepoId                    local_id,
+  const AssociationInfo&    info,
+  CORBA::Long               priority,
+  TransportReceiveListener* receive_listener)
 {
   DBG_ENTRY_LVL("TransportInterface","add_publications",6);
   // Delegate to generic add_associations operation
-  return this->add_associations(subscriber_id,
+  return this->add_associations(local_id,
+                                info,
                                 priority,
-                                "subscriber_id",
-                                "publisher_id",
-                                size,
-                                publications,
-                                receive_listener, 0);
+                                receive_listener,
+                                0);
 }
 
 ACE_INLINE void

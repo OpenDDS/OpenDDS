@@ -51,10 +51,11 @@ protected:
 
   friend class SimpleUnreliableDgramSynchResource;
 
-  virtual DataLink* find_or_create_datalink
-  (const TransportInterfaceInfo& remote_info,
-   int                           connect_as_publisher,
-   CORBA::Long                   priority);
+  virtual DataLink* find_or_create_datalink(
+    RepoId                  local_id,
+    const AssociationData*  remote_assocation,
+    CORBA::Long             priority,
+    bool                    active);
 
   virtual int configure_i(TransportConfiguration* config);
 

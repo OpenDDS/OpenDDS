@@ -53,10 +53,11 @@ protected:
   /// Either find a suitable DataLink that already exists (and is
   /// connected), or create one, connect it, save it off for reuse,
   /// and return it.
-  virtual DataLink* find_or_create_datalink
-  (const TransportInterfaceInfo& remote_info,
-   int                           connect_as_publisher,
-   int                           priority);
+  virtual DataLink* find_or_create_datalink(
+    RepoId                  local_id,
+    const AssociationData*  remote_association,
+    CORBA::Long             priority,
+    bool                    active);
 
   virtual int configure_i(TransportConfiguration* config);
 

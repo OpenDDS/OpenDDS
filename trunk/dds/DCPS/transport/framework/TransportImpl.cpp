@@ -107,29 +107,31 @@ OpenDDS::DCPS::TransportImpl::shutdown()
 }
 
 OpenDDS::DCPS::DataLink*
-OpenDDS::DCPS::TransportImpl::reserve_datalink
-(const TransportInterfaceInfo& remote_subscriber_info,
- RepoId                        subscriber_id,
- RepoId                        publisher_id,
- TransportSendListener*        send_listener,
- CORBA::Long                   priority)
+OpenDDS::DCPS::TransportImpl::reserve_datalink(
+  RepoId                  local_id,
+  const AssociationData*  remote_association,
+  CORBA::Long             priority,
+  TransportSendListener*  send_listener)
 {
   DBG_ENTRY_LVL("TransportImpl","reserve_datalink",6);
 
   // Ask our concrete subclass to find or create a (concrete) DataLink
   // that matches the supplied criterea.
 
-  // Note that we pass-in a 1 as the second argument.  This means that
+  // Note that we pass-in true as the third argument.  This means that
   // if a new DataLink needs to be created (ie, the find operation fails),
   // then the connection establishment logic will treat the local endpoint
-  // as a publisher.  This knowledge dictates whether a passive or active
+  // as the publisher.  This knowledge dictates whether a passive or active
   // connection establishment procedure should be followed.
-  DataLink_rch link
-  = this->find_or_create_datalink(remote_subscriber_info, 1, priority);
+  DataLink_rch link =
+    this->find_or_create_datalink(local_id,
+                                  remote_association,
+                                  priority,
+                                  true);
 
   if (link.is_nil()) {
-    OpenDDS::DCPS::RepoIdConverter pub_converter(publisher_id);
-    OpenDDS::DCPS::RepoIdConverter sub_converter(subscriber_id);
+    OpenDDS::DCPS::RepoIdConverter pub_converter(local_id);
+    OpenDDS::DCPS::RepoIdConverter sub_converter(remote_association->remote_id_);
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: TransportImpl::reserve_datalink: ")
                       ACE_TEXT("subclass was unable to find ")
@@ -139,21 +141,19 @@ OpenDDS::DCPS::TransportImpl::reserve_datalink
                       std::string(sub_converter).c_str()),0);
   }
 
-  link->make_reservation(
-    subscriber_id,
-    publisher_id,
-    send_listener);
+  link->make_reservation(remote_association->remote_id_,  // subscription_id
+                         local_id,                        // publication_id
+                         send_listener);
 
   return link._retn();
 }
 
 OpenDDS::DCPS::DataLink*
-OpenDDS::DCPS::TransportImpl::reserve_datalink
-(const TransportInterfaceInfo& remote_publisher_info,
- RepoId                        publisher_id,
- RepoId                        subscriber_id,
- TransportReceiveListener*     receive_listener,
- CORBA::Long                   priority)
+OpenDDS::DCPS::TransportImpl::reserve_datalink(
+  RepoId                    local_id,
+  const AssociationData*    remote_association,
+  CORBA::Long               priority,
+  TransportReceiveListener* receive_listener)
 {
   DBG_ENTRY_LVL("TransportImpl","reserve_datalink",6);
 
@@ -162,17 +162,20 @@ OpenDDS::DCPS::TransportImpl::reserve_datalink
   // Since find_or_create() is pure virtual, the concrete subclass must
   // provide an implementation for us to use.
 
-  // Note that we pass-in a 0 as the second argument.  This means that
+  // Note that we pass-in false as the third argument.  This means that
   // if a new DataLink needs to be created (ie, the find operation fails),
   // then the connection establishment logic will treat the local endpoint
   // as a subscriber.  This knowledge dictates whether a passive or active
   // connection establishment procedure should be followed.
-  DataLink_rch link
-  = this->find_or_create_datalink(remote_publisher_info, 0, priority);
+  DataLink_rch link =
+    this->find_or_create_datalink(local_id,
+                                  remote_association,
+                                  priority,
+                                  false);
 
   if (link.is_nil()) {
-    OpenDDS::DCPS::RepoIdConverter pub_converter(publisher_id);
-    OpenDDS::DCPS::RepoIdConverter sub_converter(subscriber_id);
+    OpenDDS::DCPS::RepoIdConverter pub_converter(remote_association->remote_id_);
+    OpenDDS::DCPS::RepoIdConverter sub_converter(local_id);
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: TransportImpl::reserve_datalink: ")
                       ACE_TEXT("subclass was unable to find ")
@@ -182,8 +185,8 @@ OpenDDS::DCPS::TransportImpl::reserve_datalink
                       std::string(pub_converter).c_str()),0);
   }
 
-  link->make_reservation(publisher_id,
-                         subscriber_id,
+  link->make_reservation(remote_association->remote_id_,  // publication_id
+                         local_id,                        // subscription_id
                          receive_listener);
 
   // This is called on the subscriber side to let the concrete
@@ -402,22 +405,18 @@ OpenDDS::DCPS::TransportImpl::find_subscription(OpenDDS::DCPS::RepoId sub_id, bo
 }
 
 int
-OpenDDS::DCPS::TransportImpl::add_pending_association(RepoId  pub_id,
-                                                      size_t                  num_remote_associations,
-                                                      const AssociationData*  remote_associations)
+OpenDDS::DCPS::TransportImpl::add_pending_association(
+  RepoId                  local_id,
+  const AssociationInfo&  info)
 {
   DBG_ENTRY_LVL("TransportImpl","add_pending_association",6);
 
   GuardType guard(this->lock_);
 
-  AssociationInfo info;
-  info.num_associations_ = num_remote_associations;
-  info.association_data_ = remote_associations;
-
   // Cache the Association data so it can be used for the callback
   // to notify datawriter on_publication_matched.
 
-  PendingAssociationsMap::iterator iter = pending_association_sub_map_.find(pub_id);
+  PendingAssociationsMap::iterator iter = pending_association_sub_map_.find(local_id);
 
   if (iter != pending_association_sub_map_.end())
     iter->second->push_back(info);
@@ -426,8 +425,8 @@ OpenDDS::DCPS::TransportImpl::add_pending_association(RepoId  pub_id,
     AssociationInfoList* infos = new AssociationInfoList;
     infos->push_back(info);
 
-    if (bind(pending_association_sub_map_, pub_id, infos) == -1) {
-      OpenDDS::DCPS::RepoIdConverter converter(pub_id);
+    if (bind(pending_association_sub_map_, local_id, infos) == -1) {
+      OpenDDS::DCPS::RepoIdConverter converter(local_id);
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: TransportImpl::add_pending_association: ")
                         ACE_TEXT("failed to add pending associations for pub %C\n"),
@@ -441,7 +440,7 @@ OpenDDS::DCPS::TransportImpl::add_pending_association(RepoId  pub_id,
   // called multiple times. To simplify, check by pub id since the
   // check_fully_association overloaded function clean the pending list
   // after calling fully_associated.
-  check_fully_association(pub_id);
+  check_fully_association(local_id);
 
   return 0;
 }

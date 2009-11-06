@@ -156,7 +156,11 @@ Pub::init_add_subscriptions()
       this->subs_[i].as_association(subs[i]);
     }
 
-  int result = this->add_subscriptions(this->pub_id_, 0, 0, num_subs, subs);
+  OpenDDS::DCPS::AssociationInfo info;
+  info.num_associations_ = num_subs;
+  info.association_data_ = subs;
+
+  int result = this->add_subscriptions(this->pub_id_, info, 0, 0);
 
   delete [] subs;
 

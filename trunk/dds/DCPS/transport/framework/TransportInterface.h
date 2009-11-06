@@ -11,6 +11,7 @@
 #define OPENDDS_DCPS_TRANSPORTINTERFACE_H
 
 #include "dds/DCPS/dcps_export.h"
+#include "dds/DCPS/AssociationData.h"
 #include "TransportImpl_rch.h"
 #include "DataLinkSetMap.h"
 #include "TransportDefs.h"
@@ -24,7 +25,6 @@ namespace DCPS {
 
 class  TransportSendListener;
 class  TransportReceiveListener;
-struct AssociationData;
 
 class  DataSampleList;
 struct DataSampleListElement;
@@ -98,20 +98,18 @@ protected:
   /// A Publisher will invoke this method to add associations to
   /// the transport interface.
   /// Returns 0 if successful, -1 if unsuccessful
-  int add_subscriptions(RepoId                 publisher_id,
-                        TransportSendListener* send_listener,
-                        CORBA::Long            priority,
-                        ssize_t                size,
-                        const AssociationData* subscriptions);
+  int add_subscriptions(RepoId                  local_id,
+                        const AssociationInfo&  info,
+                        CORBA::Long             priority,
+                        TransportSendListener*  send_listener);
 
   /// A Subscriber will invoke this method to add associations to
   /// the transport interface.
   /// Returns 0 if successful, -1 if unsuccessful
-  int add_publications(RepoId                    subscriber_id,
-                       TransportReceiveListener* receive_listener,
-                       CORBA::Long               priority,
-                       ssize_t                   size,
-                       const AssociationData*    publications);
+  int add_publications(RepoId                     local_id,
+                       const AssociationInfo&     info,
+                       CORBA::Long                priority,
+                       TransportReceiveListener*  receive_listener);
 
   /// Subscribers will supply an array of publisher ids,
   /// and view this as a call to "remove publications".
@@ -163,15 +161,12 @@ private:
   /// Generic algorithm used by add_publications and add_subscriptions,
   /// with the arguments determining the context (ie, local vs. remote
   /// and subscriber vs. publisher).
-  int add_associations
-  (RepoId                    local_id,
-   CORBA::Long               priority,
-   const char*               local_id_str,
-   const char*               remote_id_str,
-   size_t                    num_remote_associations,
-   const AssociationData*    remote_associations,
-   TransportReceiveListener* receive_listener = 0,
-   TransportSendListener*    send_listener = 0);
+  int add_associations(
+    RepoId                    local_id,
+    const AssociationInfo&    info,
+    CORBA::Long               priority,
+    TransportReceiveListener* receive_listener = 0,
+    TransportSendListener*    send_listener = 0);
 
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;
