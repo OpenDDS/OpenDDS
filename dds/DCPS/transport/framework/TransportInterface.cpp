@@ -131,15 +131,12 @@ OpenDDS::DCPS::TransportInterface::detach_transport()
 /// The generic add_associations() method used by both add_publications()
 /// and add_subscriptions().
 int
-OpenDDS::DCPS::TransportInterface::add_associations
-(RepoId                    local_id,
- CORBA::Long               priority,
- const char*               local_id_str,
- const char*               remote_id_str,
- size_t                    num_remote_associations,
- const AssociationData*    remote_associations,
- TransportReceiveListener* receive_listener,
- TransportSendListener*    send_listener)
+OpenDDS::DCPS::TransportInterface::add_associations(
+  RepoId                    local_id,
+  const AssociationInfo&    info,
+  CORBA::Long               priority,
+  TransportReceiveListener* receive_listener,
+  TransportSendListener*    send_listener)
 {
   DBG_ENTRY_LVL("TransportInterface","add_associations",6);
 
@@ -156,8 +153,8 @@ OpenDDS::DCPS::TransportInterface::add_associations
     // add or remove reservations at the same time as us.
     TransportImpl::ReservationGuardType guard(this->impl_->reservation_lock());
 
-    for (size_t i = 0; i < num_remote_associations; ++i) {
-      RepoId remote_id = remote_associations[i].remote_id_;
+    for (size_t i = 0; i < info.num_associations_; ++i) {
+      RepoId remote_id = info.association_data_[i].remote_id_;
 
       DataLink_rch link;
 
@@ -169,8 +166,8 @@ OpenDDS::DCPS::TransportInterface::add_associations
         if (DCPS_debug_level > 0) {
           ACE_TCHAR ebuffer[4096] ;
           ACE::format_hexdump(
-            (const char*)&remote_associations[i].remote_data_.data[0],
-            remote_associations[i].remote_data_.data.length(),
+            (const char*)&info.association_data_[i].remote_data_.data[0],
+            info.association_data_[i].remote_data_.data.length(),
             ebuffer, sizeof(ebuffer)) ;
           RepoIdConverter local_converter(local_id);
           RepoIdConverter remote_converter(remote_id);
@@ -183,18 +180,17 @@ OpenDDS::DCPS::TransportInterface::add_associations
         }
 
         // Local publisher, remote subscriber.
-        link = this->impl_->reserve_datalink(remote_associations[i].remote_data_,
-                                             remote_id,
-                                             local_id,
-                                             send_listener,
-                                             priority);
+        link = this->impl_->reserve_datalink(local_id,
+                                             &info.association_data_[i],
+                                             priority,
+                                             send_listener);
 
       } else {
         if (DCPS_debug_level > 0) {
           ACE_TCHAR ebuffer[4096] ;
           ACE::format_hexdump(
-            (const char*)&remote_associations[i].remote_data_.data[0],
-            remote_associations[i].remote_data_.data.length(),
+            (const char*)&info.association_data_[i].remote_data_.data[0],
+            info.association_data_[i].remote_data_.data.length(),
             ebuffer, sizeof(ebuffer)) ;
           RepoIdConverter local_converter(local_id);
           RepoIdConverter remote_converter(remote_id);
@@ -207,12 +203,10 @@ OpenDDS::DCPS::TransportInterface::add_associations
         }
 
         // Local subscriber, remote publisher.
-        link = this->impl_->reserve_datalink(
-                 remote_associations[i].remote_data_,
-                 remote_id,
-                 local_id,
-                 receive_listener,
-                 remote_associations[i].remote_data_.publication_transport_priority);
+        link = this->impl_->reserve_datalink(local_id,
+                                             &info.association_data_[i],
+                                             priority,
+                                             receive_listener);
       }
 
       if (link.is_nil()) {
@@ -222,10 +216,8 @@ OpenDDS::DCPS::TransportInterface::add_associations
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: Failed to reserve a DataLink with the ")
                           ACE_TEXT("TransportImpl for association from local ")
-                          ACE_TEXT("[%C %C] to remote [%C %C].\n"),
-                          local_id_str,
+                          ACE_TEXT("%C to remote %C.\n"),
                           std::string(local_converter).c_str(),
-                          remote_id_str,
                           std::string(remote_converter).c_str()),-1);
       }
 
@@ -254,8 +246,7 @@ OpenDDS::DCPS::TransportInterface::add_associations
           RepoIdConverter converter(remote_id);
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) ERROR: Failed to insert DataLink into remote_map_ ")
-                     ACE_TEXT("(DataLinkSetMap) for remote [%C %C].\n"),
-                     remote_id_str,
+                     ACE_TEXT("(DataLinkSetMap) for remote %C.\n"),
                      std::string(converter).c_str()));
         }
 
@@ -267,8 +258,7 @@ OpenDDS::DCPS::TransportInterface::add_associations
         RepoIdConverter converter(local_id);
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Failed to insert DataLink into ")
-                   ACE_TEXT("local_map_ for local [%C %C].\n"),
-                   local_id_str,
+                   ACE_TEXT("local_map_ for local %C.\n"),
                    std::string(converter).c_str()));
       }
 
@@ -281,11 +271,9 @@ OpenDDS::DCPS::TransportInterface::add_associations
       return -1;
     } // for scope
 
-    if (ACE_OS::strcmp(local_id_str, "publisher_id") == 0) {
-      if (this->impl_->add_pending_association(local_id,
-                                               num_remote_associations,
-                                               remote_associations) != 0)
-        return -1;
+    if (send_listener != 0 && // only call if we are the publisher
+        this->impl_->add_pending_association(local_id, info) != 0) {
+      return -1;
     }
 
     // We completed everything without a problem.

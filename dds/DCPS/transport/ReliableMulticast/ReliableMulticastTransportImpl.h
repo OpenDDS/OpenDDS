@@ -40,9 +40,10 @@ public:
 
 protected:
   virtual OpenDDS::DCPS::DataLink* find_or_create_datalink(
-    const TransportInterfaceInfo& remote_info,
-    int connect_as_publisher,
-    int priority);
+    RepoId                  local_id,
+    const AssociationData*  remote_association,
+    CORBA::Long             priority,
+    bool                    active);
 
   virtual int configure_i(TransportConfiguration* config);
 

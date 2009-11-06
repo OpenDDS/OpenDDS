@@ -39,13 +39,6 @@ class DataLink;
 class DataWriterImpl;
 class DataReaderImpl;
 
-struct AssociationInfo {
-  ssize_t num_associations_;
-  const AssociationData* association_data_;
-};
-
-typedef std::vector<AssociationInfo> AssociationInfoList;
-
 /** The TransportImpl class includes the abstract methods that must be implemented
 *   by any implementation to provide data delivery service to the DCPS implementation.
 *   This includes methods to send data, received data, configure the operation, and
@@ -139,9 +132,9 @@ protected:
 
   TransportImpl();
 
-  /// If connect_as_publisher == 1, then this find_or_create_datalink()
+  /// If active is equal to true, then this find_or_create_datalink()
   /// call is being made on behalf of a local publisher id association
-  /// with a remote subscriber id.  If connect_as_publisher == 0, then
+  /// with a remote subscriber id.  If active is equal to false, then
   /// this find_or_create_datalink() call is being made on behalf of a
   /// local subscriber id association with a remote publisher id.
   /// Note that this "flag" is only used if the find operation fails,
@@ -152,9 +145,10 @@ protected:
   /// establish a connection since the existing DataLink is already
   /// connected.
   virtual DataLink* find_or_create_datalink(
-    const TransportInterfaceInfo& remote_info,
-    int                           connect_as_publisher,
-    CORBA::Long                   priority) = 0;
+    RepoId                  local_id,
+    const AssociationData*  remote_association,
+    CORBA::Long             priority,
+    bool                    active) = 0;
 
   /// Concrete subclass gets a shot at the config object.  The subclass
   /// will likely downcast the TransportConfiguration object to a
@@ -230,21 +224,19 @@ private:
   /// a DataLink for a remote subscription association
   /// (a local "publisher" to a remote "subscriber" association).
   DataLink* reserve_datalink(
-    const TransportInterfaceInfo& remote_subscriber_info,
-    RepoId                        subscriber_id,
-    RepoId                        publisher_id,
-    TransportSendListener*        send_listener,
-    CORBA::Long                   priority);
+    RepoId                  local_id,
+    const AssociationData*  remote_association,
+    CORBA::Long             priority,
+    TransportSendListener*  send_listener);
 
   /// Called by our friend, the TransportInterface, to reserve
   /// a DataLink for a remote publication association
   /// (a local "subscriber" to a remote "publisher" association).
   DataLink* reserve_datalink(
-    const TransportInterfaceInfo& remote_publisher_info,
-    RepoId                        publisher_id,
-    RepoId                        subscriber_id,
-    TransportReceiveListener*     receive_listener,
-    CORBA::Long                   priority);
+    RepoId                    local_id,
+    const AssociationData*    remote_association,
+    CORBA::Long               priority,
+    TransportReceiveListener* receive_listener);
 
 protected:
   typedef ACE_SYNCH_MUTEX                ReservationLockType;
@@ -266,9 +258,8 @@ protected:
   /// subscribers then the transport will notify the datawriter fully
   /// association and the associations will be
   /// removed from the pending associations cache.
-  int add_pending_association(RepoId  pub_id,
-                              size_t                  num_remote_associations,
-                              const AssociationData*  subs);
+  int add_pending_association(RepoId                  local_id,
+                              const AssociationInfo&  info);
 
 private:
 

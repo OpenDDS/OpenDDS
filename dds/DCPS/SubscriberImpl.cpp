@@ -752,15 +752,18 @@ SubscriberImpl::add_associations(
     return;
   }
 
-  size_t const length = writers.length();
-  AssociationData* associations = new AssociationData [length];
+  AssociationInfo info;
+  info.num_associations_ = writers.length();
 
-  // TransportInterface does not take ownership
-  ACE_Auto_Array_Ptr<AssociationData> safe_associations(associations);
+  // TransportInterface does not take ownership of the associations.
+  // The associations will be deleted when safe_associations falls
+  // out of scope.
+  info.association_data_ = new AssociationData[info.num_associations_];
+  ACE_Auto_Array_Ptr<AssociationData> safe_associations(info.association_data_);
 
-  for (size_t i = 0; i < length; ++i) {
-    associations[i].remote_id_ = writers[i].writerId;
-    associations[i].remote_data_ = writers[i].writerTransInfo;
+  for (size_t i = 0; i < info.num_associations_; ++i) {
+    info.association_data_[i].remote_id_ = writers[i].writerId;
+    info.association_data_[i].remote_data_ = writers[i].writerTransInfo;
   }
 
   // 1/11/06 SHH - this lock is not required.
@@ -770,10 +773,9 @@ SubscriberImpl::add_associations(
   //           this->si_lock_);
 
   this->add_publications(reader->get_subscription_id(),
-                         reader,
-                         0, // readers have no priority policy value.
-                         length,
-                         associations);
+                         info,
+                         0, // no transport priority policy
+                         reader);
 }
 
 void

@@ -12,14 +12,22 @@
 
 #include "dds/DdsDcpsInfoUtilsC.h"
 
+#include <vector>
+
 namespace OpenDDS {
 namespace DCPS {
 
 struct AssociationData {
-  RepoId                 remote_id_;
-  // TBD - May change to a pointer (a smart pointer?)
-  TransportInterfaceInfo remote_data_;
+  RepoId                  remote_id_;
+  TransportInterfaceInfo  remote_data_;
 };
+
+struct AssociationInfo {
+  ssize_t           num_associations_;
+  AssociationData*  association_data_;
+};
+
+typedef std::vector<AssociationInfo> AssociationInfoList;
 
 } // namespace DCPS
 } // namespace OpenDDS

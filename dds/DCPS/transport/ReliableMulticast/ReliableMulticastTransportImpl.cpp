@@ -20,10 +20,13 @@
 
 OpenDDS::DCPS::DataLink*
 OpenDDS::DCPS::ReliableMulticastTransportImpl::find_or_create_datalink(
-  const TransportInterfaceInfo& remote_info,
-  int connect_as_publisher,
-  CORBA::Long priority)
+  RepoId                  /*local_id*/,
+  const AssociationData*  remote_association,
+  CORBA::Long             priority,
+  bool                    active)
 {
+  const TransportInterfaceInfo& remote_info = remote_association->remote_data_;
+
   // Get the remote address from the "blob" in the remote_info struct.
   NetworkAddress network_order_address;
 
@@ -62,7 +65,7 @@ OpenDDS::DCPS::ReliableMulticastTransportImpl::find_or_create_datalink(
     priority);
   data_links_[ PriorityKey(priority, multicast_group_address)] = data_link;
 
-  if (!data_link->connect(connect_as_publisher == 1)) {
+  if (!data_link->connect(active)) {
     ACE_ERROR_RETURN(
       (LM_ERROR, "(%P|%t) ERROR: Failed to connect data link.\n"),
       0);
@@ -74,7 +77,7 @@ OpenDDS::DCPS::ReliableMulticastTransportImpl::find_or_create_datalink(
   // receiving roles at this level, we only set on the publication end of
   // connections.
   //
-  if (connect_as_publisher) {
+  if (active) {
     //
     // Set the DiffServ codepoint according to the TRANSPORT_PRIORITY
     // policy value.  We need to do this *after* the call to connect as
