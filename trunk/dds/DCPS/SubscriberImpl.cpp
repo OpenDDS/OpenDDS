@@ -761,7 +761,7 @@ SubscriberImpl::add_associations(
   info.association_data_ = new AssociationData[info.num_associations_];
   ACE_Auto_Array_Ptr<AssociationData> safe_associations(info.association_data_);
 
-  for (size_t i = 0; i < info.num_associations_; ++i) {
+  for (ssize_t i = 0; i < info.num_associations_; ++i) {
     info.association_data_[i].remote_id_ = writers[i].writerId;
     info.association_data_[i].remote_data_ = writers[i].writerTransInfo;
   }
