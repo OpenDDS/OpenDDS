@@ -1,0 +1,49 @@
+Index: config/qt4_core.mpb
+===================================================================
+--- config/qt4_core.mpb	(revision 1670)
++++ config/qt4_core.mpb	(working copy)
+@@ -2,8 +2,15 @@
+ // $Id$
+ 
+ project {
++  // If the include files for QT are not relative to the root (for
++  // example, /usr/include/qt4), set the QT4_INCDIR environment variable.
++  expand(QT4_INCDIR) {
++    $QT4_INCDIR
++    $(QTDIR)/include
++  }
++
+   requires += qt4
+-  includes += $(QTDIR)/include
++  includes += $(QT4_INCDIR)
+   libpaths += $(QTDIR)/lib
+   lit_libs += QtCore$(QT_CFG)
+ }
+Index: config/qt4_gui.mpb
+===================================================================
+--- config/qt4_gui.mpb	(revision 1670)
++++ config/qt4_gui.mpb	(working copy)
+@@ -9,6 +9,7 @@
+     command          = $(QTDIR)/bin/uic
+     output_option    = -o
+     inputext         = .ui
++    pre_filename     = ui_
+     header_outputext = .h
+   }
+ 
+@@ -21,4 +22,15 @@
+     pre_extension    = _moc
+     source_outputext = .cpp
+   }
++
++  Define_Custom(QRC) {
++    automatic        = 1
++    command          = $(QTDIR)/bin/rcc
++    output_option    =  -o
++    commandflags     = -name <%input_noext%>
++    pch_postrule     = 1
++    inputext         = .qrc
++    pre_extension    = _qrc
++    source_outputext = .cpp
++  }
+ }
