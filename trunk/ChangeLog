@@ -1,3 +1,10 @@
+Mon Nov  9 18:52:15 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportInterface.cpp:
+
+          Fixed TRANSPORT_PRIORITY related issues introduced by latest
+          TransportInterface refactorings.
+
 Fri Nov  6 23:09:21 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/tools/odds_monitor:

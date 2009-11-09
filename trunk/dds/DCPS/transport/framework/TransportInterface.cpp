@@ -203,9 +203,14 @@ OpenDDS::DCPS::TransportInterface::add_associations(
         }
 
         // Local subscriber, remote publisher.
+        //
+        // N.B. The transport priority is determined by the value
+        // defined within the TransportInterfaceInfo, not the value
+        // passed in (should always be 0).
+        //
         link = this->impl_->reserve_datalink(local_id,
                                              &info.association_data_[i],
-                                             priority,
+                                             info.association_data_[i].remote_data_.publication_transport_priority,
                                              receive_listener);
       }
 
@@ -271,7 +276,9 @@ OpenDDS::DCPS::TransportInterface::add_associations(
       return -1;
     } // for scope
 
-    if (send_listener != 0 && // only call if we are the publisher
+    // Add pending association only if we are the active (i.e. publishing)
+    // side of the logical connection.
+    if (receive_listener == 0 &&
         this->impl_->add_pending_association(local_id, info) != 0) {
       return -1;
     }
