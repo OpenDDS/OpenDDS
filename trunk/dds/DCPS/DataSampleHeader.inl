@@ -17,6 +17,7 @@
 ACE_INLINE
 OpenDDS::DCPS::DataSampleHeader::DataSampleHeader()
   : message_id_(0)
+  , submessage_id_(0)
   , byte_order_(TAO_ENCAP_BYTE_ORDER)
   , coherent_change_(0)
   , historic_sample_(0)
@@ -37,6 +38,7 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader()
 ACE_INLINE
 OpenDDS::DCPS::DataSampleHeader::DataSampleHeader(ACE_Message_Block* buffer)
   : message_id_(0)
+  , submessage_id_(0)
   , byte_order_(TAO_ENCAP_BYTE_ORDER)
   , coherent_change_(0)
   , historic_sample_(0)
@@ -57,6 +59,7 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader(ACE_Message_Block* buffer)
 ACE_INLINE
 OpenDDS::DCPS::DataSampleHeader::DataSampleHeader(ACE_Message_Block& buffer)
   : message_id_(0)
+  , submessage_id_(0)
   , byte_order_(TAO_ENCAP_BYTE_ORDER)
   , coherent_change_(0)
   , historic_sample_(0)
@@ -102,6 +105,7 @@ size_t
 OpenDDS::DCPS::DataSampleHeader::max_marshaled_size()
 {
   return sizeof(this->message_id_)
+         + sizeof(this->submessage_id_)
          + sizeof(char) // Flags are a single byte.
          + sizeof(this->message_length_)
          + sizeof(this->sequence_)

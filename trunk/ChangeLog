@@ -1,3 +1,16 @@
+Mon Nov  9 21:42:25 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+
+          Added new sequence and submessage_id fields to the TransportHeader
+          and DataSampleHeader respectively to support ACK/NACK semantics and
+          implementation-specific (transport) control samples.
+
 Mon Nov  9 18:52:15 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportInterface.cpp:

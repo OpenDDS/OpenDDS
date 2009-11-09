@@ -33,6 +33,7 @@ operator<<(ACE_Message_Block& buffer, OpenDDS::DCPS::TransportHeader& value)
   writer << ACE_OutputCDR::from_octet(value.byte_order_);
 
   writer.write_octet_array(value.packet_id_, sizeof(value.packet_id_)) ;
+  writer << value.sequence_;
   writer << value.length_;
 
   return writer.good_bit();
@@ -47,6 +48,7 @@ operator<<(ACE_Message_Block*& buffer, OpenDDS::DCPS::TransportHeader& value)
   writer << ACE_OutputCDR::from_octet(value.byte_order_);
 
   writer.write_octet_array(value.packet_id_, sizeof(value.packet_id_)) ;
+  writer << value.sequence_;
   writer << value.length_;
 
   return writer.good_bit();

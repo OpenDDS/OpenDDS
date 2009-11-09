@@ -33,7 +33,8 @@ enum MessageId {
   FULLY_ASSOCIATED,
   REQUEST_ACK,
   SAMPLE_ACK,
-  END_COHERENT_CHANGES
+  END_COHERENT_CHANGES,
+  TRANSPORT_CONTROL
 };
 
 enum DataSampleHeaderFlag {
@@ -53,6 +54,9 @@ enum DataSampleHeaderFlag {
 struct OpenDDS_Dcps_Export DataSampleHeader {
   /// The enum MessageId.
   char message_id_;
+
+  /// Implementation-specific sub-message Ids.
+  char submessage_id_;
 
   /// 0 -  Message encoded using little-endian byte order.
   /// 1 -  Message encoded using network byte order.
