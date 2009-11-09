@@ -57,26 +57,29 @@ OpenDDS::DCPS::DataSampleHeader::init(ACE_Message_Block* buffer)
 {
   this->marshaled_size_ = 0;
 
-  TAO::DCPS::Serializer reader(buffer)  ;
+  TAO::DCPS::Serializer reader(buffer);
   // TODO: Now it's ok to serialize the message_id before flag byte
   // since the message_id_ is defined as char. If the message_id_
   // is changed to be defined as a type with multiple bytes then
   // we need define it after the flag byte or serialize flag byte before
   // serializing the message_id_. I think the former approach is simpler
   // than the latter approach.
-  reader >> this->message_id_ ;
+  reader >> this->message_id_;
 
-  if (reader.good_bit() != true) return ;
+  if (reader.good_bit() != true) return;
+  this->marshaled_size_ += sizeof(this->message_id_);
 
-  this->marshaled_size_ += sizeof(this->message_id_) ;
+  reader >> this->submessage_id_;
+
+  if (reader.good_bit() != true) return;
+  this->marshaled_size_ += sizeof(this->submessage_id_);
 
   // Extract the flag values.
   ACE_CDR::Octet byte ;
-  reader >> ACE_InputCDR::to_octet(byte) ;
+  reader >> ACE_InputCDR::to_octet(byte);
 
-  if (reader.good_bit() != true) return ;
-
-  this->marshaled_size_ += sizeof(byte) ;
+  if (reader.good_bit() != true) return;
+  this->marshaled_size_ += sizeof(byte);
 
   this->byte_order_         = byte & mask_flag(BYTE_ORDER_FLAG);
   this->coherent_change_    = byte & mask_flag(COHERENT_CHANGE_FLAG);
@@ -91,48 +94,41 @@ OpenDDS::DCPS::DataSampleHeader::init(ACE_Message_Block* buffer)
   // the publisher is in different byte order.
   reader.swap_bytes(this->byte_order_ != TAO_ENCAP_BYTE_ORDER);
 
-  reader >> this->message_length_ ;
+  reader >> this->message_length_;
 
-  if (reader.good_bit() != true) return ;
-
+  if (reader.good_bit() != true) return;
   this->marshaled_size_ += sizeof(this->message_length_) ;
 
   reader >> this->sequence_ ;
 
-  if (reader.good_bit() != true) return ;
+  if (reader.good_bit() != true) return;
+  this->marshaled_size_ += sizeof(this->sequence_);
 
-  this->marshaled_size_ += sizeof(this->sequence_) ;
+  reader >> this->source_timestamp_sec_;
 
-  reader >> this->source_timestamp_sec_ ;
-
-  if (reader.good_bit() != true) return ;
-
-  this->marshaled_size_ += sizeof(this->source_timestamp_sec_) ;
+  if (reader.good_bit() != true) return;
+  this->marshaled_size_ += sizeof(this->source_timestamp_sec_);
 
   reader >> this->source_timestamp_nanosec_ ;
 
-  if (reader.good_bit() != true) return ;
-
-  this->marshaled_size_ += sizeof(this->source_timestamp_nanosec_) ;
+  if (reader.good_bit() != true) return;
+  this->marshaled_size_ += sizeof(this->source_timestamp_nanosec_);
 
   if (this->lifespan_duration_) {
     reader >> this->lifespan_duration_sec_;
 
     if (!reader.good_bit()) return;
-
     this->marshaled_size_ += sizeof(this->lifespan_duration_sec_);
 
     reader >> this->lifespan_duration_nanosec_;
 
     if (!reader.good_bit()) return;
-
     this->marshaled_size_ += sizeof(this->lifespan_duration_nanosec_);
   }
 
   reader >> this->publication_id_;
 
   if (reader.good_bit() != true) return ;
-
   this->marshaled_size_ += _dcps_find_size(this->publication_id_) ;
 }
 
@@ -141,7 +137,8 @@ operator<< (ACE_Message_Block*& buffer, OpenDDS::DCPS::DataSampleHeader& value)
 {
   TAO::DCPS::Serializer writer(buffer, value.byte_order_ != TAO_ENCAP_BYTE_ORDER) ;
 
-  writer << value.message_id_ ;
+  writer << value.message_id_;
+  writer << value.submessage_id_;
 
   // Write the flags as a single byte.
   ACE_CDR::Octet flags = (value.byte_order_         << OpenDDS::DCPS::BYTE_ORDER_FLAG)
@@ -193,6 +190,8 @@ std::ostream& operator<<(std::ostream& str, const OpenDDS::DCPS::MessageId value
     return str << "SAMPLE_ACK";
   case OpenDDS::DCPS::END_COHERENT_CHANGES:
     return str << "END_COHERENT_CHANGES";
+  case OpenDDS::DCPS::TRANSPORT_CONTROL:
+    return str << "TRANSPORT_CONTROL";
   default:
     return str << "UNSPECIFIED(" << int(value) << ")";
   }
@@ -204,7 +203,8 @@ std::ostream& operator<<(std::ostream& str, const OpenDDS::DCPS::DataSampleHeade
 {
   str << "[";
 
-  str << OpenDDS::DCPS::MessageId(value.message_id_) << ", ";
+  str << OpenDDS::DCPS::MessageId(value.message_id_)
+      << " (" << "0x" << std::hex << value.submessage_id_ << "), ";
 
   if (value.byte_order_ == 1) {
     str << "network order, ";

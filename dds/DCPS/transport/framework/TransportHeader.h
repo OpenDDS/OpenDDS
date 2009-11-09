@@ -49,9 +49,14 @@ struct OpenDDS_Dcps_Export TransportHeader {
   /// The protocol and version of the packet being transmitted.
   ACE_CDR::Octet packet_id_[6];
 
+  /// The sequence number of the packet identified by this header; this
+  /// value is guaranteed to be a monotonically increasing number per
+  /// transport instance.
+  ACE_INT16 sequence_;
+
   /// The size of the message following this header, not including the
   /// 11 bytes used by this TransportHeader.
-  ACE_UINT32 length_;
+  ACE_UINT16 length_;
 
   /// Similar to IDL compiler generated methods.
   size_t max_marshaled_size() ;
@@ -71,15 +76,10 @@ private:
 extern
 ACE_CDR::Boolean
 operator<<(ACE_Message_Block&, OpenDDS::DCPS::TransportHeader& value);
-extern
-ACE_CDR::Boolean
-operator<<(ACE_Message_Block*&, OpenDDS::DCPS::TransportHeader& value);
 
 extern
 ACE_CDR::Boolean
-operator<<(ACE_Message_Block&, OpenDDS::DCPS::TransportHeader& value);
-// TBD
-//MJM: DUPLICATE declaration!(??)
+operator<<(ACE_Message_Block*&, OpenDDS::DCPS::TransportHeader& value);
 
 #if defined(__ACE_INLINE__)
 #include "TransportHeader.inl"

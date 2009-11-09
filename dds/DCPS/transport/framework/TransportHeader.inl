@@ -12,7 +12,8 @@
 
 ACE_INLINE
 OpenDDS::DCPS::TransportHeader::TransportHeader()
-  : length_(0)
+  : sequence_(0),
+    length_(0)
 {
   DBG_ENTRY_LVL("TransportHeader","TransportHeader",6);
 
@@ -63,7 +64,10 @@ OpenDDS::DCPS::TransportHeader::max_marshaled_size()
 {
   DBG_ENTRY_LVL("TransportHeader","max_marshaled_size",6);
   // Representation takes no extra space for encoding.
-  return sizeof(this->byte_order_) + sizeof(this->packet_id_) + sizeof(this->length_) ;
+  return sizeof(this->byte_order_) +
+         sizeof(this->packet_id_) +
+         sizeof(this->sequence_) +
+         sizeof(this->length_);
 }
 
 ACE_INLINE
@@ -108,6 +112,9 @@ OpenDDS::DCPS::TransportHeader::init(ACE_Message_Block* buffer)
   if (reader.good_bit() != true) {
     return;
   }
+
+  // Extract the sequence_ value.
+  reader >> this->sequence_;
 
   // Extract the length_ value.
   reader >> this->length_;
