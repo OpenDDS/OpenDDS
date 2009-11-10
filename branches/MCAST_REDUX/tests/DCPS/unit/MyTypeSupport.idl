@@ -1,0 +1,15 @@
+
+//#include "orbsvcs/dds/DdsDcpsInfrastructure.idl"
+//#include "orbsvcs/dds/DdsDcpsTopic.idl"
+//#include "orbsvcs/dds/DdsDcpsDataWriterRemote.idl"
+//#include "orbsvcs/dds/DdsDcpsDataReaderRemote.idl"
+#include "dds/DdsDcpsTypeSupportExt.idl"
+
+
+local interface MyTypeSupport : OpenDDS::DCPS::TypeSupport {
+    DDS::ReturnCode_t register_type(
+                in DDS::DomainParticipant participant,
+                in string type_name);
+};
+
+
