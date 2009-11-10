@@ -1585,6 +1585,12 @@ OpenDDS::DCPS::TransportSendStrategy::prepare_packet()
   this->pkt_chain_->cont(visitor.chain());
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+        "Increment header sequence for next packet.\n"));
+
+  // Increment header sequence for next packet.
+  this->header_.sequence_++;
+
+  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Set the header_complete_ flag to false (0).\n"));
 
   // Don't forget to set the header_complete_ to false (0) to indicate
