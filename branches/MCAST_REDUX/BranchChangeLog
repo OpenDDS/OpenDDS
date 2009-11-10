@@ -1,0 +1,11 @@
+Tue Nov 10 20:53:25 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * BranchChangeLog:
+
+          Branched from r2529 to track multicast transport refactorings.
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:
