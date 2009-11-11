@@ -1,3 +1,27 @@
+Wed Nov 11 19:46:36 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportDefs.h:
+
+          Added new default TransportId constant for Multicast transport:
+          DEFAULT_MULTICAST_ID.
+
+        * dds/DCPS/transport/multicast:
+        * dds/DCPS/transport/multicast/Multicast.mpc:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/multicast/MulticastFactory.h:
+        * dds/DCPS/transport/multicast/MulticastFactory.cpp:
+        * dds/DCPS/transport/multicast/MulticastGenerator.h:
+        * dds/DCPS/transport/multicast/MulticastGenerator.cpp:
+        * dds/DCPS/transport/multicast/MulticastLoader.h:
+        * dds/DCPS/transport/multicast/MulticastLoader.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/Multicast_Export.h:
+
+          Dynamic loading and configuration complete; stubbed out
+          TransportImpl interfaces for future implementation.
+
 Tue Nov 10 20:53:25 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * BranchChangeLog:
