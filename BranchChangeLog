@@ -1,3 +1,19 @@
+Thu Nov 12 00:25:11 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/NetworkAddress.h:
+        * dds/DCPS/transport/framework/NetworkAddress.inl:
+
+          Added explicit constructor to initialize from a specified
+          ACE_INET_Addr.
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Updates to transport configuration; implemented configure_i and
+          connection_info_i entry points.
+
 Wed Nov 11 19:46:36 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportDefs.h:

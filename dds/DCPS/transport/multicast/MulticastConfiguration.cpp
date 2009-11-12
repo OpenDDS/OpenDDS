@@ -9,17 +9,19 @@
 
 #include "MulticastConfiguration.h"
 
+#include "dds/DCPS/transport/framework/TransportDefs.h"
+
 namespace {
 
-const bool DEFAULT_DEFAULT_TO_IPV6 = false;
+const bool  DEFAULT_DEFAULT_TO_IPV6(false);
 
-const char* DEFAULT_IPV4_GROUP_ADDRESS = "224.0.36.0";
-const char* DEFAULT_IPV6_GROUP_ADDRESS = "FF36::8000:0";
+const char* DEFAULT_IPV4_GROUP_ADDRESS("224.0.36.0");
+const char* DEFAULT_IPV6_GROUP_ADDRESS("FF36::8000:0");
 
-const long DEFAULT_HANDSHAKE_TIMEOUT = 30000;
+const long  DEFAULT_HANDSHAKE_TIMEOUT(30000);
 
-const long DEFAULT_NAK_TIMEOUT = 30000;
-const size_t DEFAULT_NAK_REPAIR_DEPTH = 32;
+const long    DEFAULT_NAK_TIMEOUT(30000);
+const size_t  DEFAULT_NAK_REPAIR_DEPTH(32);
 
 } // namespace
 
@@ -32,6 +34,7 @@ MulticastConfiguration::MulticastConfiguration()
     nak_timeout_(DEFAULT_NAK_TIMEOUT),
     nak_repair_depth_(DEFAULT_NAK_REPAIR_DEPTH)
 {
+  default_group_address(this->group_address_, DEFAULT_MULTICAST_ID);
 }
 
 MulticastConfiguration::~MulticastConfiguration()
@@ -61,19 +64,14 @@ MulticastConfiguration::load(const TransportIdType& id,
   GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("default_to_ipv6"),
                    this->default_to_ipv6_, bool)
 
-  ACE_TString group_address;
+  ACE_TString group_address_s;
   GET_CONFIG_STRING_VALUE(config, transport_key, ACE_TEXT("group_address"),
-                          group_address)
-  if (group_address.is_empty()) {
-    // Default group_address:
-    if (this->default_to_ipv6_) {
-      this->group_address_.set(u_short(id), DEFAULT_IPV6_GROUP_ADDRESS);
-    } else {
-      this->group_address_.set(u_short(id), DEFAULT_IPV4_GROUP_ADDRESS);
-    }
+                          group_address_s)
+
+  if (group_address_s.is_empty()) {
+    default_group_address(this->group_address_, id);    // default
   } else {
-    // User-defined group_address:
-    this->group_address_.set(group_address.c_str());
+    this->group_address_.set(group_address_s.c_str());  // user-defined
   }
 
   GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("handshake_timeout"),
@@ -86,6 +84,20 @@ MulticastConfiguration::load(const TransportIdType& id,
                    this->nak_repair_depth_, size_t)
 
   return 0;
+}
+
+void
+MulticastConfiguration::default_group_address(ACE_INET_Addr& group_address,
+                                              const TransportIdType& id)
+{
+  if (this->default_to_ipv6_) {
+    group_address.set_address(DEFAULT_IPV6_GROUP_ADDRESS,
+                              sizeof (DEFAULT_IPV6_GROUP_ADDRESS));
+  } else {
+    group_address.set_address(DEFAULT_IPV4_GROUP_ADDRESS,
+                              sizeof (DEFAULT_IPV4_GROUP_ADDRESS));
+  }
+  group_address.set_port_number(u_short(id)); // truncate if needed
 }
 
 } // namespace DCPS

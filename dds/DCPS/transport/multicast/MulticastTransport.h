@@ -7,6 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include "tao/Basic_Types.h"
+
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 
 #include "Multicast_Export.h"
@@ -17,9 +19,13 @@
 namespace OpenDDS {
 namespace DCPS {
 
+class MulticastConfiguration;
+
 class OpenDDS_Multicast_Export MulticastTransport
   : public TransportImpl {
 public:
+  static const CORBA::Long TRANSPORT_ID;
+
   virtual ~MulticastTransport();
 
 protected:
@@ -36,6 +42,9 @@ protected:
   virtual int connection_info_i(TransportInterfaceInfo& local_info) const;
 
   virtual void release_datalink_i(DataLink* link, bool release_pending);
+
+private:
+  MulticastConfiguration* config_i_;
 };
 
 } // namespace DCPS
