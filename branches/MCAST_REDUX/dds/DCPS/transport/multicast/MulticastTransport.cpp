@@ -11,7 +11,6 @@
 #include "MulticastConfiguration.h"
 
 #include "ace/CDR_Base.h"
-#include "tao/OctetSeqC.h"
 
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 
