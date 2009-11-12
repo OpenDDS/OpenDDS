@@ -36,7 +36,7 @@ public:
   /// The multicast group address from which to send and/or
   /// receive data. The default group addresses are:
   ///   224.0.36.0:<transportId> (IPv4), and
-  ///   FF36::8000:0:<transportId> (IPv6)
+  ///   [FF36::8000:0]:<transportId> (IPv6)
   ACE_INET_Addr group_address_;
 
   /// The maximum number of milliseconds to wait while
@@ -54,6 +54,10 @@ public:
   /// The default is 32; this yields a minimum of 32
   /// samples and a maximum 2048K of sample data.
   size_t nak_repair_depth_;
+
+private:
+  void default_group_address(ACE_INET_Addr& group_address,
+                             const TransportIdType& id);
 };
 
 } // namespace DCPS
