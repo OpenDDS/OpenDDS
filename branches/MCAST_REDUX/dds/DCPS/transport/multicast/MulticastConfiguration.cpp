@@ -67,7 +67,6 @@ MulticastConfiguration::load(const TransportIdType& id,
   ACE_TString group_address_s;
   GET_CONFIG_STRING_VALUE(config, transport_key, ACE_TEXT("group_address"),
                           group_address_s)
-
   if (group_address_s.is_empty()) {
     default_group_address(this->group_address_, id);    // default
   } else {
