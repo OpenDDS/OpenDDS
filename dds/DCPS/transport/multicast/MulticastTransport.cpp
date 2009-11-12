@@ -17,7 +17,7 @@
 namespace OpenDDS {
 namespace DCPS {
 
-const MulticastTransport::TRANSPORT_ID(0x4d435354); // MCST
+const CORBA::Long MulticastTransport::TRANSPORT_ID(0x4d435354); // MCST
 
 MulticastTransport::~MulticastTransport()
 {
@@ -50,10 +50,10 @@ MulticastTransport::shutdown_i()
 int
 MulticastTransport::connection_info_i(TransportInterfaceInfo& local_info) const
 {
-  NetworkAddress local_address(this->config_i_->group_address_);
+  NetworkAddress group_address(this->config_i_->group_address_);
 
   ACE_OutputCDR cdr;
-  cdr << local_address;
+  cdr << group_address;
 
   size_t len = cdr.total_length();
   char* buffer = const_cast<char*>(cdr.buffer()); // safe
