@@ -16,10 +16,6 @@
 namespace OpenDDS {
 namespace DCPS {
 
-MulticastGenerator::~MulticastGenerator()
-{
-}
-
 TransportImplFactory*
 MulticastGenerator::new_factory()
 {

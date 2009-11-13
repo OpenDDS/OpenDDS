@@ -141,3 +141,11 @@ OpenDDS::DCPS::TransportSendStrategy::isDirectMode()
 {
   return this->mode_ == MODE_DIRECT;
 }
+
+ACE_INLINE ssize_t
+OpenDDS::DCPS::TransportSendStrategy::send_bytes(const iovec iov[],
+                                                 int n,
+                                                 int& /*bp*/)
+{
+  return send_bytes_i(iov, n);
+}

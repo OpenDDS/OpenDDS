@@ -22,14 +22,14 @@ class MulticastConfiguration;
 class OpenDDS_Multicast_Export MulticastTransport
   : public TransportImpl {
 public:
-  virtual ~MulticastTransport();
+  ~MulticastTransport();
 
 protected:
   virtual DataLink* find_or_create_datalink(
-    RepoId                  local_id,
-    const AssociationData*  remote_association,
-    CORBA::Long             priority,
-    bool                    active);
+    RepoId local_id,
+    const AssociationData* remote_association,
+    CORBA::Long priority,
+    bool active);
 
   virtual int configure_i(TransportConfiguration* config);
 

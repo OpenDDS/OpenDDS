@@ -19,11 +19,14 @@ namespace DCPS {
 
 class OpenDDS_Multicast_Export MulticastDataLink
   : public DataLink {
-public:
-  virtual ~MulticastDataLink();
-
 protected:
   virtual void stop_i();
+
+private:
+  // TODO implement
+
+  friend class MulticastSendStrategy;
+  friend class MulticastReceiveStrategy;
 };
 
 } // namespace DCPS

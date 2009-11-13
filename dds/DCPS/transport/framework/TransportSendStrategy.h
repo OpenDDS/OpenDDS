@@ -133,11 +133,12 @@ protected:
   // Third arg is the "back-pressure" flag.  If send_bytes() returns
   // -1 and the bp == 1, then it isn't really an error - it is
   // backpressure.
-  virtual ssize_t send_bytes(const iovec iov[], int n, int& bp) = 0;
+  virtual ssize_t send_bytes(const iovec iov[], int n, int& bp);
 
   virtual ssize_t non_blocking_send(const iovec iov[], int n, int& bp);
 
   virtual ACE_HANDLE get_handle() = 0;
+
   virtual ssize_t send_bytes_i(const iovec iov[], int n) = 0;
 
 //MJM: Hmmm...  Shouldn't we just return success with a backpreassure

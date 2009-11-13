@@ -23,7 +23,6 @@ class OpenDDS_Multicast_Export MulticastConfiguration
   : public TransportConfiguration {
 public:
   MulticastConfiguration();
-  virtual ~MulticastConfiguration();
 
   virtual int load(const TransportIdType& id,
                    ACE_Configuration_Heap& config);
@@ -35,8 +34,8 @@ public:
 
   /// The multicast group address from which to send and/or
   /// receive data. The default group addresses are:
-  ///   224.0.36.0:<transportId> (IPv4), and
-  ///   [FF36::8000:0]:<transportId> (IPv6)
+  ///   224.0.0.128:<transportId> (IPv4), and
+  ///   [FF01::80]:<transportId> (IPv6)
   ACE_INET_Addr group_address_;
 
   /// The maximum number of milliseconds to wait while

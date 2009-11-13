@@ -15,10 +15,6 @@
 namespace OpenDDS {
 namespace DCPS {
 
-MulticastLoader::~MulticastLoader()
-{
-}
-
 int
 MulticastLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
 {
