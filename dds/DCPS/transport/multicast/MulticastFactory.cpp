@@ -17,6 +17,12 @@ MulticastFactory::~MulticastFactory()
 {
 }
 
+int
+MulticastFactory::requires_reactor() const
+{
+  return 1;  // requires reactor
+}
+
 TransportImpl*
 MulticastFactory::create()
 {

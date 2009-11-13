@@ -13,14 +13,22 @@
 #include "ace/CDR_Base.h"
 
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
+#include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
+
+namespace {
+
+const CORBA::Long TRANSPORT_INTERFACE_ID(0x4d435354); // MCST
+
+} // namespace
 
 namespace OpenDDS {
 namespace DCPS {
 
-const CORBA::Long MulticastTransport::TRANSPORT_ID(0x4d435354); // MCST
-
 MulticastTransport::~MulticastTransport()
 {
+  if (this->config_i_ != 0) {
+    this->config_i_->_remove_ref();
+  }
 }
 
 DataLink*
@@ -38,6 +46,9 @@ MulticastTransport::configure_i(TransportConfiguration* config)
 {
   this->config_i_ = dynamic_cast<MulticastConfiguration*>(config);
   if (this->config_i_ == 0) return -1;  // invalid configuration
+
+  this->config_i_->_add_ref();
+
   return 0;
 }
 
@@ -58,7 +69,7 @@ MulticastTransport::connection_info_i(TransportInterfaceInfo& local_info) const
   size_t len = cdr.total_length();
   char* buffer = const_cast<char*>(cdr.buffer()); // safe
 
-  local_info.transport_id = TRANSPORT_ID;
+  local_info.transport_id = TRANSPORT_INTERFACE_ID;
   local_info.data = TransportInterfaceBLOB(len, len,
     reinterpret_cast<CORBA::Octet*>(buffer));
 

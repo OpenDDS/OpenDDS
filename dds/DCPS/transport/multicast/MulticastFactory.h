@@ -22,7 +22,7 @@ class OpenDDS_Multicast_Export MulticastFactory
 public:
   virtual ~MulticastFactory();
 
-  virtual int requires_reactor() const { return 1; }
+  virtual int requires_reactor() const;
 
 protected:
   virtual TransportImpl* create();

@@ -1,8 +1,20 @@
+Fri Nov 13 14:44:14 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastFactory.h:
+        * dds/DCPS/transport/multicast/MulticastFactory.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Stubbed out MulticastDataLink; minor refactorings.
+
 Thu Nov 12 16:26:20 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastTransport.cpp:
 
-	  Fixed missing type for const definitiion.
+          Fixed missing type for const definitiion.
 
 Thu Nov 12 00:25:11 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 

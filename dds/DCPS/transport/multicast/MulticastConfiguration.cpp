@@ -16,7 +16,7 @@ namespace {
 const bool DEFAULT_DEFAULT_TO_IPV6(false);
 
 const char* DEFAULT_IPV4_GROUP_ADDRESS("224.0.36.0");
-const char* DEFAULT_IPV6_GROUP_ADDRESS("FF36::8000:0");
+const char* DEFAULT_IPV6_GROUP_ADDRESS("FF01:0:0:0:0:0:36:0");
 
 const long DEFAULT_HANDSHAKE_TIMEOUT(30000);
 
