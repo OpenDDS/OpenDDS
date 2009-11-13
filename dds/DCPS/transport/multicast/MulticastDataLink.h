@@ -20,7 +20,7 @@ namespace DCPS {
 class OpenDDS_Multicast_Export MulticastDataLink
   : public DataLink {
 public:
-  virtual ~DataLink();
+  virtual ~MulticastDataLink();
 
 protected:
   virtual void stop_i();
