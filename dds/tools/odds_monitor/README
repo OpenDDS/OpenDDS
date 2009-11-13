@@ -31,13 +31,26 @@ Monitor.qrc
 Monitor.mpc
   -- MPC project file for the application.
 
-qt4-patch.diff
-  -- Patchfile for MPC used by this application.  This will be removed
-     once the patch is incorporated into the base MPC code.  If needed,
-     it should be applied from the MPC home directory.
-
 *.{h,cpp}
   -- source code for application.
+
+------------------------------------------------------------------------
+Code notes:
+
+The GUI source code files are compiled by the Qt meta-object compiler and
+have certain macros and other non-standard language constructs that are
+parsed by that system.
+
+This means that it is not recommended to run a style utility on the GUI
+files, as the Qt specific elements may no longer be recognizable by the
+Qt tools.
+
+Currently the GUI files that should not be reformatted include:
+  all generated files
+  Monitor_main.cpp
+  MonitorDataModel.{h,cpp}
+  TreeNode.h
+  Viewer.{h,cpp}
 
 ------------------------------------------------------------------------
 System notes:

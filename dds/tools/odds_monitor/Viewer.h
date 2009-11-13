@@ -34,8 +34,6 @@ class Viewer : public QMainWindow {
     Ui::Monitor       ui;
     MonitorDataModel* model_;
     TreeNode*         root_;
-
-  private: MonitorDataModel* loadStubData();
 };
 
 } // End of namespace Monitor

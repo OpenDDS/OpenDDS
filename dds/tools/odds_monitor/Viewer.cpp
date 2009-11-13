@@ -12,8 +12,6 @@
 #include "MonitorDataModel.h"
 #include "TreeNode.h"
 
-#include <iostream>
-
 namespace Monitor {
 
 Viewer::Viewer( QMainWindow* parent)
@@ -27,6 +25,14 @@ Viewer::Viewer( QMainWindow* parent)
   connect( ui.actionQuit,      SIGNAL(triggered()), this, SLOT(close()));
   connect( ui.quitButton,      SIGNAL(clicked()),   this, SLOT(close()));
   connect( ui.changeNowButton, SIGNAL(clicked()),   this, SLOT(modifyTree()));
+
+  QList< QVariant> list;
+  list << QString( "Element")
+       << QString( "Value");
+
+  this->root_ = new TreeNode( list);
+  this->model_ = new MonitorDataModel( this->root_);
+  this->ui.repoView->setModel( this->model_);
 }
 
 void
@@ -34,10 +40,9 @@ Viewer::openFile()
 {
   QString fileName = QFileDialog::getOpenFileName( this);
   if( !fileName.isEmpty()) {
-    std::cout << "FILENAME: " << fileName.toStdString() << std::endl;
-    delete this->model_;
-    this->model_ = this->loadStubData();
-    this->ui.repoView->setModel( this->model_);
+    QList< QVariant> list;
+    list << QString( "File") << fileName;
+    this->model_->addData( 0, list, this->model_->index( 0, 0).parent());
   }
 }
 
@@ -54,111 +59,35 @@ Viewer::getIor()
 			&status
                       );
   if( status && !iorString.isEmpty()) {
-    std::cout << "IOR: " << iorString.toStdString() << std::endl;
-    delete this->model_;
-    this->model_ = this->loadStubData();
-    this->ui.repoView->setModel( this->model_);
-
-  } else {
-    std::cout << "NO JOY!" << std::endl;
+    QList< QVariant> list;
+    list << QString( "IOR") << iorString;
+    this->model_->addData( 0, list, this->ui.repoView->currentIndex());
   }
 }
 
 void
 Viewer::modifyTree()
 {
-std::cout << "NO ";
   static int counter = 0;
-  QList< QVariant> list;
-  list << QString( "Root") << QString( "RootValue");
-  this->root_ = new TreeNode( list);
 
   QString left("NewNode ");
   left.append( QVariant( ++counter).toString());
   QString right( "NewValue ");
   right.append( QVariant( ++counter).toString());
 
-  list.clear();
+  QList< QVariant> list;
   list << left << right;
-  this->root_->append( new TreeNode( list, this->root_));
 
-  delete this->model_;
-  this->model_ = new MonitorDataModel( this->root_);
-  this->ui.repoView->setModel( this->model_);
-
-  std::cout << "JOY!" << std::endl;
-  return;
-//  this->model_->insertRows( 1, 1);
-//  QModelIndex newIndex = this->model_index( 0, 0);
-  this->root_->append( new TreeNode( list, this->root_));
-//  this->model_->dataChanged( QModelIndex(), QModelIndex());
-  this->model_->addData( 0, list);
+  this->model_->addData(
+    1 + this->ui.repoView->currentIndex().row(),
+    list,
+    this->ui.repoView->currentIndex().parent()
+  );
 }
 
 void
 Viewer::closeEvent( QCloseEvent* /* event */)
 {
-  std::cerr << "CLOSING!" << std::endl;
-}
-
-MonitorDataModel*
-Viewer::loadStubData()
-{
-  static int entry = 0;
-  static int counter = 0;
-
-  this->root_ = 0;
-  switch( ++entry) {
-    case 1:
-      {
-        QList< QVariant> list;
-        list << QString( "Root") << QString( "RootValue");
-        this->root_ = new TreeNode( list);
-
-        list.clear();
-        list << QString( "Node1") << QString( "Value1");
-        TreeNode* node1 = new TreeNode( list, this->root_);
-        this->root_->append( node1);
-
-        list.clear();
-        list << QString( "Node2") << QString( "Value2");
-        this->root_->append( new TreeNode( list, this->root_));
-
-        list.clear();
-        list << QString( "Node3") << QString( "Value3");
-        node1->append( new TreeNode( list, node1));
-      }
-      break;
-
-    default:
-      {
-        QList< QVariant> list;
-        list << QString( "Root") << QString( "RootValue");
-        this->root_ = new TreeNode( list);
-
-        list.clear();
-        list << QString( "Empty") << QString( "nothing");
-        this->root_->append( new TreeNode( list, this->root_));
-
-        list.clear();
-        list << QString( "Stuff") << QString( "something");
-        TreeNode* node2 = new TreeNode( list, this->root_);
-        this->root_->append( node2);
-
-        for( int i = 0; i < entry; ++i) {
-          list.clear();
-          QString left("Node");
-          left.append( QVariant( ++counter).toString());
-          QString right( "Value");
-          right.append( QVariant( ++counter).toString());
-          list << left << right;
-          node2->append( new TreeNode( list, node2));
-        }
-      }
-      break;
-  }
-
-  return new MonitorDataModel( this->root_);
 }
 
 } // End of namespace Monitor
