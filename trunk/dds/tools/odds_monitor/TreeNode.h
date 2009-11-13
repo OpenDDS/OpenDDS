@@ -44,8 +44,17 @@ class TreeNode {
     /// Virtual destructor.
     virtual ~TreeNode();
 
+    /// Update with new data.
+    bool setData( int column, const QVariant& data);
+
     /// Append another node as a child.
     void append( TreeNode* child);
+
+    /// Insert a number of empty child nodes.
+    bool insertChildren( int row, int count, int columns);
+
+    /// Remove a number of child nodes.
+    bool removeChildren( int row, int count);
 
     /**
      * @brief Access a child by index.
@@ -105,10 +114,57 @@ Monitor::TreeNode::~TreeNode()
 }
 
 inline
+bool
+Monitor::TreeNode::setData( int column, const QVariant& data)
+{
+  if( column < 0 || column > this->width()) {
+    return false;
+  }
+
+  this->data_.replace( column, data);
+  return true;
+}
+
+inline
 void
 Monitor::TreeNode::append( TreeNode* child)
 {
   this->children_.append( child);
+}
+
+inline
+bool
+Monitor::TreeNode::insertChildren( int row, int count, int columns)
+{
+  if( row < 0 || row > this->size()) {
+    return false;
+  }
+
+  while( count--) {
+    QList< QVariant> data;
+    for( int index = 0; index < columns; ++index) {
+      data.append( QVariant());
+    }
+    TreeNode* node = new TreeNode( data, this);
+    this->children_.insert( row, node);
+  }
+
+  return true;
+}
+
+inline
+bool
+Monitor::TreeNode::removeChildren( int row, int count)
+{
+  if( row < 0 || (row+count) > this->size()) {
+    return false;
+  }
+
+  while( count--) {
+    delete this->children_.takeAt( row);
+  }
+
+  return true;
 }
 
 inline

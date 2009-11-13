@@ -47,6 +47,8 @@ class MonitorDataModel : public QAbstractItemModel {
 
     /* Exposing data from the model */
 
+    TreeNode* getNode( const QModelIndex &index) const;
+
     virtual QModelIndex index(
       int                row,
       int                column,
@@ -158,12 +160,10 @@ class MonitorDataModel : public QAbstractItemModel {
 
     virtual void fetchMore( const QModelIndex& parent);
 
-    /// Add a new node as a new row of data.
-    void addData( int row, QList< QVariant> list);
+    /* Data insertion methods. */
 
-  protected:
-    /// Populate the model with data.
-    void load( const QStringList& lines, TreeNode* parent);
+    /// Add a new node as a new row of data.
+    void addData( int row, QList< QVariant> list, const QModelIndex& parent);
 
   private:
     /// Root node of the tree.

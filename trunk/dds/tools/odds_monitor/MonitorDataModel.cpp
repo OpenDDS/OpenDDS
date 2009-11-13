@@ -26,6 +26,18 @@ MonitorDataModel::~MonitorDataModel()
   delete this->root_;
 }
 
+TreeNode*
+MonitorDataModel::getNode( const QModelIndex &index) const
+{
+  if( index.isValid()) {
+    TreeNode* node = static_cast< TreeNode*>( index.internalPointer());
+    if( node) {
+      return node;
+    }
+  }
+  return this->root_;
+}
+
 QModelIndex
 MonitorDataModel::index(
   int                row,
@@ -37,14 +49,10 @@ MonitorDataModel::index(
     return QModelIndex();
   }
 
-  TreeNode* parentNode = this->root_;
-  if( parent.isValid()) {
-    parentNode = static_cast<TreeNode*>( parent.internalPointer());
-  }
-
-  TreeNode* childNode = (*parentNode)[ row];
+  TreeNode* parentNode = this->getNode( parent);
+  TreeNode* childNode  = (*parentNode)[ row];
   if( childNode) {
-    return createIndex( row, column, childNode);
+    return this->QAbstractItemModel::createIndex( row, column, childNode);
 
   } else {
     return QModelIndex();
@@ -58,14 +66,14 @@ MonitorDataModel::parent( const QModelIndex& index) const
     return QModelIndex();
   }
 
-  TreeNode* childNode  = static_cast<TreeNode*>( index.internalPointer());
+  TreeNode* childNode  = this->getNode( index);
   TreeNode* parentNode = childNode->parent();
 
   if( parentNode == this->root_) {
     return QModelIndex();
   }
 
-  return createIndex( parentNode->row(), 0, parentNode);
+  return this->QAbstractItemModel::createIndex( parentNode->row(), 0, parentNode);
 }
 
 QVariant
@@ -77,7 +85,7 @@ MonitorDataModel::data( const QModelIndex& index, int role) const
 
   switch( role) {
     case Qt::DisplayRole:
-      return static_cast<TreeNode*>( index.internalPointer())->column( index.column());
+      return this->getNode( index)->column( index.column());
 
     case Qt::ToolTipRole:
     case Qt::StatusTipRole:
@@ -91,10 +99,12 @@ Qt::ItemFlags
 MonitorDataModel::flags( const QModelIndex& index) const
 {
   if( false == index.isValid()) {
-    return Qt::ItemIsEnabled;
+    return 0;
   }
 
   return this->QAbstractItemModel::flags( index)
+         | Qt::ItemIsEnabled
+         | Qt::ItemIsSelectable
          | Qt::ItemIsEditable
   //     | Qt::ItemIsDragEnabled
   //     | Qt::ItemIsDropEnabled
@@ -104,11 +114,15 @@ MonitorDataModel::flags( const QModelIndex& index) const
 QVariant
 MonitorDataModel::headerData(
   int             section,
-  Qt::Orientation orientation,
+  Qt::Orientation /* orientation */,
   int             role
 ) const
 {
-  return this->QAbstractItemModel::headerData( section, orientation, role);
+  if( role == Qt::DisplayRole) {
+    return this->root_->column( section);
+  }
+
+  return QVariant();
 }
 
 int
@@ -118,23 +132,13 @@ MonitorDataModel::rowCount( const QModelIndex& parent) const
     return 0;
   }
 
-  TreeNode* parentNode = this->root_;
-  if( parent.isValid()) {
-    parentNode = static_cast<TreeNode*>( parent.internalPointer());
-  }
-
-  return parentNode->size();
+  return this->getNode( parent)->size();
 }
 
 int
 MonitorDataModel::columnCount( const QModelIndex& parent) const
 {
-  if( parent.isValid()) {
-    return static_cast<TreeNode*>( parent.internalPointer())->width();
-
-  } else {
-    return this->root_->width();
-  }
+  return this->getNode( parent)->width();
 }
 
 bool
@@ -144,18 +148,42 @@ MonitorDataModel::setData(
   int                role
 )
 {
-  return this->QAbstractItemModel::setData( index, value, role);
+  switch( role) {
+    case Qt::EditRole:
+      if( index.column() == 0) return false;
+      break;
+
+    case Qt::DisplayRole:
+      break;
+
+    default: return false;
+  }
+
+  this->getNode( index)->setData( index.column(), value);
+
+  emit dataChanged( index, index);
+  return true;
 }
 
 bool
 MonitorDataModel::setHeaderData(
   int             section,
-  Qt::Orientation orientation,
+  Qt::Orientation /* orientation */,
   const QVariant& value,
   int             role
 )
 {
-  return this->QAbstractItemModel::setHeaderData( section, orientation, value, role);
+  switch( role) {
+    case Qt::DisplayRole:
+      break;
+
+    default: return false;
+  }
+
+  this->root_->setData( section, value);
+
+  emit dataChanged( QModelIndex(), QModelIndex());
+  return true;
 }
 
 bool
@@ -165,7 +193,17 @@ MonitorDataModel::insertRows(
   const QModelIndex& parent
 )
 {
-  return this->QAbstractItemModel::insertRows( row, count, parent);
+  bool success;
+
+  beginInsertRows( parent, row, row+count-1);
+  success = this->getNode( parent)->insertChildren(
+              row,
+              count,
+              this->root_->width()
+            );
+  endInsertRows();
+
+  return success;
 }
 
 bool
@@ -175,7 +213,13 @@ MonitorDataModel::removeRows(
   const QModelIndex& parent
 )
 {
-  return this->QAbstractItemModel::removeRows( row, count, parent);
+  bool success;
+
+  beginRemoveRows( parent, row, row+count-1);
+  success = this->getNode( parent)->removeChildren( row, count);
+  endRemoveRows();
+
+  return success;
 }
 
 bool
@@ -266,7 +310,7 @@ MonitorDataModel::hasChildren(
   const QModelIndex& parent
 ) const
 {
-  return this->QAbstractItemModel::hasChildren( parent);
+  return this->getNode( parent)->size() > 0;
 }
 
 bool
@@ -282,14 +326,14 @@ MonitorDataModel::fetchMore( const QModelIndex& parent)
 }
 
 void
-MonitorDataModel::load( const QStringList& /* lines */, TreeNode* /* parent */)
+MonitorDataModel::addData( int row, QList< QVariant> list, const QModelIndex& parent)
 {
-}
-
-void
-MonitorDataModel::addData( int row, QList< QVariant> list)
-{
-  this->layoutChanged();
+  this->insertRows( row, 1, parent);
+  int column = 0;
+  Q_FOREACH( QVariant current, list) {
+    QModelIndex index = this->index( row, column, parent);
+    this->setData( index, list.at( column++), Qt::DisplayRole);
+  }
 }
 
 } // End of namespace Monitor
