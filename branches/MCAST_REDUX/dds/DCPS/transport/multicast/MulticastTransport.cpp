@@ -13,7 +13,6 @@
 #include "ace/CDR_Base.h"
 
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
-#include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
 
 namespace {
 
@@ -33,10 +32,10 @@ MulticastTransport::~MulticastTransport()
 
 DataLink*
 MulticastTransport::find_or_create_datalink(
-  RepoId                  local_id,
-  const AssociationData*  remote_association,
-  CORBA::Long             priority,
-  bool                    active)
+  RepoId local_id,
+  const AssociationData* remote_association,
+  CORBA::Long priority,
+  bool active)
 {
   return 0; // TODO implement
 }

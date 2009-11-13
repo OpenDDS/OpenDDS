@@ -20,8 +20,6 @@ namespace DCPS {
 class OpenDDS_Multicast_Export MulticastFactory
   : public TransportImplFactory {
 public:
-  virtual ~MulticastFactory();
-
   virtual int requires_reactor() const;
 
 protected:

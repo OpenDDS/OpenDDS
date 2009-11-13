@@ -13,10 +13,6 @@
 namespace OpenDDS {
 namespace DCPS {
 
-MulticastFactory::~MulticastFactory()
-{
-}
-
 int
 MulticastFactory::requires_reactor() const
 {

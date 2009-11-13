@@ -20,8 +20,6 @@ namespace DCPS {
 class OpenDDS_Multicast_Export MulticastGenerator
   : public TransportGenerator {
 public:
-  virtual ~MulticastGenerator();
-
   virtual TransportImplFactory* new_factory();
 
   virtual TransportConfiguration* new_configuration(const TransportIdType id);

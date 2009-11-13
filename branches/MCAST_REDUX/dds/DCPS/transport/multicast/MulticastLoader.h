@@ -22,8 +22,6 @@ namespace DCPS {
 class OpenDDS_Multicast_Export MulticastLoader
   : public ACE_Service_Object {
 public:
-  virtual ~MulticastLoader();
-
   virtual int init(int argc, ACE_TCHAR* argv[]);
 };
 

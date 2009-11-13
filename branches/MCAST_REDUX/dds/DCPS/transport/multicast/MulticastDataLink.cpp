@@ -12,10 +12,6 @@
 namespace OpenDDS {
 namespace DCPS {
 
-MulticastDataLink::~MulticastDataLink()
-{
-}
-
 void
 MulticastDataLink::stop_i()
 {
