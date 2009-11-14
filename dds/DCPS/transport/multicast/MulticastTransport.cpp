@@ -50,7 +50,7 @@ MulticastTransport::find_or_create_datalink(
   DataLinkMap::iterator it = this->links_.find(remote_participant);
   if (it != this->links_.end()) return it->second;  // found existing
 
-  // At this point we can assume we are creating a new reservation
+  // At this point we can assume we are creating a new DataLink
   // between participants.
 
   // TODO implement
