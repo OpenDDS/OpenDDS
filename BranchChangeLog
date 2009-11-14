@@ -4,7 +4,7 @@ Sat Nov 14 00:15:51 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
 
           Added reliable/unreliable personality to configuration; this
-          is a semi-temporary workaround to not having the 
+          is a semi-temporary workaround to not having the ability to
           query the relevant QoS policy values from the ETF.
 
         * dds/DCPS/transport/multicast/MulticastDataLink.h:
