@@ -44,10 +44,10 @@ MulticastTransport::find_or_create_datalink(
   // specific domainId). Given this, we may assume that the local_id
   // always has the same participantId, therefore all we need to track
   // is the remote participantId.
-  long remote_id =
+  long remote_participant =
     RepoIdConverter(remote_association->remote_id_).participantId();
 
-  DataLinkMap::iterator it = this->links_.find(remote_id);
+  DataLinkMap::iterator it = this->links_.find(remote_participant);
   if (it != this->links_.end()) return it->second;  // found existing
 
   // At this point we can assume we are creating a new reservation
