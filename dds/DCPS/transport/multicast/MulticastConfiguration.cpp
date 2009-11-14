@@ -18,10 +18,12 @@ const bool DEFAULT_DEFAULT_TO_IPV6(false);
 const char* DEFAULT_IPV4_GROUP_ADDRESS("224.0.0.128");
 const char* DEFAULT_IPV6_GROUP_ADDRESS("FF01::80");
 
+const bool DEFAULT_RELIABLE(true);
+
 const long DEFAULT_HANDSHAKE_TIMEOUT(30000);
 
+const size_t DEFAULT_NAK_DEPTH(32);
 const long DEFAULT_NAK_TIMEOUT(30000);
-const size_t DEFAULT_NAK_REPAIR_DEPTH(32);
 
 } // namespace
 
@@ -30,9 +32,10 @@ namespace DCPS {
 
 MulticastConfiguration::MulticastConfiguration()
   : default_to_ipv6_(DEFAULT_DEFAULT_TO_IPV6),
+    reliable_(DEFAULT_RELIABLE),
     handshake_timeout_(DEFAULT_HANDSHAKE_TIMEOUT),
-    nak_timeout_(DEFAULT_NAK_TIMEOUT),
-    nak_repair_depth_(DEFAULT_NAK_REPAIR_DEPTH)
+    nak_depth_(DEFAULT_NAK_DEPTH),
+    nak_timeout_(DEFAULT_NAK_TIMEOUT)
 {
   default_group_address(this->group_address_, DEFAULT_MULTICAST_ID);
 }
@@ -69,14 +72,17 @@ MulticastConfiguration::load(const TransportIdType& id,
     this->group_address_.set(group_address_s.c_str());  // user-defined
   }
 
+  GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("reliable"),
+                   this->reliable_, bool)
+
   GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("handshake_timeout"),
                    this->handshake_timeout_, long)
 
+  GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("nak_depth"),
+                   this->nak_depth_, size_t)
+
   GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("nak_timeout"),
                    this->nak_timeout_, long)
-
-  GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("nak_repair_depth"),
-                   this->nak_repair_depth_, size_t)
 
   return 0;
 }

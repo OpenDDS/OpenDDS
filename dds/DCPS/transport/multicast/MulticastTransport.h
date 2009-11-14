@@ -11,6 +11,8 @@
 
 #include "Multicast_Export.h"
 
+#include <map>
+
 #ifndef DCPS_MULTICASTTRANSPORT_H
 #define DCPS_MULTICASTTRANSPORT_H
 
@@ -41,6 +43,9 @@ protected:
 
 private:
   MulticastConfiguration* config_i_;
+
+  typedef std::map<long, DataLink*> datalink_map;
+  datalink_map datalinks_;
 };
 
 } // namespace DCPS
