@@ -42,7 +42,8 @@ MulticastTransport::find_or_create_datalink(
   // TransportImpl instance may only be attached to entities within
   // the same DomainParticipant (which is in turn is tied to a
   // specific domainId). Given this, we may assume that the local_id
-  // always has the same participantId.
+  // always has the same participantId, therefore all we need to track
+  // is the remote participantId.
   long remote_id =
     RepoIdConverter(remote_association->remote_id_).participantId();
 
