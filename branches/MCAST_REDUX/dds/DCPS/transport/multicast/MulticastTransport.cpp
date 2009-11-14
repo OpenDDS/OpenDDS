@@ -47,8 +47,8 @@ MulticastTransport::find_or_create_datalink(
   long remote_id =
     RepoIdConverter(remote_association->remote_id_).participantId();
 
-  datalink_map::iterator it = this->datalinks_.find(remote_id);
-  if (it != this->datalinks_.end()) return it->second;  // found existing
+  DataLinkMap::iterator it = this->links_.find(remote_id);
+  if (it != this->links_.end()) return it->second;  // found existing
 
   // At this point we can assume we are creating a new connection
   // between participants; TODO implement
@@ -88,12 +88,12 @@ MulticastTransport::connection_info_i(TransportInterfaceInfo& local_info) const
 void
 MulticastTransport::release_datalink_i(DataLink* link, bool /*release_pending*/)
 {
-  for (datalink_map::iterator it = this->datalinks_.begin();
-       it != this->datalinks_.end(); ++it) {
+  for (DataLinkMap::iterator it = this->links_.begin();
+       it != this->links_.end(); ++it) {
     // We are guaranteed to have exactly one matching DataLink
     // in the map; release any resources held and return.
     if (it->second == link) {
-      this->datalinks_.erase(it);
+      this->links_.erase(it);
       link->_remove_ref();
       return;
     }

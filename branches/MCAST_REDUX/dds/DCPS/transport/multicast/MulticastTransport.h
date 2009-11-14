@@ -44,8 +44,8 @@ protected:
 private:
   MulticastConfiguration* config_i_;
 
-  typedef std::map<long, DataLink*> datalink_map;
-  datalink_map datalinks_;
+  typedef std::map<long, DataLink*> DataLinkMap;
+  DataLinkMap links_;
 };
 
 } // namespace DCPS
