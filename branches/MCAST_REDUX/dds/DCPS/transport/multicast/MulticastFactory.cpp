@@ -16,7 +16,7 @@ namespace DCPS {
 int
 MulticastFactory::requires_reactor() const
 {
-  return 1;  // requires reactor
+  return 1;  // require reactor
 }
 
 TransportImpl*

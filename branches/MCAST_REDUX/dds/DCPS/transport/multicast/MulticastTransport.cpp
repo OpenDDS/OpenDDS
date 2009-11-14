@@ -9,10 +9,9 @@
 
 #include "MulticastTransport.h"
 #include "MulticastConfiguration.h"
+#include "MulticastDataLink.h"
 
-#include "ace/CDR_Base.h"
-
-#include "dds/DCPS/transport/framework/NetworkAddress.h"
+#include "dds/DCPS/RepoIdConverter.h"
 
 namespace {
 
@@ -34,10 +33,26 @@ DataLink*
 MulticastTransport::find_or_create_datalink(
   RepoId local_id,
   const AssociationData* remote_association,
-  CORBA::Long priority,
+  CORBA::Long /*priority*/,
   bool active)
 {
-  return 0; // TODO implement
+  // N.B. We form reservations between DomainParticipants; this is
+  // is a significant departure from traditional reservations formed
+  // formed between Subscriptions and Publications. Currently, a
+  // TransportImpl instance may only be attached to entities within
+  // the same DomainParticipant (which is in turn is tied to a
+  // specific domainId). Given this, we may assume that the local_id
+  // always has the same participantId.
+  long remote_id =
+    RepoIdConverter(remote_association->remote_id_).participantId();
+
+  datalink_map::iterator it = this->datalinks_.find(remote_id);
+  if (it != this->datalinks_.end()) return it->second;  // found existing
+
+  // At this point we can assume we are creating a new connection
+  // between participants; TODO implement
+
+  return 0;
 }
 
 int
@@ -46,6 +61,8 @@ MulticastTransport::configure_i(TransportConfiguration* config)
   this->config_i_ = dynamic_cast<MulticastConfiguration*>(config);
   if (this->config_i_ == 0) return -1;  // invalid configuration
 
+  // The ETF will only call configure_i once during
+  // our lifetime; increment ref count.
   this->config_i_->_add_ref();
 
   return 0;
@@ -60,25 +77,26 @@ MulticastTransport::shutdown_i()
 int
 MulticastTransport::connection_info_i(TransportInterfaceInfo& local_info) const
 {
-  NetworkAddress group_address(this->config_i_->group_address_);
-
-  ACE_OutputCDR cdr;
-  cdr << group_address;
-
-  size_t len = cdr.total_length();
-  char* buffer = const_cast<char*>(cdr.buffer()); // safe
-
+  // Both endpoints already know the group address by merit of
+  // having a configured TransportImpl; no additional information
+  // needs to be exchanged using the TransportInterfaceBLOB.
   local_info.transport_id = TRANSPORT_INTERFACE_ID;
-  local_info.data = TransportInterfaceBLOB(len, len,
-    reinterpret_cast<CORBA::Octet*>(buffer));
-
   return 0;
 }
 
 void
-MulticastTransport::release_datalink_i(DataLink* link, bool release_pending)
+MulticastTransport::release_datalink_i(DataLink* link, bool /*release_pending*/)
 {
-  // TODO implement
+  for (datalink_map::iterator it = this->datalinks_.begin();
+       it != this->datalinks_.end(); ++it) {
+    // We are guaranteed to have only one matching DataLink
+    // in the map; release any resources held and return.
+    if (it->second == link) {
+      this->datalinks_.erase(it);
+      link->_remove_ref();
+      return;
+    }
+  }
 }
 
 } // namespace DCPS

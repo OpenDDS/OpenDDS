@@ -7,6 +7,7 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include "dds/DCPS/RcObject_T.h"
 #include "dds/DCPS/transport/framework/DataLink.h"
 
 #include "Multicast_Export.h"
@@ -21,12 +22,6 @@ class OpenDDS_Multicast_Export MulticastDataLink
   : public DataLink {
 protected:
   virtual void stop_i();
-
-private:
-  // TODO implement
-
-  friend class MulticastSendStrategy;
-  friend class MulticastReceiveStrategy;
 };
 
 } // namespace DCPS
