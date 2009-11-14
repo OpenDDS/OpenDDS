@@ -90,7 +90,7 @@ MulticastTransport::release_datalink_i(DataLink* link, bool /*release_pending*/)
 {
   for (datalink_map::iterator it = this->datalinks_.begin();
        it != this->datalinks_.end(); ++it) {
-    // We are guaranteed to have only one matching DataLink
+    // We are guaranteed to have exactly one matching DataLink
     // in the map; release any resources held and return.
     if (it->second == link) {
       this->datalinks_.erase(it);
