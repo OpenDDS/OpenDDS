@@ -20,12 +20,10 @@ namespace OpenDDS {
 namespace DCPS {
 
 class MulticastConfiguration;
+class MulticastDataLink;
 
 class OpenDDS_Multicast_Export MulticastTransport
   : public TransportImpl {
-public:
-  ~MulticastTransport();
-
 protected:
   virtual DataLink* find_or_create_datalink(
     RepoId local_id,
@@ -44,8 +42,8 @@ protected:
 private:
   MulticastConfiguration* config_i_;
 
-  typedef std::map<long, DataLink*> DataLinkMap;
-  DataLinkMap links_;
+  typedef std::map<long, MulticastDataLink*> MulticastDataLinkMap;
+  MulticastDataLinkMap links_;
 };
 
 } // namespace DCPS

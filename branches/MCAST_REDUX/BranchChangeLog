@@ -1,3 +1,10 @@
+Sun Nov 15 01:46:01 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Partially implemented shutdown_i; general refactorings.
+
 Sat Nov 14 00:15:51 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastConfiguration.h:
