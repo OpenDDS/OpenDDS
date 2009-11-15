@@ -1,3 +1,13 @@
+Sun Nov 15 20:51:26 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Added additional member functions to MulticastDataLink for
+          lifecycle management; finished MulticastTransport implementation.
+
 Sun Nov 15 01:46:01 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastTransport.h:
