@@ -44,6 +44,8 @@ private:
 
   typedef std::map<long, MulticastDataLink*> MulticastDataLinkMap;
   MulticastDataLinkMap links_;
+
+  friend class MulticastDataLink;
 };
 
 } // namespace DCPS
