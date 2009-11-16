@@ -22,26 +22,27 @@ MulticastReceiveUnreliable::receive_bytes(iovec iov[],
                                           int n,
                                           ACE_INET_Addr& remote_address)
 {
-  return 0; // TODO implement
+  ACE_SOCK_Dgram_Mcast& socket = this->link_->get_socket();
+  return socket.recv(iov, n, remote_address);
 }
 
 void
 MulticastReceiveUnreliable::deliver_sample(ReceivedDataSample& sample,
-                                           const ACE_INET_Addr& remote_address)
+                                           const ACE_INET_Addr& /*remote_address*/)
 {
-  // TODO implement
+  // No pre-processing; deliver data as-is:
+  this->link_->data_received(sample);
 }
 
 int
 MulticastReceiveUnreliable::start_i()
 {
-  return 0; // TODO implement
+  return 0; // do nothing
 }
 
 void
 MulticastReceiveUnreliable::stop_i()
 {
-  // TODO implement
 }
 
 } // namespace DCPS

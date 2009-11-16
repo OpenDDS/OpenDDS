@@ -130,7 +130,7 @@ MulticastTransport::shutdown_i()
   for (MulticastDataLinkMap::iterator it = this->links_.begin();
        it != this->links_.end(); ++it) {
     MulticastDataLink* link = it->second;
-    link->leave();
+    link->transport_shutdown();
     link->_remove_ref();
   }
   this->links_.clear();

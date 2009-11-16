@@ -13,6 +13,8 @@
 #include "MulticastReceiveReliable.h"
 #include "MulticastReceiveUnreliable.h"
 
+#include "ace/Log_Msg.h"
+
 #ifndef __ACE_INLINE__
 # include "MulticastDataLink.inl"
 #endif  /* __ACE_INLINE__ */
@@ -50,28 +52,43 @@ MulticastDataLink::MulticastDataLink(MulticastTransport* impl,
 
 MulticastDataLink::~MulticastDataLink()
 {
-  if (this->recv_strategy_ != 0) this->recv_strategy_->_remove_ref();
-  if (this->send_strategy_ != 0) this->send_strategy_->_remove_ref();
+  delete this->recv_strategy_;
+  delete this->send_strategy_;
 
-  if (this->config_ != 0) this->config_->_remove_ref();
+  if (this->config_ != 0) {
+    this->config_->_remove_ref();
+  }
 }
 
 bool
 MulticastDataLink::join(const ACE_INET_Addr& group_address, bool active)
 {
-  return false; // TODO implement
-}
+  if (this->socket_.join(group_address) != 0) return false;
 
-void
-MulticastDataLink::leave()
-{
-  // TODO implement
+  if (start(this->send_strategy_, this->recv_strategy_) != 0) {
+    this->socket_.close();
+
+    ACE_ERROR_RETURN((LM_ERROR,
+		      ACE_TEXT("(%P|%t) ERROR: ")
+		      ACE_TEXT("MulticastDataLink::join: ")
+		      ACE_TEXT("failed to start send/receive strategies!\n")),
+                     false);
+  }
+
+  // Reliable links should handshake before returning control
+  // back to the ETF; this ensures both peers are initialized
+  // prior to sending data.
+  if (active && this->config_->reliable_) {
+    // TODO handshake
+  }
+
+  return true;
 }
 
 void
 MulticastDataLink::stop_i()
 {
-  // TODO implement
+  this->socket_.close();
 }
 
 } // namespace DCPS

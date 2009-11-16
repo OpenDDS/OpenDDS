@@ -35,7 +35,6 @@ public:
   ~MulticastDataLink();
 
   bool join(const ACE_INET_Addr& group_address, bool active);
-  void leave();
 
   TransportConfiguration* get_configuration();
 
@@ -56,6 +55,7 @@ private:
   MulticastSendStrategy* send_strategy_;
   MulticastReceiveStrategy* recv_strategy_;
 
+  ACE_INET_Addr group_address_;
   ACE_SOCK_Dgram_Mcast socket_;
 };
 
