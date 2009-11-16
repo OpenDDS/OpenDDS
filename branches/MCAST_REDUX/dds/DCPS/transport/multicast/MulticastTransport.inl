@@ -11,7 +11,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 ACE_INLINE MulticastConfiguration*
-MulticastTransport::get_configuration() const
+MulticastTransport::get_configuration()
 {
   return this->config_i_;
 }

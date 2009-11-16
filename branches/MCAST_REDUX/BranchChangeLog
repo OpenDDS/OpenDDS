@@ -1,3 +1,27 @@
+Mon Nov 16 21:58:45 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.inl:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastReceiveReliable.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveReliable.cpp:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastReceiveUnreliable.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveUnreliable.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendReliable.h:
+        * dds/DCPS/transport/multicast/MulticastSendReliable.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendUnreliable.h:
+        * dds/DCPS/transport/multicast/MulticastSendUnreliable.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.inl:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Additional refactorings; broke reliable/unreliable behavior
+          into separate strategies.
+
 Mon Nov 16 19:02:57 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastDataLink.h:

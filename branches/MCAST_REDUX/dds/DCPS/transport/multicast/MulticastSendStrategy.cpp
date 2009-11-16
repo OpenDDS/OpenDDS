@@ -12,28 +12,18 @@
 namespace OpenDDS {
 namespace DCPS {
 
-MulticastSendStrategy::MulticastSendStrategy(TransportConfiguration* config,
-                                             CORBA::Long priority)
-  : TransportSendStrategy(config, 0, priority)
+MulticastSendStrategy::MulticastSendStrategy(MulticastDataLink* link)
+  : TransportSendStrategy(link->get_configuration(),
+                          0,  // ThreadSynchResource
+                          link->transport_priority()),
+    link_(link)
 {
+  if (this->link_ != 0) this->link_->_add_ref();
 }
 
-void
-MulticastSendStrategy::stop_i()
+MulticastSendStrategy::~MulticastSendStrategy()
 {
-  // TODO implement
-}
-
-ACE_HANDLE
-MulticastSendStrategy::get_handle()
-{
-  return 0; // TODO implement
-}
-
-ssize_t
-MulticastSendStrategy::send_bytes_i(const iovec iov[], int n)
-{
-  return 0; // TODO implement
+  if (this->link_ != 0) this->link_->_remove_ref();
 }
 
 } // namespace DCPS
