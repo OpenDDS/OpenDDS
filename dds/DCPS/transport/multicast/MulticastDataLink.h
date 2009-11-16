@@ -7,7 +7,10 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "dds/DCPS/RcObject_T.h"
+#include "MulticastTransport.h"
+
+#include "ace/SOCK_Dgram_Mcast.h"
+
 #include "dds/DCPS/transport/framework/DataLink.h"
 
 #include "Multicast_Export.h"
@@ -18,26 +21,33 @@
 namespace OpenDDS {
 namespace DCPS {
 
-class MulticastTransport;
+class AssociationData;
 class MulticastConfiguration;
 
 class OpenDDS_Multicast_Export MulticastDataLink
   : public DataLink {
 public:
   MulticastDataLink(MulticastTransport* impl,
-                    long local_id,
                     CORBA::Long priority,
-                    bool active);
+                    long local_peer,
+                    long remote_peer);
 
-  bool open(long remote_id);
+  bool open(const ACE_INET_Addr& group_address, bool active);
   void close();
 
 protected:
   virtual void stop_i();
 
 private:
-  long local_id_;
-  bool active_;
+  MulticastTransport* impl_i_;
+
+  long local_peer_;
+  long remote_peer_;
+
+  ACE_SOCK_Dgram_Mcast socket_;
+
+  friend class MulticastSendStrategy;
+  friend class MulticastReceiveStrategy;
 };
 
 } // namespace DCPS

@@ -9,9 +9,9 @@
 
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 
-#include "Multicast_Export.h"
-
 #include <map>
+
+#include "Multicast_Export.h"
 
 #ifndef DCPS_MULTICASTTRANSPORT_H
 #define DCPS_MULTICASTTRANSPORT_H
@@ -24,6 +24,9 @@ class MulticastDataLink;
 
 class OpenDDS_Multicast_Export MulticastTransport
   : public TransportImpl {
+public:
+  MulticastConfiguration* get_configuration() const;
+
 protected:
   virtual DataLink* find_or_create_datalink(
     RepoId local_id,
@@ -35,7 +38,7 @@ protected:
 
   virtual void shutdown_i();
 
-  virtual int connection_info_i(TransportInterfaceInfo& local_info) const;
+  virtual int connection_info_i(TransportInterfaceInfo& info) const;
 
   virtual void release_datalink_i(DataLink* link, bool release_pending);
 
@@ -45,10 +48,14 @@ private:
   typedef std::map<long, MulticastDataLink*> MulticastDataLinkMap;
   MulticastDataLinkMap links_;
 
-  friend class MulticastDataLink;
+  ACE_INET_Addr get_connection_info(const TransportInterfaceInfo& info) const;
 };
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+#ifdef __ACE_INLINE__
+# include "MulticastTransport.inl"
+#endif  /* __ACE_INLINE__ */
 
 #endif  /* DCPS_MULTICASTTRANSPORT_H */

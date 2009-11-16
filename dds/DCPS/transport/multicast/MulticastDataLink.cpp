@@ -8,24 +8,24 @@
  */
 
 #include "MulticastDataLink.h"
-#include "MulticastTransport.h"
 #include "MulticastConfiguration.h"
 
 namespace OpenDDS {
 namespace DCPS {
 
 MulticastDataLink::MulticastDataLink(MulticastTransport* impl,
-                                     long local_id,
 				     CORBA::Long priority,
-                                     bool active)
+                                     long local_peer,
+                                     long remote_peer)
   : DataLink(impl, priority),
-    local_id_(local_id),
-    active_(active)
+    impl_i_(impl),
+    local_peer_(local_peer),
+    remote_peer_(remote_peer)
 {
 }
 
 bool
-MulticastDataLink::open(long remote_id)
+MulticastDataLink::open(const ACE_INET_Addr& group_address, bool active)
 {
   return false; // TODO implement
 }
