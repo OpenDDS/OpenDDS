@@ -17,6 +17,10 @@
 #include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 
+#ifndef __ACE_INLINE__
+# include "MulticastTransport.inl"
+#endif  /* __ACE_INLINE__ */
+
 namespace {
 
 const CORBA::Long TRANSPORT_INTERFACE_ID(0x4d435354); // MCST
@@ -41,40 +45,56 @@ MulticastTransport::find_or_create_datalink(
   // domainId). Given this, we may assume that the local_id always
   // references the same participantId; all we need to associate a
   // DataLink to is the remote participantId.
-  long remote_id =
+  long remote_peer =
     RepoIdConverter(remote_association->remote_id_).participantId();
 
-  MulticastDataLinkMap::iterator it = this->links_.find(remote_id);
+  MulticastDataLinkMap::iterator it = this->links_.find(remote_peer);
   if (it != this->links_.end()) return it->second;  // found existing
+
+  // At this point we can assume that we are creating a new DataLink
+  // to a pair of DomainParticipants identified by their participantIds.
+  long local_peer = RepoIdConverter(local_id).participantId();
 
   MulticastDataLink* link;
   ACE_NEW_RETURN(link,
-		 MulticastDataLink(this,
-                                   RepoIdConverter(local_id).participantId(),
+                 MulticastDataLink(this,
                                    priority,
-                                   active),
+                                   local_peer,
+                                   remote_peer),
                  0);
-  
-  if (!link->open(remote_id)) {
+
+  ACE_INET_Addr group_address;
+  if (active) {
+    // Active peers obtain the group address via the
+    // TransportInterfaceBLOB in the TranpsortInterfaceInfo:
+    group_address = get_connection_info(remote_association->remote_data_);
+
+  } else {
+    // Passive peers obtain the group address via the
+    // transport configuration:
+    group_address = this->config_i_->group_address_;
+  }
+
+  if (!link->open(group_address, active)) {
     link->_remove_ref();
     ACE_ERROR_RETURN((LM_ERROR,
 		      ACE_TEXT("(%P|%t) ERROR: ")
 		      ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
 		      ACE_TEXT("unable to open with remote peer: %d\n"),
-		      remote_id), 0);
-  } 
-  
+		      remote_peer), 0);
+  }
+
   std::pair<MulticastDataLinkMap::iterator, bool> pair =
-    this->links_.insert(MulticastDataLinkMap::value_type(remote_id, link));
+    this->links_.insert(MulticastDataLinkMap::value_type(remote_peer, link));
   if (!pair.second) {
     link->_remove_ref();
     ACE_ERROR_RETURN((LM_ERROR,
 		      ACE_TEXT("(%P|%t) ERROR: ")
 		      ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
 		      ACE_TEXT("unable to reserve link to remote peer: %d\n"),
-		      remote_id), 0);
+		      remote_peer), 0);
   }
-  
+
   return link;
 }
 
@@ -112,23 +132,48 @@ MulticastTransport::shutdown_i()
 }
 
 int
-MulticastTransport::connection_info_i(TransportInterfaceInfo& local_info) const
+MulticastTransport::connection_info_i(TransportInterfaceInfo& info) const
 {
-  NetworkAddress group_address(this->config_i_->group_address_);
+  NetworkAddress network_address(this->config_i_->group_address_);
 
   ACE_OutputCDR cdr;
-  cdr << group_address;
+  cdr << network_address;
 
   size_t len = cdr.total_length();
-  char* buffer = const_cast<char*>(cdr.buffer()); // safe
+  char *buffer = const_cast<char*>(cdr.buffer()); // safe
 
   // Provide connection information for active endpoints; active
   // endpoints will select the group address based on this value.
-  local_info.transport_id = TRANSPORT_INTERFACE_ID;
-  local_info.data = TransportInterfaceBLOB(len, len,
+  info.transport_id = TRANSPORT_INTERFACE_ID;
+  info.data = TransportInterfaceBLOB(len, len,
     reinterpret_cast<CORBA::Octet*>(buffer));
 
   return 0;
+}
+
+ACE_INET_Addr
+MulticastTransport::get_connection_info(const TransportInterfaceInfo& info) const
+{
+  if (info.transport_id != TRANSPORT_INTERFACE_ID) {
+    ACE_ERROR((LM_WARNING,
+               ACE_TEXT("(%P|%t) WARNING: ")
+               ACE_TEXT("MulticastTransport::get_connection_info: ")
+               ACE_TEXT("transport interface does not match ours: 0x%x\n"),
+               info.transport_id));
+  }
+
+  ACE_INET_Addr group_address;
+  NetworkAddress network_address;
+
+  size_t len = info.data.length();
+  const char* buffer = reinterpret_cast<const char*>(info.data.get_buffer());
+
+  ACE_InputCDR cdr(buffer, len);
+  cdr >> network_address;
+
+  network_address.to_addr(group_address);
+
+  return group_address;
 }
 
 void
