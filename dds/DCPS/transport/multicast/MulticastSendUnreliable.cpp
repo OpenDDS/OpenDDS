@@ -20,19 +20,20 @@ MulticastSendUnreliable::MulticastSendUnreliable(MulticastDataLink* link)
 void
 MulticastSendUnreliable::stop_i()
 {
-  // TODO implement
 }
 
 ACE_HANDLE
 MulticastSendUnreliable::get_handle()
 {
-  return 0; // TODO implement
+  ACE_SOCK_Dgram_Mcast& socket = this->link_->get_socket();
+  return socket.get_handle();
 }
 
 ssize_t
 MulticastSendUnreliable::send_bytes_i(const iovec iov[], int n)
 {
-  return 0; // TODO implement
+  ACE_SOCK_Dgram_Mcast& socket = this->link_->get_socket();
+  return socket.send(iov, n);
 }
 
 } // namespace DCPS

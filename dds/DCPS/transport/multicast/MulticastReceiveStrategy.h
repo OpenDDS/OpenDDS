@@ -26,7 +26,7 @@ public:
   virtual ~MulticastReceiveStrategy();
 
 protected:
-  MulticastDataLink*  link_;
+  MulticastDataLink* link_;
 };
 
 } // namespace DCPS
