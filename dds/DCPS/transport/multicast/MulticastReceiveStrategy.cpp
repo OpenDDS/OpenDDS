@@ -12,24 +12,15 @@
 namespace OpenDDS {
 namespace DCPS {
 
-int
-MulticastReceiveStrategy::start_i()
+MulticastReceiveStrategy::MulticastReceiveStrategy(MulticastDataLink* link)
+  : link_(link)
 {
-  return 0; // TODO implement
+  if (this->link_ != 0) this->link_->_add_ref();
 }
 
-void
-MulticastReceiveStrategy::stop_i()
+MulticastReceiveStrategy::~MulticastReceiveStrategy()
 {
-  // TODO implement
-}
-
-ssize_t
-MulticastReceiveStrategy::receive_bytes(iovec iov[],
-                                        int n,
-                                        ACE_INET_Addr& remote_address)
-{
-  return 0; // TODO implement
+  if (this->link_ != 0) this->link_->_remove_ref();
 }
 
 } // namespace DCPS

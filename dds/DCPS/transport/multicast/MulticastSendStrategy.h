@@ -7,6 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include "MulticastDataLink.h"
+
 #include "dds/DCPS/transport/framework/TransportSendStrategy.h"
 
 #include "Multicast_Export.h"
@@ -20,15 +22,11 @@ namespace DCPS {
 class OpenDDS_Multicast_Export MulticastSendStrategy
   : public TransportSendStrategy {
 public:
-  MulticastSendStrategy(TransportConfiguration* config,
-                        CORBA::Long priority);
-
-  virtual void stop_i();
+  explicit MulticastSendStrategy(MulticastDataLink* link);
+  virtual ~MulticastSendStrategy();
 
 protected:
-  virtual ACE_HANDLE get_handle();
-
-  virtual ssize_t send_bytes_i(const iovec iov[], int n);
+  MulticastDataLink* link_;
 };
 
 } // namespace DCPS

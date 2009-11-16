@@ -7,6 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include "MulticastDataLink.h"
+
 #include "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
 
 #include "Multicast_Export.h"
@@ -19,14 +21,12 @@ namespace DCPS {
 
 class OpenDDS_Multicast_Export MulticastReceiveStrategy
   : public TransportReceiveStrategy {
+public:
+  explicit MulticastReceiveStrategy(MulticastDataLink* link);
+  virtual ~MulticastReceiveStrategy();
+
 protected:
-  virtual int start_i();
-
-  virtual void stop_i();
-
-  virtual ssize_t receive_bytes(iovec iov[],
-                                int n,
-                                ACE_INET_Addr& remote_address);
+  MulticastDataLink*  link_;
 };
 
 } // namespace DCPS

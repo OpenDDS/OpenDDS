@@ -10,6 +10,8 @@
 #include "MulticastTransport.h"
 #include "MulticastConfiguration.h"
 #include "MulticastDataLink.h"
+#include "MulticastSendStrategy.h"
+#include "MulticastReceiveStrategy.h"
 
 #include "ace/CDR_Base.h"
 #include "ace/Log_Msg.h"
@@ -52,7 +54,8 @@ MulticastTransport::find_or_create_datalink(
   if (it != this->links_.end()) return it->second;  // found existing
 
   // At this point we can assume that we are creating a new DataLink
-  // to a pair of DomainParticipants identified by their participantIds.
+  // between a logical pair of DomainParticipants (peers) identified
+  // by their participantIds.
   long local_peer = RepoIdConverter(local_id).participantId();
 
   MulticastDataLink* link;
@@ -75,19 +78,24 @@ MulticastTransport::find_or_create_datalink(
     group_address = this->config_i_->group_address_;
   }
 
-  if (!link->open(group_address, active)) {
+  if (!link->join(group_address, active)) {
     link->_remove_ref();
+
+    ACE_TCHAR group_address_s[64];
+    group_address.addr_to_string(group_address_s, sizeof (group_address_s));
+
     ACE_ERROR_RETURN((LM_ERROR,
 		      ACE_TEXT("(%P|%t) ERROR: ")
 		      ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
-		      ACE_TEXT("unable to open with remote peer: %d\n"),
-		      remote_peer), 0);
+		      ACE_TEXT("failed to join multicast group: %C\n"),
+		      group_address_s), 0);
   }
 
   std::pair<MulticastDataLinkMap::iterator, bool> pair =
     this->links_.insert(MulticastDataLinkMap::value_type(remote_peer, link));
   if (!pair.second) {
     link->_remove_ref();
+
     ACE_ERROR_RETURN((LM_ERROR,
 		      ACE_TEXT("(%P|%t) ERROR: ")
 		      ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
@@ -122,7 +130,7 @@ MulticastTransport::shutdown_i()
   for (MulticastDataLinkMap::iterator it = this->links_.begin();
        it != this->links_.end(); ++it) {
     MulticastDataLink* link = it->second;
-    link->close();
+    link->leave();
     link->_remove_ref();
   }
   this->links_.clear();
@@ -158,7 +166,7 @@ MulticastTransport::get_connection_info(const TransportInterfaceInfo& info) cons
     ACE_ERROR((LM_WARNING,
                ACE_TEXT("(%P|%t) WARNING: ")
                ACE_TEXT("MulticastTransport::get_connection_info: ")
-               ACE_TEXT("transport interface does not match ours: 0x%x\n"),
+               ACE_TEXT("transport interface ID does not match ours: 0x%x\n"),
                info.transport_id));
   }
 
