@@ -1,3 +1,13 @@
+Mon Nov 16 19:21:13 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor:
+
+          Moved OpenDDS monitor application to this location.
+
+        * dds/tools/odds_monitor:
+
+          Removed OpenDDS monitor application from this location.
+
 Fri Nov 13 00:45:07 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/tools/odds_monitor/MonitorDataModel.h:
