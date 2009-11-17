@@ -24,13 +24,6 @@ MulticastSendUnreliable::stop_i()
 {
 }
 
-ACE_HANDLE
-MulticastSendUnreliable::get_handle()
-{
-  ACE_SOCK_Dgram_Mcast& socket = this->link_->get_socket();
-  return socket.get_handle();
-}
-
 ssize_t
 MulticastSendUnreliable::send_bytes_i(const iovec iov[], int n)
 {

@@ -149,3 +149,9 @@ OpenDDS::DCPS::TransportSendStrategy::send_bytes(const iovec iov[],
 {
   return send_bytes_i(iov, n);
 }
+
+ACE_INLINE ACE_HANDLE
+OpenDDS::DCPS::TransportSendStrategy::get_handle()
+{
+  return ACE_INVALID_HANDLE;
+}
