@@ -39,14 +39,14 @@ MulticastDataLink::MulticastDataLink(MulticastTransport* impl,
     // will be autonegotiated; unfortunately the ETF currently
     // multiplexes reliable and non-reliable samples over the same
     // DataLink.
-    if (this->config_->reliable_) {
-      ACE_NEW_NORETURN(this->send_strategy_, MulticastSendReliable(this));
-      ACE_NEW_NORETURN(this->recv_strategy_, MulticastReceiveReliable(this));
-
-    } else {  // unreliable
+    //if (this->config_->reliable_) {
+    //  ACE_NEW_NORETURN(this->send_strategy_, MulticastSendReliable(this));
+    //  ACE_NEW_NORETURN(this->recv_strategy_, MulticastReceiveReliable(this));
+//
+  //  } else {  // unreliable
       ACE_NEW_NORETURN(this->send_strategy_, MulticastSendUnreliable(this));
       ACE_NEW_NORETURN(this->recv_strategy_, MulticastReceiveUnreliable(this));
-    }
+    //}
   }
 }
 

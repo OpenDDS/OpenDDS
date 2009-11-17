@@ -99,7 +99,7 @@ MulticastTransport::find_or_create_datalink(
     ACE_ERROR_RETURN((LM_ERROR,
 		      ACE_TEXT("(%P|%t) ERROR: ")
 		      ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
-		      ACE_TEXT("unable to reserve link to remote peer: %d\n"),
+		      ACE_TEXT("unable to reserve link for remote peer: %d\n"),
 		      remote_peer), 0);
   }
 
