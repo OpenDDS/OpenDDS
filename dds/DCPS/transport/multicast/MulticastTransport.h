@@ -7,20 +7,22 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifndef DCPS_MULTICASTTRANSPORT_H
+#define DCPS_MULTICASTTRANSPORT_H
+
+#include "Multicast_Export.h"
+
+#include "MulticastConfiguration.h"
+#include "MulticastConfiguration_rch.h"
+#include "MulticastDataLink.h"
+#include "MulticastDataLink_rch.h"
+
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 
 #include <map>
 
-#include "Multicast_Export.h"
-
-#ifndef DCPS_MULTICASTTRANSPORT_H
-#define DCPS_MULTICASTTRANSPORT_H
-
 namespace OpenDDS {
 namespace DCPS {
-
-class MulticastConfiguration;
-class MulticastDataLink;
 
 class OpenDDS_Multicast_Export MulticastTransport
   : public TransportImpl {
@@ -43,9 +45,9 @@ protected:
   virtual void release_datalink_i(DataLink* link, bool release_pending);
 
 private:
-  MulticastConfiguration* config_i_;
+  MulticastConfiguration_rch config_i_;
 
-  typedef std::map<long, MulticastDataLink*> MulticastDataLinkMap;
+  typedef std::map<long, MulticastDataLink_rch> MulticastDataLinkMap;
   MulticastDataLinkMap links_;
 
   ACE_INET_Addr get_connection_info(const TransportInterfaceInfo& info) const;

@@ -15,16 +15,10 @@ namespace DCPS {
 MulticastReceiveStrategy::MulticastReceiveStrategy(MulticastDataLink* link)
   : link_(link)
 {
-  if (this->link_ != 0) {
-    this->link_->_add_ref();
-  }
 }
 
 MulticastReceiveStrategy::~MulticastReceiveStrategy()
 {
-  if (this->link_ != 0) {
-    this->link_->_remove_ref();
-  }
 }
 
 } // namespace DCPS

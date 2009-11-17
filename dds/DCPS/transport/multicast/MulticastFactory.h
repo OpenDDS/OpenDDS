@@ -7,12 +7,12 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "dds/DCPS/transport/framework/TransportImplFactory.h"
+#ifndef DCPS_MULTICASTFACTORY_H
+#define DCPS_MULTICASTFACTORY_H
 
 #include "Multicast_Export.h"
 
-#ifndef DCPS_MULTICASTFACTORY_H
-#define DCPS_MULTICASTFACTORY_H
+#include "dds/DCPS/transport/framework/TransportImplFactory.h"
 
 namespace OpenDDS {
 namespace DCPS {

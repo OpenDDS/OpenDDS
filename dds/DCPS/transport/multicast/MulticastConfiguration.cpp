@@ -18,6 +18,8 @@ const bool DEFAULT_DEFAULT_TO_IPV6(false);
 const char* DEFAULT_IPV4_GROUP_ADDRESS("224.0.0.128");
 const char* DEFAULT_IPV6_GROUP_ADDRESS("FF01::80");
 
+const u_short DEFAULT_PORT_OFFSET(9000);
+
 const bool DEFAULT_RELIABLE(true);
 
 const long DEFAULT_HANDSHAKE_TIMEOUT(30000);
@@ -32,6 +34,7 @@ namespace DCPS {
 
 MulticastConfiguration::MulticastConfiguration()
   : default_to_ipv6_(DEFAULT_DEFAULT_TO_IPV6),
+    port_offset_(DEFAULT_PORT_OFFSET),
     reliable_(DEFAULT_RELIABLE),
     handshake_timeout_(DEFAULT_HANDSHAKE_TIMEOUT),
     nak_depth_(DEFAULT_NAK_DEPTH),
@@ -51,7 +54,7 @@ MulticastConfiguration::load(const TransportIdType& id,
   ACE_TString section_name = id_to_section_name(id);
   if (config.open_section(config.root_section(),
                           section_name.c_str(),
-                          0,
+                          0,  // create
                           transport_key) != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
@@ -71,6 +74,9 @@ MulticastConfiguration::load(const TransportIdType& id,
   } else {
     this->group_address_.set(group_address_s.c_str());  // user-defined
   }
+  
+  GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("port_offset"),
+                   this->port_offset_, u_short)
 
   GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("reliable"),
                    this->reliable_, bool)
@@ -91,10 +97,12 @@ void
 MulticastConfiguration::default_group_address(ACE_INET_Addr& group_address,
                                               const TransportIdType& id)
 {
+  u_short port_number(this->port_offset_ + id);
+
   if (this->default_to_ipv6_) {
-    group_address.set(u_short(id), DEFAULT_IPV6_GROUP_ADDRESS);
+    group_address.set(port_number, DEFAULT_IPV6_GROUP_ADDRESS);
   } else {
-    group_address.set(u_short(id), DEFAULT_IPV4_GROUP_ADDRESS);
+    group_address.set(port_number, DEFAULT_IPV4_GROUP_ADDRESS);
   }
 }
 

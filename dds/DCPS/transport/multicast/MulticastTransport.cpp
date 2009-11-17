@@ -8,10 +8,8 @@
  */
 
 #include "MulticastTransport.h"
-#include "MulticastConfiguration.h"
-#include "MulticastDataLink.h"
-#include "MulticastSendStrategy.h"
-#include "MulticastReceiveStrategy.h"
+#include "MulticastSendStrategy_rch.h"
+#include "MulticastReceiveStrategy_rch.h"
 
 #include "ace/CDR_Base.h"
 #include "ace/Log_Msg.h"
@@ -51,20 +49,18 @@ MulticastTransport::find_or_create_datalink(
     RepoIdConverter(remote_association->remote_id_).participantId();
 
   MulticastDataLinkMap::iterator it = this->links_.find(remote_peer);
-  if (it != this->links_.end()) return it->second;  // found existing
+  if (it != this->links_.end()) return it->second.in();  // found
 
   // At this point we can assume that we are creating a new DataLink
   // between a logical pair of DomainParticipants (peers) identified
   // by their participantIds.
   long local_peer = RepoIdConverter(local_id).participantId();
 
-  MulticastDataLink* link;
-  ACE_NEW_RETURN(link,
-                 MulticastDataLink(this,
-                                   priority,
-                                   local_peer,
-                                   remote_peer),
-                 0);
+  MulticastDataLink_rch link =
+    new MulticastDataLink(this, priority, local_peer, remote_peer);
+  if (link.is_nil()) {
+    return 0;
+  }
 
   ACE_INET_Addr group_address;
   if (active) {
@@ -79,45 +75,39 @@ MulticastTransport::find_or_create_datalink(
   }
 
   if (!link->join(group_address, active)) {
-    link->_remove_ref();
-
     ACE_TCHAR group_address_s[64];
     group_address.addr_to_string(group_address_s, sizeof (group_address_s));
-
     ACE_ERROR_RETURN((LM_ERROR,
 		      ACE_TEXT("(%P|%t) ERROR: ")
 		      ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
-		      ACE_TEXT("failed to join multicast group: %C\n"),
+		      ACE_TEXT("unable to join multicast group: %C\n"),
 		      group_address_s), 0);
   }
 
   std::pair<MulticastDataLinkMap::iterator, bool> pair =
     this->links_.insert(MulticastDataLinkMap::value_type(remote_peer, link));
   if (!pair.second) {
-    link->_remove_ref();
-
     ACE_ERROR_RETURN((LM_ERROR,
 		      ACE_TEXT("(%P|%t) ERROR: ")
 		      ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
-		      ACE_TEXT("unable to reserve DataLink for remote peer: %d\n"),
+		      ACE_TEXT("unable to insert DataLink to remote peer: %d\n"),
 		      remote_peer), 0);
   }
 
-  return link;
+  return link._retn();
 }
 
 int
 MulticastTransport::configure_i(TransportConfiguration* config)
 {
   this->config_i_ = dynamic_cast<MulticastConfiguration*>(config);
-  if (this->config_i_ == 0) {
+  if (this->config_i_.is_nil()) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastTransport::configure_i: ")
                       ACE_TEXT("invalid configuration!\n")),
                      -1);
   }
-  this->config_i_->_add_ref();
 
   return 0;
 }
@@ -125,17 +115,13 @@ MulticastTransport::configure_i(TransportConfiguration* config)
 void
 MulticastTransport::shutdown_i()
 {
-  // Close reserved datalinks and configuration; release
-  // any resources held.
+  // Shutdown reserved datalinks and release configuration:
   for (MulticastDataLinkMap::iterator it = this->links_.begin();
        it != this->links_.end(); ++it) {
-    MulticastDataLink* link = it->second;
-    link->transport_shutdown();
-    link->_remove_ref();
+    it->second->transport_shutdown();
   }
   this->links_.clear();
 
-  this->config_i_->_remove_ref();
   this->config_i_ = 0;
 }
 
@@ -150,8 +136,8 @@ MulticastTransport::connection_info_i(TransportInterfaceInfo& info) const
   size_t len = cdr.total_length();
   char *buffer = const_cast<char*>(cdr.buffer()); // safe
 
-  // Provide connection information for active endpoints; active
-  // endpoints will select the group address based on this value.
+  // Provide connection information for active peers; active
+  // peers will select the group address based on this value.
   info.transport_id = TRANSPORT_INTERFACE_ID;
   info.data = TransportInterfaceBLOB(len, len,
     reinterpret_cast<CORBA::Octet*>(buffer));
@@ -191,9 +177,8 @@ MulticastTransport::release_datalink_i(DataLink* link, bool /*release_pending*/)
        it != this->links_.end(); ++it) {
     // We are guaranteed to have exactly one matching DataLink
     // in the map; release any resources held and return.
-    if (it->second == link) {
+    if (it->second.in() == link) {
       this->links_.erase(it);
-      link->_remove_ref();
       return;
     }
   }

@@ -7,12 +7,12 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "dds/DCPS/transport/framework/TransportGenerator.h"
+#ifndef DCPS_MULTICASTGENERATOR_H
+#define DCPS_MULTICASTGENERATOR_H
 
 #include "Multicast_Export.h"
 
-#ifndef DCPS_MULTICASTGENERATOR_H
-#define DCPS_MULTICASTGENERATOR_H
+#include "dds/DCPS/transport/framework/TransportGenerator.h"
 
 namespace OpenDDS {
 namespace DCPS {

@@ -10,11 +10,11 @@
 #ifndef DCPS_MULTICASTLOADER_H
 #define DCPS_MULTICASTLOADER_H
 
+#include "Multicast_Export.h"
+
 #include "ace/Global_Macros.h"
 #include "ace/Service_Config.h"
 #include "ace/Service_Object.h"
-
-#include "Multicast_Export.h"
 
 namespace OpenDDS {
 namespace DCPS {

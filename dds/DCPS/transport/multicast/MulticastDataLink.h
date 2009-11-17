@@ -7,23 +7,24 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "MulticastTransport.h"
+#ifndef DCPS_MULTICASTDATALINK_H
+#define DCPS_MULTICASTDATALINK_H
+
+#include "Multicast_Export.h"
+
 #include "MulticastConfiguration.h"
+#include "MulticastConfiguration_rch.h"
+#include "MulticastSendStrategy_rch.h"
+#include "MulticastReceiveStrategy_rch.h"
 
 #include "ace/SOCK_Dgram_Mcast.h"
 
 #include "dds/DCPS/transport/framework/DataLink.h"
 
-#include "Multicast_Export.h"
-
-#ifndef DCPS_MULTICASTDATALINK_H
-#define DCPS_MULTICASTDATALINK_H
-
 namespace OpenDDS {
 namespace DCPS {
 
-class MulticastSendStrategy;
-class MulticastReceiveStrategy;
+class MulticastTransport;
 
 class OpenDDS_Multicast_Export MulticastDataLink
   : public DataLink {
@@ -32,11 +33,10 @@ public:
                     CORBA::Long priority,
                     long local_peer,
                     long remote_peer);
-  ~MulticastDataLink();
 
   bool join(const ACE_INET_Addr& group_address, bool active);
 
-  TransportConfiguration* get_configuration();
+  MulticastConfiguration* get_configuration();
 
   long get_local_peer() const;
   long get_remote_peer() const;
@@ -47,13 +47,13 @@ protected:
   virtual void stop_i();
 
 private:
-  MulticastConfiguration* config_;
+  MulticastConfiguration_rch config_;
 
   long local_peer_;
   long remote_peer_;
 
-  MulticastSendStrategy* send_strategy_;
-  MulticastReceiveStrategy* recv_strategy_;
+  MulticastSendStrategy_rch send_strategy_;
+  MulticastReceiveStrategy_rch recv_strategy_;
 
   ACE_INET_Addr group_address_;
   ACE_SOCK_Dgram_Mcast socket_;
