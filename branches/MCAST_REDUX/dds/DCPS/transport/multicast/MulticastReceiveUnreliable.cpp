@@ -37,7 +37,7 @@ MulticastReceiveUnreliable::deliver_sample(ReceivedDataSample& sample,
 int
 MulticastReceiveUnreliable::start_i()
 {
-  return 0; // do nothing
+  return 0;
 }
 
 void
