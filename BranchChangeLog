@@ -1,3 +1,9 @@
+Tue Nov 17 00:25:00 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+
+          Corrected default_group_address behavior.
+
 Tue Nov 17 00:07:44 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * MPC/config/dcps_multicast.mpb:

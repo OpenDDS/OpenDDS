@@ -92,13 +92,10 @@ MulticastConfiguration::default_group_address(ACE_INET_Addr& group_address,
                                               const TransportIdType& id)
 {
   if (this->default_to_ipv6_) {
-    group_address.set_address(DEFAULT_IPV6_GROUP_ADDRESS,
-                              sizeof (DEFAULT_IPV6_GROUP_ADDRESS));
+    group_address.set(u_short(id), DEFAULT_IPV6_GROUP_ADDRESS);
   } else {
-    group_address.set_address(DEFAULT_IPV4_GROUP_ADDRESS,
-                              sizeof (DEFAULT_IPV4_GROUP_ADDRESS));
+    group_address.set(u_short(id), DEFAULT_IPV4_GROUP_ADDRESS);
   }
-  group_address.set_port_number(u_short(id)); // truncate if needed
 }
 
 } // namespace DCPS
