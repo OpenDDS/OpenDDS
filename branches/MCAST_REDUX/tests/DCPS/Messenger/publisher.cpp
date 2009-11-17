@@ -48,6 +48,9 @@ parse_args(int argc, ACE_TCHAR *argv[])
       } else if (ACE_OS::strcmp(get_opts.opt_arg(), ACE_TEXT("reliable_mcast")) == 0) {
         transport_impl_id = 4;
 
+      } else if (ACE_OS::strcmp(get_opts.opt_arg(), ACE_TEXT("multicast")) == 0) {
+        transport_impl_id = 5;
+
       } else if (ACE_OS::strcmp(get_opts.opt_arg(), ACE_TEXT("default_tcp")) == 0) {
         transport_impl_id = OpenDDS::DCPS::DEFAULT_SIMPLE_TCP_ID;
 
