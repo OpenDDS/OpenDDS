@@ -7,11 +7,12 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "MulticastSendStrategy.h"
-#include "Multicast_Export.h"
-
 #ifndef DCPS_MULTICASTSENDUNRELIABLE_H
 #define DCPS_MULTICASTSENDUNRELIABLE_H
+
+#include "Multicast_Export.h"
+
+#include "MulticastSendStrategy.h"
 
 namespace OpenDDS {
 namespace DCPS {

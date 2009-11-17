@@ -13,7 +13,7 @@ namespace DCPS {
 ACE_INLINE MulticastConfiguration*
 MulticastTransport::get_configuration()
 {
-  return this->config_i_;
+  return this->config_i_.in();
 }
 
 } // namespace DCPS

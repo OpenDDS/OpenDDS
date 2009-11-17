@@ -7,14 +7,14 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "ace/INET_Addr.h"
-
-#include "dds/DCPS/transport/framework/TransportConfiguration.h"
+#ifndef DCPS_MULTICASTCONFIGURATION_H
+#define DCPS_MULTICASTCONFIGURATION_H
 
 #include "Multicast_Export.h"
 
-#ifndef DCPS_MULTICASTCONFIGURATION_H
-#define DCPS_MULTICASTCONFIGURATION_H
+#include "ace/INET_Addr.h"
+
+#include "dds/DCPS/transport/framework/TransportConfiguration.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -34,14 +34,19 @@ public:
 
   /// The multicast group address from which to send and/or
   /// receive data. The default group addresses are:
-  ///   224.0.0.128:<transportId> (IPv4), and
-  ///   [FF01::80]:<transportId> (IPv6)
+  ///   224.0.0.128:<port_offset + transportId> (IPv4), and
+  ///   [FF01::80]:<port_offset + transportId> (IPv6)
   ACE_INET_Addr group_address_;
+
+  /// The offset used to determine default port numbers; this
+  /// value will be added to the transportId to determine the
+  /// actual port number. The default is: 9000.
+  u_short port_offset_;
 
   /// Enable/disable reliable communication. This option
   /// will eventually be deprecated once the ETF is able
   /// to properly segregate reliable/unreliable samples on
-  /// a per datalink basis. The default is true.
+  /// a per-DataLink basis. The default is true.
   bool reliable_;
 
   /// The maximum number of milliseconds to wait while

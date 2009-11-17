@@ -8,6 +8,8 @@
  */
 
 #include "MulticastSendStrategy.h"
+#include "MulticastDataLink.h"
+#include "MulticastConfiguration.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -18,16 +20,10 @@ MulticastSendStrategy::MulticastSendStrategy(MulticastDataLink* link)
                           link->transport_priority()),
     link_(link)
 {
-  if (this->link_ != 0) {
-    this->link_->_add_ref();
-  }
 }
 
 MulticastSendStrategy::~MulticastSendStrategy()
 {
-  if (this->link_ != 0) {
-    this->link_->_remove_ref();
-  }
 }
 
 } // namespace DCPS

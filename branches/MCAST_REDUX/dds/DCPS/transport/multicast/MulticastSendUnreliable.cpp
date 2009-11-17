@@ -9,6 +9,8 @@
 
 #include "MulticastSendUnreliable.h"
 
+#include "ace/SOCK_Dgram_Mcast.h"
+
 namespace OpenDDS {
 namespace DCPS {
 

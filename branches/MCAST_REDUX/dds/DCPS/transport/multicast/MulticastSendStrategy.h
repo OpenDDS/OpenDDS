@@ -7,14 +7,15 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "MulticastDataLink.h"
-
-#include "dds/DCPS/transport/framework/TransportSendStrategy.h"
+#ifndef DCPS_MULTICASTSENDSTRATEGY_H
+#define DCPS_MULTICASTSENDSTRATEGY_H
 
 #include "Multicast_Export.h"
 
-#ifndef DCPS_MULTICASTSENDSTRATEGY_H
-#define DCPS_MULTICASTSENDSTRATEGY_H
+#include "MulticastDataLink.h"
+#include "MulticastDataLink_rch.h"
+
+#include "dds/DCPS/transport/framework/TransportSendStrategy.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -26,7 +27,7 @@ public:
   virtual ~MulticastSendStrategy();
 
 protected:
-  MulticastDataLink* link_;
+  MulticastDataLink_rch link_;
 };
 
 } // namespace DCPS
