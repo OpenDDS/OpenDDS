@@ -1,3 +1,15 @@
+Tue Nov 17 03:43:56 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/Messenger/Messenger.mpc:
+        * tests/DCPS/Messenger/multicast.conf:
+        * tests/DCPS/Messenger/pub_multicast.ini:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/run_test.pl:
+        * tests/DCPS/Messenger/sub_multicast.ini:
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          Added new multicast variant to Messenger tests.
+
 Tue Nov 17 00:25:00 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
