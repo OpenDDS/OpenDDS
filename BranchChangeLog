@@ -1,3 +1,14 @@
+Tue Nov 17 18:55:17 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/multicast/MulticastSendUnreliable.h:
+        * dds/DCPS/transport/multicast/MulticastSendUnreliable.cpp:
+
+          Refactored TransportSendStrategy to provide a default get_handle
+          implementation which returns ACE_INVALID_HANDLE; only subclasses
+          which make use of ACE acceptors will need to override this.
+
 Tue Nov 17 16:38:30 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastConfiguration.h:
