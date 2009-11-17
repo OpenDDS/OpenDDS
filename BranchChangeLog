@@ -1,3 +1,10 @@
+Tue Nov 17 00:07:44 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * MPC/config/dcps_multicast.mpb:
+        * dds/DCPS/transport/multicast/multicast.conf:
+
+          Added MPC project and multicast service configuration.
+
 Mon Nov 16 23:10:59 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastDataLink.h:
