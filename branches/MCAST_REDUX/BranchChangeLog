@@ -1,3 +1,11 @@
+Wed Nov 18 23:57:04 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastLoader.cpp:
+        * tests/DCPS/Messenger/pub_multicast.ini:
+        * tests/DCPS/Messenger/sub_multicast.ini:
+
+          Renamed transport_type name to all lower case.
+
 Wed Nov 18 23:34:12 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastReceiveStrategy.h:
