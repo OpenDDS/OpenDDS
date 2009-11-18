@@ -8,10 +8,8 @@
  */
 
 #include "MulticastTransport.h"
-#include "MulticastSendReliable.h"
-#include "MulticastSendUnreliable.h"
-#include "MulticastReceiveReliable.h"
-#include "MulticastReceiveUnreliable.h"
+#include "MulticastSendStrategy.h"
+#include "MulticastReceiveStrategy.h"
 
 #include "ace/CDR_Base.h"
 #include "ace/Log_Msg.h"
@@ -66,18 +64,9 @@ MulticastTransport::find_or_create_datalink(
   // Configure link with our configuration and reactor task:
   link->configure(this->config_i_.in(), reactor_task());
 
-  // This transport supports two modes of operation: reliable and
-  // unreliable. Eventually the selection of this mode will be
-  // autonegotiated; unfortunately the ETF currently multiplexes
-  // reliable and best-effort samples over the same DataLink.
-  if (this->config_i_->reliable_) {
-    link->send_strategy(new MulticastSendReliable(link.in()));
-    link->receive_strategy(new MulticastReceiveReliable(link.in()));
-
-  } else {  // best-effort
-    link->send_strategy(new MulticastSendUnreliable(link.in()));
-    link->receive_strategy(new MulticastReceiveUnreliable(link.in()));
-  }
+  // Assign blessed send/receive strategies:
+  link->send_strategy(new MulticastSendStrategy(link.in()));
+  link->receive_strategy(new MulticastReceiveStrategy(link.in()));
 
   ACE_INET_Addr group_address;
   if (active) {

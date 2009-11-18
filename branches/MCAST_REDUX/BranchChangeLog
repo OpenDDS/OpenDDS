@@ -1,3 +1,26 @@
+Wed Nov 18 23:34:12 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/multicast.mpc:
+
+          Refactored strategy support.
+
+        * dds/DCPS/transport/multicast/Multicast.mpc:
+        * dds/DCPS/transport/multicast/MulticastReceiveReliable.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveReliable.cpp:
+        * dds/DCPS/transport/multicast/MulticastReceiveUnreliable.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveUnreliable.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendReliable.h:
+        * dds/DCPS/transport/multicast/MulticastSendReliable.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendUnreliable.h:
+        * dds/DCPS/transport/multicast/MulticastSendUnreliable.cpp:
+
+          Removed these files.
+
 Wed Nov 18 22:55:09 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastConfiguration.h:

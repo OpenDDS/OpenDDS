@@ -27,13 +27,22 @@ class OpenDDS_Multicast_Export MulticastReceiveStrategy
     public ACE_Event_Handler {
 public:
   explicit MulticastReceiveStrategy(MulticastDataLink* link);
-  virtual ~MulticastReceiveStrategy();
 
   virtual ACE_HANDLE get_handle() const;
-
   virtual int handle_input(ACE_HANDLE fd);
 
 protected:
+  virtual ssize_t receive_bytes(iovec iov[],
+                                int n,
+                                ACE_INET_Addr& remote_address);
+
+  virtual void deliver_sample(ReceivedDataSample& sample,
+                              const ACE_INET_Addr& remote_address);
+
+  virtual int start_i();
+  virtual void stop_i();
+
+private:
   MulticastDataLink_rch link_;
 };
 
