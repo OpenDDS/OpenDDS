@@ -1,3 +1,22 @@
+Wed Nov 18 01:33:23 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Honor the pending timeout value.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          remove_sample()
+          remove_all_control_msgs()
+            - Refactored to call the specific virtual method and delegate
+              processing to the do_remove_sample() method.
+          remove_sample_i()
+          remove_all_control_msgs_i()
+            - Default nil implementations.
+          do_remove_sample()
+            - perform framework removal processing.
+
 Tue Nov 17 18:55:17 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.h:
