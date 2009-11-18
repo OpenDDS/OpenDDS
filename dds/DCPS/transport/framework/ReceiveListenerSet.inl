@@ -60,9 +60,13 @@ OpenDDS::DCPS::ReceiveListenerSet::data_received(const ReceivedDataSample& sampl
 
   char* ptr = sample.sample_->rd_ptr();
 
+  bool release_sample(true);
   for (MapType::iterator itr = map_.begin();
        itr != map_.end();
        ++itr) {
+    
+    if (itr->second == 0) continue; // invalid listener
+
     // reset read pointer because demarshal (in data_received()) moves it.
     sample.sample_->rd_ptr(ptr);
     itr->second->data_received(sample);
