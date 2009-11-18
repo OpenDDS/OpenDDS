@@ -20,7 +20,7 @@ const u_short DEFAULT_PORT_OFFSET(49400);
 
 const bool DEFAULT_RELIABLE(true);
 
-const long DEFAULT_HANDSHAKE_TIMEOUT(30000);
+const long DEFAULT_SYN_TIMEOUT(30000);
 
 const size_t DEFAULT_NAK_DEPTH(32);
 const long DEFAULT_NAK_TIMEOUT(30000);
@@ -34,7 +34,7 @@ MulticastConfiguration::MulticastConfiguration()
   : default_to_ipv6_(DEFAULT_DEFAULT_TO_IPV6),
     port_offset_(DEFAULT_PORT_OFFSET),
     reliable_(DEFAULT_RELIABLE),
-    handshake_timeout_(DEFAULT_HANDSHAKE_TIMEOUT),
+    syn_timeout_(DEFAULT_SYN_TIMEOUT),
     nak_depth_(DEFAULT_NAK_DEPTH),
     nak_timeout_(DEFAULT_NAK_TIMEOUT)
 {
@@ -72,15 +72,15 @@ MulticastConfiguration::load(const TransportIdType& id,
   } else {
     this->group_address_.set(group_address_s.c_str());  // user-defined
   }
-  
+
   GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("port_offset"),
                    this->port_offset_, u_short)
 
   GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("reliable"),
                    this->reliable_, bool)
 
-  GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("handshake_timeout"),
-                   this->handshake_timeout_, long)
+  GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("syn_timeout"),
+                   this->syn_timeout_, long)
 
   GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("nak_depth"),
                    this->nak_depth_, size_t)

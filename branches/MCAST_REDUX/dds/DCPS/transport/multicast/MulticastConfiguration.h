@@ -43,7 +43,7 @@ public:
   ///   [FF01::80]:<port>  [IANA 2009-08-28]
   ACE_INET_Addr group_address_;
 
-  /// The offset used to determine default port numbers; 
+  /// The offset used to determine default port numbers;
   /// this value will be added to the transportId. The
   /// default is: 49400 [IANA 2009-11-16].
   u_short port_offset_;
@@ -57,7 +57,7 @@ public:
   /// The maximum number of milliseconds to wait while
   /// handshaking with remote peers (reliable only).
   /// The default is 30000 (30 seconds).
-  long handshake_timeout_;
+  long syn_timeout_;
 
   /// The number of DCPS datagrams to retain in order to
   /// service incoming NAK requests (reliable only). The

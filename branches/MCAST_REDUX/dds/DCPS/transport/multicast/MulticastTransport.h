@@ -40,6 +40,9 @@ protected:
   virtual int connection_info_i(TransportInterfaceInfo& info) const;
   ACE_INET_Addr connection_info_i(const TransportInterfaceInfo& info) const;
 
+  virtual bool acked(RepoId local_id, RepoId remote_id);
+  virtual void remove_ack(RepoId local_id, RepoId remote_id);
+
   virtual void release_datalink_i(DataLink* link, bool release_pending);
 
 private:
