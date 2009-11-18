@@ -22,8 +22,16 @@ MulticastSendStrategy::MulticastSendStrategy(MulticastDataLink* link)
 {
 }
 
-MulticastSendStrategy::~MulticastSendStrategy()
+void
+MulticastSendStrategy::stop_i()
 {
+}
+
+ssize_t
+MulticastSendStrategy::send_bytes_i(const iovec iov[], int n)
+{
+  ACE_SOCK_Dgram_Mcast& socket = this->link_->socket();
+  return socket.send(iov, n);
 }
 
 } // namespace DCPS
