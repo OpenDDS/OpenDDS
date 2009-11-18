@@ -24,7 +24,7 @@ MulticastLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
   TransportGenerator *generator;
   ACE_NEW_RETURN(generator, MulticastGenerator, -1);
 
-  TheTransportFactory->register_generator(ACE_TEXT("Multicast"),
+  TheTransportFactory->register_generator(ACE_TEXT("multicast"),
                                           generator);
   initialized = true;
 
