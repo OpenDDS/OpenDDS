@@ -34,28 +34,32 @@ public:
                     long local_peer,
                     long remote_peer);
 
-  bool join(const ACE_INET_Addr& group_address, bool active);
+  MulticastConfiguration* config();
 
-  MulticastConfiguration* get_configuration();
+  long local_peer() const;
+  long remote_peer() const;
 
-  long get_local_peer() const;
-  long get_remote_peer() const;
+  ACE_SOCK_Dgram_Mcast& socket();
+  
+  void send_strategy(MulticastSendStrategy* send_strategy);
+  void receive_strategy(MulticastReceiveStrategy* recv_strategy);
+  
+  bool join(const ACE_INET_Addr& group_address);
 
-  ACE_SOCK_Dgram_Mcast& get_socket();
+  bool handshake();
 
 protected:
   virtual void stop_i();
 
 private:
   MulticastConfiguration_rch config_;
+  
+  MulticastSendStrategy_rch send_strategy_;
+  MulticastReceiveStrategy_rch recv_strategy_;
 
   long local_peer_;
   long remote_peer_;
 
-  MulticastSendStrategy_rch send_strategy_;
-  MulticastReceiveStrategy_rch recv_strategy_;
-
-  ACE_INET_Addr group_address_;
   ACE_SOCK_Dgram_Mcast socket_;
 };
 

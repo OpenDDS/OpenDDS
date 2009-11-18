@@ -27,7 +27,7 @@ MulticastSendUnreliable::stop_i()
 ssize_t
 MulticastSendUnreliable::send_bytes_i(const iovec iov[], int n)
 {
-  ACE_SOCK_Dgram_Mcast& socket = this->link_->get_socket();
+  ACE_SOCK_Dgram_Mcast& socket = this->link_->socket();
   return socket.send(iov, n);
 }
 

@@ -1,3 +1,27 @@
+Wed Nov 18 01:52:52 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportDefs.h:
+
+          Moved DEFAULT_MULTICAST_ID constant to MulticastConfiguration.h
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.inl:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastGenerator.cpp:
+        * dds/DCPS/transport/multicast/MulticastReceiveUnreliable.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendReliable.h:
+        * dds/DCPS/transport/multicast/MulticastSendReliable.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendUnreliable.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.inl:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Major refactorings; adjusted default port assignments based on
+          current IANA documents.
+
 Wed Nov 18 01:33:23 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/WriteDataContainer.cpp:
