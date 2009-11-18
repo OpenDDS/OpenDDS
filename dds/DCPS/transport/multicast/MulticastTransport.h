@@ -26,9 +26,6 @@ namespace DCPS {
 
 class OpenDDS_Multicast_Export MulticastTransport
   : public TransportImpl {
-public:
-  MulticastConfiguration* config();
-
 protected:
   virtual DataLink* find_or_create_datalink(
     RepoId local_id,
@@ -54,9 +51,5 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
-
-#ifdef __ACE_INLINE__
-# include "MulticastTransport.inl"
-#endif  /* __ACE_INLINE__ */
 
 #endif  /* DCPS_MULTICASTTRANSPORT_H */

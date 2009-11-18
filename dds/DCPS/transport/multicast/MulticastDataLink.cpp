@@ -27,14 +27,13 @@ MulticastDataLink::MulticastDataLink(MulticastTransport* impl,
                                      long local_peer,
                                      long remote_peer)
   : DataLink(impl, priority),
-    config_(impl->config()),
     local_peer_(local_peer),
     remote_peer_(remote_peer)
 {
 }
 
 bool
-MulticastDataLink::join(const ACE_INET_Addr& group_address)
+MulticastDataLink::join(const ACE_INET_Addr& group_address, bool active)
 {
   int error;
 
@@ -59,13 +58,13 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address)
                      false);
   }
 
-  return true;
-}
+  // Reliable links handshake before returning control; this ensures
+  // the remote (passive) peer is ready to receive data reliably:
+  if (active && this->config_->reliable_) {
+    // TODO implement
+  }
 
-bool
-MulticastDataLink::handshake()
-{
-  return false; // TODO implement
+  return true;
 }
 
 void

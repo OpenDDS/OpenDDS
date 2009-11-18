@@ -20,6 +20,8 @@
 #include "ace/SOCK_Dgram_Mcast.h"
 
 #include "dds/DCPS/transport/framework/DataLink.h"
+#include "dds/DCPS/transport/framework/TransportReactorTask.h"
+#include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -33,32 +35,38 @@ public:
                     CORBA::Long priority,
                     long local_peer,
                     long remote_peer);
-
+  
+  void config(MulticastConfiguration* config);
   MulticastConfiguration* config();
-
-  long local_peer() const;
-  long remote_peer() const;
-
-  ACE_SOCK_Dgram_Mcast& socket();
+  
+  void reactor_task(TransportReactorTask* reactor_task);
+  TransportReactorTask* reactor_task();
+  
+  ACE_Reactor* get_reactor();
   
   void send_strategy(MulticastSendStrategy* send_strategy);
   void receive_strategy(MulticastReceiveStrategy* recv_strategy);
   
-  bool join(const ACE_INET_Addr& group_address);
-
-  bool handshake();
+  long local_peer() const;
+  long remote_peer() const;
+  
+  ACE_SOCK_Dgram_Mcast& socket();
+  
+  bool join(const ACE_INET_Addr& group_address, bool active);
 
 protected:
   virtual void stop_i();
 
 private:
+  long local_peer_;
+  long remote_peer_;
+
   MulticastConfiguration_rch config_;
+
+  TransportReactorTask_rch reactor_task_;
   
   MulticastSendStrategy_rch send_strategy_;
   MulticastReceiveStrategy_rch recv_strategy_;
-
-  long local_peer_;
-  long remote_peer_;
 
   ACE_SOCK_Dgram_Mcast socket_;
 };

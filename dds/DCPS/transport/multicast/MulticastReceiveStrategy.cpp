@@ -21,5 +21,18 @@ MulticastReceiveStrategy::~MulticastReceiveStrategy()
 {
 }
 
+ACE_HANDLE
+MulticastReceiveStrategy::get_handle() const
+{
+  ACE_SOCK_Dgram_Mcast& socket = this->link_->socket();
+  return socket.get_handle();
+}
+
+int
+MulticastReceiveStrategy::handle_input(ACE_HANDLE /*fd*/)
+{
+  return TransportReceiveStrategy::handle_input();
+}
+
 } // namespace DCPS
 } // namespace OpenDDS

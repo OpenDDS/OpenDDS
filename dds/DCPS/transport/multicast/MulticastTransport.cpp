@@ -19,10 +19,6 @@
 #include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 
-#ifndef __ACE_INLINE__
-# include "MulticastTransport.inl"
-#endif  /* __ACE_INLINE__ */
-
 namespace {
 
 const CORBA::Long TRANSPORT_INTERFACE_ID(0x4d435354); // MCST
@@ -66,6 +62,10 @@ MulticastTransport::find_or_create_datalink(
   if (link.is_nil()) {
     return 0; // bad link
   }
+
+  // Set transport configuration and reactor task:
+  link->config(this->config_i_.in());
+  link->reactor_task(reactor_task());
   
   // This transport supports two modes of operation: reliable and
   // unreliable. Eventually the selection of this mode will be
@@ -92,7 +92,7 @@ MulticastTransport::find_or_create_datalink(
     group_address = this->config_i_->group_address_;
   }
 
-  if (!link->join(group_address)) {
+  if (!link->join(group_address, active)) {
     ACE_TCHAR group_address_s[64];
     group_address.addr_to_string(group_address_s, sizeof (group_address_s));
     ACE_ERROR_RETURN((LM_ERROR,
@@ -100,18 +100,6 @@ MulticastTransport::find_or_create_datalink(
 		      ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
 		      ACE_TEXT("unable to join multicast group: %C\n"),
 		      group_address_s), 0);
-  }
-  
-  // Reliable links handshake before returning control; this ensures
-  // the remote (passive) peer is ready to receive data reliably:
-  if (active && this->config_i_->reliable_) {
-    if (!link->handshake()) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
-                        ACE_TEXT("unable to handshake with remote peer: %d\n"),
-                        remote_peer), 0);
-    }
   }
 
   std::pair<MulticastDataLinkMap::iterator, bool> pair =
