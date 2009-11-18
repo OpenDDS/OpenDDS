@@ -1,3 +1,10 @@
+Wed Nov 18 05:03:36 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
+
+          Fixed issue which caused ReceiveListenerSet to SEGV when data
+          samples are delivered to invalid (NULL) listeners.
+
 Wed Nov 18 04:17:01 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastDataLink.h:
