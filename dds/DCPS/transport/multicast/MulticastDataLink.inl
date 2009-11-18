@@ -11,34 +11,11 @@ namespace OpenDDS {
 namespace DCPS {
 
 ACE_INLINE void
-MulticastDataLink::config(MulticastConfiguration* config)
+MulticastDataLink::configure(MulticastConfiguration* config,
+                             TransportReactorTask* reactor_task)
 {
   this->config_ = config;
-}
-
-ACE_INLINE MulticastConfiguration*
-MulticastDataLink::config()
-{
-  return this->config_.in();
-}
-
-ACE_INLINE void
-MulticastDataLink::reactor_task(TransportReactorTask* reactor_task)
-{
   this->reactor_task_ = reactor_task;
-}
-
-ACE_INLINE TransportReactorTask*
-MulticastDataLink::reactor_task()
-{
-  return this->reactor_task_.in();
-}
-
-ACE_INLINE ACE_Reactor*
-MulticastDataLink::get_reactor()
-{
-  if (this->reactor_task_.is_nil()) return 0;
-  return this->reactor_task_->get_reactor();
 }
 
 ACE_INLINE void
@@ -63,6 +40,25 @@ ACE_INLINE long
 MulticastDataLink::remote_peer() const
 {
   return this->remote_peer_;
+}
+
+ACE_INLINE MulticastConfiguration*
+MulticastDataLink::config()
+{
+  return this->config_.in();
+}
+
+ACE_INLINE TransportReactorTask*
+MulticastDataLink::reactor_task()
+{
+  return this->reactor_task_.in();
+}
+
+ACE_INLINE ACE_Reactor*
+MulticastDataLink::get_reactor()
+{
+  if (this->reactor_task_.is_nil()) return 0;
+  return this->reactor_task_->get_reactor();
 }
 
 ACE_INLINE ACE_SOCK_Dgram_Mcast&

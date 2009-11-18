@@ -48,20 +48,13 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address, bool active)
 
   if ((error = start(this->send_strategy_.in(),
                      this->recv_strategy_.in())) != 0) {
-    stop_i();
-
+    this->socket_.close();
     ACE_ERROR_RETURN((LM_ERROR,
 		      ACE_TEXT("(%P|%t) ERROR: ")
 		      ACE_TEXT("MulticastDataLink::join: ")
 		      ACE_TEXT("start failed: %d\n"),
                       error),
                      false);
-  }
-
-  // Reliable links handshake before returning control; this ensures
-  // the remote (passive) peer is ready to receive data reliably:
-  if (active && this->config_->reliable_) {
-    // TODO implement
   }
 
   return true;

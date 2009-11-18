@@ -63,10 +63,9 @@ MulticastTransport::find_or_create_datalink(
     return 0; // bad link
   }
 
-  // Set transport configuration and reactor task:
-  link->config(this->config_i_.in());
-  link->reactor_task(reactor_task());
-  
+  // Configure link with our configuration and reactor task:
+  link->configure(this->config_i_.in(), reactor_task());
+
   // This transport supports two modes of operation: reliable and
   // unreliable. Eventually the selection of this mode will be
   // autonegotiated; unfortunately the ETF currently multiplexes
@@ -74,7 +73,7 @@ MulticastTransport::find_or_create_datalink(
   if (this->config_i_->reliable_) {
     link->send_strategy(new MulticastSendReliable(link.in()));
     link->receive_strategy(new MulticastReceiveReliable(link.in()));
-  
+
   } else {  // best-effort
     link->send_strategy(new MulticastSendUnreliable(link.in()));
     link->receive_strategy(new MulticastReceiveUnreliable(link.in()));
@@ -141,6 +140,7 @@ MulticastTransport::shutdown_i()
   }
   this->links_.clear();
 
+  this->config_i_->_remove_ref(); // release ownership
   this->config_i_ = 0;
 }
 
@@ -187,6 +187,17 @@ MulticastTransport::connection_info_i(const TransportInterfaceInfo& info) const
   network_address.to_addr(group_address);
 
   return group_address;
+}
+
+bool
+MulticastTransport::acked(RepoId /*local_id*/, RepoId /*remote_id*/)
+{
+  return true;
+}
+
+void
+MulticastTransport::remove_ack(RepoId /*local_id*/, RepoId /*remote_id*/)
+{
 }
 
 void

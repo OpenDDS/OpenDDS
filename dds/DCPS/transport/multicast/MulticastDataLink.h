@@ -35,23 +35,25 @@ public:
                     CORBA::Long priority,
                     long local_peer,
                     long remote_peer);
-  
-  void config(MulticastConfiguration* config);
-  MulticastConfiguration* config();
-  
-  void reactor_task(TransportReactorTask* reactor_task);
-  TransportReactorTask* reactor_task();
-  
-  ACE_Reactor* get_reactor();
-  
+
+  void configure(MulticastConfiguration* config,
+                 TransportReactorTask* reactor_task);
+
   void send_strategy(MulticastSendStrategy* send_strategy);
+
   void receive_strategy(MulticastReceiveStrategy* recv_strategy);
-  
+
   long local_peer() const;
   long remote_peer() const;
-  
+
+  MulticastConfiguration* config();
+
+  TransportReactorTask* reactor_task();
+
+  ACE_Reactor* get_reactor();
+
   ACE_SOCK_Dgram_Mcast& socket();
-  
+
   bool join(const ACE_INET_Addr& group_address, bool active);
 
 protected:
@@ -64,7 +66,7 @@ private:
   MulticastConfiguration_rch config_;
 
   TransportReactorTask_rch reactor_task_;
-  
+
   MulticastSendStrategy_rch send_strategy_;
   MulticastReceiveStrategy_rch recv_strategy_;
 
