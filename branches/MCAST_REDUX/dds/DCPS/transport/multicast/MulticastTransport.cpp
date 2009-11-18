@@ -8,8 +8,10 @@
  */
 
 #include "MulticastTransport.h"
-#include "MulticastSendStrategy_rch.h"
-#include "MulticastReceiveStrategy_rch.h"
+#include "MulticastSendReliable.h"
+#include "MulticastSendUnreliable.h"
+#include "MulticastReceiveReliable.h"
+#include "MulticastReceiveUnreliable.h"
 
 #include "ace/CDR_Base.h"
 #include "ace/Log_Msg.h"
@@ -37,14 +39,14 @@ MulticastTransport::find_or_create_datalink(
   CORBA::Long priority,
   bool active)
 {
-  // N.B. We form reservations between DomainParticipants; this is
-  // is a significant departure from traditional reservations formed
+  // We form reservations between DomainParticipants; this is a
+  // significant departure from traditional reservations formed
   // between individual subscriptions and publications. Currently, a
   // TransportImpl instance may only be attached to entities within
   // the same DomainParticipant (which is in turn tied to a specific
   // domainId). Given this, we may assume that the local_id always
   // references the same participantId; all we need to associate a
-  // DataLink to is the remote participantId.
+  // DataLink to is the remote participantId:
   long remote_peer =
     RepoIdConverter(remote_association->remote_id_).participantId();
 
@@ -53,20 +55,36 @@ MulticastTransport::find_or_create_datalink(
 
   // At this point we can assume that we are creating a new DataLink
   // between a logical pair of DomainParticipants (peers) identified
-  // by their participantIds.
+  // by their participantIds:
   long local_peer = RepoIdConverter(local_id).participantId();
 
   MulticastDataLink_rch link =
-    new MulticastDataLink(this, priority, local_peer, remote_peer);
+    new MulticastDataLink(this,
+                          priority,
+                          local_peer,
+                          remote_peer);
   if (link.is_nil()) {
-    return 0;
+    return 0; // bad link
+  }
+  
+  // This transport supports two modes of operation: reliable and
+  // unreliable. Eventually the selection of this mode will be
+  // autonegotiated; unfortunately the ETF currently multiplexes
+  // reliable and best-effort samples over the same DataLink.
+  if (this->config_i_->reliable_) {
+    link->send_strategy(new MulticastSendReliable(link.in()));
+    link->receive_strategy(new MulticastReceiveReliable(link.in()));
+  
+  } else {  // best-effort
+    link->send_strategy(new MulticastSendUnreliable(link.in()));
+    link->receive_strategy(new MulticastReceiveUnreliable(link.in()));
   }
 
   ACE_INET_Addr group_address;
   if (active) {
     // Active peers obtain the group address via the
     // TransportInterfaceBLOB in the TranpsortInterfaceInfo:
-    group_address = get_connection_info(remote_association->remote_data_);
+    group_address = connection_info_i(remote_association->remote_data_);
 
   } else {
     // Passive peers obtain the group address via the
@@ -74,7 +92,7 @@ MulticastTransport::find_or_create_datalink(
     group_address = this->config_i_->group_address_;
   }
 
-  if (!link->join(group_address, active)) {
+  if (!link->join(group_address)) {
     ACE_TCHAR group_address_s[64];
     group_address.addr_to_string(group_address_s, sizeof (group_address_s));
     ACE_ERROR_RETURN((LM_ERROR,
@@ -83,6 +101,18 @@ MulticastTransport::find_or_create_datalink(
 		      ACE_TEXT("unable to join multicast group: %C\n"),
 		      group_address_s), 0);
   }
+  
+  // Reliable links handshake before returning control; this ensures
+  // the remote (passive) peer is ready to receive data reliably:
+  if (active && this->config_i_->reliable_) {
+    if (!link->handshake()) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
+                        ACE_TEXT("unable to handshake with remote peer: %d\n"),
+                        remote_peer), 0);
+    }
+  }
 
   std::pair<MulticastDataLinkMap::iterator, bool> pair =
     this->links_.insert(MulticastDataLinkMap::value_type(remote_peer, link));
@@ -90,7 +120,7 @@ MulticastTransport::find_or_create_datalink(
     ACE_ERROR_RETURN((LM_ERROR,
 		      ACE_TEXT("(%P|%t) ERROR: ")
 		      ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
-		      ACE_TEXT("unable to insert DataLink to remote peer: %d\n"),
+		      ACE_TEXT("unable to insert DataLink for remote peer: %d\n"),
 		      remote_peer), 0);
   }
 
@@ -108,6 +138,7 @@ MulticastTransport::configure_i(TransportConfiguration* config)
                       ACE_TEXT("invalid configuration!\n")),
                      -1);
   }
+  this->config_i_->_add_ref();  // take ownership
 
   return 0;
 }
@@ -146,7 +177,7 @@ MulticastTransport::connection_info_i(TransportInterfaceInfo& info) const
 }
 
 ACE_INET_Addr
-MulticastTransport::get_connection_info(const TransportInterfaceInfo& info) const
+MulticastTransport::connection_info_i(const TransportInterfaceInfo& info) const
 {
   if (info.transport_id != TRANSPORT_INTERFACE_ID) {
     ACE_ERROR((LM_WARNING,

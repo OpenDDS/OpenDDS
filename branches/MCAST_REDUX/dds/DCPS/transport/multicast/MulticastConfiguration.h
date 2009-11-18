@@ -14,10 +14,16 @@
 
 #include "ace/INET_Addr.h"
 
+#include "dds/DCPS/transport/framework/TransportDefs.h"
 #include "dds/DCPS/transport/framework/TransportConfiguration.h"
 
 namespace OpenDDS {
 namespace DCPS {
+
+// This constant forces the default group address selection to
+// resolve port number 49152; this is the minimal port defined
+// in the dynamic/private range [IANA 2009-11-16].
+const TransportIdType DEFAULT_MULTICAST_ID(0xFFFFFF08);
 
 class OpenDDS_Multicast_Export MulticastConfiguration
   : public TransportConfiguration {
@@ -34,13 +40,13 @@ public:
 
   /// The multicast group address from which to send and/or
   /// receive data. The default group addresses are:
-  ///   224.0.0.128:<port_offset + transportId> (IPv4), and
-  ///   [FF01::80]:<port_offset + transportId> (IPv6)
+  ///   224.0.0.128:<port> [IANA 2009-11-17], or
+  ///   [FF01::80]:<port>  [IANA 2009-08-28]
   ACE_INET_Addr group_address_;
 
-  /// The offset used to determine default port numbers; this
-  /// value will be added to the transportId to determine the
-  /// actual port number. The default is: 9000.
+  /// The offset used to determine default port numbers; 
+  /// this value will be added to the transportId. The
+  /// default is: 49400 [IANA 2009-11-16].
   u_short port_offset_;
 
   /// Enable/disable reliable communication. This option
@@ -55,9 +61,9 @@ public:
   long handshake_timeout_;
 
   /// The number of DCPS datagrams to retain in order to
-  /// service incoming NAK requests (reliable only).
-  /// The default is 32; this yields a minimum of 32
-  /// samples and a maximum 2048K of sample data.
+  /// service incoming NAK requests (reliable only). The
+  /// default is 32; this yields a minimum of 32 samples
+  /// and a maximum 2048K of sample data.
   size_t nak_depth_;
 
   /// The maximum number of milliseconds to wait before

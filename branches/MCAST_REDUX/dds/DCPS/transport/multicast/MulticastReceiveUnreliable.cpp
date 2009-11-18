@@ -22,7 +22,7 @@ MulticastReceiveUnreliable::receive_bytes(iovec iov[],
                                           int n,
                                           ACE_INET_Addr& remote_address)
 {
-  ACE_SOCK_Dgram_Mcast& socket = this->link_->get_socket();
+  ACE_SOCK_Dgram_Mcast& socket = this->link_->socket();
   return socket.recv(iov, n, remote_address);
 }
 

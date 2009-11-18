@@ -27,7 +27,7 @@ namespace DCPS {
 class OpenDDS_Multicast_Export MulticastTransport
   : public TransportImpl {
 public:
-  MulticastConfiguration* get_configuration();
+  MulticastConfiguration* config();
 
 protected:
   virtual DataLink* find_or_create_datalink(
@@ -41,6 +41,7 @@ protected:
   virtual void shutdown_i();
 
   virtual int connection_info_i(TransportInterfaceInfo& info) const;
+  ACE_INET_Addr connection_info_i(const TransportInterfaceInfo& info) const;
 
   virtual void release_datalink_i(DataLink* link, bool release_pending);
 
@@ -49,8 +50,6 @@ private:
 
   typedef std::map<long, MulticastDataLink_rch> MulticastDataLinkMap;
   MulticastDataLinkMap links_;
-
-  ACE_INET_Addr get_connection_info(const TransportInterfaceInfo& info) const;
 };
 
 } // namespace DCPS

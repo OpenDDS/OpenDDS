@@ -23,12 +23,6 @@ MulticastSendReliable::stop_i()
   // TODO implement
 }
 
-ACE_HANDLE
-MulticastSendReliable::get_handle()
-{
-  return 0; // TODO implement
-}
-
 ssize_t
 MulticastSendReliable::send_bytes_i(const iovec iov[], int n)
 {

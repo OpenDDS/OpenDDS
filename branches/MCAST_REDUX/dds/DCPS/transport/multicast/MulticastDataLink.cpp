@@ -9,10 +9,8 @@
 
 #include "MulticastDataLink.h"
 #include "MulticastTransport.h"
-#include "MulticastSendReliable.h"
-#include "MulticastSendUnreliable.h"
-#include "MulticastReceiveReliable.h"
-#include "MulticastReceiveUnreliable.h"
+#include "MulticastSendStrategy.h"
+#include "MulticastReceiveStrategy.h"
 
 #include "ace/Log_Msg.h"
 #include "ace/OS_NS_string.h"
@@ -29,29 +27,14 @@ MulticastDataLink::MulticastDataLink(MulticastTransport* impl,
                                      long local_peer,
                                      long remote_peer)
   : DataLink(impl, priority),
-    config_(impl->get_configuration()),
+    config_(impl->config()),
     local_peer_(local_peer),
     remote_peer_(remote_peer)
 {
-  if (!this->config_.is_nil()) {
-    // N.B. This transport supports two primary modes of operation:
-    // reliable and unreliable. Eventually the selection of this mode
-    // will be autonegotiated; unfortunately the ETF currently
-    // multiplexes reliable and non-reliable samples over the same
-    // DataLink.
-    if (this->config_->reliable_) {
-      this->send_strategy_ = new MulticastSendReliable(this);
-      this->recv_strategy_ = new MulticastReceiveReliable(this);
-    
-    } else {  // unreliable
-      this->send_strategy_ = new MulticastSendUnreliable(this);
-      this->recv_strategy_ = new MulticastReceiveUnreliable(this);
-    }
-  }
 }
 
 bool
-MulticastDataLink::join(const ACE_INET_Addr& group_address, bool active)
+MulticastDataLink::join(const ACE_INET_Addr& group_address)
 {
   int error;
 
@@ -76,14 +59,13 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address, bool active)
                      false);
   }
 
-  // Reliable links should handshake before returning control
-  // back to the ETF; this ensures both peers are initialized
-  // prior to sending data.
-  if (active && this->config_->reliable_) {
-    // TODO handshake
-  }
-
   return true;
+}
+
+bool
+MulticastDataLink::handshake()
+{
+  return false; // TODO implement
 }
 
 void

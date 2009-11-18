@@ -18,7 +18,7 @@ const bool DEFAULT_DEFAULT_TO_IPV6(false);
 const char* DEFAULT_IPV4_GROUP_ADDRESS("224.0.0.128");
 const char* DEFAULT_IPV6_GROUP_ADDRESS("FF01::80");
 
-const u_short DEFAULT_PORT_OFFSET(9000);
+const u_short DEFAULT_PORT_OFFSET(49400);
 
 const bool DEFAULT_RELIABLE(true);
 
