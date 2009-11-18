@@ -31,6 +31,7 @@ struct DataSampleListElement;
 class QueueRemoveVisitor;
 class PacketRemoveVisitor;
 
+
 /**
  * This class provides methods to fill packets with samples for sending
  * and handles backpressure. It maintains the list of samples in current
@@ -143,11 +144,13 @@ protected:
 
   virtual ssize_t send_bytes_i(const iovec iov[], int n) = 0;
 
-//MJM: Hmmm...  Shouldn't we just return success with a backpreassure
-//MJM: flag to be checked?  This means that the bp needs to be checked
-//MJM: each time on success, instead of checking the bp flag only on
-//MJM: failure.
-//MJM: Oh.  Nevermind.
+  /// Provide the opportunity to remove a sample from implementation
+  /// specific lists as well.
+  virtual void remove_sample_i( const DataSampleListElement* sample);
+
+  /// Provide the opportunity to remove control messages from
+  /// implementation specific lists as well.
+  virtual void remove_all_control_msgs_i( RepoId pub_id);
 
 private:
 
@@ -163,9 +166,6 @@ private:
     NOTIFY_IMMEADIATELY,
     DELAY_NOTIFICATION
   };
-
-  int remove_sample_i(QueueRemoveVisitor& simple_rem_vis,
-                      PacketRemoveVisitor& pac_rem_vis);
 
   /// Called from send() when it is time to attempt to send our
   /// current packet to the socket while in MODE_DIRECT mode_.
@@ -242,6 +242,9 @@ public:
   void clear(SendMode mode = MODE_DIRECT);
 
 private:
+  /// Implement framework chain visitations to remove a sample.
+  int do_remove_sample(QueueRemoveVisitor& simple_rem_vis,
+                       PacketRemoveVisitor& pac_rem_vis);
 
   /// Helper function to debugging.
   static const char* mode_as_str(SendMode mode);
@@ -275,12 +278,6 @@ private:
 
   /// Current transport packet header, marshalled.
   ACE_Message_Block* header_block_;
-//MJM: Why not hold this as a member rather than a reference?  That is
-//MJM: have a message/data/buffer complex holding a header that can be
-//MJM: remarshaled for each packet sent.  That way there will be no
-//MJM: allocations required.  You may need to mark it as being on the
-//MJM: stack, even though it may not be, in order to not worry if it
-//MJM: participates in the normal memory management regimine.
 
   /// Current elements that have contributed blocks to the current
   /// transport packet.
@@ -304,12 +301,6 @@ private:
   /// us at the same time.  We use this counter to enable a
   /// "composite" send_start() and send_stop().
   unsigned start_counter_;
-//MJM: Um.  I am not sure that we want to allow the packets from
-//MJM: different interfaces to interleave.  I may need to think about
-//MJM: this for a bit.
-//MJM: Nevermind.  Just thought about it some.  The transport packets
-//MJM: are not special at the higher layersa and so there does not need
-//MJM: to be any restriction.
 
   /// This mode determines how send() calls will be handled.
   SendMode mode_;
