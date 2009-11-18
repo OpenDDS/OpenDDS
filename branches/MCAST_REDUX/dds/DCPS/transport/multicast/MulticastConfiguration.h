@@ -14,7 +14,6 @@
 
 #include "ace/INET_Addr.h"
 
-#include "dds/DCPS/transport/framework/TransportDefs.h"
 #include "dds/DCPS/transport/framework/TransportConfiguration.h"
 
 namespace OpenDDS {
