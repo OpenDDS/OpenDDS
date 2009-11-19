@@ -17,6 +17,7 @@
 #include "BasicQueue_T.h"
 #include "TransportHeader.h"
 #include "TransportReplacedElement.h"
+#include "TransportRetainedElement.h"
 #include "TransportConfiguration_rch.h"
 
 #include "ace/Synch.h"
@@ -330,6 +331,11 @@ private:
 
   /// Cached allocator for TransportReplaceElement.
   TransportReplacedElementAllocator replaced_element_allocator_;
+
+  /// Cached allocator for TransportRetainedElements used by reliable
+  /// datagram transports to retain PDUs after they have been sent.  This
+  /// is created in start if the transport needs it.
+  TransportRetainedElementAllocator* retained_element_allocator_;
 
   TransportConfiguration_rch config_;
 

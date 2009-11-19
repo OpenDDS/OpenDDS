@@ -9,6 +9,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "PacketRemoveVisitor.h"
+#include "TransportRetainedElement.h"
 #include "dds/DCPS/DataSampleList.h"
 #include "ace/Message_Block.h"
 
@@ -17,29 +18,11 @@
 #endif /* __ACE_INLINE__ */
 
 OpenDDS::DCPS::PacketRemoveVisitor::PacketRemoveVisitor
-(const ACE_Message_Block* sample,
- ACE_Message_Block*&      unsent_head_block,
- ACE_Message_Block*       header_block,
+(const TransportQueueElement& sample,
+ ACE_Message_Block*&          unsent_head_block,
+ ACE_Message_Block*           header_block,
  TransportReplacedElementAllocator& allocator)
   : sample_(sample),
-    pub_id_(GUID_UNKNOWN),
-    head_(unsent_head_block),
-    header_block_(header_block),
-    status_(0),
-    current_block_(0),
-    previous_block_(0),
-    replaced_element_allocator_(allocator)
-{
-  DBG_ENTRY_LVL("PacketRemoveVisitor","PacketRemoveVisitor",6);
-}
-
-OpenDDS::DCPS::PacketRemoveVisitor::PacketRemoveVisitor
-(RepoId              pub_id,
- ACE_Message_Block*& unsent_head_block,
- ACE_Message_Block*  header_block,
- TransportReplacedElementAllocator& allocator)
-  : sample_(0),
-    pub_id_(pub_id),
     head_(unsent_head_block),
     header_block_(header_block),
     status_(0),
@@ -146,8 +129,7 @@ OpenDDS::DCPS::PacketRemoveVisitor::visit_element_ref
 
   // Does the current element (being visited) match the sample that we
   // need to remove?
-  if (((this->sample_ != 0) && (*element == this->sample_)) ||
-      ((this->sample_ == 0) && (element->is_control(this->pub_id_)))) {
+  if( this->sample_ == *element) {
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "YES - The element matches the sample\n"));
 
@@ -360,22 +342,15 @@ OpenDDS::DCPS::PacketRemoveVisitor::visit_element_ref
           orig_elem));
 
     // Create the replacement element for the original element.
-    // Optimize - use cached allocator
-    // This is really a copy of ACE_NEW_MALLOC_RETURN, but I can
-    // not simply use the ACE_NEW_MALLOC_RETURN macro because I have to
-    // set the status that indicates the error.
-    element = (TransportQueueElement*)replaced_element_allocator_.malloc();
-
-    if (element == 0) {
-      errno = ENOMEM;
-      // Set the status to indicate a fatal error occurred.
+    ACE_NEW_MALLOC_NORETURN(
+      element,
+      (TransportQueueElement*)this->replaced_element_allocator_.malloc(),
+      TransportReplacedElement(orig_elem, &this->replaced_element_allocator_)
+    );
+    if( element == 0) {
+      // Set fatal error and stop visitation.
       this->status_ = -1;
-      // Stop vistation now.
       return 0;
-
-    } else {
-      (void) new(element) TransportReplacedElement(orig_elem,
-                                                   &replaced_element_allocator_);
     }
 
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -483,13 +458,12 @@ OpenDDS::DCPS::PacketRemoveVisitor::visit_element_ref
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "Return 0 to halt visitation.\n"));
 
-    if (this->sample_ != 0) {
-      // Stop visitation.
+    if (this->sample_.msg() != 0) {
+      // Replace a single sample if one is specified, otherwise visit the
+      // entire queue replacing each sample with the specified
+      // publication Id value.
       return 0;
     }
-
-    // When this->sample_ == 0, we are looking to remove (replace)
-    // *all* control samples for our pub_id_.  So we visit every element.
   }
 
   // The element currently being visited does not "match" the sample that
@@ -503,3 +477,4 @@ OpenDDS::DCPS::PacketRemoveVisitor::visit_element_ref
   // Continue visitation.
   return 1;
 }
+

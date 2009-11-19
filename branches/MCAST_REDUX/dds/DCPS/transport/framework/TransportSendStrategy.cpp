@@ -65,6 +65,7 @@ OpenDDS::DCPS::TransportSendStrategy::TransportSendStrategy
     synch_(0),
     lock_(),
     replaced_element_allocator_(NUM_REPLACED_ELEMENT_CHUNKS),
+    retained_element_allocator_( 0),
     graceful_disconnecting_(false),
     link_released_(true)
 {
@@ -1183,8 +1184,9 @@ OpenDDS::DCPS::TransportSendStrategy::remove_all_control_msgs(RepoId pub_id)
   // Process any specific sample storage first.
   this->remove_all_control_msgs_i(pub_id);
 
-  QueueRemoveVisitor remove_element_visitor(pub_id);
-  PacketRemoveVisitor remove_from_packet_visitor(pub_id,
+  TransportRetainedElement current_sample( 0, pub_id);
+  QueueRemoveVisitor remove_element_visitor( current_sample);
+  PacketRemoveVisitor remove_from_packet_visitor(current_sample,
                                                  this->pkt_chain_,
                                                  this->header_block_,
                                                  this->replaced_element_allocator_);
@@ -1214,8 +1216,9 @@ OpenDDS::DCPS::TransportSendStrategy::remove_sample(const DataSampleListElement*
   // Process any specific sample storage first.
   this->remove_sample_i(sample);
 
-  QueueRemoveVisitor  remove_element_visitor(sample->sample_);
-  PacketRemoveVisitor remove_from_packet_visitor(sample->sample_,
+  TransportRetainedElement current_sample( sample->sample_, sample->publication_id_);
+  QueueRemoveVisitor  remove_element_visitor(current_sample);
+  PacketRemoveVisitor remove_from_packet_visitor( current_sample,
                                   this->pkt_chain_,
                                   this->header_block_,
                                   this->replaced_element_allocator_);

@@ -27,8 +27,7 @@ OpenDDS::DCPS::QueueRemoveVisitor::visit_element_remove(TransportQueueElement* e
 {
   DBG_ENTRY_LVL("QueueRemoveVisitor","visit_element_remove",6);
 
-  if (((this->sample_ != 0) && (*element == this->sample_)) ||
-      ((this->sample_ == 0) && (element->is_control(this->pub_id_)))) {
+  if( this->sample_ == *element) {
     // We are visiting the element that we want to remove, since the
     // element "matches" our sample_.
 
@@ -50,13 +49,16 @@ OpenDDS::DCPS::QueueRemoveVisitor::visit_element_remove(TransportQueueElement* e
     // the sample.
     this->status_ = 1;
 
-    if (this->sample_ != 0) {
+    if (this->sample_.msg() != 0) {
       // Stop visitation since we've handled the element that matched
       // our sample_.
+      // N.B. This test means that if we are comparing by sample, we
+      //      remove just the single element matching the sample, but if
+      //      we are comparing by publication Id value, we visit the
+      //      entire chain and remove all samples originating from that
+      //      publication Id.
       return 0;
     }
-
-    // When this->sample_ == 0, we visit every element.
   }
 
   // Continue visitation.
