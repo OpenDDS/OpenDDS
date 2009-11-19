@@ -24,15 +24,8 @@ class TransportQueueElement;
 class OpenDDS_Dcps_Export QueueRemoveVisitor : public BasicQueueVisitor<TransportQueueElement> {
 public:
 
-  /// In order to construct a QueueRemoveVisitor, it must be
-  /// provided with the DataSampleListElement* (used as an
-  /// identifier) that should be removed from the BasicQueue<T>
-  /// (the one this visitor will visit when it is passed-in
-  /// to a BasicQueue<T>::accept_remove_visitor() invocation).
-  QueueRemoveVisitor(const ACE_Message_Block* sample);
-
-  /// Used to remove all control samples with the specified pub_id.
-  QueueRemoveVisitor(RepoId pub_id);
+  /// Construct with a queue element representing the sample to be removed.
+  QueueRemoveVisitor(const TransportQueueElement& sample);
 
   virtual ~QueueRemoveVisitor();
 
@@ -50,10 +43,7 @@ public:
 private:
 
   /// The sample that needs to be removed.
-  const ACE_Message_Block* sample_;
-
-  /// The publisher_id of the control samples to be removed.
-  RepoId pub_id_;
+  const TransportQueueElement& sample_;
 
   /// Holds the status of our visit.
   int status_;

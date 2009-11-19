@@ -1,3 +1,79 @@
+Thu Nov 19 23:34:09 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/framework/BuildChainVisitor.cpp:
+
+          Cosmetic changes to comments.
+
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.h:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.h:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.inl:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
+
+          Modified to contain a TransportQueueElement reference
+          representing the sample for comparison while operating on the
+          queue.
+
+          constructors
+            - changed argument from message block to queue element.
+              Removed second (pubId) constructor.  The queue element
+              contains both a message block and a publication Id.
+
+          visit_element*()
+            - modified to use a TransportQueueElement sample for
+              comparison.
+
+        * dds/DCPS/transport/framework/ThreadPerConRemoveVisitor.cpp:
+
+          visit_element_remove()
+            - changed comparison to compare TransportQueueElements to
+              determine sample to remove.  Form a local Qeuue element for
+              comparison.
+
+        * dds/DCPS/transport/framework/TransportControlElement.h:
+        * dds/DCPS/transport/framework/TransportControlElement.cpp:
+
+          constructor
+            - Added publication Id and ownership indications.  Stored
+              these as members.
+
+          release_element()
+            - predicate deletion on ownership flag.  This allows objects
+              of this type to be created on the stack safely.
+
+        * dds/DCPS/transport/framework/TransportQueueElement.h:
+        * dds/DCPS/transport/framework/TransportQueueElement.inl:
+
+          operator==()
+            - Changed argument to compare to TransportQueueElements.
+              Comaprison now compares rd_ptr() of both sides first.  If
+              no chain is available to compare, then equal publication Id
+              values that are not GUID_UNKNOWN compare true.
+
+        * dds/DCPS/transport/framework/TransportRetainedElement.h:
+        * dds/DCPS/transport/framework/TransportRetainedElement.inl:
+        * dds/DCPS/transport/framework/TransportRetainedElement.cpp:
+
+          New TransportQueueElement subtype containing just an
+          ACE_Message_Block chain and publication Id value.  These are
+          used for forming comparison samples in the existing queue
+          visitors and can be used to store sent PDU information so that
+          samples from publications being torn down can be copied out.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          constructor
+            - Added a new TransportRetainedElementAllocator pointer,
+              initialized to null, for use by reliable datagram based
+              transport implementations.
+
+          remove_all_control_msgs()
+          remove_sample()
+            - changed construction of visitors to use a stack based
+              TransportQueueElement for comparison by the visitor
+              objects.
+
 Wed Nov 18 23:57:04 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastLoader.cpp:

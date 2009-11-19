@@ -11,19 +11,8 @@
 
 ACE_INLINE
 OpenDDS::DCPS::QueueRemoveVisitor::QueueRemoveVisitor
-(const ACE_Message_Block* sample)
+(const TransportQueueElement& sample)
   : sample_(sample),
-    pub_id_(GUID_UNKNOWN),
-    status_(0),
-    removed_bytes_(0)
-{
-  DBG_ENTRY_LVL("QueueRemoveVisitor","QueueRemoveVisitor",6);
-}
-
-ACE_INLINE
-OpenDDS::DCPS::QueueRemoveVisitor::QueueRemoveVisitor(RepoId pub_id)
-  : sample_(0),
-    pub_id_(pub_id),
     status_(0),
     removed_bytes_(0)
 {
