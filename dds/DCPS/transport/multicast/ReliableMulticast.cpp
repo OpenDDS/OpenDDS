@@ -39,8 +39,8 @@ SynHandler::handle_timeout(const ACE_Time_Value& now,
   ReliableMulticast* link =
     static_cast<ReliableMulticast*>(const_cast<void*>(arg));  // safe
 
-  // Initiate a handshake by sending a MULTICAST_SYN control
-  // message to a specific remote peer. In this case, we will
+  // Initiate a handshake by broadcasting a MULTICAST_SYN control
+  // message for a specific remote peer. In this case, we will
   // always select the remote (passive) peer assigned when the
   // DataLink was created:
   link->send_syn(link->remote_peer());
