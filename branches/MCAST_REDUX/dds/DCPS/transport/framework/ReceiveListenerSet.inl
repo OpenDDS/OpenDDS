@@ -60,7 +60,6 @@ OpenDDS::DCPS::ReceiveListenerSet::data_received(const ReceivedDataSample& sampl
 
   char* ptr = sample.sample_->rd_ptr();
 
-  bool release_sample(true);
   for (MapType::iterator itr = map_.begin();
        itr != map_.end();
        ++itr) {
