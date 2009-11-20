@@ -209,7 +209,7 @@ ReliableMulticast::send_synack(ACE_INT32 remote_peer)
 bool
 ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
 {
-  if (!active) return true; // passive peers are done
+  if (!active) return true; // passive peers are finished
 
   // Active peers must initiate a handshake to verify that the
   // reservation is reliable. We do this by setting a bounded
