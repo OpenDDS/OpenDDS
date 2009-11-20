@@ -17,7 +17,9 @@
 #include "MulticastConfiguration.h"
 #include "MulticastConfiguration_rch.h"
 #include "MulticastSendStrategy_rch.h"
+#include "MulticastSendStrategy.h"
 #include "MulticastReceiveStrategy_rch.h"
+#include "MulticastReceiveStrategy.h"
 
 #include "ace/Basic_Types.h"
 #include "ace/SOCK_Dgram_Mcast.h"

@@ -1571,6 +1571,10 @@ OpenDDS::DCPS::TransportSendStrategy::prepare_packet()
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Increment header sequence for next packet.\n"));
 
+  // Allow the specific implementation the opportunity to process the
+  // newly prepared packet.
+  this->prepare_packet_i();
+
   // Increment header sequence for next packet.
   this->header_.sequence_++;
 
@@ -1583,10 +1587,18 @@ OpenDDS::DCPS::TransportSendStrategy::prepare_packet()
   this->header_complete_ = 0;
 }
 
-OpenDDS::DCPS::TransportSendStrategy::SendPacketOutcome
-OpenDDS::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_notification)
+void
+OpenDDS::DCPS::TransportSendStrategy::prepare_packet_i()
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","send_packet",6);
+  DBG_ENTRY_LVL("TransportSendStrategy","prepare_packet_i",6);
+
+  // Default implementation does nothing.
+}
+
+ssize_t
+OpenDDS::DCPS::TransportSendStrategy::do_send_packet( int& bp)
+{
+  DBG_ENTRY_LVL("TransportSendStrategy","do_send_packet",6);
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
             "Populate the iovec array using the pkt_chain_.\n"), 5);
@@ -1608,18 +1620,25 @@ OpenDDS::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_n
             "There are [%d] number of entries in the iovec array.\n",
             num_blocks), 5);
 
-  // Get our subclass to do this next step, since it is the one that knows
-  // how to really do this part.
-  int bp_flag = 0;
-
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
             "Attempt to send_bytes() now.\n"), 5);
 
-  ssize_t num_bytes_sent = this->send_bytes(iov, num_blocks, bp_flag);
+  ssize_t num_bytes_sent = this->send_bytes(iov, num_blocks, bp);
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
             "The send_bytes() said that num_bytes_sent == [%d].\n",
             num_bytes_sent), 5);
+
+  return num_bytes_sent;
+}
+
+OpenDDS::DCPS::TransportSendStrategy::SendPacketOutcome
+OpenDDS::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_notification)
+{
+  DBG_ENTRY_LVL("TransportSendStrategy","send_packet",6);
+
+  int bp_flag = 0;
+  ssize_t num_bytes_sent = this->do_send_packet( bp_flag);
 
   if (num_bytes_sent == 0) {
     VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "

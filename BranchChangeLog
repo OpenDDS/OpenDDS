@@ -1,3 +1,25 @@
+Fri Nov 20 23:17:53 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          prepare_packet_i()
+            - new template method to give implementations the opportunity
+              to process PDUs as they are formed.
+          send_packet()
+          do_send_packet()
+            - refactored to allow implementations the ability to resend
+              PDUs without invoking the post send processing.
+
+        * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
+
+          Remove obsolete local variable.
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+
+          Include headers for send and receive strategies so they can be
+          used.
+
 Fri Nov 20 06:18:59 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.h:

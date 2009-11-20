@@ -145,6 +145,9 @@ protected:
 
   virtual ssize_t send_bytes_i(const iovec iov[], int n) = 0;
 
+  /// Specific implementation processing of prepared packet.
+  virtual void prepare_packet_i();
+
   /// Provide the opportunity to remove a sample from implementation
   /// specific lists as well.
   virtual void remove_sample_i( const DataSampleListElement* sample);
@@ -152,6 +155,9 @@ protected:
   /// Provide the opportunity to remove control messages from
   /// implementation specific lists as well.
   virtual void remove_all_control_msgs_i( RepoId pub_id);
+
+  /// Form an IOV and call the send_bytes() template method.
+  ssize_t do_send_packet( int& bp);
 
 private:
 
