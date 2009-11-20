@@ -28,6 +28,14 @@ const CORBA::Long TRANSPORT_INTERFACE_ID(0x4d435354); // MCST
 namespace OpenDDS {
 namespace DCPS {
 
+// N.B. TRANSPORT_PRIORITY is not directly supported by this
+// transport. This is partially due to routing restrictions placed
+// on default group addresses as the selection heuristic assigns
+// from the link-local range. Since the TTL will always be 1
+// (non-routable), setting the TOS would provide little to no
+// benefit at the cost of significant complexity managing n-way
+// reservations.
+
 DataLink*
 MulticastTransport::find_or_create_datalink(
   RepoId local_id,
