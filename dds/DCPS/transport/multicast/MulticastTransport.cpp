@@ -8,6 +8,8 @@
  */
 
 #include "MulticastTransport.h"
+#include "ReliableMulticast.h"
+#include "BestEffortMulticast.h"
 #include "MulticastSendStrategy.h"
 #include "MulticastReceiveStrategy.h"
 
@@ -30,17 +32,16 @@ DataLink*
 MulticastTransport::find_or_create_datalink(
   RepoId local_id,
   const AssociationData* remote_association,
-  CORBA::Long priority,
+  CORBA::Long /*priority*/,
   bool active)
 {
-  // We form reservations between DomainParticipants; this is a
-  // significant departure from traditional reservations formed
-  // between individual subscriptions and publications. Currently, a
-  // TransportImpl instance may only be attached to entities within
-  // the same DomainParticipant (which is in turn tied to a specific
-  // domainId). Given this, we may assume that the local_id always
-  // references the same participantId; all we need to associate a
-  // DataLink to is the remote participantId:
+  // This transport forms reservations between DomainParticipants;
+  // this is a significant departure from traditional reservations
+  // formed between individual subscriptions and publications.
+  // Currently, a TransportImpl instance may only be attached to
+  // entities within the same DomainParticipant. Given this, we may
+  // assume that the local_id always references the same participant;
+  // all we need to associate a DataLink is the remote participantId:
   long remote_peer =
     RepoIdConverter(remote_association->remote_id_).participantId();
 
@@ -52,16 +53,26 @@ MulticastTransport::find_or_create_datalink(
   // by their participantIds:
   long local_peer = RepoIdConverter(local_id).participantId();
 
-  MulticastDataLink_rch link =
-    new MulticastDataLink(this,
-                          priority,
-                          local_peer,
-                          remote_peer);
+  // This transport supports two modes of operation: reliable and
+  // best-effort. Eventually the selection of this mode will be
+  // autonegotiated based on QoS. Unfortunately the ETF currently
+  // multiplexes both reliable and best-effort samples over the same
+  // DataLink which forces all samples into one mode or the other.
+  MulticastDataLink_rch link;
+  if (this->config_i_->reliable_) {
+    link = new ReliableMulticast(this, local_peer, remote_peer);
+  } else {
+    link = new BestEffortMulticast(this, local_peer, remote_peer);
+  }
   if (link.is_nil()) {
-    return 0; // bad link
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
+                      ACE_TEXT("unable to create DataLink to remote peer 0x%x!\n"),
+                      remote_peer), 0);
   }
 
-  // Configure link with our configuration and reactor task:
+  // Configure link with configuration and reactor task:
   link->configure(this->config_i_.in(), reactor_task());
 
   // Assign blessed send/receive strategies:
@@ -86,7 +97,7 @@ MulticastTransport::find_or_create_datalink(
     ACE_ERROR_RETURN((LM_ERROR,
 		      ACE_TEXT("(%P|%t) ERROR: ")
 		      ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
-		      ACE_TEXT("unable to join multicast group: %C\n"),
+		      ACE_TEXT("unable to join multicast group: %C!\n"),
 		      group_address_s), 0);
   }
 
@@ -96,7 +107,7 @@ MulticastTransport::find_or_create_datalink(
     ACE_ERROR_RETURN((LM_ERROR,
 		      ACE_TEXT("(%P|%t) ERROR: ")
 		      ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
-		      ACE_TEXT("unable to insert DataLink for remote peer: %d\n"),
+		      ACE_TEXT("unable to insert DataLink to remote peer: 0x%x!\n"),
 		      remote_peer), 0);
   }
 
@@ -179,14 +190,23 @@ MulticastTransport::connection_info_i(const TransportInterfaceInfo& info) const
 }
 
 bool
-MulticastTransport::acked(RepoId /*local_id*/, RepoId /*remote_id*/)
+MulticastTransport::acked(RepoId /*local_id*/, RepoId remote_id)
 {
-  return true;
+  long remote_peer = RepoIdConverter(remote_id).participantId();
+
+  MulticastDataLinkMap::iterator it = this->links_.find(remote_peer);
+  if (it != this->links_.end()) {
+    return it->second->acked();
+  }
+
+  return false;
 }
 
 void
 MulticastTransport::remove_ack(RepoId /*local_id*/, RepoId /*remote_id*/)
 {
+  // ACK state is managed by each individual DataLink; there
+  // is no state that needs to be removed at this level.
 }
 
 void

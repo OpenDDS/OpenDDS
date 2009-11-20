@@ -13,6 +13,7 @@
 #include "Multicast_Export.h"
 
 #include "ace/INET_Addr.h"
+#include "ace/Time_Value.h"
 
 #include "dds/DCPS/transport/framework/TransportConfiguration.h"
 
@@ -34,7 +35,7 @@ public:
 
   /// The default group address selection is IPv4; this
   /// option controls whether IPv6 is to be used instead.
-  /// The default is false.
+  /// The default value is false.
   bool default_to_ipv6_;
 
   /// The multicast group address from which to send and/or
@@ -45,30 +46,41 @@ public:
 
   /// The offset used to determine default port numbers;
   /// this value will be added to the transportId. The
-  /// default is: 49400 [IANA 2009-11-16].
+  /// default value is: 49400 [IANA 2009-11-16].
   u_short port_offset_;
 
   /// Enable/disable reliable communication. This option
   /// will eventually be deprecated once the ETF is able
-  /// to properly segregate reliable/unreliable samples on
-  /// a per-DataLink basis. The default is true.
+  /// to properly segregate reliable/best-effort samples
+  /// on a per-DataLink basis. The default value is true.
   bool reliable_;
 
-  /// The maximum number of milliseconds to wait while
-  /// handshaking with remote peers (reliable only).
-  /// The default is 30000 (30 seconds).
+  /// The maximum number of milliseconds to wait between
+  /// SYN attempts during association (reliable only).
+  /// The default value is 500.
+  long syn_interval_;
+  
+  /// The maximum number of milliseconds to wait for a
+  /// SYNACK response during association (reliable only).
+  /// The default value is 30000 (30 seconds).
   long syn_timeout_;
 
   /// The number of DCPS datagrams to retain in order to
   /// service incoming NAK requests (reliable only). The
-  /// default is 32; this yields a minimum of 32 samples
-  /// and a maximum 2048K of sample data.
+  /// default value is 32; this yields a minimum of 32
+  /// samples and a maximum 2048K of sample data.
   size_t nak_depth_;
 
   /// The maximum number of milliseconds to wait before
   /// giving up on a NAK response (reliable only). The
-  /// default is 30000 (30 seconds).
+  /// default value is 30000 (30 seconds).
   long nak_timeout_;
+
+  /// Convenience conversion function for syn_internal:
+  ACE_Time_Value syn_interval() const;
+
+  /// Convenience conversion function for syn_timeout:
+  ACE_Time_Value syn_timeout() const;
 
 private:
   void default_group_address(ACE_INET_Addr& group_address,
@@ -77,5 +89,9 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+#ifdef __ACE_INLINE__
+# include "MulticastConfiguration.inl"
+#endif  /* __ACE_INLINE__ */
 
 #endif  /* DCPS_MULTICASTCONFIGURATION_H */

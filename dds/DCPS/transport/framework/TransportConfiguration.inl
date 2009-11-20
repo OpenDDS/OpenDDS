@@ -28,7 +28,8 @@ OpenDDS::DCPS::TransportConfiguration::TransportConfiguration()
     max_samples_per_packet_(DEFAULT_CONFIG_MAX_SAMPLES_PER_PACKET),
     optimum_packet_size_(DEFAULT_CONFIG_OPTIMUM_PACKET_SIZE),
     thread_per_connection_(0),
-    datalink_release_delay_(10000)
+    datalink_release_delay_(10000),
+    datalink_control_chunks_(32)
 {
   DBG_ENTRY_LVL("TransportConfiguration","TransportConfiguration",6);
   this->send_thread_strategy_ =  new PerConnectionSynchStrategy();
