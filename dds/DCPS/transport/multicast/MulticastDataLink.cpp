@@ -21,18 +21,10 @@
 namespace OpenDDS {
 namespace DCPS {
 
-// N.B. TRANSPORT_PRIORITY is not directly supported by this
-// transport. This is partially due to routing restrictions placed
-// on default group addresses as the selection heuristic assigns
-// from the link-local range. Since the TTL will always be 1
-// (non-routable), setting the TOS would provide little to no
-// benefit at the cost of significant complexity managing n-way
-// reservations.
-
 MulticastDataLink::MulticastDataLink(MulticastTransport* transport,
                                      ACE_INT32 local_peer,
                                      ACE_INT32 remote_peer)
-  : DataLink(transport, 0),
+  : DataLink(transport, 0), // priority
     transport_(transport),
     local_peer_(local_peer),
     remote_peer_(remote_peer)
