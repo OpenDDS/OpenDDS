@@ -11,16 +11,19 @@
 #define OPENDDS_DCPS_DATALINK_H
 
 #include "dds/DCPS/dcps_export.h"
+#include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/RcObject_T.h"
-#include "TransportDefs.h"
 #include "ReceiveListenerSetMap.h"
 #include "RepoIdSetMap.h"
+#include "TransportDefs.h"
 #include "TransportImpl_rch.h"
 #include "TransportSendStrategy.h"
 #include "TransportSendStrategy.h"
 #include "TransportSendStrategy_rch.h"
 #include "TransportReceiveStrategy.h"
 #include "TransportReceiveStrategy_rch.h"
+#include "TransportSendControlElement.h"
+#include "TransportSendListener.h"
 #include "dds/DCPS/transport/framework/QueueTaskBase_T.h"
 
 #include "ace/Synch.h"
@@ -65,7 +68,11 @@ class  ThreadPerConnectionSendTask;
  * 2) Own ThreadPerConnectionSendTask object which is used when thread_per_connection
  *    is enabled.
  */
-class OpenDDS_Dcps_Export DataLink : public RcObject<ACE_SYNCH_MUTEX>, public ACE_Event_Handler {
+class OpenDDS_Dcps_Export DataLink
+  : public RcObject<ACE_SYNCH_MUTEX>,
+    public TransportSendListener,
+    public ACE_Event_Handler {
+  
   friend class DataLinkCleanupTask;
 
 public:
@@ -220,6 +227,11 @@ public:
 
   bool cancel_release();
 
+  // TransportSendListener callbacks for transport control samples:
+  virtual void control_delivered(ACE_Message_Block* message);
+  
+  virtual void control_dropped(ACE_Message_Block* message,
+                               bool dropped_by_transport);
 protected:
 
   /// This is how the subclass "announces" to this DataLink base class
@@ -236,6 +248,17 @@ protected:
   /// it will be stopped before the start() method returns -1.
   int start(TransportSendStrategy*    send_strategy,
             TransportReceiveStrategy* receive_strategy);
+
+  /// This allows a subclass to easily create a transport control
+  /// sample to send via send_control.
+  ACE_Message_Block* create_control(char submessage_id,
+                                    ACE_Message_Block* data);
+
+  /// This allows a subclass to send transport control samples over
+  /// this DataLink. This is useful for sending transport-specific
+  /// control messages between one or more endpoints under this
+  /// DataLink's control.
+  SendControlStatus send_control(ACE_Message_Block* data);
 
   /// This announces the "stop" event to our subclass.  The "stop"
   /// event will occur when this DataLink is handling a
@@ -353,6 +376,15 @@ protected:
   /// Configurable delay in milliseconds that the datalink
   /// should be released after all associations are removed.
   ACE_Time_Value datalink_release_delay_;
+
+  /// Allocator for TransportSendControlElements created when
+  /// send_control is called.
+  TransportSendControlElementAllocator* send_control_allocator_;
+
+  /// Allocators for data and message blocks used by transport
+  /// control samples when send_control is called.
+  MessageBlockAllocator* mb_allocator_;
+  DataBlockAllocator* db_allocator_;
 };
 
 } // namespace DCPS

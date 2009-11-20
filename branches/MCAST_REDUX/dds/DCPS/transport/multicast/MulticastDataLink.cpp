@@ -8,7 +8,6 @@
  */
 
 #include "MulticastDataLink.h"
-#include "MulticastTransport.h"
 #include "MulticastSendStrategy.h"
 #include "MulticastReceiveStrategy.h"
 
@@ -22,13 +21,25 @@
 namespace OpenDDS {
 namespace DCPS {
 
-MulticastDataLink::MulticastDataLink(MulticastTransport* impl,
-				     CORBA::Long priority,
-                                     long local_peer,
-                                     long remote_peer)
-  : DataLink(impl, priority),
+// N.B. TRANSPORT_PRIORITY is not directly supported by this
+// transport. This is partially due to routing restrictions placed
+// on default group addresses as the selection heuristic assigns
+// from the link-local range. Since the TTL will always be 1
+// (non-routable), setting the TOS would provide little to no
+// benefit at the cost of significant complexity managing n-way
+// reservations.
+
+MulticastDataLink::MulticastDataLink(MulticastTransport* transport,
+                                     ACE_INT32 local_peer,
+                                     ACE_INT32 remote_peer)
+  : DataLink(transport, 0),
+    transport_(transport),
     local_peer_(local_peer),
     remote_peer_(remote_peer)
+{
+}
+
+MulticastDataLink::~MulticastDataLink()
 {
 }
 
@@ -57,13 +68,30 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address, bool active)
                      false);
   }
 
+  if (!join_i(group_address, active)) {
+    this->socket_.close();
+    ACE_ERROR_RETURN((LM_ERROR,
+		      ACE_TEXT("(%P|%t) ERROR: ")
+		      ACE_TEXT("MulticastDataLink::join: ")
+		      ACE_TEXT("join_i failed!\n"),
+                      error),
+                     false);
+  }
+  
   return true;
+}
+
+void
+MulticastDataLink::leave()
+{
+  leave_i();
+  this->socket_.close();
 }
 
 void
 MulticastDataLink::stop_i()
 {
-  this->socket_.close();
+  leave();
 }
 
 } // namespace DCPS

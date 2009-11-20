@@ -9,6 +9,10 @@
 
 #include "MulticastConfiguration.h"
 
+#ifndef __ACE_INLINE__
+# include "MulticastConfiguration.inl"
+#endif  /* __ACE_INLINE__ */
+
 namespace {
 
 const bool DEFAULT_DEFAULT_TO_IPV6(false);
@@ -20,6 +24,7 @@ const u_short DEFAULT_PORT_OFFSET(49400);
 
 const bool DEFAULT_RELIABLE(true);
 
+const long DEFAULT_SYN_INTERVAL(500);
 const long DEFAULT_SYN_TIMEOUT(30000);
 
 const size_t DEFAULT_NAK_DEPTH(32);
@@ -34,6 +39,7 @@ MulticastConfiguration::MulticastConfiguration()
   : default_to_ipv6_(DEFAULT_DEFAULT_TO_IPV6),
     port_offset_(DEFAULT_PORT_OFFSET),
     reliable_(DEFAULT_RELIABLE),
+    syn_interval_(DEFAULT_SYN_INTERVAL),
     syn_timeout_(DEFAULT_SYN_TIMEOUT),
     nak_depth_(DEFAULT_NAK_DEPTH),
     nak_timeout_(DEFAULT_NAK_TIMEOUT)
@@ -78,6 +84,9 @@ MulticastConfiguration::load(const TransportIdType& id,
 
   GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("reliable"),
                    this->reliable_, bool)
+  
+  GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("syn_interval"),
+                   this->syn_interval_, long)
 
   GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("syn_timeout"),
                    this->syn_timeout_, long)
