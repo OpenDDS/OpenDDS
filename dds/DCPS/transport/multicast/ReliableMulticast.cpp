@@ -98,7 +98,7 @@ ReliableMulticast::syn_received(ACE_Message_Block* message)
   serializer >> remote_peer;
   serializer >> local_peer;
 
-  // Ignore message if was not destined for us:
+  // Ignore message if not destined for us:
   if (local_peer != this->local_peer_) return;
   
   // MULTICAST_SYN control messages are always positively
@@ -157,7 +157,7 @@ ReliableMulticast::synack_received(ACE_Message_Block* message)
   serializer >> remote_peer;
   serializer >> local_peer;
 
-  // Ignore message if was not destined for us:
+  // Ignore message if not destined for us:
   if (local_peer != this->local_peer_) return;
 
   cancel_syn_timer();
