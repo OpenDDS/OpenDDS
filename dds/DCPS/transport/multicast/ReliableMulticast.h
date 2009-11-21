@@ -14,7 +14,7 @@
 
 #include "MulticastDataLink.h"
 
-#include "ace/Event_Handler.h"
+#include "dds/DCPS/transport/framework/TransportWatchdog_T.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -24,15 +24,19 @@ enum MulticastSubMessageId {
   MULTICAST_SYNACK
 };
 
-class OpenDDS_Multicast_Export SynHandler
-  : public ACE_Event_Handler {
+class ReliableMulticast;
+
+class OpenDDS_Multicast_Export SynWatchdog
+  : public TransportWatchdog<ReliableMulticast> {
 public:
-  SynHandler(const ACE_Time_Value& deadline);
-  
-  virtual int handle_timeout(const ACE_Time_Value& now,
-                             const void* arg);
-private:
-  ACE_Time_Value deadline_;
+  SynWatchDog(ReliableMulticast* link);
+
+protected:
+  virtual ACE_Time_Value get_interval();
+  virtual bool handle_interval(const void* arg);
+
+  virtual ACE_Time_Value get_timeout();
+  virtual void handle_timeout(const void* arg);
 };
 
 class OpenDDS_Multicast_Export ReliableMulticast
@@ -47,19 +51,17 @@ public:
 
   void syn_received(ACE_Message_Block* message);
   void send_syn(ACE_INT32 remote_peer);
- 
+
   void synack_received(ACE_Message_Block* message);
-  void send_synack(ACE_INT32 remote_peer); 
-  
+  void send_synack(ACE_INT32 remote_peer);
+
 protected:
   virtual bool join_i(const ACE_INET_Addr& group_address, bool active);
   virtual void leave_i();
 
 private:
+  SynWatchdog syn_watchdog_;
   bool acked_;
-  long syn_timer_id_;
-  
-  void cancel_syn_timer();
 };
 
 } // namespace DCPS

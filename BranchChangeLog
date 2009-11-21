@@ -1,3 +1,19 @@
+Sat Nov 21 00:59:52 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportWatchdog_T.h:
+
+          Initial checkin; still needs to be implemented.
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Refactored static event handler for MULTICAST_SYN control
+          messages in factor of a dynamic watchdog which may be used for
+          handling NAK responses.
+
 Fri Nov 20 23:17:53 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.h:

@@ -8,8 +8,6 @@
  */
 
 #include "MulticastDataLink.h"
-#include "MulticastSendStrategy.h"
-#include "MulticastReceiveStrategy.h"
 
 #include "ace/Log_Msg.h"
 #include "ace/OS_NS_string.h"
@@ -69,7 +67,7 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address, bool active)
                       error),
                      false);
   }
-  
+
   return true;
 }
 
