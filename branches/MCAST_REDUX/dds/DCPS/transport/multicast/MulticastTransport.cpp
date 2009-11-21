@@ -34,7 +34,7 @@ namespace DCPS {
 // from the link-local range. Since the TTL will always be 1
 // (non-routable), setting the TOS would provide little to no
 // benefit at the cost of significant complexity managing n-way
-// reservations.
+// reservations based on priority key.
 
 DataLink*
 MulticastTransport::find_or_create_datalink(
@@ -65,7 +65,7 @@ MulticastTransport::find_or_create_datalink(
   // best-effort. Eventually the selection of this mode will be
   // autonegotiated based on QoS. Unfortunately the ETF currently
   // multiplexes both reliable and best-effort samples over the same
-  // DataLink which forces all samples into one mode or the other.
+  // DataLink which forces all samples into one mode or the other:
   MulticastDataLink_rch link;
   if (this->config_i_->reliable_) {
     link = new ReliableMulticast(this, local_peer, remote_peer);
@@ -77,7 +77,8 @@ MulticastTransport::find_or_create_datalink(
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
                       ACE_TEXT("unable to create DataLink to remote peer 0x%x!\n"),
-                      remote_peer), 0);
+                      remote_peer),
+                     0);
   }
 
   // Configure link with configuration and reactor task:
@@ -103,20 +104,22 @@ MulticastTransport::find_or_create_datalink(
     ACE_TCHAR group_address_s[64];
     group_address.addr_to_string(group_address_s, sizeof (group_address_s));
     ACE_ERROR_RETURN((LM_ERROR,
-		      ACE_TEXT("(%P|%t) ERROR: ")
-		      ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
-		      ACE_TEXT("unable to join multicast group: %C!\n"),
-		      group_address_s), 0);
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
+                      ACE_TEXT("unable to join multicast group: %C!\n"),
+                      group_address_s),
+                     0);
   }
 
   std::pair<MulticastDataLinkMap::iterator, bool> pair =
     this->links_.insert(MulticastDataLinkMap::value_type(remote_peer, link));
   if (!pair.second) {
     ACE_ERROR_RETURN((LM_ERROR,
-		      ACE_TEXT("(%P|%t) ERROR: ")
-		      ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
-		      ACE_TEXT("unable to insert DataLink to remote peer: 0x%x!\n"),
-		      remote_peer), 0);
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
+                      ACE_TEXT("unable to insert DataLink for remote peer: 0x%x!\n"),
+                      remote_peer),
+                     0);
   }
 
   return link._retn();
@@ -187,7 +190,8 @@ MulticastTransport::connection_info_i(const TransportInterfaceInfo& info) const
   NetworkAddress network_address;
 
   size_t len = info.data.length();
-  const char* buffer = reinterpret_cast<const char*>(info.data.get_buffer());
+  const char* buffer =
+    reinterpret_cast<const char*>(info.data.get_buffer());
 
   ACE_InputCDR cdr(buffer, len);
   cdr >> network_address;

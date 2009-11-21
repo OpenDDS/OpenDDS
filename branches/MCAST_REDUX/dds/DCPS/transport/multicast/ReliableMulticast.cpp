@@ -9,51 +9,66 @@
 
 #include "ReliableMulticast.h"
 
-#include "ace/OS_NS_time.h"
-
 #include "dds/DCPS/Serializer.h"
 
 namespace OpenDDS {
 namespace DCPS {
 
-SynHandler::SynHandler(const ACE_Time_Value& deadline)
-  : deadline_(deadline)
+// N.B. The SynWatchdog currently executes at a fixed rate which is
+// determined by the syn_interval configuration option. In the
+// future, it may be worthwhile to introduce an exponential backoff
+// to prevent potential SYN flooding in large multicast groups.
+
+SynWatchDog::SynWatchDog(ReliableMulticast* link)
+  : TransportWatchdog<ReliableMulticast>(link)
 {
 }
 
-int
-SynHandler::handle_timeout(const ACE_Time_Value& now,
-                           const void* arg)
+ACE_Time_Value
+SynWatchdog::get_interval()
 {
-  if (now > this->deadline_) {
-    reactor()->cancel_timer(this);
-    delete this;
+  MulticastConfiguration* config = this->link_->config();
+  return config->syn_interval();
+}
 
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("SynHandler::handle_timeout: ")
-                      ACE_TEXT("deadline exceeded; giving up!\n")),
-                     0);
-  }
-
-  ReliableMulticast* link =
-    static_cast<ReliableMulticast*>(const_cast<void*>(arg));  // safe
-
+bool
+SynWatchdog::handle_interval(const void* /*arg*/)
+{
   // Initiate a handshake by broadcasting a MULTICAST_SYN control
   // message for a specific remote peer. In this case, we will
-  // always select the remote (passive) peer assigned when the
+  // always select the (passive) remote peer assigned when the
   // DataLink was created:
-  link->send_syn(link->remote_peer());
+  this->link_->send_syn(this->link_->remote_peer());
+  return true;  // reschedule if timeout not exceeded
+}
 
-  return 0;
+ACE_Time_Value
+SynWatchdog::get_timeout()
+{
+  MulticastConfiguration* config = this->link_->config();
+  return config->syn_timeout();
+}
+
+void
+SynWatchdog::handle_timeout(const void* /*arg*/)
+{
+  // There is no recourse if a link is unable to handshake; log a
+  // warning and return. In the future, it may be worthwhile to
+  // allow a DataLink to initiate (via the TransportSendListener
+  // interface) the removal of an association.
+  ACE_ERROR((LM_ERROR,
+             ACE_TEXT("(%P|%t) ERROR: ")
+             ACE_TEXT("SynWatchdog::handle_timeout: ")
+             ACE_TEXT("timed out handshaking with remote peer: 0x%x!\n"),
+             this->link_->remote_peer()));
 }
 
 ReliableMulticast::ReliableMulticast(MulticastTransport* transport,
                                      ACE_INT32 local_peer,
                                      ACE_INT32 remote_peer)
   : MulticastDataLink(transport, local_peer, remote_peer),
-    acked_(false),
-    syn_timer_id_(-1)
+    syn_watchdog_(this),
+    acked_(false)
 {
 }
 
@@ -63,7 +78,7 @@ ReliableMulticast::sample_received(ReceivedDataSample& sample)
   switch(sample.header_.message_id_) {
   case TRANSPORT_CONTROL: {
     ACE_Message_Block* message = sample.sample_;
-    
+
     switch (sample.header_.submessage_id_) {
     case MULTICAST_SYN:
       syn_received(message);
@@ -100,12 +115,11 @@ ReliableMulticast::syn_received(ACE_Message_Block* message)
 
   // Ignore message if not destined for us:
   if (local_peer != this->local_peer_) return;
-  
+
   // MULTICAST_SYN control messages are always positively
-  // acknowledged by a matching remote peer, regardless of
-  // association status. This prevents a number of known race
-  // conditions during association which could prevent a
-  // successful handshake.
+  // acknowledged by a matching remote peer. In the future
+  // it may be worthwhile to predicate this on association
+  // status to prevent potential denial of service attacks.
   send_synack(remote_peer);
 }
 
@@ -121,7 +135,7 @@ ReliableMulticast::send_syn(ACE_INT32 remote_peer)
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("ReliableMulticast::send_syn: ")
-               ACE_TEXT("unable to create message!\n")));
+               ACE_TEXT("failed to allocate message!\n")));
     return;
   }
 
@@ -160,12 +174,12 @@ ReliableMulticast::synack_received(ACE_Message_Block* message)
   // Ignore message if not destined for us:
   if (local_peer != this->local_peer_) return;
 
-  cancel_syn_timer();
- 
+  this->syn_watchdog_.cancel();
+
   // The handshake is now complete; we have verified that the
   // passive peer is indeed accepting (and responding) to samples
   // reliably. Adjust the acked flag and force the TransportImpl
-  // to re-evaluate any pending associations it has queued: 
+  // to re-evaluate any pending associations it has queued:
   this->acked_ = true;
   this->transport_->check_fully_association();
 }
@@ -182,7 +196,7 @@ ReliableMulticast::send_synack(ACE_INT32 remote_peer)
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("ReliableMulticast::send_synack: ")
-               ACE_TEXT("unable to create message!\n")));
+               ACE_TEXT("failed to allocate message!\n")));
     return;
   }
 
@@ -209,14 +223,13 @@ ReliableMulticast::send_synack(ACE_INT32 remote_peer)
 bool
 ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
 {
-  if (!active) return true; // passive peers are finished
+  if (!active) return true; // passive peers are done
 
-  // Active peers must initiate a handshake to verify that the
-  // reservation is reliable. We do this by setting a bounded
-  // timer to broadcast MULTICAST_SYN control messages to the
-  // passive peer. This process must be executed using the
-  // transport reactor thread to prevent uneccessary blocking in
-  // the TransportImpl::find_or_create_datalink call.
+  // Active peers must initiate a handshake to verify the DataLink
+  // is indeed reliable. We do this by scheduling a watchdog timer
+  // to broadcast MULTICAST_SYN control messages to passive peers
+  // at fixed intervals. This process must be executed using the
+  // reactor thread to prevent blocking the current thread.
 
   ACE_Reactor* reactor = get_reactor();
   if (reactor == 0) {
@@ -227,21 +240,11 @@ ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
                      false);
   }
 
-  ACE_Time_Value deadline(ACE_OS::gettimeofday());
-  deadline += this->config_->syn_timeout();
-  
-  ACE_Time_Value interval = this->config_->syn_interval();
-  
-  this->syn_timer_id_ =
-    reactor->schedule_timer(new SynHandler(deadline),
-                            this,
-                            ACE_Time_Value::zero,
-                            interval);
-  if (this->syn_timer_id_ == -1) {
+  if (!this->syn_watchdog_.schedule(reactor)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("ReliableMulticast::join_i: ")
-                      ACE_TEXT("failed to schedule timer!\n")),
+                      ACE_TEXT("failed to schedule watchdog timer!\n")),
                      false);
   }
 
@@ -249,27 +252,9 @@ ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
 }
 
 void
-ReliableMulticast::cancel_syn_timer()
-{
-  if (this->syn_timer_id_ == -1) return;
-
-  ACE_Reactor* reactor = get_reactor();
-  if (reactor == 0) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("ReliableMulticast::leave_i: ")
-               ACE_TEXT("NULL reactor reference!\n")));
-    return;
-  }
-
-  reactor->cancel_timer(this->syn_timer_id_);
-  this->syn_timer_id_ = -1; // invalidate handle
-}
-
-void
 ReliableMulticast::leave_i()
 {
-  cancel_syn_timer();
+  this->syn_watchdog_.cancel();
 }
 
 } // namespace DCPS

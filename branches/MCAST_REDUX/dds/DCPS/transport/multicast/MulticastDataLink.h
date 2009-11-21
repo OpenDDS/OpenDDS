@@ -16,10 +16,10 @@
 #include "MulticastTransport_rch.h"
 #include "MulticastConfiguration.h"
 #include "MulticastConfiguration_rch.h"
-#include "MulticastSendStrategy_rch.h"
 #include "MulticastSendStrategy.h"
-#include "MulticastReceiveStrategy_rch.h"
+#include "MulticastSendStrategy_rch.h"
 #include "MulticastReceiveStrategy.h"
+#include "MulticastReceiveStrategy_rch.h"
 
 #include "ace/Basic_Types.h"
 #include "ace/SOCK_Dgram_Mcast.h"
@@ -37,7 +37,7 @@ public:
   MulticastDataLink(MulticastTransport* transport,
                     ACE_INT32 local_peer,
                     ACE_INT32 remote_peer);
-  
+
   virtual ~MulticastDataLink();
 
   void configure(MulticastConfiguration* config,
