@@ -12,18 +12,18 @@
 
 ACE_INLINE
 OpenDDS::DCPS::TransportHeader::TransportHeader()
-  : sequence_(0),
+  : version_(DCPS_VERSION),
+    source_(0),
+    sequence_(0),
     length_(0)
 {
   DBG_ENTRY_LVL("TransportHeader","TransportHeader",6);
 
   this->byte_order_ = TAO_ENCAP_BYTE_ORDER;
-  this->packet_id_[0] = supported_id_[0];
-  this->packet_id_[1] = supported_id_[1];
-  this->packet_id_[2] = supported_id_[2];
-  this->packet_id_[3] = supported_id_[3];
-  this->packet_id_[4] = supported_id_[4];
-  this->packet_id_[5] = supported_id_[5];
+  this->protocol_[0] = DCPS_PROTOCOL[0];  // D
+  this->protocol_[1] = DCPS_PROTOCOL[1];  // C
+  this->protocol_[2] = DCPS_PROTOCOL[2];  // P
+  this->protocol_[3] = DCPS_PROTOCOL[3];  // S
 }
 
 ACE_INLINE
@@ -65,7 +65,9 @@ OpenDDS::DCPS::TransportHeader::max_marshaled_size()
   DBG_ENTRY_LVL("TransportHeader","max_marshaled_size",6);
   // Representation takes no extra space for encoding.
   return sizeof(this->byte_order_) +
-         sizeof(this->packet_id_) +
+         sizeof(this->protocol_) +
+         sizeof(this->version_) +
+         sizeof(this->source_) +
          sizeof(this->sequence_) +
          sizeof(this->length_);
 }
@@ -76,21 +78,11 @@ OpenDDS::DCPS::TransportHeader::valid() const
 {
   DBG_ENTRY_LVL("TransportHeader","valid",6);
 
-  const char* valid_bytes = reinterpret_cast<const char*>(supported_id_);
-  const char* check_bytes = reinterpret_cast<const char*>(this->packet_id_);
-
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-        "supported_id_ bytes == [%X] [%X] [%X] [%X] [%X] [%X]\n",
-        valid_bytes[0],valid_bytes[1],valid_bytes[2],
-        valid_bytes[3],valid_bytes[4],valid_bytes[5]));
-
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-        "this->packet_id_ bytes == [%X] [%X] [%X] [%X] [%X] [%X]\n",
-        check_bytes[0],check_bytes[1],check_bytes[2],
-        check_bytes[3],check_bytes[4],check_bytes[5]));
-
-  // Only return true if the check_bytes match the valid_bytes.
-  return 0 == ACE_OS::strncmp(valid_bytes, check_bytes, sizeof(supported_id_));
+  return this->protocol_[0] == DCPS_PROTOCOL[0] &&  // D
+         this->protocol_[1] == DCPS_PROTOCOL[1] &&  // C
+         this->protocol_[2] == DCPS_PROTOCOL[2] &&  // P
+         this->protocol_[3] == DCPS_PROTOCOL[3] &&  // S
+         this->version_ == DCPS_VERSION;
 }
 
 ACE_INLINE
@@ -107,11 +99,14 @@ OpenDDS::DCPS::TransportHeader::init(ACE_Message_Block* buffer)
   reader.swap_bytes(this->byte_order_ != TAO_ENCAP_BYTE_ORDER);
 
   // Extract the packet_id_ octet values.
-  reader.read_octet_array(this->packet_id_, sizeof(this->packet_id_));
+  reader.read_octet_array(this->protocol_, sizeof(this->protocol_));
+  if (reader.good_bit() != true) return;  // bad reader
 
-  if (reader.good_bit() != true) {
-    return;
-  }
+  // Extract the version_ value.
+  reader >> ACE_InputCDR::to_octet(this->version_);
+
+  // Extract the source_id_ value.
+  reader >> this->source_;
 
   // Extract the sequence_ value.
   reader >> this->sequence_;

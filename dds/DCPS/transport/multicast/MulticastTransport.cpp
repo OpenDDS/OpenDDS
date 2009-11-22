@@ -33,8 +33,7 @@ namespace DCPS {
 // on default group addresses as the selection heuristic assigns
 // from the link-local range. Since the TTL will always be 1
 // (non-routable), setting the TOS would provide little to no
-// benefit at the cost of significant complexity managing n-way
-// reservations based on priority key.
+// benefit.
 
 DataLink*
 MulticastTransport::find_or_create_datalink(

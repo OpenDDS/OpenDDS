@@ -1519,6 +1519,27 @@ OpenDDS::DCPS::TransportSendStrategy::get_packet_elems_from_queue()
 }
 
 void
+OpenDDS::DCPS::TransportSendStrategy::prepare_header()
+{
+  DBG_ENTRY_LVL("TransportSendStrategy","prepare_header",6);
+
+  // Increment header sequence for packet:
+  this->header_.sequence_ = ++this->header_sequence_;
+  
+  // Allow the specific implementation the opportunity to set
+  // values in the packet header.
+  this->prepare_header_i();
+}
+
+void
+OpenDDS::DCPS::TransportSendStrategy::prepare_header_i()
+{
+  DBG_ENTRY_LVL("TransportSendStrategy","prepare_header_i",6);
+
+  // Default implementation does nothing.
+}
+
+void
 OpenDDS::DCPS::TransportSendStrategy::prepare_packet()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","prepare_packet",6);
@@ -1536,6 +1557,9 @@ OpenDDS::DCPS::TransportSendStrategy::prepare_packet()
   */
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Marshall the packet header.\n"));
+
+  // Prepare the header for sending.
+  this->prepare_header();
 
   // First make sure that the header_block_ is "reset".
   this->header_block_->rd_ptr(this->header_block_->base());
@@ -1574,9 +1598,6 @@ OpenDDS::DCPS::TransportSendStrategy::prepare_packet()
   // Allow the specific implementation the opportunity to process the
   // newly prepared packet.
   this->prepare_packet_i();
-
-  // Increment header sequence for next packet.
-  this->header_.sequence_++;
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Set the header_complete_ flag to false (0).\n"));

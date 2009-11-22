@@ -11,6 +11,7 @@
 #define OPENDDS_DCPS_TRANSPORTSENDSTRATEGY_H
 
 #include "dds/DCPS/dcps_export.h"
+#include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/RcObject_T.h"
 #include "ThreadSynchWorker.h"
 #include "TransportDefs.h"
@@ -144,6 +145,9 @@ protected:
   virtual ACE_HANDLE get_handle();
 
   virtual ssize_t send_bytes_i(const iovec iov[], int n) = 0;
+  
+  /// Specific implementation processing of prepared packet header.
+  virtual void prepare_header_i();
 
   /// Specific implementation processing of prepared packet.
   virtual void prepare_packet_i();
@@ -193,6 +197,10 @@ private:
   /// After this step has been done, the prepare_packet() step can
   /// be performed, followed by the actual send_packet() call.
   void get_packet_elems_from_queue();
+  
+  /// This method is responsible for updating the packet header.
+  /// Called exclusively by prepare_packet.
+  void prepare_header();
 
   /// This method is responsible for actually "creating" the current
   /// send packet using the packet header and the collection of
@@ -277,14 +285,14 @@ private:
   //QueueType* not_yet_pac_q_;
   //size_t not_yet_pac_q_len_;
 
-  /// Current transport packet header.
-  TransportHeader header_;
-
   /// Maximum marshalled size of the transport packet header.
   size_t max_header_size_;
 
   /// Current transport packet header, marshalled.
   ACE_Message_Block* header_block_;
+
+  /// Current transport header sequence number.
+  SequenceNumber header_sequence_;
 
   /// Current elements that have contributed blocks to the current
   /// transport packet.
@@ -351,6 +359,9 @@ private:
 
   //remove these are only for debugging: DUMP_FOR_PACKET_INFO
 protected:
+  /// Current transport packet header.
+  TransportHeader header_;
+
   ACE_Message_Block*    dup_pkt_chain;
   ACE_Message_Block*    act_pkt_chain_ptr;
   void*                 act_elems_head_ptr;
@@ -359,7 +370,6 @@ protected:
   TransportHeader       dup_presend_header;
   const char*           called_from;
   const char*           completely_filled;
-
 };
 
 } // namespace DCPS

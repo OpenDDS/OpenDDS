@@ -32,5 +32,12 @@ MulticastSendStrategy::send_bytes_i(const iovec iov[], int n)
   return socket.send(iov, n);
 }
 
+void
+MulticastSendStrategy::prepare_header_i()
+{
+  // Tag outgoing packets with our participantId:
+  this->header_.source_ = this->link_->local_peer();
+}
+
 } // namespace DCPS
 } // namespace OpenDDS

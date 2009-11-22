@@ -1,3 +1,18 @@
+Sun Nov 22 21:38:03 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          General refactorings; updated DCPS PDUs.
+
 Sun Nov 22 17:23:59 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
