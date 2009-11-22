@@ -37,8 +37,8 @@ bool
 SynWatchdog::on_interval(const void* /*arg*/)
 {
   // Initiate handshake by broadcasting MULTICAST_SYN control
-  // messages for a specific passive peer. We will always select
-  // passive peer based on the remote peer assigned when the
+  // messages for a specific passive peer. The passive peer 
+  // selected is based on the remote peer assigned when the
   // DataLink was created:
   this->link_->send_syn(this->link_->remote_peer());
   return true;  // reschedule
@@ -182,10 +182,10 @@ ReliableMulticast::synack_received(ACE_Message_Block* message)
 
   this->syn_watchdog_.cancel();
 
-  // The handshake is now complete; we have verified that the
-  // passive peer is indeed accepting (and responding) to samples
-  // reliably. Adjust the acked flag and force the TransportImpl
-  // to re-evaluate any pending associations it has queued:
+  // 2-way handshake is complete; we have verified that the passive
+  // peer is indeed sending/receiving data reliably. Adjust the
+  // acked flag and force the TransportImpl to re-evaluate any
+  // pending associations it has queued:
   this->acked_ = true;
   this->transport_->check_fully_association();
 }
@@ -231,11 +231,11 @@ ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
 {
   if (!active) return true; // passive peers are done
 
-  // Active peers must initiate a handshake to verify the DataLink
-  // is indeed reliable. We do this by scheduling a watchdog timer
-  // to broadcast MULTICAST_SYN control messages to passive peers
-  // at fixed intervals. This process must be executed using the
-  // transport reactor thread to prevent blocking.
+  // Active peers initiate a 2-way handshake to verify passive peers
+  // can send/receive data reliably. We do this by scheduling a
+  // watchdog timer to broadcast MULTICAST_SYN control messages to
+  // passive peers at fixed intervals. This process must be executed
+  // using the transport reactor thread to prevent blocking.
   ACE_Reactor* reactor = get_reactor();
   if (reactor == 0) {
     ACE_ERROR_RETURN((LM_ERROR,

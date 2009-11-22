@@ -10,8 +10,10 @@
 #ifndef DCPS_DATALINKWATCHDOG_T_H
 #define DCPS_DATALINKWATCHDOG_T_H
 
+#include "ace/Global_Macros.h"
 #include "ace/Event_Handler.h"
 #include "ace/Log_Msg.h"
+#include "ace/Mutex.h"
 #include "ace/Time_Value.h"
 
 #include "ace/OS_NS_time.h"
@@ -30,9 +32,16 @@ public:
       timer_id_(-1)
   {}
 
-  virtual ~DataLinkWatchdog() {}
+  virtual ~DataLinkWatchdog() {
+    cancel();
+  }
   
   bool schedule(ACE_Reactor* reactor, const void* arg = 0) {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex,
+                     guard,
+                     this->lock_,
+                     false);
+
     if (this->timer_id_ != -1) return false;
 
     this->epoch_ = ACE_OS::gettimeofday();
@@ -48,11 +57,15 @@ public:
   }
 
   void cancel() {
+    ACE_GUARD(ACE_Thread_Mutex,
+              guard,
+              this->lock_);
+
     if (this->timer_id_ != -1) {
       this->reactor_->cancel_timer(this->timer_id_);
 
-      this->reactor_ = 0;   // invalidate handle
-      this->timer_id_ = -1; // invalidate handle
+      this->reactor_ = 0;
+      this->timer_id_ = -1;
     }
   }
   
@@ -92,6 +105,8 @@ protected:
   virtual void on_timeout(const void* arg) = 0;
 
 private:
+  ACE_Thread_Mutex lock_;
+
   ACE_Reactor* reactor_;
   long timer_id_;
 

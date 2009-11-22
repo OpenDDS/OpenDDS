@@ -13,9 +13,11 @@
 #include "EntryExit.h"
 
 const ACE_CDR::Octet
-OpenDDS::DCPS::TransportHeader::supported_id_[6] =
-  { 0x44, 0x43, 0x50, 0x53, 0x01, 0x00 } ;
-//   D     C     P     S     1     0
+OpenDDS::DCPS::TransportHeader::DCPS_PROTOCOL[] =
+  { 0x44, 0x43, 0x50, 0x53 }; // DCPS
+
+const ACE_CDR::Octet
+OpenDDS::DCPS::TransportHeader::DCPS_VERSION = 0x11; // 1.1
 
 #if !defined (__ACE_INLINE__)
 # include "TransportHeader.inl"
@@ -32,7 +34,9 @@ operator<<(ACE_Message_Block& buffer, OpenDDS::DCPS::TransportHeader& value)
   TAO::DCPS::Serializer writer(&buffer, value.byte_order_ != TAO_ENCAP_BYTE_ORDER);
   writer << ACE_OutputCDR::from_octet(value.byte_order_);
 
-  writer.write_octet_array(value.packet_id_, sizeof(value.packet_id_)) ;
+  writer.write_octet_array(value.protocol_, sizeof(value.protocol_));
+  writer << ACE_OutputCDR::from_octet(value.version_);
+  writer << value.source_;
   writer << value.sequence_;
   writer << value.length_;
 
@@ -47,7 +51,9 @@ operator<<(ACE_Message_Block*& buffer, OpenDDS::DCPS::TransportHeader& value)
   TAO::DCPS::Serializer writer(buffer, value.byte_order_ != TAO_ENCAP_BYTE_ORDER);
   writer << ACE_OutputCDR::from_octet(value.byte_order_);
 
-  writer.write_octet_array(value.packet_id_, sizeof(value.packet_id_)) ;
+  writer.write_octet_array(value.protocol_, sizeof(value.protocol_));
+  writer << ACE_OutputCDR::from_octet(value.version_);
+  writer << value.source_;
   writer << value.sequence_;
   writer << value.length_;
 

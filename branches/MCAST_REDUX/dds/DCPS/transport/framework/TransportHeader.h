@@ -26,6 +26,9 @@ namespace DCPS {
  * same transport packet).
  */
 struct OpenDDS_Dcps_Export TransportHeader {
+  static const ACE_CDR::Octet DCPS_PROTOCOL[];
+  static const ACE_CDR::Octet DCPS_VERSION;
+
   /// Default constructor.
   TransportHeader();
 
@@ -46,8 +49,15 @@ struct OpenDDS_Dcps_Export TransportHeader {
   /// instance.
   ACE_CDR::Octet byte_order_;
 
-  /// The protocol and version of the packet being transmitted.
-  ACE_CDR::Octet packet_id_[6];
+  /// The protocol of the packet being transmitted.
+  ACE_CDR::Octet protocol_[4];
+
+  /// The version of the protocol.
+  ACE_CDR::Octet version_;
+
+  /// A transport-specific identification number which uniquely
+  /// identifies the source of the packet.
+  ACE_INT32 source_;
 
   /// The sequence number of the packet identified by this header; this
   /// value is guaranteed to be a monotonically increasing number per
@@ -62,12 +72,8 @@ struct OpenDDS_Dcps_Export TransportHeader {
   size_t max_marshaled_size() ;
 
 private:
-
   /// Demarshall transport packet from ACE_Message_Block.
   void init(ACE_Message_Block* buffer);
-
-  /// Supported value of the packet ID.
-  static const ACE_CDR::Octet supported_id_[ 6] ;
 };
 
 } // namespace DCPS

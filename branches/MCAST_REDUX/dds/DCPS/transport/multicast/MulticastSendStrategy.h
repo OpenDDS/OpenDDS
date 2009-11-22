@@ -29,6 +29,7 @@ public:
 
 protected:
   virtual ssize_t send_bytes_i(const iovec iov[], int n);
+  virtual void prepare_header_i();
 
 private:
   MulticastDataLink_rch link_;
