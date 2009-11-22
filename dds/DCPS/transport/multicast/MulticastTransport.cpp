@@ -81,7 +81,7 @@ MulticastTransport::find_or_create_datalink(
                      0);
   }
 
-  // Configure link with configuration and reactor task:
+  // Configure link with transport configuration and reactor task:
   link->configure(this->config_i_.in(), reactor_task());
 
   // Assign blessed send/receive strategies:
