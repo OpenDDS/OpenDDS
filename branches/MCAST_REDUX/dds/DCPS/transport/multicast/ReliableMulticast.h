@@ -14,7 +14,7 @@
 
 #include "MulticastDataLink.h"
 
-#include "dds/DCPS/transport/framework/TransportWatchdog_T.h"
+#include "dds/DCPS/transport/framework/DataLinkWatchdog_T.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -27,16 +27,16 @@ enum MulticastSubMessageId {
 class ReliableMulticast;
 
 class OpenDDS_Multicast_Export SynWatchdog
-  : public TransportWatchdog<ReliableMulticast> {
+  : public DataLinkWatchdog<ReliableMulticast> {
 public:
-  SynWatchDog(ReliableMulticast* link);
+  explicit SynWatchdog(ReliableMulticast* link);
 
 protected:
-  virtual ACE_Time_Value get_interval();
-  virtual bool handle_interval(const void* arg);
+  virtual ACE_Time_Value next_interval();
+  virtual bool on_interval(const void* arg);
 
-  virtual ACE_Time_Value get_timeout();
-  virtual void handle_timeout(const void* arg);
+  virtual ACE_Time_Value next_timeout();
+  virtual void on_timeout(const void* arg);
 };
 
 class OpenDDS_Multicast_Export ReliableMulticast
