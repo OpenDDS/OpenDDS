@@ -37,9 +37,8 @@ bool
 SynWatchdog::on_interval(const void* /*arg*/)
 {
   // Initiate handshake by broadcasting MULTICAST_SYN control
-  // messages for a specific passive peer. The passive peer 
-  // selected is based on the remote peer assigned when the
-  // DataLink was created:
+  // messages for a specific remote peer (this is the same
+  // remote peer assigned when the DataLink was created).
   this->link_->send_syn(this->link_->remote_peer());
   return true;  // reschedule
 }
@@ -59,11 +58,11 @@ void
 SynWatchdog::on_timeout(const void* /*arg*/)
 {
   // There is no recourse if a link is unable to handshake; log
-  // a warning and return. In the future, it may be worthwhile to
+  // an error and return. In the future, it may be worthwhile to
   // allow a DataLink to initiate the removal of an association
   // via the TransportSendListener interface.
-  ACE_ERROR((LM_WARNING,
-             ACE_TEXT("(%P|%t) WARNING: ")
+  ACE_ERROR((LM_ERROR,
+             ACE_TEXT("(%P|%t) ERROR: ")
              ACE_TEXT("SynWatchdog::on_timeout: ")
              ACE_TEXT("timed out handshaking with remote peer: 0x%x!\n"),
              this->link_->remote_peer()));
@@ -231,11 +230,11 @@ ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
 {
   if (!active) return true; // passive peers are done
 
-  // Active peers initiate a 2-way handshake to verify passive peers
-  // can send/receive data reliably. We do this by scheduling a
-  // watchdog timer to broadcast MULTICAST_SYN control messages to
-  // passive peers at fixed intervals. This process must be executed
-  // using the transport reactor thread to prevent blocking.
+  // Active peers initiate a 2-way handshake to verify that passive
+  // endpoints can send/receive data reliably. A watchdog timer is
+  // scheduled to broadcast MULTICAST_SYN control messages at fixed
+  // intervals. This process must be executed using the transport
+  // reactor thread to prevent blocking.
   ACE_Reactor* reactor = get_reactor();
   if (reactor == 0) {
     ACE_ERROR_RETURN((LM_ERROR,
