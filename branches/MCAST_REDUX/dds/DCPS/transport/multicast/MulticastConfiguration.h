@@ -13,7 +13,6 @@
 #include "Multicast_Export.h"
 
 #include "ace/INET_Addr.h"
-#include "ace/Time_Value.h"
 
 #include "dds/DCPS/transport/framework/TransportConfiguration.h"
 
@@ -76,12 +75,6 @@ public:
   /// default value is 30000 (30 seconds).
   long nak_timeout_;
 
-  /// Convenience conversion function for syn_internal:
-  ACE_Time_Value syn_interval() const;
-
-  /// Convenience conversion function for syn_timeout:
-  ACE_Time_Value syn_timeout() const;
-
 private:
   void default_group_address(ACE_INET_Addr& group_address,
                              const TransportIdType& id);
@@ -89,9 +82,5 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
-
-#ifdef __ACE_INLINE__
-# include "MulticastConfiguration.inl"
-#endif  /* __ACE_INLINE__ */
 
 #endif  /* DCPS_MULTICASTCONFIGURATION_H */

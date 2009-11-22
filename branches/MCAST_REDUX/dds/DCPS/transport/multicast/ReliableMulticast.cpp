@@ -22,20 +22,24 @@ SynWatchdog::SynWatchdog(ReliableMulticast* link)
 ACE_Time_Value
 SynWatchdog::next_interval()
 {
+  ACE_Time_Value interval;
+
   // Currently we execute at a fixed rate. In the future, it may
   // be worthwhile to introduce an exponential backoff to prevent
   // potential SYN flooding in large multicast groups.
   MulticastConfiguration* config = this->link_->config();
-  return config->syn_interval();
+  interval.msec(config->syn_interval_);
+
+  return interval;
 }
 
 bool
 SynWatchdog::on_interval(const void* /*arg*/)
 {
   // Initiate a handshake by broadcasting a MULTICAST_SYN control
-  // message for a specific remote peer. In this case, we will
-  // always select the (passive) remote peer assigned when the
-  // DataLink was created:
+  // message for a specific remote peer. Currently, we will always
+  // select the remote (passive) peer assigned when the DataLink
+  // was created:
   this->link_->send_syn(this->link_->remote_peer());
   return true;  // reschedule
 }
@@ -43,8 +47,12 @@ SynWatchdog::on_interval(const void* /*arg*/)
 ACE_Time_Value
 SynWatchdog::next_timeout()
 {
+  ACE_Time_Value timeout;
+
   MulticastConfiguration* config = this->link_->config();
-  return config->syn_timeout();
+  timeout.msec(config->syn_timeout_);
+
+  return timeout;
 }
 
 void
@@ -227,7 +235,7 @@ ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
   // is indeed reliable. We do this by scheduling a watchdog timer
   // to broadcast MULTICAST_SYN control messages to passive peers
   // at fixed intervals. This process must be executed using the
-  // reactor thread to prevent blocking the current thread.
+  // transport reactor thread to prevent blocking.
   ACE_Reactor* reactor = get_reactor();
   if (reactor == 0) {
     ACE_ERROR_RETURN((LM_ERROR,

@@ -9,10 +9,6 @@
 
 #include "MulticastConfiguration.h"
 
-#ifndef __ACE_INLINE__
-# include "MulticastConfiguration.inl"
-#endif  /* __ACE_INLINE__ */
-
 namespace {
 
 const bool DEFAULT_DEFAULT_TO_IPV6(false);
