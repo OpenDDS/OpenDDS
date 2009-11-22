@@ -11,8 +11,10 @@
 #define DCPS_DATALINKWATCHDOG_T_H
 
 #include "ace/Event_Handler.h"
-#include "ace/OS_NS_time.h"
+#include "ace/Log_Msg.h"
 #include "ace/Time_Value.h"
+
+#include "ace/OS_NS_time.h"
 
 namespace OpenDDS {
 namespace DCPS {
