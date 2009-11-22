@@ -22,12 +22,12 @@ SynWatchdog::SynWatchdog(ReliableMulticast* link)
 ACE_Time_Value
 SynWatchdog::next_interval()
 {
-  ACE_Time_Value interval;
-
-  // Currently we execute at a fixed rate. In the future, it may
-  // be worthwhile to introduce an exponential backoff to prevent
-  // potential SYN flooding in large multicast groups.
   MulticastConfiguration* config = this->link_->config();
+
+  // In the future, it may be worthwhile to introduce an
+  // exponential backoff to prevent potential SYN flooding in
+  // large multicast groups.
+  ACE_Time_Value interval;
   interval.msec(config->syn_interval_);
 
   return interval;
@@ -36,10 +36,10 @@ SynWatchdog::next_interval()
 bool
 SynWatchdog::on_interval(const void* /*arg*/)
 {
-  // Initiate a handshake by broadcasting a MULTICAST_SYN control
-  // message for a specific remote peer. Currently, we will always
-  // select the remote (passive) peer assigned when the DataLink
-  // was created:
+  // Initiate handshake by broadcasting MULTICAST_SYN control
+  // messages for a specific passive peer. We will always select
+  // passive peer based on the remote peer assigned when the
+  // DataLink was created:
   this->link_->send_syn(this->link_->remote_peer());
   return true;  // reschedule
 }
@@ -47,9 +47,9 @@ SynWatchdog::on_interval(const void* /*arg*/)
 ACE_Time_Value
 SynWatchdog::next_timeout()
 {
-  ACE_Time_Value timeout;
-
   MulticastConfiguration* config = this->link_->config();
+  
+  ACE_Time_Value timeout;
   timeout.msec(config->syn_timeout_);
 
   return timeout;
