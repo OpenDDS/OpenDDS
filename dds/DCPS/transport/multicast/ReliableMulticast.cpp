@@ -14,51 +14,49 @@
 namespace OpenDDS {
 namespace DCPS {
 
-// N.B. The SynWatchdog currently executes at a fixed rate which is
-// determined by the syn_interval configuration option. In the
-// future, it may be worthwhile to introduce an exponential backoff
-// to prevent potential SYN flooding in large multicast groups.
-
-SynWatchDog::SynWatchDog(ReliableMulticast* link)
-  : TransportWatchdog<ReliableMulticast>(link)
+SynWatchdog::SynWatchdog(ReliableMulticast* link)
+  : DataLinkWatchdog<ReliableMulticast>(link)
 {
 }
 
 ACE_Time_Value
-SynWatchdog::get_interval()
+SynWatchdog::next_interval()
 {
+  // Currently we execute at a fixed rate. In the future, it may
+  // be worthwhile to introduce an exponential backoff to prevent
+  // potential SYN flooding in large multicast groups.
   MulticastConfiguration* config = this->link_->config();
   return config->syn_interval();
 }
 
 bool
-SynWatchdog::handle_interval(const void* /*arg*/)
+SynWatchdog::on_interval(const void* /*arg*/)
 {
   // Initiate a handshake by broadcasting a MULTICAST_SYN control
   // message for a specific remote peer. In this case, we will
   // always select the (passive) remote peer assigned when the
   // DataLink was created:
   this->link_->send_syn(this->link_->remote_peer());
-  return true;  // reschedule if timeout not exceeded
+  return true;  // reschedule
 }
 
 ACE_Time_Value
-SynWatchdog::get_timeout()
+SynWatchdog::next_timeout()
 {
   MulticastConfiguration* config = this->link_->config();
   return config->syn_timeout();
 }
 
 void
-SynWatchdog::handle_timeout(const void* /*arg*/)
+SynWatchdog::on_timeout(const void* /*arg*/)
 {
-  // There is no recourse if a link is unable to handshake; log a
-  // warning and return. In the future, it may be worthwhile to
-  // allow a DataLink to initiate (via the TransportSendListener
-  // interface) the removal of an association.
-  ACE_ERROR((LM_ERROR,
-             ACE_TEXT("(%P|%t) ERROR: ")
-             ACE_TEXT("SynWatchdog::handle_timeout: ")
+  // There is no recourse if a link is unable to handshake; log
+  // a warning and return. In the future, it may be worthwhile to
+  // allow a DataLink to initiate the removal of an association
+  // via the TransportSendListener interface.
+  ACE_ERROR((LM_WARNING,
+             ACE_TEXT("(%P|%t) WARNING: ")
+             ACE_TEXT("SynWatchdog::on_timeout: ")
              ACE_TEXT("timed out handshaking with remote peer: 0x%x!\n"),
              this->link_->remote_peer()));
 }
@@ -230,7 +228,6 @@ ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
   // to broadcast MULTICAST_SYN control messages to passive peers
   // at fixed intervals. This process must be executed using the
   // reactor thread to prevent blocking the current thread.
-
   ACE_Reactor* reactor = get_reactor();
   if (reactor == 0) {
     ACE_ERROR_RETURN((LM_ERROR,

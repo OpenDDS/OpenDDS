@@ -1,3 +1,11 @@
+Sun Nov 22 17:23:59 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Refactored watchdog support for DataLinks.
+
 Sat Nov 21 00:59:52 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportWatchdog_T.h:
