@@ -1,3 +1,26 @@
+Mon Nov 23 20:20:52 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/framework/CopyChainVisitor.h:
+        * dds/DCPS/transport/framework/CopyChainVisitor.inl:
+        * dds/DCPS/transport/framework/CopyChainVisitor.cpp:
+
+          New visitor type to copy an existing
+          BasicQueue<TransportQueueElement> object into a new one using
+          TransportRetainedElement link types.
+
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+
+          Removed an obsolete comment.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          do_send_packet()
+            - Added the packet being sent to the method signature
+              rather than sending a packet stored in a member.
+              This simplifies resending retained PDUs for reliable
+              datagram based transports.
+
 Mon Nov 23 19:49:11 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
