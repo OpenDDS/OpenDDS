@@ -15,67 +15,10 @@
 #include "EntryExit.h"
 
 ACE_INLINE
-OpenDDS::DCPS::TransportImpl::TransportImpl()
-{
-  DBG_ENTRY_LVL("TransportImpl","TransportImpl",6);
-}
-
-ACE_INLINE
 OpenDDS::DCPS::TransportConfiguration*
 OpenDDS::DCPS::TransportImpl::config() const
 {
   return this->config_.in();
-}
-
-ACE_INLINE int
-OpenDDS::DCPS::TransportImpl::configure(TransportConfiguration* config)
-{
-  DBG_ENTRY_LVL("TransportImpl","configure",6);
-
-  GuardType guard(this->lock_);
-
-  if (config == 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: invalid configuration.\n"),
-                     -1);
-  }
-
-  if (!this->config_.is_nil()) {
-    // We are rejecting this configuration attempt since this
-    // TransportImpl object has already been configured.
-    ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: TransportImpl already configured.\n"),
-                     -1);
-  }
-
-//MJM: So we disallow dynamic reconfiguration?  So if we want a
-//MJM: different configuration, we should kill this one and create and
-//MJM: configure a new one...
-
-  // Let our subclass take a shot at the configuration object.
-  if (this->configure_i(config) == -1) {
-    // The subclass rejected the configuration attempt.
-    ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: TransportImpl configuration failed.\n"),
-                     -1);
-  }
-
-  // Our subclass accepted the configuration attempt.
-  // Save off a "copy" of the reference for ourselves.
-  config->_add_ref();
-  this->config_ = config;
-
-  // Open the DL Cleanup task
-  // We depend upon the existing config logic to ensure the
-  // DL Cleanup task is opened only once
-  if (this->dl_clean_task_.open()) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: DL Cleanup task failed to open : %p\n",
-                      ACE_TEXT("open")), -1);
-  }
-
-  // Success.
-  return 0;
 }
 
 /// NOTE: Should only be called if this->lock_ has already been acquired.

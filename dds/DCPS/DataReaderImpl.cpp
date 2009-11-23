@@ -24,6 +24,7 @@
 #include "Util.h"
 #include "RequestedDeadlineWatchdog.h"
 #include "QueryConditionImpl.h"
+#include "MonitorFactory.h"
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #if !defined (DDS_HAS_MINIMUM_BIT)
@@ -65,7 +66,9 @@ DataReaderImpl::DataReaderImpl()
     always_get_history_(false),
     statistics_enabled_(false),
     raw_latency_buffer_size_(0),
-    raw_latency_buffer_type_(DataCollector<double>::KeepOldest)
+    raw_latency_buffer_type_(DataCollector<double>::KeepOldest),
+    monitor_(0),
+    periodic_monitor_(0)
 {
   CORBA::ORB_var orb = TheServiceParticipant->get_ORB();
   reactor_ = orb->orb_core()->reactor();
@@ -105,6 +108,9 @@ DataReaderImpl::DataReaderImpl()
   this->budget_exceeded_status_.total_count = 0;
   this->budget_exceeded_status_.total_count_change = 0;
   this->budget_exceeded_status_.last_instance_handle = DDS::HANDLE_NIL;
+
+  monitor_ = TheServiceParticipant->monitor_factory_->create_data_reader_monitor(this);
+  periodic_monitor_ = TheServiceParticipant->monitor_factory_->create_data_reader_periodic_monitor(this);
 }
 
 // This method is called when there are no longer any reference to the
@@ -1092,6 +1098,10 @@ ACE_THROW_SPEC((CORBA::SystemException))
                          this->dr_local_objref_.in(),
                          this->requested_deadline_missed_status_,
                          this->last_deadline_missed_total_count_));
+  }
+
+  if (this->monitor_) {
+    this->monitor_->report();
   }
 
   this->set_enabled();

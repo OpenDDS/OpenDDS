@@ -1,0 +1,58 @@
+
+project(Monitor*idl): dcps {
+  // This project ensures the common components get built first.
+
+  TypeSupport_Files {
+    Messenger.idl
+  }
+
+  custom_only = 1
+}
+
+
+project(Monitor*Publisher) : dcpsexe_with_tcp, dcps_unreliable_dgram, dcps_reliable_multicast {
+
+  exename   = publisher
+  after    += DDS*idl
+
+  TypeSupport_Files {
+    Messenger.idl
+  }
+
+  Source_Files {
+    publisher.cpp
+    Writer.cpp
+  }
+}
+
+project(Monitor*Subscriber) : dcpsexe_with_tcp, dcps_unreliable_dgram, dcps_reliable_multicast {
+
+  exename   = subscriber
+  after    += DDS*idl
+
+  TypeSupport_Files {
+    Messenger.idl
+  }
+
+  Source_Files {
+    subscriber.cpp
+    DataReaderListener.cpp
+  }
+}
+
+project(Monitor*monitor) : dcpsexe_with_tcp {
+
+  exename   = monitor
+  after    += DDS*idl
+  libs     += OpenDDS_monitor
+
+  TypeSupport_Files {
+  }
+
+  Source_Files {
+    monitor.cpp
+    SPMDataReaderListener.cpp
+    DPMDataReaderListener.cpp
+    TopicMDataReaderListener.cpp
+  }
+}

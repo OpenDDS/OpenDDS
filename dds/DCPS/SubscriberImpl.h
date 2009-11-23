@@ -33,7 +33,8 @@ namespace DCPS {
 
 // Forward declarations
 class DomainParticipantImpl;
-class DataReaderImpl ;
+class DataReaderImpl;
+class Monitor;
 
 // Keep track of all the DataReaders attached to this
 // Subscriber
@@ -229,6 +230,9 @@ private:
   /// It also projects the TransportInterface (it must be held when
   /// calling any TransportInterface method).
   ACE_Recursive_Thread_Mutex   si_lock_;
+
+  /// Monitor object for this entity
+  Monitor* monitor_;
 };
 
 } // namespace DCPS

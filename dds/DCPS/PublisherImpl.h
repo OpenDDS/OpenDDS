@@ -32,6 +32,7 @@ namespace DCPS {
 
 class DomainParticipantImpl;
 class DataWriterImpl;
+class Monitor;
 
 /// Information about a DataWriter
 struct OpenDDS_Dcps_Export PublisherDataWriterInfo {
@@ -268,6 +269,9 @@ private:
 
   /// The catched available data while suspending.
   DataSampleList                available_data_list_;
+
+  /// Monitor object for this entity
+  Monitor* monitor_;
 };
 
 } // namespace  DDS

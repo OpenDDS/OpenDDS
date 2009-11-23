@@ -138,6 +138,16 @@ public:
   /// to be returned.
   TransportImpl_rch obtain(TransportIdType impl_id);
 
+  /// The "Impl Map"
+  ///
+  ///   Key   == "TransportImpl instance id"
+  ///   Value == TransportImpl object
+  typedef std::map<TransportIdType, TransportImpl_rch> ImplMap;
+
+  /// Method to return the map of Transport Impl instance ids to
+  /// TransportImpl objects
+  const ImplMap& get_transport_impl_map();
+
 private:
 
   /// Get the previously created TransportImplFactory object reference or create
@@ -179,12 +189,6 @@ private:
   ///   Key   == "Transport type"
   ///   Value == TransportImplFactory object
   typedef std::map<FactoryIdType, TransportImplFactory_rch> ImplTypeMap;
-
-  /// The "Impl Map"
-  ///
-  ///   Key   == "TransportImpl instance id"
-  ///   Value == TransportImpl object
-  typedef std::map<TransportIdType, TransportImpl_rch> ImplMap;
 
   /// Thread Lock type
   typedef ACE_SYNCH_MUTEX     LockType;

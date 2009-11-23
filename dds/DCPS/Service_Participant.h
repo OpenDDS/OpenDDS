@@ -18,6 +18,7 @@
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/MonitorFactory.h"
 
 #include "tao/PortableServer/PortableServer.h"
 
@@ -40,6 +41,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 class DataDurabilityCache;
+class Monitor;
 
 const char DEFAULT_ORB_NAME[] = "OpenDDS_DCPS";
 
@@ -108,7 +110,7 @@ public:
    * Initialize the DDS client environment and get the
    * @c DomainParticipantFactory.
    *
-   * This method consumes @c -DCPS* options and thier arguments.
+   * This method consumes @c -DCPS* options and their arguments.
    * Unless the client/application code calls other methods to
    * define how the ORB is run, calling this method will
    * initiallize the ORB and then run it in a separate thread.
@@ -332,7 +334,7 @@ private:
 
   /**
    * Parse the command line for user options. e.g. "-DCPSInfo <iorfile>".
-   * It consumes -DCPS* options and thier arguments
+   * It consumes -DCPS* options and their arguments
    */
   int parse_args(int &argc, ACE_TCHAR *argv[]);
 
@@ -473,6 +475,13 @@ public:
   /// The configuration object that imports the configuration
   /// file.
   ACE_Configuration_Heap cf_;
+
+  /// Pointer to the monitor factory that is used to create 
+  /// monitor objects.
+  MonitorFactory* monitor_factory_;
+
+  /// Pointer to the monitor object for this object
+  Monitor* monitor_;
 
 private:
   /// The FederationRecoveryDuration value in seconds.

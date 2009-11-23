@@ -13,6 +13,7 @@
 #include "BuiltInTopicUtils.h"
 #include "DataDurabilityCache.h"
 #include "RepoIdConverter.h"
+#include "MonitorFactory.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
@@ -87,6 +88,8 @@ Service_Participant::Service_Participant()
 #endif
     ),
     bit_lookup_duration_msec_(BIT_LOOKUP_DURATION_MSEC),
+    monitor_factory_(0),
+    monitor_(0),
     federation_recovery_duration_(DEFAULT_FEDERATION_RECOVERY_DURATION),
     federation_initial_backoff_seconds_(DEFAULT_FEDERATION_INITIAL_BACKOFF_SECONDS),
     federation_backoff_multiplier_(DEFAULT_FEDERATION_BACKOFF_MULTIPLIER),
@@ -105,6 +108,7 @@ Service_Participant::Service_Participant()
 
 Service_Participant::~Service_Participant()
 {
+  delete monitor_;
 }
 
 Service_Participant *
@@ -353,6 +357,17 @@ Service_Participant::get_domain_participant_factory(int &argc,
                        ACE_TEXT("Failed to activate the orb task.")));
             return DDS::DomainParticipantFactory::_nil();
           }
+        }
+
+        this->monitor_factory_ =
+          ACE_Dynamic_Service<MonitorFactory>::instance ("OpenDDS_Monitor");
+
+        if (this->monitor_factory_ == 0) {
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("ERROR: Service_Participant::get_domain_participant_factory, ")
+                     ACE_TEXT ("Unable to initialize Monitor Factory\n")));
+        } else {
+          this->monitor_ = this->monitor_factory_->create_sp_monitor(this);
         }
 
       } catch (const CORBA::Exception& ex) {
