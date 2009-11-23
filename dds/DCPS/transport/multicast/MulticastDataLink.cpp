@@ -8,6 +8,7 @@
  */
 
 #include "MulticastDataLink.h"
+#include "MulticastTransport.h"
 
 #include "ace/Log_Msg.h"
 #include "ace/OS_NS_string.h"
@@ -20,8 +21,8 @@ namespace OpenDDS {
 namespace DCPS {
 
 MulticastDataLink::MulticastDataLink(MulticastTransport* transport,
-                                     ACE_INT32 local_peer,
-                                     ACE_INT32 remote_peer)
+                                     peer_type local_peer,
+                                     peer_type remote_peer)
   : DataLink(transport, 0), // priority
     transport_(transport),
     local_peer_(local_peer),

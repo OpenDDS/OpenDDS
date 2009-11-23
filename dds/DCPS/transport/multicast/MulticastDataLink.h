@@ -12,7 +12,6 @@
 
 #include "Multicast_Export.h"
 
-#include "MulticastTransport.h"
 #include "MulticastTransport_rch.h"
 #include "MulticastConfiguration.h"
 #include "MulticastConfiguration_rch.h"
@@ -34,10 +33,11 @@ namespace DCPS {
 class OpenDDS_Multicast_Export MulticastDataLink
   : public DataLink {
 public:
-  MulticastDataLink(MulticastTransport* transport,
-                    ACE_INT32 local_peer,
-                    ACE_INT32 remote_peer);
+  typedef ACE_INT32 peer_type;
 
+  MulticastDataLink(MulticastTransport* transport,
+                    peer_type local_peer,
+                    peer_type remote_peer);
   virtual ~MulticastDataLink();
 
   void configure(MulticastConfiguration* config,
@@ -46,8 +46,8 @@ public:
   void send_strategy(MulticastSendStrategy* send_strategy);
   void receive_strategy(MulticastReceiveStrategy* recv_strategy);
 
-  ACE_INT32 local_peer() const;
-  ACE_INT32 remote_peer() const;
+  peer_type local_peer() const;
+  peer_type remote_peer() const;
 
   MulticastConfiguration* config();
   TransportReactorTask* reactor_task();
@@ -59,9 +59,6 @@ public:
   bool join(const ACE_INET_Addr& group_address, bool active);
   void leave();
 
-  ACE_RW_Thread_Mutex& active_lock();
-  ACE_RW_Thread_Mutex& passive_lock();
-
   virtual bool header_received(const TransportHeader& header) = 0;
   virtual void sample_received(ReceivedDataSample& sample) = 0;
 
@@ -70,8 +67,8 @@ public:
 protected:
   MulticastTransport_rch transport_;
 
-  ACE_INT32 local_peer_;
-  ACE_INT32 remote_peer_;
+  peer_type local_peer_;
+  peer_type remote_peer_;
 
   MulticastConfiguration_rch config_;
   TransportReactorTask_rch reactor_task_;

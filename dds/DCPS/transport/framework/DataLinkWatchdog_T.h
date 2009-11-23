@@ -35,7 +35,7 @@ public:
   virtual ~DataLinkWatchdog() {
     cancel();
   }
-  
+
   bool schedule(ACE_Reactor* reactor, const void* arg = 0) {
     ACE_GUARD_RETURN(ACE_Thread_Mutex,
                      guard,
@@ -45,15 +45,15 @@ public:
     if (this->timer_id_ != -1) return false;
 
     this->epoch_ = ACE_OS::gettimeofday();
-    
+
     this->reactor_ = reactor;
     this->timer_id_ =
       reactor->schedule_timer(this,  // event_handler
                               arg,
                               ACE_Time_Value::zero,
                               next_interval());
-   
-    return this->timer_id_ != -1; 
+
+    return this->timer_id_ != -1;
   }
 
   void cancel() {
@@ -68,7 +68,7 @@ public:
       this->timer_id_ = -1;
     }
   }
-  
+
   int handle_timeout(const ACE_Time_Value& now, const void* arg) {
     ACE_Time_Value timeout = next_timeout();
     if (timeout != ACE_Time_Value::zero) {
@@ -80,27 +80,24 @@ public:
       }
     }
 
-    if (!on_interval(arg)) {
-      cancel();
-      return 0;
-    }
-  
+    on_interval(arg);
+
     if (this->reactor_->reset_timer_interval(this->timer_id_,
-                                             next_interval()) != 0) { 
+                                             next_interval()) != 0) {
       ACE_ERROR((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: ")
                  ACE_TEXT("DataLinkWatchdog::handle_timeout: ")
                  ACE_TEXT("unable to reset timer interval!\n")));
     }
-    
+
     return 0;
   }
 
 protected:
   ptr_type link_;
-  
+
   virtual ACE_Time_Value next_interval() = 0;
-  virtual bool on_interval(const void* arg) = 0;
+  virtual void on_interval(const void* arg) = 0;
 
   virtual ACE_Time_Value next_timeout() { return ACE_Time_Value::zero; }
   virtual void on_timeout(const void* arg) {}

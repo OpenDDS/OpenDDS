@@ -49,7 +49,7 @@ MulticastTransport::find_or_create_datalink(
   // entities within the same DomainParticipant. Given this, we may
   // assume that the local_id always references the same participant;
   // all we need to associate a DataLink is the remote participantId:
-  long remote_peer =
+  MulticastDataLink::peer_type remote_peer =
     RepoIdConverter(remote_association->remote_id_).participantId();
 
   MulticastDataLinkMap::iterator it = this->links_.find(remote_peer);
@@ -58,7 +58,8 @@ MulticastTransport::find_or_create_datalink(
   // At this point we can assume that we are creating a new DataLink
   // between a logical pair of DomainParticipants (peers) identified
   // by their participantIds:
-  long local_peer = RepoIdConverter(local_id).participantId();
+  MulticastDataLink::peer_type local_peer =
+    RepoIdConverter(local_id).participantId();
 
   // This transport supports two modes of operation: reliable and
   // best-effort. Eventually the selection of this mode will be
@@ -67,13 +68,9 @@ MulticastTransport::find_or_create_datalink(
   // DataLink which forces all samples into one mode or the other:
   MulticastDataLink_rch link;
   if (this->config_i_->reliable_) {
-    link = new ReliableMulticast(this,    // transport
-                                 local_peer,
-                                 remote_peer);
+    link = new ReliableMulticast(this, local_peer, remote_peer);
   } else {
-    link = new BestEffortMulticast(this,  // transport
-                                   local_peer,
-                                   remote_peer);
+    link = new BestEffortMulticast(this, local_peer, remote_peer);
   }
   if (link.is_nil()) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -207,7 +204,8 @@ MulticastTransport::connection_info_i(const TransportInterfaceInfo& info) const
 bool
 MulticastTransport::acked(RepoId /*local_id*/, RepoId remote_id)
 {
-  long remote_peer = RepoIdConverter(remote_id).participantId();
+  MulticastDataLink::peer_type remote_peer =
+    RepoIdConverter(remote_id).participantId();
 
   MulticastDataLinkMap::iterator it = this->links_.find(remote_peer);
   if (it != this->links_.end()) {
