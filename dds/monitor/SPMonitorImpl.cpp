@@ -53,7 +53,7 @@ SPMonitorImpl::report()
     for (DomainParticipantFactoryImpl::DPMap::const_iterator mapIter = participants.begin();
          mapIter != participants.end();
          ++mapIter) {
-      for (DomainParticipantFactoryImpl::DPSet::iterator iter = mapIter->second.begin();
+      for (DomainParticipantFactoryImpl::DPSet::const_iterator iter = mapIter->second.begin();
            iter != mapIter->second.end();
            ++iter) {
         report.domain_participants.length(length+1);

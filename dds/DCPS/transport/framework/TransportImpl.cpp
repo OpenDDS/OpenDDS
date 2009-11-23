@@ -16,6 +16,7 @@
 #include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/Util.h"
 #include "dds/DCPS/MonitorFactory.h"
+#include "dds/DCPS/Service_Participant.h"
 #include "tao/debug.h"
 #include <sstream>
 

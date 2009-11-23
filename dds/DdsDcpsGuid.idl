@@ -69,6 +69,8 @@ module OpenDDS
       EntityId_t   entityId;
     };
 
+    typedef sequence<GUID_t> GUIDSeq;
+
 }; }; // module OpenDDS::DCPS
 
 #endif /* TAO_DDS_DCPS_GUID_IDL */

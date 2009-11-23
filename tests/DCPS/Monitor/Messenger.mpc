@@ -10,7 +10,7 @@ project(Monitor*idl): dcps {
 }
 
 
-project(Monitor*Publisher) : dcpsexe_with_tcp, dcps_unreliable_dgram, dcps_reliable_multicast {
+project(Monitor*Publisher) : dcpsexe_with_tcp {
 
   exename   = publisher
   after    += DDS*idl
@@ -25,7 +25,7 @@ project(Monitor*Publisher) : dcpsexe_with_tcp, dcps_unreliable_dgram, dcps_relia
   }
 }
 
-project(Monitor*Subscriber) : dcpsexe_with_tcp, dcps_unreliable_dgram, dcps_reliable_multicast {
+project(Monitor*Subscriber) : dcpsexe_with_tcp {
 
   exename   = subscriber
   after    += DDS*idl
@@ -44,6 +44,7 @@ project(Monitor*monitor) : dcpsexe_with_tcp {
 
   exename   = monitor
   after    += DDS*idl
+  after    += monitor
   libs     += OpenDDS_monitor
 
   TypeSupport_Files {
