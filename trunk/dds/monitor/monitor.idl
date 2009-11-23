@@ -1,6 +1,7 @@
 
 #include "dds/DdsDcpsInfrastructure.idl"
 #include "dds/DdsDcpsGuid.idl"
+#include "dds/DdsDcpsDataWriterRemote.idl"
 
 module OpenDDS {
 
@@ -26,24 +27,25 @@ module OpenDDS {
       double                  variance;
     };
 
-    typedef sequence<unsigned long>   UnsignedLongSequence;
-    typedef sequence<string> StringSequence;
-    typedef sequence<GUID_t> GUIDSequence;
+    typedef sequence<unsigned long> ULongSeq;
+    typedef sequence<string>        StringSeq;
+
+    //typedef sequence<GUID_t> GUIDSeq;
 
     enum ValueEnumType { INTEGER_TYPE, DOUBLE_TYPE, STRING_TYPE, 
                          STATISTICS_TYPE, STRING_LIST_TYPE };
     union ValueUnion switch (ValueEnumType) {
-      case INTEGER_TYPE:     long           integer_value;
-      case DOUBLE_TYPE:      double         double_value;
-      case STRING_TYPE:      string         string_value;
-      case STATISTICS_TYPE:  Statistics     stat_value;
-      case STRING_LIST_TYPE: StringSequence string_seq_value;
+      case INTEGER_TYPE:     long       integer_value;
+      case DOUBLE_TYPE:      double     double_value;
+      case STRING_TYPE:      string     string_value;
+      case STATISTICS_TYPE:  Statistics stat_value;
+      case STRING_LIST_TYPE: StringSeq  string_seq_value;
     };
     struct NameValuePair {
       string     name;
       ValueUnion value;
     };
-    typedef sequence<NameValuePair> NVPSequence;
+    typedef sequence<NameValuePair> NVPSeq;
 
 
 #pragma DCPS_DATA_TYPE "OpenDDS::DCPS::ServiceParticipantReport"
@@ -51,11 +53,11 @@ module OpenDDS {
 #pragma DCPS_DATA_KEY  "OpenDDS::DCPS::ServiceParticipantReport pid"
 
     struct ServiceParticipantReport {
-      string               host;
-      long                 pid;
-      GUIDSequence         domain_participants;
-      UnsignedLongSequence transports;
-      NVPSequence          values;
+      string    host;
+      long      pid;
+      GUIDSeq   domain_participants;
+      ULongSeq  transports;
+      NVPSeq    values;
     };
 
 #pragma DCPS_DATA_TYPE "OpenDDS::DCPS::DomainParticipantReport"
@@ -82,7 +84,7 @@ module OpenDDS {
     struct DomainParticipantReport {
       GUID_t           dp_id;
       DDS::DomainId_t  domain_id;
-      NVPSequence      values;
+      NVPSeq           values;
     };
 
 #pragma DCPS_DATA_TYPE "OpenDDS::DCPS::TopicReport"
@@ -107,10 +109,10 @@ module OpenDDS {
 #pragma DCPS_DATA_KEY  "OpenDDS::DCPS::TopicReport topic_id.entityId.entityKind"
 
     struct TopicReport {
-      GUID_t      topic_id;
-      string      topic_name;
-      string      type_name;
-      NVPSequence values;
+      GUID_t  topic_id;
+      string  topic_name;
+      string  type_name;
+      NVPSeq  values;
     };
 
 #pragma DCPS_DATA_TYPE "OpenDDS::DCPS::PublisherReport"
@@ -137,8 +139,8 @@ module OpenDDS {
     struct PublisherReport {
       GUID_t        pub_id;
       unsigned long transport_id;
-      GUIDSequence  writers;
-      NVPSequence   values;
+      GUIDSeq       writers;
+      NVPSeq        values;
     };
 
 #pragma DCPS_DATA_TYPE "OpenDDS::DCPS::SubscriberReport"
@@ -165,8 +167,8 @@ module OpenDDS {
     struct SubscriberReport {
       GUID_t        sub_id;
       unsigned long transport_id;
-      GUIDSequence  readers;
-      NVPSequence   values;
+      GUIDSeq       readers;
+      NVPSeq        values;
     };
 
 #pragma DCPS_DATA_TYPE "OpenDDS::DCPS::DataWriterReport"
@@ -197,10 +199,10 @@ module OpenDDS {
     struct DataWriterReport {
       GUID_t         dw_id;
       GUID_t         topic_id;
-      GUIDSequence   readers;
-      GUIDSequence   instances;
+      GUIDSeq        readers;
+      GUIDSeq        instances;
       DWAssociations associations;
-      NVPSequence    values;
+      NVPSeq         values;
     };
 
 #pragma DCPS_DATA_TYPE "OpenDDS::DCPS::DataWriterPeriodicReport"
@@ -236,7 +238,7 @@ module OpenDDS {
       unsigned long control_dropped_count;
       unsigned long control_delivered_count;
       DWAssociationsPeriodic associations;
-      NVPSequence   values;
+      NVPSeq        values;
     };
 
 #pragma DCPS_DATA_TYPE "OpenDDS::DCPS::DataReaderReport"
@@ -268,10 +270,10 @@ module OpenDDS {
     struct DataReaderReport {
       GUID_t         dr_id;
       GUID_t         topic_id;
-      GUIDSequence   writers;
-      GUIDSequence   instances;
+      GUIDSeq        writers;
+      GUIDSeq        instances;
       DRAssociations associations;
-      NVPSequence    values;
+      NVPSeq         values;
     };
 
 #pragma DCPS_DATA_TYPE "OpenDDS::DCPS::DataReaderPeriodicReport"
@@ -304,7 +306,7 @@ module OpenDDS {
     struct DataReaderPeriodicReport {
       GUID_t        dr_id;
       DRAssociationsPeriodic associations;
-      NVPSequence   values;
+      NVPSeq        values;
     };
 
 #pragma DCPS_DATA_TYPE "OpenDDS::DCPS::TransportReport"
@@ -317,7 +319,7 @@ module OpenDDS {
       long          pid;
       unsigned long transport_id;
       string        transport_type;
-      NVPSequence   values;
+      NVPSeq        values;
     };
 
     enum ReportType {
