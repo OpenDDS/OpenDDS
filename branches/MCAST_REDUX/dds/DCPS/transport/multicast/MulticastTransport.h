@@ -48,7 +48,7 @@ protected:
 private:
   MulticastConfiguration_rch config_i_;
 
-  typedef std::map<long, MulticastDataLink_rch> MulticastDataLinkMap;
+  typedef std::map<MulticastDataLink::peer_type, MulticastDataLink_rch> MulticastDataLinkMap;
   MulticastDataLinkMap links_;
 };
 

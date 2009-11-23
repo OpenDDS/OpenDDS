@@ -37,13 +37,15 @@ MulticastConfiguration::MulticastConfiguration()
   : default_to_ipv6_(DEFAULT_DEFAULT_TO_IPV6),
     port_offset_(DEFAULT_PORT_OFFSET),
     reliable_(DEFAULT_RELIABLE),
-    syn_interval_(DEFAULT_SYN_INTERVAL),
-    syn_timeout_(DEFAULT_SYN_TIMEOUT),
-    nak_interval_(DEFAULT_NAK_INTERVAL),
-    nak_timeout_(DEFAULT_NAK_TIMEOUT),
     nak_repair_size_(DEFAULT_NAK_REPAIR_SIZE)
 {
   default_group_address(this->group_address_, DEFAULT_MULTICAST_ID);
+
+  this->syn_interval_.msec(DEFAULT_SYN_INTERVAL);
+  this->syn_timeout_.msec(DEFAULT_SYN_TIMEOUT);
+
+  this->nak_interval_.msec(DEFAULT_NAK_INTERVAL);
+  this->nak_timeout_.msec(DEFAULT_NAK_TIMEOUT);
 }
 
 int
@@ -73,9 +75,9 @@ MulticastConfiguration::load(const TransportIdType& id,
   GET_CONFIG_STRING_VALUE(config, transport_key, ACE_TEXT("group_address"),
                           group_address_s)
   if (group_address_s.is_empty()) {
-    default_group_address(this->group_address_, id);    // default
+    default_group_address(this->group_address_, id);
   } else {
-    this->group_address_.set(group_address_s.c_str());  // user-defined
+    this->group_address_.set(group_address_s.c_str());
   }
 
   GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("port_offset"),
@@ -83,19 +85,35 @@ MulticastConfiguration::load(const TransportIdType& id,
 
   GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("reliable"),
                    this->reliable_, bool)
-  
+
+  long syn_interval_msec = -1;
   GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("syn_interval"),
-                   this->syn_interval_, long)
+                   syn_interval_msec, long)
+  if (syn_interval_msec != -1) {
+    this->syn_interval_.msec(syn_interval_msec);
+  }
 
+  long syn_timeout_msec = -1;
   GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("syn_timeout"),
-                   this->syn_timeout_, long)
+                   syn_timeout_msec, long)
+  if (syn_timeout_msec != -1) {
+    this->syn_timeout_.msec(syn_timeout_msec);
+  }
 
+  long nak_interval_msec = -1;
   GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("nak_interval"),
-                   this->nak_interval_, long)
+                   nak_interval_msec, long)
+  if (nak_interval_msec != -1) {
+    this->nak_interval_.msec(nak_interval_msec);
+  }
 
+  long nak_timeout_msec = -1;
   GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("nak_timeout"),
-                   this->nak_timeout_, long)
-  
+                   nak_timeout_msec, long)
+  if (nak_timeout_msec != -1) {
+    this->nak_timeout_.msec(nak_timeout_msec);
+  }
+
   GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("nak_repair_size"),
                    this->nak_repair_size_, size_t)
 

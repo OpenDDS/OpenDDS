@@ -13,6 +13,7 @@
 #include "Multicast_Export.h"
 
 #include "ace/INET_Addr.h"
+#include "ace/Time_Value.h"
 
 #include "dds/DCPS/transport/framework/TransportConfiguration.h"
 
@@ -57,22 +58,22 @@ public:
   /// The maximum number of milliseconds to wait between
   /// SYN attempts during association (reliable only).
   /// The default value is 500.
-  long syn_interval_;
-  
+  ACE_Time_Value syn_interval_;
+
   /// The maximum number of milliseconds to wait for a
   /// SYNACK response during association (reliable only).
   /// The default value is 30000 (30 seconds).
-  long syn_timeout_;
+  ACE_Time_Value syn_timeout_;
 
   /// The maximum number of milliseconds to wait between
   /// NAK requests (reliable only). The default value is
   /// 2000 (2 seconds).
-  long nak_interval_;
+  ACE_Time_Value nak_interval_;
 
   /// The maximum number of milliseconds to wait before
   /// giving up on a NAK response (reliable only). The
   /// default value is 30000 (30 seconds).
-  long nak_timeout_;
+  ACE_Time_Value nak_timeout_;
 
   /// The number of DCPS datagrams to retain in order to
   /// service incoming NAK requests (reliable only). The

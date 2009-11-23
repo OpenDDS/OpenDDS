@@ -8,11 +8,36 @@
  */
 
 #include "ReliableMulticast.h"
+#include "MulticastTransport.h"
 
 #include "dds/DCPS/Serializer.h"
 
 namespace OpenDDS {
 namespace DCPS {
+
+NakWatchdog::NakWatchdog(ReliableMulticast* link)
+  : DataLinkWatchdog<ReliableMulticast>(link)
+{
+}
+
+ACE_Time_Value
+NakWatchdog::next_interval()
+{
+  // In the future, it may be worthwhile to introduce a
+  // random backoff to prevent NAK implosions in large
+  // multicast groups.
+  MulticastConfiguration* config = this->link_->config();
+  return config->nak_interval_;
+}
+
+void
+NakWatchdog::on_interval(const void* /*arg*/)
+{
+  // Initiate resend by broadcasting MULTICAST_NAK control
+  // messages to any peers from which we have missing data.
+  this->link_->send_naks();
+}
+
 
 SynWatchdog::SynWatchdog(ReliableMulticast* link)
   : DataLinkWatchdog<ReliableMulticast>(link)
@@ -22,36 +47,27 @@ SynWatchdog::SynWatchdog(ReliableMulticast* link)
 ACE_Time_Value
 SynWatchdog::next_interval()
 {
-  MulticastConfiguration* config = this->link_->config();
-
   // In the future, it may be worthwhile to introduce an
-  // exponential backoff to prevent potential SYN flooding in
-  // large multicast groups.
-  ACE_Time_Value interval;
-  interval.msec(config->syn_interval_);
-
-  return interval;
+  // exponential backoff to prevent SYN flooding in large
+  // multicast groups.
+  MulticastConfiguration* config = this->link_->config();
+  return config->syn_interval_;
 }
 
-bool
+void
 SynWatchdog::on_interval(const void* /*arg*/)
 {
   // Initiate handshake by broadcasting MULTICAST_SYN control
   // messages for a specific remote peer (this is the same
   // remote peer assigned when the DataLink was created).
-  this->link_->send_syn(this->link_->remote_peer());
-  return true;  // reschedule
+  this->link_->send_syn();
 }
 
 ACE_Time_Value
 SynWatchdog::next_timeout()
 {
   MulticastConfiguration* config = this->link_->config();
-  
-  ACE_Time_Value timeout;
-  timeout.msec(config->syn_timeout_);
-
-  return timeout;
+  return config->syn_timeout_;
 }
 
 void
@@ -68,65 +84,34 @@ SynWatchdog::on_timeout(const void* /*arg*/)
              this->link_->remote_peer()));
 }
 
-//
-
-NakWatchdog::NakWatchdog(ReliableMulticast* link)
-  : DataLinkWatchdog<ReliableMulticast>(link)
-{
-}
-
-ACE_Time_Value
-NakWatchdog::next_interval()
-{
-  MulticastConfiguration* config = this->link_->config();
-
-  // In the future, it may be worthwhile to introduce an
-  // exponential backoff to prevent NAK implosions in large
-  // multicast groups.
-  ACE_Time_Value interval;
-  interval.msec(config->nak_interval_);
-
-  return interval;
-}
-
-bool
-NakWatchdog::on_interval(const void* /*arg*/)
-{
-  // Initiate resend by broadcasting MULTICAST_NAK control
-  // messages to any peers from which we have missing data.
-  this->link_->send_naks();
-  return true;  // reschedule
-}
-
-//
 
 ReliableMulticast::ReliableMulticast(MulticastTransport* transport,
-                                     ACE_INT32 local_peer,
-                                     ACE_INT32 remote_peer)
+                                     peer_type local_peer,
+                                     peer_type remote_peer)
   : MulticastDataLink(transport,
                       local_peer,
                       remote_peer),
     acked_(false),
-    syn_watchdog_(this),
-    nak_watchdog_(this)
+    nak_watchdog_(this),
+    syn_watchdog_(this)
 {
 }
 
 bool
 ReliableMulticast::header_received(const TransportHeader& header)
 {
+  this->recvd_header_ = header;
+
   ACE_WRITE_GUARD_RETURN(ACE_RW_Thread_Mutex,
                          guard,
                          this->passive_lock_,
                          true);
-  
-  this->last_sequence_ = header.sequence_;
 
   SequenceMap::iterator it = this->sequences_.find(header.source_);
   if (it != this->sequences_.end()) {
     // Update last known sequence for active peer; return false
     // if we have already seen this packet:
-    return it->second.update(this->last_sequence_);
+    return it->second.update(header.sequence_);
   }
 
   return true;
@@ -155,6 +140,13 @@ ReliableMulticast::sample_received(ReceivedDataSample& sample)
     case MULTICAST_NAKACK:
       nakack_received(message);
       break;
+
+    default:
+      ACE_ERROR((LM_WARNING,
+                 ACE_TEXT("(%P|%t) WARNING: ")
+                 ACE_TEXT("ReliableMulticast::sample_received: ")
+                 ACE_TEXT("unknown TRANSPORT_CONTROL submessage: 0x%x!\n"),
+                 sample.header_.submessage_id_));
     }
   } break;
 
@@ -175,8 +167,8 @@ ReliableMulticast::syn_received(ACE_Message_Block* message)
   TAO::DCPS::Serializer serializer(
     message, this->transport_->swap_bytes());
 
-  ACE_INT32 remote_peer;  // sent as local_peer
-  ACE_INT32 local_peer;   // sent as remote_peer
+  peer_type remote_peer;  // sent as local_peer
+  peer_type local_peer;   // sent as remote_peer
 
   serializer >> remote_peer;
   serializer >> local_peer;
@@ -184,16 +176,17 @@ ReliableMulticast::syn_received(ACE_Message_Block* message)
   // Ignore message if not destined for us:
   if (local_peer != this->local_peer_) return;
 
-  // Insert active peer into sequence map; this establishes a
-  // baseline from which to begin verifying sequence numbers for
-  // MULTICAST_NAK requests.
+  // Insert active peer into sequences_ map. This establishes a
+  // baseline from which to verify sequence numbers for gaps
+  // when receiving data:
   {
     ACE_WRITE_GUARD(ACE_RW_Thread_Mutex,
                     guard,
                     this->passive_lock_);
 
+    SequenceNumber value(this->recvd_header_.sequence_);
     std::pair<SequenceMap::iterator, bool> pair = this->sequences_.insert(
-      SequenceMap::value_type(remote_peer, DisjointSequence(this->last_sequence_)));
+      SequenceMap::value_type(remote_peer, DisjointSequence(value)));
     if (pair.first == this->sequences_.end()) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: ")
@@ -212,10 +205,10 @@ ReliableMulticast::syn_received(ACE_Message_Block* message)
 }
 
 void
-ReliableMulticast::send_syn(ACE_INT32 remote_peer)
+ReliableMulticast::send_syn()
 {
   size_t len = sizeof (this->local_peer_)
-             + sizeof (remote_peer_);
+             + sizeof (this->remote_peer_);
 
   ACE_Message_Block* data;
   ACE_NEW_NORETURN(data, ACE_Message_Block(len));
@@ -231,7 +224,7 @@ ReliableMulticast::send_syn(ACE_INT32 remote_peer)
     data, this->transport_->swap_bytes());
 
   serializer << this->local_peer_;
-  serializer << remote_peer_;
+  serializer << this->remote_peer_;
 
   ACE_Message_Block* message =
     create_control(MULTICAST_SYN, data);
@@ -253,8 +246,8 @@ ReliableMulticast::synack_received(ACE_Message_Block* message)
   TAO::DCPS::Serializer serializer(
     message, this->transport_->swap_bytes());
 
-  ACE_INT32 remote_peer;  // sent as local_peer
-  ACE_INT32 local_peer;   // sent as remote peer
+  peer_type remote_peer;  // sent as local_peer
+  peer_type local_peer;   // sent as remote peer
 
   serializer >> remote_peer;
   serializer >> local_peer;
@@ -262,18 +255,18 @@ ReliableMulticast::synack_received(ACE_Message_Block* message)
   // Ignore message if not destined for us:
   if (local_peer != this->local_peer_) return;
 
-  this->syn_watchdog_.cancel();
-
   // 2-way handshake is complete; we have verified that the passive
   // peer is indeed sending/receiving data reliably. Adjust the
   // acked flag and force the TransportImpl to re-evaluate any
   // pending associations it has queued:
+  this->syn_watchdog_.cancel();
   this->acked_ = true;
+
   this->transport_->check_fully_association();
 }
 
 void
-ReliableMulticast::send_synack(ACE_INT32 remote_peer)
+ReliableMulticast::send_synack(peer_type remote_peer)
 {
   size_t len = sizeof (this->local_peer_)
              + sizeof (remote_peer);
@@ -315,7 +308,7 @@ ReliableMulticast::nak_received(ACE_Message_Block* message)
 }
 
 void
-ReliableMulticast::send_nak(ACE_INT32 remote_peer,
+ReliableMulticast::send_nak(peer_type remote_peer,
                             ACE_INT16 low,
                             ACE_INT16 high)
 {
@@ -359,12 +352,17 @@ ReliableMulticast::send_nak(ACE_INT32 remote_peer,
 void
 ReliableMulticast::send_naks()
 {
+  // Currently, this transport relies on LIFESPAN to send a heartbeat
+  // to aid in these detecting gaps. In future it may be worthwhile
+  // to implement an FEC mechanism to reduce NAK repair requests and
+  // provide an additional source from which to detect reception gaps.
   ACE_READ_GUARD(ACE_RW_Thread_Mutex,
                  guard,
                  this->passive_lock_);
 
   for (SequenceMap::iterator it = this->sequences_.begin();
        it != this->sequences_.end(); ++it) {
+
     if (!it->second.disjoint()) continue; // nothing to NAK
 
     DisjointSequence::RangeSet ranges;
@@ -394,7 +392,7 @@ ReliableMulticast::nakack_received(ACE_Message_Block* message)
 }
 
 void
-ReliableMulticast::send_nakack(ACE_INT32 remote_peer,
+ReliableMulticast::send_nakack(peer_type remote_peer,
                                ACE_INT16 low,
                                ACE_INT16 high)
 {
@@ -413,6 +411,18 @@ ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
                      false);
   }
 
+  // A watchdog timer is scheduled to periodically check for gaps in
+  // received data. If a gap is discovered, then MULTICAST_NAK
+  // control messages will be broadcasted to initiate resends from
+  // associated active peers.
+  if (!this->nak_watchdog_.schedule(reactor)) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("ReliableMulticast::join_i: ")
+                      ACE_TEXT("failed to schedule NAK watchdog timer!\n")),
+                     false);
+  }
+
   if (active) {
     // Active peers initiate a 2-way handshake to verify that passive
     // endpoints can send/receive data reliably. A watchdog timer is
@@ -420,21 +430,11 @@ ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
     // intervals. This process must be executed using the transport
     // reactor thread to prevent blocking.
     if (!this->syn_watchdog_.schedule(reactor)) {
+      this->nak_watchdog_.cancel();
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
                         ACE_TEXT("ReliableMulticast::join_i: ")
-                        ACE_TEXT("failed to schedule watchdog timer!\n")),
-                       false);
-    }
-  
-  } else {
-    // Passive peers simply schedule a watchdog timer to handle sending
-    // MULTICAST_NAK requests for missing data.
-    if (!this->nak_watchdog_.schedule(reactor)) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("ReliableMulticast::join_i: ")
-                        ACE_TEXT("failed to schedule watchdog timer!\n")),
+                        ACE_TEXT("failed to schedule SYN watchdog timer!\n")),
                        false);
     }
   }
