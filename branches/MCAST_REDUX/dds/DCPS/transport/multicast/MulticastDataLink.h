@@ -59,7 +59,12 @@ public:
   bool join(const ACE_INET_Addr& group_address, bool active);
   void leave();
 
+  ACE_RW_Thread_Mutex& active_lock();
+  ACE_RW_Thread_Mutex& passive_lock();
+
+  virtual bool header_received(const TransportHeader& header) = 0;
   virtual void sample_received(ReceivedDataSample& sample) = 0;
+
   virtual bool acked() = 0;
 
 protected:

@@ -67,15 +67,19 @@ MulticastTransport::find_or_create_datalink(
   // DataLink which forces all samples into one mode or the other:
   MulticastDataLink_rch link;
   if (this->config_i_->reliable_) {
-    link = new ReliableMulticast(this, local_peer, remote_peer);
+    link = new ReliableMulticast(this,    // transport
+                                 local_peer,
+                                 remote_peer);
   } else {
-    link = new BestEffortMulticast(this, local_peer, remote_peer);
+    link = new BestEffortMulticast(this,  // transport
+                                   local_peer,
+                                   remote_peer);
   }
   if (link.is_nil()) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
-                      ACE_TEXT("unable to create DataLink to remote peer 0x%x!\n"),
+                      ACE_TEXT("unable to create DataLink for remote peer 0x%x!\n"),
                       remote_peer),
                      0);
   }
@@ -112,11 +116,11 @@ MulticastTransport::find_or_create_datalink(
 
   std::pair<MulticastDataLinkMap::iterator, bool> pair =
     this->links_.insert(MulticastDataLinkMap::value_type(remote_peer, link));
-  if (!pair.second) {
+  if (pair.first == this->links_.end()) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
-                      ACE_TEXT("unable to insert DataLink for remote peer: 0x%x!\n"),
+                      ACE_TEXT("failed to insert link for remote peer: 0x%x!\n"),
                       remote_peer),
                      0);
   }

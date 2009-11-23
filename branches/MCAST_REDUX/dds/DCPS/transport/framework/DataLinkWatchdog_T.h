@@ -70,13 +70,14 @@ public:
   }
   
   int handle_timeout(const ACE_Time_Value& now, const void* arg) {
-    ACE_Time_Value deadline(this->epoch_);
-    deadline += next_timeout();
-
-    if (now > deadline) {
-      on_timeout(arg);
-      cancel();
-      return 0;
+    ACE_Time_Value timeout = next_timeout();
+    if (timeout != ACE_Time_Value::zero) {
+      timeout += this->epoch_;
+      if (now > timeout) {
+        on_timeout(arg);
+        cancel();
+        return 0;
+      }
     }
 
     if (!on_interval(arg)) {
@@ -101,8 +102,8 @@ protected:
   virtual ACE_Time_Value next_interval() = 0;
   virtual bool on_interval(const void* arg) = 0;
 
-  virtual ACE_Time_Value next_timeout() = 0;
-  virtual void on_timeout(const void* arg) = 0;
+  virtual ACE_Time_Value next_timeout() { return ACE_Time_Value::zero; }
+  virtual void on_timeout(const void* arg) {}
 
 private:
   ACE_Thread_Mutex lock_;
