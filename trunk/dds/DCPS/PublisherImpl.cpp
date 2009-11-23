@@ -18,6 +18,7 @@
 #include "RepoIdConverter.h"
 #include "Marked_Default_Qos.h"
 #include "TopicImpl.h"
+#include "MonitorFactory.h"
 #include "dds/DdsDcpsTypeSupportExtS.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "AssociationData.h"
@@ -47,11 +48,13 @@ PublisherImpl::PublisherImpl(DDS::InstanceHandle_t handle,
     suspend_depth_count_(0),
     sequence_number_(),
     aggregation_period_start_(ACE_Time_Value::zero),
-    reverse_pi_lock_(pi_lock_)
+    reverse_pi_lock_(pi_lock_),
+    monitor_(0)
 {
   if (!CORBA::is_nil(a_listener)) {
     fast_listener_ = listener_.in();
   }
+  monitor_ = TheServiceParticipant->monitor_factory_->create_publisher_monitor(this);
 }
 
 // Implementation skeleton destructor
@@ -848,6 +851,10 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
   if (this->participant_->is_enabled() == false) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+
+  if (this->monitor_) {
+    this->monitor_->report();
   }
 
   this->set_enabled();

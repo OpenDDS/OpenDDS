@@ -38,6 +38,7 @@ class TransportFactory;
 class DataLink;
 class DataWriterImpl;
 class DataReaderImpl;
+class Monitor;
 
 /** The TransportImpl class includes the abstract methods that must be implemented
 *   by any implementation to provide data delivery service to the DCPS implementation.
@@ -335,6 +336,8 @@ private:
   /// smart ptr to the associated DL cleanup task
   DataLinkCleanupTask dl_clean_task_;
 
+  /// Monitor object for this entity
+  Monitor* monitor_;
 };
 
 } // namespace DCPS

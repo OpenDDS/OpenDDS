@@ -49,6 +49,7 @@ class DomainParticipantImpl;
 class SubscriptionInstance;
 class TopicImpl;
 class RequestedDeadlineWatchdog;
+class Monitor;
 
 typedef Cached_Allocator_With_Overflow<OpenDDS::DCPS::ReceivedDataElement, ACE_Null_Mutex>
 ReceivedDataAllocator;
@@ -618,6 +619,12 @@ private:
 
   typedef std::set<DDS::ReadCondition_var, VarLess<DDS::ReadCondition> > ReadConditionSet;
   ReadConditionSet read_conditions_;
+
+  /// Monitor object for this entity
+  Monitor* monitor_;
+
+  /// Periodic Monitor object for this entity
+  Monitor* periodic_monitor_;
 };
 
 } // namespace DCPS

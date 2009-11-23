@@ -29,3 +29,10 @@ OpenDDS::DCPS::TransportFactory::~TransportFactory()
   // and release references.  The map destructors will cause the smart
   // pointers to destruct, and that will release the references for us.
 }
+
+ACE_INLINE
+const OpenDDS::DCPS::TransportFactory::ImplMap&
+OpenDDS::DCPS::TransportFactory::get_transport_impl_map()
+{
+  return impl_map_;
+}

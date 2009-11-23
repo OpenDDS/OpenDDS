@@ -1,3 +1,81 @@
+Mon Nov 23 14:28:01 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/GuidUtils.cpp:
+        * dds/DCPS/MonitorFactory.h:
+        * dds/DCPS/MonitorFactory.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.h:
+        * dds/DCPS/TopicImpl.cpp:
+        * dds/DCPS/transport/framework/TransportFactory.h:
+        * dds/DCPS/transport/framework/TransportFactory.inl:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/monitor/DPMonitorImpl.h:
+        * dds/monitor/DPMonitorImpl.cpp:
+        * dds/monitor/DRMonitorImpl.h:
+        * dds/monitor/DRMonitorImpl.cpp:
+        * dds/monitor/DRPeriodicMonitorImpl.h:
+        * dds/monitor/DRPeriodicMonitorImpl.cpp:
+        * dds/monitor/DWMonitorImpl.h:
+        * dds/monitor/DWMonitorImpl.cpp:
+        * dds/monitor/DWPeriodicMonitorImpl.h:
+        * dds/monitor/DWPeriodicMonitorImpl.cpp:
+        * dds/monitor/MonitorFactoryImpl.h:
+        * dds/monitor/MonitorFactoryImpl.cpp:
+        * dds/monitor/PublisherMonitorImpl.h:
+        * dds/monitor/PublisherMonitorImpl.cpp:
+        * dds/monitor/SPMonitorImpl.h:
+        * dds/monitor/SPMonitorImpl.cpp:
+        * dds/monitor/SubscriberMonitorImpl.h:
+        * dds/monitor/SubscriberMonitorImpl.cpp:
+        * dds/monitor/TopicMonitorImpl.h:
+        * dds/monitor/TopicMonitorImpl.cpp:
+        * dds/monitor/TransportMonitorImpl.h:
+        * dds/monitor/TransportMonitorImpl.cpp:
+        * dds/monitor/monitor.idl:
+        * dds/monitor/monitor.mpc:
+        * dds/monitor/monitor_export.h:
+
+          Add the monitor library and the hooks in the DCPS library to
+          call out to it.  The various monitors are not complete, but
+          the different monitors are all publishing though all fields
+          are not populated.
+
+        * tests/DCPS/Monitor/DPMDataReaderListener.h:
+        * tests/DCPS/Monitor/DPMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/DataReaderListener.h:
+        * tests/DCPS/Monitor/DataReaderListener.cpp:
+        * tests/DCPS/Monitor/Messenger.idl:
+        * tests/DCPS/Monitor/Messenger.mpc:
+        * tests/DCPS/Monitor/SPMDataReaderListener.h:
+        * tests/DCPS/Monitor/SPMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/TopicMDataReaderListener.h:
+        * tests/DCPS/Monitor/TopicMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/Writer.h:
+        * tests/DCPS/Monitor/Writer.cpp:
+        * tests/DCPS/Monitor/monitor.cpp:
+        * tests/DCPS/Monitor/pub.ini:
+        * tests/DCPS/Monitor/publisher.cpp:
+        * tests/DCPS/Monitor/run_test.pl:
+        * tests/DCPS/Monitor/sub.ini:
+        * tests/DCPS/Monitor/subscriber.cpp:
+        * tests/DCPS/Monitor/tcp.conf:
+
+          Add a test for the monitor library.
+
 Mon Nov 16 19:21:13 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/odds_monitor:

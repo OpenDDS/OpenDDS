@@ -14,6 +14,7 @@
 #include "Definitions.h"
 #include "Service_Participant.h"
 #include "DomainParticipantImpl.h"
+#include "MonitorFactory.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -36,10 +37,12 @@ TopicImpl::TopicImpl(const RepoId                   topic_id,
     listener_(DDS::TopicListener::_duplicate(a_listener)),
     fast_listener_(0),
     id_(topic_id),
-    entity_refs_(0)
+    entity_refs_(0),
+    monitor_(0)
 {
   inconsistent_topic_status_.total_count = 0;
   inconsistent_topic_status_.total_count_change = 0;
+  monitor_ = TheServiceParticipant->monitor_factory_->create_topic_monitor(this);
 }
 
 // Implementation skeleton destructor
@@ -155,6 +158,9 @@ ACE_THROW_SPEC((CORBA::SystemException))
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
+  if (this->monitor_) {
+    monitor_->report();
+  }
   return this->set_enabled();
 }
 

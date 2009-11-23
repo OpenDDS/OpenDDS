@@ -19,6 +19,7 @@
 #include "Transient_Kludge.h"
 #include "DataDurabilityCache.h"
 #include "OfferedDeadlineWatchdog.h"
+#include "MonitorFactory.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
@@ -71,7 +72,9 @@ DataWriterImpl::DataWriterImpl()
     cancel_timer_(false),
     is_bit_(false),
     initialized_(false),
-    wfaCondition_(this->wfaLock_)
+    wfaCondition_(this->wfaLock_),
+    monitor_(0),
+    periodic_monitor_(0)
 {
   liveliness_lost_status_.total_count = 0;
   liveliness_lost_status_.total_count_change = 0;
@@ -90,6 +93,11 @@ DataWriterImpl::DataWriterImpl()
   publication_match_status_.current_count = 0;
   publication_match_status_.current_count_change = 0;
   publication_match_status_.last_subscription_handle = DDS::HANDLE_NIL;
+
+  monitor_ =
+    TheServiceParticipant->monitor_factory_->create_data_writer_monitor(this);
+  periodic_monitor_ =
+    TheServiceParticipant->monitor_factory_->create_data_writer_periodic_monitor(this);
 }
 
 // This method is called when there are no longer any reference to the
@@ -1218,6 +1226,10 @@ ACE_THROW_SPEC((CORBA::SystemException))
                          this->dw_local_objref_.in(),
                          this->offered_deadline_missed_status_,
                          this->last_deadline_missed_total_count_));
+  }
+
+  if (this->monitor_) {
+    this->monitor_->report();
   }
 
   this->set_enabled();
