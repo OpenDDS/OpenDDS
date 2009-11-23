@@ -15,8 +15,16 @@ namespace DCPS {
 BestEffortMulticast::BestEffortMulticast(MulticastTransport* transport,
                                          ACE_INT32 local_peer,
                                          ACE_INT32 remote_peer)
-  : MulticastDataLink(transport, local_peer, remote_peer)
+  : MulticastDataLink(transport,
+                      local_peer,
+                      remote_peer)
 {
+}
+
+bool
+BestEffortMulticast::header_received(const TransportHeader& header)
+{
+  return true;
 }
 
 void

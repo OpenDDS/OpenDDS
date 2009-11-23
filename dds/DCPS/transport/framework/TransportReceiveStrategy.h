@@ -40,13 +40,6 @@ public:
   virtual void relink(bool do_suspend = true);
 
 protected:
-  /// Status of the current transport header.
-  enum TransportHeaderStatus {
-    VALID_HEADER,
-    REPEATED_HEADER,
-    INVALID_HEADER
-  };
-
   TransportReceiveStrategy();
 
   /// Only our subclass knows how to do this.
@@ -55,7 +48,7 @@ protected:
                                 ACE_INET_Addr& remote_address) = 0;
 
   /// Check the transport header for suitability.
-  virtual TransportHeaderStatus check_transport_header( const TransportHeader& header);
+  virtual bool check_header(const TransportHeader& header);
 
   /// Called when there is a ReceivedDataSample to be delivered.
   virtual void deliver_sample(ReceivedDataSample&  sample,
@@ -108,13 +101,13 @@ private:
   /// Current data sample header.
   ReceivedDataSample receive_sample_;
 
-  /** Flag indicating that the currently resident PDU is a repeated one
-    * (has already been received and processed previously).  This is
+  /** Flag indicating that the currently resident PDU is a good one
+    * (i.e. has not been received and processed previously).  This is
     * included in case we receive PDUs that were resent for reliability
     * reasons and we receive one even if we have already processed it.
     * This is a use case from multicast transports.
     */
-  bool repeated_pdu_;
+  bool good_pdu_;
 
   /// Amount of the current PDU that has not been processed yet.
   size_t pdu_remaining_;

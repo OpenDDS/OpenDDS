@@ -24,7 +24,9 @@ public:
                       ACE_INT32 local_peer,
                       ACE_INT32 remote_peer);
 
+  virtual bool header_received(const TransportHeader& header);
   virtual void sample_received(ReceivedDataSample& sample);
+
   virtual bool acked();
 
 protected:

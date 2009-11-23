@@ -20,8 +20,10 @@ namespace DCPS {
 
 class OpenDDS_Dcps_Export DisjointSequence {
 public:
+  typedef std::pair<SequenceNumber, SequenceNumber> RangePair;
+  typedef std::set<RangePair> RangeSet;
+
   explicit DisjointSequence(SequenceNumber value = SequenceNumber());
-  ~DisjointSequence();
 
   SequenceNumber low() const;
   SequenceNumber high() const;
@@ -29,14 +31,16 @@ public:
   size_t depth() const;
   bool disjoint() const;
 
-  void update(SequenceNumber value);
+  bool range(RangeSet& values, size_t max_interval);
+
+  bool update(SequenceNumber value);
   void skip(SequenceNumber value);
 
   operator SequenceNumber() const;
 
 private:
-  typedef std::set<SequenceNumber> values_type;
-  values_type values_;
+  typedef std::set<SequenceNumber> SequenceSet;
+  SequenceSet values_;
 
   void normalize();
 };

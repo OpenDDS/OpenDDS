@@ -1,3 +1,25 @@
+Mon Nov 23 04:43:05 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.cpp:
+        * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+        * dds/DCPS/transport/multicast/BestEffortMulticast.h:
+        * dds/DCPS/transport/multicast/BestEffortMulticast.cpp:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Added support for sending MULTICAST_NAK messages; added plumbing
+          receiving these messages as well as initial suppor for
+          MULTICAST_NAKACK.
+
 Sun Nov 22 21:38:03 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:

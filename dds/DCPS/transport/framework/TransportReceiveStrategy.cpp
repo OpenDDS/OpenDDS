@@ -22,7 +22,7 @@ OpenDDS::DCPS::TransportReceiveStrategy::TransportReceiveStrategy()
     db_allocator_(DATA_BLOCKS),
     data_allocator_(DATA_BLOCKS),
     buffer_index_(0),
-    repeated_pdu_( false),
+    good_pdu_(true),
     pdu_remaining_( 0)
 {
   DBG_ENTRY_LVL("TransportReceiveStrategy","TransportReceiveStrategy",6);
@@ -60,14 +60,10 @@ OpenDDS::DCPS::TransportReceiveStrategy::~TransportReceiveStrategy()
   }
 }
 
-OpenDDS::DCPS::TransportReceiveStrategy::TransportHeaderStatus
-OpenDDS::DCPS::TransportReceiveStrategy::check_transport_header( const TransportHeader& header)
+bool
+OpenDDS::DCPS::TransportReceiveStrategy::check_header(const TransportHeader& header)
 {
-  if(header.valid()) {
-    return VALID_HEADER;
-  } else {
-    return INVALID_HEADER;
-  }
+  return true;
 }
 
 /// Note that this is just an initial implementation.  We may take
@@ -481,22 +477,14 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
         //
         // Check the TransportHeader.
         //
-        switch( this->check_transport_header( this->receive_transport_header_)) {
-          case INVALID_HEADER:
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT
-                              ("(%P|%t) ERROR: TransportHeader invalid.\n")),
-                             -1) ;
-            break;
-
-          case REPEATED_HEADER:
-            this->repeated_pdu_ = true;
-            break;
-
-          case VALID_HEADER:
-            this->repeated_pdu_ = false;
-            break;
+        if (!this->receive_transport_header_.valid()) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT
+                            ("(%P|%t) ERROR: TransportHeader invalid.\n")),
+                           -1) ;
         }
+
+        this->good_pdu_ = check_header(this->receive_transport_header_);
         this->pdu_remaining_ = this->receive_transport_header_.length_;
 
         VDBG((LM_DEBUG,"(%P|%t) DBG:   "
@@ -506,10 +494,10 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
     }
 
     //
-    // Ignore repeated PDUs by skipping over them.  We do this out here
-    // in case we did not skip over the entire repeated PDU last time.
+    // Ignore bad PDUs by skipping over them.  We do this out here
+    // in case we did not skip over the entire bad PDU last time.
     //
-    if( this->repeated_pdu_) {
+    if(!this->good_pdu_) {
       //
       // Adjust the message block chain pointers to account for the
       // skipped data.

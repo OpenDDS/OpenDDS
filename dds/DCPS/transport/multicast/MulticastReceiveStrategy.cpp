@@ -39,6 +39,12 @@ MulticastReceiveStrategy::receive_bytes(iovec iov[],
   return socket.recv(iov, n, remote_address);
 }
 
+bool
+MulticastReceiveStrategy::check_header(const TransportHeader& header)
+{
+  return this->link_->header_received(header);
+}
+
 void
 MulticastReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
                                          const ACE_INET_Addr& /*remote_address*/)

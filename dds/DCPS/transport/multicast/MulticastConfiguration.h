@@ -64,16 +64,21 @@ public:
   /// The default value is 30000 (30 seconds).
   long syn_timeout_;
 
-  /// The number of DCPS datagrams to retain in order to
-  /// service incoming NAK requests (reliable only). The
-  /// default value is 32; this yields a minimum of 32
-  /// samples and a maximum 2048K of sample data.
-  size_t nak_depth_;
+  /// The maximum number of milliseconds to wait between
+  /// NAK requests (reliable only). The default value is
+  /// 2000 (2 seconds).
+  long nak_interval_;
 
   /// The maximum number of milliseconds to wait before
   /// giving up on a NAK response (reliable only). The
   /// default value is 30000 (30 seconds).
   long nak_timeout_;
+
+  /// The number of DCPS datagrams to retain in order to
+  /// service incoming NAK requests (reliable only). The
+  /// default value is 32; this yields a minimum of 32
+  /// samples and a maximum 2048K of sample data.
+  size_t nak_repair_size_;
 
 private:
   void default_group_address(ACE_INET_Addr& group_address,
