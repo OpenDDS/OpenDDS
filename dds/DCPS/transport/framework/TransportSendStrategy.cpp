@@ -1617,16 +1617,16 @@ OpenDDS::DCPS::TransportSendStrategy::prepare_packet_i()
 }
 
 ssize_t
-OpenDDS::DCPS::TransportSendStrategy::do_send_packet( int& bp)
+OpenDDS::DCPS::TransportSendStrategy::do_send_packet( ACE_Message_Block* packet, int& bp)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","do_send_packet",6);
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
-            "Populate the iovec array using the pkt_chain_.\n"), 5);
+            "Populate the iovec array using the packet.\n"), 5);
 
   iovec iov[MAX_SEND_BLOCKS];
 
-  ACE_Message_Block* block = this->pkt_chain_;
+  ACE_Message_Block* block = packet;
 
   int num_blocks = 0;
 
@@ -1659,7 +1659,7 @@ OpenDDS::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_n
   DBG_ENTRY_LVL("TransportSendStrategy","send_packet",6);
 
   int bp_flag = 0;
-  ssize_t num_bytes_sent = this->do_send_packet( bp_flag);
+  ssize_t num_bytes_sent = this->do_send_packet( this->pkt_chain_, bp_flag);
 
   if (num_bytes_sent == 0) {
     VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "

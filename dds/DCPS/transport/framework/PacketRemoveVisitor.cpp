@@ -466,11 +466,6 @@ OpenDDS::DCPS::PacketRemoveVisitor::visit_element_ref
     }
   }
 
-  // The element currently being visited does not "match" the sample that
-  // needs to be removed.
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-        "NO - The element does not match the sample\n"));
-
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Return 1 to continue visitation.\n"));
 

@@ -161,7 +161,7 @@ protected:
   virtual void remove_all_control_msgs_i( RepoId pub_id);
 
   /// Form an IOV and call the send_bytes() template method.
-  ssize_t do_send_packet( int& bp);
+  ssize_t do_send_packet( ACE_Message_Block* packet, int& bp);
 
 private:
 
