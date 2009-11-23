@@ -78,7 +78,7 @@ private:
   // Message Block Allocators are more plentiful since they hold samples
   // as well as data read from the handle(s).
   //
-  enum { RECEIVE_BUFFERS  =    8 };
+  enum { RECEIVE_BUFFERS  =    2 };
   enum { BUFFER_LOW_WATER = 1500 };
   enum { MESSAGE_BLOCKS   = 1000 };
   enum { DATA_BLOCKS      =  100 };
