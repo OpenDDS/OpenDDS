@@ -27,7 +27,7 @@ public:
   friend class const_iterator
     : public std::iterator<std::input_iterator_tag, range_type> {
   public:
-    const_iterator(const set_type& set, set_type::const_iterator pos);
+    const_iterator(const set_type& values, set_type::const_iterator pos);
     const_iterator(const const_iterator& it);
 
     const_iterator& operator++();
