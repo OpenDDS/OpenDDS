@@ -10,6 +10,82 @@
 namespace OpenDDS {
 namespace DCPS {
 
+ACE_INLINE
+DisjointSequence::const_iterator::const_iterator(const disjoint_set& values,
+                                                 disjoint_set::const_iterator pos)
+  : values_(values),
+    pos_(pos)
+{
+}
+
+ACE_INLINE
+DisjointSequence::const_iterator::const_iterator(const const_iterator& it)
+{
+  this->values_ = it.values_;
+  this->pos_ = it.pos_;
+}
+
+ACE_INLINE DisjointSequence::const_iterator&
+DisjointSequence::const_iterator::operator++()
+{
+  return *this; // TODO
+}
+
+ACE_INLINE DisjointSequence::const_iterator&
+DisjointSequence::const_iterator::operator++(int)
+{
+  return *this; // TODO
+}
+
+ACE_INLINE bool
+DisjointSequence::const_iterator::operator==(const const_iterator& rhs)
+{
+  return this->values_ == rhs.values_ &&
+         this->pos_ == rhs.pos_;
+}
+
+ACE_INLINE bool
+DisjointSequence::const_iterator::operator!=(const const_iterator& rhs)
+{
+  return !(*this == rhs);
+}
+
+ACE_INLINE DisjointSequence::disjoint_range
+DisjointSequence::iterator::operator*()
+{
+  return disjoint_range();  // TODO
+}
+
+//
+
+ACE_INLINE DisjointSequence::iterator
+DisjointSequence::begin()
+{
+  return iterator(this->values_,
+                  this->values_.begin());
+}
+
+ACE_INLINE DisjointSequence::const_iterator
+DisjointSequence::begin() const
+{
+  return const_iterator(this->values_,
+                        this->values_.begin());
+}
+
+ACE_INLINE DisjointSequence::iterator
+DisjointSequence::end()
+{
+  return iterator(this->values_,
+                  this->values_.end());
+}
+
+ACE_INLINE DisjointSequence::const_iterator
+DisjointSequence::end() const
+{
+  return const_iterator(this->values_,
+                        this->values_.end());
+}
+
 ACE_INLINE SequenceNumber
 DisjointSequence::low() const
 {

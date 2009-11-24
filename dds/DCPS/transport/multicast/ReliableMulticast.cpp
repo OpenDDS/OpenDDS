@@ -102,11 +102,6 @@ ReliableMulticast::header_received(const TransportHeader& header)
 {
   this->recvd_header_ = header;
 
-  ACE_WRITE_GUARD_RETURN(ACE_RW_Thread_Mutex,
-                         guard,
-                         this->passive_lock_,
-                         true);
-
   SequenceMap::iterator it = this->sequences_.find(header.source_);
   if (it != this->sequences_.end()) {
     // Update last known sequence for active peer; return false
@@ -150,6 +145,10 @@ ReliableMulticast::sample_received(ReceivedDataSample& sample)
     }
   } break;
 
+  case SAMPLE_ACK:
+    ack_received(sample);
+    break;
+
   default:
     data_received(sample);
   }
@@ -179,22 +178,16 @@ ReliableMulticast::syn_received(ACE_Message_Block* message)
   // Insert active peer into sequences_ map. This establishes a
   // baseline from which to verify sequence numbers for gaps
   // when receiving data:
-  {
-    ACE_WRITE_GUARD(ACE_RW_Thread_Mutex,
-                    guard,
-                    this->passive_lock_);
-
-    SequenceNumber value(this->recvd_header_.sequence_);
-    std::pair<SequenceMap::iterator, bool> pair = this->sequences_.insert(
-      SequenceMap::value_type(remote_peer, DisjointSequence(value)));
-    if (pair.first == this->sequences_.end()) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("ReliableMulticast::syn_received: ")
-                 ACE_TEXT("failed to insert sequence for remote peer: 0x%x!\n"),
-                 remote_peer));
-      return;
-    }
+  SequenceNumber value(this->recvd_header_.sequence_);
+  std::pair<SequenceMap::iterator, bool> pair = this->sequences_.insert(
+    SequenceMap::value_type(remote_peer, DisjointSequence(value)));
+  if (pair.first == this->sequences_.end()) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("ReliableMulticast::syn_received: ")
+               ACE_TEXT("failed to insert sequence for remote peer: 0x%x!\n"),
+               remote_peer));
+    return;
   }
 
   // MULTICAST_SYN control messages are always positively
@@ -353,16 +346,12 @@ void
 ReliableMulticast::send_naks()
 {
   // Currently, this transport relies on LIFESPAN to send a heartbeat
-  // to aid in these detecting gaps. In future it may be worthwhile
-  // to implement an FEC mechanism to reduce NAK repair requests and
-  // provide an additional source from which to detect reception gaps.
-  ACE_READ_GUARD(ACE_RW_Thread_Mutex,
-                 guard,
-                 this->passive_lock_);
-
+  // to aid in detecting reception gaps. In future it may be
+  // worthwhile to implement an FEC mechanism to reduce NAK requests
+  // and provide an additional source from which to detect gaps.
+/*
   for (SequenceMap::iterator it = this->sequences_.begin();
        it != this->sequences_.end(); ++it) {
-
     if (!it->second.disjoint()) continue; // nothing to NAK
 
     DisjointSequence::RangeSet ranges;
@@ -378,11 +367,12 @@ ReliableMulticast::send_naks()
     for (DisjointSequence::RangeSet::iterator range = ranges.begin();
          range != ranges.end(); ++range) {
       // Send MULTICAST_NAK request to active peer. The peer should
-      // respond with either a re-send of the missing data or a
+      // respond with either a resend of the missing data or a
       // MULTICAST_NAKACK indicating the data is no longer available.
       send_nak(it->first, range->first.value_, range->second.value_);
     }
   }
+*/
 }
 
 void
