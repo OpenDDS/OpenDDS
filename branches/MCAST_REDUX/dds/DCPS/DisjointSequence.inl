@@ -11,79 +11,75 @@ namespace OpenDDS {
 namespace DCPS {
 
 ACE_INLINE
-DisjointSequence::const_iterator::const_iterator(const set_type& values,
-                                                 set_type::const_iterator pos)
-  : values_(values),
-    pos_(pos)
+DisjointSequence::range_iterator::range_iterator(set_type::iterator pos)
+  : pos_(pos)
 {
+  // N.B. range_iterators always look ahead; the iterator must be
+  // incremented to properly initialize state. This is safe as we
+  // are guaranteed to have at least one element in the set:
+  ++*this;
 }
 
 ACE_INLINE
-DisjointSequence::const_iterator::const_iterator(const const_iterator& it)
+DisjointSequence::range_iterator::range_iterator(const range_iterator& it)
 {
-  this->values_ = it.values_;
   this->pos_ = it.pos_;
+  this->value_ = it.value_;
 }
 
-ACE_INLINE DisjointSequence::const_iterator&
-DisjointSequence::const_iterator::operator++()
+ACE_INLINE DisjointSequence::range_iterator&
+DisjointSequence::range_iterator::operator++()
 {
-  return *this; // TODO
+  set_type::iterator prev(this->pos_++);
+  this->value_ = range_type(SequenceNumber(prev->value_ + 1),
+                            SequenceNumber(this->pos_->value_ - 1));
+  return *this;
 }
 
-ACE_INLINE DisjointSequence::const_iterator&
-DisjointSequence::const_iterator::operator++(int)
+ACE_INLINE DisjointSequence::range_iterator
+DisjointSequence::range_iterator::operator++(int)
 {
-  return *this; // TODO
+  range_iterator prev(*this);
+  ++*this;
+  return prev;
 }
 
 ACE_INLINE bool
-DisjointSequence::const_iterator::operator==(const const_iterator& rhs)
+DisjointSequence::range_iterator::operator==(const range_iterator& rhs)
 {
-  return this->values_ == rhs.values_ &&
-         this->pos_ == rhs.pos_;
+  return this->pos_ == rhs.pos_;
 }
 
 ACE_INLINE bool
-DisjointSequence::const_iterator::operator!=(const const_iterator& rhs)
+DisjointSequence::range_iterator::operator!=(const range_iterator& rhs)
 {
   return !(*this == rhs);
 }
 
-ACE_INLINE DisjointSequence::range_type
-DisjointSequence::iterator::operator*()
+ACE_INLINE DisjointSequence::range_type&
+DisjointSequence::range_iterator::operator*()
 {
-  return range_type();  // TODO
+  return this->value_;
+}
+
+ACE_INLINE DisjointSequence::range_type*
+DisjointSequence::range_iterator::operator->()
+{
+  return &this->value_;
 }
 
 //
 
-ACE_INLINE DisjointSequence::iterator
-DisjointSequence::begin()
+ACE_INLINE DisjointSequence::range_iterator
+DisjointSequence::range_begin()
 {
-  return iterator(this->values_,
-                  this->values_.begin());
+  return range_iterator(this->values_.begin());
 }
 
-ACE_INLINE DisjointSequence::const_iterator
-DisjointSequence::begin() const
+ACE_INLINE DisjointSequence::range_iterator
+DisjointSequence::range_end()
 {
-  return const_iterator(this->values_,
-                        this->values_.begin());
-}
-
-ACE_INLINE DisjointSequence::iterator
-DisjointSequence::end()
-{
-  return iterator(this->values_,
-                  this->values_.end());
-}
-
-ACE_INLINE DisjointSequence::const_iterator
-DisjointSequence::end() const
-{
-  return const_iterator(this->values_,
-                        this->values_.end());
+  return range_iterator(this->values_.end());
 }
 
 ACE_INLINE SequenceNumber

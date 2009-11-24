@@ -49,17 +49,16 @@ MulticastTransport::find_or_create_datalink(
   // entities within the same DomainParticipant. Given this, we may
   // assume that the local_id always references the same participant;
   // all we need to associate a DataLink is the remote participantId:
-  MulticastDataLink::peer_type remote_peer =
+  MulticastPeer remote_peer =
     RepoIdConverter(remote_association->remote_id_).participantId();
 
-  MulticastDataLinkMap::iterator it = this->links_.find(remote_peer);
+  MulticastDataLinkMap::iterator it(this->links_.find(remote_peer));
   if (it != this->links_.end()) return it->second.in();  // found
 
   // At this point we can assume that we are creating a new DataLink
   // between a logical pair of DomainParticipants (peers) identified
   // by their participantIds:
-  MulticastDataLink::peer_type local_peer =
-    RepoIdConverter(local_id).participantId();
+  MulticastPeer local_peer = RepoIdConverter(local_id).participantId();
 
   // This transport supports two modes of operation: reliable and
   // best-effort. Eventually the selection of this mode will be
@@ -68,15 +67,19 @@ MulticastTransport::find_or_create_datalink(
   // DataLink which forces all samples into one mode or the other:
   MulticastDataLink_rch link;
   if (this->config_i_->reliable_) {
-    link = new ReliableMulticast(this, local_peer, remote_peer);
+    link = new ReliableMulticast(this,
+                                 local_peer,
+                                 remote_peer);
   } else {
-    link = new BestEffortMulticast(this, local_peer, remote_peer);
+    link = new BestEffortMulticast(this,
+                                   local_peer,
+                                   remote_peer);
   }
   if (link.is_nil()) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
-                      ACE_TEXT("unable to create DataLink for remote peer 0x%x!\n"),
+                      ACE_TEXT("unable to create DataLink for remote peer: 0x%x!\n"),
                       remote_peer),
                      0);
   }
@@ -145,7 +148,7 @@ void
 MulticastTransport::shutdown_i()
 {
   // Shutdown reserved datalinks and release configuration:
-  for (MulticastDataLinkMap::iterator it = this->links_.begin();
+  for (MulticastDataLinkMap::iterator it(this->links_.begin());
        it != this->links_.end(); ++it) {
     it->second->transport_shutdown();
   }
@@ -182,7 +185,7 @@ MulticastTransport::connection_info_i(const TransportInterfaceInfo& info) const
     ACE_ERROR((LM_WARNING,
                ACE_TEXT("(%P|%t) WARNING: ")
                ACE_TEXT("MulticastTransport::get_connection_info: ")
-               ACE_TEXT("transport interface ID does not match ours: 0x%x\n"),
+               ACE_TEXT("transport interface ID does not match: 0x%x\n"),
                info.transport_id));
   }
 
@@ -204,10 +207,10 @@ MulticastTransport::connection_info_i(const TransportInterfaceInfo& info) const
 bool
 MulticastTransport::acked(RepoId /*local_id*/, RepoId remote_id)
 {
-  MulticastDataLink::peer_type remote_peer =
+  MulticastPeer remote_peer =
     RepoIdConverter(remote_id).participantId();
 
-  MulticastDataLinkMap::iterator it = this->links_.find(remote_peer);
+  MulticastDataLinkMap::iterator it(this->links_.find(remote_peer));
   if (it != this->links_.end()) {
     return it->second->acked();
   }
@@ -225,7 +228,7 @@ MulticastTransport::remove_ack(RepoId /*local_id*/, RepoId /*remote_id*/)
 void
 MulticastTransport::release_datalink_i(DataLink* link, bool /*release_pending*/)
 {
-  for (MulticastDataLinkMap::iterator it = this->links_.begin();
+  for (MulticastDataLinkMap::iterator it(this->links_.begin());
        it != this->links_.end(); ++it) {
     // We are guaranteed to have exactly one matching DataLink
     // in the map; release any resources held and return.

@@ -34,7 +34,6 @@ protected:
   virtual void on_interval(const void* arg);
 };
 
-
 class OpenDDS_Multicast_Export SynWatchdog
   : public DataLinkWatchdog<ReliableMulticast> {
 public:
@@ -48,7 +47,6 @@ protected:
   virtual void on_timeout(const void* arg);
 };
 
-
 class OpenDDS_Multicast_Export ReliableMulticast
   : public MulticastDataLink {
 public:
@@ -60,8 +58,8 @@ public:
   };
 
   ReliableMulticast(MulticastTransport* transport,
-                    peer_type local_peer,
-                    peer_type remote_peer);
+                    MulticastPeer local_peer,
+                    MulticastPeer remote_peer);
 
   virtual bool header_received(const TransportHeader& header);
   virtual void sample_received(ReceivedDataSample& sample);
@@ -72,18 +70,18 @@ public:
   void send_syn();
 
   void synack_received(ACE_Message_Block* message);
-  void send_synack(peer_type remote_peer);
+  void send_synack(MulticastPeer remote_peer);
 
   void nak_received(ACE_Message_Block* message);
-  void send_nak(peer_type remote_peer,
-                ACE_INT16 low,
-                ACE_INT16 high);
+  void send_nak(MulticastPeer remote_peer,
+                MulticastSequence low,
+                MulticastSequence high);
   void send_naks();
 
   void nakack_received(ACE_Message_Block* message);
-  void send_nakack(peer_type remote_peer,
-                   ACE_INT16 low,
-                   ACE_INT16 high);
+  void send_nakack(MulticastPeer remote_peer,
+                   MulticastSequence low,
+                   MulticastSequence high);
 
 protected:
   virtual bool join_i(const ACE_INET_Addr& group_address, bool active);
@@ -97,7 +95,7 @@ private:
 
   TransportHeader recvd_header_;
 
-  typedef std::map<peer_type, DisjointSequence> SequenceMap;
+  typedef std::map<MulticastPeer, DisjointSequence> SequenceMap;
   SequenceMap sequences_;
 };
 

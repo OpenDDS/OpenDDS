@@ -45,9 +45,9 @@ DisjointSequence::normalize()
 {
   // Remove contiguities from the beginning of the
   // set; set should minimally contain one value.
-  sequence_set::iterator first = this->values_.begin();
+  set_type::iterator first(this->values_.begin());
   while (first != this->values_.end()) {
-    sequence_set::iterator second(first);
+    set_type::iterator second(first);
     second++;
 
     if (second == this->values_.end() ||

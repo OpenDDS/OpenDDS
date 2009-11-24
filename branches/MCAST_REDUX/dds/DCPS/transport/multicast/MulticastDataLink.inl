@@ -30,13 +30,13 @@ MulticastDataLink::receive_strategy(MulticastReceiveStrategy* recv_strategy)
   this->recv_strategy_ = recv_strategy;
 }
 
-ACE_INLINE MulticastDataLink::peer_type
+ACE_INLINE MulticastPeer
 MulticastDataLink::local_peer() const
 {
   return this->local_peer_;
 }
 
-ACE_INLINE MulticastDataLink::peer_type
+ACE_INLINE MulticastPeer
 MulticastDataLink::remote_peer() const
 {
   return this->remote_peer_;
