@@ -1,3 +1,9 @@
+Tue Nov 24 23:30:45 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/multicast.ini:
+
+          Added multicast configuration example.
+
 Tue Nov 24 23:04:11 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/DisjointSequence.inl:
