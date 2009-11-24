@@ -88,20 +88,9 @@ public:
 
   ///Initialize the monitor (required to report data)
   virtual void initialize();
-
-  /// Static initializer ensures the factory is loaded
-  static int service_initialize();
 };
-
-static int
-OpenDDS_Requires_MonitorFactory_Initializer =
-  MonitorFactory::service_initialize ();
 
 } // namespace DCPS
 } // namespace OpenDDS
-
-
-ACE_STATIC_SVC_DECLARE (MonitorFactory)
-ACE_FACTORY_DECLARE (OpenDDS_Dcps, MonitorFactory)
 
 #endif /* OPENDDS_DCPS_MONITOR_FACTORY_BASE_H */

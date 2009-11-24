@@ -73,6 +73,8 @@ public:
 
   ServiceParticipantReportDataWriter_ptr get_sp_writer();
 
+  static int service_initialize();
+
 private:
   DDS::DataWriter_ptr create_data_writer(DDS::DomainParticipant_ptr participant,
                                          DDS::Publisher_ptr publisher,
@@ -91,6 +93,9 @@ private:
   DataReaderPeriodicReportDataWriter_var  dr_per_writer_;
   TransportReportDataWriter_var           transport_writer_;
 };
+
+static int OpenDDS_Requires_MonitorFactoryImpl_Initializer =
+  MonitorFactoryImpl::service_initialize();
 
 } // namespace DCPS
 } // namespace OpenDDS
