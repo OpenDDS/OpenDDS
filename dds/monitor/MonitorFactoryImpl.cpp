@@ -124,7 +124,7 @@ MonitorFactoryImpl::create_data_writer(DDS::DomainParticipant_ptr participant,
                               DDS::TopicListener::_nil(),
                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (CORBA::is_nil(topic)) {
-    ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::create_data_writer(): Failed to create topic\n"));
+    ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::create_data_writer(): Failed to create topic, name = %s\n", topic_name));
   }
   DDS::DataWriter_var writer =
     publisher->create_datawriter(topic.in(),
@@ -221,7 +221,7 @@ MonitorFactoryImpl::initialize()
   writer = create_data_writer(participant.in(),
                               publisher.in(),
                               pub_type_name.in(),
-                              TOPIC_MONITOR_TOPIC,
+                              PUBLISHER_MONITOR_TOPIC,
                               dw_qos);
   this->pub_writer_ =
     OpenDDS::DCPS::PublisherReportDataWriter::_narrow(writer.in());
@@ -236,7 +236,7 @@ MonitorFactoryImpl::initialize()
   writer = create_data_writer(participant.in(),
                               publisher.in(),
                               sub_type_name.in(),
-                              TOPIC_MONITOR_TOPIC,
+                              SUBSCRIBER_MONITOR_TOPIC,
                               dw_qos);
   this->sub_writer_ =
     OpenDDS::DCPS::SubscriberReportDataWriter::_narrow(writer.in());
@@ -251,7 +251,7 @@ MonitorFactoryImpl::initialize()
   writer = create_data_writer(participant.in(),
                               publisher.in(),
                               dw_type_name.in(),
-                              TOPIC_MONITOR_TOPIC,
+                              DATA_WRITER_MONITOR_TOPIC,
                               dw_qos);
   this->dw_writer_ =
     OpenDDS::DCPS::DataWriterReportDataWriter::_narrow(writer.in());
@@ -266,7 +266,7 @@ MonitorFactoryImpl::initialize()
   writer = create_data_writer(participant.in(),
                               publisher.in(),
                               dw_per_type_name.in(),
-                              TOPIC_MONITOR_TOPIC,
+                              DATA_WRITER_PERIODIC_MONITOR_TOPIC,
                               dw_qos);
   this->dw_per_writer_ =
     OpenDDS::DCPS::DataWriterPeriodicReportDataWriter::_narrow(writer.in());
@@ -281,7 +281,7 @@ MonitorFactoryImpl::initialize()
   writer = create_data_writer(participant.in(),
                               publisher.in(),
                               dr_type_name.in(),
-                              TOPIC_MONITOR_TOPIC,
+                              DATA_READER_MONITOR_TOPIC,
                               dw_qos);
   this->dr_writer_ =
     OpenDDS::DCPS::DataReaderReportDataWriter::_narrow(writer.in());
@@ -296,7 +296,7 @@ MonitorFactoryImpl::initialize()
   writer = create_data_writer(participant.in(),
                               publisher.in(),
                               dr_per_type_name.in(),
-                              TOPIC_MONITOR_TOPIC,
+                              DATA_READER_PERIODIC_MONITOR_TOPIC,
                               dw_qos);
   this->dr_per_writer_ =
     OpenDDS::DCPS::DataReaderPeriodicReportDataWriter::_narrow(writer.in());
@@ -311,7 +311,7 @@ MonitorFactoryImpl::initialize()
   writer = create_data_writer(participant.in(),
                               publisher.in(),
                               transport_type_name.in(),
-                              TOPIC_MONITOR_TOPIC,
+                              TRANSPORT_MONITOR_TOPIC,
                               dw_qos);
   this->transport_writer_ =
     OpenDDS::DCPS::TransportReportDataWriter::_narrow(writer.in());

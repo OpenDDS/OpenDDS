@@ -1120,6 +1120,22 @@ PublisherImpl::assert_liveliness_by_participant()
   return ret;
 }
 
+void
+PublisherImpl::get_publication_ids(PublicationIdVec& pubs)
+{
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                   guard,
+                   this->pi_lock_,
+                   );
+
+  pubs.reserve(publication_map_.size());
+  for (PublicationMap::iterator iter = publication_map_.begin();
+       iter != publication_map_.end();
+       ++iter) {
+    pubs.push_back(iter->first);
+  }
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 

@@ -1,3 +1,41 @@
+Tue Nov 24 21:22:37 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Add a helper function to get the publication (data writer) ids.
+
+        * dds/monitor/MonitorFactoryImpl.cpp:
+
+          Fix problems with some of the monitor topic registrations.
+
+        * dds/monitor/PublisherMonitorImpl.cpp:
+
+          Finish filling out the PublisherReport data.
+
+        * dds/monitor/monitor.idl:
+
+          Clean up some redundancies in the monitor report model.
+
+        * tests/DCPS/Monitor/DRMDataReaderListener.h:
+        * tests/DCPS/Monitor/DRMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/DRPerMDataReaderListener.h:
+        * tests/DCPS/Monitor/DRPerMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/DWMDataReaderListener.h:
+        * tests/DCPS/Monitor/DWMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/DWPerMDataReaderListener.h:
+        * tests/DCPS/Monitor/DWPerMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/Messenger.mpc:
+        * tests/DCPS/Monitor/PublisherMDataReaderListener.h:
+        * tests/DCPS/Monitor/PublisherMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/SubscriberMDataReaderListener.h:
+        * tests/DCPS/Monitor/SubscriberMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/TransportMDataReaderListener.h:
+        * tests/DCPS/Monitor/TransportMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/monitor.cpp:
+
+          Add remaining subscriptions to the monitor test client.
+
 Tue Nov 24 17:24:35 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/MonitorFactory.h:
