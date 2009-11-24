@@ -109,8 +109,8 @@ DisjointSequence::disjoint() const
 ACE_INLINE
 DisjointSequence::operator SequenceNumber() const
 {
-  // Always return low water mark; this value
-  // represents the max contiguous value seen.
+  // Always return low water mark; this value/ represents the
+  // maximum contiguous value seen.
   return low();
 }
 

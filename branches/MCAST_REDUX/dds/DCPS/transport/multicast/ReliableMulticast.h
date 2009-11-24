@@ -65,18 +65,20 @@ public:
   virtual void sample_received(ReceivedDataSample& sample);
 
   virtual bool acked();
-
+  
+  void expire_naks(); 
+  void send_naks();
+ 
   void syn_received(ACE_Message_Block* message);
   void send_syn();
 
   void synack_received(ACE_Message_Block* message);
   void send_synack(MulticastPeer remote_peer);
-
+  
   void nak_received(ACE_Message_Block* message);
   void send_nak(MulticastPeer remote_peer,
                 MulticastSequence low,
                 MulticastSequence high);
-  void send_naks();
 
   void nakack_received(ACE_Message_Block* message);
   void send_nakack(MulticastPeer remote_peer,
@@ -97,6 +99,10 @@ private:
 
   typedef std::map<MulticastPeer, DisjointSequence> SequenceMap;
   SequenceMap sequences_;
+
+  typedef std::pair<MulticastPeer, SequenceNumber> NakRequest;
+  typedef std::multimap<ACE_Time_Value, NakRequest> NakHistory;
+  NakHistory nak_history_;
 };
 
 } // namespace DCPS
