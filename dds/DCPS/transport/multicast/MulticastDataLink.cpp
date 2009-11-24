@@ -21,8 +21,8 @@ namespace OpenDDS {
 namespace DCPS {
 
 MulticastDataLink::MulticastDataLink(MulticastTransport* transport,
-                                     peer_type local_peer,
-                                     peer_type remote_peer)
+                                     MulticastPeer local_peer,
+                                     MulticastPeer remote_peer)
   : DataLink(transport, 0), // priority
     transport_(transport),
     local_peer_(local_peer),

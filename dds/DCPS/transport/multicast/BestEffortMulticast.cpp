@@ -13,8 +13,8 @@ namespace OpenDDS {
 namespace DCPS {
 
 BestEffortMulticast::BestEffortMulticast(MulticastTransport* transport,
-                                         ACE_INT32 local_peer,
-                                         ACE_INT32 remote_peer)
+                                         MulticastPeer local_peer,
+                                         MulticastPeer remote_peer)
   : MulticastDataLink(transport,
                       local_peer,
                       remote_peer)
@@ -30,7 +30,14 @@ BestEffortMulticast::header_received(const TransportHeader& header)
 void
 BestEffortMulticast::sample_received(ReceivedDataSample& sample)
 {
-  data_received(sample);
+  switch(sample.header_.message_id_) {
+  case SAMPLE_ACK:
+    ack_received(sample);
+    break;
+
+  default:
+    data_received(sample);
+  }
 }
 
 bool

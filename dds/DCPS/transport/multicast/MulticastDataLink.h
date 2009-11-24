@@ -30,14 +30,15 @@
 namespace OpenDDS {
 namespace DCPS {
 
+typedef ACE_INT32 MulticastPeer;
+typedef ACE_INT16 MulticastSequence;
+
 class OpenDDS_Multicast_Export MulticastDataLink
   : public DataLink {
 public:
-  typedef ACE_INT32 peer_type;
-
   MulticastDataLink(MulticastTransport* transport,
-                    peer_type local_peer,
-                    peer_type remote_peer);
+                    MulticastPeer local_peer,
+                    MulticastPeer remote_peer);
   virtual ~MulticastDataLink();
 
   void configure(MulticastConfiguration* config,
@@ -46,8 +47,8 @@ public:
   void send_strategy(MulticastSendStrategy* send_strategy);
   void receive_strategy(MulticastReceiveStrategy* recv_strategy);
 
-  peer_type local_peer() const;
-  peer_type remote_peer() const;
+  MulticastPeer local_peer() const;
+  MulticastPeer remote_peer() const;
 
   MulticastConfiguration* config();
   TransportReactorTask* reactor_task();
@@ -67,8 +68,8 @@ public:
 protected:
   MulticastTransport_rch transport_;
 
-  peer_type local_peer_;
-  peer_type remote_peer_;
+  MulticastPeer local_peer_;
+  MulticastPeer remote_peer_;
 
   MulticastConfiguration_rch config_;
   TransportReactorTask_rch reactor_task_;

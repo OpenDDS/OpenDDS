@@ -23,9 +23,9 @@ NakWatchdog::NakWatchdog(ReliableMulticast* link)
 ACE_Time_Value
 NakWatchdog::next_interval()
 {
-  // In the future, it may be worthwhile to introduce a
-  // random backoff to prevent NAK implosions in large
-  // multicast groups.
+  // TODO In the future, it may be worthwhile to introduce
+  // a random backoff and NAK suppression to prevent NAK
+  // implosions in large multicast groups.
   MulticastConfiguration* config = this->link_->config();
   return config->nak_interval_;
 }
@@ -34,7 +34,7 @@ void
 NakWatchdog::on_interval(const void* /*arg*/)
 {
   // Initiate resend by broadcasting MULTICAST_NAK control
-  // messages to any peers from which we have missing data.
+  // messages to remote peers from which we are missing data:
   this->link_->send_naks();
 }
 
@@ -47,8 +47,8 @@ SynWatchdog::SynWatchdog(ReliableMulticast* link)
 ACE_Time_Value
 SynWatchdog::next_interval()
 {
-  // In the future, it may be worthwhile to introduce an
-  // exponential backoff to prevent SYN flooding in large
+  // TODO In the future, it may be worthwhile to introduce
+  // an exponential backoff to prevent SYN flooding in large
   // multicast groups.
   MulticastConfiguration* config = this->link_->config();
   return config->syn_interval_;
@@ -58,8 +58,8 @@ void
 SynWatchdog::on_interval(const void* /*arg*/)
 {
   // Initiate handshake by broadcasting MULTICAST_SYN control
-  // messages for a specific remote peer (this is the same
-  // remote peer assigned when the DataLink was created).
+  // messages for a specific remote peer (HINT: this is the
+  // same remote peer assigned when the DataLink was created).
   this->link_->send_syn();
 }
 
@@ -74,9 +74,11 @@ void
 SynWatchdog::on_timeout(const void* /*arg*/)
 {
   // There is no recourse if a link is unable to handshake; log
-  // an error and return. In the future, it may be worthwhile to
-  // allow a DataLink to initiate the removal of an association
-  // via the TransportSendListener interface.
+  // an error and return.
+  //
+  // TODO In the future, it may be worthwhile to allow a DataLink
+  // to initiate the removal of an association via the
+  // TransportSendListener interface.
   ACE_ERROR((LM_ERROR,
              ACE_TEXT("(%P|%t) ERROR: ")
              ACE_TEXT("SynWatchdog::on_timeout: ")
@@ -86,8 +88,8 @@ SynWatchdog::on_timeout(const void* /*arg*/)
 
 
 ReliableMulticast::ReliableMulticast(MulticastTransport* transport,
-                                     peer_type local_peer,
-                                     peer_type remote_peer)
+                                     MulticastPeer local_peer,
+                                     MulticastPeer remote_peer)
   : MulticastDataLink(transport,
                       local_peer,
                       remote_peer),
@@ -102,10 +104,10 @@ ReliableMulticast::header_received(const TransportHeader& header)
 {
   this->recvd_header_ = header;
 
-  SequenceMap::iterator it = this->sequences_.find(header.source_);
+  SequenceMap::iterator it(this->sequences_.find(header.source_));
   if (it != this->sequences_.end()) {
-    // Update last known sequence for active peer; return false
-    // if we have already seen this packet:
+    // Update last seen sequence for remote peer; return false if we
+    // have already seen this packet (prevents duplicate delivery):
     return it->second.update(header.sequence_);
   }
 
@@ -166,8 +168,8 @@ ReliableMulticast::syn_received(ACE_Message_Block* message)
   TAO::DCPS::Serializer serializer(
     message, this->transport_->swap_bytes());
 
-  peer_type remote_peer;  // sent as local_peer
-  peer_type local_peer;   // sent as remote_peer
+  MulticastPeer remote_peer;  // sent as local_peer
+  MulticastPeer local_peer;   // sent as remote_peer
 
   serializer >> remote_peer;
   serializer >> local_peer;
@@ -175,10 +177,10 @@ ReliableMulticast::syn_received(ACE_Message_Block* message)
   // Ignore message if not destined for us:
   if (local_peer != this->local_peer_) return;
 
-  // Insert active peer into sequences_ map. This establishes a
-  // baseline from which to verify sequence numbers for gaps
-  // when receiving data:
+  // Insert remote peer into sequence map. This establishes a baseline
+  // to check for reception gaps during delivery of sample data:
   SequenceNumber value(this->recvd_header_.sequence_);
+  
   std::pair<SequenceMap::iterator, bool> pair = this->sequences_.insert(
     SequenceMap::value_type(remote_peer, DisjointSequence(value)));
   if (pair.first == this->sequences_.end()) {
@@ -191,9 +193,11 @@ ReliableMulticast::syn_received(ACE_Message_Block* message)
   }
 
   // MULTICAST_SYN control messages are always positively
-  // acknowledged by a matching remote peer. In the future
-  // it may be worthwhile to predicate this on association
-  // status to prevent potential denial of service attacks.
+  // acknowledged by a matching remote peer.
+  //
+  // TODO In the future it may be worthwhile to predicate
+  // this behavior on association status to prevent potential
+  // denial of service attacks.
   send_synack(remote_peer);
 }
 
@@ -239,8 +243,8 @@ ReliableMulticast::synack_received(ACE_Message_Block* message)
   TAO::DCPS::Serializer serializer(
     message, this->transport_->swap_bytes());
 
-  peer_type remote_peer;  // sent as local_peer
-  peer_type local_peer;   // sent as remote peer
+  MulticastPeer remote_peer;  // sent as local_peer
+  MulticastPeer local_peer;   // sent as remote peer
 
   serializer >> remote_peer;
   serializer >> local_peer;
@@ -248,7 +252,7 @@ ReliableMulticast::synack_received(ACE_Message_Block* message)
   // Ignore message if not destined for us:
   if (local_peer != this->local_peer_) return;
 
-  // 2-way handshake is complete; we have verified that the passive
+  // 2-way handshake is complete; we have verified that the remote
   // peer is indeed sending/receiving data reliably. Adjust the
   // acked flag and force the TransportImpl to re-evaluate any
   // pending associations it has queued:
@@ -259,7 +263,7 @@ ReliableMulticast::synack_received(ACE_Message_Block* message)
 }
 
 void
-ReliableMulticast::send_synack(peer_type remote_peer)
+ReliableMulticast::send_synack(MulticastPeer remote_peer)
 {
   size_t len = sizeof (this->local_peer_)
              + sizeof (remote_peer);
@@ -301,9 +305,9 @@ ReliableMulticast::nak_received(ACE_Message_Block* message)
 }
 
 void
-ReliableMulticast::send_nak(peer_type remote_peer,
-                            ACE_INT16 low,
-                            ACE_INT16 high)
+ReliableMulticast::send_nak(MulticastPeer remote_peer,
+                            MulticastSequence low,
+                            MulticastSequence high)
 {
   size_t len = sizeof (this->local_peer_)
              + sizeof (remote_peer)
@@ -345,34 +349,19 @@ ReliableMulticast::send_nak(peer_type remote_peer,
 void
 ReliableMulticast::send_naks()
 {
-  // Currently, this transport relies on LIFESPAN to send a heartbeat
-  // to aid in detecting reception gaps. In future it may be
-  // worthwhile to implement an FEC mechanism to reduce NAK requests
-  // and provide an additional source from which to detect gaps.
-/*
-  for (SequenceMap::iterator it = this->sequences_.begin();
+  for (SequenceMap::iterator it(this->sequences_.begin());
        it != this->sequences_.end(); ++it) {
+    
     if (!it->second.disjoint()) continue; // nothing to NAK
 
-    DisjointSequence::RangeSet ranges;
-    if (!it->second.range(ranges, this->config_->nak_repair_size_)) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("ReliableMulticast::send_nak: ")
-                 ACE_TEXT("failed to collect NAK ranges for remote peer: 0x%x!\n"),
-                 it->first));
-      return;
-    }
-
-    for (DisjointSequence::RangeSet::iterator range = ranges.begin();
-         range != ranges.end(); ++range) {
-      // Send MULTICAST_NAK request to active peer. The peer should
+    for (DisjointSequence::range_iterator range(it->second.range_begin());
+         range != it->second.range_end(); ++range) {
+      // Send MULTICAST_NAK request to remote peer. The peer should
       // respond with either a resend of the missing data or a
       // MULTICAST_NAKACK indicating the data is no longer available.
-      send_nak(it->first, range->first.value_, range->second.value_);
+      send_nak(it->first, range->first, range->second);
     }
   }
-*/
 }
 
 void
@@ -382,9 +371,9 @@ ReliableMulticast::nakack_received(ACE_Message_Block* message)
 }
 
 void
-ReliableMulticast::send_nakack(peer_type remote_peer,
-                               ACE_INT16 low,
-                               ACE_INT16 high)
+ReliableMulticast::send_nakack(MulticastPeer remote_peer,
+                               MulticastSequence low,
+                               MulticastSequence high)
 {
   // TODO implement
 }
@@ -402,9 +391,16 @@ ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
   }
 
   // A watchdog timer is scheduled to periodically check for gaps in
-  // received data. If a gap is discovered, then MULTICAST_NAK
-  // control messages will be broadcasted to initiate resends from
-  // associated active peers.
+  // received data. If a gap is discovered, MULTICAST_NAK control
+  // messages will be broadcasted to initiate resends from
+  // responsible remote peers.
+  //
+  // Currently, this transport relies on LIFESPAN to periodically
+  // send heartbeat messages to aid in detecting reception gaps.
+  //
+  // TODO In the future it may be worthwhile to implement an FEC
+  // mechanism to reduce repair requests and provide an additional
+  // source from which to detect gaps.
   if (!this->nak_watchdog_.schedule(reactor)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
@@ -414,11 +410,10 @@ ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
   }
 
   if (active) {
-    // Active peers initiate a 2-way handshake to verify that passive
-    // endpoints can send/receive data reliably. A watchdog timer is
-    // scheduled to broadcast MULTICAST_SYN control messages at fixed
-    // intervals. This process must be executed using the transport
-    // reactor thread to prevent blocking.
+    // Active peers schedule a watchdog timer to initiate a 2-way
+    // handshake to verify that passive endpoints can send/receive
+    // data reliably. This process must be executed using the
+    // transport reactor thread to prevent blocking.
     if (!this->syn_watchdog_.schedule(reactor)) {
       this->nak_watchdog_.cancel();
       ACE_ERROR_RETURN((LM_ERROR,

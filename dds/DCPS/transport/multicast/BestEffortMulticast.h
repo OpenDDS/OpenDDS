@@ -21,8 +21,8 @@ class OpenDDS_Multicast_Export BestEffortMulticast
   : public MulticastDataLink {
 public:
   BestEffortMulticast(MulticastTransport* transport,
-                      ACE_INT32 local_peer,
-                      ACE_INT32 remote_peer);
+                      MulticastPeer local_peer,
+                      MulticastPeer remote_peer);
 
   virtual bool header_received(const TransportHeader& header);
   virtual void sample_received(ReceivedDataSample& sample);

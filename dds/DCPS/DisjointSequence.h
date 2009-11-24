@@ -24,25 +24,25 @@ public:
   typedef std::pair<SequenceNumber, SequenceNumber> range_type;
   typedef std::set<SequenceNumber> set_type;
 
-  friend class const_iterator
+  class range_iterator
     : public std::iterator<std::input_iterator_tag, range_type> {
   public:
-    const_iterator(const set_type& values, set_type::const_iterator pos);
-    const_iterator(const const_iterator& it);
+    explicit range_iterator(set_type::iterator pos);
+    range_iterator(const range_iterator& it);
 
-    const_iterator& operator++();
-    const_iterator& operator++(int);
+    range_iterator& operator++();
+    range_iterator  operator++(int);
 
-    bool operator==(const const_iterator& rhs);
-    bool operator!=(const const_iterator& rhs);
+    bool operator==(const range_iterator& rhs);
+    bool operator!=(const range_iterator& rhs);
 
-    range_type operator*();
+    range_type& operator*();
+    range_type* operator->(); 
 
   private:
-    const set_type& values_;
-    set_type::const_iterator pos_;
+    set_type::iterator pos_;
+    range_type value_;
   };
-  typedef const_iterator iterator;
 
   explicit DisjointSequence(SequenceNumber value = SequenceNumber());
 
@@ -52,11 +52,8 @@ public:
   size_t depth() const;
   bool disjoint() const;
 
-  iterator begin();
-  const_iterator begin() const;
-
-  iterator end();
-  const_iterator end() const;
+  range_iterator range_begin();
+  range_iterator range_end();
 
   bool update(SequenceNumber value);
   void skip(SequenceNumber value);
@@ -68,6 +65,7 @@ private:
 
   void normalize();
 };
+  
 
 } // namespace DCPS
 } // namespace OpenDDS
