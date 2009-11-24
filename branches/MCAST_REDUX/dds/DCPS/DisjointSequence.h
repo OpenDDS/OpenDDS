@@ -24,7 +24,7 @@ public:
   typedef std::pair<SequenceNumber, SequenceNumber> range_type;
   typedef std::set<SequenceNumber> set_type;
 
-  class range_iterator
+  class OpenDDS_Dcps_Export range_iterator
     : public std::iterator<std::input_iterator_tag, range_type> {
   public:
     explicit range_iterator(set_type::iterator pos);

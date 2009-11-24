@@ -15,6 +15,7 @@
 #include "ace/Log_Msg.h"
 #include "ace/Mutex.h"
 #include "ace/Time_Value.h"
+#include "ace/Reactor.h"
 
 #include "ace/OS_NS_time.h"
 
