@@ -203,7 +203,6 @@ module OpenDDS {
     struct DataWriterReport {
       GUID_t         dw_id;
       GUID_t         topic_id;
-      GUIDSeq        readers;
       GUIDSeq        instances;
       DWAssociations associations;
       NVPSeq         values;
@@ -274,7 +273,6 @@ module OpenDDS {
     struct DataReaderReport {
       GUID_t         dr_id;
       GUID_t         topic_id;
-      GUIDSeq        writers;
       GUIDSeq        instances;
       DRAssociations associations;
       NVPSeq         values;

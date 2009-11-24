@@ -225,6 +225,11 @@ public:
 
   DDS::ReturnCode_t assert_liveliness_by_participant();
 
+  typedef std::vector<PublicationId> PublicationIdVec;
+  /// Populates a std::vector with the PublicationIds (GUIDs) 
+  /// of this Publisher's Data Writers
+  void get_publication_ids(PublicationIdVec& pubs);
+
 private:
   DDS::InstanceHandle_t        handle_;
 

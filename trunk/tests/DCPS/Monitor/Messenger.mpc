@@ -59,5 +59,12 @@ project(Monitor*monitor) : dcpsexe_with_tcp {
     SPMDataReaderListener.cpp
     DPMDataReaderListener.cpp
     TopicMDataReaderListener.cpp
+    PublisherMDataReaderListener.cpp
+    SubscriberMDataReaderListener.cpp
+    DWMDataReaderListener.cpp
+    DWPerMDataReaderListener.cpp
+    DRMDataReaderListener.cpp
+    DRPerMDataReaderListener.cpp
+    TransportMDataReaderListener.cpp
   }
 }
