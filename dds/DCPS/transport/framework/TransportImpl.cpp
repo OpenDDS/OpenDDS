@@ -45,7 +45,9 @@ OpenDDS::DCPS::TransportImpl::TransportImpl()
   : monitor_(0)
 {
   DBG_ENTRY_LVL("TransportImpl","TransportImpl",6);
-  monitor_ = TheServiceParticipant->monitor_factory_->create_transport_monitor(this);
+  if (TheServiceParticipant->monitor_factory_) {
+    monitor_ = TheServiceParticipant->monitor_factory_->create_transport_monitor(this);
+  }
 }
 
 OpenDDS::DCPS::TransportImpl::~TransportImpl()
