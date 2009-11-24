@@ -8,6 +8,7 @@
  */
 
 #include "MulticastConfiguration.h"
+#include "dds/DCPS/transport/framework/TransportDebug.h"
 
 namespace {
 

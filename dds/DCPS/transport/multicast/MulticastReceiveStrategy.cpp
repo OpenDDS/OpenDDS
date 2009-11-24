@@ -8,6 +8,7 @@
  */
 
 #include "MulticastReceiveStrategy.h"
+#include "ace/Reactor.h"
 
 namespace OpenDDS {
 namespace DCPS {
