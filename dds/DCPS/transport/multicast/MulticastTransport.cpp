@@ -28,13 +28,6 @@ const CORBA::Long TRANSPORT_INTERFACE_ID(0x4d435354); // MCST
 namespace OpenDDS {
 namespace DCPS {
 
-// N.B. TRANSPORT_PRIORITY is not directly supported by this
-// transport. This is partially due to routing restrictions placed
-// on default group addresses as the selection heuristic assigns
-// from the link-local range. Since the TTL will always be 1
-// (non-routable), setting the TOS would provide little to no
-// benefit.
-
 DataLink*
 MulticastTransport::find_or_create_datalink(
   RepoId local_id,
@@ -114,16 +107,9 @@ MulticastTransport::find_or_create_datalink(
                      0);
   }
 
-  std::pair<MulticastDataLinkMap::iterator, bool> pair =
-    this->links_.insert(MulticastDataLinkMap::value_type(remote_peer, link));
-  if (pair.first == this->links_.end()) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
-                      ACE_TEXT("failed to insert link for remote peer: 0x%x!\n"),
-                      remote_peer),
-                     0);
-  }
+  // Insert remote peer into DataLink map. This allows DataLinks to
+  // be re-used based on a matching participantId:
+  this->links_.insert(MulticastDataLinkMap::value_type(remote_peer, link));
 
   return link._retn();
 }
