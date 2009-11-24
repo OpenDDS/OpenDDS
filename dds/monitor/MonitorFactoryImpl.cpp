@@ -320,6 +320,12 @@ MonitorFactoryImpl::initialize()
   }
 }
 
+int
+MonitorFactoryImpl::service_initialize()
+{
+  return ACE_Service_Config::process_directive(ace_svc_desc_MonitorFactoryImpl);
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 

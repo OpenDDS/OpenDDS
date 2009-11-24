@@ -16,7 +16,6 @@ namespace DCPS {
 // Implementation skeleton constructor
 MonitorFactory::MonitorFactory()
 {
-  ACE_DEBUG((LM_DEBUG, "MonitorFactory::MonitorFactory\n"));
 }
 
 // Implementation skeleton destructor
@@ -89,23 +88,8 @@ MonitorFactory::initialize()
 {
 }
 
-int
-MonitorFactory::service_initialize()
-{
-  return ACE_Service_Config::process_directive
-    (ace_svc_desc_MonitorFactory);
-}
-
 } // namespace DCPS
 } // namespace OpenDDS
 
 using namespace OpenDDS::DCPS;
-
-ACE_FACTORY_DEFINE (OpenDDS_Dcps, MonitorFactory)
-ACE_STATIC_SVC_DEFINE (MonitorFactory,
-                       ACE_TEXT ("OpenDDS_Monitor"),
-                       ACE_SVC_OBJ_T,
-                       &ACE_SVC_NAME (MonitorFactory),
-                       ACE_Service_Type::DELETE_THIS | ACE_Service_Type::DELETE_OBJ,
-                       0)
 

@@ -14,6 +14,8 @@ project(Monitor*Publisher) : dcpsexe_with_tcp {
 
   exename   = publisher
   after    += DDS*idl
+  after    += monitor
+  libs     += OpenDDS_monitor
 
   TypeSupport_Files {
     Messenger.idl
@@ -29,6 +31,8 @@ project(Monitor*Subscriber) : dcpsexe_with_tcp {
 
   exename   = subscriber
   after    += DDS*idl
+  after    += monitor
+  libs     += OpenDDS_monitor
 
   TypeSupport_Files {
     Messenger.idl

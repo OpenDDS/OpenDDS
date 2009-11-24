@@ -361,14 +361,11 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
         this->monitor_factory_ =
           ACE_Dynamic_Service<MonitorFactory>::instance ("OpenDDS_Monitor");
-
         if (this->monitor_factory_ == 0) {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("ERROR: Service_Participant::get_domain_participant_factory, ")
-                     ACE_TEXT ("Unable to initialize Monitor Factory\n")));
-        } else {
-          this->monitor_ = this->monitor_factory_->create_sp_monitor(this);
+          // Use the stubbed factory
+          this->monitor_factory_ = new MonitorFactory;
         }
+        this->monitor_ = this->monitor_factory_->create_sp_monitor(this);
 
       } catch (const CORBA::Exception& ex) {
         ex._tao_print_exception(

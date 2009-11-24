@@ -13,6 +13,7 @@
 #include "dds/DCPS/PublisherImpl.h"
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
+#include <dds/DCPS/DomainParticipantImpl.h>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -33,8 +34,10 @@ void
 PublisherMonitorImpl::report() {
   if (!CORBA::is_nil(this->pub_writer_.in())) {
     PublisherReport report;
-    //report.pub_id   = pub_->get_id(); // There is no RepoId for the pub!
-    //TransportImpl_rch ti = pub_->get_transport_impl();
+    report.handle = pub_->get_instance_handle();
+    DDS::DomainParticipant_var dp = pub_->get_participant();
+    report.dp_id   = dynamic_cast<DomainParticipantImpl*>(dp.in())->get_id();
+    TransportImpl_rch ti = pub_->get_transport_impl();
     //report.transport_id = // No direct way to look up the transport ID
     //report.writers  = 
     this->pub_writer_->write(report, DDS::HANDLE_NIL);

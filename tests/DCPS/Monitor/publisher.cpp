@@ -18,8 +18,7 @@
 
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
-#include <dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram.h>
-#include <dds/DCPS/transport/ReliableMulticast/ReliableMulticast.h>
+#include <dds/monitor/MonitorFactoryImpl.h>
 #endif
 
 #include "MessengerTypeSupportImpl.h"
