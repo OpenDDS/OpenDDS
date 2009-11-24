@@ -21,13 +21,13 @@ namespace DCPS {
 
 class OpenDDS_Dcps_Export DisjointSequence {
 public:
-  typedef std::pair<SequenceNumber, SequenceNumber> disjoint_range;
-  typedef std::set<SequenceNumber> disjoint_set;
+  typedef std::pair<SequenceNumber, SequenceNumber> range_type;
+  typedef std::set<SequenceNumber> set_type;
 
   friend class const_iterator
-    : public std::iterator<std::input_iterator_tag, disjoint_range> {
+    : public std::iterator<std::input_iterator_tag, range_type> {
   public:
-    const_iterator(const disjoint_set& set, disjoint_set::const_iterator pos);
+    const_iterator(const set_type& set, set_type::const_iterator pos);
     const_iterator(const const_iterator& it);
 
     const_iterator& operator++();
@@ -36,11 +36,11 @@ public:
     bool operator==(const const_iterator& rhs);
     bool operator!=(const const_iterator& rhs);
 
-    disjoint_range operator*();
+    range_type operator*();
 
   private:
-    const disjoint_set& values_;
-    disjoint_set::const_iterator pos_;
+    const set_type& values_;
+    set_type::const_iterator pos_;
   };
   typedef const_iterator iterator;
 
@@ -64,7 +64,7 @@ public:
   operator SequenceNumber() const;
 
 private:
-  disjoint_set values_;
+  set_type values_;
 
   void normalize();
 };

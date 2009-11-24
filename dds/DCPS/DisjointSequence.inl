@@ -11,8 +11,8 @@ namespace OpenDDS {
 namespace DCPS {
 
 ACE_INLINE
-DisjointSequence::const_iterator::const_iterator(const disjoint_set& values,
-                                                 disjoint_set::const_iterator pos)
+DisjointSequence::const_iterator::const_iterator(const set_type& values,
+                                                 set_type::const_iterator pos)
   : values_(values),
     pos_(pos)
 {
@@ -50,10 +50,10 @@ DisjointSequence::const_iterator::operator!=(const const_iterator& rhs)
   return !(*this == rhs);
 }
 
-ACE_INLINE DisjointSequence::disjoint_range
+ACE_INLINE DisjointSequence::range_type
 DisjointSequence::iterator::operator*()
 {
-  return disjoint_range();  // TODO
+  return range_type();  // TODO
 }
 
 //
