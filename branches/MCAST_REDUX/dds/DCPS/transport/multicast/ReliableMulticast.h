@@ -95,9 +95,6 @@ private:
   NakWatchdog nak_watchdog_;
   SynWatchdog syn_watchdog_;
 
-  ACE_RW_Thread_Mutex active_lock_;
-  ACE_RW_Thread_Mutex passive_lock_;
-
   TransportHeader recvd_header_;
 
   typedef std::map<peer_type, DisjointSequence> SequenceMap;

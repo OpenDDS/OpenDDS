@@ -10,9 +10,10 @@
 #ifndef DCPS_DISJOINTSEQUENCE_H
 #define DCPS_DISJOINTSEQUENCE_H
 
-#include "Definitions.h"
 #include "dcps_export.h"
+#include "Definitions.h"
 
+#include <iterator>
 #include <set>
 
 namespace OpenDDS {
@@ -20,8 +21,28 @@ namespace DCPS {
 
 class OpenDDS_Dcps_Export DisjointSequence {
 public:
-  typedef std::pair<SequenceNumber, SequenceNumber> RangePair;
-  typedef std::set<RangePair> RangeSet;
+  typedef std::pair<SequenceNumber, SequenceNumber> disjoint_range;
+  typedef std::set<SequenceNumber> disjoint_set;
+
+  friend class const_iterator
+    : public std::iterator<std::input_iterator_tag, disjoint_range> {
+  public:
+    const_iterator(const disjoint_set& set, disjoint_set::const_iterator pos);
+    const_iterator(const const_iterator& it);
+
+    const_iterator& operator++();
+    const_iterator& operator++(int);
+
+    bool operator==(const const_iterator& rhs);
+    bool operator!=(const const_iterator& rhs);
+
+    disjoint_range operator*();
+
+  private:
+    const disjoint_set& values_;
+    disjoint_set::const_iterator pos_;
+  };
+  typedef const_iterator iterator;
 
   explicit DisjointSequence(SequenceNumber value = SequenceNumber());
 
@@ -31,7 +52,11 @@ public:
   size_t depth() const;
   bool disjoint() const;
 
-  bool range(RangeSet& values, size_t max_interval);
+  iterator begin();
+  const_iterator begin() const;
+
+  iterator end();
+  const_iterator end() const;
 
   bool update(SequenceNumber value);
   void skip(SequenceNumber value);
@@ -39,8 +64,7 @@ public:
   operator SequenceNumber() const;
 
 private:
-  typedef std::set<SequenceNumber> SequenceSet;
-  SequenceSet values_;
+  disjoint_set values_;
 
   void normalize();
 };
