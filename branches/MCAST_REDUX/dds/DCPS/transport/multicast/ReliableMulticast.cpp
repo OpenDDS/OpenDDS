@@ -79,7 +79,6 @@ NakWatchdog::on_interval(const void* /*arg*/)
   this->link_->send_naks();
 }
 
-
 ReliableMulticast::ReliableMulticast(MulticastTransport* transport,
                                      MulticastPeer local_peer,
                                      MulticastPeer remote_peer)

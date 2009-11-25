@@ -47,7 +47,6 @@ protected:
   virtual void on_interval(const void* arg);
 };
 
-
 class OpenDDS_Multicast_Export ReliableMulticast
   : public MulticastDataLink {
 public:
