@@ -37,17 +37,17 @@ public:
   /// option controls whether ipv6 is to be used instead.
   /// the default value is false.
   bool default_to_ipv6_;
+  
+  /// The offset used to determine default port numbers;
+  /// this value will be added to the transportId. The
+  /// default value is: 49400 [IANA 2009-11-16].
+  u_short port_offset_;
 
   /// The multicast group address from which to send and/or
   /// receive data. The default group addresses are:
   ///   224.0.0.128:<port> [IANA 2009-11-17], and
   ///    [FF01::80]:<port> [IANA 2009-08-28]
   ACE_INET_Addr group_address_;
-
-  /// The offset used to determine default port numbers;
-  /// this value will be added to the transportId. The
-  /// default value is: 49400 [IANA 2009-11-16].
-  u_short port_offset_;
 
   /// Enable/disable reliable communication. This option
   /// will eventually be deprecated once the ETF is able
