@@ -1,3 +1,10 @@
+Wed Nov 25 18:57:08 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Refactored synack_received; dropped extra filtering, added
+          better support for receiving multiple MULTICAST_SYNACK samples.
+
 Wed Nov 25 18:14:07 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportHeader.h:

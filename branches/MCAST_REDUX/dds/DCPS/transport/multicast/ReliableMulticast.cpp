@@ -98,7 +98,7 @@ ReliableMulticast::header_received(const TransportHeader& header)
 
   SequenceMap::iterator it(this->sequences_.find(header.source_));
   if (it == this->sequences_.end()) return true;  // unknown peer
-  
+
   // Update last seen sequence for remote peer; return false if we
   // have already seen this datagram to prevent duplicate delivery:
   return it->second.update(header.sequence_);
@@ -158,18 +158,18 @@ ReliableMulticast::expire_naks()
 
   NakHistory::iterator first(this->nak_history_.begin());
   NakHistory::iterator last(this->nak_history_.upper_bound(deadline));
-  
+
   if (first == last) return; // nothing to expire
-  
+
   for (NakHistory::iterator it(first); it != last; ++it) {
     NakRequest& nak_request(it->second);
-    
+
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("ReliableMulticast::expire_naks: ")
                ACE_TEXT("timed out waiting on remote peer: 0x%x!\n"),
                nak_request.first));
-    
+
     SequenceMap::iterator sequence(this->sequences_.find(nak_request.first));
     if (sequence == this->sequences_.end()) {
       ACE_ERROR((LM_ERROR,
@@ -186,7 +186,7 @@ ReliableMulticast::expire_naks()
       sequence->second.skip(nak_request.second);
     }
   }
- 
+
   // Remove expired repair requests:
   this->nak_history_.erase(first, last);
 }
@@ -198,7 +198,7 @@ ReliableMulticast::send_naks()
 
   for (SequenceMap::iterator it(this->sequences_.begin());
        it != this->sequences_.end(); ++it) {
-    
+
     if (!it->second.disjoint()) continue; // nothing to NAK
 
     // Record high-water mark for peer on this interval; this value
@@ -228,8 +228,8 @@ ReliableMulticast::syn_received(ACE_Message_Block* control)
 
   // Ignore sample if not destined for us:
   if (local_peer != this->local_peer_) return;
- 
-  // Fetch remote peer from header: 
+
+  // Fetch remote peer from header:
   MulticastPeer remote_peer(this->received_header_.source_);
 
   // Insert remote peer into sequence map; this establishes a
@@ -271,24 +271,15 @@ ReliableMulticast::synack_received(ACE_Message_Block* control)
   // Ignore sample if not destined for us:
   if (local_peer != this->local_peer_) return;
 
-  // Fetch remote peer from header: 
-  MulticastPeer remote_peer(this->received_header_.source_);
-  
-  if (remote_peer != this->remote_peer_) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("ReliableMulticast::synack_received: ")
-               ACE_TEXT("acknowledgement received from unexpected peer: 0x%x!\n"),
-               remote_peer));
-    return;
-  }
-
   this->syn_watchdog_.cancel();
 
-  // Handshake is complete; adjust the acked flag and force the
-  // TransportImpl to re-evaluate any pending associations:
-  this->acked_ = true;
-  this->transport_->check_fully_association();
+  if (!this->acked_) {
+    this->acked_ = true;
+
+    // Handshake is complete; force the TransportImpl to re-evaluate
+    // any pending associations it has queued:
+    this->transport_->check_fully_association();
+  }
 }
 
 void
@@ -319,16 +310,16 @@ ReliableMulticast::nak_received(ACE_Message_Block* control)
 
   // Ignore sample if not destined for us:
   if (local_peer != this->local_peer_) return;
-  
+
   MulticastSequence low;
   serializer >> low;
-  
+
   MulticastSequence high;
   serializer >> high;
-  
-  // Fetch remote peer from header: 
+
+  // Fetch remote peer from header:
   MulticastPeer remote_peer(this->received_header_.source_);
-  
+
   // TODO implement
 }
 
@@ -358,21 +349,21 @@ ReliableMulticast::send_nak(MulticastPeer remote_peer,
 void
 ReliableMulticast::nakack_received(ACE_Message_Block* control)
 {
-  // Fetch remote peer from header: 
+  // Fetch remote peer from header:
   MulticastPeer remote_peer(this->received_header_.source_);
 
   SequenceMap::iterator it(this->sequences_.find(remote_peer));
   if (it == this->sequences_.end()) return; // unknown peer
-  
+
   TAO::DCPS::Serializer serializer(
     control, this->transport_->swap_bytes());
 
   MulticastSequence low;
   serializer >> low;
-  
+
   MulticastSequence high;
   serializer >> high;
-  
+
   ACE_ERROR((LM_ERROR,
              ACE_TEXT("(%P|%t) ERROR: ")
              ACE_TEXT("ReliableMulticast::nackack_received: ")
