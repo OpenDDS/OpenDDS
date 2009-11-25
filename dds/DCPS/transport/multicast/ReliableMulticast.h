@@ -71,7 +71,7 @@ public:
   void send_naks();
  
   void syn_received(ACE_Message_Block* control);
-  void send_syn(MulticastPeer remote_peer);
+  void send_syn();
 
   void synack_received(ACE_Message_Block* control);
   void send_synack(MulticastPeer remote_peer);

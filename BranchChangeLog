@@ -1,3 +1,12 @@
+Wed Nov 25 06:16:33 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Applied optimizations to control sample handling; control samples
+          will only be partially deserialized worst case for those samples
+          which are destined for other peers.
+
 Wed Nov 25 05:39:14 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/DisjointSequence.h:
