@@ -102,7 +102,7 @@ ReliableMulticast::header_received(const TransportHeader& header)
   if (it == this->sequences_.end()) return true;  // unknown peer
   
   // Update last seen sequence for remote peer; return false if we
-  // have already seen this packet to prevent duplicate delivery:
+  // have already seen this datagram to prevent duplicate delivery:
   return it->second.update(header.sequence_);
 }
 
