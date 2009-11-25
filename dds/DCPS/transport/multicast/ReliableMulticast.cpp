@@ -31,8 +31,7 @@ void
 SynWatchdog::on_interval(const void* /*arg*/)
 {
   // Initiate handshake by broadcasting MULTICAST_SYN control
-  // samples to the remote (passive) peer assigned when the
-  // DataLink was created:
+  // samples to the assigned remote peer:
   this->link_->send_syn();
 }
 
@@ -46,12 +45,12 @@ SynWatchdog::next_timeout()
 void
 SynWatchdog::on_timeout(const void* /*arg*/)
 {
-  // There is no recourse if a link is unable to handshake; log
-  // an error and return:
+  // There is no recourse if a link is unable to handshake;
+  // log an error and return:
   ACE_ERROR((LM_ERROR,
              ACE_TEXT("(%P|%t) ERROR: ")
              ACE_TEXT("SynWatchdog::on_timeout: ")
-             ACE_TEXT("timed out handshaking with remote peer: 0x%x!\n"),
+             ACE_TEXT("timed out waiting on remote peer: 0x%x!\n"),
              this->link_->remote_peer()));
 }
 
@@ -96,7 +95,7 @@ ReliableMulticast::ReliableMulticast(MulticastTransport* transport,
 bool
 ReliableMulticast::header_received(const TransportHeader& header)
 {
-  this->recvd_header_ = header;
+  this->received_header_ = header;
 
   SequenceMap::iterator it(this->sequences_.find(header.source_));
   if (it == this->sequences_.end()) return true;  // unknown peer
@@ -166,6 +165,12 @@ ReliableMulticast::expire_naks()
   for (NakHistory::iterator it(first); it != last; ++it) {
     NakRequest& nak_request(it->second);
     
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("ReliableMulticast::expire_naks: ")
+               ACE_TEXT("timed out waiting on remote peer: 0x%x!\n"),
+               nak_request.first));
+    
     SequenceMap::iterator sequence(this->sequences_.find(nak_request.first));
     if (sequence == this->sequences_.end()) {
       ACE_ERROR((LM_ERROR,
@@ -175,15 +180,9 @@ ReliableMulticast::expire_naks()
                  nak_request.first));
       continue;
     }
-      
-    ACE_ERROR((LM_WARNING,
-               ACE_TEXT("(%P|%t) WARNING: ")
-               ACE_TEXT("ReliableMulticast::expire_naks: ")
-               ACE_TEXT("timed out waiting on remote peer: 0x%x!\n"),
-               nak_request.first));
 
     // Skip unrecoverable datagrams; attempt to re-establish a
-    // new baseline to detect future reception gaps:
+    // reasonable baseline to detect future reception gaps:
     if (nak_request.second > sequence->second) {
       sequence->second.skip(nak_request.second);
     }
@@ -204,17 +203,16 @@ ReliableMulticast::send_naks()
     if (!it->second.disjoint()) continue; // nothing to NAK
 
     // Record high-water mark for peer on this interval; this value
-    // is used to reset the low-water mark in the event a remote
-    // peer does not respond to our repair requests:
+    // is used to reset the low-water mark in the event the peer
+    // becomes unresponsive:
     this->nak_history_.insert(NakHistory::value_type(
       now, NakRequest(it->first, it->second.high())));
 
     for (DisjointSequence::range_iterator range(it->second.range_begin());
          range != it->second.range_end(); ++range) {
-      // Broadcast MULTICAST_NAK control sample to  the remote
-      // peer. The peer should respond with either a resend of
-      // the missing data or a MULTICAST_NAKACK indicating the
-      // data is no longer available.
+      // Broadcast MULTICAST_NAK control sample to remote peer. The
+      // peer should respond with a resend of the missing data or a
+      // MULTICAST_NAKACK indicating the data is no longer available.
       send_nak(it->first, range->first, range->second);
     }
   }
@@ -227,19 +225,18 @@ ReliableMulticast::syn_received(ACE_Message_Block* control)
     control, this->transport_->swap_bytes());
 
   MulticastPeer local_peer;
-  MulticastPeer remote_peer;
-  
-  serializer >> local_peer;   // sent as remote_peer
+  serializer >> local_peer; // sent as remote_peer
 
   // Ignore sample if not destined for us:
   if (local_peer != this->local_peer_) return;
-  
-  serializer >> remote_peer;  // sent as local_peer
+ 
+  // Fetch remote peer from header: 
+  MulticastPeer remote_peer(this->received_header_.source_);
 
-  // Insert remote peer into sequence map. This establishes a
+  // Insert remote peer into sequence map; this establishes a
   // baseline for detecting reception gaps during delivery.
   this->sequences_.insert(SequenceMap::value_type(
-    remote_peer, DisjointSequence(this->recvd_header_.sequence_)));
+    remote_peer, DisjointSequence(this->received_header_.sequence_)));
 
   // MULTICAST_SYN control samples are always positively
   // acknowledged by a matching remote peer:
@@ -249,37 +246,18 @@ ReliableMulticast::syn_received(ACE_Message_Block* control)
 void
 ReliableMulticast::send_syn()
 {
-  size_t len = sizeof (this->remote_peer_)
-             + sizeof (this->local_peer_);
+  size_t len = sizeof (this->remote_peer_);
 
   ACE_Message_Block* data;
-  ACE_NEW_NORETURN(data, ACE_Message_Block(len));
-  if (data == 0) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("ReliableMulticast::send_syn: ")
-               ACE_TEXT("failed to allocate message!\n")));
-    return;
-  }
+  ACE_NEW(data, ACE_Message_Block(len));
 
   TAO::DCPS::Serializer serializer(
     data, this->transport_->swap_bytes());
 
   serializer << this->remote_peer_;
-  serializer << this->local_peer_;
 
-  ACE_Message_Block* control =
-    create_control(MULTICAST_SYN, data);
-
-  int error;
-  if ((error = send_control(control)) != SEND_CONTROL_OK) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("ReliableMulticast::send_syn: ")
-               ACE_TEXT("send_control failed: %d!\n"),
-               error));
-    return;
-  }
+  // Send control sample to remote peer:
+  send_control(MULTICAST_SYN, data);
 }
 
 void
@@ -289,30 +267,27 @@ ReliableMulticast::synack_received(ACE_Message_Block* control)
     control, this->transport_->swap_bytes());
 
   MulticastPeer local_peer;
-  MulticastPeer remote_peer;
-  
-  serializer >> local_peer;   // sent as remote_peer
+  serializer >> local_peer; // sent as remote_peer
 
   // Ignore sample if not destined for us:
   if (local_peer != this->local_peer_) return;
 
-  serializer >> remote_peer;  // sent as local_peer
-
+  // Fetch remote peer from header: 
+  MulticastPeer remote_peer(this->received_header_.source_);
+  
   if (remote_peer != this->remote_peer_) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("ReliableMulticast::synack_received: ")
-               ACE_TEXT("ACK received from unexpected peer: 0x%x!\n"),
+               ACE_TEXT("acknowledgement received from unexpected peer: 0x%x!\n"),
                remote_peer));
     return;
   }
 
   this->syn_watchdog_.cancel();
 
-  // 2-way handshake is complete; we have verified that the remote
-  // peer is indeed sending/receiving data reliably. Adjust the
-  // acked flag and force the TransportImpl to re-evaluate any
-  // pending associations it has queued:
+  // Handshake is complete; adjust the acked flag and force the
+  // TransportImpl to re-evaluate any pending associations:
   this->acked_ = true;
   this->transport_->check_fully_association();
 }
@@ -320,37 +295,18 @@ ReliableMulticast::synack_received(ACE_Message_Block* control)
 void
 ReliableMulticast::send_synack(MulticastPeer remote_peer)
 {
-  size_t len = sizeof (remote_peer)
-             + sizeof (this->local_peer_);
+  size_t len = sizeof (remote_peer);
 
   ACE_Message_Block* data;
-  ACE_NEW_NORETURN(data, ACE_Message_Block(len));
-  if (data == 0) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("ReliableMulticast::send_synack: ")
-               ACE_TEXT("failed to allocate message!\n")));
-    return;
-  }
+  ACE_NEW(data, ACE_Message_Block(len));
 
   TAO::DCPS::Serializer serializer(
     data, this->transport_->swap_bytes());
 
   serializer << remote_peer;
-  serializer << this->local_peer_;
 
-  ACE_Message_Block* control =
-    create_control(MULTICAST_SYNACK, data);
-
-  int error;
-  if ((error = send_control(control)) != SEND_CONTROL_OK) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("ReliableMulticast::send_synack: ")
-               ACE_TEXT("send_control failed: %d!\n"),
-               error));
-    return;
-  }
+  // Send control sample to remote peer:
+  send_control(MULTICAST_SYNACK, data);
 }
 
 void
@@ -360,18 +316,19 @@ ReliableMulticast::nak_received(ACE_Message_Block* control)
     control, this->transport_->swap_bytes());
 
   MulticastPeer local_peer;
-  MulticastPeer remote_peer;
-  MulticastSequence low;
-  MulticastSequence high;
-  
-  serializer >> local_peer;   // sent as remote_peer
+  serializer >> local_peer; // sent as remote_peer
 
   // Ignore sample if not destined for us:
   if (local_peer != this->local_peer_) return;
   
-  serializer >> remote_peer;  // sent as local_peer
+  MulticastSequence low;
   serializer >> low;
+  
+  MulticastSequence high;
   serializer >> high;
+  
+  // Fetch remote peer from header: 
+  MulticastPeer remote_peer(this->received_header_.source_);
   
   // TODO implement
 }
@@ -382,40 +339,21 @@ ReliableMulticast::send_nak(MulticastPeer remote_peer,
                             MulticastSequence high)
 {
   size_t len = sizeof (remote_peer)
-             + sizeof (this->local_peer_)
              + sizeof (low)
              + sizeof (high);
 
   ACE_Message_Block* data;
-  ACE_NEW_NORETURN(data, ACE_Message_Block(len));
-  if (data == 0) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("ReliableMulticast::send_nak: ")
-               ACE_TEXT("failed to allocate message!\n")));
-    return;
-  }
+  ACE_NEW(data, ACE_Message_Block(len));
 
   TAO::DCPS::Serializer serializer(
     data, this->transport_->swap_bytes());
 
   serializer << remote_peer;
-  serializer << this->local_peer_;
   serializer << low;
   serializer << high;
 
-  ACE_Message_Block* control =
-    create_control(MULTICAST_NAK, data);
-
-  int error;
-  if ((error = send_control(control)) != SEND_CONTROL_OK) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("ReliableMulticast::send_nak: ")
-               ACE_TEXT("send_control failed: %d!\n"),
-               error));
-    return;
-  }
+  // Send control sample to remote peer:
+  send_control(MULTICAST_NAK, data);
 }
 
 void
@@ -425,22 +363,26 @@ ReliableMulticast::nakack_received(ACE_Message_Block* control)
     control, this->transport_->swap_bytes());
 
   MulticastPeer local_peer;
-  MulticastPeer remote_peer;
-  MulticastSequence low;
-  MulticastSequence high;
-  
-  serializer >> local_peer;   // sent as remote_peer
+  serializer >> local_peer; // sent as remote_peer
 
   // Ignore sample if not destined for us:
   if (local_peer != this->local_peer_) return;
   
-  serializer >> remote_peer;  // sent as local_peer
+  MulticastSequence low;
   serializer >> low;
+  
+  MulticastSequence high;
   serializer >> high;
+  
+  // Fetch remote peer from header: 
+  MulticastPeer remote_peer(this->received_header_.source_);
+      
+  ACE_ERROR((LM_ERROR,
+             ACE_TEXT("(%P|%t) ERROR: ")
+             ACE_TEXT("ReliableMulticast::nackack_received: ")
+             ACE_TEXT("unrecoverable samples reported by remote peer: 0x%x!\n"),
+             remote_peer));
 
-  // MULTICAST_NAKACK control samples indicate data which cannot be
-  // repaired by a remote peer. Update the sequence map to suppress
-  // future repair requests for the range:
   SequenceMap::iterator it(this->sequences_.find(remote_peer));
   if (it == this->sequences_.end()) {
     ACE_ERROR((LM_ERROR,
@@ -450,13 +392,10 @@ ReliableMulticast::nakack_received(ACE_Message_Block* control)
                remote_peer));
     return;
   }
-      
-  ACE_ERROR((LM_WARNING,
-             ACE_TEXT("(%P|%t) WARNING: ")
-             ACE_TEXT("ReliableMulticast::nackack_received: ")
-             ACE_TEXT("unrecoverable samples reported by remote peer: 0x%x!\n"),
-             remote_peer));
 
+  // MULTICAST_NAKACK control samples indicate data which cannot be
+  // repaired by a remote peer. Update the sequence map to suppress
+  // future repair requests for the given range:
   it->second.update(DisjointSequence::range_type(low, high));
 }
 
@@ -466,36 +405,41 @@ ReliableMulticast::send_nakack(MulticastPeer remote_peer,
                                MulticastSequence high)
 {
   size_t len = sizeof (remote_peer)
-             + sizeof (this->local_peer_)
              + sizeof (low)
              + sizeof (high);
 
   ACE_Message_Block* data;
-  ACE_NEW_NORETURN(data, ACE_Message_Block(len));
-  if (data == 0) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("ReliableMulticast::send_nakack: ")
-               ACE_TEXT("failed to allocate message!\n")));
-    return;
-  }
+  ACE_NEW(data, ACE_Message_Block(len));
 
   TAO::DCPS::Serializer serializer(
     data, this->transport_->swap_bytes());
 
   serializer << remote_peer;
-  serializer << this->local_peer_;
   serializer << low;
   serializer << high;
 
-  ACE_Message_Block* control =
-    create_control(MULTICAST_NAKACK, data);
+  // Send control sample to remote peer:
+  send_control(MULTICAST_NAKACK, data);
+}
 
-  int error;
-  if ((error = send_control(control)) != SEND_CONTROL_OK) {
+void
+ReliableMulticast::send_control(SubMessageId submessage_id,
+                                ACE_Message_Block* data)
+{
+  ACE_Message_Block* control = create_control(submessage_id, data);
+  if (control == 0) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("ReliableMulticast::send_nakack: ")
+               ACE_TEXT("ReliableMulticast::send_control: ")
+               ACE_TEXT("create_control failed!\n")));
+    return;
+  }
+
+  int error;
+  if ((error = DataLink::send_control(control)) != SEND_CONTROL_OK) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("ReliableMulticast::send_control: ")
                ACE_TEXT("send_control failed: %d!\n"),
                error));
     return;

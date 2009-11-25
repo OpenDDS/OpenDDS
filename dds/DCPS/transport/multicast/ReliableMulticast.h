@@ -51,7 +51,7 @@ protected:
 class OpenDDS_Multicast_Export ReliableMulticast
   : public MulticastDataLink {
 public:
-  enum {
+  enum SubMessageId {
     MULTICAST_SYN,
     MULTICAST_SYNACK,
     MULTICAST_NAK,
@@ -86,6 +86,9 @@ public:
                    MulticastSequence low,
                    MulticastSequence high);
 
+  void send_control(SubMessageId submessage_id,
+                    ACE_Message_Block* data);
+
 protected:
   virtual bool join_i(const ACE_INET_Addr& group_address, bool active);
   virtual void leave_i();
@@ -96,7 +99,7 @@ private:
   SynWatchdog syn_watchdog_;
   NakWatchdog nak_watchdog_;
 
-  TransportHeader recvd_header_;
+  TransportHeader received_header_;
 
   typedef std::map<MulticastPeer, DisjointSequence> SequenceMap;
   SequenceMap sequences_;

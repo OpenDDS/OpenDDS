@@ -15,10 +15,10 @@ namespace {
 
 const bool DEFAULT_DEFAULT_TO_IPV6(false);
 
+const u_short DEFAULT_PORT_OFFSET(49400);
+
 const char* DEFAULT_IPV4_GROUP_ADDRESS("224.0.0.128");
 const char* DEFAULT_IPV6_GROUP_ADDRESS("FF01::80");
-
-const u_short DEFAULT_PORT_OFFSET(49400);
 
 const bool DEFAULT_RELIABLE(true);
 
@@ -72,6 +72,9 @@ MulticastConfiguration::load(const TransportIdType& id,
 
   GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("default_to_ipv6"),
                    this->default_to_ipv6_, bool)
+  
+  GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("port_offset"),
+                   this->port_offset_, u_short)
 
   ACE_TString group_address_s;
   GET_CONFIG_STRING_VALUE(config, transport_key, ACE_TEXT("group_address"),
@@ -81,9 +84,6 @@ MulticastConfiguration::load(const TransportIdType& id,
   } else {
     this->group_address_.set(group_address_s.c_str());
   }
-
-  GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("port_offset"),
-                   this->port_offset_, u_short)
 
   GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("reliable"),
                    this->reliable_, bool)
