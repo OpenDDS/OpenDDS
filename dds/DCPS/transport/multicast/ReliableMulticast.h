@@ -82,8 +82,7 @@ public:
                 MulticastSequence high);
 
   void nakack_received(ACE_Message_Block* control);
-  void send_nakack(MulticastPeer remote_peer,
-                   MulticastSequence low,
+  void send_nakack(MulticastSequence low,
                    MulticastSequence high);
 
   void send_control(SubMessageId submessage_id,
