@@ -1,3 +1,11 @@
+Wed Nov 25 04:01:33 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/Monitor.qrc:
+        * tools/odds_monitor/Monitor.ui:
+        * tools/odds_monitor/Monitor_main.cpp:
+
+          Added resource file and a splash to the application.
+
 Wed Nov 25 00:55:49 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/odds_monitor/Monitor.mpc:
