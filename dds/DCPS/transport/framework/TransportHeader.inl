@@ -12,18 +12,14 @@
 
 ACE_INLINE
 OpenDDS::DCPS::TransportHeader::TransportHeader()
-  : version_(DCPS_VERSION),
+  : protocol_(DCPS_PROTOCOL),
+    version_major_(DCPS_VERSION_MAJOR),
+    version_minor_(DCPS_VERSION_MINOR),
     source_(0),
     sequence_(0),
     length_(0)
 {
   DBG_ENTRY_LVL("TransportHeader","TransportHeader",6);
-
-  this->byte_order_ = TAO_ENCAP_BYTE_ORDER;
-  this->protocol_[0] = DCPS_PROTOCOL[0];  // D
-  this->protocol_[1] = DCPS_PROTOCOL[1];  // C
-  this->protocol_[2] = DCPS_PROTOCOL[2];  // P
-  this->protocol_[3] = DCPS_PROTOCOL[3];  // S
 }
 
 ACE_INLINE
@@ -64,9 +60,9 @@ OpenDDS::DCPS::TransportHeader::max_marshaled_size()
 {
   DBG_ENTRY_LVL("TransportHeader","max_marshaled_size",6);
   // Representation takes no extra space for encoding.
-  return sizeof(this->byte_order_) +
-         sizeof(this->protocol_) +
-         sizeof(this->version_) +
+  return sizeof(this->protocol_) +
+         sizeof(this->version_major_) +
+         sizeof(this->version_minor_) +
          sizeof(this->source_) +
          sizeof(this->sequence_) +
          sizeof(this->length_);
@@ -78,11 +74,18 @@ OpenDDS::DCPS::TransportHeader::valid() const
 {
   DBG_ENTRY_LVL("TransportHeader","valid",6);
 
-  return this->protocol_[0] == DCPS_PROTOCOL[0] &&  // D
-         this->protocol_[1] == DCPS_PROTOCOL[1] &&  // C
-         this->protocol_[2] == DCPS_PROTOCOL[2] &&  // P
-         this->protocol_[3] == DCPS_PROTOCOL[3] &&  // S
-         this->version_ == DCPS_VERSION;
+  return (this->protocol_ == DCPS_PROTOCOL || swap_bytes()) &&
+         this->version_major_ == DCPS_VERSION_MAJOR &&
+         this->version_minor_ == DCPS_VERSION_MINOR;
+}
+
+ACE_INLINE
+bool
+OpenDDS::DCPS::TransportHeader::swap_bytes() const
+{
+  DBG_ENTRY_LVL("TransportHeader","swap_bytes",6);
+
+  return this->protocol_ == DCPS_PROTOCOL_SWAPPED;
 }
 
 ACE_INLINE
@@ -93,17 +96,16 @@ OpenDDS::DCPS::TransportHeader::init(ACE_Message_Block* buffer)
 
   TAO::DCPS::Serializer reader(buffer);
 
-  // Extract the byte order for the transport header.
-  reader >> ACE_InputCDR::to_octet(this->byte_order_);
+  // Extract the protocol_ value.
+  reader >> this->protocol_;
 
-  reader.swap_bytes(this->byte_order_ != TAO_ENCAP_BYTE_ORDER);
+  reader.swap_bytes(swap_bytes());
 
-  // Extract the packet_id_ octet values.
-  reader.read_octet_array(this->protocol_, sizeof(this->protocol_));
-  if (reader.good_bit() != true) return;  // bad reader
+  // Extract the version_major_ value.
+  reader >> ACE_InputCDR::to_octet(this->version_major_);
 
-  // Extract the version_ value.
-  reader >> ACE_InputCDR::to_octet(this->version_);
+  // Extract the version_minor_ value.
+  reader >> ACE_InputCDR::to_octet(this->version_minor_);
 
   // Extract the source_id_ value.
   reader >> this->source_;

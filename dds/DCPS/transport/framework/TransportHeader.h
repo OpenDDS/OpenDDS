@@ -10,6 +10,8 @@
 #ifndef OPENDDS_DCPS_TRANSPORTHEADER_H
 #define OPENDDS_DCPS_TRANSPORTHEADER_H
 
+#include "ace/Basic_Types.h"
+
 #include "dds/DCPS/Definitions.h"
 
 namespace OpenDDS {
@@ -26,8 +28,11 @@ namespace DCPS {
  * same transport packet).
  */
 struct OpenDDS_Dcps_Export TransportHeader {
-  static const ACE_CDR::Octet DCPS_PROTOCOL[];
-  static const ACE_CDR::Octet DCPS_VERSION;
+  static const ACE_INT32      DCPS_PROTOCOL;
+  static const ACE_INT32      DCPS_PROTOCOL_SWAPPED;
+
+  static const ACE_CDR::Octet DCPS_VERSION_MAJOR;
+  static const ACE_CDR::Octet DCPS_VERSION_MINOR;
 
   /// Default constructor.
   TransportHeader();
@@ -41,19 +46,20 @@ struct OpenDDS_Dcps_Export TransportHeader {
   TransportHeader& operator=(ACE_Message_Block& buffer);
 
   /// Determine if this is a valid packet header.
-  bool valid() const ;
+  bool valid() const;
 
-  /// Byte order for the transport header. This byte_order_ flag indicates
-  /// the endianess of the host of the publisher side. This is not affected
-  /// by the swap_bytes configuration defined for the specific TransportImpl
-  /// instance.
-  ACE_CDR::Octet byte_order_;
+  /// Determine if the serializer should swap bytes.
+  bool swap_bytes() const;
 
-  /// The protocol of the packet being transmitted.
-  ACE_CDR::Octet protocol_[4];
+  /// The protocol of the packet being transmitted. This value also
+  /// indicates the endianess of the source.
+  ACE_INT32 protocol_;
 
-  /// The version of the protocol.
-  ACE_CDR::Octet version_;
+  /// The major version of the protocol.
+  ACE_CDR::Octet version_major_;
+
+  /// The minor version of the protocol.
+  ACE_CDR::Octet version_minor_;
 
   /// A transport-specific identification number which uniquely
   /// identifies the source of the packet.
