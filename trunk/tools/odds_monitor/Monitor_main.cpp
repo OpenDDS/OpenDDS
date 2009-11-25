@@ -9,6 +9,7 @@
 
 #include "Viewer.h"
 #include "Options.h"
+#include <QtGui/QSplashScreen>
 
 #include "dds/DCPS/Service_Participant.h"
 
@@ -20,6 +21,13 @@ main( int argc, char** argv, char**)
 
   // Initialize the application, consume any Qt arguments.
   QApplication application( argc, argv);
+  QPixmap splashImage(":/jpeg/splash.jpg");
+  QSplashScreen splash(splashImage);
+  splash.show();
+  application.processEvents();
+
+  splash.showMessage("Initializing DDS Service");
+  application.processEvents();
 
   // Process the command line arguments left after ACE and Qt have had a go.
   Monitor::Options options( argc, argv);
@@ -27,6 +35,9 @@ main( int argc, char** argv, char**)
   // Instantiate and display.
   Monitor::Viewer* viewer = new Monitor::Viewer( options);
   viewer->show();
+
+  sleep(5); // Development: For emphasis.
+  splash.finish( viewer);
 
   // Main GUI processing loop.
   return application.exec();
