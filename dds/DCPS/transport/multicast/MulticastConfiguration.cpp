@@ -8,6 +8,7 @@
  */
 
 #include "MulticastConfiguration.h"
+
 #include "dds/DCPS/transport/framework/TransportDebug.h"
 
 namespace {
@@ -87,33 +88,17 @@ MulticastConfiguration::load(const TransportIdType& id,
   GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("reliable"),
                    this->reliable_, bool)
 
-  long syn_interval_msec = -1;
-  GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("syn_interval"),
-                   syn_interval_msec, long)
-  if (syn_interval_msec != -1) {
-    this->syn_interval_.msec(syn_interval_msec);
-  }
+  GET_CONFIG_TIME_VALUE(config, transport_key, ACE_TEXT("syn_interval"),
+                        this->syn_interval_)
 
-  long syn_timeout_msec = -1;
-  GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("syn_timeout"),
-                   syn_timeout_msec, long)
-  if (syn_timeout_msec != -1) {
-    this->syn_timeout_.msec(syn_timeout_msec);
-  }
+  GET_CONFIG_TIME_VALUE(config, transport_key, ACE_TEXT("syn_timeout"),
+                        this->syn_timeout_)
 
-  long nak_interval_msec = -1;
-  GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("nak_interval"),
-                   nak_interval_msec, long)
-  if (nak_interval_msec != -1) {
-    this->nak_interval_.msec(nak_interval_msec);
-  }
+  GET_CONFIG_TIME_VALUE(config, transport_key, ACE_TEXT("nak_interval"),
+                        this->nak_interval_)
 
-  long nak_timeout_msec = -1;
-  GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("nak_timeout"),
-                   nak_timeout_msec, long)
-  if (nak_timeout_msec != -1) {
-    this->nak_timeout_.msec(nak_timeout_msec);
-  }
+  GET_CONFIG_TIME_VALUE(config, transport_key, ACE_TEXT("nak_timeout"),
+                        this->nak_timeout_)
 
   GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("nak_repair_size"),
                    this->nak_repair_size_, size_t)

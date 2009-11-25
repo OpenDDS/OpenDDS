@@ -8,6 +8,7 @@
  */
 
 #include "MulticastSendStrategy.h"
+#include "MulticastDataLink.h"
 
 namespace OpenDDS {
 namespace DCPS {

@@ -33,15 +33,15 @@ public:
   virtual int load(const TransportIdType& id,
                    ACE_Configuration_Heap& config);
 
-  /// The default group address selection is IPv4; this
-  /// option controls whether IPv6 is to be used instead.
-  /// The default value is false.
+  /// the default group address selection is ipv4; this
+  /// option controls whether ipv6 is to be used instead.
+  /// the default value is false.
   bool default_to_ipv6_;
 
   /// The multicast group address from which to send and/or
   /// receive data. The default group addresses are:
-  ///   224.0.0.128:<port> [IANA 2009-11-17], or
-  ///   [FF01::80]:<port>  [IANA 2009-08-28]
+  ///   224.0.0.128:<port> [IANA 2009-11-17], and
+  ///    [FF01::80]:<port> [IANA 2009-08-28]
   ACE_INET_Addr group_address_;
 
   /// The offset used to determine default port numbers;

@@ -24,6 +24,8 @@ BestEffortMulticast::BestEffortMulticast(MulticastTransport* transport,
 bool
 BestEffortMulticast::header_received(const TransportHeader& header)
 {
+  // Assume header is valid; this does not prevent duplicate
+  // delivery of datagrams.
   return true;
 }
 
@@ -43,13 +45,15 @@ BestEffortMulticast::sample_received(ReceivedDataSample& sample)
 bool
 BestEffortMulticast::acked()
 {
+  // Assume remote peer is available; this does not prevent
+  // data lost if remote peer is unreachable.
   return true;
 }
 
 bool
 BestEffortMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool /*active*/)
 {
-  return true;
+  return true;  // do nothing
 }
 
 void

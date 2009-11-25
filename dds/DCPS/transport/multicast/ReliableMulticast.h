@@ -24,16 +24,6 @@ namespace DCPS {
 
 class ReliableMulticast;
 
-class OpenDDS_Multicast_Export NakWatchdog
-  : public DataLinkWatchdog<ReliableMulticast> {
-public:
-  explicit NakWatchdog(ReliableMulticast* link);
-
-protected:
-  virtual ACE_Time_Value next_interval();
-  virtual void on_interval(const void* arg);
-};
-
 class OpenDDS_Multicast_Export SynWatchdog
   : public DataLinkWatchdog<ReliableMulticast> {
 public:
@@ -46,6 +36,17 @@ protected:
   virtual ACE_Time_Value next_timeout();
   virtual void on_timeout(const void* arg);
 };
+
+class OpenDDS_Multicast_Export NakWatchdog
+  : public DataLinkWatchdog<ReliableMulticast> {
+public:
+  explicit NakWatchdog(ReliableMulticast* link);
+
+protected:
+  virtual ACE_Time_Value next_interval();
+  virtual void on_interval(const void* arg);
+};
+
 
 class OpenDDS_Multicast_Export ReliableMulticast
   : public MulticastDataLink {
@@ -69,18 +70,18 @@ public:
   void expire_naks(); 
   void send_naks();
  
-  void syn_received(ACE_Message_Block* message);
+  void syn_received(ACE_Message_Block* control);
   void send_syn();
 
-  void synack_received(ACE_Message_Block* message);
+  void synack_received(ACE_Message_Block* control);
   void send_synack(MulticastPeer remote_peer);
   
-  void nak_received(ACE_Message_Block* message);
+  void nak_received(ACE_Message_Block* control);
   void send_nak(MulticastPeer remote_peer,
                 MulticastSequence low,
                 MulticastSequence high);
 
-  void nakack_received(ACE_Message_Block* message);
+  void nakack_received(ACE_Message_Block* control);
   void send_nakack(MulticastPeer remote_peer,
                    MulticastSequence low,
                    MulticastSequence high);
@@ -92,8 +93,8 @@ protected:
 private:
   bool acked_;
 
-  NakWatchdog nak_watchdog_;
   SynWatchdog syn_watchdog_;
+  NakWatchdog nak_watchdog_;
 
   TransportHeader recvd_header_;
 

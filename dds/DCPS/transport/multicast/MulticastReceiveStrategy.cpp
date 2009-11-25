@@ -8,6 +8,8 @@
  */
 
 #include "MulticastReceiveStrategy.h"
+#include "MulticastDataLink.h"
+
 #include "ace/Reactor.h"
 
 namespace OpenDDS {

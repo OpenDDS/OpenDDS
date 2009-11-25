@@ -15,32 +15,6 @@
 namespace OpenDDS {
 namespace DCPS {
 
-NakWatchdog::NakWatchdog(ReliableMulticast* link)
-  : DataLinkWatchdog<ReliableMulticast>(link)
-{
-}
-
-ACE_Time_Value
-NakWatchdog::next_interval()
-{
-  MulticastConfiguration* config = this->link_->config();
-  return config->nak_interval_;
-}
-
-void
-NakWatchdog::on_interval(const void* /*arg*/)
-{
-  // Expire outstanding NAK requests that have not yet been
-  // fulfilled; this prevents NAK implosions due to remote
-  // peers becoming unreachable.
-  this->link_->expire_naks();
-
-  // Initiate resends by broadcasting MULTICAST_NAK control
-  // messages to remote peers from which we are missing data:
-  this->link_->send_naks();
-}
-
-
 SynWatchdog::SynWatchdog(ReliableMulticast* link)
   : DataLinkWatchdog<ReliableMulticast>(link)
 {
@@ -57,8 +31,8 @@ void
 SynWatchdog::on_interval(const void* /*arg*/)
 {
   // Initiate handshake by broadcasting MULTICAST_SYN control
-  // messages to the remote peer assigned when the DataLink
-  // was created:
+  // samples to the remote (passive) peer assigned when the
+  // DataLink was created:
   this->link_->send_syn();
 }
 
@@ -81,6 +55,31 @@ SynWatchdog::on_timeout(const void* /*arg*/)
              this->link_->remote_peer()));
 }
 
+NakWatchdog::NakWatchdog(ReliableMulticast* link)
+  : DataLinkWatchdog<ReliableMulticast>(link)
+{
+}
+
+ACE_Time_Value
+NakWatchdog::next_interval()
+{
+  MulticastConfiguration* config = this->link_->config();
+  return config->nak_interval_;
+}
+
+void
+NakWatchdog::on_interval(const void* /*arg*/)
+{
+  // Expire outstanding repair requests that have not yet been
+  // fulfilled; this prevents NAK implosions due to remote
+  // peers becoming unreachable.
+  this->link_->expire_naks();
+
+  // Initiate resends by broadcasting MULTICAST_NAK control
+  // samples to remote peers from which we are missing data:
+  this->link_->send_naks();
+}
+
 
 ReliableMulticast::ReliableMulticast(MulticastTransport* transport,
                                      MulticastPeer local_peer,
@@ -89,8 +88,8 @@ ReliableMulticast::ReliableMulticast(MulticastTransport* transport,
                       local_peer,
                       remote_peer),
     acked_(false),
-    nak_watchdog_(this),
-    syn_watchdog_(this)
+    syn_watchdog_(this),
+    nak_watchdog_(this)
 {
 }
 
@@ -112,23 +111,21 @@ ReliableMulticast::sample_received(ReceivedDataSample& sample)
 {
   switch(sample.header_.message_id_) {
   case TRANSPORT_CONTROL: {
-    ACE_Message_Block* message = sample.sample_;
-
     switch (sample.header_.submessage_id_) {
     case MULTICAST_SYN:
-      syn_received(message);
+      syn_received(sample.sample_);
       break;
 
     case MULTICAST_SYNACK:
-      synack_received(message);
+      synack_received(sample.sample_);
       break;
 
     case MULTICAST_NAK:
-      nak_received(message);
+      nak_received(sample.sample_);
       break;
 
     case MULTICAST_NAKACK:
-      nakack_received(message);
+      nakack_received(sample.sample_);
       break;
 
     default:
@@ -169,7 +166,7 @@ ReliableMulticast::expire_naks()
   for (NakHistory::iterator it(first); it != last; ++it) {
     NakRequest& nak_request(it->second);
     
-    SequenceMap::iterator sequence = this->sequences_.find(nak_request.first);
+    SequenceMap::iterator sequence(this->sequences_.find(nak_request.first));
     if (sequence == this->sequences_.end()) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: ")
@@ -179,8 +176,8 @@ ReliableMulticast::expire_naks()
       continue;
     }
 
-    // Skip undeliverable datagrams; attempt to establish a new
-    // baseline to check for future reception gaps during delivery:
+    // Skip undeliverable datagrams; attempt to re-establish a
+    // new baseline to detect future reception gaps:
     if (nak_request.second > sequence->second) {
       ACE_ERROR((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: ")
@@ -215,19 +212,20 @@ ReliableMulticast::send_naks()
 
     for (DisjointSequence::range_iterator range(it->second.range_begin());
          range != it->second.range_end(); ++range) {
-      // Send MULTICAST_NAK request to remote peer. The peer should
-      // respond with either a resend of the missing data or a
-      // MULTICAST_NAKACK indicating the data is no longer available.
+      // Broadcast MULTICAST_NAK control sample to  the remote
+      // peer. The peer should respond with either a resend of
+      // the missing data or a MULTICAST_NAKACK indicating the
+      // data is no longer available.
       send_nak(it->first, range->first, range->second);
     }
   }
 }
 
 void
-ReliableMulticast::syn_received(ACE_Message_Block* message)
+ReliableMulticast::syn_received(ACE_Message_Block* control)
 {
   TAO::DCPS::Serializer serializer(
-    message, this->transport_->swap_bytes());
+    control, this->transport_->swap_bytes());
 
   MulticastPeer remote_peer;  // sent as local_peer
   MulticastPeer local_peer;   // sent as remote_peer
@@ -235,15 +233,15 @@ ReliableMulticast::syn_received(ACE_Message_Block* message)
   serializer >> remote_peer;
   serializer >> local_peer;
 
-  // Ignore message if not destined for us:
+  // Ignore sample if not destined for us:
   if (local_peer != this->local_peer_) return;
 
-  // Insert remote peer into sequence map. This establishes a baseline
-  // to check for reception gaps during delivery of sample data:
+  // Insert remote peer into sequence map. This establishes a
+  // baseline for detecting reception gaps during delivery.
   this->sequences_.insert(SequenceMap::value_type(
     remote_peer, DisjointSequence(this->recvd_header_.sequence_)));
 
-  // MULTICAST_SYN control messages are always positively
+  // MULTICAST_SYN control samples are always positively
   // acknowledged by a matching remote peer:
   send_synack(remote_peer);
 }
@@ -270,11 +268,11 @@ ReliableMulticast::send_syn()
   serializer << this->local_peer_;
   serializer << this->remote_peer_;
 
-  ACE_Message_Block* message =
+  ACE_Message_Block* control =
     create_control(MULTICAST_SYN, data);
 
   int error;
-  if ((error = send_control(message)) != SEND_CONTROL_OK) {
+  if ((error = send_control(control)) != SEND_CONTROL_OK) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("ReliableMulticast::send_syn: ")
@@ -285,10 +283,10 @@ ReliableMulticast::send_syn()
 }
 
 void
-ReliableMulticast::synack_received(ACE_Message_Block* message)
+ReliableMulticast::synack_received(ACE_Message_Block* control)
 {
   TAO::DCPS::Serializer serializer(
-    message, this->transport_->swap_bytes());
+    control, this->transport_->swap_bytes());
 
   MulticastPeer remote_peer;  // sent as local_peer
   MulticastPeer local_peer;   // sent as remote peer
@@ -296,7 +294,7 @@ ReliableMulticast::synack_received(ACE_Message_Block* message)
   serializer >> remote_peer;
   serializer >> local_peer;
 
-  // Ignore message if not destined for us:
+  // Ignore sample if not destined for us:
   if (local_peer != this->local_peer_) return;
 
   this->syn_watchdog_.cancel();
@@ -331,11 +329,11 @@ ReliableMulticast::send_synack(MulticastPeer remote_peer)
   serializer << this->local_peer_;
   serializer << remote_peer;
 
-  ACE_Message_Block* message =
+  ACE_Message_Block* control =
     create_control(MULTICAST_SYNACK, data);
 
   int error;
-  if ((error = send_control(message)) != SEND_CONTROL_OK) {
+  if ((error = send_control(control)) != SEND_CONTROL_OK) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("ReliableMulticast::send_synack: ")
@@ -346,7 +344,7 @@ ReliableMulticast::send_synack(MulticastPeer remote_peer)
 }
 
 void
-ReliableMulticast::nak_received(ACE_Message_Block* message)
+ReliableMulticast::nak_received(ACE_Message_Block* control)
 {
   // TODO implement
 }
@@ -379,11 +377,11 @@ ReliableMulticast::send_nak(MulticastPeer remote_peer,
   serializer << low;
   serializer << high;
 
-  ACE_Message_Block* message =
+  ACE_Message_Block* control =
     create_control(MULTICAST_NAK, data);
 
   int error;
-  if ((error = send_control(message)) != SEND_CONTROL_OK) {
+  if ((error = send_control(control)) != SEND_CONTROL_OK) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("ReliableMulticast::send_nak: ")
@@ -394,7 +392,7 @@ ReliableMulticast::send_nak(MulticastPeer remote_peer,
 }
 
 void
-ReliableMulticast::nakack_received(ACE_Message_Block* message)
+ReliableMulticast::nakack_received(ACE_Message_Block* control)
 {
   // TODO implement
 }
@@ -421,8 +419,7 @@ ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
 
   // A watchdog timer is scheduled to periodically check for gaps in
   // received data. If a gap is discovered, MULTICAST_NAK control
-  // messages will be broadcasted to initiate resends from
-  // responsible remote peers.
+  // samples will be broadcasted to initiate resends.
   if (!this->nak_watchdog_.schedule(reactor)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
@@ -452,8 +449,8 @@ ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
 void
 ReliableMulticast::leave_i()
 {
-  this->syn_watchdog_.cancel();
   this->nak_watchdog_.cancel();
+  this->syn_watchdog_.cancel();
 }
 
 } // namespace DCPS
