@@ -33,7 +33,7 @@ SynWatchdog::on_interval(const void* /*arg*/)
   // Initiate handshake by broadcasting MULTICAST_SYN control
   // samples to the remote (passive) peer assigned when the
   // DataLink was created:
-  this->link_->send_syn(this->link_->remote_peer());
+  this->link_->send_syn();
 }
 
 ACE_Time_Value
@@ -226,14 +226,15 @@ ReliableMulticast::syn_received(ACE_Message_Block* control)
   TAO::DCPS::Serializer serializer(
     control, this->transport_->swap_bytes());
 
-  MulticastPeer remote_peer;  // sent as local_peer
-  MulticastPeer local_peer;   // sent as remote_peer
-
-  serializer >> remote_peer;
-  serializer >> local_peer;
+  MulticastPeer local_peer;
+  MulticastPeer remote_peer;
+  
+  serializer >> local_peer;   // sent as remote_peer
 
   // Ignore sample if not destined for us:
   if (local_peer != this->local_peer_) return;
+  
+  serializer >> remote_peer;  // sent as local_peer
 
   // Insert remote peer into sequence map. This establishes a
   // baseline for detecting reception gaps during delivery.
@@ -246,10 +247,10 @@ ReliableMulticast::syn_received(ACE_Message_Block* control)
 }
 
 void
-ReliableMulticast::send_syn(MulticastPeer remote_peer)
+ReliableMulticast::send_syn()
 {
-  size_t len = sizeof (this->local_peer_)
-             + sizeof (remote_peer);
+  size_t len = sizeof (this->remote_peer_)
+             + sizeof (this->local_peer_);
 
   ACE_Message_Block* data;
   ACE_NEW_NORETURN(data, ACE_Message_Block(len));
@@ -264,8 +265,8 @@ ReliableMulticast::send_syn(MulticastPeer remote_peer)
   TAO::DCPS::Serializer serializer(
     data, this->transport_->swap_bytes());
 
+  serializer << this->remote_peer_;
   serializer << this->local_peer_;
-  serializer << remote_peer;
 
   ACE_Message_Block* control =
     create_control(MULTICAST_SYN, data);
@@ -287,14 +288,24 @@ ReliableMulticast::synack_received(ACE_Message_Block* control)
   TAO::DCPS::Serializer serializer(
     control, this->transport_->swap_bytes());
 
-  MulticastPeer remote_peer;  // sent as local_peer
-  MulticastPeer local_peer;   // sent as remote peer
-
-  serializer >> remote_peer;
-  serializer >> local_peer;
+  MulticastPeer local_peer;
+  MulticastPeer remote_peer;
+  
+  serializer >> local_peer;   // sent as remote_peer
 
   // Ignore sample if not destined for us:
   if (local_peer != this->local_peer_) return;
+
+  serializer >> remote_peer;  // sent as local_peer
+
+  if (remote_peer != this->remote_peer_) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("ReliableMulticast::synack_received: ")
+               ACE_TEXT("ACK received from unexpected peer: 0x%x!\n"),
+               remote_peer));
+    return;
+  }
 
   this->syn_watchdog_.cancel();
 
@@ -309,8 +320,8 @@ ReliableMulticast::synack_received(ACE_Message_Block* control)
 void
 ReliableMulticast::send_synack(MulticastPeer remote_peer)
 {
-  size_t len = sizeof (this->local_peer_)
-             + sizeof (remote_peer);
+  size_t len = sizeof (remote_peer)
+             + sizeof (this->local_peer_);
 
   ACE_Message_Block* data;
   ACE_NEW_NORETURN(data, ACE_Message_Block(len));
@@ -325,8 +336,8 @@ ReliableMulticast::send_synack(MulticastPeer remote_peer)
   TAO::DCPS::Serializer serializer(
     data, this->transport_->swap_bytes());
 
-  serializer << this->local_peer_;
   serializer << remote_peer;
+  serializer << this->local_peer_;
 
   ACE_Message_Block* control =
     create_control(MULTICAST_SYNACK, data);
@@ -348,17 +359,17 @@ ReliableMulticast::nak_received(ACE_Message_Block* control)
   TAO::DCPS::Serializer serializer(
     control, this->transport_->swap_bytes());
 
-  MulticastPeer remote_peer;  // sent as local_peer
-  MulticastPeer local_peer;   // sent as remote_peer
+  MulticastPeer local_peer;
+  MulticastPeer remote_peer;
   MulticastSequence low;
   MulticastSequence high;
-
-  serializer >> remote_peer;
-  serializer >> local_peer;
+  
+  serializer >> local_peer;   // sent as remote_peer
 
   // Ignore sample if not destined for us:
   if (local_peer != this->local_peer_) return;
-
+  
+  serializer >> remote_peer;  // sent as local_peer
   serializer >> low;
   serializer >> high;
   
@@ -370,8 +381,8 @@ ReliableMulticast::send_nak(MulticastPeer remote_peer,
                             MulticastSequence low,
                             MulticastSequence high)
 {
-  size_t len = sizeof (this->local_peer_)
-             + sizeof (remote_peer)
+  size_t len = sizeof (remote_peer)
+             + sizeof (this->local_peer_)
              + sizeof (low)
              + sizeof (high);
 
@@ -388,8 +399,8 @@ ReliableMulticast::send_nak(MulticastPeer remote_peer,
   TAO::DCPS::Serializer serializer(
     data, this->transport_->swap_bytes());
 
-  serializer << this->local_peer_;
   serializer << remote_peer;
+  serializer << this->local_peer_;
   serializer << low;
   serializer << high;
 
@@ -413,17 +424,17 @@ ReliableMulticast::nakack_received(ACE_Message_Block* control)
   TAO::DCPS::Serializer serializer(
     control, this->transport_->swap_bytes());
 
-  MulticastPeer remote_peer;  // sent as local_peer
-  MulticastPeer local_peer;   // sent as remote_peer
+  MulticastPeer local_peer;
+  MulticastPeer remote_peer;
   MulticastSequence low;
   MulticastSequence high;
-
-  serializer >> remote_peer;
-  serializer >> local_peer;
+  
+  serializer >> local_peer;   // sent as remote_peer
 
   // Ignore sample if not destined for us:
   if (local_peer != this->local_peer_) return;
-
+  
+  serializer >> remote_peer;  // sent as local_peer
   serializer >> low;
   serializer >> high;
 
@@ -454,8 +465,8 @@ ReliableMulticast::send_nakack(MulticastPeer remote_peer,
                                MulticastSequence low,
                                MulticastSequence high)
 {
-  size_t len = sizeof (this->local_peer_)
-             + sizeof (remote_peer)
+  size_t len = sizeof (remote_peer)
+             + sizeof (this->local_peer_)
              + sizeof (low)
              + sizeof (high);
 
@@ -472,8 +483,8 @@ ReliableMulticast::send_nakack(MulticastPeer remote_peer,
   TAO::DCPS::Serializer serializer(
     data, this->transport_->swap_bytes());
 
-  serializer << this->local_peer_;
   serializer << remote_peer;
+  serializer << this->local_peer_;
   serializer << low;
   serializer << high;
 
