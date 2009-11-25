@@ -22,6 +22,13 @@ DisjointSequence::DisjointSequence(SequenceNumber value)
   this->values_.insert(value);
 }
 
+void
+DisjointSequence::skip(SequenceNumber value)
+{
+  this->values_.clear();
+  this->values_.insert(value);
+}
+
 bool
 DisjointSequence::update(SequenceNumber value)
 {
@@ -33,11 +40,16 @@ DisjointSequence::update(SequenceNumber value)
   return true;
 }
 
-void
-DisjointSequence::skip(SequenceNumber value)
+bool
+DisjointSequence::update(range_type range)
 {
-  this->values_.clear();
-  this->values_.insert(value);
+  if (range.second <= low()) return false;  // already seen
+
+  for (SequenceNumber value(range.first);
+       value != range.second + 1; ++value) {
+    (void) update(value);
+  }
+  return true;
 }
 
 void
