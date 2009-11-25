@@ -9,44 +9,68 @@
 #ifndef MONITORDATA_H
 #define MONITORDATA_H
 
-#include "dds/DdsDcpsDomainC.h"
-#include "dds/DdsDcpsSubscriptionC.h"
-#include "dds/DdsDcpsInfrastructureTypeSupportC.h"
+namespace DDS { namespace DCPS { class GUID_t; }}
+
+class QString;
 
 namespace Monitor {
+
+class Options;
+class MonitorDataModel;
+class MonitorTask;
 
 class MonitorData {
   public:
     /// Construct with an IOR only.
-    MonitorData( const std::string& ior);
+    MonitorData( const Options& options, MonitorDataModel* model);
 
     /// Virtual destructor.
     virtual ~MonitorData();
 
-  private:
-    /// Read and process any existing samples.
-    void processCurrentSamples(
-           ::DDS::DataReaderListener_var                    listener,
-           ::DDS::PublicationBuiltinTopicDataDataReader_var reader
+    /// Disable operation for orderly shutdown.
+    void disable();
+
+    /// @name Messages from GUI to DDS.
+    /// @{
+
+    /// Establish a binding to a repository.  There can be only one.
+    void setRepoIor( const QString& ior);
+
+    /// @}
+
+    /// @name Messages from DDS to GUI.
+    /// @{
+
+    /// Add a new data element to the model.
+    void addDataElement(
+           const DDS::DCPS::GUID_t& parent,
+           const DDS::DCPS::GUID_t& id,
+           char* value
          );
 
-    /// Local Domain Participant
-    ::DDS::DomainParticipant_var participant_;
+    /// Update the value of a data element in the model.
+    void updateDataElement(
+           const DDS::DCPS::GUID_t& id,
+           char* value
+         );
 
-    /// Subscriber for the Builtin topics.
-    ::DDS::Subscriber_var builtinSubscriber_;
+    /// Remove a data element from the model.
+    void removeDataElement( const DDS::DCPS::GUID_t& id);
 
-    /// DataReader for the BuiltinTopic "DCPSParticipant".
-    ::DDS::ParticipantBuiltinTopicDataDataReader_var participantReader_;
+    /// @}
 
-    /// DataReader for the BuiltinTopic "DCPSTopic".
-    ::DDS::TopicBuiltinTopicDataDataReader_var topicReader_;
+  private:
+    /// Enabled flag.
+    bool enabled_;
 
-    /// DataReader for the BuiltinTopic "DCPSPublication".
-    ::DDS::PublicationBuiltinTopicDataDataReader_var publicationReader_;
+    /// Configuration information.
+    const Options& options_;
 
-    /// DataReader for the BuiltinTopic "DCPSSubscription".
-    ::DDS::SubscriptionBuiltinTopicDataDataReader_var subscriptionReader_;
+    /// The GUI model.
+    MonitorDataModel* model_;
+
+    /// The DDS data source.
+    MonitorTask* dataSource_;
 };
 
 } // End of namespace Monitor

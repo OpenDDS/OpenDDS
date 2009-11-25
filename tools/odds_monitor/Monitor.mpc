@@ -12,6 +12,8 @@ project : dcpsexe_with_tcp, qt4_gui {
   }
 
   Header_Files {
+    Options.h
+    MonitorTask.h
     MonitorData.h
     MonitorDataModel.h
     TreeNode.h
@@ -23,6 +25,8 @@ project : dcpsexe_with_tcp, qt4_gui {
   // generate the header if its not explicit here.
 
   Source_Files {
+    Options.cpp
+    MonitorTask.cpp
     MonitorData.cpp
     MonitorDataModel.cpp
     MonitorDataModel_moc.cpp

@@ -13,6 +13,8 @@
 
 namespace Monitor {
 
+class Options;
+class MonitorData;
 class MonitorDataModel;
 class TreeNode;
 
@@ -20,18 +22,22 @@ class Viewer : public QMainWindow {
   Q_OBJECT
 
   public:
-    Viewer( QMainWindow* parent = 0);
+    Viewer( const Options& options, QMainWindow* parent = 0);
 
   private slots:
     void openFile();
     void getIor();
-    void modifyTree();
 
   protected:
+    void setupHeader();
     void closeEvent( QCloseEvent* event = 0);
+
+void stubmodelchange();
 
   private:
     Ui::Monitor       ui;
+    const Options&    options_;
+    MonitorData*      dataSource_;
     MonitorDataModel* model_;
     TreeNode*         root_;
 };
