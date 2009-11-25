@@ -33,7 +33,7 @@ SynWatchdog::on_interval(const void* /*arg*/)
   // Initiate handshake by broadcasting MULTICAST_SYN control
   // samples to the remote (passive) peer assigned when the
   // DataLink was created:
-  this->link_->send_syn();
+  this->link_->send_syn(this->link_->remote_peer());
 }
 
 ACE_Time_Value
@@ -175,17 +175,16 @@ ReliableMulticast::expire_naks()
                  nak_request.first));
       continue;
     }
+      
+    ACE_ERROR((LM_WARNING,
+               ACE_TEXT("(%P|%t) WARNING: ")
+               ACE_TEXT("ReliableMulticast::expire_naks: ")
+               ACE_TEXT("timed out waiting on remote peer: 0x%x!\n"),
+               nak_request.first));
 
-    // Skip undeliverable datagrams; attempt to re-establish a
+    // Skip unrecoverable datagrams; attempt to re-establish a
     // new baseline to detect future reception gaps:
     if (nak_request.second > sequence->second) {
-      ACE_ERROR((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: ")
-                 ACE_TEXT("ReliableMulticast::expire_naks: ")
-                 ACE_TEXT("skipping %d datagrams from unreliable remote peer: 0x%x!\n"),
-                 sequence->second.depth(),
-                 nak_request.first));
-      
       sequence->second.skip(nak_request.second);
     }
   }
@@ -204,7 +203,7 @@ ReliableMulticast::send_naks()
     
     if (!it->second.disjoint()) continue; // nothing to NAK
 
-    // Track high-water mark for peer on this interval; this value
+    // Record high-water mark for peer on this interval; this value
     // is used to reset the low-water mark in the event a remote
     // peer does not respond to our repair requests:
     this->nak_history_.insert(NakHistory::value_type(
@@ -247,10 +246,10 @@ ReliableMulticast::syn_received(ACE_Message_Block* control)
 }
 
 void
-ReliableMulticast::send_syn()
+ReliableMulticast::send_syn(MulticastPeer remote_peer)
 {
   size_t len = sizeof (this->local_peer_)
-             + sizeof (this->remote_peer_);
+             + sizeof (remote_peer);
 
   ACE_Message_Block* data;
   ACE_NEW_NORETURN(data, ACE_Message_Block(len));
@@ -266,7 +265,7 @@ ReliableMulticast::send_syn()
     data, this->transport_->swap_bytes());
 
   serializer << this->local_peer_;
-  serializer << this->remote_peer_;
+  serializer << remote_peer;
 
   ACE_Message_Block* control =
     create_control(MULTICAST_SYN, data);
@@ -346,6 +345,23 @@ ReliableMulticast::send_synack(MulticastPeer remote_peer)
 void
 ReliableMulticast::nak_received(ACE_Message_Block* control)
 {
+  TAO::DCPS::Serializer serializer(
+    control, this->transport_->swap_bytes());
+
+  MulticastPeer remote_peer;  // sent as local_peer
+  MulticastPeer local_peer;   // sent as remote_peer
+  MulticastSequence low;
+  MulticastSequence high;
+
+  serializer >> remote_peer;
+  serializer >> local_peer;
+
+  // Ignore sample if not destined for us:
+  if (local_peer != this->local_peer_) return;
+
+  serializer >> low;
+  serializer >> high;
+  
   // TODO implement
 }
 
@@ -394,7 +410,43 @@ ReliableMulticast::send_nak(MulticastPeer remote_peer,
 void
 ReliableMulticast::nakack_received(ACE_Message_Block* control)
 {
-  // TODO implement
+  TAO::DCPS::Serializer serializer(
+    control, this->transport_->swap_bytes());
+
+  MulticastPeer remote_peer;  // sent as local_peer
+  MulticastPeer local_peer;   // sent as remote_peer
+  MulticastSequence low;
+  MulticastSequence high;
+
+  serializer >> remote_peer;
+  serializer >> local_peer;
+
+  // Ignore sample if not destined for us:
+  if (local_peer != this->local_peer_) return;
+
+  serializer >> low;
+  serializer >> high;
+
+  // MULTICAST_NAKACK control samples indicate data which cannot be
+  // repaired by a remote peer. Update the sequence map to suppress
+  // future repair requests for the range:
+  SequenceMap::iterator it(this->sequences_.find(remote_peer));
+  if (it == this->sequences_.end()) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("ReliableMulticast::nakack_received: ")
+               ACE_TEXT("failed to find sequence for remote peer: 0x%x!\n"),
+               remote_peer));
+    return;
+  }
+      
+  ACE_ERROR((LM_WARNING,
+             ACE_TEXT("(%P|%t) WARNING: ")
+             ACE_TEXT("ReliableMulticast::nackack_received: ")
+             ACE_TEXT("unrecoverable samples reported by remote peer: 0x%x!\n"),
+             remote_peer));
+
+  it->second.update(DisjointSequence::range_type(low, high));
 }
 
 void
@@ -402,7 +454,41 @@ ReliableMulticast::send_nakack(MulticastPeer remote_peer,
                                MulticastSequence low,
                                MulticastSequence high)
 {
-  // TODO implement
+  size_t len = sizeof (this->local_peer_)
+             + sizeof (remote_peer)
+             + sizeof (low)
+             + sizeof (high);
+
+  ACE_Message_Block* data;
+  ACE_NEW_NORETURN(data, ACE_Message_Block(len));
+  if (data == 0) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("ReliableMulticast::send_nakack: ")
+               ACE_TEXT("failed to allocate message!\n")));
+    return;
+  }
+
+  TAO::DCPS::Serializer serializer(
+    data, this->transport_->swap_bytes());
+
+  serializer << this->local_peer_;
+  serializer << remote_peer;
+  serializer << low;
+  serializer << high;
+
+  ACE_Message_Block* control =
+    create_control(MULTICAST_NAKACK, data);
+
+  int error;
+  if ((error = send_control(control)) != SEND_CONTROL_OK) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("ReliableMulticast::send_nakack: ")
+               ACE_TEXT("send_control failed: %d!\n"),
+               error));
+    return;
+  }
 }
 
 bool
@@ -424,7 +510,7 @@ ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("ReliableMulticast::join_i: ")
-                      ACE_TEXT("failed to schedule NAK watchdog timer!\n")),
+                      ACE_TEXT("failed to schedule NAK watchdog!\n")),
                      false);
   }
 
@@ -438,7 +524,7 @@ ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
                         ACE_TEXT("ReliableMulticast::join_i: ")
-                        ACE_TEXT("failed to schedule SYN watchdog timer!\n")),
+                        ACE_TEXT("failed to schedule SYN watchdog!\n")),
                        false);
     }
   }

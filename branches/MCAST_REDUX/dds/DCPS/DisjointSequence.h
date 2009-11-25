@@ -54,9 +54,11 @@ public:
 
   range_iterator range_begin();
   range_iterator range_end();
+  
+  void skip(SequenceNumber value);
 
   bool update(SequenceNumber value);
-  void skip(SequenceNumber value);
+  bool update(range_type range); 
 
   operator SequenceNumber() const;
 

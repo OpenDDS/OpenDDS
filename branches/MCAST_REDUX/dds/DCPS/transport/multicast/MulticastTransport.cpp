@@ -35,13 +35,11 @@ MulticastTransport::find_or_create_datalink(
   CORBA::Long /*priority*/,
   bool active)
 {
-  // This transport forms reservations between DomainParticipants;
-  // this is a significant departure from traditional reservations
-  // formed between individual subscriptions and publications.
-  // Currently, a TransportImpl instance may only be attached to
-  // entities within the same DomainParticipant. Given this, we may
-  // assume that the local_id always references the same participant;
-  // all we need to associate a DataLink is the remote participantId:
+  // This transport forms reservations between DomainParticipants.
+  // TransportImpl instances may only be attached either Subscribers
+  // or Publishers within the same DomainParticipant. Given this,
+  // it may be assumed that the local_id always references the same
+  // participant.
   MulticastPeer remote_peer =
     RepoIdConverter(remote_association->remote_id_).participantId();
 
@@ -49,8 +47,8 @@ MulticastTransport::find_or_create_datalink(
   if (it != this->links_.end()) return it->second.in();  // found
 
   // At this point we can assume that we are creating a new DataLink
-  // between a logical pair of DomainParticipants (peers) identified
-  // by their participantIds:
+  // between a logical pair of peers (DomainParticipants) identified
+  // by a participantId:
   MulticastPeer local_peer = RepoIdConverter(local_id).participantId();
 
   // This transport supports two modes of operation: reliable and
@@ -70,7 +68,7 @@ MulticastTransport::find_or_create_datalink(
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
-                      ACE_TEXT("unable to create DataLink for remote peer: 0x%x!\n"),
+                      ACE_TEXT("failed to create DataLink for remote peer: 0x%x!\n"),
                       remote_peer),
                      0);
   }
@@ -100,7 +98,7 @@ MulticastTransport::find_or_create_datalink(
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
-                      ACE_TEXT("unable to join multicast group: %C!\n"),
+                      ACE_TEXT("failed to join multicast group: %C!\n"),
                       group_address_s),
                      0);
   }
