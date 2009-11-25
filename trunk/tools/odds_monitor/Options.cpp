@@ -59,7 +59,7 @@ Monitor::Options::Options( int argc, ACE_TCHAR** argv, char** /* envp */)
         parser.get_current()
       ));
     }
-    const ACE_TCHAR* currentArg = 0;
+    // const ACE_TCHAR* currentArg = 0;
 
     if( 0 <= (parser.cur_arg_strncasecmp( VERBOSE_ARGUMENT))) {
       this->verbose_ = true;

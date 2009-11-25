@@ -1,3 +1,32 @@
+Wed Nov 25 23:02:54 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/Monitor.mpc:
+        * tools/odds_monitor/Monitor.qrc:
+        * tools/odds_monitor/Monitor.ui:
+        * tools/odds_monitor/MonitorData.h:
+        * tools/odds_monitor/MonitorData.cpp:
+        * tools/odds_monitor/MonitorDataModel.h:
+        * tools/odds_monitor/MonitorDataModel.cpp:
+        * tools/odds_monitor/Options.cpp:
+        * tools/odds_monitor/RepoDialog.ui:
+        * tools/odds_monitor/RepoSelect.h:
+        * tools/odds_monitor/RepoSelect.cpp:
+        * tools/odds_monitor/Viewer.h:
+        * tools/odds_monitor/Viewer.cpp:
+
+          More work on making the GUI usable.  Added a better mechanism
+          to manage multiple repositories, expecting the bind this into
+          the multi-repo capability of the service.  Cleaned up a few
+          nits along the way.
+
+        * tools/odds_monitor/images/splash.jpg:
+
+          Renamed splash image.
+
+        * tools/odds_monitor/images/Winnebago-Moon.jpg:
+
+          Removed this file.
+
 Wed Nov 25 04:01:33 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/odds_monitor/Monitor.qrc:

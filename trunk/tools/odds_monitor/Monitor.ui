@@ -13,33 +13,92 @@
   <property name="windowTitle">
    <string>OpenDDS Monitor</string>
   </property>
-  <property name="toolTip">
-   <string>Instrumentation Viewer</string>
-  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
+    <item row="2" column="0" rowspan="2">
      <widget class="QTreeView" name="repoView"/>
     </item>
-    <item row="0" column="1">
-     <layout class="QVBoxLayout" name="verticalLayout">
+    <item row="3" column="1">
+     <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
       <item>
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
+       <widget class="QGroupBox" name="groupBox">
+        <property name="title">
+         <string>Repository</string>
         </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
+        <property name="flat">
+         <bool>false</bool>
         </property>
-       </spacer>
+        <widget class="QPushButton" name="repoAddButton">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>40</y>
+           <width>92</width>
+           <height>28</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Add</string>
+         </property>
+         <property name="shortcut">
+          <string>Ctrl+A</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="repoRemoveButton">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>90</y>
+           <width>92</width>
+           <height>28</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Remove</string>
+         </property>
+         <property name="shortcut">
+          <string>Ctrl+R</string>
+         </property>
+        </widget>
+       </widget>
       </item>
       <item>
        <widget class="QPushButton" name="quitButton">
         <property name="text">
          <string>Quit</string>
+        </property>
+        <property name="shortcut">
+         <string>Ctrl+Q</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="0">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Current Repository:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="repoSelection">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>1</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>repository to monitor</string>
+        </property>
+        <property name="statusTip">
+         <string>Select a repository to monitor</string>
+        </property>
+        <property name="minimumContentsLength">
+         <number>0</number>
         </property>
        </widget>
       </item>
@@ -56,43 +115,8 @@
      <height>25</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuRepository">
-    <property name="title">
-     <string>&amp;Repository</string>
-    </property>
-    <widget class="QMenu" name="menuIOR">
-     <property name="title">
-      <string>&amp;IOR ...</string>
-     </property>
-     <addaction name="actionIOR_String"/>
-     <addaction name="actionIOR_File"/>
-    </widget>
-    <addaction name="menuIOR"/>
-    <addaction name="separator"/>
-    <addaction name="actionQuit"/>
-   </widget>
-   <addaction name="menuRepository"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar">
-   <property name="toolTip">
-    <string>Repository</string>
-   </property>
-  </widget>
-  <action name="actionIOR_String">
-   <property name="text">
-    <string>IOR &amp;String ...</string>
-   </property>
-  </action>
-  <action name="actionIOR_File">
-   <property name="text">
-    <string>IOR &amp;File ...</string>
-   </property>
-  </action>
-  <action name="actionQuit">
-   <property name="text">
-    <string>&amp;Quit</string>
-   </property>
-  </action>
+  <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources>
   <include location="Monitor.qrc"/>
