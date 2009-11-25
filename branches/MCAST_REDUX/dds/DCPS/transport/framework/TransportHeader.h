@@ -28,11 +28,7 @@ namespace DCPS {
  * same transport packet).
  */
 struct OpenDDS_Dcps_Export TransportHeader {
-  static const ACE_INT32      DCPS_PROTOCOL;
-  static const ACE_INT32      DCPS_PROTOCOL_SWAPPED;
-
-  static const ACE_CDR::Octet DCPS_VERSION_MAJOR;
-  static const ACE_CDR::Octet DCPS_VERSION_MINOR;
+  static const ACE_CDR::Octet DCPS_PROTOCOL[];
 
   /// Default constructor.
   TransportHeader();
@@ -51,28 +47,27 @@ struct OpenDDS_Dcps_Export TransportHeader {
   /// Determine if this is a valid packet header.
   bool valid() const;
 
-  /// The protocol of the packet being transmitted. This value also
-  /// indicates the endianess of the source.
-  ACE_INT32 protocol_;
+  /// The protocol of the packet being transmitted.
+  ACE_CDR::Octet protocol_[6];
 
-  /// The major version of the protocol.
-  ACE_CDR::Octet version_major_;
+  /// The byte order used to generate the header.
+  ACE_CDR::Octet byte_order_;
 
-  /// The minor version of the protocol.
-  ACE_CDR::Octet version_minor_;
+  /// Reserved for future use (provides padding for preamble).
+  ACE_CDR::Octet reserved_;
 
-  /// A transport-specific identification number which uniquely
-  /// identifies the source of the packet.
-  ACE_INT32 source_;
+  /// The size of the message following this header, not including the
+  /// 11 bytes used by this TransportHeader.
+  ACE_UINT16 length_;
 
   /// The sequence number of the packet identified by this header; this
   /// value is guaranteed to be a monotonically increasing number per
   /// transport instance.
   ACE_INT16 sequence_;
 
-  /// The size of the message following this header, not including the
-  /// 11 bytes used by this TransportHeader.
-  ACE_UINT16 length_;
+  /// A transport-specific identification number which uniquely
+  /// identifies the source of the packet.
+  ACE_INT32 source_;
 
   /// Similar to IDL compiler generated methods.
   size_t max_marshaled_size() ;

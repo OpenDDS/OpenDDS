@@ -1,3 +1,11 @@
+Wed Nov 25 22:05:45 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+
+          Finalized TransportHeader PDU.
+
 Wed Nov 25 18:57:08 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/ReliableMulticast.cpp:

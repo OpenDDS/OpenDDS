@@ -12,17 +12,11 @@
 #include "dds/DCPS/Serializer.h"
 #include "EntryExit.h"
 
-const ACE_INT32
-OpenDDS::DCPS::TransportHeader::DCPS_PROTOCOL(0x44435053); // DCPS
-
-const ACE_INT32
-OpenDDS::DCPS::TransportHeader::DCPS_PROTOCOL_SWAPPED(0x53504344);  // SPCD
-
 const ACE_CDR::Octet
-OpenDDS::DCPS::TransportHeader::DCPS_VERSION_MAJOR(0x02);
-
-const ACE_CDR::Octet
-OpenDDS::DCPS::TransportHeader::DCPS_VERSION_MINOR(0x00);
+OpenDDS::DCPS::TransportHeader::DCPS_PROTOCOL[] =
+  { 0x44, 0x43, 0x50, 0x53, 0x02, 0x00 };
+//   D     C     P     S     |     |__ minor version
+//                           |________ major version
 
 #if !defined (__ACE_INLINE__)
 # include "TransportHeader.inl"
@@ -36,14 +30,16 @@ operator<<(ACE_Message_Block& buffer, OpenDDS::DCPS::TransportHeader& value)
 {
   DBG_ENTRY_LVL("TransportHeader","operator<<",6);
 
-  TAO::DCPS::Serializer writer(&buffer);
+  TAO::DCPS::Serializer writer(&buffer, swap_bytes());
 
-  writer << value.protocol_;
-  writer << ACE_OutputCDR::from_octet(value.version_major_);
-  writer << ACE_OutputCDR::from_octet(value.version_minor_);
-  writer << value.source_;
-  writer << value.sequence_;
+  writer.write_octet_array(value.protocol_, sizeof(value.protocol_));
+
+  writer << ACE_OutputCDR::from_octet(value.byte_order_);
+  writer << ACE_OutputCDR::from_octet(value.reserved_);
+
   writer << value.length_;
+  writer << value.sequence_;
+  writer << value.source_;
 
   return writer.good_bit();
 }
@@ -53,14 +49,16 @@ operator<<(ACE_Message_Block*& buffer, OpenDDS::DCPS::TransportHeader& value)
 {
   DBG_ENTRY_LVL("TransportHeader","operator<<",6);
 
-  TAO::DCPS::Serializer writer(buffer);
+  TAO::DCPS::Serializer writer(buffer, swap_bytes());
 
-  writer << value.protocol_;
-  writer << ACE_OutputCDR::from_octet(value.version_major_);
-  writer << ACE_OutputCDR::from_octet(value.version_minor_);
-  writer << value.source_;
-  writer << value.sequence_;
+  writer.write_octet_array(value.protocol_, sizeof(value.protocol_));
+
+  writer << ACE_OutputCDR::from_octet(value.byte_order_);
+  writer << ACE_OutputCDR::from_octet(value.reserved_);
+
   writer << value.length_;
+  writer << value.sequence_;
+  writer << value.source_;
 
   return writer.good_bit();
 }
