@@ -359,39 +359,26 @@ ReliableMulticast::send_nak(MulticastPeer remote_peer,
 void
 ReliableMulticast::nakack_received(ACE_Message_Block* control)
 {
+  // Fetch remote peer from header: 
+  MulticastPeer remote_peer(this->received_header_.source_);
+
+  SequenceMap::iterator it(this->sequences_.find(remote_peer));
+  if (it == this->sequences_.end()) return; // unknown peer
+  
   TAO::DCPS::Serializer serializer(
     control, this->transport_->swap_bytes());
 
-  MulticastPeer local_peer;
-  serializer >> local_peer; // sent as remote_peer
-
-  // Ignore sample if not destined for us:
-  if (local_peer != this->local_peer_) return;
-  
   MulticastSequence low;
   serializer >> low;
   
   MulticastSequence high;
   serializer >> high;
   
-  // Fetch remote peer from header: 
-  MulticastPeer remote_peer(this->received_header_.source_);
-      
   ACE_ERROR((LM_ERROR,
              ACE_TEXT("(%P|%t) ERROR: ")
              ACE_TEXT("ReliableMulticast::nackack_received: ")
              ACE_TEXT("unrecoverable samples reported by remote peer: 0x%x!\n"),
              remote_peer));
-
-  SequenceMap::iterator it(this->sequences_.find(remote_peer));
-  if (it == this->sequences_.end()) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("ReliableMulticast::nakack_received: ")
-               ACE_TEXT("failed to find sequence for remote peer: 0x%x!\n"),
-               remote_peer));
-    return;
-  }
 
   // MULTICAST_NAKACK control samples indicate data which cannot be
   // repaired by a remote peer. Update the sequence map to suppress
@@ -400,12 +387,10 @@ ReliableMulticast::nakack_received(ACE_Message_Block* control)
 }
 
 void
-ReliableMulticast::send_nakack(MulticastPeer remote_peer,
-                               MulticastSequence low,
+ReliableMulticast::send_nakack(MulticastSequence low,
                                MulticastSequence high)
 {
-  size_t len = sizeof (remote_peer)
-             + sizeof (low)
+  size_t len = sizeof (low)
              + sizeof (high);
 
   ACE_Message_Block* data;
@@ -414,11 +399,10 @@ ReliableMulticast::send_nakack(MulticastPeer remote_peer,
   TAO::DCPS::Serializer serializer(
     data, this->transport_->swap_bytes());
 
-  serializer << remote_peer;
   serializer << low;
   serializer << high;
 
-  // Send control sample to remote peer:
+  // Send control sample to all remote peers:
   send_control(MULTICAST_NAKACK, data);
 }
 
