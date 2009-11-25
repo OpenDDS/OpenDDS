@@ -47,8 +47,10 @@ DisjointSequence::update(range_type range)
 
   for (SequenceNumber value(range.first);
        value != range.second + 1; ++value) {
-    (void) update(value);
+    this->values_.insert(value);
+    normalize();
   }
+
   return true;
 }
 
