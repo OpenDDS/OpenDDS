@@ -108,7 +108,7 @@ void
 ReliableMulticast::sample_received(ReceivedDataSample& sample)
 {
   switch(sample.header_.message_id_) {
-  case TRANSPORT_CONTROL: {
+  case TRANSPORT_CONTROL:
     switch (sample.header_.submessage_id_) {
     case MULTICAST_SYN:
       syn_received(sample.sample_);
@@ -133,7 +133,7 @@ ReliableMulticast::sample_received(ReceivedDataSample& sample)
                  ACE_TEXT("unknown TRANSPORT_CONTROL submessage: 0x%x!\n"),
                  sample.header_.submessage_id_));
     }
-  } break;
+    break;
 
   case SAMPLE_ACK:
     ack_received(sample);
