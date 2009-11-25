@@ -1,9 +1,10 @@
 
-project : dcpsexe_with_tcp, qt4_gui {
+project(*App) : dcpsexe_with_tcp, qt4_gui {
   exename = odds_monitor
 
   MOC_Files {
     MonitorDataModel.h
+    RepoSelect.h
     Viewer.h
   }
 
@@ -17,6 +18,8 @@ project : dcpsexe_with_tcp, qt4_gui {
     MonitorData.h
     MonitorDataModel.h
     TreeNode.h
+    RepoSelect.h
+    ui_RepoDialog.h
     Viewer.h
     ui_Monitor.h
   }
@@ -31,6 +34,8 @@ project : dcpsexe_with_tcp, qt4_gui {
     MonitorDataModel.cpp
     MonitorDataModel_moc.cpp
     Monitor_main.cpp
+    RepoSelect.cpp
+    RepoSelect_moc.cpp
     Viewer.cpp
     Viewer_moc.cpp
   }

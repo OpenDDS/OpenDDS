@@ -29,12 +29,16 @@ class MonitorData {
 
     /// Disable operation for orderly shutdown.
     void disable();
+    void stubmodelchange();
 
     /// @name Messages from GUI to DDS.
     /// @{
 
-    /// Establish a binding to a repository.  There can be only one.
-    void setRepoIor( const QString& ior);
+    /// Establish a binding to a repository.  There can be only one per IOR.
+    bool setRepoIor( const QString& ior);
+
+    /// Remove a binding to a repository.  There should be only one with this IOR.
+    bool removeRepo( const QString& ior);
 
     /// @}
 

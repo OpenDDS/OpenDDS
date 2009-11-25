@@ -30,13 +30,12 @@ class MonitorDataModel : public QAbstractItemModel {
     /**
      * @brief Construct with data and an optional parent link.
      *
-     * @param data   list of data contained by this node
      * @param parent link to parent node of this one
      *
      * If no parent link is supplied this node acts as the root of a
      * tree with the parent link held as nil.
      */
-    MonitorDataModel( TreeNode* root, QObject* parent = 0);
+    MonitorDataModel( QObject* parent = 0);
 
     /// Change to a new tree of data.
     void newRoot( TreeNode* root);

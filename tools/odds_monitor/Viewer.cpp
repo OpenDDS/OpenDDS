@@ -10,6 +10,7 @@
 #include <Qt/QtGui>
 #include <sstream>
 #include "Viewer.h"
+#include "RepoSelect.h"
 #include "Options.h"
 #include "MonitorData.h"
 #include "MonitorDataModel.h"
@@ -21,122 +22,64 @@ Viewer::Viewer( const Options& options, QMainWindow* parent)
  : QMainWindow( parent),
    options_( options),
    dataSource_( 0),
-   model_( 0),
-   root_( 0)
+   model_( new MonitorDataModel())
 {
   ui.setupUi( this);
-  connect( ui.actionIOR_String, SIGNAL(triggered()), this, SLOT(getIor()));
-  connect( ui.actionIOR_File,   SIGNAL(triggered()), this, SLOT(openFile()));
-  connect( ui.actionQuit,       SIGNAL(triggered()), this, SLOT(close()));
-  connect( ui.quitButton,       SIGNAL(clicked()),   this, SLOT(close()));
+  connect( ui.repoAddButton,    SIGNAL(clicked()), this, SLOT(addRepo()));
+  connect( ui.repoRemoveButton, SIGNAL(clicked()), this, SLOT(removeRepo()));
+  connect( ui.quitButton,       SIGNAL(clicked()), this, SLOT(close()));
 
-  // Tree view header values.
-  QList< QVariant> list;
-  list << QString( "Element")
-       << QString( "Value");
+  connect( ui.repoSelection, SIGNAL(currentIndexChanged( const QString&)),
+           this,             SLOT(newRepo( const QString&)));
 
-  this->root_       = new TreeNode( list);
-  this->model_      = new MonitorDataModel( this->root_);
   this->dataSource_ = new MonitorData( this->options_, this->model_);
   this->ui.repoView->setModel( this->model_);
 }
 
 void
-Viewer::stubmodelchange()
+Viewer::newRepo( const QString& ior)
 {
-  // Tree view header values.
-  QList< QVariant> list;
-  list << QString( "Element")
-       << QString( "Value");
-  this->root_ = new TreeNode( list);
-
-  static int which = 0;
-  TreeNode* parent = this->root_;
-  if( ++which%2) {
-    for( int row = 0; row < 4; ++row) {
-      std::stringstream buffer1;
-      buffer1 << "SomeProperty at " << row << std::ends;
-      QString element(buffer1.str().c_str());
-
-      std::stringstream buffer2;
-      buffer2 << "some value with which = " << which << " at " << row << std::ends;
-      QString value(buffer2.str().c_str());
-
-      QList<QVariant> data;
-      data << element << value;
-
-      TreeNode* node = new TreeNode( data, parent);
-      parent->append( node);
-    }
-
-  } else {
-    for( int row = 0; row < 4; ++row) {
-      std::stringstream buffer1;
-      buffer1 << "AnotherProperty at " << row << std::ends;
-      QString element(buffer1.str().c_str());
-
-      std::stringstream buffer2;
-      buffer2 << "another value with which = " << which << " at " << row << std::ends;
-      QString value(buffer2.str().c_str());
-
-      QList<QVariant> data;
-      data << element << value;
-
-      TreeNode* node = new TreeNode( data, parent);
-      parent->append( node);
+  if( !ior.isEmpty()) {
+    if( this->dataSource_->setRepoIor( ior)) {
+      ui.statusbar->showMessage( tr("Attached"));
+      return;
     }
   }
-
-  this->model_->newRoot( this->root_);
+  ui.statusbar->showMessage( tr("Detached"));
 }
 
 void
-Viewer::openFile()
-{
-  QString fileName = QFileDialog::getOpenFileName( this);
-  if( !fileName.isEmpty()) {
-    QString fileIor( "file://");
-    fileIor.append( fileName);
-    this->dataSource_->setRepoIor( fileIor);
-    ui.statusbar->showMessage(fileIor);
-
-    stubmodelchange();
-
-    /// Stub a visible result.
-    //QList< QVariant> list;
-    //list << QString( "File") << fileName;
-    //this->model_->addData( 0, list, this->model_->index( 0, 0).parent());
-  }
-}
-
-void
-Viewer::getIor()
+Viewer::addRepo()
 {
   bool status = false;
-  QString iorString = QInputDialog::getText(
-                        this,
-			tr("Stringified Inter ORB Reference"),
-			tr("Input an IOR"),
-			QLineEdit::Normal,
-			tr("corbaloc::iiop:"),
-			&status
-                      );
+  QString iorString = RepoSelect::getRepoIOR( this, &status);
   if( status && !iorString.isEmpty()) {
-    this->dataSource_->setRepoIor( iorString);
-    ui.statusbar->showMessage(iorString);
+    ui.repoSelection->addItem( iorString);
 
-    stubmodelchange();
+    // Setting the index results in the signal calling newRepo().
+    int index = ui.repoSelection->findText( iorString);
+    ui.repoSelection->setCurrentIndex( index);
+    // Status bar updated when the index change propagates.
 
-    /// Stub a visible result.
-    //QList< QVariant> list;
-    //list << QString( "IOR") << iorString;
-    //this->model_->addData( 0, list, this->ui.repoView->currentIndex());
+  } else {
+    ui.statusbar->showMessage( tr("Detached"));
   }
+}
+
+void
+Viewer::removeRepo()
+{
+  this->dataSource_->removeRepo( ui.repoSelection->currentText());
+  ui.repoSelection->removeItem( ui.repoSelection->currentIndex());
+
+  // Status bar is updated when the index change propagates.
 }
 
 void
 Viewer::closeEvent( QCloseEvent* /* event */)
 {
+  ui.statusbar->showMessage( tr("Closing"));
+
   this->dataSource_->disable();
   delete this->model_;
   delete this->dataSource_;

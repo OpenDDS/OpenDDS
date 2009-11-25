@@ -14,10 +14,14 @@
 
 namespace Monitor {
 
-MonitorDataModel::MonitorDataModel( TreeNode* root, QObject* parent)
- : QAbstractItemModel( parent),
-   root_( root)
+MonitorDataModel::MonitorDataModel( QObject* parent)
+ : QAbstractItemModel( parent)
 {
+  // Tree view header values are invariant for this model.
+  QList< QVariant> list;
+  list << QString( "Element")
+       << QString( "Value");
+  this->root_ = new TreeNode( list);
 }
 
 MonitorDataModel::~MonitorDataModel()
