@@ -38,6 +38,9 @@ class MonitorDataModel : public QAbstractItemModel {
      */
     MonitorDataModel( TreeNode* root, QObject* parent = 0);
 
+    /// Change to a new tree of data.
+    void newRoot( TreeNode* root);
+
     //
     // QAbstractModel interfaces.
     //

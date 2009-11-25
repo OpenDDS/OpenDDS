@@ -1,299 +1,99 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>Monitor</class>
- <widget class="QMainWindow" name="Monitor" >
-  <property name="geometry" >
+ <widget class="QMainWindow" name="Monitor">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>793</width>
+    <width>800</width>
     <height>600</height>
    </rect>
   </property>
-  <property name="windowTitle" >
-   <string>ODDS Monitor</string>
+  <property name="windowTitle">
+   <string>OpenDDS Monitor</string>
   </property>
-  <property name="toolTip" >
-   <string>An OpenDDS Repository Viewer</string>
+  <property name="toolTip">
+   <string>Instrumentation Viewer</string>
   </property>
-  <widget class="QWidget" name="centralwidget" >
-   <widget class="QWidget" name="layoutWidget" >
-    <property name="geometry" >
-     <rect>
-      <x>289</x>
-      <y>11</y>
-      <width>481</width>
-      <height>539</height>
-     </rect>
-    </property>
-    <layout class="QVBoxLayout" >
-     <item>
-      <widget class="QStackedWidget" name="stackedWidget" >
-       <property name="currentIndex" >
-        <number>0</number>
-       </property>
-       <widget class="QWidget" name="page" >
-        <widget class="QWidget" name="layoutWidget" >
-         <property name="geometry" >
-          <rect>
-           <x>13</x>
-           <y>7</y>
-           <width>281</width>
-           <height>141</height>
-          </rect>
-         </property>
-         <layout class="QHBoxLayout" >
-          <item>
-           <layout class="QVBoxLayout" >
-            <item>
-             <widget class="QLabel" name="label_7" >
-              <property name="text" >
-               <string>DomainParticipant</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer>
-              <property name="orientation" >
-               <enum>Qt::Vertical</enum>
-              </property>
-              <property name="sizeHint" >
-               <size>
-                <width>20</width>
-                <height>40</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <layout class="QGridLayout" >
-              <item row="0" column="0" >
-               <widget class="QLabel" name="label" >
-                <property name="text" >
-                 <string>Key</string>
-                </property>
-                <property name="alignment" >
-                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                </property>
-                <property name="textInteractionFlags" >
-                 <set>Qt::NoTextInteraction</set>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1" >
-               <widget class="QLabel" name="label_4" >
-                <property name="frameShape" >
-                 <enum>QFrame::Panel</enum>
-                </property>
-                <property name="frameShadow" >
-                 <enum>QFrame::Sunken</enum>
-                </property>
-                <property name="text" >
-                 <string>TextLabel</string>
-                </property>
-                <property name="textInteractionFlags" >
-                 <set>Qt::NoTextInteraction</set>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0" >
-               <widget class="QLabel" name="label_2" >
-                <property name="text" >
-                 <string>Domain</string>
-                </property>
-                <property name="alignment" >
-                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                </property>
-                <property name="textInteractionFlags" >
-                 <set>Qt::NoTextInteraction</set>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="1" >
-               <widget class="QLabel" name="label_5" >
-                <property name="frameShape" >
-                 <enum>QFrame::Panel</enum>
-                </property>
-                <property name="frameShadow" >
-                 <enum>QFrame::Sunken</enum>
-                </property>
-                <property name="text" >
-                 <string>TextLabel</string>
-                </property>
-                <property name="textInteractionFlags" >
-                 <set>Qt::NoTextInteraction</set>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="0" >
-               <widget class="QLabel" name="label_3" >
-                <property name="text" >
-                 <string>Enabled</string>
-                </property>
-                <property name="alignment" >
-                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                </property>
-                <property name="textInteractionFlags" >
-                 <set>Qt::NoTextInteraction</set>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="1" >
-               <widget class="QLabel" name="label_6" >
-                <property name="frameShape" >
-                 <enum>QFrame::Panel</enum>
-                </property>
-                <property name="frameShadow" >
-                 <enum>QFrame::Sunken</enum>
-                </property>
-                <property name="text" >
-                 <string>TextLabel</string>
-                </property>
-                <property name="textInteractionFlags" >
-                 <set>Qt::NoTextInteraction</set>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <spacer>
-            <property name="orientation" >
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" >
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </widget>
-        <widget class="QPushButton" name="changeNowButton" >
-         <property name="geometry" >
-          <rect>
-           <x>200</x>
-           <y>200</y>
-           <width>75</width>
-           <height>28</height>
-          </rect>
-         </property>
-         <property name="text" >
-          <string>ChangeNow</string>
-         </property>
-        </widget>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="QTreeView" name="repoView"/>
+    </item>
+    <item row="0" column="1">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="quitButton">
+        <property name="text">
+         <string>Quit</string>
+        </property>
        </widget>
-       <widget class="QWidget" name="page_2" />
-      </widget>
-     </item>
-     <item>
-      <spacer>
-       <property name="orientation" >
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeHint" >
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" >
-       <item>
-        <spacer>
-         <property name="orientation" >
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" >
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QPushButton" name="quitButton" >
-         <property name="text" >
-          <string>Quit</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QTreeView" name="repoView" >
-    <property name="geometry" >
-     <rect>
-      <x>20</x>
-      <y>10</y>
-      <width>256</width>
-      <height>531</height>
-     </rect>
-    </property>
-   </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
   </widget>
-  <widget class="QMenuBar" name="menubar" >
-   <property name="geometry" >
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>793</width>
-     <height>30</height>
+     <width>800</width>
+     <height>25</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menu_File" >
-    <property name="title" >
+   <widget class="QMenu" name="menuRepository">
+    <property name="title">
      <string>&amp;Repository</string>
     </property>
-    <widget class="QMenu" name="menuOpen" >
-     <property name="title" >
-      <string>&amp;Open...</string>
+    <widget class="QMenu" name="menuIOR">
+     <property name="title">
+      <string>&amp;IOR ...</string>
      </property>
-     <addaction name="action_String" />
-     <addaction name="actionFile" />
+     <addaction name="actionIOR_String"/>
+     <addaction name="actionIOR_File"/>
     </widget>
-    <addaction name="menuOpen" />
-    <addaction name="separator" />
-    <addaction name="actionQuit" />
+    <addaction name="menuIOR"/>
+    <addaction name="separator"/>
+    <addaction name="actionQuit"/>
    </widget>
-   <addaction name="menu_File" />
+   <addaction name="menuRepository"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar" />
-  <action name="action_Corbaloc" >
-   <property name="text" >
-    <string>&amp;Corbaloc</string>
+  <widget class="QStatusBar" name="statusbar">
+   <property name="toolTip">
+    <string>Repository</string>
+   </property>
+  </widget>
+  <action name="actionIOR_String">
+   <property name="text">
+    <string>IOR &amp;String ...</string>
    </property>
   </action>
-  <action name="action_File" >
-   <property name="text" >
-    <string>&amp;File</string>
+  <action name="actionIOR_File">
+   <property name="text">
+    <string>IOR &amp;File ...</string>
    </property>
   </action>
-  <action name="action_String" >
-   <property name="text" >
-    <string>&amp;String...</string>
-   </property>
-  </action>
-  <action name="actionFile" >
-   <property name="text" >
-    <string>&amp;File...</string>
-   </property>
-  </action>
-  <action name="actionQuit" >
-   <property name="text" >
-    <string>Quit</string>
+  <action name="actionQuit">
+   <property name="text">
+    <string>&amp;Quit</string>
    </property>
   </action>
  </widget>
- <resources>
-  <include location="Monitor.qrc" />
- </resources>
+ <resources/>
  <connections/>
 </ui>

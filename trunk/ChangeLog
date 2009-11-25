@@ -1,3 +1,24 @@
+Wed Nov 25 00:55:49 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/Monitor.mpc:
+        * tools/odds_monitor/Monitor.ui:
+        * tools/odds_monitor/MonitorData.h:
+        * tools/odds_monitor/MonitorData.cpp:
+        * tools/odds_monitor/MonitorDataModel.h:
+        * tools/odds_monitor/MonitorDataModel.cpp:
+        * tools/odds_monitor/MonitorTask.h:
+        * tools/odds_monitor/MonitorTask.cpp:
+        * tools/odds_monitor/Monitor_main.cpp:
+        * tools/odds_monitor/Options.h:
+        * tools/odds_monitor/Options.cpp:
+        * tools/odds_monitor/Viewer.h:
+        * tools/odds_monitor/Viewer.cpp:
+
+          Continue to develop application.  Updated UI and stubbed to
+          show model clearing and recreation to support changing
+          repository references.  GUI and DDS threads issues addressed
+          for DDS task processing.
+
 Tue Nov 24 21:52:00 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportImpl.cpp:

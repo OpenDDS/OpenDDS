@@ -26,6 +26,14 @@ MonitorDataModel::~MonitorDataModel()
   delete this->root_;
 }
 
+void
+MonitorDataModel::newRoot( TreeNode* root)
+{
+  delete this->root_;
+  this->root_ = root;
+  this->reset();
+}
+
 TreeNode*
 MonitorDataModel::getNode( const QModelIndex &index) const
 {
