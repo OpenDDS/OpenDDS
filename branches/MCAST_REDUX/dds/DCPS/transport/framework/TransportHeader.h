@@ -45,11 +45,11 @@ struct OpenDDS_Dcps_Export TransportHeader {
   TransportHeader& operator=(ACE_Message_Block* buffer);
   TransportHeader& operator=(ACE_Message_Block& buffer);
 
-  /// Determine if this is a valid packet header.
-  bool valid() const;
-
   /// Determine if the serializer should swap bytes.
   bool swap_bytes() const;
+
+  /// Determine if this is a valid packet header.
+  bool valid() const;
 
   /// The protocol of the packet being transmitted. This value also
   /// indicates the endianess of the source.

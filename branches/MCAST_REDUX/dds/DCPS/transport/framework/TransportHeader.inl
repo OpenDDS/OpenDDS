@@ -70,6 +70,15 @@ OpenDDS::DCPS::TransportHeader::max_marshaled_size()
 
 ACE_INLINE
 bool
+OpenDDS::DCPS::TransportHeader::swap_bytes() const
+{
+  DBG_ENTRY_LVL("TransportHeader","swap_bytes",6);
+
+  return this->protocol_ == DCPS_PROTOCOL_SWAPPED;
+}
+
+ACE_INLINE
+bool
 OpenDDS::DCPS::TransportHeader::valid() const
 {
   DBG_ENTRY_LVL("TransportHeader","valid",6);
@@ -77,15 +86,6 @@ OpenDDS::DCPS::TransportHeader::valid() const
   return (this->protocol_ == DCPS_PROTOCOL || swap_bytes()) &&
          this->version_major_ == DCPS_VERSION_MAJOR &&
          this->version_minor_ == DCPS_VERSION_MINOR;
-}
-
-ACE_INLINE
-bool
-OpenDDS::DCPS::TransportHeader::swap_bytes() const
-{
-  DBG_ENTRY_LVL("TransportHeader","swap_bytes",6);
-
-  return this->protocol_ == DCPS_PROTOCOL_SWAPPED;
 }
 
 ACE_INLINE
