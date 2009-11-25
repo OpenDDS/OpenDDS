@@ -162,7 +162,7 @@ ReliableMulticast::expire_naks()
   if (first == last) return; // nothing to expire
 
   for (NakHistory::iterator it(first); it != last; ++it) {
-    NakRequest& nak_request(it->second);
+    const NakRequest& nak_request(it->second);
 
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
