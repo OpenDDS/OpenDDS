@@ -12,7 +12,6 @@
 
 #include "Multicast_Export.h"
 
-#include "MulticastDataLink.h"
 #include "MulticastDataLink_rch.h"
 
 #include "dds/DCPS/transport/framework/TransportSendStrategy.h"

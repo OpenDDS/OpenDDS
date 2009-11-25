@@ -65,7 +65,7 @@ class ACE_Data_Block;
     ACE_TString stringvalue;                                                     \
     if (CF.get_string_value (SECT, KEY, stringvalue) == -1)                      \
     {                                                                            \
-      if (OpenDDS::DCPS::Transport_debug_level > 0)                            \
+      if (OpenDDS::DCPS::Transport_debug_level > 0)                              \
       {                                                                          \
         ACE_DEBUG ((LM_WARNING,                                                  \
                     ACE_TEXT ("(%P|%t)\"%s\" is not defined in config ")         \
@@ -116,6 +116,16 @@ class ACE_Data_Block;
     {                                                                            \
       VALUE = ACE_OS::strtod (stringvalue.c_str (), 0);                          \
     }                                                                            \
+  }
+
+/// Macro to get the individual configuration value
+///  from ACE_Configuration_Heap as ACE_Time_Value
+///  using milliseconds.
+#define GET_CONFIG_TIME_VALUE(CF, SECT, KEY, VALUE)                              \
+  {                                                                              \
+    long tv = -1;                                                                \
+    GET_CONFIG_VALUE(CF, SECT, KEY, tv, long);                                   \
+    if (tv != -1) VALUE.msec(tv);                                                \
   }
 
 // The transport section name prefix.

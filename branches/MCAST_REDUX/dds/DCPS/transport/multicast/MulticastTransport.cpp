@@ -55,9 +55,7 @@ MulticastTransport::find_or_create_datalink(
 
   // This transport supports two modes of operation: reliable and
   // best-effort. Eventually the selection of this mode will be
-  // autonegotiated based on QoS. Unfortunately the ETF currently
-  // multiplexes both reliable and best-effort samples over the same
-  // DataLink which forces all samples into one mode or the other:
+  // autonegotiated based on QoS:
   MulticastDataLink_rch link;
   if (this->config_i_->reliable_) {
     link = new ReliableMulticast(this,
