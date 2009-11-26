@@ -447,8 +447,7 @@ ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
   // handshake to verify that passive endpoints can send/receive
   // data reliably. This process must be executed using the
   // transport reactor thread to prevent blocking.
-  if (active) {
-    if (!this->syn_watchdog_.schedule(reactor)) {
+  if (active && !this->syn_watchdog_.schedule(reactor)) {
       this->nak_watchdog_.cancel();
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
