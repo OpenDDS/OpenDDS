@@ -180,9 +180,9 @@ ReliableMulticast::expire_naks()
       continue;
     }
 
+    // Skip unrecoverable datagrams; attempt to re-establish a
+    // reasonable baseline to detect future reception gaps:
     if (nak_request.second > sequence->second) {
-      // Skip unrecoverable datagrams; attempt to re-establish a
-      // reasonable baseline to detect future reception gaps:
       sequence->second.skip(nak_request.second);
     }
   }
@@ -207,11 +207,11 @@ ReliableMulticast::send_naks()
     this->nak_history_.insert(NakHistory::value_type(
       now, NakRequest(it->first, it->second.high())));
 
+    // Broadcast MULTICAST_NAK control samples to remote peer. The
+    // peer should respond with a resend of the missing data or a
+    // MULTICAST_NAKACK indicating the data is no longer available.
     for (DisjointSequence::range_iterator range(it->second.range_begin());
          range != it->second.range_end(); ++range) {
-      // Broadcast MULTICAST_NAK control samples to remote peer. The
-      // peer should respond with a resend of the missing data or a
-      // MULTICAST_NAKACK indicating the data is no longer available.
       send_nak(it->first, range->first, range->second);
     }
   }
@@ -443,11 +443,11 @@ ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
                      false);
   }
 
+  // Active peers schedule a watchdog timer to initiate a 2-way
+  // handshake to verify that passive endpoints can send/receive
+  // data reliably. This process must be executed using the
+  // transport reactor thread to prevent blocking.
   if (active) {
-    // Active peers schedule a watchdog timer to initiate a 2-way
-    // handshake to verify that passive endpoints can send/receive
-    // data reliably. This process must be executed using the
-    // transport reactor thread to prevent blocking.
     if (!this->syn_watchdog_.schedule(reactor)) {
       this->nak_watchdog_.cancel();
       ACE_ERROR_RETURN((LM_ERROR,
