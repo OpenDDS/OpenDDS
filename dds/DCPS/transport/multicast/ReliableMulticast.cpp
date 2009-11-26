@@ -71,7 +71,7 @@ NakWatchdog::on_interval(const void* /*arg*/)
 {
   // Expire outstanding repair requests that have not yet been
   // fulfilled; this prevents NAK implosions due to remote
-  // peers becoming unreachable.
+  // peers becoming unresponsive:
   this->link_->expire_naks();
 
   // Initiate resends by broadcasting MULTICAST_NAK control
@@ -209,7 +209,7 @@ ReliableMulticast::send_naks()
 
     for (DisjointSequence::range_iterator range(it->second.range_begin());
          range != it->second.range_end(); ++range) {
-      // Broadcast MULTICAST_NAK control sample to remote peer. The
+      // Broadcast MULTICAST_NAK control samples to remote peer. The
       // peer should respond with a resend of the missing data or a
       // MULTICAST_NAKACK indicating the data is no longer available.
       send_nak(it->first, range->first, range->second);
