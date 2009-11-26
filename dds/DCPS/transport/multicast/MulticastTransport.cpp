@@ -39,21 +39,20 @@ MulticastTransport::find_or_create_datalink(
   // TransportImpl instances may only be attached either Subscribers
   // or Publishers within the same DomainParticipant. Given this,
   // it may be assumed that the local_id always references the same
-  // participant.
+  // participant; the remote_id may match one or more publications
+  // or subscriptions belonging to the same remote participant.
   MulticastPeer remote_peer =
     RepoIdConverter(remote_association->remote_id_).participantId();
 
   MulticastDataLinkMap::iterator it(this->links_.find(remote_peer));
   if (it != this->links_.end()) return it->second.in();  // found
 
-  // At this point we can assume that we are creating a new DataLink
-  // between a logical pair of peers (DomainParticipants) identified
-  // by a participantId:
+  // At this point we may assume that we are creating a new DataLink
+  // between a logical pair of peers identified by a participantId:
   MulticastPeer local_peer = RepoIdConverter(local_id).participantId();
 
   // This transport supports two modes of operation: reliable and
-  // best-effort. Eventually the selection of this mode will be
-  // autonegotiated based on QoS:
+  // best-effort; mode selection is based on transport configuration:
   MulticastDataLink_rch link;
   if (this->config_i_->reliable_) {
     link = new ReliableMulticast(this,
@@ -76,7 +75,7 @@ MulticastTransport::find_or_create_datalink(
   // Configure link with transport configuration and reactor task:
   link->configure(this->config_i_.in(), reactor_task());
 
-  // Assign blessed send/receive strategies:
+  // Assign send/receive strategies:
   link->send_strategy(new MulticastSendStrategy(link.in()));
   link->receive_strategy(new MulticastReceiveStrategy(link.in()));
 
@@ -87,8 +86,8 @@ MulticastTransport::find_or_create_datalink(
     group_address = connection_info_i(remote_association->remote_data_);
 
   } else {
-    // Passive peers obtain the group address via the
-    // transport configuration:
+    // Passive peers obtain the group address via the transport
+    // configuration:
     group_address = this->config_i_->group_address_;
   }
 
@@ -103,8 +102,9 @@ MulticastTransport::find_or_create_datalink(
                      0);
   }
 
-  // Insert remote peer into DataLink map. This allows DataLinks to
-  // be re-used based on a matching participantId:
+  // Insert new link into the links map. This allows DataLinks to be
+  // shared by other publications or subscriptions belonging to the
+  // same participant.
   this->links_.insert(MulticastDataLinkMap::value_type(remote_peer, link));
 
   return link._retn();
