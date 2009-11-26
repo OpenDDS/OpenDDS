@@ -448,13 +448,12 @@ ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
   // data reliably. This process must be executed using the
   // transport reactor thread to prevent blocking.
   if (active && !this->syn_watchdog_.schedule(reactor)) {
-      this->nak_watchdog_.cancel();
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("ReliableMulticast::join_i: ")
-                        ACE_TEXT("failed to schedule SYN watchdog!\n")),
-                       false);
-    }
+    this->nak_watchdog_.cancel();
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("ReliableMulticast::join_i: ")
+                      ACE_TEXT("failed to schedule SYN watchdog!\n")),
+                     false);
   }
 
   return true;
