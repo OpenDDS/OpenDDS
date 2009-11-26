@@ -15,6 +15,7 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/debug.h"
 #include "ace/Basic_Types.h"
+#include "TransportDebug.h"
 #include <vector>
 
 class ACE_Message_Block;
