@@ -36,10 +36,10 @@ MulticastTransport::find_or_create_datalink(
   bool active)
 {
   // This transport forms reservations between DomainParticipants.
-  // TransportImpl instances may only be attached either Subscribers
-  // or Publishers within the same DomainParticipant. Given this,
+  // Given that TransportImpl instances may only be attached either
+  // Subscribers or Publishers within the same DomainParticipant,
   // it may be assumed that the local_id always references the same
-  // participant; the remote_id may match one or more publications
+  // participant. The remote_id may match one or more publications
   // or subscriptions belonging to the same remote participant.
   MulticastPeer remote_peer =
     RepoIdConverter(remote_association->remote_id_).participantId();
