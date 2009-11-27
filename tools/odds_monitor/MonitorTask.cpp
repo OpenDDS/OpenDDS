@@ -25,18 +25,33 @@ Monitor::MonitorTask::MonitorTask(
     gate_( this->lock_),
     controlContext_( ExternalControl),
     waiter_( new DDS::WaitSet),
-    guardCondition_( new DDS::GuardCondition)
+    guardCondition_( new DDS::GuardCondition),
+    currentKey_( 0)
 {
+  // Find and map the current IOR strings to their IOR key values.
+  for( OpenDDS::DCPS::Service_Participant::KeyIorMap::const_iterator
+       location = TheServiceParticipant->keyIorMap().begin();
+       location != TheServiceParticipant->keyIorMap().end();
+       ++location) {
+    this->iorKeyMap_[ location->second] = location->first;
+  }
 }
 
 Monitor::MonitorTask::~MonitorTask()
 {
   // Terminate processing cleanly.
   this->stop();
+  this->iorKeyMap_.clear();
 
   // Clean up the service resources.
   TheTransportFactory->release();
   TheServiceParticipant->shutdown();
+}
+
+const Monitor::MonitorTask::IorKeyMap&
+Monitor::MonitorTask::iorKeyMap() const
+{
+  return this->iorKeyMap_;
 }
 
 int
@@ -136,7 +151,36 @@ Monitor::MonitorTask::shutdownRepo()
 }
 
 void
-Monitor::MonitorTask::setRepoIor( const std::string& /* ior */)
+Monitor::MonitorTask::setRepoIor( const std::string& ior)
+{
+  RepoKey key;
+  IorKeyMap::iterator location = this->iorKeyMap_.find( ior);
+  if( location != this->iorKeyMap_.end()) {
+    // We already have this IOR mapped, use the existing key.
+    key = location->second;
+
+  } else {
+    // We need to find an open key to use.  Check the actual
+    // Service_Participant mappings for a slot.
+    OpenDDS::DCPS::Service_Participant::KeyIorMap::const_iterator
+      keylocation;
+    key = this->currentKey_;
+    do {
+      keylocation = TheServiceParticipant->keyIorMap().find( ++key);
+    } while( keylocation != TheServiceParticipant->keyIorMap().end());
+    this->currentKey_ = key;
+
+    // We have a new repository to install, go ahead.
+    TheServiceParticipant->set_repo_ior( ior.c_str(), key);
+    this->iorKeyMap_[ ior] = key;
+  }
+
+  // Map the instrumentation domain onto the indicated repository.
+  TheServiceParticipant->set_repo_domain( this->options_.domain(), key);
+}
+
+void
+Monitor::MonitorTask::someMethod()
 {
   // Shutdown current processing.
   this->shutdownRepo();

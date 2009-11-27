@@ -42,6 +42,11 @@ Viewer::Viewer( const Options& options, QMainWindow* parent)
   this->ui.repoView->setModel( this->model_);
 
   this->ui.repoSelection->addItem( repoDetachedSelection);
+  QList<QString> iorList;
+  this->dataSource_->getIorList( iorList);
+  while( !iorList.isEmpty()) {
+    this->ui.repoSelection->addItem( iorList.takeFirst());
+  }
 }
 
 void

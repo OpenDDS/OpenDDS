@@ -724,6 +724,10 @@ Service_Participant::set_repo_ior(const char* ior, const RepoKey key)
     return;
   }
 
+  // If we made it this far, the IOR is valid, so store the key/IOR
+  // mapping for informational purposes.
+  this->keyIorMap_[ key] = ior;
+
   // Actually install the repository to the mappings.
   this->set_repo(repo.in(), key);
 }
@@ -957,6 +961,12 @@ Service_Participant::repository_lost(const RepoKey key)
   // If we reach here, we have exceeded the total recovery time
   // specified.
   ACE_ASSERT(recoveryFailedTime == ACE_Time_Value::zero);
+}
+
+const Service_Participant::KeyIorMap&
+Service_Participant::keyIorMap() const
+{
+  return this->keyIorMap_;
 }
 
 DCPSInfo_ptr

@@ -42,6 +42,17 @@ Monitor::MonitorData::disable()
   this->enabled_ = false;
 }
 
+void
+Monitor::MonitorData::getIorList( QList<QString>& iorList)
+{
+  for( MonitorTask::IorKeyMap::const_iterator
+       location = this->dataSource_->iorKeyMap().begin();
+       location != this->dataSource_->iorKeyMap().end();
+       ++location) {
+    iorList.append( QString( location->first.c_str()));
+  }
+}
+
 bool
 Monitor::MonitorData::setRepoIor( const QString& ior)
 {
@@ -87,6 +98,11 @@ Monitor::MonitorData::clearData()
        = this->model_->headerData( index, Qt::Horizontal).toString();
      list << value;
   }
+
+  // Clear the mappings.
+  this->storage_->clear();
+
+  // Create a new tree to install fresh data into.
   TreeNode* root = new TreeNode( list);
 
   // Install the empty tree into the data model.
