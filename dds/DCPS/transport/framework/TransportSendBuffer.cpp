@@ -49,7 +49,7 @@ TransportSendBuffer::retain(RepoId pub_id)
 }
 
 bool
-TransportSendBuffer::resend(const range_type& range, range_type& actual)
+TransportSendBuffer::resend(range_type& range)
 {
   return false;
 }

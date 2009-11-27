@@ -58,7 +58,7 @@ public:
   void skip(SequenceNumber value);
 
   bool update(SequenceNumber value);
-  bool update(range_type range); 
+  bool update(const range_type& range); 
 
   operator SequenceNumber() const;
 

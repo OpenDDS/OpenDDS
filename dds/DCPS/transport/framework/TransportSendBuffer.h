@@ -22,7 +22,6 @@
 #include "dds/DCPS/RcObject_T.h"
 
 #include <map>
-#include <utility>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -45,7 +44,7 @@ public:
   
   void retain(RepoId pub_id);
   
-  bool resend(const range_type& range, range_type& actual); 
+  bool resend(range_type& range);
   bool resend(SequenceNumber sequence);
 
 private:
