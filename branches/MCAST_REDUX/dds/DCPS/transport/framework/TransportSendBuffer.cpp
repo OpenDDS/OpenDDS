@@ -67,7 +67,7 @@ TransportSendBuffer::insert(SequenceNumber sequence, const buffer_type& value)
   // Age off oldest sample if we are at capacity:
   if (this->buffers_.size() == this->capacity_) {
     BufferMap::iterator it(this->buffers_.begin());
-    if (it == this->buffers_.end()) return;
+    if (it == this->buffers_.end()) return; // no capacity
 
     release(it->second);
     this->buffers_.erase(it);
@@ -78,14 +78,14 @@ TransportSendBuffer::insert(SequenceNumber sequence, const buffer_type& value)
 
   buffer_type& buffer(pair.first->second);
 
-  // Copy the sample's TransportQueueElements:
+  // Copy sample's TransportQueueElements:
   TransportSendStrategy::QueueType*& samples(buffer.first);
   ACE_NEW(samples, TransportSendStrategy::QueueType(value.first->size(), 1));
 
   CopyChainVisitor visitor(*samples, &this->sample_allocator_);
   value.first->accept_visitor(visitor);
 
-  // Copy the sample's message/data block descriptors:
+  // Copy sample's message/data block descriptors:
   ACE_Message_Block*& data(buffer.second);
   data = value.second->duplicate();
 }
