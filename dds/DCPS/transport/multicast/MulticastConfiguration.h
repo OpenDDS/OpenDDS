@@ -33,9 +33,8 @@ public:
   virtual int load(const TransportIdType& id,
                    ACE_Configuration_Heap& config);
 
-  /// the default group address selection is ipv4; this
-  /// option controls whether ipv6 is to be used instead.
-  /// the default value is false.
+  /// Enable/disable IPv6 default group address selection.
+  /// The default value is false.
   bool default_to_ipv6_;
   
   /// The offset used to determine default port numbers;
