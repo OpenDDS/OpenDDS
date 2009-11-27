@@ -172,8 +172,7 @@ MulticastTransport::connection_info_i(const TransportInterfaceInfo& info) const
   NetworkAddress network_address;
 
   size_t len = info.data.length();
-  const char* buffer =
-    reinterpret_cast<const char*>(info.data.get_buffer());
+  const char* buffer = reinterpret_cast<const char*>(info.data.get_buffer());
 
   ACE_InputCDR cdr(buffer, len);
   cdr >> network_address;
@@ -190,7 +189,7 @@ MulticastTransport::acked(RepoId /*local_id*/, RepoId remote_id)
     RepoIdConverter(remote_id).participantId();
 
   MulticastDataLinkMap::iterator it(this->links_.find(remote_peer));
-  if (it != this->links_.end()) return it->second->acked();
+  if (it != this->links_.end()) return it->second->acked(); // found
 
   return false;
 }
@@ -198,9 +197,8 @@ MulticastTransport::acked(RepoId /*local_id*/, RepoId remote_id)
 void
 MulticastTransport::remove_ack(RepoId /*local_id*/, RepoId /*remote_id*/)
 {
-  // Association acknowledgement is managed by each individual
-  // DataLink; there is no state which needs to be removed by
-  // the TransportImpl.
+  // Association acks are managed by each individual DataLink; there
+  // is no state that needs to be removed by this TransportImpl.
 }
 
 void

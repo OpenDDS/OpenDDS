@@ -76,13 +76,13 @@ protected:
 
   MulticastConfiguration_rch config_;
   TransportReactorTask_rch reactor_task_;
+  
+  virtual void stop_i();
  
   // These methods may be overridden to provide additional behavior
   // when joining/leaving a multicast group:
   virtual bool join_i(const ACE_INET_Addr& group_address, bool active);
   virtual void leave_i();
-  
-  virtual void stop_i();
 
 private:
   ACE_SOCK_Dgram_Mcast socket_;

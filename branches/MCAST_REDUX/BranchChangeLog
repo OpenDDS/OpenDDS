@@ -1,3 +1,28 @@
+Fri Nov 27 16:39:30 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.cpp:
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+        * dds/DCPS/transport/multicast/BestEffortMulticast.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastLoader.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+        * dds/DCPS/transport/multicast/multicast.conf-dist:
+        * dds/DCPS/transport/multicast/multicast.ini-dist:
+
+          Final pass of refactoring/documentation updates for the
+          multicast transport.
+
+        * dds/DCPS/transport/multicast/multicast.conf:
+        * dds/DCPS/transport/multicast/multicast.ini:
+
+          Removed these files.
+
 Fri Nov 27 06:46:33 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendBuffer.h:

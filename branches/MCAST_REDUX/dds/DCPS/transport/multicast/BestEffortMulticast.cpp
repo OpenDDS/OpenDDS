@@ -25,7 +25,7 @@ bool
 BestEffortMulticast::acked()
 {
   // Assume remote peer is available; this does not prevent
-  // data lost if remote peer is unreachable.
+  // data loss if the remote peer is initially unresponsive:
   return true;
 }
 
@@ -33,7 +33,7 @@ bool
 BestEffortMulticast::header_received(const TransportHeader& header)
 {
   // Assume header is valid; this does not prevent duplicate
-  // delivery of datagrams.
+  // delivery of datagrams:
   return true;
 }
 

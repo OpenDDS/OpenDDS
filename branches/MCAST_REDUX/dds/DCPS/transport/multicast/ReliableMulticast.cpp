@@ -318,18 +318,14 @@ ReliableMulticast::nak_received(ACE_Message_Block* control)
   MulticastSequence high;
   serializer >> high;
 
-  // Fetch remote peer from header:
-  MulticastPeer remote_peer(this->received_header_.source_);
-
-  TransportSendBuffer::range_type nak_range(low, high);
-  TransportSendBuffer::range_type nakack_range;
+  TransportSendBuffer::range_type range(low, high);
 
   // Attempt to resend requested datagrams:
-  if (!this->send_buffer_->resend(nak_range, nakack_range)) {
+  if (!this->send_buffer_->resend(range)) {
     // One or more datagrams are unrecoverable; broadcast a
     // MULTICAST_NAKACK control sample to suppress further
-    // repair requests for the range:
-    send_nakack(nakack_range.first, nakack_range.second);
+    // repair requests for the updated range:
+    send_nakack(range.first, range.second);
   }
 }
 
@@ -469,8 +465,7 @@ ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
   // A send buffer is bound to the send strategy to ensure a
   // configured number of most-recent datagrams are buffered in
   // order to fulfill repair requests:
-  this->send_buffer_ =
-    new TransportSendBuffer(this->config_->nak_repair_size_);
+  this->send_buffer_ = new TransportSendBuffer(this->config_->nak_repair_size_);
   if (this->send_buffer_.is_nil()) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
@@ -490,6 +485,7 @@ ReliableMulticast::leave_i()
 {
   if (!this->send_buffer_.is_nil()) {
     this->send_buffer_->_remove_ref();  // release ownership
+    this->send_buffer_ = 0;
   }
 
   this->nak_watchdog_.cancel();

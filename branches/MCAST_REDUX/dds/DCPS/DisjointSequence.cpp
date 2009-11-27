@@ -41,7 +41,7 @@ DisjointSequence::update(SequenceNumber value)
 }
 
 bool
-DisjointSequence::update(range_type range)
+DisjointSequence::update(const range_type& range)
 {
   if (range.second <= low()) return false;  // already seen
 

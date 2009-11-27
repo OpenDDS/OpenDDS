@@ -19,6 +19,7 @@ int
 MulticastLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
 {
   static bool initialized(false);
+  
   if (initialized) return 0;  // already initialized
 
   TransportGenerator *generator;
