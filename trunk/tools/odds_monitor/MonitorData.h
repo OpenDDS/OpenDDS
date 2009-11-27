@@ -9,9 +9,10 @@
 #ifndef MONITORDATA_H
 #define MONITORDATA_H
 
-namespace DDS { namespace DCPS { class GUID_t; }}
+namespace OpenDDS { namespace DCPS { class GUID_t; }}
 
 class QString;
+template< class T> class QList;
 
 namespace Monitor {
 
@@ -40,10 +41,13 @@ class MonitorData {
 
     /// Disable operation for orderly shutdown.
     void disable();
-    void stubmodelchange();
+void stubmodelchange();
 
-    /// @name Messages from GUI to DDS.
+    /// @name Messages and queries from GUI to DDS.
     /// @{
+
+    /// Obtain a list of existing repository IOR values.
+    void getIorList( QList<QString>& iorList);
 
     /// Establish a binding to a repository.  There can be only one per IOR.
     bool setRepoIor( const QString& ior);
@@ -56,24 +60,24 @@ class MonitorData {
 
     /// @}
 
-    /// @name Messages from DDS to GUI.
+    /// @name Messages and queries from DDS to GUI.
     /// @{
 
     /// Add a new data element to the model.
     void addDataElement(
-           const DDS::DCPS::GUID_t& parent,
-           const DDS::DCPS::GUID_t& id,
+           const OpenDDS::DCPS::GUID_t& parent,
+           const OpenDDS::DCPS::GUID_t& id,
            char* value
          );
 
     /// Update the value of a data element in the model.
     void updateDataElement(
-           const DDS::DCPS::GUID_t& id,
+           const OpenDDS::DCPS::GUID_t& id,
            char* value
          );
 
     /// Remove a data element from the model.
-    void removeDataElement( const DDS::DCPS::GUID_t& id);
+    void removeDataElement( const OpenDDS::DCPS::GUID_t& id);
 
     /// @}
 

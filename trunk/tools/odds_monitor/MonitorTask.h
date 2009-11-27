@@ -9,6 +9,7 @@
 #include "dds/DdsDcpsInfrastructureTypeSupportC.h"
 #include "dds/DCPS/GuardCondition.h"
 #include "dds/DCPS/WaitSet.h"
+#include "dds/DCPS/Service_Participant.h"
 
 #include <ace/Task.h>
 
@@ -31,6 +32,12 @@ class MonitorData;
  */
 class MonitorTask : public ACE_Task_Base {
   public:
+    /// Alias the RepoKey type locally.
+    typedef OpenDDS::DCPS::Service_Participant::RepoKey RepoKey;
+
+    /// Map IOR values to repository key values.
+    typedef std::map< std::string, RepoKey> IorKeyMap;
+
     MonitorTask(
       MonitorData* data,
       const Options& options
@@ -60,8 +67,13 @@ class MonitorTask : public ACE_Task_Base {
 
     /// @}
 
+    /// Provide access to the IOR mappings.
+    const IorKeyMap& iorKeyMap() const;
+
   private:
     enum ControlContext { InternalControl, ExternalControl};
+
+void someMethod();
 
     /// Terminate current processing.
     void shutdownRepo();
@@ -113,6 +125,12 @@ class MonitorTask : public ACE_Task_Base {
 
     /// DataReader for the BuiltinTopic "DCPSSubscription".
     ::DDS::SubscriptionBuiltinTopicDataDataReader_var subscriptionReader_;
+
+    /// Map IOR strings to repository key values.
+    IorKeyMap iorKeyMap_;
+
+    /// Repository key value to use for next IOR to be set.
+    RepoKey currentKey_;
 };
 
 } // End of namespace Monitor

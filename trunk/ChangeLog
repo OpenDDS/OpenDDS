@@ -1,3 +1,61 @@
+Fri Nov 27 22:43:20 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+
+          keyIorMap
+            - new method to provide access to a new container that
+              maintains mappings from repository keys to IOR strings.
+
+          In the header, moved a 'public' specification down to hide a
+          large amount of internal code that should not be exposed.  This
+          has creeped in during work on the RT11950 branch and is not
+          necessary.  Could not remove entirely as the new monitor API
+          appears to rely on some members being public.
+
+        * tools/odds_monitor/MonitorData.h:
+        * tools/odds_monitor/MonitorData.cpp:
+
+          getIorList
+            - new method to access the MonitorTask and populate a list of
+              IOR values.
+
+          setRepoIor
+            - added call to clear the storage object when changing
+              repositories.
+
+        * tools/odds_monitor/MonitorDataStorage.h:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+
+          clear() - stub new method.
+
+          Added GuidToTreeMap container to hold mappings from OpenDDS
+          service values to the GUI TreeNode elements.
+
+        * tools/odds_monitor/MonitorTask.h:
+        * tools/odds_monitor/MonitorTask.cpp:
+
+          constructor
+            - added query to Service_Participant to obtain list of IOR
+              mappings at startup.
+
+          iorKeyMap
+            - added accessor to new container that maps IOR string values
+              to the Service_Participant internal repository key values.
+
+          setRepoIor
+            - changed this to manage IOR values and keys via the
+              Service_Participant.
+
+        * tools/odds_monitor/Viewer.h:
+
+          Removed obsolete stub.
+
+        * tools/odds_monitor/Viewer.cpp:
+
+          Added query for existing repositories at startup and populate
+          repository selections with them.
+
 Fri Nov 27 05:28:41 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DdsDcpsGuid.idl:

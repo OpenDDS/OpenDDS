@@ -79,6 +79,9 @@ public:
   /// Key type for storing repository objects.
   typedef int RepoKey;
 
+  /// Map type to access IOR strings from repository key values.
+  typedef std::map<RepoKey, std::string> KeyIorMap;
+
   /// Constructor.
   Service_Participant();
 
@@ -144,6 +147,9 @@ public:
 
   /// Accessor of the DCPSInfo object reference.
   DCPSInfo_ptr get_repository(const DDS::DomainId_t domain);
+
+  /// Access the key/IOR mappings currently in effect.
+  const KeyIorMap& keyIorMap() const;
 
   /** Accessors of the qos policy initial values. **/
   DDS::UserDataQosPolicy            initial_UserDataQosPolicy() const;
@@ -368,7 +374,7 @@ private:
    */
   int load_repo_configuration();
 
-public:
+// public:
 
   /// The orb object reference which can be provided by client or
   /// initialized by this sigleton.
@@ -395,6 +401,9 @@ public:
   /// The DomainId to RepoKey mapping.
   typedef std::map<DDS::DomainId_t, RepoKey> DomainRepoMap;
   DomainRepoMap domainRepoMap_;
+
+  /// Repository key to IOR string values.
+  KeyIorMap keyIorMap_;
 
   /// The DomainId to DCPSInfo/repository object references
   /// container.
@@ -476,6 +485,7 @@ public:
   /// file.
   ACE_Configuration_Heap cf_;
 
+public:
   /// Pointer to the monitor factory that is used to create 
   /// monitor objects.
   MonitorFactory* monitor_factory_;

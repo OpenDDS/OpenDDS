@@ -34,3 +34,9 @@ Monitor::MonitorDataStorage::~MonitorDataStorage()
   delete this->transportIdGenerator_;
 }
 
+void
+Monitor::MonitorDataStorage::clear()
+{
+  this->guidToTreeMap_.clear();
+}
+

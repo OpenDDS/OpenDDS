@@ -31,8 +31,6 @@ class Viewer : public QMainWindow {
   protected:
     void closeEvent( QCloseEvent* event = 0);
 
-void stubmodelchange();
-
   private:
     Ui::Monitor          ui;
     const Options&       options_;

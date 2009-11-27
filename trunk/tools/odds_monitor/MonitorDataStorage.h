@@ -9,6 +9,10 @@
 #ifndef MONITORDATASTORAGE_H
 #define MONITORDATASTORAGE_H
 
+#include "dds/DCPS/GuidUtils.h"
+
+#include <map>
+
 class RepoIdGenerator;
 
 namespace Monitor {
@@ -55,6 +59,9 @@ class MonitorDataStorage {
     /// Virtual destructor.
     virtual ~MonitorDataStorage();
 
+    /// Clean contents from all storage.
+    void clear();
+
     /// @name GUI data access methods.
     /// @{
 
@@ -66,6 +73,14 @@ class MonitorDataStorage {
     /// @}
 
   private:
+    /// Map GUID_t values to TreeNode elements.
+    typedef
+      std::map< OpenDDS::DCPS::GUID_t,
+                std::pair< int, TreeNode*>,
+                GUID_tKeyLessThan>
+      GuidToTreeMap;
+    GuidToTreeMap guidToTreeMap_;
+
     /// Generate Guid values for publishers.
     RepoIdGenerator* publisherIdGenerator_;
 
