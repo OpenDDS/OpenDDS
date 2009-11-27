@@ -29,7 +29,7 @@ sep(std::ostream& os)
 inline std::ostream&
 setopts(std::ostream& os)
 {
-  return os << std::hex << std::setfill('0') << std::setw(2);
+  return os << std::setfill('0') << std::setw(2);
 }
 
 } // namespace
@@ -40,6 +40,8 @@ operator<<(std::ostream& os, const OpenDDS::DCPS::GUID_t& rhs)
   std::size_t len;
 
   len = sizeof(rhs.guidPrefix) / sizeof(CORBA::Octet);
+
+  os << std::hex;
 
   for (std::size_t i = 0; i < len; ++i) {
     os << setopts << unsigned(rhs.guidPrefix[i]);
@@ -54,6 +56,9 @@ operator<<(std::ostream& os, const OpenDDS::DCPS::GUID_t& rhs)
   }
 
   os << setopts << unsigned(rhs.entityId.entityKind);
+
+  // Reset, because hex is "sticky"
+  os << std::dec;
 
   return os;
 }

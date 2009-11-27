@@ -42,6 +42,7 @@ namespace DCPS {
 class PublisherImpl;
 class DomainParticipantImpl;
 class OfferedDeadlineWatchdog;
+class Monitor;
 
 /**
 * @class DataWriterImpl
@@ -603,6 +604,12 @@ private:
   RepoIdToSequenceMap idToSequence_;
 
   IdSet                      pending_readers_;
+
+  /// Monitor object for this entity
+  Monitor* monitor_;
+
+  /// Periodic Monitor object for this entity
+  Monitor* periodic_monitor_;
 };
 
 } // namespace DCPS

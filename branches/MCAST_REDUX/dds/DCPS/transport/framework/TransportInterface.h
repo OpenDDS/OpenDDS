@@ -148,7 +148,7 @@ protected:
 private:
 
   /// We trust the TransportImpl as our friend.  It needs to call
-  /// our private attach_transport() and detach_transport() methods.
+  /// our private transport_detached() method.
   friend class TransportImpl;
 //MJM: yuk.
 

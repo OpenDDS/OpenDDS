@@ -14,7 +14,7 @@
 #include /**/ "dds/DdsDcpsInfrastructureC.h"
 #include /**/ "dds/DdsDcpsInfoS.h"
 
-#include "RepoIdGenerator.h"
+#include "dds/DCPS/RepoIdGenerator.h"
 
 #include /**/ "ace/Map_Manager.h"
 

@@ -12,6 +12,7 @@
 #include "TransportFactory.h"
 #include "TransportConfiguration.h"
 #include "dds/DCPS/Util.h"
+#include "dds/DCPS/Service_Participant.h"
 
 #include "tao/TAO_Singleton.h"
 
@@ -238,6 +239,9 @@ OpenDDS::DCPS::TransportFactory::create_transport_impl(TransportIdType transport
     trans_impl->configure(config.in());
   }
 
+  if (TheServiceParticipant->monitor_) {
+    TheServiceParticipant->monitor_->report();
+  }
   return trans_impl;
 }
 

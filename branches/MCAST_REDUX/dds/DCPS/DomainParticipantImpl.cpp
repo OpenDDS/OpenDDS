@@ -20,6 +20,7 @@
 #include "FailoverListener.h"
 #include "DomainParticipantFactoryImpl.h"
 #include "Util.h"
+#include "MonitorFactory.h"
 
 #include "dds/DdsDcpsGuidC.h"
 
@@ -76,10 +77,12 @@ DomainParticipantImpl::DomainParticipantImpl(DomainParticipantFactoryImpl *     
     domain_id_(domain_id),
     dp_id_(dp_id),
     federated_(federated),
-    failoverListener_(0)
+    failoverListener_(0),
+    monitor_(0)
 {
   DDS::ReturnCode_t ret;
   ret = this->set_listener(a_listener, mask);
+  monitor_ = TheServiceParticipant->monitor_factory_->create_dp_monitor(this);
 }
 
 // Implementation skeleton destructor
@@ -605,13 +608,13 @@ ACE_THROW_SPEC((CORBA::SystemException))
         ACE_Time_Value now = ACE_OS::gettimeofday();
 
         if (now < timeout_tv) {
-          ACE_Time_Value remainging = timeout_tv - now;
+          ACE_Time_Value remaining = timeout_tv - now;
 
-          if (remainging.sec() >= 1) {
+          if (remaining.sec() >= 1) {
             ACE_OS::sleep(1);
 
           } else {
-            ACE_OS::sleep(remainging);
+            ACE_OS::sleep(remaining);
           }
         }
       }
@@ -1472,6 +1475,13 @@ ACE_THROW_SPEC((CORBA::SystemException))
   }
 
   DDS::ReturnCode_t ret = this->set_enabled();
+
+  if (monitor_) {
+    monitor_->report();
+  }
+  if (TheServiceParticipant->monitor_) {
+    TheServiceParticipant->monitor_->report();
+  }
 
   if (ret == DDS::RETCODE_OK && !TheTransientKludge->is_enabled()) {
 #if !defined (DDS_HAS_MINIMUM_BIT)

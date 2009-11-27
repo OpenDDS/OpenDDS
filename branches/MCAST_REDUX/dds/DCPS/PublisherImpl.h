@@ -32,6 +32,7 @@ namespace DCPS {
 
 class DomainParticipantImpl;
 class DataWriterImpl;
+class Monitor;
 
 /// Information about a DataWriter
 struct OpenDDS_Dcps_Export PublisherDataWriterInfo {
@@ -224,6 +225,11 @@ public:
 
   DDS::ReturnCode_t assert_liveliness_by_participant();
 
+  typedef std::vector<PublicationId> PublicationIdVec;
+  /// Populates a std::vector with the PublicationIds (GUIDs) 
+  /// of this Publisher's Data Writers
+  void get_publication_ids(PublicationIdVec& pubs);
+
 private:
   DDS::InstanceHandle_t        handle_;
 
@@ -268,6 +274,9 @@ private:
 
   /// The catched available data while suspending.
   DataSampleList                available_data_list_;
+
+  /// Monitor object for this entity
+  Monitor* monitor_;
 };
 
 } // namespace  DDS

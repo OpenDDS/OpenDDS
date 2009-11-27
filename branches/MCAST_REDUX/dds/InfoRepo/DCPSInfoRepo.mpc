@@ -18,7 +18,6 @@ project(*InfoRepoLib): dcps, iortable, DCPSInfoRepo_bits, imr_client, svc_utils 
     DCPS_IR_Topic_Description.cpp
     DCPS_Utils.cpp
     DomainParticipantListener_i.cpp
-    RepoIdGenerator.cpp
     PersistenceUpdater.cpp
     UpdateManager.cpp
   }
