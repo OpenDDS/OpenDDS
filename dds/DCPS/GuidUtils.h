@@ -50,7 +50,11 @@ enum EntityKind {     // EntityId_t.entityKind value(s)
   KIND_PARTICIPANT,   // 0x3f & 0x01
   KIND_WRITER,        // 0x3f & 0x02 | 0x3f & 0x03
   KIND_READER,        // 0x3f & 0x04 | 0x3f & 0x07
-  KIND_TOPIC          // 0x3f & 0x05
+  KIND_TOPIC,         // 0x3f & 0x05
+
+  KIND_PUBLISHER,     // OpenDDS specific Publisher Guid values
+  KIND_SUBSCRIBER,    // OpenDDS specific Subscriber Guid values
+  KIND_USER           // OpenDDS specific other Guid values
 };
 
 } // namespace DCPS

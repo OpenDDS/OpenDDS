@@ -42,6 +42,7 @@ module OpenDDS
     const octet ENTITYKIND_OPENDDS_PUBLISHER    = 0x42;
 
     const octet ENTITYKIND_OPENDDS_TOPIC        = 0x45;
+    const octet ENTITYKIND_OPENDDS_USER         = 0x4a;
 
 // Specifying the GUID type as a DCPS data type with a complex key forces
 // the generation of the logical less than functor for the type.

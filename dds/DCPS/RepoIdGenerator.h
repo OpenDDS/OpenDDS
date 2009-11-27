@@ -17,7 +17,7 @@
 
 #include "dds/DCPS/GuidUtils.h"
 
-#include "inforepo_export.h"
+#include "dcps_export.h"
 
 /**
  * @class RepoIdGenerator
@@ -88,7 +88,7 @@
  * Where the VendorId value used for OpenDDS is the one for
  * Object Computing, Inc. == 0x03.
  */
-class OpenDDS_InfoRepoLib_Export RepoIdGenerator {
+class OpenDDS_Dcps_Export RepoIdGenerator {
 public:
   static const unsigned KeyBits;
 

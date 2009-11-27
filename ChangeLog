@@ -1,3 +1,60 @@
+Fri Nov 27 05:28:41 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DdsDcpsGuid.idl:
+
+          Added ENTITYKIND_OPENDDS_USER kind value for general purpose
+          usage.
+
+        * dds/DCPS/GuidUtils.h:
+
+          Added KIND_PUBLISHER, KIND_SUBSCRIBER, and KIND_USER to allow
+          generation of Guids for these kinds.
+
+        * dds/DCPS/GuidBuilder.cpp:
+
+          Build the new kinds of Guid.
+
+        * dds/DCPS/GuidConverter.cpp:
+
+          Convert the new kinds of Guid.
+
+        * tools/odds_monitor/MonitorDataStorage.h:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+
+          Added new storage class to hold instrumentation data for both
+          the OpenDDS service and the GUI.
+
+        * tools/odds_monitor/Monitor.mpc:
+        * tools/odds_monitor/MonitorData.h:
+        * tools/odds_monitor/MonitorData.cpp:
+        * tools/odds_monitor/MonitorDataModel.cpp:
+        * tools/odds_monitor/Monitor_main.cpp:
+        * tools/odds_monitor/RepoDialog.ui:
+        * tools/odds_monitor/Viewer.cpp:
+
+          More general improvements and updates.  Plumbing for new
+          storage type.  Made GUI operation more robust.
+
+        * dds/DCPS/RepoIdGenerator.h:
+        * dds/DCPS/RepoIdGenerator.cpp:
+
+          Moved these from InfoRepo directory to make them more generally
+          available without needing to link the entire repository
+          libraries.  Adjusted the pch and export details to work after
+          the move.
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+
+          Account for new location of RepoIdGenerator.h file.
+
+        * dds/InfoRepo/RepoIdGenerator.h:
+        * dds/InfoRepo/RepoIdGenerator.cpp:
+
+          Removed these files.
+
 Wed Nov 25 23:02:54 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/odds_monitor/Monitor.mpc:

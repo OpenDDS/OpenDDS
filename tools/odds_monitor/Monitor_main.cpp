@@ -16,9 +16,6 @@
 int
 main( int argc, char** argv, char**)
 {
-  // Initialize the service and consume the ACE+TAO+DDS arguments.
-  TheParticipantFactoryWithArgs( argc, argv);
-
   // Initialize the application, consume any Qt arguments.
   QApplication application( argc, argv);
   QPixmap splashImage(":/jpeg/splash.jpg");
@@ -29,6 +26,9 @@ main( int argc, char** argv, char**)
   splash.showMessage("Initializing DDS Service");
   application.processEvents();
 
+  // Initialize the service and consume the ACE+TAO+DDS arguments.
+  TheParticipantFactoryWithArgs( argc, argv);
+
   // Process the command line arguments left after ACE and Qt have had a go.
   Monitor::Options options( argc, argv);
 
@@ -36,7 +36,7 @@ main( int argc, char** argv, char**)
   Monitor::Viewer* viewer = new Monitor::Viewer( options);
   viewer->show();
 
-  sleep(5); // Development: For emphasis.
+  sleep(3); // Development: For emphasis.
   splash.finish( viewer);
 
   // Main GUI processing loop.

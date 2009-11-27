@@ -17,8 +17,19 @@ namespace Monitor {
 
 class Options;
 class MonitorDataModel;
+class MonitorDataStorage;
 class MonitorTask;
 
+/**
+ * @class MonitorData
+ *
+ * brief mediate the interaction between the GUI and the DDS service.
+ *
+ * This class provides the mechanism for the GUI to send messages to the
+ * DDS service and the service to send messages to the GUI.  This class
+ * also stores the data used by the data model so that it can be accessed
+ * by the GUI data model as well as by the service.
+ */
 class MonitorData {
   public:
     /// Construct with an IOR only.
@@ -39,6 +50,9 @@ class MonitorData {
 
     /// Remove a binding to a repository.  There should be only one with this IOR.
     bool removeRepo( const QString& ior);
+
+    /// Evict the currently monitored repository.
+    bool clearData();
 
     /// @}
 
@@ -64,6 +78,7 @@ class MonitorData {
     /// @}
 
   private:
+
     /// Enabled flag.
     bool enabled_;
 
@@ -75,6 +90,9 @@ class MonitorData {
 
     /// The DDS data source.
     MonitorTask* dataSource_;
+
+    /// The instrumentation data storage.
+    MonitorDataStorage* storage_;
 };
 
 } // End of namespace Monitor

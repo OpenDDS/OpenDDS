@@ -7,7 +7,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "DcpsInfo_pch.h"
+#include "DCPS/DdsDcps_pch.h"
 
 #include "RepoIdGenerator.h"
 #include "dds/DCPS/RepoIdBuilder.h"

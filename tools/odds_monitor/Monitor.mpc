@@ -17,6 +17,7 @@ project(*App) : dcpsexe_with_tcp, qt4_gui {
     MonitorTask.h
     MonitorData.h
     MonitorDataModel.h
+    MonitorDataStorage.h
     TreeNode.h
     RepoSelect.h
     ui_RepoDialog.h
@@ -33,6 +34,7 @@ project(*App) : dcpsexe_with_tcp, qt4_gui {
     MonitorData.cpp
     MonitorDataModel.cpp
     MonitorDataModel_moc.cpp
+    MonitorDataStorage.cpp
     Monitor_main.cpp
     RepoSelect.cpp
     RepoSelect_moc.cpp
