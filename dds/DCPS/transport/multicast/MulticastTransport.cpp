@@ -203,8 +203,9 @@ MulticastTransport::acked(RepoId /*local_id*/, RepoId remote_id)
 void
 MulticastTransport::remove_ack(RepoId /*local_id*/, RepoId /*remote_id*/)
 {
-  // Association acknowledgements are managed by each individual
-  // DataLink; there is no state which needs to be removed.
+  // Association acknowledgement is managed by each individual
+  // DataLink; there is no state which needs to be removed by
+  // the TransportImpl.
 }
 
 void
