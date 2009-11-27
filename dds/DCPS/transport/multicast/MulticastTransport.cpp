@@ -55,13 +55,10 @@ MulticastTransport::find_or_create_datalink(
   // best-effort; mode selection is based on transport configuration:
   MulticastDataLink_rch link;
   if (this->config_i_->reliable_) {
-    link = new ReliableMulticast(this,
-                                 local_peer,
-                                 remote_peer);
+    link = new ReliableMulticast(this, local_peer, remote_peer);
+  
   } else {
-    link = new BestEffortMulticast(this,
-                                   local_peer,
-                                   remote_peer);
+    link = new BestEffortMulticast(this, local_peer, remote_peer);
   }
   if (link.is_nil()) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -71,10 +68,10 @@ MulticastTransport::find_or_create_datalink(
                       remote_peer),
                      0);
   }
-
+  
   // Configure link with transport configuration and reactor task:
   link->configure(this->config_i_.in(), reactor_task());
-
+  
   // Assign send/receive strategies:
   link->send_strategy(new MulticastSendStrategy(link.in()));
   link->receive_strategy(new MulticastReceiveStrategy(link.in()));
@@ -102,9 +99,9 @@ MulticastTransport::find_or_create_datalink(
                      0);
   }
 
-  // Insert new link into the links map. This allows DataLinks to be
-  // shared by other publications or subscriptions belonging to the
-  // same participant.
+  // Insert new link into the links map; this allows DataLinks to be
+  // shared by additional publications or subscriptions belonging to
+  // the same participant:
   this->links_.insert(MulticastDataLinkMap::value_type(remote_peer, link));
 
   return link._retn();
@@ -193,9 +190,7 @@ MulticastTransport::acked(RepoId /*local_id*/, RepoId remote_id)
     RepoIdConverter(remote_id).participantId();
 
   MulticastDataLinkMap::iterator it(this->links_.find(remote_peer));
-  if (it != this->links_.end()) {
-    return it->second->acked();
-  }
+  if (it != this->links_.end()) return it->second->acked();
 
   return false;
 }

@@ -22,6 +22,14 @@ BestEffortMulticast::BestEffortMulticast(MulticastTransport* transport,
 }
 
 bool
+BestEffortMulticast::acked()
+{
+  // Assume remote peer is available; this does not prevent
+  // data lost if remote peer is unreachable.
+  return true;
+}
+
+bool
 BestEffortMulticast::header_received(const TransportHeader& header)
 {
   // Assume header is valid; this does not prevent duplicate
@@ -40,14 +48,6 @@ BestEffortMulticast::sample_received(ReceivedDataSample& sample)
   default:
     data_received(sample);
   }
-}
-
-bool
-BestEffortMulticast::acked()
-{
-  // Assume remote peer is available; this does not prevent
-  // data lost if remote peer is unreachable.
-  return true;
 }
 
 } // namespace DCPS

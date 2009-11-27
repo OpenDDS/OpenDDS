@@ -14,6 +14,7 @@
 #include "ThreadSynchStrategy.h"
 #include "ThreadSynchResource.h"
 #include "TransportQueueElement.h"
+#include "TransportSendBuffer.h"
 #include "BuildChainVisitor.h"
 #include "QueueRemoveVisitor.h"
 #include "PacketRemoveVisitor.h"
@@ -158,6 +159,14 @@ OpenDDS::DCPS::TransportSendStrategy::~TransportSendStrategy()
 
   if (this->queue_)
     delete this->queue_;
+}
+
+void
+OpenDDS::DCPS::TransportSendStrategy::send_buffer(
+  OpenDDS::DCPS::TransportSendBuffer* send_buffer)
+{
+  this->send_buffer_ = send_buffer;
+  this->send_buffer_->bind(this);
 }
 
 OpenDDS::DCPS::TransportSendStrategy::WorkOutcome

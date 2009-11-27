@@ -23,11 +23,11 @@ public:
   BestEffortMulticast(MulticastTransport* transport,
                       MulticastPeer local_peer,
                       MulticastPeer remote_peer);
+  
+  virtual bool acked();
 
   virtual bool header_received(const TransportHeader& header);
   virtual void sample_received(ReceivedDataSample& sample);
-
-  virtual bool acked();
 };
 
 } // namespace DCPS
