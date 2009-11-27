@@ -245,7 +245,7 @@ ReliableMulticast::syn_received(ACE_Message_Block* control)
 void
 ReliableMulticast::send_syn()
 {
-  size_t len = sizeof (this->remote_peer_);
+  size_t len = sizeof(this->remote_peer_);
 
   ACE_Message_Block* data;
   ACE_NEW(data, ACE_Message_Block(len));
@@ -284,7 +284,7 @@ ReliableMulticast::synack_received(ACE_Message_Block* control)
 void
 ReliableMulticast::send_synack(MulticastPeer remote_peer)
 {
-  size_t len = sizeof (remote_peer);
+  size_t len = sizeof(remote_peer);
 
   ACE_Message_Block* data;
   ACE_NEW(data, ACE_Message_Block(len));
@@ -327,9 +327,9 @@ ReliableMulticast::send_nak(MulticastPeer remote_peer,
                             MulticastSequence low,
                             MulticastSequence high)
 {
-  size_t len = sizeof (remote_peer)
-             + sizeof (low)
-             + sizeof (high);
+  size_t len = sizeof(remote_peer)
+             + sizeof(low)
+             + sizeof(high);
 
   ACE_Message_Block* data;
   ACE_NEW(data, ACE_Message_Block(len));
@@ -379,8 +379,8 @@ void
 ReliableMulticast::send_nakack(MulticastSequence low,
                                MulticastSequence high)
 {
-  size_t len = sizeof (low)
-             + sizeof (high);
+  size_t len = sizeof(low)
+             + sizeof(high);
 
   ACE_Message_Block* data;
   ACE_NEW(data, ACE_Message_Block(len));
