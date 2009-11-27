@@ -478,7 +478,7 @@ ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
                       ACE_TEXT("failed to create TransportSendBuffer!\n")),
                      false);
   }
-  this->send_strategy_->_add_ref(); // take ownership
+  this->send_buffer_->_add_ref(); // take ownership
 
   this->send_strategy_->send_buffer(this->send_buffer_.in());
 
