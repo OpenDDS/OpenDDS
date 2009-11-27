@@ -73,11 +73,13 @@ protected:
 
   MulticastConfiguration_rch config_;
   TransportReactorTask_rch reactor_task_;
-
-  virtual bool join_i(const ACE_INET_Addr& group_address, bool active) = 0;
-  virtual void leave_i() = 0;
-
+  
   virtual void stop_i();
+
+  // These methods may be overridden by subclasses to attach
+  // additional behavior when joining/leaving a multicast group:
+  virtual bool join_i(const ACE_INET_Addr& group_address, bool active);
+  virtual void leave_i();
 
 private:
   MulticastSendStrategy_rch send_strategy_;

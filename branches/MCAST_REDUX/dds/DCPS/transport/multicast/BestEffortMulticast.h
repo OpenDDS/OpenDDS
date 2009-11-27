@@ -28,10 +28,6 @@ public:
   virtual void sample_received(ReceivedDataSample& sample);
 
   virtual bool acked();
-
-protected:
-  virtual bool join_i(const ACE_INET_Addr& group_address, bool active);
-  virtual void leave_i();
 };
 
 } // namespace DCPS

@@ -85,5 +85,16 @@ MulticastDataLink::stop_i()
   leave();
 }
 
+bool
+MulticastDataLink::join_i(const ACE_INET_Addr& /*group_address*/, bool /*active*/)
+{
+  return true;
+}
+
+void
+MulticastDataLink::leave_i()
+{
+}
+
 } // namespace DCPS
 } // namespace OpenDDS

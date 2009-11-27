@@ -50,16 +50,5 @@ BestEffortMulticast::acked()
   return true;
 }
 
-bool
-BestEffortMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool /*active*/)
-{
-  return true;  // do nothing
-}
-
-void
-BestEffortMulticast::leave_i()
-{
-}
-
 } // namespace DCPS
 } // namespace OpenDDS
