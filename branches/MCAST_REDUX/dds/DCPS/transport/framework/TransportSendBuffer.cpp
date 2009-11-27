@@ -29,7 +29,7 @@ TransportSendBuffer::~TransportSendBuffer()
 }
 
 void
-TransportSendBuffer::insert(SequenceNumber sequence, const value_type& value)
+TransportSendBuffer::insert(SequenceNumber sequence, const buffer_type& value)
 {
 }
 
@@ -39,7 +39,7 @@ TransportSendBuffer::release_all()
 }
 
 void
-TransportSendBuffer::release(const value_type& value)
+TransportSendBuffer::release(const buffer_type& value)
 {
 }
 

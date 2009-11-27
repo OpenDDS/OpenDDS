@@ -30,18 +30,18 @@ namespace DCPS {
 class OpenDDS_Dcps_Export TransportSendBuffer
   : public RcObject<ACE_SYNCH_MUTEX> {
 public:
+  typedef std::pair<TransportSendStrategy::QueueType*, ACE_Message_Block*> buffer_type;
   typedef std::pair<SequenceNumber, SequenceNumber> range_type;
-  typedef std::pair<TransportSendStrategy::QueueType*, ACE_Message_Block*> value_type;
 
   explicit TransportSendBuffer(size_t capacity);
   ~TransportSendBuffer();
 
   void bind(TransportSendStrategy* strategy);
 
-  void insert(SequenceNumber sequence, const value_type& value);
+  void insert(SequenceNumber sequence, const buffer_type& value);
 
   void release_all();
-  void release(const value_type& value);
+  void release(const buffer_type& value);
   
   void retain(RepoId pub_id);
   
@@ -53,7 +53,7 @@ private:
 
   TransportSendStrategy_rch strategy_;
 
-  typedef std::map<SequenceNumber, value_type> BufferMap;
+  typedef std::map<SequenceNumber, buffer_type> BufferMap;
   BufferMap buffers_;
 };
 
