@@ -14,7 +14,6 @@
 
 #include "MulticastDataLink.h"
 
-#include "dds/DCPS/DisjointSequence.h"
 #include "dds/DCPS/transport/framework/DataLinkWatchdog_T.h"
 #include "dds/DCPS/transport/framework/TransportSendBuffer_rch.h"
 
@@ -23,6 +22,7 @@
 namespace OpenDDS {
 namespace DCPS {
 
+class DisjointSequence;
 class ReliableMulticast;
 
 class OpenDDS_Multicast_Export SynWatchdog

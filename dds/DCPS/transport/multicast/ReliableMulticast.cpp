@@ -10,6 +10,7 @@
 #include "ReliableMulticast.h"
 #include "MulticastTransport.h"
 
+#include "dds/DCPS/DisjointSequence.h"
 #include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/transport/framework/TransportSendBuffer.h"
 
@@ -321,14 +322,14 @@ ReliableMulticast::nak_received(ACE_Message_Block* control)
   DisjointSequence missing;
 
   // Attempt to resend requested datagrams:
-  DisjointSequence::range_type range(low, high);
-  if (!this->send_buffer_->resend(range, missing)) {
+  if (!this->send_buffer_->resend(
+        DisjointSequence::range_type(low, high), missing)) {
     // One or more datagrams are unrecoverable:
-    for (DisjointSequence::range_iterator it(missing.range_begin());
-         it != missing.range_end(); ++it) {
+    for (DisjointSequence::range_iterator range(missing.range_begin());
+         range != missing.range_end(); ++range) {
       // Broadcast MULTICAST_NAKACK control samples to suppress
       // repair requests for missing ranges:
-      send_nakack(it->first, it->second);
+      send_nakack(range->first, range->second);
     }
   }
 }
@@ -384,8 +385,7 @@ ReliableMulticast::nakack_received(ACE_Message_Block* control)
   // MULTICAST_NAKACK control samples indicate data which cannot be
   // repaired by a remote peer. Update the sequence map to suppress
   // future repair requests for the given range:
-  DisjointSequence::range_type range(low, high);
-  it->second.update(range);
+  it->second.update(DisjointSequence::range_type(low, high));
 }
 
 void

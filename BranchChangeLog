@@ -1,3 +1,10 @@
+Fri Nov 27 23:46:04 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Nits finalized; branch is now code complete.
+
 Fri Nov 27 23:28:55 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendBuffer.h:
