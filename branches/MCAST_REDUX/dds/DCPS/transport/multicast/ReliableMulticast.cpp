@@ -479,6 +479,7 @@ ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
                      false);
   }
   this->send_strategy_->_add_ref(); // take ownership
+
   this->send_strategy_->send_buffer(this->send_buffer_.in());
 
   return true;
