@@ -76,8 +76,8 @@ protected:
   
   virtual void stop_i();
 
-  // These methods may be overridden by subclasses to attach
-  // additional behavior when joining/leaving a multicast group:
+  // These methods may be overridden to provide additional behavior
+  // when joining/leaving a multicast group:
   virtual bool join_i(const ACE_INET_Addr& group_address, bool active);
   virtual void leave_i();
 
