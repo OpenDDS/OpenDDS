@@ -20,6 +20,7 @@
 #include "TransportReplacedElement.h"
 #include "TransportRetainedElement.h"
 #include "TransportConfiguration_rch.h"
+#include "TransportSendBuffer_rch.h"
 
 #include "ace/Synch.h"
 
@@ -48,8 +49,12 @@ class OpenDDS_Dcps_Export TransportSendStrategy
   : public RcObject<ACE_SYNCH_MUTEX>,
       public ThreadSynchWorker {
 public:
+  typedef BasicQueue<TransportQueueElement> QueueType;
 
   virtual ~TransportSendStrategy();
+
+  /// Assigns an optional send buffer.
+  void send_buffer(TransportSendBuffer* send_buffer);
 
   /// Start the TransportSendStrategy.  This happens once, when
   /// the DataLink that "owns" this strategy object has established
@@ -125,6 +130,9 @@ public:
   void link_released(bool flag);
 
   bool isDirectMode();
+  
+  /// Form an IOV and call the send_bytes() template method.
+  ssize_t do_send_packet( ACE_Message_Block* packet, int& bp);
 
 protected:
 
@@ -159,9 +167,6 @@ protected:
   /// Provide the opportunity to remove control messages from
   /// implementation specific lists as well.
   virtual void remove_all_control_msgs_i( RepoId pub_id);
-
-  /// Form an IOV and call the send_bytes() template method.
-  ssize_t do_send_packet( ACE_Message_Block* packet, int& bp);
 
 private:
 
@@ -224,8 +229,6 @@ private:
 
   /// This is called by perform_work() after it has sent
   void send_delayed_notifications();
-
-  typedef BasicQueue<TransportQueueElement> QueueType;
 
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;
@@ -356,6 +359,8 @@ private:
   bool graceful_disconnecting_;
 
   bool link_released_;
+
+  TransportSendBuffer_rch send_buffer_;
 
   //remove these are only for debugging: DUMP_FOR_PACKET_INFO
 protected:

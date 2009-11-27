@@ -16,6 +16,7 @@
 
 #include "dds/DCPS/DisjointSequence.h"
 #include "dds/DCPS/transport/framework/DataLinkWatchdog_T.h"
+#include "dds/DCPS/transport/framework/TransportSendBuffer_rch.h"
 
 #include <map>
 #include <utility>
@@ -61,20 +62,20 @@ public:
   ReliableMulticast(MulticastTransport* transport,
                     MulticastPeer local_peer,
                     MulticastPeer remote_peer);
-
-  virtual bool header_received(const TransportHeader& header);
-  virtual void sample_received(ReceivedDataSample& sample);
-
+  
   virtual bool acked();
   
-  void expire_naks(); 
-  void send_naks();
- 
+  virtual bool header_received(const TransportHeader& header);
+  virtual void sample_received(ReceivedDataSample& sample);
+  
   void syn_received(ACE_Message_Block* control);
   void send_syn();
 
   void synack_received(ACE_Message_Block* control);
   void send_synack(MulticastPeer remote_peer);
+ 
+  void expire_naks(); 
+  void send_naks();
   
   void nak_received(ACE_Message_Block* control);
   void send_nak(MulticastPeer remote_peer,
@@ -98,6 +99,8 @@ private:
   SynWatchdog syn_watchdog_;
   NakWatchdog nak_watchdog_;
 
+  TransportSendBuffer_rch send_buffer_;
+  
   TransportHeader received_header_;
 
   typedef std::map<MulticastPeer, DisjointSequence> SequenceMap;

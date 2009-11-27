@@ -34,6 +34,14 @@ MulticastDataLink::~MulticastDataLink()
 {
 }
 
+void
+MulticastDataLink::configure(MulticastConfiguration* config,
+                             TransportReactorTask* reactor_task)
+{
+  this->config_ = config;
+  this->reactor_task_ = reactor_task;
+}
+
 bool
 MulticastDataLink::join(const ACE_INET_Addr& group_address, bool active)
 {
@@ -47,18 +55,7 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address, bool active)
                       ACE_OS::strerror(error)),
                      false);
   }
-
-  if ((error = start(this->send_strategy_.in(),
-                     this->recv_strategy_.in())) != 0) {
-    this->socket_.close();
-    ACE_ERROR_RETURN((LM_ERROR,
-		      ACE_TEXT("(%P|%t) ERROR: ")
-		      ACE_TEXT("MulticastDataLink::join: ")
-		      ACE_TEXT("start failed: %d\n"),
-                      error),
-                     false);
-  }
-
+  
   if (!join_i(group_address, active)) {
     this->socket_.close();
     ACE_ERROR_RETURN((LM_ERROR,
@@ -69,7 +66,24 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address, bool active)
                      false);
   }
 
+  if ((error = start(this->send_strategy_.in(),
+                     this->recv_strategy_.in())) != 0) {
+    leave();
+    ACE_ERROR_RETURN((LM_ERROR,
+		      ACE_TEXT("(%P|%t) ERROR: ")
+		      ACE_TEXT("MulticastDataLink::join: ")
+		      ACE_TEXT("start failed: %d\n"),
+                      error),
+                     false);
+  }
+
   return true;
+}
+
+bool
+MulticastDataLink::join_i(const ACE_INET_Addr& /*group_address*/, bool /*active*/)
+{
+  return true;  // default
 }
 
 void
@@ -80,20 +94,15 @@ MulticastDataLink::leave()
 }
 
 void
-MulticastDataLink::stop_i()
+MulticastDataLink::leave_i()
 {
-  leave();
-}
-
-bool
-MulticastDataLink::join_i(const ACE_INET_Addr& /*group_address*/, bool /*active*/)
-{
-  return true;
+  // default
 }
 
 void
-MulticastDataLink::leave_i()
+MulticastDataLink::stop_i()
 {
+  leave();
 }
 
 } // namespace DCPS

@@ -40,12 +40,12 @@ public:
                     MulticastPeer local_peer,
                     MulticastPeer remote_peer);
   virtual ~MulticastDataLink();
+  
+  void send_strategy(MulticastSendStrategy* send_strategy);
+  void receive_strategy(MulticastReceiveStrategy* recv_strategy);
 
   void configure(MulticastConfiguration* config,
                  TransportReactorTask* reactor_task);
-
-  void send_strategy(MulticastSendStrategy* send_strategy);
-  void receive_strategy(MulticastReceiveStrategy* recv_strategy);
 
   MulticastPeer local_peer() const;
   MulticastPeer remote_peer() const;
@@ -59,32 +59,32 @@ public:
 
   bool join(const ACE_INET_Addr& group_address, bool active);
   void leave();
+  
+  virtual bool acked() = 0;
 
   virtual bool header_received(const TransportHeader& header) = 0;
   virtual void sample_received(ReceivedDataSample& sample) = 0;
-
-  virtual bool acked() = 0;
 
 protected:
   MulticastTransport_rch transport_;
 
   MulticastPeer local_peer_;
   MulticastPeer remote_peer_;
+  
+  MulticastSendStrategy_rch send_strategy_;
+  MulticastReceiveStrategy_rch recv_strategy_;
 
   MulticastConfiguration_rch config_;
   TransportReactorTask_rch reactor_task_;
-  
-  virtual void stop_i();
-
+ 
   // These methods may be overridden to provide additional behavior
   // when joining/leaving a multicast group:
   virtual bool join_i(const ACE_INET_Addr& group_address, bool active);
   virtual void leave_i();
+  
+  virtual void stop_i();
 
 private:
-  MulticastSendStrategy_rch send_strategy_;
-  MulticastReceiveStrategy_rch recv_strategy_;
-
   ACE_SOCK_Dgram_Mcast socket_;
 };
 
