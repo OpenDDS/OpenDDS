@@ -57,7 +57,7 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address, bool active)
   }
   
   if (!join_i(group_address, active)) {
-    this->socket_.close();
+    leave();
     ACE_ERROR_RETURN((LM_ERROR,
 		      ACE_TEXT("(%P|%t) ERROR: ")
 		      ACE_TEXT("MulticastDataLink::join: ")
