@@ -318,14 +318,18 @@ ReliableMulticast::nak_received(ACE_Message_Block* control)
   MulticastSequence high;
   serializer >> high;
 
-  TransportSendBuffer::range_type range(low, high);
+  DisjointSequence missing;
 
   // Attempt to resend requested datagrams:
-  if (!this->send_buffer_->resend(range)) {
-    // One or more datagrams are unrecoverable; broadcast a
-    // MULTICAST_NAKACK control sample to suppress further
-    // repair requests for the updated range:
-    send_nakack(range.first, range.second);
+  DisjointSequence::range_type range(low, high);
+  if (!this->send_buffer_->resend(range, missing)) {
+    // One or more datagrams are unrecoverable:
+    for (DisjointSequence::range_iterator it(missing.range_begin());
+         it != missing.range_end(); ++it) {
+      // Broadcast MULTICAST_NAKACK control samples to suppress
+      // repair requests for missing ranges:
+      send_nakack(it->first, it->second);
+    }
   }
 }
 
@@ -380,7 +384,8 @@ ReliableMulticast::nakack_received(ACE_Message_Block* control)
   // MULTICAST_NAKACK control samples indicate data which cannot be
   // repaired by a remote peer. Update the sequence map to suppress
   // future repair requests for the given range:
-  it->second.update(DisjointSequence::range_type(low, high));
+  DisjointSequence::range_type range(low, high);
+  it->second.update(range);
 }
 
 void
@@ -465,7 +470,9 @@ ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
   // A send buffer is bound to the send strategy to ensure a
   // configured number of most-recent datagrams are buffered in
   // order to fulfill repair requests:
-  this->send_buffer_ = new TransportSendBuffer(this->config_->nak_repair_size_);
+  this->send_buffer_ =
+    new TransportSendBuffer(this->config_->nak_repair_size_,
+                            this->config_->max_samples_per_packet_);
   if (this->send_buffer_.is_nil()) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
@@ -484,6 +491,8 @@ void
 ReliableMulticast::leave_i()
 {
   if (!this->send_buffer_.is_nil()) {
+    this->send_strategy_->send_buffer(0);
+
     this->send_buffer_->_remove_ref();  // release ownership
     this->send_buffer_ = 0;
   }
