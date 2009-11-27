@@ -262,6 +262,8 @@ ReliableMulticast::send_syn()
 void
 ReliableMulticast::synack_received(ACE_Message_Block* control)
 {
+  if (this->acked_) return; // already acked
+
   TAO::DCPS::Serializer serializer(
     control, this->transport_->swap_bytes());
 
@@ -270,16 +272,13 @@ ReliableMulticast::synack_received(ACE_Message_Block* control)
 
   // Ignore sample if not destined for us:
   if (local_peer != this->local_peer_) return;
-
+  
   this->syn_watchdog_.cancel();
 
-  if (!this->acked_) {
-    this->acked_ = true;
-
-    // Handshake is complete; force the TransportImpl to re-evaluate
-    // any pending associations it has queued:
-    this->transport_->check_fully_association();
-  }
+  // Handshake is complete; adjust the acked flag and force the
+  // TransportImpl to re-evaluate any pending associations:
+  this->acked_ = true;
+  this->transport_->check_fully_association();
 }
 
 void
