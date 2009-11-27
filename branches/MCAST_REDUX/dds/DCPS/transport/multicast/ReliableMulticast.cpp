@@ -180,9 +180,9 @@ ReliableMulticast::expire_naks()
       continue;
     }
 
-    // Skip unrecoverable datagrams; attempt to re-establish a
-    // reasonable baseline to detect future reception gaps:
     if (nak_request.second > sequence->second) {
+      // Skip unrecoverable datagrams; attempt to re-establish a
+      // reasonable baseline to detect future reception gaps:
       sequence->second.skip(nak_request.second);
     }
   }
