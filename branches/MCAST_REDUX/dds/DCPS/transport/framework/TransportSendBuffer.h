@@ -19,9 +19,11 @@
 
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/DisjointSequence.h"
 #include "dds/DCPS/RcObject_T.h"
 
 #include <map>
+#include <set>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -30,25 +32,29 @@ class OpenDDS_Dcps_Export TransportSendBuffer
   : public RcObject<ACE_SYNCH_MUTEX> {
 public:
   typedef std::pair<TransportSendStrategy::QueueType*, ACE_Message_Block*> buffer_type;
-  typedef std::pair<SequenceNumber, SequenceNumber> range_type;
 
-  explicit TransportSendBuffer(size_t capacity);
+  explicit TransportSendBuffer(size_t capacity,
+                               size_t max_samples_per_packet);
   ~TransportSendBuffer();
 
   void bind(TransportSendStrategy* strategy);
 
+  void release_all();
+  void release(buffer_type& buffer);
+
   void insert(SequenceNumber sequence, const buffer_type& value);
 
-  void release_all();
-  void release(const buffer_type& value);
-  
   void retain(RepoId pub_id);
-  
-  bool resend(range_type& range);
-  bool resend(SequenceNumber sequence);
+
+  bool resend(const DisjointSequence::range_type& range,
+              DisjointSequence& missing);
+  void resend(buffer_type& buffer);
 
 private:
   size_t capacity_;
+  
+  TransportRetainedElementAllocator sample_allocator_;
+  TransportReplacedElementAllocator replaced_allocator_;
 
   TransportSendStrategy_rch strategy_;
 

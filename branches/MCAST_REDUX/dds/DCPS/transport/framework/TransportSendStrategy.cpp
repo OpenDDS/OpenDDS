@@ -1190,6 +1190,12 @@ OpenDDS::DCPS::TransportSendStrategy::remove_all_control_msgs(RepoId pub_id)
 
   GuardType guard(this->lock_);
 
+  if (!this->send_buffer_.is_nil()) {
+    // If a secondary send buffer is bound, removed samples must
+    // be retained in order to properly maintain the buffer:
+    this->send_buffer_->retain(pub_id);
+  }
+  
   // Process any specific sample storage first.
   this->remove_all_control_msgs_i(pub_id);
 
@@ -1701,6 +1707,13 @@ OpenDDS::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_n
     //           "return code.\n"));
 
     return OUTCOME_SEND_ERROR;
+  }
+
+  if (!this->send_buffer_.is_nil()) {
+    // If a secondary send buffer is bound, send samples must
+    // be inserted in order to properly maintain the buffer:
+    this->send_buffer_->insert(this->header_.sequence_,
+      TransportSendBuffer::buffer_type(this->elems_, this->pkt_chain_));
   }
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
