@@ -203,8 +203,8 @@ MulticastTransport::acked(RepoId /*local_id*/, RepoId remote_id)
 void
 MulticastTransport::remove_ack(RepoId /*local_id*/, RepoId /*remote_id*/)
 {
-  // ACK state is managed by each individual DataLink; there
-  // is no state that needs to be removed at this level.
+  // Association acknowledgements are managed by each individual
+  // DataLink; there is no state which needs to be removed.
 }
 
 void
