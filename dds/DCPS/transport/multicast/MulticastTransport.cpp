@@ -93,7 +93,7 @@ MulticastTransport::find_or_create_datalink(
 
   if (!link->join(group_address, active)) {
     ACE_TCHAR group_address_s[64];
-    group_address.addr_to_string(group_address_s, sizeof (group_address_s));
+    group_address.addr_to_string(group_address_s, sizeof(group_address_s));
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
