@@ -13,6 +13,7 @@
 #include "BuiltInTopicUtils.h"
 #include "DataDurabilityCache.h"
 #include "RepoIdConverter.h"
+#include "MonitorFactory.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
@@ -87,6 +88,8 @@ Service_Participant::Service_Participant()
 #endif
     ),
     bit_lookup_duration_msec_(BIT_LOOKUP_DURATION_MSEC),
+    monitor_factory_(0),
+    monitor_(0),
     federation_recovery_duration_(DEFAULT_FEDERATION_RECOVERY_DURATION),
     federation_initial_backoff_seconds_(DEFAULT_FEDERATION_INITIAL_BACKOFF_SECONDS),
     federation_backoff_multiplier_(DEFAULT_FEDERATION_BACKOFF_MULTIPLIER),
@@ -105,6 +108,7 @@ Service_Participant::Service_Participant()
 
 Service_Participant::~Service_Participant()
 {
+  delete monitor_;
 }
 
 Service_Participant *
@@ -354,6 +358,14 @@ Service_Participant::get_domain_participant_factory(int &argc,
             return DDS::DomainParticipantFactory::_nil();
           }
         }
+
+        this->monitor_factory_ =
+          ACE_Dynamic_Service<MonitorFactory>::instance ("OpenDDS_Monitor");
+        if (this->monitor_factory_ == 0) {
+          // Use the stubbed factory
+          this->monitor_factory_ = new MonitorFactory;
+        }
+        this->monitor_ = this->monitor_factory_->create_sp_monitor(this);
 
       } catch (const CORBA::Exception& ex) {
         ex._tao_print_exception(
@@ -712,6 +724,10 @@ Service_Participant::set_repo_ior(const char* ior, const RepoKey key)
     return;
   }
 
+  // If we made it this far, the IOR is valid, so store the key/IOR
+  // mapping for informational purposes.
+  this->keyIorMap_[ key] = ior;
+
   // Actually install the repository to the mappings.
   this->set_repo(repo.in(), key);
 }
@@ -945,6 +961,12 @@ Service_Participant::repository_lost(const RepoKey key)
   // If we reach here, we have exceeded the total recovery time
   // specified.
   ACE_ASSERT(recoveryFailedTime == ACE_Time_Value::zero);
+}
+
+const Service_Participant::KeyIorMap&
+Service_Participant::keyIorMap() const
+{
+  return this->keyIorMap_;
 }
 
 DCPSInfo_ptr

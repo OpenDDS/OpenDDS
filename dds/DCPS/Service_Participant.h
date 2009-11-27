@@ -18,6 +18,7 @@
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/MonitorFactory.h"
 
 #include "tao/PortableServer/PortableServer.h"
 
@@ -40,6 +41,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 class DataDurabilityCache;
+class Monitor;
 
 const char DEFAULT_ORB_NAME[] = "OpenDDS_DCPS";
 
@@ -77,6 +79,9 @@ public:
   /// Key type for storing repository objects.
   typedef int RepoKey;
 
+  /// Map type to access IOR strings from repository key values.
+  typedef std::map<RepoKey, std::string> KeyIorMap;
+
   /// Constructor.
   Service_Participant();
 
@@ -108,7 +113,7 @@ public:
    * Initialize the DDS client environment and get the
    * @c DomainParticipantFactory.
    *
-   * This method consumes @c -DCPS* options and thier arguments.
+   * This method consumes @c -DCPS* options and their arguments.
    * Unless the client/application code calls other methods to
    * define how the ORB is run, calling this method will
    * initiallize the ORB and then run it in a separate thread.
@@ -142,6 +147,9 @@ public:
 
   /// Accessor of the DCPSInfo object reference.
   DCPSInfo_ptr get_repository(const DDS::DomainId_t domain);
+
+  /// Access the key/IOR mappings currently in effect.
+  const KeyIorMap& keyIorMap() const;
 
   /** Accessors of the qos policy initial values. **/
   DDS::UserDataQosPolicy            initial_UserDataQosPolicy() const;
@@ -332,7 +340,7 @@ private:
 
   /**
    * Parse the command line for user options. e.g. "-DCPSInfo <iorfile>".
-   * It consumes -DCPS* options and thier arguments
+   * It consumes -DCPS* options and their arguments
    */
   int parse_args(int &argc, ACE_TCHAR *argv[]);
 
@@ -366,7 +374,7 @@ private:
    */
   int load_repo_configuration();
 
-public:
+// public:
 
   /// The orb object reference which can be provided by client or
   /// initialized by this sigleton.
@@ -393,6 +401,9 @@ public:
   /// The DomainId to RepoKey mapping.
   typedef std::map<DDS::DomainId_t, RepoKey> DomainRepoMap;
   DomainRepoMap domainRepoMap_;
+
+  /// Repository key to IOR string values.
+  KeyIorMap keyIorMap_;
 
   /// The DomainId to DCPSInfo/repository object references
   /// container.
@@ -473,6 +484,14 @@ public:
   /// The configuration object that imports the configuration
   /// file.
   ACE_Configuration_Heap cf_;
+
+public:
+  /// Pointer to the monitor factory that is used to create 
+  /// monitor objects.
+  MonitorFactory* monitor_factory_;
+
+  /// Pointer to the monitor object for this object
+  Monitor* monitor_;
 
 private:
   /// The FederationRecoveryDuration value in seconds.

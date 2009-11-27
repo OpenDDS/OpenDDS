@@ -17,7 +17,7 @@
 #include /**/ "DCPS_IR_Publication.h"
 #include /**/ "DCPS_IR_Subscription.h"
 #include /**/ "DCPS_IR_Domain.h"
-#include "RepoIdGenerator.h"
+#include "dds/DCPS/RepoIdGenerator.h"
 #include "UpdateManager.h"
 
 #include /**/ "dds/DdsDcpsInfoS.h"

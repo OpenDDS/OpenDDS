@@ -15,6 +15,7 @@
 #include "Qos_Helper.h"
 #include "RepoIdConverter.h"
 #include "TopicImpl.h"
+#include "MonitorFactory.h"
 #include "DataReaderImpl.h"
 #include "Service_Participant.h"
 #include "dds/DdsDcpsTypeSupportExtC.h"
@@ -49,7 +50,8 @@ SubscriberImpl::SubscriberImpl(DDS::InstanceHandle_t handle,
     participant_(participant),
     domain_id_(participant->get_domain_id()),
     raw_latency_buffer_size_(0),
-    raw_latency_buffer_type_(DataCollector<double>::KeepOldest)
+    raw_latency_buffer_type_(DataCollector<double>::KeepOldest),
+    monitor_(0)
 {
   //Note: OK to duplicate a nil.
   listener_ = DDS::SubscriberListener::_duplicate(a_listener);
@@ -57,6 +59,8 @@ SubscriberImpl::SubscriberImpl(DDS::InstanceHandle_t handle,
   if (!CORBA::is_nil(a_listener)) {
     fast_listener_ = listener_.in();
   }
+
+  monitor_ = TheServiceParticipant->monitor_factory_->create_subscriber_monitor(this);
 }
 
 // Implementation skeleton destructor
@@ -701,6 +705,10 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
   if (this->participant_->is_enabled() == false) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+
+  if (this->monitor_) {
+    this->monitor_->report();
   }
 
   this->set_enabled();

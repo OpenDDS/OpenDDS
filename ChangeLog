@@ -1,3 +1,361 @@
+Fri Nov 27 22:43:20 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+
+          keyIorMap
+            - new method to provide access to a new container that
+              maintains mappings from repository keys to IOR strings.
+
+          In the header, moved a 'public' specification down to hide a
+          large amount of internal code that should not be exposed.  This
+          has creeped in during work on the RT11950 branch and is not
+          necessary.  Could not remove entirely as the new monitor API
+          appears to rely on some members being public.
+
+        * tools/odds_monitor/MonitorData.h:
+        * tools/odds_monitor/MonitorData.cpp:
+
+          getIorList
+            - new method to access the MonitorTask and populate a list of
+              IOR values.
+
+          setRepoIor
+            - added call to clear the storage object when changing
+              repositories.
+
+        * tools/odds_monitor/MonitorDataStorage.h:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+
+          clear() - stub new method.
+
+          Added GuidToTreeMap container to hold mappings from OpenDDS
+          service values to the GUI TreeNode elements.
+
+        * tools/odds_monitor/MonitorTask.h:
+        * tools/odds_monitor/MonitorTask.cpp:
+
+          constructor
+            - added query to Service_Participant to obtain list of IOR
+              mappings at startup.
+
+          iorKeyMap
+            - added accessor to new container that maps IOR string values
+              to the Service_Participant internal repository key values.
+
+          setRepoIor
+            - changed this to manage IOR values and keys via the
+              Service_Participant.
+
+        * tools/odds_monitor/Viewer.h:
+
+          Removed obsolete stub.
+
+        * tools/odds_monitor/Viewer.cpp:
+
+          Added query for existing repositories at startup and populate
+          repository selections with them.
+
+Fri Nov 27 05:28:41 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DdsDcpsGuid.idl:
+
+          Added ENTITYKIND_OPENDDS_USER kind value for general purpose
+          usage.
+
+        * dds/DCPS/GuidUtils.h:
+
+          Added KIND_PUBLISHER, KIND_SUBSCRIBER, and KIND_USER to allow
+          generation of Guids for these kinds.
+
+        * dds/DCPS/GuidBuilder.cpp:
+
+          Build the new kinds of Guid.
+
+        * dds/DCPS/GuidConverter.cpp:
+
+          Convert the new kinds of Guid.
+
+        * tools/odds_monitor/MonitorDataStorage.h:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+
+          Added new storage class to hold instrumentation data for both
+          the OpenDDS service and the GUI.
+
+        * tools/odds_monitor/Monitor.mpc:
+        * tools/odds_monitor/MonitorData.h:
+        * tools/odds_monitor/MonitorData.cpp:
+        * tools/odds_monitor/MonitorDataModel.cpp:
+        * tools/odds_monitor/Monitor_main.cpp:
+        * tools/odds_monitor/RepoDialog.ui:
+        * tools/odds_monitor/Viewer.cpp:
+
+          More general improvements and updates.  Plumbing for new
+          storage type.  Made GUI operation more robust.
+
+        * dds/DCPS/RepoIdGenerator.h:
+        * dds/DCPS/RepoIdGenerator.cpp:
+
+          Moved these from InfoRepo directory to make them more generally
+          available without needing to link the entire repository
+          libraries.  Adjusted the pch and export details to work after
+          the move.
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+
+          Account for new location of RepoIdGenerator.h file.
+
+        * dds/InfoRepo/RepoIdGenerator.h:
+        * dds/InfoRepo/RepoIdGenerator.cpp:
+
+          Removed these files.
+
+Wed Nov 25 23:02:54 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/Monitor.mpc:
+        * tools/odds_monitor/Monitor.qrc:
+        * tools/odds_monitor/Monitor.ui:
+        * tools/odds_monitor/MonitorData.h:
+        * tools/odds_monitor/MonitorData.cpp:
+        * tools/odds_monitor/MonitorDataModel.h:
+        * tools/odds_monitor/MonitorDataModel.cpp:
+        * tools/odds_monitor/Options.cpp:
+        * tools/odds_monitor/RepoDialog.ui:
+        * tools/odds_monitor/RepoSelect.h:
+        * tools/odds_monitor/RepoSelect.cpp:
+        * tools/odds_monitor/Viewer.h:
+        * tools/odds_monitor/Viewer.cpp:
+
+          More work on making the GUI usable.  Added a better mechanism
+          to manage multiple repositories, expecting the bind this into
+          the multi-repo capability of the service.  Cleaned up a few
+          nits along the way.
+
+        * tools/odds_monitor/images/splash.jpg:
+
+          Renamed splash image.
+
+        * tools/odds_monitor/images/Winnebago-Moon.jpg:
+
+          Removed this file.
+
+Wed Nov 25 04:01:33 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/Monitor.qrc:
+        * tools/odds_monitor/Monitor.ui:
+        * tools/odds_monitor/Monitor_main.cpp:
+
+          Added resource file and a splash to the application.
+
+Wed Nov 25 00:55:49 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/Monitor.mpc:
+        * tools/odds_monitor/Monitor.ui:
+        * tools/odds_monitor/MonitorData.h:
+        * tools/odds_monitor/MonitorData.cpp:
+        * tools/odds_monitor/MonitorDataModel.h:
+        * tools/odds_monitor/MonitorDataModel.cpp:
+        * tools/odds_monitor/MonitorTask.h:
+        * tools/odds_monitor/MonitorTask.cpp:
+        * tools/odds_monitor/Monitor_main.cpp:
+        * tools/odds_monitor/Options.h:
+        * tools/odds_monitor/Options.cpp:
+        * tools/odds_monitor/Viewer.h:
+        * tools/odds_monitor/Viewer.cpp:
+
+          Continue to develop application.  Updated UI and stubbed to
+          show model clearing and recreation to support changing
+          repository references.  GUI and DDS threads issues addressed
+          for DDS task processing.
+
+Tue Nov 24 21:52:00 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Make the monitor code more tolerant of apps that create transports
+          before domain participants (like some transport tests).
+
+Tue Nov 24 21:22:37 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Add a helper function to get the publication (data writer) ids.
+
+        * dds/monitor/MonitorFactoryImpl.cpp:
+
+          Fix problems with some of the monitor topic registrations.
+
+        * dds/monitor/PublisherMonitorImpl.cpp:
+
+          Finish filling out the PublisherReport data.
+
+        * dds/monitor/monitor.idl:
+
+          Clean up some redundancies in the monitor report model.
+
+        * tests/DCPS/Monitor/DRMDataReaderListener.h:
+        * tests/DCPS/Monitor/DRMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/DRPerMDataReaderListener.h:
+        * tests/DCPS/Monitor/DRPerMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/DWMDataReaderListener.h:
+        * tests/DCPS/Monitor/DWMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/DWPerMDataReaderListener.h:
+        * tests/DCPS/Monitor/DWPerMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/Messenger.mpc:
+        * tests/DCPS/Monitor/PublisherMDataReaderListener.h:
+        * tests/DCPS/Monitor/PublisherMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/SubscriberMDataReaderListener.h:
+        * tests/DCPS/Monitor/SubscriberMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/TransportMDataReaderListener.h:
+        * tests/DCPS/Monitor/TransportMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/monitor.cpp:
+
+          Add remaining subscriptions to the monitor test client.
+
+Tue Nov 24 17:24:35 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/MonitorFactory.h:
+        * dds/DCPS/MonitorFactory.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/monitor/MonitorFactoryImpl.h:
+        * dds/monitor/MonitorFactoryImpl.cpp:
+        * tests/DCPS/Monitor/Messenger.mpc:
+        * tests/DCPS/Monitor/monitor.cpp:
+        * tests/DCPS/Monitor/publisher.cpp:
+        * tests/DCPS/Monitor/subscriber.cpp:
+
+          A series of changes to make things work properly in static builds.
+
+        * dds/monitor/PublisherMonitorImpl.cpp:
+
+          Publish more details in the Publisher report.  Still a work in
+          progress.
+
+        * dds/monitor/monitor.idl:
+
+          Change the Publisher and Subscriber reports.  These entities do
+          not have GUIDs so a combination of DomainParticipant GUID and
+          instance handle is used as keys.
+
+Mon Nov 23 17:06:25 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.h:
+        * dds/DdsDcpsGuid.idl:
+        * dds/monitor/SPMonitorImpl.cpp:
+        * dds/monitor/monitor.idl:
+        * tests/DCPS/Monitor/Messenger.mpc:
+
+          Cleanup some issues with the previous commit (mostly Windows
+          issues).
+
+Mon Nov 23 14:28:01 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/GuidUtils.cpp:
+        * dds/DCPS/MonitorFactory.h:
+        * dds/DCPS/MonitorFactory.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.h:
+        * dds/DCPS/TopicImpl.cpp:
+        * dds/DCPS/transport/framework/TransportFactory.h:
+        * dds/DCPS/transport/framework/TransportFactory.inl:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/monitor/DPMonitorImpl.h:
+        * dds/monitor/DPMonitorImpl.cpp:
+        * dds/monitor/DRMonitorImpl.h:
+        * dds/monitor/DRMonitorImpl.cpp:
+        * dds/monitor/DRPeriodicMonitorImpl.h:
+        * dds/monitor/DRPeriodicMonitorImpl.cpp:
+        * dds/monitor/DWMonitorImpl.h:
+        * dds/monitor/DWMonitorImpl.cpp:
+        * dds/monitor/DWPeriodicMonitorImpl.h:
+        * dds/monitor/DWPeriodicMonitorImpl.cpp:
+        * dds/monitor/MonitorFactoryImpl.h:
+        * dds/monitor/MonitorFactoryImpl.cpp:
+        * dds/monitor/PublisherMonitorImpl.h:
+        * dds/monitor/PublisherMonitorImpl.cpp:
+        * dds/monitor/SPMonitorImpl.h:
+        * dds/monitor/SPMonitorImpl.cpp:
+        * dds/monitor/SubscriberMonitorImpl.h:
+        * dds/monitor/SubscriberMonitorImpl.cpp:
+        * dds/monitor/TopicMonitorImpl.h:
+        * dds/monitor/TopicMonitorImpl.cpp:
+        * dds/monitor/TransportMonitorImpl.h:
+        * dds/monitor/TransportMonitorImpl.cpp:
+        * dds/monitor/monitor.idl:
+        * dds/monitor/monitor.mpc:
+        * dds/monitor/monitor_export.h:
+
+          Add the monitor library and the hooks in the DCPS library to
+          call out to it.  The various monitors are not complete, but
+          the different monitors are all publishing though all fields
+          are not populated.
+
+        * tests/DCPS/Monitor/DPMDataReaderListener.h:
+        * tests/DCPS/Monitor/DPMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/DataReaderListener.h:
+        * tests/DCPS/Monitor/DataReaderListener.cpp:
+        * tests/DCPS/Monitor/Messenger.idl:
+        * tests/DCPS/Monitor/Messenger.mpc:
+        * tests/DCPS/Monitor/SPMDataReaderListener.h:
+        * tests/DCPS/Monitor/SPMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/TopicMDataReaderListener.h:
+        * tests/DCPS/Monitor/TopicMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/Writer.h:
+        * tests/DCPS/Monitor/Writer.cpp:
+        * tests/DCPS/Monitor/monitor.cpp:
+        * tests/DCPS/Monitor/pub.ini:
+        * tests/DCPS/Monitor/publisher.cpp:
+        * tests/DCPS/Monitor/run_test.pl:
+        * tests/DCPS/Monitor/sub.ini:
+        * tests/DCPS/Monitor/subscriber.cpp:
+        * tests/DCPS/Monitor/tcp.conf:
+
+          Add a test for the monitor library.
+
+Mon Nov 16 19:21:13 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor:
+
+          Moved OpenDDS monitor application to this location.
+
+        * dds/tools/odds_monitor:
+
+          Removed OpenDDS monitor application from this location.
+
+Fri Nov 13 00:45:07 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/tools/odds_monitor/MonitorDataModel.h:
+        * dds/tools/odds_monitor/MonitorDataModel.cpp:
+        * dds/tools/odds_monitor/README:
+        * dds/tools/odds_monitor/TreeNode.h:
+        * dds/tools/odds_monitor/Viewer.h:
+        * dds/tools/odds_monitor/Viewer.cpp:
+
+          Finished basic binding of model to view.
+
+        * dds/tools/odds_monitor/qt4-patch.diff:
+
+          Removed this file.
+
 Tue Nov 10 20:50:19 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:

@@ -44,6 +44,7 @@ class FailoverListener;
 class PublisherImpl;
 class SubscriberImpl;
 class DomainParticipantFactoryImpl;
+class Monitor;
 
 /**
 * @class DomainParticipantImpl
@@ -393,6 +394,7 @@ private:
   /// The datareader for built in topic subscription.
   DDS::SubscriptionBuiltinTopicDataDataReader_var bit_sub_dr_;
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
+  Monitor* monitor_;
 };
 
 } // namespace DCPS

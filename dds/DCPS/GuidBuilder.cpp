@@ -122,6 +122,24 @@ GuidBuilder::entityKind(EntityKind kind)
       ENTITYKIND_OPENDDS_TOPIC;
     break;
 
+  // OpenDDS specific Publisher Guid values
+  case KIND_PUBLISHER:
+    guid_.entityId.entityKind =
+      ENTITYKIND_OPENDDS_PUBLISHER;
+    break;
+
+  // OpenDDS specific Subscriber Guid values
+  case KIND_SUBSCRIBER:
+    guid_.entityId.entityKind =
+      ENTITYKIND_OPENDDS_SUBSCRIBER;
+    break;
+
+  // OpenDDS specific other Guid values
+  case KIND_USER:
+    guid_.entityId.entityKind =
+      ENTITYKIND_OPENDDS_USER;
+    break;
+
   default:
     guid_.entityId.entityKind =
       ENTITYKIND_USER_UNKNOWN;
