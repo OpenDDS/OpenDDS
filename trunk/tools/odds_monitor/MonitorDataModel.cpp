@@ -117,7 +117,7 @@ MonitorDataModel::flags( const QModelIndex& index) const
   return this->QAbstractItemModel::flags( index)
          | Qt::ItemIsEnabled
          | Qt::ItemIsSelectable
-         | Qt::ItemIsEditable
+  //     | Qt::ItemIsEditable
   //     | Qt::ItemIsDragEnabled
   //     | Qt::ItemIsDropEnabled
          ;
@@ -161,9 +161,9 @@ MonitorDataModel::setData(
 )
 {
   switch( role) {
-    case Qt::EditRole:
-      if( index.column() == 0) return false;
-      break;
+//  case Qt::EditRole:
+//    if( index.column() == 0) return false;
+//    break;
 
     case Qt::DisplayRole:
       break;

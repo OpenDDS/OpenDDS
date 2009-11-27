@@ -11,6 +11,7 @@
 #include "Options.h"
 #include "MonitorTask.h"
 #include "MonitorDataModel.h"
+#include "MonitorDataStorage.h"
 
 #include "dds/DCPS/Service_Participant.h"
 
@@ -21,7 +22,8 @@ Monitor::MonitorData::MonitorData( const Options& options, MonitorDataModel* mod
  : enabled_( true),
    options_( options),
    model_( model),
-   dataSource_( 0)
+   dataSource_( 0),
+   storage_( new MonitorDataStorage())
 {
   this->dataSource_ = new MonitorTask( this, this->options_);
   this->dataSource_->start();
@@ -31,6 +33,7 @@ Monitor::MonitorData::~MonitorData()
 {
   this->disable();
   delete this->dataSource_;
+  delete this->storage_;
 }
 
 void
@@ -58,6 +61,36 @@ Monitor::MonitorData::removeRepo( const QString& /* ior */)
   if( !this->enabled_) {
     return false;
   }
+
+  // Check if this is the currently monitored repository, and clear its
+  // data if it is in the view.
+  if( false) {
+    this->clearData();
+  }
+
+  // Look up the index for this IOR and remove it from the service.
+  return true;
+}
+
+bool
+Monitor::MonitorData::clearData()
+{
+  if( !this->enabled_) {
+    return false;
+  }
+
+  // Copy out the previous header settings.
+  QList< QVariant> list;
+  int cols = this->model_->columnCount();
+  for( int index = 0; index < cols; ++index) {
+     QString value
+       = this->model_->headerData( index, Qt::Horizontal).toString();
+     list << value;
+  }
+  TreeNode* root = new TreeNode( list);
+
+  // Install the empty tree into the data model.
+  this->model_->newRoot( root);
 
   // Look up the index for this IOR and remove it from the service.
   return true;
