@@ -121,6 +121,7 @@ bool
 TransportSendBuffer::resend(const DisjointSequence::range_type& range,
                             DisjointSequence& missing)
 {
+  // Set bounds on given DisjointSequence:
   missing.skip(range.first.value_ - 1);     // low
   missing.update(range.second.value_ + 1);  // high
 
