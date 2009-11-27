@@ -207,11 +207,11 @@ ReliableMulticast::send_naks()
     this->nak_history_.insert(NakHistory::value_type(
       now, NakRequest(it->first, it->second.high())));
 
-    // Broadcast MULTICAST_NAK control samples to remote peer. The
-    // peer should respond with a resend of the missing data or a
-    // MULTICAST_NAKACK indicating the data is no longer available.
     for (DisjointSequence::range_iterator range(it->second.range_begin());
          range != it->second.range_end(); ++range) {
+      // Broadcast MULTICAST_NAK control sample to remote peer; the
+      // peer should respond with a resend of the missing data or a
+      // MULTICAST_NAKACK indicating the data is no longer available:
       send_nak(it->first, range->first, range->second);
     }
   }
@@ -233,12 +233,12 @@ ReliableMulticast::syn_received(ACE_Message_Block* control)
   MulticastPeer remote_peer(this->received_header_.source_);
 
   // Insert remote peer into sequence map; this establishes a
-  // baseline for detecting reception gaps during delivery.
+  // baseline for detecting reception gaps during delivery:
   this->sequences_.insert(SequenceMap::value_type(
     remote_peer, DisjointSequence(this->received_header_.sequence_)));
 
   // MULTICAST_SYN control samples are always positively
-  // acknowledged by a matching remote peer:
+  // acknowledged by a matching remote peer.
   send_synack(remote_peer);
 }
 
@@ -262,7 +262,8 @@ ReliableMulticast::send_syn()
 void
 ReliableMulticast::synack_received(ACE_Message_Block* control)
 {
-  if (this->acked_) return; // already acked
+  // Ignore sample if already acked:
+  if (this->acked_) return;
 
   TAO::DCPS::Serializer serializer(
     control, this->transport_->swap_bytes());
@@ -351,8 +352,9 @@ ReliableMulticast::nakack_received(ACE_Message_Block* control)
   // Fetch remote peer from header:
   MulticastPeer remote_peer(this->received_header_.source_);
 
+  // Ignore sample if remote peer not known:
   SequenceMap::iterator it(this->sequences_.find(remote_peer));
-  if (it == this->sequences_.end()) return; // unknown peer
+  if (it == this->sequences_.end()) return;
 
   TAO::DCPS::Serializer serializer(
     control, this->transport_->swap_bytes());
