@@ -18,6 +18,7 @@
 #include "dds/DCPS/transport/framework/DataLinkWatchdog_T.h"
 
 #include <map>
+#include <utility>
 
 namespace OpenDDS {
 namespace DCPS {
