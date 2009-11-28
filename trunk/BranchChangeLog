@@ -1,0 +1,816 @@
+Fri Nov 27 23:53:27 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+          Backmerged r2645 in preparation for merge to trunk.
+
+Fri Nov 27 23:46:04 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Nits finalized; branch is now code complete.
+
+Fri Nov 27 23:28:55 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Implemented TransportSendBuffer mechanism.
+
+Fri Nov 27 16:39:30 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.cpp:
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+        * dds/DCPS/transport/multicast/BestEffortMulticast.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastLoader.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+        * dds/DCPS/transport/multicast/multicast.conf-dist:
+        * dds/DCPS/transport/multicast/multicast.ini-dist:
+
+          Final pass of refactoring/documentation updates for the
+          multicast transport.
+
+        * dds/DCPS/transport/multicast/multicast.conf:
+        * dds/DCPS/transport/multicast/multicast.ini:
+
+          Removed these files.
+
+Fri Nov 27 06:46:33 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.inl:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+        * dds/DCPS/transport/framework/TransportSendBuffer_rch.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Introduced new type (TransportSendBuffer) to manage datagram
+          retention; interface has been stubbed out for implementation.
+
+        * dds/DCPS/transport/multicast/BestEffortMulticast.h:
+        * dds/DCPS/transport/multicast/BestEffortMulticast.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.inl:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Completed NAK mechanism; general refactoring.
+
+Thu Nov 26 23:02:08 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+        * dds/DCPS/transport/multicast/multicast.ini:
+
+          Updated documentation/comments.
+
+Wed Nov 25 22:05:45 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+
+          Finalized TransportHeader PDU.
+
+Wed Nov 25 18:57:08 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Refactored synack_received; dropped extra filtering, added
+          better support for receiving multiple MULTICAST_SYNACK samples.
+
+Wed Nov 25 18:14:07 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+
+          Refactored TransportHeader PDUs; DCPS protocol version is now at
+          2.0.
+
+Wed Nov 25 07:58:06 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/multicast/multicast.ini:
+
+          Fixed minor issue which caused port_offset to be ignored during
+          default address selection.
+
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Reduced and refactored control samples; state machine now pulls
+          from the tranpsort header rather than the control sample for
+          source peer.
+
+Wed Nov 25 06:16:33 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Applied optimizations to control sample handling; control samples
+          will only be partially deserialized worst case for those samples
+          which are destined for other peers.
+
+Wed Nov 25 05:39:14 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Added support for updating ranges of sequence numbers.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Implemented MULTICAST_NAKACK support; stubbed out
+          received_nak.
+
+Wed Nov 25 00:41:19 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportDefs.h:
+
+          Added new GET_CONFIG_TIME_VALUE macro for retreiving
+          ACE_Time_Value values by millisecond.
+
+        * dds/DCPS/transport/multicast/BestEffortMulticast.cpp:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          General refactoring; updated documentation.
+
+Tue Nov 24 23:30:45 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/multicast.ini:
+
+          Added multicast configuration example.
+
+Tue Nov 24 23:04:11 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.inl:
+
+          Updated documentation.
+
+        * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
+
+          Updated locking behavior; fixed scheduling issues.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Refactored NAK request behavior to properly age off according
+          to nak_timeout; updated documentation.
+
+Tue Nov 24 18:00:04 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+
+          Add a missing export to a nested class (required for VC++).
+
+        * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.cpp:
+
+          Add some missing #includes (required for VC++).
+
+        * dds/DdsDcps.mpc:
+
+          Add NOMINMAX to supress min/max macros on windows.
+
+Tue Nov 24 16:22:40 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Introduced range_interator to allow iteration through disjointed
+          sequence ranges.
+
+        * dds/DCPS/transport/multicast/BestEffortMulticast.h:
+        * dds/DCPS/transport/multicast/BestEffortMulticast.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.inl:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastLoader.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          General refactorings; incorporated use of
+          DisjointSequence::range_iterator into send_naks.
+
+        * tests/DCPS/Messenger/Writer.cpp:
+
+          Removed changes introduced in previous commits.
+
+Mon Nov 23 20:20:52 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/framework/CopyChainVisitor.h:
+        * dds/DCPS/transport/framework/CopyChainVisitor.inl:
+        * dds/DCPS/transport/framework/CopyChainVisitor.cpp:
+
+          New visitor type to copy an existing
+          BasicQueue<TransportQueueElement> object into a new one using
+          TransportRetainedElement link types.
+
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+
+          Removed an obsolete comment.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          do_send_packet()
+            - Added the packet being sent to the method signature
+              rather than sending a packet stored in a member.
+              This simplifies resending retained PDUs for reliable
+              datagram based transports.
+
+Mon Nov 23 19:49:11 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.inl:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          General refactoring.
+
+Mon Nov 23 04:43:05 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.cpp:
+        * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+        * dds/DCPS/transport/multicast/BestEffortMulticast.h:
+        * dds/DCPS/transport/multicast/BestEffortMulticast.cpp:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Added support for sending MULTICAST_NAK messages; added plumbing
+          receiving these messages as well as initial suppor for
+          MULTICAST_NAKACK.
+
+Sun Nov 22 21:38:03 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          General refactorings; updated DCPS PDUs.
+
+Sun Nov 22 17:23:59 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Refactored watchdog support for DataLinks.
+
+Sat Nov 21 00:59:52 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportWatchdog_T.h:
+
+          Initial checkin; still needs to be implemented.
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Refactored static event handler for MULTICAST_SYN control
+          messages in factor of a dynamic watchdog which may be used for
+          handling NAK responses.
+
+Fri Nov 20 23:17:53 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          prepare_packet_i()
+            - new template method to give implementations the opportunity
+              to process PDUs as they are formed.
+          send_packet()
+          do_send_packet()
+            - refactored to allow implementations the ability to resend
+              PDUs without invoking the post send processing.
+
+        * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
+
+          Remove obsolete local variable.
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+
+          Include headers for send and receive strategies so they can be
+          used.
+
+Fri Nov 20 06:18:59 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/TransportConfiguration.h:
+        * dds/DCPS/transport/framework/TransportConfiguration.inl:
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        * dds/DCPS/transport/framework/TransportSendListener.cpp:
+
+          Added support for transport level control messages.
+
+        * dds/DCPS/transport/multicast/BestEffortMulticast.h:
+        * dds/DCPS/transport/multicast/BestEffortMulticast.cpp:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.inl:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.inl:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport_rch.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Refactored reliable and best-effort support; implemented
+          handshaking between active and passive peers.
+
+Thu Nov 19 23:34:09 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/framework/BuildChainVisitor.cpp:
+
+          Cosmetic changes to comments.
+
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.h:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.h:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.inl:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
+
+          Modified to contain a TransportQueueElement reference
+          representing the sample for comparison while operating on the
+          queue.
+
+          constructors
+            - changed argument from message block to queue element.
+              Removed second (pubId) constructor.  The queue element
+              contains both a message block and a publication Id.
+
+          visit_element*()
+            - modified to use a TransportQueueElement sample for
+              comparison.
+
+        * dds/DCPS/transport/framework/ThreadPerConRemoveVisitor.cpp:
+
+          visit_element_remove()
+            - changed comparison to compare TransportQueueElements to
+              determine sample to remove.  Form a local Qeuue element for
+              comparison.
+
+        * dds/DCPS/transport/framework/TransportControlElement.h:
+        * dds/DCPS/transport/framework/TransportControlElement.cpp:
+
+          constructor
+            - Added publication Id and ownership indications.  Stored
+              these as members.
+
+          release_element()
+            - predicate deletion on ownership flag.  This allows objects
+              of this type to be created on the stack safely.
+
+        * dds/DCPS/transport/framework/TransportQueueElement.h:
+        * dds/DCPS/transport/framework/TransportQueueElement.inl:
+
+          operator==()
+            - Changed argument to compare to TransportQueueElements.
+              Comaprison now compares rd_ptr() of both sides first.  If
+              no chain is available to compare, then equal publication Id
+              values that are not GUID_UNKNOWN compare true.
+
+        * dds/DCPS/transport/framework/TransportRetainedElement.h:
+        * dds/DCPS/transport/framework/TransportRetainedElement.inl:
+        * dds/DCPS/transport/framework/TransportRetainedElement.cpp:
+
+          New TransportQueueElement subtype containing just an
+          ACE_Message_Block chain and publication Id value.  These are
+          used for forming comparison samples in the existing queue
+          visitors and can be used to store sent PDU information so that
+          samples from publications being torn down can be copied out.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          constructor
+            - Added a new TransportRetainedElementAllocator pointer,
+              initialized to null, for use by reliable datagram based
+              transport implementations.
+
+          remove_all_control_msgs()
+          remove_sample()
+            - changed construction of visitors to use a stack based
+              TransportQueueElement for comparison by the visitor
+              objects.
+
+Wed Nov 18 23:57:04 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastLoader.cpp:
+        * tests/DCPS/Messenger/pub_multicast.ini:
+        * tests/DCPS/Messenger/sub_multicast.ini:
+
+          Renamed transport_type name to all lower case.
+
+Wed Nov 18 23:34:12 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/multicast.mpc:
+
+          Refactored strategy support.
+
+        * dds/DCPS/transport/multicast/Multicast.mpc:
+        * dds/DCPS/transport/multicast/MulticastReceiveReliable.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveReliable.cpp:
+        * dds/DCPS/transport/multicast/MulticastReceiveUnreliable.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveUnreliable.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendReliable.h:
+        * dds/DCPS/transport/multicast/MulticastSendReliable.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendUnreliable.h:
+        * dds/DCPS/transport/multicast/MulticastSendUnreliable.cpp:
+
+          Removed these files.
+
+Wed Nov 18 22:55:09 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.inl:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Finalized unreliable multicast support.
+
+Wed Nov 18 05:03:36 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
+
+          Fixed issue which caused ReceiveListenerSet to SEGV when data
+          samples are delivered to invalid (NULL) listeners.
+
+Wed Nov 18 04:17:01 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.inl:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastReceiveUnreliable.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Completed unreliable multicast implementation.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.inl:
+
+          Removed this file.
+
+Wed Nov 18 01:52:52 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportDefs.h:
+
+          Moved DEFAULT_MULTICAST_ID constant to MulticastConfiguration.h
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.inl:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastGenerator.cpp:
+        * dds/DCPS/transport/multicast/MulticastReceiveUnreliable.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendReliable.h:
+        * dds/DCPS/transport/multicast/MulticastSendReliable.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendUnreliable.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.inl:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Major refactorings; adjusted default port assignments based on
+          current IANA documents.
+
+Wed Nov 18 01:33:23 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Honor the pending timeout value.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          remove_sample()
+          remove_all_control_msgs()
+            - Refactored to call the specific virtual method and delegate
+              processing to the do_remove_sample() method.
+          remove_sample_i()
+          remove_all_control_msgs_i()
+            - Default nil implementations.
+          do_remove_sample()
+            - perform framework removal processing.
+
+Tue Nov 17 18:55:17 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/multicast/MulticastSendUnreliable.h:
+        * dds/DCPS/transport/multicast/MulticastSendUnreliable.cpp:
+
+          Refactored TransportSendStrategy to provide a default get_handle
+          implementation which returns ACE_INVALID_HANDLE; only subclasses
+          which make use of ACE acceptors will need to override this.
+
+Tue Nov 17 16:38:30 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/multicast/MulticastConfiguration_rch.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.inl:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink_rch.h:
+        * dds/DCPS/transport/multicast/MulticastFactory.h:
+        * dds/DCPS/transport/multicast/MulticastGenerator.h:
+        * dds/DCPS/transport/multicast/MulticastLoader.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveReliable.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy_rch.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveUnreliable.h:
+        * dds/DCPS/transport/multicast/MulticastSendReliable.h:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy_rch.h:
+        * dds/DCPS/transport/multicast/MulticastSendUnreliable.h:
+        * dds/DCPS/transport/multicast/MulticastSendUnreliable.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.inl:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Refactored ref counting behavior.
+
+Tue Nov 17 03:43:56 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/Messenger/Messenger.mpc:
+        * tests/DCPS/Messenger/multicast.conf:
+        * tests/DCPS/Messenger/pub_multicast.ini:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/run_test.pl:
+        * tests/DCPS/Messenger/sub_multicast.ini:
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          Added new multicast variant to Messenger tests.
+
+Tue Nov 17 00:25:00 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+
+          Corrected default_group_address behavior.
+
+Tue Nov 17 00:07:44 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * MPC/config/dcps_multicast.mpb:
+        * dds/DCPS/transport/multicast/multicast.conf:
+
+          Added MPC project and multicast service configuration.
+
+Mon Nov 16 23:10:59 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveUnreliable.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendUnreliable.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Initial implementation of unreliable multicast.
+
+Mon Nov 16 21:58:45 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.inl:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastReceiveReliable.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveReliable.cpp:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastReceiveUnreliable.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveUnreliable.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendReliable.h:
+        * dds/DCPS/transport/multicast/MulticastSendReliable.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendUnreliable.h:
+        * dds/DCPS/transport/multicast/MulticastSendUnreliable.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.inl:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Additional refactorings; broke reliable/unreliable behavior
+          into separate strategies.
+
+Mon Nov 16 19:02:57 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.inl:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Additional refactorings to MulticastTransport and
+          MulticastDataLink.
+
+Sun Nov 15 20:51:26 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Added additional member functions to MulticastDataLink for
+          lifecycle management; finished MulticastTransport implementation.
+
+Sun Nov 15 01:46:01 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Partially implemented shutdown_i; general refactorings.
+
+Sat Nov 14 00:15:51 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+
+          Added reliable/unreliable personality to configuration; this
+          is a semi-temporary workaround to not having the ability to
+          query the relevant QoS policy values from the ETF.
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastFactory.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Implemented release_datalink_i and partially implemented
+          find_or_create_datalink; general refactorings.
+
+Fri Nov 13 22:29:21 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+
+          check_transport_header()
+            - added template method with default implementation.
+          handle_input()
+            - check for repeated PDUs and skip them when encountered.
+
+Fri Nov 13 19:53:31 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+
+          Added new default implementation for send_bytes which calls
+          into send_bytes_i; backpressure is ignored.
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastFactory.h:
+        * dds/DCPS/transport/multicast/MulticastFactory.cpp:
+        * dds/DCPS/transport/multicast/MulticastGenerator.h:
+        * dds/DCPS/transport/multicast/MulticastGenerator.cpp:
+        * dds/DCPS/transport/multicast/MulticastLoader.h:
+        * dds/DCPS/transport/multicast/MulticastLoader.cpp:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Added remaining ETF-mandated interfaces; general refactorings.
+
+Fri Nov 13 14:44:14 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastFactory.h:
+        * dds/DCPS/transport/multicast/MulticastFactory.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Stubbed out MulticastDataLink; minor refactorings.
+
+Thu Nov 12 16:26:20 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Fixed missing type for const definitiion.
+
+Thu Nov 12 00:25:11 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/NetworkAddress.h:
+        * dds/DCPS/transport/framework/NetworkAddress.inl:
+
+          Added explicit constructor to initialize from a specified
+          ACE_INET_Addr.
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Updates to transport configuration; implemented configure_i and
+          connection_info_i entry points.
+
+Wed Nov 11 19:46:36 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportDefs.h:
+
+          Added new default TransportId constant for Multicast transport:
+          DEFAULT_MULTICAST_ID.
+
+        * dds/DCPS/transport/multicast:
+        * dds/DCPS/transport/multicast/Multicast.mpc:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/multicast/MulticastFactory.h:
+        * dds/DCPS/transport/multicast/MulticastFactory.cpp:
+        * dds/DCPS/transport/multicast/MulticastGenerator.h:
+        * dds/DCPS/transport/multicast/MulticastGenerator.cpp:
+        * dds/DCPS/transport/multicast/MulticastLoader.h:
+        * dds/DCPS/transport/multicast/MulticastLoader.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/Multicast_Export.h:
+
+          Dynamic loading and configuration complete; stubbed out
+          TransportImpl interfaces for future implementation.
+
+Tue Nov 10 20:53:25 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * BranchChangeLog:
+
+          Branched from r2529 to track multicast transport refactorings.
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

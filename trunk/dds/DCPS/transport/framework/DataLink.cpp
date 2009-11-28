@@ -37,7 +37,10 @@
 /// Only called by our TransportImpl object.
 OpenDDS::DCPS::DataLink::DataLink(TransportImpl* impl, CORBA::Long priority)
   : thr_per_con_send_task_(0),
-    transport_priority_(priority)
+    transport_priority_(priority),
+    send_control_allocator_(0),
+    mb_allocator_(0),
+    db_allocator_(0)
 {
   DBG_ENTRY_LVL("DataLink","DataLink",6);
 
@@ -63,6 +66,15 @@ OpenDDS::DCPS::DataLink::DataLink(TransportImpl* impl, CORBA::Long priority)
                  ACE_TEXT("started new thread to send data with.\n")));
     }
   }
+
+  // Initialize transport control sample allocators:
+  size_t control_chunks = this->impl_->config_->datalink_control_chunks_;
+  
+  this->send_control_allocator_ =
+    new TransportSendControlElementAllocator(control_chunks);
+  
+  this->mb_allocator_ = new MessageBlockAllocator(control_chunks);
+  this->db_allocator_ = new DataBlockAllocator(control_chunks);
 }
 
 OpenDDS::DCPS::DataLink::~DataLink()
@@ -77,6 +89,11 @@ OpenDDS::DCPS::DataLink::~DataLink()
                this->pub_map_.size(),
                this->sub_map_.size()));
   }
+
+  delete this->db_allocator_;
+  delete this->mb_allocator_;
+  
+  delete this->send_control_allocator_;
 
   if (this->thr_per_con_send_task_ != 0) {
     this->thr_per_con_send_task_->close(1);
@@ -425,6 +442,75 @@ OpenDDS::DCPS::DataLink::cancel_release()
   CORBA::ORB_var orb = TheServiceParticipant->get_ORB();
   ACE_Reactor* reactor = orb->orb_core()->reactor();
   return reactor->cancel_timer(this) > 0;
+}
+
+void
+OpenDDS::DCPS::DataLink::control_delivered(ACE_Message_Block* message)
+{
+  message->release();
+}
+
+void
+OpenDDS::DCPS::DataLink::control_dropped(ACE_Message_Block* message,
+                                         bool dropped_by_transport)
+{
+  message->release();
+}
+
+ACE_Message_Block*
+OpenDDS::DCPS::DataLink::create_control(char submessage_id,
+                                        ACE_Message_Block* data)
+{
+  DataSampleHeader header;
+
+  header.byte_order_ = this->impl_->swap_bytes() ? !TAO_ENCAP_BYTE_ORDER
+                                                 : TAO_ENCAP_BYTE_ORDER;
+  header.message_id_ = TRANSPORT_CONTROL;
+  header.submessage_id_ = submessage_id;
+  header.message_length_ = data->total_length();
+
+  ACE_Message_Block* message;
+  ACE_NEW_MALLOC_RETURN(message,
+                        static_cast<ACE_Message_Block*>(
+                            this->mb_allocator_->malloc(sizeof (ACE_Message_Block))),
+                        ACE_Message_Block(header.max_marshaled_size(),
+                                          ACE_Message_Block::MB_DATA,
+                                          data,
+                                          0,  // data
+                                          0,  // allocator_strategy
+                                          0,  // locking_strategy
+                                          ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                                          ACE_Time_Value::zero,
+                                          ACE_Time_Value::max_time,
+                                          this->db_allocator_,
+                                          this->mb_allocator_),
+                        0);
+
+  message << header;
+
+  return message;
+}
+
+OpenDDS::DCPS::SendControlStatus
+OpenDDS::DCPS::DataLink::send_control(ACE_Message_Block* message)
+{
+  TransportSendControlElement* elem;
+
+  ACE_NEW_MALLOC_RETURN(elem,
+                        static_cast<TransportSendControlElement*>(
+                          this->send_control_allocator_->malloc()),
+                        TransportSendControlElement(1,  // initial_count
+                                                    GUID_UNKNOWN,
+                                                    this,
+                                                    message,
+                                                    this->send_control_allocator_),
+                        SEND_CONTROL_ERROR);
+
+  send_start();
+  send(elem);
+  send_stop();
+
+  return SEND_CONTROL_OK;
 }
 
 /// This method will "deliver" the sample to all TransportReceiveListeners

@@ -6,6 +6,8 @@ project: taolib, portableserver, core, dcps_bits, coverage_optional, built_in_to
   includes    += $(DDS_ROOT)
   pch_header   = DCPS/DdsDcps_pch.h
   pch_source   = DCPS/DdsDcps_pch.cpp
+  macros      += NOMINMAX         //don't #define min and max in Win32 headers
+
 
   //The following is only to make the PCH work, client projects should not have
   //this as an include path.

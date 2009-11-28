@@ -1,3 +1,95 @@
+Sat Nov 28 00:23:46 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * MPC/config/dcps_multicast.mpb:
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+        * dds/DCPS/DisjointSequence.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/BuildChainVisitor.cpp:
+        * dds/DCPS/transport/framework/CopyChainVisitor.h:
+        * dds/DCPS/transport/framework/CopyChainVisitor.inl:
+        * dds/DCPS/transport/framework/CopyChainVisitor.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
+        * dds/DCPS/transport/framework/NetworkAddress.h:
+        * dds/DCPS/transport/framework/NetworkAddress.inl:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.h:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.h:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.inl:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
+        * dds/DCPS/transport/framework/ThreadPerConRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/TransportConfiguration.h:
+        * dds/DCPS/transport/framework/TransportConfiguration.inl:
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+        * dds/DCPS/transport/framework/TransportControlElement.h:
+        * dds/DCPS/transport/framework/TransportControlElement.cpp:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportQueueElement.h:
+        * dds/DCPS/transport/framework/TransportQueueElement.inl:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportRetainedElement.h:
+        * dds/DCPS/transport/framework/TransportRetainedElement.inl:
+        * dds/DCPS/transport/framework/TransportRetainedElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.inl:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+        * dds/DCPS/transport/framework/TransportSendBuffer_rch.h:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        * dds/DCPS/transport/framework/TransportSendListener.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/multicast:
+        * dds/DCPS/transport/multicast/BestEffortMulticast.h:
+        * dds/DCPS/transport/multicast/BestEffortMulticast.cpp:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/multicast/MulticastConfiguration_rch.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.inl:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink_rch.h:
+        * dds/DCPS/transport/multicast/MulticastFactory.h:
+        * dds/DCPS/transport/multicast/MulticastFactory.cpp:
+        * dds/DCPS/transport/multicast/MulticastGenerator.h:
+        * dds/DCPS/transport/multicast/MulticastGenerator.cpp:
+        * dds/DCPS/transport/multicast/MulticastLoader.h:
+        * dds/DCPS/transport/multicast/MulticastLoader.cpp:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy_rch.h:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy_rch.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport_rch.h:
+        * dds/DCPS/transport/multicast/Multicast_Export.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+        * dds/DCPS/transport/multicast/multicast.conf-dist:
+        * dds/DCPS/transport/multicast/multicast.ini-dist:
+        * dds/DCPS/transport/multicast/multicast.mpc:
+        * dds/DdsDcps.mpc:
+        * tests/DCPS/Messenger/Messenger.mpc:
+        * tests/DCPS/Messenger/multicast.conf:
+        * tests/DCPS/Messenger/pub_multicast.ini:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/run_test.pl:
+        * tests/DCPS/Messenger/sub_multicast.ini:
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          Merged changes from Multicast branch (r2651); for details please
+          see: $DDS_ROOT/history/ChangeLog-Multicast
+
 Fri Nov 27 22:43:20 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:

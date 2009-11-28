@@ -1116,14 +1116,12 @@ WriteDataContainer::wait_pending()
 
   ACE_Time_Value* pTimeout = 0;
 
-  if (pending_timeout == ACE_Time_Value::zero) {
+  if (pending_timeout != ACE_Time_Value::zero) {
     pTimeout = &pending_timeout;
     pending_timeout += ACE_OS::gettimeofday();
   }
 
-  bool do_wait = true;
-
-  while (do_wait) {
+  while (true) {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
     if (!pending_data())

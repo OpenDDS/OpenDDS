@@ -9,7 +9,8 @@
 
 #include "EntryExit.h"
 
-#include <ace/CDR_Base.h>
+#include "ace/CDR_Stream.h"
+#include "ace/OS_NS_netdb.h"
 
 ACE_INLINE
 OpenDDS::DCPS::NetworkAddress::NetworkAddress()
@@ -19,8 +20,15 @@ OpenDDS::DCPS::NetworkAddress::NetworkAddress()
 }
 
 ACE_INLINE
-OpenDDS::DCPS::NetworkAddress::~NetworkAddress()
+OpenDDS::DCPS::NetworkAddress::NetworkAddress(const ACE_INET_Addr& addr)
+  : reserved_(0)
 {
+  DBG_ENTRY_LVL("NetworkAddress","NetworkAddress",6);
+
+  ACE_TCHAR addr_s[MAXHOSTNAMELEN + 1];
+  addr.addr_to_string(addr_s, sizeof (addr_s), 1);
+
+  this->addr_ = addr_s; // obtain copy
 }
 
 ACE_INLINE
@@ -30,6 +38,11 @@ OpenDDS::DCPS::NetworkAddress::NetworkAddress(const ACE_TString& addr)
   DBG_ENTRY_LVL("NetworkAddress","NetworkAddress",6);
 
   addr_ = addr;
+}
+
+ACE_INLINE
+OpenDDS::DCPS::NetworkAddress::~NetworkAddress()
+{
 }
 
 ACE_INLINE

@@ -98,6 +98,10 @@ public:
   /// associations are removed. The default value is 10 seconds.
   long datalink_release_delay_;
 
+  /// The number of chunks used to size allocators for transport control
+  /// samples. The default value is 32.
+  size_t datalink_control_chunks_;
+
 protected:
 
   /// Default ctor.

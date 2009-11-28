@@ -22,18 +22,6 @@ DisjointSequence::DisjointSequence(SequenceNumber value)
   this->values_.insert(value);
 }
 
-DisjointSequence::~DisjointSequence()
-{
-}
-
-void
-DisjointSequence::update(SequenceNumber value)
-{
-  if (value <= low()) return;
-  this->values_.insert(value);
-  normalize();
-}
-
 void
 DisjointSequence::skip(SequenceNumber value)
 {
@@ -41,14 +29,39 @@ DisjointSequence::skip(SequenceNumber value)
   this->values_.insert(value);
 }
 
+bool
+DisjointSequence::update(SequenceNumber value)
+{
+  if (value <= low()) return false; // already seen
+
+  this->values_.insert(value);
+  normalize();
+
+  return true;
+}
+
+bool
+DisjointSequence::update(const range_type& range)
+{
+  if (range.second <= low()) return false;  // already seen
+
+  for (SequenceNumber value(range.first);
+       value != range.second + 1; ++value) {
+    this->values_.insert(value);
+    normalize();
+  }
+
+  return true;
+}
+
 void
 DisjointSequence::normalize()
 {
   // Remove contiguities from the beginning of the
   // set; set should minimally contain one value.
-  values_type::iterator first = this->values_.begin();
+  set_type::iterator first(this->values_.begin());
   while (first != this->values_.end()) {
-    values_type::iterator second(first);
+    set_type::iterator second(first);
     second++;
 
     if (second == this->values_.end() ||

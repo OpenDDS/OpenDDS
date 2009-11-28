@@ -12,6 +12,7 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/GuidUtils.h"
 #include "ace/Synch.h"
 
 class ACE_Message_Block;
@@ -44,8 +45,8 @@ public:
   /// Dtor
   virtual ~TransportQueueElement();
 
-  /// Returns true if the supplied sample matches the wrapped sample.
-  bool operator==(const ACE_Message_Block* sample) const;
+  /// Returns true if the other element matches this one.
+  bool operator==(const TransportQueueElement& rhs) const;
 
   /// Invoked when the sample is dropped from a DataLink due to a
   /// remove_sample() call.

@@ -22,11 +22,18 @@ OpenDDS::DCPS::TransportQueueElement::TransportQueueElement(int initial_count)
 
 ACE_INLINE
 bool
-OpenDDS::DCPS::TransportQueueElement::operator==
-(const ACE_Message_Block* sample) const
+OpenDDS::DCPS::TransportQueueElement::operator==(
+  const TransportQueueElement& rhs
+) const
 {
   DBG_ENTRY_LVL("TransportQueueElement","operator==",6);
-  return (sample->rd_ptr() == this->msg()->rd_ptr());
+  if( this->msg()) {
+    return this->msg()->rd_ptr() == rhs.msg()->rd_ptr();
+
+  } else {
+    return  (this->publication_id() == rhs.publication_id())
+        && !(this->publication_id() == GUID_UNKNOWN);
+  }
 }
 
 ACE_INLINE

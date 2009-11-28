@@ -21,7 +21,9 @@ OpenDDS::DCPS::TransportReceiveStrategy::TransportReceiveStrategy()
     mb_allocator_(MESSAGE_BLOCKS),
     db_allocator_(DATA_BLOCKS),
     data_allocator_(DATA_BLOCKS),
-    buffer_index_(0)
+    buffer_index_(0),
+    good_pdu_(true),
+    pdu_remaining_( 0)
 {
   DBG_ENTRY_LVL("TransportReceiveStrategy","TransportReceiveStrategy",6);
 
@@ -56,6 +58,12 @@ OpenDDS::DCPS::TransportReceiveStrategy::~TransportReceiveStrategy()
                  size));
     }
   }
+}
+
+bool
+OpenDDS::DCPS::TransportReceiveStrategy::check_header(const TransportHeader& header)
+{
+  return true;
 }
 
 /// Note that this is just an initial implementation.  We may take
@@ -403,12 +411,10 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
     //
 
     //
-    // Check the transport packet length.  We can use the header value
-    // here to keep track of how much packet is left since we fully
-    // consume the header here and no downstream processing will expect
-    // to examine the value.
+    // Check the remaining transport packet length to see if we are
+    // expecting a new one.
     //
-    if (this->receive_transport_header_.length_ == 0) {
+    if (this->pdu_remaining_ == 0) {
       VDBG((LM_DEBUG,"(%P|%t) DBG:   "
             "We are expecting a transport packet header.\n"));
 
@@ -471,23 +477,73 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
         //
         // Check the TransportHeader.
         //
-        if (this->receive_transport_header_.valid() == false) {
+        if (!this->receive_transport_header_.valid()) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT
                             ("(%P|%t) ERROR: TransportHeader invalid.\n")),
                            -1) ;
         }
 
+        this->good_pdu_ = check_header(this->receive_transport_header_);
+        this->pdu_remaining_ = this->receive_transport_header_.length_;
+
         VDBG((LM_DEBUG,"(%P|%t) DBG:   "
               "Amount of transport packet bytes (remaining): %d.\n",
-              this->receive_transport_header_.length_));
+              this->pdu_remaining_));
+      }
+    }
+
+    //
+    // Ignore bad PDUs by skipping over them.  We do this out here
+    // in case we did not skip over the entire bad PDU last time.
+    //
+    if(!this->good_pdu_) {
+      //
+      // Adjust the message block chain pointers to account for the
+      // skipped data.
+      //
+      size_t  bytes = this->pdu_remaining_;
+
+      for (size_t index = this->buffer_index_ ;
+           bytes > 0 ;
+           index = this->successor_index(index)) {
+        size_t amount
+        = ace_min<size_t>(bytes, this->receive_buffers_[ index]->space()) ;
+
+        this->receive_buffers_[ index]->rd_ptr(amount) ;
+        bytes -= amount ;
+
+        if (bytes > 0 && this->successor_index(index) == this->buffer_index_) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("(%P|%t) ERROR: ")
+                            ACE_TEXT("TransportReceiveStrategy::handle_input()")
+                            ACE_TEXT(" - Unrecoverably corrupted ")
+                            ACE_TEXT("receive buffer management detected: ")
+                            ACE_TEXT("read more bytes than available.\n")),
+                           -1) ;
+        }
+      }
+
+      //
+      // Adjust the buffer chain in case we crossed into the next
+      // buffer after skipping the PDU.
+      //
+      size_t initial = this->buffer_index_ ;
+
+      while (this->receive_buffers_[ this->buffer_index_]->length() == 0) {
+        this->buffer_index_ = this->successor_index(this->buffer_index_) ;
+
+        if (initial == this->buffer_index_) {
+          // No more data to process, our work here is done.
+          return 0;
+        }
       }
     }
 
     //
     // Keep processing samples while we have data to read.
     //
-    while (this->receive_transport_header_.length_ > 0) {
+    while (this->pdu_remaining_ > 0) {
       VDBG((LM_DEBUG,"(%P|%t) DBG:   "
             "We have a transport packet now.  There are more sample "
             "bytes to parse in order to complete the packet.\n"));
@@ -591,12 +647,12 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
                 "== %d.\n",
                 this->receive_sample_.header_.marshaled_size()));
 
-          this->receive_transport_header_.length_
+          this->pdu_remaining_
           -= this->receive_sample_.header_.marshaled_size() ;
 
           VDBG((LM_DEBUG,"(%P|%t) DBG:   "
                 "Amount of transport packet remaining: %d.\n",
-                this->receive_transport_header_.length_));
+                this->pdu_remaining_));
         }
       }
 
@@ -716,8 +772,8 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
       current_sample_block->wr_ptr(
         this->receive_buffers_[ this->buffer_index_]->wr_ptr()) ;
       this->receive_buffers_[ this->buffer_index_]->rd_ptr(amount) ;
-      this->receive_sample_remaining_         -= amount ;
-      this->receive_transport_header_.length_ -= amount ;
+      this->receive_sample_remaining_ -= amount ;
+      this->pdu_remaining_            -= amount ;
 
       VDBG((LM_DEBUG,"(%P|%t) DBG:   "
             "After adjustment of the pointers and byte counters\n"));
@@ -747,7 +803,7 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
             this->receive_sample_remaining_));
       VDBG((LM_DEBUG,"(%P|%t) DBG:   "
             "After adjustment, remaining transport packet bytes == %d\n",
-            this->receive_transport_header_.length_));
+            this->pdu_remaining_));
 
       //
       // Dispatch the received message if we have received it all.
@@ -781,7 +837,7 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
         return 0;
       }
 
-    } // End of while( this->receive_transport_header_.length_ > 0)
+    } // End of while( this->pdu_remaining_ > 0)
 
     VDBG((LM_DEBUG,"(%P|%t) DBG:   "
           "Let's try to do some more.\n"));

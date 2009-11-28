@@ -26,8 +26,8 @@ public:
 
   virtual ~TransportSendListener();
 
-  virtual void data_delivered(DataSampleListElement* sample) = 0;
-  virtual void data_dropped(DataSampleListElement* sample, bool dropped_by_transport)   = 0;
+  virtual void data_delivered(DataSampleListElement* sample);
+  virtual void data_dropped(DataSampleListElement* sample, bool dropped_by_transport);
 
   virtual void control_delivered(ACE_Message_Block* sample);
   virtual void control_dropped(ACE_Message_Block* sample, bool dropped_by_transport);
