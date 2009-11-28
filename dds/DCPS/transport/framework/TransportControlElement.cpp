@@ -11,9 +11,14 @@
 #include "TransportControlElement.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
-OpenDDS::DCPS::TransportControlElement::TransportControlElement(ACE_Message_Block* msg_block)
-  : TransportQueueElement(1),
-    msg_(msg_block)
+OpenDDS::DCPS::TransportControlElement::TransportControlElement(
+  const ACE_Message_Block* msg_block,
+  const RepoId& pub_id,
+  bool owner
+) : TransportQueueElement(1),
+    msg_( ACE_Message_Block::duplicate(msg_block)),
+    pub_id_( pub_id),
+    owner_( owner)
 {
   DBG_ENTRY_LVL("TransportControlElement","TransportControlElement",6);
 }
@@ -31,17 +36,18 @@ OpenDDS::DCPS::TransportControlElement::requires_exclusive_packet() const
 }
 
 void
-OpenDDS::DCPS::TransportControlElement::release_element(bool dropped_by_transport)
+OpenDDS::DCPS::TransportControlElement::release_element(
+  bool /* dropped_by_transport */
+)
 {
-  ACE_UNUSED_ARG(dropped_by_transport);
-
-  if (msg_) {
-    msg_->release();
+  if (this->msg_) {
+    this->msg_->release();
+    this->msg_ = 0;
   }
 
-  // This element is guaranteed to be heap-based. The DCPS layer passes
-  // a ptr to this object to the transport layer, hense the guarantee.
-  delete this;
+  if (this->owner_) {
+    delete this;
+  }
 }
 
 void

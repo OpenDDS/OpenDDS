@@ -10,6 +10,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "ThreadPerConRemoveVisitor.h"
 #include "TransportQueueElement.h"
+#include "TransportRetainedElement.h"
 #include "dds/DCPS/DataSampleList.h"
 
 #if !defined (__ACE_INLINE__)
@@ -27,7 +28,8 @@ OpenDDS::DCPS::ThreadPerConRemoveVisitor::visit_element_remove(SendRequest* elem
 {
   DBG_ENTRY("ThreadPerConRemoveVisitor","visit_element_remove");
 
-  if ((this->sample_ != 0) && (element->op_ == SEND) && (*(element->element_) == this->sample_)) {
+  TransportRetainedElement remove_sample( this->sample_, GUID_UNKNOWN);
+  if( (element->op_ == SEND) && remove_sample == *element->element_) {
     // We are visiting the element that we want to remove, since the
     // element "matches" our sample_.
 

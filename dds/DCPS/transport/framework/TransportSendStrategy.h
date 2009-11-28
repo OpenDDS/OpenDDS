@@ -11,13 +11,16 @@
 #define OPENDDS_DCPS_TRANSPORTSENDSTRATEGY_H
 
 #include "dds/DCPS/dcps_export.h"
+#include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/RcObject_T.h"
 #include "ThreadSynchWorker.h"
 #include "TransportDefs.h"
 #include "BasicQueue_T.h"
 #include "TransportHeader.h"
 #include "TransportReplacedElement.h"
+#include "TransportRetainedElement.h"
 #include "TransportConfiguration_rch.h"
+#include "TransportSendBuffer_rch.h"
 
 #include "ace/Synch.h"
 
@@ -30,6 +33,7 @@ class TransportQueueElement;
 struct DataSampleListElement;
 class QueueRemoveVisitor;
 class PacketRemoveVisitor;
+
 
 /**
  * This class provides methods to fill packets with samples for sending
@@ -45,8 +49,12 @@ class OpenDDS_Dcps_Export TransportSendStrategy
   : public RcObject<ACE_SYNCH_MUTEX>,
       public ThreadSynchWorker {
 public:
+  typedef BasicQueue<TransportQueueElement> QueueType;
 
   virtual ~TransportSendStrategy();
+
+  /// Assigns an optional send buffer.
+  void send_buffer(TransportSendBuffer* send_buffer);
 
   /// Start the TransportSendStrategy.  This happens once, when
   /// the DataLink that "owns" this strategy object has established
@@ -122,6 +130,9 @@ public:
   void link_released(bool flag);
 
   bool isDirectMode();
+  
+  /// Form an IOV and call the send_bytes() template method.
+  ssize_t do_send_packet( ACE_Message_Block* packet, int& bp);
 
 protected:
 
@@ -133,18 +144,29 @@ protected:
   // Third arg is the "back-pressure" flag.  If send_bytes() returns
   // -1 and the bp == 1, then it isn't really an error - it is
   // backpressure.
-  virtual ssize_t send_bytes(const iovec iov[], int n, int& bp) = 0;
+  virtual ssize_t send_bytes(const iovec iov[], int n, int& bp);
 
   virtual ssize_t non_blocking_send(const iovec iov[], int n, int& bp);
 
-  virtual ACE_HANDLE get_handle() = 0;
-  virtual ssize_t send_bytes_i(const iovec iov[], int n) = 0;
+  // Subclasses which make use of acceptors should override
+  // this method and return the peer handle.
+  virtual ACE_HANDLE get_handle();
 
-//MJM: Hmmm...  Shouldn't we just return success with a backpreassure
-//MJM: flag to be checked?  This means that the bp needs to be checked
-//MJM: each time on success, instead of checking the bp flag only on
-//MJM: failure.
-//MJM: Oh.  Nevermind.
+  virtual ssize_t send_bytes_i(const iovec iov[], int n) = 0;
+  
+  /// Specific implementation processing of prepared packet header.
+  virtual void prepare_header_i();
+
+  /// Specific implementation processing of prepared packet.
+  virtual void prepare_packet_i();
+
+  /// Provide the opportunity to remove a sample from implementation
+  /// specific lists as well.
+  virtual void remove_sample_i( const DataSampleListElement* sample);
+
+  /// Provide the opportunity to remove control messages from
+  /// implementation specific lists as well.
+  virtual void remove_all_control_msgs_i( RepoId pub_id);
 
 private:
 
@@ -160,9 +182,6 @@ private:
     NOTIFY_IMMEADIATELY,
     DELAY_NOTIFICATION
   };
-
-  int remove_sample_i(QueueRemoveVisitor& simple_rem_vis,
-                      PacketRemoveVisitor& pac_rem_vis);
 
   /// Called from send() when it is time to attempt to send our
   /// current packet to the socket while in MODE_DIRECT mode_.
@@ -183,6 +202,10 @@ private:
   /// After this step has been done, the prepare_packet() step can
   /// be performed, followed by the actual send_packet() call.
   void get_packet_elems_from_queue();
+  
+  /// This method is responsible for updating the packet header.
+  /// Called exclusively by prepare_packet.
+  void prepare_header();
 
   /// This method is responsible for actually "creating" the current
   /// send packet using the packet header and the collection of
@@ -206,8 +229,6 @@ private:
 
   /// This is called by perform_work() after it has sent
   void send_delayed_notifications();
-
-  typedef BasicQueue<TransportQueueElement> QueueType;
 
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;
@@ -239,6 +260,9 @@ public:
   void clear(SendMode mode = MODE_DIRECT);
 
 private:
+  /// Implement framework chain visitations to remove a sample.
+  int do_remove_sample(QueueRemoveVisitor& simple_rem_vis,
+                       PacketRemoveVisitor& pac_rem_vis);
 
   /// Helper function to debugging.
   static const char* mode_as_str(SendMode mode);
@@ -264,20 +288,14 @@ private:
   //QueueType* not_yet_pac_q_;
   //size_t not_yet_pac_q_len_;
 
-  /// Current transport packet header.
-  TransportHeader header_;
-
   /// Maximum marshalled size of the transport packet header.
   size_t max_header_size_;
 
   /// Current transport packet header, marshalled.
   ACE_Message_Block* header_block_;
-//MJM: Why not hold this as a member rather than a reference?  That is
-//MJM: have a message/data/buffer complex holding a header that can be
-//MJM: remarshaled for each packet sent.  That way there will be no
-//MJM: allocations required.  You may need to mark it as being on the
-//MJM: stack, even though it may not be, in order to not worry if it
-//MJM: participates in the normal memory management regimine.
+
+  /// Current transport header sequence number.
+  SequenceNumber header_sequence_;
 
   /// Current elements that have contributed blocks to the current
   /// transport packet.
@@ -301,12 +319,6 @@ private:
   /// us at the same time.  We use this counter to enable a
   /// "composite" send_start() and send_stop().
   unsigned start_counter_;
-//MJM: Um.  I am not sure that we want to allow the packets from
-//MJM: different interfaces to interleave.  I may need to think about
-//MJM: this for a bit.
-//MJM: Nevermind.  Just thought about it some.  The transport packets
-//MJM: are not special at the higher layersa and so there does not need
-//MJM: to be any restriction.
 
   /// This mode determines how send() calls will be handled.
   SendMode mode_;
@@ -337,14 +349,24 @@ private:
   /// Cached allocator for TransportReplaceElement.
   TransportReplacedElementAllocator replaced_element_allocator_;
 
+  /// Cached allocator for TransportRetainedElements used by reliable
+  /// datagram transports to retain PDUs after they have been sent.  This
+  /// is created in start if the transport needs it.
+  TransportRetainedElementAllocator* retained_element_allocator_;
+
   TransportConfiguration_rch config_;
 
   bool graceful_disconnecting_;
 
   bool link_released_;
 
+  TransportSendBuffer_rch send_buffer_;
+
   //remove these are only for debugging: DUMP_FOR_PACKET_INFO
 protected:
+  /// Current transport packet header.
+  TransportHeader header_;
+
   ACE_Message_Block*    dup_pkt_chain;
   ACE_Message_Block*    act_pkt_chain_ptr;
   void*                 act_elems_head_ptr;
@@ -353,7 +375,6 @@ protected:
   TransportHeader       dup_presend_header;
   const char*           called_from;
   const char*           completely_filled;
-
 };
 
 } // namespace DCPS

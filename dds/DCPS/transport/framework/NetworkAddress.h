@@ -11,6 +11,7 @@
 #define OPENDDS_DCPS_NETWORKADDRESS_H
 
 #include "dds/DCPS/dcps_export.h"
+#include "dds/DCPS/Serializer.h"
 #include "tao/Basic_Types.h"
 #include "ace/INET_Addr.h"
 #include "ace/CDR_Stream.h"
@@ -36,13 +37,11 @@ typedef std::vector <HostnameInfo> HostnameInfoVector;
  * This is used to send/receive an address information through transport.
  */
 struct OpenDDS_Dcps_Export NetworkAddress {
-  /// Default Ctor
   NetworkAddress();
+  explicit NetworkAddress(const ACE_INET_Addr& addr);
+  explicit NetworkAddress(const ACE_TString& addr);
 
   ~NetworkAddress();
-
-  /// Ctor using address string.
-  explicit NetworkAddress(const ACE_TString& addr);
 
   void dump();
 

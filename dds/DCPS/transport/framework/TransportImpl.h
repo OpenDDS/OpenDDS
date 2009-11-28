@@ -129,6 +129,17 @@ public:
   /// we can do.
   TransportConfiguration* config() const;
 
+  /// Accessor for the "swap bytes" flag that was supplied to this
+  /// TransportImpl via the TransportConfiguration object supplied
+  /// to our configure() method.
+  int swap_bytes() const;
+  
+  /// This method is called when the FULLY_ASSOCIATED ack of the pending
+  /// associations is received. If the datawriter is registered, the
+  /// datawriter will be notified, otherwise the status of the pending
+  /// associations will be marked as FULLTY_ASSOCIATED.
+  void check_fully_association();
+
 protected:
 
   TransportImpl();
@@ -264,11 +275,6 @@ protected:
 
 private:
 
-  /// This method is called when the FULLY_ASSOCIATED ack of the pending
-  /// associations is received. If the datawriter is registered, the
-  /// datawriter will be notified, otherwise the status of the pending
-  /// associations will be marked as FULLTY_ASSOCIATED.
-  void check_fully_association();
   void check_fully_association(const RepoId pub_id);
   bool check_fully_association(const RepoId pub_id,
                                AssociationInfo& associations);
@@ -279,12 +285,6 @@ private:
   /// with this TransportImpl's connection information (ie, how
   /// another process would connect to this TransportImpl).
   int connection_info(TransportInterfaceInfo& local_info) const;
-
-  /// Called by our friend, the TransportInterface.
-  /// Accessor for the "swap bytes" flag that was supplied to this
-  /// TransportImpl via the TransportConfiguration object supplied
-  /// to our configure() method.
-  int swap_bytes() const;
 
   typedef std::map<void*, TransportInterface*>         InterfaceMapType;
 

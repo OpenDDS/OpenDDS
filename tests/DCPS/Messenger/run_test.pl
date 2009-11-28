@@ -30,6 +30,11 @@ elsif ($ARGV[0] eq 'mcast') {
     $pub_opts = "$opts -DCPSConfigFile pub_mcast.ini";
     $sub_opts = "$opts -DCPSConfigFile sub_mcast.ini";
 }
+elsif ($ARGV[0] eq 'multicast') {
+    $opts .= ($use_svc_config ? " -ORBSvcConf multicast.conf " : '') . "-t multicast";
+    $pub_opts = "$opts -DCPSConfigFile pub_multicast.ini";
+    $sub_opts = "$opts -DCPSConfigFile sub_multicast.ini";
+}
 elsif ($ARGV[0] eq 'reliable_mcast') {
     $opts .= ($use_svc_config ? " -ORBSvcConf reliable_mcast.conf " : '')
         . "-t reliable_mcast";

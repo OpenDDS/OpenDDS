@@ -10,6 +10,8 @@
 #ifndef OPENDDS_DCPS_TRANSPORTHEADER_H
 #define OPENDDS_DCPS_TRANSPORTHEADER_H
 
+#include "ace/Basic_Types.h"
+
 #include "dds/DCPS/Definitions.h"
 
 namespace OpenDDS {
@@ -26,6 +28,8 @@ namespace DCPS {
  * same transport packet).
  */
 struct OpenDDS_Dcps_Export TransportHeader {
+  static const ACE_CDR::Octet DCPS_PROTOCOL[];
+
   /// Default constructor.
   TransportHeader();
 
@@ -37,37 +41,40 @@ struct OpenDDS_Dcps_Export TransportHeader {
   TransportHeader& operator=(ACE_Message_Block* buffer);
   TransportHeader& operator=(ACE_Message_Block& buffer);
 
-  /// Determine if this is a valid packet header.
-  bool valid() const ;
+  /// Determine if the serializer should swap bytes.
+  bool swap_bytes() const;
 
-  /// Byte order for the transport header. This byte_order_ flag indicates
-  /// the endianess of the host of the publisher side. This is not affected
-  /// by the swap_bytes configuration defined for the specific TransportImpl
-  /// instance.
+  /// Determine if this is a valid packet header.
+  bool valid() const;
+
+  /// The protocol of the packet being transmitted.
+  ACE_CDR::Octet protocol_[6];
+
+  /// The byte order used to generate the header.
   ACE_CDR::Octet byte_order_;
 
-  /// The protocol and version of the packet being transmitted.
-  ACE_CDR::Octet packet_id_[6];
+  /// Reserved for future use (provides padding for preamble).
+  ACE_CDR::Octet reserved_;
+
+  /// The size of the message following this header, not including the
+  /// 11 bytes used by this TransportHeader.
+  ACE_UINT16 length_;
 
   /// The sequence number of the packet identified by this header; this
   /// value is guaranteed to be a monotonically increasing number per
   /// transport instance.
   ACE_INT16 sequence_;
 
-  /// The size of the message following this header, not including the
-  /// 11 bytes used by this TransportHeader.
-  ACE_UINT16 length_;
+  /// A transport-specific identification number which uniquely
+  /// identifies the source of the packet.
+  ACE_INT32 source_;
 
   /// Similar to IDL compiler generated methods.
   size_t max_marshaled_size() ;
 
 private:
-
   /// Demarshall transport packet from ACE_Message_Block.
   void init(ACE_Message_Block* buffer);
-
-  /// Supported value of the packet ID.
-  static const ACE_CDR::Octet supported_id_[ 6] ;
 };
 
 } // namespace DCPS

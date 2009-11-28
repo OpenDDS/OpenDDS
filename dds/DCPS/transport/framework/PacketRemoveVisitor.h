@@ -24,14 +24,9 @@ namespace DCPS {
 class OpenDDS_Dcps_Export PacketRemoveVisitor : public BasicQueueVisitor<TransportQueueElement> {
 public:
 
-  PacketRemoveVisitor(const ACE_Message_Block* sample,
-                      ACE_Message_Block*&      unsent_head_block,
-                      ACE_Message_Block*       header_block,
-                      TransportReplacedElementAllocator& allocator);
-
-  PacketRemoveVisitor(RepoId               pub_id,
-                      ACE_Message_Block*&  unsent_head_block,
-                      ACE_Message_Block*   header_block,
+  PacketRemoveVisitor(const TransportQueueElement& sample,
+                      ACE_Message_Block*&          unsent_head_block,
+                      ACE_Message_Block*           header_block,
                       TransportReplacedElementAllocator& allocator);
 
   virtual ~PacketRemoveVisitor();
@@ -50,10 +45,7 @@ public:
 private:
 
   /// The sample that needs to be removed.
-  const ACE_Message_Block* sample_;
-
-  /// The publisher_id of the control samples to be removed.
-  RepoId pub_id_;
+  const TransportQueueElement& sample_;
 
   /// The head block of the chain of unsent blocks in the packet.
   ACE_Message_Block*& head_;

@@ -43,9 +43,7 @@ OpenDDS::DCPS::BuildChainVisitor::visit_element(TransportQueueElement* element)
     }
   }
 
-  // Always continue visitation.
+  // Visit entire queue.
   return 1;
-//MJM: I assume here that you limit packet sizes external to this.
-//MJM: Hmm... I guess that I don't understand the context of this
-//MJM: visitor yet.
 }
+
