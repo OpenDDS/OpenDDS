@@ -24,6 +24,7 @@
 
 #include <map>
 #include <set>
+#include <utility>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -41,10 +42,10 @@ public:
 
   void release_all();
   void release(buffer_type& buffer);
+  
+  void retain_all(RepoId pub_id);
 
   void insert(SequenceNumber sequence, const buffer_type& value);
-
-  void retain(RepoId pub_id);
 
   bool resend(const DisjointSequence::range_type& range,
               DisjointSequence& missing);
