@@ -1193,7 +1193,7 @@ OpenDDS::DCPS::TransportSendStrategy::remove_all_control_msgs(RepoId pub_id)
   if (!this->send_buffer_.is_nil()) {
     // If a secondary send buffer is bound, removed samples must
     // be retained in order to properly maintain the buffer:
-    this->send_buffer_->retain(pub_id);
+    this->send_buffer_->retain_all(pub_id);
   }
   
   // Process any specific sample storage first.
