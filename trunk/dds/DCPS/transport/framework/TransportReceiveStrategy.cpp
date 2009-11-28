@@ -61,7 +61,7 @@ OpenDDS::DCPS::TransportReceiveStrategy::~TransportReceiveStrategy()
 }
 
 bool
-OpenDDS::DCPS::TransportReceiveStrategy::check_header(const TransportHeader& header)
+OpenDDS::DCPS::TransportReceiveStrategy::check_header(const TransportHeader& /*header*/)
 {
   return true;
 }

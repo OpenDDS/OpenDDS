@@ -30,7 +30,7 @@ BestEffortMulticast::acked()
 }
 
 bool
-BestEffortMulticast::header_received(const TransportHeader& header)
+BestEffortMulticast::header_received(const TransportHeader& /*header*/)
 {
   // Assume header is valid; this does not prevent duplicate
   // delivery of datagrams:

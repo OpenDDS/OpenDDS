@@ -1,3 +1,12 @@
+Sat Nov 28 18:00:50 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+        * dds/DCPS/transport/multicast/BestEffortMulticast.cpp:
+
+          Fixed GCC warnings introduced by merge.
+
 Sat Nov 28 00:23:46 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * MPC/config/dcps_multicast.mpb:

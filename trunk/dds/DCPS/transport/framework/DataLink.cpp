@@ -452,7 +452,7 @@ OpenDDS::DCPS::DataLink::control_delivered(ACE_Message_Block* message)
 
 void
 OpenDDS::DCPS::DataLink::control_dropped(ACE_Message_Block* message,
-                                         bool dropped_by_transport)
+                                         bool /*dropped_by_transport*/)
 {
   message->release();
 }

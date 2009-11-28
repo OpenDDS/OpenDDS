@@ -96,7 +96,7 @@ protected:
   virtual void on_interval(const void* arg) = 0;
 
   virtual ACE_Time_Value next_timeout() { return ACE_Time_Value::zero; }
-  virtual void on_timeout(const void* arg) {}
+  virtual void on_timeout(const void* /*arg*/) {}
 
 private:
   ACE_Thread_Mutex lock_;
