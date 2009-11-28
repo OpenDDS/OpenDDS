@@ -96,8 +96,8 @@ Sat Nov 28 00:23:46 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * tests/DCPS/Messenger/sub_multicast.ini:
         * tests/DCPS/Messenger/subscriber.cpp:
 
-          Merged changes from Multicast branch (r2651); for details please
-          see: $DDS_ROOT/history/ChangeLog-Multicast
+          Merged changes from Multicast branch (r2651); for details see:
+          $DDS_ROOT/history/ChangeLog-Multicast
 
 Fri Nov 27 22:43:20 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
