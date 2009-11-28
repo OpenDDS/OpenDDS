@@ -1,3 +1,10 @@
+Sat Nov 28 18:29:55 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+
+          Fixed VC9 errors introduced by merge.
+
 Sat Nov 28 18:00:50 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:

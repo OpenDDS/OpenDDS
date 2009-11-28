@@ -62,41 +62,12 @@ TransportSendBuffer::release(buffer_type& buffer)
 }
 
 void
-TransportSendBuffer::insert(SequenceNumber sequence, const buffer_type& value)
-{
-  // Age off oldest sample if we are at capacity:
-  if (this->buffers_.size() == this->capacity_) {
-    BufferMap::iterator it(this->buffers_.begin());
-    if (it == this->buffers_.end()) return; // no capacity
-
-    release(it->second);
-    this->buffers_.erase(it);
-  }
-
-  std::pair<BufferMap::iterator, bool> pair =
-    this->buffers_.insert(BufferMap::value_type(sequence, buffer_type()));
-
-  buffer_type& buffer(pair.first->second);
-
-  // Copy sample's TransportQueueElements:
-  TransportSendStrategy::QueueType*& samples(buffer.first);
-  ACE_NEW(samples, TransportSendStrategy::QueueType(value.first->size(), 1));
-
-  CopyChainVisitor visitor(*samples, &this->sample_allocator_);
-  value.first->accept_visitor(visitor);
-
-  // Copy sample's message/data block descriptors:
-  ACE_Message_Block*& data(buffer.second);
-  data = value.second->duplicate();
-}
-
-void
-TransportSendBuffer::retain(RepoId pub_id)
+TransportSendBuffer::retain_all(RepoId pub_id)
 {
   for (BufferMap::iterator it(this->buffers_.begin());
        it != this->buffers_.end(); ++it) {
 
-    buffer_type& buffer(it->second);
+    buffer_type& buffer = it->second;
 
     TransportRetainedElement sample(0, pub_id);
     PacketRemoveVisitor visitor(sample,
@@ -109,12 +80,42 @@ TransportSendBuffer::retain(RepoId pub_id)
       RepoIdConverter converter(pub_id);
       ACE_ERROR((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: ")
-                 ACE_TEXT("TransportSendBuffer::retain_samples: ")
+                 ACE_TEXT("TransportSendBuffer::retain_all: ")
                  ACE_TEXT("failed to retain samples from publication: %C!\n"),
                  std::string(converter).c_str()));
       release(buffer);
     }
   }
+}
+
+void
+TransportSendBuffer::insert(SequenceNumber sequence, const buffer_type& value)
+{
+  // Age off oldest sample if we are at capacity:
+  if (this->buffers_.size() == this->capacity_) {
+    BufferMap::iterator it(this->buffers_.begin());
+    if (it == this->buffers_.end()) return;
+
+    release(it->second);
+    this->buffers_.erase(it);
+  }
+
+  std::pair<BufferMap::iterator, bool> pair =
+    this->buffers_.insert(BufferMap::value_type(sequence, buffer_type()));
+  if (pair.first == this->buffers_.end()) return;
+
+  buffer_type& buffer = pair.first->second;
+
+  // Copy sample's TransportQueueElements:
+  TransportSendStrategy::QueueType*& samples(buffer.first);
+  ACE_NEW(samples, TransportSendStrategy::QueueType(value.first->size(), 1));
+
+  CopyChainVisitor visitor(*samples, &this->sample_allocator_);
+  value.first->accept_visitor(visitor);
+
+  // Copy sample's message/data block descriptors:
+  ACE_Message_Block*& data(buffer.second);
+  data = value.second->duplicate();
 }
 
 bool
