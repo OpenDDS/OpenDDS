@@ -10,7 +10,6 @@
 #include "Multicast.h"
 #include "MulticastLoader.h"
 
-#include "ace/Dynamic_Service.h"
 #include "ace/Service_Config.h"
 
 namespace OpenDDS {
