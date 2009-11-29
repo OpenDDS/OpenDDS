@@ -33,25 +33,12 @@ if ($ARGV[0] eq 'udp') {
     $pub_config_file = "$file_prefix/pub_udp.ini";
     $sub_config_file = "$file_prefix/sub_udp.ini";
 }
-elsif ($ARGV[0] eq 'mcast') {
+elsif ($ARGV[0] eq 'multicast') {
     $opts .= ($use_svc_config ?
-                  " -ORBSvcConf $file_prefix/mcast.conf " : '')
-        . "-t mcast";
-    $pub_config_file = "$file_prefix/pub_mcast.ini";
-    $sub_config_file = "$file_prefix/sub_mcast.ini";
-}
-elsif ($ARGV[0] eq 'reliable_mcast') {
-    $opts .= ($use_svc_config ?
-              " -ORBSvcConf $file_prefix/reliable_mcast.conf " : '')
-        . "-t reliable_mcast";
-    $pub_config_file = "$file_prefix/pub_reliable_mcast.ini";
-    $sub_config_file = "$file_prefix/sub_reliable_mcast.ini";
-}
-elsif ($ARGV[0] eq 'default_mcast') {
-    $opts .= ($use_svc_config ?
-                  " -ORBSvcConf $file_prefix/mcast.conf " : '');
-    $pub_opts = "-t default_mcast_pub";
-    $sub_opts = "-t default_mcast_sub";
+                  " -ORBSvcConf $file_prefix/multicast.conf " : '')
+        . "-t multicast";
+    $pub_config_file = "$file_prefix/pub_multicast.ini";
+    $sub_config_file = "$file_prefix/sub_multicast.ini";
 }
 
 $CS = new CrossSyncDDS (1, PerlACE::random_port(), PerlACE::random_port()

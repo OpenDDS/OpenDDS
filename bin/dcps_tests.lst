@@ -57,8 +57,7 @@ tests/DCPS/FooTest4_0/run_test.pl:
 
 tests/DCPS/FooTest5/run_test.pl: !DCPS_MIN
 tests/DCPS/FooTest5/run_test.pl udp: !DCPS_MIN
-tests/DCPS/FooTest5/run_test.pl mcast: !DCPS_MIN !NOMCAST
-tests/DCPS/FooTest5/run_test.pl reliable_multicast: !DCPS_MIN !NOMCAST
+tests/DCPS/FooTest5/run_test.pl multicast: !DCPS_MIN !NOMCAST
 tests/DCPS/FooTest5/run_test.pl mi: !DCPS_MIN
 tests/DCPS/FooTest5/run_test.pl udp mi: !DCPS_MIN
 tests/DCPS/FooTest5/run_test.pl nokey mi: !DCPS_MIN
@@ -69,8 +68,7 @@ tests/DCPS/FooTest5/run_test.pl mwmr: !DCPS_MIN
 tests/DCPS/FooTest5/run_test.pl mixed_trans: !DCPS_MIN
 tests/DCPS/FooTest5/run_test_multi_trans.pl: !DCPS_MIN
 tests/DCPS/FooTest5/run_test_multi_trans.pl udp: !DCPS_MIN
-tests/DCPS/FooTest5/run_test_multi_trans.pl mcast: !DCPS_MIN !NOMCAST
-tests/DCPS/FooTest5/run_test_multi_trans.pl reliable_multicast: !DCPS_MIN !NOMCAST
+tests/DCPS/FooTest5/run_test_multi_trans.pl multicast: !DCPS_MIN !NOMCAST
 tests/DCPS/FooTest5/run_test_multi_trans.pl mi: !DCPS_MIN
 tests/DCPS/FooTest5/run_test_multi_trans.pl udp mi: !DCPS_MIN
 tests/DCPS/FooTest5/run_test_multi_trans.pl nokey mi: !DCPS_MIN
@@ -112,13 +110,10 @@ tests/DCPS/NotifyTest/run_test.pl: !DCPS_MIN
 
 tests/transport/udp_simple_n/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
 tests/transport/udp_simple/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
-tests/transport/mcast_simple_n/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN !NOMCAST
-tests/transport/mcast_simple/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN !NOMCAST
 tests/transport/simple_bp_rm/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
 tests/transport/simple_bp/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
 tests/transport/simple_n/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
 tests/transport/simple/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
-tests/transport/reliable_multicast/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN !NOMCAST
 performance-tests/DCPS/InfoRepo_population/run_test.pl: !DCPS_MIN !MIN_CORBA
 performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl: !DCPS_MIN
 # run with single-copy read (the default is zero-copy read)
@@ -132,13 +127,11 @@ DevGuideExamples/DCPS/Messenger/run_test.pl: !DCPS_MIN
 DevGuideExamples/DCPS/Messenger_ZeroCopy/run_test.pl: !DCPS_MIN
 
 tests/DCPS/Messenger/run_test.pl: !DCPS_MIN
-#tests/DCPS/Messenger/run_test.pl default_tcp: !DCPS_MIN
+tests/DCPS/Messenger/run_test.pl default_tcp: !DCPS_MIN
 tests/DCPS/Messenger/run_test.pl udp: !DCPS_MIN
-#tests/DCPS/Messenger/run_test.pl default_udp: !DCPS_MIN
-tests/DCPS/Messenger/run_test.pl mcast: !DCPS_MIN
-#tests/DCPS/Messenger/run_test.pl default_mcast: !DCPS_MIN
-tests/DCPS/Messenger/run_test.pl reliable_mcast: !DCPS_MIN
-#tests/DCPS/Messenger/run_test.pl default_reliable_mcast: !DCPS_MIN
+tests/DCPS/Messenger/run_test.pl default_udp: !DCPS_MIN
+tests/DCPS/Messenger/run_test.pl multicast: !DCPS_MIN !NOMCAST
+tests/DCPS/Messenger/run_test.pl default_multicast: !DCPS_MIN !NOMCAST
 tests/DCPS/Messenger/run_test.pl nobits: !DCPS_MIN
 tests/DCPS/Messenger/run_test.pl stack: !DCPS_MIN
 tests/DCPS/Messenger/run_corbaloc_test.pl: !DCPS_MIN
