@@ -9,6 +9,7 @@
 
 #include "MulticastLoader.h"
 #include "MulticastGenerator.h"
+#include "MulticastConfiguration.h"
 
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
@@ -25,7 +26,7 @@ MulticastLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
   TransportGenerator *generator;
   ACE_NEW_RETURN(generator, MulticastGenerator, -1);
 
-  TheTransportFactory->register_generator(ACE_TEXT("multicast"),
+  TheTransportFactory->register_generator(MULTICAST_TRANSPORT_TYPE,
                                           generator);
   initialized = true;
 

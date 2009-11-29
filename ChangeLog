@@ -1,3 +1,16 @@
+Sun Nov 29 17:10:22 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/multicast/MulticastLoader.cpp:
+
+          Refactored multicast constants; added missing transport_type_
+          initialization.
+
+        * tests/DCPS/Messenger/run_test.pl:
+
+          Fixed bad test spec for default_multicast variant.
+
 Sun Nov 29 08:07:51 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * bin/dcps_tests.lst:

@@ -42,9 +42,10 @@ elsif ($ARGV[0] eq 'default_udp') {
     $sub_opts = "$opts";
 }
 elsif ($ARGV[0] eq 'default_multicast') {
-    $opts .= ($use_svc_config ? " -ORBSvcConf multicast.conf " : '') . "-t multicast";
-    $pub_opts = "$opts -DCPSConfigFile pub_multicast.ini";
-    $sub_opts = "$opts -DCPSConfigFile sub_multicast.ini";
+    $opts .= ($use_svc_config ? " -ORBSvcConf multicast.conf " : '')
+        . "-t default_multicast";
+    $pub_opts = "$opts";
+    $sub_opts = "$opts";
 }
 elsif ($ARGV[0] eq 'nobits') {
     $repo_bit_opt = '-NOBITS';

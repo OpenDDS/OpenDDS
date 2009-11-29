@@ -20,10 +20,12 @@
 namespace OpenDDS {
 namespace DCPS {
 
-// This constant forces the default group address selection to
-// resolve port number 49152; this is the minimal port defined
-// in the dynamic/private range [IANA 2009-11-16].
-const TransportIdType DEFAULT_MULTICAST_ID(0xFFFFFF08);
+// The default Transport ID forces the default group address
+// selection to resolve port number 49152; this is the minimal
+// port defined in the dynamic/private range [IANA 2009-11-16].
+extern const TransportIdType DEFAULT_MULTICAST_ID;
+
+extern const ACE_TCHAR* MULTICAST_TRANSPORT_TYPE;
 
 class OpenDDS_Multicast_Export MulticastConfiguration
   : public TransportConfiguration {
@@ -38,7 +40,7 @@ public:
   bool default_to_ipv6_;
   
   /// The offset used to determine default port numbers;
-  /// this value will be added to the transportId. The
+  /// this value will be added to the Transport ID. The
   /// default value is: 49400 [IANA 2009-11-16].
   u_short port_offset_;
 
