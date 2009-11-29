@@ -77,9 +77,6 @@ int init_reader_transport ()
       OpenDDS::DCPS::TransportConfiguration_rch reader_config 
         = TheTransportFactory->create_configuration (SUB_TRAFFIC_MULTICAST, ACE_TEXT("multicast"));
 
-      OpenDDS::DCPS::MulticastConfiguration* reader_multicast_config 
-        = static_cast <OpenDDS::DCPS::MulticastConfiguration*> (reader_config.in ());
-
       if (reader_multicast_impl->configure(reader_config.in()) != 0)
         {
           ACE_ERROR((LM_ERROR,
@@ -99,9 +96,6 @@ int init_reader_transport ()
                                                           OpenDDS::DCPS::DONT_AUTO_CONFIG);
           OpenDDS::DCPS::TransportConfiguration_rch reader_config 
             = TheTransportFactory->create_configuration (SUB_TRAFFIC_UDP, ACE_TEXT("SimpleUdp"));
-
-          OpenDDS::DCPS::SimpleUdpConfiguration* reader_udp_config 
-            = static_cast <OpenDDS::DCPS::SimpleUdpConfiguration*> (reader_config.in ());
 
           if (reader_udp_impl->configure(reader_config.in()) != 0)
             {
@@ -162,9 +156,6 @@ int init_writer_transport ()
       OpenDDS::DCPS::TransportConfiguration_rch writer_config 
         = TheTransportFactory->create_configuration (PUB_TRAFFIC_MULTICAST, ACE_TEXT("multicast"));
 
-      OpenDDS::DCPS::MulticastConfiguration* writer_multicast_config 
-        = static_cast <OpenDDS::DCPS::MulticastConfiguration*> (writer_config.in ());
-
       if (writer_multicast_impl->configure(writer_config.in()) != 0)
         {
           ACE_ERROR((LM_ERROR,
@@ -185,9 +176,6 @@ int init_writer_transport ()
 
       OpenDDS::DCPS::TransportConfiguration_rch writer_config 
         = TheTransportFactory->create_configuration (PUB_TRAFFIC_UDP, ACE_TEXT("SimpleUdp"));
-
-      OpenDDS::DCPS::SimpleUdpConfiguration* writer_udp_config 
-        = static_cast <OpenDDS::DCPS::SimpleUdpConfiguration*> (writer_config.in ());
 
       if (writer_udp_impl->configure(writer_config.in()) != 0)
       {
