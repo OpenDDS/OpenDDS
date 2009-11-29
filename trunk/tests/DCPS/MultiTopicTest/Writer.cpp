@@ -5,6 +5,7 @@
 #include "common.h"
 #include "../common/TestException.h"
 #include "../common/TestSupport.h"
+#include "ace/Atomic_Op_T.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "tests/DCPS/MultiTopicTypes/Foo1DefTypeSupportC.h"
 #include "tests/DCPS/MultiTopicTypes/Foo2DefTypeSupportC.h"
@@ -12,6 +13,7 @@
 
 #include "ace/OS_NS_unistd.h"
 
+ACE_Atomic_Op<ACE_SYNCH_MUTEX, CORBA::Long> key(0);
 
 Writer::Writer(::DDS::DataWriter_ptr writer,
                int num_thread_to_write,
@@ -75,7 +77,7 @@ Writer::svc ()
         foo.x = -1;
         foo.y = -1;
 
-        foo.key = (CORBA::Long) (ACE_OS::thr_self ());
+        foo.key = ++key;
 
         ::T1::Foo1DataWriter_var foo_dw
             = ::T1::Foo1DataWriter::_narrow(writer_.in ());
@@ -104,7 +106,7 @@ Writer::svc ()
       {
         ::T2::Foo2 foo;
 
-        foo.key = (CORBA::Long) (ACE_OS::thr_self ());
+        foo.key = ++key;
 
         ::T2::Foo2DataWriter_var foo_dw
             = ::T2::Foo2DataWriter::_narrow(writer_.in ());
@@ -135,7 +137,7 @@ Writer::svc ()
       {
         ::T3::Foo3 foo;
 
-        foo.key = (CORBA::Long) (ACE_OS::thr_self ());
+        foo.key = ++key;
 
         ::T3::Foo3DataWriter_var foo_dw
             = ::T3::Foo3DataWriter::_narrow(writer_.in ());

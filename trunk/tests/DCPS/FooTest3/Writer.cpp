@@ -8,9 +8,10 @@
 #include "TestException.h"
 #include "tests/DCPS/common/TestSupport.h"
 #include "tests/DCPS/FooType3/FooDefTypeSupportC.h"
+#include "ace/Atomic_Op_T.h"
 
 const int default_key = 101010;
-
+ACE_Atomic_Op<ACE_SYNCH_MUTEX, CORBA::Long> key(0);
 
 Writer::Writer(::DDS::DataWriter_ptr writer,
                int num_thread_to_write,
@@ -64,7 +65,7 @@ Writer::svc ()
     if (multiple_instances_ == 1)
     {
       // Use the thread id as the instance key.
-      foo.a_long_value = (CORBA::Long) (ACE_OS::thr_self ());
+      foo.a_long_value = ++key;
     }
     else
     {

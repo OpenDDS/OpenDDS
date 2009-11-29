@@ -7,13 +7,14 @@
 #include "Writer.h"
 #include "PubDriver.h"
 #include "TestException.h"
+#include "ace/Atomic_Op_T.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/DataWriterImpl.h"
 #include "tests/DCPS/FooType3/FooDefTypeSupportC.h"
 #include "tests/DCPS/common/TestSupport.h"
 
 const int default_key = 101010;
-
+ACE_Atomic_Op<ACE_SYNCH_MUTEX, CORBA::Long> key(0);
 
 Writer::Writer(PubDriver*            pubdriver,
                ::DDS::DataWriter_ptr writer,
@@ -80,7 +81,7 @@ Writer::svc ()
     if (multiple_instances_ == 1)
     {
       // Use the thread id as the instance key.
-      foo.a_long_value = (CORBA::Long) (ACE_OS::thr_self ());
+      foo.a_long_value = ++key;
     }
     else
     {

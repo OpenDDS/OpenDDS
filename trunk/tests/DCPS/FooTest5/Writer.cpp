@@ -6,7 +6,10 @@
 #include "TestException.h"
 #include "tests/DCPS/FooType5/FooDefTypeSupportC.h"
 #include "tests/DCPS/common/TestSupport.h"
+#include "ace/Atomic_Op_T.h"
 #include "ace/OS_NS_unistd.h"
+
+ACE_Atomic_Op<ACE_SYNCH_MUTEX, CORBA::Long> key(0);
 
 // Only for Microsoft VC6
 #if defined (_MSC_VER) && (_MSC_VER >= 1200) && (_MSC_VER < 1300)
@@ -40,7 +43,7 @@ template<class DT, class DW, class DW_var>
     foo.y = (float)writer_id;
 
     // Use the thread id as the instance key.
-    foo.data_source = (CORBA::Long) (ACE_OS::thr_self ());
+    foo.data_source = ++key;
 
     DW_var foo_dw
       = DW::_narrow(writer);
