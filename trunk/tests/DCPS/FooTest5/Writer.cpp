@@ -82,15 +82,13 @@ template<class DT, class DW, class DW_var>
         }
       }
 
-      if (using_udp || using_mcast)
+      if (using_udp || using_multicast)
       {
         // Delay between sends to avoid dropping.
         static ACE_Time_Value delay(op_interval_ms/1000,
                                     op_interval_ms%1000 *1000);
         ACE_OS::sleep (delay);
       }
-
-      // No delay necessary for reliable multicast
     }
   }
   catch (const CORBA::Exception& ex)

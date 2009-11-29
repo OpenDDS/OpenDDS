@@ -15,7 +15,7 @@
 // Include the SimpleUnreliableDgram.h to make sure Initializer is created before the Service
 // Configurator open service configure file.
 #include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram.h"
-#include "dds/DCPS/transport/ReliableMulticast/ReliableMulticast.h"
+#include "dds/DCPS/transport/multicast/Multicast.h"
 
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
@@ -40,18 +40,6 @@
 /// parse the command line arguments
 int parse_args (int argc, ACE_TCHAR *argv[])
 {
-//Create the multicast_group_address_str using default multicast address.
-#ifdef ACE_HAS_IPV6
-  multicast_group_address_str = ACE_TEXT(ACE_DEFAULT_MULTICASTV6_ADDR);
-#else
-  multicast_group_address_str = ACE_TEXT(ACE_DEFAULT_MULTICAST_ADDR);
-#endif
-  multicast_group_address_str += ACE_TEXT(":");
-  std::basic_stringstream<ACE_TCHAR> out;
-  out << ACE_DEFAULT_MULTICAST_PORT;
-  multicast_group_address_str += out.str().c_str();
-
-
   u_long mask =  ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS) ;
   ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS) ;
   ACE_Arg_Shifter arg_shifter (argc, argv);
@@ -65,8 +53,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     //  -d history.depth            defaults to 1
     //  -s sub transport address    defaults to localhost:23456
     //  -u using_udp                defaults to 0 - using TCP
-    //  -c using_mcast              defaults to 0 - using TCP
-    //  -a using_reliable_mcast     defaults to 0 - using TCP
+    //  -c using_multicast          defaults to 0 - using TCP
     //  -m num_instances_per_writer defaults to 1
     //  -i num_samples_per_instance defaults to 1
     //  -w num_datawriters          defaults to 1
@@ -107,12 +94,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
       reader_address_given = 1;
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-p"))) != 0)
-    {
-      multicast_group_address_str = currentArg;
-      multicast_group_address_given = 1;
-      arg_shifter.consume_arg ();
-    }
     else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-u"))) != 0)
     {
       using_udp = ACE_OS::atoi (currentArg);
@@ -124,19 +105,10 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     }
     else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-c"))) != 0)
     {
-      using_mcast = ACE_OS::atoi (currentArg);
-      if (using_mcast == 1)
+      using_multicast = ACE_OS::atoi (currentArg);
+      if (using_multicast == 1)
       {
-        ACE_DEBUG((LM_DEBUG, "Subscriber Using MCAST transport.\n"));
-      }
-      arg_shifter.consume_arg();
-    }
-    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-a"))) != 0)
-    {
-      using_reliable_multicast = ACE_OS::atoi (currentArg);
-      if (using_reliable_multicast == 1)
-      {
-        ACE_DEBUG((LM_DEBUG, "Subscriber Using RELIABLE_MULTICAST transport.\n"));
+        ACE_DEBUG((LM_DEBUG, "Subscriber Using MULTICAST transport.\n"));
       }
       arg_shifter.consume_arg();
     }
@@ -205,12 +177,10 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     }
   }
 
-  if ((using_udp != 0 || mixed_trans != 0) && (using_mcast != 0 || using_reliable_multicast != 0))
+  if ((using_udp != 0 || mixed_trans != 0) && using_multicast != 0)
   {
-    using_mcast = 0;
-    using_reliable_multicast = 0;
-    ACE_DEBUG((LM_DEBUG, "Subscriber NOT using MCAST transport.\n"));
-    ACE_DEBUG((LM_DEBUG, "Subscriber NOT using RELIABLE_MULTICAST transport.\n"));
+    using_multicast = 0;
+    ACE_DEBUG((LM_DEBUG, "Subscriber NOT using MULTICAST transport.\n"));
   }
 
   // Indicates sucessful parsing of the command line
@@ -221,8 +191,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
 ::DDS::Subscriber_ptr
 create_subscriber (::DDS::DomainParticipant_ptr participant,
                    int                          attach_to_udp,
-                   int                          attach_to_mcast,
-                   int                          attach_to_reliable_multicast)
+                   int                          attach_to_multicast)
 {
 
   // Create the subscriber
@@ -258,15 +227,10 @@ create_subscriber (::DDS::DomainParticipant_ptr participant,
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to udp \n")));
           attach_status = sub_impl->attach_transport(reader_udp_impl.in());
         }
-      else if (attach_to_mcast)
+      else if (attach_to_multicast)
         {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to mcast \n")));
-          attach_status = sub_impl->attach_transport(reader_mcast_impl.in());
-        }
-      else if (attach_to_reliable_multicast)
-        {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to reliable multicast \n")));
-          attach_status = sub_impl->attach_transport(reader_reliable_multicast_impl.in());
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to multicast \n")));
+          attach_status = sub_impl->attach_transport(reader_multicast_impl.in());
         }
       else
         {
@@ -451,13 +415,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         }
 
       int attach_to_udp = using_udp;
-      int attach_to_mcast = using_mcast;
-      int attach_to_reliable_multicast = using_reliable_multicast;
+      int attach_to_multicast = using_multicast;
 
       // Create the subscriber and attach to the corresponding
       // transport.
       ::DDS::Subscriber_var sub
-        = create_subscriber(participant.in (), attach_to_udp, attach_to_mcast, attach_to_reliable_multicast);
+        = create_subscriber(participant.in (), attach_to_udp, attach_to_multicast);
       if (CORBA::is_nil (sub.in ()))
         {
           ACE_ERROR ((LM_ERROR,
@@ -470,7 +433,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         {
           // Create the subscriber with a different transport from previous
           // subscriber.
-          sub1 = create_subscriber(participant.in (), ! attach_to_udp, attach_to_mcast, attach_to_reliable_multicast);
+          sub1 = create_subscriber(participant.in (), ! attach_to_udp, attach_to_multicast);
           if (CORBA::is_nil (sub1.in ()))
             {
               ACE_ERROR ((LM_ERROR,
@@ -671,7 +634,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   //       Otherwise cleanup after main() will encount access vilation.
   reader_tcp_impl = 0;
   reader_udp_impl = 0;
-  reader_mcast_impl = 0;
-  reader_reliable_multicast_impl = 0;
+  reader_multicast_impl = 0;
   return status;
 }

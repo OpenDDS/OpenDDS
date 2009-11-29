@@ -1,3 +1,34 @@
+Sun Nov 29 08:07:51 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/Crossplatform/Messenger_run_test.pl:
+        * tests/DCPS/FooTest5/FooTest5.mpc:
+        * tests/DCPS/FooTest5/Writer.cpp:
+        * tests/DCPS/FooTest5/common.h:
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/FooTest5/multicast.conf:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/run_test.pl:
+        * tests/DCPS/FooTest5/run_test_multi_trans.pl:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/Messenger/pub_multicast.ini:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/run_test.pl:
+        * tests/DCPS/Messenger/stack_subscriber.cpp:
+        * tests/DCPS/Messenger/sub_multicast.ini:
+        * tests/DCPS/Messenger/subscriber.cpp:
+        * tests/DCPS/FooTest5/mcast.conf:
+        * tests/DCPS/FooTest5/reliable_multicast.conf:
+        * tests/DCPS/Messenger/mcast.conf:
+        * tests/DCPS/Messenger/pub_mcast.ini:
+        * tests/DCPS/Messenger/pub_reliable_mcast.ini:
+        * tests/DCPS/Messenger/reliable_mcast.conf:
+        * tests/DCPS/Messenger/sub_mcast.ini:
+        * tests/DCPS/Messenger/sub_reliable_mcast.ini:
+
+          Deprecated mcast and reliable_mcast tests; added new test variants
+          for new multicast transport.
+
 Sun Nov 29 07:32:21 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/Multicast.h:
