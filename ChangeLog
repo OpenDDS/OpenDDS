@@ -13,7 +13,7 @@ Sun Nov 29 02:39:16 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * tests/DCPS/MultiDPTest/Writer.cpp:
         * tests/DCPS/MultiTopicTest/Writer.cpp:
 
-          Fixed tests to compile correctly on Mac OS X 10.6 (Snow Leopard).
+          Fixed errors on Mac OS X 10.6 (Snow Leopard) hosts.
 
 Sat Nov 28 18:29:55 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
