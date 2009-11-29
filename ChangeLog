@@ -1,3 +1,10 @@
+Sun Nov 29 07:32:21 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/Multicast.h:
+        * dds/DCPS/transport/multicast/Multicast.cpp:
+
+          Added static initialization support for multicast transport.
+
 Sun Nov 29 02:39:16 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastDataLink.inl:
