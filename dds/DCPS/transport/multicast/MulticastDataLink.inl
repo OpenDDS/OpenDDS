@@ -11,6 +11,14 @@ namespace OpenDDS {
 namespace DCPS {
 
 ACE_INLINE void
+MulticastDataLink::configure(MulticastConfiguration* config,
+                             TransportReactorTask* reactor_task)
+{
+  this->config_ = config;
+  this->reactor_task_ = reactor_task;
+}
+
+ACE_INLINE void
 MulticastDataLink::send_strategy(MulticastSendStrategy* send_strategy)
 {
   this->send_strategy_ = send_strategy;
