@@ -16,6 +16,7 @@
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #include <dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h>
+#include <dds/DCPS/transport/multicast/MulticastConfiguration.h>
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
 #endif
@@ -41,7 +42,7 @@ parse_args (int argc, ACE_TCHAR *argv[])
       if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("udp")) == 0) {
         transport_impl_id = 2;
       }
-      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("mcast")) == 0) {
+      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("multicast")) == 0) {
         transport_impl_id = 3;
       }
       // test with DEFAULT_SIMPLE_TCP_ID.
@@ -52,8 +53,8 @@ parse_args (int argc, ACE_TCHAR *argv[])
       else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_udp")) == 0) {
         transport_impl_id = OpenDDS::DCPS::DEFAULT_SIMPLE_UDP_ID;
       }
-      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_mcast_pub")) == 0) {
-        transport_impl_id = OpenDDS::DCPS::DEFAULT_SIMPLE_MCAST_PUB_ID;
+      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_multicast")) == 0) {
+        transport_impl_id = OpenDDS::DCPS::DEFAULT_MULTICAST_ID;
       }
       break;
     case '?':

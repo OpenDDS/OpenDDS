@@ -19,7 +19,7 @@
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
 #include <dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram.h>
-#include <dds/DCPS/transport/ReliableMulticast/ReliableMulticast.h>
+#include <dds/DCPS/transport/multicast/Multicast.h>
 #endif
 
 #include "OpenDDS_Subscription_Manager.h"
@@ -57,17 +57,17 @@ void
 OpenDDS_Subscription_Manager::init (const DDS::SubscriberQos & qos)
 {
   // create the subscriber using default QoS.
-  sub_ = 
+  sub_ =
     dm_.participant ()->create_subscriber (qos,
                                            DDS::SubscriberListener::_nil (),
                                            OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-  
+
   // check for successful creation
   if (CORBA::is_nil (sub_.in ()))
     throw Manager_Exception ("Failed to create subscriber.");
 }
 
-void 
+void
 OpenDDS_Subscription_Manager::register_transport (
   OpenDDS::DCPS::TransportIdType transport_id)
 {
@@ -84,10 +84,10 @@ OpenDDS_Subscription_Manager::register_transport (
     throw Manager_Exception ("Failed to obtain subscriber servant");
   }
 
-  OpenDDS::DCPS::AttachStatus status = 
+  OpenDDS::DCPS::AttachStatus status =
     sub_impl->attach_transport(transport_impl.in());
 
-  if (status != OpenDDS::DCPS::ATTACH_OK) 
+  if (status != OpenDDS::DCPS::ATTACH_OK)
     {
       std::string status_str;
       switch (status) {
@@ -131,7 +131,7 @@ OpenDDS_Subscription_Manager::access_topic (
     tm.datareader (Subscription_Manager (ref), qos);
 }
 
-DDS::DataReader_ptr 
+DDS::DataReader_ptr
 OpenDDS_Subscription_Manager::lookup_datareader (const std::string & topic_name)
 {
   return sub_->lookup_datareader (topic_name.c_str ());

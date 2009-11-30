@@ -1,3 +1,60 @@
+Mon Nov 30 06:57:24 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * MPC/config/dds_wrapper.mpb:
+        * bin/cross_tests.lst:
+        * java/tests/messenger/publisher/publisher_idl_test.mpc:
+        * java/tests/messenger/subscriber/subscriber_idl_test.mpc:
+        * performance-tests/Bench/bin/run_test:
+        * performance-tests/Bench/etc/svc.conf:
+        * performance-tests/Bench/etc/transport.ini:
+        * performance-tests/Bench/src/TestProcess.mpc:
+        * performance-tests/Bench/tools/mkpkg:
+        * performance-tests/DCPS/Priority/Options.h:
+        * performance-tests/DCPS/Priority/Priority.mpc:
+        * performance-tests/DCPS/Priority/Publisher.cpp:
+        * performance-tests/DCPS/Priority/Subscriber.cpp:
+        * performance-tests/DCPS/Priority/run_test.pl:
+        * performance-tests/DCPS/Priority/svc.conf:
+        * performance-tests/DCPS/Priority/transport.ini:
+        * performance-tests/DCPS/TransportLatency/multicast.conf:
+        * performance-tests/DCPS/TransportLatency/pub_multicast.ini:
+        * performance-tests/DCPS/TransportLatency/publisher.cpp:
+        * performance-tests/DCPS/TransportLatency/run_test.pl:
+        * performance-tests/DCPS/TransportLatency/sub_multicast.ini:
+        * performance-tests/DCPS/TransportLatency/subscriber.cpp:
+        * tests/DCPS/Messenger/Messenger.mpc:
+        * tests/DCPS/Priority/Options.h:
+        * tests/DCPS/Priority/Options.cpp:
+        * tests/DCPS/Priority/Priority.mpc:
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Priority/Subscriber.cpp:
+        * tests/DCPS/Priority/run_test.pl:
+        * tests/DCPS/Priority/services.conf:
+        * tests/DCPS/Priority/transport.ini:
+        * tests/DCPS/Priority/transport_solaris.ini:
+        * tests/DCPS/Prst_delayed_subscriber/publisher.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/run_test.pl:
+        * tests/DCPS/Prst_delayed_subscriber/subscriber.cpp:
+        * tests/DCPS/WaitForAck/Publisher.cpp:
+        * tests/DCPS/WaitForAck/Subscriber.cpp:
+        * tests/DCPS/WaitForAck/run_test.pl:
+        * wrapper/DDSWrapper_OpenDDS.mpc:
+        * wrapper/OpenDDS/OpenDDS_Domain_Manager.h:
+        * wrapper/OpenDDS/OpenDDS_Domain_Manager.cpp:
+        * wrapper/OpenDDS/OpenDDS_Publication_Manager.cpp:
+        * wrapper/OpenDDS/OpenDDS_Subscription_Manager.cpp:
+
+          Removed last remnants of SimpleMcast and ReliableMulticast tests.
+
+        * MPC/config/dcps_reliable_multicast.mpb:
+        * MPC/config/dcpsexe_with_reliable_multicast.mpb:
+        * performance-tests/DCPS/TransportLatency/mcast.conf:
+        * performance-tests/DCPS/TransportLatency/pub_reliable_mcast.ini:
+        * performance-tests/DCPS/TransportLatency/reliable_mcast.conf:
+        * performance-tests/DCPS/TransportLatency/sub_reliable_mcast.ini:
+
+          Removed these files.
+
 Mon Nov 30 04:10:24 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/ReliableMulticast:

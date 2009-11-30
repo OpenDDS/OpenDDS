@@ -324,7 +324,7 @@ publication.
 
 =item B<./run_demo.pl -d 10 -T 4 -f test.log>
 
-=item B<./run_demo.pl -x -t mcast>
+=item B<./run_demo.pl -x -t multicast>
 
 =item B<./run_test.pl -vd10T4V>
 

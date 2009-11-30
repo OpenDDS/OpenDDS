@@ -8,7 +8,7 @@ project(BenchIdl): dcps {
   custom_only = 1
 }
 
-project(BenchProcess) : dcpsexe_with_unreliable_dgram, dcps_reliable_multicast, dcps_tcp, svc_utils {
+project(BenchProcess) : dcpsexe_with_unreliable_dgram, dcps_multicast, dcps_tcp, svc_utils {
   exename = testprocess
   exeout  = ../bin
   after  += BenchIdl

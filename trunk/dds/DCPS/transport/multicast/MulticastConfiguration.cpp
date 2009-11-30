@@ -8,6 +8,7 @@
  */
 
 #include "MulticastConfiguration.h"
+#include "MulticastLoader.h"
 
 namespace {
 
@@ -33,10 +34,6 @@ const size_t DEFAULT_NAK_REPAIR_SIZE(32);
 namespace OpenDDS {
 namespace DCPS {
 
-const TransportIdType DEFAULT_MULTICAST_ID(0xFFFFFF08);
-
-const ACE_TCHAR* MULTICAST_TRANSPORT_TYPE(ACE_TEXT("multicast"));
-
 MulticastConfiguration::MulticastConfiguration()
   : default_to_ipv6_(DEFAULT_DEFAULT_TO_IPV6),
     port_offset_(DEFAULT_PORT_OFFSET),
@@ -50,7 +47,7 @@ MulticastConfiguration::MulticastConfiguration()
 
   this->nak_interval_.msec(DEFAULT_NAK_INTERVAL);
   this->nak_timeout_.msec(DEFAULT_NAK_TIMEOUT);
-  
+
   this->transport_type_ = MULTICAST_TRANSPORT_TYPE;
 }
 
@@ -77,7 +74,7 @@ MulticastConfiguration::load(const TransportIdType& id,
 
   GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("default_to_ipv6"),
                    this->default_to_ipv6_, bool)
-  
+
   GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("port_offset"),
                    this->port_offset_, u_short)
 

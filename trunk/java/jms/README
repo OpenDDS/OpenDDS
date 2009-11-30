@@ -88,8 +88,7 @@ The following JMX MBeans are provided:
         The following transport types are supported:
           - SimpleTcp
           - SimpleUdp
-          - SimpleMcast
-          - ReliableMulticast
+          - multicast
 
 
  2. org.opendds.jms.management.Destination (required)

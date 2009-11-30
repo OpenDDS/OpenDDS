@@ -1,4 +1,4 @@
-project : dcps_tcp, dcps_unreliable_dgram, dcps_reliable_multicast {
+project : dcps_tcp, dcps_unreliable_dgram, dcps_multicast {
   after += DDSWrapper_OpenDDS
   libs  += DDSWrapper
 
