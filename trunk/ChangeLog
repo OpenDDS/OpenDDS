@@ -1,3 +1,11 @@
+Mon Nov 30 22:09:24 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/html/multicast:
+        * docs/html/multicast/images:
+        * docs/html/multicast/index.html:
+
+          Initial commit for multicast design documentation.
+
 Mon Nov 30 21:50:43 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * docs/html:
