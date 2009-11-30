@@ -11,10 +11,9 @@
 #include "OpenDDS_DCPS_TheServiceParticipant.h"
 #include "OpenDDS_DCPS_transport_TheTransportFactory.h"
 #include "OpenDDS_DCPS_transport_TransportImpl.h"
-#include "OpenDDS_DCPS_transport_ReliableMulticastConfiguration.h"
-#include "OpenDDS_DCPS_transport_SimpleMcastConfiguration.h"
 #include "OpenDDS_DCPS_transport_SimpleTcpConfiguration.h"
 #include "OpenDDS_DCPS_transport_SimpleUnreliableDgramConfiguration.h"
+#include "OpenDDS_DCPS_transport_MulticastConfiguration.h"
 #include "DDS_WaitSet.h"
 #include "DDS_GuardCondition.h"
 
@@ -30,9 +29,8 @@
 #include "dds/DCPS/transport/framework/PoolSynchStrategy.h"
 #include "dds/DCPS/transport/framework/NullSynchStrategy.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
-#include "dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.h"
 #include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramConfiguration.h"
-#include "dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastConfiguration.h"
+#include "dds/DCPS/transport/multicast/MulticastConfiguration.h"
 
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/PublisherImpl.h"
@@ -256,31 +254,6 @@ BaseField<Tcp> *fields[] = {&la, &ena, &crid, &crbm, &cra, &mopp, &prd, &pcd};
 
 } // namespace TcpConfig
 
-namespace RMcastConfig {
-
-typedef OpenDDS::DCPS::ReliableMulticastTransportConfiguration RMcast;
-const char *jclassName =
-  "OpenDDS/DCPS/transport/ReliableMulticastConfiguration";
-const ACE_TCHAR *configName = ACE_TEXT("ReliableMulticast");
-
-const ACE_TCHAR *svcName = ACE_TEXT("OPENDDS_DCPS_ReliableMulticastLoader");
-const ACE_TCHAR *svcConfDir =
-  ACE_TEXT("dynamic OPENDDS_DCPS_ReliableMulticastLoader Service_Object * ")
-  ACE_TEXT("ReliableMulticast:_make_OPENDDS_DCPS_ReliableMulticastLoader()")
-  ACE_TEXT(" \"\"");
-
-InetAddrField<RMcast> la("localAddress",
-                         &RMcast::local_address_str_, &RMcast::local_address_);
-InetAddrField<RMcast> mga("multicastGroupAddress",
-                          &RMcast::multicast_group_address_str_, &RMcast::multicast_group_address_);
-BoolField<RMcast> r("receiver", &RMcast::receiver_);
-SizetField<RMcast> shs("senderHistorySize", &RMcast::sender_history_size_);
-SizetField<RMcast> rbs("receiverBufferSize", &RMcast::receiver_buffer_size_);
-
-BaseField<RMcast> *fields[] = {&la, &mga, &r, &shs, &rbs};
-
-} // namespace RMcastConfig
-
 namespace UdpConfig {
 
 typedef OpenDDS::DCPS::SimpleUnreliableDgramConfiguration Udp;
@@ -304,24 +277,63 @@ IntField<Udp> mopp("maxOutputPausePeriod", &Udp::max_output_pause_period_);
 
 BaseField<Udp> *fields[] = {&la, &mopp};
 
-} // namespace UdpConfig
+} // namespace TcpConfig
 
-namespace McastConfig {
+namespace MulticastConfig {
 
-typedef OpenDDS::DCPS::SimpleMcastConfiguration Mcast;
-const char *jclassName = "OpenDDS/DCPS/transport/SimpleMcastConfiguration";
-const ACE_TCHAR *configName = ACE_TEXT("SimpleMcast");
+typedef OpenDDS::DCPS::MulticastConfiguration config;
+const char *jclassName =
+  "OpenDDS/DCPS/transport/MulticastConfiguration";
 
-const ACE_TCHAR *svcName = UdpConfig::svcName;
-const ACE_TCHAR *svcConfDir = UdpConfig::svcConfDir;
+const char *jclassNameUdp = "OpenDDS/DCPS/transport/MulticastConfiguration";
+const ACE_TCHAR *configName = ACE_TEXT("multicast");
 
-InetAddrField<Mcast> mga("multicastGroupAddress",
-                         &Mcast::multicast_group_address_str_, &Mcast::multicast_group_address_);
-BoolField<Mcast> r("receiver", &Mcast::receiver_);
+const ACE_TCHAR *svcName =
+  ACE_TEXT("OpenDDS_DCPS_Multicast_Service");
+const ACE_TCHAR *svcConfDir =
+  ACE_TEXT("dynamic OpenDDS_DCPS_Multicast_Service Service_Object *")
+  ACE_TEXT(" OpenDDS_Multicast:_make_MulticastLoader()");
 
-BaseField<Mcast> *fields[] = {&mga, &r};
+BoolField<config> default_to_ipv6("defaultToIPv6",
+                                  &config::default_to_ipv6_);
 
-} // namespace McastConfig
+UshortField<config> port_offset("portOffset",
+                                &config::port_offset_);
+
+InetAddrField<config> group_address("groupAddress",
+                                    0 /*unused*/, &config::group_address_);
+
+BoolField<config> reliable("reliable",
+                           &config::reliable_);
+
+TimeField<config> syn_interval("synInterval",
+                               &config::syn_interval_);
+
+TimeField<config> syn_timeout("synTimeout",
+                              &config::syn_timeout_);
+
+TimeField<config> nak_interval("nakInterval",
+                               &config::nak_interval_);
+
+TimeField<config> nak_timeout("nakTimeout",
+                              &config::nak_timeout_);
+
+SizetField<config> nak_repair_size("nakRepairSize",
+                                   &config::nak_repair_size_);
+
+BaseField<config> *fields[] = {
+  &default_to_ipv6,
+  &port_offset,
+  &group_address,
+  &reliable,
+  &syn_interval, 
+  &syn_timeout,
+  &nak_interval,
+  &nak_timeout,
+  &nak_repair_size
+};
+
+} // namespace MulticastConfig
 
 namespace {
 
@@ -346,17 +358,13 @@ jobject get_or_create_impl(JNIEnv *jni, jint id, const ACE_TString &typeCxx)
     clazz_specific = findClass(jni, TcpConfig::jclassName);
     loadLibIfNeeded(TcpConfig::svcName, TcpConfig::svcConfDir);
 
-  } else if (typeCxx == RMcastConfig::configName) {
-    clazz_specific = findClass(jni, RMcastConfig::jclassName);
-    loadLibIfNeeded(RMcastConfig::svcName, RMcastConfig::svcConfDir);
-
   } else if (typeCxx == UdpConfig::configName) {
     clazz_specific = findClass(jni, UdpConfig::jclassNameUdp);
     loadLibIfNeeded(UdpConfig::svcName, UdpConfig::svcConfDir);
-
-  } else if (typeCxx == McastConfig::configName) {
-    clazz_specific = findClass(jni, McastConfig::jclassName);
-    loadLibIfNeeded(McastConfig::svcName, McastConfig::svcConfDir);
+  
+  } else if (typeCxx == MulticastConfig::configName) {
+    clazz_specific = findClass(jni, MulticastConfig::jclassNameUdp);
+    loadLibIfNeeded(MulticastConfig::svcName, MulticastConfig::svcConfDir);
   }
 
   //unknown type, let OpenDDS find out and throw its exception from get_or_...
@@ -585,28 +593,6 @@ Java_OpenDDS_DCPS_transport_SimpleTcpConfiguration_loadSpecificConfig
   toJava(jni, clazz, *tc, jThis, TcpConfig::fields);
 }
 
-// ReliableMulticastConfiguration
-
-void JNICALL
-Java_OpenDDS_DCPS_transport_ReliableMulticastConfiguration_saveSpecificConfig
-(JNIEnv *jni, jobject jThis, jlong ptr)
-{
-  OpenDDS::DCPS::ReliableMulticastTransportConfiguration *tc;
-  narrowTransportConfig(tc, ptr);
-  jclass clazz = findClass(jni, RMcastConfig::jclassName);
-  toCxx(jni, clazz, jThis, *tc, RMcastConfig::fields);
-}
-
-void JNICALL
-Java_OpenDDS_DCPS_transport_ReliableMulticastConfiguration_loadSpecificConfig
-(JNIEnv *jni, jobject jThis, jlong ptr)
-{
-  OpenDDS::DCPS::ReliableMulticastTransportConfiguration *tc;
-  narrowTransportConfig(tc, ptr);
-  jclass clazz = findClass(jni, RMcastConfig::jclassName);
-  toJava(jni, clazz, *tc, jThis, RMcastConfig::fields);
-}
-
 // SimpleUnreliableDgramConfiguration
 
 void JNICALL
@@ -629,26 +615,26 @@ Java_OpenDDS_DCPS_transport_SimpleUnreliableDgramConfiguration_loadSpecificConfi
   toJava(jni, clazz, *tc, jThis, UdpConfig::fields);
 }
 
-// SimpleMcastConfiguration
+// MulticastConfiguration
 
 void JNICALL
-Java_OpenDDS_DCPS_transport_SimpleMcastConfiguration_saveMcastConfig
+Java_OpenDDS_DCPS_transport_MulticastConfiguration_saveSpecificConfig
 (JNIEnv *jni, jobject jThis, jlong ptr)
 {
-  OpenDDS::DCPS::SimpleMcastConfiguration *tc;
+  OpenDDS::DCPS::MulticastConfiguration *tc;
   narrowTransportConfig(tc, ptr);
-  jclass clazz = findClass(jni, McastConfig::jclassName);
-  toCxx(jni, clazz, jThis, *tc, McastConfig::fields);
+  jclass clazz = findClass(jni, MulticastConfig::jclassName);
+  toCxx(jni, clazz, jThis, *tc, MulticastConfig::fields);
 }
 
 void JNICALL
-Java_OpenDDS_DCPS_transport_SimpleMcastConfiguration_loadMcastConfig
+Java_OpenDDS_DCPS_transport_MulticastConfiguration_loadSpecificConfig
 (JNIEnv *jni, jobject jThis, jlong ptr)
 {
-  OpenDDS::DCPS::SimpleMcastConfiguration *tc;
+  OpenDDS::DCPS::MulticastConfiguration *tc;
   narrowTransportConfig(tc, ptr);
-  jclass clazz = findClass(jni, McastConfig::jclassName);
-  toJava(jni, clazz, *tc, jThis, McastConfig::fields);
+  jclass clazz = findClass(jni, MulticastConfig::jclassName);
+  toJava(jni, clazz, *tc, jThis, MulticastConfig::fields);
 }
 
 // WaitSet and GuardCondition

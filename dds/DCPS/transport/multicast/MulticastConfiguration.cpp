@@ -70,8 +70,9 @@ MulticastConfiguration::load(const TransportIdType& id,
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastConfiguration::load: ")
-                      ACE_TEXT("unable to open section: [%C]\n"),
-                      section_name.c_str()), -1);
+                      ACE_TEXT("unable to open section: [%C]!\n"),
+                      section_name.c_str()),
+                     -1);
   }
 
   GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("default_to_ipv6"),
@@ -87,6 +88,14 @@ MulticastConfiguration::load(const TransportIdType& id,
     default_group_address(this->group_address_, id);
   } else {
     this->group_address_.set(group_address_s.c_str());
+    if (!this->group_address_.is_multicast()) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("MulticastConfiguration::load: ")
+                        ACE_TEXT("invalid group address: %C!\n"),
+                        this->group_address_.get_host_addr()),
+                       -1);
+    }
   }
 
   GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("reliable"),

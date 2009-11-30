@@ -15,22 +15,20 @@ import org.opendds.jms.management.argument.SvcConfDirective;
  * @author  Steven Stallion
  * @version $Revision$
  */
-public class SimpleMcastTransport implements Transport {
+public class MulticastTransport implements Transport {
 
     public String getName() {
-        return "SimpleMcast";
+        return "multicast";
     }
 
     public SvcConfDirective getDirective() {
         SvcConfDirective directive = new SvcConfDirective();
 
         directive.setDynamic(true);
-        directive.setServiceName("OPENDDS_DCPS_SimpleUnreliableDgramLoader");
+        directive.setServiceName("OpenDDS_DCPS_Multicast_Service");
         directive.setBaseObjectType("Service_Object *");
-        directive.setLibrary("SimpleUnreliableDgram");
-        directive.setFactoryFunction("_make_OPENDDS_DCPS_SimpleUnreliableDgramLoader()");
-        directive.addOption("-type");
-        directive.addOption("SimpleMcast");
+        directive.setLibrary("OpenDDS_Multicast");
+        directive.setFactoryFunction("_make_MulticastLoader()");
 
         return directive;
     }

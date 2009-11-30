@@ -18,9 +18,8 @@ import OpenDDS.DCPS.transport.TransportImpl;
 import OpenDDS.DCPS.transport.TransportException;
 import OpenDDS.DCPS.transport.TransportConfiguration;
 import OpenDDS.DCPS.transport.SimpleTcpConfiguration;
-import OpenDDS.DCPS.transport.SimpleMcastConfiguration;
 import OpenDDS.DCPS.transport.SimpleUdpConfiguration;
-import OpenDDS.DCPS.transport.ReliableMulticastConfiguration;
+import OpenDDS.DCPS.transport.MulticastConfiguration;
 
 public class TransportConfigTest {
 
@@ -41,20 +40,12 @@ public class TransportConfigTest {
 
     public static void main(String[] args) throws Exception {
         setUp(args);
-        try {
-            testModifyTransportFromFileTCP();
-            testCreateNewTransportRMCast();
-            testCreateNewTransportUDP();
-            testCreateNewTransportMCast();
-        } catch (SystemException se) {
-            se.printStackTrace();
-            assert false;
-        } catch (TransportException te) {
-            te.printStackTrace();
-            assert false;
-        } finally {
-            tearDown();
-        }
+        
+        testModifyTransportFromFileTCP();
+        testCreateNewTransportUDP();
+        testCreateNewTransportMulticast();
+
+        tearDown();
     }
 
 
@@ -85,39 +76,8 @@ public class TransportConfigTest {
     }
 
 
-    protected static void testCreateNewTransportRMCast() throws Exception {
-        final int ID = 2;
-        TransportConfiguration tc =
-            TheTransportFactory.get_or_create_configuration(ID,
-                 TheTransportFactory.TRANSPORT_RMCAST);
-        ReliableMulticastConfiguration rmc =
-            (ReliableMulticastConfiguration) tc;
-        rmc.setLocalAddress("0.0.0.0:2048");
-        rmc.setMulticastGroupAddress("224.0.0.1:29823");
-        rmc.setReceiver(true);
-        rmc.setSenderHistorySize(12);
-        rmc.setReceiverBufferSize(13);
-
-        TransportImpl ti = TheTransportFactory.create_transport_impl(ID,
-            TheTransportFactory.TRANSPORT_RMCAST,
-            TheTransportFactory.DONT_AUTO_CONFIG);
-        ti.configure(tc);
-
-        tc = TheTransportFactory.get_or_create_configuration(ID,
-                 TheTransportFactory.TRANSPORT_RMCAST);
-        rmc = (ReliableMulticastConfiguration) tc;
-        assert rmc.getLocalAddress().equals("0.0.0.0:2048");
-        assert rmc.getMulticastGroupAddress().equals("224.0.0.1:29823");
-        assert rmc.isReceiver();
-        assert rmc.getSenderHistorySize() == 12;
-        assert rmc.getReceiverBufferSize() == 13;
-
-        TheTransportFactory.release(ID);
-    }
-
-
     protected static void testCreateNewTransportUDP() throws Exception {
-        final int ID = 3;
+        final int ID = 2;
         TransportConfiguration tc =
             TheTransportFactory.get_or_create_configuration(ID,
                  TheTransportFactory.TRANSPORT_UDP_UNI);
@@ -143,25 +103,41 @@ public class TransportConfigTest {
     }
 
 
-    protected static void testCreateNewTransportMCast() throws Exception {
-        final int ID = 4;
+    protected static void testCreateNewTransportMulticast() throws Exception {
+        final int ID = 3;
         TransportConfiguration tc =
             TheTransportFactory.get_or_create_configuration(ID,
-                 TheTransportFactory.TRANSPORT_UDP_MULTI);
-        SimpleMcastConfiguration smc = (SimpleMcastConfiguration) tc;
-        smc.setMulticastGroupAddress("224.0.0.1:29824");
-        smc.setReceiver(false);
+                 TheTransportFactory.TRANSPORT_MULTICAST);
+        tc.setSendThreadStrategy(TransportConfiguration.ThreadSynchStrategy.NULL_SYNCH);
+        MulticastConfiguration mc = (MulticastConfiguration) tc;
+        mc.setDefaultToIPv6(true);
+        mc.setPortOffset((short) 9000);
+        mc.setGroupAddress("224.0.0.1:1234");
+        mc.setReliable(false);
+        mc.setSynInterval(100);
+        mc.setSynTimeout(100);
+        mc.setNakInterval(100);
+        mc.setNakTimeout(100);
+        mc.setNakRepairSize(16);
 
         TransportImpl ti = TheTransportFactory.create_transport_impl(ID,
-            TheTransportFactory.TRANSPORT_UDP_MULTI,
+            TheTransportFactory.TRANSPORT_MULTICAST,
             TheTransportFactory.DONT_AUTO_CONFIG);
         ti.configure(tc);
 
         tc = TheTransportFactory.get_or_create_configuration(ID,
-                 TheTransportFactory.TRANSPORT_UDP_MULTI);
-        smc = (SimpleMcastConfiguration) tc;
-        assert smc.getMulticastGroupAddress().equals("224.0.0.1:29824");
-        assert !smc.isReceiver();
+                 TheTransportFactory.TRANSPORT_MULTICAST);
+        assert tc.getSendThreadStrategy() == TransportConfiguration.ThreadSynchStrategy.NULL_SYNCH;
+        mc = (MulticastConfiguration) tc;
+        assert mc.getDefaultToIPv6() == true;
+        assert mc.getPortOffset() == 9000;
+        assert mc.getGroupAddress().equals("224.0.0.1:1234");
+        assert mc.getReliable() == false;
+        assert mc.getSynInterval() == 100;
+        assert mc.getSynTimeout() == 100;
+        assert mc.getNakInterval() == 100;
+        assert mc.getNakTimeout() == 100;
+        assert mc.getNakRepairSize() == 16;
 
         TheTransportFactory.release(ID);
     }
