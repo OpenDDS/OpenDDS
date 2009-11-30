@@ -7,13 +7,13 @@ Mon Nov 30 03:49:13 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * java/dds/OpenDDS_jni_helpers.h:
         * java/dds/dcps_java.mpc:
           
-          Added support for new multicast transport to Java bindings.
+          Added support for multicast transport to Java bindings.
 
         * java/jms/build.xml:
         * java/jms/src/META-INF/services/org.opendds.jms.transport.spi.Transport:
         * java/jms/src/org/opendds/jms/transport/spi/MulticastTransport.java:
 
-          Added support for new multicast transport to JMS bindings.
+          Added support for multicast transport to JMS bindings.
 
         * java/tests/dcps_java_tests.lst:
         * java/tests/messenger/publisher/pub_multicast.ini:
@@ -22,7 +22,7 @@ Mon Nov 30 03:49:13 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * java/tests/messenger/subscriber/sub_multicast.ini:
         * java/tests/transport_config/TransportConfigTest.java:
 
-          Updated tests for new multicast transport.
+          Updated tests for multicast transport.
 
         * java/dds/OpenDDS/DCPS/transport/ReliableMulticastConfiguration.java:
         * java/dds/OpenDDS/DCPS/transport/SimpleMcastConfiguration.java:
