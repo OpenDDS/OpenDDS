@@ -1,3 +1,44 @@
+Mon Nov 30 03:49:13 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * java/dds/OpenDDS/DCPS/transport/MulticastConfiguration.java:
+        * java/dds/OpenDDS/DCPS/transport/TheTransportFactory.java:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * java/dds/OpenDDS_jni_helpers.h:
+        * java/dds/dcps_java.mpc:
+          
+          Added support for new multicast transport to Java bindings.
+
+        * java/jms/build.xml:
+        * java/jms/src/META-INF/services/org.opendds.jms.transport.spi.Transport:
+        * java/jms/src/org/opendds/jms/transport/spi/MulticastTransport.java:
+
+          Added support for new multicast transport to JMS bindings.
+
+        * java/tests/dcps_java_tests.lst:
+        * java/tests/messenger/publisher/pub_multicast.ini:
+        * java/tests/messenger/publisher/sub_multicast.ini:
+        * java/tests/messenger/subscriber/pub_multicast.ini:
+        * java/tests/messenger/subscriber/sub_multicast.ini:
+        * java/tests/transport_config/TransportConfigTest.java:
+
+          Updated tests for new multicast transport.
+
+        * java/dds/OpenDDS/DCPS/transport/ReliableMulticastConfiguration.java:
+        * java/dds/OpenDDS/DCPS/transport/SimpleMcastConfiguration.java:
+        * java/jms/src/org/opendds/jms/transport/spi/ReliableMulticastTransport.java:
+        * java/jms/src/org/opendds/jms/transport/spi/SimpleMcastTransport.java:
+        * java/tests/messenger/publisher/pub_mcast.ini:
+        * java/tests/messenger/publisher/pub_reliable_mcast.ini:
+        * java/tests/messenger/publisher/sub_mcast.ini:
+        * java/tests/messenger/publisher/sub_reliable_mcast.ini:
+        * java/tests/messenger/subscriber/pub_mcast.ini:
+        * java/tests/messenger/subscriber/pub_reliable_mcast.ini:
+        * java/tests/messenger/subscriber/sub_mcast.ini:
+        * java/tests/messenger/subscriber/sub_reliable_mcast.ini:
+
+          Removed these files.
+
 Sun Nov 29 17:24:11 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * tests/DCPS/FooTest5/common.cpp:

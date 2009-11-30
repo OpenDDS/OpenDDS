@@ -19,15 +19,12 @@ java/tests/transport_config/run_test.pl
 #
 java/tests/messenger/publisher/run_test.pl tcp
 java/tests/messenger/publisher/run_test.pl udp
-java/tests/messenger/publisher/run_test.pl mcast
-java/tests/messenger/publisher/run_test.pl reliable_mcast
+java/tests/messenger/publisher/run_test.pl multicast
 
 java/tests/messenger/subscriber/run_test.pl tcp
 java/tests/messenger/subscriber/run_test.pl udp
-java/tests/messenger/subscriber/run_test.pl mcast
-java/tests/messenger/subscriber/run_test.pl reliable_mcast
+java/tests/messenger/subscriber/run_test.pl multicast
 
 java/tests/messenger/run_test.pl tcp
 java/tests/messenger/run_test.pl udp
-java/tests/messenger/run_test.pl mcast
-java/tests/messenger/run_test.pl reliable_mcast
+java/tests/messenger/run_test.pl multicast

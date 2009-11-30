@@ -22,9 +22,8 @@ public final class TheTransportFactory {
     // to the create_transport_impl() method and to the
     // get_or_create_configuration() method.
     public static final String TRANSPORT_TCP = "SimpleTcp";
-    public static final String TRANSPORT_RMCAST = "ReliableMulticast";
     public static final String TRANSPORT_UDP_UNI = "SimpleUdp";
-    public static final String TRANSPORT_UDP_MULTI = "SimpleMcast";
+    public static final String TRANSPORT_MULTICAST = "multicast";
 
     public static native TransportImpl create_transport_impl(int id, boolean auto_configure);
     public static native TransportImpl create_transport_impl(int id, String transportType, boolean auto_configure);

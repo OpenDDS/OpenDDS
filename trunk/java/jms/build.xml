@@ -176,9 +176,9 @@
             <include name="Federator"/>
             <include name="InfoRepoLib"/>
             <include name="OpenDDS_Dcps"/>
-            <include name="ReliableMulticast"/>
             <include name="SimpleTcp"/>
             <include name="SimpleUnreliableDgram"/>
+            <include name="OpenDDS_Multicast"/>
             <include name="OpenDDS_DCPS_Java"/>
             <include name="idl2jni_runtime"/>
             <include name="tao_java"/>

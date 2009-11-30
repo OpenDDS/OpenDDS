@@ -129,6 +129,18 @@ struct SizetField : SimpleField<C, size_t, jvmSig::INT, jint,
 };
 
 template <typename C>
+struct UshortField : SimpleField<C, unsigned short, jvmSig::SHORT, jshort,
+      &JNIEnv::GetShortField, &JNIEnv::SetShortField> {
+  typedef typename SimpleField<C, unsigned short, jvmSig::SHORT, jshort,
+  &JNIEnv::GetShortField, &JNIEnv::SetShortField>::memptr_t memptr_t;
+
+  UshortField(const char *j, memptr_t c)
+    : SimpleField<C, unsigned short, jvmSig::SHORT, jshort,
+        &JNIEnv::GetShortField, &JNIEnv::SetShortField> (j, c)
+  {}
+};
+
+template <typename C>
 struct Uint32Field : SimpleField<C, ACE_UINT32, jvmSig::INT, jint,
       &JNIEnv::GetIntField, &JNIEnv::SetIntField> {
   typedef typename SimpleField<C, ACE_UINT32, jvmSig::INT, jint,
@@ -178,17 +190,48 @@ struct InetAddrField : Field<C, ACE_TString, jvmSig::STRING> {
     jfieldID fid = this->getFid(jni, clazz);
     jobject src = jni->GetObjectField(obj, fid);
     JStringMgr jsm(jni, static_cast<jstring>(src));
-    cxx.*(this->member_ptr_) = jsm.tc_str();
     (cxx.*addr_).set(jsm.c_str());
+    if (this->member_ptr_ != 0) {
+      cxx.*(this->member_ptr_) = jsm.tc_str();
+    }
   }
 
   void toJava(JNIEnv *jni, jclass clazz, const C &cxx, jobject obj) {
     jfieldID fid = this->getFid(jni, clazz);
-    jstring str = jni->NewStringUTF(ACE_TEXT_ALWAYS_CHAR(
-                                      (cxx.*(this->member_ptr_)).c_str()));
+    jstring str;
+    if (this->member_ptr_ != 0) {
+      str = jni->NewStringUTF(ACE_TEXT_ALWAYS_CHAR(
+              (cxx.*(this->member_ptr_)).c_str()));
+    } else {
+      ACE_TCHAR buf[64];
+      (cxx.*addr_).addr_to_string(buf, sizeof(buf));
+      str = jni->NewStringUTF(buf);
+    }
     jni->SetObjectField(obj, fid, str);
     jni->DeleteLocalRef(str);
   }
 };
 
+template <typename C>
+struct TimeField : Field<C, long, jvmSig::LONG> {
+  typedef typename Field<C, long, jvmSig::LONG>::memptr_t memptr_t;
+  typedef ACE_Time_Value C::*timeval_t;
+  timeval_t time_;
+  TimeField(const char *j, timeval_t time_field)
+    : Field<C, long, jvmSig::LONG> (j, 0)
+    , time_(time_field)
+  {}
+
+  void toCxx(JNIEnv *jni, jclass clazz, jobject obj, C &cxx) {
+    jfieldID fid = this->getFid(jni, clazz);
+    long value = jni->GetLongField(obj, fid);
+    (cxx.*time_).msec(value);
+  }
+
+  void toJava(JNIEnv *jni, jclass clazz, const C &cxx, jobject obj) {
+    jfieldID fid = this->getFid(jni, clazz);
+    long value = static_cast<long>((cxx.*time_).msec());
+    jni->SetLongField(obj, fid, value);
+  }
+};
 #endif
