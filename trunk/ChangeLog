@@ -1,3 +1,13 @@
+Mon Nov 30 21:50:43 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/html:
+        * docs/html/template:
+        * docs/html/template/images:
+        * docs/html/template/images/opendds.png:
+        * docs/html/template/template.html:
+
+          Added template for HTML documentation based on TiddlyWiki.
+
 Mon Nov 30 06:57:24 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * MPC/config/dds_wrapper.mpb:
