@@ -1,3 +1,10 @@
+Mon Nov 30 04:10:24 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/ReliableMulticast:
+        * tests/transport/reliable_multicast:
+
+          Removed these files.
+
 Mon Nov 30 03:49:13 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
@@ -6,7 +13,7 @@ Mon Nov 30 03:49:13 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * java/dds/OpenDDS_DCPS_jni.cpp:
         * java/dds/OpenDDS_jni_helpers.h:
         * java/dds/dcps_java.mpc:
-          
+
           Added support for multicast transport to Java bindings.
 
         * java/jms/build.xml:
