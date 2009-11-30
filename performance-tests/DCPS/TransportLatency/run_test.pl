@@ -22,16 +22,10 @@ if ($ARGV[0] eq 'udp') {
     $pub_opts = "$opts -DCPSConfigFile pub_udp.ini";
     $sub_opts = "$opts -DCPSConfigFile sub_udp.ini";
 }
-elsif ($ARGV[0] eq 'mcast') {
-    $opts =  "-ORBSvcConf mcast.conf -t mcast -ORBSvcConf tcp.conf";
-    $pub_opts = "$opts -DCPSConfigFile pub_mcast.ini";
-    $sub_opts = "$opts -DCPSConfigFile sub_mcast.ini";
-}
-elsif ($ARGV[0] eq 'reliable_mcast') {
-    $opts =  "-ORBSvcConf reliable_mcast.conf -t reliable_mcast";
-#	. " -ORBSvcConf tcp.conf";
-    $pub_opts = "$opts -DCPSConfigFile pub_reliable_mcast.ini";
-    $sub_opts = "$opts -DCPSConfigFile sub_reliable_mcast.ini";
+elsif ($ARGV[0] eq 'multicast') {
+    $opts =  "-ORBSvcConf multicast.conf -ORBSvcConf tcp.conf";
+    $pub_opts = "$opts -DCPSConfigFile pub_multicast.ini";
+    $sub_opts = "$opts -DCPSConfigFile sub_multicast.ini";
 }
 elsif ($ARGV[0] eq 'default_tcp') {
     $opts =  "-ORBSvcConf tcp.conf -t default_tcp";
@@ -47,10 +41,10 @@ elsif ($ARGV[0] eq 'default_udp') {
 elsif ($ARGV[0] eq '-n') {
     $pub_opts = $pub_opts." -n $ARGV[1]";
 }
-elsif ($ARGV[0] eq 'default_mcast') {
-    $opts =  "-ORBSvcConf mcast.conf -ORBSvcConf tcp.conf";
-    $pub_opts = "$opts -t default_mcast_pub";
-    $sub_opts = "$opts -t default_mcast_sub";
+elsif ($ARGV[0] eq 'default_multicast') {
+    $opts =  "-ORBSvcConf multicast.conf -ORBSvcConf tcp.conf";
+    $pub_opts = "$opts -t default_multicast";
+    $sub_opts = "$opts -t default_multicast";
 }
 elsif ($ARGV[0] eq '-debug') {
     if($ARGV[1] eq '-n') {

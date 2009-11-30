@@ -24,7 +24,7 @@
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
 #include <dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram.h>
-#include <dds/DCPS/transport/ReliableMulticast/ReliableMulticast.h>
+#include <dds/DCPS/transport/multicast/Multicast.h>
 #endif
 
 #if !defined (__ACE_INLINE__)
@@ -50,7 +50,7 @@ void
 OpenDDS_Publication_Manager::init (const DDS::PublisherQos & qos)
 {
   // create the subscriber using default QoS.
-  pub_ = 
+  pub_ =
     dm_.participant ()->create_publisher (qos,
                                           DDS::PublisherListener::_nil (),
                                           OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -72,13 +72,13 @@ OpenDDS_Publication_Manager::register_transport (OpenDDS::DCPS::TransportIdType 
   OpenDDS::DCPS::PublisherImpl* pub_impl =
     dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub_.in ());
 
-  if (0 == pub_impl) 
+  if (0 == pub_impl)
     throw Manager_Exception ("Failed to obtain publisher servant");
 
-  OpenDDS::DCPS::AttachStatus status = 
+  OpenDDS::DCPS::AttachStatus status =
     pub_impl->attach_transport(transport_impl.in ());
 
-  if (status != OpenDDS::DCPS::ATTACH_OK) 
+  if (status != OpenDDS::DCPS::ATTACH_OK)
     {
       std::string status_str;
       switch (status) {

@@ -61,10 +61,10 @@ if ($ARGV[0] eq 'udp') {
     $pub_opts = "$opts -DCPSConfigFile pub_udp.ini";
     $sub_opts = "$opts -DCPSConfigFile sub_udp.ini";
 }
-elsif ($ARGV[0] eq 'mcast') {
-    $opts = ($use_svc_conf ? "-ORBSvcConf mcast.conf" : '') . " -t mcast";
-    $pub_opts = "$opts -DCPSConfigFile pub_mcast.ini";
-    $sub_opts = "$opts -DCPSConfigFile sub_mcast.ini";
+elsif ($ARGV[0] eq 'multicast') {
+    $opts = ($use_svc_conf ? "-ORBSvcConf multicast.conf" : '') . " -t multicast";
+    $pub_opts = "$opts -DCPSConfigFile pub_multicast.ini";
+    $sub_opts = "$opts -DCPSConfigFile sub_multicast.ini";
 }
 elsif ($ARGV[0] eq 'default_tcp') {
     $opts = $use_svc_conf ? "-ORBSvcConf tcp.conf" : '';
@@ -76,10 +76,10 @@ elsif ($ARGV[0] eq 'default_udp') {
     $pub_opts = "$opts -t default_udp";
     $sub_opts = "$opts -t default_udp";
 }
-elsif ($ARGV[0] eq 'default_mcast') {
-    $opts = $use_svc_conf ? "-ORBSvcConf mcast.conf" : '';
-    $pub_opts = "$opts -t default_mcast_pub";
-    $sub_opts = "$opts -t default_mcast_sub";
+elsif ($ARGV[0] eq 'default_multicast') {
+    $opts = $use_svc_conf ? "-ORBSvcConf multicast.conf" : '';
+    $pub_opts = "$opts -t default_multicast";
+    $sub_opts = "$opts -t default_multicast";
 }
 elsif ($ARGV[0] ne '') {
     print STDERR "ERROR: invalid test case\n";

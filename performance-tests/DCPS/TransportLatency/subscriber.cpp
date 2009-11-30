@@ -16,6 +16,8 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
+#include <dds/DCPS/transport/framework/TransportDefs.h>
+#include <dds/DCPS/transport/multicast/MulticastConfiguration.h>
 #include <performance-tests/DCPS/dummyTCP/DummyTcpConfiguration.h>
 #include <performance-tests/DCPS/dummyTCP/PerformanceTest.h>
 
@@ -40,11 +42,8 @@ parse_args (int argc, ACE_TCHAR *argv[])
       if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("udp")) == 0) {
         transport_impl_id = 2;
       }
-      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("mcast")) == 0) {
+      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("multicast")) == 0) {
         transport_impl_id = 3;
-      }
-      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("reliable_mcast")) == 0) {
-        transport_impl_id = 4;
       }
       // test with DEFAULT_DUMMY_TCP_ID.
       else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_tcp")) == 0) {
@@ -54,8 +53,8 @@ parse_args (int argc, ACE_TCHAR *argv[])
       else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_udp")) == 0) {
         transport_impl_id = OpenDDS::DCPS::DEFAULT_SIMPLE_UDP_ID;
       }
-      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_mcast_sub")) == 0) {
-        transport_impl_id = OpenDDS::DCPS::DEFAULT_SIMPLE_MCAST_SUB_ID;
+      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_multicast")) == 0) {
+        transport_impl_id = OpenDDS::DCPS::DEFAULT_MULTICAST_ID;
       }
       break;
     case '?':
@@ -117,7 +116,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
       // Initialize the transport
-      OpenDDS::DCPS::TransportImpl_rch tcp_impl = 
+      OpenDDS::DCPS::TransportImpl_rch tcp_impl =
         TheTransportFactory->create_transport_impl (transport_impl_id,
                                                     ACE_TEXT("DummyTcp"),
                                                     ::OpenDDS::DCPS::AUTO_CONFIG);

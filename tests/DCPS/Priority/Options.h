@@ -31,8 +31,7 @@ class Options  {
       NONE,     // Unsupported
       TCP,      // SimpleTcp
       UDP,      // SimpleUnreliableDgram
-      MC,       // SimpleUnreliableMcast
-      RMC       // ReliableMulticast
+      MC        // multicast
     };
     friend std::ostream& operator<<( std::ostream& str, TransportType value);
 

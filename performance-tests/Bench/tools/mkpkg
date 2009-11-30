@@ -17,14 +17,14 @@ cp $DDS_ROOT/lib/libInfoRepoLib.so.*      $PKG/lib/
 cp $DDS_ROOT/lib/libOpenDDS_Dcps.so.*     $PKG/lib/
 
 # For statically linked
-cp $DDS_ROOT/lib/libReliableMulticast.so.*     $PKG/lib/
 cp $DDS_ROOT/lib/libSimpleTcp.so.*             $PKG/lib/
 cp $DDS_ROOT/lib/libSimpleUnreliableDgram.so.* $PKG/lib/
+cp $DDS_ROOT/lib/libOpenDDS_Multicast.so.*     $PKG/lib/
 
 # For dynamic linking
-(cd $PKG/lib; ln -s libReliableMulticast.so.*     libReliableMulticast.so)
 (cd $PKG/lib; ln -s libSimpleTcp.so.*             libSimpleTcp.so)
 (cd $PKG/lib; ln -s libSimpleUnreliableDgram.so.* libSimpleUnreliableDgram.so)
+(cd $PKG/lib; ln -s libOpenDDS_Multicast.so.*     libOpenDDS_Multicast.so)
 
 # Statically linked
 cp $ACE_ROOT/lib/libACE.so.*                $PKG/lib/

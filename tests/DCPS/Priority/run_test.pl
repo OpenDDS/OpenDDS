@@ -260,7 +260,7 @@ Options:
 
   -t NAME | --transport=NAME
                          use NAME transport for test execution - one of
-                         (tcp, udp, mcast, rmcast), default tcp
+                         (tcp, udp, mcast), default tcp
 
   -c NUMBER | --samples=NUMBER
                          number of samples to publish during the test -

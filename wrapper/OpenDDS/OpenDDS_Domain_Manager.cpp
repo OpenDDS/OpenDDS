@@ -15,6 +15,7 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/transport/framework/TransportFactory.h>
+#include <dds/DCPS/transport/multicast/MulticastConfiguration.h>
 
 #include <ace/streams.h>
 #include <ace/Get_Opt.h>
@@ -29,15 +30,15 @@
 #include "OpenDDS_Domain_Manager.inl"
 #endif
 
-OpenDDS_Domain_Manager::OpenDDS_Domain_Manager (int & argc, 
-                                ACE_TCHAR* argv[], 
+OpenDDS_Domain_Manager::OpenDDS_Domain_Manager (int & argc,
+                                ACE_TCHAR* argv[],
                                 DDS::DomainId_t domain_id)
   : dp_ (DDS::DomainParticipant::_nil ()),
     transport_impl_id_ (1),
     shutdown_lock_ (0),
     exit_handler_ (shutdown_lock_)
 {
-  // get the domain participant factory from the singleton 
+  // get the domain participant factory from the singleton
   DDS::DomainParticipantFactory_var dpf =
     OpenDDS::DCPS::Service_Participant::instance ()->
       get_domain_participant_factory (argc, argv);
@@ -64,8 +65,8 @@ OpenDDS_Domain_Manager::OpenDDS_Domain_Manager (int & argc,
   sig_handler.register_handler (SIGINT, &exit_handler_);
 }
 
-OpenDDS_Domain_Manager::OpenDDS_Domain_Manager (int & argc, 
-                                ACE_TCHAR* argv[], 
+OpenDDS_Domain_Manager::OpenDDS_Domain_Manager (int & argc,
+                                ACE_TCHAR* argv[],
                                 DDS::DomainId_t domain_id,
                                 const DDS::DomainParticipantQos & qos)
   : dp_ (DDS::DomainParticipant::_nil ()),
@@ -73,7 +74,7 @@ OpenDDS_Domain_Manager::OpenDDS_Domain_Manager (int & argc,
     shutdown_lock_ (0),
     exit_handler_ (shutdown_lock_)
 {
-  // get the domain participant factory from the singleton 
+  // get the domain participant factory from the singleton
   DDS::DomainParticipantFactory_var dpf =
     OpenDDS::DCPS::Service_Participant::instance ()->
       get_domain_participant_factory (argc, argv);
@@ -110,7 +111,7 @@ OpenDDS_Domain_Manager::~OpenDDS_Domain_Manager ()
     OpenDDS::DCPS::Service_Participant::instance()->
     get_domain_participant_factory ();
 
-  if (!CORBA::is_nil (dpf.in ())) 
+  if (!CORBA::is_nil (dpf.in ()))
     dpf->delete_participant(dp_.in ());
 
   // clean up the transport implementations
@@ -142,7 +143,7 @@ OpenDDS_Domain_Manager::subscription_manager (
   // use the simple constructor for consecutive calls of this method
   return Subscription_Manager (
     Subscription_Manager_Ptr (
-      new OpenDDS_Subscription_Manager (Domain_Manager (ref), 
+      new OpenDDS_Subscription_Manager (Domain_Manager (ref),
                                         transport_impl_id_,
                                         qos)));
 }
@@ -153,7 +154,7 @@ OpenDDS_Domain_Manager::builtin_topic_subscriber (const Domain_Manager_Ptr & ref
   return Subscription_Manager (
            Subscription_Manager_Ptr (
              new OpenDDS_Subscription_Manager (
-               Domain_Manager (ref), 
+               Domain_Manager (ref),
                dp_->get_builtin_subscriber ())));
 }
 
@@ -175,48 +176,42 @@ OpenDDS_Domain_Manager::parse_args (int & argc, ACE_TCHAR * argv [])
   ACE_Arg_Shifter arg_shifter (argc, argv);
 
   const ACE_TCHAR *current = 0;
-  
+
   // Ignore the command - argv[0].
   arg_shifter.ignore_arg ();
-  
-  while (arg_shifter.is_anything_left ()) 
+
+  while (arg_shifter.is_anything_left ())
     {
-      if ((current = arg_shifter.get_the_parameter (ACE_TEXT("-t"))) != 0) 
+      if ((current = arg_shifter.get_the_parameter (ACE_TEXT("-t"))) != 0)
         {
             if (ACE_OS::strcmp (current, ACE_TEXT("udp")) == 0)
               {
                 transport_impl_id_ = 2;
               }
             else if (ACE_OS::strcmp (current,
-                                     ACE_TEXT("mcast")) == 0)
+                                     ACE_TEXT("multicast")) == 0)
               {
                 transport_impl_id_ = 3;
               }
             else if (ACE_OS::strcmp (current,
-                                     ACE_TEXT("reliable_mcast")) == 0)
-              {
-                transport_impl_id_ = 4;
-              }
-            else if (ACE_OS::strcmp (current,
-                                     ACE_TEXT("default_tcp")) == 0) 
+                                     ACE_TEXT("default_tcp")) == 0)
               {
                 transport_impl_id_ = OpenDDS::DCPS::DEFAULT_SIMPLE_TCP_ID;
               }
             else if (ACE_OS::strcmp (current,
-                                     ACE_TEXT("default_udp")) == 0) 
+                                     ACE_TEXT("default_udp")) == 0)
               {
                 transport_impl_id_ = OpenDDS::DCPS::DEFAULT_SIMPLE_UDP_ID;
               }
             else if (ACE_OS::strcmp (current,
-                                     ACE_TEXT("default_mcast_sub")) == 0) 
+                                     ACE_TEXT("default_multicast")) == 0)
               {
-                transport_impl_id_ = 
-                  OpenDDS::DCPS::DEFAULT_SIMPLE_MCAST_SUB_ID;
+                transport_impl_id_ = OpenDDS::DCPS::DEFAULT_MULTICAST_ID;
               }
             else
               {
-                ACE_DEBUG ((LM_ERROR, 
-                            ACE_TEXT ("Unkown value %s for -t option.\n"), 
+                ACE_DEBUG ((LM_ERROR,
+                            ACE_TEXT ("Unkown value %s for -t option.\n"),
                             current));
                 return false;
               }
@@ -228,6 +223,6 @@ OpenDDS_Domain_Manager::parse_args (int & argc, ACE_TCHAR * argv [])
           arg_shifter.ignore_arg ();
         }
     }
-        
-  return true;  
+
+  return true;
 }

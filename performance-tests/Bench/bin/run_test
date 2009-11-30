@@ -437,7 +437,7 @@ TBD
 
 =item B<./run_test -d 10 -T 4 -s test.ini -f test.log -h localhost:2038>
 
-=item B<./run_test -x -t mcast -s scenario1.ini>
+=item B<./run_test -x -t multicast -s scenario1.ini>
 
 =item B<./run_test -vd10T4V -s test.ini -h machine.domain.com:2112>
 

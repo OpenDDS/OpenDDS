@@ -9,18 +9,19 @@
 
 #include "MulticastLoader.h"
 #include "MulticastGenerator.h"
-#include "MulticastConfiguration.h"
 
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
 namespace OpenDDS {
 namespace DCPS {
 
+const ACE_TCHAR* MULTICAST_TRANSPORT_TYPE(ACE_TEXT("multicast"));
+
 int
 MulticastLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
 {
   static bool initialized(false);
-  
+
   if (initialized) return 0;  // already initialized
 
   TransportGenerator *generator;

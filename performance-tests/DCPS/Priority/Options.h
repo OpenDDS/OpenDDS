@@ -37,12 +37,11 @@ namespace Test {
  *   -v
  *      Be verbose when executing.
  *
- *   -t [ tcp | udp | mc | rmc ]
+ *   -t [ tcp | udp | mc ]
  *      Establish the transport implementation for data.  The values are:
  *        tcp - use the SimpleTcp transport
  *        udp - use the SimpleUnreliableDatagram transport
- *        mc  - use the SimpleUnreliableMcast transport
- *        rmc - use the ReliableMulticast transport
+ *        mc  - use the multicast transport
  *
  *   -c <seconds>
  *      Run test for <seconds> seconds.  If not specified, the test will
@@ -59,7 +58,7 @@ namespace Test {
  *      sections include:
  *
  *        Transport = <type>
- *      
+ *
  *      Where <type> can be one of: tcp, udp, mc or rmc.
  *
  *        TestDuration = <seconds>
@@ -107,8 +106,7 @@ class Options  {
       NONE,     // Unsupported
       TCP,      // SimpleTcp
       UDP,      // SimpleUnreliableDgram
-      MC,       // SimpleUnreliableMcast
-      RMC       // ReliableMulticast
+      MC        // multicast
     };
 
     /// Container type for publication profiles.

@@ -15,8 +15,7 @@
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpConfiguration.h"
-#include "dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastConfiguration.h"
-#include "dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.h"
+#include "dds/DCPS/transport/multicast/MulticastConfiguration.h"
 
 #ifdef ACE_AS_STATIC_LIBS
 #include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"

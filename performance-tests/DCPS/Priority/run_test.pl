@@ -401,9 +401,9 @@ priority samples is demonstrated.
 
 =item B<./run_demo.pl -d 10 -T 4 -f test.log -t udp>
 
-=item B<./run_demo.pl -x -t mcast>
+=item B<./run_demo.pl -x -t multicast>
 
-=item B<./run_test.pl -vd10T4Vt mcast -p 1,4,8>
+=item B<./run_test.pl -vd10T4Vt multicast -p 1,4,8>
 
 =back
 

@@ -28,18 +28,18 @@ class OpenDDS_Domain_Manager : public Domain_Manager_Impl
 {
  public:
   /// ctor
-  /// will read dcps configuration and information about the used transport 
-  /// implementation from the command line and set up a domain participant 
+  /// will read dcps configuration and information about the used transport
+  /// implementation from the command line and set up a domain participant
   /// with this.
-  OpenDDS_Domain_Manager (int & argc, 
+  OpenDDS_Domain_Manager (int & argc,
                           ACE_TCHAR *argv[],
                           DDS::DomainId_t domain_id);
 
   /// ctor
-  /// will read dcps configuration and information about the used transport 
-  /// implementation from the command line and set up a domain participant 
+  /// will read dcps configuration and information about the used transport
+  /// implementation from the command line and set up a domain participant
   /// with this. It also allows to pass specific DomainParticipant QoS parameters
-  OpenDDS_Domain_Manager (int & argc, 
+  OpenDDS_Domain_Manager (int & argc,
                           ACE_TCHAR *argv[],
                           DDS::DomainId_t domain_id,
                           const DDS::DomainParticipantQos & qos);
@@ -56,7 +56,7 @@ class OpenDDS_Domain_Manager : public Domain_Manager_Impl
   /// getter method for the subscription manager, the caller is responsible for
   /// memory management
   virtual Subscription_Manager subscription_manager (
-    const Domain_Manager_Ptr & ref, 
+    const Domain_Manager_Ptr & ref,
     const DDS::SubscriberQos & qos);
 
   /// returns a subscription manager for built-in topics
@@ -66,7 +66,7 @@ class OpenDDS_Domain_Manager : public Domain_Manager_Impl
   /// getter method for the publication manager, the caller is responsible for
   /// memory management
   virtual Publication_Manager publication_manager (
-    const Domain_Manager_Ptr & ref, 
+    const Domain_Manager_Ptr & ref,
     const DDS::PublisherQos & qos);
 
   /// getter method for the internal domain participant
@@ -76,11 +76,11 @@ class OpenDDS_Domain_Manager : public Domain_Manager_Impl
  private:
   /// processing transport implementation related options
   /// 't' - transport implementation to be used:
-  ///       udp           for basic udp 
-  ///       mcast         for mutlicast
-  ///       default_tcp   for tcp/ip 
-  ///       default_udp   for default udp
-  ///       default_mcast_sub for multicast with sub id
+  ///       udp               for basic udp
+  ///       multicast         for mutlicast
+  ///       default_tcp       for tcp/ip
+  ///       default_udp       for default udp
+  ///       default_multicast for multicast with sub id
   bool parse_args (int & argc, ACE_TCHAR * argv[]);
 
  private:

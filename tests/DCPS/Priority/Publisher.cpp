@@ -14,13 +14,12 @@
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpConfiguration.h"
-#include "dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastConfiguration.h"
-#include "dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.h"
+#include "dds/DCPS/transport/multicast/MulticastConfiguration.h"
 
 #ifdef ACE_AS_STATIC_LIBS
 #include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
 #include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram.h"
-#include "dds/DCPS/transport/ReliableMulticast/ReliableMulticast.h"
+#include "dds/DCPS/transport/multicast/Multicast.h"
 #endif
 
 #include <sstream>
@@ -194,12 +193,11 @@ Publisher::Publisher( const Options& options)
   // Reliability varies with the transport implementation.
   switch( this->options_.transportType()) {
     case Options::TCP:
-    case Options::RMC:
+    case Options::MC:
       writerQos.reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
       break;
 
     case Options::UDP:
-    case Options::MC:
       writerQos.reliability.kind = ::DDS::BEST_EFFORT_RELIABILITY_QOS;
       break;
 
