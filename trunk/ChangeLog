@@ -1,3 +1,14 @@
+Tue Dec  1 18:57:58 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/html/multicast/diagrams/class.dia:
+        * docs/html/multicast/diagrams/handshake.dia:
+        * docs/html/multicast/diagrams/repair.dia:
+        * docs/html/multicast/images/class.png:
+        * docs/html/multicast/images/handshake.png:
+        * docs/html/multicast/images/repair.png:
+
+          Updated diagrams for multicast design documentation.
+
 Mon Nov 30 22:09:24 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * docs/html/multicast:
