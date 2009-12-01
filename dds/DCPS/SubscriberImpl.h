@@ -202,6 +202,11 @@ public:
 
   /// @}
 
+  typedef std::vector<RepoId> SubscriptionIdVec;
+  /// Populates a std::vector with the SubscriptionIds (GUIDs) 
+  /// of this Subscriber's Data Readers
+  void get_subscription_ids(SubscriptionIdVec& subs);
+
 private:
   DDS::InstanceHandle_t        handle_;
 

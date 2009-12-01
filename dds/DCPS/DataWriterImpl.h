@@ -151,6 +151,12 @@ public:
 
   virtual DDS::ReturnCode_t assert_liveliness_by_participant();
 
+  typedef std::vector<DDS::InstanceHandle_t> InstanceHandleVec;
+  void get_instance_handles(InstanceHandleVec& instance_handles);
+
+  typedef std::set<RepoId, GUID_tKeyLessThan> IdSet;
+  void get_readers(IdSet& readers);
+
   virtual DDS::ReturnCode_t get_matched_subscriptions(
     DDS::InstanceHandleSeq & subscription_handles)
   ACE_THROW_SPEC((CORBA::SystemException));
@@ -536,8 +542,6 @@ private:
   typedef std::map<RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan> RepoIdToHandleMap;
 
   RepoIdToHandleMap               id_to_handle_map_;
-
-  typedef std::set<RepoId, GUID_tKeyLessThan> IdSet;
 
   IdSet                           readers_;
 

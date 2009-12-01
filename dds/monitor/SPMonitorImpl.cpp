@@ -64,12 +64,11 @@ SPMonitorImpl::report()
     length = 0;
     const TransportFactory::ImplMap& transports =
       TransportFactory::instance()->get_transport_impl_map();
+    report.transports.length(transports.size());
     for (TransportFactory::ImplMap::const_iterator mapIter = transports.begin();
          mapIter != transports.end();
          ++mapIter) {
-      report.transports.length(length+1);
-      report.transports[length] = mapIter->first;
-      length++;
+      report.transports[length++] = mapIter->first;
     }
     this->sp_writer_->write(report, DDS::HANDLE_NIL);
   }

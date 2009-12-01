@@ -302,6 +302,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
     datareader_set_.erase(dr_servant) ;
   }
 
+  this->monitor_->report();
+
   RepoId subscription_id  = dr_info->subscription_id_ ;
 
   try {
@@ -905,6 +907,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
   // by the datareader map.
   info->local_reader_impl_->_add_ref();
 
+  this->monitor_->report();
+
   return DDS::RETCODE_OK;
 }
 
@@ -932,6 +936,22 @@ DataCollector<double>::OnFull&
 SubscriberImpl::raw_latency_buffer_type()
 {
   return this->raw_latency_buffer_type_;
+}
+
+void
+SubscriberImpl::get_subscription_ids(SubscriptionIdVec& subs)
+{
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                   guard,
+                   this->si_lock_,
+                   );
+
+  subs.reserve(datareader_map_.size());
+  for (DataReaderMap::iterator iter = datareader_map_.begin();
+       iter != datareader_map_.end();
+       ++iter) {
+    subs.push_back(iter->second->subscription_id_);
+  }
 }
 
 } // namespace DCPS

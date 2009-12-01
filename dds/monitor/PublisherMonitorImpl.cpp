@@ -42,15 +42,12 @@ PublisherMonitorImpl::report() {
     PublisherImpl::PublicationIdVec writers;
     pub_->get_publication_ids(writers);
     CORBA::ULong length = 0;
+    report.writers.length(writers.size());
     for (PublisherImpl::PublicationIdVec::iterator iter = writers.begin();
          iter != writers.end();
          ++iter) {
-      report.writers.length(length+1);
-      report.writers[length] = *iter;
-      length++;
+      report.writers[length++] = *iter;
     }
-    
-    //report.writers  = 
     this->pub_writer_->write(report, DDS::HANDLE_NIL);
   }
 }

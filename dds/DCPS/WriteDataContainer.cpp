@@ -1131,5 +1131,19 @@ WriteDataContainer::wait_pending()
   }
 }
 
+void
+WriteDataContainer::get_instance_handles(InstanceHandleVec& instance_handles)
+{
+  ACE_GUARD(ACE_Recursive_Thread_Mutex,
+            guard,
+            this->lock_);
+  PublicationInstanceMapType::iterator it = instances_.begin();
+
+  while (it != instances_.end()) {
+    instance_handles.push_back(it->second->instance_handle_);
+    ++it;
+  }
+}
+
 } // namespace OpenDDS
 } // namespace DCPS
