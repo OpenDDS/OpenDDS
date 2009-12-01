@@ -34,7 +34,9 @@ DisjointSequence::update(SequenceNumber value)
 {
   if (value <= low()) return false; // already seen
 
-  this->values_.insert(value);
+  std::pair<set_type::iterator, bool> pair = this->values_.insert(value);
+  if (!pair.second) return false;   // already seen
+
   normalize();
 
   return true;
