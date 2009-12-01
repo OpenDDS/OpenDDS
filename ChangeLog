@@ -1,3 +1,10 @@
+Tue Dec  1 19:44:26 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Fixed bug which could cause duplicate delivery when used with
+          reliable multicast.
+
 Tue Dec  1 18:57:58 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * docs/html/multicast/diagrams/class.dia:
