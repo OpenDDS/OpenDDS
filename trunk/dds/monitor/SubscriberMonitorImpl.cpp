@@ -13,6 +13,7 @@
 #include "dds/DCPS/SubscriberImpl.h"
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
+#include <dds/DCPS/DomainParticipantImpl.h>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -33,9 +34,20 @@ void
 SubscriberMonitorImpl::report() {
   if (!CORBA::is_nil(this->sub_writer_.in())) {
     SubscriberReport report;
-    //report.sub_id   = sub_->get_id();  // There is no RepoId for the sub!
-    //report.transport_id = sub_->
-    //report.readers  = sub_->
+    report.handle = sub_->get_instance_handle();
+    DDS::DomainParticipant_var dp = sub_->get_participant();
+    report.dp_id   = dynamic_cast<DomainParticipantImpl*>(dp.in())->get_id();
+    TransportImpl_rch ti = sub_->get_transport_impl();
+    //report.transport_id = // No direct way to look up the transport ID
+    SubscriberImpl::SubscriptionIdVec readers;
+    sub_->get_subscription_ids(readers);
+    CORBA::ULong length = 0;
+    report.readers.length(readers.size());
+    for (SubscriberImpl::SubscriptionIdVec::iterator iter = readers.begin();
+         iter != readers.end();
+         ++iter) {
+      report.readers[length++] = *iter;
+    }    
     this->sub_writer_->write(report, DDS::HANDLE_NIL);
   }
 }

@@ -311,6 +311,13 @@ public:
    */
   void wait_pending();
 
+  /**
+   * Returns a vector of handles for the instances registered for this
+   * data writer.
+   */
+  typedef std::vector<DDS::InstanceHandle_t> InstanceHandleVec;
+  void get_instance_handles(InstanceHandleVec& instance_handles);
+
 private:
 
   // --------------------------

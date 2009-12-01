@@ -332,6 +332,10 @@ DataWriterImpl::fully_associated(OpenDDS::DCPS::RepoId myid,
   if (len == 0)
     return;
 
+  if (this->monitor_) {
+    this->monitor_->report();
+  }
+
   if (!is_bit_) {
     DDS::InstanceHandleSeq handles;
     // Create the list of readers repo id.
@@ -1285,6 +1289,10 @@ ACE_THROW_SPEC((CORBA::SystemException))
                      ret);
   }
 
+  if (this->monitor_) {
+    this->monitor_->report();
+  }
+
   // Add header with the registration sample data.
   ACE_Message_Block* registered_sample =
     this->create_control_message(INSTANCE_REGISTRATION,
@@ -2135,6 +2143,19 @@ void
 DataWriterImpl::wait_pending()
 {
   this->data_container_->wait_pending();
+}
+
+void
+DataWriterImpl::get_instance_handles(InstanceHandleVec& instance_handles)
+{
+  this->data_container_->get_instance_handles(instance_handles);
+}
+
+void
+DataWriterImpl::get_readers(IdSet& readers)
+{
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
+  readers = this->readers_;
 }
 
 } // namespace DCPS

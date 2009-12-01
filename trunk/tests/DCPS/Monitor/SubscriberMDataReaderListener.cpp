@@ -52,9 +52,10 @@ throw(CORBA::SystemException)
 
       if (si.valid_data) {
         std::cout << "SubscriberReport:" << std::endl
-                  << "  dp_id   = " << subr.dp_id        << std::endl
+                  << "  handle       = " << subr.handle       << std::endl
+                  << "  dp_id        = " << subr.dp_id        << std::endl
                   << "  transport_id = " << subr.transport_id << std::endl
-                  << "  readers = " << std::endl;
+                  << "  readers      = " << std::endl;
         for (CORBA::ULong i = 0; i < subr.readers.length(); i++) {
           std::cout << "    " << subr.readers[i] << std::endl;
         }
