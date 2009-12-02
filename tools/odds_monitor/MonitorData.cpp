@@ -24,9 +24,9 @@ Monitor::MonitorData::MonitorData( const Options& options, MonitorDataModel* mod
    options_( options),
    model_( model),
    dataSource_( 0),
-   storage_( new MonitorDataStorage())
+   storage_( new MonitorDataStorage( this))
 {
-  this->dataSource_ = new MonitorTask( this, this->options_);
+  this->dataSource_ = new MonitorTask( this->storage_, this->options_);
   this->dataSource_->start();
 }
 
@@ -131,86 +131,6 @@ Monitor::MonitorData::clearData()
   this->storage_->activeIor() = std::string();
 
   return true;
-}
-
-void
-Monitor::MonitorData::update(
-  const OpenDDS::DCPS::ServiceParticipantReport& /* data */,
-  bool  /* remove */
-)
-{
-}
-
-void
-Monitor::MonitorData::update(
-  const OpenDDS::DCPS::DomainParticipantReport& /* data */,
-  bool  /* remove */
-)
-{
-}
-
-void
-Monitor::MonitorData::update(
-  const OpenDDS::DCPS::TopicReport& /* data */,
-  bool  /* remove */
-)
-{
-}
-
-void
-Monitor::MonitorData::update(
-  const OpenDDS::DCPS::PublisherReport& /* data */,
-  bool  /* remove */
-)
-{
-}
-
-void
-Monitor::MonitorData::update(
-  const OpenDDS::DCPS::SubscriberReport& /* data */,
-  bool  /* remove */
-)
-{
-}
-
-void
-Monitor::MonitorData::update(
-  const OpenDDS::DCPS::DataWriterReport& /* data */,
-  bool  /* remove */
-)
-{
-}
-
-void
-Monitor::MonitorData::update(
-  const OpenDDS::DCPS::DataWriterPeriodicReport& /* data */,
-  bool  /* remove */
-)
-{
-}
-
-void
-Monitor::MonitorData::update(
-  const OpenDDS::DCPS::DataReaderReport& /* data */,
-  bool  /* remove */
-)
-{
-}
-
-void
-Monitor::MonitorData::update(
-  const OpenDDS::DCPS::DataReaderPeriodicReport& /* data */,
-  bool  /* remove */
-)
-{
-}
-
-void
-Monitor::MonitorData::update(
-  const OpenDDS::DCPS::TransportReport& /* data */,
-  bool  /* remove */
-)
-{
 }
 
 void

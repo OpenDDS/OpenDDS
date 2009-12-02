@@ -1,3 +1,19 @@
+Wed Dec  2 20:57:43 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/MonitorData.h:
+        * tools/odds_monitor/MonitorData.cpp:
+        * tools/odds_monitor/MonitorDataStorage.h:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+        * tools/odds_monitor/MonitorDataStorage.inl:
+        * tools/odds_monitor/MonitorTask.h:
+        * tools/odds_monitor/MonitorTask.cpp:
+
+          Refactored processing and applyed method templates to reduce
+          the total code volume.  Changed to forward updates from the
+          task to the storage object to let it mediate the updates with
+          the GUI.  Stubbed the updates in the MonitorDataStorage.inl
+          file.
+
 Wed Dec  2 19:03:41 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/odds_monitor/MonitorData.h:

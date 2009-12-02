@@ -17,7 +17,7 @@
 namespace Monitor {
 
 class Options;
-class MonitorData;
+class MonitorDataStorage;
 
 /**
  * @class MonitorTask
@@ -41,8 +41,8 @@ class MonitorTask : public ACE_Task_Base {
     typedef std::map< std::string, RepoKey> IorKeyMap;
 
     MonitorTask(
-      MonitorData* data,
-      const Options& options
+      MonitorDataStorage* data,
+      const Options&      options
     );
 
     virtual ~MonitorTask();
@@ -76,13 +76,17 @@ class MonitorTask : public ACE_Task_Base {
     const IorKeyMap& iorKeyMap() const;
 
   private:
-    /// @brief Specialize processing by type.
-    template< class ReaderType, class DataType>
-    class InboundData {
-      public:
-        /// Forward inbound samples to the model.
-        void process( DDS::DataReader_ptr reader, MonitorData* model);
-    };
+    /// Specialize data handling by type.
+    template< class ReaderType, typename DataType>
+    void dataUpdate( DDS::DataReader_ptr reader);
+
+    /// Specialize subscriptions by type support.
+    template< class TypeSupport>
+    void createSubscription(
+           DDS::Subscriber_ptr subscriber,
+           const char*         topicName,
+           int                 type
+         ); 
 
     /// Terminate the current instrumentation processing.
     void stopInstrumentation();
@@ -102,8 +106,8 @@ class MonitorTask : public ACE_Task_Base {
     /// Configuration Information.
     const Options& options_;
 
-    /// Model data interface.
-    MonitorData* data_;
+    /// Model data storage interface.
+    MonitorDataStorage* data_;
 
     /// Id of the activated thread.
     ACE_thread_t thread_;

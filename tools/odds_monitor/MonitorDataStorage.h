@@ -10,6 +10,7 @@
 #define MONITORDATASTORAGE_H
 
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/monitor/monitorC.h"
 
 #include <map>
 #include <string>
@@ -19,6 +20,7 @@ class RepoIdGenerator;
 namespace Monitor {
 
 class TreeNode;
+class MonitorData;
 
 /**
  * @class MonitorDataStorage
@@ -54,8 +56,8 @@ class TreeNode;
  */
 class MonitorDataStorage {
   public:
-    /// Construct with an IOR only.
-    MonitorDataStorage();
+    /// Construct with a reference to the model.
+    MonitorDataStorage( MonitorData* model);
 
     /// Virtual destructor.
     virtual ~MonitorDataStorage();
@@ -77,9 +79,16 @@ class MonitorDataStorage {
     /// @name OpenDDS service access methods.
     /// @{
 
+    /// Update or remove a data element in the model.
+    template< typename DataType>
+    void update( const DataType& data, bool remove = false);
+
     /// @}
 
   private:
+    /// Reference to the model.
+    MonitorData* model_;
+
     /// Map GUID_t values to TreeNode elements.
     typedef
       std::map< OpenDDS::DCPS::GUID_t,
@@ -100,6 +109,8 @@ class MonitorDataStorage {
     /// Generate Guid values for transports.
     RepoIdGenerator* transportIdGenerator_;
 };
+
+#include "MonitorDataStorage.inl"
 
 } // End of namespace Monitor
 
