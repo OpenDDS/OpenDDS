@@ -691,7 +691,7 @@ project : dcps_multicast {
 &lt;/div&gt;
 &lt;!--}}}--&gt;</pre>
 </div>
-<div title="Reliability" modifier="Steven Stallion" created="200912011934" modified="200912020046" changecount="71">
+<div title="Reliability" modifier="Steven Stallion" created="200912011934" modified="200912020052" changecount="72">
 <pre>DCPS control samples were chosen in lieu of more traditional ~PDUs for the exchange of control information between peers. This allows the transport to leverage existing functionality such as byte ordering and efficient marshaling/demarshaling of data at the cost of a slightly increased payload size.
 
 Reliable delivery is achieved through two primary mechanisms:
@@ -711,7 +711,7 @@ As each datagram is delivered to the {{{DataLink}}}, the transport sequence valu
 
 If the active peer receives a {{{MULTICAST_NAK}}} control sample it examines its send buffer for the missing datagram. If the datagram is no longer available, it sends a {{{MULTICAST_NAKACK}}} control sample to the entire multicast group to suppress further repair requests. If the datagram is still available, it resends the missing data to the entire multicast group.
 
-If the passive peer instead receives a {{{MULTICAST_NAKACK}}} control sample, it will behave just asif the repair request has aged off, suppressing further repair requests.</pre>
+If the passive peer instead receives a {{{MULTICAST_NAKACK}}} control sample, it will behave just as if the repair request has aged off, suppressing further repair requests.</pre>
 </div>
 <div title="SideBarOptions" modifier="Steven Stallion" created="200911302023" changecount="1">
 <pre>&lt;&lt;search&gt;&gt;&lt;&lt;closeAll&gt;&gt;&lt;&lt;permaview&gt;&gt;&lt;&lt;newTiddler&gt;&gt;&lt;&lt;saveChanges&gt;&gt;&lt;&lt;slider chkSliderOptionsPanel OptionsPanel &quot;options »&quot; &quot;Change TiddlyWiki advanced options&quot;&gt;&gt;</pre>
