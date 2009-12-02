@@ -1,3 +1,13 @@
+Wed Dec  2 22:41:22 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.cpp:
+
+          operator<<()
+            - forced submessage_id to be interpreted as an integer type
+              when inserting onto a std::ostream.  This corrects a
+              problem where the log messages were truncated at the
+              submessage_id.
+
 Wed Dec  2 22:00:04 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * docs/html/federation:
