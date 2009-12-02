@@ -855,6 +855,15 @@ Service_Participant::set_repo_domain(const DDS::DomainId_t domain, const RepoKey
 
   // Make all of the remote calls after releasing the lock.
   for (unsigned int index = 0; index < repoList.size(); ++index) {
+    if (DCPS_debug_level > 0) {
+      RepoIdConverter converter(repoList[ index].second);
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) Service_Participant::set_repo_domain: ")
+                 ACE_TEXT("(%d of %d) attaching domain %d participant %C to Repo[ %d].\n"),
+                 (1+index), repoList.size(), domain,
+                 std::string(converter).c_str(),
+                 key));
+    }
     repoList[ index].first->attach_participant(domain, repoList[ index].second);
   }
 }

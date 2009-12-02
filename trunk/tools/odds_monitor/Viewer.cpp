@@ -16,6 +16,10 @@
 #include "MonitorDataModel.h"
 #include "TreeNode.h"
 
+#ifdef DEVELOPMENT
+#include <iostream>
+#endif /* DEVELOPMENT */
+
 namespace { // Anonymous namespace for file scope.
   /// Default (detached) repository selection item label.
   const QString repoDetachedSelection( QObject::tr("<detached>"));
@@ -30,6 +34,7 @@ Viewer::Viewer( const Options& options, QMainWindow* parent)
    dataSource_( 0),
    model_( new MonitorDataModel())
 {
+  // Initialize the GUI and connect the signals and slots.
   this->ui.setupUi( this);
   connect( this->ui.repoAddButton,    SIGNAL(clicked()), this, SLOT(addRepo()));
   connect( this->ui.repoRemoveButton, SIGNAL(clicked()), this, SLOT(removeRepo()));
@@ -38,32 +43,25 @@ Viewer::Viewer( const Options& options, QMainWindow* parent)
   connect( this->ui.repoSelection, SIGNAL(currentIndexChanged( const QString&)),
            this,                   SLOT(newRepo( const QString&)));
 
+  connect( this->ui.repoView->header(), SIGNAL(sectionClicked(int)),
+           this,                        SLOT(doSort(int)));
+
+  // Initialize the model and tree view.
   this->dataSource_ = new MonitorData( this->options_, this->model_);
   this->ui.repoView->setModel( this->model_);
 
+  // Setup the repository selections using the initial set.
   this->ui.repoSelection->addItem( repoDetachedSelection);
   QList<QString> iorList;
   this->dataSource_->getIorList( iorList);
   while( !iorList.isEmpty()) {
     this->ui.repoSelection->addItem( iorList.takeFirst());
   }
-}
 
-void
-Viewer::newRepo( const QString& ior)
-{
-  if( ior != repoDetachedSelection) {
-    if( !ior.isEmpty()) {
-      if( this->dataSource_->setRepoIor( ior)) {
-        this->ui.statusbar->showMessage( tr("Attached"));
-
-      } else {
-        this->ui.statusbar->showMessage( tr("Failed to attach"));
-      }
-    }
-  } else {
-    this->dataSource_->clearData();
-    this->ui.statusbar->showMessage( tr("Detached"));
+  // Establish the most recent selection as the initial one.
+  int count = this->ui.repoSelection->count();
+  if( count > 0) {
+    this->ui.repoSelection->setCurrentIndex( count - 1);
   }
 }
 
@@ -101,8 +99,40 @@ Viewer::removeRepo()
     this->dataSource_->removeRepo( current);
     this->ui.repoSelection->removeItem( this->ui.repoSelection->currentIndex());
   }
-
   // Status bar is updated when the index change propagates.
+}
+
+void
+Viewer::newRepo( const QString& ior)
+{
+  if( ior != repoDetachedSelection) {
+    if( !ior.isEmpty()) {
+      if( this->dataSource_->setRepoIor( ior)) {
+        this->ui.statusbar->showMessage( tr("Attached"));
+
+      } else {
+        // This selection was not a valid repository, remove it from the
+        // selection list (since it was already added to the list to get
+        // to this point).
+        this->removeRepo();
+        this->ui.statusbar->showMessage( tr("Failed to attach"));
+      }
+    }
+  } else {
+    // This is the <detached> selection, remove any active repository.
+    this->dataSource_->clearData();
+    this->ui.statusbar->showMessage( tr("Detached"));
+  }
+}
+
+void
+Viewer::doSort( int index)
+{
+  Qt::SortOrder ordering = this->ui.repoView->header()->sortIndicatorOrder();
+#ifdef DEVELOPMENT
+std::cerr << "Sorting column " << index << " ordered by " << ordering << std::endl;
+#endif /* DEVELOPMENT */
+  this->ui.repoView->sortByColumn( index, ordering);
 }
 
 void

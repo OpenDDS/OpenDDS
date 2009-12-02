@@ -1,3 +1,69 @@
+Wed Dec  2 00:21:11 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Added an additional diagnostic message.
+
+        * tools/odds_monitor/Monitor.mpc:
+
+          Added monitor lib directly for now.  We may want to make
+          monitoring a base configuration.
+
+        * tools/odds_monitor/Monitor.ui:
+
+          Enhanced the GUI.
+
+        * tools/odds_monitor/MonitorData.cpp:
+
+          Pass status information to the GUI about the repository
+          attachment.
+
+        * tools/odds_monitor/MonitorDataStorage.h:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+
+          Store the currently active repository IOR for general usage.
+
+        * tools/odds_monitor/MonitorTask.h:
+        * tools/odds_monitor/MonitorTask.cpp:
+
+          Added more DDS initialization code.  Debugged some
+          synchronization issues.  Predicate IOR success on resolving the
+          given IOR.
+
+        * tools/odds_monitor/Options.cpp:
+
+          Derive the domain Id value for the instrumentation from the
+          monitor.idl definitions.
+
+        * tools/odds_monitor/MonitorDataModel.h:
+        * tools/odds_monitor/MonitorDataModel.cpp:
+        * tools/odds_monitor/TreeNode.h:
+
+          Added support for sorting columns.
+
+        * tools/odds_monitor/Viewer.h:
+        * tools/odds_monitor/Viewer.cpp:
+
+          Added support for sorting columns.  Set the initial repository
+          to the last added during initialization.
+
+        * tools/odds_monitor/monitor.conf:
+        * tools/odds_monitor/repo.conf:
+
+          Service configuration files for the application and
+          repositories.  Currently only establishes the TCP transport
+          service.
+
+        * tools/odds_monitor/repos.ini:
+
+          Configuration script for establishing an initial set of three
+          repositories for the monitor application to attach.
+
+        * tools/odds_monitor/start_repos.pl:
+
+          Utility script to start multiple repository processes for
+          testing.
+
 Tue Dec  1 20:19:28 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.h:

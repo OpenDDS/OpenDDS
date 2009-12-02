@@ -11,6 +11,7 @@
 
 #include <QtCore/QList>
 #include <QtCore/QVariant>
+#include <QtCore/QtAlgorithms>
 
 namespace Monitor {
 
@@ -56,13 +57,29 @@ class TreeNode {
     /// Remove a number of child nodes.
     bool removeChildren( int row, int count);
 
+    /// Sort our children recursively.
+    void sort( int column, Qt::SortOrder order);
+
+    /// Function object defining how to sort children.
+    class CompareByColumn {
+      public:
+        CompareByColumn( int column, Qt::SortOrder order);
+        bool operator()(
+               const TreeNode* const& lhs,
+               const TreeNode* const& rhs
+             ) const;
+      private:
+        int           column_;
+        Qt::SortOrder order_;
+    };
+
     /**
      * @brief Access a child by index.
      *
      * @param  row the contained child node to select and return
      * @return     pointer to the selected child node
      */
-    TreeNode* operator[]( int row);
+    TreeNode* operator[]( int row) const;
 
     /**
      * @brief Access the data in a desired column.
@@ -70,7 +87,7 @@ class TreeNode {
      * @param  column the column of data to access
      * @return        value of the contained data
      */
-    QVariant column( int column);
+    QVariant column( int column) const;
 
     /// Number of children we have.
     int size() const;
@@ -82,7 +99,7 @@ class TreeNode {
     int row() const;
 
     /// Access our parent.
-    TreeNode* parent();
+    TreeNode* parent() const;
 
   private:
     /// Container of children of this element.
@@ -96,6 +113,34 @@ class TreeNode {
 };
 
 } // End of namespace Monitor
+
+inline
+Monitor::TreeNode::CompareByColumn::CompareByColumn(
+  int column,
+  Qt::SortOrder order
+) : column_( column), order_( order)
+{
+}
+
+inline
+bool
+Monitor::TreeNode::CompareByColumn::operator()(
+  const TreeNode* const& lhs,
+  const TreeNode* const& rhs
+) const
+{
+  switch( this->order_) {
+    case Qt::AscendingOrder:
+      return rhs->column( this->column_).toString()
+           < lhs->column( this->column_).toString();
+
+    case Qt::DescendingOrder:
+      return lhs->column( this->column_).toString()
+           < rhs->column( this->column_).toString();
+  }
+  // Unrecognized order will result in equality for all.
+  return false;
+}
 
 inline
 Monitor::TreeNode::TreeNode(
@@ -168,15 +213,26 @@ Monitor::TreeNode::removeChildren( int row, int count)
 }
 
 inline
+void
+Monitor::TreeNode::sort( int column, Qt::SortOrder order)
+{
+  CompareByColumn compare( column, order);
+  qStableSort( this->children_.begin(), this->children_.end(), compare);
+  for( int index = 0; index < this->size(); ++index) {
+    (*this)[ index]->sort( column, order);
+  }
+}
+
+inline
 Monitor::TreeNode*
-Monitor::TreeNode::operator[]( int row)
+Monitor::TreeNode::operator[]( int row) const
 {
   return this->children_.value( row);
 }
 
 inline
 QVariant
-Monitor::TreeNode::column( int column)
+Monitor::TreeNode::column( int column) const
 {
   return this->data_.value( column);
 }
@@ -209,7 +265,7 @@ Monitor::TreeNode::row() const
 
 inline
 Monitor::TreeNode*
-Monitor::TreeNode::parent()
+Monitor::TreeNode::parent() const
 {
   return this->parent_;
 }

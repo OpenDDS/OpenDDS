@@ -11,6 +11,7 @@
 #include "dds/DCPS/WaitSet.h"
 #include "dds/DCPS/Service_Participant.h"
 
+
 #include <ace/Task.h>
 
 namespace Monitor {
@@ -63,7 +64,7 @@ class MonitorTask : public ACE_Task_Base {
 
     /// Establish a binding to a repository.  Clear any previously
     /// created structures first: there can be only one.
-    void setRepoIor( const std::string& ior);
+    bool setRepoIor( const std::string& ior);
 
     /// @}
 
@@ -71,18 +72,20 @@ class MonitorTask : public ACE_Task_Base {
     const IorKeyMap& iorKeyMap() const;
 
   private:
-    enum ControlContext { InternalControl, ExternalControl};
+    /// Initiate instrumentation monitoring on the currently bound domain.
+    void startInstrumentation();
 
-void someMethod();
-
-    /// Terminate current processing.
-    void shutdownRepo();
+    /// Terminate the current instrumentation processing.
+    void stopInstrumentation();
 
     /// Thread state flag.
     bool opened_;
 
     /// Service control flag.
     bool done_;
+
+    /// Flow control.
+    bool inUse_;
 
     /// Configuration Information.
     const Options& options_;
@@ -99,9 +102,6 @@ void someMethod();
     /// Condition to gate access to the service facilities.
     ACE_Condition<ACE_SYNCH_MUTEX> gate_;
 
-    /// Context of the current processing used to serialize access.
-    ControlContext controlContext_;
-
     /// Object to wait on DDS service conditions with.
     DDS::WaitSet_var waiter_;
 
@@ -111,23 +111,11 @@ void someMethod();
     /// Local Domain Participant
     ::DDS::DomainParticipant_var participant_;
 
-    /// Subscriber for the Builtin topics.
-    ::DDS::Subscriber_var builtinSubscriber_;
-
-    /// DataReader for the BuiltinTopic "DCPSParticipant".
-    ::DDS::ParticipantBuiltinTopicDataDataReader_var participantReader_;
-
-    /// DataReader for the BuiltinTopic "DCPSTopic".
-    ::DDS::TopicBuiltinTopicDataDataReader_var topicReader_;
-
-    /// DataReader for the BuiltinTopic "DCPSPublication".
-    ::DDS::PublicationBuiltinTopicDataDataReader_var publicationReader_;
-
-    /// DataReader for the BuiltinTopic "DCPSSubscription".
-    ::DDS::SubscriptionBuiltinTopicDataDataReader_var subscriptionReader_;
-
     /// Map IOR strings to repository key values.
     IorKeyMap iorKeyMap_;
+
+    /// Key value of the currently active repository.
+    RepoKey activeKey_;
 
     /// Repository key value to use for next IOR to be set.
     RepoKey currentKey_;

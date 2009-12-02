@@ -60,14 +60,25 @@ Monitor::MonitorData::setRepoIor( const QString& ior)
     return false;
   }
 
+  // Return successfully if the requested repository is already the
+  // active repository.
+  if( this->storage_->activeIor() == ior.toStdString()) {
+    return true;
+  }
+
   // Delegate to the data source.
-  this->dataSource_->setRepoIor( ior.toStdString());
-  this->stubmodelchange();
-  return true;
+  if( this->dataSource_->setRepoIor( ior.toStdString())) {
+    this->storage_->activeIor() = ior.toStdString();
+this->stubmodelchange();
+    return true;
+
+  } else {
+    return false;
+  }
 }
 
 bool
-Monitor::MonitorData::removeRepo( const QString& /* ior */)
+Monitor::MonitorData::removeRepo( const QString& ior)
 {
   if( !this->enabled_) {
     return false;
@@ -75,7 +86,7 @@ Monitor::MonitorData::removeRepo( const QString& /* ior */)
 
   // Check if this is the currently monitored repository, and clear its
   // data if it is in the view.
-  if( false) {
+  if( this->storage_->activeIor() == ior.toStdString()) {
     this->clearData();
   }
 
@@ -108,7 +119,9 @@ Monitor::MonitorData::clearData()
   // Install the empty tree into the data model.
   this->model_->newRoot( root);
 
-  // Look up the index for this IOR and remove it from the service.
+  // Clear the active IOR field.
+  this->storage_->activeIor() = std::string();
+
   return true;
 }
 

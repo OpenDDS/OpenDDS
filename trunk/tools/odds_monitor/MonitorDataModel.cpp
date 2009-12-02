@@ -214,6 +214,7 @@ MonitorDataModel::insertRows(
               this->root_->width()
             );
   endInsertRows();
+  emit layoutChanged();
 
   return success;
 }
@@ -230,6 +231,7 @@ MonitorDataModel::removeRows(
   beginRemoveRows( parent, row, row+count-1);
   success = this->getNode( parent)->removeChildren( row, count);
   endRemoveRows();
+  emit layoutChanged();
 
   return success;
 }
@@ -252,6 +254,30 @@ MonitorDataModel::removeColumns(
 )
 {
   return this->QAbstractItemModel::removeColumns( column, count, parent);
+}
+
+void
+MonitorDataModel::sort(
+  int           column,
+  Qt::SortOrder order
+)
+{
+  this->doSort( column, order);
+}
+
+void
+MonitorDataModel::doSort(
+  int                column,
+  Qt::SortOrder      order,
+  const QModelIndex& index
+)
+{
+  TreeNode* node = this->getNode( index);
+  if( !node) {
+    node = this->root_;
+  }
+  node->sort( column, order);
+  emit layoutChanged();
 }
 
 QMimeData*

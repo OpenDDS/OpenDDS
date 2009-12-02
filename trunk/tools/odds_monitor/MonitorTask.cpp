@@ -6,6 +6,7 @@
 #include "MonitorData.h"
 #include "Options.h"
 
+#include "dds/monitor/monitorTypeSupportImpl.h"
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/Qos_Helper.h"
@@ -20,10 +21,10 @@ Monitor::MonitorTask::MonitorTask(
   const Options& options
 ) : opened_( false),
     done_( false),
+    inUse_( false),
     options_( options),
     data_( data),
     gate_( this->lock_),
-    controlContext_( ExternalControl),
     waiter_( new DDS::WaitSet),
     guardCondition_( new DDS::GuardCondition),
     currentKey_( 0)
@@ -81,12 +82,15 @@ Monitor::MonitorTask::close( u_long flags)
   }
 
   // Shutdown current processing.
-  this->shutdownRepo();
+  this->stopInstrumentation();
 
   // This is the single location where this member is written, don't
   // bother to lock access.
   this->done_ = true;
-  this->controlContext_ = InternalControl;
+  {
+    ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, -1);
+    this->inUse_ = false;
+  }
   this->gate_.broadcast();
 
   this->guardCondition_->set_trigger_value( true);
@@ -113,7 +117,7 @@ Monitor::MonitorTask::stop()
 }
 
 void
-Monitor::MonitorTask::shutdownRepo()
+Monitor::MonitorTask::stopInstrumentation()
 {
   // Only shutdown if we are currently actively processing data from a
   // repository.
@@ -121,15 +125,19 @@ Monitor::MonitorTask::shutdownRepo()
     return;
   }
 
-  // Wait to gain control of processing.
-  if( this->controlContext_ == InternalControl) {
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) MonitorTask::stopInstrumentation() - ")
+    ACE_TEXT("removing participant for domain %d.\n"),
+    this->participant_->get_domain_id()
+  ));
+
+  { // Wait to gain control of processing.
     ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->lock_);
-    while( this->controlContext_ == InternalControl) {
-      this->guardCondition_->set_trigger_value( true);
+    while( this->inUse_) {
       this->gate_.wait();
     }
+    this->inUse_ = true;
   }
-  // At this point, the context is ExternalControl.
 
   // Clean up the wait conditions.
   DDS::ConditionSeq conditions;
@@ -144,15 +152,33 @@ Monitor::MonitorTask::shutdownRepo()
   // Destroy the instrumentation participant.
   this->participant_->delete_contained_entities();
   TheParticipantFactory->delete_participant( this->participant_.in());
+  this->participant_ = DDS::DomainParticipant::_nil();
 
-  // Yield control.
-  this->controlContext_ = InternalControl;
+  /// Yield control.
+  {
+    ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->lock_);
+    this->inUse_ = false;
+  }
   this->gate_.broadcast();
 }
 
-void
+bool
 Monitor::MonitorTask::setRepoIor( const std::string& ior)
 {
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) MonitorTask::setRepoIor() - ")
+    ACE_TEXT("setting active repository to: %C.\n"),
+    ior.c_str()
+  ));
+
+  { // Wait to gain control of processing.
+    ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, false);
+    while( this->inUse_) {
+      this->gate_.wait();
+    }
+    this->inUse_ = true;
+  }
+
   RepoKey key;
   IorKeyMap::iterator location = this->iorKeyMap_.find( ior);
   if( location != this->iorKeyMap_.end()) {
@@ -163,37 +189,163 @@ Monitor::MonitorTask::setRepoIor( const std::string& ior)
     // We need to find an open key to use.  Check the actual
     // Service_Participant mappings for a slot.
     OpenDDS::DCPS::Service_Participant::KeyIorMap::const_iterator
-      keylocation;
+      keyLocation;
     key = this->currentKey_;
     do {
-      keylocation = TheServiceParticipant->keyIorMap().find( ++key);
-    } while( keylocation != TheServiceParticipant->keyIorMap().end());
+      keyLocation = TheServiceParticipant->keyIorMap().find( ++key);
+    } while( keyLocation != TheServiceParticipant->keyIorMap().end());
     this->currentKey_ = key;
 
     // We have a new repository to install, go ahead.
     TheServiceParticipant->set_repo_ior( ior.c_str(), key);
+
+    // Check that we were able to resolve and attach to the repository.
+    keyLocation = TheServiceParticipant->keyIorMap().find( key);
+    if( keyLocation == TheServiceParticipant->keyIorMap().end()) {
+      // We failed to install this IOR, nothing left to do.
+      {
+        ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, -1);
+        this->inUse_ = false;
+      }
+      return false;
+    }
+
+    // Store the reverse mapping for our use.
     this->iorKeyMap_[ ior] = key;
   }
 
+  // Save the currently active repository key.
+  this->activeKey_ = key;
+
+  /// Yield control.
+  {
+    ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, -1);
+    this->inUse_ = false;
+  }
+
+  // Shutdown current processing.  This has the effect of removing the
+  // existing participant.
+  // N.B. The current participant needs to be removed before remapping
+  //      the domain since it would be attached to the new repository,
+  //      which does not work unless federated.  This needs to work in
+  //      the case of non-federated repositories.
+  this->stopInstrumentation();
+
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) MonitorTask::setRepoIor() - ")
+    ACE_TEXT("rebinding instrumentation domain %d to repository at: %C.\n"),
+    this->options_.domain(),
+    ior.c_str()
+  ));
+
   // Map the instrumentation domain onto the indicated repository.
   TheServiceParticipant->set_repo_domain( this->options_.domain(), key);
+
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) MonitorTask::setRepoIor() - ")
+    ACE_TEXT("restarting monitoring with new repository.\n")
+  ));
+
+  // Fire up the instrumentation monitoring on the currently bound
+  // domain.
+  this->startInstrumentation();
+
+  return true;
+}
+
+int
+Monitor::MonitorTask::svc()
+{
+  this->thread_ = ACE_OS::thr_self();
+
+  if( this->options_.verbose()) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) MonitorTask::svc() - ")
+      ACE_TEXT("processing starts on thread.\n")
+    ));
+  }
+
+  DDS::Duration_t   timeout = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC};
+  DDS::ConditionSeq conditions;
+
+  while( !this->done_) {
+    if( this->options_.verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) MonitorTask::svc() - ")
+        ACE_TEXT("waiting for work.\n")
+      ));
+    }
+
+    if( DDS::RETCODE_OK != this->waiter_->wait( conditions, timeout)) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: MonitorTask::svc() - ")
+        ACE_TEXT("failed to synchronize DDS conditions.\n")
+      ));
+      return -1;
+    }
+
+    if( this->options_.verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) MonitorTask::svc() - ")
+        ACE_TEXT("processing conditions.\n")
+      ));
+    }
+
+    { // Wait to gain control of processing.
+      ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, -1);
+      while( this->inUse_) {
+        this->gate_.wait();
+      }
+      this->inUse_ = true;
+    }
+
+    for( unsigned long index = 0; index < conditions.length(); ++index) {
+      // Extract the current Condition.
+      DDS::StatusCondition_var condition
+        = DDS::StatusCondition::_narrow( conditions[ index].in());
+      if( !CORBA::is_nil( condition.in())) {
+        // Its a CommunicationStatus, process inbound data.
+        DDS::DataReader_var reader
+          = DDS::DataReader::_narrow( condition->get_entity());
+        if( !CORBA::is_nil( reader.in())) {
+          /// @TODO: Process inbound data here.
+        }
+      }
+    }
+
+    // Yield before we start another pass.
+    {
+      ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, -1);
+      this->inUse_ = false;
+    }
+    this->gate_.broadcast();
+  }
+
+  if( this->options_.verbose()) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) MonitorTask::svc() - ")
+      ACE_TEXT("honoring termination request, stopping thread.\n")
+    ));
+  }
+  return 0;
 }
 
 void
-Monitor::MonitorTask::someMethod()
+Monitor::MonitorTask::startInstrumentation()
 {
-  // Shutdown current processing.
-  this->shutdownRepo();
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) MonitorTask::startInstrumentation() - ")
+    ACE_TEXT("previous instrumentation has been torn down, ")
+    ACE_TEXT("establishing new monitoring.\n")
+  ));
 
-  // Wait to gain control of processing.
-  if( this->controlContext_ == InternalControl) {
+  { // Wait to gain control of processing.
     ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->lock_);
-    while( this->controlContext_ == InternalControl) {
-      this->guardCondition_->set_trigger_value( true);
+    while( this->inUse_) {
       this->gate_.wait();
     }
+    this->inUse_ = true;
   }
-  // At this point, the context is ExternalControl.
 
   // Clear any existing data and create a new tree.
 
@@ -209,201 +361,457 @@ Monitor::MonitorTask::someMethod()
       );
   if( CORBA::is_nil( this->participant_.in())) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: MonitorTask::setRepoIor() - ")
+      ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
       ACE_TEXT("failed to create participant.\n")
     ));
+    {
+      ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->lock_);
+      this->inUse_ = false;
+    }
     return;
   }
 
-#if 0
-  // Create the publisher.
-  this->publisher_
-    = participant->create_publisher(
-        this->profile_->publisherQos,
-        ::DDS::PublisherListener::_nil(),
-        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
-      );
-  if( CORBA::is_nil( publisher_.in())) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) MonitorTask::enable() - publication %C: ")
-      ACE_TEXT("failed to create publisher.\n"),
-        this->name_.c_str()
+  if( this->options_.verbose()) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) MonitorTask::startInstrumentation() - ")
+      ACE_TEXT("created participant.\n")
     ));
-    throw BadPublisherException();
   }
 
-  // Try to obtain the transport first
+  // Fire up a subscriber.
+  ::DDS::Subscriber_var subscriber = this->participant_->create_subscriber(
+                                       SUBSCRIBER_QOS_DEFAULT,
+                                       ::DDS::SubscriberListener::_nil(),
+                                       ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
+                                     );
+  if( CORBA::is_nil( subscriber.in())) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
+      ACE_TEXT("failed to create subscriber.\n")
+    ));
+    {
+      ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->lock_);
+      this->inUse_ = false;
+    }
+    return;
+  }
+
+  if( this->options_.verbose()) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) MonitorTask::startInstrumentation() - ")
+      ACE_TEXT("created subscriber.\n")
+    ));
+  }
+
+  // Extract a transport index for this subscription.
+  OpenDDS::DCPS::TransportIdType transportKey
+    = static_cast<OpenDDS::DCPS::TransportIdType>( this->activeKey_);
+
+  // Grab the transport itself.
   OpenDDS::DCPS::TransportImpl_rch transport
-    = TheTransportFactory->obtain(
-        this->profile_->transport
-      );
+    = TheTransportFactory->obtain( transportKey);
   if( transport.is_nil()) {
-    // Create the transport
     transport = TheTransportFactory->create_transport_impl(
-        this->profile_->transport,
-        ::OpenDDS::DCPS::AUTO_CONFIG
-      );
+                  transportKey,
+                  "SimpleTcp",
+                  OpenDDS::DCPS::AUTO_CONFIG
+                );
     if( transport.is_nil()) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) MonitorTask::enable() - publication %C: ")
-        ACE_TEXT("failed to create transport with index %d.\n"),
-        this->name_.c_str(),
-        this->profile_->transport
+        ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
+        ACE_TEXT("failed to create transport.\n")
       ));
-      throw BadTransportException();
-    } else if( this->verbose_) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) MonitorTask::enable() - publication %C: ")
-        ACE_TEXT("created transport with index %d.\n"),
-        this->name_.c_str(),
-        this->profile_->transport
-      ));
+      {
+        ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->lock_);
+        this->inUse_ = false;
+      }
+      return;
     }
-  } else if( this->verbose_) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) MonitorTask::enable() - publication %C: ")
-      ACE_TEXT("obtained transport with index %d.\n"),
-      this->name_.c_str(),
-      this->profile_->transport
-    ));
   }
 
-  // Attach the transport
-  if( ::OpenDDS::DCPS::ATTACH_OK != transport->attach( publisher_.in())) {
+  if( ::OpenDDS::DCPS::ATTACH_OK != transport->attach( subscriber.in())) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) MonitorTask::enable() - publication %C: ")
-      ACE_TEXT("failed to attach transport with index %d to publisher.\n"),
-      this->name_.c_str(),
-      this->profile_->transport
+      ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
+      ACE_TEXT("failed to attach transport to subscriber.\n")
     ));
-    throw BadAttachException();
+    {
+      ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->lock_);
+      this->inUse_ = false;
+    }
+    return;
+  }
 
-  } else if( this->verbose_) {
+  if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) MonitorTask::enable() - publication %C: ")
-      ACE_TEXT("attached transport with index %d to publisher.\n"),
-      this->name_.c_str(),
-      this->profile_->transport
+      ACE_TEXT("(%P|%t) MonitorTask::startInstrumentation() - ")
+      ACE_TEXT("attached to transport with index %d.\n"),
+      transportKey
     ));
   }
 
-  // Derive the writer Qos values.
-  ::DDS::TopicQos topicQos;
+  DDS::Topic_var           topic;
+  DDS::TopicQos            topicQos;
+  DDS::DataReaderQos       readerQos;
+  DDS::DataReader_var      reader;
+  DDS::StatusCondition_var status;
+
+  // Create each topic and subscription together so we can keep things on the stack.
+
+  OpenDDS::DCPS::ServiceParticipantReportTypeSupportImpl* serviceParticipantReportTypeSupport
+    = new OpenDDS::DCPS::ServiceParticipantReportTypeSupportImpl();
+  serviceParticipantReportTypeSupport->register_type( this->participant_.in(), 0);
+  topic = this->participant_->create_topic(
+            OpenDDS::DCPS::SERVICE_PARTICIPANT_MONITOR_TOPIC,
+            serviceParticipantReportTypeSupport->get_type_name(),
+            TOPIC_QOS_DEFAULT,
+            DDS::TopicListener::_nil(),
+            OpenDDS::DCPS::DEFAULT_STATUS_MASK
+          );
+
   topic->get_qos( topicQos);
-
-  ::DDS::DataWriterQos writerQos;
-  publisher_->get_default_datawriter_qos( writerQos);
-
-  publisher_->copy_from_topic_qos( writerQos, topicQos);
-
-  this->profile_->copyToWriterQos( writerQos);
-
-  // Create the writer.
-  DDS::DataWriter_var writer
-    = publisher_->create_datawriter(
-        topic,
-        writerQos,
-        ::DDS::DataWriterListener::_nil(),
-        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
-      );
-  if( CORBA::is_nil( writer.in())) {
+  subscriber->get_default_datareader_qos( readerQos);
+  subscriber->copy_from_topic_qos( readerQos, topicQos);
+  reader = subscriber->create_datareader(
+             topic,
+             readerQos,
+             ::DDS::DataReaderListener::_nil(),
+             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
+           );
+  if( CORBA::is_nil( reader.in())) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) MonitorTask::enable() - publication %C: ")
-      ACE_TEXT("failed to create writer.\n"),
-      this->name_.c_str()
+      ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
+      ACE_TEXT("failed to create a reader for SERVICE_PARTICIPANT_MONITOR_TOPIC.\n")
     ));
-    throw BadWriterException();
-
-  } else if( this->verbose_) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) MonitorTask::enable() - publication %C: ")
-      ACE_TEXT("created writer.\n"),
-      this->name_.c_str()
-    ));
+    {
+      ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->lock_);
+      this->inUse_ = false;
+    }
+    return;
   }
+  status = reader->get_statuscondition();
+  status->set_enabled_statuses( DDS::DATA_AVAILABLE_STATUS);
+  this->waiter_->attach_condition( status.in());
 
-  this->writer_ = Test::DataDataWriter::_narrow( writer.in());
-  if( CORBA::is_nil( this->writer_.in())) {
+  OpenDDS::DCPS::DomainParticipantReportTypeSupportImpl* domainParticipantReportTypeSupport
+    = new OpenDDS::DCPS::DomainParticipantReportTypeSupportImpl();
+  domainParticipantReportTypeSupport->register_type( this->participant_.in(), 0);
+  topic = this->participant_->create_topic(
+            OpenDDS::DCPS::DOMAIN_PARTICIPANT_MONITOR_TOPIC,
+            domainParticipantReportTypeSupport->get_type_name(),
+            TOPIC_QOS_DEFAULT,
+            DDS::TopicListener::_nil(),
+            OpenDDS::DCPS::DEFAULT_STATUS_MASK
+          );
+
+  topic->get_qos( topicQos);
+  subscriber->get_default_datareader_qos( readerQos);
+  subscriber->copy_from_topic_qos( readerQos, topicQos);
+  reader = subscriber->create_datareader(
+             topic,
+             readerQos,
+             ::DDS::DataReaderListener::_nil(),
+             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
+           );
+  if( CORBA::is_nil( reader.in())) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) MonitorTask::enable() - publication %C: ")
-      ACE_TEXT("failed to narrow writer for Test::Data type.\n"),
-      this->name_.c_str()
+      ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
+      ACE_TEXT("failed to create a reader for DOMAIN_PARTICIPANT_MONITOR_TOPIC.\n")
     ));
-    throw BadWriterException();
-
-  } else if( this->verbose_) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) MonitorTask::enable() - publication %C: ")
-      ACE_TEXT("narrowed writer for Test::Data type.\n"),
-      this->name_.c_str()
-    ));
+    {
+      ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->lock_);
+      this->inUse_ = false;
+    }
+    return;
   }
-#endif
+  status = reader->get_statuscondition();
+  status->set_enabled_statuses( DDS::DATA_AVAILABLE_STATUS);
+  this->waiter_->attach_condition( status.in());
+
+  OpenDDS::DCPS::TopicReportTypeSupportImpl* topicReportTypeSupport
+    = new OpenDDS::DCPS::TopicReportTypeSupportImpl();
+  topicReportTypeSupport->register_type( this->participant_.in(), 0);
+  topic = this->participant_->create_topic(
+            OpenDDS::DCPS::TOPIC_MONITOR_TOPIC,
+            topicReportTypeSupport->get_type_name(),
+            TOPIC_QOS_DEFAULT,
+            DDS::TopicListener::_nil(),
+            OpenDDS::DCPS::DEFAULT_STATUS_MASK
+          );
+
+  topic->get_qos( topicQos);
+  subscriber->get_default_datareader_qos( readerQos);
+  subscriber->copy_from_topic_qos( readerQos, topicQos);
+  reader = subscriber->create_datareader(
+             topic,
+             readerQos,
+             ::DDS::DataReaderListener::_nil(),
+             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
+           );
+  if( CORBA::is_nil( reader.in())) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
+      ACE_TEXT("failed to create a reader for TOPIC_MONITOR_TOPIC.\n")
+    ));
+    {
+      ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->lock_);
+      this->inUse_ = false;
+    }
+    return;
+  }
+  status = reader->get_statuscondition();
+  status->set_enabled_statuses( DDS::DATA_AVAILABLE_STATUS);
+  this->waiter_->attach_condition( status.in());
+
+  OpenDDS::DCPS::PublisherReportTypeSupportImpl* publisherReportTypeSupport
+    = new OpenDDS::DCPS::PublisherReportTypeSupportImpl();
+  publisherReportTypeSupport->register_type( this->participant_.in(), 0);
+  topic = this->participant_->create_topic(
+            OpenDDS::DCPS::PUBLISHER_MONITOR_TOPIC,
+            publisherReportTypeSupport->get_type_name(),
+            TOPIC_QOS_DEFAULT,
+            DDS::TopicListener::_nil(),
+            OpenDDS::DCPS::DEFAULT_STATUS_MASK
+          );
+
+  topic->get_qos( topicQos);
+  subscriber->get_default_datareader_qos( readerQos);
+  subscriber->copy_from_topic_qos( readerQos, topicQos);
+  reader = subscriber->create_datareader(
+             topic,
+             readerQos,
+             ::DDS::DataReaderListener::_nil(),
+             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
+           );
+  if( CORBA::is_nil( reader.in())) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
+      ACE_TEXT("failed to create a reader for PUBLISHER_MONITOR_TOPIC.\n")
+    ));
+    {
+      ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->lock_);
+      this->inUse_ = false;
+    }
+    return;
+  }
+  status = reader->get_statuscondition();
+  status->set_enabled_statuses( DDS::DATA_AVAILABLE_STATUS);
+  this->waiter_->attach_condition( status.in());
+
+  OpenDDS::DCPS::SubscriberReportTypeSupportImpl* subscriberReportTypeSupport
+    = new OpenDDS::DCPS::SubscriberReportTypeSupportImpl();
+  subscriberReportTypeSupport->register_type( this->participant_.in(), 0);
+  topic = this->participant_->create_topic(
+            OpenDDS::DCPS::SUBSCRIBER_MONITOR_TOPIC,
+            subscriberReportTypeSupport->get_type_name(),
+            TOPIC_QOS_DEFAULT,
+            DDS::TopicListener::_nil(),
+            OpenDDS::DCPS::DEFAULT_STATUS_MASK
+          );
+
+  topic->get_qos( topicQos);
+  subscriber->get_default_datareader_qos( readerQos);
+  subscriber->copy_from_topic_qos( readerQos, topicQos);
+  reader = subscriber->create_datareader(
+             topic,
+             readerQos,
+             ::DDS::DataReaderListener::_nil(),
+             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
+           );
+  if( CORBA::is_nil( reader.in())) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
+      ACE_TEXT("failed to create a reader for SUBSCRIBER_MONITOR_TOPIC.\n")
+    ));
+    {
+      ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->lock_);
+      this->inUse_ = false;
+    }
+    return;
+  }
+  status = reader->get_statuscondition();
+  status->set_enabled_statuses( DDS::DATA_AVAILABLE_STATUS);
+  this->waiter_->attach_condition( status.in());
+
+  OpenDDS::DCPS::DataWriterReportTypeSupportImpl* dataWriterReportTypeSupport
+    = new OpenDDS::DCPS::DataWriterReportTypeSupportImpl();
+  dataWriterReportTypeSupport->register_type( this->participant_.in(), 0);
+  topic = this->participant_->create_topic(
+            OpenDDS::DCPS::DATA_WRITER_MONITOR_TOPIC,
+            dataWriterReportTypeSupport->get_type_name(),
+            TOPIC_QOS_DEFAULT,
+            DDS::TopicListener::_nil(),
+            OpenDDS::DCPS::DEFAULT_STATUS_MASK
+          );
+
+  topic->get_qos( topicQos);
+  subscriber->get_default_datareader_qos( readerQos);
+  subscriber->copy_from_topic_qos( readerQos, topicQos);
+  reader = subscriber->create_datareader(
+             topic,
+             readerQos,
+             ::DDS::DataReaderListener::_nil(),
+             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
+           );
+  if( CORBA::is_nil( reader.in())) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
+      ACE_TEXT("failed to create a reader for DATA_WRITER_MONITOR_TOPIC.\n")
+    ));
+    {
+      ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->lock_);
+      this->inUse_ = false;
+    }
+    return;
+  }
+  status = reader->get_statuscondition();
+  status->set_enabled_statuses( DDS::DATA_AVAILABLE_STATUS);
+  this->waiter_->attach_condition( status.in());
+
+  OpenDDS::DCPS::DataWriterPeriodicReportTypeSupportImpl* dataWriterPeriodicReportTypeSupport
+    = new OpenDDS::DCPS::DataWriterPeriodicReportTypeSupportImpl();
+  dataWriterPeriodicReportTypeSupport->register_type( this->participant_.in(), 0);
+  topic = this->participant_->create_topic(
+            OpenDDS::DCPS::DATA_WRITER_PERIODIC_MONITOR_TOPIC,
+            dataWriterPeriodicReportTypeSupport->get_type_name(),
+            TOPIC_QOS_DEFAULT,
+            DDS::TopicListener::_nil(),
+            OpenDDS::DCPS::DEFAULT_STATUS_MASK
+          );
+
+  topic->get_qos( topicQos);
+  subscriber->get_default_datareader_qos( readerQos);
+  subscriber->copy_from_topic_qos( readerQos, topicQos);
+  reader = subscriber->create_datareader(
+             topic,
+             readerQos,
+             ::DDS::DataReaderListener::_nil(),
+             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
+           );
+  if( CORBA::is_nil( reader.in())) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
+      ACE_TEXT("failed to create a reader for DATA_WRITER_PERIODIC_MONITOR_TOPIC.\n")
+    ));
+    {
+      ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->lock_);
+      this->inUse_ = false;
+    }
+    return;
+  }
+  status = reader->get_statuscondition();
+  status->set_enabled_statuses( DDS::DATA_AVAILABLE_STATUS);
+  this->waiter_->attach_condition( status.in());
+
+  OpenDDS::DCPS::DataReaderReportTypeSupportImpl* dataReaderReportTypeSupport
+    = new OpenDDS::DCPS::DataReaderReportTypeSupportImpl();
+  dataReaderReportTypeSupport->register_type( this->participant_.in(), 0);
+  topic = this->participant_->create_topic(
+            OpenDDS::DCPS::DATA_READER_MONITOR_TOPIC,
+            dataReaderReportTypeSupport->get_type_name(),
+            TOPIC_QOS_DEFAULT,
+            DDS::TopicListener::_nil(),
+            OpenDDS::DCPS::DEFAULT_STATUS_MASK
+          );
+
+  topic->get_qos( topicQos);
+  subscriber->get_default_datareader_qos( readerQos);
+  subscriber->copy_from_topic_qos( readerQos, topicQos);
+  reader = subscriber->create_datareader(
+             topic,
+             readerQos,
+             ::DDS::DataReaderListener::_nil(),
+             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
+           );
+  if( CORBA::is_nil( reader.in())) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
+      ACE_TEXT("failed to create a reader for DATA_READER_MONITOR_TOPIC.\n")
+    ));
+    {
+      ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->lock_);
+      this->inUse_ = false;
+    }
+    return;
+  }
+  status = reader->get_statuscondition();
+  status->set_enabled_statuses( DDS::DATA_AVAILABLE_STATUS);
+  this->waiter_->attach_condition( status.in());
+
+  OpenDDS::DCPS::DataReaderPeriodicReportTypeSupportImpl* dataReaderPeriodicReportTypeSupport
+    = new OpenDDS::DCPS::DataReaderPeriodicReportTypeSupportImpl();
+  dataReaderPeriodicReportTypeSupport->register_type( this->participant_.in(), 0);
+  topic = this->participant_->create_topic(
+            OpenDDS::DCPS::DATA_READER_PERIODIC_MONITOR_TOPIC,
+            dataReaderPeriodicReportTypeSupport->get_type_name(),
+            TOPIC_QOS_DEFAULT,
+            DDS::TopicListener::_nil(),
+            OpenDDS::DCPS::DEFAULT_STATUS_MASK
+          );
+
+  topic->get_qos( topicQos);
+  subscriber->get_default_datareader_qos( readerQos);
+  subscriber->copy_from_topic_qos( readerQos, topicQos);
+  reader = subscriber->create_datareader(
+             topic,
+             readerQos,
+             ::DDS::DataReaderListener::_nil(),
+             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
+           );
+  if( CORBA::is_nil( reader.in())) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
+      ACE_TEXT("failed to create a reader for DATA_READER_PERIODIC_MONITOR_TOPIC.\n")
+    ));
+    {
+      ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->lock_);
+      this->inUse_ = false;
+    }
+    return;
+  }
+  status = reader->get_statuscondition();
+  status->set_enabled_statuses( DDS::DATA_AVAILABLE_STATUS);
+  this->waiter_->attach_condition( status.in());
+
+  OpenDDS::DCPS::TransportReportTypeSupportImpl* transportReportTypeSupport
+    = new OpenDDS::DCPS::TransportReportTypeSupportImpl();
+  transportReportTypeSupport->register_type( this->participant_.in(), 0);
+  topic = this->participant_->create_topic(
+            OpenDDS::DCPS::TRANSPORT_MONITOR_TOPIC,
+            transportReportTypeSupport->get_type_name(),
+            TOPIC_QOS_DEFAULT,
+            DDS::TopicListener::_nil(),
+            OpenDDS::DCPS::DEFAULT_STATUS_MASK
+          );
+
+  topic->get_qos( topicQos);
+  subscriber->get_default_datareader_qos( readerQos);
+  subscriber->copy_from_topic_qos( readerQos, topicQos);
+  reader = subscriber->create_datareader(
+             topic,
+             readerQos,
+             ::DDS::DataReaderListener::_nil(),
+             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
+           );
+  if( CORBA::is_nil( reader.in())) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
+      ACE_TEXT("failed to create a reader for TRANSPORT_MONITOR_TOPIC.\n")
+    ));
+    {
+      ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->lock_);
+      this->inUse_ = false;
+    }
+    return;
+  }
+  status = reader->get_statuscondition();
+  status->set_enabled_statuses( DDS::DATA_AVAILABLE_STATUS);
+  this->waiter_->attach_condition( status.in());
 
   // Yield control.
-  this->controlContext_ = InternalControl;
+  {
+    ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->lock_);
+    this->inUse_ = false;
+  }
   this->gate_.broadcast();
-}
-
-int
-Monitor::MonitorTask::svc ()
-{
-  this->thread_ = ACE_OS::thr_self();
-
-  if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) MonitorTask::svc() - ")
-      ACE_TEXT("processing starts on thread.\n")
-    ));
-  }
-
-  DDS::Duration_t   timeout = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC};
-  DDS::ConditionSeq conditions;
-
-  while( !this->done_) {
-    if( this->controlContext_ == ExternalControl) {
-      ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, -1);
-      while( this->controlContext_ == ExternalControl) {
-        this->gate_.wait();
-      }
-    }
-
-    if( DDS::RETCODE_OK != this->waiter_->wait( conditions, timeout)) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: MonitorTask::svc() - ")
-        ACE_TEXT("failed to synchronize DDS conditions.\n")
-      ));
-      return -1;
-    }
-
-    for( unsigned long index = 0; index < conditions.length(); ++index) {
-      // Extract the current Condition.
-      DDS::StatusCondition_var condition
-        = DDS::StatusCondition::_narrow( conditions[ index].in());
-      if( !CORBA::is_nil( condition.in())) {
-        // Its a CommunicationStatus, process inbound data.
-        DDS::DataReader_var reader
-          = DDS::DataReader::_narrow( condition->get_entity());
-        if( !CORBA::is_nil( reader.in())) {
-          /// @TODO: Process inbound data here.
-        }
-      }
-
-      // Reset the GuardCondition regardless of its trigger state.
-      this->guardCondition_->set_trigger_value( false);
-    }
-
-    // Yield before we start another pass.
-    this->controlContext_ = ExternalControl;
-    this->gate_.broadcast();
-  }
-
-  if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) MonitorTask::svc() - ")
-      ACE_TEXT("honoring termination request, stopping thread.\n")
-    ));
-  }
-  return 0;
 }
 
