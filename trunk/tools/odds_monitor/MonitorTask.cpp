@@ -3,7 +3,7 @@
 // $Id$
 
 #include "MonitorTask.h"
-#include "MonitorData.h"
+#include "MonitorDataStorage.h"
 #include "Options.h"
 
 #include "dds/monitor/monitorTypeSupportImpl.h"
@@ -17,8 +17,8 @@
 #include <sstream>
 
 Monitor::MonitorTask::MonitorTask(
-  MonitorData* data,
-  const Options& options
+  MonitorDataStorage* data,
+  const Options&      options
 ) : opened_( false),
     done_( false),
     inUse_( false),
@@ -380,11 +380,11 @@ Monitor::MonitorTask::setActiveRepo( RepoKey key)
   }
 
   // Fire up a subscriber.
-  ::DDS::Subscriber_var subscriber = this->participant_->create_subscriber(
-                                       SUBSCRIBER_QOS_DEFAULT,
-                                       ::DDS::SubscriberListener::_nil(),
-                                       ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
-                                     );
+  DDS::Subscriber_var subscriber = this->participant_->create_subscriber(
+                                     SUBSCRIBER_QOS_DEFAULT,
+                                     ::DDS::SubscriberListener::_nil(),
+                                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
+                                   );
   if( CORBA::is_nil( subscriber.in())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
@@ -450,383 +450,67 @@ Monitor::MonitorTask::setActiveRepo( RepoKey key)
     ));
   }
 
-  DDS::Topic_var           topic;
-  DDS::TopicQos            topicQos;
-  DDS::DataReaderQos       readerQos;
-  DDS::DataReader_var      reader;
-  DDS::StatusCondition_var status;
+  // Create each subscription and attach them to the waiter.
 
-  // Create each topic and subscription together so we can keep things on the stack.
-
-  OpenDDS::DCPS::ServiceParticipantReportTypeSupportImpl* serviceParticipantReportTypeSupport
-    = new OpenDDS::DCPS::ServiceParticipantReportTypeSupportImpl();
-  serviceParticipantReportTypeSupport->register_type( this->participant_.in(), 0);
-  topic = this->participant_->create_topic(
+  this->createSubscription<
+          OpenDDS::DCPS::ServiceParticipantReportTypeSupportImpl>(
+            subscriber.in(),
             OpenDDS::DCPS::SERVICE_PARTICIPANT_MONITOR_TOPIC,
-            serviceParticipantReportTypeSupport->get_type_name(),
-            TOPIC_QOS_DEFAULT,
-            DDS::TopicListener::_nil(),
-            OpenDDS::DCPS::DEFAULT_STATUS_MASK
-          );
+            OpenDDS::DCPS::SERVICE_PARTICIPANT_REPORT_TYPE);
 
-  topic->get_qos( topicQos);
-  subscriber->get_default_datareader_qos( readerQos);
-  subscriber->copy_from_topic_qos( readerQos, topicQos);
-  reader = subscriber->create_datareader(
-             topic,
-             readerQos,
-             ::DDS::DataReaderListener::_nil(),
-             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
-           );
-  if( CORBA::is_nil( reader.in())) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
-      ACE_TEXT("failed to create a reader for SERVICE_PARTICIPANT_MONITOR_TOPIC.\n")
-    ));
-    {
-      ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, false);
-      this->inUse_ = false;
-    }
-    return false;
-  }
-  status = reader->get_statuscondition();
-  status->set_enabled_statuses( DDS::DATA_AVAILABLE_STATUS);
-  this->waiter_->attach_condition( status.in());
-  this->handleTypeMap_[ reader->get_instance_handle()]
-    = OpenDDS::DCPS::SERVICE_PARTICIPANT_REPORT_TYPE;
-
-  OpenDDS::DCPS::DomainParticipantReportTypeSupportImpl* domainParticipantReportTypeSupport
-    = new OpenDDS::DCPS::DomainParticipantReportTypeSupportImpl();
-  domainParticipantReportTypeSupport->register_type( this->participant_.in(), 0);
-  topic = this->participant_->create_topic(
+  this->createSubscription<
+          OpenDDS::DCPS::DomainParticipantReportTypeSupportImpl>(
+            subscriber.in(),
             OpenDDS::DCPS::DOMAIN_PARTICIPANT_MONITOR_TOPIC,
-            domainParticipantReportTypeSupport->get_type_name(),
-            TOPIC_QOS_DEFAULT,
-            DDS::TopicListener::_nil(),
-            OpenDDS::DCPS::DEFAULT_STATUS_MASK
-          );
+            OpenDDS::DCPS::DOMAIN_PARTICIPANT_REPORT_TYPE);
 
-  topic->get_qos( topicQos);
-  subscriber->get_default_datareader_qos( readerQos);
-  subscriber->copy_from_topic_qos( readerQos, topicQos);
-  reader = subscriber->create_datareader(
-             topic,
-             readerQos,
-             ::DDS::DataReaderListener::_nil(),
-             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
-           );
-  if( CORBA::is_nil( reader.in())) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
-      ACE_TEXT("failed to create a reader for DOMAIN_PARTICIPANT_MONITOR_TOPIC.\n")
-    ));
-    {
-      ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, false);
-      this->inUse_ = false;
-    }
-    return false;
-  }
-  status = reader->get_statuscondition();
-  status->set_enabled_statuses( DDS::DATA_AVAILABLE_STATUS);
-  this->waiter_->attach_condition( status.in());
-  this->handleTypeMap_[ reader->get_instance_handle()]
-    = OpenDDS::DCPS::DOMAIN_PARTICIPANT_REPORT_TYPE;
-
-  OpenDDS::DCPS::TopicReportTypeSupportImpl* topicReportTypeSupport
-    = new OpenDDS::DCPS::TopicReportTypeSupportImpl();
-  topicReportTypeSupport->register_type( this->participant_.in(), 0);
-  topic = this->participant_->create_topic(
+  this->createSubscription<
+          OpenDDS::DCPS::TopicReportTypeSupportImpl>(
+            subscriber.in(),
             OpenDDS::DCPS::TOPIC_MONITOR_TOPIC,
-            topicReportTypeSupport->get_type_name(),
-            TOPIC_QOS_DEFAULT,
-            DDS::TopicListener::_nil(),
-            OpenDDS::DCPS::DEFAULT_STATUS_MASK
-          );
+            OpenDDS::DCPS::TOPIC_REPORT_TYPE);
 
-  topic->get_qos( topicQos);
-  subscriber->get_default_datareader_qos( readerQos);
-  subscriber->copy_from_topic_qos( readerQos, topicQos);
-  reader = subscriber->create_datareader(
-             topic,
-             readerQos,
-             ::DDS::DataReaderListener::_nil(),
-             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
-           );
-  if( CORBA::is_nil( reader.in())) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
-      ACE_TEXT("failed to create a reader for TOPIC_MONITOR_TOPIC.\n")
-    ));
-    {
-      ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, false);
-      this->inUse_ = false;
-    }
-    return false;
-  }
-  status = reader->get_statuscondition();
-  status->set_enabled_statuses( DDS::DATA_AVAILABLE_STATUS);
-  this->waiter_->attach_condition( status.in());
-  this->handleTypeMap_[ reader->get_instance_handle()]
-    = OpenDDS::DCPS::TOPIC_REPORT_TYPE;
-
-  OpenDDS::DCPS::PublisherReportTypeSupportImpl* publisherReportTypeSupport
-    = new OpenDDS::DCPS::PublisherReportTypeSupportImpl();
-  publisherReportTypeSupport->register_type( this->participant_.in(), 0);
-  topic = this->participant_->create_topic(
+  this->createSubscription<
+          OpenDDS::DCPS::PublisherReportTypeSupportImpl>(
+            subscriber.in(),
             OpenDDS::DCPS::PUBLISHER_MONITOR_TOPIC,
-            publisherReportTypeSupport->get_type_name(),
-            TOPIC_QOS_DEFAULT,
-            DDS::TopicListener::_nil(),
-            OpenDDS::DCPS::DEFAULT_STATUS_MASK
-          );
+            OpenDDS::DCPS::PUBLISHER_REPORT_TYPE);
 
-  topic->get_qos( topicQos);
-  subscriber->get_default_datareader_qos( readerQos);
-  subscriber->copy_from_topic_qos( readerQos, topicQos);
-  reader = subscriber->create_datareader(
-             topic,
-             readerQos,
-             ::DDS::DataReaderListener::_nil(),
-             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
-           );
-  if( CORBA::is_nil( reader.in())) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
-      ACE_TEXT("failed to create a reader for PUBLISHER_MONITOR_TOPIC.\n")
-    ));
-    {
-      ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, false);
-      this->inUse_ = false;
-    }
-    return false;
-  }
-  status = reader->get_statuscondition();
-  status->set_enabled_statuses( DDS::DATA_AVAILABLE_STATUS);
-  this->waiter_->attach_condition( status.in());
-  this->handleTypeMap_[ reader->get_instance_handle()]
-    = OpenDDS::DCPS::PUBLISHER_REPORT_TYPE;
-
-  OpenDDS::DCPS::SubscriberReportTypeSupportImpl* subscriberReportTypeSupport
-    = new OpenDDS::DCPS::SubscriberReportTypeSupportImpl();
-  subscriberReportTypeSupport->register_type( this->participant_.in(), 0);
-  topic = this->participant_->create_topic(
+  this->createSubscription<
+          OpenDDS::DCPS::SubscriberReportTypeSupportImpl>(
+            subscriber.in(),
             OpenDDS::DCPS::SUBSCRIBER_MONITOR_TOPIC,
-            subscriberReportTypeSupport->get_type_name(),
-            TOPIC_QOS_DEFAULT,
-            DDS::TopicListener::_nil(),
-            OpenDDS::DCPS::DEFAULT_STATUS_MASK
-          );
+            OpenDDS::DCPS::SUBSCRIBER_REPORT_TYPE);
 
-  topic->get_qos( topicQos);
-  subscriber->get_default_datareader_qos( readerQos);
-  subscriber->copy_from_topic_qos( readerQos, topicQos);
-  reader = subscriber->create_datareader(
-             topic,
-             readerQos,
-             ::DDS::DataReaderListener::_nil(),
-             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
-           );
-  if( CORBA::is_nil( reader.in())) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
-      ACE_TEXT("failed to create a reader for SUBSCRIBER_MONITOR_TOPIC.\n")
-    ));
-    {
-      ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, false);
-      this->inUse_ = false;
-    }
-    return false;
-  }
-  status = reader->get_statuscondition();
-  status->set_enabled_statuses( DDS::DATA_AVAILABLE_STATUS);
-  this->waiter_->attach_condition( status.in());
-  this->handleTypeMap_[ reader->get_instance_handle()]
-    = OpenDDS::DCPS::SUBSCRIBER_REPORT_TYPE;
-
-  OpenDDS::DCPS::DataWriterReportTypeSupportImpl* dataWriterReportTypeSupport
-    = new OpenDDS::DCPS::DataWriterReportTypeSupportImpl();
-  dataWriterReportTypeSupport->register_type( this->participant_.in(), 0);
-  topic = this->participant_->create_topic(
+  this->createSubscription<
+          OpenDDS::DCPS::DataWriterReportTypeSupportImpl>(
+            subscriber.in(),
             OpenDDS::DCPS::DATA_WRITER_MONITOR_TOPIC,
-            dataWriterReportTypeSupport->get_type_name(),
-            TOPIC_QOS_DEFAULT,
-            DDS::TopicListener::_nil(),
-            OpenDDS::DCPS::DEFAULT_STATUS_MASK
-          );
+            OpenDDS::DCPS::DATA_WRITER_REPORT_TYPE);
 
-  topic->get_qos( topicQos);
-  subscriber->get_default_datareader_qos( readerQos);
-  subscriber->copy_from_topic_qos( readerQos, topicQos);
-  reader = subscriber->create_datareader(
-             topic,
-             readerQos,
-             ::DDS::DataReaderListener::_nil(),
-             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
-           );
-  if( CORBA::is_nil( reader.in())) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
-      ACE_TEXT("failed to create a reader for DATA_WRITER_MONITOR_TOPIC.\n")
-    ));
-    {
-      ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, false);
-      this->inUse_ = false;
-    }
-    return false;
-  }
-  status = reader->get_statuscondition();
-  status->set_enabled_statuses( DDS::DATA_AVAILABLE_STATUS);
-  this->waiter_->attach_condition( status.in());
-  this->handleTypeMap_[ reader->get_instance_handle()]
-    = OpenDDS::DCPS::DATA_WRITER_REPORT_TYPE;
-
-  OpenDDS::DCPS::DataWriterPeriodicReportTypeSupportImpl* dataWriterPeriodicReportTypeSupport
-    = new OpenDDS::DCPS::DataWriterPeriodicReportTypeSupportImpl();
-  dataWriterPeriodicReportTypeSupport->register_type( this->participant_.in(), 0);
-  topic = this->participant_->create_topic(
+  this->createSubscription<
+          OpenDDS::DCPS::DataWriterPeriodicReportTypeSupportImpl>(
+            subscriber.in(),
             OpenDDS::DCPS::DATA_WRITER_PERIODIC_MONITOR_TOPIC,
-            dataWriterPeriodicReportTypeSupport->get_type_name(),
-            TOPIC_QOS_DEFAULT,
-            DDS::TopicListener::_nil(),
-            OpenDDS::DCPS::DEFAULT_STATUS_MASK
-          );
+            OpenDDS::DCPS::DATA_WRITER_PERIODIC_REPORT_TYPE);
 
-  topic->get_qos( topicQos);
-  subscriber->get_default_datareader_qos( readerQos);
-  subscriber->copy_from_topic_qos( readerQos, topicQos);
-  reader = subscriber->create_datareader(
-             topic,
-             readerQos,
-             ::DDS::DataReaderListener::_nil(),
-             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
-           );
-  if( CORBA::is_nil( reader.in())) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
-      ACE_TEXT("failed to create a reader for DATA_WRITER_PERIODIC_MONITOR_TOPIC.\n")
-    ));
-    {
-      ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, false);
-      this->inUse_ = false;
-    }
-    return false;
-  }
-  status = reader->get_statuscondition();
-  status->set_enabled_statuses( DDS::DATA_AVAILABLE_STATUS);
-  this->waiter_->attach_condition( status.in());
-  this->handleTypeMap_[ reader->get_instance_handle()]
-    = OpenDDS::DCPS::DATA_WRITER_PERIODIC_REPORT_TYPE;
-
-  OpenDDS::DCPS::DataReaderReportTypeSupportImpl* dataReaderReportTypeSupport
-    = new OpenDDS::DCPS::DataReaderReportTypeSupportImpl();
-  dataReaderReportTypeSupport->register_type( this->participant_.in(), 0);
-  topic = this->participant_->create_topic(
+  this->createSubscription<
+          OpenDDS::DCPS::DataReaderReportTypeSupportImpl>(
+            subscriber.in(),
             OpenDDS::DCPS::DATA_READER_MONITOR_TOPIC,
-            dataReaderReportTypeSupport->get_type_name(),
-            TOPIC_QOS_DEFAULT,
-            DDS::TopicListener::_nil(),
-            OpenDDS::DCPS::DEFAULT_STATUS_MASK
-          );
+            OpenDDS::DCPS::DATA_READER_REPORT_TYPE);
 
-  topic->get_qos( topicQos);
-  subscriber->get_default_datareader_qos( readerQos);
-  subscriber->copy_from_topic_qos( readerQos, topicQos);
-  reader = subscriber->create_datareader(
-             topic,
-             readerQos,
-             ::DDS::DataReaderListener::_nil(),
-             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
-           );
-  if( CORBA::is_nil( reader.in())) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
-      ACE_TEXT("failed to create a reader for DATA_READER_MONITOR_TOPIC.\n")
-    ));
-    {
-      ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, false);
-      this->inUse_ = false;
-    }
-    return false;
-  }
-  status = reader->get_statuscondition();
-  status->set_enabled_statuses( DDS::DATA_AVAILABLE_STATUS);
-  this->waiter_->attach_condition( status.in());
-  this->handleTypeMap_[ reader->get_instance_handle()]
-    = OpenDDS::DCPS::DATA_READER_REPORT_TYPE;
-
-  OpenDDS::DCPS::DataReaderPeriodicReportTypeSupportImpl* dataReaderPeriodicReportTypeSupport
-    = new OpenDDS::DCPS::DataReaderPeriodicReportTypeSupportImpl();
-  dataReaderPeriodicReportTypeSupport->register_type( this->participant_.in(), 0);
-  topic = this->participant_->create_topic(
+  this->createSubscription<
+          OpenDDS::DCPS::DataReaderPeriodicReportTypeSupportImpl>(
+            subscriber.in(),
             OpenDDS::DCPS::DATA_READER_PERIODIC_MONITOR_TOPIC,
-            dataReaderPeriodicReportTypeSupport->get_type_name(),
-            TOPIC_QOS_DEFAULT,
-            DDS::TopicListener::_nil(),
-            OpenDDS::DCPS::DEFAULT_STATUS_MASK
-          );
+            OpenDDS::DCPS::DATA_READER_PERIODIC_REPORT_TYPE);
 
-  topic->get_qos( topicQos);
-  subscriber->get_default_datareader_qos( readerQos);
-  subscriber->copy_from_topic_qos( readerQos, topicQos);
-  reader = subscriber->create_datareader(
-             topic,
-             readerQos,
-             ::DDS::DataReaderListener::_nil(),
-             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
-           );
-  if( CORBA::is_nil( reader.in())) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
-      ACE_TEXT("failed to create a reader for DATA_READER_PERIODIC_MONITOR_TOPIC.\n")
-    ));
-    {
-      ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, false);
-      this->inUse_ = false;
-    }
-    return false;
-  }
-  status = reader->get_statuscondition();
-  status->set_enabled_statuses( DDS::DATA_AVAILABLE_STATUS);
-  this->waiter_->attach_condition( status.in());
-  this->handleTypeMap_[ reader->get_instance_handle()]
-    = OpenDDS::DCPS::DATA_READER_PERIODIC_REPORT_TYPE;
-
-  OpenDDS::DCPS::TransportReportTypeSupportImpl* transportReportTypeSupport
-    = new OpenDDS::DCPS::TransportReportTypeSupportImpl();
-  transportReportTypeSupport->register_type( this->participant_.in(), 0);
-  topic = this->participant_->create_topic(
+  this->createSubscription<
+          OpenDDS::DCPS::TransportReportTypeSupportImpl>(
+            subscriber.in(),
             OpenDDS::DCPS::TRANSPORT_MONITOR_TOPIC,
-            transportReportTypeSupport->get_type_name(),
-            TOPIC_QOS_DEFAULT,
-            DDS::TopicListener::_nil(),
-            OpenDDS::DCPS::DEFAULT_STATUS_MASK
-          );
-
-  topic->get_qos( topicQos);
-  subscriber->get_default_datareader_qos( readerQos);
-  subscriber->copy_from_topic_qos( readerQos, topicQos);
-  reader = subscriber->create_datareader(
-             topic,
-             readerQos,
-             ::DDS::DataReaderListener::_nil(),
-             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
-           );
-  if( CORBA::is_nil( reader.in())) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
-      ACE_TEXT("failed to create a reader for TRANSPORT_MONITOR_TOPIC.\n")
-    ));
-    {
-      ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, false);
-      this->inUse_ = false;
-    }
-    return false;
-  }
-  status = reader->get_statuscondition();
-  status->set_enabled_statuses( DDS::DATA_AVAILABLE_STATUS);
-  this->waiter_->attach_condition( status.in());
-  this->handleTypeMap_[ reader->get_instance_handle()]
-    = OpenDDS::DCPS::TRANSPORT_REPORT_TYPE;
+            OpenDDS::DCPS::TRANSPORT_REPORT_TYPE);
 
   // Yield control.
   {
@@ -838,107 +522,144 @@ Monitor::MonitorTask::setActiveRepo( RepoKey key)
   return true;
 }
 
+template< class TypeSupport>
+void
+Monitor::MonitorTask::createSubscription( 
+  DDS::Subscriber_ptr subscriber,
+  const char*         topicName,
+  int                 type
+)
+{
+  DDS::Topic_var           topic;
+  DDS::TopicQos            topicQos;
+  DDS::DataReaderQos       readerQos;
+  DDS::DataReader_var      reader;
+  DDS::StatusCondition_var status;
+
+  TypeSupport* typeSupport = new TypeSupport();
+  typeSupport->register_type( this->participant_.in(), 0);
+  topic = this->participant_->create_topic(
+            topicName,
+            typeSupport->get_type_name(),
+            TOPIC_QOS_DEFAULT,
+            DDS::TopicListener::_nil(),
+            OpenDDS::DCPS::DEFAULT_STATUS_MASK
+          );
+
+  topic->get_qos( topicQos);
+  subscriber->get_default_datareader_qos( readerQos);
+  subscriber->copy_from_topic_qos( readerQos, topicQos);
+  reader = subscriber->create_datareader(
+             topic,
+             readerQos,
+             ::DDS::DataReaderListener::_nil(),
+             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
+           );
+  if( CORBA::is_nil( reader.in())) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
+      ACE_TEXT("failed to create a reader for %s.\n"),
+      topicName
+    ));
+    return;
+  }
+  status = reader->get_statuscondition();
+  status->set_enabled_statuses( DDS::DATA_AVAILABLE_STATUS);
+  this->waiter_->attach_condition( status.in());
+  this->handleTypeMap_[ reader->get_instance_handle()] = type;
+}
+
 void
 Monitor::MonitorTask::dispatchReader( DDS::DataReader_ptr reader)
 {
   switch( this->handleTypeMap_[ reader->get_instance_handle()]) {
     case OpenDDS::DCPS::SERVICE_PARTICIPANT_REPORT_TYPE:
       {
-        InboundData<
+        this->dataUpdate<
           OpenDDS::DCPS::ServiceParticipantReportDataReader,
-          OpenDDS::DCPS::ServiceParticipantReport
-        > handler;
-        handler.process( reader, this->data_);
+          OpenDDS::DCPS::ServiceParticipantReport>(
+            reader);
       }
       break;
 
     case OpenDDS::DCPS::DOMAIN_PARTICIPANT_REPORT_TYPE:
       {
-        InboundData<
+        this->dataUpdate<
           OpenDDS::DCPS::DomainParticipantReportDataReader,
-          OpenDDS::DCPS::DomainParticipantReport
-        > handler;
-        handler.process( reader, this->data_);
+          OpenDDS::DCPS::DomainParticipantReport>(
+            reader);
       }
       break;
 
     case OpenDDS::DCPS::TOPIC_REPORT_TYPE:
       {
-        InboundData<
+        this->dataUpdate<
           OpenDDS::DCPS::TopicReportDataReader,
-          OpenDDS::DCPS::TopicReport
-        > handler;
-        handler.process( reader, this->data_);
+          OpenDDS::DCPS::TopicReport>(
+            reader);
       }
       break;
 
     case OpenDDS::DCPS::PUBLISHER_REPORT_TYPE:
       {
-        InboundData<
+        this->dataUpdate<
           OpenDDS::DCPS::PublisherReportDataReader,
-          OpenDDS::DCPS::PublisherReport
-        > handler;
-        handler.process( reader, this->data_);
+          OpenDDS::DCPS::PublisherReport>(
+            reader);
       }
       break;
 
     case OpenDDS::DCPS::SUBSCRIBER_REPORT_TYPE:
       {
-        InboundData<
+        this->dataUpdate<
           OpenDDS::DCPS::SubscriberReportDataReader,
-          OpenDDS::DCPS::SubscriberReport
-        > handler;
-        handler.process( reader, this->data_);
+          OpenDDS::DCPS::SubscriberReport>(
+            reader);
       }
       break;
 
     case OpenDDS::DCPS::DATA_WRITER_REPORT_TYPE:
       {
-        InboundData<
+        this->dataUpdate<
           OpenDDS::DCPS::DataWriterReportDataReader,
-          OpenDDS::DCPS::DataWriterReport
-        > handler;
-        handler.process( reader, this->data_);
+          OpenDDS::DCPS::DataWriterReport>(
+            reader);
       }
       break;
 
     case OpenDDS::DCPS::DATA_WRITER_PERIODIC_REPORT_TYPE:
       {
-        InboundData<
+        this->dataUpdate<
           OpenDDS::DCPS::DataWriterPeriodicReportDataReader,
-          OpenDDS::DCPS::DataWriterPeriodicReport
-        > handler;
-        handler.process( reader, this->data_);
+          OpenDDS::DCPS::DataWriterPeriodicReport>(
+            reader);
       }
       break;
 
     case OpenDDS::DCPS::DATA_READER_REPORT_TYPE:
       {
-        InboundData<
+        this->dataUpdate<
           OpenDDS::DCPS::DataReaderReportDataReader,
-          OpenDDS::DCPS::DataReaderReport
-        > handler;
-        handler.process( reader, this->data_);
+          OpenDDS::DCPS::DataReaderReport>(
+            reader);
       }
       break;
 
     case OpenDDS::DCPS::DATA_READER_PERIODIC_REPORT_TYPE:
       {
-        InboundData<
+        this->dataUpdate<
           OpenDDS::DCPS::DataReaderPeriodicReportDataReader,
-          OpenDDS::DCPS::DataReaderPeriodicReport
-        > handler;
-        handler.process( reader, this->data_);
+          OpenDDS::DCPS::DataReaderPeriodicReport>(
+            reader);
       }
       break;
 
     case OpenDDS::DCPS::TRANSPORT_REPORT_TYPE:
       {
-        InboundData<
+        this->dataUpdate<
           OpenDDS::DCPS::TransportReportDataReader,
-          OpenDDS::DCPS::TransportReport
-        > handler;
-        handler.process( reader, this->data_);
+          OpenDDS::DCPS::TransportReport>(
+            reader);
       }
       break;
   }
@@ -946,9 +667,8 @@ Monitor::MonitorTask::dispatchReader( DDS::DataReader_ptr reader)
 
 template< class ReaderType, class DataType>
 void
-Monitor::MonitorTask::InboundData< ReaderType, DataType>::process(
-  DDS::DataReader_ptr reader,
-  MonitorData*        model
+Monitor::MonitorTask::dataUpdate(
+  DDS::DataReader_ptr reader
 )
 {
   // Extract the specific reader for this data.
@@ -967,10 +687,10 @@ Monitor::MonitorTask::InboundData< ReaderType, DataType>::process(
   DDS::SampleInfo info;
   while( DDS::RETCODE_OK == typedReader->take_next_sample( data, info)) {
     if( info.valid_data) {
-      model->update( data);
+      this->data_->update( data);
 
     } else if( info.instance_state & DDS::NOT_ALIVE_INSTANCE_STATE) {
-      model->update( data, true);
+      this->data_->update( data, true);
     }
   }
 }

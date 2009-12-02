@@ -9,13 +9,15 @@
 
 #include "MonitorDataStorage.h"
 #include "TreeNode.h"
+#include "MonitorData.h"
 
 #include "dds/DCPS/RepoIdGenerator.h"
 
 #include <sstream>
 
-Monitor::MonitorDataStorage::MonitorDataStorage()
- : publisherIdGenerator_(
+Monitor::MonitorDataStorage::MonitorDataStorage( MonitorData* model)
+ : model_( model),
+   publisherIdGenerator_(
      new RepoIdGenerator( 0, 0, OpenDDS::DCPS::KIND_PUBLISHER)
    ),
    subscriberIdGenerator_(

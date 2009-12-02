@@ -75,68 +75,27 @@ void stubmodelchange();
 
     /// @name Messages and queries from DDS to GUI.
     /// @{
-
+ 
     /// Add a new data element to the model.
     void addDataElement(
            const OpenDDS::DCPS::GUID_t& parent,
            const OpenDDS::DCPS::GUID_t& id,
            char* value
          );
-
+ 
     /// Update the value of a data element in the model.
     void updateDataElement(
            const OpenDDS::DCPS::GUID_t& id,
            char* value
          );
 
+    /// Update or remove a data element in the model.
+    template< typename DataType>
+    void update( const DataType& data, bool remove = false);
+
     /// Remove a data element from the model.
     void removeDataElement( const OpenDDS::DCPS::GUID_t& id);
 
-    /// @}
-
-    /// @name Inbound data updates.
-    /// @note These are all called from the service thread.
-    /// @{
-    void update(
-           const OpenDDS::DCPS::ServiceParticipantReport& data,
-           bool remove = false
-         );
-    void update(
-           const OpenDDS::DCPS::DomainParticipantReport& data,
-           bool remove = false
-         );
-    void update(
-           const OpenDDS::DCPS::TopicReport& data,
-           bool remove = false
-         );
-    void update(
-           const OpenDDS::DCPS::PublisherReport& data,
-           bool remove = false
-         );
-    void update(
-           const OpenDDS::DCPS::SubscriberReport& data,
-           bool remove = false
-         );
-    void update(
-           const OpenDDS::DCPS::DataWriterReport& data,
-           bool remove = false
-         );
-    void update(
-           const OpenDDS::DCPS::DataWriterPeriodicReport& data,
-           bool remove = false
-         );
-    void update(
-           const OpenDDS::DCPS::DataReaderReport& data,
-           bool remove = false
-         );
-    void update(
-           const OpenDDS::DCPS::DataReaderPeriodicReport& data,
-           bool remove = false
-         );
-    void update(
-           const OpenDDS::DCPS::TransportReport& data,
-           bool remove = false
-         );
     /// @}
 
   private:
