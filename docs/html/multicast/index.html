@@ -511,10 +511,10 @@ Also see [[AdvancedOptions]]</pre>
 </div>
 <!--POST-SHADOWAREA-->
 <div id="storeArea">
-<div title="Class Diagram" modifier="Steven Stallion" created="200912011933" modified="200912022013" changecount="3">
+<div title="Class Diagram" modifier="StevenStallion" created="200912011933" modified="200912022013" changecount="3">
 <pre>{{classDiagram{[img[images/class.png]]}}}</pre>
 </div>
-<div title="ColorPalette" modifier="Steven Stallion" created="200911302008" modified="200912011920" changecount="17">
+<div title="ColorPalette" modifier="OpenDDS" created="200911302008" modified="200912011920" server.type="file" server.host="file:///export/OCI/DDS/docs/html/template/index.html" server.page.revision="200912011920">
 <pre>Background: #fff
 Foreground: #000
 PrimaryPale: #eee
@@ -532,7 +532,7 @@ TertiaryDark: #666
 Error: #f88
 </pre>
 </div>
-<div title="Configuration" modifier="Steven Stallion" created="200912011939" modified="200912022135" changecount="28">
+<div title="Configuration" modifier="StevenStallion" created="200912011939" modified="200912022135" changecount="28">
 <pre>As with other transports, dynamic configuration is provided by the ACE Service Configurator Framework. A svc.conf file should be created which contains the following:
 {{{
 dynamic OpenDDS_DCPS_Multicast_Service Service_Object * OpenDDS_Multicast:_make_MulticastLoader()
@@ -597,7 +597,7 @@ nak_repair_size=32
 }}}
 Default examples of these files are provided under the source directory (see: {{{$DDS_ROOT/dds/DCPS/transport/multicast/}}}).</pre>
 </div>
-<div title="DefaultTiddlers" modifier="Steven Stallion" created="200912011933" modified="200912012032" changecount="5">
+<div title="DefaultTiddlers" modifier="StevenStallion" created="200912011933" modified="200912012032" changecount="5">
 <pre>[[Overview]]
 [[Class Diagram]]
 [[Reliability]]
@@ -605,7 +605,7 @@ Default examples of these files are provided under the source directory (see: {{
 [[Known Issues]]
 [[Future Tasks]]</pre>
 </div>
-<div title="Future Tasks" modifier="Steven Stallion" created="200912011940" modified="200912022140" changecount="33">
+<div title="Future Tasks" modifier="StevenStallion" created="200912011940" modified="200912022140" changecount="33">
 <pre>An exponential backoff should be introduced to prevent potential SYN flooding in large multicast groups (see: {{{OpenDDS::DCPS::SynWatchdog::next_interval}}}).
 
 A random backoff should be introduced to prevent potential NAK implosions in large multicast groups (see: {{{OpenDDS::DCPS::NakWatchdog::next_interval}}}).
@@ -618,7 +618,7 @@ An FEC mechanism should be introduced to reduce repair requests and to provide a
 
 {{{DataLink}}}s should initiate the removal of an association based on changes in reliability (not currently supported by the ETF).</pre>
 </div>
-<div title="Known Issues" modifier="Steven Stallion" created="200912012032" modified="200912022141" changecount="39">
+<div title="Known Issues" modifier="StevenStallion" created="200912012032" modified="200912022141" changecount="39">
 <pre>{{{TRANSPORT_PRIORITY}}} is not directly supported. This is partially due to routing restrictions placed on default group addresses as the selection heuristic assigns from the link-local range. Setting the TOS would provide little to no benefit for non-default group addresses at the cost of additional resources and complexity managing n-ary associations by priority key.
 
 Reliability must be configured via the {{{reliable}}} transport configuration option. The ETF currently multiplexes best-effort and reliable samples across the same {{{DataLink}}} which effectively disables autonegotiation of reliability between peers at the transport level.
@@ -629,7 +629,7 @@ The current implementation relies on {{{LIVELINESS}}} to periodically send appli
 
 The current implementation relies on the transport reactor being derived from {{{ACE_Select_Reactor}}}; this ensures a single thread may be active when sending/receiving data. If the transport reactor implementation is changed, additional locks must be introduced to protect critical sections.</pre>
 </div>
-<div title="MainMenu" modifier="Steven Stallion" created="200912011934" modified="200912012032" changecount="7">
+<div title="MainMenu" modifier="StevenStallion" created="200912011934" modified="200912012032" changecount="7">
 <pre>[[Overview]]
 [[Class Diagram]]
 [[Reliability]]
@@ -637,12 +637,12 @@ The current implementation relies on the transport reactor being derived from {{
 [[Known Issues]]
 [[Future Tasks]]</pre>
 </div>
-<div title="OpenDDS" modifier="Steven Stallion" created="200911302157" tags="OpenDDS" changecount="1">
+<div title="OpenDDS" modifier="OpenDDS" created="200911302157" tags="OpenDDS" server.type="file" server.host="file:///export/OCI/DDS/docs/html/template/index.html" server.page.revision="200911302157">
 <pre>OpenDDS is an open source C++ implementation of the Object Management Group (OMG) Data Distribution Service (DDS). OpenDDS also supports Java bindings through JNI and can be included with JBoss (ESB) frameworks by means of a JMS wrapper. OpenDDS leverages the ADAPTIVE Communication Environment (ACE) to provide a cross platform environment.
 
 OpenDDS is supported by [[Object Computing, Inc.|http://www.ociweb.com/]]</pre>
 </div>
-<div title="Overview" modifier="Steven Stallion" created="200912011932" modified="200912022137" changecount="95">
+<div title="Overview" modifier="StevenStallion" created="200912011932" modified="200912022137" changecount="95">
 <pre>Starting with the OpenDDS 2.1 release, a new multicast transport is available which replaces the {{{SimpleMcast}}} and {{{ReliableMulticast}}} transports. The source for the {{{multicast}}} transport is available under the general OpenDDS license and may be found under: {{{$DDS_ROOT/dds/DCPS/transport/multicast/}}}.
 
 What follows is a detailed overview of the design, configuration, known issues, and potential future enhancements:
@@ -672,7 +672,7 @@ project : dcps_multicast {
 }
 }}}</pre>
 </div>
-<div title="PageTemplate" modifier="Steven Stallion" created="200911302019" modified="200911302100" changecount="2">
+<div title="PageTemplate" modifier="OpenDDS" created="200911302019" modified="200911302100" server.type="file" server.host="file:///export/OCI/DDS/docs/html/template/index.html" server.page.revision="200911302100">
 <pre>&lt;!--{{{--&gt;
 &lt;div class='header'&gt;
 &lt;div class='headerForeground'&gt;
@@ -691,7 +691,7 @@ project : dcps_multicast {
 &lt;/div&gt;
 &lt;!--}}}--&gt;</pre>
 </div>
-<div title="Reliability" modifier="Steven Stallion" created="200912011934" modified="200912022130" changecount="87">
+<div title="Reliability" modifier="StevenStallion" created="200912011934" modified="200912022130" changecount="87">
 <pre>Reliable delivery is achieved through two primary mechanisms:
 * 2-way peer handshaking (SYN/SYNACK)
 * Negative acknowledgment of missing data (NAK/NAKACK)
@@ -713,23 +713,19 @@ If the active peer receives a {{{MULTICAST_NAK}}} control sample it will examine
 
 If the passive peer receives a {{{MULTICAST_NAKACK}}} control sample, it will behave just as if the repair request had aged off, suppressing further repair requests and logging an error as above.</pre>
 </div>
-<div title="SideBarOptions" modifier="Steven Stallion" created="200911302023" changecount="1">
+<div title="SideBarOptions" modifier="OpenDDS" created="200911302023" server.type="file" server.host="file:///export/OCI/DDS/docs/html/template/index.html" server.page.revision="200911302023">
 <pre>&lt;&lt;search&gt;&gt;&lt;&lt;closeAll&gt;&gt;&lt;&lt;permaview&gt;&gt;&lt;&lt;newTiddler&gt;&gt;&lt;&lt;saveChanges&gt;&gt;&lt;&lt;slider chkSliderOptionsPanel OptionsPanel &quot;options »&quot; &quot;Change TiddlyWiki advanced options&quot;&gt;&gt;</pre>
 </div>
-<div title="SiteSubtitle" modifier="Steven Stallion" created="200911302000" modified="200912011939" tags="OpenDDS" changecount="2">
+<div title="SiteSubtitle" modifier="StevenStallion" created="200911302000" modified="200912022209" tags="OpenDDS" server.type="file" server.host="file:///export/OCI/DDS/docs/html/template/index.html" server.page.revision="200911302000" changecount="1">
 <pre>Multicast Transport Design</pre>
 </div>
-<div title="SiteTitle" modifier="Steven Stallion" created="200911301959" tags="OpenDDS" changecount="1">
+<div title="SiteTitle" modifier="OpenDDS" created="200911301959" tags="OpenDDS" server.type="file" server.host="file:///export/OCI/DDS/docs/html/template/index.html" server.page.revision="200911301959">
 <pre>OpenDDS</pre>
 </div>
-<div title="SiteUrl" modifier="Steven Stallion" created="200911302027" changecount="1">
+<div title="SiteUrl" modifier="OpenDDS" created="200911302027" server.type="file" server.host="file:///export/OCI/DDS/docs/html/template/index.html" server.page.revision="200911302027">
 <pre>http://www.ociweb.com/</pre>
 </div>
-<div title="Steven Stallion" modifier="Steven Stallion" created="200912011920" changecount="1">
-<pre>Senior Software Engineer
-[[Object Computing, Inc.|http://www.ociweb.com/]]</pre>
-</div>
-<div title="StyleSheet" modifier="Steven Stallion" created="200911302014" modified="200912022013" changecount="56">
+<div title="StyleSheet" modifier="StevenStallion" created="200911302014" modified="200912022013" changecount="56">
 <pre>a:hover {
     text-decoration: none;
 }
@@ -768,7 +764,7 @@ If the passive peer receives a {{{MULTICAST_NAKACK}}} control sample, it will be
     margin-right: auto;
 }</pre>
 </div>
-<div title="StyleSheetColors" modifier="Steven Stallion" created="200911302020" modified="200911302134" changecount="5">
+<div title="StyleSheetColors" modifier="OpenDDS" created="200911302020" modified="200911302134" server.type="file" server.host="file:///export/OCI/DDS/docs/html/template/index.html" server.page.revision="200911302134">
 <pre>/*{{{*/
 body {background:[[ColorPalette::Background]]; color:[[ColorPalette::Foreground]];}
 
