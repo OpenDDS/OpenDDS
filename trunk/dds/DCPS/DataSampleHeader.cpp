@@ -204,7 +204,7 @@ std::ostream& operator<<(std::ostream& str, const OpenDDS::DCPS::DataSampleHeade
   str << "[";
 
   str << OpenDDS::DCPS::MessageId(value.message_id_)
-      << " (" << "0x" << std::hex << value.submessage_id_ << "), ";
+      << " (" << "0x" << std::hex << int(value.submessage_id_) << "), ";
 
   if (value.byte_order_ == 1) {
     str << "network order, ";
