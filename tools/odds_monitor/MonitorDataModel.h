@@ -116,6 +116,18 @@ class MonitorDataModel : public QAbstractItemModel {
       const QModelIndex& parent = QModelIndex()
     );
 
+    /* Sorting */
+    virtual void sort(
+      int           column,
+      Qt::SortOrder order = Qt::AscendingOrder
+    );
+
+    void doSort(
+      int                column,
+      Qt::SortOrder      order = Qt::AscendingOrder,
+      const QModelIndex& index = QModelIndex()
+    );
+
     /* Drag and drop support */
     /* Also requires insert rows/columns, remove rows/columns and setData */
 

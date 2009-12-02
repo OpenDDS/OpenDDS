@@ -27,6 +27,7 @@ class Viewer : public QMainWindow {
     void addRepo();
     void removeRepo();
     void newRepo( const QString& ior);
+    void doSort( int index);
 
   protected:
     void closeEvent( QCloseEvent* event = 0);

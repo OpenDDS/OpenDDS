@@ -40,3 +40,15 @@ Monitor::MonitorDataStorage::clear()
   this->guidToTreeMap_.clear();
 }
 
+std::string&
+Monitor::MonitorDataStorage::activeIor()
+{
+  return this->activeIor_;
+}
+
+std::string
+Monitor::MonitorDataStorage::activeIor() const
+{
+  return this->activeIor_;
+}
+

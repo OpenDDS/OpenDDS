@@ -12,6 +12,7 @@
 #include "dds/DCPS/GuidUtils.h"
 
 #include <map>
+#include <string>
 
 class RepoIdGenerator;
 
@@ -62,6 +63,12 @@ class MonitorDataStorage {
     /// Clean contents from all storage.
     void clear();
 
+    /// Access the active repository IOR.
+    std::string& activeIor();
+    std::string  activeIor() const;
+
+    void currentIor( const std::string& ior);
+
     /// @name GUI data access methods.
     /// @{
 
@@ -80,6 +87,9 @@ class MonitorDataStorage {
                 GUID_tKeyLessThan>
       GuidToTreeMap;
     GuidToTreeMap guidToTreeMap_;
+
+    /// Active repository IOR.
+    std::string activeIor_;
 
     /// Generate Guid values for publishers.
     RepoIdGenerator* publisherIdGenerator_;
