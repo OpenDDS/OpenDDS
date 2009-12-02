@@ -35,6 +35,7 @@ class MonitorTask : public ACE_Task_Base {
   public:
     /// Alias the RepoKey type locally.
     typedef OpenDDS::DCPS::Service_Participant::RepoKey RepoKey;
+    enum { DEFAULT_REPO = OpenDDS::DCPS::Service_Participant::DEFAULT_REPO };
 
     /// Map IOR values to repository key values.
     typedef std::map< std::string, RepoKey> IorKeyMap;
@@ -64,7 +65,10 @@ class MonitorTask : public ACE_Task_Base {
 
     /// Establish a binding to a repository.  Clear any previously
     /// created structures first: there can be only one.
-    bool setRepoIor( const std::string& ior);
+    RepoKey setRepoIor( const std::string& ior);
+
+    /// Set the active repository.
+    bool setActiveRepo( RepoKey key);
 
     /// @}
 
@@ -72,11 +76,19 @@ class MonitorTask : public ACE_Task_Base {
     const IorKeyMap& iorKeyMap() const;
 
   private:
-    /// Initiate instrumentation monitoring on the currently bound domain.
-    void startInstrumentation();
+    /// @brief Specialize processing by type.
+    template< class ReaderType, class DataType>
+    class InboundData {
+      public:
+        /// Forward inbound samples to the model.
+        void process( DDS::DataReader_ptr reader, MonitorData* model);
+    };
 
     /// Terminate the current instrumentation processing.
     void stopInstrumentation();
+
+    /// Dispatch a reader with data to be processed.
+    void dispatchReader( DDS::DataReader_ptr reader);
 
     /// Thread state flag.
     bool opened_;
@@ -109,7 +121,10 @@ class MonitorTask : public ACE_Task_Base {
     DDS::GuardCondition_var guardCondition_;
 
     /// Local Domain Participant
-    ::DDS::DomainParticipant_var participant_;
+    DDS::DomainParticipant_var participant_;
+
+    typedef std::map< DDS::InstanceHandle_t, int> HandleTypeMap;
+    HandleTypeMap handleTypeMap_;
 
     /// Map IOR strings to repository key values.
     IorKeyMap iorKeyMap_;
@@ -117,8 +132,8 @@ class MonitorTask : public ACE_Task_Base {
     /// Key value of the currently active repository.
     RepoKey activeKey_;
 
-    /// Repository key value to use for next IOR to be set.
-    RepoKey currentKey_;
+    /// Repository key value used for last IOR to be set.
+    RepoKey lastKey_;
 };
 
 } // End of namespace Monitor

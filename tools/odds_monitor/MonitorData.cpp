@@ -14,6 +14,7 @@
 #include "MonitorDataStorage.h"
 
 #include "dds/DCPS/Service_Participant.h"
+#include "dds/monitor/monitorC.h"
 
 #include <sstream>    // For stub
 #include "TreeNode.h" // For stub?
@@ -66,8 +67,15 @@ Monitor::MonitorData::setRepoIor( const QString& ior)
     return true;
   }
 
-  // Delegate to the data source.
-  if( this->dataSource_->setRepoIor( ior.toStdString())) {
+  // Set the repository IOR.
+  MonitorTask::RepoKey key
+    = this->dataSource_->setRepoIor( ior.toStdString());
+
+  // Clear existing data.
+  this->clearData();
+
+  // Switch to the new repository.
+  if( this->dataSource_->setActiveRepo( key)) {
     this->storage_->activeIor() = ior.toStdString();
 this->stubmodelchange();
     return true;
@@ -123,6 +131,86 @@ Monitor::MonitorData::clearData()
   this->storage_->activeIor() = std::string();
 
   return true;
+}
+
+void
+Monitor::MonitorData::update(
+  const OpenDDS::DCPS::ServiceParticipantReport& /* data */,
+  bool  /* remove */
+)
+{
+}
+
+void
+Monitor::MonitorData::update(
+  const OpenDDS::DCPS::DomainParticipantReport& /* data */,
+  bool  /* remove */
+)
+{
+}
+
+void
+Monitor::MonitorData::update(
+  const OpenDDS::DCPS::TopicReport& /* data */,
+  bool  /* remove */
+)
+{
+}
+
+void
+Monitor::MonitorData::update(
+  const OpenDDS::DCPS::PublisherReport& /* data */,
+  bool  /* remove */
+)
+{
+}
+
+void
+Monitor::MonitorData::update(
+  const OpenDDS::DCPS::SubscriberReport& /* data */,
+  bool  /* remove */
+)
+{
+}
+
+void
+Monitor::MonitorData::update(
+  const OpenDDS::DCPS::DataWriterReport& /* data */,
+  bool  /* remove */
+)
+{
+}
+
+void
+Monitor::MonitorData::update(
+  const OpenDDS::DCPS::DataWriterPeriodicReport& /* data */,
+  bool  /* remove */
+)
+{
+}
+
+void
+Monitor::MonitorData::update(
+  const OpenDDS::DCPS::DataReaderReport& /* data */,
+  bool  /* remove */
+)
+{
+}
+
+void
+Monitor::MonitorData::update(
+  const OpenDDS::DCPS::DataReaderPeriodicReport& /* data */,
+  bool  /* remove */
+)
+{
+}
+
+void
+Monitor::MonitorData::update(
+  const OpenDDS::DCPS::TransportReport& /* data */,
+  bool  /* remove */
+)
+{
 }
 
 void
