@@ -1,3 +1,35 @@
+Wed Dec  2 19:03:41 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/MonitorData.h:
+        * tools/odds_monitor/MonitorData.cpp:
+
+          update
+            - Added type specific data update methods.
+          setRepoIor
+            - implemented to call service in two stages: setting the IOR
+              and then switching to it.  Clear model data between the two
+              stages.
+
+        * tools/odds_monitor/MonitorTask.h:
+        * tools/odds_monitor/MonitorTask.cpp:
+
+          setRepoIor
+            - refactored to move switching repository assignments to
+              the new setActiveRepo method.
+          setActiveRepo
+            - new method to actually switch active repository and
+              initialize the instrumentation subscriptions.
+          InboundData
+            - new private template class to handle reading data and
+              forwarding it to the model.
+          dispatchReader
+            - new method to select the correct data processor and invoke
+              it.
+
+          Added new 'handleTypeMap' container that maps instance handles
+          to instrumentation domain report types.  This is used to select
+          which data processor to invoke when receiving data.
+
 Wed Dec  2 00:47:27 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * docs/html/multicast/diagrams/handshake.dia:

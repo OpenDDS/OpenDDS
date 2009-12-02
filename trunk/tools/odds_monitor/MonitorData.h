@@ -9,7 +9,20 @@
 #ifndef MONITORDATA_H
 #define MONITORDATA_H
 
-namespace OpenDDS { namespace DCPS { class GUID_t; }}
+namespace OpenDDS { namespace DCPS {
+  class GUID_t;
+  struct ServiceParticipantReport;
+  struct DomainParticipantReport;
+  struct TopicReport;
+  struct PublisherReport;
+  struct SubscriberReport;
+  struct DataWriterReport;
+  struct DataWriterPeriodicReport;
+  struct DataReaderReport;
+  struct DataReaderPeriodicReport;
+  struct TransportReport;
+
+}} // End of namespace OpenDDS::DCPS
 
 class QString;
 template< class T> class QList;
@@ -79,6 +92,51 @@ void stubmodelchange();
     /// Remove a data element from the model.
     void removeDataElement( const OpenDDS::DCPS::GUID_t& id);
 
+    /// @}
+
+    /// @name Inbound data updates.
+    /// @note These are all called from the service thread.
+    /// @{
+    void update(
+           const OpenDDS::DCPS::ServiceParticipantReport& data,
+           bool remove = false
+         );
+    void update(
+           const OpenDDS::DCPS::DomainParticipantReport& data,
+           bool remove = false
+         );
+    void update(
+           const OpenDDS::DCPS::TopicReport& data,
+           bool remove = false
+         );
+    void update(
+           const OpenDDS::DCPS::PublisherReport& data,
+           bool remove = false
+         );
+    void update(
+           const OpenDDS::DCPS::SubscriberReport& data,
+           bool remove = false
+         );
+    void update(
+           const OpenDDS::DCPS::DataWriterReport& data,
+           bool remove = false
+         );
+    void update(
+           const OpenDDS::DCPS::DataWriterPeriodicReport& data,
+           bool remove = false
+         );
+    void update(
+           const OpenDDS::DCPS::DataReaderReport& data,
+           bool remove = false
+         );
+    void update(
+           const OpenDDS::DCPS::DataReaderPeriodicReport& data,
+           bool remove = false
+         );
+    void update(
+           const OpenDDS::DCPS::TransportReport& data,
+           bool remove = false
+         );
     /// @}
 
   private:
