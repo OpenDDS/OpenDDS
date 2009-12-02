@@ -1,3 +1,9 @@
+Wed Dec  2 21:41:50 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/html/multicast/index.html:
+
+          Finalized multicast transport design documentation.
+
 Wed Dec  2 20:57:43 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/odds_monitor/MonitorData.h:
