@@ -67,7 +67,7 @@ TransportSendBuffer::retain_all(RepoId pub_id)
   for (BufferMap::iterator it(this->buffers_.begin());
        it != this->buffers_.end(); ++it) {
 
-    buffer_type& buffer = it->second;
+    buffer_type& buffer(it->second);
 
     TransportRetainedElement sample(0, pub_id);
     PacketRemoveVisitor visitor(sample,
@@ -81,7 +81,7 @@ TransportSendBuffer::retain_all(RepoId pub_id)
       ACE_ERROR((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: ")
                  ACE_TEXT("TransportSendBuffer::retain_all: ")
-                 ACE_TEXT("failed to retain samples from publication: %C!\n"),
+                 ACE_TEXT("failed to retain data from publication: %C!\n"),
                  std::string(converter).c_str()));
       release(buffer);
     }
@@ -104,13 +104,13 @@ TransportSendBuffer::insert(SequenceNumber sequence, const buffer_type& value)
     this->buffers_.insert(BufferMap::value_type(sequence, buffer_type()));
   if (pair.first == this->buffers_.end()) return;
 
-  buffer_type& buffer = pair.first->second;
+  buffer_type& buffer(pair.first->second);
 
   // Copy sample's TransportQueueElements:
-  TransportSendStrategy::QueueType*& samples(buffer.first);
-  ACE_NEW(samples, TransportSendStrategy::QueueType(value.first->size(), 1));
+  TransportSendStrategy::QueueType*& elems(buffer.first);
+  ACE_NEW(elems, TransportSendStrategy::QueueType(value.first->size(), 1));
 
-  CopyChainVisitor visitor(*samples, &this->sample_allocator_);
+  CopyChainVisitor visitor(*elems, &this->sample_allocator_);
   value.first->accept_visitor(visitor);
 
   // Copy sample's message/data block descriptors:
