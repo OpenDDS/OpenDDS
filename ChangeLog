@@ -1,3 +1,9 @@
+Thu Dec  3 23:57:13 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * MPC/config/dcpsexe_with_multicast.mpb:
+
+          Added additional MPC base project.
+
 Thu Dec  3 23:54:56 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/odds_monitor/MonitorData.h:
