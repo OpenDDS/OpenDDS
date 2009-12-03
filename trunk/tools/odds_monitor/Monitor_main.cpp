@@ -28,6 +28,7 @@ main( int argc, char** argv, char**)
 
   // Initialize the service and consume the ACE+TAO+DDS arguments.
   TheParticipantFactoryWithArgs( argc, argv);
+  TheServiceParticipant->monitor_factory_->initialize();
 
   // Process the command line arguments left after ACE and Qt have had a go.
   Monitor::Options options( argc, argv);
