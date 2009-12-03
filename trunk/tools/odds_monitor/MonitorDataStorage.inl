@@ -31,12 +31,16 @@ MonitorDataStorage::update< OpenDDS::DCPS::ServiceParticipantReport>(
   //   NVPSeq    values;
   // };
 
+  // Retain knowledge of node insertions, updates, and deletions.
+  bool layoutChanged = false;
+  bool dataChanged   = false;
+
   // HOST
 
   std::string host( data.host);
   TreeNode* hostNode = 0;
   HostToTreeMap::iterator hostLocation
-    = this->hostToTreeMap_.find( std::string( host));
+    = this->hostToTreeMap_.find( host);
   if( hostLocation == this->hostToTreeMap_.end()) {
     // We are done if we are removing.
     if( remove) return;
@@ -47,9 +51,10 @@ MonitorDataStorage::update< OpenDDS::DCPS::ServiceParticipantReport>(
 
     // Host first.
     QList<QVariant> list;
-    list << QString("HOST") << QString( data.host);
+    list << QString("Host") << QString( data.host);
     hostNode = new TreeNode( list, root);
     root->append( hostNode);
+    layoutChanged = true;
 
     // Install the new node.
     this->hostToTreeMap_[ host]
@@ -75,9 +80,10 @@ MonitorDataStorage::update< OpenDDS::DCPS::ServiceParticipantReport>(
 
     // PID data.
     QList<QVariant> list;
-    list << QString("Process") << data.pid;
+    list << QString("Process") << QString::number(data.pid);
     pidNode = new TreeNode( list, hostNode);
     hostNode->append( pidNode);
+    layoutChanged = true;
 
     // Install the new node.
     this->processToTreeMap_[ key]
@@ -88,21 +94,93 @@ MonitorDataStorage::update< OpenDDS::DCPS::ServiceParticipantReport>(
   }
 
   if( remove) {
-    // Need to build a reverse index to do this efficiently.
-    // Or maybe get the QModelIndex and recursively descend from there
-    // to find the TreeNodes to remove.  I guess that still leaves us
-    // with needing to find them in the maps for removal.
+    // Descend from the pidNode and remove it and all its children from
+    // the maps.
+    this->cleanMaps( pidNode);
+    this->processToTreeMap_.erase( pidLocation);
+    hostNode->removeChildren( pidNode->row(), 1);
 
-    /// @TODO: implement this.
+    // Check and remove the host node if there are no pid nodes remaining
+    // after the removal (no children).
+    if( hostNode->size() == 0) {
+      this->hostToTreeMap_.erase( hostLocation);
+      delete hostNode;
+    }
+
+    // Nothing else to do on removal.
+    this->model_->changed();
     return;
   }
 
   // PARTICIPANTS
+  // NOTE: The following makes sure that any new DomainParticipants are
+  //       added to the host/pid as they are received by this update.  It
+  //       does *not* remove any deleted participants.  This is left for
+  //       the DomainParticipantReport updates.
+  int size = data.domain_participants.length();
+  for( int index = 0; index < size; ++index) {
+    const OpenDDS::DCPS::GUID_t& id = data.domain_participants[ index];
+    GuidToTreeMap::iterator location = this->guidToTreeMap_.find( id);
+    if( location == this->guidToTreeMap_.end()) {
+      // We need to add this participant.
+      QList<QVariant> list;
+      OpenDDS::DCPS::GuidConverter converter( id);
+      list << QString("Participant")
+           << QString( std::string(converter).c_str());
+      TreeNode* node = new TreeNode( list, pidNode);
+      pidNode->append( node);
+      layoutChanged = true;
+
+      // Install the new node.
+      this->guidToTreeMap_[ id]
+        = std::make_pair( node->row(), node);
+
+    // } else {
+      // This participant is already loaded, we can ignore it here since
+      // we have nothing to update from this data sample.
+    }
+  }
 
   // TRANSPORTS
+  size = data.transports.length();
+  for( int index = 0; index < size; ++index) {
+    int transport = data.transports[ index];
+    TransportKey key( host, data.pid, transport);
+    TransportToGuidMap::iterator guidLocation
+      = this->transportToGuidMap_.find( key);
+    if( guidLocation == this->transportToGuidMap_.end()) {
+      // This transport needs to be installed.
+      OpenDDS::DCPS::GUID_t id = this->transportIdGenerator_->next();
+      this->transportToGuidMap_[ key] = id;
 
-  // KEY VALUE DATA
+      QList<QVariant> list;
+      OpenDDS::DCPS::GuidConverter converter( id);
+      list << QString("Transport")
+           << QString::number( transport);
+      TreeNode* node = new TreeNode( list, pidNode);
+      pidNode->append( node);
+      layoutChanged = true;
 
+      // Install the new node.
+      this->guidToTreeMap_[ id]
+        = std::make_pair( node->row(), node);
+
+    // } else {
+      // This transport is already loaded, we can ignore it here since
+      // we have nothing to update from this data sample.
+    }
+  }
+
+  // NAME / VALUE DATA
+
+  // Notify the GUI if we have changed the underlying model.
+  if( layoutChanged) {
+    /// @TODO: Check that we really do not need to do updated here.
+    this->model_->changed();
+
+  } else if( dataChanged) {
+    this->model_->updated( pidNode, 1, (*pidNode)[ pidNode->size()-1], 1);
+  }
 }
 
 template<>

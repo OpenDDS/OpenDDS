@@ -38,6 +38,55 @@ MonitorDataModel::newRoot( TreeNode* root)
   this->reset();
 }
 
+void
+MonitorDataModel::updated(
+  TreeNode* left,  int lcol,
+  TreeNode* right, int rcol
+)
+{
+  QModelIndex topLeft     = this->index( left,  lcol);
+  QModelIndex bottomRight = this->index( right, rcol);
+  emit dataChanged( topLeft, bottomRight);
+}
+
+void
+MonitorDataModel::updated( TreeNode* node, int column)
+{
+  QModelIndex index = this->index( node, column);
+  emit dataChanged( index, index);
+}
+
+void
+MonitorDataModel::changed()
+{
+  emit layoutChanged();
+}
+
+QModelIndex
+MonitorDataModel::index( TreeNode* node, int column) const
+{
+  // Treat null nodes as the root.
+  if( !node) node = this->root_;
+
+  // We have to reach the root before we can start forming indices.
+  // Retain the row information for the entire path as we traverse it.
+  QList<int> list;
+  for( ; node->parent(); node = node->parent()) {
+    list.append( node->row());
+  }
+
+  // Form the index of the tree root to start from.  Use the topmost
+  // non-null node that we found as the root.
+  QModelIndex index = this->QAbstractItemModel::createIndex( 0, column, node);
+
+  // Now we can form index values all the way back to the node of
+  // interest.
+  while( !list.isEmpty()) {
+    index = this->index( list.takeLast(), column, index);
+  }
+  return index;
+}
+
 TreeNode*
 MonitorDataModel::getNode( const QModelIndex &index) const
 {

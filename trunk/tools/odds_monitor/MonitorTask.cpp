@@ -362,7 +362,7 @@ Monitor::MonitorTask::setActiveRepo( RepoKey key)
       );
   if( CORBA::is_nil( this->participant_.in())) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
+      ACE_TEXT("(%P|%t) ERROR: MonitorTask::setActiveRepo() - ")
       ACE_TEXT("failed to create participant.\n")
     ));
     {
@@ -374,7 +374,7 @@ Monitor::MonitorTask::setActiveRepo( RepoKey key)
 
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) MonitorTask::startInstrumentation() - ")
+      ACE_TEXT("(%P|%t) MonitorTask::setActiveRepo() - ")
       ACE_TEXT("created participant.\n")
     ));
   }
@@ -387,7 +387,7 @@ Monitor::MonitorTask::setActiveRepo( RepoKey key)
                                    );
   if( CORBA::is_nil( subscriber.in())) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
+      ACE_TEXT("(%P|%t) ERROR: MonitorTask::setActiveRepo() - ")
       ACE_TEXT("failed to create subscriber.\n")
     ));
     {
@@ -399,7 +399,7 @@ Monitor::MonitorTask::setActiveRepo( RepoKey key)
 
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) MonitorTask::startInstrumentation() - ")
+      ACE_TEXT("(%P|%t) MonitorTask::setActiveRepo() - ")
       ACE_TEXT("created subscriber.\n")
     ));
   }
@@ -419,7 +419,7 @@ Monitor::MonitorTask::setActiveRepo( RepoKey key)
                 );
     if( transport.is_nil()) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
+        ACE_TEXT("(%P|%t) ERROR: MonitorTask::setActiveRepo() - ")
         ACE_TEXT("failed to create transport.\n")
       ));
       {
@@ -432,7 +432,7 @@ Monitor::MonitorTask::setActiveRepo( RepoKey key)
 
   if( ::OpenDDS::DCPS::ATTACH_OK != transport->attach( subscriber.in())) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
+      ACE_TEXT("(%P|%t) ERROR: MonitorTask::setActiveRepo() - ")
       ACE_TEXT("failed to attach transport to subscriber.\n")
     ));
     {
@@ -444,7 +444,7 @@ Monitor::MonitorTask::setActiveRepo( RepoKey key)
 
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) MonitorTask::startInstrumentation() - ")
+      ACE_TEXT("(%P|%t) MonitorTask::setActiveRepo() - ")
       ACE_TEXT("attached to transport with index %d.\n"),
       transportKey
     ));
@@ -511,6 +511,13 @@ Monitor::MonitorTask::setActiveRepo( RepoKey key)
             subscriber.in(),
             OpenDDS::DCPS::TRANSPORT_MONITOR_TOPIC,
             OpenDDS::DCPS::TRANSPORT_REPORT_TYPE);
+
+  if( this->options_.verbose()) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) MonitorTask::setActiveRepo() - ")
+      ACE_TEXT("created all instrumentation subscriptions.\n")
+    ));
+  }
 
   // Yield control.
   {
