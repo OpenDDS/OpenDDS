@@ -208,7 +208,7 @@ ReliableMulticast::synack_received(ACE_Message_Block* control)
 
   // Ignore sample if not destined for us:
   if (local_peer != this->local_peer_) return;
-  
+
   this->syn_watchdog_.cancel();
 
   // Handshake is complete; adjust the acked flag and force the
@@ -248,12 +248,6 @@ ReliableMulticast::expire_naks()
   for (NakHistory::iterator it(first); it != last; ++it) {
     const NakRequest& nak_request(it->second);
 
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("ReliableMulticast::expire_naks: ")
-               ACE_TEXT("timed out waiting on remote peer: 0x%x!\n"),
-               nak_request.first));
-
     SequenceMap::iterator sequence(this->sequences_.find(nak_request.first));
     if (sequence == this->sequences_.end()) {
       ACE_ERROR((LM_ERROR,
@@ -264,9 +258,15 @@ ReliableMulticast::expire_naks()
       continue;
     }
 
+    // Skip unrecoverable datagrams; attempt to re-establish a
+    // reasonable baseline to detect future reception gaps:
     if (nak_request.second > sequence->second) {
-      // Skip unrecoverable datagrams; attempt to re-establish a
-      // reasonable baseline to detect future reception gaps:
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("ReliableMulticast::expire_naks: ")
+                 ACE_TEXT("timed out waiting on remote peer: 0x%x!\n"),
+                 nak_request.first));
+
       sequence->second.skip(nak_request.second);
     }
   }
@@ -320,6 +320,8 @@ ReliableMulticast::nak_received(ACE_Message_Block* control)
   serializer >> high;
 
   DisjointSequence missing;
+
+  std::cout << "GOT NAKED FOR: " << low << " " << high << std::endl;
 
   // Attempt to resend requested datagrams:
   if (!this->send_buffer_->resend(
@@ -443,7 +445,7 @@ ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
                       ACE_TEXT("NULL reactor reference!\n")),
                      false);
   }
-  
+
   // Active peers schedule a watchdog timer to initiate a 2-way
   // handshake to verify that passive endpoints can send/receive
   // data reliably. This process must be executed using the
@@ -466,7 +468,7 @@ ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
                       ACE_TEXT("failed to schedule NAK watchdog!\n")),
                      false);
   }
-  
+
   // A send buffer is bound to the send strategy to ensure a
   // configured number of most-recent datagrams are buffered in
   // order to fulfill repair requests:
