@@ -79,6 +79,15 @@ void stubmodelchange();
 
     /// Grab the root of the model tree.
     TreeNode* modelRoot();
+
+    /// Update data values for a single node.
+    void updated( TreeNode* node, int column);
+
+    /// Update data values for a range of nodes.
+    void updated( TreeNode* left, int lcol, TreeNode* right, int rcol);
+
+    /// Modify the layout of the GUI.
+    void changed();
  
     /// Add a new data element to the model.
     void addDataElement(

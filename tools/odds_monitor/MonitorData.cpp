@@ -140,6 +140,24 @@ Monitor::MonitorData::modelRoot()
 }
 
 void
+Monitor::MonitorData::updated( TreeNode* node, int column)
+{
+  this->model_->updated( node, column);
+}
+
+void
+Monitor::MonitorData::updated( TreeNode* left, int lcol, TreeNode* right, int rcol)
+{
+  this->model_->updated( left, lcol, right, rcol);
+}
+
+void
+Monitor::MonitorData::changed()
+{
+  this->model_->changed();
+}
+
+void
 Monitor::MonitorData::stubmodelchange()
 {
   if( !this->enabled_) {

@@ -1,3 +1,17 @@
+Thu Dec  3 22:23:05 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/MonitorData.h:
+        * tools/odds_monitor/MonitorData.cpp:
+        * tools/odds_monitor/MonitorDataModel.h:
+        * tools/odds_monitor/MonitorDataModel.cpp:
+        * tools/odds_monitor/MonitorDataStorage.h:
+        * tools/odds_monitor/MonitorDataStorage.inl:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+        * tools/odds_monitor/MonitorTask.cpp:
+
+          Initial ServiceParticipantReport handling complete except for
+          Name/Value pair data.
+
 Thu Dec  3 17:04:55 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendBuffer.h:

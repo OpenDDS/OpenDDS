@@ -10,10 +10,12 @@
 #define MONITORDATASTORAGE_H
 
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/GuidConverter.h"
 #include "dds/monitor/monitorC.h"
 
 #include <map>
 #include <string>
+#include <algorithm>
 
 // For the inline implementations.
 #include "MonitorData.h"
@@ -141,7 +143,7 @@ class MonitorDataStorage {
     /// @name OpenDDS service access methods.
     /// @{
 
-    /// Update or remove a data element in the model.
+    /// Add, modify, or remove a data element in the model.
     template< typename DataType>
     void update( const DataType& data, bool remove = false);
 
@@ -151,21 +153,27 @@ class MonitorDataStorage {
     /// Clear the maps and delete the generators.
     void clear();
 
+    /// Recursively descend a tree and erase the contents from the maps.
+    void cleanMaps( TreeNode* node);
+
+    /// Remove a tree node from a map.
+    template< class MapType>
+    void removeNode( MapType& map, TreeNode* node);
+
     /// Reference to the model.
     MonitorData* model_;
 
+    /// Convenience type for storing information.
+    typedef std::pair< int, TreeNode*> RowNodePair;
+
     /// Map GUID_t values to TreeNode elements.
     typedef
-      std::map< OpenDDS::DCPS::GUID_t,
-                std::pair< int, TreeNode*>,
-                GUID_tKeyLessThan>
+      std::map< OpenDDS::DCPS::GUID_t, RowNodePair, GUID_tKeyLessThan>
       GuidToTreeMap;
     GuidToTreeMap guidToTreeMap_;
 
     /// Map host names to TreeNode elements.
-    typedef std::map< std::string,
-                      std::pair< int, TreeNode*>
-                    > HostToTreeMap;
+    typedef std::map< std::string, RowNodePair> HostToTreeMap;
     HostToTreeMap hostToTreeMap_;
 
     /// Uniquely identify processes.
@@ -177,10 +185,24 @@ class MonitorDataStorage {
     };
 
     /// Map process identifiers to TreeNode elements.
-    typedef std::map< ProcessKey,
-                      std::pair< int, TreeNode*>
-                    > ProcessToTreeMap;
+    typedef std::map< ProcessKey, RowNodePair> ProcessToTreeMap;
     ProcessToTreeMap processToTreeMap_;
+
+    /// Uniquely identify transports.
+    struct TransportKey {
+      TransportKey( const std::string& h, int p, int t)
+        : host( h), pid( p), transport( t)
+      { }
+      std::string host;
+      int         pid;
+      int         transport;
+      bool operator<( const TransportKey& rhs) const;
+    };
+
+    /// Map transport identifiers to GUID_t values.
+    typedef std::map< TransportKey, OpenDDS::DCPS::GUID_t >
+            TransportToGuidMap;
+    TransportToGuidMap transportToGuidMap_;
 
     /// Active repository IOR.
     std::string activeIor_;

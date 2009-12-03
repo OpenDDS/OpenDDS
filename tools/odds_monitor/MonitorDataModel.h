@@ -28,28 +28,43 @@ class MonitorDataModel : public QAbstractItemModel {
 
   public:
     /**
-     * @brief Construct with data and an optional parent link.
+     * @brief Construct with an optional parent link.
      *
-     * @param parent link to parent node of this one
-     *
-     * If no parent link is supplied this node acts as the root of a
-     * tree with the parent link held as nil.
+     * @param parent link to parent object of this one
      */
     MonitorDataModel( QObject* parent = 0);
-
-    /// Change to a new tree of data.
-    void newRoot( TreeNode* root);
-
-    //
-    // QAbstractModel interfaces.
-    //
 
     /// Virtual destructor.
     virtual ~MonitorDataModel();
 
     /* Exposing data from the model */
 
+    /// Obtain an index from a node.
+    QModelIndex index( TreeNode* node, int column) const;
+
+    /// Obtain a node from an index.
     TreeNode* getNode( const QModelIndex &index) const;
+
+    /* Model update methods. */
+
+    /// Change to a new tree of data.
+    void newRoot( TreeNode* root);
+
+    /// Data values have changed in a single node, update the view.
+    void updated( TreeNode* node, int column);
+
+    /// Data values have changed in a range of nodes, update the view.
+    void updated( TreeNode* left,  int lcol, TreeNode* right, int rcol);
+
+    /// Underlying model has changed, update the layout.
+    void changed();
+
+    /// Add a new node as a new row of data.
+    void addData( int row, QList< QVariant> list, const QModelIndex& parent);
+
+    //
+    // QAbstractModel interfaces.
+    //
 
     virtual QModelIndex index(
       int                row,
@@ -173,11 +188,6 @@ class MonitorDataModel : public QAbstractItemModel {
     virtual bool canFetchMore( const QModelIndex& parent) const;
 
     virtual void fetchMore( const QModelIndex& parent);
-
-    /* Data insertion methods. */
-
-    /// Add a new node as a new row of data.
-    void addData( int row, QList< QVariant> list, const QModelIndex& parent);
 
   private:
     /// Root node of the tree.
