@@ -302,7 +302,9 @@ ACE_THROW_SPEC((CORBA::SystemException))
     datareader_set_.erase(dr_servant) ;
   }
 
-  this->monitor_->report();
+  if (this->monitor_) {
+    this->monitor_->report();
+  }
 
   RepoId subscription_id  = dr_info->subscription_id_ ;
 
@@ -907,7 +909,9 @@ ACE_THROW_SPEC((CORBA::SystemException))
   // by the datareader map.
   info->local_reader_impl_->_add_ref();
 
-  this->monitor_->report();
+  if (this->monitor_) {
+    this->monitor_->report();
+  }
 
   return DDS::RETCODE_OK;
 }

@@ -1,4 +1,6 @@
 
+#include "tao/orb.idl"
+
 module Xyz {
 
 #pragma DCPS_DATA_TYPE "Xyz::Foo"

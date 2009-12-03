@@ -1,3 +1,26 @@
+Thu Dec  3 01:34:57 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Add some missing if's that could cause segfaults in the 
+          monitoring code.
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+
+          Fix a VC++ issue with constructor-style initialization of
+          references.
+          
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Added a missing header include that VC++ needed to see.
+
+        * tests/DCPS/FooType3Unbounded/FooDef.idl:
+        * tests/DCPS/FooType5/FooDef.idl:
+
+          Added missing #include "tao/orb.idl" that was required
+          because of VC++ template export issues (see TAO DOC 
+          Bugzilla #2703 and the TAO FAQ for details).
+
 Thu Dec  3 00:04:35 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/odds_monitor/MonitorData.h:

@@ -107,14 +107,14 @@ TransportSendBuffer::insert(SequenceNumber sequence, const buffer_type& value)
   buffer_type& buffer(pair.first->second);
 
   // Copy sample's TransportQueueElements:
-  TransportSendStrategy::QueueType*& elems(buffer.first);
+  TransportSendStrategy::QueueType*& elems = buffer.first;
   ACE_NEW(elems, TransportSendStrategy::QueueType(value.first->size(), 1));
 
   CopyChainVisitor visitor(*elems, &this->sample_allocator_);
   value.first->accept_visitor(visitor);
 
   // Copy sample's message/data block descriptors:
-  ACE_Message_Block*& data(buffer.second);
+  ACE_Message_Block*& data = buffer.second;
   data = value.second->duplicate();
 }
 

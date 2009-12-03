@@ -16,6 +16,7 @@
 #include "ace/CDR_Base.h"
 #include "ace/Log_Msg.h"
 
+#include "dds/DCPS/transport/framework/TransportSendBuffer.h"
 #include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 
