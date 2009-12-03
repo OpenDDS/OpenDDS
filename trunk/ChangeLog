@@ -1,3 +1,10 @@
+Thu Dec  3 16:37:41 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Reverted previous commit; caused circular dependency.
+
 Thu Dec  3 16:28:34 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.h:
