@@ -33,6 +33,7 @@ class Options;
 class MonitorDataModel;
 class MonitorDataStorage;
 class MonitorTask;
+class TreeNode;
 
 /**
  * @class MonitorData
@@ -75,6 +76,9 @@ void stubmodelchange();
 
     /// @name Messages and queries from DDS to GUI.
     /// @{
+
+    /// Grab the root of the model tree.
+    TreeNode* modelRoot();
  
     /// Add a new data element to the model.
     void addDataElement(
