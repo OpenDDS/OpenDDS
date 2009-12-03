@@ -18,6 +18,7 @@
 
 #include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
+#include "dds/DCPS/transport/framework/TransportSendBuffer.h"
 
 namespace {
 

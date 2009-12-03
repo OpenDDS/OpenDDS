@@ -20,7 +20,6 @@
 #include "TransportReplacedElement.h"
 #include "TransportRetainedElement.h"
 #include "TransportConfiguration_rch.h"
-#include "TransportSendBuffer.h"
 #include "TransportSendBuffer_rch.h"
 
 #include "ace/Synch.h"
