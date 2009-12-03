@@ -18,6 +18,7 @@
 
 #include "dds/DCPS/DisjointSequence.h"
 #include "dds/DCPS/RepoIdConverter.h"
+#include "dds/DCPS/transport/framework/TransportSendStrategy.h"
 
 #ifndef __ACE_INLINE__
 # include "TransportSendBuffer.inl"
@@ -29,7 +30,7 @@ namespace DCPS {
 TransportSendBuffer::TransportSendBuffer(size_t capacity,
                                          size_t max_samples_per_packet)
   : capacity_(capacity),
-    sample_allocator_(capacity * max_samples_per_packet),
+    retained_allocator_(capacity * max_samples_per_packet),
     replaced_allocator_(capacity * max_samples_per_packet)
 {
 }
@@ -107,10 +108,10 @@ TransportSendBuffer::insert(SequenceNumber sequence, const buffer_type& value)
   buffer_type& buffer(pair.first->second);
 
   // Copy sample's TransportQueueElements:
-  TransportSendStrategy::QueueType*& elems = buffer.first;
-  ACE_NEW(elems, TransportSendStrategy::QueueType(value.first->size(), 1));
+  queue_type*& elems = buffer.first;
+  ACE_NEW(elems, queue_type(value.first->size(), 1));
 
-  CopyChainVisitor visitor(*elems, &this->sample_allocator_);
+  CopyChainVisitor visitor(*elems, &this->retained_allocator_);
   value.first->accept_visitor(visitor);
 
   // Copy sample's message/data block descriptors:
