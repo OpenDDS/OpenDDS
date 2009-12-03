@@ -119,7 +119,7 @@ Monitor::MonitorData::clearData()
   }
 
   // Clear the mappings.
-  this->storage_->clear();
+  this->storage_->reset();
 
   // Create a new tree to install fresh data into.
   TreeNode* root = new TreeNode( list);
@@ -131,6 +131,12 @@ Monitor::MonitorData::clearData()
   this->storage_->activeIor() = std::string();
 
   return true;
+}
+
+Monitor::TreeNode*
+Monitor::MonitorData::modelRoot()
+{
+  return this->model_->getNode( QModelIndex());
 }
 
 void

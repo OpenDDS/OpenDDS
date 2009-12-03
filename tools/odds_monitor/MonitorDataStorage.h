@@ -15,12 +15,13 @@
 #include <map>
 #include <string>
 
-class RepoIdGenerator;
+// For the inline implementations.
+#include "MonitorData.h"
+#include "MonitorDataModel.h"
+#include "TreeNode.h"
+#include "dds/DCPS/RepoIdGenerator.h"
 
 namespace Monitor {
-
-class TreeNode;
-class MonitorData;
 
 /**
  * @class MonitorDataStorage
@@ -53,6 +54,65 @@ class MonitorData;
  * observing 16 million entities of a type, the Guid values will wrap -
  * and operation is undefined after that point.  Other limits are likely
  * to be exceeded before this becomes a problem.
+ *
+ * The GUI represents the data as a hierarchical tree.  The structure of
+ * the tree is consistent in what node types are represented at similar
+ * levels of the tree hierarchy.  Currently, this hierarchy includes:
+ *
+ *    host.pid.transport-guid.data
+ *    host.pid.participant-guid.data
+ *    host.pid.participant-guid.topic-guid.data
+ *    host.pid.participant-guid.publisher-guid.data
+ *    host.pid.participant-guid.publisher-guid.writer-guid.data
+ *    host.pid.participant-guid.subscriber-guid.data
+ *    host.pid.participant-guid.subscriber-guid.reader-guid.data
+ *
+ * Nodes in the tree can contain one of several types of contents.  These
+ * contents are displayed as a name/value pair of string data.  Node types
+ * include:
+ *
+ *   root node - header information
+ *               (name = "Element", value = "Value")
+ *   host node - holds a host name
+ *               (name = "Host", value = <name>)
+ *   pid  node - holds a process identifier
+ *               (name = "Process", value = <pid>)
+ *   guid node - holds an entity identified by GUID_t value
+ *               (name = "<type>", value = <stringified GUID_t>)
+ *   data node - holds simple data with no global identity
+ *               (name = "<name>", value = <value>)
+ *
+ * where the GUID <types> are:
+ *
+ *   DomainParticipant
+ *   Topic
+ *   Publisher
+ *   Subscriber
+ *   DataWriter
+ *   DataReader
+ *   Transport
+ *
+ * Nodes in the tree can contain nodes of several types as children.
+ * These include:
+ *
+ *   <host> nodes
+ *     can contain: <pid> nodes
+ *   <pid> nodes
+ *     can contain: Transports, data
+ *   DomainParticipant
+ *     can contain: Topics, Publishers, Subscribers, data
+ *   Topic
+ *     can contain: data
+ *   Publisher
+ *     can contain: DataWriters, data
+ *   Subscriber
+ *     can contain: DataReaders, data
+ *   DataWriter
+ *     can contain: data
+ *   DataReader
+ *     can contain: data
+ *   Transport
+ *     can contain: data
  */
 class MonitorDataStorage {
   public:
@@ -62,8 +122,10 @@ class MonitorDataStorage {
     /// Virtual destructor.
     virtual ~MonitorDataStorage();
 
-    /// Clean contents from all storage.
-    void clear();
+    /// Clean contents from all storage and restart the generators.
+    /// N.B. It is a mistake to clear this storage without destroying the
+    ///      GUI tree it references as well.
+    void reset();
 
     /// Access the active repository IOR.
     std::string& activeIor();
@@ -86,6 +148,9 @@ class MonitorDataStorage {
     /// @}
 
   private:
+    /// Clear the maps and delete the generators.
+    void clear();
+
     /// Reference to the model.
     MonitorData* model_;
 
@@ -96,6 +161,26 @@ class MonitorDataStorage {
                 GUID_tKeyLessThan>
       GuidToTreeMap;
     GuidToTreeMap guidToTreeMap_;
+
+    /// Map host names to TreeNode elements.
+    typedef std::map< std::string,
+                      std::pair< int, TreeNode*>
+                    > HostToTreeMap;
+    HostToTreeMap hostToTreeMap_;
+
+    /// Uniquely identify processes.
+    struct ProcessKey {
+      ProcessKey( const std::string& h, int p) : host( h), pid( p) { }
+      std::string host;
+      int         pid;
+      bool operator<( const ProcessKey& rhs) const;
+    };
+
+    /// Map process identifiers to TreeNode elements.
+    typedef std::map< ProcessKey,
+                      std::pair< int, TreeNode*>
+                    > ProcessToTreeMap;
+    ProcessToTreeMap processToTreeMap_;
 
     /// Active repository IOR.
     std::string activeIor_;
