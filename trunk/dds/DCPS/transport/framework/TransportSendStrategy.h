@@ -20,6 +20,7 @@
 #include "TransportReplacedElement.h"
 #include "TransportRetainedElement.h"
 #include "TransportConfiguration_rch.h"
+#include "TransportSendBuffer.h"
 #include "TransportSendBuffer_rch.h"
 
 #include "ace/Synch.h"
@@ -49,8 +50,6 @@ class OpenDDS_Dcps_Export TransportSendStrategy
   : public RcObject<ACE_SYNCH_MUTEX>,
       public ThreadSynchWorker {
 public:
-  typedef BasicQueue<TransportQueueElement> QueueType;
-
   virtual ~TransportSendStrategy();
 
   /// Assigns an optional send buffer.
@@ -169,6 +168,7 @@ protected:
   virtual void remove_all_control_msgs_i( RepoId pub_id);
 
 private:
+  typedef BasicQueue<TransportQueueElement> QueueType;
 
   enum SendPacketOutcome {
     OUTCOME_COMPLETE_SEND,

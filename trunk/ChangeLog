@@ -1,3 +1,13 @@
+Thu Dec  3 17:04:55 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Fixed circular dependencies; fixed interface lead caused by
+          TransportSendStrategy.
+
 Thu Dec  3 16:37:41 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.h:
