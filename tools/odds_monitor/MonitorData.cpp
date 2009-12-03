@@ -77,7 +77,6 @@ Monitor::MonitorData::setRepoIor( const QString& ior)
   // Switch to the new repository.
   if( this->dataSource_->setActiveRepo( key)) {
     this->storage_->activeIor() = ior.toStdString();
-this->stubmodelchange();
     return true;
 
   } else {
@@ -155,62 +154,5 @@ void
 Monitor::MonitorData::changed()
 {
   this->model_->changed();
-}
-
-void
-Monitor::MonitorData::stubmodelchange()
-{
-  if( !this->enabled_) {
-    return;
-  }
-
-  // Copy out the previous header settings.
-  QList< QVariant> list;
-  int cols = this->model_->columnCount();
-  for( int index = 0; index < cols; ++index) {
-     QString value
-       = this->model_->headerData( index, Qt::Horizontal).toString();
-     list << value;
-  }
-  TreeNode* root = new TreeNode( list);
-
-  static int which = 0;
-  TreeNode* parent = root;
-  if( ++which%2) {
-    for( int row = 0; row < 4; ++row) {
-      std::stringstream buffer1;
-      buffer1 << "SomeProperty at " << row << std::ends;
-      QString element(buffer1.str().c_str());
-
-      std::stringstream buffer2;
-      buffer2 << "some value with which = " << which << " at " << row << std::ends;
-      QString value(buffer2.str().c_str());
-
-      QList<QVariant> data;
-      data << element << value;
-
-      TreeNode* node = new TreeNode( data, parent);
-      parent->append( node);
-    }
-
-  } else {
-    for( int row = 0; row < 4; ++row) {
-      std::stringstream buffer1;
-      buffer1 << "AnotherProperty at " << row << std::ends;
-      QString element(buffer1.str().c_str());
-
-      std::stringstream buffer2;
-      buffer2 << "another value with which = " << which << " at " << row << std::ends;
-      QString value(buffer2.str().c_str());
-
-      QList<QVariant> data;
-      data << element << value;
-
-      TreeNode* node = new TreeNode( data, parent);
-      parent->append( node);
-    }
-  }
-
-  this->model_->newRoot( root);
 }
 

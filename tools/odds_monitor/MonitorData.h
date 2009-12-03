@@ -55,7 +55,6 @@ class MonitorData {
 
     /// Disable operation for orderly shutdown.
     void disable();
-void stubmodelchange();
 
     /// @name Messages and queries from GUI to DDS.
     /// @{

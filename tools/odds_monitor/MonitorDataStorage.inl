@@ -31,6 +31,14 @@ MonitorDataStorage::update< OpenDDS::DCPS::ServiceParticipantReport>(
   //   NVPSeq    values;
   // };
 
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
+    ACE_TEXT("%s ServiceParticipantReport, host: %C, pid: %d.\n"),
+    remove? "removing": "processing",
+    (const char*)data.host,
+    data.pid
+  ));
+
   // Retain knowledge of node insertions, updates, and deletions.
   bool layoutChanged = false;
   bool dataChanged   = false;
@@ -187,8 +195,8 @@ template<>
 inline
 void
 MonitorDataStorage::update< OpenDDS::DCPS::DomainParticipantReport>(
-  const OpenDDS::DCPS::DomainParticipantReport& /* data */,
-  bool /* remove */
+  const OpenDDS::DCPS::DomainParticipantReport& data,
+  bool remove
 )
 {
   // struct DomainParticipantReport {
@@ -196,14 +204,23 @@ MonitorDataStorage::update< OpenDDS::DCPS::DomainParticipantReport>(
   //   DDS::DomainId_t  domain_id;
   //   NVPSeq           values;
   // };
+
+  OpenDDS::DCPS::GuidConverter converter( data.dp_id);
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
+    ACE_TEXT("%s DomainParticipantReport, id: %C, domain: data.domain_id.\n"),
+    remove? "removing": "processing",
+    std::string(converter).c_str(),
+    data.domain_id
+  ));
 }
 
 template<>
 inline
 void
 MonitorDataStorage::update< OpenDDS::DCPS::TopicReport>(
-  const OpenDDS::DCPS::TopicReport& /* data */,
-  bool /* remove */
+  const OpenDDS::DCPS::TopicReport& data,
+  bool remove
 )
 {
   // struct TopicReport {
@@ -212,14 +229,24 @@ MonitorDataStorage::update< OpenDDS::DCPS::TopicReport>(
   //   string  type_name;
   //   NVPSeq  values;
   // };
+
+  OpenDDS::DCPS::GuidConverter converter( data.topic_id);
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
+    ACE_TEXT("%s TopicReport, id: %C, name: %C, type: %C.\n"),
+    remove? "removing": "processing",
+    std::string(converter).c_str(),
+    (const char*)data.topic_name,
+    (const char*)data.type_name
+  ));
 }
 
 template<>
 inline
 void
 MonitorDataStorage::update< OpenDDS::DCPS::PublisherReport>(
-  const OpenDDS::DCPS::PublisherReport& /* data */,
-  bool /* remove */
+  const OpenDDS::DCPS::PublisherReport& data,
+  bool remove
 )
 {
   // struct PublisherReport {
@@ -229,14 +256,24 @@ MonitorDataStorage::update< OpenDDS::DCPS::PublisherReport>(
   //   GUIDSeq       writers;
   //   NVPSeq        values;
   // };
+
+  OpenDDS::DCPS::GuidConverter converter( data.dp_id);
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
+    ACE_TEXT("%s PublisherReport, id: %C, handle: %d, transport: %d.\n"),
+    remove? "removing": "processing",
+    std::string(converter).c_str(),
+    data.handle,
+    data.transport_id
+  ));
 }
 
 template<>
 inline
 void
 MonitorDataStorage::update< OpenDDS::DCPS::SubscriberReport>(
-  const OpenDDS::DCPS::SubscriberReport& /* data */,
-  bool /* remove */
+  const OpenDDS::DCPS::SubscriberReport& data,
+  bool remove
 )
 {
   // struct SubscriberReport {
@@ -246,14 +283,24 @@ MonitorDataStorage::update< OpenDDS::DCPS::SubscriberReport>(
   //   GUIDSeq       readers;
   //   NVPSeq        values;
   // };
+
+  OpenDDS::DCPS::GuidConverter converter( data.dp_id);
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
+    ACE_TEXT("%s SubscriberReport, id: %C, handle: %d, transport: %d.\n"),
+    remove? "removing": "processing",
+    std::string(converter).c_str(),
+    data.handle,
+    data.transport_id
+  ));
 }
 
 template<>
 inline
 void
 MonitorDataStorage::update< OpenDDS::DCPS::DataWriterReport>(
-  const OpenDDS::DCPS::DataWriterReport& /* data */,
-  bool /* remove */
+  const OpenDDS::DCPS::DataWriterReport& data,
+  bool remove
 )
 {
   // struct DataWriterAssociation {
@@ -267,14 +314,24 @@ MonitorDataStorage::update< OpenDDS::DCPS::DataWriterReport>(
   //   DWAssociations associations;
   //   NVPSeq         values;
   // };
+
+  OpenDDS::DCPS::GuidConverter idconverter( data.dw_id);
+  OpenDDS::DCPS::GuidConverter topicconverter( data.topic_id);
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
+    ACE_TEXT("%s DataWriterReport, id: %C, topic: %C.\n"),
+    remove? "removing": "processing",
+    std::string(idconverter).c_str(),
+    std::string(topicconverter).c_str()
+  ));
 }
 
 template<>
 inline
 void
 MonitorDataStorage::update< OpenDDS::DCPS::DataWriterPeriodicReport>(
-  const OpenDDS::DCPS::DataWriterPeriodicReport& /* data */,
-  bool /* remove */
+  const OpenDDS::DCPS::DataWriterPeriodicReport& data,
+  bool remove
 )
 {
   // struct DataWriterAssociationPeriodic {
@@ -291,14 +348,22 @@ MonitorDataStorage::update< OpenDDS::DCPS::DataWriterPeriodicReport>(
   //   DWAssociationsPeriodic associations;
   //   NVPSeq        values;
   // };
+
+  OpenDDS::DCPS::GuidConverter converter( data.dw_id);
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
+    ACE_TEXT("%s DataWriterPeriodicReport, id: %C.\n"),
+    remove? "removing": "processing",
+    std::string(converter).c_str()
+  ));
 }
 
 template<>
 inline
 void
 MonitorDataStorage::update< OpenDDS::DCPS::DataReaderReport>(
-  const OpenDDS::DCPS::DataReaderReport& /* data */,
-  bool /* remove */
+  const OpenDDS::DCPS::DataReaderReport& data,
+  bool remove
 )
 {
   // struct DataReaderAssociation {
@@ -313,14 +378,24 @@ MonitorDataStorage::update< OpenDDS::DCPS::DataReaderReport>(
   //   DRAssociations associations;
   //   NVPSeq         values;
   // };
+
+  OpenDDS::DCPS::GuidConverter idconverter( data.dr_id);
+  OpenDDS::DCPS::GuidConverter topicconverter( data.topic_id);
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
+    ACE_TEXT("%s DataReaderReport, id: %C, topic: %C.\n"),
+    remove? "removing": "processing",
+    std::string(idconverter).c_str(),
+    std::string(topicconverter).c_str()
+  ));
 }
 
 template<>
 inline
 void
 MonitorDataStorage::update< OpenDDS::DCPS::DataReaderPeriodicReport>(
-  const OpenDDS::DCPS::DataReaderPeriodicReport& /* data */,
-  bool /* remove */
+  const OpenDDS::DCPS::DataReaderPeriodicReport& data,
+  bool remove
 )
 {
   // struct DataReaderAssociationPeriodic {
@@ -334,14 +409,22 @@ MonitorDataStorage::update< OpenDDS::DCPS::DataReaderPeriodicReport>(
   //   DRAssociationsPeriodic associations;
   //   NVPSeq        values;
   // };
+
+  OpenDDS::DCPS::GuidConverter converter( data.dr_id);
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
+    ACE_TEXT("%s DataReaderPeriodicReport, id: %C.\n"),
+    remove? "removing": "processing",
+    std::string(converter).c_str()
+  ));
 }
 
 template<>
 inline
 void
 MonitorDataStorage::update< OpenDDS::DCPS::TransportReport>(
-  const OpenDDS::DCPS::TransportReport& /* data */,
-  bool /* remove */
+  const OpenDDS::DCPS::TransportReport& data,
+  bool remove
 )
 {
   // struct TransportReport {
@@ -351,5 +434,16 @@ MonitorDataStorage::update< OpenDDS::DCPS::TransportReport>(
   //   string        transport_type;
   //   NVPSeq        values;
   // };
+
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
+    ACE_TEXT("%s TransportReport, host: %C, pid: %d, ")
+    ACE_TEXT("transport: %d, type: %C.\n"),
+    remove? "removing": "processing",
+    (const char*)data.host,
+    data.pid,
+    data.transport_id,
+    (const char*)data.transport_type
+  ));
 }
 
