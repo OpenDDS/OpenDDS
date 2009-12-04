@@ -176,7 +176,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     // ASSERT multiple contiguities return  multiple ranges
     //        of values with a difference of one:
     sequence = DisjointSequence(0);
-    sequence.update(5);   // discontiguity
+    sequence.update(5);  // discontiguity
     sequence.update(7);  // discontiguity
     sequence.update(9);  // discontiguity
 
