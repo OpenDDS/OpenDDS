@@ -18,18 +18,6 @@ MulticastDataLink::configure(MulticastConfiguration* config,
   this->reactor_task_ = reactor_task;
 }
 
-ACE_INLINE void
-MulticastDataLink::send_strategy(MulticastSendStrategy* send_strategy)
-{
-  this->send_strategy_ = send_strategy;
-}
-
-ACE_INLINE void
-MulticastDataLink::receive_strategy(MulticastReceiveStrategy* recv_strategy)
-{
-  this->recv_strategy_ = recv_strategy;
-}
-
 ACE_INLINE MulticastPeer
 MulticastDataLink::local_peer() const
 {

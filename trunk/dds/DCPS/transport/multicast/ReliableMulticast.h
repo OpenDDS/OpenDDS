@@ -61,6 +61,9 @@ public:
   ReliableMulticast(MulticastTransport* transport,
                     MulticastPeer local_peer,
                     MulticastPeer remote_peer);
+  ~ReliableMulticast();
+
+  virtual void send_strategy(MulticastSendStrategy* send_strategy);
   
   virtual bool acked();
   

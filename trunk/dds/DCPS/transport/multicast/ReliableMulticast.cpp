@@ -93,6 +93,38 @@ ReliableMulticast::ReliableMulticast(MulticastTransport* transport,
 {
 }
 
+ReliableMulticast::~ReliableMulticast()
+{
+  if (!this->send_buffer_.is_nil()) {
+    this->send_strategy_->send_buffer(0);
+
+    this->send_buffer_->_remove_ref();  // release ownership
+    this->send_buffer_ = 0;
+  }
+}
+
+void
+ReliableMulticast::send_strategy(MulticastSendStrategy* send_strategy)
+{
+  // A send buffer is bound to the send strategy to ensure a
+  // configured number of most-recent datagrams are retained in
+  // order to fulfill repair requests:
+  this->send_buffer_ =
+    new TransportSendBuffer(this->config_->nak_repair_size_,
+                            this->config_->max_samples_per_packet_);
+  if (this->send_buffer_.is_nil()) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("ReliableMulticast::send_strategy: ")
+               ACE_TEXT("failed to create TransportSendBuffer!\n")));
+    return;
+  }
+  this->send_buffer_->_add_ref(); // take ownership
+
+  send_strategy->send_buffer(this->send_buffer_.in());
+  MulticastDataLink::send_strategy(send_strategy);  // delegate to parent
+}
+
 bool
 ReliableMulticast::acked()
 {
@@ -444,6 +476,17 @@ ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
                      false);
   }
 
+  // A watchdog timer is scheduled to periodically check for gaps in
+  // received data. If a gap is discovered, MULTICAST_NAK control
+  // samples will be sent to initiate resends.
+  if (!this->nak_watchdog_.schedule(reactor)) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("ReliableMulticast::join_i: ")
+                      ACE_TEXT("failed to schedule NAK watchdog!\n")),
+                     false);
+  }
+
   // Active peers schedule a watchdog timer to initiate a 2-way
   // handshake to verify that passive endpoints can send/receive
   // data reliably. This process must be executed using the
@@ -456,49 +499,14 @@ ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
                      false);
   }
 
-  // A watchdog timer is scheduled to periodically check for gaps in
-  // received data. If a gap is discovered, MULTICAST_NAK control
-  // samples will be sent to initiate resends.
-  if (!this->nak_watchdog_.schedule(reactor)) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("ReliableMulticast::join_i: ")
-                      ACE_TEXT("failed to schedule NAK watchdog!\n")),
-                     false);
-  }
-
-  // A send buffer is bound to the send strategy to ensure a
-  // configured number of most-recent datagrams are buffered in
-  // order to fulfill repair requests:
-  this->send_buffer_ =
-    new TransportSendBuffer(this->config_->nak_repair_size_,
-                            this->config_->max_samples_per_packet_);
-  if (this->send_buffer_.is_nil()) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("ReliableMulticast::join_i: ")
-                      ACE_TEXT("failed to create TransportSendBuffer!\n")),
-                     false);
-  }
-  this->send_buffer_->_add_ref(); // take ownership
-
-  this->send_strategy_->send_buffer(this->send_buffer_.in());
-
   return true;
 }
 
 void
 ReliableMulticast::leave_i()
 {
-  if (!this->send_buffer_.is_nil()) {
-    this->send_strategy_->send_buffer(0);
-
-    this->send_buffer_->_remove_ref();  // release ownership
-    this->send_buffer_ = 0;
-  }
-
-  this->nak_watchdog_.cancel();
   this->syn_watchdog_.cancel();
+  this->nak_watchdog_.cancel();
 }
 
 } // namespace DCPS
