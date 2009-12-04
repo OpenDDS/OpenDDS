@@ -1,3 +1,12 @@
+Fri Dec  4 00:36:24 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+
+          Added range_iterator unit tests; fixed issue contributing to
+          multicast NAk request failures due to bogus ranges.
+
 Thu Dec  3 23:57:13 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * MPC/config/dcpsexe_with_multicast.mpb:
