@@ -42,11 +42,14 @@ public:
                                size_t max_samples_per_packet);
   ~TransportSendBuffer();
 
+  size_t capacity() const;
+  size_t n_chunks() const;
+
   void bind(TransportSendStrategy* strategy);
 
   void release_all();
   void release(buffer_type& buffer);
-  
+
   void retain_all(RepoId pub_id);
 
   void insert(SequenceNumber sequence, const buffer_type& value);
@@ -57,7 +60,8 @@ public:
 
 private:
   size_t capacity_;
-  
+  size_t n_chunks_;
+
   TransportRetainedElementAllocator retained_allocator_;
   TransportReplacedElementAllocator replaced_allocator_;
 

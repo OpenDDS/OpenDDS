@@ -14,6 +14,22 @@ OpenDDS::DCPS::TransportSendStrategy::start()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","start",6);
 
+  size_t header_chunks(1);
+
+  // If a secondary send buffer is bound, sent headers should
+  // be cached to properly maintain the buffer:
+  if (!this->send_buffer_.is_nil()) {
+    header_chunks += this->send_buffer_->capacity();
+  }
+
+  ACE_NEW_RETURN(this->header_db_allocator_,
+                 TransportDataBlockAllocator(header_chunks),
+                 -1);
+
+  ACE_NEW_RETURN(this->header_mb_allocator_,
+                 TransportMessageBlockAllocator(header_chunks),
+                 -1);
+
   // Since we (the TransportSendStrategy object) are a reference-counted
   // object, but the synch_ object doesn't necessarily know this, we need
   // to give a "copy" of a reference to ourselves to the synch_ object here.
@@ -44,6 +60,9 @@ OpenDDS::DCPS::TransportSendStrategy::stop()
   // Since we gave the synch_ a "copy" of a reference to ourselves, we need
   // to take it back now.
   this->_remove_ref();
+
+  delete this->header_mb_allocator_;
+  delete this->header_db_allocator_;
 
   {
     GuardType guard(this->lock_);
