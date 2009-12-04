@@ -57,7 +57,8 @@ DisjointSequence::range_iterator::operator++(int)
 ACE_INLINE bool
 DisjointSequence::range_iterator::operator==(const range_iterator& rhs)
 {
-  return this->pos_ == rhs.pos_;
+  return this->pos_ == rhs.pos_ &&
+         this->end_ == rhs.end_;
 }
 
 ACE_INLINE bool
