@@ -642,10 +642,10 @@ The current implementation relies on the transport reactor being derived from {{
 
 OpenDDS is supported by [[Object Computing, Inc.|http://www.ociweb.com/]]</pre>
 </div>
-<div title="Overview" modifier="StevenStallion" created="200912011932" modified="200912040051" changecount="101">
+<div title="Overview" modifier="StevenStallion" created="200912011932" modified="200912040052" changecount="103">
 <pre>Starting with the OpenDDS 2.1 release, a new multicast transport is available which replaces the {{{SimpleMcast}}} and {{{ReliableMulticast}}} transports. The source for the {{{multicast}}} transport is available under the general OpenDDS license and may be found under: {{{$DDS_ROOT/dds/DCPS/transport/multicast/}}}.
 
-What follows is a detailed description of the design, configuration, known issues, and potential future enhancements of the {{{multicast}}} transport.
+What follows is a detailed description of the design, configuration, known issues, and potential enhancements for the {{{multicast}}} transport.
 
 Unlike other transports, multicast reservations are formed between participants rather than individual publications and subscriptions. This allows any number of associations  belonging to the same pair of participants to re-use an existing {{{DataLink}}}, thereby reducing the amount of resources needed in multicast intensive environments. Another departure is unified support for best-effort and reliable delivery based on transport configuration. Delivery-specific behavior is abstracted by each concrete {{{MulticastDataLink}}} implementation, which allows for the same set of transport strategies to be used regardless of delivery mode.
 
