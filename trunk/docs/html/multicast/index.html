@@ -532,7 +532,7 @@ TertiaryDark: #666
 Error: #f88
 </pre>
 </div>
-<div title="Configuration" modifier="StevenStallion" created="200912011939" modified="200912022135" changecount="28">
+<div title="Configuration" modifier="StevenStallion" created="200912011939" modified="200912040330" changecount="29">
 <pre>As with other transports, dynamic configuration is provided by the ACE Service Configurator Framework. A svc.conf file should be created which contains the following:
 {{{
 dynamic OpenDDS_DCPS_Multicast_Service Service_Object * OpenDDS_Multicast:_make_MulticastLoader()
@@ -563,7 +563,6 @@ port_offset=49400
 #   224.0.0.128:&lt;port&gt; (IPv4), and
 #    [FF01::80]:&lt;port&gt; (IPv6)
 group_address=224.0.0.128:49401
-group_address=[FF01::80]:49401
 
 # Enable/disable reliable communication. This option
 # will eventually be deprecated. The default value
@@ -642,7 +641,7 @@ The current implementation relies on the transport reactor being derived from {{
 
 OpenDDS is supported by [[Object Computing, Inc.|http://www.ociweb.com/]]</pre>
 </div>
-<div title="Overview" modifier="StevenStallion" created="200912011932" modified="200912040052" changecount="103">
+<div title="Overview" modifier="StevenStallion" created="200912011932" modified="200912040330" changecount="104">
 <pre>Starting with the OpenDDS 2.1 release, a new multicast transport is available which replaces the {{{SimpleMcast}}} and {{{ReliableMulticast}}} transports. The source for the {{{multicast}}} transport is available under the general OpenDDS license and may be found under: {{{$DDS_ROOT/dds/DCPS/transport/multicast/}}}.
 
 What follows is a detailed description of the design, configuration, known issues, and potential enhancements for the {{{multicast}}} transport.
