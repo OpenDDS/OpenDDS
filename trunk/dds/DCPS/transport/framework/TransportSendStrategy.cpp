@@ -51,7 +51,6 @@ OpenDDS::DCPS::TransportSendStrategy::TransportSendStrategy
     //not_yet_pac_q_(new QueueType (1,config->max_samples_per_packet_)),
     //not_yet_pac_q_len_ (0),
     max_header_size_(0),
-    header_block_(0),
     elems_(new QueueType(1,config->max_samples_per_packet_)),
     pkt_chain_(0),
     header_complete_(0),
@@ -61,8 +60,8 @@ OpenDDS::DCPS::TransportSendStrategy::TransportSendStrategy
     delayed_delivered_notification_queue_(0),
     delayed_notification_mode_(0),
     num_delayed_notifications_(0),
-    header_mb_allocator_(2),
-    header_db_allocator_(1),
+    header_mb_allocator_(0),
+    header_db_allocator_(0),
     synch_(0),
     lock_(),
     replaced_element_allocator_(NUM_REPLACED_ELEMENT_CHUNKS),
@@ -91,29 +90,9 @@ OpenDDS::DCPS::TransportSendStrategy::TransportSendStrategy
   this->max_header_size_ = this->header_.max_marshaled_size();
 
   if (OpenDDS::DCPS::Transport_debug_level >= 2) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t)TransportSendStrategy header_db_allocator %x with 1 chunks\n",
-               &header_db_allocator_));
-    ACE_DEBUG((LM_DEBUG, "(%P|%t)TransportSendStrategy header_mb_allocator %x with 2 chunks\n",
-               &header_mb_allocator_));
     ACE_DEBUG((LM_DEBUG, "(%P|%t)TransportSendStrategy replaced_element_allocator %x with %d chunks\n",
                &replaced_element_allocator_, NUM_REPLACED_ELEMENT_CHUNKS));
   }
-
-  // Create the header_block_ that is used to hold the marshalled
-  // transport packet header bytes.
-  ACE_NEW_MALLOC(this->header_block_,
-                 (ACE_Message_Block*)header_mb_allocator_.malloc(),
-                 ACE_Message_Block(this->max_header_size_,
-                                   ACE_Message_Block::MB_DATA,
-                                   0,
-                                   0,
-                                   0,
-                                   0,
-                                   ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
-                                   ACE_Time_Value::zero,
-                                   ACE_Time_Value::max_time,
-                                   &header_db_allocator_,
-                                   &header_mb_allocator_));
 
   this->delayed_delivered_notification_queue_ = new TransportQueueElement* [max_samples_];
   this->delayed_notification_mode_ = new SendMode[max_samples_];
@@ -133,11 +112,6 @@ OpenDDS::DCPS::TransportSendStrategy::~TransportSendStrategy()
                  ACE_TEXT("terminating with %d unsent bytes.\n"),
                  size));
     }
-  }
-
-  // We created the header_block_ in our ctor, so we should release() it.
-  if (this->header_block_) {
-    this->header_block_->release();
   }
 
   if (this->synch_) {
@@ -1195,7 +1169,7 @@ OpenDDS::DCPS::TransportSendStrategy::remove_all_control_msgs(RepoId pub_id)
     // be retained in order to properly maintain the buffer:
     this->send_buffer_->retain_all(pub_id);
   }
-  
+
   // Process any specific sample storage first.
   this->remove_all_control_msgs_i(pub_id);
 
@@ -1203,7 +1177,7 @@ OpenDDS::DCPS::TransportSendStrategy::remove_all_control_msgs(RepoId pub_id)
   QueueRemoveVisitor remove_element_visitor( current_sample);
   PacketRemoveVisitor remove_from_packet_visitor(current_sample,
                                                  this->pkt_chain_,
-                                                 this->header_block_,
+                                                 this->pkt_chain_,
                                                  this->replaced_element_allocator_);
 
   this->do_remove_sample(remove_element_visitor,
@@ -1235,7 +1209,7 @@ OpenDDS::DCPS::TransportSendStrategy::remove_sample(const DataSampleListElement*
   QueueRemoveVisitor  remove_element_visitor(current_sample);
   PacketRemoveVisitor remove_from_packet_visitor( current_sample,
                                   this->pkt_chain_,
-                                  this->header_block_,
+                                  this->pkt_chain_,
                                   this->replaced_element_allocator_);
 
   return this->do_remove_sample(remove_element_visitor,
@@ -1540,7 +1514,7 @@ OpenDDS::DCPS::TransportSendStrategy::prepare_header()
 
   // Increment header sequence for packet:
   this->header_.sequence_ = ++this->header_sequence_;
-  
+
   // Allow the specific implementation the opportunity to set
   // values in the packet header.
   this->prepare_header_i();
@@ -1570,26 +1544,29 @@ OpenDDS::DCPS::TransportSendStrategy::prepare_packet()
   this->header_.length_ += this->not_yet_pac_q_len_;
   this->not_yet_pac_q_len_ = 0;
   */
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-        "Marshall the packet header.\n"));
 
   // Prepare the header for sending.
   this->prepare_header();
 
-  // First make sure that the header_block_ is "reset".
-  this->header_block_->rd_ptr(this->header_block_->base());
-  this->header_block_->wr_ptr(this->header_block_->base());
-
-  // Marshall the packet header_ into the header_block_
-  this->header_block_ << this->header_;
-
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-        "Set the pkt_chain_ to point to a duplicate of the "
-        "(marshalled) packet header block.\n"));
+        "Marshall the packet header.\n"));
 
-  // Make a duplicate of the header_block_ and make that be the head
-  // block in the pkt_chain_.
-  this->pkt_chain_ = this->header_block_->duplicate();
+  ACE_NEW_MALLOC(this->pkt_chain_,
+                 static_cast<ACE_Message_Block*>(this->header_mb_allocator_->malloc()),
+                 ACE_Message_Block(this->max_header_size_,
+                                   ACE_Message_Block::MB_DATA,
+                                   0,
+                                   0,
+                                   0,
+                                   0,
+                                   ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                                   ACE_Time_Value::zero,
+                                   ACE_Time_Value::max_time,
+                                   this->header_db_allocator_,
+                                   this->header_mb_allocator_));
+
+  // Marshall the packet header_ into the pkt_chain_.
+  this->pkt_chain_ << this->header_;
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Use a BuildChainVisitor to visit the packet elems_.\n"));
@@ -1710,7 +1687,7 @@ OpenDDS::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_n
   }
 
   if (!this->send_buffer_.is_nil()) {
-    // If a secondary send buffer is bound, send samples must
+    // If a secondary send buffer is bound, sent samples must
     // be inserted in order to properly maintain the buffer:
     this->send_buffer_->insert(this->header_.sequence_,
       TransportSendBuffer::buffer_type(this->elems_, this->pkt_chain_));

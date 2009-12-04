@@ -10,6 +10,18 @@
 namespace OpenDDS {
 namespace DCPS {
 
+ACE_INLINE size_t
+TransportSendBuffer::capacity() const
+{
+  return this->capacity_;
+}
+
+ACE_INLINE size_t
+TransportSendBuffer::n_chunks() const
+{
+  return this->n_chunks_;
+}
+
 ACE_INLINE void
 TransportSendBuffer::bind(TransportSendStrategy* strategy) {
   this->strategy_ = strategy;

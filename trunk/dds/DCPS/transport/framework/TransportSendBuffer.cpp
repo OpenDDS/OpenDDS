@@ -30,8 +30,9 @@ namespace DCPS {
 TransportSendBuffer::TransportSendBuffer(size_t capacity,
                                          size_t max_samples_per_packet)
   : capacity_(capacity),
-    retained_allocator_(capacity * max_samples_per_packet),
-    replaced_allocator_(capacity * max_samples_per_packet)
+    n_chunks_(capacity * max_samples_per_packet),
+    retained_allocator_(this->n_chunks_),
+    replaced_allocator_(this->n_chunks_)
 {
 }
 
@@ -48,7 +49,6 @@ TransportSendBuffer::release_all()
     release(it->second);
   }
   this->buffers_.clear();
-
 }
 
 void

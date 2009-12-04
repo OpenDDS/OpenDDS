@@ -129,7 +129,7 @@ public:
   void link_released(bool flag);
 
   bool isDirectMode();
-  
+
   /// Form an IOV and call the send_bytes() template method.
   ssize_t do_send_packet( ACE_Message_Block* packet, int& bp);
 
@@ -152,7 +152,7 @@ protected:
   virtual ACE_HANDLE get_handle();
 
   virtual ssize_t send_bytes_i(const iovec iov[], int n) = 0;
-  
+
   /// Specific implementation processing of prepared packet header.
   virtual void prepare_header_i();
 
@@ -202,7 +202,7 @@ private:
   /// After this step has been done, the prepare_packet() step can
   /// be performed, followed by the actual send_packet() call.
   void get_packet_elems_from_queue();
-  
+
   /// This method is responsible for updating the packet header.
   /// Called exclusively by prepare_packet.
   void prepare_header();
@@ -334,10 +334,10 @@ private:
   size_t num_delayed_notifications_;
 
   /// Allocator for header data block.
-  TransportMessageBlockAllocator header_mb_allocator_;
+  TransportMessageBlockAllocator* header_mb_allocator_;
 
   /// Allocator for header message block.
-  TransportDataBlockAllocator header_db_allocator_;
+  TransportDataBlockAllocator* header_db_allocator_;
 
   /// The thread synch object.
   ThreadSynch* synch_;
