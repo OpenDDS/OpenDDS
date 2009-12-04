@@ -1,3 +1,9 @@
+Fri Dec  4 00:49:30 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/html/multicast/index.html:
+
+          Corrected minor nits.
+
 Fri Dec  4 00:36:24 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/DisjointSequence.h:
