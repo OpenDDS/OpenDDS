@@ -321,8 +321,6 @@ ReliableMulticast::nak_received(ACE_Message_Block* control)
 
   DisjointSequence missing;
 
-  std::cout << "GOT NAKED FOR: " << low << " " << high << std::endl;
-
   // Attempt to resend requested datagrams:
   if (!this->send_buffer_->resend(
         DisjointSequence::range_type(low, high), missing)) {
