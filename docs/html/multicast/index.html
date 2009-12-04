@@ -642,10 +642,10 @@ The current implementation relies on the transport reactor being derived from {{
 
 OpenDDS is supported by [[Object Computing, Inc.|http://www.ociweb.com/]]</pre>
 </div>
-<div title="Overview" modifier="StevenStallion" created="200912011932" modified="200912022137" changecount="95">
+<div title="Overview" modifier="StevenStallion" created="200912011932" modified="200912040051" changecount="101">
 <pre>Starting with the OpenDDS 2.1 release, a new multicast transport is available which replaces the {{{SimpleMcast}}} and {{{ReliableMulticast}}} transports. The source for the {{{multicast}}} transport is available under the general OpenDDS license and may be found under: {{{$DDS_ROOT/dds/DCPS/transport/multicast/}}}.
 
-What follows is a detailed overview of the design, configuration, known issues, and potential future enhancements:
+What follows is a detailed description of the design, configuration, known issues, and potential future enhancements of the {{{multicast}}} transport.
 
 Unlike other transports, multicast reservations are formed between participants rather than individual publications and subscriptions. This allows any number of associations  belonging to the same pair of participants to re-use an existing {{{DataLink}}}, thereby reducing the amount of resources needed in multicast intensive environments. Another departure is unified support for best-effort and reliable delivery based on transport configuration. Delivery-specific behavior is abstracted by each concrete {{{MulticastDataLink}}} implementation, which allows for the same set of transport strategies to be used regardless of delivery mode.
 
@@ -665,10 +665,14 @@ if (status != OpenDDS::DCPS::ATTACH_OK) {
   exit(EXIT_FAILURE);
 }
 }}}
-An MPC base project is also provided for linking against the {{{OpenDDS_Multicast}}} library:
+MPC base projects are also provided for linking against the {{{OpenDDS_Multicast}}} library:
 {{{
 project : dcps_multicast {
-  ...
+}
+}}}
+and
+{{{
+project : dcpsexe_with_multicast {
 }
 }}}</pre>
 </div>
@@ -691,7 +695,7 @@ project : dcps_multicast {
 &lt;/div&gt;
 &lt;!--}}}--&gt;</pre>
 </div>
-<div title="Reliability" modifier="StevenStallion" created="200912011934" modified="200912022130" changecount="87">
+<div title="Reliability" modifier="StevenStallion" created="200912011934" modified="200912040048" changecount="89">
 <pre>Reliable delivery is achieved through two primary mechanisms:
 * 2-way peer handshaking (SYN/SYNACK)
 * Negative acknowledgment of missing data (NAK/NAKACK)
@@ -711,7 +715,7 @@ As each datagram is delivered to the {{{DataLink}}}, the transport sequence valu
 
 If the active peer receives a {{{MULTICAST_NAK}}} control sample it will examine its send buffer for the missing datagram. If the datagram is no longer available, it sends a {{{MULTICAST_NAKACK}}} control sample to the entire multicast group to suppress further repair requests. If the datagram is still available, it resends the missing data to the entire multicast group.
 
-If the passive peer receives a {{{MULTICAST_NAKACK}}} control sample, it will behave just as if the repair request had aged off, suppressing further repair requests and logging an error as above.</pre>
+If the passive peer receives a {{{MULTICAST_NAKACK}}} control sample, it will behave just as if the repair request has aged off, suppressing further repair requests and logging an error.</pre>
 </div>
 <div title="SideBarOptions" modifier="OpenDDS" created="200911302023" server.type="file" server.host="file:///export/OCI/DDS/docs/html/template/index.html" server.page.revision="200911302023">
 <pre>&lt;&lt;search&gt;&gt;&lt;&lt;closeAll&gt;&gt;&lt;&lt;permaview&gt;&gt;&lt;&lt;newTiddler&gt;&gt;&lt;&lt;saveChanges&gt;&gt;&lt;&lt;slider chkSliderOptionsPanel OptionsPanel &quot;options »&quot; &quot;Change TiddlyWiki advanced options&quot;&gt;&gt;</pre>
