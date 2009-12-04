@@ -8,6 +8,7 @@
  */
 
 #include "ace/OS_main.h"
+
 #include "dds/DCPS/DisjointSequence.h"
 
 #include "../common/TestSupport.h"
