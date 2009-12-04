@@ -27,7 +27,10 @@ public:
   class OpenDDS_Dcps_Export range_iterator
     : public std::iterator<std::input_iterator_tag, range_type> {
   public:
-    explicit range_iterator(set_type::iterator pos);
+    range_iterator();
+    range_iterator(set_type::iterator begin,
+                   set_type::iterator end);
+
     range_iterator(const range_iterator& it);
 
     range_iterator& operator++();
@@ -41,6 +44,8 @@ public:
 
   private:
     set_type::iterator pos_;
+    set_type::iterator end_;
+
     range_type value_;
   };
 
