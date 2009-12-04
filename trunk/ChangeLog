@@ -1,3 +1,9 @@
+Fri Dec  4 14:13:59 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Reverted temporary debug logging.
+
 Fri Dec  4 00:49:30 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * docs/html/multicast/index.html:
