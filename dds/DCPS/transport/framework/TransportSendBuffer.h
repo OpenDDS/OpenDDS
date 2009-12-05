@@ -16,6 +16,7 @@
 #include "TransportQueueElement.h"
 #include "TransportRetainedElement.h"
 #include "TransportReplacedElement.h"
+#include "TransportSendStrategy.h"
 #include "TransportSendStrategy_rch.h"
 
 #include "ace/Message_Block.h"
@@ -35,8 +36,7 @@ namespace DCPS {
 class OpenDDS_Dcps_Export TransportSendBuffer
   : public RcObject<ACE_SYNCH_MUTEX> {
 public:
-  typedef BasicQueue<TransportQueueElement> queue_type;
-  typedef std::pair<queue_type*, ACE_Message_Block*> buffer_type;
+  typedef std::pair<TransportSendStrategy::QueueType*, ACE_Message_Block*> buffer_type;
 
   explicit TransportSendBuffer(size_t capacity,
                                size_t max_samples_per_packet);
