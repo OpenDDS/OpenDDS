@@ -1,3 +1,17 @@
+Sat Dec  5 20:02:21 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Refactored relationship between TransportSendStrategy and
+          TransportSendBuffer. A good amount of shared state exists
+          between both classes; the send strategy should eventually
+          the send buffer. Until such time, the send buffer will be
+          the send strategy's BFF.
+
 Sat Dec  5 19:21:35 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastDataLink.h:

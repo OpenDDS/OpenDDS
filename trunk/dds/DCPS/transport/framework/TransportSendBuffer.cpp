@@ -18,7 +18,6 @@
 
 #include "dds/DCPS/DisjointSequence.h"
 #include "dds/DCPS/RepoIdConverter.h"
-#include "dds/DCPS/transport/framework/TransportSendStrategy.h"
 
 #ifndef __ACE_INLINE__
 # include "TransportSendBuffer.inl"
@@ -108,8 +107,8 @@ TransportSendBuffer::insert(SequenceNumber sequence, const buffer_type& value)
   buffer_type& buffer(pair.first->second);
 
   // Copy sample's TransportQueueElements:
-  queue_type*& elems = buffer.first;
-  ACE_NEW(elems, queue_type(value.first->size(), 1));
+  TransportSendStrategy::QueueType*& elems = buffer.first;
+  ACE_NEW(elems, TransportSendStrategy::QueueType(value.first->size(), 1));
 
   CopyChainVisitor visitor(*elems, &this->retained_allocator_);
   value.first->accept_visitor(visitor);
@@ -144,9 +143,9 @@ TransportSendBuffer::resend(const DisjointSequence::range_type& range,
 void
 TransportSendBuffer::resend(buffer_type& buffer)
 {
-  ACE_GUARD(ACE_SYNCH_MUTEX,
+  ACE_GUARD(TransportSendStrategy::LockType,
             guard,
-            this->strategy_->lock());
+            this->strategy_->lock_);
 
   int bp = 0;
   this->strategy_->do_send_packet(buffer.second, bp);

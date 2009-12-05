@@ -20,7 +20,6 @@
 #include "TransportReplacedElement.h"
 #include "TransportRetainedElement.h"
 #include "TransportConfiguration_rch.h"
-#include "TransportSendBuffer.h"
 #include "TransportSendBuffer_rch.h"
 
 #include "ace/Synch.h"
@@ -34,7 +33,6 @@ class TransportQueueElement;
 struct DataSampleListElement;
 class QueueRemoveVisitor;
 class PacketRemoveVisitor;
-
 
 /**
  * This class provides methods to fill packets with samples for sending
@@ -130,9 +128,6 @@ public:
 
   bool isDirectMode();
 
-  /// Form an IOV and call the send_bytes() template method.
-  ssize_t do_send_packet( ACE_Message_Block* packet, int& bp);
-
 protected:
 
   TransportSendStrategy(TransportConfiguration* config,
@@ -217,6 +212,9 @@ private:
   /// just been prepared via a call to prepare_packet().
   SendPacketOutcome send_packet(UseDelayedNotification delay_notification);
 
+  /// Form an IOV and call the send_bytes() template method.
+  ssize_t do_send_packet( ACE_Message_Block* packet, int& bp);
+
   /// This is called from the send_packet() method after it has
   /// sent at least one byte from the current packet.  This method
   /// will update the current packet appropriately, as well as deal
@@ -258,8 +256,6 @@ public:
   // Since the default is the earlier hard-coded value, this
   // shouldn't have any impact.
   void clear(SendMode mode = MODE_DIRECT);
-
-  LockType& lock();
 
 private:
   /// Implement framework chain visitations to remove a sample.
@@ -364,11 +360,16 @@ private:
 
   TransportSendBuffer_rch send_buffer_;
 
-  //remove these are only for debugging: DUMP_FOR_PACKET_INFO
+  // N.B. The behavior present in TransortSendBuffer should be
+  // refactored into the TransportSendStrategy eventually; a good
+  // amount of private state is shared between both classes.
+  friend class TransportSendBuffer;
+
 protected:
   /// Current transport packet header.
   TransportHeader header_;
 
+  //remove these are only for debugging: DUMP_FOR_PACKET_INFO
   ACE_Message_Block*    dup_pkt_chain;
   ACE_Message_Block*    act_pkt_chain_ptr;
   void*                 act_elems_head_ptr;

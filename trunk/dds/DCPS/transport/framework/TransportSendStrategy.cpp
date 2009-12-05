@@ -848,6 +848,71 @@ OpenDDS::DCPS::TransportSendStrategy::clear(SendMode mode)
   delete queue;
 }
 
+int
+OpenDDS::DCPS::TransportSendStrategy::start()
+{
+  DBG_ENTRY_LVL("TransportSendStrategy","start",6);
+
+  size_t header_chunks(1);
+
+  // If a secondary send buffer is bound, sent headers should
+  // be cached to properly maintain the buffer:
+  if (!this->send_buffer_.is_nil()) {
+    header_chunks += this->send_buffer_->capacity();
+  }
+
+  ACE_NEW_RETURN(this->header_db_allocator_,
+                 TransportDataBlockAllocator(header_chunks),
+                 -1);
+
+  ACE_NEW_RETURN(this->header_mb_allocator_,
+                 TransportMessageBlockAllocator(header_chunks),
+                 -1);
+
+  // Since we (the TransportSendStrategy object) are a reference-counted
+  // object, but the synch_ object doesn't necessarily know this, we need
+  // to give a "copy" of a reference to ourselves to the synch_ object here.
+  // We will do the reverse when we unregister ourselves (as a worker) from
+  // the synch_ object.
+  //MJM: The synch thingie knows to not "delete" us, right?
+  this->_add_ref();
+
+  if (this->synch_->register_worker(this) == -1) {
+    // Take back our "copy".
+    this->_remove_ref();
+    ACE_ERROR_RETURN((LM_ERROR,
+                      "(%P|%t) ERROR: TransportSendStrategy failed to register "
+                      "as a worker with the ThreadSynch object.\n"),
+                     -1);
+  }
+
+  return 0;
+}
+
+void
+OpenDDS::DCPS::TransportSendStrategy::stop()
+{
+  DBG_ENTRY_LVL("TransportSendStrategy","stop",6);
+
+  this->synch_->unregister_worker();
+
+  // Since we gave the synch_ a "copy" of a reference to ourselves, we need
+  // to take it back now.
+  this->_remove_ref();
+
+  delete this->header_mb_allocator_;
+  delete this->header_db_allocator_;
+
+  {
+    GuardType guard(this->lock_);
+
+    this->stop_i();
+  }
+
+  // TBD SOON - What about all of the samples that may still be stuck in
+  //            our queue_ and/or elems_?
+}
+
 void
 OpenDDS::DCPS::TransportSendStrategy::send(TransportQueueElement* element, bool relink)
 {
