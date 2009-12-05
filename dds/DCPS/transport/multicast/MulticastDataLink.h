@@ -43,11 +43,9 @@ public:
   
   void configure(MulticastConfiguration* config,
                  TransportReactorTask* reactor_task);
-
-  // These methods may be overridden to provide additional behavior
-  // when assigning send/receive strategies:
-  virtual void send_strategy(MulticastSendStrategy* send_strategy);
-  virtual void receive_strategy(MulticastReceiveStrategy* recv_strategy);
+  
+  void send_strategy(MulticastSendStrategy* send_strategy);
+  void receive_strategy(MulticastReceiveStrategy* recv_strategy);
 
   MulticastPeer local_peer() const;
   MulticastPeer remote_peer() const;
@@ -80,6 +78,11 @@ protected:
   TransportReactorTask_rch reactor_task_;
   
   virtual void stop_i();
+  
+  // These methods may be overridden to provide additional behavior
+  // when assigning send/receive strategies:
+  virtual void send_strategy_i(MulticastSendStrategy* send_strategy);
+  virtual void receive_strategy_i(MulticastReceiveStrategy* recv_strategy);
  
   // These methods may be overridden to provide additional behavior
   // when joining/leaving a multicast group:
