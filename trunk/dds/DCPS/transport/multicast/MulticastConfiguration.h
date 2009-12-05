@@ -28,11 +28,6 @@ const TransportIdType DEFAULT_MULTICAST_ID(0xFFFFFF08);
 class OpenDDS_Multicast_Export MulticastConfiguration
   : public TransportConfiguration {
 public:
-  MulticastConfiguration();
-
-  virtual int load(const TransportIdType& id,
-                   ACE_Configuration_Heap& config);
-
   /// Enable/disable IPv6 default group address selection.
   /// The default value is: false.
   bool default_to_ipv6_;
@@ -79,6 +74,11 @@ public:
   /// giving up on a repair response (reliable only).
   /// The default value is: 30000 (30 seconds).
   ACE_Time_Value nak_timeout_;
+
+  MulticastConfiguration();
+
+  virtual int load(const TransportIdType& id,
+                   ACE_Configuration_Heap& config);
 
 private:
   void default_group_address(ACE_INET_Addr& group_address,

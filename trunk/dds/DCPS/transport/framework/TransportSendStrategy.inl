@@ -141,6 +141,12 @@ OpenDDS::DCPS::TransportSendStrategy::resume_send()
   }
 }
 
+ACE_INLINE OpenDDS::DCPS::TransportSendStrategy::LockType&
+OpenDDS::DCPS::TransportSendStrategy::lock()
+{
+  return this->lock_;
+}
+
 ACE_INLINE const char*
 OpenDDS::DCPS::TransportSendStrategy::mode_as_str(SendMode mode)
 {

@@ -144,6 +144,10 @@ TransportSendBuffer::resend(const DisjointSequence::range_type& range,
 void
 TransportSendBuffer::resend(buffer_type& buffer)
 {
+  ACE_GUARD(ACE_SYNCH_MUTEX,
+            guard,
+            this->strategy_->lock());
+
   int bp = 0;
   this->strategy_->do_send_packet(buffer.second, bp);
 }
