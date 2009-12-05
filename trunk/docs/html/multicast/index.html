@@ -693,11 +693,11 @@ project : dcpsexe_with_multicast {
 &lt;/div&gt;
 &lt;!--}}}--&gt;</pre>
 </div>
-<div title="Reliability" modifier="StevenStallion" created="200912011934" modified="200912040048" changecount="89">
+<div title="Reliability" modifier="StevenStallion" created="200912011934" modified="200912051831" changecount="90">
 <pre>Reliable delivery is achieved through two primary mechanisms:
 * 2-way peer handshaking (SYN/SYNACK)
 * Negative acknowledgment of missing data (NAK/NAKACK)
-For the purposes of examining the interactions between reliable peers, it helps to narrow the view of the multicast group to two specific peers: active and passive. The active peer is the publishing side of the {{{DataLink}}}. The passive peer will be the remote peer associated with the link when it was created. It is important to remember that control data will be exchanged among all peers within the multicast group, however disinterested peers will discard payloads which are not addressed to them directly.
+For the purpose of examining the interactions between reliable peers, it helps to narrow the view of the multicast group to two specific peers: active and passive. The active peer is the publishing side of the {{{DataLink}}}. The passive peer will be the remote peer associated with the link when it was created. It is important to remember that control data will be exchanged among all peers within the multicast group, however disinterested peers will discard payloads which are not addressed to them directly.
 
 DCPS control samples were chosen in lieu of more traditional ~PDUs for the exchange of control data between peers; this allowed the transport to leverage existing functionality at the cost of a slightly increased payload size.
 !!SYN/SYNACK
