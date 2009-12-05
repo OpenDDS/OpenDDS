@@ -76,7 +76,7 @@ NakWatchdog::on_interval(const void* /*arg*/)
   // peers becoming unresponsive:
   this->link_->expire_naks();
 
-  // Initiate resends by sending MULTICAST_NAK control samples
+  // Initiate repairs by sending MULTICAST_NAK control samples
   // to remote peers from which we are missing data:
   this->link_->send_naks();
 }
@@ -110,7 +110,7 @@ ReliableMulticast::send_strategy(MulticastSendStrategy* send_strategy)
   // configured number of most-recent datagrams are retained in
   // order to fulfill repair requests:
   this->send_buffer_ =
-    new TransportSendBuffer(this->config_->nak_repair_size_,
+    new TransportSendBuffer(this->config_->nak_depth_,
                             this->config_->max_samples_per_packet_);
   if (this->send_buffer_.is_nil()) {
     ACE_ERROR((LM_ERROR,
@@ -476,17 +476,6 @@ ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
                      false);
   }
 
-  // A watchdog timer is scheduled to periodically check for gaps in
-  // received data. If a gap is discovered, MULTICAST_NAK control
-  // samples will be sent to initiate resends.
-  if (!this->nak_watchdog_.schedule(reactor)) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("ReliableMulticast::join_i: ")
-                      ACE_TEXT("failed to schedule NAK watchdog!\n")),
-                     false);
-  }
-
   // Active peers schedule a watchdog timer to initiate a 2-way
   // handshake to verify that passive endpoints can send/receive
   // data reliably. This process must be executed using the
@@ -498,6 +487,17 @@ ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
                       ACE_TEXT("failed to schedule SYN watchdog!\n")),
                      false);
   }
+  
+  // A watchdog timer is scheduled to periodically check for gaps in
+  // received data. If a gap is discovered, MULTICAST_NAK control
+  // samples will be sent to initiate repairs.
+  if (!this->nak_watchdog_.schedule(reactor)) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("ReliableMulticast::join_i: ")
+                      ACE_TEXT("failed to schedule NAK watchdog!\n")),
+                     false);
+  }
 
   return true;
 }
@@ -505,8 +505,8 @@ ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
 void
 ReliableMulticast::leave_i()
 {
-  this->syn_watchdog_.cancel();
   this->nak_watchdog_.cancel();
+  this->syn_watchdog_.cancel();
 }
 
 } // namespace DCPS

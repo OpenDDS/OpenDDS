@@ -12,7 +12,7 @@
 
 namespace {
 
-const bool DEFAULT_DEFAULT_TO_IPV6(false);
+const bool DEFAULT_TO_IPV6(false);
 
 const u_short DEFAULT_PORT_OFFSET(49400);
 
@@ -24,10 +24,9 @@ const bool DEFAULT_RELIABLE(true);
 const long DEFAULT_SYN_INTERVAL(500);
 const long DEFAULT_SYN_TIMEOUT(30000);
 
+const size_t DEFAULT_NAK_DEPTH(32);
 const long DEFAULT_NAK_INTERVAL(2000);
 const long DEFAULT_NAK_TIMEOUT(30000);
-
-const size_t DEFAULT_NAK_REPAIR_SIZE(32);
 
 } // namespace
 
@@ -35,10 +34,10 @@ namespace OpenDDS {
 namespace DCPS {
 
 MulticastConfiguration::MulticastConfiguration()
-  : default_to_ipv6_(DEFAULT_DEFAULT_TO_IPV6),
+  : default_to_ipv6_(DEFAULT_TO_IPV6),
     port_offset_(DEFAULT_PORT_OFFSET),
     reliable_(DEFAULT_RELIABLE),
-    nak_repair_size_(DEFAULT_NAK_REPAIR_SIZE)
+    nak_depth_(DEFAULT_NAK_DEPTH)
 {
   default_group_address(this->group_address_, DEFAULT_MULTICAST_ID);
 
@@ -104,14 +103,14 @@ MulticastConfiguration::load(const TransportIdType& id,
   GET_CONFIG_TIME_VALUE(config, transport_key, ACE_TEXT("syn_timeout"),
                         this->syn_timeout_)
 
+  GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("nak_depth"),
+                   this->nak_depth_, size_t)
+
   GET_CONFIG_TIME_VALUE(config, transport_key, ACE_TEXT("nak_interval"),
                         this->nak_interval_)
 
   GET_CONFIG_TIME_VALUE(config, transport_key, ACE_TEXT("nak_timeout"),
                         this->nak_timeout_)
-
-  GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("nak_repair_size"),
-                   this->nak_repair_size_, size_t)
 
   return 0;
 }
