@@ -63,8 +63,6 @@ public:
                     MulticastPeer remote_peer);
   ~ReliableMulticast();
 
-  virtual void send_strategy(MulticastSendStrategy* send_strategy);
-  
   virtual bool acked();
   
   virtual bool header_received(const TransportHeader& header);
@@ -92,6 +90,8 @@ public:
                     ACE_Message_Block* data);
 
 protected:
+  virtual void send_strategy_i(MulticastSendStrategy* send_strategy);
+  
   virtual bool join_i(const ACE_INET_Addr& group_address, bool active);
   virtual void leave_i();
 

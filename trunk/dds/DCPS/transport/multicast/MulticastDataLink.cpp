@@ -34,18 +34,6 @@ MulticastDataLink::~MulticastDataLink()
 {
 }
 
-void
-MulticastDataLink::send_strategy(MulticastSendStrategy* send_strategy)
-{
-  this->send_strategy_ = send_strategy;
-}
-
-void
-MulticastDataLink::receive_strategy(MulticastReceiveStrategy* recv_strategy)
-{
-  this->recv_strategy_ = recv_strategy;
-}
-
 bool
 MulticastDataLink::join(const ACE_INET_Addr& group_address, bool active)
 {
@@ -95,6 +83,16 @@ void
 MulticastDataLink::stop_i()
 {
   leave();
+}
+
+void
+MulticastDataLink::send_strategy_i(MulticastSendStrategy* send_strategy)
+{
+}
+
+void
+MulticastDataLink::receive_strategy_i(MulticastReceiveStrategy* recv_strategy)
+{
 }
 
 bool
