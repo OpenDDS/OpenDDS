@@ -259,6 +259,8 @@ public:
   // shouldn't have any impact.
   void clear(SendMode mode = MODE_DIRECT);
 
+  LockType& lock();
+
 private:
   /// Implement framework chain visitations to remove a sample.
   int do_remove_sample(QueueRemoveVisitor& simple_rem_vis,
