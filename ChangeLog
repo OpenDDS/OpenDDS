@@ -1,3 +1,9 @@
+Sun Dec  6 18:32:30 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+
+	  Fixed GCC warnings due to unused parameters.
+
 Sat Dec  5 20:02:21 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendBuffer.h:

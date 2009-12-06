@@ -86,12 +86,12 @@ MulticastDataLink::stop_i()
 }
 
 void
-MulticastDataLink::send_strategy_i(MulticastSendStrategy* send_strategy)
+MulticastDataLink::send_strategy_i(MulticastSendStrategy* /*send_strategy*/)
 {
 }
 
 void
-MulticastDataLink::receive_strategy_i(MulticastReceiveStrategy* recv_strategy)
+MulticastDataLink::receive_strategy_i(MulticastReceiveStrategy* /*recv_strategy*/)
 {
 }
 
