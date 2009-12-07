@@ -1,3 +1,22 @@
+Mon Dec  7 23:08:48 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/MonitorDataStorage.h:
+        * tools/odds_monitor/MonitorDataStorage.inl:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+
+          Factored out name/value data handling and implemented.
+          Included GUI notification at end of sample processing.
+
+        * tools/odds_monitor/MonitorTask.cpp:
+
+          Additional diagnostic information.
+
+        * tools/odds_monitor/TreeNode.h:
+
+          indexOf()
+            - new method to determine the row index containing a given
+              value in a given column.
+
 Mon Dec  7 21:22:08 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * tools/odds_monitor/RepoSelect.cpp:

@@ -89,6 +89,15 @@ class TreeNode {
      */
     QVariant column( int column) const;
 
+    /**
+     * @brief find the row of a value in a colum.
+     *
+     * @param column the column to be searched
+     * @param value  the value to compare
+     * @return       the row containing the value
+     */
+    int indexOf( int column, QVariant value);
+
     /// Number of children we have.
     int size() const;
 
@@ -228,6 +237,18 @@ Monitor::TreeNode*
 Monitor::TreeNode::operator[]( int row) const
 {
   return this->children_.value( row);
+}
+
+inline
+int
+Monitor::TreeNode::indexOf( int column, QVariant value)
+{
+  for( int index = 0; index < this->size(); ++index) {
+    if( value == (*this)[ index]->column( column)) {
+      return index;
+    }
+  }
+  return -1;
 }
 
 inline

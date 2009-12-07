@@ -160,6 +160,15 @@ class MonitorDataStorage {
     template< class MapType>
     void removeNode( MapType& map, TreeNode* node);
 
+    /// Display Name/Value pairs in the tree.  Notify the GUI if the
+    /// layout or data has changed as well.
+    void displayNvp(
+           TreeNode*                    node,
+           const OpenDDS::DCPS::NVPSeq& nvp,
+           bool                         layoutChanged,
+           bool                         dataChanged
+         );
+
     /// Reference to the model.
     MonitorData* model_;
 
