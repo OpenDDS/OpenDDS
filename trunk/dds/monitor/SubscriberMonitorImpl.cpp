@@ -38,7 +38,11 @@ SubscriberMonitorImpl::report() {
     DDS::DomainParticipant_var dp = sub_->get_participant();
     report.dp_id   = dynamic_cast<DomainParticipantImpl*>(dp.in())->get_id();
     TransportImpl_rch ti = sub_->get_transport_impl();
-    //report.transport_id = // No direct way to look up the transport ID
+    if (ti != 0) {
+      report.transport_id = ti->get_transport_id();
+    } else {
+      report.transport_id = 0;
+    }
     SubscriberImpl::SubscriptionIdVec readers;
     sub_->get_subscription_ids(readers);
     CORBA::ULong length = 0;

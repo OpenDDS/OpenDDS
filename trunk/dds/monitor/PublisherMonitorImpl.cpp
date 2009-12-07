@@ -38,7 +38,11 @@ PublisherMonitorImpl::report() {
     DDS::DomainParticipant_var dp = pub_->get_participant();
     report.dp_id   = dynamic_cast<DomainParticipantImpl*>(dp.in())->get_id();
     TransportImpl_rch ti = pub_->get_transport_impl();
-    //report.transport_id = // No direct way to look up the transport ID
+    if (ti != 0) {
+      report.transport_id = ti->get_transport_id();
+    } else {
+      report.transport_id = 0;
+    }
     PublisherImpl::PublicationIdVec writers;
     pub_->get_publication_ids(writers);
     CORBA::ULong length = 0;

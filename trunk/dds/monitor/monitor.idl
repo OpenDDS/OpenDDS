@@ -273,7 +273,7 @@ module OpenDDS {
     struct DataReaderReport {
       GUID_t         dr_id;
       GUID_t         topic_id;
-      GUIDSeq        instances;
+      DDS::InstanceHandleSeq instances;
       DRAssociations associations;
       NVPSeq         values;
     };

@@ -113,6 +113,11 @@ OpenDDS::DCPS::TransportFactory::create_transport_impl_i(TransportIdType impl_id
   }
 
   int result = bind(impl_map_, impl_id, impl);
+  impl->set_transport_id(impl_id);
+  impl->set_factory_id(type_id);
+  if (TheServiceParticipant->monitor_) {
+    TheServiceParticipant->monitor_->report();
+  }
 
   if (result == 0) {
     // Success!
@@ -239,9 +244,6 @@ OpenDDS::DCPS::TransportFactory::create_transport_impl(TransportIdType transport
     trans_impl->configure(config.in());
   }
 
-  if (TheServiceParticipant->monitor_) {
-    TheServiceParticipant->monitor_->report();
-  }
   return trans_impl;
 }
 
@@ -540,6 +542,10 @@ OpenDDS::DCPS::TransportFactory::release(TransportIdType impl_id)
   {
     GuardType guard(this->lock_);
     result = unbind(impl_map_, impl_id, impl);
+
+    if (TheServiceParticipant->monitor_) {
+      TheServiceParticipant->monitor_->report();
+    }
 
     // 0 means the unbind was successful, -1 means it failed.
     if (result == -1) {

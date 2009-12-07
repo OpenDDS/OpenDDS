@@ -63,8 +63,8 @@ throw(CORBA::SystemException)
         }
         cout << "  associations = " << endl;
         for (CORBA::ULong i = 0; i < drr.associations.length(); i++) {
-          cout << "    dw_id = " << drr.associations[i].dw_id << endl
-               << "      state = " << drr.associations[i].state << endl;
+          cout << "    dw_id = " << drr.associations[i].dw_id
+               << "    state = " << drr.associations[i].state << endl;
         }
 
       } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {

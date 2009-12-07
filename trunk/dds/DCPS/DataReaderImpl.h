@@ -449,6 +449,15 @@ public:
 
   ACE_Reactor* get_reactor();
 
+  RepoId get_topic_id();
+
+  typedef std::vector<DDS::InstanceHandle_t> InstanceHandleVec;
+  void get_instance_handles(InstanceHandleVec& instance_handles);
+
+  typedef std::pair<PublicationId, WriterInfo::WriterState> WriterStatePair;
+  typedef std::vector<WriterStatePair> WriterStatePairVec;
+  void get_writer_states(WriterStatePairVec& writer_states);
+
 protected:
 
   SubscriberImpl* get_subscriber_servant();

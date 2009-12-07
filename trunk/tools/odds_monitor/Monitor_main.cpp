@@ -14,7 +14,7 @@
 #include "dds/DCPS/Service_Participant.h"
 
 int
-main( int argc, char** argv, char**)
+main( int argc, char** argv)
 {
   // Initialize the application, consume any Qt arguments.
   QApplication application( argc, argv);
@@ -37,7 +37,7 @@ main( int argc, char** argv, char**)
   Monitor::Viewer* viewer = new Monitor::Viewer( options);
   viewer->show();
 
-  sleep(3); // Development: For emphasis.
+  ACE_OS::sleep(3); // Development: For emphasis.
   splash.finish( viewer);
 
   // Main GUI processing loop.
