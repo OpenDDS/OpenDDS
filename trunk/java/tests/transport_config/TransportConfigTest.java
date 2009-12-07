@@ -116,9 +116,9 @@ public class TransportConfigTest {
         mc.setReliable(false);
         mc.setSynInterval(100);
         mc.setSynTimeout(100);
+        mc.setNakDepth(16);
         mc.setNakInterval(100);
         mc.setNakTimeout(100);
-        mc.setNakRepairSize(16);
 
         TransportImpl ti = TheTransportFactory.create_transport_impl(ID,
             TheTransportFactory.TRANSPORT_MULTICAST,
@@ -135,9 +135,9 @@ public class TransportConfigTest {
         assert mc.getReliable() == false;
         assert mc.getSynInterval() == 100;
         assert mc.getSynTimeout() == 100;
+        assert mc.getNakDepth() == 16;
         assert mc.getNakInterval() == 100;
         assert mc.getNakTimeout() == 100;
-        assert mc.getNakRepairSize() == 16;
 
         TheTransportFactory.release(ID);
     }
