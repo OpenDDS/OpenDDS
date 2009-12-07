@@ -1,8 +1,14 @@
+Mon Dec  7 02:23:48 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+
+	  Updated documentation; renamed nak_repair_size to nak_depth.
+
 Sun Dec  6 18:32:30 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
 
-	  Fixed GCC warnings due to unused parameters.
+          Fixed GCC warnings due to unused parameters.
 
 Sat Dec  5 20:02:21 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
