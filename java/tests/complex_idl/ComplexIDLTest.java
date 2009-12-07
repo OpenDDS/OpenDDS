@@ -170,20 +170,22 @@ public class ComplexIDLTest extends QuoteSupport {
 
                             Data data = dh.value;
 
-                            switch (data.payload.discriminator().value()) {
-                                case DataType._DATA_IDL:
-                                    assert data.payload.idl_quote().cast_member == cast_pre_take;
-                                    printQuote(data.payload.idl_quote());
-                                    break;
+                            if (si.valid_data) {
+                                switch (data.payload.discriminator().value()) {
+                                    case DataType._DATA_IDL:
+                                        assert data.payload.idl_quote().cast_member == cast_pre_take;
+                                        printQuote(data.payload.idl_quote());
+                                        break;
 
-                                case DataType._DATA_STREAM:
-                                    ByteArrayInputStream in =
-                                        new ByteArrayInputStream(data.payload.stream());
+                                    case DataType._DATA_STREAM:
+                                        ByteArrayInputStream in =
+                                            new ByteArrayInputStream(data.payload.stream());
 
-                                    ObjectInputStream os = new ObjectInputStream(in);
-                                    Object obj = os.readObject();
+                                        ObjectInputStream os = new ObjectInputStream(in);
+                                        Object obj = os.readObject();
 
-                                    assert (obj instanceof String);
+                                        assert (obj instanceof String);
+                                }
                             }
 
                             if (count.decrementAndGet() == 0) {
