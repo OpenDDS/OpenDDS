@@ -140,6 +140,11 @@ public:
   /// associations will be marked as FULLTY_ASSOCIATED.
   void check_fully_association();
 
+  TransportIdType get_transport_id();
+  void set_transport_id(const TransportIdType& tid);
+  const FactoryIdType& get_factory_id();
+  void set_factory_id(const FactoryIdType& fid);
+
 protected:
 
   TransportImpl();
@@ -338,6 +343,12 @@ private:
 
   /// Monitor object for this entity
   Monitor* monitor_;
+
+  /// Transport ID for this transport
+  TransportIdType transport_id_;
+
+  /// Factory ID for this transport (identifies the transport type)
+  FactoryIdType factory_id_;
 };
 
 } // namespace DCPS

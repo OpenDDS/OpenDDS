@@ -31,6 +31,7 @@ public:
 private:
   TransportImpl* transport_;
   OpenDDS::DCPS::TransportReportDataWriter_var transport_writer_;
+  std::string hostname_;
 };
 
 } // namespace DCPS

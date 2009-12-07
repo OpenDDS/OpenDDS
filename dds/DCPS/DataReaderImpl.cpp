@@ -450,6 +450,10 @@ ACE_THROW_SPEC((CORBA::SystemException))
     }
   }
 
+  if (this->monitor_) {
+    this->monitor_->report();
+  }
+
   delete []infos;
 }
 
@@ -586,6 +590,10 @@ ACE_THROW_SPEC((CORBA::SystemException))
   // subscription lost.
   if (notify_lost) {
     this->notify_subscription_lost(handles);
+  }
+
+  if (this->monitor_) {
+    this->monitor_->report();
   }
 }
 
@@ -1785,6 +1793,9 @@ DataReaderImpl::release_instance(DDS::InstanceHandle_t handle)
 
   this->instances_.erase(handle);
   this->release_instance_i(handle);
+  if (this->monitor_) {
+    this->monitor_->report();
+  }
 }
 
 OpenDDS::DCPS::WriterInfo::WriterInfo()
@@ -2074,6 +2085,10 @@ DataReaderImpl::writer_became_alive(WriterInfo& info,
   // which need the current state info.
   info.state_ = WriterInfo::ALIVE;
 
+  if (this->monitor_) {
+    this->monitor_->report();
+  }
+
   // Call listener only when there are liveliness status changes.
   if (liveliness_changed) {
     this->notify_liveliness_change();
@@ -2123,6 +2138,10 @@ DataReaderImpl::writer_became_dead(WriterInfo & info,
   //update the state to DEAD.
   info.state_ = WriterInfo::DEAD;
   info.seen_data_ = false;
+
+  if (this->monitor_) {
+    this->monitor_->report();
+  }
 
   if (liveliness_changed_status_.alive_count < 0) {
     ACE_ERROR((LM_ERROR,
@@ -2673,6 +2692,37 @@ ACE_Reactor*
 DataReaderImpl::get_reactor()
 {
   return this->reactor_;
+}
+
+OpenDDS::DCPS::RepoId
+DataReaderImpl::get_topic_id()
+{
+  return this->topic_servant_->get_id();
+}
+
+void
+DataReaderImpl::get_instance_handles(InstanceHandleVec& instance_handles)
+{
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+
+  for (SubscriptionInstanceMapType::iterator iter = instances_.begin(),
+       end = instances_.end(); iter != end; ++iter) {
+    instance_handles.push_back(iter->first);
+  }
+}
+
+void
+DataReaderImpl::get_writer_states(WriterStatePairVec& writer_states)
+{
+  ACE_READ_GUARD(ACE_RW_Thread_Mutex,
+                 read_guard,
+                 this->writers_lock_);
+  for (WriterMapType::iterator iter = writers_.begin();
+       iter != writers_.end();
+       ++iter) {
+    writer_states.push_back(WriterStatePair(iter->first,
+                                            iter->second->get_state()));
+  }
 }
 
 } // namespace DCPS

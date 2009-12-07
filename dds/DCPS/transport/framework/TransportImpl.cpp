@@ -42,7 +42,9 @@ void clear(Container& c)
 } // namespace
 
 OpenDDS::DCPS::TransportImpl::TransportImpl()
-  : monitor_(0)
+  : monitor_(0),
+    transport_id_(0),
+    factory_id_("")
 {
   DBG_ENTRY_LVL("TransportImpl","TransportImpl",6);
   if (TheServiceParticipant->monitor_factory_) {
@@ -680,4 +682,28 @@ OpenDDS::DCPS::TransportImpl::attach(DDS::Subscriber_ptr sub)
   }
 
   return sub_impl->attach_transport(this);
+}
+
+OpenDDS::DCPS::TransportIdType
+OpenDDS::DCPS::TransportImpl::get_transport_id()
+{
+  return this->transport_id_;
+}
+
+void
+OpenDDS::DCPS::TransportImpl::set_transport_id(const TransportIdType& tid)
+{
+  this->transport_id_ = tid;
+}
+
+const OpenDDS::DCPS::FactoryIdType&
+OpenDDS::DCPS::TransportImpl::get_factory_id()
+{
+  return this->factory_id_;
+}
+
+void
+OpenDDS::DCPS::TransportImpl::set_factory_id(const FactoryIdType& fid)
+{
+  this->factory_id_ = fid;
 }

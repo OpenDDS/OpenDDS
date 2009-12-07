@@ -10,7 +10,7 @@
 #define MONITORDATA_H
 
 namespace OpenDDS { namespace DCPS {
-  class GUID_t;
+  struct GUID_t;
   struct ServiceParticipantReport;
   struct DomainParticipantReport;
   struct TopicReport;

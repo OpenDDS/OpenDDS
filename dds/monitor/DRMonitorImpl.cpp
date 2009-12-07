@@ -34,10 +34,27 @@ DRMonitorImpl::report() {
   if (!CORBA::is_nil(this->dr_writer_.in())) {
     DataReaderReport report;
     report.dr_id   = dr_->get_subscription_id();
-    //report.topic_id = dr_->
-    //report.writers  = dr_->
-    //report.instances  = dr_->
-    //report.associations  = dr_->
+    report.topic_id = this->dr_->get_topic_id();
+    DataReaderImpl::InstanceHandleVec instances;
+    this->dr_->get_instance_handles(instances);
+    CORBA::ULong length = 0;
+    report.instances.length(instances.size());
+    for (DataReaderImpl::InstanceHandleVec::iterator iter = instances.begin();
+         iter != instances.end();
+         ++iter) {
+      report.instances[length++] = *iter;
+    }
+    DataReaderImpl::WriterStatePairVec writer_states;
+    this->dr_->get_writer_states(writer_states);
+    length = 0;
+    report.associations.length(writer_states.size());
+    for (DataReaderImpl::WriterStatePairVec::iterator iter = writer_states.begin();
+         iter != writer_states.end();
+         ++iter) {
+      report.associations[length].dw_id = iter->first;
+      report.associations[length].state = iter->second;
+      length++;
+    }
     this->dr_writer_->write(report, DDS::HANDLE_NIL);
   }
 }
