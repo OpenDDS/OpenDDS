@@ -7,7 +7,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include <Qt/QtGui>
+#include <QtGui/QtGui>
 #include <sstream>
 #include "Viewer.h"
 #include "RepoSelect.h"
