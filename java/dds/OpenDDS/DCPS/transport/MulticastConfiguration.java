@@ -44,6 +44,10 @@ public class MulticastConfiguration extends TransportConfiguration {
     public long getSynTimeout() { return synTimeout; }
     public void setSynTimeout(long st) { synTimeout = st; }
 
+    private int nakDepth;
+    public int getNakDepth() { return nakDepth; }
+    public void setNakDepth(int nd) { nakDepth = nd; }
+
     private long nakInterval;
     public long getNakInterval() { return nakInterval; }
     public void setNakInterval(long ni) { nakInterval = ni; }
@@ -51,8 +55,4 @@ public class MulticastConfiguration extends TransportConfiguration {
     private long nakTimeout;
     public long getNakTimeout() { return nakTimeout; }
     public void setNakTimeout(long nt) { nakTimeout = nt; }
-
-    private int nakRepairSize;
-    public int getNakRepairSize() { return nakRepairSize; }
-    public void setNakRepairSize(int nrs) { nakRepairSize = nrs; }
 }
