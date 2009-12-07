@@ -224,13 +224,13 @@ struct TimeField : Field<C, long, jvmSig::LONG> {
 
   void toCxx(JNIEnv *jni, jclass clazz, jobject obj, C &cxx) {
     jfieldID fid = this->getFid(jni, clazz);
-    long value = jni->GetLongField(obj, fid);
-    (cxx.*time_).msec(value);
+    jlong value = jni->GetLongField(obj, fid);
+    (cxx.*time_).msec(static_cast<long>(value));
   }
 
   void toJava(JNIEnv *jni, jclass clazz, const C &cxx, jobject obj) {
     jfieldID fid = this->getFid(jni, clazz);
-    long value = static_cast<long>((cxx.*time_).msec());
+    jlong value = static_cast<jlong>((cxx.*time_).msec());
     jni->SetLongField(obj, fid, value);
   }
 };
