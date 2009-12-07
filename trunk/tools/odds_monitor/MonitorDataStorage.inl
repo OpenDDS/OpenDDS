@@ -179,16 +179,8 @@ MonitorDataStorage::update< OpenDDS::DCPS::ServiceParticipantReport>(
     }
   }
 
-  // NAME / VALUE DATA
-
-  // Notify the GUI if we have changed the underlying model.
-  if( layoutChanged) {
-    /// @TODO: Check that we really do not need to do updated here.
-    this->model_->changed();
-
-  } else if( dataChanged) {
-    this->model_->updated( pidNode, 1, (*pidNode)[ pidNode->size()-1], 1);
-  }
+  // NAME / VALUE DATA, notify GUI of changes.
+  this->displayNvp( pidNode, data.values, layoutChanged, dataChanged);
 }
 
 template<>
@@ -213,6 +205,15 @@ MonitorDataStorage::update< OpenDDS::DCPS::DomainParticipantReport>(
     std::string(converter).c_str(),
     data.domain_id
   ));
+
+  // Retain knowledge of node insertions, updates, and deletions.
+  bool layoutChanged = false;
+  bool dataChanged   = false;
+
+  TreeNode* node = 0;
+
+  // NAME / VALUE DATA, notify GUI of changes.
+  this->displayNvp( node, data.values, layoutChanged, dataChanged);
 }
 
 template<>
@@ -239,6 +240,15 @@ MonitorDataStorage::update< OpenDDS::DCPS::TopicReport>(
     (const char*)data.topic_name,
     (const char*)data.type_name
   ));
+
+  // Retain knowledge of node insertions, updates, and deletions.
+  bool layoutChanged = false;
+  bool dataChanged   = false;
+
+  TreeNode* node = 0;
+
+  // NAME / VALUE DATA, notify GUI of changes.
+  this->displayNvp( node, data.values, layoutChanged, dataChanged);
 }
 
 template<>
@@ -266,6 +276,15 @@ MonitorDataStorage::update< OpenDDS::DCPS::PublisherReport>(
     data.handle,
     data.transport_id
   ));
+
+  // Retain knowledge of node insertions, updates, and deletions.
+  bool layoutChanged = false;
+  bool dataChanged   = false;
+
+  TreeNode* node = 0;
+
+  // NAME / VALUE DATA, notify GUI of changes.
+  this->displayNvp( node, data.values, layoutChanged, dataChanged);
 }
 
 template<>
@@ -293,6 +312,15 @@ MonitorDataStorage::update< OpenDDS::DCPS::SubscriberReport>(
     data.handle,
     data.transport_id
   ));
+
+  // Retain knowledge of node insertions, updates, and deletions.
+  bool layoutChanged = false;
+  bool dataChanged   = false;
+
+  TreeNode* node = 0;
+
+  // NAME / VALUE DATA, notify GUI of changes.
+  this->displayNvp( node, data.values, layoutChanged, dataChanged);
 }
 
 template<>
@@ -324,6 +352,15 @@ MonitorDataStorage::update< OpenDDS::DCPS::DataWriterReport>(
     std::string(idconverter).c_str(),
     std::string(topicconverter).c_str()
   ));
+
+  // Retain knowledge of node insertions, updates, and deletions.
+  bool layoutChanged = false;
+  bool dataChanged   = false;
+
+  TreeNode* node = 0;
+
+  // NAME / VALUE DATA, notify GUI of changes.
+  this->displayNvp( node, data.values, layoutChanged, dataChanged);
 }
 
 template<>
@@ -356,6 +393,15 @@ MonitorDataStorage::update< OpenDDS::DCPS::DataWriterPeriodicReport>(
     remove? "removing": "processing",
     std::string(converter).c_str()
   ));
+
+  // Retain knowledge of node insertions, updates, and deletions.
+  bool layoutChanged = false;
+  bool dataChanged   = false;
+
+  TreeNode* node = 0;
+
+  // NAME / VALUE DATA, notify GUI of changes.
+  this->displayNvp( node, data.values, layoutChanged, dataChanged);
 }
 
 template<>
@@ -388,6 +434,15 @@ MonitorDataStorage::update< OpenDDS::DCPS::DataReaderReport>(
     std::string(idconverter).c_str(),
     std::string(topicconverter).c_str()
   ));
+
+  // Retain knowledge of node insertions, updates, and deletions.
+  bool layoutChanged = false;
+  bool dataChanged   = false;
+
+  TreeNode* node = 0;
+
+  // NAME / VALUE DATA, notify GUI of changes.
+  this->displayNvp( node, data.values, layoutChanged, dataChanged);
 }
 
 template<>
@@ -417,6 +472,15 @@ MonitorDataStorage::update< OpenDDS::DCPS::DataReaderPeriodicReport>(
     remove? "removing": "processing",
     std::string(converter).c_str()
   ));
+
+  // Retain knowledge of node insertions, updates, and deletions.
+  bool layoutChanged = false;
+  bool dataChanged   = false;
+
+  TreeNode* node = 0;
+
+  // NAME / VALUE DATA, notify GUI of changes.
+  this->displayNvp( node, data.values, layoutChanged, dataChanged);
 }
 
 template<>
@@ -445,5 +509,14 @@ MonitorDataStorage::update< OpenDDS::DCPS::TransportReport>(
     data.transport_id,
     (const char*)data.transport_type
   ));
+
+  // Retain knowledge of node insertions, updates, and deletions.
+  bool layoutChanged = false;
+  bool dataChanged   = false;
+
+  TreeNode* node = 0;
+
+  // NAME / VALUE DATA, notify GUI of changes.
+  this->displayNvp( node, data.values, layoutChanged, dataChanged);
 }
 

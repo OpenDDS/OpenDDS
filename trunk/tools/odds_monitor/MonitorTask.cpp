@@ -564,7 +564,7 @@ Monitor::MonitorTask::createSubscription(
            );
   if( CORBA::is_nil( reader.in())) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: MonitorTask::startInstrumentation() - ")
+      ACE_TEXT("(%P|%t) ERROR: MonitorTask::createSubscription() - ")
       ACE_TEXT("failed to create a reader for %s.\n"),
       topicName
     ));
@@ -574,6 +574,15 @@ Monitor::MonitorTask::createSubscription(
   status->set_enabled_statuses( DDS::DATA_AVAILABLE_STATUS);
   this->waiter_->attach_condition( status.in());
   this->handleTypeMap_[ reader->get_instance_handle()] = type;
+
+  if( this->options_.verbose()) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) MonitorTask::createSubscription() - ")
+      ACE_TEXT("installed and mapped instance %d to type %d.\n"),
+      reader->get_instance_handle(),
+      type
+    ));
+  }
 }
 
 void
@@ -669,6 +678,14 @@ Monitor::MonitorTask::dispatchReader( DDS::DataReader_ptr reader)
             reader);
       }
       break;
+    
+    default:
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: MonitorTask::dispatchReader() - ")
+        ACE_TEXT("unknown type for instance %d.\n"),
+        reader->get_instance_handle()
+      ));
+      break;
   }
 }
 
@@ -689,16 +706,30 @@ Monitor::MonitorTask::dataUpdate(
     return;
   }
 
+  // Diagnostic information only.
+  int valid   = 0;
+  int invalid = 0;
+
   // Read and forward all available data.
   DataType        data;
   DDS::SampleInfo info;
   while( DDS::RETCODE_OK == typedReader->take_next_sample( data, info)) {
     if( info.valid_data) {
       this->data_->update( data);
+      ++valid;
 
     } else if( info.instance_state & DDS::NOT_ALIVE_INSTANCE_STATE) {
       this->data_->update( data, true);
+      ++invalid;
     }
+  }
+
+  if( this->options_.verbose()) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) MonitorTask::dataUpdate() - ")
+      ACE_TEXT("forwarded %d/%d (valid/invalid) samples from instance %d.\n"),
+      valid, invalid, reader->get_instance_handle()
+    ));
   }
 }
 

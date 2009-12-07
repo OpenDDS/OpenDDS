@@ -82,6 +82,79 @@ Monitor::MonitorDataStorage::removeNode( MapType& map, TreeNode* node)
   }
 }
 
+void
+Monitor::MonitorDataStorage::displayNvp(
+  TreeNode*                    node,
+  const OpenDDS::DCPS::NVPSeq& data,
+  bool                         layoutChanged,
+  bool                         dataChanged
+)
+{
+  // NAME / VALUE DATA
+  int size = data.length();
+  for( int index = 0; index < size; ++index) {
+    QString name( data[ index].name);
+    int row = node->indexOf( 1, name);
+    if( row == -1) {
+      // This is new data, insert it.
+      QList<QVariant> list;
+      list << name;
+      switch( data[ index].value._d()) {
+        case OpenDDS::DCPS::INTEGER_TYPE:
+          list << QString::number( data[ index].value.integer_value());
+          break;
+
+        case OpenDDS::DCPS::DOUBLE_TYPE:
+          list << QString::number( data[ index].value.double_value());
+          break;
+
+        case OpenDDS::DCPS::STRING_TYPE:
+          list << QString( data[ index].value.string_value());
+          break;
+
+        case OpenDDS::DCPS::STATISTICS_TYPE:
+        case OpenDDS::DCPS::STRING_LIST_TYPE:
+          list << QString( "<display unimplemented>");
+          break;
+      }
+      TreeNode* node = new TreeNode( list, node);
+      node->append( node);
+      layoutChanged = true;
+
+    } else {
+      // This is existing data, update the value.
+      TreeNode* node = (*node)[ row];
+      switch( data[ index].value._d()) {
+        case OpenDDS::DCPS::INTEGER_TYPE:
+          node->setData( 1, QString::number( data[ index].value.integer_value()));
+          break;
+
+        case OpenDDS::DCPS::DOUBLE_TYPE:
+          node->setData( 1, QString::number( data[ index].value.double_value()));
+          break;
+
+        case OpenDDS::DCPS::STRING_TYPE:
+          node->setData( 1, QString( data[ index].value.string_value()));
+          break;
+
+        case OpenDDS::DCPS::STATISTICS_TYPE:
+        case OpenDDS::DCPS::STRING_LIST_TYPE:
+          break;
+      }
+      dataChanged = true;
+    }
+  }
+
+  // Notify the GUI if we have changed the underlying model.
+  if( layoutChanged) {
+    /// @TODO: Check that we really do not need to do updated here.
+    this->model_->changed();
+
+  } else if( dataChanged) {
+    this->model_->updated( node, 1, (*node)[ node->size()-1], 1);
+  }
+}
+
 std::string&
 Monitor::MonitorDataStorage::activeIor()
 {
