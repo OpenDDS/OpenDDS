@@ -108,7 +108,8 @@ class TreeNode {
     int row() const;
 
     /// Access our parent.
-    TreeNode* parent() const;
+    TreeNode*  parent() const;
+    TreeNode*& parent();
 
   private:
     /// Container of children of this element.
@@ -287,6 +288,13 @@ Monitor::TreeNode::row() const
 inline
 Monitor::TreeNode*
 Monitor::TreeNode::parent() const
+{
+  return this->parent_;
+}
+
+inline
+Monitor::TreeNode*&
+Monitor::TreeNode::parent()
 {
   return this->parent_;
 }

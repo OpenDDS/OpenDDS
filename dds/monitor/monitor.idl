@@ -82,6 +82,8 @@ module OpenDDS {
 #pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DomainParticipantReport dp_id.entityId.entityKind"
 
     struct DomainParticipantReport {
+      string           host;
+      long             pid;
       GUID_t           dp_id;
       DDS::DomainId_t  domain_id;
       NVPSeq           values;
@@ -109,6 +111,7 @@ module OpenDDS {
 #pragma DCPS_DATA_KEY  "OpenDDS::DCPS::TopicReport topic_id.entityId.entityKind"
 
     struct TopicReport {
+      GUID_t  dp_id;
       GUID_t  topic_id;
       string  topic_name;
       string  type_name;
@@ -201,6 +204,8 @@ module OpenDDS {
     };
     typedef sequence<DataWriterAssociation> DWAssociations;
     struct DataWriterReport {
+      DDS::InstanceHandle_t handle;
+      GUID_t         dp_id;
       GUID_t         dw_id;
       GUID_t         topic_id;
       DDS::InstanceHandleSeq instances;
@@ -271,6 +276,8 @@ module OpenDDS {
     };
     typedef sequence<DataReaderAssociation> DRAssociations;
     struct DataReaderReport {
+      DDS::InstanceHandle_t handle;
+      GUID_t         dp_id;
       GUID_t         dr_id;
       GUID_t         topic_id;
       DDS::InstanceHandleSeq instances;

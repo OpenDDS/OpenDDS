@@ -160,30 +160,8 @@ class MonitorDataStorage {
     template< class MapType>
     void removeNode( MapType& map, TreeNode* node);
 
-    /// Display Name/Value pairs in the tree.  Notify the GUI if the
-    /// layout or data has changed as well.
-    void displayNvp(
-           TreeNode*                    node,
-           const OpenDDS::DCPS::NVPSeq& nvp,
-           bool                         layoutChanged,
-           bool                         dataChanged
-         );
-
-    /// Reference to the model.
-    MonitorData* model_;
-
     /// Convenience type for storing information.
     typedef std::pair< int, TreeNode*> RowNodePair;
-
-    /// Map GUID_t values to TreeNode elements.
-    typedef
-      std::map< OpenDDS::DCPS::GUID_t, RowNodePair, GUID_tKeyLessThan>
-      GuidToTreeMap;
-    GuidToTreeMap guidToTreeMap_;
-
-    /// Map host names to TreeNode elements.
-    typedef std::map< std::string, RowNodePair> HostToTreeMap;
-    HostToTreeMap hostToTreeMap_;
 
     /// Uniquely identify processes.
     struct ProcessKey {
@@ -192,10 +170,6 @@ class MonitorDataStorage {
       int         pid;
       bool operator<( const ProcessKey& rhs) const;
     };
-
-    /// Map process identifiers to TreeNode elements.
-    typedef std::map< ProcessKey, RowNodePair> ProcessToTreeMap;
-    ProcessToTreeMap processToTreeMap_;
 
     /// Uniquely identify transports.
     struct TransportKey {
@@ -208,10 +182,155 @@ class MonitorDataStorage {
       bool operator<( const TransportKey& rhs) const;
     };
 
-    /// Map transport identifiers to GUID_t values.
-    typedef std::map< TransportKey, OpenDDS::DCPS::GUID_t >
-            TransportToGuidMap;
-    TransportToGuidMap transportToGuidMap_;
+    /// Uniquely identify publishers and subscribers.
+    struct InstanceKey {
+      InstanceKey(
+        const OpenDDS::DCPS::GUID_t g,
+        const DDS::InstanceHandle_t h
+      ) : guid( g), handle( h)
+      { }
+      OpenDDS::DCPS::GUID_t guid;
+      DDS::InstanceHandle_t handle;
+      bool operator<( const InstanceKey& rhs) const;
+    };
+
+    /**
+     * @brief Obtain a PID TreeNode from a key value.  Possibly create
+     *        one if needed.
+     *
+     * @param key    key of node to find or possibly create
+     * @param create boolean value indicating whether to create a node if
+     *               one is not found.  It is set before returning to
+     *               indicate whether a node was created (true) or found
+     *               (false).
+     * @return pointer to the node representing the key value.
+     */
+    TreeNode* getProcessNode( const ProcessKey& key, bool& create);
+
+    /**
+     * @brief Obtain a Transport TreeNode from a key value.  Possibly
+     *        create one if needed.
+     *
+     * @param key    key of node to find or possibly create
+     * @param create boolean value indicating whether to create a node if
+     *               one is not found.  It is set before returning to
+     *               indicate whether a node was created (true) or found
+     *               (false).
+     * @return pointer to the node representing the key value.
+     */
+    TreeNode* getTransportNode(
+                const ProcessKey&   pid,
+                const TransportKey& key,
+                bool&               create
+              );
+
+    /**
+     * @brief Obtain a possibly new DomainParticipant node.  Possibly
+     *        create on if needed.
+     *
+     * @param pid    key of parent node
+     * @param key    key of node to find or possibly create
+     * @param create boolean value indicating whether to create a node if
+     *               one is not found.  It is set before returning to
+     *               indicate whether a node was created (true) or found
+     *               (false).
+     * @return pointer to the node representing the key value.
+     */
+    TreeNode* getParticipantNode(
+                const ProcessKey&            pid,
+                const OpenDDS::DCPS::GUID_t& id,
+                bool&                        create
+              );
+
+    /**
+     * @brief Obtain a possibly new instance handle node.  Possibly
+     *        create on if needed.
+     *
+     * @param pid    key of parent node
+     * @param key    key of node to find or possibly create
+     * @param create boolean value indicating whether to create a node if
+     *               one is not found.  It is set before returning to
+     *               indicate whether a node was created (true) or found
+     *               (false).
+     * @return pointer to the node representing the key value.
+     */
+    TreeNode* getInstanceNode(
+                const std::string& label,
+                const InstanceKey& key,
+                bool&              create
+              );
+
+    /**
+     * @brief Obtain a possibly new endpoint handle node.  Possibly
+     *        create on if needed.
+     *
+     * @param pid    key of parent node
+     * @param key    key of node to find or possibly create
+     * @param create boolean value indicating whether to create a node if
+     *               one is not found.  It is set before returning to
+     *               indicate whether a node was created (true) or found
+     *               (false).
+     * @return pointer to the node representing the key value.
+     */
+    TreeNode* getEndpointNode(
+                const std::string&           label,
+                const InstanceKey&           key,
+                const OpenDDS::DCPS::GUID_t& id,
+                bool&                        create
+              );
+
+    /**
+     * @brief Obtain a possibly new tree node.  Possibly create on
+     *        if needed.
+     *
+     * @param pid    key of parent node
+     * @param key    key of node to find or possibly create
+     * @param create boolean value indicating whether to create a node if
+     *               one is not found.  It is set before returning to
+     *               indicate whether a node was created (true) or found
+     *               (false).
+     * @return pointer to the node representing the key value.
+     */
+    TreeNode* getNode(
+                const std::string&           label,
+                const OpenDDS::DCPS::GUID_t& parentId,
+                const OpenDDS::DCPS::GUID_t& id,
+                bool&                        create
+              );
+
+    /// Display Name/Value pairs in the tree.  Notify the GUI if the
+    /// layout or data has changed as well.
+    void displayNvp(
+           TreeNode*                    node,
+           const OpenDDS::DCPS::NVPSeq& nvp,
+           bool                         layoutChanged,
+           bool                         dataChanged
+         );
+
+    /// Reference to the model.
+    MonitorData* model_;
+
+    /// Map GUID_t values to TreeNode elements.
+    typedef
+      std::map< OpenDDS::DCPS::GUID_t, RowNodePair, GUID_tKeyLessThan>
+      GuidToTreeMap;
+    GuidToTreeMap guidToTreeMap_;
+
+    /// Map host names to TreeNode elements.
+    typedef std::map< std::string, RowNodePair> HostToTreeMap;
+    HostToTreeMap hostToTreeMap_;
+
+    /// Map process identifiers to TreeNode elements.
+    typedef std::map< ProcessKey, RowNodePair> ProcessToTreeMap;
+    ProcessToTreeMap processToTreeMap_;
+
+    /// Map participant/handle identifiers to TreeNode elements.
+    typedef std::map< InstanceKey, RowNodePair> InstanceToTreeMap;
+    InstanceToTreeMap instanceToTreeMap_;
+
+    /// Map transport identifiers to TreeNode elements.
+    typedef std::map< TransportKey, RowNodePair> TransportToTreeMap;
+    TransportToTreeMap transportToTreeMap_;
 
     /// Active repository IOR.
     std::string activeIor_;
