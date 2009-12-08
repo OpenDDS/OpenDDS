@@ -50,7 +50,7 @@ Monitor::MonitorData::getIorList( QList<QString>& iorList)
        location = this->dataSource_->iorKeyMap().begin();
        location != this->dataSource_->iorKeyMap().end();
        ++location) {
-    iorList.append( QString( location->first.c_str()));
+    iorList.append( QString( QObject::tr( location->first.c_str())));
   }
 }
 

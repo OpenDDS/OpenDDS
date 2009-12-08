@@ -1,3 +1,23 @@
+Tue Dec  8 23:44:45 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/monitor/monitor.idl:
+
+          Added parent links.
+
+        * tools/odds_monitor/MonitorData.cpp:
+        * tools/odds_monitor/MonitorDataStorage.h:
+        * tools/odds_monitor/MonitorDataStorage.inl:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+
+          Added processing for DomainParticipant, Topic, Publisher, and
+          Subscriber reports.  Added basic handling for Transports but
+          not the report processing.
+
+        * tools/odds_monitor/TreeNode.h:
+        
+          Made the parent member completely accessible to allow movement
+          within the tree.
+
 Mon Dec  7 23:08:48 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/odds_monitor/MonitorDataStorage.h:

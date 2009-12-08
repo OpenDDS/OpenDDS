@@ -13,6 +13,10 @@ void
 MonitorDataStorage::update( const DataType&, bool)
 {
   // Error condition.
+  ACE_ERROR((LM_ERROR,
+    ACE_TEXT("(%P|%t) ERROR: MonitorDataStorage::update() - ")
+    ACE_TEXT("recieved sample of unknown data type.\n")
+  ));
 }
 
 template<>
@@ -42,76 +46,30 @@ MonitorDataStorage::update< OpenDDS::DCPS::ServiceParticipantReport>(
   // Retain knowledge of node insertions, updates, and deletions.
   bool layoutChanged = false;
   bool dataChanged   = false;
+  bool create        = !remove;
 
-  // HOST
-
+  // Obtain, or possibly create, the host and PID nodes.
   std::string host( data.host);
-  TreeNode* hostNode = 0;
-  HostToTreeMap::iterator hostLocation
-    = this->hostToTreeMap_.find( host);
-  if( hostLocation == this->hostToTreeMap_.end()) {
-    // We are done if we are removing.
-    if( remove) return;
-
-    // We need to add a new host.  Host nodes are children of the
-    // root node.
-    TreeNode* root = this->model_->modelRoot();
-
-    // Host first.
-    QList<QVariant> list;
-    list << QString("Host") << QString( data.host);
-    hostNode = new TreeNode( list, root);
-    root->append( hostNode);
-    layoutChanged = true;
-
-    // Install the new node.
-    this->hostToTreeMap_[ host]
-      = std::make_pair( hostNode->row(), hostNode);
-
-  } else {
-    // Retain the current host node.
-    hostNode = hostLocation->second.second;
+  ProcessKey pid( host, data.pid);
+  TreeNode* pidNode = this->getProcessNode( pid, create);
+  if( !pidNode) {
+    return;
   }
-
-  // PROCESS
-
-  ProcessKey key( host, data.pid);
-  TreeNode* pidNode = 0;
-  ProcessToTreeMap::iterator pidLocation
-    = this->processToTreeMap_.find( key);
-  if( pidLocation == this->processToTreeMap_.end()) {
-    // We are done if we are removing.
-    if( remove) return;
-
-    // We need to add a new PID.  PID nodes are children of the host
-    // nodes.  We just found the relevant host node.
-
-    // PID data.
-    QList<QVariant> list;
-    list << QString("Process") << QString::number(data.pid);
-    pidNode = new TreeNode( list, hostNode);
-    hostNode->append( pidNode);
-    layoutChanged = true;
-
-    // Install the new node.
-    this->processToTreeMap_[ key]
-      = std::make_pair( pidNode->row(), pidNode);
-
-  } else {
-    pidNode = pidLocation->second.second;
-  }
+  layoutChanged |= create;
 
   if( remove) {
     // Descend from the pidNode and remove it and all its children from
     // the maps.
     this->cleanMaps( pidNode);
-    this->processToTreeMap_.erase( pidLocation);
+    this->processToTreeMap_.erase( pid);
+
+    TreeNode* hostNode = pidNode->parent();
     hostNode->removeChildren( pidNode->row(), 1);
 
     // Check and remove the host node if there are no pid nodes remaining
     // after the removal (no children).
     if( hostNode->size() == 0) {
-      this->hostToTreeMap_.erase( hostLocation);
+      this->hostToTreeMap_.erase( host);
       delete hostNode;
     }
 
@@ -127,56 +85,23 @@ MonitorDataStorage::update< OpenDDS::DCPS::ServiceParticipantReport>(
   //       the DomainParticipantReport updates.
   int size = data.domain_participants.length();
   for( int index = 0; index < size; ++index) {
-    const OpenDDS::DCPS::GUID_t& id = data.domain_participants[ index];
-    GuidToTreeMap::iterator location = this->guidToTreeMap_.find( id);
-    if( location == this->guidToTreeMap_.end()) {
-      // We need to add this participant.
-      QList<QVariant> list;
-      OpenDDS::DCPS::GuidConverter converter( id);
-      list << QString("Participant")
-           << QString( std::string(converter).c_str());
-      TreeNode* node = new TreeNode( list, pidNode);
-      pidNode->append( node);
-      layoutChanged = true;
-
-      // Install the new node.
-      this->guidToTreeMap_[ id]
-        = std::make_pair( node->row(), node);
-
-    // } else {
-      // This participant is already loaded, we can ignore it here since
-      // we have nothing to update from this data sample.
-    }
+    create = true;
+    (void)this->getParticipantNode(
+      pid,
+      data.domain_participants[ index],
+      create
+    );
+    layoutChanged |= create;
   }
 
   // TRANSPORTS
   size = data.transports.length();
   for( int index = 0; index < size; ++index) {
+    create = true;
     int transport = data.transports[ index];
     TransportKey key( host, data.pid, transport);
-    TransportToGuidMap::iterator guidLocation
-      = this->transportToGuidMap_.find( key);
-    if( guidLocation == this->transportToGuidMap_.end()) {
-      // This transport needs to be installed.
-      OpenDDS::DCPS::GUID_t id = this->transportIdGenerator_->next();
-      this->transportToGuidMap_[ key] = id;
-
-      QList<QVariant> list;
-      OpenDDS::DCPS::GuidConverter converter( id);
-      list << QString("Transport")
-           << QString::number( transport);
-      TreeNode* node = new TreeNode( list, pidNode);
-      pidNode->append( node);
-      layoutChanged = true;
-
-      // Install the new node.
-      this->guidToTreeMap_[ id]
-        = std::make_pair( node->row(), node);
-
-    // } else {
-      // This transport is already loaded, we can ignore it here since
-      // we have nothing to update from this data sample.
-    }
+    (void)this->getTransportNode( pid, key, create);
+    layoutChanged |= create;
   }
 
   // NAME / VALUE DATA, notify GUI of changes.
@@ -191,11 +116,13 @@ MonitorDataStorage::update< OpenDDS::DCPS::DomainParticipantReport>(
   bool remove
 )
 {
-  // struct DomainParticipantReport {
-  //   GUID_t           dp_id;
-  //   DDS::DomainId_t  domain_id;
-  //   NVPSeq           values;
-  // };
+  //   struct DomainParticipantReport {
+  //     string           host;
+  //     long             pid;
+  //     GUID_t           dp_id;
+  //     DDS::DomainId_t  domain_id;
+  //     NVPSeq           values;
+  //   };
 
   OpenDDS::DCPS::GuidConverter converter( data.dp_id);
   ACE_DEBUG((LM_DEBUG,
@@ -207,10 +134,52 @@ MonitorDataStorage::update< OpenDDS::DCPS::DomainParticipantReport>(
   ));
 
   // Retain knowledge of node insertions, updates, and deletions.
-  bool layoutChanged = false;
+  bool layoutChanged = !remove; // Updated by getParticipantNode()
   bool dataChanged   = false;
 
-  TreeNode* node = 0;
+  std::string host( data.host);
+  ProcessKey pid( host, data.pid);
+  TreeNode* node = this->getParticipantNode( pid, data.dp_id, layoutChanged);
+  if( !node) {
+    return;
+  }
+
+  if( remove) {
+    // Descend from the node and remove it and all its children from
+    // the maps.
+    this->cleanMaps( node);
+    this->guidToTreeMap_.erase( data.dp_id);
+    TreeNode* parent = node->parent();
+    if( parent) {
+      parent->removeChildren( node->row(), 1);
+
+    } else {
+      delete node;
+    }
+
+    // Nothing else to do on removal, let the GUID know we changed the
+    // model.
+    this->model_->changed();
+    return;
+  }
+
+  // Domain Id value.
+  QString label( QObject::tr( "Domain Id"));
+  int row = node->indexOf( 0, label);
+  if( row == -1) {
+    // New data, insert.
+    QList<QVariant> list;
+    list << label << QString::number( data.domain_id);
+    TreeNode* domainNode = new TreeNode( list, node);
+    node->append( domainNode);
+    layoutChanged = true;
+
+  } else {
+    // Existing data, update.
+    TreeNode* domainNode = (*node)[ row];
+    domainNode->setData( 1, QString::number( data.domain_id));
+    dataChanged = true;
+  }
 
   // NAME / VALUE DATA, notify GUI of changes.
   this->displayNvp( node, data.values, layoutChanged, dataChanged);
@@ -224,12 +193,13 @@ MonitorDataStorage::update< OpenDDS::DCPS::TopicReport>(
   bool remove
 )
 {
-  // struct TopicReport {
-  //   GUID_t  topic_id;
-  //   string  topic_name;
-  //   string  type_name;
-  //   NVPSeq  values;
-  // };
+  //  struct TopicReport {
+  //    GUID_t  dp_id;
+  //    GUID_t  topic_id;
+  //    string  topic_name;
+  //    string  type_name;
+  //    NVPSeq  values;
+  //  };
 
   OpenDDS::DCPS::GuidConverter converter( data.topic_id);
   ACE_DEBUG((LM_DEBUG,
@@ -242,10 +212,82 @@ MonitorDataStorage::update< OpenDDS::DCPS::TopicReport>(
   ));
 
   // Retain knowledge of node insertions, updates, and deletions.
-  bool layoutChanged = false;
+  bool layoutChanged = !remove; // Updated by getNode()
   bool dataChanged   = false;
 
-  TreeNode* node = 0;
+  // Find or create this topic node.
+  TreeNode* node = this->getNode(
+                     std::string("Topic"),
+                     data.dp_id,
+                     data.topic_id,
+                     layoutChanged
+                   );
+  if( !node) {
+    return;
+  }
+
+  if( remove) {
+    // Descend from the node and remove it and all its children from
+    // the maps.
+    this->cleanMaps( node);
+    this->guidToTreeMap_.erase( data.dp_id);
+    TreeNode* parent = node->parent();
+    if( parent) {
+      parent->removeChildren( node->row(), 1);
+
+    } else {
+      delete node;
+    }
+
+    // Nothing else to do on removal, let the GUID know we changed the
+    // model.
+    this->model_->changed();
+    return;
+  }
+
+  // Topic name value.
+  QString nameLabel( QObject::tr( "Topic Name"));
+  int row = node->indexOf( 0, nameLabel);
+  if( row == -1) {
+    // New data, insert.
+    QList<QVariant> list;
+    list << nameLabel
+         << QString( QObject::tr( static_cast<const char*>(data.topic_name)));
+    TreeNode* nameNode = new TreeNode( list, node);
+    node->append( nameNode);
+    layoutChanged = true;
+
+  } else {
+    // Existing data, update.
+    TreeNode* nameNode = (*node)[ row];
+    nameNode->setData(
+      1,
+      QString( QObject::tr( static_cast<const char*>(data.topic_name)))
+    );
+    dataChanged = true;
+  }
+
+  // Data type value.
+  QString typeLabel( QObject::tr( "Data Type"));
+  row = node->indexOf( 0, typeLabel);
+  if( row == -1) {
+    // New data, insert.
+    QList<QVariant> list;
+    list << typeLabel
+         << QString( QObject::tr( static_cast<const char*>(data.type_name)));
+    TreeNode* typeNode = new TreeNode( list, node);
+    node->append( typeNode);
+    layoutChanged = true;
+
+  } else {
+    // Existing data, update.
+    TreeNode* typeNode = (*node)[ row];
+    typeNode->setData(
+      1,
+      QString( QObject::tr( static_cast<const char*>(data.type_name)))
+    );
+    dataChanged = true;
+  }
 
   // NAME / VALUE DATA, notify GUI of changes.
   this->displayNvp( node, data.values, layoutChanged, dataChanged);
@@ -278,10 +320,72 @@ MonitorDataStorage::update< OpenDDS::DCPS::PublisherReport>(
   ));
 
   // Retain knowledge of node insertions, updates, and deletions.
-  bool layoutChanged = false;
+  bool layoutChanged = !remove; // Updated by getEndpointNode()
   bool dataChanged   = false;
 
-  TreeNode* node = 0;
+  InstanceKey key( data.dp_id, data.handle);
+  TreeNode* node = this->getInstanceNode(
+                     std::string( "Publisher"),
+                     key,
+                     layoutChanged
+                   );
+  if( !node) {
+    return;
+  }
+
+  if( remove) {
+    // Descend from the node and remove it and all its children from
+    // the maps.
+    this->cleanMaps( node);
+    this->instanceToTreeMap_.erase( key);
+    TreeNode* parent = node->parent();
+    if( parent) {
+      parent->removeChildren( node->row(), 1);
+
+    } else {
+      delete node;
+    }
+
+    // Nothing else to do on removal, let the GUID know we changed the
+    // model.
+    this->model_->changed();
+    return;
+  }
+
+  // Transport Id value.
+  QString label( QObject::tr( "Transport Id"));
+  int row = node->indexOf( 0, label);
+  if( row == -1) {
+    // New data, insert.
+    QList<QVariant> list;
+    list << label << QString::number( data.transport_id);
+    TreeNode* idNode = new TreeNode( list, node);
+    node->append( idNode);
+    layoutChanged = true;
+
+  } else {
+    // Existing data, update.
+    TreeNode* idNode = (*node)[ row];
+    idNode->setData( 1, QString::number( data.transport_id));
+    dataChanged = true;
+  }
+
+  // WRITERS
+  // NOTE: The following makes sure that any new DataWriters are added to
+  //       the Publisher as they are received by this update.  It does
+  //       *not* remove any deleted writers.  This is left for the
+  //       DataWriterReport updates.
+  int size = data.writers.length();
+  for( int index = 0; index < size; ++index) {
+    bool create = true;
+    (void)this->getEndpointNode(
+      std::string( "Writer"),
+      key,
+      data.writers[ index],
+      create
+    );
+    layoutChanged |= create;
+  }
 
   // NAME / VALUE DATA, notify GUI of changes.
   this->displayNvp( node, data.values, layoutChanged, dataChanged);
@@ -314,10 +418,72 @@ MonitorDataStorage::update< OpenDDS::DCPS::SubscriberReport>(
   ));
 
   // Retain knowledge of node insertions, updates, and deletions.
-  bool layoutChanged = false;
+  bool layoutChanged = !remove; // Updated by getEndpointNode()
   bool dataChanged   = false;
 
-  TreeNode* node = 0;
+  InstanceKey key( data.dp_id, data.handle);
+  TreeNode* node = this->getInstanceNode(
+                     std::string( "Subscriber"),
+                     key,
+                     layoutChanged
+                   );
+  if( !node) {
+    return;
+  }
+
+  if( remove) {
+    // Descend from the node and remove it and all its children from
+    // the maps.
+    this->cleanMaps( node);
+    this->instanceToTreeMap_.erase( key);
+    TreeNode* parent = node->parent();
+    if( parent) {
+      parent->removeChildren( node->row(), 1);
+
+    } else {
+      delete node;
+    }
+
+    // Nothing else to do on removal, let the GUID know we changed the
+    // model.
+    this->model_->changed();
+    return;
+  }
+
+  // Transport Id value.
+  QString label( QObject::tr( "Transport Id"));
+  int row = node->indexOf( 0, label);
+  if( row == -1) {
+    // New data, insert.
+    QList<QVariant> list;
+    list << label << QString::number( data.transport_id);
+    TreeNode* idNode = new TreeNode( list, node);
+    node->append( idNode);
+    layoutChanged = true;
+
+  } else {
+    // Existing data, update.
+    TreeNode* idNode = (*node)[ row];
+    idNode->setData( 1, QString::number( data.transport_id));
+    dataChanged = true;
+  }
+
+  // READERS
+  // NOTE: The following makes sure that any new DataReaders are added to
+  //       the Subscriber as they are received by this update.  It does
+  //       *not* remove any deleted writers.  This is left for the
+  //       DataReaderReport updates.
+  int size = data.readers.length();
+  for( int index = 0; index < size; ++index) {
+    bool create = true;
+    (void)this->getEndpointNode(
+      std::string( "Reader"),
+      key,
+      data.readers[ index],
+      create
+    );
+    layoutChanged |= create;
+  }
 
   // NAME / VALUE DATA, notify GUI of changes.
   this->displayNvp( node, data.values, layoutChanged, dataChanged);
