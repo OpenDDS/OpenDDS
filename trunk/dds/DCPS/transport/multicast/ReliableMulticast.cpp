@@ -308,6 +308,8 @@ ReliableMulticast::expire_naks()
 void
 ReliableMulticast::send_naks()
 {
+  if (this->sequences_.empty()) return; // nothing to NAK
+
   ACE_Time_Value now(ACE_OS::gettimeofday());
 
   for (SequenceMap::iterator it(this->sequences_.begin());
