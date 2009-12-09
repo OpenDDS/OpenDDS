@@ -1,3 +1,9 @@
+Wed Dec  9 00:33:16 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/html/multicast/index.html:
+
+          Updated design notes with latest changes.
+
 Wed Dec  9 00:00:20 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/DisjointSequence.h:
