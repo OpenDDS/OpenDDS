@@ -72,8 +72,9 @@ struct TopicProfile {
  *   Topic            = <string> # One of topic <name>
  *   TransportIndex   = <number> # Index into transport configurations
  *   MessageSource    = <string> # One of subscription <name>
- *   FixedRate        = <number> # Samples per second
- *   MessageRate      = <number> # Samples per second
+ *   MessageFixedRate = <number> # Samples per second
+ *   MessageFixedRate = <number> # Samples per second, 0 indicates use MessageRate
+ *   MessageRate      = <number> # Samples per second, Poisson arrival times
  *   MessageSize      = <number> # bytes per sample
  *   MessageMax       = <number> # upper bound for size
  *   MessageMin       = <number> # lower bound for size
