@@ -26,14 +26,6 @@ DisjointSequence::range_iterator::range_iterator(set_type::iterator begin,
   ++*this;
 }
 
-ACE_INLINE
-DisjointSequence::range_iterator::range_iterator(const range_iterator& it)
-{
-  this->pos_ = it.pos_;
-  this->end_ = it.end_;
-  this->value_ = it.value_;
-}
-
 ACE_INLINE DisjointSequence::range_iterator&
 DisjointSequence::range_iterator::operator++()
 {
@@ -55,14 +47,14 @@ DisjointSequence::range_iterator::operator++(int)
 }
 
 ACE_INLINE bool
-DisjointSequence::range_iterator::operator==(const range_iterator& rhs)
+DisjointSequence::range_iterator::operator==(const range_iterator& rhs) const
 {
   return this->pos_ == rhs.pos_ &&
          this->end_ == rhs.end_;
 }
 
 ACE_INLINE bool
-DisjointSequence::range_iterator::operator!=(const range_iterator& rhs)
+DisjointSequence::range_iterator::operator!=(const range_iterator& rhs) const
 {
   return !(*this == rhs);
 }

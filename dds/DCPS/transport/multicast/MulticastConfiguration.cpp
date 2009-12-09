@@ -21,11 +21,12 @@ const char* DEFAULT_IPV6_GROUP_ADDRESS("FF01::80");
 
 const bool DEFAULT_RELIABLE(true);
 
-const long DEFAULT_SYN_INTERVAL(500);
+const double DEFAULT_SYN_BACKOFF(2.0);
+const long DEFAULT_SYN_INTERVAL(250);
 const long DEFAULT_SYN_TIMEOUT(30000);
 
 const size_t DEFAULT_NAK_DEPTH(32);
-const long DEFAULT_NAK_INTERVAL(2000);
+const long DEFAULT_NAK_INTERVAL(500);
 const long DEFAULT_NAK_TIMEOUT(30000);
 
 } // namespace
@@ -37,6 +38,7 @@ MulticastConfiguration::MulticastConfiguration()
   : default_to_ipv6_(DEFAULT_TO_IPV6),
     port_offset_(DEFAULT_PORT_OFFSET),
     reliable_(DEFAULT_RELIABLE),
+    syn_backoff_(DEFAULT_SYN_BACKOFF),
     nak_depth_(DEFAULT_NAK_DEPTH)
 {
   default_group_address(this->group_address_, DEFAULT_MULTICAST_ID);
@@ -96,6 +98,9 @@ MulticastConfiguration::load(const TransportIdType& id,
 
   GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("reliable"),
                    this->reliable_, bool)
+
+  GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("syn_backoff"),
+                   this->syn_backoff_, double)
 
   GET_CONFIG_TIME_VALUE(config, transport_key, ACE_TEXT("syn_interval"),
                         this->syn_interval_)
