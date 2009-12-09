@@ -33,7 +33,10 @@ void
 DRMonitorImpl::report() {
   if (!CORBA::is_nil(this->dr_writer_.in())) {
     DataReaderReport report;
-    report.dr_id   = dr_->get_subscription_id();
+    report.dp_id = this->dr_->get_dp_id();
+    DDS::Subscriber_var sub = this->dr_->get_subscriber();
+    report.sub_handle = sub->get_instance_handle();
+    report.dr_id   = this->dr_->get_subscription_id();
     report.topic_id = this->dr_->get_topic_id();
     DataReaderImpl::InstanceHandleVec instances;
     this->dr_->get_instance_handles(instances);

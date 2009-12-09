@@ -11,6 +11,7 @@
 #include "monitorC.h"
 #include "monitorTypeSupportImpl.h"
 #include "dds/DCPS/TopicImpl.h"
+#include "dds/DCPS/DomainParticipantImpl.h"
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
 
@@ -33,9 +34,13 @@ void
 TopicMonitorImpl::report() {
   if (!CORBA::is_nil(this->topic_writer_.in())) {
     TopicReport report;
-    report.topic_id   = topic_->get_id();
-    report.topic_name = topic_->get_name();
-    report.type_name  = topic_->get_type_name();
+    DDS::DomainParticipant_var dp = this->topic_->get_participant();
+    DomainParticipantImpl* dp_impl =
+      dynamic_cast<DomainParticipantImpl*>(dp.in());
+    report.dp_id      = dp_impl->get_id();
+    report.topic_id   = this->topic_->get_id();
+    report.topic_name = this->topic_->get_name();
+    report.type_name  = this->topic_->get_type_name();
     this->topic_writer_->write(report, DDS::HANDLE_NIL);
   }
 }

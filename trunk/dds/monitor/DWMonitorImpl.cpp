@@ -33,8 +33,11 @@ void
 DWMonitorImpl::report() {
   if (!CORBA::is_nil(this->dw_writer_.in())) {
     DataWriterReport report;
-    report.dw_id   = dw_->get_publication_id();
-    DDS::Topic_var topic = dw_->get_topic();
+    report.dp_id = this->dw_->get_dp_id();
+    DDS::Publisher_var pub = this->dw_->get_publisher();
+    report.pub_handle = pub->get_instance_handle();
+    report.dw_id   = this->dw_->get_publication_id();
+    DDS::Topic_var topic = this->dw_->get_topic();
     report.topic_id = dynamic_cast<TopicImpl*>(topic.in())->get_id();
     DataWriterImpl::InstanceHandleVec instances;
     this->dw_->get_instance_handles(instances);

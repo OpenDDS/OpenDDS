@@ -2700,6 +2700,12 @@ DataReaderImpl::get_topic_id()
   return this->topic_servant_->get_id();
 }
 
+OpenDDS::DCPS::RepoId
+DataReaderImpl::get_dp_id()
+{
+  return this->participant_servant_->get_id();
+}
+
 void
 DataReaderImpl::get_instance_handles(InstanceHandleVec& instance_handles)
 {

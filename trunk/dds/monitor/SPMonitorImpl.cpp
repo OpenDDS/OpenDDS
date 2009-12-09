@@ -28,6 +28,7 @@ SPMonitorImpl::SPMonitorImpl(MonitorFactoryImpl* monitor_factory,
   char host[256];
   ACE_OS::hostname(host, 256);
   hostname_ = host;
+  pid_ = ACE_OS::getpid();
 }
 
 SPMonitorImpl::~SPMonitorImpl()
@@ -44,8 +45,8 @@ SPMonitorImpl::report()
   // If the SP writer is not available, it is too soon to report
   if (!CORBA::is_nil(this->sp_writer_.in())) {
     ServiceParticipantReport report;
-    report.host = hostname_.c_str();
-    report.pid  = ACE_OS::getpid();
+    report.host = this->hostname_.c_str();
+    report.pid  = this->pid_;
     DDS::DomainParticipantFactory_var pf = TheParticipantFactory;
     const DomainParticipantFactoryImpl::DPMap& participants =
       dynamic_cast<DomainParticipantFactoryImpl*>(pf.in())->participants();

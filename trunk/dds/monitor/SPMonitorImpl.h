@@ -35,6 +35,7 @@ private:
   MonitorFactoryImpl* monitor_factory_;
   OpenDDS::DCPS::ServiceParticipantReportDataWriter_var sp_writer_;
   std::string hostname_;
+  pid_t pid_;
 };
 
 

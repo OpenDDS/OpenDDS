@@ -19,6 +19,9 @@
 
 #include <iostream>
 
+using std::cout;
+using std::endl;
+
 TopicMDataReaderListenerImpl::TopicMDataReaderListenerImpl()
 {
 }
@@ -47,14 +50,15 @@ throw(CORBA::SystemException)
     DDS::ReturnCode_t status = topicm_dr->take_next_sample(topicr, si) ;
 
     if (status == DDS::RETCODE_OK) {
-      std::cout << "SampleInfo.sample_rank = " << si.sample_rank << std::endl;
-      std::cout << "SampleInfo.instance_state = " << si.instance_state << std::endl;
+      cout << "SampleInfo.sample_rank = " << si.sample_rank << endl;
+      cout << "SampleInfo.instance_state = " << si.instance_state << endl;
 
       if (si.valid_data) {
-        std::cout << "TopicReport:" << std::endl
-                  << "  topic_id   = " << topicr.topic_id        << std::endl
-                  << "  topic_name = " << topicr.topic_name.in() << std::endl
-                  << "  topic_type = " << topicr.type_name.in()  << std::endl;
+        cout << "TopicReport:" << endl
+             << "  dp_id      = " << topicr.dp_id           << endl
+             << "  topic_id   = " << topicr.topic_id        << endl
+             << "  topic_name = " << topicr.topic_name.in() << endl
+             << "  topic_type = " << topicr.type_name.in()  << endl;
 
       } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));

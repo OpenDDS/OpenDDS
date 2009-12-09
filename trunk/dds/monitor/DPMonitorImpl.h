@@ -31,6 +31,8 @@ public:
 private:
   DomainParticipantImpl* dp_;
   OpenDDS::DCPS::DomainParticipantReportDataWriter_var dp_writer_;
+  std::string hostname_;
+  pid_t pid_;
 };
 
 } // namespace DCPS
