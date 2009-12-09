@@ -308,14 +308,14 @@ ReliableMulticast::expire_naks()
 void
 ReliableMulticast::send_naks()
 {
-  if (this->sequences_.empty()) return; // nothing to NAK
+  if (this->sequences_.empty()) return; // nothing to send
 
   ACE_Time_Value now(ACE_OS::gettimeofday());
 
   for (SequenceMap::iterator it(this->sequences_.begin());
        it != this->sequences_.end(); ++it) {
 
-    if (!it->second.disjoint()) continue; // nothing to NAK
+    if (!it->second.disjoint()) continue; // nothing to send
 
     // Record high-water mark for peer on this interval; this value
     // is used to reset the low-water mark in the event the peer
