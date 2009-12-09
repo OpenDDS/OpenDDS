@@ -36,6 +36,10 @@ public class MulticastConfiguration extends TransportConfiguration {
     public boolean getReliable() { return reliable; }
     public void setReliable(boolean r) { reliable = r; }
 
+    private double synBackoff;
+    public double getSynBackoff() { return synBackoff; }
+    public void setSynBackoff(double sb) { synBackoff = sb; }
+
     private long synInterval;
     public long getSynInterval() { return synInterval; }
     public void setSynInterval(long si) { synInterval = si; }
