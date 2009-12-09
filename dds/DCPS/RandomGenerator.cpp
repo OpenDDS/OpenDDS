@@ -22,7 +22,7 @@ namespace DCPS {
 
 struct RandomSeed {
   RandomSeed() {
-    std::srand(std::time(0));
+    std::srand(static_cast<unsigned>(std::time(0)));
   }
 } __random_seed;
 
