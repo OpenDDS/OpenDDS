@@ -1,3 +1,10 @@
+Wed Dec  9 17:22:09 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Clarified member names.
+
 Wed Dec  9 16:49:06 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/ReliableMulticast.cpp:

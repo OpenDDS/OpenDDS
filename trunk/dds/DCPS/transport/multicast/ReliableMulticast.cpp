@@ -132,8 +132,8 @@ ReliableMulticast::header_received(const TransportHeader& header)
 {
   this->received_header_ = header;
 
-  SequenceMap::iterator it(this->sequences_.find(header.source_));
-  if (it == this->sequences_.end()) return true;  // unknown peer
+  NakSequenceMap::iterator it(this->nak_sequences_.find(header.source_));
+  if (it == this->nak_sequences_.end()) return true;  // unknown peer
 
   // Update last seen sequence for remote peer; return false if we
   // have already seen this datagram to prevent duplicate delivery:
@@ -197,7 +197,7 @@ ReliableMulticast::syn_received(ACE_Message_Block* control)
 
   // Insert remote peer into sequence map; this establishes a
   // baseline for detecting reception gaps during delivery:
-  this->sequences_.insert(SequenceMap::value_type(
+  this->nak_sequences_.insert(NakSequenceMap::value_type(
     remote_peer, DisjointSequence(this->received_header_.sequence_)));
 
   // MULTICAST_SYN control samples are always positively
@@ -265,62 +265,62 @@ ReliableMulticast::send_synack(MulticastPeer remote_peer)
 void
 ReliableMulticast::expire_naks()
 {
-  if (this->nak_history_.empty()) return; // nothing to expire
+  if (this->nak_requests_.empty()) return; // nothing to expire
 
   ACE_Time_Value deadline(ACE_OS::gettimeofday());
   deadline -= this->config_->nak_timeout_;
 
-  NakHistory::iterator first(this->nak_history_.begin());
-  NakHistory::iterator last(this->nak_history_.upper_bound(deadline));
+  NakRequestMap::iterator first(this->nak_requests_.begin());
+  NakRequestMap::iterator last(this->nak_requests_.upper_bound(deadline));
 
   if (first == last) return; // nothing to expire
 
-  for (NakHistory::iterator it(first); it != last; ++it) {
-    const NakRequest& nak_request(it->second);
+  for (NakRequestMap::iterator it(first); it != last; ++it) {
+    NakRequest& request(it->second);
 
-    SequenceMap::iterator sequence(this->sequences_.find(nak_request.first));
-    if (sequence == this->sequences_.end()) {
+    NakSequenceMap::iterator sequence(this->nak_sequences_.find(request.first));
+    if (sequence == this->nak_sequences_.end()) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: ")
                  ACE_TEXT("ReliableMulticast::expire_naks: ")
                  ACE_TEXT("failed to find sequence for remote peer: 0x%x!\n"),
-                 nak_request.first));
+                 request.first));
       continue;
     }
 
     // Skip unrecoverable datagrams; attempt to re-establish a
     // reasonable baseline to detect future reception gaps:
-    if (nak_request.second > sequence->second) {
+    if (request.second > sequence->second) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: ")
                  ACE_TEXT("ReliableMulticast::expire_naks: ")
                  ACE_TEXT("timed out waiting on remote peer: 0x%x!\n"),
-                 nak_request.first));
+                 request.first));
 
-      sequence->second.skip(nak_request.second);
+      sequence->second.skip(request.second);
     }
   }
 
   // Remove expired repair requests:
-  this->nak_history_.erase(first, last);
+  this->nak_requests_.erase(first, last);
 }
 
 void
 ReliableMulticast::send_naks()
 {
-  if (this->sequences_.empty()) return; // nothing to send
+  if (this->nak_sequences_.empty()) return; // nothing to send
 
   ACE_Time_Value now(ACE_OS::gettimeofday());
 
-  for (SequenceMap::iterator it(this->sequences_.begin());
-       it != this->sequences_.end(); ++it) {
+  for (NakSequenceMap::iterator it(this->nak_sequences_.begin());
+       it != this->nak_sequences_.end(); ++it) {
 
     if (!it->second.disjoint()) continue; // nothing to send
 
     // Record high-water mark for peer on this interval; this value
     // is used to reset the low-water mark in the event the peer
     // becomes unresponsive:
-    this->nak_history_.insert(NakHistory::value_type(
+    this->nak_requests_.insert(NakRequestMap::value_type(
       now, NakRequest(it->first, it->second.high())));
 
     for (DisjointSequence::range_iterator range(it->second.range_begin());
@@ -396,8 +396,8 @@ ReliableMulticast::nakack_received(ACE_Message_Block* control)
   MulticastPeer remote_peer(this->received_header_.source_);
 
   // Ignore sample if remote peer not known:
-  SequenceMap::iterator it(this->sequences_.find(remote_peer));
-  if (it == this->sequences_.end()) return;
+  NakSequenceMap::iterator it(this->nak_sequences_.find(remote_peer));
+  if (it == this->nak_sequences_.end()) return;
 
   TAO::DCPS::Serializer serializer(
     control, this->transport_->swap_bytes());
