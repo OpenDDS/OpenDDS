@@ -306,6 +306,9 @@ InetAddrField<config> group_address("groupAddress",
 BoolField<config> reliable("reliable",
                            &config::reliable_);
 
+DoubleField<config> syn_backoff("synBackoff",
+                                &config::syn_backoff_);
+
 TimeField<config> syn_interval("synInterval",
                                &config::syn_interval_);
 
@@ -326,6 +329,7 @@ BaseField<config> *fields[] = {
   &port_offset,
   &group_address,
   &reliable,
+  &syn_backoff,
   &syn_interval, 
   &syn_timeout,
   &nak_depth,
