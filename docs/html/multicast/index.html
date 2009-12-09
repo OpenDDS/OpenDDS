@@ -532,7 +532,7 @@ TertiaryDark: #666
 Error: #f88
 </pre>
 </div>
-<div title="Configuration" modifier="StevenStallion" created="200912011939" modified="200912051757" changecount="30">
+<div title="Configuration" modifier="Steven Stallion" created="200912011939" modified="200912090032" changecount="31">
 <pre>As with other transports, dynamic configuration is provided by the ACE Service Configurator Framework. A svc.conf file should be created which contains the following:
 {{{
 dynamic OpenDDS_DCPS_Multicast_Service Service_Object * OpenDDS_Multicast:_make_MulticastLoader()
@@ -549,47 +549,53 @@ Alternately, the transport may be statically loaded by including the {{{dds/DCPS
 }}}
 A number of additional transport configuration options are available:
 {{{
-# Enable/disable IPv6 default group address selection.
+# Enables IPv6 default group address selection.
 # The default value is: 0 (disabled).
 default_to_ipv6=0
 
-# The offset used to determine default port numbers; this
-# value will be added to the Transport ID.
+# The offset used to determine default port numbers; this value
+# will be added to the Transport ID for the actual port number.
 # The default value is: 49400.
 port_offset=49400
 
-# The multicast group to join.
+# The multicast group to join to send/receive data.
 # The default value is:
-#   224.0.0.128:&lt;port&gt; (IPv4), and
+#   224.0.0.128:&lt;port&gt; (IPv4), or
 #    [FF01::80]:&lt;port&gt; (IPv6)
 group_address=224.0.0.128:49401
 
-# Enable/disable reliable communication.
+# Enables reliable communication. This option will eventually
+# be deprecated.
 # The default value is: 1 (enabled).
 reliable=1
 
-# The maximum number of milliseconds to wait between
-# handshake attempts during association (reliable only).
-# The default value is: 500.
-syn_interval=500
+# The exponential base used during handshake retries; smaller
+# values yield shorter delays between attempts (reliable only).
+# The default value is: 2.0.
+syn_backoff=2.0
 
-# The maximum number of milliseconds to wait for a
-# handshake response during association (reliable only).
+# The minimum number of milliseconds to wait between handshake
+# attempts during association (reliable only).
+# The default value is: 250.
+syn_interval=250
+
+# The maximum number of milliseconds to wait before giving up
+# on a handshake response during association (reliable only).
 # The default value is: 30000 (30 seconds).
 syn_timeout=30000
 
-# The number of datagrams to retain in order to service
-# incoming repair requests (reliable only).
+# The number of datagrams to retain in order to service repair
+# requests (reliable only).
 # The default value is: 32.
 nak_depth=32
 
-# The maximum number of milliseconds to wait between
-# repair requests (reliable only).
-# The default value is: 2000 (2 seconds).
-nak_interval=2000
+# The minimum number of milliseconds to wait between repair
+# requests (reliable only).
+# The default value is: 500.
+nak_interval=500
 
-# The maximum number of milliseconds to wait before
-# giving up on a repair response (reliable only).
+# The maximum number of milliseconds to wait before giving up
+# on a repair response (reliable only).
 # The default value is: 30000 (30 seconds).
 nak_timeout=30000
 }}}
@@ -603,12 +609,8 @@ Default examples of these files are provided under the source directory (see: {{
 [[Known Issues]]
 [[Future Tasks]]</pre>
 </div>
-<div title="Future Tasks" modifier="StevenStallion" created="200912011940" modified="200912022140" changecount="33">
-<pre>An exponential backoff should be introduced to prevent potential SYN flooding in large multicast groups (see: {{{OpenDDS::DCPS::SynWatchdog::next_interval}}}).
-
-A random backoff should be introduced to prevent potential NAK implosions in large multicast groups (see: {{{OpenDDS::DCPS::NakWatchdog::next_interval}}}).
-
-NAK suppression for duplicate ranges requested by other peers within a given interval should be introduced to prevent potential NAK implosions in large multicast groups.
+<div title="Future Tasks" modifier="Steven Stallion" created="200912011940" modified="200912090031" changecount="34">
+<pre>NAK suppression for duplicate ranges requested by other peers within a given interval should be introduced to prevent potential NAK implosions in large multicast groups.
 
 An FEC mechanism should be introduced to reduce repair requests and to provide an additional source from which to detect reception gaps.
 
@@ -693,7 +695,7 @@ project : dcpsexe_with_multicast {
 &lt;/div&gt;
 &lt;!--}}}--&gt;</pre>
 </div>
-<div title="Reliability" modifier="StevenStallion" created="200912011934" modified="200912051831" changecount="90">
+<div title="Reliability" modifier="Steven Stallion" created="200912011934" modified="200912090030" changecount="91">
 <pre>Reliable delivery is achieved through two primary mechanisms:
 * 2-way peer handshaking (SYN/SYNACK)
 * Negative acknowledgment of missing data (NAK/NAKACK)
@@ -702,7 +704,7 @@ For the purpose of examining the interactions between reliable peers, it helps t
 DCPS control samples were chosen in lieu of more traditional ~PDUs for the exchange of control data between peers; this allowed the transport to leverage existing functionality at the cost of a slightly increased payload size.
 !!SYN/SYNACK
 [&lt;img[images/handshake.png]]
-The active peer initiates a handshake by sending a {{{MULTICAST_SYN}}} control sample to the passive peer at a fixed interval bounded by a timeout to ensure delivery.
+The active peer initiates a handshake by sending a {{{MULTICAST_SYN}}} control sample to the passive peer at periodic intervals bounded by a timeout to ensure delivery.
 
 Upon receiving the {{{MULTICAST_SYN}}} control sample, the passive peer records the current transport sequence value for the active peer and responds with a {{{MULTICAST_SYNACK}}} control sample. This sequence number establishes a value from which reception gaps may be identified in the future.
 
