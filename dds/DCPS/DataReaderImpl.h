@@ -450,6 +450,7 @@ public:
   ACE_Reactor* get_reactor();
 
   RepoId get_topic_id();
+  RepoId get_dp_id();
 
   typedef std::vector<DDS::InstanceHandle_t> InstanceHandleVec;
   void get_instance_handles(InstanceHandleVec& instance_handles);

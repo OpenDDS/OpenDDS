@@ -1611,6 +1611,10 @@ ACE_THROW_SPEC((CORBA::SystemException))
     return DDS::Topic::_nil();
   }
 
+  if (this->monitor_) {
+    this->monitor_->report();
+  }
+
   // the topics_ map has one reference and we duplicate to give
   // the caller another reference.
   return DDS::Topic::_duplicate(refCounted_topic.pair_.obj_.in());
@@ -2010,6 +2014,20 @@ DomainParticipantImpl::attach_bit_transport()
 #else
   return DDS::RETCODE_UNSUPPORTED;
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
+}
+
+void
+DomainParticipantImpl::get_topic_ids(TopicIdVec& topics)
+{
+  ACE_GUARD(ACE_Recursive_Thread_Mutex,
+            guard,
+            this->topics_protector_);
+
+  topics.reserve(topics_.size());
+  for (TopicMap::iterator it(topics_.begin());
+       it != topics_.end(); ++it) {
+    topics.push_back(it->second.pair_.svt_->get_id());
+  }
 }
 
 } // namespace DCPS

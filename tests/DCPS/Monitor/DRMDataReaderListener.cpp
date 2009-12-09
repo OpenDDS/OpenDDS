@@ -55,8 +55,10 @@ throw(CORBA::SystemException)
 
       if (si.valid_data) {
         cout << "DataReaderReport:" << endl
-             << "  dr_id        = " << drr.dr_id    << endl
-             << "  topic_id     = " << drr.topic_id << endl
+             << "  dp_id        = " << drr.dp_id      << endl
+             << "  sub_handle   = " << drr.sub_handle << endl
+             << "  dr_id        = " << drr.dr_id      << endl
+             << "  topic_id     = " << drr.topic_id   << endl
              << "  instances    = " << endl;
         for (CORBA::ULong i = 0; i < drr.instances.length(); i++) {
           cout << "    " << drr.instances[i] << endl;

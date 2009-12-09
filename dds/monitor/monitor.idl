@@ -86,6 +86,7 @@ module OpenDDS {
       long             pid;
       GUID_t           dp_id;
       DDS::DomainId_t  domain_id;
+      GUIDSeq          topics;
       NVPSeq           values;
     };
 
@@ -142,10 +143,10 @@ module OpenDDS {
 
     struct PublisherReport {
       DDS::InstanceHandle_t handle;
-      GUID_t        dp_id;
-      unsigned long transport_id;
-      GUIDSeq       writers;
-      NVPSeq        values;
+      GUID_t                dp_id;
+      unsigned long         transport_id;
+      GUIDSeq               writers;
+      NVPSeq                values;
     };
 
 #pragma DCPS_DATA_TYPE "OpenDDS::DCPS::SubscriberReport"
@@ -172,10 +173,10 @@ module OpenDDS {
 
     struct SubscriberReport {
       DDS::InstanceHandle_t handle;
-      GUID_t        dp_id;
-      unsigned long transport_id;
-      GUIDSeq       readers;
-      NVPSeq        values;
+      GUID_t                dp_id;
+      unsigned long         transport_id;
+      GUIDSeq               readers;
+      NVPSeq                values;
     };
 
 #pragma DCPS_DATA_TYPE "OpenDDS::DCPS::DataWriterReport"
@@ -204,13 +205,13 @@ module OpenDDS {
     };
     typedef sequence<DataWriterAssociation> DWAssociations;
     struct DataWriterReport {
-      DDS::InstanceHandle_t handle;
-      GUID_t         dp_id;
-      GUID_t         dw_id;
-      GUID_t         topic_id;
+      GUID_t                 dp_id;
+      DDS::InstanceHandle_t  pub_handle;
+      GUID_t                 dw_id;
+      GUID_t                 topic_id;
       DDS::InstanceHandleSeq instances;
-      DWAssociations associations;
-      NVPSeq         values;
+      DWAssociations         associations;
+      NVPSeq                 values;
     };
 
 #pragma DCPS_DATA_TYPE "OpenDDS::DCPS::DataWriterPeriodicReport"
@@ -276,13 +277,13 @@ module OpenDDS {
     };
     typedef sequence<DataReaderAssociation> DRAssociations;
     struct DataReaderReport {
-      DDS::InstanceHandle_t handle;
-      GUID_t         dp_id;
-      GUID_t         dr_id;
-      GUID_t         topic_id;
+      GUID_t                 dp_id;
+      DDS::InstanceHandle_t  sub_handle;
+      GUID_t                 dr_id;
+      GUID_t                 topic_id;
       DDS::InstanceHandleSeq instances;
-      DRAssociations associations;
-      NVPSeq         values;
+      DRAssociations         associations;
+      NVPSeq                 values;
     };
 
 #pragma DCPS_DATA_TYPE "OpenDDS::DCPS::DataReaderPeriodicReport"

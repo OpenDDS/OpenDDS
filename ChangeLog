@@ -1,3 +1,33 @@
+Wed Dec  9 01:47:12 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/monitor/monitor.idl:
+
+	  Change handle member of the DW and DR report to be
+	  pub_handle and sub_handle, respectively.  Add topics
+	  sequence to DP report.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/monitor/DPMonitorImpl.h:
+        * dds/monitor/DPMonitorImpl.cpp:
+        * dds/monitor/DRMonitorImpl.cpp:
+        * dds/monitor/DWMonitorImpl.cpp:
+        * dds/monitor/SPMonitorImpl.h:
+        * dds/monitor/SPMonitorImpl.cpp:
+        * dds/monitor/TopicMonitorImpl.cpp:
+        * dds/monitor/TransportMonitorImpl.h:
+        * dds/monitor/TransportMonitorImpl.cpp:
+        * tests/DCPS/Monitor/DPMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/DRMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/DWMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/TopicMDataReaderListener.cpp:
+
+	  Add support for new "parent" and topic fields.
+
 Wed Dec  9 00:33:16 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * docs/html/multicast/index.html:

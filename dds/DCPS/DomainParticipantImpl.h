@@ -287,6 +287,13 @@ public:
   */
   DDS::DomainParticipantListener* listener_for(DDS::StatusKind kind);
 
+  typedef std::vector<RepoId> TopicIdVec;
+  /**
+  * Populates an std::vector with the RepoId of the topics this
+  * participant has created/found.
+  */
+  void get_topic_ids(TopicIdVec& topics);
+
 private:
 
   /** The implementation of create_topic.

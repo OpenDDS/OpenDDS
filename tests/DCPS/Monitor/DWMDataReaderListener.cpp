@@ -19,6 +19,9 @@
 
 #include <iostream>
 
+using std::cout;
+using std::endl;
+
 DWMDataReaderListenerImpl::DWMDataReaderListenerImpl()
 {
 }
@@ -47,20 +50,22 @@ throw(CORBA::SystemException)
     DDS::ReturnCode_t status = dwm_dr->take_next_sample(dwr, si) ;
 
     if (status == DDS::RETCODE_OK) {
-      std::cout << "SampleInfo.sample_rank = " << si.sample_rank << std::endl;
-      std::cout << "SampleInfo.instance_state = " << si.instance_state << std::endl;
+      cout << "SampleInfo.sample_rank = " << si.sample_rank << endl;
+      cout << "SampleInfo.instance_state = " << si.instance_state << endl;
 
       if (si.valid_data) {
-        std::cout << "DataWriterReport:" << std::endl
-                  << "  dw_id        = " << dwr.dw_id    << std::endl
-                  << "  topic_id     = " << dwr.topic_id << std::endl;
-        std::cout << "  instances    = " << std::endl;
+        cout << "DataWriterReport:" << endl
+             << "  dp_id        = " << dwr.dp_id      << endl
+             << "  pub_handle   = " << dwr.pub_handle << endl
+             << "  dw_id        = " << dwr.dw_id      << endl
+             << "  topic_id     = " << dwr.topic_id   << endl;
+        cout << "  instances    = " << endl;
         for (CORBA::ULong i = 0; i < dwr.instances.length(); i++) {
-          std::cout << "    " << dwr.instances[i] << std::endl;
+          cout << "    " << dwr.instances[i] << endl;
         }
-        std::cout << "  associations = " << std::endl;
+        cout << "  associations = " << endl;
         for (CORBA::ULong i = 0; i < dwr.associations.length(); i++) {
-          std::cout << "    dr_id = " << dwr.associations[i].dr_id << std::endl;
+          cout << "    dr_id = " << dwr.associations[i].dr_id << endl;
         }
 
       } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {

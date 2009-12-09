@@ -272,6 +272,11 @@ public:
   RepoId get_publication_id();
 
   /**
+   * Accessor of the repository id of the domain participant.
+   */
+  RepoId get_dp_id();
+
+  /**
    * Delegate to WriteDataContainer to unregister all instances.
    */
   void unregister_all();
@@ -516,7 +521,7 @@ private:
   DomainParticipantImpl*          participant_servant_;
   /// The domain id.
   DDS::DomainId_t                 domain_id_;
-  /// The publisher servant which creates this datawrite.
+  /// The publisher servant which creates this datawriter.
   PublisherImpl*                  publisher_servant_;
   /// the object reference of the local datawriter
   DDS::DataWriter_var             dw_local_objref_;

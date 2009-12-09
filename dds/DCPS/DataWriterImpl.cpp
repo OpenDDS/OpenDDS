@@ -1557,6 +1557,12 @@ DataWriterImpl::get_publication_id()
   return publication_id_;
 }
 
+RepoId
+DataWriterImpl::get_dp_id()
+{
+  return participant_servant_->get_id();
+}
+
 const char*
 DataWriterImpl::get_topic_name()
 {

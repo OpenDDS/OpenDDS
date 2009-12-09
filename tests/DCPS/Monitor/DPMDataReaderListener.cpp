@@ -19,6 +19,9 @@
 
 #include <iostream>
 
+using std::cout;
+using std::endl;
+
 DPMDataReaderListenerImpl::DPMDataReaderListenerImpl()
 {
 }
@@ -47,14 +50,19 @@ throw(CORBA::SystemException)
     DDS::ReturnCode_t status = dpm_dr->take_next_sample(dpr, si) ;
 
     if (status == DDS::RETCODE_OK) {
-      std::cout << "SampleInfo.sample_rank = " << si.sample_rank << std::endl;
-      std::cout << "SampleInfo.instance_state = " << si.instance_state << std::endl;
+      cout << "SampleInfo.sample_rank = " << si.sample_rank << endl;
+      cout << "SampleInfo.instance_state = " << si.instance_state << endl;
 
       if (si.valid_data) {
-        std::cout << "DomainParticipantReport:" << std::endl
-                  << "  dp_id     = " << dpr.dp_id     << std::endl
-                  << "  domain_id = " << dpr.domain_id << std::endl;
-
+        cout << "DomainParticipantReport:" << endl
+             << "  host      = " << dpr.host      << endl
+             << "  pid       = " << dpr.pid       << endl
+             << "  dp_id     = " << dpr.dp_id     << endl
+             << "  domain_id = " << dpr.domain_id << endl
+             << "  topics    = " << std::endl;
+        for (CORBA::ULong i = 0; i < dpr.topics.length(); i++) {
+          std::cout << "    " << dpr.topics[i] << std::endl;
+        }
       } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
 

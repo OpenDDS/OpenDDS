@@ -26,6 +26,7 @@ TransportMonitorImpl::TransportMonitorImpl(TransportImpl* transport,
   char host[256];
   ACE_OS::hostname(host, 256);
   hostname_ = host;
+  pid_  = ACE_OS::getpid();
 }
 
 TransportMonitorImpl::~TransportMonitorImpl()
@@ -36,10 +37,11 @@ void
 TransportMonitorImpl::report() {
   if (!CORBA::is_nil(this->transport_writer_.in())) {
     TransportReport report;
-    report.host = hostname_.c_str();
-    report.pid  = ACE_OS::getpid();
-    report.transport_id  = transport_->get_transport_id();
-    report.transport_type = ACE_TEXT_ALWAYS_CHAR(transport_->get_factory_id().c_str());
+    report.host = this->hostname_.c_str();
+    report.pid  = this->pid_;
+    report.transport_id  = this->transport_->get_transport_id();
+    report.transport_type =
+      ACE_TEXT_ALWAYS_CHAR(this->transport_->get_factory_id().c_str());
     this->transport_writer_->write(report, DDS::HANDLE_NIL);
   }
 }
