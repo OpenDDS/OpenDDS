@@ -19,6 +19,7 @@
 #include "dds/DCPS/transport/framework/TransportSendBuffer_rch.h"
 
 #include <map>
+#include <utility>
 
 namespace OpenDDS {
 namespace DCPS {
