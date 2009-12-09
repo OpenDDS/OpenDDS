@@ -1112,8 +1112,8 @@ Options::loadPublication(
    *   Topic            = <string> # One of topic <name>
    *   TransportIndex   = <number> # Index into transport configurations
    *   MessageSource    = <string> # One of subscription <name>
-   *   FixedRate        = <number> # Samples per second
-   *   MessageRate      = <number> # Samples per second
+   *   MessageFixedRate = <number> # Samples per second, 0 indicates use MessageRate
+   *   MessageRate      = <number> # Samples per second, Poisson arrival times
    *   MessageSize      = <number> # bytes per sample
    *   MessageMax       = <number> # upper bound for size
    *   MessageMin       = <number> # lower bound for size
@@ -1860,7 +1860,7 @@ Options::loadPublication(
     }
   }
 
-  // FixedRate        = <number> # Samples per second
+  // MessageFixedRate = <number> # Samples per second, 0 indicates use MessageRate
   profile->fixedRate = DEFAULT_FIXED_RATE;
   valueString.clear();
   heap.get_string_value( sectionKey, MESSAGEFIXEDRATE_KEYNAME, valueString);
@@ -1877,7 +1877,7 @@ Options::loadPublication(
     }
   }
 
-  // MessageRate      = <number> # Samples per second
+  // MessageRate      = <number> # Samples per second, Poisson arrival times
   valueString.clear();
   heap.get_string_value( sectionKey, MESSAGERATE_KEYNAME, valueString);
   if (valueString.length() > 0) {

@@ -1,3 +1,11 @@
+Wed Dec  9 19:03:17 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/datamodel.txt:
+        * performance-tests/Bench/src/EntityProfiles.h:
+        * performance-tests/Bench/src/Options.cpp:
+
+          Corrected documentation.
+
 Wed Dec  9 18:53:40 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/doc/datamodel.txt:
