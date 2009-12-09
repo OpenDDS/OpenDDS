@@ -72,6 +72,7 @@ struct TopicProfile {
  *   Topic            = <string> # One of topic <name>
  *   TransportIndex   = <number> # Index into transport configurations
  *   MessageSource    = <string> # One of subscription <name>
+ *   FixedRate        = <number> # Samples per second
  *   MessageRate      = <number> # Samples per second
  *   MessageSize      = <number> # bytes per sample
  *   MessageMax       = <number> # upper bound for size
@@ -83,6 +84,7 @@ struct PublicationProfile {
   unsigned int       transport;
   std::string        source;
   Gaussian           size;
+  unsigned int       fixedRate;
   Exponential        rate;
   DDS::PublisherQos  publisherQos;
   DDS::DataWriterQos writerQos;

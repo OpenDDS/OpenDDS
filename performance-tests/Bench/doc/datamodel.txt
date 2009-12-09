@@ -90,7 +90,8 @@ Topic and Partition values for individual publications and subscriptions.
   Topic                               = <string> # One of topic <name>
   TransportIndex                      = <number> # Index into transport configurations
   MessageSource                       = <string> # One of subscription <name>
-  MessageRate                         = <number> # Samples per second
+  FixedRate                           = <number> # Samples per second, 0 indicates use MessageRate
+  MessageRate                         = <number> # Samples per second, Poisson arrival times
   MessageSize                         = <number> # bytes per sample
   MessageMax                          = <number> # upper bound for size
   MessageMin                          = <number> # lower bound for size

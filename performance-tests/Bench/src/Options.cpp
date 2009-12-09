@@ -31,6 +31,7 @@ namespace { // anonymous namespace for file scope.
   enum { DEFAULT_MIN             =  800};
   enum { DEFAULT_SIZE            = 1000};
   enum { DEFAULT_DEVIATION       =  300};
+  enum { DEFAULT_FIXED_RATE      =    0};
   enum { DEFAULT_RATE            =  100};
 
   const std::string DEFAULT_RAW_OUTPUT_FILENAME = std::string();
@@ -98,6 +99,7 @@ namespace { // anonymous namespace for file scope.
   const ACE_TCHAR* TOPIC_KEYNAME                               = ACE_TEXT("Topic");
   const ACE_TCHAR* TRANSPORTINDEX_KEYNAME                      = ACE_TEXT("TransportIndex");
   const ACE_TCHAR* MESSAGESOURCE_KEYNAME                       = ACE_TEXT("MessageSource");
+  const ACE_TCHAR* MESSAGEFIXEDRATE_KEYNAME                    = ACE_TEXT("MessageFixedRate");
   const ACE_TCHAR* MESSAGERATE_KEYNAME                         = ACE_TEXT("MessageRate");
   const ACE_TCHAR* MESSAGESIZE_KEYNAME                         = ACE_TEXT("MessageSize");
   const ACE_TCHAR* MESSAGEMAX_KEYNAME                          = ACE_TEXT("MessageMax");
@@ -1110,6 +1112,7 @@ Options::loadPublication(
    *   Topic            = <string> # One of topic <name>
    *   TransportIndex   = <number> # Index into transport configurations
    *   MessageSource    = <string> # One of subscription <name>
+   *   FixedRate        = <number> # Samples per second
    *   MessageRate      = <number> # Samples per second
    *   MessageSize      = <number> # bytes per sample
    *   MessageMax       = <number> # upper bound for size
@@ -1853,6 +1856,23 @@ Options::loadPublication(
         sectionName.c_str(),
         MESSAGESOURCE_KEYNAME,
         profile->source.c_str()
+      ));
+    }
+  }
+
+  // FixedRate        = <number> # Samples per second
+  profile->fixedRate = DEFAULT_FIXED_RATE;
+  valueString.clear();
+  heap.get_string_value( sectionKey, MESSAGEFIXEDRATE_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->fixedRate = ACE_OS::atoi( valueString.c_str());
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        MESSAGEFIXEDRATE_KEYNAME,
+        profile->fixedRate
       ));
     }
   }

@@ -1,3 +1,14 @@
+Wed Dec  9 18:53:40 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/datamodel.txt:
+        * performance-tests/Bench/src/EntityProfiles.h:
+        * performance-tests/Bench/src/Gaussian.cpp:
+        * performance-tests/Bench/src/Options.cpp:
+        * performance-tests/Bench/src/Publication.cpp:
+
+          Added new FixedRate publication parameter to allow
+          specification of fixed sending rates.
+
 Wed Dec  9 17:22:09 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/ReliableMulticast.h:

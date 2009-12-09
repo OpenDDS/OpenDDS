@@ -28,6 +28,11 @@ namespace Test {
 double
 Gaussian::value() const
 {
+  // Shortcut for fixed values.
+  if( this->deviation_ == 0) {
+    return this->mean_;
+  }
+
   // Return previously calculated deviate if we have one.
   if( this->valueAvailable_) {
     this->valueAvailable_ = false;
