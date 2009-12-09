@@ -28,50 +28,53 @@ const TransportIdType DEFAULT_MULTICAST_ID(0xFFFFFF08);
 class OpenDDS_Multicast_Export MulticastConfiguration
   : public TransportConfiguration {
 public:
-  /// Enable/disable IPv6 default group address selection.
+  /// Enables IPv6 default group address selection.
   /// The default value is: false.
   bool default_to_ipv6_;
 
-  /// The offset used to determine default port numbers;
-  /// this value will be added to the Transport ID.
+  /// The offset used to determine default port numbers; this value
+  /// will be added to the Transport ID for the actual port number.
   /// The default value is: 49400 [IANA 2009-11-16].
   u_short port_offset_;
 
-  /// The multicast group to join.
+  /// The multicast group to join to send/receive data.
   /// The default value is:
-  ///   224.0.0.128:<port> [IANA 2009-11-17], and
-  ///    [FF01::80]:<port> [IANA 2009-08-28] 
+  ///   224.0.0.128:<port> [IANA 2009-11-17], or
+  ///    [FF01::80]:<port> [IANA 2009-08-28]
   ACE_INET_Addr group_address_;
 
-  /// Enable/disable reliable communication. This option
-  /// will eventually be deprecated once the ETF is able
-  /// to properly demux reliable/best-effort samples.
+  /// Enables reliable communication. This option will eventually
+  /// be deprecated.
   /// The default value is: true.
   bool reliable_;
 
-  /// The maximum number of milliseconds to wait between
-  /// handshake attempts during association (reliable only).
-  /// The default value is: 500.
+  /// The exponential base used during handshake retries; smaller
+  /// values yield shorter delays between attempts (reliable only).
+  /// The default value is: 2.0.
+  double syn_backoff_;
+
+  /// The minimum number of milliseconds to wait between handshake
+  /// attempts during association (reliable only).
+  /// The default value is: 250.
   ACE_Time_Value syn_interval_;
 
-  /// The maximum number of milliseconds to wait for a
-  /// handshake response during association (reliable only).
+  /// The maximum number of milliseconds to wait before giving up
+  /// on a handshake response during association (reliable only).
   /// The default value is: 30000 (30 seconds).
   ACE_Time_Value syn_timeout_;
 
-  /// The number of datagrams to retain in order to service
-  /// service incoming repair requests (reliable only).
-  /// The default value is: 32; this yields a minimum of 32
-  /// samples and a maximum 2048K of sample data.
+  /// The number of datagrams to retain in order to service repair
+  /// requests (reliable only).
+  /// The default value is: 32.
   size_t nak_depth_;
 
-  /// The maximum number of milliseconds to wait between
-  /// repair requests (reliable only).
-  /// The default value is: 2000 (2 seconds).
+  /// The minimum number of milliseconds to wait between repair
+  /// requests (reliable only).
+  /// The default value is: 500.
   ACE_Time_Value nak_interval_;
 
-  /// The maximum number of milliseconds to wait before
-  /// giving up on a repair response (reliable only).
+  /// The maximum number of milliseconds to wait before giving up
+  /// on a repair response (reliable only).
   /// The default value is: 30000 (30 seconds).
   ACE_Time_Value nak_timeout_;
 

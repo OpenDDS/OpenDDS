@@ -14,6 +14,7 @@
 
 #include "MulticastDataLink.h"
 
+#include "dds/DCPS/RandomGenerator.h"
 #include "dds/DCPS/transport/framework/DataLinkWatchdog_T.h"
 #include "dds/DCPS/transport/framework/TransportSendBuffer_rch.h"
 
@@ -36,6 +37,10 @@ protected:
 
   virtual ACE_Time_Value next_timeout();
   virtual void on_timeout(const void* arg);
+
+private:
+  RandomGenerator random_;
+  int retries_;
 };
 
 class OpenDDS_Multicast_Export NakWatchdog
@@ -46,6 +51,9 @@ public:
 protected:
   virtual ACE_Time_Value next_interval();
   virtual void on_interval(const void* arg);
+
+private:
+  RandomGenerator random_;
 };
 
 class OpenDDS_Multicast_Export ReliableMulticast
@@ -64,19 +72,19 @@ public:
   ~ReliableMulticast();
 
   virtual bool acked();
-  
+
   virtual bool header_received(const TransportHeader& header);
   virtual void sample_received(ReceivedDataSample& sample);
-  
+
   void syn_received(ACE_Message_Block* control);
   void send_syn();
 
   void synack_received(ACE_Message_Block* control);
   void send_synack(MulticastPeer remote_peer);
- 
-  void expire_naks(); 
+
+  void expire_naks();
   void send_naks();
-  
+
   void nak_received(ACE_Message_Block* control);
   void send_nak(MulticastPeer remote_peer,
                 MulticastSequence low,
@@ -91,7 +99,7 @@ public:
 
 protected:
   virtual void send_strategy_i(MulticastSendStrategy* send_strategy);
-  
+
   virtual bool join_i(const ACE_INET_Addr& group_address, bool active);
   virtual void leave_i();
 
@@ -102,7 +110,7 @@ private:
   NakWatchdog nak_watchdog_;
 
   TransportSendBuffer_rch send_buffer_;
-  
+
   TransportHeader received_header_;
 
   typedef std::map<MulticastPeer, DisjointSequence> SequenceMap;

@@ -31,16 +31,14 @@ public:
     range_iterator(set_type::iterator begin,
                    set_type::iterator end);
 
-    range_iterator(const range_iterator& it);
-
     range_iterator& operator++();
     range_iterator  operator++(int);
 
-    bool operator==(const range_iterator& rhs);
-    bool operator!=(const range_iterator& rhs);
+    bool operator==(const range_iterator& rhs) const;
+    bool operator!=(const range_iterator& rhs) const;
 
     range_type& operator*();
-    range_type* operator->(); 
+    range_type* operator->();
 
   private:
     set_type::iterator pos_;
@@ -59,11 +57,11 @@ public:
 
   range_iterator range_begin();
   range_iterator range_end();
-  
+
   void skip(SequenceNumber value);
 
   bool update(SequenceNumber value);
-  bool update(const range_type& range); 
+  bool update(const range_type& range);
 
   operator SequenceNumber() const;
 
@@ -72,7 +70,7 @@ private:
 
   void normalize();
 };
-  
+
 
 } // namespace DCPS
 } // namespace OpenDDS

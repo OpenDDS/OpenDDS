@@ -14,11 +14,14 @@
 #include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/transport/framework/TransportSendBuffer.h"
 
+#include <cmath>
+
 namespace OpenDDS {
 namespace DCPS {
 
 SynWatchdog::SynWatchdog(ReliableMulticast* link)
-  : DataLinkWatchdog<ReliableMulticast>(link)
+  : DataLinkWatchdog<ReliableMulticast>(link),
+    retries_(0)
 {
 }
 
@@ -26,7 +29,15 @@ ACE_Time_Value
 SynWatchdog::next_interval()
 {
   MulticastConfiguration* config = this->link_->config();
-  return config->syn_interval_;
+
+  ACE_Time_Value interval(config->syn_interval_);
+  if (this->retries_ > 0) {
+    // Apply exponential backoff based on number of retries:
+    interval *= std::pow(config->syn_backoff_, this->retries_);
+  }
+  ++this->retries_;
+
+  return interval;
 }
 
 void
@@ -65,7 +76,12 @@ ACE_Time_Value
 NakWatchdog::next_interval()
 {
   MulticastConfiguration* config = this->link_->config();
-  return config->nak_interval_;
+
+  ACE_Time_Value interval(config->nak_interval_);
+  // Apply random backoff to minimize potential collisions:
+  interval *= (++this->random_ + 1.0);
+
+  return interval;
 }
 
 void
@@ -247,6 +263,8 @@ ReliableMulticast::send_synack(MulticastPeer remote_peer)
 void
 ReliableMulticast::expire_naks()
 {
+  if (this->nak_history_.empty()) return; // nothing to expire
+
   ACE_Time_Value deadline(ACE_OS::gettimeofday());
   deadline -= this->config_->nak_timeout_;
 
@@ -486,7 +504,7 @@ ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
                       ACE_TEXT("failed to schedule SYN watchdog!\n")),
                      false);
   }
-  
+
   // A watchdog timer is scheduled to periodically check for gaps in
   // received data. If a gap is discovered, MULTICAST_NAK control
   // samples will be sent to initiate repairs.

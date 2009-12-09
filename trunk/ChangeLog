@@ -1,3 +1,26 @@
+Wed Dec  9 00:00:20 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+
+          Dropped uneccessary copy constructor.
+
+        * dds/DCPS/RandomGenerator.h:
+        * dds/DCPS/RandomGenerator.inl:
+        * dds/DCPS/RandomGenerator.cpp:
+
+          Added random number generation container; added static initializer
+          to seed generation based on library load time.
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+        * dds/DCPS/transport/multicast/multicast.ini-dist:
+
+          Added support for exponential and random backoffs for SYN and NAK
+          interactions between reliable multicast peers.
+
 Tue Dec  8 23:44:45 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/monitor/monitor.idl:
@@ -14,7 +37,7 @@ Tue Dec  8 23:44:45 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
           not the report processing.
 
         * tools/odds_monitor/TreeNode.h:
-        
+
           Made the parent member completely accessible to allow movement
           within the tree.
 
