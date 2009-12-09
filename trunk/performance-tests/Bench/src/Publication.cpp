@@ -379,8 +379,13 @@ Publication::svc ()
 
     // Determine the interval to next message here so it can be mentioned
     // in the diagnostic messsage.
-    long microseconds
-      = static_cast<long>( 1.0e6 * this->profile_->rate.value());
+    long microseconds = 0;
+    if( this->profile_->fixedRate) {
+      microseconds = static_cast<long>( 1.0e6 / this->profile_->fixedRate);
+    } else {
+      microseconds
+        = static_cast<long>( 1.0e6 * this->profile_->rate.value());
+    }
     ACE_Time_Value interval( 0, microseconds);
 
     if( this->verbose_ && BE_REALLY_VERBOSE) {
