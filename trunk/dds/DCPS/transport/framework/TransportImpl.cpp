@@ -43,8 +43,7 @@ void clear(Container& c)
 
 OpenDDS::DCPS::TransportImpl::TransportImpl()
   : monitor_(0),
-    transport_id_(0),
-    factory_id_("")
+    transport_id_(0)
 {
   DBG_ENTRY_LVL("TransportImpl","TransportImpl",6);
   if (TheServiceParticipant->monitor_factory_) {

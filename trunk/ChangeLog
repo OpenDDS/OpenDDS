@@ -1,3 +1,13 @@
+Wed Dec  9 22:32:00 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.h:
+        
+          Added vector include to fix compilation errors.
+          
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Fixed compilation errors on wchar build.
+          
 Wed Dec  9 19:03:17 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/doc/datamodel.txt:

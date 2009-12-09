@@ -32,6 +32,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <vector>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
