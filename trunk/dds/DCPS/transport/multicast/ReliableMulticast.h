@@ -113,12 +113,12 @@ private:
 
   TransportHeader received_header_;
 
+  typedef std::map<MulticastPeer, DisjointSequence> NakSequenceMap;
+  NakSequenceMap nak_sequences_;
+
   typedef std::pair<MulticastPeer, SequenceNumber> NakRequest;
   typedef std::multimap<ACE_Time_Value, NakRequest> NakRequestMap;
   NakRequestMap nak_requests_;
-
-  typedef std::map<MulticastPeer, DisjointSequence> NakSequenceMap;
-  NakSequenceMap nak_sequences_;
 };
 
 } // namespace DCPS
