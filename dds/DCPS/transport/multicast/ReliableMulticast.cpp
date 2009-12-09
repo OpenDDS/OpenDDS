@@ -34,7 +34,6 @@ SynWatchdog::next_interval()
   if (this->retries_ > 0) {
     // Apply exponential backoff based on number of retries:
     interval *= std::pow(config->syn_backoff_, this->retries_);
-    // Apply random backoff to minimize potential collisions:
     interval *= (++this->random_ + 1.0);
   }
   ++this->retries_;
