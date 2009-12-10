@@ -42,12 +42,19 @@ public:
                      guard,
                      this->lock_,
                      false);
-    
-    if (this->timer_id_ != -1) return false;
 
-    this->epoch_ = ACE_OS::gettimeofday();
-    
-    return schedule_i(reactor, arg);
+    if (this->timer_id_ != -1) return false;
+    return schedule_i(reactor, arg, false);
+  }
+
+  bool schedule_now(ACE_Reactor* reactor, const void* arg = 0) {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex,
+                     guard,
+                     this->lock_,
+                     false);
+
+    if (this->timer_id_ != -1) return false;
+    return schedule_i(reactor, arg, true);
   }
 
   void cancel() {
@@ -79,7 +86,7 @@ public:
 
     on_interval(arg);
 
-    if (!schedule_i(reactor(), arg)) {
+    if (!schedule_i(reactor(), arg, false)) {
       ACE_ERROR((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: ")
                  ACE_TEXT("DataLinkWatchdog::handle_timeout: ")
@@ -105,21 +112,23 @@ private:
   long timer_id_;
 
   ACE_Time_Value epoch_;
-  
-  bool schedule_i(ACE_Reactor* reactor, const void* arg) {
-    ACE_Time_Value interval = next_interval();
-    if (interval == ACE_Time_Value::zero) {
-      cancel_i();
-      return true;
+
+  bool schedule_i(ACE_Reactor* reactor, const void* arg, bool nodelay) {
+    ACE_Time_Value delay;
+
+    if (!nodelay) delay = next_interval();
+
+    if (this->epoch_ == ACE_Time_Value::zero) {
+      this->epoch_ = ACE_OS::gettimeofday();
     }
 
     this->reactor_ = reactor;
     this->timer_id_ = reactor->schedule_timer(this,  // event_handler
                                               arg,
-                                              interval);
+                                              delay);
     return this->timer_id_ != -1;
   }
-  
+
   void cancel_i() {
     this->reactor_ = 0;   // invalidate handle
     this->timer_id_ = -1; // invalidate handle

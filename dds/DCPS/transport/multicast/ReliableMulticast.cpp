@@ -515,7 +515,7 @@ ReliableMulticast::start_i()
   // handshake to verify that passive endpoints can send/receive
   // data reliably. This process must be executed using the
   // transport reactor thread to prevent blocking.
-  if (this->active_ && !this->syn_watchdog_.schedule(reactor)) {
+  if (this->active_ && !this->syn_watchdog_.schedule_now(reactor)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("ReliableMulticast::start_i: ")
