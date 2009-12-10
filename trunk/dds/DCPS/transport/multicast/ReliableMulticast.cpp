@@ -48,7 +48,6 @@ SynWatchdog::on_interval(const void* /*arg*/)
   // Initiate handshake by sending a MULTICAST_SYN control
   // sample to the assigned remote peer:
   this->link_->send_syn();
-  std::cout << "SENT HANDHAKE!" << std::endl;
 }
 
 ACE_Time_Value
