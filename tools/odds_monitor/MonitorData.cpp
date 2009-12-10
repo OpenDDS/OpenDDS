@@ -61,22 +61,26 @@ Monitor::MonitorData::setRepoIor( const QString& ior)
     return false;
   }
 
+  // Replace call to toStdString() with toLocal8Bit().constData()
+  // to avoid QString-related aborts under windows.
+  const char* ior_str = ior.toLocal8Bit().constData();
+
   // Return successfully if the requested repository is already the
   // active repository.
-  if( this->storage_->activeIor() == ior.toStdString()) {
+  if( this->storage_->activeIor() == ior_str) {
     return true;
   }
 
   // Set the repository IOR.
   MonitorTask::RepoKey key
-    = this->dataSource_->setRepoIor( ior.toStdString());
+    = this->dataSource_->setRepoIor( ior_str);
 
   // Clear existing data.
   this->clearData();
 
   // Switch to the new repository.
   if( this->dataSource_->setActiveRepo( key)) {
-    this->storage_->activeIor() = ior.toStdString();
+    this->storage_->activeIor() = ior_str;
     return true;
 
   } else {
