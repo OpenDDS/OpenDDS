@@ -100,7 +100,7 @@ public:
                     ACE_Message_Block* data);
 
 protected:
-  virtual void send_strategy_i(MulticastSendStrategy* send_strategy);
+  virtual void send_strategy(MulticastSendStrategy* send_strategy);
 
   virtual int start_i();
   virtual void stop_i();

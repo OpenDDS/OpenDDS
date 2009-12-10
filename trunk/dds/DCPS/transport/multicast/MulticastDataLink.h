@@ -45,8 +45,8 @@ public:
   void configure(MulticastConfiguration* config,
                  TransportReactorTask* reactor_task);
 
-  void send_strategy(MulticastSendStrategy* send_strategy);
-  void receive_strategy(MulticastReceiveStrategy* recv_strategy);
+  virtual void send_strategy(MulticastSendStrategy* send_strategy);
+  virtual void receive_strategy(MulticastReceiveStrategy* recv_strategy);
 
   MulticastPeer local_peer() const;
   MulticastPeer remote_peer() const;
@@ -59,7 +59,6 @@ public:
   ACE_Reactor* get_reactor();
 
   ACE_SOCK_Dgram_Mcast& socket();
-
   bool join(const ACE_INET_Addr& group_address);
 
   virtual bool acked() = 0;
@@ -75,16 +74,11 @@ protected:
 
   bool active_;
 
-  MulticastSendStrategy_rch send_strategy_;
-  MulticastReceiveStrategy_rch recv_strategy_;
-
   MulticastConfiguration_rch config_;
   TransportReactorTask_rch reactor_task_;
 
-  // These methods may be overridden to provide additional behavior
-  // prior to assigning send/receive strategies:
-  virtual void send_strategy_i(MulticastSendStrategy* send_strategy);
-  virtual void receive_strategy_i(MulticastReceiveStrategy* recv_strategy);
+  MulticastSendStrategy_rch send_strategy_;
+  MulticastReceiveStrategy_rch recv_strategy_;
 
   virtual void stop_i();
 
