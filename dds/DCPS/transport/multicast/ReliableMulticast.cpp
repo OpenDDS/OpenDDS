@@ -467,7 +467,7 @@ ReliableMulticast::send_control(SubMessageId submessage_id,
 }
 
 void
-ReliableMulticast::send_strategy_i(MulticastSendStrategy* send_strategy)
+ReliableMulticast::send_strategy(MulticastSendStrategy* send_strategy)
 {
   // A send buffer is bound to the send strategy to ensure a
   // configured number of most-recent datagrams are retained in
@@ -485,6 +485,8 @@ ReliableMulticast::send_strategy_i(MulticastSendStrategy* send_strategy)
   this->send_buffer_->_add_ref(); // take ownership
 
   send_strategy->send_buffer(this->send_buffer_.in());
+
+  MulticastDataLink::send_strategy(send_strategy);  // delegate to parent
 }
 
 int
