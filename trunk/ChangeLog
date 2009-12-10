@@ -1,3 +1,11 @@
+Thu Dec 10 20:19:56 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tools/odds_monitor/MonitorData.cpp:
+
+          Add a workaround to deal with QStrings on windows.
+          Using QString::toStdString() results in an access violation.
+          Replace these calls with QString::toLocal8Bit().constData().
+
 Thu Dec 10 17:35:46 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * MPC/config/dcps_multicast.mpb:
