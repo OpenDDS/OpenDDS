@@ -65,7 +65,7 @@ struct OpenDDS_Dcps_Export SequenceNumber {
   }
 
   /// Convert to integer type.
-  operator ACE_INT16() {
+  operator ACE_INT16() const {
     return this->value_;
   }
 
