@@ -1,3 +1,13 @@
+Thu Dec 10 21:49:20 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+
+          Type conversion is const, so make it so.
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+
+          Add diagnostics.
+
 Thu Dec 10 20:19:56 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * tools/odds_monitor/MonitorData.cpp:
