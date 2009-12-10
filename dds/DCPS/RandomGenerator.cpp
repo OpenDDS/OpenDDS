@@ -15,7 +15,6 @@
 # include "RandomGenerator.inl"
 #endif  /* __ACE_INLINE__ */
 
-#include <ctime>
 #include "ace/OS_NS_time.h"
 
 namespace OpenDDS {
