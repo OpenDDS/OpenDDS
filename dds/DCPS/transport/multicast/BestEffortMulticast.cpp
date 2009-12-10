@@ -14,10 +14,12 @@ namespace DCPS {
 
 BestEffortMulticast::BestEffortMulticast(MulticastTransport* transport,
                                          MulticastPeer local_peer,
-                                         MulticastPeer remote_peer)
+                                         MulticastPeer remote_peer,
+                                         bool active)
   : MulticastDataLink(transport,
                       local_peer,
-                      remote_peer)
+                      remote_peer,
+                      active)
 {
 }
 

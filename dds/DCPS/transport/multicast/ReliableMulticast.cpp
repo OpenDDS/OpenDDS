@@ -34,6 +34,7 @@ SynWatchdog::next_interval()
   if (this->retries_ > 0) {
     // Apply exponential backoff based on number of retries:
     interval *= std::pow(config->syn_backoff_, this->retries_);
+    // Apply random backoff to minimize potential collisions:
     interval *= (++this->random_ + 1.0);
   }
   ++this->retries_;
@@ -47,6 +48,7 @@ SynWatchdog::on_interval(const void* /*arg*/)
   // Initiate handshake by sending a MULTICAST_SYN control
   // sample to the assigned remote peer:
   this->link_->send_syn();
+  std::cout << "SENT HANDHAKE!" << std::endl;
 }
 
 ACE_Time_Value
@@ -100,10 +102,12 @@ NakWatchdog::on_interval(const void* /*arg*/)
 
 ReliableMulticast::ReliableMulticast(MulticastTransport* transport,
                                      MulticastPeer local_peer,
-                                     MulticastPeer remote_peer)
+                                     MulticastPeer remote_peer,
+                                     bool active)
   : MulticastDataLink(transport,
                       local_peer,
-                      remote_peer),
+                      remote_peer,
+                      active),
     acked_(false),
     syn_watchdog_(this),
     nak_watchdog_(this)
@@ -484,28 +488,16 @@ ReliableMulticast::send_strategy_i(MulticastSendStrategy* send_strategy)
   send_strategy->send_buffer(this->send_buffer_.in());
 }
 
-bool
-ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
+int
+ReliableMulticast::start_i()
 {
   ACE_Reactor* reactor = get_reactor();
   if (reactor == 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("ReliableMulticast::join_i: ")
+                      ACE_TEXT("ReliableMulticast::start_i: ")
                       ACE_TEXT("NULL reactor reference!\n")),
-                     false);
-  }
-
-  // Active peers schedule a watchdog timer to initiate a 2-way
-  // handshake to verify that passive endpoints can send/receive
-  // data reliably. This process must be executed using the
-  // transport reactor thread to prevent blocking.
-  if (active && !this->syn_watchdog_.schedule(reactor)) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("ReliableMulticast::join_i: ")
-                      ACE_TEXT("failed to schedule SYN watchdog!\n")),
-                     false);
+                     -1);
   }
 
   // A watchdog timer is scheduled to periodically check for gaps in
@@ -514,19 +506,33 @@ ReliableMulticast::join_i(const ACE_INET_Addr& /*group_address*/, bool active)
   if (!this->nak_watchdog_.schedule(reactor)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("ReliableMulticast::join_i: ")
+                      ACE_TEXT("ReliableMulticast::start_i: ")
                       ACE_TEXT("failed to schedule NAK watchdog!\n")),
-                     false);
+                     -1);
   }
 
-  return true;
+  // Active peers schedule a watchdog timer to initiate a 2-way
+  // handshake to verify that passive endpoints can send/receive
+  // data reliably. This process must be executed using the
+  // transport reactor thread to prevent blocking.
+  if (this->active_ && !this->syn_watchdog_.schedule(reactor)) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("ReliableMulticast::start_i: ")
+                      ACE_TEXT("failed to schedule SYN watchdog!\n")),
+                     -1);
+  }
+
+  return 0;
 }
 
 void
-ReliableMulticast::leave_i()
+ReliableMulticast::stop_i()
 {
-  this->nak_watchdog_.cancel();
   this->syn_watchdog_.cancel();
+  this->nak_watchdog_.cancel();
+
+  MulticastDataLink::stop_i();  // delegate to parent
 }
 
 } // namespace DCPS

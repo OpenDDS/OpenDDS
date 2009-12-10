@@ -44,6 +44,12 @@ MulticastDataLink::remote_peer() const
   return this->remote_peer_;
 }
 
+ACE_INLINE bool
+MulticastDataLink::active() const
+{
+  return this->active_;
+}
+
 ACE_INLINE MulticastConfiguration*
 MulticastDataLink::config()
 {

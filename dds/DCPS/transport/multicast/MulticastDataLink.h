@@ -38,17 +38,20 @@ class OpenDDS_Multicast_Export MulticastDataLink
 public:
   MulticastDataLink(MulticastTransport* transport,
                     MulticastPeer local_peer,
-                    MulticastPeer remote_peer);
+                    MulticastPeer remote_peer,
+                    bool active);
   virtual ~MulticastDataLink();
-  
+
   void configure(MulticastConfiguration* config,
                  TransportReactorTask* reactor_task);
-  
+
   void send_strategy(MulticastSendStrategy* send_strategy);
   void receive_strategy(MulticastReceiveStrategy* recv_strategy);
 
   MulticastPeer local_peer() const;
   MulticastPeer remote_peer() const;
+
+  bool active() const;
 
   MulticastConfiguration* config();
   TransportReactorTask* reactor_task();
@@ -57,9 +60,8 @@ public:
 
   ACE_SOCK_Dgram_Mcast& socket();
 
-  bool join(const ACE_INET_Addr& group_address, bool active);
-  void leave();
-  
+  bool join(const ACE_INET_Addr& group_address);
+
   virtual bool acked() = 0;
 
   virtual bool header_received(const TransportHeader& header) = 0;
@@ -70,24 +72,21 @@ protected:
 
   MulticastPeer local_peer_;
   MulticastPeer remote_peer_;
-  
+
+  bool active_;
+
   MulticastSendStrategy_rch send_strategy_;
   MulticastReceiveStrategy_rch recv_strategy_;
 
   MulticastConfiguration_rch config_;
   TransportReactorTask_rch reactor_task_;
-  
-  virtual void stop_i();
-  
+
   // These methods may be overridden to provide additional behavior
-  // when assigning send/receive strategies:
+  // prior to assigning send/receive strategies:
   virtual void send_strategy_i(MulticastSendStrategy* send_strategy);
   virtual void receive_strategy_i(MulticastReceiveStrategy* recv_strategy);
- 
-  // These methods may be overridden to provide additional behavior
-  // when joining/leaving a multicast group:
-  virtual bool join_i(const ACE_INET_Addr& group_address, bool active);
-  virtual void leave_i();
+
+  virtual void stop_i();
 
 private:
   ACE_SOCK_Dgram_Mcast socket_;

@@ -1,3 +1,24 @@
+Thu Dec 10 22:45:18 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Refactored make_reservation to call new start_i callback
+          when the first reservation is made.
+
+        * dds/DCPS/transport/multicast/BestEffortMulticast.h:
+        * dds/DCPS/transport/multicast/BestEffortMulticast.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.inl:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Updated to accomodate changes in DataLink; separating the
+          watchdog scheduling from join was neccessary to prevent
+          lost data during the initial handshake.
+
 Thu Dec 10 21:49:20 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/Definitions.h:

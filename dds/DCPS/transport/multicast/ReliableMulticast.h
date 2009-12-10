@@ -69,7 +69,8 @@ public:
 
   ReliableMulticast(MulticastTransport* transport,
                     MulticastPeer local_peer,
-                    MulticastPeer remote_peer);
+                    MulticastPeer remote_peer,
+                    bool active);
   ~ReliableMulticast();
 
   virtual bool acked();
@@ -101,8 +102,8 @@ public:
 protected:
   virtual void send_strategy_i(MulticastSendStrategy* send_strategy);
 
-  virtual bool join_i(const ACE_INET_Addr& group_address, bool active);
-  virtual void leave_i();
+  virtual int start_i();
+  virtual void stop_i();
 
 private:
   bool acked_;
