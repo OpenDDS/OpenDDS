@@ -72,7 +72,7 @@ class OpenDDS_Dcps_Export DataLink
   : public RcObject<ACE_SYNCH_MUTEX>,
     public TransportSendListener,
     public ACE_Event_Handler {
-  
+
   friend class DataLinkCleanupTask;
 
 public:
@@ -229,7 +229,7 @@ public:
 
   // TransportSendListener callbacks for transport control samples:
   virtual void control_delivered(ACE_Message_Block* message);
-  
+
   virtual void control_dropped(ACE_Message_Block* message,
                                bool dropped_by_transport);
 protected:
@@ -260,6 +260,11 @@ protected:
   /// DataLink's control.
   SendControlStatus send_control(ACE_Message_Block* data);
 
+  /// This announces the "start" event to our subclass.  The "start"
+  /// event will occur when this DataLink is handling its first
+  /// make_reservation() call.
+  virtual int start_i();
+
   /// This announces the "stop" event to our subclass.  The "stop"
   /// event will occur when this DataLink is handling a
   /// release_reservations() call and determines that it has just
@@ -267,7 +272,7 @@ protected:
   /// The "stop" event will also occur when the TransportImpl
   /// is being shutdown() - we call stop_i() from our
   /// transport_shutdown() method to handle this case.
-  virtual void stop_i() = 0;
+  virtual void stop_i();
 
   /// Used to provide unique Ids to all DataLink methods.
   static ACE_UINT64 get_next_datalink_id();

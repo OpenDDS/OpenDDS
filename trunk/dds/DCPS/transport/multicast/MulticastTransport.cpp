@@ -55,10 +55,15 @@ MulticastTransport::find_or_create_datalink(
   // best-effort; mode selection is based on transport configuration:
   MulticastDataLink_rch link;
   if (this->config_i_->reliable_) {
-    link = new ReliableMulticast(this, local_peer, remote_peer);
-  
+    link = new ReliableMulticast(this,
+                                 local_peer,
+                                 remote_peer,
+                                 active);
   } else {
-    link = new BestEffortMulticast(this, local_peer, remote_peer);
+    link = new BestEffortMulticast(this,
+                                   local_peer,
+                                   remote_peer,
+                                   active);
   }
   if (link.is_nil()) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -68,10 +73,10 @@ MulticastTransport::find_or_create_datalink(
                       remote_peer),
                      0);
   }
-  
+
   // Configure link with transport configuration and reactor task:
   link->configure(this->config_i_.in(), reactor_task());
-  
+
   // Assign send/receive strategies:
   link->send_strategy(new MulticastSendStrategy(link.in()));
   link->receive_strategy(new MulticastReceiveStrategy(link.in()));
@@ -88,7 +93,7 @@ MulticastTransport::find_or_create_datalink(
     group_address = this->config_i_->group_address_;
   }
 
-  if (!link->join(group_address, active)) {
+  if (!link->join(group_address)) {
     ACE_TCHAR group_address_s[64];
     group_address.addr_to_string(group_address_s, sizeof(group_address_s));
     ACE_ERROR_RETURN((LM_ERROR,

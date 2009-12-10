@@ -22,67 +22,18 @@ namespace DCPS {
 
 MulticastDataLink::MulticastDataLink(MulticastTransport* transport,
                                      MulticastPeer local_peer,
-                                     MulticastPeer remote_peer)
+                                     MulticastPeer remote_peer,
+                                     bool active)
   : DataLink(transport, 0), // priority
     transport_(transport),
     local_peer_(local_peer),
-    remote_peer_(remote_peer)
+    remote_peer_(remote_peer),
+    active_(active)
 {
 }
 
 MulticastDataLink::~MulticastDataLink()
 {
-}
-
-bool
-MulticastDataLink::join(const ACE_INET_Addr& group_address, bool active)
-{
-  int error;
-  
-  if ((error = this->socket_.join(group_address)) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("MulticastDataLink::join: ")
-                      ACE_TEXT("join failed: %C\n"),
-                      ACE_OS::strerror(error)),
-                     false);
-  }
-
-  if ((error = start(this->send_strategy_.in(),
-                     this->recv_strategy_.in())) != 0) {
-    this->socket_.close();
-    ACE_ERROR_RETURN((LM_ERROR,
-		      ACE_TEXT("(%P|%t) ERROR: ")
-		      ACE_TEXT("MulticastDataLink::join: ")
-		      ACE_TEXT("start failed: %d\n"),
-                      error),
-                     false);
-  }
-
-  if (!join_i(group_address, active)) {
-    this->socket_.close();
-    ACE_ERROR_RETURN((LM_ERROR,
-		      ACE_TEXT("(%P|%t) ERROR: ")
-		      ACE_TEXT("MulticastDataLink::join: ")
-		      ACE_TEXT("join_i failed!\n"),
-                      error),
-                     false);
-  }
-
-  return true;
-}
-
-void
-MulticastDataLink::leave()
-{
-  leave_i();
-  this->socket_.close();
-}
-
-void
-MulticastDataLink::stop_i()
-{
-  leave();
 }
 
 void
@@ -96,14 +47,37 @@ MulticastDataLink::receive_strategy_i(MulticastReceiveStrategy* /*recv_strategy*
 }
 
 bool
-MulticastDataLink::join_i(const ACE_INET_Addr& /*group_address*/, bool /*active*/)
+MulticastDataLink::join(const ACE_INET_Addr& group_address)
 {
+  int error;
+
+  if ((error = this->socket_.join(group_address)) != 0) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("MulticastDataLink::join: ")
+                      ACE_TEXT("join failed: %C\n"),
+                      ACE_OS::strerror(error)),
+                     false);
+  }
+
+  if ((error = start(this->send_strategy_.in(),
+                     this->recv_strategy_.in())) != 0) {
+    stop_i();
+    ACE_ERROR_RETURN((LM_ERROR,
+		      ACE_TEXT("(%P|%t) ERROR: ")
+		      ACE_TEXT("MulticastDataLink::join: ")
+		      ACE_TEXT("start failed: %d\n"),
+                      error),
+                     false);
+  }
+
   return true;
 }
 
 void
-MulticastDataLink::leave_i()
+MulticastDataLink::stop_i()
 {
+  this->socket_.close();
 }
 
 } // namespace DCPS

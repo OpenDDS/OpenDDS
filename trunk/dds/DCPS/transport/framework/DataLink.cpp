@@ -69,10 +69,10 @@ OpenDDS::DCPS::DataLink::DataLink(TransportImpl* impl, CORBA::Long priority)
 
   // Initialize transport control sample allocators:
   size_t control_chunks = this->impl_->config_->datalink_control_chunks_;
-  
+
   this->send_control_allocator_ =
     new TransportSendControlElementAllocator(control_chunks);
-  
+
   this->mb_allocator_ = new MessageBlockAllocator(control_chunks);
   this->db_allocator_ = new DataBlockAllocator(control_chunks);
 }
@@ -92,7 +92,7 @@ OpenDDS::DCPS::DataLink::~DataLink()
 
   delete this->db_allocator_;
   delete this->mb_allocator_;
-  
+
   delete this->send_control_allocator_;
 
   if (this->thr_per_con_send_task_ != 0) {
@@ -122,6 +122,9 @@ OpenDDS::DCPS::DataLink::make_reservation(
   int pub_result      = 0;
   int sub_result      = 0;
   int pub_undo_result = 0;
+  int sub_undo_result = 0;
+
+  bool first_pub = false;
 
   if (DCPS_debug_level > 9) {
     RepoIdConverter local(publisher_id);
@@ -144,33 +147,40 @@ OpenDDS::DCPS::DataLink::make_reservation(
 
   {
     GuardType guard(this->pub_map_lock_);
+
+    first_pub = this->pub_map_.size() == 0; // empty
+
     // Update our pub_map_.  The last argument is a 0 because remote
     // subscribers don't have a TransportReceiveListener object.
-    pub_result = this->pub_map_.insert(publisher_id,subscriber_id,0);
+    pub_result = this->pub_map_.insert(publisher_id, subscriber_id, 0);
 
     // Take advantage of the lock and store the send listener as well.
-    this->send_listeners_[ publisher_id] = send_listener;
+    this->send_listeners_[publisher_id] = send_listener;
   }
 
   if (pub_result == 0) {
     {
-      GuardType guard2(this->sub_map_lock_);
+      GuardType guard(this->sub_map_lock_);
       sub_result = this->sub_map_.insert(subscriber_id,publisher_id);
     }
 
     if (sub_result == 0) {
-      // Success!
-      return 0;
+      // If this is our first reservation, we should notify the
+      // subclass that it should start:
+      if (!first_pub || start_i() == 0) {
+        // Success!
+        return 0;
 
-    } else {
-      GuardType guard(this->pub_map_lock_);
-      // Since we failed to insert into into the sub_map_, and have
-      // already inserted it in the pub_map_, we better attempt to
-      // undo the insert that we did to the pub_map_.  Otherwise,
-      // the pub_map_ and sub_map_ will become inconsistent.
-      pub_undo_result = this->pub_map_.remove(publisher_id,
-                                              subscriber_id);;
+      } else {
+        GuardType guard(this->sub_map_lock_);
+        sub_undo_result = this->sub_map_.remove(subscriber_id,
+                                                publisher_id);
+      }
     }
+
+    GuardType guard(this->pub_map_lock_);
+    pub_undo_result = this->pub_map_.remove(publisher_id,
+                                            subscriber_id);
   }
 
   // We only get to here when an error occurred somewhere along the way.
@@ -199,6 +209,17 @@ OpenDDS::DCPS::DataLink::make_reservation(
                  std::string(sub_converter).c_str()));
     }
 
+    if (sub_undo_result != 0) {
+      RepoIdConverter sub_converter(subscriber_id);
+      RepoIdConverter pub_converter(publisher_id);
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
+                 ACE_TEXT("failed to remove (undo) local subscriber %C ")
+                 ACE_TEXT("to remote publisher %C reservation from sub_map_.\n"),
+                 std::string(sub_converter).c_str(),
+                 std::string(pub_converter).c_str()));
+    }
+
   } else {
     RepoIdConverter pub_converter(publisher_id);
     RepoIdConverter sub_converter(subscriber_id);
@@ -224,6 +245,9 @@ OpenDDS::DCPS::DataLink::make_reservation
   int sub_result      = 0;
   int pub_result      = 0;
   int sub_undo_result = 0;
+  int pub_undo_result = 0;
+
+  bool first_sub = false;
 
   if (DCPS_debug_level > 9) {
     RepoIdConverter local(subscriber_id);
@@ -246,6 +270,9 @@ OpenDDS::DCPS::DataLink::make_reservation
 
   {
     GuardType guard(this->sub_map_lock_);
+
+    first_sub = this->sub_map_.size() == 0; // empty
+
     // Update our sub_map_.
     sub_result = this->sub_map_.insert(subscriber_id,publisher_id);
   }
@@ -259,18 +286,26 @@ OpenDDS::DCPS::DataLink::make_reservation
     }
 
     if (pub_result == 0) {
-      // Success!
-      return 0;
+      // If this is our first reservation, we should notify the
+      // subclass that it should start:
+      if (!first_sub || start_i() == 0) {
+        // Success!
+        return 0;
 
-    } else {
-      GuardType guard(this->sub_map_lock_);
-      // Since we failed to insert into into the pub_map_, and have
-      // already inserted it in the sub_map_, we better attempt to
-      // undo the insert that we did to the sub_map_.  Otherwise,
-      // the sub_map_ and pub_map_ will become inconsistent.
-      sub_undo_result = this->sub_map_.remove(subscriber_id,
-                                              publisher_id);
+      } else {
+        GuardType guard(this->pub_map_lock_);
+        pub_undo_result = this->pub_map_.remove(publisher_id,
+                                                subscriber_id);
+      }
     }
+
+    GuardType guard(this->sub_map_lock_);
+    // Since we failed to insert into into the pub_map_, and have
+    // already inserted it in the sub_map_, we better attempt to
+    // undo the insert that we did to the sub_map_.  Otherwise,
+    // the sub_map_ and pub_map_ will become inconsistent.
+    sub_undo_result = this->sub_map_.remove(subscriber_id,
+                                            publisher_id);
   }
 
   //this->send_strategy_->link_released (false);
@@ -299,6 +334,17 @@ OpenDDS::DCPS::DataLink::make_reservation
                  ACE_TEXT("publisher %C reservation from sub_map_.\n"),
                  std::string(sub_converter).c_str(),
                  std::string(pub_converter).c_str()));
+    }
+
+    if (pub_undo_result != 0) {
+      RepoIdConverter pub_converter(publisher_id);
+      RepoIdConverter sub_converter(subscriber_id);
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservations: ")
+                 ACE_TEXT("failed to remove (undo) local publisher %C to remote ")
+                 ACE_TEXT("subscriber %C reservation from pub_map_.\n"),
+                 std::string(pub_converter).c_str(),
+                 std::string(sub_converter).c_str()));
     }
 
   } else {
@@ -444,9 +490,25 @@ OpenDDS::DCPS::DataLink::cancel_release()
   return reactor->cancel_timer(this) > 0;
 }
 
+int
+OpenDDS::DCPS::DataLink::start_i()
+{
+  DBG_ENTRY_LVL("DataLink","start_i",6);
+
+  return 0;
+}
+
+void
+OpenDDS::DCPS::DataLink::stop_i()
+{
+  DBG_ENTRY_LVL("DataLink","stop_i",6);
+}
+
 void
 OpenDDS::DCPS::DataLink::control_delivered(ACE_Message_Block* message)
 {
+  DBG_ENTRY_LVL("DataLink","control_delivered",6);
+
   message->release();
 }
 
@@ -454,6 +516,8 @@ void
 OpenDDS::DCPS::DataLink::control_dropped(ACE_Message_Block* message,
                                          bool /*dropped_by_transport*/)
 {
+  DBG_ENTRY_LVL("DataLink","control_dropped",6);
+
   message->release();
 }
 
@@ -461,6 +525,8 @@ ACE_Message_Block*
 OpenDDS::DCPS::DataLink::create_control(char submessage_id,
                                         ACE_Message_Block* data)
 {
+  DBG_ENTRY_LVL("DataLink","create_control",6);
+
   DataSampleHeader header;
 
   header.byte_order_ = this->impl_->swap_bytes() ? !TAO_ENCAP_BYTE_ORDER
@@ -494,6 +560,8 @@ OpenDDS::DCPS::DataLink::create_control(char submessage_id,
 OpenDDS::DCPS::SendControlStatus
 OpenDDS::DCPS::DataLink::send_control(ACE_Message_Block* message)
 {
+  DBG_ENTRY_LVL("DataLink","send_control",6);
+
   TransportSendControlElement* elem;
 
   ACE_NEW_MALLOC_RETURN(elem,

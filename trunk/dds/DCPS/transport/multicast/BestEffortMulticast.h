@@ -22,8 +22,9 @@ class OpenDDS_Multicast_Export BestEffortMulticast
 public:
   BestEffortMulticast(MulticastTransport* transport,
                       MulticastPeer local_peer,
-                      MulticastPeer remote_peer);
-  
+                      MulticastPeer remote_peer,
+                      bool active);
+
   virtual bool acked();
 
   virtual bool header_received(const TransportHeader& header);
