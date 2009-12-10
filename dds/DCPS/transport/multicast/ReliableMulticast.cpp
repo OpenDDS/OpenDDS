@@ -483,6 +483,7 @@ ReliableMulticast::send_strategy(MulticastSendStrategy* send_strategy)
   this->send_buffer_->_add_ref(); // take ownership
 
   send_strategy->send_buffer(this->send_buffer_.in());
+
   MulticastDataLink::send_strategy(send_strategy);  // delegate to parent
 }
 
