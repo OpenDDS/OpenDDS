@@ -40,7 +40,6 @@ protected:
   virtual void on_timeout(const void* arg);
 
 private:
-  RandomGenerator random_;
   int retries_;
 };
 
