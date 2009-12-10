@@ -16,13 +16,14 @@
 #endif  /* __ACE_INLINE__ */
 
 #include <ctime>
+#include "ace/OS_NS_time.h"
 
 namespace OpenDDS {
 namespace DCPS {
 
 struct RandomSeed {
   RandomSeed() {
-    std::srand(static_cast<unsigned>(std::time(0)));
+    std::srand(static_cast<unsigned>(ACE_OS::time(0)));
   }
 } __random_seed;
 
