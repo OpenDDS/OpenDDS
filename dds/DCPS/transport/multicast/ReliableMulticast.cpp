@@ -10,7 +10,6 @@
 #include "ReliableMulticast.h"
 #include "MulticastTransport.h"
 
-#include "dds/DCPS/DisjointSequence.h"
 #include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/transport/framework/TransportSendBuffer.h"
 
@@ -31,6 +30,7 @@ SynWatchdog::next_interval()
   MulticastConfiguration* config = this->link_->config();
 
   ACE_Time_Value interval(config->syn_interval_);
+
   if (this->retries_ > 0) {
     // Apply exponential backoff based on number of retries:
     interval *= std::pow(config->syn_backoff_, this->retries_);
@@ -78,6 +78,7 @@ NakWatchdog::next_interval()
   MulticastConfiguration* config = this->link_->config();
 
   ACE_Time_Value interval(config->nak_interval_);
+
   // Apply random backoff to minimize potential collisions:
   interval *= (++this->random_ + 1.0);
 
@@ -301,21 +302,19 @@ ReliableMulticast::expire_naks()
     }
   }
 
-  // Remove expired repair requests:
+  // Clear expired repair requests:
   this->nak_requests_.erase(first, last);
 }
 
 void
 ReliableMulticast::send_naks()
 {
-  if (this->nak_sequences_.empty()) return; // nothing to send
-
-  ACE_Time_Value now(ACE_OS::gettimeofday());
-
   for (NakSequenceMap::iterator it(this->nak_sequences_.begin());
        it != this->nak_sequences_.end(); ++it) {
 
     if (!it->second.disjoint()) continue; // nothing to send
+
+    ACE_Time_Value now(ACE_OS::gettimeofday());
 
     // Record high-water mark for peer on this interval; this value
     // is used to reset the low-water mark in the event the peer
@@ -323,14 +322,27 @@ ReliableMulticast::send_naks()
     this->nak_requests_.insert(NakRequestMap::value_type(
       now, NakRequest(it->first, it->second.high())));
 
-    for (DisjointSequence::range_iterator range(it->second.range_begin());
-         range != it->second.range_end(); ++range) {
-      // Send a MULTICAST_NAK control sample to remote peer; the
-      // peer should respond with a resend of the missing data or a
-      // MULTICAST_NAKACK indicating the data is unrecoverable:
+    // Take a copy to facilitate temporary suppression:
+    DisjointSequence missing(it->second);
+
+    for (NakPeerMap::iterator peer(this->nak_peers_.find(it->first));
+         peer != this->nak_peers_.end(); ++peer) {
+      // Update set to suppress repair requests for ranges already
+      // requested by other peers for this interval:
+      missing.update(peer->second);
+    }
+
+    for (DisjointSequence::range_iterator range(missing.range_begin());
+         range != missing.range_end(); ++range) {
+      // Send MULTICAST_NAK control samples to remote peer; the
+      // peer should respond with a resend of the missing data or
+      // a MULTICAST_NAKACK indicating the data is unrecoverable:
       send_nak(it->first, range->first, range->second);
     }
   }
+
+  // Clear current peer repair requests:
+  this->nak_peers_.clear();
 }
 
 void
@@ -342,20 +354,22 @@ ReliableMulticast::nak_received(ACE_Message_Block* control)
   MulticastPeer local_peer;
   serializer >> local_peer; // sent as remote_peer
 
+  DisjointSequence::range_type request;
+  serializer >> request.first.value_;
+  serializer >> request.second.value_;
+
+  // Record request for known peer to suppress duplicate repairs:
+  if (this->nak_sequences_.find(local_peer) != this->nak_sequences_.end()) {
+    this->nak_peers_.insert(NakPeerMap::value_type(local_peer, request));
+  }
+
   // Ignore sample if not destined for us:
   if (local_peer != this->local_peer_) return;
-
-  MulticastSequence low;
-  serializer >> low;
-
-  MulticastSequence high;
-  serializer >> high;
 
   DisjointSequence missing;
 
   // Attempt to resend requested datagrams:
-  if (!this->send_buffer_->resend(
-        DisjointSequence::range_type(low, high), missing)) {
+  if (!this->send_buffer_->resend(request, missing)) {
     // One or more datagrams are unrecoverable:
     for (DisjointSequence::range_iterator range(missing.range_begin());
          range != missing.range_end(); ++range) {
@@ -402,22 +416,20 @@ ReliableMulticast::nakack_received(ACE_Message_Block* control)
   TAO::DCPS::Serializer serializer(
     control, this->transport_->swap_bytes());
 
-  MulticastSequence low;
-  serializer >> low;
-
-  MulticastSequence high;
-  serializer >> high;
+  DisjointSequence::range_type request;
+  serializer >> request.first.value_;
+  serializer >> request.second.value_;
 
   ACE_ERROR((LM_ERROR,
              ACE_TEXT("(%P|%t) ERROR: ")
-             ACE_TEXT("ReliableMulticast::nackack_received: ")
+             ACE_TEXT("ReliableMulticast::nakack_received: ")
              ACE_TEXT("unrecoverable samples reported by remote peer: 0x%x!\n"),
              remote_peer));
 
   // MULTICAST_NAKACK control samples indicate data which cannot be
   // repaired by a remote peer. Update the sequence map to suppress
-  // future repair requests for the given range:
-  it->second.update(DisjointSequence::range_type(low, high));
+  // future repairs for the given request:
+  it->second.update(request);
 }
 
 void
