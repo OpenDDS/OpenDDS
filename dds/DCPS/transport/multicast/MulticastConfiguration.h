@@ -70,7 +70,7 @@ public:
 
   /// The minimum number of milliseconds to wait between repair
   /// requests (reliable only).
-  /// The default value is: 500.
+  /// The default value is: 2000 (2 seconds).
   ACE_Time_Value nak_interval_;
 
   /// The maximum number of milliseconds to wait before giving up
