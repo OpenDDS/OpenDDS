@@ -26,7 +26,7 @@ const long DEFAULT_SYN_INTERVAL(250);
 const long DEFAULT_SYN_TIMEOUT(30000);
 
 const size_t DEFAULT_NAK_DEPTH(32);
-const long DEFAULT_NAK_INTERVAL(500);
+const long DEFAULT_NAK_INTERVAL(2000);
 const long DEFAULT_NAK_TIMEOUT(30000);
 
 } // namespace

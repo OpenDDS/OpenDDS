@@ -47,8 +47,8 @@ nak_depth=32
 
 # The minimum number of milliseconds to wait between repair
 # requests (reliable only).
-# The default value is: 500.
-nak_interval=500
+# The default value is: 2000 (2 seconds).
+nak_interval=2000
 
 # The maximum number of milliseconds to wait before giving up
 # on a repair response (reliable only).
