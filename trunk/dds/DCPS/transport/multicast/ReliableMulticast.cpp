@@ -30,7 +30,6 @@ SynWatchdog::next_interval()
   MulticastConfiguration* config = this->link_->config();
 
   ACE_Time_Value interval(config->syn_interval_);
-
   if (this->retries_ > 0) {
     // Apply exponential backoff based on number of retries:
     interval *= std::pow(config->syn_backoff_, this->retries_);
@@ -78,7 +77,6 @@ NakWatchdog::next_interval()
   MulticastConfiguration* config = this->link_->config();
 
   ACE_Time_Value interval(config->nak_interval_);
-
   // Apply random backoff to minimize potential collisions:
   interval *= (++this->random_ + 1.0);
 
