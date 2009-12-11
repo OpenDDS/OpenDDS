@@ -151,7 +151,6 @@ Monitor::MonitorDataStorage::getProcessNode(
 
 Monitor::TreeNode*
 Monitor::MonitorDataStorage::getTransportNode(
-  const ProcessKey&   pid,
   const TransportKey& key,
   bool&               create
 )
@@ -168,11 +167,13 @@ Monitor::MonitorDataStorage::getTransportNode(
     // Find the parent node, if any.  It is ok to not have a parent node
     // for cases of out-of-order updates.  We handle that as the updates
     // are actually processed.
+    ProcessKey pid( key.host, key.pid);
     TreeNode* parent = this->getProcessNode( pid, create);
 
     QList<QVariant> list;
-    list << QString( QObject::tr( "Transport"))
-         << QString::number( key.transport);
+    QString value = QString("0x%1")
+                    .arg( key.transport, 8, 16, QLatin1Char('0'));
+    list << QString( QObject::tr( "Transport")) << value;
     node = new TreeNode( list, parent);
     if( parent) {
       parent->append( node);
@@ -192,6 +193,7 @@ Monitor::MonitorDataStorage::getTransportNode(
   // parent so this will be bypassed.
   if( !node->parent()) {
     create = true;
+    ProcessKey pid( key.host, key.pid);
     node->parent() = this->getProcessNode( pid, create);
   }
 

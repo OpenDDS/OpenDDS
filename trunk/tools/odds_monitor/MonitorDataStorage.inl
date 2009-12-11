@@ -100,7 +100,7 @@ MonitorDataStorage::update< OpenDDS::DCPS::ServiceParticipantReport>(
     create = true;
     int transport = data.transports[ index];
     TransportKey key( host, data.pid, transport);
-    (void)this->getTransportNode( pid, key, create);
+    (void)this->getTransportNode( key, create);
     layoutChanged |= create;
   }
 
@@ -116,13 +116,14 @@ MonitorDataStorage::update< OpenDDS::DCPS::DomainParticipantReport>(
   bool remove
 )
 {
-  //   struct DomainParticipantReport {
-  //     string           host;
-  //     long             pid;
-  //     GUID_t           dp_id;
-  //     DDS::DomainId_t  domain_id;
-  //     NVPSeq           values;
-  //   };
+  //  struct DomainParticipantReport {
+  //    string           host;
+  //    long             pid;
+  //    GUID_t           dp_id;
+  //    DDS::DomainId_t  domain_id;
+  //    GUIDSeq          topics;
+  //    NVPSeq           values;
+  //  };
 
   OpenDDS::DCPS::GuidConverter converter( data.dp_id);
   ACE_DEBUG((LM_DEBUG,
@@ -157,7 +158,7 @@ MonitorDataStorage::update< OpenDDS::DCPS::DomainParticipantReport>(
       delete node;
     }
 
-    // Nothing else to do on removal, let the GUID know we changed the
+    // Nothing else to do on removal, let the GUI know we changed the
     // model.
     this->model_->changed();
     return;
@@ -179,6 +180,23 @@ MonitorDataStorage::update< OpenDDS::DCPS::DomainParticipantReport>(
     TreeNode* domainNode = (*node)[ row];
     domainNode->setData( 1, QString::number( data.domain_id));
     dataChanged = true;
+  }
+
+  // TOPICS
+  // NOTE: The following makes sure that any new Topics are added to
+  //       the DomainParticipant as they are received by this update.
+  //       It does *not* remove any deleted topics.  This is left for
+  //       the TopicReport updates.
+  int size = data.topics.length();
+  for( int index = 0; index < size; ++index) {
+    bool create = true;
+    (void)this->getNode(
+      std::string( "Topic"),
+      data.dp_id,
+      data.topics[ index],
+      create
+    );
+    layoutChanged |= create;
   }
 
   // NAME / VALUE DATA, notify GUI of changes.
@@ -239,7 +257,7 @@ MonitorDataStorage::update< OpenDDS::DCPS::TopicReport>(
       delete node;
     }
 
-    // Nothing else to do on removal, let the GUID know we changed the
+    // Nothing else to do on removal, let the GUI know we changed the
     // model.
     this->model_->changed();
     return;
@@ -312,7 +330,7 @@ MonitorDataStorage::update< OpenDDS::DCPS::PublisherReport>(
   OpenDDS::DCPS::GuidConverter converter( data.dp_id);
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
-    ACE_TEXT("%s PublisherReport, id: %C, handle: %d, transport: %d.\n"),
+    ACE_TEXT("%s PublisherReport, id: %C, handle: %d, transport: 0x%x.\n"),
     remove? "removing": "processing",
     std::string(converter).c_str(),
     data.handle,
@@ -346,7 +364,7 @@ MonitorDataStorage::update< OpenDDS::DCPS::PublisherReport>(
       delete node;
     }
 
-    // Nothing else to do on removal, let the GUID know we changed the
+    // Nothing else to do on removal, let the GUI know we changed the
     // model.
     this->model_->changed();
     return;
@@ -354,11 +372,13 @@ MonitorDataStorage::update< OpenDDS::DCPS::PublisherReport>(
 
   // Transport Id value.
   QString label( QObject::tr( "Transport Id"));
+  QString value = QString("0x%1")
+                  .arg( data.transport_id, 8, 16, QLatin1Char('0'));
   int row = node->indexOf( 0, label);
   if( row == -1) {
     // New data, insert.
     QList<QVariant> list;
-    list << label << QString::number( data.transport_id);
+    list << label << value;
     TreeNode* idNode = new TreeNode( list, node);
     node->append( idNode);
     layoutChanged = true;
@@ -366,7 +386,7 @@ MonitorDataStorage::update< OpenDDS::DCPS::PublisherReport>(
   } else {
     // Existing data, update.
     TreeNode* idNode = (*node)[ row];
-    idNode->setData( 1, QString::number( data.transport_id));
+    idNode->setData( 1, value);
     dataChanged = true;
   }
 
@@ -410,7 +430,7 @@ MonitorDataStorage::update< OpenDDS::DCPS::SubscriberReport>(
   OpenDDS::DCPS::GuidConverter converter( data.dp_id);
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
-    ACE_TEXT("%s SubscriberReport, id: %C, handle: %d, transport: %d.\n"),
+    ACE_TEXT("%s SubscriberReport, id: %C, handle: %d, transport: 0x%x.\n"),
     remove? "removing": "processing",
     std::string(converter).c_str(),
     data.handle,
@@ -444,7 +464,7 @@ MonitorDataStorage::update< OpenDDS::DCPS::SubscriberReport>(
       delete node;
     }
 
-    // Nothing else to do on removal, let the GUID know we changed the
+    // Nothing else to do on removal, let the GUI know we changed the
     // model.
     this->model_->changed();
     return;
@@ -452,11 +472,13 @@ MonitorDataStorage::update< OpenDDS::DCPS::SubscriberReport>(
 
   // Transport Id value.
   QString label( QObject::tr( "Transport Id"));
+  QString value = QString("0x%1")
+                  .arg( data.transport_id, 8, 16, QLatin1Char('0'));
   int row = node->indexOf( 0, label);
   if( row == -1) {
     // New data, insert.
     QList<QVariant> list;
-    list << label << QString::number( data.transport_id);
+    list << label << value;
     TreeNode* idNode = new TreeNode( list, node);
     node->append( idNode);
     layoutChanged = true;
@@ -464,7 +486,7 @@ MonitorDataStorage::update< OpenDDS::DCPS::SubscriberReport>(
   } else {
     // Existing data, update.
     TreeNode* idNode = (*node)[ row];
-    idNode->setData( 1, QString::number( data.transport_id));
+    idNode->setData( 1, value);
     dataChanged = true;
   }
 
@@ -497,17 +519,19 @@ MonitorDataStorage::update< OpenDDS::DCPS::DataWriterReport>(
   bool remove
 )
 {
-  // struct DataWriterAssociation {
-  //   GUID_t        dr_id;
-  // };
-  // typedef sequence<DataWriterAssociation> DWAssociations;
-  // struct DataWriterReport {
-  //   GUID_t         dw_id;
-  //   GUID_t         topic_id;
-  //   DDS::InstanceHandleSeq instances;
-  //   DWAssociations associations;
-  //   NVPSeq         values;
-  // };
+  //  struct DataWriterAssociation {
+  //    GUID_t        dr_id;
+  //  };
+  //  typedef sequence<DataWriterAssociation> DWAssociations;
+  //  struct DataWriterReport {
+  //    GUID_t                 dp_id;
+  //    DDS::InstanceHandle_t  pub_handle;
+  //    GUID_t                 dw_id;
+  //    GUID_t                 topic_id;
+  //    DDS::InstanceHandleSeq instances;
+  //    DWAssociations         associations;
+  //    NVPSeq                 values;
+  //  };
 
   OpenDDS::DCPS::GuidConverter idconverter( data.dw_id);
   OpenDDS::DCPS::GuidConverter topicconverter( data.topic_id);
@@ -520,10 +544,104 @@ MonitorDataStorage::update< OpenDDS::DCPS::DataWriterReport>(
   ));
 
   // Retain knowledge of node insertions, updates, and deletions.
+  bool create        = !remove;
   bool layoutChanged = false;
   bool dataChanged   = false;
 
-  TreeNode* node = 0;
+  InstanceKey key( data.dp_id, data.pub_handle);
+  TreeNode* node = this->getEndpointNode(
+                     std::string( "Writer"),
+                     key,
+                     data.dw_id,
+                     create
+                   );
+  if( !node) {
+    return;
+  }
+  layoutChanged |= create;
+
+  if( remove) {
+    // Descend from the node and remove it and all its children from
+    // the maps.
+    this->cleanMaps( node);
+    this->guidToTreeMap_.erase( data.dw_id);
+    TreeNode* parent = node->parent();
+    if( parent) {
+      parent->removeChildren( node->row(), 1);
+
+    } else {
+      delete node;
+    }
+
+    // Nothing else to do on removal, let the GUI know we changed the
+    // model.
+    this->model_->changed();
+    return;
+  }
+
+  // TOPIC
+  // N.B. This topic id value is for reference and are not connected to
+  //      the information containing Topic nodes which are children of
+  //      the DomainParticipant nodes.  The values should correspond,
+  //      but we do not duplicate the data here.
+  // N.B. A consequence of this is that out-of-order processing, where
+  //      the DataWriterReport is processed prior to the TopicReport will
+  //      result in the Topic GUID being displayed instead of the Topic
+  //      name.  There is no mechanism currently to update this value
+  //      when the TopicReport is received.
+
+  // Find the actual topic, if possible.  Use the name as the topic
+  // value if it can be found, or the string-ified GUID if not.
+  OpenDDS::DCPS::GuidConverter converter( data.topic_id);
+  QString topicValue( std::string(converter).c_str());
+  TreeNode* topicNode = this->getNode(
+                          std::string( "Topic"),
+                          data.dp_id,
+                          data.topic_id,
+                          create
+                        );
+  if( topicNode) {
+    QString nameLabel( QObject::tr( "Topic Name"));
+    int row = topicNode->indexOf( 0, nameLabel);
+    if( row != -1) {
+      topicValue = (*topicNode)[ row]->column( 1).toString();
+    }
+  }
+
+  // Now find or create a child node to hold the topic name.
+  QString topicLabel( QObject::tr( "Topic"));
+  int row = node->indexOf( 0, topicLabel);
+  if( row == -1) {
+    // New data, insert.
+    QList<QVariant> list;
+    list << topicLabel << topicValue;
+    TreeNode* valueNode = new TreeNode( list, node);
+    node->append( valueNode);
+    layoutChanged = true;
+
+  } else {
+    // Existing data, update.
+    (*node)[ row]->setData( 1, topicValue);
+    dataChanged = true;
+  }
+
+  // ASSOCIATIONS
+  int size = data.associations.length();
+  for( int index = 0; index < size; ++index) {
+    // Create a child node to hold the association if its not already in
+    // the tree.
+    OpenDDS::DCPS::GuidConverter converter( data.associations[ index].dr_id);
+    QString reader( std::string(converter).c_str());
+    int row = node->indexOf( 1, reader);
+    if( row == -1) {
+      // New data, insert.
+      QList<QVariant> list;
+      list << QString( QObject::tr("Reader")) << reader;
+      TreeNode* valueNode = new TreeNode( list, node);
+      node->append( valueNode);
+      layoutChanged = true;
+    }
+  }
 
   // NAME / VALUE DATA, notify GUI of changes.
   this->displayNvp( node, data.values, layoutChanged, dataChanged);
@@ -578,18 +696,20 @@ MonitorDataStorage::update< OpenDDS::DCPS::DataReaderReport>(
   bool remove
 )
 {
-  // struct DataReaderAssociation {
-  //   GUID_t        dw_id;
-  //   short         state;
-  // };
-  // typedef sequence<DataReaderAssociation> DRAssociations;
-  // struct DataReaderReport {
-  //   GUID_t         dr_id;
-  //   GUID_t         topic_id;
-  //   GUIDSeq        instances;
-  //   DRAssociations associations;
-  //   NVPSeq         values;
-  // };
+  //  struct DataReaderAssociation {
+  //    GUID_t        dw_id;
+  //    short         state;
+  //  };
+  //  typedef sequence<DataReaderAssociation> DRAssociations;
+  //  struct DataReaderReport {
+  //    GUID_t                 dp_id;
+  //    DDS::InstanceHandle_t  sub_handle;
+  //    GUID_t                 dr_id;
+  //    GUID_t                 topic_id;
+  //    DDS::InstanceHandleSeq instances;
+  //    DRAssociations         associations;
+  //    NVPSeq                 values;
+  //  };
 
   OpenDDS::DCPS::GuidConverter idconverter( data.dr_id);
   OpenDDS::DCPS::GuidConverter topicconverter( data.topic_id);
@@ -602,10 +722,104 @@ MonitorDataStorage::update< OpenDDS::DCPS::DataReaderReport>(
   ));
 
   // Retain knowledge of node insertions, updates, and deletions.
+  bool create        = !remove;
   bool layoutChanged = false;
   bool dataChanged   = false;
 
-  TreeNode* node = 0;
+  InstanceKey key( data.dp_id, data.sub_handle);
+  TreeNode* node = this->getEndpointNode(
+                     std::string( "Reader"),
+                     key,
+                     data.dr_id,
+                     create
+                   );
+  if( !node) {
+    return;
+  }
+  layoutChanged |= create;
+
+  if( remove) {
+    // Descend from the node and remove it and all its children from
+    // the maps.
+    this->cleanMaps( node);
+    this->guidToTreeMap_.erase( data.dr_id);
+    TreeNode* parent = node->parent();
+    if( parent) {
+      parent->removeChildren( node->row(), 1);
+
+    } else {
+      delete node;
+    }
+
+    // Nothing else to do on removal, let the GUI know we changed the
+    // model.
+    this->model_->changed();
+    return;
+  }
+
+  // TOPIC
+  // N.B. This topic id value is for reference and are not connected to
+  //      the information containing Topic nodes which are children of
+  //      the DomainParticipant nodes.  The values should correspond,
+  //      but we do not duplicate the data here.
+  // N.B. A consequence of this is that out-of-order processing, where
+  //      the DataWriterReport is processed prior to the TopicReport will
+  //      result in the Topic GUID being displayed instead of the Topic
+  //      name.  There is no mechanism currently to update this value
+  //      when the TopicReport is received.
+
+  // Find the actual topic, if possible.  Use the name as the topic
+  // value if it can be found, or the string-ified GUID if not.
+  OpenDDS::DCPS::GuidConverter converter( data.topic_id);
+  QString topicValue( std::string(converter).c_str());
+  TreeNode* topicNode = this->getNode(
+                          std::string( "Topic"),
+                          data.dp_id,
+                          data.topic_id,
+                          create
+                        );
+  if( topicNode) {
+    QString nameLabel( QObject::tr( "Topic Name"));
+    int row = topicNode->indexOf( 0, nameLabel);
+    if( row != -1) {
+      topicValue = (*topicNode)[ row]->column( 1).toString();
+    }
+  }
+
+  // Now find or create a child node to hold the topic name.
+  QString topicLabel( QObject::tr( "Topic"));
+  int row = node->indexOf( 0, topicLabel);
+  if( row == -1) {
+    // New data, insert.
+    QList<QVariant> list;
+    list << topicLabel << topicValue;
+    TreeNode* valueNode = new TreeNode( list, node);
+    node->append( valueNode);
+    layoutChanged = true;
+
+  } else {
+    // Existing data, update.
+    (*node)[ row]->setData( 1, topicValue);
+    dataChanged = true;
+  }
+
+  // ASSOCIATIONS
+  int size = data.associations.length();
+  for( int index = 0; index < size; ++index) {
+    // Create a child node to hold the association if its not already in
+    // the tree.
+    OpenDDS::DCPS::GuidConverter converter( data.associations[ index].dw_id);
+    QString writer( std::string(converter).c_str());
+    int row = node->indexOf( 1, writer);
+    if( row == -1) {
+      // New data, insert.
+      QList<QVariant> list;
+      list << QString( QObject::tr("Writer")) << writer;
+      TreeNode* valueNode = new TreeNode( list, node);
+      node->append( valueNode);
+      layoutChanged = true;
+    }
+  }
 
   // NAME / VALUE DATA, notify GUI of changes.
   this->displayNvp( node, data.values, layoutChanged, dataChanged);
@@ -668,7 +882,7 @@ MonitorDataStorage::update< OpenDDS::DCPS::TransportReport>(
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
     ACE_TEXT("%s TransportReport, host: %C, pid: %d, ")
-    ACE_TEXT("transport: %d, type: %C.\n"),
+    ACE_TEXT("transport: 0x%x, type: %C.\n"),
     remove? "removing": "processing",
     (const char*)data.host,
     data.pid,
@@ -677,10 +891,55 @@ MonitorDataStorage::update< OpenDDS::DCPS::TransportReport>(
   ));
 
   // Retain knowledge of node insertions, updates, and deletions.
-  bool layoutChanged = false;
+  bool layoutChanged = !remove; // Updated by getTransportNode()
   bool dataChanged   = false;
 
-  TreeNode* node = 0;
+  TransportKey key( std::string(data.host), data.pid, data.transport_id);
+  TreeNode* node = this->getTransportNode( key, layoutChanged);
+  if( !node) {
+    return;
+  }
+
+  if( remove) {
+    // Descend from the node and remove it and all its children from
+    // the maps.
+    this->cleanMaps( node);
+    this->transportToTreeMap_.erase( key);
+    TreeNode* parent = node->parent();
+    if( parent) {
+      parent->removeChildren( node->row(), 1);
+
+    } else {
+      delete node;
+    }
+
+    // Nothing else to do on removal, let the GUI know we changed the
+    // model.
+    this->model_->changed();
+    return;
+  }
+
+  // Transpot type value.
+  QString typeLabel( QObject::tr( "Type"));
+  int row = node->indexOf( 0, typeLabel);
+  if( row == -1) {
+    // New data, insert.
+    QList<QVariant> list;
+    list << typeLabel
+         << QString( QObject::tr( static_cast<const char*>(data.transport_type)));
+    TreeNode* nameNode = new TreeNode( list, node);
+    node->append( nameNode);
+    layoutChanged = true;
+
+  } else {
+    // Existing data, update.
+    TreeNode* nameNode = (*node)[ row];
+    nameNode->setData(
+      1,
+      QString( QObject::tr( static_cast<const char*>(data.transport_type)))
+    );
+    dataChanged = true;
+  }
 
   // NAME / VALUE DATA, notify GUI of changes.
   this->displayNvp( node, data.values, layoutChanged, dataChanged);
