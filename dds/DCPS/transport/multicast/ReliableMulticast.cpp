@@ -339,7 +339,7 @@ ReliableMulticast::send_naks()
     }
   }
 
-  // Clear current peer repair requests:
+  // Clear peer repair requests:
   this->nak_peers_.clear();
 }
 
