@@ -219,7 +219,6 @@ class MonitorDataStorage {
      * @return pointer to the node representing the key value.
      */
     TreeNode* getTransportNode(
-                const ProcessKey&   pid,
                 const TransportKey& key,
                 bool&               create
               );

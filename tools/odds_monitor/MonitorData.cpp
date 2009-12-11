@@ -95,9 +95,13 @@ Monitor::MonitorData::removeRepo( const QString& ior)
     return false;
   }
 
+  // Replace call to toStdString() with toLocal8Bit().constData()
+  // to avoid QString-related aborts under windows.
+  const char* ior_str = ior.toLocal8Bit().constData();
+
   // Check if this is the currently monitored repository, and clear its
   // data if it is in the view.
-  if( this->storage_->activeIor() == ior.toStdString()) {
+  if( this->storage_->activeIor() == ior_str) {
     this->clearData();
   }
 
