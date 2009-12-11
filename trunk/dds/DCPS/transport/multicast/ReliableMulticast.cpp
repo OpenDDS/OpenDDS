@@ -320,7 +320,7 @@ ReliableMulticast::send_naks()
     this->nak_requests_.insert(NakRequestMap::value_type(
       now, NakRequest(it->first, it->second.high())));
 
-    // Take a copy to facilitate temporary suppression:
+    // Take a copy to facilitate suppression:
     DisjointSequence missing(it->second);
 
     for (NakPeerMap::iterator peer(this->nak_peers_.find(it->first));
@@ -360,7 +360,7 @@ ReliableMulticast::nak_received(ACE_Message_Block* control)
 
   SequenceRange range(low, high);
 
-  // Record request for known peer (suppress duplicate repairs):
+  // Record repair request for known peer:
   if (this->nak_sequences_.find(local_peer) != this->nak_sequences_.end()) {
     this->nak_peers_.insert(NakPeerMap::value_type(local_peer, range));
   }
@@ -423,7 +423,7 @@ ReliableMulticast::nakack_received(ACE_Message_Block* control)
 
   // MULTICAST_NAKACK control samples indicate data which cannot be
   // repaired by a remote peer. Update the sequence map to suppress
-  // future repairs by shifting to the provided low-water mark:
+  // future repairs by shifting to a new low-water mark:
   it->second.shift(low);
 }
 
