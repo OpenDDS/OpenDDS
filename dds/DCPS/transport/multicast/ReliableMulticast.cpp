@@ -356,7 +356,7 @@ ReliableMulticast::nak_received(ACE_Message_Block* control)
   serializer >> request.first.value_;
   serializer >> request.second.value_;
 
-  // Record request for known peer to suppress duplicate repairs:
+  // Record request for known peer (suppress duplicate repairs):
   if (this->nak_sequences_.find(local_peer) != this->nak_sequences_.end()) {
     this->nak_peers_.insert(NakPeerMap::value_type(local_peer, request));
   }
