@@ -130,7 +130,7 @@ MonitorDataModel::parent( const QModelIndex& index) const
   TreeNode* childNode  = this->getNode( index);
   TreeNode* parentNode = childNode->parent();
 
-  if( parentNode == this->root_) {
+  if( parentNode == this->root_ || parentNode == 0) {
     return QModelIndex();
   }
 
