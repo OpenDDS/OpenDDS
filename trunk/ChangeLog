@@ -1,3 +1,9 @@
+Fri Dec 11 20:03:05 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/html/multicast/index.html:
+
+          Updated design notes with latest changes.
+
 Fri Dec 11 19:55:30 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastConfiguration.h:

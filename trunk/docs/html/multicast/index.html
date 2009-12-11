@@ -532,7 +532,7 @@ TertiaryDark: #666
 Error: #f88
 </pre>
 </div>
-<div title="Configuration" modifier="Steven Stallion" created="200912011939" modified="200912090042" changecount="32">
+<div title="Configuration" modifier="Steven Stallion" created="200912011939" modified="200912111957" changecount="33">
 <pre>As with other transports, dynamic configuration is provided by the ACE Service Configurator Framework. A svc.conf file should be created which contains the following:
 {{{
 dynamic OpenDDS_DCPS_Multicast_Service Service_Object * OpenDDS_Multicast:_make_MulticastLoader()
@@ -591,8 +591,8 @@ nak_depth=32
 
 # The minimum number of milliseconds to wait between repair
 # requests (reliable only).
-# The default value is: 500.
-nak_interval=500
+# The default value is: 2000 (2 seconds).
+nak_interval=2000
 
 # The maximum number of milliseconds to wait before giving up
 # on a repair response (reliable only).
@@ -609,10 +609,8 @@ Default examples of these files are provided under: {{{$DDS_ROOT/dds/DCPS/transp
 [[Known Issues]]
 [[Future Tasks]]</pre>
 </div>
-<div title="Future Tasks" modifier="Steven Stallion" created="200912011940" modified="200912090031" changecount="34">
-<pre>NAK suppression for duplicate ranges requested by other peers within a given interval should be introduced to prevent potential NAK implosions in large multicast groups.
-
-An FEC mechanism should be introduced to reduce repair requests and to provide an additional source from which to detect reception gaps.
+<div title="Future Tasks" modifier="Steven Stallion" created="200912011940" modified="200912111957" changecount="35">
+<pre>An FEC mechanism should be introduced to reduce repair requests and to provide an additional source from which to detect reception gaps.
 
 ~SYNACKs should be predicated on association status to prevent potential denial of service attacks (not currently supported by the ETF).
 
@@ -695,7 +693,7 @@ project : dcpsexe_with_multicast {
 &lt;/div&gt;
 &lt;!--}}}--&gt;</pre>
 </div>
-<div title="Reliability" modifier="Steven Stallion" created="200912011934" modified="200912090030" changecount="91">
+<div title="Reliability" modifier="Steven Stallion" created="200912011934" modified="200912112002" changecount="96">
 <pre>Reliable delivery is achieved through two primary mechanisms:
 * 2-way peer handshaking (SYN/SYNACK)
 * Negative acknowledgment of missing data (NAK/NAKACK)
@@ -715,7 +713,9 @@ As each datagram is delivered to the {{{DataLink}}}, the transport sequence valu
 
 If the active peer receives a {{{MULTICAST_NAK}}} control sample it will examine its send buffer for the missing datagram. If the datagram is no longer available, it sends a {{{MULTICAST_NAKACK}}} control sample to the entire multicast group to suppress further repair requests. If the datagram is still available, it resends the missing data to the entire multicast group.
 
-If the passive peer receives a {{{MULTICAST_NAKACK}}} control sample, it will behave just as if the repair request has aged off, suppressing further repair requests and logging an error.</pre>
+If the passive peer receives a {{{MULTICAST_NAKACK}}} control sample, it will behave just as if the repair request has aged off, suppressing further repair requests and logging an error.
+
+Passive peers perform NAK suppression based on all repair requests destined for the same active peer. If previous requests have been sent, a passive peer will temporarily elide previously requested ranges for the current interval.</pre>
 </div>
 <div title="SideBarOptions" modifier="OpenDDS" created="200911302023" server.type="file" server.host="file:///export/OCI/DDS/docs/html/template/index.html" server.page.revision="200911302023">
 <pre>&lt;&lt;search&gt;&gt;&lt;&lt;closeAll&gt;&gt;&lt;&lt;permaview&gt;&gt;&lt;&lt;newTiddler&gt;&gt;&lt;&lt;saveChanges&gt;&gt;&lt;&lt;slider chkSliderOptionsPanel OptionsPanel &quot;options »&quot; &quot;Change TiddlyWiki advanced options&quot;&gt;&gt;</pre>
