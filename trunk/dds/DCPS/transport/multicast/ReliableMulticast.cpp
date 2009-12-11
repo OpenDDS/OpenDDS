@@ -369,7 +369,7 @@ ReliableMulticast::nak_received(ACE_Message_Block* control)
   if (local_peer != this->local_peer_) return;
 
   if (!this->send_buffer_->resend(range)) {
-    // Broadcast MULTICAST_NAKACK control sample to suppress
+    // Broadcast a MULTICAST_NAKACK control sample to suppress
     // repair requests for unrecoverable samples by providing a
     // new low-water mark for affected peers:
     send_nakack(this->send_buffer_->low());
