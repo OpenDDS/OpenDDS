@@ -161,6 +161,14 @@ TransportSendBuffer::resend(const SequenceRange& range)
     // will be scored against the given DisjointSequence:
     BufferMap::iterator it(this->buffers_.find(sequence));
     if (it != this->buffers_.end()) {
+      if (OpenDDS::DCPS::Transport_debug_level >= 4) {
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) TransportSendBuffer::resend() - ")
+                   ACE_TEXT("resending PDU: 0x%x, (0x%x,0x%x)\n"),
+                   static_cast<const ACE_INT16>(sequence),
+                   it->second.first,
+                   it->second.second));
+      }
       resend(it->second);
     }
   }
@@ -172,15 +180,6 @@ TransportSendBuffer::resend(const SequenceRange& range)
 void
 TransportSendBuffer::resend(buffer_type& buffer)
 {
-  if (OpenDDS::DCPS::Transport_debug_level >= 4) {
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) TransportSendBuffer::resend(): ")
-               ACE_TEXT("resending PDU: 0x%x, (0x%x,0x%x)\n"),
-               static_cast<const ACE_INT16>(sequence),
-               it->second.first,
-               it->second.second));
-  }
-
   ACE_GUARD(TransportSendStrategy::LockType,
             guard,
             this->strategy_->lock_);
