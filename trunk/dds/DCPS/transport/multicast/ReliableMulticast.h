@@ -92,8 +92,7 @@ public:
                 MulticastSequence high);
 
   void nakack_received(ACE_Message_Block* control);
-  void send_nakack(MulticastSequence low,
-                   MulticastSequence high);
+  void send_nakack(MulticastSequence low);
 
   void send_control(SubMessageId submessage_id,
                     ACE_Message_Block* data);
@@ -121,7 +120,7 @@ private:
   typedef std::multimap<ACE_Time_Value, NakRequest> NakRequestMap;
   NakRequestMap nak_requests_;
 
-  typedef std::multimap<MulticastPeer, DisjointSequence::range_type> NakPeerMap;
+  typedef std::multimap<MulticastPeer, SequenceRange> NakPeerMap;
   NakPeerMap nak_peers_;
 };
 

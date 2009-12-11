@@ -16,8 +16,8 @@ DisjointSequence::range_iterator::range_iterator()
 }
 
 ACE_INLINE
-DisjointSequence::range_iterator::range_iterator(set_type::iterator begin,
-                                                 set_type::iterator end)
+DisjointSequence::range_iterator::range_iterator(SequenceSet::iterator begin,
+                                                 SequenceSet::iterator end)
   : pos_(begin),
     end_(end)
 {
@@ -30,10 +30,10 @@ ACE_INLINE DisjointSequence::range_iterator&
 DisjointSequence::range_iterator::operator++()
 {
   if (this->pos_ != this->end_) {
-    set_type::iterator prev(this->pos_++);
+    SequenceSet::iterator prev(this->pos_++);
 
-    this->value_ = range_type(SequenceNumber(prev->value_ + 1),
-                              SequenceNumber(this->pos_->value_ - 1));
+    this->value_ = SequenceRange(SequenceNumber(prev->value_ + 1),
+                                 SequenceNumber(this->pos_->value_ - 1));
   }
   return *this;
 }
@@ -59,13 +59,13 @@ DisjointSequence::range_iterator::operator!=(const range_iterator& rhs) const
   return !(*this == rhs);
 }
 
-ACE_INLINE DisjointSequence::range_type&
+ACE_INLINE SequenceRange&
 DisjointSequence::range_iterator::operator*()
 {
   return this->value_;
 }
 
-ACE_INLINE DisjointSequence::range_type*
+ACE_INLINE SequenceRange*
 DisjointSequence::range_iterator::operator->()
 {
   return &this->value_;
@@ -76,39 +76,39 @@ DisjointSequence::range_iterator::operator->()
 ACE_INLINE DisjointSequence::range_iterator
 DisjointSequence::range_begin()
 {
-  return range_iterator(this->values_.begin(),
-                        this->values_.end());
+  return range_iterator(this->sequences_.begin(),
+                        this->sequences_.end());
 }
 
 ACE_INLINE DisjointSequence::range_iterator
 DisjointSequence::range_end()
 {
-  return range_iterator(this->values_.end(),
-                        this->values_.end());
+  return range_iterator(this->sequences_.end(),
+                        this->sequences_.end());
 }
 
 ACE_INLINE SequenceNumber
 DisjointSequence::low() const
 {
-  return *(this->values_.begin());
+  return *(this->sequences_.begin());
 }
 
 ACE_INLINE SequenceNumber
 DisjointSequence::high() const
 {
-  return *(this->values_.rbegin());
+  return *(this->sequences_.rbegin());
 }
 
 ACE_INLINE size_t
 DisjointSequence::depth() const
 {
-  return high() - low();
+  return std::abs(high().value_ - low().value_);
 }
 
 ACE_INLINE bool
 DisjointSequence::disjoint() const
 {
-  return this->values_.size() > 1;
+  return this->sequences_.size() > 1;
 }
 
 ACE_INLINE

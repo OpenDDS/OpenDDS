@@ -1,3 +1,18 @@
+Fri Dec 11 23:30:18 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+        * dds/DCPS/DisjointSequence.cpp:
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.inl:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Refactored MULTICAST_NAKACK mechanism to be proactive; peers
+          will now shift away unrecoverable samples upon reception.
+
 Fri Dec 11 23:29:19 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * tools/odds_monitor/MonitorDataModel.cpp:

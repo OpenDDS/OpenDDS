@@ -16,6 +16,7 @@
 #include "ace/Message_Block.h"
 
 #include <functional>
+#include <utility>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -110,7 +111,9 @@ struct OpenDDS_Dcps_Export SequenceNumber {
     if (this->value_ == 0x7fff) this->value_ = 0x0 ;
     else                        this->value_++ ;
   }
-} ;
+};
+
+typedef std::pair<SequenceNumber, SequenceNumber> SequenceRange;
 
 typedef Cached_Allocator_With_Overflow<ACE_Message_Block, ACE_Thread_Mutex>
 MessageBlockAllocator;

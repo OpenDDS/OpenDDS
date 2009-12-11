@@ -111,6 +111,7 @@ TransportSendBuffer::insert(SequenceNumber sequence, const buffer_type& value)
   if (this->buffers_.size() == this->capacity_) {
     BufferMap::iterator it(this->buffers_.begin());
     if (it == this->buffers_.end()) return;
+
     if ( OpenDDS::DCPS::Transport_debug_level >= 10) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) TransportSendBuffer::insert() - ")
@@ -152,38 +153,34 @@ TransportSendBuffer::insert(SequenceNumber sequence, const buffer_type& value)
 }
 
 bool
-TransportSendBuffer::resend(const DisjointSequence::range_type& range,
-                            DisjointSequence& missing)
+TransportSendBuffer::resend(const SequenceRange& range)
 {
-  // Set bounds on given DisjointSequence:
-  missing.skip(range.first.value_ - 1);     // low
-  missing.update(range.second.value_ + 1);  // high
-
   for (SequenceNumber sequence(range.first);
        sequence <= range.second; ++sequence) {
     // Re-send requested sample if still buffered; missing samples
     // will be scored against the given DisjointSequence:
     BufferMap::iterator it(this->buffers_.find(sequence));
     if (it != this->buffers_.end()) {
-      if ( OpenDDS::DCPS::Transport_debug_level >= 4) {
-        ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) TransportSendBuffer::resend() - ")
-          ACE_TEXT("resending PDU: 0x%x, (0x%x,0x%x)\n"),
-          static_cast<const ACE_INT16>(sequence),
-          it->second.first, it->second.second
-        ));
-      }
       resend(it->second);
-      missing.update(sequence);
     }
   }
 
-  return !missing.disjoint();
+  // Have we resent all requested data?
+  return range.first >= low() && range.second <= high();
 }
 
 void
 TransportSendBuffer::resend(buffer_type& buffer)
 {
+  if (OpenDDS::DCPS::Transport_debug_level >= 4) {
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) TransportSendBuffer::resend(): ")
+               ACE_TEXT("resending PDU: 0x%x, (0x%x,0x%x)\n"),
+               static_cast<const ACE_INT16>(sequence),
+               it->second.first,
+               it->second.second));
+  }
+
   ACE_GUARD(TransportSendStrategy::LockType,
             guard,
             this->strategy_->lock_);

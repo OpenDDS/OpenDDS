@@ -352,29 +352,27 @@ ReliableMulticast::nak_received(ACE_Message_Block* control)
   MulticastPeer local_peer;
   serializer >> local_peer; // sent as remote_peer
 
-  DisjointSequence::range_type request;
-  serializer >> request.first.value_;
-  serializer >> request.second.value_;
+  MulticastSequence low;
+  serializer >> low;
+
+  MulticastSequence high;
+  serializer >> high;
+
+  SequenceRange range(low, high);
 
   // Record request for known peer (suppress duplicate repairs):
   if (this->nak_sequences_.find(local_peer) != this->nak_sequences_.end()) {
-    this->nak_peers_.insert(NakPeerMap::value_type(local_peer, request));
+    this->nak_peers_.insert(NakPeerMap::value_type(local_peer, range));
   }
 
   // Ignore sample if not destined for us:
   if (local_peer != this->local_peer_) return;
 
-  DisjointSequence missing;
-
-  // Attempt to resend requested datagrams:
-  if (!this->send_buffer_->resend(request, missing)) {
-    // One or more datagrams are unrecoverable:
-    for (DisjointSequence::range_iterator range(missing.range_begin());
-         range != missing.range_end(); ++range) {
-      // Broadcast MULTICAST_NAKACK control samples to suppress
-      // repair requests for missing ranges:
-      send_nakack(range->first, range->second);
-    }
+  if (!this->send_buffer_->resend(range)) {
+    // Broadcast MULTICAST_NAKACK control sample to suppress
+    // repair requests for unrecoverable samples by providing a
+    // new low-water mark for affected peers:
+    send_nakack(this->send_buffer_->low());
   }
 }
 
@@ -414,9 +412,8 @@ ReliableMulticast::nakack_received(ACE_Message_Block* control)
   TAO::DCPS::Serializer serializer(
     control, this->transport_->swap_bytes());
 
-  DisjointSequence::range_type request;
-  serializer >> request.first.value_;
-  serializer >> request.second.value_;
+  MulticastSequence low;
+  serializer >> low;
 
   ACE_ERROR((LM_ERROR,
              ACE_TEXT("(%P|%t) ERROR: ")
@@ -426,16 +423,14 @@ ReliableMulticast::nakack_received(ACE_Message_Block* control)
 
   // MULTICAST_NAKACK control samples indicate data which cannot be
   // repaired by a remote peer. Update the sequence map to suppress
-  // future repairs for the given request:
-  it->second.update(request);
+  // future repairs by shifting to the provided low-water mark:
+  it->second.shift(low);
 }
 
 void
-ReliableMulticast::send_nakack(MulticastSequence low,
-                               MulticastSequence high)
+ReliableMulticast::send_nakack(MulticastSequence low)
 {
-  size_t len = sizeof(low)
-             + sizeof(high);
+  size_t len = sizeof(low);
 
   ACE_Message_Block* data;
   ACE_NEW(data, ACE_Message_Block(len));
@@ -444,7 +439,6 @@ ReliableMulticast::send_nakack(MulticastSequence low,
     data, this->transport_->swap_bytes());
 
   serializer << low;
-  serializer << high;
 
   // Broadcast control sample to remote peers:
   send_control(MULTICAST_NAKACK, data);
