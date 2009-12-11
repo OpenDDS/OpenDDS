@@ -26,6 +26,7 @@
 #include "dds/DCPS/DisjointSequence.h"
 #include "dds/DCPS/RcObject_T.h"
 
+#include <exception>
 #include <map>
 #include <set>
 #include <utility>
@@ -54,9 +55,11 @@ public:
 
   void insert(SequenceNumber sequence, const buffer_type& value);
 
-  bool resend(const DisjointSequence::range_type& range,
-              DisjointSequence& missing);
+  bool resend(const SequenceRange& range);
   void resend(buffer_type& buffer);
+
+  SequenceNumber low() const;
+  SequenceNumber high() const;
 
 private:
   size_t capacity_;

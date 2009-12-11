@@ -27,5 +27,19 @@ TransportSendBuffer::bind(TransportSendStrategy* strategy) {
   this->strategy_ = strategy;
 }
 
+ACE_INLINE SequenceNumber
+TransportSendBuffer::low() const
+{
+  if (this->buffers_.empty()) throw std::exception();
+  return this->buffers_.begin()->first;
+}
+
+ACE_INLINE SequenceNumber
+TransportSendBuffer::high() const
+{
+  if (this->buffers_.empty()) throw std::exception();
+  return this->buffers_.rbegin()->first;
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
