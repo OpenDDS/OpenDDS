@@ -13,6 +13,8 @@
 #include "dcps_export.h"
 #include "Definitions.h"
 
+#include "ace/Basic_Types.h"
+
 #include <cstdlib>
 #include <iterator>
 #include <set>
