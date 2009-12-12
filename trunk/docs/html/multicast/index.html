@@ -676,7 +676,7 @@ project : dcpsexe_with_multicast {
 }
 }}}</pre>
 </div>
-<div title="PageTemplate" modifier="OpenDDS" created="200911302019" modified="200911302100" server.type="file" server.host="file:///export/OCI/DDS/docs/html/template/index.html" server.page.revision="200911302100">
+<div title="PageTemplate" modifier="OpenDDS" created="200911302019" modified="200912120004" server.type="file" server.host="file:///export/DDS/docs/html/template/index.html" server.page.revision="200912120004">
 <pre>&lt;!--{{{--&gt;
 &lt;div class='header'&gt;
 &lt;div class='headerForeground'&gt;
@@ -692,6 +692,7 @@ project : dcpsexe_with_multicast {
 &lt;div id='displayArea'&gt;
 &lt;div id='messageArea'&gt;&lt;/div&gt;
 &lt;div id='tiddlerDisplay'&gt;&lt;/div&gt;
+&lt;div class='footer'&gt;$Id$&lt;/div&gt;
 &lt;/div&gt;
 &lt;!--}}}--&gt;</pre>
 </div>
@@ -731,7 +732,7 @@ Passive peers perform NAK suppression based on all repair requests destined for 
 <div title="SiteUrl" modifier="OpenDDS" created="200911302027" server.type="file" server.host="file:///export/OCI/DDS/docs/html/template/index.html" server.page.revision="200911302027">
 <pre>http://www.ociweb.com/</pre>
 </div>
-<div title="StyleSheet" modifier="StevenStallion" created="200911302014" modified="200912022013" changecount="56">
+<div title="StyleSheet" modifier="StevenStallion" created="200911302014" modified="200912120013" server.type="file" server.host="file:///export/DDS/docs/html/template/index.html" server.page.revision="200912120011" changecount="1">
 <pre>a:hover {
     text-decoration: none;
 }
@@ -750,6 +751,13 @@ Passive peers perform NAK suppression based on all repair requests destined for 
 .headerForeground a {
     color:[[ColorPalette::SecondaryDark]];
     font-weight: bold;
+}
+
+.footer {
+    border-top: 1px solid [[ColorPalette::SecondaryLight]];
+    color:[[ColorPalette::SecondaryLight]];
+    margin-top: 20px;
+    font-size: 1.1em;
 }
 
 .siteTitle {
