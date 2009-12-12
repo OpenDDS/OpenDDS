@@ -609,10 +609,10 @@ Default examples of these files are provided under: {{{$DDS_ROOT/dds/DCPS/transp
 [[Known Issues]]
 [[Future Tasks]]</pre>
 </div>
-<div title="Future Tasks" modifier="StevenStallion" created="200912011940" modified="200912111957" changecount="35">
+<div title="Future Tasks" modifier="StevenStallion" created="200912011940" modified="200912120031" changecount="36">
 <pre>An FEC mechanism should be introduced to reduce repair requests and to provide an additional source from which to detect reception gaps.
 
-~SYNACKs should be predicated on association status to prevent potential denial of service attacks (not currently supported by the ETF).
+{{{MULTICAST_SYNACK}}} responses should be predicated on association status to prevent potential denial of service attacks (not currently supported by the ETF).
 
 {{{DataLink}}}s should initiate the removal of an association based on changes in reliability (not currently supported by the ETF).</pre>
 </div>
