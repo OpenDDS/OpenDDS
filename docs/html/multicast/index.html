@@ -616,16 +616,18 @@ Default examples of these files are provided under: {{{$DDS_ROOT/dds/DCPS/transp
 
 {{{DataLink}}}s should initiate the removal of an association based on changes in reliability (not currently supported by the ETF).</pre>
 </div>
-<div title="Known Issues" modifier="StevenStallion" created="200912012032" modified="200912051757" changecount="40">
+<div title="Known Issues" modifier="Steven Stallion" created="200912012032" modified="200912112359" changecount="42">
 <pre>{{{TRANSPORT_PRIORITY}}} is not directly supported. This is partially due to routing restrictions placed on default group addresses as the selection heuristic assigns from the link-local range. Setting the TOS would provide little to no benefit for non-default group addresses at the cost of additional resources and complexity managing n-ary associations by priority key.
 
 Reliability must be configured via the {{{reliable}}} transport configuration option. The ETF currently multiplexes best-effort and reliable samples across the same {{{DataLink}}} which effectively disables autonegotiation of reliability between peers at the transport level.
 
-{{{nak_depth}}} must not exceed {{{16383}}} (2^^14^^-1) due to limits imposed by {{{OpenDDS::DCPS::SequenceNumber}}} comparisons (see: {{{$DDS_ROOT/dds/DCPS/Definitions.h}}}).
+{{{nak_depth}}} should not exceed {{{16383}}} (2^^14^^-1) due to limits imposed by {{{OpenDDS::DCPS::SequenceNumber}}} comparisons (see: {{{$DDS_ROOT/dds/DCPS/Definitions.h}}}).
 
 The current implementation relies on {{{LIVELINESS}}} to periodically send application-level heartbeat messages to aid in detecting reception gaps. If {{{AUTOMATIC_LIVELINESS_QOS}}} (the default) is not used, peers may not detect these gaps in a timely manner leading to unrecoverable data loss.
 
-The current implementation relies on the transport reactor being derived from {{{ACE_Select_Reactor}}}; this ensures a single thread may be active when sending/receiving data. If the transport reactor implementation is changed, additional locks must be introduced to protect critical sections.</pre>
+The current implementation relies on the transport reactor being derived from {{{ACE_Select_Reactor}}}; this ensures a single thread may be active when sending/receiving data. If the transport reactor implementation is changed, additional locks must be introduced to protect critical sections.
+
+The current implementation provides no rate limiting or flow control; it is possible to overrun the send buffer which can lead to unrecoverable data loss even if reliability is enabled. Users should either implement their own rate limiting for excessive sample rates, increase the {{{nak_depth}}} configuration option, and/or increase the OS receive buffer size.</pre>
 </div>
 <div title="MainMenu" modifier="StevenStallion" created="200912011934" modified="200912012032" changecount="7">
 <pre>[[Overview]]
