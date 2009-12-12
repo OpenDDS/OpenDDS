@@ -532,7 +532,7 @@ TertiaryDark: #666
 Error: #f88
 </pre>
 </div>
-<div title="Configuration" modifier="Steven Stallion" created="200912011939" modified="200912111957" changecount="33">
+<div title="Configuration" modifier="StevenStallion" created="200912011939" modified="200912111957" changecount="33">
 <pre>As with other transports, dynamic configuration is provided by the ACE Service Configurator Framework. A svc.conf file should be created which contains the following:
 {{{
 dynamic OpenDDS_DCPS_Multicast_Service Service_Object * OpenDDS_Multicast:_make_MulticastLoader()
@@ -609,25 +609,25 @@ Default examples of these files are provided under: {{{$DDS_ROOT/dds/DCPS/transp
 [[Known Issues]]
 [[Future Tasks]]</pre>
 </div>
-<div title="Future Tasks" modifier="Steven Stallion" created="200912011940" modified="200912111957" changecount="35">
+<div title="Future Tasks" modifier="StevenStallion" created="200912011940" modified="200912111957" changecount="35">
 <pre>An FEC mechanism should be introduced to reduce repair requests and to provide an additional source from which to detect reception gaps.
 
 ~SYNACKs should be predicated on association status to prevent potential denial of service attacks (not currently supported by the ETF).
 
 {{{DataLink}}}s should initiate the removal of an association based on changes in reliability (not currently supported by the ETF).</pre>
 </div>
-<div title="Known Issues" modifier="Steven Stallion" created="200912012032" modified="200912112359" changecount="42">
+<div title="Known Issues" modifier="StevenStallion" created="200912012032" modified="200912120029" changecount="44">
 <pre>{{{TRANSPORT_PRIORITY}}} is not directly supported. This is partially due to routing restrictions placed on default group addresses as the selection heuristic assigns from the link-local range. Setting the TOS would provide little to no benefit for non-default group addresses at the cost of additional resources and complexity managing n-ary associations by priority key.
 
 Reliability must be configured via the {{{reliable}}} transport configuration option. The ETF currently multiplexes best-effort and reliable samples across the same {{{DataLink}}} which effectively disables autonegotiation of reliability between peers at the transport level.
 
 {{{nak_depth}}} should not exceed {{{16383}}} (2^^14^^-1) due to limits imposed by {{{OpenDDS::DCPS::SequenceNumber}}} comparisons (see: {{{$DDS_ROOT/dds/DCPS/Definitions.h}}}).
 
+The current implementation provides no rate limiting or flow control; it is possible to overrun the send buffer which can lead to unrecoverable data loss even if reliability is enabled. Users should either implement their own rate limiting for excessive rates, increase the {{{nak_depth}}} configuration option, and/or increase the OS receive buffer size if needed.
+
 The current implementation relies on {{{LIVELINESS}}} to periodically send application-level heartbeat messages to aid in detecting reception gaps. If {{{AUTOMATIC_LIVELINESS_QOS}}} (the default) is not used, peers may not detect these gaps in a timely manner leading to unrecoverable data loss.
 
-The current implementation relies on the transport reactor being derived from {{{ACE_Select_Reactor}}}; this ensures a single thread may be active when sending/receiving data. If the transport reactor implementation is changed, additional locks must be introduced to protect critical sections.
-
-The current implementation provides no rate limiting or flow control; it is possible to overrun the send buffer which can lead to unrecoverable data loss even if reliability is enabled. Users should either implement their own rate limiting for excessive sample rates, increase the {{{nak_depth}}} configuration option, and/or increase the OS receive buffer size.</pre>
+The current implementation relies on the transport reactor being derived from {{{ACE_Select_Reactor}}}; this ensures a single thread may be active when sending/receiving data. If the transport reactor implementation is changed, additional locks must be introduced to protect critical sections.</pre>
 </div>
 <div title="MainMenu" modifier="StevenStallion" created="200912011934" modified="200912012032" changecount="7">
 <pre>[[Overview]]
@@ -642,7 +642,7 @@ The current implementation provides no rate limiting or flow control; it is poss
 
 OpenDDS is supported by [[Object Computing, Inc.|http://www.ociweb.com/]]</pre>
 </div>
-<div title="Overview" modifier="Steven Stallion" created="200912011932" modified="200912090038" changecount="106">
+<div title="Overview" modifier="StevenStallion" created="200912011932" modified="200912090038" changecount="106">
 <pre>Starting with the OpenDDS 2.1 release, a new multicast transport is available which replaces the {{{SimpleMcast}}} and {{{ReliableMulticast}}} transports. The source for the {{{multicast}}} transport is available under the general OpenDDS license and may be found under: {{{$DDS_ROOT/dds/DCPS/transport/multicast/}}}.
 
 What follows is a detailed description of the design, configuration, known issues, and potential enhancements for the {{{multicast}}} transport:
@@ -696,7 +696,7 @@ project : dcpsexe_with_multicast {
 &lt;/div&gt;
 &lt;!--}}}--&gt;</pre>
 </div>
-<div title="Reliability" modifier="Steven Stallion" created="200912011934" modified="200912112002" changecount="96">
+<div title="Reliability" modifier="StevenStallion" created="200912011934" modified="200912112002" changecount="96">
 <pre>Reliable delivery is achieved through two primary mechanisms:
 * 2-way peer handshaking (SYN/SYNACK)
 * Negative acknowledgment of missing data (NAK/NAKACK)
