@@ -1,3 +1,9 @@
+Fri Dec 11 23:59:24 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/html/multicast/index.html:
+
+          Added additional verbiage for rate limiting issues.
+
 Fri Dec 11 23:30:18 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/Definitions.h:
