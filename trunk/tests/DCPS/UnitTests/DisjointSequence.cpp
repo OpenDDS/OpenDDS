@@ -142,7 +142,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   {
     DisjointSequence sequence;
     DisjointSequence::range_iterator it;
-    DisjointSequence::range_type range;
+    SequenceRange range;
 
     // ASSERT a single dicontiguity returns a single range
     //        of values: <low + 1, high - 1>
@@ -168,12 +168,12 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(range.first == SequenceNumber(1));
     TEST_CHECK(range.second == SequenceNumber(4));
     TEST_CHECK(++it != sequence.range_end());
-    
+
     range = *it;
     TEST_CHECK(range.first == SequenceNumber(6));
     TEST_CHECK(range.second == SequenceNumber(9));
     TEST_CHECK(++it == sequence.range_end());
-    
+
     // ASSERT multiple contiguities return  multiple ranges
     //        of values with a difference of one:
     sequence = DisjointSequence(0);
@@ -187,12 +187,12 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(range.first == SequenceNumber(1));
     TEST_CHECK(range.second == SequenceNumber(4));
     TEST_CHECK(++it != sequence.range_end());
-    
+
     range = *it;
     TEST_CHECK(range.first == SequenceNumber(6));
     TEST_CHECK(range.second == SequenceNumber(6));
     TEST_CHECK(++it != sequence.range_end());
-    
+
     range = *it;
     TEST_CHECK(range.first == SequenceNumber(8));
     TEST_CHECK(range.second == SequenceNumber(8));
