@@ -502,18 +502,16 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
       // Adjust the message block chain pointers to account for the
       // skipped data.
       //
-      size_t  bytes = this->pdu_remaining_;
-
       for (size_t index = this->buffer_index_ ;
-           bytes > 0 ;
+           this->pdu_remaining_ > 0 ;
            index = this->successor_index(index)) {
-        size_t amount
-        = ace_min<size_t>(bytes, this->receive_buffers_[ index]->space()) ;
+        size_t amount =
+          ace_min<size_t>(this->pdu_remaining_, this->receive_buffers_[ index]->space());
 
         this->receive_buffers_[ index]->rd_ptr(amount) ;
-        bytes -= amount ;
+        this->pdu_remaining_ -= amount ;
 
-        if (bytes > 0 && this->successor_index(index) == this->buffer_index_) {
+        if (this->pdu_remaining_ > 0 && this->successor_index(index) == this->buffer_index_) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: ")
                             ACE_TEXT("TransportReceiveStrategy::handle_input()")
