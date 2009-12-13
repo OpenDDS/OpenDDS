@@ -1,8 +1,14 @@
+Sun Dec 13 00:00:20 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+
+	  Fixed receive buffer corruption on duplicate packets.
+
 Sat Dec 12 22:55:37 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/DisjointSequence.h:
 
-	  Added missing include.
+          Added missing include.
 
 Sat Dec 12 00:35:19 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
