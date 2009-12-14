@@ -1,8 +1,37 @@
+Mon Dec 14 23:26:29 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/Monitor.ui:
+
+          Attempted to relax geometry settings to allow full buttons to
+          be displayed on some platforms where they are being truncated.
+
+        * tools/odds_monitor/MonitorData.h:
+
+          Removed obsolete method declarations.
+
+        * tools/odds_monitor/MonitorDataStorage.h:
+        * tools/odds_monitor/MonitorDataStorage.inl:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+
+          Refactored and simplified node removals.
+
+        * tools/odds_monitor/MonitorDataModel.cpp:
+        * tools/odds_monitor/TreeNode.h:
+
+          Added internal value reference capability.  This allows the
+          same data to be displayed at multiple locations in the model
+          without duplicating the data or becoming incoherent.
+
+          Added the ability to update the background color of individual
+          items.  This is intended for use to indicate when elements are
+          deleted from the service, leaving them in the GUI, and when
+          internal reference links become stale.
+
 Mon Dec 14 23:01:14 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * DDS_release_notes.txt:
 
-	  Updated release notes with multicast transport information.
+          Updated release notes with multicast transport information.
 
 Mon Dec 14 15:33:57 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 

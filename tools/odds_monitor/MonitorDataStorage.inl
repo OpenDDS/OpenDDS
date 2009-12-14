@@ -7,6 +7,23 @@
  * See: http://www.opendds.org/license.html
  */
 
+template< class MapType>
+void
+MonitorDataStorage::deleteNode( MapType& map, TreeNode* node)
+{
+  this->removeNode( map, node);
+  TreeNode* parent = node->parent();
+  if( parent) {
+    parent->removeChildren( node->row(), 1);
+
+  } else {
+    delete node;
+  }
+
+  // Notify the GUI to update.
+  this->model_->changed();
+}
+
 template< typename DataType>
 inline
 void
@@ -58,23 +75,7 @@ MonitorDataStorage::update< OpenDDS::DCPS::ServiceParticipantReport>(
   layoutChanged |= create;
 
   if( remove) {
-    // Descend from the pidNode and remove it and all its children from
-    // the maps.
-    this->cleanMaps( pidNode);
-    this->processToTreeMap_.erase( pid);
-
-    TreeNode* hostNode = pidNode->parent();
-    hostNode->removeChildren( pidNode->row(), 1);
-
-    // Check and remove the host node if there are no pid nodes remaining
-    // after the removal (no children).
-    if( hostNode->size() == 0) {
-      this->hostToTreeMap_.erase( host);
-      delete hostNode;
-    }
-
-    // Nothing else to do on removal.
-    this->model_->changed();
+    this->deleteProcessNode( pidNode);
     return;
   }
 
@@ -146,21 +147,7 @@ MonitorDataStorage::update< OpenDDS::DCPS::DomainParticipantReport>(
   }
 
   if( remove) {
-    // Descend from the node and remove it and all its children from
-    // the maps.
-    this->cleanMaps( node);
-    this->guidToTreeMap_.erase( data.dp_id);
-    TreeNode* parent = node->parent();
-    if( parent) {
-      parent->removeChildren( node->row(), 1);
-
-    } else {
-      delete node;
-    }
-
-    // Nothing else to do on removal, let the GUI know we changed the
-    // model.
-    this->model_->changed();
+    this->deleteNode( this->guidToTreeMap_, node);
     return;
   }
 
@@ -245,21 +232,7 @@ MonitorDataStorage::update< OpenDDS::DCPS::TopicReport>(
   }
 
   if( remove) {
-    // Descend from the node and remove it and all its children from
-    // the maps.
-    this->cleanMaps( node);
-    this->guidToTreeMap_.erase( data.dp_id);
-    TreeNode* parent = node->parent();
-    if( parent) {
-      parent->removeChildren( node->row(), 1);
-
-    } else {
-      delete node;
-    }
-
-    // Nothing else to do on removal, let the GUI know we changed the
-    // model.
-    this->model_->changed();
+    this->deleteNode( this->guidToTreeMap_, node);
     return;
   }
 
@@ -352,21 +325,7 @@ MonitorDataStorage::update< OpenDDS::DCPS::PublisherReport>(
   }
 
   if( remove) {
-    // Descend from the node and remove it and all its children from
-    // the maps.
-    this->cleanMaps( node);
-    this->instanceToTreeMap_.erase( key);
-    TreeNode* parent = node->parent();
-    if( parent) {
-      parent->removeChildren( node->row(), 1);
-
-    } else {
-      delete node;
-    }
-
-    // Nothing else to do on removal, let the GUI know we changed the
-    // model.
-    this->model_->changed();
+    this->deleteNode( this->instanceToTreeMap_, node);
     return;
   }
 
@@ -452,21 +411,7 @@ MonitorDataStorage::update< OpenDDS::DCPS::SubscriberReport>(
   }
 
   if( remove) {
-    // Descend from the node and remove it and all its children from
-    // the maps.
-    this->cleanMaps( node);
-    this->instanceToTreeMap_.erase( key);
-    TreeNode* parent = node->parent();
-    if( parent) {
-      parent->removeChildren( node->row(), 1);
-
-    } else {
-      delete node;
-    }
-
-    // Nothing else to do on removal, let the GUI know we changed the
-    // model.
-    this->model_->changed();
+    this->deleteNode( this->instanceToTreeMap_, node);
     return;
   }
 
@@ -561,21 +506,7 @@ MonitorDataStorage::update< OpenDDS::DCPS::DataWriterReport>(
   layoutChanged |= create;
 
   if( remove) {
-    // Descend from the node and remove it and all its children from
-    // the maps.
-    this->cleanMaps( node);
-    this->guidToTreeMap_.erase( data.dw_id);
-    TreeNode* parent = node->parent();
-    if( parent) {
-      parent->removeChildren( node->row(), 1);
-
-    } else {
-      delete node;
-    }
-
-    // Nothing else to do on removal, let the GUI know we changed the
-    // model.
-    this->model_->changed();
+    this->deleteNode( this->guidToTreeMap_, node);
     return;
   }
 
@@ -739,21 +670,7 @@ MonitorDataStorage::update< OpenDDS::DCPS::DataReaderReport>(
   layoutChanged |= create;
 
   if( remove) {
-    // Descend from the node and remove it and all its children from
-    // the maps.
-    this->cleanMaps( node);
-    this->guidToTreeMap_.erase( data.dr_id);
-    TreeNode* parent = node->parent();
-    if( parent) {
-      parent->removeChildren( node->row(), 1);
-
-    } else {
-      delete node;
-    }
-
-    // Nothing else to do on removal, let the GUI know we changed the
-    // model.
-    this->model_->changed();
+    this->deleteNode( this->guidToTreeMap_, node);
     return;
   }
 
@@ -901,25 +818,11 @@ MonitorDataStorage::update< OpenDDS::DCPS::TransportReport>(
   }
 
   if( remove) {
-    // Descend from the node and remove it and all its children from
-    // the maps.
-    this->cleanMaps( node);
-    this->transportToTreeMap_.erase( key);
-    TreeNode* parent = node->parent();
-    if( parent) {
-      parent->removeChildren( node->row(), 1);
-
-    } else {
-      delete node;
-    }
-
-    // Nothing else to do on removal, let the GUI know we changed the
-    // model.
-    this->model_->changed();
+    this->deleteNode( this->transportToTreeMap_, node);
     return;
   }
 
-  // Transpot type value.
+  // Transport type value.
   QString typeLabel( QObject::tr( "Type"));
   int row = node->indexOf( 0, typeLabel);
   if( row == -1) {

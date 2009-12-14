@@ -12,6 +12,7 @@
 #include <QtCore/QList>
 #include <QtCore/QVariant>
 #include <QtCore/QtAlgorithms>
+#include <QtGui/QColor>
 
 namespace Monitor {
 
@@ -20,14 +21,24 @@ namespace Monitor {
  *
  * @brief Encapsulate a node within a tree model.
  *
- * This class provides the interface to interact with elements of a tree
- * model.
+ * This class provides the interface for data to interact with elements
+ * of a tree model.
  *
  * Note that we hold native Qt containers and types here in order to
  * simplify interaction with the GUI.  While it is quite possible to use
  * STL containers and types here, we would spend a large part of this
  * class translating between the two worldviews.  And that seems a bit
  * silly.
+ *
+ * Since it is desirable to display data in multiple locations within
+ * the tree, this class implements the concept of 'value reference' nodes
+ * which obtain their data from a single source.  This allows the GUI to
+ * represent the same data at multiple locations in the tree in a way
+ * that ensures consistent data views.  A tree node with a non-NULL
+ * valueSource_ member is called a "value reference" node.  The tree node
+ * located as the valueSource_ will be queried for all data information
+ * when the GUI requests information for this node.  The location is
+ * local to this node, keeping it separate from the referenced node.
  */
 class TreeNode {
   public:
@@ -48,8 +59,20 @@ class TreeNode {
     /// Update with new data.
     bool setData( int column, const QVariant& data);
 
+    /// Update with new background color.
+    bool setColor( int column, const QVariant& data);
+
     /// Append another node as a child.
     void append( TreeNode* child);
+
+    /// Append another node as a reference to the value of this data.
+    void addValueRef( TreeNode* ref);
+
+    /// Remove a value reference node for this data.
+    bool removeValueRef( TreeNode* ref);
+
+    /// Value reference data source is no longer valid.
+    void staleValueRef();
 
     /// Insert a number of empty child nodes.
     bool insertChildren( int row, int count, int columns);
@@ -89,6 +112,9 @@ class TreeNode {
      */
     QVariant column( int column) const;
 
+    /// Get the background color of a column.
+    QVariant color( int column) const;
+
     /**
      * @brief find the row of a value in a colum.
      *
@@ -111,15 +137,28 @@ class TreeNode {
     TreeNode*  parent() const;
     TreeNode*& parent();
 
+    /// Access the source node for our data, if different from us.
+    TreeNode*  valueSource() const;
+    TreeNode*& valueSource();
+
   private:
     /// Container of children of this element.
     QList<TreeNode*> children_;
 
+    /// Container of different tree nodes that view this same data.
+    QList<TreeNode*> valueRefs_;
+
     /// Container of data for this node.
     QList<QVariant> data_;
 
+    /// Container of background colors for this node.
+    QList<QVariant> colors_;
+
     /// Parent node of this one.  Tree root has nil parent.
     TreeNode* parent_;
+
+    /// Data source if this is a reference value.
+    TreeNode* valueSource_;
 };
 
 } // End of namespace Monitor
@@ -158,14 +197,21 @@ Monitor::TreeNode::TreeNode(
   TreeNode*              parent
 
 ) : data_( data),
-    parent_( parent)
+    parent_( parent),
+    valueSource_( 0)
 {
 }
 
 inline
 Monitor::TreeNode::~TreeNode()
 {
+  // Cascade delete children.
   qDeleteAll( this->children_);
+
+  // Remove references to this node.
+  while( !this->valueRefs_.isEmpty()) {
+    this->valueRefs_.takeFirst()->staleValueRef();
+  }
 }
 
 inline
@@ -177,6 +223,28 @@ Monitor::TreeNode::setData( int column, const QVariant& data)
   }
 
   this->data_.replace( column, data);
+
+  return true;
+}
+
+inline
+bool
+Monitor::TreeNode::setColor( int column, const QVariant& data)
+{
+  if( column < 0 || column > this->width()) {
+    return false;
+  }
+
+  if( this->colors_.count() < column) {
+    for( int index = this->colors_.count(); index < column; ++index) {
+      this->colors_.push_back( QVariant(QColor()));
+    }
+    this->colors_.insert( column, data);
+
+  } else {
+    this->colors_.replace( column, data);
+  }
+
   return true;
 }
 
@@ -188,6 +256,33 @@ Monitor::TreeNode::append( TreeNode* child)
 }
 
 inline
+void
+Monitor::TreeNode::addValueRef( TreeNode* ref)
+{
+  this->valueRefs_.append( ref);
+  ref->valueSource() = this;
+}
+
+inline
+bool
+Monitor::TreeNode::removeValueRef( TreeNode* ref)
+{
+  ref->staleValueRef();
+  return this->valueRefs_.removeOne( ref);
+}
+
+inline
+void
+Monitor::TreeNode::staleValueRef()
+{
+  for( int index = 0; index < this->data_.count(); ++index) {
+    this->data_.replace( index, QString( QObject::tr( "<defunct>")));
+    this->setColor( index, QColor("yellow"));
+  }
+  this->valueSource_ = 0;
+}
+
+inline
 bool
 Monitor::TreeNode::insertChildren( int row, int count, int columns)
 {
@@ -195,12 +290,18 @@ Monitor::TreeNode::insertChildren( int row, int count, int columns)
     return false;
   }
 
+  QList< QVariant> data;
+  QList< QVariant> colors;
+  for( int index = 0; index < columns; ++index) {
+    data.append( QVariant());
+    colors.append( QColor());
+  }
+
   while( count--) {
-    QList< QVariant> data;
-    for( int index = 0; index < columns; ++index) {
-      data.append( QVariant());
-    }
     TreeNode* node = new TreeNode( data, this);
+    for( int index = 0; index < columns; ++index) {
+      (*node)[ index]->setColor( index, colors[ index]);
+    }
     this->children_.insert( row, node);
   }
 
@@ -256,7 +357,28 @@ inline
 QVariant
 Monitor::TreeNode::column( int column) const
 {
-  return this->data_.value( column);
+  if( this->valueSource_) {
+    // This is a reference node, use the referenced value.
+    return this->valueSource_->column( column);
+
+  } else {
+    // This node contains the value;
+    return this->data_.value( column);
+  }
+}
+
+inline
+QVariant
+Monitor::TreeNode::color( int column) const
+{
+  if( this->valueSource_) {
+    // This is a reference node, use the referenced value.
+    return this->valueSource_->color( column);
+
+  } else {
+    // This node contains the value;
+    return this->colors_.value( column);
+  }
 }
 
 inline
@@ -297,6 +419,20 @@ Monitor::TreeNode*&
 Monitor::TreeNode::parent()
 {
   return this->parent_;
+}
+
+inline
+Monitor::TreeNode*
+Monitor::TreeNode::valueSource() const
+{
+  return this->valueSource_;
+}
+
+inline
+Monitor::TreeNode*&
+Monitor::TreeNode::valueSource()
+{
+  return this->valueSource_;
 }
 
 #endif /* TREENODE_H */
