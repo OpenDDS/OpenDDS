@@ -194,9 +194,9 @@ MulticastTransport::acked(RepoId /*local_id*/, RepoId remote_id)
     RepoIdConverter(remote_id).participantId();
 
   MulticastDataLinkMap::iterator it(this->links_.find(remote_peer));
-  if (it != this->links_.end()) return it->second->acked(); // found
+  if (it == this->links_.end()) return false;  // not found
 
-  return false;
+  return it->second->acked();
 }
 
 void

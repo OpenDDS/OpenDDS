@@ -20,7 +20,7 @@
 namespace OpenDDS {
 namespace DCPS {
 
-// The default Transport ID forces the group address selection
+// The default transport ID forces the group address selection
 // heuristic to resolve port number 49152; this is the minimal
 // port defined in the dynamic/private range [IANA 2009-11-16].
 const TransportIdType DEFAULT_MULTICAST_ID(0xFFFFFF08);
@@ -33,7 +33,7 @@ public:
   bool default_to_ipv6_;
 
   /// The offset used to determine default port numbers; this value
-  /// will be added to the Transport ID for the actual port number.
+  /// will be added to the transport ID for the actual port number.
   /// The default value is: 49400 [IANA 2009-11-16].
   u_short port_offset_;
 
@@ -70,7 +70,7 @@ public:
 
   /// The minimum number of milliseconds to wait between repair
   /// requests (reliable only).
-  /// The default value is: 2000 (2 seconds).
+  /// The default value is: 500.
   ACE_Time_Value nak_interval_;
 
   /// The maximum number of milliseconds to wait before giving up

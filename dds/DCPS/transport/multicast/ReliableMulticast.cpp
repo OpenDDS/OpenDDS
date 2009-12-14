@@ -126,6 +126,88 @@ ReliableMulticast::acked()
   return this->acked_;
 }
 
+void
+ReliableMulticast::expire_naks()
+{
+  if (this->nak_requests_.empty()) return; // nothing to expire
+
+  ACE_Time_Value deadline(ACE_OS::gettimeofday());
+  deadline -= this->config_->nak_timeout_;
+
+  NakRequestMap::iterator first(this->nak_requests_.begin());
+  NakRequestMap::iterator last(this->nak_requests_.upper_bound(deadline));
+
+  if (first == last) return; // nothing to expire
+
+  for (NakRequestMap::iterator it(first); it != last; ++it) {
+    NakRequest& request(it->second);
+
+    NakSequenceMap::iterator sequence(this->nak_sequences_.find(request.first));
+    if (sequence == this->nak_sequences_.end()) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("ReliableMulticast::expire_naks: ")
+                 ACE_TEXT("failed to find sequence for remote peer: 0x%x!\n"),
+                 request.first));
+      continue;
+    }
+
+    // Skip unrecoverable datagrams; attempt to re-establish a
+    // reasonable baseline to detect future reception gaps:
+    if (request.second > sequence->second) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("ReliableMulticast::expire_naks: ")
+                 ACE_TEXT("timed out waiting on remote peer: 0x%x!\n"),
+                 request.first));
+
+      sequence->second.skip(request.second);
+    }
+  }
+
+  // Clear expired repair requests:
+  this->nak_requests_.erase(first, last);
+}
+
+void
+ReliableMulticast::send_naks()
+{
+  for (NakSequenceMap::iterator it(this->nak_sequences_.begin());
+       it != this->nak_sequences_.end(); ++it) {
+
+    if (!it->second.disjoint()) continue; // nothing to send
+
+    ACE_Time_Value now(ACE_OS::gettimeofday());
+
+    // Record high-water mark for peer on this interval; this value
+    // is used to reset the low-water mark in the event the peer
+    // becomes unresponsive:
+    this->nak_requests_.insert(NakRequestMap::value_type(
+      now, NakRequest(it->first, it->second.high())));
+
+    // Take a copy to facilitate temporary suppression:
+    DisjointSequence missing(it->second);
+
+    for (NakPeerMap::iterator peer(this->nak_peers_.find(it->first));
+         peer != this->nak_peers_.end(); ++peer) {
+      // Update set to temporarily suppress repair requests for
+      // ranges already requested by other peers on this interval:
+      missing.update(peer->second);
+    }
+
+    for (DisjointSequence::range_iterator range(missing.range_begin());
+         range != missing.range_end(); ++range) {
+      // Send MULTICAST_NAK control samples to remote peer; the
+      // peer should respond with a resend of the missing data or
+      // a MULTICAST_NAKACK indicating the data is unrecoverable:
+      send_nak(it->first, range->first, range->second);
+    }
+  }
+
+  // Clear peer repair requests:
+  this->nak_peers_.clear();
+}
+
 bool
 ReliableMulticast::header_received(const TransportHeader& header)
 {
@@ -259,88 +341,6 @@ ReliableMulticast::send_synack(MulticastPeer remote_peer)
 
   // Send control sample to remote peer:
   send_control(MULTICAST_SYNACK, data);
-}
-
-void
-ReliableMulticast::expire_naks()
-{
-  if (this->nak_requests_.empty()) return; // nothing to expire
-
-  ACE_Time_Value deadline(ACE_OS::gettimeofday());
-  deadline -= this->config_->nak_timeout_;
-
-  NakRequestMap::iterator first(this->nak_requests_.begin());
-  NakRequestMap::iterator last(this->nak_requests_.upper_bound(deadline));
-
-  if (first == last) return; // nothing to expire
-
-  for (NakRequestMap::iterator it(first); it != last; ++it) {
-    NakRequest& request(it->second);
-
-    NakSequenceMap::iterator sequence(this->nak_sequences_.find(request.first));
-    if (sequence == this->nak_sequences_.end()) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("ReliableMulticast::expire_naks: ")
-                 ACE_TEXT("failed to find sequence for remote peer: 0x%x!\n"),
-                 request.first));
-      continue;
-    }
-
-    // Skip unrecoverable datagrams; attempt to re-establish a
-    // reasonable baseline to detect future reception gaps:
-    if (request.second > sequence->second) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("ReliableMulticast::expire_naks: ")
-                 ACE_TEXT("timed out waiting on remote peer: 0x%x!\n"),
-                 request.first));
-
-      sequence->second.skip(request.second);
-    }
-  }
-
-  // Clear expired repair requests:
-  this->nak_requests_.erase(first, last);
-}
-
-void
-ReliableMulticast::send_naks()
-{
-  for (NakSequenceMap::iterator it(this->nak_sequences_.begin());
-       it != this->nak_sequences_.end(); ++it) {
-
-    if (!it->second.disjoint()) continue; // nothing to send
-
-    ACE_Time_Value now(ACE_OS::gettimeofday());
-
-    // Record high-water mark for peer on this interval; this value
-    // is used to reset the low-water mark in the event the peer
-    // becomes unresponsive:
-    this->nak_requests_.insert(NakRequestMap::value_type(
-      now, NakRequest(it->first, it->second.high())));
-
-    // Take a copy to facilitate suppression:
-    DisjointSequence missing(it->second);
-
-    for (NakPeerMap::iterator peer(this->nak_peers_.find(it->first));
-         peer != this->nak_peers_.end(); ++peer) {
-      // Update set to suppress repair requests for ranges already
-      // requested by other peers for this interval:
-      missing.update(peer->second);
-    }
-
-    for (DisjointSequence::range_iterator range(missing.range_begin());
-         range != missing.range_end(); ++range) {
-      // Send MULTICAST_NAK control samples to remote peer; the
-      // peer should respond with a resend of the missing data or
-      // a MULTICAST_NAKACK indicating the data is unrecoverable:
-      send_nak(it->first, range->first, range->second);
-    }
-  }
-
-  // Clear peer repair requests:
-  this->nak_peers_.clear();
 }
 
 void

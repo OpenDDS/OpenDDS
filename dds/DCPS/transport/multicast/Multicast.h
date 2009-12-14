@@ -20,7 +20,7 @@ public:
   MulticastInitializer();
 };
 
-static MulticastInitializer __multicast_initializer;
+static MulticastInitializer multicast_init;
 
 } // namespace DCPS
 } // namespace OpenDDS

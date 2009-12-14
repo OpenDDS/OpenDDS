@@ -74,6 +74,9 @@ public:
 
   virtual bool acked();
 
+  void expire_naks();
+  void send_naks();
+
   virtual bool header_received(const TransportHeader& header);
   virtual void sample_received(ReceivedDataSample& sample);
 
@@ -82,9 +85,6 @@ public:
 
   void synack_received(ACE_Message_Block* control);
   void send_synack(MulticastPeer remote_peer);
-
-  void expire_naks();
-  void send_naks();
 
   void nak_received(ACE_Message_Block* control);
   void send_nak(MulticastPeer remote_peer,
