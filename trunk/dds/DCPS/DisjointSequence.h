@@ -50,7 +50,7 @@ public:
     SequenceRange value_;
   };
 
-  static const ACE_INT16 MAX_DEPTH(SHRT_MAX / 2);
+  static const ACE_INT16 MAX_DEPTH;
 
   explicit DisjointSequence(SequenceNumber value = SequenceNumber());
 

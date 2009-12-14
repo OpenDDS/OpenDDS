@@ -20,6 +20,8 @@
 namespace OpenDDS {
 namespace DCPS {
 
+const ACE_INT16 DisjointSequence::MAX_DEPTH(SHRT_MAX / 2);
+
 DisjointSequence::DisjointSequence(SequenceNumber value)
 {
   this->sequences_.insert(value);
