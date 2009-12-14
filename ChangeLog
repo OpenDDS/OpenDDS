@@ -1,3 +1,9 @@
+Mon Dec 14 23:01:14 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+	  Updated release notes with multicast transport information.
+
 Mon Dec 14 15:33:57 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/RandomGenerator.cpp:
