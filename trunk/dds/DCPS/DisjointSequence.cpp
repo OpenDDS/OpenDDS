@@ -22,7 +22,7 @@
 namespace OpenDDS {
 namespace DCPS {
 
-const size_t DisjointSequence::MAX_DEPTH(SHRT_MAX / 2);
+const size_t DisjointSequence::MAX_DEPTH(SHRT_MAX / 2 - 1);
 
 DisjointSequence::DisjointSequence(SequenceNumber value)
 {
