@@ -98,7 +98,7 @@ DisjointSequence::normalize()
                ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("DisjointSequence::normalize: ")
                ACE_TEXT("MAX_DEPTH exceeded; skipping to: 0x%x!\n"),
-               static_cast<ACE_INT16>(low())));
+               static_cast<ACE_UINT16>(low())));
     return;
   }
 
