@@ -15,7 +15,6 @@
 
 #include "ace/Basic_Types.h"
 
-#include <climits>
 #include <cstdlib>
 #include <iterator>
 #include <set>
