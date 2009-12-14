@@ -13,8 +13,6 @@
 #include "dcps_export.h"
 #include "Definitions.h"
 
-#include "ace/Basic_Types.h"
-
 #include <cstdlib>
 #include <iterator>
 #include <set>
@@ -49,7 +47,7 @@ public:
     SequenceRange value_;
   };
 
-  static const ACE_INT16 MAX_DEPTH;
+  static const size_t MAX_DEPTH;
 
   explicit DisjointSequence(SequenceNumber value = SequenceNumber());
 

@@ -1,8 +1,15 @@
+Mon Dec 14 14:56:03 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Fixed various GCC warnings.
+
 Sun Dec 13 00:00:20 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
 
-	  Fixed receive buffer corruption on duplicate packets.
+          Fixed receive buffer corruption on duplicate packets.
 
 Sat Dec 12 22:55:37 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
