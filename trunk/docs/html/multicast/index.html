@@ -616,14 +616,12 @@ Default examples of these files are provided under: {{{$DDS_ROOT/dds/DCPS/transp
 
 {{{DataLink}}}s should initiate the removal of an association based on changes in reliability (not currently supported by the ETF).</pre>
 </div>
-<div title="Known Issues" modifier="StevenStallion" created="200912012032" modified="200912141626" changecount="45">
+<div title="Known Issues" modifier="StevenStallion" created="200912012032" modified="200912141627" changecount="46">
 <pre>{{{TRANSPORT_PRIORITY}}} is not directly supported. This is partially due to routing restrictions placed on default group addresses as the selection heuristic assigns from the link-local range. Setting the TOS would provide little to no benefit for non-default group addresses at the cost of additional resources and complexity managing n-ary associations by priority key.
 
 Reliability must be configured via the {{{reliable}}} transport configuration option. The ETF currently multiplexes best-effort and reliable samples across the same {{{DataLink}}} which effectively disables autonegotiation of reliability between peers at the transport level.
 
-{{{nak_depth}}} should not exceed {{{16383}}} (2^^14^^-1) due to limits imposed by {{{OpenDDS::DCPS::SequenceNumber}}} comparisons (see: {{{$DDS_ROOT/dds/DCPS/Definitions.h}}}).
-
-The current implementation provides no rate limiting or flow control; it is possible to overrun the receive buffer which can lead to unrecoverable data loss even if reliability is enabled. Users should either implement their own rate limiting for excessive rates, increase the {{{nak_depth}}} configuration option, and/or increase the OS receive buffer size if needed.
+The current implementation provides no rate limiting or flow control; it is possible to overrun the receive buffer which can lead to unrecoverable data loss even if reliability is enabled. Users should either implement their own rate limiting for excessive rates, increase the {{{nak_depth}}} configuration option, and/or increase the OS receive buffer size if needed. {{{nak_depth}}} should not exceed {{{16383}}} (2^^14^^-1) due to limits imposed by {{{OpenDDS::DCPS::SequenceNumber}}} comparisons (see: {{{$DDS_ROOT/dds/DCPS/Definitions.h}}}).
 
 The current implementation relies on {{{LIVELINESS}}} to periodically send application-level heartbeat messages to aid in detecting reception gaps. If {{{AUTOMATIC_LIVELINESS_QOS}}} (the default) is not used, peers may not detect these gaps in a timely manner leading to unrecoverable data loss.
 
