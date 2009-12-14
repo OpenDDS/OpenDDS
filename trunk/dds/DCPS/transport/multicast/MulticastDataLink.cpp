@@ -24,7 +24,8 @@ MulticastDataLink::MulticastDataLink(MulticastTransport* transport,
                                      MulticastPeer local_peer,
                                      MulticastPeer remote_peer,
                                      bool active)
-  : DataLink(transport, 0), // priority
+  : DataLink(transport,
+             0), // priority
     transport_(transport),
     local_peer_(local_peer),
     remote_peer_(remote_peer),

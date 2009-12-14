@@ -1,3 +1,19 @@
+Mon Dec 14 15:33:57 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/RandomGenerator.cpp:
+        * dds/DCPS/transport/multicast/Multicast.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+        * dds/DCPS/transport/multicast/multicast.ini-dist:
+        * docs/html/multicast/index.html:
+
+          Final corrections and default configuration adjustments.
+
 Mon Dec 14 14:56:03 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/DisjointSequence.h:

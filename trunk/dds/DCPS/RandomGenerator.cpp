@@ -24,7 +24,7 @@ struct RandomSeed {
   RandomSeed() {
     std::srand(static_cast<unsigned>(ACE_OS::time(0)));
   }
-} __random_seed;
+} random_seed;
 
 } // namespace OpenDDS
 } // namespace DCPS

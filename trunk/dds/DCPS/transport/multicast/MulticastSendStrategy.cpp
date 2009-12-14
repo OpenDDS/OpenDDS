@@ -24,7 +24,7 @@ MulticastSendStrategy::MulticastSendStrategy(MulticastDataLink* link)
 void
 MulticastSendStrategy::prepare_header_i()
 {
-  // Tag outgoing packets with our source ID:
+  // Tag outgoing packets with our local peer ID:
   this->header_.source_ = this->link_->local_peer();
 }
 
