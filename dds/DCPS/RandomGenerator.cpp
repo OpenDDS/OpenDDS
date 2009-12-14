@@ -20,11 +20,11 @@
 namespace OpenDDS {
 namespace DCPS {
 
-struct RandomSeed {
-  RandomSeed() {
+struct RandomInitializer {
+  RandomInitializer() {
     std::srand(static_cast<unsigned>(ACE_OS::time(0)));
   }
-} random_seed;
+} random_init;
 
 } // namespace OpenDDS
 } // namespace DCPS
