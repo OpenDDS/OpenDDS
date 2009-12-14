@@ -153,6 +153,16 @@ MonitorDataModel::data( const QModelIndex& index, int role) const
     case Qt::WhatsThisRole:
     default:
       return QVariant();
+
+    case Qt::BackgroundRole:
+      {
+        QVariant value = this->getNode( index)->color( index.column());
+        if( value.value<QColor>().isValid()) {
+          return value;
+        } else {
+          return QVariant();
+        }
+      }
   }
 }
 
@@ -215,12 +225,16 @@ MonitorDataModel::setData(
 //    break;
 
     case Qt::DisplayRole:
+      this->getNode( index)->setData( index.column(), value);
+      break;
+
+    case Qt::BackgroundRole:
+      // QColor(255,191,191);
+      this->getNode( index)->setColor( index.column(), value);
       break;
 
     default: return false;
   }
-
-  this->getNode( index)->setData( index.column(), value);
 
   emit dataChanged( index, index);
   return true;
@@ -236,12 +250,16 @@ MonitorDataModel::setHeaderData(
 {
   switch( role) {
     case Qt::DisplayRole:
+      this->root_->setData( section, value);
+      // this->getNode( index)->setColor( section, QColor(255,255,255));
+      break;
+
+    case Qt::BackgroundRole:
+      this->root_->setColor( section, value);
       break;
 
     default: return false;
   }
-
-  this->root_->setData( section, value);
 
   emit dataChanged( QModelIndex(), QModelIndex());
   return true;

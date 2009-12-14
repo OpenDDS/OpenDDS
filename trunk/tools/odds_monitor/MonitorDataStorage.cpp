@@ -197,6 +197,7 @@ Monitor::MonitorDataStorage::getTransportNode(
     node->parent() = this->getProcessNode( pid, create);
   }
 
+//node->setColor(1,QColor("#ffbfbf"));
   return node;
 }
 
@@ -443,8 +444,30 @@ Monitor::MonitorDataStorage::getNode(
 }
 
 void
+Monitor::MonitorDataStorage::deleteProcessNode( TreeNode* node)
+{
+  this->removeNode( this->processToTreeMap_, node);
+
+  // Remove the process from the host.
+  TreeNode* hostNode = node->parent();
+  hostNode->removeChildren( node->row(), 1);
+
+  // Check and remove the host node if there are no pid nodes remaining
+  // after the removal (no children).
+  if( hostNode->size() == 0) {
+    this->removeNode( this->hostToTreeMap_, hostNode);
+    delete hostNode;
+  }
+
+  delete node;
+
+  // Notify the GUI to update.
+  this->model_->changed();
+}
+
+void
 Monitor::MonitorDataStorage::displayNvp(
-  TreeNode*                    node,
+  TreeNode*                    parent,
   const OpenDDS::DCPS::NVPSeq& data,
   bool                         layoutChanged,
   bool                         dataChanged
@@ -454,7 +477,7 @@ Monitor::MonitorDataStorage::displayNvp(
   int size = data.length();
   for( int index = 0; index < size; ++index) {
     QString name( data[ index].name);
-    int row = node->indexOf( 0, name);
+    int row = parent->indexOf( 0, name);
     if( row == -1) {
       // This is new data, insert it.
       QList<QVariant> list;
@@ -477,13 +500,13 @@ Monitor::MonitorDataStorage::displayNvp(
           list << QString( QObject::tr("<display unimplemented>"));
           break;
       }
-      TreeNode* node = new TreeNode( list, node);
-      node->append( node);
+      TreeNode* node = new TreeNode( list, parent);
+      parent->append( node);
       layoutChanged = true;
 
     } else {
       // This is existing data, update the value.
-      TreeNode* node = (*node)[ row];
+      TreeNode* node = (*parent)[ row];
       switch( data[ index].value._d()) {
         case OpenDDS::DCPS::INTEGER_TYPE:
           node->setData( 1, QString::number( data[ index].value.integer_value()));
@@ -511,7 +534,7 @@ Monitor::MonitorDataStorage::displayNvp(
     this->model_->changed();
 
   } else if( dataChanged) {
-    this->model_->updated( node, 1, (*node)[ node->size()-1], 1);
+    this->model_->updated( parent, 1, (*parent)[ parent->size()-1], 1);
   }
 }
 

@@ -87,26 +87,6 @@ class MonitorData {
 
     /// Modify the layout of the GUI.
     void changed();
- 
-    /// Add a new data element to the model.
-    void addDataElement(
-           const OpenDDS::DCPS::GUID_t& parent,
-           const OpenDDS::DCPS::GUID_t& id,
-           char* value
-         );
- 
-    /// Update the value of a data element in the model.
-    void updateDataElement(
-           const OpenDDS::DCPS::GUID_t& id,
-           char* value
-         );
-
-    /// Update or remove a data element in the model.
-    template< typename DataType>
-    void update( const DataType& data, bool remove = false);
-
-    /// Remove a data element from the model.
-    void removeDataElement( const OpenDDS::DCPS::GUID_t& id);
 
     /// @}
 

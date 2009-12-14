@@ -23,6 +23,13 @@
    <layout class="QGridLayout" name="gridLayout">
     <item row="2" column="0" rowspan="2">
      <widget class="QTreeView" name="repoView">
+      <property name="styleSheet">
+       <string notr="true">
+*[ddsActive=&quot;true&quot;] {
+  background-color: red;
+}
+</string>
+      </property>
       <property name="sortingEnabled">
        <bool>true</bool>
       </property>
@@ -61,7 +68,7 @@
     <item row="1" column="1" rowspan="2">
      <widget class="QGroupBox" name="groupBox">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
@@ -87,6 +94,12 @@
          <height>28</height>
         </rect>
        </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="text">
         <string>Add</string>
        </property>
@@ -102,6 +115,12 @@
          <width>71</width>
          <height>28</height>
         </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
        <property name="text">
         <string>Remove</string>

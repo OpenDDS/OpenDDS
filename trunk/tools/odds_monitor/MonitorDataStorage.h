@@ -147,6 +147,13 @@ class MonitorDataStorage {
     template< typename DataType>
     void update( const DataType& data, bool remove = false);
 
+    /// Completely delete a process node from the model.
+    void deleteProcessNode( TreeNode* node);
+
+    /// Completely delete a tree node from the model.
+    template< class MapType>
+    void deleteNode( MapType& map, TreeNode* node);
+
     /// @}
 
   private:
