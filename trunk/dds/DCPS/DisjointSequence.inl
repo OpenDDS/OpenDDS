@@ -102,7 +102,8 @@ DisjointSequence::high() const
 ACE_INLINE size_t
 DisjointSequence::depth() const
 {
-  return std::abs(high().value_ - low().value_);
+  SequenceNumber sequence(high() - low());
+  return std::abs(sequence.value_);
 }
 
 ACE_INLINE bool
