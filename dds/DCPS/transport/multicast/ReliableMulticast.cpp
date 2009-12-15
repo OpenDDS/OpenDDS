@@ -120,12 +120,6 @@ ReliableMulticast::~ReliableMulticast()
   }
 }
 
-bool
-ReliableMulticast::acked()
-{
-  return this->acked_;
-}
-
 void
 ReliableMulticast::expire_naks()
 {
@@ -206,6 +200,12 @@ ReliableMulticast::send_naks()
 
   // Clear peer repair requests:
   this->nak_peers_.clear();
+}
+
+bool
+ReliableMulticast::acked()
+{
+  return this->acked_;
 }
 
 bool

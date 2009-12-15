@@ -72,10 +72,10 @@ public:
                     bool active);
   ~ReliableMulticast();
 
-  virtual bool acked();
-
   void expire_naks();
   void send_naks();
+
+  virtual bool acked();
 
   virtual bool header_received(const TransportHeader& header);
   virtual void sample_received(ReceivedDataSample& sample);
