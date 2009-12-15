@@ -1,3 +1,12 @@
+Tue Dec 15 23:15:16 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+        * dds/DCPS/DisjointSequence.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Fixed spurious log messages on MULTICAST_NAKACK delivery.
+
 Tue Dec 15 22:01:23 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * README:
