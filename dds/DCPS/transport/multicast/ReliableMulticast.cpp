@@ -146,8 +146,8 @@ ReliableMulticast::expire_naks()
       continue;
     }
 
-    // Skip unrecoverable datagrams; attempt to re-establish a
-    // reasonable baseline to detect future reception gaps:
+    // Skip unrecoverable datagrams if needed; attempt to
+    // re-establish a baseline to detect future reception gaps:
     if (request.second > sequence->second) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: ")
@@ -415,16 +415,18 @@ ReliableMulticast::nakack_received(ACE_Message_Block* control)
   MulticastSequence low;
   serializer >> low;
 
-  ACE_ERROR((LM_ERROR,
-             ACE_TEXT("(%P|%t) ERROR: ")
-             ACE_TEXT("ReliableMulticast::nakack_received: ")
-             ACE_TEXT("unrecoverable samples reported by remote peer: 0x%x!\n"),
-             remote_peer));
-
   // MULTICAST_NAKACK control samples indicate data which cannot be
-  // repaired by a remote peer. Update the sequence map to suppress
-  // future repairs by shifting to a new low-water mark:
-  it->second.shift(low);
+  // repaired by a remote peer; update the sequence map if needed
+  //  to suppress repairs by shifting to a new low-water mark:
+  if (!it->second.seen(low)) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("ReliableMulticast::nakack_received: ")
+               ACE_TEXT("unrecoverable samples reported by remote peer: 0x%x!\n"),
+               remote_peer));
+
+    it->second.shift(low);
+  }
 }
 
 void

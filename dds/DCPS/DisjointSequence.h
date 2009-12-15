@@ -60,6 +60,8 @@ public:
   range_iterator range_begin();
   range_iterator range_end();
 
+  bool seen(SequenceNumber value) const;
+
   void shift(SequenceNumber value);
   void skip(SequenceNumber value);
 

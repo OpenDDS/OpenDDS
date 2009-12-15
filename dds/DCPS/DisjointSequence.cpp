@@ -34,7 +34,7 @@ DisjointSequence::shift(SequenceNumber value)
 {
   value = SequenceNumber(value - 1);  // non-inclusive
 
-  if (value <= low()) return; // nothing to shift
+  if (seen(value)) return; // nothing to shift
 
   this->sequences_.insert(value);
 
@@ -57,10 +57,10 @@ DisjointSequence::skip(SequenceNumber value)
 bool
 DisjointSequence::update(SequenceNumber value)
 {
-  if (value <= low()) return false; // already seen
+  if (seen(value)) return false;  // nothing to update
 
   std::pair<SequenceSet::iterator, bool> pair = this->sequences_.insert(value);
-  if (!pair.second) return false;   // already seen
+  if (!pair.second) return false; // nothing to update
 
   normalize();
 
@@ -70,13 +70,13 @@ DisjointSequence::update(SequenceNumber value)
 bool
 DisjointSequence::update(const SequenceRange& range)
 {
-  if (range.second <= low()) return false;  // already seen
+  if (seen(range.second)) return false; // nothing to update
 
   bool updated(false);
   for (SequenceNumber value(range.first);
        value != range.second + 1; ++value) {
 
-    if (value <= low()) continue; // already seen
+    if (seen(value)) continue;  // nothing to update
 
     this->sequences_.insert(value);
     normalize();
