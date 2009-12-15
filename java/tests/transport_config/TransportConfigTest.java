@@ -114,6 +114,7 @@ public class TransportConfigTest {
         mc.setPortOffset((short) 9000);
         mc.setGroupAddress("224.0.0.1:1234");
         mc.setReliable(false);
+	mc.setSynBackoff(0.5);
         mc.setSynInterval(100);
         mc.setSynTimeout(100);
         mc.setNakDepth(16);
@@ -133,6 +134,7 @@ public class TransportConfigTest {
         assert mc.getPortOffset() == 9000;
         assert mc.getGroupAddress().equals("224.0.0.1:1234");
         assert mc.getReliable() == false;
+	assert mc.getSynBackoff() == 0.5;
         assert mc.getSynInterval() == 100;
         assert mc.getSynTimeout() == 100;
         assert mc.getNakDepth() == 16;

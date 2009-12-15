@@ -1,3 +1,9 @@
+Tue Dec 15 00:03:54 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/tests/transport_config/TransportConfigTest.java:
+
+	  Added missing test for syn_backoff.
+
 Mon Dec 14 23:26:29 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/odds_monitor/Monitor.ui:
