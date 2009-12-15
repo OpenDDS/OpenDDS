@@ -416,8 +416,8 @@ ReliableMulticast::nakack_received(ACE_Message_Block* control)
   serializer >> low;
 
   // MULTICAST_NAKACK control samples indicate data which cannot be
-  // repaired by a remote peer; update the sequence map if needed
-  // to suppress repairs by shifting to a new low-water mark:
+  // repaired by a remote peer; update the sequence map to suppress
+  // repairs by shifting to a new low-water mark if needed:
   if (!it->second.seen(low)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
