@@ -2,7 +2,7 @@ Version 2.1 of OpenDDS.
 
 New to this version are the following changes:
 
-- A new multicast transport is now available which replaces the existing
+- A new multicast transport is available which replaces the existing
   ReliableMulticast and SimpleMcast transports.  For a detailed
   description of the design, configuration, known issues, and potential
   enhancements, see: $DDS_ROOT/docs/html/multicast/index.html.
