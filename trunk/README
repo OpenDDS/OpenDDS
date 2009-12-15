@@ -51,9 +51,9 @@ sales@ociweb.com.
 This release of OpenDDS is based on the DDS Specification formal/07-01-01
 (version 1.2).  It features the following transport protocols:
 
-** TCP
-** Unreliable and reliable multicast
-** UDP
+** TCP/IP
+** UDP/IP
+** IP multicast
 
 OpenDDS has been found to perform better than other similar TAO
 services (notification and real-time event channel) by a factor of two
