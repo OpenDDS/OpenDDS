@@ -71,6 +71,9 @@ class TreeNode {
     /// Remove a value reference node for this data.
     bool removeValueRef( TreeNode* ref);
 
+    /// Reassign all references to this node to a new node.
+    bool reassignValueRefs( TreeNode* node);
+
     /// Value reference data source is no longer valid.
     void staleValueRef();
 
@@ -208,6 +211,11 @@ Monitor::TreeNode::~TreeNode()
   // Cascade delete children.
   qDeleteAll( this->children_);
 
+  // Remove references from this node.
+  if( this->valueSource_) {
+    this->valueSource_->removeValueRef( this);
+  }
+
   // Remove references to this node.
   while( !this->valueRefs_.isEmpty()) {
     this->valueRefs_.takeFirst()->staleValueRef();
@@ -222,7 +230,13 @@ Monitor::TreeNode::setData( int column, const QVariant& data)
     return false;
   }
 
-  this->data_.replace( column, data);
+  if( this->valueSource_) {
+    // Forward new data to the referent.
+    this->valueSource_->setData( column, data);
+
+  } else {
+    this->data_.replace( column, data);
+  }
 
   return true;
 }
@@ -235,14 +249,14 @@ Monitor::TreeNode::setColor( int column, const QVariant& data)
     return false;
   }
 
-  if( this->colors_.count() < column) {
+  if( column < this->colors_.count()) {
+    this->colors_.replace( column, data);
+
+  } else {
     for( int index = this->colors_.count(); index < column; ++index) {
       this->colors_.push_back( QVariant(QColor()));
     }
     this->colors_.insert( column, data);
-
-  } else {
-    this->colors_.replace( column, data);
   }
 
   return true;
@@ -272,11 +286,22 @@ Monitor::TreeNode::removeValueRef( TreeNode* ref)
 }
 
 inline
+bool
+Monitor::TreeNode::reassignValueRefs( TreeNode* node)
+{
+  bool value = !this->valueRefs_.isEmpty();
+  while( !this->valueRefs_.isEmpty()) {
+    node->addValueRef( this->valueRefs_.takeFirst());
+  }
+  return value;
+}
+
+inline
 void
 Monitor::TreeNode::staleValueRef()
 {
-  for( int index = 0; index < this->data_.count(); ++index) {
-    this->data_.replace( index, QString( QObject::tr( "<defunct>")));
+  for( int index = 0; index < this->width(); ++index) {
+    this->data_.insert( index, QString( QObject::tr( "<defunct>")));
     this->setColor( index, QColor("yellow"));
   }
   this->valueSource_ = 0;
@@ -371,14 +396,8 @@ inline
 QVariant
 Monitor::TreeNode::color( int column) const
 {
-  if( this->valueSource_) {
-    // This is a reference node, use the referenced value.
-    return this->valueSource_->color( column);
-
-  } else {
-    // This node contains the value;
-    return this->colors_.value( column);
-  }
+  // Colors are local.
+  return this->colors_.value( column);
 }
 
 inline
@@ -392,7 +411,12 @@ inline
 int
 Monitor::TreeNode::width() const
 {
-  return this->data_.count();
+  if( this->valueSource_) {
+    return this->valueSource_->width();
+
+  } else {
+    return this->data_.count();
+  }
 }
 
 inline

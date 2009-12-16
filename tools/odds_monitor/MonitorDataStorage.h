@@ -163,16 +163,19 @@ class MonitorDataStorage {
     /// Recursively descend a tree and erase the contents from the maps.
     void cleanMaps( TreeNode* node);
 
-    /// Remove a tree node from a map.
+    /// Find a map key for a tree node in the map.
     template< class MapType>
-    void removeNode( MapType& map, TreeNode* node);
+    std::pair< bool, typename MapType::key_type>
+    findKey( MapType& map, TreeNode* node);
 
     /// Convenience type for storing information.
     typedef std::pair< int, TreeNode*> RowNodePair;
 
     /// Uniquely identify processes.
     struct ProcessKey {
-      ProcessKey( const std::string& h, int p) : host( h), pid( p) { }
+      ProcessKey( const std::string& h = "", int p = 0)
+        : host( h), pid( p)
+      { }
       std::string host;
       int         pid;
       bool operator<( const ProcessKey& rhs) const;
@@ -180,7 +183,7 @@ class MonitorDataStorage {
 
     /// Uniquely identify transports.
     struct TransportKey {
-      TransportKey( const std::string& h, int p, int t)
+      TransportKey( const std::string& h = "", int p = 0, int t = 0)
         : host( h), pid( p), transport( t)
       { }
       std::string host;
@@ -192,8 +195,8 @@ class MonitorDataStorage {
     /// Uniquely identify publishers and subscribers.
     struct InstanceKey {
       InstanceKey(
-        const OpenDDS::DCPS::GUID_t g,
-        const DDS::InstanceHandle_t h
+        const OpenDDS::DCPS::GUID_t g = OpenDDS::DCPS::GUID_UNKNOWN,
+        const DDS::InstanceHandle_t h = 0
       ) : guid( g), handle( h)
       { }
       OpenDDS::DCPS::GUID_t guid;
@@ -303,6 +306,22 @@ class MonitorDataStorage {
                 const OpenDDS::DCPS::GUID_t& id,
                 bool&                        create
               );
+
+    /// Manage the link to a transport node reference for a publisher or
+    /// subscriber node.
+    void manageTransportLink(
+           TreeNode* node,
+           int       transport_id,
+           bool&     create
+         );
+
+    /// Manage the link to a topic node reference for an endpoint.
+    void manageTopicLink(
+           TreeNode*                    node,
+           const OpenDDS::DCPS::GUID_t& dp_id,
+           const OpenDDS::DCPS::GUID_t& topic_id,
+           bool&                        create
+         );
 
     /// Display Name/Value pairs in the tree.  Notify the GUI if the
     /// layout or data has changed as well.

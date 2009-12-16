@@ -36,8 +36,6 @@ main( int argc, char** argv)
   // Instantiate and display.
   Monitor::Viewer* viewer = new Monitor::Viewer( options);
   viewer->show();
-
-  ACE_OS::sleep(3); // Development: For emphasis.
   splash.finish( viewer);
 
   // Main GUI processing loop.
