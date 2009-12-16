@@ -11,6 +11,8 @@
 #include "MulticastFactory.h"
 #include "MulticastConfiguration.h"
 
+#include "dds/DCPS/transport/framework/TransportDefs.h"
+
 namespace OpenDDS {
 namespace DCPS {
 

@@ -17,7 +17,6 @@
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #include <dds/DCPS/transport/framework/TransportDefs.h>
-#include <dds/DCPS/transport/multicast/MulticastConfiguration.h>
 #include <performance-tests/DCPS/dummyTCP/DummyTcpConfiguration.h>
 #include <performance-tests/DCPS/dummyTCP/PerformanceTest.h>
 

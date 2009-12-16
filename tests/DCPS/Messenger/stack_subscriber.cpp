@@ -19,7 +19,6 @@
 #include <dds/DCPS/WaitSet.h>
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #include <dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h>
-#include <dds/DCPS/transport/multicast/MulticastConfiguration.h>
 
 #include "DataReaderListener.h"
 #include "MessengerTypeSupportImpl.h"

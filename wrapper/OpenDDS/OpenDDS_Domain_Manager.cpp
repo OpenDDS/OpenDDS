@@ -15,7 +15,6 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/transport/framework/TransportFactory.h>
-#include <dds/DCPS/transport/multicast/MulticastConfiguration.h>
 
 #include <ace/streams.h>
 #include <ace/Get_Opt.h>
