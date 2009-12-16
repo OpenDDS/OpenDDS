@@ -279,5 +279,11 @@ http://download.ociweb.com/OpenDDS/OpenDDS-latest.pdf
   resources.  Any failure reported above the `low' threshold should not be
   considered a true test failure.
 
+** multicast
+
+  Tests using the multicast transport fail on QNX hosts due to problems with
+  IP multicast loopback.  These tests are disabled in the nightly automated
+  build/test.
+
 Note: A list of tests that are run in the nightly automated build/test
       can be found in $DDS_ROOT/bin/dcps_tests.lst
