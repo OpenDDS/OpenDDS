@@ -11,7 +11,12 @@ template< class MapType>
 void
 MonitorDataStorage::deleteNode( MapType& map, TreeNode* node)
 {
-  this->removeNode( map, node);
+  std::pair< bool, typename MapType::key_type> result
+    = this->findKey( map, node);
+  if( result.first) {
+    map.erase( result.second);
+  }
+
   TreeNode* parent = node->parent();
   if( parent) {
     parent->removeChildren( node->row(), 1);
@@ -23,7 +28,7 @@ MonitorDataStorage::deleteNode( MapType& map, TreeNode* node)
   // Notify the GUI to update.
   this->model_->changed();
 }
-
+ 
 template< typename DataType>
 inline
 void
@@ -237,6 +242,7 @@ MonitorDataStorage::update< OpenDDS::DCPS::TopicReport>(
   }
 
   // Topic name value.
+  TreeNode* nameNode = 0;
   QString nameLabel( QObject::tr( "Topic Name"));
   int row = node->indexOf( 0, nameLabel);
   if( row == -1) {
@@ -244,17 +250,25 @@ MonitorDataStorage::update< OpenDDS::DCPS::TopicReport>(
     QList<QVariant> list;
     list << nameLabel
          << QString( QObject::tr( static_cast<const char*>(data.topic_name)));
-    TreeNode* nameNode = new TreeNode( list, node);
+    nameNode = new TreeNode( list, node);
     node->append( nameNode);
     layoutChanged = true;
 
   } else {
     // Existing data, update.
-    TreeNode* nameNode = (*node)[ row];
+    /// @TODO: check to see if we are really changing the value.
+    nameNode = (*node)[ row];
     nameNode->setData(
       1,
       QString( QObject::tr( static_cast<const char*>(data.topic_name)))
     );
+    dataChanged = true;
+  }
+
+  // Move any references to this topic node to the more useful name node
+  // just obtained.
+  if( node->reassignValueRefs( nameNode)) {
+nameNode->setColor( 1, QColor("#bfffbf"));
     dataChanged = true;
   }
 
@@ -311,43 +325,30 @@ MonitorDataStorage::update< OpenDDS::DCPS::PublisherReport>(
   ));
 
   // Retain knowledge of node insertions, updates, and deletions.
-  bool layoutChanged = !remove; // Updated by getEndpointNode()
+  bool create        = !remove;
+  bool layoutChanged = false;
   bool dataChanged   = false;
 
   InstanceKey key( data.dp_id, data.handle);
   TreeNode* node = this->getInstanceNode(
                      std::string( "Publisher"),
                      key,
-                     layoutChanged
+                     create
                    );
   if( !node) {
     return;
   }
+  layoutChanged |= create;
 
   if( remove) {
     this->deleteNode( this->instanceToTreeMap_, node);
     return;
   }
 
-  // Transport Id value.
-  QString label( QObject::tr( "Transport Id"));
-  QString value = QString("0x%1")
-                  .arg( data.transport_id, 8, 16, QLatin1Char('0'));
-  int row = node->indexOf( 0, label);
-  if( row == -1) {
-    // New data, insert.
-    QList<QVariant> list;
-    list << label << value;
-    TreeNode* idNode = new TreeNode( list, node);
-    node->append( idNode);
-    layoutChanged = true;
-
-  } else {
-    // Existing data, update.
-    TreeNode* idNode = (*node)[ row];
-    idNode->setData( 1, value);
-    dataChanged = true;
-  }
+  // TRANSPORT
+  create = true;
+  this->manageTransportLink( node, data.transport_id, create);
+  layoutChanged |= create;
 
   // WRITERS
   // NOTE: The following makes sure that any new DataWriters are added to
@@ -397,43 +398,30 @@ MonitorDataStorage::update< OpenDDS::DCPS::SubscriberReport>(
   ));
 
   // Retain knowledge of node insertions, updates, and deletions.
-  bool layoutChanged = !remove; // Updated by getEndpointNode()
+  bool create        = !remove;
+  bool layoutChanged = false;
   bool dataChanged   = false;
 
   InstanceKey key( data.dp_id, data.handle);
   TreeNode* node = this->getInstanceNode(
                      std::string( "Subscriber"),
                      key,
-                     layoutChanged
+                     create
                    );
   if( !node) {
     return;
   }
+  layoutChanged |= create;
 
   if( remove) {
     this->deleteNode( this->instanceToTreeMap_, node);
     return;
   }
 
-  // Transport Id value.
-  QString label( QObject::tr( "Transport Id"));
-  QString value = QString("0x%1")
-                  .arg( data.transport_id, 8, 16, QLatin1Char('0'));
-  int row = node->indexOf( 0, label);
-  if( row == -1) {
-    // New data, insert.
-    QList<QVariant> list;
-    list << label << value;
-    TreeNode* idNode = new TreeNode( list, node);
-    node->append( idNode);
-    layoutChanged = true;
-
-  } else {
-    // Existing data, update.
-    TreeNode* idNode = (*node)[ row];
-    idNode->setData( 1, value);
-    dataChanged = true;
-  }
+  // TRANSPORT
+  create = true;
+  this->manageTransportLink( node, data.transport_id, create);
+  layoutChanged |= create;
 
   // READERS
   // NOTE: The following makes sure that any new DataReaders are added to
@@ -442,7 +430,7 @@ MonitorDataStorage::update< OpenDDS::DCPS::SubscriberReport>(
   //       DataReaderReport updates.
   int size = data.readers.length();
   for( int index = 0; index < size; ++index) {
-    bool create = true;
+    create = true;
     (void)this->getEndpointNode(
       std::string( "Reader"),
       key,
@@ -511,50 +499,9 @@ MonitorDataStorage::update< OpenDDS::DCPS::DataWriterReport>(
   }
 
   // TOPIC
-  // N.B. This topic id value is for reference and are not connected to
-  //      the information containing Topic nodes which are children of
-  //      the DomainParticipant nodes.  The values should correspond,
-  //      but we do not duplicate the data here.
-  // N.B. A consequence of this is that out-of-order processing, where
-  //      the DataWriterReport is processed prior to the TopicReport will
-  //      result in the Topic GUID being displayed instead of the Topic
-  //      name.  There is no mechanism currently to update this value
-  //      when the TopicReport is received.
-
-  // Find the actual topic, if possible.  Use the name as the topic
-  // value if it can be found, or the string-ified GUID if not.
-  OpenDDS::DCPS::GuidConverter converter( data.topic_id);
-  QString topicValue( std::string(converter).c_str());
-  TreeNode* topicNode = this->getNode(
-                          std::string( "Topic"),
-                          data.dp_id,
-                          data.topic_id,
-                          create
-                        );
-  if( topicNode) {
-    QString nameLabel( QObject::tr( "Topic Name"));
-    int row = topicNode->indexOf( 0, nameLabel);
-    if( row != -1) {
-      topicValue = (*topicNode)[ row]->column( 1).toString();
-    }
-  }
-
-  // Now find or create a child node to hold the topic name.
-  QString topicLabel( QObject::tr( "Topic"));
-  int row = node->indexOf( 0, topicLabel);
-  if( row == -1) {
-    // New data, insert.
-    QList<QVariant> list;
-    list << topicLabel << topicValue;
-    TreeNode* valueNode = new TreeNode( list, node);
-    node->append( valueNode);
-    layoutChanged = true;
-
-  } else {
-    // Existing data, update.
-    (*node)[ row]->setData( 1, topicValue);
-    dataChanged = true;
-  }
+  create = true;
+  this->manageTopicLink( node, data.dp_id, data.topic_id, create);
+  layoutChanged |= create;
 
   // ASSOCIATIONS
   int size = data.associations.length();
@@ -675,50 +622,9 @@ MonitorDataStorage::update< OpenDDS::DCPS::DataReaderReport>(
   }
 
   // TOPIC
-  // N.B. This topic id value is for reference and are not connected to
-  //      the information containing Topic nodes which are children of
-  //      the DomainParticipant nodes.  The values should correspond,
-  //      but we do not duplicate the data here.
-  // N.B. A consequence of this is that out-of-order processing, where
-  //      the DataWriterReport is processed prior to the TopicReport will
-  //      result in the Topic GUID being displayed instead of the Topic
-  //      name.  There is no mechanism currently to update this value
-  //      when the TopicReport is received.
-
-  // Find the actual topic, if possible.  Use the name as the topic
-  // value if it can be found, or the string-ified GUID if not.
-  OpenDDS::DCPS::GuidConverter converter( data.topic_id);
-  QString topicValue( std::string(converter).c_str());
-  TreeNode* topicNode = this->getNode(
-                          std::string( "Topic"),
-                          data.dp_id,
-                          data.topic_id,
-                          create
-                        );
-  if( topicNode) {
-    QString nameLabel( QObject::tr( "Topic Name"));
-    int row = topicNode->indexOf( 0, nameLabel);
-    if( row != -1) {
-      topicValue = (*topicNode)[ row]->column( 1).toString();
-    }
-  }
-
-  // Now find or create a child node to hold the topic name.
-  QString topicLabel( QObject::tr( "Topic"));
-  int row = node->indexOf( 0, topicLabel);
-  if( row == -1) {
-    // New data, insert.
-    QList<QVariant> list;
-    list << topicLabel << topicValue;
-    TreeNode* valueNode = new TreeNode( list, node);
-    node->append( valueNode);
-    layoutChanged = true;
-
-  } else {
-    // Existing data, update.
-    (*node)[ row]->setData( 1, topicValue);
-    dataChanged = true;
-  }
+  create = true;
+  this->manageTopicLink( node, data.dp_id, data.topic_id, create);
+  layoutChanged |= create;
 
   // ASSOCIATIONS
   int size = data.associations.length();
@@ -846,5 +752,139 @@ MonitorDataStorage::update< OpenDDS::DCPS::TransportReport>(
 
   // NAME / VALUE DATA, notify GUI of changes.
   this->displayNvp( node, data.values, layoutChanged, dataChanged);
+}
+
+template<>
+inline
+void
+MonitorDataStorage::update< DDS::ParticipantBuiltinTopicData>(
+  const DDS::ParticipantBuiltinTopicData& data,
+  bool remove
+)
+{
+  //  struct ParticipantBuiltinTopicData {
+  //    BuiltinTopicKey_t key;
+  //    UserDataQosPolicy user_data;
+  //  };
+
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
+    ACE_TEXT("%s Participant Builtin Topic, key: ")
+    ACE_TEXT("[0x%x, 0x%x, 0x%x].\n"),
+    remove? "removing": "processing",
+    data.key.value[0], data.key.value[1], data.key.value[2]
+  ));
+}
+
+template<>
+inline
+void
+MonitorDataStorage::update< DDS::TopicBuiltinTopicData>(
+  const DDS::TopicBuiltinTopicData& data,
+  bool remove
+)
+{
+  //  struct TopicBuiltinTopicData {
+  //    BuiltinTopicKey_t key;
+  //    string name;
+  //    string type_name;
+  //    DurabilityQosPolicy durability;
+  //    DurabilityServiceQosPolicy durability_service;
+  //    DeadlineQosPolicy deadline;
+  //    LatencyBudgetQosPolicy latency_budget;
+  //    LivelinessQosPolicy liveliness;
+  //    ReliabilityQosPolicy reliability;
+  //    TransportPriorityQosPolicy transport_priority;
+  //    LifespanQosPolicy lifespan;
+  //    DestinationOrderQosPolicy destination_order;
+  //    HistoryQosPolicy history;
+  //    ResourceLimitsQosPolicy resource_limits;
+  //    OwnershipQosPolicy ownership;
+  //    TopicDataQosPolicy topic_data;
+  //  };
+
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
+    ACE_TEXT("%s Topic Builtin Topic, key: ")
+    ACE_TEXT("[0x%x, 0x%x, 0x%x].\n"),
+    remove? "removing": "processing",
+    data.key.value[0], data.key.value[1], data.key.value[2]
+  ));
+}
+
+template<>
+inline
+void
+MonitorDataStorage::update< DDS::PublicationBuiltinTopicData>(
+  const DDS::PublicationBuiltinTopicData& data,
+  bool remove
+)
+{
+  //  struct PublicationBuiltinTopicData {
+  //    BuiltinTopicKey_t key;
+  //    BuiltinTopicKey_t participant_key;
+  //    string topic_name;
+  //    string type_name;
+  //    DurabilityQosPolicy durability;
+  //    DurabilityServiceQosPolicy durability_service;
+  //    DeadlineQosPolicy deadline;
+  //    LatencyBudgetQosPolicy latency_budget;
+  //    LivelinessQosPolicy liveliness;
+  //    ReliabilityQosPolicy reliability;
+  //    LifespanQosPolicy lifespan;
+  //    UserDataQosPolicy user_data;
+  //    OwnershipQosPolicy ownership;
+  //    OwnershipStrengthQosPolicy ownership_strength;
+  //    DestinationOrderQosPolicy destination_order;
+  //    PresentationQosPolicy presentation;
+  //    PartitionQosPolicy partition;
+  //    TopicDataQosPolicy topic_data;
+  //    GroupDataQosPolicy group_data;
+  //  };
+
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
+    ACE_TEXT("%s Publication Builtin Topic, key: ")
+    ACE_TEXT("[0x%x, 0x%x, 0x%x].\n"),
+    remove? "removing": "processing",
+    data.key.value[0], data.key.value[1], data.key.value[2]
+  ));
+}
+
+template<>
+inline
+void
+MonitorDataStorage::update< DDS::SubscriptionBuiltinTopicData>(
+  const DDS::SubscriptionBuiltinTopicData& data,
+  bool remove
+)
+{
+  //  struct SubscriptionBuiltinTopicData {
+  //    BuiltinTopicKey_t key;
+  //    BuiltinTopicKey_t participant_key;
+  //    string topic_name;
+  //    string type_name;
+  //    DurabilityQosPolicy durability;
+  //    DeadlineQosPolicy deadline;
+  //    LatencyBudgetQosPolicy latency_budget;
+  //    LivelinessQosPolicy liveliness;
+  //    ReliabilityQosPolicy reliability;
+  //    OwnershipQosPolicy ownership;
+  //    DestinationOrderQosPolicy destination_order;
+  //    UserDataQosPolicy user_data;
+  //    TimeBasedFilterQosPolicy time_based_filter;
+  //    PresentationQosPolicy presentation;
+  //    PartitionQosPolicy partition;
+  //    TopicDataQosPolicy topic_data;
+  //    GroupDataQosPolicy group_data;
+  //  };
+
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
+    ACE_TEXT("%s Subscription Builtin Topic, key: ")
+    ACE_TEXT("[0x%x, 0x%x, 0x%x].\n"),
+    remove? "removing": "processing",
+    data.key.value[0], data.key.value[1], data.key.value[2]
+  ));
 }
 

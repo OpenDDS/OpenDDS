@@ -6,7 +6,9 @@
 #include "MonitorDataStorage.h"
 #include "Options.h"
 
+#include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 #include "dds/monitor/monitorTypeSupportImpl.h"
+#include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/Qos_Helper.h"
@@ -15,6 +17,20 @@
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
 
 #include <sstream>
+
+namespace { // Anonymous namespace for file scope.
+
+  /// Type Id values for dispatching Builtin Topic samples.
+  /// @note This must not conflict with the OpenDDS::DCPS::ReportType
+  ///       enumeration.
+  enum BuiltinReportType {
+    BUILTIN_PARTICIPANT_REPORT_TYPE = OpenDDS::DCPS::TRANSPORT_REPORT_TYPE + 1,
+    BUILTIN_TOPIC_REPORT_TYPE,
+    BUILTIN_PUBLICATION_REPORT_TYPE,
+    BUILTIN_SUBSCRIPTION_REPORT_TYPE
+  };
+
+} // End of anonymous namespace
 
 Monitor::MonitorTask::MonitorTask(
   MonitorDataStorage* data,
@@ -256,6 +272,8 @@ Monitor::MonitorTask::svc()
       ));
     }
 
+    // Clear previous conditions.
+    conditions.length(0);
     if( DDS::RETCODE_OK != this->waiter_->wait( conditions, timeout)) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: MonitorTask::svc() - ")
@@ -284,6 +302,13 @@ Monitor::MonitorTask::svc()
       DDS::StatusCondition_var condition
         = DDS::StatusCondition::_narrow( conditions[ index].in());
       if( !CORBA::is_nil( condition.in())) {
+        if( this->options_.verbose()) {
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) MonitorTask::svc() - ")
+            ACE_TEXT("processing condition for instance %d.\n"),
+            condition->get_entity()->get_instance_handle()
+          ));
+        }
         // Its a CommunicationStatus, process inbound data.
         DDS::DataReader_var reader
           = DDS::DataReader::_narrow( condition->get_entity());
@@ -450,7 +475,7 @@ Monitor::MonitorTask::setActiveRepo( RepoKey key)
     ));
   }
 
-  // Create each subscription and attach them to the waiter.
+  // Create each instrumentation subscription and attach them to the waiter.
 
   this->createSubscription<
           OpenDDS::DCPS::ServiceParticipantReportTypeSupportImpl>(
@@ -519,6 +544,24 @@ Monitor::MonitorTask::setActiveRepo( RepoKey key)
     ));
   }
 
+  // Create each builtin topic subscription and attach them to the waiter.
+
+  this->createBuiltinSubscription(
+          OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
+          BUILTIN_PARTICIPANT_REPORT_TYPE);
+
+  this->createBuiltinSubscription(
+          OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC,
+          BUILTIN_TOPIC_REPORT_TYPE);
+
+  this->createBuiltinSubscription(
+          OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC,
+          BUILTIN_PUBLICATION_REPORT_TYPE);
+
+  this->createBuiltinSubscription(
+          OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC,
+          BUILTIN_SUBSCRIPTION_REPORT_TYPE);
+
   // Yield control.
   {
     ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, false);
@@ -578,7 +621,35 @@ Monitor::MonitorTask::createSubscription(
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) MonitorTask::createSubscription() - ")
-      ACE_TEXT("installed and mapped instance %d to type %d.\n"),
+      ACE_TEXT("topic %C installed and mapped instance %d to type %d.\n"),
+      topicName,
+      reader->get_instance_handle(),
+      type
+    ));
+  }
+}
+
+void
+Monitor::MonitorTask::createBuiltinSubscription(
+  const char* topicName,
+  int         type
+)
+{
+  DDS::Subscriber_var subscriber
+    = this->participant_->get_builtin_subscriber();
+  DDS::DataReader_var reader
+    = subscriber->lookup_datareader( topicName);
+
+  DDS::StatusCondition_var status = reader->get_statuscondition();
+  status->set_enabled_statuses( DDS::DATA_AVAILABLE_STATUS);
+  this->waiter_->attach_condition( status.in());
+  this->handleTypeMap_[ reader->get_instance_handle()] = type;
+
+  if( this->options_.verbose()) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) MonitorTask::createBuiltinSubscription() - ")
+      ACE_TEXT("topic %C installed and mapped instance %d to type %d.\n"),
+      topicName,
       reader->get_instance_handle(),
       type
     ));
@@ -678,7 +749,43 @@ Monitor::MonitorTask::dispatchReader( DDS::DataReader_ptr reader)
             reader);
       }
       break;
-    
+
+    case BUILTIN_PARTICIPANT_REPORT_TYPE:
+      {
+        this->dataUpdate<
+          DDS::ParticipantBuiltinTopicDataDataReader,
+          DDS::ParticipantBuiltinTopicData>(
+            reader);
+      }
+      break;
+
+    case BUILTIN_TOPIC_REPORT_TYPE:
+      {
+        this->dataUpdate<
+          DDS::TopicBuiltinTopicDataDataReader,
+          DDS::TopicBuiltinTopicData>(
+            reader);
+      }
+      break;
+
+    case BUILTIN_PUBLICATION_REPORT_TYPE:
+      {
+        this->dataUpdate<
+          DDS::PublicationBuiltinTopicDataDataReader,
+          DDS::PublicationBuiltinTopicData>(
+            reader);
+      }
+      break;
+
+    case BUILTIN_SUBSCRIPTION_REPORT_TYPE:
+      {
+        this->dataUpdate<
+          DDS::SubscriptionBuiltinTopicDataDataReader,
+          DDS::SubscriptionBuiltinTopicData>(
+            reader);
+      }
+      break;
+
     default:
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: MonitorTask::dispatchReader() - ")
@@ -700,8 +807,9 @@ Monitor::MonitorTask::dataUpdate(
     = ReaderType::_narrow( reader);
   if( CORBA::is_nil( typedReader.in())) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: InboundData::process() - ")
-      ACE_TEXT("failed to narrow the reader.\n")
+      ACE_TEXT("(%P|%t) ERROR: MonitorTask::dataUpdate() - ")
+      ACE_TEXT("failed to narrow the reader for instance %d.\n"),
+      reader->get_instance_handle()
     ));
     return;
   }

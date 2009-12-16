@@ -61,16 +61,41 @@ Monitor::MonitorDataStorage::cleanMaps( TreeNode* node)
   }
 
   // Now remove ourselves from all the maps.
-  this->removeNode( this->guidToTreeMap_, node);
-  this->removeNode( this->hostToTreeMap_, node);
-  this->removeNode( this->processToTreeMap_, node);
-  this->removeNode( this->instanceToTreeMap_, node);
-  this->removeNode( this->transportToTreeMap_, node);
+
+  std::pair< bool, GuidToTreeMap::key_type> gResult
+    = this->findKey( this->guidToTreeMap_, node);
+  if( gResult.first) {
+    this->guidToTreeMap_.erase( gResult.second);
+  }
+
+  std::pair< bool, HostToTreeMap::key_type> hResult
+    = this->findKey( this->hostToTreeMap_, node);
+  if( hResult.first) {
+    this->hostToTreeMap_.erase( hResult.second);
+  }
+
+  std::pair< bool, ProcessToTreeMap::key_type> pResult
+    = this->findKey( this->processToTreeMap_, node);
+  if( pResult.first) {
+    this->processToTreeMap_.erase( pResult.second);
+  }
+
+  std::pair< bool, InstanceToTreeMap::key_type> iResult
+    = this->findKey( this->instanceToTreeMap_, node);
+  if( iResult.first) {
+    this->instanceToTreeMap_.erase( iResult.second);
+  }
+
+  std::pair< bool, TransportToTreeMap::key_type> tResult
+    = this->findKey( this->transportToTreeMap_, node);
+  if( tResult.first) {
+    this->transportToTreeMap_.erase( tResult.second);
+  }
 }
 
 template< class MapType>
-void
-Monitor::MonitorDataStorage::removeNode( MapType& map, TreeNode* node)
+std::pair< bool, typename MapType::key_type>
+Monitor::MonitorDataStorage::findKey( MapType& map, TreeNode* node)
 {
   // This search is predicated on a node only being present once in any
   // tree.
@@ -79,10 +104,10 @@ Monitor::MonitorDataStorage::removeNode( MapType& map, TreeNode* node)
        current != map.end();
        ++current) {
     if( node == current->second.second) {
-      map.erase( current);
-      break;
+      return std::make_pair( true, current->first);
     }
   }
+  return std::make_pair( false, typename MapType::key_type());
 }
 
 Monitor::TreeNode*
@@ -444,9 +469,171 @@ Monitor::MonitorDataStorage::getNode(
 }
 
 void
+Monitor::MonitorDataStorage::manageTransportLink(
+  TreeNode* node,
+  int       transport_id,
+  bool&     create
+)
+{
+  // Start by finding the participant node.
+  TreeNode* processNode = node->parent();
+  if( processNode) {
+    // And follow it to the actual process node.
+    processNode = processNode->parent();
+
+  } else {
+    // Horribly corrupt model, something oughta been done about it!
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: MonitorDataStorage::manageTransportLink() - ")
+      ACE_TEXT("unable to locate the ancestor process node!\n")
+    ));
+    return;
+  }
+
+  // Then finds its key in the maps.
+  ProcessKey processKey;
+  std::pair< bool, ProcessKey> pResult
+    = this->findKey( this->processToTreeMap_, processNode);
+  if( pResult.first) {
+    processKey = pResult.second;
+
+  } else {
+    // Horribly corrupt model, something oughta been done about it!
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: MonitorDataStorage::manageTransportLink() - ")
+      ACE_TEXT("unable to locate the process node in the maps!\n")
+    ));
+    return;
+  }
+
+  // Now we have enough information to build a TransportKey and find or
+  // create a transport node for our Id value.
+  TransportKey transportKey(
+                 processKey.host,
+                 processKey.pid,
+                 transport_id
+               );
+  TreeNode* transportNode = this->getTransportNode( transportKey, create);
+  if( !node) {
+    return;
+  }
+
+  // Transport Id display.
+  QString label( QObject::tr( "Transport Id"));
+  int row = node->indexOf( 0, label);
+  if( row == -1) {
+    // New entry, add a reference to the actual transport node.
+    QList<QVariant> list;
+    list << label << QString( QObject::tr("<error>"));;
+    TreeNode* idNode = new TreeNode( list, node);
+idNode->setColor( 1, QColor("#bfbfff"));
+    node->append( idNode);
+    transportNode->addValueRef( idNode);
+transportNode->setColor( 1, QColor("#bfffbf"));
+    create = true;
+  }
+}
+
+void
+Monitor::MonitorDataStorage::manageTopicLink(
+  TreeNode*                    node,
+  const OpenDDS::DCPS::GUID_t& dp_id,
+  const OpenDDS::DCPS::GUID_t& topic_id,
+  bool&                        create
+)
+{
+  // This gets a bit tedious.  Here are the cases:
+  // 1) We currently have no reference, and found a Topic node to
+  //    reference:
+  //    - attach a reference to the topic node;
+  // 2) We currently have no reference, and found a Name node to
+  //    reference:
+  //    - attach a reference to the name node;
+  // 3) We currently have a Topic node referenced, and found the same
+  //    topic node to reference:
+  //    - nothing to do;
+  // 4) We currently have a Topic node referenced, and found a different
+  //    Topic node to reference:
+  //    - detach previous reference and reattach to new topic node;
+  // 5) We currently have a Topic node referenced, but were able to find
+  //    a name node to reference:
+  //    - detach previous reference and reattach to new name node;
+  // 6) We currently have a Name node referenced, and found the same name
+  //    node to reference:
+  //    - nothing to do;
+  // 7) We currently have a Name node referenced, and found a different
+  //    name node to reference:
+  //    - detach previous reference and reattach to new name node;
+  // 8) We currently have a Name node referenced, and found a different
+  //    Topic node to reference:
+  //    - detach previous reference and reattach to new topic node.
+  //
+  // Note that cases (4), (7), and (8) indicate inconsistent data reports
+  // and are error conditions.  We chose to not handle these cases.
+  // Cases (3) and (6) require no action, so the only code paths we need
+  // to consider are for cases (1), (2), and (5).
+
+  // Find the actual topic.
+  TreeNode* topicNode = this->getNode(
+                          std::string( "Topic"),
+                          dp_id,
+                          topic_id,
+                          create
+                        );
+  if( !topicNode) {
+    return;
+  }
+
+  // Find the topic name to reference instead of the GUID value.
+  TreeNode* nameNode = 0;
+  QString nameLabel( QObject::tr( "Topic Name"));
+  int row = topicNode->indexOf( 0, nameLabel);
+  if( row != -1) {
+    nameNode = (*topicNode)[ row];
+  }
+
+  // Check for an existing Topic entry.
+  QString topicLabel( QObject::tr( "Topic"));
+  int topicRow = node->indexOf( 0, topicLabel);
+  if( nameNode && topicRow != -1) {
+    // Case 5: We have a topic reference and found a name reference,
+    //         remove the existing topic reference
+    TreeNode* topicRef = (*node)[ topicRow];
+    if( topicRef && topicRef->valueSource()) {
+      topicRef->valueSource()->removeValueRef( topicRef);
+    }
+//  node->removeChildren( topicRow, 1); // DEVELOPMENT: don't delete to show stale data.
+  }
+
+  // The node to install.
+  TreeNode* refNode = nameNode;
+  if( !refNode) {
+    refNode = topicNode;
+  }
+
+  // Check to see if we need to create a name entry.
+  int nameRow  = node->indexOf( 0, nameLabel);
+  if( nameRow == -1) {
+    // New entry, add a reference to the topic or its name.
+    QList<QVariant> list;
+    list << topicLabel << QString( QObject::tr("<error>"));
+    TreeNode* idNode = new TreeNode( list, node);
+idNode->setColor( 1, QColor("#bfbfff"));
+    node->append( idNode);
+    refNode->addValueRef( idNode);
+refNode->setColor( 1, QColor("#bfffbf"));
+    create = true;
+  }
+}
+
+void
 Monitor::MonitorDataStorage::deleteProcessNode( TreeNode* node)
 {
-  this->removeNode( this->processToTreeMap_, node);
+  std::pair< bool, ProcessToTreeMap::key_type> pResult
+    = this->findKey( this->processToTreeMap_, node);
+  if( pResult.first) {
+    this->processToTreeMap_.erase( pResult.second);
+  }
 
   // Remove the process from the host.
   TreeNode* hostNode = node->parent();
@@ -455,7 +642,11 @@ Monitor::MonitorDataStorage::deleteProcessNode( TreeNode* node)
   // Check and remove the host node if there are no pid nodes remaining
   // after the removal (no children).
   if( hostNode->size() == 0) {
-    this->removeNode( this->hostToTreeMap_, hostNode);
+    std::pair< bool, HostToTreeMap::key_type> hResult
+      = this->findKey( this->hostToTreeMap_, hostNode);
+    if( hResult.first) {
+      this->hostToTreeMap_.erase( hResult.second);
+    }
     delete hostNode;
   }
 

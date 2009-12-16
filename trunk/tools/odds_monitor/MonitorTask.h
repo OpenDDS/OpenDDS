@@ -88,6 +88,12 @@ class MonitorTask : public ACE_Task_Base {
            int                 type
          ); 
 
+    /// Create subscriptions for Builtin Topics.
+    void createBuiltinSubscription(
+           const char* topicName,
+           int         type
+         );
+
     /// Terminate the current instrumentation processing.
     void stopInstrumentation();
 
