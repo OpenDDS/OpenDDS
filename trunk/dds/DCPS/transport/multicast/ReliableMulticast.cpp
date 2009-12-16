@@ -14,6 +14,7 @@
 #include "dds/DCPS/transport/framework/TransportSendBuffer.h"
 
 #include <cmath>
+#include <cstdlib>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -77,8 +78,10 @@ NakWatchdog::next_interval()
   MulticastConfiguration* config = this->link_->config();
 
   ACE_Time_Value interval(config->nak_interval_);
+
   // Apply random backoff to minimize potential collisions:
-  interval *= (++this->random_ + 1.0);
+  interval *= static_cast<double>(std::rand()) /
+              static_cast<double>(RAND_MAX) + 1.0;
 
   return interval;
 }

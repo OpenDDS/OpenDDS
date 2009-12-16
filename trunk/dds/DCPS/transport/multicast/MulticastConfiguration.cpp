@@ -10,6 +10,8 @@
 #include "MulticastConfiguration.h"
 #include "MulticastLoader.h"
 
+#include "dds/DCPS/transport/framework/TransportDefs.h"
+
 namespace {
 
 const bool DEFAULT_TO_IPV6(false);

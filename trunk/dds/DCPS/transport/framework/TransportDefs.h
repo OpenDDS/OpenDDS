@@ -155,16 +155,20 @@ typedef std::vector <TransportIdType> TransportIdList;
 typedef ACE_UINT64  DataLinkIdType;
 
 // Note: The range 0xFFFFFF00 to 0xFFFFFFFF is reserved for transport
-//       DEFAULT_<transport>_CONFIG values. If a new transport is
-//       implemented, the default id of the new transport need be
+//       DEFAULT_<transport>_ID values. If a new transport is
+//       implemented, the default ID of the new transport must be
 //       defined here.
 const TransportIdType DEFAULT_SIMPLE_TCP_ID = 0xFFFFFF00;
 const TransportIdType DEFAULT_SIMPLE_UDP_ID = 0xFFFFFF01;
 const TransportIdType DEFAULT_SIMPLE_MCAST_PUB_ID = 0xFFFFFF02;
 const TransportIdType DEFAULT_SIMPLE_MCAST_SUB_ID = 0xFFFFFF03;
-const TransportIdType DEFAULT_RELIABLE_MULTICAST_PUB_ID = 0xFFFFFF04;
-const TransportIdType DEFAULT_RELIABLE_MULTICAST_SUB_ID = 0xFFFFFF05;
+
 const TransportIdType DEFAULT_DUMMY_TCP_ID = 0xFFFFFF06;
+
+// The default multicast ID forces the group address selection
+// heuristic to resolve port number 49152; this is the minimal
+// port defined in the dynamic/private range [IANA 2009-11-16].
+const TransportIdType DEFAULT_MULTICAST_ID = 0xFFFFFF08;
 
 /// Return code type for send_control() operations.
 enum SendControlStatus {
