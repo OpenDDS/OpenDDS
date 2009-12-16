@@ -283,7 +283,7 @@ http://download.ociweb.com/OpenDDS/OpenDDS-latest.pdf
 
   Tests using the multicast transport fail on QNX hosts due to problems with
   IP multicast loopback.  These tests are disabled in the nightly automated
-  build/test.
+  build/test for QNX hosts.
 
 Note: A list of tests that are run in the nightly automated build/test
       can be found in $DDS_ROOT/bin/dcps_tests.lst
