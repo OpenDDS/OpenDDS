@@ -29,7 +29,11 @@ class Viewer : public QMainWindow {
     void newRepo( const QString& ior);
     void doSort( int index);
 
+    /// Translate index to column to signal the view to resize the column.
+    void itemExpanded( const QModelIndex& item);
+
   protected:
+    /// Close action.
     void closeEvent( QCloseEvent* event = 0);
 
   private:

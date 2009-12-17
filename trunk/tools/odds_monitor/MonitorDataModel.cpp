@@ -11,6 +11,7 @@
 #include "TreeNode.h"
 
 #include <QtCore/QStringList>
+#include <QtGui/QTreeView>
 
 namespace Monitor {
 
@@ -47,6 +48,11 @@ MonitorDataModel::updated(
   QModelIndex topLeft     = this->index( left,  lcol);
   QModelIndex bottomRight = this->index( right, rcol);
   emit dataChanged( topLeft, bottomRight);
+
+  QTreeView* viewer = static_cast<QTreeView*>(this->QObject::parent());
+  for( int column = lcol; column <= rcol; ++column) {
+    viewer->resizeColumnToContents( column);
+  }
 }
 
 void
@@ -54,6 +60,9 @@ MonitorDataModel::updated( TreeNode* node, int column)
 {
   QModelIndex index = this->index( node, column);
   emit dataChanged( index, index);
+
+  QTreeView* viewer = static_cast<QTreeView*>(this->QObject::parent());
+  viewer->resizeColumnToContents( column);
 }
 
 void

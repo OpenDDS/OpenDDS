@@ -32,21 +32,40 @@ Viewer::Viewer( const Options& options, QMainWindow* parent)
  : QMainWindow( parent),
    options_( options),
    dataSource_( 0),
-   model_( new MonitorDataModel())
+   model_( 0)
 {
   // Initialize the GUI and connect the signals and slots.
   this->ui.setupUi( this);
+
+  //
+  // SIGNAL to SLOT connections (GUI to behavior connections).
+  //
+
+  // Add a repository from button.
   connect( this->ui.repoAddButton,    SIGNAL(clicked()), this, SLOT(addRepo()));
+
+  // Remove a repository from button.
   connect( this->ui.repoRemoveButton, SIGNAL(clicked()), this, SLOT(removeRepo()));
+
+  // Quit from button.
   connect( this->ui.quitButton,       SIGNAL(clicked()), this, SLOT(close()));
 
+  // Combo box selection change attaches to different repository.
   connect( this->ui.repoSelection, SIGNAL(currentIndexChanged( const QString&)),
            this,                   SLOT(newRepo( const QString&)));
 
+  // Clicking on header sorts column.
   connect( this->ui.repoView->header(), SIGNAL(sectionClicked(int)),
            this,                        SLOT(doSort(int)));
 
+  // Expanding tree node resizes column
+  connect( this->ui.repoView, SIGNAL(expanded(const QModelIndex&)),
+           this,              SLOT(itemExpanded(const QModelIndex&)));
+
+  // GUI to behavior attachments complete.
+
   // Initialize the model and tree view.
+  this->model_      = new MonitorDataModel(this->ui.repoView);
   this->dataSource_ = new MonitorData( this->options_, this->model_);
   this->ui.repoView->setModel( this->model_);
 
@@ -63,6 +82,12 @@ Viewer::Viewer( const Options& options, QMainWindow* parent)
   if( count > 0) {
     this->ui.repoSelection->setCurrentIndex( count - 1);
   }
+}
+
+void
+Viewer::itemExpanded( const QModelIndex& item)
+{
+  this->ui.repoView->resizeColumnToContents( item.column());
 }
 
 void
