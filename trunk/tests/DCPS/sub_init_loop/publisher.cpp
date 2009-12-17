@@ -150,7 +150,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit(1);
       }
 
-      Writer writer (dw.in(), sub_finished_filename, verbose);
+      Writer writer (dw.in(), sub_finished_filename, verbose, write_delay_ms);
 
       // Indicate that the publisher is ready
       FILE* writers_ready = ACE_OS::fopen (pub_ready_filename, ACE_TEXT("w"));
