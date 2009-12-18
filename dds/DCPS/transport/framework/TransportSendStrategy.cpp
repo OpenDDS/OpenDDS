@@ -927,7 +927,7 @@ OpenDDS::DCPS::TransportSendStrategy::send(TransportQueueElement* element, bool 
       ++num_delayed_notifications_;
 
     } else {
-      if (this->mode_ == MODE_TERMINATED) {
+      if (this->mode_ == MODE_TERMINATED && !this->graceful_disconnecting_) {
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "TransportSendStrategy::send: mode is MODE_TERMINATED and not in "
               "graceful disconnecting, so discard message.\n"));

@@ -1,10 +1,5 @@
 Thu Dec 17 22:17:48 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
-        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
-
-          Fixed hole in state machine which allowed data to be sent over
-          a terminated connection.
-
         * tests/DCPS/sub_init_loop/publisher.cpp:
 
           Added missing write_delay_ms which caused issues with excessive
