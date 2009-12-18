@@ -1,3 +1,54 @@
+Fri Dec 18 22:46:47 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * MPC/config/dcps_udp.mpb:
+        * MPC/config/dcpsexe_with_udp.mpb:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/udp:
+        * dds/DCPS/transport/udp/Udp.h:
+        * dds/DCPS/transport/udp/Udp.cpp:
+        * dds/DCPS/transport/udp/UdpConfiguration.h:
+        * dds/DCPS/transport/udp/UdpConfiguration.cpp:
+        * dds/DCPS/transport/udp/UdpConfiguration_rch.h:
+        * dds/DCPS/transport/udp/UdpDataLink.h:
+        * dds/DCPS/transport/udp/UdpDataLink.inl:
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+        * dds/DCPS/transport/udp/UdpDataLink_rch.h:
+        * dds/DCPS/transport/udp/UdpFactory.h:
+        * dds/DCPS/transport/udp/UdpFactory.cpp:
+        * dds/DCPS/transport/udp/UdpGenerator.h:
+        * dds/DCPS/transport/udp/UdpGenerator.cpp:
+        * dds/DCPS/transport/udp/UdpLoader.h:
+        * dds/DCPS/transport/udp/UdpLoader.cpp:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.h:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy_rch.h:
+        * dds/DCPS/transport/udp/UdpSendStrategy.h:
+        * dds/DCPS/transport/udp/UdpSendStrategy.cpp:
+        * dds/DCPS/transport/udp/UdpSendStrategy_rch.h:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpTransport_rch.h:
+        * dds/DCPS/transport/udp/Udp_Export.h:
+        * dds/DCPS/transport/udp/udp.conf-dist:
+        * dds/DCPS/transport/udp/udp.ini-dist:
+        * dds/DCPS/transport/udp/udp.mpc:
+
+          Added new udp transport to replace SimpleUdp.  
+
+        * tests/DCPS/Messenger/Messenger.mpc:
+        * tests/DCPS/Messenger/Writer.cpp:
+        * tests/DCPS/Messenger/pub_udp.ini:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/sub_udp.ini:
+        * tests/DCPS/Messenger/subscriber.cpp:
+        * tests/DCPS/Messenger/udp.conf:
+
+          Converted Messenger test to use new udp transport.
+        
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Fixed bad comparison on pointer addresses.
+
 Fri Dec 18 17:14:22 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
