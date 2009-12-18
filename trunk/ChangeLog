@@ -1,3 +1,21 @@
+Fri Dec 18 04:08:58 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/MonitorDataStorage.h:
+        * tools/odds_monitor/MonitorDataStorage.inl:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+
+          Starting to implement Builtin Topic updates.
+
+        * tools/odds_monitor/Monitor.mpc:
+        * tools/odds_monitor/QosFormatter.h:
+        * tools/odds_monitor/QosFormatter.cpp:
+
+          Added formatting for each QoS Policy type.
+
+        * tools/odds_monitor/TreeNode.h:
+
+          insertChildren() - debugged implementation.
+
 Thu Dec 17 22:17:48 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * tests/DCPS/sub_init_loop/publisher.cpp:

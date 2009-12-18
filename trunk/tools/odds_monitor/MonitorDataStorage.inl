@@ -28,6 +28,30 @@ MonitorDataStorage::deleteNode( MapType& map, TreeNode* node)
   // Notify the GUI to update.
   this->model_->changed();
 }
+
+template< class PolicyType>
+bool
+MonitorDataStorage::manageQosPolicy(
+  TreeNode*         node, 
+  const QString&    label,
+  const PolicyType& value
+)
+{
+  int row = node->indexOf( 0, label);
+  if( row == -1) {
+    // New value, add a node.
+    QList<QVariant> list;
+    list << label << QosToQString( value);
+    TreeNode* policyNode = new TreeNode( list, node);
+    node->append( policyNode);
+    return true;
+
+  } else {
+    // Value update.
+    (*node)[ row]->setData( 1, QosToQString( value));
+  }
+  return false;
+}
  
 template< typename DataType>
 inline
@@ -774,6 +798,85 @@ MonitorDataStorage::update< DDS::ParticipantBuiltinTopicData>(
     remove? "removing": "processing",
     data.key.value[0], data.key.value[1], data.key.value[2]
   ));
+
+  // Retain knowledge of node insertions, updates, and deletions.
+  bool layoutChanged = false;
+  bool dataChanged   = false;
+
+  // Extract a GUID from the key.
+  OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::GUID_UNKNOWN;
+  OpenDDS::DCPS::RepoIdBuilder builder(id);
+  builder.from_BuiltinTopicKey(data.key);
+
+  // Find or create a DomainParticipant node for this data.
+  TreeNode* node = this->getParticipantNode( ProcessKey(), id, layoutChanged);
+  if( !node) {
+    node = this->createParticipantNode( ProcessKey(), id, layoutChanged);
+  }
+
+  if( remove) {
+    // Indicate visually that this participant has been destroyed.
+    // @TODO: This should probably recursively modify the children as well.
+    node->setColor(1,QColor("#ffbfbf"));
+
+    this->model_->changed();
+    return;
+  }
+
+  TreeNode* qosNode = 0;
+  QString qosLabel( QObject::tr( "Qos"));
+  int qosRow = node->indexOf( 0, qosLabel);
+  if( qosRow == -1) {
+    // New entry, add a reference to the actual transport node.
+    node->insertChildren( 0, 1, 2); // Always make Qos the first child.
+    (*node)[ 0]->setData( 0, qosLabel);
+    (*node)[ 0]->setData( 1, QString( QObject::tr("DomainParticipantQos")));
+    layoutChanged = true;
+
+  } else {
+    qosNode = (*node)[ qosRow];
+  }
+
+  if( !qosNode) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: MonitorDataStorage::update() - ")
+      ACE_TEXT("DomainParticipant Builtin Topic, key: ")
+      ACE_TEXT("[0x%x, 0x%x, 0x%x] unable to find place for Qos in GUI.\n"),
+      data.key.value[0], data.key.value[1], data.key.value[2]
+    ));
+    return;
+  }
+
+  // Install the policy values.
+
+  //    BuiltinTopicKey_t key;
+  QString builtinTopicKeyLabel
+    = QString( QObject::tr("BuiltinTopicKey.value"));
+  if( this->manageQosPolicy( qosNode, builtinTopicKeyLabel, data.key)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    UserDataQosPolicy user_data;
+  QString userDataLabel
+    = QString( QObject::tr("UserDataQosPolicy.user_data"));
+  if( this->manageQosPolicy( qosNode, userDataLabel, data.user_data)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  // Notify the GUI if we have changed the underlying model.
+  if( layoutChanged) {
+    /// @TODO: Check that we really do not need to do updated here.
+    this->model_->changed();
+
+  } else if( dataChanged) {
+    this->model_->updated( node, 1, (*node)[ node->size()-1], 1);
+  }
 }
 
 template<>
