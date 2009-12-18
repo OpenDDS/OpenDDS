@@ -10,7 +10,7 @@ project(DDS*idl): dcps {
 }
 
 
-project(DDS*Publisher) : dcpsexe_with_tcp, dcps_unreliable_dgram, dcps_multicast {
+project(DDS*Publisher) : dcpsexe_with_tcp, dcps_udp, dcps_multicast {
 
   exename   = publisher
   after    += DDS*idl
@@ -25,7 +25,7 @@ project(DDS*Publisher) : dcpsexe_with_tcp, dcps_unreliable_dgram, dcps_multicast
   }
 }
 
-project(DDS*Subscriber) : dcpsexe_with_tcp, dcps_unreliable_dgram, dcps_multicast {
+project(DDS*Subscriber) : dcpsexe_with_tcp, dcps_udp, dcps_multicast {
 
   exename   = subscriber
   after    += DDS*idl
@@ -40,7 +40,7 @@ project(DDS*Subscriber) : dcpsexe_with_tcp, dcps_unreliable_dgram, dcps_multicas
   }
 }
 
-project(DDS*StackSubscriber) : dcpsexe_with_tcp, dcps_unreliable_dgram, dcps_multicast {
+project(DDS*StackSubscriber) : dcpsexe_with_tcp, dcps_udp, dcps_multicast {
 
   exename   = stack_subscriber
   after    += DDS*idl

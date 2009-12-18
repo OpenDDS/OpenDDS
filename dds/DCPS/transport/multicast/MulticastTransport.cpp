@@ -213,7 +213,7 @@ MulticastTransport::release_datalink_i(DataLink* link, bool /*release_pending*/)
        it != this->links_.end(); ++it) {
     // We are guaranteed to have exactly one matching DataLink
     // in the map; release any resources held and return.
-    if (it->second.in() == link) {
+    if (link == static_cast<DataLink*>(it->second.in())) {
       this->links_.erase(it);
       return;
     }
