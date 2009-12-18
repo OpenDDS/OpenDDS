@@ -12,10 +12,7 @@
 #include <sstream>
 
 Monitor::MonitorDataStorage::MonitorDataStorage( MonitorData* model)
- : model_( model),
-   publisherIdGenerator_( 0),
-   subscriberIdGenerator_( 0),
-   transportIdGenerator_( 0)
+ : model_( model)
 {
   this->reset();
 }
@@ -29,11 +26,6 @@ void
 Monitor::MonitorDataStorage::reset()
 {
   this->clear();
-
-  // Establish the generators.
-  this->publisherIdGenerator_ = new RepoIdGenerator( 0, 0, OpenDDS::DCPS::KIND_PUBLISHER);
-  this->subscriberIdGenerator_ = new RepoIdGenerator( 0, 0, OpenDDS::DCPS::KIND_SUBSCRIBER);
-  this->transportIdGenerator_ = new RepoIdGenerator( 0, 0, OpenDDS::DCPS::KIND_USER);
 }
 
 void
@@ -45,11 +37,6 @@ Monitor::MonitorDataStorage::clear()
   this->processToTreeMap_.clear();
   this->instanceToTreeMap_.clear();
   this->transportToTreeMap_.clear();
-
-  // Remove the generators.
-  delete this->publisherIdGenerator_;
-  delete this->subscriberIdGenerator_;
-  delete this->transportIdGenerator_;
 }
 
 void
@@ -227,6 +214,38 @@ Monitor::MonitorDataStorage::getTransportNode(
 }
 
 Monitor::TreeNode*
+Monitor::MonitorDataStorage::createParticipantNode(
+  const ProcessKey&            pid,
+  const OpenDDS::DCPS::GUID_t& id,
+  bool&                        create
+)
+{
+  if( id == OpenDDS::DCPS::GUID_UNKNOWN) {
+    return 0;
+  }
+
+  // Find the parent node, if any.  It is ok to not have a parent node
+  // for cases of out-of-order udpates.  We handle that as the updates
+  // are actually processed.
+  TreeNode* parent = this->getProcessNode( pid, create);
+
+  // DomainParticipant data.
+  OpenDDS::DCPS::GuidConverter converter( id);
+  QList<QVariant> list;
+  list << QString("DomainParticipant")
+       << QString( QObject::tr( std::string( converter).c_str()));
+  TreeNode* node = new TreeNode( list, parent);
+  if( parent) {
+    parent->append( node);
+  }
+
+  // Install the new node.
+  this->guidToTreeMap_[ id] = std::make_pair( node->row(), node);
+
+  return node;
+}
+
+Monitor::TreeNode*
 Monitor::MonitorDataStorage::getParticipantNode(
   const ProcessKey&            pid,
   const OpenDDS::DCPS::GUID_t& id,
@@ -240,24 +259,7 @@ Monitor::MonitorDataStorage::getParticipantNode(
     if( !create) return 0;
 
     // We need to add a new DomainParticipant.
-
-    // Find the parent node, if any.  It is ok to not have a parent node
-    // for cases of out-of-order udpates.  We handle that as the updates
-    // are actually processed.
-    TreeNode* parent = this->getProcessNode( pid, create);
-
-    // DomainParticipant data.
-    OpenDDS::DCPS::GuidConverter converter( id);
-    QList<QVariant> list;
-    list << QString("DomainParticipant")
-         << QString( QObject::tr( std::string( converter).c_str()));
-    node = new TreeNode( list, parent);
-    if( parent) {
-      parent->append( node);
-    }
-
-    // Install the new node.
-    this->guidToTreeMap_[ id] = std::make_pair( node->row(), node);
+    node = this->createParticipantNode( pid, id, create);
 
   } else {
     node = location->second.second;

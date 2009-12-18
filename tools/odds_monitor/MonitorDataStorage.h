@@ -21,7 +21,8 @@
 #include "MonitorData.h"
 #include "MonitorDataModel.h"
 #include "TreeNode.h"
-#include "dds/DCPS/RepoIdGenerator.h"
+#include "QosFormatter.h"
+#include "dds/DCPS/RepoIdBuilder.h"
 
 namespace Monitor {
 
@@ -168,6 +169,14 @@ class MonitorDataStorage {
     std::pair< bool, typename MapType::key_type>
     findKey( MapType& map, TreeNode* node);
 
+    /// Install or update a QoS policy node.
+    template< class PolicyType>
+    bool manageQosPolicy(
+           TreeNode*         node, 
+           const QString&    label,
+           const PolicyType& value
+         );
+
     /// Convenience type for storing information.
     typedef std::pair< int, TreeNode*> RowNodePair;
 
@@ -250,6 +259,22 @@ class MonitorDataStorage {
                 const OpenDDS::DCPS::GUID_t& id,
                 bool&                        create
               );
+
+    /**
+     * @brief Create a DomainParticipant TreeNode from a key value.
+     *
+     * @param key    key of node to create
+     * @param create boolean value indicating whether a parent node
+     *               should be created if one is not found.  It is set
+     *               before returning to indicate wheter a parent was
+     *               created.
+     * @return pointer to the new node.
+     */
+    TreeNode* createParticipantNode(
+      const ProcessKey&            key,
+      const OpenDDS::DCPS::GUID_t& id,
+      bool&                        create
+    );
 
     /**
      * @brief Obtain a possibly new instance handle node.  Possibly
@@ -359,15 +384,6 @@ class MonitorDataStorage {
 
     /// Active repository IOR.
     std::string activeIor_;
-
-    /// Generate Guid values for publishers.
-    RepoIdGenerator* publisherIdGenerator_;
-
-    /// Generate Guid values for subscribers.
-    RepoIdGenerator* subscriberIdGenerator_;
-
-    /// Generate Guid values for transports.
-    RepoIdGenerator* transportIdGenerator_;
 };
 
 #include "MonitorDataStorage.inl"

@@ -325,7 +325,7 @@ Monitor::TreeNode::insertChildren( int row, int count, int columns)
   while( count--) {
     TreeNode* node = new TreeNode( data, this);
     for( int index = 0; index < columns; ++index) {
-      (*node)[ index]->setColor( index, colors[ index]);
+      node->setColor( index, colors[ index]);
     }
     this->children_.insert( row, node);
   }
