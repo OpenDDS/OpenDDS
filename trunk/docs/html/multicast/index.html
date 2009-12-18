@@ -609,8 +609,10 @@ Default examples of these files are provided under: {{{$DDS_ROOT/dds/DCPS/transp
 [[Known Issues]]
 [[Future Tasks]]</pre>
 </div>
-<div title="Future Tasks" modifier="StevenStallion" created="200912011940" modified="200912152040" changecount="41">
-<pre>An FEC mechanism should be introduced to reduce repair requests and to provide an additional source from which to detect reception gaps.
+<div title="Future Tasks" modifier="StevenStallion" created="200912011940" modified="200912181545" changecount="46">
+<pre>NAK requests currently contain individual ranges; performance testing should be done to determine if collapsing ranges into a single sample would yield better performance for the entire multicast group in a lossy network.
+
+An FEC mechanism should be introduced to reduce repair requests and to provide an additional source from which to detect reception gaps.
 
 {{{MulticastTransport::connection_info_i}}} should publish ephemeral port numbers in the {{{TransportInterfaceBLOB}}} (not currently supported by the ETF).
 
