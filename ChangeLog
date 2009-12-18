@@ -1,3 +1,9 @@
+Fri Dec 18 22:57:38 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * configure.ac:
+
+          We don't need no stinkin' autotools.
+
 Fri Dec 18 22:46:47 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * MPC/config/dcps_udp.mpb:
@@ -33,7 +39,7 @@ Fri Dec 18 22:46:47 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * dds/DCPS/transport/udp/udp.ini-dist:
         * dds/DCPS/transport/udp/udp.mpc:
 
-          Added new udp transport to replace SimpleUdp.  
+          Added new udp transport to replace SimpleUdp.
 
         * tests/DCPS/Messenger/Messenger.mpc:
         * tests/DCPS/Messenger/Writer.cpp:
@@ -44,7 +50,7 @@ Fri Dec 18 22:46:47 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * tests/DCPS/Messenger/udp.conf:
 
           Converted Messenger test to use new udp transport.
-        
+
         * dds/DCPS/transport/multicast/MulticastTransport.cpp:
 
           Fixed bad comparison on pointer addresses.
