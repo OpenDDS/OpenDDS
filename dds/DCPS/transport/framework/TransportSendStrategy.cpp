@@ -51,6 +51,7 @@ OpenDDS::DCPS::TransportSendStrategy::TransportSendStrategy
     //not_yet_pac_q_(new QueueType (1,config->max_samples_per_packet_)),
     //not_yet_pac_q_len_ (0),
     max_header_size_(0),
+    header_block_(0),
     elems_(new QueueType(1,config->max_samples_per_packet_)),
     pkt_chain_(0),
     header_complete_(0),
@@ -1242,7 +1243,7 @@ OpenDDS::DCPS::TransportSendStrategy::remove_all_control_msgs(RepoId pub_id)
   QueueRemoveVisitor remove_element_visitor( current_sample);
   PacketRemoveVisitor remove_from_packet_visitor(current_sample,
                                                  this->pkt_chain_,
-                                                 this->pkt_chain_,
+                                                 this->header_block_,
                                                  this->replaced_element_allocator_);
 
   this->do_remove_sample(remove_element_visitor,
@@ -1274,7 +1275,7 @@ OpenDDS::DCPS::TransportSendStrategy::remove_sample(const DataSampleListElement*
   QueueRemoveVisitor  remove_element_visitor(current_sample);
   PacketRemoveVisitor remove_from_packet_visitor( current_sample,
                                   this->pkt_chain_,
-                                  this->pkt_chain_,
+                                  this->header_block_,
                                   this->replaced_element_allocator_);
 
   return this->do_remove_sample(remove_element_visitor,
@@ -1616,7 +1617,7 @@ OpenDDS::DCPS::TransportSendStrategy::prepare_packet()
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Marshall the packet header.\n"));
 
-  ACE_NEW_MALLOC(this->pkt_chain_,
+  ACE_NEW_MALLOC(this->header_block_,
                  static_cast<ACE_Message_Block*>(this->header_mb_allocator_->malloc()),
                  ACE_Message_Block(this->max_header_size_,
                                    ACE_Message_Block::MB_DATA,
@@ -1630,8 +1631,10 @@ OpenDDS::DCPS::TransportSendStrategy::prepare_packet()
                                    this->header_db_allocator_,
                                    this->header_mb_allocator_));
 
-  // Marshall the packet header_ into the pkt_chain_.
-  this->pkt_chain_ << this->header_;
+  // Marshall the packet header_ into the header_block_.
+  this->header_block_ << this->header_;
+
+  this->pkt_chain_ = this->header_block_->duplicate();
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Use a BuildChainVisitor to visit the packet elems_.\n"));

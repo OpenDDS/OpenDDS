@@ -1,3 +1,9 @@
+Fri Dec 18 17:14:22 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Fixed buffer management problems with the transport header.
+
 Fri Dec 18 15:45:56 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * docs/html/multicast/index.html:
