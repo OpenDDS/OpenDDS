@@ -7,9 +7,9 @@ New to this version are the following changes:
   of the design, configuration, known issues, and potential enhancements,
   see: $DDS_ROOT/docs/html/multicast/index.html.
 
-- A new unicast udp transport is available which replaces the older
-  SimpleUdp transport.  Like SimpleUdp, udp provides best-effort reliablity
-  only; its use should be considered experimental.
+- A new udp transport is available which replaces the older SimpleUdp
+  transport.  Like SimpleUdp, udp provides best-effort reliablity only;
+  its use should be considered experimental.
 
 
 =========================================================================
