@@ -21,7 +21,7 @@
 
 #ifdef ACE_AS_STATIC_LIBS
 #include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
-#include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram.h"
+#include "dds/DCPS/transport/udp/Udp.h"
 #endif
 
 #include "ace/Arg_Shifter.h"
@@ -43,13 +43,13 @@ static int init_writer_tranport ()
     {
       writer_transport_impl =
           TheTransportFactory->create_transport_impl (PUB_TRAFFIC,
-                                                      ACE_TEXT("SimpleUdp"),
+                                                      ACE_TEXT("udp"),
                                                       OpenDDS::DCPS::DONT_AUTO_CONFIG);
       OpenDDS::DCPS::TransportConfiguration_rch writer_config
-        = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("SimpleUdp"));
+        = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("udp"));
 
-      OpenDDS::DCPS::SimpleUdpConfiguration* writer_udp_config
-        = static_cast <OpenDDS::DCPS::SimpleUdpConfiguration*> (writer_config.in ());
+      OpenDDS::DCPS::UdpConfiguration* writer_udp_config
+        = static_cast <OpenDDS::DCPS::UdpConfiguration*> (writer_config.in ());
 
       if (!writer_address_given)
         {
@@ -61,7 +61,6 @@ static int init_writer_tranport ()
 
       ACE_INET_Addr writer_address (writer_address_str);
       writer_udp_config->local_address_ = writer_address;
-      writer_udp_config->local_address_str_ = writer_address_str;
 
       if (writer_transport_impl->configure(writer_config.in()) != 0)
         {

@@ -18,12 +18,12 @@ cp $DDS_ROOT/lib/libOpenDDS_Dcps.so.*     $PKG/lib/
 
 # For statically linked
 cp $DDS_ROOT/lib/libSimpleTcp.so.*             $PKG/lib/
-cp $DDS_ROOT/lib/libSimpleUnreliableDgram.so.* $PKG/lib/
+cp $DDS_ROOT/lib/libOpenDDS_Udp.so.*           $PKG/lib/
 cp $DDS_ROOT/lib/libOpenDDS_Multicast.so.*     $PKG/lib/
 
 # For dynamic linking
 (cd $PKG/lib; ln -s libSimpleTcp.so.*             libSimpleTcp.so)
-(cd $PKG/lib; ln -s libSimpleUnreliableDgram.so.* libSimpleUnreliableDgram.so)
+(cd $PKG/lib; ln -s libOpenDDS_Udp.so.*           libOpenDDS_Udp.so)
 (cd $PKG/lib; ln -s libOpenDDS_Multicast.so.*     libOpenDDS_Multicast.so)
 
 # Statically linked
@@ -94,4 +94,3 @@ cp $DDS_ROOT/performance-tests/Bench/tests/s2-p6.ini $PKG/tests/
 cp $DDS_ROOT/performance-tests/Bench/tests/s3-p1.ini $PKG/tests/
 cp $DDS_ROOT/performance-tests/Bench/tests/s3-p2.ini $PKG/tests/
 cp $DDS_ROOT/performance-tests/Bench/tests/s3-p3.ini $PKG/tests/
-

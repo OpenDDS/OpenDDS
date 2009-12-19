@@ -20,8 +20,8 @@
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
-#include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpConfiguration.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
+#include "dds/DCPS/transport/udp/UdpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
 #include "ace/Arg_Shifter.h"
@@ -72,14 +72,14 @@ int init_tranport ()
     {
       reader_transport_impl
         = TheTransportFactory->create_transport_impl (SUB_TRAFFIC,
-                                                      ACE_TEXT("SimpleUdp"),
+                                                      ACE_TEXT("udp"),
                                                       OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
       OpenDDS::DCPS::TransportConfiguration_rch reader_config
-        = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("SimpleUdp"));
+        = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("udp"));
 
-      OpenDDS::DCPS::SimpleUdpConfiguration* reader_udp_config
-        = static_cast <OpenDDS::DCPS::SimpleUdpConfiguration*> (reader_config.in ());
+      OpenDDS::DCPS::UdpConfiguration* reader_udp_config
+        = static_cast <OpenDDS::DCPS::UdpConfiguration*> (reader_config.in ());
 
       if (!reader_address_given)
         {
@@ -92,7 +92,6 @@ int init_tranport ()
 
       ACE_INET_Addr reader_address (reader_address_str.c_str ());
       reader_udp_config->local_address_ = reader_address;
-      reader_udp_config->local_address_str_ = reader_address_str;
 
       if (reader_transport_impl->configure(reader_config.in()) != 0)
         {
@@ -136,14 +135,14 @@ int init_tranport ()
     {
       writer_transport_impl
          = TheTransportFactory->create_transport_impl (PUB_TRAFFIC,
-                                                       ACE_TEXT("SimpleUdp"),
+                                                       ACE_TEXT("udp"),
                                                        OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
       OpenDDS::DCPS::TransportConfiguration_rch writer_config
-        = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("SimpleUdp"));
+        = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("udp"));
 
-      OpenDDS::DCPS::SimpleUdpConfiguration* writer_udp_config
-        = static_cast <OpenDDS::DCPS::SimpleUdpConfiguration*> (writer_config.in ());
+      OpenDDS::DCPS::UdpConfiguration* writer_udp_config
+        = static_cast <OpenDDS::DCPS::UdpConfiguration*> (writer_config.in ());
 
       if (!writer_address_given)
         {
@@ -155,7 +154,6 @@ int init_tranport ()
 
       ACE_INET_Addr writer_address (writer_address_str.c_str ());
       writer_udp_config->local_address_ = writer_address;
-      writer_udp_config->local_address_str_ = writer_address_str;
 
       if (writer_transport_impl->configure(writer_config.in()) != 0)
         {
@@ -537,7 +535,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         }
 
       ::DDS::SubscriptionMatchedStatus matched;
-      
+
       if (foo_dr->get_subscription_matched_status (matched) != ::DDS::RETCODE_OK)
       {
         ACE_ERROR_RETURN((LM_ERROR,

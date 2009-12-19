@@ -11,7 +11,7 @@
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
 #include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
-#include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpConfiguration.h"
+#include "dds/DCPS/transport/udp/UdpConfiguration.h"
 #include "dds/DCPS/transport/multicast/MulticastConfiguration.h"
 
 
@@ -92,10 +92,10 @@ int init_reader_transport ()
         {
           reader_udp_impl
             = TheTransportFactory->create_transport_impl (SUB_TRAFFIC_UDP,
-                                                          ACE_TEXT("SimpleUdp"),
+                                                          ACE_TEXT("udp"),
                                                           OpenDDS::DCPS::DONT_AUTO_CONFIG);
           OpenDDS::DCPS::TransportConfiguration_rch reader_config
-            = TheTransportFactory->create_configuration (SUB_TRAFFIC_UDP, ACE_TEXT("SimpleUdp"));
+            = TheTransportFactory->create_configuration (SUB_TRAFFIC_UDP, ACE_TEXT("udp"));
 
           if (reader_udp_impl->configure(reader_config.in()) != 0)
             {
@@ -171,11 +171,11 @@ int init_writer_transport ()
     {
       writer_udp_impl
         = TheTransportFactory->create_transport_impl (PUB_TRAFFIC_UDP,
-        ACE_TEXT("SimpleUdp"),
+        ACE_TEXT("udp"),
         OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
       OpenDDS::DCPS::TransportConfiguration_rch writer_config
-        = TheTransportFactory->create_configuration (PUB_TRAFFIC_UDP, ACE_TEXT("SimpleUdp"));
+        = TheTransportFactory->create_configuration (PUB_TRAFFIC_UDP, ACE_TEXT("udp"));
 
       if (writer_udp_impl->configure(writer_config.in()) != 0)
       {

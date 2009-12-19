@@ -15,6 +15,11 @@
 namespace OpenDDS {
 namespace DCPS {
 
+UdpConfiguration::UdpConfiguration()
+{
+  this->transport_type_ = UDP_TRANSPORT_TYPE;
+}
+
 int
 UdpConfiguration::load(const TransportIdType& id,
                        ACE_Configuration_Heap& config)

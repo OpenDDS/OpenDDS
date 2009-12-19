@@ -18,7 +18,7 @@ import OpenDDS.DCPS.transport.TransportImpl;
 import OpenDDS.DCPS.transport.TransportException;
 import OpenDDS.DCPS.transport.TransportConfiguration;
 import OpenDDS.DCPS.transport.SimpleTcpConfiguration;
-import OpenDDS.DCPS.transport.SimpleUdpConfiguration;
+import OpenDDS.DCPS.transport.UdpConfiguration;
 import OpenDDS.DCPS.transport.MulticastConfiguration;
 
 public class TransportConfigTest {
@@ -40,9 +40,9 @@ public class TransportConfigTest {
 
     public static void main(String[] args) throws Exception {
         setUp(args);
-        
+
         testModifyTransportFromFileTCP();
-        testCreateNewTransportUDP();
+        testCreateNewTransportUdp();
         testCreateNewTransportMulticast();
 
         tearDown();
@@ -76,28 +76,26 @@ public class TransportConfigTest {
     }
 
 
-    protected static void testCreateNewTransportUDP() throws Exception {
+    protected static void testCreateNewTransportUdp() throws Exception {
         final int ID = 2;
         TransportConfiguration tc =
             TheTransportFactory.get_or_create_configuration(ID,
-                 TheTransportFactory.TRANSPORT_UDP_UNI);
+                 TheTransportFactory.TRANSPORT_UDP);
         tc.setSendThreadStrategy(TransportConfiguration.ThreadSynchStrategy.NULL_SYNCH);
-        SimpleUdpConfiguration suc = (SimpleUdpConfiguration) tc;
-        suc.setLocalAddress("0.0.0.0:2047");
-        suc.setMaxOutputPausePeriod(123456);
+        UdpConfiguration suc = (UdpConfiguration) tc;
+        suc.setLocalAddress("0.0.0.0:1234");
 
         TransportImpl ti = TheTransportFactory.create_transport_impl(ID,
-            TheTransportFactory.TRANSPORT_UDP_UNI,
+            TheTransportFactory.TRANSPORT_UDP,
             TheTransportFactory.DONT_AUTO_CONFIG);
         ti.configure(tc);
 
         tc = TheTransportFactory.get_or_create_configuration(ID,
-                 TheTransportFactory.TRANSPORT_UDP_UNI);
+                 TheTransportFactory.TRANSPORT_UDP);
         assert tc.getSendThreadStrategy() == TransportConfiguration.ThreadSynchStrategy.NULL_SYNCH;
-        suc = (SimpleUdpConfiguration) tc;
+        suc = (UdpConfiguration) tc;
         //Only checking endsWith here b/c the 0.0.0.0 is resolved to a hostname
-        assert suc.getLocalAddress().endsWith(":2047");
-        assert suc.getMaxOutputPausePeriod() == 123456;
+        assert suc.getLocalAddress().endsWith(":1234");
 
         TheTransportFactory.release(ID);
     }

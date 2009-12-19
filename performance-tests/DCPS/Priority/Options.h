@@ -40,7 +40,7 @@ namespace Test {
  *   -t [ tcp | udp | mc ]
  *      Establish the transport implementation for data.  The values are:
  *        tcp - use the SimpleTcp transport
- *        udp - use the SimpleUnreliableDatagram transport
+ *        udp - use the udp transport
  *        mc  - use the multicast transport
  *
  *   -c <seconds>
@@ -105,7 +105,7 @@ class Options  {
     enum TransportType {
       NONE,     // Unsupported
       TCP,      // SimpleTcp
-      UDP,      // SimpleUnreliableDgram
+      UDP,      // udp
       MC        // multicast
     };
 

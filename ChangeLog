@@ -1,3 +1,136 @@
+Sat Dec 19 06:27:05 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Enabled additional performance tests for new udp and multicast
+          transports.
+
+        * docs/html/multicast/index.html:
+
+          Updated documentation.
+
+        * java/dds/OpenDDS/DCPS/transport/TheTransportFactory.java:
+        * java/dds/OpenDDS/DCPS/transport/UdpConfiguration.java:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * java/dds/dcps_java.mpc:
+        * java/jms/README:
+        * java/jms/src/META-INF/services/org.opendds.jms.transport.spi.Transport:
+        * java/jms/src/org/opendds/jms/transport/spi/UdpTransport.java:
+        * java/tests/messenger/publisher/pub_udp.ini:
+        * java/tests/messenger/publisher/publisher_idl_test.mpc:
+        * java/tests/messenger/publisher/sub_udp.ini:
+        * java/tests/messenger/subscriber/pub_udp.ini:
+        * java/tests/messenger/subscriber/sub_udp.ini:
+        * java/tests/messenger/subscriber/subscriber_idl_test.mpc:
+        * java/tests/multirepo/MultiRepoWorker.java:
+        * java/tests/transport_config/TransportConfigTest.java:
+
+          Added support for new udp transport.
+        
+        * performance-tests/DCPS/MulticastListenerTest:
+        * performance-tests/DCPS/MulticastListenerTest/MulticastListenerTest.mpc:
+        * performance-tests/DCPS/MulticastListenerTest/common.h:
+        * performance-tests/DCPS/MulticastListenerTest/multicast.conf:
+        * performance-tests/DCPS/MulticastListenerTest/publisher.cpp:
+        * performance-tests/DCPS/MulticastListenerTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/MulticastListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/MulticastListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/MulticastListenerTest/run_test-4p1s.pl:
+        * performance-tests/DCPS/MulticastListenerTest/subscriber.cpp:
+
+          Added support for new multicast transport.
+
+        * MPC/config/dds_wrapper.mpb:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/udp/UdpConfiguration.h:
+        * dds/DCPS/transport/udp/UdpConfiguration.cpp:
+        * examples/DCPS/IntroductionToOpenDDS/pub_udp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/sub2_udp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/sub_udp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/udp.conf:
+        * examples/DCPS/Messenger_IOGR_Imr/publisher.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/subscriber.cpp:
+        * examples/DCPS/Messenger_Imr/publisher.cpp:
+        * examples/DCPS/Messenger_Imr/subscriber.cpp:
+        * performance-tests/Bench/etc/svc.conf:
+        * performance-tests/Bench/etc/transport.ini:
+        * performance-tests/Bench/src/TestProcess.mpc:
+        * performance-tests/Bench/tools/mkpkg:
+        * performance-tests/DCPS/InfoRepo_population/pub_udp.ini:
+        * performance-tests/DCPS/InfoRepo_population/sub_udp.ini:
+        * performance-tests/DCPS/Priority/Options.h:
+        * performance-tests/DCPS/Priority/Priority.mpc:
+        * performance-tests/DCPS/Priority/Publisher.cpp:
+        * performance-tests/DCPS/Priority/Subscriber.cpp:
+        * performance-tests/DCPS/Priority/svc.conf:
+        * performance-tests/DCPS/Priority/transport.ini:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * performance-tests/DCPS/TransportLatency/pub_udp.ini:
+        * performance-tests/DCPS/TransportLatency/publisher.cpp:
+        * performance-tests/DCPS/TransportLatency/sub_udp.ini:
+        * performance-tests/DCPS/TransportLatency/subscriber.cpp:
+        * performance-tests/DCPS/TransportLatency/udp.conf:
+        * performance-tests/DCPS/UDPListenerTest/common.h:
+        * performance-tests/DCPS/UDPListenerTest/udp.conf:
+        * performance-tests/DCPS/UDPNoKeyTest/common.h:
+        * performance-tests/DCPS/UDPNoKeyTest/udp.conf:
+        * tests/DCPS/FooTest5/FooTest5.mpc:
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/FooTest5/udp.conf:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/FooTest5_0/udp.conf:
+        * tests/DCPS/LivelinessTest/LivelinessTest.mpc:
+        * tests/DCPS/LivelinessTest/common.h:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/LivelinessTest/udp.conf:
+        * tests/DCPS/Messenger/Writer.cpp:
+        * tests/DCPS/Messenger/pub_udp.ini:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/stack_subscriber.cpp:
+        * tests/DCPS/Messenger/sub_udp.ini:
+        * tests/DCPS/Messenger/subscriber.cpp:
+        * tests/DCPS/MultiTopicTest/common.h:
+        * tests/DCPS/MultiTopicTest/publisher.cpp:
+        * tests/DCPS/MultiTopicTest/subscriber.cpp:
+        * tests/DCPS/Priority/Options.h:
+        * tests/DCPS/Priority/Priority.mpc:
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Priority/Subscriber.cpp:
+        * tests/DCPS/Priority/run_test.pl:
+        * tests/DCPS/Priority/services.conf:
+        * tests/DCPS/Priority/transport.ini:
+        * tests/DCPS/Priority/transport_solaris.ini:
+        * tests/DCPS/Prst_delayed_subscriber/publisher.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/subscriber.cpp:
+        * tests/DCPS/WaitForAck/Publisher.cpp:
+        * tests/DCPS/WaitForAck/Subscriber.cpp:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+        * wrapper/example/pub_udp_conf.ini:
+        * wrapper/example/sub2_udp_conf.ini:
+        * wrapper/example/sub_udp_conf.ini:
+
+          Added support for new udp and multicast transports.
+
+        * MPC/config/dcps_unreliable_dgram.mpb:
+        * MPC/config/dcpsexe_with_unreliable_dgram.mpb:
+        * dds/DCPS/transport/simpleUnreliableDgram:
+        * docs/Configuration_Settings.html:
+        * java/dds/OpenDDS/DCPS/transport/SimpleUdpConfiguration.java:
+        * java/dds/OpenDDS/DCPS/transport/SimpleUnreliableDgramConfiguration.java:
+        * java/jms/src/org/opendds/jms/transport/spi/SimpleUdpTransport.java:
+        * performance-tests/DCPS/McastListenerTest:
+        * tests/transport/mcast_simple:
+        * tests/transport/mcast_simple_n:
+        * tests/transport/udp_simple:
+        * tests/transport/udp_simple_n:
+
+          Removed these files.
+
 Fri Dec 18 23:18:00 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * DDS_release_notes.txt:

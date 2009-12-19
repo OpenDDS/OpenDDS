@@ -12,7 +12,7 @@
 #include "OpenDDS_DCPS_transport_TheTransportFactory.h"
 #include "OpenDDS_DCPS_transport_TransportImpl.h"
 #include "OpenDDS_DCPS_transport_SimpleTcpConfiguration.h"
-#include "OpenDDS_DCPS_transport_SimpleUnreliableDgramConfiguration.h"
+#include "OpenDDS_DCPS_transport_UdpConfiguration.h"
 #include "OpenDDS_DCPS_transport_MulticastConfiguration.h"
 #include "DDS_WaitSet.h"
 #include "DDS_GuardCondition.h"
@@ -29,7 +29,7 @@
 #include "dds/DCPS/transport/framework/PoolSynchStrategy.h"
 #include "dds/DCPS/transport/framework/NullSynchStrategy.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
-#include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramConfiguration.h"
+#include "dds/DCPS/transport/udp/UdpConfiguration.h"
 #include "dds/DCPS/transport/multicast/MulticastConfiguration.h"
 
 #include "dds/DCPS/SubscriberImpl.h"
@@ -256,26 +256,25 @@ BaseField<Tcp> *fields[] = {&la, &ena, &crid, &crbm, &cra, &mopp, &prd, &pcd};
 
 namespace UdpConfig {
 
-typedef OpenDDS::DCPS::SimpleUnreliableDgramConfiguration Udp;
+typedef OpenDDS::DCPS::UdpConfiguration config;
 const char *jclassName =
-  "OpenDDS/DCPS/transport/SimpleUnreliableDgramConfiguration";
+  "OpenDDS/DCPS/transport/UdpConfiguration";
 
-const char *jclassNameUdp = "OpenDDS/DCPS/transport/SimpleUdpConfiguration";
-const ACE_TCHAR *configName = ACE_TEXT("SimpleUdp");
+const char *jclassNameUdp = "OpenDDS/DCPS/transport/UdpConfiguration";
+const ACE_TCHAR *configName = ACE_TEXT("udp");
 
 const ACE_TCHAR *svcName =
-  ACE_TEXT("OPENDDS_DCPS_SimpleUnreliableDgramLoader");
+  ACE_TEXT("OpenDDS_DCPS_Udp_Service");
 const ACE_TCHAR *svcConfDir =
-  ACE_TEXT("dynamic OPENDDS_DCPS_SimpleUnreliableDgramLoader Service_Object")
-  ACE_TEXT(" * SimpleUnreliableDgram:")
-  ACE_TEXT("_make_OPENDDS_DCPS_SimpleUnreliableDgramLoader() ")
-  ACE_TEXT("\"-type SimpleUdp -type SimpleMcast\"");
+  ACE_TEXT("dynamic OpenDDS_DCPS_Udp_Service Service_Object *")
+  ACE_TEXT(" OpenDDS_Udp:_make_UdpLoader()");
 
-InetAddrField<Udp> la("localAddress",
-                      &Udp::local_address_str_, &Udp::local_address_);
-IntField<Udp> mopp("maxOutputPausePeriod", &Udp::max_output_pause_period_);
+InetAddrField<config> local_address("localAddress",
+                                    0 /*UNUSED*/, &config::local_address_);
 
-BaseField<Udp> *fields[] = {&la, &mopp};
+BaseField<config> *fields[] = {
+  &local_address,
+};
 
 } // namespace TcpConfig
 
@@ -330,7 +329,7 @@ BaseField<config> *fields[] = {
   &group_address,
   &reliable,
   &syn_backoff,
-  &syn_interval, 
+  &syn_interval,
   &syn_timeout,
   &nak_depth,
   &nak_interval,
@@ -365,7 +364,7 @@ jobject get_or_create_impl(JNIEnv *jni, jint id, const ACE_TString &typeCxx)
   } else if (typeCxx == UdpConfig::configName) {
     clazz_specific = findClass(jni, UdpConfig::jclassNameUdp);
     loadLibIfNeeded(UdpConfig::svcName, UdpConfig::svcConfDir);
-  
+
   } else if (typeCxx == MulticastConfig::configName) {
     clazz_specific = findClass(jni, MulticastConfig::jclassNameUdp);
     loadLibIfNeeded(MulticastConfig::svcName, MulticastConfig::svcConfDir);
@@ -597,23 +596,23 @@ Java_OpenDDS_DCPS_transport_SimpleTcpConfiguration_loadSpecificConfig
   toJava(jni, clazz, *tc, jThis, TcpConfig::fields);
 }
 
-// SimpleUnreliableDgramConfiguration
+// UdpConfiguration
 
 void JNICALL
-Java_OpenDDS_DCPS_transport_SimpleUnreliableDgramConfiguration_saveSpecificConfig
+Java_OpenDDS_DCPS_transport_UdpConfiguration_saveSpecificConfig
 (JNIEnv *jni, jobject jThis, jlong ptr)
 {
-  OpenDDS::DCPS::SimpleUnreliableDgramConfiguration *tc;
+  OpenDDS::DCPS::UdpConfiguration *tc;
   narrowTransportConfig(tc, ptr);
   jclass clazz = findClass(jni, UdpConfig::jclassName);
   toCxx(jni, clazz, jThis, *tc, UdpConfig::fields);
 }
 
 void JNICALL
-Java_OpenDDS_DCPS_transport_SimpleUnreliableDgramConfiguration_loadSpecificConfig
+Java_OpenDDS_DCPS_transport_UdpConfiguration_loadSpecificConfig
 (JNIEnv *jni, jobject jThis, jlong ptr)
 {
-  OpenDDS::DCPS::SimpleUnreliableDgramConfiguration *tc;
+  OpenDDS::DCPS::UdpConfiguration *tc;
   narrowTransportConfig(tc, ptr);
   jclass clazz = findClass(jni, UdpConfig::jclassName);
   toJava(jni, clazz, *tc, jThis, UdpConfig::fields);

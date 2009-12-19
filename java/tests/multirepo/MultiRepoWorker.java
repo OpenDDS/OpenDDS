@@ -163,7 +163,9 @@ public class MultiRepoWorker {
 
                     read = true;
 
-                    System.out.printf("[%s] read: \"%s\"\n", participant, mh.value.text);
+                    if (si.valid_data) {
+                        System.out.printf("[%s] read: \"%s\"\n", participant, mh.value.text);
+                    }
                 }
             }, DEFAULT_STATUS_MASK.value
         );

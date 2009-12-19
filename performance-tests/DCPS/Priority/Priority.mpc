@@ -9,7 +9,7 @@ project(perf*idl): dcps {
 }
 
 
-project(perf*Publisher) : dcpsexe_with_unreliable_dgram, dcps_multicast, dcps_tcp {
+project(perf*Publisher) : dcpsexe_with_tcp, dcps_udp, dcps_multicast {
   exename = publisher
   after  += perf*idl
 
@@ -26,7 +26,7 @@ project(perf*Publisher) : dcpsexe_with_unreliable_dgram, dcps_multicast, dcps_tc
   }
 }
 
-project(perf*Subscriber) : dcpsexe_with_unreliable_dgram, dcps_multicast, dcps_tcp {
+project(perf*Subscriber) : dcpsexe_with_tcp, dcps_udp, dcps_multicast {
   exename = subscriber
   after  += perf*idl
 
