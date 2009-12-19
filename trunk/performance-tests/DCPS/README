@@ -13,11 +13,11 @@ The tests support samples of 128, 512, 2048 and 8192 floats.
 	Sample data types.
 
 - TCPListenerTest
-    Uses the SimpleTCPTransport.
+    Uses the SimpleTcp transport.
     Subscriber reads after N calls to on_data_available.
     
 - UDPListenerTest
-    Uses the SimpleUDPTransport.
+    Uses the udp transport.
     Must throttle the publisher to avoid having too many dropped packets.
     Subscriber reads after N calls to on_data_available.
 

@@ -350,10 +350,9 @@ The default value is 0.
 Establishes the transport type to use for the current test execution.
 
 Accepted values are:
-  tcp - use the SimpleTCP transport;
-  udp - use the SimpleUDP transport;
-  mc  - use the SimpleMcast transport;
-  rmc - use the ReliableMcast transport.
+  tcp       - use the SimpleTCP transport;
+  udp       - use the udp transport;
+  multicast - use the multicast transport;
 
 The default value is 'tcp'.
 

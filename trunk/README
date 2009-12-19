@@ -249,8 +249,8 @@ http://download.ociweb.com/OpenDDS/OpenDDS-latest.pdf
 
 ----------------------------------------------------------------------
 ) There is no check that the Transport implementation supports the
-  given QoS.  The user should not use the SimpleUDPTransport with
-  HISTORY.kind=KEEP_ALL or RELIABILITY.kind = RELIABLE.
+  given QoS.  The user should not use the udp transport with
+  RELIABILITY.kind = RELIABLE.
 
 ----------------------------------------------------------------------
 ) The DURABILITY_SERVICE service_cleanup_delay support is currently

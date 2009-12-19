@@ -125,7 +125,7 @@ module OpenDDS { module Federator {
       // OpenDDS::DCPS::TransportInterfaceInfo
       // which do not have TypeSupport created for them.
 
-      // The transport type (.e.g SimpleTCP or SimpleUDP)
+      // The transport type (.e.g SimpleTCP or udp)
       OpenDDS::DCPS::TransportInterfaceId transport_id;
 
       // Information about the transport instance that is opaque to all but
