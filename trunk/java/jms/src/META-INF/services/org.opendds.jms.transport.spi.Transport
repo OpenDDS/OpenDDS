@@ -3,5 +3,5 @@
 #
 
 org.opendds.jms.transport.spi.SimpleTcpTransport
-org.opendds.jms.transport.spi.SimpleUdpTransport
+org.opendds.jms.transport.spi.UdpTransport
 org.opendds.jms.transport.spi.MulticastTransport

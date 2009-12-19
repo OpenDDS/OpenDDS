@@ -10,12 +10,8 @@
 // ============================================================================
 
 
-#include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpConfiguration.h"
+#include "dds/DCPS/transport/udp/UdpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
-
-
-
-
 
 const long  TEST_DOMAIN   = 411;
 const char* TEST_TOPIC    = "UDPListenerPerfTest";
@@ -35,7 +31,7 @@ int num_datareaders = 1;
 unsigned throttle_factor = 0;
 unsigned id = 0;
 // largest positive value of a long is 2147483647
-CORBA::Long MAX_SAMPLES_PER_INSTANCE = ::DDS::LENGTH_UNLIMITED; 
+CORBA::Long MAX_SAMPLES_PER_INSTANCE = ::DDS::LENGTH_UNLIMITED;
 CORBA::Long MAX_SAMPLES = ::DDS::LENGTH_UNLIMITED;
 CORBA::Long MAX_INSTANCES = ::DDS::LENGTH_UNLIMITED;
 
@@ -60,12 +56,13 @@ int init_reader_tranport ()
   int status = 0;
 
   reader_transport_impl =
-      TheTransportFactory->create_transport_impl (SUB_TRAFFIC, ACE_TEXT("SimpleUdp"), OpenDDS::DCPS::DONT_AUTO_CONFIG);
-  OpenDDS::DCPS::TransportConfiguration_rch reader_config 
-    = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("SimpleUdp"));
+      TheTransportFactory->create_transport_impl (SUB_TRAFFIC, ACE_TEXT("udp"), OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-  OpenDDS::DCPS::SimpleUdpConfiguration* reader_udp_config 
-    = static_cast <OpenDDS::DCPS::SimpleUdpConfiguration*> (reader_config.in ());
+  OpenDDS::DCPS::TransportConfiguration_rch reader_config
+    = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("udp"));
+
+  OpenDDS::DCPS::UdpConfiguration* reader_udp_config
+    = static_cast <OpenDDS::DCPS::UdpConfiguration*> (reader_config.in ());
 
   ACE_INET_Addr reader_address (reader_address_str);
   reader_udp_config->local_address_ = reader_address;
@@ -88,15 +85,15 @@ int init_writer_tranport ()
   int status = 0;
 
   writer_transport_impl =
-      TheTransportFactory->create_transport_impl(PUB_TRAFFIC, 
-                                                 ACE_TEXT("SimpleUdp"),
+      TheTransportFactory->create_transport_impl(PUB_TRAFFIC,
+                                                 ACE_TEXT("udp"),
                                                  OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-  OpenDDS::DCPS::TransportConfiguration_rch writer_config 
-    = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("SimpleUdp"));
+  OpenDDS::DCPS::TransportConfiguration_rch writer_config
+    = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("udp"));
 
-  OpenDDS::DCPS::SimpleUdpConfiguration* writer_udp_config 
-    = static_cast <OpenDDS::DCPS::SimpleUdpConfiguration*> (writer_config.in ());
+  OpenDDS::DCPS::UdpConfiguration* writer_udp_config
+    = static_cast <OpenDDS::DCPS::UdpConfiguration*> (writer_config.in ());
 
   if (0 != ACE_OS::strcmp(ACE_TEXT("default"), writer_address_str) )
     {

@@ -1,4 +1,4 @@
-project(LivelinessTestPublisher): dcpsexe_with_tcp, dcps_unreliable_dgram {
+project(LivelinessTestPublisher): dcpsexe_with_tcp, dcps_udp {
   exename   = publisher
   libpaths += ../FooType4
   libpaths += ../common
@@ -13,7 +13,7 @@ project(LivelinessTestPublisher): dcpsexe_with_tcp, dcps_unreliable_dgram {
 }
 
 
-project(LivelinessTestSubscriber): dcpsexe_with_tcp, dcps_unreliable_dgram {
+project(LivelinessTestSubscriber): dcpsexe_with_tcp, dcps_udp {
   exename   = subscriber
   libpaths += ../FooType4
   libpaths += ../common

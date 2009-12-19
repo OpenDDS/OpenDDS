@@ -13,9 +13,9 @@
 #include "common.h"
 #include "Writer.h"
 #include "TestException.h"
-// Include the SimpleUnreliableDgram.h to make sure Initializer is created before the Service
+// Include the Udp.h to make sure Initializer is created before the Service
 // Configurator open service configure file.
-#include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram.h"
+#include "dds/DCPS/transport/udp/Udp.h"
 #include "dds/DCPS/transport/multicast/Multicast.h"
 
 #include "dds/DCPS/Service_Participant.h"

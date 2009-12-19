@@ -87,7 +87,7 @@ The following JMX MBeans are provided:
 
         The following transport types are supported:
           - SimpleTcp
-          - SimpleUdp
+          - udp
           - multicast
 
 

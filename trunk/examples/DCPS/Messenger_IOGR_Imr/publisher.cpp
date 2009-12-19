@@ -55,19 +55,19 @@ parse_args (int argc, ACE_TCHAR *argv[])
       if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("udp")) == 0) {
         transport_impl_id = 2;
       }
-      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("mcast")) == 0) {
+      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("multicast")) == 0) {
         transport_impl_id = 3;
       }
       // test with DEFAULT_SIMPLE_TCP_ID.
       else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_tcp")) == 0) {
         transport_impl_id = OpenDDS::DCPS::DEFAULT_SIMPLE_TCP_ID;
       }
-      // test with DEFAULT_SIMPLE_UDP_ID.
+      // test with DEFAULT_UDP_ID.
       else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_udp")) == 0) {
-        transport_impl_id = OpenDDS::DCPS::DEFAULT_SIMPLE_UDP_ID;
+        transport_impl_id = OpenDDS::DCPS::DEFAULT_UDP_ID;
       }
-      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_mcast_pub")) == 0) {
-        transport_impl_id = OpenDDS::DCPS::DEFAULT_SIMPLE_MCAST_PUB_ID;
+      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_multicast")) == 0) {
+        transport_impl_id = OpenDDS::DCPS::DEFAULT_MULTICAST_ID;
       }
       break;
     case '?':

@@ -19,8 +19,8 @@
 #include "SimpleTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
-#include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpConfiguration.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
+#include "dds/DCPS/transport/udp/UdpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
 #ifdef ACE_AS_STATIC_LIBS
@@ -77,7 +77,7 @@ public:
     int num_allocs() { return num_allocs_;};
     int num_frees()  { return num_frees_;};
 
-    virtual void *malloc (size_t nbytes) { 
+    virtual void *malloc (size_t nbytes) {
         num_allocs_++;
         return ACE_OS::malloc(nbytes);
     };
@@ -86,15 +86,15 @@ public:
         ACE_OS::free(ptr);
     };
 
-    void *calloc (size_t nbytes, char initial_value) 
-            {/* no-op */ 
+    void *calloc (size_t nbytes, char initial_value)
+            {/* no-op */
               ACE_UNUSED_ARG (nbytes);
               ACE_UNUSED_ARG (initial_value);
               return (void*)0;
             };
 
     void *calloc (size_t n_elem, size_t elem_size, char initial_value)
-            {/* no-op */ 
+            {/* no-op */
               ACE_UNUSED_ARG (n_elem);
               ACE_UNUSED_ARG (elem_size);
               ACE_UNUSED_ARG (initial_value);
@@ -102,102 +102,102 @@ public:
             };
 
     int remove (void)
-            {/* no-op */ 
+            {/* no-op */
                 ACE_ASSERT("not supported" ==0);
-                return -1; 
+                return -1;
             };
 
     int bind (const char *name, void *pointer, int duplicates)
-            {/* no-op */ 
+            {/* no-op */
                 ACE_ASSERT("not supported" ==0);
                 ACE_UNUSED_ARG (name);
                 ACE_UNUSED_ARG (pointer);
                 ACE_UNUSED_ARG (duplicates);
-                return -1; 
+                return -1;
             };
 
     int trybind (const char *name, void *&pointer)
-            {/* no-op */ 
+            {/* no-op */
                 ACE_ASSERT("not supported" ==0);
                 ACE_UNUSED_ARG (name);
                 ACE_UNUSED_ARG (pointer);
-                return -1; 
+                return -1;
             };
 
     int find (const char *name, void *&pointer)
-            {/* no-op */ 
+            {/* no-op */
                 ACE_ASSERT("not supported" ==0);
                 ACE_UNUSED_ARG (name);
                 ACE_UNUSED_ARG (pointer);
-                return -1; 
+                return -1;
             };
 
     int find (const char *name)
-            {/* no-op */ 
+            {/* no-op */
                 ACE_ASSERT("not supported" ==0);
                 ACE_UNUSED_ARG (name);
-                return -1; 
+                return -1;
             };
 
     int unbind (const char *name)
-            {/* no-op */ 
+            {/* no-op */
                 ACE_ASSERT("not supported" ==0);
                 ACE_UNUSED_ARG (name);
-                return -1; 
+                return -1;
             };
 
     int unbind (const char *name, void *&pointer)
-            {/* no-op */ 
+            {/* no-op */
                 ACE_ASSERT("not supported" ==0);
                 ACE_UNUSED_ARG (name);
                 ACE_UNUSED_ARG (pointer);
-                return -1; 
+                return -1;
             };
 
     int sync (ssize_t len, int flags)
-            {/* no-op */ 
+            {/* no-op */
                 ACE_ASSERT("not supported" ==0);
                 ACE_UNUSED_ARG (len);
                 ACE_UNUSED_ARG (flags);
-                return -1; 
+                return -1;
             };
 
     int sync (void *addr, size_t len, int flags)
-            {/* no-op */ 
+            {/* no-op */
                 ACE_ASSERT("not supported" ==0);
                 ACE_UNUSED_ARG (addr);
                 ACE_UNUSED_ARG (len);
                 ACE_UNUSED_ARG (flags);
-                return -1; 
+                return -1;
             };
 
     int protect (ssize_t len, int prot)
-            {/* no-op */ 
+            {/* no-op */
                 ACE_ASSERT("not supported" ==0);
                 ACE_UNUSED_ARG (len);
                 ACE_UNUSED_ARG (prot);
-                return -1; 
+                return -1;
             };
 
     int protect (void *addr, size_t len, int prot)
-            {/* no-op */ 
+            {/* no-op */
                 ACE_ASSERT("not supported" ==0);
                 ACE_UNUSED_ARG (addr);
                 ACE_UNUSED_ARG (len);
                 ACE_UNUSED_ARG (prot);
-                return -1; 
+                return -1;
             };
 
 #if defined (ACE_HAS_MALLOC_STATS)
 
     void print_stats (void) const
-            {/* no-op */ 
+            {/* no-op */
                 ACE_ASSERT("not supported" ==0);
             };
 #endif /* ACE_HAS_MALLOC_STATS */
 
     void dump (void) const
-            {/* no-op */ 
+            {/* no-op */
                 ACE_ASSERT("not supported" ==0);
             };
 
@@ -785,7 +785,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         ::DDS::SampleInfoSeq copyInfo;
         copy     = data2;
         copyInfo = info2;
-        if (   copy.length() != data2.length() 
+        if (   copy.length() != data2.length()
             || copy[0].count != data2[0].count
             || item->ref_count() != 4)
           {
@@ -793,7 +793,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                 ACE_TEXT("(%P|%t) t1 ERROR: assignment operator failed\n") ));
             test_failed = 1;
           }
-            
+
         status = fast_dr->return_loan(copy, copyInfo );
 
         check_return_loan_status(status, copy, 0, 0, "t1 return_loan copy");
@@ -914,19 +914,19 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         ::DDS::SampleInfoSeq copyInfo (max_samples+1);
         copy     = data2;
         copyInfo = info2;
-        if (   copy.length() != data2.length() 
+        if (   copy.length() != data2.length()
             || copy[0].count != data2[0].count )
           {
             ACE_ERROR ((LM_ERROR,
                 ACE_TEXT("(%P|%t) t2 ERROR: assignment operator failed\n") ));
             test_failed = 1;
           }
-            
+
         status = fast_dr->return_loan(copy, copyInfo );
 
         check_return_loan_status(status, copy, 1, max_samples, "t2 return_loan copy");
 
-        status = fast_dr->return_loan(  data2 
+        status = fast_dr->return_loan(  data2
                                       , info2 );
 
         check_return_loan_status(status, data2, 1, max_samples, "t2 return_loan2");
@@ -1292,7 +1292,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       } // t5
       {
         //=====================================================
-        // 6) show that take takes 
+        // 6) show that take takes
         //=====================================================
         ACE_DEBUG((LM_INFO,"==== TEST 6 : show that take takes.\n"));
 
@@ -1300,7 +1300,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         // 0 means zero-copy
         Test::SimpleSeq     data1 (0, max_samples);
         ::DDS::SampleInfoSeq info1;
-         
+
         foo.key  = 1;
         foo.count = 1;
 
@@ -1317,7 +1317,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         DDS::ReturnCode_t status  ;
         if (do_by_instance)
           {
-            status = fast_dr->take_instance(  data1 
+            status = fast_dr->take_instance(  data1
                                     , info1
                                     , max_samples
                                     , reader_instance_handle
@@ -1327,14 +1327,14 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           }
         else
           {
-            status = fast_dr->take(  data1 
+            status = fast_dr->take(  data1
                                     , info1
                                     , max_samples
                                     , ::DDS::ANY_SAMPLE_STATE
                                     , ::DDS::ANY_VIEW_STATE
                                     , ::DDS::ANY_INSTANCE_STATE );
           }
-          
+
         check_read_status(status, data1, 1, "t6 read2");
 
         if (data1[0].count != 1)
@@ -1352,7 +1352,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         ::DDS::SampleInfoSeq info2(0, max_samples); //testing alternate ctor
         if (do_by_instance)
           {
-            status = fast_dr->take_instance ( data2 
+            status = fast_dr->take_instance ( data2
                                     , info2
                                     , max_samples
                                     , reader_instance_handle
@@ -1362,7 +1362,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           }
         else
           {
-            status = fast_dr->take(  data2 
+            status = fast_dr->take(  data2
                                     , info2
                                     , max_samples
                                     , ::DDS::ANY_SAMPLE_STATE
@@ -1370,7 +1370,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                                     , ::DDS::ANY_INSTANCE_STATE );
           }
 
-          
+
         if (status != ::DDS::RETCODE_NO_DATA)
         {
             ACE_ERROR ((LM_ERROR,
@@ -1380,12 +1380,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         }
 
         // ?OK to return an empty loan?
-        status = fast_dr->return_loan(  data2 
+        status = fast_dr->return_loan(  data2
                                       , info2 );
 
         check_return_loan_status(status, data2, 0, 0, "t6 return_loan2");
 
-        status = fast_dr->return_loan(  data1 
+        status = fast_dr->return_loan(  data1
                                       , info1 );
 
         check_return_loan_status(status, data1, 0, 0, "t6 return_loan1");
@@ -1402,7 +1402,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         // 0 means zero-copy
         Test::SimpleSeq     data1 (0, max_samples);
         ::DDS::SampleInfoSeq info1;
-         
+
         // It is important that the last test case took all of the samples!
 
         foo.key  = 7; // a new instance - this is important to get the correct view_state.
@@ -1419,14 +1419,14 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                             1);
 
         DDS::ReturnCode_t status  ;
-        status = fast_dr->read(  data1 
+        status = fast_dr->read(  data1
                                 , info1
                                 , max_samples
                                 , ::DDS::ANY_SAMPLE_STATE
                                 , ::DDS::ANY_VIEW_STATE
                                 , ::DDS::ANY_INSTANCE_STATE );
 
-          
+
         check_read_status(status, data1, 1, "t7 read2");
 
         if (info1[0].view_state != ::DDS::NEW_VIEW_STATE)
@@ -1449,14 +1449,14 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         // 0 means zero-copy
         Test::SimpleSeq     data2 (0, max_samples);
         ::DDS::SampleInfoSeq info2;
-        status = fast_dr->take(  data2 
+        status = fast_dr->take(  data2
                                 , info2
                                 , max_samples
                                 , ::DDS::ANY_SAMPLE_STATE
                                 , ::DDS::ANY_VIEW_STATE
                                 , ::DDS::ANY_INSTANCE_STATE );
 
-          
+
         check_read_status(status, data2, 1, "t7 take");
 
         if (info2[0].view_state != ::DDS::NOT_NEW_VIEW_STATE)
@@ -1474,12 +1474,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
         }
 
-        status = fast_dr->return_loan(  data2 
+        status = fast_dr->return_loan(  data2
                                       , info2 );
 
         check_return_loan_status(status, data2, 0, 0, "t7 return_loan2");
 
-        status = fast_dr->return_loan(  data1 
+        status = fast_dr->return_loan(  data1
                                       , info1 );
 
         check_return_loan_status(status, data1, 0, 0, "t7 return_loan1");
@@ -1502,8 +1502,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         // Note: because of the read/take preconditions the sequence does not need to resize.
         Test::SimpleSeq     data1 (0, max_samples, &the_allocator);
         ::DDS::SampleInfoSeq info1;
-         
-        foo.key  = 1; 
+
+        foo.key  = 1;
         foo.count = 8;
 
         // since depth=1 the previous sample will be "lost"
@@ -1517,14 +1517,14 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                             1);
 
         DDS::ReturnCode_t status  ;
-        status = fast_dr->read(  data1 
+        status = fast_dr->read(  data1
                                 , info1
                                 , max_samples
                                 , ::DDS::ANY_SAMPLE_STATE
                                 , ::DDS::ANY_VIEW_STATE
                                 , ::DDS::ANY_INSTANCE_STATE );
 
-          
+
         check_read_status(status, data1, 1, "t8 read2");
 
         if (1 != the_allocator.num_allocs())
@@ -1547,14 +1547,14 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         // 0 means zero-copy
         Test::SimpleSeq     data2 (0, max_samples, &the_allocator);
         ::DDS::SampleInfoSeq info2;
-        status = fast_dr->take(  data2 
+        status = fast_dr->take(  data2
                                 , info2
                                 , max_samples
                                 , ::DDS::ANY_SAMPLE_STATE
                                 , ::DDS::ANY_VIEW_STATE
                                 , ::DDS::ANY_INSTANCE_STATE );
 
-          
+
         check_read_status(status, data2, 1, "t8 take");
 
         if (2 != the_allocator.num_allocs())
@@ -1572,7 +1572,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
         }
 
-        status = fast_dr->return_loan(  data2 
+        status = fast_dr->return_loan(  data2
                                       , info2 );
 
         // Note: the samples are freed in return_loan (if not reference by something else)
@@ -1581,7 +1581,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         check_return_loan_status(status, data2, 0, 0, "t8 return_loan2");
 
 
-        status = fast_dr->return_loan(  data1 
+        status = fast_dr->return_loan(  data1
                                       , info1 );
 
         check_return_loan_status(status, data1, 0, 0, "t8 return_loan1");
@@ -1677,8 +1677,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         // operation.
         Test::SimpleSeq     data0 (0, max_samples);
         ::DDS::SampleInfoSeq info0;
-         
-        foo.key  = 1; 
+
+        foo.key  = 1;
         foo.count = 9;
 
         // since depth=1 the previous sample will be "lost"
@@ -1692,7 +1692,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                             1);
 
         DDS::ReturnCode_t status  ;
-        status = fast_dr->read(  data0 
+        status = fast_dr->read(  data0
                                 , info0
                                 , max_samples
                                 , ::DDS::ANY_SAMPLE_STATE
@@ -1702,7 +1702,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         // Copy read sample sequence and use it to check read status.
         Test::SimpleSeq     data1 (data0);
         ::DDS::SampleInfoSeq info1 (info0);
-  
+
         check_read_status(status, data1, 1, "t10 read2");
 
         if (data1[0].count != 9)
@@ -1722,13 +1722,13 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         }
 
         // Return the "loan" of read samples to datareader.
-        status = fast_dr->return_loan(  data0 
+        status = fast_dr->return_loan(  data0
                                       , info0 );
 
         check_return_loan_status(status, data0, 0, 0, "t10 return_loan");
 
         // Return the "loan" of copied samples to the datareader.
-        status = fast_dr->return_loan(  data1 
+        status = fast_dr->return_loan(  data1
                                       , info1 );
 
         check_return_loan_status(status, data1, 0, 0, "t10 return_loan");

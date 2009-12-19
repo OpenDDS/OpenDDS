@@ -14,7 +14,7 @@
 #include "dds/DCPS/PublisherImpl.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
-#include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpConfiguration.h"
+#include "dds/DCPS/transport/udp/UdpConfiguration.h"
 #include "dds/DCPS/transport/multicast/MulticastConfiguration.h"
 
 #ifdef ACE_AS_STATIC_LIBS

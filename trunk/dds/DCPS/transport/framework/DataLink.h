@@ -186,8 +186,8 @@ public:
   // by DataLinkCleanupTask.
   bool release_resources();
 
-  // Used by SimpleUdp and SimpleMcast to inform the send strategy to
-  // clear all unsent samples upon backpressure timed out.
+  // Used by to inform the send strategy to clear all unsent samples upon
+  // backpressure timed out.
   void terminate_send();
 
   /// This is called on publisher side to see if this link communicates

@@ -30,7 +30,7 @@ class Options  {
     enum TransportType {
       NONE,     // Unsupported
       TCP,      // SimpleTcp
-      UDP,      // SimpleUnreliableDgram
+      UDP,      // udp
       MC        // multicast
     };
     friend std::ostream& operator<<( std::ostream& str, TransportType value);

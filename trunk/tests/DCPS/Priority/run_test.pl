@@ -260,7 +260,7 @@ Options:
 
   -t NAME | --transport=NAME
                          use NAME transport for test execution - one of
-                         (tcp, udp, mcast), default tcp
+                         (tcp, udp, multicast), default tcp
 
   -c NUMBER | --samples=NUMBER
                          number of samples to publish during the test -
@@ -334,10 +334,9 @@ The default value is 0.
 Establishes the transport type to use for the current test execution.
 
 Accepted values are:
-  tcp    - use the SimpleTCP transport;
-  udp    - use the SimpleUDP transport;
-  mcast  - use the SimplMcast transport;
-  rmcast - use the ReliableMcast transport.
+  tcp       - use the SimpleTCP transport;
+  udp       - use the udp transport;
+  multicast - use the multicast transport;
 
 The default value is 'tcp'.
 
@@ -369,9 +368,9 @@ associations between them at different priority levels.
 
 =item B<./run_demo.pl -d 10 -T 4 -f test.log -t udp>
 
-=item B<./run_demo.pl -x -t mcast>
+=item B<./run_demo.pl -x -t multicast>
 
-=item B<./run_test.pl -vd10T4Vt mcast -p 8>
+=item B<./run_test.pl -vd10T4Vt multicast -p 8>
 
 =back
 

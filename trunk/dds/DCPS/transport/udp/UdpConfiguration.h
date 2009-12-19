@@ -26,6 +26,8 @@ public:
   /// The default value is: none.
   ACE_INET_Addr local_address_;
 
+  UdpConfiguration();
+
   virtual int load(const TransportIdType& id,
                    ACE_Configuration_Heap& config);
 };
