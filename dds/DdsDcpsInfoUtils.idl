@@ -31,7 +31,7 @@ module OpenDDS
     typedef CORBA::OctetSeq TransportInterfaceBLOB;
 
     struct TransportInterfaceInfo {
-      /// The transport type (.e.g SimpleTCP or SimpleUDP)
+      /// The transport type (.e.g SimpleTcp or udp)
       TransportInterfaceId   transport_id;
       /// Informationn about the transport instance that is opaque to all but
       /// code specific to that transport implementation.
