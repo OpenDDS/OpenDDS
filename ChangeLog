@@ -1,3 +1,9 @@
+Sun Dec 20 01:06:43 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+	  Disabled experimental performance tests enabled in last commit.
+
 Sat Dec 19 06:27:05 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * bin/dcps_tests.lst:
@@ -26,7 +32,7 @@ Sat Dec 19 06:27:05 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * java/tests/transport_config/TransportConfigTest.java:
 
           Added support for new udp transport.
-        
+
         * performance-tests/DCPS/MulticastListenerTest:
         * performance-tests/DCPS/MulticastListenerTest/MulticastListenerTest.mpc:
         * performance-tests/DCPS/MulticastListenerTest/common.h:
