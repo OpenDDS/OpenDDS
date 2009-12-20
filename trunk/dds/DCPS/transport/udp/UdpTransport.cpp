@@ -97,8 +97,7 @@ UdpTransport::shutdown_i()
   }
   this->links_.clear();
 
-  this->config_i_->_remove_ref(); // release ownership
-  this->config_i_ = 0;
+  this->config_i_ = 0;  // release ownership
 }
 
 int

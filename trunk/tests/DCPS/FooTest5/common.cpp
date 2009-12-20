@@ -97,6 +97,11 @@ int init_reader_transport ()
           OpenDDS::DCPS::TransportConfiguration_rch reader_config
             = TheTransportFactory->create_configuration (SUB_TRAFFIC_UDP, ACE_TEXT("udp"));
 
+          OpenDDS::DCPS::UdpConfiguration* reader_udp_config =
+            static_cast<OpenDDS::DCPS::UdpConfiguration*>(reader_config.in());
+
+          reader_udp_config->local_address_.set("localhost:52001");
+
           if (reader_udp_impl->configure(reader_config.in()) != 0)
             {
               ACE_ERROR((LM_ERROR,
@@ -176,6 +181,11 @@ int init_writer_transport ()
 
       OpenDDS::DCPS::TransportConfiguration_rch writer_config
         = TheTransportFactory->create_configuration (PUB_TRAFFIC_UDP, ACE_TEXT("udp"));
+
+      OpenDDS::DCPS::UdpConfiguration* writer_udp_config =
+        static_cast<OpenDDS::DCPS::UdpConfiguration*>(writer_config.in());
+
+      writer_udp_config->local_address_.set("localhost:52000");
 
       if (writer_udp_impl->configure(writer_config.in()) != 0)
       {
