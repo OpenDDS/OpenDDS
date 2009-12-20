@@ -1,8 +1,26 @@
+Sun Dec 20 22:59:31 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Corrected ref counting behavior; fixed test failures in FooTest5_0.
+        
+        * dds/DCPS/transport/udp/UdpDataLink.h:
+
+          Added missing include; fixed compilation failures on Win32 hosts.
+
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/Priority/transport.ini:
+        * tests/DCPS/Priority/transport_solaris.ini:
+
+          Fixed test failures for FooTest5 and Priority.
+
 Sun Dec 20 01:06:43 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * bin/dcps_tests.lst:
 
-	  Disabled experimental performance tests enabled in last commit.
+          Disabled experimental performance tests enabled in last commit.
 
 Sat Dec 19 06:27:05 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 

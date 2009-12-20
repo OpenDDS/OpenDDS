@@ -12,6 +12,7 @@
 
 #include "Udp_Export.h"
 
+#include "UdpTransport.h"
 #include "UdpTransport_rch.h"
 #include "UdpConfiguration.h"
 #include "UdpConfiguration_rch.h"
