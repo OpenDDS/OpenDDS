@@ -118,6 +118,7 @@ OpenDDS::DCPS::TransportFactory::create_transport_impl_i(TransportIdType impl_id
   if (TheServiceParticipant->monitor_) {
     TheServiceParticipant->monitor_->report();
   }
+  impl->report();
 
   if (result == 0) {
     // Success!

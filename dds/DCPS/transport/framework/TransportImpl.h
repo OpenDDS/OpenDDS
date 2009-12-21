@@ -144,6 +144,7 @@ public:
   void set_transport_id(const TransportIdType& tid);
   const FactoryIdType& get_factory_id();
   void set_factory_id(const FactoryIdType& fid);
+  void report();
 
 protected:
 

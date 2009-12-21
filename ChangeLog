@@ -1,3 +1,25 @@
+Mon Dec 21 21:42:37 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Publish DP reports after a create_topic() call.
+
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/monitor/TransportMonitorImpl.h:
+        * dds/monitor/TransportMonitorImpl.cpp:
+        * tests/DCPS/Monitor/SPMDataReaderListener.cpp:
+
+          Queue transports so they are published when initialization
+          is completed.
+
+        * tools/odds_monitor/MonitorDataStorage.inl:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+
+          Move the findKey() implementation to the .inl file (to
+          fix some template instantiation issues).
+
 Mon Dec 21 16:14:27 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/odds_monitor/MonitorDataStorage.h:

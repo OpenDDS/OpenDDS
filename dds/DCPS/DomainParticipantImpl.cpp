@@ -422,6 +422,9 @@ ACE_THROW_SPEC((CORBA::SystemException))
                                                     topic_qos,
                                                     a_listener,
                                                     mask);
+        if (this->monitor_) {
+          this->monitor_->report();
+        }
         return new_topic;
 
       } else {

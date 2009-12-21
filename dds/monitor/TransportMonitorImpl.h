@@ -13,6 +13,8 @@
 #include "monitor_export.h"
 #include "dds/DCPS/MonitorFactory.h"
 #include "monitorTypeSupportImpl.h"
+#include "ace/Recursive_Thread_Mutex.h"
+#include <vector>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -33,6 +35,10 @@ private:
   OpenDDS::DCPS::TransportReportDataWriter_var transport_writer_;
   std::string hostname_;
   pid_t pid_;
+
+  typedef std::vector<TransportReport> TransportReportVec;
+  static ACE_Recursive_Thread_Mutex queue_lock_;
+  static TransportReportVec queue_;
 };
 
 } // namespace DCPS

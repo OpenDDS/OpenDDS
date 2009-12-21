@@ -58,10 +58,11 @@ throw(CORBA::SystemException)
         for (CORBA::ULong i = 0; i < spr.domain_participants.length(); i++) {
           std::cout << "    " << spr.domain_participants[i] << std::endl;
         }
-        std::cout << "  transports = "   << std::endl;
+        std::cout << "  transports = ";
         for (CORBA::ULong i = 0; i < spr.transports.length(); i++) {
-          std::cout << "    " << spr.transports[i] << std::endl;
+          std::cout << "    " << spr.transports[i];
         }
+          std::cout << std::endl;
 
       } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
