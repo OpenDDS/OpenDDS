@@ -470,6 +470,38 @@ Monitor::MonitorDataStorage::getNode(
   return node;
 }
 
+
+Monitor::TreeNode*
+Monitor::MonitorDataStorage::createQosNode(
+  const std::string& label,
+  TreeNode*          node,
+  bool&              created
+)
+{
+  TreeNode* qosNode = 0;
+  QString qosLabel( QObject::tr( "Qos"));
+  int qosRow = node->indexOf( 0, qosLabel);
+  if( qosRow == -1) {
+    // New entry, add a reference to the actual transport node.
+    node->insertChildren( 0, 1, 2); // Always make Qos the first child.
+    qosNode = (*node)[0];
+    qosNode->setData( 0, qosLabel);
+    qosNode->setData( 1, label.c_str());
+    created = true;
+
+  } else {
+    qosNode = (*node)[ qosRow];
+  }
+
+  if( !qosNode) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: MonitorDataStorage::createQosNode() - ")
+      ACE_TEXT("unable to find place for Qos in GUI.\n")
+    ));
+  }
+  return qosNode;
+}
+
 void
 Monitor::MonitorDataStorage::manageTransportLink(
   TreeNode* node,
