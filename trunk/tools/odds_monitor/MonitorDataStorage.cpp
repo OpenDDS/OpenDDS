@@ -80,23 +80,6 @@ Monitor::MonitorDataStorage::cleanMaps( TreeNode* node)
   }
 }
 
-template< class MapType>
-std::pair< bool, typename MapType::key_type>
-Monitor::MonitorDataStorage::findKey( MapType& map, TreeNode* node)
-{
-  // This search is predicated on a node only being present once in any
-  // tree.
-  // Need to build a reverse index to do this efficiently.
-  for( typename MapType::iterator current = map.begin();
-       current != map.end();
-       ++current) {
-    if( node == current->second.second) {
-      return std::make_pair( true, current->first);
-    }
-  }
-  return std::make_pair( false, typename MapType::key_type());
-}
-
 Monitor::TreeNode*
 Monitor::MonitorDataStorage::getProcessNode(
   const ProcessKey& key,

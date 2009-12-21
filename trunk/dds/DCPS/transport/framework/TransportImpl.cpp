@@ -706,3 +706,11 @@ OpenDDS::DCPS::TransportImpl::set_factory_id(const FactoryIdType& fid)
 {
   this->factory_id_ = fid;
 }
+
+void
+OpenDDS::DCPS::TransportImpl::report()
+{
+  if (this->monitor_) {
+    this->monitor_->report();
+  }
+}
