@@ -21,6 +21,14 @@ QosToQString( const QosType& /* value */)
   return QString( QObject::tr("<formatting-error>"));
 }
 
+//    QString - to help simplify calling code.
+template<>
+QString
+QosToQString<QString>( const QString& value)
+{
+  return value;
+}
+
 //    BuiltinTopicKey_t
 template<>
 QString

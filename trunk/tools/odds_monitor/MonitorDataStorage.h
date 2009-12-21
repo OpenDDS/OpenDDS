@@ -298,8 +298,8 @@ class MonitorDataStorage {
      * @brief Obtain a possibly new endpoint handle node.  Possibly
      *        create on if needed.
      *
-     * @param pid    key of parent node
-     * @param key    key of node to find or possibly create
+     * @param label  label string for the node if it is created.
+     * @param key    key of node to find or possibly create.
      * @param create boolean value indicating whether to create a node if
      *               one is not found.  It is set before returning to
      *               indicate whether a node was created (true) or found
@@ -317,12 +317,13 @@ class MonitorDataStorage {
      * @brief Obtain a possibly new tree node.  Possibly create on
      *        if needed.
      *
-     * @param pid    key of parent node
-     * @param key    key of node to find or possibly create
-     * @param create boolean value indicating whether to create a node if
-     *               one is not found.  It is set before returning to
-     *               indicate whether a node was created (true) or found
-     *               (false).
+     * @param label    label string for the node if it is created.
+     * @param parentId GUID of parent node.
+     * @param id       GUID of node to find or possibly create.
+     * @param create   boolean value indicating whether to create a node if
+     *                 one is not found.  It is set before returning to
+     *                 indicate whether a node was created (true) or found
+     *                 (false).
      * @return pointer to the node representing the key value.
      */
     TreeNode* getNode(
@@ -331,6 +332,20 @@ class MonitorDataStorage {
                 const OpenDDS::DCPS::GUID_t& id,
                 bool&                        create
               );
+
+    /**
+     * @brief Find or create a node in which to place Qos value nodes.
+     *
+     * @param label   label string for the node if it is created.
+     * @param key     key of node to find or possibly create.
+     * @param created indicates whether a new node was created.
+     * @return pointer to the node containing the Qos value nodes.
+     */
+    TreeNode* createQosNode(
+      const std::string& label,
+      TreeNode*          node,
+      bool&              created
+    );
 
     /// Manage the link to a transport node reference for a publisher or
     /// subscriber node.
