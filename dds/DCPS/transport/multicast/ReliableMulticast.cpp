@@ -118,7 +118,9 @@ ReliableMulticast::~ReliableMulticast()
 {
   if (!this->send_buffer_.is_nil()) {
     this->send_strategy_->send_buffer(0);
-    this->send_buffer_ = 0; // release ownership
+
+    this->send_buffer_->_remove_ref();	// release ownership
+    this->send_buffer_ = 0;
   }
 }
 
