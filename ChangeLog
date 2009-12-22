@@ -1,3 +1,10 @@
+Tue Dec 22 16:55:45 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * tools/odds_monitor/MonitorData.cpp:
+
+          Fixed issue with QString conversion to const char* due to 
+          toLocal8Bit returned array destroyed. 
+          
 Mon Dec 21 21:42:37 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/DomainParticipantImpl.cpp:
