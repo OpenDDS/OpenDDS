@@ -63,8 +63,9 @@ Monitor::MonitorData::setRepoIor( const QString& ior)
 
   // Replace call to toStdString() with toLocal8Bit().constData()
   // to avoid QString-related aborts under windows.
-  const char* ior_str = ior.toLocal8Bit().constData();
-
+  QByteArray ior_arr = ior.toLocal8Bit();
+  const char* ior_str = ior_arr.constData();
+  
   // Return successfully if the requested repository is already the
   // active repository.
   if( this->storage_->activeIor() == ior_str) {
@@ -97,7 +98,8 @@ Monitor::MonitorData::removeRepo( const QString& ior)
 
   // Replace call to toStdString() with toLocal8Bit().constData()
   // to avoid QString-related aborts under windows.
-  const char* ior_str = ior.toLocal8Bit().constData();
+  QByteArray ior_arr = ior.toLocal8Bit();
+  const char* ior_str = ior_arr.constData();
 
   // Check if this is the currently monitored repository, and clear its
   // data if it is in the view.
