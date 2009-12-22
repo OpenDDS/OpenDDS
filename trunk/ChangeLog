@@ -2,7 +2,7 @@ Tue Dec 22 21:11:08 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * wrapper/DDSWrapper_OpenDDS.mpc:
 
-	  Added support for new udp transport.
+          Added support for new udp transport.
 
 Tue Dec 22 16:55:45 UTC 2009  Yan Dai  <dai_y@ociweb.com>
 
