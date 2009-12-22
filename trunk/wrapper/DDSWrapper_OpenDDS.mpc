@@ -1,4 +1,4 @@
-project(DDSWrapper_OpenDDS) : dcpsexe_with_tcp, dcps_unreliable_dgram, dcps_multicast {
+project(DDSWrapper_OpenDDS) : dcpsexe_with_tcp, dcps_udp, dcps_multicast {
   sharedname = DDSWrapper
   dynamicflags += DDSWRAPPER_BUILD_DLL
   includes += .
