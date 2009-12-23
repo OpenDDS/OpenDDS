@@ -2370,7 +2370,7 @@ DDS::InstanceHandle_t
 DataReaderImpl::get_next_handle(const DDS::BuiltinTopicKey_t& key)
 {
   if (this->is_bit()) {
-    OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::GUID_UNKNOWN;
+    OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::RepoIdBuilder::create();
     OpenDDS::DCPS::RepoIdBuilder builder(id);
     builder.from_BuiltinTopicKey(key);
     return this->participant_servant_->get_handle(id);

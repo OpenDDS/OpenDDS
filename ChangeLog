@@ -1,8 +1,31 @@
+Wed Dec 23 20:49:35 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Changed to use GUID values with our vendor Id when generating
+          handle values.
+
+        * tools/odds_monitor/MonitorDataStorage.inl:
+
+          Use GUID values with our vendor Id when generating GUID values
+          from Builtin Topic keys.
+
+        * tools/odds_monitor/MonitorTask.cpp:
+
+          Make the readers TRANSIENT_LOCAL durability to ensure they
+          receive historical data when joining.
+
+        * tools/odds_monitor/Monitor_main.cpp:
+        * tools/odds_monitor/monitor.conf:
+
+          Remove monitor service from the monitor application.  This was
+          for initial testing only and has become obsolete.
+
 Wed Dec 23 01:02:33 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * wrapper/OpenDDS/OpenDDS_Domain_Manager.cpp:
 
-	  Dropped DEFAULT_SIMPLE_UDP constant.
+          Dropped DEFAULT_SIMPLE_UDP constant.
 
 Tue Dec 22 21:11:08 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
