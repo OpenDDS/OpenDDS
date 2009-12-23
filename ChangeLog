@@ -1,3 +1,9 @@
+Wed Dec 23 01:02:33 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * wrapper/OpenDDS/OpenDDS_Domain_Manager.cpp:
+
+	  Dropped DEFAULT_SIMPLE_UDP constant.
+
 Tue Dec 22 21:11:08 UTC 2009  Steven Stallion  <stallions@ociweb.com>
 
         * wrapper/DDSWrapper_OpenDDS.mpc:
