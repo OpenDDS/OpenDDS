@@ -814,10 +814,9 @@ MonitorDataStorage::update< DDS::ParticipantBuiltinTopicData>(
   bool dataChanged   = false;
 
   // Extract a GUID from the key.
-  OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::GUID_UNKNOWN;
+  OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::RepoIdBuilder::create();
   OpenDDS::DCPS::RepoIdBuilder builder(id);
   builder.from_BuiltinTopicKey(data.key);
-  id.guidPrefix[1] = 3;
 
   OpenDDS::DCPS::GuidConverter converter( id);
   ACE_DEBUG((LM_DEBUG,
@@ -914,10 +913,9 @@ MonitorDataStorage::update< DDS::TopicBuiltinTopicData>(
   //  };
 
   // Extract a GUID from the key.
-  OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::GUID_UNKNOWN;
+  OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::RepoIdBuilder::create();
   OpenDDS::DCPS::RepoIdBuilder builder(id);
   builder.from_BuiltinTopicKey(data.key);
-  id.guidPrefix[1] = 3;
 
   OpenDDS::DCPS::GuidConverter converter( id);
   ACE_DEBUG((LM_DEBUG,
@@ -1174,16 +1172,17 @@ MonitorDataStorage::update< DDS::PublicationBuiltinTopicData>(
   //  };
 
   // Extract a GUID from the key.
-  OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::GUID_UNKNOWN;
+  OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::RepoIdBuilder::create();
   OpenDDS::DCPS::RepoIdBuilder builder(id);
   builder.from_BuiltinTopicKey(data.key);
-  id.guidPrefix[1] = 3;
 
+  OpenDDS::DCPS::GuidConverter converter( id);
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
-    ACE_TEXT("%s Publication Builtin Topic, key: ")
+    ACE_TEXT("%s Publication Builtin Topic %C, key: ")
     ACE_TEXT("[0x%x, 0x%x, 0x%x].\n"),
     remove? "removing": "processing",
+    std::string(converter).c_str(),
     data.key.value[0], data.key.value[1], data.key.value[2]
   ));
 
@@ -1454,16 +1453,17 @@ MonitorDataStorage::update< DDS::SubscriptionBuiltinTopicData>(
   //  };
 
   // Extract a GUID from the key.
-  OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::GUID_UNKNOWN;
+  OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::RepoIdBuilder::create();
   OpenDDS::DCPS::RepoIdBuilder builder(id);
   builder.from_BuiltinTopicKey(data.key);
-  id.guidPrefix[1] = 3;
 
+  OpenDDS::DCPS::GuidConverter converter( id);
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
-    ACE_TEXT("%s Subscription Builtin Topic, key: ")
+    ACE_TEXT("%s Subscription Builtin Topic %C, key: ")
     ACE_TEXT("[0x%x, 0x%x, 0x%x].\n"),
     remove? "removing": "processing",
+    std::string(converter).c_str(),
     data.key.value[0], data.key.value[1], data.key.value[2]
   ));
 

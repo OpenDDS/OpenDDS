@@ -599,6 +599,7 @@ Monitor::MonitorTask::createSubscription(
   topic->get_qos( topicQos);
   subscriber->get_default_datareader_qos( readerQos);
   subscriber->copy_from_topic_qos( readerQos, topicQos);
+  readerQos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
   reader = subscriber->create_datareader(
              topic,
              readerQos,
