@@ -5,7 +5,7 @@ Sun Dec 27 01:58:56 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * dds/DCPS/transport/multicast/ReliableMulticast.h:
         * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
 
-	  Dropped unnecessary copy of transport header; added new accessor
+	  Dropped unnecessary copy of transport header; added accessor
 	  to TransportReceiveStrategy for receive_transport_header_.
 
 Wed Dec 23 20:49:35 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
