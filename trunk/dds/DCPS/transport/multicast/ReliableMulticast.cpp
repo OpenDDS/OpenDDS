@@ -425,7 +425,7 @@ ReliableMulticast::nakack_received(ACE_Message_Block* control)
                ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("ReliableMulticast::nakack_received: ")
                ACE_TEXT("unrecoverable samples reported by remote peer: 0x%x!\n"),
-               remote_peer));
+               header.source_));
 
     it->second.shift(low);
   }
