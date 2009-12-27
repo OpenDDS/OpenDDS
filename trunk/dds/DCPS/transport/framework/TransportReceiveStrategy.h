@@ -39,6 +39,10 @@ public:
   /// when recv returns an error.
   virtual void relink(bool do_suspend = true);
 
+  /// Provides access to the received transport header
+  /// for subclasses. 
+  const TransportHeader& received_header() const;
+
 protected:
   TransportReceiveStrategy();
 

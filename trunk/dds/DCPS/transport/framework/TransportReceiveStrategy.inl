@@ -24,6 +24,13 @@ OpenDDS::DCPS::TransportReceiveStrategy::stop()
   this->stop_i();
 }
 
+ACE_INLINE const OpenDDS::DCPS::TransportHeader&
+OpenDDS::DCPS::TransportReceiveStrategy::received_header() const
+{
+  DBG_ENTRY_LVL("TransportReceiveStrategy","received_header",6);
+  return this->receive_transport_header_;
+}
+
 ACE_INLINE size_t
 OpenDDS::DCPS::TransportReceiveStrategy::successor_index(size_t index) const
 {

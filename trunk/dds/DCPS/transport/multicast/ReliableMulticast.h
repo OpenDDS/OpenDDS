@@ -107,8 +107,6 @@ private:
 
   TransportSendBuffer_rch send_buffer_;
 
-  TransportHeader received_header_;
-
   typedef std::map<MulticastPeer, DisjointSequence> NakSequenceMap;
   NakSequenceMap nak_sequences_;
 
