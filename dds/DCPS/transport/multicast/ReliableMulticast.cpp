@@ -215,8 +215,6 @@ ReliableMulticast::acked()
 bool
 ReliableMulticast::header_received(const TransportHeader& header)
 {
-  this->received_header_ = header;
-
   NakSequenceMap::iterator it(this->nak_sequences_.find(header.source_));
   if (it == this->nak_sequences_.end()) return true;  // unknown peer
 
@@ -277,17 +275,17 @@ ReliableMulticast::syn_received(ACE_Message_Block* control)
   // Ignore sample if not destined for us:
   if (local_peer != this->local_peer_) return;
 
-  // Fetch remote peer from header:
-  MulticastPeer remote_peer(this->received_header_.source_);
+  // Obtain reference to received header:
+  const TransportHeader& header(this->recv_strategy_->received_header());
 
   // Insert remote peer into sequence map; this establishes a
   // baseline for detecting reception gaps during delivery:
   this->nak_sequences_.insert(NakSequenceMap::value_type(
-    remote_peer, DisjointSequence(this->received_header_.sequence_)));
+    header.source_, DisjointSequence(header.sequence_)));
 
   // MULTICAST_SYN control samples are always positively
   // acknowledged by a matching remote peer:
-  send_synack(remote_peer);
+  send_synack(header.source_);
 }
 
 void
@@ -406,11 +404,11 @@ ReliableMulticast::send_nak(MulticastPeer remote_peer,
 void
 ReliableMulticast::nakack_received(ACE_Message_Block* control)
 {
-  // Fetch remote peer from header:
-  MulticastPeer remote_peer(this->received_header_.source_);
+  // Obtain reference to received header:
+  const TransportHeader& header(this->recv_strategy_->received_header());
 
   // Ignore sample if remote peer not known:
-  NakSequenceMap::iterator it(this->nak_sequences_.find(remote_peer));
+  NakSequenceMap::iterator it(this->nak_sequences_.find(header.source_));
   if (it == this->nak_sequences_.end()) return;
 
   TAO::DCPS::Serializer serializer(
