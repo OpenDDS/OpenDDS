@@ -1380,7 +1380,7 @@ void recursive_bases(AST_Interface *interf, set<string> &bases,
 
   if (bases.insert(name).second) {
     for (int i = 0; i < interf->n_inherits(); ++i) {
-      AST_Interface *base = interf->inherits()[i];
+      AST_Interface *base = dynamic_cast<AST_Interface*>(interf->inherits()[i]);
       recursive_bases(base, bases, ctors);
     }
 
