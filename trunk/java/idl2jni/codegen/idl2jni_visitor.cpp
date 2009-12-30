@@ -174,8 +174,15 @@ idl2jni_visitor::visit_interface(AST_Interface *node)
 
   addToToplevels(node);
 
-  vector<AST_Interface *> inherits(node->inherits(),
-                                   node->inherits() + node->n_inherits());
+  // The type returned by AST_Interface::inherits() changed
+  // to a AST_Type** in TAO 1.7.6.  This requires an explicit
+  // dynamic cast for each element.
+  //vector<AST_Interface *> inherits(node->inherits(),
+  //                                 node->inherits() + node->n_inherits());
+  vector<AST_Interface *> inherits(node->n_inherits());
+  for (int i = 0; i < node->n_inherits(); i++) {
+    inherits[i] = dynamic_cast<AST_Interface *>(*(node->inherits()+i));
+  }
 
   vector<AST_Interface *> inherits_flat(node->inherits_flat(),
                                         node->inherits_flat() + node->n_inherits_flat());
@@ -589,10 +596,51 @@ int idl2jni_visitor::visit_valuebox(AST_ValueBox *)
 
 #if (TAO_MAJOR_VERSION > 2 || (TAO_MAJOR_VERSION == 1 && \
  (TAO_MINOR_VERSION > 7 || (TAO_MINOR_VERSION == 7 && TAO_BETA_VERSION > 3))))
+
+//#  if (TAO_MAJOR_VERSION > 2 || (TAO_MAJOR_VERSION == 1 &&
+// (TAO_MINOR_VERSION > 7 || (TAO_MINOR_VERSION == 7 && TAO_BETA_VERSION > 5))))
+
+int
+idl2jni_visitor::visit_template_module (AST_Template_Module *)
+{
+  return 0;
+}
+
+int
+idl2jni_visitor::visit_template_module_inst (AST_Template_Module_Inst *)
+{
+  return 0;
+}
+
+int
+idl2jni_visitor::visit_template_module_ref (AST_Template_Module_Ref *)
+{
+  return 0;
+}
+
+//#  else
+
 int idl2jni_visitor::visit_template_interface(AST_Template_Interface *)
 {
   return 0;
 }
+
+int idl2jni_visitor::visit_instantiated_connector(AST_Instantiated_Connector *)
+{
+  return 0;
+}
+
+int idl2jni_visitor::visit_tmpl_port(AST_Tmpl_Port *)
+{
+  return 0;
+}
+
+int idl2jni_visitor::visit_tmpl_mirror_port(AST_Tmpl_Mirror_Port *)
+{
+  return 0;
+}
+
+//#  endif
 
 int idl2jni_visitor::visit_porttype(AST_PortType *)
 {
@@ -639,18 +687,4 @@ int idl2jni_visitor::visit_connector(AST_Connector *)
   return 0;
 }
 
-int idl2jni_visitor::visit_instantiated_connector(AST_Instantiated_Connector *)
-{
-  return 0;
-}
-
-int idl2jni_visitor::visit_tmpl_port(AST_Tmpl_Port *)
-{
-  return 0;
-}
-
-int idl2jni_visitor::visit_tmpl_mirror_port(AST_Tmpl_Mirror_Port *)
-{
-  return 0;
-}
 #endif
