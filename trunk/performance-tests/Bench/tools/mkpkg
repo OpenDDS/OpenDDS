@@ -69,7 +69,7 @@ cp $ACE_ROOT/bin/PerlACE/TestTarget_LVRT.pm $PKG/bin/PerlACE/
 
 # Executables
 cp $DDS_ROOT/bin/DCPSInfoRepo                        $PKG/bin/
-cp $DDS_ROOT/bin/opendds_repo_ctl                    $PKG/bin/
+cp $DDS_ROOT/bin/odds_repoctl                        $PKG/bin/
 cp $DDS_ROOT/performance-tests/Bench/bin/testprocess $PKG/bin/
 cp $DDS_ROOT/performance-tests/Bench/bin/run_test    $PKG/bin/
 cp $DDS_ROOT/performance-tests/Bench/bin/runcmd      $PKG/bin/
