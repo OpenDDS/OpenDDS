@@ -16,7 +16,7 @@ if [ $# = 0 ]; then
 fi
 
 DATE=`date +%Y`
-for FILE in "$FILES"; do
+for FILE in "$@"; do
   if [ ! -f "$FILE" ]; then
     echo "$FILE: No such file"
     exit 1
