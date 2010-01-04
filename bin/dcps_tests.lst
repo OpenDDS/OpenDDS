@@ -133,8 +133,8 @@ performance-tests/DCPS/TCPListenerTest/run_test-4p1s.pl: !DCPS_MIN
 #performance-tests/DCPS/MulticastListenerTest/run_test-1p4s.pl: !DCPS_MIN !QNX
 #performance-tests/DCPS/MulticastListenerTest/run_test-2p3s.pl: !DCPS_MIN !QNX
 
-DevGuideExamples/DCPS/Messenger/run_test.pl: !DCPS_MIN
-DevGuideExamples/DCPS/Messenger_ZeroCopy/run_test.pl: !DCPS_MIN
+examples/DevGuide/Messenger/run_test.pl: !DCPS_MIN
+examples/DevGuide/Messenger_ZeroCopy/run_test.pl: !DCPS_MIN
 
 tests/DCPS/Messenger/run_test.pl: !DCPS_MIN
 tests/DCPS/Messenger/run_test.pl default_tcp: !DCPS_MIN
