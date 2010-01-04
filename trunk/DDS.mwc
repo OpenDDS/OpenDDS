@@ -8,9 +8,9 @@ workspace {
     java/jms
   }
 
-  // temporarily ignoring this for the WChar conversion
+  // Exclude external contributions by default:
   exclude {
-    wrapper
+    contrib/wrapper
   }
 }
 
