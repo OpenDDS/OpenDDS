@@ -1,3 +1,19 @@
+Mon Jan  4 20:53:56 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/opendds_repo_ctl:
+
+          Moved opendds_repo_ctl under tools directory.
+
+        * tools/scripts:
+        * tools/scripts/copyright:
+        * tools/scripts/style:
+
+          Moved copyright and style tools under scripts subdirectory.
+
+        * tools/test_burnin.sh:
+
+          Removed these files.
+
 Mon Jan  4 20:42:47 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * INSTALL:
