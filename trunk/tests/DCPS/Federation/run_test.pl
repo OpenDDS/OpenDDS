@@ -24,7 +24,7 @@ my $debug ;
 my $man ;
 my $help ;
 my $verbose ;
-
+my $for_monitor_test;
 #
 # Specific options.
 #
@@ -33,6 +33,7 @@ my $repoCount = 2;
 my $pubCount  = 1;
 my $subCount  = 1;
 my $samples   = 10;
+my $sample_interval   = 0;
 my $debugFile;
 my $transport;
 
@@ -51,6 +52,8 @@ GetOptions( "verbose!"      => \$verbose,
             "subs|s=i"      => \$subCount,
             "dfile|f=s"     => \$debugFile,
             "samples|n=s"   => \$samples,
+            "SampleInterval|i=s"   => \$sample_interval,
+            "monitor|m"       => \$for_monitor_test,
 
 ) or pod2usage( 0) ;
 pod2usage( 1)             if $help ;
@@ -64,6 +67,8 @@ print "Repos==$repoCount\n" if $verbose;
 print "pubs==$pubCount\n" if $verbose;
 print "subs==$subCount\n" if $verbose;
 print "samples==$samples\n" if $verbose;
+print "SampleInterval==$sample_interval\n" if $verbose;
+print "for_monitor_test==$for_monitor_test\n" if $verbose;
 
 my @repo_ior;
 my @repo_ini;
@@ -135,7 +140,13 @@ for my $index ( 1 .. $repoCount) {
   print "Established repository $index.\n" if $debug;
 }
 
+if ($for_monitor_test == 1) {
+    $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
+      : "-ORBSvcConf ../../../tools/odds_monitor/monitor.conf ";
+}
+
 my $appOpts = "$svc_config ";
+
 $appOpts .= $verboseDebug if $verboseDebug;
 $appOpts .= "-DCPSDebugLevel $appDebug "                if $appDebug;
 $appOpts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
@@ -148,7 +159,7 @@ $appOpts .= "-ORBLogFile $debugFile " if ($appDebug or $transportDebug) and $deb
 my @pubArgs;
 for my $index ( 1 .. $subCount) {
   my $repoIndex = $index;
-  $pubArgs[ $index - 1] .= "$appOpts -Samples $samples ";
+  $pubArgs[ $index - 1] .= "$appOpts -Samples $samples -SampleInterval $sample_interval ";
   $pubArgs[ $index - 1] .= "-DCPSInfoRepo file://$repo_ior[ $repoIndex] ";
 
   if (PerlACE::is_vxworks_test()) {
@@ -185,7 +196,7 @@ for my $index ( 1 .. $repoCount) {
       exit 1;
   }
 }
-print "\nLetting repository federation operations settle a bit...\n"; sleep 2*$interval;
+print "\nLetting repository federation operations settle a bit...\n"; #sleep 2*$interval;
 
 # Fire up the subscribers.
 

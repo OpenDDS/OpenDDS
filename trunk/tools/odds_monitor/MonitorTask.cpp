@@ -15,6 +15,7 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
+#include "dds/DdsDcpsInfoUtilsC.h"
 
 #include <sstream>
 
@@ -29,7 +30,7 @@ namespace { // Anonymous namespace for file scope.
     BUILTIN_PUBLICATION_REPORT_TYPE,
     BUILTIN_SUBSCRIPTION_REPORT_TYPE
   };
-
+  
 } // End of anonymous namespace
 
 Monitor::MonitorTask::MonitorTask(
@@ -43,6 +44,7 @@ Monitor::MonitorTask::MonitorTask(
     gate_( this->lock_),
     waiter_( new DDS::WaitSet),
     guardCondition_( new DDS::GuardCondition),
+    activeKeyInited_(false),
     lastKey_( 0)
 {
   // Find and map the current IOR strings to their IOR key values.
@@ -165,10 +167,36 @@ Monitor::MonitorTask::stopInstrumentation()
 
   // Terminate the transport resources.
 
-  // Destroy the instrumentation participant.
-  this->participant_->delete_contained_entities();
-  TheParticipantFactory->delete_participant( this->participant_.in());
+  // It is possible that the repository was down at this point,
+  // and we do not want the exception stop the monitor process
+  // so catch exception here.
+  try {
+    // Destroy the instrumentation participant.
+    this->participant_->delete_contained_entities();
+    TheParticipantFactory->delete_participant( this->participant_.in());
+  }
+  catch (const CORBA::TRANSIENT&)
+  {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) MonitorTask::stopInstrumentation() - ")
+      ACE_TEXT("caught TRANSIENT exception.\n")
+    ));
+  }
+  catch (const CORBA::Exception& ex) {
+    ex._tao_print_exception("(%P|%t)  MonitorTask::stopInstrumentation() - ");
+    throw;
+  }
+  catch (...) {
+    throw;
+  }
+  
   this->participant_ = DDS::DomainParticipant::_nil();
+  
+  // Extract a transport index for this subscription.
+  OpenDDS::DCPS::TransportIdType transportKey
+    = static_cast<OpenDDS::DCPS::TransportIdType>( this->activeKey_);
+ 
+  TheTransportFactory->release (transportKey);
 
   /// Yield control.
   {
@@ -202,6 +230,9 @@ Monitor::MonitorTask::setRepoIor( const std::string& ior)
   if( location != this->iorKeyMap_.end()) {
     // We already have this IOR mapped, use the existing key.
     key = location->second;
+    // In case the same repo restart again, need resolve the 
+    // repo object reference again.
+    TheServiceParticipant->set_repo_ior( ior.c_str(), key, false);
 
   } else {
     // We need to find an open key to use.  Check the actual
@@ -215,7 +246,7 @@ Monitor::MonitorTask::setRepoIor( const std::string& ior)
     this->lastKey_ = key;
 
     // We have a new repository to install, go ahead.
-    TheServiceParticipant->set_repo_ior( ior.c_str(), key);
+    TheServiceParticipant->set_repo_ior( ior.c_str(), key, false);
 
     // Check that we were able to resolve and attach to the repository.
     keyLocation = TheServiceParticipant->keyIorMap().find( key);
@@ -361,19 +392,28 @@ Monitor::MonitorTask::setActiveRepo( RepoKey key)
       key
     ));
   }
-
+  
   // Remap all domains pointing to the old repository to the new one.
-  TheServiceParticipant->remap_domains( this->activeKey_, key);
+  // But do not attach the participant to the repository as the repo
+  // may not know the monitor domain and monitor also will request
+  // create_participant.
+  TheServiceParticipant->remap_domains( this->activeKey_, key, false);
 
   // Check that the instrumentation domain repository is the new one.
   RepoKey monitorKey = TheServiceParticipant->domain_to_repo(
-                         this->options_.domain()
-                       );
-  if( monitorKey != key) {
+                        this->options_.domain()
+                      );
+                        
+  if(!activeKeyInited_ || monitorKey != key) {
+    if (!activeKeyInited_)
+      {
+        activeKeyInited_ = true;
+      }
+      
     // Otherwise map the instrumentation domain onto the new repository.
-    TheServiceParticipant->set_repo_domain( this->options_.domain(), key);
+    TheServiceParticipant->set_repo_domain( this->options_.domain(), key, false);
   }
-
+  
   // Save the newly active repository key.
   this->activeKey_ = key;
 

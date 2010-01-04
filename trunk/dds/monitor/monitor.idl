@@ -8,6 +8,7 @@ module OpenDDS {
   module DCPS {
 
     const long MONITOR_DOMAIN_ID = 999;
+    const long MONITOR_TRANSPORT_ID = 999;
     const string SERVICE_PARTICIPANT_MONITOR_TOPIC = "Service Participant Monitor";
     const string DOMAIN_PARTICIPANT_MONITOR_TOPIC = "Domain Participant Monitor";
     const string TOPIC_MONITOR_TOPIC = "Topic Monitor";

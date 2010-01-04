@@ -224,22 +224,30 @@ public:
   /// Load DCPSInfoRepo IORs.
   // CORBA strings are narrow so ior is const char* not ACE_TCHAR
   void set_repo_ior(const char* ior,
-                    const RepoKey key = DEFAULT_REPO);
+                    const RepoKey key = DEFAULT_REPO,
+                    bool  attach_participant = true);
 
 #ifdef DDS_HAS_WCHAR
   /// Convenience overload for wchar_t
-  void set_repo_ior(const wchar_t* ior, const RepoKey key = DEFAULT_REPO);
+  void set_repo_ior(const wchar_t* ior, 
+                    const RepoKey key = DEFAULT_REPO,
+                    bool  attach_participant = true);
 #endif
 
   /// Load DCPSInfoRepo reference directly.
-  void set_repo(DCPSInfo_ptr repo, const RepoKey key = DEFAULT_REPO);
+  void set_repo(DCPSInfo_ptr repo, 
+                const RepoKey key = DEFAULT_REPO,
+                bool  attach_participant = true);
 
   /// Rebind a domain from one repository to another.
-  void remap_domains(const RepoKey oldKey, const RepoKey newKey);
+  void remap_domains(const RepoKey oldKey, 
+                     const RepoKey newKey,
+                     bool attach_participant = true);
 
   /// Bind DCPSInfoRepo IORs to domains.
   void set_repo_domain(const DDS::DomainId_t domain,
-                       const RepoKey repo);
+                       const RepoKey repo,
+                       bool attach_participant = true);
 
   /// Convert domainId to repository key.
   RepoKey domain_to_repo(const DDS::DomainId_t domain) const;

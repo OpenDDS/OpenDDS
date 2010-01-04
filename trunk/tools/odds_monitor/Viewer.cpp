@@ -14,6 +14,7 @@
 #include "Options.h"
 #include "MonitorData.h"
 #include "MonitorDataModel.h"
+#include "MonitorTask.h"
 #include "TreeNode.h"
 
 #ifdef DEVELOPMENT
@@ -106,9 +107,9 @@ Viewer::addRepo()
     // Add the value as a selection.
     this->ui.repoSelection->addItem( iorString);
 
-    // Setting the index results in the signal calling newRepo().
-    int index = this->ui.repoSelection->findText( iorString);
-    this->ui.repoSelection->setCurrentIndex( index);
+    //// Setting the index results in the signal calling newRepo().
+    //int index = this->ui.repoSelection->findText( iorString);
+    //this->ui.repoSelection->setCurrentIndex( index);
     // Status bar updated when the index change propagates.
 
   } else {
@@ -145,6 +146,7 @@ Viewer::newRepo( const QString& ior)
     }
   } else {
     // This is the <detached> selection, remove any active repository.
+    this->dataSource_->dataSource_->stopInstrumentation();
     this->dataSource_->clearData();
     this->ui.statusbar->showMessage( tr("Detached"));
   }

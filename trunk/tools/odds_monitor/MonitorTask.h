@@ -33,6 +33,9 @@ class MonitorDataStorage;
  */
 class MonitorTask : public ACE_Task_Base {
   public:
+    friend class Viewer;
+    friend class MonitorData;
+    
     /// Alias the RepoKey type locally.
     typedef OpenDDS::DCPS::Service_Participant::RepoKey RepoKey;
     enum { DEFAULT_REPO = OpenDDS::DCPS::Service_Participant::DEFAULT_REPO };
@@ -142,6 +145,9 @@ class MonitorTask : public ACE_Task_Base {
     /// Key value of the currently active repository.
     RepoKey activeKey_;
 
+    /// Is any repo ever set to active ?
+    bool activeKeyInited_;
+    
     /// Repository key value used for last IOR to be set.
     RepoKey lastKey_;
 };

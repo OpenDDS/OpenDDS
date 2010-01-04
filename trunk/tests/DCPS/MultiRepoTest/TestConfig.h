@@ -68,6 +68,10 @@ class TestConfig {
     int& samples();
     int  samples() const;
 
+    /// Interval between each sample sending.
+    int& sample_interval ();
+    int  sample_interval() const;
+
     /// Data type name.
     std::string& typeName();
     std::string  typeName() const;
@@ -122,6 +126,9 @@ class TestConfig {
     /// Number of samples to emit into the subsystems.
     int samples_;
 
+    /// Interval in seconds between sample sending.
+    int sample_interval_;
+    
     /// Data type name.
     std::string typeName_;
 

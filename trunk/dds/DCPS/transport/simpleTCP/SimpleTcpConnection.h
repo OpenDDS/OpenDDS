@@ -19,6 +19,8 @@
 #include "SimpleTcpConnection_rch.h"
 #include "SimpleTcpSendStrategy.h"
 #include "SimpleTcpSendStrategy_rch.h"
+#include "SimpleTcpReceiveStrategy.h"
+#include "SimpleTcpReceiveStrategy_rch.h"
 #include "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
 #include "SimpleTcpReconnectTask.h"
 #include "dds/DCPS/transport/framework/TransportReceiveStrategy_rch.h"
@@ -66,7 +68,7 @@ public:
   // itself in as a void*.
   virtual int open(void* arg);
 
-  void set_receive_strategy(TransportReceiveStrategy* receive_strategy);
+  void set_receive_strategy(SimpleTcpReceiveStrategy* receive_strategy);
 
   void remove_receive_strategy();
 
@@ -148,7 +150,7 @@ private:
   /// Flag indicate this connection object is the connector or acceptor.
   bool      is_connector_;
   /// Reference to the receiving strategy.
-  TransportReceiveStrategy_rch receive_strategy_;
+  SimpleTcpReceiveStrategy_rch receive_strategy_;
   /// Reference to the send strategy.
   SimpleTcpSendStrategy_rch send_strategy_;
   /// Remote address.

@@ -30,6 +30,10 @@ class TestConfig {
     int& samples();
     int  samples() const;
 
+    /// Interval between each sample sending.
+    int& sample_interval ();
+    int  sample_interval() const;
+
     /// Domain
     int& domain();
     int  domain() const;
@@ -48,6 +52,9 @@ class TestConfig {
 
     /// Number of samples to emit into the subsystems.
     int samples_;
+    
+    /// Interval in seconds between sample sending.
+    int sample_interval_;
 
     /// Domain value.
     int domain_;
