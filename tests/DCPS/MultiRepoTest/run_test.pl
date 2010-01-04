@@ -21,7 +21,7 @@ PerlDDS::add_lib_path('../FooType5');
 # Name the pieces.
 
 my $samples = 10;
-
+my $sample_interval = 0;
 my $sys1_addr = "localhost:16701";
 my $sys1_pub_domain = 511;
 my $sys1_sub_domain = 411;
@@ -54,6 +54,7 @@ my $system1_config = "";
 my $system2_config = "";
 my $system3_config = "";
 my $monitor_config = "";
+my $svc_conf = "../../tcp.conf ";
 
 if ($ARGV[0] eq 'fileconfig') {
   # File configuration test.
@@ -83,7 +84,28 @@ if ($ARGV[0] eq 'fileconfig') {
                   . "-InfoRepo file://$dcpsrepo3_ior "
                   . "-WriterDomain $sys3_sub_domain -ReaderDomain $sys3_pub_domain "; 
 
-} else {
+} elsif ($ARGV[0] eq 'monitor') {
+  # Default: Command line configuration test.
+  $system1_config = "-InfoRepo file://$dcpsrepo1_ior ";
+  $system2_config = "-InfoRepo file://$dcpsrepo2_ior ";
+  $system3_config = "-InfoRepo file://$dcpsrepo3_ior ";
+
+  # This is horribly position dependent.  The InfoRepo IOR values start
+  # with the first RepositoryKey value 0 and increment as they are
+  # encountered with the current (in the command line) key value used to
+  # bind any domain definitions from the command line.
+  $monitor_config = "-InfoRepo file://$dcpsrepo1_ior "
+                  . "-WriterDomain $sys1_sub_domain -ReaderDomain $sys1_pub_domain "
+                  . "-InfoRepo file://$dcpsrepo2_ior "
+                  . "-WriterDomain $sys2_sub_domain -ReaderDomain $sys2_pub_domain "
+                  . "-InfoRepo file://$dcpsrepo3_ior "
+                  . "-WriterDomain $sys3_sub_domain -ReaderDomain $sys3_pub_domain "; 
+
+  $svc_conf = "../../../tools/odds_monitor/monitor.conf ";
+  $samples = 10000;
+  $sample_interval = 5;
+}
+else {
   print STDERR "ERROR: invalid parameter $ARGV[0]\n";
   exit 1;
 }
@@ -95,9 +117,8 @@ unlink $dcpsrepo2_ior;
 unlink $dcpsrepo3_ior;
 
 # Configure the repositories.
-
 my $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
-    : "-ORBSvcConf ../../tcp.conf ";
+    : "-ORBSvcConf $svc_conf ";
 
 $svc_config .= "-DCPSDebugLevel $debug " if $debug;
 
@@ -132,7 +153,7 @@ my $sys3_parameters = "$svc_config $system3_config "
 #   monitor reader [2]   <---    system3 writer
 #
 
-$monitor_parameters = "$svc_config -Samples $samples $monitor_config "
+$monitor_parameters = "$svc_config -Samples $samples -SampleInterval $sample_interval $monitor_config "
                     . "-WriterTopic $sys1_sub_topic "
                     . "-WriterTopic $sys2_sub_topic "
                     . "-WriterTopic $sys3_sub_topic "

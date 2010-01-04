@@ -26,6 +26,7 @@
 #include <dds/DdsDcpsPublicationC.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
+#include <dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -158,10 +159,25 @@ MonitorFactoryImpl::initialize()
     participant->create_publisher(PUBLISHER_QOS_DEFAULT,
                                   DDS::PublisherListener::_nil(),
                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                  
   OpenDDS::DCPS::TransportImpl_rch transport_impl =
-    TheTransportFactory->create_transport_impl(
-                                OpenDDS::DCPS::DEFAULT_SIMPLE_TCP_ID,
-                                OpenDDS::DCPS::AUTO_CONFIG);
+    TheTransportFactory->obtain (MONITOR_TRANSPORT_ID);
+  if (transport_impl.is_nil ())
+  {
+    transport_impl = TheTransportFactory->create_transport_impl(
+      MONITOR_TRANSPORT_ID,
+      ACE_TEXT("SimpleTcp"),
+      OpenDDS::DCPS::DONT_AUTO_CONFIG);
+
+    OpenDDS::DCPS::TransportConfiguration_rch config 
+      = TheTransportFactory->get_or_create_configuration(MONITOR_TRANSPORT_ID, ACE_TEXT("SimpleTcp"));
+
+    OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config
+      = static_cast <SimpleTcpConfiguration*>(config.in());
+  
+    transport_impl->configure (tcp_config);
+  }
+  
   transport_impl->attach(publisher.in());
 
   DDS::DataWriter_var writer;

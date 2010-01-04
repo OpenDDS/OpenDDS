@@ -47,6 +47,8 @@ class TreeNode;
  */
 class MonitorData {
   public:
+    friend class Viewer;
+    
     /// Construct with an IOR only.
     MonitorData( const Options& options, MonitorDataModel* model);
 

@@ -76,6 +76,8 @@ module OpenDDS
       // Called when a connection failure has been detected
       // and there are still associations using the connection
       // after the configurable graceful_disconnected_period.
+      // When connection is gracefully disconnected, this callback
+      // is also triggered.
       void on_subscription_disconnected(
         in ::DDS::DataReader reader,
         in SubscriptionDisconnectedStatus status);

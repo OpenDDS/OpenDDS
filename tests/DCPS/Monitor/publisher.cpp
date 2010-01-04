@@ -24,11 +24,40 @@
 #include "MessengerTypeSupportImpl.h"
 #include "Writer.h"
 
+int send_interval = 0;
+
 namespace {
 
 OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
 
 } // namespace
+
+int
+parse_args (int argc, ACE_TCHAR *argv[])
+{
+  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("i:"));
+  int c;
+
+  while ((c = get_opts ()) != -1)
+  {
+    switch (c)
+    {
+    case 'i':
+      send_interval = ACE_OS::atoi (get_opts.opt_arg ());
+      break;
+    case '?':
+    default:
+      ACE_ERROR_RETURN ((LM_ERROR,
+        "usage:  %s "
+        "-i <send_interval_sec> "
+        "\n",
+        argv [0]),
+        -1);
+    }
+  }
+  // Indicates sucessful parsing of the command line
+  return 0;
+}
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
@@ -37,6 +66,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
 
+    if (parse_args (argc, argv) != 0) {
+      return 1;
+    }
+    
     TheServiceParticipant->monitor_factory_->initialize();
 
     // Create DomainParticipant

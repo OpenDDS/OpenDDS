@@ -11,13 +11,20 @@ use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use DDS_Run_Test;
 
+$send_interval = 0;
+$test_duration = 300;
+if ($ARGV[0] eq 'long') {
+  $send_interval = 30;
+  $test_duration = 600;
+}
+
 $status = 0;
 $use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
 
 $opts = $use_svc_config ? "-ORBSvcConf tcp.conf" : '';
 $repo_bit_opt = $opts;
 
-$pub_opts = "$opts -ORBDebugLevel 10 -ORBLogFile pub.log -DCPSConfigFile pub.ini -DCPSDebugLevel 10";
+$pub_opts = "$opts -i $send_interval -ORBDebugLevel 10 -ORBLogFile pub.log -DCPSConfigFile pub.ini -DCPSDebugLevel 10";
 $sub_opts = "$opts -DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile sub.log -DCPSConfigFile sub.ini -DCPSDebugLevel 10";
 $mon_opts = "$opts -DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile mon.log -DCPSConfigFile sub.ini -DCPSDebugLevel 10";
 
@@ -50,7 +57,7 @@ print $Subscriber->CommandLine() . "\n";
 $Subscriber->Spawn ();
 
 
-$PublisherResult = $Publisher->WaitKill (300);
+$PublisherResult = $Publisher->WaitKill ($test_duration);
 if ($PublisherResult != 0) {
     print STDERR "ERROR: publisher returned $PublisherResult \n";
     $status = 1;

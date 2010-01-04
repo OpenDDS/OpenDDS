@@ -456,6 +456,22 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSPendingTimeout"))) != 0) {
       this->pending_timeout_ = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
+    
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-FederationRecoveryDuration"))) != 0) {
+      this->federation_recovery_duration_ = ACE_OS::atoi(currentArg);
+      arg_shifter.consume_arg();
+    
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-FederationInitialBackoffSeconds"))) != 0) {
+      this->federation_initial_backoff_seconds_ = ACE_OS::atoi(currentArg);
+      arg_shifter.consume_arg();
+
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-FederationBackoffMultiplier"))) != 0) {
+      this->federation_backoff_multiplier_ = ACE_OS::atoi(currentArg);
+      arg_shifter.consume_arg();
+
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-FederationLivelinessDuration"))) != 0) {
+      this->federation_liveliness_ = ACE_OS::atoi(currentArg);
+      arg_shifter.consume_arg();
 
     } else {
       arg_shifter.ignore_arg();
@@ -682,14 +698,16 @@ Service_Participant::initializeScheduling()
 
 #ifdef DDS_HAS_WCHAR
 void
-Service_Participant::set_repo_ior(const wchar_t* ior, const RepoKey key)
+Service_Participant::set_repo_ior(const wchar_t* ior, 
+                                  const RepoKey key, 
+                                  bool  attach_participant)
 {
-  set_repo_ior(ACE_Wide_To_Ascii(ior).char_rep(), key);
+  set_repo_ior(ACE_Wide_To_Ascii(ior).char_rep(), key, attach_participant);
 }
 #endif
 
 void
-Service_Participant::set_repo_ior(const char* ior, const RepoKey key)
+Service_Participant::set_repo_ior(const char* ior, const RepoKey key, bool attach_participant)
 {
   if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
@@ -729,11 +747,11 @@ Service_Participant::set_repo_ior(const char* ior, const RepoKey key)
   this->keyIorMap_[ key] = ior;
 
   // Actually install the repository to the mappings.
-  this->set_repo(repo.in(), key);
+  this->set_repo(repo.in(), key, attach_participant);
 }
 
 void
-Service_Participant::set_repo(DCPSInfo_ptr repo, const RepoKey key)
+Service_Participant::set_repo(DCPSInfo_ptr repo, const RepoKey key, bool attach_participant)
 {
   if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
@@ -749,11 +767,13 @@ Service_Participant::set_repo(DCPSInfo_ptr repo, const RepoKey key)
 
   // Force a call to attach_participant() for all domains bound to
   // this repository.
-  this->remap_domains(key, key);
+  this->remap_domains(key, key, attach_participant);
 }
 
 void
-Service_Participant::remap_domains(const RepoKey oldKey, const RepoKey newKey)
+Service_Participant::remap_domains(const RepoKey oldKey, 
+                                   const RepoKey newKey,
+                                   bool attach_participant)
 {
   // Search the mappings for any domains mapped to this repository.
   std::vector<DDS::DomainId_t> domainList;
@@ -773,12 +793,14 @@ Service_Participant::remap_domains(const RepoKey oldKey, const RepoKey newKey)
   for (unsigned int index = 0; index < domainList.size(); ++index) {
     // For mapped domains, attach their participants by setting the
     // mapping again.
-    this->set_repo_domain(domainList[ index], newKey);
+    this->set_repo_domain(domainList[ index], newKey, attach_participant);
   }
 }
 
 void
-Service_Participant::set_repo_domain(const DDS::DomainId_t domain, const RepoKey key)
+Service_Participant::set_repo_domain(const DDS::DomainId_t domain, 
+                                     const RepoKey key,
+                                     bool attach_participant)
 {
   std::vector<std::pair<DCPSInfo_var, RepoId> > repoList;
   {
@@ -864,7 +886,11 @@ Service_Participant::set_repo_domain(const DDS::DomainId_t domain, const RepoKey
                  std::string(converter).c_str(),
                  key));
     }
-    repoList[ index].first->attach_participant(domain, repoList[ index].second);
+    
+    if (attach_participant)
+    {
+      repoList[ index].first->attach_participant(domain, repoList[ index].second);
+    }
   }
 }
 

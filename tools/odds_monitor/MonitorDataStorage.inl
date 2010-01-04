@@ -790,9 +790,6 @@ MonitorDataStorage::update< OpenDDS::DCPS::TransportReport>(
     );
     dataChanged = true;
   }
-
-  // NAME / VALUE DATA, notify GUI of changes.
-  this->displayNvp( node, data.values, layoutChanged, dataChanged);
 }
 
 template<>

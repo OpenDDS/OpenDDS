@@ -1,3 +1,90 @@
+Mon Jan  4 22:51:20 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Enabled notify_subscription_disconnected and
+          notify_subscription_lost callback for built-in-topic
+          datareader. This is needed for failover repository
+          detection.
+
+        * dds/DCPS/FailoverListener.cpp:
+
+          Added repository recovery call upon
+          on_subscription_disconnected callback.
+
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+
+          Added attach_participant bool parameter to several methods
+          (e.g. remap_domain). If flag is false, it will not invoke
+          attach_participant() on repo. This invocation cause failure
+          for odds_monitor in some test scenarios. Those method defaults
+          to invoke attach_participant on repo.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy_rch.h:
+
+          Changed receive_strategy_ to be SimpleTcpSendStrategy_rch instead of
+          TransportReceiveStrategy_rch so it can call gracefully_disconnected()
+          to verify connection and notify user about disconnection.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+
+          Fixed an issue that new datalink and passive accepted connection
+          not associated when new connection is accepted before
+          find_or_create_datalink() creates the new datalink.
+
+        * dds/DdsDcpsSubscriptionExt.idl:
+
+          Updated comments for on_subscription_disconnected
+          that can be called if gracefully disconnected by peer.
+          This is needed to discover the failover repository.
+
+        * dds/monitor/MonitorFactoryImpl.cpp:
+        * dds/monitor/monitor.idl:
+
+          - Added MONITOR_TRANSPORT_ID for monitor transport to avoid
+            conflict of using DEFAULT_SIMPLE_TCP_ID by both monitor lib
+            and user application.
+          - The MONITOR_TRANSPORT_ID is a temporary define, we'll define
+            the reserved and user used range for transport id, domain id,
+            repository id and etc.
+
+        * tools/odds_monitor/MonitorData.h:
+        * tools/odds_monitor/MonitorDataStorage.inl:
+        * tools/odds_monitor/MonitorTask.h:
+        * tools/odds_monitor/MonitorTask.cpp:
+        * tools/odds_monitor/Viewer.cpp:
+
+          Fixed issues upon switching repo via GUI.
+          - Made "add" button only add repository to repo list and the binding
+            to repo only happens when selecting the repo.
+          - Fixed crash when same repo location is selected but the repo is
+            restarted. The repo reference needs be resolved again.
+          - Initialized activeKey and associated monitor domain with repo
+            when first time setActiveRepo is called, otherwise monitor domain
+            will not be found when trying to remap domain to different repo.
+          - Released monitor transport if stop instrumentation so it has
+            clean state for new instrumentation.
+
+        * tests/DCPS/MultiRepoTest/TestConfig.cpp:
+        * tests/DCPS/MultiRepoTest/TestConfig.h:
+        * tests/DCPS/MultiRepoTest/TestSystem.cpp:
+        * tests/DCPS/MultiRepoTest/TestMonitor.cpp:
+        * tests/DCPS/MultiRepoTest/run_test.pl:
+        * tests/DCPS/Monitor/Writer.cpp:
+        * tests/DCPS/Monitor/run_test.pl:
+        * tests/DCPS/Monitor/publisher.cpp:
+        * tests/DCPS/Federation/Subscriber.cpp:
+        * tests/DCPS/Federation/TestConfig.cpp:
+        * tests/DCPS/Federation/TestConfig.h:
+        * tests/DCPS/Federation/run_test.pl:
+        * tests/DCPS/Federation/Publisher.cpp:
+
+          Added command options to extend the test duration to help test
+          odds_monitor repository switch feature.
+
 Mon Jan  4 21:42:56 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * bin/dcps_tests.lst:

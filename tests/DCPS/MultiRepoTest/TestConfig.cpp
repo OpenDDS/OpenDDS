@@ -15,6 +15,7 @@ namespace { // anonymous namespace for file scope.
   //
   const bool  TC_DEFAULT_VERBOSE = false;
   enum {      TC_DEFAULT_SAMPLES = 10};
+  enum {      TC_DEFAULT_SAMPLE_INTERVAL = 0};
   const char* TC_DEFAULT_TYPE    = "Foo";
 
 } // end of anonymous namespace.
@@ -26,6 +27,7 @@ TestConfig::~TestConfig()
 TestConfig::TestConfig( int argc, ACE_TCHAR** argv, char** envp)
  : verbose_( TC_DEFAULT_VERBOSE),
    samples_( TC_DEFAULT_SAMPLES),
+   sample_interval_(TC_DEFAULT_SAMPLE_INTERVAL),
    typeName_( TC_DEFAULT_TYPE)
 {
   ACE_UNUSED_ARG(envp);
@@ -71,7 +73,10 @@ TestConfig::TestConfig( int argc, ACE_TCHAR** argv, char** envp)
     } else if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-Samples")))) {
       this->samples_ = ACE_OS::atoi( currentArg);
       parser.consume_arg();
-
+    }
+    else if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-SampleInterval")))) {
+      this->sample_interval_ = ACE_OS::atoi( currentArg);
+      parser.consume_arg();
     } else if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-v")))) {
       this->verbose_ = true;
 
@@ -119,6 +124,18 @@ int
 TestConfig::samples() const
 {
   return this->samples_;
+}
+
+int&
+TestConfig::sample_interval()
+{
+  return this->sample_interval_;
+}
+
+int
+TestConfig::sample_interval() const
+{
+  return this->sample_interval_;
 }
 
 std::string&

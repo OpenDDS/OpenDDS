@@ -22,7 +22,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
   // operations - they should not get optimized away!  Note that this
   // passes the arguments to the ORB initialization first, then strips
   // the DCPS arguments.
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) INFO: initializing the service.\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) INFO: initializing the service.%d\n"), this->config_.infoRepoIorSize()));
   ::DDS::DomainParticipantFactory_var factory = TheParticipantFactoryWithArgs( argc, argv);
 
   // We only need to do loading and binding if we receive InfoRepo IOR
@@ -53,6 +53,10 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
       this->config_.publisherDomain(),
       OpenDDS::DCPS::Service_Participant::DEFAULT_REPO
     );
+    
+#if 1
+    TheServiceParticipant->monitor_factory_->initialize();
+#endif  
   }
 
   //

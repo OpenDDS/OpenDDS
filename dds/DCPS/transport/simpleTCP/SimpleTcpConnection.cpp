@@ -83,10 +83,8 @@ OpenDDS::DCPS::SimpleTcpConnection::disconnect()
   this->connected_ = false;
 
   if (!this->receive_strategy_.is_nil()) {
-    SimpleTcpReceiveStrategy* rs
-    = dynamic_cast <SimpleTcpReceiveStrategy*>(this->receive_strategy_.in());
 
-    rs->get_reactor()->remove_handler(this,
+    this->receive_strategy_->get_reactor()->remove_handler(this,
                                       ACE_Event_Handler::READ_MASK | ACE_Event_Handler::DONT_CALL);
   }
 
@@ -97,7 +95,7 @@ OpenDDS::DCPS::SimpleTcpConnection::disconnect()
 // visibility into the receive strategy to call add_ref().  Oh well.
 void
 OpenDDS::DCPS::SimpleTcpConnection::set_receive_strategy
-(TransportReceiveStrategy* receive_strategy)
+(SimpleTcpReceiveStrategy* receive_strategy)
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","set_receive_strategy",6);
 
@@ -241,13 +239,11 @@ OpenDDS::DCPS::SimpleTcpConnection::handle_input(ACE_HANDLE)
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","handle_input",6);
 
-  TransportReceiveStrategy_rch rs = this->receive_strategy_;
-
-  if (rs.is_nil()) {
+  if (this->receive_strategy_.is_nil()) {
     return 0;
   }
 
-  return rs->handle_input();
+  return this->receive_strategy_->handle_input();
 }
 
 int
@@ -274,10 +270,17 @@ OpenDDS::DCPS::SimpleTcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
   //            My guess is that it happens if the reactor is closed
   //            while we are still registered with the reactor.  Right?
 
+
   if (!this->send_strategy_.is_nil())
     this->send_strategy_->terminate_send();
 
   this->disconnect();
+  
+  if (this->receive_strategy_->gracefully_disconnected())
+  {
+    this->link_->notify (DataLink::DISCONNECTED);
+  }
+    
   return 0;
 }
 

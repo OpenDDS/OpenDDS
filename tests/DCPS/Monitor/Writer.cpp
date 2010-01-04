@@ -19,6 +19,7 @@
 
 const int num_instances_per_writer = 1;
 const int num_messages = 10;
+extern int send_interval;
 
 Writer::Writer(DDS::DataWriter_ptr writer)
   : writer_(DDS::DataWriter::_duplicate(writer)),
@@ -119,6 +120,11 @@ Writer::svc()
       }
 
       message.count++;
+      
+      if (send_interval > 0)
+      {
+        ACE_OS::sleep (send_interval);
+      }
     }
 
   } catch (const CORBA::Exception& e) {

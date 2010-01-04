@@ -2385,21 +2385,19 @@ DataReaderImpl::notify_subscription_disconnected(const WriterIdSeq& pubids)
 {
   DBG_ENTRY_LVL("DataReaderImpl","notify_subscription_disconnected",6);
 
-  if (!this->is_bit_) {
-    // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
-    // is given to this DataReader then narrow() fails.
-    DataReaderListener_var the_listener
-    = DataReaderListener::_narrow(this->listener_.in());
+  // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
+  // is given to this DataReader then narrow() fails.
+  DataReaderListener_var the_listener
+  = DataReaderListener::_narrow(this->listener_.in());
 
-    if (!CORBA::is_nil(the_listener.in())) {
-      SubscriptionLostStatus status;
+  if (!CORBA::is_nil(the_listener.in())) {
+    SubscriptionLostStatus status;
 
-      // Since this callback may come after remove_association which removes
-      // the writer from id_to_handle map, we can ignore this error.
-      this->lookup_instance_handles(pubids, status.publication_handles);
-      the_listener->on_subscription_disconnected(this->dr_local_objref_.in(),
-                                                 status);
-    }
+    // Since this callback may come after remove_association which removes
+    // the writer from id_to_handle map, we can ignore this error.
+    this->lookup_instance_handles(pubids, status.publication_handles);
+    the_listener->on_subscription_disconnected(this->dr_local_objref_.in(),
+                                                status);
   }
 }
 
@@ -2462,21 +2460,19 @@ DataReaderImpl::notify_subscription_lost(const WriterIdSeq& pubids)
 {
   DBG_ENTRY_LVL("DataReaderImpl","notify_subscription_lost",6);
 
-  if (!this->is_bit_) {
-    // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
-    // is given to this DataReader then narrow() fails.
-    DataReaderListener_var the_listener
-    = DataReaderListener::_narrow(this->listener_.in());
+  // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
+  // is given to this DataReader then narrow() fails.
+  DataReaderListener_var the_listener
+  = DataReaderListener::_narrow(this->listener_.in());
 
-    if (!CORBA::is_nil(the_listener.in())) {
-      SubscriptionLostStatus status;
+  if (!CORBA::is_nil(the_listener.in())) {
+    SubscriptionLostStatus status;
 
-      // Since this callback may come after remove_association which removes
-      // the writer from id_to_handle map, we can ignore this error.
-      this->lookup_instance_handles(pubids, status.publication_handles);
-      the_listener->on_subscription_lost(this->dr_local_objref_.in(),
-                                         status);
-    }
+    // Since this callback may come after remove_association which removes
+    // the writer from id_to_handle map, we can ignore this error.
+    this->lookup_instance_handles(pubids, status.publication_handles);
+    the_listener->on_subscription_lost(this->dr_local_objref_.in(),
+                                        status);
   }
 }
 

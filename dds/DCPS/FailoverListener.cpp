@@ -128,6 +128,7 @@ throw(CORBA::SystemException)
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) FailoverListener::on_subscription_disconnected\n")));
   }
+  TheServiceParticipant->repository_lost(this->key_);
 }
 
 void
