@@ -1,3 +1,9 @@
+Mon Jan  4 21:28:56 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * docs:
+
+          Updated documentation for consistency.
+
 Mon Jan  4 20:59:28 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * java/jms/compat/build.xml:
