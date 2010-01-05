@@ -17,13 +17,9 @@
 #endif
 #include "SimpleTcpDataLink_rch.h"
 #include "SimpleTcpConnection_rch.h"
-#include "SimpleTcpSendStrategy.h"
 #include "SimpleTcpSendStrategy_rch.h"
-#include "SimpleTcpReceiveStrategy.h"
 #include "SimpleTcpReceiveStrategy_rch.h"
-#include "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
 #include "SimpleTcpReconnectTask.h"
-#include "dds/DCPS/transport/framework/TransportReceiveStrategy_rch.h"
 #include "dds/DCPS/RcObject_T.h"
 #include "ace/SOCK_Stream.h"
 #include "ace/Svc_Handler.h"
