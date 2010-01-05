@@ -7,8 +7,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 use Env qw(ACE_ROOT DDS_ROOT);
 use lib "$DDS_ROOT/bin";
 use lib "$ACE_ROOT/bin";
-use DDS_Run_Test;
-use JavaProcess;
+use PerlDDS::Run_Test;
+use PerlDDS::Process_Java;
 use strict;
 
 my $status = 0;
@@ -25,7 +25,7 @@ my $debug_opt = ($debug eq '0') ? ''
 
 my $test_opts = "-DCPSConfigFile dcps.ini $debug_opt";
 
-my $TEST = new JavaProcess ('TransportConfigTest', $test_opts);
+my $TEST = new PerlDDS::Process_Java ('TransportConfigTest', $test_opts);
 
 my $TestResult = $TEST->SpawnWaitKill (300);
 if ($TestResult != 0) {

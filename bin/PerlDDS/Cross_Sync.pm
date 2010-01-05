@@ -1,8 +1,8 @@
-package CrossSyncDDS;
+package PerlDDS;
 
-use CrossSync;
+use PerlDDS::Cross_Sync_Common;
 
-@ISA = ("CrossSync"); #inherits from CrossSync
+@ISA = ("PerlDDS::Cross_Sync_Common"); #inherits from Cross_Syn_Common
 
 sub new {
     my $proto = shift;

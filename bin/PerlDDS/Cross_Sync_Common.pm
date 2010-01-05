@@ -1,4 +1,4 @@
-package CrossSync;
+package PerlDDS;
 
 use strict;
 use FileHandle;

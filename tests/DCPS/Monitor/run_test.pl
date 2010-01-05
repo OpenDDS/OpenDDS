@@ -9,7 +9,7 @@ use Env (DDS_ROOT);
 use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use DDS_Run_Test;
+use PerlDDS::Run_Test;
 
 $send_interval = 0;
 $test_duration = 300;

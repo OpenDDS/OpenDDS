@@ -11,8 +11,8 @@ use Env (DDS_ROOT);
 use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use DDS_Run_Test;
-use CrossSyncDDS;
+use PerlDDS::Run_Test;
+use PerlDDS::Cross_Sync;
 
 $| = 1;
 my $status = 0;
@@ -41,7 +41,7 @@ elsif ($ARGV[0] eq 'multicast') {
     $sub_config_file = "$file_prefix/sub_multicast.ini";
 }
 
-$CS = new CrossSyncDDS (1, PerlACE::random_port(), PerlACE::random_port()
+$CS = new PerlDDS::Cross_Sync (1, PerlACE::random_port(), PerlACE::random_port()
                         , $pub_config_file, $sub_config_file);
 if (!$CS) {
     print "Crossplatform test pre-reqs not met. Skipping...\n";
@@ -62,7 +62,7 @@ if ($role == -1) {
 my($port1) = 10001 + @ports[0];
 my $dcpsrepo_ior = "repo.ior";
 my $repo_host;
-if ($role == CrossSync::SERVER) {
+if ($role == PerlDDS::Cross_Sync::SERVER) {
     $repo_host = $CS->self();
 } else {
     $repo_host = $CS->peer();
@@ -79,7 +79,7 @@ $Publisher = PerlDDS::create_process
       ("$ENV{DDS_ROOT}/tests/DCPS/Messenger/publisher",
        "-DCPSConfigFile $pub_config_file $common_args $pub_opts");
 
-if ($role == CrossSync::SERVER) {
+if ($role == PerlDDS::Cross_Sync::SERVER) {
     unlink $dcpsrepo_ior;
     $DCPSREPO = PerlDDS::create_process
           ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",

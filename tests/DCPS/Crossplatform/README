@@ -2,7 +2,7 @@ This directory contains crossplatform test scripts. There
  are no test executables here, instead the regular
  executables are used to run the test across the network.
 
-The test framework is implemented in $DDS_ROOT/bin/CrossSync*.pm
+The test framework is implemented in $DDS_ROOT/bin/PerlDDS/Cross_Sync*.pm
 
 The cross platform testing schedule is maintained in test_list.txt.
  Every test has three configuration components. The test group, the
