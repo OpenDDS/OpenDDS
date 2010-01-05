@@ -12,6 +12,7 @@
 #include "SimpleTcpSendStrategy.h"
 #include "SimpleTcpTransport.h"
 #include "SimpleTcpDataLink.h"
+#include "SimpleTcpConnection.h"
 
 #include <sstream>
 
