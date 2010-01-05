@@ -5,7 +5,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 use Env (DDS_ROOT);
 use lib "$DDS_ROOT/bin";
 use lib "$ENV{ACE_ROOT}/bin";
-use DDS_Run_Test;
+use PerlDDS::Run_Test;
 
 $PUB_1 = PerlDDS::create_process("raw_tcp_publisher",
                               "-p 192.168.1.2:9999 -n 10000 -d 9 -s 192.168.1.3:5555");

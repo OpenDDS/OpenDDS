@@ -7,8 +7,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 use Env qw(ACE_ROOT DDS_ROOT);
 use lib "$DDS_ROOT/bin";
 use lib "$ACE_ROOT/bin";
-use DDS_Run_Test;
-use JavaProcess;
+use PerlDDS::Run_Test;
+use PerlDDS::Process_Java;
 use strict;
 
 my $status = 0;
@@ -38,7 +38,7 @@ my $DCPSREPO = PerlDDS::create_process ("$DDS_ROOT/bin/DCPSInfoRepo",
 
 PerlACE::add_lib_path ("$DDS_ROOT/java/tests/messenger/messenger_idl");
 
-my $TEST = new JavaProcess ("BuiltinTopicsTest", $test_opts,
+my $TEST = new PerlDDS::Process_Java ("BuiltinTopicsTest", $test_opts,
     ["$DDS_ROOT/java/tests/messenger/messenger_idl/messenger_idl_test.jar"]);
 
 $DCPSREPO->Spawn ();

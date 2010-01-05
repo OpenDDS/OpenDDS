@@ -12,7 +12,7 @@ BEGIN { $projectRoot = "$FindBin::Bin/.."; }
 
 # Locate the Perl modules
 use lib "$projectRoot/bin";
-use DDS_Run_Test;
+use PerlDDS::Run_Test;
 
 ########################################
 #

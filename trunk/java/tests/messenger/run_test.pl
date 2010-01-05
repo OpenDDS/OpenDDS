@@ -7,8 +7,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 use Env qw(ACE_ROOT DDS_ROOT);
 use lib "$DDS_ROOT/bin";
 use lib "$ACE_ROOT/bin";
-use DDS_Run_Test;
-use JavaProcess;
+use PerlDDS::Run_Test;
+use PerlDDS::Process_Java;
 use strict;
 
 my $status = 0;
@@ -46,11 +46,11 @@ my $DCPSREPO = PerlDDS::create_process ("$DDS_ROOT/bin/DCPSInfoRepo",
 
 PerlACE::add_lib_path ("$DDS_ROOT/java/tests/messenger/messenger_idl");
 
-my $PUB = new JavaProcess ('TestPublisher', $pub_opts,
+my $PUB = new PerlDDS::Process_Java ('TestPublisher', $pub_opts,
                            ["$DDS_ROOT/java/tests/messenger/messenger_idl/".
                             "messenger_idl_test.jar", "$pub_dir/classes"]);
 
-my $SUB = new JavaProcess ('TestSubscriber', $sub_opts,
+my $SUB = new PerlDDS::Process_Java ('TestSubscriber', $sub_opts,
                            ["$DDS_ROOT/java/tests/messenger/messenger_idl/".
                             "messenger_idl_test.jar", "$sub_dir/classes"]);
 

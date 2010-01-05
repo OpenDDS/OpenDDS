@@ -7,8 +7,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 use Env qw(ACE_ROOT JAVA_HOME DDS_ROOT);
 use lib "$DDS_ROOT/bin";
 use lib "$ACE_ROOT/bin";
-use DDS_Run_Test;
-use JavaProcess;
+use PerlDDS::Run_Test;
+use PerlDDS::Process_Java;
 use strict;
 
 my $status = 0;
@@ -53,8 +53,8 @@ my $DCPSREPO2 = PerlDDS::create_process ("$DDS_ROOT/bin/DCPSInfoRepo",
 
 PerlACE::add_lib_path ("$DDS_ROOT/java/tests/multirepo");
 
-my $MASTER = new JavaProcess ("MultiRepoMaster", $master_opts);
-my $SLAVE = new JavaProcess ("MultiRepoSlave", $slave_opts);
+my $MASTER = new PerlDDS::Process_Java ("MultiRepoMaster", $master_opts);
+my $SLAVE = new PerlDDS::Process_Java ("MultiRepoSlave", $slave_opts);
 
 $DCPSREPO1->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo1_ior, 30) == -1) {

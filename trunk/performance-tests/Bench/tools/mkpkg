@@ -49,7 +49,7 @@ mkdir -p $PKG/bin/PerlDDS
 mkdir -p $PKG/bin/PerlACE
 
 # Perl modules
-cp $DDS_ROOT/bin/DDS_Run_Test.pm            $PKG/bin/
+cp $DDS_ROOT/bin/PerlDDS/Run_Test.pm        $PKG/bin/PerlDDS/
 cp $DDS_ROOT/bin/PerlDDS/ProcessFactory.pm  $PKG/bin/PerlDDS/
 cp $DDS_ROOT/bin/PerlDDS/Process.pm         $PKG/bin/PerlDDS/
 

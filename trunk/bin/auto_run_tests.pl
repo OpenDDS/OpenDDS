@@ -13,7 +13,7 @@ use lib "$ENV{DDS_ROOT}/bin";
 if (defined $ENV{srcdir}) {
   use lib "$ENV{srcdir}/bin";
 }
-use DDS_Run_Test;
+use PerlDDS::Run_Test;
 
 use English;
 use Getopt::Std;
