@@ -1,4 +1,4 @@
-package PerlDDS;
+package PerlDDS::Cross_Sync_Common;
 
 use strict;
 use FileHandle;

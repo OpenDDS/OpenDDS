@@ -1,4 +1,4 @@
-package PerlDDS;
+package PerlDDS::Process_Java;
 
 use strict;
 use Env qw(JAVA_HOME DDS_ROOT ACE_ROOT TAO_ROOT);
