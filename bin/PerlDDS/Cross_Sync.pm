@@ -1,4 +1,4 @@
-package PerlDDS;
+package PerlDDS::Cross_Sync;
 
 use PerlDDS::Cross_Sync_Common;
 

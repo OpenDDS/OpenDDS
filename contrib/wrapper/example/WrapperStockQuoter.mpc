@@ -30,7 +30,7 @@ project(*Common) : dcps {
 project(*Publisher) : dcpsexe, svc_utils, dds_wrapper {
   after    += *Common
   exename   = publisher
-  includes += $(TAO_ROOT)/orbsvcs $(DDS_ROOT)/wrapper
+  includes += $(TAO_ROOT)/orbsvcs $(DDS_ROOT)/contrib/wrapper
   libs     += StockQuoterCommon
 
   IDL_Files {
@@ -56,7 +56,7 @@ project(*Publisher) : dcpsexe, svc_utils, dds_wrapper {
 project(*Subscriber) : dcpsexe, dds_wrapper {
   after    += *Common
   exename   = subscriber
-  includes += $(TAO_ROOT)/orbsvcs $(DDS_ROOT)/wrapper
+  includes += $(TAO_ROOT)/orbsvcs $(DDS_ROOT)/contrib/wrapper
   libs     += StockQuoterCommon
 
   IDL_Files {
