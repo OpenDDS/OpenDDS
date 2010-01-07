@@ -1,14 +1,20 @@
+Thu Jan  7 04:44:26 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/html/multirepo.html:
+
+	  Updated to new HTML documentation style.
+
 Wed Jan  6 05:23:50 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * bin/PerlDDS/Cross_Sync.pm:
         * bin/PerlDDS/Cross_Sync_Common.pm:
         * bin/PerlDDS/Process_Java.pm:
 
-	  Fixed package names.
+          Fixed package names.
 
         * contrib/wrapper/example/WrapperStockQuoter.mpc:
 
-	  Fixed includes directive.
+          Fixed includes directive.
 
 Wed Jan  6 04:24:14 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
