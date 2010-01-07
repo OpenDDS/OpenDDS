@@ -11,7 +11,6 @@
 #include "MulticastTransport.h"
 
 #include "ace/Log_Msg.h"
-#include "ace/OS_NS_string.h"
 
 #ifndef __ACE_INLINE__
 # include "MulticastDataLink.inl"
