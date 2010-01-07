@@ -33,9 +33,6 @@ class MonitorDataStorage;
  */
 class MonitorTask : public ACE_Task_Base {
   public:
-    friend class Viewer;
-    friend class MonitorData;
-    
     /// Alias the RepoKey type locally.
     typedef OpenDDS::DCPS::Service_Participant::RepoKey RepoKey;
     enum { DEFAULT_REPO = OpenDDS::DCPS::Service_Participant::DEFAULT_REPO };
@@ -73,6 +70,9 @@ class MonitorTask : public ACE_Task_Base {
     /// Set the active repository.
     bool setActiveRepo( RepoKey key);
 
+    /// Terminate the current instrumentation processing.
+    void stopInstrumentation();
+
     /// @}
 
     /// Provide access to the IOR mappings.
@@ -96,9 +96,6 @@ class MonitorTask : public ACE_Task_Base {
            const char* topicName,
            int         type
          );
-
-    /// Terminate the current instrumentation processing.
-    void stopInstrumentation();
 
     /// Dispatch a reader with data to be processed.
     void dispatchReader( DDS::DataReader_ptr reader);

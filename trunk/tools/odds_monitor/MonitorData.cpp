@@ -16,9 +16,6 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/monitor/monitorC.h"
 
-#include <sstream>    // For stub
-#include "TreeNode.h" // For stub?
-
 Monitor::MonitorData::MonitorData( const Options& options, MonitorDataModel* model)
  : enabled_( true),
    options_( options),
@@ -138,6 +135,17 @@ Monitor::MonitorData::clearData()
 
   // Clear the active IOR field.
   this->storage_->activeIor() = std::string();
+
+  return true;
+}
+
+bool
+Monitor::MonitorData::stopInstrumentation()
+{
+  if( !this->enabled_) {
+    return false;
+  }
+  this->dataSource_->stopInstrumentation();
 
   return true;
 }
