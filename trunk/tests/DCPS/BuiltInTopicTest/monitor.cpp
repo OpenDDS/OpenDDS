@@ -216,10 +216,15 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
         for (CORBA::ULong i = 0; i < len; ++ i)
         {
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) monitor: participant %d examining participant handle %d.\n"),
+            participant->get_instance_handle(),
+            handles[i]
+          ));
           ::DDS::ParticipantBuiltinTopicData data;
           participant->get_discovered_participant_data(data, handles[i]);
 
-          OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::GUID_UNKNOWN;
+          OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::RepoIdBuilder::create();
           OpenDDS::DCPS::RepoIdBuilder builder( id);
           builder.from_BuiltinTopicKey( data.key);
 
@@ -311,7 +316,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           ::DDS::TopicBuiltinTopicData data;
           participant->get_discovered_topic_data(data, handles[i]);
 
-          OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::GUID_UNKNOWN;
+          OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::RepoIdBuilder::create();
           OpenDDS::DCPS::RepoIdBuilder builder( id);
           builder.from_BuiltinTopicKey( data.key);
 
