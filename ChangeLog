@@ -1,9 +1,15 @@
+Thu Jan  7 05:14:11 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * NEWS:
+
+	  Updated release notes with new documentation path.
+
 Thu Jan  7 05:08:11 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
         * dds/DCPS/transport/udp/UdpDataLink.cpp:
 
-	  Corrected logging for errno values.
+          Corrected logging for errno values.
 
 Thu Jan  7 04:44:26 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
