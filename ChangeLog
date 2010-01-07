@@ -1,8 +1,17 @@
+Thu Jan  7 17:30:21 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/MonitorData.h:
+        * tools/odds_monitor/MonitorData.cpp:
+        * tools/odds_monitor/MonitorTask.h:
+        * tools/odds_monitor/Viewer.cpp:
+
+          Removed a minor encapsulation violation.
+
 Thu Jan  7 05:14:11 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * NEWS:
 
-	  Updated release notes with new documentation path.
+          Updated release notes with new documentation path.
 
 Thu Jan  7 05:08:11 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 

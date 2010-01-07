@@ -14,7 +14,6 @@
 #include "Options.h"
 #include "MonitorData.h"
 #include "MonitorDataModel.h"
-#include "MonitorTask.h"
 #include "TreeNode.h"
 
 #ifdef DEVELOPMENT
@@ -146,7 +145,7 @@ Viewer::newRepo( const QString& ior)
     }
   } else {
     // This is the <detached> selection, remove any active repository.
-    this->dataSource_->dataSource_->stopInstrumentation();
+    this->dataSource_->stopInstrumentation();
     this->dataSource_->clearData();
     this->ui.statusbar->showMessage( tr("Detached"));
   }

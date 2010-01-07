@@ -47,8 +47,6 @@ class TreeNode;
  */
 class MonitorData {
   public:
-    friend class Viewer;
-    
     /// Construct with an IOR only.
     MonitorData( const Options& options, MonitorDataModel* model);
 
@@ -72,6 +70,9 @@ class MonitorData {
 
     /// Evict the currently monitored repository.
     bool clearData();
+
+    /// Stop processing inbound instrumentation data.
+    bool stopInstrumentation();
 
     /// @}
 
