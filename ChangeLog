@@ -1,3 +1,10 @@
+Thu Jan  7 23:54:03 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+
+          Changed comparison GUID_t value extracted from
+          BuiltinTopicKey_t to have the VendorId field set.
+
 Thu Jan  7 17:30:21 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/odds_monitor/MonitorData.h:
