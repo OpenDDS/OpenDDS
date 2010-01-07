@@ -29,24 +29,19 @@ UdpDataLink::UdpDataLink(UdpTransport* transport)
 bool
 UdpDataLink::open(const ACE_INET_Addr& remote_address)
 {
-  int error;
-
   ACE_INET_Addr& local_address(this->config_->local_address_);
-  if ((error = this->socket_.open(local_address)) != 0) {
+  if (this->socket_.open(local_address) != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("UdpDataLink::open: open failed: %C\n"),
-                      ACE_OS::strerror(error)),
+                      ACE_TEXT("UdpDataLink::open: open failed: %p\n")),
                      false);
   }
 
-  if ((error = start(this->send_strategy_.in(),
-                     this->recv_strategy_.in())) != 0) {
+  if (start(this->send_strategy_.in(), this->recv_strategy_.in()) != 0) {
     stop_i();
     ACE_ERROR_RETURN((LM_ERROR,
 		      ACE_TEXT("(%P|%t) ERROR: ")
-		      ACE_TEXT("UdpDataLink::open: start failed: %d\n"),
-                      error),
+		      ACE_TEXT("UdpDataLink::open: start failed!\n")),
                      false);
   }
 
