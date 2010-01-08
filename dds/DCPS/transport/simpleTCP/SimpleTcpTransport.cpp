@@ -130,25 +130,26 @@ OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink(
 
         } else {
           // This should not happen.
-          ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Failed to move link prio=%d addr=%C:%d to links_\n",
+          ACE_ERROR((LM_ERROR, "(%P|%t) Failed to move link prio=%d addr=%C:%d to links_\n",
                      link->transport_priority(), link->remote_address().get_host_name(),
-                     link->remote_address().get_port_number()), 0);
+                     link->remote_address().get_port_number()));
         }
       }
     }
 
     // else not exist in pending release so create new link
-  
+  }
 
-    // The "find" part of the find_or_create_datalink has been attempted, and
-    // we failed to find a suitable DataLink.  This means we need to move on
-    // and attempt the "create" part of "find_or_create_datalink".
+  // The "find" part of the find_or_create_datalink has been attempted, and
+  // we failed to find a suitable DataLink.  This means we need to move on
+  // and attempt the "create" part of "find_or_create_datalink".
 
-    // Here is where we actually create the DataLink.
-    link = new SimpleTcpDataLink(remote_address, this, priority);
+  // Here is where we actually create the DataLink.
+  link = new SimpleTcpDataLink(remote_address, this, priority);
 
-    // Double check if link is added in case other thread already add 
-    // a link.
+  { // guard scope
+    GuardType guard(this->links_lock_);
+
     // Attempt to bind the SimpleTcpDataLink to our links_ map.
     if (this->links_.bind(PriorityKey(priority, remote_address), link) != 0) {
       // We failed to bind the new DataLink into our links_ map.
@@ -699,26 +700,6 @@ OpenDDS::DCPS::SimpleTcpTransport::fresh_link(SimpleTcpConnection_rch connection
       return link->reconnect(connection.in());
     }
   }
-  else {
-    // The link is removed and the connection is accepted before add_associations/find_or_create_datalink 
-    // so add the link and associate the link with connection, otherwise the find_or_create_datalink
-    // will create a new link and wait for new connection.
-    // Here is where we actually create the DataLink.
-    link = new SimpleTcpDataLink(key.address(), this, key.priority());
 
-    // Double check if link is added in case other thread already add 
-    // a link.
-    // Attempt to bind the SimpleTcpDataLink to our links_ map.
-    if (this->links_.bind(key, link) != 0) {
-      // We failed to bind the new DataLink into our links_ map.
-      // On error, we return a NULL pointer.
-      ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: Unable to bind new SimpleTcpDataLink to "
-                        "SimpleTcpTransport in links_ map.\n"), 0);
-    }
-    
-    return this->connect_datalink (link.in (), connection.in());
-  }
-  
   return 0;
 }
