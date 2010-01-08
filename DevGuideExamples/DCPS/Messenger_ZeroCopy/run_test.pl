@@ -9,7 +9,7 @@ use Env (DDS_ROOT);
 use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlDDS::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 $use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
