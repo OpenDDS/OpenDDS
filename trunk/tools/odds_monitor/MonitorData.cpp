@@ -150,6 +150,42 @@ Monitor::MonitorData::stopInstrumentation()
   return true;
 }
 
+bool
+Monitor::MonitorData::getBuiltinTopicData(
+  const OpenDDS::DCPS::GUID_t&      id,
+  DDS::ParticipantBuiltinTopicData& data
+)
+{
+  return this->dataSource_->getBuiltinTopicData( id, data);
+}
+
+bool
+Monitor::MonitorData::getBuiltinTopicData(
+  const OpenDDS::DCPS::GUID_t& id,
+  DDS::TopicBuiltinTopicData&  data
+)
+{
+  return this->dataSource_->getBuiltinTopicData( id, data);
+}
+
+bool
+Monitor::MonitorData::getBuiltinTopicData(
+  const OpenDDS::DCPS::GUID_t&      id,
+  DDS::PublicationBuiltinTopicData& data
+)
+{
+  return this->dataSource_->getBuiltinTopicData( id, data);
+}
+
+bool
+Monitor::MonitorData::getBuiltinTopicData(
+  const OpenDDS::DCPS::GUID_t&       id,
+  DDS::SubscriptionBuiltinTopicData& data
+)
+{
+  return this->dataSource_->getBuiltinTopicData( id, data);
+}
+
 Monitor::TreeNode*
 Monitor::MonitorData::modelRoot()
 {

@@ -22,6 +22,45 @@ Monitor::MonitorDataStorage::~MonitorDataStorage()
   this->clear();
 }
 
+std::string&
+Monitor::MonitorDataStorage::activeIor()
+{
+  return this->activeIor_;
+}
+
+std::string
+Monitor::MonitorDataStorage::activeIor() const
+{
+  return this->activeIor_;
+}
+
+bool
+Monitor::MonitorDataStorage::ProcessKey::operator<( const ProcessKey& rhs) const
+{
+  if( this->host < rhs.host)      return true;
+  else if( rhs.host < this->host) return false;
+  else                            return this->pid < rhs.pid;
+}
+
+bool
+Monitor::MonitorDataStorage::TransportKey::operator<( const TransportKey& rhs) const
+{
+  if( this->host < rhs.host)      return true;
+  else if( rhs.host < this->host) return false;
+  else if( this->pid < rhs.pid)   return true;
+  else if( rhs.pid < this->pid)   return false;
+  else                            return this->transport < rhs.transport;
+}
+
+bool
+Monitor::MonitorDataStorage::InstanceKey::operator<( const InstanceKey& rhs) const
+{
+  GUID_tKeyLessThan compare;
+  if( compare( this->guid, rhs.guid))      return true;
+  else if( compare( rhs.guid, this->guid)) return false;
+  else                                     return this->handle < rhs.handle;
+}
+
 void
 Monitor::MonitorDataStorage::reset()
 {
@@ -453,38 +492,6 @@ Monitor::MonitorDataStorage::getNode(
   return node;
 }
 
-
-Monitor::TreeNode*
-Monitor::MonitorDataStorage::createQosNode(
-  const std::string& label,
-  TreeNode*          node,
-  bool&              created
-)
-{
-  TreeNode* qosNode = 0;
-  QString qosLabel( QObject::tr( "Qos"));
-  int qosRow = node->indexOf( 0, qosLabel);
-  if( qosRow == -1) {
-    // New entry, add a reference to the actual transport node.
-    node->insertChildren( 0, 1, 2); // Always make Qos the first child.
-    qosNode = (*node)[0];
-    qosNode->setData( 0, qosLabel);
-    qosNode->setData( 1, label.c_str());
-    created = true;
-
-  } else {
-    qosNode = (*node)[ qosRow];
-  }
-
-  if( !qosNode) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: MonitorDataStorage::createQosNode() - ")
-      ACE_TEXT("unable to find place for Qos in GUI.\n")
-    ));
-  }
-  return qosNode;
-}
-
 void
 Monitor::MonitorDataStorage::manageTransportLink(
   TreeNode* node,
@@ -746,42 +753,261 @@ Monitor::MonitorDataStorage::displayNvp(
   }
 }
 
-std::string&
-Monitor::MonitorDataStorage::activeIor()
+Monitor::TreeNode*
+Monitor::MonitorDataStorage::createQosNode(
+  const std::string& label,
+  TreeNode*          node,
+  bool&              created
+)
 {
-  return this->activeIor_;
+  TreeNode* qosNode = 0;
+  QString qosLabel( QObject::tr( "Qos"));
+  int qosRow = node->indexOf( 0, qosLabel);
+  if( qosRow == -1) {
+    // New entry, add a reference to the actual transport node.
+    node->insertChildren( 0, 1, 2); // Always make Qos the first child.
+    qosNode = (*node)[0];
+    qosNode->setData( 0, qosLabel);
+    qosNode->setData( 1, label.c_str());
+    created = true;
+
+  } else {
+    qosNode = (*node)[ qosRow];
+  }
+
+  if( !qosNode) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: MonitorDataStorage::createQosNode() - ")
+      ACE_TEXT("unable to find place for Qos in GUI.\n")
+    ));
+  }
+  return qosNode;
 }
 
-std::string
-Monitor::MonitorDataStorage::activeIor() const
+void
+Monitor::MonitorDataStorage::managePublicationQos(
+  TreeNode*                               parent,
+  const DDS::PublicationBuiltinTopicData& data,
+  bool&                                   layoutChanged,
+  bool&                                   dataChanged
+)
 {
-  return this->activeIor_;
-}
+  //  struct PublicationBuiltinTopicData {
+  //    BuiltinTopicKey_t key;
+  //    BuiltinTopicKey_t participant_key;
+  //    string topic_name;
+  //    string type_name;
+  //    DurabilityQosPolicy durability;
+  //    DurabilityServiceQosPolicy durability_service;
+  //    DeadlineQosPolicy deadline;
+  //    LatencyBudgetQosPolicy latency_budget;
+  //    LivelinessQosPolicy liveliness;
+  //    ReliabilityQosPolicy reliability;
+  //    LifespanQosPolicy lifespan;
+  //    UserDataQosPolicy user_data;
+  //    OwnershipQosPolicy ownership;
+  //    OwnershipStrengthQosPolicy ownership_strength;
+  //    DestinationOrderQosPolicy destination_order;
+  //    PresentationQosPolicy presentation;
+  //    PartitionQosPolicy partition;
+  //    TopicDataQosPolicy topic_data;
+  //    GroupDataQosPolicy group_data;
+  //  };
 
-bool
-Monitor::MonitorDataStorage::ProcessKey::operator<( const ProcessKey& rhs) const
-{
-  if( this->host < rhs.host)      return true;
-  else if( rhs.host < this->host) return false;
-  else                            return this->pid < rhs.pid;
-}
+  /// @TODO: segregate the publisher and data writer policy values.
 
-bool
-Monitor::MonitorDataStorage::TransportKey::operator<( const TransportKey& rhs) const
-{
-  if( this->host < rhs.host)      return true;
-  else if( rhs.host < this->host) return false;
-  else if( this->pid < rhs.pid)   return true;
-  else if( rhs.pid < this->pid)   return false;
-  else                            return this->transport < rhs.transport;
-}
+  // Obtain the node to hold the Qos policy values.
+  bool create = false;
+  TreeNode* qosNode
+    = this->createQosNode( std::string("PublicationQos"), parent, create);
+  layoutChanged |= create;
 
-bool
-Monitor::MonitorDataStorage::InstanceKey::operator<( const InstanceKey& rhs) const
-{
-  GUID_tKeyLessThan compare;
-  if( compare( this->guid, rhs.guid))      return true;
-  else if( compare( rhs.guid, this->guid)) return false;
-  else                                     return this->handle < rhs.handle;
+  // Install the policy values.
+
+  //    BuiltinTopicKey_t key;
+  QString builtinTopicKeyLabel
+    = QString( QObject::tr("BuiltinTopicKey.value"));
+  if( this->manageQosPolicy( qosNode, builtinTopicKeyLabel, data.key)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    string name;
+  QString topicNameLabel
+    = QString( QObject::tr("Topic name"));
+  QString topicNameValue
+    = QString( QObject::tr( static_cast<const char*>(data.topic_name)));
+  if( this->manageQosPolicy( qosNode, topicNameLabel, topicNameValue)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    string type_name;
+  QString topicTypeLabel
+    = QString( QObject::tr("Topic data type"));
+  QString topicTypeValue
+    = QString( QObject::tr( static_cast<const char*>(data.type_name)));
+  if( this->manageQosPolicy( qosNode, topicTypeLabel, topicTypeValue)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    DurabilityQosPolicy durability;
+  QString durabilityLabel
+    = QString( QObject::tr("DurabilityQosPolicy.durability"));
+  if( this->manageQosPolicy( qosNode, durabilityLabel, data.durability)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    DurabilityServiceQosPolicy durability_service;
+  QString durabilityServiceLabel
+    = QString( QObject::tr("DurabilityServiceQosPolicy.durability"));
+  if( this->manageQosPolicy( qosNode, durabilityServiceLabel, data.durability_service)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    DeadlineQosPolicy deadline;
+  QString deadlineLabel
+    = QString( QObject::tr("DeadlineQosPolicy.deadline"));
+  if( this->manageQosPolicy( qosNode, deadlineLabel, data.deadline)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    LatencyBudgetQosPolicy latency_budget;
+  QString latencyLabel
+    = QString( QObject::tr("LatencyBudgetQosPolicy.latency_budget"));
+  if( this->manageQosPolicy( qosNode, latencyLabel, data.latency_budget)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    LivelinessQosPolicy liveliness;
+  QString livelinessLabel
+    = QString( QObject::tr("LivelinessQosPolicy.liveliness"));
+  if( this->manageQosPolicy( qosNode, livelinessLabel, data.liveliness)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    ReliabilityQosPolicy reliability;
+  QString reliabilityLabel
+    = QString( QObject::tr("ReliabilityQosPolicy.reliability"));
+  if( this->manageQosPolicy( qosNode, reliabilityLabel, data.reliability)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    LifespanQosPolicy lifespan;
+  QString lifespanLabel
+    = QString( QObject::tr("LifespandQosPolicy.lifespan"));
+  if( this->manageQosPolicy( qosNode, lifespanLabel, data.lifespan)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    UserDataQosPolicy user_data;
+  QString userDataLabel
+    = QString( QObject::tr("UserDataQosPolicy.user_data"));
+  if( this->manageQosPolicy( qosNode, userDataLabel, data.user_data)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    OwnershipQosPolicy ownership;
+  QString ownershipDataLabel
+    = QString( QObject::tr("OwnershipQosPolicy.ownership"));
+  if( this->manageQosPolicy( qosNode, ownershipDataLabel, data.ownership)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    OwnershipStrengthQosPolicy ownership_strength;
+  QString ownershipStrengthDataLabel
+    = QString( QObject::tr("OwnershipStrengthQosPolicy.ownership_strength"));
+  if( this->manageQosPolicy( qosNode,
+                             ownershipStrengthDataLabel,
+                             data.ownership_strength)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    DestinationOrderQosPolicy destination_order;
+  QString destinationOrderLabel
+    = QString( QObject::tr("DestinationOrderQosPolicy.destination_order"));
+  if( this->manageQosPolicy( qosNode, destinationOrderLabel, data.destination_order)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    PresentationQosPolicy presentation;
+  QString presentationLabel
+    = QString( QObject::tr("PresentationQosPolicy.presentation"));
+  if( this->manageQosPolicy( qosNode, presentationLabel, data.presentation)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    PartitionQosPolicy partition;
+  QString partitionLabel
+    = QString( QObject::tr("PartitionQosPolicy.partition"));
+  if( this->manageQosPolicy( qosNode, partitionLabel, data.partition)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    TopicDataQosPolicy topic_data;
+  QString topicDataLabel
+    = QString( QObject::tr("TopicDataQosPolicy.topic_data"));
+  if( this->manageQosPolicy( qosNode, topicDataLabel, data.topic_data)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    GroupDataQosPolicy group_data;
+  QString groupDataLabel
+    = QString( QObject::tr("GroupDataQosPolicy.group_data"));
+  if( this->manageQosPolicy( qosNode, groupDataLabel, data.group_data)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
 }
 

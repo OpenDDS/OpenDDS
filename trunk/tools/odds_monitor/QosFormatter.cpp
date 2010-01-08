@@ -85,7 +85,7 @@ QosToQString<DDS::DestinationOrderQosPolicy>(
       return QString( "SOURCE TIMESTAMP");
   
     default:
-      return QString( QObject::tr("<bad value>"));
+      return QString( "<bad value == %1>").arg(value.kind);
   }
 }
 

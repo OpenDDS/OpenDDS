@@ -1,12 +1,35 @@
+Fri Jan  8 23:46:31 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/MonitorData.h:
+        * tools/odds_monitor/MonitorData.cpp:
+        * tools/odds_monitor/MonitorDataStorage.h:
+        * tools/odds_monitor/MonitorDataStorage.inl:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+        * tools/odds_monitor/MonitorTask.h:
+        * tools/odds_monitor/MonitorTask.cpp:
+        * tools/odds_monitor/QosFormatter.cpp:
+
+        Starting to refactor Qos policy value processing.  This will
+        avoid the current problem with the BuiltinTopic samples being
+        handled identically to the instrumentation reports.  Specifically
+        we need to 'read' and not 'take' the BuiltinTopic data.
+
+        This is a work in progress and is not complete.  Only the
+        Publication Qos policies / BuiltinTopic samples have been
+        modified.  There is now a complaint from Qt about using pixmaps
+        on a non-GUI thread.  I don't know where this is from, but I may
+        need to hand off processing from the DDS service to the GUI loop
+        to avoid conflicts.
+
 Fri Jan  8 23:23:45 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
 
-          Reverted the changes made on 
+          Reverted the changes made on
           "Mon Jan  4 22:51:20 UTC 2010  Yan Dai  <dai_y@ociweb.com>"
           The changes intended to fix a corner test case failure detected
-          in odds_monitor, but it appeared to cause other issues. 
-          
+          in odds_monitor, but it appeared to cause other issues.
+
 Fri Jan  8 20:11:41 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * DevGuideExamples:
