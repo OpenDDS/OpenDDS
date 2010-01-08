@@ -360,7 +360,10 @@ private:
   TopicMap       topics_;
   /// Collection of handles.
   HandleMap      handles_;
-
+  /// Collection of ignored participants.
+  HandleMap      ignored_participants_;
+  /// Collection of ignored topics.
+  HandleMap      ignored_topics_;
   /// Protect the publisher collection.
   ACE_Recursive_Thread_Mutex   publishers_protector_;
   /// Protect the subscriber collection.

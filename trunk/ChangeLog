@@ -1,3 +1,17 @@
+Fri Jan  8 06:03:48 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          - Made get_discovered_participants returns exclude itself.
+          - Made get_discovered_participants and get_discovered_topics
+            returns exclude the ignored participants and topics. 
+          
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+
+          Added get_discovered_participants/get_discovered_topics
+          excluding ignored participants/topics test case.
+          
 Thu Jan  7 23:54:03 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tests/DCPS/BuiltInTopicTest/monitor.cpp:

@@ -953,6 +953,15 @@ ACE_THROW_SPEC((CORBA::SystemException))
     return ret;
   }
 
+  HandleMap::const_iterator location = this->ignored_participants_.find(ignoreId);
+
+  if (location == this->ignored_participants_.end()) {
+    this->ignored_participants_[ ignoreId] = handle;
+  }
+  else {// ignore same participant again, just return ok.
+    return DDS::RETCODE_OK;
+  }
+  
   try {
     if (DCPS_debug_level >= 4) {
       RepoIdConverter converter(dp_id_);
@@ -1020,6 +1029,15 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
   if (ret != DDS::RETCODE_OK) {
     return ret;
+  }
+
+  HandleMap::const_iterator location = this->ignored_topics_.find(ignoreId);
+
+  if (location == this->ignored_topics_.end()) {
+    this->ignored_topics_[ ignoreId] = handle;
+  }
+  else { // ignore same topic again, just return ok.
+    return DDS::RETCODE_OK;
   }
 
   try {
@@ -1309,7 +1327,15 @@ ACE_THROW_SPEC((CORBA::SystemException))
        iter != itEnd; ++iter) {
     GuidConverter converter(iter->first);
 
-    if (converter.entityKind() == KIND_PARTICIPANT) {
+    if (converter.entityKind() == KIND_PARTICIPANT)
+    {
+      // skip itself and the ignored participant
+      if (iter->first == this->dp_id_
+      || (this->ignored_participants_.find(iter->first)
+        != this->ignored_participants_.end ())) {
+        continue;
+      }
+
       CORBA::ULong len = participant_handles.length();
       participant_handles.length(len + 1);
       participant_handles[len] = iter->second;
@@ -1388,6 +1414,13 @@ ACE_THROW_SPEC((CORBA::SystemException))
     GuidConverter converter(iter->first);
 
     if (converter.entityKind() == KIND_TOPIC) {
+
+      // skip the ignored topic
+      if (this->ignored_topics_.find(iter->first) 
+          != this->ignored_topics_.end ()) {
+        continue;
+      }
+      
       CORBA::ULong len = topic_handles.length();
       topic_handles.length(len + 1);
       topic_handles[len] = iter->second;

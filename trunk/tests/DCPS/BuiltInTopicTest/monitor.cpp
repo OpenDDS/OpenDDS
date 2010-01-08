@@ -206,7 +206,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         }
       
         CORBA::ULong len = handles.length ();
-        if (len != num_parts)
+        if (len != num_parts - 1)
         {
           ACE_ERROR_RETURN ((LM_ERROR,
             "(%P|%t) monitor:  get_discovered_participant expected %d got %d.\n", 
@@ -235,6 +235,21 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           }
         }
 
+        if (participant->ignore_participant (handles[0]) != ::DDS::RETCODE_OK)
+        {
+          ACE_ERROR((LM_ERROR, "(%P|%t) monitor: ignore_participant failed.\n"));
+          return 1;
+        }
+        
+        handles.length (0);
+        if (participant->get_discovered_participants (handles) != ::DDS::RETCODE_OK
+          || handles.length () != num_parts - 2)
+        {      
+          ACE_ERROR((LM_ERROR, ACE_TEXT ("(%P|%t) monitor: get_discovered_participant ")
+                               ACE_TEXT ("skip ignored participant test failed.\n")));
+          return 1;
+        } 
+         
         ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: discover participants test PASSED.\n"));
       }
 
@@ -326,6 +341,21 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             return 1;
           }
         }
+        
+        if (participant->ignore_topic (handles[0]) != ::DDS::RETCODE_OK)
+        {
+          ACE_ERROR((LM_ERROR, "(%P|%t) monitor: ignore_topic failed.\n"));
+          return 1;
+        }
+        
+        handles.length (0);
+        if (participant->get_discovered_topics (handles) != ::DDS::RETCODE_OK
+          || handles.length () != num_parts - 2)
+        {      
+          ACE_ERROR((LM_ERROR, ACE_TEXT ("(%P|%t) monitor: get_discovered_topics ")
+                               ACE_TEXT ("skip ignored topic test failed.\n")));
+          return 1;
+        }      
          
         ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: discover topics test PASSED.\n"));
       }
