@@ -24,6 +24,14 @@ namespace OpenDDS { namespace DCPS {
 
 }} // End of namespace OpenDDS::DCPS
 
+namespace DDS {
+  struct ParticipantBuiltinTopicData;
+  struct TopicBuiltinTopicData;
+  struct PublicationBuiltinTopicData;
+  struct SubscriptionBuiltinTopicData;
+
+} // End of namespace DDS
+
 class QString;
 template< class T> class QList;
 
@@ -56,7 +64,7 @@ class MonitorData {
     /// Disable operation for orderly shutdown.
     void disable();
 
-    /// @name Messages and queries from GUI to DDS.
+    /// @name Messages and queries to DDS.
     /// @{
 
     /// Obtain a list of existing repository IOR values.
@@ -74,9 +82,37 @@ class MonitorData {
     /// Stop processing inbound instrumentation data.
     bool stopInstrumentation();
 
+    /// @NOTE: the following methods are not templated to reduce
+    ///        dependencies, since the implementation would need to be
+    ///        visible from this header.
+
+    /// Obtain Builtin Topic data for a Participant.
+    bool getBuiltinTopicData(
+           const OpenDDS::DCPS::GUID_t&      id,
+           DDS::ParticipantBuiltinTopicData& data
+         );
+
+    /// Obtain Builtin Topic data for a Topic.
+    bool getBuiltinTopicData(
+           const OpenDDS::DCPS::GUID_t& id,
+           DDS::TopicBuiltinTopicData&  data
+         );
+
+    /// Obtain Builtin Topic data for a Publication.
+    bool getBuiltinTopicData(
+           const OpenDDS::DCPS::GUID_t&      id,
+           DDS::PublicationBuiltinTopicData& data
+         );
+
+    /// Obtain Builtin Topic data for a Subscription.
+    bool getBuiltinTopicData(
+           const OpenDDS::DCPS::GUID_t&       id,
+           DDS::SubscriptionBuiltinTopicData& data
+         );
+
     /// @}
 
-    /// @name Messages and queries from DDS to GUI.
+    /// @name Messages and queries to GUI.
     /// @{
 
     /// Grab the root of the model tree.

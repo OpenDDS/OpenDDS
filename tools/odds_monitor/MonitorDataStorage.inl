@@ -175,8 +175,9 @@ MonitorDataStorage::update< OpenDDS::DCPS::DomainParticipantReport>(
   OpenDDS::DCPS::GuidConverter converter( data.dp_id);
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
-    ACE_TEXT("%s DomainParticipantReport, id: %C, domain: data.domain_id.\n"),
+    ACE_TEXT("%s DomainParticipantReport, id: %C, domain: %d.\n"),
     remove? "removing": "processing",
+    (data.dp_id == OpenDDS::DCPS::GUID_UNKNOWN)? "GUID_UNKNOWN":
     std::string(converter).c_str(),
     data.domain_id
   ));
@@ -257,6 +258,7 @@ MonitorDataStorage::update< OpenDDS::DCPS::TopicReport>(
     ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
     ACE_TEXT("%s TopicReport, id: %C, name: %C, type: %C.\n"),
     remove? "removing": "processing",
+    (data.topic_id == OpenDDS::DCPS::GUID_UNKNOWN)? "GUID_UNKNOWN":
     std::string(converter).c_str(),
     (const char*)data.topic_name,
     (const char*)data.type_name
@@ -360,6 +362,7 @@ MonitorDataStorage::update< OpenDDS::DCPS::PublisherReport>(
     ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
     ACE_TEXT("%s PublisherReport, id: %C, handle: %d, transport: 0x%x.\n"),
     remove? "removing": "processing",
+    (data.dp_id == OpenDDS::DCPS::GUID_UNKNOWN)? "GUID_UNKNOWN":
     std::string(converter).c_str(),
     data.handle,
     data.transport_id
@@ -433,6 +436,7 @@ MonitorDataStorage::update< OpenDDS::DCPS::SubscriberReport>(
     ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
     ACE_TEXT("%s SubscriberReport, id: %C, handle: %d, transport: 0x%x.\n"),
     remove? "removing": "processing",
+    (data.dp_id == OpenDDS::DCPS::GUID_UNKNOWN)? "GUID_UNKNOWN":
     std::string(converter).c_str(),
     data.handle,
     data.transport_id
@@ -513,7 +517,9 @@ MonitorDataStorage::update< OpenDDS::DCPS::DataWriterReport>(
     ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
     ACE_TEXT("%s DataWriterReport, id: %C, topic: %C.\n"),
     remove? "removing": "processing",
+    (data.dw_id == OpenDDS::DCPS::GUID_UNKNOWN)? "GUID_UNKNOWN":
     std::string(idconverter).c_str(),
+    (data.topic_id == OpenDDS::DCPS::GUID_UNKNOWN)? "GUID_UNKNOWN":
     std::string(topicconverter).c_str()
   ));
 
@@ -538,6 +544,11 @@ MonitorDataStorage::update< OpenDDS::DCPS::DataWriterReport>(
     this->deleteNode( this->guidToTreeMap_, node);
     return;
   }
+
+  // QOS
+  DDS::PublicationBuiltinTopicData qosData;
+  this->model_->getBuiltinTopicData( data.dw_id, qosData);
+  this->managePublicationQos( node, qosData, layoutChanged, dataChanged);
 
   // TOPIC
   create = true;
@@ -594,6 +605,7 @@ MonitorDataStorage::update< OpenDDS::DCPS::DataWriterPeriodicReport>(
     ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
     ACE_TEXT("%s DataWriterPeriodicReport, id: %C.\n"),
     remove? "removing": "processing",
+    (data.dw_id == OpenDDS::DCPS::GUID_UNKNOWN)? "GUID_UNKNOWN":
     std::string(converter).c_str()
   ));
 
@@ -636,7 +648,9 @@ MonitorDataStorage::update< OpenDDS::DCPS::DataReaderReport>(
     ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
     ACE_TEXT("%s DataReaderReport, id: %C, topic: %C.\n"),
     remove? "removing": "processing",
+    (data.dr_id == OpenDDS::DCPS::GUID_UNKNOWN)? "GUID_UNKNOWN":
     std::string(idconverter).c_str(),
+    (data.topic_id == OpenDDS::DCPS::GUID_UNKNOWN)? "GUID_UNKNOWN":
     std::string(topicconverter).c_str()
   ));
 
@@ -714,6 +728,7 @@ MonitorDataStorage::update< OpenDDS::DCPS::DataReaderPeriodicReport>(
     ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
     ACE_TEXT("%s DataReaderPeriodicReport, id: %C.\n"),
     remove? "removing": "processing",
+    (data.dr_id == OpenDDS::DCPS::GUID_UNKNOWN)? "GUID_UNKNOWN":
     std::string(converter).c_str()
   ));
 
@@ -821,6 +836,7 @@ MonitorDataStorage::update< DDS::ParticipantBuiltinTopicData>(
     ACE_TEXT("%s Participant Builtin Topic %C, key: ")
     ACE_TEXT("[0x%x, 0x%x, 0x%x].\n"),
     remove? "removing": "processing",
+    (id == OpenDDS::DCPS::GUID_UNKNOWN)? "GUID_UNKNOWN":
     std::string(converter).c_str(),
     data.key.value[0], data.key.value[1], data.key.value[2]
   ));
@@ -920,6 +936,7 @@ MonitorDataStorage::update< DDS::TopicBuiltinTopicData>(
     ACE_TEXT("%s Topic Builtin Topic %C, key: ")
     ACE_TEXT("[0x%x, 0x%x, 0x%x].\n"),
     remove? "removing": "processing",
+    (id == OpenDDS::DCPS::GUID_UNKNOWN)? "GUID_UNKNOWN":
     std::string(converter).c_str(),
     data.key.value[0], data.key.value[1], data.key.value[2]
   ));
@@ -1179,6 +1196,7 @@ MonitorDataStorage::update< DDS::PublicationBuiltinTopicData>(
     ACE_TEXT("%s Publication Builtin Topic %C, key: ")
     ACE_TEXT("[0x%x, 0x%x, 0x%x].\n"),
     remove? "removing": "processing",
+    (id == OpenDDS::DCPS::GUID_UNKNOWN)? "GUID_UNKNOWN":
     std::string(converter).c_str(),
     data.key.value[0], data.key.value[1], data.key.value[2]
   ));
@@ -1213,201 +1231,8 @@ MonitorDataStorage::update< DDS::PublicationBuiltinTopicData>(
     return;
   }
 
-  /// @TODO: segregate the publisher and data writer policy values.
-
-  // Obtain the node to hold the Qos policy values.
-  create = false;
-  TreeNode* qosNode
-    = this->createQosNode( std::string("PublicationQos"), node, create);
-  layoutChanged |= create;
-
-  // Install the policy values.
-
-  //    BuiltinTopicKey_t key;
-  QString builtinTopicKeyLabel
-    = QString( QObject::tr("BuiltinTopicKey.value"));
-  if( this->manageQosPolicy( qosNode, builtinTopicKeyLabel, data.key)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    string name;
-  QString topicNameLabel
-    = QString( QObject::tr("Topic name"));
-  QString topicNameValue
-    = QString( QObject::tr( static_cast<const char*>(data.topic_name)));
-  if( this->manageQosPolicy( qosNode, topicNameLabel, topicNameValue)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    string type_name;
-  QString topicTypeLabel
-    = QString( QObject::tr("Topic data type"));
-  QString topicTypeValue
-    = QString( QObject::tr( static_cast<const char*>(data.type_name)));
-  if( this->manageQosPolicy( qosNode, topicTypeLabel, topicTypeValue)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    DurabilityQosPolicy durability;
-  QString durabilityLabel
-    = QString( QObject::tr("DurabilityQosPolicy.durability"));
-  if( this->manageQosPolicy( qosNode, durabilityLabel, data.durability)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    DurabilityServiceQosPolicy durability_service;
-  QString durabilityServiceLabel
-    = QString( QObject::tr("DurabilityServiceQosPolicy.durability"));
-  if( this->manageQosPolicy( qosNode, durabilityServiceLabel, data.durability_service)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    DeadlineQosPolicy deadline;
-  QString deadlineLabel
-    = QString( QObject::tr("DeadlineQosPolicy.deadline"));
-  if( this->manageQosPolicy( qosNode, deadlineLabel, data.deadline)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    LatencyBudgetQosPolicy latency_budget;
-  QString latencyLabel
-    = QString( QObject::tr("LatencyBudgetQosPolicy.latency_budget"));
-  if( this->manageQosPolicy( qosNode, latencyLabel, data.latency_budget)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    LivelinessQosPolicy liveliness;
-  QString livelinessLabel
-    = QString( QObject::tr("LivelinessQosPolicy.liveliness"));
-  if( this->manageQosPolicy( qosNode, livelinessLabel, data.liveliness)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    ReliabilityQosPolicy reliability;
-  QString reliabilityLabel
-    = QString( QObject::tr("ReliabilityQosPolicy.reliability"));
-  if( this->manageQosPolicy( qosNode, reliabilityLabel, data.reliability)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    LifespanQosPolicy lifespan;
-  QString lifespanLabel
-    = QString( QObject::tr("LifespandQosPolicy.lifespan"));
-  if( this->manageQosPolicy( qosNode, lifespanLabel, data.lifespan)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    UserDataQosPolicy user_data;
-  QString userDataLabel
-    = QString( QObject::tr("UserDataQosPolicy.user_data"));
-  if( this->manageQosPolicy( qosNode, userDataLabel, data.user_data)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    OwnershipQosPolicy ownership;
-  QString ownershipDataLabel
-    = QString( QObject::tr("OwnershipQosPolicy.ownership"));
-  if( this->manageQosPolicy( qosNode, ownershipDataLabel, data.ownership)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    OwnershipStrengthQosPolicy ownership_strength;
-  QString ownershipStrengthDataLabel
-    = QString( QObject::tr("OwnershipStrengthQosPolicy.ownership_strength"));
-  if( this->manageQosPolicy( qosNode,
-                             ownershipStrengthDataLabel,
-                             data.ownership_strength)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    DestinationOrderQosPolicy destination_order;
-  QString destinationOrderLabel
-    = QString( QObject::tr("DestinationOrderQosPolicy.deadline"));
-  if( this->manageQosPolicy( qosNode, destinationOrderLabel, data.destination_order)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    PresentationQosPolicy presentation;
-  QString presentationLabel
-    = QString( QObject::tr("PresentationQosPolicy.presentation"));
-  if( this->manageQosPolicy( qosNode, presentationLabel, data.presentation)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    PartitionQosPolicy partition;
-  QString partitionLabel
-    = QString( QObject::tr("PartitionQosPolicy.partition"));
-  if( this->manageQosPolicy( qosNode, partitionLabel, data.partition)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    TopicDataQosPolicy topic_data;
-  QString topicDataLabel
-    = QString( QObject::tr("TopicDataQosPolicy.topic_data"));
-  if( this->manageQosPolicy( qosNode, topicDataLabel, data.topic_data)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    GroupDataQosPolicy group_data;
-  QString groupDataLabel
-    = QString( QObject::tr("GroupDataQosPolicy.group_data"));
-  if( this->manageQosPolicy( qosNode, groupDataLabel, data.group_data)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
+  // Process the Qos data for this node.
+  this->managePublicationQos( node, data, layoutChanged, dataChanged);
 
   // Notify the GUI if we have changed the underlying model.
   if( layoutChanged) {
@@ -1460,6 +1285,7 @@ MonitorDataStorage::update< DDS::SubscriptionBuiltinTopicData>(
     ACE_TEXT("%s Subscription Builtin Topic %C, key: ")
     ACE_TEXT("[0x%x, 0x%x, 0x%x].\n"),
     remove? "removing": "processing",
+    (id == OpenDDS::DCPS::GUID_UNKNOWN)? "GUID_UNKNOWN":
     std::string(converter).c_str(),
     data.key.value[0], data.key.value[1], data.key.value[2]
   ));

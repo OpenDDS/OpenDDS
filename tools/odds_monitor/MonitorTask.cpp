@@ -654,10 +654,14 @@ Monitor::MonitorTask::createSubscription(
     ));
     return;
   }
+
+  // Track the type by handle and process any initial data.
+  this->handleTypeMap_[ reader->get_instance_handle()] = type;
+  this->dispatchReader( reader.in());
+
   status = reader->get_statuscondition();
   status->set_enabled_statuses( DDS::DATA_AVAILABLE_STATUS);
   this->waiter_->attach_condition( status.in());
-  this->handleTypeMap_[ reader->get_instance_handle()] = type;
 
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
@@ -676,15 +680,19 @@ Monitor::MonitorTask::createBuiltinSubscription(
   int         type
 )
 {
+return;
   DDS::Subscriber_var subscriber
     = this->participant_->get_builtin_subscriber();
   DDS::DataReader_var reader
     = subscriber->lookup_datareader( topicName);
 
+  // Track the type by handle and process any initial data.
+  this->handleTypeMap_[ reader->get_instance_handle()] = type;
+  this->dispatchReader( reader.in());
+
   DDS::StatusCondition_var status = reader->get_statuscondition();
   status->set_enabled_statuses( DDS::DATA_AVAILABLE_STATUS);
   this->waiter_->attach_condition( status.in());
-  this->handleTypeMap_[ reader->get_instance_handle()] = type;
 
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
@@ -880,5 +888,132 @@ Monitor::MonitorTask::dataUpdate(
       valid, invalid, reader->get_instance_handle()
     ));
   }
+}
+
+template< class ReaderType, class DataType, class DataTypeSeq>
+bool
+Monitor::MonitorTask::readBuiltinTopicData(
+  const OpenDDS::DCPS::GUID_t& id,
+  DataType&                    data,
+  const char*                  topicName
+)
+{
+  // Grab the BuiltinTopic subscriber.
+  DDS::Subscriber_var subscriber
+    = this->participant_->get_builtin_subscriber();
+
+  // Lookup the reader for this BuiltinTopic type.
+  DDS::DataReader_var reader =
+    subscriber->lookup_datareader( topicName);
+
+  // Get the specific reader we need.
+  typename ReaderType::_var_type typedReader
+    = ReaderType::_narrow(reader.in());
+
+  // Find the instance to read.
+  OpenDDS::DCPS::RepoIdConverter converter( id);
+  converter.get_BuiltinTopicKey( data.key);
+
+  // Find the instance we are interested in.
+  DDS::InstanceHandle_t instance = typedReader->lookup_instance( data);
+
+  // with HISTORY.depth == 1, this should be the sample that we are
+  // interested in.
+  DDS::SampleInfoSeq infoSeq( 1);
+  DataTypeSeq        dataSeq( 1);
+  if( DDS::RETCODE_OK != typedReader->read_instance(
+                           dataSeq, infoSeq, 1, instance,
+                           DDS::ANY_SAMPLE_STATE,
+                           DDS::ANY_VIEW_STATE,
+                           DDS::ANY_INSTANCE_STATE
+                         )) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: MonitorTask::readBuiltinTopicData<%s>() - ")
+      ACE_TEXT("failed to read instance %d.\n"),
+      topicName,
+      instance
+    ));
+    return false;
+  }
+
+  // Copy out the data we want.
+  if( dataSeq.length() > 0) {
+    data = dataSeq[0];
+
+  } else {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: MonitorTask::readBuiltinTopicData<%s>() - ")
+      ACE_TEXT("failed to read a sample.\n"),
+      topicName
+    ));
+    return false;
+  }
+
+  if( this->options_.verbose()) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) MonitorTask::readBuiltinTopicData<%s>() - ")
+      ACE_TEXT("%s read BuiltinTopic data.\n"),
+      topicName,
+      infoSeq[0].valid_data? "successfully": "failed to"
+    ));
+  }
+
+  return infoSeq[0].valid_data;
+}
+
+bool
+Monitor::MonitorTask::getBuiltinTopicData(
+  const OpenDDS::DCPS::GUID_t&      id,
+  DDS::ParticipantBuiltinTopicData& data
+)
+{
+  return this->readBuiltinTopicData<
+           DDS::ParticipantBuiltinTopicDataDataReader,
+           DDS::ParticipantBuiltinTopicData,
+           DDS::ParticipantBuiltinTopicDataSeq>(
+             id, data, OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC
+           );
+}
+
+bool
+Monitor::MonitorTask::getBuiltinTopicData(
+  const OpenDDS::DCPS::GUID_t& id,
+  DDS::TopicBuiltinTopicData&  data
+)
+{
+  return this->readBuiltinTopicData<
+           DDS::TopicBuiltinTopicDataDataReader,
+           DDS::TopicBuiltinTopicData,
+           DDS::TopicBuiltinTopicDataSeq>(
+             id, data, OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC
+           );
+}
+
+bool
+Monitor::MonitorTask::getBuiltinTopicData(
+  const OpenDDS::DCPS::GUID_t&      id,
+  DDS::PublicationBuiltinTopicData& data
+)
+{
+  return this->readBuiltinTopicData<
+           DDS::PublicationBuiltinTopicDataDataReader,
+           DDS::PublicationBuiltinTopicData,
+           DDS::PublicationBuiltinTopicDataSeq>(
+             id, data, OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC
+           );
+}
+
+bool
+Monitor::MonitorTask::getBuiltinTopicData(
+  const OpenDDS::DCPS::GUID_t&       id,
+  DDS::SubscriptionBuiltinTopicData& data
+)
+{
+  return this->readBuiltinTopicData<
+           DDS::SubscriptionBuiltinTopicDataDataReader,
+           DDS::SubscriptionBuiltinTopicData,
+           DDS::SubscriptionBuiltinTopicDataSeq>(
+             id, data, OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC
+           );
 }
 

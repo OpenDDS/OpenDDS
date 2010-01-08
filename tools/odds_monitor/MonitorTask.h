@@ -60,7 +60,7 @@ class MonitorTask : public ACE_Task_Base {
     void stop();
     /// @}
 
-    /// @name Messages from GUI.
+    /// @name Messages and requests from facade.
     /// @{
 
     /// Establish a binding to a repository.  Clear any previously
@@ -73,6 +73,30 @@ class MonitorTask : public ACE_Task_Base {
     /// Terminate the current instrumentation processing.
     void stopInstrumentation();
 
+    /// Read Builtin Topic data for a Participant.
+    bool getBuiltinTopicData(
+           const OpenDDS::DCPS::GUID_t&      id,
+           DDS::ParticipantBuiltinTopicData& data
+         );
+
+    /// Read Builtin Topic data for a Topic.
+    bool getBuiltinTopicData(
+           const OpenDDS::DCPS::GUID_t& id,
+           DDS::TopicBuiltinTopicData&  data
+         );
+
+    /// Read Builtin Topic data for a Publication.
+    bool getBuiltinTopicData(
+           const OpenDDS::DCPS::GUID_t&      id,
+           DDS::PublicationBuiltinTopicData& data
+         );
+
+    /// Read Builtin Topic data for a Subscription.
+    bool getBuiltinTopicData(
+           const OpenDDS::DCPS::GUID_t&       id,
+           DDS::SubscriptionBuiltinTopicData& data
+         );
+
     /// @}
 
     /// Provide access to the IOR mappings.
@@ -82,6 +106,14 @@ class MonitorTask : public ACE_Task_Base {
     /// Specialize data handling by type.
     template< class ReaderType, typename DataType>
     void dataUpdate( DDS::DataReader_ptr reader);
+
+    /// Specialize BuiltinTopic reading.
+    template< class ReaderType, typename DataType, class DataTypeSeq>
+    bool readBuiltinTopicData(
+           const OpenDDS::DCPS::GUID_t& id,
+           DataType&                    data,
+           const char*                  topicName
+         );
 
     /// Specialize subscriptions by type support.
     template< class TypeSupport>

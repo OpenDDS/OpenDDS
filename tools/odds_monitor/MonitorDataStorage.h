@@ -347,6 +347,14 @@ class MonitorDataStorage {
       bool&              created
     );
 
+    /// Manage the QoS policy values for a Publication.
+    void managePublicationQos(
+           TreeNode*                               parent,
+           const DDS::PublicationBuiltinTopicData& data,
+           bool&                                   layoutChanged,
+           bool&                                   dataChanged
+         );
+
     /// Manage the link to a transport node reference for a publisher or
     /// subscriber node.
     void manageTransportLink(
