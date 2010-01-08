@@ -1,3 +1,12 @@
+Fri Jan  8 23:23:45 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+
+          Reverted the changes made on 
+          "Mon Jan  4 22:51:20 UTC 2010  Yan Dai  <dai_y@ociweb.com>"
+          The changes intended to fix a corner test case failure detected
+          in odds_monitor, but it appeared to cause other issues. 
+          
 Fri Jan  8 20:11:41 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * DevGuideExamples:
