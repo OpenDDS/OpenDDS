@@ -198,6 +198,11 @@ MonitorDataStorage::update< OpenDDS::DCPS::DomainParticipantReport>(
     return;
   }
 
+  // QOS
+  DDS::ParticipantBuiltinTopicData qosData;
+  this->model_->getBuiltinTopicData( data.dp_id, qosData);
+  this->manageParticipantQos( node, qosData, layoutChanged, dataChanged);
+
   // Domain Id value.
   QString label( QObject::tr( "Domain Id"));
   int row = node->indexOf( 0, label);
@@ -283,6 +288,11 @@ MonitorDataStorage::update< OpenDDS::DCPS::TopicReport>(
     this->deleteNode( this->guidToTreeMap_, node);
     return;
   }
+
+  // QOS
+  DDS::TopicBuiltinTopicData qosData;
+  this->model_->getBuiltinTopicData( data.topic_id, qosData);
+  this->manageTopicQos( node, qosData, layoutChanged, dataChanged);
 
   // Topic name value.
   TreeNode* nameNode = 0;
@@ -676,6 +686,11 @@ MonitorDataStorage::update< OpenDDS::DCPS::DataReaderReport>(
     return;
   }
 
+  // QOS
+  DDS::SubscriptionBuiltinTopicData qosData;
+  this->model_->getBuiltinTopicData( data.dr_id, qosData);
+  this->manageSubscriptionQos( node, qosData, layoutChanged, dataChanged);
+
   // TOPIC
   create = true;
   this->manageTopicLink( node, data.dp_id, data.topic_id, create);
@@ -820,11 +835,6 @@ MonitorDataStorage::update< DDS::ParticipantBuiltinTopicData>(
   //    UserDataQosPolicy user_data;
   //  };
 
-  // Retain knowledge of node insertions, updates, and deletions.
-  bool create        = !remove;
-  bool layoutChanged = false;
-  bool dataChanged   = false;
-
   // Extract a GUID from the key.
   OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::RepoIdBuilder::create();
   OpenDDS::DCPS::RepoIdBuilder builder(id);
@@ -841,8 +851,12 @@ MonitorDataStorage::update< DDS::ParticipantBuiltinTopicData>(
     data.key.value[0], data.key.value[1], data.key.value[2]
   ));
 
+  // Retain knowledge of node insertions, updates, and deletions.
+  bool layoutChanged = false;
+  bool dataChanged   = false;
+
   // Find or create a DomainParticipant node for this data.
-  create = false;
+  bool create = false;
   TreeNode* node = this->getParticipantNode( ProcessKey(), id, create);
   if( !node) {
     node = this->createParticipantNode( ProcessKey(), id, layoutChanged);
@@ -858,33 +872,8 @@ MonitorDataStorage::update< DDS::ParticipantBuiltinTopicData>(
     return;
   }
 
-  // Obtain the node to hold the Qos policy values.
-  create = false;
-  TreeNode* qosNode
-    = this->createQosNode( std::string("DomainParticipantQos"), node, create);
-  layoutChanged |= create;
-
-  // Install the policy values.
-
-  //    BuiltinTopicKey_t key;
-  QString builtinTopicKeyLabel
-    = QString( QObject::tr("BuiltinTopicKey.value"));
-  if( this->manageQosPolicy( qosNode, builtinTopicKeyLabel, data.key)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    UserDataQosPolicy user_data;
-  QString userDataLabel
-    = QString( QObject::tr("UserDataQosPolicy.user_data"));
-  if( this->manageQosPolicy( qosNode, userDataLabel, data.user_data)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
+  // Process the Qos data for this node.
+  this->manageParticipantQos( node, data, layoutChanged, dataChanged);
 
   // Notify the GUI if we have changed the underlying model.
   if( layoutChanged) {
@@ -971,177 +960,8 @@ MonitorDataStorage::update< DDS::TopicBuiltinTopicData>(
     return;
   }
 
-  // Obtain the node to hold the Qos policy values.
-  create = false;
-  TreeNode* qosNode
-    = this->createQosNode( std::string("TopicQos"), node, create);
-  layoutChanged |= create;
-
-  // Install the policy values.
-
-  //    BuiltinTopicKey_t key;
-  QString builtinTopicKeyLabel
-    = QString( QObject::tr("BuiltinTopicKey.value"));
-  if( this->manageQosPolicy( qosNode, builtinTopicKeyLabel, data.key)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    string name;
-  QString topicNameLabel
-    = QString( QObject::tr("Topic name"));
-  QString topicNameValue
-    = QString( QObject::tr( static_cast<const char*>(data.name)));
-  if( this->manageQosPolicy( qosNode, topicNameLabel, topicNameValue)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    string type_name;
-  QString topicTypeLabel
-    = QString( QObject::tr("Topic data type"));
-  QString topicTypeValue
-    = QString( QObject::tr( static_cast<const char*>(data.type_name)));
-  if( this->manageQosPolicy( qosNode, topicTypeLabel, topicTypeValue)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    DurabilityQosPolicy durability;
-  QString durabilityLabel
-    = QString( QObject::tr("DurabilityQosPolicy.durability"));
-  if( this->manageQosPolicy( qosNode, durabilityLabel, data.durability)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    DurabilityServiceQosPolicy durability_service;
-  QString durabilityServiceLabel
-    = QString( QObject::tr("DurabilityServiceQosPolicy.durability"));
-  if( this->manageQosPolicy( qosNode, durabilityServiceLabel, data.durability_service)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    DeadlineQosPolicy deadline;
-  QString deadlineLabel
-    = QString( QObject::tr("DeadlineQosPolicy.deadline"));
-  if( this->manageQosPolicy( qosNode, deadlineLabel, data.deadline)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    LatencyBudgetQosPolicy latency_budget;
-  QString latencyLabel
-    = QString( QObject::tr("LatencyBudgetQosPolicy.latency_budget"));
-  if( this->manageQosPolicy( qosNode, latencyLabel, data.latency_budget)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    LivelinessQosPolicy liveliness;
-  QString livelinessLabel
-    = QString( QObject::tr("LivelinessQosPolicy.liveliness"));
-  if( this->manageQosPolicy( qosNode, livelinessLabel, data.liveliness)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    ReliabilityQosPolicy reliability;
-  QString reliabilityLabel
-    = QString( QObject::tr("ReliabilityQosPolicy.reliability"));
-  if( this->manageQosPolicy( qosNode, reliabilityLabel, data.reliability)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    TransportPriorityQosPolicy transport_priority;
-  QString priorityLabel
-    = QString( QObject::tr("TransportPriorityQosPolicy.transport_priority"));
-  if( this->manageQosPolicy( qosNode, priorityLabel, data.transport_priority)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    LifespanQosPolicy lifespan;
-  QString lifespanLabel
-    = QString( QObject::tr("LifespandQosPolicy.lifespan"));
-  if( this->manageQosPolicy( qosNode, lifespanLabel, data.lifespan)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    DestinationOrderQosPolicy destination_order;
-  QString destinationOrderLabel
-    = QString( QObject::tr("DestinationOrderQosPolicy.deadline"));
-  if( this->manageQosPolicy( qosNode, destinationOrderLabel, data.destination_order)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    HistoryQosPolicy history;
-  QString historyLabel
-    = QString( QObject::tr("HistoryQosPolicy.history"));
-  if( this->manageQosPolicy( qosNode, historyLabel, data.history)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    ResourceLimitsQosPolicy resource_limits;
-  QString limitsLabel
-    = QString( QObject::tr("ResourceLimitsQosPolicy.resource_limits"));
-  if( this->manageQosPolicy( qosNode, limitsLabel, data.resource_limits)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    OwnershipQosPolicy ownership;
-  QString ownershipLabel
-    = QString( QObject::tr("OwnershipQosPolicy.ownership"));
-  if( this->manageQosPolicy( qosNode, ownershipLabel, data.ownership)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    TopicDataQosPolicy topic_data;
-  QString topicDataLabel
-    = QString( QObject::tr("TopicDataQosPolicy.topic_data"));
-  if( this->manageQosPolicy( qosNode, topicDataLabel, data.topic_data)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
+  // Process the Qos data for this node.
+  this->manageTopicQos( node, data, layoutChanged, dataChanged);
 
   // Notify the GUI if we have changed the underlying model.
   if( layoutChanged) {
@@ -1320,181 +1140,8 @@ MonitorDataStorage::update< DDS::SubscriptionBuiltinTopicData>(
     return;
   }
 
-  /// @TODO: segregate the publisher and data writer policy values.
-
-  // Obtain the node to hold the Qos policy values.
-  create = false;
-  TreeNode* qosNode
-    = this->createQosNode( std::string("SubscriptionQos"), node, create);
-  layoutChanged |= create;
-
-  // Install the policy values.
-
-  //    BuiltinTopicKey_t key;
-  QString builtinTopicKeyLabel
-    = QString( QObject::tr("BuiltinTopicKey.value"));
-  if( this->manageQosPolicy( qosNode, builtinTopicKeyLabel, data.key)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    string name;
-  QString topicNameLabel
-    = QString( QObject::tr("Topic name"));
-  QString topicNameValue
-    = QString( QObject::tr( static_cast<const char*>(data.topic_name)));
-  if( this->manageQosPolicy( qosNode, topicNameLabel, topicNameValue)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    string type_name;
-  QString topicTypeLabel
-    = QString( QObject::tr("Topic data type"));
-  QString topicTypeValue
-    = QString( QObject::tr( static_cast<const char*>(data.type_name)));
-  if( this->manageQosPolicy( qosNode, topicTypeLabel, topicTypeValue)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    DurabilityQosPolicy durability;
-  QString durabilityLabel
-    = QString( QObject::tr("DurabilityQosPolicy.durability"));
-  if( this->manageQosPolicy( qosNode, durabilityLabel, data.durability)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    DeadlineQosPolicy deadline;
-  QString deadlineLabel
-    = QString( QObject::tr("DeadlineQosPolicy.deadline"));
-  if( this->manageQosPolicy( qosNode, deadlineLabel, data.deadline)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    LatencyBudgetQosPolicy latency_budget;
-  QString latencyLabel
-    = QString( QObject::tr("LatencyBudgetQosPolicy.latency_budget"));
-  if( this->manageQosPolicy( qosNode, latencyLabel, data.latency_budget)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    LivelinessQosPolicy liveliness;
-  QString livelinessLabel
-    = QString( QObject::tr("LivelinessQosPolicy.liveliness"));
-  if( this->manageQosPolicy( qosNode, livelinessLabel, data.liveliness)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    ReliabilityQosPolicy reliability;
-  QString reliabilityLabel
-    = QString( QObject::tr("ReliabilityQosPolicy.reliability"));
-  if( this->manageQosPolicy( qosNode, reliabilityLabel, data.reliability)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    OwnershipQosPolicy ownership;
-  QString ownershipDataLabel
-    = QString( QObject::tr("OwnershipQosPolicy.ownership"));
-  if( this->manageQosPolicy( qosNode, ownershipDataLabel, data.ownership)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    DestinationOrderQosPolicy destination_order;
-  QString destinationOrderLabel
-    = QString( QObject::tr("DestinationOrderQosPolicy.destination_order"));
-  if( this->manageQosPolicy( qosNode, destinationOrderLabel, data.destination_order)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    UserDataQosPolicy user_data;
-  QString userDataLabel
-    = QString( QObject::tr("UserDataQosPolicy.user_data"));
-  if( this->manageQosPolicy( qosNode, userDataLabel, data.user_data)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    TimeBasedFilterQosPolicy time_based_filter;
-  QString timeBasedFilterLabel
-    = QString( QObject::tr("TimeBasedFilterQosPolicy.time_based_filter"));
-  if( this->manageQosPolicy( qosNode,
-                             timeBasedFilterLabel,
-                             data.time_based_filter)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    PresentationQosPolicy presentation;
-  QString presentationLabel
-    = QString( QObject::tr("PresentationQosPolicy.presentation"));
-  if( this->manageQosPolicy( qosNode, presentationLabel, data.presentation)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    PartitionQosPolicy partition;
-  QString partitionLabel
-    = QString( QObject::tr("PartitionQosPolicy.partition"));
-  if( this->manageQosPolicy( qosNode, partitionLabel, data.partition)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    TopicDataQosPolicy topic_data;
-  QString topicDataLabel
-    = QString( QObject::tr("TopicDataQosPolicy.topic_data"));
-  if( this->manageQosPolicy( qosNode, topicDataLabel, data.topic_data)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
-
-  //    GroupDataQosPolicy group_data;
-  QString groupDataLabel
-    = QString( QObject::tr("GroupDataQosPolicy.group_data"));
-  if( this->manageQosPolicy( qosNode, groupDataLabel, data.group_data)) {
-    layoutChanged = true;
-
-  } else {
-    dataChanged = true;
-  }
+  // Process the Qos data for this node.
+  this->manageSubscriptionQos( node, data, layoutChanged, dataChanged);
 
   // Notify the GUI if we have changed the underlying model.
   if( layoutChanged) {
