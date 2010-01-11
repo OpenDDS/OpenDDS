@@ -1,3 +1,13 @@
+Mon Jan 11 20:34:15 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/MonitorDataStorage.h:
+        * tools/odds_monitor/MonitorDataStorage.inl:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+
+          BuiltinTopic sample handling refactor complete.  Added
+          Subscription, Topic, and DomainParticipant implementations in
+          same style as the Publication BuiltinTopic sample handling.
+
 Mon Jan 11 17:28:48 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/odds_monitor/MonitorTask.h:
@@ -15,7 +25,7 @@ Mon Jan 11 17:28:48 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/odds_monitor/QosFormatter.cpp:
 
-          Added the value to the disply string if an invalid enumration
+          Added the value to the disply string if an invalid enumeration
           value is detected.
 
 Mon Jan 11 04:25:47 UTC 2010  Yan Dai  <dai_y@ociweb.com>

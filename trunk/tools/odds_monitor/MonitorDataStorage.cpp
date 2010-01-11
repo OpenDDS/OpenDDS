@@ -785,6 +785,248 @@ Monitor::MonitorDataStorage::createQosNode(
 }
 
 void
+Monitor::MonitorDataStorage::manageParticipantQos(
+  TreeNode*                               parent,
+  const DDS::ParticipantBuiltinTopicData& data,
+  bool&                                   layoutChanged,
+  bool&                                   dataChanged
+)
+{
+  //  struct ParticipantBuiltinTopicData {
+  //    BuiltinTopicKey_t key;
+  //    UserDataQosPolicy user_data;
+  //  };
+
+  // Obtain the node to hold the Qos policy values.
+  bool create = false;
+  TreeNode* qosNode
+    = this->createQosNode( std::string("DomainParticipantQos"), parent, create);
+  layoutChanged |= create;
+
+  // Install the policy values.
+
+  //    BuiltinTopicKey_t key;
+  QString builtinTopicKeyLabel
+    = QString( QObject::tr("BuiltinTopicKey.value"));
+  if( this->manageQosPolicy( qosNode, builtinTopicKeyLabel, data.key)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    UserDataQosPolicy user_data;
+  QString userDataLabel
+    = QString( QObject::tr("UserDataQosPolicy.user_data"));
+  if( this->manageQosPolicy( qosNode, userDataLabel, data.user_data)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+}
+
+void
+Monitor::MonitorDataStorage::manageTopicQos(
+  TreeNode*                         parent,
+  const DDS::TopicBuiltinTopicData& data,
+  bool&                             layoutChanged,
+  bool&                             dataChanged
+)
+{
+  //  struct TopicBuiltinTopicData {
+  //    BuiltinTopicKey_t key;
+  //    string name;
+  //    string type_name;
+  //    DurabilityQosPolicy durability;
+  //    DurabilityServiceQosPolicy durability_service;
+  //    DeadlineQosPolicy deadline;
+  //    LatencyBudgetQosPolicy latency_budget;
+  //    LivelinessQosPolicy liveliness;
+  //    ReliabilityQosPolicy reliability;
+  //    TransportPriorityQosPolicy transport_priority;
+  //    LifespanQosPolicy lifespan;
+  //    DestinationOrderQosPolicy destination_order;
+  //    HistoryQosPolicy history;
+  //    ResourceLimitsQosPolicy resource_limits;
+  //    OwnershipQosPolicy ownership;
+  //    TopicDataQosPolicy topic_data;
+  //  };
+
+  // Obtain the node to hold the Qos policy values.
+  bool create = false;
+  TreeNode* qosNode
+    = this->createQosNode( std::string("TopicQos"), parent, create);
+  layoutChanged |= create;
+
+  // Install the policy values.
+
+  //    BuiltinTopicKey_t key;
+  QString builtinTopicKeyLabel
+    = QString( QObject::tr("BuiltinTopicKey.value"));
+  if( this->manageQosPolicy( qosNode, builtinTopicKeyLabel, data.key)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    string name;
+  QString topicNameLabel
+    = QString( QObject::tr("Topic name"));
+  QString topicNameValue
+    = QString( QObject::tr( static_cast<const char*>(data.name)));
+  if( this->manageQosPolicy( qosNode, topicNameLabel, topicNameValue)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    string type_name;
+  QString topicTypeLabel
+    = QString( QObject::tr("Topic data type"));
+  QString topicTypeValue
+    = QString( QObject::tr( static_cast<const char*>(data.type_name)));
+  if( this->manageQosPolicy( qosNode, topicTypeLabel, topicTypeValue)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    DurabilityQosPolicy durability;
+  QString durabilityLabel
+    = QString( QObject::tr("DurabilityQosPolicy.durability"));
+  if( this->manageQosPolicy( qosNode, durabilityLabel, data.durability)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    DurabilityServiceQosPolicy durability_service;
+  QString durabilityServiceLabel
+    = QString( QObject::tr("DurabilityServiceQosPolicy.durability"));
+  if( this->manageQosPolicy( qosNode, durabilityServiceLabel, data.durability_service)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    DeadlineQosPolicy deadline;
+  QString deadlineLabel
+    = QString( QObject::tr("DeadlineQosPolicy.deadline"));
+  if( this->manageQosPolicy( qosNode, deadlineLabel, data.deadline)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    LatencyBudgetQosPolicy latency_budget;
+  QString latencyLabel
+    = QString( QObject::tr("LatencyBudgetQosPolicy.latency_budget"));
+  if( this->manageQosPolicy( qosNode, latencyLabel, data.latency_budget)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    LivelinessQosPolicy liveliness;
+  QString livelinessLabel
+    = QString( QObject::tr("LivelinessQosPolicy.liveliness"));
+  if( this->manageQosPolicy( qosNode, livelinessLabel, data.liveliness)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    ReliabilityQosPolicy reliability;
+  QString reliabilityLabel
+    = QString( QObject::tr("ReliabilityQosPolicy.reliability"));
+  if( this->manageQosPolicy( qosNode, reliabilityLabel, data.reliability)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    TransportPriorityQosPolicy transport_priority;
+  QString priorityLabel
+    = QString( QObject::tr("TransportPriorityQosPolicy.transport_priority"));
+  if( this->manageQosPolicy( qosNode, priorityLabel, data.transport_priority)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    LifespanQosPolicy lifespan;
+  QString lifespanLabel
+    = QString( QObject::tr("LifespandQosPolicy.lifespan"));
+  if( this->manageQosPolicy( qosNode, lifespanLabel, data.lifespan)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    DestinationOrderQosPolicy destination_order;
+  QString destinationOrderLabel
+    = QString( QObject::tr("DestinationOrderQosPolicy.deadline"));
+  if( this->manageQosPolicy( qosNode, destinationOrderLabel, data.destination_order)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    HistoryQosPolicy history;
+  QString historyLabel
+    = QString( QObject::tr("HistoryQosPolicy.history"));
+  if( this->manageQosPolicy( qosNode, historyLabel, data.history)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    ResourceLimitsQosPolicy resource_limits;
+  QString limitsLabel
+    = QString( QObject::tr("ResourceLimitsQosPolicy.resource_limits"));
+  if( this->manageQosPolicy( qosNode, limitsLabel, data.resource_limits)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    OwnershipQosPolicy ownership;
+  QString ownershipLabel
+    = QString( QObject::tr("OwnershipQosPolicy.ownership"));
+  if( this->manageQosPolicy( qosNode, ownershipLabel, data.ownership)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    TopicDataQosPolicy topic_data;
+  QString topicDataLabel
+    = QString( QObject::tr("TopicDataQosPolicy.topic_data"));
+  if( this->manageQosPolicy( qosNode, topicDataLabel, data.topic_data)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+}
+
+void
 Monitor::MonitorDataStorage::managePublicationQos(
   TreeNode*                               parent,
   const DDS::PublicationBuiltinTopicData& data,
@@ -964,6 +1206,211 @@ Monitor::MonitorDataStorage::managePublicationQos(
   QString destinationOrderLabel
     = QString( QObject::tr("DestinationOrderQosPolicy.destination_order"));
   if( this->manageQosPolicy( qosNode, destinationOrderLabel, data.destination_order)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    PresentationQosPolicy presentation;
+  QString presentationLabel
+    = QString( QObject::tr("PresentationQosPolicy.presentation"));
+  if( this->manageQosPolicy( qosNode, presentationLabel, data.presentation)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    PartitionQosPolicy partition;
+  QString partitionLabel
+    = QString( QObject::tr("PartitionQosPolicy.partition"));
+  if( this->manageQosPolicy( qosNode, partitionLabel, data.partition)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    TopicDataQosPolicy topic_data;
+  QString topicDataLabel
+    = QString( QObject::tr("TopicDataQosPolicy.topic_data"));
+  if( this->manageQosPolicy( qosNode, topicDataLabel, data.topic_data)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    GroupDataQosPolicy group_data;
+  QString groupDataLabel
+    = QString( QObject::tr("GroupDataQosPolicy.group_data"));
+  if( this->manageQosPolicy( qosNode, groupDataLabel, data.group_data)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+}
+
+void
+Monitor::MonitorDataStorage::manageSubscriptionQos(
+  TreeNode*                                parent,
+  const DDS::SubscriptionBuiltinTopicData& data,
+  bool&                                    layoutChanged,
+  bool&                                    dataChanged
+)
+{
+  //  struct SubscriptionBuiltinTopicData {
+  //    BuiltinTopicKey_t key;
+  //    BuiltinTopicKey_t participant_key;
+  //    string topic_name;
+  //    string type_name;
+  //    DurabilityQosPolicy durability;
+  //    DeadlineQosPolicy deadline;
+  //    LatencyBudgetQosPolicy latency_budget;
+  //    LivelinessQosPolicy liveliness;
+  //    ReliabilityQosPolicy reliability;
+  //    OwnershipQosPolicy ownership;
+  //    DestinationOrderQosPolicy destination_order;
+  //    UserDataQosPolicy user_data;
+  //    TimeBasedFilterQosPolicy time_based_filter;
+  //    PresentationQosPolicy presentation;
+  //    PartitionQosPolicy partition;
+  //    TopicDataQosPolicy topic_data;
+  //    GroupDataQosPolicy group_data;
+  //  };
+
+  /// @TODO: segregate the publisher and data writer policy values.
+
+  // Obtain the node to hold the Qos policy values.
+  bool create = false;
+  TreeNode* qosNode
+    = this->createQosNode( std::string("SubscriptionQos"), parent, create);
+  layoutChanged |= create;
+
+  // Install the policy values.
+
+  //    BuiltinTopicKey_t key;
+  QString builtinTopicKeyLabel
+    = QString( QObject::tr("BuiltinTopicKey.value"));
+  if( this->manageQosPolicy( qosNode, builtinTopicKeyLabel, data.key)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    string name;
+  QString topicNameLabel
+    = QString( QObject::tr("Topic name"));
+  QString topicNameValue
+    = QString( QObject::tr( static_cast<const char*>(data.topic_name)));
+  if( this->manageQosPolicy( qosNode, topicNameLabel, topicNameValue)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    string type_name;
+  QString topicTypeLabel
+    = QString( QObject::tr("Topic data type"));
+  QString topicTypeValue
+    = QString( QObject::tr( static_cast<const char*>(data.type_name)));
+  if( this->manageQosPolicy( qosNode, topicTypeLabel, topicTypeValue)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    DurabilityQosPolicy durability;
+  QString durabilityLabel
+    = QString( QObject::tr("DurabilityQosPolicy.durability"));
+  if( this->manageQosPolicy( qosNode, durabilityLabel, data.durability)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    DeadlineQosPolicy deadline;
+  QString deadlineLabel
+    = QString( QObject::tr("DeadlineQosPolicy.deadline"));
+  if( this->manageQosPolicy( qosNode, deadlineLabel, data.deadline)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    LatencyBudgetQosPolicy latency_budget;
+  QString latencyLabel
+    = QString( QObject::tr("LatencyBudgetQosPolicy.latency_budget"));
+  if( this->manageQosPolicy( qosNode, latencyLabel, data.latency_budget)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    LivelinessQosPolicy liveliness;
+  QString livelinessLabel
+    = QString( QObject::tr("LivelinessQosPolicy.liveliness"));
+  if( this->manageQosPolicy( qosNode, livelinessLabel, data.liveliness)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    ReliabilityQosPolicy reliability;
+  QString reliabilityLabel
+    = QString( QObject::tr("ReliabilityQosPolicy.reliability"));
+  if( this->manageQosPolicy( qosNode, reliabilityLabel, data.reliability)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    OwnershipQosPolicy ownership;
+  QString ownershipDataLabel
+    = QString( QObject::tr("OwnershipQosPolicy.ownership"));
+  if( this->manageQosPolicy( qosNode, ownershipDataLabel, data.ownership)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    DestinationOrderQosPolicy destination_order;
+  QString destinationOrderLabel
+    = QString( QObject::tr("DestinationOrderQosPolicy.destination_order"));
+  if( this->manageQosPolicy( qosNode, destinationOrderLabel, data.destination_order)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    UserDataQosPolicy user_data;
+  QString userDataLabel
+    = QString( QObject::tr("UserDataQosPolicy.user_data"));
+  if( this->manageQosPolicy( qosNode, userDataLabel, data.user_data)) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //    TimeBasedFilterQosPolicy time_based_filter;
+  QString timeBasedFilterLabel
+    = QString( QObject::tr("TimeBasedFilterQosPolicy.time_based_filter"));
+  if( this->manageQosPolicy( qosNode,
+                             timeBasedFilterLabel,
+                             data.time_based_filter)) {
     layoutChanged = true;
 
   } else {

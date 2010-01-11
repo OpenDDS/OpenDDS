@@ -347,12 +347,36 @@ class MonitorDataStorage {
       bool&              created
     );
 
+    /// Manage the QoS policy values for a DomainParticipant.
+    void manageParticipantQos(
+           TreeNode*                               parent,
+           const DDS::ParticipantBuiltinTopicData& data,
+           bool&                                   layoutChanged,
+           bool&                                   dataChanged
+         );
+
+    /// Manage the QoS policy values for a Topic.
+    void manageTopicQos(
+           TreeNode*                         parent,
+           const DDS::TopicBuiltinTopicData& data,
+           bool&                             layoutChanged,
+           bool&                             dataChanged
+         );
+
     /// Manage the QoS policy values for a Publication.
     void managePublicationQos(
            TreeNode*                               parent,
            const DDS::PublicationBuiltinTopicData& data,
            bool&                                   layoutChanged,
            bool&                                   dataChanged
+         );
+
+    /// Manage the QoS policy values for a Subscription.
+    void manageSubscriptionQos(
+           TreeNode*                                parent,
+           const DDS::SubscriptionBuiltinTopicData& data,
+           bool&                                    layoutChanged,
+           bool&                                    dataChanged
          );
 
     /// Manage the link to a transport node reference for a publisher or
