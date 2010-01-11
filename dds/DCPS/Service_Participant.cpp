@@ -1132,6 +1132,8 @@ Service_Participant::init_bit_transport_impl(DDS::DomainId_t domain)
   SimpleTcpConfiguration* tcp_config
   = static_cast <SimpleTcpConfiguration*>(config.in());
 
+  tcp_config->datalink_release_delay_ = 0;
+  
   if (0 == this->bitTransportIpMap_[ repo].length()) {
     tcp_config->local_address_.set_port_number(this->bitTransportPortMap_[ repo]);
 

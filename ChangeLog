@@ -1,3 +1,12 @@
+Mon Jan 11 04:25:47 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Made BIT transport configured with datalink_release_delay=0. 
+          The BIT does not need this parameter which is used for performance
+          improvement during reconnecting. It also solved odds_monitor
+          hang during repo switch issue.
+
 Sat Jan  9 22:21:20 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/run_test.pl:
