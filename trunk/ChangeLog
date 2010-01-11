@@ -1,3 +1,13 @@
+Mon Jan 11 23:21:21 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/README:
+
+          Updated documentation.
+
+        * tools/odds_monitor/monitor.conf:
+
+          Added the monitor service loader.
+
 Mon Jan 11 22:10:25 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/odds_monitor/MonitorTask.h:
