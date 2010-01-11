@@ -1,3 +1,11 @@
+Mon Jan 11 22:10:25 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/MonitorTask.h:
+        * tools/odds_monitor/MonitorTask.cpp:
+
+          Simplified locking and removed initial sample processing as the
+          samples will be processed through normal operation.
+
 Mon Jan 11 20:34:15 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/odds_monitor/MonitorDataStorage.h:

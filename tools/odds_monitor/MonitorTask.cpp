@@ -38,7 +38,6 @@ Monitor::MonitorTask::MonitorTask(
   const Options&      options
 ) : opened_( false),
     done_( false),
-    inUse_( false),
     options_( options),
     data_( data),
     gate_( this->lock_),
@@ -105,11 +104,6 @@ Monitor::MonitorTask::close( u_long flags)
   // This is the single location where this member is written, don't
   // bother to lock access.
   this->done_ = true;
-  {
-    ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, -1);
-    this->inUse_ = false;
-  }
-  this->gate_.broadcast();
 
   this->guardCondition_->set_trigger_value( true);
 
@@ -149,13 +143,7 @@ Monitor::MonitorTask::stopInstrumentation()
     this->participant_->get_domain_id()
   ));
 
-  { // Wait to gain control of processing.
-    ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->lock_);
-    while( this->inUse_) {
-      this->gate_.wait();
-    }
-    this->inUse_ = true;
-  }
+  ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->lock_);
 
   // Clean up the wait conditions.
   DDS::ConditionSeq conditions;
@@ -197,18 +185,13 @@ Monitor::MonitorTask::stopInstrumentation()
     = static_cast<OpenDDS::DCPS::TransportIdType>( this->activeKey_);
  
   TheTransportFactory->release (transportKey);
-
-  /// Yield control.
-  {
-    ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->lock_);
-    this->inUse_ = false;
-  }
-  this->gate_.broadcast();
 }
 
 Monitor::MonitorTask::RepoKey
 Monitor::MonitorTask::setRepoIor( const std::string& ior)
 {
+  RepoKey key;
+
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) MonitorTask::setRepoIor() - ")
@@ -217,57 +200,40 @@ Monitor::MonitorTask::setRepoIor( const std::string& ior)
     ));
   }
 
-  { // Wait to gain control of processing.
-    ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, DEFAULT_REPO);
-    while( this->inUse_) {
-      this->gate_.wait();
-    }
-    this->inUse_ = true;
-  }
+  { ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, DEFAULT_REPO);
+    IorKeyMap::iterator location = this->iorKeyMap_.find( ior);
+    if( location != this->iorKeyMap_.end()) {
+      // We already have this IOR mapped, use the existing key.
+      key = location->second;
+      // In case the same repo restart again, need resolve the 
+      // repo object reference again.
+      TheServiceParticipant->set_repo_ior( ior.c_str(), key, false);
 
-  RepoKey key;
-  IorKeyMap::iterator location = this->iorKeyMap_.find( ior);
-  if( location != this->iorKeyMap_.end()) {
-    // We already have this IOR mapped, use the existing key.
-    key = location->second;
-    // In case the same repo restart again, need resolve the 
-    // repo object reference again.
-    TheServiceParticipant->set_repo_ior( ior.c_str(), key, false);
+    } else {
+      // We need to find an open key to use.  Check the actual
+      // Service_Participant mappings for a slot.
+      OpenDDS::DCPS::Service_Participant::KeyIorMap::const_iterator
+        keyLocation;
+      key = this->lastKey_;
+      do {
+        keyLocation = TheServiceParticipant->keyIorMap().find( ++key);
+      } while( keyLocation != TheServiceParticipant->keyIorMap().end());
+      this->lastKey_ = key;
 
-  } else {
-    // We need to find an open key to use.  Check the actual
-    // Service_Participant mappings for a slot.
-    OpenDDS::DCPS::Service_Participant::KeyIorMap::const_iterator
-      keyLocation;
-    key = this->lastKey_;
-    do {
-      keyLocation = TheServiceParticipant->keyIorMap().find( ++key);
-    } while( keyLocation != TheServiceParticipant->keyIorMap().end());
-    this->lastKey_ = key;
+      // We have a new repository to install, go ahead.
+      TheServiceParticipant->set_repo_ior( ior.c_str(), key, false);
 
-    // We have a new repository to install, go ahead.
-    TheServiceParticipant->set_repo_ior( ior.c_str(), key, false);
-
-    // Check that we were able to resolve and attach to the repository.
-    keyLocation = TheServiceParticipant->keyIorMap().find( key);
-    if( keyLocation == TheServiceParticipant->keyIorMap().end()) {
-      // We failed to install this IOR, nothing left to do.
-      {
-        ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, DEFAULT_REPO);
-        this->inUse_ = false;
+      // Check that we were able to resolve and attach to the repository.
+      keyLocation = TheServiceParticipant->keyIorMap().find( key);
+      if( keyLocation == TheServiceParticipant->keyIorMap().end()) {
+        // We failed to install this IOR, nothing left to do.
+        return DEFAULT_REPO;
       }
-      return DEFAULT_REPO;
+
+      // Store the reverse mapping for our use.
+      this->iorKeyMap_[ ior] = key;
     }
-
-    // Store the reverse mapping for our use.
-    this->iorKeyMap_[ ior] = key;
-  }
-
-  /// Yield control.
-  {
-    ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, DEFAULT_REPO);
-    this->inUse_ = false;
-  }
+  } // End of lock scope.
 
   // Shutdown current processing.  This has the effect of removing the
   // existing participant.
@@ -320,13 +286,7 @@ Monitor::MonitorTask::svc()
       ));
     }
 
-    { // Wait to gain control of processing.
-      ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, -1);
-      while( this->inUse_) {
-        this->gate_.wait();
-      }
-      this->inUse_ = true;
-    }
+    ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, -1);
 
     for( unsigned long index = 0; index < conditions.length(); ++index) {
       // Extract the current Condition.
@@ -349,13 +309,6 @@ Monitor::MonitorTask::svc()
         }
       }
     }
-
-    // Yield before we start another pass.
-    {
-      ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, -1);
-      this->inUse_ = false;
-    }
-    this->gate_.broadcast();
   }
 
   if( this->options_.verbose()) {
@@ -376,13 +329,7 @@ Monitor::MonitorTask::setActiveRepo( RepoKey key)
     ACE_TEXT("establishing new monitoring.\n")
   ));
 
-  { // Wait to gain control of processing.
-    ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, false);
-    while( this->inUse_) {
-      this->gate_.wait();
-    }
-    this->inUse_ = true;
-  }
+  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, false);
 
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
@@ -430,10 +377,6 @@ Monitor::MonitorTask::setActiveRepo( RepoKey key)
       ACE_TEXT("(%P|%t) ERROR: MonitorTask::setActiveRepo() - ")
       ACE_TEXT("failed to create participant.\n")
     ));
-    {
-      ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, false);
-      this->inUse_ = false;
-    }
     return false;
   }
 
@@ -455,10 +398,6 @@ Monitor::MonitorTask::setActiveRepo( RepoKey key)
       ACE_TEXT("(%P|%t) ERROR: MonitorTask::setActiveRepo() - ")
       ACE_TEXT("failed to create subscriber.\n")
     ));
-    {
-      ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, false);
-      this->inUse_ = false;
-    }
     return false;
   }
 
@@ -487,10 +426,6 @@ Monitor::MonitorTask::setActiveRepo( RepoKey key)
         ACE_TEXT("(%P|%t) ERROR: MonitorTask::setActiveRepo() - ")
         ACE_TEXT("failed to create transport.\n")
       ));
-      {
-        ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, false);
-        this->inUse_ = false;
-      }
       return false;
     }
   }
@@ -500,10 +435,6 @@ Monitor::MonitorTask::setActiveRepo( RepoKey key)
       ACE_TEXT("(%P|%t) ERROR: MonitorTask::setActiveRepo() - ")
       ACE_TEXT("failed to attach transport to subscriber.\n")
     ));
-    {
-      ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, false);
-      this->inUse_ = false;
-    }
     return false;
   }
 
@@ -609,13 +540,6 @@ Monitor::MonitorTask::setActiveRepo( RepoKey key)
     ));
   }
 
-  // Yield control.
-  {
-    ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, false);
-    this->inUse_ = false;
-  }
-  this->gate_.broadcast();
-
   return true;
 }
 
@@ -664,7 +588,6 @@ Monitor::MonitorTask::createSubscription(
 
   // Track the type by handle and process any initial data.
   this->handleTypeMap_[ reader->get_instance_handle()] = type;
-  this->dispatchReader( reader.in());
 
   status = reader->get_statuscondition();
   status->set_enabled_statuses( DDS::DATA_AVAILABLE_STATUS);
@@ -694,7 +617,6 @@ Monitor::MonitorTask::createBuiltinSubscription(
 
   // Track the type by handle and process any initial data.
   this->handleTypeMap_[ reader->get_instance_handle()] = type;
-  this->dispatchReader( reader.in());
 
   DDS::StatusCondition_var status = reader->get_statuscondition();
   status->set_enabled_statuses( DDS::DATA_AVAILABLE_STATUS);

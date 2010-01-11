@@ -144,9 +144,6 @@ class MonitorTask : public ACE_Task_Base {
     /// Service control flag.
     bool done_;
 
-    /// Flow control.
-    bool inUse_;
-
     /// Configuration Information.
     const Options& options_;
 
