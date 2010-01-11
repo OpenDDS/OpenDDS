@@ -602,6 +602,13 @@ Monitor::MonitorTask::setActiveRepo( RepoKey key)
           OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC,
           BUILTIN_SUBSCRIPTION_REPORT_TYPE);
 
+  if( this->options_.verbose()) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) MonitorTask::setActiveRepo() - ")
+      ACE_TEXT("attached all builtinTopic subscriptions.\n")
+    ));
+  }
+
   // Yield control.
   {
     ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, false);
@@ -680,7 +687,6 @@ Monitor::MonitorTask::createBuiltinSubscription(
   int         type
 )
 {
-return;
   DDS::Subscriber_var subscriber
     = this->participant_->get_builtin_subscriber();
   DDS::DataReader_var reader
@@ -801,7 +807,7 @@ Monitor::MonitorTask::dispatchReader( DDS::DataReader_ptr reader)
 
     case BUILTIN_PARTICIPANT_REPORT_TYPE:
       {
-        this->dataUpdate<
+        this->builtinTopicUpdate<
           DDS::ParticipantBuiltinTopicDataDataReader,
           DDS::ParticipantBuiltinTopicData>(
             reader);
@@ -810,7 +816,7 @@ Monitor::MonitorTask::dispatchReader( DDS::DataReader_ptr reader)
 
     case BUILTIN_TOPIC_REPORT_TYPE:
       {
-        this->dataUpdate<
+        this->builtinTopicUpdate<
           DDS::TopicBuiltinTopicDataDataReader,
           DDS::TopicBuiltinTopicData>(
             reader);
@@ -819,7 +825,7 @@ Monitor::MonitorTask::dispatchReader( DDS::DataReader_ptr reader)
 
     case BUILTIN_PUBLICATION_REPORT_TYPE:
       {
-        this->dataUpdate<
+        this->builtinTopicUpdate<
           DDS::PublicationBuiltinTopicDataDataReader,
           DDS::PublicationBuiltinTopicData>(
             reader);
@@ -828,7 +834,7 @@ Monitor::MonitorTask::dispatchReader( DDS::DataReader_ptr reader)
 
     case BUILTIN_SUBSCRIPTION_REPORT_TYPE:
       {
-        this->dataUpdate<
+        this->builtinTopicUpdate<
           DDS::SubscriptionBuiltinTopicDataDataReader,
           DDS::SubscriptionBuiltinTopicData>(
             reader);
@@ -884,6 +890,51 @@ Monitor::MonitorTask::dataUpdate(
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) MonitorTask::dataUpdate() - ")
+      ACE_TEXT("forwarded %d/%d (valid/invalid) samples from instance %d.\n"),
+      valid, invalid, reader->get_instance_handle()
+    ));
+  }
+}
+
+template< class ReaderType, class DataType>
+void
+Monitor::MonitorTask::builtinTopicUpdate(
+  DDS::DataReader_ptr reader
+)
+{
+  // Get the specific reader we need.
+  typename ReaderType::_var_type typedReader
+    = ReaderType::_narrow(reader);
+  if( CORBA::is_nil( typedReader.in())) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: MonitorTask::builtinTopicUpdate() - ")
+      ACE_TEXT("failed to narrow the reader for instance %d.\n"),
+      reader->get_instance_handle()
+    ));
+    return;
+  }
+
+  // Diagnostic information only.
+  int valid   = 0;
+  int invalid = 0;
+
+  // Read and forward all available new data.
+  DataType        data;
+  DDS::SampleInfo info;
+  while( DDS::RETCODE_OK == typedReader->read_next_sample( data, info)) {
+    if( info.valid_data) {
+      this->data_->update( data);
+      ++valid;
+
+    } else if( info.instance_state & DDS::NOT_ALIVE_INSTANCE_STATE) {
+      this->data_->update( data, true);
+      ++invalid;
+    }
+  }
+
+  if( this->options_.verbose()) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) MonitorTask::builtinTopicUpdate() - ")
       ACE_TEXT("forwarded %d/%d (valid/invalid) samples from instance %d.\n"),
       valid, invalid, reader->get_instance_handle()
     ));

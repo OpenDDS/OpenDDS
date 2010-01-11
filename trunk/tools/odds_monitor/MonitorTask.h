@@ -103,9 +103,15 @@ class MonitorTask : public ACE_Task_Base {
     const IorKeyMap& iorKeyMap() const;
 
   private:
-    /// Specialize data handling by type.
+    /// Specialize data handling by type.  This 'take's the monitor data
+    /// samples.
     template< class ReaderType, typename DataType>
     void dataUpdate( DDS::DataReader_ptr reader);
+
+    /// Specialize builtin topic handling by type.  This 'read's the
+    /// BuiltinTopic samples.
+    template< class ReaderType, typename DataType>
+    void builtinTopicUpdate( DDS::DataReader_ptr reader);
 
     /// Specialize BuiltinTopic reading.
     template< class ReaderType, typename DataType, class DataTypeSeq>

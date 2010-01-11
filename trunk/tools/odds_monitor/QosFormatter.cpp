@@ -108,7 +108,7 @@ QosToQString<DDS::DurabilityQosPolicy>( const DDS::DurabilityQosPolicy& value)
       return QString( "kind = PERSISTENT LOCAL");
 
     default:
-      return QString( QObject::tr("<bad value>"));
+      return QString( "<bad value == %1>").arg(value.kind);
   }
 }
 
@@ -242,7 +242,7 @@ QosToQString<DDS::OwnershipQosPolicy>( const DDS::OwnershipQosPolicy& value)
       return QString( "EXCLUSIVE");
   
     default:
-      return QString( QObject::tr("<bad value>"));
+      return QString( "<bad value == %1>").arg(value.kind);
   }
 }
 
