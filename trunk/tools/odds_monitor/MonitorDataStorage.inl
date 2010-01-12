@@ -54,20 +54,8 @@ MonitorDataStorage::manageQosPolicy(
   const PolicyType& value
 )
 {
-  int row = node->indexOf( 0, label);
-  if( row == -1) {
-    // New value, add a node.
-    QList<QVariant> list;
-    list << label << QosToQString( value);
-    TreeNode* policyNode = new TreeNode( list, node);
-    node->append( policyNode);
-    return true;
-
-  } else {
-    // Value update.
-    (*node)[ row]->setData( 1, QosToQString( value));
-  }
-  return false;
+  TreeNode* child = 0;
+  return this->manageChildValue( node, child, label, QosToQString( value));
 }
  
 template< typename DataType>
@@ -205,19 +193,12 @@ MonitorDataStorage::update< OpenDDS::DCPS::DomainParticipantReport>(
 
   // Domain Id value.
   QString label( QObject::tr( "Domain Id"));
-  int row = node->indexOf( 0, label);
-  if( row == -1) {
-    // New data, insert.
-    QList<QVariant> list;
-    list << label << QString::number( data.domain_id);
-    TreeNode* domainNode = new TreeNode( list, node);
-    node->append( domainNode);
+  QString value = QString::number( data.domain_id);
+  TreeNode* child = 0;
+  if( this->manageChildValue( node, child, label, value)) {
     layoutChanged = true;
 
   } else {
-    // Existing data, update.
-    TreeNode* domainNode = (*node)[ row];
-    domainNode->setData( 1, QString::number( data.domain_id));
     dataChanged = true;
   }
 
@@ -297,24 +278,11 @@ MonitorDataStorage::update< OpenDDS::DCPS::TopicReport>(
   // Topic name value.
   TreeNode* nameNode = 0;
   QString nameLabel( QObject::tr( "Topic Name"));
-  int row = node->indexOf( 0, nameLabel);
-  if( row == -1) {
-    // New data, insert.
-    QList<QVariant> list;
-    list << nameLabel
-         << QString( QObject::tr( static_cast<const char*>(data.topic_name)));
-    nameNode = new TreeNode( list, node);
-    node->append( nameNode);
+  QString nameValue( QObject::tr( static_cast<const char*>(data.topic_name)));
+  if( this->manageChildValue( node, nameNode, nameLabel, nameValue)) {
     layoutChanged = true;
 
   } else {
-    // Existing data, update.
-    /// @TODO: check to see if we are really changing the value.
-    nameNode = (*node)[ row];
-    nameNode->setData(
-      1,
-      QString( QObject::tr( static_cast<const char*>(data.topic_name)))
-    );
     dataChanged = true;
   }
 
@@ -326,24 +294,13 @@ nameNode->setColor( 1, QColor("#bfffbf"));
   }
 
   // Data type value.
+  TreeNode* child = 0;
   QString typeLabel( QObject::tr( "Data Type"));
-  row = node->indexOf( 0, typeLabel);
-  if( row == -1) {
-    // New data, insert.
-    QList<QVariant> list;
-    list << typeLabel
-         << QString( QObject::tr( static_cast<const char*>(data.type_name)));
-    TreeNode* typeNode = new TreeNode( list, node);
-    node->append( typeNode);
+  QString typeValue( QObject::tr( static_cast<const char*>(data.type_name)));
+  if( this->manageChildValue( node, child, typeLabel, typeValue)) {
     layoutChanged = true;
 
   } else {
-    // Existing data, update.
-    TreeNode* typeNode = (*node)[ row];
-    typeNode->setData(
-      1,
-      QString( QObject::tr( static_cast<const char*>(data.type_name)))
-    );
     dataChanged = true;
   }
 
@@ -619,11 +576,119 @@ MonitorDataStorage::update< OpenDDS::DCPS::DataWriterPeriodicReport>(
     std::string(converter).c_str()
   ));
 
+  // Ignore remove flag for these samples - the static reports control
+  // the lifetime.
+  if( remove) {
+    return;
+  }
+
   // Retain knowledge of node insertions, updates, and deletions.
   bool layoutChanged = false;
   bool dataChanged   = false;
 
-  TreeNode* node = 0;
+  // Find, do not create, a writer node.
+  TreeNode* node = this->getNode(
+                     std::string("Writer"),
+                     OpenDDS::DCPS::GUID_UNKNOWN,
+                     data.dw_id,
+                     layoutChanged
+                   );
+  if( !node) {
+    return;
+  }
+
+  //   unsigned long data_dropped_count;
+  TreeNode* child = 0;
+  QString dataDroppedLabel( QObject::tr("data dropped"));
+  QString dataDroppedValue
+    = QString::number( data.data_dropped_count);
+  if( this->manageChildValue(
+        node, child, dataDroppedLabel, dataDroppedValue
+    )) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //   unsigned long data_delivered_count;
+  child = 0;
+  QString dataDeliveredLabel( QObject::tr("data delivered"));
+  QString dataDeliveredValue
+    = QString::number( data.data_delivered_count);
+  if( this->manageChildValue(
+        node, child, dataDeliveredLabel, dataDeliveredValue
+    )) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //   unsigned long control_dropped_count;
+  child = 0;
+  QString controlDroppedLabel( QObject::tr("control dropped"));
+  QString controlDroppedValue
+    = QString::number( data.control_dropped_count);
+  if( this->manageChildValue(
+        node, child, controlDroppedLabel, controlDroppedValue
+    )) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  //   unsigned long control_delivered_count;
+  child = 0;
+  QString controlDeliveredLabel( QObject::tr("control delivered"));
+  QString controlDeliveredValue
+    = QString::number( data.control_delivered_count);
+  if( this->manageChildValue(
+        node, child, controlDeliveredLabel, controlDeliveredValue
+    )) {
+    layoutChanged = true;
+
+  } else {
+    dataChanged = true;
+  }
+
+  // ASSOCIATIONS
+  int size = data.associations.length();
+  for( int index = 0; index < size; ++index) {
+    // Create a child node to hold the association if its not already in
+    // the tree.
+    TreeNode* readerNode = 0;
+    OpenDDS::DCPS::GuidConverter converter( data.associations[ index].dr_id);
+    QString reader( std::string(converter).c_str());
+    int row = node->indexOf( 1, reader);
+    if( row == -1) {
+      // New data, insert.
+      QList<QVariant> list;
+      list << QString( QObject::tr("Reader")) << reader;
+      readerNode = new TreeNode( list, node);
+      node->append( readerNode);
+      layoutChanged = true;
+
+    } else {
+      // Existing data, use it.
+      readerNode = (*node)[ row];
+    }
+
+    // Add or update the current sequence number for this association.
+    TreeNode* child = 0;
+    QString sequenceLabel( QObject::tr("sequence number"));
+    QString sequenceValue
+      = QString::number( data.associations[ index].sequence_number);
+    if( this->manageChildValue(
+          readerNode, child, sequenceLabel, sequenceValue
+      )) {
+      layoutChanged = true;
+
+    } else {
+      dataChanged = true;
+    }
+  }
 
   // NAME / VALUE DATA, notify GUI of changes.
   this->displayNvp( node, data.values, layoutChanged, dataChanged);
@@ -747,11 +812,63 @@ MonitorDataStorage::update< OpenDDS::DCPS::DataReaderPeriodicReport>(
     std::string(converter).c_str()
   ));
 
+  // Ignore remove flag for these samples - the static reports control
+  // the lifetime.
+  if( remove) {
+    return;
+  }
+
   // Retain knowledge of node insertions, updates, and deletions.
   bool layoutChanged = false;
   bool dataChanged   = false;
 
-  TreeNode* node = 0;
+  // Find, do not create, a reader node.
+  TreeNode* node = this->getNode(
+                     std::string("Reader"),
+                     OpenDDS::DCPS::GUID_UNKNOWN,
+                     data.dr_id,
+                     layoutChanged
+                   );
+  if( !node) {
+    return;
+  }
+
+  // ASSOCIATIONS
+  int size = data.associations.length();
+  for( int index = 0; index < size; ++index) {
+    // Create a child node to hold the association if its not already in
+    // the tree.
+    TreeNode* writerNode = 0;
+    OpenDDS::DCPS::GuidConverter converter( data.associations[ index].dw_id);
+    QString writer( std::string(converter).c_str());
+    int row = node->indexOf( 1, writer);
+    if( row == -1) {
+      // New data, insert.
+      QList<QVariant> list;
+      list << QString( QObject::tr("Writer")) << writer;
+      writerNode = new TreeNode( list, node);
+      node->append( writerNode);
+      layoutChanged = true;
+
+    } else {
+      // Existing data, use it.
+      writerNode = (*node)[ row];
+    }
+
+    // Add or update the current number of samples available for this association.
+    TreeNode* child = 0;
+    QString samplesLabel( QObject::tr("samples available"));
+    QString samplesValue
+      = QString::number( data.associations[ index].samples_available);
+    if( this->manageChildValue(
+          writerNode, child, samplesLabel, samplesValue
+      )) {
+      layoutChanged = true;
+
+    } else {
+      dataChanged = true;
+    }
+  }
 
   // NAME / VALUE DATA, notify GUI of changes.
   this->displayNvp( node, data.values, layoutChanged, dataChanged);
@@ -859,8 +976,7 @@ MonitorDataStorage::update< DDS::ParticipantBuiltinTopicData>(
   bool create = false;
   TreeNode* node = this->getParticipantNode( ProcessKey(), id, create);
   if( !node) {
-    node = this->createParticipantNode( ProcessKey(), id, layoutChanged);
-    layoutChanged = true;
+    return;
   }
 
   if( remove) {
@@ -931,7 +1047,7 @@ MonitorDataStorage::update< DDS::TopicBuiltinTopicData>(
   ));
 
   // Retain knowledge of node insertions, updates, and deletions.
-  bool create        = !remove;
+  bool create        = false;
   bool layoutChanged = false;
   bool dataChanged   = false;
 
@@ -943,10 +1059,6 @@ MonitorDataStorage::update< DDS::TopicBuiltinTopicData>(
                      create
                    );
   if( !node) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: MonitorDataStorage::update() - ")
-      ACE_TEXT("unable to find place for Topic Qos in GUI.\n")
-    ));
     return;
   }
   layoutChanged |= create;
@@ -1022,7 +1134,7 @@ MonitorDataStorage::update< DDS::PublicationBuiltinTopicData>(
   ));
 
   // Retain knowledge of node insertions, updates, and deletions.
-  bool create        = !remove;
+  bool create        = false;
   bool layoutChanged = false;
   bool dataChanged   = false;
 
@@ -1034,10 +1146,6 @@ MonitorDataStorage::update< DDS::PublicationBuiltinTopicData>(
                      create
                    );
   if( !node) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: MonitorDataStorage::update() - ")
-      ACE_TEXT("unable to find place for Topic Qos in GUI.\n")
-    ));
     return;
   }
   layoutChanged |= create;
@@ -1111,7 +1219,7 @@ MonitorDataStorage::update< DDS::SubscriptionBuiltinTopicData>(
   ));
 
   // Retain knowledge of node insertions, updates, and deletions.
-  bool create        = !remove;
+  bool create        = false;
   bool layoutChanged = false;
   bool dataChanged   = false;
 
@@ -1123,10 +1231,6 @@ MonitorDataStorage::update< DDS::SubscriptionBuiltinTopicData>(
                      create
                    );
   if( !node) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: MonitorDataStorage::update() - ")
-      ACE_TEXT("unable to find place for Topic Qos in GUI.\n")
-    ));
     return;
   }
   layoutChanged |= create;

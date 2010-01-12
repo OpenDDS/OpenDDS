@@ -19,7 +19,6 @@
 
 // For the inline implementations.
 #include "MonitorData.h"
-#include "MonitorDataModel.h"
 #include "TreeNode.h"
 #include "QosFormatter.h"
 #include "dds/DCPS/RepoIdBuilder.h"
@@ -39,53 +38,44 @@ namespace Monitor {
  * Since the OpenDDS service implementation uses Guid values to identify
  * most of its internal entities, we maintain a map keyed by Guid values
  * to easily access data for the service.  Since some entities do not
- * naturally have Guid values associated with them, we extend the Guid
- * values to include some user defined Guid values local to this process
- * and specific to the types needing them.  Maps from the OpenDDS key
- * values to the local Guid values are maintained to allow simple
- * searches to be performed.
+ * naturally have Guid values associated with them, we include containers
+ * accesible with the natural keys for these types.  These include
+ * process, transport, and instance information.
  *
- * Currently, the entities providing instrumentation data that require
- * lcoal Guid values to be generated include: Publisher, Subscriber, and
- * Transport entities.  Publisher and Subscriber Entities are keyed by
- * the containing participant and the InstanceHandle value within that
- * participant.  Transport entities are keyed some other way.
- *
- * The current scheme simply assigns an OpenDDS specific Vendor entityKind
- * value for the three different types of entities, then increments the
- * entityId value for subsequent generated values.  This means that after
- * observing 16 million entities of a type, the Guid values will wrap -
- * and operation is undefined after that point.  Other limits are likely
- * to be exceeded before this becomes a problem.
+ * Process information is accessed using a combination of hostname and
+ * process Id.  Transports are identified by process (hostname+pid) and
+ * the unique transport Id value within that process.  Instance
+ * information (Publisher and Subscriber access) is accessed using the
+ * containing DomainParticipant Guid and the Entity instance handle.
  *
  * The GUI represents the data as a hierarchical tree.  The structure of
  * the tree is consistent in what node types are represented at similar
  * levels of the tree hierarchy.  Currently, this hierarchy includes:
  *
- *    host.pid.transport-guid.data
+ *    host.pid.transport-id.data
  *    host.pid.participant-guid.data
  *    host.pid.participant-guid.topic-guid.data
- *    host.pid.participant-guid.publisher-guid.data
- *    host.pid.participant-guid.publisher-guid.writer-guid.data
- *    host.pid.participant-guid.subscriber-guid.data
- *    host.pid.participant-guid.subscriber-guid.reader-guid.data
+ *    host.pid.participant-guid.publisher-handle.data
+ *    host.pid.participant-guid.publisher-handle.writer-guid.data
+ *    host.pid.participant-guid.subscriber-handle.data
+ *    host.pid.participant-guid.subscriber-handle.reader-guid.data
  *
  * Nodes in the tree can contain one of several types of contents.  These
  * contents are displayed as a name/value pair of string data.  Node types
  * include:
  *
- *   root node - header information
- *               (name = "Element", value = "Value")
- *   host node - holds a host name
- *               (name = "Host", value = <name>)
- *   pid  node - holds a process identifier
- *               (name = "Process", value = <pid>)
- *   guid node - holds an entity identified by GUID_t value
- *               (name = "<type>", value = <stringified GUID_t>)
- *   data node - holds simple data with no global identity
- *               (name = "<name>", value = <value>)
+ *   root node   - header information
+ *                 (name = "Element", value = "Value")
+ *   host node   - holds a host name
+ *                 (name = "Host", value = <name>)
+ *   pid node    - holds a process identifier
+ *                 (name = "Process", value = <pid>)
+ *   entity node - holds an entity identified by GUID_t value
+ *                 (name = "<type>", value = <stringified id value>)
+ *   data node   - holds simple data with no global identity
+ *                 (name = "<name>", value = <value>)
  *
- * where the GUID <types> are:
+ * where the entity <types> are:
  *
  *   DomainParticipant
  *   Topic
@@ -101,25 +91,25 @@ namespace Monitor {
  *   <host> nodes
  *     can contain: <pid> nodes
  *   <pid> nodes
- *     can contain: Transports, data
+ *     can contain: Transports, DomainParticipants, data
  *   DomainParticipant
- *     can contain: Topics, Publishers, Subscribers, data
+ *     can contain: Topics, Publishers, Subscribers, Qos, data
  *   Topic
- *     can contain: data
+ *     can contain: Qos, data
  *   Publisher
- *     can contain: DataWriters, data
+ *     can contain: Qos, DataWriters, data
  *   Subscriber
- *     can contain: DataReaders, data
+ *     can contain: Qos, DataReaders, data
  *   DataWriter
- *     can contain: data
+ *     can contain: Qos, data
  *   DataReader
- *     can contain: data
+ *     can contain: Qos, data
  *   Transport
  *     can contain: data
  */
 class MonitorDataStorage {
   public:
-    /// Construct with a reference to the model.
+    /// Construct with a reference to the model facade.
     MonitorDataStorage( MonitorData* model);
 
     /// Virtual destructor.
@@ -168,6 +158,14 @@ class MonitorDataStorage {
     template< class MapType>
     std::pair< bool, typename MapType::key_type>
     findKey( MapType& map, TreeNode* node);
+
+    /// Install or update a child value node.
+    bool manageChildValue(
+      TreeNode*      parent, 
+      TreeNode*&     node, 
+      const QString& label,
+      const QString& value
+    );
 
     /// Install or update a QoS policy node.
     template< class PolicyType>

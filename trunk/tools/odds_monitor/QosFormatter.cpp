@@ -131,6 +131,10 @@ QosToQString<DDS::DurabilityServiceQosPolicy>(
     case DDS::KEEP_ALL_HISTORY_QOS:
       result.append( QString("history kind = KEEP ALL, "));
       break;
+
+    default:
+      result.append( QString( "<bad value == %1>, ").arg(value.history_kind));
+      break;
   }
 
   result.append( QString("history depth = %1, ")
@@ -170,6 +174,10 @@ QosToQString<DDS::HistoryQosPolicy>( const DDS::HistoryQosPolicy& value)
 
     case DDS::KEEP_ALL_HISTORY_QOS:
       result.append( QString("KEEP ALL"));
+      break;
+
+    default:
+      result.append( QString( "<bad value == %1>").arg(value.kind));
       break;
   }
 
@@ -219,6 +227,10 @@ QosToQString<DDS::LivelinessQosPolicy>( const DDS::LivelinessQosPolicy& value)
 
     case DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS:
       result.append( QString("MANUAL BY TOPIC"));
+      break;
+
+    default:
+      result.append( QString( "<bad value == %1>").arg(value.kind));
       break;
   }
 
@@ -286,9 +298,13 @@ QosToQString<DDS::PresentationQosPolicy>(
     case DDS::GROUP_PRESENTATION_QOS:
       result.append( QString("GROUP"));
       break;
+
+    default:
+      result.append( QString( "<bad value == %1>").arg(value.access_scope));
+      break;
   }
 
-  result.append( QString(", coherent = %1, ")
+  result.append( QString(", coherent = %1")
                  .arg(value.coherent_access? "true": "false"));
 
   result.append( QString(", ordered = %1")
@@ -311,6 +327,10 @@ QosToQString<DDS::ReliabilityQosPolicy>( const DDS::ReliabilityQosPolicy& value)
 
     case DDS::RELIABLE_RELIABILITY_QOS:
       result.append( QString("RELIABLE"));
+      break;
+
+    default:
+      result.append( QString( "<bad value == %1>").arg(value.kind));
       break;
   }
 

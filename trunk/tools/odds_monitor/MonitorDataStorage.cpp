@@ -492,6 +492,31 @@ Monitor::MonitorDataStorage::getNode(
   return node;
 }
 
+bool
+Monitor::MonitorDataStorage::manageChildValue(
+  TreeNode*      parent, 
+  TreeNode*&     node, 
+  const QString& label,
+  const QString& value
+)
+{
+  int row = parent->indexOf( 0, label);
+  if( row == -1) {
+    // New value, add a node.
+    QList<QVariant> list;
+    list << label << value;
+    node = new TreeNode( list, parent);
+    parent->append( node);
+    return true;
+
+  } else {
+    // Value update.
+    node = (*parent)[ row];
+    node->setData( 1, value);
+  }
+  return false;
+}
+
 void
 Monitor::MonitorDataStorage::manageTransportLink(
   TreeNode* node,
