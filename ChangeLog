@@ -1,3 +1,20 @@
+Tue Jan 12 23:33:01 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/MonitorDataStorage.h:
+        * tools/odds_monitor/MonitorDataStorage.inl:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+        * tools/odds_monitor/MonitorTask.cpp:
+        * tools/odds_monitor/QosFormatter.cpp:
+
+          Refactored child data node handling to simplify.  Initial
+          implementation of periodic report handling complete, but not
+          tested as we are not receiving any of these reports.
+
+          Stopped creating parentless nodes from BultinTopic samples -
+          the reports read these samples when they arrive.
+
+          Some minor cleanup and documentation updates.
+
 Mon Jan 11 23:21:21 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/odds_monitor/README:

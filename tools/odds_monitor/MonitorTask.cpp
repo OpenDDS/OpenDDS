@@ -890,6 +890,28 @@ Monitor::MonitorTask::readBuiltinTopicData(
   // Find the instance we are interested in.
   DDS::InstanceHandle_t instance = typedReader->lookup_instance( data);
 
+  if( this->options_.verbose()) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) MonitorTask::readBuiltinTopicData<%s>() - ")
+      ACE_TEXT("id: %C ==> BuiltinTopic key: ")
+      ACE_TEXT("[0x%x, 0x%x, 0x%x], handle %d.\n"),
+      topicName,
+      std::string(converter).c_str(),
+      data.key.value[0], data.key.value[1], data.key.value[2],
+      instance
+    ));
+  }
+
+  if( instance == DDS::HANDLE_NIL) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) MonitorTask::readBuiltinTopicData<%s>() - ")
+      ACE_TEXT("no data for id %C at this time.\n"),
+      topicName,
+      std::string(converter).c_str()
+    ));
+    return false;
+  }
+
   // with HISTORY.depth == 1, this should be the sample that we are
   // interested in.
   DDS::SampleInfoSeq infoSeq( 1);
