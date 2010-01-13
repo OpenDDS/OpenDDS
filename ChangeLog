@@ -1,3 +1,28 @@
+Wed Jan 13 21:57:22 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/BidirMessenger:
+        * tests/DCPS/BidirMessenger/BidirMessenger.mpc:
+        * tests/DCPS/BidirMessenger/DataReaderListener.h:
+        * tests/DCPS/BidirMessenger/DataReaderListener.cpp:
+        * tests/DCPS/BidirMessenger/Messenger.idl:
+        * tests/DCPS/BidirMessenger/Writer.h:
+        * tests/DCPS/BidirMessenger/Writer.cpp:
+        * tests/DCPS/BidirMessenger/multicast.conf:
+        * tests/DCPS/BidirMessenger/pub_udp.ini:
+        * tests/DCPS/BidirMessenger/publisher.cpp:
+        * tests/DCPS/BidirMessenger/pubsub.ini:
+        * tests/DCPS/BidirMessenger/pubsub.cpp:
+        * tests/DCPS/BidirMessenger/pubsub_ipv6.ini:
+        * tests/DCPS/BidirMessenger/pubsub_multicast.ini:
+        * tests/DCPS/BidirMessenger/run_test.pl:
+        * tests/DCPS/BidirMessenger/sub_udp.ini:
+        * tests/DCPS/BidirMessenger/tcp.conf:
+        * tests/DCPS/BidirMessenger/udp.conf:
+
+          Added BidirMessenger test (submitted by Don Busch) with
+          modifications to test the new udp and multicast transports.
+
 Wed Jan 13 20:34:03 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DdsDcpsInfo.idl:
