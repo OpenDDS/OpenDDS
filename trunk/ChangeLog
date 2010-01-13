@@ -1,3 +1,9 @@
+Wed Jan 13 22:12:10 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Fixed idiotic SEGV when passing a NULL pointer to send_buffer.
+
 Wed Jan 13 21:57:22 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * bin/dcps_tests.lst:

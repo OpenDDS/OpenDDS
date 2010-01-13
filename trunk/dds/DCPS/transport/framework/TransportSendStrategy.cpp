@@ -141,7 +141,9 @@ OpenDDS::DCPS::TransportSendStrategy::send_buffer(
   OpenDDS::DCPS::TransportSendBuffer* send_buffer)
 {
   this->send_buffer_ = send_buffer;
-  this->send_buffer_->bind(this);
+  if (!this->send_buffer_.is_nil()) {
+    this->send_buffer_->bind(this);
+  }
 }
 
 OpenDDS::DCPS::TransportSendStrategy::WorkOutcome
