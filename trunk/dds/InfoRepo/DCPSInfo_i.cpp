@@ -1218,6 +1218,76 @@ TAO_DDS_DCPSInfo_i::remove_by_owner(
   return status;
 }
 
+void
+TAO_DDS_DCPSInfo_i::disassociate_subscription(
+  DDS::DomainId_t domainId,
+  const OpenDDS::DCPS::RepoId& participantId,
+  const OpenDDS::DCPS::RepoId& subscriptionId,
+  const OpenDDS::DCPS::RepoId& publicationId)
+ACE_THROW_SPEC((CORBA::SystemException,
+                OpenDDS::DCPS::Invalid_Domain,
+                OpenDDS::DCPS::Invalid_Participant,
+                OpenDDS::DCPS::Invalid_Subscription))
+{
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
+
+  DCPS_IR_Domain_Map::iterator it(this->domains_.find(domainId));
+  if (it == this->domains_.end()) {
+    throw OpenDDS::DCPS::Invalid_Domain();
+  }
+
+  DCPS_IR_Participant* participant = it->second->participant(participantId);
+  if (participant == 0) {
+    throw OpenDDS::DCPS::Invalid_Participant();
+  }
+
+  DCPS_IR_Subscription* subscription;
+  if (participant->find_subscription_reference(subscriptionId, subscription)
+      != 0 || subscription == 0) {
+    throw OpenDDS::DCPS::Invalid_Subscription();
+  }
+
+  // Disassociate from publication temporarily:
+  subscription->disassociate_publication(publicationId, true);
+
+  it->second->remove_dead_participants();
+}
+
+void
+TAO_DDS_DCPSInfo_i::disassociate_publication(
+  DDS::DomainId_t domainId,
+  const OpenDDS::DCPS::RepoId& participantId,
+  const OpenDDS::DCPS::RepoId& publicationId,
+  const OpenDDS::DCPS::RepoId& subscriptionId)
+ACE_THROW_SPEC((CORBA::SystemException,
+                OpenDDS::DCPS::Invalid_Domain,
+                OpenDDS::DCPS::Invalid_Participant,
+                OpenDDS::DCPS::Invalid_Publication))
+{
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
+
+  DCPS_IR_Domain_Map::iterator it(this->domains_.find(domainId));
+  if (it == this->domains_.end()) {
+    throw OpenDDS::DCPS::Invalid_Domain();
+  }
+
+  DCPS_IR_Participant* participant = it->second->participant(participantId);
+  if (participant == 0) {
+    throw OpenDDS::DCPS::Invalid_Participant();
+  }
+
+  DCPS_IR_Publication* publication;
+  if (participant->find_publication_reference(publicationId, publication)
+      != 0 || publication == 0) {
+    throw OpenDDS::DCPS::Invalid_Publication();
+  }
+
+  // Disassociate from subscription temporarily:
+  publication->disassociate_subscription(subscriptionId, true);
+
+  it->second->remove_dead_participants();
+}
+
 void TAO_DDS_DCPSInfo_i::remove_domain_participant(
   DDS::DomainId_t domainId,
   const OpenDDS::DCPS::RepoId& participantId)

@@ -138,7 +138,23 @@ module OpenDDS {
         raises (Invalid_Domain,
                 Invalid_Participant);
 
+      /// Forces an association to dissolve by subscription.
+      void disassociate_subscription(in DDS::DomainId_t domainId,
+                                     in RepoId participantId,
+                                     in RepoId subscriptionId,
+                                     in RepoId publicationId)
+        raises(Invalid_Domain,
+               Invalid_Participant,
+               Invalid_Subscription);
 
+      /// Forces an association to dissolve by publication.
+      void disassociate_publication(in DDS::DomainId_t domainId,
+                                    in RepoId participantId,
+                                    in RepoId publicationId,
+                                    in RepoId subscriptionId)
+        raises(Invalid_Domain,
+               Invalid_Participant,
+               Invalid_Publication);
 
       //Note: the ignore_xxx methods are not reversable - per DDS spec.
 
@@ -175,7 +191,7 @@ module OpenDDS {
         raises (Invalid_Domain,
                 Invalid_Participant,
                 Invalid_Publication);
-
+      
       //=======================================================
       // Update the QoS of an enitity to support Built-in Topics
       // and updating the other side of assocations.

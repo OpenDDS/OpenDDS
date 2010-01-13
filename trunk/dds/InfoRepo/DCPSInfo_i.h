@@ -281,6 +281,26 @@ public:
     DDS::DomainId_t domain,
     long              owner);
 
+  virtual void disassociate_subscription(
+    DDS::DomainId_t domainId,
+    const OpenDDS::DCPS::RepoId& participantId,
+    const OpenDDS::DCPS::RepoId& subscriptionId,
+    const OpenDDS::DCPS::RepoId& publicationId)
+  ACE_THROW_SPEC((CORBA::SystemException,
+                  OpenDDS::DCPS::Invalid_Domain,
+                  OpenDDS::DCPS::Invalid_Participant,
+                  OpenDDS::DCPS::Invalid_Subscription));
+
+  virtual void disassociate_publication(
+    DDS::DomainId_t domainId,
+    const OpenDDS::DCPS::RepoId& participantId,
+    const OpenDDS::DCPS::RepoId& publicationId,
+    const OpenDDS::DCPS::RepoId& subscriptionId)
+  ACE_THROW_SPEC((CORBA::SystemException,
+                  OpenDDS::DCPS::Invalid_Domain,
+                  OpenDDS::DCPS::Invalid_Participant,
+                  OpenDDS::DCPS::Invalid_Publication));
+
   virtual void ignore_topic(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& myParticipantId,

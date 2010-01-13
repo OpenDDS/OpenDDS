@@ -346,7 +346,8 @@ void DCPS_IR_Subscription::disassociate_topic(OpenDDS::DCPS::RepoId id)
   }
 }
 
-void DCPS_IR_Subscription::disassociate_publication(OpenDDS::DCPS::RepoId id)
+void DCPS_IR_Subscription::disassociate_publication(OpenDDS::DCPS::RepoId id,
+                                                    bool /*reassociate*/)
 {
   DCPS_IR_Publication* pub = 0;
   size_t numAssociations = associations_.size();
