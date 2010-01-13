@@ -88,7 +88,8 @@ public:
   void disassociate_topic(OpenDDS::DCPS::RepoId id);
 
   /// Remove any publications with id
-  void disassociate_publication(OpenDDS::DCPS::RepoId id);
+  void disassociate_publication(OpenDDS::DCPS::RepoId id,
+                                bool reassociate = false);
 
   /// Notify the reader of incompatible qos status
   ///  and reset the status' count_since_last_send to 0
