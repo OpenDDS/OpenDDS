@@ -1,3 +1,10 @@
+Wed Jan 13 16:56:18 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/images/splash.jpg:
+
+          Replaced splash image with a spectrogram of a wave file
+          containing the spoken phrase "OpenDDS".
+
 Tue Jan 12 23:33:01 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/odds_monitor/MonitorDataStorage.h:
