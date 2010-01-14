@@ -1,3 +1,18 @@
+Thu Jan 14 22:42:06 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DdsDcpsInfo.idl:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+
+          Additional interface changes to allow one participant to
+          disassociate from another.
+
 Thu Jan 14 22:05:03 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * NEWS:

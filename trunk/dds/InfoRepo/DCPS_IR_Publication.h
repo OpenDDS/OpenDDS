@@ -82,7 +82,8 @@ public:
   int remove_associations(CORBA::Boolean notify_lost);
 
   /// Remove any subscriptions whose participant has the id
-  void disassociate_participant(OpenDDS::DCPS::RepoId id);
+  void disassociate_participant(OpenDDS::DCPS::RepoId id,
+                                bool reassociate = false);
 
   /// Remove any subscriptions whose topic has the id
   void disassociate_topic(OpenDDS::DCPS::RepoId id);
@@ -184,6 +185,7 @@ private:
   DDS::PublisherQos publisherQos_;
 
   DCPS_IR_Subscription_Set associations_;
+  DCPS_IR_Subscription_Set defunct_;
 
   OpenDDS::DCPS::IncompatibleQosStatus incompatibleQosStatus_;
 };

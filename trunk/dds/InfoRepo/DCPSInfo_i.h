@@ -269,23 +269,23 @@ public:
                    , OpenDDS::DCPS::Invalid_Domain
                    , OpenDDS::DCPS::Invalid_Participant));
 
-  virtual void ignore_domain_participant(
-    DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& myParticipantId,
-    const OpenDDS::DCPS::RepoId& ignoreId)
-  ACE_THROW_SPEC((CORBA::SystemException
-                   , OpenDDS::DCPS::Invalid_Domain
-                   , OpenDDS::DCPS::Invalid_Participant));
-
   bool remove_by_owner(
     DDS::DomainId_t domain,
     long              owner);
 
+  virtual void disassociate_participant(
+    DDS::DomainId_t domainId,
+    const OpenDDS::DCPS::RepoId& local_id,
+    const OpenDDS::DCPS::RepoId& remote_id)
+  ACE_THROW_SPEC((CORBA::SystemException,
+                  OpenDDS::DCPS::Invalid_Domain,
+                  OpenDDS::DCPS::Invalid_Participant));
+
   virtual void disassociate_subscription(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
-    const OpenDDS::DCPS::RepoId& subscriptionId,
-    const OpenDDS::DCPS::RepoId& publicationId)
+    const OpenDDS::DCPS::RepoId& local_id,
+    const OpenDDS::DCPS::RepoId& remote_id)
   ACE_THROW_SPEC((CORBA::SystemException,
                   OpenDDS::DCPS::Invalid_Domain,
                   OpenDDS::DCPS::Invalid_Participant,
@@ -294,12 +294,20 @@ public:
   virtual void disassociate_publication(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
-    const OpenDDS::DCPS::RepoId& publicationId,
-    const OpenDDS::DCPS::RepoId& subscriptionId)
+    const OpenDDS::DCPS::RepoId& local_id,
+    const OpenDDS::DCPS::RepoId& remote_id)
   ACE_THROW_SPEC((CORBA::SystemException,
                   OpenDDS::DCPS::Invalid_Domain,
                   OpenDDS::DCPS::Invalid_Participant,
                   OpenDDS::DCPS::Invalid_Publication));
+
+  virtual void ignore_domain_participant(
+    DDS::DomainId_t domainId,
+    const OpenDDS::DCPS::RepoId& myParticipantId,
+    const OpenDDS::DCPS::RepoId& ignoreId)
+  ACE_THROW_SPEC((CORBA::SystemException
+                   , OpenDDS::DCPS::Invalid_Domain
+                   , OpenDDS::DCPS::Invalid_Participant));
 
   virtual void ignore_topic(
     DDS::DomainId_t domainId,
