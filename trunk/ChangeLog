@@ -1,3 +1,9 @@
+Thu Jan 14 22:05:03 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * NEWS:
+
+          Updated release notes with changes to opendds_repo_ctl.
+
 Thu Jan 14 21:39:36 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/udp/UdpDataLink.h:

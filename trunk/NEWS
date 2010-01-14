@@ -11,6 +11,10 @@ New to this version are the following changes:
   transport.  Like SimpleUdp, udp provides best-effort reliablity only;
   its use should be considered experimental.
 
+- The opendds_repo_ctl tool has been moved from $DDS_ROOT/dds/tools to
+  $DDS_ROOT/tools.  The name has also been changed to odds_repoctl to
+  reflect changes in naming conventions since the last release.
+
 
 =========================================================================
 
