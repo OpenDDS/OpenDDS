@@ -214,12 +214,13 @@ int DCPS_IR_Subscription::remove_associations(CORBA::Boolean notify_lost)
       remove_associated_publication(pub, dontSend, dont_notify_lost);
     }
   }
+  this->defunct_.reset();
 
   return status;
 }
 
 void DCPS_IR_Subscription::disassociate_participant(OpenDDS::DCPS::RepoId id,
-                                                    bool /*reassociate*/)
+                                                    bool reassociate)
 {
   DCPS_IR_Publication* pub = 0;
   size_t numAssociations = associations_.size();
@@ -259,6 +260,17 @@ void DCPS_IR_Subscription::disassociate_participant(OpenDDS::DCPS::RepoId id,
 
         idSeq[count] = pub->get_id();
         ++count;
+
+        if (reassociate && this->defunct_.insert(pub) != 0) {
+          OpenDDS::DCPS::RepoIdConverter sub_converter(id_);
+          OpenDDS::DCPS::RepoIdConverter pub_converter(pub->get_id());
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Subscription::disassociate_participant: ")
+                     ACE_TEXT("subscription %C failed to reassociate publication %C at %x.\n"),
+                     std::string(sub_converter).c_str(),
+                     std::string(pub_converter).c_str(),
+                     pub));
+        }
       }
     }
 
@@ -348,7 +360,7 @@ void DCPS_IR_Subscription::disassociate_topic(OpenDDS::DCPS::RepoId id)
 }
 
 void DCPS_IR_Subscription::disassociate_publication(OpenDDS::DCPS::RepoId id,
-                                                    bool /*reassociate*/)
+                                                    bool reassociate)
 {
   DCPS_IR_Publication* pub = 0;
   size_t numAssociations = associations_.size();
@@ -386,6 +398,17 @@ void DCPS_IR_Subscription::disassociate_publication(OpenDDS::DCPS::RepoId id,
 
         idSeq[count] = pub->get_id();
         ++count;
+
+        if (reassociate && this->defunct_.insert(pub) != 0) {
+          OpenDDS::DCPS::RepoIdConverter sub_converter(id_);
+          OpenDDS::DCPS::RepoIdConverter pub_converter(pub->get_id());
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Subscription::disassociate_publication: ")
+                     ACE_TEXT("subscription %C failed to reassociate publication %C at %x.\n"),
+                     std::string(sub_converter).c_str(),
+                     std::string(pub_converter).c_str(),
+                     pub));
+        }
       }
     }
 
