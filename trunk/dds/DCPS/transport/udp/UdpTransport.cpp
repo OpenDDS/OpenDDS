@@ -28,15 +28,21 @@ UdpTransport::find_or_create_datalink(
   RepoId /*local_id*/,
   const AssociationData* remote_association,
   CORBA::Long /*priority*/,
-  bool /*active*/)
+  bool active)
 {
   RepoId remote_id(remote_association->remote_id_);
 
-  UdpDataLinkMap::iterator it(this->links_.find(remote_id));
-  if (it != this->links_.end()) return it->second.in(); // found
+  if (active) {
+    UdpDataLinkMap::iterator it(this->client_links_.find(remote_id));
+    if (it != this->client_links_.end()) return it->second.in(); // found
+
+  } else if (!this->server_link_.is_nil()) {
+    // A single DataLink is managed for all passive reservations:
+    return this->server_link_.in(); // found
+  }
 
   // Create new DataLink for logical connection:
-  UdpDataLink_rch link = new UdpDataLink(this);
+  UdpDataLink_rch link = new UdpDataLink(this, active);
   if (link.is_nil()) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
@@ -56,17 +62,18 @@ UdpTransport::find_or_create_datalink(
     connection_info_i(remote_association->remote_data_));
 
   if (!link->open(remote_address)) {
-    ACE_TCHAR remote_address_s[64];
-    remote_address.addr_to_string(remote_address_s, sizeof(remote_address_s));
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("UdpTransport::find_or_create_datalink: ")
-                      ACE_TEXT("failed to open remote address: %C!\n"),
-                      remote_address_s),
+                      ACE_TEXT("failed to open DataLink!\n")),
                      0);
   }
 
-  this->links_.insert(UdpDataLinkMap::value_type(remote_id, link));
+  if (active) {
+    this->client_links_.insert(UdpDataLinkMap::value_type(remote_id, link));
+  } else {
+    this->server_link_ = link;
+  }
 
   return link._retn();
 }
@@ -91,11 +98,11 @@ void
 UdpTransport::shutdown_i()
 {
   // Shutdown reserved datalinks and release configuration:
-  for (UdpDataLinkMap::iterator it(this->links_.begin());
-       it != this->links_.end(); ++it) {
+  for (UdpDataLinkMap::iterator it(this->client_links_.begin());
+       it != this->client_links_.end(); ++it) {
     it->second->transport_shutdown();
   }
-  this->links_.clear();
+  this->client_links_.clear();
 
   this->config_i_ = 0;  // release ownership
 }
@@ -157,12 +164,12 @@ UdpTransport::remove_ack(RepoId /*local_id*/, RepoId /*remote_id*/)
 void
 UdpTransport::release_datalink_i(DataLink* link, bool /*release_pending*/)
 {
-  for (UdpDataLinkMap::iterator it(this->links_.begin());
-       it != this->links_.end(); ++it) {
+  for (UdpDataLinkMap::iterator it(this->client_links_.begin());
+       it != this->client_links_.end(); ++it) {
     // We are guaranteed to have exactly one matching DataLink
     // in the map; release any resources held and return.
     if (link == static_cast<DataLink*>(it->second.in())) {
-      this->links_.erase(it);
+      this->client_links_.erase(it);
       return;
     }
   }

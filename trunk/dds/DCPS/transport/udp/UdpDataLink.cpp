@@ -19,16 +19,24 @@
 namespace OpenDDS {
 namespace DCPS {
 
-UdpDataLink::UdpDataLink(UdpTransport* transport)
+UdpDataLink::UdpDataLink(UdpTransport* transport,
+                         bool active)
   : DataLink(transport,
-             0) // priority
+             0), // priority
+    active_(active)
 {
 }
 
 bool
 UdpDataLink::open(const ACE_INET_Addr& remote_address)
 {
-  ACE_INET_Addr& local_address(this->config_->local_address_);
+  this->remote_address_ = remote_address;
+
+  ACE_INET_Addr local_address;
+  if (!this->active_) {
+    local_address = this->config_->local_address_;
+  }
+
   if (this->socket_.open(local_address) != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
@@ -43,8 +51,6 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
 		      ACE_TEXT("UdpDataLink::open: start failed!\n")),
                      false);
   }
-
-  this->remote_address_ = remote_address;
 
   return true;
 }

@@ -30,6 +30,12 @@ UdpDataLink::receive_strategy(UdpReceiveStrategy* recv_strategy)
   this->recv_strategy_ = recv_strategy;
 }
 
+ACE_INLINE bool
+UdpDataLink::active() const
+{
+  return this->active_;
+}
+
 ACE_INLINE UdpConfiguration*
 UdpDataLink::config()
 {
