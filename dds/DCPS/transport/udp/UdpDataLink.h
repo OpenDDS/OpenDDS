@@ -34,13 +34,16 @@ namespace DCPS {
 class OpenDDS_Udp_Export UdpDataLink
   : public DataLink {
 public:
-  UdpDataLink(UdpTransport* transport);
+  UdpDataLink(UdpTransport* transport,
+              bool active);
 
   void configure(UdpConfiguration* config,
                  TransportReactorTask* reactor_task);
 
   void send_strategy(UdpSendStrategy* send_strategy);
   void receive_strategy(UdpReceiveStrategy* recv_strategy);
+
+  bool active() const;
 
   UdpConfiguration* config();
   TransportReactorTask* reactor_task();
@@ -55,6 +58,7 @@ public:
 
 protected:
   UdpTransport_rch transport_;
+  bool active_;
 
   UdpConfiguration_rch config_;
   TransportReactorTask_rch reactor_task_;

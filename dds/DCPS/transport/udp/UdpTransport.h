@@ -49,8 +49,10 @@ protected:
 private:
   UdpConfiguration_rch config_i_;
 
+  UdpDataLink_rch server_link_;
+
   typedef std::map<RepoId, UdpDataLink_rch, GUID_tKeyLessThan> UdpDataLinkMap;
-  UdpDataLinkMap links_;
+  UdpDataLinkMap client_links_;
 };
 
 } // namespace DCPS

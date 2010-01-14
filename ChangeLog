@@ -1,3 +1,13 @@
+Thu Jan 14 21:39:36 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/udp/UdpDataLink.h:
+        * dds/DCPS/transport/udp/UdpDataLink.inl:
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Resolved port conflicts.
+
 Thu Jan 14 17:17:29 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/multicast.ini-dist:
