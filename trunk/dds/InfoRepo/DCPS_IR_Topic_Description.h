@@ -79,7 +79,7 @@ public:
 
   /// Checks to see if the publication and subscription can
   ///  be associated.
-  void try_associate(DCPS_IR_Publication* publication,
+  bool try_associate(DCPS_IR_Publication* publication,
                      DCPS_IR_Subscription* subscription);
 
   /// Associate the publication and subscription

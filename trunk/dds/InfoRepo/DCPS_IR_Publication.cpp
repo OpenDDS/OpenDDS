@@ -714,7 +714,8 @@ void DCPS_IR_Publication::reevaluate_existing_associations()
   }
 }
 
-void DCPS_IR_Publication::reevaluate_association(DCPS_IR_Subscription* subscription)
+bool
+DCPS_IR_Publication::reevaluate_association(DCPS_IR_Subscription* subscription)
 {
   int status = this->associations_.find(subscription);
 
@@ -729,8 +730,10 @@ void DCPS_IR_Publication::reevaluate_association(DCPS_IR_Subscription* subscript
 
   } else {
     DCPS_IR_Topic_Description* description = this->topic_->get_topic_description();
-    description->try_associate(this, subscription);
+    return description->try_associate(this, subscription);
   }
+
+  return false;
 }
 
 #if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)

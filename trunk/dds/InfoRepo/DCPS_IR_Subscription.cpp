@@ -664,7 +664,8 @@ void DCPS_IR_Subscription::reevaluate_existing_associations()
   }
 }
 
-void DCPS_IR_Subscription::reevaluate_association(DCPS_IR_Publication* publication)
+bool
+DCPS_IR_Subscription::reevaluate_association(DCPS_IR_Publication* publication)
 {
   int status = this->associations_.find(publication);
 
@@ -679,8 +680,10 @@ void DCPS_IR_Subscription::reevaluate_association(DCPS_IR_Publication* publicati
 
   } else {
     DCPS_IR_Topic_Description* description = this->topic_->get_topic_description();
-    description->try_associate(publication, this);
+    return description->try_associate(publication, this);
   }
+
+  return false;
 }
 
 OpenDDS::DCPS::RepoId DCPS_IR_Subscription::get_id()

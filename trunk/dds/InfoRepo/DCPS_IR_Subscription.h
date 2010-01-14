@@ -135,7 +135,7 @@ public:
   // publication. If they are already associated and not compatible then
   // they will be dis-associated. If they are not already associated then
   // the new association will be added.
-  void reevaluate_association(DCPS_IR_Publication* publication);
+  bool reevaluate_association(DCPS_IR_Publication* publication);
 
   /// get the transport ID of the transport implementation type.
   OpenDDS::DCPS::TransportInterfaceId   get_transport_id() const;
