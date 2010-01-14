@@ -82,7 +82,8 @@ public:
   int remove_associations(CORBA::Boolean notify_lost);
 
   /// Remove any publications whose participant has the id
-  void disassociate_participant(OpenDDS::DCPS::RepoId id);
+  void disassociate_participant(OpenDDS::DCPS::RepoId id,
+                                bool reassociate = false);
 
   /// Remove any publications whose topic has the id
   void disassociate_topic(OpenDDS::DCPS::RepoId id);

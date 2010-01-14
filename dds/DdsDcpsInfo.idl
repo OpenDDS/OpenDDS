@@ -138,11 +138,18 @@ module OpenDDS {
         raises (Invalid_Domain,
                 Invalid_Participant);
 
+      /// Forces associatios to dissolve by participant.
+      void disassociate_participant(in DDS::DomainId_t domainId,
+                                    in RepoId local_id,
+                                    in RepoId remote_id)
+        raises(Invalid_Domain,
+               Invalid_Participant);
+
       /// Forces an association to dissolve by subscription.
       void disassociate_subscription(in DDS::DomainId_t domainId,
                                      in RepoId participantId,
-                                     in RepoId subscriptionId,
-                                     in RepoId publicationId)
+                                     in RepoId local_id,
+                                     in RepoId remote_id)
         raises(Invalid_Domain,
                Invalid_Participant,
                Invalid_Subscription);
@@ -150,8 +157,8 @@ module OpenDDS {
       /// Forces an association to dissolve by publication.
       void disassociate_publication(in DDS::DomainId_t domainId,
                                     in RepoId participantId,
-                                    in RepoId publicationId,
-                                    in RepoId subscriptionId)
+                                    in RepoId local_id,
+                                    in RepoId remote_id)
         raises(Invalid_Domain,
                Invalid_Participant,
                Invalid_Publication);

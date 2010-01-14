@@ -684,6 +684,25 @@ void DCPS_IR_Participant::remove_all_dependents(CORBA::Boolean notify_lost)
   this->subscriptions_.clear();
 }
 
+void
+DCPS_IR_Participant::disassociate_participant(OpenDDS::DCPS::RepoId id,
+                                              bool reassociate)
+{
+  {
+    DCPS_IR_Subscription_Map::iterator it(this->subscriptions_.begin());
+    while (it != this->subscriptions_.end()) {
+      it->second->disassociate_participant(id, reassociate);
+    }
+  }
+
+  {
+    DCPS_IR_Publication_Map::iterator it(this->publications_.begin());
+    while (it != this->publications_.end()) {
+      it->second->disassociate_participant(id, reassociate);
+    }
+  }
+}
+
 void DCPS_IR_Participant::mark_dead()
 {
   aliveStatus_ = 0;

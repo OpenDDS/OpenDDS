@@ -217,7 +217,8 @@ int DCPS_IR_Publication::remove_associations(CORBA::Boolean notify_lost)
   return status;
 }
 
-void DCPS_IR_Publication::disassociate_participant(OpenDDS::DCPS::RepoId id)
+void DCPS_IR_Publication::disassociate_participant(OpenDDS::DCPS::RepoId id,
+                                                   bool /*reassociate*/)
 {
   DCPS_IR_Subscription* sub = 0;
   size_t numAssociations = associations_.size();
