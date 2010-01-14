@@ -161,7 +161,7 @@ public:
   // subscription. If they are already associated and not compatible then
   // they will be dis-associated. If they are not already associated then
   // the new association will be added.
-  void reevaluate_association(DCPS_IR_Subscription* subscription);
+  bool reevaluate_association(DCPS_IR_Subscription* subscription);
 
 private:
 

@@ -318,8 +318,9 @@ void DCPS_IR_Topic_Description::try_associate_subscription(DCPS_IR_Subscription*
   }
 }
 
-void DCPS_IR_Topic_Description::try_associate(DCPS_IR_Publication* publication,
-                                              DCPS_IR_Subscription* subscription)
+bool
+DCPS_IR_Topic_Description::try_associate(DCPS_IR_Publication* publication,
+                                         DCPS_IR_Subscription* subscription)
 {
   if (publication->is_subscription_ignored(subscription->get_participant_id(),
                                            subscription->get_topic_id(),
@@ -365,12 +366,13 @@ void DCPS_IR_Topic_Description::try_associate(DCPS_IR_Publication* publication,
 
     if (compatibleQOS(publication, subscription)) {
       associate(publication, subscription);
+      return true;
     }
 
     // Dont notify that there is an incompatible qos here
     // notify where we can distinguish which one is being added
     // so we only send one response(with all incompatible qos) to it
-
+    return false;
   }
 }
 
