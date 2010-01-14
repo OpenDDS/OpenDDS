@@ -1,3 +1,11 @@
+Thu Jan 14 23:45:46 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+
+          Completed front-end half to reassociation.
+
 Thu Jan 14 22:42:06 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DdsDcpsInfo.idl:

@@ -186,6 +186,7 @@ private:
   DDS::SubscriberQos subscriberQos_;
 
   DCPS_IR_Publication_Set associations_;
+  DCPS_IR_Publication_Set defunct_;
 
   OpenDDS::DCPS::IncompatibleQosStatus incompatibleQosStatus_;
 };
