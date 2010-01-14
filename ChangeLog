@@ -1,3 +1,10 @@
+Thu Jan 14 17:17:29 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/multicast.ini-dist:
+        * docs/html/multicast/multicast.html:
+
+          Updated default port number documentation.
+
 Thu Jan 14 16:50:08 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
