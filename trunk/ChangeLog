@@ -1,3 +1,29 @@
+Fri Jan 15 20:17:05 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/latency-commands:
+        * performance-tests/Bench/doc/tests-latency:
+
+          Added documentation describing support for the message size
+          based performance test configurations just added.
+
+        * performance-tests/Bench/etc/transport-multi-be.ini:
+        * performance-tests/Bench/etc/transport-multi-rel.ini:
+        * performance-tests/Bench/etc/transport-tcp.ini:
+        * performance-tests/Bench/etc/transport-udp.ini:
+
+          Added transport specific configurations supporting the message
+          size based performance testing configurations.
+
+        * performance-tests/Bench/tests/latency:
+
+          Added test configurations for message size based latency
+          performance testing.
+
+        * performance-tests/Bench/tools/mkpkg:
+
+          Changed to include all test specification files in the
+          generated distribution package.
+
 Fri Jan 15 16:54:35 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
