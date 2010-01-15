@@ -372,8 +372,9 @@ DCPS_IR_Topic_Description::try_associate(DCPS_IR_Publication* publication,
     // Dont notify that there is an incompatible qos here
     // notify where we can distinguish which one is being added
     // so we only send one response(with all incompatible qos) to it
-    return false;
   }
+
+  return false;
 }
 
 void DCPS_IR_Topic_Description::associate(DCPS_IR_Publication* publication,
