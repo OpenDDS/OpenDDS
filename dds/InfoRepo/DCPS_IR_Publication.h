@@ -149,6 +149,8 @@ public:
   // Expose the datawriter.
   OpenDDS::DCPS::DataWriterRemote_ptr writer();
 
+  void reevaluate_defunct_associations();
+
   // Verify the existing associations. This may result removal of
   // associations. The existing associations have to be removed before
   // adding new association and may need some delay. Otherwise, if

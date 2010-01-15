@@ -1240,7 +1240,17 @@ ACE_THROW_SPEC((CORBA::SystemException,
   }
 
   // Disassociate from participant temporarily:
-  participant->disassociate_participant(remote_id, true);
+  DCPS_IR_Subscription_Map::const_iterator subs(
+    participant->subscriptions().begin());
+  while (subs != participant->subscriptions().end()) {
+    subs->second->disassociate_participant(remote_id, true);
+  }
+
+  DCPS_IR_Publication_Map::const_iterator pubs(
+    participant->publications().begin());
+  while (pubs != participant->publications().end()) {
+    pubs->second->disassociate_participant(remote_id, true);
+  }
 
   it->second->remove_dead_participants();
 }
