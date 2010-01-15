@@ -710,6 +710,16 @@ DCPS_IR_Publication::reevaluate_defunct_associations()
 
     if (reevaluate_association(subscription)) {
       this->defunct_.remove(subscription); // no longer defunct
+
+    } else {
+      OpenDDS::DCPS::RepoIdConverter pub_converter(id_);
+      OpenDDS::DCPS::RepoIdConverter sub_converter(subscription->get_id());
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Publication::reevaluate_defunct_associations: ")
+                 ACE_TEXT("publication %C failed to reassociate subscription %C at %x.\n"),
+                 std::string(pub_converter).c_str(),
+                 std::string(sub_converter).c_str(),
+                 subscription));
     }
   }
 }
