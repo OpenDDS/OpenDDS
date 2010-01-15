@@ -1,3 +1,10 @@
+Fri Jan 15 21:52:35 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/etc/transport-multi-rel.ini:
+        * performance-tests/Bench/etc/transport-udp.ini:
+
+          Corrected transport type specifications.
+
 Fri Jan 15 21:23:38 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/doc/latency-commands:
