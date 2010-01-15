@@ -80,17 +80,9 @@ mkdir -p $PKG/etc
 cp $DDS_ROOT/performance-tests/Bench/etc/svc.conf      $PKG/etc/
 cp $DDS_ROOT/performance-tests/Bench/etc/transport.ini $PKG/etc/
 
-mkdir -p $PKG/tests
+mkdir -p $PKG/tests/latency
 
 # Test scenarios
-cp $DDS_ROOT/performance-tests/Bench/tests/s1-p1.ini $PKG/tests/
-cp $DDS_ROOT/performance-tests/Bench/tests/s1-p2.ini $PKG/tests/
-cp $DDS_ROOT/performance-tests/Bench/tests/s2-p1.ini $PKG/tests/
-cp $DDS_ROOT/performance-tests/Bench/tests/s2-p2.ini $PKG/tests/
-cp $DDS_ROOT/performance-tests/Bench/tests/s2-p3.ini $PKG/tests/
-cp $DDS_ROOT/performance-tests/Bench/tests/s2-p4.ini $PKG/tests/
-cp $DDS_ROOT/performance-tests/Bench/tests/s2-p5.ini $PKG/tests/
-cp $DDS_ROOT/performance-tests/Bench/tests/s2-p6.ini $PKG/tests/
-cp $DDS_ROOT/performance-tests/Bench/tests/s3-p1.ini $PKG/tests/
-cp $DDS_ROOT/performance-tests/Bench/tests/s3-p2.ini $PKG/tests/
-cp $DDS_ROOT/performance-tests/Bench/tests/s3-p3.ini $PKG/tests/
+cp $DDS_ROOT/performance-tests/Bench/tests/*.ini $PKG/tests/
+cp $DDS_ROOT/performance-tests/Bench/tests/latency/*.ini $PKG/tests/latency
+

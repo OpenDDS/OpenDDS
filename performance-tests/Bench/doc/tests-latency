@@ -1,0 +1,95 @@
+
+$Id$
+
+This file explains the execution of the latency tests located in the
+tests/latency directory.
+
+These tests are intended to gather latency performance information for
+various message sizes using the available transports.  The data rate for
+all tests is maintained at approximately 1.5 Mbits/second for all message
+rates.  Latency data is gathered for the last 5,000 samples of the test
+and the test duration is adjusted to ensure that at least this many
+messages are received.
+
+The test consists of two hosts, with a originating publication and
+terminating subscription executing in a single process on one host, and
+the other host executing a single process that subscribes to the
+originating publication and republishes the samples on a separate
+partition to reach the terminating subscription.  This allows full
+path timing information to be measured using the same system clock.  The
+latency data gathered is then divided by 2 to account for the 2 hops in
+the test topology.
+
+This discussion assumes that OpenDDS and the OpenDDS Bench software have
+been built on each host participating in the test.  See the "doc/tests"
+documentation file for more information about how to setup the Bench
+software.
+
+There is a process configuration file for each message size to be tested
+located in the tests/latency directory.  The sizes are:
+
+  file            size	  rate	  runtime  minimum duration
+  --------------  ------- ------- -------- ------------------
+                  (bytes) (m/s)    2 m     (for 5000 samples)
+  p1-50.ini       50      4000     2 m     1.2s
+  p1-100.ini      100     2000     2 m     2.5s
+  p1-250.ini      250     800      2 m     6.25s
+  p1-500.ini      500     400      2 m     12.5s
+  p1-1000.ini     1000    200      2 m     25s
+  p1-2500.ini     2500    80       2 m     1m 2.5s
+  p1-5000.ini     5000    40       5 m     2m 5s
+  p1-8000.ini     8000    25       5 m     3m 33s
+  p1-16000.ini    16000   12      10 m     6m 57s
+  p1-32000.ini    32000   6       10 m     13m 53s
+
+There is a transport configuration file for each transport type that
+defines the transport index values used in the individual test
+configuration files.  These include:
+
+  file                      transport
+  -----------------------   ---------------------
+  transport-multi-be.ini    best effort multicast
+  transport-multi-rel.ini   reliable multicast
+  transport-tcp.ini         TCP
+  transport-udp.ini         UDP
+
+To execute the tests use the 'bin/run_test' script provided to ensure
+that the test processes are started with the correct parameters.
+For more information about the available command line arguments run:
+
+  bin/run_test --man
+
+In addition to the test processes, a repository will need to be started.
+Ideally the repository will execute on a host other than one of the
+two participating in the data exchange, but this is not required.
+Operation of the repository is restricted to the setup and teardown of
+the test and there is no activity with the repository during the data
+passing portions of the test.
+
+Start the repository at a reachable endpoint:
+
+  bin/run_test -S -h iiop:<hostname>:2809
+
+If all hosts participating in the test are unable to resolve the
+<hostname>, then replace it with the specific IP address to be used by each
+participating host.  Port 2809 is the default ORB port to listen on, if
+this conflicts with another instance of an ORB you may need to use a
+different port.
+
+Run the tests by executing the two processes on two hosts.  On the first
+host, execute:
+
+  run_test -P -t <runtime> -h <hostname>:2809 -i <transportconfig> -s <testconfig>
+
+Once a test has completed, the latency results will be in the current
+directory where the originating process (on the first host) was started
+with a name including the message size of the test.  This includes
+both per hop and full path information.  The summary data is for all
+received samples while the latency for the last 5,000 samples recieved
+is also stored.  If the two hosts are not synchronized closely, the per
+hop information will be of limited value.
+
+The file latency-commands contains a summary of how to execute the entire
+suite of latency tests.  It is presented in a pseudo script style using
+bash variable and executable syntax.
+
