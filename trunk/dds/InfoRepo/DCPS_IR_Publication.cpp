@@ -700,6 +700,20 @@ bool DCPS_IR_Publication::compatibleQosChange(const DDS::PublisherQos & qos)
   return true;
 }
 
+void
+DCPS_IR_Publication::reevaluate_defunct_associations()
+{
+  DCPS_IR_Subscription_Set::iterator it(this->defunct_.begin());
+  while (it != this->defunct_.end()) {
+    DCPS_IR_Subscription* subscription = *it;
+    ++it;
+
+    if (reevaluate_association(subscription)) {
+      this->defunct_.remove(subscription); // no longer defunct
+    }
+  }
+}
+
 void DCPS_IR_Publication::reevaluate_existing_associations()
 {
   DCPS_IR_Subscription* sub = 0;

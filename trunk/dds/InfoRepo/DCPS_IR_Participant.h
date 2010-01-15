@@ -130,9 +130,6 @@ public:
   // subscriptions for this participant
   void remove_all_dependents(CORBA::Boolean notify_lost);
 
-  void disassociate_participant(OpenDDS::DCPS::RepoId id,
-                                bool reassociate = false);
-
   // called by publications and subscriptions when the writer
   // or reader throws an exception during a remote invocation
   //
