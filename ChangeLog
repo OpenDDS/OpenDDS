@@ -1,3 +1,10 @@
+Fri Jan 15 21:23:38 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/latency-commands:
+        * performance-tests/Bench/tools/mkpkg:
+
+          Minor corrections from debug.
+
 Fri Jan 15 20:17:05 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/doc/latency-commands:

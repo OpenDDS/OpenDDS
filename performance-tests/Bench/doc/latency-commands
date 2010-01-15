@@ -24,7 +24,7 @@ all hosts: export REPOPORT=2809
 all hosts: export PROJECTBASE=$BASEDIR/perf-tests
 all hosts: export TESTBASE=$PROJECTBASE/tests/latency
 
-repository host: $PROJECTBASE/bin/run_test -S -h iiop:$REPOHOST:$REPOPORT
+repository host: $PROJECTBASE/bin/run_test -S -h iiop://$REPOHOST:$REPOPORT
 
 all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-multi-be.ini
 all hosts: mkdir -p $TESTBASE/multi-be/run
