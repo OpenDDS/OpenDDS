@@ -42,6 +42,12 @@
 #include <string>
 #include <sstream>
 
+namespace {
+
+const long DEFAULT_REASSOCIATE_DELAY(5000);
+
+} // namespace
+
 InfoRepo::InfoRepo(int argc, ACE_TCHAR *argv[])
   : ior_file_(ACE_TEXT("repo.ior"))
   , listen_address_given_(0)
@@ -55,6 +61,8 @@ InfoRepo::InfoRepo(int argc, ACE_TCHAR *argv[])
   , cond_(lock_)
   , shutdown_complete_(false)
 {
+  this->reassociate_delay_.msec(DEFAULT_REASSOCIATE_DELAY);
+
   try {
     init();
 
@@ -143,6 +151,7 @@ InfoRepo::usage(const ACE_TCHAR * cmd)
              ACE_TEXT("    -FederatorConfig <file> configure federation from <file>\n")
              ACE_TEXT("    -FederationId <number> value for this repository\n")
              ACE_TEXT("    -FederateWith <ior> federate initially with object at <ior>\n")
+             ACE_TEXT("    -ReassociateDelay <msec> delay between reassociations\n")
              ACE_TEXT("    -?\n")
              ACE_TEXT("\n"),
              cmd));
@@ -183,6 +192,12 @@ InfoRepo::parse_args(int argc,
 
     } else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-z")) == 0) {
       TURN_ON_VERBOSE_DEBUG;
+      arg_shifter.consume_arg();
+
+    } else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-ReassociateDelay")) == 0) {
+      long msec = ACE_OS::atoi(current_arg);
+      this->reassociate_delay_.msec(msec);
+
       arg_shifter.consume_arg();
     }
 
@@ -300,6 +315,13 @@ InfoRepo::init()
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPSInfoRepo::init: ")
                ACE_TEXT("Unable to initialize persistence.\n")));
     throw InitError("Unable to initialize persistence.");
+  }
+
+  // Initialize reassociation.
+  if (!info_servant->init_reassociation(this->reassociate_delay_)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPSInfoRepo::init: ")
+               ACE_TEXT("Unable to initialize reassociation.\n")));
+    throw InitError("Unable to initialize reassociation.");
   }
 
   // Fire up the federator.

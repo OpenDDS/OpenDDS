@@ -45,6 +45,39 @@ TAO_DDS_DCPSInfo_i::~TAO_DDS_DCPSInfo_i()
 {
 }
 
+int
+TAO_DDS_DCPSInfo_i::handle_timeout(const ACE_Time_Value& now,
+                                   const void* /*arg*/)
+{
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, 0);
+
+  // NOTE: This is a purposefully naive approach to addressing defunct
+  // associations.  In the future, it may be worthwhile to introduce a
+  // callback model to address the heinous runtime complexity below:
+  for (DCPS_IR_Domain_Map::const_iterator domain(this->domains_.begin());
+       domain != this->domains_.end(); ++domain) {
+
+    const DCPS_IR_Participant_Map& participants(domain->second->participants());
+    for (DCPS_IR_Participant_Map::const_iterator participant(participants.begin());
+         participant != participants.end(); ++participant) {
+
+      const DCPS_IR_Subscription_Map& subscriptions(participant->second->subscriptions());
+      for (DCPS_IR_Subscription_Map::const_iterator subscription(subscriptions.begin());
+           subscription != subscriptions.end(); ++subscription) {
+        subscription->second->reevaluate_defunct_associations();
+      }
+
+      const DCPS_IR_Publication_Map& publications(participant->second->publications());
+      for (DCPS_IR_Publication_Map::const_iterator publication(publications.begin());
+           publication != publications.end(); ++publication) {
+        publication->second->reevaluate_defunct_associations();
+      }
+    }
+  }
+
+  return 0;
+}
+
 void
 TAO_DDS_DCPSInfo_i::shutdown() ACE_THROW_SPEC((CORBA::SystemException))
 {
@@ -2134,6 +2167,13 @@ TAO_DDS_DCPSInfo_i::init_persistence()
   }
 
   return true;
+}
+
+bool
+TAO_DDS_DCPSInfo_i::init_reassociation(const ACE_Time_Value& delay)
+{
+  ACE_Reactor* reactor = this->orb_->orb_core()->reactor();
+  return reactor->schedule_timer(this, 0, delay, delay) != -1;
 }
 
 const DCPS_IR_Domain_Map&
