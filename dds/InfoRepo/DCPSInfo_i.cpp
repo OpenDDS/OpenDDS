@@ -53,7 +53,7 @@ TAO_DDS_DCPSInfo_i::handle_timeout(const ACE_Time_Value& now,
 
   // NOTE: This is a purposefully naive approach to addressing defunct
   // associations.  In the future, it may be worthwhile to introduce a
-  // callback model to address the heinous runtime complexity below:
+  // callback model to fix the heinous runtime complexity below:
   for (DCPS_IR_Domain_Map::const_iterator domain(this->domains_.begin());
        domain != this->domains_.end(); ++domain) {
 
