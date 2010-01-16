@@ -480,8 +480,6 @@ private:
   ShutdownInterface* shutdown_;
 
   ACE_Recursive_Thread_Mutex lock_;
-
-  long reassociate_timer_;
 };
 
 #endif /* DCPSINFO_I_H */
