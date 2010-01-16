@@ -28,6 +28,7 @@ public class InfoRepoArguments implements DynamicArgumentProvider {
     public static final String FEDERATOR_CONFIG = "FederatorConfig";
     public static final String FEDERATION_ID = "FederationId";
     public static final String FEDERATE_WITH = "FederateWith";
+    public static final String REASSOCIATE_DELAY = "ReassociateDelay";
 
     private DynamicMBeanSupport instance;
 
@@ -45,6 +46,7 @@ public class InfoRepoArguments implements DynamicArgumentProvider {
         instance.registerAttribute(FEDERATOR_CONFIG, String.class);
         instance.registerAttribute(FEDERATION_ID, String.class);
         instance.registerAttribute(FEDERATE_WITH, String.class);
+        instance.registerAttribute(REASSOCIATE_DELAY, Integer.class);
     }
 
     public void addArgs(List<String> args) throws Exception {
@@ -58,6 +60,7 @@ public class InfoRepoArguments implements DynamicArgumentProvider {
         writer.writeIfSet("-FederatorConfig", FEDERATOR_CONFIG);
         writer.writeIfSet("-FederationId", FEDERATION_ID);
         writer.writeIfSet("-FederateWith", FEDERATE_WITH);
+        writer.writeIfSet("-ReassociateDelay", REASSOCIATE_DELAY);
 
         String persistentFile =
             (String) instance.getAttribute(PERSISTENT_FILE);

@@ -50,7 +50,9 @@ class ShutdownInterface;
  * This is the Information Repository object.  Clients of
  * the system will use the CORBA reference of this object.
  */
-class  OpenDDS_InfoRepoLib_Export TAO_DDS_DCPSInfo_i : public virtual POA_OpenDDS::DCPS::DCPSInfo {
+class  OpenDDS_InfoRepoLib_Export TAO_DDS_DCPSInfo_i
+  : public virtual POA_OpenDDS::DCPS::DCPSInfo,
+    public ACE_Event_Handler {
 public:
   //Constructor
   TAO_DDS_DCPSInfo_i(
@@ -61,6 +63,9 @@ public:
 
   //Destructor
   virtual ~TAO_DDS_DCPSInfo_i();
+
+  virtual int handle_timeout(const ACE_Time_Value& now,
+                             const void* arg);
 
   virtual CORBA::Boolean attach_participant(
     DDS::DomainId_t domainId,
@@ -459,6 +464,8 @@ public:
 
   bool init_persistence();
 
+  bool init_reassociation(const ACE_Time_Value& delay);
+
 private:
   DCPS_IR_Domain_Map domains_;
   CORBA::ORB_var orb_;
@@ -473,6 +480,8 @@ private:
   ShutdownInterface* shutdown_;
 
   ACE_Recursive_Thread_Mutex lock_;
+
+  long reassociate_timer_;
 };
 
 #endif /* DCPSINFO_I_H */

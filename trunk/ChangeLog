@@ -1,3 +1,16 @@
+Sat Jan 16 00:14:19 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepoServ.h:
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          Completed back-end half to reassociation.
+
+        * java/jms/src/org/opendds/jms/management/argument/InfoRepoArguments.java:
+
+          Added support for new -ReassociateDelay command line option.
+
 Fri Jan 15 21:52:35 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/etc/transport-multi-rel.ini:
