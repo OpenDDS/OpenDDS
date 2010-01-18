@@ -60,15 +60,15 @@ host 2: $PROJECTBASE/bin/run_test -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORT
 host 1: $PROJECTBASE/bin/run_test -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p1-2500.ini 2>&1 | tee p1-2500.log
 host 2: $PROJECTBASE/bin/run_test -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p2.ini 2>&1 | tee p2.log
 
-host 1: $PROJECTBASE/bin/run_test -P -t 300 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p1-5000.ini 2>&1 | tee p1-5000.log
-host 2: $PROJECTBASE/bin/run_test -P -t 300 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p2.ini 2>&1 | tee p2.log
+host 1: $PROJECTBASE/bin/run_test -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p1-5000.ini 2>&1 | tee p1-5000.log
+host 2: $PROJECTBASE/bin/run_test -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p2.ini 2>&1 | tee p2.log
 
-host 1: $PROJECTBASE/bin/run_test -P -t 300 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p1-8000.ini 2>&1 | tee p1-8000.log
-host 2: $PROJECTBASE/bin/run_test -P -t 300 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p2.ini 2>&1 | tee p2.log
+host 1: $PROJECTBASE/bin/run_test -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p1-8000.ini 2>&1 | tee p1-8000.log
+host 2: $PROJECTBASE/bin/run_test -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p2.ini 2>&1 | tee p2.log
 
-host 1: $PROJECTBASE/bin/run_test -P -t 600 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p1-16000.ini 2>&1 | tee p1-16000.log
-host 2: $PROJECTBASE/bin/run_test -P -t 600 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p2.ini 2>&1 | tee p2.log
+host 1: $PROJECTBASE/bin/run_test -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p1-16000.ini 2>&1 | tee p1-16000.log
+host 2: $PROJECTBASE/bin/run_test -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p2.ini 2>&1 | tee p2.log
 
-host 1: $PROJECTBASE/bin/run_test -P -t 900 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p1-32000.ini 2>&1 | tee p1-32000.log
-host 2: $PROJECTBASE/bin/run_test -P -t 900 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p2.ini 2>&1 | tee p2.log
+host 1: $PROJECTBASE/bin/run_test -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p1-32000.ini 2>&1 | tee p1-32000.log
+host 2: $PROJECTBASE/bin/run_test -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p2.ini 2>&1 | tee p2.log
 

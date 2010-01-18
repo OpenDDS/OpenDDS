@@ -1,3 +1,29 @@
+Mon Jan 18 21:58:22 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/latency-commands:
+        * performance-tests/Bench/doc/tests-latency:
+
+          Updated documentation to explain how to execute the latency
+          testing as it was performed during development.
+
+        * performance-tests/Bench/etc/transport-udp.ini:
+
+          Included a hostname placeholder that needs to be specified for
+          each host on which a test will be executed.
+
+        * performance-tests/Bench/tests/latency/p1-100.ini:
+        * performance-tests/Bench/tests/latency/p1-1000.ini:
+        * performance-tests/Bench/tests/latency/p1-16000.ini:
+        * performance-tests/Bench/tests/latency/p1-250.ini:
+        * performance-tests/Bench/tests/latency/p1-2500.ini:
+        * performance-tests/Bench/tests/latency/p1-32000.ini:
+        * performance-tests/Bench/tests/latency/p1-50.ini:
+        * performance-tests/Bench/tests/latency/p1-500.ini:
+        * performance-tests/Bench/tests/latency/p1-5000.ini:
+        * performance-tests/Bench/tests/latency/p1-8000.ini:
+
+          Updated with a common rate to execute latency tests at.
+
 Mon Jan 18 20:04:25 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/PublisherImpl.h:
