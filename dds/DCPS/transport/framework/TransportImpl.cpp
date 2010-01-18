@@ -67,6 +67,33 @@ OpenDDS::DCPS::TransportImpl::~TransportImpl()
 }
 
 void
+OpenDDS::DCPS::TransportImpl::reliability_lost_i(
+  DataLink* link,
+  TransportInterface* transport_interface)
+{
+  // Subclass should override if interested in the
+  // reliability_lost "event".
+  DBG_ENTRY_LVL("TransportImpl","reliability_lost_i",6);
+}
+
+void
+OpenDDS::DCPS::TransportImpl::reliability_lost(DataLink* link)
+{
+  DBG_ENTRY_LVL("TransportImpl","reliability_lost",6);
+
+  GuardType guard(this->lock_);
+
+  if (this->config_.is_nil()) {
+    return; // transport is shutdown
+  }
+
+  for (InterfaceMapType::iterator it(this->interfaces_.begin());
+       it != this->interfaces_.end(); ++it) {
+    reliability_lost_i(link, it->second);
+  }
+}
+
+void
 OpenDDS::DCPS::TransportImpl::shutdown()
 {
   DBG_ENTRY_LVL("TransportImpl","shutdown",6);

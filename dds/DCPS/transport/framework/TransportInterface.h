@@ -40,6 +40,12 @@ public:
 
   virtual ~TransportInterface();
 
+  /// Accessor for the Domain ID.
+  virtual DDS::DomainId_t get_domain_id() const;
+
+  /// Accessor for the Participant ID.
+  virtual RepoId get_participant_id() const;
+
   /// Accessor for the TransportInterfaceInfo.
   const TransportInterfaceInfo& connection_info() const;
 
@@ -90,6 +96,20 @@ public:
 
   /// Return the TransportImpl object reference.
   TransportImpl_rch get_transport_impl();
+
+  /// This method may be invoked to force all associations belonging
+  /// to a pair of participants to be reassociated.
+  void disassociate_participant(RepoId remote_id);  // participant
+
+  /// This method may be invoked to force an association belonging
+  /// to a local subscription to be reassociated.
+  void disassociate_subscription(RepoId local_id,   // subscription
+                                 RepoId remote_id); // publication
+
+  /// This method may be invoked to force an association belonging
+  /// to a local publication to be reassociated.
+  void disassociate_publication(RepoId local_id,    // publication
+                                RepoId remote_id);  // subscription
 
 protected:
 

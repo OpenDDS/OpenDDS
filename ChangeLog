@@ -1,8 +1,23 @@
+Mon Jan 18 20:04:25 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.h:
+        * dds/DCPS/transport/framework/TransportInterface.cpp:
+
+          Added client interface to disassociate_* InfoRepo operations.
+          Also added new reliability_lost_i entry point to TransportImpl
+          to allow a transport to report a loss in reliability.
+
 Mon Jan 18 14:59:13 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/InfoRepo/DCPSInfo_i.cpp:
 
-	  Fixed compiler warnings/errors for GCC and VC++.
+          Fixed compiler warnings/errors for GCC and VC++.
 
 Sat Jan 16 00:14:19 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
