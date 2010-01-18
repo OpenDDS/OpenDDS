@@ -83,7 +83,7 @@ OpenDDS::DCPS::TransportImpl::reliability_lost(DataLink* link)
   DBG_ENTRY_LVL("TransportImpl","reliability_lost",6);
 
   // In order to accomodate potential remote calls as a result of the
-  // reliability_lost_i callback, locks will not be held. Instead,
+  // reliability_lost_i callback, locks may not be held. Instead,
   // refcounts must be incremented to avoid derefencing invalid
   // pointers due to lifecycle changes. Unfortunately, this requires
   // some rather evil sideways casting to find the correct interface.
@@ -125,7 +125,7 @@ OpenDDS::DCPS::TransportImpl::reliability_lost(DataLink* link)
 
   // Notify subclass; This callback will likely result in a remote
   // call to the DCPSInfoRepo to either dissolve or re-form one or
-  // more associations.
+  // more associations:
   {
     for (std::vector<TransportInterface*>::iterator it(interfaces.begin());
          it != interfaces.end(); ++it) {
