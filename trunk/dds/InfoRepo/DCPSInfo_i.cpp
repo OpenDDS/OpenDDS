@@ -25,6 +25,7 @@
 #include /**/ "ace/Read_Buffer.h"
 #include /**/ "ace/OS_NS_stdio.h"
 #include "ace/Dynamic_Service.h"
+#include "ace/Reactor.h"
 
 // constructor
 TAO_DDS_DCPSInfo_i::TAO_DDS_DCPSInfo_i(CORBA::ORB_ptr orb
@@ -46,7 +47,7 @@ TAO_DDS_DCPSInfo_i::~TAO_DDS_DCPSInfo_i()
 }
 
 int
-TAO_DDS_DCPSInfo_i::handle_timeout(const ACE_Time_Value& now,
+TAO_DDS_DCPSInfo_i::handle_timeout(const ACE_Time_Value& /*now*/,
                                    const void* /*arg*/)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, 0);
