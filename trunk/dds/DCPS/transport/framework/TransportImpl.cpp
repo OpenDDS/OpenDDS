@@ -88,7 +88,7 @@ OpenDDS::DCPS::TransportImpl::reliability_lost(DataLink* link)
   // pointers due to lifecycle changes. Unfortunately, this requires
   // some rather evil sideways casting to find the correct interface.
   //
-  // This makes me die a little inside...
+  // This code makes me die a little inside...
 
   std::vector<TransportInterface*> interfaces;
 
