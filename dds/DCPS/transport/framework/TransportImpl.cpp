@@ -19,6 +19,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "tao/debug.h"
 #include <sstream>
+#include <vector>
 
 #if !defined (__ACE_INLINE__)
 #include "TransportImpl.inl"
@@ -81,15 +82,77 @@ OpenDDS::DCPS::TransportImpl::reliability_lost(DataLink* link)
 {
   DBG_ENTRY_LVL("TransportImpl","reliability_lost",6);
 
-  GuardType guard(this->lock_);
+  // In order to accomodate potential remote calls as a result of the
+  // reliability_lost_i callback, locks will not be held. Instead,
+  // refcounts must be incremented to avoid derefencing invalid
+  // pointers due to lifecycle changes. Unfortunately, this requires
+  // some rather evil sideways casting to find the correct interface.
+  //
+  // This makes me die a little inside...
 
-  if (this->config_.is_nil()) {
-    return; // transport is shutdown
+  std::vector<TransportInterface*> interfaces;
+
+  // Acquire resources for callbacks:
+  {
+    GuardType guard(this->lock_);
+
+    if (this->config_.is_nil()) return; // transport is shutdown
+
+    for (InterfaceMapType::iterator it(this->interfaces_.begin());
+         it != this->interfaces_.end(); ++it) {
+
+      TransportInterface* interface = it->second;
+
+      SubscriberImpl* subscriber = dynamic_cast<SubscriberImpl*>(interface);
+      if (subscriber != 0) {
+        subscriber->_add_ref();   // take ownership
+
+      } else {
+        PublisherImpl* publisher = dynamic_cast<PublisherImpl*>(interface);
+        if (publisher != 0) {
+          publisher->_add_ref();  // take ownership
+
+        } else {
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("(%P|%t) TransportImpl::reliability_lost:"),
+                     ACE_TEXT(" unknown TransportInterface subclass!\n")));
+          return;
+        }
+      }
+      interfaces.push_back(interface);
+    }
   }
 
-  for (InterfaceMapType::iterator it(this->interfaces_.begin());
-       it != this->interfaces_.end(); ++it) {
-    reliability_lost_i(link, it->second);
+  // Notify subclass; This callback will likely result in a remote
+  // call to the DCPSInfoRepo to either dissolve or re-form one or
+  // more associations.
+  {
+    for (std::vector<TransportInterface*>::iterator it(interfaces.begin());
+         it != interfaces.end(); ++it) {
+      reliability_lost_i(link, *it);
+    }
+  }
+
+  // Release acquired resources:
+  {
+    GuardType guard(this->lock_);
+
+    if (this->config_.is_nil()) return; // transport is shutdown
+
+    for (std::vector<TransportInterface*>::iterator it(interfaces.begin());
+         it != interfaces.end(); ++it) {
+
+      SubscriberImpl* subscriber = dynamic_cast<SubscriberImpl*>(*it);
+      if (subscriber != 0) {
+        subscriber->_remove_ref();  // release ownership
+
+      } else {
+        PublisherImpl* publisher = dynamic_cast<PublisherImpl*>(*it);
+        if (publisher != 0) {
+          publisher->_remove_ref(); // release ownership
+        }
+      }
+    }
   }
 }
 
