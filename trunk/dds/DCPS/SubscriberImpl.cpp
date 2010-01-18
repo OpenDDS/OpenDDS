@@ -958,6 +958,18 @@ SubscriberImpl::get_subscription_ids(SubscriptionIdVec& subs)
   }
 }
 
+DDS::DomainId_t
+SubscriberImpl::get_domain_id() const
+{
+  return this->domain_id_;
+}
+
+RepoId
+SubscriberImpl::get_participant_id() const
+{
+  return this->participant_->get_id();
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 

@@ -114,10 +114,15 @@ public:
   /// this function to be noop.
   virtual void remove_ack(RepoId pub_id, RepoId sub_id);
 
-  /// Callback from teh DataLink to clean up any associated resources.
+  /// Callback from the DataLink to clean up any associated resources.
   /// This usually is done when the DataLink is lost. The call is made with
   /// no transport/DCPS locks held.
   bool release_link_resources(DataLink* link);
+
+  /// Callback from the DataLink to indicate transport reliability
+  /// has been lost. This call should be made with no transport/DCPS
+  /// locks held.
+  void reliability_lost(DataLink* link);
 
   /// Called by the application to attach this transport to a publisher.
   OpenDDS::DCPS::AttachStatus attach(DDS::Publisher_ptr pub);
@@ -133,7 +138,7 @@ public:
   /// TransportImpl via the TransportConfiguration object supplied
   /// to our configure() method.
   int swap_bytes() const;
-  
+
   /// This method is called when the FULLY_ASSOCIATED ack of the pending
   /// associations is received. If the datawriter is registered, the
   /// datawriter will be notified, otherwise the status of the pending
@@ -192,6 +197,13 @@ protected:
   /// concrete TransportImpl subclass a chance to do something when
   /// the release_datalink "event" occurs.
   virtual void release_datalink_i(DataLink* link, bool release_pending) = 0;
+
+  /// Called by our reliability_lost() method in order to give the
+  /// concrete TransportImpl subclass a chance to do something when
+  /// the reliability_lost "event" occurs.
+  virtual void reliability_lost_i(
+    DataLink* link,
+    TransportInterface* transport_interface);
 
   /// Accessor to obtain a "copy" of the reference to the reactor task.
   /// Caller is responsible for the "copy" of the reference that is
