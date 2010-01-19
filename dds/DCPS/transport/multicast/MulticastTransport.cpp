@@ -126,6 +126,7 @@ MulticastTransport::configure_i(TransportConfiguration* config)
                       ACE_TEXT("invalid configuration!\n")),
                      -1);
   }
+  this->config_i_->add_ref();
 
   return 0;
 }
@@ -140,6 +141,7 @@ MulticastTransport::shutdown_i()
   }
   this->links_.clear();
 
+  this->config_i_->remove_ref();
   this->config_i_ = 0;
 }
 

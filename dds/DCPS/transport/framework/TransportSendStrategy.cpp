@@ -68,7 +68,8 @@ OpenDDS::DCPS::TransportSendStrategy::TransportSendStrategy
     replaced_element_allocator_(NUM_REPLACED_ELEMENT_CHUNKS),
     retained_element_allocator_( 0),
     graceful_disconnecting_(false),
-    link_released_(true)
+    link_released_(true),
+    send_buffer_(0)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","TransportSendStrategy",6);
 
