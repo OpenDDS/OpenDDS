@@ -59,13 +59,13 @@ SynWatchdog::next_timeout()
 void
 SynWatchdog::on_timeout(const void* /*arg*/)
 {
-  // There is no recourse if a link is unable to handshake;
-  // log an error and return:
   ACE_ERROR((LM_ERROR,
              ACE_TEXT("(%P|%t) ERROR: ")
              ACE_TEXT("SynWatchdog::on_timeout: ")
              ACE_TEXT("timed out waiting on remote peer: 0x%x!\n"),
              this->link_->remote_peer()));
+
+  this->link_->reliability_lost();
 }
 
 NakWatchdog::NakWatchdog(ReliableMulticast* link)
@@ -109,6 +109,7 @@ ReliableMulticast::ReliableMulticast(MulticastTransport* transport,
                       remote_peer,
                       active),
     acked_(false),
+    defunct_(false),
     syn_watchdog_(this),
     nak_watchdog_(this)
 {
@@ -150,8 +151,7 @@ ReliableMulticast::expire_naks()
       continue;
     }
 
-    // Skip unrecoverable datagrams if needed; attempt to
-    // re-establish a baseline to detect future reception gaps:
+    // Notify if expired request contains unseen data:
     if (request.second > sequence->second) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: ")
@@ -159,7 +159,8 @@ ReliableMulticast::expire_naks()
                  ACE_TEXT("timed out waiting on remote peer: 0x%x!\n"),
                  request.first));
 
-      sequence->second.skip(request.second);
+      reliability_lost();
+      break;
     }
   }
 
@@ -215,12 +216,28 @@ ReliableMulticast::acked()
 bool
 ReliableMulticast::header_received(const TransportHeader& header)
 {
+  if (this->defunct_) return false; // no longer accepting data
+
   NakSequenceMap::iterator it(this->nak_sequences_.find(header.source_));
   if (it == this->nak_sequences_.end()) return true;  // unknown peer
 
   // Update last seen sequence for remote peer; return false if we
   // have already seen this datagram to prevent duplicate delivery:
-  return it->second.update(header.sequence_);
+  if (!it->second.update(header.sequence_)) return false;
+
+  // Notify if sequence has overflowed:
+  if (it->second.overflowed()) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("ReliableMulticast::header_received: ")
+               ACE_TEXT("reception overflow from remote peer: 0x%x!\n"),
+               header.source_));
+
+    reliability_lost();
+    return false;
+  }
+
+  return true;
 }
 
 void
@@ -418,8 +435,7 @@ ReliableMulticast::nakack_received(ACE_Message_Block* control)
   serializer >> low;
 
   // MULTICAST_NAKACK control samples indicate data which cannot be
-  // repaired by a remote peer; update the sequence map to suppress
-  // repairs by shifting to a new low-water mark if needed:
+  // repaired; notify if response indicates unseen data:
   if (!it->second.seen(low)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
@@ -427,7 +443,7 @@ ReliableMulticast::nakack_received(ACE_Message_Block* control)
                ACE_TEXT("unrecoverable samples reported by remote peer: 0x%x!\n"),
                header.source_));
 
-    it->second.shift(low);
+    reliability_lost();
   }
 }
 
@@ -470,6 +486,22 @@ ReliableMulticast::send_control(SubMessageId submessage_id,
                error));
     return;
   }
+}
+
+void
+ReliableMulticast::reliability_lost()
+{
+  if (this->defunct_) return; // already notified
+
+  this->defunct_ = true;
+
+  this->syn_watchdog_.cancel();
+  this->nak_watchdog_.cancel();
+
+  // Notify transport reliability has been compromised. This will
+  // trigger the reassociation mechanism which will ultimately
+  // shutdown this DataLink and create a new one:
+  this->transport_->reliability_lost(this);
 }
 
 void

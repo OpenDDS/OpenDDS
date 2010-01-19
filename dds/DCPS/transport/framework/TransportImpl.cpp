@@ -69,8 +69,8 @@ OpenDDS::DCPS::TransportImpl::~TransportImpl()
 
 void
 OpenDDS::DCPS::TransportImpl::reliability_lost_i(
-  DataLink* link,
-  TransportInterface* transport_interface)
+  DataLink* /*link*/,
+  TransportInterface* /*transport_interface*/)
 {
   // Subclass should override if interested in the
   // reliability_lost "event".

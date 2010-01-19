@@ -93,6 +93,8 @@ public:
   void send_control(SubMessageId submessage_id,
                     ACE_Message_Block* data);
 
+  void reliability_lost();
+
 protected:
   virtual void send_strategy(MulticastSendStrategy* send_strategy);
 
@@ -101,6 +103,7 @@ protected:
 
 private:
   bool acked_;
+  bool defunct_;
 
   SynWatchdog syn_watchdog_;
   NakWatchdog nak_watchdog_;

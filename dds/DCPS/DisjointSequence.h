@@ -57,6 +57,8 @@ public:
   size_t depth() const;
   bool disjoint() const;
 
+  bool overflowed() const;
+
   range_iterator range_begin();
   range_iterator range_end();
 
@@ -71,6 +73,7 @@ public:
   operator SequenceNumber() const;
 
 private:
+  bool overflowed_;
   SequenceSet sequences_;
 
   void normalize();

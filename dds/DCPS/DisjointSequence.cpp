@@ -25,6 +25,7 @@ namespace DCPS {
 const size_t DisjointSequence::MAX_DEPTH(SHRT_MAX / 2 - 1);
 
 DisjointSequence::DisjointSequence(SequenceNumber value)
+  : overflowed_(false)
 {
   this->sequences_.insert(value);
 }
@@ -93,12 +94,8 @@ DisjointSequence::normalize()
   // Ensure the set does not span more than MAX_DEPTH
   // sequences; this will cause comparisons to fail.
   if (depth() > MAX_DEPTH) {
-    skip(high());
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("DisjointSequence::normalize: ")
-               ACE_TEXT("MAX_DEPTH exceeded; skipping to: 0x%x!\n"),
-               static_cast<ACE_UINT16>(low())));
+    skip(high()); // set new low-water mark
+    this->overflowed_ = true;
     return;
   }
 
