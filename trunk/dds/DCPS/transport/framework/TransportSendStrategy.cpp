@@ -141,7 +141,8 @@ OpenDDS::DCPS::TransportSendStrategy::send_buffer(
   OpenDDS::DCPS::TransportSendBuffer* send_buffer)
 {
   this->send_buffer_ = send_buffer;
-  if (!this->send_buffer_.is_nil()) {
+
+  if (this->send_buffer_ != 0) {
     this->send_buffer_->bind(this);
   }
 }
@@ -860,7 +861,7 @@ OpenDDS::DCPS::TransportSendStrategy::start()
 
   // If a secondary send buffer is bound, sent headers should
   // be cached to properly maintain the buffer:
-  if (!this->send_buffer_.is_nil()) {
+  if (this->send_buffer_ != 0) {
     header_chunks += this->send_buffer_->capacity();
   }
 
@@ -1232,7 +1233,7 @@ OpenDDS::DCPS::TransportSendStrategy::remove_all_control_msgs(RepoId pub_id)
 
   GuardType guard(this->lock_);
 
-  if (!this->send_buffer_.is_nil()) {
+  if (this->send_buffer_ != 0) {
     // If a secondary send buffer is bound, removed samples must
     // be retained in order to properly maintain the buffer:
     this->send_buffer_->retain_all(pub_id);
@@ -1756,7 +1757,7 @@ OpenDDS::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_n
     return OUTCOME_SEND_ERROR;
   }
 
-  if (!this->send_buffer_.is_nil()) {
+  if (this->send_buffer_ != 0) {
     // If a secondary send buffer is bound, sent samples must
     // be inserted in order to properly maintain the buffer:
     this->send_buffer_->insert(this->header_.sequence_,

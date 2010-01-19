@@ -12,14 +12,14 @@
 
 #include "Multicast_Export.h"
 
-#include "MulticastDataLink_rch.h"
-
 #include "ace/Event_Handler.h"
 
 #include "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
 
 namespace OpenDDS {
 namespace DCPS {
+
+class MulticastDataLink;
 
 class OpenDDS_Multicast_Export MulticastReceiveStrategy
   : public TransportReceiveStrategy,
@@ -44,7 +44,7 @@ protected:
   virtual void stop_i();
 
 private:
-  MulticastDataLink_rch link_;
+  MulticastDataLink* link_;
 };
 
 } // namespace DCPS

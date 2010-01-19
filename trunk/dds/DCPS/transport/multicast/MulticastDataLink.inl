@@ -39,19 +39,19 @@ MulticastDataLink::active() const
 ACE_INLINE MulticastConfiguration*
 MulticastDataLink::config()
 {
-  return this->config_.in();
+  return this->config_;
 }
 
 ACE_INLINE TransportReactorTask*
 MulticastDataLink::reactor_task()
 {
-  return this->reactor_task_.in();
+  return this->reactor_task_;
 }
 
 ACE_INLINE ACE_Reactor*
 MulticastDataLink::get_reactor()
 {
-  if (this->reactor_task_.is_nil()) return 0;
+  if (this->reactor_task_ == 0) return 0;
   return this->reactor_task_->get_reactor();
 }
 

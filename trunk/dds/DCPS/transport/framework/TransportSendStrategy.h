@@ -20,7 +20,6 @@
 #include "TransportReplacedElement.h"
 #include "TransportRetainedElement.h"
 #include "TransportConfiguration_rch.h"
-#include "TransportSendBuffer_rch.h"
 
 #include "ace/Synch.h"
 
@@ -30,6 +29,7 @@ namespace DCPS {
 class ThreadSynch;
 class ThreadSynchResource;
 class TransportQueueElement;
+class TransportSendBuffer;
 struct DataSampleListElement;
 class QueueRemoveVisitor;
 class PacketRemoveVisitor;
@@ -358,7 +358,7 @@ private:
 
   bool link_released_;
 
-  TransportSendBuffer_rch send_buffer_;
+  TransportSendBuffer* send_buffer_;
 
   // N.B. The behavior present in TransortSendBuffer should be
   // refactored into the TransportSendStrategy eventually; a good

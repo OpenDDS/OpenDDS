@@ -17,7 +17,6 @@
 #include "TransportRetainedElement.h"
 #include "TransportReplacedElement.h"
 #include "TransportSendStrategy.h"
-#include "TransportSendStrategy_rch.h"
 
 #include "ace/Message_Block.h"
 
@@ -68,7 +67,7 @@ private:
   TransportRetainedElementAllocator retained_allocator_;
   TransportReplacedElementAllocator replaced_allocator_;
 
-  TransportSendStrategy_rch strategy_;
+  TransportSendStrategy* strategy_;
 
   typedef std::map<SequenceNumber, buffer_type> BufferMap;
   BufferMap buffers_;
