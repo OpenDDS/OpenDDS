@@ -38,6 +38,7 @@ TAO_DDS_DCPSInfo_i::TAO_DDS_DCPSInfo_i(CORBA::ORB_ptr orb
   , um_(0)
   , reincarnate_(reincarnate)
   , shutdown_(shutdown)
+  , reassociate_timer_id_(-1)
 {
 }
 
@@ -54,24 +55,24 @@ TAO_DDS_DCPSInfo_i::handle_timeout(const ACE_Time_Value& /*now*/,
 
   // NOTE: This is a purposefully naive approach to addressing defunct
   // associations.  In the future, it may be worthwhile to introduce a
-  // callback model to fix the heinous runtime complexity below:
-  for (DCPS_IR_Domain_Map::const_iterator domain(this->domains_.begin());
-       domain != this->domains_.end(); ++domain) {
+  // callback model to fix the heinous runtime cost below:
+  for (DCPS_IR_Domain_Map::const_iterator dom(this->domains_.begin());
+       dom != this->domains_.end(); ++dom) {
 
-    const DCPS_IR_Participant_Map& participants(domain->second->participants());
-    for (DCPS_IR_Participant_Map::const_iterator participant(participants.begin());
-         participant != participants.end(); ++participant) {
+    const DCPS_IR_Participant_Map& participants(dom->second->participants());
+    for (DCPS_IR_Participant_Map::const_iterator part(participants.begin());
+         part != participants.end(); ++part) {
 
-      const DCPS_IR_Subscription_Map& subscriptions(participant->second->subscriptions());
-      for (DCPS_IR_Subscription_Map::const_iterator subscription(subscriptions.begin());
-           subscription != subscriptions.end(); ++subscription) {
-        subscription->second->reevaluate_defunct_associations();
+      const DCPS_IR_Subscription_Map& subscriptions(part->second->subscriptions());
+      for (DCPS_IR_Subscription_Map::const_iterator sub(subscriptions.begin());
+           sub != subscriptions.end(); ++sub) {
+        sub->second->reevaluate_defunct_associations();
       }
 
-      const DCPS_IR_Publication_Map& publications(participant->second->publications());
-      for (DCPS_IR_Publication_Map::const_iterator publication(publications.begin());
-           publication != publications.end(); ++publication) {
-        publication->second->reevaluate_defunct_associations();
+      const DCPS_IR_Publication_Map& publications(part->second->publications());
+      for (DCPS_IR_Publication_Map::const_iterator pub(publications.begin());
+           pub != publications.end(); ++pub) {
+        pub->second->reevaluate_defunct_associations();
       }
     }
   }
@@ -2173,8 +2174,23 @@ TAO_DDS_DCPSInfo_i::init_persistence()
 bool
 TAO_DDS_DCPSInfo_i::init_reassociation(const ACE_Time_Value& delay)
 {
+  if (this->reassociate_timer_id_ != -1) return false;  // already scheduled
+
   ACE_Reactor* reactor = this->orb_->orb_core()->reactor();
-  return reactor->schedule_timer(this, 0, delay, delay) != -1;
+
+  this->reassociate_timer_id_ = reactor->schedule_timer(this, 0, delay, delay);
+  return this->reassociate_timer_id_ != -1;
+}
+
+void
+TAO_DDS_DCPSInfo_i::finalize()
+{
+  if (reassociate_timer_id_ != -1) {
+    ACE_Reactor* reactor = this->orb_->orb_core()->reactor();
+
+    reactor->cancel_timer(this->reassociate_timer_id_);
+    this->reassociate_timer_id_ = -1;
+  }
 }
 
 const DCPS_IR_Domain_Map&

@@ -75,6 +75,8 @@ private:
   OpenDDS::Federator::Config      federatorConfig_;
 
   PortableServer::ServantBase_var info_;
+  TAO_DDS_DCPSInfo_i* info_servant_;
+
   ACE_Thread_Mutex lock_;
   ACE_Condition_Thread_Mutex cond_;
   bool shutdown_complete_;
