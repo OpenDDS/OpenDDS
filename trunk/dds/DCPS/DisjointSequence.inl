@@ -107,15 +107,21 @@ DisjointSequence::depth() const
 }
 
 ACE_INLINE bool
-DisjointSequence::seen(SequenceNumber value) const
-{
-  return value <= low();
-}
-
-ACE_INLINE bool
 DisjointSequence::disjoint() const
 {
   return this->sequences_.size() > 1;
+}
+
+ACE_INLINE bool
+DisjointSequence::overflowed() const
+{
+  return this->overflowed_;
+}
+
+ACE_INLINE bool
+DisjointSequence::seen(SequenceNumber value) const
+{
+  return value <= low();
 }
 
 ACE_INLINE

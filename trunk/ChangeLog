@@ -1,3 +1,27 @@
+Tue Jan 19 17:13:18 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Added support for checking overflowed sequences.
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Fixed GCC warnings related to unused parameters.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Added support for reliability_lost callback.
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          Fixed bug in disassociate_participant which caused iterators
+          to not be incremented correctly.
+
 Mon Jan 18 22:11:13 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportImpl.cpp:

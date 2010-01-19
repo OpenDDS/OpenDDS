@@ -16,6 +16,7 @@
 #include "ace/CDR_Base.h"
 #include "ace/Log_Msg.h"
 
+#include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 
@@ -168,7 +169,7 @@ MulticastTransport::connection_info_i(const TransportInterfaceInfo& info) const
     ACE_ERROR((LM_WARNING,
                ACE_TEXT("(%P|%t) WARNING: ")
                ACE_TEXT("MulticastTransport::get_connection_info: ")
-               ACE_TEXT("transport interface ID does not match: 0x%x\n"),
+               ACE_TEXT("transport interface ID does not match: 0x%x!\n"),
                info.transport_id));
   }
 
@@ -202,11 +203,12 @@ void
 MulticastTransport::remove_ack(RepoId /*local_id*/, RepoId /*remote_id*/)
 {
   // Association acks are managed by each individual DataLink; there
-  // is no state that needs to be removed by this TransportImpl.
+  // is no state that needs to be removed.
 }
 
 void
-MulticastTransport::release_datalink_i(DataLink* link, bool /*release_pending*/)
+MulticastTransport::release_datalink_i(DataLink* link,
+                                       bool /*release_pending*/)
 {
   for (MulticastDataLinkMap::iterator it(this->links_.begin());
        it != this->links_.end(); ++it) {
@@ -214,6 +216,36 @@ MulticastTransport::release_datalink_i(DataLink* link, bool /*release_pending*/)
     // in the map; release any resources held and return.
     if (link == static_cast<DataLink*>(it->second.in())) {
       this->links_.erase(it);
+      return;
+    }
+  }
+}
+
+void
+MulticastTransport::reliability_lost_i(DataLink* link,
+                                       TransportInterface* interface)
+{
+  for (MulticastDataLinkMap::iterator it(this->links_.begin());
+       it != this->links_.end(); ++it) {
+    // We are guaranteed to have exactly one matching DataLink
+    // in the map; disassociate affected participant and return.
+    if (link == static_cast<DataLink*>(it->second.in())) {
+      // As reservations are formed between two participants, we can
+      // reconstruct the remote participant RepoId by substituting
+      // the local participantId with the remote peer identifier:
+      RepoId remote_id(interface->get_participant_id());
+
+      RepoIdBuilder builder(remote_id);
+      builder.participantId(it->first);
+
+      RepoIdConverter converter(remote_id);
+      ACE_ERROR((LM_WARNING,
+                 ACE_TEXT("(%P|%t) WARNING: ")
+                 ACE_TEXT("MulticastTransport::reliability_lost_i: ")
+                 ACE_TEXT("disassociating remote participant: %C!\n"),
+                 std::string(converter).c_str()));
+
+      interface->disassociate_participant(remote_id);
       return;
     }
   }

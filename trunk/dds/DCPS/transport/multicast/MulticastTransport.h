@@ -43,7 +43,11 @@ protected:
   virtual bool acked(RepoId local_id, RepoId remote_id);
   virtual void remove_ack(RepoId local_id, RepoId remote_id);
 
-  virtual void release_datalink_i(DataLink* link, bool release_pending);
+  virtual void release_datalink_i(DataLink* link,
+                                  bool release_pending);
+
+  virtual void reliability_lost_i(DataLink* link,
+                                  TransportInterface* interface);
 
 private:
   MulticastConfiguration_rch config_i_;
