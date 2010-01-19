@@ -95,14 +95,16 @@ InfoRepo::run()
 void
 InfoRepo::finalize()
 {
-  info_ = 0;
-  federator_.finalize();
+  this->info_servant_->finalize();
+  this->info_ = 0;
+
+  this->federator_.finalize();
 
   TheTransportFactory->release();
   TheServiceParticipant->shutdown();
 
   if (!CORBA::is_nil(orb_.in())) {
-    orb_->destroy();
+    this->orb_->destroy();
   }
 
   this->finalized_ = true;
@@ -228,11 +230,10 @@ InfoRepo::init()
     this,
     this->federatorConfig_.federationId());
 
-  TAO_DDS_DCPSInfo_i* info_servant
-  = dynamic_cast<TAO_DDS_DCPSInfo_i*>(info_.in());
+  this->info_servant_ = dynamic_cast<TAO_DDS_DCPSInfo_i*>(info_.in());
 
   // Install the DCPSInfo_i into the Federator::Manager.
-  this->federator_.info() = info_servant;
+  this->federator_.info() = this->info_servant_;
 
   CORBA::Object_var obj =
     orb_->resolve_initial_references("RootPOA");
@@ -292,7 +293,7 @@ InfoRepo::init()
   poa_manager_->activate();
 
   if (use_bits_) {
-    if (0 != info_servant->init_transport(listen_address_given_,
+    if (0 != this->info_servant_->init_transport(listen_address_given_,
                                           listen_address_str_.c_str())) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPSInfoRepo::init: ")
                  ACE_TEXT("Unable to initialize transport.\n")));
@@ -311,14 +312,14 @@ InfoRepo::init()
 
   // Initialize persistence _after_ initializing the participant factory
   // and intializing the transport.
-  if (false == info_servant->init_persistence()) {
+  if (false == this->info_servant_->init_persistence()) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPSInfoRepo::init: ")
                ACE_TEXT("Unable to initialize persistence.\n")));
     throw InitError("Unable to initialize persistence.");
   }
 
   // Initialize reassociation.
-  if (!info_servant->init_reassociation(this->reassociate_delay_)) {
+  if (!this->info_servant_->init_reassociation(this->reassociate_delay_)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPSInfoRepo::init: ")
                ACE_TEXT("Unable to initialize reassociation.\n")));
     throw InitError("Unable to initialize reassociation.");
@@ -355,7 +356,7 @@ InfoRepo::init()
     // N.B. This needs to be done *after* the call to load_domains()
     //      since that is where the update manager is initialized in the
     //      info startup sequencing.
-    info_servant->add(&this->federator_);
+    this->info_servant_->add(&this->federator_);
   }
 
   // Grab the IOR table.

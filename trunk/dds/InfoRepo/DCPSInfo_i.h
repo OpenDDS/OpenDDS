@@ -466,6 +466,9 @@ public:
 
   bool init_reassociation(const ACE_Time_Value& delay);
 
+  /// Cleanup state for shutdown.
+  void finalize();
+
 private:
   DCPS_IR_Domain_Map domains_;
   CORBA::ORB_var orb_;
@@ -480,6 +483,8 @@ private:
   ShutdownInterface* shutdown_;
 
   ACE_Recursive_Thread_Mutex lock_;
+
+  long reassociate_timer_id_;
 };
 
 #endif /* DCPSINFO_I_H */
