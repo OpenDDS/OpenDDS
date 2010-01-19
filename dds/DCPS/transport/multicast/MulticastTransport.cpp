@@ -56,32 +56,35 @@ MulticastTransport::find_or_create_datalink(
   // best-effort; mode selection is based on transport configuration:
   MulticastDataLink_rch link;
   if (this->config_i_->reliable_) {
-    link = new ReliableMulticast(this,
-                                 local_peer,
-                                 remote_peer,
-                                 active);
+    ACE_NEW_RETURN(link,
+                   ReliableMulticast(this,
+                                     local_peer,
+                                     remote_peer,
+                                     active),
+                   0);
   } else {
-    link = new BestEffortMulticast(this,
-                                   local_peer,
-                                   remote_peer,
-                                   active);
-  }
-  if (link.is_nil()) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
-                      ACE_TEXT("failed to create DataLink for remote peer: 0x%x!\n"),
-                      remote_peer),
-                     0);
+    ACE_NEW_RETURN(link,
+                   BestEffortMulticast(this,
+                                       local_peer,
+                                       remote_peer,
+                                       active),
+                   0);
   }
 
   // Configure link with transport configuration and reactor task:
-  link->configure(this->config_i_.in(), reactor_task());
+  link->configure(this->config_i_, reactor_task());
 
   // Assign send/receive strategies:
-  link->send_strategy(new MulticastSendStrategy(link.in()));
-  link->receive_strategy(new MulticastReceiveStrategy(link.in()));
+  MulticastSendStrategy *send_strategy;
+  ACE_NEW_RETURN(send_strategy, MulticastSendStrategy(link.in()), 0);
 
+  MulticastReceiveStrategy *recv_strategy;
+  ACE_NEW_RETURN(recv_strategy, MulticastReceiveStrategy(link.in()), 0);
+
+  link->send_strategy(send_strategy);
+  link->receive_strategy(recv_strategy);
+
+  // Join multicast group:
   ACE_INET_Addr group_address;
   if (active) {
     // Active peers obtain the group address via the
@@ -108,7 +111,7 @@ MulticastTransport::find_or_create_datalink(
   // Insert new link into the links map; this allows DataLinks to be
   // shared by additional publications or subscriptions belonging to
   // the same participant:
-  this->links_.insert(MulticastDataLinkMap::value_type(remote_peer, link));
+  this->links_.insert(MulticastDataLinkMap::value_type(remote_peer, link.in()));
 
   return link._retn();
 }
@@ -117,14 +120,13 @@ int
 MulticastTransport::configure_i(TransportConfiguration* config)
 {
   this->config_i_ = dynamic_cast<MulticastConfiguration*>(config);
-  if (this->config_i_.is_nil()) {
+  if (this->config_i_ == 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastTransport::configure_i: ")
                       ACE_TEXT("invalid configuration!\n")),
                      -1);
   }
-  this->config_i_->_add_ref();  // take ownership
 
   return 0;
 }
@@ -138,8 +140,6 @@ MulticastTransport::shutdown_i()
     it->second->transport_shutdown();
   }
   this->links_.clear();
-
-  this->config_i_ = 0;  // release ownership
 }
 
 int

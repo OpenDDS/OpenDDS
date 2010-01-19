@@ -119,9 +119,6 @@ ReliableMulticast::~ReliableMulticast()
 {
   if (!this->send_buffer_.is_nil()) {
     this->send_strategy_->send_buffer(0);
-
-    this->send_buffer_->_remove_ref();	// release ownership
-    this->send_buffer_ = 0;
   }
 }
 
@@ -510,9 +507,9 @@ ReliableMulticast::send_strategy(MulticastSendStrategy* send_strategy)
   // A send buffer is bound to the send strategy to ensure a
   // configured number of most-recent datagrams are retained in
   // order to fulfill repair requests:
-  this->send_buffer_ =
-    new TransportSendBuffer(this->config_->nak_depth_,
-                            this->config_->max_samples_per_packet_);
+  ACE_NEW_NORETURN(this->send_buffer_,
+                   TransportSendBuffer(this->config_->nak_depth_,
+                                       this->config_->max_samples_per_packet_));
   if (this->send_buffer_.is_nil()) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
@@ -520,8 +517,6 @@ ReliableMulticast::send_strategy(MulticastSendStrategy* send_strategy)
                ACE_TEXT("failed to create TransportSendBuffer!\n")));
     return;
   }
-  this->send_buffer_->_add_ref(); // take ownership
-
   send_strategy->send_buffer(this->send_buffer_.in());
 
   MulticastDataLink::send_strategy(send_strategy);  // delegate to parent

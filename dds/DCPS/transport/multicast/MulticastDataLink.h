@@ -12,9 +12,7 @@
 
 #include "Multicast_Export.h"
 
-#include "MulticastTransport_rch.h"
 #include "MulticastConfiguration.h"
-#include "MulticastConfiguration_rch.h"
 #include "MulticastSendStrategy.h"
 #include "MulticastSendStrategy_rch.h"
 #include "MulticastReceiveStrategy.h"
@@ -25,10 +23,11 @@
 
 #include "dds/DCPS/transport/framework/DataLink.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
-#include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
 
 namespace OpenDDS {
 namespace DCPS {
+
+class MulticastTransport;
 
 typedef ACE_INT32 MulticastPeer;
 typedef ACE_INT16 MulticastSequence;
@@ -67,15 +66,15 @@ public:
   virtual void sample_received(ReceivedDataSample& sample) = 0;
 
 protected:
-  MulticastTransport_rch transport_;
+  MulticastTransport* transport_;
 
   MulticastPeer local_peer_;
   MulticastPeer remote_peer_;
 
   bool active_;
 
-  MulticastConfiguration_rch config_;
-  TransportReactorTask_rch reactor_task_;
+  MulticastConfiguration* config_;
+  TransportReactorTask* reactor_task_;
 
   MulticastSendStrategy_rch send_strategy_;
   MulticastReceiveStrategy_rch recv_strategy_;

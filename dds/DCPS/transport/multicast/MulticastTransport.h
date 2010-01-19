@@ -13,7 +13,6 @@
 #include "Multicast_Export.h"
 
 #include "MulticastConfiguration.h"
-#include "MulticastConfiguration_rch.h"
 #include "MulticastDataLink.h"
 #include "MulticastDataLink_rch.h"
 
@@ -50,7 +49,7 @@ protected:
                                   TransportInterface* interface);
 
 private:
-  MulticastConfiguration_rch config_i_;
+  MulticastConfiguration* config_i_;
 
   typedef std::map<MulticastPeer, MulticastDataLink_rch> MulticastDataLinkMap;
   MulticastDataLinkMap links_;

@@ -12,12 +12,12 @@
 
 #include "Multicast_Export.h"
 
-#include "MulticastDataLink_rch.h"
-
 #include "dds/DCPS/transport/framework/TransportSendStrategy.h"
 
 namespace OpenDDS {
 namespace DCPS {
+
+class MulticastDataLink;
 
 class OpenDDS_Multicast_Export MulticastSendStrategy
   : public TransportSendStrategy {
@@ -28,11 +28,11 @@ public:
 
 protected:
   virtual void prepare_header_i();
-  
+
   virtual ssize_t send_bytes_i(const iovec iov[], int n);
 
 private:
-  MulticastDataLink_rch link_;
+  MulticastDataLink* link_;
 };
 
 } // namespace DCPS
