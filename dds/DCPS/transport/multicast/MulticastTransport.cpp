@@ -77,11 +77,10 @@ MulticastTransport::find_or_create_datalink(
   // Assign send/receive strategies:
   MulticastSendStrategy *send_strategy;
   ACE_NEW_RETURN(send_strategy, MulticastSendStrategy(link.in()), 0);
+  link->send_strategy(send_strategy);
 
   MulticastReceiveStrategy *recv_strategy;
   ACE_NEW_RETURN(recv_strategy, MulticastReceiveStrategy(link.in()), 0);
-
-  link->send_strategy(send_strategy);
   link->receive_strategy(recv_strategy);
 
   // Join multicast group:
@@ -140,6 +139,8 @@ MulticastTransport::shutdown_i()
     it->second->transport_shutdown();
   }
   this->links_.clear();
+
+  this->config_i_ = 0;
 }
 
 int
