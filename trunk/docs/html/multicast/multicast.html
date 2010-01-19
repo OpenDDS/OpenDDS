@@ -609,14 +609,12 @@ Default examples of these files are provided under: {{{$DDS_ROOT/dds/DCPS/transp
 [[Known Issues]]
 [[Future Tasks]]</pre>
 </div>
-<div title="Future Tasks" modifier="StevenStallion" created="200912011940" modified="200912190007" changecount="47">
+<div title="Future Tasks" modifier="StevenStallion" created="200912011940" modified="201001191719" changecount="48">
 <pre>NAK requests currently contain individual ranges; performance testing should be done to determine if collapsing ranges into a single sample would yield better performance for the entire multicast group in a lossy network.
 
 An FEC mechanism should be introduced to reduce repair requests and to provide an additional source from which to detect reception gaps.
 
 {{{MulticastTransport::connection_info_i}}} should support ephemeral port numbers in the {{{TransportInterfaceBLOB}}} (not currently supported by the ETF).
-
-{{{ReliableMulticast}}} should initiate the removal of an association based on changes in reliability (not currently supported by the ETF).
 
 {{{MULTICAST_SYNACK}}} responses should be predicated on association status to prevent potential denial of service attacks (not currently supported by the ETF).</pre>
 </div>
