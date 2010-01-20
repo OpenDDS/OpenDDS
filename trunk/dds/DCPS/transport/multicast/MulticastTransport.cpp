@@ -225,31 +225,37 @@ MulticastTransport::release_datalink_i(DataLink* link,
 }
 
 void
-MulticastTransport::reliability_lost_i(DataLink* link,
-                                       TransportInterface* interface)
+MulticastTransport::reliability_lost_i(
+  DataLink* link,
+  const InterfaceListType& interfaces)
 {
-  for (MulticastDataLinkMap::iterator it(this->links_.begin());
-       it != this->links_.end(); ++it) {
-    // We are guaranteed to have exactly one matching DataLink
-    // in the map; disassociate affected participant and return.
-    if (link == static_cast<DataLink*>(it->second.in())) {
-      // As reservations are formed between two participants, we can
-      // reconstruct the remote participant RepoId by substituting
-      // the local participantId with the remote peer identifier:
-      RepoId remote_id(interface->get_participant_id());
+  for (InterfaceListType::const_iterator it(interfaces.begin());
+       it != interfaces.end(); ++it) {
+    TransportInterface* interface = *it;
 
-      RepoIdBuilder builder(remote_id);
-      builder.participantId(it->first);
+    for (MulticastDataLinkMap::iterator link_it(this->links_.begin());
+         link_it != this->links_.end(); ++link_it) {
+      // We are guaranteed to have exactly one matching DataLink
+      // in the map; disassociate affected participant and return.
+      if (link == static_cast<DataLink*>(link_it->second.in())) {
+        // As reservations are formed between two participants, we can
+        // reconstruct the remote participant RepoId by substituting
+        // the local participantId with the remote peer identifier:
+        RepoId remote_id(interface->get_participant_id());
 
-      RepoIdConverter converter(remote_id);
-      ACE_ERROR((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: ")
-                 ACE_TEXT("MulticastTransport::reliability_lost_i: ")
-                 ACE_TEXT("disassociating remote participant: %C!\n"),
-                 std::string(converter).c_str()));
+        RepoIdBuilder builder(remote_id);
+        builder.participantId(link_it->first);
 
-      interface->disassociate_participant(remote_id);
-      return;
+        RepoIdConverter converter(remote_id);
+        ACE_ERROR((LM_WARNING,
+                   ACE_TEXT("(%P|%t) WARNING: ")
+                   ACE_TEXT("MulticastTransport::reliability_lost_i: ")
+                   ACE_TEXT("disassociating remote participant: %C!\n"),
+                   std::string(converter).c_str()));
+
+        interface->disassociate_participant(remote_id);
+        return;
+      }
     }
   }
 }

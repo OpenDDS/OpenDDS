@@ -45,8 +45,9 @@ protected:
   virtual void release_datalink_i(DataLink* link,
                                   bool release_pending);
 
-  virtual void reliability_lost_i(DataLink* link,
-                                  TransportInterface* interface);
+  virtual void reliability_lost_i(
+    DataLink* link,
+    const InterfaceListType& interfaces);
 
 private:
   MulticastConfiguration* config_i_;

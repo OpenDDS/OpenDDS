@@ -25,8 +25,8 @@
 #include "RepoIdSetMap.h"
 #include "DataLinkCleanupTask.h"
 #include "ace/Synch.h"
+#include <list>
 #include <map>
-#include <vector>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -198,12 +198,14 @@ protected:
   /// the release_datalink "event" occurs.
   virtual void release_datalink_i(DataLink* link, bool release_pending) = 0;
 
+  typedef std::list<TransportInterface*> InterfaceListType;
+
   /// Called by our reliability_lost() method in order to give the
   /// concrete TransportImpl subclass a chance to do something when
   /// the reliability_lost "event" occurs.
   virtual void reliability_lost_i(
     DataLink* link,
-    TransportInterface* transport_interface);
+    const InterfaceListType& interfaces);
 
   /// Accessor to obtain a "copy" of the reference to the reactor task.
   /// Caller is responsible for the "copy" of the reference that is
