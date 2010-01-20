@@ -13,6 +13,7 @@
 #include "Multicast_Export.h"
 
 #include "MulticastDataLink.h"
+#include "MulticastTransport.h"
 
 #include "dds/DCPS/DisjointSequence.h"
 #include "dds/DCPS/transport/framework/DataLinkWatchdog_T.h"
@@ -68,19 +69,19 @@ public:
                     bool active);
   ~ReliableMulticast();
 
-  void expire_naks();
-  void send_naks();
-
-  virtual bool acked();
-
   virtual bool header_received(const TransportHeader& header);
   virtual void sample_received(ReceivedDataSample& sample);
+
+  virtual bool acked();
 
   void syn_received(ACE_Message_Block* control);
   void send_syn();
 
   void synack_received(ACE_Message_Block* control);
   void send_synack(MulticastPeer remote_peer);
+
+  void expire_naks();
+  void send_naks();
 
   void nak_received(ACE_Message_Block* control);
   void send_nak(MulticastPeer remote_peer,
@@ -103,7 +104,6 @@ protected:
 
 private:
   bool acked_;
-  bool defunct_;
 
   SynWatchdog syn_watchdog_;
   NakWatchdog nak_watchdog_;
@@ -123,5 +123,9 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+#ifdef __ACE_INLINE__
+# include "ReliableMulticast.inl"
+#endif  /* __ACE_INLINE__ */
 
 #endif  /* DCPS_RELIABLEMULTICAST_H */

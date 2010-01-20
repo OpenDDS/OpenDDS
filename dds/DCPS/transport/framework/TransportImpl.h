@@ -152,6 +152,7 @@ public:
   void report();
 
 protected:
+  typedef std::list<TransportInterface*> InterfaceListType;
 
   TransportImpl();
 
@@ -191,21 +192,18 @@ protected:
   /// TransportImpl subclass to do the dirty work since it really
   /// is the one that knows how to populate the supplied
   /// TransportInterfaceInfo object.
-  virtual int connection_info_i (TransportInterfaceInfo& local_info) const = 0;
+  virtual int connection_info_i(TransportInterfaceInfo& local_info) const = 0;
+
+  /// Called by our reliability_lost() method in order to give the
+  /// concrete TransportImpl subclass a chance to do something when
+  /// the reliability_lost "event" occurs.
+  virtual void reliability_lost_i(DataLink* link,
+                                  const InterfaceListType& interfaces);
 
   /// Called by our release_datalink() method in order to give the
   /// concrete TransportImpl subclass a chance to do something when
   /// the release_datalink "event" occurs.
   virtual void release_datalink_i(DataLink* link, bool release_pending) = 0;
-
-  typedef std::list<TransportInterface*> InterfaceListType;
-
-  /// Called by our reliability_lost() method in order to give the
-  /// concrete TransportImpl subclass a chance to do something when
-  /// the reliability_lost "event" occurs.
-  virtual void reliability_lost_i(
-    DataLink* link,
-    const InterfaceListType& interfaces);
 
   /// Accessor to obtain a "copy" of the reference to the reactor task.
   /// Caller is responsible for the "copy" of the reference that is

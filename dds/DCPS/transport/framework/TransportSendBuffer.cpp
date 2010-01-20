@@ -37,7 +37,7 @@ TransportSendBuffer::TransportSendBuffer(size_t capacity,
 
 TransportSendBuffer::~TransportSendBuffer()
 {
-  release_all();
+  //release_all();
 }
 
 void

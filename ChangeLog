@@ -1,3 +1,30 @@
+Wed Jan 20 22:07:26 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Added stop operation to allow a DataLink to stop sending and
+          receiving data without tearing down resources.
+          transport_shutdown now exhibits idempotent behavior if a
+          DataLink is already stopped.
+
+        * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
+
+          Fixed deadlock problem on upcall in on_timeout.
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+
+          Minor reformatting.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.inl:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Updated reliability_lost behavior.
+
 Wed Jan 20 16:23:33 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportImpl.h:

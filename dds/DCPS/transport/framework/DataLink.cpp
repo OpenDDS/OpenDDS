@@ -36,7 +36,8 @@
 
 /// Only called by our TransportImpl object.
 OpenDDS::DCPS::DataLink::DataLink(TransportImpl* impl, CORBA::Long priority)
-  : thr_per_con_send_task_(0),
+  : stopped_(false),
+    thr_per_con_send_task_(0),
     transport_priority_(priority),
     send_control_allocator_(0),
     mb_allocator_(0),
@@ -99,6 +100,30 @@ OpenDDS::DCPS::DataLink::~DataLink()
     this->thr_per_con_send_task_->close(1);
     delete this->thr_per_con_send_task_;
   }
+}
+
+void
+OpenDDS::DCPS::DataLink::stop()
+{
+  GuardType guard(this->strategy_lock_);
+
+  if (this->stopped_) return; // already stopped
+
+  // Stop the TransportSendStrategy and the TransportReceiveStrategy.
+  if (!this->send_strategy_.is_nil()) {
+    this->send_strategy_->stop();
+    this->send_strategy_ = 0;
+  }
+
+  if (!this->receive_strategy_.is_nil()) {
+    this->receive_strategy_->stop();
+    this->receive_strategy_ = 0;
+  }
+
+  // Tell our subclass about the "stop" event.
+  this->stop_i();
+
+  this->stopped_ = true;
 }
 
 void
@@ -467,7 +492,9 @@ OpenDDS::DCPS::DataLink::release_reservations(RepoId          remote_id,
       // The samples has to be removed at this point, otherwise the sample
       // can not be delivered when new association is added and still use
       // this connection/datalink.
-      this->send_strategy_->clear();
+      if (!this->send_strategy_.is_nil()) {
+        this->send_strategy_->clear();
+      }
 
       CORBA::ORB_var orb = TheServiceParticipant->get_ORB();
       ACE_Reactor* reactor = orb->orb_core()->reactor();
@@ -773,23 +800,7 @@ OpenDDS::DCPS::DataLink::transport_shutdown()
     this->handle_timeout(ACE_OS::gettimeofday(), (const void *)0);
   }
 
-  {
-    GuardType guard(this->strategy_lock_);
-
-    // Stop the TransportSendStrategy and the TransportReceiveStrategy.
-    if (!this->send_strategy_.is_nil()) {
-      this->send_strategy_->stop();
-      this->send_strategy_ = 0;
-    }
-
-    if (!this->receive_strategy_.is_nil()) {
-      this->receive_strategy_->stop();
-      this->receive_strategy_ = 0;
-    }
-
-    // Tell our subclass about the "stop" event.
-    this->stop_i();
-  }
+  stop();
 
   // Drop our reference to the TransportImpl object
   this->impl_ = 0;
