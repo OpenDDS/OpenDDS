@@ -225,9 +225,8 @@ MulticastTransport::release_datalink_i(DataLink* link,
 }
 
 void
-MulticastTransport::reliability_lost_i(
-  DataLink* link,
-  const InterfaceListType& interfaces)
+MulticastTransport::reliability_lost_i(DataLink* link,
+                                       const InterfaceListType& interfaces)
 {
   for (InterfaceListType::const_iterator it(interfaces.begin());
        it != interfaces.end(); ++it) {
