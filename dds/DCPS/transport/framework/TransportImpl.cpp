@@ -19,7 +19,6 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "tao/debug.h"
 #include <sstream>
-#include <vector>
 
 #if !defined (__ACE_INLINE__)
 #include "TransportImpl.inl"
@@ -70,7 +69,7 @@ OpenDDS::DCPS::TransportImpl::~TransportImpl()
 void
 OpenDDS::DCPS::TransportImpl::reliability_lost_i(
   DataLink* /*link*/,
-  TransportInterface* /*transport_interface*/)
+  const InterfaceListType& /*interfaces*/)
 {
   // Subclass should override if interested in the
   // reliability_lost "event".
@@ -89,8 +88,7 @@ OpenDDS::DCPS::TransportImpl::reliability_lost(DataLink* link)
   // some rather evil sideways casting to find the correct interface.
   //
   // This code makes me die a little inside...
-
-  std::vector<TransportInterface*> interfaces;
+  InterfaceListType interfaces;
 
   // Acquire resources for callbacks:
   {
@@ -105,12 +103,12 @@ OpenDDS::DCPS::TransportImpl::reliability_lost(DataLink* link)
 
       SubscriberImpl* subscriber = dynamic_cast<SubscriberImpl*>(interface);
       if (subscriber != 0) {
-        subscriber->_add_ref();   // take ownership
+        subscriber->_add_ref();
 
       } else {
         PublisherImpl* publisher = dynamic_cast<PublisherImpl*>(interface);
         if (publisher != 0) {
-          publisher->_add_ref();  // take ownership
+          publisher->_add_ref();
 
         } else {
           ACE_ERROR((LM_ERROR,
@@ -126,31 +124,20 @@ OpenDDS::DCPS::TransportImpl::reliability_lost(DataLink* link)
   // Notify subclass; This callback will likely result in a remote
   // call to the DCPSInfoRepo to either dissolve or re-form one or
   // more associations:
-  {
-    for (std::vector<TransportInterface*>::iterator it(interfaces.begin());
-         it != interfaces.end(); ++it) {
-      reliability_lost_i(link, *it);
-    }
-  }
+  reliability_lost_i(link, interfaces);
 
   // Release acquired resources:
-  {
-    GuardType guard(this->lock_);
+  for (InterfaceListType::iterator it(interfaces.begin());
+       it != interfaces.end(); ++it) {
 
-    if (this->config_.is_nil()) return; // transport is shutdown
+    SubscriberImpl* subscriber = dynamic_cast<SubscriberImpl*>(*it);
+    if (subscriber != 0) {
+      subscriber->_remove_ref();
 
-    for (std::vector<TransportInterface*>::iterator it(interfaces.begin());
-         it != interfaces.end(); ++it) {
-
-      SubscriberImpl* subscriber = dynamic_cast<SubscriberImpl*>(*it);
-      if (subscriber != 0) {
-        subscriber->_remove_ref();  // release ownership
-
-      } else {
-        PublisherImpl* publisher = dynamic_cast<PublisherImpl*>(*it);
-        if (publisher != 0) {
-          publisher->_remove_ref(); // release ownership
-        }
+    } else {
+      PublisherImpl* publisher = dynamic_cast<PublisherImpl*>(*it);
+      if (publisher != 0) {
+        publisher->_remove_ref();
       }
     }
   }
