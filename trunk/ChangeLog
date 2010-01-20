@@ -1,3 +1,9 @@
+Wed Jan 20 15:50:04 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+
+          Added missing include for TransportInterface.h.
+
 Tue Jan 19 22:55:47 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
