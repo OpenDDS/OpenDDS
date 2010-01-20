@@ -91,6 +91,9 @@ public:
   DataLink(TransportImpl* impl, CORBA::Long priority = 0);
   virtual ~DataLink();
 
+  /// The stop method is used to stop the DataLink prior to shutdown.
+  void stop();
+
   /// The resume_send is used in the case of reconnection
   /// on the subscriber's side, e.g.,to send
   /// out the FULLY_ASSOCIATED message to publisher.
@@ -325,6 +328,10 @@ private:
 
   /// Convenience function for diagnostic information.
   friend std::ostream& ::operator<<(std::ostream& str, const DataLink& value);
+
+  /// A boolean indicating if the DataLink has been stopped. This
+  /// value is protected by the strategy_lock_.
+  bool stopped_;
 
   /// Map publication Id value to TransportSendListener.
   typedef std::map<RepoId, TransportSendListener*, GUID_tKeyLessThan> IdToSendListenerMap;

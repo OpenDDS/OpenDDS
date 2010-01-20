@@ -43,7 +43,6 @@ public:
                      this->lock_,
                      false);
 
-    if (this->timer_id_ != -1) return false;
     return schedule_i(reactor, arg, false);
   }
 
@@ -53,7 +52,6 @@ public:
                      this->lock_,
                      false);
 
-    if (this->timer_id_ != -1) return false;
     return schedule_i(reactor, arg, true);
   }
 
@@ -62,31 +60,31 @@ public:
               guard,
               this->lock_);
 
-    if (this->timer_id_ != -1) {
-      this->reactor_->cancel_timer(this->timer_id_);
-      cancel_i();
-    }
+    if (this->timer_id_ == -1) return;
+
+    this->reactor_->cancel_timer(this->timer_id_);
+
+    this->timer_id_ = -1;
+    this->reactor_ = 0;
+
+    this->cancelled_ = true;
   }
 
   int handle_timeout(const ACE_Time_Value& now, const void* arg) {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex,
-                     guard,
-                     this->lock_,
-                     -1);
-
     ACE_Time_Value timeout = next_timeout();
+
     if (timeout != ACE_Time_Value::zero) {
       timeout += this->epoch_;
       if (now > timeout) {
         on_timeout(arg);
-        cancel_i();
+        cancel();
         return 0;
       }
     }
 
     on_interval(arg);
 
-    if (!schedule_i(reactor(), arg, false)) {
+    if (!schedule(reactor(), arg)) {
       ACE_ERROR((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: ")
                  ACE_TEXT("DataLinkWatchdog::handle_timeout: ")
@@ -112,10 +110,12 @@ private:
   long timer_id_;
 
   ACE_Time_Value epoch_;
+  bool cancelled_;
 
   bool schedule_i(ACE_Reactor* reactor, const void* arg, bool nodelay) {
-    ACE_Time_Value delay;
+    if (this->cancelled_) return true;
 
+    ACE_Time_Value delay;
     if (!nodelay) delay = next_interval();
 
     if (this->epoch_ == ACE_Time_Value::zero) {
@@ -127,11 +127,6 @@ private:
                                               arg,
                                               delay);
     return this->timer_id_ != -1;
-  }
-
-  void cancel_i() {
-    this->reactor_ = 0;   // invalidate handle
-    this->timer_id_ = -1; // invalidate handle
   }
 };
 
