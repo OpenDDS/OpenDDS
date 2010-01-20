@@ -19,6 +19,7 @@
 #include "TransportDefs.h"
 #include "TransportConfiguration.h"
 #include "TransportConfiguration_rch.h"
+#include "TransportInterface.h"
 #include "TransportReactorTask.h"
 #include "TransportReactorTask_rch.h"
 #include "RepoIdSetMap.h"
@@ -30,7 +31,6 @@
 namespace OpenDDS {
 namespace DCPS {
 
-class TransportInterface;
 class TransportReceiveListener;
 class ThreadSynchStrategy;
 class TransportImplFactory;
