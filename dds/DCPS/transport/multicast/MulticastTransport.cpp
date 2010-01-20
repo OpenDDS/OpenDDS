@@ -236,7 +236,7 @@ MulticastTransport::reliability_lost_i(
     for (MulticastDataLinkMap::iterator link_it(this->links_.begin());
          link_it != this->links_.end(); ++link_it) {
       // We are guaranteed to have exactly one matching DataLink
-      // in the map; disassociate affected participant and return.
+      // in the map; disassociate affected participant and break.
       if (link == static_cast<DataLink*>(link_it->second.in())) {
         // As reservations are formed between two participants, we can
         // reconstruct the remote participant RepoId by substituting
@@ -254,7 +254,7 @@ MulticastTransport::reliability_lost_i(
                    std::string(converter).c_str()));
 
         interface->disassociate_participant(remote_id);
-        return;
+        break;
       }
     }
   }
