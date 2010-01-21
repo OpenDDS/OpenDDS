@@ -12,12 +12,12 @@
 
 #include "Udp_Export.h"
 
-#include "UdpDataLink_rch.h"
-
 #include "dds/DCPS/transport/framework/TransportSendStrategy.h"
 
 namespace OpenDDS {
 namespace DCPS {
+
+class UdpDataLink;
 
 class OpenDDS_Udp_Export UdpSendStrategy
   : public TransportSendStrategy {
@@ -30,7 +30,7 @@ protected:
   virtual ssize_t send_bytes_i(const iovec iov[], int n);
 
 private:
-  UdpDataLink_rch link_;
+  UdpDataLink* link_;
 };
 
 } // namespace DCPS

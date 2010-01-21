@@ -28,7 +28,9 @@ MulticastDataLink::MulticastDataLink(MulticastTransport* transport,
     transport_(transport),
     local_peer_(local_peer),
     remote_peer_(remote_peer),
-    active_(active)
+    active_(active),
+    config_(0),
+    reactor_task_(0)
 {
 }
 

@@ -12,10 +12,7 @@
 
 #include "Udp_Export.h"
 
-#include "UdpTransport.h"
-#include "UdpTransport_rch.h"
 #include "UdpConfiguration.h"
-#include "UdpConfiguration_rch.h"
 #include "UdpSendStrategy.h"
 #include "UdpSendStrategy_rch.h"
 #include "UdpReceiveStrategy.h"
@@ -26,10 +23,11 @@
 
 #include "dds/DCPS/transport/framework/DataLink.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
-#include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
 
 namespace OpenDDS {
 namespace DCPS {
+
+class UdpTransport;
 
 class OpenDDS_Udp_Export UdpDataLink
   : public DataLink {
@@ -57,11 +55,10 @@ public:
   bool open(const ACE_INET_Addr& remote_address);
 
 protected:
-  UdpTransport_rch transport_;
   bool active_;
 
-  UdpConfiguration_rch config_;
-  TransportReactorTask_rch reactor_task_;
+  UdpConfiguration* config_;
+  TransportReactorTask* reactor_task_;
 
   UdpSendStrategy_rch send_strategy_;
   UdpReceiveStrategy_rch recv_strategy_;

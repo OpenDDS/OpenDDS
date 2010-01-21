@@ -12,14 +12,14 @@
 
 #include "Udp_Export.h"
 
-#include "UdpDataLink_rch.h"
-
 #include "ace/Event_Handler.h"
 
 #include "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
 
 namespace OpenDDS {
 namespace DCPS {
+
+class UdpDataLink;
 
 class OpenDDS_Udp_Export UdpReceiveStrategy
   : public TransportReceiveStrategy,
@@ -42,7 +42,7 @@ protected:
   virtual void stop_i();
 
 private:
-  UdpDataLink_rch link_;
+  UdpDataLink* link_;
 };
 
 } // namespace DCPS

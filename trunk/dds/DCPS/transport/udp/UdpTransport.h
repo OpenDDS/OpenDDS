@@ -13,7 +13,6 @@
 #include "Udp_Export.h"
 
 #include "UdpConfiguration.h"
-#include "UdpConfiguration_rch.h"
 #include "UdpDataLink.h"
 #include "UdpDataLink_rch.h"
 
@@ -47,7 +46,7 @@ protected:
   virtual void release_datalink_i(DataLink* link, bool release_pending);
 
 private:
-  UdpConfiguration_rch config_i_;
+  UdpConfiguration* config_i_;
 
   UdpDataLink_rch server_link_;
 
