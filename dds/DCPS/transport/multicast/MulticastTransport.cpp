@@ -214,6 +214,7 @@ void
 MulticastTransport::reliability_lost_i(DataLink* link,
                                        const InterfaceListType& interfaces)
 {
+  // Prevent link from sending/receiving unreliable data:
   link->stop();
 
   // Disassociate all associations matching the remote peer:
@@ -240,6 +241,7 @@ MulticastTransport::reliability_lost_i(DataLink* link,
     }
   }
 
+  // Prevent future associations from acquiring this link:
   release_datalink_i(link, false);
 }
 

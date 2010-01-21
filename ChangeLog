@@ -1,3 +1,9 @@
+Thu Jan 21 18:36:56 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Documentation updates.
+
 Thu Jan 21 18:33:56 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
@@ -13,7 +19,7 @@ Thu Jan 21 18:33:56 UTC 2010  Steven Stallion  <stallions@ociweb.com>
         * dds/DCPS/transport/udp/UdpSendStrategy.h:
         * dds/DCPS/transport/udp/UdpTransport.h:
         * dds/DCPS/transport/udp/UdpTransport.cpp:
-          
+
           Re-worked refcounting behavior.
 
         * dds/DCPS/transport/udp/UdpConfiguration_rch.h:
