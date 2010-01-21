@@ -23,7 +23,9 @@ UdpDataLink::UdpDataLink(UdpTransport* transport,
                          bool active)
   : DataLink(transport,
              0), // priority
-    active_(active)
+    active_(active),
+    config_(0),
+    reactor_task_(0)
 {
 }
 

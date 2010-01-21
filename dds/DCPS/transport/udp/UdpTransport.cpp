@@ -8,6 +8,8 @@
  */
 
 #include "UdpTransport.h"
+#include "UdpSendStrategy.h"
+#include "UdpReceiveStrategy.h"
 
 #include "ace/CDR_Base.h"
 #include "ace/Log_Msg.h"
@@ -42,7 +44,9 @@ UdpTransport::find_or_create_datalink(
   }
 
   // Create new DataLink for logical connection:
-  UdpDataLink_rch link = new UdpDataLink(this, active);
+  UdpDataLink_rch link;
+  ACE_NEW_RETURN(link, UdpDataLink(this, active), 0);
+
   if (link.is_nil()) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
@@ -52,12 +56,19 @@ UdpTransport::find_or_create_datalink(
   }
 
   // Configure link with transport configuration and reactor task:
-  link->configure(this->config_i_.in(), reactor_task());
+  link->configure(this->config_i_, reactor_task());
 
-  // Assign send/receive strategies:
-  link->send_strategy(new UdpSendStrategy(link.in()));
-  link->receive_strategy(new UdpReceiveStrategy(link.in()));
+  // Assign send strategy:
+  UdpSendStrategy* send_strategy;
+  ACE_NEW_RETURN(send_strategy, UdpSendStrategy(link.in()), 0);
+  link->send_strategy(send_strategy);
 
+  // Assign receive strategy:
+  UdpReceiveStrategy* recv_strategy;
+  ACE_NEW_RETURN(recv_strategy, UdpReceiveStrategy(link.in()), 0);
+  link->receive_strategy(recv_strategy);
+
+  // Open logical connection:
   ACE_INET_Addr remote_address(
     connection_info_i(remote_association->remote_data_));
 
@@ -82,14 +93,14 @@ int
 UdpTransport::configure_i(TransportConfiguration* config)
 {
   this->config_i_ = dynamic_cast<UdpConfiguration*>(config);
-  if (this->config_i_.is_nil()) {
+  if (this->config_i_ == 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("UdpTransport::configure_i: ")
                       ACE_TEXT("invalid configuration!\n")),
                      -1);
   }
-  this->config_i_->_add_ref();  // take ownership
+  this->config_i_->_add_ref();
 
   return 0;
 }
@@ -104,7 +115,8 @@ UdpTransport::shutdown_i()
   }
   this->client_links_.clear();
 
-  this->config_i_ = 0;  // release ownership
+  this->config_i_->_remove_ref();
+  this->config_i_ = 0;
 }
 
 int

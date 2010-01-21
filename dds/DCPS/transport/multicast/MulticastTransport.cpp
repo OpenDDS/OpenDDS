@@ -74,11 +74,12 @@ MulticastTransport::find_or_create_datalink(
   // Configure link with transport configuration and reactor task:
   link->configure(this->config_i_, reactor_task());
 
-  // Assign send/receive strategies:
+  // Assign send strategy:
   MulticastSendStrategy *send_strategy;
   ACE_NEW_RETURN(send_strategy, MulticastSendStrategy(link.in()), 0);
   link->send_strategy(send_strategy);
 
+  // Assign receive strategy:
   MulticastReceiveStrategy *recv_strategy;
   ACE_NEW_RETURN(recv_strategy, MulticastReceiveStrategy(link.in()), 0);
   link->receive_strategy(recv_strategy);
