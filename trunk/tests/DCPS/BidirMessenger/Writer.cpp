@@ -18,13 +18,13 @@
 #include "Writer.h"
 
 const int num_instances_per_writer = 1;
-const int num_messages = 10;
 
-Writer::Writer(DDS::DataWriter_ptr writer, int num_processes)
+Writer::Writer(DDS::DataWriter_ptr writer, int num_processes, int num_samples_per_topic)
   : writer_(DDS::DataWriter::_duplicate(writer)),
     finished_instances_(0),
     timeout_writes_(0),
-    num_processes_(num_processes)
+    num_processes_(num_processes),
+    num_samples_per_topic_(num_samples_per_topic)
 {
 }
 
@@ -107,7 +107,7 @@ Writer::svc()
     message.text       = CORBA::string_dup("Worst. Movie. Ever.");
     message.count      = 0;
 
-    for (int i = 0; i < num_messages; i++) {
+    for (int i = 0; i < this->num_samples_per_topic_; i++) {
       DDS::ReturnCode_t error = message_dw->write(message, handle);
 
       if (error != DDS::RETCODE_OK) {
@@ -147,5 +147,5 @@ Writer::get_timeout_writes() const
 int
 Writer::get_num_writes() const
 {
-  return num_messages;
+  return this->num_samples_per_topic_;
 }

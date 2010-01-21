@@ -187,7 +187,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           ACE_TEXT("%N:%l main()")
                           ACE_TEXT(" ERROR: get_subscription_matched_status() failed!\n")), -1);
       }
-    } while (matches.current_count > 0);
+    } while (1);
 
     ws->detach_condition(condition);
 
