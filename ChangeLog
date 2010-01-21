@@ -1,3 +1,10 @@
+Thu Jan 21 18:41:09 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Add NULL initializers for pointer types.
+
 Thu Jan 21 18:36:56 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastTransport.cpp:
