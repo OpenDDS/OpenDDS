@@ -29,6 +29,11 @@ const CORBA::Long TRANSPORT_INTERFACE_ID(0x4d435354); // MCST
 namespace OpenDDS {
 namespace DCPS {
 
+MulticastTransport::MulticastTransport()
+  : config_i_(0)
+{
+}
+
 DataLink*
 MulticastTransport::find_or_create_datalink(
   RepoId local_id,

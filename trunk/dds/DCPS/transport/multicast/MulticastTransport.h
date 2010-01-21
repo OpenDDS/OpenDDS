@@ -26,6 +26,8 @@ namespace DCPS {
 class OpenDDS_Multicast_Export MulticastTransport
   : public TransportImpl {
 protected:
+  MulticastTransport();
+
   virtual DataLink* find_or_create_datalink(
     RepoId local_id,
     const AssociationData* remote_association,
