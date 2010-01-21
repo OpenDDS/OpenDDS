@@ -1,3 +1,9 @@
+Thu Jan 21 00:13:13 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+        
+          Corrected the if condition in repository_lost().
+
 Wed Jan 20 22:07:26 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.h:
