@@ -1,3 +1,16 @@
+Thu Jan 21 19:06:39 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/BidirMessenger/DataReaderListener.h:
+        * tests/DCPS/BidirMessenger/DataReaderListener.cpp:
+        * tests/DCPS/BidirMessenger/Writer.h:
+        * tests/DCPS/BidirMessenger/Writer.cpp:
+        * tests/DCPS/BidirMessenger/pubsub.cpp:
+        * tests/DCPS/BidirMessenger/run_test.pl:
+        * tests/DCPS/Messenger/Writer.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          Applied changes submitted by Don Busch to BidirMessenger test.
+
 Thu Jan 21 18:42:57 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastTransport.h:

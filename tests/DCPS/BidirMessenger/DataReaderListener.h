@@ -11,6 +11,7 @@
 #define DATAREADER_LISTENER_IMPL
 
 #include <dds/DdsDcpsSubscriptionS.h>
+#include <ace/Synch.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -61,12 +62,15 @@ public:
   throw(CORBA::SystemException);
 
   long num_reads() const {
+    ACE_Guard<ACE_Mutex> guard(this->lock_);
     return num_reads_;
   }
 
 private:
   DDS::DataReader_var  reader_;
   long                 num_reads_;
+
+  mutable ACE_Mutex    lock_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */

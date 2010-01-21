@@ -46,14 +46,16 @@ throw(CORBA::SystemException)
     DDS::SampleInfo si;
 
     DDS::ReturnCode_t status = message_dr->take_next_sample(message, si) ;
- 
-
-    if (status == DDS::RETCODE_OK) {
+    while (status == DDS::RETCODE_OK) {
+#if 0
       std::cout << "SampleInfo.sample_rank = " << si.sample_rank << std::endl;
       std::cout << "SampleInfo.instance_state = " << si.instance_state << std::endl;
+#endif
 
       if (si.valid_data) {
+        ACE_Guard<ACE_Mutex> guard(this->lock_);
         num_reads_ ++;
+#if 0
         std::cout << "Message: subject    = " << message.subject.in() << std::endl
                   << "         subject_id = " << message.subject_id   << std::endl
                   << "         from       = " << message.from.in()    << std::endl
@@ -61,7 +63,7 @@ throw(CORBA::SystemException)
                   << "         text       = " << message.text.in()    << std::endl
                   << "         Source Pid = " << message.source_pid   << std::endl
                   << "         Reader Pid = " << ACE_OS::getpid()     << std::endl;
-
+#endif
       } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
 
@@ -74,12 +76,8 @@ throw(CORBA::SystemException)
                    ACE_TEXT(" ERROR: unknown instance state: %d\n"),
                    si.instance_state));
       }
-
-    } else {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("%N:%l: on_data_available()")
-                 ACE_TEXT(" ERROR: unexpected status: %d\n"),
-                 status));
+      // take the next one
+      status = message_dr->take_next_sample(message, si);
     }
 
   } catch (const CORBA::Exception& e) {

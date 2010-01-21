@@ -16,7 +16,7 @@
 class Writer : public ACE_Task_Base {
 public:
 
-  Writer(DDS::DataWriter_ptr writer, int num_processes);
+  Writer(DDS::DataWriter_ptr writer, int num_processes, int num_samples_per_topic);
 
   void start();
 
@@ -36,6 +36,7 @@ private:
   ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> finished_instances_;
   ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> timeout_writes_;
   int num_processes_;
+  int num_samples_per_topic_;
 };
 
 #endif /* WRITER_H */
