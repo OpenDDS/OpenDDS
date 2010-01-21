@@ -922,7 +922,8 @@ Service_Participant::repository_lost(const RepoKey key)
   int backoff = this->federation_initial_backoff_seconds();
 
   // Keep trying until the total recovery time specified is exceeded.
-  while (recoveryFailedTime < ACE_OS::gettimeofday()) {
+  while (recoveryFailedTime > ACE_OS::gettimeofday()) {
+
     // Wrap to the beginning at the end of the list.
     if (current == this->repoMap_.end()) {
       // Continue to traverse the list.
