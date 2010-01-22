@@ -18,7 +18,7 @@
 #include "Writer.h"
 
 const int num_instances_per_writer = 1;
-const int num_messages = 100000000;
+const int num_messages = 10;
 
 Writer::Writer(DDS::DataWriter_ptr writer)
   : writer_(DDS::DataWriter::_duplicate(writer)),
