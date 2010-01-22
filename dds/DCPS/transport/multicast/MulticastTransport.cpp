@@ -226,7 +226,7 @@ MulticastTransport::reliability_lost_i(DataLink* link,
   for (InterfaceListType::const_iterator it(interfaces.begin());
        it != interfaces.end(); ++it) {
 
-    TransportInterface* interface = *it;
+    TransportInterface* intf = *it;
 
     for (MulticastDataLinkMap::iterator link_it(this->links_.begin());
          link_it != this->links_.end(); ++link_it) {
@@ -235,12 +235,12 @@ MulticastTransport::reliability_lost_i(DataLink* link,
       if (link == static_cast<DataLink*>(link_it->second.in())) {
         // Reconstruct the remote participant RepoId by substituting
         // the local participantId with the remote peer identifier:
-        RepoId remote_id(interface->get_participant_id());
+        RepoId remote_id(intf->get_participant_id());
 
         RepoIdBuilder builder(remote_id);
         builder.participantId(link_it->first);
 
-        interface->disassociate_participant(remote_id);
+        intf->disassociate_participant(remote_id);
         break;
       }
     }

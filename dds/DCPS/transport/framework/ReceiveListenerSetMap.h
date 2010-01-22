@@ -21,7 +21,6 @@
 namespace OpenDDS {
 namespace DCPS {
 
-class TransportInterface;
 class TransportReceiveListener;
 class ReceivedDataSample;
 
