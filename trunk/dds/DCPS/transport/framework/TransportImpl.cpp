@@ -99,14 +99,12 @@ OpenDDS::DCPS::TransportImpl::reliability_lost(DataLink* link)
     for (InterfaceMapType::iterator it(this->interfaces_.begin());
          it != this->interfaces_.end(); ++it) {
 
-      TransportInterface* interface = it->second;
-
-      SubscriberImpl* subscriber = dynamic_cast<SubscriberImpl*>(interface);
+      SubscriberImpl* subscriber = dynamic_cast<SubscriberImpl*>(it->second);
       if (subscriber != 0) {
         subscriber->_add_ref();
 
       } else {
-        PublisherImpl* publisher = dynamic_cast<PublisherImpl*>(interface);
+        PublisherImpl* publisher = dynamic_cast<PublisherImpl*>(it->second);
         if (publisher != 0) {
           publisher->_add_ref();
 
@@ -117,7 +115,7 @@ OpenDDS::DCPS::TransportImpl::reliability_lost(DataLink* link)
           return;
         }
       }
-      interfaces.push_back(interface);
+      interfaces.push_back(it->second);
     }
   }
 
