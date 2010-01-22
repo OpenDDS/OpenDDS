@@ -1,3 +1,9 @@
+Fri Jan 22 20:20:35 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/Messenger/subscriber.cpp:
+          
+          Fixed locally modified conditional used for stress testing.
+
 Fri Jan 22 19:46:57 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/framework/ReceiveListenerSetMap.h:
