@@ -1,3 +1,14 @@
+Fri Jan 22 16:09:19 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Temporarily disabled nightly BidirMessenger tests until
+          transport issues have been resolved.
+
+        * tests/DCPS/Messenger/Writer.cpp:
+
+          Fixed locally modified constant used for stress testing.
+
 Thu Jan 21 19:06:39 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tests/DCPS/BidirMessenger/DataReaderListener.h:

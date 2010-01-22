@@ -148,11 +148,11 @@ tests/DCPS/Messenger/run_corbaloc_test.pl: !DCPS_MIN
 tests/DCPS/Messenger/run_ns_test.pl: !DCPS_MIN !DDS_NO_ORBSVCS
 tests/DCPS/Messenger/run_test.pl ipv6: IPV6 !DCPS_MIN
 
-tests/DCPS/BidirMessenger/run_test.pl: !DCPS_MIN
-tests/DCPS/BidirMessenger/run_test.pl udp: !DCPS_MIN
-tests/DCPS/BidirMessenger/run_test.pl multicast: !DCPS_MIN !QNX
-tests/DCPS/BidirMessenger/run_test.pl nobits: !DCPS_MIN
-tests/DCPS/BidirMessenger/run_test.pl ipv6: IPV6 !DCPS_MIN
+##tests/DCPS/BidirMessenger/run_test.pl: !DCPS_MIN
+##tests/DCPS/BidirMessenger/run_test.pl udp: !DCPS_MIN
+##tests/DCPS/BidirMessenger/run_test.pl multicast: !DCPS_MIN !QNX
+##tests/DCPS/BidirMessenger/run_test.pl nobits: !DCPS_MIN
+##tests/DCPS/BidirMessenger/run_test.pl ipv6: IPV6 !DCPS_MIN
 
 examples/DCPS/Messenger_Imr/run_test.pl: !DCPS_MIN !MIN_CORBA !CORBA_E_COMPACT !CORBA_E_MICRO !DDS_NO_ORBSVCS
 
