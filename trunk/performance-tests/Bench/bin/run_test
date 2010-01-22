@@ -10,7 +10,17 @@ use FindBin;
 my $projectRoot;
 BEGIN { $projectRoot = "$FindBin::Bin/.."; }
 
+# Use information from the environment.
+use Env qw( @LD_LIBRARY_PATH
+            @LIB_PATH
+            @SHLIB_PATH
+            @PATH
+            $DDS_ROOT
+            $ACE_ROOT);
+
 # Locate the Perl modules
+use lib "$ACE_ROOT/bin";
+use lib "$DDS_ROOT/bin";
 use lib "$projectRoot/bin";
 use PerlDDS::Run_Test;
 
@@ -20,7 +30,6 @@ use PerlDDS::Run_Test;
 # PerlDDS::add_lib_path( "$projectRoot/lib");
 #  NOTE: add_lib_path() does not appear to export the path to the
 #        subprocess sufficiently for use by our subprocesses.
-use Env qw( @LD_LIBRARY_PATH @LIB_PATH @SHLIB_PATH @PATH);
 unshift @LD_LIBRARY_PATH, "$projectRoot/lib";
 unshift @LIB_PATH,        "$projectRoot/lib";
 unshift @SHLIB_PATH,      "$projectRoot/lib";

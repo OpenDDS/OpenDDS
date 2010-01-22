@@ -1,7 +1,23 @@
+Fri Jan 22 22:13:53 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/mktiddler.pl:
+
+          New script to generate a TiddlyWiki format table from latency
+          test data created with the bin/extract.pl script.
+
+        * performance-tests/Bench/bin/run_test:
+
+          Added DDS_ROOT and ACE_ROOT to the search path so the script
+          can execute from a local directory.
+
+        * performance-tests/Bench/tools/plot-all.gp:
+
+          Cosmetic cleanup for readability.
+
 Fri Jan 22 20:20:35 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tests/DCPS/Messenger/subscriber.cpp:
-          
+
           Fixed locally modified conditional used for stress testing.
 
 Fri Jan 22 19:46:57 UTC 2010  Steven Stallion  <stallions@ociweb.com>
