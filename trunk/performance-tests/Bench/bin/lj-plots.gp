@@ -1,0 +1,55 @@
+
+# Call parameters:
+#   $0 - datafilename
+#   $1 - statsfilename
+#   $2 - outputfilename
+#   $3 - multiplot title
+
+set datafile separator whitespace
+
+load '$1'
+set terminal push
+set terminal png size 1290,770
+set output '$2'
+set multiplot layout 2,2 title '$3'
+
+set grid
+set autoscale
+unset label
+
+# Latency plot
+set key off
+set title "Latency per sample"
+set xlabel "Elapsed Time (seconds)"
+set ylabel "Latency (seconds)"
+set format x "%.1s%c"
+set format y "%.1s%cS"
+plot '$0' index 0 using (column(0)/100):(column(1)) with lines lt rgb '#600000'
+
+# Jitter plot
+set title "Jitter per sample"
+set ylabel "Jitter (seconds)"
+plot '$0' index 0 using (column(0)/100):(column(2)) with lines lt rgb '#600000'
+
+# Latency histogram
+set title "Latency Distribution"
+set xlabel "Latency (seconds)"
+set ylabel "Frequency (samples)"
+set label latency_stats at graph 0.6,0.9
+set format x "%.0s%cS"
+set format y "%.1s%c"
+set style fill solid 0.8
+plot '$0' index 1 using (column(1)):2 with boxes lt rgb '#600000'
+unset label
+
+# Jitter histogram
+set title "Jitter Distribution"
+set label jitter_stats at graph 0.6,0.9
+set xlabel "Jitter (seconds)"
+plot '$0' index 2 using (column(1)):2 with boxes lt rgb '#600000'
+unset label
+
+unset multiplot
+set output
+set terminal pop
+
