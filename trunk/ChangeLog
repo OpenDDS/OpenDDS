@@ -1,3 +1,10 @@
+Mon Jan 25 17:29:06 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * java/idl2jni/codegen/idl2jni_visitor.h:
+        * java/idl2jni/codegen/idl2jni_visitor.cpp:
+
+          Added compatibility with latest DOC group TAO_IDL compiler.
+
 Mon Jan 25 17:05:00 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportImpl.h:

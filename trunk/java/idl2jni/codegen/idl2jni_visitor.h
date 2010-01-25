@@ -120,6 +120,8 @@ public:
 
   virtual int visit_template_module_ref (AST_Template_Module_Ref *node);
 
+  virtual int visit_param_holder(AST_Param_Holder *node);
+
   //#  else
 
   virtual int visit_template_interface(AST_Template_Interface *node);
