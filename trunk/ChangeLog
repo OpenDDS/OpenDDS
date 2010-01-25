@@ -1,3 +1,10 @@
+Mon Jan 25 17:05:00 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+
+          Went back to just a fwd decl (not an include) of TransportImpl.
+          This was required for gcc 3.3.2.
+
 Fri Jan 22 22:13:53 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/bin/mktiddler.pl:
