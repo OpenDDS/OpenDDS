@@ -618,6 +618,12 @@ idl2jni_visitor::visit_template_module_ref (AST_Template_Module_Ref *)
   return 0;
 }
 
+int
+idl2jni_visitor::visit_param_holder(AST_Param_Holder *)
+{
+  return 0;
+}
+
 //#  else
 
 int idl2jni_visitor::visit_template_interface(AST_Template_Interface *)
