@@ -7,8 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_FEDERATOR_IDL
-#define TAO_DDS_FEDERATOR_IDL
+#ifndef OPENDDS_FEDERATOR_IDL
+#define OPENDDS_FEDERATOR_IDL
 
 #include "dds/DdsDcpsInfo.idl"
 #include "dds/DdsDcpsGuid.idl"
@@ -35,7 +35,7 @@ module OpenDDS { module Federator {
 
     // Constant values.
     const RepoKey          NIL_REPOSITORY           = 0; // Reserved repository Id value.
-    const FederationDomain DEFAULT_FEDERATIONDOMAIN = 0x5265706f;
+    const FederationDomain DEFAULT_FEDERATIONDOMAIN = -2107281297;
     const FederationDomain ANY_FEDERATIONDOMAIN     = -1;
 
     ////////////////////////////////////////////////////////////////////
@@ -266,4 +266,4 @@ module OpenDDS { module Federator {
 
 }; }; // End of OpenDDS::Federator
 
-#endif /* TAO_DDS_FEDERATOR_IDL */
+#endif /* OPENDDS_FEDERATOR_IDL */

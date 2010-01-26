@@ -1,3 +1,12 @@
+Tue Jan 26 22:34:19 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DdsDcpsInfrastructure.idl:
+        * dds/InfoRepo/Federator.idl:
+        * dds/monitor/monitor.idl:
+
+          Provide a constant for the maximum user Domain ID.  Move all Domain
+          IDs used by OpenDDS to the range above that constant.
+
 Tue Jan 26 15:22:28 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastTransport.cpp:
