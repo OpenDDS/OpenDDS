@@ -711,6 +711,9 @@ module OpenDDS
   // potential conflicts with new OMG defined QosPolicyId_t values.
   const ::DDS::QosPolicyId_t TRANSPORTTYPE_QOS_POLICY_ID = 0x7fffffff;
 
+  // DomainIds used by the implementation will be larger than this constant:
+  const ::DDS::DomainId_t MAX_USER_DOMAINID = 0x7fffffff;
+
   module DCPS
   {
     const DDS::StatusMask ALL_STATUS_MASK = 0xffffffff;
