@@ -1,3 +1,9 @@
+Tue Jan 26 15:22:28 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          inline=0 builds now require an #include of TransportInterface.h
+
 Mon Jan 25 17:29:06 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * java/idl2jni/codegen/idl2jni_visitor.h:
