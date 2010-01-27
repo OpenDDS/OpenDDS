@@ -163,6 +163,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     for (int i = 0; i < 10; i++) {
       DDS::ReturnCode_t error = message_writer->write(message, DDS::HANDLE_NIL);
+      ++message.count;
 
       if (error != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR,
