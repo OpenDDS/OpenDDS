@@ -7,14 +7,13 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include "MulticastSessionFactory.h"
+
 namespace OpenDDS {
 namespace DCPS {
 
-ACE_INLINE void
-ReliableMulticast::reliability_lost()
+MulticastSessionFactory::~MulticastSessionFactory()
 {
-  // Notify transport that reliability has been compromised:
-  this->transport_->reliability_lost(this);
 }
 
 } // namespace DCPS

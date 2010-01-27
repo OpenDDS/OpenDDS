@@ -22,23 +22,15 @@
 namespace OpenDDS {
 namespace DCPS {
 
-template<typename LINK>
+template<typename ACE_LOCK>
 class DataLinkWatchdog : public ACE_Event_Handler {
 public:
-  typedef LINK* ptr_type;
-
-  explicit DataLinkWatchdog(ptr_type link)
-    : link_(link),
-      reactor_(0),
-      timer_id_(-1)
-  {}
-
   virtual ~DataLinkWatchdog() {
     cancel();
   }
 
   bool schedule(ACE_Reactor* reactor, const void* arg = 0) {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex,
+    ACE_GUARD_RETURN(ACE_LOCK,
                      guard,
                      this->lock_,
                      false);
@@ -47,7 +39,7 @@ public:
   }
 
   bool schedule_now(ACE_Reactor* reactor, const void* arg = 0) {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex,
+    ACE_GUARD_RETURN(ACE_LOCK,
                      guard,
                      this->lock_,
                      false);
@@ -56,7 +48,7 @@ public:
   }
 
   void cancel() {
-    ACE_GUARD(ACE_Thread_Mutex,
+    ACE_GUARD(ACE_LOCK,
               guard,
               this->lock_);
 
@@ -95,7 +87,10 @@ public:
   }
 
 protected:
-  ptr_type link_;
+  DataLinkWatchdog()
+    : reactor_(0),
+      timer_id_(-1)
+  {}
 
   virtual ACE_Time_Value next_interval() = 0;
   virtual void on_interval(const void* arg) = 0;
@@ -104,7 +99,7 @@ protected:
   virtual void on_timeout(const void* /*arg*/) {}
 
 private:
-  ACE_Thread_Mutex lock_;
+  ACE_LOCK lock_;
 
   ACE_Reactor* reactor_;
   long timer_id_;

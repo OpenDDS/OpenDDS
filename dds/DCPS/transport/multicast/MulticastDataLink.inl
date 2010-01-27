@@ -10,12 +10,10 @@
 namespace OpenDDS {
 namespace DCPS {
 
-ACE_INLINE void
-MulticastDataLink::configure(MulticastConfiguration* config,
-                             TransportReactorTask* reactor_task)
+ACE_INLINE MulticastTransport*
+MulticastDataLink::transport()
 {
-  this->config_ = config;
-  this->reactor_task_ = reactor_task;
+  return this->transport_;
 }
 
 ACE_INLINE MulticastPeer
@@ -24,16 +22,22 @@ MulticastDataLink::local_peer() const
   return this->local_peer_;
 }
 
-ACE_INLINE MulticastPeer
-MulticastDataLink::remote_peer() const
+ACE_INLINE MulticastSendStrategy*
+MulticastDataLink::send_strategy()
 {
-  return this->remote_peer_;
+  return this->send_strategy_.in();
 }
 
-ACE_INLINE bool
-MulticastDataLink::active() const
+ACE_INLINE MulticastReceiveStrategy*
+MulticastDataLink::receive_strategy()
 {
-  return this->active_;
+  return this->recv_strategy_.in();
+}
+
+ACE_INLINE TransportSendBuffer*
+MulticastDataLink::send_buffer()
+{
+  return this->send_buffer_.in();
 }
 
 ACE_INLINE MulticastConfiguration*

@@ -1173,7 +1173,7 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header)
         // a baseline must be established based on the first
         // data sample received.
         writer->seen_data_ = true;
-        writer->ack_sequence_.skip(header.sequence_);
+        writer->ack_sequence_.reset(header.sequence_);
       }
     }
   }

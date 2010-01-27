@@ -9,6 +9,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "TransportImpl.h"
+#include "DataLink.h"
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/PublisherImpl.h"
@@ -67,16 +68,6 @@ OpenDDS::DCPS::TransportImpl::~TransportImpl()
 }
 
 void
-OpenDDS::DCPS::TransportImpl::reliability_lost_i(
-  DataLink* /*link*/,
-  const InterfaceListType& /*interfaces*/)
-{
-  // Subclass should override if interested in the
-  // reliability_lost "event".
-  DBG_ENTRY_LVL("TransportImpl","reliability_lost_i",6);
-}
-
-void
 OpenDDS::DCPS::TransportImpl::reliability_lost(DataLink* link)
 {
   DBG_ENTRY_LVL("TransportImpl","reliability_lost",6);
@@ -88,7 +79,7 @@ OpenDDS::DCPS::TransportImpl::reliability_lost(DataLink* link)
   // some rather evil sideways casting to find the correct interface.
   //
   // This code makes me die a little inside...
-  InterfaceListType interfaces;
+  DataLink::InterfaceListType interfaces;
 
   // Acquire resources for callbacks:
   {
@@ -119,13 +110,15 @@ OpenDDS::DCPS::TransportImpl::reliability_lost(DataLink* link)
     }
   }
 
+  if (interfaces.empty()) return; // nothing to notify
+
   // Notify subclass; This callback will likely result in a remote
   // call to the DCPSInfoRepo to either dissolve or re-form one or
   // more associations:
-  reliability_lost_i(link, interfaces);
+  link->reliability_lost(interfaces);
 
   // Release acquired resources:
-  for (InterfaceListType::iterator it(interfaces.begin());
+  for (DataLink::InterfaceListType::iterator it(interfaces.begin());
        it != interfaces.end(); ++it) {
 
     SubscriberImpl* subscriber = dynamic_cast<SubscriberImpl*>(*it);

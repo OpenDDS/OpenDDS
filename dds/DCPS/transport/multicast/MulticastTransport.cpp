@@ -8,15 +8,15 @@
  */
 
 #include "MulticastTransport.h"
-#include "ReliableMulticast.h"
-#include "BestEffortMulticast.h"
-#include "MulticastSendStrategy.h"
+#include "MulticastDataLink.h"
 #include "MulticastReceiveStrategy.h"
+#include "MulticastSendStrategy.h"
+#include "MulticastSession.h"
+#include "BestEffortSessionFactory.h"
+#include "ReliableSessionFactory.h"
 
-#include "ace/CDR_Base.h"
 #include "ace/Log_Msg.h"
 
-#include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/transport/framework/TransportInterface.h"
@@ -42,84 +42,73 @@ MulticastTransport::find_or_create_datalink(
   CORBA::Long /*priority*/,
   bool active)
 {
-  // This transport forms reservations between DomainParticipants.
-  // Given that TransportImpl instances may only be attached either
+  // To accommodate the one-to-many nature of multicast reservations,
+  // a session layer is used to maintain state between unique pairs
+  // of DomainParticipants over a single DataLink instance. Given
+  // that TransportImpl instances may only be attached either
   // Subscribers or Publishers within the same DomainParticipant,
   // it may be assumed that the local_id always references the same
   // participant. The remote_id may match one or more publications
   // or subscriptions belonging to the same remote participant.
+  if (this->link_.is_nil()) {
+    MulticastSessionFactory* session_factory;
+    if (this->config_i_->reliable_) {
+      ACE_NEW_RETURN(session_factory, ReliableSessionFactory, 0);
+    } else {
+      ACE_NEW_RETURN(session_factory, BestEffortSessionFactory, 0);
+    }
+
+    MulticastPeer local_peer = RepoIdConverter(local_id).participantId();
+
+    MulticastDataLink_rch link;
+    ACE_NEW_RETURN(link,
+                   MulticastDataLink(this, session_factory, local_peer),
+                   0);
+
+    // Configure link with transport configuration and reactor task:
+    link->configure(this->config_i_, reactor_task());
+
+    // Assign send strategy:
+    MulticastSendStrategy* send_strategy;
+    ACE_NEW_RETURN(send_strategy, MulticastSendStrategy(link.in()), 0);
+    link->send_strategy(send_strategy);
+
+    // Assign receive strategy:
+    MulticastReceiveStrategy* recv_strategy;
+    ACE_NEW_RETURN(recv_strategy, MulticastReceiveStrategy(link.in()), 0);
+    link->receive_strategy(recv_strategy);
+
+    // Join multicast group:
+    if (!link->join(this->config_i_->group_address_)) {
+      ACE_TCHAR str[64];
+      this->config_i_->group_address_.addr_to_string(str, sizeof(str));
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
+                        ACE_TEXT("failed to join multicast group: %C!\n"),
+                        str),
+                       0);
+    }
+
+    this->link_ = link;
+
+    // @TODO TEMPORARY HACK
+    this->link_->_add_ref();
+  }
+
   MulticastPeer remote_peer =
     RepoIdConverter(remote_association->remote_id_).participantId();
 
-  MulticastDataLinkMap::iterator it(this->links_.find(remote_peer));
-  if (it != this->links_.end()) return it->second.in();  // found
-
-  // At this point we may assume that we are creating a new DataLink
-  // between a logical pair of peers identified by a participantId:
-  MulticastPeer local_peer = RepoIdConverter(local_id).participantId();
-
-  // This transport supports two modes of operation: reliable and
-  // best-effort; mode selection is based on transport configuration:
-  MulticastDataLink_rch link;
-  if (this->config_i_->reliable_) {
-    ACE_NEW_RETURN(link,
-                   ReliableMulticast(this,
-                                     local_peer,
-                                     remote_peer,
-                                     active),
-                   0);
-  } else {
-    ACE_NEW_RETURN(link,
-                   BestEffortMulticast(this,
-                                       local_peer,
-                                       remote_peer,
-                                       active),
-                   0);
-  }
-
-  // Configure link with transport configuration and reactor task:
-  link->configure(this->config_i_, reactor_task());
-
-  // Assign send strategy:
-  MulticastSendStrategy *send_strategy;
-  ACE_NEW_RETURN(send_strategy, MulticastSendStrategy(link.in()), 0);
-  link->send_strategy(send_strategy);
-
-  // Assign receive strategy:
-  MulticastReceiveStrategy *recv_strategy;
-  ACE_NEW_RETURN(recv_strategy, MulticastReceiveStrategy(link.in()), 0);
-  link->receive_strategy(recv_strategy);
-
-  // Join multicast group:
-  ACE_INET_Addr group_address;
-  if (active) {
-    // Active peers obtain the group address via the
-    // TransportInterfaceBLOB in the TranpsortInterfaceInfo:
-    group_address = connection_info_i(remote_association->remote_data_);
-
-  } else {
-    // Passive peers obtain the group address via the transport
-    // configuration:
-    group_address = this->config_i_->group_address_;
-  }
-
-  if (!link->join(group_address)) {
-    ACE_TCHAR group_address_s[64];
-    group_address.addr_to_string(group_address_s, sizeof(group_address_s));
+  if (!this->link_->obtain_session(remote_peer, active)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
-                      ACE_TEXT("failed to join multicast group: %C!\n"),
-                      group_address_s),
+                      ACE_TEXT("failed to activate session for remote peer: 0x%x!\n"),
+                      remote_peer),
                      0);
   }
 
-  // Insert new link into the links map; this allows DataLinks to be
-  // shared by additional publications or subscriptions belonging to
-  // the same participant:
-  this->links_.insert(MulticastDataLinkMap::value_type(remote_peer, link));
-
-  return link._retn();
+  return this->link_.in();
 }
 
 int
@@ -141,12 +130,9 @@ MulticastTransport::configure_i(TransportConfiguration* config)
 void
 MulticastTransport::shutdown_i()
 {
-  // Shutdown reserved datalinks and release configuration:
-  for (MulticastDataLinkMap::iterator it(this->links_.begin());
-       it != this->links_.end(); ++it) {
-    it->second->transport_shutdown();
+  if (!this->link_.is_nil()) {
+    this->link_->transport_shutdown();
   }
-  this->links_.clear();
 
   this->config_i_->_remove_ref();
   this->config_i_ = 0;
@@ -163,50 +149,28 @@ MulticastTransport::connection_info_i(TransportInterfaceInfo& info) const
   size_t len = cdr.total_length();
   char *buffer = const_cast<char*>(cdr.buffer()); // safe
 
-  // Provide connection information for active peers; active
-  // peers will select the group address based on this value.
+  // Provide connection information for endpoint identification by
+  // the DCPSInfoRepo. These values are not used by multicast
+  // for DataLink establishment.
   info.transport_id = TRANSPORT_INTERFACE_ID;
+
   info.data = TransportInterfaceBLOB(len, len,
     reinterpret_cast<CORBA::Octet*>(buffer));
 
+  info.publication_transport_priority = 0;
+
   return 0;
-}
-
-ACE_INET_Addr
-MulticastTransport::connection_info_i(const TransportInterfaceInfo& info) const
-{
-  if (info.transport_id != TRANSPORT_INTERFACE_ID) {
-    ACE_ERROR((LM_WARNING,
-               ACE_TEXT("(%P|%t) WARNING: ")
-               ACE_TEXT("MulticastTransport::get_connection_info: ")
-               ACE_TEXT("transport interface ID does not match: 0x%x!\n"),
-               info.transport_id));
-  }
-
-  ACE_INET_Addr group_address;
-  NetworkAddress network_address;
-
-  size_t len = info.data.length();
-  const char* buffer = reinterpret_cast<const char*>(info.data.get_buffer());
-
-  ACE_InputCDR cdr(buffer, len);
-  cdr >> network_address;
-
-  network_address.to_addr(group_address);
-
-  return group_address;
 }
 
 bool
 MulticastTransport::acked(RepoId /*local_id*/, RepoId remote_id)
 {
-  MulticastPeer remote_peer =
-    RepoIdConverter(remote_id).participantId();
+  if (!this->link_.is_nil()) {
+    MulticastPeer remote_peer = RepoIdConverter(remote_id).participantId();
+    return this->link_->acked(remote_peer);
+  }
 
-  MulticastDataLinkMap::iterator it(this->links_.find(remote_peer));
-  if (it == this->links_.end()) return false;  // not found
-
-  return it->second->acked();
+  return false;
 }
 
 void
@@ -217,53 +181,10 @@ MulticastTransport::remove_ack(RepoId /*local_id*/, RepoId /*remote_id*/)
 }
 
 void
-MulticastTransport::reliability_lost_i(DataLink* link,
-                                       const InterfaceListType& interfaces)
-{
-  // Prevent link from sending/receiving unreliable data:
-  link->stop();
-
-  // Disassociate all associations matching the remote peer:
-  for (InterfaceListType::const_iterator it(interfaces.begin());
-       it != interfaces.end(); ++it) {
-
-    TransportInterface* intf = *it;
-
-    for (MulticastDataLinkMap::iterator link_it(this->links_.begin());
-         link_it != this->links_.end(); ++link_it) {
-      // We are guaranteed to have exactly one matching DataLink
-      // in the map; disassociate affected participant and break.
-      if (link == static_cast<DataLink*>(link_it->second.in())) {
-        // Reconstruct the remote participant RepoId by substituting
-        // the local participantId with the remote peer identifier:
-        RepoId remote_id(intf->get_participant_id());
-
-        RepoIdBuilder builder(remote_id);
-        builder.participantId(link_it->first);
-
-        intf->disassociate_participant(remote_id);
-        break;
-      }
-    }
-  }
-
-  // Prevent future associations from acquiring this link:
-  release_datalink_i(link, false);
-}
-
-void
-MulticastTransport::release_datalink_i(DataLink* link,
+MulticastTransport::release_datalink_i(DataLink* /*link*/,
                                        bool /*release_pending*/)
 {
-  for (MulticastDataLinkMap::iterator it(this->links_.begin());
-       it != this->links_.end(); ++it) {
-    // We are guaranteed to have exactly one matching DataLink
-    // in the map; release any resources held and return.
-    if (link == static_cast<DataLink*>(it->second.in())) {
-      this->links_.erase(it);
-      return;
-    }
-  }
+  this->link_ = 0;  // release ownership
 }
 
 } // namespace DCPS

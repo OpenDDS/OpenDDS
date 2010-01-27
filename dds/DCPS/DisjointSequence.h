@@ -65,10 +65,11 @@ public:
   bool seen(SequenceNumber value) const;
 
   void shift(SequenceNumber value);
-  void skip(SequenceNumber value);
 
   bool update(SequenceNumber value);
   bool update(const SequenceRange& range);
+
+  void reset(SequenceNumber value = SequenceNumber());
 
   operator SequenceNumber() const;
 
