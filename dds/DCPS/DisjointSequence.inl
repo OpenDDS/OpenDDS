@@ -32,8 +32,10 @@ DisjointSequence::range_iterator::operator++()
   if (this->pos_ != this->end_) {
     SequenceSet::iterator prev(this->pos_++);
 
-    this->value_ = SequenceRange(SequenceNumber(prev->value_ + 1),
-                                 SequenceNumber(this->pos_->value_ - 1));
+    if (this->pos_ != this->end_) {
+      this->value_ = SequenceRange(SequenceNumber(prev->value_ + 1),
+                                   SequenceNumber(this->pos_->value_ - 1));
+    }
   }
   return *this;
 }
