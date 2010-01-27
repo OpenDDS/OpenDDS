@@ -19,6 +19,11 @@
 #include <dds/DCPS/WaitSet.h>
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #include <dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h>
+#ifdef ACE_AS_STATIC_LIBS
+#include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
+#include <dds/DCPS/transport/udp/Udp.h>
+#include <dds/DCPS/transport/multicast/Multicast.h>
+#endif
 
 #include "DataReaderListener.h"
 #include "MessengerTypeSupportImpl.h"
