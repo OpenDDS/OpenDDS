@@ -691,6 +691,15 @@ OpenDDS::DCPS::DataLink::ack_received(ReceivedDataSample& sample)
   listener->deliver_ack(sample.header_, sample.sample_);
 }
 
+void
+OpenDDS::DCPS::DataLink::reliability_lost(
+  const InterfaceListType& /*interfaces*/)
+{
+  // Subclass should override if interested in the
+  // reliability_lost "event".
+  DBG_ENTRY_LVL("DataLink","reliability_lost",6);
+}
+
 /// No locking needed because the caller (release_reservations()) should
 /// have already acquired our lock_.
 // Ciju: Don't believe a guard is necessary here

@@ -49,7 +49,7 @@ DisjointSequence::shift(SequenceNumber value)
 }
 
 void
-DisjointSequence::skip(SequenceNumber value)
+DisjointSequence::reset(SequenceNumber value)
 {
   this->sequences_.clear();
   this->sequences_.insert(value);
@@ -94,7 +94,7 @@ DisjointSequence::normalize()
   // Ensure the set does not span more than MAX_DEPTH
   // sequences; this will cause comparisons to fail.
   if (depth() > MAX_DEPTH) {
-    skip(high()); // set new low-water mark
+    reset(high()); // set new low-water mark
     this->overflowed_ = true;
     return;
   }

@@ -29,6 +29,7 @@
 #include "ace/Synch.h"
 #include "ace/Event_Handler.h"
 
+#include <list>
 #include <map>
 
 #include <iosfwd> // For operator<<() diagnostic formatter.
@@ -50,6 +51,7 @@ std::ostream& operator<<(std::ostream& str,
 namespace OpenDDS {
 namespace DCPS {
 
+class  TransportInterface;
 class  TransportReceiveListener;
 class  TransportSendListener;
 class  TransportQueueElement;
@@ -230,11 +232,30 @@ public:
 
   bool cancel_release();
 
+  /// This allows a subclass to easily create a transport control
+  /// sample to send via send_control.
+  ACE_Message_Block* create_control(char submessage_id,
+                                    ACE_Message_Block* data);
+
+  /// This allows a subclass to send transport control samples over
+  /// this DataLink. This is useful for sending transport-specific
+  /// control messages between one or more endpoints under this
+  /// DataLink's control.
+  SendControlStatus send_control(ACE_Message_Block* data);
+
   // TransportSendListener callbacks for transport control samples:
   virtual void control_delivered(ACE_Message_Block* message);
 
   virtual void control_dropped(ACE_Message_Block* message,
                                bool dropped_by_transport);
+
+  typedef std::list<TransportInterface*> InterfaceListType;
+
+  /// Called by the TransportImpl class in order to give the
+  /// concrete DataLink subclass a chance to do something when
+  /// the reliability_lost "event" occurs.
+  virtual void reliability_lost(const InterfaceListType& interfaces);
+
 protected:
 
   /// This is how the subclass "announces" to this DataLink base class
@@ -251,17 +272,6 @@ protected:
   /// it will be stopped before the start() method returns -1.
   int start(TransportSendStrategy*    send_strategy,
             TransportReceiveStrategy* receive_strategy);
-
-  /// This allows a subclass to easily create a transport control
-  /// sample to send via send_control.
-  ACE_Message_Block* create_control(char submessage_id,
-                                    ACE_Message_Block* data);
-
-  /// This allows a subclass to send transport control samples over
-  /// this DataLink. This is useful for sending transport-specific
-  /// control messages between one or more endpoints under this
-  /// DataLink's control.
-  SendControlStatus send_control(ACE_Message_Block* data);
 
   /// This announces the "start" event to our subclass.  The "start"
   /// event will occur when this DataLink is handling its first

@@ -13,8 +13,8 @@
 #include "Multicast_Export.h"
 
 #include "MulticastConfiguration.h"
-#include "MulticastDataLink.h"
 #include "MulticastDataLink_rch.h"
+#include "MulticastTypes.h"
 
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 
@@ -40,21 +40,16 @@ protected:
   virtual void shutdown_i();
 
   virtual int connection_info_i(TransportInterfaceInfo& info) const;
-  ACE_INET_Addr connection_info_i(const TransportInterfaceInfo& info) const;
 
   virtual bool acked(RepoId local_id, RepoId remote_id);
   virtual void remove_ack(RepoId local_id, RepoId remote_id);
-
-  virtual void reliability_lost_i(DataLink* link,
-                                  const InterfaceListType& interfaces);
 
   virtual void release_datalink_i(DataLink* link,
                                   bool release_pending);
 private:
   MulticastConfiguration* config_i_;
 
-  typedef std::map<MulticastPeer, MulticastDataLink_rch> MulticastDataLinkMap;
-  MulticastDataLinkMap links_;
+  MulticastDataLink_rch link_;
 };
 
 } // namespace DCPS

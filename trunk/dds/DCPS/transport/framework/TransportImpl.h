@@ -152,8 +152,6 @@ public:
   void report();
 
 protected:
-  typedef std::list<TransportInterface*> InterfaceListType;
-
   TransportImpl();
 
   /// If active is equal to true, then this find_or_create_datalink()
@@ -193,12 +191,6 @@ protected:
   /// is the one that knows how to populate the supplied
   /// TransportInterfaceInfo object.
   virtual int connection_info_i(TransportInterfaceInfo& local_info) const = 0;
-
-  /// Called by our reliability_lost() method in order to give the
-  /// concrete TransportImpl subclass a chance to do something when
-  /// the reliability_lost "event" occurs.
-  virtual void reliability_lost_i(DataLink* link,
-                                  const InterfaceListType& interfaces);
 
   /// Called by our release_datalink() method in order to give the
   /// concrete TransportImpl subclass a chance to do something when

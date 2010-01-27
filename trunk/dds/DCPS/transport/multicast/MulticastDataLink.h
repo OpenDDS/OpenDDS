@@ -17,72 +17,92 @@
 #include "MulticastSendStrategy_rch.h"
 #include "MulticastReceiveStrategy.h"
 #include "MulticastReceiveStrategy_rch.h"
+#include "MulticastSession_rch.h"
+#include "MulticastSessionFactory.h"
+#include "MulticastSessionFactory_rch.h"
+#include "MulticastTransport.h"
+#include "MulticastTypes.h"
 
-#include "ace/Basic_Types.h"
 #include "ace/SOCK_Dgram_Mcast.h"
+#include "ace/Synch_Traits.h"
 
 #include "dds/DCPS/transport/framework/DataLink.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
+#include "dds/DCPS/transport/framework/TransportSendBuffer.h"
+#include "dds/DCPS/transport/framework/TransportSendBuffer_rch.h"
+
+#include <map>
 
 namespace OpenDDS {
 namespace DCPS {
 
 class MulticastTransport;
 
-typedef ACE_INT32 MulticastPeer;
-typedef ACE_INT16 MulticastSequence;
-
 class OpenDDS_Multicast_Export MulticastDataLink
   : public DataLink {
 public:
   MulticastDataLink(MulticastTransport* transport,
-                    MulticastPeer local_peer,
-                    MulticastPeer remote_peer,
-                    bool active);
+                    MulticastSessionFactory* session_factory,
+                    MulticastPeer local_peer);
   virtual ~MulticastDataLink();
+
+  MulticastTransport* transport();
+
+  MulticastPeer local_peer() const;
 
   void configure(MulticastConfiguration* config,
                  TransportReactorTask* reactor_task);
 
-  virtual void send_strategy(MulticastSendStrategy* send_strategy);
-  virtual void receive_strategy(MulticastReceiveStrategy* recv_strategy);
+  void send_strategy(MulticastSendStrategy* send_strategy);
+  MulticastSendStrategy* send_strategy();
 
-  MulticastPeer local_peer() const;
-  MulticastPeer remote_peer() const;
+  void receive_strategy(MulticastReceiveStrategy* recv_strategy);
+  MulticastReceiveStrategy* receive_strategy();
 
-  bool active() const;
+  TransportSendBuffer* send_buffer();
 
   MulticastConfiguration* config();
-  TransportReactorTask* reactor_task();
 
+  TransportReactorTask* reactor_task();
   ACE_Reactor* get_reactor();
 
   ACE_SOCK_Dgram_Mcast& socket();
+
   bool join(const ACE_INET_Addr& group_address);
 
-  virtual bool acked() = 0;
+  bool obtain_session(MulticastPeer remote_peer, bool active);
 
-  virtual bool header_received(const TransportHeader& header) = 0;
-  virtual void sample_received(ReceivedDataSample& sample) = 0;
+  bool acked(MulticastPeer remote_peer);
 
-protected:
+  bool header_received(const TransportHeader& header);
+  void sample_received(ReceivedDataSample& sample);
+
+  void reliability_lost(const InterfaceListType& interfaces);
+
+private:
   MulticastTransport* transport_;
 
-  MulticastPeer local_peer_;
-  MulticastPeer remote_peer_;
+  MulticastSessionFactory_rch session_factory_;
 
-  bool active_;
+  MulticastPeer local_peer_;
 
   MulticastConfiguration* config_;
+
   TransportReactorTask* reactor_task_;
 
   MulticastSendStrategy_rch send_strategy_;
   MulticastReceiveStrategy_rch recv_strategy_;
 
-  virtual void stop_i();
+  TransportSendBuffer_rch send_buffer_;
 
-private:
   ACE_SOCK_Dgram_Mcast socket_;
+
+  ACE_SYNCH_RECURSIVE_MUTEX session_lock_;
+
+  typedef std::map<MulticastPeer, MulticastSession_rch> MulticastSessionMap;
+  MulticastSessionMap sessions_;
+
+  virtual void stop_i();
 };
 
 } // namespace DCPS
