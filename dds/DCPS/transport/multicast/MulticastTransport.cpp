@@ -35,6 +35,10 @@ MulticastTransport::MulticastTransport()
 {
 }
 
+MulticastTransport::~MulticastTransport()
+{
+}
+
 DataLink*
 MulticastTransport::find_or_create_datalink(
   RepoId local_id,
