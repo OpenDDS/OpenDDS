@@ -22,7 +22,7 @@ plot '$0'\
   '' index 0 using 2:($$3/2) t "multicast/best effort" with linespoints,\
   '' index 1 using 2:($$3/2) t "multicast/reliable"    with linespoints
 
-set xrange [0:1100]
+set xrange [0:2500]
 set output '$1-zoom.png'
 replot
 
