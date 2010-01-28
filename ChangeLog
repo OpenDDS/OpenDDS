@@ -1,3 +1,17 @@
+Thu Jan 28 20:43:58 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/expandColors.pl:
+
+          New script to post process a published static HTML version of a
+          TiddlyWiki document to translate the ColorPalette.  This
+          replaces development of a plugin to do the processing
+          internally.
+
+        * performance-tests/Bench/bin/plot-jitter.gp:
+        * performance-tests/Bench/bin/plot-transports.gp:
+
+          Change the zoom range to [0:2500]
+
 Thu Jan 28 16:36:26 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastDataLink.h:
