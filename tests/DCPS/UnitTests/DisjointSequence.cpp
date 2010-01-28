@@ -60,11 +60,11 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     sequence.update(5);   // discontiguous
     sequence.update(10);  // discontiguous
 
-    sequence.skip(20);
+    sequence.reset(20);
 
-    // ASSERT skip value is correct:
-    SequenceNumber skip_value = sequence;
-    TEST_CHECK(skip_value == SequenceNumber(20));
+    // ASSERT reset value is correct:
+    SequenceNumber reset_value = sequence;
+    TEST_CHECK(reset_value == SequenceNumber(20));
 
     // ASSERT low and high water marks are the same:
     TEST_CHECK(sequence.low() == sequence.high());
