@@ -27,6 +27,7 @@ class OpenDDS_Multicast_Export MulticastTransport
   : public TransportImpl {
 public:
   MulticastTransport();
+  ~MulticastTransport();
 
 protected:
   virtual DataLink* find_or_create_datalink(
