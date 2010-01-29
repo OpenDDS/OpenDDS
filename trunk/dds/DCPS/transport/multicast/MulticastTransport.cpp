@@ -95,9 +95,6 @@ MulticastTransport::find_or_create_datalink(
     }
 
     this->link_ = link;
-
-    // @TODO TEMPORARY HACK
-    this->link_->_add_ref();
   }
 
   MulticastPeer remote_peer =
@@ -112,7 +109,7 @@ MulticastTransport::find_or_create_datalink(
                      0);
   }
 
-  return this->link_.in();
+  return MulticastDataLink_rch(this->link_)._retn();
 }
 
 int

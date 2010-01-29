@@ -36,7 +36,9 @@ UdpTransport::find_or_create_datalink(
 
   if (active) {
     UdpDataLinkMap::iterator it(this->client_links_.find(remote_id));
-    if (it != this->client_links_.end()) return it->second.in(); // found
+    if (it != this->client_links_.end()) {
+      return UdpDataLink_rch(it->second)._retn(); // found
+    }
 
   } else if (!this->server_link_.is_nil()) {
     // A single DataLink is managed for all passive reservations:
