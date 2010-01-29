@@ -23,7 +23,8 @@ public:
   BestEffortSession(MulticastDataLink* link,
                     MulticastPeer remote_peer);
 
-  virtual bool acked() const;
+  virtual bool acked();
+  virtual bool defunct();
 
   virtual bool header_received(const TransportHeader& header);
 

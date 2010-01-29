@@ -21,27 +21,12 @@ namespace DCPS {
 MulticastSession::MulticastSession(MulticastDataLink* link,
                                    MulticastPeer remote_peer)
   : link_(link),
-    remote_peer_(remote_peer),
-    defunct_(false)
+    remote_peer_(remote_peer)
 {
 }
 
 MulticastSession::~MulticastSession()
 {
-}
-
-void
-MulticastSession::reliability_lost()
-{
-  // Stop session to avoid sending/receiving unreliable data:
-  stop();
-
-  this->defunct_ = true;
-
-  // Notify transport DataLink has become unreliable; this
-  // will ultimately cause the session to be destroyed:
-  MulticastTransport* transport = this->link_->transport();
-  transport->reliability_lost(this->link_);
 }
 
 void

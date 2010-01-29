@@ -22,11 +22,5 @@ MulticastSession::remote_peer() const
   return this->remote_peer_;
 }
 
-ACE_INLINE bool
-MulticastSession::defunct() const
-{
-  return this->defunct_;
-}
-
 } // namespace DCPS
 } // namespace OpenDDS

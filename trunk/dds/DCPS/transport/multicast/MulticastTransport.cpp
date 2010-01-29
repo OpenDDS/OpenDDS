@@ -170,7 +170,9 @@ bool
 MulticastTransport::acked(RepoId /*local_id*/, RepoId remote_id)
 {
   if (!this->link_.is_nil()) {
-    MulticastPeer remote_peer = RepoIdConverter(remote_id).participantId();
+    MulticastPeer remote_peer =
+      RepoIdConverter(remote_id).participantId();
+
     return this->link_->acked(remote_peer);
   }
 

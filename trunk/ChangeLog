@@ -1,3 +1,18 @@
+Fri Jan 29 16:51:05 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/BestEffortSession.h:
+        * dds/DCPS/transport/multicast/BestEffortSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.h:
+        * dds/DCPS/transport/multicast/MulticastSession.inl:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.h:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Updated reliability_lost behavior; added additional check in
+          header_received to avoid spuriously updating nak_sequence_.
+
 Thu Jan 28 20:43:58 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/bin/expandColors.pl:
@@ -1988,7 +2003,7 @@ Thu Dec  3 17:04:55 UTC 2009  Steven Stallion  <stallions@ociweb.com>
         * dds/DCPS/transport/framework/TransportSendStrategy.h:
         * dds/DCPS/transport/multicast/MulticastTransport.cpp:
 
-          Fixed circular dependencies; fixed interface lead caused by
+          Fixed circular dependencies; fixed interface leak caused by
           TransportSendStrategy.
 
 Thu Dec  3 16:37:41 UTC 2009  Steven Stallion  <stallions@ociweb.com>
