@@ -107,7 +107,7 @@ MulticastDataLink::obtain_session(MulticastPeer remote_peer, bool active)
   ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX,
                    guard,
                    this->session_lock_,
-                   0);
+                   false);
 
   MulticastSessionMap::iterator it(this->sessions_.find(remote_peer));
   if (it != this->sessions_.end()) return true; // already exists
@@ -120,7 +120,7 @@ MulticastDataLink::obtain_session(MulticastPeer remote_peer, bool active)
                       ACE_TEXT("MulticastDataLink::obtain_session: ")
                       ACE_TEXT("failed to create session for remote peer: 0x%x!\n"),
                       remote_peer),
-                     0);
+                     false);
   }
 
   if (!session->start(active)) {
@@ -129,7 +129,7 @@ MulticastDataLink::obtain_session(MulticastPeer remote_peer, bool active)
                       ACE_TEXT("MulticastDataLink::obtain_session: ")
                       ACE_TEXT("failed to start session for remote peer: 0x%x!\n"),
                       remote_peer),
-                     0);
+                     false);
   }
 
   std::pair<MulticastSessionMap::iterator, bool> pair = this->sessions_.insert(
@@ -140,10 +140,10 @@ MulticastDataLink::obtain_session(MulticastPeer remote_peer, bool active)
                       ACE_TEXT("MulticastStrategy::obtain_session: ")
                       ACE_TEXT("failed to insert session for remote peer: 0x%x!\n"),
                       remote_peer),
-                     0);
+                     false);
   }
 
-  return session._retn();
+  return true;
 }
 
 bool
@@ -213,11 +213,17 @@ MulticastDataLink::reliability_lost(const InterfaceListType& interfaces)
               guard,
               this->session_lock_);
 
-    for (MulticastSessionMap::iterator it(this->sessions_.begin());
-         it != this->sessions_.end(); ++it) {
-      if (it->second->defunct()) {
-        remote_peers.push_back(it->second->remote_peer());
-        this->sessions_.erase(it);
+    MulticastSessionMap::iterator it(this->sessions_.begin());
+    while (it != this->sessions_.end()) {
+      MulticastSessionMap::iterator prev(it++);
+
+      if (prev->second->defunct()) {
+        MulticastSession_rch session = prev->second;
+
+        session->stop();
+        remote_peers.push_back(session->remote_peer());
+
+        this->sessions_.erase(prev);
       }
     }
   }

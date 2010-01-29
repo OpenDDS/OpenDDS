@@ -19,11 +19,19 @@ BestEffortSession::BestEffortSession(MulticastDataLink* link,
 }
 
 bool
-BestEffortSession::acked() const
+BestEffortSession::acked()
 {
   // Assume remote peer is available; this does not prevent
   // data loss if the peer is initially unresponsive:
   return true;
+}
+
+bool
+BestEffortSession::defunct()
+{
+  // Assume remote peer is available; this does not prevent
+  // data loss if the peer is subsequently unresponsive:
+  return false;
 }
 
 bool

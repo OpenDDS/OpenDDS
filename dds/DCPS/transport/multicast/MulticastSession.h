@@ -33,9 +33,8 @@ public:
 
   MulticastPeer remote_peer() const;
 
-  bool defunct() const;
-
-  virtual bool acked() const = 0;
+  virtual bool acked() = 0;
+  virtual bool defunct() = 0;
 
   virtual bool header_received(const TransportHeader& header) = 0;
 
@@ -45,14 +44,10 @@ public:
   virtual bool start(bool active) = 0;
   virtual void stop() = 0;
 
-  void reliability_lost();
-
 protected:
   MulticastDataLink* link_;
 
   MulticastPeer remote_peer_;
-
-  bool defunct_;
 
   MulticastSession(MulticastDataLink* link,
                    MulticastPeer remote_peer);
