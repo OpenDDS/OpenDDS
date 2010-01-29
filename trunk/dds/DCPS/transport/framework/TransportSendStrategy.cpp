@@ -104,18 +104,6 @@ OpenDDS::DCPS::TransportSendStrategy::~TransportSendStrategy()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","~TransportSendStrategy",6);
 
-  if (this->pkt_chain_ != 0) {
-    size_t size = this->pkt_chain_->total_length();
-
-    if (size > 0) {
-      this->pkt_chain_->release();
-      ACE_DEBUG((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: TransportSendStrategy::~TransportSendStrategy() - ")
-                 ACE_TEXT("terminating with %d unsent bytes.\n"),
-                 size));
-    }
-  }
-
   if (this->synch_) {
     delete this->synch_;
   }
@@ -904,6 +892,18 @@ OpenDDS::DCPS::TransportSendStrategy::stop()
   // Since we gave the synch_ a "copy" of a reference to ourselves, we need
   // to take it back now.
   this->_remove_ref();
+
+  if (this->pkt_chain_ != 0) {
+    size_t size = this->pkt_chain_->total_length();
+
+    if (size > 0) {
+      this->pkt_chain_->release();
+      ACE_DEBUG((LM_WARNING,
+                 ACE_TEXT("(%P|%t) WARNING: TransportSendStrategy::~TransportSendStrategy() - ")
+                 ACE_TEXT("terminating with %d unsent bytes.\n"),
+                 size));
+    }
+  }
 
   delete this->header_mb_allocator_;
   delete this->header_db_allocator_;
