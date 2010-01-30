@@ -21,19 +21,19 @@ unset label
 set key off
 set title "Latency per sample"
 set xlabel "Elapsed Time (seconds)"
-set ylabel "Latency (seconds)"
+set ylabel "Latency (microseconds)"
 set format x "%.1s%c"
 set format y "%.1s%cS"
 plot '$0' index 0 using (column(0)/100):(column(1)) with lines lt rgb '#600000'
 
 # Jitter plot
 set title "Jitter per sample"
-set ylabel "Jitter (seconds)"
+set ylabel "Jitter (microseconds)"
 plot '$0' index 0 using (column(0)/100):(column(2)) with lines lt rgb '#600000'
 
 # Latency histogram
 set title "Latency Distribution"
-set xlabel "Latency (seconds)"
+set xlabel "Latency (microseconds)"
 set ylabel "Frequency (samples)"
 set label latency_stats at graph 0.6,0.9
 set format x "%.0s%cS"
@@ -45,7 +45,7 @@ unset label
 # Jitter histogram
 set title "Jitter Distribution"
 set label jitter_stats at graph 0.6,0.9
-set xlabel "Jitter (seconds)"
+set xlabel "Jitter (microseconds)"
 plot '$0' index 2 using (column(1)):2 with boxes lt rgb '#600000'
 unset label
 

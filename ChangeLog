@@ -1,3 +1,10 @@
+Sat Jan 30 23:44:13 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/lj-plots.gp:
+        * performance-tests/Bench/bin/plot-transports.gp:
+
+          Changed Latency and Jitter units to microseconds.
+
 Fri Jan 29 21:57:37 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastTransport.cpp:

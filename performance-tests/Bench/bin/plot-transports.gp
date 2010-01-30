@@ -11,7 +11,7 @@ set autoscale
 set key top left box
 set title  "Latency per Message Size"
 set xlabel "Message Size (bytes)"
-set ylabel "Latency (seconds)"
+set ylabel "Latency (microseconds)"
 set format x "%.1s%c"
 set format y "%.1s%cS"
 
