@@ -862,6 +862,21 @@ OpenDDS::DCPS::TransportSendStrategy::start()
                  TransportMessageBlockAllocator(header_chunks),
                  -1);
 
+  ACE_NEW_MALLOC_RETURN (this->header_block_,
+                static_cast<ACE_Message_Block*>(this->header_mb_allocator_->malloc()),
+                ACE_Message_Block(this->max_header_size_,
+                                  ACE_Message_Block::MB_DATA,
+                                  0,
+                                  0,
+                                  0,
+                                  0,
+                                  ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                                  ACE_Time_Value::zero,
+                                  ACE_Time_Value::max_time,
+                                  this->header_db_allocator_,
+                                  this->header_mb_allocator_), -1); 
+
+
   // Since we (the TransportSendStrategy object) are a reference-counted
   // object, but the synch_ object doesn't necessarily know this, we need
   // to give a "copy" of a reference to ourselves to the synch_ object here.
@@ -1621,19 +1636,9 @@ OpenDDS::DCPS::TransportSendStrategy::prepare_packet()
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Marshall the packet header.\n"));
 
-  ACE_NEW_MALLOC(this->header_block_,
-                 static_cast<ACE_Message_Block*>(this->header_mb_allocator_->malloc()),
-                 ACE_Message_Block(this->max_header_size_,
-                                   ACE_Message_Block::MB_DATA,
-                                   0,
-                                   0,
-                                   0,
-                                   0,
-                                   ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
-                                   ACE_Time_Value::zero,
-                                   ACE_Time_Value::max_time,
-                                   this->header_db_allocator_,
-                                   this->header_mb_allocator_));
+  // First make sure that the header_block_ is "reset".
+  this->header_block_->rd_ptr(this->header_block_->base());
+  this->header_block_->wr_ptr(this->header_block_->base());
 
   // Marshall the packet header_ into the header_block_.
   this->header_block_ << this->header_;

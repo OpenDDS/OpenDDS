@@ -1,3 +1,11 @@
+Mon Feb  1 06:34:39 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Made header_block_ created once instead of for every packet.
+          This should fix memory leak due to header_block_ not released
+          and reduce the heap allocation which should improve performance.
+
 Sat Jan 30 23:44:13 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/bin/lj-plots.gp:
