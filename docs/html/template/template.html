@@ -529,6 +529,20 @@ TertiaryDark: #666
 Error: #f88
 </pre>
 </div>
+<div title="GettingStarted" modifier="MikeMartinez" created="201002011551" modified="201002011553" changecount="3">
+<pre>To get started with this blank [[TiddlyWiki]], you'll need to modify the following tiddlers:
+* [[SiteTitle]] &amp; [[SiteSubtitle]]: The title and subtitle of the site, as shown above (after saving, they will also appear in the browser title bar)
+* [[MainMenu]]: The menu (usually on the left)
+* [[DefaultTiddlers]]: Contains the names of the tiddlers that you want to appear when the TiddlyWiki is opened
+* [[StyleSheet]]: the ''.headerForeground'' class includes a relative path to the opendds.png logo file.  Ensure that this will be reachable from the final document.  As supplied, this is expected to be located internal to the //./images// directory
+You'll also need to enter your username for signing your edits: &lt;&lt;option txtUserName&gt;&gt;
+
+If you wish to publish the contents of this document as static HTML web pages, then:
+* add a ''publish'' tag to each tiddler to be included in the published document
+* [[PublishIndexTemplate]], [[PublishTemplateBody]], [[PublishTemplateBodySingle]]: edit to the style desired in the published document
+* [[StyleSheet]]: modify the reference to the logo file in the //.publishLogo// class to be in a correct relative directory path
+* use the ''publish'' selection on the right sidebar to publish all tiddlers with the ''publish'' tag to individual HTML files.  They will all be located in the //./publish// directory</pre>
+</div>
 <div title="OpenDDS" modifier="OpenDDS" created="200911302157" tags="OpenDDS" changecount="1">
 <pre>OpenDDS is an open source C++ implementation of the Object Management Group (OMG) Data Distribution Service (DDS). OpenDDS also supports Java bindings through JNI and can be included with JBoss (ESB) frameworks by means of a JMS wrapper. OpenDDS leverages the ADAPTIVE Communication Environment (ACE) to provide a cross platform environment.
 
@@ -554,8 +568,261 @@ OpenDDS is supported by [[Object Computing, Inc.|http://www.ociweb.com/]]</pre>
 &lt;/div&gt;
 &lt;!--}}}--&gt;</pre>
 </div>
-<div title="SideBarOptions" modifier="OpenDDS" created="200911302023" changecount="1">
-<pre>&lt;&lt;search&gt;&gt;&lt;&lt;closeAll&gt;&gt;&lt;&lt;permaview&gt;&gt;&lt;&lt;newTiddler&gt;&gt;&lt;&lt;saveChanges&gt;&gt;&lt;&lt;slider chkSliderOptionsPanel OptionsPanel &quot;options »&quot; &quot;Change TiddlyWiki advanced options&quot;&gt;&gt;</pre>
+<div title="PublishIndexTemplate" modifier="MikeMartinez" created="201002011539" server.type="file" server.host="jackparke.googlepages.com/jtw.html" changecount="1">
+<pre>&lt;div class='viewer' id='contentWrapper'&gt;&lt;small&gt;&lt;a href=&quot;index.html&quot;&gt;Home&lt;/a&gt; &gt; %1&lt;/small&gt;&lt;h1 class='publishLogo'&gt;%0&lt;/h1&gt;
+&lt;div id='publishContentWrapper'&gt;
+&lt;h2&gt;%1&lt;/h2&gt;
+&lt;ul&gt;%2
+&lt;/ul&gt;
+&lt;small&gt;Published: %6&lt;/small&gt;
+&lt;/div&gt;&lt;/div&gt;
+</pre>
+</div>
+<div title="PublishMacro" modifier="Jack" created="200701021553" modified="200807021533" tags="Plugin systemConfig" server.type="file" server.host="jackparke.googlepages.com/jtw.html" server.page.revision="200807021533">
+<pre>/***
+|''Name:''|Publish Macro|
+|''Version:''|2.4.1 (2 July 2008)|
+|''Source''|http://jackparke.googlepages.com/jtw.html#PublishMacro ([[del.icio.us|http://del.icio.us/post?url=http://jackparke.googlepages.com/jtw.html%23PublishMacro]])|
+|''Author:''|[[Jack]]|
+|''Type:''|Macro|
+!Description
+&lt;&lt;doPublish&gt;&gt; tiddlers tagged with these tags &lt;&lt;option txtPublishTags&gt;&gt; (comma seperated) as HTML pages to the subfolder 'publish' (you must create this). Use the [[PublishTemplateHead]] and [[PublishTemplateBody]] templates to style your pages and the [[PublishIndexTemplate]] to define an index page. For publishing individual tiddlers the [[PublishTemplateBodySingle]] template is used.
+!Usage
+To publish all tagged tiddlers:
+{{{&lt;&lt;doPublish&gt;&gt;}}} &lt;&lt;doPublish&gt;&gt;
+To publish a single tiddler, use the {{{&lt;&lt;publishTiddler&gt;&gt;}}} macro or add the &quot;publishTiddler&quot; command to your ViewTemplate
+!Template placeholders
+|!Placeholder|!Meaning|
+|%0|Your SiteTitle &quot;&lt;&lt;tiddler SiteTitle&gt;&gt;&quot;|
+|%1|The current tiddler title|
+|%2|The rendered tiddler HTML|
+|%3|CSV list of tags|
+|%4|Tiddler modifier|
+|%5|Tiddler modified date|
+|%6|Tiddler creation date|
+|%7|Tiddler wiki text|
+!Revision History
+* Original by [[Jack]] 24 May 2006
+* Updated 2 Jan 2007
+* Refactored 4 Jan 2007
+* Small improvements
+* Publish single tiddlers
+* Template placeholder %7 for tiddler's wiki text
+
+!Code
+***/
+//{{{
+version.extensions.doPublish = {
+ major: 2,
+ minor: 4,
+ revision: 1,
+ date: new Date(&quot;July 2, 2008&quot;)
+};
+config.macros.doPublish = {
+ label: &quot;publish&quot;,
+ prompt: &quot;Publish Tiddlers as HTML files&quot;
+};
+if (config.options.txtPublishTags == undefined) config.options.txtPublishTags = &quot;Publish&quot;;
+config.shadowTiddlers.PublishTemplateHead = '&lt;title&gt;%0 - %1&lt;/title&gt;\n&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;style.css&quot;/&gt;\n&lt;meta name=&quot;keywords&quot; content=&quot;%3&quot;/&gt;'
+config.shadowTiddlers.PublishTemplateBody = '&lt;div class=\'viewer\' id=\'contentWrapper\'&gt;&lt;small&gt;&lt;a href=\&quot;./publish/index.html\&quot;&gt;Home&lt;/a&gt; &gt; %1&lt;/small&gt;&lt;h1&gt;%0&lt;/h1&gt;\n&lt;h2&gt;%1&lt;/h2&gt;\n%2\n&lt;hr&gt;Tags: %3\n&lt;hr&gt;%4, %5&amp;nbsp;(created %6)\n&lt;/div&gt;\n'
+config.shadowTiddlers.PublishTemplateBodySingle = '&lt;h1&gt;%0&lt;/h1&gt;\n&lt;h2&gt;%1&lt;/h2&gt;\n%2\n&lt;hr&gt;Tags: %3\n&lt;hr&gt;%4, %5&amp;nbsp;(created %6)\n&lt;/div&gt;\n'
+config.shadowTiddlers.PublishIndexTemplate = '&lt;div class=\'viewer\' id=\'contentWrapper\'&gt;&lt;small&gt;&lt;a href=&quot;./publish/index.html&quot;&gt;Home&lt;/a&gt; &gt; %1&lt;/small&gt;&lt;h1&gt;%0&lt;/h1&gt;&lt;h2&gt;%1&lt;/h2&gt;\n&lt;ul&gt;%2\n&lt;/ul&gt;\n&lt;small&gt;Published: %6&lt;/small&gt;\n&lt;/div&gt;\n';
+config.macros.doPublish.handler = function(place)
+ {
+ if (!readOnly)
+ createTiddlyButton(place, this.label, this.prompt, 
+ function() {
+  doPublish();
+  return false;
+ },
+ null, null, this.accessKey);
+
+}
+config.macros.publishTiddler = {
+ label : 'publish',
+ prompt : 'Publish this tiddler as an HTML file.',
+ handler : function(place,macroName,params,wikifier,paramString,tiddler)
+ {
+  var btn = createTiddlyButton(place, this.label, this.prompt, 
+  function(e) {
+   if(!e) var e = window.event;
+   publishTiddler(this.getAttribute('tiddler'))
+   return false;
+  },
+  null, null, this.accessKey);
+  btn.setAttribute('tiddler', tiddler.title);
+}}
+config.commands.publishTiddler = {handler : function(event,src,title) {publishTiddler(title);},text: &quot;publish&quot;, tooltip: &quot;Publish this tiddler as HTML&quot;};
+function publishTiddler(title) {
+ //debugger
+ 
+ var PublishFolder = getWikiPath('publish');
+ var place = document.getElementById(story.container)
+ var HTMLTemplateHead = store.getTiddlerText(&quot;PublishTemplateHead&quot;);
+ var HTMLTemplateBody = store.getTiddlerText(&quot;PublishTemplateBodySingle&quot;) || store.getTiddlerText(&quot;PublishTemplateBody&quot;);
+ HTMLTemplateBody = renderTemplate(HTMLTemplateBody)
+ HTMLTemplateBody = wiki2Web(HTMLTemplateBody);
+ 
+ var tiddler = store.getTiddler(title);
+ var tiddlerText = store.getValue(tiddler, 'text');
+ var tiddlerHTML = wikifyStatic(tiddlerText);
+ var HTML = '&lt;html&gt;\n\&lt;head&gt;\n' + HTMLTemplateHead + '\n&lt;/head&gt;\n&lt;body&gt;\n' + HTMLTemplateBody + '\n&lt;/body&gt;\n&lt;/html&gt;';
+ HTML = HTML.format([
+  wikifyPlain(&quot;SiteTitle&quot;).htmlEncode(), 
+  tiddler.title.htmlEncode(), 
+  wiki2Web(tiddlerHTML), 
+  tiddler.tags.join(&quot;, &quot;), 
+  tiddler.modifier, 
+  tiddler.modified.toLocaleString(), 
+  tiddler.created.toLocaleString(),
+  tiddlerText
+ ]);
+ saveFile(PublishFolder + tiddler.title.filenameEncode() + &quot;.html&quot;, HTML);
+ //story.closeTiddler(tiddler.title);
+ var indexWin = window.open((PublishFolder + title.filenameEncode() + &quot;.html&quot;).replace(/\\/g, &quot;/&quot;), null);
+ indexWin.focus();
+}
+function doPublish() {
+ var savedTiddlers = [];
+ var tiddlers = store.getTiddlers(&quot;title&quot;);
+ var place = document.getElementById(story.container)
+ var HTMLTemplateHead = store.getTiddlerText(&quot;PublishTemplateHead&quot;);
+ var HTMLTemplateBody = store.getTiddlerText(&quot;PublishTemplateBody&quot;);
+ HTMLTemplateBody = renderTemplate(HTMLTemplateBody)
+ HTMLTemplateBody = wiki2Web(HTMLTemplateBody);
+
+ var PublishTags = config.options.txtPublishTags || &quot;publish&quot;;
+ PublishTags = PublishTags.split(&quot;,&quot;)
+ var PublishFolder = getWikiPath('publish');
+ if (!PublishFolder) return;
+ var indexFile = &quot;&quot;;
+
+ var indexFileTemplate = store.getTiddlerText(&quot;PublishIndexTemplate&quot;);
+ // This does not allow &lt;&lt;myMacro&gt;&gt; but wants &lt;div macro=&quot;myMacro&quot;&gt;
+ indexFileTemplate = renderTemplate(indexFileTemplate)
+ // This option allows WIKI-syntax but is limited in it's HTML capabilities
+ //indexFileTemplate = wikifyStatic(indexFileTemplate)
+
+ for (var t = 0; t &lt; tiddlers.length; t++) {
+  var tiddler = tiddlers[t];
+  if (tiddler.tags.containsAny(PublishTags)) {
+   var tiddlerText = store.getValue(tiddler, 'text');
+   var tiddlerHTML = wikifyStatic(tiddlerText);
+   var HTML = '&lt;html&gt;\n\&lt;head&gt;\n' + HTMLTemplateHead + '\n&lt;/head&gt;\n&lt;body&gt;\n' + HTMLTemplateBody + '\n&lt;/body&gt;\n&lt;/html&gt;';
+   HTML = HTML.format([
+   wikifyPlain(&quot;SiteTitle&quot;).htmlEncode(), 
+   tiddler.title.htmlEncode(), 
+   wiki2Web(tiddlerHTML), 
+   tiddler.tags.join(&quot;, &quot;), 
+   tiddler.modifier, 
+   tiddler.modified.toLocaleString(), 
+   tiddler.created.toLocaleString(),
+  tiddlerText
+   ]);
+   //saveFile(PublishFolder + tiddler.created.formatString(&quot;YYYY0MM0DD&quot;) + &quot;.html&quot;, HTML);
+   saveFile(PublishFolder + tiddler.title.filenameEncode() + &quot;.html&quot;, HTML);
+   indexFile += &quot;&lt;li&gt;&lt;a href=\&quot;&quot; + tiddler.title.filenameEncode() + &quot;.html&quot; + &quot;\&quot; class=\&quot;tiddlyLink tiddlyLinkExisting\&quot;&gt;&quot; + tiddler.title + &quot;&lt;/a&gt;&lt;/li&gt;\n&quot;;
+   story.closeTiddler(tiddler.title);
+
+  }
+
+ }
+ indexFileTemplate = '&lt;html&gt;\n\&lt;head&gt;\n' + HTMLTemplateHead + '\n&lt;/head&gt;\n&lt;body&gt;\n' + indexFileTemplate + '\n&lt;/body&gt;\n&lt;/html&gt;';
+ indexFileTemplate = indexFileTemplate.format([wikifyPlain(&quot;SiteTitle&quot;).htmlEncode(), wikifyPlain(&quot;SiteSubtitle&quot;).htmlEncode(), &quot;%2&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, (new Date()).toLocaleString()])
+
+ indexFile = indexFileTemplate.replace(&quot;%2&quot;, indexFile)
+ indexFile = wiki2Web(indexFile);
+ saveFile(PublishFolder + &quot;index.html&quot;, indexFile)
+ saveFile(PublishFolder + &quot;style.css&quot;, store.getTiddlerText(&quot;StyleSheet&quot;) + store.getTiddlerText(&quot;StyleSheetLayout&quot;) + store.getTiddlerText(&quot;StyleSheetColors&quot;))
+ var indexWin = window.open(&quot;file://&quot; + PublishFolder.replace(/\\/g, &quot;/&quot;) + &quot;index.html&quot;, null);
+ indexWin.focus();
+
+}
+
+function renderTemplate(html) {
+ var result = document.createElement(&quot;div&quot;);
+ result.innerHTML = html;
+ applyHtmlMacros(result, null);
+ var temp = result.innerHTML;
+ //result.parentNode.removeChild(result);
+ return temp;
+
+}
+
+// Convert wikified text to html
+function wiki2Web(wikiHTML) {
+ //var regexpLinks = new RegExp(&quot;&lt;a tiddlylink=.*?&lt;/a&gt;&quot;, &quot;img&quot;);
+ var regexpLinks = /&lt;a[^&gt;]+tiddlylink\s*=\s*[&quot;']?\s*?([^ &quot;'&gt;]*)\s*[&quot;']?[^&gt;]*&gt;[^&lt;]+&lt;\/a&gt;/img;
+ var result = wikiHTML.match(regexpLinks);
+ if (result) {
+  for (i = 0; i &lt; result.length; i++) {
+   var className = result[i].match(/ class=&quot;(.*?)&quot;/i) ? result[i].match(/ class=&quot;(.*?)&quot;/i)[1] : &quot;&quot;;
+   var tiddlerName = result[i].match(/ tiddlylink=&quot;(.*?)&quot;/i)[1]; 
+   var url = tiddlerName.htmlDecode().filenameEncode() + &quot;.html&quot;; 
+   var tiddlerLabel = result[i].match(/&quot;&gt;(.*?)&lt;\/a&gt;/i)[1]; 
+   if (!className.match(/tiddlyLinkNonExisting/i)) 
+   wikiHTML = wikiHTML.myReplace(result[i], &quot;&lt;a class=\&quot;&quot; + className + &quot;\&quot; href=\&quot;&quot; + url + &quot;\&quot;&gt;&quot; + tiddlerLabel + &quot;&lt;/a&gt;&quot;); 
+   else
+   wikiHTML = wikiHTML.myReplace(result[i], &quot;&lt;a class=\&quot;&quot; + className + &quot;\&quot; title=\&quot;Page does not exist\&quot; href=\&quot;#\&quot;&gt;&quot; + tiddlerName + &quot;&lt;/a&gt;&quot;);
+
+  }
+  wikiHTML = wikiHTML.replace(/ href=&quot;http:\/\//gi, &quot; target=\&quot;_blank\&quot; href=\&quot;http://&quot;);
+
+ }
+ return wikiHTML
+
+}
+function getWikiPath(folderName) {
+ var originalPath = document.location.toString();
+ if (originalPath.substr(0, 5) != 'file:') {
+  alert(config.messages.notFileUrlError);
+  if (store.tiddlerExists(config.messages.saveInstructions))
+  story.displayTiddler(null, config.messages.saveInstructions);
+  return;
+
+ }
+ var localPath = getLocalPath(originalPath);
+ var backSlash = localPath.lastIndexOf('\\') == -1 ? '/': '\\';
+ var dirPathPos = localPath.lastIndexOf(backSlash);
+ var subPath = localPath.substr(0, dirPathPos) + backSlash + (folderName ? folderName + backSlash: '');
+ return subPath;
+
+}
+
+// Replace without regex
+String.prototype.myReplace = function(sea, rep) {
+ var t1 = this.indexOf(sea);
+ var t2 = parseInt(this.indexOf(sea)) + parseInt(sea.length);
+ var t3 = this.length;
+ return this.substring(0, t1) + rep + this.substring(t2, t3)
+
+}
+// Convert illegal characters to underscores
+String.prototype.filenameEncode = function()
+ {
+ return (this.toLowerCase().replace(/[^a-z0-9_-]/g, &quot;_&quot;));
+
+}
+//}}}</pre>
+</div>
+<div title="PublishTemplateBody" modifier="MikeMartinez" created="200806271146" modified="201002011537" server.type="file" server.host="jackparke.googlepages.com/jtw.html" server.page.revision="200806271146" changecount="1">
+<pre>&lt;div class='viewer' id='contentWrapper'&gt;&lt;small&gt;&lt;a href=&quot;./publish/index.html&quot;&gt;Home&lt;/a&gt; &gt; %1&lt;/small&gt;&lt;h1&gt;%0&lt;/h1&gt;
+&lt;h2&gt;%1&lt;/h2&gt;
+%2
+&lt;hr&gt;Tags: %3
+&lt;hr&gt;%4, %5&amp;nbsp;(created %6)
+&lt;/div&gt;</pre>
+</div>
+<div title="PublishTemplateBodySingle" modifier="MikeMartinez" created="200806271151" modified="201002011542" server.type="file" server.host="jackparke.googlepages.com/jtw.html" server.page.revision="200806271151" changecount="2">
+<pre>&lt;h1&gt;%0&lt;/h1&gt;
+&lt;h2&gt;%1&lt;/h2&gt;
+%2
+&lt;hr&gt;Tags: %3
+&lt;hr&gt;%4, %5&amp;nbsp;(created %6)
+&lt;/div&gt;</pre>
+</div>
+<div title="SideBarOptions" modifier="MikeMartinez" created="200911302023" modified="201002011534" changecount="2">
+<pre>&lt;&lt;search&gt;&gt;&lt;&lt;closeAll&gt;&gt;&lt;&lt;permaview&gt;&gt;&lt;&lt;newTiddler&gt;&gt;&lt;&lt;saveChanges&gt;&gt;&lt;&lt;doPublish&gt;&gt;&lt;&lt;slider chkSliderOptionsPanel OptionsPanel &quot;options »&quot; &quot;Change TiddlyWiki advanced options&quot;&gt;&gt;</pre>
 </div>
 <div title="SiteSubtitle" modifier="OpenDDS" created="200911302000" tags="OpenDDS" changecount="1">
 <pre>(document description)</pre>
@@ -566,15 +833,27 @@ OpenDDS is supported by [[Object Computing, Inc.|http://www.ociweb.com/]]</pre>
 <div title="SiteUrl" modifier="OpenDDS" created="200911302027" changecount="1">
 <pre>http://www.ociweb.com/</pre>
 </div>
-<div title="StyleSheet" modifier="OpenDDS" created="200911302014" modified="200912120011" changecount="64">
+<div title="StyleSheet" modifier="MikeMartinez" created="200911302014" modified="201002011554" changecount="67">
 <pre>a:hover {
     text-decoration: none;
 }
 
+.publishLogo {
+    position: relative;
+    background-color:[[ColorPalette::Background]];
+    background-image: url(images/opendds.png);
+    background-position: left;
+    background-repeat: no-repeat;
+    color:[[ColorPalette::SecondaryDark]];
+    padding: 20px 0 5px 72px;
+    border-bottom: 1px solid [[ColorPalette::SecondaryLight]];
+}
+
+
 .headerForeground {
     position: relative;
     background-color:[[ColorPalette::Background]];
-    background-image: url(../template/images/opendds.png);
+    background-image: url(images/opendds.png);
     background-position: left;
     background-repeat: no-repeat;
     color:[[ColorPalette::SecondaryDark]];
@@ -604,7 +883,13 @@ OpenDDS is supported by [[Object Computing, Inc.|http://www.ociweb.com/]]</pre>
 
 .toolbar {
     float: right;
-}</pre>
+}
+
+#publishContentWrapper {margin: 0 5em 0 5em; padding: 0;}
+
+th { border-style: inset;}
+td { border-style: inset;}
+</pre>
 </div>
 <div title="StyleSheetColors" modifier="OpenDDS" created="200911302020" modified="200911302134" changecount="5">
 <pre>/*{{{*/

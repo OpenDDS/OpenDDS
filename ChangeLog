@@ -1,3 +1,20 @@
+Mon Feb  1 16:13:15 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * docs/html/README:
+
+          Added instructions to create new documents.  This includes
+          copying the 'images' subdirectory to reflect some changes in
+          the template.html.  Added instructions to publish document as
+          static HTML pages.
+
+        * docs/html/template/template.html:
+
+          - changed the path to the 'opendds.png' logo to be in the local
+            'images' directory to remove a dependency on the '../template'
+            directory.
+          - added the 'PublishMacro' plugin to allow publication of the
+            TiddlyWiki document as separate static HTML pages.
+
 Mon Feb  1 15:34:10 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
