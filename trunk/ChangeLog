@@ -1,3 +1,9 @@
+Mon Feb  1 21:18:58 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Initialize WriterInfo::seen_data_ in the 2-arg constructor.
+
 Mon Feb  1 18:55:50 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
