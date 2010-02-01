@@ -846,7 +846,7 @@ OpenDDS::DCPS::TransportSendStrategy::start()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","start",6);
 
-  size_t header_chunks(1);
+  size_t header_chunks(2);
 
   // If a secondary send buffer is bound, sent headers should
   // be cached to properly maintain the buffer:
@@ -1621,6 +1621,10 @@ OpenDDS::DCPS::TransportSendStrategy::prepare_packet()
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Marshall the packet header.\n"));
 
+  if (this->header_block_ != 0) {
+    this->header_block_->release ();
+  }
+  
   ACE_NEW_MALLOC(this->header_block_,
                  static_cast<ACE_Message_Block*>(this->header_mb_allocator_->malloc()),
                  ACE_Message_Block(this->max_header_size_,

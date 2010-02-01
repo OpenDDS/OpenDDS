@@ -1,3 +1,12 @@
+Mon Feb  1 22:31:50 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          - Made the header_block_ released before it was created again
+          - Increased header_chunks to be 2.
+          These fixed the memory leaks seen in a stress test that sends
+          large number of messages without delay.
+
 Mon Feb  1 21:18:58 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
