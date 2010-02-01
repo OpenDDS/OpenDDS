@@ -846,12 +846,15 @@ OpenDDS::DCPS::TransportSendStrategy::start()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","start",6);
 
-  size_t header_chunks(2);
+  size_t header_chunks(1);
 
   // If a secondary send buffer is bound, sent headers should
   // be cached to properly maintain the buffer:
   if (this->send_buffer_ != 0) {
     header_chunks += this->send_buffer_->capacity();
+
+  } else {
+    header_chunks += 1;
   }
 
   ACE_NEW_RETURN(this->header_db_allocator_,
@@ -1624,7 +1627,7 @@ OpenDDS::DCPS::TransportSendStrategy::prepare_packet()
   if (this->header_block_ != 0) {
     this->header_block_->release ();
   }
-  
+
   ACE_NEW_MALLOC(this->header_block_,
                  static_cast<ACE_Message_Block*>(this->header_mb_allocator_->malloc()),
                  ACE_Message_Block(this->max_header_size_,
