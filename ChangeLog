@@ -1,3 +1,9 @@
+Mon Feb  1 23:25:35 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * NEWS:
+
+          Updated with new reliable transport teardown details.
+
 Mon Feb  1 22:31:50 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
