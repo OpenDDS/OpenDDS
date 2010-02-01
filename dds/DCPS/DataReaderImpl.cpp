@@ -1812,6 +1812,7 @@ OpenDDS::DCPS::WriterInfo::WriterInfo()
 OpenDDS::DCPS::WriterInfo::WriterInfo(DataReaderImpl* reader,
                                       PublicationId   writer_id)
   : last_liveliness_activity_time_(ACE_OS::gettimeofday()),
+    seen_data_(false),
     state_(NOT_SET),
     reader_(reader),
     writer_id_(writer_id),
