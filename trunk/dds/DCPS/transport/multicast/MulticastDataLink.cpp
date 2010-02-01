@@ -220,8 +220,8 @@ MulticastDataLink::reliability_lost(const InterfaceListType& interfaces)
       if (prev->second->defunct()) {
         MulticastSession_rch session = prev->second;
 
-        session->stop();
         remote_peers.push_back(session->remote_peer());
+        session->stop();
 
         this->sessions_.erase(prev);
       }

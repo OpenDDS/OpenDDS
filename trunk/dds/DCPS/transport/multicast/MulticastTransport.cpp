@@ -49,11 +49,10 @@ MulticastTransport::find_or_create_datalink(
   // To accommodate the one-to-many nature of multicast reservations,
   // a session layer is used to maintain state between unique pairs
   // of DomainParticipants over a single DataLink instance. Given
-  // that TransportImpl instances may only be attached either
+  // that TransportImpl instances may only be attached to either
   // Subscribers or Publishers within the same DomainParticipant,
   // it may be assumed that the local_id always references the same
-  // participant. The remote_id may match one or more publications
-  // or subscriptions belonging to the same remote participant.
+  // participant.
   if (this->link_.is_nil()) {
     MulticastSessionFactory* session_factory;
     if (this->config_i_->reliable_) {
@@ -104,7 +103,7 @@ MulticastTransport::find_or_create_datalink(
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
-                      ACE_TEXT("failed to activate session for remote peer: 0x%x!\n"),
+                      ACE_TEXT("failed to obtain session for remote peer: 0x%x!\n"),
                       remote_peer),
                      0);
   }
@@ -179,8 +178,8 @@ MulticastTransport::acked(RepoId /*local_id*/, RepoId remote_id)
 void
 MulticastTransport::remove_ack(RepoId /*local_id*/, RepoId /*remote_id*/)
 {
-  // Association acks are managed by each individual DataLink; there
-  // is no state that needs to be removed.
+  // Association acks are managed by our MulticastDataLink; there
+  // is no state that needs to be removed in MulticastTransport.
 }
 
 void
