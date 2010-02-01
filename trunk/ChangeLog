@@ -1,3 +1,11 @@
+Mon Feb  1 15:12:09 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Reverted previous commit (r2948); this change affected retained
+          PDU behavior in the TransportSendBuffer used by the multicast
+          transport.
+
 Mon Feb  1 06:34:39 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
