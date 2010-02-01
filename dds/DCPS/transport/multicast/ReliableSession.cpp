@@ -137,17 +137,6 @@ ReliableSession::defunct()
 bool
 ReliableSession::header_received(const TransportHeader& header)
 {
-  // Avoid updating sequence numbers for remote peer if we have
-  // not yet received a MULTICAST_SYNACK sample:
-  {
-    ACE_READ_GUARD_RETURN(ACE_SYNCH_RW_MUTEX,
-                          guard,
-                          this->lock_,
-                          false);
-
-    if (!this->acked_) return true;
-  }
-
   // Update last seen sequence for remote peer; return false if we
   // have already seen this datagram to prevent duplicate delivery:
   if (!this->nak_sequence_.update(header.sequence_)) return false;
