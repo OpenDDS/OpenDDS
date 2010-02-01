@@ -1,3 +1,9 @@
+Mon Feb  1 16:50:50 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Removed bogus acked_ check for passive peers.
+
 Mon Feb  1 16:13:15 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * docs/html/README:
