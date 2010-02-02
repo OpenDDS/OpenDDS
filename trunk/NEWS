@@ -16,11 +16,15 @@ New to this version are the following changes:
   reliability status.  This feature prevents an attached Subscriber from
   receiving potentially unreliable data.  Changes in association status
   will be reported via the usual mechanisms and generation counts will be
-  updated.
+  updated per the specification.
 
 - The opendds_repo_ctl tool has been moved from $DDS_ROOT/dds/tools to
   $DDS_ROOT/tools.  The name has also been changed to odds_repoctl to
   reflect changes in naming conventions since the last release.
+
+- Formal ranges of DDS::DomainId_t values are now specified; users now have
+  full access to all DomainId values between 0x0 and 0x7ffffff. All other
+  values are reserved for use by the implementation.
 
 
 =========================================================================

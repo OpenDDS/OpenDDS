@@ -1,3 +1,9 @@
+Tue Feb  2 14:10:43 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * NEWS:
+
+	  Updated with changes to supported DDS::DomainId_t ranges.
+
 Mon Feb  1 23:47:09 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
