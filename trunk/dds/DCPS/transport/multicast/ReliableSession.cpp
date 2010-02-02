@@ -137,6 +137,17 @@ ReliableSession::defunct()
 bool
 ReliableSession::header_received(const TransportHeader& header)
 {
+  // Avoid updating last seen sequence if we have not yet been
+  // acknowledged by the remote peer:
+  {
+    ACE_READ_GUARD_RETURN(ACE_SYNCH_RW_MUTEX,
+                          guard,
+                          this->lock_,
+                          false);
+
+    if (!this->acked_) return true;
+  }
+
   // Update last seen sequence for remote peer; return false if we
   // have already seen this datagram to prevent duplicate delivery:
   if (!this->nak_sequence_.update(header.sequence_)) return false;
@@ -189,6 +200,10 @@ ReliableSession::control_received(char submessage_id,
 void
 ReliableSession::syn_received(ACE_Message_Block* control)
 {
+  ACE_WRITE_GUARD(ACE_SYNCH_RW_MUTEX,
+                  guard,
+                  this->lock_);
+
   TAO::DCPS::Serializer serializer(
     control, this->link_->transport()->swap_bytes());
 
@@ -204,6 +219,7 @@ ReliableSession::syn_received(ACE_Message_Block* control)
 
   // Establish a baseline for detecting reception gaps:
   this->nak_sequence_.reset(header.sequence_);
+  this->acked_ = true;
 
   // MULTICAST_SYN control samples are always positively
   // acknowledged by a matching remote peer:

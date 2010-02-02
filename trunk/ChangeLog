@@ -1,3 +1,15 @@
+Tue Feb  2 23:39:52 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Added additional filtering based on acked status for both active
+          and passive peers.
+
+        * dds/DCPS/transport/multicast/multicast.ini-dist:
+        * docs/html/multicast/multicast.html:
+
+          Updated default port number documentation.
+
 Tue Feb  2 22:24:56 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:

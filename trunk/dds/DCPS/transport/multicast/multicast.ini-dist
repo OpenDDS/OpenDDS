@@ -18,7 +18,7 @@ port_offset=49400
 # The default value is:
 #   224.0.0.128:<port> (IPv4), or
 #    [FF01::80]:<port> (IPv6)
-group_address=224.0.0.128:49152
+group_address=224.0.0.128:49401
 
 # Enables reliable communication. This option will eventually
 # be deprecated.
