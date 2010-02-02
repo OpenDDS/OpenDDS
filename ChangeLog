@@ -1,8 +1,14 @@
+Tue Feb  2 16:14:44 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * java/idl2jni/codegen/idl2jni_visitor.h:
+
+          Uncommented guards for DOC x.7.6 release.
+
 Tue Feb  2 14:13:37 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * NEWS:
 
-	  Minor fix to DDS::DomainId_t ranges.
+          Minor fix to DDS::DomainId_t ranges.
 
 Tue Feb  2 14:10:43 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
