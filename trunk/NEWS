@@ -23,7 +23,7 @@ New to this version are the following changes:
   reflect changes in naming conventions since the last release.
 
 - Formal ranges of DDS::DomainId_t values are now specified; users now have
-  full access to all DomainId values between 0x0 and 0x7ffffff. All other
+  full access to all DomainId values between 0x0 and 0x7fffffff. All other
   values are reserved for use by the implementation.
 
 
