@@ -14,6 +14,7 @@
 #include "ThreadSynchStrategy.h"
 #include "ThreadSynchResource.h"
 #include "TransportQueueElement.h"
+#include "TransportSendElement.h"
 #include "TransportSendBuffer.h"
 #include "BuildChainVisitor.h"
 #include "QueueRemoveVisitor.h"

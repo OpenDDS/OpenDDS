@@ -1,3 +1,9 @@
+Tue Feb  2 22:24:56 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Added an #include that was necessary for inline=0 builds.
+
 Tue Feb  2 21:59:28 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.h:
