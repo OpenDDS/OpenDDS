@@ -20,13 +20,13 @@ SendResponseListener::~SendResponseListener()
 }
 
 void
-SendResponseListener::data_delivered(DataSampleListElement* /* sample */)
+SendResponseListener::data_delivered(const DataSampleListElement* /* sample */)
 {
 }
 
 void
 SendResponseListener::data_dropped(
-  DataSampleListElement* /* sample */,
+  const DataSampleListElement* /* sample */,
   bool /* dropped_by_transport */)
 {
 }

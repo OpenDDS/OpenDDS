@@ -83,106 +83,83 @@ DataSampleList::dequeue_next_sample(DataSampleListElement* stale)
   return found;
 }
 
-bool
-DataSampleList::dequeue_next_instance_sample(DataSampleListElement* stale)
+DataSampleListElement*
+DataSampleList::dequeue_next_instance_sample(const DataSampleListElement* stale)
 {
   if (head_ == 0) {
-    return false;
+    return 0;
   }
 
   // Same as dequeue from head.
   if (stale == head_) {
-    return dequeue_head_next_instance_sample(stale);
+    DataSampleListElement* tmp = head_;
+    return dequeue_head_next_instance_sample(tmp) ? tmp : 0;
   }
 
   // Search from head_->next_instance_sample_.
-  bool found = false;
+  DataSampleListElement* toRemove = 0;
   DataSampleListElement* previous = head_;
 
-  for (DataSampleListElement* item = head_->next_instance_sample_ ;
-       item != 0 ;
+  for (DataSampleListElement* item = head_->next_instance_sample_;
+       item != 0 && toRemove == 0;
        item = item->next_instance_sample_) {
     if (item == stale) {
-      found = true;
+      toRemove = item;
       previous->next_instance_sample_ = stale->next_instance_sample_;
-      -- size_ ;
-
-      stale->next_instance_sample_ = 0;
-
-      break;
+      --size_ ;
+      item->next_instance_sample_ = 0;
     }
 
     previous = item;
   }
 
-  return found;
+  return toRemove;
 }
 
-bool
-DataSampleList::dequeue_next_send_sample(DataSampleListElement* stale)
+DataSampleListElement*
+DataSampleList::dequeue_next_send_sample(const DataSampleListElement* stale)
 {
   if (head_ == 0) {
-    return false;
+    return 0;
   }
 
   // Same as dequeue from head.
   if (stale == head_) {
-    return dequeue_head_next_send_sample(stale);
+    DataSampleListElement* tmp = head_;
+    return dequeue_head_next_send_sample(tmp) ? tmp : 0;
   }
 
   // Search from head_->next_send_sample_.
-  bool found = false;
-
-  for (DataSampleListElement* item = head_->next_send_sample_ ;
-       item != 0 ;
+  DataSampleListElement* toRemove = 0;
+  for (DataSampleListElement* item = head_->next_send_sample_;
+       item != 0 && toRemove == 0;
        item = item->next_send_sample_) {
     if (item == stale) {
-      found = true;
-      break;
+      toRemove = item;
     }
   }
 
-  if (found) {
-    // Adjust size.
+  if (toRemove) {
     size_ --;
-    //
     // Remove from the previous element.
-    //
-    //stale->previous_sample_->next_sample_ = stale->next_sample_ ;
-    //stale->previous_sample_->next_send_sample_ = stale->next_send_sample_ ;
-    stale->previous_send_sample_->next_send_sample_ = stale->next_send_sample_ ;
+    toRemove->previous_send_sample_->next_send_sample_ = toRemove->next_send_sample_ ;
 
-    //
     // Remove from the next element.
-    //
-    if (stale->next_send_sample_ != 0) {
+    if (toRemove->next_send_sample_ != 0) {
       // Remove from the inside of the list.
-      stale->next_send_sample_->previous_send_sample_ = stale->previous_send_sample_ ;
+      toRemove->next_send_sample_->previous_send_sample_ = toRemove->previous_send_sample_ ;
 
     } else {
-      stale->previous_send_sample_->next_send_sample_ = 0;
+      toRemove->previous_send_sample_->next_send_sample_ = 0;
       // Remove from the tail of the list.
-      tail_ = stale->previous_send_sample_ ;
+      tail_ = toRemove->previous_send_sample_ ;
     }
 
-    stale->next_send_sample_ = 0;
-    stale->previous_send_sample_ = 0;
-    ////
-    //// Remove from the next element.
-    ////
-    //if( stale->next_sample_ != 0)
-    //  {
-    //    // Remove from the inside of the list.
-    //    stale->next_sample_->previous_sample_ = stale->previous_sample_ ;
-    //  }
-    //else
-    //  {
-    //    // Remove from the tail of the list.
-    //    tail_ = stale->previous_sample_ ;
-    //  }
+    toRemove->next_send_sample_ = 0;
+    toRemove->previous_send_sample_ = 0;
   }
 
-  return found;
+  return toRemove;
 }
 
 void

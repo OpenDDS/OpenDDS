@@ -1678,7 +1678,7 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
 }
 
 void
-DataWriterImpl::data_delivered(DataSampleListElement* sample)
+DataWriterImpl::data_delivered(const DataSampleListElement* sample)
 {
   DBG_ENTRY_LVL("DataWriterImpl","data_delivered",6);
 
@@ -1820,7 +1820,7 @@ DataWriterImpl::remove_sample(DataSampleListElement* element,
 }
 
 void
-DataWriterImpl::data_dropped(DataSampleListElement* element,
+DataWriterImpl::data_dropped(const DataSampleListElement* element,
                              bool dropped_by_transport)
 {
   DBG_ENTRY_LVL("DataWriterImpl","data_dropped",6);

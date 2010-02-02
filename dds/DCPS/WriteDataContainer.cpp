@@ -482,7 +482,7 @@ WriteDataContainer::pending_data()
 }
 
 void
-WriteDataContainer::data_delivered(DataSampleListElement* sample)
+WriteDataContainer::data_delivered(const DataSampleListElement* sample)
 {
   DBG_ENTRY_LVL("WriteDataContainer","data_delivered",6);
 
@@ -502,8 +502,9 @@ WriteDataContainer::data_delivered(DataSampleListElement* sample)
   // by transport.  We are now been notified by transport, so we can
   // now release the element.
   //
-  if (released_data_.dequeue_next_send_sample(sample)) {
-    release_buffer(sample);
+  if (DataSampleListElement* stale =
+      released_data_.dequeue_next_send_sample(sample)) {
+    release_buffer(stale);
 
   } else {
     //
@@ -511,10 +512,7 @@ WriteDataContainer::data_delivered(DataSampleListElement* sample)
     //
     if (sending_data_.dequeue_next_send_sample(sample)) {
       // in sending_data_ list
-    }
-
-    //
-    else {
+    } else {
       // The sample is neither in the sending_data_ nor the
       // released_data_.
       ACE_ERROR((LM_ERROR,
@@ -530,7 +528,9 @@ WriteDataContainer::data_delivered(DataSampleListElement* sample)
     if (instance->waiting_list_.head_ != 0) {
       // Remove the delivered sample from the instance sample list
       // and release.
-      if (instance->samples_.dequeue_next_instance_sample(sample) == false) {
+      DataSampleListElement* stale =
+        instance->samples_.dequeue_next_instance_sample(sample);
+      if (stale == 0) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: ")
                    ACE_TEXT("WriteDataContainer::data_delivered, ")
@@ -538,13 +538,13 @@ WriteDataContainer::data_delivered(DataSampleListElement* sample)
                    ACE_TEXT("list failed\n")));
       }
 
-      release_buffer(sample);
+      release_buffer(stale);
 
       // Mark the first waiting sample will be next to add to instance
       // list.
       instance->waiting_list_.head_->space_available_ = true;
       // Remove this waiting sample from waiting list.
-      DataSampleListElement* stale = 0;
+      stale = 0;
 
       if (instance->waiting_list_.dequeue_head_next_instance_sample(stale) == false) {
         ACE_ERROR((LM_ERROR,
@@ -582,7 +582,7 @@ WriteDataContainer::data_delivered(DataSampleListElement* sample)
 }
 
 void
-WriteDataContainer::data_dropped(DataSampleListElement* sample,
+WriteDataContainer::data_dropped(const DataSampleListElement* sample,
                                  bool dropped_by_transport)
 {
   DBG_ENTRY_LVL("WriteDataContainer","data_dropped",6);
@@ -612,18 +612,19 @@ WriteDataContainer::data_dropped(DataSampleListElement* sample,
   // keep the sample from the sending_data_ list still in
   // sample list since we will send it.
 
-  if (sending_data_.dequeue_next_send_sample(sample) == true) {
+  if (sending_data_.dequeue_next_send_sample(sample)) {
     // else: The data_dropped is called as a result of remove_sample()
     // called from reenqueue_all() which supports the TRANSIENT_LOCAL
     // qos. The samples that are sending by transport are dropped from
     // transport and will be moved to the unsent list for resend.
     unsent_data_.enqueue_tail_next_send_sample(sample);
 
-  } else if (released_data_.dequeue_next_send_sample(sample) == true) {
+  } else if (DataSampleListElement* stale =
+             released_data_.dequeue_next_send_sample(sample)) {
     // The remove_sample is requested when sample list size
     // reaches limit. In this case, the oldest sample is
     // moved to released_data_ already.
-    release_buffer(sample);
+    release_buffer(stale);
 
   } else {
     // The sample is neither in not in the

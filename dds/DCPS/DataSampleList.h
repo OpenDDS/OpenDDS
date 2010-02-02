@@ -228,7 +228,7 @@ public:
 
   /// This function assumes the list is the sending_data or sent_data
   /// which is linked by the next_send_sample.
-  void enqueue_tail_next_send_sample(DataSampleListElement* sample);
+  void enqueue_tail_next_send_sample(const DataSampleListElement* sample);
 
   /// This function assumes the list is the sending_data or sent_data
   /// which is linked by the next_send_sample.
@@ -250,12 +250,14 @@ public:
   /// This function assumes that the list is a list that linked using
   /// next_instance_sample but the stale element's position is
   /// unknown.
-  bool dequeue_next_instance_sample(DataSampleListElement* stale);
+  DataSampleListElement*
+  dequeue_next_instance_sample(const DataSampleListElement* stale);
 
   /// This function assumes that the list is a list that linked using
   /// next_send_sample but the stale element's position is
   /// unknown.
-  bool dequeue_next_send_sample(DataSampleListElement* stale);
+  DataSampleListElement*
+  dequeue_next_send_sample(const DataSampleListElement* stale);
 
   /// This function assumes the appended list is a list linked with
   /// previous/next_sample_ and might be linked with next_send_sample_.

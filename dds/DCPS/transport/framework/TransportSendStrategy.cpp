@@ -1244,17 +1244,10 @@ OpenDDS::DCPS::TransportSendStrategy::remove_all_control_msgs(RepoId pub_id)
   }
 
   // Process any specific sample storage first.
-  this->remove_all_control_msgs_i(pub_id);
+  remove_all_control_msgs_i(pub_id);
 
-  TransportRetainedElement current_sample( 0, pub_id);
-  QueueRemoveVisitor remove_element_visitor( current_sample);
-  PacketRemoveVisitor remove_from_packet_visitor(current_sample,
-                                                 this->pkt_chain_,
-                                                 this->header_block_,
-                                                 this->replaced_element_allocator_);
-
-  this->do_remove_sample(remove_element_visitor,
-                         remove_from_packet_visitor);
+  TransportRetainedElement current_sample(0, pub_id);
+  do_remove_sample(current_sample);
 }
 
 void
@@ -1276,17 +1269,16 @@ OpenDDS::DCPS::TransportSendStrategy::remove_sample(const DataSampleListElement*
   GuardType guard(this->lock_);
 
   // Process any specific sample storage first.
-  this->remove_sample_i(sample);
+  remove_sample_i(sample);
 
-  TransportRetainedElement current_sample( sample->sample_, sample->publication_id_);
-  QueueRemoveVisitor  remove_element_visitor(current_sample);
-  PacketRemoveVisitor remove_from_packet_visitor( current_sample,
-                                  this->pkt_chain_,
-                                  this->header_block_,
-                                  this->replaced_element_allocator_);
-
-  return this->do_remove_sample(remove_element_visitor,
-                                remove_from_packet_visitor);
+  if (this->send_buffer_ == 0) {
+    TransportSendElement current_sample(0, sample);
+    return do_remove_sample(current_sample);
+  } else {
+    TransportRetainedElement current_sample(sample->sample_,
+                                            sample->publication_id_);
+    return do_remove_sample(current_sample);
+  }
 }
 
 void
@@ -1300,10 +1292,15 @@ OpenDDS::DCPS::TransportSendStrategy::remove_sample_i(
 }
 
 int
-OpenDDS::DCPS::TransportSendStrategy::do_remove_sample(QueueRemoveVisitor& simple_rem_vis,
-                                                       PacketRemoveVisitor& pac_rem_vis)
+OpenDDS::DCPS::TransportSendStrategy::do_remove_sample(TransportQueueElement& current_sample)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","do_remove_sample",6);
+
+  QueueRemoveVisitor simple_rem_vis(current_sample);
+  PacketRemoveVisitor pac_rem_vis(current_sample,
+                                  this->pkt_chain_,
+                                  this->header_block_,
+                                  this->replaced_element_allocator_);
 
   int status = 0;
 
