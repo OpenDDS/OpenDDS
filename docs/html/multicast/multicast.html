@@ -532,7 +532,7 @@ TertiaryDark: #666
 Error: #f88
 </pre>
 </div>
-<div title="Configuration" modifier="StevenStallion" created="200912011939" modified="201001141716" changecount="35">
+<div title="Configuration" modifier="StevenStallion" created="200912011939" modified="201002022149" changecount="36">
 <pre>As with other transports, dynamic configuration is provided by the ACE Service Configurator Framework. A svc.conf file should be created which contains the following:
 {{{
 dynamic OpenDDS_DCPS_Multicast_Service Service_Object * OpenDDS_Multicast:_make_MulticastLoader()
@@ -562,7 +562,7 @@ port_offset=49400
 # The default value is:
 #   224.0.0.128:&lt;port&gt; (IPv4), or
 #    [FF01::80]:&lt;port&gt; (IPv6)
-group_address=224.0.0.128:49152
+group_address=224.0.0.128:49401
 
 # Enables reliable communication. This option will eventually
 # be deprecated.
