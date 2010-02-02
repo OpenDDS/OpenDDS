@@ -286,7 +286,7 @@ public:
    * delivered and it is delegated to WriteDataContainer
    * to adjust the internal data sample threads.
    */
-  void data_delivered(DataSampleListElement* sample);
+  void data_delivered(const DataSampleListElement* sample);
 
   /**
    * This is called by transport to notify that the control
@@ -348,7 +348,7 @@ public:
    * sample is dropped and it delegates to WriteDataContainer
    * to update the internal list.
    */
-  void data_dropped(DataSampleListElement* element,
+  void data_dropped(const DataSampleListElement* element,
                     bool dropped_by_transport);
 
   /**

@@ -162,25 +162,26 @@ DataSampleList::dequeue_head_next_sample(DataSampleListElement*& stale)
 
 ACE_INLINE
 void
-DataSampleList::enqueue_tail_next_send_sample(DataSampleListElement* sample)
+DataSampleList::enqueue_tail_next_send_sample(const DataSampleListElement* sample)
 {
-  //sample->previous_sample_ = 0;
-  //sample->next_sample_ = 0;
-  //sample->next_send_sample_ = 0;
+  ++size_;
 
-  ++ size_ ;
+  // const_cast here so that higher layers don't need to pass around so many
+  // non-const pointers to DataSampleListElement.  Ideally the design would be
+  // changed to accomdate const-correctness throughout.
+  DataSampleListElement* mSample = const_cast<DataSampleListElement*>(sample);
 
   if (head_ == 0) {
     // First sample in list.
-    head_ = tail_ = sample ;
+    head_ = tail_ = mSample;
 
   } else {
     // Add to existing list.
     //sample->previous_sample_ = tail_;
     //tail_->next_sample_ = sample;
-    sample->previous_send_sample_ = tail_;
-    tail_->next_send_sample_ = sample ;
-    tail_ = sample ;
+    mSample->previous_send_sample_ = tail_;
+    tail_->next_send_sample_ = mSample;
+    tail_ = mSample;
   }
 }
 

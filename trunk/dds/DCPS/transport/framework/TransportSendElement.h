@@ -17,13 +17,11 @@
 namespace OpenDDS {
 namespace DCPS {
 
-//Yan struct DataSampleListElement;
-
 class OpenDDS_Dcps_Export TransportSendElement : public TransportQueueElement {
 public:
 
   TransportSendElement(int initial_count,
-                       DataSampleListElement* sample,
+                       const DataSampleListElement* sample,
                        TransportSendElementAllocator* allocator = 0);
   virtual ~TransportSendElement();
 
@@ -41,7 +39,7 @@ private:
 
   /// This is the actual element that the transport framework was
   /// asked to send.
-  DataSampleListElement* element_;
+  const DataSampleListElement* element_;
 
   /// Reference to TransportSendElement allocator.
   TransportSendElementAllocator* allocator_;

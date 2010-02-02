@@ -242,7 +242,7 @@ public:
    * list.  If there is any threads waiting for available space
    *  then it needs wake up these threads.
    */
-  void data_delivered(DataSampleListElement* sample);
+  void data_delivered(const DataSampleListElement* sample);
 
   /**
    * This method is called by the transport to notify the sample
@@ -259,7 +259,7 @@ public:
    * remove_sample and data_dropped() is a result of
    * remove_sample().
    */
-  void data_dropped(DataSampleListElement* element,
+  void data_dropped(const DataSampleListElement* element,
                     bool dropped_by_transport);
 
   /**
@@ -350,17 +350,17 @@ private:
 private:
 
   /// List of data that has not been sent yet.
-  DataSampleList   unsent_data_ ;
+  DataSampleList   unsent_data_;
 
   /// List of data that is currently being sent.
-  DataSampleList   sending_data_ ;
+  DataSampleList   sending_data_;
 
   /// List of data that has already been sent.
-  DataSampleList   sent_data_ ;
+  DataSampleList   sent_data_;
 
   /// List of data that has been released, but it
   /// still in use externally (by the transport).
-  DataSampleList   released_data_ ;
+  DataSampleList   released_data_;
 
   /// The list of all samples written to this datawriter in
   /// writing order.
@@ -371,13 +371,13 @@ private:
   /// samples in sent and sending list. These
   /// DataSampleListElement will be appended to released_data_
   /// list after passing to the transport.
-  DataSampleList   resend_data_ ;
+  DataSampleList   resend_data_;
 
   /// The individual instance queue threads in the data.
   PublicationInstanceMapType instances_;
 
   /// The publication Id from repo.
-  PublicationId    publication_id_ ;
+  PublicationId    publication_id_;
 
   /// The writer that owns this container.
   DataWriterImpl*  writer_;

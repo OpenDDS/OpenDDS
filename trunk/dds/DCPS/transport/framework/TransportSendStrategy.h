@@ -259,8 +259,7 @@ public:
 
 private:
   /// Implement framework chain visitations to remove a sample.
-  int do_remove_sample(QueueRemoveVisitor& simple_rem_vis,
-                       PacketRemoveVisitor& pac_rem_vis);
+  int do_remove_sample(TransportQueueElement& current_sample);
 
   /// Helper function to debugging.
   static const char* mode_as_str(SendMode mode);
