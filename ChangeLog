@@ -1,8 +1,14 @@
+Tue Feb  2 14:13:37 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * NEWS:
+
+	  Minor fix to DDS::DomainId_t ranges.
+
 Tue Feb  2 14:10:43 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * NEWS:
 
-	  Updated with changes to supported DDS::DomainId_t ranges.
+          Updated with changes to supported DDS::DomainId_t ranges.
 
 Mon Feb  1 23:47:09 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
