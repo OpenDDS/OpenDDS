@@ -1,3 +1,9 @@
+Tue Feb  2 16:17:04 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * java/idl2jni/codegen/idl2jni_visitor.cpp:
+
+          Uncommented guards for DOC x.7.6 release.
+
 Tue Feb  2 16:14:44 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * java/idl2jni/codegen/idl2jni_visitor.h:
