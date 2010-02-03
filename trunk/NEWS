@@ -2,6 +2,17 @@ Version 2.1 of OpenDDS.
 
 New to this version are the following changes:
 
+- The OpenDDS-Bench performance testing framework has been ehanced to
+  include the following:
+    -) extended to allow fixed rate testing;
+    -) added predefined latency test configuration files;
+    -) added data reduction scripts to post process test results;
+    -) added data visualization scripts using gnuplot to create charts
+       from test data;
+
+- A new instrumentation application is available to view executing
+  OpenDDS service Entities.  This is located at: $DDS_ROOT/tools/odds_monitor.
+
 - A new multicast transport is available which replaces the older
   ReliableMulticast and SimpleMcast transports.  For a detailed description
   of the design, configuration, known issues, and potential enhancements,
