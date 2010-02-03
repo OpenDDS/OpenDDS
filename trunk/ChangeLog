@@ -1,3 +1,10 @@
+Wed Feb  3 19:26:53 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/doc/userguide.html:
+
+          This time I actually *saved* the HTML file before commiting the
+          changes.
+
 Wed Feb  3 19:09:24 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/odds_monitor/Monitor_main.cpp:
