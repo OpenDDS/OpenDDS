@@ -17,24 +17,27 @@ int
 main( int argc, char** argv)
 {
   // Initialize the application, consume any Qt arguments.
-  QApplication application( argc, argv);
-  QPixmap splashImage(":/jpeg/splash.jpg");
+  QApplication  application( argc, argv);
+  QPixmap       splashImage(":/jpeg/splash.jpg");
   QSplashScreen splash(splashImage);
   splash.show();
   application.processEvents();
 
-  splash.showMessage("Initializing DDS Service");
-  application.processEvents();
-
   // Initialize the service and consume the ACE+TAO+DDS arguments.
   TheParticipantFactoryWithArgs( argc, argv);
+  application.processEvents();
+
+  // Load the SimpleTcp transport library as we know that we will be
+  // using it.
   ACE_Service_Config::process_directive(
     ACE_TEXT("dynamic DCPS_SimpleTcpLoader Service_Object * ")
     ACE_TEXT("SimpleTcp:_make_DCPS_SimpleTcpLoader() \"-type SimpleTcp\"")
   );
+  application.processEvents();
 
   // Process the command line arguments left after ACE and Qt have had a go.
   Monitor::Options options( argc, argv);
+  application.processEvents();
 
   // Instantiate and display.
   Monitor::Viewer* viewer = new Monitor::Viewer( options);

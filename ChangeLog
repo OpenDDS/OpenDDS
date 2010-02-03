@@ -1,3 +1,20 @@
+Wed Feb  3 23:03:01 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * NEWS:
+
+          Updated for upcoming release with odds_monitor and Bench
+          changes.
+
+        * docs/html/README:
+
+          Made the copy instructions explicit to use subversion copy
+          command.
+
+        * tools/odds_monitor/Monitor_main.cpp:
+
+          Simple cleanup - adding GUI loop executions in more places
+          while splash is displayed.
+
 Wed Feb  3 19:26:53 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/odds_monitor/doc/userguide.html:
