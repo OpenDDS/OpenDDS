@@ -1,3 +1,21 @@
+Wed Feb  3 00:18:35 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * etc/monitor.conf:
+
+          Added this here to simplify odds_monitor operation.
+
+        * tools/odds_monitor/Monitor.mpc:
+
+          Added installation to $DDS_ROOT/bin
+
+        * tools/odds_monitor/doc/images:
+
+          Documentation images.
+
+        * tools/odds_monitor/doc/userguide.html:
+
+          Initial User Guide.
+
 Tue Feb  2 23:39:52 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/ReliableSession.cpp:
