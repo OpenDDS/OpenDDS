@@ -1101,15 +1101,15 @@ String.prototype.filenameEncode = function()
     };
 }}}</pre>
 </div>
-<div title="Quick Start" modifier="MikeMartinez" created="201002021625" modified="201002030423" tags="publish" changecount="10">
+<div title="Quick Start" modifier="MikeMartinez" created="201002021625" modified="201002031908" tags="publish" changecount="11">
 <pre>The //odds_monitor// tool is provided to inspect information available about an operating ~OpenDDS system.  The viewer attaches to a single ~OpenDDS repostiory at a time and subscribes to both the DDS specification defined Builtin Topics and the ~OpenDDS specific Monitor topics.  It is possible to switch from viewing the information from one repository to another while the monitor is running.
 
 To execute the application, do the following:
 * Make sure that the application is [[built|Building]].
-* Make sure that the [[environment|Setup]] is setup correctly.
+* Make sure that the [[environment|Setup]] is setup correctly for execution.
 * Start the application:
 {{{
-  &gt; odds_monitor  -ORBSvcConf $DDS_ROOT/etc/monitor.conf
+  &gt; odds_monitor
 }}}
 * Attach to a running ~OpenDDS service
 ** Add the repository:
