@@ -30,9 +30,9 @@ class SimpleDataWriter : public OpenDDS::DCPS::TransportSendListener
     // message.
     void transport_lost();
 
-    virtual void data_delivered(OpenDDS::DCPS::DataSampleListElement* sample);
-    virtual void data_dropped(OpenDDS::DCPS::DataSampleListElement* sample,
-                              bool dropped_by_transport = false);
+    void data_delivered(const OpenDDS::DCPS::DataSampleListElement* sample);
+    void data_dropped(const OpenDDS::DCPS::DataSampleListElement* sample,
+                      bool dropped_by_transport = false);
 
     int delivered_test_message();
 

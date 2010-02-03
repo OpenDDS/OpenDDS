@@ -118,7 +118,7 @@ SimpleDataWriter::transport_lost()
 
 
 void
-SimpleDataWriter::data_delivered(OpenDDS::DCPS::DataSampleListElement* sample)
+SimpleDataWriter::data_delivered(const OpenDDS::DCPS::DataSampleListElement* sample)
 {
   DBG_ENTRY("SimpleDataWriter","data_delivered");
 
@@ -140,7 +140,7 @@ SimpleDataWriter::data_delivered(OpenDDS::DCPS::DataSampleListElement* sample)
 
 
 void
-SimpleDataWriter::data_dropped(OpenDDS::DCPS::DataSampleListElement* sample,
+SimpleDataWriter::data_dropped(const OpenDDS::DCPS::DataSampleListElement* sample,
                                bool dropped_by_transport)
 {
   DBG_ENTRY("SimpleDataWriter","data_dropped");

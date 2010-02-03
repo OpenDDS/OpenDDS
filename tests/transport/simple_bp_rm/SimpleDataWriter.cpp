@@ -107,9 +107,14 @@ SimpleDataWriter::transport_lost()
 
 
 void
-SimpleDataWriter::data_delivered(OpenDDS::DCPS::DataSampleListElement* sample)
+SimpleDataWriter::data_delivered(const OpenDDS::DCPS::DataSampleListElement* sample)
 {
-  unsigned num_delivered = this->release_element(sample);
+  if (sample != this->element_) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) oops?\n"));
+    return;
+  }
+
+  unsigned num_delivered = this->release_element(element_);
   ACE_UNUSED_ARG(num_delivered);
 
   VDBG((LM_DEBUG,
@@ -119,10 +124,15 @@ SimpleDataWriter::data_delivered(OpenDDS::DCPS::DataSampleListElement* sample)
 
 
 void
-SimpleDataWriter::data_dropped(OpenDDS::DCPS::DataSampleListElement* sample,
+SimpleDataWriter::data_dropped(const OpenDDS::DCPS::DataSampleListElement* sample,
                                bool dropped_by_transport)
 {
-  unsigned num_delivered = this->release_element(sample);
+  if (sample != this->element_) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) oops?\n"));
+    return;
+  }
+
+  unsigned num_delivered = this->release_element(element_);
   ACE_UNUSED_ARG(num_delivered);
   ACE_UNUSED_ARG(dropped_by_transport);
 
