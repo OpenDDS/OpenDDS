@@ -28,6 +28,10 @@ main( int argc, char** argv)
 
   // Initialize the service and consume the ACE+TAO+DDS arguments.
   TheParticipantFactoryWithArgs( argc, argv);
+  ACE_Service_Config::process_directive(
+    ACE_TEXT("dynamic DCPS_SimpleTcpLoader Service_Object * ")
+    ACE_TEXT("SimpleTcp:_make_DCPS_SimpleTcpLoader() \"-type SimpleTcp\"")
+  );
 
   // Process the command line arguments left after ACE and Qt have had a go.
   Monitor::Options options( argc, argv);

@@ -1,3 +1,16 @@
+Wed Feb  3 19:09:24 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/Monitor_main.cpp:
+
+          Added an ACE_Service_Config::process_directive() call to load
+          the SimpleTcp library always.  This eliminates the need for a
+          service configuration file for the most common use case.
+
+        * tools/odds_monitor/doc/userguide.html:
+
+          Removed service configuration file from invocation example.
+          Some additional cleanup.
+
 Wed Feb  3 15:05:43 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * tests/transport/dds_comparative/PubWriter.h:
