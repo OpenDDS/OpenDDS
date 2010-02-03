@@ -27,14 +27,6 @@ BestEffortSession::acked()
 }
 
 bool
-BestEffortSession::defunct()
-{
-  // Assume remote peer is available; this does not prevent
-  // data loss if the peer is subsequently unresponsive:
-  return false;
-}
-
-bool
 BestEffortSession::header_received(const TransportHeader& /*header*/)
 {
   // Assume header is valid; this does not prevent duplicate

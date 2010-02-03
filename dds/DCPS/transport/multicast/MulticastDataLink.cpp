@@ -169,9 +169,11 @@ MulticastDataLink::header_received(const TransportHeader& header)
                    false);
 
   MulticastSessionMap::iterator it(this->sessions_.find(header.source_));
-  if (it == this->sessions_.end()) return true;  // unknown peer
+  if (it != this->sessions_.end() && it->second->acked()) {
+    return it->second->header_received(header);
+  }
 
-  return it->second->header_received(header);
+  return true;
 }
 
 void
@@ -199,53 +201,6 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
 
   default:
     data_received(sample);
-  }
-}
-
-void
-MulticastDataLink::reliability_lost(const InterfaceListType& interfaces)
-{
-  // Sessions which have lost reliability are marked defunct;
-  // copy affected peer identifiers and destroy session state:
-  std::list<MulticastPeer> remote_peers;
-  {
-    ACE_GUARD(ACE_SYNCH_RECURSIVE_MUTEX,
-              guard,
-              this->session_lock_);
-
-    MulticastSessionMap::iterator it(this->sessions_.begin());
-    while (it != this->sessions_.end()) {
-      MulticastSessionMap::iterator prev(it++);
-
-      if (prev->second->defunct()) {
-        MulticastSession_rch session = prev->second;
-
-        remote_peers.push_back(session->remote_peer());
-        session->stop();
-
-        this->sessions_.erase(prev);
-      }
-    }
-  }
-
-  if (remote_peers.empty()) return; // nothing to disassociate
-
-  for (InterfaceListType::const_iterator it(interfaces.begin());
-       it != interfaces.end(); ++it) {
-
-    TransportInterface* intf = *it;
-
-    for (std::list<MulticastPeer>::iterator peer(remote_peers.begin());
-         peer != remote_peers.end(); ++peer) {
-      // Reconstruct the remote participant RepoId by substituting
-      // the local participantId with the remote peer value:
-      RepoId remote_id(intf->get_participant_id());
-
-      RepoIdBuilder builder(remote_id);
-      builder.participantId(*peer);
-
-      intf->disassociate_participant(remote_id);
-    }
   }
 }
 

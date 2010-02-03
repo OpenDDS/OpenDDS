@@ -51,7 +51,6 @@ std::ostream& operator<<(std::ostream& str,
 namespace OpenDDS {
 namespace DCPS {
 
-class  TransportInterface;
 class  TransportReceiveListener;
 class  TransportSendListener;
 class  TransportQueueElement;
@@ -248,13 +247,6 @@ public:
 
   virtual void control_dropped(ACE_Message_Block* message,
                                bool dropped_by_transport);
-
-  typedef std::list<TransportInterface*> InterfaceListType;
-
-  /// Called by the TransportImpl class in order to give the
-  /// concrete DataLink subclass a chance to do something when
-  /// the reliability_lost "event" occurs.
-  virtual void reliability_lost(const InterfaceListType& interfaces);
 
 protected:
 

@@ -27,7 +27,6 @@
 #include "ace/Synch_Traits.h"
 
 #include "dds/DCPS/transport/framework/DataLink.h"
-#include "dds/DCPS/transport/framework/TransportInterface.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
 #include "dds/DCPS/transport/framework/TransportSendBuffer.h"
 #include "dds/DCPS/transport/framework/TransportSendBuffer_rch.h"
@@ -77,8 +76,6 @@ public:
 
   bool header_received(const TransportHeader& header);
   void sample_received(ReceivedDataSample& sample);
-
-  void reliability_lost(const InterfaceListType& interfaces);
 
 private:
   MulticastTransport* transport_;

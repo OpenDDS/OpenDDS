@@ -1136,18 +1136,6 @@ PublisherImpl::get_publication_ids(PublicationIdVec& pubs)
   }
 }
 
-DDS::DomainId_t
-PublisherImpl::get_domain_id() const
-{
-  return this->domain_id_;
-}
-
-RepoId
-PublisherImpl::get_participant_id() const
-{
-  return this->participant_->get_id();
-}
-
 } // namespace DCPS
 } // namespace OpenDDS
 

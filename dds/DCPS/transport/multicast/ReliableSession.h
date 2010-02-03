@@ -72,7 +72,6 @@ public:
                   MulticastPeer remote_peer);
 
   virtual bool acked();
-  virtual bool defunct();
 
   virtual bool header_received(const TransportHeader& header);
 
@@ -95,14 +94,11 @@ public:
   void nakack_received(ACE_Message_Block* control);
   void send_nakack(MulticastSequence low);
 
-  void reliability_lost();
-
   virtual bool start(bool active);
   virtual void stop();
 
 private:
   bool acked_;
-  bool defunct_;
 
   ACE_SYNCH_RW_MUTEX lock_;
 

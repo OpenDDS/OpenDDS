@@ -230,10 +230,6 @@ public:
   /// of this Publisher's Data Writers
   void get_publication_ids(PublicationIdVec& pubs);
 
-  virtual DDS::DomainId_t get_domain_id() const;
-
-  virtual RepoId get_participant_id() const;
-
 private:
   DDS::InstanceHandle_t        handle_;
 

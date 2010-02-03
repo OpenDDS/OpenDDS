@@ -62,13 +62,13 @@ SynWatchdog::next_timeout()
 void
 SynWatchdog::on_timeout(const void* /*arg*/)
 {
+  // There is no recourse if a link is unable to handshake;
+  // log an error and return:
   ACE_ERROR((LM_WARNING,
              ACE_TEXT("(%P|%t) WARNING: ")
              ACE_TEXT("SynWatchdog::on_timeout: ")
              ACE_TEXT("timed out waiting on remote peer: 0x%x!\n"),
              this->session_->remote_peer()));
-
-  this->session_->reliability_lost();
 }
 
 NakWatchdog::NakWatchdog(ReliableSession* session)
@@ -106,7 +106,6 @@ ReliableSession::ReliableSession(MulticastDataLink* link,
                                  MulticastPeer remote_peer)
   : MulticastSession(link, remote_peer),
     acked_(false),
-    defunct_(false),
     syn_watchdog_(this),
     nak_watchdog_(this)
 {
@@ -124,47 +123,11 @@ ReliableSession::acked()
 }
 
 bool
-ReliableSession::defunct()
-{
-  ACE_READ_GUARD_RETURN(ACE_SYNCH_RW_MUTEX,
-                        guard,
-                        this->lock_,
-                        false);
-
-  return this->defunct_;
-}
-
-bool
 ReliableSession::header_received(const TransportHeader& header)
 {
-  // Avoid updating last seen sequence if we have not yet been
-  // acknowledged by the remote peer:
-  {
-    ACE_READ_GUARD_RETURN(ACE_SYNCH_RW_MUTEX,
-                          guard,
-                          this->lock_,
-                          false);
-
-    if (!this->acked_) return true;
-  }
-
   // Update last seen sequence for remote peer; return false if we
   // have already seen this datagram to prevent duplicate delivery:
-  if (!this->nak_sequence_.update(header.sequence_)) return false;
-
-  // Notify if sequence has overflowed:
-  if (this->nak_sequence_.overflowed()) {
-    ACE_ERROR((LM_WARNING,
-               ACE_TEXT("(%P|%t) WARNING: ")
-               ACE_TEXT("ReliableSession::header_received: ")
-               ACE_TEXT("reception overflow from remote peer: 0x%x!\n"),
-               this->remote_peer_));
-
-    reliability_lost();
-    return false;
-  }
-
-  return true;
+  return this->nak_sequence_.update(header.sequence_);
 }
 
 void
@@ -302,7 +265,8 @@ ReliableSession::expire_naks()
   if (first == last) return; // nothing to expire
 
   for (NakRequestMap::iterator it(first); it != last; ++it) {
-    // Notify if expired request contains unseen data:
+    // Skip unrecoverable datagrams if needed; attempt to
+    // re-establish a baseline to detect future reception gaps:
     if (it->second > this->nak_sequence_) {
       ACE_ERROR((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: ")
@@ -310,8 +274,7 @@ ReliableSession::expire_naks()
                  ACE_TEXT("timed out waiting on remote peer: 0x%x!\n"),
                  this->remote_peer_));
 
-      reliability_lost();
-      return;
+      this->nak_sequence_.reset(it->second);
     }
   }
 
@@ -425,7 +388,8 @@ ReliableSession::nakack_received(ACE_Message_Block* control)
   serializer >> low;
 
   // MULTICAST_NAKACK control samples indicate data which cannot be
-  // repaired; notify if response indicates unseen data:
+  // repaired by a remote peer; update sequence to suppress repairs
+  // by shifting to a new low-water mark if needed:
   if (!this->nak_sequence_.seen(low)) {
     ACE_ERROR((LM_WARNING,
                ACE_TEXT("(%P|%t) WARNING: ")
@@ -433,7 +397,7 @@ ReliableSession::nakack_received(ACE_Message_Block* control)
                ACE_TEXT("unrecoverable samples reported by remote peer: 0x%x!\n"),
                this->remote_peer_));
 
-    reliability_lost();
+    this->nak_sequence_.shift(low);
   }
 }
 
@@ -452,23 +416,6 @@ ReliableSession::send_nakack(MulticastSequence low)
 
   // Broadcast control sample to all peers:
   send_control(MULTICAST_NAKACK, data);
-}
-
-void
-ReliableSession::reliability_lost()
-{
-  {
-    ACE_WRITE_GUARD(ACE_SYNCH_RW_MUTEX,
-                    guard,
-                    this->lock_);
-
-    this->defunct_ = true;
-  }
-
-  // Notify transport DataLink has become unreliable; this
-  // will ultimately cause the session to be destroyed:
-  MulticastTransport* transport = this->link_->transport();
-  transport->reliability_lost(this->link_);
 }
 
 bool
@@ -499,6 +446,7 @@ ReliableSession::start(bool active)
   // data reliably. This process must be executed using the
   // transport reactor thread to prevent blocking.
   if (active && !this->syn_watchdog_.schedule_now(reactor)) {
+    this->nak_watchdog_.cancel();
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("ReliableSession::start: ")
