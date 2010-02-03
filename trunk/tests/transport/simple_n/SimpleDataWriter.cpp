@@ -121,7 +121,7 @@ SimpleDataWriter::transport_lost()
 
 
 void
-SimpleDataWriter::data_delivered(OpenDDS::DCPS::DataSampleListElement* sample)
+SimpleDataWriter::data_delivered(const OpenDDS::DCPS::DataSampleListElement* sample)
 {
   ACE_UNUSED_ARG(sample);
 
@@ -141,7 +141,7 @@ SimpleDataWriter::data_delivered(OpenDDS::DCPS::DataSampleListElement* sample)
 
 
 void
-SimpleDataWriter::data_dropped(OpenDDS::DCPS::DataSampleListElement* sample,
+SimpleDataWriter::data_dropped(const OpenDDS::DCPS::DataSampleListElement* sample,
                                bool dropped_by_transport)
 {
   ACE_UNUSED_ARG(sample);

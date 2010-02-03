@@ -130,7 +130,7 @@ PubWriter::transport_lost()
 
 
 void
-PubWriter::data_delivered(OpenDDS::DCPS::DataSampleListElement* sample)
+PubWriter::data_delivered(const OpenDDS::DCPS::DataSampleListElement* sample)
 {
   {
     GuardType guard(this->lock_);
@@ -150,7 +150,7 @@ PubWriter::data_delivered(OpenDDS::DCPS::DataSampleListElement* sample)
 
 
 void
-PubWriter::data_dropped(OpenDDS::DCPS::DataSampleListElement* sample,
+PubWriter::data_dropped(const OpenDDS::DCPS::DataSampleListElement* sample,
                         bool dropped_by_transport)
 {
   ACE_UNUSED_ARG (dropped_by_transport);

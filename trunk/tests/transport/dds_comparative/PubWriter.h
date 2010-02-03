@@ -51,15 +51,15 @@ class PubWriter : public OpenDDS::DCPS::TransportSendListener
 
     /// TransportSendListener method that confirms delivery of a message
     /// that we had previously sent to the TransportInterface.
-    virtual void data_delivered(OpenDDS::DCPS::DataSampleListElement* sample);
+    void data_delivered(const OpenDDS::DCPS::DataSampleListElement* sample);
 
     /// TransportSendListener method that confirms a message has been
     /// been dropped from the transport, at our request.  We make the
     /// request by asking the TransportInterface to remove_sample().
     /// Thus, this should only be invoked if the remove_sample() method
     /// is actually used by the particular test.
-    virtual void data_dropped(OpenDDS::DCPS::DataSampleListElement* sample,
-                              bool dropped_by_transport = false);
+    void data_dropped(const OpenDDS::DCPS::DataSampleListElement* sample,
+                      bool dropped_by_transport = false);
 
 
   private:
