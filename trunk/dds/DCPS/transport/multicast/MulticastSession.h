@@ -34,7 +34,6 @@ public:
   MulticastPeer remote_peer() const;
 
   virtual bool acked() = 0;
-  virtual bool defunct() = 0;
 
   virtual bool header_received(const TransportHeader& header) = 0;
 

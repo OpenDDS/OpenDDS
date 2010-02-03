@@ -644,7 +644,7 @@ The current implementation relies on the transport reactor being derived from {{
 
 OpenDDS is supported by [[Object Computing, Inc.|http://www.ociweb.com/]]</pre>
 </div>
-<div title="Overview" modifier="StevenStallion" created="200912011932" modified="201002021835" changecount="110">
+<div title="Overview" modifier="StevenStallion" created="200912011932" modified="201002032104" changecount="111">
 <pre>Starting with the OpenDDS 2.1 release, a new multicast transport is available which replaces the {{{SimpleMcast}}} and {{{ReliableMulticast}}} transports. The source for the {{{multicast}}} transport is available under the general OpenDDS license and may be found under: {{{$DDS_ROOT/dds/DCPS/transport/multicast/}}}.
 
 What follows is a detailed description of the design, configuration, known issues, and potential enhancements for the {{{multicast}}} transport:
@@ -654,7 +654,7 @@ Unlike other transports, a single {{{DataLink}}} is maintained for each {{{Trans
 Two delivery modes are supported: best-effort and reliable.
 * Best-effort delivery imposes the least amount of overhead as data is exchanged between peers, however it does not provide any guarantee of delivery. Data may be lost due to unresponsive or unreachable peers or received in duplicate (see: {{{OpenDDS::DCPS::BestEffortSession}}}).
 * Reliable delivery provides for guaranteed delivery of data to associated peers with no duplication at the cost of additional processing and bandwidth (see: {{{OpenDDS::DCPS::ReliableSession}}}).
-When a new reservation is made, a remote and local peer identifier is assigned based on the participant ID of the associated entities. These values are used to uniquely identify each side of a given {{{MulticastSession}}} within the multicast group. The ETF will always designate the publishing side of the association as being active. Multicast datagrams will always assign the local peer ID to the source field of the transport header (see: {{{OpenDDS::DCPS::TransportHeader}}}).
+When a new reservation is made, a remote and local peer identifier is assigned based on the participant ID of the associated entities. These values are used to uniquely identify each side of a given {{{MulticastSession}}} within the multicast group. The Extensible Transport Framework (ETF) will always designate the publishing side of the association as being active. Multicast datagrams will always assign the local peer ID to the source field of the transport header (see: {{{OpenDDS::DCPS::TransportHeader}}}).
 
 The {{{multicast}}} transport may be configured and attached similarly to other transport implementations:
 {{{
@@ -698,7 +698,7 @@ project : dcpsexe_with_multicast {
 &lt;/div&gt;
 &lt;!--}}}--&gt;</pre>
 </div>
-<div title="Reliability" modifier="StevenStallion" created="200912011934" modified="201002021840" changecount="101">
+<div title="Reliability" modifier="StevenStallion" created="200912011934" modified="201002031829" changecount="102">
 <pre>Reliable delivery is achieved through two primary mechanisms:
 * 2-way peer handshaking (SYN/SYNACK)
 * Negative acknowledgment of missing data (NAK/NAKACK)
@@ -718,9 +718,7 @@ As each datagram is delivered to the {{{ReliableSession}}}, the transport sequen
 
 If the active peer receives a {{{MULTICAST_NAK}}} control sample it will examine its send buffer for the missing datagram. If the datagram is no longer available, it sends a {{{MULTICAST_NAKACK}}} control sample to the entire multicast group to suppress further repair requests. If the datagram is still available, it resends the missing data to the entire multicast group.
 
-If the passive peer receives a {{{MULTICAST_NAKACK}}} control sample, it will behave just as if the repair request has aged off, suppressing further repair requests and logging an error.
-
-In the event the transport detects a loss of reliability, the ETF will be notified and affected associations will be terminated and re-established.</pre>
+If the passive peer receives a {{{MULTICAST_NAKACK}}} control sample, it will behave just as if the repair request has aged off, suppressing further repair requests and logging an error.</pre>
 </div>
 <div title="SideBarOptions" modifier="OpenDDS" created="200911302023" server.type="file" server.host="file:///export/OCI/DDS/docs/html/template/index.html" server.page.revision="200911302023">
 <pre>&lt;&lt;search&gt;&gt;&lt;&lt;closeAll&gt;&gt;&lt;&lt;permaview&gt;&gt;&lt;&lt;newTiddler&gt;&gt;&lt;&lt;saveChanges&gt;&gt;&lt;&lt;slider chkSliderOptionsPanel OptionsPanel &quot;options »&quot; &quot;Change TiddlyWiki advanced options&quot;&gt;&gt;</pre>

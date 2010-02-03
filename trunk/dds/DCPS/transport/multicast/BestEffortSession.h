@@ -24,7 +24,6 @@ public:
                     MulticastPeer remote_peer);
 
   virtual bool acked();
-  virtual bool defunct();
 
   virtual bool header_received(const TransportHeader& header);
 

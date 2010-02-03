@@ -37,8 +37,8 @@ public:
     bool operator==(const range_iterator& rhs) const;
     bool operator!=(const range_iterator& rhs) const;
 
-    SequenceRange&  operator*();
-    SequenceRange*  operator->();
+    SequenceRange& operator*();
+    SequenceRange* operator->();
 
   private:
     SequenceSet::iterator pos_;
@@ -57,24 +57,20 @@ public:
   size_t depth() const;
   bool disjoint() const;
 
-  bool overflowed() const;
-
-  range_iterator range_begin();
-  range_iterator range_end();
-
   bool seen(SequenceNumber value) const;
 
+  void reset(SequenceNumber value = SequenceNumber());
   void shift(SequenceNumber value);
 
   bool update(SequenceNumber value);
   bool update(const SequenceRange& range);
 
-  void reset(SequenceNumber value = SequenceNumber());
+  range_iterator range_begin();
+  range_iterator range_end();
 
   operator SequenceNumber() const;
 
 private:
-  bool overflowed_;
   SequenceSet sequences_;
 
   void normalize();

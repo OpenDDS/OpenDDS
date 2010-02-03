@@ -22,13 +22,6 @@ New to this version are the following changes:
   transport.  Like SimpleUdp, udp provides best-effort reliablity only;
   its use should be considered experimental.
 
-- An experimental feature has been added which allows a reliable transport
-  to selectively destroy and re-create associations based on changes in
-  reliability status.  This feature prevents an attached Subscriber from
-  receiving potentially unreliable data.  Changes in association status
-  will be reported via the usual mechanisms and generation counts will be
-  updated per the specification.
-
 - The opendds_repo_ctl tool has been moved from $DDS_ROOT/dds/tools to
   $DDS_ROOT/tools.  The name has also been changed to odds_repoctl to
   reflect changes in naming conventions since the last release.

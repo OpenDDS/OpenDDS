@@ -119,11 +119,6 @@ public:
   /// no transport/DCPS locks held.
   bool release_link_resources(DataLink* link);
 
-  /// Callback from the DataLink to indicate transport reliability
-  /// has been lost. This call should be made with no transport/DCPS
-  /// locks held.
-  void reliability_lost(DataLink* link);
-
   /// Called by the application to attach this transport to a publisher.
   OpenDDS::DCPS::AttachStatus attach(DDS::Publisher_ptr pub);
 

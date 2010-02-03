@@ -25,8 +25,14 @@ namespace DCPS {
 const size_t DisjointSequence::MAX_DEPTH(SHRT_MAX / 2 - 1);
 
 DisjointSequence::DisjointSequence(SequenceNumber value)
-  : overflowed_(false)
 {
+  this->sequences_.insert(value);
+}
+
+void
+DisjointSequence::reset(SequenceNumber value)
+{
+  this->sequences_.clear();
   this->sequences_.insert(value);
 }
 
@@ -46,13 +52,6 @@ DisjointSequence::shift(SequenceNumber value)
 
   // Shift low-water mark to inserted value:
   this->sequences_.erase(first, last);
-}
-
-void
-DisjointSequence::reset(SequenceNumber value)
-{
-  this->sequences_.clear();
-  this->sequences_.insert(value);
 }
 
 bool
@@ -77,12 +76,7 @@ DisjointSequence::update(const SequenceRange& range)
   for (SequenceNumber value(range.first);
        value != range.second + 1; ++value) {
 
-    if (seen(value)) continue;  // nothing to update
-
-    this->sequences_.insert(value);
-    normalize();
-
-    updated = true;
+    if (update(value)) updated = true;
   }
 
   return updated;
@@ -91,14 +85,6 @@ DisjointSequence::update(const SequenceRange& range)
 void
 DisjointSequence::normalize()
 {
-  // Ensure the set does not span more than MAX_DEPTH
-  // sequences; this will cause comparisons to fail.
-  if (depth() > MAX_DEPTH) {
-    reset(high()); // set new low-water mark
-    this->overflowed_ = true;
-    return;
-  }
-
   // Remove contiguities from the beginning of the
   // set; set should minimally contain one value.
   SequenceSet::iterator first(this->sequences_.begin());

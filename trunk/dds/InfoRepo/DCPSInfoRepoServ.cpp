@@ -42,12 +42,6 @@
 #include <string>
 #include <sstream>
 
-namespace {
-
-const long DEFAULT_REASSOCIATE_DELAY(5000);
-
-} // namespace
-
 InfoRepo::InfoRepo(int argc, ACE_TCHAR *argv[])
   : ior_file_(ACE_TEXT("repo.ior"))
   , listen_address_given_(0)
@@ -61,8 +55,6 @@ InfoRepo::InfoRepo(int argc, ACE_TCHAR *argv[])
   , cond_(lock_)
   , shutdown_complete_(false)
 {
-  this->reassociate_delay_.msec(DEFAULT_REASSOCIATE_DELAY);
-
   try {
     init();
 
@@ -319,7 +311,8 @@ InfoRepo::init()
   }
 
   // Initialize reassociation.
-  if (!this->info_servant_->init_reassociation(this->reassociate_delay_)) {
+  if (this->reassociate_delay_ != ACE_Time_Value::zero &&
+     !this->info_servant_->init_reassociation(this->reassociate_delay_)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPSInfoRepo::init: ")
                ACE_TEXT("Unable to initialize reassociation.\n")));
     throw InitError("Unable to initialize reassociation.");
