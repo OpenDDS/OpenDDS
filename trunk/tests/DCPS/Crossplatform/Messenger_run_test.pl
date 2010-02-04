@@ -62,7 +62,7 @@ if ($role == -1) {
 my($port1) = 10001 + @ports[0];
 my $dcpsrepo_ior = "repo.ior";
 my $repo_host;
-if ($role == PerlDDS::Cross_Sync::SERVER) {
+if ($role == PerlDDS::Cross_Sync_Common::SERVER) {
     $repo_host = $CS->self();
 } else {
     $repo_host = $CS->peer();
@@ -79,7 +79,7 @@ $Publisher = PerlDDS::create_process
       ("$ENV{DDS_ROOT}/tests/DCPS/Messenger/publisher",
        "-DCPSConfigFile $pub_config_file $common_args $pub_opts");
 
-if ($role == PerlDDS::Cross_Sync::SERVER) {
+if ($role == PerlDDS::Cross_Sync_Common::SERVER) {
     unlink $dcpsrepo_ior;
     $DCPSREPO = PerlDDS::create_process
           ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
