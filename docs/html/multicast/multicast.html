@@ -618,8 +618,10 @@ An FEC mechanism should be introduced to reduce repair requests and to provide a
 
 {{{MULTICAST_SYNACK}}} responses should be predicated on association status to prevent potential denial of service attacks (not currently supported by the ETF).</pre>
 </div>
-<div title="Known Issues" modifier="StevenStallion" created="200912012032" modified="201002021839" changecount="53">
+<div title="Known Issues" modifier="StevenStallion" created="200912012032" modified="201002042309" changecount="58">
 <pre>The current implementation supports //at most// one DDS domain per multicast group.
+
+A given participant may only have a single multicast {{{TransportImpl}}} attached; if you wish to send and receive samples on the same multicast group in the same process, independent {{{DomainParticipant}}}s must be used.
 
 {{{TRANSPORT_PRIORITY}}} is not directly supported. This is partially due to routing restrictions placed on default group addresses as the selection heuristic assigns from the link-local range. Setting the TOS would provide little to no benefit for non-default group addresses at the cost of additional resources and complexity managing n-ary associations by priority key.
 

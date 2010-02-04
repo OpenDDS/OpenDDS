@@ -81,9 +81,9 @@ OpenDDS requires TAO for both IDL compilation as well as interaction
 with the DCPSInfoRepo.  At a minimum, you must be at one of the following
 versions (or later) in order to properly compile OpenDDS:
 
-*** TAO 1.5a patch 16
-*** TAO 1.6a patch 3
-*** TAO 1.7.4 (DOC Group)
+*** TAO 1.5a patch 17
+*** TAO 1.6a patch 4
+*** TAO 1.7.6 (DOC Group)
 
 Note that the 1.xa releases are from OCI and can be obtained from
 http://www.theaceorb.com/.  The DOC Group releases can be obtained from
@@ -267,6 +267,10 @@ http://download.ociweb.com/OpenDDS/OpenDDS-latest.pdf
   is persisted.  When a non-volatile DataWriter comes online, samples
   previously sent as a part of a change group will no longer maintain
   their atomicity.
+
+----------------------------------------------------------------------
+) The multicast transport design documentation maintains its own set of
+  known issues; see: $DDS_ROOT/docs/html/multicast/multicast.html.
 
 
 ======================================================================
