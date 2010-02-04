@@ -64,7 +64,7 @@ public class TestSubscriber {
         }
 
         AttachStatus stat = transport_impl.attach_to_subscriber(sub);
-        if(stat != AttachStatus.ATTACH_OK) {
+        if (stat != AttachStatus.ATTACH_OK) {
             System.err.println("ERROR: Couldn't attach transport.");
             System.exit(1);
         }
@@ -79,8 +79,30 @@ public class TestSubscriber {
             return;
         }
 
-        while(listener.num_reads () < N_EXPECTED)
-            try { Thread.sleep(1000); } catch (InterruptedException ie) {}
+        StatusCondition sc = dr.get_statuscondition();
+        sc.set_enabled_statuses(SUBSCRIPTION_MATCHED_STATUS.value);
+        WaitSet ws = new WaitSet();
+        ws.attach_condition(sc);
+        SubscriptionMatchedStatusHolder matched =
+          new SubscriptionMatchedStatusHolder(new SubscriptionMatchedStatus());
+        Duration_t timeout = new Duration_t(DURATION_INFINITE_SEC.value,
+                                            DURATION_INFINITE_NSEC.value);
+
+        do {
+            ConditionSeqHolder cond = new ConditionSeqHolder(new Condition[]{});
+            if (ws.wait(cond, timeout) != RETCODE_OK.value) {
+                System.err.println("ERROR: wait() failed.");
+                return;
+            }
+            final int result = dr.get_subscription_matched_status(matched);
+            if (result != RETCODE_OK.value) {
+                System.err.println("ERROR: get_subscription_matched_status()" +
+                                   "failed.");
+                return;
+            }
+        } while (matched.value.current_count > 0);
+
+        ws.detach_condition(sc);
 
         dp.delete_contained_entities();
         dpf.delete_participant(dp);

@@ -1,3 +1,12 @@
+Thu Feb  4 17:15:52 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * java/tests/messenger/subscriber/TestSubscriber.java:
+
+          Determine when to end the process based on the subscription
+          becoming un-matched using a WaitSet and StatusCondition.
+          This replaces the old method of counting the number of samples
+          received, which is not appropraite for unreliable transports.
+
 Thu Feb  4 17:02:23 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * NEWS:
