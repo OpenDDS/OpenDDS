@@ -184,21 +184,29 @@ ACE_THROW_SPEC((CORBA::SystemException))
 }
 
 OpenDDS::DCPS::TransportImpl_rch
-TestBase::create_transport()
+TestBase::find_or_create_transport()
 ACE_THROW_SPEC((CORBA::SystemException))
 {
-  OpenDDS::DCPS::TransportIdType transport_id = next_transport_id();
+  OpenDDS::DCPS::TransportIdType transport_id(-1);  // should never be used
   ACE_TString transport_type(DEFAULT_TRANSPORT);
 
   if (init_transport(transport_id, transport_type) != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("ERROR: %N:%l: create_transport() -")
+               ACE_TEXT("ERROR: %N:%l: find_or_create_transport() -")
                ACE_TEXT(" init_transport failed!\n")));
     ACE_OS::exit(-1);
   }
 
-  TheTransportFactory->get_or_create_configuration(transport_id, transport_type);
-  return TheTransportFactory->create_transport_impl(transport_id);
+  // Assign a valid transport ID if one is not specified by init_transport:
+  if (transport_id == -1) transport_id = next_transport_id();
+
+  OpenDDS::DCPS::TransportImpl_rch result =
+    TheTransportFactory->obtain(transport_id);
+  if (result.is_nil()) {
+    TheTransportFactory->get_or_create_configuration(transport_id, transport_type);
+    result = TheTransportFactory->create_transport_impl(transport_id);
+  }
+  return result;
 }
 
 OpenDDS::DCPS::TransportIdType

@@ -1,3 +1,23 @@
+Thu Feb  4 20:41:14 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/SharedTransport:
+        * tests/DCPS/SharedTransport/SharedTransport.mpc:
+        * tests/DCPS/SharedTransport/TestCase.h:
+        * tests/DCPS/SharedTransport/TestCase.cpp:
+        * tests/DCPS/SharedTransport/run_test.pl:
+        * tests/DCPS/SharedTransport/svc.conf:
+        * tests/DCPS/SharedTransport/test.ini:
+
+          Added experimental test for sharing the same TransportImpl
+          between Subscriber and Publisher instances.
+
+        * tests/DCPS/TestFramework/TestFramework.h:
+        * tests/DCPS/TestFramework/TestFramework.cpp:
+        * tests/DCPS/TestFramework/TestFramework_T.cpp:
+
+          Updates to the TestFramework to support sharing the same
+          TransportImpl between Subscriber and Publisher instances.
+
 Thu Feb  4 19:30:49 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/Crossplatform/Messenger_run_test.pl:
