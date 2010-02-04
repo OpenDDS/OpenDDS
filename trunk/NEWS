@@ -4,14 +4,18 @@ New to this version are the following changes:
 
 - The OpenDDS-Bench performance testing framework has been enhanced to
   include the following:
-    -) extended to allow fixed rate testing;
-    -) added predefined latency test configuration files;
-    -) added data reduction scripts to post process test results;
-    -) added data visualization scripts using gnuplot to create charts
-       from reduced test data.
+    * extended to allow fixed rate testing;
+    * added predefined latency test configuration files;
+    * added data reduction scripts to post process test results;
+    * added data visualization scripts using gnuplot to create charts
+      from reduced test data.
 
 - A new instrumentation application is available to view executing
   OpenDDS service Entities.  This is located at: $DDS_ROOT/tools/odds_monitor.
+
+- The opendds_repo_ctl tool has been moved from $DDS_ROOT/dds/tools to
+  $DDS_ROOT/tools.  The name has also been changed to odds_repoctl to
+  reflect changes in naming conventions in this release.
 
 - A new multicast transport is available which replaces the older
   ReliableMulticast and SimpleMcast transports.  For a detailed description
@@ -22,11 +26,10 @@ New to this version are the following changes:
   transport.  Like SimpleUdp, udp provides best-effort reliablity only;
   its use should be considered experimental.
 
-- The opendds_repo_ctl tool has been moved from $DDS_ROOT/dds/tools to
-  $DDS_ROOT/tools.  The name has also been changed to odds_repoctl to
-  reflect changes in naming conventions since the last release.
+- Numerous bugs in the Extensible Transport Framework (ETF) have been
+  addressed to improve the stability of new and existing transports.
 
-- Formal ranges of DDS::DomainId_t values are now specified; users now have
+- Formal ranges of DDS::DomainId_t values are now specified; users have
   full access to all DomainId values between 0x0 and 0x7fffffff. All other
   values are reserved for use by the implementation.
 
