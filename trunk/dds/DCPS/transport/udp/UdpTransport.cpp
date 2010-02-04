@@ -42,7 +42,7 @@ UdpTransport::find_or_create_datalink(
 
   } else if (!this->server_link_.is_nil()) {
     // A single DataLink is managed for all passive reservations:
-    return this->server_link_.in(); // found
+    return UdpDataLink_rch(this->server_link_)._retn(); // found
   }
 
   // Create new DataLink for logical connection:
