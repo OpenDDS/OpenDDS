@@ -1,6 +1,14 @@
+project(*Idl) : dcps {
+  custom_only = 1
+
+  TypeSupport_Files {
+    Messenger.idl
+    Messenger2.idl
+  }
+}
 
 project(*Publisher) : dcpsexe_with_tcp {
-  requires += exceptions
+  after    += *Idl
   exename   = publisher
 
   TypeSupport_Files {
@@ -15,7 +23,7 @@ project(*Publisher) : dcpsexe_with_tcp {
 }
 
 project(*Subscriber) : dcpsexe_with_tcp {
-  requires += exceptions
+  after    += *Idl
   exename   = subscriber
 
   TypeSupport_Files {

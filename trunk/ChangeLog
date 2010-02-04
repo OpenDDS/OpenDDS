@@ -1,3 +1,10 @@
+Thu Feb  4 21:08:09 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/CorbaSeq/CorbaSeq.mpc:
+
+          Added a separate mpc project for the code-generation steps,
+          which helps enable parallel builds.
+
 Thu Feb  4 20:41:14 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tests/DCPS/SharedTransport:
