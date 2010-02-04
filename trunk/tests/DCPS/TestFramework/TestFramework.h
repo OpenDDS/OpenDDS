@@ -83,7 +83,7 @@ protected:
   DDS::Topic_var create_topic()
   ACE_THROW_SPEC((CORBA::SystemException));
 
-  OpenDDS::DCPS::TransportImpl_rch create_transport()
+  OpenDDS::DCPS::TransportImpl_rch find_or_create_transport()
   ACE_THROW_SPEC((CORBA::SystemException));
 
   static OpenDDS::DCPS::TransportIdType next_transport_id();

@@ -18,7 +18,7 @@
 #include "Writer.h"
 
 const int num_instances_per_writer = 1;
-const int num_messages = 10;
+const int num_messages = 1000000;
 
 Writer::Writer(DDS::DataWriter_ptr writer)
   : writer_(DDS::DataWriter::_duplicate(writer)),
@@ -119,6 +119,8 @@ Writer::svc()
       }
 
       message.count++;
+
+      ACE_OS::sleep(2);
     }
 
   } catch (const CORBA::Exception& e) {
