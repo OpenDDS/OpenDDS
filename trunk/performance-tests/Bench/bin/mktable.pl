@@ -9,14 +9,15 @@ use strict;
 
 $Id$
 
-mktiddler.pl - create a TiddlyWiki table suitable for defining in a tidder.
+mktable.pl - create a TiddlyWiki or HTML table with latency test data
 
 SYNOPSIS
-  mktidder.pl <infile>
+  mktable.pl [ html ] <infile>
 
 This script reads a data file with statistical information and creates
 output suitable for inclusion within a tiddler in a TiddlyWiki document
-to define a table with the data included.
+to define a table with the data included.  If the optional 'html'
+argument is supplied the output format will be as a static HTML table.
 
 The input file is expected to be in the format produced by the extract.pl
 data reduction script.  Each record (line) of the input file contains the
@@ -36,9 +37,10 @@ following fields:
 This script will only successfully create table data for input files that
 contain the same number of message size data for each transport included.
 
-The output consists of TiddlyWiki table format definitions to create a
-table containing the statistical informatino and links to tiddlers that
-should contain the quad-plots representing the summarized data.
+The tiddler table output consists of TiddlyWiki table format definitions
+to create a table containing the statistical information and links to
+tiddlers that should contain the quad-plots representing the summarized
+data.
 
 The first two rows of the table include a row and column title for the
 leftmost column identifying the transport along with the data columns -
@@ -69,12 +71,25 @@ from the input file.
 
 EXAMPLE
 
-  mktiddler.pl data/latency.csv > doc/results-tiddler
+  mktable.pl data/latency.csv > doc/results-tiddler
+
+  mktable.pl html data/latency.csv > table-frag.html
 
 =cut
 
 # data - parsed input: $data->{transport}->{size}->{stat}
-our ($data);
+our ($data, $outputStyle);
+
+# Extract the output style selection from the command line, if any.
+BEGIN {
+  if( $ARGV[0] eq "html") {
+    shift;
+    $outputStyle = "html";
+
+  } else {
+    $outputStyle = "tiddler";
+  }
+}
 
 # Skip comments.
 next if /#/;
@@ -119,16 +134,28 @@ END {
   # List of sizes to use.
   my @sizeList = sort { $a <=> $b; } keys %{$data->{$sizeTransport}};
 
+  # Generate the desired output.
+  if( $outputStyle eq "html") {
+    &htmltable( \@sizeList, $transportLabels);
+
+  } else {
+    &tiddlertable( \@sizeList, $transportLabels);
+  }
+}
+
+sub tiddlertable {
+  my ($sizeList, $transportLabels) = @_;
+
   # Row 1
   print "| Transport |";
-  for( my $index = 0; $index < ($#sizeList - 1); ++$index) {
+  for( my $index = 0; $index < ($#$sizeList - 1); ++$index) {
     print ">|>|";
   }
   print ">| Message Size (bytes) |\n";
 
   # Row 2
   print "|~|";
-  foreach my $size (@sizeList) {
+  foreach my $size (@$sizeList) {
     print ">| $size |";
   }
   print "\n";
@@ -138,7 +165,7 @@ END {
     # Row n
     #   Column 1
     print "| $transportLabels->{$transport} |";
-    foreach my $size (@sizeList) {
+    foreach my $size (@$sizeList) {
       # Even Columns
       print " Latency |";
       # Odd Columns
@@ -149,7 +176,7 @@ END {
     # Row 1 + n
     #   Column 1
     print "|~|";
-    foreach my $size (@sizeList) {
+    foreach my $size (@$sizeList) {
       # Even Columns
       print "~|";
       # Odd Columns
@@ -160,7 +187,7 @@ END {
     # Row 2 + n
     #   Column 1
     print "|~|";
-    foreach my $size (@sizeList) {
+    foreach my $size (@$sizeList) {
       # Even Columns
       print " Jitter |";
       # Odd Columns
@@ -171,7 +198,7 @@ END {
     # Row 3 + n
     #   Column 1
     print "|~|";
-    foreach my $size (@sizeList) {
+    foreach my $size (@$sizeList) {
       # Even Columns
       print "~|";
       # Odd Columns
@@ -182,7 +209,7 @@ END {
     # Row 4 + n
     #   Column 1
     print "|~|";
-    foreach my $size (@sizeList) {
+    foreach my $size (@$sizeList) {
       # Even Columns
       print ">|";
       # Odd Columns
@@ -190,5 +217,9 @@ END {
     }
     print "\n";
   }
+}
+
+sub htmltable {
+  print "\n\n   HTML output not currently implemented.\n\n\n";
 }
 

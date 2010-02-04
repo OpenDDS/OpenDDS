@@ -2,7 +2,10 @@
 $Id$
 
 This file explains the execution of the latency tests located in the
-tests/latency directory.
+tests/latency subdirectory.  The file 'test-commands' in that directory
+contains a summary of how to execute the entire suite of latency tests
+as described below.  It is presented in a pseudo script style using bash
+variable and executable syntax.
 
 These tests are intended to gather latency performance information for
 various message sizes using the available transports.  The data rate
@@ -85,7 +88,7 @@ participating host.  Port 2809 is the default ORB port to listen on, if
 this conflicts with another instance of an ORB you may need to use a
 different port.
 
-Run the tests by executing the two processes on two hosts.  On the each
+Run the tests by executing the two processes on two hosts.  On each
 host, execute:
 
   run_test -P -t <runtime> -h <hostname>:2809 -i <transportconfig> -s <testconfig>
@@ -101,8 +104,4 @@ both per hop and full path information.  The summary data is for all
 received samples while the latency for the last 5,000 samples recieved
 is also stored.  If the two hosts are not synchronized closely, the per
 hop information will be of limited value.
-
-The file 'latency-commands' contains a summary of how to execute the entire
-suite of latency tests.  It is presented in a pseudo script style using
-bash variable and executable syntax.
 
