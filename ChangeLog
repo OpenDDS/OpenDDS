@@ -1,3 +1,32 @@
+Thu Feb  4 17:02:23 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * NEWS:
+
+          Corrected spelling.
+
+        * performance-tests/Bench/bin/mktable.pl:
+
+          Renamed to allow for additional output formats.  Added HTML
+          output option (unimplemented).
+
+        * performance-tests/Bench/doc/tests-latency:
+
+          Updated documentation.
+
+        * performance-tests/Bench/tests/latency/test-commands:
+
+          Moved from doc to tests/latency subdirectory.  Removed
+          extraneous intermediate directory in data generation commands.
+
+        * performance-tests/Bench/tools/convert-all:
+
+          Removed extraneous intermediate directory.
+
+        * performance-tests/Bench/bin/mktiddler.pl:
+        * performance-tests/Bench/doc/latency-commands:
+
+          Removed these files.  They were moved or renamed
+
 Wed Feb  3 23:52:09 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * NEWS:

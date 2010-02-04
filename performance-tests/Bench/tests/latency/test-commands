@@ -27,20 +27,20 @@ all hosts: export TESTBASE=$PROJECTBASE/tests/latency
 repository host: $PROJECTBASE/bin/run_test -S -h iiop://$REPOHOST:$REPOPORT
 
 all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-multi-be.ini
-all hosts: mkdir -p $TESTBASE/multi-be/run
-all hosts: cd $TESTBASE/multi-be/run
+all hosts: mkdir -p $TESTBASE/multi-be
+all hosts: cd $TESTBASE/multi-be
 
 # all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-multi-rel.ini
-# all hosts: mkdir -p $TESTBASE/multi-rel/run
-# all hosts: cd $TESTBASE/multi-rel/run
+# all hosts: mkdir -p $TESTBASE/multi-rel
+# all hosts: cd $TESTBASE/multi-rel
 
 # all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-udp.ini
-# all hosts: mkdir -p $TESTBASE/udp/run
-# all hosts: cd $TESTBASE/udp/run
+# all hosts: mkdir -p $TESTBASE/udp
+# all hosts: cd $TESTBASE/udp
 
 # all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-tcp.ini
-# all hosts: mkdir -p $TESTBASE/tcp/run
-# all hosts: cd $TESTBASE/tcp/run
+# all hosts: mkdir -p $TESTBASE/tcp
+# all hosts: cd $TESTBASE/tcp
 
 host 1: $PROJECTBASE/bin/run_test -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p1-50.ini 2>&1 | tee p1-50.log
 host 2: $PROJECTBASE/bin/run_test -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p2.ini 2>&1 | tee p2.log
