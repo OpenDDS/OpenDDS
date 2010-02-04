@@ -1,3 +1,9 @@
+Thu Feb  4 21:27:54 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/Messenger/Writer.cpp:
+
+          Reverted changes accidentally introduced in previous commit.
+
 Thu Feb  4 21:08:09 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/CorbaSeq/CorbaSeq.mpc:
