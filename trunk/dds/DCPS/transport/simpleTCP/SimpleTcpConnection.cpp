@@ -437,14 +437,19 @@ OpenDDS::DCPS::SimpleTcpConnection::reconnect(bool on_new_association)
   if (on_new_association)
     return this->active_reconnect_on_new_association();
 
-  // Try to reconnect if it's connector previously.
-  else if (this->is_connector_ && this->active_reconnect_i() == -1)
-    return -1;
+  // If on_new_association is false, it's called by the reconnect task.
+  // We need make sure if the link release is pending. If does, do
+  // not try to reconnect.
+  else if (! this->link_->is_release_pending ())
+  {
+    // Try to reconnect if it's connector previously.
+    if (this->is_connector_ && this->active_reconnect_i() == -1)
+      return -1;
 
-  // Schedule a timer to see if a incoming connection is accepted when timeout.
-  else if (!this->is_connector_ && this->passive_reconnect_i() == -1)
-    return -1;
-
+    // Schedule a timer to see if a incoming connection is accepted when timeout.
+    else if (!this->is_connector_ && this->passive_reconnect_i() == -1)
+      return -1;
+  }
   return 0;
 }
 
