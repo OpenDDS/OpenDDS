@@ -6,9 +6,8 @@ BUILDING OpenDDS
 
 * Supported platform:
 
-  We have built OpenDDS on Windows using Visual Studio .NET 2003 (VC 7.1)
-  and Visual Studio 2005 (VC 8), as well as gcc 3.3 on Solaris/x86, and gcc 3.4
-  and 4.x on Linux.  (See $DDS_ROOT/README for a more complete description)
+  We have built OpenDDS on number of different platforms and compilers.  See
+  $DDS_ROOT/README for a more complete description of supported configurations.
 
 * Compiling:
 

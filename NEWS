@@ -37,7 +37,7 @@ New to this version are the following changes:
   addressed to improve the stability of new and existing transports.
 
 - Formal ranges of DDS::DomainId_t values are now specified; users have
-  full access to all DomainId values between 0x0 and 0x7fffffff. All other
+  full access to all DomainId values between 0x0 and 0x7fffffff.  All other
   values are reserved for use by the implementation.
 
 
