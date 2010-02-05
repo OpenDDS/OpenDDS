@@ -1,3 +1,7 @@
+Fri Feb  5 21:47:14 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * OpenDDS version 2.1 released.
+
 Fri Feb  5 20:45:41 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/ReliableSession.cpp:
