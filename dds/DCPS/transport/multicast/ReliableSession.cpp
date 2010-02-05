@@ -167,8 +167,12 @@ ReliableSession::syn_received(ACE_Message_Block* control)
                   guard,
                   this->lock_);
 
+  // Obtain reference to received header:
+  const TransportHeader& header =
+    this->link_->receive_strategy()->received_header();
+
   TAO::DCPS::Serializer serializer(
-    control, this->link_->transport()->swap_bytes());
+    control, header.swap_bytes());
 
   MulticastPeer local_peer;
   serializer >> local_peer; // sent as remote_peer
@@ -176,9 +180,6 @@ ReliableSession::syn_received(ACE_Message_Block* control)
   // Ignore sample if not destined for us:
   if (local_peer != this->link_->local_peer()) return;
 
-  // Obtain reference to received header:
-  const TransportHeader& header =
-    this->link_->receive_strategy()->received_header();
 
   // Establish a baseline for detecting reception gaps:
   this->nak_sequence_.reset(header.sequence_);
@@ -216,8 +217,12 @@ ReliableSession::synack_received(ACE_Message_Block* control)
 
     if (this->acked_) return; // already acked
 
+    // Obtain reference to received header:
+    const TransportHeader& header =
+      this->link_->receive_strategy()->received_header();
+
     TAO::DCPS::Serializer serializer(
-      control, this->link_->transport()->swap_bytes());
+      control, header.swap_bytes());
 
     MulticastPeer local_peer;
     serializer >> local_peer; // sent as remote_peer
@@ -320,8 +325,12 @@ ReliableSession::send_naks()
 void
 ReliableSession::nak_received(ACE_Message_Block* control)
 {
+  // Obtain reference to received header:
+  const TransportHeader& header =
+    this->link_->receive_strategy()->received_header();
+
   TAO::DCPS::Serializer serializer(
-    control, this->link_->transport()->swap_bytes());
+    control, header.swap_bytes());
 
   MulticastPeer local_peer;
   serializer >> local_peer; // sent as remote_peer
@@ -382,7 +391,7 @@ ReliableSession::nakack_received(ACE_Message_Block* control)
   if (this->remote_peer_ != header.source_) return; // unknown peer
 
   TAO::DCPS::Serializer serializer(
-    control, this->link_->transport()->swap_bytes());
+    control, header.swap_bytes());
 
   MulticastSequence low;
   serializer >> low;
