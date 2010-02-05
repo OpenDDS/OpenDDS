@@ -511,24 +511,34 @@ Also see [[AdvancedOptions]]</pre>
 </div>
 <!--POST-SHADOWAREA-->
 <div id="storeArea">
-<div title="Building" modifier="MikeMartinez" created="201002021752" modified="201002021926" tags="publish" changecount="6">
+<div title="Building" modifier="AHM" created="201002021752" modified="201002051630" tags="publish" changecount="8">
 <pre>The //odds_monitor// application is built as an ~OpenDDS and a Qt4 application.  It uses ~OpenDDS to subscribe to the monitor data and the DDS specified Builtin Topic data.  It uses Qt4 as the GUI.  Building will require setting the ''qt4'' feature for MPC.  This can be set in the //$~ACE_ROOT/include/makeinclude/platform_macros.GNU// configuration file, or set on the individual command lines during the build process (recommended).  The following assumes that the //platform_macros.GNU// file does ''not'' have the ''qt4'' feature set, as it is not required for any of the dependent software.
 
-On a platform using //gcc// and GNU //make//, the following steps should be followed:
+The following steps should be followed:
 * Ensure that the [[dependent|Dependencies]] header files and libraries are available.
 * Ensure that the build [[environment|Setup]] is setup correctly.  Then work within the application directory:
 {{{
   &gt; cd $DDS_ROOT/tools/odds_monitor
 }}}
-* Create the makefiles:
+For Windows:
 {{{
-  &gt; mwc.pl -type gnuace -features qt4=1
+  &gt; cd %DDS_ROOT%\tools\odds_monitor
 }}}
+* Create the makefiles / project files:
+{{{
+  &gt; $ACE_ROOT/bin/mwc.pl -type gnuace -features qt4=1
+}}}
+For Windows:
+{{{
+  &gt; %ACE_ROOT%\bin\mwc.pl -type vc9 -features qt4=1
+}}}
+Replace &quot;vc9&quot; with &quot;vc8&quot; or &quot;vc71&quot; as needed.
 * Build the application:
 {{{
   &gt; make qt4=1
   &gt; make qt4=1 depend
 }}}
+For Windows, build using Visual Studio.
 
 The //odds_monitor// application will be installed to the $~DDS_ROOT/bin directory and can be invoked from there.</pre>
 </div>
@@ -1162,7 +1172,7 @@ To execute the application, do the following:
     };
 }}}</pre>
 </div>
-<div title="Setup" modifier="MikeMartinez" created="201002022012" modified="201002030000" tags="publish" changecount="11">
+<div title="Setup" modifier="AHM" created="201002022012" modified="201002051616" tags="publish" changecount="15">
 <pre>Establishing the environment for building and executing the //odds_monitor// application consists of setting specific environment variables.  The environment required to execute the application is a subset of the environment required to build the application.
 
 !Build Environment
@@ -1181,7 +1191,8 @@ In addition to the ACE+TAO+~OpenDDS build environment, additional environment va
 | //odds_monitor// Build Environment |c
 | Variable | Status | Value | Description |
 |QTDIR | Required |Must contain the base of the Qt4 software installation. |This is the base of the Qt4 installation and all Qt4 software - headers and libraries - will be found relative to this directory, with the possible exception noted below for the ~QT4_INCDIR variable. |
-|~QT4_INCDIR | Optional |May contain a separate directory where the Qt4 software header files are located. |Some system installations have the include files located under a separate base directory from the libraries.  For example, Ubuntu 9.10 locates the Qt4 software libraries relative to the ///usr// directory, but the include files are located relative to the ///usr/include/qt4// directory instead of the expected ///usr/include// directory.  Setting this variable accomodates installations with this feature. |
+|~QT4_INCDIR | Optional |May contain a separate directory where the Qt4 software header files are located. |Some system installations have the include files located under a separate base directory from the libraries.  For example, Ubuntu 9.10 locates the Qt4 software libraries relative to the ///usr// directory, but the include files are located relative to the ///usr/include/qt4// directory instead of the expected ///usr/include// directory.  Setting this variable accommodates installations with this feature. |
+|~QT_CFG | Optional |Determines library names for Qt. |If your Qt4 installation uses a suffix for the library names (for example, ~QtCore4.lib), set this variable to that suffix (for example, 4). |
 
 !Execution Environment
 To execute the //odds_monitor// application, the following environment variables need to be set:

@@ -1,3 +1,10 @@
+Fri Feb  5 16:34:13 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/odds_monitor/doc/userguide.html:
+
+          Documented the QT_CFG environment variable and added steps
+          for building with VC++.
+
 Fri Feb  5 16:13:51 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/odds_monitor/README:
