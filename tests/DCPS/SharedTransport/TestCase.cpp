@@ -22,7 +22,7 @@
 namespace {
 
 OpenDDS::DCPS::TransportIdType local_transport_id(1);
-ACE_TString local_transport_type("SimpleTcp");
+ACE_TString local_transport_type(ACE_TEXT("SimpleTcp"));
 
 void
 parse_args(int& argc, ACE_TCHAR** argv)
@@ -32,13 +32,13 @@ parse_args(int& argc, ACE_TCHAR** argv)
   while (shifter.is_anything_left()) {
     if (shifter.cur_arg_strncasecmp(ACE_TEXT("udp")) == 0) {
       local_transport_id = 2;
-      local_transport_type = "udp";
+      local_transport_type = ACE_TEXT("udp");
 
       shifter.consume_arg();
 
     } else if (shifter.cur_arg_strncasecmp(ACE_TEXT("multicast")) == 0) {
       local_transport_id = 3;
-      local_transport_type = "multicast";
+      local_transport_type = ACE_TEXT("multicast");
 
       shifter.consume_arg();
 

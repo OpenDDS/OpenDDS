@@ -1,3 +1,11 @@
+Fri Feb  5 12:58:18 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/SharedTransport/SharedTransport.mpc:
+        * tests/DCPS/SharedTransport/TestCase.cpp:
+        * tests/DCPS/TestFramework/TestFramework.cpp:
+
+	  Fixed compiler warnings/errors for GCC and VC++.
+
 Fri Feb  5 02:18:21 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:
