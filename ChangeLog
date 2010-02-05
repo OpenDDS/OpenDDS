@@ -1,3 +1,16 @@
+Fri Feb  5 15:59:27 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * NEWS:
+
+          Added a reference to the OpenDDS-Bench documentation directory.
+
+        * performance-tests/Bench/doc/scenarios.txt:
+        * performance-tests/Bench/doc/tests-latency.txt:
+        * performance-tests/Bench/doc/tests.txt:
+
+          Added '.txt' extension to these text files to accommodate those
+          who need it.
+
 Fri Feb  5 15:39:33 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/odds_monitor/doc/odds_monitor.man1:
