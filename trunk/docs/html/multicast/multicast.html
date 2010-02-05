@@ -609,12 +609,10 @@ Default examples of these files are provided under: {{{$DDS_ROOT/dds/DCPS/transp
 [[Known Issues]]
 [[Future Tasks]]</pre>
 </div>
-<div title="Future Tasks" modifier="StevenStallion" created="200912011940" modified="201001191719" changecount="48">
+<div title="Future Tasks" modifier="StevenStallion" created="200912011940" modified="201002051406" changecount="49">
 <pre>NAK requests currently contain individual ranges; performance testing should be done to determine if collapsing ranges into a single sample would yield better performance for the entire multicast group in a lossy network.
 
 An FEC mechanism should be introduced to reduce repair requests and to provide an additional source from which to detect reception gaps.
-
-{{{MulticastTransport::connection_info_i}}} should support ephemeral port numbers in the {{{TransportInterfaceBLOB}}} (not currently supported by the ETF).
 
 {{{MULTICAST_SYNACK}}} responses should be predicated on association status to prevent potential denial of service attacks (not currently supported by the ETF).</pre>
 </div>
@@ -646,8 +644,8 @@ The current implementation relies on the transport reactor being derived from {{
 
 OpenDDS is supported by [[Object Computing, Inc.|http://www.ociweb.com/]]</pre>
 </div>
-<div title="Overview" modifier="StevenStallion" created="200912011932" modified="201002032104" changecount="111">
-<pre>Starting with the OpenDDS 2.1 release, a new multicast transport is available which replaces the {{{SimpleMcast}}} and {{{ReliableMulticast}}} transports. The source for the {{{multicast}}} transport is available under the general OpenDDS license and may be found under: {{{$DDS_ROOT/dds/DCPS/transport/multicast/}}}.
+<div title="Overview" modifier="StevenStallion" created="200912011932" modified="201002051406" changecount="112">
+<pre>Starting with the OpenDDS 2.1 release, a new IP multicast transport is available which replaces the {{{SimpleMcast}}} and {{{ReliableMulticast}}} transports. The source for the {{{multicast}}} transport is available under the general OpenDDS license and may be found under: {{{$DDS_ROOT/dds/DCPS/transport/multicast/}}}.
 
 What follows is a detailed description of the design, configuration, known issues, and potential enhancements for the {{{multicast}}} transport:
 
@@ -700,7 +698,7 @@ project : dcpsexe_with_multicast {
 &lt;/div&gt;
 &lt;!--}}}--&gt;</pre>
 </div>
-<div title="Reliability" modifier="StevenStallion" created="200912011934" modified="201002031829" changecount="102">
+<div title="Reliability" modifier="StevenStallion" created="200912011934" modified="201002051407" changecount="104">
 <pre>Reliable delivery is achieved through two primary mechanisms:
 * 2-way peer handshaking (SYN/SYNACK)
 * Negative acknowledgment of missing data (NAK/NAKACK)
@@ -716,7 +714,7 @@ Upon receiving the {{{MULTICAST_SYN}}} control sample, the passive peer records 
 If the active peer receives a {{{MULTICAST_SYNACK}}} control sample, it will then notify the ETF that the association is complete, which will in turn trigger a communication status change in the DCPS layer. In the event a {{{MULTICAST_SYNACK}}} control sample is not received, an error will be logged.
 !!NAK/NAKACK
 [&gt;img[images/repair.png]]
-As each datagram is delivered to the {{{ReliableSession}}}, the transport sequence value is scored against a special container which identifies reception gaps (see: {{{OpenDDS::DCPS::DisjointSequence}}}). Periodically, a watchdog executes and will age off any outstanding repair requests which have not been fulfilled by resetting the sequence low-water mark and logging an error. Once outstanding requests have been purged, the watchdog will then check for reception gaps.  In the event a new (or existing) reception gap is identified, the {{{ReliableSession}}} records the current interval and the high-water mark for the transport sequence. It will then issue {{{MULTICAST_NAK}}} control samples to active peers from which it is missing data. This interval is randomized to prevent potential collisions among similarly associated peers. Passive peers perform NAK suppression based on all repair requests destined for the same active peer. If previous requests have been sent, a passive peer will temporarily elide previously requested ranges for the current interval.
+As each datagram is delivered to the {{{ReliableSession}}}, the transport sequence value is scored against a special container which identifies reception gaps (see: {{{OpenDDS::DCPS::DisjointSequence}}}). Periodically, a watchdog executes and will age off any outstanding repair requests which have not been fulfilled by resetting the sequence low-water mark and logging an error. Once outstanding requests have been purged, the watchdog will then check for reception gaps.  In the event a new (or existing) reception gap is identified, the {{{ReliableSession}}} records the current interval and the high-water mark for the transport sequence. It will then issue {{{MULTICAST_NAK}}} control samples to active peers from which it is missing data. Passive peers perform NAK suppression based on all repair requests destined for the same active peer. If previous requests have been sent, a passive peer will temporarily elide previously requested ranges for the current interval. This interval is randomized to prevent potential collisions among similarly associated peers.
 
 If the active peer receives a {{{MULTICAST_NAK}}} control sample it will examine its send buffer for the missing datagram. If the datagram is no longer available, it sends a {{{MULTICAST_NAKACK}}} control sample to the entire multicast group to suppress further repair requests. If the datagram is still available, it resends the missing data to the entire multicast group.
 
