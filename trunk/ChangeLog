@@ -1,3 +1,10 @@
+Fri Feb  5 20:45:41 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Fixed spurious byte swapping for received transport control
+          samples.
+
 Fri Feb  5 18:44:30 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * INSTALL:
