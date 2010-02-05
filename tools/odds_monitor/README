@@ -4,31 +4,9 @@ odds_monitor - instrumentation viewer application for OpenDDS.
 This application provides a GUI view into instrumentation of the OpenDDS
 service.
 
-------------------------------------------------------------------------
-QUICKSTART:
-> export QTDIR=/usr
-> mwc.pl -type gnuace -features qt4=1
-> make qt4=1
-> make qt4=1 depend
-
-------------------------------------------------------------------------
-ENVIRONMENT:
-You will need to set the environment for the standard ACE+TAO+DDS
-settings.  See $DDS_ROOT/INSTALL for more information on these.
-
-The base directory for Qt needs to be located by the QTDIR variable:
-
-  QTDIR=/usr
-
-If your system locates the Qt4 include directories in a location other
-than $QTDIR/include, then you can set the QT4_INCDIR variable to locate
-the include directory:
-
-  QT4_INCDIR=/usr/include/qt4
-
-NOTE: The standard Ubuntu installation locates the include directory in
-      /usr/include/qt4, which is not $QTDIR/include, so this definition is
-      required on that system.
+Documentation describing how to build and execute the application is
+included at doc/userguide.html.  That includes establishing the build and
+execution environments as well.
 
 ------------------------------------------------------------------------
 DIRECTORIES:
@@ -71,19 +49,4 @@ Currently the GUI files that should not be reformatted include:
   MonitorDataModel.{h,cpp}
   TreeNode.h
   Viewer.{h,cpp}
-
-------------------------------------------------------------------------
-System notes:
-
-You will need to set the environment for the standard ACE+TAO+DDS
-settings.  Additionally, the following needs to be set:
-
-> export QTDIR=/usr
-
-If you are using a distribution version of Qt (such as the libqt4-dev
-package for the Debian and Ubuntu distributions), then you will need to
-set the environment to use a non-relative include directory for the Qt4
-files:
-
-> export QT4_INCDIR=/usr/include/qt4
 
