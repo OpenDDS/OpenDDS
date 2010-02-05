@@ -15,6 +15,7 @@ const DDS::DomainId_t TestBase::DEFAULT_DOMAIN = 42;
 const char*           TestBase::DEFAULT_TOPIC = "TestFramework";
 const DDS::Duration_t TestBase::DEFAULT_TIMEOUT = { 30, 0 }; // 30 seconds
 const ACE_TCHAR*      TestBase::DEFAULT_TRANSPORT = ACE_TEXT("SimpleTcp");
+const TransportIdType TestBase::DEFAULT_TRANSPORT_ID = 0xFFFFFFFF;
 
 TestBase::TestBase()
 {
@@ -187,7 +188,7 @@ OpenDDS::DCPS::TransportImpl_rch
 TestBase::find_or_create_transport()
 ACE_THROW_SPEC((CORBA::SystemException))
 {
-  OpenDDS::DCPS::TransportIdType transport_id(-1);  // should never be used
+  OpenDDS::DCPS::TransportIdType transport_id(DEFAULT_TRANSPORT_ID);
   ACE_TString transport_type(DEFAULT_TRANSPORT);
 
   if (init_transport(transport_id, transport_type) != DDS::RETCODE_OK) {
@@ -197,8 +198,10 @@ ACE_THROW_SPEC((CORBA::SystemException))
     ACE_OS::exit(-1);
   }
 
-  // Assign a valid transport ID if one is not specified by init_transport:
-  if (transport_id == -1) transport_id = next_transport_id();
+  // Assign a valid transport ID if not specified:
+  if (transport_id == DEFAULT_TRANSPORT_ID) {
+    transport_id = next_transport_id();
+  }
 
   OpenDDS::DCPS::TransportImpl_rch result =
     TheTransportFactory->obtain(transport_id);
