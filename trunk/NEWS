@@ -10,6 +10,12 @@ New to this version are the following changes:
     * added data visualization scripts using gnuplot to create charts
       from reduced test data.
 
+- The monitor library introduces a new instrumentation mechanism for
+  reporting OpenDDS run-time information.  This information is 
+  intended to supplement that provided by the standard-defined
+  Built-In-Topics.  See $DDS_ROOT/dds/monitor/README for further
+  details.
+
 - A new instrumentation application is available to view executing
   OpenDDS service Entities.  This is located at: $DDS_ROOT/tools/odds_monitor.
 
