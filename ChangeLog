@@ -1,3 +1,11 @@
+Fri Feb  5 16:43:30 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Dropped remaining use of TransportRetained element from
+          remove_sample; this causes spurious ACE_Message_Block allocations
+          which are not subsequently released.
+
 Fri Feb  5 16:34:13 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * tools/odds_monitor/doc/userguide.html:

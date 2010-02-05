@@ -1272,14 +1272,8 @@ OpenDDS::DCPS::TransportSendStrategy::remove_sample(const DataSampleListElement*
   // Process any specific sample storage first.
   remove_sample_i(sample);
 
-  if (this->send_buffer_ == 0) {
-    TransportSendElement current_sample(0, sample);
-    return do_remove_sample(current_sample);
-  } else {
-    TransportRetainedElement current_sample(sample->sample_,
-                                            sample->publication_id_);
-    return do_remove_sample(current_sample);
-  }
+  TransportSendElement current_sample(0, sample);
+  return do_remove_sample(current_sample);
 }
 
 void
