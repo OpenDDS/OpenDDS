@@ -25,7 +25,8 @@ OpenDDS::DCPS::SimpleTcpDataLink::SimpleTcpDataLink(
   OpenDDS::DCPS::SimpleTcpTransport*  transport_impl,
   CORBA::Long priority) : DataLink(transport_impl, priority),
     remote_address_(remote_address),
-    graceful_disconnect_sent_(false)
+    graceful_disconnect_sent_(false),
+    release_is_pending_ (false)
 {
   DBG_ENTRY_LVL("SimpleTcpDataLink","SimpleTcpDataLink",6);
   transport_impl->_add_ref();
@@ -326,3 +327,14 @@ OpenDDS::DCPS::SimpleTcpDataLink::fully_associated()
 
   this->send_i(send_element);
 }
+
+void OpenDDS::DCPS::SimpleTcpDataLink::set_release_pending (bool flag)
+{
+  this->release_is_pending_ = flag;
+}
+
+bool OpenDDS::DCPS::SimpleTcpDataLink::is_release_pending () const
+{
+  return this->release_is_pending_.value();
+}
+

@@ -122,6 +122,7 @@ OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink(
 
     } else if (this->pending_release_links_.find(key, link) == 0) {
       if (link->cancel_release()) {
+        link->set_release_pending (false);
         if (this->pending_release_links_.unbind(key, link) == 0 && this->links_.bind(key, link) == 0) {
           VDBG_LVL((LM_DEBUG, "(%P|%t) Move link prio=%d addr=%C:%d to links_\n",
                     link->transport_priority(), link->remote_address().get_host_name(),
@@ -437,6 +438,7 @@ OpenDDS::DCPS::SimpleTcpTransport::release_datalink_i(DataLink* link,
                "release and it.\n"));
 
   } else if (release_pending) {
+    released_link->set_release_pending (true);
     if (this->pending_release_links_.bind(key, released_link) != 0) {
       ACE_ERROR((LM_ERROR,
                  "(%P|%t) ERROR: Unable to bind released SimpleTcpDataLink to "

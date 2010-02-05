@@ -50,6 +50,11 @@ public:
   /// message to the publisher.
   virtual void fully_associated();
 
+  /// Set release pending flag.
+  void set_release_pending (bool flag);
+  /// Get release pending flag.
+  bool is_release_pending () const;
+
 protected:
 
   /// Called when the DataLink is self-releasing because all of its
@@ -65,6 +70,7 @@ private:
   SimpleTcpConnection_rch connection_;
   SimpleTcpTransport_rch  transport_;
   bool graceful_disconnect_sent_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, bool> release_is_pending_;
 };
 
 } // namespace DCPS

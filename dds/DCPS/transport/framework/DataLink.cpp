@@ -449,6 +449,7 @@ OpenDDS::DCPS::DataLink::release_reservations(RepoId          remote_id,
       if (id_set->size() == 0) {
         // Remove the remote_id(sub) after the remote/local ids is released
         // and there are no local pubs associated with this sub.
+        GuardType guard(this->sub_map_lock_);
         id_set = this->sub_map_.remove_set(remote_id);
       }
 
@@ -747,7 +748,14 @@ OpenDDS::DCPS::DataLink::release_remote_publisher
 
   if (listener_set->exist(subscriber_id)) {
     // Remove the publisher_id => subscriber_id association.
-    if (this->sub_map_.release_publisher(subscriber_id,publisher_id) == 1) {
+  
+    int result = 0;
+    { 
+      GuardType guard(this->sub_map_lock_);
+      result = this->sub_map_.release_publisher(subscriber_id,publisher_id);
+    }
+    
+    if (result == 1) {
       // This means that this release() operation has caused the
       // subscriber_id to no longer be associated with *any* publishers.
       released_subscribers.insert_link(subscriber_id,this);
