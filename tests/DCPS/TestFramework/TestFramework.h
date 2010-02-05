@@ -35,6 +35,7 @@ public:
   static const char* DEFAULT_TOPIC;
   static const DDS::Duration_t DEFAULT_TIMEOUT;
   static const ACE_TCHAR* DEFAULT_TRANSPORT;
+  static const OpenDDS::DCPS::TransportIdType DEFAULT_TRANSPORT_ID;
 
   virtual ~TestBase();
 
