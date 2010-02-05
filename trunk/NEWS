@@ -9,6 +9,7 @@ New to this version are the following changes:
     * added data reduction scripts to post process test results;
     * added data visualization scripts using gnuplot to create charts
       from reduced test data.
+  Documentation is located at: $DDS_ROOT/performance-tests/Bench/doc.
 
 - The monitor library introduces a new instrumentation mechanism for
   reporting OpenDDS run-time information.  This information is 
