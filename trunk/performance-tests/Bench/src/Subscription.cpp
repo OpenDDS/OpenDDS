@@ -300,6 +300,10 @@ Subscription::priorities() const
 std::ostream&
 Subscription::summaryData( std::ostream& str) const
 {
+  str << "Total Messages Received: " << this->total_messages() << std::endl;
+  str << "Valid Messages Received: " << this->valid_messages() << std::endl;
+  str << std::endl;
+
   ::OpenDDS::DCPS::LatencyStatisticsSeq statistics;
   this->reader_->get_latency_stats( statistics);
   str << " --- last hop statistical summary for subscription " << this->name_

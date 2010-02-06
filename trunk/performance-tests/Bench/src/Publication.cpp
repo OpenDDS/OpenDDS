@@ -356,11 +356,11 @@ Publication::svc ()
   int pid = converter.checksum();
 
   int count = 0;
+  Test::Data sample;
   while( this->done_ == false) {
     unsigned long size
       = static_cast<unsigned long>( this->profile_->size.value());
 
-    Test::Data sample;
     sample.priority = this->profile_->writerQos.transport_priority.value;
     sample.seq      = ++count;
     sample.pid      = pid;
