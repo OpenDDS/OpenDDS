@@ -69,12 +69,13 @@ my $startTest;
 my $repoHost;
 my $iniFile  = $projectRoot . "/etc/transport.ini";
 my $scenarios;
+my $collectStats;
 
 ########################################################################
 #
 # Process the command line.
 #
-#   -v -V -? -d -T -R -x -f -r -h -s -i -S -P -t
+#   -v -V -? -d -T -R -x -f -C -r -h -s -i -S -P -t
 #
 GetOptions( "verbose!"            => \$verbose,
             "v"                   => \$verbose,
@@ -86,6 +87,7 @@ GetOptions( "verbose!"            => \$verbose,
             "rdebug|R=i"          => \$repoDebug,
             "noaction|x"          => \$noaction,
             "dfile|f=s"           => \$dFile,
+            "collect|C"           => \$collectStats,
             "rawdatafile|r=s"     => \$rawData,
             "repohost|h=s"        => \$repoHost,
             "inifile|i=s"         => \$iniFile,
@@ -117,6 +119,8 @@ print "RepoHost==$repoHost\n"             if $verbose;
 print scalar(@scenario) . " scenarios==" . join(', ', @scenario) . "\n"
                                           if $verbose;
 print "RawDataFile==$rawData\n"           if $verbose and $rawData;
+print "System Statistics will be collected.\n"
+                                          if $verbose and $collectStats;
 
 print "Debug==$debug\n"                   if $verbose and $debug;
 print "RepoDebug==$repoDebug\n"           if $verbose and $repoDebug;
@@ -171,6 +175,7 @@ $testOpts .= "-DCPSInfoRepo corbaloc:iiop:$repoHost/DCPSInfoRepo ";
 $testOpts .= "-d $duration " if $duration;
 $testOpts .= "-t newest -s $rawSize -r $rawData " if $rawData;
 
+
 # Define the processes.
 
 my $repoArgs = "$repoOpts -o $repo_ior ";
@@ -199,11 +204,14 @@ if( $noaction) {
   exit;
 }
 
+&collectSystemStats if $collectStats;
+
 if( $startRepo) {
   # Fire up the repository
   print "\nREPO\n";
   print $REPO->CommandLine() . "\n";
   $REPO->Spawn();
+  &collectProcessStats( $REPO->{PROCESS}) if $collectStats;
 }
 
 if( $startTest) {
@@ -212,6 +220,7 @@ if( $startTest) {
     print "\nTEST $index\n";
     print $TEST[ $index - 1]->CommandLine() . "\n";
     $TEST[ $index - 1]->Spawn();
+    &collectProcessStats( $TEST[ $index - 1]->{PROCESS}) if $collectStats;
   }
 
   # block forever if no duration was specified.
@@ -266,6 +275,29 @@ sub WaitForUserInput {
   my $userinput = <STDIN>;
 }
 
+sub collectProcessStats {
+  my $PID = shift;
+  if( if $PID and $^O ne 'MSWin32') {
+    my $processStatsCmd
+       = 'top -bd 1 -p '  . $PID
+       . ' |perl -ne \'/' . $PID
+       . '/ && s/\s+$// && print localtime() . ": $_\n";\' > process-' .  $PID
+       . '.log &';
+    print "Process Statistics command: $processStatsCmd\n" if $verbose;
+    system("$processStatsCmd");
+  }
+}
+
+sub collectSystemStats {
+  if( $^O ne 'MSWin32') {
+    my $systemStatsCmd
+       = 'vmstat 1 |perl -ne '
+       . '\'s/\s+$// && print localtime() . ": $_\n";\' > system-stats.log &';
+    print "System Statistics command: $systemStatsCmd\n" if $verbose;
+    system("$systemStatsCmd");
+  }
+}
+
 =head1 NAME
 
 run_test - Execute the test process for a distributed test.
@@ -297,6 +329,8 @@ Options:
                          set the DCPS debugging level for the repository
 
   -f FILE | --dfile=FILE set the filename for debug output
+
+  -C | --collect         collect process and system statistics during test
 
   -h FQDN | --repohost FQDN
                          fully qualified domain name (and port) for
@@ -396,6 +430,16 @@ The default value is to not start a test process.
 Sets the -ORBLogFile option value.
 
 The default value is 0.
+
+=item B<-C> | B<--collect>
+
+Starts the system 'vmstat' to collect system statistics and the 'top'
+command in batch mode to collect process statistics.  The system
+statistics are collected in the file 'system-stats.log' which is
+overridden each time this script is run.  The process statistics are
+collected in files named 'process-<pid>.log'.
+
+The default is off - do not collect statistics.
 
 =item B<-h FQDN> | B<--repohost=FQDN>
 

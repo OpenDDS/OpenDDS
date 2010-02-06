@@ -1,3 +1,36 @@
+Sat Feb  6 00:01:39 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+
+          Added new '-C' option to indicate that process and system
+          statistics should be collected.  System statistics are gathered
+          using a single 'vmstat' command during the test, while process
+          statistics are gathered for each sub-process using a batch
+          'top' command.  This is useful only on *nix derived platforms
+          and so is restricted to them.
+
+        * performance-tests/Bench/src/Publication.cpp:
+
+          Hoisted sample stack allocation out of sending loop.  Invariant
+          sample sizes will no longer result in byte sequence needing to
+          be extended for each sample.
+
+        * performance-tests/Bench/src/Subscription.cpp:
+
+          Added count summary output regardless of statistics collection
+          to remove a need to calculate statistics to count samples.
+
+        * performance-tests/Bench/tests/latency/test-commands.txt:
+
+          Added '.txt' extension for convenience.
+
+        * performance-tests/Bench/tests/thru:
+
+          Added new pre-configured test.  This includes 13 conditions
+          covering the message size/ message rate space to send from
+          76 Mibps (100Mbps) through 1907 Mibps (2500Mbps) of data
+          through the test path.
+
 Fri Feb  5 22:37:05 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * README:
