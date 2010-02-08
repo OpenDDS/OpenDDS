@@ -1,3 +1,15 @@
+Mon Feb  8 15:10:54 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+
+          Correct a syntax error.
+
+        * performance-tests/Bench/tools/mkpkg:
+
+          Add the new througput test configuration files to the built
+          package.  Added a note about versions on the transport library
+          link establishment as well.
+
 Sat Feb  6 00:01:39 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/bin/run_test:
