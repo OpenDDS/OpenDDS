@@ -693,4 +693,14 @@ int idl2jni_visitor::visit_connector(AST_Connector *)
   return 0;
 }
 
+/*# if (TAO_MAJOR_VERSION > 2 || (TAO_MAJOR_VERSION == 1 && \
+     (TAO_MINOR_VERSION > 7 || (TAO_MINOR_VERSION == 7 && TAO_BETA_VERSION > 6))))*/
+
+int idl2jni_visitor::visit_finder(AST_Finder *)
+{
+  return 0;
+}
+
+/*# endif*/
+
 #endif
