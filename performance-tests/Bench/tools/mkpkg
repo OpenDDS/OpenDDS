@@ -22,6 +22,9 @@ cp $DDS_ROOT/lib/libOpenDDS_Udp.so.*           $PKG/lib/
 cp $DDS_ROOT/lib/libOpenDDS_Multicast.so.*     $PKG/lib/
 
 # For dynamic linking
+# NOTE: This allows only a single version of the library to be present
+#       during package creation.  Run 'make realclean;make' if the
+#       version has been updated since the last build.
 (cd $PKG/lib; ln -s libSimpleTcp.so.*             libSimpleTcp.so)
 (cd $PKG/lib; ln -s libOpenDDS_Udp.so.*           libOpenDDS_Udp.so)
 (cd $PKG/lib; ln -s libOpenDDS_Multicast.so.*     libOpenDDS_Multicast.so)
@@ -81,8 +84,10 @@ cp $DDS_ROOT/performance-tests/Bench/etc/svc.conf $PKG/etc/
 cp $DDS_ROOT/performance-tests/Bench/etc/*.ini    $PKG/etc/
 
 mkdir -p $PKG/tests/latency
+mkdir -p $PKG/tests/thru
 
 # Test scenarios
 cp $DDS_ROOT/performance-tests/Bench/tests/*.ini $PKG/tests/
 cp $DDS_ROOT/performance-tests/Bench/tests/latency/*.ini $PKG/tests/latency
+cp $DDS_ROOT/performance-tests/Bench/tests/latency/*.ini $PKG/tests/thru
 

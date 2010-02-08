@@ -277,7 +277,7 @@ sub WaitForUserInput {
 
 sub collectProcessStats {
   my $PID = shift;
-  if( if $PID and $^O ne 'MSWin32') {
+  if( $PID and $^O ne 'MSWin32') {
     my $processStatsCmd
        = 'top -bd 1 -p '  . $PID
        . ' |perl -ne \'/' . $PID
