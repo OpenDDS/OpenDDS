@@ -1,3 +1,9 @@
+Mon Feb  8 15:32:31 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/tools/mkpkg:
+
+          Use correct configuration file source for package.
+
 Mon Feb  8 15:10:54 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/bin/run_test:
