@@ -204,7 +204,7 @@ if( $noaction) {
   exit;
 }
 
-&collectSystemStats if $collectStats;
+&collectSystemStats( $PID) if $collectStats;
 
 if( $startRepo) {
   # Fire up the repository
@@ -276,12 +276,12 @@ sub WaitForUserInput {
 }
 
 sub collectProcessStats {
-  my $PID = shift;
-  if( $PID and $^O ne 'MSWin32') {
+  my $pid = shift;
+  if( $pid and $^O ne 'MSWin32') {
     my $processStatsCmd
-       = 'top -bd 1 -p '  . $PID
-       . ' |perl -ne \'/' . $PID
-       . '/ && s/\s+$// && print localtime() . ": $_\n";\' > process-' .  $PID
+       = 'top -bd 1 -p '  . $pid
+       . ' |perl -ne \'/' . $pid
+       . '/ && s/\s+$// && print localtime() . ": $_\n";\' > process-' .  $pid
        . '.log &';
     print "Process Statistics command: $processStatsCmd\n" if $verbose;
     system("$processStatsCmd");
@@ -289,10 +289,12 @@ sub collectProcessStats {
 }
 
 sub collectSystemStats {
-  if( $^O ne 'MSWin32') {
+  my $pid = shift;
+  if( $pid and $^O ne 'MSWin32') {
     my $systemStatsCmd
        = 'vmstat 1 |perl -ne '
-       . '\'s/\s+$// && print localtime() . ": $_\n";\' > system-stats.log &';
+       . '\'s/\s+$// && print localtime() . ": $_\n";\' > system-stats-'
+       . $pid . '.log &';
     print "System Statistics command: $systemStatsCmd\n" if $verbose;
     system("$systemStatsCmd");
   }
@@ -396,12 +398,6 @@ The default value is 0.
 =item B<-R NUMBER> | B<--rdebug=NUMBER>
 
 Sets the -DCPSDebugLevel option value for the repository process.
-
-The default value is 0.
-
-=item B<-T NUMBER> | B<--tdebug=NUMBER>
-
-Sets the -DCPSTransportDebugLevel option value.
 
 The default value is 0.
 
