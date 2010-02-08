@@ -23,6 +23,8 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+class AST_Finder;
+
 class idl2jni_visitor : public ast_visitor {
 public:
   explicit idl2jni_visitor(AST_Decl *scope, CORBA::Boolean in_reopened = 0);
@@ -146,6 +148,13 @@ public:
   virtual int visit_mirror_port(AST_Mirror_Port *node);
 
   virtual int visit_connector(AST_Connector *node);
+
+/*# if (TAO_MAJOR_VERSION > 2 || (TAO_MAJOR_VERSION == 1 && \
+     (TAO_MINOR_VERSION > 7 || (TAO_MINOR_VERSION == 7 && TAO_BETA_VERSION > 6))))*/
+
+  virtual int visit_finder(AST_Finder *node);
+
+/*# endif*/
 
 #endif
 

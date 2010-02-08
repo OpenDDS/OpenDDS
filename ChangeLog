@@ -1,3 +1,10 @@
+Mon Feb  8 16:17:24 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * java/idl2jni/codegen/idl2jni_visitor.h:
+        * java/idl2jni/codegen/idl2jni_visitor.cpp:
+
+          Updated ast_visitor interface for upcoming DOC x.7.7 release.
+
 Mon Feb  8 15:32:31 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/tools/mkpkg:
