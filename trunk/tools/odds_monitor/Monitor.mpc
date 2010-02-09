@@ -2,7 +2,8 @@
 project(*App) : dcpsexe_with_tcp, qt4_gui {
   exename = odds_monitor
   exeout  = $(DDS_ROOT)/bin
-  libs += OpenDDS_monitor
+  libs  += OpenDDS_monitor
+  after += OpenDDS_monitor
 
   MOC_Files {
     MonitorDataModel.h
