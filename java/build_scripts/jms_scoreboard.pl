@@ -7,6 +7,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # Build or test the java/jms subtree with one command.
 # Requires ANT_HOME, JAVA_HOME, and JBOSS_HOME to be set.
 
+use strict;
 use Env qw(ANT_HOME DDS_ROOT ACE_ROOT);
 use Cwd;
 use lib "$ACE_ROOT/bin";
@@ -64,6 +65,7 @@ for my $tgt (@targets) {
     else {
       $status = system("\"$ANT_HOME/bin/ant\" @ARGV $extra $tgt->[1]");
     }
+    my $testfailed = 0;
     if ($operation eq 'test') {
         open LOG, 'ant.log' or die "ERROR: Can't open ant.log";
         my $testclass;
@@ -82,6 +84,8 @@ for my $tgt (@targets) {
                     if ($r == 0) {
                       s/Errors:/Errs:/;
                       #we don't want this to get parsed as an 'error' line
+                    } else {
+                      $testfailed = 1;
                     }
                     print "$_\n\nauto_run_tests_finished: $testclass Time:$t ".
                         "Result:$r\n";
@@ -94,7 +98,13 @@ for my $tgt (@targets) {
         close LOG;
     }
     if ($status > 0) {
-        print "ERROR: ant invocation failed with $status\n";
+        #If we've had a test failure, the scoreboard will pick that up as 
+        #an 'error' line and we don't need an extra one for the ant invocation
+        #returning non-zero.
+        if ($testfailed == 0) {
+            print "ERROR: ";
+        }
+        print "ant invocation failed with $status\n";
         exit($status >> 8);
     }
     if ($tgt->[0] ne '.') {
