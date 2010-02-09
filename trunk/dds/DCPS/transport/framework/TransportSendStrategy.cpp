@@ -1008,7 +1008,7 @@ OpenDDS::DCPS::TransportSendStrategy::send(TransportQueueElement* element, bool 
       int element_requires_exclusive_packet = element->requires_exclusive_packet();
 
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-            "The element %s require an exclusive packet.\n",
+            "The element %C require an exclusive packet.\n",
             (element_requires_exclusive_packet? "DOES": "does NOT")
           ));
 
@@ -1114,7 +1114,7 @@ OpenDDS::DCPS::TransportSendStrategy::send(TransportQueueElement* element, bool 
               "Back from the direct_send() attempt.\n"));
 
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "And we %s as a result of the direct_send() call.\n",
+              "And we %C as a result of the direct_send() call.\n",
               ((this->mode_ == MODE_QUEUE)? "flipped into MODE_QUEUE":
                                             "stayed in MODE_DIRECT")));
 
@@ -1222,7 +1222,7 @@ OpenDDS::DCPS::TransportSendStrategy::send_stop()
             "Back from the attempt to send leftover packet directly.\n"));
 
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-            "But we %s as a result.\n",
+            "But we %C as a result.\n",
             ((this->mode_ == MODE_QUEUE)? "flipped into MODE_QUEUE":
                                           "stayed in MODE_DIRECT" )));
     }
