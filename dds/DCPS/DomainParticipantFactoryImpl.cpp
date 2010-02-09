@@ -202,7 +202,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   DDS::DomainId_t domain_id = the_servant->get_domain_id();
   RepoId dp_id = the_servant->get_id();
 
-  DPSet* entry;
+  DPSet* entry = 0;
 
   if (find(participants_, domain_id, entry) == -1) {
     RepoIdConverter converter(dp_id);

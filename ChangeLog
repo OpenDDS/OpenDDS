@@ -1,3 +1,11 @@
+Tue Feb  9 13:08:49 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+          Initialise a pointer with 0
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+          Fix invalid logging mask
+
 Tue Feb  9 04:38:49 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/bin/run_test:
