@@ -1,3 +1,13 @@
+Tue Feb  9 04:38:49 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+
+          Debugged statistics collecting.
+
+        * performance-tests/Bench/tests/thru/test-commands.txt:
+
+          Added statistics gathering argument to p2 command lines.
+
 Mon Feb  8 18:03:34 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/bin/run_test:

@@ -204,7 +204,10 @@ if( $noaction) {
   exit;
 }
 
-&collectSystemStats( $PID) if $collectStats;
+# Manage statistics collection processes.
+my @COLLECTORS;
+my @HANDLES;
+&collectSystemStats( $$) if $collectStats;
 
 if( $startRepo) {
   # Fire up the repository
@@ -258,6 +261,9 @@ if( $startRepo) {
   unlink $repo_ior;
 }
 
+# Terminate the statistics collectors.
+kill 3, @COLLECTORS;
+
 # Report results.
 
 if( $failed == 0) {
@@ -278,25 +284,48 @@ sub WaitForUserInput {
 sub collectProcessStats {
   my $pid = shift;
   if( $pid and $^O ne 'MSWin32') {
-    my $processStatsCmd
-       = 'top -bd 1 -p '  . $pid
-       . ' |perl -ne \'/' . $pid
-       . '/ && s/\s+$// && print localtime() . ": $_\n";\' > process-' .  $pid
-       . '.log &';
-    print "Process Statistics command: $processStatsCmd\n" if $verbose;
-    system("$processStatsCmd");
+    &runCollector( "top -bd 1 -p $pid", "process-$pid.log", "$pid");
   }
 }
 
 sub collectSystemStats {
   my $pid = shift;
   if( $pid and $^O ne 'MSWin32') {
-    my $systemStatsCmd
-       = 'vmstat 1 |perl -ne '
-       . '\'s/\s+$// && print localtime() . ": $_\n";\' > system-stats-'
-       . $pid . '.log &';
-    print "System Statistics command: $systemStatsCmd\n" if $verbose;
-    system("$systemStatsCmd");
+    &runCollector( "vmstat 1", "system-$pid.log");
+  }
+}
+
+sub runCollector {
+  my ( $command, $filename, $filter) = @_;
+  my $child = open( my $handle, "-|");
+  if( not defined($child)) { # Broken
+    warn "Unable to start statistics collection: $!";
+
+  } elsif( $child) { # Parent
+    my $cmd = <$handle>;
+    chomp $cmd;
+    push @COLLECTORS, $cmd;
+    push @HANDLES, $handle;
+    print "Starting to write statistics to <$filename> from process <$cmd> running <$command>.\n";
+
+  } else { # Child
+    # Prevent issues with test process management in the child.
+    $REPO->{RUNNING} = 0;
+    map $_->{RUNNING} = 0, @TEST;
+
+    # Start collecting.
+    open( STATSOUT, "> $filename")
+      or die "Failed to open statistics output file <$filename>: $!";
+    my $cmd = open( STATSIN, "$command |")
+      or die "Failed to start statistics gathering command <$command>: $!";
+    print "$cmd\n";
+    select STATSOUT; $!=1;
+    while(<STATSIN>) {
+      next if $filter and not /$filter/;
+      s/\s+$// && print STATSOUT localtime() . ": $_\n";
+    }
+    close STATSOUT;
+    exit;
   }
 }
 
