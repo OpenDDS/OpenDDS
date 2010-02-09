@@ -1,3 +1,10 @@
+Tue Feb  9 15:02:53 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/Monitor.mpc:
+
+          Make the project build after the OpenDDS_monitor project it
+          depends on.  Thanks to Johnny Willemsen for this correction.
+
 Tue Feb  9 13:08:49 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DCPS/DomainParticipantFactoryImpl.cpp:
