@@ -1,3 +1,12 @@
+Tue Feb  9 15:24:05 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * MPC/config/dcps_monitor.mpb:
+        * tools/odds_monitor/Monitor.mpc:
+
+          Added a new base project for including the monitor library.
+          Thanks to Adam Mitz for helping me understand Johnny's original
+          suggestion.
+
 Tue Feb  9 15:02:53 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/odds_monitor/Monitor.mpc:
