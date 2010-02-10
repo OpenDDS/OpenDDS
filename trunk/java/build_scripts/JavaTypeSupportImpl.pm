@@ -2,6 +2,7 @@ package JavaTypeSupportImpl;
 
 use File::Path;
 use File::Basename;
+use strict;
 
 sub generate {
     my $pkg = shift;
@@ -18,9 +19,14 @@ sub generate {
     $extra{'cpp'} = '#include "idl2jni_jni.h"' . "\n\n";
     $extra{'cpp'}.= '#include "' . $file_names->[1] . "\"\n\n" if $cpp_file;
     for my $type (@$aref) {
-        my @path = split ('::', $type);
+        my @path = split ('::', $type);	
+	my @my_path = @path;
+	for(my $i = 0; $i < @my_path; $i++) {
+          $my_path[$i] =~ s/_/_1/g;	
+	}	
+
         my $file = join ('/', @path) . 'TypeSupportImpl.java';
-        my $jniclass = join ('_', @path);
+        my $jniclass = join ('_', @my_path);
         my @pkg = @path;
         my $class = pop @pkg;
         my $jpackage = (scalar @pkg == 0) ? ''
@@ -51,7 +57,7 @@ EOT
     } # for each type...
 
     if ($cpp_file) {
-      open (CPP, ">$cpp_file") or die "Failed to open $file\n";
+      open (CPP, ">$cpp_file") or die "Failed to open $cpp_file\n";
       print CPP $extra{'cpp'};
       close CPP;
       delete $extra{'cpp'};

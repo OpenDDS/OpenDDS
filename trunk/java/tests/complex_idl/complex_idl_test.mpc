@@ -14,11 +14,11 @@ project: dcps_tcp, dcps_java {
     // Older versions of Visual Studio will create the intermediate directories
     // in all-lowercase, so we have to create them first to get the correct case.
     specific(vc71, vc8) {
-        prebuild    += <%mkdir%> Complex 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
-        prebuild    += <%mkdir%> classes<%slash%>Complex 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
+        prebuild    += <%mkdir%> Complex_Idl 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
+        prebuild    += <%mkdir%> classes<%slash%>Complex_Idl 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
     }
 
     TypeSupport_Files {
-        Complex.idl
+        Complex_Idl.idl
     }
 }
