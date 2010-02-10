@@ -1,3 +1,17 @@
+Wed Feb 10 00:11:21 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/tests/thru/pub-*-*-*.ini:
+        * performance-tests/Bench/tests/thru/pub-*-*.ini:
+        * performance-tests/Bench/tests/thru/sub-*.ini:
+
+          New set of tests for publication bound and subscription bound
+          throughput testing.
+
+        * performance-tests/Bench/tests/thru/test-commands.txt:
+
+          Added documentation of new publication bound and subscription
+          bound tests.
+
 Tue Feb  9 16:58:50 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * java/build_scripts/jms_scoreboard.pl:
