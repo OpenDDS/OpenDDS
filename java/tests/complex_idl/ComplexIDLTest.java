@@ -24,7 +24,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.omg.CORBA.StringSeqHolder;
 
-import Complex.*;
+import Complex_Idl.*;
 
 /**
  * @author  Steven Stallion

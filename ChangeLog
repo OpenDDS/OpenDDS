@@ -1,3 +1,20 @@
+Wed Feb 10 22:38:46 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * java/build_scripts/JavaTypeSupportImpl.pm:
+
+          Fixed a bug that generates incorrect jni class name when the
+          module name contains underscore and causes UnsatisfiedLinkError.
+          The "_1" needs be used to replace the underscore. 
+          
+        * java/tests/complex_idl/ComplexIDLTest.java:
+        * java/tests/complex_idl/Complex_Idl.idl:
+        * java/tests/complex_idl/QuoteSupport.java:
+        * java/tests/complex_idl/complex_idl_test.mpc:
+        * java/tests/complex_idl/Complex.idl:
+
+          Renamed Complex.idl to Complex_Idl.idl file and changed
+          module name from Complex to Complex_Idl to verify the bug fix.
+
 Wed Feb 10 21:55:26 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * java/idl2jni/codegen/im_java.cpp:

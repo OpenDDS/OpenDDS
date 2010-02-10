@@ -7,13 +7,13 @@
  * See: http://www.opendds.org/license.html
  */
 
-#pragma DCPS_DATA_TYPE "Complex::Data"
-#pragma DCPS_DATA_KEY "Complex::Data id"
+#pragma DCPS_DATA_TYPE "Complex_Idl::Data"
+#pragma DCPS_DATA_KEY "Complex_Idl::Data id"
 
 #include "tao/OctetSeq.pidl"
 #include "tao/StringSeq.pidl"
 
-module Complex {
+module Complex_Idl {
 
     struct CastMember {
         string python;
