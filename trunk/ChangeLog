@@ -1,3 +1,12 @@
+Wed Feb 10 21:55:26 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * java/idl2jni/codegen/im_java.cpp:
+
+          For IDL unions without an explicit default that need a generated
+          default (because the branches don't cover all possible discriminator
+          values), if the discriminator type is an enum we need to wrap the
+          primitive (int) value of the enum in the Java object for the enum.
+
 Wed Feb 10 00:11:21 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/tests/thru/pub-*-*-*.ini:

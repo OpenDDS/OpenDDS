@@ -879,7 +879,7 @@ bool idl_mapping_java::gen_union(UTL_ScopedName *name,
 
     body +=
       "  public void __default() {\n"
-      "    _discriminator = " + dv.str() + ";\n"
+      "    _discriminator = " + pre_disc_set + dv.str() + post_disc_set + ";\n"
       "  }\n\n"
       "  public void __default(" + disc_ty + " discriminator) {\n"
       "    _discriminator = discriminator;\n"
