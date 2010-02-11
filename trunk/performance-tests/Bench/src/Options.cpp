@@ -109,6 +109,7 @@ namespace { // anonymous namespace for file scope.
   const ACE_TCHAR* DATACOLLECTIONBOUND_KEYNAME                 = ACE_TEXT("DataCollectionBound");
   const ACE_TCHAR* DATACOLLECTIONRETENTION_KEYNAME             = ACE_TEXT("DataCollectionRetention");
   const ACE_TCHAR* ASSOCIATIONS_KEYNAME                        = ACE_TEXT("Associations");
+  const ACE_TCHAR* STARTAFTERDELAY_KEYNAME                     = ACE_TEXT("StartAfterDelay");
 
 } // end of anonymous namespace.
 
@@ -1109,16 +1110,17 @@ Options::loadPublication(
    *   OwnershipStrength                   = <number>
    *   WriterDataLifecycle                 = <bool> # Boolean: numeric 0 or 1
    *   # Test execution parameters
-   *   Topic            = <string> # One of topic <name>
-   *   TransportIndex   = <number> # Index into transport configurations
-   *   MessageSource    = <string> # One of subscription <name>
-   *   MessageFixedRate = <number> # Samples per second, 0 indicates use MessageRate
-   *   MessageRate      = <number> # Samples per second, Poisson arrival times
-   *   MessageSize      = <number> # bytes per sample
-   *   MessageMax       = <number> # upper bound for size
-   *   MessageMin       = <number> # lower bound for size
-   *   MessageDeviation = <number> # standard deviation for size
-   *   Associations     = <number> # subscriptions that will connect
+   *   Topic             = <string> # One of topic <name>
+   *   TransportIndex    = <number> # Index into transport configurations
+   *   MessageSource     = <string> # One of subscription <name>
+   *   MessageFixedRate  = <number> # Samples per second, 0 indicates use MessageRate
+   *   MessageRate       = <number> # Samples per second, Poisson arrival times
+   *   MessageSize       = <number> # bytes per sample
+   *   MessageMax        = <number> # upper bound for size
+   *   MessageMin        = <number> # lower bound for size
+   *   MessageDeviation  = <number> # standard deviation for size
+   *   Associations      = <number> # Number of subscriptions to match before starting.
+   *   StartAfterDelay   = <number> # Delay before writes start after matching.
    */
 
   // Note that this requires that the Service Participant already be
@@ -1897,7 +1899,8 @@ Options::loadPublication(
   valueString.clear();
   heap.get_string_value( sectionKey, MESSAGESIZE_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    profile->size.mean() = ACE_OS::atoi( valueString.c_str());
+    profile->size.mean()
+      = static_cast<double>(ACE_OS::atoi( valueString.c_str()));
     if( this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Options::loadPublication() - ")
@@ -1913,7 +1916,8 @@ Options::loadPublication(
   valueString.clear();
   heap.get_string_value( sectionKey, MESSAGEMAX_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    profile->size.maximum() = ACE_OS::atoi( valueString.c_str());
+    profile->size.maximum()
+      = static_cast<double>(ACE_OS::atoi( valueString.c_str()));
     if( this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Options::loadPublication() - ")
@@ -1929,7 +1933,8 @@ Options::loadPublication(
   valueString.clear();
   heap.get_string_value( sectionKey, MESSAGEMIN_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    profile->size.minimum() = ACE_OS::atoi( valueString.c_str());
+    profile->size.minimum()
+      = static_cast<double>(ACE_OS::atoi( valueString.c_str()));
     if( this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Options::loadPublication() - ")
@@ -1945,7 +1950,8 @@ Options::loadPublication(
   valueString.clear();
   heap.get_string_value( sectionKey, MESSAGEDEVIATION_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    profile->size.deviation() = ACE_OS::atoi( valueString.c_str());
+    profile->size.deviation()
+      = static_cast<double>(ACE_OS::atoi( valueString.c_str()));
     if( this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Options::loadPublication() - ")
@@ -1969,6 +1975,22 @@ Options::loadPublication(
         sectionName.c_str(),
         ASSOCIATIONS_KEYNAME,
         profile->associations
+      ));
+    }
+  }
+
+  // StartAfterDelay = <number> # Delay before writes start after matching.
+  valueString.clear();
+  heap.get_string_value( sectionKey, STARTAFTERDELAY_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->delay = ACE_OS::atoi( valueString.c_str());
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        STARTAFTERDELAY_KEYNAME,
+        profile->delay
       ));
     }
   }

@@ -406,49 +406,34 @@ Process::unblock()
 void
 Process::run()
 {
-  DDS::Duration_t   timeout = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC};
-  DDS::ConditionSeq conditions;
-  DDS::PublicationMatchedStatus publicationMatches = { 0, 0, 0, 0, 0};
-  unsigned int cummulative_count = 0;
-  if (publicationsAssociations_ > 0) {
-    do {
-      if( this->options_.verbose()) {
-        ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) Process::run() - ")
-          ACE_TEXT("%d of %d subscriptions attached to publications, waiting for more.\n"),
-          cummulative_count,
-          publicationsAssociations_
-        ));
-      }
-      if( DDS::RETCODE_OK != this->publicationWaiter_->wait( conditions, timeout)) {
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: Process::run() - ")
-          ACE_TEXT("failed to synchronize at start of test.\n")
-        ));
-        throw BadSyncException();
-      }
-      for( unsigned long index = 0; index < conditions.length(); ++index) {
-        DDS::StatusCondition_var condition
-          = DDS::StatusCondition::_narrow( conditions[ index].in());
+  bool ready = false;
+  while( !ready) {
+    if( this->options_.verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Process::run() - ")
+        ACE_TEXT("waiting for subscriptions to attach to publications.\n")
+      ));
+    }
 
-        DDS::DataWriter_var writer = DDS::DataWriter::_narrow( condition->get_entity());
-        if( !CORBA::is_nil( writer.in())) {
-          DDS::StatusMask changes = writer->get_status_changes();
-          if( changes & DDS::PUBLICATION_MATCHED_STATUS) {
-            if (writer->get_publication_matched_status(publicationMatches) != ::DDS::RETCODE_OK)
-            {
-              ACE_ERROR ((LM_ERROR,
-                "ERROR: failed to get publication matched status\n"));
-              ACE_OS::exit (1);
-            }
-            cummulative_count += publicationMatches.current_count_change;
-          }
-        }
-      }
+    // Wait for the matched status to be updated.
+    DDS::Duration_t   timeout = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC};
+    DDS::ConditionSeq discard;
+    if( DDS::RETCODE_OK != this->publicationWaiter_->wait( discard, timeout)) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Process::run() - ")
+        ACE_TEXT("failed to synchronize at start of test.\n")
+      ));
+      throw BadSyncException();
+    }
 
-    // @NOTE: This currently makes the simplifying assumption that there
-    // is a single subscription for each publication.
-    } while( cummulative_count < publicationsAssociations_);
+    // Check each publication for its readiness to run.
+    ready = true;
+    for( PublicationMap::const_iterator current = this->publications_.begin();
+         current != this->publications_.end();
+         ++current
+       ) {
+      ready &= current->second->ready();
+    }
   }
 
   // Kluge to bias the race between BuiltinTopic samples and application
@@ -458,8 +443,7 @@ Process::run()
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Process::run() - ")
-      ACE_TEXT("starting to publish samples with %d matched subscriptions.\n"),
-      cummulative_count
+      ACE_TEXT("starting to publish samples.\n")
     ));
   }
 
@@ -540,9 +524,14 @@ Process::run()
     current->second->wait();
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Process::run() - ")
-      ACE_TEXT("publication %C stopping after sending %d messages.\n"),
+      ACE_TEXT("publication %C stopping with results:\n")
+      ACE_TEXT("   test elapsed time: %g,\n")
+      ACE_TEXT("   messages     sent: %d,\n")
+      ACE_TEXT("   messages timedout: %d.\n"),
       current->first.c_str(),
-      current->second->messages()
+      current->second->duration(),
+      current->second->messages(),
+      current->second->timeouts()
     ));
     delete current->second;
   }
@@ -560,56 +549,35 @@ Process::run()
   // stopped any forwarding.  We wait for the subscriptions to
   // become unassociated before we shut down entirely.
   //
+  for(;;) {
+    // Check for active subscriptions (associated with publications).
+    if( this->options_.verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Process::run() - ")
+        ACE_TEXT("waiting for remote publications to finish.\n")
+      ));
+    }
+    bool active = false;
+    for( SubscriptionMap::const_iterator current = this->subscriptions_.begin();
+         current != this->subscriptions_.end();
+         ++current
+       ) {
+      active |= current->second->active();
+    }
+    if( !active) {
+      break;
+    }
 
-  DDS::SubscriptionMatchedStatus subscriptionMatches = { 0, 0, 0, 0, 0};
-  unsigned int current_count;
-  if (subscriptions_.size() > 0) {
-    do {
-      if( DDS::RETCODE_OK != this->subscriptionWaiter_->wait( conditions, timeout)) {
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: Process::run() - ")
-          ACE_TEXT("failed to synchronize subscription conditions.\n")
-        ));
-        throw BadSyncException();
-      }
-
-      // At this point, we do not actually care what *caused* the thread to
-      // unblock, we just want to determine if *any* subscription still has
-      // an actively associated writer.
-      current_count = 0;
-      this->subscriptionWaiter_->get_conditions( conditions);
-      for( unsigned long index = 0; index < conditions.length(); ++index) {
-        // Extract the current Condition.
-        DDS::StatusCondition_var condition
-          = DDS::StatusCondition::_narrow( conditions[ index].in());
-        if( !CORBA::is_nil( condition.in())) {
-          // Its not our GuardCondition, go ahead and extract the reader.
-          DDS::DataReader_var reader = DDS::DataReader::_narrow( condition->get_entity());
-          if( !CORBA::is_nil( reader.in())) {
-            // Again, we do not actually care what the event or change was,
-            // we just take this opportunity to determine the current status
-            // of associations.
-            if (reader->get_subscription_matched_status(subscriptionMatches) != ::DDS::RETCODE_OK)
-            {
-              ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) Process::run() - ")
-                ACE_TEXT("failed to get subscription matches status.\n")));
-            }
-            else
-              current_count += subscriptionMatches.current_count;
-          }
-        }
-      }
-
-      if( this->options_.verbose()) {
-        ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) Process::run() - ")
-          ACE_TEXT("waiting for %d remote publications to finish.\n"),
-          current_count
-        ));
-      }
-
-    } while( !this->terminated_ && current_count > 0);
+    // Now wait for a change in associations.
+    DDS::Duration_t   timeout = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC};
+    DDS::ConditionSeq discard;
+    if( DDS::RETCODE_OK != this->subscriptionWaiter_->wait( discard, timeout)) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Process::run() - ")
+        ACE_TEXT("failed to synchronize subscription conditions.\n")
+      ));
+      throw BadSyncException();
+    }
   }
   // At this point, we are done sending and receiving data, so we can go
   // ahead and write any data that was requested.

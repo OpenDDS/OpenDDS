@@ -35,6 +35,7 @@ Publication::Publication(
     done_( false),
     enabled_( false),
     messages_( 0),
+    timeouts_( 0),
     publisher_(::DDS::Publisher::_nil())
 {
 }
@@ -90,6 +91,26 @@ int
 Publication::messages() const
 {
   return this->messages_;
+}
+
+int
+Publication::timeouts() const
+{
+  return this->timeouts_;
+}
+
+double
+Publication::duration() const
+{
+  return this->duration_;
+}
+
+bool
+Publication::ready() const
+{
+  DDS::PublicationMatchedStatus publicationMatches = { 0, 0, 0, 0, 0};
+  this->writer_->get_publication_matched_status(publicationMatches);
+  return publicationMatches.current_count == static_cast<int>(this->profile_->associations);
 }
 
 ::DDS::StatusCondition_ptr
@@ -159,28 +180,39 @@ Publication::write( const Test::Data& sample)
 {
   // Only forward if we have not been stopped.
   if( !this->done_) {
-    ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->lock_);
-    if( DDS::RETCODE_OK == this->writer_->write( sample, DDS::HANDLE_NIL)) {
-      ++this->messages_;
-      if( this->verbose_ && BE_REALLY_VERBOSE) {
-        ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) Publication::write() - publication %C: ")
-          ACE_TEXT("forwarded sample %d at priority %d.\n"),
-          this->name_.c_str(),
-          this->messages_,
-          this->profile_->writerQos.transport_priority.value
-        ));
-      }
+    DDS::ReturnCode_t result;
+    {
+      ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->lock_);
+      result = this->writer_->write( sample, DDS::HANDLE_NIL);
+    }
+    switch( result) {
+      case DDS::RETCODE_OK:
+        ++this->messages_;
+        if( this->verbose_ && BE_REALLY_VERBOSE) {
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) Publication::write() - publication %C: ")
+            ACE_TEXT("forwarded sample %d at priority %d.\n"),
+            this->name_.c_str(),
+            this->messages_,
+            this->profile_->writerQos.transport_priority.value
+          ));
+        }
+        break;
 
-    } else {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) Publication::write() - publication %C: ")
-        ACE_TEXT("failed to forward sample: pid: %d, seq: %d, priority: %d.\n"),
-          this->name_.c_str(),
-          sample.pid,
-          sample.seq,
-          sample.priority
-      ));
+      case DDS::RETCODE_TIMEOUT:
+        ++this->timeouts_;
+        break;
+
+      default:
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) Publication::write() - publication %C: ")
+          ACE_TEXT("failed to forward sample: pid: %d, seq: %d, priority: %d.\n"),
+            this->name_.c_str(),
+            sample.pid,
+            sample.seq,
+            sample.priority
+        ));
+        break;
     }
   }
 }
@@ -349,21 +381,41 @@ Publication::svc ()
     ));
   }
 
+  // Honor a request to delay the start of publication.
+  if( this->profile_->delay > 0) {
+    ACE_Time_Value initialDelay( this->profile_->delay, 0);
+    ACE_OS::sleep( initialDelay);
+    if( this->verbose_) {
+    ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Publication::svc() - publication %C: ")
+        ACE_TEXT("publication starting after initial delay.\n"),
+        this->name_.c_str()
+      ));
+    }
+  }
+
   OpenDDS::DCPS::DataWriterImpl* servant
     = dynamic_cast< OpenDDS::DCPS::DataWriterImpl*>( this->writer_.in());
  
   OpenDDS::DCPS::RepoIdConverter converter(servant->get_publication_id());
   int pid = converter.checksum();
 
-  int count = 0;
-  Test::Data sample;
+  long fixedInterval = 0;
+  if( this->profile_->fixedRate) {
+    fixedInterval = static_cast<long>( 1.0e6 / this->profile_->fixedRate);
+  }
+  ACE_Time_Value startTime = ACE_High_Res_Timer::gettimeofday_hr();
+  int            count = 0;
+  Test::Data     sample;
+  sample.priority = this->profile_->writerQos.transport_priority.value;
+  sample.pid      = pid;
+
+  // Main loop for publishing.
   while( this->done_ == false) {
     unsigned long size
       = static_cast<unsigned long>( this->profile_->size.value());
 
-    sample.priority = this->profile_->writerQos.transport_priority.value;
     sample.seq      = ++count;
-    sample.pid      = pid;
     sample.buffer.length( size);
 
     ACE_Time_Value  start = ACE_High_Res_Timer::gettimeofday_hr();
@@ -371,17 +423,30 @@ Publication::svc ()
     sample.sec     = stamp.sec;
     sample.nanosec = stamp.nanosec;
 
+    DDS::ReturnCode_t result;
     {
       ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, 0);
-      this->writer_->write( sample, DDS::HANDLE_NIL);
-      ++this->messages_;
+      result = this->writer_->write( sample, DDS::HANDLE_NIL);
+    }
+    switch( result) {
+      case DDS::RETCODE_OK:      ++this->messages_; break;
+      case DDS::RETCODE_TIMEOUT: ++this->timeouts_; break;
+
+      default:
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) Publication::svc() - publication %C: ")
+          ACE_TEXT("write failed with code: %d.\n"),
+          this->name_.c_str(),
+          result
+        ));
+        break;
     }
 
     // Determine the interval to next message here so it can be mentioned
     // in the diagnostic messsage.
     long microseconds = 0;
     if( this->profile_->fixedRate) {
-      microseconds = static_cast<long>( 1.0e6 / this->profile_->fixedRate);
+      microseconds = fixedInterval;
     } else {
       microseconds
         = static_cast<long>( 1.0e6 * this->profile_->rate.value());
@@ -407,6 +472,10 @@ Publication::svc ()
       ACE_OS::sleep( interval);
     }
   }
+  ACE_Time_Value elapsedTime
+    = ACE_High_Res_Timer::gettimeofday_hr() - startTime;
+  this->duration_ = elapsedTime.sec()
+                  + (elapsedTime.usec() * 1.0e-6);
 
   if( this->verbose_) {
     ACE_DEBUG((LM_DEBUG,

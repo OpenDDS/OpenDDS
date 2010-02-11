@@ -148,10 +148,6 @@ my $common_opts = new PerlACE::ConfigList->check_config ('STATIC') ? ''
 $common_opts .= $verboseDebug if $verboseDebug;
 $common_opts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
 
-# Process variables.
-my $REPO;
-my @TEST;
-
 # Establish process arguments.
 
 my $appDebug;
@@ -177,30 +173,31 @@ $testOpts .= "-t newest -s $rawSize -r $rawData " if $rawData;
 
 
 # Define the processes.
+my @PROCESSES;
 
-my $repoArgs = "$repoOpts -o $repo_ior ";
-if( PerlACE::is_vxworks_test()) {
-  $REPO = new PerlACE::ProcessVX( "$FindBin::Bin/DCPSInfoRepo", $repoArgs);
-} else {
-  $REPO = new PerlACE::Process( "$FindBin::Bin/DCPSInfoRepo", $repoArgs);
+if( $startRepo) {
+  my $repoArgs = "$repoOpts -o $repo_ior ";
+  if( PerlACE::is_vxworks_test()) {
+    push @PROCESSES, new PerlACE::ProcessVX( "$FindBin::Bin/DCPSInfoRepo", $repoArgs);
+  } else {
+    push @PROCESSES, new PerlACE::Process( "$FindBin::Bin/DCPSInfoRepo", $repoArgs);
+  }
 }
 
-for my $index ( 1 .. scalar(@scenario)) {
-  my $testArgs = "$testOpts "
-               . "-f $scenario[ $index - 1] ";
-  if( PerlACE::is_vxworks_test()) {
-    $TEST[ $index - 1] = new PerlACE::ProcessVX( "$FindBin::Bin/testprocess", $testArgs);
-  } else {
-    $TEST[ $index - 1] = new PerlACE::Process( "$FindBin::Bin/testprocess", $testArgs);
-  }
+if( $startTest) {
+  map {
+    my $testArgs = "$testOpts -f $_ ";
+    if( PerlACE::is_vxworks_test()) {
+      push @PROCESSES, new PerlACE::ProcessVX( "$FindBin::Bin/testprocess", $testArgs);
+    } else {
+      push @PROCESSES, new PerlACE::Process( "$FindBin::Bin/testprocess", $testArgs);
+    }
+  } @scenario;
 }
 
 if( $noaction) {
   # Be verbose.
-  print $REPO->CommandLine() . "\n" if $verbose and $startRepo;
-  foreach my $test (@TEST) {
-    print $test->CommandLine() . "\n" if $verbose and $startTest;
-  }
+  map { print $_->CommandLine() . "\n"; } @PROCESSES;
   exit;
 }
 
@@ -209,55 +206,35 @@ my @COLLECTORS;
 my @HANDLES;
 &collectSystemStats( $$) if $collectStats;
 
-if( $startRepo) {
-  # Fire up the repository
-  print "\nREPO\n";
-  print $REPO->CommandLine() . "\n";
-  $REPO->Spawn();
-  &collectProcessStats( $REPO->{PROCESS}) if $collectStats;
-}
+# Start and stop the test processes.
+map {
+  print "\nTEST PROCESS\n";
+  print $_->CommandLine() . "\n";
+  $_->Spawn();
+  &collectProcessStats( $_->{PROCESS}) if $collectStats;
+} @PROCESSES;
 
-if( $startTest) {
-  # Fire up the test processes.
-  for my $index ( 1 .. scalar(@scenario)) {
-    print "\nTEST $index\n";
-    print $TEST[ $index - 1]->CommandLine() . "\n";
-    $TEST[ $index - 1]->Spawn();
-    &collectProcessStats( $TEST[ $index - 1]->{PROCESS}) if $collectStats;
+# block forever if no duration was specified.
+WaitForUserInput() if not $duration;
+
+# Wait for the test processes to terminate nicely.  Terminate in reverse
+# order from starting order.
+map {
+  if ($duration) {
+    $status = $_->WaitKill( $killDelay);
+  } else {
+    $status = $_->TerminateWaitKill( $killDelay);
   }
-
-  # block forever if no duration was specified.
-  WaitForUserInput() if not $duration;
-
-  # Wait for the testprocess to terminate nicely.
-
-  for my $index ( 1 .. scalar(@scenario)) {
-    if ($duration) {
-      $status = $TEST[ $index - 1]->WaitKill( $killDelay);
-    } else {
-      $status = $TEST[ $index - 1]->TerminateWaitKill( $killDelay);
-    }
-    if( $status != 0) {
-      print STDERR "ERROR: Test $index returned $status\n";
-      ++$failed;
-    }
-    $killDelay = 5;
-  }
-}
-
-# Terminate the repository.
-
-if( $startRepo) {
-  # block forever if no duration was specified and we haven't already
-  # been released from this obligation.
-  WaitForUserInput() if not $duration and not $startTest;
-
-  print "\nStopping repository\n";
-  $status = $REPO->TerminateWaitKill( $killDelay);
+  print "Terminated test process.\n" if $verbose;
   if( $status != 0) {
-    print STDERR "ERROR: Repository returned $status\n";
+    print STDERR "ERROR: Test returned $status\n";
     ++$failed;
   }
+  $killDelay = 5;
+} reverse @PROCESSES;
+
+# Clean up after the repository.
+if( $startRepo) {
   unlink $repo_ior;
 }
 
@@ -265,7 +242,6 @@ if( $startRepo) {
 kill 3, @COLLECTORS;
 
 # Report results.
-
 if( $failed == 0) {
   print "test PASSED.\n";
 
@@ -275,56 +251,83 @@ if( $failed == 0) {
 
 exit $failed;
 
-
 sub WaitForUserInput {
-  print "\n\nNo Duration specified.  Hit Enter to end the processes and finish the test.\n\n";
+  print "\n\nNo Duration specified.  Hit Enter to end the processes "
+      . "and finish the test.\n\n";
   my $userinput = <STDIN>;
 }
 
 sub collectProcessStats {
   my $pid = shift;
   if( $pid and $^O ne 'MSWin32') {
-    &runCollector( "top -bd 1 -p $pid", "process-$pid.log", "$pid");
+    &runCollector(
+      "top -bd 1 -p $pid",
+      "process-$pid.log",
+      sub { # Action to process each line of input.
+        my ( $input, $output) = @_;
+        next if not $input =~ /$pid/;
+        print $output localtime() . ": $input\n";
+      }
+    );
   }
 }
 
 sub collectSystemStats {
   my $pid = shift;
   if( $pid and $^O ne 'MSWin32') {
-    &runCollector( "vmstat 1", "system-$pid.log");
+    &runCollector(
+      "vmstat 1",
+      "system-$pid.log",
+      sub { # Action to process each line of input.
+        my ( $input, $output) = @_;
+        print $output localtime() . ": $input\n";
+      }
+    );
   }
 }
 
 sub runCollector {
-  my ( $command, $filename, $filter) = @_;
+  my ( $command, $filename, $action) = @_;
+
+  # Start a sub-process to collect statistics.
   my $child = open( my $handle, "-|");
   if( not defined($child)) { # Broken
     warn "Unable to start statistics collection: $!";
 
   } elsif( $child) { # Parent
+    # Obtain the statistics process Id to terminate processing with.
     my $cmd = <$handle>;
     chomp $cmd;
-    push @COLLECTORS, $cmd;
-    push @HANDLES, $handle;
-    print "Starting to write statistics to <$filename> from process <$cmd> running <$command>.\n";
+    push @COLLECTORS, $cmd; # For terminating.
+    push @HANDLES, $handle; # For process scope.
+    print "Starting to write statistics to <$filename> "
+        . "from process <$cmd> running <$command>.\n";
 
   } else { # Child
-    # Prevent issues with test process management in the child.
-    $REPO->{RUNNING} = 0;
-    map $_->{RUNNING} = 0, @TEST;
+    # Prevent issues with test process management in the child.  The
+    # managed processes are managed only by the parent process.
+    map $_->{RUNNING} = 0, @PROCESSES;
 
-    # Start collecting.
-    open( STATSOUT, "> $filename")
-      or die "Failed to open statistics output file <$filename>: $!";
+    # Start collecting using the provided command as input.
     my $cmd = open( STATSIN, "$command |")
       or die "Failed to start statistics gathering command <$command>: $!";
+
+    # Send the command PID to the parent process.
     print "$cmd\n";
-    select STATSOUT; $!=1;
+
+    # Open and unbuffer the output.
+    open( my $output, "> $filename")
+      or die "Failed to open statistics output file <$filename>: $!";
+    select $output; $!=1;
+
+    # Process all of the input.
     while(<STATSIN>) {
-      next if $filter and not /$filter/;
-      s/\s+$// && print STATSOUT localtime() . ": $_\n";
+      s/\s+$//; # Elide trailing whitespace; 'chomp' doesn't work quite right.
+      $action->( "$_", $output);
     }
-    close STATSOUT;
+
+    # Done collecting.
+    close $output;
     exit;
   }
 }
