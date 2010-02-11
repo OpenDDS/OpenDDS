@@ -3,7 +3,7 @@
 //
 
 project : dcps, wireshark {
-  sharedname      = odds_dissector
+  sharedname    = odds_dissector
 
   Source_Files {
     odds_dissector.cpp

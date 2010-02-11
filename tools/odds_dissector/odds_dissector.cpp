@@ -11,8 +11,14 @@
 
 #include <epan/packet.h>
 
-extern "C"
+extern "C" {
+
+static void proto_register_odds(void);
+static void proto_reg_handoff_odds(void);
+
 static void dissect_odds(tvbuff_t*, packet_info*, proto_tree*);
+
+} // extern "C"
 
 static int proto_odds = -1;
 
