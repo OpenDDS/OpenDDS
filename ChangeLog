@@ -1,3 +1,68 @@
+Thu Feb 11 22:52:45 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+
+          Updated to simplify process management.  Added use of anonymous
+          closures for statistics gathering to factor common processing.
+
+        * performance-tests/Bench/doc/datamodel.txt:
+
+          Added documentation for new Publication "StartAfterDelay" and
+          existing but undocumented "Associations" test parameters.
+
+        * performance-tests/Bench/src/EntityProfiles.h:
+
+          PublicationProfile
+            - added new 'delay' member to hold the "StartAfterDelay"
+              test parameter value.
+
+        * performance-tests/Bench/src/Options.cpp:
+
+          loadPublication() - added new "StartAfterDelay" test parameter.
+
+        * performance-tests/Bench/src/Gaussian.cpp:
+
+          value() - make deviation_ comparison to floating point literal.
+
+        * performance-tests/Bench/src/Process.cpp:
+
+          run()
+            - simplified initiation processing to use new
+              Publication::ready() state information directly rather than
+              examining changed status conditions.
+            - simplified termination processing to use new
+              Subscription::active() state information directly rather than
+              examining changed status conditions.
+            - print timeout and duration information as well as message
+              count on test termination.
+
+        * performance-tests/Bench/src/Publication.h:
+        * performance-tests/Bench/src/Publication.cpp:
+
+          timeouts()
+          duration()
+          ready()
+            - new accessors for state information.
+
+          write()
+            - added behavior for cases where write() call times out.
+
+          svc()
+            - added behavior for cases where write() call times out.
+              added "StartAfterDelay" test parameter implementation.
+              simplified main loop - hoisted some asssignments out.
+              added test duration calculation.
+
+        * performance-tests/Bench/src/Subscription.h:
+        * performance-tests/Bench/src/Subscription.cpp:
+
+          active() - new accesor for state information.
+
+        * performance-tests/Bench/tests/thru/test-commands.txt:
+
+          Corrected some reliable loopback commands.
+          Added reliable publication and subscription bound commands.
+
 Thu Feb 11 21:51:06 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/odds_dissector/odds_dissector.cpp:

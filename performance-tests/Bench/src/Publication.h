@@ -46,8 +46,13 @@ class Publication : public ACE_Task_Base {
       ::DDS::Topic_ptr             topic
     );
 
-    /// State access
+    /// @name State access
+    /// @{
     int messages() const;
+    int timeouts() const;
+    double duration() const;
+    bool ready() const;
+    /// @}
 
     /// @name DataWriter interfaces.
     /// @{
@@ -80,6 +85,12 @@ class Publication : public ACE_Task_Base {
 
     /// Count of messages sent by this publication.
     int messages_;
+
+    /// Count of write timeouts encountered during publishing.
+    int timeouts_;
+
+    /// Duration of sending samples.
+    double duration_;
 
     /// The writer for the publication.
     Test::DataDataWriter_var writer_;

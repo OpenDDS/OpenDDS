@@ -29,7 +29,7 @@ double
 Gaussian::value() const
 {
   // Shortcut for fixed values.
-  if( this->deviation_ == 0) {
+  if( this->deviation_ == 0.0) {
     return this->mean_;
   }
 

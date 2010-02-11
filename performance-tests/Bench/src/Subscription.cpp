@@ -267,6 +267,14 @@ Subscription::enable(
   this->enabled_ = true;
 }
 
+bool
+Subscription::active() const
+{
+  DDS::SubscriptionMatchedStatus subscriptionMatches = { 0, 0, 0, 0, 0};
+  this->reader_->get_subscription_matched_status(subscriptionMatches);
+  return subscriptionMatches.current_count > 0;
+}
+
 int
 Subscription::total_messages() const
 {

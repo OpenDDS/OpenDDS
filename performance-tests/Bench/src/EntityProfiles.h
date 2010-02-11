@@ -69,16 +69,17 @@ struct TopicProfile {
  *   # Publisher Qos Policy values
  *   # DataWriter Qos Policy values
  *   # Test execution parameters
- *   Topic            = <string> # One of topic <name>
- *   TransportIndex   = <number> # Index into transport configurations
- *   MessageSource    = <string> # One of subscription <name>
- *   MessageFixedRate = <number> # Samples per second
- *   MessageFixedRate = <number> # Samples per second, 0 indicates use MessageRate
- *   MessageRate      = <number> # Samples per second, Poisson arrival times
- *   MessageSize      = <number> # bytes per sample
- *   MessageMax       = <number> # upper bound for size
- *   MessageMin       = <number> # lower bound for size
- *   MessageDeviation = <number> # standard deviation for size
+ *   Topic             = <string> # One of topic <name>
+ *   TransportIndex    = <number> # Index into transport configurations
+ *   Associations      = <number> # Number of subscriptions to match before starting.
+ *   StartAfterDelay   = <number> # Delay before writes start after matching.
+ *   MessageSource     = <string> # One of subscription <name>
+ *   MessageFixedRate  = <number> # Samples per second, 0 indicates use MessageRate
+ *   MessageRate       = <number> # Samples per second, Poisson arrival times
+ *   MessageSize       = <number> # bytes per sample
+ *   MessageMax        = <number> # upper bound for size
+ *   MessageMin        = <number> # lower bound for size
+ *   MessageDeviation  = <number> # standard deviation for size
  */
 struct PublicationProfile {
   std::string        topic;
@@ -91,6 +92,7 @@ struct PublicationProfile {
   DDS::DataWriterQos writerQos;
   unsigned int       writerQosMask;
   unsigned int       associations;
+  unsigned int       delay;
 
   void copyToWriterQos( ::DDS::DataWriterQos& qos);
 };

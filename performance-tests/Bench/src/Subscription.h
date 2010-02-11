@@ -39,6 +39,9 @@ class Subscription {
     /// @name State access
     /// @{
 
+    /// Flag indicating that publications are still associated.
+    bool active() const;
+
     /// Number of received messages.
     int total_messages() const;
 

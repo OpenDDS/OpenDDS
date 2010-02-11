@@ -231,28 +231,28 @@ host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSP
 host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p2-rel.ini 2>&1 | tee p2-rel-1907.log
 
 host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p1-rel-191r.ini 2>&1 | tee p1-rel-191r.log
-host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p2-be.ini 2>&1 | tee p2-rel-191r.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p2-rel.ini 2>&1 | tee p2-rel-191r.log
 
 host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p1-rel-286r.ini 2>&1 | tee p1-rel-286r.log
-host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p2-be.ini 2>&1 | tee p2-rel-286r.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p2-rel.ini 2>&1 | tee p2-rel-286r.log
 
 host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p1-rel-381r.ini 2>&1 | tee p1-rel-381r.log
-host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p2-be.ini 2>&1 | tee p2-rel-381r.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p2-rel.ini 2>&1 | tee p2-rel-381r.log
 
 host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p1-rel-477r.ini 2>&1 | tee p1-rel-477r.log
-host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p2-be.ini 2>&1 | tee p2-rel-477r.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p2-rel.ini 2>&1 | tee p2-rel-477r.log
 
 host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p1-rel-191s.ini 2>&1 | tee p1-rel-191s.log
-host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p2-be.ini 2>&1 | tee p2-rel-191s.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p2-rel.ini 2>&1 | tee p2-rel-191s.log
 
 host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p1-rel-286s.ini 2>&1 | tee p1-rel-286s.log
-host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p2-be.ini 2>&1 | tee p2-rel-286s.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p2-rel.ini 2>&1 | tee p2-rel-286s.log
 
 host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p1-rel-381s.ini 2>&1 | tee p1-rel-381s.log
-host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p2-be.ini 2>&1 | tee p2-rel-381s.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p2-rel.ini 2>&1 | tee p2-rel-381s.log
 
 host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p1-rel-477s.ini 2>&1 | tee p1-rel-477s.log
-host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p2-be.ini 2>&1 | tee p2-rel-477s.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p2-rel.ini 2>&1 | tee p2-rel-477s.log
 
 --- publication bound:
 ---   host 1: run_test -P -i <transportconfig> -s pub-*-*.ini
@@ -379,4 +379,137 @@ host 3: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSP
 host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-be-477-size.ini 2>&1 | tee pub1-be-477-size.log
 host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-be-477-size.ini 2>&1 | tee pub2-be-477-size.log
 host 3: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-be.ini 2>&1 | tee sub-be-477-size.log
+
+--- publication bound:
+---   host 1: run_test -P -i <transportconfig> -s pub-*-*.ini
+---   host 2: run_test -P -i <transportconfig> -s sub-*.ini
+---   host 3: run_test -P -i <transportconfig> -s sub-*.ini
+
+all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-multi-rel.ini
+all hosts: mkdir -p $TESTBASE/multi-rel
+all hosts: cd $TESTBASE/multi-rel
+
+# all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-tcp.ini
+# all hosts: mkdir -p $TESTBASE/tcp
+# all hosts: cd $TESTBASE/tcp
+
+host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-76.ini 2>&1 | tee pub-rel-76.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub1-rel-76.log
+host 3: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub2-rel-76.log
+
+host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-305.ini 2>&1 | tee pub-rel-305.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub1-rel-305.log
+host 3: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub2-rel-305.log
+
+host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-687.ini 2>&1 | tee pub-rel-687.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub1-rel-687.log
+host 3: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub2-rel-687.log
+
+host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-1220.ini 2>&1 | tee pub-rel-1220.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub1-rel-1220.log
+host 3: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub2-rel-1220.log
+
+host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-1907.ini 2>&1 | tee pub-rel-1907.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub1-rel-1907.log
+host 3: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub2-rel-1907.log
+
+host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-191s.ini 2>&1 | tee pub-rel-191s.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub1-rel-191s.log
+host 3: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub2-rel-191s.log
+
+host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-286s.ini 2>&1 | tee pub-rel-286s.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub1-rel-286s.log
+host 3: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub2-rel-286s.log
+
+host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-381s.ini 2>&1 | tee pub-rel-381s.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub1-rel-381s.log
+host 3: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub2-rel-381s.log
+
+host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-477s.ini 2>&1 | tee pub-rel-477s.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub1-rel-477s.log
+host 3: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub2-rel-477s.log
+
+host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-191r.ini 2>&1 | tee pub-rel-191r.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub1-rel-191r.log
+host 3: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub2-rel-191r.log
+
+host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-286r.ini 2>&1 | tee pub-rel-286r.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub1-rel-286r.log
+host 3: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub2-rel-286r.log
+
+host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-381r.ini 2>&1 | tee pub-rel-381r.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub1-rel-381r.log
+host 3: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub2-rel-381r.log
+
+host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-477r.ini 2>&1 | tee pub-rel-477r.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub1-rel-477r.log
+host 3: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub2-rel-477r.log
+
+--- subscription bound:
+---   host 1: run_test -P -i <transportconfig> -s pub-*-*.ini
+---   host 2: run_test -P -i <transportconfig> -s pub-*-*.ini
+---   host 3: run_test -P -i <transportconfig> -s sub-*.ini
+
+all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-multi-rel.ini
+all hosts: mkdir -p $TESTBASE/multi-rel
+all hosts: cd $TESTBASE/multi-rel
+
+# all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-tcp.ini
+# all hosts: mkdir -p $TESTBASE/tcp
+# all hosts: cd $TESTBASE/tcp
+
+host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-76-half.ini 2>&1 | tee pub1-rel-76-half.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-76-half.ini 2>&1 | tee pub2-rel-76-half.log
+host 3: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub-rel-76-half.log
+
+host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-191s.ini 2>&1 | tee pub1-rel-305-half.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-191s.ini 2>&1 | tee pub2-rel-305-half.log
+host 3: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub-rel-305-half.log
+
+host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-687-half.ini 2>&1 | tee pub1-rel-687-half.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-687-half.ini 2>&1 | tee pub2-rel-687-half.log
+host 3: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub-rel-687-half.log
+
+host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-1220-half.ini 2>&1 | tee pub1-rel-1220-half.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-1220-half.ini 2>&1 | tee pub2-rel-1220-half.log
+host 3: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub-rel-1220-half.log
+
+host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-1907-half.ini 2>&1 | tee pub1-rel-1907-half.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-1907-half.ini 2>&1 | tee pub2-rel-1907-half.log
+host 3: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub-rel-1907-half.log
+
+host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-76-rate.ini 2>&1 | tee pub1-rel-76-rate.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-76-rate.ini 2>&1 | tee pub2-rel-76-rate.log
+host 3: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub-rel-76-rate.log
+
+host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-76.ini 2>&1 | tee pub1-rel-191-rate.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-76.ini 2>&1 | tee pub2-rel-191-rate.log
+host 3: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub-rel-191-rate.log
+
+host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-286-rate.ini 2>&1 | tee pub1-rel-286-rate.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-286-rate.ini 2>&1 | tee pub2-rel-286-rate.log
+host 3: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub-rel-286-rate.log
+
+host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-477-rate.ini 2>&1 | tee pub1-rel-477-rate.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-477-rate.ini 2>&1 | tee pub2-rel-477-rate.log
+host 3: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub-rel-477-rate.log
+
+host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-286-size.ini 2>&1 | tee pub1-rel-286-size.log
+host 2: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-286-size.ini 2>&1 | tee pub2-rel-286-size.log
+host 3: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub-rel-286-size.log
+
+host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-381-size.ini 2>&1 | tee pub1-rel-381-size.log
+host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-381-size.ini 2>&1 | tee pub2-rel-381-size.log
+host 3: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub-rel-381-size.log
+
+host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-477-size.ini 2>&1 | tee pub1-rel-477-size.log
+host 1: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/pub-rel-477-size.ini 2>&1 | tee pub2-rel-477-size.log
+host 3: $PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/sub-rel.ini 2>&1 | tee sub-rel-477-size.log
+
+========================================================================
+
+export TESTCMD="$PROJECTBASE/bin/run_tests -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
+host 1: $TESTCMD -s $TESTBASE/pub-be-477-size.ini 2>&1 | tee pub1-be-477-size.log
+host 1: $TESTCMD -s $TESTBASE/pub-be-477-size.ini 2>&1 | tee pub2-be-477-size.log
+host 3: $TESTCMD -s $TESTBASE/sub-be.ini 2>&1 | tee sub-be-477-size.log
 

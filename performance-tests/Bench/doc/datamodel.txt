@@ -96,6 +96,8 @@ Topic and Partition values for individual publications and subscriptions.
   MessageMax                          = <number> # upper bound for size
   MessageMin                          = <number> # lower bound for size
   MessageDeviation                    = <number> # standard deviation for size
+  Associations                        = <number> # Number of subscriptions to match before starting.
+  StartAfterDelay                     = <number> # Delay before writes start after matching.
 
 [subscription/<name>]
   # Subscriber Qos Policy values
