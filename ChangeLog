@@ -1,11 +1,20 @@
+Thu Feb 11 21:43:37 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector:
+        * tools/odds_dissector/README:
+        * tools/odds_dissector/odds_dissector.cpp:
+        * tools/odds_dissector/odds_dissector.mpc:
+
+          Initial commit of dissector for wireshark support.
+
 Wed Feb 10 22:38:46 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * java/build_scripts/JavaTypeSupportImpl.pm:
 
           Fixed a bug that generates incorrect jni class name when the
           module name contains underscore and causes UnsatisfiedLinkError.
-          The "_1" needs be used to replace the underscore. 
-          
+          The "_1" needs be used to replace the underscore.
+
         * java/tests/complex_idl/ComplexIDLTest.java:
         * java/tests/complex_idl/Complex_Idl.idl:
         * java/tests/complex_idl/QuoteSupport.java:
