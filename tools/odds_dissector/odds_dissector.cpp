@@ -11,18 +11,16 @@
 
 #include <epan/packet.h>
 
-extern "C" {
+extern "C" void
+dissect_odds(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
+{
+}
 
-static void proto_register_odds(void);
-static void proto_reg_handoff_odds(void);
-
-static void dissect_odds(tvbuff_t*, packet_info*, proto_tree*);
-
-} // extern "C"
+//
 
 static int proto_odds = -1;
 
-void
+extern "C" void
 proto_register_odds()
 {
   proto_odds = proto_register_protocol(
@@ -31,15 +29,10 @@ proto_register_odds()
     "odds");                  // filter_name
 }
 
-void
+extern "C" void
 proto_reg_handoff_odds()
 {
   static dissector_handle_t odds_handle;
 
   odds_handle = create_dissector_handle(dissect_odds, proto_odds);
-}
-
-void
-dissect_odds(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
-{
 }
