@@ -13,7 +13,7 @@
 
 #ifndef ACE_AS_STATIC_LIBS
 odds_Export extern "C"
-const gchar version[] = "$Revision$"
+const gchar version[] = "$Revision$";
 
 odds_Export extern "C" void
 plugin_register()
