@@ -265,8 +265,7 @@ sub collectProcessStats {
       "process-$pid.log",
       sub { # Action to process each line of input.
         my ( $input, $output) = @_;
-        next if not $input =~ /$pid/;
-        print $output localtime() . ": $input\n";
+        print $output localtime() . ": $input\n" if $input =~ /$pid/;
       }
     );
   }

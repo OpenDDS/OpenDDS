@@ -1,3 +1,14 @@
+Fri Feb 12 20:54:38 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+
+          Simplified, removing some less than correct syntax in the process.
+
+        * performance-tests/Bench/src/Process.cpp:
+
+          Updated startup checking to allow for no-publication
+          configurations to work.  Again.
+
 Fri Feb 12 00:15:35 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/odds_dissector/odds_plugin.cpp:
