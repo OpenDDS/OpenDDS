@@ -1,3 +1,9 @@
+Fri Feb 12 22:30:32 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/odds_plugin.cpp:
+
+          Added missing line terminator.
+
 Fri Feb 12 22:26:29 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportHeader.h:
@@ -9,7 +15,7 @@ Fri Feb 12 22:26:29 UTC 2010  Steven Stallion  <stallions@ociweb.com>
         * tools/odds_dissector/odds_dissector.cpp:
         * tools/odds_dissector/odds_plugin.cpp:
 
-          DCPS packets are properly recognized and header fields are 
+          DCPS packets are properly recognized and header fields are
           exposed.
 
 Fri Feb 12 20:54:38 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
