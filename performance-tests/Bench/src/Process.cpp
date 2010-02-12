@@ -406,13 +406,24 @@ Process::unblock()
 void
 Process::run()
 {
-  bool ready = false;
-  while( !ready) {
+  for(;;) {
     if( this->options_.verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Process::run() - ")
         ACE_TEXT("waiting for subscriptions to attach to publications.\n")
       ));
+    }
+
+    // Check each publication for its readiness to run.
+    bool ready = true;
+    for( PublicationMap::const_iterator current = this->publications_.begin();
+         current != this->publications_.end();
+         ++current
+       ) {
+      ready &= current->second->ready();
+    }
+    if( ready) {
+      break;
     }
 
     // Wait for the matched status to be updated.
@@ -424,15 +435,6 @@ Process::run()
         ACE_TEXT("failed to synchronize at start of test.\n")
       ));
       throw BadSyncException();
-    }
-
-    // Check each publication for its readiness to run.
-    ready = true;
-    for( PublicationMap::const_iterator current = this->publications_.begin();
-         current != this->publications_.end();
-         ++current
-       ) {
-      ready &= current->second->ready();
     }
   }
 
