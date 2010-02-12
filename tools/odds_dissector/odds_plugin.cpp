@@ -9,9 +9,11 @@
 
 #include "odds_Export.h"
 
+#include <glib.h>
+
 #ifndef ACE_AS_STATIC_LIBS
 odds_Export extern "C"
-const char version[] = "$Id$";
+const gchar version[] = "$Revision$"
 
 odds_Export extern "C" void
 plugin_register()

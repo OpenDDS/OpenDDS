@@ -11,6 +11,7 @@
 #define OPENDDS_DCPS_TRANSPORTHEADER_H
 
 #include "ace/Basic_Types.h"
+#include "ace/CDR_Base.h"
 
 #include "dds/DCPS/Definitions.h"
 
@@ -28,7 +29,7 @@ namespace DCPS {
  * same transport packet).
  */
 struct OpenDDS_Dcps_Export TransportHeader {
-  static const ACE_CDR::Octet DCPS_PROTOCOL[];
+  static const ACE_CDR::Octet DCPS_PROTOCOL[6];
 
   /// Default constructor.
   TransportHeader();
@@ -72,7 +73,6 @@ struct OpenDDS_Dcps_Export TransportHeader {
   /// Similar to IDL compiler generated methods.
   size_t max_marshaled_size() ;
 
-private:
   /// Demarshall transport packet from ACE_Message_Block.
   void init(ACE_Message_Block* buffer);
 };

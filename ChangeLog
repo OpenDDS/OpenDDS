@@ -1,3 +1,17 @@
+Fri Feb 12 22:26:29 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportHeader.h:
+
+          Promoted init to public scope; this allows a transport header
+          to be initialized with an ACE_Message_Block without making an
+          extraneous copy.
+
+        * tools/odds_dissector/odds_dissector.cpp:
+        * tools/odds_dissector/odds_plugin.cpp:
+
+          DCPS packets are properly recognized and header fields are 
+          exposed.
+
 Fri Feb 12 20:54:38 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/bin/run_test:
