@@ -11,7 +11,7 @@
 
 #ifndef ACE_AS_STATIC_LIBS
 odds_Export extern "C"
-const char version[] = "$Revision$";
+const char version[] = "$Id$";
 
 odds_Export extern "C" void
 plugin_register()
