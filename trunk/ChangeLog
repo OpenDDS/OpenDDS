@@ -1,3 +1,13 @@
+Fri Feb 12 00:13:39 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/odds_Export.h:
+        * tools/odds_dissector/odds_dissector.mpc:
+        * tools/odds_dissector/odds_dissector.cpp:
+        * tools/odds_dissector/odds_plugin.cpp:
+
+          Finished bootstrap code; plugin now initializes correctly
+          in wireshark and registers itself as a proper dissector.
+
 Thu Feb 11 22:52:45 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/bin/run_test:
