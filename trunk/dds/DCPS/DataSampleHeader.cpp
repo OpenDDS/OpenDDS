@@ -201,30 +201,31 @@ std::ostream& operator<<(std::ostream& str, const OpenDDS::DCPS::MessageId value
 extern OpenDDS_Dcps_Export
 std::ostream& operator<<(std::ostream& str, const OpenDDS::DCPS::DataSampleHeader& value)
 {
-  str << "[";
-
   str << OpenDDS::DCPS::MessageId(value.message_id_)
-      << " (" << "0x" << std::hex << int(value.submessage_id_) << "), ";
+      << " (0x" << std::hex << unsigned(value.message_id_) << "), ";
 
-  if (value.byte_order_ == 1) {
-    str << "network order, ";
+  str << "Byte order: " << (value.byte_order_ == 1 ? "Little" : "Big")
+      << " Endian (0x" << std::hex << unsigned(value.byte_order_) << "), ";
 
-  } else {
-    str << "little endian, ";
+  str << "Length: " << std::dec << value.message_length_;
+
+  if (value.message_id_ != OpenDDS::DCPS::TRANSPORT_CONTROL) {
+    str << ", ";
+
+    if (value.coherent_change_ == 1) str << "Coherent change, ";
+
+    str << "Sequence: 0x" << std::hex << ACE_UINT16(value.sequence_) << ", ";
+
+    str << "Timestamp: " << std::dec << value.source_timestamp_sec_ << "."
+        << std::dec << value.source_timestamp_nanosec_ << ", ";
+
+    if (value.lifespan_duration_) {
+      str << "Lifespan: " << std::dec << value.lifespan_duration_sec_ << "."
+          << std::dec << value.lifespan_duration_nanosec_ << ", ";
+    }
+
+    str << "Publication: " << OpenDDS::DCPS::RepoIdConverter(value.publication_id_);
   }
 
-  if (value.coherent_change_ == 1) {
-    str << "coherent change, ";
-  }
-
-  str << std::dec << value.message_length_ << ", ";
-  str << "0x" << std::hex << value.sequence_ << ", ";
-  str << "(" << std::dec << value.source_timestamp_sec_ << "/";
-  str << std::dec << value.source_timestamp_nanosec_ << "), ";
-  str << "(" << std::dec << value.lifespan_duration_sec_ << "/";
-  str << std::dec << value.lifespan_duration_nanosec_ << "), ";
-  str << OpenDDS::DCPS::RepoIdConverter(value.publication_id_);
-
-  str << "]";
   return str;
 }

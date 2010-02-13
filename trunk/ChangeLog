@@ -1,3 +1,15 @@
+Sat Feb 13 00:47:20 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.cpp:
+
+          Promoted init to public scope; this allows a sample header
+          to be initialized with an ACE_Message_Block without making an
+          extraneous copy.
+
+          Updated stream operators to provide output compatible with
+          wireshark.
+
 Fri Feb 12 22:30:32 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/odds_dissector/odds_plugin.cpp:
