@@ -37,6 +37,14 @@ enum MessageId {
   TRANSPORT_CONTROL
 };
 
+enum SubMessageId {
+  SUBMESSAGE_NONE,
+  MULTICAST_SYN,
+  MULTICAST_SYNACK,
+  MULTICAST_NAK,
+  MULTICAST_NAKACK
+};
+
 enum DataSampleHeaderFlag {
   BYTE_ORDER_FLAG,
   COHERENT_CHANGE_FLAG,
@@ -138,7 +146,7 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   DataSampleHeader& operator= (ACE_Message_Block& buffer) ;
 
   /// Amount of data read when initializing from a buffer.
-  size_t marshaled_size() ;
+  size_t marshaled_size() const;
 
   /// Similar to IDL compiler generated methods.
   size_t max_marshaled_size() ;
@@ -171,6 +179,10 @@ operator<< (ACE_Message_Block*&, OpenDDS::DCPS::DataSampleHeader& value) ;
 /// Message Id enumarion insertion onto an ostream.
 extern OpenDDS_Dcps_Export
 std::ostream& operator<<(std::ostream& str, const OpenDDS::DCPS::MessageId value);
+
+/// Sub-Message Id enumarion insertion onto an ostream.
+extern OpenDDS_Dcps_Export
+std::ostream& operator<<(std::ostream& os, const OpenDDS::DCPS::SubMessageId rhs);
 
 /// Message header insertion onto an ostream.
 extern OpenDDS_Dcps_Export

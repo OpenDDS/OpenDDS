@@ -9,7 +9,11 @@
 
 #include "odds_Export.h"
 
+extern "C" {
+
 #include <glib.h>
+
+} // extern "C"
 
 #ifndef ACE_AS_STATIC_LIBS
 odds_Export extern "C"

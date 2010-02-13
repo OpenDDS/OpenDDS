@@ -12,6 +12,7 @@
 #include "Serializer.h"
 #include "RepoIdConverter.h"
 
+#include <iomanip>
 #include <iostream>
 
 #if !defined (__ACE_INLINE__)
@@ -193,7 +194,26 @@ std::ostream& operator<<(std::ostream& str, const OpenDDS::DCPS::MessageId value
   case OpenDDS::DCPS::TRANSPORT_CONTROL:
     return str << "TRANSPORT_CONTROL";
   default:
-    return str << "UNSPECIFIED(" << int(value) << ")";
+    return str << "Unknown";
+  }
+}
+
+/// Sub-Message Id enumeration insertion onto an ostream.
+std::ostream& operator<<(std::ostream& os, const OpenDDS::DCPS::SubMessageId rhs)
+{
+  switch (rhs) {
+  case OpenDDS::DCPS::SUBMESSAGE_NONE:
+    return os << "SUBMESSAGE_NONE";
+  case OpenDDS::DCPS::MULTICAST_SYN:
+    return os << "MULTICAST_SYN";
+  case OpenDDS::DCPS::MULTICAST_SYNACK:
+    return os << "MULTICAST_SYNACK";
+  case OpenDDS::DCPS::MULTICAST_NAK:
+    return os << "MULTICAST_NAK";
+  case OpenDDS::DCPS::MULTICAST_NAKACK:
+    return os << "MULTICAST_NAKACK";
+  default:
+    return os << "Unknown";
   }
 }
 
@@ -201,20 +221,31 @@ std::ostream& operator<<(std::ostream& str, const OpenDDS::DCPS::MessageId value
 extern OpenDDS_Dcps_Export
 std::ostream& operator<<(std::ostream& str, const OpenDDS::DCPS::DataSampleHeader& value)
 {
-  str << OpenDDS::DCPS::MessageId(value.message_id_)
-      << " (0x" << std::hex << unsigned(value.message_id_) << "), ";
+  if (value.submessage_id_ != OpenDDS::DCPS::SUBMESSAGE_NONE) {
+    str << OpenDDS::DCPS::SubMessageId(value.submessage_id_)
+      << " (0x" << std::hex << std::setw(2) << std::setfill('0')
+      << unsigned(value.submessage_id_) << "), ";
+
+  } else {
+    str << OpenDDS::DCPS::MessageId(value.message_id_)
+        << " (0x" << std::hex << std::setw(2) << std::setfill('0')
+        << unsigned(value.message_id_) << "), ";
+  }
+
+  str << "Length: " << std::dec << value.message_length_ << ", ";
 
   str << "Byte order: " << (value.byte_order_ == 1 ? "Little" : "Big")
-      << " Endian (0x" << std::hex << unsigned(value.byte_order_) << "), ";
-
-  str << "Length: " << std::dec << value.message_length_;
+      << " Endian (0x" << std::hex << unsigned(value.byte_order_) << ")";
 
   if (value.message_id_ != OpenDDS::DCPS::TRANSPORT_CONTROL) {
     str << ", ";
 
-    if (value.coherent_change_ == 1) str << "Coherent change, ";
+    if (value.coherent_change_ == 1) str << "Coherent, ";
+    if (value.historic_sample_ == 1) str << "Historic, ";
+    if (value.lifespan_duration_ == 1) str << "Lifespan, ";
 
-    str << "Sequence: 0x" << std::hex << ACE_UINT16(value.sequence_) << ", ";
+    str << "Sequence: 0x" << std::hex << std::setw(2) << std::setfill('0')
+        << ACE_UINT16(value.sequence_) << ", ";
 
     str << "Timestamp: " << std::dec << value.source_timestamp_sec_ << "."
         << std::dec << value.source_timestamp_nanosec_ << ", ";
