@@ -95,7 +95,7 @@ OpenDDS::DCPS::DataSampleHeader::operator= (ACE_Message_Block& buffer)
 
 ACE_INLINE
 size_t
-OpenDDS::DCPS::DataSampleHeader::marshaled_size()
+OpenDDS::DCPS::DataSampleHeader::marshaled_size() const
 {
   return marshaled_size_ ;
 }

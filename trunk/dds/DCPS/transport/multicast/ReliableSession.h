@@ -61,13 +61,6 @@ private:
 class OpenDDS_Multicast_Export ReliableSession
   : public MulticastSession {
 public:
-  enum SubMessageId {
-    MULTICAST_SYN,
-    MULTICAST_SYNACK,
-    MULTICAST_NAK,
-    MULTICAST_NAKACK
-  };
-
   ReliableSession(MulticastDataLink* link,
                   MulticastPeer remote_peer);
 
