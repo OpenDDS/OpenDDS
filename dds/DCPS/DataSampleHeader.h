@@ -143,10 +143,10 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   /// Similar to IDL compiler generated methods.
   size_t max_marshaled_size() ;
 
-private:
   /// Implement load from buffer.
   void init(ACE_Message_Block* buffer) ;
 
+private:
   /// Keep track of the amount of data read from a buffer.
   size_t marshaled_size_ ;
 };
