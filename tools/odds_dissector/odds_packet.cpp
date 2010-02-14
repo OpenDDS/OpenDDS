@@ -194,8 +194,10 @@ format_sample(const DataSampleHeader& sample)
   os << ", Length: " << std::dec << sample.message_length_;
 
   if (sample.message_id_ != TRANSPORT_CONTROL) {
-    os << ", Sequence: 0x" << std::hex << std::setw(4) << std::setfill('0')
-       << ACE_UINT16(sample.sequence_);
+    if (sample.message_id_ == SAMPLE_DATA) {
+      os << ", Sequence: 0x" << std::hex << std::setw(4) << std::setfill('0')
+         << ACE_UINT16(sample.sequence_);
+    }
     os << ", Publication: " << RepoIdConverter(sample.publication_id_);
   }
 
@@ -234,7 +236,7 @@ dissect_sample(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree,
 
   // hf_sample_sequence
   len = sizeof(sample.sequence_);
-  if (sample.message_id_ != TRANSPORT_CONTROL) {
+  if (sample.message_id_ == SAMPLE_DATA) {
     proto_tree_add_uint(tree, hf_sample_sequence, tvb, offset, len,
       guint16(sample.sequence_));
   }
