@@ -267,7 +267,7 @@ dissect_sample(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree,
   }
 
   // hf_sample_publication
-  len = _odds_find_size(sample.publication_id_);
+  len = _dcps_find_size(sample.publication_id_);
   if (sample.message_id_ != TRANSPORT_CONTROL) {
     RepoIdConverter converter(sample.publication_id_);
     proto_tree_add_bytes_format_value(tree, hf_sample_publication, tvb, offset, len,
