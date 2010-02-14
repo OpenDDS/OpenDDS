@@ -7,8 +7,6 @@
  * See: http://www.odds.org/license.html
  */
 
-#include "odds_Export.h"
-
 extern "C" {
 
 #include "config.h"
@@ -17,6 +15,7 @@ extern "C" {
 #include <epan/packet.h>
 
 #include <glib.h>
+#include <gmodule.h>
 
 } // extern "C"
 
@@ -28,12 +27,12 @@ extern "C" {
 #include <dds/DCPS/RepoIdConverter.h>
 #include <dds/DCPS/transport/framework/TransportHeader.h>
 
+#include <cstring>
+
 #include <algorithm>
 #include <iomanip>
 #include <sstream>
 #include <string>
-
-#include <cstring>
 
 using namespace OpenDDS::DCPS;
 
@@ -281,7 +280,7 @@ dissect_sample(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree,
 
 } // namespace
 
-odds_Export extern "C" void
+G_MODULE_EXPORT extern "C" void
 dissect_odds(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
 {
   gint offset = 0;
@@ -324,7 +323,7 @@ dissect_odds(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
   }
 }
 
-odds_Export extern "C" gboolean
+G_MODULE_EXPORT extern "C" gboolean
 dissect_odds_heur(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
 {
   size_t len = sizeof(TransportHeader::DCPS_PROTOCOL);
@@ -338,7 +337,7 @@ dissect_odds_heur(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
   return FALSE;
 }
 
-odds_Export extern "C" void
+G_MODULE_EXPORT extern "C" void
 proto_register_odds()
 {
   static hf_register_info hf[] = {
@@ -511,7 +510,7 @@ proto_register_odds()
   proto_register_subtree_array(ett, array_length(ett));
 }
 
-odds_Export extern "C" void
+G_MODULE_EXPORT extern "C" void
 proto_reg_handoff_odds()
 {
   static dissector_handle_t odds_handle =
