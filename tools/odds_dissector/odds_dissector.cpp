@@ -47,14 +47,14 @@ int hf_length     = -1;
 int hf_sequence   = -1;
 int hf_source     = -1;
 
-int hf_sample               = -1;
-int hf_sample_message_id    = -1;
-int hf_sample_submessage_id = -1;
-int hf_sample_length        = -1;
-int hf_sample_sequence      = -1;
-int hf_sample_timestamp     = -1;
-int hf_sample_lifespan      = -1;
-int hf_sample_publication   = -1;
+int hf_sample             = -1;
+int hf_sample_id          = -1;
+int hf_sample_sub_id      = -1;
+int hf_sample_length      = -1;
+int hf_sample_sequence    = -1;
+int hf_sample_timestamp   = -1;
+int hf_sample_lifespan    = -1;
+int hf_sample_publication = -1;
 
 int hf_sample_flags             = -1;
 int hf_sample_flags_byte_order  = -1;
@@ -82,7 +82,7 @@ const value_string byte_order_vals[] = {
   { 0,    NULL            }
 };
 
-const value_string sample_message_id_vals[] = {
+const value_string sample_id_vals[] = {
   { SAMPLE_DATA,            "SAMPLE_DATA"           },
   { DATAWRITER_LIVELINESS,  "DATAWRITER_LIVELINESS" },
   { INSTANCE_REGISTRATION,  "INSTANCE_REGISTRATION" },
@@ -97,7 +97,7 @@ const value_string sample_message_id_vals[] = {
   { 0,                      NULL                    }
 };
 
-const value_string sample_submessage_id_vals[] = {
+const value_string sample_sub_id_vals[] = {
   { SUBMESSAGE_NONE,        "SUBMESSAGE_NONE"       },
   { MULTICAST_SYN,          "MULTICAST_SYN"         },
   { MULTICAST_SYNACK,       "MULTICAST_SYNACK"      },
@@ -210,15 +210,15 @@ dissect_sample(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree,
 {
   size_t len;
 
-  // hf_sample_message_id
+  // hf_sample_id
   len = sizeof(sample.message_id_);
-  proto_tree_add_item(tree, hf_sample_message_id, tvb, offset, len, FALSE);
+  proto_tree_add_item(tree, hf_sample_id, tvb, offset, len, FALSE);
   offset += len;
 
-  // hf_sample_submessage_id
+  // hf_sample_sub_id
   len = sizeof(sample.submessage_id_);
   if (sample.submessage_id_ != SUBMESSAGE_NONE) {
-    proto_tree_add_item(tree, hf_sample_submessage_id, tvb, offset, len, FALSE);
+    proto_tree_add_item(tree, hf_sample_sub_id, tvb, offset, len, FALSE);
   }
   offset += len;
 
@@ -390,21 +390,21 @@ proto_register_odds()
         HFILL
       }
     },
-    { &hf_sample_message_id,
-      { "Message ID",
-        "odds.sample.message_id",
+    { &hf_sample_id,
+      { "ID",
+        "odds.sample.id",
         FT_UINT8,
         BASE_HEX,
-        VALS(sample_message_id_vals),
+        VALS(sample_id_vals),
         HFILL
       }
     },
-    { &hf_sample_submessage_id,
-      { "Sub-Message ID",
-        "odds.sample.submessage_id",
+    { &hf_sample_sub_id,
+      { "Sub-ID",
+        "odds.sample.sub_id",
         FT_UINT8,
         BASE_HEX,
-        VALS(sample_submessage_id_vals),
+        VALS(sample_sub_id_vals),
         HFILL
       }
     },
