@@ -4,18 +4,18 @@
  * Copyright 2010 Object Computing, Inc.
  *
  * Distributed under the OpenDDS License.
- * See: http://www.odds.org/license.html
+ * See: http://www.opendds.org/license.html
  */
 
 extern "C" {
 
 #include "config.h"
 
-#include <epan/ipproto.h>
-#include <epan/packet.h>
-
 #include <glib.h>
 #include <gmodule.h>
+
+#include <epan/ipproto.h>
+#include <epan/packet.h>
 
 } // extern "C"
 
@@ -126,10 +126,10 @@ format_header(const TransportHeader& header)
 {
   std::ostringstream os;
 
-  os << "Length: " << std::dec << header.length_ << ", ";
-  os << "Sequence: 0x" << std::hex << std::setw(4) << std::setfill('0')
-     << ACE_UINT16(header.sequence_) << ", ";
-  os << "Source: 0x" << std::hex << std::setw(8) << std::setfill('0')
+  os << "Length: " << std::dec << header.length_;
+  os << ", Sequence: 0x" << std::hex << std::setw(4) << std::setfill('0')
+     << ACE_UINT16(header.sequence_);
+  os << ", Source: 0x" << std::hex << std::setw(8) << std::setfill('0')
      << ACE_UINT32(header.source_);
 
   return os.str();
@@ -184,20 +184,19 @@ format_sample(const DataSampleHeader& sample)
   if (sample.submessage_id_ != SUBMESSAGE_NONE) {
     os << SubMessageId(sample.submessage_id_)
        << " (0x" << std::hex << std::setw(2) << std::setfill('0')
-       << unsigned(sample.submessage_id_) << "), ";
+       << unsigned(sample.submessage_id_) << ")";
   } else {
     os << MessageId(sample.message_id_)
        << " (0x" << std::hex << std::setw(2) << std::setfill('0')
-       << unsigned(sample.message_id_) << "), ";
+       << unsigned(sample.message_id_) << ")";
   }
 
-  os << "Length: " << std::dec << sample.message_length_;
+  os << ", Length: " << std::dec << sample.message_length_;
 
   if (sample.message_id_ != TRANSPORT_CONTROL) {
-    os << ", ";
-    os << "Sequence: 0x" << std::hex << std::setw(4) << std::setfill('0')
-       << ACE_UINT16(sample.sequence_) << ", ";
-    os << "Publication: " << RepoIdConverter(sample.publication_id_);
+    os << ", Sequence: 0x" << std::hex << std::setw(4) << std::setfill('0')
+       << ACE_UINT16(sample.sequence_);
+    os << ", Publication: " << RepoIdConverter(sample.publication_id_);
   }
 
   return os.str();
@@ -257,11 +256,13 @@ dissect_sample(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree,
   if (sample.lifespan_duration_) {
     len = sizeof(sample.lifespan_duration_sec_) +
           sizeof(sample.lifespan_duration_nanosec_);
-    nstime_t ns = {
-      sample.lifespan_duration_sec_,
-      sample.lifespan_duration_nanosec_
-    };
-    proto_tree_add_time(tree, hf_sample_lifespan, tvb, offset, len, &ns);
+    if (sample.message_id_ != TRANSPORT_CONTROL) {
+      nstime_t ns = {
+        sample.lifespan_duration_sec_,
+        sample.lifespan_duration_nanosec_
+      };
+      proto_tree_add_time(tree, hf_sample_lifespan, tvb, offset, len, &ns);
+    }
     offset += len;
   }
 
@@ -275,7 +276,7 @@ dissect_sample(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree,
   }
   offset += len;
 
-  offset += sample.message_length_;   // skip marshaled data
+  offset += sample.message_length_; // skip marshaled data
 }
 
 } // namespace
@@ -516,7 +517,6 @@ proto_reg_handoff_odds()
   static dissector_handle_t odds_handle =
     create_dissector_handle(dissect_odds, proto_odds);
 
-  // OpenDDS supports TCP/IP, UDP/IP, and IP multicast:
   heur_dissector_add("tcp", dissect_odds_heur, proto_odds);
   heur_dissector_add("udp", dissect_odds_heur, proto_odds);
 }

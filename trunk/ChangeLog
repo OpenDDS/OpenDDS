@@ -1,3 +1,14 @@
+Sun Feb 14 06:40:43 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/odds_dissector.cpp:
+
+          Formatting updates; added additional guard for sub-messages
+          and lifespan.
+
+        * tools/odds_dissector/odds_plugin.cpp:
+
+          Dropped use of ACE_AS_STATIC_LIBS.
+
 Sun Feb 14 06:04:22 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/odds_dissector/odds_dissector.cpp:
