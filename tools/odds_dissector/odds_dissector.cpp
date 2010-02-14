@@ -4,7 +4,7 @@
  * Copyright 2010 Object Computing, Inc.
  *
  * Distributed under the OpenDDS License.
- * See: http://www.dcps.org/license.html
+ * See: http://www.odds.org/license.html
  */
 
 #include "odds_Export.h"
@@ -15,6 +15,7 @@ extern "C" {
 
 #include <epan/ipproto.h>
 #include <epan/packet.h>
+
 #include <glib.h>
 
 } // extern "C"
@@ -60,6 +61,8 @@ int hf_sample_flags_byte_order  = -1;
 int hf_sample_flags_coherent    = -1;
 int hf_sample_flags_historic    = -1;
 int hf_sample_flags_lifespan    = -1;
+
+const int sample_flags_bits = 8;
 
 const int* sample_flags_fields[] = {
   &hf_sample_flags_byte_order,
@@ -124,10 +127,10 @@ format_header(const TransportHeader& header)
 {
   std::ostringstream os;
 
-  os << "Length: " << std::dec << header.length_;
-  os << ", Sequence: 0x" << std::hex << std::setw(4) << std::setfill('0')
-     << ACE_UINT16(header.sequence_);
-  os << ", Source: 0x" << std::hex << std::setw(8) << std::setfill('0')
+  os << "Length: " << std::dec << header.length_ << ", ";
+  os << "Sequence: 0x" << std::hex << std::setw(4) << std::setfill('0')
+     << ACE_UINT16(header.sequence_) << ", ";
+  os << "Source: 0x" << std::hex << std::setw(8) << std::setfill('0')
      << ACE_UINT32(header.source_);
 
   return os.str();
@@ -182,19 +185,20 @@ format_sample(const DataSampleHeader& sample)
   if (sample.submessage_id_ != SUBMESSAGE_NONE) {
     os << SubMessageId(sample.submessage_id_)
        << " (0x" << std::hex << std::setw(2) << std::setfill('0')
-       << unsigned(sample.submessage_id_) << ")";
+       << unsigned(sample.submessage_id_) << "), ";
   } else {
     os << MessageId(sample.message_id_)
        << " (0x" << std::hex << std::setw(2) << std::setfill('0')
-       << unsigned(sample.message_id_) << ")";
+       << unsigned(sample.message_id_) << "), ";
   }
 
-  os << ", Length: " << std::dec << sample.message_length_;
+  os << "Length: " << std::dec << sample.message_length_;
 
   if (sample.message_id_ != TRANSPORT_CONTROL) {
-    os << ", Sequence: 0x" << std::hex << std::setw(4) << std::setfill('0')
-       << ACE_UINT16(sample.sequence_);
-    os << ", Publication: " << RepoIdConverter(sample.publication_id_);
+    os << ", ";
+    os << "Sequence: 0x" << std::hex << std::setw(4) << std::setfill('0')
+       << ACE_UINT16(sample.sequence_) << ", ";
+    os << "Publication: " << RepoIdConverter(sample.publication_id_);
   }
 
   return os.str();
@@ -263,7 +267,7 @@ dissect_sample(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree,
   }
 
   // hf_sample_publication
-  len = _dcps_find_size(sample.publication_id_);
+  len = _odds_find_size(sample.publication_id_);
   if (sample.message_id_ != TRANSPORT_CONTROL) {
     RepoIdConverter converter(sample.publication_id_);
     proto_tree_add_bytes_format_value(tree, hf_sample_publication, tvb, offset, len,
@@ -340,7 +344,7 @@ proto_register_odds()
   static hf_register_info hf[] = {
     { &hf_version,
       { "Version",
-        "dcps.version",
+        "odds.version",
         FT_BYTES,
         BASE_HEX,
         HFILL
@@ -348,7 +352,7 @@ proto_register_odds()
     },
     { &hf_byte_order,
       { "Byte order",
-        "dcps.byte_order",
+        "odds.byte_order",
         FT_UINT8,
         BASE_HEX,
         VALS(byte_order_vals),
@@ -357,7 +361,7 @@ proto_register_odds()
     },
     { &hf_length,
       { "Length",
-        "dcps.length",
+        "odds.length",
         FT_UINT16,
         BASE_HEX,
         HFILL
@@ -365,7 +369,7 @@ proto_register_odds()
     },
     { &hf_sequence,
       { "Sequence",
-        "dcps.sequence",
+        "odds.sequence",
         FT_UINT16,
         BASE_HEX,
         HFILL
@@ -373,7 +377,7 @@ proto_register_odds()
     },
     { &hf_source,
       { "Source",
-        "dcps.source",
+        "odds.source",
         FT_UINT32,
         BASE_HEX,
         HFILL
@@ -381,14 +385,14 @@ proto_register_odds()
     },
     { &hf_sample,
       { "Sample",
-        "dcps.sample",
+        "odds.sample",
         FT_NONE,
         HFILL
       }
     },
     { &hf_sample_message_id,
       { "Message ID",
-        "dcps.sample.message_id",
+        "odds.sample.message_id",
         FT_UINT8,
         BASE_HEX,
         VALS(sample_message_id_vals),
@@ -397,7 +401,7 @@ proto_register_odds()
     },
     { &hf_sample_submessage_id,
       { "Sub-Message ID",
-        "dcps.sample.submessage_id",
+        "odds.sample.submessage_id",
         FT_UINT8,
         BASE_HEX,
         VALS(sample_submessage_id_vals),
@@ -406,7 +410,7 @@ proto_register_odds()
     },
     { &hf_sample_flags,
       { "Flags",
-        "dcps.sample.flags",
+        "odds.sample.flags",
         FT_UINT8,
         BASE_HEX,
         HFILL
@@ -414,47 +418,47 @@ proto_register_odds()
     },
     { &hf_sample_flags_byte_order,
       { "Little Endian",
-        "dcps.sample.flags.byte_order",
+        "odds.sample.flags.byte_order",
         FT_BOOLEAN,
-        8,
+        sample_flags_bits,
         NULL,
-        0x01,
+        1 << 0,
         HFILL
       }
     },
     { &hf_sample_flags_coherent,
       { "Coherent",
-        "dcps.sample.flags.coherent",
+        "odds.sample.flags.coherent",
         FT_BOOLEAN,
-        8,
+        sample_flags_bits,
         NULL,
-        0x02,
+        1 << 1,
         HFILL
       }
     },
     { &hf_sample_flags_historic,
       { "Historic",
-        "dcps.sample.flags.historic",
+        "odds.sample.flags.historic",
         FT_BOOLEAN,
-        8,
+        sample_flags_bits,
         NULL,
-        0x04,
+        1 << 2,
         HFILL
       }
     },
     { &hf_sample_flags_lifespan,
       { "Lifespan",
-        "dcps.sample.flags.lifespan",
+        "odds.sample.flags.lifespan",
         FT_BOOLEAN,
-        8,
+        sample_flags_bits,
         NULL,
-        0x08,
+        1 << 3,
         HFILL
       }
     },
     { &hf_sample_length,
       { "Length",
-        "dcps.sample.length",
+        "odds.sample.length",
         FT_UINT32,
         BASE_HEX,
         HFILL
@@ -462,7 +466,7 @@ proto_register_odds()
     },
     { &hf_sample_sequence,
       { "Sequence",
-        "dcps.sample.sequence",
+        "odds.sample.sequence",
         FT_UINT16,
         BASE_HEX,
         HFILL
@@ -470,21 +474,21 @@ proto_register_odds()
     },
     { &hf_sample_timestamp,
       { "Timestamp",
-        "dcps.sample.timestamp",
+        "odds.sample.timestamp",
         FT_ABSOLUTE_TIME,
         HFILL
       }
     },
     { &hf_sample_lifespan,
       { "Lifespan",
-        "dcps.sample.lifespan",
+        "odds.sample.lifespan",
         FT_RELATIVE_TIME,
         HFILL
       }
     },
     { &hf_sample_publication,
       { "Publication",
-        "dcps.sample.publication",
+        "odds.sample.publication",
         FT_BYTES,
         BASE_HEX,
         HFILL
@@ -501,7 +505,7 @@ proto_register_odds()
   proto_odds = proto_register_protocol(
     "OpenDDS DCPS Protocol",  // name
     "OpenDDS",                // short_name
-    "dcps");                  // filter_name
+    "odds");                  // filter_name
 
   proto_register_field_array(proto_odds, hf, array_length(hf));
   proto_register_subtree_array(ett, array_length(ett));

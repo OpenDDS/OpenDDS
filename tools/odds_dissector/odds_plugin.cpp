@@ -15,9 +15,11 @@ extern "C" {
 
 } // extern "C"
 
+#include <dds/Version.h>
+
 #ifndef ACE_AS_STATIC_LIBS
 odds_Export extern "C"
-const gchar version[] = "$Revision$";
+const gchar version[] = DDS_VERSION;
 
 odds_Export extern "C" void
 plugin_register()
