@@ -9,6 +9,8 @@
 
 extern "C" {
 
+#include "config.h"
+
 #include <glib.h>
 #include <gmodule.h>
 
@@ -16,7 +18,7 @@ extern "C" {
 
 #include <dds/Version.h>
 
-#ifndef ACE_AS_STATIC_LIBS
+#ifndef ENABLE_STATIC
 G_MODULE_EXPORT extern "C"
 const gchar version[] = DDS_VERSION;
 
@@ -33,4 +35,4 @@ plugin_reg_handoff()
   extern void proto_reg_handoff_odds();
   proto_reg_handoff_odds();
 }
-#endif  /* ACE_AS_STATIC_LIBS */
+#endif  /* ENABLE_STATIC */
