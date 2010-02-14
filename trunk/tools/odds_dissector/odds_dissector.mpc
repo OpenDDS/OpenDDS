@@ -10,4 +10,12 @@ project : dcps, wireshark {
     odds_plugin.cpp
     odds_dissector.cpp
   }
+
+  // Wireshark does not support traditional `lib' prefixes
+  // when applied to plugins; omit on affected platforms:
+  verbatim(gnuace, macros) {
+    LIB_NAME        = odds
+    LIB_UNCHECKED   = $(LIB_NAME).$(LIBEXT)
+    SHLIB_UNCHECKED = $(LIB_NAME).$(SOEXT)
+  }  
 }
