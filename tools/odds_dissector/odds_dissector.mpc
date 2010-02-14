@@ -8,7 +8,7 @@ project : dcps, wireshark {
 
   Source_Files {
     odds_plugin.cpp
-    odds_dissector.cpp
+    odds_packet.cpp
   }
 
   // Wireshark does not support traditional `lib' prefixes
