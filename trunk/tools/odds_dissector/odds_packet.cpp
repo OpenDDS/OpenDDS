@@ -81,6 +81,11 @@ const value_string byte_order_vals[] = {
   { 0,    NULL            }
 };
 
+const true_false_string byte_order_tfs[] = {
+  "Little Endian",
+  "Big Endian"
+};
+
 const value_string sample_id_vals[] = {
   { SAMPLE_DATA,            "SAMPLE_DATA"           },
   { DATAWRITER_LIVELINESS,  "DATAWRITER_LIVELINESS" },
@@ -423,11 +428,11 @@ proto_register_odds()
       }
     },
     { &hf_sample_flags_byte_order,
-      { "Little Endian",
+      { "Byte order",
         "odds.sample.flags.byte_order",
         FT_BOOLEAN,
         sample_flags_bits,
-        NULL,
+        TFS(byte_order_tfs),
         1 << 0,
         HFILL
       }
