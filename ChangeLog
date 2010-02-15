@@ -1,3 +1,10 @@
+Mon Feb 15 19:35:00 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/odds_dissector.mpc:
+        * tools/odds_dissector/odds_dissector.rc:
+
+	  Added resource file for Windows builds.
+
 Mon Feb 15 05:33:44 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/odds_dissector/odds_packet.cpp:
