@@ -1,3 +1,10 @@
+Mon Feb 15 21:17:42 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * java/README:
+
+          Added a description of what the contents of the hypothetical
+          Foo.idl file would look like.
+
 Mon Feb 15 19:35:00 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/odds_dissector/odds_dissector.mpc:
