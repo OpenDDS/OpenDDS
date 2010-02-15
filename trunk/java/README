@@ -62,6 +62,15 @@ Foo.idl                       - hand-written description of the DDS sample type
 - Baz/Bar*.java               - idl2jni: Java representation of IDL struct
 - FooJC.{h,cpp}               - idl2jni: JNI native method implementations
 
+Foo.idl
+-------
+module Baz {
+#pragma DCPS_DATA_TYPE "Baz::Bar"
+  struct Bar {
+    long x;
+  };
+};
+
 
 ======================================================================
 * Step-by-step instructions for setting up a new project
