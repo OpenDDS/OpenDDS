@@ -1,3 +1,9 @@
+Mon Feb 15 05:33:44 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/odds_packet.cpp:
+
+          Updated output for sample byte_order flag.
+
 Mon Feb 15 05:07:22 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/odds_dissector/odds_dissector.mpc:
