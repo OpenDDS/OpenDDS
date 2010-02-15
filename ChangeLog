@@ -1,3 +1,11 @@
+Mon Feb 15 05:07:22 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/odds_dissector.mpc:
+        * tools/odds_dissector/odds_packet.cpp:
+        * tools/odds_dissector/odds_plugin.cpp:
+
+          Updates for VC++ support.
+
 Sun Feb 14 07:19:10 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/odds_dissector/odds_packet.cpp:

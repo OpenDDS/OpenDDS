@@ -105,7 +105,8 @@ const value_string sample_sub_id_vals[] = {
   { 0,                      NULL                    }
 };
 
-ACE_INLINE template<typename T> T
+template<typename T>
+ACE_INLINE T
 demarshal_data(tvbuff_t* tvb, gint offset)
 {
   T t;
@@ -283,7 +284,8 @@ dissect_sample(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree,
 
 } // namespace
 
-G_MODULE_EXPORT extern "C" void
+extern "C"
+G_MODULE_EXPORT void
 dissect_odds(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
 {
   gint offset = 0;
@@ -311,7 +313,7 @@ dissect_odds(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
 
     dissect_header(tvb, pinfo, header_tree, header, offset);
 
-    while (offset < tvb->length) {
+    while (offset < gint(tvb->length)) {
       DataSampleHeader sample = demarshal_data<DataSampleHeader>(tvb, offset);
       std::string sample_str(format_sample(sample));
 
@@ -326,7 +328,8 @@ dissect_odds(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
   }
 }
 
-G_MODULE_EXPORT extern "C" gboolean
+extern "C"
+G_MODULE_EXPORT gboolean
 dissect_odds_heur(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
 {
   size_t len = sizeof(TransportHeader::DCPS_PROTOCOL);
@@ -340,7 +343,8 @@ dissect_odds_heur(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
   return FALSE;
 }
 
-G_MODULE_EXPORT extern "C" void
+extern "C"
+G_MODULE_EXPORT void
 proto_register_odds()
 {
   static hf_register_info hf[] = {
@@ -513,7 +517,8 @@ proto_register_odds()
   proto_register_subtree_array(ett, array_length(ett));
 }
 
-G_MODULE_EXPORT extern "C" void
+extern "C"
+G_MODULE_EXPORT void
 proto_reg_handoff_odds()
 {
   static dissector_handle_t odds_handle =
