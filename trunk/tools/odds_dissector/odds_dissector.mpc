@@ -6,6 +6,8 @@ project : dcps, wireshark {
   sharedname    = odds
   libout        = .
 
+  macros       += NOMINMAX
+
   Source_Files {
     odds_plugin.cpp
     odds_packet.cpp
