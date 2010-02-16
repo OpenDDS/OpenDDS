@@ -65,7 +65,8 @@ according to the Wireshark Developer's Guide (see above).
 5. Run Wireshark
 
    You may verify the plugin is installed correctly by clicking on the
-   Help -> Supported Protocols menu item.
+   Help -> Supported Protocols menu item and looking for `OpenDDS' under
+   the Protocols tab.
 
    NOTE: You may need to define LD_LIBRARY_PATH (for Linux and Solaris),
          or PATH (for Windows) in order to resolve all dependent libraries
@@ -139,13 +140,15 @@ A number of display filters are supported by the OpenDDS DCPS dissector:
 A set of color filters are included in the source distribution which may
 be imported to highlight DCPS protocol packets.
 
-To import these filters, click on the View -> Coloring Rules menu item
-followed by the the Import button. Select the colorfilters file in the
+To import these filters, click on the View -> Coloring Rules menu item,
+followed by the the Import button.  Select the colorfilters file in the
 $DDS_ROOT/tools/odds_dissector/ directory and click the Open button.
 
 NOTE: Coloring rules are applied on a "first match" basis; you may need
-      to move the imported rules above the TCP and UDP rules using the
-      Order buttons on the right hand side of the Coloring Rules dialog.
+      to move the imported rules above the various TCP and UDP rules
+      using the Order buttons on the right hand side of the Coloring Rules
+      dialog.  If ordering is changed, you must ensure that the
+      `OpenDDS (Important)' rule appears before the `OpenDDS' rule.
 
 
 ======================================================================
