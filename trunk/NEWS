@@ -2,7 +2,8 @@ Version 2.2 of OpenDDS.
 
 New to this version are the following changes:
 
-- First change goes here...
+- A Wireshark 1.2.x compatible dissector is included in this release.
+  See $DDS_ROOT/tools/odds_dissector/README for details.
 
 
 =========================================================================
