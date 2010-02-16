@@ -13,7 +13,7 @@ BEGIN
     BEGIN
         BLOCK "040904B0"
         BEGIN
-            VALUE "FileDescription", "OpenDDS DCPS Dissector (opendds.org)\0"
+            VALUE "FileDescription", "OpenDDS DCPS dissector (opendds.org)\0"
             VALUE "FileVersion", DDS_VERSION "\0"
             VALUE "InternalName", "odds_dissector\0"
             VALUE "LegalCopyright", "See the LICENSE file\0"
