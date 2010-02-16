@@ -205,7 +205,10 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
     } else {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DataReaderListener::on_data_available() - ")
-        ACE_TEXT("received an INVALID sample.\n")
+        ACE_TEXT("received a non-data sample.  After messages: ")
+        ACE_TEXT("total: %d, valid: %d.\n"),
+        this->totalMessages_,
+        this->validMessages_
       ));
     }
   }
