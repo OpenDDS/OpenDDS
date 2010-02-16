@@ -203,12 +203,24 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
         ));
       }
     } else {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: DataReaderListener::on_data_available() - ")
+      std::stringstream buffer;
+      buffer.fill( '0');
+      for( std::map< long, long>::const_iterator current = this->counts_.begin();
+           current != this->counts_.end();
+           ++current
+         ) {
+        buffer << "  Writer[ 0x" << std::hex << std::setw(8);
+        buffer << current->first << "]: " << current->second;
+        buffer << " samples, " << this->bytes_[ current->first];
+        buffer << " bytes." << std::endl;
+      }
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) DataReaderListener::on_data_available() - ")
         ACE_TEXT("received a non-data sample.  After messages: ")
-        ACE_TEXT("total: %d, valid: %d.\n"),
+        ACE_TEXT("total: %d, valid: %d.\n%C"),
         this->totalMessages_,
-        this->validMessages_
+        this->validMessages_,
+        buffer.str().c_str()
       ));
     }
   }
