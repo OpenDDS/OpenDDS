@@ -1,3 +1,9 @@
+Tue Feb 16 17:23:47 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/colorfilters:
+
+          Updated coloring rule for important DCPS packets.
+
 Tue Feb 16 17:21:12 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/src/DataReaderListener.cpp:
