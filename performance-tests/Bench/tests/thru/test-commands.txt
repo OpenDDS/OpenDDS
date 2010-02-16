@@ -61,7 +61,7 @@ all hosts: cd $TESTBASE/multi-be
 # all hosts: mkdir -p $TESTBASE/udp
 # all hosts: cd $TESTBASE/udp
 
-all hosts: export TESTCMD="$PROJECTBASE/bin/run_tests -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
+all hosts: export TESTCMD="$PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
 
 # Steepest ascent
 
@@ -131,7 +131,7 @@ all hosts: cd $TESTBASE/multi-rel
 # all hosts: mkdir -p $TESTBASE/tcp
 # all hosts: cd $TESTBASE/tcp
 
-all hosts: export TESTCMD="$PROJECTBASE/bin/run_tests -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
+all hosts: export TESTCMD="$PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
 
 # Steepest ascent
 
@@ -204,7 +204,7 @@ all hosts: cd $TESTBASE/multi-be
 # all hosts: mkdir -p $TESTBASE/udp
 # all hosts: cd $TESTBASE/udp
 
-all hosts: export TESTCMD="$PROJECTBASE/bin/run_tests -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
+all hosts: export TESTCMD="$PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
 
 # Steepest ascent
 
@@ -290,7 +290,7 @@ all hosts: cd $TESTBASE/multi-rel
 # all hosts: mkdir -p $TESTBASE/tcp
 # all hosts: cd $TESTBASE/tcp
 
-all hosts: export TESTCMD="$PROJECTBASE/bin/run_tests -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
+all hosts: export TESTCMD="$PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
 
 # Steepest ascent
 
@@ -376,7 +376,7 @@ all hosts: cd $TESTBASE/multi-be
 # all hosts: mkdir -p $TESTBASE/udp
 # all hosts: cd $TESTBASE/udp
 
-all hosts: export TESTCMD="$PROJECTBASE/bin/run_tests -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
+all hosts: export TESTCMD="$PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
 
 # Steepest ascent
 
@@ -457,7 +457,7 @@ all hosts: cd $TESTBASE/multi-rel
 # all hosts: mkdir -p $TESTBASE/tcp
 # all hosts: cd $TESTBASE/tcp
 
-all hosts: export TESTCMD="$PROJECTBASE/bin/run_tests -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
+all hosts: export TESTCMD="$PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
 
 # Steepest ascent
 
@@ -527,7 +527,7 @@ host 3: $TESTCMD -s $TESTBASE/sub-rel.ini 2>&1 | tee test25-sub-be.log
 
 ========================================================================
 
-export TESTCMD="$PROJECTBASE/bin/run_tests -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
+export TESTCMD="$PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
 host 1: $TESTCMD -s $TESTBASE/pub-be-477-size.ini 2>&1 | tee pub1-be-477-size.log
 host 2: $TESTCMD -s $TESTBASE/pub-be-477-size.ini 2>&1 | tee pub2-be-477-size.log
 host 3: $TESTCMD -s $TESTBASE/sub-be.ini 2>&1 | tee sub-be-477-size.log

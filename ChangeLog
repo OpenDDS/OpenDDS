@@ -1,3 +1,13 @@
+Tue Feb 16 17:21:12 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/src/DataReaderListener.cpp:
+
+          Added more information to a diagnostic message.
+
+        * performance-tests/Bench/tests/thru/test-commands.txt:
+
+          Corrected the command name being used.
+
 Tue Feb 16 17:01:23 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/odds_dissector/README:
