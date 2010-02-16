@@ -1,4 +1,4 @@
-#include "dds/Version.h"
+#include <dds/Version.h>
 
 1 VERSIONINFO
  FILEVERSION DDS_MAJOR_VERSION,DDS_MINOR_VERSION,DDS_MICRO_VERSION,0
