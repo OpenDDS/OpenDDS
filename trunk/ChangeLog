@@ -1,3 +1,9 @@
+Tue Feb 16 19:03:46 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/src/DataReaderListener.cpp:
+
+          Adding even more information to diagnostic message.
+
 Tue Feb 16 17:51:26 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/odds_dissector/README:
