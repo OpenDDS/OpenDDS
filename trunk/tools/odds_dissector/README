@@ -73,11 +73,11 @@ according to the Wireshark Developer's Guide (see above).
 
 
 ======================================================================
-* Available Filters
+* Available Display Filters
 
-A number of filters are supported by the OpenDDS DCPS dissector:
+A number of display filters are supported by the OpenDDS DCPS dissector:
 
-1. Transport header filters
+1. Transport header display filters
 
    odds.version
      Revision of the DCPS protocol.
@@ -94,7 +94,7 @@ A number of filters are supported by the OpenDDS DCPS dissector:
    odds.source
      Source identifier; only used by the multicast transport.
 
-2. Sample header filters
+2. Sample header display filters
 
    odds.sample.id
      Message ID of sample (i.e. SAMPLE_DATA).
@@ -131,6 +131,21 @@ A number of filters are supported by the OpenDDS DCPS dissector:
    
    odds.sample.publication
      Publication ID of transmitting DataWriter.
+
+
+======================================================================
+* Available Color Filters
+
+A set of color filters are included in the source distribution which may
+be imported to highlight DCPS protocol packets.
+
+To import these filters, click on the View -> Coloring Rules menu item
+followed by the the Import button. Select the colorfilters file in the
+$DDS_ROOT/tools/odds_dissector/ directory and click the Open button.
+
+NOTE: Coloring rules are applied on a "first match" basis; you may need
+      to move the imported rules above the TCP and UDP rules using the
+      Order buttons on the right hand side of the Coloring Rules dialog.
 
 
 ======================================================================
