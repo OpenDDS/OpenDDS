@@ -146,9 +146,9 @@ $DDS_ROOT/tools/odds_dissector/ directory and click the Open button.
 
 NOTE: Coloring rules are applied on a "first match" basis; you may need
       to move the imported rules above the various TCP and UDP rules
-      using the Order buttons on the right hand side of the Coloring Rules
-      dialog.  If ordering is changed, you must ensure that the
-      `OpenDDS (Important)' rule appears before the `OpenDDS' rule.
+      using the Order buttons on the right-hand side of the dialog.
+      If ordering is changed, you must ensure the `OpenDDS (Important)'
+      rule appears before the `OpenDDS' rule.
 
 
 ======================================================================
