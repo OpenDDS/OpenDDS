@@ -122,17 +122,20 @@ module simple {
   local
 #endif
   interface TestLI {
-    boolean localOp(inout EnumSeq p1, out TestStructSequence p2,
-                    in TestStructArray p3);
+    boolean localOp(inout EnumSeq p1, out TestStructSequence p2);
+                //FUTURE: support for passing arrays     in TestStructArray p3);
     boolean localOp2(inout TestStructSequence s1);
     EnumSeq returnASequence(out short p1, inout TestStruct p2);
     void primitive(inout boolean p1, out char p2, inout octet p3, out short p4,
                    inout unsigned long p5, out long long p6, inout float p7,
                    out double p8);
+
+    //FUTURE: support for passing arrays
+    /*
     TestArrayTypedef primArray(in TestArrayTypedef p1,
                                inout TestArrayTypedef p2,
                                out TestArrayTypedef p3);
-
+    */
     attribute long attr1;
     attribute double attr2;
   };
