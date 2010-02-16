@@ -1,8 +1,16 @@
+Tue Feb 16 15:24:20 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * java/idl2jni/tests/simple/idl2jni_test_simple.mpc:
+        * java/idl2jni/tests/simple/simple.idl:
+
+          Enabled the test after commenting-out some unsupported IDL
+          constructs (passing arrays as parameters to operations).
+
 Tue Feb 16 06:44:29 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/odds_dissector/README:
 
-	  Minor formatting updates.
+          Minor formatting updates.
 
 Tue Feb 16 00:08:15 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
