@@ -1,3 +1,135 @@
+Tue Feb 16 00:08:15 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/src/Process.cpp:
+
+          Updated flow control depending on the publication and
+          subscription matching status.
+
+        * performance-tests/Bench/src/Publication.h:
+        * performance-tests/Bench/src/Publication.cpp:
+
+            associations()
+            missing_associations()
+              - new accessors for state information.
+
+        * performance-tests/Bench/src/Subscription.h:
+        * performance-tests/Bench/src/Subscription.cpp:
+
+            associations() - new accessor for state information.
+
+        * performance-tests/Bench/tests/latency/*.ini
+
+          Updated publication specifications with an Associations value
+          for the updated flow control.
+
+        * performance-tests/Bench/tests/thru/bidir-*-*-*.ini:
+
+          Updated modified latency tests to current flow control and test
+          requirements.  Renamed from Mibi bps to Mbps.
+
+        * performance-tests/Bench/tests/thru/bidir-remote-be.ini:
+        * performance-tests/Bench/tests/thru/bidir-remote-rel.ini:
+
+          Renamed the remote end configuration files to better reflect
+          their semantics.
+
+        * performance-tests/Bench/tests/thru/pub-1sub-*-*.ini:
+
+          Updated subscription bound tests to current flow control and test
+          requirements.  Renamed from Mibi bps to Mbps.
+
+        * performance-tests/Bench/tests/thru/pub-2sub-*-*.ini:
+
+          Updated publication bound tests to current flow control and test
+          requirements.  Renamed from Mibi bps to Mbps.
+
+        * performance-tests/Bench/tests/thru/test-commands.txt:
+
+          Updated test command summary with current test configuration
+          file information.  Simplified test execution through use of
+          even more shell variables.
+
+        * performance-tests/Bench/tests/thru/test-descriptions.txt:
+
+          Segregated test descriptions from the command summary.
+
+        * performance-tests/Bench/tests/thru/p1-be-1220.ini:
+        * performance-tests/Bench/tests/thru/p1-be-1907.ini:
+        * performance-tests/Bench/tests/thru/p1-be-191r.ini:
+        * performance-tests/Bench/tests/thru/p1-be-191s.ini:
+        * performance-tests/Bench/tests/thru/p1-be-286r.ini:
+        * performance-tests/Bench/tests/thru/p1-be-286s.ini:
+        * performance-tests/Bench/tests/thru/p1-be-305.ini:
+        * performance-tests/Bench/tests/thru/p1-be-381r.ini:
+        * performance-tests/Bench/tests/thru/p1-be-381s.ini:
+        * performance-tests/Bench/tests/thru/p1-be-477r.ini:
+        * performance-tests/Bench/tests/thru/p1-be-477s.ini:
+        * performance-tests/Bench/tests/thru/p1-be-687.ini:
+        * performance-tests/Bench/tests/thru/p1-be-76.ini:
+        * performance-tests/Bench/tests/thru/p1-rel-1220.ini:
+        * performance-tests/Bench/tests/thru/p1-rel-1907.ini:
+        * performance-tests/Bench/tests/thru/p1-rel-191r.ini:
+        * performance-tests/Bench/tests/thru/p1-rel-191s.ini:
+        * performance-tests/Bench/tests/thru/p1-rel-286r.ini:
+        * performance-tests/Bench/tests/thru/p1-rel-286s.ini:
+        * performance-tests/Bench/tests/thru/p1-rel-305.ini:
+        * performance-tests/Bench/tests/thru/p1-rel-381r.ini:
+        * performance-tests/Bench/tests/thru/p1-rel-381s.ini:
+        * performance-tests/Bench/tests/thru/p1-rel-477r.ini:
+        * performance-tests/Bench/tests/thru/p1-rel-477s.ini:
+        * performance-tests/Bench/tests/thru/p1-rel-687.ini:
+        * performance-tests/Bench/tests/thru/p1-rel-76.ini:
+        * performance-tests/Bench/tests/thru/p2-be.ini:
+        * performance-tests/Bench/tests/thru/p2-rel.ini:
+        * performance-tests/Bench/tests/thru/pub-be-1220-half.ini:
+        * performance-tests/Bench/tests/thru/pub-be-1220.ini:
+        * performance-tests/Bench/tests/thru/pub-be-1907-half.ini:
+        * performance-tests/Bench/tests/thru/pub-be-1907.ini:
+        * performance-tests/Bench/tests/thru/pub-be-191r.ini:
+        * performance-tests/Bench/tests/thru/pub-be-191s.ini:
+        * performance-tests/Bench/tests/thru/pub-be-286-rate.ini:
+        * performance-tests/Bench/tests/thru/pub-be-286-size.ini:
+        * performance-tests/Bench/tests/thru/pub-be-286r.ini:
+        * performance-tests/Bench/tests/thru/pub-be-286s.ini:
+        * performance-tests/Bench/tests/thru/pub-be-305.ini:
+        * performance-tests/Bench/tests/thru/pub-be-381-size.ini:
+        * performance-tests/Bench/tests/thru/pub-be-381r.ini:
+        * performance-tests/Bench/tests/thru/pub-be-381s.ini:
+        * performance-tests/Bench/tests/thru/pub-be-477-rate.ini:
+        * performance-tests/Bench/tests/thru/pub-be-477-size.ini:
+        * performance-tests/Bench/tests/thru/pub-be-477r.ini:
+        * performance-tests/Bench/tests/thru/pub-be-477s.ini:
+        * performance-tests/Bench/tests/thru/pub-be-687-half.ini:
+        * performance-tests/Bench/tests/thru/pub-be-687.ini:
+        * performance-tests/Bench/tests/thru/pub-be-76-half.ini:
+        * performance-tests/Bench/tests/thru/pub-be-76-rate.ini:
+        * performance-tests/Bench/tests/thru/pub-be-76.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-1220-half.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-1220.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-1907-half.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-1907.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-191r.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-191s.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-286-rate.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-286-size.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-286r.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-286s.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-305.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-381-size.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-381r.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-381s.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-477-rate.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-477-size.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-477r.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-477s.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-687-half.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-687.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-76-half.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-76-rate.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-76.ini:
+
+          Removed these files.
+
 Tue Feb 16 00:04:34 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * NEWS:

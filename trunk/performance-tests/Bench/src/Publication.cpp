@@ -105,12 +105,24 @@ Publication::duration() const
   return this->duration_;
 }
 
-bool
-Publication::ready() const
+int
+Publication::associations() const
 {
   DDS::PublicationMatchedStatus publicationMatches = { 0, 0, 0, 0, 0};
   this->writer_->get_publication_matched_status(publicationMatches);
-  return publicationMatches.current_count == static_cast<int>(this->profile_->associations);
+  return publicationMatches.current_count;
+}
+
+int
+Publication::missing_associations() const
+{
+  return this->profile_->associations - this->associations();
+}
+
+bool
+Publication::ready() const
+{
+  return this->missing_associations() == 0;
 }
 
 ::DDS::StatusCondition_ptr
