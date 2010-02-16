@@ -51,6 +51,8 @@ class Publication : public ACE_Task_Base {
     int messages() const;
     int timeouts() const;
     double duration() const;
+    int associations() const;
+    int missing_associations() const;
     bool ready() const;
     /// @}
 

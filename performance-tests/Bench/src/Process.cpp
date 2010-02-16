@@ -407,23 +407,24 @@ void
 Process::run()
 {
   for(;;) {
-    if( this->options_.verbose()) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Process::run() - ")
-        ACE_TEXT("waiting for subscriptions to attach to publications.\n")
-      ));
-    }
-
     // Check each publication for its readiness to run.
-    bool ready = true;
+    int  missing = 0;
     for( PublicationMap::const_iterator current = this->publications_.begin();
          current != this->publications_.end();
          ++current
        ) {
-      ready &= current->second->ready();
+      missing += current->second->missing_associations();
     }
-    if( ready) {
+    if( missing == 0) {
       break;
+    }
+
+    if( this->options_.verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Process::run() - ")
+        ACE_TEXT("waiting for %d subscriptions to attach to publications.\n"),
+        missing
+      ));
     }
 
     // Wait for the matched status to be updated.
@@ -442,7 +443,7 @@ Process::run()
   // samples towards the BuiltinTopics during association establishment.
   ACE_OS::sleep( 2);
 
-  if( this->options_.verbose()) {
+  if( this->options_.verbose() && this->publications_.size() > 0) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Process::run() - ")
       ACE_TEXT("starting to publish samples.\n")
@@ -539,7 +540,7 @@ Process::run()
   }
   this->publications_.clear();
 
-  if( this->options_.verbose()) {
+  if( this->options_.verbose() && this->publications_.size() > 0) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Process::run() - ")
       ACE_TEXT("finished publishing samples.\n")
@@ -553,21 +554,22 @@ Process::run()
   //
   for(;;) {
     // Check for active subscriptions (associated with publications).
-    if( this->options_.verbose()) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Process::run() - ")
-        ACE_TEXT("waiting for remote publications to finish.\n")
-      ));
-    }
-    bool active = false;
+    int associations = 0;
     for( SubscriptionMap::const_iterator current = this->subscriptions_.begin();
          current != this->subscriptions_.end();
          ++current
        ) {
-      active |= current->second->active();
+      associations += current->second->associations();
     }
-    if( !active) {
+    if( associations == 0) {
       break;
+    }
+    if( this->options_.verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Process::run() - ")
+        ACE_TEXT("waiting for %d remote publications to finish.\n"),
+        associations
+      ));
     }
 
     // Now wait for a change in associations.

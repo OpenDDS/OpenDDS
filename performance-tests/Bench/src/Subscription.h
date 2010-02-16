@@ -39,6 +39,9 @@ class Subscription {
     /// @name State access
     /// @{
 
+    /// Number of active associations.
+    int associations() const;
+
     /// Flag indicating that publications are still associated.
     bool active() const;
 

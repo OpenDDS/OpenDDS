@@ -267,12 +267,18 @@ Subscription::enable(
   this->enabled_ = true;
 }
 
-bool
-Subscription::active() const
+int
+Subscription::associations() const
 {
   DDS::SubscriptionMatchedStatus subscriptionMatches = { 0, 0, 0, 0, 0};
   this->reader_->get_subscription_matched_status(subscriptionMatches);
-  return subscriptionMatches.current_count > 0;
+  return subscriptionMatches.current_count;
+}
+
+bool
+Subscription::active() const
+{
+  return this->associations() > 0;
 }
 
 int
