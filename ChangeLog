@@ -1,3 +1,9 @@
+Tue Feb 16 20:41:50 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/odds_packet.cpp:
+
+          Fixed compiler warnings/errors for GCC.
+
 Tue Feb 16 19:03:46 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/src/DataReaderListener.cpp:

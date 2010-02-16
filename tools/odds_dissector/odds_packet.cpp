@@ -81,7 +81,7 @@ const value_string byte_order_vals[] = {
   { 0,    NULL            }
 };
 
-const true_false_string byte_order_tfs[] = {
+const true_false_string byte_order_tfs = {
   "Little Endian",
   "Big Endian"
 };
@@ -116,7 +116,7 @@ demarshal_data(tvbuff_t* tvb, gint offset)
 {
   T t;
 
-  size_t len = std::min(tvb->length - offset, t.max_marshaled_size());
+  size_t len = std::min(size_t(tvb->length - offset), t.max_marshaled_size());
   const guint8* data = tvb_get_ptr(tvb, offset, len);
 
   ACE_Message_Block mb(reinterpret_cast<const char*>(data));
@@ -145,6 +145,8 @@ void
 dissect_header(tvbuff* tvb, packet_info* pinfo, proto_tree* tree,
                const TransportHeader& header, gint& offset)
 {
+  ACE_UNUSED_ARG(pinfo);
+
   size_t len;
 
   offset += sizeof(header.protocol_) - 2; // skip preamble
@@ -214,6 +216,8 @@ void
 dissect_sample(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree,
                const DataSampleHeader& sample, gint& offset)
 {
+  ACE_UNUSED_ARG(pinfo);
+
   size_t len;
 
   // hf_sample_id
@@ -359,6 +363,9 @@ proto_register_odds()
         "odds.version",
         FT_BYTES,
         BASE_HEX,
+        NULL,
+        0,
+        NULL,
         HFILL
       }
     },
@@ -368,6 +375,8 @@ proto_register_odds()
         FT_UINT8,
         BASE_HEX,
         VALS(byte_order_vals),
+        0,
+        NULL,
         HFILL
       }
     },
@@ -376,6 +385,9 @@ proto_register_odds()
         "odds.length",
         FT_UINT16,
         BASE_HEX,
+        NULL,
+        0,
+        NULL,
         HFILL
       }
     },
@@ -384,6 +396,9 @@ proto_register_odds()
         "odds.sequence",
         FT_UINT16,
         BASE_HEX,
+        NULL,
+        0,
+        NULL,
         HFILL
       }
     },
@@ -392,6 +407,9 @@ proto_register_odds()
         "odds.source",
         FT_UINT32,
         BASE_HEX,
+        NULL,
+        0,
+        NULL,
         HFILL
       }
     },
@@ -399,6 +417,10 @@ proto_register_odds()
       { "Sample",
         "odds.sample",
         FT_NONE,
+        BASE_NONE,
+        NULL,
+        0,
+        NULL,
         HFILL
       }
     },
@@ -408,6 +430,8 @@ proto_register_odds()
         FT_UINT8,
         BASE_HEX,
         VALS(sample_id_vals),
+        0,
+        NULL,
         HFILL
       }
     },
@@ -417,6 +441,8 @@ proto_register_odds()
         FT_UINT8,
         BASE_HEX,
         VALS(sample_sub_id_vals),
+        0,
+        NULL,
         HFILL
       }
     },
@@ -425,6 +451,9 @@ proto_register_odds()
         "odds.sample.flags",
         FT_UINT8,
         BASE_HEX,
+        NULL,
+        0,
+        NULL,
         HFILL
       }
     },
@@ -433,8 +462,9 @@ proto_register_odds()
         "odds.sample.flags.byte_order",
         FT_BOOLEAN,
         sample_flags_bits,
-        TFS(byte_order_tfs),
+        TFS(&byte_order_tfs),
         1 << 0,
+        NULL,
         HFILL
       }
     },
@@ -445,6 +475,7 @@ proto_register_odds()
         sample_flags_bits,
         NULL,
         1 << 1,
+        NULL,
         HFILL
       }
     },
@@ -455,6 +486,7 @@ proto_register_odds()
         sample_flags_bits,
         NULL,
         1 << 2,
+        NULL,
         HFILL
       }
     },
@@ -465,6 +497,7 @@ proto_register_odds()
         sample_flags_bits,
         NULL,
         1 << 3,
+        NULL,
         HFILL
       }
     },
@@ -473,6 +506,9 @@ proto_register_odds()
         "odds.sample.length",
         FT_UINT32,
         BASE_HEX,
+        NULL,
+        0,
+        NULL,
         HFILL
       }
     },
@@ -481,6 +517,9 @@ proto_register_odds()
         "odds.sample.sequence",
         FT_UINT16,
         BASE_HEX,
+        NULL,
+        0,
+        NULL,
         HFILL
       }
     },
@@ -488,6 +527,10 @@ proto_register_odds()
       { "Timestamp",
         "odds.sample.timestamp",
         FT_ABSOLUTE_TIME,
+        BASE_NONE,
+        NULL,
+        0,
+        NULL,
         HFILL
       }
     },
@@ -495,6 +538,10 @@ proto_register_odds()
       { "Lifespan",
         "odds.sample.lifespan",
         FT_RELATIVE_TIME,
+        BASE_NONE,
+        NULL,
+        0,
+        NULL,
         HFILL
       }
     },
@@ -503,9 +550,12 @@ proto_register_odds()
         "odds.sample.publication",
         FT_BYTES,
         BASE_HEX,
+        NULL,
+        0,
+        NULL,
         HFILL
       }
-    },
+    }
   };
 
   static gint *ett[] = {
@@ -529,6 +579,8 @@ proto_reg_handoff_odds()
 {
   static dissector_handle_t odds_handle =
     create_dissector_handle(dissect_odds, proto_odds);
+
+  ACE_UNUSED_ARG(odds_handle);
 
   heur_dissector_add("tcp", dissect_odds_heur, proto_odds);
   heur_dissector_add("udp", dissect_odds_heur, proto_odds);
