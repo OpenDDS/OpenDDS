@@ -136,10 +136,10 @@ A number of filters are supported by the OpenDDS DCPS dissector:
 ======================================================================
 * Known Limitations
 
-- OpenDDS only maintains wire compatibility with the current revision
-  of the DCPS protocol.  This dissector is effective for the compiled
-  protocol version only.
+  - OpenDDS only maintains wire compatibility with the current revision
+    of the DCPS protocol.  This dissector is effective for the compiled
+    protocol version only.
 
-- Dissection of marshaled sample data is not currently supported. 
+  - Dissection of marshaled sample data is not currently supported. 
 
 
