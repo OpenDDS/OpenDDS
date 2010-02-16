@@ -1,3 +1,9 @@
+Tue Feb 16 06:44:29 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/README:
+
+	  Minor formatting updates.
+
 Tue Feb 16 00:08:15 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/src/Process.cpp:
@@ -136,7 +142,7 @@ Tue Feb 16 00:04:34 UTC 2010  Steven Stallion  <stallions@ociweb.com>
         * tools/odds_dissector/README:
         * tools/odds_dissector/odds_dissector.rc:
 
-	  Updated documentation for odds_dissector.
+          Updated documentation for odds_dissector.
 
 Mon Feb 15 21:17:42 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
