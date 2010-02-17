@@ -39,7 +39,7 @@ according to the Wireshark Developer's Guide (see above).
 
 2. Update platform_macros.GNU (optional)
 
-   For UNIX platforms, the platform_macros.GNU file must be modified
+   For Linux and Solaris, the platform_macros.GNU file must be modified
    to contain the following:
      versioned_so=0
      wireshark=1
