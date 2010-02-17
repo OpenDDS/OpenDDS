@@ -1,7 +1,7 @@
 Starting with release 2.2, OpenDDS provides support for Wireshark.
 The OpenDDS DCPS dissector provides a Wireshark 1.2.x compatible dissector
 which supports the TCP/IP, UDP/IP, and IP multicast transports.  Dissection
-of transport and encapsulated sample headers are fully supported.
+of transport headers and encapsulated sample headers are fully supported.
 
 
 ======================================================================
@@ -37,7 +37,14 @@ according to the Wireshark Developer's Guide (see above).
      set WIRESHARK_SRC=<full path to the Wireshark source directory>
      set WIRETAP_VERSION=<version of the wiretap DLL built by Wireshark>
 
-2. Generate MPC workspace
+2. Update platform_macros.GNU (optional)
+
+   For UNIX platforms, the platform_macros.GNU file must be modified
+   to contain the following:
+     versioned_so=0
+     wireshark=1
+
+3. Generate MPC workspace
 
    Linux and Solaris:
      cd $DDS_ROOT/tools/odds_dissector/
@@ -48,29 +55,28 @@ according to the Wireshark Developer's Guide (see above).
      perl %ACE_ROOT%\bin\mwc.pl -type [CompilerType] -features wireshark=1
        "CompilerTypes" tested includes vc71, vc8, vc9, and nmake
 
-3. Build
+4. Build
 
    Build normally as described in the $DDS_ROOT/INSTALL document.
 
-4. Install plugin
+5. Install plugin
 
    Linux and Solaris:
      cp odds.so <full path of Wireshark install>/plugins/<version>/
 
    Windows:
      copy odds.dll <full path of Wireshark install>\plugins\<version>\
-     - or -
+     -or-
      copy oddsd.dll <full path of Wireshark install>\plugins\<version>\
 
-5. Run Wireshark
+6. Run Wireshark
 
    You may verify the plugin is installed correctly by clicking on the
-   Help -> Supported Protocols menu item and looking for `OpenDDS' under
+   Help -> Supported Protocols menu item and looking for "OpenDDS" under
    the Protocols tab.
 
    NOTE: You may need to define LD_LIBRARY_PATH (for Linux and Solaris),
-         or PATH (for Windows) in order to resolve all dependent libraries
-	 at run-time.
+         or PATH (for Windows) to resolve dependent libraries at run-time.
 
 
 ======================================================================
@@ -147,8 +153,8 @@ $DDS_ROOT/tools/odds_dissector/ directory and click the Open button.
 NOTE: Coloring rules are applied on a "first match" basis; you may need
       to move the imported rules above the various TCP and UDP rules
       using the Order buttons on the right-hand side of the dialog.
-      If ordering is changed, you must ensure the `OpenDDS (Important)'
-      rule appears before the `OpenDDS' rule.
+      If ordering is changed, you must ensure the "OpenDDS (Important)"
+      rule appears before the "OpenDDS" rule.
 
 
 ======================================================================
