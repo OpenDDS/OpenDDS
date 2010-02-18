@@ -26,6 +26,35 @@ OpenDDS::DCPS::DataLink::transport_priority() const
   return this->transport_priority_;
 }
 
+
+ACE_INLINE
+bool& OpenDDS::DCPS::DataLink::is_loopback() 
+{
+  return this->is_loopback_;
+}
+
+
+ACE_INLINE
+bool  OpenDDS::DCPS::DataLink::is_loopback() const
+{
+  return this->is_loopback_;
+}
+
+
+ACE_INLINE
+bool& OpenDDS::DCPS::DataLink::is_active()
+{
+  return this->is_active_;
+}
+
+
+ACE_INLINE
+bool  OpenDDS::DCPS::DataLink::is_active() const
+{
+  return this->is_active_;
+}
+
+
 ACE_INLINE void
 OpenDDS::DCPS::DataLink::send_start()
 {

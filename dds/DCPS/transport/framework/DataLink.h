@@ -89,7 +89,7 @@ public:
   /// created this DataLink.  The ability to specifiy a priority
   /// for individual links is included for construction so its
   /// value can be available for activating any threads.
-  DataLink(TransportImpl* impl, CORBA::Long priority = 0);
+  DataLink(TransportImpl* impl, CORBA::Long priority, bool is_loopback, bool is_active);
   virtual ~DataLink();
 
   /// The stop method is used to stop the DataLink prior to shutdown.
@@ -228,6 +228,12 @@ public:
   /// this link.
   CORBA::Long& transport_priority();
   CORBA::Long  transport_priority() const;
+
+  bool& is_loopback();
+  bool  is_loopback() const;
+
+  bool& is_active();
+  bool  is_active() const;
 
   bool cancel_release();
 
@@ -399,6 +405,9 @@ protected:
   /// control samples when send_control is called.
   MessageBlockAllocator* mb_allocator_;
   DataBlockAllocator* db_allocator_;
+  
+  bool is_loopback_;
+  bool is_active_;
 };
 
 } // namespace DCPS

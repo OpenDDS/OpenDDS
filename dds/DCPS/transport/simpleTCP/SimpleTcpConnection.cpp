@@ -371,6 +371,10 @@ OpenDDS::DCPS::SimpleTcpConnection::active_establishment
 
   } else {
     this->connected_ = true;
+    VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+      "active_establishment(%C:%d->%C:%d)\n",
+      this->local_address_.get_host_addr(), this->local_address_.get_port_number(),
+      this->remote_address_.get_host_addr(), this->remote_address_.get_port_number()));
   }
 
   // Set the DiffServ codepoint according to the priority value.
