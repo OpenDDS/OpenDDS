@@ -144,8 +144,7 @@ OpenDDS::DCPS::DataSampleHeader::clear_flag(DataSampleHeaderFlag flag,
     return;
   }
 
-  // Twiddle flag bit.
-  *(base + 1) ^= mask_flag(flag);
+  *(base + FLAGS_OFFSET) &= ~mask_flag(flag);
 }
 
 ACE_INLINE
@@ -164,8 +163,7 @@ OpenDDS::DCPS::DataSampleHeader::set_flag(DataSampleHeaderFlag flag,
     return;
   }
 
-  // Twiddle flag bit.
-  *(base + 1) |= mask_flag(flag);
+  *(base + FLAGS_OFFSET) |= mask_flag(flag);
 }
 
 ACE_INLINE
@@ -184,5 +182,5 @@ OpenDDS::DCPS::DataSampleHeader::test_flag(DataSampleHeaderFlag flag,
   }
 
   // Test flag bit.
-  return *(base + 1) & mask_flag(flag);
+  return *(base + FLAGS_OFFSET) & mask_flag(flag);
 }

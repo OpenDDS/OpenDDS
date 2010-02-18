@@ -1,3 +1,11 @@
+Thu Feb 18 21:22:42 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+
+          Fixed bad bit twiddling for historic samples introduced by
+          submessage_id_.
+
 Wed Feb 17 19:56:32 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/odds_dissector/README:

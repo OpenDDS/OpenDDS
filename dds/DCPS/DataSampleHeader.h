@@ -60,6 +60,8 @@ enum DataSampleHeaderFlag {
 /// This header and the data sample are in different
 /// message block and will be chained together.
 struct OpenDDS_Dcps_Export DataSampleHeader {
+  static const size_t FLAGS_OFFSET = 2; // message_id_ + submessage_id_
+
   /// The enum MessageId.
   char message_id_;
 
