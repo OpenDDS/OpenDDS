@@ -102,6 +102,8 @@ private:
   int connect_datalink(SimpleTcpDataLink*   link,
                        SimpleTcpConnection* connection);
 
+  void wait_for_connection (const ACE_Time_Value& abs_timeout);
+
   /// Map Type: (key) PriorityKey to (value) SimpleTcpDataLink_rch
   typedef ACE_Hash_Map_Manager_Ex
   <PriorityKey,
@@ -116,6 +118,9 @@ private:
   typedef ACE_SYNCH_MUTEX         LockType;
   typedef ACE_Guard<LockType>     GuardType;
   typedef ACE_Condition<LockType> ConditionType;
+  
+  typedef ACE_Reverse_Lock<ReservationLockType> Reverse_Lock_t;
+  Reverse_Lock_t reverse_reservation_lock_;
 
 // TBD SOON - Something needs to protect the tcp_config_ reference
 //            because it gets set in our configure() method, and

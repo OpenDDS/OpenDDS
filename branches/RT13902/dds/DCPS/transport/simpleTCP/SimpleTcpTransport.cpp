@@ -26,7 +26,8 @@
 OpenDDS::DCPS::SimpleTcpTransport::SimpleTcpTransport()
   : acceptor_(new SimpleTcpAcceptor(this)),
     connections_updated_(this->connections_lock_),
-    con_checker_(new SimpleTcpConnectionReplaceTask(this))
+    con_checker_(new SimpleTcpConnectionReplaceTask(this)),
+    reverse_reservation_lock_ (this->reservation_lock ())
 {
   DBG_ENTRY_LVL("SimpleTcpTransport","SimpleTcpTransport",6);
 }
@@ -60,37 +61,26 @@ OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink(
 {
   DBG_ENTRY_LVL("SimpleTcpTransport","find_or_create_datalink",6);
 
-  const TransportInterfaceInfo& remote_info = remote_association->remote_data_;
-
-  // Get the remote address from the "blob" in the remote_info struct.
-  NetworkAddress network_order_address;
-
-  ACE_InputCDR cdr((const char*)remote_info.data.get_buffer(), remote_info.data.length());
-
-  if (cdr >> network_order_address == 0) {
-    ACE_ERROR((LM_ERROR, "(%P|%t)SimpleTcpTransport::find_or_create_datalink failed "
-               "to de-serialize the NetworkAddress\n"));
-    return 0;
-  }
-
-  ACE_INET_Addr remote_address;
-  network_order_address.to_addr(remote_address);
-
+  ACE_INET_Addr& remote_address = const_cast<AssociationData*> (remote_association)->get_remote_address();
+  
+  bool is_loopback = remote_address == this->tcp_config_->local_address_;
   VDBG_LVL((LM_DEBUG, "(%P|%t)SimpleTcpTransport::find_or_create_datalink remote addr str "
-            "\"%s\" remote_address \"%C:%d\"\n",
-            network_order_address.addr_.c_str(),
+            "\"%s\" remote_address \"%C:%d priority %d is_loopback %d active %d\"\n",
+            const_cast<AssociationData*> (remote_association)->network_order_address_.addr_.c_str(),
             remote_address.get_host_name(),
-            remote_address.get_port_number()), 2);
+            remote_address.get_port_number(),
+            priority,is_loopback, active),
+            2);
 
   SimpleTcpDataLink_rch link;
+  PriorityKey key(priority, remote_address, is_loopback, active);
+    
 
   { // guard scope
     GuardType guard(this->links_lock_);
 
     // First, we have to try to find an existing (connected) DataLink
     // that suits the caller's needs.
-
-    PriorityKey key(priority, remote_address);
 
     if (this->links_.find(key, link) == 0) {
       SimpleTcpConnection_rch con = link->get_connection();
@@ -146,13 +136,13 @@ OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink(
   // and attempt the "create" part of "find_or_create_datalink".
 
   // Here is where we actually create the DataLink.
-  link = new SimpleTcpDataLink(remote_address, this, priority);
+  link = new SimpleTcpDataLink(remote_address, this, priority, remote_address == this->tcp_config_->local_address_, active);
 
   { // guard scope
     GuardType guard(this->links_lock_);
 
     // Attempt to bind the SimpleTcpDataLink to our links_ map.
-    if (this->links_.bind(PriorityKey(priority, remote_address), link) != 0) {
+    if (this->links_.bind(key, link) != 0) {
       // We failed to bind the new DataLink into our links_ map.
       // On error, we return a NULL pointer.
       ACE_ERROR_RETURN((LM_ERROR,
@@ -190,7 +180,7 @@ OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink(
     // return code from the unbind() call since we know that we just
     // did the bind() moments ago - and with the links_lock_ acquired
     // the whole time.
-    this->links_.unbind(PriorityKey(priority, remote_address));
+    this->links_.unbind(key);
 
     // On error, return a NULL pointer.
     return 0;
@@ -336,7 +326,6 @@ OpenDDS::DCPS::SimpleTcpTransport::shutdown_i()
     GuardType guard(this->connections_lock_);
 
     this->connections_.clear();
-
     // TBD SOON - Need to set some flag to tell those threads waiting on
     //            the connections_updated_ condition that there is no hope
     //            of ever getting the connection that they seek - they should
@@ -430,7 +419,9 @@ OpenDDS::DCPS::SimpleTcpTransport::release_datalink_i(DataLink* link,
   // Attempt to remove the SimpleTcpDataLink from our links_ map.
   PriorityKey key(
     tcp_link->transport_priority(),
-    tcp_link->remote_address());
+    tcp_link->remote_address(),
+    tcp_link->is_loopback(),
+    tcp_link->is_active());
 
   if (this->links_.unbind(key, released_link) != 0) {
     ACE_ERROR((LM_ERROR,
@@ -480,7 +471,7 @@ OpenDDS::DCPS::SimpleTcpTransport::passive_connection
 
   if (DCPS_debug_level > 9) {
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) SimpleTcpTransport::passive connection() - ")
+               ACE_TEXT("(%P|%t) SimpleTcpTransport::passive_connection() - ")
                ACE_TEXT("established with %C:%d.\n"),
                remote_address.get_host_name(),
                remote_address.get_port_number()));
@@ -493,7 +484,10 @@ OpenDDS::DCPS::SimpleTcpTransport::passive_connection
               , this->connections_.size()), 5);
 
     // Check and report and problems.
-    PriorityKey key(connection->transport_priority(), remote_address);
+    PriorityKey key(connection->transport_priority(), 
+                    remote_address, 
+                    remote_address==this->tcp_config_->local_address_, 
+                    connection->is_connector());
     ConnectionMap::iterator where = this->connections_.find(key);
 
     if (where != this->connections_.end()) {
@@ -505,7 +499,7 @@ OpenDDS::DCPS::SimpleTcpTransport::passive_connection
                  remote_address.get_port_number(),
                  connection->transport_priority()));
     }
-
+    
     // Swap in the new connection.
     this->connections_[ key] = connection_obj;
 
@@ -572,7 +566,7 @@ OpenDDS::DCPS::SimpleTcpTransport::make_passive_connection
     buffer << *link;
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) SimpleTcpTransport::make_passive connection() - ")
-               ACE_TEXT("established with %C:%d and priority %d.\n%C"),
+               ACE_TEXT("waiting for connection from %C:%d and priority %d.\n%C"),
                remote_address.get_host_name(),
                remote_address.get_port_number(),
                link->transport_priority(),
@@ -587,7 +581,7 @@ OpenDDS::DCPS::SimpleTcpTransport::make_passive_connection
     abs_timeout += ACE_OS::gettimeofday();
   }
 
-  PriorityKey key(link->transport_priority(), remote_address);
+  PriorityKey key(link->transport_priority(), remote_address, link->is_loopback(), link->is_active());
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
             "Passive connect timeout: %d milliseconds (0 == forever).\n",
@@ -617,12 +611,17 @@ OpenDDS::DCPS::SimpleTcpTransport::make_passive_connection
         break; // break out and continue with connection establishment
       }
 
-      // Now lets wait for an update
-      if (abs_timeout == ACE_Time_Value::zero) {
-        this->connections_updated_.wait(0);
-
-      } else {
-        this->connections_updated_.wait(&abs_timeout);
+      if (link->is_loopback()) {
+        // The reservation lock needs be released at this point so the publisher 
+        // attached to same transport can make reservation and try to connect to
+        // peer in TransportInterface::add_associations().
+        ACE_GUARD_RETURN (Reverse_Lock_t, unlock_guard, reverse_reservation_lock_, -1);
+        // Now lets wait for an update
+        wait_for_connection (abs_timeout);
+      }
+      else {
+        //Now lets wait for an update
+        wait_for_connection (abs_timeout);
       }
     }
   }
@@ -632,6 +631,20 @@ OpenDDS::DCPS::SimpleTcpTransport::make_passive_connection
 
   return this->connect_datalink(link, connection.in());
 }
+
+
+void
+OpenDDS::DCPS::SimpleTcpTransport::wait_for_connection (const ACE_Time_Value& abs_timeout) 
+{   
+  // Now lets wait for an update
+  if (abs_timeout == ACE_Time_Value::zero) {
+    this->connections_updated_.wait(0);
+
+  } else {
+    this->connections_updated_.wait(&abs_timeout);
+  }
+}
+
 
 /// Common code used by make_active_connection() and make_passive_connection().
 int
@@ -684,7 +697,10 @@ OpenDDS::DCPS::SimpleTcpTransport::fresh_link(SimpleTcpConnection_rch connection
   SimpleTcpDataLink_rch link;
   GuardType guard(this->links_lock_);
 
-  PriorityKey key(connection->transport_priority(), connection->get_remote_address());
+  PriorityKey key(connection->transport_priority(), 
+                  connection->get_remote_address(), 
+                  connection->get_remote_address() == this->tcp_config_->local_address_,
+                  connection->is_connector());
 
   if (this->links_.find(key, link) == 0) {
     SimpleTcpConnection_rch old_con = link->get_connection();

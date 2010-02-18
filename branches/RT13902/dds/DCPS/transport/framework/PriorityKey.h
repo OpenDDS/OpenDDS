@@ -56,7 +56,7 @@ public:
   PriorityKey();
 
   // Construct with values.
-  PriorityKey(CORBA::Long priority, ACE_INET_Addr address);
+  PriorityKey(CORBA::Long priority, ACE_INET_Addr address, bool is_loopback, bool active);
 
   // Ordering for STL containers.
   bool operator<(const PriorityKey& rhs) const;
@@ -75,12 +75,21 @@ public:
   ACE_INET_Addr& address();
   ACE_INET_Addr  address() const;
 
+  bool& is_loopback();
+  bool  is_loopback() const;
+
+  bool& is_active();
+  bool  is_active() const;
+  
 private:
   // Priority value of key.
   CORBA::Long priority_;
 
   // Address value of key.
   ACE_INET_Addr address_;
+  
+  bool is_loopback_;
+  bool is_active_;
 };
 
 } // namespace DCPS

@@ -166,7 +166,7 @@ ReliableSession::syn_received(ACE_Message_Block* control)
   ACE_WRITE_GUARD(ACE_SYNCH_RW_MUTEX,
                   guard,
                   this->lock_);
-
+    
   // Obtain reference to received header:
   const TransportHeader& header =
     this->link_->receive_strategy()->received_header();
@@ -215,29 +215,34 @@ ReliableSession::synack_received(ACE_Message_Block* control)
                     guard,
                     this->lock_);
 
-    if (this->acked_) return; // already acked
+    if (! this->acked_) {
 
-    // Obtain reference to received header:
-    const TransportHeader& header =
-      this->link_->receive_strategy()->received_header();
+      // Obtain reference to received header:
+      const TransportHeader& header =
+        this->link_->receive_strategy()->received_header();
 
-    TAO::DCPS::Serializer serializer(
-      control, header.swap_bytes());
+      TAO::DCPS::Serializer serializer(
+        control, header.swap_bytes());
 
-    MulticastPeer local_peer;
-    serializer >> local_peer; // sent as remote_peer
+      MulticastPeer local_peer;
+      serializer >> local_peer; // sent as remote_peer
 
-    // Ignore sample if not destined for us:
-    if (local_peer != this->link_->local_peer()) return;
+      // Ignore sample if not destined for us:
+      if (local_peer != this->link_->local_peer()) return;
 
-    this->syn_watchdog_.cancel();
-    this->acked_ = true;
+      this->syn_watchdog_.cancel();
+      this->acked_ = true;
+    }
   }
-
-  // Force the TransportImpl to re-evaluate pending associations:
+  
+  // Force the TransportImpl to re-evaluate pending associations even
+  // acked already to avoid some race causes datawriter never been notify
+  // fully associated.
   MulticastTransport* transport = this->link_->transport();
   transport->check_fully_association();
 }
+
+
 
 void
 ReliableSession::send_synack()
@@ -442,7 +447,7 @@ ReliableSession::start(bool active)
   // A watchdog timer is scheduled to periodically check for gaps in
   // received data. If a gap is discovered, MULTICAST_NAK control
   // samples will be sent to initiate repairs.
-  if (!this->nak_watchdog_.schedule(reactor)) {
+  if (!active && !this->nak_watchdog_.schedule(reactor)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("ReliableSession::start: ")

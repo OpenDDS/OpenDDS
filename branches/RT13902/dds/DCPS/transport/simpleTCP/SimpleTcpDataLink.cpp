@@ -23,7 +23,10 @@
 OpenDDS::DCPS::SimpleTcpDataLink::SimpleTcpDataLink(
   const ACE_INET_Addr& remote_address,
   OpenDDS::DCPS::SimpleTcpTransport*  transport_impl,
-  CORBA::Long priority) : DataLink(transport_impl, priority),
+  CORBA::Long priority,
+  bool        is_loopback,
+  bool        is_active) 
+  : DataLink(transport_impl, priority, is_loopback, is_active),
     remote_address_(remote_address),
     graceful_disconnect_sent_(false),
     release_is_pending_ (false)

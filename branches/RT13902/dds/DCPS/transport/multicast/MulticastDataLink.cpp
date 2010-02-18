@@ -26,8 +26,10 @@ namespace DCPS {
 
 MulticastDataLink::MulticastDataLink(MulticastTransport* transport,
                                      MulticastSessionFactory* session_factory,
-                                     MulticastPeer local_peer)
-  : DataLink(transport, 0), // priority
+                                     MulticastPeer local_peer,
+                                     bool is_loopback,
+                                     bool is_active)
+  : DataLink(transport, 0, is_loopback, is_active), // priority, is_loopback, is_active
     transport_(transport),
     session_factory_(session_factory),
     local_peer_(local_peer),
