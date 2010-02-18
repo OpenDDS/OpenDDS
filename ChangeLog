@@ -1,3 +1,9 @@
+Thu Feb 18 21:41:25 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Dropped use of acked_ flag for passive sessions.
+
 Thu Feb 18 21:22:42 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/DataSampleHeader.h:

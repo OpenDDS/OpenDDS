@@ -180,10 +180,8 @@ ReliableSession::syn_received(ACE_Message_Block* control)
   // Ignore sample if not destined for us:
   if (local_peer != this->link_->local_peer()) return;
 
-
   // Establish a baseline for detecting reception gaps:
   this->nak_sequence_.reset(header.sequence_);
-  this->acked_ = true;
 
   // MULTICAST_SYN control samples are always positively
   // acknowledged by a matching remote peer:
