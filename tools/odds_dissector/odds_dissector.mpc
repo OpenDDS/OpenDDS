@@ -4,9 +4,9 @@
 
 project : dcps, wireshark {
   sharedname    = odds
-  libout        = .
-
+  dynamicflags += ODDS_BUILD_DLL
   macros       += NOMINMAX
+  libout        = .
 
   Source_Files {
     odds_plugin.cpp
