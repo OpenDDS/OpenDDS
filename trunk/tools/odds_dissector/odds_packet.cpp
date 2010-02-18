@@ -34,6 +34,8 @@ extern "C" {
 #include <sstream>
 #include <string>
 
+#include "odds_export.h"
+
 using namespace OpenDDS::DCPS;
 
 namespace {
@@ -294,7 +296,7 @@ dissect_sample(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree,
 } // namespace
 
 extern "C"
-G_MODULE_EXPORT void
+odds_Export void
 dissect_odds(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
 {
   gint offset = 0;
@@ -339,7 +341,7 @@ dissect_odds(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
 }
 
 extern "C"
-G_MODULE_EXPORT gboolean
+odds_Export gboolean
 dissect_odds_heur(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
 {
   size_t len = sizeof(TransportHeader::DCPS_PROTOCOL);
@@ -354,7 +356,7 @@ dissect_odds_heur(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
 }
 
 extern "C"
-G_MODULE_EXPORT void
+odds_Export void
 proto_register_odds()
 {
   static hf_register_info hf[] = {
@@ -574,7 +576,7 @@ proto_register_odds()
 }
 
 extern "C"
-G_MODULE_EXPORT void
+odds_Export void
 proto_reg_handoff_odds()
 {
   static dissector_handle_t odds_handle =
