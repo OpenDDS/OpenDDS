@@ -30,7 +30,7 @@ sub header {
 #ifndef <%UPPERIDLBASE%>TYPESUPPORTIMPL_H_
 #define <%UPPERIDLBASE%>TYPESUPPORTIMPL_H_
 
-#include "<%IDLBASE%>TypeSupportS.h"
+#include "<%IDLBASE%>TypeSupportC.h"
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h"
