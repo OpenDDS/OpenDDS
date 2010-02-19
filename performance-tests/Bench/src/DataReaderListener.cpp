@@ -210,7 +210,8 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
            ++current
          ) {
         buffer << "  Writer[ 0x" << std::hex << std::setw(8);
-        buffer << current->first << "]: " << current->second;
+        buffer << current->first << "]: ";
+        buffer << std::dec << current->second;
         buffer << " samples, " << this->bytes_[ current->first];
         buffer << " bytes." << std::endl;
       }

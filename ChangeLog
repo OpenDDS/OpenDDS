@@ -1,3 +1,15 @@
+Fri Feb 19 03:09:30 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/images:
+        * performance-tests/Bench/doc/userguide.html:
+
+          Initial outline of user guide.
+
+        * performance-tests/Bench/src/DataReaderListener.cpp:
+
+          Adjust output radix to be more useful (counts in decimal make
+          more sense).
+
 Thu Feb 18 22:37:42 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * bin/DCPS/HTemplate.pm:
