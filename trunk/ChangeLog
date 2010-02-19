@@ -1,3 +1,9 @@
+Fri Feb 19 19:53:34 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Dropped unnecessary lock in syn_received.
+
 Fri Feb 19 15:19:59 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/multicast/multicast.rc:
