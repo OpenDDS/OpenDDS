@@ -163,11 +163,6 @@ ReliableSession::control_received(char submessage_id,
 void
 ReliableSession::syn_received(ACE_Message_Block* control)
 {
-  ACE_WRITE_GUARD(ACE_SYNCH_RW_MUTEX,
-                  guard,
-                  this->lock_);
-
-  // Obtain reference to received header:
   const TransportHeader& header =
     this->link_->receive_strategy()->received_header();
 
@@ -215,7 +210,6 @@ ReliableSession::synack_received(ACE_Message_Block* control)
 
     if (this->acked_) return; // already acked
 
-    // Obtain reference to received header:
     const TransportHeader& header =
       this->link_->receive_strategy()->received_header();
 
@@ -323,7 +317,6 @@ ReliableSession::send_naks()
 void
 ReliableSession::nak_received(ACE_Message_Block* control)
 {
-  // Obtain reference to received header:
   const TransportHeader& header =
     this->link_->receive_strategy()->received_header();
 
@@ -381,7 +374,6 @@ ReliableSession::send_nak(MulticastSequence low,
 void
 ReliableSession::nakack_received(ACE_Message_Block* control)
 {
-  // Obtain reference to received header:
   const TransportHeader& header =
     this->link_->receive_strategy()->received_header();
 
