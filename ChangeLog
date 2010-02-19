@@ -1,8 +1,17 @@
+Fri Feb 19 15:19:59 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/multicast/multicast.rc:
+        * dds/DCPS/transport/udp/udp.rc:
+        * dds/monitor/monitor.rc:
+
+          Added resource files to new core libraries so that their DLLs
+          will contain descriptive names and version information.
+
 Fri Feb 19 03:56:04 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/odds_dissector/README:
 
-	  Added missing whitespace.
+          Added missing whitespace.
 
 Fri Feb 19 03:44:59 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
