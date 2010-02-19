@@ -30,8 +30,8 @@ according to the Wireshark Developer's Guide (see above).
 1. Define environment variables
 
    Linux and Solaris:
-     export GLIB_ROOT=<full path to the GLib installation directory>
-     export WIRESHARK_SRC=<full path to Wireshark source directory>
+     export GLIB_ROOT=<full path to the GLib root directory>
+     export WIRESHARK_SRC=<full path to the Wireshark source directory>
    Windows:
      set GLIB_ROOT=<full path to the Wireshark win32-libs/gtk2 directory>
      set WIRESHARK_SRC=<full path to the Wireshark source directory>
@@ -62,12 +62,13 @@ according to the Wireshark Developer's Guide (see above).
 5. Install plugin
 
    Linux and Solaris:
-     cp odds.so <full path of Wireshark install>/plugins/<version>/
+     export WIRESHARK_ROOT=<full path to the Wireshark root directory>
+     cp odds.so $WIRESHARK_ROOT/lib/wireshark/plugins/<version>/
 
    Windows:
-     copy odds.dll <full path of Wireshark install>\plugins\<version>\
+     copy odds.dll <full path to the Wireshark install>\plugins\<version>\
      -or-
-     copy oddsd.dll <full path of Wireshark install>\plugins\<version>\
+     copy oddsd.dll <full path to the Wireshark install>\plugins\<version>\
 
 6. Run Wireshark
 
