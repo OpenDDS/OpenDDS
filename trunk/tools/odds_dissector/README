@@ -32,6 +32,7 @@ according to the Wireshark Developer's Guide (see above).
    Linux and Solaris:
      export GLIB_ROOT=<full path to the GLib root directory>
      export WIRESHARK_SRC=<full path to the Wireshark source directory>
+
    Windows:
      set GLIB_ROOT=<full path to the Wireshark win32-libs/gtk2 directory>
      set WIRESHARK_SRC=<full path to the Wireshark source directory>
