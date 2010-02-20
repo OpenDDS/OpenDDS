@@ -84,10 +84,12 @@ cp $DDS_ROOT/performance-tests/Bench/etc/svc.conf $PKG/etc/
 cp $DDS_ROOT/performance-tests/Bench/etc/*.ini    $PKG/etc/
 
 mkdir -p $PKG/tests/latency
+mkdir -p $PKG/tests/scaling
 mkdir -p $PKG/tests/thru
 
 # Test scenarios
 cp $DDS_ROOT/performance-tests/Bench/tests/*.ini $PKG/tests/
 cp $DDS_ROOT/performance-tests/Bench/tests/latency/*.ini $PKG/tests/latency
+cp $DDS_ROOT/performance-tests/Bench/tests/scaling/*.ini $PKG/tests/scaling
 cp $DDS_ROOT/performance-tests/Bench/tests/thru/*.ini $PKG/tests/thru
 
