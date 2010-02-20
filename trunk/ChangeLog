@@ -1,3 +1,21 @@
+Sat Feb 20 00:15:10 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * performance-tests/Bench/tests/scaling:
+        * performance-tests/Bench/tests/scaling/pub-1.ini:
+        * performance-tests/Bench/tests/scaling/pub-2.ini:
+        * performance-tests/Bench/tests/scaling/pub-3.ini:
+        * performance-tests/Bench/tests/scaling/pub-4.ini:
+        * performance-tests/Bench/tests/scaling/pub-5.ini:
+        * performance-tests/Bench/tests/scaling/pub-6.ini:
+        * performance-tests/Bench/tests/scaling/pub-7.ini:
+        * performance-tests/Bench/tests/scaling/pub-8.ini:
+        * performance-tests/Bench/tests/scaling/sub.ini:
+        * performance-tests/Bench/tests/scaling/test-commands.txt:
+        * performance-tests/Bench/tools/mkpkg:
+
+          Added scaling test for measuring full-trip latency as the
+          number of subscribing endpoints increase.
+
 Sat Feb 20 00:14:23 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastTransport.cpp:
