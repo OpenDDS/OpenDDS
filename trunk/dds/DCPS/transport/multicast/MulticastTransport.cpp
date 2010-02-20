@@ -100,7 +100,7 @@ MulticastTransport::find_or_create_datalink(
     RepoIdConverter(remote_association->remote_id_).participantId();
 
   MulticastSession* session = this->link_->find_or_create_session(remote_peer);
-  if (!session == 0) {
+  if (session == 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
