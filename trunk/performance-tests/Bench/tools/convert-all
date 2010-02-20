@@ -1,3 +1,4 @@
+#!/bin/bash
 
 reduce.pl tcp/latency-50.data > data/tcp-50.gpd
 reduce.pl tcp/latency-100.data > data/tcp-100.gpd
