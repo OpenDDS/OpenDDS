@@ -105,6 +105,7 @@ NakWatchdog::on_interval(const void* /*arg*/)
 ReliableSession::ReliableSession(MulticastDataLink* link,
                                  MulticastPeer remote_peer)
   : MulticastSession(link, remote_peer),
+    started_(false),
     acked_(false),
     syn_watchdog_(this),
     nak_watchdog_(this)
@@ -420,6 +421,13 @@ ReliableSession::send_nakack(MulticastSequence low)
 bool
 ReliableSession::start(bool active)
 {
+  ACE_READ_GUARD_RETURN(ACE_SYNCH_RW_MUTEX,
+                        guard,
+                        this->lock_,
+                        false);
+
+  if (this->started_) return true;
+
   ACE_Reactor* reactor = this->link_->get_reactor();
   if (reactor == 0) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -453,7 +461,7 @@ ReliableSession::start(bool active)
                      false);
   }
 
-  return true;
+  return this->started_ = true;
 }
 
 void

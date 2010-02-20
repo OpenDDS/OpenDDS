@@ -70,7 +70,7 @@ public:
 
   bool join(const ACE_INET_Addr& group_address);
 
-  bool obtain_session(MulticastPeer remote_peer, bool active);
+  MulticastSession* find_or_create_session(MulticastPeer remote_peer);
 
   bool acked(MulticastPeer remote_peer);
 

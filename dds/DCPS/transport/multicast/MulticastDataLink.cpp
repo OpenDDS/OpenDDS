@@ -101,8 +101,8 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address)
   return true;
 }
 
-bool
-MulticastDataLink::obtain_session(MulticastPeer remote_peer, bool active)
+MulticastSession*
+MulticastDataLink::find_or_create_session(MulticastPeer remote_peer)
 {
   ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX,
                    guard,
@@ -110,24 +110,15 @@ MulticastDataLink::obtain_session(MulticastPeer remote_peer, bool active)
                    false);
 
   MulticastSessionMap::iterator it(this->sessions_.find(remote_peer));
-  if (it != this->sessions_.end()) return true; // already exists
+  if (it != this->sessions_.end()) return it->second.in();  // already exists
 
   MulticastSession_rch session =
     this->session_factory_->create(this, remote_peer);
   if (session.is_nil()) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("MulticastDataLink::obtain_session: ")
+                      ACE_TEXT("MulticastDataLink::find_or_create_session: ")
                       ACE_TEXT("failed to create session for remote peer: 0x%x!\n"),
-                      remote_peer),
-                     false);
-  }
-
-  if (!session->start(active)) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("MulticastDataLink::obtain_session: ")
-                      ACE_TEXT("failed to start session for remote peer: 0x%x!\n"),
                       remote_peer),
                      false);
   }
@@ -137,13 +128,13 @@ MulticastDataLink::obtain_session(MulticastPeer remote_peer, bool active)
   if (pair.first == this->sessions_.end()) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("MulticastStrategy::obtain_session: ")
+                      ACE_TEXT("MulticastDataLink::find_or_create_session: ")
                       ACE_TEXT("failed to insert session for remote peer: 0x%x!\n"),
                       remote_peer),
                      false);
   }
 
-  return true;
+  return session._retn();
 }
 
 bool

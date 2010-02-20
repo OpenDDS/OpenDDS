@@ -99,11 +99,21 @@ MulticastTransport::find_or_create_datalink(
   MulticastPeer remote_peer =
     RepoIdConverter(remote_association->remote_id_).participantId();
 
-  if (!this->link_->obtain_session(remote_peer, active)) {
+  MulticastSession* session = this->link_->find_or_create_session(remote_peer);
+  if (!session == 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
-                      ACE_TEXT("failed to obtain session for remote peer: 0x%x!\n"),
+                      ACE_TEXT("failed to create session for remote peer: 0x%x!\n"),
+                      remote_peer),
+                     0);
+  }
+
+  if (!session->start(active)) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("MulticasTransport::find_or_create_datalink: ")
+                      ACE_TEXT("failed to start session for remote peer: 0x%x!\n"),
                       remote_peer),
                      0);
   }
