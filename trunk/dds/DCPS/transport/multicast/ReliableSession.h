@@ -91,6 +91,7 @@ public:
   virtual void stop();
 
 private:
+  bool started_;
   bool acked_;
 
   ACE_SYNCH_RW_MUTEX lock_;
