@@ -1,3 +1,9 @@
+Sat Feb 20 00:14:23 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Fixed incorrect conditional introduced by previous commit.
+
 Sat Feb 20 00:07:56 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastDataLink.h:
