@@ -1,3 +1,15 @@
+Sat Feb 20 02:20:54 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * NEWS:
+
+	  Updated next release version; updated release notes with recent
+	  changes to multicast and the transport framework.
+
+	* README:
+        * tools/odds_dissector/README:
+
+	  Updated next release version.
+
 Sat Feb 20 00:15:10 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * performance-tests/Bench/tests/scaling:

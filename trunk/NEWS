@@ -1,9 +1,12 @@
-Version 2.2 of OpenDDS.
+Version 2.1.1 of OpenDDS.
 
 New to this version are the following changes:
 
 - A Wireshark 1.2.x compatible dissector is included in this release.
   See $DDS_ROOT/tools/odds_dissector/README for details.
+
+- Various bugfixes have been applied to the new IP multicast transport
+  and the Extensible Transport Framework (ETF) to improve stability.
 
 
 =========================================================================

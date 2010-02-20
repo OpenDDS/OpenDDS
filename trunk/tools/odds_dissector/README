@@ -1,4 +1,4 @@
-Starting with release 2.2, OpenDDS provides support for Wireshark.
+Starting with release 2.1.1, OpenDDS provides support for Wireshark.
 The OpenDDS DCPS dissector provides a Wireshark 1.2.x compatible dissector
 which supports the TCP/IP, UDP/IP, and IP multicast transports.  Dissection
 of transport headers and encapsulated sample headers are fully supported.
