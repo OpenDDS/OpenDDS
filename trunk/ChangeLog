@@ -13,7 +13,7 @@ Sat Feb 20 00:15:10 UTC 2010  Steven Stallion  <stallions@ociweb.com>
         * performance-tests/Bench/tests/scaling/test-commands.txt:
         * performance-tests/Bench/tools/mkpkg:
 
-          Added scaling test for measuring full-trip latency as the
+          Added scaling test for measuring round-trip latency as the
           number of subscribing endpoints increase.
 
 Sat Feb 20 00:14:23 UTC 2010  Steven Stallion  <stallions@ociweb.com>
