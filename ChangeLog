@@ -1,14 +1,20 @@
+Sat Feb 20 16:29:31 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * performance-tests/Bench/bin/plot-transports-scaling.gp:
+
+          Updated output image size.
+
 Sat Feb 20 04:51:30 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * performance-tests/Bench/tools/convert-all:
 
-	  Added missing bash interpreter directive.
+          Added missing bash interpreter directive.
 
         * performance-tests/Bench/bin/plot-transports-scaling.gp:
         * performance-tests/Bench/tools/convert-scaling:
         * performance-tests/Bench/tools/plot-scaling.gp:
 
-	  Added support for analyzing scaling results.
+          Added support for analyzing scaling results.
 
 Sat Feb 20 02:20:54 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
