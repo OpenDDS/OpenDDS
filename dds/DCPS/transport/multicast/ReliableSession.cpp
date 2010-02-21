@@ -176,6 +176,14 @@ ReliableSession::syn_received(ACE_Message_Block* control)
   // Ignore sample if not destined for us:
   if (local_peer != this->link_->local_peer()) return;
 
+  {
+    ACE_WRITE_GUARD(ACE_SYNCH_RW_MUTEX,
+                    guard,
+                    this->lock_);
+
+    this->acked_ = true;
+  }
+
   // Establish a baseline for detecting reception gaps:
   this->nak_sequence_.reset(header.sequence_);
 
@@ -204,24 +212,24 @@ ReliableSession::send_syn()
 void
 ReliableSession::synack_received(ACE_Message_Block* control)
 {
-  {
+  const TransportHeader& header =
+    this->link_->receive_strategy()->received_header();
+
+  TAO::DCPS::Serializer serializer(
+    control, header.swap_bytes());
+
+  MulticastPeer local_peer;
+  serializer >> local_peer; // sent as remote_peer
+
+  // Ignore sample if not destined for us:
+  if (local_peer != this->link_->local_peer()) return;
+ 
+  { 
     ACE_WRITE_GUARD(ACE_SYNCH_RW_MUTEX,
                     guard,
                     this->lock_);
 
     if (this->acked_) return; // already acked
-
-    const TransportHeader& header =
-      this->link_->receive_strategy()->received_header();
-
-    TAO::DCPS::Serializer serializer(
-      control, header.swap_bytes());
-
-    MulticastPeer local_peer;
-    serializer >> local_peer; // sent as remote_peer
-
-    // Ignore sample if not destined for us:
-    if (local_peer != this->link_->local_peer()) return;
 
     this->syn_watchdog_.cancel();
     this->acked_ = true;
@@ -426,7 +434,7 @@ ReliableSession::start(bool active)
                          this->lock_,
                          false);
 
-  if (this->started_) return true;
+  if (this->started_) return true;  // already started
 
   ACE_Reactor* reactor = this->link_->get_reactor();
   if (reactor == 0) {
