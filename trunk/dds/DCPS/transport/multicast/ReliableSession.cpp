@@ -115,10 +115,10 @@ ReliableSession::ReliableSession(MulticastDataLink* link,
 bool
 ReliableSession::acked()
 {
-  ACE_READ_GUARD_RETURN(ACE_SYNCH_RW_MUTEX,
-                        guard,
-                        this->lock_,
-                        false);
+  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX,
+                   guard,
+                   this->lock_,
+                   false);
 
   return this->acked_;
 }
@@ -177,9 +177,9 @@ ReliableSession::syn_received(ACE_Message_Block* control)
   if (local_peer != this->link_->local_peer()) return;
 
   {
-    ACE_WRITE_GUARD(ACE_SYNCH_RW_MUTEX,
-                    guard,
-                    this->lock_);
+    ACE_GUARD(ACE_SYNCH_MUTEX,
+              guard,
+              this->lock_);
 
     this->acked_ = true;
   }
@@ -225,9 +225,9 @@ ReliableSession::synack_received(ACE_Message_Block* control)
   if (local_peer != this->link_->local_peer()) return;
  
   { 
-    ACE_WRITE_GUARD(ACE_SYNCH_RW_MUTEX,
-                    guard,
-                    this->lock_);
+    ACE_GUARD(ACE_SYNCH_MUTEX,
+              guard,
+              this->lock_);
 
     if (this->acked_) return; // already acked
 
@@ -429,10 +429,10 @@ ReliableSession::send_nakack(MulticastSequence low)
 bool
 ReliableSession::start(bool active)
 {
-  ACE_WRITE_GUARD_RETURN(ACE_SYNCH_RW_MUTEX,
-                         guard,
-                         this->lock_,
-                         false);
+  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX,
+                   guard,
+                   this->lock_,
+                   false);
 
   if (this->started_) return true;  // already started
 
