@@ -1,3 +1,9 @@
+Sun Feb 21 02:41:30 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/README:
+
+	  Clarified language concerning color filter ordering.
+
 Sat Feb 20 16:29:31 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * performance-tests/Bench/bin/plot-transports-scaling.gp:
