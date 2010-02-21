@@ -1,3 +1,9 @@
+Sun Feb 21 22:09:46 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * performance-tests/Bench/bin/plot-transports-scaling.gp:
+
+          Reverted changes introduced by previous commit.
+
 Sun Feb 21 19:47:46 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * performance-tests/Bench/bin/plot-transports-scaling.gp:

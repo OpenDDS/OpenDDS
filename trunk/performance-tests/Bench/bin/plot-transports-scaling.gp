@@ -3,7 +3,7 @@
 #   $1 - outputfilename
 
 set terminal push
-set terminal png size 896,468
+set terminal png size 640,480
 
 set datafile separator ","
 set grid
