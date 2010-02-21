@@ -1,9 +1,17 @@
+Sun Feb 21 05:20:25 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableSession.h:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+	  Switched from ACE_SYNCH_RW_MUTEX to ACE_SYNCH_MUTEX; there
+	  is no longer any benefit to using a RW mutex here.
+
 Sun Feb 21 05:13:53 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/ReliableSession.cpp:
 
-	  Reduced lock scopes; reverted change made in r3050 which
-	  prevented the NACK mechanism from triggering properly.
+          Reduced lock scopes; reverted change made in r3050 which
+          prevented the NACK mechanism from triggering properly.
 
 Sun Feb 21 04:44:54 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 

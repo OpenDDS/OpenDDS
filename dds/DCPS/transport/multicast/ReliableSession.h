@@ -94,7 +94,7 @@ private:
   bool started_;
   bool acked_;
 
-  ACE_SYNCH_RW_MUTEX lock_;
+  ACE_SYNCH_MUTEX lock_;
 
   SynWatchdog syn_watchdog_;
   NakWatchdog nak_watchdog_;
