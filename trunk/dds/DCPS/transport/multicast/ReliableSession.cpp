@@ -421,10 +421,10 @@ ReliableSession::send_nakack(MulticastSequence low)
 bool
 ReliableSession::start(bool active)
 {
-  ACE_READ_GUARD_RETURN(ACE_SYNCH_RW_MUTEX,
-                        guard,
-                        this->lock_,
-                        false);
+  ACE_WRITE_GUARD_RETURN(ACE_SYNCH_RW_MUTEX,
+                         guard,
+                         this->lock_,
+                         false);
 
   if (this->started_) return true;
 

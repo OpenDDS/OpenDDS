@@ -1,8 +1,14 @@
+Sun Feb 21 04:44:54 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+	  Corrected locking behavior in start.
+
 Sun Feb 21 02:41:30 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/odds_dissector/README:
 
-	  Clarified language concerning color filter ordering.
+          Clarified language concerning color filter ordering.
 
 Sat Feb 20 16:29:31 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
