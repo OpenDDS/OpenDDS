@@ -1,8 +1,15 @@
+Sun Feb 21 05:13:53 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+	  Reduced lock scopes; reverted change made in r3050 which
+	  prevented the NACK mechanism from triggering properly.
+
 Sun Feb 21 04:44:54 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/ReliableSession.cpp:
 
-	  Corrected locking behavior in start.
+          Corrected locking behavior in start.
 
 Sun Feb 21 02:41:30 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
