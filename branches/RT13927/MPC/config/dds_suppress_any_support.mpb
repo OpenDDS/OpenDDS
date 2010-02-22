@@ -1,0 +1,3 @@
+feature (dds_suppress_anys) : taoidldefaults {
+  idlflags += -Sa -St
+}

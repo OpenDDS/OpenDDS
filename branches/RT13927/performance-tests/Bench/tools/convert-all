@@ -1,0 +1,49 @@
+#!/bin/bash
+
+reduce.pl tcp/latency-50.data > data/tcp-50.gpd
+reduce.pl tcp/latency-100.data > data/tcp-100.gpd
+reduce.pl tcp/latency-250.data > data/tcp-250.gpd
+reduce.pl tcp/latency-500.data > data/tcp-500.gpd
+reduce.pl tcp/latency-1000.data > data/tcp-1000.gpd
+reduce.pl tcp/latency-2500.data > data/tcp-2500.gpd
+reduce.pl tcp/latency-5000.data > data/tcp-5000.gpd
+reduce.pl tcp/latency-8000.data > data/tcp-8000.gpd
+reduce.pl tcp/latency-16000.data > data/tcp-16000.gpd
+reduce.pl tcp/latency-32000.data > data/tcp-32000.gpd
+
+reduce.pl udp/latency-50.data > data/udp-50.gpd
+reduce.pl udp/latency-100.data > data/udp-100.gpd
+reduce.pl udp/latency-250.data > data/udp-250.gpd
+reduce.pl udp/latency-500.data > data/udp-500.gpd
+reduce.pl udp/latency-1000.data > data/udp-1000.gpd
+reduce.pl udp/latency-2500.data > data/udp-2500.gpd
+reduce.pl udp/latency-5000.data > data/udp-5000.gpd
+reduce.pl udp/latency-8000.data > data/udp-8000.gpd
+reduce.pl udp/latency-16000.data > data/udp-16000.gpd
+reduce.pl udp/latency-32000.data > data/udp-32000.gpd
+
+reduce.pl multi-be/latency-50.data > data/mbe-50.gpd
+reduce.pl multi-be/latency-100.data > data/mbe-100.gpd
+reduce.pl multi-be/latency-250.data > data/mbe-250.gpd
+reduce.pl multi-be/latency-500.data > data/mbe-500.gpd
+reduce.pl multi-be/latency-1000.data > data/mbe-1000.gpd
+reduce.pl multi-be/latency-2500.data > data/mbe-2500.gpd
+reduce.pl multi-be/latency-5000.data > data/mbe-5000.gpd
+reduce.pl multi-be/latency-8000.data > data/mbe-8000.gpd
+reduce.pl multi-be/latency-16000.data > data/mbe-16000.gpd
+reduce.pl multi-be/latency-32000.data > data/mbe-32000.gpd
+
+reduce.pl multi-rel/latency-50.data > data/mrel-50.gpd
+reduce.pl multi-rel/latency-100.data > data/mrel-100.gpd
+reduce.pl multi-rel/latency-250.data > data/mrel-250.gpd
+reduce.pl multi-rel/latency-500.data > data/mrel-500.gpd
+reduce.pl multi-rel/latency-1000.data > data/mrel-1000.gpd
+reduce.pl multi-rel/latency-2500.data > data/mrel-2500.gpd
+reduce.pl multi-rel/latency-5000.data > data/mrel-5000.gpd
+reduce.pl multi-rel/latency-8000.data > data/mrel-8000.gpd
+reduce.pl multi-rel/latency-16000.data > data/mrel-16000.gpd
+reduce.pl multi-rel/latency-32000.data > data/mrel-32000.gpd
+
+extract.pl data/*.gpd > data/latency.csv
+genstats.pl data/latency.csv
+
