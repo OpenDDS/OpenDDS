@@ -1,3 +1,9 @@
+Mon Feb 22 20:57:32 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/colorfilters:
+
+          Updated syntax to match that of built-in filters.
+
 Sun Feb 21 22:09:46 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * performance-tests/Bench/bin/plot-transports-scaling.gp:

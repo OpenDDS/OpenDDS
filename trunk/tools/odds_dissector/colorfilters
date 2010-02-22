@@ -2,5 +2,5 @@
 # $Id$
 #
 
-@OpenDDS (Important)@(odds.sample.sub_id eq MULTICAST_NAK) or (odds.sample.sub_id eq MULTICAST_NAKACK)@[24672,0,0][61166,61166,61166]
+@OpenDDS (Important)@odds.sample.sub_id == MULTICAST_NAK || odds.sample.sub_id == MULTICAST_NAKACK@[24672,0,0][61166,61166,61166]
 @OpenDDS@odds@[61166,61166,61166][24672,0,0]
