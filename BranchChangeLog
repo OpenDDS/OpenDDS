@@ -1,0 +1,12 @@
+Mon Feb 22 21:08:31 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * BranchChangeLog:
+
+          Created branch based on r3071 to track NAVAIR SBIR Phase II SDK
+          development.
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:
