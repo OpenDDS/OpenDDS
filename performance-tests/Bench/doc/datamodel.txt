@@ -98,6 +98,7 @@ Topic and Partition values for individual publications and subscriptions.
   MessageDeviation                    = <number> # standard deviation for size
   Associations                        = <number> # Number of subscriptions to match before starting.
   StartAfterDelay                     = <number> # Delay before writes start after matching.
+  AckDelay                            = <number> # >0 passed to wait_for_acks()
 
 [subscription/<name>]
   # Subscriber Qos Policy values

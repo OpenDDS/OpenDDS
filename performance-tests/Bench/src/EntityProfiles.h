@@ -80,6 +80,7 @@ struct TopicProfile {
  *   MessageMax        = <number> # upper bound for size
  *   MessageMin        = <number> # lower bound for size
  *   MessageDeviation  = <number> # standard deviation for size
+ *   AckDelay          = <number> # >0 passed to wait_for_acks()
  */
 struct PublicationProfile {
   std::string        topic;
@@ -93,6 +94,7 @@ struct PublicationProfile {
   unsigned int       writerQosMask;
   unsigned int       associations;
   unsigned int       delay;
+  unsigned int       ackDelay;
 
   void copyToWriterQos( ::DDS::DataWriterQos& qos);
 };

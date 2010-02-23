@@ -110,6 +110,7 @@ namespace { // anonymous namespace for file scope.
   const ACE_TCHAR* DATACOLLECTIONRETENTION_KEYNAME             = ACE_TEXT("DataCollectionRetention");
   const ACE_TCHAR* ASSOCIATIONS_KEYNAME                        = ACE_TEXT("Associations");
   const ACE_TCHAR* STARTAFTERDELAY_KEYNAME                     = ACE_TEXT("StartAfterDelay");
+  const ACE_TCHAR* ACKDELAY_KEYNAME                            = ACE_TEXT("AckDelay");
 
 } // end of anonymous namespace.
 
@@ -1121,6 +1122,7 @@ Options::loadPublication(
    *   MessageDeviation  = <number> # standard deviation for size
    *   Associations      = <number> # Number of subscriptions to match before starting.
    *   StartAfterDelay   = <number> # Delay before writes start after matching.
+   *   AckDelay          = <number> # >0 passed to wait_for_acks()
    */
 
   // Note that this requires that the Service Participant already be
@@ -1991,6 +1993,22 @@ Options::loadPublication(
         sectionName.c_str(),
         STARTAFTERDELAY_KEYNAME,
         profile->delay
+      ));
+    }
+  }
+
+  // AckDelay = <number> # >0 passed to wait_for_acks()
+  valueString.clear();
+  heap.get_string_value( sectionKey, ACKDELAY_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->ackDelay = ACE_OS::atoi( valueString.c_str());
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        ACKDELAY_KEYNAME,
+        profile->ackDelay
       ));
     }
   }
