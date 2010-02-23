@@ -1,3 +1,24 @@
+Tue Feb 23 17:42:03 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/userguide.html:
+        
+          Current state of documentation.
+
+        * performance-tests/Bench/doc/datamodel.txt:
+        * performance-tests/Bench/src/EntityProfiles.h:
+        * performance-tests/Bench/src/Options.cpp:
+
+          Added AckDelay configuration parameter to Publication profile.
+
+        * performance-tests/Bench/src/Publication.cpp:
+
+          Use AckDelay configuration parameter to selectively call
+          wait_for_acknowledgments() at publication termination.
+
+        * performance-tests/Bench/tools/convert-all:
+
+          Removed a gratuitous change.
+
 Tue Feb 23 16:48:25 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * NEWS:

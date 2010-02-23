@@ -484,6 +484,35 @@ Publication::svc ()
       ACE_OS::sleep( interval);
     }
   }
+
+  // Wait for data to be delivered if we have been asked to.
+  if( this->profile_->ackDelay) {
+    DDS::Duration_t timeout = { this->profile_->ackDelay, 0};
+    DDS::ReturnCode_t result;
+    result = this->writer_->wait_for_acknowledgments( timeout);
+    switch( result) {
+      case DDS::RETCODE_OK: break;
+
+      case DDS::RETCODE_TIMEOUT:
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) Publication::svc() - publication %C: ")
+          ACE_TEXT("failed waiting %d seconds for acknowledgments.\n"),
+          this->name_.c_str(),
+          this->profile_->ackDelay
+        ));
+        break;
+
+      default:
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) Publication::svc() - publication %C: ")
+          ACE_TEXT("write failed with code: %d.\n"),
+          this->name_.c_str(),
+          result
+        ));
+        break;
+    }
+  }
+
   ACE_Time_Value elapsedTime
     = ACE_High_Res_Timer::gettimeofday_hr() - startTime;
   this->duration_ = elapsedTime.sec()
