@@ -1,3 +1,10 @@
+Tue Feb 23 20:57:44 UTC 2010  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/odds_repoctl/odds_repoctl.mpc:
+        
+          Added explicit dependency on InfoRepoLib, as it is required
+          by the Federator lib.
+
 Tue Feb 23 17:42:03 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/doc/userguide.html:
