@@ -26,7 +26,7 @@ module DDS
   // ----------------------------------------------------------------------
   local interface DomainParticipant : Entity
   {
-    // Factory     interfaces
+    // Factory interfaces
     Publisher create_publisher(in PublisherQos qos,
                                in PublisherListener a_listener,
                                in StatusMask mask);
@@ -60,6 +60,29 @@ module DDS
     //     Do not call delete_topic for lookup_topicdescription since
     //     topic is not duplicated.
     TopicDescription lookup_topicdescription(in string name);
+
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+
+    ContentFilteredTopic create_contentfilteredtopic(
+        in string name,
+        in Topic related_topic,
+        in string filter_expression,
+        in StringSeq expression_parameters);
+
+    ReturnCode_t delete_contentfilteredtopic(
+        in ContentFilteredTopic a_contentfilteredtopic);
+
+    MultiTopic create_multitopic(
+        in string name,
+        in string type_name, 
+        in string subscription_expression,
+        in StringSeq expression_parameters);
+
+    ReturnCode_t delete_multitopic(in MultiTopic a_multitopic);
+
+#endif
+
 
     ReturnCode_t delete_contained_entities();
 

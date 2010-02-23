@@ -668,6 +668,46 @@ ACE_THROW_SPEC((CORBA::SystemException))
   }
 }
 
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+
+DDS::ContentFilteredTopic_ptr
+DomainParticipantImpl::create_contentfilteredtopic(
+  const char * /*name*/,
+  DDS::Topic_ptr /*related_topic*/,
+  const char * /*filter_expression*/,
+  const DDS::StringSeq & /*expression_parameters*/)
+ACE_THROW_SPEC((CORBA::SystemException))
+{
+  return 0;
+}
+
+DDS::ReturnCode_t DomainParticipantImpl::delete_contentfilteredtopic(
+  DDS::ContentFilteredTopic_ptr /*a_contentfilteredtopic*/)
+ACE_THROW_SPEC((CORBA::SystemException))
+{
+  return DDS::RETCODE_UNSUPPORTED;
+}
+
+DDS::MultiTopic_ptr DomainParticipantImpl::create_multitopic(
+  const char * /*name*/,
+  const char * /*type_name*/, 
+  const char * /*subscription_expression*/,
+  const DDS::StringSeq & /*expression_parameters*/)
+ACE_THROW_SPEC((CORBA::SystemException))
+{
+  return 0;
+}
+
+DDS::ReturnCode_t DomainParticipantImpl::delete_multitopic(
+  DDS::MultiTopic_ptr /*a_multitopic*/)
+ACE_THROW_SPEC((CORBA::SystemException))
+{
+  return DDS::RETCODE_UNSUPPORTED;
+}
+
+#endif
+
 DDS::ReturnCode_t
 DomainParticipantImpl::delete_contained_entities()
 ACE_THROW_SPEC((CORBA::SystemException))
