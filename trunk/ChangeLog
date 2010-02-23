@@ -1,3 +1,14 @@
+Tue Feb 23 16:48:25 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DdsDcpsDomain.idl:
+        * dds/DdsDcpsTopic.idl:
+
+          Added IDL for ContentFilteredTopic and MultiTopic, but they are not
+          yet implemented (operations will return NULL or RETCODE_UNSUPPORTED).
+
 Mon Feb 22 20:57:32 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/odds_dissector/colorfilters:

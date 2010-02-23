@@ -8,6 +8,8 @@ New to this version are the following changes:
 - Various bugfixes have been applied to the new IP multicast transport
   and the Extensible Transport Framework (ETF) to improve stability.
 
+- Added IDL for ContentFilteredTopic and MultiTopic, but they are not yet
+  implemented (operations will return NULL or RETCODE_UNSUPPORTED).
 
 =========================================================================
 
