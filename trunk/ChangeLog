@@ -1,3 +1,10 @@
+Wed Feb 24 20:36:48 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+        
+          Made DataBlockAllocator to have mutex protected. This resolved 
+          cores in throughput tests. 
+
 Wed Feb 24 14:50:02 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/FooTest3NoKey/InstanceDataMap.h:
