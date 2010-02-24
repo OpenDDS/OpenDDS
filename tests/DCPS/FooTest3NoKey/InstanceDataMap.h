@@ -5,7 +5,7 @@
 #define INSTANCE_DATA_MAP_H
 
 #include  "dds/DdsDcpsInfoUtilsC.h"
-#include  "tests/DCPS/FooType3/FooDefC.h"
+#include  "tests/DCPS/FooType3NoKey/FooDefC.h"
 #include  "ace/Synch.h"
 
 #include <set>
