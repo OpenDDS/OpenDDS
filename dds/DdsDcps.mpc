@@ -1,4 +1,6 @@
-project: taolib, portableserver, core, dcps_bits, coverage_optional, built_in_topic_support {
+// $Id$
+
+project: taolib, portableserver, core, dcps_bits, coverage_optional, built_in_topic_support, dds4ccm_opendds {
   requires    += exceptions
   sharedname   = OpenDDS_Dcps
   dynamicflags = OPENDDS_DCPS_BUILD_DLL
@@ -54,6 +56,7 @@ project: taolib, portableserver, core, dcps_bits, coverage_optional, built_in_to
 
   IDL_Files {
     idlflags += -Gdcpsonly
+    idlflags -= -Glem
     gendir = .
     CorbaSeq/*.idl
   }
@@ -64,3 +67,75 @@ project: taolib, portableserver, core, dcps_bits, coverage_optional, built_in_to
     DdsDcpsInfrastructure.idl
   }
 }
+
+project (DdsDcps_lem_gen) : dds4ccm_opendds, taoidldefaults {
+  requires += dds4ccm_opendds
+  after += DdsDcps
+  idlflags += -I$(CIAO_ROOT)/connectors \
+              -Wb,stub_export_macro=DDSDCPS_LEM_STUB_Export \
+              -Wb,stub_export_include=DdsDcps_lem_stub_export.h -SS -I$(DDS_ROOT)
+
+  IDL_Files {
+     idlflags += -Gxhst
+     DdsDcpsDomainE.idl
+  }
+
+  IDL_Files {
+    DdsDcpsDataReaderRemoteE.idl
+    DdsDcpsDataWriterRemoteE.idl
+    DdsDcpsDomainExtE.idl
+    DdsDcpsE.idl
+    DdsDcpsInfoE.idl
+    DdsDcpsInfrastructureE.idl
+    DdsDcpsPublicationE.idl
+    DdsDcpsSubscriptionE.idl
+    DdsDcpsSubscriptionExtE.idl
+    DdsDcpsTopicE.idl
+    DdsDcpsTypeSupportExtE.idl
+  }
+
+  Source_Files {
+  }
+}
+
+project (DdsDcps_lem_stub) : dcps {
+  requires += dds4ccm_opendds
+  after += DdsDcps DdsDcps_lem_gen
+  includes += $(CIAO_ROOT)/connectors
+  sharedname = OpenDDS_Dcps_lem_stub
+  dynamicflags += DDSDCPS_LEM_STUB_BUILD_DLL
+
+  IDL_Files {
+  }
+
+  Source_Files {
+    DdsDcpsDomainEC.cpp
+    DdsDcpsDataReaderRemoteEC.cpp
+    DdsDcpsDataWriterRemoteEC.cpp
+    DdsDcpsDomainExtEC.cpp
+    DdsDcpsEC.cpp
+    DdsDcpsInfoEC.cpp
+    DdsDcpsInfrastructureEC.cpp
+    DdsDcpsPublicationEC.cpp
+    DdsDcpsSubscriptionEC.cpp
+    DdsDcpsSubscriptionExtEC.cpp
+    DdsDcpsTopicEC.cpp
+    DdsDcpsTypeSupportExtEC.cpp
+  }
+
+  Header_Files {
+    DdsDcpsDomainEC.h
+    DdsDcpsDataReaderRemoteEC.h
+    DdsDcpsDataWriterRemoteEC.h
+    DdsDcpsDomainExtEC.h
+    DdsDcpsEC.h
+    DdsDcpsInfoEC.h
+    DdsDcpsInfrastructureEC.h
+    DdsDcpsPublicationEC.h
+    DdsDcpsSubscriptionEC.h
+    DdsDcpsSubscriptionExtEC.h
+    DdsDcpsTopicEC.h
+    DdsDcpsTypeSupportExtEC.h
+  }
+}
+

@@ -1,3 +1,5 @@
+// $Id$
+
 project {
 
   requires += java
@@ -9,10 +11,10 @@ project {
   // add a "specific" assignment to your .mpc file:
   //   specific {
   //     jarname = foo
-  //   }    
+  //   }
 
   Define_Custom(Java) {
-    automatic            = 1 
+    automatic            = 1
     inputext             = .java
     command              = perl $(DDS_ROOT)/java/build_scripts/javac_wrapper.pl
     commandflags         = -sourcepath . -d classes -classpath .

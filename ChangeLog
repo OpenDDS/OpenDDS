@@ -1,14 +1,43 @@
+Wed Feb 24 13:20:12 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+          Added projects to generate the lem needed for dds4ccm. When the
+          MPC feature dds4ccm_opendds is set to 1, the lem and the lem
+          stub dll will be generated.
+
+        * dds/DdsDcpsDataReaderRemote.idl:
+        * dds/DdsDcpsDataWriterRemote.idl:
+        * dds/DdsDcpsDomain.idl:
+        * dds/DdsDcpsDomainExt.idl:
+        * dds/DdsDcpsInfo.idl:
+        * dds/DdsDcpsInfrastructure.idl:
+        * dds/DdsDcpsPublication.idl:
+        * dds/DdsDcpsSubscription.idl:
+        * dds/DdsDcpsTopic.idl:
+          Added ciao lem pragma which we need for dds4ccm
+
+        * MPC/config/dcps_tcp.mpb:
+        * MPC/config/dds_suppress_any_support.mpb:
+        * MPC/config/dds_wrapper.mpb:
+        * MPC/config/idl2jni.mpb:
+        * MPC/config/java.mpb:
+        * MPC/config/optional_jni_check.mpb:
+          Added Id tag
+
+        * MPC/config/dds4ccm_opendds.mpb:
+          New base project
+
 Tue Feb 23 20:57:44 UTC 2010  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * tools/odds_repoctl/odds_repoctl.mpc:
-        
+
           Added explicit dependency on InfoRepoLib, as it is required
           by the Federator lib.
 
 Tue Feb 23 17:42:03 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/doc/userguide.html:
-        
+
           Current state of documentation.
 
         * performance-tests/Bench/doc/datamodel.txt:
