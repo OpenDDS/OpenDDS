@@ -36,12 +36,13 @@
 #include "tao/StringSeq.pidl"
 #include "tao/LongSeq.pidl"
 
+#pragma ciao lem "dds/DdsDcpsInfrastructureE.idl"
+
 module DDS {
 
 // Make the IDL compiler produce include of zero-copy read info
 // sequence template.
 #pragma DCPS_SUPPORT_ZERO_COPY_READ
-
     typedef DOMAINID_TYPE_NATIVE  DomainId_t;
     typedef HANDLE_TYPE_NATIVE    InstanceHandle_t;
 
@@ -74,7 +75,7 @@ module DDS {
     const InstanceHandle_t HANDLE_NIL = HANDLE_NIL_NATIVE;
 
     const long LENGTH_UNLIMITED = -1;
-    
+
     const long            DURATION_INFINITE_SEC   = 0x7fffffff;
     const unsigned long   DURATION_INFINITE_NSEC  = 0x7fffffff;
 
@@ -225,7 +226,7 @@ module DDS {
     //interface Subscriber;
     //interface Publisher;
 
-    //typedef sequence<Topic> TopicSeq; 
+    //typedef sequence<Topic> TopicSeq;
     //typedef sequence<DataReader> DataReaderSeq;
 
     local interface Listener {};
@@ -238,7 +239,7 @@ module DDS {
     local interface Condition {
         boolean get_trigger_value();
     };
-    
+
     typedef sequence<Condition> ConditionSeq;
 
     // WaitSet and GuardCondition can't be expressed in IDL because they are
@@ -252,7 +253,7 @@ module DDS {
 
     local interface WaitSetInterf {
         ReturnCode_t wait(
-            inout ConditionSeq active_conditions, 
+            inout ConditionSeq active_conditions,
             in Duration_t timeout);
         ReturnCode_t attach_condition(
             in Condition cond);
@@ -667,7 +668,7 @@ module DDS {
     //  ReturnCode_t get_qos(
     //      inout EntityQos qos);
     //  ReturnCode_t set_listener(
-    //      in Listener l, 
+    //      in Listener l,
     //      in StatusMask mask);
     //  Listener get_listener();
 
