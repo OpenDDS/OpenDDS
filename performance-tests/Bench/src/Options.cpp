@@ -99,12 +99,18 @@ namespace { // anonymous namespace for file scope.
   const ACE_TCHAR* TOPIC_KEYNAME                               = ACE_TEXT("Topic");
   const ACE_TCHAR* TRANSPORTINDEX_KEYNAME                      = ACE_TEXT("TransportIndex");
   const ACE_TCHAR* MESSAGESOURCE_KEYNAME                       = ACE_TEXT("MessageSource");
-  const ACE_TCHAR* MESSAGEFIXEDRATE_KEYNAME                    = ACE_TEXT("MessageFixedRate");
+  const ACE_TCHAR* MESSAGERATETYPE_KEYNAME                     = ACE_TEXT("MessageRateType");
   const ACE_TCHAR* MESSAGERATE_KEYNAME                         = ACE_TEXT("MessageRate");
+  const ACE_TCHAR* MESSAGESIZETYPE_KEYNAME                     = ACE_TEXT("MessageSizeType");
   const ACE_TCHAR* MESSAGESIZE_KEYNAME                         = ACE_TEXT("MessageSize");
   const ACE_TCHAR* MESSAGEMAX_KEYNAME                          = ACE_TEXT("MessageMax");
   const ACE_TCHAR* MESSAGEMIN_KEYNAME                          = ACE_TEXT("MessageMin");
   const ACE_TCHAR* MESSAGEDEVIATION_KEYNAME                    = ACE_TEXT("MessageDeviation");
+  const ACE_TCHAR* INSTANCETYPE_KEYNAME                        = ACE_TEXT("InstanceType");
+  const ACE_TCHAR* INSTANCEMEAN_KEYNAME                        = ACE_TEXT("InstanceMean");
+  const ACE_TCHAR* INSTANCEMAX_KEYNAME                         = ACE_TEXT("InstanceMax");
+  const ACE_TCHAR* INSTANCEMIN_KEYNAME                         = ACE_TEXT("InstanceMin");
+  const ACE_TCHAR* INSTANCEDEVIATION_KEYNAME                   = ACE_TEXT("InstanceDeviation");
   const ACE_TCHAR* DATACOLLECTIONFILE_KEYNAME                  = ACE_TEXT("DataCollectionFile");
   const ACE_TCHAR* DATACOLLECTIONBOUND_KEYNAME                 = ACE_TEXT("DataCollectionBound");
   const ACE_TCHAR* DATACOLLECTIONRETENTION_KEYNAME             = ACE_TEXT("DataCollectionRetention");
@@ -1114,12 +1120,18 @@ Options::loadPublication(
    *   Topic             = <string> # One of topic <name>
    *   TransportIndex    = <number> # Index into transport configurations
    *   MessageSource     = <string> # One of subscription <name>
-   *   MessageFixedRate  = <number> # Samples per second, 0 indicates use MessageRate
+   *   MessageRateType   = <string> # One of FIXED, UNIFORM, GAUSSIAN
    *   MessageRate       = <number> # Samples per second, Poisson arrival times
+   *   MessageSizeType   = <string> # One of FIXED, UNIFORM, GAUSSIAN
    *   MessageSize       = <number> # bytes per sample
    *   MessageMax        = <number> # upper bound for size
    *   MessageMin        = <number> # lower bound for size
    *   MessageDeviation  = <number> # standard deviation for size
+   *   InstanceType      = <string> # One of FIXED, UNIFORM, GAUSSIAN
+   *   InstanceMean      = <number> # average value of instance key for sending
+   *   InstanceMax       = <number> # upper bound for number of instances
+   *   InstanceMin       = <number> # lower bound for number of instances
+   *   InstanceDeviation = <number> # standard deviation of instance key for sending
    *   Associations      = <number> # Number of subscriptions to match before starting.
    *   StartAfterDelay   = <number> # Delay before writes start after matching.
    *   AckDelay          = <number> # >0 passed to wait_for_acks()
@@ -1133,7 +1145,9 @@ Options::loadPublication(
   profile->publisherQos  = TheServiceParticipant->initial_PublisherQos();
   profile->writerQos     = TheServiceParticipant->initial_DataWriterQos();
   profile->writerQosMask = 0;
-  profile->associations = 1;
+  profile->associations  = 1;
+  profile->size          = 0;
+  profile->rate          = 0;
   ACE_TString valueString;
 
   // Presentation                        = <string> # One of INSTANCE, TOPIC, GROUP
@@ -1864,36 +1878,85 @@ Options::loadPublication(
     }
   }
 
-  // MessageFixedRate = <number> # Samples per second, 0 indicates use MessageRate
-  profile->fixedRate = DEFAULT_FIXED_RATE;
+  // MessageRateType = <string> # One of FIXED, POISSON
   valueString.clear();
-  heap.get_string_value( sectionKey, MESSAGEFIXEDRATE_KEYNAME, valueString);
+  heap.get_string_value( sectionKey, MESSAGERATETYPE_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    profile->fixedRate = ACE_OS::atoi( valueString.c_str());
     if( this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Options::loadPublication() - ")
-        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        ACE_TEXT("  [publication/%s] %s == %s.\n"),
         sectionName.c_str(),
-        MESSAGEFIXEDRATE_KEYNAME,
-        profile->fixedRate
+        MESSAGERATETYPE_KEYNAME,
+        valueString.c_str()
       ));
+    }
+    if( valueString == ACE_TEXT("FIXED")) {
+      profile->rate = new FixedValue<double>();
+
+    } else if( valueString == ACE_TEXT("POISSON")) {
+      profile->rate = new ExponentialValue<double>();
+
+    } else {
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) loadPublication() - ")
+        ACE_TEXT("unrecognized value for %s: %s - ")
+        ACE_TEXT("using FIXED value instead.\n"),
+        MESSAGERATETYPE_KEYNAME,
+        valueString.c_str()
+      ));
+      profile->rate = new FixedValue<double>();
     }
   }
 
-  // MessageRate      = <number> # Samples per second, Poisson arrival times
+  // MessageRate      = <number> # Samples per second
   valueString.clear();
   heap.get_string_value( sectionKey, MESSAGERATE_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    profile->rate.rate() = ACE_OS::atoi( valueString.c_str());
+    profile->rate->mean()
+      = static_cast<double>(ACE_OS::atoi( valueString.c_str()));
     if( this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Options::loadPublication() - ")
         ACE_TEXT("  [publication/%s] %s == %d.\n"),
         sectionName.c_str(),
         MESSAGERATE_KEYNAME,
-        profile->rate.rate()
+        static_cast<long>(profile->rate->mean())
       ));
+    }
+  }
+
+  // MessageSizeType   = <string> # One of FIXED, UNIFORM, GAUSSIAN
+  valueString.clear();
+  heap.get_string_value( sectionKey, MESSAGESIZETYPE_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        MESSAGESIZETYPE_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+    if( valueString == ACE_TEXT("FIXED")) {
+      profile->size = new FixedValue<long>();
+
+    } else if( valueString == ACE_TEXT("UNIFORM")) {
+      profile->size = new UniformValue<long>();
+
+    } else if( valueString == ACE_TEXT("GAUSSIAN")) {
+      profile->size = new GaussianValue<long>();
+
+    } else {
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) loadPublication() - ")
+        ACE_TEXT("unrecognized value for %s: %s - ")
+        ACE_TEXT("using FIXED value instead.\n"),
+        MESSAGESIZETYPE_KEYNAME,
+        valueString.c_str()
+      ));
+      profile->size = new FixedValue<long>();
     }
   }
 
@@ -1901,15 +1964,14 @@ Options::loadPublication(
   valueString.clear();
   heap.get_string_value( sectionKey, MESSAGESIZE_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    profile->size.mean()
-      = static_cast<double>(ACE_OS::atoi( valueString.c_str()));
+    profile->size->mean() = ACE_OS::atoi( valueString.c_str());
     if( this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Options::loadPublication() - ")
         ACE_TEXT("  [publication/%s] %s == %d.\n"),
         sectionName.c_str(),
         MESSAGESIZE_KEYNAME,
-        profile->size.mean()
+        profile->size->mean()
       ));
     }
   }
@@ -1918,15 +1980,15 @@ Options::loadPublication(
   valueString.clear();
   heap.get_string_value( sectionKey, MESSAGEMAX_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    profile->size.maximum()
-      = static_cast<double>(ACE_OS::atoi( valueString.c_str()));
+    profile->size->maximum()
+      = ACE_OS::atoi( valueString.c_str());
     if( this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Options::loadPublication() - ")
         ACE_TEXT("  [publication/%s] %s == %d.\n"),
         sectionName.c_str(),
         MESSAGEMAX_KEYNAME,
-        profile->size.maximum()
+        profile->size->maximum()
       ));
     }
   }
@@ -1935,15 +1997,15 @@ Options::loadPublication(
   valueString.clear();
   heap.get_string_value( sectionKey, MESSAGEMIN_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    profile->size.minimum()
-      = static_cast<double>(ACE_OS::atoi( valueString.c_str()));
+    profile->size->minimum()
+      = ACE_OS::atoi( valueString.c_str());
     if( this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Options::loadPublication() - ")
         ACE_TEXT("  [publication/%s] %s == %d.\n"),
         sectionName.c_str(),
         MESSAGEMIN_KEYNAME,
-        profile->size.minimum()
+        profile->size->minimum()
       ));
     }
   }
@@ -1952,7 +2014,7 @@ Options::loadPublication(
   valueString.clear();
   heap.get_string_value( sectionKey, MESSAGEDEVIATION_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    profile->size.deviation()
+    profile->size->deviation()
       = static_cast<double>(ACE_OS::atoi( valueString.c_str()));
     if( this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
@@ -1960,7 +2022,108 @@ Options::loadPublication(
         ACE_TEXT("  [publication/%s] %s == %d.\n"),
         sectionName.c_str(),
         MESSAGEDEVIATION_KEYNAME,
-        profile->size.deviation()
+        static_cast<long>(profile->size->deviation())
+      ));
+    }
+  }
+
+  // InstanceType      = <string> # One of FIXED, UNIFORM, GAUSSIAN
+  valueString.clear();
+  heap.get_string_value( sectionKey, INSTANCETYPE_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        INSTANCETYPE_KEYNAME,
+        valueString.c_str()
+      ));
+    }
+    if( valueString == ACE_TEXT("FIXED")) {
+      profile->instances = new FixedValue<long>();
+
+    } else if( valueString == ACE_TEXT("UNIFORM")) {
+      profile->instances = new UniformValue<long>();
+
+    } else if( valueString == ACE_TEXT("GAUSSIAN")) {
+      profile->instances = new GaussianValue<long>();
+
+    } else {
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) loadPublication() - ")
+        ACE_TEXT("unrecognized value for %s: %s - ")
+        ACE_TEXT("using FIXED value instead.\n"),
+        INSTANCETYPE_KEYNAME,
+        valueString.c_str()
+      ));
+      profile->instances = new FixedValue<long>();
+    }
+  }
+
+  // InstanceMean      = <number> # average value of instance key for sending
+  valueString.clear();
+  heap.get_string_value( sectionKey, INSTANCEMEAN_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->instances->mean() = ACE_OS::atoi( valueString.c_str());
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        INSTANCEMEAN_KEYNAME,
+        profile->instances->mean()
+      ));
+    }
+  }
+
+  // InstanceMax       = <number> # upper bound for number of instances
+  valueString.clear();
+  heap.get_string_value( sectionKey, INSTANCEMAX_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->instances->maximum()
+      = ACE_OS::atoi( valueString.c_str());
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        INSTANCEMAX_KEYNAME,
+        profile->size->maximum()
+      ));
+    }
+  }
+
+  // InstanceMin       = <number> # lower bound for number of instances
+  valueString.clear();
+  heap.get_string_value( sectionKey, INSTANCEMIN_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->instances->minimum()
+      = ACE_OS::atoi( valueString.c_str());
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        INSTANCEMIN_KEYNAME,
+        profile->instances->minimum()
+      ));
+    }
+  }
+
+  // InstanceDeviation = <number> # standard deviation of instance key for sending
+  valueString.clear();
+  heap.get_string_value( sectionKey, INSTANCEDEVIATION_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->instances->deviation()
+      = static_cast<double>(ACE_OS::atoi( valueString.c_str()));
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        INSTANCEDEVIATION_KEYNAME,
+        static_cast<long>(profile->instances->deviation())
       ));
     }
   }

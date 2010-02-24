@@ -564,7 +564,7 @@ If you wish to publish the contents of this document as static HTML web pages, t
 
 OpenDDS is supported by [[Object Computing, Inc.|http://www.ociweb.com/]]</pre>
 </div>
-<div title="OpenDDS-Bench" modifier="MikeMartinez" created="201002182000" modified="201002221641" tags="publish" changecount="12">
+<div title="OpenDDS-Bench" modifier="MikeMartinez" created="201002182000" modified="201002231946" tags="publish" changecount="13">
 <pre>OpenDDS-Bench is a testing framework for specifying and executing performance testing of OpenDDS.  It supports testing on one or more hosts each with one or more processes.  Any test process may contain any number of DDS service publications or subscriptions.
 
 The framework consists of:
@@ -577,7 +577,7 @@ OpenDDS-Bench is included in the OpenDDS download files and is located in the //
 
 Several pre-configured tests are available for testing without needing to develop them.  These include tests for ''latency'' and ''throughput''.
 
-This document is written assuming a minimum environment setup which includes establishing the framework root, adding the framework bin directory to the command search path, and adding the framework library directory to the library runtime search path.  This can be done easily by setting the following environment variables:
+This user guide is written assuming a minimum environment setup which includes establishing the framework root, adding the framework bin directory to the command search path, and adding the framework library directory to the library runtime search path.  This can be done easily by setting the following environment variables:
 
 | Variable | Value |
 |''~BENCH_ROOT'' |$~DDS_ROOT/performance-tests/Bench |
@@ -1067,8 +1067,8 @@ h2,h3 {border-bottom:1px solid [[ColorPalette::TertiaryLight]];}
 #backstageCloak {background:[[ColorPalette::Foreground]]; opacity:0.6; filter:'alpha(opacity=60)';}
 /*}}}*/</pre>
 </div>
-<div title="Test Execution" modifier="MikeMartinez" created="201002221632" modified="201002221633" tags="publish" changecount="4">
-<pre>Test execution using the OpenDDS-Bench framework is managed through the use of a single Perl script.  This script is located in $~BENCH_ROOT/bin/run_test.  It has many options which are enumerated by executing the script with either the '-?' or the '-&amp;nbsp;-man' command line arguments.  The '-&amp;nbsp;-man' argument will provide a more detailed explanation of the available options.</pre>
+<div title="Test Execution" modifier="MikeMartinez" created="201002221632" modified="201002231947" tags="publish" changecount="6">
+<pre>Test execution using the OpenDDS-Bench framework is managed through the use of a single Perl script.  This script is located in $~BENCH_ROOT/bin/run_test.  It has many options which are enumerated by executing the script with either the '-?' or the '-&amp;nbsp;-man' command line arguments.  The '-&amp;nbsp;-man' argument will provide a more detailed explanation of the [[available options|RunTest]].</pre>
 </div>
 </div>
 <!--POST-STOREAREA-->

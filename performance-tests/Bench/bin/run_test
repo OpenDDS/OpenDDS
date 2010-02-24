@@ -204,7 +204,7 @@ if( $noaction) {
 # Manage statistics collection processes.
 my @COLLECTORS;
 my @HANDLES;
-&collectSystemStats( $$) if $collectStats;
+&collectSystemStats( $$)  if $collectStats;
 
 # Start and stop the test processes.
 map {
@@ -212,6 +212,7 @@ map {
   print $_->CommandLine() . "\n";
   $_->Spawn();
   &collectProcessStats( $_->{PROCESS}) if $collectStats;
+  &collectNetworkStats( $_->{PROCESS}) if $collectStats;
 } @PROCESSES;
 
 # block forever if no duration was specified.
@@ -280,6 +281,20 @@ sub collectSystemStats {
       sub { # Action to process each line of input.
         my ( $input, $output) = @_;
         print $output localtime() . ": $input\n";
+      }
+    );
+  }
+}
+
+sub collectNetworkStats {
+  my $pid = shift;
+  if( $pid and $^O ne 'MSWin32') {
+    &runCollector(
+      "netstat -ntpc",
+      "network-$pid.log",
+      sub { # Action to process each line of input.
+        my ( $input, $output) = @_;
+        print $output localtime() . ": $input\n" if $input =~ /$pid/;
       }
     );
   }
@@ -507,19 +522,39 @@ There is no default value, so no data will be reported by default.
 
 =head1 DESCRIPTION
 
-TBD
+This script manages execution of the processes needed for distributed
+testing of OpenDDS.  The processes used by the OpenDDS-Bench performance
+testing framework include the OpenDDS specific repository process and the
+test specific process.  The repository executable is the standard OpenDDS
+C<DCPSInfoRepo> program.  The framework C<testprocess> program is
+specific to this testing and provides the ability to start multiple
+publishers and / or subscribers within a single process.
+
+It is possible to start any number of C<testprocess> programs at once.
+A separate process will be started for each configuration file supplied.
+The same configuration file can be included more than once to start
+separate processes with the same configuration.
+
+Processes started by this script will either execute until terminated by
+the user (no duration specified) or until a specified duration has
+elapsed.  For the C<testprocess> commands, the duration is passed to the
+program to allow it to terminate cleanly.  The script will wait 60
+seconds beyond this time and then terminate the process by force.
+
+This script will establish the environment for the executable processes
+by adding the test library to the runtime library search path.
 
 =head1 EXAMPLES
 
 =over 8
 
-=item B<./run_test -vx -s s1.ini>
+=item B<bin/run_test -vx -s s1.ini>
 
-=item B<./run_test -d 10 -T 4 -s test.ini -f test.log -h localhost:2038>
+=item B<bin/run_test -d 10 -T 4 -s test.ini -f test.log -h localhost:2038>
 
-=item B<./run_test -x -t multicast -s scenario1.ini>
+=item B<bin/run_test -x -t multicast -s scenario1.ini>
 
-=item B<./run_test -vd10T4V -s test.ini -h machine.domain.com:2112>
+=item B<bin/run_test -vd10T4V -s test.ini -h machine.domain.com:2112>
 
 =back
 

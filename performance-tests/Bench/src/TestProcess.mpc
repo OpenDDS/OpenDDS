@@ -22,8 +22,7 @@ project(BenchProcess) : dcpsexe_with_tcp, dcps_udp, dcps_multicast, svc_utils {
   }
 
   Source_Files {
-    Exponential.cpp
-    Gaussian.cpp
+    StatisticalValue.cpp
     EntityProfiles.cpp
     Options.cpp
     Publication.cpp
