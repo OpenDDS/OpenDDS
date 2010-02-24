@@ -1,9 +1,63 @@
+Wed Feb 24 22:43:05 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/userguide.html:
+
+          Current state of the documentation.  This is still an ongoing
+          activity.
+
+        * performance-tests/Bench/bin/run_test:
+
+          Extended POD description.
+          Added 'netstat -ntpc' statistics gathering to periodically grab
+          the network information.  This has not been tested yet, so
+          consider it experimental at this time.
+
+        * performance-tests/Bench/doc/datamodel.txt:
+
+          Added new Instance* test configuration parameters to allow
+          specifying a number of instances to send data on.
+
+          Modified the mechanism to select the type of message size,
+          message rate, and instance selection to be explicit using the
+          new *Type specification parameters.
+
+        * performance-tests/Bench/src/EntityProfiles.h:
+        * performance-tests/Bench/src/Options.cpp:
+        * performance-tests/Bench/src/Publication.cpp:
+
+          Implemented new instance test configuration parameters and
+          modified type specifications.
+
+        * performance-tests/Bench/src/Test.idl:
+
+          Added a key field to be used in when specifying more than one
+          instance to send data on.
+
+        * performance-tests/Bench/src/TestProcess.mpc:
+        * performance-tests/Bench/src/StatisticalValue.h:
+        * performance-tests/Bench/src/StatisticalValue.cpp:
+
+          Replaced the previous statistical classes with a hierarchy that
+          includes a StatisticalValue<Type> intervace base class and
+          various implementations:
+            FixedValue<Type>
+            UniformValue<Type>
+            ExponentialValue<Type>
+            GaussianValue<Type>
+
+        * performance-tests/Bench/src/Exponential.h:
+        * performance-tests/Bench/src/Exponential.cpp:
+        * performance-tests/Bench/src/Gaussian.h:
+        * performance-tests/Bench/src/Gaussian.cpp:
+
+          Removed these files.
+
 Wed Feb 24 20:36:48 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/Definitions.h:
-        
-          Made DataBlockAllocator to have mutex protected. This resolved 
-          cores in throughput tests. 
+
+          Made DataBlockAllocator to have mutex protected. This resolved
+          cores in throughput tests.
 
 Wed Feb 24 14:50:02 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 

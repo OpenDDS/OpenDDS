@@ -412,10 +412,6 @@ Publication::svc ()
   OpenDDS::DCPS::RepoIdConverter converter(servant->get_publication_id());
   int pid = converter.checksum();
 
-  long fixedInterval = 0;
-  if( this->profile_->fixedRate) {
-    fixedInterval = static_cast<long>( 1.0e6 / this->profile_->fixedRate);
-  }
   ACE_Time_Value startTime = ACE_High_Res_Timer::gettimeofday_hr();
   int            count = 0;
   Test::Data     sample;
@@ -424,11 +420,9 @@ Publication::svc ()
 
   // Main loop for publishing.
   while( this->done_ == false) {
-    unsigned long size
-      = static_cast<unsigned long>( this->profile_->size.value());
-
-    sample.seq      = ++count;
-    sample.buffer.length( size);
+    sample.buffer.length( *this->profile_->size);
+    sample.key = *this->profile_->instances;
+    sample.seq = ++count;
 
     ACE_Time_Value  start = ACE_High_Res_Timer::gettimeofday_hr();
     DDS::Duration_t stamp = ::OpenDDS::DCPS::time_value_to_duration( start);
@@ -456,13 +450,7 @@ Publication::svc ()
 
     // Determine the interval to next message here so it can be mentioned
     // in the diagnostic messsage.
-    long microseconds = 0;
-    if( this->profile_->fixedRate) {
-      microseconds = fixedInterval;
-    } else {
-      microseconds
-        = static_cast<long>( 1.0e6 * this->profile_->rate.value());
-    }
+    long microseconds = static_cast<long>( 1.0e6 * *this->profile_->rate);
     ACE_Time_Value interval( 0, microseconds);
 
     if( this->verbose_ && BE_REALLY_VERBOSE) {
