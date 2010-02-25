@@ -1,3 +1,49 @@
+Thu Feb 25 17:26:34 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/tests.txt:
+        * performance-tests/Bench/doc/userguide.html:
+
+        * performance-tests/Bench/src/Options.cpp:
+
+          Ensured that a default FIXED variable is available even if no
+          specification is made for MessageSizeType, MessageRateType, and
+          InstanceType.
+
+        * performance-tests/Bench/src/Test.idl:
+
+          Removed priority as instance key.
+
+        * performance-tests/Bench/tests/latency/*.ini:
+        * performance-tests/Bench/tests/scaling/*.ini:
+        * performance-tests/Bench/tests/thru/*.ini:
+
+          Updated to use new *Type specifications.
+
+        * performance-tests/Bench/tests/scenarios/*.ini:
+
+          Moved from tests directory to new tests/scenarios sub-directory.
+          Updated to use new *Type specifications.
+
+        * performance-tests/Bench/tests/scenarios/test-descriptions.txt:
+
+          Moved and renamed from tests/README for consistency.
+
+        * performance-tests/Bench/tests/README:
+        * performance-tests/Bench/tests/s1-p1.ini:
+        * performance-tests/Bench/tests/s1-p2.ini:
+        * performance-tests/Bench/tests/s2-p1.ini:
+        * performance-tests/Bench/tests/s2-p2.ini:
+        * performance-tests/Bench/tests/s2-p3.ini:
+        * performance-tests/Bench/tests/s2-p4.ini:
+        * performance-tests/Bench/tests/s2-p5.ini:
+        * performance-tests/Bench/tests/s2-p6.ini:
+        * performance-tests/Bench/tests/s3-p1.ini:
+        * performance-tests/Bench/tests/s3-p2.ini:
+        * performance-tests/Bench/tests/s3-p3.ini:
+
+          Removed these files.  They were moved into the 'scenarios'
+          sub-directory.
+
 Thu Feb 25 08:54:12 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DdsDcpsDataReaderRemote.idl:
