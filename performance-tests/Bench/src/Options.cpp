@@ -1908,6 +1908,15 @@ Options::loadPublication(
       profile->rate = new FixedValue<double>();
     }
   }
+  if( profile->rate == 0) {
+    ACE_DEBUG((LM_WARNING,
+      ACE_TEXT("(%P|%t) loadPublication() - ")
+      ACE_TEXT("value for %s is unspecified, ")
+      ACE_TEXT("using FIXED value.\n"),
+      MESSAGERATETYPE_KEYNAME
+    ));
+    profile->rate = new FixedValue<double>();
+  }
 
   // MessageRate      = <number> # Samples per second
   valueString.clear();
@@ -1958,6 +1967,15 @@ Options::loadPublication(
       ));
       profile->size = new FixedValue<long>();
     }
+  }
+  if( profile->size == 0) {
+    ACE_DEBUG((LM_WARNING,
+      ACE_TEXT("(%P|%t) loadPublication() - ")
+      ACE_TEXT("value for %s is unspecified, ")
+      ACE_TEXT("using FIXED value.\n"),
+      MESSAGESIZETYPE_KEYNAME
+    ));
+    profile->size = new FixedValue<long>();
   }
 
   // MessageSize      = <number> # bytes per sample
@@ -2059,6 +2077,15 @@ Options::loadPublication(
       ));
       profile->instances = new FixedValue<long>();
     }
+  }
+  if( profile->size == 0) {
+    ACE_DEBUG((LM_WARNING,
+      ACE_TEXT("(%P|%t) loadPublication() - ")
+      ACE_TEXT("value for %s is unspecified, ")
+      ACE_TEXT("using FIXED value.\n"),
+      INSTANCETYPE_KEYNAME
+    ));
+    profile->size = new FixedValue<long>();
   }
 
   // InstanceMean      = <number> # average value of instance key for sending

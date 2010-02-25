@@ -83,15 +83,15 @@ include:
 
    Host1> bin/run_test -v -P \
             -DCPSInfoRepo corbaloc:iiop:repohost.domain:<port>/DCPSInfoRepo \
-            -s tests/s2-p1.ini,tests/s2-p5.ini
+            -s tests/scenarios/s2-p1.ini,tests/scenarios/s2-p5.ini
 
    Host2> bin/run_test -v -P \
             -DCPSInfoRepo corbaloc:iiop:repohost.domain:<port>/DCPSInfoRepo \
-            -s tests/s2-p2.ini,tests/s2-p4.ini
+            -s tests/scenarios/s2-p2.ini,tests/scenarios/s2-p4.ini
 
    Host2> bin/run_test -v -P \
             -DCPSInfoRepo corbaloc:iiop:repohost.domain:<port>/DCPSInfoRepo \
-            -s tests/s2-p3.ini,tests/s2-p6.ini
+            -s tests/scenarios/s2-p3.ini,tests/scenarios/s2-p6.ini
 
 Some examples of executing tests on multiple hosts is included here.  Use
 this as a guide as your local network configuratio and directory
@@ -119,14 +119,14 @@ A simple example to execute scenario1 is:
 
    host1> cd testing
    host1> sudo bin/run_test -v -P -t 60 -h host1.localdomain \
-          -i etc/transport.ini -s tests/s1-p1.ini
+          -i etc/transport.ini -s tests/scenarios/s1-p1.ini
 
    ...and on host2...
 
    host2> tar xf scenario1.tar.bz2
    host2> cd testing
    host2> sudo bin/run_test -v -P -h host1.localdomain \
-          -i etc/transport.ini -s tests/s1-p2.ini
+          -i etc/transport.ini -s tests/scenarios/s1-p2.ini
 
 A more complex example executing scenario3 on 3 hosts is:
 
@@ -142,21 +142,21 @@ A more complex example executing scenario3 on 3 hosts is:
 
    host1> cd testing
    host1> sudo bin/run_test -v -P -t 60 -h host1.localdomain \
-          -i etc/transport.ini -s s3-p1.ini
+          -i etc/transport.ini -s scenarios/s3-p1.ini
 
    ...and on host2...
 
    host2> tar xf scenario3.tar.bz2
    host2> cd testing
    host2> sudo bin/run_test -v -P -h host1.localdomain \
-          -i etc/transport.ini -s s3-p2.ini
+          -i etc/transport.ini -s scenarios/s3-p2.ini
 
    ...and on host3...
 
    host3> tar xf scenario3.tar.bz2
    host3> cd testing
    host3> sudo bin/run_test -v -P -h host1.localdomain \
-          -i etc/transport.ini -s s3-p3.ini
+          -i etc/transport.ini -s scenarios/s3-p3.ini
 
 An example of executing a custom defined scenario using files created in
 tests/myscenario-p*.ini and etc/myconfig.ini is:

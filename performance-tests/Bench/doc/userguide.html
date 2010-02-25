@@ -859,6 +859,253 @@ String.prototype.filenameEncode = function()
 &lt;hr&gt;%4, %5&amp;nbsp;(created %6)
 &lt;/div&gt;</pre>
 </div>
+<div title="RunTestManPage" modifier="MikeMartinez" created="201002251721" modified="201002251724" changecount="2">
+<pre>&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;run_test - Execute the test process for a distributed test.&lt;/title&gt;
+&lt;meta http-equiv=&quot;content-type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
+&lt;link rev=&quot;made&quot; href=&quot;mailto:root@localhost&quot; /&gt;
+&lt;/head&gt;
+
+&lt;body style=&quot;background-color: white&quot;&gt;
+
+
+&lt;!-- INDEX BEGIN --&gt;
+&lt;div name=&quot;index&quot;&gt;
+&lt;p&gt;&lt;a name=&quot;__index__&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+
+	&lt;li&gt;&lt;a href=&quot;#name&quot;&gt;NAME&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#options&quot;&gt;OPTIONS&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#description&quot;&gt;DESCRIPTION&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#examples&quot;&gt;EXAMPLES&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;hr name=&quot;index&quot; /&gt;
+&lt;/div&gt;
+&lt;!-- INDEX END --&gt;
+
+&lt;p&gt;
+&lt;/p&gt;
+&lt;h1&gt;&lt;a name=&quot;name&quot;&gt;NAME&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;run_test - Execute the test process for a distributed test.&lt;/p&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;./run_test [options]&lt;/p&gt;
+&lt;p&gt;Options:&lt;/p&gt;
+&lt;pre&gt;
+  -? | --help            brief help message&lt;/pre&gt;
+&lt;pre&gt;
+  --man                  full documentation&lt;/pre&gt;
+&lt;pre&gt;
+  -x | --noaction        do not execute any processing&lt;/pre&gt;
+&lt;pre&gt;
+  -v | --verbose         be chatty while executing&lt;/pre&gt;
+&lt;pre&gt;
+  -V | --ORBVerboseLogging=NUMBER
+                         set the corresponding ORB option&lt;/pre&gt;
+&lt;pre&gt;
+  -d NUMBER | --debug=NUMBER
+                         set the DCPS debugging level&lt;/pre&gt;
+&lt;pre&gt;
+  -T NUMBER | --tdebug=NUMBER
+                         set the DCPSTransportDebug debugging level&lt;/pre&gt;
+&lt;pre&gt;
+  -R NUMBER | --rdebug=NUMBER
+                         set the DCPS debugging level for the repository&lt;/pre&gt;
+&lt;pre&gt;
+  -f FILE | --dfile=FILE set the filename for debug output&lt;/pre&gt;
+&lt;pre&gt;
+  -C | --collect         collect process and system statistics during test&lt;/pre&gt;
+&lt;pre&gt;
+  -h FQDN | --repohost FQDN
+                         fully qualified domain name (and port) for
+                         connecting to repository&lt;/pre&gt;
+&lt;pre&gt;
+  -i FILE | --inifile FILE
+                         file for configuring the OpenDDS service&lt;/pre&gt;
+&lt;pre&gt;
+  -s FILELIST | --scenario FILELIST
+                         list of files defining the test scenario(s) to execute&lt;/pre&gt;
+&lt;pre&gt;
+  -r FILE | --rawdatafile FILE
+                         file to write collected data to at end of test&lt;/pre&gt;
+&lt;pre&gt;
+  -t NUMBER | --duration=NUMBER
+                         limit the duration of test execution&lt;/pre&gt;
+&lt;pre&gt;
+  -S | --startrepo       start a repository&lt;/pre&gt;
+&lt;pre&gt;
+  -P | --starttest       start a testprocess&lt;/pre&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;options&quot;&gt;OPTIONS&lt;/a&gt;&lt;/h1&gt;
+&lt;dl&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;help&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-?&lt;/strong&gt; | &lt;strong&gt;--help&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Print a brief help message and exits.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;man&quot; class=&quot;item&quot;&gt;&lt;strong&gt;--man&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Prints the manual page and exits.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;x_noaction&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-x&lt;/strong&gt; | &lt;strong&gt;--noaction&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Print the commands that would be executed with the current set of command
+line options and exit without performing any processing.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;v_verbose&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-v&lt;/strong&gt; | &lt;strong&gt;--verbose&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Print additional information while executing.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;v_orbverboselogging_number&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-V&lt;/strong&gt; | &lt;strong&gt;--ORBVerboseLogging=NUMBER&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Sets the -ORBVerboseLogging option to NUMBER.&lt;/p&gt;
+&lt;p&gt;The default value is 0.&lt;/p&gt;
+&lt;p&gt;The value is set to 1 if the single letter form isused (-V).&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;d_number_debug_number&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-d NUMBER&lt;/strong&gt; | &lt;strong&gt;--debug=NUMBER&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Sets the -DCPSDebugLevel option value.&lt;/p&gt;
+&lt;p&gt;The default value is 0.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;t_number_tdebug_number&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-T NUMBER&lt;/strong&gt; | &lt;strong&gt;--tdebug=NUMBER&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Sets the -DCPSTransportDebugLevel option value.&lt;/p&gt;
+&lt;p&gt;The default value is 0.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;r_number_rdebug_number&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-R NUMBER&lt;/strong&gt; | &lt;strong&gt;--rdebug=NUMBER&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Sets the -DCPSDebugLevel option value for the repository process.&lt;/p&gt;
+&lt;p&gt;The default value is 0.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;t_number_duration_number&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-t NUMBER&lt;/strong&gt; | &lt;strong&gt;--duration=NUMBER&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Limits the execution time of the test.  If not specified, then any test
+or repository process that is started will execute until the script is
+interrupted.&lt;/p&gt;
+&lt;p&gt;The default value is unspecified.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;s_startrepo&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-S&lt;/strong&gt; | &lt;strong&gt;--startrepo&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Causes a repository process to be started.&lt;/p&gt;
+&lt;p&gt;The default value is to not start a repository process.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;p_starttest&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-P&lt;/strong&gt; | &lt;strong&gt;--starttest&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Causes a test process to be started.&lt;/p&gt;
+&lt;p&gt;The default value is to not start a test process.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;f_file_dfile_file&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-f FILE&lt;/strong&gt; | &lt;strong&gt;--dfile=FILE&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Sets the -ORBLogFile option value.&lt;/p&gt;
+&lt;p&gt;The default value is 0.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;c_collect&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-C&lt;/strong&gt; | &lt;strong&gt;--collect&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Starts the system 'vmstat' to collect system statistics and the 'top'
+command in batch mode to collect process statistics.  The system
+statistics are collected in the file 'system-stats.log' which is
+overridden each time this script is run.  The process statistics are
+collected in files named 'process-&amp;lt;pid&amp;gt;.log'.&lt;/p&gt;
+&lt;p&gt;The default is off - do not collect statistics.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;h_fqdn_repohost_fqdn&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-h FQDN&lt;/strong&gt; | &lt;strong&gt;--repohost=FQDN&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;This is the fully qualified domain name and port where the OpenDDS
+repository may be found.&lt;/p&gt;
+&lt;p&gt;The default value is 'localhost:2112'.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;i_file_inifile_file&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-i FILE&lt;/strong&gt; | &lt;strong&gt;--inifile=FILE&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;OpenDDS configuration filename.  This defines the configuration
+information for the OpenDDS service itself.&lt;/p&gt;
+&lt;p&gt;The default is to use the file located in the 'etc' directory relative
+from the project root (the parent directory of the directory where the
+command was executed from) with filename 'transport.ini'.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;s_filelist_scenario_filelist&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-s FILELIST&lt;/strong&gt; | &lt;strong&gt;--scenario=FILELIST&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Test scenario definition filenames.  This defines the scenarios to execute
+for the test.  This names an 'ini' style file that contains information
+about all publications and subscriptions to execute for this test
+execution.  This can be one or more filenames, separated by commas.  One
+test process will be started (if requested) to process each named
+scenario configuration file.&lt;/p&gt;
+&lt;p&gt;There is no default value, and the test will not execute if not
+specified.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;r_file_rawdatafile_file&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-r FILE&lt;/strong&gt; | &lt;strong&gt;--rawdatafile=FILE&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Raw data output filename.  This file is where any raw latency data
+collected during the test will be written.&lt;/p&gt;
+&lt;p&gt;There is no default value, so no data will be reported by default.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;description&quot;&gt;DESCRIPTION&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;This script manages execution of the processes needed for distributed
+testing of OpenDDS.  The processes used by the OpenDDS-Bench performance
+testing framework include the OpenDDS specific repository process and the
+test specific process.  The repository executable is the standard OpenDDS
+&lt;code&gt;DCPSInfoRepo&lt;/code&gt; program.  The framework &lt;code&gt;testprocess&lt;/code&gt; program is
+specific to this testing and provides the ability to start multiple
+publishers and / or subscribers within a single process.&lt;/p&gt;
+&lt;p&gt;It is possible to start any number of &lt;code&gt;testprocess&lt;/code&gt; programs at once.
+A separate process will be started for each configuration file supplied.
+The same configuration file can be included more than once to start
+separate processes with the same configuration.&lt;/p&gt;
+&lt;p&gt;Processes started by this script will either execute until terminated by
+the user (no duration specified) or until a specified duration has
+elapsed.  For the &lt;code&gt;testprocess&lt;/code&gt; commands, the duration is passed to the
+program to allow it to terminate cleanly.  The script will wait 60
+seconds beyond this time and then terminate the process by force.&lt;/p&gt;
+&lt;p&gt;This script will establish the environment for the executable processes
+by adding the test library to the runtime library search path.&lt;/p&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;examples&quot;&gt;EXAMPLES&lt;/a&gt;&lt;/h1&gt;
+&lt;dl&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;bin_run_test_vx_s_s1_ini&quot; class=&quot;item&quot;&gt;&lt;strong&gt;bin/run_test -vx -s s1.ini&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;bin_run_test_d_10_t_4_s_test_ini_f_test_log_h_localhost_2038&quot; class=&quot;item&quot;&gt;&lt;strong&gt;bin/run_test -d 10 -T 4 -s test.ini -f test.log -h localhost:2038&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;bin_run_test_x_t_multicast_s_scenario1_ini&quot; class=&quot;item&quot;&gt;&lt;strong&gt;bin/run_test -x -t multicast -s scenario1.ini&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;bin_run_test_vd10t4v_s_test_ini_h_machine_domain_com_2112&quot; class=&quot;item&quot;&gt;&lt;strong&gt;bin/run_test -vd10T4V -s test.ini -h machine.domain.com:2112&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;/dl&gt;
+
+&lt;/body&gt;
+
+&lt;/html&gt;
+</pre>
+</div>
 <div title="SideBarOptions" modifier="MikeMartinez" created="200911302023" modified="201002011534" changecount="2">
 <pre>&lt;&lt;search&gt;&gt;&lt;&lt;closeAll&gt;&gt;&lt;&lt;permaview&gt;&gt;&lt;&lt;newTiddler&gt;&gt;&lt;&lt;saveChanges&gt;&gt;&lt;&lt;doPublish&gt;&gt;&lt;&lt;slider chkSliderOptionsPanel OptionsPanel &quot;options »&quot; &quot;Change TiddlyWiki advanced options&quot;&gt;&gt;</pre>
 </div>
@@ -1067,8 +1314,8 @@ h2,h3 {border-bottom:1px solid [[ColorPalette::TertiaryLight]];}
 #backstageCloak {background:[[ColorPalette::Foreground]]; opacity:0.6; filter:'alpha(opacity=60)';}
 /*}}}*/</pre>
 </div>
-<div title="Test Execution" modifier="MikeMartinez" created="201002221632" modified="201002231947" tags="publish" changecount="6">
-<pre>Test execution using the OpenDDS-Bench framework is managed through the use of a single Perl script.  This script is located in $~BENCH_ROOT/bin/run_test.  It has many options which are enumerated by executing the script with either the '-?' or the '-&amp;nbsp;-man' command line arguments.  The '-&amp;nbsp;-man' argument will provide a more detailed explanation of the [[available options|RunTest]].</pre>
+<div title="Test Execution" modifier="MikeMartinez" created="201002221632" modified="201002251720" tags="publish" changecount="9">
+<pre>Test execution using the OpenDDS-Bench framework is managed through the use of a single Perl script.  This script is located in $~BENCH_ROOT/bin/run_test.  It has many options which are enumerated by executing the script with either the '-?' or the '[[--man|RunTestManPage]]' command line arguments.  The '[[--man|RunTestManPage]]' argument will provide a more detailed explanation of the available options.</pre>
 </div>
 </div>
 <!--POST-STOREAREA-->
