@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Id$
+-->
+<project name="org.opendds.modeling.eclipse" default="jar" basedir="."
+         xmlns:opendds="antlib:org.opendds.ant">
+    <property name="build.dir" value="${basedir}/build"/>
+    <property name="docs.dir" value="${basedir}/docs"/>
+    <property name="lib.dir" value="${basedir}/lib"/>
+    <property name="metainf.dir" value="${basedir}/META-INF"/>
+    <property name="src.dir" value="${basedir}/src"/>
+    <property name="test.dir" value="${basedir}/test"/>
+
+    <property file="build.properties"/>
+
+    <!--
+        Project Paths
+    -->
+    <taskdef uri="antlib:org.opendds.ant"
+             resource="org/opendds/ant/antlib.xml"
+             classpath="${lib.dir}/opendds-ant.jar"/>
+
+    <opendds:init environment="env"/>
+
+    <property name="eclipse.home" value="${env.ECLIPSE_HOME}"/>
+
+    <path id="project.classpath">
+        <pathelement location="${build.dir}/classes"/>
+        <pathelement location="${build.dir}/tests"/>
+    	
+        <pathelement location="${src.dir}"/>
+        <pathelement location="${test.dir}"/>
+
+    	<fileset dir="${eclipse.home}/plugins"/>
+        <fileset dir="${lib.dir}"/>
+    </path>
+
+    <!--
+        Project Targets
+    -->
+    <target name="all" depends="clean, test, jar"
+            description="Meta target for: clean, test, jar"/>
+
+    <target name="clean" depends="javadoc.clean, test.clean"
+            description="Delete all build artifacts">
+        <delete dir="${build.dir}"/>
+    </target>
+
+    <target name="init">
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${build.dir}/classes"/>
+
+        <!-- Copy plugin manifest and update Bundle-Version -->
+        <copy file="${metainf.dir}/MANIFEST.MF" todir="${build.dir}/classes/META-INF"/>
+        <manifest file="${build.dir}/classes/META-INF/MANIFEST.MF" mode="update">
+            <attribute name="Bundle-Version" value="${opendds.version}"/>
+        </manifest>
+
+        <!-- Copy plugin descriptor -->
+        <copy file="${basedir}/plugin.xml" todir="${build.dir}/classes"/>
+    </target>
+
+    <target name="compile" depends="init"
+            description="Compile classes under src/">
+        <javac srcdir="${src.dir}"
+               destdir="${build.dir}/classes"
+               debug="${compile.debug}"
+               deprecation="${compile.deprecation}"
+               optimize="${compile.optimize}"
+               target="${compile.target}"
+               classpathref="project.classpath">
+        </javac>
+    </target>
+
+    <target name="jar" depends="compile"
+            description="Archive compiled classes and resources">
+        <jar destfile="${build.dir}/${ant.project.name}_${opendds.version}.jar"
+             compress="${jar.compress}"
+             index="${jar.index}"
+             filesetmanifest="merge">
+            <fileset dir="${build.dir}/classes"/>
+            <fileset dir="${src.dir}">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </jar>
+    </target>
+
+    <target name="test.clean">
+        <delete dir="${build.dir}/tests"/>
+    </target>
+
+    <target name="test.init" depends="init">
+        <mkdir dir="${build.dir}/tests"/>
+    </target>
+
+    <target name="test.compile" depends="compile, test.init">
+        <javac srcdir="${test.dir}"
+               destdir="${build.dir}/tests"
+               debug="${compile.debug}"
+               deprecation="${compile.deprecation}"
+               optimize="${compile.optimize}"
+               source="${project.source}"
+               classpathref="project.classpath">
+        </javac>
+    </target>
+
+    <target name="test" depends="test.compile"
+            description="Run test suites under test/">
+        <junit haltonerror="false"
+               haltonfailure="false"
+               printsummary="true"
+               fork="true">
+            <formatter type="xml"/>
+            <batchtest todir="${build.dir}/tests">
+                <fileset dir="${test.dir}">
+                    <include name="**/*Test.java"/>
+                </fileset>
+            </batchtest>
+            <jvmarg value="-ea"/> <!-- Enable assertions -->
+            <jvmarg line="${test.jvmargs}"/>
+            <classpath refid="project.classpath"/>
+        </junit>
+    </target>
+
+    <target name="test.report" depends="test">
+        <junitreport todir="${build.dir}/tests">
+            <fileset dir="${build.dir}/tests">
+                <include name="TEST-*.xml"/>
+            </fileset>
+            <report format="frames" todir="${build.dir}/tests/report"/>
+        </junitreport>
+    </target>
+
+    <target name="javadoc.clean">
+        <delete dir="${docs.dir}/api"/>
+    </target>
+
+    <target name="javadoc.init">
+        <mkdir dir="${docs.dir}/api"/>
+    </target>
+
+    <target name="javadoc" depends="javadoc.init"
+            description="Generate API documentation under doc/api/">
+        <javadoc destdir="${docs.dir}/api"
+                 source="${project.source}"
+                 author="true"
+                 version="true"
+                 overview="${docs.dir}/overview.html"
+                 doctitle="OpenDDS ${opendds.version} Modeling SDK API Specification"
+                 windowtitle="${ant.project.name}">
+            <link href="http://java.sun.com/j2se/${project.source}/docs/api/"/>
+            <classpath refid="project.classpath"/>
+            <packageset dir="${src.dir}"/>
+        </javadoc>
+    </target>
+</project>
