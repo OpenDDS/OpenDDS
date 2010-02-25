@@ -1,3 +1,14 @@
+Thu Feb 25 08:54:12 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcpsDataReaderRemote.idl:
+        * dds/DdsDcpsDataWriterRemote.idl:
+        * dds/DdsDcpsDomainExt.idl:
+        * dds/DdsDcpsInfo.idl:
+          Removed ciao leam
+
+        * dds/DdsDcps.mpc:
+          Removed generation of lem for OpenDDS specific interfaces
+
 Wed Feb 24 22:43:05 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/doc/userguide.html:

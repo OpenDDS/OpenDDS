@@ -14,8 +14,6 @@
 #include "dds/DdsDcpsInfrastructure.idl"
 #include "dds/DdsDcpsSubscription.idl"
 
-#pragma ciao lem "dds/DdsDcpsDataReaderRemoteE.idl"
-
 module OpenDDS {
   module DCPS {
 
@@ -35,13 +33,13 @@ module OpenDDS {
     // It is split out so the DDS::DataReader interface can be local.
     interface DataReaderRemote  { //x : ::DDS::DataReader {
 
-      // will tell transport and call on_subscription_matched() 
+      // will tell transport and call on_subscription_matched()
       oneway void add_associations(
         in OpenDDS::DCPS::RepoId yourId,
         in WriterAssociationSeq writers
         );
 
-      // will tell transport that associations are going away 
+      // will tell transport that associations are going away
       // The notify_lost flag true indicates the remove_association is invoked
       // by the InfoRepo after it detected a lost writer. The InfoRepo detects
       // the lost writer when the add_association/remove_association invocations
