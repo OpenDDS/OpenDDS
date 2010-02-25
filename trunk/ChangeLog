@@ -1,3 +1,11 @@
+Thu Feb 25 20:35:25 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * etc/multicast.conf:
+        * etc/tcp.conf:
+        * etc/udp.conf:
+
+          Added default svc.conf files for supported transports.
+
 Thu Feb 25 17:26:34 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/doc/tests.txt:
