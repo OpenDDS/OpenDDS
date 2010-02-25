@@ -14,8 +14,6 @@
 
 #include "dds/DdsDcpsDomain.idl"
 
-#pragma ciao lem "dds/DdsDcpsDomainExtE.idl"
-
 module OpenDDS
 {
 

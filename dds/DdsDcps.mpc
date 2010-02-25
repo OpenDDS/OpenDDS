@@ -81,11 +81,7 @@ project (DdsDcps_lem_gen) : dds4ccm_opendds, taoidldefaults {
   }
 
   IDL_Files {
-    DdsDcpsDataReaderRemoteE.idl
-    DdsDcpsDataWriterRemoteE.idl
-    DdsDcpsDomainExtE.idl
     DdsDcpsE.idl
-    DdsDcpsInfoE.idl
     DdsDcpsInfrastructureE.idl
     DdsDcpsPublicationE.idl
     DdsDcpsSubscriptionE.idl
@@ -110,11 +106,7 @@ project (DdsDcps_lem_stub) : dcps {
 
   Source_Files {
     DdsDcpsDomainEC.cpp
-    DdsDcpsDataReaderRemoteEC.cpp
-    DdsDcpsDataWriterRemoteEC.cpp
-    DdsDcpsDomainExtEC.cpp
     DdsDcpsEC.cpp
-    DdsDcpsInfoEC.cpp
     DdsDcpsInfrastructureEC.cpp
     DdsDcpsPublicationEC.cpp
     DdsDcpsSubscriptionEC.cpp
@@ -125,11 +117,7 @@ project (DdsDcps_lem_stub) : dcps {
 
   Header_Files {
     DdsDcpsDomainEC.h
-    DdsDcpsDataReaderRemoteEC.h
-    DdsDcpsDataWriterRemoteEC.h
-    DdsDcpsDomainExtEC.h
     DdsDcpsEC.h
-    DdsDcpsInfoEC.h
     DdsDcpsInfrastructureEC.h
     DdsDcpsPublicationEC.h
     DdsDcpsSubscriptionEC.h

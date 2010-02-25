@@ -19,8 +19,6 @@
 #include "dds/DdsDcpsDataWriterRemote.idl"
 #include "dds/DdsDcpsDataReaderRemote.idl"
 
-#pragma ciao lem "dds/DdsDcpsInfoE.idl"
-
 module OpenDDS {
   module DCPS {
     interface DCPSInfo {
