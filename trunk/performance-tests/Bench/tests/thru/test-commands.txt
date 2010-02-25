@@ -462,68 +462,68 @@ all hosts: export TESTCMD="$PROJECTBASE/bin/run_test -C -P -t 120 -h $REPOHOST:$
 # Steepest ascent
 
 # Test 14
-host 1: $TESTCMD -s $TESTBASE/pub-1sub-rel-80.ini 2>&1 | tee test14-pub1-be.log
-host 2: $TESTCMD -s $TESTBASE/pub-1sub-rel-80.ini 2>&1 | tee test14-pub2-be.log
-host 3: $TESTCMD -s $TESTBASE/sub-rel.ini 2>&1 | tee test14-sub-be.log
+host 1: $TESTCMD -s $TESTBASE/pub-1sub-rel-80.ini 2>&1 | tee test14-pub1-rel.log
+host 2: $TESTCMD -s $TESTBASE/pub-1sub-rel-80.ini 2>&1 | tee test14-pub2-rel.log
+host 3: $TESTCMD -s $TESTBASE/sub-rel.ini 2>&1 | tee test14-sub-rel.log
 
 # Test 15
-host 1: $TESTCMD -s $TESTBASE/pub-1sub-rel-320.ini 2>&1 | tee test15-pub1-be.log
-host 2: $TESTCMD -s $TESTBASE/pub-1sub-rel-320.ini 2>&1 | tee test15-pub2-be.log
-host 3: $TESTCMD -s $TESTBASE/sub-rel.ini 2>&1 | tee test15-sub-be.log
+host 1: $TESTCMD -s $TESTBASE/pub-1sub-rel-320.ini 2>&1 | tee test15-pub1-rel.log
+host 2: $TESTCMD -s $TESTBASE/pub-1sub-rel-320.ini 2>&1 | tee test15-pub2-rel.log
+host 3: $TESTCMD -s $TESTBASE/sub-rel.ini 2>&1 | tee test15-sub-rel.log
 
 # Test 16
-host 1: $TESTCMD -s $TESTBASE/pub-1sub-rel-720.ini 2>&1 | tee test16-pub1-be.log
-host 2: $TESTCMD -s $TESTBASE/pub-1sub-rel-720.ini 2>&1 | tee test16-pub2-be.log
-host 3: $TESTCMD -s $TESTBASE/sub-rel.ini 2>&1 | tee test16-sub-be.log
+host 1: $TESTCMD -s $TESTBASE/pub-1sub-rel-720.ini 2>&1 | tee test16-pub1-rel.log
+host 2: $TESTCMD -s $TESTBASE/pub-1sub-rel-720.ini 2>&1 | tee test16-pub2-rel.log
+host 3: $TESTCMD -s $TESTBASE/sub-rel.ini 2>&1 | tee test16-sub-rel.log
 
 # Test 17
-host 1: $TESTCMD -s $TESTBASE/pub-1sub-rel-1280.ini 2>&1 | tee test17-pub1-be.log
-host 2: $TESTCMD -s $TESTBASE/pub-1sub-rel-1280.ini 2>&1 | tee test17-pub2-be.log
-host 3: $TESTCMD -s $TESTBASE/sub-rel.ini 2>&1 | tee test17-sub-be.log
+host 1: $TESTCMD -s $TESTBASE/pub-1sub-rel-1280.ini 2>&1 | tee test17-pub1-rel.log
+host 2: $TESTCMD -s $TESTBASE/pub-1sub-rel-1280.ini 2>&1 | tee test17-pub2-rel.log
+host 3: $TESTCMD -s $TESTBASE/sub-rel.ini 2>&1 | tee test17-sub-rel.log
 
 # Test 18
-host 1: $TESTCMD -s $TESTBASE/pub-1sub-rel-2000.ini 2>&1 | tee test18-pub1-be.log
-host 2: $TESTCMD -s $TESTBASE/pub-1sub-rel-2000.ini 2>&1 | tee test18-pub2-be.log
-host 3: $TESTCMD -s $TESTBASE/sub-rel.ini 2>&1 | tee test18-sub-be.log
+host 1: $TESTCMD -s $TESTBASE/pub-1sub-rel-2000.ini 2>&1 | tee test18-pub1-rel.log
+host 2: $TESTCMD -s $TESTBASE/pub-1sub-rel-2000.ini 2>&1 | tee test18-pub2-rel.log
+host 3: $TESTCMD -s $TESTBASE/sub-rel.ini 2>&1 | tee test18-sub-rel.log
 
 # Fixed rate
 
 # Test 19
-host 1: $TESTCMD -s $TESTBASE/pub-1sub-rel-80r.ini 2>&1 | tee test19-pub1-be.log
-host 2: $TESTCMD -s $TESTBASE/pub-1sub-rel-80r.ini 2>&1 | tee test19-pub2-be.log
-host 3: $TESTCMD -s $TESTBASE/sub-rel.ini 2>&1 | tee test19-sub-be.log
+host 1: $TESTCMD -s $TESTBASE/pub-1sub-rel-80r.ini 2>&1 | tee test19-pub1-rel.log
+host 2: $TESTCMD -s $TESTBASE/pub-1sub-rel-80r.ini 2>&1 | tee test19-pub2-rel.log
+host 3: $TESTCMD -s $TESTBASE/sub-rel.ini 2>&1 | tee test19-sub-rel.log
 
 # Test 20
-host 1: $TESTCMD -s $TESTBASE/pub-1sub-rel-160.ini 2>&1 | tee test20-pub1-be.log
-host 2: $TESTCMD -s $TESTBASE/pub-1sub-rel-160.ini 2>&1 | tee test20-pub2-be.log
-host 3: $TESTCMD -s $TESTBASE/sub-rel.ini 2>&1 | tee test20-sub-be.log
+host 1: $TESTCMD -s $TESTBASE/pub-1sub-rel-160.ini 2>&1 | tee test20-pub1-rel.log
+host 2: $TESTCMD -s $TESTBASE/pub-1sub-rel-160.ini 2>&1 | tee test20-pub2-rel.log
+host 3: $TESTCMD -s $TESTBASE/sub-rel.ini 2>&1 | tee test20-sub-rel.log
 
 # Test 21
-host 1: $TESTCMD -s $TESTBASE/pub-1sub-rel-240r.ini 2>&1 | tee test21-pub1-be.log
-host 2: $TESTCMD -s $TESTBASE/pub-1sub-rel-240r.ini 2>&1 | tee test21-pub2-be.log
-host 3: $TESTCMD -s $TESTBASE/sub-rel.ini 2>&1 | tee test21-sub-be.log
+host 1: $TESTCMD -s $TESTBASE/pub-1sub-rel-240r.ini 2>&1 | tee test21-pub1-rel.log
+host 2: $TESTCMD -s $TESTBASE/pub-1sub-rel-240r.ini 2>&1 | tee test21-pub2-rel.log
+host 3: $TESTCMD -s $TESTBASE/sub-rel.ini 2>&1 | tee test21-sub-rel.log
 
 # Test 22
-host 1: $TESTCMD -s $TESTBASE/pub-1sub-rel-400r.ini 2>&1 | tee test22-pub1-be.log
-host 2: $TESTCMD -s $TESTBASE/pub-1sub-rel-400r.ini 2>&1 | tee test22-pub2-be.log
-host 3: $TESTCMD -s $TESTBASE/sub-rel.ini 2>&1 | tee test22-sub-be.log
+host 1: $TESTCMD -s $TESTBASE/pub-1sub-rel-400r.ini 2>&1 | tee test22-pub1-rel.log
+host 2: $TESTCMD -s $TESTBASE/pub-1sub-rel-400r.ini 2>&1 | tee test22-pub2-rel.log
+host 3: $TESTCMD -s $TESTBASE/sub-rel.ini 2>&1 | tee test22-sub-rel.log
 
 # Fixed size
 
 # Test 23
-host 1: $TESTCMD -s $TESTBASE/pub-1sub-rel-240s.ini 2>&1 | tee test23-pub1-be.log
-host 2: $TESTCMD -s $TESTBASE/pub-1sub-rel-240s.ini 2>&1 | tee test23-pub2-be.log
-host 3: $TESTCMD -s $TESTBASE/sub-rel.ini 2>&1 | tee test23-sub-be.log
+host 1: $TESTCMD -s $TESTBASE/pub-1sub-rel-240s.ini 2>&1 | tee test23-pub1-rel.log
+host 2: $TESTCMD -s $TESTBASE/pub-1sub-rel-240s.ini 2>&1 | tee test23-pub2-rel.log
+host 3: $TESTCMD -s $TESTBASE/sub-rel.ini 2>&1 | tee test23-sub-rel.log
 
 # Test 24
-host 1: $TESTCMD -s $TESTBASE/pub-1sub-rel-320s.ini 2>&1 | tee test24-pub1-be.log
-host 2: $TESTCMD -s $TESTBASE/pub-1sub-rel-320s.ini 2>&1 | tee test24-pub2-be.log
-host 3: $TESTCMD -s $TESTBASE/sub-rel.ini 2>&1 | tee test24-sub-be.log
+host 1: $TESTCMD -s $TESTBASE/pub-1sub-rel-320s.ini 2>&1 | tee test24-pub1-rel.log
+host 2: $TESTCMD -s $TESTBASE/pub-1sub-rel-320s.ini 2>&1 | tee test24-pub2-rel.log
+host 3: $TESTCMD -s $TESTBASE/sub-rel.ini 2>&1 | tee test24-sub-rel.log
 
 # Test 25
-host 1: $TESTCMD -s $TESTBASE/pub-1sub-rel-400s.ini 2>&1 | tee test25-pub1-be.log
-host 2: $TESTCMD -s $TESTBASE/pub-1sub-rel-400s.ini 2>&1 | tee test25-pub2-be.log
-host 3: $TESTCMD -s $TESTBASE/sub-rel.ini 2>&1 | tee test25-sub-be.log
+host 1: $TESTCMD -s $TESTBASE/pub-1sub-rel-400s.ini 2>&1 | tee test25-pub1-rel.log
+host 2: $TESTCMD -s $TESTBASE/pub-1sub-rel-400s.ini 2>&1 | tee test25-pub2-rel.log
+host 3: $TESTCMD -s $TESTBASE/sub-rel.ini 2>&1 | tee test25-sub-rel.log
 
 ========================================================================
 

@@ -1148,6 +1148,7 @@ Options::loadPublication(
   profile->associations  = 1;
   profile->size          = 0;
   profile->rate          = 0;
+  profile->instances     = 0;
   ACE_TString valueString;
 
   // Presentation                        = <string> # One of INSTANCE, TOPIC, GROUP
@@ -1878,6 +1879,23 @@ Options::loadPublication(
     }
   }
 
+  // MessageRate      = <number> # Samples per second
+  unsigned int rate = 0;
+  valueString.clear();
+  heap.get_string_value( sectionKey, MESSAGERATE_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    rate = ACE_OS::atoi( valueString.c_str());
+    if( this->verbose()) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        sectionName.c_str(),
+        MESSAGERATE_KEYNAME,
+        rate
+      ));
+    }
+  }
+
   // MessageRateType = <string> # One of FIXED, POISSON
   valueString.clear();
   heap.get_string_value( sectionKey, MESSAGERATETYPE_KEYNAME, valueString);
@@ -1893,9 +1911,13 @@ Options::loadPublication(
     }
     if( valueString == ACE_TEXT("FIXED")) {
       profile->rate = new FixedValue<double>();
+      if( rate != 0) {
+        profile->rate->mean() = 1.0 / static_cast<double>(rate);
+      }
 
     } else if( valueString == ACE_TEXT("POISSON")) {
       profile->rate = new ExponentialValue<double>();
+      profile->rate->mean() = static_cast<double>(rate);
 
     } else {
       ACE_DEBUG((LM_WARNING,
@@ -1906,6 +1928,9 @@ Options::loadPublication(
         valueString.c_str()
       ));
       profile->rate = new FixedValue<double>();
+      if( rate != 0) {
+        profile->rate->mean() = 1.0 / static_cast<double>(rate);
+      }
     }
   }
   if( profile->rate == 0) {
@@ -1916,22 +1941,8 @@ Options::loadPublication(
       MESSAGERATETYPE_KEYNAME
     ));
     profile->rate = new FixedValue<double>();
-  }
-
-  // MessageRate      = <number> # Samples per second
-  valueString.clear();
-  heap.get_string_value( sectionKey, MESSAGERATE_KEYNAME, valueString);
-  if (valueString.length() > 0) {
-    profile->rate->mean()
-      = static_cast<double>(ACE_OS::atoi( valueString.c_str()));
-    if( this->verbose()) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
-        ACE_TEXT("  [publication/%s] %s == %d.\n"),
-        sectionName.c_str(),
-        MESSAGERATE_KEYNAME,
-        static_cast<long>(profile->rate->mean())
-      ));
+    if( rate != 0) {
+      profile->rate->mean() = 1.0 / static_cast<double>(rate);
     }
   }
 
@@ -2078,14 +2089,14 @@ Options::loadPublication(
       profile->instances = new FixedValue<long>();
     }
   }
-  if( profile->size == 0) {
+  if( profile->instances == 0) {
     ACE_DEBUG((LM_WARNING,
       ACE_TEXT("(%P|%t) loadPublication() - ")
       ACE_TEXT("value for %s is unspecified, ")
       ACE_TEXT("using FIXED value.\n"),
       INSTANCETYPE_KEYNAME
     ));
-    profile->size = new FixedValue<long>();
+    profile->instances = new FixedValue<long>();
   }
 
   // InstanceMean      = <number> # average value of instance key for sending
