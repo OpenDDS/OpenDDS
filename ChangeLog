@@ -1,3 +1,21 @@
+Thu Feb 25 23:45:55 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/src/Options.cpp:
+
+          Ensure the message rate is interpreted consistently for both
+          exponential and fixed types.
+          Initialize and manage the default instance profile value.
+
+        * performance-tests/Bench/tests/thru/test-commands.txt:
+
+          Fix a logfile misnaming in the reliable subscription bound
+          testing commands.
+
+        * performance-tests/Bench/tools/mkpkg:
+
+          Account for moving the original scenario configurations to a
+          sub-directory.
+
 Thu Feb 25 20:35:25 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * etc/multicast.conf:
