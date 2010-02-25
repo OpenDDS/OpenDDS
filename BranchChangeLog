@@ -1,3 +1,53 @@
+Thu Feb 25 23:21:06 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * etc/eclipse:
+        * etc/eclipse/opendds-cleanup.xml:
+        * etc/eclipse/opendds-codeformatter.xml:
+        * etc/eclipse/opendds-codetemplates.xml:
+        * etc/eclipse/opendds.importorder:
+
+          Added various code style templates for Eclipse.
+
+        * tools/modeling:
+
+          Created tools subdirectory to contain modeling artifacts.
+
+        * tools/modeling/eclipse:
+        * tools/modeling/eclipse/.classpath:
+        * tools/modeling/eclipse/.externalToolBuilders:
+        * tools/modeling/eclipse/.externalToolBuilders/Ant Builder.launch:
+        * tools/modeling/eclipse/.project:
+        * tools/modeling/eclipse/.settings:
+        * tools/modeling/eclipse/.settings/org.eclipse.jdt.core.prefs:
+        * tools/modeling/eclipse/.settings/org.eclipse.jdt.ui.prefs:
+        * tools/modeling/eclipse/.settings/org.eclipse.ltk.core.refactoring.prefs:
+        * tools/modeling/eclipse/.settings/org.eclipse.pde.core.prefs:
+        * tools/modeling/eclipse/META-INF:
+        * tools/modeling/eclipse/META-INF/MANIFEST.MF:
+        * tools/modeling/eclipse/build.properties:
+        * tools/modeling/eclipse/build.xml:
+        * tools/modeling/eclipse/docs:
+        * tools/modeling/eclipse/docs/overview.html:
+        * tools/modeling/eclipse/lib:
+        * tools/modeling/eclipse/lib/junit-4.8.1.jar:
+        * tools/modeling/eclipse/lib/opendds-ant.jar:
+        * tools/modeling/eclipse/plugin.xml:
+        * tools/modeling/eclipse/src:
+        * tools/modeling/eclipse/src/icons:
+        * tools/modeling/eclipse/src/models:
+        * tools/modeling/eclipse/src/org:
+        * tools/modeling/eclipse/src/org/opendds:
+        * tools/modeling/eclipse/src/org/opendds/modeling:
+        * tools/modeling/eclipse/src/org/opendds/modeling/eclipse:
+        * tools/modeling/eclipse/src/org/opendds/modeling/eclipse/Activator.java:
+        * tools/modeling/eclipse/test:
+        * tools/modeling/eclipse/test/org:
+        * tools/modeling/eclipse/test/org/opendds:
+        * tools/modeling/eclipse/test/org/opendds/modeling:
+        * tools/modeling/eclipse/test/org/opendds/modeling/eclipse:
+
+          Initial commit of project structure for Eclipse plugin.
+
 Mon Feb 22 21:08:31 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * BranchChangeLog:

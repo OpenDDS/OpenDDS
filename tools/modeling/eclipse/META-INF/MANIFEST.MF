@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: OpenDDS Modeling SDK
+Bundle-SymbolicName: org.opendds.modeling.eclipse;singleton:=true
+Bundle-Version: 0.0.0
+Bundle-Activator: org.opendds.modeling.eclipse.Activator
+Bundle-Vendor: OpenDDS (http://www.opendds.org)
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.ui
