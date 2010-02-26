@@ -81,6 +81,7 @@
             <fileset dir="${build.dir}/classes"/>
             <fileset dir="${src.dir}">
                 <exclude name="**/*.java"/>
+                <exclude name="**/*.umlprofile"/>
             </fileset>
         </jar>
     </target>
