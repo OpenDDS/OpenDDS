@@ -1,3 +1,18 @@
+Fri Feb 26 03:42:01 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * performance-tests/Bench/tests/spray:
+        * performance-tests/Bench/tests/spray/pub-1.ini:
+        * performance-tests/Bench/tests/spray/pub-2.ini:
+        * performance-tests/Bench/tests/spray/pub-3.ini:
+        * performance-tests/Bench/tests/spray/pub-4.ini:
+        * performance-tests/Bench/tests/spray/sub.ini:
+        * performance-tests/Bench/tests/spray/test-commands.txt:
+        * performance-tests/Bench/tests/spray/transport.ini:
+        * performance-tests/Bench/tools/mkpkg:
+
+	  Added test for measuring reliable multicast sample loss on a
+	  lossy network.
+
 Thu Feb 25 23:45:55 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/src/Options.cpp:

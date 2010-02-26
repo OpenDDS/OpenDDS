@@ -86,11 +86,13 @@ cp $DDS_ROOT/performance-tests/Bench/etc/*.ini    $PKG/etc/
 mkdir -p $PKG/tests/scenarios
 mkdir -p $PKG/tests/latency
 mkdir -p $PKG/tests/scaling
+mkdir -p $PKG/tests/spray
 mkdir -p $PKG/tests/thru
 
 # Test scenarios
 cp $DDS_ROOT/performance-tests/Bench/tests/scenarios/*.ini $PKG/tests/scenarios
 cp $DDS_ROOT/performance-tests/Bench/tests/latency/*.ini $PKG/tests/latency
 cp $DDS_ROOT/performance-tests/Bench/tests/scaling/*.ini $PKG/tests/scaling
+cp $DDS_ROOT/performance-tests/Bench/tests/spray/*.ini $PKG/tests/spray
 cp $DDS_ROOT/performance-tests/Bench/tests/thru/*.ini $PKG/tests/thru
 
