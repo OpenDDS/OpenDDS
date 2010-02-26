@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Id$
+-->
 <notation:Diagram xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.2/notation" xmlns:uml="http://www.eclipse.org/uml2/3.0.0/UML" xmlns:uml2tools.notation="http://www.eclipse.org/mdt/uml2tools/gmf/notation/ext/2008" xmi:id="_m8zygCJnEd-faviQ9-3CEA" type="UMLProfile" name="DDS.umlprofile" measurementUnit="Pixel">
   <styles xmi:type="notation:DiagramStyle" xmi:id="_m8zygSJnEd-faviQ9-3CEA"/>
   <styles xmi:type="uml2tools.notation:U2TDiagramCanonicalStyle" xmi:id="_m8zygiJnEd-faviQ9-3CEA"/>
