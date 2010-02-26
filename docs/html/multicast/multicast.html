@@ -698,21 +698,21 @@ project : dcpsexe_with_multicast {
 &lt;/div&gt;
 &lt;!--}}}--&gt;</pre>
 </div>
-<div title="Reliability" modifier="StevenStallion" created="200912011934" modified="201002051407" changecount="104">
+<div title="Reliability" modifier="StevenStallion" created="200912011934" modified="201002261622" changecount="105">
 <pre>Reliable delivery is achieved through two primary mechanisms:
-* 2-way peer handshaking (SYN/SYNACK)
-* Negative acknowledgment of missing data (NAK/NAKACK)
+* 2-way peer handshaking (SYN/SYN+ACK)
+* Negative acknowledgment of missing data (NAK/NAK+ACK)
 For the purpose of examining the interactions between reliable peers, it helps to narrow the view of the multicast group to two specific peers: active and passive. The active peer is the publishing side of the {{{MulticastSession}}}. The passive peer will be the remote peer associated with the session when it was created. It is important to remember that control data will be exchanged among all peers within the multicast group, however disinterested peers will discard payloads which are not addressed to them directly.
 
 DCPS control samples were chosen in lieu of more traditional ~PDUs for the exchange of control data between peers; this allowed the transport to leverage existing functionality at the cost of a slightly increased payload size.
-!!SYN/SYNACK
+!!SYN/SYN+ACK
 [&lt;img[images/handshake.png]]
 The active peer initiates a handshake by sending a {{{MULTICAST_SYN}}} control sample to the passive peer at periodic intervals bounded by a timeout to ensure delivery. An exponential backoff is observed based on the number of retries.
 
 Upon receiving the {{{MULTICAST_SYN}}} control sample, the passive peer records the current transport sequence value for the active peer and responds with a {{{MULTICAST_SYNACK}}} control sample. This sequence number establishes a value from which reception gaps may be identified in the future.
 
 If the active peer receives a {{{MULTICAST_SYNACK}}} control sample, it will then notify the ETF that the association is complete, which will in turn trigger a communication status change in the DCPS layer. In the event a {{{MULTICAST_SYNACK}}} control sample is not received, an error will be logged.
-!!NAK/NAKACK
+!!NAK/NAK+ACK
 [&gt;img[images/repair.png]]
 As each datagram is delivered to the {{{ReliableSession}}}, the transport sequence value is scored against a special container which identifies reception gaps (see: {{{OpenDDS::DCPS::DisjointSequence}}}). Periodically, a watchdog executes and will age off any outstanding repair requests which have not been fulfilled by resetting the sequence low-water mark and logging an error. Once outstanding requests have been purged, the watchdog will then check for reception gaps.  In the event a new (or existing) reception gap is identified, the {{{ReliableSession}}} records the current interval and the high-water mark for the transport sequence. It will then issue {{{MULTICAST_NAK}}} control samples to active peers from which it is missing data. Passive peers perform NAK suppression based on all repair requests destined for the same active peer. If previous requests have been sent, a passive peer will temporarily elide previously requested ranges for the current interval. This interval is randomized to prevent potential collisions among similarly associated peers.
 
