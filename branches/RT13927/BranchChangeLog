@@ -1,3 +1,14 @@
+Fri Feb 26 00:08:32 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/modeling/eclipse/src/models/DDS.metamodel.uml:
+        * tools/modeling/eclipse/src/models/DDS.profile.uml:
+        * tools/modeling/eclipse/src/models/DDS.umlprofile:
+        * tools/modeling/eclipse/src/models/OpenDDS.metamodel.uml:
+        * tools/modeling/eclipse/src/models/OpenDDS.profile.uml:
+        * tools/modeling/eclipse/src/models/OpenDDS.umlprofile:
+
+          Initial commit of UML (including profile diagrams).
+
 Thu Feb 25 23:21:06 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * etc/eclipse:
