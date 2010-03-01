@@ -49,6 +49,8 @@ class StatisticalValue {
   public:
     StatisticalValue();
 
+    virtual ~StatisticalValue();
+
     /// Create a new value of Type.
     virtual operator Type() const = 0;
 
@@ -214,6 +216,11 @@ template< class Type>
 inline
 StatisticalValue<Type>::StatisticalValue()
  : max_(0), min_(0), mean_(0), deviation_(0.0), dirty_(true)
+{
+}
+
+template< class Type>
+StatisticalValue<Type>::~StatisticalValue()
 {
 }
 
