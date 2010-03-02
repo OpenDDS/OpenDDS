@@ -1,824 +1,909 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/3.0.0/UML" xmi:id="_0GFOgCJqEd-csr6NlFtsMA" name="DDS_Model">
-  <elementImport xmi:id="_tnkCwCL1Ed-csr6NlFtsMA">
-    <importedElement xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Boolean"/>
-  </elementImport>
-  <elementImport xmi:id="_tnkCwSL1Ed-csr6NlFtsMA">
-    <importedElement xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
-  </elementImport>
-  <elementImport xmi:id="_tnkCwiL1Ed-csr6NlFtsMA">
-    <importedElement xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#UnlimitedNatural"/>
-  </elementImport>
-  <elementImport xmi:id="_tnkCwyL1Ed-csr6NlFtsMA">
-    <importedElement xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-  </elementImport>
-  <packagedElement xmi:type="uml:Package" xmi:id="_4LoJUCLzEd-csr6NlFtsMA" name="DDSProfile">
-    <packagedElement xmi:type="uml:Class" xmi:id="_G3uKUCL0Ed-csr6NlFtsMA" name="Common"/>
-    <packagedElement xmi:type="uml:Class" xmi:id="_N6NVoCL0Ed-csr6NlFtsMA" name="DCPS"/>
-    <packagedElement xmi:type="uml:Package" xmi:id="_UJcfECL0Ed-csr6NlFtsMA" name="Compliance Levels">
-      <packagedElement xmi:type="uml:Package" xmi:id="_q5ehUCL0Ed-csr6NlFtsMA" name="Level 1">
-        <packageMerge xmi:id="_gUe9ICM3Ed-csr6NlFtsMA" mergedPackage="_RQbxICMhEd-csr6NlFtsMA"/>
-        <packageMerge xmi:id="_n-gpkCM3Ed-csr6NlFtsMA" mergedPackage="_bntF8CMsEd-csr6NlFtsMA"/>
-        <packageMerge xmi:id="_wVAacCM3Ed-csr6NlFtsMA" mergedPackage="_NwphcCMqEd-csr6NlFtsMA"/>
-        <packageMerge xmi:id="_zXes8CM3Ed-csr6NlFtsMA" mergedPackage="_h3MogCL0Ed-csr6NlFtsMA"/>
-        <packageMerge xmi:id="_3E0hYCM3Ed-csr6NlFtsMA" mergedPackage="_2VUD8CMfEd-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Package" xmi:id="_7iUAYCM3Ed-csr6NlFtsMA" name="Level 2"/>
-      <packagedElement xmi:type="uml:Package" xmi:id="_uphEcCL0Ed-csr6NlFtsMA" name="Level 3">
-        <packageMerge xmi:id="_9anl0CM3Ed-csr6NlFtsMA" mergedPackage="_sTND0CM1Ed-csr6NlFtsMA"/>
-      </packagedElement>
-    </packagedElement>
-    <packagedElement xmi:type="uml:Package" xmi:id="_2VUD8CMfEd-csr6NlFtsMA" name="Domain">
-      <packagedElement xmi:type="uml:Class" xmi:id="_-OIaUCMfEd-csr6NlFtsMA" name="DDSEntity">
-        <generalization xmi:id="_Z1x4ICVXEd-csr6NlFtsMA" general="_4if7wCL0Ed-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_gEQzoCVXEd-csr6NlFtsMA" memberEnd="_ixNiECVXEd-csr6NlFtsMA _Bz1WgCVhEd-eCa_VLKlKsw">
-        <ownedEnd xmi:id="_ixNiECVXEd-csr6NlFtsMA" type="_CxzZ0CMgEd-csr6NlFtsMA" subsettedProperty="_beivcCMXEd-csr6NlFtsMA _VzSAUCMYEd-csr6NlFtsMA" association="_gEQzoCVXEd-csr6NlFtsMA">
-          <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_D0xpoCVYEd-csr6NlFtsMA" value="*"/>
-        </ownedEnd>
-        <ownedEnd xmi:id="_Bz1WgCVhEd-eCa_VLKlKsw" type="_-OIaUCMfEd-csr6NlFtsMA" aggregation="composite" association="_gEQzoCVXEd-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_CxzZ0CMgEd-csr6NlFtsMA" name="QoSProperty">
-        <generalization xmi:id="_nSRt8CVhEd-eCa_VLKlKsw" general="_oA1RsCMfEd-csr6NlFtsMA"/>
-      </packagedElement>
-    </packagedElement>
-    <packagedElement xmi:type="uml:Package" xmi:id="_h3MogCL0Ed-csr6NlFtsMA" name="Core">
-      <packagedElement xmi:type="uml:Class" xmi:id="_4if7wCL0Ed-csr6NlFtsMA" name="NamedEntity" isAbstract="true">
-        <ownedAttribute xmi:id="_LlaMACL1Ed-csr6NlFtsMA" name="name" visibility="private">
-          <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_beivcCMXEd-csr6NlFtsMA" name="ownedEntity" type="_4if7wCL0Ed-csr6NlFtsMA" association="__Z98gCM5Ed-csr6NlFtsMA">
-          <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_BrZFACMYEd-csr6NlFtsMA" value="*"/>
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_BN9iICMYEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_GU3KgCMYEd-csr6NlFtsMA" name="custom_policy" type="_rmGm4CMtEd-csr6NlFtsMA" association="_eg5DICM4Ed-csr6NlFtsMA">
-          <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_TDW2YCMYEd-csr6NlFtsMA" value="*"/>
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_T7Hk0CMYEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_VzSAUCMYEd-csr6NlFtsMA" name="property" type="_oA1RsCMfEd-csr6NlFtsMA" subsettedProperty="_beivcCMXEd-csr6NlFtsMA" association="_ORAMwCM7Ed-csr6NlFtsMA">
-          <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_jf4TMCMYEd-csr6NlFtsMA" value="*"/>
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_j-2uMCMYEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_IYkcwCMaEd-csr6NlFtsMA" name="Specification">
-        <generalization xmi:id="_h0QcgCVVEd-csr6NlFtsMA" general="_4if7wCL0Ed-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_oA1RsCMfEd-csr6NlFtsMA" name="TypedEntity">
-        <generalization xmi:id="_oZBUkCVWEd-csr6NlFtsMA" general="_4if7wCL0Ed-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_v7VPcCVWEd-csr6NlFtsMA" name="type" type="_IYkcwCMaEd-csr6NlFtsMA" association="_FBmUACVWEd-csr6NlFtsMA">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_xl6h8CVWEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_eg5DICM4Ed-csr6NlFtsMA" memberEnd="_Dvx7oCM5Ed-csr6NlFtsMA _GU3KgCMYEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_Dvx7oCM5Ed-csr6NlFtsMA" type="_4if7wCL0Ed-csr6NlFtsMA" association="_eg5DICM4Ed-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="__Z98gCM5Ed-csr6NlFtsMA" memberEnd="_uH7XgCM6Ed-csr6NlFtsMA _beivcCMXEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_uH7XgCM6Ed-csr6NlFtsMA" type="_4if7wCL0Ed-csr6NlFtsMA" aggregation="shared" association="__Z98gCM5Ed-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_ORAMwCM7Ed-csr6NlFtsMA" memberEnd="_RoJHsCM7Ed-csr6NlFtsMA _VzSAUCMYEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_RoJHsCM7Ed-csr6NlFtsMA" type="_4if7wCL0Ed-csr6NlFtsMA" aggregation="composite" association="_ORAMwCM7Ed-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_FBmUACVWEd-csr6NlFtsMA" memberEnd="_TjP_kCVWEd-csr6NlFtsMA _v7VPcCVWEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_TjP_kCVWEd-csr6NlFtsMA" type="_oA1RsCMfEd-csr6NlFtsMA" association="_FBmUACVWEd-csr6NlFtsMA">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_aTinoCVWEd-csr6NlFtsMA" value="1"/>
-        </ownedEnd>
-      </packagedElement>
-    </packagedElement>
-    <packagedElement xmi:type="uml:Package" xmi:id="_RQbxICMhEd-csr6NlFtsMA" name="Topics">
-      <packagedElement xmi:type="uml:Class" xmi:id="_bfxS8CMhEd-csr6NlFtsMA" name="ContentFilteredTopic">
-        <generalization xmi:id="_0ki1QCVhEd-eCa_VLKlKsw" general="_CQ36MCMkEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_jPv2YCMhEd-csr6NlFtsMA" name="filter_expression">
-          <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_wOaFMCMhEd-csr6NlFtsMA" name="related_topic" type="_QKckACMiEd-csr6NlFtsMA" association="_HE2uwCViEd-eCa_VLKlKsw"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_60zcICMhEd-csr6NlFtsMA" name="MultiTopic">
-        <generalization xmi:id="_oKbBcCViEd-eCa_VLKlKsw" general="_CQ36MCMkEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="__LvnMCMhEd-csr6NlFtsMA" name="subscription_expression">
-          <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_GG5bcCMiEd-csr6NlFtsMA" name="related_topics" type="_QKckACMiEd-csr6NlFtsMA" association="_xekGUCViEd-eCa_VLKlKsw">
-          <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_JyuM8CMiEd-csr6NlFtsMA" value="*"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_QKckACMiEd-csr6NlFtsMA" name="Topic">
-        <generalization xmi:id="_xLm4oCVjEd-eCa_VLKlKsw" general="_CQ36MCMkEd-csr6NlFtsMA"/>
-        <generalization xmi:id="_2z7zECVjEd-eCa_VLKlKsw" general="_-OIaUCMfEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_S7fvUCMiEd-csr6NlFtsMA" name="history" type="_M3hHwCMvEd-csr6NlFtsMA" association="_GHKskCVkEd-eCa_VLKlKsw">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_2i-vsCMjEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_Yu0_4CMiEd-csr6NlFtsMA" name="transport_priority" type="_o2g3UCMxEd-csr6NlFtsMA" association="_jYM9sCVkEd-eCa_VLKlKsw">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_b-yUwCMiEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_grwaMCMiEd-csr6NlFtsMA" name="ownership" type="_8YxA4CMvEd-csr6NlFtsMA" association="_a16-ICVlEd-eCa_VLKlKsw">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_kAsVsCMiEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_lElboCMiEd-csr6NlFtsMA" name="topic_data" type="_gbCf0CMxEd-csr6NlFtsMA" association="_FPZsMCVmEd-eCa_VLKlKsw">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_oFdLoCMiEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_07qpECMiEd-csr6NlFtsMA" name="durability" type="_LRZ7ACMuEd-csr6NlFtsMA" association="_XNC9gCVmEd-eCa_VLKlKsw">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_2j39ACMiEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_3abxkCMiEd-csr6NlFtsMA" name="liveliness" type="_zpPsACMvEd-csr6NlFtsMA" association="_lqUfYCVmEd-eCa_VLKlKsw">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_54HU8CMiEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_6zZRcCMiEd-csr6NlFtsMA" name="durability_service" type="_R54q4CMuEd-csr6NlFtsMA" association="_-itVQCVmEd-eCa_VLKlKsw">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_-SyJcCMiEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_AojG8CMjEd-csr6NlFtsMA" name="destination_order" type="_BMHGACMuEd-csr6NlFtsMA" association="_L_zzkCVnEd-eCa_VLKlKsw">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Ffj5MCMjEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_JnnTsCMjEd-csr6NlFtsMA" name="deadline" type="_4pF8ECMtEd-csr6NlFtsMA" association="_exGvYCVnEd-eCa_VLKlKsw">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_LX_FICMjEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_wHw_wCMjEd-csr6NlFtsMA" name="latency_budget" type="_Zl3psCMvEd-csr6NlFtsMA" association="_p8RAQCVnEd-eCa_VLKlKsw">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_xa2YQCMjEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_zAQ24CMjEd-csr6NlFtsMA" name="reliability" type="_5MakMCMwEd-csr6NlFtsMA" association="_3hKvsCVnEd-eCa_VLKlKsw">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_1VisMCMjEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_5O4VQCMjEd-csr6NlFtsMA" name="resource_limits" type="_GZC9kCMxEd-csr6NlFtsMA" association="_DNRKcCVoEd-eCa_VLKlKsw">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_62nvICMjEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_GHKskCVkEd-eCa_VLKlKsw" memberEnd="_HOVI8CVkEd-eCa_VLKlKsw _S7fvUCMiEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_HOVI8CVkEd-eCa_VLKlKsw" type="_QKckACMiEd-csr6NlFtsMA" aggregation="composite" association="_GHKskCVkEd-eCa_VLKlKsw"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_jYM9sCVkEd-eCa_VLKlKsw" memberEnd="_k6TCkCVkEd-eCa_VLKlKsw _Yu0_4CMiEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_k6TCkCVkEd-eCa_VLKlKsw" type="_QKckACMiEd-csr6NlFtsMA" aggregation="composite" association="_jYM9sCVkEd-eCa_VLKlKsw"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_a16-ICVlEd-eCa_VLKlKsw" memberEnd="_byG5kCVlEd-eCa_VLKlKsw _grwaMCMiEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_byG5kCVlEd-eCa_VLKlKsw" type="_QKckACMiEd-csr6NlFtsMA" aggregation="composite" association="_a16-ICVlEd-eCa_VLKlKsw"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_FPZsMCVmEd-eCa_VLKlKsw" memberEnd="_F7yRECVmEd-eCa_VLKlKsw _lElboCMiEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_F7yRECVmEd-eCa_VLKlKsw" type="_QKckACMiEd-csr6NlFtsMA" aggregation="composite" association="_FPZsMCVmEd-eCa_VLKlKsw"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_XNC9gCVmEd-eCa_VLKlKsw" memberEnd="_YlYpcCVmEd-eCa_VLKlKsw _07qpECMiEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_YlYpcCVmEd-eCa_VLKlKsw" type="_QKckACMiEd-csr6NlFtsMA" aggregation="composite" association="_XNC9gCVmEd-eCa_VLKlKsw"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_lqUfYCVmEd-eCa_VLKlKsw" memberEnd="_m_h-0CVmEd-eCa_VLKlKsw _3abxkCMiEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_m_h-0CVmEd-eCa_VLKlKsw" type="_QKckACMiEd-csr6NlFtsMA" aggregation="composite" association="_lqUfYCVmEd-eCa_VLKlKsw"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_-itVQCVmEd-eCa_VLKlKsw" memberEnd="__jdnoCVmEd-eCa_VLKlKsw _6zZRcCMiEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="__jdnoCVmEd-eCa_VLKlKsw" type="_QKckACMiEd-csr6NlFtsMA" aggregation="composite" association="_-itVQCVmEd-eCa_VLKlKsw"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_L_zzkCVnEd-eCa_VLKlKsw" memberEnd="_MsRQ8CVnEd-eCa_VLKlKsw _AojG8CMjEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_MsRQ8CVnEd-eCa_VLKlKsw" type="_QKckACMiEd-csr6NlFtsMA" aggregation="composite" association="_L_zzkCVnEd-eCa_VLKlKsw"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_exGvYCVnEd-eCa_VLKlKsw" memberEnd="_f-Ya0CVnEd-eCa_VLKlKsw _JnnTsCMjEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_f-Ya0CVnEd-eCa_VLKlKsw" type="_QKckACMiEd-csr6NlFtsMA" aggregation="composite" association="_exGvYCVnEd-eCa_VLKlKsw"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_p8RAQCVnEd-eCa_VLKlKsw" memberEnd="_t2CHICVnEd-eCa_VLKlKsw _wHw_wCMjEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_t2CHICVnEd-eCa_VLKlKsw" type="_QKckACMiEd-csr6NlFtsMA" aggregation="composite" association="_p8RAQCVnEd-eCa_VLKlKsw"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_3hKvsCVnEd-eCa_VLKlKsw" memberEnd="_6YBoECVnEd-eCa_VLKlKsw _zAQ24CMjEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_6YBoECVnEd-eCa_VLKlKsw" type="_QKckACMiEd-csr6NlFtsMA" aggregation="composite" association="_3hKvsCVnEd-eCa_VLKlKsw"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_DNRKcCVoEd-eCa_VLKlKsw" memberEnd="_FB6-8CVoEd-eCa_VLKlKsw _5O4VQCMjEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_FB6-8CVoEd-eCa_VLKlKsw" type="_QKckACMiEd-csr6NlFtsMA" aggregation="composite" association="_DNRKcCVoEd-eCa_VLKlKsw"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_CQ36MCMkEd-csr6NlFtsMA" name="TopicDescription" isAbstract="true">
-        <generalization xmi:id="_MaKiYCVpEd-eCa_VLKlKsw" general="_4if7wCL0Ed-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_MZM1ECMkEd-csr6NlFtsMA" name="type" type="_jYZ7wCMkEd-csr6NlFtsMA" association="_eSnxsCVpEd-eCa_VLKlKsw"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_SIsHcCMkEd-csr6NlFtsMA" name="TopicField">
-        <generalization xmi:id="_7tmhoCVsEd-eCa_VLKlKsw" general="_0eaIgCMmEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_XeB0cCMkEd-csr6NlFtsMA" name="isDCPSKey">
-          <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Boolean"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_QFA8ICVsEd-eCa_VLKlKsw" name="members" type="_jYZ7wCMkEd-csr6NlFtsMA" aggregation="composite" redefinedProperty="_GDwdICVtEd-eCa_VLKlKsw" association="_FTKGoCVtEd-eCa_VLKlKsw"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_jYZ7wCMkEd-csr6NlFtsMA" name="TopicType">
-        <generalization xmi:id="_5lyEECVtEd-eCa_VLKlKsw" general="_hYOsYCMnEd-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_HE2uwCViEd-eCa_VLKlKsw" memberEnd="_IidVMCViEd-eCa_VLKlKsw _wOaFMCMhEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_IidVMCViEd-eCa_VLKlKsw" type="_bfxS8CMhEd-csr6NlFtsMA" association="_HE2uwCViEd-eCa_VLKlKsw"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_xekGUCViEd-eCa_VLKlKsw" memberEnd="_zciO4CViEd-eCa_VLKlKsw _GG5bcCMiEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_zciO4CViEd-eCa_VLKlKsw" type="_60zcICMhEd-csr6NlFtsMA" association="_xekGUCViEd-eCa_VLKlKsw"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_oP2FQCVoEd-eCa_VLKlKsw" memberEnd="_o1mdsCVoEd-eCa_VLKlKsw _mMX0ACMrEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_o1mdsCVoEd-eCa_VLKlKsw" type="_eEmboCMrEd-csr6NlFtsMA" association="_oP2FQCVoEd-eCa_VLKlKsw"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_eSnxsCVpEd-eCa_VLKlKsw" memberEnd="_e1ZuoCVpEd-eCa_VLKlKsw _MZM1ECMkEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_e1ZuoCVpEd-eCa_VLKlKsw" type="_CQ36MCMkEd-csr6NlFtsMA" association="_eSnxsCVpEd-eCa_VLKlKsw"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_yEUakCVpEd-eCa_VLKlKsw" memberEnd="_zSqdACVpEd-eCa_VLKlKsw _SuAMQCMqEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_zSqdACVpEd-eCa_VLKlKsw" type="_QKcDUCMqEd-csr6NlFtsMA" association="_yEUakCVpEd-eCa_VLKlKsw"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_FTKGoCVtEd-eCa_VLKlKsw" memberEnd="_GDwdICVtEd-eCa_VLKlKsw _QFA8ICVsEd-eCa_VLKlKsw">
-        <ownedEnd xmi:id="_GDwdICVtEd-eCa_VLKlKsw" type="_SIsHcCMkEd-csr6NlFtsMA" association="_FTKGoCVtEd-eCa_VLKlKsw">
-          <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_NUm0kCVtEd-eCa_VLKlKsw" value="*"/>
-        </ownedEnd>
-      </packagedElement>
-    </packagedElement>
-    <packagedElement xmi:type="uml:Package" xmi:id="_omz6UCMkEd-csr6NlFtsMA" name="Types">
-      <packagedElement xmi:type="uml:Class" xmi:id="_w_3agCMlEd-csr6NlFtsMA" name="Array">
-        <generalization xmi:id="_eVkPoCV3Ed-C3YF8TpBctg" general="_bwigkCMmEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_3gufcCMlEd-csr6NlFtsMA" name="subtype" visibility="private" type="_0eaIgCMmEd-csr6NlFtsMA" association="_tX60gCV3Ed-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_tX60gCV3Ed-C3YF8TpBctg" memberEnd="_vYFVcCV3Ed-C3YF8TpBctg _3gufcCMlEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_vYFVcCV3Ed-C3YF8TpBctg" visibility="private" type="_w_3agCMlEd-csr6NlFtsMA" association="_tX60gCV3Ed-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_-rn_4CMlEd-csr6NlFtsMA" name="Boolean">
-        <generalization xmi:id="_Fz-6wCV4Ed-C3YF8TpBctg" general="_a1LPECMnEd-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_A3KDUCMmEd-csr6NlFtsMA" name="Case">
-        <generalization xmi:id="_a6rAoCV4Ed-C3YF8TpBctg" general="_0eaIgCMmEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_DiWeQCMmEd-csr6NlFtsMA" name="labels" visibility="private">
-          <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
-          <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_xheOYCV4Ed-C3YF8TpBctg" value="1"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_S-pNICMmEd-csr6NlFtsMA" name="element_spec" visibility="private" type="_0eaIgCMmEd-csr6NlFtsMA" association="_21gT0CV4Ed-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_21gT0CV4Ed-C3YF8TpBctg" memberEnd="_3dA_wCV4Ed-C3YF8TpBctg _S-pNICMmEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_3dA_wCV4Ed-C3YF8TpBctg" visibility="private" type="_A3KDUCMmEd-csr6NlFtsMA" association="_21gT0CV4Ed-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_JYd4sCV5Ed-C3YF8TpBctg" memberEnd="_KKCfkCV5Ed-C3YF8TpBctg _sURRQCMpEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_KKCfkCV5Ed-C3YF8TpBctg" visibility="private" type="_Tp63YCMpEd-csr6NlFtsMA" association="_JYd4sCV5Ed-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_ZY0bQCMmEd-csr6NlFtsMA" name="Char">
-        <generalization xmi:id="_gjpl4CV5Ed-C3YF8TpBctg" general="_a1LPECMnEd-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_bwigkCMmEd-csr6NlFtsMA" name="Collection" isAbstract="true">
-        <generalization xmi:id="_3sVYsCV5Ed-C3YF8TpBctg" general="_0eaIgCMmEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_pjbkUCV5Ed-C3YF8TpBctg" name="length" visibility="private" type="_D6ifUCMnEd-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_hYzJkCMmEd-csr6NlFtsMA" name="ConstructedType" isAbstract="true">
-        <generalization xmi:id="_9NetECV5Ed-C3YF8TpBctg" general="_0eaIgCMmEd-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_m0YBcCMmEd-csr6NlFtsMA" name="Double">
-        <generalization xmi:id="_GLNdECV6Ed-C3YF8TpBctg" general="_78-L0CMmEd-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_qhXQkCMmEd-csr6NlFtsMA" name="Enum">
-        <generalization xmi:id="_SS8q8CV6Ed-C3YF8TpBctg" general="_a1LPECMnEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_sE6G8CMmEd-csr6NlFtsMA" name="labels" visibility="private">
-          <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_0eaIgCMmEd-csr6NlFtsMA" name="Field" isAbstract="true">
-        <generalization xmi:id="_YESXcCV6Ed-C3YF8TpBctg" general="_4if7wCL0Ed-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_fbToUCV6Ed-C3YF8TpBctg" memberEnd="_giocwCV6Ed-C3YF8TpBctg _k6460CMnEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_giocwCV6Ed-C3YF8TpBctg" visibility="private" type="_hYOsYCMnEd-csr6NlFtsMA" aggregation="composite" association="_fbToUCV6Ed-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_AYolACV7Ed-C3YF8TpBctg" memberEnd="_BKJhgCV7Ed-C3YF8TpBctg _yyhHECMpEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_BKJhgCV7Ed-C3YF8TpBctg" visibility="private" type="_Tp63YCMpEd-csr6NlFtsMA" association="_AYolACV7Ed-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_YaOVwCV7Ed-C3YF8TpBctg" memberEnd="_Z7WKQCV7Ed-C3YF8TpBctg _C53akCMpEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_Z7WKQCV7Ed-C3YF8TpBctg" visibility="private" type="_8QAKoCMoEd-csr6NlFtsMA" association="_YaOVwCV7Ed-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_1hbVcCV7Ed-C3YF8TpBctg" memberEnd="_2ItX4CV7Ed-C3YF8TpBctg _RknCoCMnEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_2ItX4CV7Ed-C3YF8TpBctg" visibility="private" type="_KI_loCMnEd-csr6NlFtsMA" association="_1hbVcCV7Ed-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_57li4CMmEd-csr6NlFtsMA" name="Float">
-        <generalization xmi:id="_Uac4ECV8Ed-C3YF8TpBctg" general="_78-L0CMmEd-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_78-L0CMmEd-csr6NlFtsMA" name="FloatingPoint">
-        <generalization xmi:id="_dpMfkCV8Ed-C3YF8TpBctg" general="_a1LPECMnEd-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_-s0dQCMmEd-csr6NlFtsMA" name="Int" isAbstract="true">
-        <generalization xmi:id="_qBBX4CV8Ed-C3YF8TpBctg" general="_a1LPECMnEd-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_BcIjMCMnEd-csr6NlFtsMA" name="Integer">
-        <generalization xmi:id="_1FKawCV8Ed-C3YF8TpBctg" general="_XnekACMnEd-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_D6ifUCMnEd-csr6NlFtsMA" name="Long">
-        <generalization xmi:id="_5JkEUCV8Ed-C3YF8TpBctg" general="_XnekACMnEd-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_GAuIsCMnEd-csr6NlFtsMA" name="LongLong">
-        <generalization xmi:id="_8nkcQCV8Ed-C3YF8TpBctg" general="_XnekACMnEd-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_HsqtICMnEd-csr6NlFtsMA" name="Octet">
-        <generalization xmi:id="_DjcCMCV9Ed-C3YF8TpBctg" general="_a1LPECMnEd-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_KI_loCMnEd-csr6NlFtsMA" name="Sequence">
-        <generalization xmi:id="_JW51oCV9Ed-C3YF8TpBctg" general="_bwigkCMmEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_RknCoCMnEd-csr6NlFtsMA" name="subtype" visibility="private" type="_0eaIgCMmEd-csr6NlFtsMA" association="_1hbVcCV7Ed-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_V_9MkCMnEd-csr6NlFtsMA" name="Short">
-        <generalization xmi:id="_ltScYCV9Ed-C3YF8TpBctg" general="_XnekACMnEd-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_XnekACMnEd-csr6NlFtsMA" name="SignedInt" isAbstract="true">
-        <generalization xmi:id="_r9Ip0CV9Ed-C3YF8TpBctg" general="_-s0dQCMmEd-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_a1LPECMnEd-csr6NlFtsMA" name="Simple" isAbstract="true">
-        <generalization xmi:id="_2jhZsCV9Ed-C3YF8TpBctg" general="_0eaIgCMmEd-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_dOz_8CMnEd-csr6NlFtsMA" name="String">
-        <generalization xmi:id="__9KCkCV9Ed-C3YF8TpBctg" general="_bwigkCMmEd-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_hYOsYCMnEd-csr6NlFtsMA" name="Struct">
-        <generalization xmi:id="_UILKYCV-Ed-C3YF8TpBctg" general="_hYzJkCMmEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_k6460CMnEd-csr6NlFtsMA" name="members" visibility="private" type="_0eaIgCMmEd-csr6NlFtsMA" association="_fbToUCV6Ed-C3YF8TpBctg">
-          <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_4Y9noCMoEd-csr6NlFtsMA" value="*"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_8QAKoCMoEd-csr6NlFtsMA" name="Typedef">
-        <generalization xmi:id="_mEJAsCV-Ed-C3YF8TpBctg" general="_0eaIgCMmEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_C53akCMpEd-csr6NlFtsMA" name="type" visibility="private" type="_0eaIgCMmEd-csr6NlFtsMA" association="_YaOVwCV7Ed-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_IcCCoCMpEd-csr6NlFtsMA" name="UInteger">
-        <generalization xmi:id="_85JCgCV-Ed-C3YF8TpBctg" general="_48bEkCMpEd-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_LCVWgCMpEd-csr6NlFtsMA" name="ULongLong">
-        <generalization xmi:id="__VnE8CV-Ed-C3YF8TpBctg" general="_48bEkCMpEd-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_OXulACMpEd-csr6NlFtsMA" name="UShort">
-        <generalization xmi:id="_B44S8CV_Ed-C3YF8TpBctg" general="_48bEkCMpEd-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_RjHi8CMpEd-csr6NlFtsMA" name="ULong">
-        <generalization xmi:id="_EkxRcCV_Ed-C3YF8TpBctg" general="_48bEkCMpEd-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_Tp63YCMpEd-csr6NlFtsMA" name="Union">
-        <generalization xmi:id="_m_LQICV_Ed-C3YF8TpBctg" general="_hYzJkCMmEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_sURRQCMpEd-csr6NlFtsMA" name="cases" visibility="private" type="_A3KDUCMmEd-csr6NlFtsMA" association="_JYd4sCV5Ed-C3YF8TpBctg">
-          <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_vArNICMpEd-csr6NlFtsMA" value="*"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_yyhHECMpEd-csr6NlFtsMA" name="switch" visibility="private" type="_0eaIgCMmEd-csr6NlFtsMA" association="_AYolACV7Ed-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_48bEkCMpEd-csr6NlFtsMA" name="UnsignedInt" isAbstract="true">
-        <generalization xmi:id="_tTXyECV_Ed-C3YF8TpBctg" general="_-s0dQCMmEd-csr6NlFtsMA"/>
-      </packagedElement>
-    </packagedElement>
-    <packagedElement xmi:type="uml:Package" xmi:id="_NwphcCMqEd-csr6NlFtsMA" name="DCPS">
-      <packagedElement xmi:type="uml:Class" xmi:id="_QKcDUCMqEd-csr6NlFtsMA" name="DataReader">
-        <generalization xmi:id="_tcYOACWIEd-C3YF8TpBctg" general="_0J3fECMqEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_SuAMQCMqEd-csr6NlFtsMA" name="topic" type="_CQ36MCMkEd-csr6NlFtsMA" association="_yEUakCVpEd-eCa_VLKlKsw"/>
-        <ownedAttribute xmi:id="_WhJtwCMqEd-csr6NlFtsMA" name="ownership_strength" type="_Hv0YsCMwEd-csr6NlFtsMA" association="_NalwsCWBEd-C3YF8TpBctg">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Z8aTsCMqEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_ajC14CMqEd-csr6NlFtsMA" name="durability_service" type="_R54q4CMuEd-csr6NlFtsMA" association="_GM17ICWCEd-C3YF8TpBctg">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_dV2UsCMqEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_eXszQCMqEd-csr6NlFtsMA" name="transport_priority" type="_o2g3UCMxEd-csr6NlFtsMA" association="_heAmQCWCEd-C3YF8TpBctg">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_gTvCICMqEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_iqHqsCMqEd-csr6NlFtsMA" name="reader_data_lifecycle" type="_tTywYCMwEd-csr6NlFtsMA" association="_tuT6QCWCEd-C3YF8TpBctg">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_kQB4kCMqEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_NalwsCWBEd-C3YF8TpBctg" memberEnd="_mEOY4CWBEd-C3YF8TpBctg _WhJtwCMqEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_mEOY4CWBEd-C3YF8TpBctg" type="_QKcDUCMqEd-csr6NlFtsMA" aggregation="composite" association="_NalwsCWBEd-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_GM17ICWCEd-C3YF8TpBctg" memberEnd="_H86KkCWCEd-C3YF8TpBctg _ajC14CMqEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_H86KkCWCEd-C3YF8TpBctg" type="_QKcDUCMqEd-csr6NlFtsMA" aggregation="composite" association="_GM17ICWCEd-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_heAmQCWCEd-C3YF8TpBctg" memberEnd="_ixjRwCWCEd-C3YF8TpBctg _eXszQCMqEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_ixjRwCWCEd-C3YF8TpBctg" type="_QKcDUCMqEd-csr6NlFtsMA" aggregation="composite" association="_heAmQCWCEd-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_tuT6QCWCEd-C3YF8TpBctg" memberEnd="_uU0goCWCEd-C3YF8TpBctg _iqHqsCMqEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_uU0goCWCEd-C3YF8TpBctg" type="_QKcDUCMqEd-csr6NlFtsMA" aggregation="composite" association="_tuT6QCWCEd-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_CXsZECWDEd-C3YF8TpBctg" memberEnd="_DEAFcCWDEd-C3YF8TpBctg _LX_U4CWDEd-C3YF8TpBctg">
-        <ownedEnd xmi:id="_DEAFcCWDEd-C3YF8TpBctg" type="_XwTWkCMsEd-csr6NlFtsMA" aggregation="composite" association="_CXsZECWDEd-C3YF8TpBctg"/>
-        <ownedEnd xmi:id="_LX_U4CWDEd-C3YF8TpBctg" type="_QKcDUCMqEd-csr6NlFtsMA" subsettedProperty="_beivcCMXEd-csr6NlFtsMA" association="_CXsZECWDEd-C3YF8TpBctg">
-          <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_Q6vy0CWDEd-C3YF8TpBctg" value="*"/>
-        </ownedEnd>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_0J3fECMqEd-csr6NlFtsMA" name="DataReaderWriter" isAbstract="true">
-        <generalization xmi:id="_iR1BICWIEd-C3YF8TpBctg" general="_-OIaUCMfEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_296UACMqEd-csr6NlFtsMA" name="deadline" type="_4pF8ECMtEd-csr6NlFtsMA" association="_BQLh8CWEEd-C3YF8TpBctg">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_4fFy4CMqEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_69yC4CMqEd-csr6NlFtsMA" name="user_data" type="_xEKOMCMxEd-csr6NlFtsMA" association="_lBk20CWGEd-C3YF8TpBctg">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_7VqXYCMqEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_8yJjgCMqEd-csr6NlFtsMA" name="liveliness" type="_zpPsACMvEd-csr6NlFtsMA" association="_vqCqUCWGEd-C3YF8TpBctg">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_-jHK0CMqEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_Dxq6YCMrEd-csr6NlFtsMA" name="durability" type="_LRZ7ACMuEd-csr6NlFtsMA" association="_gTN00CWHEd-C3YF8TpBctg">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_EMz-QCMrEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_Jzt8YCMrEd-csr6NlFtsMA" name="resource_limits" type="_GZC9kCMxEd-csr6NlFtsMA" association="_r476wCWHEd-C3YF8TpBctg">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_LImrsCMrEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_MLr5UCMrEd-csr6NlFtsMA" name="destination_order" type="_BMHGACMuEd-csr6NlFtsMA" association="_2GWxACWHEd-C3YF8TpBctg">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MgMJsCMrEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_OJ7usCMrEd-csr6NlFtsMA" name="latency_budget" type="_Zl3psCMvEd-csr6NlFtsMA">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_OqgsMCMrEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_R969sCMrEd-csr6NlFtsMA" name="reliability" type="_Zl3psCMvEd-csr6NlFtsMA" association="_-sHs8CWHEd-C3YF8TpBctg">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_UIdioCMrEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_VuwyECMrEd-csr6NlFtsMA" name="history" type="_M3hHwCMvEd-csr6NlFtsMA" association="_G5G8gCWIEd-C3YF8TpBctg">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_WI8MoCMrEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_BQLh8CWEEd-C3YF8TpBctg" memberEnd="_GmzBUCWEEd-C3YF8TpBctg _296UACMqEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_GmzBUCWEEd-C3YF8TpBctg" type="_0J3fECMqEd-csr6NlFtsMA" aggregation="composite" association="_BQLh8CWEEd-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_lBk20CWGEd-C3YF8TpBctg" memberEnd="_mCC1UCWGEd-C3YF8TpBctg _69yC4CMqEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_mCC1UCWGEd-C3YF8TpBctg" type="_0J3fECMqEd-csr6NlFtsMA" aggregation="composite" association="_lBk20CWGEd-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_vqCqUCWGEd-C3YF8TpBctg" memberEnd="_xH8LsCWGEd-C3YF8TpBctg _8yJjgCMqEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_xH8LsCWGEd-C3YF8TpBctg" type="_0J3fECMqEd-csr6NlFtsMA" aggregation="composite" association="_vqCqUCWGEd-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_gTN00CWHEd-C3YF8TpBctg" memberEnd="_g7VkwCWHEd-C3YF8TpBctg _Dxq6YCMrEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_g7VkwCWHEd-C3YF8TpBctg" type="_0J3fECMqEd-csr6NlFtsMA" aggregation="composite" association="_gTN00CWHEd-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_r476wCWHEd-C3YF8TpBctg" memberEnd="_sYHxICWHEd-C3YF8TpBctg _Jzt8YCMrEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_sYHxICWHEd-C3YF8TpBctg" type="_0J3fECMqEd-csr6NlFtsMA" aggregation="composite" association="_r476wCWHEd-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_2GWxACWHEd-C3YF8TpBctg" memberEnd="_2q0wACWHEd-C3YF8TpBctg _MLr5UCMrEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_2q0wACWHEd-C3YF8TpBctg" type="_0J3fECMqEd-csr6NlFtsMA" aggregation="composite" association="_2GWxACWHEd-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_-sHs8CWHEd-C3YF8TpBctg" memberEnd="__PNy8CWHEd-C3YF8TpBctg _R969sCMrEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="__PNy8CWHEd-C3YF8TpBctg" type="_0J3fECMqEd-csr6NlFtsMA" aggregation="composite" association="_-sHs8CWHEd-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_G5G8gCWIEd-C3YF8TpBctg" memberEnd="_ItMwUCWIEd-C3YF8TpBctg _VuwyECMrEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_ItMwUCWIEd-C3YF8TpBctg" type="_0J3fECMqEd-csr6NlFtsMA" aggregation="composite" association="_G5G8gCWIEd-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_eEmboCMrEd-csr6NlFtsMA" name="DataWriter">
-        <generalization xmi:id="_06HK4CWIEd-C3YF8TpBctg" general="_0J3fECMqEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_hkTcsCMrEd-csr6NlFtsMA" name="writer_data_lifecycle" type="_5GP1UCMxEd-csr6NlFtsMA" association="_WkeMsCWJEd-C3YF8TpBctg">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_kYA6cCMrEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_mMX0ACMrEd-csr6NlFtsMA" name="topic" type="_QKckACMiEd-csr6NlFtsMA" association="_oP2FQCVoEd-eCa_VLKlKsw"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_WkeMsCWJEd-C3YF8TpBctg" memberEnd="_XLg-kCWJEd-C3YF8TpBctg _hkTcsCMrEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_XLg-kCWJEd-C3YF8TpBctg" type="_eEmboCMrEd-csr6NlFtsMA" aggregation="composite" association="_WkeMsCWJEd-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_oBYvgCWJEd-C3YF8TpBctg" memberEnd="_oncC4CWJEd-C3YF8TpBctg _uC8pUCWJEd-C3YF8TpBctg">
-        <ownedEnd xmi:id="_oncC4CWJEd-C3YF8TpBctg" type="_B3VfMCMsEd-csr6NlFtsMA" aggregation="composite" association="_oBYvgCWJEd-C3YF8TpBctg"/>
-        <ownedEnd xmi:id="_uC8pUCWJEd-C3YF8TpBctg" type="_eEmboCMrEd-csr6NlFtsMA" subsettedProperty="_beivcCMXEd-csr6NlFtsMA" association="_oBYvgCWJEd-C3YF8TpBctg">
-          <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_2Xn1QCWJEd-C3YF8TpBctg" value="*"/>
-        </ownedEnd>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_sjUvACMrEd-csr6NlFtsMA" name="Domain">
-        <generalization xmi:id="_OziKgCWKEd-C3YF8TpBctg" general="_4if7wCL0Ed-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_Wg7UACWKEd-C3YF8TpBctg" memberEnd="_W-5CYCWKEd-C3YF8TpBctg _0nk5UCMrEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_W-5CYCWKEd-C3YF8TpBctg" type="_woxhcCMrEd-csr6NlFtsMA" association="_Wg7UACWKEd-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_woxhcCMrEd-csr6NlFtsMA" name="DomainParticipant">
-        <generalization xmi:id="_SUJfoCWMEd-C3YF8TpBctg" general="_-OIaUCMfEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_0nk5UCMrEd-csr6NlFtsMA" name="domain" type="_sjUvACMrEd-csr6NlFtsMA" association="_Wg7UACWKEd-C3YF8TpBctg"/>
-        <ownedAttribute xmi:id="_3K1gQCMrEd-csr6NlFtsMA" name="user_data" type="_xEKOMCMxEd-csr6NlFtsMA" association="_DsKtICWNEd-C3YF8TpBctg">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_4m2LQCMrEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_6QwIUCMrEd-csr6NlFtsMA" name="entity_factory" type="_u23XkCMuEd-csr6NlFtsMA" association="_ikDnUCWNEd-C3YF8TpBctg">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_7Ve7wCMrEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_aewwoCWMEd-C3YF8TpBctg" memberEnd="_bn14kCWMEd-C3YF8TpBctg _3FSsMCWMEd-C3YF8TpBctg">
-        <ownedEnd xmi:id="_bn14kCWMEd-C3YF8TpBctg" type="_B3VfMCMsEd-csr6NlFtsMA" subsettedProperty="_beivcCMXEd-csr6NlFtsMA" association="_aewwoCWMEd-C3YF8TpBctg">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_sZc0kCWMEd-C3YF8TpBctg"/>
-        </ownedEnd>
-        <ownedEnd xmi:id="_3FSsMCWMEd-C3YF8TpBctg" type="_woxhcCMrEd-csr6NlFtsMA" aggregation="composite" association="_aewwoCWMEd-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_DsKtICWNEd-C3YF8TpBctg" memberEnd="_EeI8oCWNEd-C3YF8TpBctg _3K1gQCMrEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_EeI8oCWNEd-C3YF8TpBctg" type="_woxhcCMrEd-csr6NlFtsMA" aggregation="composite" association="_DsKtICWNEd-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_ikDnUCWNEd-C3YF8TpBctg" memberEnd="_jRYAUCWNEd-C3YF8TpBctg _6QwIUCMrEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_jRYAUCWNEd-C3YF8TpBctg" type="_woxhcCMrEd-csr6NlFtsMA" aggregation="composite" association="_ikDnUCWNEd-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_ysiGwCWNEd-C3YF8TpBctg" memberEnd="_z2XcoCWNEd-C3YF8TpBctg _EDekcCWOEd-C3YF8TpBctg">
-        <ownedEnd xmi:id="_z2XcoCWNEd-C3YF8TpBctg" type="_XwTWkCMsEd-csr6NlFtsMA" subsettedProperty="_beivcCMXEd-csr6NlFtsMA" association="_ysiGwCWNEd-C3YF8TpBctg">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_3attICWNEd-C3YF8TpBctg"/>
-        </ownedEnd>
-        <ownedEnd xmi:id="_EDekcCWOEd-C3YF8TpBctg" type="_woxhcCMrEd-csr6NlFtsMA" aggregation="composite" association="_ysiGwCWNEd-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_Pq8W0CWOEd-C3YF8TpBctg" memberEnd="_QPo_UCWOEd-C3YF8TpBctg _Tyc1YCM2Ed-csr6NlFtsMA">
-        <ownedEnd xmi:id="_QPo_UCWOEd-C3YF8TpBctg" type="_yf7EwCM1Ed-csr6NlFtsMA" association="_Pq8W0CWOEd-C3YF8TpBctg">
-          <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_X1n5QCWOEd-C3YF8TpBctg" value="*"/>
-        </ownedEnd>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_B3VfMCMsEd-csr6NlFtsMA" name="Publisher">
-        <generalization xmi:id="_o7Tn0CWOEd-C3YF8TpBctg" general="_Ec5MMCMsEd-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_Ec5MMCMsEd-csr6NlFtsMA" name="PublisherSubscriber" isAbstract="true">
-        <generalization xmi:id="_rinoUCWOEd-C3YF8TpBctg" general="_-OIaUCMfEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_GwXDoCMsEd-csr6NlFtsMA" name="entity_factory" type="_u23XkCMuEd-csr6NlFtsMA" association="_Z70M4CWSEd-C3YF8TpBctg">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_IZHKICMsEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_K_k2ECMsEd-csr6NlFtsMA" name="group_data" type="_EvIEUCMvEd-csr6NlFtsMA" association="_jOl_0CWSEd-C3YF8TpBctg">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_LklAkCMsEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_NIm_ICMsEd-csr6NlFtsMA" name="presentation" type="_bDPKICMwEd-csr6NlFtsMA" association="_1FQfYCWSEd-C3YF8TpBctg">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Od5XECMsEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_PXHeECMsEd-csr6NlFtsMA" name="partition" type="_U1WrkCMwEd-csr6NlFtsMA" association="_AFtVECWTEd-C3YF8TpBctg">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_PuOWgCMsEd-csr6NlFtsMA"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_Z70M4CWSEd-C3YF8TpBctg" memberEnd="_aybr0CWSEd-C3YF8TpBctg _GwXDoCMsEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_aybr0CWSEd-C3YF8TpBctg" type="_Ec5MMCMsEd-csr6NlFtsMA" aggregation="composite" association="_Z70M4CWSEd-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_jOl_0CWSEd-C3YF8TpBctg" memberEnd="_jxTEQCWSEd-C3YF8TpBctg _K_k2ECMsEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_jxTEQCWSEd-C3YF8TpBctg" type="_Ec5MMCMsEd-csr6NlFtsMA" aggregation="composite" association="_jOl_0CWSEd-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_1FQfYCWSEd-C3YF8TpBctg" memberEnd="_3eVPkCWSEd-C3YF8TpBctg _NIm_ICMsEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_3eVPkCWSEd-C3YF8TpBctg" type="_Ec5MMCMsEd-csr6NlFtsMA" aggregation="composite" association="_1FQfYCWSEd-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_AFtVECWTEd-C3YF8TpBctg" memberEnd="_BHrvcCWTEd-C3YF8TpBctg _PXHeECMsEd-csr6NlFtsMA">
-        <ownedEnd xmi:id="_BHrvcCWTEd-C3YF8TpBctg" type="_Ec5MMCMsEd-csr6NlFtsMA" aggregation="composite" association="_AFtVECWTEd-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_XwTWkCMsEd-csr6NlFtsMA" name="Subscriber">
-        <generalization xmi:id="_Vj-p8CWSEd-C3YF8TpBctg" general="_Ec5MMCMsEd-csr6NlFtsMA"/>
-      </packagedElement>
-    </packagedElement>
-    <packagedElement xmi:type="uml:Package" xmi:id="_bntF8CMsEd-csr6NlFtsMA" name="QoS">
-      <packagedElement xmi:type="uml:Class" xmi:id="_rmGm4CMtEd-csr6NlFtsMA" name="CustomPolicy">
-        <generalization xmi:id="_5I0mACWTEd-C3YF8TpBctg" general="_qB1QYCMwEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_ycmkoCMtEd-csr6NlFtsMA" name="name" visibility="private">
-          <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_4pF8ECMtEd-csr6NlFtsMA" name="DeadlineQosPolicy">
-        <generalization xmi:id="_Vj77wCWUEd-C3YF8TpBctg" general="_qB1QYCMwEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_7yMbACMtEd-csr6NlFtsMA" name="period" type="_JLjsACMyEd-csr6NlFtsMA">
-          <defaultValue xmi:type="uml:LiteralString" xmi:id="_-4A8cCMtEd-csr6NlFtsMA" value="-1"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_BMHGACMuEd-csr6NlFtsMA" name="DestinationOrderQosPolicy">
-        <generalization xmi:id="_aT9VMCWUEd-C3YF8TpBctg" general="_qB1QYCMwEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_Drn1YCMuEd-csr6NlFtsMA" name="kind" type="_0NKxECMyEd-csr6NlFtsMA">
-          <defaultValue xmi:type="uml:LiteralString" xmi:id="_FygpYCMuEd-csr6NlFtsMA" value="BY_RECEPTION_TIMESTAMP"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_LRZ7ACMuEd-csr6NlFtsMA" name="DurabilityQosPolicy">
-        <generalization xmi:id="_oWhRACWUEd-C3YF8TpBctg" general="_qB1QYCMwEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_O6oEcCMuEd-csr6NlFtsMA" name="kind" type="_KBsNUCMzEd-csr6NlFtsMA">
-          <defaultValue xmi:type="uml:LiteralString" xmi:id="_Putz0CMuEd-csr6NlFtsMA" value="VOLATILE"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_R54q4CMuEd-csr6NlFtsMA" name="DurabilityServiceQosPolicy">
-        <generalization xmi:id="_2v044CWUEd-C3YF8TpBctg" general="_qB1QYCMwEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_VizSUCMuEd-csr6NlFtsMA" name="max_samples">
-          <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-          <defaultValue xmi:type="uml:LiteralString" xmi:id="_WTxcQCMuEd-csr6NlFtsMA" value="-1"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_aHhasCMuEd-csr6NlFtsMA" name="service_cleanup_delay" type="_JLjsACMyEd-csr6NlFtsMA">
-          <defaultValue xmi:type="uml:LiteralString" xmi:id="_b6kssCMuEd-csr6NlFtsMA" value="0"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_dDRaICMuEd-csr6NlFtsMA" name="history_kind" type="_imo_QCMyEd-csr6NlFtsMA">
-          <defaultValue xmi:type="uml:LiteralString" xmi:id="_d6ShsCMuEd-csr6NlFtsMA" value="KEEP_LAST"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_hNFIICMuEd-csr6NlFtsMA" name="max_instances">
-          <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-          <defaultValue xmi:type="uml:LiteralString" xmi:id="_jKgeICMuEd-csr6NlFtsMA" value="-1"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_kGF8oCMuEd-csr6NlFtsMA" name="history_depth">
-          <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-          <defaultValue xmi:type="uml:LiteralString" xmi:id="_lyWqICMuEd-csr6NlFtsMA" value="1"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_rIrOkCMuEd-csr6NlFtsMA" name="max_samples_per_instance">
-          <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-          <defaultValue xmi:type="uml:LiteralString" xmi:id="_s26SACMuEd-csr6NlFtsMA" value="-1"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_u23XkCMuEd-csr6NlFtsMA" name="EntityFactoryQosPolicy">
-        <generalization xmi:id="_GvNGsCWVEd-C3YF8TpBctg" general="_qB1QYCMwEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_xeKJ8CMuEd-csr6NlFtsMA" name="autoenable_created_entities">
-          <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Boolean"/>
-          <defaultValue xmi:type="uml:LiteralString" xmi:id="_24YW8CMuEd-csr6NlFtsMA" value="true"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_EvIEUCMvEd-csr6NlFtsMA" name="GroupDataQosPolicy">
-        <generalization xmi:id="_JEb4sCWVEd-C3YF8TpBctg" general="_qB1QYCMwEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_ILwjQCMvEd-csr6NlFtsMA" name="datavalue">
-          <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_M3hHwCMvEd-csr6NlFtsMA" name="HistoryQosPolicy">
-        <generalization xmi:id="_N4HqICWVEd-C3YF8TpBctg" general="_qB1QYCMwEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_OkKPwCMvEd-csr6NlFtsMA" name="kind" type="_imo_QCMyEd-csr6NlFtsMA">
-          <defaultValue xmi:type="uml:LiteralString" xmi:id="_QBtL0CMvEd-csr6NlFtsMA" value="KEEP_LAST"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_SwP1sCMvEd-csr6NlFtsMA" name="depth">
-          <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-          <defaultValue xmi:type="uml:LiteralString" xmi:id="_TIDRsCMvEd-csr6NlFtsMA" value="1"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_Zl3psCMvEd-csr6NlFtsMA" name="LatencyBudgetQosPolicy">
-        <generalization xmi:id="_T4ssgCWVEd-C3YF8TpBctg" general="_qB1QYCMwEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_dKwFsCMvEd-csr6NlFtsMA" name="duration" type="_JLjsACMyEd-csr6NlFtsMA">
-          <defaultValue xmi:type="uml:LiteralString" xmi:id="_eaAHECMvEd-csr6NlFtsMA" value="0"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_oltGECMvEd-csr6NlFtsMA" name="LifespanQosPolicy">
-        <generalization xmi:id="_b1zF8CWVEd-C3YF8TpBctg" general="_qB1QYCMwEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_r7A1ACMvEd-csr6NlFtsMA" name="duration" type="_JLjsACMyEd-csr6NlFtsMA">
-          <defaultValue xmi:type="uml:LiteralString" xmi:id="_xrkeYCMvEd-csr6NlFtsMA" value="-1"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_zpPsACMvEd-csr6NlFtsMA" name="LivelinessQosPolicy">
-        <generalization xmi:id="_lJQ1YCWVEd-C3YF8TpBctg" general="_qB1QYCMwEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_4dihcCMvEd-csr6NlFtsMA" name="lease_duration" type="_JLjsACMyEd-csr6NlFtsMA">
-          <defaultValue xmi:type="uml:LiteralString" xmi:id="_6jao0CMvEd-csr6NlFtsMA" value="-1"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_9-wHQCMvEd-csr6NlFtsMA" name="kind" type="_NeeAwCM0Ed-csr6NlFtsMA">
-          <defaultValue xmi:type="uml:LiteralString" xmi:id="__LRkwCMvEd-csr6NlFtsMA" value="AUTOMATIC"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_8YxA4CMvEd-csr6NlFtsMA" name="OwnershipQosPolicy">
-        <generalization xmi:id="_0IU1sCWVEd-C3YF8TpBctg" general="_qB1QYCMwEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_D28psCMwEd-csr6NlFtsMA" name="kind" type="_aGyMICM0Ed-csr6NlFtsMA">
-          <defaultValue xmi:type="uml:LiteralString" xmi:id="_FR49sCMwEd-csr6NlFtsMA" value="SHARED"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_Hv0YsCMwEd-csr6NlFtsMA" name="OwnershipStrengthQosPolicy">
-        <generalization xmi:id="_6oqWMCWVEd-C3YF8TpBctg" general="_qB1QYCMwEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_Ku9DUCMwEd-csr6NlFtsMA" name="value">
-          <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-          <defaultValue xmi:type="uml:LiteralString" xmi:id="_NAuRoCMwEd-csr6NlFtsMA" value="0"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_U1WrkCMwEd-csr6NlFtsMA" name="PartitionQosPolicy">
-        <generalization xmi:id="__nm8cCWVEd-C3YF8TpBctg" general="_qB1QYCMwEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_XPnukCMwEd-csr6NlFtsMA" name="name">
-          <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_bDPKICMwEd-csr6NlFtsMA" name="PresentationQosPolicy">
-        <generalization xmi:id="_DOPE4CWWEd-C3YF8TpBctg" general="_qB1QYCMwEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_crh9oCMwEd-csr6NlFtsMA" name="access_scope" type="_n0_BgCM0Ed-csr6NlFtsMA">
-          <defaultValue xmi:type="uml:LiteralString" xmi:id="_fSvQcCMwEd-csr6NlFtsMA" value="INSTANCE"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_hNyn4CMwEd-csr6NlFtsMA" name="coherent_access">
-          <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Boolean"/>
-          <defaultValue xmi:type="uml:LiteralString" xmi:id="_h41I8CMwEd-csr6NlFtsMA" value="false"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_kmisYCMwEd-csr6NlFtsMA" name="ordered_access">
-          <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Boolean"/>
-          <defaultValue xmi:type="uml:LiteralString" xmi:id="_mhEfYCMwEd-csr6NlFtsMA" value="false"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_qB1QYCMwEd-csr6NlFtsMA" name="QosPolicy" isAbstract="true">
-        <generalization xmi:id="_RaH70CWWEd-C3YF8TpBctg" general="_IYkcwCMaEd-csr6NlFtsMA"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_tTywYCMwEd-csr6NlFtsMA" name="ReaderDataLifecycleQosPolicy">
-        <generalization xmi:id="_XnNwMCWWEd-C3YF8TpBctg" general="_qB1QYCMwEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_wXi1QCMwEd-csr6NlFtsMA" name="autopurge_nowriter_samples_delay">
-          <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-          <defaultValue xmi:type="uml:LiteralString" xmi:id="_zki8wCMwEd-csr6NlFtsMA" value="-1"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_5MakMCMwEd-csr6NlFtsMA" name="ReliabilityQosPolicy">
-        <generalization xmi:id="_aHRSICWWEd-C3YF8TpBctg" general="_qB1QYCMwEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_7-RAwCMwEd-csr6NlFtsMA" name="kind" type="_2xdA0CM0Ed-csr6NlFtsMA">
-          <defaultValue xmi:type="uml:LiteralString" xmi:id="_9kVmsCMwEd-csr6NlFtsMA" value="BEST_EFFORT"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="__YTesCMwEd-csr6NlFtsMA" name="max_blocking_time" type="_JLjsACMyEd-csr6NlFtsMA">
-          <defaultValue xmi:type="uml:LiteralString" xmi:id="_AZJQoCMxEd-csr6NlFtsMA" value="-1"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_GZC9kCMxEd-csr6NlFtsMA" name="ResourceLimitsQosPolicy">
-        <generalization xmi:id="_gx0ekCWWEd-C3YF8TpBctg" general="_qB1QYCMwEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_IqeNoCMxEd-csr6NlFtsMA" name="max_samples">
-          <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-          <defaultValue xmi:type="uml:LiteralString" xmi:id="_KA5OACMxEd-csr6NlFtsMA" value="-1"/>
-        </ownedAttribute>
-        <ownedAttribute xmi:id="_OuF88CMxEd-csr6NlFtsMA" name="max_samples_per_instance">
-          <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-          <defaultValue xmi:type="uml:LiteralString" xmi:id="_Q39McCMxEd-csr6NlFtsMA" value="-1"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_Vu3RACMxEd-csr6NlFtsMA" name="TimeBasedFilterQosPolicy">
-        <generalization xmi:id="_jS8-kCWWEd-C3YF8TpBctg" general="_qB1QYCMwEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_YbRz8CMxEd-csr6NlFtsMA" name="minimum_separation">
-          <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-          <defaultValue xmi:type="uml:LiteralString" xmi:id="_aXGAYCMxEd-csr6NlFtsMA" value="0"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_gbCf0CMxEd-csr6NlFtsMA" name="TopicDataQosPolicy">
-        <generalization xmi:id="_lzoLkCWWEd-C3YF8TpBctg" general="_qB1QYCMwEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_izngwCMxEd-csr6NlFtsMA" name="value">
-          <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_o2g3UCMxEd-csr6NlFtsMA" name="TransportPriorityQosPolicy">
-        <generalization xmi:id="_pcAngCWWEd-C3YF8TpBctg" general="_qB1QYCMwEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_secAQCMxEd-csr6NlFtsMA" name="value">
-          <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-          <defaultValue xmi:type="uml:LiteralString" xmi:id="_uIBNMCMxEd-csr6NlFtsMA" value="0"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_xEKOMCMxEd-csr6NlFtsMA" name="UserDataQosPolicy">
-        <generalization xmi:id="_sT3lcCWWEd-C3YF8TpBctg" general="_qB1QYCMwEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_y6GcICMxEd-csr6NlFtsMA" name="value">
-          <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Class" xmi:id="_5GP1UCMxEd-csr6NlFtsMA" name="WriterDataLifecycleQosPolicy">
-        <generalization xmi:id="_vhCFACWWEd-C3YF8TpBctg" general="_qB1QYCMwEd-csr6NlFtsMA"/>
-        <ownedAttribute xmi:id="_8CCRACMxEd-csr6NlFtsMA" name="autodispose_unregistered_instances">
-          <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Boolean"/>
-          <defaultValue xmi:type="uml:LiteralString" xmi:id="_-aUXACMxEd-csr6NlFtsMA" value="true"/>
-        </ownedAttribute>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Package" xmi:id="_FXu1ECMyEd-csr6NlFtsMA" name="Enumerations">
-        <packagedElement xmi:type="uml:Class" xmi:id="_JLjsACMyEd-csr6NlFtsMA" name="Duration">
-          <ownedAttribute xmi:id="_Njc5UCMyEd-csr6NlFtsMA" name="second">
-            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#UnlimitedNatural"/>
-          </ownedAttribute>
-          <ownedAttribute xmi:id="_bVfF0CMyEd-csr6NlFtsMA" name="nanosecond">
-            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#UnlimitedNatural"/>
-          </ownedAttribute>
+<xmi:XMI xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:Standard="http://www.eclipse.org/uml2/schemas/Standard/1" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/3.0.0/UML" xsi:schemaLocation="http://www.eclipse.org/uml2/schemas/Standard/1 pathmap://UML_PROFILES/Standard.profile.uml#_yzU58YinEdqtvbnfB2L_5w">
+  <uml:Model xmi:id="_0" name="DDS">
+    <elementImport xmi:id="_elementImport.0">
+      <importedElement xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Boolean"/>
+    </elementImport>
+    <elementImport xmi:id="_elementImport.1">
+      <importedElement xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+    </elementImport>
+    <elementImport xmi:id="_elementImport.2">
+      <importedElement xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#UnlimitedNatural"/>
+    </elementImport>
+    <elementImport xmi:id="_elementImport.3">
+      <importedElement xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+    </elementImport>
+    <packagedElement xmi:type="uml:Package" xmi:id="DDSProfile" name="DDSProfile">
+      <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Common" name="Common"/>
+      <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-DCPS" name="DCPS"/>
+      <packagedElement xmi:type="uml:Package" xmi:id="DDSProfile-Compliance20Levels" name="Compliance Levels">
+        <packagedElement xmi:type="uml:Package" xmi:id="DDSProfile-Compliance20Levels-Level201" name="Level 1">
+          <packageMerge xmi:id="DDSProfile-Compliance20Levels-Level201-_packageMerge.0" mergedPackage="DDSProfile-Topics"/>
+          <packageMerge xmi:id="DDSProfile-Compliance20Levels-Level201-_packageMerge.1" mergedPackage="DDSProfile-QoS"/>
+          <packageMerge xmi:id="DDSProfile-Compliance20Levels-Level201-_packageMerge.2" mergedPackage="DDSProfile-DCPS.1"/>
+          <packageMerge xmi:id="DDSProfile-Compliance20Levels-Level201-_packageMerge.3" mergedPackage="DDSProfile-Core"/>
+          <packageMerge xmi:id="DDSProfile-Compliance20Levels-Level201-_packageMerge.4" mergedPackage="DDSProfile-Domain"/>
         </packagedElement>
-        <packagedElement xmi:type="uml:Enumeration" xmi:id="_imo_QCMyEd-csr6NlFtsMA" name="HistoryQosPolicyKind">
-          <ownedAttribute xmi:id="_nAO1sCMyEd-csr6NlFtsMA" name="KEEP_LAST" visibility="private">
-            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-          </ownedAttribute>
-          <ownedAttribute xmi:id="_uo8TgCMyEd-csr6NlFtsMA" name="KEEP_ALL" visibility="private">
-            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-          </ownedAttribute>
-        </packagedElement>
-        <packagedElement xmi:type="uml:Enumeration" xmi:id="_0NKxECMyEd-csr6NlFtsMA" name="DestinationOrderQosPolicyKind">
-          <ownedAttribute xmi:id="_2mpw8CMyEd-csr6NlFtsMA" name="BY_RECEPTION_TIMESTAMP" visibility="private">
-            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-          </ownedAttribute>
-          <ownedAttribute xmi:id="_9BRrACMyEd-csr6NlFtsMA" name="BY_SOURCE_TIMESTAMP" visibility="private">
-            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-          </ownedAttribute>
-        </packagedElement>
-        <packagedElement xmi:type="uml:Enumeration" xmi:id="_KBsNUCMzEd-csr6NlFtsMA" name="DurabilityQosPolicyKind">
-          <ownedAttribute xmi:id="_MNwcQCMzEd-csr6NlFtsMA" name="TRANSIENT" visibility="private">
-            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-          </ownedAttribute>
-          <ownedAttribute xmi:id="_SMqDoCMzEd-csr6NlFtsMA" name="TRANSIENT_LOCAL" visibility="private">
-            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-          </ownedAttribute>
-          <ownedAttribute xmi:id="_YPd6oCMzEd-csr6NlFtsMA" name="VOLATILE" visibility="private">
-            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-          </ownedAttribute>
-          <ownedAttribute xmi:id="_ejgrkCMzEd-csr6NlFtsMA" name="PERSISTENT" visibility="private">
-            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-          </ownedAttribute>
-        </packagedElement>
-        <packagedElement xmi:type="uml:Enumeration" xmi:id="_NeeAwCM0Ed-csr6NlFtsMA" name="LivelinessQosPolicyKind">
-          <ownedAttribute xmi:id="_OJt9MCM0Ed-csr6NlFtsMA" name="AUTOMATIC" visibility="private">
-            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-          </ownedAttribute>
-          <ownedAttribute xmi:id="_Sht4MCM0Ed-csr6NlFtsMA" name="MANUAL_BY_PARTICIPANT" visibility="private">
-            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-          </ownedAttribute>
-          <ownedAttribute xmi:id="_V4auQCM0Ed-csr6NlFtsMA" name="MANUAL_BY_TOPIC" visibility="private">
-            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-          </ownedAttribute>
-        </packagedElement>
-        <packagedElement xmi:type="uml:Enumeration" xmi:id="_aGyMICM0Ed-csr6NlFtsMA" name="OwnershipQosPolicyKind">
-          <ownedAttribute xmi:id="_eGgKACM0Ed-csr6NlFtsMA" name="SHARED" visibility="private">
-            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-          </ownedAttribute>
-          <ownedAttribute xmi:id="_iE8VgCM0Ed-csr6NlFtsMA" name="EXCLUSIVE" visibility="private">
-            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-          </ownedAttribute>
-        </packagedElement>
-        <packagedElement xmi:type="uml:Enumeration" xmi:id="_n0_BgCM0Ed-csr6NlFtsMA" name="PresentationQosPolicyAccessScopeKind">
-          <ownedAttribute xmi:id="_q6px8CM0Ed-csr6NlFtsMA" name="INSTANCE" visibility="private">
-            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-          </ownedAttribute>
-          <ownedAttribute xmi:id="_uy-uYCM0Ed-csr6NlFtsMA" name="TOPIC" visibility="private">
-            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-          </ownedAttribute>
-          <ownedAttribute xmi:id="_yUqscCM0Ed-csr6NlFtsMA" name="GROUP" visibility="private">
-            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-          </ownedAttribute>
-        </packagedElement>
-        <packagedElement xmi:type="uml:Enumeration" xmi:id="_2xdA0CM0Ed-csr6NlFtsMA" name="ReliabilityQosPolicyKind">
-          <ownedAttribute xmi:id="_6NtFQCM0Ed-csr6NlFtsMA" name="BEST_EFFORT" visibility="private">
-            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-          </ownedAttribute>
-          <ownedAttribute xmi:id="_9fDhQCM0Ed-csr6NlFtsMA" name="RELIABLE" visibility="private">
-            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-          </ownedAttribute>
+        <packagedElement xmi:type="uml:Package" xmi:id="DDSProfile-Compliance20Levels-Level202" name="Level 2"/>
+        <packagedElement xmi:type="uml:Package" xmi:id="DDSProfile-Compliance20Levels-Level203" name="Level 3">
+          <packageMerge xmi:id="DDSProfile-Compliance20Levels-Level203-_packageMerge.0" mergedPackage="DDSProfile-Application"/>
         </packagedElement>
       </packagedElement>
+      <packagedElement xmi:type="uml:Package" xmi:id="DDSProfile-Domain" name="Domain">
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Domain-DDSEntity" name="DDSEntity">
+          <generalization xmi:id="DDSProfile-Domain-DDSEntity-_generalization.0" general="DDSProfile-Core-NamedEntity"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Domain-_packagedElement.1" visibility="private" memberEnd="DDSProfile-Domain-_packagedElement.1-_ownedEnd.0 DDSProfile-Domain-_packagedElement.1-_ownedEnd.1">
+          <ownedEnd xmi:id="DDSProfile-Domain-_packagedElement.1-_ownedEnd.0" type="DDSProfile-Domain-QoSProperty" subsettedProperty="DDSProfile-Core-NamedEntity-ownedEntity DDSProfile-Core-NamedEntity-property" association="DDSProfile-Domain-_packagedElement.1">
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="DDSProfile-Domain-_packagedElement.1-_ownedEnd.0-_upperValue" value="*"/>
+          </ownedEnd>
+          <ownedEnd xmi:id="DDSProfile-Domain-_packagedElement.1-_ownedEnd.1" type="DDSProfile-Domain-DDSEntity" aggregation="composite" association="DDSProfile-Domain-_packagedElement.1"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Domain-QoSProperty" name="QoSProperty">
+          <generalization xmi:id="DDSProfile-Domain-QoSProperty-_generalization.0" general="DDSProfile-Core-TypedEntity"/>
+        </packagedElement>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Package" xmi:id="DDSProfile-Core" name="Core">
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Core-NamedEntity" name="NamedEntity" isAbstract="true">
+          <ownedAttribute xmi:id="DDSProfile-Core-NamedEntity-name" name="name" visibility="private">
+            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-Core-NamedEntity-ownedEntity" name="ownedEntity" type="DDSProfile-Core-NamedEntity" association="DDSProfile-Core-_packagedElement.4">
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="DDSProfile-Core-NamedEntity-ownedEntity-_upperValue" value="*"/>
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-Core-NamedEntity-ownedEntity-_lowerValue"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-Core-NamedEntity-custom_policy" name="custom_policy" type="DDSProfile-QoS-CustomPolicy" association="DDSProfile-Core-_packagedElement.3">
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="DDSProfile-Core-NamedEntity-custom_policy-_upperValue" value="*"/>
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-Core-NamedEntity-custom_policy-_lowerValue"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-Core-NamedEntity-property" name="property" type="DDSProfile-Core-TypedEntity" subsettedProperty="DDSProfile-Core-NamedEntity-ownedEntity" association="DDSProfile-Core-_packagedElement.5">
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="DDSProfile-Core-NamedEntity-property-_upperValue" value="*"/>
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-Core-NamedEntity-property-_lowerValue"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Core-Specification" name="Specification">
+          <generalization xmi:id="DDSProfile-Core-Specification-_generalization.0" general="DDSProfile-Core-NamedEntity"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Core-TypedEntity" name="TypedEntity">
+          <generalization xmi:id="DDSProfile-Core-TypedEntity-_generalization.0" general="DDSProfile-Core-NamedEntity"/>
+          <ownedAttribute xmi:id="DDSProfile-Core-TypedEntity-type" name="type" type="DDSProfile-Core-Specification" association="DDSProfile-Core-_packagedElement.6">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-Core-TypedEntity-type-_lowerValue"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Core-_packagedElement.3" visibility="private" memberEnd="DDSProfile-Core-_packagedElement.3-_ownedEnd.0 DDSProfile-Core-NamedEntity-custom_policy">
+          <ownedEnd xmi:id="DDSProfile-Core-_packagedElement.3-_ownedEnd.0" type="DDSProfile-Core-NamedEntity" association="DDSProfile-Core-_packagedElement.3"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Core-_packagedElement.4" visibility="private" memberEnd="DDSProfile-Core-_packagedElement.4-_ownedEnd.0 DDSProfile-Core-NamedEntity-ownedEntity">
+          <ownedEnd xmi:id="DDSProfile-Core-_packagedElement.4-_ownedEnd.0" type="DDSProfile-Core-NamedEntity" aggregation="shared" association="DDSProfile-Core-_packagedElement.4"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Core-_packagedElement.5" visibility="private" memberEnd="DDSProfile-Core-_packagedElement.5-_ownedEnd.0 DDSProfile-Core-NamedEntity-property">
+          <ownedEnd xmi:id="DDSProfile-Core-_packagedElement.5-_ownedEnd.0" type="DDSProfile-Core-NamedEntity" aggregation="composite" association="DDSProfile-Core-_packagedElement.5"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Core-_packagedElement.6" visibility="private" memberEnd="DDSProfile-Core-_packagedElement.6-_ownedEnd.0 DDSProfile-Core-TypedEntity-type">
+          <ownedEnd xmi:id="DDSProfile-Core-_packagedElement.6-_ownedEnd.0" type="DDSProfile-Core-TypedEntity" association="DDSProfile-Core-_packagedElement.6">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-Core-_packagedElement.6-_ownedEnd.0-_lowerValue" value="1"/>
+          </ownedEnd>
+        </packagedElement>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Package" xmi:id="DDSProfile-Topics" name="Topics">
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Topics-ContentFilteredTopic" name="ContentFilteredTopic">
+          <generalization xmi:id="DDSProfile-Topics-ContentFilteredTopic-_generalization.0" general="DDSProfile-Topics-TopicDescription"/>
+          <ownedAttribute xmi:id="DDSProfile-Topics-ContentFilteredTopic-filter_expression" name="filter_expression">
+            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-Topics-ContentFilteredTopic-related_topic" name="related_topic" type="DDSProfile-Topics-Topic" association="DDSProfile-Topics-_packagedElement.18"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Topics-MultiTopic" name="MultiTopic">
+          <generalization xmi:id="DDSProfile-Topics-MultiTopic-_generalization.0" general="DDSProfile-Topics-TopicDescription"/>
+          <ownedAttribute xmi:id="DDSProfile-Topics-MultiTopic-subscription_expression" name="subscription_expression">
+            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-Topics-MultiTopic-related_topics" name="related_topics" type="DDSProfile-Topics-Topic" association="DDSProfile-Topics-_packagedElement.19">
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="DDSProfile-Topics-MultiTopic-related_topics-_upperValue" value="*"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Topics-Topic" name="Topic">
+          <generalization xmi:id="DDSProfile-Topics-Topic-_generalization.0" general="DDSProfile-Topics-TopicDescription"/>
+          <generalization xmi:id="DDSProfile-Topics-Topic-_generalization.1" general="DDSProfile-Domain-DDSEntity"/>
+          <ownedAttribute xmi:id="DDSProfile-Topics-Topic-history" name="history" type="DDSProfile-QoS-HistoryQosPolicy" association="DDSProfile-Topics-_packagedElement.3">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-Topics-Topic-history-_lowerValue"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-Topics-Topic-transport_priority" name="transport_priority" type="DDSProfile-QoS-TransportPriorityQosPolicy" association="DDSProfile-Topics-_packagedElement.4">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-Topics-Topic-transport_priority-_lowerValue"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-Topics-Topic-ownership" name="ownership" type="DDSProfile-QoS-OwnershipQosPolicy" association="DDSProfile-Topics-_packagedElement.5">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-Topics-Topic-ownership-_lowerValue"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-Topics-Topic-topic_data" name="topic_data" type="DDSProfile-QoS-TopicDataQosPolicy" association="DDSProfile-Topics-_packagedElement.6">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-Topics-Topic-topic_data-_lowerValue"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-Topics-Topic-durability" name="durability" type="DDSProfile-QoS-DurabilityQosPolicy" association="DDSProfile-Topics-_packagedElement.7">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-Topics-Topic-durability-_lowerValue"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-Topics-Topic-liveliness" name="liveliness" type="DDSProfile-QoS-LivelinessQosPolicy" association="DDSProfile-Topics-_packagedElement.8">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-Topics-Topic-liveliness-_lowerValue"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-Topics-Topic-durability_service" name="durability_service" type="DDSProfile-QoS-DurabilityServiceQosPolicy" association="DDSProfile-Topics-_packagedElement.9">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-Topics-Topic-durability_service-_lowerValue"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-Topics-Topic-destination_order" name="destination_order" type="DDSProfile-QoS-DestinationOrderQosPolicy" association="DDSProfile-Topics-_packagedElement.10">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-Topics-Topic-destination_order-_lowerValue"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-Topics-Topic-deadline" name="deadline" type="DDSProfile-QoS-DeadlineQosPolicy" association="DDSProfile-Topics-_packagedElement.11">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-Topics-Topic-deadline-_lowerValue"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-Topics-Topic-latency_budget" name="latency_budget" type="DDSProfile-QoS-LatencyBudgetQosPolicy" association="DDSProfile-Topics-_packagedElement.12">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-Topics-Topic-latency_budget-_lowerValue"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-Topics-Topic-reliability" name="reliability" type="DDSProfile-QoS-ReliabilityQosPolicy" association="DDSProfile-Topics-_packagedElement.13">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-Topics-Topic-reliability-_lowerValue"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-Topics-Topic-resource_limits" name="resource_limits" type="DDSProfile-QoS-ResourceLimitsQosPolicy" association="DDSProfile-Topics-_packagedElement.14">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-Topics-Topic-resource_limits-_lowerValue"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Topics-_packagedElement.3" visibility="private" memberEnd="DDSProfile-Topics-_packagedElement.3-_ownedEnd.0 DDSProfile-Topics-Topic-history">
+          <ownedEnd xmi:id="DDSProfile-Topics-_packagedElement.3-_ownedEnd.0" type="DDSProfile-Topics-Topic" aggregation="composite" association="DDSProfile-Topics-_packagedElement.3"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Topics-_packagedElement.4" visibility="private" memberEnd="DDSProfile-Topics-_packagedElement.4-_ownedEnd.0 DDSProfile-Topics-Topic-transport_priority">
+          <ownedEnd xmi:id="DDSProfile-Topics-_packagedElement.4-_ownedEnd.0" type="DDSProfile-Topics-Topic" aggregation="composite" association="DDSProfile-Topics-_packagedElement.4"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Topics-_packagedElement.5" visibility="private" memberEnd="DDSProfile-Topics-_packagedElement.5-_ownedEnd.0 DDSProfile-Topics-Topic-ownership">
+          <ownedEnd xmi:id="DDSProfile-Topics-_packagedElement.5-_ownedEnd.0" type="DDSProfile-Topics-Topic" aggregation="composite" association="DDSProfile-Topics-_packagedElement.5"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Topics-_packagedElement.6" visibility="private" memberEnd="DDSProfile-Topics-_packagedElement.6-_ownedEnd.0 DDSProfile-Topics-Topic-topic_data">
+          <ownedEnd xmi:id="DDSProfile-Topics-_packagedElement.6-_ownedEnd.0" type="DDSProfile-Topics-Topic" aggregation="composite" association="DDSProfile-Topics-_packagedElement.6"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Topics-_packagedElement.7" visibility="private" memberEnd="DDSProfile-Topics-_packagedElement.7-_ownedEnd.0 DDSProfile-Topics-Topic-durability">
+          <ownedEnd xmi:id="DDSProfile-Topics-_packagedElement.7-_ownedEnd.0" type="DDSProfile-Topics-Topic" aggregation="composite" association="DDSProfile-Topics-_packagedElement.7"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Topics-_packagedElement.8" visibility="private" memberEnd="DDSProfile-Topics-_packagedElement.8-_ownedEnd.0 DDSProfile-Topics-Topic-liveliness">
+          <ownedEnd xmi:id="DDSProfile-Topics-_packagedElement.8-_ownedEnd.0" type="DDSProfile-Topics-Topic" aggregation="composite" association="DDSProfile-Topics-_packagedElement.8"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Topics-_packagedElement.9" visibility="private" memberEnd="DDSProfile-Topics-_packagedElement.9-_ownedEnd.0 DDSProfile-Topics-Topic-durability_service">
+          <ownedEnd xmi:id="DDSProfile-Topics-_packagedElement.9-_ownedEnd.0" type="DDSProfile-Topics-Topic" aggregation="composite" association="DDSProfile-Topics-_packagedElement.9"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Topics-_packagedElement.10" visibility="private" memberEnd="DDSProfile-Topics-_packagedElement.10-_ownedEnd.0 DDSProfile-Topics-Topic-destination_order">
+          <ownedEnd xmi:id="DDSProfile-Topics-_packagedElement.10-_ownedEnd.0" type="DDSProfile-Topics-Topic" aggregation="composite" association="DDSProfile-Topics-_packagedElement.10"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Topics-_packagedElement.11" visibility="private" memberEnd="DDSProfile-Topics-_packagedElement.11-_ownedEnd.0 DDSProfile-Topics-Topic-deadline">
+          <ownedEnd xmi:id="DDSProfile-Topics-_packagedElement.11-_ownedEnd.0" type="DDSProfile-Topics-Topic" aggregation="composite" association="DDSProfile-Topics-_packagedElement.11"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Topics-_packagedElement.12" visibility="private" memberEnd="DDSProfile-Topics-_packagedElement.12-_ownedEnd.0 DDSProfile-Topics-Topic-latency_budget">
+          <ownedEnd xmi:id="DDSProfile-Topics-_packagedElement.12-_ownedEnd.0" type="DDSProfile-Topics-Topic" aggregation="composite" association="DDSProfile-Topics-_packagedElement.12"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Topics-_packagedElement.13" visibility="private" memberEnd="DDSProfile-Topics-_packagedElement.13-_ownedEnd.0 DDSProfile-Topics-Topic-reliability">
+          <ownedEnd xmi:id="DDSProfile-Topics-_packagedElement.13-_ownedEnd.0" type="DDSProfile-Topics-Topic" aggregation="composite" association="DDSProfile-Topics-_packagedElement.13"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Topics-_packagedElement.14" visibility="private" memberEnd="DDSProfile-Topics-_packagedElement.14-_ownedEnd.0 DDSProfile-Topics-Topic-resource_limits">
+          <ownedEnd xmi:id="DDSProfile-Topics-_packagedElement.14-_ownedEnd.0" type="DDSProfile-Topics-Topic" aggregation="composite" association="DDSProfile-Topics-_packagedElement.14"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Topics-TopicDescription" name="TopicDescription" isAbstract="true">
+          <generalization xmi:id="DDSProfile-Topics-TopicDescription-_generalization.0" general="DDSProfile-Core-NamedEntity"/>
+          <ownedAttribute xmi:id="DDSProfile-Topics-TopicDescription-type" name="type" type="DDSProfile-Topics-TopicType" association="DDSProfile-Topics-_packagedElement.21"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Topics-TopicField" name="TopicField">
+          <generalization xmi:id="DDSProfile-Topics-TopicField-_generalization.0" general="DDSProfile-Types-Field"/>
+          <ownedAttribute xmi:id="DDSProfile-Topics-TopicField-isDCPSKey" name="isDCPSKey">
+            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Boolean"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-Topics-TopicField-members" name="members" type="DDSProfile-Topics-TopicType" aggregation="composite" redefinedProperty="DDSProfile-Topics-_packagedElement.23-_ownedEnd.0" association="DDSProfile-Topics-_packagedElement.23"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Topics-TopicType" name="TopicType">
+          <generalization xmi:id="DDSProfile-Topics-TopicType-_generalization.0" general="DDSProfile-Types-Struct"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Topics-_packagedElement.18" visibility="private" memberEnd="DDSProfile-Topics-_packagedElement.18-_ownedEnd.0 DDSProfile-Topics-ContentFilteredTopic-related_topic">
+          <ownedEnd xmi:id="DDSProfile-Topics-_packagedElement.18-_ownedEnd.0" type="DDSProfile-Topics-ContentFilteredTopic" association="DDSProfile-Topics-_packagedElement.18"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Topics-_packagedElement.19" visibility="private" memberEnd="DDSProfile-Topics-_packagedElement.19-_ownedEnd.0 DDSProfile-Topics-MultiTopic-related_topics">
+          <ownedEnd xmi:id="DDSProfile-Topics-_packagedElement.19-_ownedEnd.0" type="DDSProfile-Topics-MultiTopic" association="DDSProfile-Topics-_packagedElement.19"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Topics-_packagedElement.20" visibility="private" memberEnd="DDSProfile-Topics-_packagedElement.20-_ownedEnd.0 DDSProfile-DCPS.1-DataWriter-topic">
+          <ownedEnd xmi:id="DDSProfile-Topics-_packagedElement.20-_ownedEnd.0" type="DDSProfile-DCPS.1-DataWriter" association="DDSProfile-Topics-_packagedElement.20"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Topics-_packagedElement.21" visibility="private" memberEnd="DDSProfile-Topics-_packagedElement.21-_ownedEnd.0 DDSProfile-Topics-TopicDescription-type">
+          <ownedEnd xmi:id="DDSProfile-Topics-_packagedElement.21-_ownedEnd.0" type="DDSProfile-Topics-TopicDescription" association="DDSProfile-Topics-_packagedElement.21"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Topics-_packagedElement.22" visibility="private" memberEnd="DDSProfile-Topics-_packagedElement.22-_ownedEnd.0 DDSProfile-DCPS.1-DataReader-topic">
+          <ownedEnd xmi:id="DDSProfile-Topics-_packagedElement.22-_ownedEnd.0" type="DDSProfile-DCPS.1-DataReader" association="DDSProfile-Topics-_packagedElement.22"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Topics-_packagedElement.23" visibility="private" memberEnd="DDSProfile-Topics-_packagedElement.23-_ownedEnd.0 DDSProfile-Topics-TopicField-members">
+          <ownedEnd xmi:id="DDSProfile-Topics-_packagedElement.23-_ownedEnd.0" type="DDSProfile-Topics-TopicField" association="DDSProfile-Topics-_packagedElement.23">
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="DDSProfile-Topics-_packagedElement.23-_ownedEnd.0-_upperValue" value="*"/>
+          </ownedEnd>
+        </packagedElement>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Package" xmi:id="DDSProfile-Types" name="Types">
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Types-Array" name="Array">
+          <generalization xmi:id="DDSProfile-Types-Array-_generalization.0" general="DDSProfile-Types-Collection"/>
+          <ownedAttribute xmi:id="DDSProfile-Types-Array-subtype" name="subtype" visibility="private" type="DDSProfile-Types-Field" association="DDSProfile-Types-_packagedElement.1"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Types-_packagedElement.1" visibility="private" memberEnd="DDSProfile-Types-_packagedElement.1-_ownedEnd.0 DDSProfile-Types-Array-subtype">
+          <ownedEnd xmi:id="DDSProfile-Types-_packagedElement.1-_ownedEnd.0" visibility="private" type="DDSProfile-Types-Array" association="DDSProfile-Types-_packagedElement.1"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Types-Boolean" name="Boolean">
+          <generalization xmi:id="DDSProfile-Types-Boolean-_generalization.0" general="DDSProfile-Types-Simple"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Types-Case" name="Case">
+          <generalization xmi:id="DDSProfile-Types-Case-_generalization.0" general="DDSProfile-Types-Field"/>
+          <ownedAttribute xmi:id="DDSProfile-Types-Case-labels" name="labels" visibility="private">
+            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="DDSProfile-Types-Case-labels-_upperValue" value="1"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-Types-Case-element_spec" name="element_spec" visibility="private" type="DDSProfile-Types-Field" association="DDSProfile-Types-_packagedElement.4"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Types-_packagedElement.4" visibility="private" memberEnd="DDSProfile-Types-_packagedElement.4-_ownedEnd.0 DDSProfile-Types-Case-element_spec">
+          <ownedEnd xmi:id="DDSProfile-Types-_packagedElement.4-_ownedEnd.0" visibility="private" type="DDSProfile-Types-Case" association="DDSProfile-Types-_packagedElement.4"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Types-_packagedElement.5" visibility="private" memberEnd="DDSProfile-Types-_packagedElement.5-_ownedEnd.0 DDSProfile-Types-Union-cases">
+          <ownedEnd xmi:id="DDSProfile-Types-_packagedElement.5-_ownedEnd.0" visibility="private" type="DDSProfile-Types-Union" association="DDSProfile-Types-_packagedElement.5"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Types-Char" name="Char">
+          <generalization xmi:id="DDSProfile-Types-Char-_generalization.0" general="DDSProfile-Types-Simple"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Types-Collection" name="Collection" isAbstract="true">
+          <generalization xmi:id="DDSProfile-Types-Collection-_generalization.0" general="DDSProfile-Types-Field"/>
+          <ownedAttribute xmi:id="DDSProfile-Types-Collection-length" name="length" visibility="private" type="DDSProfile-Types-Long"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Types-ConstructedType" name="ConstructedType" isAbstract="true">
+          <generalization xmi:id="DDSProfile-Types-ConstructedType-_generalization.0" general="DDSProfile-Types-Field"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Types-Double" name="Double">
+          <generalization xmi:id="DDSProfile-Types-Double-_generalization.0" general="DDSProfile-Types-FloatingPoint"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Types-Enum" name="Enum">
+          <generalization xmi:id="DDSProfile-Types-Enum-_generalization.0" general="DDSProfile-Types-Simple"/>
+          <ownedAttribute xmi:id="DDSProfile-Types-Enum-labels" name="labels" visibility="private">
+            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Types-Field" name="Field" isAbstract="true">
+          <generalization xmi:id="DDSProfile-Types-Field-_generalization.0" general="DDSProfile-Core-NamedEntity"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Types-_packagedElement.12" visibility="private" memberEnd="DDSProfile-Types-_packagedElement.12-_ownedEnd.0 DDSProfile-Types-Struct-members">
+          <ownedEnd xmi:id="DDSProfile-Types-_packagedElement.12-_ownedEnd.0" visibility="private" type="DDSProfile-Types-Struct" aggregation="composite" association="DDSProfile-Types-_packagedElement.12"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Types-_packagedElement.13" visibility="private" memberEnd="DDSProfile-Types-_packagedElement.13-_ownedEnd.0 DDSProfile-Types-Union-switch">
+          <ownedEnd xmi:id="DDSProfile-Types-_packagedElement.13-_ownedEnd.0" visibility="private" type="DDSProfile-Types-Union" association="DDSProfile-Types-_packagedElement.13"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Types-_packagedElement.14" visibility="private" memberEnd="DDSProfile-Types-_packagedElement.14-_ownedEnd.0 DDSProfile-Types-Typedef-type">
+          <ownedEnd xmi:id="DDSProfile-Types-_packagedElement.14-_ownedEnd.0" visibility="private" type="DDSProfile-Types-Typedef" association="DDSProfile-Types-_packagedElement.14"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Types-_packagedElement.15" visibility="private" memberEnd="DDSProfile-Types-_packagedElement.15-_ownedEnd.0 DDSProfile-Types-Sequence-subtype">
+          <ownedEnd xmi:id="DDSProfile-Types-_packagedElement.15-_ownedEnd.0" visibility="private" type="DDSProfile-Types-Sequence" association="DDSProfile-Types-_packagedElement.15"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Types-Float" name="Float">
+          <generalization xmi:id="DDSProfile-Types-Float-_generalization.0" general="DDSProfile-Types-FloatingPoint"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Types-FloatingPoint" name="FloatingPoint">
+          <generalization xmi:id="DDSProfile-Types-FloatingPoint-_generalization.0" general="DDSProfile-Types-Simple"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Types-Int" name="Int" isAbstract="true">
+          <generalization xmi:id="DDSProfile-Types-Int-_generalization.0" general="DDSProfile-Types-Simple"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Types-Integer" name="Integer">
+          <generalization xmi:id="DDSProfile-Types-Integer-_generalization.0" general="DDSProfile-Types-SignedInt"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Types-Long" name="Long">
+          <generalization xmi:id="DDSProfile-Types-Long-_generalization.0" general="DDSProfile-Types-SignedInt"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Types-LongLong" name="LongLong">
+          <generalization xmi:id="DDSProfile-Types-LongLong-_generalization.0" general="DDSProfile-Types-SignedInt"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Types-Octet" name="Octet">
+          <generalization xmi:id="DDSProfile-Types-Octet-_generalization.0" general="DDSProfile-Types-Simple"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Types-Sequence" name="Sequence">
+          <generalization xmi:id="DDSProfile-Types-Sequence-_generalization.0" general="DDSProfile-Types-Collection"/>
+          <ownedAttribute xmi:id="DDSProfile-Types-Sequence-subtype" name="subtype" visibility="private" type="DDSProfile-Types-Field" association="DDSProfile-Types-_packagedElement.15"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Types-Short" name="Short">
+          <generalization xmi:id="DDSProfile-Types-Short-_generalization.0" general="DDSProfile-Types-SignedInt"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Types-SignedInt" name="SignedInt" isAbstract="true">
+          <generalization xmi:id="DDSProfile-Types-SignedInt-_generalization.0" general="DDSProfile-Types-Int"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Types-Simple" name="Simple" isAbstract="true">
+          <generalization xmi:id="DDSProfile-Types-Simple-_generalization.0" general="DDSProfile-Types-Field"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Types-String" name="String">
+          <generalization xmi:id="DDSProfile-Types-String-_generalization.0" general="DDSProfile-Types-Collection"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Types-Struct" name="Struct">
+          <generalization xmi:id="DDSProfile-Types-Struct-_generalization.0" general="DDSProfile-Types-ConstructedType"/>
+          <ownedAttribute xmi:id="DDSProfile-Types-Struct-members" name="members" visibility="private" type="DDSProfile-Types-Field" association="DDSProfile-Types-_packagedElement.12">
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="DDSProfile-Types-Struct-members-_upperValue" value="*"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Types-Typedef" name="Typedef">
+          <generalization xmi:id="DDSProfile-Types-Typedef-_generalization.0" general="DDSProfile-Types-Field"/>
+          <ownedAttribute xmi:id="DDSProfile-Types-Typedef-type" name="type" visibility="private" type="DDSProfile-Types-Field" association="DDSProfile-Types-_packagedElement.14"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Types-UInteger" name="UInteger">
+          <generalization xmi:id="DDSProfile-Types-UInteger-_generalization.0" general="DDSProfile-Types-UnsignedInt"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Types-ULongLong" name="ULongLong">
+          <generalization xmi:id="DDSProfile-Types-ULongLong-_generalization.0" general="DDSProfile-Types-UnsignedInt"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Types-UShort" name="UShort">
+          <generalization xmi:id="DDSProfile-Types-UShort-_generalization.0" general="DDSProfile-Types-UnsignedInt"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Types-ULong" name="ULong">
+          <generalization xmi:id="DDSProfile-Types-ULong-_generalization.0" general="DDSProfile-Types-UnsignedInt"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Types-Union" name="Union">
+          <generalization xmi:id="DDSProfile-Types-Union-_generalization.0" general="DDSProfile-Types-ConstructedType"/>
+          <ownedAttribute xmi:id="DDSProfile-Types-Union-cases" name="cases" visibility="private" type="DDSProfile-Types-Case" association="DDSProfile-Types-_packagedElement.5">
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="DDSProfile-Types-Union-cases-_upperValue" value="*"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-Types-Union-switch" name="switch" visibility="private" type="DDSProfile-Types-Field" association="DDSProfile-Types-_packagedElement.13"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Types-UnsignedInt" name="UnsignedInt" isAbstract="true">
+          <generalization xmi:id="DDSProfile-Types-UnsignedInt-_generalization.0" general="DDSProfile-Types-Int"/>
+        </packagedElement>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Package" xmi:id="DDSProfile-DCPS.1" name="DCPS">
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-DCPS.1-DataReader" name="DataReader">
+          <generalization xmi:id="DDSProfile-DCPS.1-DataReader-_generalization.0" general="DDSProfile-DCPS.1-DataReaderWriter"/>
+          <ownedAttribute xmi:id="DDSProfile-DCPS.1-DataReader-topic" name="topic" type="DDSProfile-Topics-TopicDescription" association="DDSProfile-Topics-_packagedElement.22"/>
+          <ownedAttribute xmi:id="DDSProfile-DCPS.1-DataReader-ownership_strength" name="ownership_strength" type="DDSProfile-QoS-OwnershipStrengthQosPolicy" association="DDSProfile-DCPS.1-_packagedElement.1">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-DCPS.1-DataReader-ownership_strength-_lowerValue"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-DCPS.1-DataReader-durability_service" name="durability_service" type="DDSProfile-QoS-DurabilityServiceQosPolicy" association="DDSProfile-DCPS.1-_packagedElement.2">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-DCPS.1-DataReader-durability_service-_lowerValue"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-DCPS.1-DataReader-transport_priority" name="transport_priority" type="DDSProfile-QoS-TransportPriorityQosPolicy" association="DDSProfile-DCPS.1-_packagedElement.3">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-DCPS.1-DataReader-transport_priority-_lowerValue"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-DCPS.1-DataReader-reader_data_lifecycle" name="reader_data_lifecycle" type="DDSProfile-QoS-ReaderDataLifecycleQosPolicy" association="DDSProfile-DCPS.1-_packagedElement.4">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-DCPS.1-DataReader-reader_data_lifecycle-_lowerValue"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-DCPS.1-_packagedElement.1" visibility="private" memberEnd="DDSProfile-DCPS.1-_packagedElement.1-_ownedEnd.0 DDSProfile-DCPS.1-DataReader-ownership_strength">
+          <ownedEnd xmi:id="DDSProfile-DCPS.1-_packagedElement.1-_ownedEnd.0" type="DDSProfile-DCPS.1-DataReader" aggregation="composite" association="DDSProfile-DCPS.1-_packagedElement.1"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-DCPS.1-_packagedElement.2" visibility="private" memberEnd="DDSProfile-DCPS.1-_packagedElement.2-_ownedEnd.0 DDSProfile-DCPS.1-DataReader-durability_service">
+          <ownedEnd xmi:id="DDSProfile-DCPS.1-_packagedElement.2-_ownedEnd.0" type="DDSProfile-DCPS.1-DataReader" aggregation="composite" association="DDSProfile-DCPS.1-_packagedElement.2"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-DCPS.1-_packagedElement.3" visibility="private" memberEnd="DDSProfile-DCPS.1-_packagedElement.3-_ownedEnd.0 DDSProfile-DCPS.1-DataReader-transport_priority">
+          <ownedEnd xmi:id="DDSProfile-DCPS.1-_packagedElement.3-_ownedEnd.0" type="DDSProfile-DCPS.1-DataReader" aggregation="composite" association="DDSProfile-DCPS.1-_packagedElement.3"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-DCPS.1-_packagedElement.4" visibility="private" memberEnd="DDSProfile-DCPS.1-_packagedElement.4-_ownedEnd.0 DDSProfile-DCPS.1-DataReader-reader_data_lifecycle">
+          <ownedEnd xmi:id="DDSProfile-DCPS.1-_packagedElement.4-_ownedEnd.0" type="DDSProfile-DCPS.1-DataReader" aggregation="composite" association="DDSProfile-DCPS.1-_packagedElement.4"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-DCPS.1-_packagedElement.5" visibility="private" memberEnd="DDSProfile-DCPS.1-_packagedElement.5-_ownedEnd.0 DDSProfile-DCPS.1-_packagedElement.5-_ownedEnd.1">
+          <ownedEnd xmi:id="DDSProfile-DCPS.1-_packagedElement.5-_ownedEnd.0" type="DDSProfile-DCPS.1-Subscriber" aggregation="composite" association="DDSProfile-DCPS.1-_packagedElement.5"/>
+          <ownedEnd xmi:id="DDSProfile-DCPS.1-_packagedElement.5-_ownedEnd.1" type="DDSProfile-DCPS.1-DataReader" subsettedProperty="DDSProfile-Core-NamedEntity-ownedEntity" association="DDSProfile-DCPS.1-_packagedElement.5">
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="DDSProfile-DCPS.1-_packagedElement.5-_ownedEnd.1-_upperValue" value="*"/>
+          </ownedEnd>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-DCPS.1-DataReaderWriter" name="DataReaderWriter" isAbstract="true">
+          <generalization xmi:id="DDSProfile-DCPS.1-DataReaderWriter-_generalization.0" general="DDSProfile-Domain-DDSEntity"/>
+          <ownedAttribute xmi:id="DDSProfile-DCPS.1-DataReaderWriter-deadline" name="deadline" type="DDSProfile-QoS-DeadlineQosPolicy" association="DDSProfile-DCPS.1-_packagedElement.7">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-DCPS.1-DataReaderWriter-deadline-_lowerValue"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-DCPS.1-DataReaderWriter-user_data" name="user_data" type="DDSProfile-QoS-UserDataQosPolicy" association="DDSProfile-DCPS.1-_packagedElement.8">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-DCPS.1-DataReaderWriter-user_data-_lowerValue"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-DCPS.1-DataReaderWriter-liveliness" name="liveliness" type="DDSProfile-QoS-LivelinessQosPolicy" association="DDSProfile-DCPS.1-_packagedElement.9">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-DCPS.1-DataReaderWriter-liveliness-_lowerValue"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-DCPS.1-DataReaderWriter-durability" name="durability" type="DDSProfile-QoS-DurabilityQosPolicy" association="DDSProfile-DCPS.1-_packagedElement.10">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-DCPS.1-DataReaderWriter-durability-_lowerValue"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-DCPS.1-DataReaderWriter-resource_limits" name="resource_limits" type="DDSProfile-QoS-ResourceLimitsQosPolicy" association="DDSProfile-DCPS.1-_packagedElement.11">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-DCPS.1-DataReaderWriter-resource_limits-_lowerValue"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-DCPS.1-DataReaderWriter-destination_order" name="destination_order" type="DDSProfile-QoS-DestinationOrderQosPolicy" association="DDSProfile-DCPS.1-_packagedElement.12">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-DCPS.1-DataReaderWriter-destination_order-_lowerValue"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-DCPS.1-DataReaderWriter-latency_budget" name="latency_budget" type="DDSProfile-QoS-LatencyBudgetQosPolicy">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-DCPS.1-DataReaderWriter-latency_budget-_lowerValue"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-DCPS.1-DataReaderWriter-reliability" name="reliability" type="DDSProfile-QoS-LatencyBudgetQosPolicy" association="DDSProfile-DCPS.1-_packagedElement.13">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-DCPS.1-DataReaderWriter-reliability-_lowerValue"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-DCPS.1-DataReaderWriter-history" name="history" type="DDSProfile-QoS-HistoryQosPolicy" association="DDSProfile-DCPS.1-_packagedElement.14">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-DCPS.1-DataReaderWriter-history-_lowerValue"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-DCPS.1-_packagedElement.7" visibility="private" memberEnd="DDSProfile-DCPS.1-_packagedElement.7-_ownedEnd.0 DDSProfile-DCPS.1-DataReaderWriter-deadline">
+          <ownedEnd xmi:id="DDSProfile-DCPS.1-_packagedElement.7-_ownedEnd.0" type="DDSProfile-DCPS.1-DataReaderWriter" aggregation="composite" association="DDSProfile-DCPS.1-_packagedElement.7"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-DCPS.1-_packagedElement.8" visibility="private" memberEnd="DDSProfile-DCPS.1-_packagedElement.8-_ownedEnd.0 DDSProfile-DCPS.1-DataReaderWriter-user_data">
+          <ownedEnd xmi:id="DDSProfile-DCPS.1-_packagedElement.8-_ownedEnd.0" type="DDSProfile-DCPS.1-DataReaderWriter" aggregation="composite" association="DDSProfile-DCPS.1-_packagedElement.8"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-DCPS.1-_packagedElement.9" visibility="private" memberEnd="DDSProfile-DCPS.1-_packagedElement.9-_ownedEnd.0 DDSProfile-DCPS.1-DataReaderWriter-liveliness">
+          <ownedEnd xmi:id="DDSProfile-DCPS.1-_packagedElement.9-_ownedEnd.0" type="DDSProfile-DCPS.1-DataReaderWriter" aggregation="composite" association="DDSProfile-DCPS.1-_packagedElement.9"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-DCPS.1-_packagedElement.10" visibility="private" memberEnd="DDSProfile-DCPS.1-_packagedElement.10-_ownedEnd.0 DDSProfile-DCPS.1-DataReaderWriter-durability">
+          <ownedEnd xmi:id="DDSProfile-DCPS.1-_packagedElement.10-_ownedEnd.0" type="DDSProfile-DCPS.1-DataReaderWriter" aggregation="composite" association="DDSProfile-DCPS.1-_packagedElement.10"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-DCPS.1-_packagedElement.11" visibility="private" memberEnd="DDSProfile-DCPS.1-_packagedElement.11-_ownedEnd.0 DDSProfile-DCPS.1-DataReaderWriter-resource_limits">
+          <ownedEnd xmi:id="DDSProfile-DCPS.1-_packagedElement.11-_ownedEnd.0" type="DDSProfile-DCPS.1-DataReaderWriter" aggregation="composite" association="DDSProfile-DCPS.1-_packagedElement.11"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-DCPS.1-_packagedElement.12" visibility="private" memberEnd="DDSProfile-DCPS.1-_packagedElement.12-_ownedEnd.0 DDSProfile-DCPS.1-DataReaderWriter-destination_order">
+          <ownedEnd xmi:id="DDSProfile-DCPS.1-_packagedElement.12-_ownedEnd.0" type="DDSProfile-DCPS.1-DataReaderWriter" aggregation="composite" association="DDSProfile-DCPS.1-_packagedElement.12"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-DCPS.1-_packagedElement.13" visibility="private" memberEnd="DDSProfile-DCPS.1-_packagedElement.13-_ownedEnd.0 DDSProfile-DCPS.1-DataReaderWriter-reliability">
+          <ownedEnd xmi:id="DDSProfile-DCPS.1-_packagedElement.13-_ownedEnd.0" type="DDSProfile-DCPS.1-DataReaderWriter" aggregation="composite" association="DDSProfile-DCPS.1-_packagedElement.13"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-DCPS.1-_packagedElement.14" visibility="private" memberEnd="DDSProfile-DCPS.1-_packagedElement.14-_ownedEnd.0 DDSProfile-DCPS.1-DataReaderWriter-history">
+          <ownedEnd xmi:id="DDSProfile-DCPS.1-_packagedElement.14-_ownedEnd.0" type="DDSProfile-DCPS.1-DataReaderWriter" aggregation="composite" association="DDSProfile-DCPS.1-_packagedElement.14"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-DCPS.1-DataWriter" name="DataWriter">
+          <generalization xmi:id="DDSProfile-DCPS.1-DataWriter-_generalization.0" general="DDSProfile-DCPS.1-DataReaderWriter"/>
+          <ownedAttribute xmi:id="DDSProfile-DCPS.1-DataWriter-writer_data_lifecycle" name="writer_data_lifecycle" type="DDSProfile-QoS-WriterDataLifecycleQosPolicy" association="DDSProfile-DCPS.1-_packagedElement.16">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-DCPS.1-DataWriter-writer_data_lifecycle-_lowerValue"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-DCPS.1-DataWriter-topic" name="topic" type="DDSProfile-Topics-Topic" association="DDSProfile-Topics-_packagedElement.20"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-DCPS.1-_packagedElement.16" visibility="private" memberEnd="DDSProfile-DCPS.1-_packagedElement.16-_ownedEnd.0 DDSProfile-DCPS.1-DataWriter-writer_data_lifecycle">
+          <ownedEnd xmi:id="DDSProfile-DCPS.1-_packagedElement.16-_ownedEnd.0" type="DDSProfile-DCPS.1-DataWriter" aggregation="composite" association="DDSProfile-DCPS.1-_packagedElement.16"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-DCPS.1-_packagedElement.17" visibility="private" memberEnd="DDSProfile-DCPS.1-_packagedElement.17-_ownedEnd.0 DDSProfile-DCPS.1-_packagedElement.17-_ownedEnd.1">
+          <ownedEnd xmi:id="DDSProfile-DCPS.1-_packagedElement.17-_ownedEnd.0" type="DDSProfile-DCPS.1-Publisher" aggregation="composite" association="DDSProfile-DCPS.1-_packagedElement.17"/>
+          <ownedEnd xmi:id="DDSProfile-DCPS.1-_packagedElement.17-_ownedEnd.1" type="DDSProfile-DCPS.1-DataWriter" subsettedProperty="DDSProfile-Core-NamedEntity-ownedEntity" association="DDSProfile-DCPS.1-_packagedElement.17">
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="DDSProfile-DCPS.1-_packagedElement.17-_ownedEnd.1-_upperValue" value="*"/>
+          </ownedEnd>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-DCPS.1-Domain" name="Domain">
+          <generalization xmi:id="DDSProfile-DCPS.1-Domain-_generalization.0" general="DDSProfile-Core-NamedEntity"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-DCPS.1-_packagedElement.19" visibility="private" memberEnd="DDSProfile-DCPS.1-_packagedElement.19-_ownedEnd.0 DDSProfile-DCPS.1-DomainParticipant-domain">
+          <ownedEnd xmi:id="DDSProfile-DCPS.1-_packagedElement.19-_ownedEnd.0" type="DDSProfile-DCPS.1-DomainParticipant" association="DDSProfile-DCPS.1-_packagedElement.19"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-DCPS.1-DomainParticipant" name="DomainParticipant">
+          <generalization xmi:id="DDSProfile-DCPS.1-DomainParticipant-_generalization.0" general="DDSProfile-Domain-DDSEntity"/>
+          <ownedAttribute xmi:id="DDSProfile-DCPS.1-DomainParticipant-domain" name="domain" type="DDSProfile-DCPS.1-Domain" association="DDSProfile-DCPS.1-_packagedElement.19"/>
+          <ownedAttribute xmi:id="DDSProfile-DCPS.1-DomainParticipant-user_data" name="user_data" type="DDSProfile-QoS-UserDataQosPolicy" association="DDSProfile-DCPS.1-_packagedElement.22">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-DCPS.1-DomainParticipant-user_data-_lowerValue"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-DCPS.1-DomainParticipant-entity_factory" name="entity_factory" type="DDSProfile-QoS-EntityFactoryQosPolicy" association="DDSProfile-DCPS.1-_packagedElement.23">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-DCPS.1-DomainParticipant-entity_factory-_lowerValue"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-DCPS.1-_packagedElement.21" visibility="private" memberEnd="DDSProfile-DCPS.1-_packagedElement.21-_ownedEnd.0 DDSProfile-DCPS.1-_packagedElement.21-_ownedEnd.1">
+          <ownedEnd xmi:id="DDSProfile-DCPS.1-_packagedElement.21-_ownedEnd.0" type="DDSProfile-DCPS.1-Publisher" subsettedProperty="DDSProfile-Core-NamedEntity-ownedEntity" association="DDSProfile-DCPS.1-_packagedElement.21">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-DCPS.1-_packagedElement.21-_ownedEnd.0-_lowerValue"/>
+          </ownedEnd>
+          <ownedEnd xmi:id="DDSProfile-DCPS.1-_packagedElement.21-_ownedEnd.1" type="DDSProfile-DCPS.1-DomainParticipant" aggregation="composite" association="DDSProfile-DCPS.1-_packagedElement.21"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-DCPS.1-_packagedElement.22" visibility="private" memberEnd="DDSProfile-DCPS.1-_packagedElement.22-_ownedEnd.0 DDSProfile-DCPS.1-DomainParticipant-user_data">
+          <ownedEnd xmi:id="DDSProfile-DCPS.1-_packagedElement.22-_ownedEnd.0" type="DDSProfile-DCPS.1-DomainParticipant" aggregation="composite" association="DDSProfile-DCPS.1-_packagedElement.22"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-DCPS.1-_packagedElement.23" visibility="private" memberEnd="DDSProfile-DCPS.1-_packagedElement.23-_ownedEnd.0 DDSProfile-DCPS.1-DomainParticipant-entity_factory">
+          <ownedEnd xmi:id="DDSProfile-DCPS.1-_packagedElement.23-_ownedEnd.0" type="DDSProfile-DCPS.1-DomainParticipant" aggregation="composite" association="DDSProfile-DCPS.1-_packagedElement.23"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-DCPS.1-_packagedElement.24" visibility="private" memberEnd="DDSProfile-DCPS.1-_packagedElement.24-_ownedEnd.0 DDSProfile-DCPS.1-_packagedElement.24-_ownedEnd.1">
+          <ownedEnd xmi:id="DDSProfile-DCPS.1-_packagedElement.24-_ownedEnd.0" type="DDSProfile-DCPS.1-Subscriber" subsettedProperty="DDSProfile-Core-NamedEntity-ownedEntity" association="DDSProfile-DCPS.1-_packagedElement.24">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-DCPS.1-_packagedElement.24-_ownedEnd.0-_lowerValue"/>
+          </ownedEnd>
+          <ownedEnd xmi:id="DDSProfile-DCPS.1-_packagedElement.24-_ownedEnd.1" type="DDSProfile-DCPS.1-DomainParticipant" aggregation="composite" association="DDSProfile-DCPS.1-_packagedElement.24"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-DCPS.1-_packagedElement.25" visibility="private" memberEnd="DDSProfile-DCPS.1-_packagedElement.25-_ownedEnd.0 DDSProfile-Application-ApplicationTarget-participant">
+          <ownedEnd xmi:id="DDSProfile-DCPS.1-_packagedElement.25-_ownedEnd.0" type="DDSProfile-Application-ApplicationTarget" association="DDSProfile-DCPS.1-_packagedElement.25">
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="DDSProfile-DCPS.1-_packagedElement.25-_ownedEnd.0-_upperValue" value="*"/>
+          </ownedEnd>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-DCPS.1-Publisher" name="Publisher">
+          <generalization xmi:id="DDSProfile-DCPS.1-Publisher-_generalization.0" general="DDSProfile-DCPS.1-PublisherSubscriber"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-DCPS.1-PublisherSubscriber" name="PublisherSubscriber" isAbstract="true">
+          <generalization xmi:id="DDSProfile-DCPS.1-PublisherSubscriber-_generalization.0" general="DDSProfile-Domain-DDSEntity"/>
+          <ownedAttribute xmi:id="DDSProfile-DCPS.1-PublisherSubscriber-entity_factory" name="entity_factory" type="DDSProfile-QoS-EntityFactoryQosPolicy" association="DDSProfile-DCPS.1-_packagedElement.28">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-DCPS.1-PublisherSubscriber-entity_factory-_lowerValue"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-DCPS.1-PublisherSubscriber-group_data" name="group_data" type="DDSProfile-QoS-GroupDataQosPolicy" association="DDSProfile-DCPS.1-_packagedElement.29">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-DCPS.1-PublisherSubscriber-group_data-_lowerValue"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-DCPS.1-PublisherSubscriber-presentation" name="presentation" type="DDSProfile-QoS-PresentationQosPolicy" association="DDSProfile-DCPS.1-_packagedElement.30">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-DCPS.1-PublisherSubscriber-presentation-_lowerValue"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-DCPS.1-PublisherSubscriber-partition" name="partition" type="DDSProfile-QoS-PartitionQosPolicy" association="DDSProfile-DCPS.1-_packagedElement.31">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="DDSProfile-DCPS.1-PublisherSubscriber-partition-_lowerValue"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-DCPS.1-_packagedElement.28" visibility="private" memberEnd="DDSProfile-DCPS.1-_packagedElement.28-_ownedEnd.0 DDSProfile-DCPS.1-PublisherSubscriber-entity_factory">
+          <ownedEnd xmi:id="DDSProfile-DCPS.1-_packagedElement.28-_ownedEnd.0" type="DDSProfile-DCPS.1-PublisherSubscriber" aggregation="composite" association="DDSProfile-DCPS.1-_packagedElement.28"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-DCPS.1-_packagedElement.29" visibility="private" memberEnd="DDSProfile-DCPS.1-_packagedElement.29-_ownedEnd.0 DDSProfile-DCPS.1-PublisherSubscriber-group_data">
+          <ownedEnd xmi:id="DDSProfile-DCPS.1-_packagedElement.29-_ownedEnd.0" type="DDSProfile-DCPS.1-PublisherSubscriber" aggregation="composite" association="DDSProfile-DCPS.1-_packagedElement.29"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-DCPS.1-_packagedElement.30" visibility="private" memberEnd="DDSProfile-DCPS.1-_packagedElement.30-_ownedEnd.0 DDSProfile-DCPS.1-PublisherSubscriber-presentation">
+          <ownedEnd xmi:id="DDSProfile-DCPS.1-_packagedElement.30-_ownedEnd.0" type="DDSProfile-DCPS.1-PublisherSubscriber" aggregation="composite" association="DDSProfile-DCPS.1-_packagedElement.30"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-DCPS.1-_packagedElement.31" visibility="private" memberEnd="DDSProfile-DCPS.1-_packagedElement.31-_ownedEnd.0 DDSProfile-DCPS.1-PublisherSubscriber-partition">
+          <ownedEnd xmi:id="DDSProfile-DCPS.1-_packagedElement.31-_ownedEnd.0" type="DDSProfile-DCPS.1-PublisherSubscriber" aggregation="composite" association="DDSProfile-DCPS.1-_packagedElement.31"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-DCPS.1-Subscriber" name="Subscriber">
+          <generalization xmi:id="DDSProfile-DCPS.1-Subscriber-_generalization.0" general="DDSProfile-DCPS.1-PublisherSubscriber"/>
+        </packagedElement>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Package" xmi:id="DDSProfile-QoS" name="QoS">
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-QoS-CustomPolicy" name="CustomPolicy">
+          <generalization xmi:id="DDSProfile-QoS-CustomPolicy-_generalization.0" general="DDSProfile-QoS-QosPolicy"/>
+          <ownedAttribute xmi:id="DDSProfile-QoS-CustomPolicy-name" name="name" visibility="private">
+            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-QoS-DeadlineQosPolicy" name="DeadlineQosPolicy">
+          <generalization xmi:id="DDSProfile-QoS-DeadlineQosPolicy-_generalization.0" general="DDSProfile-QoS-QosPolicy"/>
+          <ownedAttribute xmi:id="DDSProfile-QoS-DeadlineQosPolicy-period" name="period" type="DDSProfile-QoS-Enumerations-Duration">
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="DDSProfile-QoS-DeadlineQosPolicy-period-_defaultValue" value="-1"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-QoS-DestinationOrderQosPolicy" name="DestinationOrderQosPolicy">
+          <generalization xmi:id="DDSProfile-QoS-DestinationOrderQosPolicy-_generalization.0" general="DDSProfile-QoS-QosPolicy"/>
+          <ownedAttribute xmi:id="DDSProfile-QoS-DestinationOrderQosPolicy-kind" name="kind" type="DDSProfile-QoS-Enumerations-DestinationOrderQosPolicyKind">
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="DDSProfile-QoS-DestinationOrderQosPolicy-kind-_defaultValue" value="BY_RECEPTION_TIMESTAMP"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-QoS-DurabilityQosPolicy" name="DurabilityQosPolicy">
+          <generalization xmi:id="DDSProfile-QoS-DurabilityQosPolicy-_generalization.0" general="DDSProfile-QoS-QosPolicy"/>
+          <ownedAttribute xmi:id="DDSProfile-QoS-DurabilityQosPolicy-kind" name="kind" type="DDSProfile-QoS-Enumerations-DurabilityQosPolicyKind">
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="DDSProfile-QoS-DurabilityQosPolicy-kind-_defaultValue" value="VOLATILE"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-QoS-DurabilityServiceQosPolicy" name="DurabilityServiceQosPolicy">
+          <generalization xmi:id="DDSProfile-QoS-DurabilityServiceQosPolicy-_generalization.0" general="DDSProfile-QoS-QosPolicy"/>
+          <ownedAttribute xmi:id="DDSProfile-QoS-DurabilityServiceQosPolicy-max_samples" name="max_samples">
+            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="DDSProfile-QoS-DurabilityServiceQosPolicy-max_samples-_defaultValue" value="-1"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-QoS-DurabilityServiceQosPolicy-service_cleanup_delay" name="service_cleanup_delay" type="DDSProfile-QoS-Enumerations-Duration">
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="DDSProfile-QoS-DurabilityServiceQosPolicy-service_cleanup_delay-_defaultValue" value="0"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-QoS-DurabilityServiceQosPolicy-history_kind" name="history_kind" type="DDSProfile-QoS-Enumerations-HistoryQosPolicyKind">
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="DDSProfile-QoS-DurabilityServiceQosPolicy-history_kind-_defaultValue" value="KEEP_LAST"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-QoS-DurabilityServiceQosPolicy-max_instances" name="max_instances">
+            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="DDSProfile-QoS-DurabilityServiceQosPolicy-max_instances-_defaultValue" value="-1"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-QoS-DurabilityServiceQosPolicy-history_depth" name="history_depth">
+            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="DDSProfile-QoS-DurabilityServiceQosPolicy-history_depth-_defaultValue" value="1"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-QoS-DurabilityServiceQosPolicy-max_samples_per_instance" name="max_samples_per_instance">
+            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="DDSProfile-QoS-DurabilityServiceQosPolicy-max_samples_per_instance-_defaultValue" value="-1"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-QoS-EntityFactoryQosPolicy" name="EntityFactoryQosPolicy">
+          <generalization xmi:id="DDSProfile-QoS-EntityFactoryQosPolicy-_generalization.0" general="DDSProfile-QoS-QosPolicy"/>
+          <ownedAttribute xmi:id="DDSProfile-QoS-EntityFactoryQosPolicy-autoenable_created_entities" name="autoenable_created_entities">
+            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Boolean"/>
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="DDSProfile-QoS-EntityFactoryQosPolicy-autoenable_created_entities-_defaultValue" value="true"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-QoS-GroupDataQosPolicy" name="GroupDataQosPolicy">
+          <generalization xmi:id="DDSProfile-QoS-GroupDataQosPolicy-_generalization.0" general="DDSProfile-QoS-QosPolicy"/>
+          <ownedAttribute xmi:id="DDSProfile-QoS-GroupDataQosPolicy-datavalue" name="datavalue">
+            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-QoS-HistoryQosPolicy" name="HistoryQosPolicy">
+          <generalization xmi:id="DDSProfile-QoS-HistoryQosPolicy-_generalization.0" general="DDSProfile-QoS-QosPolicy"/>
+          <ownedAttribute xmi:id="DDSProfile-QoS-HistoryQosPolicy-kind" name="kind" type="DDSProfile-QoS-Enumerations-HistoryQosPolicyKind">
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="DDSProfile-QoS-HistoryQosPolicy-kind-_defaultValue" value="KEEP_LAST"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-QoS-HistoryQosPolicy-depth" name="depth">
+            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="DDSProfile-QoS-HistoryQosPolicy-depth-_defaultValue" value="1"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-QoS-LatencyBudgetQosPolicy" name="LatencyBudgetQosPolicy">
+          <generalization xmi:id="DDSProfile-QoS-LatencyBudgetQosPolicy-_generalization.0" general="DDSProfile-QoS-QosPolicy"/>
+          <ownedAttribute xmi:id="DDSProfile-QoS-LatencyBudgetQosPolicy-duration" name="duration" type="DDSProfile-QoS-Enumerations-Duration">
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="DDSProfile-QoS-LatencyBudgetQosPolicy-duration-_defaultValue" value="0"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-QoS-LifespanQosPolicy" name="LifespanQosPolicy">
+          <generalization xmi:id="DDSProfile-QoS-LifespanQosPolicy-_generalization.0" general="DDSProfile-QoS-QosPolicy"/>
+          <ownedAttribute xmi:id="DDSProfile-QoS-LifespanQosPolicy-duration" name="duration" type="DDSProfile-QoS-Enumerations-Duration">
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="DDSProfile-QoS-LifespanQosPolicy-duration-_defaultValue" value="-1"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-QoS-LivelinessQosPolicy" name="LivelinessQosPolicy">
+          <generalization xmi:id="DDSProfile-QoS-LivelinessQosPolicy-_generalization.0" general="DDSProfile-QoS-QosPolicy"/>
+          <ownedAttribute xmi:id="DDSProfile-QoS-LivelinessQosPolicy-lease_duration" name="lease_duration" type="DDSProfile-QoS-Enumerations-Duration">
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="DDSProfile-QoS-LivelinessQosPolicy-lease_duration-_defaultValue" value="-1"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-QoS-LivelinessQosPolicy-kind" name="kind" type="DDSProfile-QoS-Enumerations-LivelinessQosPolicyKind">
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="DDSProfile-QoS-LivelinessQosPolicy-kind-_defaultValue" value="AUTOMATIC"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-QoS-OwnershipQosPolicy" name="OwnershipQosPolicy">
+          <generalization xmi:id="DDSProfile-QoS-OwnershipQosPolicy-_generalization.0" general="DDSProfile-QoS-QosPolicy"/>
+          <ownedAttribute xmi:id="DDSProfile-QoS-OwnershipQosPolicy-kind" name="kind" type="DDSProfile-QoS-Enumerations-OwnershipQosPolicyKind">
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="DDSProfile-QoS-OwnershipQosPolicy-kind-_defaultValue" value="SHARED"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-QoS-OwnershipStrengthQosPolicy" name="OwnershipStrengthQosPolicy">
+          <generalization xmi:id="DDSProfile-QoS-OwnershipStrengthQosPolicy-_generalization.0" general="DDSProfile-QoS-QosPolicy"/>
+          <ownedAttribute xmi:id="DDSProfile-QoS-OwnershipStrengthQosPolicy-value" name="value">
+            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="DDSProfile-QoS-OwnershipStrengthQosPolicy-value-_defaultValue" value="0"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-QoS-PartitionQosPolicy" name="PartitionQosPolicy">
+          <generalization xmi:id="DDSProfile-QoS-PartitionQosPolicy-_generalization.0" general="DDSProfile-QoS-QosPolicy"/>
+          <ownedAttribute xmi:id="DDSProfile-QoS-PartitionQosPolicy-name" name="name">
+            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-QoS-PresentationQosPolicy" name="PresentationQosPolicy">
+          <generalization xmi:id="DDSProfile-QoS-PresentationQosPolicy-_generalization.0" general="DDSProfile-QoS-QosPolicy"/>
+          <ownedAttribute xmi:id="DDSProfile-QoS-PresentationQosPolicy-access_scope" name="access_scope" type="DDSProfile-QoS-Enumerations-PresentationQosPolicyAccessScopeKind">
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="DDSProfile-QoS-PresentationQosPolicy-access_scope-_defaultValue" value="INSTANCE"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-QoS-PresentationQosPolicy-coherent_access" name="coherent_access">
+            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Boolean"/>
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="DDSProfile-QoS-PresentationQosPolicy-coherent_access-_defaultValue" value="false"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-QoS-PresentationQosPolicy-ordered_access" name="ordered_access">
+            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Boolean"/>
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="DDSProfile-QoS-PresentationQosPolicy-ordered_access-_defaultValue" value="false"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-QoS-QosPolicy" name="QosPolicy" isAbstract="true">
+          <generalization xmi:id="DDSProfile-QoS-QosPolicy-_generalization.0" general="DDSProfile-Core-Specification"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-QoS-ReaderDataLifecycleQosPolicy" name="ReaderDataLifecycleQosPolicy">
+          <generalization xmi:id="DDSProfile-QoS-ReaderDataLifecycleQosPolicy-_generalization.0" general="DDSProfile-QoS-QosPolicy"/>
+          <ownedAttribute xmi:id="DDSProfile-QoS-ReaderDataLifecycleQosPolicy-autopurge_nowriter_samples_delay" name="autopurge_nowriter_samples_delay">
+            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="DDSProfile-QoS-ReaderDataLifecycleQosPolicy-autopurge_nowriter_samples_delay-_defaultValue" value="-1"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-QoS-ReliabilityQosPolicy" name="ReliabilityQosPolicy">
+          <generalization xmi:id="DDSProfile-QoS-ReliabilityQosPolicy-_generalization.0" general="DDSProfile-QoS-QosPolicy"/>
+          <ownedAttribute xmi:id="DDSProfile-QoS-ReliabilityQosPolicy-kind" name="kind" type="DDSProfile-QoS-Enumerations-ReliabilityQosPolicyKind">
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="DDSProfile-QoS-ReliabilityQosPolicy-kind-_defaultValue" value="BEST_EFFORT"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-QoS-ReliabilityQosPolicy-max_blocking_time" name="max_blocking_time" type="DDSProfile-QoS-Enumerations-Duration">
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="DDSProfile-QoS-ReliabilityQosPolicy-max_blocking_time-_defaultValue" value="-1"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-QoS-ResourceLimitsQosPolicy" name="ResourceLimitsQosPolicy">
+          <generalization xmi:id="DDSProfile-QoS-ResourceLimitsQosPolicy-_generalization.0" general="DDSProfile-QoS-QosPolicy"/>
+          <ownedAttribute xmi:id="DDSProfile-QoS-ResourceLimitsQosPolicy-max_samples" name="max_samples">
+            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="DDSProfile-QoS-ResourceLimitsQosPolicy-max_samples-_defaultValue" value="-1"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="DDSProfile-QoS-ResourceLimitsQosPolicy-max_samples_per_instance" name="max_samples_per_instance">
+            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="DDSProfile-QoS-ResourceLimitsQosPolicy-max_samples_per_instance-_defaultValue" value="-1"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-QoS-TimeBasedFilterQosPolicy" name="TimeBasedFilterQosPolicy">
+          <generalization xmi:id="DDSProfile-QoS-TimeBasedFilterQosPolicy-_generalization.0" general="DDSProfile-QoS-QosPolicy"/>
+          <ownedAttribute xmi:id="DDSProfile-QoS-TimeBasedFilterQosPolicy-minimum_separation" name="minimum_separation">
+            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="DDSProfile-QoS-TimeBasedFilterQosPolicy-minimum_separation-_defaultValue" value="0"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-QoS-TopicDataQosPolicy" name="TopicDataQosPolicy">
+          <generalization xmi:id="DDSProfile-QoS-TopicDataQosPolicy-_generalization.0" general="DDSProfile-QoS-QosPolicy"/>
+          <ownedAttribute xmi:id="DDSProfile-QoS-TopicDataQosPolicy-value" name="value">
+            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-QoS-TransportPriorityQosPolicy" name="TransportPriorityQosPolicy">
+          <generalization xmi:id="DDSProfile-QoS-TransportPriorityQosPolicy-_generalization.0" general="DDSProfile-QoS-QosPolicy"/>
+          <ownedAttribute xmi:id="DDSProfile-QoS-TransportPriorityQosPolicy-value" name="value">
+            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="DDSProfile-QoS-TransportPriorityQosPolicy-value-_defaultValue" value="0"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-QoS-UserDataQosPolicy" name="UserDataQosPolicy">
+          <generalization xmi:id="DDSProfile-QoS-UserDataQosPolicy-_generalization.0" general="DDSProfile-QoS-QosPolicy"/>
+          <ownedAttribute xmi:id="DDSProfile-QoS-UserDataQosPolicy-value" name="value">
+            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-QoS-WriterDataLifecycleQosPolicy" name="WriterDataLifecycleQosPolicy">
+          <generalization xmi:id="DDSProfile-QoS-WriterDataLifecycleQosPolicy-_generalization.0" general="DDSProfile-QoS-QosPolicy"/>
+          <ownedAttribute xmi:id="DDSProfile-QoS-WriterDataLifecycleQosPolicy-autodispose_unregistered_instances" name="autodispose_unregistered_instances">
+            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Boolean"/>
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="DDSProfile-QoS-WriterDataLifecycleQosPolicy-autodispose_unregistered_instances-_defaultValue" value="true"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Package" xmi:id="DDSProfile-QoS-Enumerations" name="Enumerations">
+          <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-QoS-Enumerations-Duration" name="Duration">
+            <ownedAttribute xmi:id="DDSProfile-QoS-Enumerations-Duration-second" name="second">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#UnlimitedNatural"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="DDSProfile-QoS-Enumerations-Duration-nanosecond" name="nanosecond">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#UnlimitedNatural"/>
+            </ownedAttribute>
+          </packagedElement>
+          <packagedElement xmi:type="uml:Enumeration" xmi:id="DDSProfile-QoS-Enumerations-HistoryQosPolicyKind" name="HistoryQosPolicyKind">
+            <ownedAttribute xmi:id="DDSProfile-QoS-Enumerations-HistoryQosPolicyKind-KEEP_LAST" name="KEEP_LAST" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="DDSProfile-QoS-Enumerations-HistoryQosPolicyKind-KEEP_ALL" name="KEEP_ALL" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+            </ownedAttribute>
+          </packagedElement>
+          <packagedElement xmi:type="uml:Enumeration" xmi:id="DDSProfile-QoS-Enumerations-DestinationOrderQosPolicyKind" name="DestinationOrderQosPolicyKind">
+            <ownedAttribute xmi:id="DDSProfile-QoS-Enumerations-DestinationOrderQosPolicyKind-BY_RECEPTION_TIMESTAMP" name="BY_RECEPTION_TIMESTAMP" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="DDSProfile-QoS-Enumerations-DestinationOrderQosPolicyKind-BY_SOURCE_TIMESTAMP" name="BY_SOURCE_TIMESTAMP" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+            </ownedAttribute>
+          </packagedElement>
+          <packagedElement xmi:type="uml:Enumeration" xmi:id="DDSProfile-QoS-Enumerations-DurabilityQosPolicyKind" name="DurabilityQosPolicyKind">
+            <ownedAttribute xmi:id="DDSProfile-QoS-Enumerations-DurabilityQosPolicyKind-TRANSIENT" name="TRANSIENT" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="DDSProfile-QoS-Enumerations-DurabilityQosPolicyKind-TRANSIENT_LOCAL" name="TRANSIENT_LOCAL" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="DDSProfile-QoS-Enumerations-DurabilityQosPolicyKind-VOLATILE" name="VOLATILE" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="DDSProfile-QoS-Enumerations-DurabilityQosPolicyKind-PERSISTENT" name="PERSISTENT" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+            </ownedAttribute>
+          </packagedElement>
+          <packagedElement xmi:type="uml:Enumeration" xmi:id="DDSProfile-QoS-Enumerations-LivelinessQosPolicyKind" name="LivelinessQosPolicyKind">
+            <ownedAttribute xmi:id="DDSProfile-QoS-Enumerations-LivelinessQosPolicyKind-AUTOMATIC" name="AUTOMATIC" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="DDSProfile-QoS-Enumerations-LivelinessQosPolicyKind-MANUAL_BY_PARTICIPANT" name="MANUAL_BY_PARTICIPANT" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="DDSProfile-QoS-Enumerations-LivelinessQosPolicyKind-MANUAL_BY_TOPIC" name="MANUAL_BY_TOPIC" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+            </ownedAttribute>
+          </packagedElement>
+          <packagedElement xmi:type="uml:Enumeration" xmi:id="DDSProfile-QoS-Enumerations-OwnershipQosPolicyKind" name="OwnershipQosPolicyKind">
+            <ownedAttribute xmi:id="DDSProfile-QoS-Enumerations-OwnershipQosPolicyKind-SHARED" name="SHARED" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="DDSProfile-QoS-Enumerations-OwnershipQosPolicyKind-EXCLUSIVE" name="EXCLUSIVE" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+            </ownedAttribute>
+          </packagedElement>
+          <packagedElement xmi:type="uml:Enumeration" xmi:id="DDSProfile-QoS-Enumerations-PresentationQosPolicyAccessScopeKind" name="PresentationQosPolicyAccessScopeKind">
+            <ownedAttribute xmi:id="DDSProfile-QoS-Enumerations-PresentationQosPolicyAccessScopeKind-INSTANCE" name="INSTANCE" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="DDSProfile-QoS-Enumerations-PresentationQosPolicyAccessScopeKind-TOPIC" name="TOPIC" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="DDSProfile-QoS-Enumerations-PresentationQosPolicyAccessScopeKind-GROUP" name="GROUP" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+            </ownedAttribute>
+          </packagedElement>
+          <packagedElement xmi:type="uml:Enumeration" xmi:id="DDSProfile-QoS-Enumerations-ReliabilityQosPolicyKind" name="ReliabilityQosPolicyKind">
+            <ownedAttribute xmi:id="DDSProfile-QoS-Enumerations-ReliabilityQosPolicyKind-BEST_EFFORT" name="BEST_EFFORT" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="DDSProfile-QoS-Enumerations-ReliabilityQosPolicyKind-RELIABLE" name="RELIABLE" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+            </ownedAttribute>
+          </packagedElement>
+        </packagedElement>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Package" xmi:id="DDSProfile-Application" name="Application">
+        <packagedElement xmi:type="uml:Class" xmi:id="DDSProfile-Application-ApplicationTarget" name="ApplicationTarget">
+          <ownedAttribute xmi:id="DDSProfile-Application-ApplicationTarget-platform" name="platform" type="DDSProfile-Application-PlatformType" association="DDSProfile-Application-_packagedElement.1"/>
+          <ownedAttribute xmi:id="DDSProfile-Application-ApplicationTarget-component_type" name="component_type" type="DDSProfile-Application-ComponentType" association="DDSProfile-Application-_packagedElement.2"/>
+          <ownedAttribute xmi:id="DDSProfile-Application-ApplicationTarget-participant" name="participant" type="DDSProfile-DCPS.1-DomainParticipant" association="DDSProfile-DCPS.1-_packagedElement.25"/>
+          <ownedAttribute xmi:id="DDSProfile-Application-ApplicationTarget-language" name="language" type="DDSProfile-Application-LanguageType" association="DDSProfile-Application-_packagedElement.3"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Application-_packagedElement.1" visibility="private" memberEnd="DDSProfile-Application-_packagedElement.1-_ownedEnd.0 DDSProfile-Application-ApplicationTarget-platform">
+          <ownedEnd xmi:id="DDSProfile-Application-_packagedElement.1-_ownedEnd.0" type="DDSProfile-Application-ApplicationTarget" association="DDSProfile-Application-_packagedElement.1"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Application-_packagedElement.2" visibility="private" memberEnd="DDSProfile-Application-_packagedElement.2-_ownedEnd.0 DDSProfile-Application-ApplicationTarget-component_type">
+          <ownedEnd xmi:id="DDSProfile-Application-_packagedElement.2-_ownedEnd.0" type="DDSProfile-Application-ApplicationTarget" association="DDSProfile-Application-_packagedElement.2"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="DDSProfile-Application-_packagedElement.3" visibility="private" memberEnd="DDSProfile-Application-_packagedElement.3-_ownedEnd.0 DDSProfile-Application-ApplicationTarget-language">
+          <ownedEnd xmi:id="DDSProfile-Application-_packagedElement.3-_ownedEnd.0" type="DDSProfile-Application-ApplicationTarget" association="DDSProfile-Application-_packagedElement.3"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Enumeration" xmi:id="DDSProfile-Application-ComponentType" name="ComponentType">
+          <ownedLiteral xmi:id="DDSProfile-Application-ComponentType-Executable" name="Executable"/>
+          <ownedLiteral xmi:id="DDSProfile-Application-ComponentType-Library20shared" name="Library (shared)"/>
+          <ownedLiteral xmi:id="DDSProfile-Application-ComponentType-Library20static" name="Library (static)"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Enumeration" xmi:id="DDSProfile-Application-LanguageType" name="LanguageType">
+          <ownedLiteral xmi:id="DDSProfile-Application-LanguageType-C" name="C++"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Enumeration" xmi:id="DDSProfile-Application-PlatformType" name="PlatformType">
+          <ownedLiteral xmi:id="DDSProfile-Application-PlatformType-GNU20Makefiles20gnuace" name="GNU Makefiles (gnuace)"/>
+          <ownedLiteral xmi:id="DDSProfile-Application-PlatformType-Microsoft20Visual20C207.120vc71" name="Microsoft Visual C++ 7.1 (vc71)"/>
+          <ownedLiteral xmi:id="DDSProfile-Application-PlatformType-Microsoft20Visual20C20820vc8" name="Microsoft Visual C++ 8 (vc8)"/>
+          <ownedLiteral xmi:id="DDSProfile-Application-PlatformType-Microsoft20Visual20C20920vc9" name="Microsoft Visual C++ 9 (vc9)"/>
+          <ownedLiteral xmi:id="DDSProfile-Application-PlatformType-Microsoft20Visual20C20Makefiles20nmake" name="Microsoft Visual C++ Makefiles (nmake)"/>
+        </packagedElement>
+      </packagedElement>
     </packagedElement>
-    <packagedElement xmi:type="uml:Package" xmi:id="_sTND0CM1Ed-csr6NlFtsMA" name="Application">
-      <packagedElement xmi:type="uml:Class" xmi:id="_yf7EwCM1Ed-csr6NlFtsMA" name="ApplicationTarget">
-        <ownedAttribute xmi:id="_07ehMCM1Ed-csr6NlFtsMA" name="platform" type="_2fomICM2Ed-csr6NlFtsMA" association="_6Yx1MCWXEd-C3YF8TpBctg"/>
-        <ownedAttribute xmi:id="_SGuTYCM2Ed-csr6NlFtsMA" name="component_type" type="_h4TVwCM2Ed-csr6NlFtsMA" association="_MeDYgCWYEd-C3YF8TpBctg"/>
-        <ownedAttribute xmi:id="_Tyc1YCM2Ed-csr6NlFtsMA" name="participant" type="_woxhcCMrEd-csr6NlFtsMA" association="_Pq8W0CWOEd-C3YF8TpBctg"/>
-        <ownedAttribute xmi:id="_X6Mt4CM2Ed-csr6NlFtsMA" name="language" type="_soT7sCM2Ed-csr6NlFtsMA" association="_Yws14CWYEd-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_6Yx1MCWXEd-C3YF8TpBctg" memberEnd="_8HPiICWXEd-C3YF8TpBctg _07ehMCM1Ed-csr6NlFtsMA">
-        <ownedEnd xmi:id="_8HPiICWXEd-C3YF8TpBctg" type="_yf7EwCM1Ed-csr6NlFtsMA" association="_6Yx1MCWXEd-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_MeDYgCWYEd-C3YF8TpBctg" memberEnd="_NDgO8CWYEd-C3YF8TpBctg _SGuTYCM2Ed-csr6NlFtsMA">
-        <ownedEnd xmi:id="_NDgO8CWYEd-C3YF8TpBctg" type="_yf7EwCM1Ed-csr6NlFtsMA" association="_MeDYgCWYEd-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Association" xmi:id="_Yws14CWYEd-C3YF8TpBctg" memberEnd="_Zg_DUCWYEd-C3YF8TpBctg _X6Mt4CM2Ed-csr6NlFtsMA">
-        <ownedEnd xmi:id="_Zg_DUCWYEd-C3YF8TpBctg" type="_yf7EwCM1Ed-csr6NlFtsMA" association="_Yws14CWYEd-C3YF8TpBctg"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Enumeration" xmi:id="_h4TVwCM2Ed-csr6NlFtsMA" name="ComponentType">
-        <ownedLiteral xmi:id="_lSHKMCM2Ed-csr6NlFtsMA" name="Executable"/>
-        <ownedLiteral xmi:id="_pRKZsCM2Ed-csr6NlFtsMA" name="Library (shared)"/>
-        <ownedLiteral xmi:id="_n5HosCM2Ed-csr6NlFtsMA" name="Library (static)"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Enumeration" xmi:id="_soT7sCM2Ed-csr6NlFtsMA" name="LanguageType">
-        <ownedLiteral xmi:id="_uPKkwCM2Ed-csr6NlFtsMA" name="C++"/>
-      </packagedElement>
-      <packagedElement xmi:type="uml:Enumeration" xmi:id="_2fomICM2Ed-csr6NlFtsMA" name="PlatformType">
-        <ownedLiteral xmi:id="_4GTpACM2Ed-csr6NlFtsMA" name="GNU Makefiles (gnuace)"/>
-        <ownedLiteral xmi:id="_N3e2UCM3Ed-csr6NlFtsMA" name="Microsoft Visual C++ 7.1 (vc71)"/>
-        <ownedLiteral xmi:id="_PKVlUCM3Ed-csr6NlFtsMA" name="Microsoft Visual C++ 8 (vc8)"/>
-        <ownedLiteral xmi:id="_RA5eUCM3Ed-csr6NlFtsMA" name="Microsoft Visual C++ 9 (vc9)"/>
-        <ownedLiteral xmi:id="_SiArwCM3Ed-csr6NlFtsMA" name="Microsoft Visual C++ Makefiles (nmake)"/>
-      </packagedElement>
-    </packagedElement>
-  </packagedElement>
-</uml:Model>
+    <profileApplication xmi:id="_profileApplication.0">
+      <eAnnotations xmi:id="_profileApplication.0-_http2F2Fwww.eclipse.org2Fuml22F2.0.02FUML" source="http://www.eclipse.org/uml2/2.0.0/UML">
+        <references xmi:type="ecore:EPackage" href="pathmap://UML_PROFILES/Standard.profile.uml#_yzU58YinEdqtvbnfB2L_5w"/>
+      </eAnnotations>
+      <appliedProfile href="pathmap://UML_PROFILES/Standard.profile.uml#_0"/>
+    </profileApplication>
+  </uml:Model>
+  <Standard:Metamodel xmi:id="_YuXkQCZAEd-jUP0XDEUmWA" base_Model="_0"/>
+  <Standard:Metaclass xmi:id="_YuYyYCZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Common"/>
+  <Standard:Metaclass xmi:id="_YuYyYSZAEd-jUP0XDEUmWA" base_Class="DDSProfile-DCPS"/>
+  <Standard:Metaclass xmi:id="_YuZZcCZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Domain-DDSEntity"/>
+  <Standard:Metaclass xmi:id="_YuaAgCZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Domain-QoSProperty"/>
+  <Standard:Metaclass xmi:id="_YuaAgSZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Core-NamedEntity"/>
+  <Standard:Metaclass xmi:id="_YuaAgiZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Core-Specification"/>
+  <Standard:Metaclass xmi:id="_YuankCZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Core-TypedEntity"/>
+  <Standard:Metaclass xmi:id="_YuankSZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Topics-ContentFilteredTopic"/>
+  <Standard:Metaclass xmi:id="_YubOoCZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Topics-MultiTopic"/>
+  <Standard:Metaclass xmi:id="_YubOoSZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Topics-Topic"/>
+  <Standard:Metaclass xmi:id="_YuccwCZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Topics-TopicDescription"/>
+  <Standard:Metaclass xmi:id="_YuccwSZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Topics-TopicField"/>
+  <Standard:Metaclass xmi:id="_YuccwiZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Topics-TopicType"/>
+  <Standard:Metaclass xmi:id="_YudD0CZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Types-Array"/>
+  <Standard:Metaclass xmi:id="_YudD0SZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Types-Boolean"/>
+  <Standard:Metaclass xmi:id="_YudD0iZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Types-Case"/>
+  <Standard:Metaclass xmi:id="_Yudq4CZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Types-Char"/>
+  <Standard:Metaclass xmi:id="_Yudq4SZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Types-Collection"/>
+  <Standard:Metaclass xmi:id="_Yudq4iZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Types-ConstructedType"/>
+  <Standard:Metaclass xmi:id="_Yudq4yZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Types-Double"/>
+  <Standard:Metaclass xmi:id="_YueR8CZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Types-Enum"/>
+  <Standard:Metaclass xmi:id="_YueR8SZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Types-Field"/>
+  <Standard:Metaclass xmi:id="_YueR8iZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Types-Float"/>
+  <Standard:Metaclass xmi:id="_YueR8yZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Types-FloatingPoint"/>
+  <Standard:Metaclass xmi:id="_Yue5ACZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Types-Int"/>
+  <Standard:Metaclass xmi:id="_Yue5ASZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Types-Integer"/>
+  <Standard:Metaclass xmi:id="_YufgECZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Types-Long"/>
+  <Standard:Metaclass xmi:id="_YufgESZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Types-LongLong"/>
+  <Standard:Metaclass xmi:id="_YufgEiZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Types-Octet"/>
+  <Standard:Metaclass xmi:id="_YugHICZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Types-Sequence"/>
+  <Standard:Metaclass xmi:id="_YugHISZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Types-Short"/>
+  <Standard:Metaclass xmi:id="_YuguMCZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Types-SignedInt"/>
+  <Standard:Metaclass xmi:id="_YuhVQCZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Types-Simple"/>
+  <Standard:Metaclass xmi:id="_YuhVQSZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Types-String"/>
+  <Standard:Metaclass xmi:id="_YuhVQiZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Types-Struct"/>
+  <Standard:Metaclass xmi:id="_YuhVQyZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Types-Typedef"/>
+  <Standard:Metaclass xmi:id="_Yuh8UCZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Types-UInteger"/>
+  <Standard:Metaclass xmi:id="_Yuh8USZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Types-ULongLong"/>
+  <Standard:Metaclass xmi:id="_Yuh8UiZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Types-UShort"/>
+  <Standard:Metaclass xmi:id="_Yuh8UyZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Types-ULong"/>
+  <Standard:Metaclass xmi:id="_Yuh8VCZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Types-Union"/>
+  <Standard:Metaclass xmi:id="_Yuh8VSZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Types-UnsignedInt"/>
+  <Standard:Metaclass xmi:id="_YuijYCZAEd-jUP0XDEUmWA" base_Class="DDSProfile-DCPS.1-DataReader"/>
+  <Standard:Metaclass xmi:id="_YuijYSZAEd-jUP0XDEUmWA" base_Class="DDSProfile-DCPS.1-DataReaderWriter"/>
+  <Standard:Metaclass xmi:id="_YujKcCZAEd-jUP0XDEUmWA" base_Class="DDSProfile-DCPS.1-DataWriter"/>
+  <Standard:Metaclass xmi:id="_YujxgCZAEd-jUP0XDEUmWA" base_Class="DDSProfile-DCPS.1-Domain"/>
+  <Standard:Metaclass xmi:id="_YujxgSZAEd-jUP0XDEUmWA" base_Class="DDSProfile-DCPS.1-DomainParticipant"/>
+  <Standard:Metaclass xmi:id="_YukYkCZAEd-jUP0XDEUmWA" base_Class="DDSProfile-DCPS.1-Publisher"/>
+  <Standard:Metaclass xmi:id="_YukYkSZAEd-jUP0XDEUmWA" base_Class="DDSProfile-DCPS.1-PublisherSubscriber"/>
+  <Standard:Metaclass xmi:id="_Yuk_oCZAEd-jUP0XDEUmWA" base_Class="DDSProfile-DCPS.1-Subscriber"/>
+  <Standard:Metaclass xmi:id="_Yuk_oSZAEd-jUP0XDEUmWA" base_Class="DDSProfile-QoS-CustomPolicy"/>
+  <Standard:Metaclass xmi:id="_Yuk_oiZAEd-jUP0XDEUmWA" base_Class="DDSProfile-QoS-DeadlineQosPolicy"/>
+  <Standard:Metaclass xmi:id="_Yuk_oyZAEd-jUP0XDEUmWA" base_Class="DDSProfile-QoS-DestinationOrderQosPolicy"/>
+  <Standard:Metaclass xmi:id="_Yu0QMCZAEd-jUP0XDEUmWA" base_Class="DDSProfile-QoS-DurabilityQosPolicy"/>
+  <Standard:Metaclass xmi:id="_Yu0QMSZAEd-jUP0XDEUmWA" base_Class="DDSProfile-QoS-DurabilityServiceQosPolicy"/>
+  <Standard:Metaclass xmi:id="_Yu03QCZAEd-jUP0XDEUmWA" base_Class="DDSProfile-QoS-EntityFactoryQosPolicy"/>
+  <Standard:Metaclass xmi:id="_Yu03QSZAEd-jUP0XDEUmWA" base_Class="DDSProfile-QoS-GroupDataQosPolicy"/>
+  <Standard:Metaclass xmi:id="_Yu03QiZAEd-jUP0XDEUmWA" base_Class="DDSProfile-QoS-HistoryQosPolicy"/>
+  <Standard:Metaclass xmi:id="_Yu03QyZAEd-jUP0XDEUmWA" base_Class="DDSProfile-QoS-LatencyBudgetQosPolicy"/>
+  <Standard:Metaclass xmi:id="_Yu1eUCZAEd-jUP0XDEUmWA" base_Class="DDSProfile-QoS-LifespanQosPolicy"/>
+  <Standard:Metaclass xmi:id="_Yu1eUSZAEd-jUP0XDEUmWA" base_Class="DDSProfile-QoS-LivelinessQosPolicy"/>
+  <Standard:Metaclass xmi:id="_Yu1eUiZAEd-jUP0XDEUmWA" base_Class="DDSProfile-QoS-OwnershipQosPolicy"/>
+  <Standard:Metaclass xmi:id="_Yu1eUyZAEd-jUP0XDEUmWA" base_Class="DDSProfile-QoS-OwnershipStrengthQosPolicy"/>
+  <Standard:Metaclass xmi:id="_Yu1eVCZAEd-jUP0XDEUmWA" base_Class="DDSProfile-QoS-PartitionQosPolicy"/>
+  <Standard:Metaclass xmi:id="_Yu2FYCZAEd-jUP0XDEUmWA" base_Class="DDSProfile-QoS-PresentationQosPolicy"/>
+  <Standard:Metaclass xmi:id="_Yu2FYSZAEd-jUP0XDEUmWA" base_Class="DDSProfile-QoS-QosPolicy"/>
+  <Standard:Metaclass xmi:id="_Yu2FYiZAEd-jUP0XDEUmWA" base_Class="DDSProfile-QoS-ReaderDataLifecycleQosPolicy"/>
+  <Standard:Metaclass xmi:id="_Yu2FYyZAEd-jUP0XDEUmWA" base_Class="DDSProfile-QoS-ReliabilityQosPolicy"/>
+  <Standard:Metaclass xmi:id="_Yu2scCZAEd-jUP0XDEUmWA" base_Class="DDSProfile-QoS-ResourceLimitsQosPolicy"/>
+  <Standard:Metaclass xmi:id="_Yu2scSZAEd-jUP0XDEUmWA" base_Class="DDSProfile-QoS-TimeBasedFilterQosPolicy"/>
+  <Standard:Metaclass xmi:id="_Yu2sciZAEd-jUP0XDEUmWA" base_Class="DDSProfile-QoS-TopicDataQosPolicy"/>
+  <Standard:Metaclass xmi:id="_Yu2scyZAEd-jUP0XDEUmWA" base_Class="DDSProfile-QoS-TransportPriorityQosPolicy"/>
+  <Standard:Metaclass xmi:id="_Yu2sdCZAEd-jUP0XDEUmWA" base_Class="DDSProfile-QoS-UserDataQosPolicy"/>
+  <Standard:Metaclass xmi:id="_Yu3TgCZAEd-jUP0XDEUmWA" base_Class="DDSProfile-QoS-WriterDataLifecycleQosPolicy"/>
+  <Standard:Metaclass xmi:id="_Yu3TgSZAEd-jUP0XDEUmWA" base_Class="DDSProfile-QoS-Enumerations-Duration"/>
+  <Standard:Metaclass xmi:id="_Yu36kCZAEd-jUP0XDEUmWA" base_Class="DDSProfile-Application-ApplicationTarget"/>
+</xmi:XMI>
