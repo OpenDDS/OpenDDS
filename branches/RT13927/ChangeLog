@@ -1,10 +1,3 @@
-Tue Mar  2 01:21:16 UTC 2010  Steven Stallion  <stallions@ociweb.com>
-
-        * tools/modeling/eclipse/docs/08-06-19.xmi:
-        * tools/modeling/eclipse/src/models/DDS.metamodel.uml:
-
-          Ported Beta 1 metamodel XMI (mars/08-06-19) to Eclipse.
-
 Mon Feb 22 20:57:32 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/odds_dissector/colorfilters:
