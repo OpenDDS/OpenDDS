@@ -1,3 +1,14 @@
+Tue Mar  2 22:10:58 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/modeling/eclipse/src/icons/dds.png:
+        * tools/modeling/eclipse/src/icons/opendds.png:
+
+          Added initial icons for model decoration.
+
+        * tools/modeling/eclipse/src/models/DDS.metamodel.uml:
+
+          Updated metamodel XMI for use with Eclipse profiles.
+
 Tue Mar  2 21:11:23 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/modeling/eclipse/docs/08-06-20.xmi:
