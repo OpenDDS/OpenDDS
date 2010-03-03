@@ -1,3 +1,18 @@
+Wed Mar  3 23:32:36 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+
+          Added specification for which statistics to gather.
+          Updated the documentation.
+
+        * performance-tests/Bench/doc/userguide.html:
+
+          Ongoing documentation effort.  Todays installment.
+
+        * performance-tests/Bench/tests/thru/test-commands.txt:
+
+          Updated to use the new statistics specification argument.
+
 Wed Mar  3 00:22:48 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/doc/userguide.html:
