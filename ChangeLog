@@ -1,3 +1,9 @@
+Wed Mar  3 00:22:48 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/userguide.html:
+
+          Updated with installation, quick start, and start of FAQ.
+
 Mon Mar  1 21:40:59 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/src/StatisticalValue.h:
