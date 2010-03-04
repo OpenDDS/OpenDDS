@@ -11,6 +11,7 @@ New to this version are the following changes:
 - Added IDL for ContentFilteredTopic and MultiTopic, but they are not yet
   implemented (operations will return NULL or RETCODE_UNSUPPORTED).
 
+
 =========================================================================
 
 Version 2.1 of OpenDDS.
