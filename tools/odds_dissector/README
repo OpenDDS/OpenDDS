@@ -77,8 +77,9 @@ according to the Wireshark Developer's Guide (see above).
    Help -> Supported Protocols menu item and looking for "OpenDDS" under
    the Protocols tab.
 
-   NOTE: You may need to define LD_LIBRARY_PATH (for Linux and Solaris),
-         or PATH (for Windows) to resolve dependent libraries at run-time.
+   NOTE: You may need to define LD_LIBRARY_PATH (for Linux and Solaris)
+         or PATH (for Windows) to resolve dependent libraries when running
+         Wireshark once the plugin is installed.
 
 
 ======================================================================
@@ -154,7 +155,7 @@ $DDS_ROOT/tools/odds_dissector/ directory and click the Open button.
 
 NOTE: Coloring rules are applied on a first match basis; you may need to
       move the imported rules above the "tcp" and "udp" rules using the
-      Order buttons on the right-hand side of the dialog. If ordering is
+      Order buttons on the right-hand side of the dialog.  If ordering is
       changed, you must ensure the "OpenDDS (Important)" rule appears
       before the "OpenDDS" rule.
 
