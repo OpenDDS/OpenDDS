@@ -174,7 +174,7 @@ tests/DCPS/ReadCondition/run_test.pl: !DCPS_MIN
 tests/DCPS/QueryCondition/run_test.pl: !DCPS_MIN
 tests/DCPS/Federation/run_test.pl: !DCPS_MIN
 tests/DCPS/FileSystemStorage/run_test.pl: !DCPS_MIN
-tests/DCPS/Priority/run_test.pl: !DCPS_MIN
+tests/DCPS/Priority/run_test.pl: !DCPS_MIN !QNX
 tests/DCPS/LatencyBudget/run_test.pl: !DCPS_MIN
 tests/DCPS/LatencyBudget/run_test.pl late: !DCPS_MIN
 tests/DCPS/WaitForAck/run_test.pl: !DCPS_MIN
