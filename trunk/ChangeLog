@@ -1,3 +1,16 @@
+Thu Mar  4 22:14:22 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_udp.mpb:
+        * dds/DCPS/transport/udp/udp.mpc:
+
+          Renamed the project opendds_udp.  "udp" alone is too general and
+          will easily conflict (for example, TAO/performance-tests/UDP).
+
+        * bin/dcps_tests.lst:
+
+          Exclude the Priority test on QNX.  It is hanging in
+          pthread_setschedparam().
+
 Wed Mar  3 23:32:36 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/bin/run_test:
