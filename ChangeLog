@@ -3,7 +3,7 @@ Fri Mar  5 14:34:08 UTC 2010  Steven Stallion  <stallions@ociweb.com>
         * tools/odds_dissector/odds_packet.cpp:
 
 	  Dropped unnecessary inlines; adjusted conditional behavior in
-	  odds_dissect_heur.
+	  dissect_odds_heur.
 
 Fri Mar  5 00:31:48 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
