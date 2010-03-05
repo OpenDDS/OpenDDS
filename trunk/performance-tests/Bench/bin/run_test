@@ -269,11 +269,50 @@ sub WaitForUserInput {
   my $userinput = <STDIN>;
 }
 
+#
+# Statistics gathering commands by system type
+#
+# The collection processing will start the command /once/, then capture
+# the output and process it line by line.  As this script is terminating,
+# it will send an INT (3) signal to the process to stop it.
+#
+# If a system type does not honor the commands as written, add a stanza
+# for that system type and modify the commands to be appropriate for that
+# environment.
+#
+sub collectionCommand {
+  my ( $type, $params) = @_;
+  SWITCH:{
+    $^O =~ /MSWin32/ && do {
+      return undef;
+    };
+    $^O =~ /cygwin/ && do {
+      return undef;
+    };
+    $^O =~ /VMS/ && do {
+      return undef;
+    };
+    $^O =~ /solaris/ && do {
+      return "vmstat 1"  if $type eq "system";
+      return undef       if $type eq "network";
+      return "top -bd 1" if $type eq "process"; # This still may not work.
+    };
+
+    # Handle generic Unix types here.  Assume they have modern command
+    # forms.  If not, add a stanza to handle them specifically above.
+    return "vmstat 1"             if $type eq "system";
+    return "netstat -ntpc"        if $type eq "network";
+    return "top -bd 1 -p $params" if $type eq "process";
+  }
+  return undef;
+}
+
 sub collectProcessStats {
   my $pid = shift;
-  if( $pid and $^O ne 'MSWin32') {
+  my $command = &collectionCommand( 'process', "$pid");
+  if( $pid and $command) {
     &runCollector(
-      "top -bd 1 -p $pid",
+      $command,
       "process-$pid.log",
       sub { # Action to process each line of input.
         my ( $input, $output) = @_;
@@ -285,9 +324,10 @@ sub collectProcessStats {
 
 sub collectSystemStats {
   my $pid = shift;
-  if( $pid and $^O ne 'MSWin32') {
+  my $command = &collectionCommand( 'system');
+  if( $pid and $command) {
     &runCollector(
-      "vmstat 1",
+      $command,
       "system-$pid.log",
       sub { # Action to process each line of input.
         my ( $input, $output) = @_;
@@ -299,9 +339,10 @@ sub collectSystemStats {
 
 sub collectNetworkStats {
   my $pid = shift;
-  if( $pid and $^O ne 'MSWin32') {
+  my $command = &collectionCommand( 'network');
+  if( $pid and $command) {
     &runCollector(
-      "netstat -ntpc",
+      $command,
       "network-$pid.log",
       sub { # Action to process each line of input.
         my ( $input, $output) = @_;

@@ -1,9 +1,23 @@
+Fri Mar  5 23:29:38 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+
+          Added ability to simply tailor statistics gathering commands by
+          system type.  This was necessitated after discovering that the
+          solaris environment did not support several of the command
+          options used.
+
+        * performance-tests/Bench/doc/userguide.html:
+        * performance-tests/Bench/doc/images/latencytest.png:
+
+          Minor updates from review comments (Scott).
+
 Fri Mar  5 14:34:08 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/odds_dissector/odds_packet.cpp:
 
-	  Dropped unnecessary inlines; adjusted conditional behavior in
-	  dissect_odds_heur.
+          Dropped unnecessary inlines; adjusted conditional behavior in
+          dissect_odds_heur.
 
 Fri Mar  5 00:31:48 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
