@@ -1,8 +1,18 @@
+Fri Mar  5 00:31:48 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/images/latencytest.png:
+
+          Diagram describing existing latency test.
+
+        * performance-tests/Bench/doc/userguide.html:
+
+          Ongoing documentation.  Started to describe existing tests.
+
 Thu Mar  4 22:27:23 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * NEWS:
 
-	  Fixed formatting.
+          Fixed formatting.
 
 Thu Mar  4 22:22:53 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
