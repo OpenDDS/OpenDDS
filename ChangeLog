@@ -1,3 +1,9 @@
+Sat Mar  6 19:16:09 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+          Removed ccm base project, gives a hard dependency on CIAO,
+          have to solve this differently
+
 Sat Mar  6 06:47:09 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DdsDcps.mpc:
