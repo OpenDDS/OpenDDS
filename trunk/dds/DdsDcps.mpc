@@ -94,10 +94,10 @@ project (DdsDcps_lem_gen) : dds4ccm_opendds, taoidldefaults {
   }
 }
 
-project (DdsDcps_lem_stub) : dcps, ccm_svnt {
+project (DdsDcps_lem_stub) : dcps, taolib {
   requires += dds4ccm_opendds
   after += DdsDcps DdsDcps_lem_gen
-  includes += $(CIAO_ROOT)/connectors
+  includes += $(CIAO_ROOT)/connectors $(CIAO_ROOT)
   sharedname = OpenDDS_Dcps_lem_stub
   dynamicflags += DDSDCPS_LEM_STUB_BUILD_DLL
 
