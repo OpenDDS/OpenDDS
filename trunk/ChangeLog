@@ -1,3 +1,8 @@
+Sat Mar  6 06:47:09 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+          Added needed base project for ccm lem library
+
 Fri Mar  5 23:29:38 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/bin/run_test:

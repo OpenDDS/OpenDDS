@@ -94,7 +94,7 @@ project (DdsDcps_lem_gen) : dds4ccm_opendds, taoidldefaults {
   }
 }
 
-project (DdsDcps_lem_stub) : dcps {
+project (DdsDcps_lem_stub) : dcps, ccm_svnt {
   requires += dds4ccm_opendds
   after += DdsDcps DdsDcps_lem_gen
   includes += $(CIAO_ROOT)/connectors
