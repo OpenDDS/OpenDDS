@@ -1,9 +1,9 @@
 Version 2.1.1 of OpenDDS.
 
-New to this version are the following changes:
+* This is a bugfix release to account for issues introduced by the
+  previous version.
 
-- A Wireshark 1.2.x compatible dissector is included in this release.
-  See $DDS_ROOT/tools/odds_dissector/README for details.
+New to this version are the following changes:
 
 - Various bugfixes have been applied to the new IP multicast transport
   and the Extensible Transport Framework (ETF) to improve stability.
@@ -11,8 +11,11 @@ New to this version are the following changes:
 - Added IDL for ContentFilteredTopic and MultiTopic, but they are not yet
   implemented (operations will return NULL or RETCODE_UNSUPPORTED).
 
+- A Wireshark 1.2.x compatible dissector is included in this release.
+  See $DDS_ROOT/tools/odds_dissector/README for details.
 
-=========================================================================
+
+========================================================================
 
 Version 2.1 of OpenDDS.
 
