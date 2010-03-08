@@ -1,12 +1,21 @@
+Mon Mar  8 19:01:09 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * NEWS:
+        * README:
+
+          Updated documentation for next release.
+
 Sat Mar  6 19:16:09 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DdsDcps.mpc:
+
           Removed ccm base project, gives a hard dependency on CIAO,
           have to solve this differently
 
 Sat Mar  6 06:47:09 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DdsDcps.mpc:
+
           Added needed base project for ccm lem library
 
 Fri Mar  5 23:29:38 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
@@ -196,9 +205,11 @@ Thu Feb 25 08:54:12 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
         * dds/DdsDcpsDataWriterRemote.idl:
         * dds/DdsDcpsDomainExt.idl:
         * dds/DdsDcpsInfo.idl:
+          
           Removed ciao leam
 
         * dds/DdsDcps.mpc:
+          
           Removed generation of lem for OpenDDS specific interfaces
 
 Wed Feb 24 22:43:05 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
@@ -271,6 +282,7 @@ Wed Feb 24 14:50:02 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 Wed Feb 24 13:20:12 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DdsDcps.mpc:
+
           Added projects to generate the lem needed for dds4ccm. When the
           MPC feature dds4ccm_opendds is set to 1, the lem and the lem
           stub dll will be generated.
@@ -1063,9 +1075,11 @@ Tue Feb  9 15:02:53 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 Tue Feb  9 13:08:49 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+
           Initialise a pointer with 0
 
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
           Fix invalid logging mask
 
 Tue Feb  9 04:38:49 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
