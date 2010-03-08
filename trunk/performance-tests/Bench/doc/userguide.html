@@ -532,6 +532,37 @@ Error: #f88
 <div title="DCPSInfoRepo" modifier="MikeMartinez" created="201003011936" changecount="1">
 <pre>This is the executable that manages metadata for OpenDDS.  This is where associations are made between publications and subscriptions.  Builtin Topics are distributed from here.  One process of this type is required for operaion of OpenDDS.  It implements CORBA interfaces that allow the individual DDS Participants to register for discovery and update internal state as necessary.</pre>
 </div>
+<div title="Data Reduction" modifier="MikeMartinez" created="201003082209" modified="201003082224" tags="publish" changecount="5">
+<pre>!!NOTE: This is a documentation placeholder and needs to be expanded.
+There are several scripts to assist in reducing the test data for analysis these include:
+;//$~BENCH_ROOT/bin/reduce.pl//
+:reduces latency data into a plottable format.
+;//$~BENCH_ROOT/bin/extract.pl//
+:extracts summary data from plottable latency data for further visualization.
+;//$~BENCH_ROOT/tools/convert-all//
+:notional shell script to run reduce.pl and extract.pl on data collected from multiple test execution runs.
+
+</pre>
+</div>
+<div title="Data Visualization" modifier="MikeMartinez" created="201003082219" tags="publish" changecount="1">
+<pre>!!NOTE: This is a documentation placeholder and needs to be expanded.
+There are several scripts to assist in visualizing the reduced test data.  These include:
+;//$~BENCH_ROOT/bin/mktable.pl//
+:script to crate a table of results.  This currently creates only a TiddlyWiki format table.
+;//$~BENCH_ROOT/bin/expandColors.pl//
+:script to replace color table lookups from TiddlyWiki in the data table from //mktable.pl// with actual color references.
+;//$~BENCH_ROOT/bin/genstats.pl//
+:script to create file with GNUPlot label string definitions containing summary statistics information to be added as labels to histogram charts.
+;//$~BENCH_ROOT/bin/lj-plots.gp//
+:GNUPlot script to create Latency and Jitter timeline charts and histograms in a quad-plot format.
+;//$~BENCH_ROOT/bin/plot-jitter.gp//
+:GNUPlot script to create a plot of jitter summary data for all tests.
+;//$~BENCH_ROOT/bin/plot-transports.gp//
+:GNUPlot script to create a plot of summary latency data for all tests.
+;//$~BENCH_ROOT/tools/plot-all.gp//
+:notional GNUPlot script to create plots for all gathered data.
+</pre>
+</div>
 <div title="DefaultTiddlers" modifier="MikeMartinez" created="201002181950" modified="201002182002" changecount="2">
 <pre>[[OpenDDS-Bench]]</pre>
 </div>
@@ -549,10 +580,13 @@ Error: #f88
 <pre>#[[What kind of document is this?|FAQ1]]
 </pre>
 </div>
-<div title="FAQ1" modifier="MikeMartinez" created="201003022001" tags="publish faq" changecount="1">
+<div title="FAQ1" modifier="MikeMartinez" created="201003022001" modified="201003082219" tags="publish faq" changecount="2">
 <pre>&quot;What kind of document is this?&quot;
 
-This is a TiddlyWIki document.</pre>
+This is a TiddlyWiki document.</pre>
+</div>
+<div title="GNUPlot" modifier="MikeMartinez" created="201003082221" modified="201003082223" changecount="4">
+<pre>GNUPlot is a data visualization tool available as from [[gnuplot.info|http://gnuplot.info/]]</pre>
 </div>
 <div title="GettingStarted" modifier="MikeMartinez" created="201002011551" modified="201002011553" changecount="3">
 <pre>To get started with this blank [[TiddlyWiki]], you'll need to modify the following tiddlers:
@@ -645,9 +679,26 @@ As an aid to packaging these files into a distributable form, the //$~BENCH_ROOT
 
 The script makes copies and links in a named (default //pkg//) target directory that can then be tar'ed or zip'ed into a distributable file.  The {{{run_test}}} test management script will configure the environment of processes that it starts to find libraries and commands in the subdirectories created by this script, making use of the distribution straightforward.</pre>
 </div>
-<div title="Latency Tests" modifier="MikeMartinez" created="201003042136" modified="201003050025" tags="publish" changecount="4">
-<pre>The OpenDDS-Bench framework includes configuration files for latency testing.  The latency testing covers several different conditions.
-[img[Latency Test|images/latencytest.png]]</pre>
+<div title="Latency Tests" modifier="MikeMartinez" created="201003042136" modified="201003082130" tags="publish" changecount="10">
+<pre>The OpenDDS-Bench framework includes configuration files for latency testing.  These files are located in the //$~BENCH_ROOT/tests/latency// sub-directory.  The latency testing covers several different conditions.  The configuration for these tests are illustrated in the following diagram.
+[img[Latency Test|images/latencytest.jpg]]
+The message size is varied for each test execution run and latency data for the full loopback path gathered and analyzed.  Latency data is measured by extracting a timestamp at the time of the write() call and inserting that into the data sample.  Once the sample has been received at the terminus of the path, another timestamp will be extracted and the difference logged as the latency.  Since the clocks on different hosts tend to drift at different rates, it is best to have both the write() and read() calls executed on the same host so the latency measurements are made using the same system clock.  This is ensured for these tests by placing the publication and subscription in the same process.  Typically the two processes of this test will be executed on different hosts to include network effects in the measurements.  While executing them on the same host will exclude network effects from the results, it is possible to encounter processor effects depending on the capacity of the host on which the test is executing.
+
+There is a separate configuration file supplied for each message size test to be executed.  These files configure the test to use a RELIABLE transport type.  They can be modified to select ~BEST_EFFORT for testing using the UDP and basic Multicast transports.  Users are encouraged to extend the testing to include cases specific to their environment as well, using the supplied configuration files as a guide.  The test files and message sizes specified available include the following:
+{{centeredTable{
+| ''Test File Message Sizes'' |c
+| //Message Size//&lt;br&gt;(bytes) | //Configuration File//&lt;br&gt;(in //$~BENCH_ROOT/tests/latency//) |
+| 50|p1-50.ini |
+| 100|p1-100.ini |
+| 250|p1-250.ini |
+| 500|p1-500.ini |
+| 1000|p1-1000.ini |
+| 2500|p1-2500.ini |
+| 5000|p1-5000.ini |
+| 8000|p1-8000.ini |
+| 16000|p1-16000.ini |
+| 32000|p1-32000.ini |
+}}}</pre>
 </div>
 <div title="MainMenu" modifier="MikeMartinez" created="201002181950" modified="201003031716" changecount="7">
 <pre>[[Introduction|OpenDDS-Bench]]
@@ -1811,7 +1862,77 @@ The specific Entity specifications that are supported include:
 #[[Subscription|Subscription Specifications]]
 </pre>
 </div>
-<div title="TiddlyWIki" modifier="MikeMartinez" created="201003022002" changecount="1">
+<div title="Throughput Tests" modifier="MikeMartinez" created="201003081923" modified="201003082200" tags="publish" changecount="15">
+<pre>The OpenDDS-Bench framework includes configuration files for throughput testing.  These files are located in the //$~BENCH_ROOT/tests/thru// sub-directory.  The throughput testing covers several different conditions.  These include a bidirectional test, topologically equivalent to the [[latency tests|Latency Tests]], publication bound tests, and subscription bound tests.  Publication bound testing publishes test data from one publication to two distinct subscriptions.  When these processes are on three separate hosts, the publication processing will dominate and likely be the limiting factor in throughput.  Subscription bound testing publishes test data from two separate publications to a single subscription.  When these processes are on three separate hosts, the subscription processing will dominate and likely be the limiting factor in throughput.  If the test environment does not have adequate network bandwidth, then this will dominate either or both of these tests and the CPU usage observed during the tests will give an indication of what margins are available in the test setup.  The configuration for these tests are illustrated in the following diagrams.
+[img[Bidirectional Test|images/bidirtest.jpg]]
+[img[Publication Bound Test|images/pubboundtest.jpg]]
+[img[Subscription Bound Test|images/subboundtest.jpg]]
+The message size and sending rate are varied for each test execution run and throughput data gathered and analyzed.  Throughput data consists of counting the number of samples and bytes successfully transferred from the publication(s) to the subscription(s).  Typically the processes of this test will be executed on different hosts to include network effects in the measurements.  While executing them on the same host will exclude network effects from the results, it is possible to encounter processor effects depending on the capacity of the host on which the test is executing.  These tests have two sets of configuration specifications available: one for reliable transport testing, and; one for best effort transport testing.  The transport configuration for a test must match the configuration specification.
+
+There is a separate configuration file supplied for each test condition to be executed.  Users are encouraged to extend the testing to include cases specific to their environment as well, using the supplied configuration files as a guide.  The test files and message sizes specified available include the following:
+{{centeredTable{
+| ''Throughput Test Conditions'' |c
+| //Test Case// | //Message Size//&lt;br&gt;(bytes) | // Message Rate//&lt;br&gt;(samples/second) | //Nominal Throughput//&lt;br&gt;(Mbps) | //Configuration File//&lt;br&gt;(in //$~BENCH_ROOT/tests/thru//) |
+|&gt;|&gt;|&gt;|&gt;| ''&quot;&quot;&quot;---&quot;&quot;&quot; Bidirectional Throughput Tests &quot;&quot;&quot;---&quot;&quot;&quot;'' |
+|&gt;|&gt;|&gt;|&gt;| //&quot;&quot;&quot;---&quot;&quot;&quot; Maximum Throughput Rate &quot;&quot;&quot;---&quot;&quot;&quot;// |
+| 1| 1,000| 10,000|  160|bidir-1sub-be-80.ini&lt;br&gt;bidir-1sub-rel-80.ini |
+| 2| 2,000| 20,000|  640|bidir-1sub-be-320.ini&lt;br&gt;bidir-1sub-rel-320.ini |
+| 3| 3,000| 30,000|  1440|bidir-1sub-be-720.ini&lt;br&gt;bidir-1sub-rel-720.ini |
+| 4| 4,000| 40,000|  2560|bidir-1sub-be-1280.ini&lt;br&gt;bidir-1sub-rel-1280.ini |
+| 5| 5,000| 50,000|  4000|bidir-1sub-be-2000.ini&lt;br&gt;bidir-1sub-rel-2000.ini |
+|&gt;|&gt;|&gt;|&gt;| //&quot;&quot;&quot;---&quot;&quot;&quot; Fixed Rate / Variable Size &quot;&quot;&quot;---&quot;&quot;&quot;// |
+| //1//| //1,000//| //10,000//|  //160//|//bidir-1sub-be-80.ini&lt;br&gt;bidir-1sub-rel-80.ini// |
+| 6| 1,000| 20,000|  160|bidir-1sub-be-160r.ini&lt;br&gt;bidir-1sub-rel-160r.ini |
+| 7| 1,000| 30,000|  240|bidir-1sub-be-240r.ini&lt;br&gt;bidir-1sub-rel-240r.ini |
+| 8| 1,000| 40,000|  320|bidir-1sub-be-320r.ini&lt;br&gt;bidir-1sub-rel-320r.ini |
+| 9| 1,000| 50,000|  400|bidir-1sub-be-400r.ini&lt;br&gt;bidir-1sub-rel-400r.ini |
+|&gt;|&gt;|&gt;|&gt;| //&quot;&quot;&quot;---&quot;&quot;&quot; Variable Rate / Fixed Size &quot;&quot;&quot;---&quot;&quot;&quot;// |
+| //1//| //1,000//| //10,000//|  //160//|//bidir-1sub-be-80.ini&lt;br&gt;bidir-1sub-rel-80.ini// |
+| 10| 2,000| 10,000|  160|bidir-1sub-be-160s.ini&lt;br&gt;bidir-1sub-rel-160s.ini |
+| 11| 3,000| 10,000|  240|bidir-1sub-be-240s.ini&lt;br&gt;bidir-1sub-rel-240s.ini |
+| 12| 4,000| 10,000|  320|bidir-1sub-be-320s.ini&lt;br&gt;bidir-1sub-rel-320s.ini |
+| 13| 5,000| 10,000|  400|bidir-1sub-be-400s.ini&lt;br&gt;bidir-1sub-rel-400s.ini |
+|&gt;|&gt;|&gt;|&gt;| ''&quot;&quot;&quot;---&quot;&quot;&quot; Publication Bound Tests &quot;&quot;&quot;---&quot;&quot;&quot;'' |
+|&gt;|&gt;|&gt;|&gt;| //&quot;&quot;&quot;---&quot;&quot;&quot; Maximum Throughput Rate &quot;&quot;&quot;---&quot;&quot;&quot;// |
+| 1| 1,000| 10,000|  160|pub-2sub-be-80.ini&lt;br&gt;pub-2sub-rel-80.ini |
+| 2| 2,000| 20,000|  640|pub-2sub-be-320.ini&lt;br&gt;pub-2sub-rel-320.ini |
+| 3| 3,000| 30,000|  1440|pub-2sub-be-720.ini&lt;br&gt;pub-2sub-rel-720.ini |
+| 4| 4,000| 40,000|  2560|pub-2sub-be-1280.ini&lt;br&gt;pub-2sub-rel-1280.ini |
+| 5| 5,000| 50,000|  4000|pub-2sub-be-2000.ini&lt;br&gt;pub-2sub-rel-2000.ini |
+|&gt;|&gt;|&gt;|&gt;| //&quot;&quot;&quot;---&quot;&quot;&quot; Fixed Rate / Variable Size &quot;&quot;&quot;---&quot;&quot;&quot;// |
+| //1//| //1,000//| //10,000//|  //160//|//pub-2sub-be-80.ini&lt;br&gt;pub-2sub-rel-80.ini// |
+| 6| 1,000| 20,000|  160|pub-2sub-be-160r.ini&lt;br&gt;pub-2sub-rel-80r.ini |
+| 7| 1,000| 30,000|  240|pub-2sub-be-240r.ini&lt;br&gt;pub-2sub-rel-240r.ini |
+| 8| 1,000| 40,000|  320|pub-2sub-be-320r.ini&lt;br&gt;pub-2sub-rel-320r.ini |
+| 9| 1,000| 50,000|  400|pub-2sub-be-400r.ini&lt;br&gt;pub-2sub-rel-400r.ini |
+|&gt;|&gt;|&gt;|&gt;| //&quot;&quot;&quot;---&quot;&quot;&quot; Variable Rate / Fixed Size &quot;&quot;&quot;---&quot;&quot;&quot;// |
+| //1//| //1,000//| //10,000//|  //160//|//pub-2sub-be-80.ini&lt;br&gt;pub-2sub-rel-80.ini// |
+| 10| 2,000| 10,000|  160|pub-2sub-be-160.ini&lt;br&gt;pub-2sub-rel-160.ini |
+| 11| 3,000| 10,000|  240|pub-2sub-be-240s.ini&lt;br&gt;pub-2sub-rel-240s.ini |
+| 12| 4,000| 10,000|  320|pub-2sub-be-320s.ini&lt;br&gt;pub-2sub-rel-320s.ini |
+| 13| 5,000| 10,000|  400|pub-2sub-be-400s.ini&lt;br&gt;pub-2sub-rel-400s.ini |
+|&gt;|&gt;|&gt;|&gt;| ''&quot;&quot;&quot;---&quot;&quot;&quot; Subscription Bound Tests &quot;&quot;&quot;---&quot;&quot;&quot;'' |
+|&gt;|&gt;|&gt;|&gt;| //&quot;&quot;&quot;---&quot;&quot;&quot; Maximum Throughput Rate &quot;&quot;&quot;---&quot;&quot;&quot;// |
+| 14| 500| 10,000|  800|pub-1sub-be-80.ini&lt;br&gt;pub-1sub-rel-80.ini |
+| 15| 1,000| 20,000|  160|pub-1sub-be-320.ini&lt;br&gt;pub-1sub-rel-320.ini |
+| 16| 1,500| 30,000|  240|pub-1sub-be-720.ini&lt;br&gt;pub-1sub-rel-720.ini |
+| 17| 2,000| 40,000|  320|pub-1sub-be-1280.ini&lt;br&gt;pub-1sub-rel-1280.ini |
+| 18| 2,500| 50,000|  400|pub-1sub-be-2000.ini&lt;br&gt;pub-1sub-rel-2000.ini |
+|&gt;|&gt;|&gt;|&gt;| //&quot;&quot;&quot;---&quot;&quot;&quot; Fixed Rate / Variable Size &quot;&quot;&quot;---&quot;&quot;&quot;// |
+| 19| 1,000| 5,000|  80|pub-1sub-be-80r.ini&lt;br&gt;pub-1sub-rel-80r.ini |
+| 20| 1,000| 10,000|  160|pub-1sub-be-240r.ini&lt;br&gt;pub-1sub-rel-240r.ini |
+| 21| 1,000| 15,000|  240|pub-1sub-be-320r.ini&lt;br&gt;pub-1sub-rel-320r.ini |
+| //15//| //1,000//| //20,000//|  //160//|//pub-1sub-be-320.ini&lt;br&gt;pub-1sub-rel-320.ini// |
+| 22| 1,000| 25,000|  400|pub-1sub-be-400r.ini&lt;br&gt;pub-1sub-rel-400r.ini |
+|&gt;|&gt;|&gt;|&gt;| //&quot;&quot;&quot;---&quot;&quot;&quot; Variable Rate / Fixed Size &quot;&quot;&quot;---&quot;&quot;&quot;// |
+| //14//| //500//| //10,000//|  //800//|//pub-1sub-be-80.ini&lt;br&gt;pub-1sub-rel-80.ini// |
+| //20//| //1,000//| //10,000//|  //160//|//pub-1sub-be-240r.ini&lt;br&gt;pub-1sub-rel-240r.ini// |
+| 23| 1,500| 10,000|  240|pub-1sub-be-160.ini&lt;br&gt;pub-1sub-rel-160.ini |
+| 24| 2,000| 10,000|  320|pub-1sub-be-240s.ini&lt;br&gt;pub-1sub-rel-240s.ini |
+| 25| 2,500| 10,000|  400|pub-1sub-be-320s.ini&lt;br&gt;pub-1sub-rel-320s.ini |
+}}}</pre>
+</div>
+<div title="TiddlyWiki" modifier="MikeMartinez" created="201003022002" modified="201003082219" changecount="2">
 <pre>~TiddlyWiki is a complete [[wiki|http://en.wikipedia.org/wiki/Wiki]] in a single HTML file. It contains the entire text of the wiki, and all the ~JavaScript, CSS and HTML goodness to be able to display it, and let you edit it or search it. Without needing a server.
 
 You can find out more at the [[TiddlyWiki home|http://www.tiddlywiki.com/]].</pre>

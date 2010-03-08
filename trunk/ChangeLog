@@ -1,3 +1,23 @@
+Mon Mar  8 22:29:08 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/images/bidirtest.jpg:
+        * performance-tests/Bench/doc/images/latencytest.jpg:
+        * performance-tests/Bench/doc/images/pubboundtest.jpg:
+        * performance-tests/Bench/doc/images/subboundtest.jpg:
+
+          Added more diagrams to user guide.  JPEG format is actually
+          more compact for these diagrams, so convert the existing one to
+          that format as well.
+
+        * performance-tests/Bench/doc/userguide.html:
+
+          Updated existing test descriptions and stubbed the data
+          reduction and visualization sections.
+
+        * performance-tests/Bench/doc/images/latencytest.png:
+
+          Removed this file.
+
 Mon Mar  8 19:01:09 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * NEWS:
@@ -205,11 +225,11 @@ Thu Feb 25 08:54:12 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
         * dds/DdsDcpsDataWriterRemote.idl:
         * dds/DdsDcpsDomainExt.idl:
         * dds/DdsDcpsInfo.idl:
-          
+
           Removed ciao leam
 
         * dds/DdsDcps.mpc:
-          
+
           Removed generation of lem for OpenDDS specific interfaces
 
 Wed Feb 24 22:43:05 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
