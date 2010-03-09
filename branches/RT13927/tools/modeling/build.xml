@@ -2,7 +2,7 @@
 <!--
     $Id$
 -->
-<project name="org.opendds.modeling.eclipse" default="jar" basedir="."
+<project name="opendds-modeling" default="jar" basedir="."
          xmlns:opendds="antlib:org.opendds.ant">
     <property name="build.dir" value="${basedir}/build"/>
     <property name="docs.dir" value="${basedir}/docs"/>
