@@ -7,7 +7,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-package org.opendds.modeling.eclipse;
+package org.opendds.modeling.core;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -17,7 +17,7 @@ import org.osgi.framework.BundleContext;
  * @version $Revision$
  */
 public class Activator extends AbstractUIPlugin {
-    public static final String PLUGIN_ID = "org.opendds.modeling.eclipse";
+    public static final String PLUGIN_ID = "org.opendds.modeling.core";
 
     private static Activator plugin;
 
