@@ -1,3 +1,12 @@
+Tue Mar  9 21:02:40 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/modeling/README:
+        * tools/modeling/docs:
+        * tools/modeling/plugins:
+
+          Re-organized modeling tools directory to support multiple
+          plugins.
+
 Mon Feb 22 20:57:32 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/odds_dissector/colorfilters:
