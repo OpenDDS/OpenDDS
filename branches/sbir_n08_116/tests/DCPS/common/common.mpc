@@ -1,0 +1,12 @@
+project : dcps {
+  libout       = .
+  dynamicflags = COMMON_BUILD_DLL
+  pch_header   =
+  pch_source   =
+  
+  Source_Files {
+    SampleInfo.cpp
+    TestException.cpp
+  }
+}
+
