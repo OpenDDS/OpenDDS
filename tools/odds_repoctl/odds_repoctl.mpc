@@ -1,7 +1,7 @@
-project: dcpsexe_with_tcp {
+project: dcpsexe_with_tcp  {
   exename   = odds_repoctl
   exeout    = $(DDS_ROOT)/bin
-  libs     += Federator
+  libs     += InfoRepoLib Federator
   after    += DCPSInfoRepo_Federator
 
   Source_Files {

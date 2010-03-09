@@ -12,6 +12,8 @@
 
 #include "dds/DdsDcpsInfrastructure.idl"
 
+#pragma ciao lem "dds/DdsDcpsTopicE.idl"
+
 module DDS {
     local interface DomainParticipant;
     local interface Topic;
@@ -42,6 +44,26 @@ module DDS {
         ReturnCode_t get_inconsistent_topic_status(
             inout InconsistentTopicStatus a_status);
     };
+
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+
+    local interface ContentFilteredTopic : TopicDescription {
+        string get_filter_expression();
+        ReturnCode_t get_expression_parameters(inout StringSeq params);
+        ReturnCode_t set_expression_parameters(
+            in StringSeq expression_parameters);
+        Topic get_related_topic();
+    };
+
+    local interface MultiTopic : TopicDescription {
+        string get_subscription_expression();
+        ReturnCode_t get_expression_parameters(inout StringSeq params);
+        ReturnCode_t set_expression_parameters(
+            in StringSeq expression_parameters);
+    };
+
+#endif
 
     local interface TypeSupport {
                  //        ReturnCode_t register_type(

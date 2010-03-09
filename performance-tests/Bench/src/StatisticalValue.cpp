@@ -2,7 +2,7 @@
 //
 // $Id$
 
-#include "Gaussian.h"
+#include "StatisticalValue.h"
 
 // Deconflict macros from ACE and STL algorithms.
 #ifdef min
@@ -13,9 +13,9 @@
 #undef max
 #endif /* max */
 
-#include <stdlib.h>  // For rand()
-#include <math.h>    // For log() and sqrt()
-#include <algorithm> // for max() and min()
+#include <stdlib.h>  // For rand() (Uniform, Exponential, Gaussian)
+#include <math.h>    // For log() and sqrt() (Exponential, Gaussian)
+#include <algorithm> // For max() and min() (Gaussian)
 
 namespace { // Anonymous namespace for file scope.
   /// Random number generator range is from 0 to RAND_MAX.
@@ -23,19 +23,44 @@ namespace { // Anonymous namespace for file scope.
 
 } // End of anonymous namespace.
 
-namespace Test {
+double
+Test::StatisticalImpl::uniform(
+  double lower,
+  double upper
+) const
+{
+  // Scale and shift the system random value.
+  return static_cast<double>( lower)
+         + ( static_cast<double>(upper - lower)
+           * static_cast<double>(rand())/range
+           );
+}
 
 double
-Gaussian::value() const
+Test::StatisticalImpl::exponential( double mean) const
+{
+  // Direct functional exponential deviate value.
+  if( mean == 0.0) return 0.0;
+  return -log( static_cast<double>( rand()) / range) / mean;
+}
+
+double
+Test::StatisticalImpl::gaussian(
+  bool&  dirty,
+  double mean,
+  double lower,
+  double upper,
+  double deviation
+) const
 {
   // Shortcut for fixed values.
-  if( this->deviation_ == 0.0) {
-    return this->mean_;
+  if( deviation == 0.0) {
+    return mean;
   }
 
   // Return previously calculated deviate if we have one.
-  if( this->valueAvailable_) {
-    this->valueAvailable_ = false;
+  if( !dirty) {
+    dirty = true;
     return this->nextValue_;
   }
 
@@ -61,22 +86,20 @@ Gaussian::value() const
   //
 
   // Z-adjusted to the desired mean and deviation.
-  double value = ((y * factor) * this->deviation_) + this->mean_;
+  double value = ((y * factor) * deviation) + mean;
 
   //  Bounded by the specified maximum and minimum values.
-  this->valueAvailable_ = true;
-  this->nextValue_ = std::min( this->max_, std::max( this->min_, value));
+  dirty = false;
+  this->nextValue_ = std::min( upper, std::max( lower, value));
 
   //
   // And return the other of the two generated deviates.
   //
 
   // Z-adjusted to the desired mean and deviation.
-  value = ((x * factor) * this->deviation_) + this->mean_;
+  value = ((x * factor) * deviation) + mean;
 
   //  Bounded by the specified maximum and minimum values.
-  return std::min( this->max_, std::max( this->min_, value));
+  return std::min( upper, std::max( lower, value));
 }
-
-} // End of namespace Test
 

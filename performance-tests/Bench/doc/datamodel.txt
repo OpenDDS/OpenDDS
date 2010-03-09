@@ -90,14 +90,21 @@ Topic and Partition values for individual publications and subscriptions.
   Topic                               = <string> # One of topic <name>
   TransportIndex                      = <number> # Index into transport configurations
   MessageSource                       = <string> # One of subscription <name>
-  MessageFixedRate                    = <number> # Samples per second, 0 indicates use MessageRate
+  MessageRateType                     = <string> # One of FIXED, POISSON
   MessageRate                         = <number> # Samples per second, Poisson arrival times
+  MessageSizeType                     = <string> # One of FIXED, UNIFORM, GAUSSIAN
   MessageSize                         = <number> # bytes per sample
   MessageMax                          = <number> # upper bound for size
   MessageMin                          = <number> # lower bound for size
   MessageDeviation                    = <number> # standard deviation for size
-  Associations                        = <number> # Number of subscriptions to match before starting.
-  StartAfterDelay                     = <number> # Delay before writes start after matching.
+  InstanceType                        = <string> # One of FIXED, UNIFORM, GAUSSIAN
+  InstanceMean                        = <number> # average value of instance key for sending
+  InstanceMax                         = <number> # upper bound for number of instances
+  InstanceMin                         = <number> # lower bound for number of instances
+  InstanceDeviation                   = <number> # standard deviation of instance key for sending
+  Associations                        = <number> # Number of subscriptions to match before starting
+  StartAfterDelay                     = <number> # Delay before writes start after matching
+  AckDelay                            = <number> # >0 passed to wait_for_acks()
 
 [subscription/<name>]
   # Subscriber Qos Policy values

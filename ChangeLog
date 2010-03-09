@@ -1,11 +1,376 @@
-Tue Mar  9 21:02:40 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+Tue Mar  9 08:08:06 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
 
-        * tools/modeling/README:
-        * tools/modeling/docs:
-        * tools/modeling/plugins:
+        * OpenDDS version 2.1.1 released.
 
-          Re-organized modeling tools directory to support multiple
-          plugins.
+Mon Mar  8 22:29:08 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/images/bidirtest.jpg:
+        * performance-tests/Bench/doc/images/latencytest.jpg:
+        * performance-tests/Bench/doc/images/pubboundtest.jpg:
+        * performance-tests/Bench/doc/images/subboundtest.jpg:
+
+          Added more diagrams to user guide.  JPEG format is actually
+          more compact for these diagrams, so convert the existing one to
+          that format as well.
+
+        * performance-tests/Bench/doc/userguide.html:
+
+          Updated existing test descriptions and stubbed the data
+          reduction and visualization sections.
+
+        * performance-tests/Bench/doc/images/latencytest.png:
+
+          Removed this file.
+
+Mon Mar  8 19:01:09 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * NEWS:
+        * README:
+
+          Updated documentation for next release.
+
+Sat Mar  6 19:16:09 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+
+          Removed ccm base project, gives a hard dependency on CIAO,
+          have to solve this differently
+
+Sat Mar  6 06:47:09 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+
+          Added needed base project for ccm lem library
+
+Fri Mar  5 23:29:38 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+
+          Added ability to simply tailor statistics gathering commands by
+          system type.  This was necessitated after discovering that the
+          solaris environment did not support several of the command
+          options used.
+
+        * performance-tests/Bench/doc/userguide.html:
+        * performance-tests/Bench/doc/images/latencytest.png:
+
+          Minor updates from review comments (Scott).
+
+Fri Mar  5 14:34:08 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/odds_packet.cpp:
+
+          Dropped unnecessary inlines; adjusted conditional behavior in
+          dissect_odds_heur.
+
+Fri Mar  5 00:31:48 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/images/latencytest.png:
+
+          Diagram describing existing latency test.
+
+        * performance-tests/Bench/doc/userguide.html:
+
+          Ongoing documentation.  Started to describe existing tests.
+
+Thu Mar  4 22:27:23 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * NEWS:
+
+          Fixed formatting.
+
+Thu Mar  4 22:22:53 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/README:
+
+          Updated documentation for next release.
+
+Thu Mar  4 22:14:22 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_udp.mpb:
+        * dds/DCPS/transport/udp/udp.mpc:
+
+          Renamed the project opendds_udp.  "udp" alone is too general and
+          will easily conflict (for example, TAO/performance-tests/UDP).
+
+        * bin/dcps_tests.lst:
+
+          Exclude the Priority test on QNX.  It is hanging in
+          pthread_setschedparam().
+
+Wed Mar  3 23:32:36 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+
+          Added specification for which statistics to gather.
+          Updated the documentation.
+
+        * performance-tests/Bench/doc/userguide.html:
+
+          Ongoing documentation effort.  Todays installment.
+
+        * performance-tests/Bench/tests/thru/test-commands.txt:
+
+          Updated to use the new statistics specification argument.
+
+Wed Mar  3 00:22:48 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/userguide.html:
+
+          Updated with installation, quick start, and start of FAQ.
+
+Mon Mar  1 21:40:59 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/src/StatisticalValue.h:
+
+          Remove a compiler warning.
+
+Fri Feb 26 16:25:07 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/html/multicast/multicast.html:
+
+          Updated documentation.
+
+        * performance-tests/Bench/tests/spray/transport.ini:
+
+          Updated transport configuration options; increased nak_interval
+          to more easily identify NACK suppression.
+
+Fri Feb 26 03:42:01 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * performance-tests/Bench/tests/spray:
+        * performance-tests/Bench/tests/spray/pub-1.ini:
+        * performance-tests/Bench/tests/spray/pub-2.ini:
+        * performance-tests/Bench/tests/spray/pub-3.ini:
+        * performance-tests/Bench/tests/spray/pub-4.ini:
+        * performance-tests/Bench/tests/spray/sub.ini:
+        * performance-tests/Bench/tests/spray/test-commands.txt:
+        * performance-tests/Bench/tests/spray/transport.ini:
+        * performance-tests/Bench/tools/mkpkg:
+
+          Added test for measuring reliable multicast sample loss on a
+          lossy network.
+
+Thu Feb 25 23:45:55 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/src/Options.cpp:
+
+          Ensure the message rate is interpreted consistently for both
+          exponential and fixed types.
+          Initialize and manage the default instance profile value.
+
+        * performance-tests/Bench/tests/thru/test-commands.txt:
+
+          Fix a logfile misnaming in the reliable subscription bound
+          testing commands.
+
+        * performance-tests/Bench/tools/mkpkg:
+
+          Account for moving the original scenario configurations to a
+          sub-directory.
+
+Thu Feb 25 20:35:25 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * etc/multicast.conf:
+        * etc/tcp.conf:
+        * etc/udp.conf:
+
+          Added default svc.conf files for supported transports.
+
+Thu Feb 25 17:26:34 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/tests.txt:
+        * performance-tests/Bench/doc/userguide.html:
+
+        * performance-tests/Bench/src/Options.cpp:
+
+          Ensured that a default FIXED variable is available even if no
+          specification is made for MessageSizeType, MessageRateType, and
+          InstanceType.
+
+        * performance-tests/Bench/src/Test.idl:
+
+          Removed priority as instance key.
+
+        * performance-tests/Bench/tests/latency/*.ini:
+        * performance-tests/Bench/tests/scaling/*.ini:
+        * performance-tests/Bench/tests/thru/*.ini:
+
+          Updated to use new *Type specifications.
+
+        * performance-tests/Bench/tests/scenarios/*.ini:
+
+          Moved from tests directory to new tests/scenarios sub-directory.
+          Updated to use new *Type specifications.
+
+        * performance-tests/Bench/tests/scenarios/test-descriptions.txt:
+
+          Moved and renamed from tests/README for consistency.
+
+        * performance-tests/Bench/tests/README:
+        * performance-tests/Bench/tests/s1-p1.ini:
+        * performance-tests/Bench/tests/s1-p2.ini:
+        * performance-tests/Bench/tests/s2-p1.ini:
+        * performance-tests/Bench/tests/s2-p2.ini:
+        * performance-tests/Bench/tests/s2-p3.ini:
+        * performance-tests/Bench/tests/s2-p4.ini:
+        * performance-tests/Bench/tests/s2-p5.ini:
+        * performance-tests/Bench/tests/s2-p6.ini:
+        * performance-tests/Bench/tests/s3-p1.ini:
+        * performance-tests/Bench/tests/s3-p2.ini:
+        * performance-tests/Bench/tests/s3-p3.ini:
+
+          Removed these files.  They were moved into the 'scenarios'
+          sub-directory.
+
+Thu Feb 25 08:54:12 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcpsDataReaderRemote.idl:
+        * dds/DdsDcpsDataWriterRemote.idl:
+        * dds/DdsDcpsDomainExt.idl:
+        * dds/DdsDcpsInfo.idl:
+
+          Removed ciao leam
+
+        * dds/DdsDcps.mpc:
+
+          Removed generation of lem for OpenDDS specific interfaces
+
+Wed Feb 24 22:43:05 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/userguide.html:
+
+          Current state of the documentation.  This is still an ongoing
+          activity.
+
+        * performance-tests/Bench/bin/run_test:
+
+          Extended POD description.
+          Added 'netstat -ntpc' statistics gathering to periodically grab
+          the network information.  This has not been tested yet, so
+          consider it experimental at this time.
+
+        * performance-tests/Bench/doc/datamodel.txt:
+
+          Added new Instance* test configuration parameters to allow
+          specifying a number of instances to send data on.
+
+          Modified the mechanism to select the type of message size,
+          message rate, and instance selection to be explicit using the
+          new *Type specification parameters.
+
+        * performance-tests/Bench/src/EntityProfiles.h:
+        * performance-tests/Bench/src/Options.cpp:
+        * performance-tests/Bench/src/Publication.cpp:
+
+          Implemented new instance test configuration parameters and
+          modified type specifications.
+
+        * performance-tests/Bench/src/Test.idl:
+
+          Added a key field to be used in when specifying more than one
+          instance to send data on.
+
+        * performance-tests/Bench/src/TestProcess.mpc:
+        * performance-tests/Bench/src/StatisticalValue.h:
+        * performance-tests/Bench/src/StatisticalValue.cpp:
+
+          Replaced the previous statistical classes with a hierarchy that
+          includes a StatisticalValue<Type> intervace base class and
+          various implementations:
+            FixedValue<Type>
+            UniformValue<Type>
+            ExponentialValue<Type>
+            GaussianValue<Type>
+
+        * performance-tests/Bench/src/Exponential.h:
+        * performance-tests/Bench/src/Exponential.cpp:
+        * performance-tests/Bench/src/Gaussian.h:
+        * performance-tests/Bench/src/Gaussian.cpp:
+
+          Removed these files.
+
+Wed Feb 24 20:36:48 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+
+          Made DataBlockAllocator to have mutex protected. This resolved
+          cores in throughput tests.
+
+Wed Feb 24 14:50:02 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/FooTest3NoKey/InstanceDataMap.h:
+
+          Corrected an #include.
+
+Wed Feb 24 13:20:12 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+
+          Added projects to generate the lem needed for dds4ccm. When the
+          MPC feature dds4ccm_opendds is set to 1, the lem and the lem
+          stub dll will be generated.
+
+        * dds/DdsDcpsDataReaderRemote.idl:
+        * dds/DdsDcpsDataWriterRemote.idl:
+        * dds/DdsDcpsDomain.idl:
+        * dds/DdsDcpsDomainExt.idl:
+        * dds/DdsDcpsInfo.idl:
+        * dds/DdsDcpsInfrastructure.idl:
+        * dds/DdsDcpsPublication.idl:
+        * dds/DdsDcpsSubscription.idl:
+        * dds/DdsDcpsTopic.idl:
+          Added ciao lem pragma which we need for dds4ccm
+
+        * MPC/config/dcps_tcp.mpb:
+        * MPC/config/dds_suppress_any_support.mpb:
+        * MPC/config/dds_wrapper.mpb:
+        * MPC/config/idl2jni.mpb:
+        * MPC/config/java.mpb:
+        * MPC/config/optional_jni_check.mpb:
+          Added Id tag
+
+        * MPC/config/dds4ccm_opendds.mpb:
+          New base project
+
+Tue Feb 23 20:57:44 UTC 2010  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/odds_repoctl/odds_repoctl.mpc:
+
+          Added explicit dependency on InfoRepoLib, as it is required
+          by the Federator lib.
+
+Tue Feb 23 17:42:03 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/userguide.html:
+
+          Current state of documentation.
+
+        * performance-tests/Bench/doc/datamodel.txt:
+        * performance-tests/Bench/src/EntityProfiles.h:
+        * performance-tests/Bench/src/Options.cpp:
+
+          Added AckDelay configuration parameter to Publication profile.
+
+        * performance-tests/Bench/src/Publication.cpp:
+
+          Use AckDelay configuration parameter to selectively call
+          wait_for_acknowledgments() at publication termination.
+
+        * performance-tests/Bench/tools/convert-all:
+
+          Removed a gratuitous change.
+
+Tue Feb 23 16:48:25 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DdsDcpsDomain.idl:
+        * dds/DdsDcpsTopic.idl:
+
+          Added IDL for ContentFilteredTopic and MultiTopic, but they are not
+          yet implemented (operations will return NULL or RETCODE_UNSUPPORTED).
 
 Mon Feb 22 20:57:32 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
@@ -734,9 +1099,11 @@ Tue Feb  9 15:02:53 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 Tue Feb  9 13:08:49 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+
           Initialise a pointer with 0
 
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
           Fix invalid logging mask
 
 Tue Feb  9 04:38:49 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
