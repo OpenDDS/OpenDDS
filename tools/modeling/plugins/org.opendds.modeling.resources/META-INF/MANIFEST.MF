@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: OpenDDS Modeling SDK Resources
+Bundle-SymbolicName: org.opendds.modeling.resources;singleton:=true
+Bundle-Version: 0.0.0
+Bundle-Vendor: OpenDDS (http://www.opendds.org)
+Require-Bundle: org.eclipse.emf.ecore,
+ org.eclipse.uml2.uml,
+ org.eclipse.uml2.uml.resources

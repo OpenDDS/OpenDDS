@@ -1,3 +1,18 @@
+Tue Mar  9 23:41:22 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.resources/.project:
+        * tools/modeling/plugins/org.opendds.modeling.resources/META-INF:
+        * tools/modeling/plugins/org.opendds.modeling.resources/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.resources/build.properties:
+        * tools/modeling/plugins/org.opendds.modeling.resources/libraries/OpenDDSTypes.library.properties:
+        * tools/modeling/plugins/org.opendds.modeling.resources/libraries/OpenDDSTypes.library.uml:
+        * tools/modeling/plugins/org.opendds.modeling.resources/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.resources/profiles/OpenDDS.profile.properties:
+        * tools/modeling/plugins/org.opendds.modeling.resources/profiles/OpenDDS.profile.uml:
+        * tools/modeling/plugins/org.opendds.modeling.resources/profiles/OpenDDS.umlprofile:
+
+          Completed UML profile and type library.
+
 Tue Mar  9 21:31:23 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * Back-merged trunk (r3111) to branch (r3072).
