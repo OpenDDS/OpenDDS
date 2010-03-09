@@ -1,0 +1,25 @@
+// -*- MPC -*-
+//
+// $Id$
+
+project(*Publisher): dcpsexe {
+  exename = dds_pub
+
+  Source_Files {
+    pub_main.cpp
+    PubDriver.cpp
+    PubWriter.cpp
+    Pub.cpp
+  }
+}
+
+project(*Subscriber): dcpsexe {
+  exename = dds_sub
+
+  Source_Files {
+    sub_main.cpp
+    SubDriver.cpp
+    SubReader.cpp
+    Sub.cpp
+  }
+}

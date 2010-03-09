@@ -1,0 +1,6 @@
+// $Id$
+
+project {
+  libs        += SimpleTcp
+  after       += SimpleTcp
+}
