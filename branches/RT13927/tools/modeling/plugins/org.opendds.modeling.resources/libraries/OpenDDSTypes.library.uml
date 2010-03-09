@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:Standard="http://www.eclipse.org/uml2/schemas/Standard/1" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/3.0.0/UML" xsi:schemaLocation="http://www.eclipse.org/uml2/schemas/Standard/1 pathmap://UML_PROFILES/Standard.profile.uml#_yzU58YinEdqtvbnfB2L_5w">
+  <uml:Model xmi:id="_0" name="OpenDDSTypes">
+    <packagedElement xmi:type="uml:PrimitiveType" xmi:id="Boolean" name="Boolean"/>
+    <packagedElement xmi:type="uml:PrimitiveType" xmi:id="Char" name="Char"/>
+    <packagedElement xmi:type="uml:PrimitiveType" xmi:id="Octet" name="Octet"/>
+    <packagedElement xmi:type="uml:PrimitiveType" xmi:id="Short" name="Short"/>
+    <packagedElement xmi:type="uml:PrimitiveType" xmi:id="Long" name="Long"/>
+    <packagedElement xmi:type="uml:PrimitiveType" xmi:id="LongLong" name="LongLong"/>
+    <packagedElement xmi:type="uml:PrimitiveType" xmi:id="UShort" name="UShort"/>
+    <packagedElement xmi:type="uml:PrimitiveType" xmi:id="ULong" name="ULong"/>
+    <packagedElement xmi:type="uml:PrimitiveType" xmi:id="ULongLong" name="ULongLong"/>
+    <packagedElement xmi:type="uml:PrimitiveType" xmi:id="Float" name="Float"/>
+    <packagedElement xmi:type="uml:PrimitiveType" xmi:id="Double" name="Double"/>
+    <packagedElement xmi:type="uml:PrimitiveType" xmi:id="String" name="String"/>
+    <packagedElement xmi:type="uml:PrimitiveType" xmi:id="Duration_t" name="Duration_t"/>
+    <packagedElement xmi:type="uml:PrimitiveType" xmi:id="Time_t" name="Time_t"/>
+    <packagedElement xmi:type="uml:Enumeration" xmi:id="ReliabilityQosPolicyKind" name="ReliabilityQosPolicyKind">
+      <ownedLiteral xmi:id="ReliabilityQosPolicyKind-BEST_EFFORT" name="BEST_EFFORT"/>
+      <ownedLiteral xmi:id="ReliabilityQosPolicyKind-RELIABLE" name="RELIABLE"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Enumeration" xmi:id="OwnershipQosPolicyKind" name="OwnershipQosPolicyKind">
+      <ownedLiteral xmi:id="OwnershipQosPolicyKind-SHARED" name="SHARED"/>
+      <ownedLiteral xmi:id="OwnershipQosPolicyKind-EXCLUSIVE" name="EXCLUSIVE"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Enumeration" xmi:id="DestinationOrderQosPolicyKind" name="DestinationOrderQosPolicyKind">
+      <ownedLiteral xmi:id="DestinationOrderQosPolicyKind-BY_RECEPTION_TIMESTAMP" name="BY_RECEPTION_TIMESTAMP"/>
+      <ownedLiteral xmi:id="DestinationOrderQosPolicyKind-BY_SOURCE_TIMESTAMP" name="BY_SOURCE_TIMESTAMP"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Enumeration" xmi:id="PresentationQosPolicyAccessScopeKind" name="PresentationQosPolicyAccessScopeKind">
+      <ownedLiteral xmi:id="PresentationQosPolicyAccessScopeKind-INSTANCE" name="INSTANCE"/>
+      <ownedLiteral xmi:id="PresentationQosPolicyAccessScopeKind-TOPIC" name="TOPIC"/>
+      <ownedLiteral xmi:id="PresentationQosPolicyAccessScopeKind-GROUP" name="GROUP"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Enumeration" xmi:id="LivelinessQosPolicyKind" name="LivelinessQosPolicyKind">
+      <ownedLiteral xmi:id="LivelinessQosPolicyKind-AUTOMATIC" name="AUTOMATIC"/>
+      <ownedLiteral xmi:id="LivelinessQosPolicyKind-MANUAL_BY_PARTICIPANT" name="MANUAL_BY_PARTICIPANT"/>
+      <ownedLiteral xmi:id="LivelinessQosPolicyKind-MANUAL_BY_TOPIC" name="MANUAL_BY_TOPIC"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Enumeration" xmi:id="HistoryQosPolicyKind" name="HistoryQosPolicyKind">
+      <ownedLiteral xmi:id="HistoryQosPolicyKind-KEEP_LAST" name="KEEP_LAST"/>
+      <ownedLiteral xmi:id="HistoryQosPolicyKind-KEEP_ALL" name="KEEP_ALL"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Enumeration" xmi:id="DurabilityQosPolicyKind" name="DurabilityQosPolicyKind">
+      <ownedLiteral xmi:id="DurabilityQosPolicyKind-VOLATILE" name="VOLATILE"/>
+      <ownedLiteral xmi:id="DurabilityQosPolicyKind-TRANSIENT" name="TRANSIENT"/>
+      <ownedLiteral xmi:id="DurabilityQosPolicyKind-TRANSIENT_LOCAL" name="TRANSIENT_LOCAL"/>
+      <ownedLiteral xmi:id="DurabilityQosPolicyKind-PERSISTENT" name="PERSISTENT"/>
+    </packagedElement>
+    <profileApplication xmi:id="_profileApplication.0">
+      <eAnnotations xmi:id="_profileApplication.0-_http2F2Fwww.eclipse.org2Fuml22F2.0.02FUML" source="http://www.eclipse.org/uml2/2.0.0/UML">
+        <references xmi:type="ecore:EPackage" href="pathmap://UML_PROFILES/Standard.profile.uml#_yzU58YinEdqtvbnfB2L_5w"/>
+      </eAnnotations>
+      <appliedProfile href="pathmap://UML_PROFILES/Standard.profile.uml#_0"/>
+    </profileApplication>
+  </uml:Model>
+  <Standard:ModelLibrary xmi:id="_5Ys98CuaEd-5vNDT4TBKXA" base_Package="_0"/>
+</xmi:XMI>

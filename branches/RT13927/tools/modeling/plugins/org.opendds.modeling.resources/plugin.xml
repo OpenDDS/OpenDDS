@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.emf.ecore.uri_mapping">
+      <mapping
+            source="pathmap://OPENDDS_LIBRARIES/"
+            target="platform:/plugin/org.opendds.modeling.resources/libraries/">
+      </mapping>
+   </extension>
+   <extension
+         point="org.eclipse.emf.ecore.uri_mapping">
+      <mapping
+            source="pathmap://OPENDDS_PROFILES/"
+            target="platform:/plugin/org.opendds.modeling.resources/profiles/">
+      </mapping>
+   </extension>
+</plugin>
