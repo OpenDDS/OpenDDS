@@ -129,7 +129,7 @@ demarshal_data(tvbuff_t* tvb, gint offset)
   return t;
 }
 
-ACE_INLINE std::string
+std::string
 format_header(const TransportHeader& header)
 {
   std::ostringstream os;
@@ -186,7 +186,7 @@ dissect_header(tvbuff* tvb, packet_info* pinfo, proto_tree* tree,
   offset += len;
 }
 
-ACE_INLINE std::string
+std::string
 format_sample(const DataSampleHeader& sample)
 {
   std::ostringstream os;
@@ -347,12 +347,12 @@ dissect_odds_heur(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
   size_t len = sizeof(TransportHeader::DCPS_PROTOCOL);
   guint8* data = tvb_get_ephemeral_string(tvb, 0, len);
 
-  if (std::memcmp(data, TransportHeader::DCPS_PROTOCOL, len) == 0) {
-    dissect_odds(tvb, pinfo, tree);
-    return TRUE;
+  if (std::memcmp(data, TransportHeader::DCPS_PROTOCOL, len) != 0) {
+    return FALSE;
   }
 
-  return FALSE;
+  dissect_odds(tvb, pinfo, tree);
+  return TRUE;
 }
 
 extern "C"

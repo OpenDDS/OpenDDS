@@ -12,6 +12,8 @@
 
 #include "dds/DdsDcpsInfrastructure.idl"
 
+#pragma ciao lem "dds/DdsDcpsPublicationE.idl"
+
 module DDS {
    local interface Topic;
    local interface DomainParticipant;

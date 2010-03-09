@@ -529,8 +529,64 @@ TertiaryDark: #666
 Error: #f88
 </pre>
 </div>
+<div title="DCPSInfoRepo" modifier="MikeMartinez" created="201003011936" changecount="1">
+<pre>This is the executable that manages metadata for OpenDDS.  This is where associations are made between publications and subscriptions.  Builtin Topics are distributed from here.  One process of this type is required for operaion of OpenDDS.  It implements CORBA interfaces that allow the individual DDS Participants to register for discovery and update internal state as necessary.</pre>
+</div>
+<div title="Data Reduction" modifier="MikeMartinez" created="201003082209" modified="201003082224" tags="publish" changecount="5">
+<pre>!!NOTE: This is a documentation placeholder and needs to be expanded.
+There are several scripts to assist in reducing the test data for analysis these include:
+;//$~BENCH_ROOT/bin/reduce.pl//
+:reduces latency data into a plottable format.
+;//$~BENCH_ROOT/bin/extract.pl//
+:extracts summary data from plottable latency data for further visualization.
+;//$~BENCH_ROOT/tools/convert-all//
+:notional shell script to run reduce.pl and extract.pl on data collected from multiple test execution runs.
+
+</pre>
+</div>
+<div title="Data Visualization" modifier="MikeMartinez" created="201003082219" tags="publish" changecount="1">
+<pre>!!NOTE: This is a documentation placeholder and needs to be expanded.
+There are several scripts to assist in visualizing the reduced test data.  These include:
+;//$~BENCH_ROOT/bin/mktable.pl//
+:script to crate a table of results.  This currently creates only a TiddlyWiki format table.
+;//$~BENCH_ROOT/bin/expandColors.pl//
+:script to replace color table lookups from TiddlyWiki in the data table from //mktable.pl// with actual color references.
+;//$~BENCH_ROOT/bin/genstats.pl//
+:script to create file with GNUPlot label string definitions containing summary statistics information to be added as labels to histogram charts.
+;//$~BENCH_ROOT/bin/lj-plots.gp//
+:GNUPlot script to create Latency and Jitter timeline charts and histograms in a quad-plot format.
+;//$~BENCH_ROOT/bin/plot-jitter.gp//
+:GNUPlot script to create a plot of jitter summary data for all tests.
+;//$~BENCH_ROOT/bin/plot-transports.gp//
+:GNUPlot script to create a plot of summary latency data for all tests.
+;//$~BENCH_ROOT/tools/plot-all.gp//
+:notional GNUPlot script to create plots for all gathered data.
+</pre>
+</div>
 <div title="DefaultTiddlers" modifier="MikeMartinez" created="201002181950" modified="201002182002" changecount="2">
 <pre>[[OpenDDS-Bench]]</pre>
+</div>
+<div title="Existing Tests" modifier="MikeMartinez" created="201003031715" tags="publish" changecount="1">
+<pre>There are existing test configurations for common test scenarios provided with the framework.  These are:
+;[[latency|Latency Tests]]
+:measures latency from publication to reception of each sample
+;[[throughput|Throughput Tests]]
+:measures the maximum bandwidth that can be utilized by OpenDDS
+;[[scaling|Scaling Tests]]
+:measures the incremental performance as hosts are added to a distribution
+</pre>
+</div>
+<div title="FAQ" modifier="MikeMartinez" created="201003022001" tags="publish faq" changecount="1">
+<pre>#[[What kind of document is this?|FAQ1]]
+</pre>
+</div>
+<div title="FAQ1" modifier="MikeMartinez" created="201003022001" modified="201003082219" tags="publish faq" changecount="2">
+<pre>&quot;What kind of document is this?&quot;
+
+This is a TiddlyWiki document.</pre>
+</div>
+<div title="GNUPlot" modifier="MikeMartinez" created="201003082221" modified="201003082223" changecount="4">
+<pre>GNUPlot is a data visualization tool available as from [[gnuplot.info|http://gnuplot.info/]]</pre>
 </div>
 <div title="GettingStarted" modifier="MikeMartinez" created="201002011551" modified="201002011553" changecount="3">
 <pre>To get started with this blank [[TiddlyWiki]], you'll need to modify the following tiddlers:
@@ -546,9 +602,106 @@ If you wish to publish the contents of this document as static HTML web pages, t
 * [[StyleSheet]]: modify the reference to the logo file in the //.publishLogo// class to be in a correct relative directory path
 * use the ''publish'' selection on the right sidebar to publish all tiddlers with the ''publish'' tag to individual HTML files.  They will all be located in the //./publish// directory</pre>
 </div>
-<div title="MainMenu" modifier="MikeMartinez" created="201002181950" modified="201002182009" changecount="5">
+<div title="Installation" modifier="MikeMartinez" created="201003022306" modified="201003031651" tags="publish" changecount="24">
+<pre>Once the OpenDDS core is built, the OpenDDS-Bench software can be built and installed.  This software is located relative to the OpenDDS root directory and is part of the OpenDDS download.  For purposes of this documentation, we assume that you have set the ~BENCH_ROOT environment variable to a value of //$~DDS_ROOT/performance-tests/Bench//.
+
+There is one additional executable that needs to be built as part of the framework.  This is the {{{testprocess}}} command.  Makefiles and solution files are provided as part of the OpenDDS download, so this can be built the same way as the core OpenDDS code.  Using gcc on Linux this could be done simply as:
+&lt;&lt;&lt;
+ shell&gt; make -C $~BENCH_ROOT
+&lt;&lt;&lt;
+
+Once the software has been built, it can be used for test execution.  It must be made available on all hosts which will be participating in the tests.  If the software has been built on each host participating, or if it is available via a network file system and executable on each participating host, then no further actions need to be taken.
+
+If there are hosts which are participating in the test and can execute the OpenDDS software built on one of the other hosts, but which to not have direct access to those build directories, then the libraries and command for testing can be transferred to these hosts.  The libraries used by the test processing include those from ACE, TAO, and OpenDDS.  The commands include the test execution script as well as the {{{testprocess}}} command and [[repository|DCPSInfoRepo]] command.  These are summarized in the table below.
+
+{{centeredTable{
+| ''Required Software for Test Execution'' |c
+| //Item// | //Location// | //Description// |
+|versioned ~DCPSInfoRepoServ library |$~DDS_ROOT/lib |OpenDDS repository implementation libraries |
+|versioned Federator library |$~DDS_ROOT/lib |~|
+|versioned ~InfoRepoLib library |$~DDS_ROOT/lib |~|
+|versioned ~OpenDDS_Dcps library |$~DDS_ROOT/lib |core OpenDDS library |
+|versioned ~SimpleTcp library |$~DDS_ROOT/lib |OpenDDS transport implementations |
+|versioned ~OpenDDS_Udp library |$~DDS_ROOT/lib |~|
+|versioned ~OpenDDS_Multicast library |$~DDS_ROOT/lib |~|
+|unversioned&lt;br&gt;~SimpleTcp library |link to versioned&lt;br&gt;~OpenDDS_SimpleTcp library |~|
+|unversioned&lt;br&gt;~OpenDDS_Udp library |link to versioned&lt;br&gt;~OpenDDS_Udp library |~|
+|unversioned&lt;br&gt;~OpenDDS_Multicast library |link to versioned&lt;br&gt;~OpenDDS_Multicast library |~|
+|versioned ACE library |$~ACE_ROOT/lib |core ACE library |
+|versioned ~TAO_AnyTypeCode library |$~ACE_ROOT/lib |core TAO libraries |
+|versioned ~TAO_ImR_Client library |$~ACE_ROOT/lib |~|
+|versioned ~TAO_IORTable library |$~ACE_ROOT/lib |~|
+|versioned ~TAO_PortableServer library |$~ACE_ROOT/lib |~|
+|versioned TAO library |$~ACE_ROOT/lib |~|
+|versioned ~TAO_Svc_Utils library |$~ACE_ROOT/lib |~|
+|versioned ~TAO_CodecFactory library |$~ACE_ROOT/lib |~|
+|versioned ~TAO_AnyTypeCode library |$~ACE_ROOT/lib |~|
+|versioned ~TAO_Codeset library |$~ACE_ROOT/lib |~|
+|versioned ~TAO_PI library |$~ACE_ROOT/lib |~|
+|unversioned&lt;br&gt;~TAO_CodecFactory library |link to versioned&lt;br&gt;~TAO_CodecFactory library |~|
+|unversioned&lt;br&gt;~TAO_AnyTypeCode library |link to versioned&lt;br&gt;~TAO_AnyTypeCode library |~|
+|unversioned&lt;br&gt;~TAO_Codeset library |link to versioned&lt;br&gt;~TAO_Codeset library |~|
+|unversioned&lt;br&gt;~TAO_PI library |link to versioned&lt;br&gt;~TAO_PI library |~|
+|~Run_Test.pm |$~DDS_ROOT/bin/~PerlDDS |core DDS perl modules |
+|~ProcessFactory.pm |$~DDS_ROOT/bin/~PerlDDS |~|
+|Process.pm |$~DDS_ROOT/bin/~PerlDDS |~|
+|~ConfigList.pm |$~ACE_ROOT/bin/~PerlACE |core ACE perl modules |
+|~Process_Unix.pm |$~ACE_ROOT/bin/~PerlACE |~|
+|~ProcessVX_Win32.pm |$~ACE_ROOT/bin/~PerlACE |~|
+|~TestTarget.pm |$~ACE_ROOT/bin/~PerlACE |~|
+|~MSProject.pm |$~ACE_ROOT/bin/~PerlACE |~|
+|~Process_VMS.pm |$~ACE_ROOT/bin/~PerlACE |~|
+|~Process_Win32.pm |$~ACE_ROOT/bin/~PerlACE |~|
+|~ProcessLVRT.pm |$~ACE_ROOT/bin/~PerlACE |~|
+|~ProcessVX.pm |$~ACE_ROOT/bin/~PerlACE |~|
+|~Run_Test.pm |$~ACE_ROOT/bin/~PerlACE |~|
+|Process.pm |$~ACE_ROOT/bin/~PerlACE |~|
+|~ProcessVX_Unix.pm |$~ACE_ROOT/bin/~PerlACE |~|
+|~TestTarget_LVRT.pm |$~ACE_ROOT/bin/~PerlACE |~|
+|~DCPSInfoRepo |$~DDS_ROOT/bin |OpenDDS repository command |
+|testprocess |$~BENCH_ROOT/bin |OpenDDS-Bench test process |
+|run_test |$~BENCH_ROOT/bin |OpenDDS-Bench test management script |
+}}}
+In addition to the software, there are configuration files that are available for pre-configured tests.  These should be available on all hosts participating in these tests.  These configuration files are listed in the table below.
+
+{{centeredTable{
+| ''Test Configuration Files'' |c
+| //Name// | //Location// | //Description// |
+|svc.conf |$~BENCH_ROOT/etc |Service configurator specifications for dynamically loaded libraries.  Typically this is restricted to transport libraries and the monitor service library. |
+|transport*.ini |$~BENCH_ROOT/etc |Transport configuration specifications used by all tests. |
+|*.ini |$~BENCH_ROOT/tests/scenarios |Preconfigured scenario tests.  These are old and should be considered deprecated. |
+|~|$~BENCH_ROOT/tests/latency |Preconfigured latency tests.|
+|~|$~BENCH_ROOT/tests/scaling |Preconfigured scaling tests.|
+|~|$~BENCH_ROOT/tests/spray |Preconfigured multicast multipoint tests.|
+}}}
+
+As an aid to packaging these files into a distributable form, the //$~BENCH_ROOT/tools/mkpkg// script is available.  This is a bash shell script and as such can only be used directly on a host that supports the bash shell.  It can be used as a guide for other shells or host types to create a localized version if desired.  See [[Quick Start]] for an example of how this script can be used.
+
+The script makes copies and links in a named (default //pkg//) target directory that can then be tar'ed or zip'ed into a distributable file.  The {{{run_test}}} test management script will configure the environment of processes that it starts to find libraries and commands in the subdirectories created by this script, making use of the distribution straightforward.</pre>
+</div>
+<div title="Latency Tests" modifier="MikeMartinez" created="201003042136" modified="201003082130" tags="publish" changecount="10">
+<pre>The OpenDDS-Bench framework includes configuration files for latency testing.  These files are located in the //$~BENCH_ROOT/tests/latency// sub-directory.  The latency testing covers several different conditions.  The configuration for these tests are illustrated in the following diagram.
+[img[Latency Test|images/latencytest.jpg]]
+The message size is varied for each test execution run and latency data for the full loopback path gathered and analyzed.  Latency data is measured by extracting a timestamp at the time of the write() call and inserting that into the data sample.  Once the sample has been received at the terminus of the path, another timestamp will be extracted and the difference logged as the latency.  Since the clocks on different hosts tend to drift at different rates, it is best to have both the write() and read() calls executed on the same host so the latency measurements are made using the same system clock.  This is ensured for these tests by placing the publication and subscription in the same process.  Typically the two processes of this test will be executed on different hosts to include network effects in the measurements.  While executing them on the same host will exclude network effects from the results, it is possible to encounter processor effects depending on the capacity of the host on which the test is executing.
+
+There is a separate configuration file supplied for each message size test to be executed.  These files configure the test to use a RELIABLE transport type.  They can be modified to select ~BEST_EFFORT for testing using the UDP and basic Multicast transports.  Users are encouraged to extend the testing to include cases specific to their environment as well, using the supplied configuration files as a guide.  The test files and message sizes specified available include the following:
+{{centeredTable{
+| ''Test File Message Sizes'' |c
+| //Message Size//&lt;br&gt;(bytes) | //Configuration File//&lt;br&gt;(in //$~BENCH_ROOT/tests/latency//) |
+| 50|p1-50.ini |
+| 100|p1-100.ini |
+| 250|p1-250.ini |
+| 500|p1-500.ini |
+| 1000|p1-1000.ini |
+| 2500|p1-2500.ini |
+| 5000|p1-5000.ini |
+| 8000|p1-8000.ini |
+| 16000|p1-16000.ini |
+| 32000|p1-32000.ini |
+}}}</pre>
+</div>
+<div title="MainMenu" modifier="MikeMartinez" created="201002181950" modified="201003031716" changecount="7">
 <pre>[[Introduction|OpenDDS-Bench]]
-[[FAQ]]
 [[Quick Start]]
 [[Installation]]
 [[Test Specification]]
@@ -556,7 +709,7 @@ If you wish to publish the contents of this document as static HTML web pages, t
 [[Test Execution]]
 [[Data Reduction]]
 [[Data Visualization]]
-[[Submitting Results]]
+[[FAQ]]
 </pre>
 </div>
 <div title="OpenDDS" modifier="OpenDDS" created="200911302157" tags="OpenDDS" changecount="1">
@@ -564,8 +717,8 @@ If you wish to publish the contents of this document as static HTML web pages, t
 
 OpenDDS is supported by [[Object Computing, Inc.|http://www.ociweb.com/]]</pre>
 </div>
-<div title="OpenDDS-Bench" modifier="MikeMartinez" created="201002182000" modified="201002182007" tags="publish" changecount="4">
-<pre>OpenDDS-Bench is a testing framework for specifying and executing performance testing of OpenDDS.  It supports testing on multiple hosts with multiple processes.  Any test process may contain any number of DDS service publications or subscriptions.
+<div title="OpenDDS-Bench" modifier="MikeMartinez" created="201002182000" modified="201003031652" tags="publish" changecount="20">
+<pre>OpenDDS-Bench is a testing framework for specifying and executing performance testing of OpenDDS.  It supports testing on one or more hosts; each host with one or more processes.  Any test process may contain any number of DDS service publications or subscriptions.
 
 The framework consists of:
 *executable [[test processes|Test Execution]]
@@ -575,7 +728,18 @@ The framework consists of:
 *[[data visualization|Data Visualization]] tools
 OpenDDS-Bench is included in the OpenDDS download files and is located in the //$~DDS_ROOT/performance-tests/Bench// directory.  It links the OpenDDS service libraries so should be built after OpenDDS has been successfully built.
 
-Several pre-configured tests are available for testing without needing to develop them.  These include tests for ''latency'' and ''throughput''.</pre>
+Several pre-configured tests are available for testing without needing to develop them.  These include tests for [[latency|Latency Tests]] and [[throughput|Throughput Tests]].
+
+This user guide is written assuming a minimum environment setup which includes establishing the framework root, adding the framework bin directory to the command search path, and adding the framework library directory to the library runtime search path.  This can be done easily by setting the following environment variables:
+
+{{centeredTable{
+| OpenDDS-Bench environment used in this document |c
+| //Variable// | //Value// |
+|''~BENCH_ROOT'' |$~DDS_ROOT/performance-tests/Bench |
+|''PATH'' |$~BENCH_ROOT/bin:$PATH |
+|''~LD_LIBRARY_PATH'' |$~BENCH_ROOT/lib:$~LD_LIBRARY_PATH |
+}}}
+</pre>
 </div>
 <div title="PageTemplate" modifier="OpenDDS" created="200911302019" modified="200912120004" changecount="4">
 <pre>&lt;!--{{{--&gt;
@@ -596,6 +760,133 @@ Several pre-configured tests are available for testing without needing to develo
 &lt;div class='footer'&gt;$Id$&lt;/div&gt;
 &lt;/div&gt;
 &lt;!--}}}--&gt;</pre>
+</div>
+<div title="Participant Specifications" modifier="MikeMartinez" created="201003032054" modified="201003032301" tags="publish" changecount="6">
+<pre>!Definable Parameters
+{{centeredTable{
+| ''Participant Section Keys'' |c
+| //Key// | //Value// | //Notes// |
+|&gt;|&gt;| &quot;&quot;&quot;---&quot;&quot;&quot; Participant Qos Policy values &quot;&quot;&quot;---&quot;&quot;&quot; |
+|~UserData |&lt;string&gt; |&amp;nbsp; |
+|~EntityFactory |&lt;bool&gt; |Booleans are represented with a numeric 0 or 1 |
+|&gt;|&gt;| &quot;&quot;&quot;---&quot;&quot;&quot; Test Execution Parameters &quot;&quot;&quot;---&quot;&quot;&quot; |
+|~DomainId |&lt;number&gt; |&amp;nbsp; |
+}}}
+!Test Execution Parameters
+[participant] specifications only have {{{DomainId}}} as a test execution parameter.  This determines the DDS Domain in which the participant resides.
+!Example
+An example participant section like the following would result in a DDS ~DomainParticipant with a name of //player1// being created in the process with default ~QoS parameter values and a Domain Id value of 2112.
+{{{
+[participant/player]
+DomainId = 2112
+}}}
+</pre>
+</div>
+<div title="Publication Specifications" modifier="MikeMartinez" created="201003032056" modified="201003032218" tags="publish" changecount="9">
+<pre>The OpenDDS-Bench framework specifies publications, which consist of individual DDS Publisher and ~DataWriter Entities.  The combination of these Entities make up a complete publication.  A consequence of this is that any single DDS Publisher will contain only a single DDS ~DataWriter.  This should not affect any test results or capabilities.
+
+!Definable Parameters
+{{centeredTable{
+| ''Publication Section Keys'' |c
+| //Key// | //Value// | //Notes// |
+|&gt;|&gt;| &quot;&quot;&quot;---&quot;&quot;&quot; Publisher Qos Policy values &quot;&quot;&quot;---&quot;&quot;&quot; |
+|Presentation |&lt;string&gt; |Enumeration value of {{{INSTANCE}}}, {{{TOPIC}}}, or {{{GROUP}}} |
+|~PresentationCoherent |&lt;bool&gt; |Booleans are represented with a numeric 0 or 1 |
+|~PresentationOrdered |&lt;bool&gt; |Booleans are represented with a numeric 0 or 1 |
+|Partition |&lt;string&gt; |Only single string value is currently supported |
+|~GroupData |&lt;string&gt; |&amp;nbsp; |
+|~EntityFactory |&lt;bool&gt; |Booleans are represented with a numeric 0 or 1 |
+|&gt;|&gt;| &quot;&quot;&quot;---&quot;&quot;&quot; ~DataWriter Qos Policy values &quot;&quot;&quot;---&quot;&quot;&quot; |
+|Durability |&lt;string&gt; |Enumeration value of {{{VOLATILE}}}, {{{LOCAL}}}, {{{TRANSIENT}}}, or {{{PERSISTENT}}} |
+|~DurabilityServiceDuration |&lt;number&gt; |&amp;nbsp; |
+|~DurabilityServiceHistoryKind |&lt;string&gt; |Enumeration value of {{{ALL}}} or {{{LAST}}} |
+|~DurabilityServiceHistoryDepth |&lt;number&gt; |&amp;nbsp; |
+|~DurabilityServiceSamples |&lt;number&gt; |&amp;nbsp; |
+|~DurabilityServiceInstances |&lt;number&gt; |&amp;nbsp; |
+|~DurabilityServiceSamplesPerInstance |&lt;number&gt; |&amp;nbsp; |
+|Deadline |&lt;number&gt; |&amp;nbsp; |
+|~LatencyBudget |&lt;number&gt;  |&amp;nbsp; |
+|~LivelinessKind |&lt;string&gt; |Enumeration value of {{{AUTOMATIC}}}, {{{PARTICIPANT}}}, or {{{TOPIC}}} |
+|~LivelinessDuration |&lt;number&gt; |&amp;nbsp; |
+|~ReliabilityKind |&lt;string&gt; |Enumeration value of {{{BEST_EFFORT}}} or {{{RELIABLE}}} |
+|~ReliabilityMaxBlocking |&lt;number&gt; |&amp;nbsp; |
+|~DestinationOrder |&lt;string&gt; |Enumeration value of {{{SOURCE}}} or {{{RECEPTION}}} |
+|~HistoryKind |&lt;string&gt; |Enumeration value of {{{ALL}}} or {{{LAST}}} |
+|~HistoryDepth |&lt;number&gt; |&amp;nbsp; |
+|~ResourceMaxSamples |&lt;number&gt; |&amp;nbsp; |
+|~ResourceMaxInstances |&lt;number&gt; |&amp;nbsp; |
+|~ResourceMaxSamplesPerInstance |&lt;number&gt; |&amp;nbsp; |
+|~TransportPriority |&lt;number&gt; |&amp;nbsp; |
+|Lifespan |&lt;number&gt; |&amp;nbsp; |
+|~UserData |&lt;string&gt; |&amp;nbsp; |
+|~OwnershipKind |&lt;string&gt; |Enumeration value of {{{SHARED}}} or {{{EXCLUSIVE}}} |
+|~OwnershipStrength |&lt;number&gt; |&amp;nbsp; |
+|~WriterDataLifecycle |&lt;bool&gt; |Booleans are represented with a numeric 0 or 1 |
+|&gt;|&gt;| &quot;&quot;&quot;---&quot;&quot;&quot; Test Execution Parameters &quot;&quot;&quot;---&quot;&quot;&quot; |
+|Topic |&lt;string&gt; |Must reference by name the identifier of a [topic] subsection within the file. |
+|~TransportIndex |&lt;number&gt; |Index into transport configurations |
+|~MessageSource |&lt;string&gt; |If present, this must reference by name the identifier of a [subscription] subsection within the file. |
+|~MessageRateType |&lt;string&gt; |Enumeration value of {{{FIXED}}} or {{{POISSON}}} |
+|~MessageRate |&lt;number&gt; |Samples per second, average for POISSON arrival times |
+|~MessageSizeType |&lt;string&gt; |Enumeration value of {{{FIXED}}}, {{{UNIFORM}}}, or {{{GAUSSIAN}}} |
+|~MessageSize |&lt;number&gt; |bytes per sample |
+|~MessageMax |&lt;number&gt; |upper bound for size |
+|~MessageMin |&lt;number&gt; |lower bound for size |
+|~MessageDeviation |&lt;number&gt; |standard deviation for size |
+|~InstanceType |&lt;string&gt; |Enumeration value of {{{FIXED}}}, {{{UNIFORM}}}, or {{{GAUSSIAN}}} |
+|~InstanceMean |&lt;number&gt; |average value of instance key for sending |
+|~InstanceMax |&lt;number&gt; |upper bound for instance key |
+|~InstanceMin |&lt;number&gt; |lower bound for instance key |
+|~InstanceDeviation |&lt;number&gt; |standard deviation of instance key for sending |
+|Associations |&lt;number&gt; |Number of subscriptions to match before starting |
+|~StartAfterDelay |&lt;number&gt; |Delay before writes start after matching |
+|~AckDelay |&lt;number&gt; |&quot;&quot;&quot;&gt;&quot;&quot;&quot;0 passed to wait_for_acks() |
+}}}
+!Test Execution Parameters
+The test execution parameters allow specification of several aspects of the publication during testing.  These include:
+;how the publication starts
+:the publication will not start writing until it is associated with the number of subscriptions specified by the {{{Associations}}} parameter.  After the associations have been matched, if the {{{StartAfterDelay}}} parameter has been specified and is greater than zero, the publication will wait that many seconds before starting to write data.
+;how the publication terminates
+:if the {{{WaitForAcks}}} parameter is specified and non-zero, the ~DataWriter::wait_for_acknowledgments() API method is called as the publication is terminating to wait until delivery of all data has been acknowledged.
+;the transport used
+:this is specified as an index into the transport definitions.  The definitions are in the OpenDDS service configuration file read at startup.
+;the data published
+:this is specified as either from a subscription as the {{{MessageSource}}} or as generated data samples with a specified distribution.  If from a subscription, the publication is entirely reactive and forwards all data received by the subscription without modification.  If the {{{MessageSource}}} parameter has been specified, it is used exclusively and any message generation parameters are ignored.
+;generated data sample size
+:if the publication is to generate samples, they are formed using the {{{MessageSizeType}}} and related distribution parameters.
+;generated data sample rate
+:if the publication is to generate samples, they are sent at a rate specified by the {{{MessageRateType}}} and related distribution parameters.
+;instance values used
+:each write is sent with an instance key value determined by the {{{InstanceType}}} and related distribution parameter values.
+!Distributions
+The sample message size and rate as well as the instance key value to be used when publishing data can be specified as a statistical distribution.  These distributions are described here.
+{{itemBlock{
+!!Fixed Distribution
+If the {{{MessageSizeType}}}, {{{MessageRateType}}}, or {{{InstanceType}}} have a value of ''FIXED'', then the corresponding {{{MessageSize}}}, {{{MessageRate}}}, or {{{InstanceMean}}} parameter is used as the only value for that parameter.
+!!Uniform Distribution
+If the {{{MessageSizeType}}}, or {{{InstanceType}}} have a value of ''UNIFORM'', then the corresponding *Min and *Max parameters are used as the lower and upper bound for the value and as each sample is sent a new value will be obtained from a uniform probability distribution between those limits.
+!!Exponential Distribution
+If the {{{MessageRateType}}} has a value of ''POISSON'', the the {{{MessageRate}}} parameter is used as the //lamba// parameter for an exponential probability distribution to determine the interval between writing samples.  This interval will result in a Poisson arrival time distribution of the samples as they are published.
+!!Gaussian Distribution
+If the {{{MessageSizeType}}}, or {{{InstanceType}}} have a value of ''GAUSSIAN'', then the corresponding *Mean and *Deviation parameters define a Gaussian probability distribution from which the actual value for each sample will be obtained as each sample is written.  The *Min and *Max parameters are used as the lower and upper bound for the value and values from the probability distribution that are outside this range are replaced with the nearest extreme value.
+}}}
+!Example
+As an example a publication section like the following would result in a publication that started sending after associating with a single subscription, and sent 1,000 byte samples at 1,000 samples per second during the test.
+{{{
+[publication/move]
+Topic = joystick
+TransportIndex = 1
+MessageSizeType = FIXED
+MessageSize = 1000
+MessageRateType = FIXED
+MessageRate = 1000
+HistoryKind = LAST
+HistoryDepth = 10
+ResourceMaxSamplesPerInstance = 10
+ReliabilityKind = RELIABLE
+Partition = link1
+Associations = 1
+}}}</pre>
 </div>
 <div title="PublishIndexTemplate" modifier="MikeMartinez" created="201002011539" server.type="file" server.host="jackparke.googlepages.com/jtw.html" changecount="1">
 <pre>&lt;div class='viewer' id='contentWrapper'&gt;&lt;small&gt;&lt;a href=&quot;index.html&quot;&gt;Home&lt;/a&gt; &gt; %1&lt;/small&gt;&lt;h1 class='publishLogo'&gt;%0&lt;/h1&gt;
@@ -850,6 +1141,361 @@ String.prototype.filenameEncode = function()
 &lt;hr&gt;%4, %5&amp;nbsp;(created %6)
 &lt;/div&gt;</pre>
 </div>
+<div title="Quick Start" modifier="MikeMartinez" created="201003022013" modified="201003051541" tags="publish" changecount="24">
+<pre>The steps to run a test using this framework are described below.  The description is based on a Linux platform using the gcc toolchain.  If you are using a different platform or tools the instructions will need to be modified to suit your environment.
+{{itemBlock{
+!Obtain and build ~OpenDDS and the ~OpenDDS-Bench software.
+Find the OpenDDS software build and install instructions at [[opendds.org|http://www.opendds.org/]].  Each host which will be participating in a test will need to have the software available.  For homogeneous hosts that can execute software built on the same kind of host the installation steps below show a way to distribute the software.  Each host type will need to have the software built for it.  For example if both Linux and Windows machines will be participating in the testing then a build for each host type will need to be performed and installed on hosts of that type.
+
+Once OpenDDS and the libraries it depends on have been built, the OpenDDS-Bench software needs to be built.  Do this by:
+&lt;&lt;&lt;
+ shell&gt; cd $~BENCH_ROOT
+ shell&gt; mwc.pl -type gnuace
+ shell&gt; make
+&lt;&lt;&lt;
+}}}
+{{itemBlock{
+!Install the ~OpenDDS-Bench performance testing framework on all hosts involved with the test.
+Once the OpenDDS and OpenDDS-Bench software has been built, it needs to be made available on each host participating in the testing.  There is a helper script located in //$~BENCH_ROOT/tools// to simplify this process for tests that execute on homogenous systems.  This can be done by following these steps:
+&lt;&lt;&lt;
+ shell&gt; cd $~BENCH_ROOT
+ shell&gt; tools/mkpkg bench
+ shell&gt; tar jcf bench.tar.bz2 bench
+ shell&gt; cp bench.tar.bz2 &lt;dest&gt;
+&lt;&lt;&lt;
+Where ''&lt;dest&gt;'' is the destination directory where the tarfile will be uncompressed and the tests will be executed from.  Use the ''scp'' command to transfer the tarfile between hosts if the disks are not available directly.  It is not required but recommended to have a separate destination directory for each host in the test.  It is best if the directories where the test processes will execute are local to the machine which will be executing the processes.
+Once the tarfile has been distributed unpack it and save the base directory of the distributed software as a shell variable to simplify test execution later.
+&lt;&lt;&lt;
+ shell&gt; cd &lt;dest&gt;
+ shell&gt; tar xf bench.tar.bz2
+ shell&gt; export BASEDIR=`pwd`/bench
+&lt;&lt;&lt;
+}}}
+{{itemBlock{
+!Start the testing on each host.
+Once the test software is available on each host participating in the test, the test can be executed.  A separate directory for each host is recommended to avoid inadvertently colliding output.
+The [[repository|DCPSInfoRepo]] needs to be started on one host prior to starting any {{{testprocess}}} executables.  The ''&lt;host&gt;'' and ''&lt;port&gt;'' are where the repository will listen for CORBA connection requests from the participating processes.
+&lt;&lt;&lt;
+ shell&gt; $BASEDIR/bin/run_test -S -h iiop:&quot;&quot;&quot;//&quot;&quot;&quot;&lt;host&gt;:&lt;port&gt;
+&lt;&lt;&lt;
+The following steps need to be performed on each host for each test.  The ''&lt;host&gt;'' and ''&lt;port&gt;'' should refer to the location where the repository is listening and should be reachable from the current host.  The ''&lt;transportconfig&gt;'' file specifies the transport configuration information, and the ''&lt;testconfig&gt;'' file contains the [[test specification|Test Specification]] information.
+&lt;&lt;&lt;
+ shell&gt; mkdir -p &lt;testdir&gt;
+ shell&gt; cd &lt;testdir&gt;
+ shell&gt; $BASEDIR/bin/run_test -P -h &lt;host&gt;:&lt;port&gt; -i &lt;transportconfig&gt; -s &lt;testconfig&gt; 
+&lt;&lt;&lt;
+Note that it is important to start the tests within 60 seconds of each other.  This is due to the script timeout value, which is set to 60 seconds after the specified duration.  The test execution does not start until the entire test is connected, so if any host is not started within the 60 seconds interval processes that were started first will time out before the test is complete.
+}}}</pre>
+</div>
+<div title="RunTestManPage" modifier="MikeMartinez" created="201002251721" modified="201003031700" changecount="4">
+<pre>&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;run_test - Execute test processes for distributed testing&lt;/title&gt;
+&lt;meta http-equiv=&quot;content-type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
+&lt;link rev=&quot;made&quot; href=&quot;mailto:root@localhost&quot; /&gt;
+&lt;/head&gt;
+
+&lt;body style=&quot;background-color: white&quot;&gt;
+
+
+&lt;!-- INDEX BEGIN --&gt;
+&lt;div name=&quot;index&quot;&gt;
+&lt;p&gt;&lt;a name=&quot;__index__&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+
+	&lt;li&gt;&lt;a href=&quot;#name&quot;&gt;NAME&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#options&quot;&gt;OPTIONS&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#description&quot;&gt;DESCRIPTION&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#examples&quot;&gt;EXAMPLES&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;hr name=&quot;index&quot; /&gt;
+&lt;/div&gt;
+&lt;!-- INDEX END --&gt;
+
+&lt;p&gt;
+&lt;/p&gt;
+&lt;h1&gt;&lt;a name=&quot;name&quot;&gt;NAME&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;run_test - Execute test processes for distributed testing&lt;/p&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/h1&gt;
+&lt;pre&gt;
+ run_test [options]&lt;/pre&gt;
+&lt;p&gt;Options:&lt;/p&gt;
+&lt;pre&gt;
+  -? | --help            brief help message&lt;/pre&gt;
+&lt;pre&gt;
+  --man                  full documentation&lt;/pre&gt;
+&lt;pre&gt;
+  -x | --noaction        do not execute any processing&lt;/pre&gt;
+&lt;pre&gt;
+  -v | --verbose         be chatty while executing&lt;/pre&gt;
+&lt;pre&gt;
+  -V NUMBER | --ORBVerboseLogging=NUMBER
+                         set the corresponding ORB option&lt;/pre&gt;
+&lt;pre&gt;
+  -d NUMBER | --debug=NUMBER
+                         set the DCPS debugging level&lt;/pre&gt;
+&lt;pre&gt;
+  -T NUMBER | --tdebug=NUMBER
+                         set the DCPSTransportDebug debugging level&lt;/pre&gt;
+&lt;pre&gt;
+  -R NUMBER | --rdebug=NUMBER
+                         set the DCPS debugging level for the repository&lt;/pre&gt;
+&lt;pre&gt;
+  -f FILE | --dfile=FILE set the filename for debug output&lt;/pre&gt;
+&lt;pre&gt;
+  -C TYPES | --collect=TYPES
+                         collect process and system statistics during test&lt;/pre&gt;
+&lt;pre&gt;
+  -h FQDN | --repohost FQDN
+                         fully qualified domain name (and port) for
+                         connecting to repository&lt;/pre&gt;
+&lt;pre&gt;
+  -i FILE | --inifile FILE
+                         file for configuring the OpenDDS service&lt;/pre&gt;
+&lt;pre&gt;
+  -s FILELIST | --scenario FILELIST
+                         list of files defining the test scenario(s) to execute&lt;/pre&gt;
+&lt;pre&gt;
+  -r FILE | --rawdatafile FILE
+                         file to write collected data to at end of test&lt;/pre&gt;
+&lt;pre&gt;
+  -t NUMBER | --duration=NUMBER
+                         limit the duration of test execution&lt;/pre&gt;
+&lt;pre&gt;
+  -S | --startrepo       start a repository&lt;/pre&gt;
+&lt;pre&gt;
+  -P | --starttest       start a testprocess&lt;/pre&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;options&quot;&gt;OPTIONS&lt;/a&gt;&lt;/h1&gt;
+&lt;dl&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;help&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-?&lt;/strong&gt; | &lt;strong&gt;--help&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Print a brief help message and exits.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;man&quot; class=&quot;item&quot;&gt;&lt;strong&gt;--man&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Prints this manual page and exits.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;x_noaction&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-x&lt;/strong&gt; | &lt;strong&gt;--noaction&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Print the commands that would be executed with the current set of command
+line options and exit without starting any processes.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;v_verbose&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-v&lt;/strong&gt; | &lt;strong&gt;--verbose&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Print additional information while executing.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;v_orbverboselogging_number&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-V&lt;/strong&gt; | &lt;strong&gt;--ORBVerboseLogging=NUMBER&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Sets the -ORBVerboseLogging option to NUMBER.&lt;/p&gt;
+&lt;p&gt;The default value is 0.&lt;/p&gt;
+&lt;p&gt;The value is set to 1 if any non-zero value is specified.  A value of
+zero will omit the ORBVerboseLogging specification from the process
+command line.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;d_number_debug_number&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-d NUMBER&lt;/strong&gt; | &lt;strong&gt;--debug=NUMBER&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Sets the -DCPSDebugLevel option value.  A value of 0 will omit the
+DCPSDebugLevel specification from the process command line.&lt;/p&gt;
+&lt;p&gt;The default value is 0.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;t_number_tdebug_number&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-T NUMBER&lt;/strong&gt; | &lt;strong&gt;--tdebug=NUMBER&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Sets the -DCPSTransportDebugLevel option value.  A value of 0 will omit
+the DCPSTransportDebugLevel specification from the process command line.&lt;/p&gt;
+&lt;p&gt;The default value is 0.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;r_number_rdebug_number&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-R NUMBER&lt;/strong&gt; | &lt;strong&gt;--rdebug=NUMBER&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Sets the -DCPSDebugLevel option value for the repository process.  A
+value of 0 will omit the DCPSDebugLevel specification from the repository
+process command line.&lt;/p&gt;
+&lt;p&gt;The default value is 0.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;t_number_duration_number&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-t NUMBER&lt;/strong&gt; | &lt;strong&gt;--duration=NUMBER&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Limits the execution time of the test.  If not specified, then any test
+or repository process that is started will execute until the script is
+interrupted.&lt;/p&gt;
+&lt;p&gt;The default value is unspecified.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;s_startrepo&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-S&lt;/strong&gt; | &lt;strong&gt;--startrepo&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Causes a repository process to be started.  Only a single repository
+process will be invoked by an invocation.&lt;/p&gt;
+&lt;p&gt;The default value is to not start a repository process.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;p_starttest&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-P&lt;/strong&gt; | &lt;strong&gt;--starttest&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Causes one or more test processes to be started.  One process will be
+started for each test file specified by the &lt;strong&gt;-s&lt;/strong&gt; option.&lt;/p&gt;
+&lt;p&gt;The default value is to not start a test process.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;f_file_dfile_file&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-f FILE&lt;/strong&gt; | &lt;strong&gt;--dfile=FILE&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Sets the -ORBLogFile option value.  A value of unspecified will result in
+the ORBLogFile specification being omitted from the process command line.&lt;/p&gt;
+&lt;p&gt;The default value is unspecified.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;c_types_collect_types&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-C TYPES&lt;/strong&gt; | &lt;strong&gt;--collect=TYPES&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Starts statistics collection for the specified TYPES.  TYPES may contain
+one or more of the values: &lt;a href=&quot;#n&quot;&gt;&lt;code&gt;n&lt;/code&gt;&lt;/a&gt;, &lt;a href=&quot;#s&quot;&gt;&lt;code&gt;s&lt;/code&gt;&lt;/a&gt;, and &lt;a href=&quot;#p&quot;&gt;&lt;code&gt;p&lt;/code&gt;&lt;/a&gt;, or the collective
+specification &lt;code&gt;all&lt;/code&gt;.&lt;/p&gt;
+&lt;dl&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;n&quot; class=&quot;item&quot;&gt;&lt;strong&gt;n&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Causes network statistics to be gathered.  A &lt;code&gt;netstat -ntpc&lt;/code&gt; command is
+started for each test process and the output filtered by its process Id.
+The output is stored to a file named &lt;em&gt;network-{pid}.log&lt;/em&gt;.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;s&quot; class=&quot;item&quot;&gt;&lt;strong&gt;s&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Causes system statistics to be gathered.  A single &lt;code&gt;vmstat 1&lt;/code&gt; command is
+started and the output stored in a file named &lt;em&gt;system-{pid}.log&lt;/em&gt;, where
+the pid value is for the test script.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;p&quot; class=&quot;item&quot;&gt;&lt;strong&gt;p&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Causes process statistics to be gathered.  A &lt;code&gt;top -bd 1 -p {pid}&lt;/code&gt;
+command is started for each test process and the output filtered by its
+process Id.  The output is stored to a file named &lt;em&gt;process-{pid}.log&lt;/em&gt;.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;The default is unspecified.  This results in no statistics being
+collected.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;h_fqdn_repohost_fqdn&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-h FQDN&lt;/strong&gt; | &lt;strong&gt;--repohost=FQDN&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;This is the fully qualified domain name and port where the OpenDDS
+repository may be found.&lt;/p&gt;
+&lt;p&gt;The default value is 'localhost:2112'.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;i_file_inifile_file&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-i FILE&lt;/strong&gt; | &lt;strong&gt;--inifile=FILE&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;OpenDDS configuration filename.  This defines the configuration
+information for the OpenDDS service.&lt;/p&gt;
+&lt;p&gt;The default is to use the file located in the 'etc' directory relative
+from the project root (the parent directory of the directory where the
+command was executed from) with filename 'transport.ini'.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;s_filelist_scenario_filelist&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-s FILELIST&lt;/strong&gt; | &lt;strong&gt;--scenario=FILELIST&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Test scenario definition filenames.  This defines the scenarios to execute
+for the test.  This names an 'ini' style file that contains information
+about all publications and subscriptions to execute for this test
+execution.  This can be one or more filenames, separated by commas.  One
+test process will be started (if requested) to process each named
+scenario configuration file.&lt;/p&gt;
+&lt;p&gt;The default is not specified.  This will result in no test processes
+being started if the &lt;strong&gt;-P&lt;/strong&gt; argument is given.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;r_file_rawdatafile_file&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-r FILE&lt;/strong&gt; | &lt;strong&gt;--rawdatafile=FILE&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Raw data output filename.  This file is where any raw latency data
+collected during the test will be written.&lt;/p&gt;
+&lt;p&gt;The default is unspecified.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;This is deprecated in favor of the test configuration specification for
+this filename.&lt;/em&gt;&lt;/p&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;description&quot;&gt;DESCRIPTION&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;This script manages execution of the processes needed for distributed
+testing of OpenDDS using the OpenDDS-Bench performance testing framework.
+The processes used by the framework include the OpenDDS specific
+repository process and the test specific process.  The repository
+executable is the standard OpenDDS &lt;code&gt;DCPSInfoRepo&lt;/code&gt; program.  The framework
+&lt;code&gt;testprocess&lt;/code&gt; program is specific to this testing and provides the
+ability to start multiple publications and / or subscriptions within a
+single process.&lt;/p&gt;
+&lt;p&gt;It is possible to start any number of &lt;code&gt;testprocess&lt;/code&gt; programs at once.
+A separate process will be started for each configuration file supplied.
+The same configuration file can be included more than once to start
+separate processes with the same configuration.&lt;/p&gt;
+&lt;p&gt;Processes started by this script will either execute until terminated by
+the user (no duration specified) or until a specified duration has
+elapsed.  For the &lt;code&gt;testprocess&lt;/code&gt; commands, the duration is passed to the
+program to allow it to terminate cleanly.  The script will wait 60
+seconds beyond this time and then terminate the process by force.&lt;/p&gt;
+&lt;p&gt;This script will establish the environment for the executable processes
+by adding the test library to the runtime library search path.&lt;/p&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;examples&quot;&gt;EXAMPLES&lt;/a&gt;&lt;/h1&gt;
+&lt;dl&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;bin_run_test_vx_p_s_s1_ini&quot; class=&quot;item&quot;&gt;&lt;strong&gt;bin/run_test -vx -P -s s1.ini&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;prints the commands that would be invoked when starting a single test
+process with the s1.ini test specification.  This will also be verbose
+during setup processing.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;bin_run_test_d_10_c_n_t_4_p_s_test_ini_f_test_log_h_localhost_2038&quot; class=&quot;item&quot;&gt;&lt;strong&gt;bin/run_test -d 10 -C n -T 4 -P -s test.ini -f test.log -h localhost:2038&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;starts a test process using the &lt;code&gt;test.ini&lt;/code&gt; specification file and expecting
+to find the repository process at localhost:2038.  It will run with
+&lt;code&gt;DCPSDebugLevel&lt;/code&gt; of 10, &lt;code&gt;DCPSTransportDebugLevel&lt;/code&gt; of 4 and put the logging
+output to the &lt;code&gt;test.log&lt;/code&gt; file.  Network statistics will be gathered for
+connections to the test process.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;bin_run_test_x_t_120_s_scenario1_ini_scenario1_ini_other_ini&quot; class=&quot;item&quot;&gt;&lt;strong&gt;bin/run_test -x -t 120 -s scenario1.ini,scenario1.ini,other.ini&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;prints the commands that would be invoked when starting 3 test processes:
+two using the scenario1.ini specification file and one using the other.ini
+specification file.  The test would be scheduled to last for 2 minutes.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;bin_run_test_vd10t4vcall_s_test_ini_h_machine_domain_com_2112&quot; class=&quot;item&quot;&gt;&lt;strong&gt;bin/run_test -vd10T4VCall -s test.ini -h machine.domain.com:2112&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;starts a test process using the &lt;code&gt;test.ini&lt;/code&gt; specification file and
+expecting to connect to the repository at &lt;code&gt;machine.domain.com:2112&lt;/code&gt;.  It
+will run with &lt;code&gt;DCPSDebugLevel&lt;/code&gt; of 10, &lt;code&gt;DCPSTransportDebugLevel&lt;/code&gt; of 4,
+&lt;code&gt;ORBVerboseLogging&lt;/code&gt; enabled and both the script and test process will
+execute in verbose mode.  The log output will be directed to the standard
+output.  All statistics - system, network, and process - will be gathered.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+
+&lt;/body&gt;
+
+
+&lt;/html&gt;
+</pre>
+</div>
 <div title="SideBarOptions" modifier="MikeMartinez" created="200911302023" modified="201002011534" changecount="2">
 <pre>&lt;&lt;search&gt;&gt;&lt;&lt;closeAll&gt;&gt;&lt;&lt;permaview&gt;&gt;&lt;&lt;newTiddler&gt;&gt;&lt;&lt;saveChanges&gt;&gt;&lt;&lt;doPublish&gt;&gt;&lt;&lt;slider chkSliderOptionsPanel OptionsPanel &quot;options »&quot; &quot;Change TiddlyWiki advanced options&quot;&gt;&gt;</pre>
 </div>
@@ -862,7 +1508,7 @@ String.prototype.filenameEncode = function()
 <div title="SiteUrl" modifier="OpenDDS" created="200911302027" changecount="1">
 <pre>http://www.ociweb.com/</pre>
 </div>
-<div title="StyleSheet" modifier="MikeMartinez" created="200911302014" modified="201002011554" changecount="67">
+<div title="StyleSheet" modifier="MikeMartinez" created="200911302014" modified="201003021959" changecount="76">
 <pre>a:hover {
     text-decoration: none;
 }
@@ -904,6 +1550,31 @@ String.prototype.filenameEncode = function()
 
 .siteTitle {
     font-weight: bold;
+}
+
+.itemBlock {
+  display: block;
+  text-align: left;
+  margin-left: 30px;
+  margin-right: auto;
+  padding: 5px;
+  border: solid 1px;
+}
+
+.viewer div.centeredTable {
+	text-align: center;
+}
+
+.viewer div.centeredTable table {
+	margin: 0 auto;
+	text-align: left;
+}
+
+.imgcenter {
+  display: block;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 #mainMenu {
@@ -1057,6 +1728,257 @@ h2,h3 {border-bottom:1px solid [[ColorPalette::TertiaryLight]];}
 .backstagePanelFooter .button:hover {color:[[ColorPalette::Foreground]];}
 #backstageCloak {background:[[ColorPalette::Foreground]]; opacity:0.6; filter:'alpha(opacity=60)';}
 /*}}}*/</pre>
+</div>
+<div title="Subscription Specifications" modifier="MikeMartinez" created="201003032230" modified="201003032323" tags="publish" changecount="7">
+<pre>!Definable Parameters
+{{centeredTable{
+| ''Subscription Section Keys'' |c
+| //Key// | //Value// | //Notes// |
+|&gt;|&gt;| &quot;&quot;&quot;---&quot;&quot;&quot; Subscriber Qos Policy values &quot;&quot;&quot;---&quot;&quot;&quot; |
+|Presentation |&lt;string&gt; |Enumeration value of {{{INSTANCE}}}, {{{TOPIC}}}, or {{{GROUP}}} |
+|~PresentationCoherent |&lt;bool&gt; |Booleans are represented with a numeric 0 or 1 |
+|~PresentationOrdered |&lt;bool&gt; |Booleans are represented with a numeric 0 or 1 |
+|Partition |&lt;string&gt; |Only single string value currently supported |
+|~GroupData |&lt;string&gt; |&amp;nbsp; |
+|~EntityFactory |&lt;bool&gt; |Booleans are represented with a numeric 0 or 1 |
+|&gt;|&gt;| &quot;&quot;&quot;---&quot;&quot;&quot; ~DataReader Qos Policy values &quot;&quot;&quot;---&quot;&quot;&quot; |
+|Durability |&lt;string&gt; |Enumeration value of {{{VOLATILE}}}, {{{LOCAL}}}, {{{TRANSIENT}}}, or {{{PERSISTENT}}} |
+|Deadline |&lt;number&gt; |&amp;nbsp; |
+|~LatencyBudget |&lt;number&gt; |&amp;nbsp; |
+|~LivelinessKind |&lt;string&gt; |Enumeration value of {{{AUTOMATIC}}}, {{{PARTICIPANT}}}, or {{{TOPIC}}} |
+|~LivelinessDuration |&lt;number&gt; |&amp;nbsp; |
+|~ReliabilityKind |&lt;string&gt; |Enumeration value of {{{BEST_EFFORT}}} or {{{RELIABLE}}} |
+|~ReliabilityMaxBlocking |&lt;number&gt; |&amp;nbsp; |
+|~DestinationOrder |&lt;string&gt; |Enumeration value of {{{SOURCE}}} or {{{RECEPTION}}} |
+|~HistoryKind |&lt;string&gt; |Enumeration value of {{{ALL}}} or {{{LAST}}} |
+|~HistoryDepth |&lt;number&gt; |&amp;nbsp; |
+|~ResourceMaxSamples |&lt;number&gt; |&amp;nbsp; |
+|~ResourceMaxInstances |&lt;number&gt; |&amp;nbsp; |
+|~ResourceMaxSamplesPerInstance |&lt;number&gt; |&amp;nbsp; |
+|~UserData |&lt;string&gt; |&amp;nbsp; |
+|~TimeBasedFilter |&lt;number&gt; |&amp;nbsp; |
+|~ReaderDataLifecycle |&lt;bool&gt; |Booleans are represented with a numeric 0 or 1 |
+|&gt;|&gt;| &quot;&quot;&quot;---&quot;&quot;&quot; Test Execution Parameters &quot;&quot;&quot;---&quot;&quot;&quot; |
+|Topic |&lt;string&gt; |Must reference by name the identifier of a [topic] subsection within the file. |
+|~TransportIndex |&lt;number&gt; |Index into transport configurations |
+|~DataCollectionFile |&lt;string&gt; |Filename for collected data |
+|~DataCollectionBound |&lt;number&gt;&amp;nbsp; |
+|~DataCollectionRetention |&lt;string&gt; |Enumeration value of {{{ALL}}}, {{{OLDEST}}}, or {{{NEWEST}}} |
+}}}
+!Test Execution Parameters
+The test execution parameters allow specification of the transport used for by the subscription and the data collection during the test.
+
+The transport is specified as an index into the transport definitions.
+
+Data collection is specified as a combination of where to store the results, how much data to store, and if not all which data to store.  The data collected during test operation consists of per hop latency data along with path latency data.  Summary statistics for all observed data are reported at the end of the test.  The internal collection buffers are flushed to the filesystem after the test completes as well.  This avoids writes to disk affecting the performance being measured.  Data collection specification consists of:
+;{{{DataCollectionFile}}}
+:if specified, this is the output file where data will be stored at the end of the test.  It will contain summary data at the top and (per sample) detailed data after that.  If not specified, no detailed data collection will occur.
+;{{{DataCollectionBound}}}
+:this specifies the number of samples to retain data for if the {{{DataCollectionRetention}}} parameter has a value other than {{{ALL}}}.  This parameter is not needed if the {{{DataCollectionFile}}} parameter is not specified or if the {{{DataCollectionRetention}}} parameter has the value {{{ALL}}}.
+;{{{DataCollectionRetention}}}
+:this specifies what data is to be retained during the test.  Data is collected for each sample.  To reduce the impact of storing this data on the performance being measured, the data is stored in RAM until the end of the test when it is written to the output file.  This parameter specifies what data should be stored.  If this has a value of {{{ALL}}} then all of the data will be stored in RAM.  Otherwise a fixed size buffer of size {{{DataCollectionBound}}} is created before the test starts and data stored there.  If this parameter has a value of {{{OLDEST}}} the buffer is not written once it fills up.  If the value is {{{NEWEST}}} then the buffer is treated as a ring buffer and the last {{{DataCollectionBound}}} samples will always be present.  Samples will be overwritten oldest sample first.
+!Example
+An example subscription section like the following would result in a subscription with the name //result// that receives //status// topic data on partition //link2// and stores the most recent 5,000 samples of information and writes them to the file //latency.data// at the end of the test.
+{{{
+[subscription/result]
+Topic = status
+TransportIndex = 2
+Partition = link2
+DataCollectionFile = latency.data
+DataCollectionBound = 5000
+DataCollectionRetention = NEWEST
+}}}</pre>
+</div>
+<div title="Test Execution" modifier="MikeMartinez" created="201002221632" modified="201003031707" tags="publish" changecount="33">
+<pre>Test execution using the framework involves a test script to manage the processing on each host involved in the testing, the OpenDDS [[repository|DCPSInfoRepo]] process, and a test process that creates the OpenDDS service Entities and executes the actual test operations.
+
+{{itemBlock{
+!run_test
+Test execution using the OpenDDS-Bench framework is managed through the use of a single Perl script.  This script is located in //$~BENCH_ROOT/bin/run_test//.  It has many [[options|RunTestManPage]] which are enumerated by executing the script with either the '-?' or the '&quot;&quot;&quot;--&quot;&quot;&quot;man' command line arguments.
+
+The {{{run_test}}} script will start either the {{{DCPSInfoRepo}}} [[repository|DCPSInfoRepo]] process or any number of {{{testprocess}}} test executables.  Each test executable is configured via files to create and enable a number of publications and subscriptions for the test.  The details of [[test specification|Test Specification]] include the publication and subscription ~QoS policy values and test management parameters as well as those for associated Entities of the Topic and Participant and test support for transports.  Each {{{testprocess}}} will be started with a separate test configuration file, but each process started by a single script will use the same transport configuration file.
+}}}
+
+{{itemBlock{
+!~DCPSInfoRepo
+Typically one or more test processes are started on each host involved with a test.  The {{{DCSPInfoRepo}}} [[repository|DCPSInfoRepo]] process can be established on one of the test hosts or a different host not involved with the test but reachable by all test hosts.  Since the repository is involved only during test startup and shutdown it is usually not necessary to dedicate a host for its execution.
+}}}
+
+{{itemBlock{
+!testprocess
+The {{{testprocess}}} test executable is what reads the configuration files, creates and manages the OpenDDS Entities and executes the test.  Each process in the test is configured separately and managed by the {{{run_test}}} script.  Normal usage will have a single {{{run_test}}} script on each host start as many {{{testprocess}}} processes as the test requires on that host.  The {{{testprocess}}} executable is passed options from the {{{run_test}}} script, so it is not required for users to directly specify the command line arguments to this executable.  The executable accepts the following options:
+{{indent{
+; ''-v''
+: be verbose when executing
+; ''-d &lt;duration&gt;''
+: execute for at least {{{duration}}} seconds
+; ''-f &lt;file&gt;''
+: use ''&lt;file&gt;'' as the test specification file for this execution.
+; ''-t &lt;type&gt;''
+: save the specified data when collecting timing statistics.  ''&lt;type&gt;'' is one of: ''unbounded'', ''newest'', or ''oldest''.
+//this is deprecated in favor of the configuration file specification for the same parameter//
+; ''-s &lt;size&gt;''
+: gather the specified amount of timing data.
+//this is deprecated in favor of the configuration file specification for the same parameter//
+; ''-r &lt;file&gt;''
+: place the gathered timing data into the specified file.
+//this is deprecated in favor of the configuration file specification for the same parameter//
+}}}
+This process creates the DDS Participants, Topics, Publications, and Subscriptions that are specified in the test configuration file.  It then waits until each publication has associated with the number of subscriptions specified in the configuration and starts publishing samples.  The samples are sized as specified and published at a rate specified in the configuration file.  If an interval, or test duration,  was specified the publications are stopped at the end of this interval.  If no interval was specified then the test will continue until the interrupted via an INT signal (ctl-C).  Once the publications have been stopped, the test will block until all subscriptions have released all active associations.  At this time a summary of the test results is produced and, if specified, detailed data will be stored.  If there are no publications, the test will start immediately, including the test duration interval.  If there are no subscriptions the process will terminate as soon as the publications are stopped and results stored.
+}}}
+</pre>
+</div>
+<div title="Test Specification" modifier="MikeMartinez" created="201003031725" modified="201003032303" tags="publish" changecount="32">
+<pre>Distributed tests executed by the framework will consist of many processes executing on many hosts.  There will be one process running the [[repository|DCPSInfoRepo]] for the OpenDDS service.  The transports used by the publications and subscriptions comprising the tests will be entirely specified by OpenDDS configuration files.  The DDS Participants, Topics, Publications, and Subscriptions are specified in a series of test specification files.  Each process will have a specification file defining its structure and behavior.  A single specification file can be used for more than one test process, as long as each process is identical during the testing.
+
+The specification of transports and other service configuration aspects is described in the OpenDDS [[Developers Guide|http://downloads.ociweb.com/OpenDDS/OpenDDS-latest.pdf]].  The test structures and behavior are described below.
+
+In general, each DDS Entity type specified, Participant, Topic, Publication, and Subscription will have Quality of Service policy values as well as test management properties specified.  The test specification files are in the format of //ini// files, where each section is delimited using a section header within square brackets.  Within each section are a series of ''Key'' / ''Value'' pair assignments that are used to specify parameter values for the Entity.
+
+Each DDS Entity that is part of the test is specified by a section in a test configuration file.  It will be represented as a subsection of the Entity type (participant, topic, publication, or subscription) where the subsection name is the unique identifier for the Entity.  Subsection syntax is determined by the use of the [[ACE|http://www.cs.wustl.edu/~schmidt/ACE.html]] portability layer configuration file parser.  It uses a path syntax with slash '/' characters separating the subsection levels.
+
+For example a test specification containing the following sections:
+{{{
+[participant/player]
+
+[topic/joystick]
+
+[topic/button]
+
+[topic/status]
+
+[publication/fire]
+
+[publication/move]
+
+[subscription/result]
+}}}
+specifies the creation of a DDS Participant identified as //player//, three DDS Topics identified as //joystick//, //button//, and //status//, two publications identified as //fire// and //move//, and a subscription identified as //result//.  These Entities will be created at the start of processing using the contents of the sections and destroyed at the end of processing.
+
+The specific Entity specifications that are supported include:
+#[[Participant|Participant Specifications]]
+#[[Topic|Topic Specifications]]
+#[[Publication|Publication Specifications]]
+#[[Subscription|Subscription Specifications]]
+</pre>
+</div>
+<div title="Throughput Tests" modifier="MikeMartinez" created="201003081923" modified="201003082200" tags="publish" changecount="15">
+<pre>The OpenDDS-Bench framework includes configuration files for throughput testing.  These files are located in the //$~BENCH_ROOT/tests/thru// sub-directory.  The throughput testing covers several different conditions.  These include a bidirectional test, topologically equivalent to the [[latency tests|Latency Tests]], publication bound tests, and subscription bound tests.  Publication bound testing publishes test data from one publication to two distinct subscriptions.  When these processes are on three separate hosts, the publication processing will dominate and likely be the limiting factor in throughput.  Subscription bound testing publishes test data from two separate publications to a single subscription.  When these processes are on three separate hosts, the subscription processing will dominate and likely be the limiting factor in throughput.  If the test environment does not have adequate network bandwidth, then this will dominate either or both of these tests and the CPU usage observed during the tests will give an indication of what margins are available in the test setup.  The configuration for these tests are illustrated in the following diagrams.
+[img[Bidirectional Test|images/bidirtest.jpg]]
+[img[Publication Bound Test|images/pubboundtest.jpg]]
+[img[Subscription Bound Test|images/subboundtest.jpg]]
+The message size and sending rate are varied for each test execution run and throughput data gathered and analyzed.  Throughput data consists of counting the number of samples and bytes successfully transferred from the publication(s) to the subscription(s).  Typically the processes of this test will be executed on different hosts to include network effects in the measurements.  While executing them on the same host will exclude network effects from the results, it is possible to encounter processor effects depending on the capacity of the host on which the test is executing.  These tests have two sets of configuration specifications available: one for reliable transport testing, and; one for best effort transport testing.  The transport configuration for a test must match the configuration specification.
+
+There is a separate configuration file supplied for each test condition to be executed.  Users are encouraged to extend the testing to include cases specific to their environment as well, using the supplied configuration files as a guide.  The test files and message sizes specified available include the following:
+{{centeredTable{
+| ''Throughput Test Conditions'' |c
+| //Test Case// | //Message Size//&lt;br&gt;(bytes) | // Message Rate//&lt;br&gt;(samples/second) | //Nominal Throughput//&lt;br&gt;(Mbps) | //Configuration File//&lt;br&gt;(in //$~BENCH_ROOT/tests/thru//) |
+|&gt;|&gt;|&gt;|&gt;| ''&quot;&quot;&quot;---&quot;&quot;&quot; Bidirectional Throughput Tests &quot;&quot;&quot;---&quot;&quot;&quot;'' |
+|&gt;|&gt;|&gt;|&gt;| //&quot;&quot;&quot;---&quot;&quot;&quot; Maximum Throughput Rate &quot;&quot;&quot;---&quot;&quot;&quot;// |
+| 1| 1,000| 10,000|  160|bidir-1sub-be-80.ini&lt;br&gt;bidir-1sub-rel-80.ini |
+| 2| 2,000| 20,000|  640|bidir-1sub-be-320.ini&lt;br&gt;bidir-1sub-rel-320.ini |
+| 3| 3,000| 30,000|  1440|bidir-1sub-be-720.ini&lt;br&gt;bidir-1sub-rel-720.ini |
+| 4| 4,000| 40,000|  2560|bidir-1sub-be-1280.ini&lt;br&gt;bidir-1sub-rel-1280.ini |
+| 5| 5,000| 50,000|  4000|bidir-1sub-be-2000.ini&lt;br&gt;bidir-1sub-rel-2000.ini |
+|&gt;|&gt;|&gt;|&gt;| //&quot;&quot;&quot;---&quot;&quot;&quot; Fixed Rate / Variable Size &quot;&quot;&quot;---&quot;&quot;&quot;// |
+| //1//| //1,000//| //10,000//|  //160//|//bidir-1sub-be-80.ini&lt;br&gt;bidir-1sub-rel-80.ini// |
+| 6| 1,000| 20,000|  160|bidir-1sub-be-160r.ini&lt;br&gt;bidir-1sub-rel-160r.ini |
+| 7| 1,000| 30,000|  240|bidir-1sub-be-240r.ini&lt;br&gt;bidir-1sub-rel-240r.ini |
+| 8| 1,000| 40,000|  320|bidir-1sub-be-320r.ini&lt;br&gt;bidir-1sub-rel-320r.ini |
+| 9| 1,000| 50,000|  400|bidir-1sub-be-400r.ini&lt;br&gt;bidir-1sub-rel-400r.ini |
+|&gt;|&gt;|&gt;|&gt;| //&quot;&quot;&quot;---&quot;&quot;&quot; Variable Rate / Fixed Size &quot;&quot;&quot;---&quot;&quot;&quot;// |
+| //1//| //1,000//| //10,000//|  //160//|//bidir-1sub-be-80.ini&lt;br&gt;bidir-1sub-rel-80.ini// |
+| 10| 2,000| 10,000|  160|bidir-1sub-be-160s.ini&lt;br&gt;bidir-1sub-rel-160s.ini |
+| 11| 3,000| 10,000|  240|bidir-1sub-be-240s.ini&lt;br&gt;bidir-1sub-rel-240s.ini |
+| 12| 4,000| 10,000|  320|bidir-1sub-be-320s.ini&lt;br&gt;bidir-1sub-rel-320s.ini |
+| 13| 5,000| 10,000|  400|bidir-1sub-be-400s.ini&lt;br&gt;bidir-1sub-rel-400s.ini |
+|&gt;|&gt;|&gt;|&gt;| ''&quot;&quot;&quot;---&quot;&quot;&quot; Publication Bound Tests &quot;&quot;&quot;---&quot;&quot;&quot;'' |
+|&gt;|&gt;|&gt;|&gt;| //&quot;&quot;&quot;---&quot;&quot;&quot; Maximum Throughput Rate &quot;&quot;&quot;---&quot;&quot;&quot;// |
+| 1| 1,000| 10,000|  160|pub-2sub-be-80.ini&lt;br&gt;pub-2sub-rel-80.ini |
+| 2| 2,000| 20,000|  640|pub-2sub-be-320.ini&lt;br&gt;pub-2sub-rel-320.ini |
+| 3| 3,000| 30,000|  1440|pub-2sub-be-720.ini&lt;br&gt;pub-2sub-rel-720.ini |
+| 4| 4,000| 40,000|  2560|pub-2sub-be-1280.ini&lt;br&gt;pub-2sub-rel-1280.ini |
+| 5| 5,000| 50,000|  4000|pub-2sub-be-2000.ini&lt;br&gt;pub-2sub-rel-2000.ini |
+|&gt;|&gt;|&gt;|&gt;| //&quot;&quot;&quot;---&quot;&quot;&quot; Fixed Rate / Variable Size &quot;&quot;&quot;---&quot;&quot;&quot;// |
+| //1//| //1,000//| //10,000//|  //160//|//pub-2sub-be-80.ini&lt;br&gt;pub-2sub-rel-80.ini// |
+| 6| 1,000| 20,000|  160|pub-2sub-be-160r.ini&lt;br&gt;pub-2sub-rel-80r.ini |
+| 7| 1,000| 30,000|  240|pub-2sub-be-240r.ini&lt;br&gt;pub-2sub-rel-240r.ini |
+| 8| 1,000| 40,000|  320|pub-2sub-be-320r.ini&lt;br&gt;pub-2sub-rel-320r.ini |
+| 9| 1,000| 50,000|  400|pub-2sub-be-400r.ini&lt;br&gt;pub-2sub-rel-400r.ini |
+|&gt;|&gt;|&gt;|&gt;| //&quot;&quot;&quot;---&quot;&quot;&quot; Variable Rate / Fixed Size &quot;&quot;&quot;---&quot;&quot;&quot;// |
+| //1//| //1,000//| //10,000//|  //160//|//pub-2sub-be-80.ini&lt;br&gt;pub-2sub-rel-80.ini// |
+| 10| 2,000| 10,000|  160|pub-2sub-be-160.ini&lt;br&gt;pub-2sub-rel-160.ini |
+| 11| 3,000| 10,000|  240|pub-2sub-be-240s.ini&lt;br&gt;pub-2sub-rel-240s.ini |
+| 12| 4,000| 10,000|  320|pub-2sub-be-320s.ini&lt;br&gt;pub-2sub-rel-320s.ini |
+| 13| 5,000| 10,000|  400|pub-2sub-be-400s.ini&lt;br&gt;pub-2sub-rel-400s.ini |
+|&gt;|&gt;|&gt;|&gt;| ''&quot;&quot;&quot;---&quot;&quot;&quot; Subscription Bound Tests &quot;&quot;&quot;---&quot;&quot;&quot;'' |
+|&gt;|&gt;|&gt;|&gt;| //&quot;&quot;&quot;---&quot;&quot;&quot; Maximum Throughput Rate &quot;&quot;&quot;---&quot;&quot;&quot;// |
+| 14| 500| 10,000|  800|pub-1sub-be-80.ini&lt;br&gt;pub-1sub-rel-80.ini |
+| 15| 1,000| 20,000|  160|pub-1sub-be-320.ini&lt;br&gt;pub-1sub-rel-320.ini |
+| 16| 1,500| 30,000|  240|pub-1sub-be-720.ini&lt;br&gt;pub-1sub-rel-720.ini |
+| 17| 2,000| 40,000|  320|pub-1sub-be-1280.ini&lt;br&gt;pub-1sub-rel-1280.ini |
+| 18| 2,500| 50,000|  400|pub-1sub-be-2000.ini&lt;br&gt;pub-1sub-rel-2000.ini |
+|&gt;|&gt;|&gt;|&gt;| //&quot;&quot;&quot;---&quot;&quot;&quot; Fixed Rate / Variable Size &quot;&quot;&quot;---&quot;&quot;&quot;// |
+| 19| 1,000| 5,000|  80|pub-1sub-be-80r.ini&lt;br&gt;pub-1sub-rel-80r.ini |
+| 20| 1,000| 10,000|  160|pub-1sub-be-240r.ini&lt;br&gt;pub-1sub-rel-240r.ini |
+| 21| 1,000| 15,000|  240|pub-1sub-be-320r.ini&lt;br&gt;pub-1sub-rel-320r.ini |
+| //15//| //1,000//| //20,000//|  //160//|//pub-1sub-be-320.ini&lt;br&gt;pub-1sub-rel-320.ini// |
+| 22| 1,000| 25,000|  400|pub-1sub-be-400r.ini&lt;br&gt;pub-1sub-rel-400r.ini |
+|&gt;|&gt;|&gt;|&gt;| //&quot;&quot;&quot;---&quot;&quot;&quot; Variable Rate / Fixed Size &quot;&quot;&quot;---&quot;&quot;&quot;// |
+| //14//| //500//| //10,000//|  //800//|//pub-1sub-be-80.ini&lt;br&gt;pub-1sub-rel-80.ini// |
+| //20//| //1,000//| //10,000//|  //160//|//pub-1sub-be-240r.ini&lt;br&gt;pub-1sub-rel-240r.ini// |
+| 23| 1,500| 10,000|  240|pub-1sub-be-160.ini&lt;br&gt;pub-1sub-rel-160.ini |
+| 24| 2,000| 10,000|  320|pub-1sub-be-240s.ini&lt;br&gt;pub-1sub-rel-240s.ini |
+| 25| 2,500| 10,000|  400|pub-1sub-be-320s.ini&lt;br&gt;pub-1sub-rel-320s.ini |
+}}}</pre>
+</div>
+<div title="TiddlyWiki" modifier="MikeMartinez" created="201003022002" modified="201003082219" changecount="2">
+<pre>~TiddlyWiki is a complete [[wiki|http://en.wikipedia.org/wiki/Wiki]] in a single HTML file. It contains the entire text of the wiki, and all the ~JavaScript, CSS and HTML goodness to be able to display it, and let you edit it or search it. Without needing a server.
+
+You can find out more at the [[TiddlyWiki home|http://www.tiddlywiki.com/]].</pre>
+</div>
+<div title="Topic Specifications" modifier="MikeMartinez" created="201003032055" modified="201003032223" tags="publish" changecount="3">
+<pre>!Definable Parameters
+{{centeredTable{
+| ''Topic Section Keys'' |c
+| //Key// | //Value// | //Notes// |
+|&gt;|&gt;| &quot;&quot;&quot;---&quot;&quot;&quot; Topic Qos Policy values &quot;&quot;&quot;---&quot;&quot;&quot; |
+|~TopicData |&lt;string&gt; |&amp;nbsp; |
+|Durability |&lt;string&gt; |Enumeration value of {{{VOLATILE}}}, {{{LOCAL}}}, {{{TRANSIENT}}}, or {{{PERSISTENT}}} |
+|~DurabilityServiceDuration |&lt;number&gt; |&amp;nbsp; |
+|~DurabilityServiceHistoryKind |&lt;string&gt; |Enumeration value of {{{ALL}}} or {{{LAST}}} |
+|~DurabilityServiceHistoryDepth |&lt;number&gt; |&amp;nbsp; |
+|~DurabilityServiceSamples |&lt;number&gt; |&amp;nbsp; |
+|~DurabilityServiceInstances |&lt;number&gt; |&amp;nbsp; |
+|~DurabilityServiceSamplesPerInstance |&lt;number&gt; |&amp;nbsp; |
+|Deadline |&lt;number&gt; |&amp;nbsp; |
+|~LatencyBudget |&lt;number&gt; |&amp;nbsp; |
+|~LivelinessKind |&lt;string&gt; |Enumeration value of {{{AUTOMATIC}}}, {{{PARTICIPANT}}}, or {{{TOPIC}}} |
+|~LivelinessDuration |&lt;number&gt; |&amp;nbsp; |
+|~ReliabilityKind |&lt;string&gt; |Enumeration value of {{{BEST_EFFORT}}} or {{{RELIABLE}}} |
+|~ReliabilityMaxBlocking |&lt;number&gt; |&amp;nbsp; |
+|~DestinationOrder |&lt;string&gt; |Enumeration value of {{{SOURCE}}} or {{{RECEPTION}}} |
+|~HistoryKind |&lt;string&gt; |Enumeration value of {{{ALL}}} or {{{LAST}}} |
+|~HistoryDepth |&lt;number&gt; |&amp;nbsp; |
+|~ResourceMaxSamples |&lt;number&gt; |&amp;nbsp; |
+|~ResourceMaxInstances |&lt;number&gt; |&amp;nbsp; |
+|~ResourceMaxSamplesPerInstance |&lt;number&gt; |&amp;nbsp; |
+|~TransportPriority |&lt;number&gt; |&amp;nbsp; |
+|~LifespanDuration |&lt;number&gt; |&amp;nbsp; |
+|~OwnershipKind |&lt;string&gt; |Enumeration value of {{{SHARED}}}, {{{EXCLUSIVE}}} |
+|&gt;|&gt;| &quot;&quot;&quot;---&quot;&quot;&quot; Test Execution Parameters &quot;&quot;&quot;---&quot;&quot;&quot; |
+|Participant |&lt;string&gt; |Must reference by name the identifier of a [participant] subsection within the file. |
+}}}
+!Test Execution Parameters
+[topic] sections are only linked to the containing DDS Participant.  There are no other test execution effects for a topic, other than the Quality of Service policy settings.
+!Example
+An example topic section like the following would result in a DDS Topic with a name of //status// being created in the process with reliability enabled and contained within the //player1// participant.
+{{{
+[topic/status]
+Participant = player1
+ReliabilityKind = RELIABLE
+}}}
+</pre>
 </div>
 </div>
 <!--POST-STOREAREA-->

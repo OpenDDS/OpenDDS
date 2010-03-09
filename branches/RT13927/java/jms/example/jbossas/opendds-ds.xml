@@ -13,7 +13,7 @@
         <attribute name="ORBListenEndpoints">iiop://:6667</attribute>
         <attribute name="ORBLogFile">${jboss.server.log.dir}/opendds.log</attribute>
         <attribute name="TransportType">SimpleTcp</attribute>
-        <depends>jboss.jca:service=RARDeployment,name='opendds-jms-2.1.rar'</depends>
+        <depends>jboss.jca:service=RARDeployment,name='opendds-jms-2.1.1.rar'</depends>
     </mbean>
 
     <mbean code="org.opendds.jms.management.HibernatePersistenceService"
@@ -22,7 +22,7 @@
         <attribute name="DataSource">java:/DefaultDS</attribute>
         <attribute name="Dialect">org.hibernate.dialect.HSQLDialect</attribute>
         <attribute name="Hbm2ddlAuto">update</attribute>
-        <depends>jboss.jca:service=RARDeployment,name='opendds-jms-2.1.rar'</depends>
+        <depends>jboss.jca:service=RARDeployment,name='opendds-jms-2.1.1.rar'</depends>
     </mbean>
 
     <!--
@@ -39,7 +39,7 @@
     <no-tx-connection-factory>
         <jndi-name>DDS/ConnectionFactory</jndi-name>
         <use-java-context>false</use-java-context>
-        <rar-name>opendds-jms-2.1.rar</rar-name>
+        <rar-name>opendds-jms-2.1.1.rar</rar-name>
         <connection-definition>javax.jms.ConnectionFactory</connection-definition>
         <config-property name="DomainID" type="java.lang.Integer">1</config-property>
         <config-property name="TransportType" type="java.lang.String">SimpleTcp</config-property>

@@ -4,8 +4,7 @@
 #ifndef ENTITYPROFILES_H
 #define ENTITYPROFILES_H
 
-#include "Gaussian.h"
-#include "Exponential.h"
+#include "StatisticalValue.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/DataCollector_T.h"
 #include <string>
@@ -74,25 +73,33 @@ struct TopicProfile {
  *   Associations      = <number> # Number of subscriptions to match before starting.
  *   StartAfterDelay   = <number> # Delay before writes start after matching.
  *   MessageSource     = <string> # One of subscription <name>
- *   MessageFixedRate  = <number> # Samples per second, 0 indicates use MessageRate
+ *   MessageRateType   = <string> # One of FIXED, POISSON
  *   MessageRate       = <number> # Samples per second, Poisson arrival times
+ *   MessageSizeType   = <string> # One of FIXED, UNIFORM, GAUSSIAN
  *   MessageSize       = <number> # bytes per sample
  *   MessageMax        = <number> # upper bound for size
  *   MessageMin        = <number> # lower bound for size
  *   MessageDeviation  = <number> # standard deviation for size
+ *   InstanceType      = <string> # One of FIXED, UNIFORM, GAUSSIAN
+ *   InstanceMean      = <number> # average value of instance key for sending
+ *   InstanceMax       = <number> # upper bound for number of instances
+ *   InstanceMin       = <number> # lower bound for number of instances
+ *   InstanceDeviation = <number> # standard deviation of instance key for sending
+ *   AckDelay          = <number> # >0 passed to wait_for_acks()
  */
 struct PublicationProfile {
-  std::string        topic;
-  unsigned int       transport;
-  std::string        source;
-  Gaussian           size;
-  unsigned int       fixedRate;
-  Exponential        rate;
-  DDS::PublisherQos  publisherQos;
-  DDS::DataWriterQos writerQos;
-  unsigned int       writerQosMask;
-  unsigned int       associations;
-  unsigned int       delay;
+  std::string               topic;
+  unsigned int              transport;
+  std::string               source;
+  StatisticalValue<long>*   instances;
+  StatisticalValue<long>*   size;
+  StatisticalValue<double>* rate;
+  DDS::PublisherQos         publisherQos;
+  DDS::DataWriterQos        writerQos;
+  unsigned int              writerQosMask;
+  unsigned int              associations;
+  unsigned int              delay;
+  unsigned int              ackDelay;
 
   void copyToWriterQos( ::DDS::DataWriterQos& qos);
 };

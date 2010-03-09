@@ -87,7 +87,7 @@ GetOptions( "verbose!"            => \$verbose,
             "rdebug|R=i"          => \$repoDebug,
             "noaction|x"          => \$noaction,
             "dfile|f=s"           => \$dFile,
-            "collect|C"           => \$collectStats,
+            "collect|C=s"         => \$collectStats,
             "rawdatafile|r=s"     => \$rawData,
             "repohost|h=s"        => \$repoHost,
             "inifile|i=s"         => \$iniFile,
@@ -105,6 +105,9 @@ pod2usage( -verbose => 2) if $man;
 # Extract the individual scenarios.
 my @scenario = split( ',', $scenarios);
 
+# Allow 'all' to be specified for statistics collection.
+$collectStats = "psn" if $collectStats =~ /al?l?/;
+
 # Verbosity.
 print "Commands will be printed only and not executed.\n"
                                           if $verbose and $noaction;
@@ -119,8 +122,12 @@ print "RepoHost==$repoHost\n"             if $verbose;
 print scalar(@scenario) . " scenarios==" . join(', ', @scenario) . "\n"
                                           if $verbose;
 print "RawDataFile==$rawData\n"           if $verbose and $rawData;
+print "Process Statistics will be collected.\n"
+                                          if $verbose and $collectStats =~ /p/;
 print "System Statistics will be collected.\n"
-                                          if $verbose and $collectStats;
+                                          if $verbose and $collectStats =~ /s/;
+print "Network Statistics will be collected.\n"
+                                          if $verbose and $collectStats =~ /n/;
 
 print "Debug==$debug\n"                   if $verbose and $debug;
 print "RepoDebug==$repoDebug\n"           if $verbose and $repoDebug;
@@ -143,8 +150,11 @@ my $confFile  = $projectRoot . "/etc/svc.conf";
 unlink $repo_ior;
 unlink $debugFile if $debugFile;
 
+my $verboseDebug;
+$verboseDebug = "-ORBVerboseLogging 1 " if $orbVerbose;
+
 my $common_opts = new PerlACE::ConfigList->check_config ('STATIC') ? ''
-    : "-ORBSvcConf $confFile";
+    : "-ORBSvcConf $confFile ";
 $common_opts .= $verboseDebug if $verboseDebug;
 $common_opts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
 
@@ -152,9 +162,6 @@ $common_opts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
 
 my $appDebug;
 $appDebug  = $debug if $debug;
-
-my $verboseDebug;
-$verboseDebug = "-ORBVerboseLogging 1 " if $orbVerbose;
 
 my $repoOpts = "$common_opts ";
 $repoOpts .= "-ORBListenEndpoints $repoHost " if $repoHost;
@@ -204,14 +211,19 @@ if( $noaction) {
 # Manage statistics collection processes.
 my @COLLECTORS;
 my @HANDLES;
-&collectSystemStats( $$) if $collectStats;
+&collectSystemStats( $$)  if $collectStats =~ /s/;
 
 # Start and stop the test processes.
 map {
   print "\nTEST PROCESS\n";
   print $_->CommandLine() . "\n";
   $_->Spawn();
-  &collectProcessStats( $_->{PROCESS}) if $collectStats;
+  &collectProcessStats( $_->{PROCESS}) if $collectStats =~ /p/;
+  &collectNetworkStats( $_->{PROCESS}) if $collectStats =~ /n/;
+  if( $startRepo and PerlACE::waitforfile_timed( $repo_ior, 30) == -1) {
+    print STDERR "ERROR: waiting for repository IOR file $repo_ior.\n";
+    exit 1;
+  }
 } @PROCESSES;
 
 # block forever if no duration was specified.
@@ -257,11 +269,50 @@ sub WaitForUserInput {
   my $userinput = <STDIN>;
 }
 
+#
+# Statistics gathering commands by system type
+#
+# The collection processing will start the command /once/, then capture
+# the output and process it line by line.  As this script is terminating,
+# it will send an INT (3) signal to the process to stop it.
+#
+# If a system type does not honor the commands as written, add a stanza
+# for that system type and modify the commands to be appropriate for that
+# environment.
+#
+sub collectionCommand {
+  my ( $type, $params) = @_;
+  SWITCH:{
+    $^O =~ /MSWin32/ && do {
+      return undef;
+    };
+    $^O =~ /cygwin/ && do {
+      return undef;
+    };
+    $^O =~ /VMS/ && do {
+      return undef;
+    };
+    $^O =~ /solaris/ && do {
+      return "vmstat 1"  if $type eq "system";
+      return undef       if $type eq "network";
+      return "top -bd 1" if $type eq "process"; # This still may not work.
+    };
+
+    # Handle generic Unix types here.  Assume they have modern command
+    # forms.  If not, add a stanza to handle them specifically above.
+    return "vmstat 1"             if $type eq "system";
+    return "netstat -ntpc"        if $type eq "network";
+    return "top -bd 1 -p $params" if $type eq "process";
+  }
+  return undef;
+}
+
 sub collectProcessStats {
   my $pid = shift;
-  if( $pid and $^O ne 'MSWin32') {
+  my $command = &collectionCommand( 'process', "$pid");
+  if( $pid and $command) {
     &runCollector(
-      "top -bd 1 -p $pid",
+      $command,
       "process-$pid.log",
       sub { # Action to process each line of input.
         my ( $input, $output) = @_;
@@ -273,13 +324,29 @@ sub collectProcessStats {
 
 sub collectSystemStats {
   my $pid = shift;
-  if( $pid and $^O ne 'MSWin32') {
+  my $command = &collectionCommand( 'system');
+  if( $pid and $command) {
     &runCollector(
-      "vmstat 1",
+      $command,
       "system-$pid.log",
       sub { # Action to process each line of input.
         my ( $input, $output) = @_;
         print $output localtime() . ": $input\n";
+      }
+    );
+  }
+}
+
+sub collectNetworkStats {
+  my $pid = shift;
+  my $command = &collectionCommand( 'network');
+  if( $pid and $command) {
+    &runCollector(
+      $command,
+      "network-$pid.log",
+      sub { # Action to process each line of input.
+        my ( $input, $output) = @_;
+        print $output localtime() . ": $input\n" if $input =~ /$pid/;
       }
     );
   }
@@ -333,11 +400,11 @@ sub runCollector {
 
 =head1 NAME
 
-run_test - Execute the test process for a distributed test.
+run_test - Execute test processes for distributed testing
 
 =head1 SYNOPSIS
 
-./run_test [options]
+ run_test [options]
 
 Options:
 
@@ -349,7 +416,7 @@ Options:
 
   -v | --verbose         be chatty while executing
 
-  -V | --ORBVerboseLogging=NUMBER
+  -V NUMBER | --ORBVerboseLogging=NUMBER
                          set the corresponding ORB option
 
   -d NUMBER | --debug=NUMBER
@@ -363,7 +430,8 @@ Options:
 
   -f FILE | --dfile=FILE set the filename for debug output
 
-  -C | --collect         collect process and system statistics during test
+  -C TYPES | --collect=TYPES
+                         collect process and system statistics during test
 
   -h FQDN | --repohost FQDN
                          fully qualified domain name (and port) for
@@ -395,12 +463,12 @@ Print a brief help message and exits.
 
 =item B<--man>
 
-Prints the manual page and exits.
+Prints this manual page and exits.
 
 =item B<-x> | B<--noaction>
 
 Print the commands that would be executed with the current set of command
-line options and exit without performing any processing.
+line options and exit without starting any processes.
 
 =item B<-v> | B<--verbose>
 
@@ -412,23 +480,29 @@ Sets the -ORBVerboseLogging option to NUMBER.
 
 The default value is 0.
 
-The value is set to 1 if the single letter form isused (-V).
+The value is set to 1 if any non-zero value is specified.  A value of
+zero will omit the ORBVerboseLogging specification from the process
+command line.
 
 =item B<-d NUMBER> | B<--debug=NUMBER>
 
-Sets the -DCPSDebugLevel option value.
+Sets the -DCPSDebugLevel option value.  A value of 0 will omit the
+DCPSDebugLevel specification from the process command line.
 
 The default value is 0.
 
 =item B<-T NUMBER> | B<--tdebug=NUMBER>
 
-Sets the -DCPSTransportDebugLevel option value.
+Sets the -DCPSTransportDebugLevel option value.  A value of 0 will omit
+the DCPSTransportDebugLevel specification from the process command line.
 
 The default value is 0.
 
 =item B<-R NUMBER> | B<--rdebug=NUMBER>
 
-Sets the -DCPSDebugLevel option value for the repository process.
+Sets the -DCPSDebugLevel option value for the repository process.  A
+value of 0 will omit the DCPSDebugLevel specification from the repository
+process command line.
 
 The default value is 0.
 
@@ -442,31 +516,55 @@ The default value is unspecified.
 
 =item B<-S> | B<--startrepo>
 
-Causes a repository process to be started.
+Causes a repository process to be started.  Only a single repository
+process will be invoked by an invocation.
 
 The default value is to not start a repository process.
 
 =item B<-P> | B<--starttest>
 
-Causes a test process to be started.
+Causes one or more test processes to be started.  One process will be
+started for each test file specified by the B<-s> option.
 
 The default value is to not start a test process.
 
 =item B<-f FILE> | B<--dfile=FILE>
 
-Sets the -ORBLogFile option value.
+Sets the -ORBLogFile option value.  A value of unspecified will result in
+the ORBLogFile specification being omitted from the process command line.
 
-The default value is 0.
+The default value is unspecified.
 
-=item B<-C> | B<--collect>
+=item B<-C TYPES> | B<--collect=TYPES>
 
-Starts the system 'vmstat' to collect system statistics and the 'top'
-command in batch mode to collect process statistics.  The system
-statistics are collected in the file 'system-stats.log' which is
-overridden each time this script is run.  The process statistics are
-collected in files named 'process-<pid>.log'.
+Starts statistics collection for the specified TYPES.  TYPES may contain
+one or more of the values: C<n>, C<s>, and C<p>, or the collective
+specification C<all>.
 
-The default is off - do not collect statistics.
+=over 8
+
+=item B<n>
+
+Causes network statistics to be gathered.  A C<netstat -ntpc> command is
+started for each test process and the output filtered by its process Id.
+The output is stored to a file named I<network-{pid}.log>.
+
+=item B<s>
+
+Causes system statistics to be gathered.  A single C<vmstat 1> command is
+started and the output stored in a file named I<system-{pid}.log>, where
+the pid value is for the test script.
+
+=item B<p>
+
+Causes process statistics to be gathered.  A C<top -bd 1 -p {pid}>
+command is started for each test process and the output filtered by its
+process Id.  The output is stored to a file named I<process-{pid}.log>.
+
+=back
+
+The default is unspecified.  This results in no statistics being
+collected.
 
 =item B<-h FQDN> | B<--repohost=FQDN>
 
@@ -478,7 +576,7 @@ The default value is 'localhost:2112'.
 =item B<-i FILE> | B<--inifile=FILE>
 
 OpenDDS configuration filename.  This defines the configuration
-information for the OpenDDS service itself.
+information for the OpenDDS service.
 
 The default is to use the file located in the 'etc' directory relative
 from the project root (the parent directory of the directory where the
@@ -493,33 +591,78 @@ execution.  This can be one or more filenames, separated by commas.  One
 test process will be started (if requested) to process each named
 scenario configuration file.
 
-There is no default value, and the test will not execute if not
-specified.
+The default is not specified.  This will result in no test processes
+being started if the B<-P> argument is given.
 
 =item B<-r FILE> | B<--rawdatafile=FILE>
 
 Raw data output filename.  This file is where any raw latency data
 collected during the test will be written.
 
-There is no default value, so no data will be reported by default.
+The default is unspecified.
+
+I<This is deprecated in favor of the test configuration specification for
+this filename.>
 
 =back
 
 =head1 DESCRIPTION
 
-TBD
+This script manages execution of the processes needed for distributed
+testing of OpenDDS using the OpenDDS-Bench performance testing framework.
+The processes used by the framework include the OpenDDS specific
+repository process and the test specific process.  The repository
+executable is the standard OpenDDS C<DCPSInfoRepo> program.  The framework
+C<testprocess> program is specific to this testing and provides the
+ability to start multiple publications and / or subscriptions within a
+single process.
+
+It is possible to start any number of C<testprocess> programs at once.
+A separate process will be started for each configuration file supplied.
+The same configuration file can be included more than once to start
+separate processes with the same configuration.
+
+Processes started by this script will either execute until terminated by
+the user (no duration specified) or until a specified duration has
+elapsed.  For the C<testprocess> commands, the duration is passed to the
+program to allow it to terminate cleanly.  The script will wait 60
+seconds beyond this time and then terminate the process by force.
+
+This script will establish the environment for the executable processes
+by adding the test library to the runtime library search path.
 
 =head1 EXAMPLES
 
 =over 8
 
-=item B<./run_test -vx -s s1.ini>
+=item B<bin/run_test -vx -P -s s1.ini>
 
-=item B<./run_test -d 10 -T 4 -s test.ini -f test.log -h localhost:2038>
+prints the commands that would be invoked when starting a single test
+process with the s1.ini test specification.  This will also be verbose
+during setup processing.
 
-=item B<./run_test -x -t multicast -s scenario1.ini>
+=item B<bin/run_test -d 10 -C n -T 4 -P -s test.ini -f test.log -h localhost:2038>
 
-=item B<./run_test -vd10T4V -s test.ini -h machine.domain.com:2112>
+starts a test process using the C<test.ini> specification file and expecting
+to find the repository process at localhost:2038.  It will run with
+C<DCPSDebugLevel> of 10, C<DCPSTransportDebugLevel> of 4 and put the logging
+output to the C<test.log> file.  Network statistics will be gathered for
+connections to the test process.
+
+=item B<bin/run_test -x -t 120 -s scenario1.ini,scenario1.ini,other.ini>
+
+prints the commands that would be invoked when starting 3 test processes:
+two using the scenario1.ini specification file and one using the other.ini
+specification file.  The test would be scheduled to last for 2 minutes.
+
+=item B<bin/run_test -vd10T4VCall -s test.ini -h machine.domain.com:2112>
+
+starts a test process using the C<test.ini> specification file and
+expecting to connect to the repository at C<machine.domain.com:2112>.  It
+will run with C<DCPSDebugLevel> of 10, C<DCPSTransportDebugLevel> of 4,
+C<ORBVerboseLogging> enabled and both the script and test process will
+execute in verbose mode.  The log output will be directed to the standard
+output.  All statistics - system, network, and process - will be gathered.
 
 =back
 

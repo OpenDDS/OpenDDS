@@ -153,6 +153,32 @@ public:
     const char * name)
   ACE_THROW_SPEC((CORBA::SystemException));
 
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+
+  virtual DDS::ContentFilteredTopic_ptr create_contentfilteredtopic(
+    const char * name,
+    DDS::Topic_ptr related_topic,
+    const char * filter_expression,
+    const DDS::StringSeq & expression_parameters)
+  ACE_THROW_SPEC((CORBA::SystemException));
+
+  virtual DDS::ReturnCode_t delete_contentfilteredtopic(
+    DDS::ContentFilteredTopic_ptr a_contentfilteredtopic)
+  ACE_THROW_SPEC((CORBA::SystemException));
+
+  virtual DDS::MultiTopic_ptr create_multitopic(
+    const char * name,
+    const char * type_name, 
+    const char * subscription_expression,
+    const DDS::StringSeq & expression_parameters)
+  ACE_THROW_SPEC((CORBA::SystemException));
+
+  virtual DDS::ReturnCode_t delete_multitopic(DDS::MultiTopic_ptr a_multitopic)
+  ACE_THROW_SPEC((CORBA::SystemException));
+
+#endif
+
   virtual DDS::ReturnCode_t delete_contained_entities()
   ACE_THROW_SPEC((CORBA::SystemException));
 

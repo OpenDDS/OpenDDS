@@ -2,7 +2,7 @@
 // $Id$
 //
 
-project : dcps {
+project(opendds_udp) : dcps {
   sharedname    = OpenDDS_Udp
   dynamicflags  = OPENDDS_UDP_BUILD_DLL
 }
