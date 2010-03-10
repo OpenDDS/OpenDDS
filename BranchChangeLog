@@ -1,0 +1,14 @@
+Wed Mar 10 03:59:39 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * BranchChangeLog:
+
+          Added branch specific change log.
+          Branch was from trunk@3112
+
+
+# vim: filetype=changelog
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:
