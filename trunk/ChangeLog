@@ -1,3 +1,27 @@
+Wed Mar 10 16:25:55 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/ThreadSynchStrategy.h:
+        * dds/DCPS/transport/framework/ThreadSynchStrategy_rch.h:
+        * dds/DCPS/transport/framework/TransportConfiguration.h:
+        * dds/DCPS/transport/framework/TransportConfiguration.inl:
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+
+          Added support for optionally specifying a ThreadSynchStrategy
+          implementation at construction-time (submitted by Don Busch).
+
+        * dds/DCPS/transport/udp/UdpConfiguration.cpp:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+
+          Updated UDP-based transports to use a NullSynchStrategy by
+          default; this prevents spurious threads from being spawned
+          for each created DataLink (submitted by Don Busch).
+
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Updated support for endpoint addressing; DataLinks are created
+          per unique endpoint rather than RepoId (submitted by Don Busch).
+
 Tue Mar  9 19:08:05 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * NEWS:

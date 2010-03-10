@@ -10,12 +10,14 @@
 #include "UdpConfiguration.h"
 #include "UdpLoader.h"
 
+#include "dds/DCPS/transport/framework/NullSynchStrategy.h"
 #include "dds/DCPS/transport/framework/TransportDefs.h"
 
 namespace OpenDDS {
 namespace DCPS {
 
 UdpConfiguration::UdpConfiguration()
+  : TransportConfiguration(new NullSynchStrategy())
 {
   this->transport_type_ = UDP_TRANSPORT_TYPE;
 }

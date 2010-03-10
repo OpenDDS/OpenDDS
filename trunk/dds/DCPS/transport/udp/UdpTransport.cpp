@@ -15,6 +15,7 @@
 #include "ace/Log_Msg.h"
 
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
+#include "dds/DCPS/transport/framework/PriorityKey.h"
 
 namespace {
 
@@ -29,13 +30,15 @@ DataLink*
 UdpTransport::find_or_create_datalink(
   RepoId /*local_id*/,
   const AssociationData* remote_association,
-  CORBA::Long /*priority*/,
+  CORBA::Long priority,
   bool active)
 {
-  RepoId remote_id(remote_association->remote_id_);
+  ACE_INET_Addr remote_address(
+    connection_info_i(remote_association->remote_data_));
+  PriorityKey key(priority, remote_address);
 
   if (active) {
-    UdpDataLinkMap::iterator it(this->client_links_.find(remote_id));
+    UdpDataLinkMap::iterator it(this->client_links_.find(key));
     if (it != this->client_links_.end()) {
       return UdpDataLink_rch(it->second)._retn(); // found
     }
@@ -71,9 +74,6 @@ UdpTransport::find_or_create_datalink(
   link->receive_strategy(recv_strategy);
 
   // Open logical connection:
-  ACE_INET_Addr remote_address(
-    connection_info_i(remote_association->remote_data_));
-
   if (!link->open(remote_address)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
@@ -83,7 +83,7 @@ UdpTransport::find_or_create_datalink(
   }
 
   if (active) {
-    this->client_links_.insert(UdpDataLinkMap::value_type(remote_id, link));
+    this->client_links_.insert(UdpDataLinkMap::value_type(key, link));
   } else {
     this->server_link_ = link;
   }
