@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Id$
+-->
+<project name="org.opendds.modeling.resources" default="jar">
+    
+    <import file="${basedir}/../../common/build-common.xml"/>
+
+    <target name="all" depends="clean, jar"/>
+
+    <target name="clean" depends="init"/>
+
+    <target name="jar" depends="init"/>
+</project>
