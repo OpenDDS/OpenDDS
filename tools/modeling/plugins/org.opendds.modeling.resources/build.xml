@@ -18,7 +18,7 @@
         <delete dir="${build.dir}"/>
     </target>
 
-    <target name="init" depends="bootstrap">
+    <target name="init" depends="resolve">
         <property name="plugin.jar"
                   value="${ant.project.name}_${opendds.version}.jar"/>
 
@@ -52,7 +52,7 @@
         </jar>
     </target>
 
-    <target name="install" depends="jar" if="install.dir">
+    <target name="install" depends="jar">
         <copy todir="${install.dir}" file="${build.dir}/${plugin.jar}"/>
     </target>
 </project>

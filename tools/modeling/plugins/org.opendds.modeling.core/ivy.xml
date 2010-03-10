@@ -10,6 +10,10 @@
     </publications>
 
     <dependencies>
+        <dependency name="org.opendds.ant" rev="latest.integration"/>
         <dependency name="org.opendds.modeling.resources" rev="latest.integration"/>
+
+        <!-- Third-party dependencies -->
+        <dependency name="junit" rev="4.8.1"/>
     </dependencies>
 </ivy-module>
