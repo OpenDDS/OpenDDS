@@ -8,10 +8,13 @@
 
     <dirname property="project.basedir" file="${ant.file.common}/.."/>
 
+    <property file="${project.basedir}/build.properties"/>
+
+    <!-- Project properties -->
     <property name="project.common.dir" value="${project.basedir}/common"/>
     <property name="project.plugins.dir" value="${project.basedir}/plugins"/>
 
-    <property file="${project.basedir}/build.properties"/>
+    <property environment="env"/>
 
     <!--
         Common Paths
@@ -23,7 +26,7 @@
     <!--
         Common Targets
     -->
-    <target name="init" unless="common.init">
+    <target name="bootstrap" unless="common.bootstrap">
         <!-- Apache Ivy initialization -->
         <taskdef uri="antlib:org.apache.ivy.ant"
                  resource="org/apache/ivy/ant/antlib.xml"
@@ -39,6 +42,11 @@
         <opendds:init environment="env"/>
 
         <!-- Prevent spurious re-initialization -->
-        <property name="common.init" value="true"/>
+        <property name="common.bootstrap" value="true"/>
     </target>
+
+    <!-- Dummy targets -->
+    <target name="clean"/>
+    <target name="test"/>
+    <target name="install"/>
 </project>

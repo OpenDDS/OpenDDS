@@ -1,3 +1,15 @@
+Wed Mar 10 04:32:29 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/modeling/build.properties:
+        * tools/modeling/build.xml:
+        * tools/modeling/common/build-common.xml:
+        * tools/modeling/common/ivysettings.xml:
+        * tools/modeling/plugins/org.opendds.modeling.resources:
+        * tools/modeling/plugins/org.opendds.modeling.resources/build.properties:
+        * tools/modeling/plugins/org.opendds.modeling.resources/build.xml:
+
+          Updated build scripts for org.opendds.modeling.resources plugin.
+
 Wed Mar 10 01:22:20 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/modeling/build.xml:

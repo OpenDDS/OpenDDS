@@ -4,15 +4,14 @@
 -->
 <project name="opendds-modeling" default="plugins"
          xmlns:ivy="antlib:org.apache.ivy.ant">
-
     <import file="${basedir}/common/build-common.xml"/>
 
     <!--
         Project Targets
     -->
-    <target name="all" depends="clean, plugins"/>
+    <target name="all" depends="clean, build"/>
 
-    <target name="init" depends="common.init">
+    <target name="init" depends="bootstrap">
       <ivy:buildlist reference="project.buildpath">
           <fileset dir="${project.plugins.dir}">
               <include name="**/build.xml"/>
@@ -26,9 +25,21 @@
         </subant>
     </target>
 
-    <target name="plugins" depends="init">
+    <target name="build" depends="init">
         <subant buildpathref="project.buildpath" inheritall="true">
-            <!-- default target -->
+            <!-- assume default target -->
+        </subant>
+    </target>
+    
+    <target name="test" depends="init">
+        <subant buildpathref="project.buildpath" inheritall="true">
+            <target name="test"/>
+        </subant>
+    </target>
+    
+    <target name="install" depends="init">
+        <subant buildpathref="project.buildpath" inheritall="true">
+            <target name="install"/>
         </subant>
     </target>
 </project>
