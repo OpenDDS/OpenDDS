@@ -5,7 +5,7 @@
 <project name="org.opendds.modeling.resources" default="jar"
          xmlns:opendds="antlib:org.opendds.ant">
     
-    <import file="../../etc/build-plugin.xml"/>
+    <import file="${basedir}/../../etc/build-plugin.xml"/>
 
     <property name="build.dir" value="${basedir}/build"/>
 
