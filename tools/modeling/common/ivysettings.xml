@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Id$
+-->
+<ivysettings>
+    <settings defaultResolver="default"/>
+
+    <caches useOrigin="true"/>
+
+    <resolvers>
+        <filesystem name="default">
+            <artifact pattern="${project.plugins.dir}/[module]/build/[artifact]_${opendds.version}.[ext]"/>
+            <ivy pattern="${project.plugins.dir}/[module]/ivy.xml"/>
+        </filesystem>
+    </resolvers>
+
+    <triggers>
+        <ant-build event="post-resolve-dependency"
+                   antfile="${project.plugins.dir}/[module]/build.xml" target="[ext]"/>
+    </triggers>
+</ivysettings>

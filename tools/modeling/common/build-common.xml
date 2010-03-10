@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Id$
+-->
+<project name="common"
+         xmlns:ivy="antlib:org.apache.ivy.ant"
+         xmlns:opendds="antlib:org.opendds.ant">
+
+    <dirname property="project.basedir" file="${ant.file.common}/.."/>
+
+    <property name="project.common.dir" value="${project.basedir}/common"/>
+    <property name="project.plugins.dir" value="${project.basedir}/plugins"/>
+
+    <property file="${project.basedir}/build.properties"/>
+
+    <!--
+        Common Paths
+    -->
+    <path id="common.classpath">
+        <fileset dir="${project.common.dir}/lib"/>
+    </path>
+
+    <!--
+        Common Targets
+    -->
+    <target name="init" unless="common.init">
+        <!-- Apache Ivy initialization -->
+        <taskdef uri="antlib:org.apache.ivy.ant"
+                 resource="org/apache/ivy/ant/antlib.xml"
+                 classpathref="common.classpath"/>
+
+        <ivy:configure file="${project.common.dir}/ivysettings.xml"/>
+
+        <!-- OpenDDS initialization -->
+        <taskdef uri="antlib:org.opendds.ant"
+                 resource="org/opendds/ant/antlib.xml"
+                 classpathref="common.classpath"/>
+
+        <opendds:init environment="env"/>
+
+        <!-- Prevent spurious re-initialization -->
+        <property name="common.init" value="true"/>
+    </target>
+</project>

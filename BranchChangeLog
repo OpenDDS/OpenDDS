@@ -1,3 +1,24 @@
+Wed Mar 10 01:22:20 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/modeling/build.xml:
+        * tools/modeling/common:
+        * tools/modeling/common/build-common.xml:
+        * tools/modeling/common/ivysettings.xml:
+        * tools/modeling/common/lib:
+        * tools/modeling/common/lib/ivy-2.1.0.jar:
+        * tools/modeling/common/lib/opendds-ant.jar:
+        * tools/modeling/plugins/org.opendds.modeling.core/ivy.xml:
+        * tools/modeling/plugins/org.opendds.modeling.resources/build.xml:
+        * tools/modeling/plugins/org.opendds.modeling.resources/ivy.xml:
+
+          Updated build system to use Apache Ivy to manage dependencies.
+
+        * tools/modeling/lib:
+        * tools/modeling/lib/junit-4.8.1.jar:
+        * tools/modeling/lib/opendds-ant.jar:
+
+          Removed these files.
+
 Tue Mar  9 23:41:22 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.resources/.project:
