@@ -1,3 +1,25 @@
+Wed Mar 10 07:22:07 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * java/ant/build.xml:
+        * java/ant/ivy.xml:
+
+          Added support for Apache Ivy.
+
+        * tools/modeling/build.xml:
+        * tools/modeling/common/build-common.xml:
+        * tools/modeling/common/ivysettings.xml:
+        * tools/modeling/common/lib:
+        * tools/modeling/plugins/org.opendds.modeling.core/ivy.xml:
+        * tools/modeling/plugins/org.opendds.modeling.resources/build.xml:
+        * tools/modeling/plugins/org.opendds.modeling.resources/ivy.xml:
+
+          Updated support for Apache Ivy; all dependencies should either be
+          built or downloaded on-demand.
+
+        * tools/modeling/common/lib/opendds-ant.jar:
+
+          Removed this file.
+
 Wed Mar 10 04:32:29 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/modeling/build.properties:

@@ -13,7 +13,8 @@
     <property name="test.dir" value="${basedir}/test"/>
 
     <property environment="env"/>
-    <property file="build.properties"/>
+    
+    <property file="${basedir}/build.properties"/>
 
     <!--
         Project Paths
@@ -42,9 +43,14 @@
     <target name="init">
         <mkdir dir="${build.dir}"/>
         <mkdir dir="${build.dir}/classes"/>
+        
+        <uptodate property="jar.uptodate"
+                  targetfile="${build.dir}/${ant.project.name}.jar">
+            <srcfiles dir="${src.dir}"/>
+        </uptodate>
     </target>
 
-    <target name="compile" depends="init"
+    <target name="compile" depends="init" unless="jar.uptodate"
             description="Compile classes under src/">
         <javac srcdir="${src.dir}"
                destdir="${build.dir}/classes"
@@ -56,7 +62,7 @@
         </javac>
     </target>
 
-    <target name="jar" depends="compile"
+    <target name="jar" depends="compile" unless="jar.uptodate"
             description="Archive compiled classes and resources">
         <jar destfile="${build.dir}/${ant.project.name}.jar"
              compress="${jar.compress}"

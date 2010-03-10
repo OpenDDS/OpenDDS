@@ -3,19 +3,35 @@
     $Id$
 -->
 <ivysettings>
-    <settings defaultResolver="default"/>
-
-    <caches useOrigin="true"/>
+    <caches defaultCacheDir="${project.common.lib.dir}/cache" useOrigin="true"/>
 
     <resolvers>
-        <filesystem name="default">
+        <filesystem name="opendds-ant">
+            <artifact pattern="${env.DDS_ROOT}/java/ant/build/[artifact].[ext]"/>
+            <ivy pattern="${env.DDS_ROOT}/java/ant/ivy.xml"/>
+        </filesystem>
+        <filesystem name="opendds-modeling">
             <artifact pattern="${project.plugins.dir}/[module]/[artifact]_${opendds.version}.[ext]"/>
             <ivy pattern="${project.plugins.dir}/[module]/ivy.xml"/>
         </filesystem>
+        <ibiblio name="thirdparty"/>    <!-- fetch on-demand -->
     </resolvers>
 
+    <modules>
+        <module name="org.opendds.ant" resolver="opendds-ant"/>
+        <module name="org.opendds.modeling" resolver="opendds-modeling"/>
+        <module name="*" resolver="thirdparty"/>
+    </modules>
+
     <triggers>
+        <!-- opendds-ant -->
         <ant-build event="post-resolve-dependency"
+                   filter="resolver=opendds-ant"
+                   antfile="${env.DDS_ROOT}/java/ant/build.xml"/>
+
+        <!-- opendds-modeling -->
+        <ant-build event="post-resolve-dependency"
+                   filter="resolver=opendds-modeling"
                    antfile="${project.plugins.dir}/[module]/build.xml"/>
     </triggers>
 </ivysettings>

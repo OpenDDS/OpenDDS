@@ -8,4 +8,8 @@
     <publications>
         <artifact name="org.opendds.modeling.resources" type="jar"/>
     </publications>
+
+    <dependencies>
+        <dependency name="org.opendds.ant" rev="latest.integration"/>
+    </dependencies>
 </ivy-module>
