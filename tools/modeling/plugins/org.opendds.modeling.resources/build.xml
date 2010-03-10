@@ -2,12 +2,12 @@
 <!--
     $Id$
 -->
-<project name="org.opendds.modeling.resources" default="jar">
-    <import file="${basedir}/../../common/build-common.xml"/>
+<project name="org.opendds.modeling.resources" default="jar"
+         xmlns:opendds="antlib:org.opendds.ant">
+    
+    <import file="../../common/build-plugin.xml"/>
 
     <property name="build.dir" value="${basedir}/build"/>
-
-    <property file="${basedir}/build.properties"/>
 
     <!--
         Plugin Targets
@@ -21,12 +21,21 @@
     </target>
 
     <target name="init" depends="resolve">
-        <mkdir dir="${build.dir}"/>
-        <mkdir dir="${build.dir}/classes"/>
+        <taskdef uri="antlib:org.opendds.ant"
+                 resource="org/opendds/ant/antlib.xml"
+                 classpathref="plugin.classpath"/>
 
-    	<property name="plugin.filename"
+        <opendds:init environment="env"/>
+
+        <property name="plugin.filename"
                   value="${ant.project.name}_${opendds.version}.jar"/>
 
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${build.dir}/classes"/>
+    </target>
+
+    <target name="compile" depends="init"
+            description="Compile plugin artifacts">
         <!-- Copy plugin resources -->
         <copy todir="${build.dir}/classes">
             <fileset dir="${basedir}">
@@ -45,7 +54,7 @@
         </manifest>
     </target>
 
-    <target name="jar" depends="init"
+    <target name="jar" depends="compile"
             description="Archive plugin artifacts">
         <jar destfile="${build.dir}/${plugin.filename}"
              compress="${jar.compress}"
