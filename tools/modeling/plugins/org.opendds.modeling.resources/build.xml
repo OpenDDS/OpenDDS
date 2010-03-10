@@ -12,19 +12,21 @@
     <!--
         Plugin Targets
     -->
-    <target name="all" depends="clean, jar"/>
+    <target name="all" depends="clean, jar"
+            description="Meta-target for: clean, jar"/>
 
-    <target name="clean">
+    <target name="clean"
+            description="Delete plugin artifacts">
         <delete dir="${build.dir}"/>
     </target>
 
     <target name="init" depends="resolve">
-        <property name="plugin.jar"
-                  value="${ant.project.name}_${opendds.version}.jar"/>
-
         <mkdir dir="${build.dir}"/>
         <mkdir dir="${build.dir}/classes"/>
-         
+
+    	<property name="plugin.filename"
+                  value="${ant.project.name}_${opendds.version}.jar"/>
+
         <!-- Copy plugin resources -->
         <copy todir="${build.dir}/classes">
             <fileset dir="${basedir}">
@@ -36,15 +38,16 @@
                 <exclude name="**/*.umlprofile"/>
             </fileset>
         </copy>
-        
+
         <!-- Update plugin Bundle-Version --> 
         <manifest file="${build.dir}/classes/META-INF/MANIFEST.MF" mode="update">
             <attribute name="Bundle-Version" value="${opendds.version}"/>
         </manifest>
     </target>
 
-    <target name="jar" depends="init">
-        <jar destfile="${build.dir}/${plugin.jar}"
+    <target name="jar" depends="init"
+            description="Archive plugin artifacts">
+        <jar destfile="${build.dir}/${plugin.filename}"
              compress="${jar.compress}"
              index="${jar.index}"
              filesetmanifest="merge">
@@ -52,7 +55,8 @@
         </jar>
     </target>
 
-    <target name="install" depends="jar">
-        <copy todir="${install.dir}" file="${build.dir}/${plugin.jar}"/>
+    <target name="install" depends="jar"
+    	    description="Install plugin artifacts">
+        <copy todir="${install.dir}" file="${build.dir}/${plugin.filename}"/>
     </target>
 </project>

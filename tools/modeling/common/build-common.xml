@@ -45,6 +45,9 @@
     <target name="resolve" depends="bootstrap" unless="common.resolved">
         <ivy:resolve/>
 
+        <ivy:retrieve pattern="${project.common.lib.dir}/[artifact].[ext]"
+                      synch="true"/>
+
         <ivy:cachepath pathid="cache.classpath"/>
 
         <path id="common.classpath">
