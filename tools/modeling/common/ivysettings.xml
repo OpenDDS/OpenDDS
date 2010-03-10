@@ -9,13 +9,13 @@
 
     <resolvers>
         <filesystem name="default">
-            <artifact pattern="${project.plugins.dir}/[module]/build/[artifact]_${opendds.version}.[ext]"/>
+            <artifact pattern="${project.plugins.dir}/[module]/[artifact]_${opendds.version}.[ext]"/>
             <ivy pattern="${project.plugins.dir}/[module]/ivy.xml"/>
         </filesystem>
     </resolvers>
 
     <triggers>
         <ant-build event="post-resolve-dependency"
-                   antfile="${project.plugins.dir}/[module]/build.xml" target="[ext]"/>
+                   antfile="${project.plugins.dir}/[module]/build.xml"/>
     </triggers>
 </ivysettings>
