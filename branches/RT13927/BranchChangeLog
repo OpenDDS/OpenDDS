@@ -1,3 +1,18 @@
+Wed Mar 10 21:20:41 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/modeling/build.xml:
+        * tools/modeling/common/build-common.xml:
+        * tools/modeling/plugins/org.opendds.modeling.resources/.externalToolBuilders:
+        * tools/modeling/plugins/org.opendds.modeling.resources/.externalToolBuilders/Ant Builder.launch:
+        * tools/modeling/plugins/org.opendds.modeling.resources/.project:
+        * tools/modeling/plugins/org.opendds.modeling.resources/.settings:
+        * tools/modeling/plugins/org.opendds.modeling.resources/.settings/org.eclipse.pde.core.prefs:
+        * tools/modeling/plugins/org.opendds.modeling.resources/.settings/org.eclipse.pde.prefs:
+        * tools/modeling/plugins/org.opendds.modeling.resources/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.resources/build.xml:
+
+          Finalized org.opendds.modeling.resources project setup.
+
 Wed Mar 10 18:55:45 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/modeling/common/build-common.xml:
