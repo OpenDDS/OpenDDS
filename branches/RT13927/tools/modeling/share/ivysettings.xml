@@ -3,7 +3,7 @@
     $Id$
 -->
 <ivysettings>
-    <caches defaultCacheDir="${project.common.lib.dir}/cache" useOrigin="true"/>
+    <caches useOrigin="true"/>
 
     <resolvers>
         <filesystem name="opendds-ant">

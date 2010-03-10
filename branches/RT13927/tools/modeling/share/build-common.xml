@@ -9,9 +9,10 @@
         Common Properties
     -->
     <dirname property="project.basedir" file="${ant.file.common}/.."/>
-    <property name="project.common.dir" value="${project.basedir}/common"/>
-    <property name="project.common.lib.dir" value="${project.common.dir}/lib"/>
+
+    <property name="project.lib.dir" value="${project.basedir}/lib"/>
     <property name="project.plugins.dir" value="${project.basedir}/plugins"/>
+    <property name="project.share.dir" value="${project.basedir}/share"/>
 
     <property environment="env"/>
 
@@ -22,12 +23,12 @@
     -->
     <target name="bootstrap" unless="common.bootstrap">
         <property name="ivy.settings.file"
-                  value="${project.common.dir}/ivysettings.xml"/>
+                  value="${project.share.dir}/ivysettings.xml"/>
 
         <!-- Apache Ivy initialization -->
         <taskdef uri="antlib:org.apache.ivy.ant"
                  resource="org/apache/ivy/ant/antlib.xml"
-                 classpath="${project.common.lib.dir}/ivy-2.1.0.jar"/>
+                 classpath="${project.lib.dir}/ivy-2.1.0.jar"/>
 
         <ivy:configure/>
 

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Id$
+-->
+<project name="plugin"
+         xmlns:ivy="antlib:org.apache.ivy.ant">
+
+    <import file="build-common.xml"/>
+
+    <!--
+        Plugin Properties
+    -->
+    <property name="eclipse.home" value="${env.ECLIPSE_HOME}"/>
+    <property name="eclipse.plugins.dir" value="${eclipse.home}/plugins"/>
+
+    <property name="install.dir" value="${eclipse.plugins.dir}"/>
+
+    <!--
+        Plugin Targets
+    -->
+    <target name="resolve" depends="bootstrap">
+        <ivy:resolve log="quiet"/>
+
+        <ivy:cachepath pathid="cache.classpath"/>
+
+        <path id="plugin.classpath">
+            <path refid="cache.classpath"/>
+            <fileset dir="${project.lib.dir}">
+                <include name="**/*.jar"/>
+            </fileset>
+        </path>
+    </target>
+
+    <!-- Dummy targets -->
+    <target name="clean"/>
+    <target name="test"/>
+    <target name="install"/>
+</project>
