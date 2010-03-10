@@ -3,31 +3,24 @@
     $Id$
 -->
 <project name="common"
-         xmlns:ivy="antlib:org.apache.ivy.ant"
-         xmlns:opendds="antlib:org.opendds.ant">
+         xmlns:ivy="antlib:org.apache.ivy.ant">
 
+    <!--
+        Common Properties
+    -->
     <dirname property="project.basedir" file="${ant.file.common}/.."/>
-
-    <property file="${project.basedir}/build.properties"/>
-
-    <property environment="env"/>
-
-    <!-- Project properties -->
     <property name="project.common.dir" value="${project.basedir}/common"/>
     <property name="project.common.lib.dir" value="${project.common.dir}/lib"/>
     <property name="project.plugins.dir" value="${project.basedir}/plugins"/>
 
-    <!-- Eclipse properties -->
-    <property name="eclipse.home" value="${env.ECLIPSE_HOME}"/>
-    <property name="eclipse.plugins.dir" value="${eclipse.home}/plugins"/>
+    <property environment="env"/>
 
-    <!-- Plugin properties -->
-    <property name="install.dir" value="${eclipse.plugins.dir}"/>
+    <property file="${project.basedir}/build.properties"/>
 
     <!--
         Common Targets
     -->
-    <target name="bootstrap" unless="common.bootstrapped">
+    <target name="bootstrap" unless="common.bootstrap">
         <property name="ivy.settings.file"
                   value="${project.common.dir}/ivysettings.xml"/>
 
@@ -39,37 +32,6 @@
         <ivy:configure/>
 
         <!-- Prevent spurious re-initialization -->
-        <property name="common.bootstrapped" value="true"/>
+        <property name="common.bootstrap" value="true"/>
     </target>
-
-    <target name="resolve" depends="bootstrap" unless="common.resolved">
-        <ivy:resolve/>
-
-        <ivy:retrieve pattern="${project.common.lib.dir}/[artifact].[ext]"
-                      synch="true"/>
-
-        <ivy:cachepath pathid="cache.classpath"/>
-
-        <path id="common.classpath">
-            <path refid="cache.classpath"/>
-            <fileset dir="${project.common.lib.dir}">
-                <include name="*.jar"/>
-            </fileset>
-        </path>
-
-        <!-- OpenDDS initialization -->
-        <taskdef uri="antlib:org.opendds.ant"
-                 resource="org/opendds/ant/antlib.xml"
-                 classpathref="common.classpath"/>
-
-        <opendds:init environment="env"/>
-
-        <!-- Prevent spurious re-initialization -->
-        <property name="common.resolved" value="true"/>
-    </target>
-
-    <!-- Dummy targets -->
-    <target name="clean"/>
-    <target name="test"/>
-    <target name="install"/>
 </project>

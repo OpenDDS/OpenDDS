@@ -10,7 +10,7 @@
         Project Targets
     -->
     <target name="all" depends="clean, build, test"
-            description="Metatarget for: clean, build, test"/>
+            description="Meta-target for: clean, build, test"/>
 
     <target name="init" depends="bootstrap">
       <ivy:buildlist reference="project.buildpath">
@@ -25,13 +25,12 @@
         <subant buildpathref="project.buildpath" inheritall="true">
             <target name="clean"/>
         </subant>
-        <ivy:cleancache/>
     </target>
 
     <target name="build" depends="init"
             description="Build all plugin artifacts">
         <subant buildpathref="project.buildpath" inheritall="true">
-            <!-- assume default target -->
+            <!-- default target -->
         </subant>
     </target>
     

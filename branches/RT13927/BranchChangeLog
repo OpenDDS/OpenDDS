@@ -1,3 +1,16 @@
+Wed Mar 10 22:03:58 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * java/ant/build.xml:
+        * java/jms/build.xml:
+        * tools/modeling/build.xml:
+        * tools/modeling/common/build-common.xml:
+        * tools/modeling/common/ivysettings.xml:
+        * tools/modeling/common/lib:
+        * tools/modeling/plugins/org.opendds.modeling.resources/build.xml:
+
+          Re-organization of build files; eases use of ivy:retrieve for
+          editor integration.
+
 Wed Mar 10 21:20:41 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/modeling/build.xml:

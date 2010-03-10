@@ -33,7 +33,7 @@
         Project Targets
     -->
     <target name="all" depends="clean, test, deploy"
-            description="Meta target for: clean, test, deploy"/>
+            description="Meta-target for: clean, test, deploy"/>
 
     <target name="clean" depends="test.clean"
             description="Delete all build artifacts">
