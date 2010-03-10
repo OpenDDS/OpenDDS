@@ -17,10 +17,11 @@
     <property name="project.common.lib.dir" value="${project.common.dir}/lib"/>
     <property name="project.plugins.dir" value="${project.basedir}/plugins"/>
 
-    <!-- Plugin properties -->
+    <!-- Eclipse properties -->
     <property name="eclipse.home" value="${env.ECLIPSE_HOME}"/>
     <property name="eclipse.plugins.dir" value="${eclipse.home}/plugins"/>
 
+    <!-- Plugin properties -->
     <property name="install.dir" value="${eclipse.plugins.dir}"/>
 
     <!--
