@@ -4,7 +4,7 @@
 -->
 <project name="opendds-modeling" default="build"
          xmlns:ivy="antlib:org.apache.ivy.ant">
-    <import file="${basedir}/share/build-common.xml"/>
+    <import file="${basedir}/etc/build-common.xml"/>
 
     <!--
         Project Targets
