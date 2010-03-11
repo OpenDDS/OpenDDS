@@ -1,3 +1,36 @@
+Thu Mar 11 17:01:55 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/modeling/etc/ivysettings.xml:
+        * tools/modeling/plugins/org.opendds.modeling.core/.classpath:
+        * tools/modeling/plugins/org.opendds.modeling.core/.externalToolBuilders:
+        * tools/modeling/plugins/org.opendds.modeling.core/.externalToolBuilders/org.opendds.modeling.core.launch:
+        * tools/modeling/plugins/org.opendds.modeling.core/.project:
+        * tools/modeling/plugins/org.opendds.modeling.core/.settings:
+        * tools/modeling/plugins/org.opendds.modeling.core/.settings/org.eclipse.jdt.core.prefs:
+        * tools/modeling/plugins/org.opendds.modeling.core/.settings/org.eclipse.jdt.ui.prefs:
+        * tools/modeling/plugins/org.opendds.modeling.core/.settings/org.eclipse.pde.core.prefs:
+        * tools/modeling/plugins/org.opendds.modeling.core/.settings/org.eclipse.pde.prefs:
+        * tools/modeling/plugins/org.opendds.modeling.core/.settings/org.eclipse.wst.sse.core.prefs:
+        * tools/modeling/plugins/org.opendds.modeling.core/META-INF:
+        * tools/modeling/plugins/org.opendds.modeling.core/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.core/build.properties:
+        * tools/modeling/plugins/org.opendds.modeling.core/lib:
+        * tools/modeling/plugins/org.opendds.modeling.core/lib/README:
+        * tools/modeling/plugins/org.opendds.modeling.core/src/org/opendds/modeling/core:
+        * tools/modeling/plugins/org.opendds.modeling.core/src/org/opendds/modeling/core/Activator.java:
+
+          Eclipse-ified org.opendds.modeling.core plugin.
+
+        * tools/modeling/plugins/org.opendds.modeling.resources/.externalToolBuilders/org.opendds.modeling.resources.launch:
+        * tools/modeling/plugins/org.opendds.modeling.resources/.project:
+
+          Updated Ant Builder configuration.
+        
+        * tools/modeling/plugins/org.opendds.modeling.core/src/org/opendds/modeling/Activator.java:
+        * tools/modeling/plugins/org.opendds.modeling.resources/.externalToolBuilders/Ant Builder.launch:
+
+          Removed these files.
+
 Wed Mar 10 22:03:58 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * java/ant/build.xml:

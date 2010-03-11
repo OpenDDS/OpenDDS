@@ -17,11 +17,11 @@
 		</buildCommand>
 		<buildCommand>
 			<name>org.eclipse.ui.externaltools.ExternalToolBuilder</name>
-			<triggers>clean,full,incremental,</triggers>
+			<triggers>full,incremental,</triggers>
 			<arguments>
 				<dictionary>
 					<key>LaunchConfigHandle</key>
-					<value>&lt;project&gt;/.externalToolBuilders/Ant Builder.launch</value>
+					<value>&lt;project&gt;/.externalToolBuilders/org.opendds.modeling.resources.launch</value>
 				</dictionary>
 			</arguments>
 		</buildCommand>
