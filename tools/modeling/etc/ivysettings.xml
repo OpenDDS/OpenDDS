@@ -18,9 +18,9 @@
     </resolvers>
 
     <modules>
-        <module name="org.opendds.ant" resolver="opendds-ant"/>
-        <module name="org.opendds.modeling" resolver="opendds-modeling"/>
-        <module name="*" resolver="thirdparty"/>
+        <module organization="opendds" name="org.opendds.ant" resolver="opendds-ant"/>
+        <module organization="opendds" name="org.opendds.modeling" resolver="opendds-modeling"/>
+        <module resolver="thirdparty"/>
     </modules>
 
     <triggers>
