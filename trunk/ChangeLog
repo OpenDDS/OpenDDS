@@ -1,3 +1,22 @@
+Thu Mar 11 23:54:38 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp:
+        
+          Fixed a bug in obtain_buffer() when max_blocking_time is 0 or very small 
+          period. The condition makes the write() not wait for old sample releasing.
+          In this case, the TIMEOUT error code should be returned.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+          
+          Turned off the error logging as obtain_buffer() returns TIMEOUT error code.
+          
+        * tests/DCPS/FooTest5/InstanceDataMap.cpp:
+        * tests/DCPS/FooTest5/Writer.cpp:
+        * tests/DCPS/FooTest5/run_test.pl:
+          
+          - Adjusted result verify.
+          - Log timeout error return from write() only if DCPS_debug_level > 0.
+           
 Wed Mar 10 16:25:55 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/framework/ThreadSynchStrategy.h:

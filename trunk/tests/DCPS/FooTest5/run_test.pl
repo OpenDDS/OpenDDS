@@ -80,8 +80,9 @@ elsif ($ARGV[$arg_idx] eq 'blocking') {
 elsif ($ARGV[$arg_idx] eq 'blocking_timeout') {
   $writer_blocking_ms=5; # milliseconds
   $num_instances_per_writer=5;
-  $num_samples_per_instance=20;
+  $num_samples_per_instance=50;
   $max_samples_per_instance=1;
+  $sequence_length=1000;
   $read_interval_ms=1000;
 }
 elsif ($ARGV[$arg_idx] eq 'mixed_trans') {
@@ -191,7 +192,7 @@ if ($ir != 0) {
 unlink $dcpsrepo_ior;
 unlink $subscriber_completed;
 unlink $subscriber_ready;
-unlink $publisher_completed;
+#unlink $publisher_completed;
 unlink $publisher_ready;
 
 if ($status == 0) {

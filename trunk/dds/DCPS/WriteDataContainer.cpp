@@ -825,8 +825,9 @@ WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
       // Timeout value from Qos.RELIABILITY.max_blocking_time
       ACE_Time_Value abs_timeout
       = ACE_OS::gettimeofday() + max_blocking_time_;
-
+      bool waited = false;
       while (!shutdown_ && ACE_OS::gettimeofday() < abs_timeout) {
+	waited = true;
         waiting_on_release_ = true; // reduces broadcast to only when waiting
 
         // lock is released while waiting and aquired before returning
@@ -839,17 +840,6 @@ WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
           } // else continue wait
 
         } else {
-          // Remove from the waiting list if wait() timed out or return
-          // other errors.
-          if (instance->waiting_list_.dequeue_next_instance_sample(element) == false) {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) ERROR: ")
-                              ACE_TEXT("WriteDataContainer::obtain_buffer, ")
-                              ACE_TEXT("dequeue_next_instance_sample from ")
-                              ACE_TEXT("waiting list failed\n")),
-                             DDS::RETCODE_ERROR);
-          }
-
           if (errno == ETIME) {
             ret = DDS::RETCODE_TIMEOUT;
 
@@ -861,7 +851,23 @@ WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
           break;
         }
       }
-    }
+      if (!waited) {
+        // max-blocking_time_ was so short we did not even try to wait
+	ret = DDS::RETCODE_TIMEOUT;
+      }
+      if (ret != DDS::RETCODE_OK) {
+	// Remove from the waiting list if wait() timed out or return
+	// other errors.
+	if (instance->waiting_list_.dequeue_next_instance_sample(element) == false) {
+	  ACE_ERROR_RETURN((LM_ERROR,
+			    ACE_TEXT("(%P|%t) ERROR: ")
+			    ACE_TEXT("WriteDataContainer::obtain_buffer, ")
+			    ACE_TEXT("dequeue_next_instance_sample from ")
+			    ACE_TEXT("waiting list failed\n")),
+			   DDS::RETCODE_ERROR);
+	}
+      }
+    } // wait_needed
 
   } else {
     if (!oldest_released) {

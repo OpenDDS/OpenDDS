@@ -1410,7 +1410,10 @@ ACE_THROW_SPEC((CORBA::SystemException))
   DDS::ReturnCode_t ret = this->data_container_->obtain_buffer(element,
                                                                  handle);
 
-  if (ret != DDS::RETCODE_OK) {
+  if (ret == DDS::RETCODE_TIMEOUT) {
+    return ret; // silent for timeout
+  }
+  else if (ret != DDS::RETCODE_OK) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("DataWriterImpl::write: ")
