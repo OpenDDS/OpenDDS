@@ -1,3 +1,9 @@
+Thu Mar 11 23:20:34 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/modeling/etc/ivysettings.xml:
+
+          Updates to fix default build.
+
 Thu Mar 11 17:01:55 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/modeling/etc/ivysettings.xml:
@@ -25,7 +31,7 @@ Thu Mar 11 17:01:55 UTC 2010  Steven Stallion  <stallions@ociweb.com>
         * tools/modeling/plugins/org.opendds.modeling.resources/.project:
 
           Updated Ant Builder configuration.
-        
+
         * tools/modeling/plugins/org.opendds.modeling.core/src/org/opendds/modeling/Activator.java:
         * tools/modeling/plugins/org.opendds.modeling.resources/.externalToolBuilders/Ant Builder.launch:
 
