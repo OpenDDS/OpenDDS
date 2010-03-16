@@ -1,3 +1,11 @@
+Tue Mar 16 21:01:14 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableSession.h:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Fixed deadlock caused by shared mutex between starting and
+          acknowledgement critical sections.
+
 Tue Mar 16 14:18:51 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/tests/latency/p1-16000.ini:
