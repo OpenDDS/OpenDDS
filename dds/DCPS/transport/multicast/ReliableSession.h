@@ -91,10 +91,11 @@ public:
   virtual void stop();
 
 private:
-  bool started_;
+  ACE_SYNCH_MUTEX ack_lock_;
   bool acked_;
 
-  ACE_SYNCH_MUTEX lock_;
+  ACE_SYNCH_MUTEX start_lock_;
+  bool started_;
 
   SynWatchdog syn_watchdog_;
   NakWatchdog nak_watchdog_;
