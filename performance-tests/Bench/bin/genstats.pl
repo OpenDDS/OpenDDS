@@ -6,14 +6,17 @@ use warnings;
 use strict;
 use File::Basename;
 
-=pod
-
-$Id$
+=head1 NAME
 
 genstats.pl - create GNUPlot statistical summary data string variables
 
-SYNOPSIS
+$Id$
+
+=head1 SYNOPSIS
+
   genstats.pl <infile>
+
+=head1 DESCRIPTION
 
 This script processes a comma separated value (CSV) input file and
 creates an output file for each record of the input.  Each output file is
@@ -26,16 +29,37 @@ The input file is expected to be in the format produced by the extract.pl
 data reduction script.  Each record (line) of the input file contains the
 following fields:
 
-  Field  1: transport type
-  Field  2: test message size
-  Field  3: latency mean statistic
-  Field  4: latency standard deviation statistic
-  Field  5: latency maximum statistic
-  Field  6: latency minimum statistic
-  Field  7: jitter mean statistic
-  Field  8: jitter standard deviation statistic
-  Field  9: jitter maximum statistic
-  Field 10: jitter minimum statistic
+=begin html
+
+<table border>
+  <tr><th>Field</th><th>Description</th></tr>
+  <tr><td>1</td><td>transport type</td></tr>
+  <tr><td>2</td><td>test message size</td></tr>
+  <tr><td>3</td><td>latency mean statistic</td></tr>
+  <tr><td>4</td><td>latency standard deviation statistic</td></tr>
+  <tr><td>5</td><td>latency maximum statistic</td></tr>
+  <tr><td>6</td><td>latency minimum statistic</td></tr>
+  <tr><td>7</td><td>jitter mean statistic</td></tr>
+  <tr><td>8</td><td>jitter standard deviation statistic</td></tr>
+  <tr><td>9</td><td>jitter maximum statistic</td></tr>
+  <tr><td>10</td><td>jitter minimum statistic</td></tr>
+</table>
+
+=end html
+
+=for text
+      Field  1: transport type
+      Field  2: test message size
+      Field  3: latency mean statistic
+      Field  4: latency standard deviation statistic
+      Field  5: latency maximum statistic
+      Field  6: latency minimum statistic
+      Field  7: jitter mean statistic
+      Field  8: jitter standard deviation statistic
+      Field  9: jitter maximum statistic
+      Field 10: jitter minimum statistic
+
+=for text
 
 The output includes two GNUPlot string variable definitions suitable for
 'load' or 'call' operations within GNUPlot.  Some GNUPlot data
@@ -49,7 +73,7 @@ Each variable contains the mean, standard deviation, maximum, and minimum
 data values for the output file (transport/size) in a newline separated
 single string suitable for use as a label within GNUPlot.
 
-EXAMPLE
+=head1 EXAMPLE
 
   genstats.pl data/latency.csv
 
