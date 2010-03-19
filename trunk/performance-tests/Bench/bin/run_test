@@ -406,53 +406,6 @@ run_test - Execute test processes for distributed testing
 
  run_test [options]
 
-Options:
-
-  -? | --help            brief help message
-
-  --man                  full documentation
-
-  -x | --noaction        do not execute any processing
-
-  -v | --verbose         be chatty while executing
-
-  -V NUMBER | --ORBVerboseLogging=NUMBER
-                         set the corresponding ORB option
-
-  -d NUMBER | --debug=NUMBER
-                         set the DCPS debugging level
-
-  -T NUMBER | --tdebug=NUMBER
-                         set the DCPSTransportDebug debugging level
-
-  -R NUMBER | --rdebug=NUMBER
-                         set the DCPS debugging level for the repository
-
-  -f FILE | --dfile=FILE set the filename for debug output
-
-  -C TYPES | --collect=TYPES
-                         collect process and system statistics during test
-
-  -h FQDN | --repohost FQDN
-                         fully qualified domain name (and port) for
-                         connecting to repository
-
-  -i FILE | --inifile FILE
-                         file for configuring the OpenDDS service
-
-  -s FILELIST | --scenario FILELIST
-                         list of files defining the test scenario(s) to execute
-
-  -r FILE | --rawdatafile FILE
-                         file to write collected data to at end of test
-
-  -t NUMBER | --duration=NUMBER
-                         limit the duration of test execution
-
-  -S | --startrepo       start a repository
-
-  -P | --starttest       start a testprocess
-
 =head1 OPTIONS
 
 =over 8
