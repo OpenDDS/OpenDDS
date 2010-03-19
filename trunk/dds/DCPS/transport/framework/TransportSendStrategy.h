@@ -29,6 +29,7 @@ namespace DCPS {
 class ThreadSynch;
 class ThreadSynchResource;
 class TransportQueueElement;
+class TransportSendElement;
 class TransportSendBuffer;
 struct DataSampleListElement;
 class QueueRemoveVisitor;
@@ -83,7 +84,7 @@ public:
   /// actually found and removed - it could mean that, or it could
   /// mean that the sample has already been fully sent, and there
   /// is no trace of it in this strategy object.
-  int remove_sample(const DataSampleListElement* sample);
+  int remove_sample(TransportSendElement& element);
 
   void remove_all_control_msgs(RepoId pub_id);
 
@@ -128,6 +129,10 @@ public:
 
   bool isDirectMode();
 
+  /// Informed transport shutdown so no more notifications to
+  /// listener.
+  void transport_shutdown ();
+
 protected:
 
   TransportSendStrategy(TransportConfiguration* config,
@@ -156,7 +161,7 @@ protected:
 
   /// Provide the opportunity to remove a sample from implementation
   /// specific lists as well.
-  virtual void remove_sample_i( const DataSampleListElement* sample);
+  virtual void remove_sample_i( const TransportSendElement& element);
 
   /// Provide the opportunity to remove control messages from
   /// implementation specific lists as well.
@@ -226,7 +231,7 @@ private:
                                UseDelayedNotification delay_notification);
 
   /// This is called by perform_work() after it has sent
-  void send_delayed_notifications();
+  void send_delayed_notifications(TransportSendElement& element);
 
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;
@@ -363,6 +368,8 @@ private:
   // refactored into the TransportSendStrategy eventually; a good
   // amount of private state is shared between both classes.
   friend class TransportSendBuffer;
+
+  bool transport_shutdown_;
 
 protected:
   /// Current transport packet header.

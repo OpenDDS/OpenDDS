@@ -70,7 +70,8 @@ OpenDDS::DCPS::TransportSendStrategy::TransportSendStrategy
     retained_element_allocator_( 0),
     graceful_disconnecting_(false),
     link_released_(true),
-    send_buffer_(0)
+    send_buffer_(0),
+    transport_shutdown_ (false)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","TransportSendStrategy",6);
 
@@ -269,8 +270,9 @@ OpenDDS::DCPS::TransportSendStrategy::perform_work()
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
             "The outcome of the send_packet() was %d.\n", outcome), 5);
 
+  TransportSendElement element (0, 0);
   // Notify the Elements that were sent.
-  this->send_delayed_notifications();
+  this->send_delayed_notifications(element);
 
   // If we sent the whole packet (eg, partial_send is false), and the queue_
   // is now empty, then we've cleared the backpressure situation.
@@ -686,7 +688,7 @@ OpenDDS::DCPS::TransportSendStrategy::adjust_packet_after_send
 }
 
 void
-OpenDDS::DCPS::TransportSendStrategy::send_delayed_notifications()
+OpenDDS::DCPS::TransportSendStrategy::send_delayed_notifications(TransportSendElement& element)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","send_delayed_notifications",6);
 
@@ -698,6 +700,8 @@ OpenDDS::DCPS::TransportSendStrategy::send_delayed_notifications()
 
   size_t num_delayed_notifications = 0;
 
+  TransportQueueElement* found_element = 0;
+  
   {
     GuardType guard(this->lock_);
 
@@ -711,6 +715,11 @@ OpenDDS::DCPS::TransportSendStrategy::send_delayed_notifications()
       sample = delayed_delivered_notification_queue_ [0];
       mode = delayed_notification_mode_ [0];
 
+      if (element.sample () != 0 && element.msg () == sample->msg ())
+      {
+        found_element = sample;
+      }
+        
       delayed_delivered_notification_queue_ [0] = NULL;
       delayed_notification_mode_ [0] = MODE_NOT_SET;
 
@@ -722,6 +731,10 @@ OpenDDS::DCPS::TransportSendStrategy::send_delayed_notifications()
         samples[i] = delayed_delivered_notification_queue_[i];
         modes[i] = delayed_notification_mode_[i];
 
+        if (element.sample () != 0 && element.msg () == samples[i]->msg ()) {
+          found_element = samples[i];
+        }
+        
         delayed_delivered_notification_queue_[i] = NULL;
         delayed_notification_mode_[i] = MODE_NOT_SET;
       }
@@ -732,11 +745,12 @@ OpenDDS::DCPS::TransportSendStrategy::send_delayed_notifications()
 
   if (modes == NULL) {
     // optimization for the common case
-    if (mode == MODE_TERMINATED) {
-      sample->data_dropped(true);
-
-    } else {
-      sample->data_delivered();
+    if (! this->transport_shutdown_) {
+      if (mode == MODE_TERMINATED) {
+        sample->data_dropped(true);
+      } else {
+        sample->data_delivered();
+      }
     }
 
   } else {
@@ -751,6 +765,12 @@ OpenDDS::DCPS::TransportSendStrategy::send_delayed_notifications()
 
     delete [] samples;
     delete [] modes;
+  }
+  
+  
+    
+  if (found_element) {    
+    element.released (found_element->released ());
   }
 }
 
@@ -791,9 +811,9 @@ OpenDDS::DCPS::TransportSendStrategy::clear(SendMode mode)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","clear",6);
 
-  // Notify the Elements that were sent.
-  this->send_delayed_notifications();
-
+  TransportSendElement element (0, 0);
+  this->send_delayed_notifications(element);
+  
   QueueType* elems = 0;
   QueueType* queue = 0;
   {
@@ -1142,7 +1162,9 @@ OpenDDS::DCPS::TransportSendStrategy::send(TransportQueueElement* element, bool 
     }
   }
 
-  this->send_delayed_notifications();
+  TransportSendElement delement (0, 0);
+  // Notify the Elements that were sent.
+  this->send_delayed_notifications(delement);
 }
 
 void
@@ -1228,7 +1250,9 @@ OpenDDS::DCPS::TransportSendStrategy::send_stop()
     }
   }
 
-  this->send_delayed_notifications();
+  TransportSendElement element (0, 0);
+  // Notify the Elements that were sent.
+  this->send_delayed_notifications(element);
 }
 
 void
@@ -1261,24 +1285,34 @@ OpenDDS::DCPS::TransportSendStrategy::remove_all_control_msgs_i(
 }
 
 int
-OpenDDS::DCPS::TransportSendStrategy::remove_sample(const DataSampleListElement* sample)
+OpenDDS::DCPS::TransportSendStrategy::remove_sample(TransportSendElement& element)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","remove_sample",6);
 
-  VDBG_LVL((LM_DEBUG, "(%P|%t)  Removing sample: %@", sample),5);
+  VDBG_LVL((LM_DEBUG, "(%P|%t)  Removing sample: %@", element.msg ()),5);
+  
+  // There may be still a chance, removing sample is requested while transport
+  // thread is in processing delayed notification which may result the sample 
+  // release.
+  
+  // Invoke delayed notification here to reduce the chance.
+  this->send_delayed_notifications (element);
 
+  if (element.released ()) {
+    return 0;
+  }
+  
   GuardType guard(this->lock_);
 
   // Process any specific sample storage first.
-  remove_sample_i(sample);
+  remove_sample_i(element);
 
-  TransportSendElement current_sample(0, sample);
-  return do_remove_sample(current_sample);
+  return do_remove_sample(element);
 }
 
 void
 OpenDDS::DCPS::TransportSendStrategy::remove_sample_i(
-  const DataSampleListElement* /* sample */
+  const TransportSendElement& /* element */
 )
 {
   DBG_ENTRY_LVL("TransportSendStrategy","remove_sample_i",6);
@@ -1325,8 +1359,8 @@ OpenDDS::DCPS::TransportSendStrategy::do_remove_sample(TransportQueueElement& cu
             "Failed to find the sample to remove.\n"));
     }
 
-    // Now we can return -1 if status == -1.  Otherwise, we return 0.
-    return (status == -1) ? -1 : 0;
+    // The status 1 means successfully removed the sample.
+    return (status != 1) ? -1 : 0;
   }
 
   // We now know that this->mode_ == MODE_QUEUE.

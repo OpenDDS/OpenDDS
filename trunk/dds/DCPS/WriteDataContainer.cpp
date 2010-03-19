@@ -596,13 +596,15 @@ WriteDataContainer::data_dropped(const DataSampleListElement* sample,
     return;
   }
 
-  //ACE_GUARD (ACE_Recursive_Thread_Mutex,
-  //  guard,
-  //  this->lock_);
-
-  //Here, the data_dropped call results from the remove_sample,
-  //hence it's called in the same thread that calls remove_sample
-  //which is already guarded so we do not need acquire lock here.
+  //The data_dropped could be called from the thread initiating sample remove
+  //which already hold the lock. In this case, it's not necessary to acquire
+  //lock here. It also could be called from the transport thread in a delayed  
+  //notification, it's necessary to acquire lock here to protect the internal
+  //structures in this class.
+  
+  ACE_GUARD (ACE_Recursive_Thread_Mutex,
+    guard,
+    this->lock_);
 
   // The dropped sample is either in released_data_ list or
   // sending_data_ list. Otherwise an exception will be raised.
@@ -635,11 +637,6 @@ WriteDataContainer::data_dropped(const DataSampleListElement* sample,
                ACE_TEXT("The dropped sample is not in released_data_ ")
                ACE_TEXT("list.\n")));
   }
-
-  // Signal if there is no pending data.
-  ACE_GUARD(ACE_Recursive_Thread_Mutex,
-            guard,
-            this->lock_);
 
   if (!pending_data())
     empty_condition_.broadcast();
@@ -698,7 +695,7 @@ WriteDataContainer::remove_oldest_sample(
     // Move the element to the released_data_ list since it is still
     // in use, and we need to wait until it is told by the transport.
     //
-    result = this->sending_data_.dequeue_next_send_sample(stale);
+    result = this->sending_data_.dequeue_next_send_sample(stale) != 0;
     released_data_.enqueue_tail_next_send_sample(stale);
     released = false;
 
@@ -706,7 +703,7 @@ WriteDataContainer::remove_oldest_sample(
     // No one is using the data sample, so we can release it back to
     // its allocator.
     //
-    result = this->sent_data_.dequeue_next_send_sample(stale);
+    result = this->sent_data_.dequeue_next_send_sample(stale) != 0;
     release_buffer(stale);
     released = true;
 
@@ -725,7 +722,7 @@ WriteDataContainer::remove_oldest_sample(
     // No one is using the data sample, so we can release it back to
     // its allocator.
     //
-    result = this->unsent_data_.dequeue_next_send_sample(stale);
+    result = this->unsent_data_.dequeue_next_send_sample(stale) != 0;
     release_buffer(stale);
     released = true;
 
@@ -953,6 +950,29 @@ WriteDataContainer::unregister_all()
       }
     }
 
+    /* Notify tranport to remove samples in released_data. It should be handled
+       similar to the sending data list.*/
+
+    while (this->released_data_.size_ > 0) {
+      DataSampleListElement* old_head = this->released_data_.head_;
+
+      if (old_head == 0) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: WriteDataContainer::unregister_all,")
+                   ACE_TEXT("NULL element at head of released_data_, size %d head %X tail %X \n"),
+                   this->released_data_.size_,  this->released_data_.head_,  this->released_data_.tail_));
+        break;
+      }
+
+      // Tell transport remove all samples currently
+      // transport is processing but DataWriter moved to
+      // released list.
+      this->writer_->remove_sample(old_head);
+
+      if (old_head == this->released_data_.head_) {
+        old_head->send_listener_->data_dropped(old_head, false);
+      }
+    }
+    
     // Broadcast to wake up all waiting threads.
     if (waiting_on_release_) {
       condition_.broadcast();
