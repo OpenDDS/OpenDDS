@@ -1,3 +1,64 @@
+Fri Mar 19 21:23:54 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          - Added lock in data_dropped as it could be called by the 
+            the transport thread that does not hold the lock before
+            calling it. Otherwise, it may cause SEGV when write() 
+            thraad request transport removing a sample while sample
+            is released due to tranport delayed notification.
+          - Added code to remove released_data_ samples in 
+            unregister_all().
+          
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.h:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.h:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.inl:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.h:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+        * dds/DCPS/transport/framework/TransportQueueElement.h:
+        * dds/DCPS/transport/framework/TransportQueueElement.inl:
+        * dds/DCPS/transport/framework/TransportSendElement.h:
+        * dds/DCPS/transport/framework/TransportSendElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          - Fixed an issue that DataWriter request transport to remove 
+            a sample while the sample is released by transport.
+            This could happen when there are more number of datalinks 
+            upon sample removing than sending. A datalink is requested
+            to remove sample is not requested for sending. The sample
+            may already be released while the link uses the sample to
+            find in it's storage.
+            
+            Wrappered sample to remove with TransportSendElement so the 
+            DataWriter data_dropped() will be called only when sample is
+            removed from all links it originally sent to. 
+            The TransportSendElement instance also carry the information 
+            if a data_dropped is called to DataWriter, if it does, then 
+            stop using the sample to remove from the rest links because 
+            the sample may already be released.
+        
+          - Added/update methods to accommodate the changes above.
+          - Added transport_shutdown to TransportSendStrategy to avoid
+            delayed notification upon transport release as the transport 
+            release is normally called after DataWriter is destroyed.
+          - Invoke delayed notification in remove_sample to help reduce 
+            the chance to removing a sample while it's being releasing 
+            due to delayed notification from transport thread.
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+
+          Added receive_strategy_ nil value check in handle_close() 
+          to avoid crash if receive_strategy_ is wiped before 
+          handle_close() called.
+          
 Tue Mar 16 21:01:14 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * dds/DCPS/transport/multicast/ReliableSession.h:

@@ -27,6 +27,8 @@ namespace DCPS {
 class DataLink;
 class TransportQueueElement;
 struct DataSampleListElement;
+class TransportSendElement;
+
 
 enum SendStrategyOpType {
   SEND_START,
@@ -73,7 +75,7 @@ public:
   virtual int close(u_long flag = 0);
 
   /// Remove sample from the thread per connection queue.
-  int remove_sample(const DataSampleListElement* sample);
+  int remove_sample(TransportSendElement& element);
 
 private:
 

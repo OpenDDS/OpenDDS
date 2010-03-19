@@ -120,7 +120,7 @@ OpenDDS::DCPS::DataLink::send_stop_i()
 }
 
 ACE_INLINE int
-OpenDDS::DCPS::DataLink::remove_sample(const DataSampleListElement* sample,
+OpenDDS::DCPS::DataLink::remove_sample(TransportSendElement& element,
                                        bool dropped_by_transport)
 {
   DBG_ENTRY_LVL("DataLink","remove_sample",6);
@@ -141,7 +141,7 @@ OpenDDS::DCPS::DataLink::remove_sample(const DataSampleListElement* sample,
   // Remove the sample from thread per connection queue and then
   // delegate to send strategy.
   if (this->thr_per_con_send_task_ != 0) {
-    status = this->thr_per_con_send_task_->remove_sample(sample);
+    status = this->thr_per_con_send_task_->remove_sample(element);
   }
 
   if (status == 1) {
@@ -149,7 +149,7 @@ OpenDDS::DCPS::DataLink::remove_sample(const DataSampleListElement* sample,
           "Removed sample from ThreadPerConnection queue.\n"));
 
   } else if (!strategy.is_nil()) // not exist on thread per connectio queue.
-    return strategy->remove_sample(sample);
+    return strategy->remove_sample(element);
 
   return 0;
 }

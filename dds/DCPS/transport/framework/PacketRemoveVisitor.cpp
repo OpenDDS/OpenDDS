@@ -18,7 +18,7 @@
 #endif /* __ACE_INLINE__ */
 
 OpenDDS::DCPS::PacketRemoveVisitor::PacketRemoveVisitor
-(const TransportQueueElement& sample,
+(TransportQueueElement& sample,
  ACE_Message_Block*&          unsent_head_block,
  ACE_Message_Block*           header_block,
  TransportReplacedElementAllocator& allocator)
@@ -454,6 +454,8 @@ OpenDDS::DCPS::PacketRemoveVisitor::visit_element_ref
 
     // Tell the original element (that we replaced), data_dropped().
     orig_elem->data_dropped();
+    
+    this->sample_.released (orig_elem->released ());
 
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "Return 0 to halt visitation.\n"));
