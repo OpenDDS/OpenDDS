@@ -1842,11 +1842,11 @@ DataWriterImpl::control_dropped(ACE_Message_Block* sample,
 }
 
 int
-DataWriterImpl::remove_all_control_msgs()
+DataWriterImpl::remove_all_msgs()
 {
-  DBG_ENTRY_LVL("DataWriterImpl","remove_all_control_msgs",6);
+  DBG_ENTRY_LVL("DataWriterImpl","remove_all_msgs",6);
   return
-    publisher_servant_->remove_all_control_msgs(this->publication_id_);
+    publisher_servant_->remove_all_msgs(this->publication_id_);
 }
 
 void

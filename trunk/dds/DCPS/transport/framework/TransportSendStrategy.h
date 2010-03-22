@@ -86,7 +86,7 @@ public:
   /// is no trace of it in this strategy object.
   int remove_sample(TransportSendElement& element);
 
-  void remove_all_control_msgs(RepoId pub_id);
+  void remove_all_msgs(RepoId pub_id);
 
   /// Called by our ThreadSynch object when we should be able to
   /// start sending any partial packet bytes and/or compose a new
@@ -165,7 +165,7 @@ protected:
 
   /// Provide the opportunity to remove control messages from
   /// implementation specific lists as well.
-  virtual void remove_all_control_msgs_i( RepoId pub_id);
+  virtual void remove_all_msgs_i( RepoId pub_id);
 
 private:
   typedef BasicQueue<TransportQueueElement> QueueType;
