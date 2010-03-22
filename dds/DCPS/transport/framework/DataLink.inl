@@ -155,9 +155,9 @@ OpenDDS::DCPS::DataLink::remove_sample(TransportSendElement& element,
 }
 
 ACE_INLINE void
-OpenDDS::DCPS::DataLink::remove_all_control_msgs(RepoId pub_id)
+OpenDDS::DCPS::DataLink::remove_all_msgs(RepoId pub_id)
 {
-  DBG_ENTRY_LVL("DataLink","remove_all_control_msgs",6);
+  DBG_ENTRY_LVL("DataLink","remove_all_msgs",6);
 
   // This one is easy.  Simply delegate to our TransportSendStrategy
   // data member.
@@ -170,7 +170,7 @@ OpenDDS::DCPS::DataLink::remove_all_control_msgs(RepoId pub_id)
   }
 
   if (!strategy.is_nil()) {
-    strategy->remove_all_control_msgs(pub_id);
+    strategy->remove_all_msgs(pub_id);
   }
 }
 

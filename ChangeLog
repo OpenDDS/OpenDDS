@@ -1,3 +1,24 @@
+Mon Mar 22 19:53:59 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/TransportInterface.h:
+        * dds/DCPS/transport/framework/TransportInterface.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Renamed remove_all_control_msgs() to remove_all_msgs() as the function
+          was changed to removes all messages sent by a datawriter.
+          
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Removed remove_sample call on samples in sending_data or released_data
+          lists as it's redundant with remove_all_msgs().
+                    
 Fri Mar 19 22:25:14 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/bin/expandColors.pl:
@@ -62,10 +83,14 @@ Fri Mar 19 21:23:54 UTC 2010  Yan Dai  <dai_y@ociweb.com>
           - Added transport_shutdown to TransportSendStrategy to avoid
             delayed notification upon transport release as the transport
             release is normally called after DataWriter is destroyed.
+<<<<<<< .mine
+
+=======
           - Invoke delayed notification in remove_sample to help reduce
             the chance to removing a sample while it's being releasing
             due to delayed notification from transport thread.
 
+>>>>>>> .r3142
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
 
           Added receive_strategy_ nil value check in handle_close()

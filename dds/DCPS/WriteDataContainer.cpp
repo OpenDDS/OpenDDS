@@ -904,10 +904,6 @@ WriteDataContainer::unregister_all()
 
   shutdown_ = true;
 
-  // Tell transport remove all control messages currently
-  // transport is processing.
-  (void) this->writer_->remove_all_control_msgs();
-
   {
     //The internal list needs protection since this call may result from the
     //the delete_datawriter call which does not acquire the lock in advance.
@@ -915,64 +911,11 @@ WriteDataContainer::unregister_all()
     ACE_GUARD(ACE_Recursive_Thread_Mutex,
               guard,
               this->lock_);
+              
+    // Tell transport remove all control messages currently
+    // transport is processing.
+    (void) this->writer_->remove_all_msgs();
 
-    while (sending_data_.size_ > 0) {
-      DataSampleListElement* old_head = sending_data_.head_;
-
-      if (old_head == 0) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: WriteDataContainer::unregister_all,")
-                   ACE_TEXT("NULL element at head of sending_data_, size %d head %X tail %X \n"),
-                   sending_data_.size_,  sending_data_.head_,  sending_data_.tail_));
-        break;
-      }
-
-      // Tell transport remove all samples currently
-      // transport is processing.
-      this->writer_->remove_sample(old_head);
-
-      if (old_head == sending_data_.head_) {
-        /*
-        ciju: In situations of repeated connection restablishment
-        from the subscriber, we seem to get some orphan messages
-        left behind in the system. When the system shuts down
-        due to the cleanup mechanism now in place we enter a
-        for-ever loop.
-        The problem is most probably due to missing error handling
-        somewhere in the element delivery path and fixing that is the
-        real solution as otherwise over time the internal buffers will
-        just fill up (currently only observed upon connection disruption).
-        For now I am putting this code which will trap and cleanup these
-        orphan messages at shutdown time.
-        keywords: forever loop orphan hang
-        ***********************************/
-
-        old_head->send_listener_->data_delivered(old_head);
-      }
-    }
-
-    /* Notify tranport to remove samples in released_data. It should be handled
-       similar to the sending data list.*/
-
-    while (this->released_data_.size_ > 0) {
-      DataSampleListElement* old_head = this->released_data_.head_;
-
-      if (old_head == 0) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: WriteDataContainer::unregister_all,")
-                   ACE_TEXT("NULL element at head of released_data_, size %d head %X tail %X \n"),
-                   this->released_data_.size_,  this->released_data_.head_,  this->released_data_.tail_));
-        break;
-      }
-
-      // Tell transport remove all samples currently
-      // transport is processing but DataWriter moved to
-      // released list.
-      this->writer_->remove_sample(old_head);
-
-      if (old_head == this->released_data_.head_) {
-        old_head->send_listener_->data_dropped(old_head, false);
-      }
-    }
-    
     // Broadcast to wake up all waiting threads.
     if (waiting_on_release_) {
       condition_.broadcast();

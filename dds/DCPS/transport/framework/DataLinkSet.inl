@@ -131,16 +131,16 @@ OpenDDS::DCPS::DataLinkSet::remove_sample(const DataSampleListElement* sample,
 }
 
 ACE_INLINE int
-OpenDDS::DCPS::DataLinkSet::remove_all_control_msgs(RepoId pub_id)
+OpenDDS::DCPS::DataLinkSet::remove_all_msgs(RepoId pub_id)
 {
-  DBG_ENTRY_LVL("DataLinkSet","remove_all_control_msgs",6);
+  DBG_ENTRY_LVL("DataLinkSet","remove_all_msgs",6);
 
   GuardType guard(this->lock_);
 
   for (MapType::iterator itr = map_.begin();
        itr != map_.end();
        ++itr) {
-    itr->second->remove_all_control_msgs(pub_id);
+    itr->second->remove_all_msgs(pub_id);
   }
 
   return 0;

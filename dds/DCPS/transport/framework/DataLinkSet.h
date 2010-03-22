@@ -68,7 +68,7 @@ public:
   int remove_sample(const DataSampleListElement* sample, bool dropped_by_transport);
 
   // ciju: This method was called without any locks held held from TransportInterface.
-  int remove_all_control_msgs(RepoId pub_id);
+  int remove_all_msgs(RepoId pub_id);
 
   // ciju: This method was called without any locks held held from TransportInterface.
   /// This will do several things, including adding to the membership

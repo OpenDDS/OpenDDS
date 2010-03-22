@@ -1256,9 +1256,9 @@ OpenDDS::DCPS::TransportSendStrategy::send_stop()
 }
 
 void
-OpenDDS::DCPS::TransportSendStrategy::remove_all_control_msgs(RepoId pub_id)
+OpenDDS::DCPS::TransportSendStrategy::remove_all_msgs(RepoId pub_id)
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","remove_all_control_msgs",6);
+  DBG_ENTRY_LVL("TransportSendStrategy","remove_all_msgs",6);
 
   GuardType guard(this->lock_);
 
@@ -1269,17 +1269,17 @@ OpenDDS::DCPS::TransportSendStrategy::remove_all_control_msgs(RepoId pub_id)
   }
 
   // Process any specific sample storage first.
-  remove_all_control_msgs_i(pub_id);
+  remove_all_msgs_i(pub_id);
 
   TransportRetainedElement current_sample(0, pub_id);
   do_remove_sample(current_sample);
 }
 
 void
-OpenDDS::DCPS::TransportSendStrategy::remove_all_control_msgs_i(
+OpenDDS::DCPS::TransportSendStrategy::remove_all_msgs_i(
   RepoId /* pub_id */)
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","remove_all_control_msgs_i",6);
+  DBG_ENTRY_LVL("TransportSendStrategy","remove_all_msgs_i",6);
 
   // Default implementation does nothing.
 }
@@ -1291,11 +1291,16 @@ OpenDDS::DCPS::TransportSendStrategy::remove_sample(TransportSendElement& elemen
 
   VDBG_LVL((LM_DEBUG, "(%P|%t)  Removing sample: %@", element.msg ()),5);
   
-  // There may be still a chance, removing sample is requested while transport
-  // thread is in processing delayed notification which may result the sample 
-  // release.
+  // The sample to remove is either in temporary delayed notification list or
+  // internal list (elems_ or queue_). If it's going to be removed from temporary delayed 
+  // notification list by transport thread, it needs acquire WriterDataContainer lock for
+  // data_dropped/data_delivered callback, then it needs wait for this remove_sample() call
+  // complete as this call already hold the WriterContainer's lock. So this call is safe to 
+  // access the sample to remove. If it's going to be removed by this remove_sample() calling
+  // thread, it will be removed either from delayed notification list or from internal list
+  // in which case the element carry the info if the sample is released so the datalinkset 
+  // can stop calling rest datalinks to remove this sample if it's already released..
   
-  // Invoke delayed notification here to reduce the chance.
   this->send_delayed_notifications (element);
 
   if (element.released ()) {
