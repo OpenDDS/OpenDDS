@@ -2,9 +2,10 @@ Version 2.2 of OpenDDS.
 
 New to this version are the following changes:
 
-- First change goes here...
-
-
+- Various bugfixes for locking issues during sample removing.
+- Fixed a bug in obtain_buffer() that did not return the TIMEOUT error 
+  code when max_blocking_time is 0 or very small period.
+  
 ========================================================================
 
 Version 2.1.1 of OpenDDS.
