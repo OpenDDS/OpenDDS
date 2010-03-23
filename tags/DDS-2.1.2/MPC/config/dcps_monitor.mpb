@@ -1,7 +1,0 @@
-// -*- MPC -*-
-// $Id$
-
-project {
-  libs  += OpenDDS_monitor
-  after += monitor
-}
