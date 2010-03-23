@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Id$
+
+    Author:  Steven Stallion
+    Version: $Revision$
+-->
+<project name="opendds-router" default="compile" basedir=".">
+    <property name="shared.dir" value="${basedir}/../shared"/>
+    <property name="build.dir" value="${basedir}/build"/>
+    <property name="lib.dir" value="${basedir}/lib"/>
+    <property name="src.dir" value="${basedir}/src"/>
+    <property name="web.dir" value="${basedir}/web"/>
+
+    <property file="build.properties"/>
+
+    <!--
+        Project Paths
+    -->
+    <path id="project.classpath">
+        <pathelement location="${build.dir}/classes"/>
+        <pathelement location="${src.dir}"/>
+
+        <fileset dir="${shared.dir}/lib"/>
+    </path>
+
+    <!--
+        Project Targets
+    -->
+    <target name="all" depends="clean, esb"/>
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+
+    <target name="init">
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${build.dir}/classes"/>
+    </target>
+
+    <target name="compile" depends="init">
+        <javac srcdir="${src.dir}"
+               destdir="${build.dir}/classes"
+               debug="${compile.debug}"
+               deprecation="${compile.deprecation}"
+               optimize="${compile.optimize}"
+               source="${project.source}"
+               classpathref="project.classpath">
+        </javac>
+    </target>
+
+    <target name="esb" depends="jar">
+        <jar jarfile="${build.dir}/${ant.project.name}.esb"
+             compress="${esb.compress}"
+             index="${esb.index}">
+            <fileset dir="${src.dir}">
+                <include name="META-INF/*"/>
+            </fileset>
+            <fileset dir="${build.dir}">
+                <include name="${ant.project.name}.jar"/>
+            </fileset>
+        </jar>
+    </target>
+
+    <target name="jar" depends="compile">
+        <jar jarfile="${build.dir}/${ant.project.name}.jar"
+             compress="${jar.compress}"
+             index="${jar.index}">
+            <fileset dir="${build.dir}/classes"/>
+        </jar>
+    </target>
+</project>
