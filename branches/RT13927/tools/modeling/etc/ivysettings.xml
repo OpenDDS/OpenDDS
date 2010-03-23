@@ -11,7 +11,7 @@
             <ivy pattern="${env.DDS_ROOT}/java/ant/ivy.xml"/>
         </filesystem>
         <filesystem name="opendds-modeling">
-            <artifact pattern="${project.plugins.dir}/[module]/[artifact]_${opendds.version}.[ext]"/>
+            <artifact pattern="${project.plugins.dir}/[module]/build/[artifact].[ext]"/>
             <ivy pattern="${project.plugins.dir}/[module]/ivy.xml"/>
         </filesystem>
         <ibiblio name="thirdparty"/>
@@ -26,10 +26,12 @@
     <triggers>
         <ant-build event="post-resolve-dependency"
                    filter="resolver=opendds-ant"
-                   antfile="${env.DDS_ROOT}/java/ant/build.xml"/>
+                   antfile="${env.DDS_ROOT}/java/ant/build.xml"
+                   target="archive"/>
 
         <ant-build event="post-resolve-dependency"
                    filter="resolver=opendds-modeling"
-                   antfile="${project.plugins.dir}/[module]/build.xml"/>
+                   antfile="${project.plugins.dir}/[module]/build.xml"
+                   target="archive"/>
     </triggers>
 </ivysettings>

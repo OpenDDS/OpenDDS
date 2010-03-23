@@ -7,3 +7,4 @@ Bundle-Vendor: OpenDDS (http://www.opendds.org)
 Require-Bundle: org.eclipse.emf.ecore,
  org.eclipse.uml2.uml,
  org.eclipse.uml2.uml.resources
+
