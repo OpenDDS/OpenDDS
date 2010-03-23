@@ -1,0 +1,47 @@
+Purpose
+-------
+
+DDS API being very C-like requires a lot of coding effort to implement even
+very simple applications. Most of has to be repeated for each application.
+The classes of the DDSWrapper library provide an object oriented abstraction
+of the repeating tasks that have to be performed by each DDS application
+developer and therefore ease the burden of developing DDS applications.
+In addition to simplifying development, they also provide an abstraction
+layer that hides differences between DDS implementations.
+
+Basic Concepts
+--------------
+
+The following classes provide the main functionality of this wrapper library:
+
+Domain_Manager : Abstracts details of the creation and maintainance of
+                 DDS::DomainParticipants. It also provides factory methods
+                 for Publication_Manager and Subscription_Manager.
+
+Publication_Manager : Provides an abstraction for DDS::Publisher and
+                 interacts with the Topic_Manager class to register topics
+                 for publication.
+
+Subscription_Manager : Provides an abstraction for DDS::Subscriber and
+                 interacts with the Topic_Manager class to register topics
+                 (including DataReaderListeners) for topic subscription.
+
+Topic_Manager : This class serves as a container for a concrete template
+                 class Topic_Manager_T that is parametrized with concrete
+                 topic data types to provide an abstraction for topic
+                 related functionality. This template class has to be
+                 instantiated by the user and is the only class that is
+                 aware of the concrete topic data type that is used.
+
+Further Information
+-------------------
+
+For a demonstration how DDSWrapper simplifies development of applications,
+see the 'examples' directory.
+
+For further questions contact Friedhelm Wolf (fwolf@dre.vanderbilt.edu).
+
+Planned Enhancements
+--------------------
+- support for QoS parameters
+- support for OpenSplice
