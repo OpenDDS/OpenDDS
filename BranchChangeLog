@@ -1,3 +1,21 @@
+Tue Mar 23 21:18:56 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * java/ant/build.xml:
+
+          Updated opendds-ant to conform to new build specification.
+
+        * tools/modeling/etc/build-plugin.xml:
+        * tools/modeling/etc/ivysettings.xml:
+        * tools/modeling/plugins/org.opendds.modeling.core/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.core/build.xml:
+        * tools/modeling/plugins/org.opendds.modeling.core/doc:
+        * tools/modeling/plugins/org.opendds.modeling.core/ivy.xml:
+        * tools/modeling/plugins/org.opendds.modeling.core/lib:
+        * tools/modeling/plugins/org.opendds.modeling.resources/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.resources/build.xml:
+
+          Updated build system for modeling plugins.
+
 Thu Mar 11 23:20:34 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/modeling/etc/ivysettings.xml:

@@ -5,15 +5,22 @@
 <ivy-module version="2.0">
     <info organisation="opendds" module="org.opendds.modeling.core"/>
 
+    <configurations>
+        <conf name="default" extends="thirdparty"/>
+        <conf name="thirdparty"/>
+    </configurations>
+
     <publications>
         <artifact name="org.opendds.modeling.core" type="jar"/>
     </publications>
 
     <dependencies>
-        <dependency name="org.opendds.ant" rev="latest.integration"/>
-        <dependency name="org.opendds.modeling.resources" rev="latest.integration"/>
+        <dependency name="org.opendds.ant" rev="latest.integration" conf="default"/>
+        <dependency name="org.opendds.modeling.resources" rev="latest.integration" conf="default"/>
 
         <!-- Third-party dependencies -->
-        <dependency name="junit" rev="4.8.1"/>
+        <dependency org="junit" name="junit" rev="4.8.1">
+            <conf name="thirdparty"/>
+        </dependency>
     </dependencies>
 </ivy-module>
