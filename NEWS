@@ -13,6 +13,12 @@ New to this version are the following changes:
 - Fixed a deadlock in the new IP multicast transport caused when data
   is received while a reliable session is handshaking.
 
+- Fixed an issue which caused spurious synch threads to be created for
+  connectionless transports (i.e. UDP/IP, IP multicast).
+
+- Enhanced the experimental UDP/IP transport to support multiplexing
+  samples to unique endpoints rather than unique entities.
+
 
 ========================================================================
 
