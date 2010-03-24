@@ -2,12 +2,12 @@
 <!--
     $Id$
 -->
-<project name="org.opendds.modeling.core" default="archive" basedir=".">
-    <property name="build.dir" value="${basedir}/build"/>
-    <property name="doc.dir" value="${basedir}/doc"/>
-    <property name="lib.dir" value="${basedir}/lib"/>
-    <property name="src.dir" value="${basedir}/src"/>
-    <property name="test.dir" value="${basedir}/test"/>
+<project name="org.opendds.modeling.core" default="archive">
+    <property name="build.dir" value="build"/>
+    <property name="doc.dir" value="doc"/>
+    <property name="lib.dir" value="lib"/>
+    <property name="src.dir" value="src"/>
+    <property name="test.dir" value="test"/>
     
     <import file="../../etc/build-plugin.xml"/>
 

@@ -27,11 +27,11 @@
 
         <path id="project.classpath">
             <fileset dir="${project.lib.dir}">
-                <include name="**/*.jar"/>
+                <include name="*.jar"/>
             </fileset>
             <path refid="cache.classpath"/>
             <fileset dir="${eclipse.plugins.dir}">
-                <include name="**/*.jar"/>
+                <include name="*.jar"/>
             </fileset>
         </path>
 

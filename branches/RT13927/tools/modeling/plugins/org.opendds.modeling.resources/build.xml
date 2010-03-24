@@ -2,10 +2,10 @@
 <!--
     $Id$
 -->
-<project name="org.opendds.modeling.resources" default="archive" basedir=".">
-    <property name="build.dir" value="${basedir}/build"/>
+<project name="org.opendds.modeling.resources" default="archive">
+    <property name="build.dir" value="build"/>
     
-    <import file="${basedir}/../../etc/build-plugin.xml"/>
+    <import file="../../etc/build-plugin.xml"/>
 
     <!--
         Plugin Paths
