@@ -1,3 +1,21 @@
+Wed Mar 24 22:05:05 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.core/.externalToolBuilders/org.opendds.modeling.core.launch:
+        * tools/modeling/plugins/org.opendds.modeling.resources/.externalToolBuilders/org.opendds.modeling.resources.launch:
+
+          Fixed spurious Ant invocations.
+
+        * tools/modeling/plugins/org.opendds.modeling.core/.project:
+        * tools/modeling/plugins/org.opendds.modeling.resources/.project:
+       
+          Various project updates. 
+        
+        * tools/modeling/plugins/org.opendds.modeling.resources/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.resources/profiles/OpenDDS.profile.properties:
+        * tools/modeling/plugins/org.opendds.modeling.resources/profiles/OpenDDS.profile.uml:
+
+          Added extension for automatically loading the OpenDDS UML profile.
+
 Wed Mar 24 19:52:53 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/modeling/build.xml:
