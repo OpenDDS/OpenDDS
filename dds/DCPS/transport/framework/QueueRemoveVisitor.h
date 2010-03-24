@@ -25,7 +25,7 @@ class OpenDDS_Dcps_Export QueueRemoveVisitor : public BasicQueueVisitor<Transpor
 public:
 
   /// Construct with a queue element representing the sample to be removed.
-  QueueRemoveVisitor(const TransportQueueElement& sample);
+  QueueRemoveVisitor(TransportQueueElement& sample);
 
   virtual ~QueueRemoveVisitor();
 
@@ -43,7 +43,7 @@ public:
 private:
 
   /// The sample that needs to be removed.
-  const TransportQueueElement& sample_;
+  TransportQueueElement& sample_;
 
   /// Holds the status of our visit.
   int status_;

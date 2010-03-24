@@ -596,13 +596,15 @@ WriteDataContainer::data_dropped(const DataSampleListElement* sample,
     return;
   }
 
-  //ACE_GUARD (ACE_Recursive_Thread_Mutex,
-  //  guard,
-  //  this->lock_);
-
-  //Here, the data_dropped call results from the remove_sample,
-  //hence it's called in the same thread that calls remove_sample
-  //which is already guarded so we do not need acquire lock here.
+  //The data_dropped could be called from the thread initiating sample remove
+  //which already hold the lock. In this case, it's not necessary to acquire
+  //lock here. It also could be called from the transport thread in a delayed  
+  //notification, it's necessary to acquire lock here to protect the internal
+  //structures in this class.
+  
+  ACE_GUARD (ACE_Recursive_Thread_Mutex,
+    guard,
+    this->lock_);
 
   // The dropped sample is either in released_data_ list or
   // sending_data_ list. Otherwise an exception will be raised.
@@ -635,11 +637,6 @@ WriteDataContainer::data_dropped(const DataSampleListElement* sample,
                ACE_TEXT("The dropped sample is not in released_data_ ")
                ACE_TEXT("list.\n")));
   }
-
-  // Signal if there is no pending data.
-  ACE_GUARD(ACE_Recursive_Thread_Mutex,
-            guard,
-            this->lock_);
 
   if (!pending_data())
     empty_condition_.broadcast();
@@ -698,7 +695,7 @@ WriteDataContainer::remove_oldest_sample(
     // Move the element to the released_data_ list since it is still
     // in use, and we need to wait until it is told by the transport.
     //
-    result = this->sending_data_.dequeue_next_send_sample(stale);
+    result = this->sending_data_.dequeue_next_send_sample(stale) != 0;
     released_data_.enqueue_tail_next_send_sample(stale);
     released = false;
 
@@ -706,7 +703,7 @@ WriteDataContainer::remove_oldest_sample(
     // No one is using the data sample, so we can release it back to
     // its allocator.
     //
-    result = this->sent_data_.dequeue_next_send_sample(stale);
+    result = this->sent_data_.dequeue_next_send_sample(stale) != 0;
     release_buffer(stale);
     released = true;
 
@@ -725,7 +722,7 @@ WriteDataContainer::remove_oldest_sample(
     // No one is using the data sample, so we can release it back to
     // its allocator.
     //
-    result = this->unsent_data_.dequeue_next_send_sample(stale);
+    result = this->unsent_data_.dequeue_next_send_sample(stale) != 0;
     release_buffer(stale);
     released = true;
 
@@ -825,8 +822,9 @@ WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
       // Timeout value from Qos.RELIABILITY.max_blocking_time
       ACE_Time_Value abs_timeout
       = ACE_OS::gettimeofday() + max_blocking_time_;
-
+      bool waited = false;
       while (!shutdown_ && ACE_OS::gettimeofday() < abs_timeout) {
+	waited = true;
         waiting_on_release_ = true; // reduces broadcast to only when waiting
 
         // lock is released while waiting and aquired before returning
@@ -839,17 +837,6 @@ WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
           } // else continue wait
 
         } else {
-          // Remove from the waiting list if wait() timed out or return
-          // other errors.
-          if (instance->waiting_list_.dequeue_next_instance_sample(element) == false) {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) ERROR: ")
-                              ACE_TEXT("WriteDataContainer::obtain_buffer, ")
-                              ACE_TEXT("dequeue_next_instance_sample from ")
-                              ACE_TEXT("waiting list failed\n")),
-                             DDS::RETCODE_ERROR);
-          }
-
           if (errno == ETIME) {
             ret = DDS::RETCODE_TIMEOUT;
 
@@ -861,7 +848,23 @@ WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
           break;
         }
       }
-    }
+      if (!waited) {
+        // max-blocking_time_ was so short we did not even try to wait
+	ret = DDS::RETCODE_TIMEOUT;
+      }
+      if (ret != DDS::RETCODE_OK) {
+	// Remove from the waiting list if wait() timed out or return
+	// other errors.
+	if (instance->waiting_list_.dequeue_next_instance_sample(element) == false) {
+	  ACE_ERROR_RETURN((LM_ERROR,
+			    ACE_TEXT("(%P|%t) ERROR: ")
+			    ACE_TEXT("WriteDataContainer::obtain_buffer, ")
+			    ACE_TEXT("dequeue_next_instance_sample from ")
+			    ACE_TEXT("waiting list failed\n")),
+			   DDS::RETCODE_ERROR);
+	}
+      }
+    } // wait_needed
 
   } else {
     if (!oldest_released) {
@@ -901,10 +904,6 @@ WriteDataContainer::unregister_all()
 
   shutdown_ = true;
 
-  // Tell transport remove all control messages currently
-  // transport is processing.
-  (void) this->writer_->remove_all_control_msgs();
-
   {
     //The internal list needs protection since this call may result from the
     //the delete_datawriter call which does not acquire the lock in advance.
@@ -912,40 +911,10 @@ WriteDataContainer::unregister_all()
     ACE_GUARD(ACE_Recursive_Thread_Mutex,
               guard,
               this->lock_);
-
-    while (sending_data_.size_ > 0) {
-      DataSampleListElement* old_head = sending_data_.head_;
-
-      if (old_head == 0) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: WriteDataContainer::unregister_all,")
-                   ACE_TEXT("NULL element at head of sending_data_, size %d head %X tail %X \n"),
-                   sending_data_.size_,  sending_data_.head_,  sending_data_.tail_));
-        break;
-      }
-
-      // Tell transport remove all samples currently
-      // transport is processing.
-      this->writer_->remove_sample(old_head);
-
-      if (old_head == sending_data_.head_) {
-        /*
-        ciju: In situations of repeated connection restablishment
-        from the subscriber, we seem to get some orphan messages
-        left behind in the system. When the system shuts down
-        due to the cleanup mechanism now in place we enter a
-        for-ever loop.
-        The problem is most probably due to missing error handling
-        somewhere in the element delivery path and fixing that is the
-        real solution as otherwise over time the internal buffers will
-        just fill up (currently only observed upon connection disruption).
-        For now I am putting this code which will trap and cleanup these
-        orphan messages at shutdown time.
-        keywords: forever loop orphan hang
-        ***********************************/
-
-        old_head->send_listener_->data_delivered(old_head);
-      }
-    }
+              
+    // Tell transport remove all control messages currently
+    // transport is processing.
+    (void) this->writer_->remove_all_msgs();
 
     // Broadcast to wake up all waiting threads.
     if (waiting_on_release_) {

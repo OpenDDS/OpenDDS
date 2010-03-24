@@ -21,7 +21,6 @@
 OpenDDS::DCPS::TransportConfiguration::~TransportConfiguration()
 {
   DBG_ENTRY_LVL("TransportConfiguration","~TransportConfiguration",6);
-  delete this->send_thread_strategy_;
 }
 
 ACE_TString

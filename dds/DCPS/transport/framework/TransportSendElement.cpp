@@ -50,3 +50,11 @@ OpenDDS::DCPS::TransportSendElement::msg() const
   DBG_ENTRY_LVL("TransportSendElement","msg",6);
   return this->element_->sample_;
 }
+
+
+const OpenDDS::DCPS::DataSampleListElement*
+OpenDDS::DCPS::TransportSendElement::sample() const
+{
+  DBG_ENTRY_LVL("TransportSendElement","sample",6);
+  return this->element_;
+}

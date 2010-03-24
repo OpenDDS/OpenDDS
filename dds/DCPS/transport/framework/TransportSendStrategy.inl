@@ -109,3 +109,12 @@ OpenDDS::DCPS::TransportSendStrategy::get_handle()
 {
   return ACE_INVALID_HANDLE;
 }
+
+
+ACE_INLINE void
+OpenDDS::DCPS::TransportSendStrategy::transport_shutdown ()
+{
+  this->transport_shutdown_ = true;
+}
+
+

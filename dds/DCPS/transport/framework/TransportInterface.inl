@@ -140,14 +140,14 @@ OpenDDS::DCPS::TransportInterface::remove_sample
 }
 
 ACE_INLINE int
-OpenDDS::DCPS::TransportInterface::remove_all_control_msgs(RepoId pub_id)
+OpenDDS::DCPS::TransportInterface::remove_all_msgs(RepoId pub_id)
 {
-  DBG_ENTRY_LVL("TransportInterface","remove_all_control_msgs",6);
+  DBG_ENTRY_LVL("TransportInterface","remove_all_msgs",6);
 
   DataLinkSet_rch pub_links = this->local_map_.find_set(pub_id);
 
   if (!pub_links.is_nil()) {
-    return pub_links->remove_all_control_msgs(pub_id);
+    return pub_links->remove_all_msgs(pub_id);
   }
 
   return 0;

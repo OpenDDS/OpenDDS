@@ -12,6 +12,8 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "TransportDefs.h"
+#include "ThreadSynchStrategy_rch.h"
+#include "PerConnectionSynchStrategy.h"
 #include "dds/DCPS/RcObject_T.h"
 #include "ace/Synch.h"
 #include "ace/Configuration.h"
@@ -58,9 +60,11 @@ public:
 
   /// Mutator for the "send thread strategy" object.  Will delete
   /// the existing strategy object (ie, the default) first.
+  /// This method DOES take ownership of the strategy argument
   void send_thread_strategy(ThreadSynchStrategy* strategy);
 
   /// Accessor for the "send thread strategy" object.
+  /// This method does NOT give up ownership of the returned strategy
   ThreadSynchStrategy* send_thread_strategy();
 
   /// Overwrite the default configurations with the configuration for the
@@ -105,7 +109,9 @@ public:
 protected:
 
   /// Default ctor.
-  TransportConfiguration();
+  /// Takes ownership of the strategy argument
+  TransportConfiguration(ThreadSynchStrategy* send_strategy =
+                           new PerConnectionSynchStrategy());
 
   static ACE_TString id_to_section_name(const TransportIdType& id);
 
@@ -117,7 +123,7 @@ private:
 
   /// Thread strategy used for sending data samples (and incomplete
   /// packets) when a DataLink has encountered "backpressure".
-  ThreadSynchStrategy* send_thread_strategy_;
+  ThreadSynchStrategy_rch send_thread_strategy_;
 };
 
 } // namespace DCPS
