@@ -19,10 +19,10 @@
       </mapping>
    </extension>
    <extension
-         point="org.eclipse.emf.ecore.dynamic_package">
-      <resource
-            location="platform:/plugin/org.opendds.modeling.resources/profiles/OpenDDS.profile.uml#_0"
+         point="org.eclipse.uml2.uml.dynamic_package">
+      <profile
+            location="pathmap://OPENDDS_PROFILES/OpenDDS.profile.uml"
             uri="http://www.opendds.org/schemas/modeling/OpenDDS">
-      </resource>
+      </profile>
    </extension>
 </plugin>
