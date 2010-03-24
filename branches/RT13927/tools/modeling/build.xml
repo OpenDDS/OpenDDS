@@ -9,15 +9,19 @@
     <!--
         Project Targets
     -->
-    <target name="all" depends="clean, build, test"
-            description="Meta-target for: clean, build, test"/>
-
     <target name="init" depends="bootstrap">
         <ivy:buildlist reference="project.buildpath">
             <fileset dir="${project.plugins.dir}">
                 <include name="**/build.xml"/>
             </fileset>
         </ivy:buildlist>
+    </target>
+
+    <target name="all" depends="init"
+            description="Meta-target for: clean, build, test">
+        <subant buildpathref="project.buildpath">
+            <target name="all"/>
+        </subant>
     </target>
 
     <target name="clean" depends="init"

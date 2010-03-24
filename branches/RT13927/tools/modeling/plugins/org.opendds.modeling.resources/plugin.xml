@@ -18,4 +18,11 @@
             target="platform:/plugin/org.opendds.modeling.resources/profiles/">
       </mapping>
    </extension>
+   <extension
+         point="org.eclipse.emf.ecore.dynamic_package">
+      <resource
+            location="platform:/plugin/org.opendds.modeling.resources/profiles/OpenDDS.profile.uml#_0"
+            uri="http://www.opendds.org/schemas/modeling/OpenDDS">
+      </resource>
+   </extension>
 </plugin>
