@@ -13,37 +13,37 @@
             description="Meta-target for: clean, build, test"/>
 
     <target name="init" depends="bootstrap">
-      <ivy:buildlist reference="project.buildpath">
-          <fileset dir="${project.plugins.dir}">
-              <include name="**/build.xml"/>
-          </fileset>
-      </ivy:buildlist>
+        <ivy:buildlist reference="project.buildpath">
+            <fileset dir="${project.plugins.dir}">
+                <include name="**/build.xml"/>
+            </fileset>
+        </ivy:buildlist>
     </target>
 
     <target name="clean" depends="init"
             description="Delete all plugin artifacts">
-        <subant buildpathref="project.buildpath" inheritall="true">
+        <subant buildpathref="project.buildpath">
             <target name="clean"/>
         </subant>
     </target>
 
     <target name="build" depends="init"
             description="Build all plugin artifacts">
-        <subant buildpathref="project.buildpath" inheritall="true">
+        <subant buildpathref="project.buildpath">
             <!-- default target -->
         </subant>
     </target>
     
     <target name="test" depends="init"
             description="Test all plugin artifacts">
-        <subant buildpathref="project.buildpath" inheritall="true">
+        <subant buildpathref="project.buildpath">
             <target name="test"/>
         </subant>
     </target>
     
     <target name="install" depends="init"
             description="Install all plugin artifacts">
-        <subant buildpathref="project.buildpath" inheritall="true">
+        <subant buildpathref="project.buildpath">
             <target name="install"/>
         </subant>
     </target>
