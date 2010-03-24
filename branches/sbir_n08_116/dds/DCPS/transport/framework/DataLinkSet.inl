@@ -111,35 +111,36 @@ OpenDDS::DCPS::DataLinkSet::remove_sample(const DataSampleListElement* sample,
                                           bool  dropped_by_transport)
 {
   DBG_ENTRY_LVL("DataLinkSet","remove_sample",6);
-  int status = 0;
-
+    
   GuardType guard(this->lock_);
-
+  TransportSendElement element (0, sample);
+  
   for (MapType::iterator itr = map_.begin();
        itr != map_.end();
        ++itr) {
+       
     // Tell the current DataLink to remove_sample.
-    if (itr->second->remove_sample(sample, dropped_by_transport) != 0) {
-      // Still go on to all of the DataLinks.  But we will make sure
-      // to return the error status when we finally leave.
-      status = -1;
+    if (itr->second->remove_sample(element, dropped_by_transport) == 0
+    && element.released ()) {
+      return 0;
     }
+    // else still go on to rest DataLinks.
   }
 
-  return status;
+  return -1;
 }
 
 ACE_INLINE int
-OpenDDS::DCPS::DataLinkSet::remove_all_control_msgs(RepoId pub_id)
+OpenDDS::DCPS::DataLinkSet::remove_all_msgs(RepoId pub_id)
 {
-  DBG_ENTRY_LVL("DataLinkSet","remove_all_control_msgs",6);
+  DBG_ENTRY_LVL("DataLinkSet","remove_all_msgs",6);
 
   GuardType guard(this->lock_);
 
   for (MapType::iterator itr = map_.begin();
        itr != map_.end();
        ++itr) {
-    itr->second->remove_all_control_msgs(pub_id);
+    itr->second->remove_all_msgs(pub_id);
   }
 
   return 0;

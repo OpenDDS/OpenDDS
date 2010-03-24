@@ -6,6 +6,7 @@
 #include "TestException.h"
 #include "tests/DCPS/FooType5/FooDefTypeSupportC.h"
 #include "tests/DCPS/common/TestSupport.h"
+#include "dds/DCPS/debug.h"
 #include "ace/Atomic_Op_T.h"
 #include "ace/OS_NS_unistd.h"
 
@@ -72,10 +73,13 @@ template<class DT, class DW, class DW_var>
 
       if (ret != ::DDS::RETCODE_OK)
       {
-        ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("(%P|%t)ERROR  Writer::svc, ")
-                    ACE_TEXT ("%dth write() returned %d.\n"),
-                    i, ret));
+        if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
+          ACE_ERROR ((LM_ERROR,
+                      ACE_TEXT("(%P|%t)ERROR  Writer::svc, ")
+                      ACE_TEXT ("%dth write() returned %d.\n"),
+                      i, ret));
+        }
+
         if (ret == ::DDS::RETCODE_TIMEOUT)
         {
           timeout_writes ++;

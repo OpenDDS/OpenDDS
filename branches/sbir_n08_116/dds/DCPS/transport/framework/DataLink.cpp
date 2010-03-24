@@ -803,7 +803,11 @@ void
 OpenDDS::DCPS::DataLink::transport_shutdown()
 {
   DBG_ENTRY_LVL("DataLink","transport_shutdown",6);
-
+  
+  if (! this->send_strategy_.is_nil ()) {
+    this->send_strategy_->transport_shutdown ();
+  }
+  
   if (this->cancel_release()) {
     this->handle_timeout(ACE_OS::gettimeofday(), (const void *)0);
   }

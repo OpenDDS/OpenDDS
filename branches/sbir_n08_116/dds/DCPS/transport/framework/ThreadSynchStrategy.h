@@ -11,6 +11,8 @@
 #define OPENDDS_DCPS_THREADSYNCHSTRATEGY_H
 
 #include "dds/DCPS/dcps_export.h"
+#include "dds/DCPS/RcObject_T.h"
+#include "ace/Synch.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -19,7 +21,9 @@ class ThreadSynch;
 class ThreadSynchResource;
 
 //MJM: Some class documentation here would be extremely helpful.
-class OpenDDS_Dcps_Export ThreadSynchStrategy {
+class OpenDDS_Dcps_Export ThreadSynchStrategy
+  : public RcObject<ACE_SYNCH_MUTEX>
+{
 public:
 
   virtual ~ThreadSynchStrategy();

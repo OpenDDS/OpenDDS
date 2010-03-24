@@ -15,7 +15,8 @@
 ACE_INLINE
 OpenDDS::DCPS::TransportQueueElement::TransportQueueElement(int initial_count)
   : sub_loan_count_(initial_count),
-    dropped_(false)
+    dropped_(false),
+    released_(false)
 {
   DBG_ENTRY_LVL("TransportQueueElement","TransportQueueElement",6);
 }
@@ -73,6 +74,7 @@ OpenDDS::DCPS::TransportQueueElement::decision_made(bool dropped_by_transport)
     // The queue elements are released to its cached allocator
     // in release_element() call.
     this->release_element(dropped_by_transport);
+    this->released_ = true;
     return;
   }
 
@@ -91,3 +93,21 @@ OpenDDS::DCPS::TransportQueueElement::was_dropped() const
 {
   return this->dropped_;
 }
+
+ACE_INLINE
+bool 
+OpenDDS::DCPS::TransportQueueElement::released() const
+{
+  return this->released_;
+}
+
+
+ACE_INLINE
+void 
+OpenDDS::DCPS::TransportQueueElement::released(bool flag)
+{
+  this->released_ = flag;
+}
+
+   
+

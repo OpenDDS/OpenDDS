@@ -31,6 +31,9 @@ public:
   /// Accessor for the ACE_Message_Block
   virtual const ACE_Message_Block* msg() const;
 
+  /// Original sample from send listener.
+  const DataSampleListElement* sample () const;
+  
 protected:
 
   virtual void release_element(bool dropped_by_transport);

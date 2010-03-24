@@ -148,10 +148,10 @@ public:
   /// A return value of 0 indicates that there was no fatal error, and
   /// that this DataLink no longer references the sample (if it ever
   /// did).
-  int remove_sample(const DataSampleListElement* sample, bool dropped_by_transport);
+  int remove_sample(TransportSendElement& element, bool dropped_by_transport);
 
   // ciju: Called by LinkSet with locks held
-  void remove_all_control_msgs(RepoId pub_id);
+  void remove_all_msgs(RepoId pub_id);
 
   /// This is called by our TransportReceiveStrategy object when it
   /// has received a complete data sample.  This method will cause

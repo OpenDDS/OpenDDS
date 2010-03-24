@@ -218,7 +218,7 @@ InstanceDataMap::test_passed(int expected)
     {
       for (int i = 0; i < num_samples_per_instance; i ++)
       {
-        if ((entry->int_id_)[i] < num_receives_per_sample_)
+        if (expect_receive_all && (entry->int_id_)[i] < num_receives_per_sample_)
         {
           ACE_ERROR ((LM_ERROR, 
             ACE_TEXT("(%P|%t) ERROR: received %d msg from %d instance ")

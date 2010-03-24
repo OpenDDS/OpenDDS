@@ -1,3 +1,36 @@
+Version 2.2 of OpenDDS.
+
+New to this version are the following changes:
+
+- 
+
+
+========================================================================
+
+Version 2.1.2 of OpenDDS.
+
+* This is a bugfix release to account for issues introduced by the
+  previous version.
+
+New to this version are the following changes:
+
+- Various bugfixes for locking issues during sample removal.
+
+- Fixed a bug in obtain_buffer() that did not return the TIMEOUT error 
+  code when max_blocking_time is 0 or a very small period.
+
+- Fixed a deadlock in the new IP multicast transport caused when data
+  is received while a reliable session is handshaking.
+
+- Fixed an issue which caused spurious synch threads to be created for
+  connectionless transports (i.e. UDP/IP, IP multicast).
+
+- Enhanced the experimental UDP/IP transport to support multiplexing
+  samples to unique endpoints rather than unique entities.
+
+
+========================================================================
+
 Version 2.1.1 of OpenDDS.
 
 * This is a bugfix release to account for issues introduced by the
