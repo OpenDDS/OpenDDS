@@ -1,6 +1,7 @@
 
 --- tailor this to your installation ---
 all hosts: export BASEDIR=/home/student01/thru
+all hosts: export BASEDIR=/projects/sbir/bench/tests
 
 on build host:
 
@@ -20,6 +21,7 @@ on build host:
 
 --- tailor this to your installation ---
 all hosts: export REPOHOST=172.16.10.103
+all hosts: export REPOHOST=10.201.200.115
 all hosts: export REPOPORT=2809
 all hosts: export PROJECTBASE=$BASEDIR/thru-tests
 all hosts: export TESTBASE=$PROJECTBASE/tests/thru

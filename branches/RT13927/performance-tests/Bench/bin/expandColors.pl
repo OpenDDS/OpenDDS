@@ -5,14 +5,17 @@ eval '(exit $?0)' && eval 'exec perl -pSi.bak $0 ${1+"$@"}'
 use warnings;
 use strict;
 
-=pod
+=head1 NAME
+
+expandColors.pl - Convert the TiddlyWiki ColorPalette slices to actual CSS colors
 
 $Id$
 
-expandColors.pl - Convert the TiddlyWiki ColorPalette slices to actual CSS colors.
+=head1 SYNOPSIS
 
-SYNOPSIS
   expandColors.pl <stylesheet>
+
+=head1 DESCRIPTION
 
 This script will replace the TiddlyWiki ColorPalette slice specifications
 in the CSS stylesheet(s).  The map is currently staticly defined in this
@@ -24,8 +27,8 @@ back with the updated information.  The original file is saved with an
 appended '.bak' extension.
 
 This script is intended to be run on the publish/style.css file created
-when publishing a TiddlyWiki file as a series of HTML documents.  The
-export plugin does not do this conversion for us.
+when publishing a TiddlyWiki file as a series of static HTML documents.
+The export plugin does not do this conversion for us.
 
 =cut
 

@@ -10,6 +10,7 @@
 #include "MulticastConfiguration.h"
 #include "MulticastLoader.h"
 
+#include "dds/DCPS/transport/framework/NullSynchStrategy.h"
 #include "dds/DCPS/transport/framework/TransportDefs.h"
 
 namespace {
@@ -37,7 +38,8 @@ namespace OpenDDS {
 namespace DCPS {
 
 MulticastConfiguration::MulticastConfiguration()
-  : default_to_ipv6_(DEFAULT_TO_IPV6),
+  : TransportConfiguration(new NullSynchStrategy()),
+    default_to_ipv6_(DEFAULT_TO_IPV6),
     port_offset_(DEFAULT_PORT_OFFSET),
     reliable_(DEFAULT_RELIABLE),
     syn_backoff_(DEFAULT_SYN_BACKOFF),

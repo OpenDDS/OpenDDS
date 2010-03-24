@@ -105,8 +105,8 @@ NakWatchdog::on_interval(const void* /*arg*/)
 ReliableSession::ReliableSession(MulticastDataLink* link,
                                  MulticastPeer remote_peer)
   : MulticastSession(link, remote_peer),
-    started_(false),
     acked_(false),
+    started_(false),
     syn_watchdog_(this),
     nak_watchdog_(this)
 {
@@ -117,7 +117,7 @@ ReliableSession::acked()
 {
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX,
                    guard,
-                   this->lock_,
+                   this->ack_lock_,
                    false);
 
   return this->acked_;
@@ -179,7 +179,7 @@ ReliableSession::syn_received(ACE_Message_Block* control)
   {
     ACE_GUARD(ACE_SYNCH_MUTEX,
               guard,
-              this->lock_);
+              this->ack_lock_);
 
     this->acked_ = true;
   }
@@ -223,11 +223,11 @@ ReliableSession::synack_received(ACE_Message_Block* control)
 
   // Ignore sample if not destined for us:
   if (local_peer != this->link_->local_peer()) return;
- 
-  { 
+
+  {
     ACE_GUARD(ACE_SYNCH_MUTEX,
               guard,
-              this->lock_);
+              this->ack_lock_);
 
     if (this->acked_) return; // already acked
 
@@ -431,7 +431,7 @@ ReliableSession::start(bool active)
 {
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX,
                    guard,
-                   this->lock_,
+                   this->start_lock_,
                    false);
 
   if (this->started_) return true;  // already started

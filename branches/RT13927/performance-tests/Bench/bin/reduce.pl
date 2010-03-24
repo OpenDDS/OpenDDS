@@ -5,14 +5,17 @@ eval '(exit $?0)' && eval 'exec perl -nS $0 ${1+"$@"}'
 use warnings;
 use strict;
 
-=pod
+=head1 NAME
+
+reduce.pl - reduce test results into plottable data
 
 $Id$
 
-reduce.pl - reduce test results into plottable data.
+=head1 SYNOPSIS
 
-SYNOPSIS
   reduce.pl <infile>
+
+=head1 DESCRIPTION
 
 This script processes the input file and prints converted data to
 standard output.
@@ -24,27 +27,64 @@ The output consists of data suitable for plotting using GNUPlot.  There
 are 4 indexed sections with the following data in the columns of each
 section:
 
-Index 0 -- latency and jitter data
-           This index does not include a sample number.  This can be
-           derived by using $0 for the x axis in the GNUPlot plot command.
-  Column 1 - individual data points for 1/2 full path latency from the
-             input file.
-  Column 2 - individual data points for jitter between successive latency
-             data points.
+=over 8
 
-Index 1 -- latency histogram data
-           This index has binned data derived from the index 0 / column 1
-           data points.  There are currently 25 bins into which the data
-           is placed.
-  Column 1 - the center of each bin
-  Column 2 - the frequency (number of samples) in the bin
+=item B<Index 0>
 
-Index 2 -- jitter histogram data
-           This index has binned data derived from the index 0 / column 2
-           data points.  There are currently 25 bins into which the data
-           is placed.
-  Column 1 - the center of each bin
-  Column 2 - the frequency (number of samples) in the bin
+Latency and jitter data.
+
+This index does not include a sample number.  This can be derived by
+using $0 for the x axis in the GNUPlot plot command.
+
+=over 8
+
+=item B<Column 1>
+
+Individual data points for 1/2 full path latency from the input file.
+
+=item B<Column 2>
+
+Individual data points for jitter between successive latency data points.
+
+=back
+
+=item B<Index 1>
+
+Latency histogram data.  This index has binned data derived from the
+index 0 / column 1 data points.  There are currently 25 bins into which
+the data is placed.
+
+=over 8
+
+=item B<Column 1>
+
+The center of each bin.
+
+=item B<Column 2>
+
+The frequency (number of samples) in the bin.
+
+=back
+
+=item B<Index 2>
+
+Jitter histogram data.  This index has binned data derived from the
+index 0 / column 2 data points.  There are currently 25 bins into which
+the data is placed.
+
+=over 8
+
+=item B<Column 1>
+
+The center of each bin.
+
+=item B<Column 2>
+
+The frequency (number of samples) in the bin.
+
+=back
+
+=back
 
 Each index section has a header comment.  The histogram sections (Index 1
 and Index 2) have statistical summary data included as well.  This
@@ -57,7 +97,7 @@ two '-' separated fields followed by the extension ".gpd" (representing
 GNUPlot data file).  The fields represent the transport type and the
 message size of the test data.
 
-EXAMPLE
+=head1 EXAMPLE
 
   reduce.pl tcp/run/latency-1000.data > data/tcp-1000.gpd
 
@@ -66,9 +106,11 @@ EXAMPLE
 # LOWER and UPPER are the upper and lower percentiles bounding the
 # histogram data.
 # BINS is the number of bins that the histogram data is partitioned into.
+# HOPS is the number of hops in the collected data.  This is normalized out.
 use constant LOWER => 0.05;
 use constant UPPER => 0.95;
 use constant BINS => 25;
+use constant HOPS => 2;
 
 # skip     - indicates whether to process a record or not.
 # previous - is the previous record data.
@@ -95,8 +137,8 @@ chomp;
 my @discard = split;
 do { print "# $_\n"; next } if 1 != scalar @discard;
 
-# Value is actually single hop, or one half of the full path latency.
-my $value = $_ / 2;
+# Value desired is actually single hop.
+my $value = $_ / HOPS;
 
 # Jitter is the difference in latency between adjacent measurements.
 my $jitter;

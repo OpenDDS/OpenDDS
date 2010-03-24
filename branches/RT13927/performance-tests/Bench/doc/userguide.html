@@ -532,26 +532,71 @@ Error: #f88
 <div title="DCPSInfoRepo" modifier="MikeMartinez" created="201003011936" changecount="1">
 <pre>This is the executable that manages metadata for OpenDDS.  This is where associations are made between publications and subscriptions.  Builtin Topics are distributed from here.  One process of this type is required for operaion of OpenDDS.  It implements CORBA interfaces that allow the individual DDS Participants to register for discovery and update internal state as necessary.</pre>
 </div>
-<div title="Data Reduction" modifier="MikeMartinez" created="201003082209" modified="201003082224" tags="publish" changecount="5">
-<pre>!!NOTE: This is a documentation placeholder and needs to be expanded.
-There are several scripts to assist in reducing the test data for analysis these include:
-;//$~BENCH_ROOT/bin/reduce.pl//
-:reduces latency data into a plottable format.
-;//$~BENCH_ROOT/bin/extract.pl//
-:extracts summary data from plottable latency data for further visualization.
-;//$~BENCH_ROOT/tools/convert-all//
-:notional shell script to run reduce.pl and extract.pl on data collected from multiple test execution runs.
+<div title="Data Reduction" modifier="MikeMartinez" created="201003082209" modified="201003192144" tags="publish" changecount="31">
+<pre>Test execution will result in data being generated and stored.  This data can then be post processed to reduce it to understandable summaries as well as to visualize the results.  OpenDDS-Bench produces output to the console while operating and will create latency data files if directed to do so as part of the test configuration.
 
+{{chunk{
+!Latency Test data reduction
+
+Latency tests will rely on the data stored to the [[test output files|LatencyDataFileFormat]] specified in the test configurations.  These files contain individual sample latency data as well as summary data.
+
+Scripts are available to convert the data into plottable format.  These include the following:
+
+{{indent{
+;[[$BENCH_ROOT/bin/reduce.pl|ReduceManPage]]
+:This script will convert individual latency test output files into a format suitable for use by GNUPlot for [[visualization|Data Visualization]].
+}}}
+
+{{indent{
+;[[$BENCH_ROOT/bin/extract.pl|ExtractManPage]]
+:This script will extract the data from the previously converted plot data and create a summary table for plotting overall trend data.
+}}}
+
+In addition to these scripts, a helper script to show how the other scripts can be used to reduce the data produced by the pre-defined [[existing tests|Existing Tests]] is available at //$~BENCH_ROOT/tools/convert-all//.  The commands in there assume a directory structure in which the tests were executed and in which the analysis will be performed.  You will need to tailor a set of commands similar to these to your test environment in order to effectively use the data reduction scripts.
+
+The directory structure assumed for this analysis is the following, relative to a working directory acting as the root directory for the data reduction.
+{{centeredTable{
+| ''Data Reduction Directory Structure'' |c
+| Directory | Use |
+| data|plot data files converted from the raw data files;&lt;br&gt;extracted summary data;&lt;br&gt;plot label definition files |
+| images|data visualization results |
+}}}
+
+The data reduction steps peformed include the following:
+#Convert the raw data files into plottable files:
+{{indent{
+{{{ reduce.pl &lt;testdir&gt;/tcp/latency-&lt;size&gt;.data &gt; data/tcp-&lt;size&gt;.gpd }}}
+{{{ reduce.pl &lt;testdir&gt;/udp/latency-&lt;size&gt;.data &gt; data/udp-&lt;size&gt;.gpd }}}
+{{{ reduce.pl &lt;testdir&gt;/mbe/latency-&lt;size&gt;.data &gt; data/mbe-&lt;size&gt;.gpd }}}
+{{{ reduce.pl &lt;testdir&gt;/mrel/latency-&lt;size&gt;.data &gt; data/mrel-&lt;size&gt;.gpd }}}
+}}}
+#Extract summary data from the plottable data files:
+{{indent{
+{{{ extract.pl data/*.gpd &gt; data/latency.csv }}}
+}}}
+#Generate GNUPlot suitable label strings for charts:
+{{indent{
+{{{ genstats.pl data/latency.csv }}}
+}}}
+}}}
+
+{{chunk{
+!Throughput Test data reduction
+
+Throughput test analysis will rely on the number of samples received at the test subscriptions.  Typically no latency data will be gathered during these tests so they will not be slowed by data collection.  The summary number of samples received can be gathered from the output of the test execution.
+
+!!NOTE: This is incomplete and needs to be expanded.
+}}}
 </pre>
 </div>
-<div title="Data Visualization" modifier="MikeMartinez" created="201003082219" tags="publish" changecount="1">
+<div title="Data Visualization" modifier="MikeMartinez" created="201003082219" modified="201003191855" tags="publish" changecount="2">
 <pre>!!NOTE: This is a documentation placeholder and needs to be expanded.
 There are several scripts to assist in visualizing the reduced test data.  These include:
-;//$~BENCH_ROOT/bin/mktable.pl//
+;//[[$BENCH_ROOT/bin/mktable.pl|MktableManPage]]//
 :script to crate a table of results.  This currently creates only a TiddlyWiki format table.
-;//$~BENCH_ROOT/bin/expandColors.pl//
+;//[[$BENCH_ROOT/bin/expandColors.pl|ExpandcolorsManPage]]//
 :script to replace color table lookups from TiddlyWiki in the data table from //mktable.pl// with actual color references.
-;//$~BENCH_ROOT/bin/genstats.pl//
+;//[[$BENCH_ROOT/bin/genstats.pl|GenstatsManPage]]//
 :script to create file with GNUPlot label string definitions containing summary statistics information to be added as labels to histogram charts.
 ;//$~BENCH_ROOT/bin/lj-plots.gp//
 :GNUPlot script to create Latency and Jitter timeline charts and histograms in a quad-plot format.
@@ -576,6 +621,86 @@ There are several scripts to assist in visualizing the reduced test data.  These
 :measures the incremental performance as hosts are added to a distribution
 </pre>
 </div>
+<div title="ExtractManPage" modifier="MikeMartinez" created="201003191853" tags="publish" changecount="1">
+<pre>&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;extract.pl - extract summary statistics from plot datafiles.&lt;/title&gt;
+&lt;meta http-equiv=&quot;content-type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
+&lt;link rev=&quot;made&quot; href=&quot;mailto:root@localhost&quot; /&gt;
+&lt;/head&gt;
+
+&lt;body style=&quot;background-color: white&quot;&gt;
+
+
+&lt;!-- INDEX BEGIN --&gt;
+&lt;div name=&quot;index&quot;&gt;
+&lt;p&gt;&lt;a name=&quot;__index__&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+
+	&lt;li&gt;&lt;a href=&quot;#name&quot;&gt;NAME&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#description&quot;&gt;DESCRIPTION&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#example&quot;&gt;EXAMPLE&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;hr name=&quot;index&quot; /&gt;
+&lt;/div&gt;
+&lt;!-- INDEX END --&gt;
+
+&lt;p&gt;
+&lt;/p&gt;
+&lt;h1&gt;&lt;a name=&quot;name&quot;&gt;NAME&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;extract.pl - extract summary statistics from plot datafiles.&lt;/p&gt;
+&lt;p&gt;$Id$&lt;/p&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/h1&gt;
+&lt;pre&gt;
+  extract.pl &amp;lt;infile&amp;gt; ...&lt;/pre&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;description&quot;&gt;DESCRIPTION&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;This script processes the input files and prints a summary from all files
+in comma separated values (CSV) format to standard output.&lt;/p&gt;
+&lt;p&gt;The input file is expected to be in the format produced by the reduce.pl
+data reduction script.  This file type has statistical summary data in
+the Index 1 and Index 2 section header comments that are parsed by this
+script and gathered from all input files.&lt;/p&gt;
+&lt;p&gt;This input file name is expected to be in a format that includes '-'
+separated fields and a fixed extension of &amp;quot;.gpd&amp;quot;.&lt;/p&gt;
+&lt;pre&gt;
+  &amp;lt;transport&amp;gt;-&amp;lt;size&amp;gt;.gpd&lt;/pre&gt;
+&lt;p&gt;The &amp;lt;transport&amp;gt; and &amp;lt;size&amp;gt; fields are used to populate two columns in the
+output data.&lt;/p&gt;
+&lt;p&gt;This output consists of a single CSV file with a single record (line)
+generated from each input file.  The output files include:&lt;/p&gt;
+&lt;table border&gt;
+  &lt;tr&gt;&lt;th&gt;Field&lt;/th&gt;&lt;th&gt;Description&lt;/th&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;1&lt;/td&gt;&lt;td&gt;transport type (derived from input filename)&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;2&lt;/td&gt;&lt;td&gt;test message size (derived from input filename)&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;3&lt;/td&gt;&lt;td&gt;latency mean statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;4&lt;/td&gt;&lt;td&gt;latency standard deviation statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;5&lt;/td&gt;&lt;td&gt;latency maximum statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;6&lt;/td&gt;&lt;td&gt;latency minimum statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;7&lt;/td&gt;&lt;td&gt;jitter mean statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;8&lt;/td&gt;&lt;td&gt;jitter standard deviation statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;9&lt;/td&gt;&lt;td&gt;jitter maximum statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;10&lt;/td&gt;&lt;td&gt;jitter minimum statistic&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;example&quot;&gt;EXAMPLE&lt;/a&gt;&lt;/h1&gt;
+&lt;pre&gt;
+  extract.pl data/*.gpd &amp;gt; data/latency.csv&lt;/pre&gt;
+
+&lt;/body&gt;
+
+&lt;/html&gt;
+</pre>
+</div>
 <div title="FAQ" modifier="MikeMartinez" created="201003022001" tags="publish faq" changecount="1">
 <pre>#[[What kind of document is this?|FAQ1]]
 </pre>
@@ -587,6 +712,91 @@ This is a TiddlyWiki document.</pre>
 </div>
 <div title="GNUPlot" modifier="MikeMartinez" created="201003082221" modified="201003082223" changecount="4">
 <pre>GNUPlot is a data visualization tool available as from [[gnuplot.info|http://gnuplot.info/]]</pre>
+</div>
+<div title="GenstatsManPage" modifier="MikeMartinez" created="201003191859" tags="publish" changecount="1">
+<pre>&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;genstats.pl - create GNUPlot statistical summary data string variables&lt;/title&gt;
+&lt;meta http-equiv=&quot;content-type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
+&lt;link rev=&quot;made&quot; href=&quot;mailto:root@localhost&quot; /&gt;
+&lt;/head&gt;
+
+&lt;body style=&quot;background-color: white&quot;&gt;
+
+
+&lt;!-- INDEX BEGIN --&gt;
+&lt;div name=&quot;index&quot;&gt;
+&lt;p&gt;&lt;a name=&quot;__index__&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+
+	&lt;li&gt;&lt;a href=&quot;#name&quot;&gt;NAME&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#description&quot;&gt;DESCRIPTION&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#example&quot;&gt;EXAMPLE&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;hr name=&quot;index&quot; /&gt;
+&lt;/div&gt;
+&lt;!-- INDEX END --&gt;
+
+&lt;p&gt;
+&lt;/p&gt;
+&lt;h1&gt;&lt;a name=&quot;name&quot;&gt;NAME&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;genstats.pl - create GNUPlot statistical summary data string variables&lt;/p&gt;
+&lt;p&gt;$Id$&lt;/p&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/h1&gt;
+&lt;pre&gt;
+  genstats.pl &amp;lt;infile&amp;gt;&lt;/pre&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;description&quot;&gt;DESCRIPTION&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;This script processes a comma separated value (CSV) input file and
+creates an output file for each record of the input.  Each output file is
+placed in the same directory that the input file was located in.  The
+output file names are constructed using fields from the input record as:&lt;/p&gt;
+&lt;pre&gt;
+  &amp;lt;transport&amp;gt;-&amp;lt;size&amp;gt;.stats&lt;/pre&gt;
+&lt;p&gt;The input file is expected to be in the format produced by the extract.pl
+data reduction script.  Each record (line) of the input file contains the
+following fields:&lt;/p&gt;
+&lt;table border&gt;
+  &lt;tr&gt;&lt;th&gt;Field&lt;/th&gt;&lt;th&gt;Description&lt;/th&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;1&lt;/td&gt;&lt;td&gt;transport type&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;2&lt;/td&gt;&lt;td&gt;test message size&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;3&lt;/td&gt;&lt;td&gt;latency mean statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;4&lt;/td&gt;&lt;td&gt;latency standard deviation statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;5&lt;/td&gt;&lt;td&gt;latency maximum statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;6&lt;/td&gt;&lt;td&gt;latency minimum statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;7&lt;/td&gt;&lt;td&gt;jitter mean statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;8&lt;/td&gt;&lt;td&gt;jitter standard deviation statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;9&lt;/td&gt;&lt;td&gt;jitter maximum statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;10&lt;/td&gt;&lt;td&gt;jitter minimum statistic&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;&lt;p&gt;The output includes two GNUPlot string variable definitions suitable for
+'load' or 'call' operations within GNUPlot.  Some GNUPlot data
+visualization scripts use these variables to generate label information
+to place on some plots.  The variables are:&lt;/p&gt;
+&lt;pre&gt;
+  latency_stats
+  jitter_stats&lt;/pre&gt;
+&lt;p&gt;Each variable contains the mean, standard deviation, maximum, and minimum
+data values for the output file (transport/size) in a newline separated
+single string suitable for use as a label within GNUPlot.&lt;/p&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;example&quot;&gt;EXAMPLE&lt;/a&gt;&lt;/h1&gt;
+&lt;pre&gt;
+  genstats.pl data/latency.csv&lt;/pre&gt;
+
+&lt;/body&gt;
+
+&lt;/html&gt;
+</pre>
 </div>
 <div title="GettingStarted" modifier="MikeMartinez" created="201002011551" modified="201002011553" changecount="3">
 <pre>To get started with this blank [[TiddlyWiki]], you'll need to modify the following tiddlers:
@@ -700,6 +910,84 @@ There is a separate configuration file supplied for each message size test to be
 | 32000|p1-32000.ini |
 }}}</pre>
 </div>
+<div title="LatencyDataFileFormat" modifier="MikeMartinez" created="201003191950" modified="201003192026" tags="publish" changecount="8">
+<pre>Latency data files include last hop and full path information in both summary and detailed forms.  in the output files specified as part of the test configuration for a subscription, the summary data appears first, followed by the detailed data.  The summary data is shown organized by last hop then full path, and within each category the information is broken down and summarized by publication that wrote the data.
+
+Latency data is produced by collecting a timestamp at the originating point and sending it along with the sample to be compared with a timestamp collected at the terminating point.  Since the actual collection of timestamps can affect the operation of the test, only timestamps that are required are generated.  This typically means that a test timestamp will be generated and collected only at the path origination and termination.  This is where the full-path latency data is gathered.
+
+OpenDDS internally has a requirement to generate and send timestamps with each data sample, and those timestamps are used to extract the actual per-hop information.
+
+Since the latency data consists of two timestamps, it is important to only compare the timestamps where the comparison has meaning.  This means knowledge of skew between different clocks is necessary if the two timestamps are collected from different sources.  Since the inherent clock drift and skew between hosts is large compared to the time intervals being measured, it is best to compare data only between measurements from the same clock unless dedicated hardware of known performance is used to ensure comparison fidelity.
+
+This typically results in only the full-path data being useful in the latency data collection.  The skew and drift between hosts results in the per-hop information being of less value unless the publication and subscription are on the same host and access the same underlying system clock.
+
+An example of the summary data is shown below:
+{{{
+SUBSCRIPTION s5 SUMMARY DATA
+Total Messages Received: 11913
+Valid Messages Received: 11912
+
+ --- last hop statistical summary for subscription s5 ---
+  Writer[ 00030000.00000000.00000030.00000102(abf2c9c7)]
+     samples: 11912
+        mean: 0.00011231
+     minimum: 0.000106
+     maximum: 0.000365
+    variance: 2.20289e-11
+ --- full path statistical summary for subscription s5 ---
+  Writer[ 0xffffffff9692e077]
+     samples: 11912
+        mean: 0.000278045
+     minimum: 0.000266
+     maximum: 0.001049
+    variance: 1.58282e-10
+}}}
+;Messages Received
+:The &quot;Total Messages Recieved&quot; will in general vary from the &quot;Valid Messages Received&quot; value due to control messages that are considered invalid at the application API interfaces.  Typically this is accounted for by the terminating  &quot;unregister&quot; message that is received during test shutdown.  The &quot;Valid Messages Received&quot; indicates how many samples of the expected data type were received by the application interface during the test.
+;last hop statistical summary
+:this is collected and organized by the ~DataWriter Id value of the publication that was last to write during the data's traversal of the test path.  For more than one hop testing this will typically be a different set of ~DataWriters than those for the full path statistics.  For the last hop, the Publication Id of the ~DataWriter is available and is included in the Writer information.
+;full path statistical summary
+:this is collected and organized by the ~DataWriter Id value of the publication originating the data within the test.  For more than one hop test paths there will be a different set of ~DataWriters than those for the last hop ~DataWriters.  For the full path information the Publication Id value of the originating writer is not available, so only the 32 bit hash value is included in the Writer information.  On 64 bit systems this value might be sign-extended as in the example data above.
+The statistical data consists of the following information:
+;samples
+:this is the number of samples that are included in the statistical calculations.
+;mean
+:this is the average latency value for all of the included samples.
+;minimum
+:this is the lowest latency value of all the samples.
+;maximum
+:this is the largest latency value of all the samples.
+;variance
+:this is the variance of the entire data set.  It is the square of the standard deviation for Gaussian distributed data populations.
+The detailed data includes a data point representing the latency of a single sample for each sample in the specified collection parameters (last 5,000 samples in the predefined [[latency tests|Latency Tests]]).  This is the number of seconds between the sample write time at the originating publication and the sample read time at the terminating subscription.
+
+An example of the detailed data is shown below:
+{{{
+SUBSCRIPTION s5 DETAILED DATA
+ --- last hop statistical data for subscription s5 ---
+
+  Writer[ 00030000.00000000.00000030.00000102(abf2c9c7)]
+5000 samples out of 11912
+1.13000e-04
+1.12000e-04
+1.12000e-04
+...
+1.13000e-04
+1.23000e-04
+1.20000e-04
+ --- full path statistical data for subscription s5 ---
+  Writer[ 0xffffffff9692e077]
+5000 samples out of 11912
+2.80000e-04
+2.76000e-04
+2.80000e-04
+...
+2.78000e-04
+3.22000e-04
+3.12000e-04
+}}}
+</pre>
+</div>
 <div title="MainMenu" modifier="MikeMartinez" created="201002181950" modified="201003031716" changecount="7">
 <pre>[[Introduction|OpenDDS-Bench]]
 [[Quick Start]]
@@ -710,6 +998,125 @@ There is a separate configuration file supplied for each message size test to be
 [[Data Reduction]]
 [[Data Visualization]]
 [[FAQ]]
+</pre>
+</div>
+<div title="MktableManPage" modifier="MikeMartinez" created="201003191856" tags="publish" changecount="1">
+<pre>&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;mktable.pl - create a TiddlyWiki or HTML table with latency test data&lt;/title&gt;
+&lt;meta http-equiv=&quot;content-type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
+&lt;link rev=&quot;made&quot; href=&quot;mailto:root@localhost&quot; /&gt;
+&lt;/head&gt;
+
+&lt;body style=&quot;background-color: white&quot;&gt;
+
+
+&lt;!-- INDEX BEGIN --&gt;
+&lt;div name=&quot;index&quot;&gt;
+&lt;p&gt;&lt;a name=&quot;__index__&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+
+	&lt;li&gt;&lt;a href=&quot;#name&quot;&gt;NAME&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#options&quot;&gt;OPTIONS&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#description&quot;&gt;DESCRIPTION&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#example&quot;&gt;EXAMPLE&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;hr name=&quot;index&quot; /&gt;
+&lt;/div&gt;
+&lt;!-- INDEX END --&gt;
+
+&lt;p&gt;
+&lt;/p&gt;
+&lt;h1&gt;&lt;a name=&quot;name&quot;&gt;NAME&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;mktable.pl - create a TiddlyWiki or HTML table with latency test data&lt;/p&gt;
+&lt;p&gt;$Id$&lt;/p&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/h1&gt;
+&lt;pre&gt;
+  mktable.pl [ html ] &amp;lt;infile&amp;gt;&lt;/pre&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;options&quot;&gt;OPTIONS&lt;/a&gt;&lt;/h1&gt;
+&lt;dl&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;html&quot; class=&quot;item&quot;&gt;&lt;strong&gt;html&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Select HTML output format instead of the default TiddlyWiki tiddler
+table format.  &lt;strong&gt;This is not currently supported&lt;/strong&gt;.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;description&quot;&gt;DESCRIPTION&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;This script reads a data file with statistical information and creates
+output suitable for inclusion within a tiddler in a TiddlyWiki document
+to define a table with the data included.  If the optional 'html'
+argument is supplied the output format will be as a static HTML table.&lt;/p&gt;
+&lt;p&gt;The input file is expected to be in the format produced by the extract.pl
+data reduction script.  Each record (line) of the input file contains the
+following fields:&lt;/p&gt;
+&lt;table border&gt;
+  &lt;tr&gt;&lt;th&gt;Field&lt;/th&gt;&lt;th&gt;Description&lt;/th&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;1&lt;/td&gt;&lt;td&gt;transport type&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;2&lt;/td&gt;&lt;td&gt;test message size&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;3&lt;/td&gt;&lt;td&gt;latency mean statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;4&lt;/td&gt;&lt;td&gt;latency standard deviation statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;5&lt;/td&gt;&lt;td&gt;latency maximum statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;6&lt;/td&gt;&lt;td&gt;latency minimum statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;7&lt;/td&gt;&lt;td&gt;jitter mean statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;8&lt;/td&gt;&lt;td&gt;jitter standard deviation statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;9&lt;/td&gt;&lt;td&gt;jitter maximum statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;10&lt;/td&gt;&lt;td&gt;jitter minimum statistic&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;&lt;p&gt;This script will only successfully create table data for input files that
+contain the same number of message size data for each transport included.&lt;/p&gt;
+&lt;p&gt;The tiddler table output consists of TiddlyWiki table format definitions
+to create a table containing the statistical information and links to
+tiddlers that should contain the quad-plots representing the summarized
+data.&lt;/p&gt;
+&lt;p&gt;The first two rows of the table include a row and column title for the
+leftmost column identifying the transport along with the data columns -
+one pair for each data size.&lt;/p&gt;
+&lt;p&gt;Subsequent rows include sets of 5 rows each representing summary data for
+a specific transport type.  These rows contain the following columns:&lt;/p&gt;
+&lt;table border&gt;
+  &lt;tr&gt;&lt;th&gt;Row&lt;/th&gt;&lt;th&gt;Column(s)&lt;/th&gt;&lt;th&gt;Tiddler Format Contents&lt;/th&gt;&lt;th&gt;HTML Format Contents&lt;/th&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;n&lt;/td&gt;&lt;td&gt;1&lt;/td&gt;&lt;td&gt;transport identification (name)&lt;/td&gt;&lt;td&gt;unsupported&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;n&lt;/td&gt;&lt;td&gt;even&lt;/td&gt;&lt;td&gt;&quot;Latency&quot; label&lt;/td&gt;&lt;td&gt;unsupported&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;n&lt;/td&gt;&lt;td&gt;odd, after first&lt;/td&gt;&lt;td&gt;&quot;Mean&amp;lt;br&gt;&quot; . $data&lt;/td&gt;&lt;td&gt;unsupported&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;1 + n&lt;/td&gt;&lt;td&gt;1&lt;/td&gt;&lt;td&gt;&quot;~&quot; ROWSPAN specification&lt;/td&gt;&lt;td&gt;unsupported&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;1 + n&lt;/td&gt;&lt;td&gt;even&lt;/td&gt;&lt;td&gt;&quot;~&quot; ROWSPAN specification&lt;/td&gt;&lt;td&gt;unsupported&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;1 + n&lt;/td&gt;&lt;td&gt;odd, after first&lt;/td&gt;&lt;td&gt;&quot;Dev&amp;lt;br&gt;&quot; . $data&lt;/td&gt;&lt;td&gt;unsupported&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;2 + n&lt;/td&gt;&lt;td&gt;1&lt;/td&gt;&lt;td&gt;&quot;~&quot; ROWSPAN specification&lt;/td&gt;&lt;td&gt;unsupported&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;2 + n&lt;/td&gt;&lt;td&gt;even&lt;/td&gt;&lt;td&gt;&quot;Jitter&quot; label&lt;/td&gt;&lt;td&gt;unsupported&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;2 + n&lt;/td&gt;&lt;td&gt;odd, after first&lt;/td&gt;&lt;td&gt;&quot;Mean&amp;lt;br&gt;&quot; . $data&lt;/td&gt;&lt;td&gt;unsupported&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;3 + n&lt;/td&gt;&lt;td&gt;1&lt;/td&gt;&lt;td&gt;&quot;~&quot; ROWSPAN specification&lt;/td&gt;&lt;td&gt;unsupported&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;3 + n&lt;/td&gt;&lt;td&gt;even&lt;/td&gt;&lt;td&gt;&quot;~&quot; ROWSPAN specification&lt;/td&gt;&lt;td&gt;unsupported&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;3 + n&lt;/td&gt;&lt;td&gt;odd, after first&lt;/td&gt;&lt;td&gt;&quot;Dev&amp;lt;br&gt;&quot; . $data&lt;/td&gt;&lt;td&gt;unsupported&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;4 + n&lt;/td&gt;&lt;td&gt;1&lt;/td&gt;&lt;td&gt;&quot;~&quot; ROWSPAN specification&lt;/td&gt;&lt;td&gt;unsupported&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;4 + n&lt;/td&gt;&lt;td&gt;even&lt;/td&gt;&lt;td&gt;&quot;&gt;&quot; COLSPAN specification&lt;/td&gt;&lt;td&gt;unsupported&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;4 + n&lt;/td&gt;&lt;td&gt;odd, after first&lt;/td&gt;&lt;td&gt;&quot;[[plot]|&quot; . $data . &quot;]]&quot;&lt;/td&gt;&lt;td&gt;unsupported&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;&lt;p&gt;Where the mean and deviation data are taken from the input file, and the
+plot data is formed from the transport type and message size obtained
+from the input file.&lt;/p&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;example&quot;&gt;EXAMPLE&lt;/a&gt;&lt;/h1&gt;
+&lt;pre&gt;
+  mktable.pl data/latency.csv &amp;gt; doc/results-tiddler&lt;/pre&gt;
+&lt;pre&gt;
+  mktable.pl html data/latency.csv &amp;gt; table-frag.html&lt;/pre&gt;
+
+&lt;/body&gt;
+
+&lt;/html&gt;
 </pre>
 </div>
 <div title="OpenDDS" modifier="OpenDDS" created="200911302157" tags="OpenDDS" changecount="1">
@@ -1187,6 +1594,135 @@ The following steps need to be performed on each host for each test.  The ''&lt;
 Note that it is important to start the tests within 60 seconds of each other.  This is due to the script timeout value, which is set to 60 seconds after the specified duration.  The test execution does not start until the entire test is connected, so if any host is not started within the 60 seconds interval processes that were started first will time out before the test is complete.
 }}}</pre>
 </div>
+<div title="ReduceManPage" modifier="MikeMartinez" created="201003191851" tags="publish" changecount="1">
+<pre>&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;reduce.pl - reduce test results into plottable data&lt;/title&gt;
+&lt;meta http-equiv=&quot;content-type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
+&lt;link rev=&quot;made&quot; href=&quot;mailto:root@localhost&quot; /&gt;
+&lt;/head&gt;
+
+&lt;body style=&quot;background-color: white&quot;&gt;
+
+
+&lt;!-- INDEX BEGIN --&gt;
+&lt;div name=&quot;index&quot;&gt;
+&lt;p&gt;&lt;a name=&quot;__index__&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+
+	&lt;li&gt;&lt;a href=&quot;#name&quot;&gt;NAME&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#description&quot;&gt;DESCRIPTION&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#example&quot;&gt;EXAMPLE&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;hr name=&quot;index&quot; /&gt;
+&lt;/div&gt;
+&lt;!-- INDEX END --&gt;
+
+&lt;p&gt;
+&lt;/p&gt;
+&lt;h1&gt;&lt;a name=&quot;name&quot;&gt;NAME&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;reduce.pl - reduce test results into plottable data&lt;/p&gt;
+&lt;p&gt;$Id$&lt;/p&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/h1&gt;
+&lt;pre&gt;
+  reduce.pl &amp;lt;infile&amp;gt;&lt;/pre&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;description&quot;&gt;DESCRIPTION&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;This script processes the input file and prints converted data to
+standard output.&lt;/p&gt;
+&lt;p&gt;The input file is expected to be in the format produced by the OpenDDS
+performance test bench latency data summary.&lt;/p&gt;
+&lt;p&gt;The output consists of data suitable for plotting using GNUPlot.  There
+are 4 indexed sections with the following data in the columns of each
+section:&lt;/p&gt;
+&lt;dl&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;index_0&quot; class=&quot;item&quot;&gt;&lt;strong&gt;Index 0&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Latency and jitter data.&lt;/p&gt;
+&lt;p&gt;This index does not include a sample number.  This can be derived by
+using $0 for the x axis in the GNUPlot plot command.&lt;/p&gt;
+&lt;dl&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;column_1&quot; class=&quot;item&quot;&gt;&lt;strong&gt;Column 1&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Individual data points for 1/2 full path latency from the input file.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;column_2&quot; class=&quot;item&quot;&gt;&lt;strong&gt;Column 2&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Individual data points for jitter between successive latency data points.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;index_1&quot; class=&quot;item&quot;&gt;&lt;strong&gt;Index 1&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Latency histogram data.  This index has binned data derived from the
+index 0 / column 1 data points.  There are currently 25 bins into which
+the data is placed.&lt;/p&gt;
+&lt;dl&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;column_12&quot; class=&quot;item&quot;&gt;&lt;strong&gt;Column 1&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;The center of each bin.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;column_22&quot; class=&quot;item&quot;&gt;&lt;strong&gt;Column 2&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;The frequency (number of samples) in the bin.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;index_2&quot; class=&quot;item&quot;&gt;&lt;strong&gt;Index 2&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Jitter histogram data.  This index has binned data derived from the
+index 0 / column 2 data points.  There are currently 25 bins into which
+the data is placed.&lt;/p&gt;
+&lt;dl&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;column_13&quot; class=&quot;item&quot;&gt;&lt;strong&gt;Column 1&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;The center of each bin.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;column_23&quot; class=&quot;item&quot;&gt;&lt;strong&gt;Column 2&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;The frequency (number of samples) in the bin.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;Each index section has a header comment.  The histogram sections (Index 1
+and Index 2) have statistical summary data included as well.  This
+statistical summary data is usable by the 'extract.pl' script to provide
+plottable summary data.&lt;/p&gt;
+&lt;p&gt;If the data produced by this script is to be used by the 'extract.pl'
+script, then the output file needs to be named such that it consists of
+two '-' separated fields followed by the extension &amp;quot;.gpd&amp;quot; (representing
+GNUPlot data file).  The fields represent the transport type and the
+message size of the test data.&lt;/p&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;example&quot;&gt;EXAMPLE&lt;/a&gt;&lt;/h1&gt;
+&lt;pre&gt;
+  reduce.pl tcp/run/latency-1000.data &amp;gt; data/tcp-1000.gpd&lt;/pre&gt;
+
+&lt;/body&gt;
+
+&lt;/html&gt;
+</pre>
+</div>
 <div title="RunTestManPage" modifier="MikeMartinez" created="201002251721" modified="201003031700" changecount="4">
 <pre>&lt;html&gt;
 &lt;head&gt;
@@ -1508,7 +2044,7 @@ output.  All statistics - system, network, and process - will be gathered.&lt;/p
 <div title="SiteUrl" modifier="OpenDDS" created="200911302027" changecount="1">
 <pre>http://www.ociweb.com/</pre>
 </div>
-<div title="StyleSheet" modifier="MikeMartinez" created="200911302014" modified="201003021959" changecount="76">
+<div title="StyleSheet" modifier="MikeMartinez" created="200911302014" modified="201003192115" changecount="82">
 <pre>a:hover {
     text-decoration: none;
 }
@@ -1560,6 +2096,8 @@ output.  All statistics - system, network, and process - will be gathered.&lt;/p
   padding: 5px;
   border: solid 1px;
 }
+
+.chunk {background:[[ColorPalette::SecondaryPale]]; border:2px; margin-left:5%; margin-right:5%;}
 
 .viewer div.centeredTable {
 	text-align: center;

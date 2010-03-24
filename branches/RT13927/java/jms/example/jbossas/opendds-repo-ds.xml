@@ -11,6 +11,6 @@
         <attribute name="ORBListenEndpoints">iiop://:6666</attribute>
         <attribute name="ORBLogFile">${jboss.server.log.dir}/opendds-repo.log</attribute>
         <attribute name="TransportType">SimpleTcp</attribute>
-        <depends>jboss.jca:service=RARDeployment,name='opendds-jms-2.1.1.rar'</depends>
+        <depends>jboss.jca:service=RARDeployment,name='opendds-jms-2.1.2.rar'</depends>
     </mbean>
 </connection-factories>

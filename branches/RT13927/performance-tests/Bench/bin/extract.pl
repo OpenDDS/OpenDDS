@@ -6,14 +6,17 @@ use warnings;
 use strict;
 use File::Basename;
 
-=pod
-
-$Id$
+=head1 NAME
 
 extract.pl - extract summary statistics from plot datafiles.
 
-SYNOPSIS
+$Id$
+
+=head1 SYNOPSIS
+
   extract.pl <infile> ...
+
+=head1 DESCRIPTION
 
 This script processes the input files and prints a summary from all files
 in comma separated values (CSV) format to standard output.
@@ -34,18 +37,37 @@ output data.
 This output consists of a single CSV file with a single record (line)
 generated from each input file.  The output files include:
 
-  Field  1: transport type (derived from input filename)
-  Field  2: test message size (derived from input filename)
-  Field  3: latency mean statistic
-  Field  4: latency standard deviation statistic
-  Field  5: latency maximum statistic
-  Field  6: latency minimum statistic
-  Field  7: jitter mean statistic
-  Field  8: jitter standard deviation statistic
-  Field  9: jitter maximum statistic
-  Field 10: jitter minimum statistic
+=begin html
 
-EXAMPLE
+<table border>
+  <tr><th>Field</th><th>Description</th></tr>
+  <tr><td>1</td><td>transport type (derived from input filename)</td></tr>
+  <tr><td>2</td><td>test message size (derived from input filename)</td></tr>
+  <tr><td>3</td><td>latency mean statistic</td></tr>
+  <tr><td>4</td><td>latency standard deviation statistic</td></tr>
+  <tr><td>5</td><td>latency maximum statistic</td></tr>
+  <tr><td>6</td><td>latency minimum statistic</td></tr>
+  <tr><td>7</td><td>jitter mean statistic</td></tr>
+  <tr><td>8</td><td>jitter standard deviation statistic</td></tr>
+  <tr><td>9</td><td>jitter maximum statistic</td></tr>
+  <tr><td>10</td><td>jitter minimum statistic</td></tr>
+</table>
+
+=end html
+
+=for text
+      Field  1: transport type (derived from input filename)
+      Field  2: test message size (derived from input filename)
+      Field  3: latency mean statistic
+      Field  4: latency standard deviation statistic
+      Field  5: latency maximum statistic
+      Field  6: latency minimum statistic
+      Field  7: jitter mean statistic
+      Field  8: jitter standard deviation statistic
+      Field  9: jitter maximum statistic
+      Field 10: jitter minimum statistic
+
+=head1 EXAMPLE
 
   extract.pl data/*.gpd > data/latency.csv
 

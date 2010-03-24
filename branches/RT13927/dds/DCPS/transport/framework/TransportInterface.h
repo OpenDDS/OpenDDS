@@ -81,7 +81,7 @@ public:
   /// along the way.
   int remove_sample(const DataSampleListElement* sample, bool dropped_by_transport);
 
-  int remove_all_control_msgs(RepoId pub_id);
+  int remove_all_msgs(RepoId pub_id);
 
   /// This method is called by the client application (or a subclass
   /// of TransportInterface) in order to attach this TransportInterface
