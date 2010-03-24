@@ -1,3 +1,15 @@
+Wed Mar 24 19:52:53 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/modeling/build.xml:
+        * tools/modeling/plugins/org.opendds.modeling.core/build.xml:
+        * tools/modeling/plugins/org.opendds.modeling.resources/build.xml:
+
+          Final tweaks to the build system.
+
+        * tools/modeling/plugins/org.opendds.modeling.resources/plugin.xml:
+
+          Added initial support for registering the UML2 OpenDDS profile.
+
 Wed Mar 24 16:15:29 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.core/.project:

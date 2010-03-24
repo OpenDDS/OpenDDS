@@ -6,6 +6,7 @@
     <property name="build.dir" value="build"/>
     <property name="doc.dir" value="doc"/>
     <property name="lib.dir" value="lib"/>
+	<property name="metainf.dir" value="META-INF"/>
     <property name="src.dir" value="src"/>
     <property name="test.dir" value="test"/>
     
@@ -60,28 +61,25 @@
                classpathref="plugin.classpath"
                includeantruntime="false">
         </javac>
-
-        <!-- Copy plugin resources -->
-        <copy todir="${build.dir}/classes">
-            <fileset refid="plugin.resources"/>
-            <fileset dir="${src.dir}">
-                <exclude name="**/*.java"/>
-            </fileset>
-        </copy>
-
-        <!-- Update plugin Bundle-Version --> 
-        <manifest file="${build.dir}/classes/META-INF/MANIFEST.MF" mode="update">
-            <attribute name="Bundle-Version" value="${opendds.version}"/>
-        </manifest>
     </target>
 
     <target name="archive" depends="compile" unless="plugin.uptodate"
             description="Archive plugin artifacts">
+        <!-- Update plugin Bundle-Version -->
+        <copy file="${metainf.dir}/MANIFEST.MF" todir="${build.dir}"/>
+        <manifest file="${build.dir}/MANIFEST.MF" mode="update">
+            <attribute name="Bundle-Version" value="${opendds.version}"/>
+        </manifest>
+
         <jar destfile="${build.dir}/${ant.project.name}.jar"
              compress="${jar.compress}"
              index="${jar.index}"
-             filesetmanifest="merge">
+             manifest="${build.dir}/MANIFEST.MF">
+            <fileset dir="${src.dir}">
+                <exclude name="**/*.java"/>
+            </fileset>
             <fileset dir="${build.dir}/classes"/>
+            <fileset refid="plugin.resources"/>
         </jar>
     </target>
 
