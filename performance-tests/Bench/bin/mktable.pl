@@ -5,14 +5,28 @@ eval '(exit $?0)' && eval 'exec perl -nS $0 ${1+"$@"}'
 use warnings;
 use strict;
 
-=pod
-
-$Id$
+=head1 NAME
 
 mktable.pl - create a TiddlyWiki or HTML table with latency test data
 
-SYNOPSIS
+$Id$
+
+=head1 SYNOPSIS
+
   mktable.pl [ html ] <infile>
+
+=head1 OPTIONS
+
+=over 8
+
+=item B<html>
+
+Select HTML output format instead of the default TiddlyWiki tiddler
+table format.  B<This is not currently supported>.
+
+=back
+
+=head1 DESCRIPTION
 
 This script reads a data file with statistical information and creates
 output suitable for inclusion within a tiddler in a TiddlyWiki document
@@ -23,16 +37,37 @@ The input file is expected to be in the format produced by the extract.pl
 data reduction script.  Each record (line) of the input file contains the
 following fields:
 
-  Field 0: transport type
-  Field 1: test message size
-  Field 2: latency mean statistic
-  Field 3: latency standard deviation statistic
-  Field 4: latency maximum statistic
-  Field 5: latency minimum statistic
-  Field 6: jitter mean statistic
-  Field 7: jitter standard deviation statistic
-  Field 8: jitter maximum statistic
-  Field 9: jitter minimum statistic
+=begin html
+
+<table border>
+  <tr><th>Field</th><th>Description</th></tr>
+  <tr><td>1</td><td>transport type</td></tr>
+  <tr><td>2</td><td>test message size</td></tr>
+  <tr><td>3</td><td>latency mean statistic</td></tr>
+  <tr><td>4</td><td>latency standard deviation statistic</td></tr>
+  <tr><td>5</td><td>latency maximum statistic</td></tr>
+  <tr><td>6</td><td>latency minimum statistic</td></tr>
+  <tr><td>7</td><td>jitter mean statistic</td></tr>
+  <tr><td>8</td><td>jitter standard deviation statistic</td></tr>
+  <tr><td>9</td><td>jitter maximum statistic</td></tr>
+  <tr><td>10</td><td>jitter minimum statistic</td></tr>
+</table>
+
+=end html
+
+=for text
+      Field 0: transport type
+      Field 1: test message size
+      Field 2: latency mean statistic
+      Field 3: latency standard deviation statistic
+      Field 4: latency maximum statistic
+      Field 5: latency minimum statistic
+      Field 6: jitter mean statistic
+      Field 7: jitter standard deviation statistic
+      Field 8: jitter maximum statistic
+      Field 9: jitter minimum statistic
+
+=for text
 
 This script will only successfully create table data for input files that
 contain the same number of message size data for each transport included.
@@ -49,27 +84,53 @@ one pair for each data size.
 Subsequent rows include sets of 5 rows each representing summary data for
 a specific transport type.  These rows contain the following columns:
 
-  Row     n, Column 1: transport identification (name)
-  Row     n, Even columns: "Latency" label
-  Row     n, Odd columns: "Mean<br>" . $data
-  Row 1 + n, Column 1: "~" ROWSPAN specification
-  Row 1 + n, Even columns: "~" ROWSPAN specification
-  Row 1 + n, Odd columns: "Dev<br>" . $data
-  Row 2 + n, Column 1: "~" ROWSPAN specification
-  Row 2 + n, Even columns: "Jitter" label
-  Row 2 + n, Odd columns: "Mean<br>" . $data
-  Row 3 + n, Column 1: "~" ROWSPAN specification
-  Row 3 + n, Even columns: "~" ROWSPAN specification
-  Row 3 + n, Odd columns: "Dev<br>" . $data
-  Row 4 + n, Column 1: "~" ROWSPAN specification
-  Row 4 + n, Even columns: ">" COLSPAN specification
-  Row 4 + n, Odd columns: "[[plot|" . $data . "]]"
+=begin html
+
+<table border>
+  <tr><th>Row</th><th>Column(s)</th><th>Tiddler Format Contents</th><th>HTML Format Contents</th></tr>
+  <tr><td>n</td><td>1</td><td>transport identification (name)</td><td>unsupported</td></tr>
+  <tr><td>n</td><td>even</td><td>"Latency" label</td><td>unsupported</td></tr>
+  <tr><td>n</td><td>odd, after first</td><td>"Mean&lt;br>" . $data</td><td>unsupported</td></tr>
+  <tr><td>1 + n</td><td>1</td><td>"~" ROWSPAN specification</td><td>unsupported</td></tr>
+  <tr><td>1 + n</td><td>even</td><td>"~" ROWSPAN specification</td><td>unsupported</td></tr>
+  <tr><td>1 + n</td><td>odd, after first</td><td>"Dev&lt;br>" . $data</td><td>unsupported</td></tr>
+  <tr><td>2 + n</td><td>1</td><td>"~" ROWSPAN specification</td><td>unsupported</td></tr>
+  <tr><td>2 + n</td><td>even</td><td>"Jitter" label</td><td>unsupported</td></tr>
+  <tr><td>2 + n</td><td>odd, after first</td><td>"Mean&lt;br>" . $data</td><td>unsupported</td></tr>
+  <tr><td>3 + n</td><td>1</td><td>"~" ROWSPAN specification</td><td>unsupported</td></tr>
+  <tr><td>3 + n</td><td>even</td><td>"~" ROWSPAN specification</td><td>unsupported</td></tr>
+  <tr><td>3 + n</td><td>odd, after first</td><td>"Dev&lt;br>" . $data</td><td>unsupported</td></tr>
+  <tr><td>4 + n</td><td>1</td><td>"~" ROWSPAN specification</td><td>unsupported</td></tr>
+  <tr><td>4 + n</td><td>even</td><td>">" COLSPAN specification</td><td>unsupported</td></tr>
+  <tr><td>4 + n</td><td>odd, after first</td><td>"[[plot]|" . $data . "]]"</td><td>unsupported</td></tr>
+</table>
+
+=end html
+
+=for text
+      Row     n, Column 1: transport identification (name)
+      Row     n, Even columns: "Latency" label
+      Row     n, Odd columns: "Mean<br>" . $data
+      Row 1 + n, Column 1: "~" ROWSPAN specification
+      Row 1 + n, Even columns: "~" ROWSPAN specification
+      Row 1 + n, Odd columns: "Dev<br>" . $data
+      Row 2 + n, Column 1: "~" ROWSPAN specification
+      Row 2 + n, Even columns: "Jitter" label
+      Row 2 + n, Odd columns: "Mean<br>" . $data
+      Row 3 + n, Column 1: "~" ROWSPAN specification
+      Row 3 + n, Even columns: "~" ROWSPAN specification
+      Row 3 + n, Odd columns: "Dev<br>" . $data
+      Row 4 + n, Column 1: "~" ROWSPAN specification
+      Row 4 + n, Even columns: ">" COLSPAN specification
+      Row 4 + n, Odd columns: "[[plot|" . $data . "]]"
+
+=for text
 
 Where the mean and deviation data are taken from the input file, and the
 plot data is formed from the transport type and message size obtained
 from the input file.
 
-EXAMPLE
+=head1 EXAMPLE
 
   mktable.pl data/latency.csv > doc/results-tiddler
 

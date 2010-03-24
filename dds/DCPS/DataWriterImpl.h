@@ -359,11 +359,11 @@ public:
                        bool dropped_by_transport);
 
   /**
-   * Tell transport to remove all control messages requested
+   * Tell transport to remove all messages requested
    * by this datawriter.
    * This is called during datawriter shutdown.
    */
-  int remove_all_control_msgs();
+  int remove_all_msgs();
 
   /**
    * Accessor of the WriterDataContainer's lock.

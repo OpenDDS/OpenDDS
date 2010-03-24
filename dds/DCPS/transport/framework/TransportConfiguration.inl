@@ -20,7 +20,7 @@
 //MJM: specified lifetime.  I could be very wrong about the use case.
 
 ACE_INLINE
-OpenDDS::DCPS::TransportConfiguration::TransportConfiguration()
+OpenDDS::DCPS::TransportConfiguration::TransportConfiguration(ThreadSynchStrategy* send_strategy)
   : swap_bytes_(0),
     queue_messages_per_pool_(DEFAULT_CONFIG_QUEUE_MESSAGES_PER_POOL),
     queue_initial_pools_(DEFAULT_CONFIG_QUEUE_INITIAL_POOLS),
@@ -29,35 +29,30 @@ OpenDDS::DCPS::TransportConfiguration::TransportConfiguration()
     optimum_packet_size_(DEFAULT_CONFIG_OPTIMUM_PACKET_SIZE),
     thread_per_connection_(0),
     datalink_release_delay_(10000),
-    datalink_control_chunks_(32)
+    datalink_control_chunks_(32),
+    send_thread_strategy_(send_strategy)
 {
   DBG_ENTRY_LVL("TransportConfiguration","TransportConfiguration",6);
-  this->send_thread_strategy_ =  new PerConnectionSynchStrategy();
   this->adjust_config_value();
 }
 
-// TBD - Resolve Mike's questions/comments.
-//MJM: This is where we need to decide on ownership, 'nest pas?
+// The class DOES take ownership of the parameter (DCB)
 ACE_INLINE
 void
 OpenDDS::DCPS::TransportConfiguration::send_thread_strategy
 (ThreadSynchStrategy* strategy)
 {
   DBG_ENTRY_LVL("TransportConfiguration","send_thread_strategy",6);
-
-  if (this->send_thread_strategy_ != 0) {
-    delete this->send_thread_strategy_;
-  }
-
   this->send_thread_strategy_ = strategy;
 }
 
+// This method does NOT give up ownership of the returned strategy (DCB)
 ACE_INLINE
 OpenDDS::DCPS::ThreadSynchStrategy*
 OpenDDS::DCPS::TransportConfiguration::send_thread_strategy()
 {
   DBG_ENTRY_LVL("TransportConfiguration","send_thread_strategy",6);
-  return this->send_thread_strategy_;
+  return this->send_thread_strategy_.in();
 }
 
 ACE_INLINE

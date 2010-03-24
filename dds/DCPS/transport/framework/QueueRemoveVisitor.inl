@@ -11,7 +11,7 @@
 
 ACE_INLINE
 OpenDDS::DCPS::QueueRemoveVisitor::QueueRemoveVisitor
-(const TransportQueueElement& sample)
+(TransportQueueElement& sample)
   : sample_(sample),
     status_(0),
     removed_bytes_(0)

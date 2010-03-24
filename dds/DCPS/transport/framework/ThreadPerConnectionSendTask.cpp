@@ -10,6 +10,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "ThreadPerConnectionSendTask.h"
 #include "TransportQueueElement.h"
+#include "TransportSendElement.h"
 #include "DataLink.h"
 #include "ThreadPerConRemoveVisitor.h"
 #include "DirectPriorityMapper.h"
@@ -181,14 +182,14 @@ int OpenDDS::DCPS::ThreadPerConnectionSendTask::close(u_long flag)
 }
 
 int
-OpenDDS::DCPS::ThreadPerConnectionSendTask::remove_sample(const DataSampleListElement* sample)
+OpenDDS::DCPS::ThreadPerConnectionSendTask::remove_sample(TransportSendElement& element)
 {
   DBG_ENTRY("ThreadPerConnectionSendTask","remove_sample");
 
   GuardType guard(this->lock_);
 
   // Construct a PacketRemoveVisitor object.
-  ThreadPerConRemoveVisitor vistor(sample->sample_);
+  ThreadPerConRemoveVisitor vistor(element.msg());
 
   // Let it visit our elems_ collection as a "replace" visitor.
   this->queue_.accept_visitor(vistor);

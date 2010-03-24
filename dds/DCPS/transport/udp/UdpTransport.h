@@ -16,7 +16,7 @@
 #include "UdpDataLink.h"
 #include "UdpDataLink_rch.h"
 
-#include "dds/DdsDcpsGuidC.h"
+#include "dds/DCPS/transport/framework/PriorityKey.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 
 #include <map>
@@ -50,7 +50,7 @@ private:
 
   UdpDataLink_rch server_link_;
 
-  typedef std::map<RepoId, UdpDataLink_rch, GUID_tKeyLessThan> UdpDataLinkMap;
+  typedef std::map<PriorityKey, UdpDataLink_rch> UdpDataLinkMap;
   UdpDataLinkMap client_links_;
 };
 
