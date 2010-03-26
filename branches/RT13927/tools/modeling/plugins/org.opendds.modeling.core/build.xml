@@ -28,7 +28,7 @@
         <include name="plugin.xml"/>
         <include name="model/**"/>
         <!-- Exclude Ecore diagrams -->
-        <exclude name="*.ecorediag"/>
+        <exclude name="**/*.ecorediag"/>
     </fileset>
 
     <!--
