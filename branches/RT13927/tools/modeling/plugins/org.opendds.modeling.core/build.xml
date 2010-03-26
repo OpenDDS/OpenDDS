@@ -26,6 +26,9 @@
     <fileset id="plugin.resources" dir="${basedir}">
         <include name="META-INF/**"/>
         <include name="plugin.xml"/>
+        <include name="model/**"/>
+        <!-- Exclude Ecore diagrams -->
+        <exclude name="*.ecorediag"/>
     </fileset>
 
     <!--

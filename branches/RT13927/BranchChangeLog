@@ -1,3 +1,17 @@
+Fri Mar 26 15:53:58 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.core/.settings/org.eclipse.core.resources.prefs:
+
+          Updates to project settings.
+
+        * tools/modeling/plugins/org.opendds.modeling.core/model:
+        * tools/modeling/plugins/org.opendds.modeling.core/model/opendds.ecore:
+        * tools/modeling/plugins/org.opendds.modeling.core/model/opendds.ecorediag:
+        * tools/modeling/plugins/org.opendds.modeling.core/model/openddsTypes.ecore:
+        * tools/modeling/plugins/org.opendds.modeling.core/model/openddsTypes.ecorediag:
+
+          Added ECore metamodel based on defined UML2 Profile.
+
 Wed Mar 24 22:05:05 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.core/.externalToolBuilders/org.opendds.modeling.core.launch:
@@ -7,9 +21,9 @@ Wed Mar 24 22:05:05 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.core/.project:
         * tools/modeling/plugins/org.opendds.modeling.resources/.project:
-       
-          Various project updates. 
-        
+
+          Various project updates.
+
         * tools/modeling/plugins/org.opendds.modeling.resources/plugin.xml:
         * tools/modeling/plugins/org.opendds.modeling.resources/profiles/OpenDDS.profile.properties:
         * tools/modeling/plugins/org.opendds.modeling.resources/profiles/OpenDDS.profile.uml:
