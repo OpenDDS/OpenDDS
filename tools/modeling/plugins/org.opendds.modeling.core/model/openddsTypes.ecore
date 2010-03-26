@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="openddsTypes"
+    nsURI="http://www.opendds.org/schemas/modeling/OpenDDSTypes" nsPrefix="openddsTypes">
+  <eClassifiers xsi:type="ecore:EDataType" name="Boolean" instanceClassName="Boolean"/>
+  <eClassifiers xsi:type="ecore:EDataType" name="Char" instanceClassName="Char"/>
+  <eClassifiers xsi:type="ecore:EDataType" name="Octet" instanceClassName="Octet"/>
+  <eClassifiers xsi:type="ecore:EDataType" name="Short" instanceClassName="Short"/>
+  <eClassifiers xsi:type="ecore:EDataType" name="Long" instanceClassName="Long"/>
+  <eClassifiers xsi:type="ecore:EDataType" name="LongLong" instanceClassName="LongLong"/>
+  <eClassifiers xsi:type="ecore:EDataType" name="UShort" instanceClassName="UShort"/>
+  <eClassifiers xsi:type="ecore:EDataType" name="ULong" instanceClassName="ULong"/>
+  <eClassifiers xsi:type="ecore:EDataType" name="ULongLong" instanceClassName="ULongLong"/>
+  <eClassifiers xsi:type="ecore:EDataType" name="Float" instanceClassName="Float"/>
+  <eClassifiers xsi:type="ecore:EDataType" name="Double" instanceClassName="Double"/>
+  <eClassifiers xsi:type="ecore:EDataType" name="String" instanceClassName="String"/>
+  <eClassifiers xsi:type="ecore:EDataType" name="Duration_t" instanceTypeName="Duration_t"/>
+  <eClassifiers xsi:type="ecore:EDataType" name="Time_t" instanceTypeName="Time_t"/>
+  <eClassifiers xsi:type="ecore:EEnum" name="ReliabilityQosPolicyKind">
+    <eLiterals name="BEST_EFFORT"/>
+    <eLiterals name="RELIABLE" value="1"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="OwnershipQosPolicyKind">
+    <eLiterals name="SHARED"/>
+    <eLiterals name="EXCLUSIVE" value="1"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="DestinationOrderQosPolicyKind">
+    <eLiterals name="BY_RECEPTION_TIMESTAMP"/>
+    <eLiterals name="BY_SOURCE_TIMESTAMP" value="1"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="PresentationQosPolicyAccessScopeKind">
+    <eLiterals name="INSTANCE"/>
+    <eLiterals name="TOPIC" value="1"/>
+    <eLiterals name="GROUP" value="2"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="LivelinessQosPolicyKind">
+    <eLiterals name="AUTOMATIC"/>
+    <eLiterals name="MANUAL_BY_PARTICIPANT" value="1"/>
+    <eLiterals name="MANUAL_BY_TOPIC" value="2"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="HistoryQosPolicyKind">
+    <eLiterals name="KEEP_LAST"/>
+    <eLiterals name="KEEP_ALL" value="1"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="DurabilityQosPolicyKind">
+    <eLiterals name="VOLATILE"/>
+    <eLiterals name="TRANSIENT" value="1"/>
+    <eLiterals name="TRANSIENT_LOCAL" value="2"/>
+    <eLiterals name="PERSISTENT" value="3"/>
+  </eClassifiers>
+</ecore:EPackage>
