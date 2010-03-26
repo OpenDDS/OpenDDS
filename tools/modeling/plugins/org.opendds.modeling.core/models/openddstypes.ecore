@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ecore:EPackage xmi:version="2.0"
     xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="openddsTypes"
-    nsURI="http://www.opendds.org/schemas/modeling/OpenDDSTypes" nsPrefix="openddsTypes">
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="openddstypes"
+    nsURI="http://www.opendds.org/schemas/modeling/OpenDDSTypes" nsPrefix="openddstypes">
   <eClassifiers xsi:type="ecore:EDataType" name="Boolean" instanceClassName="Boolean"/>
   <eClassifiers xsi:type="ecore:EDataType" name="Char" instanceClassName="Char"/>
   <eClassifiers xsi:type="ecore:EDataType" name="Octet" instanceClassName="Octet"/>
