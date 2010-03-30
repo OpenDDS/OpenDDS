@@ -147,7 +147,7 @@ my $debugFile;
 my $confFile  = $projectRoot . "/etc/svc.conf";
 
 # Clean out leftovers.
-unlink $repo_ior;
+unlink $repo_ior if $startRepo;
 unlink $debugFile if $debugFile;
 
 my $verboseDebug;
@@ -513,6 +513,11 @@ the pid value is for the test script.
 Causes process statistics to be gathered.  A C<top -bd 1 -p {pid}>
 command is started for each test process and the output filtered by its
 process Id.  The output is stored to a file named I<process-{pid}.log>.
+
+=item B<all>
+
+Causes all statistics described above to be gathered.  This is a synonym
+for I<nsp>
 
 =back
 
