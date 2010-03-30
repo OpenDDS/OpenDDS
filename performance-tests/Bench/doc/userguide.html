@@ -611,7 +611,7 @@ There are several scripts to assist in visualizing the reduced test data.  These
 <div title="DefaultTiddlers" modifier="MikeMartinez" created="201002181950" modified="201002182002" changecount="2">
 <pre>[[OpenDDS-Bench]]</pre>
 </div>
-<div title="Existing Tests" modifier="MikeMartinez" created="201003031715" tags="publish" changecount="1">
+<div title="Existing Tests" modifier="MikeMartinez" created="201003031715" modified="201003221816" tags="publish" changecount="3">
 <pre>There are existing test configurations for common test scenarios provided with the framework.  These are:
 ;[[latency|Latency Tests]]
 :measures latency from publication to reception of each sample
@@ -619,7 +619,10 @@ There are several scripts to assist in visualizing the reduced test data.  These
 :measures the maximum bandwidth that can be utilized by OpenDDS
 ;[[scaling|Scaling Tests]]
 :measures the incremental performance as hosts are added to a distribution
-</pre>
+
+In addition to the test specification files, the transport specification files may need to be updated for your test environment.  Today, only the //$~BENCH_ROOT/etc/transport-udp.ini// file will need to be udpated.  Replace the &lt;%HOSTNAME%&gt; placeholders with IP addresses or resolvable hostnames in your environment.
+
+Included in the test specification directories is a file &quot;//test-commands.txt//&quot; which contains a set of bash script commands that can be used to execute the full set of tests in a Linux environment.  These can be used as an example and tailored to your specific test environment.  Beyond translating to the native shell type, the IP addresses used should be changed to those that are valid in your environment.</pre>
 </div>
 <div title="ExtractManPage" modifier="MikeMartinez" created="201003191853" tags="publish" changecount="1">
 <pre>&lt;html&gt;
@@ -701,14 +704,18 @@ generated from each input file.  The output files include:&lt;/p&gt;
 &lt;/html&gt;
 </pre>
 </div>
-<div title="FAQ" modifier="MikeMartinez" created="201003022001" tags="publish faq" changecount="1">
+<div title="FAQ" modifier="MikeMartinez" created="201003022001" modified="201003221739" tags="publish faq" changecount="3">
 <pre>#[[What kind of document is this?|FAQ1]]
-</pre>
+#[[What is the latency data output file format?|FAQ2]]</pre>
 </div>
 <div title="FAQ1" modifier="MikeMartinez" created="201003022001" modified="201003082219" tags="publish faq" changecount="2">
 <pre>&quot;What kind of document is this?&quot;
 
 This is a TiddlyWiki document.</pre>
+</div>
+<div title="FAQ2" modifier="MikeMartinez" created="201003221738" modified="201003221739" tags="publish faq" changecount="2">
+<pre>The output files generated when gathering latency data is: [[latency file format|LatencyDataFileFormat]].
+</pre>
 </div>
 <div title="GNUPlot" modifier="MikeMartinez" created="201003082221" modified="201003082223" changecount="4">
 <pre>GNUPlot is a data visualization tool available as from [[gnuplot.info|http://gnuplot.info/]]</pre>
@@ -889,7 +896,7 @@ As an aid to packaging these files into a distributable form, the //$~BENCH_ROOT
 
 The script makes copies and links in a named (default //pkg//) target directory that can then be tar'ed or zip'ed into a distributable file.  The {{{run_test}}} test management script will configure the environment of processes that it starts to find libraries and commands in the subdirectories created by this script, making use of the distribution straightforward.</pre>
 </div>
-<div title="Latency Tests" modifier="MikeMartinez" created="201003042136" modified="201003082130" tags="publish" changecount="10">
+<div title="Latency Tests" modifier="MikeMartinez" created="201003042136" modified="201003221819" tags="publish" changecount="12">
 <pre>The OpenDDS-Bench framework includes configuration files for latency testing.  These files are located in the //$~BENCH_ROOT/tests/latency// sub-directory.  The latency testing covers several different conditions.  The configuration for these tests are illustrated in the following diagram.
 [img[Latency Test|images/latencytest.jpg]]
 The message size is varied for each test execution run and latency data for the full loopback path gathered and analyzed.  Latency data is measured by extracting a timestamp at the time of the write() call and inserting that into the data sample.  Once the sample has been received at the terminus of the path, another timestamp will be extracted and the difference logged as the latency.  Since the clocks on different hosts tend to drift at different rates, it is best to have both the write() and read() calls executed on the same host so the latency measurements are made using the same system clock.  This is ensured for these tests by placing the publication and subscription in the same process.  Typically the two processes of this test will be executed on different hosts to include network effects in the measurements.  While executing them on the same host will exclude network effects from the results, it is possible to encounter processor effects depending on the capacity of the host on which the test is executing.
@@ -910,7 +917,7 @@ There is a separate configuration file supplied for each message size test to be
 | 32000|p1-32000.ini |
 }}}</pre>
 </div>
-<div title="LatencyDataFileFormat" modifier="MikeMartinez" created="201003191950" modified="201003192026" tags="publish" changecount="8">
+<div title="LatencyDataFileFormat" modifier="MikeMartinez" created="201003191950" modified="201003221736" tags="publish" changecount="9">
 <pre>Latency data files include last hop and full path information in both summary and detailed forms.  in the output files specified as part of the test configuration for a subscription, the summary data appears first, followed by the detailed data.  The summary data is shown organized by last hop then full path, and within each category the information is broken down and summarized by publication that wrote the data.
 
 Latency data is produced by collecting a timestamp at the originating point and sending it along with the sample to be compared with a timestamp collected at the terminating point.  Since the actual collection of timestamps can affect the operation of the test, only timestamps that are required are generated.  This typically means that a test timestamp will be generated and collected only at the path origination and termination.  This is where the full-path latency data is gathered.
@@ -1723,7 +1730,7 @@ message size of the test data.&lt;/p&gt;
 &lt;/html&gt;
 </pre>
 </div>
-<div title="RunTestManPage" modifier="MikeMartinez" created="201002251721" modified="201003031700" changecount="4">
+<div title="RunTestManPage" modifier="MikeMartinez" created="201002251721" modified="201003221757" tags="publish" changecount="6">
 <pre>&lt;html&gt;
 &lt;head&gt;
 &lt;title&gt;run_test - Execute test processes for distributed testing&lt;/title&gt;
@@ -1761,52 +1768,6 @@ message size of the test data.&lt;/p&gt;
 &lt;h1&gt;&lt;a name=&quot;synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/h1&gt;
 &lt;pre&gt;
  run_test [options]&lt;/pre&gt;
-&lt;p&gt;Options:&lt;/p&gt;
-&lt;pre&gt;
-  -? | --help            brief help message&lt;/pre&gt;
-&lt;pre&gt;
-  --man                  full documentation&lt;/pre&gt;
-&lt;pre&gt;
-  -x | --noaction        do not execute any processing&lt;/pre&gt;
-&lt;pre&gt;
-  -v | --verbose         be chatty while executing&lt;/pre&gt;
-&lt;pre&gt;
-  -V NUMBER | --ORBVerboseLogging=NUMBER
-                         set the corresponding ORB option&lt;/pre&gt;
-&lt;pre&gt;
-  -d NUMBER | --debug=NUMBER
-                         set the DCPS debugging level&lt;/pre&gt;
-&lt;pre&gt;
-  -T NUMBER | --tdebug=NUMBER
-                         set the DCPSTransportDebug debugging level&lt;/pre&gt;
-&lt;pre&gt;
-  -R NUMBER | --rdebug=NUMBER
-                         set the DCPS debugging level for the repository&lt;/pre&gt;
-&lt;pre&gt;
-  -f FILE | --dfile=FILE set the filename for debug output&lt;/pre&gt;
-&lt;pre&gt;
-  -C TYPES | --collect=TYPES
-                         collect process and system statistics during test&lt;/pre&gt;
-&lt;pre&gt;
-  -h FQDN | --repohost FQDN
-                         fully qualified domain name (and port) for
-                         connecting to repository&lt;/pre&gt;
-&lt;pre&gt;
-  -i FILE | --inifile FILE
-                         file for configuring the OpenDDS service&lt;/pre&gt;
-&lt;pre&gt;
-  -s FILELIST | --scenario FILELIST
-                         list of files defining the test scenario(s) to execute&lt;/pre&gt;
-&lt;pre&gt;
-  -r FILE | --rawdatafile FILE
-                         file to write collected data to at end of test&lt;/pre&gt;
-&lt;pre&gt;
-  -t NUMBER | --duration=NUMBER
-                         limit the duration of test execution&lt;/pre&gt;
-&lt;pre&gt;
-  -S | --startrepo       start a repository&lt;/pre&gt;
-&lt;pre&gt;
-  -P | --starttest       start a testprocess&lt;/pre&gt;
 &lt;p&gt;
 &lt;/p&gt;
 &lt;hr /&gt;
@@ -1898,7 +1859,7 @@ the ORBLogFile specification being omitted from the process command line.&lt;/p&
 &lt;dd&gt;
 &lt;p&gt;Starts statistics collection for the specified TYPES.  TYPES may contain
 one or more of the values: &lt;a href=&quot;#n&quot;&gt;&lt;code&gt;n&lt;/code&gt;&lt;/a&gt;, &lt;a href=&quot;#s&quot;&gt;&lt;code&gt;s&lt;/code&gt;&lt;/a&gt;, and &lt;a href=&quot;#p&quot;&gt;&lt;code&gt;p&lt;/code&gt;&lt;/a&gt;, or the collective
-specification &lt;code&gt;all&lt;/code&gt;.&lt;/p&gt;
+specification &lt;a href=&quot;#all&quot;&gt;&lt;code&gt;all&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
 &lt;dl&gt;
 &lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;n&quot; class=&quot;item&quot;&gt;&lt;strong&gt;n&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
 
@@ -1920,6 +1881,12 @@ the pid value is for the test script.&lt;/p&gt;
 &lt;p&gt;Causes process statistics to be gathered.  A &lt;code&gt;top -bd 1 -p {pid}&lt;/code&gt;
 command is started for each test process and the output filtered by its
 process Id.  The output is stored to a file named &lt;em&gt;process-{pid}.log&lt;/em&gt;.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;all&quot; class=&quot;item&quot;&gt;&lt;strong&gt;all&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Causes all statistics described above to be gathered.  This is a synonym
+for &lt;em&gt;nsp&lt;/em&gt;&lt;/p&gt;
 &lt;/dd&gt;
 &lt;/dl&gt;
 &lt;p&gt;The default is unspecified.  This results in no statistics being
@@ -2028,9 +1995,7 @@ output.  All statistics - system, network, and process - will be gathered.&lt;/p
 
 &lt;/body&gt;
 
-
-&lt;/html&gt;
-</pre>
+&lt;/html&gt;</pre>
 </div>
 <div title="SideBarOptions" modifier="MikeMartinez" created="200911302023" modified="201002011534" changecount="2">
 <pre>&lt;&lt;search&gt;&gt;&lt;&lt;closeAll&gt;&gt;&lt;&lt;permaview&gt;&gt;&lt;&lt;newTiddler&gt;&gt;&lt;&lt;saveChanges&gt;&gt;&lt;&lt;doPublish&gt;&gt;&lt;&lt;slider chkSliderOptionsPanel OptionsPanel &quot;options »&quot; &quot;Change TiddlyWiki advanced options&quot;&gt;&gt;</pre>
@@ -2400,7 +2365,7 @@ The specific Entity specifications that are supported include:
 #[[Subscription|Subscription Specifications]]
 </pre>
 </div>
-<div title="Throughput Tests" modifier="MikeMartinez" created="201003081923" modified="201003082200" tags="publish" changecount="15">
+<div title="Throughput Tests" modifier="MikeMartinez" created="201003081923" modified="201003221817" tags="publish" changecount="17">
 <pre>The OpenDDS-Bench framework includes configuration files for throughput testing.  These files are located in the //$~BENCH_ROOT/tests/thru// sub-directory.  The throughput testing covers several different conditions.  These include a bidirectional test, topologically equivalent to the [[latency tests|Latency Tests]], publication bound tests, and subscription bound tests.  Publication bound testing publishes test data from one publication to two distinct subscriptions.  When these processes are on three separate hosts, the publication processing will dominate and likely be the limiting factor in throughput.  Subscription bound testing publishes test data from two separate publications to a single subscription.  When these processes are on three separate hosts, the subscription processing will dominate and likely be the limiting factor in throughput.  If the test environment does not have adequate network bandwidth, then this will dominate either or both of these tests and the CPU usage observed during the tests will give an indication of what margins are available in the test setup.  The configuration for these tests are illustrated in the following diagrams.
 [img[Bidirectional Test|images/bidirtest.jpg]]
 [img[Publication Bound Test|images/pubboundtest.jpg]]

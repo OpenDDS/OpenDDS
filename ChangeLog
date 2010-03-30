@@ -1,3 +1,21 @@
+Tue Mar 30 22:39:41 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+
+          Do not remove the repo.ior file unless we are going to start a
+          repository process.
+          Updated POD.
+
+        * performance-tests/Bench/doc/userguide.html:
+
+          Updated documentation.
+
+        * performance-tests/Bench/src/Publication.cpp:
+        * performance-tests/Bench/src/Subscription.cpp:
+
+          Added more detail to the transport creation/obtain processing
+          to ensure that the transport type is available in the logfile.
+
 Tue Mar 23 20:33:39 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
 
         * NEWS:
