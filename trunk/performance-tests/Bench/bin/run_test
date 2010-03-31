@@ -166,7 +166,7 @@ $appDebug  = $debug if $debug;
 my $repoOpts = "$common_opts ";
 $repoOpts .= "-ORBListenEndpoints $repoHost " if $repoHost;
 $repoOpts .= "-DCPSDebugLevel $repoDebug " if $repoDebug;
-$repoOpts .= "-ORBLogFile $debugFile " if ($repoDebug or $transportDebug) and $debugFile;
+$repoOpts .= "-ORBLogFile $debugFile " if $debugFile;
 
 my $index = 0;
 my $testOpts = "$common_opts ";
