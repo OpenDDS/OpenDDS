@@ -39,6 +39,9 @@ if( $^O eq 'MSWin32') { unshift @PATH, "$projectRoot/lib"; }
 #
 ########################################
 
+# Locate the commands.
+unshift @PATH, "$FindBin::Bin";
+
 use Getopt::Long qw( :config bundling) ;
 use Pod::Usage ;
 
@@ -185,9 +188,9 @@ my @PROCESSES;
 if( $startRepo) {
   my $repoArgs = "$repoOpts -o $repo_ior ";
   if( PerlACE::is_vxworks_test()) {
-    push @PROCESSES, new PerlACE::ProcessVX( "$FindBin::Bin/DCPSInfoRepo", $repoArgs);
+    push @PROCESSES, new PerlACE::ProcessVX( "DCPSInfoRepo", $repoArgs);
   } else {
-    push @PROCESSES, new PerlACE::Process( "$FindBin::Bin/DCPSInfoRepo", $repoArgs);
+    push @PROCESSES, new PerlACE::Process( "DCPSInfoRepo", $repoArgs);
   }
 }
 
@@ -195,9 +198,9 @@ if( $startTest) {
   map {
     my $testArgs = "$testOpts -f $_ ";
     if( PerlACE::is_vxworks_test()) {
-      push @PROCESSES, new PerlACE::ProcessVX( "$FindBin::Bin/testprocess", $testArgs);
+      push @PROCESSES, new PerlACE::ProcessVX( "testprocess", $testArgs);
     } else {
-      push @PROCESSES, new PerlACE::Process( "$FindBin::Bin/testprocess", $testArgs);
+      push @PROCESSES, new PerlACE::Process( "testprocess", $testArgs);
     }
   } @scenario;
 }
