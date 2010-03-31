@@ -2,7 +2,7 @@
 <!--
     $Id$
 -->
-<project name="org.opendds.modeling.core" default="archive">
+<project name="org.opendds.modeling" default="archive">
     <property name="build.dir" value="build"/>
     <property name="doc.dir" value="doc"/>
     <property name="lib.dir" value="lib"/>
@@ -26,9 +26,8 @@
     <fileset id="plugin.resources" dir="${basedir}">
         <include name="META-INF/**"/>
         <include name="plugin.xml"/>
-        <include name="model/**"/>
-        <!-- Exclude Ecore diagrams -->
-        <exclude name="**/*.ecorediag"/>
+        <include name="models/**"/>
+        <include name="templates/**"/>
     </fileset>
 
     <!--
