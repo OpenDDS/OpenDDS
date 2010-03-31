@@ -1,3 +1,11 @@
+Wed Mar 31 13:55:53 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+
+          Allow debug file to be specified in the absence of a debug
+          level.  This allows the verbose test output to reach a logfile
+          instead of the standard output.
+
 Tue Mar 30 22:39:41 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/bin/run_test:
