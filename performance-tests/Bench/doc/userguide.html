@@ -819,10 +819,13 @@ If you wish to publish the contents of this document as static HTML web pages, t
 * [[StyleSheet]]: modify the reference to the logo file in the //.publishLogo// class to be in a correct relative directory path
 * use the ''publish'' selection on the right sidebar to publish all tiddlers with the ''publish'' tag to individual HTML files.  They will all be located in the //./publish// directory</pre>
 </div>
-<div title="Installation" modifier="MikeMartinez" created="201003022306" modified="201003031651" tags="publish" changecount="24">
-<pre>Once the OpenDDS core is built, the OpenDDS-Bench software can be built and installed.  This software is located relative to the OpenDDS root directory and is part of the OpenDDS download.  For purposes of this documentation, we assume that you have set the ~BENCH_ROOT environment variable to a value of //$~DDS_ROOT/performance-tests/Bench//.
+<div title="Installation" modifier="MikeMartinez" created="201003022306" modified="201003311545" tags="publish" changecount="26">
+<pre>Once the OpenDDS core is built, the OpenDDS-Bench software can be built and installed.  This software is located relative to the OpenDDS root directory and is part of the OpenDDS download.  For purposes of this documentation, we assume that you have set the ~BENCH_ROOT environment variable to a value of //$~DDS_ROOT/performance-tests/Bench//.  In a bash shell this can be done as:
+&lt;&lt;&lt;
+ shell&gt; export ~BENCH_ROOT=$~DDS_ROOT/performance-tests/Bench
+&lt;&lt;&lt;
 
-There is one additional executable that needs to be built as part of the framework.  This is the {{{testprocess}}} command.  Makefiles and solution files are provided as part of the OpenDDS download, so this can be built the same way as the core OpenDDS code.  Using gcc on Linux this could be done simply as:
+There is one additional executable that needs to be built as part of the framework.  This is the {{{testprocess}}} command.  Makefiles and solution files are provided as part of the OpenDDS download, so this can be built the same way as the core OpenDDS code.  Using the GNU toolchain on Linux this could be done simply as:
 &lt;&lt;&lt;
  shell&gt; make -C $~BENCH_ROOT
 &lt;&lt;&lt;
@@ -896,7 +899,7 @@ As an aid to packaging these files into a distributable form, the //$~BENCH_ROOT
 
 The script makes copies and links in a named (default //pkg//) target directory that can then be tar'ed or zip'ed into a distributable file.  The {{{run_test}}} test management script will configure the environment of processes that it starts to find libraries and commands in the subdirectories created by this script, making use of the distribution straightforward.</pre>
 </div>
-<div title="Latency Tests" modifier="MikeMartinez" created="201003042136" modified="201003221819" tags="publish" changecount="12">
+<div title="Latency Tests" modifier="MikeMartinez" created="201003042136" modified="201003311508" tags="publish" changecount="19">
 <pre>The OpenDDS-Bench framework includes configuration files for latency testing.  These files are located in the //$~BENCH_ROOT/tests/latency// sub-directory.  The latency testing covers several different conditions.  The configuration for these tests are illustrated in the following diagram.
 [img[Latency Test|images/latencytest.jpg]]
 The message size is varied for each test execution run and latency data for the full loopback path gathered and analyzed.  Latency data is measured by extracting a timestamp at the time of the write() call and inserting that into the data sample.  Once the sample has been received at the terminus of the path, another timestamp will be extracted and the difference logged as the latency.  Since the clocks on different hosts tend to drift at different rates, it is best to have both the write() and read() calls executed on the same host so the latency measurements are made using the same system clock.  This is ensured for these tests by placing the publication and subscription in the same process.  Typically the two processes of this test will be executed on different hosts to include network effects in the measurements.  While executing them on the same host will exclude network effects from the results, it is possible to encounter processor effects depending on the capacity of the host on which the test is executing.
@@ -915,6 +918,23 @@ There is a separate configuration file supplied for each message size test to be
 | 8000|p1-8000.ini |
 | 16000|p1-16000.ini |
 | 32000|p1-32000.ini |
+}}}
+{{itemBlock{
+Commands that can be used to structure the test execution for these tests is included in the file //$~BENCH_ROOT/tests/latency/test-commands.txt//.  This file contains a set of commands for each test configuration described above.  They can be used to structure tests for your specific environment.  Executing tests in a Linux environment can be done as follows:
+!Start the repostory
+&lt;&lt;&lt;
+repohost&gt; $~BENCH_ROOT/bin/run_test -S -h iiop:&quot;&quot;&quot;//&quot;&quot;&quot;&lt;repohost&gt;:2809
+&lt;&lt;&lt;
+!Start the forwarding (loopback) process
+&lt;&lt;&lt;
+host2&gt; cd &lt;testdir&gt;
+host2&gt; $~BENCH_ROOT/bin/run_test -P -t 120 -h &lt;repohost&gt;:2809 -i $~BENCH_ROOT/etc/&lt;transportconfigfile&gt; -s $~BENCH_ROOT/tests/latency/p2.ini
+&lt;&lt;&lt;
+!Start the originating and receiving process
+&lt;&lt;&lt;
+host1&gt; cd &lt;testdir&gt;
+host1&gt; $~BENCH_ROOT/bin/run_test -P -v -t 120 -h &lt;repohost&gt;:2809 -i $~BENCH_ROOT/etc/&lt;transportconfigfile&gt; -s $~BENCH_ROOT/tests/latency/p1-&lt;size&gt;.ini
+&lt;&lt;&lt;
 }}}</pre>
 </div>
 <div title="LatencyDataFileFormat" modifier="MikeMartinez" created="201003191950" modified="201003221736" tags="publish" changecount="9">
@@ -1175,7 +1195,7 @@ This user guide is written assuming a minimum environment setup which includes e
 &lt;/div&gt;
 &lt;!--}}}--&gt;</pre>
 </div>
-<div title="Participant Specifications" modifier="MikeMartinez" created="201003032054" modified="201003032301" tags="publish" changecount="6">
+<div title="Participant Specifications" modifier="MikeMartinez" created="201003032054" modified="201003311552" tags="publish" changecount="7">
 <pre>!Definable Parameters
 {{centeredTable{
 | ''Participant Section Keys'' |c
@@ -1189,14 +1209,14 @@ This user guide is written assuming a minimum environment setup which includes e
 !Test Execution Parameters
 [participant] specifications only have {{{DomainId}}} as a test execution parameter.  This determines the DDS Domain in which the participant resides.
 !Example
-An example participant section like the following would result in a DDS ~DomainParticipant with a name of //player1// being created in the process with default ~QoS parameter values and a Domain Id value of 2112.
+An example participant section like the following would result in a DDS ~DomainParticipant with a name of //player// being created in the process with default ~QoS parameter values and a Domain Id value of 2112.
 {{{
 [participant/player]
 DomainId = 2112
 }}}
 </pre>
 </div>
-<div title="Publication Specifications" modifier="MikeMartinez" created="201003032056" modified="201003032218" tags="publish" changecount="9">
+<div title="Publication Specifications" modifier="MikeMartinez" created="201003032056" modified="201003311608" tags="publish" changecount="12">
 <pre>The OpenDDS-Bench framework specifies publications, which consist of individual DDS Publisher and ~DataWriter Entities.  The combination of these Entities make up a complete publication.  A consequence of this is that any single DDS Publisher will contain only a single DDS ~DataWriter.  This should not affect any test results or capabilities.
 
 !Definable Parameters
@@ -1261,7 +1281,7 @@ The test execution parameters allow specification of several aspects of the publ
 ;how the publication starts
 :the publication will not start writing until it is associated with the number of subscriptions specified by the {{{Associations}}} parameter.  After the associations have been matched, if the {{{StartAfterDelay}}} parameter has been specified and is greater than zero, the publication will wait that many seconds before starting to write data.
 ;how the publication terminates
-:if the {{{WaitForAcks}}} parameter is specified and non-zero, the ~DataWriter::wait_for_acknowledgments() API method is called as the publication is terminating to wait until delivery of all data has been acknowledged.
+:if the {{{AckDelay}}} parameter is specified and non-zero, the ~DataWriter::wait_for_acknowledgments() API method is called as the publication is terminating to wait until delivery of all data has been acknowledged.
 ;the transport used
 :this is specified as an index into the transport definitions.  The definitions are in the OpenDDS service configuration file read at startup.
 ;the data published
@@ -1282,7 +1302,7 @@ If the {{{MessageSizeType}}}, or {{{InstanceType}}} have a value of ''UNIFORM'',
 !!Exponential Distribution
 If the {{{MessageRateType}}} has a value of ''POISSON'', the the {{{MessageRate}}} parameter is used as the //lamba// parameter for an exponential probability distribution to determine the interval between writing samples.  This interval will result in a Poisson arrival time distribution of the samples as they are published.
 !!Gaussian Distribution
-If the {{{MessageSizeType}}}, or {{{InstanceType}}} have a value of ''GAUSSIAN'', then the corresponding *Mean and *Deviation parameters define a Gaussian probability distribution from which the actual value for each sample will be obtained as each sample is written.  The *Min and *Max parameters are used as the lower and upper bound for the value and values from the probability distribution that are outside this range are replaced with the nearest extreme value.
+If the {{{MessageSizeType}}}, or {{{InstanceType}}} have a value of ''GAUSSIAN'', then the corresponding *//Mean// and *//Deviation// parameters define a Gaussian probability distribution from which the actual value for each sample will be obtained as each sample is written.  The *//Min// and *//Max// parameters are used as the lower and upper bound for the value and values from the probability distribution that are outside this range are replaced with the nearest extreme value.
 }}}
 !Example
 As an example a publication section like the following would result in a publication that started sending after associating with a single subscription, and sent 1,000 byte samples at 1,000 samples per second during the test.
@@ -1555,17 +1575,26 @@ String.prototype.filenameEncode = function()
 &lt;hr&gt;%4, %5&amp;nbsp;(created %6)
 &lt;/div&gt;</pre>
 </div>
-<div title="Quick Start" modifier="MikeMartinez" created="201003022013" modified="201003051541" tags="publish" changecount="24">
-<pre>The steps to run a test using this framework are described below.  The description is based on a Linux platform using the gcc toolchain.  If you are using a different platform or tools the instructions will need to be modified to suit your environment.
+<div title="Quick Start" modifier="MikeMartinez" created="201003022013" modified="201003311543" tags="publish" changecount="28">
+<pre>The steps to run a test using this framework are described below.
+The description is based on a Linux platform using the GNU toolchain.  If you are using a different platform or tools the instructions will need to be modified to suit your environment.
 {{itemBlock{
 !Obtain and build ~OpenDDS and the ~OpenDDS-Bench software.
 Find the OpenDDS software build and install instructions at [[opendds.org|http://www.opendds.org/]].  Each host which will be participating in a test will need to have the software available.  For homogeneous hosts that can execute software built on the same kind of host the installation steps below show a way to distribute the software.  Each host type will need to have the software built for it.  For example if both Linux and Windows machines will be participating in the testing then a build for each host type will need to be performed and installed on hosts of that type.
 
 Once OpenDDS and the libraries it depends on have been built, the OpenDDS-Bench software needs to be built.  Do this by:
 &lt;&lt;&lt;
- shell&gt; cd $~BENCH_ROOT
+ shell&gt; cd $~DDS_ROOT/performance-tests/Bench
  shell&gt; mwc.pl -type gnuace
  shell&gt; make
+&lt;&lt;&lt;
+}}}
+{{itemBlock{
+!Locate the ~OpenDDS-Bench performance testing framework software.
+
+Do this by:
+&lt;&lt;&lt;
+shell&gt; export ~BENCH_ROOT=$~DDS_ROOT/performance-tests/Bench
 &lt;&lt;&lt;
 }}}
 {{itemBlock{
@@ -2365,7 +2394,7 @@ The specific Entity specifications that are supported include:
 #[[Subscription|Subscription Specifications]]
 </pre>
 </div>
-<div title="Throughput Tests" modifier="MikeMartinez" created="201003081923" modified="201003221817" tags="publish" changecount="17">
+<div title="Throughput Tests" modifier="MikeMartinez" created="201003081923" modified="201003311533" tags="publish" changecount="19">
 <pre>The OpenDDS-Bench framework includes configuration files for throughput testing.  These files are located in the //$~BENCH_ROOT/tests/thru// sub-directory.  The throughput testing covers several different conditions.  These include a bidirectional test, topologically equivalent to the [[latency tests|Latency Tests]], publication bound tests, and subscription bound tests.  Publication bound testing publishes test data from one publication to two distinct subscriptions.  When these processes are on three separate hosts, the publication processing will dominate and likely be the limiting factor in throughput.  Subscription bound testing publishes test data from two separate publications to a single subscription.  When these processes are on three separate hosts, the subscription processing will dominate and likely be the limiting factor in throughput.  If the test environment does not have adequate network bandwidth, then this will dominate either or both of these tests and the CPU usage observed during the tests will give an indication of what margins are available in the test setup.  The configuration for these tests are illustrated in the following diagrams.
 [img[Bidirectional Test|images/bidirtest.jpg]]
 [img[Publication Bound Test|images/pubboundtest.jpg]]
@@ -2433,6 +2462,62 @@ There is a separate configuration file supplied for each test condition to be ex
 | 23| 1,500| 10,000|  240|pub-1sub-be-160.ini&lt;br&gt;pub-1sub-rel-160.ini |
 | 24| 2,000| 10,000|  320|pub-1sub-be-240s.ini&lt;br&gt;pub-1sub-rel-240s.ini |
 | 25| 2,500| 10,000|  400|pub-1sub-be-320s.ini&lt;br&gt;pub-1sub-rel-320s.ini |
+}}}
+{{itemBlock{
+Commands that can be used to structure the test execution for these tests is included in the file //$~BENCH_ROOT/tests/thru/test-commands.txt//.  This file contains a set of commands for each test configuration described above.  They can be used to structure tests for your specific environment.
+!Executing bidirectional tests in a Linux environment can be done as follows:
+*Start the repostory
+&lt;&lt;&lt;
+repohost&gt; $~BENCH_ROOT/bin/run_test -S -h iiop:&quot;&quot;&quot;//&quot;&quot;&quot;&lt;repohost&gt;:2809
+&lt;&lt;&lt;
+*Start the forwarding (loopback) process
+&lt;&lt;&lt;
+host2&gt; cd &lt;testdir&gt;
+host2&gt; $~BENCH_ROOT/bin/run_test -P -t 120 -h &lt;repohost&gt;:2809 -i $~BENCH_ROOT/etc/&lt;transportconfigfile&gt; -s $~BENCH_ROOT/tests/thru/bidir-remote-&lt;rel&gt;.ini
+&lt;&lt;&lt;
+*Start the originating and receiving process
+&lt;&lt;&lt;
+host1&gt; cd &lt;testdir&gt;
+host1&gt; $~BENCH_ROOT/bin/run_test -P -v -t 120 -h &lt;repohost&gt;:2809 -i $~BENCH_ROOT/etc/&lt;transportconfigfile&gt; -s $~BENCH_ROOT/tests/thru/bidir-1sub-&lt;rel&gt;-&lt;rate&gt;.ini
+&lt;&lt;&lt;
+!Executing publication bound tests in a Linux environment can be done as follows:
+*Start the repostory
+&lt;&lt;&lt;
+repohost&gt; $~BENCH_ROOT/bin/run_test -S -h iiop:&quot;&quot;&quot;//&quot;&quot;&quot;&lt;repohost&gt;:2809
+&lt;&lt;&lt;
+*Start the receiving processes
+&lt;&lt;&lt;
+host2&gt; cd &lt;testdir&gt;
+host2&gt; $~BENCH_ROOT/bin/run_test -P -v -t 120 -h &lt;repohost&gt;:2809 -i $~BENCH_ROOT/etc/&lt;transportconfigfile&gt; -s $~BENCH_ROOT/tests/thru/sub-&lt;rel&gt;.ini
+&lt;&lt;&lt;
+&lt;&lt;&lt;
+host3&gt; cd &lt;testdir&gt;
+host3&gt; $~BENCH_ROOT/bin/run_test -P -v -t 120 -h &lt;repohost&gt;:2809 -i $~BENCH_ROOT/etc/&lt;transportconfigfile&gt; -s $~BENCH_ROOT/tests/thru/sub-&lt;rel&gt;.ini
+&lt;&lt;&lt;
+*Start the publishing process
+&lt;&lt;&lt;
+host1&gt; cd &lt;testdir&gt;
+host1&gt; $~BENCH_ROOT/bin/run_test -P -v -t 120 -h &lt;repohost&gt;:2809 -i $~BENCH_ROOT/etc/&lt;transportconfigfile&gt; -s $~BENCH_ROOT/tests/thru/pub-2sub-&lt;rel&gt;-&lt;rate&gt;.ini
+&lt;&lt;&lt;
+!Executing subscription bound tests in a Linux environment can be done as follows:
+*Start the repostory
+&lt;&lt;&lt;
+repohost&gt; $~BENCH_ROOT/bin/run_test -S -h iiop:&quot;&quot;&quot;//&quot;&quot;&quot;&lt;repohost&gt;:2809
+&lt;&lt;&lt;
+*Start the publishing processes
+&lt;&lt;&lt;
+host1&gt; cd &lt;testdir&gt;
+host1&gt; $~BENCH_ROOT/bin/run_test -P -v -t 120 -h &lt;repohost&gt;:2809 -i $~BENCH_ROOT/etc/&lt;transportconfigfile&gt; -s $~BENCH_ROOT/tests/thru/pub-1sub-&lt;rel&gt;-&lt;rate&gt;.ini
+&lt;&lt;&lt;
+&lt;&lt;&lt;
+host2&gt; cd &lt;testdir&gt;
+host2&gt; $~BENCH_ROOT/bin/run_test -P -v -t 120 -h &lt;repohost&gt;:2809 -i $~BENCH_ROOT/etc/&lt;transportconfigfile&gt; -s $~BENCH_ROOT/tests/thru/pub-1sub-&lt;rel&gt;-&lt;rate&gt;.ini
+&lt;&lt;&lt;
+*Start the receiving process
+&lt;&lt;&lt;
+host3&gt; cd &lt;testdir&gt;
+host3&gt; $~BENCH_ROOT/bin/run_test -P -v -t 120 -h &lt;repohost&gt;:2809 -i $~BENCH_ROOT/etc/&lt;transportconfigfile&gt; -s $~BENCH_ROOT/tests/thru/sub-&lt;rel&gt;.ini
+&lt;&lt;&lt;
 }}}</pre>
 </div>
 <div title="TiddlyWiki" modifier="MikeMartinez" created="201003022002" modified="201003082219" changecount="2">
@@ -2440,7 +2525,7 @@ There is a separate configuration file supplied for each test condition to be ex
 
 You can find out more at the [[TiddlyWiki home|http://www.tiddlywiki.com/]].</pre>
 </div>
-<div title="Topic Specifications" modifier="MikeMartinez" created="201003032055" modified="201003032223" tags="publish" changecount="3">
+<div title="Topic Specifications" modifier="MikeMartinez" created="201003032055" modified="201003311551" tags="publish" changecount="4">
 <pre>!Definable Parameters
 {{centeredTable{
 | ''Topic Section Keys'' |c
@@ -2468,17 +2553,17 @@ You can find out more at the [[TiddlyWiki home|http://www.tiddlywiki.com/]].</pr
 |~ResourceMaxSamplesPerInstance |&lt;number&gt; |&amp;nbsp; |
 |~TransportPriority |&lt;number&gt; |&amp;nbsp; |
 |~LifespanDuration |&lt;number&gt; |&amp;nbsp; |
-|~OwnershipKind |&lt;string&gt; |Enumeration value of {{{SHARED}}}, {{{EXCLUSIVE}}} |
+|~OwnershipKind |&lt;string&gt; |Enumeration value of {{{SHARED}}} or {{{EXCLUSIVE}}} |
 |&gt;|&gt;| &quot;&quot;&quot;---&quot;&quot;&quot; Test Execution Parameters &quot;&quot;&quot;---&quot;&quot;&quot; |
 |Participant |&lt;string&gt; |Must reference by name the identifier of a [participant] subsection within the file. |
 }}}
 !Test Execution Parameters
 [topic] sections are only linked to the containing DDS Participant.  There are no other test execution effects for a topic, other than the Quality of Service policy settings.
 !Example
-An example topic section like the following would result in a DDS Topic with a name of //status// being created in the process with reliability enabled and contained within the //player1// participant.
+An example topic section like the following would result in a DDS Topic with a name of //status// being created in the process with reliability enabled and contained within the //player// participant.
 {{{
 [topic/status]
-Participant = player1
+Participant = player
 ReliabilityKind = RELIABLE
 }}}
 </pre>
