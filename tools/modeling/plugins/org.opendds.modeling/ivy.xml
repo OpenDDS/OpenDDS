@@ -3,7 +3,7 @@
     $Id$
 -->
 <ivy-module version="2.0">
-    <info organisation="opendds" module="org.opendds.modeling.core"/>
+    <info organisation="opendds" module="org.opendds.modeling"/>
 
     <configurations>
         <conf name="default" extends="thirdparty"/>
@@ -11,12 +11,11 @@
     </configurations>
 
     <publications>
-        <artifact name="org.opendds.modeling.core" type="jar"/>
+        <artifact name="org.opendds.modeling" type="jar"/>
     </publications>
 
     <dependencies>
         <dependency name="org.opendds.ant" rev="latest.integration" conf="default"/>
-        <dependency name="org.opendds.modeling.resources" rev="latest.integration" conf="default"/>
 
         <!-- Third-party dependencies -->
         <dependency org="junit" name="junit" rev="4.8.1">

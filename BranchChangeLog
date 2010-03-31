@@ -1,3 +1,11 @@
+Wed Mar 31 20:20:44 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling:
+
+          Refactored the org.opendds.modeling.core and
+          org.opendds.modeling.resources plugins to reflect changes in
+          meta-model development (transition from UML to eCore).
+
 Fri Mar 26 15:53:58 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.core/.settings/org.eclipse.core.resources.prefs:
