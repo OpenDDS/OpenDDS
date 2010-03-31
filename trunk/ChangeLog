@@ -1,3 +1,11 @@
+Wed Mar 31 19:51:26 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+
+          Prepend the script directory to the command search path and
+          then use that path to find commands.  This allows installations
+          other than the 'mkpkg' ones to work as well.
+
 Wed Mar 31 19:02:50 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/bin/run_test:
