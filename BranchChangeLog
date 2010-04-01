@@ -1,3 +1,10 @@
+Thu Apr  1 23:34:38 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/models/OpenDDS.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/models/OpenDDS.xsd:
+
+          Updated generation model; generated schema for XMI-serialized models.
+
 Thu Apr  1 21:56:25 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model:

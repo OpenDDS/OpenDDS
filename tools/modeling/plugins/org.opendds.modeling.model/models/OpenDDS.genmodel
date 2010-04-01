@@ -1,17 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <genmodel:GenModel xmi:version="2.0"
     xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
-    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelDirectory="/org.opendds.modeling.model/src"
-    creationIcons="false" creationSubmenus="true" modelPluginID="org.opendds.modeling.model"
-    templateDirectory="/org.opendds.modeling.model/templates" dynamicTemplates="true" modelName="OpenDDS"
-    editPluginClass="org.opendds.modeling.provider.OpenDDSEditPlugin" editorPluginClass="org.opendds.modeling.presentation.OpenDDSEditorPlugin"
-    generateSchema="true" codeFormatting="true" testsDirectory="/org.opendds.modeling.tests/src"
-    testSuiteClass="org.opendds.modeling.tests.OpenDDSAllTests" importerID="org.eclipse.emf.importer.ecore"
-    complianceLevel="5.0" suppressGenModelAnnotations="false" copyrightFields="false"
-    testsPluginID="org.opendds.modeling.tests" language="">
+    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" copyrightText="Copyright 2010 Object Computing, Inc.&#xA;&#xA;Distributed under the OpenDDS License.&#xA;See: http://www.opendds.org/license.html"
+    modelDirectory="/org.opendds.modeling.model/src" creationIcons="false" creationSubmenus="true"
+    editDirectory="/org.opendds.modeling.edit/src" editorDirectory="/org.opendds.modeling.editor/src"
+    modelPluginID="org.opendds.modeling.model" templateDirectory="/org.opendds.modeling.model/templates"
+    dynamicTemplates="true" redirection="" modelName="OpenDDS" modelPluginClass="org.opendds.modeling.model.ModelPlugin"
+    editPluginClass="org.opendds.modeling.edit.EditPlugin" editorPluginClass="org.opendds.modeling.editor.EditorPlugin"
+    codeFormatting="true" testsDirectory="/org.opendds.modeling.tests/src" testSuiteClass="org.opendds.modeling.tests.OpenDDSAllTests"
+    booleanFlagsField="" importerID="org.eclipse.emf.importer.ecore" complianceLevel="5.0"
+    suppressGenModelAnnotations="false" copyrightFields="false" editPluginID="org.opendds.modeling.edit"
+    editorPluginID="org.opendds.modeling.editor" testsPluginID="org.opendds.modeling.tests"
+    language="" interfaceNamePattern="">
+  <genAnnotations source="http://www.eclipse.org/emf/2002/GenModel/exporter/org.eclipse.xsd.ecore.exporter.xmi">
+    <genAnnotations source="selectedPackages">
+      <details key="http://www.opendds.org/schemas/modeling/OpenDDS" value="OpenDDS.xsd"/>
+    </genAnnotations>
+    <details key="directoryURI" value="."/>
+  </genAnnotations>
   <foreignModel>OpenDDS.ecore</foreignModel>
-  <genPackages prefix="model" basePackage="org.opendds.modeling" disposableProviderFactory="true"
-      generateExampleClass="false" ecorePackage="OpenDDS.ecore#/">
+  <genPackages prefix="" disposableProviderFactory="true" classPackageSuffix="" utilityPackageSuffix=""
+      providerPackageSuffix="" presentationPackageSuffix="" testsPackageSuffix=""
+      generateExampleClass="false" contentTypeIdentifier="" fileExtensions="opendds"
+      ecorePackage="OpenDDS.ecore#/">
+    <genAnnotations source="http://www.eclipse.org/emf/2002/GenModel/exporter/org.eclipse.xsd.ecore.exporter.xmi">
+      <genAnnotations source="opendds.xsd"/>
+      <genAnnotations source="OpenDDS.xsd"/>
+    </genAnnotations>
     <genEnums typeSafeEnumCompatible="false" ecoreEnum="OpenDDS.ecore#//DestinationOrderQosPolicyKind">
       <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//DestinationOrderQosPolicyKind/BY_RECEPTION_TIMESTAMP"/>
       <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//DestinationOrderQosPolicyKind/BY_SOURCE_TIMESTAMP"/>
