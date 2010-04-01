@@ -1,3 +1,9 @@
+Thu Apr  1 21:47:55 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling/models/OpenDDS.genmodel:
+
+          Created initial generation model for the modeling SDK.
+
 Thu Apr  1 21:00:17 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling/models/OpenDDS.ecore:
