@@ -8,13 +8,13 @@ use File::Basename;
 
 =head1 NAME
 
-extract.pl - extract summary statistics from plot datafiles.
+extract-latency.pl - extract summary statistics from plot datafiles.
 
 $Id$
 
 =head1 SYNOPSIS
 
-  extract.pl <infile> ...
+  extract-latency.pl <infile> ...
 
 =head1 DESCRIPTION
 
@@ -29,7 +29,7 @@ script and gathered from all input files.
 This input file name is expected to be in a format that includes '-'
 separated fields and a fixed extension of ".gpd".
 
-  <transport>-<size>.gpd
+  latency-<transport>-<size>.gpd
 
 The <transport> and <size> fields are used to populate two columns in the
 output data.
@@ -69,7 +69,7 @@ generated from each input file.  The output files include:
 
 =head1 EXAMPLE
 
-  extract.pl data/*.gpd > data/latency.csv
+  extract-latency.pl data/*.gpd > data/latency.csv
 
 =cut
 
@@ -85,7 +85,8 @@ our ($current, $transport, $size, $section, $data);
 
 if( not defined $current or $ARGV ne "$current") {
   # Starting a new file.
-  ($transport, $size) = split "-", basename( $ARGV, EXTENSION);
+  my $testtype;
+  ($testtype, $transport, $size) = split "-", basename( $ARGV, EXTENSION);
   $current = $ARGV;
   undef $section;
 }
