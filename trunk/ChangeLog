@@ -1,3 +1,24 @@
+Wed Mar 31 23:59:23 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+        * bin/performance_tests.lst:
+        * performance-tests/Bench/bin/extract-latency.pl:
+        * performance-tests/Bench/bin/extract-throughput.pl:
+        * performance-tests/Bench/bin/plot-throughput.gp:
+        * performance-tests/Bench/bin/reduce-latency-data.pl:
+        * performance-tests/Bench/tests/latency/run_test.pl:
+        * performance-tests/Bench/tests/latency/test_list.txt:
+        * performance-tests/Bench/tests/thru/test-commands.txt:
+        * performance-tests/Bench/tools/convert-all:
+        * performance-tests/Bench/tools/convert-latency:
+        * performance-tests/Bench/tools/plot-latency.gp:
+        * performance-tests/Bench/tools/plot-throughput.gp:
+        * performance-tests/Bench/bin/reduce.pl:
+        * performance-tests/Bench/bin/extract.pl:
+        * performance-tests/Bench/tools/plot-all.gp:
+
+          Added initial scripts for plotting throughput data and renamed
+          the genericly name latency scripts.
+
 Wed Mar 31 19:51:26 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/bin/run_test:

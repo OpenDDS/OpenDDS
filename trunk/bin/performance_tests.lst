@@ -1,0 +1,69 @@
+
+## Run inter-host tests first
+
+performance-tests/Bench/tests/latency/run_test.pl tcp 50: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl tcp 100: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl tcp 250: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl tcp 500: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl tcp 1000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl tcp 2500: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl tcp 5000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl tcp 8000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl tcp 16000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl tcp 32000: !DCPS_MIN
+
+performance-tests/Bench/tests/latency/run_test.pl udp 50: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl udp 100: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl udp 250: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl udp 500: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl udp 1000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl udp 2500: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl udp 5000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl udp 8000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl udp 16000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl udp 32000: !DCPS_MIN
+
+performance-tests/Bench/tests/latency/run_test.pl multibe 50: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multibe 100: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multibe 250: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multibe 500: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multibe 1000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multibe 2500: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multibe 5000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multibe 8000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multibe 16000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multibe 32000: !DCPS_MIN
+
+performance-tests/Bench/tests/latency/run_test.pl multire 50: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multire 100: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multire 250: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multire 500: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multire 1000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multire 2500: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multire 5000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multire 8000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multire 16000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multire 32000: !DCPS_MIN
+
+
+
+## Run local tests
+performance-tests/DCPS/InfoRepo_population/run_test.pl: !DCPS_MIN !MIN_CORBA
+
+performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl: !DCPS_MIN
+performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl 13 1 500: !DCPS_MIN
+performance-tests/DCPS/TCPListenerTest/run_test-1p4s.pl: !DCPS_MIN
+performance-tests/DCPS/TCPListenerTest/run_test-2p3s.pl: !DCPS_MIN
+performance-tests/DCPS/TCPListenerTest/run_test-4p1s.pl: !DCPS_MIN
+
+## N.B. There appear to be some bad assumptions in the following tests:
+#performance-tests/DCPS/UDPListenerTest/run_test-1p1s.pl: !DCPS_MIN
+#performance-tests/DCPS/UDPListenerTest/run_test-4p1s.pl: !DCPS_MIN
+#performance-tests/DCPS/UDPListenerTest/run_test-1p4s.pl: !DCPS_MIN
+#performance-tests/DCPS/UDPListenerTest/run_test-2p3s.pl: !DCPS_MIN
+
+## N.B. There appear to be some bad assumptions in the following tests:
+#performance-tests/DCPS/MulticastListenerTest/run_test-1p1s.pl: !DCPS_MIN !QNX
+#performance-tests/DCPS/MulticastListenerTest/run_test-4p1s.pl: !DCPS_MIN !QNX
+#performance-tests/DCPS/MulticastListenerTest/run_test-1p4s.pl: !DCPS_MIN !QNX
+#performance-tests/DCPS/MulticastListenerTest/run_test-2p3s.pl: !DCPS_MIN !QNX

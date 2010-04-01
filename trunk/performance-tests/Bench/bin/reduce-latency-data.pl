@@ -7,13 +7,13 @@ use strict;
 
 =head1 NAME
 
-reduce.pl - reduce test results into plottable data
+reduce-latency-data.pl - reduce test results into plottable data
 
 $Id$
 
 =head1 SYNOPSIS
 
-  reduce.pl <infile>
+  reduce-latency-data.pl <infile>
 
 =head1 DESCRIPTION
 
@@ -99,7 +99,7 @@ message size of the test data.
 
 =head1 EXAMPLE
 
-  reduce.pl tcp/run/latency-1000.data > data/tcp-1000.gpd
+  reduce-latency-data.pl tcp/latency-1000.data > data/latency-tcp-1000.gpd
 
 =cut
 
