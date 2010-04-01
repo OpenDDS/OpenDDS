@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<genmodel:GenModel xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelDirectory="/org.opendds.modeling/src"
+    creationIcons="false" creationSubmenus="true" modelPluginID="org.opendds.modeling"
+    templateDirectory="/org.opendds.modeling/templates" dynamicTemplates="true" modelName="OpenDDS"
+    editPluginClass="org.opendds.modeling.provider.OpenDDSEditPlugin" editorPluginClass="org.opendds.modeling.presentation.OpenDDSEditorPlugin"
+    generateSchema="true" codeFormatting="true" testsDirectory="/org.opendds.modeling.tests/src"
+    testSuiteClass="org.opendds.modeling.tests.OpenDDSAllTests" importerID="org.eclipse.emf.importer.ecore"
+    complianceLevel="5.0" suppressGenModelAnnotations="false" copyrightFields="false"
+    testsPluginID="org.opendds.modeling.tests" language="">
+  <foreignModel>OpenDDS.ecore</foreignModel>
+  <genPackages prefix="model" basePackage="org.opendds.modeling" disposableProviderFactory="true"
+      generateExampleClass="false" ecorePackage="OpenDDS.ecore#/">
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="OpenDDS.ecore#//DestinationOrderQosPolicyKind">
+      <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//DestinationOrderQosPolicyKind/BY_RECEPTION_TIMESTAMP"/>
+      <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//DestinationOrderQosPolicyKind/BY_SOURCE_TIMESTAMP"/>
+    </genEnums>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="OpenDDS.ecore#//DurabilityQosPolicyKind">
+      <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//DurabilityQosPolicyKind/VOLATILE"/>
+      <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//DurabilityQosPolicyKind/TRANSIENT"/>
+      <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//DurabilityQosPolicyKind/TRANSIENT_LOCAL"/>
+      <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//DurabilityQosPolicyKind/PERSISTENT"/>
+    </genEnums>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="OpenDDS.ecore#//HistoryQosPolicyKind">
+      <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//HistoryQosPolicyKind/KEEP_LAST"/>
+      <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//HistoryQosPolicyKind/KEEP_ALL"/>
+    </genEnums>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="OpenDDS.ecore#//LivelinessQosPolicyKind">
+      <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//LivelinessQosPolicyKind/AUTOMATIC"/>
+      <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//LivelinessQosPolicyKind/MANUAL_BY_PARTICIPANT"/>
+      <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//LivelinessQosPolicyKind/MANUAL_BY_TOPIC"/>
+    </genEnums>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="OpenDDS.ecore#//OwnershipQosPolicyKind">
+      <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//OwnershipQosPolicyKind/SHARED"/>
+      <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//OwnershipQosPolicyKind/EXCLUSIVE"/>
+    </genEnums>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="OpenDDS.ecore#//PresentationQosPolicyAccessScopeKind">
+      <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//PresentationQosPolicyAccessScopeKind/INSTANCE"/>
+      <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//PresentationQosPolicyAccessScopeKind/TOPIC"/>
+      <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//PresentationQosPolicyAccessScopeKind/GROUP"/>
+    </genEnums>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="OpenDDS.ecore#//ReliabilityQosPolicyKind">
+      <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//ReliabilityQosPolicyKind/BEST_EFFORT"/>
+      <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//ReliabilityQosPolicyKind/RELIABLE"/>
+    </genEnums>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="OpenDDS.ecore#//ComponentType"/>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="OpenDDS.ecore#//LanguageType"/>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="OpenDDS.ecore#//PlatformType"/>
+    <genClasses image="false" ecoreClass="OpenDDS.ecore#//Entity"/>
+    <genClasses image="false" ecoreClass="OpenDDS.ecore#//NamedEntity">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//NamedEntity/name"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="OpenDDS.ecore#//Specification"/>
+    <genClasses image="false" ecoreClass="OpenDDS.ecore#//DomainEntity"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//ContentFilteredTopic">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//ContentFilteredTopic/filter_expression"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//MultiTopic">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//MultiTopic/subscription_expression"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//Topic">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Topic/durability_service"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Topic/transport_priority"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Topic/topic_data"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Topic/resource_limits"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Topic/reliability"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Topic/ownership"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Topic/liveliness"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Topic/history"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Topic/durability"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Topic/destination_order"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Topic/deadline"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Topic/latency_budget"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="OpenDDS.ecore#//TopicDescription">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//TopicDescription/type"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//Array">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Array/subtype"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//Boolean"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//Case">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//Case/labels"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Case/element_spec"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//Char"/>
+    <genClasses image="false" ecoreClass="OpenDDS.ecore#//Collection">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//Collection/length"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="OpenDDS.ecore#//ConstructedTopicType"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//Double"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//Enum">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//Enum/labels"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//Float"/>
+    <genClasses image="false" ecoreClass="OpenDDS.ecore#//FloatingPoint"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//Key">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Key/member"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//KeyField"/>
+    <genClasses image="false" ecoreClass="OpenDDS.ecore#//Int"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//Long"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//LongLong"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//Octet"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//Sequence">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Sequence/subtype"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//Short"/>
+    <genClasses image="false" ecoreClass="OpenDDS.ecore#//SignedInt"/>
+    <genClasses image="false" ecoreClass="OpenDDS.ecore#//Simple"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//String"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//TopicStruct">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//TopicStruct/members"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//TopicStruct/keys"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="OpenDDS.ecore#//TopicField"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//Typedef">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Typedef/type"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//ULong"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//ULongLong"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//Union">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Union/switch"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Union/cases"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="OpenDDS.ecore#//UnsignedInt"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//UShort"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//DataReader">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DataReader/topic"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DataReader/reader_data_lifecycle"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DataReader/transport_priority"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DataReader/durability_service"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DataReader/ownership_strength"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="OpenDDS.ecore#//DataReaderWriter">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DataReaderWriter/durability"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DataReaderWriter/destination_order"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DataReaderWriter/deadline"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DataReaderWriter/history"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DataReaderWriter/user_data"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DataReaderWriter/resource_limits"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DataReaderWriter/ownership"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DataReaderWriter/liveliness"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DataReaderWriter/latency_budget"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DataReaderWriter/reliability"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//DataWriter">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DataWriter/topic"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DataWriter/writer_data_lifecycle"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//Domain"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//DomainParticipant">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DomainParticipant/subscribers"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DomainParticipant/publishers"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DomainParticipant/entity_factory"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DomainParticipant/user_data"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DomainParticipant/domain"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//Publisher">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Publisher/writers"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="OpenDDS.ecore#//PublisherSubscriber">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//PublisherSubscriber/entity_factory"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//PublisherSubscriber/presentation"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//PublisherSubscriber/group_data"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//PublisherSubscriber/partition"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//PublisherSubscriber/transport"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//Subscriber">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Subscriber/readers"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//DeadlineQosPolicy">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DeadlineQosPolicy/period"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//DestinationOrderQosPolicy">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//DestinationOrderQosPolicy/kind"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//DurabilityQosPolicy">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//DurabilityQosPolicy/kind"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//DurabilityServiceQosPolicy">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//DurabilityServiceQosPolicy/history_depth"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//DurabilityServiceQosPolicy/history_kind"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//DurabilityServiceQosPolicy/max_instances"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//DurabilityServiceQosPolicy/max_samples"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//DurabilityServiceQosPolicy/max_samples_per_instance"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DurabilityServiceQosPolicy/service_cleanup_delay"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//EntityFactoryQosPolicy">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//EntityFactoryQosPolicy/autoenable_created_entities"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//GroupDataQosPolicy">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//GroupDataQosPolicy/value"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//HistoryQosPolicy">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//HistoryQosPolicy/depth"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//HistoryQosPolicy/kind"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//LatencyBudgetQosPolicy">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//LatencyBudgetQosPolicy/duration"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//LifespanQosPolicy">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//LifespanQosPolicy/duration"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//LivelinessQosPolicy">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//LivelinessQosPolicy/kind"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//LivelinessQosPolicy/lease_duration"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//OwnershipQosPolicy">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//OwnershipQosPolicy/kind"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//OwnershipStrengthQosPolicy">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//OwnershipStrengthQosPolicy/value"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//PartitionQosPolicy">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//PartitionQosPolicy/name"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//PresentationQosPolicy">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//PresentationQosPolicy/access_scope"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//PresentationQosPolicy/coherent_access"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//PresentationQosPolicy/ordered_access"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="OpenDDS.ecore#//QosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//ReaderDataLifecycleQosPolicy">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//ReaderDataLifecycleQosPolicy/autopurge_nowriter_samples_delay"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//ReliabilityQosPolicy">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//ReliabilityQosPolicy/kind"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//ReliabilityQosPolicy/max_blocking_time"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//ResourceLimitsQosPolicy">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//ResourceLimitsQosPolicy/max_instances"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//ResourceLimitsQosPolicy/max_samples"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//ResourceLimitsQosPolicy/max_samples_per_instance"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//TimeBasedFilterQosPolicy">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//TimeBasedFilterQosPolicy/minimum_separation"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//TopicDataQosPolicy">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//TopicDataQosPolicy/value"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//TransportPriorityQosPolicy">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//TransportPriorityQosPolicy/value"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//UserDataQosPolicy">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//UserDataQosPolicy/value"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//Period">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//Period/seconds"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//Period/nanoseconds"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//WriterDataLifecycleQosPolicy">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//WriterDataLifecycleQosPolicy/autodispose_unregistered_instances"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//ApplicationTarget">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//ApplicationTarget/component_type"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//ApplicationTarget/language"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//ApplicationTarget/platform"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//ApplicationTarget/participant"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//ApplicationTarget/service_arguments"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//Transport">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//Transport/transport_id"/>
+    </genClasses>
+  </genPackages>
+</genmodel:GenModel>
