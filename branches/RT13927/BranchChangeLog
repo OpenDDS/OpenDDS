@@ -1,3 +1,10 @@
+Thu Apr  1 21:56:25 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model:
+
+          Refactored the org.opendds.modeling plugin to reflect its new
+          nature.
+
 Thu Apr  1 21:47:55 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling/models/OpenDDS.genmodel:

@@ -2,7 +2,7 @@
 <!--
     $Id$
 -->
-<project name="org.opendds.modeling" default="archive">
+<project name="org.opendds.modeling.model" default="archive">
     <property name="build.dir" value="build"/>
     <property name="doc.dir" value="doc"/>
     <property name="lib.dir" value="lib"/>
