@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>org.opendds.modeling</name>
+	<name>org.opendds.modeling.model</name>
 	<comment></comment>
 	<projects></projects>
 	<buildSpec>
@@ -20,7 +20,7 @@
 			<arguments>
 				<dictionary>
 					<key>LaunchConfigHandle</key>
-					<value>&lt;project&gt;/.externalToolBuilders/org.opendds.modeling.launch</value>
+					<value>&lt;project&gt;/.externalToolBuilders/org.opendds.modeling.model.launch</value>
 				</dictionary>
 			</arguments>
 		</buildCommand>
