@@ -41,6 +41,8 @@ if( $^O eq 'MSWin32') { unshift @PATH, "$projectRoot/lib"; }
 
 # Locate the commands.
 unshift @PATH, "$FindBin::Bin";
+my $testprocessCommand = &findCommand('testprocess');
+my $repoCommand        = &findCommand('DCPSInfoRepo');
 
 use Getopt::Long qw( :config bundling) ;
 use Pod::Usage ;
@@ -115,7 +117,11 @@ $collectStats = "psn" if $collectStats =~ /al?l?/;
 print "Commands will be printed only and not executed.\n"
                                           if $verbose and $noaction;
 print "Repository will be started\n"      if $verbose and $startRepo;
+print "Repository is located at: $repoCommand\n"
+                                          if $verbose;
 print "Test process will be started\n"    if $verbose and $startTest;
+print "Test process is located at: $testprocessCommand\n"
+                                          if $verbose;
 print "Test will execute for at least $duration seconds before terminating\n"
                                           if $verbose and $duration;
 print "Test will execute continuously and not terminate\n"
@@ -188,9 +194,9 @@ my @PROCESSES;
 if( $startRepo) {
   my $repoArgs = "$repoOpts -o $repo_ior ";
   if( PerlACE::is_vxworks_test()) {
-    push @PROCESSES, new PerlACE::ProcessVX( "DCPSInfoRepo", $repoArgs);
+    push @PROCESSES, new PerlACE::ProcessVX( $repoCommand, $repoArgs);
   } else {
-    push @PROCESSES, new PerlACE::Process( "DCPSInfoRepo", $repoArgs);
+    push @PROCESSES, new PerlACE::Process( $repoCommand, $repoArgs);
   }
 }
 
@@ -198,9 +204,9 @@ if( $startTest) {
   map {
     my $testArgs = "$testOpts -f $_ ";
     if( PerlACE::is_vxworks_test()) {
-      push @PROCESSES, new PerlACE::ProcessVX( "testprocess", $testArgs);
+      push @PROCESSES, new PerlACE::ProcessVX( $testprocessCommand, $testArgs);
     } else {
-      push @PROCESSES, new PerlACE::Process( "testprocess", $testArgs);
+      push @PROCESSES, new PerlACE::Process( $testprocessCommand, $testArgs);
     }
   } @scenario;
 }
@@ -270,6 +276,22 @@ sub WaitForUserInput {
   print "\n\nNo Duration specified.  Hit Enter to end the processes "
       . "and finish the test.\n\n";
   my $userinput = <STDIN>;
+}
+
+#
+# Search the environments command search path for a command to execute.
+# The PerlACE::Process needs to have a fully located command to operate
+# correctly, and does not honor the environment PATH.
+#
+# This is the equivalent of "return `which $command`;", but cross
+# platform.  I hope.
+#
+sub findCommand {
+  my $command = shift;
+  foreach my $location (@PATH) {
+    return "$location/$command" if -x "$location/$command";
+  }
+  die "Unable to locate command: $command for execution.";
 }
 
 #
