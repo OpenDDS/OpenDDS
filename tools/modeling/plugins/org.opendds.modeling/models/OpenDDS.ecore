@@ -129,7 +129,7 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Publisher" eSuperTypes="#//PublisherSubscriber">
     <eStructuralFeatures xsi:type="ecore:EReference" name="writers" lowerBound="1"
-        upperBound="-1" eType="#//DataWriter"/>
+        upperBound="-1" eType="#//DataWriter" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PublisherSubscriber" abstract="true"
       eSuperTypes="#//DomainEntity">
@@ -142,7 +142,7 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Subscriber" eSuperTypes="#//PublisherSubscriber">
     <eStructuralFeatures xsi:type="ecore:EReference" name="readers" lowerBound="1"
-        upperBound="-1" eType="#//DataReader"/>
+        upperBound="-1" eType="#//DataReader" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="DeadlineQosPolicy" eSuperTypes="#//QosPolicy">
     <eStructuralFeatures xsi:type="ecore:EReference" name="period" eType="#//Period"
