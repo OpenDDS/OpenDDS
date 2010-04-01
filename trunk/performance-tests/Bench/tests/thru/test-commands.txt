@@ -68,59 +68,59 @@ all hosts: export TESTCMD="$PROJECTBASE/bin/run_test -Call -P -t 120 -h $REPOHOS
 # Steepest ascent
 
 # Test 1
-host 1: $TESTCMD -s $TESTBASE/bidir-1sub-be-80.ini -v -f bidir1.data 2>&1 | tee bidir1-local-be.log
+host 1: $TESTCMD -s $TESTBASE/bidir-1sub-be-80.ini -v -f bidir1.results 2>&1 | tee bidir1-local-be.log
 host 2: $TESTCMD -s $TESTBASE/bidir-remote-be.ini 2>&1 | tee bidir1-remote-be.log
 
 # Test 2
-host 1: $TESTCMD -s $TESTBASE/bidir-1sub-be-320.ini -v -f bidir2.data 2>&1 | tee bidir2-local-be.log
+host 1: $TESTCMD -s $TESTBASE/bidir-1sub-be-320.ini -v -f bidir2.results 2>&1 | tee bidir2-local-be.log
 host 2: $TESTCMD -s $TESTBASE/bidir-remote-be.ini 2>&1 | tee bidir2-remote-be.log
 
 # Test 3
-host 1: $TESTCMD -s $TESTBASE/bidir-1sub-be-720.ini -v -f bidir3.data 2>&1 | tee bidir3-local-be.log
+host 1: $TESTCMD -s $TESTBASE/bidir-1sub-be-720.ini -v -f bidir3.results 2>&1 | tee bidir3-local-be.log
 host 2: $TESTCMD -s $TESTBASE/bidir-remote-be.ini 2>&1 | tee bidir3-remote-be.log
 
 # Test 4
-host 1: $TESTCMD -s $TESTBASE/bidir-1sub-be-1280.ini -v -f bidir4.data 2>&1 | tee bidir4-local-be.log
+host 1: $TESTCMD -s $TESTBASE/bidir-1sub-be-1280.ini -v -f bidir4.results 2>&1 | tee bidir4-local-be.log
 host 2: $TESTCMD -s $TESTBASE/bidir-remote-be.ini 2>&1 | tee bidir4-remote-be.log
 
 # Test 5
-host 1: $TESTCMD -s $TESTBASE/bidir-1sub-be-2000.ini -v -f bidir5.data 2>&1 | tee bidir5-local-be.log
+host 1: $TESTCMD -s $TESTBASE/bidir-1sub-be-2000.ini -v -f bidir5.results 2>&1 | tee bidir5-local-be.log
 host 2: $TESTCMD -s $TESTBASE/bidir-remote-be.ini 2>&1 | tee bidir5-remote-be.log
 
 # Fixed rate
 
 # Test 6
-host 1: $TESTCMD -s $TESTBASE/bidir-1sub-be-160r.ini -v -f bidir6.data 2>&1 | tee bidir6-local-be.log
+host 1: $TESTCMD -s $TESTBASE/bidir-1sub-be-160r.ini -v -f bidir6.results 2>&1 | tee bidir6-local-be.log
 host 2: $TESTCMD -s $TESTBASE/bidir-remote-be.ini 2>&1 | tee bidir6-remote-be.log
 
 # Test 7
-host 1: $TESTCMD -s $TESTBASE/bidir-1sub-be-240r.ini -v -f bidir7.data 2>&1 | tee bidir7-local-be.log
+host 1: $TESTCMD -s $TESTBASE/bidir-1sub-be-240r.ini -v -f bidir7.results 2>&1 | tee bidir7-local-be.log
 host 2: $TESTCMD -s $TESTBASE/bidir-remote-be.ini 2>&1 | tee bidir7-remote-be.log
 
 # Test 8
-host 1: $TESTCMD -s $TESTBASE/bidir-1sub-be-320r.ini -v -f bidir8.data 2>&1 | tee bidir8-local-be.log
+host 1: $TESTCMD -s $TESTBASE/bidir-1sub-be-320r.ini -v -f bidir8.results 2>&1 | tee bidir8-local-be.log
 host 2: $TESTCMD -s $TESTBASE/bidir-remote-be.ini 2>&1 | tee bidir8-remote-be.log
 
 # Test 9
-host 1: $TESTCMD -s $TESTBASE/bidir-1sub-be-400r.ini -v -f bidir9.data 2>&1 | tee bidir9-local-be.log
+host 1: $TESTCMD -s $TESTBASE/bidir-1sub-be-400r.ini -v -f bidir9.results 2>&1 | tee bidir9-local-be.log
 host 2: $TESTCMD -s $TESTBASE/bidir-remote-be.ini 2>&1 | tee bidir9-remote-be.log
 
 # Fixed size
 
 # Test 10
-host 1: $TESTCMD -s $TESTBASE/bidir-1sub-be-160s.ini -v -f bidir10.data 2>&1 | tee bidir10-local-be.log
+host 1: $TESTCMD -s $TESTBASE/bidir-1sub-be-160s.ini -v -f bidir10.results 2>&1 | tee bidir10-local-be.log
 host 2: $TESTCMD -s $TESTBASE/bidir-remote-be.ini 2>&1 | tee bidir10-remote-be.log
 
 # Test 11
-host 1: $TESTCMD -s $TESTBASE/bidir-1sub-be-240s.ini -v -f bidir11.data 2>&1 | tee bidir11-local-be.log
+host 1: $TESTCMD -s $TESTBASE/bidir-1sub-be-240s.ini -v -f bidir11.results 2>&1 | tee bidir11-local-be.log
 host 2: $TESTCMD -s $TESTBASE/bidir-remote-be.ini 2>&1 | tee bidir11-remote-be.log
 
 # Test 12
-host 1: $TESTCMD -s $TESTBASE/bidir-1sub-be-320s.ini -v -f bidir12.data 2>&1 | tee bidir12-local-be.log
+host 1: $TESTCMD -s $TESTBASE/bidir-1sub-be-320s.ini -v -f bidir12.results 2>&1 | tee bidir12-local-be.log
 host 2: $TESTCMD -s $TESTBASE/bidir-remote-be.ini 2>&1 | tee bidir12-remote-be.log
 
 # Test 13
-host 1: $TESTCMD -s $TESTBASE/bidir-1sub-be-400s.ini -v -f bidir13.data 2>&1 | tee bidir13-local-be.log
+host 1: $TESTCMD -s $TESTBASE/bidir-1sub-be-400s.ini -v -f bidir13.results 2>&1 | tee bidir13-local-be.log
 host 2: $TESTCMD -s $TESTBASE/bidir-remote-be.ini 2>&1 | tee bidir13-remote-be.log
 
 --- Bidirectional (modified latency) tests, reliable ---
@@ -138,59 +138,59 @@ all hosts: export TESTCMD="$PROJECTBASE/bin/run_test -Call -P -t 120 -h $REPOHOS
 # Steepest ascent
 
 # Test 1
-host 1: $TESTCMD -s $TESTBASE/bidir-1sub-rel-80.ini -v -f bidir1.data 2>&1 | tee bidir1-local-rel.log
+host 1: $TESTCMD -s $TESTBASE/bidir-1sub-rel-80.ini -v -f bidir1.results 2>&1 | tee bidir1-local-rel.log
 host 2: $TESTCMD -s $TESTBASE/bidir-remote-rel.ini 2>&1 | tee bidir1-remote-rel.log
 
 # Test 2
-host 1: $TESTCMD -s $TESTBASE/bidir-1sub-rel-320.ini -v -f bidir2.data 2>&1 | tee bidir2-local-rel.log
+host 1: $TESTCMD -s $TESTBASE/bidir-1sub-rel-320.ini -v -f bidir2.results 2>&1 | tee bidir2-local-rel.log
 host 2: $TESTCMD -s $TESTBASE/bidir-remote-rel.ini 2>&1 | tee bidir2-remote-rel.log
 
 # Test 3
-host 1: $TESTCMD -s $TESTBASE/bidir-1sub-rel-720.ini -v -f bidir3.data 2>&1 | tee bidir3-local-rel.log
+host 1: $TESTCMD -s $TESTBASE/bidir-1sub-rel-720.ini -v -f bidir3.results 2>&1 | tee bidir3-local-rel.log
 host 2: $TESTCMD -s $TESTBASE/bidir-remote-rel.ini 2>&1 | tee bidir3-remote-rel.log
 
 # Test 4
-host 1: $TESTCMD -s $TESTBASE/bidir-1sub-rel-1280.ini -v -f bidir4.data 2>&1 | tee bidir4-local-rel.log
+host 1: $TESTCMD -s $TESTBASE/bidir-1sub-rel-1280.ini -v -f bidir4.results 2>&1 | tee bidir4-local-rel.log
 host 2: $TESTCMD -s $TESTBASE/bidir-remote-rel.ini 2>&1 | tee bidir4-remote-rel.log
 
 # Test 5
-host 1: $TESTCMD -s $TESTBASE/bidir-1sub-rel-2000.ini -v -f bidir5.data 2>&1 | tee bidir5-local-rel.log
+host 1: $TESTCMD -s $TESTBASE/bidir-1sub-rel-2000.ini -v -f bidir5.results 2>&1 | tee bidir5-local-rel.log
 host 2: $TESTCMD -s $TESTBASE/bidir-remote-rel.ini 2>&1 | tee bidir5-remote-rel.log
 
 # Fixed rate
 
 # Test 6
-host 1: $TESTCMD -s $TESTBASE/bidir-1sub-rel-160r.ini -v -f bidir6.data 2>&1 | tee bidir6-local-rel.log
+host 1: $TESTCMD -s $TESTBASE/bidir-1sub-rel-160r.ini -v -f bidir6.results 2>&1 | tee bidir6-local-rel.log
 host 2: $TESTCMD -s $TESTBASE/bidir-remote-rel.ini 2>&1 | tee bidir6-remote-rel.log
 
 # Test 7
-host 1: $TESTCMD -s $TESTBASE/bidir-1sub-rel-240r.ini -v -f bidir7.data 2>&1 | tee bidir7-local-rel.log
+host 1: $TESTCMD -s $TESTBASE/bidir-1sub-rel-240r.ini -v -f bidir7.results 2>&1 | tee bidir7-local-rel.log
 host 2: $TESTCMD -s $TESTBASE/bidir-remote-rel.ini 2>&1 | tee bidir7-remote-rel.log
 
 # Test 8
-host 1: $TESTCMD -s $TESTBASE/bidir-1sub-rel-320r.ini -v -f bidir8.data 2>&1 | tee bidir8-local-rel.log
+host 1: $TESTCMD -s $TESTBASE/bidir-1sub-rel-320r.ini -v -f bidir8.results 2>&1 | tee bidir8-local-rel.log
 host 2: $TESTCMD -s $TESTBASE/bidir-remote-rel.ini 2>&1 | tee bidir8-remote-rel.log
 
 # Test 9
-host 1: $TESTCMD -s $TESTBASE/bidir-1sub-rel-400r.ini -v -f bidir9.data 2>&1 | tee bidir9-local-rel.log
+host 1: $TESTCMD -s $TESTBASE/bidir-1sub-rel-400r.ini -v -f bidir9.results 2>&1 | tee bidir9-local-rel.log
 host 2: $TESTCMD -s $TESTBASE/bidir-remote-rel.ini 2>&1 | tee bidir9-remote-rel.log
 
 # Fixed size
 
 # Test 10
-host 1: $TESTCMD -s $TESTBASE/bidir-1sub-rel-160s.ini -v -f bidir10.data 2>&1 | tee bidir10-local-rel.log
+host 1: $TESTCMD -s $TESTBASE/bidir-1sub-rel-160s.ini -v -f bidir10.results 2>&1 | tee bidir10-local-rel.log
 host 2: $TESTCMD -s $TESTBASE/bidir-remote-rel.ini 2>&1 | tee bidir10-remote-rel.log
 
 # Test 11
-host 1: $TESTCMD -s $TESTBASE/bidir-1sub-rel-240s.ini -v -f bidir11.data 2>&1 | tee bidir11-local-rel.log
+host 1: $TESTCMD -s $TESTBASE/bidir-1sub-rel-240s.ini -v -f bidir11.results 2>&1 | tee bidir11-local-rel.log
 host 2: $TESTCMD -s $TESTBASE/bidir-remote-rel.ini 2>&1 | tee bidir11-remote-rel.log
 
 # Test 12
-host 1: $TESTCMD -s $TESTBASE/bidir-1sub-rel-320s.ini -v -f bidir12.data 2>&1 | tee bidir12-local-rel.log
+host 1: $TESTCMD -s $TESTBASE/bidir-1sub-rel-320s.ini -v -f bidir12.results 2>&1 | tee bidir12-local-rel.log
 host 2: $TESTCMD -s $TESTBASE/bidir-remote-rel.ini 2>&1 | tee bidir12-remote-rel.log
 
 # Test 13
-host 1: $TESTCMD -s $TESTBASE/bidir-1sub-rel-400s.ini -v -f bidir13.data 2>&1 | tee bidir13-local-rel.log
+host 1: $TESTCMD -s $TESTBASE/bidir-1sub-rel-400s.ini -v -f bidir13.results 2>&1 | tee bidir13-local-rel.log
 host 2: $TESTCMD -s $TESTBASE/bidir-remote-rel.ini 2>&1 | tee bidir13-remote-rel.log
 
 --- publication bound:
