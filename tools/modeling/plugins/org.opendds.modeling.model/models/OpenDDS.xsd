@@ -48,13 +48,26 @@
     </xsd:restriction>
   </xsd:simpleType>
   <xsd:simpleType name="ComponentType">
-    <xsd:restriction base="xsd:NCName"/>
+    <xsd:restriction base="xsd:NCName">
+      <xsd:enumeration value="EXECUTABLE"/>
+      <xsd:enumeration value="SHARED_LIBRARY"/>
+      <xsd:enumeration value="STATIC_LIBRARY"/>
+    </xsd:restriction>
   </xsd:simpleType>
   <xsd:simpleType name="LanguageType">
-    <xsd:restriction base="xsd:NCName"/>
+    <xsd:restriction base="xsd:NCName">
+      <xsd:enumeration value="CXX"/>
+    </xsd:restriction>
   </xsd:simpleType>
   <xsd:simpleType name="PlatformType">
-    <xsd:restriction base="xsd:NCName"/>
+    <xsd:restriction base="xsd:NCName">
+      <xsd:enumeration value="MPC_CDT"/>
+      <xsd:enumeration value="MPC_GNUACE"/>
+      <xsd:enumeration value="MPC_NMAKE"/>
+      <xsd:enumeration value="MPC_VC71"/>
+      <xsd:enumeration value="MPC_VC8"/>
+      <xsd:enumeration value="MPC_VC9"/>
+    </xsd:restriction>
   </xsd:simpleType>
   <xsd:complexType abstract="true" name="Entity">
     <xsd:choice maxOccurs="unbounded" minOccurs="0">
@@ -149,42 +162,42 @@
   <xsd:complexType name="Array">
     <xsd:complexContent>
       <xsd:extension base="opendds:Collection">
-        <xsd:choice maxOccurs="unbounded" minOccurs="0">
-          <xsd:element name="subtype" type="opendds:TopicField"/>
-        </xsd:choice>
-        <xsd:attribute name="subtype" type="xsd:string"/>
+        <xsd:attribute name="length" type="xsd:long" use="required"/>
       </xsd:extension>
     </xsd:complexContent>
   </xsd:complexType>
   <xsd:element name="Array" type="opendds:Array"/>
-  <xsd:complexType name="Boolean">
+  <xsd:complexType name="OBoolean">
     <xsd:complexContent>
       <xsd:extension base="opendds:Simple"/>
     </xsd:complexContent>
   </xsd:complexType>
-  <xsd:element name="Boolean" type="opendds:Boolean"/>
+  <xsd:element name="OBoolean" type="opendds:OBoolean"/>
   <xsd:complexType name="Case">
     <xsd:complexContent>
       <xsd:extension base="opendds:TopicField">
         <xsd:choice maxOccurs="unbounded" minOccurs="0">
-          <xsd:element name="element_spec" type="opendds:TopicField"/>
+          <xsd:element name="type" type="opendds:TopicField"/>
         </xsd:choice>
         <xsd:attribute name="labels" type="xsd:string"/>
-        <xsd:attribute name="element_spec" type="xsd:string"/>
+        <xsd:attribute name="type" type="xsd:string"/>
       </xsd:extension>
     </xsd:complexContent>
   </xsd:complexType>
   <xsd:element name="Case" type="opendds:Case"/>
-  <xsd:complexType name="Char">
+  <xsd:complexType name="OChar">
     <xsd:complexContent>
       <xsd:extension base="opendds:Simple"/>
     </xsd:complexContent>
   </xsd:complexType>
-  <xsd:element name="Char" type="opendds:Char"/>
+  <xsd:element name="OChar" type="opendds:OChar"/>
   <xsd:complexType abstract="true" name="Collection">
     <xsd:complexContent>
       <xsd:extension base="opendds:TopicField">
-        <xsd:attribute name="length" type="xsd:long"/>
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="type" type="opendds:TopicField"/>
+        </xsd:choice>
+        <xsd:attribute name="type" type="xsd:string"/>
       </xsd:extension>
     </xsd:complexContent>
   </xsd:complexType>
@@ -195,12 +208,12 @@
     </xsd:complexContent>
   </xsd:complexType>
   <xsd:element name="ConstructedTopicType" type="opendds:ConstructedTopicType"/>
-  <xsd:complexType name="Double">
+  <xsd:complexType name="ODouble">
     <xsd:complexContent>
-      <xsd:extension base="opendds:FloatingPoint"/>
+      <xsd:extension base="opendds:Simple"/>
     </xsd:complexContent>
   </xsd:complexType>
-  <xsd:element name="Double" type="opendds:Double"/>
+  <xsd:element name="ODouble" type="opendds:ODouble"/>
   <xsd:complexType name="Enum">
     <xsd:complexContent>
       <xsd:extension base="opendds:TopicField">
@@ -209,18 +222,12 @@
     </xsd:complexContent>
   </xsd:complexType>
   <xsd:element name="Enum" type="opendds:Enum"/>
-  <xsd:complexType name="Float">
-    <xsd:complexContent>
-      <xsd:extension base="opendds:FloatingPoint"/>
-    </xsd:complexContent>
-  </xsd:complexType>
-  <xsd:element name="Float" type="opendds:Float"/>
-  <xsd:complexType abstract="true" name="FloatingPoint">
+  <xsd:complexType name="OFloat">
     <xsd:complexContent>
       <xsd:extension base="opendds:Simple"/>
     </xsd:complexContent>
   </xsd:complexType>
-  <xsd:element name="FloatingPoint" type="opendds:FloatingPoint"/>
+  <xsd:element name="OFloat" type="opendds:OFloat"/>
   <xsd:complexType name="Key">
     <xsd:choice maxOccurs="unbounded" minOccurs="0">
       <xsd:element name="member" type="opendds:KeyField"/>
@@ -239,65 +246,48 @@
     <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
   </xsd:complexType>
   <xsd:element name="KeyField" type="opendds:KeyField"/>
-  <xsd:complexType abstract="true" name="Int">
+  <xsd:complexType name="OLong">
     <xsd:complexContent>
       <xsd:extension base="opendds:Simple"/>
     </xsd:complexContent>
   </xsd:complexType>
-  <xsd:element name="Int" type="opendds:Int"/>
-  <xsd:complexType name="Long">
-    <xsd:complexContent>
-      <xsd:extension base="opendds:SignedInt"/>
-    </xsd:complexContent>
-  </xsd:complexType>
-  <xsd:element name="Long" type="opendds:Long"/>
-  <xsd:complexType name="LongLong">
-    <xsd:complexContent>
-      <xsd:extension base="opendds:SignedInt"/>
-    </xsd:complexContent>
-  </xsd:complexType>
-  <xsd:element name="LongLong" type="opendds:LongLong"/>
-  <xsd:complexType name="Octet">
+  <xsd:element name="OLong" type="opendds:OLong"/>
+  <xsd:complexType name="OLongLong">
     <xsd:complexContent>
       <xsd:extension base="opendds:Simple"/>
     </xsd:complexContent>
   </xsd:complexType>
-  <xsd:element name="Octet" type="opendds:Octet"/>
+  <xsd:element name="OLongLong" type="opendds:OLongLong"/>
+  <xsd:complexType name="OOctet">
+    <xsd:complexContent>
+      <xsd:extension base="opendds:Simple"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="OOctet" type="opendds:OOctet"/>
   <xsd:complexType name="Sequence">
     <xsd:complexContent>
-      <xsd:extension base="opendds:Collection">
-        <xsd:choice maxOccurs="unbounded" minOccurs="0">
-          <xsd:element name="subtype" type="opendds:TopicField"/>
-        </xsd:choice>
-        <xsd:attribute name="subtype" type="xsd:string"/>
-      </xsd:extension>
+      <xsd:extension base="opendds:Collection"/>
     </xsd:complexContent>
   </xsd:complexType>
   <xsd:element name="Sequence" type="opendds:Sequence"/>
-  <xsd:complexType name="Short">
+  <xsd:complexType name="OShort">
     <xsd:complexContent>
-      <xsd:extension base="opendds:SignedInt"/>
+      <xsd:extension base="opendds:Simple"/>
     </xsd:complexContent>
   </xsd:complexType>
-  <xsd:element name="Short" type="opendds:Short"/>
-  <xsd:complexType abstract="true" name="SignedInt">
-    <xsd:complexContent>
-      <xsd:extension base="opendds:Int"/>
-    </xsd:complexContent>
-  </xsd:complexType>
-  <xsd:element name="SignedInt" type="opendds:SignedInt"/>
+  <xsd:element name="OShort" type="opendds:OShort"/>
   <xsd:complexType abstract="true" name="Simple">
     <xsd:complexContent>
       <xsd:extension base="opendds:TopicField"/>
     </xsd:complexContent>
   </xsd:complexType>
   <xsd:element name="Simple" type="opendds:Simple"/>
-  <xsd:complexType name="String">
+  <xsd:complexType name="OString">
     <xsd:complexContent>
-      <xsd:extension base="opendds:Collection"/>
+      <xsd:extension base="opendds:Simple"/>
     </xsd:complexContent>
   </xsd:complexType>
-  <xsd:element name="String" type="opendds:String"/>
+  <xsd:element name="OString" type="opendds:OString"/>
   <xsd:complexType name="TopicStruct">
     <xsd:complexContent>
       <xsd:extension base="opendds:ConstructedTopicType">
@@ -326,18 +316,22 @@
     </xsd:complexContent>
   </xsd:complexType>
   <xsd:element name="Typedef" type="opendds:Typedef"/>
-  <xsd:complexType name="ULong">
-    <xsd:complexContent>
-      <xsd:extension base="opendds:UnsignedInt"/>
-    </xsd:complexContent>
+  <xsd:complexType name="OULong">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
   </xsd:complexType>
-  <xsd:element name="ULong" type="opendds:ULong"/>
-  <xsd:complexType name="ULongLong">
-    <xsd:complexContent>
-      <xsd:extension base="opendds:UnsignedInt"/>
-    </xsd:complexContent>
+  <xsd:element name="OULong" type="opendds:OULong"/>
+  <xsd:complexType name="OULongLong">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
   </xsd:complexType>
-  <xsd:element name="ULongLong" type="opendds:ULongLong"/>
+  <xsd:element name="OULongLong" type="opendds:OULongLong"/>
   <xsd:complexType name="Union">
     <xsd:complexContent>
       <xsd:extension base="opendds:ConstructedTopicType">
@@ -351,18 +345,14 @@
     </xsd:complexContent>
   </xsd:complexType>
   <xsd:element name="Union" type="opendds:Union"/>
-  <xsd:complexType abstract="true" name="UnsignedInt">
-    <xsd:complexContent>
-      <xsd:extension base="opendds:Int"/>
-    </xsd:complexContent>
+  <xsd:complexType name="OUShort">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
   </xsd:complexType>
-  <xsd:element name="UnsignedInt" type="opendds:UnsignedInt"/>
-  <xsd:complexType name="UShort">
-    <xsd:complexContent>
-      <xsd:extension base="opendds:UnsignedInt"/>
-    </xsd:complexContent>
-  </xsd:complexType>
-  <xsd:element name="UShort" type="opendds:UShort"/>
+  <xsd:element name="OUShort" type="opendds:OUShort"/>
   <xsd:complexType name="DataReader">
     <xsd:complexContent>
       <xsd:extension base="opendds:DataReaderWriter">
@@ -710,13 +700,13 @@
     <xsd:complexContent>
       <xsd:extension base="opendds:Entity">
         <xsd:choice maxOccurs="unbounded" minOccurs="0">
-          <xsd:element name="participant" type="opendds:DomainParticipant"/>
+          <xsd:element name="participants" type="opendds:DomainParticipant"/>
         </xsd:choice>
         <xsd:attribute name="component_type" type="opendds:ComponentType" use="required"/>
         <xsd:attribute name="language" type="opendds:LanguageType" use="required"/>
         <xsd:attribute name="platform" type="opendds:PlatformType" use="required"/>
         <xsd:attribute name="service_arguments" type="xsd:string"/>
-        <xsd:attribute name="participant" type="xsd:string"/>
+        <xsd:attribute name="participants" type="xsd:string"/>
       </xsd:extension>
     </xsd:complexContent>
   </xsd:complexType>
