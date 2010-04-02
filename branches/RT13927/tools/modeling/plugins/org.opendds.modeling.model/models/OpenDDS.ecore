@@ -34,44 +34,37 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="type" lowerBound="1" eType="#//TopicField"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Array" eSuperTypes="#//Collection">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="subtype" lowerBound="1"
-        eType="#//TopicField"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="length" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Boolean" eSuperTypes="#//Simple"/>
+  <eClassifiers xsi:type="ecore:EClass" name="OBoolean" eSuperTypes="#//Simple"/>
   <eClassifiers xsi:type="ecore:EClass" name="Case" eSuperTypes="#//TopicField">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="labels" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="element_spec" lowerBound="1"
-        eType="#//TopicField"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="type" lowerBound="1" eType="#//TopicField"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Char" eSuperTypes="#//Simple"/>
+  <eClassifiers xsi:type="ecore:EClass" name="OChar" eSuperTypes="#//Simple"/>
   <eClassifiers xsi:type="ecore:EClass" name="Collection" abstract="true" eSuperTypes="#//TopicField">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="length" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="type" lowerBound="1" eType="#//TopicField"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ConstructedTopicType" abstract="true"
       eSuperTypes="#//TopicField"/>
-  <eClassifiers xsi:type="ecore:EClass" name="Double" eSuperTypes="#//FloatingPoint"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ODouble" eSuperTypes="#//Simple"/>
   <eClassifiers xsi:type="ecore:EClass" name="Enum" eSuperTypes="#//TopicField">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="labels" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Float" eSuperTypes="#//FloatingPoint"/>
-  <eClassifiers xsi:type="ecore:EClass" name="FloatingPoint" abstract="true" eSuperTypes="#//Simple"/>
+  <eClassifiers xsi:type="ecore:EClass" name="OFloat" eSuperTypes="#//Simple"/>
   <eClassifiers xsi:type="ecore:EClass" name="Key">
     <eStructuralFeatures xsi:type="ecore:EReference" name="member" lowerBound="1"
         eType="#//KeyField"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="KeyField"/>
-  <eClassifiers xsi:type="ecore:EClass" name="Int" abstract="true" eSuperTypes="#//Simple"/>
-  <eClassifiers xsi:type="ecore:EClass" name="Long" eSuperTypes="#//SignedInt"/>
-  <eClassifiers xsi:type="ecore:EClass" name="LongLong" eSuperTypes="#//SignedInt"/>
-  <eClassifiers xsi:type="ecore:EClass" name="Octet" eSuperTypes="#//Simple"/>
-  <eClassifiers xsi:type="ecore:EClass" name="Sequence" eSuperTypes="#//Collection">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="subtype" lowerBound="1"
-        eType="#//TopicField"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Short" eSuperTypes="#//SignedInt"/>
-  <eClassifiers xsi:type="ecore:EClass" name="SignedInt" abstract="true" eSuperTypes="#//Int"/>
+  <eClassifiers xsi:type="ecore:EClass" name="OLong" eSuperTypes="#//Simple"/>
+  <eClassifiers xsi:type="ecore:EClass" name="OLongLong" eSuperTypes="#//Simple"/>
+  <eClassifiers xsi:type="ecore:EClass" name="OOctet" eSuperTypes="#//Simple"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Sequence" eSuperTypes="#//Collection"/>
+  <eClassifiers xsi:type="ecore:EClass" name="OShort" eSuperTypes="#//Simple"/>
   <eClassifiers xsi:type="ecore:EClass" name="Simple" abstract="true" eSuperTypes="#//TopicField #//KeyField"/>
-  <eClassifiers xsi:type="ecore:EClass" name="String" eSuperTypes="#//Collection"/>
+  <eClassifiers xsi:type="ecore:EClass" name="OString" eSuperTypes="#//Simple"/>
   <eClassifiers xsi:type="ecore:EClass" name="TopicStruct" eSuperTypes="#//ConstructedTopicType">
     <eStructuralFeatures xsi:type="ecore:EReference" name="members" lowerBound="1"
         upperBound="-1" eType="#//TopicField" containment="true"/>
@@ -82,15 +75,14 @@
   <eClassifiers xsi:type="ecore:EClass" name="Typedef" eSuperTypes="#//TopicField">
     <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//TopicField"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ULong" eSuperTypes="#//UnsignedInt"/>
-  <eClassifiers xsi:type="ecore:EClass" name="ULongLong" eSuperTypes="#//UnsignedInt"/>
+  <eClassifiers xsi:type="ecore:EClass" name="OULong"/>
+  <eClassifiers xsi:type="ecore:EClass" name="OULongLong"/>
   <eClassifiers xsi:type="ecore:EClass" name="Union" eSuperTypes="#//ConstructedTopicType">
     <eStructuralFeatures xsi:type="ecore:EReference" name="switch" lowerBound="1"
         eType="#//TopicField"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="cases" lowerBound="1" eType="#//Case"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="UnsignedInt" abstract="true" eSuperTypes="#//Int"/>
-  <eClassifiers xsi:type="ecore:EClass" name="UShort" eSuperTypes="#//UnsignedInt"/>
+  <eClassifiers xsi:type="ecore:EClass" name="OUShort"/>
   <eClassifiers xsi:type="ecore:EClass" name="DataReader" eSuperTypes="#//DataReaderWriter">
     <eStructuralFeatures xsi:type="ecore:EReference" name="topic" lowerBound="1" eType="#//TopicDescription"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="reader_data_lifecycle"
@@ -280,13 +272,26 @@
         eType="#//LanguageType"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="platform" lowerBound="1"
         eType="#//PlatformType"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="participant" lowerBound="1"
-        eType="#//DomainParticipant"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="participants" lowerBound="1"
+        upperBound="-1" eType="#//DomainParticipant"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="service_arguments" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EEnum" name="ComponentType"/>
-  <eClassifiers xsi:type="ecore:EEnum" name="LanguageType"/>
-  <eClassifiers xsi:type="ecore:EEnum" name="PlatformType"/>
+  <eClassifiers xsi:type="ecore:EEnum" name="ComponentType">
+    <eLiterals name="EXECUTABLE"/>
+    <eLiterals name="SHARED_LIBRARY" value="1"/>
+    <eLiterals name="STATIC_LIBRARY" value="2"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="LanguageType">
+    <eLiterals name="CXX"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="PlatformType">
+    <eLiterals name="MPC_CDT"/>
+    <eLiterals name="MPC_GNUACE" value="1"/>
+    <eLiterals name="MPC_NMAKE" value="2"/>
+    <eLiterals name="MPC_VC71" value="3"/>
+    <eLiterals name="MPC_VC8" value="4"/>
+    <eLiterals name="MPC_VC9" value="5"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Transport">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="transport_id" lowerBound="1"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong"/>

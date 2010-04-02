@@ -1,3 +1,13 @@
+Fri Apr  2 22:23:08 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/models/OpenDDS.ecore:
+        * tools/modeling/plugins/org.opendds.modeling.model/models/OpenDDS.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/models/OpenDDS.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/templates/Header.javajetinc:
+
+          Updated generation model, domain model, and schema for proper
+          model generation.
+
 Thu Apr  1 23:34:38 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model/models/OpenDDS.genmodel:
