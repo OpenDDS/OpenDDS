@@ -6,7 +6,7 @@
     <property name="build.dir" value="build"/>
     <property name="doc.dir" value="doc"/>
     <property name="lib.dir" value="lib"/>
-	<property name="metainf.dir" value="META-INF"/>
+    <property name="metainf.dir" value="META-INF"/>
     <property name="src.dir" value="src"/>
     <property name="test.dir" value="test"/>
     
@@ -27,7 +27,6 @@
         <include name="META-INF/**"/>
         <include name="plugin.xml"/>
         <include name="models/**"/>
-        <include name="templates/**"/>
     </fileset>
 
     <!--
@@ -137,6 +136,10 @@
             <link href="http://java.sun.com/j2se/${compile.target}/docs/api/"/>
             <classpath refid="plugin.classpath"/>
             <packageset dir="${src.dir}"/>
+            <!-- Exclude extraneous tags -->
+            <tag name="generated" enabled="false"/>
+            <tag name="model" enabled="false"/>
+            <tag name="ordered" enabled="false"/>
         </javadoc>
     </target>
 </project>
