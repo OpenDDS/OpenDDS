@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: OpenDDS Modeling SDK (editor)
+Bundle-SymbolicName: org.opendds.modeling.editor;singleton:=true
+Bundle-Version: 0.0.0
+Bundle-Activator: org.opendds.modeling.editor.EditorPlugin$Implementation
+Bundle-Vendor: OpenDDS
+Bundle-Localization: plugin
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Export-Package: OpenDDS,
+ org.opendds.modeling.editor
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.core.resources;visibility:=reexport,
+ org.opendds.modeling.edit;visibility:=reexport,
+ org.eclipse.emf.ecore.xmi;visibility:=reexport,
+ org.eclipse.emf.edit.ui;visibility:=reexport,
+ org.eclipse.ui.ide;visibility:=reexport
+

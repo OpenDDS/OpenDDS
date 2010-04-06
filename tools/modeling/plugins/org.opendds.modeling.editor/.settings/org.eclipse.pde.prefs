@@ -1,0 +1,25 @@
+#Wed Mar 10 17:18:47 CST 2010
+compilers.f.unresolved-features=1
+compilers.f.unresolved-plugins=1
+compilers.incompatible-environment=0
+compilers.p.build=0
+compilers.p.deprecated=0
+compilers.p.discouraged-class=0
+compilers.p.internal=0
+compilers.p.missing-packages=0
+compilers.p.missing-version-export-package=2
+compilers.p.missing-version-import-package=2
+compilers.p.missing-version-require-bundle=2
+compilers.p.no-required-att=0
+compilers.p.not-externalized-att=2
+compilers.p.unknown-attribute=0
+compilers.p.unknown-class=0
+compilers.p.unknown-element=0
+compilers.p.unknown-identifier=0
+compilers.p.unknown-resource=0
+compilers.p.unresolved-ex-points=0
+compilers.p.unresolved-import=0
+compilers.s.create-docs=false
+compilers.s.doc-folder=doc
+compilers.s.open-tags=1
+eclipse.preferences.version=1

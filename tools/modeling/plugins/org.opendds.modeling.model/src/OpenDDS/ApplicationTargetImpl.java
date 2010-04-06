@@ -12,13 +12,9 @@ package OpenDDS;
 import java.util.Collection;
 
 import org.eclipse.emf.common.notify.Notification;
-
 import org.eclipse.emf.common.util.EList;
-
 import org.eclipse.emf.ecore.EClass;
-
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
-
 import org.eclipse.emf.ecore.util.EObjectResolvingEList;
 
 /**
@@ -165,9 +161,10 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     public void setComponent_type(ComponentType newComponent_type) {
         ComponentType oldComponent_type = component_type;
         component_type = newComponent_type == null ? COMPONENT_TYPE_EDEFAULT : newComponent_type;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.APPLICATION_TARGET__COMPONENT_TYPE,
                     oldComponent_type, component_type));
+        }
     }
 
     /**
@@ -187,9 +184,10 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     public void setLanguage(LanguageType newLanguage) {
         LanguageType oldLanguage = language;
         language = newLanguage == null ? LANGUAGE_EDEFAULT : newLanguage;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.APPLICATION_TARGET__LANGUAGE,
                     oldLanguage, language));
+        }
     }
 
     /**
@@ -209,9 +207,10 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     public void setPlatform(PlatformType newPlatform) {
         PlatformType oldPlatform = platform;
         platform = newPlatform == null ? PLATFORM_EDEFAULT : newPlatform;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.APPLICATION_TARGET__PLATFORM,
                     oldPlatform, platform));
+        }
     }
 
     /**
@@ -244,9 +243,10 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     public void setService_arguments(String newService_arguments) {
         String oldService_arguments = service_arguments;
         service_arguments = newService_arguments;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.APPLICATION_TARGET__SERVICE_ARGUMENTS,
                     oldService_arguments, service_arguments));
+        }
     }
 
     /**
@@ -357,8 +357,9 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
      */
     @Override
     public String toString() {
-        if (eIsProxy())
+        if (eIsProxy()) {
             return super.toString();
+        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (component_type: ");

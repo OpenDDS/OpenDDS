@@ -11,10 +11,8 @@ package OpenDDS;
 
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.notify.NotificationChain;
-
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.InternalEObject;
-
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
@@ -81,10 +79,11 @@ public class TimeBasedFilterQosPolicyImpl extends QosPolicyImpl implements TimeB
             ENotificationImpl notification = new ENotificationImpl(this, Notification.SET,
                     ModelPackage.TIME_BASED_FILTER_QOS_POLICY__MINIMUM_SEPARATION, oldMinimum_separation,
                     newMinimum_separation);
-            if (msgs == null)
+            if (msgs == null) {
                 msgs = notification;
-            else
+            } else {
                 msgs.add(notification);
+            }
         }
         return msgs;
     }
@@ -97,19 +96,23 @@ public class TimeBasedFilterQosPolicyImpl extends QosPolicyImpl implements TimeB
     public void setMinimum_separation(Period newMinimum_separation) {
         if (newMinimum_separation != minimum_separation) {
             NotificationChain msgs = null;
-            if (minimum_separation != null)
+            if (minimum_separation != null) {
                 msgs = ((InternalEObject) minimum_separation).eInverseRemove(this, EOPPOSITE_FEATURE_BASE
                         - ModelPackage.TIME_BASED_FILTER_QOS_POLICY__MINIMUM_SEPARATION, null, msgs);
-            if (newMinimum_separation != null)
+            }
+            if (newMinimum_separation != null) {
                 msgs = ((InternalEObject) newMinimum_separation).eInverseAdd(this, EOPPOSITE_FEATURE_BASE
                         - ModelPackage.TIME_BASED_FILTER_QOS_POLICY__MINIMUM_SEPARATION, null, msgs);
+            }
             msgs = basicSetMinimum_separation(newMinimum_separation, msgs);
-            if (msgs != null)
+            if (msgs != null) {
                 msgs.dispatch();
-        } else if (eNotificationRequired())
+            }
+        } else if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET,
                     ModelPackage.TIME_BASED_FILTER_QOS_POLICY__MINIMUM_SEPARATION, newMinimum_separation,
                     newMinimum_separation));
+        }
     }
 
     /**

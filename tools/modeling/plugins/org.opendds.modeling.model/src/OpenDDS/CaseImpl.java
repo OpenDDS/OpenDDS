@@ -10,10 +10,8 @@
 package OpenDDS;
 
 import org.eclipse.emf.common.notify.Notification;
-
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.InternalEObject;
-
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
@@ -97,8 +95,9 @@ public class CaseImpl extends TopicFieldImpl implements Case {
     public void setLabels(String newLabels) {
         String oldLabels = labels;
         labels = newLabels;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.CASE__LABELS, oldLabels, labels));
+        }
     }
 
     /**
@@ -111,8 +110,9 @@ public class CaseImpl extends TopicFieldImpl implements Case {
             InternalEObject oldType = (InternalEObject) type;
             type = (TopicField) eResolveProxy(oldType);
             if (type != oldType) {
-                if (eNotificationRequired())
+                if (eNotificationRequired()) {
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.CASE__TYPE, oldType, type));
+                }
             }
         }
         return type;
@@ -135,8 +135,9 @@ public class CaseImpl extends TopicFieldImpl implements Case {
     public void setType(TopicField newType) {
         TopicField oldType = type;
         type = newType;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.CASE__TYPE, oldType, type));
+        }
     }
 
     /**
@@ -150,8 +151,9 @@ public class CaseImpl extends TopicFieldImpl implements Case {
             case ModelPackage.CASE__LABELS:
                 return getLabels();
             case ModelPackage.CASE__TYPE:
-                if (resolve)
+                if (resolve) {
                     return getType();
+                }
                 return basicGetType();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -216,8 +218,9 @@ public class CaseImpl extends TopicFieldImpl implements Case {
      */
     @Override
     public String toString() {
-        if (eIsProxy())
+        if (eIsProxy()) {
             return super.toString();
+        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (labels: ");

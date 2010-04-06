@@ -10,9 +10,7 @@
 package OpenDDS;
 
 import org.eclipse.emf.common.notify.Notification;
-
 import org.eclipse.emf.ecore.EClass;
-
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
@@ -106,9 +104,10 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
     public void setDepth(long newDepth) {
         long oldDepth = depth;
         depth = newDepth;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.HISTORY_QOS_POLICY__DEPTH, oldDepth,
                     depth));
+        }
     }
 
     /**
@@ -128,8 +127,9 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
     public void setKind(HistoryQosPolicyKind newKind) {
         HistoryQosPolicyKind oldKind = kind;
         kind = newKind == null ? KIND_EDEFAULT : newKind;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.HISTORY_QOS_POLICY__KIND, oldKind, kind));
+        }
     }
 
     /**
@@ -207,8 +207,9 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
      */
     @Override
     public String toString() {
-        if (eIsProxy())
+        if (eIsProxy()) {
             return super.toString();
+        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (depth: ");

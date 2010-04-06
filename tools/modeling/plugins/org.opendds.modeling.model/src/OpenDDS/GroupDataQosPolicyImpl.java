@@ -10,9 +10,7 @@
 package OpenDDS;
 
 import org.eclipse.emf.common.notify.Notification;
-
 import org.eclipse.emf.ecore.EClass;
-
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
@@ -85,9 +83,10 @@ public class GroupDataQosPolicyImpl extends QosPolicyImpl implements GroupDataQo
     public void setValue(String newValue) {
         String oldValue = value;
         value = newValue;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.GROUP_DATA_QOS_POLICY__VALUE, oldValue,
                     value));
+        }
     }
 
     /**
@@ -155,8 +154,9 @@ public class GroupDataQosPolicyImpl extends QosPolicyImpl implements GroupDataQo
      */
     @Override
     public String toString() {
-        if (eIsProxy())
+        if (eIsProxy()) {
             return super.toString();
+        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (value: ");

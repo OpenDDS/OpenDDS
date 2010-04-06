@@ -10,9 +10,7 @@
 package OpenDDS;
 
 import org.eclipse.emf.common.notify.Notification;
-
 import org.eclipse.emf.ecore.EClass;
-
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
@@ -85,10 +83,11 @@ public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityF
     public void setAutoenable_created_entities(boolean newAutoenable_created_entities) {
         boolean oldAutoenable_created_entities = autoenable_created_entities;
         autoenable_created_entities = newAutoenable_created_entities;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET,
                     ModelPackage.ENTITY_FACTORY_QOS_POLICY__AUTOENABLE_CREATED_ENTITIES,
                     oldAutoenable_created_entities, autoenable_created_entities));
+        }
     }
 
     /**
@@ -156,8 +155,9 @@ public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityF
      */
     @Override
     public String toString() {
-        if (eIsProxy())
+        if (eIsProxy()) {
             return super.toString();
+        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (autoenable_created_entities: ");

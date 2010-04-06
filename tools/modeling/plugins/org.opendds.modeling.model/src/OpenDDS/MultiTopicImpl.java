@@ -10,9 +10,7 @@
 package OpenDDS;
 
 import org.eclipse.emf.common.notify.Notification;
-
 import org.eclipse.emf.ecore.EClass;
-
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
@@ -85,9 +83,10 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
     public void setSubscription_expression(String newSubscription_expression) {
         String oldSubscription_expression = subscription_expression;
         subscription_expression = newSubscription_expression;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.MULTI_TOPIC__SUBSCRIPTION_EXPRESSION,
                     oldSubscription_expression, subscription_expression));
+        }
     }
 
     /**
@@ -156,8 +155,9 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
      */
     @Override
     public String toString() {
-        if (eIsProxy())
+        if (eIsProxy()) {
             return super.toString();
+        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (subscription_expression: ");

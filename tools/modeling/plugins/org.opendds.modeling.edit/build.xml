@@ -25,9 +25,9 @@
 
     <fileset id="plugin.resources" dir="${basedir}">
         <include name="META-INF/**"/>
+        <include name="icons/**"/>
         <include name="plugin.properties"/>
         <include name="plugin.xml"/>
-        <include name="icons/**"/>
     </fileset>
 
     <!--

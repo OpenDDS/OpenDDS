@@ -11,10 +11,8 @@ package OpenDDS;
 
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.notify.NotificationChain;
-
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.InternalEObject;
-
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
@@ -82,10 +80,11 @@ public class ReaderDataLifecycleQosPolicyImpl extends QosPolicyImpl implements R
             ENotificationImpl notification = new ENotificationImpl(this, Notification.SET,
                     ModelPackage.READER_DATA_LIFECYCLE_QOS_POLICY__AUTOPURGE_NOWRITER_SAMPLES_DELAY,
                     oldAutopurge_nowriter_samples_delay, newAutopurge_nowriter_samples_delay);
-            if (msgs == null)
+            if (msgs == null) {
                 msgs = notification;
-            else
+            } else {
                 msgs.add(notification);
+            }
         }
         return msgs;
     }
@@ -98,19 +97,23 @@ public class ReaderDataLifecycleQosPolicyImpl extends QosPolicyImpl implements R
     public void setAutopurge_nowriter_samples_delay(Period newAutopurge_nowriter_samples_delay) {
         if (newAutopurge_nowriter_samples_delay != autopurge_nowriter_samples_delay) {
             NotificationChain msgs = null;
-            if (autopurge_nowriter_samples_delay != null)
+            if (autopurge_nowriter_samples_delay != null) {
                 msgs = ((InternalEObject) autopurge_nowriter_samples_delay).eInverseRemove(this, EOPPOSITE_FEATURE_BASE
                         - ModelPackage.READER_DATA_LIFECYCLE_QOS_POLICY__AUTOPURGE_NOWRITER_SAMPLES_DELAY, null, msgs);
-            if (newAutopurge_nowriter_samples_delay != null)
+            }
+            if (newAutopurge_nowriter_samples_delay != null) {
                 msgs = ((InternalEObject) newAutopurge_nowriter_samples_delay).eInverseAdd(this, EOPPOSITE_FEATURE_BASE
                         - ModelPackage.READER_DATA_LIFECYCLE_QOS_POLICY__AUTOPURGE_NOWRITER_SAMPLES_DELAY, null, msgs);
+            }
             msgs = basicSetAutopurge_nowriter_samples_delay(newAutopurge_nowriter_samples_delay, msgs);
-            if (msgs != null)
+            if (msgs != null) {
                 msgs.dispatch();
-        } else if (eNotificationRequired())
+            }
+        } else if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET,
                     ModelPackage.READER_DATA_LIFECYCLE_QOS_POLICY__AUTOPURGE_NOWRITER_SAMPLES_DELAY,
                     newAutopurge_nowriter_samples_delay, newAutopurge_nowriter_samples_delay));
+        }
     }
 
     /**
