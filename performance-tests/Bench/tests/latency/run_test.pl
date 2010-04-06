@@ -25,7 +25,7 @@ sub configure_transport_file {
 
   while (<CONFIGFILE>) {
     s/\<%HOSTNAME%\>/$myhostname/g;
-    print <NEWCONFIGFILE> $_;
+    print NEWCONFIGFILE "$_\n";
   }
   close NEWCONFIGFILE;
   close CONFIGFILE;
@@ -70,15 +70,8 @@ elsif ($ARGV[1] == 32000) {
 }
 
 
-$CS = new PerlDDS::Cross_Sync (1, PerlACE::random_port(), PerlACE::random_port()
-                        , $pub_config_file, $sub_config_file);
-if (!$CS) {
-    print "Crossplatform test pre-reqs not met. Skipping...\n";
-    exit 0;
-}
-
 if ($ARGV[0] eq 'udp') {
-    $trans_config_file = configure_transport_file ("$bench_location/etc/transport-udp.ini", $CS->self());
+    # trans_config_file assigned after determining cross host identity
     mkdir "udp", 0777 unless -d "udp";
     chdir "udp";
 }
@@ -101,9 +94,17 @@ else {
     exit 0;
 }
 
-@test_configs = $CS->get_config_info();
-$pub_config_file = @test_configs[0];
-$sub_config_file = @test_configs[1];
+
+$CS = new PerlDDS::Cross_Sync (1, PerlACE::random_port(), PerlACE::random_port()
+                        , $pub_config_file, $sub_config_file, "../test_list.txt");
+if (!$CS) {
+    print "Crossplatform test pre-reqs not met. Skipping...\n";
+    exit 0;
+}
+
+if ($ARGV[0] eq 'udp') {
+    $trans_config_file = configure_transport_file ("$bench_location/etc/transport-udp.ini", $CS->self());
+}
 
 my $role = $CS->wait();
 if ($role == -1) {
@@ -122,8 +123,6 @@ if ($role == PerlDDS::Cross_Sync_Common::SERVER) {
 }
 my $common_args = "-P -t 120 -h $repo_host:$port1 -i $trans_config_file ";
 
-unlink $dcpsrepo_ior;
-
 if ($role == PerlDDS::Cross_Sync_Common::SERVER) {
     unlink $dcpsrepo_ior;
     $DCPSREPO = PerlDDS::create_process
@@ -137,7 +136,6 @@ if ($role == PerlDDS::Cross_Sync_Common::SERVER) {
         $DCPSREPO->Kill ();
         exit 1;
     }
-    unlink $dcpsrepo_ior;
 
     $Publisher = PerlDDS::create_process
           ("$bench_location/bin/run_test",
@@ -167,6 +165,8 @@ if ($role == PerlDDS::Cross_Sync_Common::SERVER) {
     #    print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
     #    $status = 1;
     #}
+
+    unlink $dcpsrepo_ior;
 } else {
     $Subscriber = PerlDDS::create_process
           ("$bench_location/bin/run_test",
@@ -192,4 +192,3 @@ if ($status == 0) {
 
 exit $status;
 
-#  LocalWords:  eval

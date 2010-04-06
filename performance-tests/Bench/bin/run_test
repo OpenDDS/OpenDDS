@@ -173,7 +173,7 @@ my $appDebug;
 $appDebug  = $debug if $debug;
 
 my $repoOpts = "$common_opts ";
-$repoOpts .= "-ORBListenEndpoints $repoHost " if $repoHost;
+$repoOpts .= "-ORBListenEndpoints iiop://$repoHost " if $repoHost;
 $repoOpts .= "-DCPSDebugLevel $repoDebug " if $repoDebug;
 $repoOpts .= "-ORBLogFile $debugFile " if $debugFile;
 
@@ -190,9 +190,11 @@ $testOpts .= "-t newest -s $rawSize -r $rawData " if $rawData;
 
 # Define the processes.
 my @PROCESSES;
-
+my $repoonly;
+my $repoArgs;
 if( $startRepo) {
-  my $repoArgs = "$repoOpts -o $repo_ior ";
+  $repoonly = 1 unless (scalar @scenario > 0);
+  $repoArgs = "$repoOpts -o $repo_ior ";
   if( PerlACE::is_vxworks_test()) {
     push @PROCESSES, new PerlACE::ProcessVX( $repoCommand, $repoArgs);
   } else {
@@ -238,11 +240,19 @@ map {
 # block forever if no duration was specified.
 WaitForUserInput() if not $duration;
 
+# The repo running alone will not wait the duration
+sleep $duration if $repoonly;
+
+
 # Wait for the test processes to terminate nicely.  Terminate in reverse
 # order from starting order.
 map {
-  if ($duration) {
-    $status = $_->WaitKill( $killDelay);
+  if ( $duration) {
+    if ( $startRepo && ($_->{ARGUMENTS} eq $repoArgs)) {
+      $status = $_->TerminateWaitKill( $killDelay);
+    } else {
+      $status = $_->WaitKill( $killDelay);
+    }
   } else {
     $status = $_->TerminateWaitKill( $killDelay);
   }
